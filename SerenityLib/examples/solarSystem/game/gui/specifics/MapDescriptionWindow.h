@@ -5,21 +5,22 @@
 class  Font;
 class  ScrollFrame;
 class  Widget;
-
+class  HostScreen;
 #include "../../map/MapEntry.h"
+#include "../RoundedWindow.h"
 
-class MapDescriptionWindow final {
+class MapDescriptionWindow final : public RoundedWindow {
+    friend class  HostScreen;
     private:
-        ScrollFrame*  m_ScrollFrame;
+        HostScreen&   m_HostScreen;
+        ScrollFrame*  m_MapDescriptionTextScrollFrame;
         Font&         m_Font;
         void*         m_UserPointer;
     public:
-        MapDescriptionWindow(Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth);
+        MapDescriptionWindow(HostScreen& hostScreen, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const std::string& labelText);
         ~MapDescriptionWindow();
 
-        void setCurrentMapChoice(const MapEntryData& choice);
 
-        void setColor(const float& r, const float& g, const float& b, const float& a);
         void setPosition(const float x, const float y);
 
         void onResize(const unsigned int newWidth, const unsigned int newHeight);

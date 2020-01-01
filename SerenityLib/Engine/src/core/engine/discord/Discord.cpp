@@ -5,6 +5,7 @@
 #include <core/engine/system/window/Engine_Window.h>
 
 #include <iostream>
+#include <chrono>
 
 using namespace std;
 
@@ -74,8 +75,20 @@ void Engine::Discord::DiscordActivity::setPartyID(const std::string& partyID) {
 void Engine::Discord::DiscordActivity::setInstance(const bool& instance) {
     m_Activity.SetInstance(instance);
 }
+void Engine::Discord::DiscordActivity::setTimestampStartAsNow() {
+    int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    m_Activity.GetTimestamps().SetStart(now);
+}
 void Engine::Discord::DiscordActivity::setTimestampStart(const std::int64_t start) {
     m_Activity.GetTimestamps().SetStart(start);
+}
+void Engine::Discord::DiscordActivity::setTimestampEndSinceNow(const std::int64_t end) {
+    int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    m_Activity.GetTimestamps().SetStart(now + end);
+}
+void Engine::Discord::DiscordActivity::setTimestampEndSinceNowSeconds(const unsigned int& end) {
+    int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    m_Activity.GetTimestamps().SetStart(now + static_cast<std::int64_t>(end * 1000));
 }
 void Engine::Discord::DiscordActivity::setTimestampEnd(const std::int64_t end) {
     m_Activity.GetTimestamps().SetEnd(end);
@@ -110,8 +123,16 @@ void Engine::Discord::DiscordCore::update_activity(const discord::Activity& acti
         return;
 
     core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
-        std::cout << get_result_string_message(result) << std::endl;
-     });
+        //std::cout << get_result_string_message(result) << std::endl;
+    });
+}
+void Engine::Discord::DiscordCore::clear_activity() {
+    if (!m_Active)
+        return;
+
+    core->ActivityManager().ClearActivity([](discord::Result result) {
+        //std::cout << get_result_string_message(result) << std::endl;
+    });
 }
 const bool Engine::Discord::DiscordCore::activate(const discord::ClientId& clientID) {
     if (m_Active) {
@@ -238,7 +259,9 @@ const string Engine::Discord::DiscordCore::get_result_string_message(const disco
 void Engine::Discord::update_activity(const Engine::Discord::DiscordActivity& activity_) {
     discordManager->update_activity(activity_.getActivity());
 }
-
+void Engine::Discord::clear_activity() {
+    discordManager->clear_activity();
+}
 const bool Engine::Discord::activate(const discord::ClientId& clientID) {
     if (!discordManager)
         return false;

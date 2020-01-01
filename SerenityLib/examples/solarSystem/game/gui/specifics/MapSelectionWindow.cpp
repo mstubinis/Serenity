@@ -1,4 +1,5 @@
 #include "MapSelectionWindow.h"
+#include "MapDescriptionWindow.h"
 #include "HostScreen.h"
 #include "../../Menu.h"
 #include "../../map/Map.h"
@@ -21,42 +22,48 @@ const float button_size = 40.0f;
 
 struct MapSelectorButtonOnClick final { void operator()(Button* button) const {
     auto& button_data = *static_cast<MapSelectionWindow::ButtonPtr*>(button->getUserPointer());
-    auto& map_selection_window = button_data.hostScreen->getMapSelectionWindow();
-    //auto& map_desc_window = button_data.hostScreen->getMapDescriptionWindow();
+    auto& hostScreen = *button_data.hostScreen;
+    auto& map_selection_window = hostScreen.getMapSelectionWindow();
+    auto& map_desc_window = hostScreen.getMapDescriptionWindow();
     map_selection_window.clear_chosen_map();
     button->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueHighlight]);
     button->disableMouseover();
-    map_selection_window.m_CurrentChoice = button_data.mapChoice;
 
-    //map_desc_window.setCurrentMapChoice(button_data.mapChoice);
+    const_cast<HostScreen::FirstPartData&>(hostScreen.getData()).m_CurrentMapChoice = button_data.mapChoice;
+
+    hostScreen.setCurrentMapChoice(button_data.mapChoice);
 }};
 
 struct CycleGameModeLeftButtonOnClick final { void operator()(Button* button) const {
     auto& mapSelectionWindow = *static_cast<MapSelectionWindow*>(button->getUserPointer());
-    int num = static_cast<int>(mapSelectionWindow.m_CurrentGameMode);
+    auto& map_desc_window = mapSelectionWindow.m_HostScreen.getMapDescriptionWindow();
+    int num = static_cast<int>(mapSelectionWindow.m_HostScreen.getData().m_CurrentGameModeChoice);
     --num;
     if (num < 0) {
         num = GameplayModeType::_TOTAL - 1;
     }
-    mapSelectionWindow.setCurrentGameMode(static_cast<GameplayModeType::Mode>(num));
+    mapSelectionWindow.m_HostScreen.clearCurrentMapChoice();
+    mapSelectionWindow.m_HostScreen.setCurrentGameMode(static_cast<GameplayModeType::Mode>(num));
 }};
 struct CycleGameModeRightButtonOnClick final { void operator()(Button* button) const {
     auto& mapSelectionWindow = *static_cast<MapSelectionWindow*>(button->getUserPointer());
-    int num = static_cast<int>(mapSelectionWindow.m_CurrentGameMode);
+    auto& map_desc_window = mapSelectionWindow.m_HostScreen.getMapDescriptionWindow();
+    int num = static_cast<int>(mapSelectionWindow.m_HostScreen.getData().m_CurrentGameModeChoice);
     ++num;
     if (num >= GameplayModeType::_TOTAL) {
         num = 0;
     }
-    mapSelectionWindow.setCurrentGameMode(static_cast<GameplayModeType::Mode>(num));
+    mapSelectionWindow.m_HostScreen.clearCurrentMapChoice();
+    mapSelectionWindow.m_HostScreen.setCurrentGameMode(static_cast<GameplayModeType::Mode>(num));
 }};
 
-MapSelectionWindow::MapSelectionWindow(HostScreen& hostScreen, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const float borderSize, const string& labelText)
-:RoundedWindow(font,x,y,width,height,depth,borderSize,labelText), m_HostScreen(hostScreen),m_Font(font){
+MapSelectionWindow::MapSelectionWindow(HostScreen& hostScreen, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const string& labelText)
+:RoundedWindow(font,x,y,width,height,depth,borderSize,labelText), m_HostScreen(hostScreen), m_Font(font){
 
     m_ChangeGameModeLeftButton = new Button(font, x - (width / 2.0f) - 29.0f, y + (height / 2.0f) - 5.0f, button_size, button_size);
     m_ChangeGameModeLeftButton->setText("<");
     m_ChangeGameModeLeftButton->setAlignment(Alignment::TopLeft);
-    m_ChangeGameModeLeftButton->setDepth(depth - 0.02f);
+    m_ChangeGameModeLeftButton->setDepth(depth - 0.002f);
     m_ChangeGameModeLeftButton->setUserPointer(this);
     m_ChangeGameModeLeftButton->setOnClickFunctor(CycleGameModeLeftButtonOnClick());
     m_ChangeGameModeLeftButton->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
@@ -66,7 +73,7 @@ MapSelectionWindow::MapSelectionWindow(HostScreen& hostScreen, Font& font, const
     m_ChangeGameModeRightButton = new Button(font, x + (width / 2.0f) + 29.0f, y + (height / 2.0f) - 5.0f, button_size, button_size);
     m_ChangeGameModeRightButton->setText(">");
     m_ChangeGameModeRightButton->setAlignment(Alignment::TopRight);
-    m_ChangeGameModeRightButton->setDepth(depth - 0.02f);
+    m_ChangeGameModeRightButton->setDepth(depth - 0.002f);
     m_ChangeGameModeRightButton->setUserPointer(this);
     m_ChangeGameModeRightButton->setOnClickFunctor(CycleGameModeRightButtonOnClick());
     m_ChangeGameModeRightButton->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
@@ -75,22 +82,19 @@ MapSelectionWindow::MapSelectionWindow(HostScreen& hostScreen, Font& font, const
     m_MapFileScrollFrame = new ScrollFrame(font, x, y - (height / 2.0f) + 30.0f, width - 60.0f, height - 110.0f, depth - 0.001f);
     m_MapFileScrollFrame->setAlignment(Alignment::BottomCenter);
 
-    setCurrentGameMode(GameplayModeType::FFA);
 }
 MapSelectionWindow::~MapSelectionWindow() {
     SAFE_DELETE(m_MapFileScrollFrame);
     SAFE_DELETE(m_ChangeGameModeLeftButton);
     SAFE_DELETE(m_ChangeGameModeRightButton);
 }
-const MapEntryData& MapSelectionWindow::getCurrentChoice() const {
-    return m_CurrentChoice;
-}
+
 void MapSelectionWindow::recalculate_maps() {
     clearWindow();
     for (auto& itr : Map::DATABASE) {
         auto& data = itr.second;
         for (auto& game_mode_int : data.map_valid_game_modes) {
-            if (game_mode_int == static_cast<unsigned int>(m_CurrentGameMode)) {
+            if (game_mode_int == static_cast<unsigned int>(m_HostScreen.getData().m_CurrentGameModeChoice)) {
                 Button& button = *NEW Button(m_Font, 0.0f, 0.0f, m_MapFileScrollFrame->width(), 180.0f);
                 button.setText(data.map_name);
                 button.setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
@@ -103,9 +107,7 @@ void MapSelectionWindow::recalculate_maps() {
                 ptr->mapChoice = Map::DATABASE.at(data.map_name);
                 button.setUserPointer(ptr);
                 button.setOnClickFunctor(MapSelectorButtonOnClick());
-
                 button.setPaddingSize(40);
-
 
                 m_MapFileScrollFrame->addContent(&button);
             }
@@ -113,7 +115,6 @@ void MapSelectionWindow::recalculate_maps() {
     }
 }
 void MapSelectionWindow::clear_chosen_map() {
-    m_CurrentChoice = MapEntryData();
     for (auto& widgetEntry : m_MapFileScrollFrame->content()) {
         auto& button = *static_cast<Button*>(widgetEntry.widget);
         button.enableMouseover();
@@ -121,7 +122,6 @@ void MapSelectionWindow::clear_chosen_map() {
     }
 }
 void MapSelectionWindow::clearWindow() {
-    m_CurrentChoice = MapEntryData();
     auto& content = m_MapFileScrollFrame->content();
     if (content.size() > 0) {
         for (auto& widgetEntry : content) {
@@ -130,11 +130,6 @@ void MapSelectionWindow::clearWindow() {
         }
         m_MapFileScrollFrame->clear();
     }
-}
-void MapSelectionWindow::setCurrentGameMode(const GameplayModeType::Mode& currentGameMode) {
-    m_CurrentGameMode = currentGameMode;
-    setLabelText(GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES[m_CurrentGameMode]);
-    recalculate_maps();
 }
 void MapSelectionWindow::onResize(const unsigned int& newWidth, const unsigned int& newHeight) {
     RoundedWindow::onResize(newWidth, newHeight);
@@ -154,7 +149,6 @@ void MapSelectionWindow::update(const double& dt) {
     m_ChangeGameModeRightButton->update(dt);
 
     RoundedWindow::update(dt);
-
 
     m_MapFileScrollFrame->update(dt);
 }

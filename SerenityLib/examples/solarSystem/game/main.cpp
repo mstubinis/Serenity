@@ -20,11 +20,11 @@ int main(int argc, char* argv[]) {
 
 
     EngineOptions options;
-    options.window_title   = "Star Trek - Homeland Security";
+    options.window_title   = "Star Trek: Homeland Security";
     options.width          = sf::VideoMode::getDesktopMode().width - 30;
     options.height         = sf::VideoMode::getDesktopMode().height - 120;
     options.fullscreen     = false;
-    options.show_console   = true;
+    options.show_console   = false;
     options.maximized      = true;
     options.aa_algorithm   = AntiAliasingAlgorithm::SMAA;
     options.argv           = argv;

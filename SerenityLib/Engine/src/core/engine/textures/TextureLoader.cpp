@@ -103,7 +103,7 @@ void TextureLoader::LoadDDSFile(Texture& texture, const string& filename, ImageL
     stream.seekg(0, ios::beg);
 
     vector<uint8_t> file_data;
-    file_data.reserve(fileSize);
+    file_data.reserve(static_cast<unsigned int>(fileSize));
     file_data.insert(file_data.begin(), std::istream_iterator<uint8_t>(stream), std::istream_iterator<uint8_t>());
     stream.close();
 

@@ -11,41 +11,62 @@ class  ServerHostingMapSelectorWindow;
 class  RoundedWindow;
 class  MapSelectionWindow;
 class  MapDescriptionWindow;
-    class HostScreen final {
-        private:
-            Menu& m_Menu;
 
-            Button* m_BackgroundEdgeGraphicBottom;
+class  HostScreenFFA2;
+class  HostScreenTeamDeathmatch2;
+class  HostScreenHomelandSecurity2;
 
-            //left window
-            MapSelectionWindow* m_LeftWindow;
+#include "../../map/MapEntry.h"
+#include "../../modes/GameplayMode.h"
 
-            //right window
-            RoundedWindow*   m_RightWindow;
+class HostScreen final {
+    friend class  HostScreenFFA2;
+    friend class  HostScreenTeamDeathmatch2;
+    friend class  HostScreenHomelandSecurity2;
+    friend class  MapSelectionWindow;
+    friend class  MapDescriptionWindow;
+    public:
+        struct FirstPartData final {
+            MapEntryData             m_CurrentMapChoice;
+            GameplayModeType::Mode   m_CurrentGameModeChoice;
 
-            TextBox* m_UserName_TextBox;
-            TextBox* m_ServerPort_TextBox;
- 
-            MapDescriptionWindow*           m_MapDescriptionWindow;
+            FirstPartData() {
+                m_CurrentGameModeChoice = GameplayModeType::FFA;
+            }
+            ~FirstPartData() {}
+        };
+    private:
+        HostScreen::FirstPartData  m_Data;
+        Font&                      m_Font;
+        Menu&                      m_Menu;
 
-            Button* m_BackButton;
-            Button* m_ForwardButton;
+        Button*                    m_BackgroundEdgeGraphicBottom;
+        Button*                    m_BackButton;
+        Button*                    m_ForwardButton;
 
-        public:
-            HostScreen(Menu&, Font& font);
-            ~HostScreen();
+        MapSelectionWindow*        m_LeftWindow;
+        MapDescriptionWindow*      m_RightWindow;
+    public:
+        HostScreen(Menu&, Font& font);
+        ~HostScreen();
 
-            Menu& getMenu();
+        Menu& getMenu();
 
-            TextBox& getUserNameTextBox();
-            TextBox& getServerPortTextBox();
-            MapSelectionWindow& getMapSelectionWindow();
-            MapDescriptionWindow& getMapDescriptionWindow();
+        void clearCurrentMapChoice();
+        void setCurrentMapChoice(const MapEntryData& choice);
+        void setCurrentGameMode(const GameplayModeType::Mode& currentGameMode);
+        const MapEntryData& getCurrentChoice() const;
 
-            void onResize(const unsigned int newWidth, const unsigned int newHeight);
 
-            void update(const double& dt);
-            void render();
+
+        const HostScreen::FirstPartData& getData();
+        MapSelectionWindow& getMapSelectionWindow();
+        MapDescriptionWindow& getMapDescriptionWindow();
+
+        void onResize(const unsigned int newWidth, const unsigned int newHeight);
+
+        void update(const double& dt);
+        void render();
 };
 
 #endif

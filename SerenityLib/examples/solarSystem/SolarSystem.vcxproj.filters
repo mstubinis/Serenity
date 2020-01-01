@@ -310,6 +310,9 @@
     <Filter Include="Source Files\Game\GUI\Specifics\HostScreen2">
       <UniqueIdentifier>{416785f2-0d0b-491b-b9c8-4e8f049cafbc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Icon">
+      <UniqueIdentifier>{5441b9fc-7235-422d-83bd-3ad808f7130d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -657,14 +660,23 @@
     <ClInclude Include="game\gui\RoundedWindow.h">
       <Filter>Header Files\Game\GUI\Specifics\Templates</Filter>
     </ClInclude>
-    <ClInclude Include="game\gui\specifics\HostScreen2.h">
-      <Filter>Header Files\Game\GUI\Specifics\HostScreen2</Filter>
-    </ClInclude>
     <ClInclude Include="game\gui\specifics\MapSelectionWindow.h">
       <Filter>Header Files\Game\GUI\Specifics\HostScreen</Filter>
     </ClInclude>
     <ClInclude Include="game\gui\ScrollFrame.h">
       <Filter>Header Files\Game\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\HostScreenFFA2.h">
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen2</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\HostScreenTeamDeathmatch2.h">
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen2</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\HostScreenHomelandSecurity2.h">
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen2</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -989,14 +1001,20 @@
     <ClCompile Include="game\gui\RoundedWindow.cpp">
       <Filter>Source Files\Game\GUI\Specifics\Templates</Filter>
     </ClCompile>
-    <ClCompile Include="game\gui\specifics\HostScreen2.cpp">
-      <Filter>Source Files\Game\GUI\Specifics\HostScreen2</Filter>
-    </ClCompile>
     <ClCompile Include="game\gui\specifics\MapSelectionWindow.cpp">
       <Filter>Source Files\Game\GUI\Specifics\HostScreen</Filter>
     </ClCompile>
     <ClCompile Include="game\gui\ScrollFrame.cpp">
       <Filter>Source Files\Game\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\HostScreenFFA2.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen2</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\HostScreenHomelandSecurity2.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen2</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\HostScreenTeamDeathmatch2.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen2</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1036,5 +1054,15 @@
     <None Include="..\data\Shaders\shipFwd_vert.glsl">
       <Filter>Resource Files\Shaders</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\data\Textures\icon.ico">
+      <Filter>Resource Files\Icon</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="SolarSystem.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

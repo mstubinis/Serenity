@@ -33,12 +33,18 @@
 #include "gui/specifics/MainMenu.h"
 #include "gui/specifics/HostScreen.h"
 
+#include "gui/specifics/HostScreenFFA2.h"
+#include "gui/specifics/HostScreenTeamDeathmatch2.h"
+#include "gui/specifics/HostScreenHomelandSecurity2.h"
+
 #include "hud/HUD.h"
 #include "modes/GameplayMode.h"
 #include "teams/Team.h"
 
 #include <regex>
 #include <core/engine/sounds/Sounds.h>
+
+#include <core/engine/discord/Discord.h>
 
 using namespace Engine;
 using namespace std;
@@ -68,28 +74,18 @@ vector<glm::vec4> Menu::DEFAULT_COLORS = []() {
 struct ButtonBack_OnClick {void operator()(Button* button) const {
     Menu& menu = *static_cast<Menu*>(button->getUserPointer());
     switch (menu.m_GameState) {
-        case GameState::Host_Server_Lobby_And_Ship: {
-
-            //force server to disconnect client
-            menu.m_Core.shutdownClient();
-            menu.m_Core.shutdownServer();
-
-            menu.m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
-            menu.m_GameState = GameState::Host_Server_Port_And_Name_And_Map;
-            menu.m_Next->setText("Next");
-            break;
-        }case GameState::Join_Server_Port_And_Name_And_IP: {
+        case GameState::Join_Screen_Setup_1: {
             //force server to disconnect client
             menu.m_Core.shutdownClient();
 
             menu.go_to_main_menu();
             break;
-        }case GameState::Join_Server_Server_Lobby: {
+        }case GameState::Join_Screen_Lobby_2: {
             //force server to disconnect client
             menu.m_Core.shutdownClient();
             menu.m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
 
-            menu.m_GameState = GameState::Join_Server_Port_And_Name_And_IP;
+            menu.m_GameState = GameState::Join_Screen_Setup_1;
 
             menu.m_Next->setText("Next");
             break;
@@ -102,10 +98,10 @@ struct ButtonBack_OnClick {void operator()(Button* button) const {
 struct ButtonNext_OnClick {void operator()(Button* button) const {
     Menu& menu = *static_cast<Menu*>(button->getUserPointer());
     switch (menu.m_GameState) {
-        case GameState::Host_Server_Lobby_And_Ship: {
+        case GameState::Host_Screen_Lobby_3: {
             menu.enter_the_game();
             break;
-        }case GameState::Join_Server_Port_And_Name_And_IP: {
+        }case GameState::Join_Screen_Setup_1: {
             const string& username   = menu.m_UserName->text();
             const string& portstring = menu.m_ServerPort->text();
             const string& ip         = menu.m_ServerIp->text();
@@ -132,7 +128,7 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
                 menu.setErrorText("Do not leave any fields blank");
             }
             break;
-        }case GameState::Join_Server_Server_Lobby: { 
+        }case GameState::Join_Screen_Lobby_2: { 
             menu.enter_the_game();
             break;
         }default: {
@@ -154,8 +150,11 @@ Menu::Menu(Scene& menu_scene, Camera& game_camera, GameState::State& _state, Cor
     m_MainMenuScreen = new MainMenu(*this, *m_Font, 0.1f);
     m_HostScreen = new HostScreen(*this, *m_Font);
 
-    //todo: remove
+    m_HostScreenFFA2 = new HostScreenFFA2(*m_HostScreen , *this, *m_Font);
+    m_HostScreenTeamDeathmatch2 = new HostScreenTeamDeathmatch2(*m_HostScreen, *this, *m_Font);
+    m_HostScreenHomelandSecurity2 = new HostScreenHomelandSecurity2(*m_HostScreen, *this, *m_Font);
 
+    //todo: remove
     m_Back = NEW Button(*m_Font, 100.0f, 50.0f, 150.0f, 50.0f);
     m_Back->setText("Back");
     m_Back->setColor(0.5f, 0.5f, 0.5f, 1.0f);
@@ -191,11 +190,16 @@ Menu::Menu(Scene& menu_scene, Camera& game_camera, GameState::State& _state, Cor
     
     m_ServerLobbyShipSelectorWindow = NEW ServerLobbyShipSelectorWindow(core, menu_scene, game_camera, *m_Font, 50.0f, windowDimensions.y - 50.0f, 578, 270);
     m_ServerLobbyShipSelectorWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
-    
+
+    go_to_main_menu();  
 }
 Menu::~Menu() {
     SAFE_DELETE(m_MainMenuScreen);
     SAFE_DELETE(m_HostScreen);
+
+    SAFE_DELETE(m_HostScreenFFA2);
+    SAFE_DELETE(m_HostScreenTeamDeathmatch2);
+    SAFE_DELETE(m_HostScreenHomelandSecurity2);
 
     SAFE_DELETE(m_Back);
     SAFE_DELETE(m_Next);
@@ -248,6 +252,19 @@ void Menu::go_to_main_menu() {
     auto& window = Resources::getWindow();
     window.keepMouseInWindow(false);
     window.setMouseCursorVisible(true);
+
+
+    Discord::DiscordActivity activity;
+    activity.setDetail("At Main Menu");
+    activity.setType(discord::ActivityType::Playing);
+    activity.setInstance(false);
+    activity.setState("");
+    activity.setTimestampStart(0);
+    activity.setTimestampEnd(0);
+    activity.setImageLarge("large_icon");
+    activity.setImageLargeText("");
+    activity.setImageSmallText("");
+    Discord::update_activity(activity);
 }
 
 
@@ -269,7 +286,11 @@ void Menu::setErrorText(const string& text, const float errorTime) {
 
 void Menu::onResize(const uint& width, const uint& height) {
     m_MainMenuScreen->onResize(width, height);
+
     m_HostScreen->onResize(width, height);
+    m_HostScreenFFA2->onResize(width, height);
+    m_HostScreenTeamDeathmatch2->onResize(width, height);
+    m_HostScreenHomelandSecurity2->onResize(width, height);
 
     m_Back->setPosition(100.0f, 50.0f);
     m_Next->setPosition(width - 100.0f, 50.0f);
@@ -280,7 +301,6 @@ void Menu::onResize(const uint& width, const uint& height) {
 
     m_InfoText->setPosition(width / 2.0f, 65.0f);
 
-    
 
     m_ServerLobbyChatWindow->setPosition(50.0f, 140.0f + 300.0f);
     m_ServerLobbyConnectedPlayersWindow->setPosition(50.0f + m_ServerLobbyChatWindow->getWindowFrame().width(), 140.0f + 300.0f);
@@ -289,6 +309,7 @@ void Menu::onResize(const uint& width, const uint& height) {
     m_ServerLobbyShipSelectorWindow->setPosition(50, winSize.y - 50.0f);
 }
 
+#pragma region updates
 void Menu::update_game(const double& dt) {
 
 }
@@ -298,7 +319,23 @@ void Menu::update_main_menu(const double& dt) {
 
     m_MainMenuScreen->update(dt);
 }
-void Menu::update_host_server_lobby_and_ship(const double& dt) {
+void Menu::update_host_setup_1(const double& dt) {
+    m_Back->update(dt);
+    m_Next->update(dt);
+
+    m_HostScreen->update(dt);
+}
+void Menu::update_host_setup_ffa_2(const double& dt) {
+    m_HostScreenFFA2->update(dt);
+}
+void Menu::update_host_setup_td_2(const double& dt) {
+    m_HostScreenTeamDeathmatch2->update(dt);
+}
+void Menu::update_host_setup_hs_2(const double& dt) {
+    m_HostScreenHomelandSecurity2->update(dt);
+}
+
+void Menu::update_host_lobby_3(const double& dt) {
     m_ServerLobbyChatWindow->update(dt);
     m_ServerLobbyConnectedPlayersWindow->update(dt);
     m_ServerLobbyShipSelectorWindow->update(dt);
@@ -306,10 +343,8 @@ void Menu::update_host_server_lobby_and_ship(const double& dt) {
     m_Back->update(dt);
     m_Next->update(dt);
 }
-void Menu::update_host_server_port_and_name_and_map(const double& dt) {
-    m_HostScreen->update(dt);
-}
-void Menu::update_join_server_port_and_name_and_ip(const double& dt) {
+
+void Menu::update_join_setup_1(const double& dt) {
     m_Back->update(dt);
     m_Next->update(dt);
 
@@ -317,7 +352,7 @@ void Menu::update_join_server_port_and_name_and_ip(const double& dt) {
     m_ServerPort->update(dt);
     m_UserName->update(dt);
 }
-void Menu::update_join_server_server_lobby(const double& dt) {
+void Menu::update_join_lobby_2(const double& dt) {
     m_ServerLobbyChatWindow->update(dt);
     m_ServerLobbyConnectedPlayersWindow->update(dt);
     m_ServerLobbyShipSelectorWindow->update(dt);
@@ -325,12 +360,36 @@ void Menu::update_join_server_server_lobby(const double& dt) {
     m_Back->update(dt);
     m_Next->update(dt);
 }
-void Menu::update_options(const double& dt) {
+
+void Menu::update_options_main(const double& dt) {
 
 }
-void Menu::update_encyclopedia(const double& dt) {
+void Menu::update_options_sounds(const double& dt) {
 
 }
+void Menu::update_options_graphics(const double& dt) {
+
+}
+void Menu::update_options_keybinds(const double& dt) {
+
+}
+
+void Menu::update_encyclopedia_main(const double& dt) {
+
+}
+void Menu::update_encyclopedia_technology(const double& dt) {
+
+}
+void Menu::update_encyclopedia_ships(const double& dt) {
+
+}
+void Menu::update_encyclopedia_factions(const double& dt) {
+
+}
+#pragma endregion
+
+
+
 
 void Menu::render_game() {
 
@@ -338,7 +397,19 @@ void Menu::render_game() {
 void Menu::render_main_menu() {
     m_MainMenuScreen->render();
 }
-void Menu::render_host_server_lobby_and_ship() {
+void Menu::render_host_setup_1() {
+    m_HostScreen->render();
+}
+void Menu::render_host_setup_ffa_2() {
+    m_HostScreenFFA2->render();
+}
+void Menu::render_host_setup_td_2() {
+    m_HostScreenTeamDeathmatch2->render();
+}
+void Menu::render_host_setup_hs_2() {
+    m_HostScreenHomelandSecurity2->render();
+}
+void Menu::render_host_lobby_3() {
     m_ServerLobbyChatWindow->render();
     m_ServerLobbyConnectedPlayersWindow->render();
     m_ServerLobbyShipSelectorWindow->render();
@@ -346,10 +417,8 @@ void Menu::render_host_server_lobby_and_ship() {
     m_Back->render();
     m_Next->render();
 }
-void Menu::render_host_server_port_and_name_and_map() {
-    m_HostScreen->render();
-}
-void Menu::render_join_server_port_and_name_and_ip() {
+
+void Menu::render_join_setup_1() {
     m_Back->render();
     m_Next->render();
 
@@ -357,7 +426,7 @@ void Menu::render_join_server_port_and_name_and_ip() {
     m_ServerPort->render();
     m_UserName->render();
 }
-void Menu::render_join_server_server_lobby() {
+void Menu::render_join_lobby_2() {
     m_ServerLobbyChatWindow->render();
     m_ServerLobbyConnectedPlayersWindow->render();
     m_ServerLobbyShipSelectorWindow->render();
@@ -365,28 +434,68 @@ void Menu::render_join_server_server_lobby() {
     m_Back->render();
     m_Next->render();
 }
-void Menu::render_options() {
+
+void Menu::render_options_main() {
 
 }
-void Menu::render_encyclopedia() {
+void Menu::render_options_sounds() {
 
 }
+void Menu::render_options_graphics() {
+
+}
+void Menu::render_options_keybinds() {
+
+}
+
+void Menu::render_encyclopedia_main() {
+
+}
+void Menu::render_encyclopedia_technology() {
+
+}
+void Menu::render_encyclopedia_ships() {
+
+}
+void Menu::render_encyclopedia_factions() {
+
+}
+
+
 void Menu::update(const double& dt) {
     switch (m_GameState) {
         case GameState::Main_Menu: {
             update_main_menu(dt); break;
-        }case GameState::Host_Server_Lobby_And_Ship: {
-            update_host_server_lobby_and_ship(dt); break;
-        }case GameState::Host_Server_Port_And_Name_And_Map: {
-            update_host_server_port_and_name_and_map(dt); break;
-        }case GameState::Join_Server_Port_And_Name_And_IP: {
-            update_join_server_port_and_name_and_ip(dt); break;
-        }case GameState::Join_Server_Server_Lobby: {
-            update_join_server_server_lobby(dt); break;
-        }case GameState::Encyclopedia: {
-            update_encyclopedia(dt); break;
-        }case GameState::Options: {
-            update_options(dt); break;
+        }case GameState::Host_Screen_Setup_1: {
+            update_host_setup_1(dt); break;
+        }case GameState::Host_Screen_Setup_FFA_2: {
+            update_host_setup_ffa_2(dt); break;
+        }case GameState::Host_Screen_Setup_TeamDeathMatch_2: {
+            update_host_setup_td_2(dt); break;
+        }case GameState::Host_Screen_Setup_HomelandSecurity_2: {
+            update_host_setup_hs_2(dt); break;
+        }case GameState::Host_Screen_Lobby_3: {
+            update_host_lobby_3(dt); break;
+        }case GameState::Join_Screen_Setup_1: {
+            update_join_setup_1(dt); break;
+        }case GameState::Join_Screen_Lobby_2: {
+            update_join_lobby_2(dt); break;
+        }case GameState::Encyclopedia_Main: {
+            update_encyclopedia_main(dt); break;
+        }case GameState::Encyclopedia_Ships: {
+            update_encyclopedia_ships(dt); break;
+        }case GameState::Encyclopedia_Factions: {
+            update_encyclopedia_factions(dt); break;
+        }case GameState::Encyclopedia_Technology: {
+            update_encyclopedia_technology(dt); break;
+        }case GameState::Options_Main: {
+            update_options_main(dt); break;
+        }case GameState::Options_Graphics: {
+            update_options_graphics(dt); break;
+        }case GameState::Options_Sounds: {
+            update_options_sounds(dt); break;
+        }case GameState::Options_Keybinds: {
+            update_options_keybinds(dt); break;
         }case GameState::Game: {
             update_game(dt); break;
         }default: {
@@ -405,18 +514,36 @@ void Menu::render() {
     switch (m_GameState) {
         case GameState::Main_Menu: {
             render_main_menu(); break;
-        }case GameState::Host_Server_Lobby_And_Ship: {
-            render_host_server_lobby_and_ship(); break;
-        }case GameState::Host_Server_Port_And_Name_And_Map: {
-            render_host_server_port_and_name_and_map(); break;
-        }case GameState::Join_Server_Port_And_Name_And_IP: {
-            render_join_server_port_and_name_and_ip(); break;
-        }case GameState::Join_Server_Server_Lobby: {
-            render_join_server_server_lobby(); break;
-        }case GameState::Options: {
-            render_options(); break;
-        }case GameState::Encyclopedia: {
-            render_encyclopedia(); break;
+        }case GameState::Host_Screen_Setup_1: {
+            render_host_setup_1(); break;
+        }case GameState::Host_Screen_Setup_FFA_2: {
+            render_host_setup_ffa_2(); break;
+        }case GameState::Host_Screen_Setup_TeamDeathMatch_2: {
+            render_host_setup_td_2(); break;
+        }case GameState::Host_Screen_Setup_HomelandSecurity_2: {
+            render_host_setup_hs_2(); break;
+        }case GameState::Host_Screen_Lobby_3: {
+            render_host_lobby_3(); break;
+        }case GameState::Join_Screen_Setup_1: {
+            render_join_setup_1(); break;
+        }case GameState::Join_Screen_Lobby_2: {
+            render_join_lobby_2(); break;
+        }case GameState::Encyclopedia_Main: {
+            render_encyclopedia_main(); break;
+        }case GameState::Encyclopedia_Ships: {
+            render_encyclopedia_ships(); break;
+        }case GameState::Encyclopedia_Factions: {
+            render_encyclopedia_factions(); break;
+        }case GameState::Encyclopedia_Technology: {
+            render_encyclopedia_technology(); break;
+        }case GameState::Options_Main: {
+            render_options_main(); break;
+        }case GameState::Options_Graphics: {
+            render_options_graphics(); break;
+        }case GameState::Options_Sounds: {
+            render_options_sounds(); break;
+        }case GameState::Options_Keybinds: {
+            render_options_keybinds(); break;
         }case GameState::Game: {
             render_game(); break;
         }default: {

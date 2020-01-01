@@ -23,7 +23,7 @@ struct GameCameraShipSelectorLogicFunctor final { void operator()(ComponentLogic
     GameCamera& camera = *static_cast<GameCamera*>(_component.getUserPointer());
     Core& core = *static_cast<Core*>(_component.getUserPointer1());
     Ship3DViewer& window = *static_cast<Ship3DViewer*>(_component.getUserPointer2());
-    if (core.gameState() == GameState::Host_Server_Lobby_And_Ship || core.gameState() == GameState::Join_Server_Server_Lobby) {
+    if (core.gameState() == GameState::Host_Screen_Lobby_3 || core.gameState() == GameState::Join_Screen_Lobby_2) {
         auto& entity = camera.entity();
         EntityDataRequest dataRequest(entity);
         auto& thisCamera = *entity.getComponent<ComponentCamera>(dataRequest);

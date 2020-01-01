@@ -24,6 +24,7 @@ class MapSelectionWindow final: public RoundedWindow {
     friend struct CycleGameModeLeftButtonOnClick;
     friend struct CycleGameModeRightButtonOnClick;
     friend class  Client;
+    friend class  HostScreen;
 
     struct ButtonPtr final {
         HostScreen*   hostScreen;
@@ -36,24 +37,18 @@ class MapSelectionWindow final: public RoundedWindow {
 
     private:
         HostScreen&              m_HostScreen;
-        GameplayModeType::Mode   m_CurrentGameMode;
         Button*                  m_ChangeGameModeLeftButton;
         Button*                  m_ChangeGameModeRightButton;
-        MapEntryData             m_CurrentChoice;
         ScrollFrame*             m_MapFileScrollFrame;
         Font&                    m_Font;
 
         void clear_chosen_map();
         void recalculate_maps();
     public:
-        MapSelectionWindow(HostScreen&, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const float borderSize, const std::string& labelText);
+        MapSelectionWindow(HostScreen&, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const std::string& labelText);
         ~MapSelectionWindow();
 
-        const MapEntryData& getCurrentChoice() const;
-
         void clearWindow();
-
-        void setCurrentGameMode(const GameplayModeType::Mode& currentGameMode);
 
         void onResize(const unsigned int& newWidth, const unsigned int& newHeight);
 

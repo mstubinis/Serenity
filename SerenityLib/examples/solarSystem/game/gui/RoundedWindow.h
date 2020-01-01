@@ -11,9 +11,9 @@ class  Text;
 class  Font;
 class RoundedWindow: public Button {
     protected:
-        Button*   m_Background;
-        Text*     m_Label;
-        float     m_BorderSize;
+        Button*       m_Background;
+        Text*         m_Label;
+        unsigned int  m_BorderSize;
 
         std::function<glm::vec2()> m_SizeFunctor;
         std::function<glm::vec2()> m_PositionFunctor;
@@ -26,7 +26,7 @@ class RoundedWindow: public Button {
             m_PositionFunctor = std::bind<glm::vec2>(functor, this);
         }
     public:
-        RoundedWindow(Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth,const float borderSize = 1, const std::string& labelText = "");
+        RoundedWindow(Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth,const unsigned int& borderSize = 1, const std::string& labelText = "");
         virtual ~RoundedWindow();
 
         virtual void onResize(const unsigned int& newWidth, const unsigned int& newHeight);

@@ -12,32 +12,23 @@
 #include "ResourceManifest.h"
 #include <core/engine/discord/Discord.h>
 
+#include <chrono>
+#include <thread>
+
+
 using namespace Engine;
 using namespace std;
 
 Core* m_Core = nullptr;
 
 void Game::initResources(){
+    Resources::getWindow().setIcon("../data/Textures/icon.png");
+
     Discord::activate(661384805786845214);
     
-    Discord::DiscordActivity activity;
-    activity.setDetail("At Main Menu");
-    activity.setType(discord::ActivityType::Playing);
-    activity.setInstance(false);
-    activity.setState("Playing Solo");
-    activity.setTimestampStart(0);
-    activity.setTimestampEnd(0);
-    activity.setImageLarge("large_icon");
-    activity.setImageLargeText("");
-    activity.setImageSmallText("");
-
-    Discord::update_activity(activity);
-
     m_Core = NEW Core();
 
     ResourceManifest::init();
-    //const std::string& iconPath = ResourceManifest::BasePath + "data/Textures/icon.png";
-    //Resources::getWindow().setIcon(iconPath);
 }
 void Game::initLogic(){
     Physics::setNumberOfStepsPerFrame(3);
@@ -45,6 +36,8 @@ void Game::initLogic(){
 
 }
 void Game::cleanup() {
+    Discord::clear_activity();
+    std::this_thread::sleep_for(std::chrono::milliseconds(250)); //TODO: probably not needed, wanted to see if this would speed up discord sending over the status
     SAFE_DELETE(m_Core);
     ResourceManifest::destruct();
 }

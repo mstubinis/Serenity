@@ -8,6 +8,7 @@
 #include "../Button.h"
 #include "../TextBox.h"
 #include "../Text.h"
+#include "../../modes/GameplayMode.h"
 
 #include "../../networking/client/Client.h"
 #include "../../networking/server/Server.h"
@@ -37,61 +38,36 @@ struct Host_ButtonBack_OnClick { void operator()(Button* button) const {
     HostScreen& hostScreen = *static_cast<HostScreen*>(button->getUserPointer());
     auto& menu = hostScreen.getMenu();
     menu.go_to_main_menu();
-
-    //force server to disconnect client
-    menu.getCore().shutdownClient();
-    menu.getCore().shutdownServer();
 }};
 struct Host_ButtonNext_OnClick { void operator()(Button* button) const {
     HostScreen& hostScreen = *static_cast<HostScreen*>(button->getUserPointer());
     auto& menu = hostScreen.getMenu();
+    auto& data = hostScreen.getData();
 
-    const string& username   = hostScreen.getUserNameTextBox().text();
-    const string& portstring = hostScreen.getServerPortTextBox().text();
-    const auto& map          = hostScreen.getMapSelectionWindow().getCurrentChoice();
-    if (!portstring.empty() && !username.empty() && !map.map_file_path.empty()) {
-        //TODO: prevent special characters in usename
-        if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) { //port must have numbers only
-            if (username.find_first_not_of(' ') != std::string::npos) {
-                if (std::regex_match(username, std::regex("[a-zA-ZäöüßÄÖÜ]+"))) { //letters only please
+    if (!data.m_CurrentMapChoice.map_file_path.empty()) {
+        auto& core = menu.getCore();
 
-                    auto& core = menu.getCore();
-
-                    const int port = stoi(portstring);
-                    core.startServer(port);
-                    core.startClient(nullptr, port, username, "127.0.0.1"); //the client will request validation at this stage
-
-
-                    //TODO: replace this hard coded test case with real input values
-                    vector<TeamNumber::Enum> nil;
-                    vector<TeamNumber::Enum> team1enemies{ TeamNumber::Team_2 };
-                    vector<TeamNumber::Enum> team2enemies{ TeamNumber::Team_1 };
-                    Team team1 = Team(TeamNumber::Team_1, nil, team1enemies);
-                    Team team2 = Team(TeamNumber::Team_2, nil, team2enemies);
-                    core.getServer()->getGameplayMode().setGameplayMode(GameplayModeType::TeamDeathmatch);
-                    core.getServer()->getGameplayMode().setMaxAmountOfPlayers(50);
-                    core.getServer()->getGameplayMode().addTeam(team1);
-                    core.getServer()->getGameplayMode().addTeam(team2);
-                    core.getClient()->getGameplayMode() = core.getServer()->getGameplayMode();
-
-                    core.getServer()->startupMap(map);
-
-                    menu.m_ServerLobbyChatWindow->setUserPointer(core.getClient());
-                }else {
-                    menu.setErrorText("The username must only contain letters");
-                }
-            }else {
-                menu.setErrorText("The username must have some letters in it");
+        switch (data.m_CurrentGameModeChoice) {
+            case GameplayModeType::FFA: {
+                menu.setGameState(GameState::Host_Screen_Setup_FFA_2);
+                break;
+            }case GameplayModeType::TeamDeathmatch: {
+                menu.setGameState(GameState::Host_Screen_Setup_TeamDeathMatch_2);
+                break;
+            }case GameplayModeType::HomelandSecurity: {
+                menu.setGameState(GameState::Host_Screen_Setup_HomelandSecurity_2);
+                break;
+            }default: {
+                break;
             }
-        }else {
-            menu.setErrorText("Server port must contain numbers only");
         }
+        menu.setErrorText(""); 
     }else {
-        menu.setErrorText("Do not leave any fields blank");
+        menu.setErrorText("Please choose a map");
     }
 }};
 
-HostScreen::HostScreen(Menu& menu, Font& font) : m_Menu(menu){
+HostScreen::HostScreen(Menu& menu, Font& font) : m_Menu(menu), m_Font(font){
     const auto winSize                 = Resources::getWindowSize();
     const auto contentSize             = glm::vec2(winSize) - glm::vec2(padding_x * 2.0f, (padding_y * 2.0f) + bottom_bar_height);
     const auto top_content_height      = contentSize.y / 2.0f;
@@ -106,8 +82,12 @@ HostScreen::HostScreen(Menu& menu, Font& font) : m_Menu(menu){
 
     const auto window_height = (winSize.y - bottom_bar_height_total - padding_y);
     {
-        m_LeftWindow = new MapSelectionWindow(*this,font, (padding_x / 2.0f) + (left_window_width / 2.0f), winSize.y - (padding_y / 2.0f) - (window_height / 2.0f), left_window_width, window_height, 0.512f, 1, "Free for All");
-
+        m_LeftWindow = new MapSelectionWindow(*this, font, 
+            (padding_x / 2.0f) + (left_window_width / 2.0f),
+            winSize.y - (padding_y / 2.0f) - (window_height / 2.0f),
+            left_window_width,
+            window_height, 
+        0.05f, 1, "Free for All");
         struct LeftSizeFunctor { glm::vec2 operator()(RoundedWindow* window) const {
             const auto winSize = Resources::getWindowSize();
             const auto window_height = (winSize.y - bottom_bar_height_total - padding_y);
@@ -116,14 +96,21 @@ HostScreen::HostScreen(Menu& menu, Font& font) : m_Menu(menu){
         struct LeftPositionFunctor { glm::vec2 operator()(RoundedWindow* window) const {
             const auto winSize = Resources::getWindowSize();
             const auto window_height = (winSize.y - bottom_bar_height_total - padding_y);
-            return glm::vec2((padding_x / 2.0f) + (left_window_width / 2.0f), winSize.y - (padding_y / 2.0f) - (window_height / 2.0f));
+            const auto x = (padding_x / 2.0f) + (left_window_width / 2.0f);
+            const auto y = winSize.y - (padding_y / 2.0f) - (window_height / 2.0f);
+            return glm::vec2(x, y);
         }};
         m_LeftWindow->setPositionFunctor(LeftPositionFunctor());
         m_LeftWindow->setSizeFunctor(LeftSizeFunctor());
 
     }
     {
-        m_RightWindow = new RoundedWindow(font, winSize.x - (padding_x / 2.0f) - (window_height / 2.0f), winSize.y - (padding_y / 2.0f) - (window_height / 2.0f), window_height, window_height,0.512f, 1, "");
+        m_RightWindow = new MapDescriptionWindow(*this, font,
+            winSize.x - (padding_x / 2.0f) - (window_height / 2.0f),
+            winSize.y - (padding_y / 2.0f) - (window_height / 2.0f),
+            window_height,
+            window_height,
+        0.05f, 1, "");
         struct RightSizeFunctor {glm::vec2 operator()(RoundedWindow* window) const {
             const auto winSize = Resources::getWindowSize();
             const auto window_height = (winSize.y - bottom_bar_height_total - padding_y);
@@ -132,12 +119,13 @@ HostScreen::HostScreen(Menu& menu, Font& font) : m_Menu(menu){
         struct RightPositionFunctor { glm::vec2 operator()(RoundedWindow* window) const {
             const auto winSize = Resources::getWindowSize();
             const auto window_height = (winSize.y - bottom_bar_height_total - padding_y);
-            return glm::vec2(winSize.x - (padding_x / 2.0f) - (window_height / 2.0f), winSize.y - (padding_y / 2.0f) - (window_height / 2.0f));
+            const auto x = winSize.x - (padding_x / 2.0f) - (window_height / 2.0f);
+            const auto y = winSize.y - (padding_y / 2.0f) - (window_height / 2.0f);
+            return glm::vec2(x, y);
         }};
         m_RightWindow->setPositionFunctor(RightPositionFunctor());
         m_RightWindow->setSizeFunctor(RightSizeFunctor());
     }
-    m_MapDescriptionWindow = NEW MapDescriptionWindow(font, padding_x + contentSize.x / 3.0f, winSize.y - padding_y, contentSize.x / 3.0f, contentSize.y / 2.0f, 0.512f);
 
     m_BackButton = NEW Button(font, padding_x + (bottom_bar_button_width / 2.0f), padding_y + (bottom_bar_height / 2.0f), bottom_bar_button_width, bottom_bar_height);
     m_BackButton->setText("Back");
@@ -153,120 +141,74 @@ HostScreen::HostScreen(Menu& menu, Font& font) : m_Menu(menu){
     m_ForwardButton->setUserPointer(this);
     m_ForwardButton->setOnClickFunctor(Host_ButtonNext_OnClick());
 
-
-    m_UserName_TextBox = NEW TextBox("Your Name", font, 20, winSize.x / 2.0f, 275.0f);
-    m_UserName_TextBox->setColor(0.5f, 0.5f, 0.5f, 1.0f);
-    m_UserName_TextBox->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
-
-    m_ServerPort_TextBox = NEW TextBox("Server Port", font, 7, winSize.x / 2.0f, 195.0f);
-    m_ServerPort_TextBox->setColor(0.5f, 0.5f, 0.5f, 1.0f);
-    m_ServerPort_TextBox->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
-    m_ServerPort_TextBox->setText("55000");
+    setCurrentGameMode(GameplayModeType::FFA);
 }
 HostScreen::~HostScreen() {
     SAFE_DELETE(m_BackButton);
     SAFE_DELETE(m_ForwardButton);
-    SAFE_DELETE(m_UserName_TextBox);
-    SAFE_DELETE(m_ServerPort_TextBox);
-    SAFE_DELETE(m_MapDescriptionWindow);
-    {
-        SAFE_DELETE(m_LeftWindow);
-    }
-    {
-        SAFE_DELETE(m_RightWindow);
-    }
-
+    SAFE_DELETE(m_LeftWindow);
+    SAFE_DELETE(m_RightWindow);
     SAFE_DELETE(m_BackgroundEdgeGraphicBottom);
+}
+void HostScreen::clearCurrentMapChoice() {
+    m_Data.m_CurrentMapChoice = MapEntryData();
+    m_LeftWindow->clear_chosen_map();
+    m_RightWindow->clear();
+}
+void HostScreen::setCurrentMapChoice(const MapEntryData& choice) {
+    m_RightWindow->clear();
+    m_RightWindow->setLabelText(choice.map_name);
+    Text* text = NEW Text(0, 0, m_Font, choice.map_desc);
+    text->setColor(m_RightWindow->m_MapDescriptionTextScrollFrame->color());
+    text->setTextScale(0.85f, 0.85f);
+    m_RightWindow->addContent(text);
+}
+const MapEntryData& HostScreen::getCurrentChoice() const {
+    return m_Data.m_CurrentMapChoice;
+}
+void HostScreen::setCurrentGameMode(const GameplayModeType::Mode& currentGameMode) {
+    m_Data.m_CurrentGameModeChoice = currentGameMode;
+    m_LeftWindow->setLabelText(GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES[currentGameMode]);
+    m_LeftWindow->recalculate_maps();
+}
+const HostScreen::FirstPartData& HostScreen::getData() {
+    return m_Data;
 }
 Menu& HostScreen::getMenu() {
     return m_Menu;
-}
-TextBox& HostScreen::getUserNameTextBox() {
-    return *m_UserName_TextBox;
-}
-TextBox& HostScreen::getServerPortTextBox() {
-    return *m_ServerPort_TextBox;
 }
 MapSelectionWindow& HostScreen::getMapSelectionWindow() {
     return *m_LeftWindow;
 }
 MapDescriptionWindow& HostScreen::getMapDescriptionWindow() {
-    return *m_MapDescriptionWindow;
+    return *m_RightWindow;
 }
 void HostScreen::onResize(const unsigned int newWidth, const unsigned int newHeight) {
     const auto winSize = glm::uvec2(newWidth, newHeight);
-    const auto contentSize = glm::vec2(winSize) - glm::vec2(padding_x * 2.0f, (padding_y * 2.0f) + bottom_bar_height);
-    const auto top_content_height = contentSize.y / 2.0f;
-    const auto first_2_boxes_width_top = contentSize.x - top_content_height;
-    const auto window_height = (winSize.y - bottom_bar_height_total - padding_y);
 
-    m_BackButton->setPosition(
-        padding_x + (bottom_bar_button_width / 2.0f),
-        bottom_bar_height_total / 2.0f
-    );
-    m_ForwardButton->setPosition(
-        winSize.x - (padding_x + (bottom_bar_button_width / 2.0f)), 
-        bottom_bar_height_total / 2.0f
-    );
-
-
-    {
-        m_LeftWindow->onResize(newWidth, newHeight);
-    }
-    {
-        m_RightWindow->onResize(newWidth, newHeight);
-
-    }
-
+    m_BackButton->setPosition(padding_x + (bottom_bar_button_width / 2.0f), bottom_bar_height_total / 2.0f);
+    m_ForwardButton->setPosition(winSize.x - (padding_x + (bottom_bar_button_width / 2.0f)), bottom_bar_height_total / 2.0f);
     m_BackgroundEdgeGraphicBottom->setPosition(winSize.x / 2.0f, bottom_bar_height_total / 2.0f);
     m_BackgroundEdgeGraphicBottom->setSize(winSize.x, bottom_bar_height_total);
 
-    //m_MapDescriptionWindow->setPosition(m_LeftWindow->getWindowFrame().positionWorld().x + m_LeftWindow->getWindowFrame().width() + 2, winSize.y - (padding_y - 2));
-    m_MapDescriptionWindow->setSize(first_2_boxes_width_top / 2.0f, top_content_height + 2);
+    m_LeftWindow->onResize(newWidth, newHeight);
+    m_RightWindow->onResize(newWidth, newHeight); 
+
 }
 
 void HostScreen::update(const double& dt) {
     m_BackButton->update(dt);
     m_ForwardButton->update(dt);
 
-    m_ServerPort_TextBox->update(dt);
-    m_UserName_TextBox->update(dt);
-    m_MapDescriptionWindow->update(dt);
-    {
-        m_LeftWindow->update(dt);
-    }
-    {
-        m_RightWindow->update(dt);
-    }
-
+    m_LeftWindow->update(dt);
+    m_RightWindow->update(dt);
     m_BackgroundEdgeGraphicBottom->update(dt);
 }
 void HostScreen::render() {
-    m_MapDescriptionWindow->render();
     m_BackButton->render();
     m_ForwardButton->render();
 
-    m_ServerPort_TextBox->render();
-    m_UserName_TextBox->render();
-    {
-        m_LeftWindow->render();
-    }
-    {
-        m_RightWindow->render();
-    }
-
+    m_LeftWindow->render();
+    m_RightWindow->render();
     m_BackgroundEdgeGraphicBottom->render();
-    //render map screenshot
-    const auto& current_map_data = getMapSelectionWindow().getCurrentChoice();
-
-    auto& desc_frame = getMapDescriptionWindow().getWindowFrame();
-
-    const auto texture_frame_size = glm::vec2(desc_frame.height(), desc_frame.height());
-    const auto ss_pos = desc_frame.positionWorld() + glm::vec2(desc_frame.width(),0);
-    if (!current_map_data.map_name.empty()) {
-        Texture& texture = *(Texture*)current_map_data.map_screenshot_handle.get();
-        auto scl = texture_frame_size / glm::vec2(texture.size());
-        Renderer::renderTexture(texture, ss_pos + glm::vec2(4, 0), glm::vec4(1.0f), 0.0f, scl, 0.0141f, Alignment::TopLeft);
-    }
-    Renderer::renderBorder(1, ss_pos + glm::vec2(3, 0), glm::vec4(1, 1, 0, 1), texture_frame_size.x + 1, texture_frame_size.y, 0.0f, 0.014f, Alignment::TopLeft);
 }

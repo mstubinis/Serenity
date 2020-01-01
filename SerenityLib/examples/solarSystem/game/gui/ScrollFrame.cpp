@@ -226,7 +226,7 @@ void ScrollFrame::render(const glm::vec4& scissor) {
 
     const auto pos = positionWorld();
 
-    //Renderer::renderBorder(1, pos, m_Color, m_Width, m_Height, 0, 0.02f, m_Alignment, scissor);
+    //Renderer::renderBorder(1, pos, m_Color, m_Width, m_Height, 0, 0.0001f, m_Alignment, scissor);
 
     for (auto& widgetEntry : m_Content) {
         widgetEntry.widget->render(scissor);
@@ -241,7 +241,7 @@ void ScrollFrame::render() {
     const auto pos  = positionWorld();
     const auto pos2 = positionFromAlignmentWorld();
 
-    //Renderer::renderBorder(1, pos, m_Color, m_Width, m_Height, 0, 0.02f, m_Alignment);
+    //Renderer::renderBorder(1, pos, m_Color, m_Width, m_Height, 0, 0.0001f, m_Alignment);
 
     auto scissor = glm::vec4(pos2.x, pos2.y, m_Width, m_Height);
     for (auto& widgetEntry : m_Content) {

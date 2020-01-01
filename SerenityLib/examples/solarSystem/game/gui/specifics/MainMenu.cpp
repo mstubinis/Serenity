@@ -9,23 +9,23 @@ using namespace std;
 
 struct Button_Host_OnClick { void operator()(Button* button) const {
     Menu& menu = *static_cast<Menu*>(button->getUserPointer());
-    menu.setGameState(GameState::Host_Server_Port_And_Name_And_Map);
+    menu.setGameState(GameState::Host_Screen_Setup_1);
     menu.setErrorText("", 0.2f);
 }};
 struct Button_Join_OnClick { void operator()(Button* button) const {
     Menu& menu = *static_cast<Menu*>(button->getUserPointer());
-    menu.setGameState(GameState::Join_Server_Port_And_Name_And_IP);
+    menu.setGameState(GameState::Join_Screen_Setup_1);
     menu.setErrorText("", 0.2f);
 }};
 
 struct Button_Options_OnClick { void operator()(Button* button) const {
     Menu& menu = *static_cast<Menu*>(button->getUserPointer());
-    menu.setGameState(GameState::Options);
+    menu.setGameState(GameState::Options_Main);
     menu.setErrorText("", 0.2f);
 }};
 struct Button_Encyclopedia_OnClick { void operator()(Button* button) const {
     Menu& menu = *static_cast<Menu*>(button->getUserPointer());
-    menu.setGameState(GameState::Encyclopedia);
+    menu.setGameState(GameState::Encyclopedia_Main);
     menu.setErrorText("", 0.2f);
 }};
 struct Button_Exit_OnClick { void operator()(Button* button) const {

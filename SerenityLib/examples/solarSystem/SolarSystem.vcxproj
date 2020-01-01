@@ -227,7 +227,9 @@
     <ClInclude Include="game\gui\ScrollFrame.h" />
     <ClInclude Include="game\gui\specifics\FFALobby.h" />
     <ClInclude Include="game\gui\specifics\HostScreen.h" />
-    <ClInclude Include="game\gui\specifics\HostScreen2.h" />
+    <ClInclude Include="game\gui\specifics\HostScreenFFA2.h" />
+    <ClInclude Include="game\gui\specifics\HostScreenHomelandSecurity2.h" />
+    <ClInclude Include="game\gui\specifics\HostScreenTeamDeathmatch2.h" />
     <ClInclude Include="game\gui\specifics\MainMenu.h" />
     <ClInclude Include="game\gui\specifics\MapDescriptionWindow.h" />
     <ClInclude Include="game\gui\specifics\MapSelectionWindow.h" />
@@ -324,6 +326,7 @@
     <ClInclude Include="game\weapons\torpedos\QuantumTorpedo.h" />
     <ClInclude Include="game\weapons\WeaponIncludes.h" />
     <ClInclude Include="game\weapons\Weapons.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\ai\AI.cpp" />
@@ -345,7 +348,9 @@
     <ClCompile Include="game\gui\ScrollFrame.cpp" />
     <ClCompile Include="game\gui\specifics\FFALobby.cpp" />
     <ClCompile Include="game\gui\specifics\HostScreen.cpp" />
-    <ClCompile Include="game\gui\specifics\HostScreen2.cpp" />
+    <ClCompile Include="game\gui\specifics\HostScreenFFA2.cpp" />
+    <ClCompile Include="game\gui\specifics\HostScreenHomelandSecurity2.cpp" />
+    <ClCompile Include="game\gui\specifics\HostScreenTeamDeathmatch2.cpp" />
     <ClCompile Include="game\gui\specifics\MainMenu.cpp" />
     <ClCompile Include="game\gui\specifics\MapDescriptionWindow.cpp" />
     <ClCompile Include="game\gui\specifics\MapSelectionWindow.cpp" />
@@ -455,6 +460,12 @@
     <None Include="..\data\Shaders\shipDef_vert.glsl" />
     <None Include="..\data\Shaders\shipFwd_frag.glsl" />
     <None Include="..\data\Shaders\shipFwd_vert.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\data\Textures\icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="SolarSystem.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
