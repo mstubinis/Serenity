@@ -120,10 +120,10 @@ struct ShieldInstanceUnbindFunctor {void operator()(EngineResource* r) const {
 
 #pragma region ShieldImpactStruct
 ShipSystemShieldsImpactPoint::ShipSystemShieldsImpactPoint() {
-    active = false;
-    impactLocation = glm::vec3(0.0f);
-    impactRadius = maxTime = currentTime = 0.0f;
-    indexInArray = 0;
+    reset(0);
+}
+ShipSystemShieldsImpactPoint::ShipSystemShieldsImpactPoint(const unsigned int& index) {
+    reset(index);
 }
 void ShipSystemShieldsImpactPoint::impact(const glm::vec3& _impactLocation, const float& _impactRadius, const float& _maxTime, vector<uint>& freelist) {
     active = true;
@@ -134,7 +134,12 @@ void ShipSystemShieldsImpactPoint::impact(const glm::vec3& _impactLocation, cons
 
     removeFromVector(freelist, indexInArray);
 }
-
+void ShipSystemShieldsImpactPoint::reset(const unsigned int& index) {
+    active = false;
+    impactLocation = glm::vec3(0.0f);
+    impactRadius = maxTime = currentTime = 0.0f;
+    indexInArray = index;
+}
 const bool ShipSystemShieldsImpactPoint::update(const float& dt, vector<uint>& freelist, size_t& maxIndex) {
     if (active) {
         currentTime += dt;
@@ -216,17 +221,17 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, con
         m_ImpactPoints[i].indexInArray = i;
     }
     m_ImpactPointsFreelist.reserve(MAX_IMPACT_POINTS);
-    m_MaxIndex = 0;
     for (uint i = 0; i < MAX_IMPACT_POINTS; ++i) {
         m_ImpactPointsFreelist.push_back(i);
     }
+    m_MaxIndex = 0;
     m_ShieldsAreUp = true;
 
 
     //TODO: create shield pyramids (6 total) here
-    const auto x = shieldScale.x;
-    const auto y = shieldScale.y;
-    const auto z = shieldScale.z;
+    const auto& x = shieldScale.x;
+    const auto& y = shieldScale.y;
+    const auto& z = shieldScale.z;
     glm::vec3 A, B, C, D, E, F, G, H, I;
 
     A = glm::vec3(-x,  y, -z);
@@ -276,10 +281,11 @@ void ShipSystemShields::restoreToFull() {
     for (size_t i = 0; i < m_HealthPointsCurrent.size(); ++i) {
         m_HealthPointsCurrent[i] = m_HealthPointsMax[i];
     }
+    m_MaxIndex = 0;
 }
 void ShipSystemShields::reset_all_impact_points() {
     for (uint i = 0; i < MAX_IMPACT_POINTS; ++i) {
-        m_ImpactPoints[i] = ShipSystemShieldsImpactPoint();
+        m_ImpactPoints[i].reset(i);
     }
     m_MaxIndex = 0;
 }

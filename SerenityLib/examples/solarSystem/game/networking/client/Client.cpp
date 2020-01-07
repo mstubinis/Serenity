@@ -114,6 +114,7 @@ void Client::connect(const unsigned short& timeout) {
         }else if (status == sf::Socket::Status::Error) {
             m_Core.m_Menu->setErrorText("Connection to the server failed", 20);
         }else if (status == sf::Socket::Status::Disconnected) {
+            m_Core.m_Menu->go_to_main_menu(); //needed to restore mouse cursor
             m_Core.m_Menu->setErrorText("Disconnected from the server", 20);
         }else {
 

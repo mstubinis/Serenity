@@ -36,7 +36,7 @@ const FactionInformation& Ships::getFactionInformation(const string& shipClass) 
     return Database[shipClass].FactionInformation;
 }
 
-void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& faction, const double respawnTime, const float threatModifier, const bool printClassNameOnHUD) {
+void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& faction, const double respawnTime, const float threatModifier, const ShipTier::Tier& tier, const bool printClassNameOnHUD) {
     if (Database.count(shipClass))
         return;
 
@@ -47,6 +47,7 @@ void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& fa
     info.FactionInformation     = Factions::Database[faction];
     info.RespawnTime            = respawnTime;
     info.ThreatModifier         = threatModifier;
+    info.Tier                   = tier;
     info.PrintClassNameOnHUD    = printClassNameOnHUD;
 
     auto ship_class_lower = boost::algorithm::to_lower_copy(shipClass);
@@ -140,38 +141,38 @@ void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& fa
     Database.emplace(shipClass, info);
 }
 void Ships::init() {
-    createShipEntry("Defiant",          FactionEnum::Federation,   6,    1.0f);
-    createShipEntry("Nova",             FactionEnum::Federation,   6,    1.0f);
-    createShipEntry("Akira",            FactionEnum::Federation,   20,   1.2f);
-    createShipEntry("Intrepid",         FactionEnum::Federation,   20,   1.1f);
-    createShipEntry("Excelsior",        FactionEnum::Federation,   20,   1.2f);
-    createShipEntry("Constitution",     FactionEnum::Federation,   20,   1.1f);
-    createShipEntry("Miranda",          FactionEnum::Federation,   6,    1.0f);
-    //createShipEntry("Saber",          FactionEnum::Federation,   6,    1.0f);
-    //createShipEntry("Norway",         FactionEnum::Federation,   8,    1.05f);
-    //createShipEntry("Steamrunner",    FactionEnum::Federation,   20,   1.1f);
-    //createShipEntry("Galaxy",         FactionEnum::Federation,   30,   1.3f);
-    //createShipEntry("Nebula",         FactionEnum::Federation,   30,   1.25f);
-    createShipEntry("Sovereign",        FactionEnum::Federation,   30,   1.35f);
-    //createShipEntry("Liberty",        FactionEnum::Federation,   40,   1.5f);
-    createShipEntry("Federation Defense Platform", FactionEnum::Federation,   60,    1.0f, false);
-    createShipEntry("Federation Starbase Mushroom", FactionEnum::Federation, 600, 1.0f, false);
+    createShipEntry("Defiant",          FactionEnum::Federation,   6,    1.0f, ShipTier::Escort);
+    createShipEntry("Nova",             FactionEnum::Federation,   6,    1.0f, ShipTier::Escort);
+    createShipEntry("Akira",            FactionEnum::Federation,   20,   1.2f, ShipTier::Cruiser);
+    createShipEntry("Intrepid",         FactionEnum::Federation,   20,   1.1f, ShipTier::Cruiser);
+    createShipEntry("Excelsior",        FactionEnum::Federation,   20,   1.2f, ShipTier::Cruiser);
+    createShipEntry("Constitution",     FactionEnum::Federation,   20,   1.1f, ShipTier::Cruiser);
+    createShipEntry("Miranda",          FactionEnum::Federation,   6,    1.0f, ShipTier::Escort);
+    //createShipEntry("Saber",          FactionEnum::Federation,   6,    1.0f, ShipTier::Escort);
+    //createShipEntry("Norway",         FactionEnum::Federation,   8,    1.05f, ShipTier::Escort);
+    //createShipEntry("Steamrunner",    FactionEnum::Federation,   20,   1.1f, ShipTier::Cruiser);
+    //createShipEntry("Galaxy",         FactionEnum::Federation,   30,   1.3f, ShipTier::Cruiser);
+    //createShipEntry("Nebula",         FactionEnum::Federation,   30,   1.25f, ShipTier::Cruiser);
+    createShipEntry("Sovereign",        FactionEnum::Federation,   30,   1.35f, ShipTier::Flagship);
+    //createShipEntry("Liberty",        FactionEnum::Federation,   40,   1.5f, ShipTier::Flagship);
+    createShipEntry("Federation Defense Platform", FactionEnum::Federation,   60,    1.0f, ShipTier::Station, false);
+    createShipEntry("Federation Starbase Mushroom", FactionEnum::Federation, 600, 1.0f, ShipTier::Station, false);
 
-    createShipEntry("B'rel",            FactionEnum::Klingon,      6,    1.0f);
-    createShipEntry("Vor'cha",          FactionEnum::Klingon,      20,   1.2f);
-    //createShipEntry("Negh'var",       FactionEnum::Klingon,      30,   1.35f);
-    //createShipEntry("Kahless",        FactionEnum::Klingon,      40,   1.5f);
+    createShipEntry("B'rel",            FactionEnum::Klingon,      6,    1.0f, ShipTier::Escort);
+    createShipEntry("Vor'cha",          FactionEnum::Klingon,      20,   1.2f, ShipTier::Cruiser);
+    //createShipEntry("Negh'var",       FactionEnum::Klingon,      30,   1.35f, ShipTier::Flagship);
+    //createShipEntry("Kahless",        FactionEnum::Klingon,      40,   1.5f, ShipTier::Flagship);
 
-    createShipEntry("Shrike",           FactionEnum::Romulan,      6,    1.0f);
-    //createShipEntry("Venerex",        FactionEnum::Romulan,      20,   1.2f);
-    createShipEntry("D'deridex",        FactionEnum::Romulan,      30,   1.4f);
-    //createShipEntry("Aeterna",        FactionEnum::Romulan,      40,   1.5f);
+    createShipEntry("Shrike",           FactionEnum::Romulan,      6,    1.0f, ShipTier::Escort);
+    //createShipEntry("Venerex",        FactionEnum::Romulan,      20,   1.2f, ShipTier::Cruiser);
+    createShipEntry("D'deridex",        FactionEnum::Romulan,      30,   1.4f, ShipTier::Flagship);
+    //createShipEntry("Aeterna",        FactionEnum::Romulan,      40,   1.5f, ShipTier::Flagship);
 
 
-    //createShipEntry("Probe",          FactionEnum::Borg,         6,    1.0f);
-    //createShipEntry("Sphere",         FactionEnum::Borg,         20,   1.2f);
-    //createShipEntry("Diamond",        FactionEnum::Borg,         30,   1.4f);
-    createShipEntry("Cube",             FactionEnum::Borg,         600,  2.5f);
+    //createShipEntry("Probe",          FactionEnum::Borg,         6,    1.0f, ShipTier::Escort);
+    //createShipEntry("Sphere",         FactionEnum::Borg,         20,   1.2f, ShipTier::Cruiser);
+    //createShipEntry("Diamond",        FactionEnum::Borg,         30,   1.4f, ShipTier::Cruiser);
+    createShipEntry("Cube",             FactionEnum::Borg,         600,  2.5f, ShipTier::Flagship);
 
     
     Material& defMat = *((Material*)Database["Defiant"].MaterialHandles[0].get());
@@ -195,4 +196,25 @@ void Ships::init() {
 }
 void Ships::destruct() {
     Database.clear();
+}
+vector<string> Ships::getShipClassesSortedByFaction(const ShipTier::Tier& tier) {
+    vector<string>             ship_classes_str;
+    vector<ShipInformation>    ship_classes;
+    for (auto& ship_info : Ships::Database) {
+        if (ship_info.second.Tier == tier) {
+            ship_classes.push_back(ship_info.second);
+        }
+    }
+
+    auto lamda_sorter = [&](ShipInformation& lhs, ShipInformation& rhs) {
+        return lhs.Faction < rhs.Faction;
+    };
+
+    std::sort(ship_classes.begin(), ship_classes.end(), lamda_sorter);
+
+    ship_classes_str.reserve(ship_classes.size());
+    for (auto& ship_info : ship_classes) {
+        ship_classes_str.push_back(ship_info.Class);
+    }
+    return ship_classes_str;
 }

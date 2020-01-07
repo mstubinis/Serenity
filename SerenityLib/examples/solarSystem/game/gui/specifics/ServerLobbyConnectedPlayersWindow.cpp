@@ -32,12 +32,14 @@ void ServerLobbyConnectedPlayersWindow::addContent(Widget* widget) {
 
 const bool ServerLobbyConnectedPlayersWindow::removeContent(const string& key) {
     auto& content = m_ChatWindow->content();
-    for (auto& widgetEntry : content) {
-        Text* text = dynamic_cast<Text*>(widgetEntry.widget);
-        if (text) {
-            if (text->text() == key) {
-                m_ChatWindow->removeContent(widgetEntry.widget);
-                return true;
+    for (auto& row : content) {
+        for (auto& widgetEntry : row.widgets) {
+            Text* text = dynamic_cast<Text*>(widgetEntry.widget);
+            if (text) {
+                if (text->text() == key) {
+                    m_ChatWindow->removeContent(widgetEntry.widget);
+                    return true;
+                }
             }
         }
     }
@@ -45,8 +47,10 @@ const bool ServerLobbyConnectedPlayersWindow::removeContent(const string& key) {
 }
 void ServerLobbyConnectedPlayersWindow::clear() {
     auto& content = m_ChatWindow->content();
-    for (auto& widgetEntry : content) {
-        SAFE_DELETE(widgetEntry.widget);
+    for (auto& row : content) {
+        for (auto& widgetEntry : row.widgets) {
+            SAFE_DELETE(widgetEntry.widget);
+        }
     }
     content.clear();
 }

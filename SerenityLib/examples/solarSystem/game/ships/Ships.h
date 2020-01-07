@@ -36,8 +36,16 @@
 #include "../factions/Faction.h"
 #include <core/engine/resources/Handle.h>
 
+struct ShipTier final { enum Tier {
+    Escort,
+    Cruiser,
+    Flagship,
+    Station,
+_TOTAL};};
+
 struct ShipInformation final {
     std::string                    Class;
+    ShipTier::Tier                 Tier;
     FactionEnum::Type              Faction;
     FactionInformation             FactionInformation;
     std::vector<Handle>            MeshHandles;
@@ -56,6 +64,8 @@ class Ships final{
     public:
         static std::unordered_map<std::string, ShipInformation> Database;
 
+        static std::vector<std::string> getShipClassesSortedByFaction(const ShipTier::Tier& tier);
+
         static const glm::vec4& getShieldsColor(const FactionEnum::Type&);
         static const glm::vec4& getTextColor(const FactionEnum::Type&);
         static const std::string& getFactionNameShort(const FactionEnum::Type&);
@@ -63,7 +73,13 @@ class Ships final{
 
         static const FactionInformation& getFactionInformation(const std::string& shipClass);
 
-        static void createShipEntry(const std::string& shipClass, const FactionEnum::Type& faction, const double respawnTime, const float threatModifier, const bool printClassNameOnHUD = true);
+        static void createShipEntry(
+            const std::string& shipClass,
+            const FactionEnum::Type& faction,
+            const double respawnTime,
+            const float threatModifier,
+            const ShipTier::Tier& tier,
+            const bool printClassNameOnHUD = true);
 
         static void init();
         static void destruct();

@@ -249,10 +249,10 @@ void Menu::go_to_main_menu() {
     m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
     m_Next->setText("Next");
     setErrorText("", 0.0f);
+
     auto& window = Resources::getWindow();
     window.keepMouseInWindow(false);
     window.setMouseCursorVisible(true);
-
 
     Discord::DiscordActivity activity;
     activity.setDetail("At Main Menu");
@@ -316,13 +316,9 @@ void Menu::update_game(const double& dt) {
 void Menu::update_main_menu(const double& dt) {
     m_Font->renderText(epriv::Core::m_Engine->m_DebugManager.reportDebug(), glm::vec2(50), glm::vec4(1.0), 0);
 
-
     m_MainMenuScreen->update(dt);
 }
 void Menu::update_host_setup_1(const double& dt) {
-    m_Back->update(dt);
-    m_Next->update(dt);
-
     m_HostScreen->update(dt);
 }
 void Menu::update_host_setup_ffa_2(const double& dt) {

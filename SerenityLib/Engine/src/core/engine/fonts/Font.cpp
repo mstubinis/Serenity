@@ -9,9 +9,10 @@
 
 using namespace Engine;
 using namespace std;
-
-Font::Font(const string& filename):EngineResource(ResourceType::Font, filename){ 
+#include <iostream>
+Font::Font(const string& filename) : EngineResource(ResourceType::Font, filename){ 
     string rawname = filename;
+    m_MaxHeight = 0.0f;
     const size_t& lastindex = filename.find_last_of(".");
     if (lastindex != string::npos) {
         rawname = filename.substr(0, lastindex);
@@ -19,6 +20,9 @@ Font::Font(const string& filename):EngineResource(ResourceType::Font, filename){
     }
     m_FontTexture = NEW Texture(rawname, false, ImageInternalFormat::SRGB8_ALPHA8);
     Handle handle = epriv::Core::m_Engine->m_ResourceManager._addTexture(m_FontTexture);
+
+    float min_y_offset = 9999999.0f;
+    float max_y_offset = 0.0f;
 
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
     for (string line; getline(str, line, '\n');) {
@@ -31,14 +35,30 @@ Font::Font(const string& filename):EngineResource(ResourceType::Font, filename){
                 const string& key = token.substr(0, pos);
                 const string& value = token.substr(pos + 1, string::npos);
 
-                     if (key == "id")       fontGlyph.id = stoi(value);
-                else if (key == "x")        fontGlyph.x = stoi(value);
-                else if (key == "y")        fontGlyph.y = stoi(value);
-                else if (key == "width")    fontGlyph.width = stoi(value);
-                else if (key == "height")   fontGlyph.height = stoi(value);
-                else if (key == "xoffset")  fontGlyph.xoffset = stoi(value);
-                else if (key == "yoffset")  fontGlyph.yoffset = stoi(value);
-                else if (key == "xadvance") fontGlyph.xadvance = stoi(value);
+                if (key == "id") {
+                    fontGlyph.id = stoi(value);
+                }else if (key == "x") {
+                    fontGlyph.x = stoi(value);
+                }else if (key == "y") {
+                    fontGlyph.y = stoi(value);
+                }else if (key == "width") {
+                    fontGlyph.width = stoi(value);
+                }else if (key == "height") {
+                    fontGlyph.height = stoi(value);
+                }else if (key == "xoffset") {
+                    fontGlyph.xoffset = stoi(value);
+                }else if (key == "yoffset") {
+                    fontGlyph.yoffset = stoi(value);
+                }else if (key == "xadvance") {
+                    fontGlyph.xadvance = stoi(value);
+                }
+
+                if (fontGlyph.yoffset + fontGlyph.height > max_y_offset) {
+                    max_y_offset = fontGlyph.yoffset + fontGlyph.height;
+                }
+                if (fontGlyph.yoffset < min_y_offset) {
+                    min_y_offset = fontGlyph.yoffset;
+                }
             }
             fontGlyph.pts.emplace_back(0.0f, 0.0f, 0.0f);
             fontGlyph.pts.emplace_back(fontGlyph.width, fontGlyph.height, 0.0f);
@@ -61,6 +81,7 @@ Font::Font(const string& filename):EngineResource(ResourceType::Font, filename){
             m_FontGlyphs.emplace(fontGlyph.id, std::move(fontGlyph));
         }
     }
+    m_MaxHeight = max_y_offset - min_y_offset;
 }
 Font::~Font(){ 
 }
@@ -86,6 +107,9 @@ const float Font::getTextWidth(const string& text) const {
         maxWidth = ret;
     }
     return maxWidth;
+}
+const float& Font::getMaxHeight() const {
+    return m_MaxHeight;
 }
 const float Font::getTextHeight(const string& text) const {
     float lineCount = 1;

@@ -28,8 +28,10 @@ using namespace std;
 
 struct ShipSelectorButtonOnClick final { void operator()(Button* button) const {
     ServerLobbyShipSelectorWindow& window = *static_cast<ServerLobbyShipSelectorWindow*>(button->getUserPointer());
-    for (auto& widgetEntry : window.getWindowFrame().content()) {
-        widgetEntry.widget->setColor(0.1f, 0.1f, 0.1f, 0.0f);
+    for (auto& row : window.getWindowFrame().content()) {
+        for (auto& widgetEntry : row.widgets) {
+            widgetEntry.widget->setColor(0.1f, 0.1f, 0.1f, 0.0f);
+        }
     }
     button->setColor(0.5f, 0.5f, 0.5f, 1.0f);
     const string& shipClass = button->text();
@@ -82,8 +84,10 @@ void ServerLobbyShipSelectorWindow::setShipViewportActive(const bool& active) {
 }
 void ServerLobbyShipSelectorWindow::clear() {
     auto& content = m_ShipWindow->content();
-    for (auto& widgetEntry : content) {
-        SAFE_DELETE(widgetEntry.widget);
+    for (auto& row : content) {
+        for (auto& widgetEntry : row.widgets) {
+            SAFE_DELETE(widgetEntry.widget);
+        }
     }
     content.clear();
 }

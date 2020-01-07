@@ -23,9 +23,10 @@ struct ShipSystemShieldsImpactPoint final {
     uint       indexInArray;
 
     ShipSystemShieldsImpactPoint();
-
+    ShipSystemShieldsImpactPoint(const unsigned int& index);
     void impact(const glm::vec3& _impactLocation, const float& _impactRadius, const float& _maxTime, std::vector<uint>& freelist);
     const bool update(const float& dt, std::vector<uint>& freelist, size_t& maxIndex);
+    void reset(const unsigned int& index);
 };
 
 

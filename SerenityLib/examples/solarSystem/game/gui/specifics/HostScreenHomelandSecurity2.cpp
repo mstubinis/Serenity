@@ -102,6 +102,18 @@ HostScreenHomelandSecurity2::HostScreenHomelandSecurity2(HostScreen& hostScreen1
     const auto top_content_height = contentSize.y / 2.0f;
     const auto first_2_boxes_width_top = contentSize.x - top_content_height;
 
+    m_BackgroundEdgeGraphicTop = NEW Button(font, winSize.x / 2.0f, winSize.y, winSize.x, bottom_bar_height_total);
+    m_BackgroundEdgeGraphicTop->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueDark]);
+    m_BackgroundEdgeGraphicTop->setAlignment(Alignment::TopCenter);
+    m_BackgroundEdgeGraphicTop->setDepth(0.512f);
+    m_BackgroundEdgeGraphicTop->disable();
+    m_BackgroundEdgeGraphicTop->setTextureCorner(nullptr);
+    m_BackgroundEdgeGraphicTop->enableTextureCorner(false);
+    m_TopLabel = new Text(winSize.x / 2.0f, winSize.y - (bottom_bar_height_total / 2.0f) + 15.0f, font);
+    m_TopLabel->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_TopLabel->setAlignment(Alignment::Center);
+    m_TopLabel->setTextAlignment(TextAlignment::Center);
+
     m_BackgroundEdgeGraphicBottom = NEW Button(font, winSize.x / 2.0f, bottom_bar_height_total / 2.0f, winSize.x, bottom_bar_height_total);
     m_BackgroundEdgeGraphicBottom->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueDark]);
     m_BackgroundEdgeGraphicBottom->setDepth(0.512f);
@@ -124,13 +136,20 @@ HostScreenHomelandSecurity2::HostScreenHomelandSecurity2(HostScreen& hostScreen1
     m_ForwardButton->setOnClickFunctor(Host2HS_ButtonNext_OnClick());
 }
 HostScreenHomelandSecurity2::~HostScreenHomelandSecurity2() {
-
+    SAFE_DELETE(m_UserName_TextBox);
+    SAFE_DELETE(m_ServerPort_TextBox);
+    SAFE_DELETE(m_BackButton);
+    SAFE_DELETE(m_ForwardButton);
+    SAFE_DELETE(m_BackgroundEdgeGraphicBottom);
+    SAFE_DELETE(m_BackgroundEdgeGraphicTop);
+    SAFE_DELETE(m_TopLabel);
 }
-
+void HostScreenHomelandSecurity2::setTopText(const string& text) {
+    m_TopLabel->setText(text);
+}
 Menu& HostScreenHomelandSecurity2::getMenu() {
     return m_Menu;
 }
-
 void HostScreenHomelandSecurity2::onResize(const unsigned int newWidth, const unsigned int newHeight) {
     const auto winSize = glm::uvec2(newWidth, newHeight);
 
@@ -138,11 +157,34 @@ void HostScreenHomelandSecurity2::onResize(const unsigned int newWidth, const un
     m_ForwardButton->setPosition(winSize.x - (padding_x + (bottom_bar_button_width / 2.0f)), bottom_bar_height_total / 2.0f);
     m_BackgroundEdgeGraphicBottom->setPosition(winSize.x / 2.0f, bottom_bar_height_total / 2.0f);
     m_BackgroundEdgeGraphicBottom->setSize(winSize.x, bottom_bar_height_total);
+
+    m_BackgroundEdgeGraphicTop->setSize(winSize.x, bottom_bar_height_total);
+    m_BackgroundEdgeGraphicTop->setPosition(winSize.x / 2.0f, winSize.y);
+
+    m_TopLabel->setPosition(winSize.x / 2.0f, winSize.y - (bottom_bar_height_total / 2.0f) + 15.0f);
 }
 
 void HostScreenHomelandSecurity2::update(const double& dt) {
+    //m_ServerPort_TextBox->update(dt);
+    //m_UserName_TextBox->update(dt);
 
+    m_BackButton->update(dt);
+    m_ForwardButton->update(dt);
+
+    m_BackgroundEdgeGraphicBottom->update(dt);
+    m_BackgroundEdgeGraphicTop->update(dt);
+
+    m_TopLabel->update(dt);
 }
 void HostScreenHomelandSecurity2::render() {
+    //m_ServerPort_TextBox->render();
+    //m_UserName_TextBox->render();
 
+    m_BackButton->render();
+    m_ForwardButton->render();
+
+    m_BackgroundEdgeGraphicBottom->render();
+    m_BackgroundEdgeGraphicTop->render();
+
+    m_TopLabel->render();
 }

@@ -21,6 +21,9 @@ class HostScreenHomelandSecurity2 final {
         HostScreen& m_HostScreen1;
         Menu& m_Menu;
 
+        Button* m_BackgroundEdgeGraphicTop;
+        Text* m_TopLabel;
+
         TextBox* m_UserName_TextBox;
         TextBox* m_ServerPort_TextBox;
 
@@ -33,6 +36,8 @@ class HostScreenHomelandSecurity2 final {
         ~HostScreenHomelandSecurity2();
 
         Menu& getMenu();
+
+        void setTopText(const std::string& text);
 
         void onResize(const unsigned int newWidth, const unsigned int newHeight);
 

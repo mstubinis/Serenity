@@ -11,6 +11,38 @@ using namespace std;
 
 const auto scrollbar_width = 30.0f;
 
+
+ScrollFrame::WidgetEntry::WidgetEntry() {
+    widget = nullptr;
+    original_width = 0.0f;
+    original_text = "";
+}
+ScrollFrame::WidgetEntry::WidgetEntry(Widget* widget_) {
+    widget = widget_;
+    original_width = widget_->width();
+    Text* text = dynamic_cast<Text*>(widget_);
+    if (text) {
+        original_text = text->text();
+    }
+}
+ScrollFrame::WidgetEntry::~WidgetEntry() {
+}
+
+
+ScrollFrame::WidgetRow::WidgetRow() {
+    maxHeight = 0.0f;
+}
+ScrollFrame::WidgetRow::~WidgetRow() {
+}
+void ScrollFrame::WidgetRow::clear() {
+    for (auto& widgetEntry : widgets) {
+        SAFE_DELETE(widgetEntry.widget);
+    }
+    maxHeight = 0.0f;
+}
+
+
+
 ScrollFrame::ScrollFrame(const Font& font, const float x, const float y, const float w, const float h, const float depth) : Widget(x, y, w, h) {
     m_ScrollBar = NEW ScrollBar(font, x + w - scrollbar_width, y, scrollbar_width, h, depth - 0.001f);
 
@@ -19,20 +51,42 @@ ScrollFrame::ScrollFrame(const Font& font, const float x, const float y, const f
 }
 ScrollFrame::~ScrollFrame() {
     SAFE_DELETE(m_ScrollBar);
-    for (auto& entry : m_Content) {
-        SAFE_DELETE(entry.widget);
+    for (auto& row : m_Content) {
+        for (auto& entry : row.widgets) {
+            SAFE_DELETE(entry.widget);
+        }
     }
 }
 void ScrollFrame::clear() {
-    for (auto& entry : m_Content) {
-        SAFE_DELETE(entry.widget);
+    for (auto& row : m_Content) {
+        row.clear();
     }
     m_Content.clear();
     internal_recalculate_content_sizes();
 }
-void ScrollFrame::addContent(Widget* widget) {
+void ScrollFrame::addContent(Widget* widget, const unsigned int row) {
+    if (m_Content.size() <= row) {
+        m_Content.resize(row + 1, ScrollFrame::WidgetRow());
+    }
+    auto& row_ = m_Content[row];
     WidgetEntry entry(widget);
-    m_Content.push_back(std::move(widget));
+    row_.widgets.push_back(std::move(entry));
+    float max_height = 0.0f;
+    for (auto& widgetInRow : row_.widgets) {
+        const auto widgetHeight = widgetInRow.widget->height();
+        if (widgetHeight > max_height) {
+            max_height = widgetHeight;
+        }
+    }
+    row_.maxHeight = max_height;
+    internal_recalculate_content_sizes();
+}
+void ScrollFrame::addContent(Widget* widget) {
+    WidgetRow row;
+    WidgetEntry entry(widget);
+    row.widgets.push_back(std::move(entry));
+    row.maxHeight = widget->height();
+    m_Content.push_back(std::move(row));
     internal_recalculate_content_sizes();
 }
 void ScrollFrame::fit_widget_to_window(WidgetEntry& widgetEntry) {
@@ -52,7 +106,8 @@ void ScrollFrame::fit_widget_to_window(WidgetEntry& widgetEntry) {
         const auto threshold = actual_content_width - 240.0f; //TODO: re-eval this hardcoded number
         float text_width = 0.0f;
         bool changed = false;
-        string text = textWidget->text();
+        string text = widgetEntry.original_text;
+        textWidget->setText(text);
         for (auto itr = text.begin(); itr != text.end(); ++itr) {
             auto character = (*itr);
             if (character == '\n')
@@ -105,15 +160,17 @@ void ScrollFrame::internal_recalculate_content_sizes() {
         actual_content_width = m_Width;
     }
     if (m_Content.size() > 0) {
-        height = m_Content[0].widget->height();
-        for (size_t i = 0; i < m_Content.size(); ++i) {
+        for (auto& row : m_Content) {
+            height += row.maxHeight;
             float width_left = actual_content_width;
             float max_height = 0;
-            for (size_t j = i; j < m_Content.size(); ++j) {
-                width_left -= m_Content[j].widget->width();
-                if (m_Content[j].widget->height() > max_height) {
-                    max_height = m_Content[j].widget->height();
+            for (size_t i = 0; i < row.widgets.size(); ++i) {
+                if (row.widgets[i].widget->height() > max_height) {
+                    max_height = row.widgets[i].widget->height();
                 }
+            }
+            for (size_t i = 0; i < row.widgets.size(); ++i) {
+                width_left -= row.widgets[i].widget->width();
                 if (width_left < 0) {
                     height += max_height;
                     break;
@@ -126,8 +183,10 @@ void ScrollFrame::internal_recalculate_content_sizes() {
     m_ScrollBar->setSliderSize(percent);
 
     if (m_Content.size() > 0) {
-        for (size_t i = 0; i < m_Content.size(); ++i) {
-            fit_widget_to_window(m_Content[i]);
+        for (auto& row : m_Content) {
+            for (size_t i = 0; i < row.widgets.size(); ++i) {
+                fit_widget_to_window(row.widgets[i]);
+            }
         }
     }
     m_ScrollBar->resetScrollOffset();
@@ -137,7 +196,7 @@ void ScrollFrame::setAlignment(const Alignment::Type& alignment) {
     setPosition(m_Position.x, m_Position.y);
 }
 
-vector<ScrollFrame::WidgetEntry>& ScrollFrame::content() {
+vector<ScrollFrame::WidgetRow>& ScrollFrame::content() {
     return m_Content;
 }
 const float ScrollFrame::contentHeight() const {
@@ -175,13 +234,16 @@ void ScrollFrame::onResize(const unsigned int newWidth, const unsigned int newHe
 }
 void ScrollFrame::removeContent(Widget* widget) {
     size_t index = 0;
-    for (size_t i = 0; i < m_Content.size(); ++i) {
-        if (m_Content[i].widget == widget) {
-            index = i;
-            break;
+    for (auto& row : m_Content) {
+        for (size_t i = 0; i < row.widgets.size(); ++i) {
+            if (row.widgets[i].widget == widget) {
+                index = i;
+                break;
+            }
         }
+        row.widgets.erase(row.widgets.begin() + index);
     }
-    m_Content.erase(m_Content.begin() + index);
+    //TODO: erase empty rows?
     SAFE_DELETE(widget);
     internal_recalculate_content_sizes();
 }
@@ -206,10 +268,25 @@ void ScrollFrame::update(const double& dt) {
 
     auto pos = positionFromAlignmentWorld();
 
-    for (auto& widgetEntry : m_Content) {
-        widgetEntry.widget->setPosition(pos.x, ((pos.y+m_Height) - height) - scrollOffset);
-        height += widgetEntry.widget->height();
-        widgetEntry.widget->update(dt);
+    for (auto& row : m_Content) {
+        float total_width = 0.0f;
+        for (auto& widgetEntry : row.widgets) {
+            total_width += widgetEntry.widget->width();
+        }
+        float width_accumulator = 0.0f;
+        for (auto& widgetEntry : row.widgets) {
+            widgetEntry.widget->setPosition(pos.x + width_accumulator, ((pos.y + m_Height) - height) - scrollOffset);
+            widgetEntry.widget->update(dt);
+            width_accumulator += widgetEntry.widget->width();
+            if (width_accumulator > total_width) {
+                width_accumulator = 0.0f;
+                height += row.maxHeight;
+
+                widgetEntry.widget->setPosition(pos.x + width_accumulator, ((pos.y + m_Height) - height) - scrollOffset);
+                widgetEntry.widget->update(dt);
+            }
+        }
+        height += row.maxHeight;
     }
 
     if (m_MouseIsOver || m_ScrollBar->isMouseOver()) {
@@ -228,10 +305,11 @@ void ScrollFrame::render(const glm::vec4& scissor) {
 
     //Renderer::renderBorder(1, pos, m_Color, m_Width, m_Height, 0, 0.0001f, m_Alignment, scissor);
 
-    for (auto& widgetEntry : m_Content) {
-        widgetEntry.widget->render(scissor);
+    for (auto& row : m_Content) {
+        for (auto& widgetEntry : row.widgets) {
+            widgetEntry.widget->render(scissor);
+        }
     }
-
     Widget::render(scissor);
 }
 void ScrollFrame::render() {
@@ -244,8 +322,10 @@ void ScrollFrame::render() {
     //Renderer::renderBorder(1, pos, m_Color, m_Width, m_Height, 0, 0.0001f, m_Alignment);
 
     auto scissor = glm::vec4(pos2.x, pos2.y, m_Width, m_Height);
-    for (auto& widgetEntry : m_Content) {
-        widgetEntry.widget->render(scissor);
+    for (auto& row : m_Content) {
+        for (auto& widgetEntry : row.widgets) {
+            widgetEntry.widget->render(scissor);
+        }
     }
     Widget::render(scissor);
 }

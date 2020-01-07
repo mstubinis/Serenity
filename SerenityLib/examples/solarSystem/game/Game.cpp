@@ -33,11 +33,10 @@ void Game::initResources(){
 void Game::initLogic(){
     Physics::setNumberOfStepsPerFrame(3);
     m_Core->init();
-
 }
 void Game::cleanup() {
     Discord::clear_activity();
-    std::this_thread::sleep_for(std::chrono::milliseconds(250)); //TODO: probably not needed, wanted to see if this would speed up discord sending over the status
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
     SAFE_DELETE(m_Core);
     ResourceManifest::destruct();
 }

@@ -103,8 +103,22 @@ HostScreenFFA2::HostScreenFFA2(HostScreen& hostScreen1, Menu& menu, Font& font) 
     const auto top_content_height = contentSize.y / 2.0f;
     const auto first_2_boxes_width_top = contentSize.x - top_content_height;
 
-    m_BackgroundEdgeGraphicBottom = NEW Button(font, winSize.x / 2.0f, bottom_bar_height_total / 2.0f, winSize.x, bottom_bar_height_total);
+
+    m_BackgroundEdgeGraphicTop = NEW Button(font, winSize.x / 2.0f, winSize.y, winSize.x, bottom_bar_height_total);
+    m_BackgroundEdgeGraphicTop->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueDark]);
+    m_BackgroundEdgeGraphicTop->setAlignment(Alignment::TopCenter);
+    m_BackgroundEdgeGraphicTop->setDepth(0.512f);
+    m_BackgroundEdgeGraphicTop->disable();
+    m_BackgroundEdgeGraphicTop->setTextureCorner(nullptr);
+    m_BackgroundEdgeGraphicTop->enableTextureCorner(false);
+    m_TopLabel = new Text(winSize.x / 2.0f, winSize.y - (bottom_bar_height_total / 2.0f) + 15.0f, font);
+    m_TopLabel->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_TopLabel->setAlignment(Alignment::Center);
+    m_TopLabel->setTextAlignment(TextAlignment::Center);
+
+    m_BackgroundEdgeGraphicBottom = NEW Button(font, winSize.x / 2.0f, 0, winSize.x, bottom_bar_height_total);
     m_BackgroundEdgeGraphicBottom->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueDark]);
+    m_BackgroundEdgeGraphicBottom->setAlignment(Alignment::BottomCenter);
     m_BackgroundEdgeGraphicBottom->setDepth(0.512f);
     m_BackgroundEdgeGraphicBottom->disable();
     m_BackgroundEdgeGraphicBottom->setTextureCorner(nullptr);
@@ -139,6 +153,11 @@ HostScreenFFA2::~HostScreenFFA2() {
     SAFE_DELETE(m_BackButton);
     SAFE_DELETE(m_ForwardButton);
     SAFE_DELETE(m_BackgroundEdgeGraphicBottom);
+    SAFE_DELETE(m_BackgroundEdgeGraphicTop);
+    SAFE_DELETE(m_TopLabel);
+}
+void HostScreenFFA2::setTopText(const string& text) {
+    m_TopLabel->setText(text);
 }
 Menu& HostScreenFFA2::getMenu() {
     return m_Menu;
@@ -148,8 +167,14 @@ void HostScreenFFA2::onResize(const unsigned int newWidth, const unsigned int ne
 
     m_BackButton->setPosition(padding_x + (bottom_bar_button_width / 2.0f), bottom_bar_height_total / 2.0f);
     m_ForwardButton->setPosition(winSize.x - (padding_x + (bottom_bar_button_width / 2.0f)), bottom_bar_height_total / 2.0f);
-    m_BackgroundEdgeGraphicBottom->setPosition(winSize.x / 2.0f, bottom_bar_height_total / 2.0f);
+
+    m_BackgroundEdgeGraphicBottom->setPosition(winSize.x / 2.0f, 0);
     m_BackgroundEdgeGraphicBottom->setSize(winSize.x, bottom_bar_height_total);
+
+    m_BackgroundEdgeGraphicTop->setSize(winSize.x, bottom_bar_height_total);
+    m_BackgroundEdgeGraphicTop->setPosition(winSize.x / 2.0f, winSize.y);
+
+    m_TopLabel->setPosition(winSize.x / 2.0f, winSize.y - (bottom_bar_height_total / 2.0f) + 15.0f);
 }
 
 void HostScreenFFA2::update(const double& dt) {
@@ -160,6 +185,9 @@ void HostScreenFFA2::update(const double& dt) {
     m_ForwardButton->update(dt);
 
     m_BackgroundEdgeGraphicBottom->update(dt);
+    m_BackgroundEdgeGraphicTop->update(dt);
+
+    m_TopLabel->update(dt);
 }
 void HostScreenFFA2::render() {
     m_ServerPort_TextBox->render();
@@ -169,4 +197,7 @@ void HostScreenFFA2::render() {
     m_ForwardButton->render();
 
     m_BackgroundEdgeGraphicBottom->render();
+    m_BackgroundEdgeGraphicTop->render();
+
+    m_TopLabel->render();
 }

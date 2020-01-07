@@ -21,37 +21,23 @@ class HostScreenFFA2 final {
         HostScreen& m_HostScreen1;
         Menu&       m_Menu;
 
-        TextBox* m_UserName_TextBox;
-        TextBox* m_ServerPort_TextBox;
+        TextBox*    m_UserName_TextBox;
+        TextBox*    m_ServerPort_TextBox;
 
-        /*
-        Button* m_BackgroundEdgeGraphic;
 
-        TextBox* m_UserName_TextBox;
-        TextBox* m_ServerPort_TextBox;
-        //Text* m_Info_Text;
+        Button*     m_BackgroundEdgeGraphicTop;
+        Text*       m_TopLabel;
 
-        ServerHostingMapSelectorWindow* m_ServerHostMapSelector;
-        MapDescriptionWindow* m_MapDescriptionWindow;
-        
-        CurrentSelectedMapDescription
-        CurrentSelectedMapScreenshot
-
-        ShipsAvailableToUseOnMap
-        ShipsCurrentlyAllowedOnMap
-
-        Max#OfPlayers
-        */
-
-        Button* m_BackgroundEdgeGraphicBottom;
-        Button* m_BackButton;
-        Button* m_ForwardButton;
-
+        Button*     m_BackgroundEdgeGraphicBottom;
+        Button*     m_BackButton;
+        Button*     m_ForwardButton;
     public:
         HostScreenFFA2(HostScreen& hostScreen1, Menu&, Font& font);
         ~HostScreenFFA2();
 
         Menu& getMenu();
+
+        void setTopText(const std::string& text);
 
         void onResize(const unsigned int newWidth, const unsigned int newHeight);
 

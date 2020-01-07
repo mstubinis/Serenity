@@ -30,6 +30,8 @@ class  ServerHostingMapSelectorWindow;
 
 struct ButtonBack_OnClick;
 struct ButtonNext_OnClick;
+struct Host_ButtonBack_OnClick;
+struct Host_ButtonNext_OnClick;
 
 class  MainMenu;
 class  HostScreen;
@@ -54,6 +56,8 @@ struct MenuDefaultColors final {enum Color {
 _TOTAL};};
 
 class Menu final{
+    friend struct Host_ButtonBack_OnClick;
+    friend struct Host_ButtonNext_OnClick;
     friend struct ButtonBack_OnClick;
     friend struct ButtonNext_OnClick;
     friend class  Core;

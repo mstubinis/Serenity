@@ -26,6 +26,8 @@ struct ScrollBar_Functor final { void operator()(Button* button) const {
     //bar->scroll(-1.0f);
 }};
 
+const unsigned int default_padding = 7;
+
 ScrollBar::ScrollBar(const Font& font, const float x, const float y, const float w, const float h, const float depth, const ScrollBarType::Type& type) : Widget(x, y, w, h){
     m_Type                           = type;
     m_Alignment                      = Alignment::TopLeft;
@@ -39,7 +41,7 @@ ScrollBar::ScrollBar(const Font& font, const float x, const float y, const float
 
     m_ScrollArea = new Button(font, x, y, w, h - w - w);
     m_ScrollArea->setDepth(depth - 0.002f);
-    m_ScrollArea->setPaddingSize(5);
+    m_ScrollArea->setPaddingSize(default_padding);
     m_ScrollArea->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
 
     m_ScrollArea->setTextureCorner(ResourceManifest::GUITextureCornerBoxSmall);
@@ -53,7 +55,7 @@ ScrollBar::ScrollBar(const Font& font, const float x, const float y, const float
 
     m_ScrollAreaBackground = new Button(font, x, y, w, h - w - w);
     m_ScrollAreaBackground->setDepth(depth + 0.001f);
-    m_ScrollAreaBackground->setPaddingSize(5);
+    m_ScrollAreaBackground->setPaddingSize(default_padding);
     m_ScrollAreaBackground->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueSlightlyDarker]);
     m_ScrollAreaBackground->setAlignment(Alignment::TopLeft);
     m_ScrollAreaBackground->disableMouseover();
@@ -64,7 +66,7 @@ ScrollBar::ScrollBar(const Font& font, const float x, const float y, const float
 
     m_TopOrLeftButton     = NEW Button(font, x,y, w, w);
     m_TopOrLeftButton->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
-    m_TopOrLeftButton->setPaddingSize(5);
+    m_TopOrLeftButton->setPaddingSize(default_padding);
     m_TopOrLeftButton->setDepth(depth - 0.001f);
     m_TopOrLeftButton->setText("");
     m_TopOrLeftButton->setAlignment(Alignment::TopLeft);
@@ -85,7 +87,7 @@ ScrollBar::ScrollBar(const Font& font, const float x, const float y, const float
 
     m_BottomOrRightButton = NEW Button(font, x, y - h, w, w);
     m_BottomOrRightButton->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
-    m_BottomOrRightButton->setPaddingSize(5);
+    m_BottomOrRightButton->setPaddingSize(default_padding);
     m_BottomOrRightButton->setDepth(depth - 0.001f);
     m_BottomOrRightButton->setText("");
     m_BottomOrRightButton->setAlignment(Alignment::BottomLeft);
@@ -112,7 +114,6 @@ ScrollBar::~ScrollBar() {
     SAFE_DELETE(m_TopOrLeftButton);
     SAFE_DELETE(m_BottomOrRightButton);
 }
-
 void ScrollBar::resetScrollOffset() {
     scroll(999999999999.0f);
 }
@@ -152,7 +153,6 @@ void ScrollBar::setPosition(const float x, const float y) {
 void ScrollBar::setPosition(const glm::vec2& position) {
     ScrollBar::setPosition(position.x, position.y);
 }
-
 void ScrollBar::setSliderSize(const float percent) {
     m_ScrollBarCurrentContentPercent = glm::clamp(percent,0.01f,1.0f);
     internalUpdateScrollbarPosition();
@@ -168,7 +168,6 @@ const float ScrollBar::getSliderHeight() const {
     auto res   = (m_ScrollBarCurrentContentPercent) * part1;
     return res;
 }
-
 void ScrollBar::setType(const ScrollBarType::Type& type) {
     m_Type = type;
 }

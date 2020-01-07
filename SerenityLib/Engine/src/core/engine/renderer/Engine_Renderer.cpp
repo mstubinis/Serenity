@@ -1346,7 +1346,7 @@ class epriv::RenderManager::impl final{
                 //if ((text_ind.size() * 6) >= text_ind.capacity())
                     //return;
                 if (character == '\n') {
-                    y += newLineGlyphHeight + 7;
+                    y += newLineGlyphHeight;
                     x = 0.0f;
                 }else if (character != '\0') {
                     const uint& accum = i * 4;
@@ -1422,7 +1422,7 @@ class epriv::RenderManager::impl final{
                         text_uvs.emplace_back(chr.uvs[3].x, chr.uvs[3].y);
                     }
                 }
-                y += newLineGlyphHeight + 7;
+                y += newLineGlyphHeight;
                 x = 0.0f;
             }
         }
@@ -1483,7 +1483,7 @@ class epriv::RenderManager::impl final{
                         text_uvs.emplace_back(chr.uvs[3].x, chr.uvs[3].y);
                     }
                 }
-                y += newLineGlyphHeight + 7;
+                y += newLineGlyphHeight;
                 x = 0.0f;
             }
         }
@@ -2481,7 +2481,7 @@ struct RenderingAPI2D final {
         mesh.bind();
         sendUniform1("DiffuseTextureEnabled", 1);
 
-        const auto& newLineGlyphHeight = font.getGlyphData('X').height;
+        const auto& newLineGlyphHeight = font.getMaxHeight();
         const auto& texture = font.getGlyphTexture();
         sendTexture("DiffuseTexture", texture, 0);
         sendUniform4("Object_Color", color);

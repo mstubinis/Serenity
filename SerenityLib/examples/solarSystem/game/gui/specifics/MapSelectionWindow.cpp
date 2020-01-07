@@ -115,18 +115,22 @@ void MapSelectionWindow::recalculate_maps() {
     }
 }
 void MapSelectionWindow::clear_chosen_map() {
-    for (auto& widgetEntry : m_MapFileScrollFrame->content()) {
-        auto& button = *static_cast<Button*>(widgetEntry.widget);
-        button.enableMouseover();
-        button.setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    for (auto& row : m_MapFileScrollFrame->content()) {
+        for (auto& widgetEntry : row.widgets) {
+            auto& button = *static_cast<Button*>(widgetEntry.widget);
+            button.enableMouseover();
+            button.setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+        }
     }
 }
 void MapSelectionWindow::clearWindow() {
     auto& content = m_MapFileScrollFrame->content();
     if (content.size() > 0) {
-        for (auto& widgetEntry : content) {
-            auto* map_ptr_data = static_cast<MapSelectionWindow::ButtonPtr*>(widgetEntry.widget->getUserPointer());
-            SAFE_DELETE(map_ptr_data);
+        for (auto& row : content) {
+            for (auto& widgetEntry : row.widgets) {
+                auto* map_ptr_data = static_cast<MapSelectionWindow::ButtonPtr*>(widgetEntry.widget->getUserPointer());
+                SAFE_DELETE(map_ptr_data);
+            }
         }
         m_MapFileScrollFrame->clear();
     }

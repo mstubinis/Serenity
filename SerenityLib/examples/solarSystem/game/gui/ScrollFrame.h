@@ -14,21 +14,23 @@ class ScrollFrame: public Widget {
     struct WidgetEntry {
         Widget* widget;
         float original_width;
-        WidgetEntry() {
-            widget = nullptr;
-            original_width = 0.0f;
-        }
-        WidgetEntry(Widget* widget_) {
-            widget = widget_;
-            original_width = widget_->width();
-        }
-        ~WidgetEntry() {}
+        std::string original_text;
+        WidgetEntry();
+        WidgetEntry(Widget* widget_);
+        ~WidgetEntry();
+    };
+    struct WidgetRow final {
+        std::vector<WidgetEntry> widgets;
+        float maxHeight;
+        WidgetRow();
+        ~WidgetRow();
+        void clear();
     };
 
     private:
         ScrollBar*                                m_ScrollBar;
         float                                     m_ContentHeight;
-        std::vector<ScrollFrame::WidgetEntry>     m_Content;
+        std::vector<ScrollFrame::WidgetRow>       m_Content;
 
         void reposition_scroll_bar();
         void internal_recalculate_content_sizes();
@@ -42,7 +44,9 @@ class ScrollFrame: public Widget {
         void clear();
 
         void addContent(Widget* widget);
+        void addContent(Widget* widget, const unsigned int row);
         void removeContent(Widget* widget);
+
         void setAlignment(const Alignment::Type& alignment);
 
         void setWidth(const float);
@@ -51,7 +55,7 @@ class ScrollFrame: public Widget {
 
         void onResize(const unsigned int newWidth, const unsigned int newHeight);
 
-        std::vector<ScrollFrame::WidgetEntry>& content();
+        std::vector<ScrollFrame::WidgetRow>& content();
 
         void setPosition(const float x, const float y);
         void setPosition(const glm::vec2& position);

@@ -25,6 +25,7 @@ class Font final: public EngineResource{
         static const unsigned int MAX_CHARACTERS_RENDERED_PER_FRAME = 4096;
     private:
         Texture* m_FontTexture;
+        float    m_MaxHeight;
         std::unordered_map<unsigned char, FontGlyph> m_FontGlyphs;
     public:
         Font(const std::string& filename);
@@ -42,6 +43,8 @@ class Font final: public EngineResource{
         );
         const float getTextWidth(const std::string& text) const;
         const float getTextHeight(const std::string& text) const;
+
+        const float& getMaxHeight() const;
 
         const Texture& getGlyphTexture() const;
         const FontGlyph& getGlyphData(const unsigned char& character) const;

@@ -1,4 +1,9 @@
 #include "HostScreen.h"
+
+#include "HostScreenFFA2.h"
+#include "HostScreenTeamDeathmatch2.h"
+#include "HostScreenHomelandSecurity2.h"
+
 #include "../RoundedWindow.h"
 #include "MapSelectionWindow.h"
 #include "MapDescriptionWindow.h"
@@ -36,31 +41,34 @@ const auto left_window_width       = 550;
 
 struct Host_ButtonBack_OnClick { void operator()(Button* button) const {
     HostScreen& hostScreen = *static_cast<HostScreen*>(button->getUserPointer());
-    auto& menu = hostScreen.getMenu();
+    auto& menu             = hostScreen.getMenu();
     menu.go_to_main_menu();
 }};
 struct Host_ButtonNext_OnClick { void operator()(Button* button) const {
     HostScreen& hostScreen = *static_cast<HostScreen*>(button->getUserPointer());
-    auto& menu = hostScreen.getMenu();
-    auto& data = hostScreen.getData();
+    auto& menu             = hostScreen.getMenu();
+    auto& data             = hostScreen.getData();
 
     if (!data.m_CurrentMapChoice.map_file_path.empty()) {
         auto& core = menu.getCore();
-
         switch (data.m_CurrentGameModeChoice) {
             case GameplayModeType::FFA: {
+                menu.m_HostScreenFFA2->setTopText(hostScreen.getCurrentChoice().map_name + " - " + GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES[data.m_CurrentGameModeChoice]);
                 menu.setGameState(GameState::Host_Screen_Setup_FFA_2);
                 break;
             }case GameplayModeType::TeamDeathmatch: {
+                menu.m_HostScreenTeamDeathmatch2->setTopText(hostScreen.getCurrentChoice().map_name + " - " + GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES[data.m_CurrentGameModeChoice]);
                 menu.setGameState(GameState::Host_Screen_Setup_TeamDeathMatch_2);
                 break;
             }case GameplayModeType::HomelandSecurity: {
+                menu.m_HostScreenHomelandSecurity2->setTopText(hostScreen.getCurrentChoice().map_name + " - " + GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES[data.m_CurrentGameModeChoice]);
                 menu.setGameState(GameState::Host_Screen_Setup_HomelandSecurity_2);
                 break;
             }default: {
                 break;
             }
         }
+        
         menu.setErrorText(""); 
     }else {
         menu.setErrorText("Please choose a map");

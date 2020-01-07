@@ -52,8 +52,10 @@ ServerLobbyChatWindow::~ServerLobbyChatWindow() {
 }
 void ServerLobbyChatWindow::clear() {
     auto& content = m_ChatWindow->content();
-    for (auto& widgetEntry : content) {
-        SAFE_DELETE(widgetEntry.widget);
+    for (auto& row : content) {
+        for (auto& widgetEntry : row.widgets) {
+            SAFE_DELETE(widgetEntry.widget);
+        }
     }
     content.clear();
 }

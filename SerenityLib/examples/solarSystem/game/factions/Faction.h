@@ -8,7 +8,6 @@
 #include <vector>
 
 struct FactionEnum final {enum Type {
-    Unknown,
     Federation,
     Klingon,
     Romulan,
@@ -16,17 +15,26 @@ struct FactionEnum final {enum Type {
     //Cardassian,
     //Dominion,
     //Ferengi,
-    _TOTAL,
-};};
+    Unknown,
+_TOTAL,};};
 
 struct FactionInformation final {
-    glm::vec4   ColorShield;
-    glm::vec4   ColorText;
-    std::string NameShort;
-    std::string NameLong;
+    glm::vec4     ColorShield;
+    glm::vec4     ColorText;
+    std::string   NameShort;
+    std::string   NameLong;
+    std::string   FileTag;
+    std::string   Description;
 
     FactionInformation();
-    FactionInformation(const std::string& nameLong, const std::string& nameShort, const glm::vec4& colorText, const glm::vec4& colorShield);
+    FactionInformation(
+        const std::string& nameLong,
+        const std::string& nameShort,
+        const glm::vec4& colorText,
+        const glm::vec4& colorShield,
+        const std::string& fileTag,
+        const std::string& description
+    );
     ~FactionInformation();
 };
 

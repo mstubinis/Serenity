@@ -41,13 +41,11 @@ struct Host2TD_ButtonBack_OnClick { void operator()(Button* button) const {
     menu.getCore().shutdownServer();
 }};
 struct Host2TD_ButtonNext_OnClick { void operator()(Button* button) const {
-    auto& hostScreenTD = *static_cast<HostScreenTeamDeathmatch2*>(button->getUserPointer());
-
-    auto& menu = hostScreenTD.getMenu();
-
-    const string& username = hostScreenTD.m_UserName_TextBox->text();
+    auto& hostScreenTD       = *static_cast<HostScreenTeamDeathmatch2*>(button->getUserPointer());
+    auto& menu               = hostScreenTD.getMenu();
+    const string& username   = hostScreenTD.m_UserName_TextBox->text();
     const string& portstring = hostScreenTD.m_ServerPort_TextBox->text();
-    const auto& map = hostScreenTD.m_HostScreen1.getCurrentChoice();
+    const auto& map          = hostScreenTD.m_HostScreen1.getCurrentChoice();
     if (!portstring.empty() && !username.empty() && !map.map_file_path.empty()) {
 
         auto& core = menu.getCore();
@@ -93,7 +91,6 @@ struct Host2TD_ButtonNext_OnClick { void operator()(Button* button) const {
     }else {
         menu.setErrorText("Do not leave any fields blank");
     }
-
 }};
 
 
@@ -102,6 +99,18 @@ HostScreenTeamDeathmatch2::HostScreenTeamDeathmatch2(HostScreen& hostScreen1, Me
     const auto contentSize = glm::vec2(winSize) - glm::vec2(padding_x * 2.0f, (padding_y * 2.0f) + bottom_bar_height);
     const auto top_content_height = contentSize.y / 2.0f;
     const auto first_2_boxes_width_top = contentSize.x - top_content_height;
+
+    m_BackgroundEdgeGraphicTop = NEW Button(font, winSize.x / 2.0f, winSize.y, winSize.x, bottom_bar_height_total);
+    m_BackgroundEdgeGraphicTop->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueDark]);
+    m_BackgroundEdgeGraphicTop->setAlignment(Alignment::TopCenter);
+    m_BackgroundEdgeGraphicTop->setDepth(0.512f);
+    m_BackgroundEdgeGraphicTop->disable();
+    m_BackgroundEdgeGraphicTop->setTextureCorner(nullptr);
+    m_BackgroundEdgeGraphicTop->enableTextureCorner(false);
+    m_TopLabel = new Text(winSize.x / 2.0f, winSize.y - (bottom_bar_height_total / 2.0f) + 15.0f, font);
+    m_TopLabel->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_TopLabel->setAlignment(Alignment::Center);
+    m_TopLabel->setTextAlignment(TextAlignment::Center);
 
     m_BackgroundEdgeGraphicBottom = NEW Button(font, winSize.x / 2.0f, bottom_bar_height_total / 2.0f, winSize.x, bottom_bar_height_total);
     m_BackgroundEdgeGraphicBottom->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueDark]);
@@ -125,17 +134,20 @@ HostScreenTeamDeathmatch2::HostScreenTeamDeathmatch2(HostScreen& hostScreen1, Me
     m_ForwardButton->setOnClickFunctor(Host2TD_ButtonNext_OnClick());
 }
 HostScreenTeamDeathmatch2::~HostScreenTeamDeathmatch2() {
-    //SAFE_DELETE(m_UserName_TextBox);
-    //SAFE_DELETE(m_ServerPort_TextBox);
+    SAFE_DELETE(m_UserName_TextBox);
+    SAFE_DELETE(m_ServerPort_TextBox);
     SAFE_DELETE(m_BackButton);
     SAFE_DELETE(m_ForwardButton);
     SAFE_DELETE(m_BackgroundEdgeGraphicBottom);
+    SAFE_DELETE(m_BackgroundEdgeGraphicTop);
+    SAFE_DELETE(m_TopLabel);
 }
-
+void HostScreenTeamDeathmatch2::setTopText(const string& text) {
+    m_TopLabel->setText(text);
+}
 Menu& HostScreenTeamDeathmatch2::getMenu() {
     return m_Menu;
 }
-
 void HostScreenTeamDeathmatch2::onResize(const unsigned int newWidth, const unsigned int newHeight) {
     const auto winSize = glm::uvec2(newWidth, newHeight);
 
@@ -143,6 +155,11 @@ void HostScreenTeamDeathmatch2::onResize(const unsigned int newWidth, const unsi
     m_ForwardButton->setPosition(winSize.x - (padding_x + (bottom_bar_button_width / 2.0f)), bottom_bar_height_total / 2.0f);
     m_BackgroundEdgeGraphicBottom->setPosition(winSize.x / 2.0f, bottom_bar_height_total / 2.0f);
     m_BackgroundEdgeGraphicBottom->setSize(winSize.x, bottom_bar_height_total);
+
+    m_BackgroundEdgeGraphicTop->setSize(winSize.x, bottom_bar_height_total);
+    m_BackgroundEdgeGraphicTop->setPosition(winSize.x / 2.0f, winSize.y);
+
+    m_TopLabel->setPosition(winSize.x / 2.0f, winSize.y - (bottom_bar_height_total / 2.0f) + 15.0f);
 }
 
 void HostScreenTeamDeathmatch2::update(const double& dt) {
@@ -153,6 +170,9 @@ void HostScreenTeamDeathmatch2::update(const double& dt) {
     m_ForwardButton->update(dt);
 
     m_BackgroundEdgeGraphicBottom->update(dt);
+    m_BackgroundEdgeGraphicTop->update(dt);
+
+    m_TopLabel->update(dt);
 }
 void HostScreenTeamDeathmatch2::render() {
     //m_ServerPort_TextBox->render();
@@ -162,4 +182,7 @@ void HostScreenTeamDeathmatch2::render() {
     m_ForwardButton->render();
 
     m_BackgroundEdgeGraphicBottom->render();
+    m_BackgroundEdgeGraphicTop->render();
+
+    m_TopLabel->render();
 }
