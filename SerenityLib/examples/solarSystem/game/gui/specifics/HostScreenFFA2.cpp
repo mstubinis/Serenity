@@ -5,6 +5,7 @@
 #include "MapDescriptionWindow.h"
 #include "ServerLobbyChatWindow.h"
 #include "../../Menu.h"
+#include "../../factions/Faction.h"
 #include "../../Core.h"
 #include "../Button.h"
 #include "../TextBox.h"
@@ -44,59 +45,60 @@ struct Host2FFA_ButtonBack_OnClick { void operator()(Button* button) const {
     menu.getCore().shutdownServer();
 }};
 struct Host2FFA_ButtonNext_OnClick { void operator()(Button* button) const {
-    auto& hostScreenFFA = *static_cast<HostScreenFFA2*>(button->getUserPointer());
-
-    auto& menu = hostScreenFFA.getMenu();
-
+    auto& hostScreenFFA      = *static_cast<HostScreenFFA2*>(button->getUserPointer());
+    auto& menu               = hostScreenFFA.getMenu();
     const string& username   = hostScreenFFA.m_UserName_TextBox->text();
     const string& portstring = hostScreenFFA.m_ServerPort_TextBox->text();
-    const auto& map          = hostScreenFFA.m_HostScreen1.getCurrentChoice();
-    if (!portstring.empty() && !username.empty() && !map.map_file_path.empty()) {
+    const auto& map          = Server::SERVER_HOST_DATA.getMapChoice();
+    if (hostScreenFFA.m_ShipSelectorWindow->getAllowedShips().size() > 0) {
+        if (!portstring.empty() && !username.empty() && !map.map_file_path.empty()) {
 
-        auto& core = menu.getCore();
-        menu.setGameState(GameState::Host_Screen_Lobby_3);
-        menu.setErrorText("");
-        //TODO: prevent special characters in usename
-        if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) { //port must have numbers only
-            if (username.find_first_not_of(' ') != std::string::npos) {
-                if (std::regex_match(username, std::regex("[a-zA-ZäöüßÄÖÜ]+"))) { //letters only please
-        
-                    auto& core = menu.getCore();
+            auto& core = menu.getCore();
+            menu.setGameState(GameState::Host_Screen_Lobby_3);
+            menu.setErrorText("");
+            //TODO: prevent special characters in usename
+            if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) { //port must have numbers only
+                if (username.find_first_not_of(' ') != std::string::npos) {
+                    if (std::regex_match(username, std::regex("[a-zA-ZäöüßÄÖÜ]+"))) { //letters only please
 
-                    const int port = stoi(portstring);
-                    core.startServer(port);
-                    core.startClient(nullptr, port, username, "127.0.0.1"); //the client will request validation at this stage
+                        auto& core = menu.getCore();
+
+                        const int port = stoi(portstring);
+                        core.startServer(port);
+                        core.startClient(nullptr, port, username, "127.0.0.1"); //the client will request validation at this stage
 
 
-                    //TODO: replace this hard coded test case with real input values
-                    vector<TeamNumber::Enum> nil;
-                    vector<TeamNumber::Enum> team1enemies{ TeamNumber::Team_2 };
-                    vector<TeamNumber::Enum> team2enemies{ TeamNumber::Team_1 };
-                    Team team1 = Team(TeamNumber::Team_1, nil, team1enemies);
-                    Team team2 = Team(TeamNumber::Team_2, nil, team2enemies);
-                    core.getServer()->getGameplayMode().setGameplayMode(GameplayModeType::TeamDeathmatch);
-                    core.getServer()->getGameplayMode().setMaxAmountOfPlayers(50);
-                    core.getServer()->getGameplayMode().addTeam(team1);
-                    core.getServer()->getGameplayMode().addTeam(team2);
-                    core.getClient()->getGameplayMode() = core.getServer()->getGameplayMode();
+                        //TODO: replace this hard coded test case with real input values
+                        vector<TeamNumber::Enum> nil;
+                        vector<TeamNumber::Enum> team1enemies{ TeamNumber::Team_2 };
+                        vector<TeamNumber::Enum> team2enemies{ TeamNumber::Team_1 };
+                        Team team1 = Team(TeamNumber::Team_1, nil, team1enemies);
+                        Team team2 = Team(TeamNumber::Team_2, nil, team2enemies);
+                        core.getServer()->getGameplayMode().setGameplayMode(GameplayModeType::TeamDeathmatch);
+                        core.getServer()->getGameplayMode().setMaxAmountOfPlayers(50);
+                        core.getServer()->getGameplayMode().addTeam(team1);
+                        core.getServer()->getGameplayMode().addTeam(team2);
+                        core.getClient()->getGameplayMode() = core.getServer()->getGameplayMode();
 
-                    core.getServer()->startupMap(map);
+                        core.getServer()->startupMap(map);
 
-                    menu.m_ServerLobbyChatWindow->setUserPointer(core.getClient());
-        
-                }else {
-                    menu.setErrorText("The username must only contain letters");
+                        menu.m_ServerLobbyChatWindow->setUserPointer(core.getClient());
+
+                    }else{
+                        menu.setErrorText("The username must only contain letters");
+                    }
+                }else{
+                    menu.setErrorText("The username must have some letters in it");
                 }
-            }else {
-                menu.setErrorText("The username must have some letters in it");
+            }else{
+                menu.setErrorText("Server port must contain numbers only");
             }
-        }else {
-            menu.setErrorText("Server port must contain numbers only");
+        }else{
+            menu.setErrorText("Do not leave any fields blank");
         }
-    }else {
-        menu.setErrorText("Do not leave any fields blank");
+    }else{
+        menu.setErrorText("Please choose at least one ship to allow");
     }
-
 }};
 
 
@@ -108,19 +110,19 @@ HostScreenFFA2::HostScreenFFA2(HostScreen& hostScreen1, Menu& menu, Font& font) 
 
 
     m_BackgroundEdgeGraphicTop = NEW Button(font, winSize.x / 2.0f, winSize.y, winSize.x, bottom_bar_height_total);
-    m_BackgroundEdgeGraphicTop->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueDark]);
+    m_BackgroundEdgeGraphicTop->setColor(Factions::Database[FactionEnum::Federation].GUIColorDark);
     m_BackgroundEdgeGraphicTop->setAlignment(Alignment::TopCenter);
     m_BackgroundEdgeGraphicTop->setDepth(0.512f);
     m_BackgroundEdgeGraphicTop->disable();
     m_BackgroundEdgeGraphicTop->setTextureCorner(nullptr);
     m_BackgroundEdgeGraphicTop->enableTextureCorner(false);
     m_TopLabel = new Text(winSize.x / 2.0f, winSize.y - (bottom_bar_height_total / 2.0f) + 15.0f, font);
-    m_TopLabel->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_TopLabel->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_TopLabel->setAlignment(Alignment::Center);
     m_TopLabel->setTextAlignment(TextAlignment::Center);
 
     m_BackgroundEdgeGraphicBottom = NEW Button(font, winSize.x / 2.0f, 0, winSize.x, bottom_bar_height_total);
-    m_BackgroundEdgeGraphicBottom->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueDark]);
+    m_BackgroundEdgeGraphicBottom->setColor(Factions::Database[FactionEnum::Federation].GUIColorDark);
     m_BackgroundEdgeGraphicBottom->setAlignment(Alignment::BottomCenter);
     m_BackgroundEdgeGraphicBottom->setDepth(0.512f);
     m_BackgroundEdgeGraphicBottom->disable();
@@ -129,14 +131,14 @@ HostScreenFFA2::HostScreenFFA2(HostScreen& hostScreen1, Menu& menu, Font& font) 
 
     m_BackButton = NEW Button(font, padding_x + (bottom_bar_button_width / 2.0f), padding_y + (bottom_bar_height / 2.0f), bottom_bar_button_width, bottom_bar_height);
     m_BackButton->setText("Back");
-    m_BackButton->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_BackButton->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_BackButton->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     m_BackButton->setUserPointer(this);
     m_BackButton->setOnClickFunctor(Host2FFA_ButtonBack_OnClick());
 
     m_ForwardButton = NEW Button(font, winSize.x - (padding_x + (bottom_bar_button_width / 2.0f)), padding_y + (bottom_bar_height / 2.0f), bottom_bar_button_width, bottom_bar_height);
     m_ForwardButton->setText("Next");
-    m_ForwardButton->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_ForwardButton->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_ForwardButton->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     m_ForwardButton->setUserPointer(this);
     m_ForwardButton->setOnClickFunctor(Host2FFA_ButtonNext_OnClick());
@@ -152,7 +154,8 @@ HostScreenFFA2::HostScreenFFA2(HostScreen& hostScreen1, Menu& menu, Font& font) 
 
 
     const auto window_height = (winSize.y - bottom_bar_height_total - padding_y);
-    const auto left_window_width = winSize.x - right_window_width - padding_x;
+    const auto left_window_width = winSize.x - right_window_width - padding_x - (padding_x / 2.0f);
+
     {
         m_ShipSelectorWindow = new FFAShipSelector(*this, font,
             (padding_x / 2.0f) + (left_window_width / 2.0f),
@@ -163,19 +166,41 @@ HostScreenFFA2::HostScreenFFA2(HostScreen& hostScreen1, Menu& menu, Font& font) 
         struct LeftSizeFunctor { glm::vec2 operator()(RoundedWindow* window) const {
             const auto winSize = Resources::getWindowSize();
             const auto window_height_2 = (winSize.y - bottom_bar_height_total - padding_y) - bottom_bar_height_total;
-            const auto left_window_width_2 = winSize.x - right_window_width - padding_x;
+            const auto left_window_width_2 = winSize.x - right_window_width - padding_x - (padding_x / 2.0f);
             return glm::vec2(left_window_width_2, window_height_2);
         }};
         struct LeftPositionFunctor { glm::vec2 operator()(RoundedWindow* window) const {
             const auto winSize = Resources::getWindowSize();
             const auto window_height_2 = (winSize.y - bottom_bar_height_total - padding_y);
-            const auto left_window_width_2 = winSize.x - right_window_width - padding_x;
+            const auto left_window_width_2 = winSize.x - right_window_width - padding_x - (padding_x / 2.0f);
             const auto x = (padding_x / 2.0f) + (left_window_width_2 / 2.0f);
             const auto y = winSize.y - (padding_y / 2.0f) - (window_height_2 / 2.0f) - (bottom_bar_height_total / 2.0f);
             return glm::vec2(x, y);
         }};
         m_ShipSelectorWindow->setPositionFunctor(LeftPositionFunctor());
         m_ShipSelectorWindow->setSizeFunctor(LeftSizeFunctor());
+    }
+    {
+        m_ServerInfoWindow = new FFAServerInfo(*this, font,
+            winSize.x - (right_window_width / 2.0f) - padding_x,
+            winSize.y - (padding_y / 2.0f) - (window_height / 2.0f),
+            right_window_width,
+            window_height,
+        0.1f, 1, "Server Information");
+        struct RightSizeFunctor { glm::vec2 operator()(RoundedWindow* window) const {
+            const auto winSize = Resources::getWindowSize();
+            const auto window_height_2 = (winSize.y - bottom_bar_height_total - padding_y) - bottom_bar_height_total;
+            return glm::vec2(right_window_width, window_height_2);
+        }};
+        struct RightPositionFunctor { glm::vec2 operator()(RoundedWindow* window) const {
+            const auto winSize = Resources::getWindowSize();
+            const auto window_height_2 = (winSize.y - bottom_bar_height_total - padding_y);
+            const auto x = winSize.x - (right_window_width / 2.0f) - (padding_x / 2.0f);
+            const auto y = winSize.y - (padding_y / 2.0f) - (window_height_2 / 2.0f) - (bottom_bar_height_total / 2.0f);
+            return glm::vec2(x, y);
+        }};
+        m_ServerInfoWindow->setPositionFunctor(RightPositionFunctor());
+        m_ServerInfoWindow->setSizeFunctor(RightSizeFunctor());
     }
 }
 HostScreenFFA2::~HostScreenFFA2() {
@@ -188,7 +213,7 @@ HostScreenFFA2::~HostScreenFFA2() {
     SAFE_DELETE(m_TopLabel);
 
     SAFE_DELETE(m_ShipSelectorWindow);
-    //SAFE_DELETE(m_ServerInfoWindow);
+    SAFE_DELETE(m_ServerInfoWindow);
 }
 void HostScreenFFA2::setTopText(const string& text) {
     m_TopLabel->setText(text);
@@ -211,7 +236,7 @@ void HostScreenFFA2::onResize(const unsigned int newWidth, const unsigned int ne
     m_TopLabel->setPosition(winSize.x / 2.0f, winSize.y - (bottom_bar_height_total / 2.0f) + 15.0f);
 
     m_ShipSelectorWindow->onResize(newWidth, newHeight);
-    //m_ServerInfoWindow->onResize(newWidth, newHeight);
+    m_ServerInfoWindow->onResize(newWidth, newHeight);
 }
 
 void HostScreenFFA2::update(const double& dt) {
@@ -227,7 +252,7 @@ void HostScreenFFA2::update(const double& dt) {
     m_TopLabel->update(dt);
 
     m_ShipSelectorWindow->update(dt);
-    //m_ServerInfoWindow->update(dt);
+    m_ServerInfoWindow->update(dt);
 }
 void HostScreenFFA2::render() {
     m_ServerPort_TextBox->render();
@@ -242,5 +267,5 @@ void HostScreenFFA2::render() {
     m_TopLabel->render();
 
     m_ShipSelectorWindow->render();
-    //m_ServerInfoWindow->render();
+    m_ServerInfoWindow->render();
 }

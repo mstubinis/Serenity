@@ -8,7 +8,7 @@ using namespace std;
 
 const auto token_padding = 12.0f;
 
-ShipToken::ShipToken(const string& shipClass, Font& font, const float& x, const float& y, const float& depth, const bool& lit) : Button(font, x, y, 1, 1){
+ShipToken::ShipToken(const string& shipClass, Font& font, const float& x, const float& y, const float& depth, const bool& lit, void* userPtr) : Button(font, x, y, 1, 1){
     m_ShipClass = shipClass;
     m_LightedUp = lit;
 
@@ -31,6 +31,7 @@ ShipToken::ShipToken(const string& shipClass, Font& font, const float& x, const 
     enableTextureEdge(false);
     setPaddingSize(token_padding);
     setDepth(depth);
+    setUserPointer(userPtr);
 
     m_TokenCenter = new Button(font, 0, 0, 1, 1);
     m_TokenCenter->setAlignment(Alignment::TopLeft);
@@ -48,6 +49,7 @@ ShipToken::ShipToken(const string& shipClass, Font& font, const float& x, const 
     m_TokenCenter->enableTextureEdge(false);
     m_TokenCenter->setPaddingSize(token_padding);
     m_TokenCenter->setDepth(depth - 0.001f);
+    m_TokenCenter->setUserPointer(userPtr);
     if (!lit) {
         lightOff();
     }else{
@@ -55,7 +57,7 @@ ShipToken::ShipToken(const string& shipClass, Font& font, const float& x, const 
     }
     addChild(m_TokenCenter);
 }
-ShipToken::ShipToken(const ShipInformation& shipInfo, Font& font, const float& x, const float& y, const float& depth, const bool& lit) : ShipToken(shipInfo.Class,font, x, y, depth, lit) {
+ShipToken::ShipToken(const ShipInformation& shipInfo, Font& font, const float& x, const float& y, const float& depth, const bool& lit, void* userPtr) : ShipToken(shipInfo.Class,font, x, y, depth, lit, userPtr) {
 }
 ShipToken::~ShipToken() {
     

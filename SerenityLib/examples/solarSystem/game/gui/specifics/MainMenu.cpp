@@ -1,6 +1,7 @@
 #include "MainMenu.h"
 #include "../Button.h"
 #include "../../Menu.h"
+#include "../../factions/Faction.h"
 
 #include <core/engine/system/Engine.h>
 
@@ -41,43 +42,43 @@ MainMenu::MainMenu(Menu& menu, Font& font, const float& depth) {
 
     m_ButtonHost = NEW Button(font, windowDimensions.x / 2.0f, 365.0f, button_width, button_height);
     m_ButtonHost->setText("Host");
-    m_ButtonHost->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_ButtonHost->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_ButtonHost->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     m_ButtonHost->setDepth(depth);
 
     m_ButtonsBackground = NEW Button(font, 0, 40.0f, (button_width * 1.5f), ((button_height + 22.0f) * 5));
     m_ButtonsBackground->setAlignment(Alignment::TopCenter);
     m_ButtonsBackground->disable();
-    m_ButtonsBackground->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueDark]);
+    m_ButtonsBackground->setColor(Factions::Database[FactionEnum::Federation].GUIColorDark);
     m_ButtonsBackground->setDepth(depth + 0.01f);
 
     m_ButtonsBackgroundBorder = NEW Button(font, 0, 41.0f, (button_width * 1.5f)+2, ((button_height + 22.0f) * 5)+2);
     m_ButtonsBackgroundBorder->setAlignment(Alignment::TopCenter);
     m_ButtonsBackgroundBorder->disable();
-    m_ButtonsBackgroundBorder->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueSlightlyDarker]);
+    m_ButtonsBackgroundBorder->setColor(Factions::Database[FactionEnum::Federation].GUIColorSlightlyDarker);
     m_ButtonsBackgroundBorder->setDepth(depth + 0.02f);
 
     m_ButtonJoin = NEW Button(font, 0.0f, padding_y, button_width, button_height);
     m_ButtonJoin->setText("Join");
-    m_ButtonJoin->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_ButtonJoin->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_ButtonJoin->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     m_ButtonJoin->setDepth(depth);
 
     m_ButtonOptions = NEW Button(font, 0.0f, padding_y * 2, button_width, button_height);
     m_ButtonOptions->setText("Options");
-    m_ButtonOptions->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_ButtonOptions->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_ButtonOptions->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     m_ButtonOptions->setDepth(depth);
 
     m_ButtonEncyclopedia = NEW Button(font, 0.0f, padding_y * 3, button_width, button_height);
     m_ButtonEncyclopedia->setText("Encyclopedia");
-    m_ButtonEncyclopedia->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_ButtonEncyclopedia->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_ButtonEncyclopedia->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     m_ButtonEncyclopedia->setDepth(depth);
 
     m_ButtonExit = NEW Button(font, 0.0f, padding_y * 4, button_width, button_height);
     m_ButtonExit->setText("Exit");
-    m_ButtonExit->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_ButtonExit->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_ButtonExit->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     m_ButtonExit->setDepth(depth);
 

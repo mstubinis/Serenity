@@ -89,6 +89,39 @@ void ScrollFrame::addContent(Widget* widget) {
     m_Content.push_back(std::move(row));
     internal_recalculate_content_sizes();
 }
+const float ScrollFrame::get_true_content_height(const bool updateToo, const double& dt) {
+    float height = 0;
+    float actual_content_width = 0;
+    const auto scrollbar_width = m_ScrollBar->width();
+    if (m_ScrollBar->isScrollable()) {
+        actual_content_width = m_Width - scrollbar_width;
+    }else{
+        actual_content_width = m_Width;
+    }
+    auto scrollOffset = m_ScrollBar->getSliderPosition() * (m_ContentHeight / (m_Height - (m_ScrollBar->width() * 2.0f)));
+    auto pos = positionFromAlignmentWorld();
+    for (auto& row : m_Content) {
+        float width_accumulator = 0.0f;
+        for (auto& widgetEntry : row.widgets) {
+            if (updateToo) {
+                widgetEntry.widget->setPosition(pos.x + width_accumulator, ((pos.y + m_Height) - height) - scrollOffset);
+                widgetEntry.widget->update(dt);
+            }
+            width_accumulator += widgetEntry.widget->width();
+            if (width_accumulator > actual_content_width) {
+                width_accumulator = 0.0f;
+                height += row.maxHeight;
+                if (updateToo) {
+                    widgetEntry.widget->setPosition(pos.x + width_accumulator, ((pos.y + m_Height) - height) - scrollOffset);
+                    widgetEntry.widget->update(dt);
+                }
+                width_accumulator += widgetEntry.widget->width();
+            }
+        }
+        height += row.maxHeight;
+    }
+    return height;
+}
 void ScrollFrame::fit_widget_to_window(WidgetEntry& widgetEntry) {
     if (!widgetEntry.widget)
         return;
@@ -132,6 +165,12 @@ void ScrollFrame::fit_widget_to_window(WidgetEntry& widgetEntry) {
         }
         if (changed) {
             textWidget->setText(text);
+            /*
+            m_ContentHeight = get_true_content_height();
+            const float percent = m_Height / m_ContentHeight;
+            m_ScrollBar->setSliderSize(percent);
+            m_ScrollBar->resetScrollOffset();
+            */
         }
     }else{
         //just shrink width if needed     
@@ -149,46 +188,16 @@ void ScrollFrame::fit_widget_to_window(WidgetEntry& widgetEntry) {
     }
 }
 void ScrollFrame::internal_recalculate_content_sizes() {
-    float height = 0;
-    float width_accumulator = 0;
-    float actual_content_width = 0;
-    const auto scrollbar_width = m_ScrollBar->width();
-
-    if (m_ScrollBar->isScrollable()) {
-        actual_content_width = m_Width - scrollbar_width;
-    }else {
-        actual_content_width = m_Width;
-    }
-    if (m_Content.size() > 0) {
-        for (auto& row : m_Content) {
-            height += row.maxHeight;
-            float width_left = actual_content_width;
-            float max_height = 0;
-            for (size_t i = 0; i < row.widgets.size(); ++i) {
-                if (row.widgets[i].widget->height() > max_height) {
-                    max_height = row.widgets[i].widget->height();
-                }
-            }
-            for (size_t i = 0; i < row.widgets.size(); ++i) {
-                width_left -= row.widgets[i].widget->width();
-                if (width_left < 0) {
-                    height += max_height;
-                    break;
-                }
-            }
-        }
-    }
-    m_ContentHeight = height;
-    const float percent = m_Height / m_ContentHeight;
+    m_ContentHeight = get_true_content_height();
+    float percent = m_Height / m_ContentHeight;
     m_ScrollBar->setSliderSize(percent);
 
-    if (m_Content.size() > 0) {
-        for (auto& row : m_Content) {
-            for (size_t i = 0; i < row.widgets.size(); ++i) {
-                fit_widget_to_window(row.widgets[i]);
-            }
+    for (auto& row : m_Content) {
+        for (auto& widgetEntry : row.widgets) {
+            fit_widget_to_window(widgetEntry);
         }
     }
+
     m_ScrollBar->resetScrollOffset();
 }
 void ScrollFrame::setAlignment(const Alignment::Type& alignment) {
@@ -263,31 +272,7 @@ void ScrollFrame::update(const double& dt) {
     Widget::update(dt);
     m_ScrollBar->update(dt);
 
-    auto height = 0.0f;
-    auto scrollOffset = m_ScrollBar->getSliderPosition() * (m_ContentHeight / (m_Height - (m_ScrollBar->width() * 2.0f)));
-
-    auto pos = positionFromAlignmentWorld();
-
-    for (auto& row : m_Content) {
-        float total_width = 0.0f;
-        for (auto& widgetEntry : row.widgets) {
-            total_width += widgetEntry.widget->width();
-        }
-        float width_accumulator = 0.0f;
-        for (auto& widgetEntry : row.widgets) {
-            widgetEntry.widget->setPosition(pos.x + width_accumulator, ((pos.y + m_Height) - height) - scrollOffset);
-            widgetEntry.widget->update(dt);
-            width_accumulator += widgetEntry.widget->width();
-            if (width_accumulator > total_width) {
-                width_accumulator = 0.0f;
-                height += row.maxHeight;
-
-                widgetEntry.widget->setPosition(pos.x + width_accumulator, ((pos.y + m_Height) - height) - scrollOffset);
-                widgetEntry.widget->update(dt);
-            }
-        }
-        height += row.maxHeight;
-    }
+    get_true_content_height(true, dt);
 
     if (m_MouseIsOver || m_ScrollBar->isMouseOver()) {
         const auto delta = Engine::getMouseWheelDelta();
@@ -322,6 +307,7 @@ void ScrollFrame::render() {
     //Renderer::renderBorder(1, pos, m_Color, m_Width, m_Height, 0, 0.0001f, m_Alignment);
 
     auto scissor = glm::vec4(pos2.x, pos2.y, m_Width, m_Height);
+    //auto scissor = glm::vec4(-1.0f);
     for (auto& row : m_Content) {
         for (auto& widgetEntry : row.widgets) {
             widgetEntry.widget->render(scissor);

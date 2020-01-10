@@ -15,8 +15,8 @@ class ShipToken final : public Button {
         Button*         m_TokenCenter; //this button is the "center"
         bool            m_LightedUp;
     public:
-        ShipToken(const std::string& shipClass, Font& font, const float& x, const float& y, const float& depth, const bool& lit);
-        ShipToken(const ShipInformation& shipInfo, Font& font, const float& x, const float& y, const float& depth, const bool& lit);
+        ShipToken(const std::string& shipClass, Font& font, const float& x, const float& y, const float& depth, const bool& lit, void* userPtr = nullptr);
+        ShipToken(const ShipInformation& shipInfo, Font& font, const float& x, const float& y, const float& depth, const bool& lit, void* userPtr = nullptr);
         ~ShipToken();
 
         template<class T> void setOnClickFunctor(const T& functor) {

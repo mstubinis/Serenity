@@ -1,7 +1,7 @@
 #include "ScrollBar.h"
 #include "Button.h"
 
-#include "../Menu.h"
+#include "../factions/Faction.h"
 #include "../ResourceManifest.h"
 
 #include <core/engine/events/Engine_Events.h>
@@ -42,21 +42,21 @@ ScrollBar::ScrollBar(const Font& font, const float x, const float y, const float
     m_ScrollArea = new Button(font, x, y, w, h - w - w);
     m_ScrollArea->setDepth(depth - 0.002f);
     m_ScrollArea->setPaddingSize(default_padding);
-    m_ScrollArea->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_ScrollArea->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
 
     m_ScrollArea->setTextureCorner(ResourceManifest::GUITextureCornerBoxSmall);
     m_ScrollArea->setTextureEdge(ResourceManifest::GUITextureSideSmall);
     m_ScrollArea->setTextureCornerHighlight(ResourceManifest::GUITextureCornerBoxSmall);
     m_ScrollArea->setTextureEdgeHighlight(ResourceManifest::GUITextureSideSmall);
 
-    m_ScrollArea->setAlignment(Alignment::Right);
+    m_ScrollArea->setAlignment(Alignment::TopLeft);
     m_ScrollArea->setUserPointer(this);
     m_ScrollArea->setOnClickFunctor(ScrollBar_Functor());
 
     m_ScrollAreaBackground = new Button(font, x, y, w, h - w - w);
     m_ScrollAreaBackground->setDepth(depth + 0.001f);
     m_ScrollAreaBackground->setPaddingSize(default_padding);
-    m_ScrollAreaBackground->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueSlightlyDarker]);
+    m_ScrollAreaBackground->setColor(Factions::Database[FactionEnum::Federation].GUIColorSlightlyDarker);
     m_ScrollAreaBackground->setAlignment(Alignment::TopLeft);
     m_ScrollAreaBackground->disableMouseover();
     m_ScrollAreaBackground->setTextureCorner(ResourceManifest::GUITextureCornerBoxSmall);
@@ -65,7 +65,7 @@ ScrollBar::ScrollBar(const Font& font, const float x, const float y, const float
     m_ScrollAreaBackground->setTextureEdgeHighlight(ResourceManifest::GUITextureSideSmall);
 
     m_TopOrLeftButton     = NEW Button(font, x,y, w, w);
-    m_TopOrLeftButton->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_TopOrLeftButton->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_TopOrLeftButton->setPaddingSize(default_padding);
     m_TopOrLeftButton->setDepth(depth - 0.001f);
     m_TopOrLeftButton->setText("");
@@ -86,7 +86,7 @@ ScrollBar::ScrollBar(const Font& font, const float x, const float y, const float
     m_TopOrLeftButton->setTextureCornerHighlight(ResourceManifest::GUITextureCornerBoxSmall, 3);
 
     m_BottomOrRightButton = NEW Button(font, x, y - h, w, w);
-    m_BottomOrRightButton->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_BottomOrRightButton->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_BottomOrRightButton->setPaddingSize(default_padding);
     m_BottomOrRightButton->setDepth(depth - 0.001f);
     m_BottomOrRightButton->setText("");
@@ -106,7 +106,7 @@ ScrollBar::ScrollBar(const Font& font, const float x, const float y, const float
     m_BottomOrRightButton->setTextureCornerHighlight(ResourceManifest::GUITextureCornerBoxSmall, 0);
     m_BottomOrRightButton->setTextureCornerHighlight(ResourceManifest::GUITextureCornerBoxSmall, 2);
 
-    internalUpdateScrollbarPosition();
+    update_scroll_bar_position();
 }
 ScrollBar::~ScrollBar() {
     SAFE_DELETE(m_ScrollArea);
@@ -115,7 +115,9 @@ ScrollBar::~ScrollBar() {
     SAFE_DELETE(m_BottomOrRightButton);
 }
 void ScrollBar::resetScrollOffset() {
-    scroll(999999999999.0f);
+    m_ScrollBarCurrentPosition = 0.0f;
+    m_DragSnapshot = 0.0f;
+    m_ScrollBarStartAnchor = get_scroll_bar_starting_y();
 }
 void ScrollBar::setColor(const float& r, const float& g, const float& b, const float& a) {
     Widget::setColor(r, g, b, a);
@@ -148,24 +150,26 @@ void ScrollBar::setPosition(const float x, const float y) {
     m_BottomOrRightButton->setPosition(x, y - height());
     m_ScrollAreaBackground->setPosition(x,y - (m_Width));
 
-    internalUpdateScrollbarPosition();
+    update_scroll_bar_position();
 }
 void ScrollBar::setPosition(const glm::vec2& position) {
     ScrollBar::setPosition(position.x, position.y);
 }
 void ScrollBar::setSliderSize(const float percent) {
     m_ScrollBarCurrentContentPercent = glm::clamp(percent,0.01f,1.0f);
-    internalUpdateScrollbarPosition();
+    update_scroll_bar_position();
 }
 const bool ScrollBar::isScrollable() const {
     return (m_ScrollBarCurrentContentPercent < 1.0f) ? true : false;
+}
+const float ScrollBar::get_scroll_area_max_height() const {
+    return (m_Height - (m_Width * 2.0f));
 }
 const float ScrollBar::getSliderPosition() const {
     return m_ScrollBarCurrentPosition;
 }
 const float ScrollBar::getSliderHeight() const {
-    auto part1 = (m_Height - (m_Width * 2.0f));
-    auto res   = (m_ScrollBarCurrentContentPercent) * part1;
+    auto res   = (m_ScrollBarCurrentContentPercent) * get_scroll_area_max_height();
     return res;
 }
 void ScrollBar::setType(const ScrollBarType::Type& type) {
@@ -175,28 +179,29 @@ void ScrollBar::scroll(const float amount) {
     if (m_ScrollBarCurrentContentPercent < 1.0f) {
         m_ScrollBarCurrentPosition += amount;
         
-        const float& scrollHeightMax    = m_Height - (m_Width * 2.0f);
-        const float& scrollBarHeight    = getSliderHeight();
-        const float& absoluteStartPoint = m_Position.y - ((scrollBarHeight / 2.0f) + m_Width);
-        const float& bottomMark         = scrollHeightMax - scrollBarHeight;
+        const float scrollBarHeight    = getSliderHeight();
+        const float starting_y         = get_scroll_bar_starting_y();
+        const float bottomMark         = get_scroll_area_max_height() - scrollBarHeight;
 
-        internalUpdateScrollbarPosition();
+        update_scroll_bar_position();
 
-        if (m_ScrollBarStartAnchor > absoluteStartPoint) {
+        if (m_ScrollBarStartAnchor > starting_y) {
             m_ScrollBarCurrentPosition = 0.0f;
-            m_ScrollBarStartAnchor = absoluteStartPoint;
-        }else if (m_ScrollBarStartAnchor < absoluteStartPoint - bottomMark) {
+            m_ScrollBarStartAnchor = starting_y;
+        }else if (m_ScrollBarStartAnchor < starting_y - bottomMark) {
             m_ScrollBarCurrentPosition = -bottomMark;
-            m_ScrollBarStartAnchor = absoluteStartPoint + -bottomMark;
+            m_ScrollBarStartAnchor = starting_y + -bottomMark;
         }
     }
 }
 void ScrollBar::setScrollBarColor(const glm::vec4& color) {
     m_ScrollBarColor = color;
 }
-void ScrollBar::internalUpdateScrollbarPosition() {
-    const float& absoluteStartPoint = m_Position.y - ((getSliderHeight() / 2.0f) + m_Width);
-    m_ScrollBarStartAnchor = absoluteStartPoint + m_ScrollBarCurrentPosition;
+const float ScrollBar::get_scroll_bar_starting_y() const {
+    return m_Position.y - m_Width;
+}
+void ScrollBar::update_scroll_bar_position() {
+    m_ScrollBarStartAnchor = get_scroll_bar_starting_y() + m_ScrollBarCurrentPosition;
 }
 void ScrollBar::update(const double& dt) {
     Widget::update(dt);
@@ -208,7 +213,7 @@ void ScrollBar::update(const double& dt) {
     if (m_Hidden)
         return;
     float scrollBarHeight   = getSliderHeight();
-    const float& scrollBarY = m_ScrollBarStartAnchor - scrollBarHeight / 2.0f;
+    const float scrollBarY  = m_ScrollBarStartAnchor - scrollBarHeight;
     const auto& mouse       = Engine::getMousePosition();
 
     bool mouseOver = true;
@@ -237,11 +242,11 @@ void ScrollBar::render(const glm::vec4& scissor) {
     const auto pos = positionWorld();
 
     if (m_CurrentlyDragging) {
-        m_ScrollArea->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueHighlight]);
-        m_ScrollArea->setColorHighlight(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueHighlight]);
+        m_ScrollArea->setColor(Factions::Database[FactionEnum::Federation].GUIColorHighlight);
+        m_ScrollArea->setColorHighlight(Factions::Database[FactionEnum::Federation].GUIColorHighlight);
     }else{
-        m_ScrollArea->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
-        m_ScrollArea->setColorHighlight(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueHighlight]);
+        m_ScrollArea->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
+        m_ScrollArea->setColorHighlight(Factions::Database[FactionEnum::Federation].GUIColorHighlight);
     }
     m_ScrollArea->setSize(m_Width, scrollBarHeight);
     m_ScrollArea->setPosition(pos.x, m_ScrollBarStartAnchor);

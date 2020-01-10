@@ -3,6 +3,7 @@
 #include "MapDescriptionWindow.h"
 #include "ServerLobbyChatWindow.h"
 #include "../../Menu.h"
+#include "../../factions/Faction.h"
 #include "../../Core.h"
 #include "../Button.h"
 #include "../TextBox.h"
@@ -45,9 +46,9 @@ struct Host2HS_ButtonNext_OnClick { void operator()(Button* button) const {
 
     auto& menu = hostScreenHS.getMenu();
 
-    const string& username = hostScreenHS.m_UserName_TextBox->text();
-    const string& portstring = hostScreenHS.m_ServerPort_TextBox->text();
-    const auto& map = hostScreenHS.m_HostScreen1.getCurrentChoice();
+    const string& username    = hostScreenHS.m_UserName_TextBox->text();
+    const string& portstring  = hostScreenHS.m_ServerPort_TextBox->text();
+    const auto& map           = Server::SERVER_HOST_DATA.getMapChoice();
     if (!portstring.empty() && !username.empty() && !map.map_file_path.empty()) {
 
         auto& core = menu.getCore();
@@ -103,19 +104,19 @@ HostScreenHomelandSecurity2::HostScreenHomelandSecurity2(HostScreen& hostScreen1
     const auto first_2_boxes_width_top = contentSize.x - top_content_height;
 
     m_BackgroundEdgeGraphicTop = NEW Button(font, winSize.x / 2.0f, winSize.y, winSize.x, bottom_bar_height_total);
-    m_BackgroundEdgeGraphicTop->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueDark]);
+    m_BackgroundEdgeGraphicTop->setColor(Factions::Database[FactionEnum::Federation].GUIColorDark);
     m_BackgroundEdgeGraphicTop->setAlignment(Alignment::TopCenter);
     m_BackgroundEdgeGraphicTop->setDepth(0.512f);
     m_BackgroundEdgeGraphicTop->disable();
     m_BackgroundEdgeGraphicTop->setTextureCorner(nullptr);
     m_BackgroundEdgeGraphicTop->enableTextureCorner(false);
     m_TopLabel = new Text(winSize.x / 2.0f, winSize.y - (bottom_bar_height_total / 2.0f) + 15.0f, font);
-    m_TopLabel->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_TopLabel->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_TopLabel->setAlignment(Alignment::Center);
     m_TopLabel->setTextAlignment(TextAlignment::Center);
 
     m_BackgroundEdgeGraphicBottom = NEW Button(font, winSize.x / 2.0f, bottom_bar_height_total / 2.0f, winSize.x, bottom_bar_height_total);
-    m_BackgroundEdgeGraphicBottom->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueDark]);
+    m_BackgroundEdgeGraphicBottom->setColor(Factions::Database[FactionEnum::Federation].GUIColorDark);
     m_BackgroundEdgeGraphicBottom->setDepth(0.512f);
     m_BackgroundEdgeGraphicBottom->disable();
     m_BackgroundEdgeGraphicBottom->setTextureCorner(nullptr);
@@ -123,14 +124,14 @@ HostScreenHomelandSecurity2::HostScreenHomelandSecurity2(HostScreen& hostScreen1
 
     m_BackButton = NEW Button(font, padding_x + (bottom_bar_button_width / 2.0f), padding_y + (bottom_bar_height / 2.0f), bottom_bar_button_width, bottom_bar_height);
     m_BackButton->setText("Back");
-    m_BackButton->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_BackButton->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_BackButton->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     m_BackButton->setUserPointer(this);
     m_BackButton->setOnClickFunctor(Host2HS_ButtonBack_OnClick());
 
     m_ForwardButton = NEW Button(font, winSize.x - (padding_x + (bottom_bar_button_width / 2.0f)), padding_y + (bottom_bar_height / 2.0f), bottom_bar_button_width, bottom_bar_height);
     m_ForwardButton->setText("Next");
-    m_ForwardButton->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_ForwardButton->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_ForwardButton->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     m_ForwardButton->setUserPointer(this);
     m_ForwardButton->setOnClickFunctor(Host2HS_ButtonNext_OnClick());

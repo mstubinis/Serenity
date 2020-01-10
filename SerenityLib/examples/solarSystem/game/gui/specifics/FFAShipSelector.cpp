@@ -1,11 +1,12 @@
 #include "FFAShipSelector.h"
 #include "HostScreenFFA2.h"
 #include "ShipToken.h"
-#include "../../Menu.h"
+#include "../../factions/Faction.h"
 #include "../../map/Map.h"
 #include "../Text.h"
 #include "../ScrollFrame.h"
 #include "../../ships/Ships.h"
+#include "../../networking/server/Server.h"
 
 #include <core/engine/fonts/Font.h>
 #include <core/engine/resources/Engine_Resources.h>
@@ -44,6 +45,7 @@ struct ShipTokenOnClickTotal final { void operator()(Button* button) const {
         }
         token.lightOff();
     }
+    Server::SERVER_HOST_DATA.setAllowedShips(ffaSelector.getAllowedShips());
 }};
 struct ShipTokenOnClickAllowed final { void operator()(Button* button) const {
     auto& token = *static_cast<ShipToken*>(button);
@@ -66,6 +68,7 @@ struct ShipTokenOnClickAllowed final { void operator()(Button* button) const {
         }
         token.lightOff();
     }
+    Server::SERVER_HOST_DATA.setAllowedShips(ffaSelector.getAllowedShips());
 }};
 
 FFAShipSelector::FFAShipSelector(HostScreenFFA2& hostScreen, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const string& labelText)
@@ -90,16 +93,16 @@ FFAShipSelector::FFAShipSelector(HostScreenFFA2& hostScreen, Font& font, const f
     m_ShipsTotalLabel = new Text(x - (width / 4.0f), y + (height / 2.0f) - 9.0f, font, "Ship Database");
     m_ShipsTotalLabel->setAlignment(Alignment::Center);
     m_ShipsTotalLabel->setTextAlignment(TextAlignment::Center);
-    m_ShipsTotalLabel->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_ShipsTotalLabel->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
 
 
     m_ShipsAllowedLabel = new Text(x + (width / 4.0f), y + (height / 2.0f) - 9.0f, font, "Ships Allowed");
     m_ShipsAllowedLabel->setAlignment(Alignment::Center);
     m_ShipsAllowedLabel->setTextAlignment(TextAlignment::Center);
-    m_ShipsAllowedLabel->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_ShipsAllowedLabel->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
 
     m_MiddleDivide = new Button(font, x, y - (height / 2.0f), dividor_width, height - 51.0f);
-    m_MiddleDivide->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_MiddleDivide->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_MiddleDivide->setText("");
     m_MiddleDivide->disableMouseover();
     m_MiddleDivide->disable();
@@ -138,15 +141,11 @@ void FFAShipSelector::init_window_contents() {
                 continue;
             }
 
-            ShipToken* ship_pool_button = new ShipToken(ship_info, m_Font, 0, 0, getDepth() - 0.004f, true);
-
-            ship_pool_button->setUserPointer(this);
+            ShipToken* ship_pool_button = new ShipToken(ship_info, m_Font, 0, 0, getDepth() - 0.004f, true, this);
             ship_pool_button->setOnClickFunctor(ShipTokenOnClickTotal());
             
 
-            ShipToken* ship_allowed_button = new ShipToken(ship_info, m_Font, 0, 0, getDepth() - 0.004f, false);
-
-            ship_allowed_button->setUserPointer(this);
+            ShipToken* ship_allowed_button = new ShipToken(ship_info, m_Font, 0, 0, getDepth() - 0.004f, false, this);
             ship_allowed_button->setOnClickFunctor(ShipTokenOnClickAllowed());
 
             m_ShipsTotalFrame->addContent(ship_pool_button, i);

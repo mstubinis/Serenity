@@ -25,18 +25,8 @@ class HostScreen final {
     friend class  HostScreenHomelandSecurity2;
     friend class  MapSelectionWindow;
     friend class  MapDescriptionWindow;
-    public:
-        struct FirstPartData final {
-            MapEntryData             m_CurrentMapChoice;
-            GameplayModeType::Mode   m_CurrentGameModeChoice;
 
-            FirstPartData() {
-                m_CurrentGameModeChoice = GameplayModeType::FFA;
-            }
-            ~FirstPartData() {}
-        };
     private:
-        HostScreen::FirstPartData  m_Data;
         Font&                      m_Font;
         Menu&                      m_Menu;
 
@@ -55,11 +45,7 @@ class HostScreen final {
         void clearCurrentMapChoice();
         void setCurrentMapChoice(const MapEntryData& choice);
         void setCurrentGameMode(const GameplayModeType::Mode& currentGameMode);
-        const MapEntryData& getCurrentChoice() const;
 
-
-
-        const HostScreen::FirstPartData& getData();
         MapSelectionWindow& getMapSelectionWindow();
         MapDescriptionWindow& getMapDescriptionWindow();
 

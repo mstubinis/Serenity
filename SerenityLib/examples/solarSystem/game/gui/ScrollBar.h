@@ -34,7 +34,9 @@ class ScrollBar final : public Widget {
         Button*             m_TopOrLeftButton;
         Button*             m_BottomOrRightButton;
 
-        void internalUpdateScrollbarPosition();
+        void update_scroll_bar_position();
+        const float get_scroll_bar_starting_y() const;
+        const float get_scroll_area_max_height() const;
     public:
         ScrollBar(const Font& font, const float x, const float y, const float w, const float h, const float depth, const ScrollBarType::Type& type = ScrollBarType::Type::Vertical);
         ~ScrollBar();

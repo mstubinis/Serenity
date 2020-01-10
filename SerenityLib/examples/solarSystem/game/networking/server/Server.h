@@ -2,6 +2,12 @@
 #ifndef GAME_SERVER_H
 #define GAME_SERVER_H
 
+struct Packet;
+class  ServerClient;
+class  ServerClientThread;
+class  Core;
+struct PacketMessage;
+
 #include <core/engine/networking/ListenerTCP.h>
 #include <core/engine/networking/SocketTCP.h>
 #include <core/engine/networking/SocketUDP.h>
@@ -16,11 +22,26 @@
 #include <future>
 #include <mutex>
 
-struct Packet;
-class  ServerClient;
-class  ServerClientThread;
-class  Core;
-struct PacketMessage;
+class ServerHostData final {
+    private:
+        std::vector<std::string> m_GetAllowedShips;
+        MapEntryData             m_CurrentMapChoice;
+        GameplayModeType::Mode   m_CurrentGameModeChoice;
+    public:
+        const MapEntryData& getMapChoice() const;
+        void setMapChoice(const MapEntryData&);
+
+        const GameplayModeType::Mode& getGameplayMode() const;
+        void setGameplayMode(const GameplayModeType::Mode&);
+
+        std::vector<std::string>& getAllowedShips();
+        void setAllowedShips(const std::vector<std::string>&);
+
+        const std::string& getGameplayModeString() const;
+
+        ServerHostData();
+        ~ServerHostData();
+};
 
 class ServerClient final {
     friend class Server;
@@ -75,6 +96,8 @@ class Server {
     friend class ServerClient;
     friend class ServerClientThread;
     friend class ServerMapSpecificData;
+    public:
+        static ServerHostData                          SERVER_HOST_DATA;
     private:
         ServerMapSpecificData                          m_MapSpecificData;
         GameplayMode                                   m_GameplayMode;

@@ -9,6 +9,7 @@
 #include "MapDescriptionWindow.h"
 #include "ServerLobbyChatWindow.h"
 #include "../../Menu.h"
+#include "../../factions/Faction.h"
 #include "../../Core.h"
 #include "../Button.h"
 #include "../TextBox.h"
@@ -47,21 +48,21 @@ struct Host_ButtonBack_OnClick { void operator()(Button* button) const {
 struct Host_ButtonNext_OnClick { void operator()(Button* button) const {
     HostScreen& hostScreen = *static_cast<HostScreen*>(button->getUserPointer());
     auto& menu             = hostScreen.getMenu();
-    auto& data             = hostScreen.getData();
-
-    if (!data.m_CurrentMapChoice.map_file_path.empty()) {
+    auto& data             = Server::SERVER_HOST_DATA;
+    auto& current_map      = data.getMapChoice();
+    if (!data.getMapChoice().map_file_path.empty()) {
         auto& core = menu.getCore();
-        switch (data.m_CurrentGameModeChoice) {
+        switch (data.getGameplayMode()) {
             case GameplayModeType::FFA: {
-                menu.m_HostScreenFFA2->setTopText(hostScreen.getCurrentChoice().map_name + " - " + GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES[data.m_CurrentGameModeChoice]);
+                menu.m_HostScreenFFA2->setTopText(current_map.map_name + " - " + data.getGameplayModeString());
                 menu.setGameState(GameState::Host_Screen_Setup_FFA_2);
                 break;
             }case GameplayModeType::TeamDeathmatch: {
-                menu.m_HostScreenTeamDeathmatch2->setTopText(hostScreen.getCurrentChoice().map_name + " - " + GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES[data.m_CurrentGameModeChoice]);
+                menu.m_HostScreenTeamDeathmatch2->setTopText(current_map.map_name + " - " + data.getGameplayModeString());
                 menu.setGameState(GameState::Host_Screen_Setup_TeamDeathMatch_2);
                 break;
             }case GameplayModeType::HomelandSecurity: {
-                menu.m_HostScreenHomelandSecurity2->setTopText(hostScreen.getCurrentChoice().map_name + " - " + GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES[data.m_CurrentGameModeChoice]);
+                menu.m_HostScreenHomelandSecurity2->setTopText(current_map.map_name + " - " + data.getGameplayModeString());
                 menu.setGameState(GameState::Host_Screen_Setup_HomelandSecurity_2);
                 break;
             }default: {
@@ -82,7 +83,7 @@ HostScreen::HostScreen(Menu& menu, Font& font) : m_Menu(menu), m_Font(font){
     const auto first_2_boxes_width_top = contentSize.x - top_content_height;
 
     m_BackgroundEdgeGraphicBottom = NEW Button(font, winSize.x / 2.0f, bottom_bar_height_total / 2.0f, winSize.x, bottom_bar_height_total);
-    m_BackgroundEdgeGraphicBottom->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueDark]);
+    m_BackgroundEdgeGraphicBottom->setColor(Factions::Database[FactionEnum::Federation].GUIColorDark);
     m_BackgroundEdgeGraphicBottom->setDepth(0.512f);
     m_BackgroundEdgeGraphicBottom->disable();
     m_BackgroundEdgeGraphicBottom->setTextureCorner(nullptr);
@@ -113,7 +114,7 @@ HostScreen::HostScreen(Menu& menu, Font& font) : m_Menu(menu), m_Font(font){
 
     }
     {
-        m_RightWindow = new MapDescriptionWindow(*this, font,
+        m_RightWindow = new MapDescriptionWindow(font,
             winSize.x - (padding_x / 2.0f) - (window_height / 2.0f),
             winSize.y - (padding_y / 2.0f) - (window_height / 2.0f),
             window_height,
@@ -137,14 +138,14 @@ HostScreen::HostScreen(Menu& menu, Font& font) : m_Menu(menu), m_Font(font){
 
     m_BackButton = NEW Button(font, padding_x + (bottom_bar_button_width / 2.0f), padding_y + (bottom_bar_height / 2.0f), bottom_bar_button_width, bottom_bar_height);
     m_BackButton->setText("Back");
-    m_BackButton->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_BackButton->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_BackButton->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     m_BackButton->setUserPointer(this);
     m_BackButton->setOnClickFunctor(Host_ButtonBack_OnClick());
 
     m_ForwardButton = NEW Button(font, winSize.x - (padding_x + (bottom_bar_button_width / 2.0f)), padding_y + (bottom_bar_height / 2.0f), bottom_bar_button_width, bottom_bar_height);
     m_ForwardButton->setText("Next");
-    m_ForwardButton->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_ForwardButton->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_ForwardButton->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     m_ForwardButton->setUserPointer(this);
     m_ForwardButton->setOnClickFunctor(Host_ButtonNext_OnClick());
@@ -159,7 +160,7 @@ HostScreen::~HostScreen() {
     SAFE_DELETE(m_BackgroundEdgeGraphicBottom);
 }
 void HostScreen::clearCurrentMapChoice() {
-    m_Data.m_CurrentMapChoice = MapEntryData();
+    Server::SERVER_HOST_DATA.setMapChoice(MapEntryData());
     m_LeftWindow->clear_chosen_map();
     m_RightWindow->clear();
 }
@@ -167,20 +168,14 @@ void HostScreen::setCurrentMapChoice(const MapEntryData& choice) {
     m_RightWindow->clear();
     m_RightWindow->setLabelText(choice.map_name);
     Text* text = NEW Text(0, 0, m_Font, choice.map_desc);
-    text->setColor(m_RightWindow->m_MapDescriptionTextScrollFrame->color());
+    text->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     text->setTextScale(0.85f, 0.85f);
     m_RightWindow->addContent(text);
 }
-const MapEntryData& HostScreen::getCurrentChoice() const {
-    return m_Data.m_CurrentMapChoice;
-}
 void HostScreen::setCurrentGameMode(const GameplayModeType::Mode& currentGameMode) {
-    m_Data.m_CurrentGameModeChoice = currentGameMode;
+    Server::SERVER_HOST_DATA.setGameplayMode(currentGameMode);
     m_LeftWindow->setLabelText(GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES[currentGameMode]);
     m_LeftWindow->recalculate_maps();
-}
-const HostScreen::FirstPartData& HostScreen::getData() {
-    return m_Data;
 }
 Menu& HostScreen::getMenu() {
     return m_Menu;

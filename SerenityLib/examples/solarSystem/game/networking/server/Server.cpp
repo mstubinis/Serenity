@@ -38,7 +38,35 @@ using namespace std;
 using namespace Engine;
 using namespace Engine::Networking;
 
+ServerHostData Server::SERVER_HOST_DATA;
 
+ServerHostData::ServerHostData() {
+    m_CurrentGameModeChoice = GameplayModeType::FFA;
+}
+ServerHostData::~ServerHostData() {
+
+}
+const MapEntryData& ServerHostData::getMapChoice() const {
+    return m_CurrentMapChoice;
+}
+void ServerHostData::setMapChoice(const MapEntryData& choice) {
+    m_CurrentMapChoice = choice;
+}
+const GameplayModeType::Mode& ServerHostData::getGameplayMode() const {
+    return m_CurrentGameModeChoice;
+}
+void ServerHostData::setGameplayMode(const GameplayModeType::Mode& mode) {
+    m_CurrentGameModeChoice = mode;
+}
+vector<string>& ServerHostData::getAllowedShips() {
+    return m_GetAllowedShips;
+}
+void ServerHostData::setAllowedShips(const vector<string>& allowed_ships) {
+    m_GetAllowedShips = allowed_ships;
+}
+const string& ServerHostData::getGameplayModeString() const {
+    return GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES[m_CurrentGameModeChoice];
+}
 #pragma region ServerClient
 
 ServerClient::ServerClient(const string& hash, Server& server, Core& core, sf::TcpSocket* sfTCPSocket) : m_Core(core), m_Server(server) {
@@ -595,11 +623,11 @@ void Server::updateClient(ServerClient& client) {
                         server.send_to_all(packetClientJustJoined);
 
                         PacketMapData packetMapData;
-                        Map* map = server.m_MapSpecificData.m_Map;
-                        packetMapData.map_name = map->name();
-                        packetMapData.map_file_name = map->m_Filename;
-                        packetMapData.map_allowed_ships = map->allowedShipsSingleString();
-                        packetMapData.PacketType = PacketType::Server_To_Client_Map_Data;
+                        Map* map                        = server.m_MapSpecificData.m_Map;
+                        packetMapData.map_name          = map->name();
+                        packetMapData.map_file_name     = map->m_Filename;
+                        packetMapData.map_allowed_ships = Helper::Stringify(Server::SERVER_HOST_DATA.getAllowedShips(), ',');
+                        packetMapData.PacketType        = PacketType::Server_To_Client_Map_Data;
                         server.send_to_client(client, packetMapData);
                     }else{
                         pOut.PacketType = PacketType::Server_To_Client_Reject_Connection;

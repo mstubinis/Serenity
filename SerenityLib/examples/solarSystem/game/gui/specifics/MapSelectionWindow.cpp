@@ -1,8 +1,9 @@
 #include "MapSelectionWindow.h"
 #include "MapDescriptionWindow.h"
 #include "HostScreen.h"
-#include "../../Menu.h"
+#include "../../factions/Faction.h"
 #include "../../map/Map.h"
+#include "../../networking/server/Server.h"
 #include "../ScrollFrame.h"
 
 #include <core/engine/fonts/Font.h>
@@ -21,23 +22,22 @@ namespace boost_io = boost::iostreams;
 const float button_size = 40.0f;
 
 struct MapSelectorButtonOnClick final { void operator()(Button* button) const {
-    auto& button_data = *static_cast<MapSelectionWindow::ButtonPtr*>(button->getUserPointer());
-    auto& hostScreen = *button_data.hostScreen;
+    auto& button_data          = *static_cast<MapSelectionWindow::ButtonPtr*>(button->getUserPointer());
+    auto& hostScreen           = *button_data.hostScreen;
     auto& map_selection_window = hostScreen.getMapSelectionWindow();
-    auto& map_desc_window = hostScreen.getMapDescriptionWindow();
+    auto& map_desc_window      = hostScreen.getMapDescriptionWindow();
     map_selection_window.clear_chosen_map();
-    button->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueHighlight]);
+    button->setColor(Factions::Database[FactionEnum::Federation].GUIColorHighlight);
     button->disableMouseover();
 
-    const_cast<HostScreen::FirstPartData&>(hostScreen.getData()).m_CurrentMapChoice = button_data.mapChoice;
-
+    Server::SERVER_HOST_DATA.setMapChoice(button_data.mapChoice);
     hostScreen.setCurrentMapChoice(button_data.mapChoice);
 }};
 
 struct CycleGameModeLeftButtonOnClick final { void operator()(Button* button) const {
-    auto& mapSelectionWindow = *static_cast<MapSelectionWindow*>(button->getUserPointer());
-    auto& map_desc_window = mapSelectionWindow.m_HostScreen.getMapDescriptionWindow();
-    int num = static_cast<int>(mapSelectionWindow.m_HostScreen.getData().m_CurrentGameModeChoice);
+    auto& mapSelectionWindow   = *static_cast<MapSelectionWindow*>(button->getUserPointer());
+    auto& map_desc_window      = mapSelectionWindow.m_HostScreen.getMapDescriptionWindow();
+    int num = static_cast<int>(Server::SERVER_HOST_DATA.getGameplayMode());
     --num;
     if (num < 0) {
         num = GameplayModeType::_TOTAL - 1;
@@ -46,9 +46,9 @@ struct CycleGameModeLeftButtonOnClick final { void operator()(Button* button) co
     mapSelectionWindow.m_HostScreen.setCurrentGameMode(static_cast<GameplayModeType::Mode>(num));
 }};
 struct CycleGameModeRightButtonOnClick final { void operator()(Button* button) const {
-    auto& mapSelectionWindow = *static_cast<MapSelectionWindow*>(button->getUserPointer());
-    auto& map_desc_window = mapSelectionWindow.m_HostScreen.getMapDescriptionWindow();
-    int num = static_cast<int>(mapSelectionWindow.m_HostScreen.getData().m_CurrentGameModeChoice);
+    auto& mapSelectionWindow   = *static_cast<MapSelectionWindow*>(button->getUserPointer());
+    auto& map_desc_window      = mapSelectionWindow.m_HostScreen.getMapDescriptionWindow();
+    int num = static_cast<int>(Server::SERVER_HOST_DATA.getGameplayMode());
     ++num;
     if (num >= GameplayModeType::_TOTAL) {
         num = 0;
@@ -66,7 +66,7 @@ MapSelectionWindow::MapSelectionWindow(HostScreen& hostScreen, Font& font, const
     m_ChangeGameModeLeftButton->setDepth(depth - 0.002f);
     m_ChangeGameModeLeftButton->setUserPointer(this);
     m_ChangeGameModeLeftButton->setOnClickFunctor(CycleGameModeLeftButtonOnClick());
-    m_ChangeGameModeLeftButton->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_ChangeGameModeLeftButton->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_ChangeGameModeLeftButton->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     
     
@@ -76,7 +76,7 @@ MapSelectionWindow::MapSelectionWindow(HostScreen& hostScreen, Font& font, const
     m_ChangeGameModeRightButton->setDepth(depth - 0.002f);
     m_ChangeGameModeRightButton->setUserPointer(this);
     m_ChangeGameModeRightButton->setOnClickFunctor(CycleGameModeRightButtonOnClick());
-    m_ChangeGameModeRightButton->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_ChangeGameModeRightButton->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_ChangeGameModeRightButton->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     m_MapFileScrollFrame = new ScrollFrame(font, x, y - (height / 2.0f) + 30.0f, width - 60.0f, height - 110.0f, depth - 0.001f);
@@ -91,13 +91,14 @@ MapSelectionWindow::~MapSelectionWindow() {
 
 void MapSelectionWindow::recalculate_maps() {
     clearWindow();
+    const auto gameplayMode = static_cast<unsigned int>(Server::SERVER_HOST_DATA.getGameplayMode());
     for (auto& itr : Map::DATABASE) {
         auto& data = itr.second;
         for (auto& game_mode_int : data.map_valid_game_modes) {
-            if (game_mode_int == static_cast<unsigned int>(m_HostScreen.getData().m_CurrentGameModeChoice)) {
+            if (game_mode_int == gameplayMode) {
                 Button& button = *NEW Button(m_Font, 0.0f, 0.0f, m_MapFileScrollFrame->width(), 180.0f);
                 button.setText(data.map_name);
-                button.setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+                button.setColor(Factions::Database[FactionEnum::Federation].GUIColor);
                 button.setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
                 button.setAlignment(Alignment::TopLeft);
                 button.setTextAlignment(TextAlignment::Left);
@@ -119,7 +120,7 @@ void MapSelectionWindow::clear_chosen_map() {
         for (auto& widgetEntry : row.widgets) {
             auto& button = *static_cast<Button*>(widgetEntry.widget);
             button.enableMouseover();
-            button.setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+            button.setColor(Factions::Database[FactionEnum::Federation].GUIColor);
         }
     }
 }

@@ -1,6 +1,6 @@
 #include "RoundedWindow.h"
 #include <core/engine/renderer/Engine_Renderer.h>
-#include "../Menu.h"
+#include "../factions/Faction.h"
 
 #include "Text.h"
 
@@ -20,16 +20,16 @@ RoundedWindow::RoundedWindow(Font& font, const float& x, const float& y, const f
     setPositionFunctor(emptyPosFunctor());
     
     m_Label = new Text(0, (height / 2.0f) - 10.0f, font, labelText);
-    m_Label->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_Label->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_Label->setAlignment(Alignment::Center);
     m_Label->setTextAlignment(TextAlignment::Center);
 
     m_Background = NEW Button(font, 0, 0, (width)+(borderSize*2.0f), (height)+(borderSize * 2.0f));
-    m_Background->setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue]);
+    m_Background->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_Background->setDepth(depth + 0.01f);
     m_Background->disable();
 
-    setColor(Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlueDark]);
+    setColor(Factions::Database[FactionEnum::Federation].GUIColorDark);
     setDepth(depth);
     disable();
     
@@ -60,5 +60,12 @@ void RoundedWindow::render() {
     const auto pos = positionWorld();
     const float width_ = width();
     const float height_ = height();
-    Renderer::renderRectangle(pos + glm::vec2(0, (height_ / 2.0f) - 50.0f), Menu::DEFAULT_COLORS[MenuDefaultColors::FederationBlue], width_ - 60.0f, 1, 0.0f, getDepth() - 0.01f);
+    Renderer::renderRectangle(
+        pos + glm::vec2(0, (height_ / 2.0f) - 50.0f),
+        Factions::Database[FactionEnum::Federation].GUIColor,
+        width_ - 60.0f,
+        1,
+        0.0f,
+        getDepth() - 0.01f
+    );
 }

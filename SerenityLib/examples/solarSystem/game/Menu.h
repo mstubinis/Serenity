@@ -40,21 +40,6 @@ class  HostScreenFFA2;
 class  HostScreenTeamDeathmatch2;
 class  HostScreenHomelandSecurity2;
 
-struct MenuDefaultColors final {enum Color {
-    FederationBlue,
-    FederationBlueDark,
-    FederationBlueSlightlyDarker,
-    FederationBlueHighlight,
-    KlingonRed,
-    KlingonRedDark,
-    KlingonRedSlightlyDarker,
-    KlingonRedHighlight,
-    RomulanGreen,
-    RomulanGreenDark,
-    RomulanGreenSlightlyDarker,
-    RomulanGreenHighlight,
-_TOTAL};};
-
 class Menu final{
     friend struct Host_ButtonBack_OnClick;
     friend struct Host_ButtonNext_OnClick;
@@ -64,9 +49,6 @@ class Menu final{
     friend class  Map;
     friend class  Client;
     friend class  Server;
-
-    public:
-        static std::vector<glm::vec4> DEFAULT_COLORS;
 
     public:
         ServerLobbyChatWindow* m_ServerLobbyChatWindow;

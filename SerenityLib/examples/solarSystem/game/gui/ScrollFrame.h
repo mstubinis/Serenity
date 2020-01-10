@@ -35,6 +35,7 @@ class ScrollFrame: public Widget {
         void reposition_scroll_bar();
         void internal_recalculate_content_sizes();
         void fit_widget_to_window(WidgetEntry& widget);
+        const float get_true_content_height(const bool updateToo = false, const double& dt = 0.0);
     public:
         ScrollFrame(const Font& font, const float x, const float y, const float w, const float h, const float depth);
         virtual ~ScrollFrame();

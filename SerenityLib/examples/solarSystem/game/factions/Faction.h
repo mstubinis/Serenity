@@ -26,6 +26,11 @@ struct FactionInformation final {
     std::string   FileTag;
     std::string   Description;
 
+    glm::vec4 GUIColor;
+    glm::vec4 GUIColorSlightlyDarker;
+    glm::vec4 GUIColorDark;
+    glm::vec4 GUIColorHighlight;
+
     FactionInformation();
     FactionInformation(
         const std::string& nameLong,
@@ -33,6 +38,10 @@ struct FactionInformation final {
         const glm::vec4& colorText,
         const glm::vec4& colorShield,
         const std::string& fileTag,
+        const glm::vec4& gUIColor,
+        const glm::vec4& gUIColorSlightlyDarker,
+        const glm::vec4& gUIColorDark,
+        const glm::vec4& gUIColorHighlight,
         const std::string& description
     );
     ~FactionInformation();
