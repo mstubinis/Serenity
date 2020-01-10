@@ -313,6 +313,24 @@
     <Filter Include="Resource Files\Icon">
       <UniqueIdentifier>{5441b9fc-7235-422d-83bd-3ad808f7130d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\HostScreen2\FFA">
+      <UniqueIdentifier>{33a83fd4-e5bf-4257-abc2-945221d5adbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\HostScreen2\TeamDeathmatch">
+      <UniqueIdentifier>{7637b07b-ba52-417b-b639-f8f6addec90d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\HostScreen2\HomelandSecurity">
+      <UniqueIdentifier>{2b7983a7-7dcc-4dc2-aeed-ed93af9647be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics\HostScreen2\FFA">
+      <UniqueIdentifier>{23c154a0-bafb-4b01-ab28-39c5a765d791}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics\HostScreen2\TeamDeathmatch">
+      <UniqueIdentifier>{c0c3c96c-9714-4324-bc99-4d0f6745bd47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics\HostScreen2\HomelandSecurity">
+      <UniqueIdentifier>{5ac4b0c1-8123-4a73-95f3-4b735cdbc427}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -670,13 +688,22 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game\gui\specifics\HostScreenFFA2.h">
-      <Filter>Header Files\Game\GUI\Specifics\HostScreen2</Filter>
-    </ClInclude>
-    <ClInclude Include="game\gui\specifics\HostScreenTeamDeathmatch2.h">
-      <Filter>Header Files\Game\GUI\Specifics\HostScreen2</Filter>
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen2\FFA</Filter>
     </ClInclude>
     <ClInclude Include="game\gui\specifics\HostScreenHomelandSecurity2.h">
-      <Filter>Header Files\Game\GUI\Specifics\HostScreen2</Filter>
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen2\HomelandSecurity</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\HostScreenTeamDeathmatch2.h">
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen2\TeamDeathmatch</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\FFAShipSelector.h">
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen2\FFA</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\FFAServerInfo.h">
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen2\FFA</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\ShipToken.h">
+      <Filter>Header Files\Game\GUI\Specifics\Templates</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1008,13 +1035,22 @@
       <Filter>Source Files\Game\GUI</Filter>
     </ClCompile>
     <ClCompile Include="game\gui\specifics\HostScreenFFA2.cpp">
-      <Filter>Source Files\Game\GUI\Specifics\HostScreen2</Filter>
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen2\FFA</Filter>
     </ClCompile>
     <ClCompile Include="game\gui\specifics\HostScreenHomelandSecurity2.cpp">
-      <Filter>Source Files\Game\GUI\Specifics\HostScreen2</Filter>
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen2\HomelandSecurity</Filter>
     </ClCompile>
     <ClCompile Include="game\gui\specifics\HostScreenTeamDeathmatch2.cpp">
-      <Filter>Source Files\Game\GUI\Specifics\HostScreen2</Filter>
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen2\TeamDeathmatch</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\FFAShipSelector.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen2\FFA</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\FFAServerInfo.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen2\FFA</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\ShipToken.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\Templates</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

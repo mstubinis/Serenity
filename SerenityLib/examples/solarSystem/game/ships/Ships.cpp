@@ -142,12 +142,12 @@ void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& fa
 }
 void Ships::init() {
     createShipEntry("Defiant",          FactionEnum::Federation,   6,    1.0f, ShipTier::Escort);
-    createShipEntry("Nova",             FactionEnum::Federation,   6,    1.0f, ShipTier::Escort);
+    //createShipEntry("Nova",             FactionEnum::Federation,   6,    1.0f, ShipTier::Escort);
     createShipEntry("Akira",            FactionEnum::Federation,   20,   1.2f, ShipTier::Cruiser);
-    createShipEntry("Intrepid",         FactionEnum::Federation,   20,   1.1f, ShipTier::Cruiser);
-    createShipEntry("Excelsior",        FactionEnum::Federation,   20,   1.2f, ShipTier::Cruiser);
-    createShipEntry("Constitution",     FactionEnum::Federation,   20,   1.1f, ShipTier::Cruiser);
-    createShipEntry("Miranda",          FactionEnum::Federation,   6,    1.0f, ShipTier::Escort);
+    //createShipEntry("Intrepid",         FactionEnum::Federation,   20,   1.1f, ShipTier::Cruiser);
+    //createShipEntry("Excelsior",        FactionEnum::Federation,   20,   1.2f, ShipTier::Cruiser);
+    //createShipEntry("Constitution",     FactionEnum::Federation,   20,   1.1f, ShipTier::Cruiser);
+    //createShipEntry("Miranda",          FactionEnum::Federation,   6,    1.0f, ShipTier::Escort);
     //createShipEntry("Saber",          FactionEnum::Federation,   6,    1.0f, ShipTier::Escort);
     //createShipEntry("Norway",         FactionEnum::Federation,   8,    1.05f, ShipTier::Escort);
     //createShipEntry("Steamrunner",    FactionEnum::Federation,   20,   1.1f, ShipTier::Cruiser);
@@ -180,13 +180,13 @@ void Ships::init() {
     layer->setTexture("../data/Textures/Effects/Buzzards.dds");
     layer->setMask("../data/Ships/defiant/defiant_Mask_1.dds");
     layer->addUVModificationSimpleTranslation(0.02f, 0.02f);
-
+    /*
     Material& novaMat = *((Material*)Database["Nova"].MaterialHandles[0].get());
     auto* layer1 = novaMat.getComponent(0).addLayer();
     layer1->setTexture("../data/Textures/Effects/Buzzards.dds");
     layer1->setMask("../data/Ships/nova/nova_Mask_1.dds");
     layer1->addUVModificationSimpleTranslation(0.02f, 0.02f);
-
+    */
     Material& vorchaMat = *((Material*)Database["Vor'cha"].MaterialHandles[0].get());
     auto* layer2 = vorchaMat.getComponent(0).addLayer();
     layer2->setTexture("../data/Textures/Effects/Buzzards.dds");

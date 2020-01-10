@@ -47,6 +47,8 @@ ServerLobbyShipSelectorWindow::~ServerLobbyShipSelectorWindow() {
     SAFE_DELETE(m_3DViewer);
 }
 void ServerLobbyShipSelectorWindow::addShipButton(const string& shipClass) {
+    if (!Ships::Database.count(shipClass))
+        return;
     auto& textColor = Ships::Database.at(shipClass).FactionInformation.ColorText;
     Button& shipbutton = *(NEW Button(m_Font, 0, 0, 100, 40));
     shipbutton.setText(shipClass);

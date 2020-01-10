@@ -58,10 +58,12 @@ Button::~Button() {
 }
 void Button::enable() {
     m_Enabled = true;
+    m_MouseIsOver = false;
     enableMouseover();
 }
 void Button::disable() {
     m_Enabled = false;
+    m_MouseIsOver = false;
     disableMouseover();
 }
 const bool Button::enabled() {

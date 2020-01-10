@@ -226,6 +226,8 @@
     <ClInclude Include="game\gui\ScrollBar.h" />
     <ClInclude Include="game\gui\ScrollFrame.h" />
     <ClInclude Include="game\gui\specifics\FFALobby.h" />
+    <ClInclude Include="game\gui\specifics\FFAServerInfo.h" />
+    <ClInclude Include="game\gui\specifics\FFAShipSelector.h" />
     <ClInclude Include="game\gui\specifics\HostScreen.h" />
     <ClInclude Include="game\gui\specifics\HostScreenFFA2.h" />
     <ClInclude Include="game\gui\specifics\HostScreenHomelandSecurity2.h" />
@@ -237,6 +239,7 @@
     <ClInclude Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.h" />
     <ClInclude Include="game\gui\specifics\ServerLobbyShipSelectorWindow.h" />
     <ClInclude Include="game\gui\specifics\Ship3DViewer.h" />
+    <ClInclude Include="game\gui\specifics\ShipToken.h" />
     <ClInclude Include="game\gui\Text.h" />
     <ClInclude Include="game\gui\TextBox.h" />
     <ClInclude Include="game\gui\Widget.h" />
@@ -347,6 +350,8 @@
     <ClCompile Include="game\gui\ScrollBar.cpp" />
     <ClCompile Include="game\gui\ScrollFrame.cpp" />
     <ClCompile Include="game\gui\specifics\FFALobby.cpp" />
+    <ClCompile Include="game\gui\specifics\FFAServerInfo.cpp" />
+    <ClCompile Include="game\gui\specifics\FFAShipSelector.cpp" />
     <ClCompile Include="game\gui\specifics\HostScreen.cpp" />
     <ClCompile Include="game\gui\specifics\HostScreenFFA2.cpp" />
     <ClCompile Include="game\gui\specifics\HostScreenHomelandSecurity2.cpp" />
@@ -358,6 +363,7 @@
     <ClCompile Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.cpp" />
     <ClCompile Include="game\gui\specifics\ServerLobbyShipSelectorWindow.cpp" />
     <ClCompile Include="game\gui\specifics\Ship3DViewer.cpp" />
+    <ClCompile Include="game\gui\specifics\ShipToken.cpp" />
     <ClCompile Include="game\gui\Text.cpp" />
     <ClCompile Include="game\gui\TextBox.cpp" />
     <ClCompile Include="game\gui\Widget.cpp" />

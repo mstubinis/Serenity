@@ -12,15 +12,24 @@ class  MapDescriptionWindow;
 struct Host2FFA_ButtonBack_OnClick;
 struct Host2FFA_ButtonNext_OnClick;
 class  HostScreen;
+class  FFAServerInfo;
+class  FFAShipSelector;
 
 class HostScreenFFA2 final {
     friend class  HostScreen;
     friend struct Host2FFA_ButtonBack_OnClick;
     friend struct Host2FFA_ButtonNext_OnClick;
+    friend class  FFAServerInfo;
+    friend class  FFAShipSelector;
     private:
         HostScreen& m_HostScreen1;
         Menu&       m_Menu;
 
+        FFAShipSelector* m_ShipSelectorWindow;
+        FFAServerInfo*   m_ServerInfoWindow;
+
+
+        //TODO: remove these
         TextBox*    m_UserName_TextBox;
         TextBox*    m_ServerPort_TextBox;
 

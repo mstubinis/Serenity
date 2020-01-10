@@ -1,4 +1,6 @@
 #include "HostScreenFFA2.h"
+#include "FFAShipSelector.h"
+#include "FFAServerInfo.h"
 #include "HostScreen.h"
 #include "MapDescriptionWindow.h"
 #include "ServerLobbyChatWindow.h"
@@ -29,6 +31,7 @@ const auto bottom_bar_height       = 50.0f;
 const auto bottom_bar_button_width = 150.0f;
 
 const auto bottom_bar_height_total = 80;
+const auto right_window_width = 470;
 
 struct Host2FFA_ButtonBack_OnClick { void operator()(Button* button) const {
     auto& hostScreenFFA = *static_cast<HostScreenFFA2*>(button->getUserPointer());
@@ -146,6 +149,34 @@ HostScreenFFA2::HostScreenFFA2(HostScreen& hostScreen1, Menu& menu, Font& font) 
     m_ServerPort_TextBox->setColor(0.5f, 0.5f, 0.5f, 1.0f);
     m_ServerPort_TextBox->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
     m_ServerPort_TextBox->setText("55000");
+
+
+    const auto window_height = (winSize.y - bottom_bar_height_total - padding_y);
+    const auto left_window_width = winSize.x - right_window_width - padding_x;
+    {
+        m_ShipSelectorWindow = new FFAShipSelector(*this, font,
+            (padding_x / 2.0f) + (left_window_width / 2.0f),
+            winSize.y - (padding_y / 2.0f) - (window_height / 2.0f),
+            left_window_width,
+            window_height,
+        0.1f, 1, "");
+        struct LeftSizeFunctor { glm::vec2 operator()(RoundedWindow* window) const {
+            const auto winSize = Resources::getWindowSize();
+            const auto window_height_2 = (winSize.y - bottom_bar_height_total - padding_y) - bottom_bar_height_total;
+            const auto left_window_width_2 = winSize.x - right_window_width - padding_x;
+            return glm::vec2(left_window_width_2, window_height_2);
+        }};
+        struct LeftPositionFunctor { glm::vec2 operator()(RoundedWindow* window) const {
+            const auto winSize = Resources::getWindowSize();
+            const auto window_height_2 = (winSize.y - bottom_bar_height_total - padding_y);
+            const auto left_window_width_2 = winSize.x - right_window_width - padding_x;
+            const auto x = (padding_x / 2.0f) + (left_window_width_2 / 2.0f);
+            const auto y = winSize.y - (padding_y / 2.0f) - (window_height_2 / 2.0f) - (bottom_bar_height_total / 2.0f);
+            return glm::vec2(x, y);
+        }};
+        m_ShipSelectorWindow->setPositionFunctor(LeftPositionFunctor());
+        m_ShipSelectorWindow->setSizeFunctor(LeftSizeFunctor());
+    }
 }
 HostScreenFFA2::~HostScreenFFA2() {
     SAFE_DELETE(m_UserName_TextBox);
@@ -155,6 +186,9 @@ HostScreenFFA2::~HostScreenFFA2() {
     SAFE_DELETE(m_BackgroundEdgeGraphicBottom);
     SAFE_DELETE(m_BackgroundEdgeGraphicTop);
     SAFE_DELETE(m_TopLabel);
+
+    SAFE_DELETE(m_ShipSelectorWindow);
+    //SAFE_DELETE(m_ServerInfoWindow);
 }
 void HostScreenFFA2::setTopText(const string& text) {
     m_TopLabel->setText(text);
@@ -175,6 +209,9 @@ void HostScreenFFA2::onResize(const unsigned int newWidth, const unsigned int ne
     m_BackgroundEdgeGraphicTop->setPosition(winSize.x / 2.0f, winSize.y);
 
     m_TopLabel->setPosition(winSize.x / 2.0f, winSize.y - (bottom_bar_height_total / 2.0f) + 15.0f);
+
+    m_ShipSelectorWindow->onResize(newWidth, newHeight);
+    //m_ServerInfoWindow->onResize(newWidth, newHeight);
 }
 
 void HostScreenFFA2::update(const double& dt) {
@@ -188,6 +225,9 @@ void HostScreenFFA2::update(const double& dt) {
     m_BackgroundEdgeGraphicTop->update(dt);
 
     m_TopLabel->update(dt);
+
+    m_ShipSelectorWindow->update(dt);
+    //m_ServerInfoWindow->update(dt);
 }
 void HostScreenFFA2::render() {
     m_ServerPort_TextBox->render();
@@ -200,4 +240,7 @@ void HostScreenFFA2::render() {
     m_BackgroundEdgeGraphicTop->render();
 
     m_TopLabel->render();
+
+    m_ShipSelectorWindow->render();
+    //m_ServerInfoWindow->render();
 }
