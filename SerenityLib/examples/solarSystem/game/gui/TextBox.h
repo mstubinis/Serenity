@@ -31,6 +31,20 @@ class TextBox : public Button, public EventObserver {
             m_OnEnter = boost::bind<void>(functor, this);
         }
 
+        void setWidth(const float);
+        void setHeight(const float);
+        void setSize(const float width, const float height);
+        const float width() const;
+        const float height() const;
+
+
+        const glm::vec2 positionLocal() const;
+        const glm::vec2 positionWorld() const;
+        const glm::vec2 position(const bool local = true) const;
+
+        void setPosition(const float x, const float y);
+        void setPosition(const glm::vec2& position);
+
         const std::string& getLabel() const;
 
         void setText(const std::string& text);

@@ -213,6 +213,8 @@
     <ClInclude Include="game\ai\FireAtWill.h" />
     <ClInclude Include="game\ai\logic\GunneryBaseClass.h" />
     <ClInclude Include="game\ai\ThreatTable.h" />
+    <ClInclude Include="game\config\ConfigDataStruct.h" />
+    <ClInclude Include="game\config\ConfigFile.h" />
     <ClInclude Include="game\config\Keybinds.h" />
     <ClInclude Include="game\Core.h" />
     <ClInclude Include="game\factions\Faction.h" />
@@ -338,6 +340,7 @@
     <ClCompile Include="game\ai\FireAtWill.cpp" />
     <ClCompile Include="game\ai\logic\GunneryBaseClass.cpp" />
     <ClCompile Include="game\ai\ThreatTable.cpp" />
+    <ClCompile Include="game\config\ConfigFile.cpp" />
     <ClCompile Include="game\config\Keybinds.cpp" />
     <ClCompile Include="game\Core.cpp" />
     <ClCompile Include="game\factions\Faction.cpp" />

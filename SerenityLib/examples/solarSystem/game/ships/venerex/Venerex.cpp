@@ -34,12 +34,12 @@ Venerex::Venerex(AIType::Type& ai_type, Team& team, Client& client, Map& map, co
 
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
-        ShipSystem* system = nullptr;
-        if (i == 0)  system = NEW ShipSystemReactor(_this, 1000);
-        else if (i == 1)  system = NEW ShipSystemPitchThrusters(_this);
-        else if (i == 2)  system = NEW ShipSystemYawThrusters(_this);
-        else if (i == 3)  system = NEW ShipSystemRollThrusters(_this);
-        else if (i == 4)  system = nullptr; //no cloaking device
+        ShipSystem*        system = nullptr;
+        if (i == 0)        system = NEW ShipSystemReactor(_this, 1000);
+        else if (i == 1)   system = NEW ShipSystemPitchThrusters(_this);
+        else if (i == 2)   system = NEW ShipSystemYawThrusters(_this);
+        else if (i == 3)   system = NEW ShipSystemRollThrusters(_this);
+        else if (i == 4)   system = NEW ShipSystemCloakingDevice(_this);
         else if (i == 5)   system = NEW ShipSystemShields(_this, map, 22800.0f, 22800.0f, 22800.0f, 22800.0f, 31500.0f, 31500.0f, glm::vec3(0.0f, -0.107706f, 0.279445f), glm::vec3(1.0f, 1.0f, 1.0f));
         else if (i == 6)   system = NEW ShipSystemMainThrusters(_this, 1.15f);
         else if (i == 7)   system = NEW ShipSystemWarpDrive(_this);

@@ -10,6 +10,8 @@
 #include "../Button.h"
 #include "../TextBox.h"
 #include "../Text.h"
+#include "../../Helper.h"
+#include "../../config/ConfigFile.h"
 
 #include "../../networking/client/Client.h"
 #include "../../networking/server/Server.h"
@@ -20,19 +22,20 @@
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/textures/Texture.h>
+#include <boost/algorithm/string/replace.hpp>
 
 #include <regex>
 
 using namespace Engine;
 using namespace std;
 
-const auto padding_x               = 100.0f;
-const auto padding_y               = 100.0f;
-const auto bottom_bar_height       = 50.0f;
-const auto bottom_bar_button_width = 150.0f;
+const auto padding_x                 = 100.0f;
+const auto padding_y                 = 100.0f;
+const auto bottom_bar_height         = 50.0f;
+const auto bottom_bar_button_width   = 150.0f;
 
-const auto bottom_bar_height_total = 80;
-const auto right_window_width = 470;
+const auto bottom_bar_height_total   = 80;
+const auto right_window_width        = 486;
 
 struct Host2FFA_ButtonBack_OnClick { void operator()(Button* button) const {
     auto& hostScreenFFA = *static_cast<HostScreenFFA2*>(button->getUserPointer());
@@ -47,57 +50,48 @@ struct Host2FFA_ButtonBack_OnClick { void operator()(Button* button) const {
 struct Host2FFA_ButtonNext_OnClick { void operator()(Button* button) const {
     auto& hostScreenFFA      = *static_cast<HostScreenFFA2*>(button->getUserPointer());
     auto& menu               = hostScreenFFA.getMenu();
-    const string& username   = hostScreenFFA.m_UserName_TextBox->text();
-    const string& portstring = hostScreenFFA.m_ServerPort_TextBox->text();
+    const auto& username     = hostScreenFFA.m_ServerInfoWindow->getYourNameTextBox().text();
+    const auto& portstring   = hostScreenFFA.m_ServerInfoWindow->getServerPortTextBox().text();
+    const auto& max_players  = hostScreenFFA.m_ServerInfoWindow->getMaxPlayersTextBox().text();
     const auto& map          = Server::SERVER_HOST_DATA.getMapChoice();
-    if (hostScreenFFA.m_ShipSelectorWindow->getAllowedShips().size() > 0) {
-        if (!portstring.empty() && !username.empty() && !map.map_file_path.empty()) {
 
-            auto& core = menu.getCore();
-            menu.setGameState(GameState::Host_Screen_Lobby_3);
-            menu.setErrorText("");
-            //TODO: prevent special characters in usename
-            if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) { //port must have numbers only
-                if (username.find_first_not_of(' ') != std::string::npos) {
-                    if (std::regex_match(username, std::regex("[a-zA-ZäöüßÄÖÜ]+"))) { //letters only please
-
+    if (hostScreenFFA.validateShipSelector()) {
+        if (hostScreenFFA.validateServerPortTextBox()) {
+            if (hostScreenFFA.validateUsernameTextBox()) {
+                if (hostScreenFFA.validateMatchDurationTextBox()) {
+                    if (hostScreenFFA.validateMaxNumPlayersTextBox()) {
                         auto& core = menu.getCore();
 
                         const int port = stoi(portstring);
                         core.startServer(port);
                         core.startClient(nullptr, port, username, "127.0.0.1"); //the client will request validation at this stage
 
-
-                        //TODO: replace this hard coded test case with real input values
                         vector<TeamNumber::Enum> nil;
-                        vector<TeamNumber::Enum> team1enemies{ TeamNumber::Team_2 };
-                        vector<TeamNumber::Enum> team2enemies{ TeamNumber::Team_1 };
-                        Team team1 = Team(TeamNumber::Team_1, nil, team1enemies);
-                        Team team2 = Team(TeamNumber::Team_2, nil, team2enemies);
-                        core.getServer()->getGameplayMode().setGameplayMode(GameplayModeType::TeamDeathmatch);
-                        core.getServer()->getGameplayMode().setMaxAmountOfPlayers(50);
-                        core.getServer()->getGameplayMode().addTeam(team1);
-                        core.getServer()->getGameplayMode().addTeam(team2);
-                        core.getClient()->getGameplayMode() = core.getServer()->getGameplayMode();
+                        Team team1 = Team(TeamNumber::Team_FFA, nil, nil);
 
+                        Server::SERVER_HOST_DATA.setGameplayModeType(GameplayModeType::FFA);
+                        Server::SERVER_HOST_DATA.setMaxAmountOfPlayers(stoi(max_players));
+                        Server::SERVER_HOST_DATA.addTeam(team1);
+                        Server::SERVER_HOST_DATA.setMatchDurationInSeconds(hostScreenFFA.getMatchDurationFromTextBoxInSeconds());
+                        Server::SERVER_HOST_DATA.setServerPort(port);
+
+                        core.getClient()->getGameplayMode() = Server::SERVER_HOST_DATA.getGameplayMode();
                         core.getServer()->startupMap(map);
 
                         menu.m_ServerLobbyChatWindow->setUserPointer(core.getClient());
 
-                    }else{
-                        menu.setErrorText("The username must only contain letters");
+                        ConfigFile config;
+                        config.updateHostServerName(username);
+                        config.updateHostServerPort(port);
+
+                        menu.setGameState(GameState::Host_Screen_Lobby_3);
+                        menu.setErrorText("");
+
+                        //TODO: start server and client, but do NOT load the map fully, leave that for the end.
                     }
-                }else{
-                    menu.setErrorText("The username must have some letters in it");
                 }
-            }else{
-                menu.setErrorText("Server port must contain numbers only");
             }
-        }else{
-            menu.setErrorText("Do not leave any fields blank");
         }
-    }else{
-        menu.setErrorText("Please choose at least one ship to allow");
     }
 }};
 
@@ -142,16 +136,6 @@ HostScreenFFA2::HostScreenFFA2(HostScreen& hostScreen1, Menu& menu, Font& font) 
     m_ForwardButton->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     m_ForwardButton->setUserPointer(this);
     m_ForwardButton->setOnClickFunctor(Host2FFA_ButtonNext_OnClick());
-
-    m_UserName_TextBox = NEW TextBox("Your Name", font, 20, winSize.x / 2.0f, 275.0f);
-    m_UserName_TextBox->setColor(0.5f, 0.5f, 0.5f, 1.0f);
-    m_UserName_TextBox->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
-
-    m_ServerPort_TextBox = NEW TextBox("Server Port", font, 7, winSize.x / 2.0f, 195.0f);
-    m_ServerPort_TextBox->setColor(0.5f, 0.5f, 0.5f, 1.0f);
-    m_ServerPort_TextBox->setTextColor(1.0f, 1.0f, 0.0f, 1.0f);
-    m_ServerPort_TextBox->setText("55000");
-
 
     const auto window_height = (winSize.y - bottom_bar_height_total - padding_y);
     const auto left_window_width = winSize.x - right_window_width - padding_x - (padding_x / 2.0f);
@@ -204,8 +188,6 @@ HostScreenFFA2::HostScreenFFA2(HostScreen& hostScreen1, Menu& menu, Font& font) 
     }
 }
 HostScreenFFA2::~HostScreenFFA2() {
-    SAFE_DELETE(m_UserName_TextBox);
-    SAFE_DELETE(m_ServerPort_TextBox);
     SAFE_DELETE(m_BackButton);
     SAFE_DELETE(m_ForwardButton);
     SAFE_DELETE(m_BackgroundEdgeGraphicBottom);
@@ -220,6 +202,126 @@ void HostScreenFFA2::setTopText(const string& text) {
 }
 Menu& HostScreenFFA2::getMenu() {
     return m_Menu;
+}
+const bool HostScreenFFA2::validateShipSelector() {
+    if (m_ShipSelectorWindow->getAllowedShips().size() <= 0) {
+        m_Menu.setErrorText("Please add at least one allowed ship");
+        return false;
+    }
+    return true;
+}
+const bool HostScreenFFA2::validateMaxNumPlayersTextBox() {
+    auto max_players_text = m_ServerInfoWindow->getMaxPlayersTextBox().text();
+
+    if (max_players_text.empty()) {
+        m_Menu.setErrorText("Max players cannot be empty");
+        return false;
+    }
+
+    if (max_players_text.find_first_not_of("0123456789") != std::string::npos) { //numbers only please
+        m_Menu.setErrorText("Max players needs to be a number");
+        return false;
+    }
+
+    try {
+        int num = stoi(max_players_text);
+    }catch (const std::invalid_argument& e) { //If no conversion could be performed, an invalid_argument exception is thrown.
+        m_Menu.setErrorText("Max players needs to be a number");
+        return false;
+    }catch (const std::out_of_range& e) { //If the value read is out of the range of representable values by an int, an out_of_range exception is thrown.
+        m_Menu.setErrorText("Max players is out of range of possible values");
+        return false;
+    }catch (...) {
+        m_Menu.setErrorText("Max players is invalid");
+        return false;
+    }
+    return true;
+}
+const bool HostScreenFFA2::validateServerPortTextBox() {
+    auto port_text = m_ServerInfoWindow->getServerPortTextBox().text();
+
+    if (port_text.empty()) {
+        m_Menu.setErrorText("The server port cannot be empty");
+        return false;
+    }
+
+    if (port_text.find_first_not_of("0123456789") != std::string::npos) { //numbers only please
+        m_Menu.setErrorText("Server port needs to be a number");
+        return false;
+    }
+
+    try {
+        int num = stoi(port_text);
+    }catch (const std::invalid_argument& e) { //If no conversion could be performed, an invalid_argument exception is thrown.
+        m_Menu.setErrorText("Server port needs to be a number");
+        return false;
+    }catch (const std::out_of_range& e) { //If the value read is out of the range of representable values by an int, an out_of_range exception is thrown.
+        m_Menu.setErrorText("Server port is out of range of possible values");
+        return false;
+    }catch (...) {
+        m_Menu.setErrorText("Server port is invalid");
+        return false;
+    }
+    return true;
+}
+const bool HostScreenFFA2::validateUsernameTextBox() {
+    auto username = m_ServerInfoWindow->getYourNameTextBox().text();
+    const bool space_check = username.find_first_of(' ') != std::string::npos;
+    const bool letters_check = !(std::regex_match(username, std::regex("[a-zA-ZäöüßÄÖÜ]+")));
+    if (username.empty()) {
+        m_Menu.setErrorText("The username cannot be empty");
+        return false;
+    }
+    if (space_check) { //no spaces please
+        m_Menu.setErrorText("The username cannot contain spaces");
+        return false;
+    }
+    if (letters_check) { //letters only please
+        m_Menu.setErrorText("The username must only contain letters");
+        return false;
+    }
+    return true;
+}
+const bool HostScreenFFA2::validateMatchDurationTextBox() {
+    auto text_box_text = m_ServerInfoWindow->getMatchDurationTextBox().text();
+    auto list = Helper::SeparateStringByCharacter(text_box_text, ':');
+    if (list.size() == 2) {
+        for (auto& number_as_str : list) {
+
+            if (number_as_str.find_first_not_of("0123456789") != std::string::npos) { //numbers only please
+                m_Menu.setErrorText("Match duration must only contain numbers");
+                return false;
+            }
+
+            try {
+                int num = stoi(number_as_str);
+            }catch (const std::invalid_argument& e) { //If no conversion could be performed, an invalid_argument exception is thrown.
+                m_Menu.setErrorText("Match duration needs to be in minutes : seconds format");
+                return false;
+            }catch (const std::out_of_range& e) { //If the value read is out of the range of representable values by an int, an out_of_range exception is thrown.
+                m_Menu.setErrorText("Match duration is out of range of possible values");
+                return false;
+            }catch (...) {
+                m_Menu.setErrorText("Match duration is invalid");
+                return false;
+            }
+        }
+        return true;
+    }
+    m_Menu.setErrorText("Match duration is invalid");
+    return false;
+}
+const unsigned int HostScreenFFA2::getMatchDurationFromTextBoxInSeconds() {
+    auto text_box_text = m_ServerInfoWindow->getMatchDurationTextBox().text();
+    auto list = Helper::SeparateStringByCharacter(text_box_text, ':');
+    return (stoi(list[0]) * 60) + stoi(list[1]);
+}
+const float HostScreenFFA2::getMatchDurationFromTextBoxInMinutes() {
+    auto text_box_text = m_ServerInfoWindow->getMatchDurationTextBox().text();
+    auto list = Helper::SeparateStringByCharacter(text_box_text, ':');
+    float mins = static_cast<float>(stoi(list[0]));
+    float secs = static_cast<float>(stoi(list[1]));
+    return mins + (secs / 60.0f);
 }
 void HostScreenFFA2::onResize(const unsigned int newWidth, const unsigned int newHeight) {
     const auto winSize = glm::uvec2(newWidth, newHeight);
@@ -240,9 +342,6 @@ void HostScreenFFA2::onResize(const unsigned int newWidth, const unsigned int ne
 }
 
 void HostScreenFFA2::update(const double& dt) {
-    m_ServerPort_TextBox->update(dt);
-    m_UserName_TextBox->update(dt);
-
     m_BackButton->update(dt);
     m_ForwardButton->update(dt);
 
@@ -255,9 +354,6 @@ void HostScreenFFA2::update(const double& dt) {
     m_ServerInfoWindow->update(dt);
 }
 void HostScreenFFA2::render() {
-    m_ServerPort_TextBox->render();
-    m_UserName_TextBox->render();
-
     m_BackButton->render();
     m_ForwardButton->render();
 

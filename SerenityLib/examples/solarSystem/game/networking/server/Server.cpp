@@ -41,7 +41,9 @@ using namespace Engine::Networking;
 ServerHostData Server::SERVER_HOST_DATA;
 
 ServerHostData::ServerHostData() {
-    m_CurrentGameModeChoice = GameplayModeType::FFA;
+    setGameplayModeType(GameplayModeType::FFA);
+    setServerPort(55000);
+    setMatchDurationInMinutes(15); //15 mins
 }
 ServerHostData::~ServerHostData() {
 
@@ -49,23 +51,53 @@ ServerHostData::~ServerHostData() {
 const MapEntryData& ServerHostData::getMapChoice() const {
     return m_CurrentMapChoice;
 }
+void ServerHostData::setMatchDurationInMinutes(const unsigned int& minutes) {
+    m_ExpectedMatchDurationInSeconds = 60 * minutes;
+}
+void ServerHostData::setServerPort(const unsigned short& port) {
+    m_ServerPort = port;
+}
+const unsigned short& ServerHostData::getServerPort() const {
+    return m_ServerPort;
+}
+void ServerHostData::setMatchDurationInSeconds(const unsigned int& seconds) {
+    m_ExpectedMatchDurationInSeconds = seconds;
+}
 void ServerHostData::setMapChoice(const MapEntryData& choice) {
     m_CurrentMapChoice = choice;
 }
-const GameplayModeType::Mode& ServerHostData::getGameplayMode() const {
-    return m_CurrentGameModeChoice;
+const bool ServerHostData::addTeam(Team& team) {
+    return m_GameplayMode.addTeam(team);
 }
-void ServerHostData::setGameplayMode(const GameplayModeType::Mode& mode) {
-    m_CurrentGameModeChoice = mode;
+const GameplayModeType::Mode& ServerHostData::getGameplayModeType() const {
+    return m_GameplayMode.m_GameplayModeType;
 }
-vector<string>& ServerHostData::getAllowedShips() {
-    return m_GetAllowedShips;
+void ServerHostData::setMaxAmountOfPlayers(const unsigned int& players) {
+    m_GameplayMode.setMaxAmountOfPlayers(players);
+}
+void ServerHostData::setGameplayModeType(const GameplayModeType::Mode& mode) {
+    m_GameplayMode.setGameplayMode(mode);
+}
+const GameplayMode& ServerHostData::getGameplayMode() const {
+    return m_GameplayMode;
+}
+unordered_set<string>& ServerHostData::getAllowedShips() {
+    return m_GameplayMode.m_AllowedShipClasses;
 }
 void ServerHostData::setAllowedShips(const vector<string>& allowed_ships) {
-    m_GetAllowedShips = allowed_ships;
+    unordered_set<string> ret;
+    for (auto& ship_class : allowed_ships) {
+        if (!ret.count(ship_class)) {
+            ret.insert(ship_class);
+        }
+    }
+    m_GameplayMode.m_AllowedShipClasses = ret;
+}
+void ServerHostData::setAllowedShips(const unordered_set<string>& allowed_ships) {
+    m_GameplayMode.m_AllowedShipClasses = allowed_ships;
 }
 const string& ServerHostData::getGameplayModeString() const {
-    return GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES[m_CurrentGameModeChoice];
+    return GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES[m_GameplayMode.m_GameplayModeType];
 }
 #pragma region ServerClient
 
@@ -234,7 +266,7 @@ const bool Server::startup() {
 const bool Server::startupMap(const MapEntryData& map_data) {
     m_MapSpecificData.m_Map  = static_cast<Map*>(Resources::getScene(map_data.map_name));
     if (!m_MapSpecificData.m_Map) {
-        auto* map = NEW Map(m_GameplayMode, *m_Core.m_Client, map_data.map_name, map_data.map_file_path);
+        auto* map = NEW Map(const_cast<GameplayMode&>(Server::SERVER_HOST_DATA.getGameplayMode()), *m_Core.m_Client, map_data.map_name, map_data.map_file_path);
         m_MapSpecificData.m_Map = static_cast<Map*>(Resources::getScene(map_data.map_name));
         m_MapSpecificData.m_Map->m_IsServer = true;
         return true;
@@ -612,7 +644,7 @@ void Server::updateClient(ServerClient& client) {
 
                         //now send the client info about the gameplay mode, dont do this for the player client
                         if (client.m_Username != server.m_Core.m_Client->m_Username) {
-                            auto info = server.m_GameplayMode.serialize();
+                            auto info = Server::SERVER_HOST_DATA.getGameplayMode().serialize();
                             info.PacketType = PacketType::Server_To_Client_Request_GameplayMode;
                             server.send_to_client(client, info);
                         }
@@ -661,12 +693,9 @@ void Server::updateClient(ServerClient& client) {
         //delete(basePacket_Ptr);
     }
 }
-GameplayMode& Server::getGameplayMode() {
-    return m_GameplayMode;
-}
 string Server::assignRandomTeam(PacketMessage& packet_out, ServerClient& client) {
     //assign the player a team number
-    auto& teams = m_GameplayMode.getTeams();
+    auto& teams = const_cast<GameplayMode&>(Server::SERVER_HOST_DATA.getGameplayMode()).getTeams();
     Team* chosen = nullptr;
     size_t minVal = -1;
     for (auto& team : teams) {

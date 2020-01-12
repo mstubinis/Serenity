@@ -7,6 +7,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <random>
+#include <unordered_set>
 
 class Helper final {
     public:
@@ -32,6 +33,19 @@ class Helper final {
             std::string res = list[0];
             for (size_t i = 1; i < list.size(); ++i) {
                 res += character_seperator + list[i];
+            }
+            return res;
+        }
+        static std::string Stringify(std::unordered_set<std::string>& list, const char character_seperator) {
+            if (list.size() == 0) return "";
+            if (list.size() == 1) return list.begin()._Ptr->_Myval;
+            std::string res = list.begin()._Ptr->_Myval;
+            unsigned int count = 0;
+            for (auto& itr : list) {
+                if (count > 0) {
+                    res += character_seperator + itr;
+                }
+                ++count;
             }
             return res;
         }

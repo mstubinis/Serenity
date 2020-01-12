@@ -60,10 +60,6 @@ class Button : public Widget, public GUIRenderElement {
         virtual void setColor(const float& r, const float& g, const float& b, const float& a);
         virtual void setColor(const glm::vec4& color);
 
-        void setWidth(const float);
-        void setHeight(const float);
-        void setSize(const float width, const float height);
-
         virtual void setText(const char* text);
         virtual void setText(const std::string& text);
 

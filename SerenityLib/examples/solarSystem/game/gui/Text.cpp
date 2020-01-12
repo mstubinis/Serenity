@@ -47,10 +47,10 @@ const float Text::width() const {
     return (m_Width > x) ? m_Width : x;
 }
 const float Text::height() const {
-    return (m_Font->getTextHeight(m_Text) * (m_TextScale.y * 1.5f)); //yes, this is evil
+    return m_Font->getTextHeight(m_Text) * m_TextScale.y;
 }
 const float Text::singleLineHeight() const {
-    return (m_Font->getTextHeight("X") * (m_TextScale.y * 1.5f)); //yes, this is evil
+    return m_Font->getMaxHeight() * m_TextScale.y;
 }
 const string& Text::text() const {
     return m_Text;

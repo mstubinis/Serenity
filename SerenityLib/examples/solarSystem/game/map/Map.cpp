@@ -619,8 +619,12 @@ Ship* Map::createShipDull(const string& shipClass, const glm::vec3& position, Sc
         ship = NEW Intrepid(*scene, position, glm::vec3(1.0f));
     }else if (shipClass == "Vor'cha") {
         ship = NEW Vorcha(*scene, position, glm::vec3(1.0f));
+    }else if (shipClass == "Negh'var") {
+        ship = NEW Neghvar(*scene, position, glm::vec3(1.0f));
     }else if (shipClass == "Sovereign") {
         ship = NEW Sovereign(*scene, position, glm::vec3(1.0f));
+    }else if (shipClass == "Venerex") {
+        ship = NEW Venerex(*scene, position, glm::vec3(1.0f));
     }else if (shipClass == "D'deridex") {
         ship = NEW Dderidex(*scene, position, glm::vec3(1.0f));
     }else if (shipClass == "Federation Defense Platform") {
@@ -656,8 +660,12 @@ Ship* Map::createShip(AIType::Type ai_type, Team& team, Client& client, const st
         ship = NEW Intrepid(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     }else if (shipClass == "Vor'cha") {
         ship = NEW Vorcha(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+    }else if (shipClass == "Negh'var") {
+        ship = NEW Neghvar(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     }else if (shipClass == "Sovereign") {
         ship = NEW Sovereign(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
+    }else if (shipClass == "Venerex") {
+        ship = NEW Venerex(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     }else if (shipClass == "D'deridex") {
         ship = NEW Dderidex(ai_type, team, client, *this, shipName, position, glm::vec3(1.0f), CollisionType::ConvexHull);
     }else if (shipClass == "Federation Defense Platform") {

@@ -25,10 +25,11 @@ using namespace std;
 using namespace Engine;
 
 const auto y_padding = 110.0f;
+const auto scroll_frame_padding = 30.0f;
 
 MapDescriptionWindow::MapDescriptionWindow(Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const string& labelText) : RoundedWindow(font,x,y,width,height,depth, borderSize, labelText), m_Font(font){
     m_UserPointer = nullptr;
-    m_MapDescriptionTextScrollFrame = NEW ScrollFrame(font, x, y, width, height, depth - 0.001f);
+    m_MapDescriptionTextScrollFrame = NEW ScrollFrame(font, x, y - (height / 2.0f) + scroll_frame_padding, width - (scroll_frame_padding * 2.0f), height, depth - 0.001f);
 
     m_MapDescriptionTextScrollFrame->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_MapDescriptionTextScrollFrame->setAlignment(Alignment::BottomCenter);
@@ -48,9 +49,15 @@ void MapDescriptionWindow::onResize(const unsigned int newWidth, const unsigned 
 
     const auto texture_size = glm::min(frame_size.x * 0.5f, frame_size.y * 0.5f);
 
-    m_MapDescriptionTextScrollFrame->setPosition(pos.x, pos.y - (frame_size.y / 2.0f) + 30.0f);
+    m_MapDescriptionTextScrollFrame->setPosition(
+        pos.x,
+        pos.y - (frame_size.y / 2.0f) + scroll_frame_padding
+    );
 
-    m_MapDescriptionTextScrollFrame->setSize(frame_size.x - 60.0f, texture_size - y_padding);
+    m_MapDescriptionTextScrollFrame->setSize(
+        frame_size.x - (scroll_frame_padding * 2.0f),
+        texture_size - y_padding
+    );
 }
 void MapDescriptionWindow::setSize(const float& w, const float& h) {
     m_MapDescriptionTextScrollFrame->setSize(w, h);

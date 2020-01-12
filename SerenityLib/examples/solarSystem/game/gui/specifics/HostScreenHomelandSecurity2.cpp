@@ -72,11 +72,11 @@ struct Host2HS_ButtonNext_OnClick { void operator()(Button* button) const {
                     vector<TeamNumber::Enum> team2enemies{ TeamNumber::Team_1 };
                     Team team1 = Team(TeamNumber::Team_1, nil, team1enemies);
                     Team team2 = Team(TeamNumber::Team_2, nil, team2enemies);
-                    core.getServer()->getGameplayMode().setGameplayMode(GameplayModeType::TeamDeathmatch);
-                    core.getServer()->getGameplayMode().setMaxAmountOfPlayers(50);
-                    core.getServer()->getGameplayMode().addTeam(team1);
-                    core.getServer()->getGameplayMode().addTeam(team2);
-                    core.getClient()->getGameplayMode() = core.getServer()->getGameplayMode();
+                    Server::SERVER_HOST_DATA.setGameplayModeType(GameplayModeType::TeamDeathmatch);
+                    Server::SERVER_HOST_DATA.setMaxAmountOfPlayers(50);
+                    Server::SERVER_HOST_DATA.addTeam(team1);
+                    Server::SERVER_HOST_DATA.addTeam(team2);
+                    core.getClient()->getGameplayMode() = Server::SERVER_HOST_DATA.getGameplayMode();
 
                     core.getServer()->startupMap(map);
 

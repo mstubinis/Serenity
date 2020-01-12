@@ -8,6 +8,7 @@ class  HostScreenFFA2;
 class  ScrollFrame;
 class  Text;
 class  Button;
+class  TextBox;
 
 struct ShipTokenOnClickTotal;
 struct ShipTokenOnClickAllowed;
@@ -32,6 +33,11 @@ class FFAServerInfo final : public RoundedWindow {
         ~FFAServerInfo();
 
         void onResize(const unsigned int& newWidth, const unsigned int& newHeight);
+
+        TextBox& getYourNameTextBox();
+        TextBox& getServerPortTextBox();
+        TextBox& getMatchDurationTextBox();
+        TextBox& getMaxPlayersTextBox();
 
         void update(const double& dt);
         void render();

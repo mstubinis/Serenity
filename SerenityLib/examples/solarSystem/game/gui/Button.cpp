@@ -18,15 +18,6 @@ namespace Engine {
     };
 };
 
-void Button::setWidth(const float w) {
-    Widget::setWidth(w);
-}
-void Button::setHeight(const float h) {
-    Widget::setHeight(h);
-}
-void Button::setSize(const float width, const float height) {
-    Widget::setSize(width, height);
-}
 Button::Button(const Font& font, const float x, const float y, const float width, const float height) : Widget(x, y, width, height), GUIRenderElement(this){
     setFont(font);
     setText("Button");

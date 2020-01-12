@@ -10,7 +10,9 @@ struct EngineOptions final {
     int                                argc;
     bool                               ssao_enabled;
     bool                               hdr_enabled;
-    bool                               fullscreen;
+
+    int                                window_mode; //0 = normal, 1 = fullscreen, 2 = windowed_fullscreen
+
     bool                               god_rays_enabled;
     bool                               fog_enabled;
     bool                               show_console;
@@ -25,7 +27,7 @@ struct EngineOptions final {
         ssao_enabled      = true;
         hdr_enabled       = true;
         god_rays_enabled  = true;
-        fullscreen        = false;
+        window_mode       = 0;
         fog_enabled       = false;
         show_console      = false;
         maximized         = false;

@@ -5,35 +5,53 @@
 namespace sf {
     class Window;
 };
-class Texture;
+namespace Engine {
+    namespace epriv {
+        class  EngineCore;
+    };
+};
+class  Texture;
 
 #include <memory>
 #include <string>
 #include <SFML/Window.hpp>
 #include <glm/vec2.hpp>
 
-class Engine_Window final{
+class Engine_Window_Flags final { public: enum Flag: unsigned int {
+    WindowedFullscreen = 1 << 0,
+    Windowed           = 1 << 1,
+    Fullscreen         = 1 << 2,
+    MouseVisible       = 1 << 3,
+    Active             = 1 << 4,
+    Vsync              = 1 << 5,
+    MouseGrabbed       = 1 << 6,
+    KeyRepeat          = 1 << 7,
+};};
 
+
+class Engine_Window final{
+    friend class Engine::epriv::EngineCore;
     class Engine_WindowData final {
+        friend class Engine::epriv::EngineCore;
         friend class Engine_Window;
         private:
-            unsigned int m_Style;
-            sf::VideoMode m_VideoMode;
-            const char* m_WindowName;
-            sf::Window m_SFMLWindow;
-            unsigned int m_FramerateLimit;
-            bool m_MouseCursorVisible;
-            bool m_Fullscreen;
-            bool m_Active;
-            bool m_Vsync;
-            bool m_MouseCursorGrabbed;
-            int m_OpenGLMajorVersion;
-            int m_OpenGLMinorVersion;
-            int m_GLSLVersion;
+            glm::uvec2          m_OldWindowSize;
+            unsigned int        m_Style;
+            sf::VideoMode       m_VideoMode;
+            const char*         m_WindowName;
+            sf::Window          m_SFMLWindow;
+            unsigned int        m_FramerateLimit;
+
+            unsigned int        m_Flags;
+
+
+            int                 m_OpenGLMajorVersion;
+            int                 m_OpenGLMinorVersion;
+            int                 m_GLSLVersion;
             sf::ContextSettings m_SFContextSettings;
 
             void restore_state();
-            const sf::ContextSettings create(const std::string& _name, const unsigned int& _width, const unsigned int& _height);
+            const sf::ContextSettings create(Engine_Window&, const std::string& _name, const unsigned int& _width, const unsigned int& _height);
         public:
             Engine_WindowData();
             ~Engine_WindowData();
@@ -41,6 +59,12 @@ class Engine_Window final{
 
     private:
         Engine_WindowData m_Data;
+        void internal_on_fullscreen(const bool isToBeFullscreen, const bool isMaximized, const bool isMinimized);
+        const bool remove_flag(const Engine_Window_Flags::Flag& flag);
+        const bool add_flag(const Engine_Window_Flags::Flag& flag);
+        const bool has_flag(const Engine_Window_Flags::Flag& flag);
+        void restore_state();
+        sf::VideoMode get_default_desktop_video_mode();
     public:
         Engine_Window(const char* name, const unsigned int& width, const unsigned int& height);
         ~Engine_Window();
@@ -58,8 +82,9 @@ class Engine_Window final{
         void setPosition(const unsigned int& x, const unsigned int& y);
 
         //currently specific to windows os only
-        void maximize();
-        void minimize();
+        const bool maximize();
+        //currently specific to windows os only
+        const bool minimize();
 
         //If key repeat is enabled, you will receive repeated KeyPressed events while keeping a key pressed.
         //If it is disabled, you will only get a single event when the key is pressed.
@@ -91,10 +116,28 @@ class Engine_Window final{
         const unsigned int getStyle();
         const bool hasFocus();
         const bool isOpen();
+
+        //returns true if the window is in fullscreen OR windowed fullscreen mode
         const bool isFullscreen();
+
+        //returns true if the window is in windowed fullscreen mode
+        const bool isFullscreenWindowed();
+
+        //returns true if the window is in regular fullscreen mode
+        const bool isFullscreenNonWindowed();
+
+        //currently specific to windows os only
+        const bool isMaximized();
+        //currently specific to windows os only
+        const bool isMinimized();
+
         const bool isActive();
-        void setFullScreen(const bool isFullscreen, const bool isWindowedMode = false);
+
+        const bool setFullscreen(const bool isFullscreen = true);
+        const bool setFullscreenWindowed(const bool isFullscreen = true);
+
         void setStyle(const unsigned int& style);
+
         void display();
 
         //Grab or release the mouse cursor. If set, grabs the mouse cursor inside this window's client area so it may no

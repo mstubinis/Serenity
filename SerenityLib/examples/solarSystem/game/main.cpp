@@ -4,6 +4,9 @@
 #include <time.h>
 #include <memory>
 #include <iostream>
+#include <SFML/Window.hpp>
+
+#include "config/ConfigFile.h"
 
 #ifdef _WIN32
     #include <windows.h>
@@ -18,14 +21,16 @@ int main(int argc, char* argv[]) {
     #endif
         srand(static_cast<unsigned>(time(0)));
 
+    ConfigFile config;
+    const auto& info = config.readFromFile();
 
     EngineOptions options;
     options.window_title   = "Star Trek: Homeland Security";
-    options.width          = sf::VideoMode::getDesktopMode().width - 30;
-    options.height         = sf::VideoMode::getDesktopMode().height - 120;
-    options.fullscreen     = false;
-    //options.show_console   = true;
-    options.maximized      = true;
+    options.width          = info.window_width;
+    options.height         = info.window_height;
+    options.window_mode    = info.getWindowModeInt();
+    //options.show_console = true;
+    options.maximized      = false;
     options.aa_algorithm   = AntiAliasingAlgorithm::SMAA;
     options.argv           = argv;
     options.argc           = argc;

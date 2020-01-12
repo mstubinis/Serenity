@@ -14,7 +14,9 @@ _TOTAL};};
 
 class  Team;
 struct PacketGameplayModeInfo;
+class  ServerHostData;
 class GameplayMode {
+    friend class ServerHostData;
     protected:
         GameplayModeType::Mode                           m_GameplayModeType;
         unsigned int                                     m_MaxAmountOfPlayers;

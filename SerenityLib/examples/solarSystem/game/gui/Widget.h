@@ -48,9 +48,9 @@ class Widget : public IWidget {
 
         virtual const bool isMouseOver() const;
 
-        inline const glm::vec2& positionLocal() const;
-        const glm::vec2  positionWorld() const;
-        const glm::vec2  position(const bool local = true) const;
+        virtual const glm::vec2 positionLocal() const;
+        virtual const glm::vec2 positionWorld() const;
+        virtual const glm::vec2 position(const bool local = true) const;
         const glm::vec4& color() const;
 
         void setAlignment(const Alignment::Type& alignment);

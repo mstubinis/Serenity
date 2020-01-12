@@ -705,6 +705,12 @@
     <ClInclude Include="game\gui\specifics\ShipToken.h">
       <Filter>Header Files\Game\GUI\Specifics\Templates</Filter>
     </ClInclude>
+    <ClInclude Include="game\config\ConfigFile.h">
+      <Filter>Header Files\Game\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="game\config\ConfigDataStruct.h">
+      <Filter>Header Files\Game\Config</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -1051,6 +1057,9 @@
     </ClCompile>
     <ClCompile Include="game\gui\specifics\ShipToken.cpp">
       <Filter>Source Files\Game\GUI\Specifics\Templates</Filter>
+    </ClCompile>
+    <ClCompile Include="game\config\ConfigFile.cpp">
+      <Filter>Source Files\Game\Config</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

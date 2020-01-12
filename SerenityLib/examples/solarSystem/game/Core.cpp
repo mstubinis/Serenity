@@ -12,6 +12,7 @@
 #include "ResourceManifest.h"
 #include "teams/Team.h"
 #include "modes/GameplayMode.h"
+#include "config/ConfigFile.h"
 
 #include <core/engine/system/Engine.h>
 #include <core/engine/scene/Viewport.h>
@@ -111,11 +112,11 @@ void Core::onResize(const uint& width, const uint& height) {
 void Core::init() {
     if (m_Initalized)
         return;
-    
+
     auto& window = Resources::getWindow();
     window.setKeyRepeatEnabled(false);
     window.setFramerateLimit(60);
-    
+ 
     Scene* menuScene = NEW Scene("Menu");
     Resources::setCurrentScene(menuScene);
     Camera* main_camera = NEW Camera(60,Resources::getWindowSize().x / static_cast<float>(Resources::getWindowSize().y), 0.1f, 15000.0f, menuScene);
@@ -137,10 +138,24 @@ void Core::init() {
 void Core::update(const double& dt) {
     m_GameTime += dt;
     if (Engine::isKeyDownOnce(KeyboardKey::F6)) {
-        Resources::getWindow().setFullScreen(!Resources::getWindow().isFullscreen());
+        auto& window = Resources::getWindow();
+        const auto res = window.setFullscreen(!window.isFullscreenNonWindowed());
+        ConfigFile config;
+        if (window.isFullscreenNonWindowed()) {
+            config.updateWindowMode("fullscreen");
+        }else {
+            config.updateWindowMode("windowed");
+        }
     }
     if (Engine::isKeyDownOnce(KeyboardKey::F7)) {
-        Resources::getWindow().setFullScreen(!Resources::getWindow().isFullscreen(), true);
+        auto& window = Resources::getWindow();
+        const auto res = window.setFullscreenWindowed(!window.isFullscreenWindowed());
+        ConfigFile config;
+        if (window.isFullscreenWindowed()) {
+            config.updateWindowMode("windowed_fullscreen");
+        }else {
+            config.updateWindowMode("windowed");
+        }
     }
 
     if(m_Client) m_Client->update(m_Client, dt);

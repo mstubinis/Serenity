@@ -141,7 +141,7 @@ void GUIRenderElement::render(const glm::vec4& scissor) {
         mouseOver = true;
     }
 
-    const glm::vec2 total_size = glm::vec2(m_Owner->width(), m_Owner->height());
+    const glm::vec2 total_size = glm::vec2(m_Owner->m_Width, m_Owner->m_Height);
 
     const auto pos             = m_Owner->positionFromAlignmentWorld();
     const auto corner_size     = get_corner_size(total_size);
@@ -219,13 +219,13 @@ const float GUIRenderElement::getEdgeWidth(unsigned int index) const {
     if (index == 0 || index == 1) {
         return getCornerWidth();
     }
-    const glm::vec2 total_size = glm::vec2(m_Owner->width(), m_Owner->height());
+    const glm::vec2 total_size = glm::vec2(m_Owner->m_Width, m_Owner->m_Height);
     return total_size.x - (getCornerWidth() * 2) - m_BorderSize.x - m_BorderSize.y - m_PaddingSize.x - m_PaddingSize.y;
 }
 const float GUIRenderElement::getEdgeHeight(unsigned int index) const {
     index = glm::min(index, 4U);
     if (index == 0 || index == 1) {
-        const glm::vec2 total_size = glm::vec2(m_Owner->width(), m_Owner->height());
+        const glm::vec2 total_size = glm::vec2(m_Owner->m_Width, m_Owner->m_Height);
         return total_size.y - (getCornerHeight() * 2) - m_BorderSize.z - m_BorderSize.w - m_PaddingSize.z - m_PaddingSize.w;
     }
     return getCornerHeight();

@@ -31,6 +31,7 @@ class ScrollFrame: public Widget {
         ScrollBar*                                m_ScrollBar;
         float                                     m_ContentHeight;
         std::vector<ScrollFrame::WidgetRow>       m_Content;
+        glm::uvec4                                m_PaddingSize;
 
         void reposition_scroll_bar();
         void internal_recalculate_content_sizes();
@@ -44,6 +45,8 @@ class ScrollFrame: public Widget {
 
         void clear();
 
+        void setPaddingSize(const unsigned int padding);
+        void setPaddingSize(const unsigned int padding, const unsigned int index);
         void addContent(Widget* widget);
         void addContent(Widget* widget, const unsigned int row);
         void removeContent(Widget* widget);

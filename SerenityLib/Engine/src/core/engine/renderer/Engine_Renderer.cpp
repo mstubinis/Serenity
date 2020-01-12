@@ -1233,11 +1233,8 @@ class epriv::RenderManager::impl final{
             m_2DProjectionMatrix = glm::ortho(0.0f, static_cast<float>(w), 0.0f, static_cast<float>(h), 0.005f, 3000.0f);
             m_GBuffer->resize(w, h);
         }
-        void _onFullscreen(sf::Window* sfWindow, const sf::VideoMode& videoMode,const char* winName, const uint& style, const sf::ContextSettings& settings){
+        void _onFullscreen(){
             SAFE_DELETE(m_GBuffer);
-
-            sfWindow->create(videoMode, winName, style, settings);
-
             //oh yea the opengl context is lost, gotta restore the state machine
             renderManager->OpenGLStateMachine.GL_RESTORE_CURRENT_STATE_MACHINE();
 
@@ -1341,18 +1338,16 @@ class epriv::RenderManager::impl final{
             //Renderer::bindDrawFBO(prevDrawBuffer);
         }
         void _renderTextLeft(const string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
-            uint i = 0;
+            unsigned int i = 0;
             for (auto& character : text) {
-                //if ((text_ind.size() * 6) >= text_ind.capacity())
-                    //return;
                 if (character == '\n') {
                     y += newLineGlyphHeight;
                     x = 0.0f;
                 }else if (character != '\0') {
-                    const uint& accum = i * 4;
+                    const unsigned int accum = i * 4;
                     ++i;
                     const FontGlyph& chr   = font.getGlyphData(character);
-                    const float& startingY = -int(chr.height + chr.yoffset) - y;
+                    const float startingY = -int(chr.height + chr.yoffset) - y;
 
                     text_ind.emplace_back(accum + 0);
                     text_ind.emplace_back(accum + 1);
@@ -1361,7 +1356,7 @@ class epriv::RenderManager::impl final{
                     text_ind.emplace_back(accum + 1);
                     text_ind.emplace_back(accum + 0);
 
-                    const float& startingX = x + chr.xoffset;
+                    const float startingX = x + chr.xoffset;
                     x += chr.xadvance;
 
                     text_pts.emplace_back(startingX + chr.pts[0].x, startingY + chr.pts[0].y, z);
@@ -1391,15 +1386,17 @@ class epriv::RenderManager::impl final{
             if (lines.size() == 0)
                 lines.push_back(line_accumulator);
 
-            uint i = 0;
+            unsigned int i = 0;
             for (auto& line : lines) {
-                for (int j = static_cast<int>(line.size()); j >= 0; --j) {
+                const int line_size = static_cast<int>(line.size());
+                int k = 0;
+                for (int j = line_size; j >= 0; --j) {
                     const auto& character = line[j];
                     if (character != '\0') {   
-                        const uint& accum = i * 4;
+                        const unsigned int accum = i * 4;
                         ++i;
                         const FontGlyph& chr   = font.getGlyphData(character);
-                        const float& startingY = -int(chr.height + chr.yoffset) - y;
+                        const float startingY = -int(chr.height + chr.yoffset) - y;
 
                         text_ind.emplace_back(accum + 0);
                         text_ind.emplace_back(accum + 1);
@@ -1408,7 +1405,10 @@ class epriv::RenderManager::impl final{
                         text_ind.emplace_back(accum + 1);
                         text_ind.emplace_back(accum + 0);
 
-                        const float& startingX = x + chr.xoffset;
+                        if (k == 0) {
+                            x -= chr.width;
+                        }
+                        const float startingX = x + chr.xoffset;
                         x -= chr.xadvance;
 
                         text_pts.emplace_back(startingX + chr.pts[0].x, startingY + chr.pts[0].y, z);
@@ -1420,6 +1420,7 @@ class epriv::RenderManager::impl final{
                         text_uvs.emplace_back(chr.uvs[1].x, chr.uvs[1].y);
                         text_uvs.emplace_back(chr.uvs[2].x, chr.uvs[2].y);
                         text_uvs.emplace_back(chr.uvs[3].x, chr.uvs[3].y);
+                        ++k;
                     }
                 }
                 y += newLineGlyphHeight;
@@ -1449,18 +1450,16 @@ class epriv::RenderManager::impl final{
             }
 
             x = 0.0f;
-            uint i = 0;
+            unsigned int i = 0;
             for (uint l = 0; l < lines.size(); ++l) {
                 const auto& line      = lines[l];
                 const auto& line_size = lines_sizes[l] / 2;
                 for (auto& character : line) {
-                    //if ((text_ind.size() * 6) >= text_ind.capacity())
-                        //return;
                     if (character != '\0') {
-                        const uint& accum = i * 4;
+                        const unsigned int accum = i * 4;
                         ++i;
                         const FontGlyph& chr   = font.getGlyphData(character);
-                        const float& startingY = -int(chr.height + chr.yoffset) - y;
+                        const float startingY = -int(chr.height + chr.yoffset) - y;
 
                         text_ind.emplace_back(accum + 0);
                         text_ind.emplace_back(accum + 1);
@@ -1469,7 +1468,7 @@ class epriv::RenderManager::impl final{
                         text_ind.emplace_back(accum + 1);
                         text_ind.emplace_back(accum + 0);
 
-                        const float& startingX = x + chr.xoffset;
+                        const float startingX = x + chr.xoffset;
                         x += chr.xadvance;
 
                         text_pts.emplace_back(startingX + chr.pts[0].x - line_size, startingY + chr.pts[0].y, z);
@@ -2170,8 +2169,8 @@ void epriv::RenderManager::_render(const double& dt, Viewport& viewport,const bo
 void epriv::RenderManager::_resize(uint w,uint h){ 
     m_i->_resize(w, h);
 }
-void epriv::RenderManager::_onFullscreen(sf::Window* w,const sf::VideoMode& m,const char* n, const uint& s, const sf::ContextSettings& set){
-    m_i->_onFullscreen(w, m, n, s, set);
+void epriv::RenderManager::_onFullscreen(){
+    m_i->_onFullscreen();
 }
 void epriv::RenderManager::_onOpenGLContextCreation(uint windowWidth,uint windowHeight,uint _glslVersion,uint _openglVersion){ 
     OpenGLStateMachine.GL_INIT_DEFAULT_STATE_MACHINE(windowWidth, windowHeight);

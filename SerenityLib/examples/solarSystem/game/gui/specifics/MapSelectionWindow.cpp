@@ -20,6 +20,7 @@ using namespace std;
 namespace boost_io = boost::iostreams;
 
 const float button_size = 40.0f;
+const auto scroll_frame_padding = 30.0f;
 
 struct MapSelectorButtonOnClick final { void operator()(Button* button) const {
     auto& button_data          = *static_cast<MapSelectionWindow::ButtonPtr*>(button->getUserPointer());
@@ -37,7 +38,7 @@ struct MapSelectorButtonOnClick final { void operator()(Button* button) const {
 struct CycleGameModeLeftButtonOnClick final { void operator()(Button* button) const {
     auto& mapSelectionWindow   = *static_cast<MapSelectionWindow*>(button->getUserPointer());
     auto& map_desc_window      = mapSelectionWindow.m_HostScreen.getMapDescriptionWindow();
-    int num = static_cast<int>(Server::SERVER_HOST_DATA.getGameplayMode());
+    int num = static_cast<int>(Server::SERVER_HOST_DATA.getGameplayModeType());
     --num;
     if (num < 0) {
         num = GameplayModeType::_TOTAL - 1;
@@ -48,7 +49,7 @@ struct CycleGameModeLeftButtonOnClick final { void operator()(Button* button) co
 struct CycleGameModeRightButtonOnClick final { void operator()(Button* button) const {
     auto& mapSelectionWindow   = *static_cast<MapSelectionWindow*>(button->getUserPointer());
     auto& map_desc_window      = mapSelectionWindow.m_HostScreen.getMapDescriptionWindow();
-    int num = static_cast<int>(Server::SERVER_HOST_DATA.getGameplayMode());
+    int num = static_cast<int>(Server::SERVER_HOST_DATA.getGameplayModeType());
     ++num;
     if (num >= GameplayModeType::_TOTAL) {
         num = 0;
@@ -60,7 +61,7 @@ struct CycleGameModeRightButtonOnClick final { void operator()(Button* button) c
 MapSelectionWindow::MapSelectionWindow(HostScreen& hostScreen, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const string& labelText)
 :RoundedWindow(font,x,y,width,height,depth,borderSize,labelText), m_HostScreen(hostScreen), m_Font(font){
 
-    m_ChangeGameModeLeftButton = new Button(font, x - (width / 2.0f) - 29.0f, y + (height / 2.0f) - 5.0f, button_size, button_size);
+    m_ChangeGameModeLeftButton = new Button(font, x - (width / 2.0f) - (scroll_frame_padding - 1.0f), y + (height / 2.0f) - 5.0f, button_size, button_size);
     m_ChangeGameModeLeftButton->setText("<");
     m_ChangeGameModeLeftButton->setAlignment(Alignment::TopLeft);
     m_ChangeGameModeLeftButton->setDepth(depth - 0.002f);
@@ -70,7 +71,7 @@ MapSelectionWindow::MapSelectionWindow(HostScreen& hostScreen, Font& font, const
     m_ChangeGameModeLeftButton->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     
     
-    m_ChangeGameModeRightButton = new Button(font, x + (width / 2.0f) + 29.0f, y + (height / 2.0f) - 5.0f, button_size, button_size);
+    m_ChangeGameModeRightButton = new Button(font, x + (width / 2.0f) + (scroll_frame_padding - 1.0f), y + (height / 2.0f) - 5.0f, button_size, button_size);
     m_ChangeGameModeRightButton->setText(">");
     m_ChangeGameModeRightButton->setAlignment(Alignment::TopRight);
     m_ChangeGameModeRightButton->setDepth(depth - 0.002f);
@@ -79,7 +80,7 @@ MapSelectionWindow::MapSelectionWindow(HostScreen& hostScreen, Font& font, const
     m_ChangeGameModeRightButton->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_ChangeGameModeRightButton->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    m_MapFileScrollFrame = new ScrollFrame(font, x, y - (height / 2.0f) + 30.0f, width - 60.0f, height - 110.0f, depth - 0.001f);
+    m_MapFileScrollFrame = new ScrollFrame(font, x, y - (height / 2.0f) + scroll_frame_padding, width - (scroll_frame_padding * 2.0f), height - 110.0f, depth - 0.001f);
     m_MapFileScrollFrame->setAlignment(Alignment::BottomCenter);
 
 }
@@ -91,7 +92,7 @@ MapSelectionWindow::~MapSelectionWindow() {
 
 void MapSelectionWindow::recalculate_maps() {
     clearWindow();
-    const auto gameplayMode = static_cast<unsigned int>(Server::SERVER_HOST_DATA.getGameplayMode());
+    const auto gameplayMode = static_cast<unsigned int>(Server::SERVER_HOST_DATA.getGameplayModeType());
     for (auto& itr : Map::DATABASE) {
         auto& data = itr.second;
         for (auto& game_mode_int : data.map_valid_game_modes) {
@@ -142,11 +143,17 @@ void MapSelectionWindow::onResize(const unsigned int& newWidth, const unsigned i
     const auto pos = positionWorld();
     const auto frame_size = glm::vec2(width(), height());
 
-    m_MapFileScrollFrame->setPosition(pos.x, pos.y - (frame_size.y / 2.0f) + 30.0f);
-    m_MapFileScrollFrame->setSize(frame_size.x - 60.0f, frame_size.y - 110.0f);
+    m_MapFileScrollFrame->setPosition(
+        pos.x,
+        pos.y - (frame_size.y / 2.0f) + scroll_frame_padding
+    );
+    m_MapFileScrollFrame->setSize(
+        frame_size.x - (scroll_frame_padding * 2.0f),
+        frame_size.y - 110.0f
+    );
 
-    m_ChangeGameModeLeftButton->setPosition(pos.x - (frame_size.x / 2.0f) + 29.0f, pos.y + (frame_size.y / 2.0f) - 5.0f);
-    m_ChangeGameModeRightButton->setPosition(pos.x + (frame_size.x / 2.0f) - 29.0f, pos.y + (frame_size.y / 2.0f) - 5.0f);
+    m_ChangeGameModeLeftButton->setPosition(pos.x - (frame_size.x / 2.0f) + (scroll_frame_padding - 1.0f), pos.y + (frame_size.y / 2.0f) - 5.0f);
+    m_ChangeGameModeRightButton->setPosition(pos.x + (frame_size.x / 2.0f) - (scroll_frame_padding - 1.0f), pos.y + (frame_size.y / 2.0f) - 5.0f);
 }
 
 void MapSelectionWindow::update(const double& dt) {

@@ -47,6 +47,7 @@ ScrollFrame::ScrollFrame(const Font& font, const float x, const float y, const f
     m_ScrollBar = NEW ScrollBar(font, x + w - scrollbar_width, y, scrollbar_width, h, depth - 0.001f);
 
     m_ContentHeight = 0.0f;
+    m_PaddingSize = glm::uvec4(0);
     setPosition(m_Position.x, m_Position.y);
 }
 ScrollFrame::~ScrollFrame() {
@@ -66,14 +67,14 @@ void ScrollFrame::clear() {
 }
 void ScrollFrame::addContent(Widget* widget, const unsigned int row) {
     if (m_Content.size() <= row) {
-        m_Content.resize(row + 1, ScrollFrame::WidgetRow());
+        m_Content.resize(row + 1U, ScrollFrame::WidgetRow());
     }
     auto& row_ = m_Content[row];
     WidgetEntry entry(widget);
     row_.widgets.push_back(std::move(entry));
     float max_height = 0.0f;
     for (auto& widgetInRow : row_.widgets) {
-        const auto widgetHeight = widgetInRow.widget->height();
+        const auto widgetHeight = (widgetInRow.widget->height() + m_PaddingSize.z + m_PaddingSize.w);
         if (widgetHeight > max_height) {
             max_height = widgetHeight;
         }
@@ -85,9 +86,15 @@ void ScrollFrame::addContent(Widget* widget) {
     WidgetRow row;
     WidgetEntry entry(widget);
     row.widgets.push_back(std::move(entry));
-    row.maxHeight = widget->height();
+    row.maxHeight = (widget->height() + m_PaddingSize.z + m_PaddingSize.w);
     m_Content.push_back(std::move(row));
     internal_recalculate_content_sizes();
+}
+void ScrollFrame::setPaddingSize(const unsigned int padding) {
+    m_PaddingSize = glm::uvec4(padding);
+}
+void ScrollFrame::setPaddingSize(const unsigned int padding, const unsigned int index) {
+    m_PaddingSize[index] = padding;
 }
 const float ScrollFrame::get_true_content_height(const bool updateToo, const double& dt) {
     float height = 0;
@@ -107,7 +114,7 @@ const float ScrollFrame::get_true_content_height(const bool updateToo, const dou
                 widgetEntry.widget->setPosition(pos.x + width_accumulator, ((pos.y + m_Height) - height) - scrollOffset);
                 widgetEntry.widget->update(dt);
             }
-            width_accumulator += widgetEntry.widget->width();
+            width_accumulator += widgetEntry.widget->width() + m_PaddingSize.x + m_PaddingSize.y;
             if (width_accumulator > actual_content_width) {
                 width_accumulator = 0.0f;
                 height += row.maxHeight;
@@ -115,7 +122,7 @@ const float ScrollFrame::get_true_content_height(const bool updateToo, const dou
                     widgetEntry.widget->setPosition(pos.x + width_accumulator, ((pos.y + m_Height) - height) - scrollOffset);
                     widgetEntry.widget->update(dt);
                 }
-                width_accumulator += widgetEntry.widget->width();
+                width_accumulator += (widgetEntry.widget->width() + m_PaddingSize.x + m_PaddingSize.y);
             }
         }
         height += row.maxHeight;
@@ -165,12 +172,6 @@ void ScrollFrame::fit_widget_to_window(WidgetEntry& widgetEntry) {
         }
         if (changed) {
             textWidget->setText(text);
-            /*
-            m_ContentHeight = get_true_content_height();
-            const float percent = m_Height / m_ContentHeight;
-            m_ScrollBar->setSliderSize(percent);
-            m_ScrollBar->resetScrollOffset();
-            */
         }
     }else{
         //just shrink width if needed     
@@ -231,11 +232,9 @@ void ScrollFrame::setSize(const float width, const float height) {
     reposition_scroll_bar();
     internal_recalculate_content_sizes();
 }
-
 void ScrollFrame::setColor(const float& r, const float& g, const float& b, const float& a) {
     m_ScrollBar->setColor(r, g, b, a);
     Widget::setColor(r, g, b, a);
-
 }
 void ScrollFrame::onResize(const unsigned int newWidth, const unsigned int newHeight) {
     reposition_scroll_bar();

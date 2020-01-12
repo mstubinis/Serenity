@@ -7,6 +7,7 @@
 #include <glm/vec2.hpp>
 
 #include "Core.h"
+#include "config/ConfigFile.h"
 #include <core/engine/system/Engine.h>
 
 #include "ResourceManifest.h"
@@ -22,17 +23,19 @@ using namespace std;
 Core* m_Core = nullptr;
 
 void Game::initResources(){
-    Resources::getWindow().setIcon("../data/Textures/icon.png");
+    auto& window = Resources::getWindow();
+    window.setIcon("../data/Textures/icon.png");
 
     Discord::activate(661384805786845214);
     
     m_Core = NEW Core();
-
     ResourceManifest::init();
 }
 void Game::initLogic(){
+    auto& window = Resources::getWindow();
     Physics::setNumberOfStepsPerFrame(3);
     m_Core->init();
+    Game::onResize(window.getSize().x, window.getSize().y);
 }
 void Game::cleanup() {
     Discord::clear_activity();
@@ -54,6 +57,8 @@ void Game::render(){
 void Game::onResize(const uint& width, const uint& height){
     if (m_Core) {
         m_Core->onResize(width, height);
+        ConfigFile config;
+        config.updateWindowSize(width, height);
     }
 }
 void Game::onClose(){

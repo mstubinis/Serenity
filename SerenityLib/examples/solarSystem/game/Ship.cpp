@@ -1376,9 +1376,9 @@ void Ship::update(const double& dt) {
         //setState(ShipState::UndergoingDestruction);
 
 
-        auto& map = static_cast<Map&>(entity().scene());
-        auto& team = m_Client.getGameplayMode().getTeams().at(TeamNumber::Team_2);
-        map.createShip(AIType::AI_Stationary, team, m_Client, "Cube", "Borg Cube" + to_string(map.getShipsNPCControlled().size()), getPosition() + (forward() * -90.0));
+        //auto& map = static_cast<Map&>(entity().scene());
+        //auto& team = m_Client.getGameplayMode().getTeams().at(TeamNumber::Team_FFA);
+        //map.createShip(AIType::AI_Stationary, team, m_Client, "Cube", "Borg Cube" + to_string(map.getShipsNPCControlled().size()), getPosition() + (forward() * -90.0));
     }
 }
 void Ship::fireBeams(ShipSystemWeapons& weapons, EntityWrapper* target, Ship* target_as_ship) {

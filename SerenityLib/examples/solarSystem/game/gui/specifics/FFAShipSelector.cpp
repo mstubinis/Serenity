@@ -20,9 +20,10 @@
 using namespace std;
 using namespace Engine;
 
-const auto dividor_width = 38.0f;
-const auto scroll_frame_padding = 20.0f;
-
+const auto dividor_width          = 38.0f;
+const auto scroll_frame_padding_2 = 20.0f;
+const auto scroll_frame_padding   = 30.0f;
+const auto padding_y = 110.0f;
 
 struct ShipTokenOnClickTotal final { void operator()(Button* button) const {
     auto& token = *static_cast<ShipToken*>(button);
@@ -75,18 +76,18 @@ FFAShipSelector::FFAShipSelector(HostScreenFFA2& hostScreen, Font& font, const f
 :RoundedWindow(font,x,y,width,height,depth,borderSize,labelText), m_HostScreen(hostScreen), m_Font(font){
 
     m_ShipsTotalFrame = new ScrollFrame(font, 
-        x - (dividor_width / 2.0f) - scroll_frame_padding, 
-        y - (height / 2.0f) + 30.0f, 
-        ((width - 60.0f) / 2.0f) - (scroll_frame_padding * 2.0f),
-        (height - 110.0f), 
+        x - (dividor_width / 2.0f) - scroll_frame_padding_2, 
+        y - (height / 2.0f) + scroll_frame_padding,
+        ((width - (scroll_frame_padding * 2.0f)) / 2.0f) - (scroll_frame_padding_2 * 2.0f),
+        (height - padding_y),
     depth - 0.001f);
     m_ShipsTotalFrame->setAlignment(Alignment::BottomRight);
 
     m_ShipsAllowedFrame = new ScrollFrame(font, 
-        x + (dividor_width / 2.0f) + scroll_frame_padding,
-        y - (height / 2.0f) + 30.0f,
-        ((width - 60.0f) / 2.0f) - (scroll_frame_padding * 2.0f),
-        (height - 110.0f),
+        x + (dividor_width / 2.0f) + scroll_frame_padding_2,
+        y - (height / 2.0f) + scroll_frame_padding,
+        ((width - (scroll_frame_padding * 2.0f)) / 2.0f) - (scroll_frame_padding_2 * 2.0f),
+        (height - padding_y),
     depth - 0.001f);
     m_ShipsAllowedFrame->setAlignment(Alignment::BottomLeft);
 
@@ -166,11 +167,11 @@ void FFAShipSelector::onResize(const unsigned int& newWidth, const unsigned int&
     const auto pos = positionWorld();
     const auto frame_size = glm::vec2(width(), height());
 
-    m_ShipsTotalFrame->setPosition(pos.x - (dividor_width / 2.0f) - scroll_frame_padding, pos.y - (frame_size.y / 2.0f) + 30.0f);
-    m_ShipsTotalFrame->setSize(((frame_size.x - 60.0f) / 2.0f) - (scroll_frame_padding * 2.0f), frame_size.y - 110.0f);
+    m_ShipsTotalFrame->setPosition(pos.x - (dividor_width / 2.0f) - scroll_frame_padding_2, pos.y - (frame_size.y / 2.0f) + scroll_frame_padding);
+    m_ShipsTotalFrame->setSize(((frame_size.x - (scroll_frame_padding * 2.0f)) / 2.0f) - (scroll_frame_padding_2 * 2.0f), frame_size.y - padding_y);
 
-    m_ShipsAllowedFrame->setPosition(pos.x + (dividor_width / 2.0f) + scroll_frame_padding, pos.y - (frame_size.y / 2.0f) + 30.0f);
-    m_ShipsAllowedFrame->setSize(((frame_size.x - 60.0f) / 2.0f) - (scroll_frame_padding * 2.0f), frame_size.y - 110.0f);
+    m_ShipsAllowedFrame->setPosition(pos.x + (dividor_width / 2.0f) + scroll_frame_padding_2, pos.y - (frame_size.y / 2.0f) + scroll_frame_padding);
+    m_ShipsAllowedFrame->setSize(((frame_size.x - (scroll_frame_padding * 2.0f)) / 2.0f) - (scroll_frame_padding_2 * 2.0f), frame_size.y - padding_y);
 
     m_ShipsTotalLabel->setPosition(pos.x - (frame_size.x / 4.0f), pos.y + (frame_size.y / 2.0f) - 9.0f);
     m_ShipsAllowedLabel->setPosition(pos.x + (frame_size.x / 4.0f), pos.y + (frame_size.y / 2.0f) - 9.0f);

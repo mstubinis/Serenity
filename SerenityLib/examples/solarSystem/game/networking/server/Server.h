@@ -24,19 +24,32 @@ struct PacketMessage;
 
 class ServerHostData final {
     private:
-        std::vector<std::string> m_GetAllowedShips;
-        MapEntryData             m_CurrentMapChoice;
-        GameplayModeType::Mode   m_CurrentGameModeChoice;
+        MapEntryData              m_CurrentMapChoice;
+        unsigned short            m_ServerPort;
+        GameplayMode              m_GameplayMode;
+        unsigned int              m_ExpectedMatchDurationInSeconds;
     public:
         const MapEntryData& getMapChoice() const;
         void setMapChoice(const MapEntryData&);
 
-        const GameplayModeType::Mode& getGameplayMode() const;
-        void setGameplayMode(const GameplayModeType::Mode&);
+        void setMatchDurationInMinutes(const unsigned int& minutes);
+        void setMatchDurationInSeconds(const unsigned int& seconds);
 
-        std::vector<std::string>& getAllowedShips();
+        void setServerPort(const unsigned short&);
+        const unsigned short& getServerPort() const;
+
+        const GameplayModeType::Mode& getGameplayModeType() const;
+        void setGameplayModeType(const GameplayModeType::Mode&);
+
+        const bool addTeam(Team& team);
+
+        void setMaxAmountOfPlayers(const unsigned int&);
+
+        std::unordered_set<std::string>& getAllowedShips();
         void setAllowedShips(const std::vector<std::string>&);
+        void setAllowedShips(const std::unordered_set<std::string>&);
 
+        const GameplayMode& getGameplayMode() const;
         const std::string& getGameplayModeString() const;
 
         ServerHostData();
@@ -100,7 +113,6 @@ class Server {
         static ServerHostData                          SERVER_HOST_DATA;
     private:
         ServerMapSpecificData                          m_MapSpecificData;
-        GameplayMode                                   m_GameplayMode;
         Engine::Networking::SocketUDP*                 m_UdpSocket;
         std::mutex                                     m_Mutex;
         std::vector<ServerClientThread*>               m_Threads;
@@ -127,7 +139,6 @@ class Server {
 
         const bool isValidName(const std::string& name) const;
         const unsigned int numClients() const;
-        GameplayMode& getGameplayMode();
 
         const sf::Socket::Status send_to_client(ServerClient&, Packet& packet);
         const sf::Socket::Status send_to_client(ServerClient&, sf::Packet& packet);

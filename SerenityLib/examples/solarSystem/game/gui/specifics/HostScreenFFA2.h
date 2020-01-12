@@ -28,12 +28,6 @@ class HostScreenFFA2 final {
         FFAShipSelector* m_ShipSelectorWindow;
         FFAServerInfo*   m_ServerInfoWindow;
 
-
-        //TODO: remove these
-        TextBox*    m_UserName_TextBox;
-        TextBox*    m_ServerPort_TextBox;
-
-
         Button*     m_BackgroundEdgeGraphicTop;
         Text*       m_TopLabel;
 
@@ -45,6 +39,15 @@ class HostScreenFFA2 final {
         ~HostScreenFFA2();
 
         Menu& getMenu();
+        
+        const bool validateMaxNumPlayersTextBox();
+        const bool validateShipSelector();
+        const bool validateServerPortTextBox();
+        const bool validateUsernameTextBox();
+        const bool validateMatchDurationTextBox();
+
+        const unsigned int getMatchDurationFromTextBoxInSeconds();
+        const float getMatchDurationFromTextBoxInMinutes();
 
         void setTopText(const std::string& text);
 

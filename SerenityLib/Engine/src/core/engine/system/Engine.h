@@ -28,14 +28,17 @@ namespace Engine{
     void showMouseCursor();
     void hideMouseCursor();
     void stop();
-    void setFullScreen(const bool& isFullscreen);
+    const bool setFullscreen(const bool& isFullscreen);
+    const bool setFullscreenWindowed(const bool& isFullscreen);
     namespace epriv{
         class EngineCore final {
+            friend class Engine_Window;
             private:
 
                 void init_os_specific(const EngineOptions& options);
                 void init_window(const EngineOptions& options);
 
+                void on_event_resize(const unsigned int& w, const unsigned int& h, const bool& saveSize);
                 void on_event_close();
                 void on_event_lost_focus();
                 void on_event_gained_focus();
@@ -84,7 +87,6 @@ namespace Engine{
 
                 void init(const EngineOptions& options);
                 void run();
-                void on_event_resize(const unsigned int& w, const unsigned int& h, const bool& saveSize);
                 void handle_events();
         };
         struct Core final{

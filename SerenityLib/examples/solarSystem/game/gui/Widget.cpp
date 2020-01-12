@@ -77,7 +77,7 @@ void Widget::setSize(const float width, const float height) {
 const glm::vec4& Widget::color() const {
     return m_Color;
 }
-const glm::vec2& Widget::positionLocal() const {
+const glm::vec2 Widget::positionLocal() const {
     return m_Position;
 }
 const glm::vec2 Widget::positionWorld() const {

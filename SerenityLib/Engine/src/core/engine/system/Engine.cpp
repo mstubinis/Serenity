@@ -80,8 +80,12 @@ void EngineCore::init_os_specific(const EngineOptions& options) {
 }
 void EngineCore::init_window(const EngineOptions& options) {
     auto& window = Resources::getWindow();
+
+    if (options.window_mode == 1)      window.setFullscreen(true);
+    else if (options.window_mode == 2) window.setFullscreenWindowed(true);
+    else                               window.setFullscreen(false);
+
     window.setSize(options.width, options.height);
-    window.setFullScreen(options.fullscreen);
 
     //TODO: fix this crap... (position the window in the middle of the screen)
     /*
@@ -118,11 +122,11 @@ void EngineCore::init(const EngineOptions& options) {
 
     m_ResourceManager._init(options.window_title, options.width, options.height);
 
-    init_window(options);
-
     m_DebugManager._init(options.window_title, options.width, options.height);
     m_RenderManager._init(options.window_title, options.width, options.height);
     m_PhysicsManager._init(options.window_title, options.width, options.height, static_cast<unsigned int>(m_ThreadManager.cores()));
+
+    init_window(options);
 
     //init the game here
     Engine::setMousePosition(options.width / 2, options.height / 2);
@@ -214,26 +218,28 @@ void EngineCore::render(const double& dt){
 void EngineCore::cleanup(const double& dt) {
     m_ResourceManager.onPostUpdate();
 }
-void EngineCore::on_event_resize(const unsigned int& w, const unsigned int& h, const bool& saveSize){
+void EngineCore::on_event_resize(const unsigned int& newWindowWidth, const unsigned int& newWindowHeight, const bool& saveSize){
     m_EventManager.m_KeyStatus.clear();
     m_EventManager.m_MouseStatus.clear();
-    m_RenderManager._resize(w,h);
+    m_RenderManager._resize(newWindowWidth, newWindowHeight);
 
+    auto& window = Resources::getWindow();
     if (saveSize) {
-        Resources::getWindow().setSize(w, h);
+        window.m_Data.m_VideoMode.width = newWindowWidth;
+        window.m_Data.m_VideoMode.height = newWindowHeight;
     }
-    Game::onResize(w,h);
-    //resize cameras here
+    Game::onResize(newWindowWidth, newWindowHeight);
 
+    //resize cameras here
     for (auto& scene : m_ResourceManager.scenes()) {
         if (scene) {
-            scene->onResize(w, h);
-            InternalScenePublicInterface::GetECS(*scene).onResize<ComponentCamera>(w, h);
-            InternalScenePublicInterface::GetViewports(*scene)[0]->setViewportDimensions(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h));
+            scene->onResize(newWindowWidth, newWindowHeight);
+            InternalScenePublicInterface::GetECS(*scene).onResize<ComponentCamera>(newWindowWidth, newWindowHeight);
+            InternalScenePublicInterface::GetViewports(*scene)[0]->setViewportDimensions(0.0f, 0.0f, static_cast<float>(newWindowWidth), static_cast<float>(newWindowHeight));
         }
     }
 
-    EventWindowResized e(w,h);
+    EventWindowResized e(newWindowWidth, newWindowHeight);
     Event ev;
     ev.eventWindowResized = e;
     ev.type = EventType::WindowResized;
@@ -438,10 +444,12 @@ void Engine::hideMouseCursor(){
 void Engine::stop(){ 
     Core::m_Engine->m_Misc.m_Destroyed = true;
 }
-void Engine::setFullScreen(const bool& b){ 
-    Engine::Resources::getWindow().setFullScreen(b); 
+const bool Engine::setFullscreen(const bool& b){ 
+    return Resources::getWindow().setFullscreen(b); 
 }
-
+const bool Engine::setFullscreenWindowed(const bool& b) {
+    return Resources::getWindow().setFullscreenWindowed(b);
+}
 void EngineCore::handle_events(){
     sf::Event e;
     while(Resources::getWindow().getSFMLHandle().pollEvent(e)){
@@ -467,21 +475,21 @@ void EngineCore::handle_events(){
             }case sf::Event::MouseWheelMoved:{
                 on_event_mouse_wheel_moved(e.mouseWheel.delta); break;
             }case sf::Event::MouseMoved:{
-                on_event_mouse_moved(e.mouseMove.x,e.mouseMove.y); break;
+                on_event_mouse_moved(e.mouseMove.x, e.mouseMove.y); break;
             }case sf::Event::Resized:{
-                on_event_resize(e.size.width,e.size.height,true); break;
+                on_event_resize(e.size.width, e.size.height, true); break;
             }case sf::Event::TextEntered:{
                 on_event_text_entered(e.text.unicode); break;
             }case sf::Event::JoystickButtonPressed:{
-                on_event_joystick_button_pressed(e.joystickButton.button,e.joystickButton.joystickId); break;
+                on_event_joystick_button_pressed(e.joystickButton.button, e.joystickButton.joystickId); break;
             }case sf::Event::JoystickButtonReleased:{
-                on_event_joystick_button_released(e.joystickButton.button,e.joystickButton.joystickId); break;
+                on_event_joystick_button_released(e.joystickButton.button, e.joystickButton.joystickId); break;
             }case sf::Event::JoystickConnected:{
                 on_event_joystick_connected(e.joystickConnect.joystickId); break;
             }case sf::Event::JoystickDisconnected:{
                 on_event_joystick_disconnected(e.joystickConnect.joystickId); break;
             }case sf::Event::JoystickMoved:{
-                on_event_joystick_moved(e.joystickMove.joystickId,e.joystickMove.position,e.joystickMove.axis); break;
+                on_event_joystick_moved(e.joystickMove.joystickId, e.joystickMove.position, e.joystickMove.axis); break;
             }default:{
                 break;
             }

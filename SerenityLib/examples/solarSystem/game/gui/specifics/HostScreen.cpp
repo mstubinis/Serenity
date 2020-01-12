@@ -52,7 +52,7 @@ struct Host_ButtonNext_OnClick { void operator()(Button* button) const {
     auto& current_map      = data.getMapChoice();
     if (!data.getMapChoice().map_file_path.empty()) {
         auto& core = menu.getCore();
-        switch (data.getGameplayMode()) {
+        switch (data.getGameplayModeType()) {
             case GameplayModeType::FFA: {
                 menu.m_HostScreenFFA2->setTopText(current_map.map_name + " - " + data.getGameplayModeString());
                 menu.setGameState(GameState::Host_Screen_Setup_FFA_2);
@@ -173,7 +173,7 @@ void HostScreen::setCurrentMapChoice(const MapEntryData& choice) {
     m_RightWindow->addContent(text);
 }
 void HostScreen::setCurrentGameMode(const GameplayModeType::Mode& currentGameMode) {
-    Server::SERVER_HOST_DATA.setGameplayMode(currentGameMode);
+    Server::SERVER_HOST_DATA.setGameplayModeType(currentGameMode);
     m_LeftWindow->setLabelText(GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES[currentGameMode]);
     m_LeftWindow->recalculate_maps();
 }
