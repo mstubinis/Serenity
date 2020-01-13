@@ -1,7 +1,7 @@
 #include "ResourceManifest.h"
 #include "factions/Faction.h"
 #include "ships/Ships.h"
-#include "map/Map.h"
+#include "map/MapDatabase.h"
 #include "particles/Fire.h"
 #include "particles/Sparks.h"
 #include "Planet.h"
@@ -122,7 +122,7 @@ std::string ResourceManifest::BasePath;
 void ResourceManifest::init(){
     BasePath = "../";
 
-    Map::init_basic_map_data();
+    MapDatabase::init();
     Factions::init();
     Ships::init();
     Planets::init();

@@ -34,11 +34,16 @@ struct Host_ButtonBack_OnClick;
 struct Host_ButtonNext_OnClick;
 
 class  MainMenu;
+
 class  HostScreen;
 
 class  HostScreenFFA2;
 class  HostScreenTeamDeathmatch2;
 class  HostScreenHomelandSecurity2;
+
+class  LobbyScreenFFA;
+class  LobbyScreenTeamDeathmatch;
+class  LobbyScreenHomelandSecurity;
 
 class Menu final{
     friend struct Host_ButtonBack_OnClick;
@@ -51,9 +56,9 @@ class Menu final{
     friend class  Server;
 
     public:
-        ServerLobbyChatWindow* m_ServerLobbyChatWindow;
+        ServerLobbyChatWindow*             m_ServerLobbyChatWindow;
         ServerLobbyConnectedPlayersWindow* m_ServerLobbyConnectedPlayersWindow;
-        ServerLobbyShipSelectorWindow* m_ServerLobbyShipSelectorWindow;
+        ServerLobbyShipSelectorWindow*     m_ServerLobbyShipSelectorWindow;
     private:
         glm::vec3                      m_Color;
         Handle                         m_FontHandle;
@@ -65,11 +70,19 @@ class Menu final{
         float                          m_ErrorTimer;
 
         MainMenu*                      m_MainMenuScreen;
+
+        //host part 1
         HostScreen*                    m_HostScreen;
 
+        //host part 2
         HostScreenFFA2*                m_HostScreenFFA2;
         HostScreenTeamDeathmatch2*     m_HostScreenTeamDeathmatch2;
         HostScreenHomelandSecurity2*   m_HostScreenHomelandSecurity2;
+
+        //host part 3
+        //LobbyScreenFFA*                 m_LobbyScreenFFA;
+        //LobbyScreenTeamDeathmatch*      m_LobbyScreenTeamDeathmatch;
+        //LobbyScreenHomelandSecurity*    m_LobbyScreenHomelandSecurity;
 
         Button*                        m_Back;
         Button*                        m_Next;
@@ -89,7 +102,10 @@ class Menu final{
         void update_host_setup_td_2(const double& dt);
         void update_host_setup_hs_2(const double& dt);
 
-        void update_host_lobby_3(const double& dt);
+        void update_host_lobby_td_3(const double& dt);
+        void update_host_lobby_ffa_3(const double& dt);
+        void update_host_lobby_hs_3(const double& dt);
+
         void update_join_setup_1(const double& dt);
         void update_join_lobby_2(const double& dt);
         void update_options_main(const double& dt);
@@ -110,7 +126,10 @@ class Menu final{
         void render_host_setup_td_2();
         void render_host_setup_hs_2();
 
-        void render_host_lobby_3();
+        void render_host_lobby_ffa_3();
+        void render_host_lobby_td_3();
+        void render_host_lobby_hs_3();
+
         void render_join_setup_1();
         void render_join_lobby_2();
         void render_options_main();

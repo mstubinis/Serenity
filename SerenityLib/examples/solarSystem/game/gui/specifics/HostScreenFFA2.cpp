@@ -22,6 +22,7 @@
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/textures/Texture.h>
+#include <core/engine/discord/Discord.h>
 #include <boost/algorithm/string/replace.hpp>
 
 #include <regex>
@@ -48,21 +49,24 @@ struct Host2FFA_ButtonBack_OnClick { void operator()(Button* button) const {
     menu.getCore().shutdownServer();
 }};
 struct Host2FFA_ButtonNext_OnClick { void operator()(Button* button) const {
-    auto& hostScreenFFA      = *static_cast<HostScreenFFA2*>(button->getUserPointer());
-    auto& menu               = hostScreenFFA.getMenu();
-    const auto& username     = hostScreenFFA.m_ServerInfoWindow->getYourNameTextBox().text();
-    const auto& portstring   = hostScreenFFA.m_ServerInfoWindow->getServerPortTextBox().text();
-    const auto& max_players  = hostScreenFFA.m_ServerInfoWindow->getMaxPlayersTextBox().text();
-    const auto& map          = Server::SERVER_HOST_DATA.getMapChoice();
+    auto& hostScreenFFA           = *static_cast<HostScreenFFA2*>(button->getUserPointer());
+    auto& menu                    = hostScreenFFA.getMenu();
+    const auto& username          = hostScreenFFA.m_ServerInfoWindow->getYourNameTextBox().text();
+    const auto& port_text         = hostScreenFFA.m_ServerInfoWindow->getServerPortTextBox().text();
+    const auto& max_players_text  = hostScreenFFA.m_ServerInfoWindow->getMaxPlayersTextBox().text();
+    const auto& map               = Server::SERVER_HOST_DATA.getMapChoice();
 
     if (hostScreenFFA.validateShipSelector()) {
         if (hostScreenFFA.validateServerPortTextBox()) {
             if (hostScreenFFA.validateUsernameTextBox()) {
                 if (hostScreenFFA.validateMatchDurationTextBox()) {
                     if (hostScreenFFA.validateMaxNumPlayersTextBox()) {
-                        auto& core = menu.getCore();
+                        auto& core            = menu.getCore();
+                        auto& data            = Server::SERVER_HOST_DATA;
 
-                        const int port = stoi(portstring);
+                        const int port        = stoi(port_text);
+                        const int max_players = stoi(max_players_text);
+
                         core.startServer(port);
                         core.startClient(nullptr, port, username, "127.0.0.1"); //the client will request validation at this stage
 
@@ -70,7 +74,7 @@ struct Host2FFA_ButtonNext_OnClick { void operator()(Button* button) const {
                         Team team1 = Team(TeamNumber::Team_FFA, nil, nil);
 
                         Server::SERVER_HOST_DATA.setGameplayModeType(GameplayModeType::FFA);
-                        Server::SERVER_HOST_DATA.setMaxAmountOfPlayers(stoi(max_players));
+                        Server::SERVER_HOST_DATA.setMaxAmountOfPlayers(max_players);
                         Server::SERVER_HOST_DATA.addTeam(team1);
                         Server::SERVER_HOST_DATA.setMatchDurationInSeconds(hostScreenFFA.getMatchDurationFromTextBoxInSeconds());
                         Server::SERVER_HOST_DATA.setServerPort(port);
@@ -84,8 +88,24 @@ struct Host2FFA_ButtonNext_OnClick { void operator()(Button* button) const {
                         config.updateHostServerName(username);
                         config.updateHostServerPort(port);
 
-                        menu.setGameState(GameState::Host_Screen_Lobby_3);
+                        menu.setGameState(GameState::Host_Screen_Lobby_FFA_3);
                         menu.setErrorText("");
+
+
+                        Discord::DiscordActivity activity;
+                        activity.setDetail(data.getGameplayModeString());
+                        activity.setType(discord::ActivityType::Playing);
+                        activity.setInstance(false);
+                        activity.setState(map.map_name);
+                        activity.setTimestampStart(0);
+                        activity.setTimestampEnd(0);
+                        activity.setImageLarge("large_icon");
+                        activity.setImageLargeText("");
+                        activity.setImageSmallText("");
+                        activity.setPartySizeCurrent(1);
+                        activity.setPartySizeMax(max_players);
+                        Discord::update_activity(activity);
+
 
                         //TODO: start server and client, but do NOT load the map fully, leave that for the end.
                     }
@@ -97,9 +117,9 @@ struct Host2FFA_ButtonNext_OnClick { void operator()(Button* button) const {
 
 
 HostScreenFFA2::HostScreenFFA2(HostScreen& hostScreen1, Menu& menu, Font& font) : m_Menu(menu), m_HostScreen1(hostScreen1) {
-    const auto winSize = Resources::getWindowSize();
-    const auto contentSize = glm::vec2(winSize) - glm::vec2(padding_x * 2.0f, (padding_y * 2.0f) + bottom_bar_height);
-    const auto top_content_height = contentSize.y / 2.0f;
+    const auto winSize                 = glm::vec2(Resources::getWindowSize());
+    const auto contentSize             = winSize - glm::vec2(padding_x * 2.0f, (padding_y * 2.0f) + bottom_bar_height);
+    const auto top_content_height      = contentSize.y / 2.0f;
     const auto first_2_boxes_width_top = contentSize.x - top_content_height;
 
 
@@ -225,10 +245,10 @@ const bool HostScreenFFA2::validateMaxNumPlayersTextBox() {
 
     try {
         int num = stoi(max_players_text);
-    }catch (const std::invalid_argument& e) { //If no conversion could be performed, an invalid_argument exception is thrown.
+    }catch (const std::invalid_argument) { //If no conversion could be performed, an invalid_argument exception is thrown.
         m_Menu.setErrorText("Max players needs to be a number");
         return false;
-    }catch (const std::out_of_range& e) { //If the value read is out of the range of representable values by an int, an out_of_range exception is thrown.
+    }catch (const std::out_of_range) { //If the value read is out of the range of representable values by an int, an out_of_range exception is thrown.
         m_Menu.setErrorText("Max players is out of range of possible values");
         return false;
     }catch (...) {
@@ -252,10 +272,10 @@ const bool HostScreenFFA2::validateServerPortTextBox() {
 
     try {
         int num = stoi(port_text);
-    }catch (const std::invalid_argument& e) { //If no conversion could be performed, an invalid_argument exception is thrown.
+    }catch (const std::invalid_argument) { //If no conversion could be performed, an invalid_argument exception is thrown.
         m_Menu.setErrorText("Server port needs to be a number");
         return false;
-    }catch (const std::out_of_range& e) { //If the value read is out of the range of representable values by an int, an out_of_range exception is thrown.
+    }catch (const std::out_of_range) { //If the value read is out of the range of representable values by an int, an out_of_range exception is thrown.
         m_Menu.setErrorText("Server port is out of range of possible values");
         return false;
     }catch (...) {
@@ -295,10 +315,10 @@ const bool HostScreenFFA2::validateMatchDurationTextBox() {
 
             try {
                 int num = stoi(number_as_str);
-            }catch (const std::invalid_argument& e) { //If no conversion could be performed, an invalid_argument exception is thrown.
+            }catch (const std::invalid_argument) { //If no conversion could be performed, an invalid_argument exception is thrown.
                 m_Menu.setErrorText("Match duration needs to be in minutes : seconds format");
                 return false;
-            }catch (const std::out_of_range& e) { //If the value read is out of the range of representable values by an int, an out_of_range exception is thrown.
+            }catch (const std::out_of_range) { //If the value read is out of the range of representable values by an int, an out_of_range exception is thrown.
                 m_Menu.setErrorText("Match duration is out of range of possible values");
                 return false;
             }catch (...) {
@@ -324,7 +344,7 @@ const float HostScreenFFA2::getMatchDurationFromTextBoxInMinutes() {
     return mins + (secs / 60.0f);
 }
 void HostScreenFFA2::onResize(const unsigned int newWidth, const unsigned int newHeight) {
-    const auto winSize = glm::uvec2(newWidth, newHeight);
+    const auto winSize = glm::vec2(glm::uvec2(newWidth, newHeight));
 
     m_BackButton->setPosition(padding_x + (bottom_bar_button_width / 2.0f), bottom_bar_height_total / 2.0f);
     m_ForwardButton->setPosition(winSize.x - (padding_x + (bottom_bar_button_width / 2.0f)), bottom_bar_height_total / 2.0f);

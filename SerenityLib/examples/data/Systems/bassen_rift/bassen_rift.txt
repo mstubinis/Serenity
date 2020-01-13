@@ -3,7 +3,6 @@ Bassen Rift
 data/Textures/Skyboxes/BassenRift/Skybox.dds
 12
 giDiffuse=1.0 giSpecular=1.0 giGlobal=0.2
-Defiant,Nova,Akira,Intrepid,Sovereign,Miranda,Constitution,Excelsior,Shrike,D'deridex,B'rel,Vor'cha
 #A region of deep space within a green nebula located between Romulan and Federation space. This was the location where the U.S.S. Enterprise-E and two Romulan Warbirds fought and destroyed the Reman Warbird Scimitar.
 0,1
 

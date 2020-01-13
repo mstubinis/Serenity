@@ -11,7 +11,9 @@ struct GameState {enum State {
     Host_Screen_Setup_TeamDeathMatch_2,
     Host_Screen_Setup_HomelandSecurity_2,
 
-    Host_Screen_Lobby_3,
+    Host_Screen_Lobby_FFA_3,
+    Host_Screen_Lobby_TeamDeathMatch_3,
+    Host_Screen_Lobby_HomelandSecurity_3,
 
     Join_Screen_Setup_1,
     Join_Screen_Lobby_2,

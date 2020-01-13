@@ -1,10 +1,10 @@
 #pragma once
-#ifndef GAME_GUI_FFA_LOBBY_H
-#define GAME_GUI_FFA_LOBBY_H
+#ifndef GAME_GUI_LOBBY_FFA_H
+#define GAME_GUI_LOBBY_FFA_H
 
 class Button;
 class Font;
-class FFALobby final {
+class LobbyScreenFFA final {
     private:
         bool m_IsHost;
         /*
@@ -21,8 +21,8 @@ class FFALobby final {
         Button*                       m_ForwardButton; //host only
 
     public:
-        FFALobby(Font& font, const bool isHost = false);
-        ~FFALobby();
+        LobbyScreenFFA(Font& font, const bool isHost = false);
+        ~LobbyScreenFFA();
 
         void onResize(const unsigned int newWidth, const unsigned int newHeight);
 

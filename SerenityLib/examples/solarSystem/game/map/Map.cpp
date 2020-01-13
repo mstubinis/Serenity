@@ -51,27 +51,69 @@ using namespace Engine;
 using namespace std;
 namespace boost_io = boost::iostreams;
 
-unordered_map<string, MapEntryData> Map::DATABASE;
 
-Map::Map(GameplayMode& mode, Client& client, const string& n, const string& file) : Scene(n), m_Client(client), m_GameplayMode(mode){
-    m_Player      = nullptr;
-    m_IsServer    = false;
+Map::Map(GameplayMode& mode, Client& client, const string& name, const string& file) : Scene(name), m_Client(client), m_GameplayMode(mode){
+    basic_init(file);
+
+    //if (file != "NULL") {
+    //    loadFromFile(file);
+    //}
+}
+
+void Map::basic_init(const string& file) {
+    cleanup();
+
+    GameCamera* playerCamera = NEW GameCamera(0.35f, 7000000000.0f, this);
+    setActiveCamera(*playerCamera);
+
+    m_IsServer = false;
 
     m_ActiveCannonProjectiles.initialize(5500);
     m_ActiveTorpedoProjectiles.initialize(5500);
 
-    GameCamera* playerCamera = NEW GameCamera(0.35f,7000000000.0f,this);
-
-    setActiveCamera(*playerCamera);
     m_Filename = file;
-    m_SkyboxFile = "";
-    m_RootAnchor = std::make_tuple("",nullptr);
-    if(file != "NULL")
-        Map::loadFromFile(file);
-    Font& font = client.m_Core.m_Menu->getFont();
-    m_HUD = NEW HUD(*this, font);
-}
+    m_RootAnchor = std::make_tuple("", nullptr);
 
+    Font& font = m_Client.m_Core.m_Menu->getFont();
+    m_HUD = NEW HUD(*this, font);
+
+    uint                                             count = 0;
+    boost_io::stream<boost_io::mapped_file_source>   str(m_Filename);
+
+    float gi_diffuse = 1.0f;
+    float gi_specular = 1.0f;
+    float gi_global = 1.0f;
+
+    for (string line; getline(str, line, '\n');) {
+        line.erase(remove(line.begin(), line.end(), '\r'), line.end()); //remove \r from the line
+        if (line[0] != '#') {//ignore commented lines
+            if (count == 1) {//this line has the system's name
+                setName(line);
+            }else if (count == 2) {//this line has the system's skybox
+                m_SkyboxFile = ResourceManifest::BasePath + line;
+            }else if (count == 3) {//this line has the system's skybox's number of flares
+                GameSkybox* box = NEW GameSkybox(m_SkyboxFile, boost::lexical_cast<uint>(line));
+                setSkybox(box);
+            }else if (count == 4) {//this line has the system's GI contribution
+                string token;
+                istringstream stream(line);
+                while (getline(stream, token, ' ')) {
+                    size_t pos   = token.find("=");
+                    string key   = token.substr(0, pos);
+                    string value = token.substr(pos + 1, string::npos);
+                    if      (key == "giDiffuse")   gi_diffuse = stof(value);
+                    else if (key == "giSpecular")  gi_specular = stof(value);
+                    else if (key == "giGlobal")    gi_global = stof(value);
+                }
+            }else if (count >= 5) {
+                break;
+            }
+        }
+        ++count;
+    }
+    setGlobalIllumination(gi_global, gi_diffuse, gi_specular);
+    m_LoadStatus = Map::MapLoadStatus::PartiallyLoaded;
+}
 void Map::cleanup() {
     SAFE_DELETE_VECTOR(m_Objects);
     m_ActiveCannonProjectiles.clear();
@@ -81,68 +123,13 @@ void Map::cleanup() {
     m_ShipsPlayerControlled.clear();
     m_Ships.clear();
     m_Player = nullptr;
+    m_SkyboxFile = "";
+    m_LoadStatus = Map::MapLoadStatus::CompletelyEmpty;
 }
 
 Map::~Map(){
     cleanup();
     SAFE_DELETE(m_HUD);
-}
-void Map::init_basic_map_data() {
-    string path = (ResourceManifest::BasePath + "data/Systems/");
-    if (!path.empty()) {
-        boost::filesystem::path base_path(path);
-        boost::filesystem::directory_iterator end;
-        for (boost::filesystem::directory_iterator map_folder_itr(base_path); map_folder_itr != end; ++map_folder_itr) {
-            const auto map_folder_path = (*map_folder_itr).path();
-            boost::filesystem::path map_folder(map_folder_path);
-            boost::filesystem::directory_iterator end1;
-
-            MapEntryData data;
-            data.map_folder_path = map_folder_path.string();
-            for (boost::filesystem::directory_iterator map_file_itr(map_folder); map_file_itr != end1; ++map_file_itr) {
-                boost::filesystem::path cp = (*map_file_itr);
-                const string file = (cp.filename().string());
-                const string ext = boost::filesystem::extension(file);
-                string file_without_ext = file.substr(0, file.size() - ext.size());
-                const auto map_file_path = (*map_file_itr).path();
-                if (ext == ".txt") {
-                    //map .txt file
-                    {
-                        string res;
-                        unsigned int count = 0;
-                        bool done = false;
-                        
-                        boost_io::stream<boost_io::mapped_file_source> str(map_file_path);
-                        data.map_file_path = map_file_path.string();
-                        for (res; std::getline(str, res, '\n');) {
-                            res.erase(std::remove(res.begin(), res.end(), '\r'), res.end()); //remove \r from the line
-                            if (count == 1) { // map name
-                                data.map_name = res;
-                            }else if (count == 3) {
-                                data.map_skybox = ResourceManifest::BasePath + res;
-                            }else if (count == 6) {
-                                res = res.substr(1, res.size() - 1);
-                                data.map_desc = res;
-                            }else if (count == 7) {//this line has the allowed gameplay types
-                                const auto list = Helper::SeparateStringByCharacter(res, ',');
-                                for (auto& str : list) {
-                                    data.map_valid_game_modes.push_back(static_cast<unsigned int>(stoi(str)));
-                                }
-                                break;
-                            }
-                            ++count;
-                        }
-                    }
-                }else if (file_without_ext == "screen" && (ext == ".jpg" || ext == ".png" || ext == ".tga" || ext == ".dds")) {
-                    //map screenshot
-                    {
-                        data.map_screenshot_handle = Resources::loadTexture(map_file_path.string());
-                    }
-                }
-            }
-            Map::DATABASE.emplace(data.map_name, data);
-        }
-    }
 }
 
 const bool& Map::isServer() const {
@@ -341,9 +328,13 @@ Client& Map::getClient() {
 Anchor* Map::internalCreateAnchor(const string& parentAnchor, const string& thisName, unordered_map<string, Anchor*>& loadedAnchors, const glm_vec3& position) {
     return internalCreateAnchor(parentAnchor, thisName, loadedAnchors, position.x, position.y, position.z);
 }
-void Map::loadFromFile(const string& filename) {
+const bool Map::full_load() {
+    if (m_LoadStatus != Map::MapLoadStatus::PartiallyLoaded) {
+        return false;
+    }
+
     uint                                             count = 0;
-    boost_io::stream<boost_io::mapped_file_source>   str(filename);
+    boost_io::stream<boost_io::mapped_file_source>   str(m_Filename);
     unordered_map<string, vector<RingInfo>>          planetRings;
     unordered_map<string, Handle>                    loadedMaterials;
     unordered_map<string, Handle>                    loadedMeshes;
@@ -360,35 +351,6 @@ void Map::loadFromFile(const string& filename) {
     for (string line; getline(str, line, '\n');) {
         line.erase(remove(line.begin(), line.end(), '\r'), line.end()); //remove \r from the line
         if (line[0] != '#') {//ignore commented lines
-            if (count == 1) {//this line has the system's name
-                setName(line);
-            }else if (count == 2) {//this line has the system's skybox
-                m_SkyboxFile = ResourceManifest::BasePath + line;
-            }else if (count == 3) {//this line has the system's skybox's number of flares
-                GameSkybox* box = NEW GameSkybox(m_SkyboxFile, boost::lexical_cast<uint>(line));
-                setSkybox(box);
-            }else if (count == 4) {//this line has the system's GI contribution
-                string token;
-                istringstream stream(line);
-                while (getline(stream, token, ' ')) {
-                    size_t pos = token.find("=");
-                    string key = token.substr(0, pos);
-                    string value = token.substr(pos + 1, string::npos);
-                    if      (key == "giDiffuse")   gi_diffuse = stof(value);
-                    else if (key == "giSpecular")  gi_specular = stof(value);
-                    else if (key == "giGlobal")    gi_global = stof(value);
-                }
-            }else if (count == 5) {//this line has the allowed ships
-                /*
-                stringstream ss(line);
-                vector<string> result;
-                while (ss.good()){
-                    string substr;
-                    getline(ss, substr, ',');
-                    result.push_back(substr);
-                }
-                */
-            }
             if (!line.empty() && line[0] != ' ' && line[1] == ' ') {//we got something to work with
                 Planet* planetoid = nullptr;
 
@@ -554,7 +516,7 @@ void Map::loadFromFile(const string& filename) {
                     }
                     m_Planets.emplace(NAME, planetoid);
                     internalCreateAnchor(PARENT, NAME, loadedAnchors, planetoid->getPosition());
-                }else if (line[0] == '+' /* && gameplayMode.getGameplayModeType() == GameplayModeType::HomelandSecurity */  ) {//ship / station
+                }else if (line[0] == '+' && gameplayMode.getGameplayMode() == GameplayModeType::HomelandSecurity) {//ship / station
 
                     //TODO: expand on this
                     auto& team = gameplayMode.getTeams().at(static_cast<TeamNumber::Enum>(TEAM));
@@ -592,8 +554,8 @@ void Map::loadFromFile(const string& filename) {
     }
 
     centerSceneToObject(loadedAnchors.at("Spawn Anchor")->entity());
-
-    setGlobalIllumination(gi_global, gi_diffuse, gi_specular);
+    m_LoadStatus = Map::MapLoadStatus::FullyLoaded;
+    return true;
 }
 Ship* Map::createShipDull(const string& shipClass, const glm::vec3& position, Scene* scene) {
     Ship* ship = nullptr;

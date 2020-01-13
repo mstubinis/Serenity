@@ -21,11 +21,12 @@ class ShipToken final : public Button {
 
         template<class T> void setOnClickFunctor(const T& functor) {
             m_FunctorOnClick = std::bind<void>(functor, this);
-            m_TokenCenter->setOnClickFunctor(functor);
         }
 
         void lightUp();
+        void lightUpFully();
         void lightOff();
+
         const std::string& getShipClass() const;
         const bool& isLit() const;
 

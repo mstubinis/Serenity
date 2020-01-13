@@ -24,6 +24,11 @@ class ClientMapSpecificData final {
         ClientMapSpecificData(Client&);
         ~ClientMapSpecificData();
 
+        Map& getMap();
+        Team& getTeam();
+        Client& getClient();
+        GameplayMode& getGameplayMode();
+
         void cleanup();
 
         void update(const double& dt);

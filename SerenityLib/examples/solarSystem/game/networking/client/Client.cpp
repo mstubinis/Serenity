@@ -126,6 +126,9 @@ void Client::connect(const unsigned short& timeout) {
     SAFE_DELETE_FUTURE(m_InitialConnectionThread);
     m_InitialConnectionThread = NEW std::future<sf::Socket::Status>(std::move(std::async(std::launch::async, lambda_connect, timeout)));
 }
+ClientMapSpecificData& Client::getMapData() {
+    return m_MapSpecificData;
+}
 Core& Client::getCore() {
     return m_Core;
 }
@@ -609,8 +612,8 @@ void Client::on_receive_client_just_left_server(Packet& basePacket, Menu& menu) 
 }
 void Client::on_receive_connection_accepted_by_server(Packet& basePacket, Menu& menu) {
     PacketMessage& pI = static_cast<PacketMessage&>(basePacket);
-    if (m_Core.m_GameState != GameState::Host_Screen_Lobby_3 /*&& m_Core.m_GameState == GameState::Host_Server_Port_And_Name_And_Map*/) {
-        m_Core.m_GameState = GameState::Host_Screen_Lobby_3;
+    if (m_Core.m_GameState != GameState::Host_Screen_Lobby_FFA_3 /*&& m_Core.m_GameState == GameState::Host_Server_Port_And_Name_And_Map*/) {
+        m_Core.m_GameState = GameState::Host_Screen_Lobby_FFA_3;
         menu.m_Next->setText("Start");
     }else if (m_Core.m_GameState != GameState::Join_Screen_Lobby_2 /*&& m_Core.m_GameState == GameState::Join_Server_Port_And_Name_And_IP*/) {
         m_Core.m_GameState = GameState::Join_Screen_Lobby_2;

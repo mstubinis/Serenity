@@ -48,10 +48,6 @@ struct Host2TD_ButtonNext_OnClick { void operator()(Button* button) const {
     const string& portstring = hostScreenTD.m_ServerPort_TextBox->text();
     const auto& map          = Server::SERVER_HOST_DATA.getMapChoice();
     if (!portstring.empty() && !username.empty() && !map.map_file_path.empty()) {
-
-        auto& core = menu.getCore();
-        menu.setGameState(GameState::Host_Screen_Lobby_3);
-        menu.setErrorText("");
         //TODO: prevent special characters in usename
         if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) { //port must have numbers only
             if (username.find_first_not_of(' ') != std::string::npos) {
@@ -80,6 +76,10 @@ struct Host2TD_ButtonNext_OnClick { void operator()(Button* button) const {
 
                     menu.m_ServerLobbyChatWindow->setUserPointer(core.getClient());
 
+
+                    menu.setGameState(GameState::Host_Screen_Lobby_FFA_3);
+                    menu.setErrorText("");
+
                 }else {
                     menu.setErrorText("The username must only contain letters");
                 }
@@ -96,8 +96,8 @@ struct Host2TD_ButtonNext_OnClick { void operator()(Button* button) const {
 
 
 HostScreenTeamDeathmatch2::HostScreenTeamDeathmatch2(HostScreen& hostScreen1, Menu& menu, Font& font) : m_HostScreen1(hostScreen1), m_Menu(menu) {
-    const auto winSize = Resources::getWindowSize();
-    const auto contentSize = glm::vec2(winSize) - glm::vec2(padding_x * 2.0f, (padding_y * 2.0f) + bottom_bar_height);
+    const auto winSize = glm::vec2(Resources::getWindowSize());
+    const auto contentSize = winSize - glm::vec2(padding_x * 2.0f, (padding_y * 2.0f) + bottom_bar_height);
     const auto top_content_height = contentSize.y / 2.0f;
     const auto first_2_boxes_width_top = contentSize.x - top_content_height;
 
@@ -150,7 +150,7 @@ Menu& HostScreenTeamDeathmatch2::getMenu() {
     return m_Menu;
 }
 void HostScreenTeamDeathmatch2::onResize(const unsigned int newWidth, const unsigned int newHeight) {
-    const auto winSize = glm::uvec2(newWidth, newHeight);
+    const auto winSize = glm::vec2(glm::uvec2(newWidth, newHeight));
 
     m_BackButton->setPosition(padding_x + (bottom_bar_button_width / 2.0f), bottom_bar_height_total / 2.0f);
     m_ForwardButton->setPosition(winSize.x - (padding_x + (bottom_bar_button_width / 2.0f)), bottom_bar_height_total / 2.0f);

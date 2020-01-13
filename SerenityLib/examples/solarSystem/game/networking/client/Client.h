@@ -77,6 +77,7 @@ class Client{
 
         Core& getCore();
         GameplayMode& getGameplayMode();
+        ClientMapSpecificData& getMapData();
 
         void setClientID(const unsigned int id);
 

@@ -79,6 +79,8 @@ FFAServerInfo::FFAServerInfo(HostScreenFFA2& hostScreen, Font& font, const float
     m_ScrollFrame->addContent(server_port, 1);
     m_ScrollFrame->addContent(max_players, 1);
     m_ScrollFrame->addContent(match_duration, 2);
+
+    m_Label->setColor(Factions::Database[FactionEnum::Federation].GUIColorText1);
 }
 FFAServerInfo::~FFAServerInfo() {
     SAFE_DELETE(m_ScrollFrame);

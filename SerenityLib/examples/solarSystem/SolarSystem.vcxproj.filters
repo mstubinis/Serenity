@@ -214,12 +214,6 @@
     <Filter Include="Source Files\Game\Ships\FedStarbaseMushroom">
       <UniqueIdentifier>{982ef486-7262-4fe1-aa2d-d113992d4045}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Game\GUI\Specifics\FFALobby">
-      <UniqueIdentifier>{e61428f5-cef6-4271-87e5-48458eaf62ca}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Game\GUI\Specifics\FFALobby">
-      <UniqueIdentifier>{7711606c-c848-46d6-af9e-318947e54399}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Game\Networking\Server">
       <UniqueIdentifier>{bfb6d132-6461-48d1-8436-a846c4cc4620}</UniqueIdentifier>
     </Filter>
@@ -330,6 +324,24 @@
     </Filter>
     <Filter Include="Source Files\Game\GUI\Specifics\HostScreen2\HomelandSecurity">
       <UniqueIdentifier>{5ac4b0c1-8123-4a73-95f3-4b735cdbc427}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\LobbyTeamDeathmatch">
+      <UniqueIdentifier>{edabf9e1-f3fd-45ce-babe-5ecc379acab0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\LobbyFFA">
+      <UniqueIdentifier>{e61428f5-cef6-4271-87e5-48458eaf62ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\LobbyHomelandSecurity">
+      <UniqueIdentifier>{d2ec0720-df96-4c43-8cda-a1dce279bd52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics\LobbyFFA">
+      <UniqueIdentifier>{7711606c-c848-46d6-af9e-318947e54399}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics\LobbyTeamDeathmatch">
+      <UniqueIdentifier>{2371e4a3-1417-41f9-ae1f-cb2f7acc956e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics\LobbyHomelandSecurity">
+      <UniqueIdentifier>{1f8787a8-71ca-4d39-b2e1-97dbc77c0938}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -543,9 +555,6 @@
     <ClInclude Include="game\ships\fed_starbase_mushroom\FedStarbaseMushroom.h">
       <Filter>Header Files\Game\Ships\FedStarbaseMushroom</Filter>
     </ClInclude>
-    <ClInclude Include="game\gui\specifics\FFALobby.h">
-      <Filter>Header Files\Game\GUI\Specifics\FFALobby</Filter>
-    </ClInclude>
     <ClInclude Include="game\networking\server\Server.h">
       <Filter>Header Files\Game\Networking\Server</Filter>
     </ClInclude>
@@ -710,6 +719,12 @@
     </ClInclude>
     <ClInclude Include="game\config\ConfigDataStruct.h">
       <Filter>Header Files\Game\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\LobbyFFA.h">
+      <Filter>Header Files\Game\GUI\Specifics\LobbyFFA</Filter>
+    </ClInclude>
+    <ClInclude Include="game\map\MapDatabase.h">
+      <Filter>Header Files\Game\Map</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -911,9 +926,6 @@
     <ClCompile Include="game\ships\fed_starbase_mushroom\FedStarbaseMushroom.cpp">
       <Filter>Source Files\Game\Ships\FedStarbaseMushroom</Filter>
     </ClCompile>
-    <ClCompile Include="game\gui\specifics\FFALobby.cpp">
-      <Filter>Source Files\Game\GUI\Specifics\FFALobby</Filter>
-    </ClCompile>
     <ClCompile Include="game\networking\client\Client.cpp">
       <Filter>Source Files\Game\Networking\Client</Filter>
     </ClCompile>
@@ -1060,6 +1072,12 @@
     </ClCompile>
     <ClCompile Include="game\config\ConfigFile.cpp">
       <Filter>Source Files\Game\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\LobbyFFA.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\LobbyFFA</Filter>
+    </ClCompile>
+    <ClCompile Include="game\map\MapDatabase.cpp">
+      <Filter>Source Files\Game\Map</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -3,7 +3,6 @@ Devil's Crown
 data/Textures/Skyboxes/Skybox6/Skybox.dds
 12
 giDiffuse=1.0 giSpecular=1.0 giGlobal=0.4
-Defiant,Nova,Akira,Intrepid,Sovereign,Miranda,Constitution,Excelsior,Shrike,D'deridex,B'rel,Vor'cha
 #A star sytem located within a red - orange nebula.
 0,1
 

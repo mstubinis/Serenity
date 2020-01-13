@@ -25,7 +25,6 @@ ClientMapSpecificData::~ClientMapSpecificData() {
     cleanup();
 }
 void ClientMapSpecificData::cleanup() {
-    //m_GameplayMode.clear();
 }
 void ClientMapSpecificData::update(const double& dt) {
     m_PingTimeHealthUpdate += dt;
@@ -85,4 +84,16 @@ void ClientMapSpecificData::update(const double& dt) {
         }
         m_PingTimePhysicsUpdate = 0.0;
     }
+}
+Map& ClientMapSpecificData::getMap() {
+    return *m_Map;
+}
+Team& ClientMapSpecificData::getTeam() {
+    return *m_Team;
+}
+Client& ClientMapSpecificData::getClient() {
+    return m_Client;
+}
+GameplayMode& ClientMapSpecificData::getGameplayMode() {
+    return m_GameplayMode;
 }

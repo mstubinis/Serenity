@@ -3,7 +3,6 @@ Sol
 data/Textures/Skyboxes/SolarSystem/Skybox.dds
 125
 giDiffuse=1.0 giSpecular=1.0 giGlobal=1.0
-Defiant,Nova,Akira,Intrepid,Sovereign,Miranda,Constitution,Excelsior,Shrike,D'deridex,B'rel,Vor'cha
 #The capital system of the United Federation of Planets, this system contains a single G-type main sequence star orbited by eight planets. Earth, the third planet from the star, is the only habitable planet in the system and is the homeworld of the Human race. This system also contains 575 moons and 796,354 minor planets located mainly in the Asteroid Belt, the Kuiper Belt, and the Oort Cloud.
 0,1,2
 

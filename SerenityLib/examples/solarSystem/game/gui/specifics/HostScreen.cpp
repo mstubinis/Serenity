@@ -25,6 +25,7 @@
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/textures/Texture.h>
+#include <core/engine/discord/Discord.h>
 
 #include <regex>
 
@@ -70,6 +71,20 @@ struct Host_ButtonNext_OnClick { void operator()(Button* button) const {
             }
         }
         
+
+        Discord::DiscordActivity activity;
+        activity.setDetail(data.getGameplayModeString());
+        activity.setType(discord::ActivityType::Playing);
+        activity.setInstance(false);
+        activity.setState(current_map.map_name);
+        activity.setTimestampStart(0);
+        activity.setTimestampEnd(0);
+        activity.setImageLarge("large_icon");
+        activity.setImageLargeText("");
+        activity.setImageSmallText("");
+        Discord::update_activity(activity);
+
+
         menu.setErrorText(""); 
     }else {
         menu.setErrorText("Please choose a map");

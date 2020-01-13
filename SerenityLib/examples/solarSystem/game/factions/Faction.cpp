@@ -18,6 +18,7 @@ const glm::vec4& gUIColor,
 const glm::vec4& gUIColorSlightlyDarker,
 const glm::vec4& gUIColorDark,
 const glm::vec4& gUIColorHighlight,
+const glm::vec4& gUIColorText1,
 const string& desc) {
     NameLong               = nameLong;
     NameShort              = nameShort;
@@ -30,6 +31,7 @@ const string& desc) {
     GUIColorSlightlyDarker = gUIColorSlightlyDarker;
     GUIColorDark           = gUIColorDark;
     GUIColorHighlight      = gUIColorHighlight;
+    GUIColorText1          = gUIColorText1;
 }
 FactionInformation::~FactionInformation() {
 
@@ -53,6 +55,7 @@ void Factions::init() {
         glm::vec4(0.5f, 0.78f, 0.94f, 1.0f) * glm::vec4(0.2f, 0.2f, 0.2f, 1.0f),
         glm::vec4(0.5f, 0.78f, 0.94f, 1.0f) * glm::vec4(0.03f, 0.03f, 0.03f, 1.0f),
         glm::vec4(0.5f, 0.78f, 0.94f, 1.0f) + glm::vec4(0.25f, 0.25f, 0.25f, 0.0f),
+        glm::vec4(0.94f,0.83f, 0.6f, 1.0f ),
         ("A unification of various cultures and worlds, the United Federation of Planets occupies a large amount of space in the Alpha and Beta quadrants of the galaxy, centered around their capital world of Earth in the Sol system."
             "\n\nThe Federation was built around the principles of exploration and diplomacy, prefering to solve problems with peace and using force only as a last resort. This policy is a core principle that has always remained "
             "constant, but for much of the Federation's existence, it has also guided the development of the Federation as a space faring entity, both technologically and militarily. The Federation built their ships and technology "
@@ -89,6 +92,7 @@ void Factions::init() {
         glm::vec4(0.834f, 0.26f, 0.13f, 1.0f) * glm::vec4(0.2f, 0.2f, 0.2f, 1.0f),
         glm::vec4(0.834f, 0.26f, 0.13f, 1.0f) * glm::vec4(0.03f, 0.03f, 0.03f, 1.0f),
         glm::vec4(0.834f, 0.26f, 0.13f, 1.0f) + glm::vec4(0.25f, 0.25f, 0.25f, 0.0f),
+        glm::vec4(0.94f, 0.83f, 0.6f, 1.0f),
         ""
     );
     //Rom
@@ -102,6 +106,7 @@ void Factions::init() {
         glm::vec4(0.278f, 0.813f, 0.56f, 1.0f) * glm::vec4(0.2f, 0.2f, 0.2f, 1.0f),
         glm::vec4(0.278f, 0.813f, 0.56f, 1.0f) * glm::vec4(0.03f, 0.03f, 0.03f, 1.0f),
         glm::vec4(0.278f, 0.813f, 0.56f, 1.0f) + glm::vec4(0.25f, 0.25f, 0.25f, 0.0f),
+        glm::vec4(0.94f, 0.83f, 0.6f, 1.0f),
         ""
     );
     //Borg
@@ -115,6 +120,7 @@ void Factions::init() {
         glm::vec4(0.0f, 1.0f, 0.0f, 1.0f) * glm::vec4(0.2f, 0.2f, 0.2f, 1.0f),
         glm::vec4(0.0f, 1.0f, 0.0f, 1.0f) * glm::vec4(0.03f, 0.03f, 0.03f, 1.0f),
         glm::vec4(0.0f, 1.0f, 0.0f, 1.0f) + glm::vec4(0.25f, 0.25f, 0.25f, 0.0f),
+        glm::vec4(0.94f, 0.83f, 0.6f, 1.0f),
         ""
     );
 }

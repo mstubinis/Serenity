@@ -2,9 +2,10 @@
 #include "MapDescriptionWindow.h"
 #include "HostScreen.h"
 #include "../../factions/Faction.h"
-#include "../../map/Map.h"
+#include "../../map/MapDatabase.h"
 #include "../../networking/server/Server.h"
 #include "../ScrollFrame.h"
+#include "../Text.h"
 
 #include <core/engine/fonts/Font.h>
 #include <core/engine/resources/Engine_Resources.h>
@@ -83,6 +84,7 @@ MapSelectionWindow::MapSelectionWindow(HostScreen& hostScreen, Font& font, const
     m_MapFileScrollFrame = new ScrollFrame(font, x, y - (height / 2.0f) + scroll_frame_padding, width - (scroll_frame_padding * 2.0f), height - 110.0f, depth - 0.001f);
     m_MapFileScrollFrame->setAlignment(Alignment::BottomCenter);
 
+    m_Label->setColor(Factions::Database[FactionEnum::Federation].GUIColorText1);
 }
 MapSelectionWindow::~MapSelectionWindow() {
     SAFE_DELETE(m_MapFileScrollFrame);
@@ -93,7 +95,7 @@ MapSelectionWindow::~MapSelectionWindow() {
 void MapSelectionWindow::recalculate_maps() {
     clearWindow();
     const auto gameplayMode = static_cast<unsigned int>(Server::SERVER_HOST_DATA.getGameplayModeType());
-    for (auto& itr : Map::DATABASE) {
+    for (auto& itr : MapDatabase::DATABASE) {
         auto& data = itr.second;
         for (auto& game_mode_int : data.map_valid_game_modes) {
             if (game_mode_int == gameplayMode) {
@@ -106,7 +108,7 @@ void MapSelectionWindow::recalculate_maps() {
 
                 auto* ptr = NEW MapSelectionWindow::ButtonPtr();
                 ptr->hostScreen = &m_HostScreen;
-                ptr->mapChoice = Map::DATABASE.at(data.map_name);
+                ptr->mapChoice = MapDatabase::DATABASE.at(data.map_name);
                 button.setUserPointer(ptr);
                 button.setOnClickFunctor(MapSelectorButtonOnClick());
                 button.setPaddingSize(40);

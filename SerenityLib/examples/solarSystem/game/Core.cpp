@@ -117,15 +117,16 @@ void Core::init() {
     window.setKeyRepeatEnabled(false);
     window.setFramerateLimit(60);
  
+    auto& winSize = window.getSize();
     Scene* menuScene = NEW Scene("Menu");
     Resources::setCurrentScene(menuScene);
-    Camera* main_camera = NEW Camera(60,Resources::getWindowSize().x / static_cast<float>(Resources::getWindowSize().y), 0.1f, 15000.0f, menuScene);
+    Camera* main_camera = NEW Camera(60, winSize.x / static_cast<float>(winSize.y), 0.1f, 15000.0f, menuScene);
     menuScene->setActiveCamera(*main_camera);
     menuScene->getMainViewport().removeRenderFlag(ViewportRenderingFlag::Skybox);
     
-    SunLight* light = NEW SunLight(glm::vec3(0.0f), LightType::Sun, menuScene);
-    light->setColor(1.55f, 1.55f, 1.3f);
-    light->setPosition(0.0f, 3000.0f, -10000.0f);
+    SunLight* ship_3d_viewer_light = NEW SunLight(glm::vec3(0.0f), LightType::Sun, menuScene);
+    ship_3d_viewer_light->setColor(1.55f, 1.55f, 1.3f);
+    ship_3d_viewer_light->setPosition(0.0f, 3000.0f, -10000.0f);
     
     GameCamera* ship_camera = NEW GameCamera(0.1f, 50.0f, menuScene);
     m_Menu = NEW Menu(*menuScene, *ship_camera, m_GameState, *this);

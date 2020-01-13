@@ -2,14 +2,6 @@
 #ifndef GAME_MAP_H
 #define GAME_MAP_H
 
-#include <core/engine/scene/Scene.h>
-#include <unordered_map>
-#include <tuple>
-#include "../ships/shipSystems/ShipSystemWeapons.h"
-#include "Freelist.h"
-#include "../ai/AIIncludes.h"
-#include "MapEntry.h"
-
 class Star;
 class Ship;
 class Planet;
@@ -22,12 +14,25 @@ class HUD;
 class GameplayMode;
 class Team;
 class Server;
+
+#include <core/engine/scene/Scene.h>
+#include <unordered_map>
+#include <tuple>
+#include "../ships/shipSystems/ShipSystemWeapons.h"
+#include "Freelist.h"
+#include "../ai/AIIncludes.h"
+
 class Map: public Scene{
     friend class Server;
-    public:
-        static void init_basic_map_data();
-        static std::unordered_map<std::string, MapEntryData> DATABASE;
+
+    struct MapLoadStatus final { enum Status {
+        CompletelyEmpty,
+        PartiallyLoaded,
+        FullyLoaded,
+    };};
+ 
     private:
+        Map::MapLoadStatus::Status                           m_LoadStatus;
         GameplayMode&                                        m_GameplayMode;
         std::unordered_map<std::string, Planet*>             m_Planets;
         std::unordered_map<std::string, Ship*>               m_Ships;
@@ -42,12 +47,13 @@ class Map: public Scene{
 
         Freelist<PrimaryWeaponCannonProjectile*>             m_ActiveCannonProjectiles;
         Freelist<SecondaryWeaponTorpedoProjectile*>          m_ActiveTorpedoProjectiles;
-
-        void loadFromFile(const std::string& file);
     private:
         std::tuple<std::string, Anchor*>                     m_RootAnchor;
         std::vector<std::tuple<std::string, Anchor*>>        m_SpawnAnchors;
 
+        //give the map its essentials, but do not load everything needed
+        void basic_init(const std::string& file);
+ 
         Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const decimal& x = 0, const decimal& y = 0, const decimal& z = 0);
         Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const glm_vec3& position);
     public:
@@ -62,6 +68,7 @@ class Map: public Scene{
         Map(GameplayMode& mode, Client& client, const std::string& name, const std::string& file);
         virtual ~Map();
 
+        const bool full_load();
         const bool& isServer() const;
         void cleanup();
 

@@ -20,56 +20,62 @@
 using namespace std;
 using namespace Engine;
 
-const auto dividor_width          = 38.0f;
+const auto dividor_width          = 25.0f;
 const auto scroll_frame_padding_2 = 20.0f;
 const auto scroll_frame_padding   = 30.0f;
-const auto padding_y = 110.0f;
+const auto padding_y              = 110.0f;
 
 struct ShipTokenOnClickTotal final { void operator()(Button* button) const {
-    auto& token = *static_cast<ShipToken*>(button);
-    FFAShipSelector& ffaSelector = *static_cast<FFAShipSelector*>(token.getUserPointer());
+    ShipToken* token_ptr = dynamic_cast<ShipToken*>(button);
+    if (token_ptr) {
+        ShipToken& token             = *token_ptr;
+        FFAShipSelector& ffaSelector = *static_cast<FFAShipSelector*>(token.getUserPointer());
 
-    //ship pool
-    if (token.isLit()) {
-        for (auto& widget_row : ffaSelector.m_ShipsAllowedFrame->content()) {
-            bool done = false;
-            for (auto& widget : widget_row.widgets) {
-                auto& token_1 = *static_cast<ShipToken*>(widget.widget);
-                if (token_1.getShipClass() == token.getShipClass()) {
-                    token_1.lightUp();
-                    done = true;
-                    break;
+        //ship pool
+        if (token.isLit()) {
+            for (auto& widget_row : ffaSelector.m_ShipsAllowedFrame->content()) {
+                bool done = false;
+                for (auto& widget : widget_row.widgets) {
+                    ShipToken& token_1 = *static_cast<ShipToken*>(widget.widget);
+                    if (token_1.getShipClass() == token.getShipClass()) {
+                        token_1.lightUp();
+                        done = true;
+                        break;
+                    }
                 }
+                if (done)
+                    break;
             }
-            if (done)
-                break;
+            token.lightOff();
         }
-        token.lightOff();
+        Server::SERVER_HOST_DATA.setAllowedShips(ffaSelector.getAllowedShips());
     }
-    Server::SERVER_HOST_DATA.setAllowedShips(ffaSelector.getAllowedShips());
 }};
 struct ShipTokenOnClickAllowed final { void operator()(Button* button) const {
-    auto& token = *static_cast<ShipToken*>(button);
-    FFAShipSelector& ffaSelector = *static_cast<FFAShipSelector*>(token.getUserPointer());
+    ShipToken* token_ptr = dynamic_cast<ShipToken*>(button);
+    if (token_ptr) {
+        ShipToken& token             = *token_ptr;
+        FFAShipSelector& ffaSelector = *static_cast<FFAShipSelector*>(token.getUserPointer());
 
-    //ships allowed
-    if (token.isLit()) {
-        for (auto& widget_row : ffaSelector.m_ShipsTotalFrame->content()) {
-            bool done = false;
-            for (auto& widget : widget_row.widgets) {
-                auto& token_1 = *static_cast<ShipToken*>(widget.widget);
-                if (token_1.getShipClass() == token.getShipClass()) {
-                    token_1.lightUp();
-                    done = true;
-                    break;
+        //ships allowed
+        if (token.isLit()) {
+            for (auto& widget_row : ffaSelector.m_ShipsTotalFrame->content()) {
+                bool done = false;
+                for (auto& widget : widget_row.widgets) {
+                    ShipToken& token_1 = *static_cast<ShipToken*>(widget.widget);
+                    if (token_1.getShipClass() == token.getShipClass()) {
+                        token_1.lightUp();
+                        done = true;
+                        break;
+                    }
                 }
+                if (done)
+                    break;
             }
-            if (done)
-                break;
+            token.lightOff();
         }
-        token.lightOff();
+        Server::SERVER_HOST_DATA.setAllowedShips(ffaSelector.getAllowedShips());
     }
-    Server::SERVER_HOST_DATA.setAllowedShips(ffaSelector.getAllowedShips());
 }};
 
 FFAShipSelector::FFAShipSelector(HostScreenFFA2& hostScreen, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const string& labelText)
@@ -94,13 +100,12 @@ FFAShipSelector::FFAShipSelector(HostScreenFFA2& hostScreen, Font& font, const f
     m_ShipsTotalLabel = new Text(x - (width / 4.0f), y + (height / 2.0f) - 9.0f, font, "Ship Database");
     m_ShipsTotalLabel->setAlignment(Alignment::Center);
     m_ShipsTotalLabel->setTextAlignment(TextAlignment::Center);
-    m_ShipsTotalLabel->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
-
+    m_ShipsTotalLabel->setColor(Factions::Database[FactionEnum::Federation].GUIColorText1);
 
     m_ShipsAllowedLabel = new Text(x + (width / 4.0f), y + (height / 2.0f) - 9.0f, font, "Ships Allowed");
     m_ShipsAllowedLabel->setAlignment(Alignment::Center);
     m_ShipsAllowedLabel->setTextAlignment(TextAlignment::Center);
-    m_ShipsAllowedLabel->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
+    m_ShipsAllowedLabel->setColor(Factions::Database[FactionEnum::Federation].GUIColorText1);
 
     m_MiddleDivide = new Button(font, x, y - (height / 2.0f), dividor_width, height - 51.0f);
     m_MiddleDivide->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
@@ -109,6 +114,12 @@ FFAShipSelector::FFAShipSelector(HostScreenFFA2& hostScreen, Font& font, const f
     m_MiddleDivide->disable();
     m_MiddleDivide->setDepth(depth - 0.003f);
     m_MiddleDivide->setAlignment(Alignment::BottomCenter);
+    m_MiddleDivide->setTextureCorner(nullptr);
+    m_MiddleDivide->setTextureCornerHighlight(nullptr);
+    m_MiddleDivide->setTextureEdge(nullptr);
+    m_MiddleDivide->setTextureEdgeHighlight(nullptr);
+    m_MiddleDivide->enableTextureCorner(false);
+    m_MiddleDivide->enableTextureEdge(false);
 
     init_window_contents();
 }

@@ -30,6 +30,7 @@ struct FactionInformation final {
     glm::vec4 GUIColorSlightlyDarker;
     glm::vec4 GUIColorDark;
     glm::vec4 GUIColorHighlight;
+    glm::vec4 GUIColorText1;
 
     FactionInformation();
     FactionInformation(
@@ -42,6 +43,7 @@ struct FactionInformation final {
         const glm::vec4& gUIColorSlightlyDarker,
         const glm::vec4& gUIColorDark,
         const glm::vec4& gUIColorHighlight,
+        const glm::vec4& gUIColorText1,
         const std::string& description
     );
     ~FactionInformation();

@@ -75,8 +75,9 @@ struct ButtonBack_OnClick {void operator()(Button* button) const {
 }};
 struct ButtonNext_OnClick {void operator()(Button* button) const {
     Menu& menu = *static_cast<Menu*>(button->getUserPointer());
+    auto& core = menu.getCore();
     switch (menu.m_GameState) {
-        case GameState::Host_Screen_Lobby_3: {
+        case GameState::Host_Screen_Lobby_FFA_3: {
             menu.enter_the_game();
             break;
         }case GameState::Join_Screen_Setup_1: {
@@ -107,6 +108,7 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
             }
             break;
         }case GameState::Join_Screen_Lobby_2: { 
+            core.getClient()->getMapData().getMap().full_load();
             menu.enter_the_game();
             break;
         }default: {
@@ -309,7 +311,7 @@ void Menu::update_host_setup_hs_2(const double& dt) {
     m_HostScreenHomelandSecurity2->update(dt);
 }
 
-void Menu::update_host_lobby_3(const double& dt) {
+void Menu::update_host_lobby_ffa_3(const double& dt) {
     m_ServerLobbyChatWindow->update(dt);
     m_ServerLobbyConnectedPlayersWindow->update(dt);
     m_ServerLobbyShipSelectorWindow->update(dt);
@@ -317,7 +319,26 @@ void Menu::update_host_lobby_3(const double& dt) {
     m_Back->update(dt);
     m_Next->update(dt);
 }
+void Menu::update_host_lobby_td_3(const double& dt) {
+    /*
+    m_ServerLobbyChatWindow->update(dt);
+    m_ServerLobbyConnectedPlayersWindow->update(dt);
+    m_ServerLobbyShipSelectorWindow->update(dt);
 
+    m_Back->update(dt);
+    m_Next->update(dt);
+    */
+}
+void Menu::update_host_lobby_hs_3(const double& dt) {
+    /*
+    m_ServerLobbyChatWindow->update(dt);
+    m_ServerLobbyConnectedPlayersWindow->update(dt);
+    m_ServerLobbyShipSelectorWindow->update(dt);
+
+    m_Back->update(dt);
+    m_Next->update(dt);
+    */
+}
 void Menu::update_join_setup_1(const double& dt) {
     m_Back->update(dt);
     m_Next->update(dt);
@@ -383,7 +404,7 @@ void Menu::render_host_setup_td_2() {
 void Menu::render_host_setup_hs_2() {
     m_HostScreenHomelandSecurity2->render();
 }
-void Menu::render_host_lobby_3() {
+void Menu::render_host_lobby_ffa_3() {
     m_ServerLobbyChatWindow->render();
     m_ServerLobbyConnectedPlayersWindow->render();
     m_ServerLobbyShipSelectorWindow->render();
@@ -391,7 +412,26 @@ void Menu::render_host_lobby_3() {
     m_Back->render();
     m_Next->render();
 }
+void Menu::render_host_lobby_td_3() {
+    /*
+    m_ServerLobbyChatWindow->render();
+    m_ServerLobbyConnectedPlayersWindow->render();
+    m_ServerLobbyShipSelectorWindow->render();
 
+    m_Back->render();
+    m_Next->render();
+    */
+}
+void Menu::render_host_lobby_hs_3() {
+    /*
+    m_ServerLobbyChatWindow->render();
+    m_ServerLobbyConnectedPlayersWindow->render();
+    m_ServerLobbyShipSelectorWindow->render();
+
+    m_Back->render();
+    m_Next->render();
+    */
+}
 void Menu::render_join_setup_1() {
     m_Back->render();
     m_Next->render();
@@ -448,8 +488,12 @@ void Menu::update(const double& dt) {
             update_host_setup_td_2(dt); break;
         }case GameState::Host_Screen_Setup_HomelandSecurity_2: {
             update_host_setup_hs_2(dt); break;
-        }case GameState::Host_Screen_Lobby_3: {
-            update_host_lobby_3(dt); break;
+        }case GameState::Host_Screen_Lobby_FFA_3: {
+            update_host_lobby_ffa_3(dt); break;
+        }case GameState::Host_Screen_Lobby_TeamDeathMatch_3: {
+            update_host_lobby_td_3(dt); break;
+        }case GameState::Host_Screen_Lobby_HomelandSecurity_3: {
+            update_host_lobby_hs_3(dt); break;
         }case GameState::Join_Screen_Setup_1: {
             update_join_setup_1(dt); break;
         }case GameState::Join_Screen_Lobby_2: {
@@ -496,8 +540,12 @@ void Menu::render() {
             render_host_setup_td_2(); break;
         }case GameState::Host_Screen_Setup_HomelandSecurity_2: {
             render_host_setup_hs_2(); break;
-        }case GameState::Host_Screen_Lobby_3: {
-            render_host_lobby_3(); break;
+        }case GameState::Host_Screen_Lobby_FFA_3: {
+            render_host_lobby_ffa_3(); break;
+        }case GameState::Host_Screen_Lobby_TeamDeathMatch_3: {
+            render_host_lobby_td_3(); break;
+        }case GameState::Host_Screen_Lobby_HomelandSecurity_3: {
+            render_host_lobby_hs_3(); break;
         }case GameState::Join_Screen_Setup_1: {
             render_join_setup_1(); break;
         }case GameState::Join_Screen_Lobby_2: {

@@ -27,12 +27,15 @@ using namespace Engine;
 const auto y_padding = 110.0f;
 const auto scroll_frame_padding = 30.0f;
 
-MapDescriptionWindow::MapDescriptionWindow(Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const string& labelText) : RoundedWindow(font,x,y,width,height,depth, borderSize, labelText), m_Font(font){
+MapDescriptionWindow::MapDescriptionWindow(Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const string& labelText) 
+:RoundedWindow(font,x,y,width,height,depth, borderSize, labelText), m_Font(font){
     m_UserPointer = nullptr;
     m_MapDescriptionTextScrollFrame = NEW ScrollFrame(font, x, y - (height / 2.0f) + scroll_frame_padding, width - (scroll_frame_padding * 2.0f), height, depth - 0.001f);
 
     m_MapDescriptionTextScrollFrame->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_MapDescriptionTextScrollFrame->setAlignment(Alignment::BottomCenter);
+
+    m_Label->setColor(Factions::Database[FactionEnum::Federation].GUIColorText1);
 }
 MapDescriptionWindow::~MapDescriptionWindow() {
     SAFE_DELETE(m_MapDescriptionTextScrollFrame);

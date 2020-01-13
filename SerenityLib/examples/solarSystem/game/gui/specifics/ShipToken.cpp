@@ -6,7 +6,7 @@
 
 using namespace std;
 
-const auto token_padding = 12.0f;
+const unsigned int token_padding = 12;
 
 ShipToken::ShipToken(const string& shipClass, Font& font, const float& x, const float& y, const float& depth, const bool& lit, void* userPtr) : Button(font, x, y, 1, 1){
     m_ShipClass = shipClass;
@@ -33,7 +33,7 @@ ShipToken::ShipToken(const string& shipClass, Font& font, const float& x, const 
     setDepth(depth);
     setUserPointer(userPtr);
 
-    m_TokenCenter = new Button(font, 0, 0, 1, 1);
+    m_TokenCenter = NEW Button(font, 0, 0, 1, 1);
     m_TokenCenter->setAlignment(Alignment::TopLeft);
     m_TokenCenter->setSize(texture_border->width(), texture_border->height());
     m_TokenCenter->setText("");
@@ -68,23 +68,54 @@ const string& ShipToken::getShipClass() const {
 const bool& ShipToken::isLit() const {
     return m_LightedUp;
 }
-void ShipToken::lightUp() {
+void ShipToken::lightUpFully() {
     m_LightedUp = true;
-    m_TokenCenter->show();
-    m_TokenCenter->enableMouseover();
-    m_TokenCenter->enable();
+    auto& info = Ships::Database[m_ShipClass];
+    if (m_TokenCenter) {
+        Texture* texture_border = (Texture*)(info.IconBorderTextureHandle.get());
+        Texture* texture = (Texture*)(info.IconTextureHandle.get());
 
+        m_TokenCenter->setTexture(texture);
+        m_TokenCenter->setTextureHighlight(texture);
+        m_TokenCenter->enableTexture(true);
+
+
+        m_TokenCenter->show();
+        m_TokenCenter->enableMouseover();
+        m_TokenCenter->enable();
+    }
     enableMouseover();
     enable();
+    setColor(info.FactionInformation.ColorText);
+}
+void ShipToken::lightUp() {
+    m_LightedUp = true;
     auto& info = Ships::Database[m_ShipClass];
+    if (m_TokenCenter) {
+        m_TokenCenter->show();
+        m_TokenCenter->enableMouseover();
+        m_TokenCenter->enable();
+    }
+    enableMouseover();
+    enable();
     setColor(info.FactionInformation.ColorText);
 }
 void ShipToken::lightOff() {
     m_LightedUp = false;
-    m_TokenCenter->hide();
-    m_TokenCenter->disable();
-    m_TokenCenter->disableMouseover();
+    auto& info = Ships::Database[m_ShipClass];
+    if (m_TokenCenter) {
+        Texture* texture_border = (Texture*)(info.IconBorderTextureHandle.get());
+        Texture* texture = (Texture*)(info.IconTextureHandle.get());
 
+        m_TokenCenter->setTexture(nullptr);
+        m_TokenCenter->setTextureHighlight(texture);
+        m_TokenCenter->enableTexture(false);
+
+
+        m_TokenCenter->hide();
+        m_TokenCenter->disable();
+        m_TokenCenter->disableMouseover();
+    }
     disable();
     disableMouseover();
     setColor(glm::vec4(0.25f, 0.25f, 0.25f, 1.0f));

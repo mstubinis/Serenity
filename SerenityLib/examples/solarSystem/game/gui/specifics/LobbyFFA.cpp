@@ -1,4 +1,4 @@
-#include "FFALobby.h"
+#include "LobbyFFA.h"
 
 #include "../../gui/Button.h"
 
@@ -8,8 +8,7 @@
 using namespace std;
 using namespace Engine;
 
-
-FFALobby::FFALobby(Font& font, const bool isHost) {
+LobbyScreenFFA::LobbyScreenFFA(Font& font, const bool isHost) {
     m_IsHost           = isHost;
     m_ForwardButton    = nullptr;
 
@@ -30,28 +29,26 @@ FFALobby::FFALobby(Font& font, const bool isHost) {
     m_BackButton     = NEW Button(font, position, width, height);
     m_BackButton->setText(back_text);
 }
-FFALobby::~FFALobby() {
+LobbyScreenFFA::~LobbyScreenFFA() {
     SAFE_DELETE(m_ForwardButton);
     SAFE_DELETE(m_BackButton);
 }
-void FFALobby::onResize(const unsigned int newWidth, const unsigned int newHeight) {
+void LobbyScreenFFA::onResize(const unsigned int newWidth, const unsigned int newHeight) {
     m_BackButton->setPosition(0, 0);
-    if (m_ForwardButton)
+    if (m_IsHost && m_ForwardButton)
         m_ForwardButton->setPosition(newWidth - m_ForwardButton->width(), 0);
 }
-void FFALobby::update(const double& dt) {
-    //resize
-
+void LobbyScreenFFA::update(const double& dt) {
 
     m_BackButton->update(dt);
-    if (m_ForwardButton)
+    if (m_IsHost && m_ForwardButton)
         m_ForwardButton->update(dt);
 }
-void FFALobby::render() {
+void LobbyScreenFFA::render() {
     m_BackButton->render();
-    if (m_ForwardButton)
+    if (m_IsHost && m_ForwardButton)
         m_ForwardButton->render();
 }
-const bool FFALobby::isHost() const {
+const bool LobbyScreenFFA::isHost() const {
     return m_IsHost;
 }
