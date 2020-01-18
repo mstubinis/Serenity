@@ -78,6 +78,13 @@ void EngineCore::init_os_specific(const EngineOptions& options) {
         }
     #endif
 }
+void EngineCore::cleanup_os_specific() {
+    //#ifdef _WIN32
+    //    if (GetConsoleWindow() != NULL) {
+            //FreeConsole(); //erroring out for some reason
+    //    }
+    //#endif
+}
 void EngineCore::init_window(const EngineOptions& options) {
     auto& window = Resources::getWindow();
 
@@ -510,5 +517,6 @@ void EngineCore::run(){
     }
     on_event_game_ended();
     Game::cleanup();
+    cleanup_os_specific();
     SAFE_DELETE(Core::m_Engine);
 }

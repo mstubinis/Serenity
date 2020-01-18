@@ -36,11 +36,16 @@ class HostScreen1 final {
 
         MapSelectionWindow*        m_LeftWindow;
         MapDescriptionWindow*      m_RightWindow;
+
+        bool m_IsPersistent;
     public:
         HostScreen1(Menu&, Font& font);
         ~HostScreen1();
 
         Menu& getMenu();
+
+        void setPersistent();
+        const bool isPersistent() const;
 
         void clearCurrentMapChoice();
         void setCurrentMapChoice(const MapEntryData& choice);

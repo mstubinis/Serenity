@@ -28,11 +28,15 @@ class FFAServerInfo final : public RoundedWindow {
         HostScreenFFA2&  m_HostScreen;
         ScrollFrame*     m_ScrollFrame;
         Font&            m_Font;
+        bool             m_IsPersistent;
     public:
-        FFAServerInfo(HostScreenFFA2&, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const std::string& labelText, const bool fromDatabase = false);
+        FFAServerInfo(HostScreenFFA2&, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const std::string& labelText);
         ~FFAServerInfo();
 
         void onResize(const unsigned int& newWidth, const unsigned int& newHeight);
+
+        void setPersistent();
+        const bool isPersistent() const;
 
         TextBox& getYourNameTextBox();
         TextBox& getServerPortTextBox();

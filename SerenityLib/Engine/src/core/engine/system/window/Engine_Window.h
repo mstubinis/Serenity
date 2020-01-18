@@ -60,7 +60,7 @@ class Engine_Window final{
             sf::ContextSettings m_SFContextSettings;
 
             void restore_state();
-            const sf::ContextSettings create(Engine_Window&, const std::string& _name, const unsigned int& _width, const unsigned int& _height);
+            const sf::ContextSettings create(Engine_Window&, const char* _name, const unsigned int& _width, const unsigned int& _height);
             void update_mouse_position_internal(Engine_Window&, const float x, const float y, const bool resetDifference, const bool resetPrevious);
             void on_fullscreen_internal(Engine_Window&, const bool isToBeFullscreen, const bool isMaximized, const bool isMinimized);
             sf::VideoMode get_default_desktop_video_mode();

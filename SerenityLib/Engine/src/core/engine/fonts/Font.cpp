@@ -54,10 +54,10 @@ Font::Font(const string& filename) : EngineResource(ResourceType::Font, filename
                 }
 
                 if (fontGlyph.yoffset + fontGlyph.height > max_y_offset) {
-                    max_y_offset = fontGlyph.yoffset + fontGlyph.height;
+                    max_y_offset = static_cast<float>(fontGlyph.yoffset) + static_cast<float>(fontGlyph.height);
                 }
                 if (fontGlyph.yoffset < min_y_offset) {
-                    min_y_offset = fontGlyph.yoffset;
+                    min_y_offset = static_cast<float>(fontGlyph.yoffset);
                 }
             }
             fontGlyph.pts.emplace_back(0.0f, 0.0f, 0.0f);

@@ -10,6 +10,7 @@
 #include "PacketGameplayModeInfo.h"
 #include "PacketShipInfoRequest.h"
 #include "PacketConnectionAccepted.h"
+#include "PacketUpdateLobbyTimeLeft.h"
 
 using namespace std;
 
@@ -21,6 +22,8 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
     switch (packetType) {
         case PacketType::Server_To_Client_Accept_Connection: {
             return NEW PacketConnectionAccepted();
+        }case PacketType::Server_To_Client_Update_Lobby_Time_Left: {
+            return NEW PacketUpdateLobbyTimeLeft();
         }case PacketType::Server_To_Client_Reject_Connection: {
             return NEW PacketMessage();
         }case PacketType::Client_To_Server_Request_Connection: {

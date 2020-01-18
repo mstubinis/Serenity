@@ -29,9 +29,13 @@ class ServerHostData final {
         unsigned short            m_ServerPort;
         GameplayMode              m_GameplayMode;
         unsigned int              m_ExpectedMatchDurationInSeconds;
+        double                    m_CurrentLobbyTimeInSeconds;
     public:
         const MapEntryData& getMapChoice() const;
         void setMapChoice(const MapEntryData&);
+
+        void setCurrentLobbyTimeInSeconds(const unsigned int& seconds);
+        const double getCurrentLobbyTime() const;
 
         void setMatchDurationInMinutes(const unsigned int& minutes);
         void setMatchDurationInSeconds(const unsigned int& seconds);
@@ -112,8 +116,8 @@ class Server {
     friend class ServerMapSpecificData;
     public:
         static ServerHostData                          SERVER_HOST_DATA;
+        static Database                                DATABASE;
     private:
-        Database                                       m_Database;
         ServerMapSpecificData                          m_MapSpecificData;
         Engine::Networking::SocketUDP*                 m_UdpSocket;
         std::mutex                                     m_Mutex;
@@ -166,7 +170,6 @@ class Server {
         const sf::Socket::Status receive_udp(sf::Packet& packet);
         const sf::Socket::Status receive_udp(void* data, size_t size, size_t& received);
 
-        Database& getDatabase();
         ServerClient* getClientByUsername(const std::string& UserName);
         ServerClient* getClientByMapKey(const std::string& MapKey);
 

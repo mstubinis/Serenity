@@ -43,7 +43,7 @@ void Engine_Window::Engine_WindowData::restore_state() {
     m_SFMLWindow.setVerticalSyncEnabled(m_Flags & Engine_Window_Flags::Vsync);
     m_SFMLWindow.setMouseCursorGrabbed(m_Flags & Engine_Window_Flags::MouseGrabbed);
 }
-const sf::ContextSettings Engine_Window::Engine_WindowData::create(Engine_Window& super, const string& _name, const unsigned int& _width, const unsigned int& _height) {
+const sf::ContextSettings Engine_Window::Engine_WindowData::create(Engine_Window& super, const char* _name, const unsigned int& _width, const unsigned int& _height) {
     sf::ContextSettings settings;
     settings.depthBits         = 24;
     settings.stencilBits       = 0;
@@ -67,7 +67,6 @@ const sf::ContextSettings Engine_Window::Engine_WindowData::create(Engine_Window
         m_Style = sf::Style::None;
         m_VideoMode = get_default_desktop_video_mode();
     }
-
     m_SFMLWindow.create(m_VideoMode, _name, m_Style, settings);
     unsigned int opengl_version = stoi(to_string(settings.majorVersion) + to_string(settings.minorVersion));
     epriv::Core::m_Engine->m_RenderManager._onOpenGLContextCreation(m_VideoMode.width, m_VideoMode.height, m_GLSLVersion, opengl_version);

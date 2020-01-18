@@ -361,6 +361,12 @@
     <Filter Include="Header Files\Game\GUI\Specifics\HostScreen1Persistent">
       <UniqueIdentifier>{c11b05c5-870a-44dc-af51-164d62af3972}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\Security">
+      <UniqueIdentifier>{e6022332-3a89-4bcf-b477-2048a03b7f42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Security">
+      <UniqueIdentifier>{e33d519d-f37e-4488-90a6-bff39b207b6e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -756,6 +762,21 @@
     <ClInclude Include="game\gui\specifics\MessageWithArrow.h">
       <Filter>Header Files\Game\GUI\Specifics\Templates</Filter>
     </ClInclude>
+    <ClInclude Include="game\gui\specifics\HostScreen1Persistent.h">
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen1Persistent</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\packets\PacketUpdateLobbyTimeLeft.h">
+      <Filter>Header Files\Game\Networking\Packets</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\OwnedServersSelectionWindow.h">
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen1Persistent</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\CreateServerWindow.h">
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen1Persistent</Filter>
+    </ClInclude>
+    <ClInclude Include="game\security\Security.h">
+      <Filter>Header Files\Game\Security</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -1120,6 +1141,21 @@
     </ClCompile>
     <ClCompile Include="game\gui\specifics\MessageWithArrow.cpp">
       <Filter>Source Files\Game\GUI\Specifics\Templates</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\HostScreen1Persistent.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen1Persistent</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\packets\PacketUpdateLobbyTimeLeft.cpp">
+      <Filter>Source Files\Game\Networking\Packets</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\OwnedServersSelectionWindow.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen1Persistent</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\CreateServerWindow.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen1Persistent</Filter>
+    </ClCompile>
+    <ClCompile Include="game\security\Security.cpp">
+      <Filter>Source Files\Game\Security</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

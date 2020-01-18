@@ -1,6 +1,8 @@
 #include "HostScreen0.h"
 #include "../Button.h"
 #include "../../Menu.h"
+#include "../../database/Database.h"
+#include "../../networking/server/Server.h"
 #include "../../factions/Faction.h"
 
 #include <core/engine/resources/Engine_Resources.h>
@@ -21,18 +23,21 @@ constexpr auto button_height = 100.0f;
 constexpr auto seperation_size = 225.0f;
 
 struct Host0_ButtonBack_OnClick final { void operator()(Button* button) const {
-    HostScreen0& hostScreen0 = *static_cast<HostScreen0*>(button->getUserPointer());
+    auto& hostScreen0 = *static_cast<HostScreen0*>(button->getUserPointer());
     hostScreen0.m_Menu.go_to_main_menu();
 };};
 
 struct HostTempServClick final { void operator()(Button* button) const {
-    HostScreen0& hostScreen0 = *static_cast<HostScreen0*>(button->getUserPointer());
+    auto& hostScreen0 = *static_cast<HostScreen0*>(button->getUserPointer());
     hostScreen0.m_Menu.setGameState(GameState::Host_Screen_Setup_1);
     hostScreen0.m_Menu.setErrorText("", 0.2f);
 };};
 
 struct HostPersServClick final { void operator()(Button* button) const {
-    HostScreen0& hostScreen0 = *static_cast<HostScreen0*>(button->getUserPointer());
+    auto& hostScreen0 = *static_cast<HostScreen0*>(button->getUserPointer());
+
+    Server::DATABASE.connect_to_database("servers");
+
     hostScreen0.m_Menu.setGameState(GameState::Host_Screen_Setup_1_Persistent);
     hostScreen0.m_Menu.setErrorText("", 0.2f);
 };};
@@ -91,7 +96,7 @@ Button& HostScreen0::getHostPersistentServerButton() {
 }
 
 void HostScreen0::onResize(const unsigned int newWidth, const unsigned int newHeight) {
-    const auto winSize = glm::uvec2(newWidth, newHeight);
+    const auto winSize = glm::vec2(newWidth, newHeight);
 
     m_HostTemporaryServer->setPosition((newWidth / 2.0f), (newHeight / 2.0f) + (seperation_size / 2.0f));
 

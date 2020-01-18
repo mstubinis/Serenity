@@ -69,7 +69,6 @@ struct Host2FFA_ButtonNext_OnClick { void operator()(Button* button) const {
 
                         const int port        = stoi(port_text);
                         const int max_players = stoi(max_players_text);
-                        const unsigned int lobby_duration_in_secs = hostScreenFFA.getLobbyDurationFromTextBoxInSeconds();
 
                         core.startServer(port);
                         core.startClient(nullptr, port, username, "127.0.0.1"); //the client will request validation at this stage
@@ -82,6 +81,7 @@ struct Host2FFA_ButtonNext_OnClick { void operator()(Button* button) const {
                         Server::SERVER_HOST_DATA.addTeam(team1);
                         Server::SERVER_HOST_DATA.setMatchDurationInSeconds(hostScreenFFA.getMatchDurationFromTextBoxInSeconds());
                         Server::SERVER_HOST_DATA.setServerPort(port);
+                        Server::SERVER_HOST_DATA.setCurrentLobbyTimeInSeconds(hostScreenFFA.getLobbyDurationFromTextBoxInSeconds());
 
                         core.getClient()->getGameplayMode() = Server::SERVER_HOST_DATA.getGameplayMode();
                         core.getServer()->startupMap(map);
@@ -91,8 +91,6 @@ struct Host2FFA_ButtonNext_OnClick { void operator()(Button* button) const {
                         ConfigFile config;
                         config.updateHostServerName(username);
                         config.updateHostServerPort(port);
-
-                        menu.setGameState(GameState::Host_Screen_Lobby_FFA_3);
 
                         menu.setErrorText("");
 

@@ -39,14 +39,23 @@ using namespace Engine;
 using namespace Engine::Networking;
 
 ServerHostData Server::SERVER_HOST_DATA;
+Database Server::DATABASE;
 
 ServerHostData::ServerHostData() {
     setGameplayModeType(GameplayModeType::FFA);
     setServerPort(55000);
+    setCurrentLobbyTimeInSeconds(0);
     setMatchDurationInMinutes(15); //15 mins
 }
 ServerHostData::~ServerHostData() {
 
+}
+
+void ServerHostData::setCurrentLobbyTimeInSeconds(const unsigned int& seconds) {
+    m_CurrentLobbyTimeInSeconds = static_cast<double>(seconds);
+}
+const double ServerHostData::getCurrentLobbyTime() const {
+    return m_CurrentLobbyTimeInSeconds;
 }
 const MapEntryData& ServerHostData::getMapChoice() const {
     return m_CurrentMapChoice;
@@ -229,9 +238,6 @@ void Server::shutdown(const bool destructor) {
         SAFE_DELETE(m_TCPListener);
         SAFE_DELETE(m_UdpSocket);
     }
-}
-Database& Server::getDatabase() {
-    return m_Database;
 }
 const bool Server::shutdownMap() {
     const auto success = Resources::deleteScene(*m_MapSpecificData.m_Map);
@@ -615,7 +621,27 @@ void Server::updateClient(ServerClient& client) {
                         res = server.assignRandomTeam(pI, client);
                     }
                     info[2] = res;
+
+                    //choose random ship if applicable
+                    if (info[0] == "NULL") {
+                        auto& allowed_ships = Server::SERVER_HOST_DATA.getAllowedShips();
+                        const int rand_index = Helper::GetRandomIntFromTo(0, allowed_ships.size() - 1);
+                        string rand_ship = "";
+
+                        size_t i = 0;
+                        for (auto& itr : allowed_ships) {
+                            if (i == rand_index) {
+                                rand_ship = itr;
+                                break;
+                            }
+                            ++i;
+                        }
+                        info[0] = rand_ship;
+                    }
                     pI.data = Helper::Stringify(info, ',');
+
+
+
                     server.send_to_client(client, pI);
                     break;
                 }case PacketType::Client_To_Server_Chat_Message: {
@@ -637,6 +663,7 @@ void Server::updateClient(ServerClient& client) {
                         pOut.game_mode_type = static_cast<unsigned char>(Server::SERVER_HOST_DATA.getGameplayMode().getGameplayMode());
                         pOut.already_connected_players = "";
                         pOut.allowed_ships = Helper::Stringify(Server::SERVER_HOST_DATA.getAllowedShips(), ',');
+                        pOut.lobby_time_left = Server::SERVER_HOST_DATA.getCurrentLobbyTime();
                         if (client.m_Username == server.m_Core.m_Client->m_Username) {
                             pOut.is_host = true;
                         }

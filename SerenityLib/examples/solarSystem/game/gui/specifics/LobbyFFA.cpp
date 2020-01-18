@@ -10,17 +10,20 @@
 #include "../../factions/Faction.h"
 #include "../../Menu.h"
 #include "../../Core.h"
+#include "../../Helper.h"
 #include "../../networking/server/Server.h"
 #include "../../networking/client/Client.h"
 #include "../../networking/client/ClientMapSpecificData.h"
 #include "../../networking/packets/PacketConnectionAccepted.h"
 #include "../../networking/packets/PacketMessage.h"
+#include "../../networking/packets/PacketUpdateLobbyTimeLeft.h"
 #include "../../map/Map.h"
 #include "../../teams/Team.h"
 #include "../../gui/RoundedWindow.h"
 
 #include <core/engine/fonts/Font.h>
 #include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/renderer/Engine_Renderer.h>
 
 using namespace std;
 using namespace Engine;
@@ -56,35 +59,20 @@ struct FFALobbyBackOnClick final { void operator()(Button* button) const {
 struct FFALobbyForwardOnClick final { void operator()(Button* button) const {
     auto& lobby = *static_cast<LobbyScreenFFA*>(button->getUserPointer());
     if (lobby.isHost()) { //redundant (as only the host should see this button...), but it's safe...
-        lobby.m_Core.getClient()->getMapData().getMap().full_load();
-        lobby.m_Ship3DViewer->hide();
-        lobby.m_ChooseShipMessage->hide();
-
-        auto& chosen_ship_class = lobby.getShipSelector().getChosenShipClass();
-        if (!chosen_ship_class.empty()) {
-            PacketMessage p;
-            p.PacketType = PacketType::Client_To_Server_Request_Map_Entry;
-            p.name = lobby.m_Core.getClient()->username();
-
-            p.data = chosen_ship_class; //ship class [0]
-
-            p.data += "," + lobby.m_Core.getClient()->getMapData().getMap().name(); //map name [1]
-            if (&lobby.m_Core.getClient()->getMapData().getTeam()) {
-                p.data += "," + lobby.m_Core.getClient()->getMapData().getTeam().getTeamNumberAsString();
-            }else{
-                p.data += ",-1"; //error, the client did not choose or was not assigned a team yet
-            }
-
-            lobby.m_Core.getClient()->send(p);
-        }else{
-            lobby.m_Menu.setErrorText("You must choose your ship", 5.0f);
+        if (lobby.m_TimeLeftUntilMatchStarts > 6.0) {
+            PacketUpdateLobbyTimeLeft pOut;
+            pOut.PacketType = PacketType::Server_To_Client_Update_Lobby_Time_Left;
+            pOut.time_left = 5.5;
+            lobby.m_Core.getServer()->send_to_all(pOut);
         }
     }
 }};
 
-LobbyScreenFFA::LobbyScreenFFA(Font& font, Menu& menu, Core& core, Scene& scene, Camera& camera): m_Menu(menu), m_Core(core) {
+LobbyScreenFFA::LobbyScreenFFA(Font& font, Menu& menu, Core& core, Scene& scene, Camera& camera): m_Menu(menu), m_Core(core), m_Font(font){
     const auto& winSize = glm::vec2(Resources::getWindowSize());
    
+    m_TimeLeftUntilMatchStarts = 0.0;
+
     m_BackgroundEdgeGraphicBottom = NEW Button(font, winSize.x / 2.0f, 0, winSize.x, bottom_bar_height_total);
     m_BackgroundEdgeGraphicBottom->setColor(Factions::Database[FactionEnum::Federation].GUIColorDark);
     m_BackgroundEdgeGraphicBottom->setAlignment(Alignment::BottomCenter);
@@ -168,6 +156,9 @@ LobbyScreenFFA::~LobbyScreenFFA() {
     SAFE_DELETE(m_Ship3DViewer);
     SAFE_DELETE(m_ShipDescription);
     SAFE_DELETE(m_ChooseShipMessage);
+}
+void LobbyScreenFFA::setTimeLeftUntilMatchStartsInSeconds(const double& seconds) {
+    m_TimeLeftUntilMatchStarts = (seconds);
 }
 void LobbyScreenFFA::showShipViewer() {
     m_Ship3DViewer->show();
@@ -265,6 +256,39 @@ void LobbyScreenFFA::onResize(const unsigned int newWidth, const unsigned int ne
     }
 }
 void LobbyScreenFFA::update(const double& dt) {
+
+    if (m_TimeLeftUntilMatchStarts > 0.0) {
+        m_TimeLeftUntilMatchStarts -= dt;
+        if (m_TimeLeftUntilMatchStarts < 0.0) {
+            m_TimeLeftUntilMatchStarts = 0.0;
+
+
+            
+            m_Core.getClient()->getMapData().getMap().full_load();
+            m_Ship3DViewer->hide();
+            m_ChooseShipMessage->hide();
+
+            auto& chosen_ship_class = getShipSelector().getChosenShipClass();
+
+            PacketMessage p;
+            p.PacketType = PacketType::Client_To_Server_Request_Map_Entry;
+            p.name = m_Core.getClient()->username();
+
+            p.data = (chosen_ship_class.empty()) ? "NULL" : chosen_ship_class; //ship class [0]
+
+            p.data += "," + m_Core.getClient()->getMapData().getMap().name(); //map name [1]
+            if (&m_Core.getClient()->getMapData().getTeam()) {
+                p.data += "," + m_Core.getClient()->getMapData().getTeam().getTeamNumberAsString();
+            }else{
+                p.data += ",-1"; //error, the client did not choose or was not assigned a team yet
+            }
+
+            m_Core.getClient()->send(p);
+
+
+        }
+    }
+
     m_BackgroundEdgeGraphicBottom->update(dt);
     m_BackButton->update(dt);
     if (m_IsHost == true) {
@@ -277,6 +301,21 @@ void LobbyScreenFFA::update(const double& dt) {
     m_ChooseShipMessage->update(dt);
 }
 void LobbyScreenFFA::render() {
+    const auto pos = m_RoundedWindow->positionWorld();
+
+    const double mins_as_double = m_TimeLeftUntilMatchStarts / 60.0;
+    const unsigned int mins = static_cast<unsigned int>(mins_as_double);
+    const double remainder = mins_as_double - static_cast<double>(mins);
+    const unsigned int secs = static_cast<unsigned int>(remainder * 60.0);
+
+    string time_as_str = Helper::FormatTimeAsMinThenSecs(mins, secs);
+
+    if (m_TimeLeftUntilMatchStarts > 5.9) {
+        Renderer::renderText("Match starts: " + time_as_str, m_Font, glm::vec2(pos.x + (m_RoundedWindow->width() / 2.0f) - 260.0f, pos.y + (m_RoundedWindow->height() / 2.0f) - 12.0f), glm::vec4(0.35f, 0.35f, 0.35f, 1.0f), 0.0f, glm::vec2(0.8f), 0.001f, TextAlignment::Left);
+    }else {
+        Renderer::renderText("Match starts: " + time_as_str, m_Font, glm::vec2(pos.x + (m_RoundedWindow->width() / 2.0f) - 260.0f, pos.y + (m_RoundedWindow->height() / 2.0f) - 12.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 0.0f, glm::vec2(0.8f), 0.001f, TextAlignment::Left);
+    }
+
     m_BackgroundEdgeGraphicBottom->render();
     m_BackButton->render();
     if (m_IsHost == true) {

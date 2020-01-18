@@ -17,7 +17,7 @@ ShipToken::ShipToken(const string& shipClass, Font& font, const float& x, const 
     Texture* texture_border = (Texture*)(info.IconBorderTextureHandle.get());
     Texture* texture = (Texture*)(info.IconTextureHandle.get());
 
-    setSize(texture_border->width(), texture_border->height());
+    setSize(static_cast<float>(texture_border->width()), static_cast<float>(texture_border->height()));
     setAlignment(Alignment::TopLeft);
     setText("");
     setTexture(texture_border);

@@ -239,6 +239,12 @@ void Client::on_receive_physics_update(Packet& basePacket, Map& map) {
     }
 }
 
+void Client::on_receive_lobby_time_update(Packet& basePacket, Menu& menu) {
+    PacketUpdateLobbyTimeLeft& pI = static_cast<PacketUpdateLobbyTimeLeft&>(basePacket);
+    //TODO: add other lobbies
+    menu.m_LobbyScreenFFA->setTimeLeftUntilMatchStartsInSeconds(pI.time_left);
+}
+
 void Client::on_receive_ship_notified_of_respawn(Packet& basePacket, Map& map) {
     PacketShipRespawned& pI = static_cast<PacketShipRespawned&>(basePacket);
     auto respawnPosition = glm_vec3(static_cast<decimal>(pI.x), static_cast<decimal>(pI.y), static_cast<decimal>(pI.z));
@@ -490,6 +496,8 @@ void Client::on_receive_new_client_entered_map(Packet& basePacket) {
     const auto list             = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map,teamNumber
     TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(list[2]));
     Map& map                    = *static_cast<Map*>(Resources::getScene(list[1]));
+    if (!map.isLoaded())
+        return;
     const auto spawn_anchor_pos = map.getSpawnAnchor()->getPosition();
     Ship* ship                  = map.createShip(AIType::Player_Other, *m_MapSpecificData.m_GameplayMode.getTeam(teamNumber), *this, list[0], pI.name, glm::vec3(pI.r + spawn_anchor_pos.x, pI.g + spawn_anchor_pos.y, pI.b + spawn_anchor_pos.z));
 }
@@ -607,8 +615,6 @@ void Client::on_receive_connection_accepted_by_server(Packet& basePacket, Menu& 
 
     menu.m_ServerLobbyConnectedPlayersWindow->clear();
     menu.m_ServerLobbyChatWindow->clear();
-    //menu.m_ServerLobbyShipSelectorWindow->clear();
-    //menu.m_ServerLobbyShipSelectorWindow->setShipViewportActive(true);
     
 
 
@@ -618,6 +624,7 @@ void Client::on_receive_connection_accepted_by_server(Packet& basePacket, Menu& 
         if (pI.is_host) {
             menu.m_LobbyScreenFFA->setHost(true);
         }
+        menu.m_LobbyScreenFFA->setTimeLeftUntilMatchStartsInSeconds(pI.lobby_time_left);
         menu.m_LobbyScreenFFA->setTopLabelText(pI.map_name + " - " + GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES[static_cast<unsigned int>(pI.game_mode_type)]);
     }else if (pI.game_mode_type == static_cast<unsigned char>(GameplayModeType::TeamDeathmatch)) {
         menu.setGameState(GameState::Host_Screen_Lobby_TeamDeathMatch_3);
@@ -750,6 +757,9 @@ void Client::onReceiveTCP() {
             switch (basePacket.PacketType) {
                 case PacketType::Server_To_Client_Request_GameplayMode: {
                     on_receive_server_game_mode(basePacket);
+                    break;
+                }case PacketType::Server_To_Client_Update_Lobby_Time_Left: {
+                    on_receive_lobby_time_update(basePacket, menu);
                     break;
                 }case PacketType::Server_To_Client_New_Client_Entered_Map: {
                     on_receive_new_client_entered_map(basePacket);

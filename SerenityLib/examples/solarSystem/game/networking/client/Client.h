@@ -40,6 +40,7 @@ class Client{
 
         void internal_init(const unsigned short& server_port, const std::string& server_ipAddress);
 
+        void on_receive_lobby_time_update(Packet&, Menu& menu);
         void on_receive_ship_notified_of_respawn(Packet&, Map& map);
         void on_receive_ship_notified_of_impending_respawn(Packet&, Map& map);
         void on_receive_ship_was_just_destroyed(Packet&, Map& map);

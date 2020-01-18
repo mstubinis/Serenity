@@ -2,8 +2,6 @@
 #include <core/engine/system/EngineOptions.h>
 
 #include <time.h>
-#include <memory>
-#include <iostream>
 #include <SFML/Window.hpp>
 
 #include "config/ConfigFile.h"
@@ -19,7 +17,7 @@ int main(int argc, char* argv[]) {
     #ifdef _DEBUG
         _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
     #endif
-        srand(static_cast<unsigned>(time(0)));
+    srand(static_cast<unsigned>(time(0)));
 
     ConfigFile config;
     const auto& info = config.readFromFile();
@@ -29,7 +27,7 @@ int main(int argc, char* argv[]) {
     options.width          = info.window_width;
     options.height         = info.window_height;
     options.window_mode    = info.getWindowModeInt();
-    options.show_console   = true;
+    //options.show_console   = true;
     options.maximized      = info.window_maximized;
     options.aa_algorithm   = AntiAliasingAlgorithm::SMAA;
     options.argv           = argv;
@@ -40,12 +38,6 @@ int main(int argc, char* argv[]) {
     Engine::epriv::Core::m_Engine->run();
 
     SAFE_DELETE(Engine::epriv::Core::m_Engine);
-
-    //#ifdef _WIN32
-    //    if (GetConsoleWindow() != NULL) {
-            //FreeConsole(); //erroring out for some reason
-    //    }
-    //#endif
 
     return 0;
 }

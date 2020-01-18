@@ -32,6 +32,7 @@
 #include "gui/specifics/MainMenu.h"
 #include "gui/specifics/HostScreen0.h"
 #include "gui/specifics/HostScreen1.h"
+#include "gui/specifics/HostScreen1Persistent.h"
 
 #include "gui/specifics/HostScreenFFA2.h"
 #include "gui/specifics/HostScreenTeamDeathmatch2.h"
@@ -130,6 +131,7 @@ Menu::Menu(Scene& menu_scene, Camera& game_camera, GameState::State& _state, Cor
     m_MainMenuScreen = new MainMenu(*this, *m_Font, 0.1f);
     m_HostScreen0 = new HostScreen0(*this, *m_Font);
     m_HostScreen1 = new HostScreen1(*this, *m_Font);
+    m_HostScreen1Persistent = new HostScreen1Persistent(*this, *m_Font);
 
     m_HostScreenFFA2 = new HostScreenFFA2(*m_HostScreen1 , *this, *m_Font);
     m_HostScreenTeamDeathmatch2 = new HostScreenTeamDeathmatch2(*m_HostScreen1, *this, *m_Font);
@@ -178,6 +180,7 @@ Menu::~Menu() {
     SAFE_DELETE(m_MainMenuScreen);
     SAFE_DELETE(m_HostScreen0);
     SAFE_DELETE(m_HostScreen1);
+    SAFE_DELETE(m_HostScreen1Persistent);
 
     SAFE_DELETE(m_HostScreenFFA2);
     SAFE_DELETE(m_HostScreenTeamDeathmatch2);
@@ -273,6 +276,7 @@ void Menu::onResize(const uint& width, const uint& height) {
 
     m_HostScreen0->onResize(width, height);
     m_HostScreen1->onResize(width, height);
+    m_HostScreen1Persistent->onResize(width, height);
     m_HostScreenFFA2->onResize(width, height);
     m_HostScreenTeamDeathmatch2->onResize(width, height);
     m_HostScreenHomelandSecurity2->onResize(width, height);
@@ -308,6 +312,9 @@ void Menu::update_host_setup_0(const double& dt) {
 void Menu::update_host_setup_1(const double& dt) {
     m_HostScreen1->update(dt);
 }
+void Menu::update_host_setup_1_persistent(const double& dt) {
+    m_HostScreen1Persistent->update(dt);
+}
 void Menu::update_host_setup_ffa_2(const double& dt) {
     m_HostScreenFFA2->update(dt);
 }
@@ -328,23 +335,23 @@ void Menu::update_host_lobby_hs_3(const double& dt) {
 
 }
 void Menu::update_join_setup_1(const double& dt) {
-    /*
+    
     m_Back->update(dt);
     m_Next->update(dt);
 
     m_ServerIp->update(dt);
     m_ServerPort->update(dt);
     m_UserName->update(dt);
-    */
+    
 }
 void Menu::update_join_lobby_2(const double& dt) {
-    /*
+    
     m_ServerLobbyChatWindow->update(dt);
     m_ServerLobbyConnectedPlayersWindow->update(dt);
 
     m_Back->update(dt);
     m_Next->update(dt);
-    */
+    
 }
 
 void Menu::update_options_main(const double& dt) {
@@ -393,6 +400,9 @@ void Menu::render_host_setup_0() {
 }
 void Menu::render_host_setup_1() {
     m_HostScreen1->render();
+}
+void Menu::render_host_setup_1_persistent() {
+    m_HostScreen1Persistent->render();
 }
 void Menu::render_host_setup_ffa_2() {
     m_HostScreenFFA2->render();
@@ -466,6 +476,8 @@ void Menu::update(const double& dt) {
             update_host_setup_0(dt); break;
         }case GameState::Host_Screen_Setup_1: {
             update_host_setup_1(dt); break;
+        }case GameState::Host_Screen_Setup_1_Persistent: {
+            update_host_setup_1_persistent(dt); break;
         }case GameState::Host_Screen_Setup_FFA_2: {
             update_host_setup_ffa_2(dt); break;
         }case GameState::Host_Screen_Setup_TeamDeathMatch_2: {
@@ -522,6 +534,8 @@ void Menu::render() {
             render_host_setup_0(); break;
         }case GameState::Host_Screen_Setup_1: {
             render_host_setup_1(); break;
+        }case GameState::Host_Screen_Setup_1_Persistent: {
+            render_host_setup_1_persistent(); break;
         }case GameState::Host_Screen_Setup_FFA_2: {
             render_host_setup_ffa_2(); break;
         }case GameState::Host_Screen_Setup_TeamDeathMatch_2: {

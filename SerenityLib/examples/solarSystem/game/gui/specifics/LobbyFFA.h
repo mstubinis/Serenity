@@ -25,10 +25,10 @@ class LobbyScreenFFA final {
         bool m_IsHost;
         Menu& m_Menu;
         Core& m_Core;
+        Font& m_Font;
+
+        double m_TimeLeftUntilMatchStarts;
         /*
-        TimeLeftUntilMatchStarts
-
-
         ChatRoomMessages
         ChatRoomPlayerList
         */
@@ -57,6 +57,7 @@ class LobbyScreenFFA final {
         void clearShipSelector();
 
         const bool setChosenShipClass(const std::string& shipClass);
+        void setTimeLeftUntilMatchStartsInSeconds(const double& seconds);
 
         void showShipViewer();
         void hideShipViewer();

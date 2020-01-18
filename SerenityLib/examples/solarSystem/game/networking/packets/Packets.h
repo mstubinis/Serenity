@@ -13,5 +13,6 @@
 #include "PacketGameplayModeInfo.h"
 #include "PacketShipInfoRequest.h"
 #include "PacketConnectionAccepted.h"
+#include "PacketUpdateLobbyTimeLeft.h"
 
 #endif

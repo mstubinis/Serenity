@@ -14,6 +14,8 @@ struct PacketConnectionAccepted : public Packet {
     unsigned char  game_mode_type;
     bool           is_host;
 
+    double         lobby_time_left;
+
     PacketConnectionAccepted();
     bool validate(sf::Packet& sfPacket);
     bool build(sf::Packet& sfPacket);

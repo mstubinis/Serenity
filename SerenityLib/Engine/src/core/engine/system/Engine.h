@@ -36,6 +36,7 @@ namespace Engine{
             private:
 
                 void init_os_specific(const EngineOptions& options);
+                void cleanup_os_specific();
 
                 void init_window(const EngineOptions& options);
 

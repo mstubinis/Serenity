@@ -53,7 +53,7 @@ vector<Scene*>& epriv::ResourceManager::scenes() {
 void epriv::ResourceManager::onPostUpdate() {
     if (m_ScenesToBeDeleted.size() > 0) {
         for (size_t i = 0; i < m_ScenesToBeDeleted.size(); ++i) {
-            uint index = 0;
+            size_t index = 0;
             for (size_t j = 0; j < m_Scenes.size(); ++j) {
                 if (m_Scenes[j] && m_Scenes[j]->name() == m_ScenesToBeDeleted[i]->name()) {
                     index = j;
@@ -76,7 +76,7 @@ const unsigned int epriv::ResourceManager::AddScene(Scene& s){
     for (size_t i = 0; i < m_Scenes.size(); ++i) {
         if (m_Scenes[i] == nullptr) {
             m_Scenes[i] = &s;
-            auto res = static_cast<unsigned int>(i) + 1U;
+            unsigned int res = static_cast<unsigned int>(i) + 1U;
             return res;
         }
     }

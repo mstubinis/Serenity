@@ -93,10 +93,12 @@ struct Host_ButtonNext_OnClick { void operator()(Button* button) const {
 }};
 
 HostScreen1::HostScreen1(Menu& menu, Font& font) : m_Menu(menu), m_Font(font){
-    const auto winSize                 = Resources::getWindowSize();
-    const auto contentSize             = glm::vec2(winSize) - glm::vec2(padding_x * 2.0f, (padding_y * 2.0f) + bottom_bar_height);
+    const auto winSize                 = glm::vec2(Resources::getWindowSize());
+    const auto contentSize             = winSize - glm::vec2(padding_x * 2.0f, (padding_y * 2.0f) + bottom_bar_height);
     const auto top_content_height      = contentSize.y / 2.0f;
     const auto first_2_boxes_width_top = contentSize.x - top_content_height;
+
+    m_IsPersistent = false;
 
     m_BackgroundEdgeGraphicBottom = NEW Button(font, winSize.x / 2.0f, bottom_bar_height_total / 2.0f, winSize.x, bottom_bar_height_total);
     m_BackgroundEdgeGraphicBottom->setColor(Factions::Database[FactionEnum::Federation].GUIColorDark);
@@ -135,7 +137,7 @@ HostScreen1::HostScreen1(Menu& menu, Font& font) : m_Menu(menu), m_Font(font){
             winSize.y - (padding_y / 2.0f) - (window_height / 2.0f),
             window_height,
             window_height,
-        0.05f, 1, "");
+        0.035f, 1, "");
         struct RightSizeFunctor {glm::vec2 operator()(RoundedWindow* window) const {
             const auto winSize = Resources::getWindowSize();
             const auto window_height = (winSize.y - bottom_bar_height_total - padding_y);
@@ -174,6 +176,12 @@ HostScreen1::~HostScreen1() {
     SAFE_DELETE(m_LeftWindow);
     SAFE_DELETE(m_RightWindow);
     SAFE_DELETE(m_BackgroundEdgeGraphicBottom);
+}
+void HostScreen1::setPersistent() {
+    m_IsPersistent = true;
+}
+const bool HostScreen1::isPersistent() const {
+    return m_IsPersistent;
 }
 void HostScreen1::clearCurrentMapChoice() {
     Server::SERVER_HOST_DATA.setMapChoice(MapEntryData());
