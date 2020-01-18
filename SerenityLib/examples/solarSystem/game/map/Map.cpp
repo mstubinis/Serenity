@@ -54,10 +54,6 @@ namespace boost_io = boost::iostreams;
 
 Map::Map(GameplayMode& mode, Client& client, const string& name, const string& file) : Scene(name), m_Client(client), m_GameplayMode(mode){
     basic_init(file);
-
-    //if (file != "NULL") {
-    //    loadFromFile(file);
-    //}
 }
 
 void Map::basic_init(const string& file) {
@@ -72,7 +68,7 @@ void Map::basic_init(const string& file) {
     m_ActiveTorpedoProjectiles.initialize(5500);
 
     m_Filename = file;
-    m_RootAnchor = std::make_tuple("", nullptr);
+    m_SpawnAnchors.push_back(nullptr);
 
     Font& font = m_Client.m_Core.m_Menu->getFont();
     m_HUD = NEW HUD(*this, font);
@@ -122,6 +118,7 @@ void Map::cleanup() {
     m_ShipsNPCControlled.clear();
     m_ShipsPlayerControlled.clear();
     m_Ships.clear();
+    m_SpawnAnchors.clear();
     m_Player = nullptr;
     m_SkyboxFile = "";
     m_LoadStatus = Map::MapLoadStatus::CompletelyEmpty;
@@ -281,46 +278,33 @@ vector<string> Map::allowedShips() {
     return vector<string>();
 }
 Anchor* Map::internalCreateDeepspaceAnchor(const decimal& x, const decimal& y, const decimal& z, const string& name) {
-    Anchor* anchor = NEW Anchor(*this, x, y, z);
-    Anchor* root = std::get<1>(m_RootAnchor);
-    m_Objects.push_back(anchor);
+    Anchor* root_anchor = m_SpawnAnchors[0];
 
-    string key;
-    if (name.empty()) {
-        key = "Deepspace Anchor 0";
-    }else{
-        key = name;
-    }
-    unsigned int count = 0;
-    while (true) {
-        if (!root->m_Children.count(key)) {
-            root->m_Children.emplace(key, anchor);
-            break;
-        }else{
-            ++count;
-            key = "Deepspace Anchor " + to_string(count);
-        }
-    }
-    return anchor;
+    string key = (name.empty()) ? "Deepspace Anchor 0" : name;
+    unsigned int count = (root_anchor->m_Children.size());
+    key = "Deepspace Anchor " + to_string(count - 1);
+
+    Anchor* new_deepspace_anchor = NEW Anchor(key, *this, x, y, z);
+    m_Objects.push_back(new_deepspace_anchor);
+    root_anchor->addChild(new_deepspace_anchor);
+    return new_deepspace_anchor;
 }
 Anchor* Map::internalCreateAnchor(const string& parentAnchor, const string& thisName, unordered_map<string, Anchor*>& loadedAnchors, const decimal& x, const decimal& y, const decimal& z) {
-    Anchor* anchor = NEW Anchor(*this, x, y, z);
-    m_Objects.push_back(anchor);
     const string key = thisName + " Anchor";
+    Anchor* new_anchor = NEW Anchor(key, *this, x, y, z);
+    m_Objects.push_back(new_anchor);
     if (parentAnchor.empty()) {
-        if (std::get<0>(m_RootAnchor).empty()) {
-            m_RootAnchor = tuple<string, Anchor*>(key, anchor);
+        if (m_SpawnAnchors[0] == nullptr) {
+            m_SpawnAnchors[0] = new_anchor;
         }
     }else{
-        Anchor* parent = loadedAnchors.at(parentAnchor + " Anchor");
-        if (!parent->m_Children.count(key)) {
-            parent->m_Children.emplace(key, anchor);
-        }
+        Anchor* parent_anchor = loadedAnchors.at(parentAnchor + " Anchor");
+        parent_anchor->addChild(new_anchor);
     }
     if (!loadedAnchors.count(key)) {
-        loadedAnchors.emplace(key, anchor);
+        loadedAnchors.emplace(key, new_anchor);
     }
-    return anchor;
+    return new_anchor;
 }
 Client& Map::getClient() {
     return m_Client;
@@ -529,11 +513,13 @@ const bool Map::full_load() {
                 }else if (line[0] == '?') {//Anchor (Primary Spawn) point
                     const auto& parentPos = m_Planets.at(PARENT)->getPosition();
                     auto spawnAnchor = internalCreateAnchor(PARENT, "Spawn", loadedAnchors, parentPos.x + x, parentPos.y + y, parentPos.z + z);
-                    m_SpawnAnchors.push_back( std::make_tuple("Spawn Anchor", spawnAnchor) );
+                    spawnAnchor->setName("Spawn Anchor");
+                    m_SpawnAnchors.push_back(spawnAnchor);
                 }else if (line[0] == '>') {//Anchor (Secondary Spawn) point
                     const auto& parentPos = m_Planets.at(PARENT)->getPosition();
-                    auto spawnAnchor = internalCreateAnchor(PARENT, PARENT + " Spawn", loadedAnchors, parentPos.x + x, parentPos.y + y, parentPos.z + z);
-                    m_SpawnAnchors.push_back(std::make_tuple(PARENT + " Spawn Anchor", spawnAnchor));
+                    auto* spawnAnchor = internalCreateAnchor(PARENT, PARENT + " Spawn", loadedAnchors, parentPos.x + x, parentPos.y + y, parentPos.z + z);
+                    spawnAnchor->setName(PARENT + " Spawn Anchor");
+                    m_SpawnAnchors.push_back(spawnAnchor);
                 }else if (line[0] == 'R') {//Rings
                     if (!PARENT.empty()) {
                         if (!planetRings.count(PARENT)) {
@@ -646,7 +632,7 @@ Ship* Map::createShip(AIType::Type ai_type, Team& team, Client& client, const st
     return ship;
 }
 Anchor* Map::getRootAnchor() {
-    return std::get<1>(m_RootAnchor);
+    return m_SpawnAnchors[0];
 }
 const bool Map::hasShipPlayer(const string& shipName) const {
     return (m_ShipsPlayerControlled.size() > 0 && m_ShipsPlayerControlled.count(shipName)) ? true : false;
@@ -657,17 +643,16 @@ const bool Map::hasShipNPC(const string& shipName) const {
 const bool Map::hasShip(const string& shipName) const {
     return (m_Ships.size() > 0 && m_Ships.count(shipName)) ? true : false;
 }
-
 HUD& Map::getHUD() {
     return *m_HUD;
 }
 Anchor* Map::getSpawnAnchor(const string& spawn_anchor_name) {
     if(spawn_anchor_name.empty())
-        return std::get<1>(m_SpawnAnchors[0]);
-    for (auto& tuple : m_SpawnAnchors) {
-        auto& name = std::get<0>(tuple);
+        return m_SpawnAnchors[0];
+    for (auto& anchor_itr : m_SpawnAnchors) {
+        auto& name = anchor_itr->getName();
         if (name == spawn_anchor_name)
-            return std::get<1>(tuple);
+            return anchor_itr;
     }
     return nullptr;
 }
@@ -677,12 +662,12 @@ const string Map::getClosestSpawnAnchor(Ship* ship) {
     string ret = "";
     decimal minDist = static_cast<decimal>(-1.0);
     auto playerPos = ship->getComponent<ComponentBody>()->position();
-    for (auto& spawn_anchor_tuple : m_SpawnAnchors) {
-        auto& spawn_anchor = *std::get<1>(spawn_anchor_tuple);
+    for (auto& spawn_anchor_itr : m_SpawnAnchors) {
+        auto& spawn_anchor = *spawn_anchor_itr;
         const auto dist = glm::distance(playerPos, spawn_anchor.getPosition());
         if (minDist < static_cast<decimal>(0.0) || dist < minDist) {
             minDist = dist;
-            ret = std::get<0>(spawn_anchor_tuple);
+            ret = spawn_anchor.getName();
         }
     }
     return ret;
@@ -692,20 +677,20 @@ const vector<string> Map::getClosestAnchor(Anchor* currentAnchor, Ship* ship) {
         ship = m_Player;
     vector<string> res;
     if (!currentAnchor) {
-        currentAnchor = std::get<1>(m_RootAnchor);
+        currentAnchor = m_SpawnAnchors[0];
     }
     decimal minDist = static_cast<decimal>(-1.0);
     auto pos = ship->getComponent<ComponentBody>()->position();
     while (currentAnchor->m_Children.size() > 0) {
-        string least = currentAnchor->m_Children.begin()._Ptr->_Myval.first;
+        string least = currentAnchor->m_Children[0]->getName();
         bool hasChanged = false;
         for (auto& child : currentAnchor->m_Children) {
-            auto childPos = child.second->getPosition();
+            auto childPos = child->getPosition();
             const auto dist = glm::distance(pos, childPos);
             if (minDist < static_cast<decimal>(0.0) || dist < minDist) {
                 minDist = dist;
-                least = child.first;
-                currentAnchor = child.second;
+                least = child->getName();
+                currentAnchor = child;
                 hasChanged = true;
             }
         }

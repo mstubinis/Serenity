@@ -42,18 +42,19 @@ Brel::Brel(Scene& scene, glm::vec3 position, glm::vec3 scale)
     auto& wing2 = model.getModel(2);
     wing2.setPosition(-0.232951f, 0.316462f, 0.08058f);
 
-    model.setCustomBindFunctor(ShipModelInstanceBindFunctor(), 0);
-    model.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor(), 0);
-    model.setCustomBindFunctor(ShipModelInstanceBindFunctor(), 1);
-    model.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor(), 1);
-    model.setCustomBindFunctor(ShipModelInstanceBindFunctor(), 2);
-    model.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor(), 2);
+    for (int i = 0; i <= 2; ++i) {
+        model.setCustomBindFunctor(ShipModelInstanceBindFunctor(), i);
+        model.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor(), i);
+    }
     model.setUserPointer(this);
 }
 Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
 :Ship(team,client, CLASS, map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f,0.7f,0.7f)) {
 
     m_InitialCamera = glm::vec3(0.0f, 0.7f, 0.7f);
+
+    m_Perks         = Brel::Perks::None;
+    m_UnlockedPerks = Brel::Perks::None;
 
     //add wings
     auto& model = *getComponent<ComponentModel>();
@@ -63,12 +64,10 @@ Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const st
     auto& wing2 = model.getModel(2);
     wing2.setPosition(-0.232951f, 0.316462f, 0.08058f);
 
-    model.setCustomBindFunctor(ShipModelInstanceBindFunctor(),0);
-    model.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor(),0);
-    model.setCustomBindFunctor(ShipModelInstanceBindFunctor(),1);
-    model.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor(),1);
-    model.setCustomBindFunctor(ShipModelInstanceBindFunctor(),2);
-    model.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor(),2);
+    for (int i = 0; i <= 2; ++i) {
+        model.setCustomBindFunctor(ShipModelInstanceBindFunctor(), i);
+        model.setCustomUnbindFunctor(ShipModelInstanceUnbindFunctor(), i);
+    }
     model.setUserPointer(this);
 
     const auto mass = updateShipDimensions();
@@ -112,17 +111,16 @@ Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const st
     shieldsBody.setScale(shieldScale);
     m_ShieldScale = shieldScale;
 
-    /*
-    2x fwd heavy disruptor cannons
-
-    2x fwd photon torpedos
-    1x aft photon torpedo
-    */
-
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
-    auto* left_cannon = NEW DisruptorCannon(_this, map, glm::vec3(-0.781865f, -0.638287f, -0.6665f), glm::vec3(-0.01f, 0, -1), 17.0f, 6, 500, 0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 2);
-    auto* right_cannon = NEW DisruptorCannon(_this, map, glm::vec3(0.781865f, -0.638287f, -0.6665f), glm::vec3(0.01f, 0, -1), 17.0f, 6, 500, 0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 1);
+    const float base_cannon_dmg = 500.0f;
+
+    auto* left_cannon = NEW DisruptorCannon(_this, map, glm::vec3(-0.781865f, -0.638287f, -0.6665f), glm::vec3(-0.01f, 0, -1), 17.0f, 6, 
+        (m_UnlockedPerks & Brel::Perks::CannonOverload) ? (base_cannon_dmg * 1.1f) : base_cannon_dmg,
+    0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 2);
+    auto* right_cannon = NEW DisruptorCannon(_this, map, glm::vec3(0.781865f, -0.638287f, -0.6665f), glm::vec3(0.01f, 0, -1), 17.0f, 6, 
+        (m_UnlockedPerks & Brel::Perks::CannonOverload) ? (base_cannon_dmg * 1.1f) : base_cannon_dmg,
+    0.7f, 2.5f, 1.8f, 40.5f, 50.0f, 1);
 
     weapons.addPrimaryWeaponCannon(*left_cannon, true);
     weapons.addPrimaryWeaponCannon(*right_cannon, true);

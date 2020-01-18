@@ -32,6 +32,9 @@ Dderidex::Dderidex(Scene& scene, glm::vec3 position, glm::vec3 scale)
 Dderidex::Dderidex(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
 :Ship(team, client, CLASS, map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, 0.25f, 0.0f)) {
 
+    m_Perks         = Dderidex::Perks::None;
+    m_UnlockedPerks = Dderidex::Perks::None;
+
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
@@ -40,12 +43,21 @@ Dderidex::Dderidex(AIType::Type& ai_type, Team& team, Client& client, Map& map, 
         else if (i == 2)  system = NEW ShipSystemYawThrusters(_this, 3.0f);
         else if (i == 3)  system = NEW ShipSystemRollThrusters(_this, 2.1f);
         else if (i == 4)  system = NEW ShipSystemCloakingDevice(_this);
-        else if (i == 5)  system = NEW ShipSystemShields(_this, map, 180500.0f, 180500.0f, 180500.0f, 180500.0f, 230500.0f, 230500.0f, glm::vec3(0.0f), glm::vec3(1.00f, 1.00f, 1.00f));
+        else if (i == 5)  system = NEW ShipSystemShields(_this, map, 
+            180500.0f,
+            180500.0f,
+            180500.0f,
+            180500.0f,
+            230500.0f,
+            230500.0f, 
+            glm::vec3(0.0f), glm::vec3(1.00f, 1.00f, 1.00f),
+            1700.0f
+        );
         else if (i == 6)  system = NEW ShipSystemMainThrusters(_this, 40.0f);
         else if (i == 7)  system = NEW ShipSystemWarpDrive(_this);
         else if (i == 8)  system = NEW ShipSystemSensors(_this, map);
         else if (i == 9)  system = NEW ShipSystemWeapons(_this);
-        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 205500.0f);
+        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 205500.0f, 350.0f, 5.0f);
         m_ShipSystems.emplace(i, system);
     }
     internal_finialize_init(ai_type);

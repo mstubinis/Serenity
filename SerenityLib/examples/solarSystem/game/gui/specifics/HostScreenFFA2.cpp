@@ -1,7 +1,8 @@
 #include "HostScreenFFA2.h"
 #include "FFAShipSelector.h"
 #include "FFAServerInfo.h"
-#include "HostScreen.h"
+#include "LobbyFFA.h"
+#include "HostScreen1.h"
 #include "MapDescriptionWindow.h"
 #include "ServerLobbyChatWindow.h"
 #include "../../Menu.h"
@@ -30,13 +31,15 @@
 using namespace Engine;
 using namespace std;
 
-const auto padding_x                 = 100.0f;
-const auto padding_y                 = 100.0f;
-const auto bottom_bar_height         = 50.0f;
-const auto bottom_bar_button_width   = 150.0f;
+constexpr auto padding_x                 = 100.0f;
+constexpr auto padding_y                 = 100.0f;
+constexpr auto bottom_bar_height         = 50.0f;
+constexpr auto bottom_bar_button_width   = 150.0f;
 
-const auto bottom_bar_height_total   = 80;
-const auto right_window_width        = 486;
+constexpr auto bottom_bar_height_total   = 80;
+constexpr auto top_bar_height_total      = 60;
+
+constexpr auto right_window_width        = 486;
 
 struct Host2FFA_ButtonBack_OnClick { void operator()(Button* button) const {
     auto& hostScreenFFA = *static_cast<HostScreenFFA2*>(button->getUserPointer());
@@ -66,6 +69,7 @@ struct Host2FFA_ButtonNext_OnClick { void operator()(Button* button) const {
 
                         const int port        = stoi(port_text);
                         const int max_players = stoi(max_players_text);
+                        const unsigned int lobby_duration_in_secs = hostScreenFFA.getLobbyDurationFromTextBoxInSeconds();
 
                         core.startServer(port);
                         core.startClient(nullptr, port, username, "127.0.0.1"); //the client will request validation at this stage
@@ -89,6 +93,7 @@ struct Host2FFA_ButtonNext_OnClick { void operator()(Button* button) const {
                         config.updateHostServerPort(port);
 
                         menu.setGameState(GameState::Host_Screen_Lobby_FFA_3);
+
                         menu.setErrorText("");
 
 
@@ -116,21 +121,21 @@ struct Host2FFA_ButtonNext_OnClick { void operator()(Button* button) const {
 }};
 
 
-HostScreenFFA2::HostScreenFFA2(HostScreen& hostScreen1, Menu& menu, Font& font) : m_Menu(menu), m_HostScreen1(hostScreen1) {
+HostScreenFFA2::HostScreenFFA2(HostScreen1& hostScreen1, Menu& menu, Font& font) : m_Menu(menu), m_HostScreen1(hostScreen1) {
     const auto winSize                 = glm::vec2(Resources::getWindowSize());
     const auto contentSize             = winSize - glm::vec2(padding_x * 2.0f, (padding_y * 2.0f) + bottom_bar_height);
     const auto top_content_height      = contentSize.y / 2.0f;
     const auto first_2_boxes_width_top = contentSize.x - top_content_height;
 
 
-    m_BackgroundEdgeGraphicTop = NEW Button(font, winSize.x / 2.0f, winSize.y, winSize.x, bottom_bar_height_total);
+    m_BackgroundEdgeGraphicTop = NEW Button(font, winSize.x / 2.0f, winSize.y, winSize.x, top_bar_height_total);
     m_BackgroundEdgeGraphicTop->setColor(Factions::Database[FactionEnum::Federation].GUIColorDark);
     m_BackgroundEdgeGraphicTop->setAlignment(Alignment::TopCenter);
-    m_BackgroundEdgeGraphicTop->setDepth(0.512f);
+    m_BackgroundEdgeGraphicTop->setDepth(0.2f);
     m_BackgroundEdgeGraphicTop->disable();
     m_BackgroundEdgeGraphicTop->setTextureCorner(nullptr);
     m_BackgroundEdgeGraphicTop->enableTextureCorner(false);
-    m_TopLabel = new Text(winSize.x / 2.0f, winSize.y - (bottom_bar_height_total / 2.0f) + 15.0f, font);
+    m_TopLabel = new Text(winSize.x / 2.0f, winSize.y - (top_bar_height_total / 2.0f) + 15.0f, font);
     m_TopLabel->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_TopLabel->setAlignment(Alignment::Center);
     m_TopLabel->setTextAlignment(TextAlignment::Center);
@@ -138,7 +143,7 @@ HostScreenFFA2::HostScreenFFA2(HostScreen& hostScreen1, Menu& menu, Font& font) 
     m_BackgroundEdgeGraphicBottom = NEW Button(font, winSize.x / 2.0f, 0, winSize.x, bottom_bar_height_total);
     m_BackgroundEdgeGraphicBottom->setColor(Factions::Database[FactionEnum::Federation].GUIColorDark);
     m_BackgroundEdgeGraphicBottom->setAlignment(Alignment::BottomCenter);
-    m_BackgroundEdgeGraphicBottom->setDepth(0.512f);
+    m_BackgroundEdgeGraphicBottom->setDepth(0.2f);
     m_BackgroundEdgeGraphicBottom->disable();
     m_BackgroundEdgeGraphicBottom->setTextureCorner(nullptr);
     m_BackgroundEdgeGraphicBottom->enableTextureCorner(false);
@@ -157,7 +162,7 @@ HostScreenFFA2::HostScreenFFA2(HostScreen& hostScreen1, Menu& menu, Font& font) 
     m_ForwardButton->setUserPointer(this);
     m_ForwardButton->setOnClickFunctor(Host2FFA_ButtonNext_OnClick());
 
-    const auto window_height = (winSize.y - bottom_bar_height_total - padding_y);
+    const auto window_height = (winSize.y - bottom_bar_height_total - padding_y) - top_bar_height_total;
     const auto left_window_width = winSize.x - right_window_width - padding_x - (padding_x / 2.0f);
 
     {
@@ -167,18 +172,19 @@ HostScreenFFA2::HostScreenFFA2(HostScreen& hostScreen1, Menu& menu, Font& font) 
             left_window_width,
             window_height,
         0.1f, 1, "");
+
         struct LeftSizeFunctor { glm::vec2 operator()(RoundedWindow* window) const {
-            const auto winSize = Resources::getWindowSize();
-            const auto window_height_2 = (winSize.y - bottom_bar_height_total - padding_y) - bottom_bar_height_total;
+            const auto winSize             = Resources::getWindowSize();
+            const auto window_height_2     = winSize.y - bottom_bar_height_total - padding_y - top_bar_height_total;
             const auto left_window_width_2 = winSize.x - right_window_width - padding_x - (padding_x / 2.0f);
             return glm::vec2(left_window_width_2, window_height_2);
         }};
         struct LeftPositionFunctor { glm::vec2 operator()(RoundedWindow* window) const {
-            const auto winSize = Resources::getWindowSize();
-            const auto window_height_2 = (winSize.y - bottom_bar_height_total - padding_y);
+            const auto winSize             = Resources::getWindowSize();
+            const auto window_height_2     = winSize.y - bottom_bar_height_total - padding_y - top_bar_height_total;
             const auto left_window_width_2 = winSize.x - right_window_width - padding_x - (padding_x / 2.0f);
-            const auto x = (padding_x / 2.0f) + (left_window_width_2 / 2.0f);
-            const auto y = winSize.y - (padding_y / 2.0f) - (window_height_2 / 2.0f) - (bottom_bar_height_total / 2.0f);
+            const auto x                   = (padding_x / 2.0f) + (left_window_width_2 / 2.0f);
+            const auto y                   = winSize.y - (padding_y / 2.0f) - (window_height_2 / 2.0f) - (top_bar_height_total);
             return glm::vec2(x, y);
         }};
         m_ShipSelectorWindow->setPositionFunctor(LeftPositionFunctor());
@@ -191,16 +197,17 @@ HostScreenFFA2::HostScreenFFA2(HostScreen& hostScreen1, Menu& menu, Font& font) 
             right_window_width,
             window_height,
         0.1f, 1, "Server Information");
+
         struct RightSizeFunctor { glm::vec2 operator()(RoundedWindow* window) const {
-            const auto winSize = Resources::getWindowSize();
-            const auto window_height_2 = (winSize.y - bottom_bar_height_total - padding_y) - bottom_bar_height_total;
+            const auto winSize         = Resources::getWindowSize();
+            const auto window_height_2 = winSize.y - bottom_bar_height_total - padding_y - top_bar_height_total;
             return glm::vec2(right_window_width, window_height_2);
         }};
         struct RightPositionFunctor { glm::vec2 operator()(RoundedWindow* window) const {
-            const auto winSize = Resources::getWindowSize();
-            const auto window_height_2 = (winSize.y - bottom_bar_height_total - padding_y);
-            const auto x = winSize.x - (right_window_width / 2.0f) - (padding_x / 2.0f);
-            const auto y = winSize.y - (padding_y / 2.0f) - (window_height_2 / 2.0f) - (bottom_bar_height_total / 2.0f);
+            const auto winSize         = Resources::getWindowSize();
+            const auto window_height_2 = winSize.y - bottom_bar_height_total - padding_y - top_bar_height_total;
+            const auto x               = winSize.x - (right_window_width / 2.0f) - (padding_x / 2.0f);
+            const auto y               = winSize.y - (padding_y / 2.0f) - (window_height_2 / 2.0f) - (top_bar_height_total);
             return glm::vec2(x, y);
         }};
         m_ServerInfoWindow->setPositionFunctor(RightPositionFunctor());
@@ -307,12 +314,10 @@ const bool HostScreenFFA2::validateMatchDurationTextBox() {
     auto list = Helper::SeparateStringByCharacter(text_box_text, ':');
     if (list.size() == 2) {
         for (auto& number_as_str : list) {
-
             if (number_as_str.find_first_not_of("0123456789") != std::string::npos) { //numbers only please
                 m_Menu.setErrorText("Match duration must only contain numbers");
                 return false;
             }
-
             try {
                 int num = stoi(number_as_str);
             }catch (const std::invalid_argument) { //If no conversion could be performed, an invalid_argument exception is thrown.
@@ -331,17 +336,56 @@ const bool HostScreenFFA2::validateMatchDurationTextBox() {
     m_Menu.setErrorText("Match duration is invalid");
     return false;
 }
-const unsigned int HostScreenFFA2::getMatchDurationFromTextBoxInSeconds() {
-    auto text_box_text = m_ServerInfoWindow->getMatchDurationTextBox().text();
+const bool HostScreenFFA2::validateLobbyDurationTextBox() {
+    auto text_box_text = m_ServerInfoWindow->getLobbyDurationTextBox().text();
+    auto list = Helper::SeparateStringByCharacter(text_box_text, ':');
+    if (list.size() == 2) {
+        for (auto& number_as_str : list) {
+            if (number_as_str.find_first_not_of("0123456789") != std::string::npos) { //numbers only please
+                m_Menu.setErrorText("Lobby duration must only contain numbers");
+                return false;
+            }
+            try {
+                int num = stoi(number_as_str);
+            }catch (const std::invalid_argument) { //If no conversion could be performed, an invalid_argument exception is thrown.
+                m_Menu.setErrorText("Lobby duration needs to be in minutes : seconds format");
+                return false;
+            }catch (const std::out_of_range) { //If the value read is out of the range of representable values by an int, an out_of_range exception is thrown.
+                m_Menu.setErrorText("Lobby duration is out of range of possible values");
+                return false;
+            }catch (...) {
+                m_Menu.setErrorText("Lobby duration is invalid");
+                return false;
+            }
+        }
+        return true;
+    }
+    m_Menu.setErrorText("Lobby duration is invalid");
+    return false;
+}
+const unsigned int HostScreenFFA2::get_duration_sec_helper(TextBox& box) {
+    auto text_box_text = box.text();
     auto list = Helper::SeparateStringByCharacter(text_box_text, ':');
     return (stoi(list[0]) * 60) + stoi(list[1]);
 }
-const float HostScreenFFA2::getMatchDurationFromTextBoxInMinutes() {
-    auto text_box_text = m_ServerInfoWindow->getMatchDurationTextBox().text();
+const float HostScreenFFA2::get_duration_min_helper(TextBox& box) {
+    auto text_box_text = box.text();
     auto list = Helper::SeparateStringByCharacter(text_box_text, ':');
     float mins = static_cast<float>(stoi(list[0]));
     float secs = static_cast<float>(stoi(list[1]));
     return mins + (secs / 60.0f);
+}
+const unsigned int HostScreenFFA2::getMatchDurationFromTextBoxInSeconds() {
+    return get_duration_sec_helper(m_ServerInfoWindow->getMatchDurationTextBox());
+}
+const float HostScreenFFA2::getMatchDurationFromTextBoxInMinutes() {
+    return get_duration_min_helper(m_ServerInfoWindow->getMatchDurationTextBox());
+}
+const unsigned int HostScreenFFA2::getLobbyDurationFromTextBoxInSeconds() {
+    return get_duration_sec_helper(m_ServerInfoWindow->getLobbyDurationTextBox());
+}
+const float HostScreenFFA2::getLobbyDurationFromTextBoxInMinutes() {
+    return get_duration_min_helper(m_ServerInfoWindow->getLobbyDurationTextBox());
 }
 void HostScreenFFA2::onResize(const unsigned int newWidth, const unsigned int newHeight) {
     const auto winSize = glm::vec2(glm::uvec2(newWidth, newHeight));
@@ -352,10 +396,10 @@ void HostScreenFFA2::onResize(const unsigned int newWidth, const unsigned int ne
     m_BackgroundEdgeGraphicBottom->setPosition(winSize.x / 2.0f, 0);
     m_BackgroundEdgeGraphicBottom->setSize(winSize.x, bottom_bar_height_total);
 
-    m_BackgroundEdgeGraphicTop->setSize(winSize.x, bottom_bar_height_total);
+    m_BackgroundEdgeGraphicTop->setSize(winSize.x, top_bar_height_total);
     m_BackgroundEdgeGraphicTop->setPosition(winSize.x / 2.0f, winSize.y);
 
-    m_TopLabel->setPosition(winSize.x / 2.0f, winSize.y - (bottom_bar_height_total / 2.0f) + 15.0f);
+    m_TopLabel->setPosition(winSize.x / 2.0f, winSize.y - (top_bar_height_total / 2.0f) + 15.0f);
 
     m_ShipSelectorWindow->onResize(newWidth, newHeight);
     m_ServerInfoWindow->onResize(newWidth, newHeight);

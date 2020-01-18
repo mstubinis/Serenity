@@ -2,6 +2,13 @@
 #ifndef ENGINE_THREADING_THREAD_POOL_H
 #define ENGINE_THREADING_THREAD_POOL_H
 
+namespace Engine {
+    namespace epriv {
+        class WorkerThread;
+        class ThreadPool;
+    };
+};
+
 #include <queue>
 #include <vector>
 #include <thread>
@@ -12,44 +19,47 @@
 
 namespace Engine {
     namespace epriv {
-        class WorkerThread;
-        class ThreadPool;
-        class ThreadPoolFuture {
-            friend class ThreadPool;
+        class ThreadPoolFuture final {
+            friend class Engine::epriv::ThreadPool;
             private:
-                struct EmptyCallback final { void operator()() const {} };
                 std::shared_future<void>    m_Future;
                 std::function<void()>       m_Callback;
 
+                ThreadPoolFuture() = delete;
             public:
-                ThreadPoolFuture();
-                ThreadPoolFuture(std::shared_future<void>&& future);
                 ThreadPoolFuture(std::shared_future<void>&& future, std::function<void()>&& callback);
-                ~ThreadPoolFuture();
+                ~ThreadPoolFuture() = default;
 
                 ThreadPoolFuture(const ThreadPoolFuture& other) noexcept = delete;
                 ThreadPoolFuture& operator=(const ThreadPoolFuture& other) noexcept = delete;
                 ThreadPoolFuture(ThreadPoolFuture&& other) noexcept;
                 ThreadPoolFuture& operator=(ThreadPoolFuture&& other) noexcept;
         };
-        class ThreadPool {
-            friend class WorkerThread;
+        class ThreadPool final{
+            friend class Engine::epriv::WorkerThread;
             private:
-                std::condition_variable                                         m_Condition;
+                std::condition_variable                                         m_ConditionVariable;
                 std::mutex                                                      m_Mutex;
-                std::queue<std::shared_ptr<std::packaged_task<void()>>>         m_Tasks;
-                std::vector<WorkerThread*>                                      m_WorkerThreads;
-                std::vector<ThreadPoolFuture*>                                  m_Futures;
-                bool                                                            m_Terminated;
+                std::queue<std::shared_ptr<std::packaged_task<void()>>>         m_TaskQueue;
+                std::vector<std::thread>                                        m_WorkerThreads;
+                std::vector<Engine::epriv::ThreadPoolFuture>                    m_Futures;
                 bool                                                            m_Stopped;
 
                 void init(const unsigned int num_threads);
+
+                void internal_create_packaged_task(std::function<void()>&& job, std::function<void()>&& callback);
+
+                ThreadPool() = delete;
             public:
-                ThreadPool();
                 ThreadPool(const unsigned int num_threads);
                 ~ThreadPool();
 
-                const size_t numThreads() const;
+                ThreadPool(const ThreadPool& other) noexcept = delete;
+                ThreadPool& operator=(const ThreadPool& other) noexcept = delete;
+                ThreadPool(ThreadPool&& other) noexcept = delete;
+                ThreadPool& operator=(ThreadPool&& other) noexcept = delete;
+
+                const size_t size() const;
 
                 void addJob(std::function<void()>&& job);
                 void addJob(std::function<void()>&& job, std::function<void()>&& callback);
@@ -58,7 +68,10 @@ namespace Engine {
 
                 void join_all();
                 void wait_for_all();
+
                 void shutdown();
+
+                //void clear_all_jobs();
         };
     };
 };

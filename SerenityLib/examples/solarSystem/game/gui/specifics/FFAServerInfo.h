@@ -29,7 +29,7 @@ class FFAServerInfo final : public RoundedWindow {
         ScrollFrame*     m_ScrollFrame;
         Font&            m_Font;
     public:
-        FFAServerInfo(HostScreenFFA2&, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const std::string& labelText);
+        FFAServerInfo(HostScreenFFA2&, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const std::string& labelText, const bool fromDatabase = false);
         ~FFAServerInfo();
 
         void onResize(const unsigned int& newWidth, const unsigned int& newHeight);
@@ -38,6 +38,7 @@ class FFAServerInfo final : public RoundedWindow {
         TextBox& getServerPortTextBox();
         TextBox& getMatchDurationTextBox();
         TextBox& getMaxPlayersTextBox();
+        TextBox& getLobbyDurationTextBox();
 
         void update(const double& dt);
         void render();

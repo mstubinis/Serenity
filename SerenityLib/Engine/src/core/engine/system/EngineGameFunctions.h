@@ -2,6 +2,8 @@
 #ifndef ENGINE_ENGINE_GAME_FUNCTIONS_H
 #define ENGINE_ENGINE_GAME_FUNCTIONS_H
 
+class  Engine_Window;
+
 namespace Game {
     void initResources();
     void initLogic();
@@ -9,19 +11,21 @@ namespace Game {
     void render();
     void cleanup();
 
-    void onResize(const unsigned int& width, const unsigned int& height);
-    void onClose();
-    void onLostFocus();
-    void onGainedFocus();
-    void onTextEntered(const unsigned int& unicode);
-    void onKeyPressed(const unsigned int& key);
-    void onKeyReleased(const unsigned int& key);
-    void onMouseWheelMoved(const int& delta);
-    void onMouseButtonPressed(const unsigned int& button);
-    void onMouseButtonReleased(const unsigned int& button);
-    void onMouseMoved(const float& mouseX, const float& mouseY);
-    void onMouseEntered();
-    void onMouseLeft();
+    void onResize(Engine_Window&, const unsigned int& width, const unsigned int& height);
+    void onWindowRequestedToBeClosed(Engine_Window&);
+    void onWindowClosed(Engine_Window&);
+    void onGameEnded();
+    void onLostFocus(Engine_Window&);
+    void onGainedFocus(Engine_Window&);
+    void onTextEntered(Engine_Window&, const unsigned int& unicode);
+    void onKeyPressed(Engine_Window&, const unsigned int& key);
+    void onKeyReleased(Engine_Window&, const unsigned int& key);
+    void onMouseWheelScrolled(Engine_Window&, const int& delta, const int& x, const int& y);
+    void onMouseButtonPressed(Engine_Window&, const unsigned int& button);
+    void onMouseButtonReleased(Engine_Window&, const unsigned int& button);
+    void onMouseMoved(Engine_Window&, const float& mouseX, const float& mouseY);
+    void onMouseEntered(Engine_Window&);
+    void onMouseLeft(Engine_Window&);
     void onPreUpdate(const double& dt);
     void onPostUpdate(const double& dt);
     void onJoystickButtonPressed();

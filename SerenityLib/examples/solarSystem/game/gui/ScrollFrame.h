@@ -33,9 +33,15 @@ class ScrollFrame: public Widget {
         std::vector<ScrollFrame::WidgetRow>       m_Content;
         glm::uvec4                                m_PaddingSize;
 
+        void recalc_all_max_row_heights();
+        void recalc_max_row_height(WidgetRow&);
+
         void reposition_scroll_bar();
         void internal_recalculate_content_sizes();
+
+        void fit_all_widgets_to_window();
         void fit_widget_to_window(WidgetEntry& widget);
+
         const float get_true_content_height(const bool updateToo = false, const double& dt = 0.0);
     public:
         ScrollFrame(const Font& font, const float x, const float y, const float w, const float h, const float depth);

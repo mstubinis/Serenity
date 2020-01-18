@@ -11,11 +11,8 @@ using namespace std;
 EventManager* EventManager::m_EventManager = nullptr;
 
 EventManager::EventManager(){
-    m_Delta = 0;
-    m_Position = m_Position_Previous = m_Difference = glm::vec2(0.0f);
-
-    m_currentKey    = m_previousKey     = KeyboardKey::Unknown;
-    m_currentButton = m_previousButton  = MouseButton::Unknown;
+    m_CurrentKeyboardKey = m_PreviousKeyboardKey = KeyboardKey::Unknown;
+    m_CurrentMouseButton = m_PreviousMouseButton = MouseButton::Unknown;
 
     m_EventManager = this;
 }
@@ -23,85 +20,67 @@ EventManager::~EventManager(){
     cleanup();
 }
 void EventManager::cleanup() {
-    if(m_KeyStatus.size() > 0)   m_KeyStatus.clear();
-    if(m_MouseStatus.size() > 0) m_MouseStatus.clear();
-}
-void EventManager::setMousePositionInternal(const float x, const float y, const bool resetDifference, const bool resetPrevious) {
-    const glm::vec2 newPos = glm::vec2(x, Resources::getWindowSize().y - y); //opengl flipping y axis
-    resetPrevious ? m_Position_Previous = newPos : m_Position_Previous = m_Position;
-    m_Position = newPos;
-    m_Difference += (m_Position - m_Position_Previous);
-    if (resetDifference) {
-        m_Difference = glm::vec2(0.0f);
-    }
+    if(m_KeyboardKeyStatus.size() > 0)   m_KeyboardKeyStatus.clear();
+    if(m_MouseStatus.size() > 0)         m_MouseStatus.clear();
 }
 
 void EventManager::onEventKeyPressed(const unsigned int& key){
-    m_previousKey    = m_currentKey;
-    m_currentKey     = key;
+    m_PreviousKeyboardKey = m_CurrentKeyboardKey;
+    m_CurrentKeyboardKey = key;
 
-    if (!m_KeyStatus.count(key))
-        m_KeyStatus.insert(key);
+    if (!m_KeyboardKeyStatus.count(key))
+        m_KeyboardKeyStatus.insert(key);
 }
 void EventManager::onEventKeyReleased(const unsigned int& key){
-    m_previousKey    = KeyboardKey::Unknown;
-    m_currentKey     = KeyboardKey::Unknown;
+    m_PreviousKeyboardKey = KeyboardKey::Unknown;
+    m_CurrentKeyboardKey = KeyboardKey::Unknown;
 
-    if (m_KeyStatus.count(key))
-        m_KeyStatus.erase(key);
+    if (m_KeyboardKeyStatus.count(key))
+        m_KeyboardKeyStatus.erase(key);
 }
 void EventManager::onEventMouseButtonPressed(const unsigned int& mouseButton){
-    m_previousButton           = m_currentButton;
-    m_currentButton            = mouseButton;
+    m_PreviousMouseButton = m_CurrentMouseButton;
+    m_CurrentMouseButton = mouseButton;
 
     if (!m_MouseStatus.count(mouseButton))
         m_MouseStatus.insert(mouseButton);
 }
 void EventManager::onEventMouseButtonReleased(const unsigned int& mouseButton){
-    m_previousButton           = MouseButton::Unknown;
-    m_currentButton            = MouseButton::Unknown;
+    m_PreviousMouseButton = MouseButton::Unknown;
+    m_CurrentMouseButton = MouseButton::Unknown;
 
     if(m_MouseStatus.count(mouseButton))
         m_MouseStatus.erase(mouseButton);
 }
-void EventManager::onEventMouseWheelMoved(const int& delta){
-    m_Delta += (static_cast<double>(delta) * 10.0);
-}
 void EventManager::onResetEvents(const double& dt){
-    m_previousKey    = KeyboardKey::Unknown;
-    m_currentKey     = KeyboardKey::Unknown;
-    m_previousButton = MouseButton::Unknown;
-    m_currentButton  = MouseButton::Unknown;
-
-    const double step = (1.0 - dt);
-    m_Delta *= step * step * step;
-
-    m_Difference.x = 0.0f;
-    m_Difference.y = 0.0f;
+    m_PreviousKeyboardKey = KeyboardKey::Unknown;
+    m_CurrentKeyboardKey = KeyboardKey::Unknown;
+    m_PreviousMouseButton = MouseButton::Unknown;
+    m_CurrentMouseButton = MouseButton::Unknown;
 }
 const KeyboardKey::Key Engine::getPressedKey() {
-    return static_cast<KeyboardKey::Key>(EventManager::m_EventManager->m_currentKey);
+    return static_cast<KeyboardKey::Key>(EventManager::m_EventManager->m_CurrentKeyboardKey);
 }
 const MouseButton::Button Engine::getPressedButton() {
-    return static_cast<MouseButton::Button>(EventManager::m_EventManager->m_currentButton);
+    return static_cast<MouseButton::Button>(EventManager::m_EventManager->m_CurrentMouseButton);
 }
 const bool Engine::isKeyDown(const KeyboardKey::Key& key){
-    return EventManager::m_EventManager->m_KeyStatus.count(key);
+    return EventManager::m_EventManager->m_KeyboardKeyStatus.count(key);
 }
 const bool Engine::isKeyDownOnce() {
     auto& mgr = *EventManager::m_EventManager;
-    return (mgr.m_currentKey != mgr.m_previousKey) ? true : false;
+    return (mgr.m_CurrentKeyboardKey != mgr.m_PreviousKeyboardKey) ? true : false;
 }
 
 
 
 const unsigned int Engine::getNumPressedKeys() {
     auto& mgr = *EventManager::m_EventManager;
-    return static_cast<unsigned int>(mgr.m_KeyStatus.size());
+    return static_cast<unsigned int>(mgr.m_KeyboardKeyStatus.size());
 }
 const unordered_set<unsigned int>& Engine::getPressedKeys() {
     auto& mgr = *EventManager::m_EventManager;
-    return mgr.m_KeyStatus;
+    return mgr.m_KeyboardKeyStatus;
 }
 const unordered_set<unsigned int>& Engine::getPressedMouseButtons() {
     auto& mgr = *EventManager::m_EventManager;
@@ -110,21 +89,21 @@ const unordered_set<unsigned int>& Engine::getPressedMouseButtons() {
 const bool Engine::isKeyDownOnce(const KeyboardKey::Key& key){
     const bool res = Engine::isKeyDown(key);
     auto& mgr = *EventManager::m_EventManager;
-    return (res && mgr.m_currentKey == key && (mgr.m_currentKey != mgr.m_previousKey)) ? true : false;
+    return (res && mgr.m_CurrentKeyboardKey == key && (mgr.m_CurrentKeyboardKey != mgr.m_PreviousKeyboardKey)) ? true : false;
 }
 
 const bool Engine::isKeyDownOnce(const KeyboardKey::Key& first, const KeyboardKey::Key& second) {
     const bool resFirst = Engine::isKeyDown(first);
     const bool resSecond = Engine::isKeyDown(second);
     auto& mgr = *EventManager::m_EventManager;
-    return ( resFirst && resSecond && mgr.m_currentKey == first && (mgr.m_currentKey != mgr.m_previousKey)) ? true : false;
+    return ( resFirst && resSecond && mgr.m_CurrentKeyboardKey == first && (mgr.m_CurrentKeyboardKey != mgr.m_PreviousKeyboardKey)) ? true : false;
 }
 const bool Engine::isKeyDownOnce(const KeyboardKey::Key& first, const KeyboardKey::Key& second, const KeyboardKey::Key& third) {
     const bool resFirst = Engine::isKeyDown(first);
     const bool resSecond = Engine::isKeyDown(second);
     const bool resThird = Engine::isKeyDown(third);
     auto& mgr = *EventManager::m_EventManager;
-    return (resFirst && resSecond && resThird && mgr.m_currentKey == first && (mgr.m_currentKey != mgr.m_previousKey)) ? true : false;
+    return (resFirst && resSecond && resThird && mgr.m_CurrentKeyboardKey == first && (mgr.m_CurrentKeyboardKey != mgr.m_PreviousKeyboardKey)) ? true : false;
 }
 const bool Engine::isKeyUp(const KeyboardKey::Key key){ 
     return !Engine::isKeyDown(key); 
@@ -135,33 +114,59 @@ const bool Engine::isMouseButtonDown(const MouseButton::Button& button){
 const bool Engine::isMouseButtonDownOnce(const MouseButton::Button& button){
     const bool res = Engine::isMouseButtonDown(button);
     auto& mgr = *EventManager::m_EventManager;
-    return (res && mgr.m_currentButton == button && (mgr.m_currentButton != mgr.m_previousButton)) ? true : false;
+    return (res && mgr.m_CurrentMouseButton == button && (mgr.m_CurrentMouseButton != mgr.m_PreviousMouseButton)) ? true : false;
 }
-const glm::vec2& Engine::getMouseDifference(){ 
-    return EventManager::m_EventManager->m_Difference; 
+const glm::vec2& Engine::getMouseDifference() {
+    return Engine::getMouseDifference(Resources::getWindow());
 }
-const glm::vec2& Engine::getMousePositionPrevious(){ 
-    return EventManager::m_EventManager->m_Position_Previous; 
+const glm::vec2& Engine::getMousePositionPrevious() {
+    return Engine::getMousePositionPrevious(Resources::getWindow());
 }
-const glm::vec2& Engine::getMousePosition(){ 
-    return EventManager::m_EventManager->m_Position; 
+const glm::vec2& Engine::getMousePosition() {
+    return Engine::getMousePosition(Resources::getWindow());
 }
-const double Engine::getMouseWheelDelta(){ 
-    return EventManager::m_EventManager->m_Delta; 
+const glm::vec2& Engine::getMouseDifference(Engine_Window& window){ 
+    return window.getMousePositionDifference();
 }
-void Engine::setMousePosition(const float x, const float y, const bool resetDifference, const bool resetPreviousPosition){
-    sf::Mouse::setPosition(sf::Vector2i(static_cast<int>(x), static_cast<int>(y)), Resources::getWindow().getSFMLHandle());
-    EventManager::m_EventManager->setMousePositionInternal(x, y, resetDifference, resetPreviousPosition);
+const glm::vec2& Engine::getMousePositionPrevious(Engine_Window& window){
+    return window.getMousePositionPrevious();
 }
-void Engine::setMousePosition(const unsigned int x, const unsigned int y, const bool resetDifference, const bool resetPreviousPosition){
-    sf::Mouse::setPosition(sf::Vector2i(x, y), Resources::getWindow().getSFMLHandle());
-    EventManager::m_EventManager->setMousePositionInternal(static_cast<float>(x), static_cast<float>(y), resetDifference, resetPreviousPosition);
+const glm::vec2& Engine::getMousePosition(Engine_Window& window){
+    return window.getMousePosition();
 }
-void Engine::setMousePosition(const glm::vec2& pos, const bool resetDifference, const bool resetPreviousPosition){
-    sf::Mouse::setPosition(sf::Vector2i(static_cast<int>(pos.x), static_cast<int>(pos.y)), Resources::getWindow().getSFMLHandle());
-    EventManager::m_EventManager->setMousePositionInternal(pos.x, pos.y, resetDifference, resetPreviousPosition);
+const double Engine::getMouseWheelDelta() {
+    return Engine::getMouseWheelDelta(Resources::getWindow());
 }
-void Engine::setMousePosition(const glm::uvec2& pos, const bool resetDifference, const bool resetPreviousPosition){
-    sf::Mouse::setPosition(sf::Vector2i(pos.x, pos.y), Resources::getWindow().getSFMLHandle());
-    EventManager::m_EventManager->setMousePositionInternal(static_cast<float>(pos.x), static_cast<float>(pos.y), resetDifference, resetPreviousPosition);
+const double Engine::getMouseWheelDelta(Engine_Window& window){
+    return window.getMouseWheelDelta();
+}
+void Engine::setMousePosition(Engine_Window& window, const float x, const float y, const bool resetDifference, const bool resetPreviousPosition){
+    sf::Mouse::setPosition(sf::Vector2i(static_cast<int>(x), static_cast<int>(y)), window.getSFMLHandle());
+    window.updateMousePosition(x, y, resetDifference, resetPreviousPosition);
+}
+void Engine::setMousePosition(Engine_Window& window, const unsigned int x, const unsigned int y, const bool resetDifference, const bool resetPreviousPosition){
+    sf::Mouse::setPosition(sf::Vector2i(x, y), window.getSFMLHandle());
+    window.updateMousePosition(static_cast<float>(x), static_cast<float>(y), resetDifference, resetPreviousPosition);
+}
+void Engine::setMousePosition(Engine_Window& window, const glm::vec2& pos, const bool resetDifference, const bool resetPreviousPosition){
+    sf::Mouse::setPosition(sf::Vector2i(static_cast<int>(pos.x), static_cast<int>(pos.y)), window.getSFMLHandle());
+    window.updateMousePosition(pos.x, pos.y, resetDifference, resetPreviousPosition);
+}
+void Engine::setMousePosition(Engine_Window& window, const glm::uvec2& pos, const bool resetDifference, const bool resetPreviousPosition){
+    sf::Mouse::setPosition(sf::Vector2i(pos.x, pos.y), window.getSFMLHandle());
+    window.updateMousePosition(static_cast<float>(pos.x), static_cast<float>(pos.y), resetDifference, resetPreviousPosition);
+}
+
+
+void Engine::setMousePosition(const float x, const float y, const bool resetDifference, const bool resetPreviousPosition) {
+    Engine::setMousePosition(Resources::getWindow(), x, y, resetDifference, resetPreviousPosition);
+}
+void Engine::setMousePosition(const unsigned int x, const unsigned int y, const bool resetDifference, const bool resetPreviousPosition) {
+    Engine::setMousePosition(Resources::getWindow(), x, y, resetDifference, resetPreviousPosition);
+}
+void Engine::setMousePosition(const glm::vec2& pos, const bool resetDifference, const bool resetPreviousPosition) {
+    Engine::setMousePosition(Resources::getWindow(), pos, resetDifference, resetPreviousPosition);
+}
+void Engine::setMousePosition(const glm::uvec2& pos, const bool resetDifference, const bool resetPreviousPosition) {
+    Engine::setMousePosition(Resources::getWindow(), pos, resetDifference, resetPreviousPosition);
 }

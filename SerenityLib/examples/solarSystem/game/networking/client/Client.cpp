@@ -8,7 +8,7 @@
 #include "../../gui/Text.h"
 #include "../../gui/specifics/ServerLobbyChatWindow.h"
 #include "../../gui/specifics/ServerLobbyConnectedPlayersWindow.h"
-#include "../../gui/specifics/ServerLobbyShipSelectorWindow.h"
+#include "../../gui/specifics/LobbyFFA.h"
 
 #include "../../map/Map.h"
 #include "../../map/Anchor.h"
@@ -351,10 +351,6 @@ void Client::on_receive_anti_cloak_status(Packet& basePacket, Map& map) {
     }
 }
 
-void Client::on_receive_server_game_mode(Packet& basePacket) {
-    PacketGameplayModeInfo& pI = static_cast<PacketGameplayModeInfo&>(basePacket);
-    m_MapSpecificData.m_GameplayMode.deserialize(pI);
-}
 void Client::on_receive_cannon_impact(Packet& basePacket, Map& map) {
     PacketProjectileImpact& pI = static_cast<PacketProjectileImpact&>(basePacket);
     auto* impacted_ship = map.getShips().at(pI.impacted_ship_map_key);
@@ -463,7 +459,7 @@ void Client::on_receive_create_deep_space_anchor(Packet& basePacket, Map& map) {
     const size_t size = stoi(info[0]);
     Anchor* closest   = map.getRootAnchor();
     for (size_t i = 1; i < 1 + size; ++i) {
-        closest = closest->getChildren().at(info[i]);
+        closest = closest->getChild(info[i]);
     }
     const auto anchorPos = closest->getPosition();
     const auto x         = pI.r + anchorPos.x;
@@ -485,6 +481,10 @@ void Client::on_receive_cloak_update(Packet& basePacket, Map& map) {
         ship_that_changed_cloaking.updateCloakFromPacket(pI);
     }
 }
+void Client::on_receive_server_game_mode(Packet& basePacket) {
+    PacketGameplayModeInfo& pI = static_cast<PacketGameplayModeInfo&>(basePacket);
+    m_MapSpecificData.m_GameplayMode.deserialize(pI);
+}
 void Client::on_receive_new_client_entered_map(Packet& basePacket) {
     PacketMessage& pI           = static_cast<PacketMessage&>(basePacket);
     const auto list             = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map,teamNumber
@@ -499,7 +499,7 @@ void Client::on_receive_server_approve_map_entry(Packet& basePacket, Menu& menu)
     const auto list             = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map,teamNumber
     TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(list[2]));
 
-    menu.m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
+    //menu.m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
     m_Core.enterMap(*m_MapSpecificData.m_GameplayMode.getTeam(teamNumber), list[1], list[0], pI.name, pI.r, pI.g, pI.b);
     menu.m_Next->setText("Next");
     menu.m_GameState = GameState::Game;//ok, ive entered the map
@@ -517,10 +517,10 @@ void Client::on_receive_server_approve_map_entry(Packet& basePacket, Menu& menu)
     auto position = glm_vec3(0, 0, -dist);
     modelMatrix = glm::mat4_cast(orientation) * glm::translate(position);
     auto& playerBody = *map.getPlayer()->getComponent<ComponentBody>();
-    auto spawn = map.getSpawnAnchor()->getPosition();
+    auto spawn_position = map.getSpawnAnchor()->getPosition();
     playerBody.setPosition(Math::getMatrixPosition(modelMatrix));
 
-    Math::alignTo(orientation, playerBody.position() - spawn);
+    Math::alignTo(orientation, playerBody.position() - spawn_position);
     playerBody.setRotation(orientation);
 
     //TODO: just testing particles here....
@@ -543,33 +543,10 @@ void Client::on_receive_server_approve_map_entry(Packet& basePacket, Menu& menu)
     PacketMessage pOut(pI);
     pOut.PacketType = PacketType::Client_To_Server_Successfully_Entered_Map;
     pOut.name       = map.getPlayer()->getMapKey();
-    pOut.r          = modelMatrix[3][0] - static_cast<float>(spawn.x);
-    pOut.g          = modelMatrix[3][1] - static_cast<float>(spawn.y);
-    pOut.b          = modelMatrix[3][2] - static_cast<float>(spawn.z);
+    pOut.r          = modelMatrix[3][0] - static_cast<float>(spawn_position.x);
+    pOut.g          = modelMatrix[3][1] - static_cast<float>(spawn_position.y);
+    pOut.b          = modelMatrix[3][2] - static_cast<float>(spawn_position.z);
     send(pOut);
-}
-void Client::on_receive_map_data(Packet& basePacket, Menu& menu) {
-    PacketMapData& pI = static_cast<PacketMapData&>(basePacket);
-    Map* map_ptr_real = static_cast<Map*>(Resources::getScene(pI.map_name));
-    if (!map_ptr_real) {
-        NEW Map(m_MapSpecificData.m_GameplayMode, *this, pI.map_name, pI.map_file_name);
-        map_ptr_real = static_cast<Map*>(Resources::getScene(pI.map_name));
-    }
-    m_MapSpecificData.m_Map = map_ptr_real;
-    auto& map = *m_MapSpecificData.m_Map;
-    auto& menuScene = *const_cast<Scene*>(Resources::getScene("Menu"));
-    auto* menuSkybox = menuScene.skybox();
-    SAFE_DELETE(menuSkybox);
-    GameSkybox* newMenuSkybox = NEW GameSkybox(map.skyboxFile(), 0);
-    menuScene.setSkybox(newMenuSkybox);
-    menuScene.setGlobalIllumination(map.getGlobalIllumination());
-
-    menu.m_ServerLobbyShipSelectorWindow->clear();
-    auto list = Helper::SeparateStringByCharacter(pI.map_allowed_ships, ',');
-    for (auto& allowed_ship_class : list) {
-        menu.m_ServerLobbyShipSelectorWindow->addShipButton(allowed_ship_class);
-    }
-    menu.m_ServerLobbyShipSelectorWindow->setShipViewportActive(true);
 }
 void Client::on_receive_chat_message(Packet& basePacket, Menu& menu) {
     PacketMessage& pI = static_cast<PacketMessage&>(basePacket);
@@ -611,22 +588,49 @@ void Client::on_receive_client_just_left_server(Packet& basePacket, Menu& menu) 
     menu.m_ServerLobbyChatWindow->addContent(text_message);
 }
 void Client::on_receive_connection_accepted_by_server(Packet& basePacket, Menu& menu) {
-    PacketMessage& pI = static_cast<PacketMessage&>(basePacket);
-    if (m_Core.m_GameState != GameState::Host_Screen_Lobby_FFA_3 /*&& m_Core.m_GameState == GameState::Host_Server_Port_And_Name_And_Map*/) {
-        m_Core.m_GameState = GameState::Host_Screen_Lobby_FFA_3;
-        menu.m_Next->setText("Start");
-    }else if (m_Core.m_GameState != GameState::Join_Screen_Lobby_2 /*&& m_Core.m_GameState == GameState::Join_Server_Port_And_Name_And_IP*/) {
-        m_Core.m_GameState = GameState::Join_Screen_Lobby_2;
-        menu.m_Next->setText("Start");
+    PacketConnectionAccepted& pI = static_cast<PacketConnectionAccepted&>(basePacket);
+
+    
+    Map* map_ptr_real = static_cast<Map*>(Resources::getScene(pI.map_name));
+    if (!map_ptr_real) {
+        NEW Map(m_MapSpecificData.m_GameplayMode, *this, pI.map_name, pI.map_file_name);
+        map_ptr_real = static_cast<Map*>(Resources::getScene(pI.map_name));
     }
+    m_MapSpecificData.m_Map = map_ptr_real;
+    auto& map               = *m_MapSpecificData.m_Map;
+    auto& menuScene         = *const_cast<Scene*>(Resources::getScene("Menu"));
+    auto* menuSkybox        = menuScene.skybox();
+    SAFE_DELETE(menuSkybox);
+    GameSkybox* newMenuSkybox = NEW GameSkybox(map.skyboxFile(), 0);
+    menuScene.setSkybox(newMenuSkybox);
+    menuScene.setGlobalIllumination(map.getGlobalIllumination());
+
     menu.m_ServerLobbyConnectedPlayersWindow->clear();
     menu.m_ServerLobbyChatWindow->clear();
+    //menu.m_ServerLobbyShipSelectorWindow->clear();
+    //menu.m_ServerLobbyShipSelectorWindow->setShipViewportActive(true);
+    
 
-    auto list = Helper::SeparateStringByCharacter(pI.data, ',');
-    auto client_id = stoi(list.back());
-    list.pop_back();
-    //list is a vector of connected players
-    for (auto& _name : list) {
+
+    if (pI.game_mode_type == static_cast<unsigned char>(GameplayModeType::FFA)) {
+        menu.setGameState(GameState::Host_Screen_Lobby_FFA_3);
+        menu.m_LobbyScreenFFA->initShipSelector(pI);
+        if (pI.is_host) {
+            menu.m_LobbyScreenFFA->setHost(true);
+        }
+        menu.m_LobbyScreenFFA->setTopLabelText(pI.map_name + " - " + GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES[static_cast<unsigned int>(pI.game_mode_type)]);
+    }else if (pI.game_mode_type == static_cast<unsigned char>(GameplayModeType::TeamDeathmatch)) {
+        menu.setGameState(GameState::Host_Screen_Lobby_TeamDeathMatch_3);
+    }else if (pI.game_mode_type == static_cast<unsigned char>(GameplayModeType::HomelandSecurity)) {
+        menu.setGameState(GameState::Host_Screen_Lobby_HomelandSecurity_3);
+    }
+
+
+
+    auto already_connected_players_list = Helper::SeparateStringByCharacter(pI.already_connected_players, ',');
+    auto client_id = stoi(already_connected_players_list.back());
+    already_connected_players_list.pop_back();
+    for (auto& _name : already_connected_players_list) {
         if (!_name.empty()) { //trailing "," in data can lead to an empty string added into the list
             Text* text = NEW Text(0, 0, *menu.m_Font, _name);
             text->setColor(1, 1, 0, 1);
@@ -754,9 +758,6 @@ void Client::onReceiveTCP() {
                     on_receive_server_approve_map_entry(basePacket, menu);
                     break;
                 }case PacketType::Server_To_Client_Reject_Map_Entry: {
-                    break;
-                }case PacketType::Server_To_Client_Map_Data: {
-                    on_receive_map_data(basePacket, menu);
                     break;
                 }case PacketType::Server_To_Client_Chat_Message: {
                     on_receive_chat_message(basePacket, menu);

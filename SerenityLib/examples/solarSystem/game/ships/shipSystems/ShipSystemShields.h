@@ -78,23 +78,23 @@ class ShipSystemShields final : public ShipSystem {
         ShipSystemShields(
             Ship&,
             Map&,
-            const float avg_health,
-            const glm::vec3& offset = glm::vec3(0.0f),
-            const glm::vec3& additional_size_scale = glm::vec3(1.0f),
-            const float recharge_amount = 650.0f
+             float avg_health,
+             glm::vec3 offset = glm::vec3(0.0f),
+             glm::vec3 additional_size_scale = glm::vec3(1.0f),
+             float recharge_amnt = 650.0f
         );
         ShipSystemShields(
             Ship&,
             Map&,
-            const float fwd,
-            const float aft,
-            const float port,
-            const float starboard,
-            const float dorsal,
-            const float ventral,
-            const glm::vec3& offset = glm::vec3(0.0f),
-            const glm::vec3& additional_size_scale = glm::vec3(1.0f),
-            const float recharge_amount = 650.0f
+             float fwd,
+             float aft,
+             float port,
+             float starboard,
+             float dorsal,
+             float ventral,
+             glm::vec3 offset = glm::vec3(0.0f),
+             glm::vec3 additional_size_scale = glm::vec3(1.0f),
+             float recharge_amnt = 650.0f
         );
         ~ShipSystemShields();
 

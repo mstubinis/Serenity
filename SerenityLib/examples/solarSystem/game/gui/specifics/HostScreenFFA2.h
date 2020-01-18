@@ -11,18 +11,18 @@ class  ServerHostingMapSelectorWindow;
 class  MapDescriptionWindow;
 struct Host2FFA_ButtonBack_OnClick;
 struct Host2FFA_ButtonNext_OnClick;
-class  HostScreen;
+class  HostScreen1;
 class  FFAServerInfo;
 class  FFAShipSelector;
 
 class HostScreenFFA2 final {
-    friend class  HostScreen;
+    friend class  HostScreen1;
     friend struct Host2FFA_ButtonBack_OnClick;
     friend struct Host2FFA_ButtonNext_OnClick;
     friend class  FFAServerInfo;
     friend class  FFAShipSelector;
     private:
-        HostScreen& m_HostScreen1;
+        HostScreen1& m_HostScreen1;
         Menu&       m_Menu;
 
         FFAShipSelector* m_ShipSelectorWindow;
@@ -34,8 +34,12 @@ class HostScreenFFA2 final {
         Button*     m_BackgroundEdgeGraphicBottom;
         Button*     m_BackButton;
         Button*     m_ForwardButton;
+
+        const unsigned int get_duration_sec_helper(TextBox&);
+        const float get_duration_min_helper(TextBox&);
+
     public:
-        HostScreenFFA2(HostScreen& hostScreen1, Menu&, Font& font);
+        HostScreenFFA2(HostScreen1& hostScreen1, Menu&, Font& font);
         ~HostScreenFFA2();
 
         Menu& getMenu();
@@ -45,9 +49,13 @@ class HostScreenFFA2 final {
         const bool validateServerPortTextBox();
         const bool validateUsernameTextBox();
         const bool validateMatchDurationTextBox();
+        const bool validateLobbyDurationTextBox();
 
         const unsigned int getMatchDurationFromTextBoxInSeconds();
         const float getMatchDurationFromTextBoxInMinutes();
+
+        const unsigned int getLobbyDurationFromTextBoxInSeconds();
+        const float getLobbyDurationFromTextBoxInMinutes();
 
         void setTopText(const std::string& text);
 

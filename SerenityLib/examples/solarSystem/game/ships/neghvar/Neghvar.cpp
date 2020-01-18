@@ -32,6 +32,9 @@ Neghvar::Neghvar(Scene& scene, glm::vec3 position, glm::vec3 scale)
 Neghvar::Neghvar(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
 :Ship(team, client, CLASS, map, ai_type, name, position, scale, collisionType) {
 
+    m_Perks         = Neghvar::Perks::None;
+    m_UnlockedPerks = Neghvar::Perks::None;
+
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
@@ -39,13 +42,22 @@ Neghvar::Neghvar(AIType::Type& ai_type, Team& team, Client& client, Map& map, co
         else if (i == 1)   system = NEW ShipSystemPitchThrusters(_this);
         else if (i == 2)   system = NEW ShipSystemYawThrusters(_this);
         else if (i == 3)   system = NEW ShipSystemRollThrusters(_this);
-        else if (i == 4)   system = nullptr; //no cloaking device
-        else if (i == 5)   system = NEW ShipSystemShields(_this, map, 135500.0f, 135500.0f, 135500.0f, 135500.0f, 180500.0f, 180500.0f, glm::vec3(0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+        else if (i == 4)   system = NEW ShipSystemCloakingDevice(_this);
+        else if (i == 5)   system = NEW ShipSystemShields(_this, map, 
+            135500.0f, 
+            135500.0f, 
+            135500.0f, 
+            135500.0f, 
+            180500.0f, 
+            180500.0f, 
+            glm::vec3(0.0f), glm::vec3(1.0f, 1.0f, 1.0f),
+            1650.0f
+        );
         else if (i == 6)   system = NEW ShipSystemMainThrusters(_this);
         else if (i == 7)   system = NEW ShipSystemWarpDrive(_this);
         else if (i == 8)   system = NEW ShipSystemSensors(_this, map);
         else if (i == 9)   system = NEW ShipSystemWeapons(_this);
-        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 163500.0f);
+        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 163500.0f, 250.0f, 5.0f);
         m_ShipSystems.emplace(i, system);
     }
     internal_finialize_init(ai_type);

@@ -17,21 +17,23 @@ class btDiscreteDynamicsWorld;
 namespace Engine {
     namespace epriv {
         class  GLDebugDrawer;
-        struct PhysicsWorld {
-            btBroadphaseInterface*                  broadphase;
-            btDefaultCollisionConfiguration*        collisionConfiguration;
-            btCollisionDispatcher*                  dispatcher;
-            btSequentialImpulseConstraintSolver*    solver;
-            btSequentialImpulseConstraintSolverMt*  solverMT;
-            btDiscreteDynamicsWorld*                world;
-            GLDebugDrawer*                          debugDrawer;
-            PhysicsWorld(const unsigned int numCores);
-            ~PhysicsWorld();
+        class PhysicsWorld final{
+            public:
+                btBroadphaseInterface*                  broadphase;
+                btDefaultCollisionConfiguration*        collisionConfiguration;
+                btCollisionDispatcher*                  dispatcher;
+                btSequentialImpulseConstraintSolver*    solver;
+                btSequentialImpulseConstraintSolverMt*  solverMT;
+                btDiscreteDynamicsWorld*                world;
+                GLDebugDrawer*                          debugDrawer;
+            public:
+                PhysicsWorld();
+                ~PhysicsWorld();
 
-            PhysicsWorld(const PhysicsWorld&)                      = delete;
-            PhysicsWorld& operator=(const PhysicsWorld&)           = delete;
-            PhysicsWorld(PhysicsWorld&& other) noexcept            = delete;
-            PhysicsWorld& operator=(PhysicsWorld&& other) noexcept = delete;
+                PhysicsWorld(const PhysicsWorld&)                      = delete;
+                PhysicsWorld& operator=(const PhysicsWorld&)           = delete;
+                PhysicsWorld(PhysicsWorld&& other) noexcept            = delete;
+                PhysicsWorld& operator=(PhysicsWorld&& other) noexcept = delete;
         };
     };
 };

@@ -69,6 +69,8 @@ Handle ResourceManifest::GUITextureCornerRoundSmall;
 Handle ResourceManifest::GUITextureCornerBoxSmall;
 Handle ResourceManifest::GUITextureSideSmall;
 
+Handle ResourceManifest::GUIArrowBorder;
+
 Handle ResourceManifest::EarthSkyMaterial;
 Handle ResourceManifest::StarFlareMaterial;
 Handle ResourceManifest::ShieldMaterial;
@@ -389,6 +391,8 @@ void ResourceManifest::init(){
     ((Texture*)GUITextureCornerRoundSmall.get())->setFilter(TextureFilter::Nearest);
     ((Texture*)GUITextureCornerBoxSmall.get())->setFilter(TextureFilter::Nearest);
     ((Texture*)GUITextureSideSmall.get())->setFilter(TextureFilter::Nearest);
+
+    GUIArrowBorder = Resources::loadTexture(BasePath + "data/Textures/HUD/GUI_Arrow_border.dds");
 
     //sounds
     SoundRomulanCloakingActivated = Resources::addSoundData(BasePath + "data/Sounds/effects/romulan_cloaking.ogg");

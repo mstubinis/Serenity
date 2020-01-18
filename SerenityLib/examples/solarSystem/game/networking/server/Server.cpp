@@ -230,6 +230,9 @@ void Server::shutdown(const bool destructor) {
         SAFE_DELETE(m_UdpSocket);
     }
 }
+Database& Server::getDatabase() {
+    return m_Database;
+}
 const bool Server::shutdownMap() {
     const auto success = Resources::deleteScene(*m_MapSpecificData.m_Map);
     if (success) {
@@ -565,15 +568,16 @@ void Server::updateClient(ServerClient& client) {
 
                     auto& map = *static_cast<Map*>(Resources::getScene(list[1]));
                     auto spawnPosition = map.getSpawnAnchor()->getPosition();
-                    for (auto& anchor : map.getRootAnchor()->getChildren()) {
-                        if (boost::contains(anchor.first, "Deepspace Anchor")) {
-                            const auto anchorPosition = anchor.second->getPosition();
+                    for (auto& anchor_itr : map.getRootAnchor()->getChildren()) {
+                        auto& anchor_name = anchor_itr->getName();
+                        if (boost::contains(anchor_name, "Deepspace Anchor")) {
+                            const auto anchorPosition = anchor_itr->getPosition();
                             PacketMessage pOut2;
                             pOut2.PacketType = PacketType::Server_To_Client_Anchor_Creation_Deep_Space_Initial;
                             pOut2.r = static_cast<float>(anchorPosition.x) - static_cast<float>(spawnPosition.x);
                             pOut2.g = static_cast<float>(anchorPosition.y) - static_cast<float>(spawnPosition.y);
                             pOut2.b = static_cast<float>(anchorPosition.z) - static_cast<float>(spawnPosition.z);
-                            pOut2.data = anchor.first;
+                            pOut2.data = anchor_name;
                             server.send_to_client(client, pOut2);
                         }
                     }
@@ -623,28 +627,39 @@ void Server::updateClient(ServerClient& client) {
                     PacketMessage& pI = *static_cast<PacketMessage*>(&pIn);
                     const bool valid = server.isValidName(pI.data);
                     server.assign_username_to_client(client, pI.data);
-                    PacketMessage pOut;
                     if (valid) {
+                        PacketConnectionAccepted pOut;
+                        Map* map = server.m_MapSpecificData.m_Map;
+
                         //a client wants to connect to the server
                         client.m_Validated = true;
                         pOut.PacketType = PacketType::Server_To_Client_Accept_Connection;
-                        pOut.data = "";
+                        pOut.game_mode_type = static_cast<unsigned char>(Server::SERVER_HOST_DATA.getGameplayMode().getGameplayMode());
+                        pOut.already_connected_players = "";
+                        pOut.allowed_ships = Helper::Stringify(Server::SERVER_HOST_DATA.getAllowedShips(), ',');
+                        if (client.m_Username == server.m_Core.m_Client->m_Username) {
+                            pOut.is_host = true;
+                        }
                         for (auto& clientThread : server.m_Threads) {
                             for (auto& c : clientThread->m_Clients) {
                                 if (!c.second->m_Username.empty() && c.second->m_Username != client.m_Username) {
-                                    pOut.data += c.second->m_Username + ",";
+                                    pOut.already_connected_players += c.second->m_Username + ",";
                                 }
                             }
                         }
-                        pOut.data += std::to_string(client.m_ID) + ",";
-                        if (!pOut.data.empty())
-                            pOut.data.pop_back();
+                        pOut.already_connected_players += std::to_string(client.m_ID) + ",";
+                        if (!pOut.already_connected_players.empty())
+                            pOut.already_connected_players.pop_back();
+
+                        pOut.map_file_name = map->m_Filename;
+                        pOut.map_name = map->name();
+
                         server.send_to_client(client, pOut);
                         std::cout << "Server: Approving: " + pI.data + "'s connection" << std::endl;
 
-                        //now send the client info about the gameplay mode, dont do this for the player client
-                        if (client.m_Username != server.m_Core.m_Client->m_Username) {
-                            auto info = Server::SERVER_HOST_DATA.getGameplayMode().serialize();
+                        //now send the client info about the gameplay mode
+                        if (client.m_Username != server.m_Core.m_Client->m_Username) { //as the host, we already have info about it
+                            PacketGameplayModeInfo info = Server::SERVER_HOST_DATA.getGameplayMode().serialize();
                             info.PacketType = PacketType::Server_To_Client_Request_GameplayMode;
                             server.send_to_client(client, info);
                         }
@@ -653,15 +668,8 @@ void Server::updateClient(ServerClient& client) {
                         packetClientJustJoined.name = client.m_Username;
                         packetClientJustJoined.PacketType = PacketType::Server_To_Client_Client_Joined_Server;
                         server.send_to_all(packetClientJustJoined);
-
-                        PacketMapData packetMapData;
-                        Map* map                        = server.m_MapSpecificData.m_Map;
-                        packetMapData.map_name          = map->name();
-                        packetMapData.map_file_name     = map->m_Filename;
-                        packetMapData.map_allowed_ships = Helper::Stringify(Server::SERVER_HOST_DATA.getAllowedShips(), ',');
-                        packetMapData.PacketType        = PacketType::Server_To_Client_Map_Data;
-                        server.send_to_client(client, packetMapData);
                     }else{
+                        PacketMessage pOut;
                         pOut.PacketType = PacketType::Server_To_Client_Reject_Connection;
                         std::cout << "Server: Rejecting: " + pI.data + "'s connection - invalid username" << std::endl;
                         server.send_to_client(client, pOut);

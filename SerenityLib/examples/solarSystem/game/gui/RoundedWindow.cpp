@@ -39,6 +39,10 @@ RoundedWindow::RoundedWindow(Font& font, const float& x, const float& y, const f
 RoundedWindow::~RoundedWindow() {
 
 }
+void RoundedWindow::setAlignment(const Alignment::Type& alignment) {
+    Widget::setAlignment(alignment);
+    m_Background->setAlignment(alignment);
+}
 void RoundedWindow::setLabelText(const string& text) {
     m_Label->setText(text);
 }

@@ -13,17 +13,21 @@ class Map;
 class Anchor final : public EntityWrapper {
     friend class Map;
     private:
-        std::unordered_map<std::string, Anchor*> m_Children;
+        std::vector<Anchor*>  m_Children;
+        std::string           m_Name;
     public:
-        Anchor(Map& map, const decimal& x, const decimal& y, const decimal& z);
-        Anchor(Map& map, const glm_vec3& position);
+        Anchor(const std::string& name, Map& map, const decimal& x, const decimal& y, const decimal& z);
+        Anchor(const std::string& name, Map& map, const glm_vec3& position);
         ~Anchor();
 
-        const std::unordered_map<std::string, Anchor*>& getChildren() const;
+        const std::vector<Anchor*>& getChildren() const;
 
+        void setName(const std::string&);
+        const std::string& getName() const;
         const glm_vec3 getPosition();
         void update(const double& dt);
         
-        void addChild(const std::string& key, Anchor* anchor);
+        Anchor* getChild(const std::string& childName);
+        void addChild(Anchor* anchor);
 };
 #endif

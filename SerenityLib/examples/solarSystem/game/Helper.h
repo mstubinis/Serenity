@@ -27,6 +27,20 @@ class Helper final {
                 result.push_back(str);
             return result;
         }
+        static std::unordered_set<std::string> SeparateStringByCharacterIntoSet(const std::string& str, const char character_seperator) {
+            std::unordered_set<std::string> result;
+            if (str.empty())
+                return result;
+            std::stringstream ss(str);
+            while (ss.good()) {
+                std::string substr;
+                std::getline(ss, substr, character_seperator);
+                result.insert(substr);
+            }
+            if (result.size() == 0)
+                result.insert(str);
+            return result;
+        }
         static std::string Stringify(std::vector<std::string>& list, const char character_seperator) {
             if (list.size() == 0) return "";
             if (list.size() == 1) return list[0];

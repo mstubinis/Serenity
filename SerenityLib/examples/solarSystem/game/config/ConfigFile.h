@@ -25,6 +25,7 @@ class ConfigFile final {
         void updateWindowMode(const unsigned int& sfStyleEnumBitFlag);
         void updateWindowMode(const std::string& mode);
         void updateWindowSize(const unsigned int& width, const unsigned int& height);
+        void updateWindowMaximized(const bool& maximized);
 
         void updateHostServerName(const std::string&);
         void updateHostServerPort(const unsigned short&);

@@ -9,6 +9,19 @@ constexpr auto BREL_WING_SPAN_MAX = 0.67771135f;
 
 class Brel final : public Ship {
     private:
+        enum Perks : unsigned int {
+            None           = 0,
+            SuicideRun     = 1 << 0,
+            HighEnergyTurn = 1 << 1, //maybe
+            CannonOverload = 1 << 2,
+            All            = 4294967295,
+        };
+
+
+        unsigned int                                      m_Perks;         //active perks
+        unsigned int                                      m_UnlockedPerks; //account unlocked perks (move them to a player class later on?)
+
+
         struct BrelWingSpanState final {enum State {
             Down,
             RotatingUp,

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef GAME_GUI_HOST_SCREEN_H
-#define GAME_GUI_HOST_SCREEN_H
+#ifndef GAME_GUI_HOST_SCREEN_1_H
+#define GAME_GUI_HOST_SCREEN_1_H
 
 class  Button;
 class  Font;
@@ -19,7 +19,7 @@ class  HostScreenHomelandSecurity2;
 #include "../../map/MapEntry.h"
 #include "../../modes/GameplayMode.h"
 
-class HostScreen final {
+class HostScreen1 final {
     friend class  HostScreenFFA2;
     friend class  HostScreenTeamDeathmatch2;
     friend class  HostScreenHomelandSecurity2;
@@ -37,8 +37,8 @@ class HostScreen final {
         MapSelectionWindow*        m_LeftWindow;
         MapDescriptionWindow*      m_RightWindow;
     public:
-        HostScreen(Menu&, Font& font);
-        ~HostScreen();
+        HostScreen1(Menu&, Font& font);
+        ~HostScreen1();
 
         Menu& getMenu();
 

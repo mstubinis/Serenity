@@ -557,8 +557,8 @@ void Ship::internal_update_just_destroyed_fully(const double& dt, Map& map) {
 
         Anchor* finalAnchor = map.getRootAnchor();
         const auto& list = map.getClosestAnchor();
-        for (auto& closest : list) {
-            finalAnchor = finalAnchor->getChildren().at(closest);
+        for (auto& closest_anchor_name_itr : list) {
+            finalAnchor = finalAnchor->getChild(closest_anchor_name_itr);
         }
         pOut.data += "," + to_string(list.size()); //[1]
         for (auto& closest : list)
@@ -1046,11 +1046,11 @@ void Ship::updatePhysicsFromPacket(const PacketPhysicsUpdate& packet, Map& map) 
     const unsigned int size = stoi(list[0]);
     Anchor* closest = map.getRootAnchor();
     for (unsigned int i = 1; i < 1 + size; ++i) {
-        auto& children = closest->getChildren();
-        if (!children.count(list[i])) {
+        Anchor* child = closest->getChild(list[i]);
+        if (!child) {
             return;
         }
-        closest = children.at(list[i]);
+        closest = child;
     }
     const auto nearestAnchorPos = closest->getPosition();
     const auto x = packet.px + nearestAnchorPos.x;

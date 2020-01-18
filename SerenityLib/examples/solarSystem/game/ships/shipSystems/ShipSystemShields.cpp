@@ -158,10 +158,10 @@ const bool ShipSystemShieldsImpactPoint::update(const float& dt, vector<uint>& f
 }
 #pragma endregion
 
-ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float health, const glm::vec3& offset, const glm::vec3& additional_size_scale, const float recharge_amount) :ShipSystemShields(_ship, map, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, offset, additional_size_scale, recharge_amount) {
+ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, float health, glm::vec3 offset, glm::vec3 additional_size_scale, float recharge_amount) :ShipSystemShields(_ship, map, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, health / 6.0f, offset, additional_size_scale, recharge_amount) {
 
 }
-ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, const float fwd, const float aft, const float prt, const float sbd, const float dsl, const float vnt, const glm::vec3& offset, const glm::vec3& additional_size_scale, const float recharge_amount) :ShipSystem(ShipSystemType::Shields, _ship){
+ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, float fwd, float aft, float prt, float sbd, float dsl, float vnt, glm::vec3 offset, glm::vec3 additional_size_scale, float recharge_amount) :ShipSystem(ShipSystemType::Shields, _ship){
     m_ShieldEntity = map.createEntity();
     m_ShieldsOffset = offset;
     m_AdditionalShieldScale = additional_size_scale;

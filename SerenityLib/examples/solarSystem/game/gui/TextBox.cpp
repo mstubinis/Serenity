@@ -1,4 +1,5 @@
 #include "TextBox.h"
+#include "Text.h"
 #include <core/engine/fonts/Font.h>
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/renderer/Engine_Renderer.h>
@@ -20,7 +21,9 @@ TextBox::TextBox(const string& label, const Font& font, const unsigned short max
     m_MaxCharacters = maxCharacters;
     m_TextAlignment = TextAlignment::Left;
     m_Active = false;
+    unlock();
     m_Timer = 0.0f;
+    m_LabelTextColor = glm::vec4(1.0f);
     setText("");
     setLabel(label);
 
@@ -46,7 +49,31 @@ TextBox::TextBox(const string& label, const Font& font, const unsigned short max
 TextBox::~TextBox() {
     unregisterEvent(EventType::TextEntered);
 }
-
+void TextBox::lock() {
+    m_Locked = true;
+    disable();
+    disableMouseover();
+}
+void TextBox::unlock() {
+    m_Locked = false;
+    enable();
+    enableMouseover();
+}
+const bool TextBox::isLocked() const{
+    return m_Locked;
+}
+void TextBox::setLabelTextColor(const float r, const float g, const float b, const float a) {
+    m_LabelTextColor = glm::vec4(r, g, b, a);
+}
+void TextBox::setInputTextColor(const float r, const float g, const float b, const float a) {
+    m_TextColor = glm::vec4(r, g, b, a);
+}
+void TextBox::setLabelTextColor(const glm::vec4& color) {
+    TextBox::setLabelTextColor(color.r, color.g, color.b, color.a);
+}
+void TextBox::setInputTextColor(const glm::vec4& color) {
+    TextBox::setInputTextColor(color.r, color.g, color.b, color.a);
+}
 void TextBox::internalUpdateSize() {
     const auto input_width = (((m_Font->getTextWidth("X") * m_MaxCharacters) + 20.0f) * m_TextScale.x);
     m_Width = input_width;
@@ -113,7 +140,7 @@ void TextBox::setText(const string& text) {
     m_Text = text;
 }
 void TextBox::onEvent(const Event& e) {
-    if (m_Active) {
+    if (m_Active && !m_Locked) {
         if (e.type == EventType::TextEntered) {
             auto input = e.eventTextEntered.convert();
             auto unicode = e.eventTextEntered.unicode;
@@ -141,7 +168,7 @@ void TextBox::update(const double& dt) {
         m_Active = false;
         m_Timer = 0.0f;
     }
-    if (m_Active) {
+    if (m_Active && !m_Locked) {
         m_Timer += static_cast<float>(dt);
         if (m_Timer >= 1.0f) {
             m_Timer = 0.0f;
@@ -159,16 +186,19 @@ void TextBox::update(const double& dt) {
 void TextBox::render(const glm::vec4& scissor) {
     Button::render(scissor);
 
-    const auto lineHeight = m_Font->getTextHeight(m_Label) * m_TextScale.y;
+    const auto lineHeight = m_Font->getMaxHeight() * m_TextScale.y;
 
     const auto posW = positionFromAlignmentWorld();
-    const auto pos = glm::vec2(posW.x, posW.y + (lineHeight * 2.0f));
+    const auto pos = glm::vec2(posW.x, posW.y + (lineHeight));
 
-    m_Font->renderText(m_Label, pos, m_TextColor, 0, glm::vec2(m_TextScale), getDepth() - 0.001f, TextAlignment::Right, scissor);
+    m_Font->renderText(m_Label, pos, m_LabelTextColor, 0, glm::vec2(m_TextScale), getDepth() - 0.001f, TextAlignment::Right, scissor);
 
-    if (m_Active && m_Timer <= 0.5f) {
+    if (m_Active && m_Timer <= 0.5f && !m_Locked) {
         const auto blinkerPos = glm::vec2(posW.x + getTextWidth() + 4.0f + getPaddingSize(0), posW.y + height() / 2.0f);
-        Renderer::renderRectangle(blinkerPos, glm::vec4(1.0f), 3, lineHeight + 8, 0, getDepth() - 0.002f, Alignment::Left, scissor);
+        Renderer::renderRectangle(blinkerPos, glm::vec4(1.0f), 3, lineHeight - 4, 0, getDepth() - 0.002f, Alignment::Left, scissor);
+    }
+    if (m_Locked) {
+        Renderer::renderRectangle(posW, m_TextColor * glm::vec4(1.0f, 1.0f, 1.0f, 0.25f), m_Width,m_Height, 0, getDepth() - 0.0021f, Alignment::BottomLeft, scissor);
     }
 }
 void TextBox::render() {

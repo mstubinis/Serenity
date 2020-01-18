@@ -116,10 +116,10 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)game\;$(SolutionDir)Engine\src;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\dev\sqlite\include;$(ProjectDir)game\;$(SolutionDir)Engine\src;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;SFML_STATIC;ASSIMP_STATIC;NDEBUG;_WIN32_WINNT=0x0501;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <SuppressStartupBanner>false</SuppressStartupBanner>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ForcedIncludeFiles>core\engine\utils\ForcedInclude.h;ForcedGameInclude.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
@@ -127,8 +127,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\lib\32\Release;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;$(SolutionDir)Builds\Serenity\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies);Serenity.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\dev\sqlite\lib\32;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\lib\32\Release;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;$(SolutionDir)Builds\Serenity\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies);Serenity.lib;sqlite3.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099 /ignore:4006 %(AdditionalOptions)</AdditionalOptions>
       <LinkStatus>true</LinkStatus>
     </Link>
@@ -142,7 +142,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)game\;$(SolutionDir)Engine\src;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\dev\sqlite\include;$(ProjectDir)game\;$(SolutionDir)Engine\src;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;SFML_STATIC;_WIN32_WINNT=0x0501;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <SuppressStartupBanner>false</SuppressStartupBanner>
@@ -152,8 +152,8 @@
       <EnablePREfast>true</EnablePREfast>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Debug;D:\dev\assimp\lib\32\Debug;D:\dev\SFML\lib\32\Debug;D:\dev\lua\lib\32\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;$(SolutionDir)Builds\Serenity\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies);Serenity-d.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\dev\sqlite\lib\32;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Debug;D:\dev\assimp\lib\32\Debug;D:\dev\SFML\lib\32\Debug;D:\dev\lua\lib\32\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;$(SolutionDir)Builds\Serenity\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies);Serenity-d.lib;sqlite3.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
@@ -166,7 +166,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)game\;$(SolutionDir)Engine\src;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\dev\sqlite\include;$(ProjectDir)game\;$(SolutionDir)Engine\src;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;SFML_STATIC;_WIN32_WINNT=0x0501;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -175,8 +175,8 @@
       <EnablePREfast>true</EnablePREfast>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Debug;D:\dev\assimp\lib\64\Debug;D:\dev\SFML\lib\64\Debug;D:\dev\lua\lib\64\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;$(SolutionDir)Builds\Serenity64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Serenity-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\dev\sqlite\lib\64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Debug;D:\dev\assimp\lib\64\Debug;D:\dev\SFML\lib\64\Debug;D:\dev\lua\lib\64\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;$(SolutionDir)Builds\Serenity64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Serenity-d.lib;sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
     </Link>
@@ -189,7 +189,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)game\;$(SolutionDir)Engine\src;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\dev\sqlite\include;$(ProjectDir)game\;$(SolutionDir)Engine\src;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;SFML_STATIC;ASSIMP_STATIC;NDEBUG;_WIN32_WINNT=0x0501;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -199,10 +199,10 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\lib\64\Release;D:\dev\SFML\lib\64\Release;D:\dev\lua\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;$(SolutionDir)Builds\Serenity64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\dev\sqlite\lib\64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\lib\64\Release;D:\dev\SFML\lib\64\Release;D:\dev\lua\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;$(SolutionDir)Builds\Serenity64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4099 /ignore:4006 %(AdditionalOptions)</AdditionalOptions>
       <LinkStatus>true</LinkStatus>
-      <AdditionalDependencies>Serenity.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Serenity.lib;sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -217,6 +217,7 @@
     <ClInclude Include="game\config\ConfigFile.h" />
     <ClInclude Include="game\config\Keybinds.h" />
     <ClInclude Include="game\Core.h" />
+    <ClInclude Include="game\database\Database.h" />
     <ClInclude Include="game\factions\Faction.h" />
     <ClInclude Include="game\ForcedGameInclude.h" />
     <ClInclude Include="game\GameCamera.h" />
@@ -227,10 +228,13 @@
     <ClInclude Include="game\gui\RoundedWindow.h" />
     <ClInclude Include="game\gui\ScrollBar.h" />
     <ClInclude Include="game\gui\ScrollFrame.h" />
+    <ClInclude Include="game\gui\specifics\MessageWithArrow.h" />
+    <ClInclude Include="game\gui\specifics\FFALobbyShipSelector.h" />
+    <ClInclude Include="game\gui\specifics\HostScreen0.h" />
     <ClInclude Include="game\gui\specifics\LobbyFFA.h" />
     <ClInclude Include="game\gui\specifics\FFAServerInfo.h" />
     <ClInclude Include="game\gui\specifics\FFAShipSelector.h" />
-    <ClInclude Include="game\gui\specifics\HostScreen.h" />
+    <ClInclude Include="game\gui\specifics\HostScreen1.h" />
     <ClInclude Include="game\gui\specifics\HostScreenFFA2.h" />
     <ClInclude Include="game\gui\specifics\HostScreenHomelandSecurity2.h" />
     <ClInclude Include="game\gui\specifics\HostScreenTeamDeathmatch2.h" />
@@ -239,8 +243,8 @@
     <ClInclude Include="game\gui\specifics\MapSelectionWindow.h" />
     <ClInclude Include="game\gui\specifics\ServerLobbyChatWindow.h" />
     <ClInclude Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.h" />
-    <ClInclude Include="game\gui\specifics\ServerLobbyShipSelectorWindow.h" />
     <ClInclude Include="game\gui\specifics\Ship3DViewer.h" />
+    <ClInclude Include="game\gui\specifics\ShipDescription.h" />
     <ClInclude Include="game\gui\specifics\ShipToken.h" />
     <ClInclude Include="game\gui\Text.h" />
     <ClInclude Include="game\gui\TextBox.h" />
@@ -264,9 +268,9 @@
     <ClInclude Include="game\networking\packets\PacketClientRequestConnectionToServer.h" />
     <ClInclude Include="game\networking\packets\PacketCloakUpdate.h" />
     <ClInclude Include="game\networking\packets\PacketCollisionEvent.h" />
+    <ClInclude Include="game\networking\packets\PacketConnectionAccepted.h" />
     <ClInclude Include="game\networking\packets\PacketGameplayModeInfo.h" />
     <ClInclude Include="game\networking\packets\PacketHealthUpdate.h" />
-    <ClInclude Include="game\networking\packets\PacketMapData.h" />
     <ClInclude Include="game\networking\packets\PacketMessage.h" />
     <ClInclude Include="game\networking\packets\PacketPhysicsUpdate.h" />
     <ClInclude Include="game\networking\packets\PacketProjectileImpact.h" />
@@ -344,6 +348,7 @@
     <ClCompile Include="game\config\ConfigFile.cpp" />
     <ClCompile Include="game\config\Keybinds.cpp" />
     <ClCompile Include="game\Core.cpp" />
+    <ClCompile Include="game\database\Database.cpp" />
     <ClCompile Include="game\factions\Faction.cpp" />
     <ClCompile Include="game\Game.cpp" />
     <ClCompile Include="game\GameCamera.cpp" />
@@ -353,10 +358,13 @@
     <ClCompile Include="game\gui\RoundedWindow.cpp" />
     <ClCompile Include="game\gui\ScrollBar.cpp" />
     <ClCompile Include="game\gui\ScrollFrame.cpp" />
+    <ClCompile Include="game\gui\specifics\MessageWithArrow.cpp" />
+    <ClCompile Include="game\gui\specifics\FFALobbyShipSelector.cpp" />
+    <ClCompile Include="game\gui\specifics\HostScreen0.cpp" />
     <ClCompile Include="game\gui\specifics\LobbyFFA.cpp" />
     <ClCompile Include="game\gui\specifics\FFAServerInfo.cpp" />
     <ClCompile Include="game\gui\specifics\FFAShipSelector.cpp" />
-    <ClCompile Include="game\gui\specifics\HostScreen.cpp" />
+    <ClCompile Include="game\gui\specifics\HostScreen1.cpp" />
     <ClCompile Include="game\gui\specifics\HostScreenFFA2.cpp" />
     <ClCompile Include="game\gui\specifics\HostScreenHomelandSecurity2.cpp" />
     <ClCompile Include="game\gui\specifics\HostScreenTeamDeathmatch2.cpp" />
@@ -365,8 +373,8 @@
     <ClCompile Include="game\gui\specifics\MapSelectionWindow.cpp" />
     <ClCompile Include="game\gui\specifics\ServerLobbyChatWindow.cpp" />
     <ClCompile Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.cpp" />
-    <ClCompile Include="game\gui\specifics\ServerLobbyShipSelectorWindow.cpp" />
     <ClCompile Include="game\gui\specifics\Ship3DViewer.cpp" />
+    <ClCompile Include="game\gui\specifics\ShipDescription.cpp" />
     <ClCompile Include="game\gui\specifics\ShipToken.cpp" />
     <ClCompile Include="game\gui\Text.cpp" />
     <ClCompile Include="game\gui\TextBox.cpp" />
@@ -388,9 +396,9 @@
     <ClCompile Include="game\networking\packets\PacketClientRequestConnectionToServer.cpp" />
     <ClCompile Include="game\networking\packets\PacketCloakUpdate.cpp" />
     <ClCompile Include="game\networking\packets\PacketCollisionEvent.cpp" />
+    <ClCompile Include="game\networking\packets\PacketConnectionAccepted.cpp" />
     <ClCompile Include="game\networking\packets\PacketGameplayModeInfo.cpp" />
     <ClCompile Include="game\networking\packets\PacketHealthUpdate.cpp" />
-    <ClCompile Include="game\networking\packets\PacketMapData.cpp" />
     <ClCompile Include="game\networking\packets\PacketMessage.cpp" />
     <ClCompile Include="game\networking\packets\PacketPhysicsUpdate.cpp" />
     <ClCompile Include="game\networking\packets\PacketProjectileImpact.cpp" />

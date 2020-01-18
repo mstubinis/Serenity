@@ -43,11 +43,10 @@ void Text::setTextScale(const glm::vec2& scale) {
 }
 
 const float Text::width() const {
-    const auto x = m_Font->getTextWidth(m_Text) * m_TextScale.x;
-    return (m_Width > x) ? m_Width : x;
+    return (m_Font->getTextWidth(m_Text) * m_TextScale.x);
 }
 const float Text::height() const {
-    return m_Font->getTextHeight(m_Text) * m_TextScale.y;
+    return (m_Font->getTextHeight(m_Text) * m_TextScale.y);
 }
 const float Text::singleLineHeight() const {
     return m_Font->getMaxHeight() * m_TextScale.y;

@@ -286,12 +286,6 @@
     <Filter Include="Header Files\Game\GUI\Specifics\MainMenu">
       <UniqueIdentifier>{be8d1ca2-665c-4bf8-90a8-22c67ac26fc7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Game\GUI\Specifics\HostScreen">
-      <UniqueIdentifier>{9d2cccb0-a635-4024-8dc4-778d78b5b6de}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Game\GUI\Specifics\HostScreen">
-      <UniqueIdentifier>{132a1b30-beb7-4c60-810f-434b4d413b39}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Game\GUI\Specifics\Templates">
       <UniqueIdentifier>{62e68024-5beb-4a36-8a93-3c57c3d12e5e}</UniqueIdentifier>
     </Filter>
@@ -328,9 +322,6 @@
     <Filter Include="Header Files\Game\GUI\Specifics\LobbyTeamDeathmatch">
       <UniqueIdentifier>{edabf9e1-f3fd-45ce-babe-5ecc379acab0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Game\GUI\Specifics\LobbyFFA">
-      <UniqueIdentifier>{e61428f5-cef6-4271-87e5-48458eaf62ca}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Game\GUI\Specifics\LobbyHomelandSecurity">
       <UniqueIdentifier>{d2ec0720-df96-4c43-8cda-a1dce279bd52}</UniqueIdentifier>
     </Filter>
@@ -342,6 +333,33 @@
     </Filter>
     <Filter Include="Source Files\Game\GUI\Specifics\LobbyHomelandSecurity">
       <UniqueIdentifier>{1f8787a8-71ca-4d39-b2e1-97dbc77c0938}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Database">
+      <UniqueIdentifier>{a8615d53-a460-40bb-baf8-2b9793d25844}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Database">
+      <UniqueIdentifier>{4469edce-87fe-4600-977d-f4a4e1118aa5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\HostScreen0">
+      <UniqueIdentifier>{96f0e7a6-e08a-432c-bbfb-5ea09579195c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\HostScreen1">
+      <UniqueIdentifier>{9d2cccb0-a635-4024-8dc4-778d78b5b6de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics\HostScreen0">
+      <UniqueIdentifier>{befe9af2-cb8a-49d8-964b-962aa830f641}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics\HostScreen1">
+      <UniqueIdentifier>{132a1b30-beb7-4c60-810f-434b4d413b39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\LobbyFFA">
+      <UniqueIdentifier>{e61428f5-cef6-4271-87e5-48458eaf62ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics\HostScreen1Persistent">
+      <UniqueIdentifier>{182eeb85-5c59-4c64-9c99-b015c5c1d04c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\HostScreen1Persistent">
+      <UniqueIdentifier>{c11b05c5-870a-44dc-af51-164d62af3972}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -388,9 +406,6 @@
       <Filter>Header Files\Game\GUI\Specifics</Filter>
     </ClInclude>
     <ClInclude Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.h">
-      <Filter>Header Files\Game\GUI\Specifics</Filter>
-    </ClInclude>
-    <ClInclude Include="game\gui\specifics\ServerLobbyShipSelectorWindow.h">
       <Filter>Header Files\Game\GUI\Specifics</Filter>
     </ClInclude>
     <ClInclude Include="game\Helper.h">
@@ -648,9 +663,6 @@
     <ClInclude Include="game\networking\packets\PacketShipInfoRequest.h">
       <Filter>Header Files\Game\Networking\Packets</Filter>
     </ClInclude>
-    <ClInclude Include="game\gui\specifics\Ship3DViewer.h">
-      <Filter>Header Files\Game\GUI\Specifics</Filter>
-    </ClInclude>
     <ClInclude Include="game\gui\GUIRenderElement.h">
       <Filter>Header Files\Game\GUI</Filter>
     </ClInclude>
@@ -669,17 +681,11 @@
     <ClInclude Include="game\ships\venerex\Venerex.h">
       <Filter>Header Files\Game\Ships\Venerex</Filter>
     </ClInclude>
-    <ClInclude Include="game\gui\specifics\HostScreen.h">
-      <Filter>Header Files\Game\GUI\Specifics\HostScreen</Filter>
-    </ClInclude>
     <ClInclude Include="game\gui\specifics\MainMenu.h">
       <Filter>Header Files\Game\GUI\Specifics\MainMenu</Filter>
     </ClInclude>
-    <ClInclude Include="game\networking\packets\PacketMapData.h">
-      <Filter>Header Files\Game\Networking\Packets</Filter>
-    </ClInclude>
     <ClInclude Include="game\gui\specifics\MapDescriptionWindow.h">
-      <Filter>Header Files\Game\GUI\Specifics\HostScreen</Filter>
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen1</Filter>
     </ClInclude>
     <ClInclude Include="game\map\MapEntry.h">
       <Filter>Header Files\Game\Map</Filter>
@@ -688,7 +694,7 @@
       <Filter>Header Files\Game\GUI\Specifics\Templates</Filter>
     </ClInclude>
     <ClInclude Include="game\gui\specifics\MapSelectionWindow.h">
-      <Filter>Header Files\Game\GUI\Specifics\HostScreen</Filter>
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen1</Filter>
     </ClInclude>
     <ClInclude Include="game\gui\ScrollFrame.h">
       <Filter>Header Files\Game\GUI</Filter>
@@ -725,6 +731,30 @@
     </ClInclude>
     <ClInclude Include="game\map\MapDatabase.h">
       <Filter>Header Files\Game\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\FFALobbyShipSelector.h">
+      <Filter>Header Files\Game\GUI\Specifics\LobbyFFA</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\packets\PacketConnectionAccepted.h">
+      <Filter>Header Files\Game\Networking\Packets</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\Ship3DViewer.h">
+      <Filter>Header Files\Game\GUI\Specifics\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\ShipDescription.h">
+      <Filter>Header Files\Game\GUI\Specifics\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="game\database\Database.h">
+      <Filter>Header Files\Game\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\HostScreen1.h">
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen1</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\HostScreen0.h">
+      <Filter>Header Files\Game\GUI\Specifics\HostScreen0</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\MessageWithArrow.h">
+      <Filter>Header Files\Game\GUI\Specifics\Templates</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -771,9 +801,6 @@
       <Filter>Source Files\Game\GUI\Specifics</Filter>
     </ClCompile>
     <ClCompile Include="game\gui\specifics\ServerLobbyConnectedPlayersWindow.cpp">
-      <Filter>Source Files\Game\GUI\Specifics</Filter>
-    </ClCompile>
-    <ClCompile Include="game\gui\specifics\ServerLobbyShipSelectorWindow.cpp">
       <Filter>Source Files\Game\GUI\Specifics</Filter>
     </ClCompile>
     <ClCompile Include="game\map\Map.cpp">
@@ -1016,9 +1043,6 @@
     <ClCompile Include="game\networking\packets\PacketShipInfoRequest.cpp">
       <Filter>Source Files\Game\Networking\Packets</Filter>
     </ClCompile>
-    <ClCompile Include="game\gui\specifics\Ship3DViewer.cpp">
-      <Filter>Source Files\Game\GUI\Specifics</Filter>
-    </ClCompile>
     <ClCompile Include="game\gui\GUIRenderElement.cpp">
       <Filter>Source Files\Game\GUI\Specifics</Filter>
     </ClCompile>
@@ -1031,23 +1055,17 @@
     <ClCompile Include="game\ships\neghvar\Neghvar.cpp">
       <Filter>Source Files\Game\Ships\Neghvar</Filter>
     </ClCompile>
-    <ClCompile Include="game\gui\specifics\HostScreen.cpp">
-      <Filter>Source Files\Game\GUI\Specifics\HostScreen</Filter>
-    </ClCompile>
     <ClCompile Include="game\gui\specifics\MainMenu.cpp">
       <Filter>Source Files\Game\GUI\Specifics\MainMenu</Filter>
     </ClCompile>
-    <ClCompile Include="game\networking\packets\PacketMapData.cpp">
-      <Filter>Source Files\Game\Networking\Packets</Filter>
-    </ClCompile>
     <ClCompile Include="game\gui\specifics\MapDescriptionWindow.cpp">
-      <Filter>Source Files\Game\GUI\Specifics\HostScreen</Filter>
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen1</Filter>
     </ClCompile>
     <ClCompile Include="game\gui\RoundedWindow.cpp">
       <Filter>Source Files\Game\GUI\Specifics\Templates</Filter>
     </ClCompile>
     <ClCompile Include="game\gui\specifics\MapSelectionWindow.cpp">
-      <Filter>Source Files\Game\GUI\Specifics\HostScreen</Filter>
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen1</Filter>
     </ClCompile>
     <ClCompile Include="game\gui\ScrollFrame.cpp">
       <Filter>Source Files\Game\GUI</Filter>
@@ -1078,6 +1096,30 @@
     </ClCompile>
     <ClCompile Include="game\map\MapDatabase.cpp">
       <Filter>Source Files\Game\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\FFALobbyShipSelector.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\LobbyFFA</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\packets\PacketConnectionAccepted.cpp">
+      <Filter>Source Files\Game\Networking\Packets</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\Ship3DViewer.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\Templates</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\ShipDescription.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\Templates</Filter>
+    </ClCompile>
+    <ClCompile Include="game\database\Database.cpp">
+      <Filter>Source Files\Game\Database</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\HostScreen1.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen1</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\HostScreen0.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\HostScreen0</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\MessageWithArrow.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\Templates</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

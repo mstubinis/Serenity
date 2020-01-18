@@ -3,6 +3,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
+
 #include <core/engine/materials/Material.h>
 #include <core/engine/materials/MaterialComponent.h>
 
@@ -11,7 +12,6 @@ using namespace Engine;
 
 unordered_map<string, ShipInformation> Ships::Database;
 
-
 ShipInformation::ShipInformation() {
     Faction = FactionEnum::Unknown;
     Class   = "";
@@ -19,7 +19,6 @@ ShipInformation::ShipInformation() {
 ShipInformation::~ShipInformation() {
 
 }
-
 const glm::vec4& Ships::getShieldsColor(const FactionEnum::Type& faction) {
     return Factions::Database[faction].ColorShield;
 }
@@ -36,13 +35,15 @@ const FactionInformation& Ships::getFactionInformation(const string& shipClass) 
     return Database[shipClass].FactionInformation;
 }
 
-void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& faction, const double respawnTime, const float threatModifier, const ShipTier::Tier& tier, const bool printClassNameOnHUD) {
+void Ships::createShipEntry(const string& shipClass, const string& shipClassVerbose, const string& description, const FactionEnum::Type& faction, const double respawnTime, const float threatModifier, const ShipTier::Tier& tier, const bool printClassNameOnHUD) {
     if (Database.count(shipClass))
         return;
 
     ShipInformation info;
 
     info.Class                  = shipClass;
+    info.ClassVerbose           = shipClassVerbose;
+    info.Description            = description;
     info.Faction                = faction;
     info.FactionInformation     = Factions::Database[faction];
     info.RespawnTime            = respawnTime;
@@ -110,12 +111,11 @@ void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& fa
     }
 #pragma endregion
 
-
 #pragma region Materials
     for (auto& entry : texture_files) {
         const auto path = entry.second.string();
         if (!path.empty()) {
-            if (boost::algorithm::contains(path, "_Normal")) {
+            if       (boost::algorithm::contains(path, "_Normal")) {
                 normal = path;
             }else if (boost::algorithm::contains(path, "_Glow")) {
                 glow = path;
@@ -141,40 +141,195 @@ void Ships::createShipEntry(const string& shipClass, const FactionEnum::Type& fa
     Database.emplace(shipClass, info);
 }
 void Ships::init() {
-    createShipEntry("Defiant",          FactionEnum::Federation,   6,    1.0f, ShipTier::Escort);
-    //createShipEntry("Nova",             FactionEnum::Federation,   6,    1.0f, ShipTier::Escort);
-    createShipEntry("Akira",            FactionEnum::Federation,   20,   1.2f, ShipTier::Cruiser);
-    //createShipEntry("Intrepid",         FactionEnum::Federation,   20,   1.1f, ShipTier::Cruiser);
-    //createShipEntry("Excelsior",        FactionEnum::Federation,   20,   1.2f, ShipTier::Cruiser);
-    //createShipEntry("Constitution",     FactionEnum::Federation,   20,   1.1f, ShipTier::Cruiser);
-    //createShipEntry("Miranda",          FactionEnum::Federation,   6,    1.0f, ShipTier::Escort);
-    //createShipEntry("Saber",          FactionEnum::Federation,   6,    1.0f, ShipTier::Escort);
-    //createShipEntry("Norway",         FactionEnum::Federation,   8,    1.05f, ShipTier::Escort);
-    //createShipEntry("Steamrunner",    FactionEnum::Federation,   20,   1.1f, ShipTier::Cruiser);
-    //createShipEntry("Galaxy",         FactionEnum::Federation,   30,   1.3f, ShipTier::Cruiser);
-    //createShipEntry("Nebula",         FactionEnum::Federation,   30,   1.25f, ShipTier::Cruiser);
-    createShipEntry("Sovereign",        FactionEnum::Federation,   30,   1.35f, ShipTier::Flagship);
-    //createShipEntry("Liberty",        FactionEnum::Federation,   40,   1.5f, ShipTier::Flagship);
-    createShipEntry("Federation Defense Platform", FactionEnum::Federation,   60,    1.0f, ShipTier::Station, false);
-    createShipEntry("Federation Starbase Mushroom", FactionEnum::Federation, 600, 1.0f, ShipTier::Station, false);
+    //createShipEntry("Nova",       "",    FactionEnum::Federation,   6,    1.0f,    ShipTier::Escort);
+    //createShipEntry("Intrepid",     "",  FactionEnum::Federation,   20,   1.1f,    ShipTier::Cruiser);
+    //createShipEntry("Excelsior",     "", FactionEnum::Federation,   20,   1.2f,    ShipTier::Cruiser);
+    //createShipEntry("Constitution", "",  FactionEnum::Federation,   20,   1.1f,    ShipTier::Cruiser);
+    //createShipEntry("Miranda",      "",  FactionEnum::Federation,   6,    1.0f,    ShipTier::Escort);
+    //createShipEntry("Saber",        "",  FactionEnum::Federation,   6,    1.0f,    ShipTier::Escort);
+    //createShipEntry("Norway",       "",  FactionEnum::Federation,   8,    1.05f,   ShipTier::Escort);
+    //createShipEntry("Steamrunner",   "", FactionEnum::Federation,   20,   1.1f,    ShipTier::Cruiser);
+    //createShipEntry("Galaxy",       "",  FactionEnum::Federation,   30,   1.3f,    ShipTier::Cruiser);
+    //createShipEntry("Nebula",        "", FactionEnum::Federation,   30,   1.25f,   ShipTier::Cruiser);
 
-    createShipEntry("B'rel",            FactionEnum::Klingon,      6,    1.0f, ShipTier::Escort);
-    createShipEntry("Vor'cha",          FactionEnum::Klingon,      20,   1.2f, ShipTier::Cruiser);
-    //createShipEntry("Negh'var",       FactionEnum::Klingon,      30,   1.35f, ShipTier::Flagship);
-    //createShipEntry("Kahless",        FactionEnum::Klingon,      40,   1.5f, ShipTier::Flagship);
+    createShipEntry("Defiant",
+        "Defiant class escort",
+        "The first ever Federation warship, the Defiant is a small and maneuverable escort containing a powerful arsenal of firepower. "
+        "This class was comissioned during the Dominion War and was highly effective in intercepting and eliminating enemy ships and defending allied ships.\n\n"
+        "    Armaments: \n"
+        "        - 4 forward phaser cannons\n"
+        "        - 2 forward quantum torpedos\n"
+        "        - 1 aft photon torpedo\n"
+        "        - 1 dorsal phaser beam\n"
+        "        - 1 port-ventral phaser beam\n"
+        "        - 1 port-starboard phaser beam\n",
+        FactionEnum::Federation,
+        6,
+        1.0f,
+        ShipTier::Escort
+    );
+    createShipEntry("Akira",
+        "Akira class cruiser",
+        "Designed shortly after the Defiant, the Akira is a mobile torpedo platform. This cruiser is the least maneuverable of the cruisers but has the strongest shields and hull of the cruisers in addition to a very heavy torpedo loadout. "
+        "It is best used to deal punishing damage to cruisers, flagships, and stationary targets. It does not have a large assortment of beam weapons so it is vulnerable against more maneuverable escorts without escorts of its own."
+        "\n\n"
+        "    Armaments: \n"
+        "        - 8 forward photon torpedos\n"
+        "        - 3 port-aft photon torpedos\n"
+        "        - 3 starboard-aft photon torpedos\n"
+        "        - 2 port photon torpedos\n"
+        "        - 2 starboard photon torpedos\n"
+        "        - 2 forward dorsal phaser beams\n"
+        "        - 1 port dorsal phaser beam\n"
+        "        - 1 starboard dorsal phaser beam\n"
+        "        - 1 port ventral phaser beam\n"
+        "        - 1 starboard ventral phaser beam\n",
+        FactionEnum::Federation,
+        20,
+        1.2f,
+        ShipTier::Cruiser
+    );
+    createShipEntry("Sovereign",
+        "Sovereign class flagship",
+        "The most advanced Federation starship ever created, the Sovereign class is the flagship of the Federation fleet. "
+        "It is a very well balanced flagship, containing adequate maneuverability, shields, and hull. "
+        "It has very large beam coverage, the most out of the other flagships and thus can defend herself against maneuverable escorts pretty well."
+        "\nThe famous U.S.S. Enterprise-E is of the Sovereign class."
+        "\n\n"
+        "    Armaments: \n"
+        "        - 4 forward quantum torpedos\n"
+        "        - 4 forward photon torpedos\n"
+        "        - 6 aft photon torpedos\n",
+        FactionEnum::Federation,
+        30,
+        1.35f,
+        ShipTier::Flagship
+    );
+    //createShipEntry("Liberty","",        FactionEnum::Federation,   40,   1.5f,    ShipTier::Flagship);
 
-    createShipEntry("Shrike",           FactionEnum::Romulan,      6,    1.0f, ShipTier::Escort);
-    createShipEntry("Venerex",          FactionEnum::Romulan,      20,   1.2f, ShipTier::Cruiser);
-    createShipEntry("D'deridex",        FactionEnum::Romulan,      30,   1.4f, ShipTier::Flagship);
-    //createShipEntry("Aeterna",        FactionEnum::Romulan,      40,   1.5f, ShipTier::Flagship);
+    createShipEntry("Federation Defense Platform", "","",FactionEnum::Federation,    60,    1.0f,   ShipTier::Station,   false);
+    createShipEntry("Federation Starbase Mushroom", "","",FactionEnum::Federation,   600,   1.0f,   ShipTier::Station,   false);
 
+    createShipEntry("B'rel",
+        "B'rel class escort",
+        "An aging Klingon design that is over 100 years old, the B'rel class Bird of Prey is the workhorse of the Klingon fleet. It is a very fast and maneuverable warship designed for hit and run attacks, intercepting enemy ships, and protecting the fleet. "
+        "\n\n"
+        "    Armaments: \n"
+        "        - 2 forward heavy disruptor cannons\n"
+        "        - 2 forward photon torpedos\n"
+        "        - 1 aft photon torpedo\n"
+        "        - Cloaking device\n",
+        FactionEnum::Klingon,
+        6,
+        1.0f,
+        ShipTier::Escort
+    );
+    createShipEntry("Vor'cha",
+        "Vor'cha class cruiser",
+        "A relatively new Klingon design featuring some Federation technology in the warp nacelles, it was once considered the flagship of the Klingon fleet. "
+        "It is a good jack-of-all trades cruiser with mostly cannon based weaponry."
+        "\n\n"
+        "    Armaments: \n"
+        "        - 2 forward disruptor cannons\n"
+        "        - 1 forward heavy disruptor beam\n"
+        "        - 5 forward photon torpedos\n"
+        "        - 2 aft disruptor cannons\n"
+        "        - 4 aft photon torpedos\n"
+        "        - 1 forward-port disruptor cannon\n"
+        "        - 1 forward-starboard disruptor cannon\n"
+        "        - 1 port disruptor cannon\n"
+        "        - 1 starboard disruptor cannon\n"
+        "        - 1 port disruptor beam\n"
+        "        - 1 starboard disruptor beam\n"
+        "        - 1 dorsal disruptor cannon\n"
+        "        - 1 ventral disruptor cannon\n"
+        "        - Cloaking device\n",
+        FactionEnum::Klingon,
+        20,
+        1.2f,
+        ShipTier::Cruiser
+    );
+    createShipEntry("Negh'var",
+        "Negh'var class flagship",
+        "The newest Klingon design, the Negh'var is the flagship of the Klingon Empire and is the personal vessel of the Klingon chacellor. "
+        "It is the least armored of the flagships but the most maneuverable. It is a heavy attack orientated vessel and contains many forward facing weapons. "
+        "Although powerful, it will not last as long as the other flagships, and so relies on firepower to quickly take out targets versus getting into an extended war of attrition, which is not the Klingon way."
+        "\n\n"
+        "    Armaments: \n"
+        //"        - 2 forward disruptor cannons\n"
+        //"        - 1 forward heavy disruptor beam\n"
+        //"        - 5 forward photon torpedos\n"
+        "        - Cloaking device\n",
+        FactionEnum::Klingon,
+        30,
+        1.35f,
+        ShipTier::Flagship
+    );
+    //createShipEntry("Kahless","",        FactionEnum::Klingon,      40,   1.5f,    ShipTier::Flagship);
 
-    //createShipEntry("Probe",          FactionEnum::Borg,         6,    1.0f, ShipTier::Escort);
-    //createShipEntry("Sphere",         FactionEnum::Borg,         20,   1.2f, ShipTier::Cruiser);
-    //createShipEntry("Diamond",        FactionEnum::Borg,         30,   1.4f, ShipTier::Cruiser);
-    createShipEntry("Cube",             FactionEnum::Borg,         600,  2.5f, ShipTier::Flagship);
+    createShipEntry("Shrike",
+        "Shrike class escort",
+        "A relatively new Romulan ship, it was designed to provide escort for the mostly unmaneuverable Romulan fleet of D'deridex class warbirds. "
+        "It has a powerful forward facing arsenal and contains more powerful stealth and electronic systems compared to Federation and Klingon counterparts."
+        "\n\n"
+        "    Armaments: \n"
+        "        - 4 forward plasma cannons\n"
+        "        - 2 forward plasma torpedos\n"
+        "        - 1 forward plasma beam\n"
+        "        - 1 aft plasma torpedo\n"
+        "        - Cloaking device\n",
+        FactionEnum::Romulan,
+        6,
+        1.0f,
+        ShipTier::Escort
+    );
+    createShipEntry("Venerex",
+        "Venerex class cruiser",
+        "A new design that provides a medium between the fast Shrike and slow D'deridex, it is an all around cruiser that provide a much more powerful arsenal compared to the Shrike, while being much more maneuverable than the D'deridex class flagship. "
+        "It has a healthy balance of cannon and beam based weaponry."
+        "\n\n"
+        "    Armaments: \n"
+        //"        - 4 forward plasma cannons\n"
+        //"        - 2 forward plasma torpedos\n"
+        //"        - 1 forward plasma beam\n"
+        //"        - 1 aft plasma torpedo\n"
+        "        - Cloaking device\n",
+        FactionEnum::Romulan,
+        20,
+        1.2f,
+        ShipTier::Cruiser
+    );
+    createShipEntry("D'deridex",
+        "D'deridex class flagship",
+        "Once the only class of ship in the Romulan fleet, the D'deridex class warbird is a gigantic ship containing a very powerful arsenal and very strong shield and hull systems. It is however the least maneuverable of the flagships and relies on other ships to provide it with escort and support. It can take alot of punishment before being destroyed."
+        "\n\n"
+        "    Armaments: \n"
+        "        - 5 forward plasma cannons\n"
+        "        - 1 forward plasma beam\n"
+        "        - 8 forward plasma torpedos\n"
+        "        - 6 aft plasma torpedos\n"
+        "        - 2 aft plasma cannons\n"
+        "        - 2 port plasma beams\n"
+        "        - 1 port plasma cannon\n"
+        "        - 2 starboard plasma beams\n"
+        "        - 1 starboard plasma cannon\n"
+        "        - 5 dorsal plasma beams\n"
+        "        - 2 dorsal plasma cannons\n"
+        "        - 3 ventral plasma beams\n"
+        "        - 2 ventral plasma cannons\n"
+        "        - Cloaking device\n",
+        FactionEnum::Romulan,
+        30,
+        1.4f,
+        ShipTier::Flagship
+    );
+    //createShipEntry("Aeterna","", "",       FactionEnum::Romulan,      40,   1.5f,    ShipTier::Flagship);
 
-    
+    //createShipEntry("Probe","","",          FactionEnum::Borg,         6,    1.0f,    ShipTier::Escort);
+    //createShipEntry("Sphere","","",         FactionEnum::Borg,         20,   1.2f,    ShipTier::Cruiser);
+    //createShipEntry("Diamond","","",        FactionEnum::Borg,         30,   1.4f,    ShipTier::Cruiser);
+    createShipEntry("Cube", "","", FactionEnum::Borg,         600,  2.5f,    ShipTier::Flagship);
+
     Material& defMat = *((Material*)Database["Defiant"].MaterialHandles[0].get());
     auto* layer = defMat.getComponent(0).addLayer();
     layer->setTexture("../data/Textures/Effects/Buzzards.dds");
@@ -192,7 +347,6 @@ void Ships::init() {
     layer2->setTexture("../data/Textures/Effects/Buzzards.dds");
     layer2->setMask("../data/Ships/vorcha/vorcha_Mask_1.dds");
     layer2->addUVModificationSimpleTranslation(0.02f, 0.02f);
-    
 }
 void Ships::destruct() {
     Database.clear();
@@ -205,11 +359,9 @@ vector<string> Ships::getShipClassesSortedByFaction(const ShipTier::Tier& tier) 
             ship_classes.push_back(ship_info.second);
         }
     }
-
     auto lamda_sorter = [&](ShipInformation& lhs, ShipInformation& rhs) {
         return lhs.Faction < rhs.Faction;
     };
-
     std::sort(ship_classes.begin(), ship_classes.end(), lamda_sorter);
 
     ship_classes_str.reserve(ship_classes.size());

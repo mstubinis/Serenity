@@ -107,7 +107,8 @@ void Core::enterMap(Team& playerTeam, const string& mapFile, const string& playe
     window.setMouseCursorVisible(false);
 }
 void Core::onResize(const uint& width, const uint& height) {
-    if(m_Menu)  m_Menu->onResize(width, height);
+    if(m_Menu)
+        m_Menu->onResize(width, height);
 }
 void Core::init() {
     if (m_Initalized)

@@ -74,9 +74,12 @@ namespace epriv{
     };
     struct EventMouseWheel final{ 
         int delta; 
+        int x, y;
         EventMouseWheel() = default;
-        EventMouseWheel(const int& _delta) {
-            delta = _delta;
+        EventMouseWheel(const int& delta_, const int& x_, const int& y_) {
+            delta = delta_;
+            x = x_;
+            y = y_;
         }
     };
     struct EventJoystickMoved final{ 
@@ -138,6 +141,11 @@ struct Event final{
         Engine::epriv::EventSoundStatusChanged         eventSoundStatusChanged;
         Engine::epriv::EventSceneChanged               eventSceneChanged;
     };
+    Event() = delete;
+    Event(const EventType::Type& type_) {
+        type = type_;
+    }
+
 };
 /*
 Inherit from this struct to expose your class to events and event dispatching, specifically the following functions:

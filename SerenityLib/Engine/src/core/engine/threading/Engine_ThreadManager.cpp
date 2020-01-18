@@ -8,7 +8,7 @@ using namespace std;
 epriv::ThreadManager* threadManager;
 
 epriv::ThreadManager::ThreadManager(){ 
-    m_ThreadPool = NEW ThreadPool();
+    m_ThreadPool = NEW ThreadPool(std::thread::hardware_concurrency());
     threadManager = this;
 }
 epriv::ThreadManager::~ThreadManager(){ 
@@ -20,9 +20,6 @@ void epriv::ThreadManager::cleanup() {
 }
 void epriv::ThreadManager::_update(const double& dt){ 
     m_ThreadPool->update();
-}
-const size_t epriv::ThreadManager::cores() const{  
-    return threadManager->m_ThreadPool->numThreads();
 }
 void epriv::threading::finalizeJob(std::function<void()>& task){
     threadManager->m_ThreadPool->addJob(std::move(task));  

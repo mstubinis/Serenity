@@ -11,14 +11,14 @@ class  ServerHostingMapSelectorWindow;
 class  MapDescriptionWindow;
 struct Host2HS_ButtonBack_OnClick;
 struct Host2HS_ButtonNext_OnClick;
-class  HostScreen;
+class  HostScreen1;
 
 class HostScreenHomelandSecurity2 final {
-    friend class  HostScreen;
+    friend class  HostScreen1;
     friend struct Host2HS_ButtonBack_OnClick;
     friend struct Host2HS_ButtonNext_OnClick;
     private:
-        HostScreen& m_HostScreen1;
+        HostScreen1& m_HostScreen1;
         Menu& m_Menu;
 
         Button* m_BackgroundEdgeGraphicTop;
@@ -32,7 +32,7 @@ class HostScreenHomelandSecurity2 final {
         Button* m_ForwardButton;
 
     public:
-        HostScreenHomelandSecurity2(HostScreen& hostScreen1, Menu&, Font& font);
+        HostScreenHomelandSecurity2(HostScreen1& hostScreen1, Menu&, Font& font);
         ~HostScreenHomelandSecurity2();
 
         Menu& getMenu();

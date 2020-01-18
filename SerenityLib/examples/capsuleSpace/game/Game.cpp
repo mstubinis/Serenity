@@ -69,11 +69,9 @@ void Game::onClose(){
 }
 void Game::onLostFocus(){
     Engine::getWindow().keepMouseInWindow(false);
-    //Engine::getWindow().setMouseCursorVisible(true);
 }
 void Game::onGainedFocus(){
     Engine::getWindow().keepMouseInWindow(true);
-    //Engine::getWindow().setMouseCursorVisible(false);
     auto& window = Resources::getWindow();
     const auto& size = window.getSize();
     const glm::vec2 halfRes(size.x / 2, size.y / 2);

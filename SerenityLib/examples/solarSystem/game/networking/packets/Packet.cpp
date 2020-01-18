@@ -9,7 +9,7 @@
 #include "PacketShipRespawned.h"
 #include "PacketGameplayModeInfo.h"
 #include "PacketShipInfoRequest.h"
-#include "PacketMapData.h"
+#include "PacketConnectionAccepted.h"
 
 using namespace std;
 
@@ -20,7 +20,7 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
     const unsigned int& packetType = packet.PacketType;
     switch (packetType) {
         case PacketType::Server_To_Client_Accept_Connection: {
-            return NEW PacketMessage();
+            return NEW PacketConnectionAccepted();
         }case PacketType::Server_To_Client_Reject_Connection: {
             return NEW PacketMessage();
         }case PacketType::Client_To_Server_Request_Connection: {
@@ -41,8 +41,6 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
             return NEW PacketMessage();
         }case PacketType::Server_To_Client_Client_Left_Server: {
             return NEW PacketMessage();
-        }case PacketType::Server_To_Client_Map_Data: {
-            return NEW PacketMapData();
         }case PacketType::Client_To_Server_Request_Map_Entry: {
             return NEW PacketMessage();
         }case PacketType::Server_To_Client_Approve_Map_Entry: {

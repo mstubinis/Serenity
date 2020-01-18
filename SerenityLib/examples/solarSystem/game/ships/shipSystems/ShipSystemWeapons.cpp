@@ -944,7 +944,7 @@ void ShipSystemWeapons::fireTorpedoWeapons(EntityWrapper* target, Ship* target_a
     vector<std::tuple<uint, int, EntityWrapper*>> secWeaponsTorpedosFiredInValidArc;
     if (target && !target_as_ship || (target_as_ship && !target_as_ship->isAlly(m_Ship))) {
         for (size_t i = 0; i < torpedoWeapons.size(); ++i) {
-            auto torpedo = torpedoWeapons[i].torpedo;
+            auto* torpedo = torpedoWeapons[i].torpedo;
             if (torpedo->isInControlledArc(target)) {
                 const int resIndex = torpedo->acquire_index();
                 if (resIndex >= 0) {
@@ -954,10 +954,12 @@ void ShipSystemWeapons::fireTorpedoWeapons(EntityWrapper* target, Ship* target_a
         }
     }else{
         for (size_t i = 0; i < torpedoWeapons.size(); ++i) {
-            auto torpedo = torpedoWeapons[i].torpedo;
-            const int resIndex = torpedo->acquire_index();
-            if (resIndex >= 0) {
-                secWeaponsTorpedosFiredInValidArc.push_back(std::make_tuple(static_cast<unsigned int>(i), resIndex, nullptr));
+            auto* torpedo = torpedoWeapons[i].torpedo;
+            if (torpedoWeapons[i].isForward) {
+                const int resIndex = torpedo->acquire_index();
+                if (resIndex >= 0) {
+                    secWeaponsTorpedosFiredInValidArc.push_back(std::make_tuple(static_cast<unsigned int>(i), resIndex, nullptr));
+                }
             }
         }
     }

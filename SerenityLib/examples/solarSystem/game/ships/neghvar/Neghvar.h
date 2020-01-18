@@ -7,7 +7,15 @@
 
 class Neghvar final : public Ship {
     private:
-
+        enum Perks : unsigned int {
+            None                 = 0,
+            DeathChant           = 1 << 0, //
+            DisruptorCannonBlast = 1 << 1, //
+            IonLance             = 1 << 2, //maybe
+            All                  = 4294967295,
+        };
+        unsigned int                                      m_Perks;         //active perks
+        unsigned int                                      m_UnlockedPerks; //account unlocked perks (move them to a player class later on?)
     public:
         Neghvar(
             Scene& scene,

@@ -15,28 +15,28 @@ namespace Engine {
                 std::mutex                m_Mutex;
                 std::condition_variable   m_ConditionVariable;
             public:
-                Queue_ThreadSafe() {
-                }
+                Queue_ThreadSafe() = default;
                 Queue_ThreadSafe(const Queue_ThreadSafe& other) {
                     std::lock_guard<std::mutex> lock(m_Mutex);
                     m_Queue = other.m_Queue;
                 }
                 Queue_ThreadSafe& operator=(const Queue_ThreadSafe& other) = delete;
-                ~Queue_ThreadSafe() {
-                }
+                ~Queue_ThreadSafe() = default;
 
                 const bool try_pop(T& value) {
                     std::lock_guard<std::mutex> lock(m_Mutex);
-                    if (m_Queue.empty())
+                    if (m_Queue.empty()) {
                         return false;
+                    }
                     value = m_Queue.front();
                     m_Queue.pop();
                     return true;
                 }
                 std::shared_ptr<T> try_pop() {
                     std::lock_guard<std::mutex> lock(m_Mutex);
-                    if (m_Queue.empty())
+                    if (m_Queue.empty()) {
                         return std::shared_ptr<T>();
+                    }
                     std::shared_ptr<T> res(std::make_shared<T>(m_Queue.front()));
                     m_Queue.pop();
                     return res;
@@ -58,7 +58,7 @@ namespace Engine {
                     m_Queue.pop();
                     return res;
                 }
-                void push(T pushedValue){
+                void push(T& pushedValue){
                     std::lock_guard<std::mutex> lock(m_Mutex);
                     m_Queue.push(std::move(pushedValue));
                     m_ConditionVariable.notify_one();

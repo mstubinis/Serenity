@@ -573,9 +573,6 @@
     <ClInclude Include="Engine\src\core\engine\threading\ThreadPool.h">
       <Filter>Header Files\Engine\Core\Threading</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\threading\WorkerThread.h">
-      <Filter>Header Files\Engine\Core\Threading</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\threading\Queue_ThreadSafe.h">
       <Filter>Header Files\Engine\Core\Threading</Filter>
     </ClInclude>
@@ -984,9 +981,6 @@
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\threading\ThreadPool.cpp">
-      <Filter>Source Files\Engine\Core\Threading</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\threading\WorkerThread.cpp">
       <Filter>Source Files\Engine\Core\Threading</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\textures\TextureLoader.cpp">

@@ -20,47 +20,44 @@ using namespace std;
 using namespace Engine;
 
 struct GameCameraShipSelectorLogicFunctor final { void operator()(ComponentLogic2& _component, const double& dt) const {
-    GameCamera& camera = *static_cast<GameCamera*>(_component.getUserPointer());
-    Core& core = *static_cast<Core*>(_component.getUserPointer1());
+    GameCamera& camera   = *static_cast<GameCamera*>(_component.getUserPointer());
     Ship3DViewer& window = *static_cast<Ship3DViewer*>(_component.getUserPointer2());
-    if (core.gameState() == GameState::Host_Screen_Lobby_FFA_3 || core.gameState() == GameState::Join_Screen_Lobby_2) {
-        auto& entity = camera.entity();
-        EntityDataRequest dataRequest(entity);
-        auto& thisCamera = *entity.getComponent<ComponentCamera>(dataRequest);
-        auto& thisBody = *entity.getComponent<ComponentBody>(dataRequest);
-        if ((window.m_IsCurrentlyOverShip3DWindow && dt >= 0.0) || window.m_IsCurrentlyDragging) {
-            camera.m_OrbitRadius += static_cast<float>(Engine::getMouseWheelDelta() * dt * 0.92);
-            camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 1.5f);
-        }
-        if (window.m_IsCurrentlyDragging || dt < 0.0) {
-            const auto& diff = Engine::getMouseDifference();
-            camera.m_CameraMouseFactor += glm::dvec2(-diff.y * (dt), diff.x * (dt));
-            thisBody.rotate(camera.m_CameraMouseFactor.x, camera.m_CameraMouseFactor.y, 0.0);
-            camera.m_CameraMouseFactor *= 0.0;
-        }
-        if (window.m_EntityWrapperShip) {
-            auto& ship            = *window.m_EntityWrapperShip;
-            EntityDataRequest dataRequest(ship.entity());
 
-            auto& targetBody      = *ship.getComponent<ComponentBody>(dataRequest);
-            auto& targetModel     = *ship.getComponent<ComponentModel>(dataRequest);
-            auto& radius          = targetModel.radius();
-            const glm::vec3 pos   = (glm::vec3(0.0f, 0.0f, 1.0f) * glm::length(radius) * 0.37f) + (glm::vec3(0.0f, 0.0f, 1.0f) * glm::length(radius * (1.0f + camera.m_OrbitRadius)));
+    auto& entity = camera.entity();
+    EntityDataRequest dataRequest(entity);
+    auto& thisCamera = *entity.getComponent<ComponentCamera>(dataRequest);
+    auto& thisBody = *entity.getComponent<ComponentBody>(dataRequest);
+    if ((window.m_IsCurrentlyOverShip3DWindow && dt >= 0.0) || window.m_IsCurrentlyDragging) {
+        camera.m_OrbitRadius += static_cast<float>(Engine::getMouseWheelDelta() * dt * 0.92);
+        camera.m_OrbitRadius = glm::clamp(camera.m_OrbitRadius, 0.0f, 1.5f);
+    }
+    if (window.m_IsCurrentlyDragging || dt < 0.0) {
+        const auto& diff = Engine::getMouseDifference();
+        camera.m_CameraMouseFactor += glm::dvec2(-diff.y * (dt), diff.x * (dt));
+        thisBody.rotate(camera.m_CameraMouseFactor.x, camera.m_CameraMouseFactor.y, 0.0);
+        camera.m_CameraMouseFactor *= 0.0;
+    }
+    if (window.m_EntityWrapperShip) {
+        auto& ship            = *window.m_EntityWrapperShip;
+        EntityDataRequest dataRequest(ship.entity());
 
-            glm::mat4 cameraModel = glm::mat4(1.0f);
-            cameraModel           = glm::translate(cameraModel, glm::vec3(targetBody.position()));
-            cameraModel          *= glm::mat4_cast(glm::quat(thisBody.rotation()));
-            cameraModel           = glm::translate(cameraModel, pos);
+        auto& targetBody      = *ship.getComponent<ComponentBody>(dataRequest);
+        auto& targetModel     = *ship.getComponent<ComponentModel>(dataRequest);
+        auto& radius          = targetModel.radius();
+        const glm::vec3 pos   = (glm::vec3(0.0f, 0.0f, 1.0f) * glm::length(radius) * 0.37f) + (glm::vec3(0.0f, 0.0f, 1.0f) * glm::length(radius * (1.0f + camera.m_OrbitRadius)));
 
-            const glm::vec3 eye = Math::getMatrixPosition(cameraModel);
-            thisBody.setPosition(eye);
-            thisCamera.lookAt(eye, targetBody.position(), thisBody.up());
-        }
+        glm::mat4 cameraModel = glm::mat4(1.0f);
+        cameraModel           = glm::translate(cameraModel, glm::vec3(targetBody.position()));
+        cameraModel          *= glm::mat4_cast(glm::quat(thisBody.rotation()));
+        cameraModel           = glm::translate(cameraModel, pos);
+
+        const glm::vec3 eye = Math::getMatrixPosition(cameraModel);
+        thisBody.setPosition(eye);
+        thisCamera.lookAt(eye, targetBody.position(), thisBody.up());
     }
 }};
 
 Ship3DViewer::Ship3DViewer(Core& core, Scene& menu_scene, Camera& game_camera, const float x, const float y, const float w, const float h) {
-    m_Color                       = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
     m_IsCurrentlyDragging         = false;
     m_IsCurrentlyOverShip3DWindow = false;
     m_ChosenShipClass             = "";
@@ -68,9 +65,9 @@ Ship3DViewer::Ship3DViewer(Core& core, Scene& menu_scene, Camera& game_camera, c
 
     m_EntityWrapperShip = Map::createShipDull("Defiant", glm::vec3(0.0f), &menu_scene);
     menu_scene_camera.setTarget(m_EntityWrapperShip);
-    auto& ship_body = *m_EntityWrapperShip->getComponent<ComponentBody>();
+    auto& ship_body     = *m_EntityWrapperShip->getComponent<ComponentBody>();
     ship_body.setPosition(0, 0, 8500);
-    auto& ship_model = *m_EntityWrapperShip->getComponent<ComponentModel>();
+    auto& ship_model    = *m_EntityWrapperShip->getComponent<ComponentModel>();
     ship_model.setViewportFlag(ViewportFlag::All);
     ship_model.hide();
 
@@ -92,14 +89,35 @@ Ship3DViewer::Ship3DViewer(Core& core, Scene& menu_scene, Camera& game_camera, c
 Ship3DViewer::~Ship3DViewer() {
     SAFE_DELETE(m_EntityWrapperShip);
 }
+void Ship3DViewer::show(const bool shown) {
+    m_ShipDisplayViewport->activate(shown);
+}
+void Ship3DViewer::hide() {
+    m_ShipDisplayViewport->activate(false);
+}
 void Ship3DViewer::setPosition(const float x, const float y) {
     auto& dimensions = m_ShipDisplayViewport->getViewportDimensions();
     m_ShipDisplayViewport->setViewportDimensions(x, y, dimensions.z, dimensions.w);
 }
+void Ship3DViewer::setSize(const float x, const float y) {
+    auto& dimensions = m_ShipDisplayViewport->getViewportDimensions();
+    m_ShipDisplayViewport->setViewportDimensions(dimensions.x, dimensions.y, x, y);
+}
+void Ship3DViewer::setSize(const glm::vec2& size) {
+    Ship3DViewer::setSize(size.x, size.y);
+}
 void Ship3DViewer::setShipClass(const string& shipClass) {
     if (!m_EntityWrapperShip || m_ChosenShipClass == shipClass)
         return;
+
+    if (shipClass.empty()) {
+        m_ChosenShipClass = "";
+        hide();
+        return;
+    }
+
     assert(Ships::Database.count(shipClass));
+
 
     auto& scene = m_EntityWrapperShip->entity().scene();
     m_EntityWrapperShip->destroy();
@@ -112,8 +130,9 @@ void Ship3DViewer::setShipClass(const string& shipClass) {
     auto& model = *m_EntityWrapperShip->getComponent<ComponentModel>();
     model.setViewportFlag(ViewportFlag::All);
 
-    m_ChosenShipClass                 = shipClass;
-    auto& shipData                    = Ships::Database.at(shipClass);
+    m_ChosenShipClass             = shipClass;
+    auto& shipData                = Ships::Database.at(shipClass);
+    show(true);
     model.show();
     auto* logic = menu_scene_camera.getComponent<ComponentLogic2>();
     if (logic)
@@ -122,17 +141,17 @@ void Ship3DViewer::setShipClass(const string& shipClass) {
 const string& Ship3DViewer::getShipClass() const {
     return m_ChosenShipClass;
 }
-void Ship3DViewer::setShipViewportActive(const bool& active) {
-    m_ShipDisplayViewport->activate(active);
-}
 void Ship3DViewer::setUserPointer(void* UserPointer) {
     m_UserPointer = UserPointer;
 }
 void* Ship3DViewer::getUserPointer() {
     return m_UserPointer;
 }
-const Viewport& Ship3DViewer::getShipDisplay() const {
+const Viewport& Ship3DViewer::getShipDisplayViewport() const {
     return *m_ShipDisplayViewport;
+}
+const glm::vec4& Ship3DViewer::getViewportDimensions() const {
+    return m_ShipDisplayViewport->getViewportDimensions();
 }
 void Ship3DViewer::update(const double& dt) {
     auto& dimensions              = m_ShipDisplayViewport->getViewportDimensions();
@@ -148,7 +167,7 @@ void Ship3DViewer::update(const double& dt) {
         m_IsCurrentlyDragging = true;
     }
 }
-void Ship3DViewer::render() {
-    auto& dimensions = m_ShipDisplayViewport->getViewportDimensions();
-    Renderer::renderBorder(1.0f, glm::vec2(dimensions.x, dimensions.y), m_Color, dimensions.z + 1.0f, dimensions.w, 0, 0.01f, Alignment::BottomLeft);
-}
+//void Ship3DViewer::render() {
+    //const auto& dimensions = m_ShipDisplayViewport->getViewportDimensions();
+    //Renderer::renderBorder(1.0f, glm::vec2(dimensions.x, dimensions.y), m_Color, dimensions.z + 1.0f, dimensions.w, 0, 0.01f, Alignment::BottomLeft);
+//}

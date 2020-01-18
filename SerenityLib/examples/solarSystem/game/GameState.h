@@ -5,7 +5,10 @@
 struct GameState {enum State {
     Main_Menu,
 
+    Host_Screen_Setup_0,
+
     Host_Screen_Setup_1,
+    Host_Screen_Setup_1_Persistent,
 
     Host_Screen_Setup_FFA_2,
     Host_Screen_Setup_TeamDeathMatch_2,
@@ -27,6 +30,8 @@ struct GameState {enum State {
     Options_Sounds,
     Options_Keybinds,
     Options_Graphics,
+
+    LoadingScreen,
 
     Game,
 };};

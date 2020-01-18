@@ -45,6 +45,8 @@ _TOTAL};};
 
 struct ShipInformation final {
     std::string                    Class;
+    std::string                    ClassVerbose;
+    std::string                    Description;
     ShipTier::Tier                 Tier;
     FactionEnum::Type              Faction;
     FactionInformation             FactionInformation;
@@ -75,6 +77,8 @@ class Ships final{
 
         static void createShipEntry(
             const std::string& shipClass,
+            const std::string& shipClassVerbose,
+            const std::string& description,
             const FactionEnum::Type& faction,
             const double respawnTime,
             const float threatModifier,

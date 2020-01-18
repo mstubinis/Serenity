@@ -50,6 +50,8 @@ struct ResourceManifest{
     static Handle GUITextureCornerRoundSmall;
     static Handle GUITextureCornerBoxSmall;
     static Handle GUITextureSideSmall;
+
+    static Handle GUIArrowBorder;
     //effects
     static Handle HullDamageOutline1Material;
     static Handle HullDamageMaterial1;

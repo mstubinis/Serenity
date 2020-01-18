@@ -28,14 +28,16 @@
 #include "gui/Text.h"
 #include "gui/specifics/ServerLobbyChatWindow.h"
 #include "gui/specifics/ServerLobbyConnectedPlayersWindow.h"
-#include "gui/specifics/ServerLobbyShipSelectorWindow.h"
 
 #include "gui/specifics/MainMenu.h"
-#include "gui/specifics/HostScreen.h"
+#include "gui/specifics/HostScreen0.h"
+#include "gui/specifics/HostScreen1.h"
 
 #include "gui/specifics/HostScreenFFA2.h"
 #include "gui/specifics/HostScreenTeamDeathmatch2.h"
 #include "gui/specifics/HostScreenHomelandSecurity2.h"
+
+#include "gui/specifics/LobbyFFA.h"
 
 #include "hud/HUD.h"
 #include "modes/GameplayMode.h"
@@ -61,8 +63,6 @@ struct ButtonBack_OnClick {void operator()(Button* button) const {
         }case GameState::Join_Screen_Lobby_2: {
             //force server to disconnect client
             menu.m_Core.shutdownClient();
-            menu.m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
-
             menu.m_GameState = GameState::Join_Screen_Setup_1;
 
             menu.m_Next->setText("Next");
@@ -78,6 +78,7 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
     auto& core = menu.getCore();
     switch (menu.m_GameState) {
         case GameState::Host_Screen_Lobby_FFA_3: {
+            core.getClient()->getMapData().getMap().full_load();
             menu.enter_the_game();
             break;
         }case GameState::Join_Screen_Setup_1: {
@@ -99,7 +100,6 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
                     }else {
                         menu.setErrorText("The username must have some letters in it");
                     }
-
                 }else{
                     menu.setErrorText("Server port must contain numbers only");
                 }
@@ -118,7 +118,7 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
     }
 }};
 
-Menu::Menu(Scene& menu_scene, Camera& game_camera, GameState::State& _state, Core& core):m_GameState(_state),m_Core(core){
+Menu::Menu(Scene& menu_scene, Camera& game_camera, GameState::State& _state, Core& core) : m_GameState(_state), m_Core(core) {
     m_FontHandle = Resources::addFont(ResourceManifest::BasePath + "data/Fonts/consolas.fnt");
     m_Font = Resources::getFont(m_FontHandle);
     Engine::Math::setColor(m_Color, 255.0f, 255.0f, 0.0f);
@@ -128,11 +128,14 @@ Menu::Menu(Scene& menu_scene, Camera& game_camera, GameState::State& _state, Cor
     const auto& windowDimensions = Resources::getWindowSize();
     
     m_MainMenuScreen = new MainMenu(*this, *m_Font, 0.1f);
-    m_HostScreen = new HostScreen(*this, *m_Font);
+    m_HostScreen0 = new HostScreen0(*this, *m_Font);
+    m_HostScreen1 = new HostScreen1(*this, *m_Font);
 
-    m_HostScreenFFA2 = new HostScreenFFA2(*m_HostScreen , *this, *m_Font);
-    m_HostScreenTeamDeathmatch2 = new HostScreenTeamDeathmatch2(*m_HostScreen, *this, *m_Font);
-    m_HostScreenHomelandSecurity2 = new HostScreenHomelandSecurity2(*m_HostScreen, *this, *m_Font);
+    m_HostScreenFFA2 = new HostScreenFFA2(*m_HostScreen1 , *this, *m_Font);
+    m_HostScreenTeamDeathmatch2 = new HostScreenTeamDeathmatch2(*m_HostScreen1, *this, *m_Font);
+    m_HostScreenHomelandSecurity2 = new HostScreenHomelandSecurity2(*m_HostScreen1, *this, *m_Font);
+
+    m_LobbyScreenFFA = new LobbyScreenFFA(*m_Font, *this, core, menu_scene, game_camera);
 
     //todo: remove
     m_Back = NEW Button(*m_Font, 100.0f, 50.0f, 150.0f, 50.0f);
@@ -167,19 +170,20 @@ Menu::Menu(Scene& menu_scene, Camera& game_camera, GameState::State& _state, Cor
     
     m_ServerLobbyConnectedPlayersWindow = NEW ServerLobbyConnectedPlayersWindow(*m_Font, 50.0f + m_ServerLobbyChatWindow->getWindowFrame().width(), 140.0f + 300.0f);
     m_ServerLobbyConnectedPlayersWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
-    
-    m_ServerLobbyShipSelectorWindow = NEW ServerLobbyShipSelectorWindow(core, menu_scene, game_camera, *m_Font, 50.0f, windowDimensions.y - 50.0f, 578, 270);
-    m_ServerLobbyShipSelectorWindow->setColor(1.0f, 1.0f, 0.0f, 1.0f);
+
 
     go_to_main_menu();  
 }
 Menu::~Menu() {
     SAFE_DELETE(m_MainMenuScreen);
-    SAFE_DELETE(m_HostScreen);
+    SAFE_DELETE(m_HostScreen0);
+    SAFE_DELETE(m_HostScreen1);
 
     SAFE_DELETE(m_HostScreenFFA2);
     SAFE_DELETE(m_HostScreenTeamDeathmatch2);
     SAFE_DELETE(m_HostScreenHomelandSecurity2);
+
+    SAFE_DELETE(m_LobbyScreenFFA);
 
     SAFE_DELETE(m_Back);
     SAFE_DELETE(m_Next);
@@ -189,7 +193,6 @@ Menu::~Menu() {
     SAFE_DELETE(m_InfoText);
     SAFE_DELETE(m_ServerLobbyChatWindow);
     SAFE_DELETE(m_ServerLobbyConnectedPlayersWindow);
-    SAFE_DELETE(m_ServerLobbyShipSelectorWindow);
 }
 void Menu::setGameState(const GameState::State& state) {
     m_GameState = state;
@@ -204,6 +207,7 @@ Core& Menu::getCore() {
     return m_Core;
 }
 void Menu::enter_the_game() {
+    /*
     if (!m_ServerLobbyShipSelectorWindow->getShipClass().empty()) {
         PacketMessage p;
         p.PacketType = PacketType::Client_To_Server_Request_Map_Entry;
@@ -222,11 +226,11 @@ void Menu::enter_the_game() {
     }else{
         setErrorText("You must choose your ship", 5.0f);
     }
+    */
 }
 
 void Menu::go_to_main_menu() {
     m_GameState = GameState::Main_Menu;
-    m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
     m_Next->setText("Next");
     setErrorText("", 0.0f);
 
@@ -267,10 +271,13 @@ void Menu::setErrorText(const string& text, const float errorTime) {
 void Menu::onResize(const uint& width, const uint& height) {
     m_MainMenuScreen->onResize(width, height);
 
-    m_HostScreen->onResize(width, height);
+    m_HostScreen0->onResize(width, height);
+    m_HostScreen1->onResize(width, height);
     m_HostScreenFFA2->onResize(width, height);
     m_HostScreenTeamDeathmatch2->onResize(width, height);
     m_HostScreenHomelandSecurity2->onResize(width, height);
+
+    m_LobbyScreenFFA->onResize(width, height);
 
     m_Back->setPosition(100.0f, 50.0f);
     m_Next->setPosition(width - 100.0f, 50.0f);
@@ -279,14 +286,11 @@ void Menu::onResize(const uint& width, const uint& height) {
     m_ServerPort->setPosition(width / 2.0f, 275.0f);
     m_UserName->setPosition(width / 2.0f, 195.0f);
 
-    m_InfoText->setPosition(width / 2.0f, 65.0f);
+    m_InfoText->setPosition(width / 2.0f, 55.0f);
 
 
     m_ServerLobbyChatWindow->setPosition(50.0f, 140.0f + 300.0f);
     m_ServerLobbyConnectedPlayersWindow->setPosition(50.0f + m_ServerLobbyChatWindow->getWindowFrame().width(), 140.0f + 300.0f);
-
-    const auto& winSize = Resources::getWindowSize();
-    m_ServerLobbyShipSelectorWindow->setPosition(50, winSize.y - 50.0f);
 }
 
 #pragma region updates
@@ -298,8 +302,11 @@ void Menu::update_main_menu(const double& dt) {
 
     m_MainMenuScreen->update(dt);
 }
+void Menu::update_host_setup_0(const double& dt) {
+    m_HostScreen0->update(dt);
+}
 void Menu::update_host_setup_1(const double& dt) {
-    m_HostScreen->update(dt);
+    m_HostScreen1->update(dt);
 }
 void Menu::update_host_setup_ffa_2(const double& dt) {
     m_HostScreenFFA2->update(dt);
@@ -312,48 +319,32 @@ void Menu::update_host_setup_hs_2(const double& dt) {
 }
 
 void Menu::update_host_lobby_ffa_3(const double& dt) {
-    m_ServerLobbyChatWindow->update(dt);
-    m_ServerLobbyConnectedPlayersWindow->update(dt);
-    m_ServerLobbyShipSelectorWindow->update(dt);
-
-    m_Back->update(dt);
-    m_Next->update(dt);
+    m_LobbyScreenFFA->update(dt);
 }
 void Menu::update_host_lobby_td_3(const double& dt) {
-    /*
-    m_ServerLobbyChatWindow->update(dt);
-    m_ServerLobbyConnectedPlayersWindow->update(dt);
-    m_ServerLobbyShipSelectorWindow->update(dt);
 
-    m_Back->update(dt);
-    m_Next->update(dt);
-    */
 }
 void Menu::update_host_lobby_hs_3(const double& dt) {
-    /*
-    m_ServerLobbyChatWindow->update(dt);
-    m_ServerLobbyConnectedPlayersWindow->update(dt);
-    m_ServerLobbyShipSelectorWindow->update(dt);
 
-    m_Back->update(dt);
-    m_Next->update(dt);
-    */
 }
 void Menu::update_join_setup_1(const double& dt) {
+    /*
     m_Back->update(dt);
     m_Next->update(dt);
 
     m_ServerIp->update(dt);
     m_ServerPort->update(dt);
     m_UserName->update(dt);
+    */
 }
 void Menu::update_join_lobby_2(const double& dt) {
+    /*
     m_ServerLobbyChatWindow->update(dt);
     m_ServerLobbyConnectedPlayersWindow->update(dt);
-    m_ServerLobbyShipSelectorWindow->update(dt);
 
     m_Back->update(dt);
     m_Next->update(dt);
+    */
 }
 
 void Menu::update_options_main(const double& dt) {
@@ -381,6 +372,11 @@ void Menu::update_encyclopedia_ships(const double& dt) {
 void Menu::update_encyclopedia_factions(const double& dt) {
 
 }
+
+void Menu::update_loading_screen(const double& dt) {
+
+}
+
 #pragma endregion
 
 
@@ -392,8 +388,11 @@ void Menu::render_game() {
 void Menu::render_main_menu() {
     m_MainMenuScreen->render();
 }
+void Menu::render_host_setup_0() {
+    m_HostScreen0->render();
+}
 void Menu::render_host_setup_1() {
-    m_HostScreen->render();
+    m_HostScreen1->render();
 }
 void Menu::render_host_setup_ffa_2() {
     m_HostScreenFFA2->render();
@@ -405,32 +404,13 @@ void Menu::render_host_setup_hs_2() {
     m_HostScreenHomelandSecurity2->render();
 }
 void Menu::render_host_lobby_ffa_3() {
-    m_ServerLobbyChatWindow->render();
-    m_ServerLobbyConnectedPlayersWindow->render();
-    m_ServerLobbyShipSelectorWindow->render();
-
-    m_Back->render();
-    m_Next->render();
+    m_LobbyScreenFFA->render();
 }
 void Menu::render_host_lobby_td_3() {
-    /*
-    m_ServerLobbyChatWindow->render();
-    m_ServerLobbyConnectedPlayersWindow->render();
-    m_ServerLobbyShipSelectorWindow->render();
 
-    m_Back->render();
-    m_Next->render();
-    */
 }
 void Menu::render_host_lobby_hs_3() {
-    /*
-    m_ServerLobbyChatWindow->render();
-    m_ServerLobbyConnectedPlayersWindow->render();
-    m_ServerLobbyShipSelectorWindow->render();
 
-    m_Back->render();
-    m_Next->render();
-    */
 }
 void Menu::render_join_setup_1() {
     m_Back->render();
@@ -440,13 +420,12 @@ void Menu::render_join_setup_1() {
     m_ServerPort->render();
     m_UserName->render();
 }
-void Menu::render_join_lobby_2() {
+void Menu::render_join_lobby_2() {   
     m_ServerLobbyChatWindow->render();
     m_ServerLobbyConnectedPlayersWindow->render();
-    m_ServerLobbyShipSelectorWindow->render();
 
     m_Back->render();
-    m_Next->render();
+    m_Next->render(); 
 }
 
 void Menu::render_options_main() {
@@ -474,12 +453,17 @@ void Menu::render_encyclopedia_ships() {
 void Menu::render_encyclopedia_factions() {
 
 }
+void Menu::render_loading_screen() {
+
+}
 
 
 void Menu::update(const double& dt) {
     switch (m_GameState) {
         case GameState::Main_Menu: {
             update_main_menu(dt); break;
+        }case GameState::Host_Screen_Setup_0: {
+            update_host_setup_0(dt); break;
         }case GameState::Host_Screen_Setup_1: {
             update_host_setup_1(dt); break;
         }case GameState::Host_Screen_Setup_FFA_2: {
@@ -514,6 +498,8 @@ void Menu::update(const double& dt) {
             update_options_sounds(dt); break;
         }case GameState::Options_Keybinds: {
             update_options_keybinds(dt); break;
+        }case GameState::LoadingScreen: {
+            update_loading_screen(dt); break;
         }case GameState::Game: {
             update_game(dt); break;
         }default: {
@@ -532,6 +518,8 @@ void Menu::render() {
     switch (m_GameState) {
         case GameState::Main_Menu: {
             render_main_menu(); break;
+        }case GameState::Host_Screen_Setup_0: {
+            render_host_setup_0(); break;
         }case GameState::Host_Screen_Setup_1: {
             render_host_setup_1(); break;
         }case GameState::Host_Screen_Setup_FFA_2: {
@@ -568,6 +556,8 @@ void Menu::render() {
             render_options_keybinds(); break;
         }case GameState::Game: {
             render_game(); break;
+        }case GameState::LoadingScreen: {
+            render_loading_screen(); break;
         }default: {
             break;
         }

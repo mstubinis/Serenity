@@ -1,6 +1,6 @@
 #include "MapDescriptionWindow.h"
 #include "MapSelectionWindow.h"
-#include "HostScreen.h"
+//#include "HostScreen1.h"
 
 #include <core/engine/fonts/Font.h>
 
@@ -24,8 +24,8 @@
 using namespace std;
 using namespace Engine;
 
-const auto y_padding = 110.0f;
-const auto scroll_frame_padding = 30.0f;
+constexpr auto y_padding = 110.0f;
+constexpr auto scroll_frame_padding = 30.0f;
 
 MapDescriptionWindow::MapDescriptionWindow(Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const string& labelText) 
 :RoundedWindow(font,x,y,width,height,depth, borderSize, labelText), m_Font(font){

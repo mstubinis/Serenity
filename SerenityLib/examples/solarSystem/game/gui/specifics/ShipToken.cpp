@@ -6,7 +6,7 @@
 
 using namespace std;
 
-const unsigned int token_padding = 12;
+constexpr unsigned int token_padding = 12;
 
 ShipToken::ShipToken(const string& shipClass, Font& font, const float& x, const float& y, const float& depth, const bool& lit, void* userPtr) : Button(font, x, y, 1, 1){
     m_ShipClass = shipClass;
@@ -86,7 +86,7 @@ void ShipToken::lightUpFully() {
     }
     enableMouseover();
     enable();
-    setColor(info.FactionInformation.ColorText);
+    setColor(info.FactionInformation.GUIColor);
 }
 void ShipToken::lightUp() {
     m_LightedUp = true;
@@ -98,7 +98,7 @@ void ShipToken::lightUp() {
     }
     enableMouseover();
     enable();
-    setColor(info.FactionInformation.ColorText);
+    setColor(info.FactionInformation.GUIColor);
 }
 void ShipToken::lightOff() {
     m_LightedUp = false;

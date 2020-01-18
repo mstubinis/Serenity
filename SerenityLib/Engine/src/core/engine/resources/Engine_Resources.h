@@ -31,12 +31,12 @@ namespace Engine{
                 const unsigned int AddScene(Scene&);
             public:
                 //http://gamesfromwithin.com/managing-data-relationships
-                ObjectPool<EngineResource>*                    m_Resources;
-                Engine_Window*                                 m_Window;
-                Scene*                                         m_CurrentScene;
-                bool                                           m_DynamicMemory;
-                std::vector<Scene*>                            m_Scenes;
-                std::vector<Scene*>                            m_ScenesToBeDeleted;
+                ObjectPool<EngineResource>*        m_Resources;
+                std::vector<Engine_Window*>        m_Windows;
+                Scene*                             m_CurrentScene;
+                bool                               m_DynamicMemory;
+                std::vector<Scene*>                m_Scenes;
+                std::vector<Scene*>                m_ScenesToBeDeleted;
             public:
 
                 ResourceManager(const char* name, const uint& width, const uint& height);
@@ -79,9 +79,13 @@ namespace Engine{
         const bool setCurrentScene(const std::string& sceneName);
 
         const double dt();
+        const double applicationTime();
 
         Engine_Window& getWindow();
         glm::uvec2 getWindowSize();
+
+        Engine_Window& getWindow(const unsigned int& index);
+        glm::uvec2 getWindowSize(const unsigned int& index);
 
         Scene* getScene(const std::string& sceneName);
         const bool deleteScene(const std::string& sceneName);

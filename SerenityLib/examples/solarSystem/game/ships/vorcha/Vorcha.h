@@ -6,6 +6,16 @@
 
 class Vorcha final : public Ship {
     private:
+        enum Perks : unsigned int {
+            None = 0,
+            DisruptorBarrage = 1 << 0, //always active once unlocked
+            BerserkMode      = 1 << 1, //always active once unlocked, toggable ability
+            PhasedTorpedo    = 1 << 2, //maybe
+            All = 4294967295,
+        };
+        unsigned int                                      m_Perks;         //active perks
+        unsigned int                                      m_UnlockedPerks; //account unlocked perks (move them to a player class later on?)
+
 
     public:
         Vorcha(

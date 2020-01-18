@@ -2,6 +2,8 @@
 #ifndef ENGINE_ENGINE_EVENTS_H
 #define ENGINE_ENGINE_EVENTS_H
 
+class Engine_Window;
+
 #include <core/engine/events/Engine_EventDispatcher.h>
 #include <core/engine/events/Engine_EventIncludes.h>
 
@@ -14,21 +16,16 @@ namespace Engine{
         class EventManager final{
             public:
                 static EventManager*                     m_EventManager;
-
-                std::unordered_set<unsigned int>         m_KeyStatus;
-                std::unordered_set<unsigned int>         m_MouseStatus;
-                double                                   m_Delta;
-                glm::vec2                                m_Position;
-                glm::vec2                                m_Position_Previous;
-                glm::vec2                                m_Difference;
-                unsigned int                             m_currentKey;
-                unsigned int                             m_previousKey;
-
-                unsigned int                             m_currentButton;
-                unsigned int                             m_previousButton;
-
                 EventDispatcher                          m_EventDispatcher;
 
+                std::unordered_set<unsigned int>         m_KeyboardKeyStatus;
+                std::unordered_set<unsigned int>         m_MouseStatus;
+
+                unsigned int                             m_CurrentKeyboardKey;
+                unsigned int                             m_PreviousKeyboardKey;
+
+                unsigned int                             m_CurrentMouseButton;
+                unsigned int                             m_PreviousMouseButton;
 
 
                 EventManager();
@@ -36,12 +33,10 @@ namespace Engine{
 
                 void cleanup();
 
-                void setMousePositionInternal(const float x, const float y, const bool resetDifference, const bool resetPrevious);
                 void onEventKeyPressed(const unsigned int& key);
                 void onEventKeyReleased(const unsigned int& key);
                 void onEventMouseButtonPressed(const unsigned int& mouseButton);
                 void onEventMouseButtonReleased(const unsigned int& mouseButton);
-                void onEventMouseWheelMoved(const int& delta);
                 void onResetEvents(const double& dt);
         };
     };
@@ -69,11 +64,22 @@ namespace Engine{
     const glm::vec2& getMouseDifference();
     const glm::vec2& getMousePositionPrevious();
     const glm::vec2& getMousePosition();
+
+    const glm::vec2& getMouseDifference(Engine_Window&);
+    const glm::vec2& getMousePositionPrevious(Engine_Window&);
+    const glm::vec2& getMousePosition(Engine_Window&);
+
+    const double     getMouseWheelDelta(Engine_Window&);
     const double     getMouseWheelDelta();
 
     void setMousePosition(const float x, const float y, const bool resetDifference = false, const bool resetPreviousPosition = false);
     void setMousePosition(const unsigned int x, const unsigned int y, const bool resetDifference = false, const bool resetPreviousPosition = false);
     void setMousePosition(const glm::vec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
     void setMousePosition(const glm::uvec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
+
+    void setMousePosition(Engine_Window&, const float x, const float y, const bool resetDifference = false, const bool resetPreviousPosition = false);
+    void setMousePosition(Engine_Window&, const unsigned int x, const unsigned int y, const bool resetDifference = false, const bool resetPreviousPosition = false);
+    void setMousePosition(Engine_Window&, const glm::vec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
+    void setMousePosition(Engine_Window&, const glm::uvec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
 };
 #endif

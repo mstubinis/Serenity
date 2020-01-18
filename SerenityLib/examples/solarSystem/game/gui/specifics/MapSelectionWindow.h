@@ -5,7 +5,7 @@
 
 class  Font;
 class  Client;
-class  HostScreen;
+class  HostScreen1;
 class  ScrollFrame;
 
 struct MapSelectorButtonOnClick;
@@ -24,10 +24,10 @@ class MapSelectionWindow final: public RoundedWindow {
     friend struct CycleGameModeLeftButtonOnClick;
     friend struct CycleGameModeRightButtonOnClick;
     friend class  Client;
-    friend class  HostScreen;
+    friend class  HostScreen1;
 
     struct ButtonPtr final {
-        HostScreen*   hostScreen;
+        HostScreen1*   hostScreen;
         MapEntryData  mapChoice;
         ButtonPtr() {
             hostScreen = nullptr;
@@ -36,7 +36,7 @@ class MapSelectionWindow final: public RoundedWindow {
     };
 
     private:
-        HostScreen&              m_HostScreen;
+        HostScreen1&             m_HostScreen;
         Button*                  m_ChangeGameModeLeftButton;
         Button*                  m_ChangeGameModeRightButton;
         ScrollFrame*             m_MapFileScrollFrame;
@@ -45,7 +45,7 @@ class MapSelectionWindow final: public RoundedWindow {
         void clear_chosen_map();
         void recalculate_maps();
     public:
-        MapSelectionWindow(HostScreen&, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const std::string& labelText);
+        MapSelectionWindow(HostScreen1&, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const std::string& labelText);
         ~MapSelectionWindow();
 
         void clearWindow();

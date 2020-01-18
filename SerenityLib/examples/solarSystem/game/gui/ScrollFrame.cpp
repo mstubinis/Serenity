@@ -9,7 +9,7 @@
 using namespace Engine;
 using namespace std;
 
-const auto scrollbar_width = 30.0f;
+constexpr auto scrollbar_width = 30.0f;
 
 
 ScrollFrame::WidgetEntry::WidgetEntry() {
@@ -65,6 +65,21 @@ void ScrollFrame::clear() {
     m_Content.clear();
     internal_recalculate_content_sizes();
 }
+void ScrollFrame::recalc_all_max_row_heights() {
+    for (auto& row : m_Content) {
+        recalc_max_row_height(row);
+    }
+}
+void ScrollFrame::recalc_max_row_height(WidgetRow& row) {
+    float max_height = 0.0f;
+    for (auto& widgetInRow : row.widgets) {
+        const auto widgetHeight = (widgetInRow.widget->height() + m_PaddingSize.z + m_PaddingSize.w);
+        if (widgetHeight > max_height) {
+            max_height = widgetHeight;
+        }
+    }
+    row.maxHeight = max_height;
+}
 void ScrollFrame::addContent(Widget* widget, const unsigned int row) {
     if (m_Content.size() <= row) {
         m_Content.resize(row + 1U, ScrollFrame::WidgetRow());
@@ -72,14 +87,9 @@ void ScrollFrame::addContent(Widget* widget, const unsigned int row) {
     auto& row_ = m_Content[row];
     WidgetEntry entry(widget);
     row_.widgets.push_back(std::move(entry));
-    float max_height = 0.0f;
-    for (auto& widgetInRow : row_.widgets) {
-        const auto widgetHeight = (widgetInRow.widget->height() + m_PaddingSize.z + m_PaddingSize.w);
-        if (widgetHeight > max_height) {
-            max_height = widgetHeight;
-        }
-    }
-    row_.maxHeight = max_height;
+
+    recalc_max_row_height(row_);
+
     internal_recalculate_content_sizes();
 }
 void ScrollFrame::addContent(Widget* widget) {
@@ -109,25 +119,35 @@ const float ScrollFrame::get_true_content_height(const bool updateToo, const dou
     auto pos = positionFromAlignmentWorld();
     for (auto& row : m_Content) {
         float width_accumulator = 0.0f;
-        for (auto& widgetEntry : row.widgets) {
+        for (size_t j = 0; j < row.widgets.size(); ++j) {
+            auto& widgetEntry = row.widgets[j];
             if (updateToo) {
                 widgetEntry.widget->setPosition(pos.x + width_accumulator, ((pos.y + m_Height) - height) - scrollOffset);
                 widgetEntry.widget->update(dt);
             }
             width_accumulator += widgetEntry.widget->width() + m_PaddingSize.x + m_PaddingSize.y;
             if (width_accumulator > actual_content_width) {
-                width_accumulator = 0.0f;
-                height += row.maxHeight;
-                if (updateToo) {
-                    widgetEntry.widget->setPosition(pos.x + width_accumulator, ((pos.y + m_Height) - height) - scrollOffset);
-                    widgetEntry.widget->update(dt);
+                if (j > 0) {
+                    width_accumulator = 0.0f;
+                    height += row.maxHeight;
+                    if (updateToo) {
+                        widgetEntry.widget->setPosition(pos.x + width_accumulator, ((pos.y + m_Height) - height) - scrollOffset);
+                        widgetEntry.widget->update(dt);
+                    }
+                    width_accumulator += (widgetEntry.widget->width() + m_PaddingSize.x + m_PaddingSize.y);
                 }
-                width_accumulator += (widgetEntry.widget->width() + m_PaddingSize.x + m_PaddingSize.y);
             }
         }
         height += row.maxHeight;
     }
     return height;
+}
+void ScrollFrame::fit_all_widgets_to_window() {
+    for (auto& row : m_Content) {
+        for (auto& widgetEntry : row.widgets) {
+            fit_widget_to_window(widgetEntry);
+        }
+    }
 }
 void ScrollFrame::fit_widget_to_window(WidgetEntry& widgetEntry) {
     if (!widgetEntry.widget)
@@ -143,17 +163,19 @@ void ScrollFrame::fit_widget_to_window(WidgetEntry& widgetEntry) {
         actual_content_width = m_Width;
     }
     if (textWidget) {
-        const auto threshold = actual_content_width - 240.0f; //TODO: re-eval this hardcoded number
+        const auto threshold = actual_content_width - 50.0f; //TODO: re-eval this hardcoded number
         float text_width = 0.0f;
         bool changed = false;
         string text = widgetEntry.original_text;
         textWidget->setText(text);
+        const auto& textScale = textWidget->textScale();
         for (auto itr = text.begin(); itr != text.end(); ++itr) {
             auto character = (*itr);
             if (character == '\n')
                 text_width = 0.0f;
-            else if (character != '\0' && character != '\n') {
-                text_width += (textWidget->font().getGlyphData(character).width) * textWidget->textScale().x;
+            else if (character != '\0' && character != '\n' && character != '\r') {
+                auto& glyph = textWidget->font().getGlyphData(character);
+                text_width += (glyph.xoffset + glyph.xadvance) * textScale.x;
                 if (text_width > threshold) {
 
                     auto itr2 = itr;
@@ -193,11 +215,12 @@ void ScrollFrame::internal_recalculate_content_sizes() {
     float percent = m_Height / m_ContentHeight;
     m_ScrollBar->setSliderSize(percent);
 
-    for (auto& row : m_Content) {
-        for (auto& widgetEntry : row.widgets) {
-            fit_widget_to_window(widgetEntry);
-        }
-    }
+    fit_all_widgets_to_window();
+    recalc_all_max_row_heights();
+
+    m_ContentHeight = get_true_content_height();
+    percent = m_Height / m_ContentHeight;
+    m_ScrollBar->setSliderSize(percent);
 
     m_ScrollBar->resetScrollOffset();
 }

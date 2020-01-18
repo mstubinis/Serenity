@@ -20,10 +20,10 @@
 using namespace std;
 using namespace Engine;
 
-const auto dividor_width          = 25.0f;
-const auto scroll_frame_padding_2 = 20.0f;
-const auto scroll_frame_padding   = 30.0f;
-const auto padding_y              = 110.0f;
+constexpr auto dividor_width          = 25.0f;
+constexpr auto scroll_frame_padding_2 = 20.0f;
+constexpr auto scroll_frame_padding   = 30.0f;
+constexpr auto padding_y              = 110.0f;
 
 struct ShipTokenOnClickTotal final { void operator()(Button* button) const {
     ShipToken* token_ptr = dynamic_cast<ShipToken*>(button);

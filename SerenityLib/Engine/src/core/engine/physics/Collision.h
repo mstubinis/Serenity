@@ -2,17 +2,18 @@
 #ifndef ENGINE_PHYSICS_COLLISION_H
 #define ENGINE_PHYSICS_COLLISION_H
 
-#include <core/engine/math/Numbers.h>
-#include <core/engine/physics/PhysicsIncludes.h>
-#include <LinearMath/btVector3.h>
-#include <vector>
-
 class  btCollisionShape;
 class  Mesh;
 class  ModelInstance;
 class  ComponentModel;
 class  ComponentBody;
 class  btHeightfieldTerrainShape;
+
+#include <core/engine/math/Numbers.h>
+#include <core/engine/physics/PhysicsIncludes.h>
+#include <LinearMath/btVector3.h>
+#include <vector>
+
 class Collision final {
     private:
         CollisionType::Type   m_Type;

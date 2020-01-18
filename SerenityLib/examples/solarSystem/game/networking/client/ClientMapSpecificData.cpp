@@ -47,7 +47,7 @@ void ClientMapSpecificData::update(const double& dt) {
         Anchor* finalAnchor = map.getRootAnchor();
         const auto& anchor_list = map.getClosestAnchor();
         for (auto& closest : anchor_list) {
-            finalAnchor = finalAnchor->getChildren().at(closest);
+            finalAnchor = finalAnchor->getChild(closest);
         }
         PacketPhysicsUpdate p(playerShip, map, finalAnchor, anchor_list, m_Client.m_Username);
         p.PacketType = PacketType::Client_To_Server_Ship_Physics_Update;

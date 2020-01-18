@@ -145,31 +145,33 @@ void Button::render(const glm::vec4& scissor) {
         auto corner = getEdgeWidth(3);
         auto corner_width_half = corner / 2.0f;
 
-        auto txt_height = getTextHeight();
+        auto txt_height = getTextHeight() / 2.0f;
 
-        glm::vec2 newPosTxt;
+        glm::vec2 text_position;
         switch (m_TextAlignment) {
             case TextAlignment::Left: {
-                newPosTxt = glm::vec2(pos.x - corner_width_half, pos.y + txt_height );
+                text_position = glm::vec2(pos.x - corner_width_half + 2, pos.y + txt_height);
                 break;
             }case TextAlignment::Center: {
-                newPosTxt = glm::vec2(pos.x,                     pos.y + txt_height );
+                text_position = glm::vec2(pos.x,                     pos.y + txt_height);
                 break;
             }case TextAlignment::Right: {
-                newPosTxt = glm::vec2(pos.x + corner_width_half, pos.y + txt_height );
+                text_position = glm::vec2(pos.x + corner_width_half - 2, pos.y + txt_height);
                 break;
             }default: {
-                newPosTxt = glm::vec2(pos.x,                     pos.y + txt_height );
+                text_position = glm::vec2(pos.x,                     pos.y + txt_height);
                 break;
             }
         }
         glm::vec2 f(0.0f);
         Renderer::alignmentOffset(m_Alignment, f.x, f.y, m_Width, m_Height);
 
-        m_Font->renderText(m_Text, newPosTxt + f, m_TextColor, 0, m_TextScale, 0.0077f, m_TextAlignment, scissor);
+        m_Font->renderText(m_Text, text_position + f, m_TextColor, 0, m_TextScale, 0.0077f, m_TextAlignment, scissor);
     }
     Widget::render(scissor);
 }
 void Button::render() {
     Button::render(glm::vec4(-1.0f));
+
+
 }

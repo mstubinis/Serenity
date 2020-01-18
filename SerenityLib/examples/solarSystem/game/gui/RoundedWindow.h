@@ -29,6 +29,8 @@ class RoundedWindow: public Button {
         RoundedWindow(Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth,const unsigned int& borderSize = 1, const std::string& labelText = "");
         virtual ~RoundedWindow();
 
+        void setAlignment(const Alignment::Type& alignment);
+
         virtual void onResize(const unsigned int& newWidth, const unsigned int& newHeight);
 
         void setLabelText(const std::string& text);

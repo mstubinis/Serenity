@@ -15,6 +15,7 @@ struct PacketMessage;
 #include "ServerMapSpecificData.h"
 #include "../../modes/GameplayMode.h"
 #include "../../map/MapEntry.h"
+#include "../../database/Database.h"
 
 #include <queue>
 #include <thread>
@@ -112,11 +113,11 @@ class Server {
     public:
         static ServerHostData                          SERVER_HOST_DATA;
     private:
+        Database                                       m_Database;
         ServerMapSpecificData                          m_MapSpecificData;
         Engine::Networking::SocketUDP*                 m_UdpSocket;
         std::mutex                                     m_Mutex;
         std::vector<ServerClientThread*>               m_Threads;
-        //std::queue<std::string>                        m_ClientsToBeDisconnected;
         Engine::Networking::ListenerTCP*               m_TCPListener;
         unsigned short                                 m_port;
         std::atomic<unsigned int>                      m_Active;
@@ -165,6 +166,7 @@ class Server {
         const sf::Socket::Status receive_udp(sf::Packet& packet);
         const sf::Socket::Status receive_udp(void* data, size_t size, size_t& received);
 
+        Database& getDatabase();
         ServerClient* getClientByUsername(const std::string& UserName);
         ServerClient* getClientByMapKey(const std::string& MapKey);
 

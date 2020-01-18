@@ -13,7 +13,7 @@
 
 using namespace Engine;
 
-ShipSystemCloakingDevice::ShipSystemCloakingDevice(Ship& _ship, const float cloakTimerSpeed, const float maxAlphaWhileCloaked) :ShipSystem(ShipSystemType::CloakingDevice, _ship) {
+ShipSystemCloakingDevice::ShipSystemCloakingDevice(Ship& _ship, const float cloakTimerSpeed, const float maxAlphaWhileCloaked) : ShipSystem(ShipSystemType::CloakingDevice, _ship) {
     m_Active = false;
     m_CloakTimer = 1.0f;
     m_CloakSpeed = cloakTimerSpeed;

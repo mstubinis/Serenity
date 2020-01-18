@@ -13,10 +13,12 @@ class TextBox : public Button, public EventObserver {
     friend struct OnClick;
     protected:
         bool                      m_Active;
+        bool                      m_Locked;
         float                     m_Timer;
         unsigned short            m_MaxCharacters;
         std::string               m_Label;
         boost::function<void()>   m_OnEnter;
+        glm::vec4                 m_LabelTextColor;
 
         void internalUpdateSize();
     public:
@@ -31,12 +33,20 @@ class TextBox : public Button, public EventObserver {
             m_OnEnter = boost::bind<void>(functor, this);
         }
 
+        void lock();
+        void unlock();
+        const bool isLocked() const;
+
         void setWidth(const float);
         void setHeight(const float);
         void setSize(const float width, const float height);
         const float width() const;
         const float height() const;
 
+        void setLabelTextColor(const float r, const float g, const float b, const float a);
+        void setInputTextColor(const float r, const float g, const float b, const float a);
+        void setLabelTextColor(const glm::vec4& color);
+        void setInputTextColor(const glm::vec4& color);
 
         const glm::vec2 positionLocal() const;
         const glm::vec2 positionWorld() const;

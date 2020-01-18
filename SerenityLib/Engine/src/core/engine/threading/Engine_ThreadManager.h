@@ -27,8 +27,6 @@ namespace Engine{
                 void cleanup();
 
                 void _update(const double& dt);
-
-                const size_t cores() const;
         };
         namespace threading{
 

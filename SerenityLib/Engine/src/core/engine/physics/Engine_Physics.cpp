@@ -142,8 +142,8 @@ void epriv::PhysicsManager::cleanup() {
     }
     SAFE_DELETE(m_Data);
 }
-void epriv::PhysicsManager::_init(const char* name, const unsigned int& w, const unsigned int& h, const unsigned int& numCores){
-    m_Data = NEW epriv::PhysicsWorld(numCores);
+void epriv::PhysicsManager::_init(const char* name, const unsigned int& w, const unsigned int& h){
+    m_Data = NEW epriv::PhysicsWorld();
     m_Data->debugDrawer->initRenderingContext();
 
     gContactAddedCallback = CustomMaterialContactAddedCallback;

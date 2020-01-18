@@ -61,7 +61,6 @@ class Client{
         void on_receive_cloak_update(Packet&, Map& map);
         void on_receive_new_client_entered_map(Packet&);
         void on_receive_server_approve_map_entry(Packet&, Menu&);
-        void on_receive_map_data(Packet&, Menu&);
         void on_receive_chat_message(Packet&, Menu&);
         void on_receive_client_just_joined_server_lobby(Packet&, Menu&);
         void on_receive_client_just_left_server(Packet&, Menu&);

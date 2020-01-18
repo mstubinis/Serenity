@@ -10,7 +10,9 @@ struct PacketGameplayModeInfo : public Packet {
                   gameplay_mode_max_number_of_players,
                   gameplay_mode_team_sizes;
 
-    std::string   data;
+
+    std::string   allowed_ships;
+    std::string   team_data;
 
 
     PacketGameplayModeInfo();

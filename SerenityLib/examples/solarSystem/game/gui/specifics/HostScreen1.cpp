@@ -1,4 +1,4 @@
-#include "HostScreen.h"
+#include "HostScreen1.h"
 
 #include "HostScreenFFA2.h"
 #include "HostScreenTeamDeathmatch2.h"
@@ -32,22 +32,23 @@
 using namespace Engine;
 using namespace std;
 
-const auto padding_x               = 100.0f;
-const auto padding_y               = 100.0f;
-const auto bottom_bar_height       = 50.0f;
-const auto bottom_bar_button_width = 150.0f;
+constexpr auto padding_x               = 100.0f;
+constexpr auto padding_y               = 100.0f;
+constexpr auto bottom_bar_height       = 50.0f;
+constexpr auto bottom_bar_button_width = 150.0f;
 
-const auto bottom_bar_height_total = 80;
+constexpr auto bottom_bar_height_total = 80;
 
-const auto left_window_width       = 550;
+constexpr auto left_window_width       = 550;
 
 struct Host_ButtonBack_OnClick { void operator()(Button* button) const {
-    HostScreen& hostScreen = *static_cast<HostScreen*>(button->getUserPointer());
+    HostScreen1& hostScreen = *static_cast<HostScreen1*>(button->getUserPointer());
     auto& menu             = hostScreen.getMenu();
-    menu.go_to_main_menu();
+    menu.setGameState(GameState::Host_Screen_Setup_0);
+    menu.setErrorText("", 0.2f);
 }};
 struct Host_ButtonNext_OnClick { void operator()(Button* button) const {
-    HostScreen& hostScreen = *static_cast<HostScreen*>(button->getUserPointer());
+    HostScreen1& hostScreen = *static_cast<HostScreen1*>(button->getUserPointer());
     auto& menu             = hostScreen.getMenu();
     auto& data             = Server::SERVER_HOST_DATA;
     auto& current_map      = data.getMapChoice();
@@ -91,7 +92,7 @@ struct Host_ButtonNext_OnClick { void operator()(Button* button) const {
     }
 }};
 
-HostScreen::HostScreen(Menu& menu, Font& font) : m_Menu(menu), m_Font(font){
+HostScreen1::HostScreen1(Menu& menu, Font& font) : m_Menu(menu), m_Font(font){
     const auto winSize                 = Resources::getWindowSize();
     const auto contentSize             = glm::vec2(winSize) - glm::vec2(padding_x * 2.0f, (padding_y * 2.0f) + bottom_bar_height);
     const auto top_content_height      = contentSize.y / 2.0f;
@@ -167,41 +168,42 @@ HostScreen::HostScreen(Menu& menu, Font& font) : m_Menu(menu), m_Font(font){
 
     setCurrentGameMode(GameplayModeType::FFA);
 }
-HostScreen::~HostScreen() {
+HostScreen1::~HostScreen1() {
     SAFE_DELETE(m_BackButton);
     SAFE_DELETE(m_ForwardButton);
     SAFE_DELETE(m_LeftWindow);
     SAFE_DELETE(m_RightWindow);
     SAFE_DELETE(m_BackgroundEdgeGraphicBottom);
 }
-void HostScreen::clearCurrentMapChoice() {
+void HostScreen1::clearCurrentMapChoice() {
     Server::SERVER_HOST_DATA.setMapChoice(MapEntryData());
     m_LeftWindow->clear_chosen_map();
     m_RightWindow->clear();
 }
-void HostScreen::setCurrentMapChoice(const MapEntryData& choice) {
+void HostScreen1::setCurrentMapChoice(const MapEntryData& choice) {
     m_RightWindow->clear();
     m_RightWindow->setLabelText(choice.map_name);
     Text* text = NEW Text(0, 0, m_Font, choice.map_desc);
     text->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     text->setTextScale(0.85f, 0.85f);
+    text->setAlignment(Alignment::TopLeft);
     m_RightWindow->addContent(text);
 }
-void HostScreen::setCurrentGameMode(const GameplayModeType::Mode& currentGameMode) {
+void HostScreen1::setCurrentGameMode(const GameplayModeType::Mode& currentGameMode) {
     Server::SERVER_HOST_DATA.setGameplayModeType(currentGameMode);
     m_LeftWindow->setLabelText(GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES[currentGameMode]);
     m_LeftWindow->recalculate_maps();
 }
-Menu& HostScreen::getMenu() {
+Menu& HostScreen1::getMenu() {
     return m_Menu;
 }
-MapSelectionWindow& HostScreen::getMapSelectionWindow() {
+MapSelectionWindow& HostScreen1::getMapSelectionWindow() {
     return *m_LeftWindow;
 }
-MapDescriptionWindow& HostScreen::getMapDescriptionWindow() {
+MapDescriptionWindow& HostScreen1::getMapDescriptionWindow() {
     return *m_RightWindow;
 }
-void HostScreen::onResize(const unsigned int newWidth, const unsigned int newHeight) {
+void HostScreen1::onResize(const unsigned int newWidth, const unsigned int newHeight) {
     const auto winSize = glm::uvec2(newWidth, newHeight);
 
     m_BackButton->setPosition(padding_x + (bottom_bar_button_width / 2.0f), bottom_bar_height_total / 2.0f);
@@ -214,7 +216,7 @@ void HostScreen::onResize(const unsigned int newWidth, const unsigned int newHei
 
 }
 
-void HostScreen::update(const double& dt) {
+void HostScreen1::update(const double& dt) {
     m_BackButton->update(dt);
     m_ForwardButton->update(dt);
 
@@ -222,7 +224,7 @@ void HostScreen::update(const double& dt) {
     m_RightWindow->update(dt);
     m_BackgroundEdgeGraphicBottom->update(dt);
 }
-void HostScreen::render() {
+void HostScreen1::render() {
     m_BackButton->render();
     m_ForwardButton->render();
 

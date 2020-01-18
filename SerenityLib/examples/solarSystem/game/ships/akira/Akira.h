@@ -6,6 +6,15 @@
 
 class Akira final : public Ship {
     private:
+        enum Perks : unsigned int {
+            None                = 0,
+            MarkVCasings        = 1 << 0, //always active once unlocked
+            ChainReactionPulsar = 1 << 1, //always active once unlocked, fireable weapon
+            QuantumTorpedos     = 1 << 2, //always active once unlocked
+            All                 = 4294967295,
+        };
+        unsigned int                                      m_Perks;         //active perks
+        unsigned int                                      m_UnlockedPerks; //account unlocked perks (move them to a player class later on?)
 
     public:
         Akira(

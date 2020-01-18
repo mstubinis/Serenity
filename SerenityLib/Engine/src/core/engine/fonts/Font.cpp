@@ -88,23 +88,38 @@ Font::~Font(){
 
 
 const float Font::getTextWidth(const string& text) const {
-    float ret = 0;
-    float maxWidth = 0;
-    for (auto& character : text) {
-        if (character != '\0') {
+    float row_width = 0.0f;
+    float maxWidth = 0.0f;
+    for (int i = 0; i < text.size(); ++i) {
+        auto& character = text[i];
+        if (character != '\0' && character != '\r') {
             if (character != '\n') {
                 const auto& glyph = getGlyphData(character);
-                ret += glyph.xadvance;
+                row_width += (static_cast<float>(glyph.xoffset) + static_cast<float>(glyph.xadvance));
             }else{
-                if (ret > maxWidth) {
-                    maxWidth = ret;
-                    ret = 0;
+
+                //backtrack spaces
+                int j = i-1;
+                while (j >= 0) {
+                    auto& character_backtrack = text[j];
+                    if (character_backtrack != ' ') {
+                        break;
+                    }
+                    const auto& glyph_space = getGlyphData(character_backtrack);
+                    row_width -= (static_cast<float>(glyph_space.xoffset) + static_cast<float>(glyph_space.xadvance));
+
+                    --j;
                 }
+
+                if (row_width > maxWidth) {
+                    maxWidth = row_width;
+                }
+                row_width = 0.0f;
             }
         }
     }
-    if (ret > maxWidth) {
-        maxWidth = ret;
+    if (row_width > maxWidth) {
+        maxWidth = row_width;
     }
     return maxWidth;
 }
@@ -112,14 +127,15 @@ const float& Font::getMaxHeight() const {
     return m_MaxHeight;
 }
 const float Font::getTextHeight(const string& text) const {
-    float lineCount = 1;
+    if (text.empty())
+        return 0.0f;
+    float lineCount = 0;
     for (auto& character : text) {
         if (character == '\n') {
             ++lineCount;
         }
     }
-    auto chosenChar = getGlyphData('X').height;
-    return lineCount * chosenChar;
+    return (lineCount == 0) ? (m_MaxHeight) : ((lineCount+1) * m_MaxHeight);
 }
 const Texture& Font::getGlyphTexture() const {
     return *m_FontTexture; 

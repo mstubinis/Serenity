@@ -35,7 +35,8 @@ struct Host_ButtonNext_OnClick;
 
 class  MainMenu;
 
-class  HostScreen;
+class  HostScreen0;
+class  HostScreen1;
 
 class  HostScreenFFA2;
 class  HostScreenTeamDeathmatch2;
@@ -58,7 +59,8 @@ class Menu final{
     public:
         ServerLobbyChatWindow*             m_ServerLobbyChatWindow;
         ServerLobbyConnectedPlayersWindow* m_ServerLobbyConnectedPlayersWindow;
-        ServerLobbyShipSelectorWindow*     m_ServerLobbyShipSelectorWindow;
+        //ServerLobbyShipSelectorWindow*     m_ServerLobbyShipSelectorWindow;
+
     private:
         glm::vec3                      m_Color;
         Handle                         m_FontHandle;
@@ -71,8 +73,8 @@ class Menu final{
 
         MainMenu*                      m_MainMenuScreen;
 
-        //host part 1
-        HostScreen*                    m_HostScreen;
+        HostScreen0*                   m_HostScreen0;
+        HostScreen1*                   m_HostScreen1;
 
         //host part 2
         HostScreenFFA2*                m_HostScreenFFA2;
@@ -80,9 +82,10 @@ class Menu final{
         HostScreenHomelandSecurity2*   m_HostScreenHomelandSecurity2;
 
         //host part 3
-        //LobbyScreenFFA*                 m_LobbyScreenFFA;
+        LobbyScreenFFA* m_LobbyScreenFFA;
         //LobbyScreenTeamDeathmatch*      m_LobbyScreenTeamDeathmatch;
         //LobbyScreenHomelandSecurity*    m_LobbyScreenHomelandSecurity;
+
 
         Button*                        m_Back;
         Button*                        m_Next;
@@ -96,6 +99,8 @@ class Menu final{
 
         void update_game(const double& dt);
         void update_main_menu(const double& dt);
+
+        void update_host_setup_0(const double& dt);
         void update_host_setup_1(const double& dt);
 
         void update_host_setup_ffa_2(const double& dt);
@@ -117,9 +122,15 @@ class Menu final{
         void update_encyclopedia_ships(const double& dt);
         void update_encyclopedia_factions(const double& dt);
 
+        void update_loading_screen(const double& dt);
+
+
+
 
         void render_game();
         void render_main_menu();
+
+        void render_host_setup_0();
         void render_host_setup_1();
 
         void render_host_setup_ffa_2();
@@ -140,6 +151,8 @@ class Menu final{
         void render_encyclopedia_technology();
         void render_encyclopedia_ships();
         void render_encyclopedia_factions();
+
+        void render_loading_screen();
     public:
         Menu(Scene& scene, Camera& camera, GameState::State& current, Core& core);
         ~Menu();

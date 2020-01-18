@@ -6,7 +6,15 @@
 
 class Dderidex final : public Ship {
     private:
-
+        enum Perks : unsigned int {
+            None                = 0,
+            TachyonField        = 1 << 0, //
+            ComputerHack        = 1 << 1, //
+            ShieldInversionBeam = 1 << 2, //maybe
+            All                 = 4294967295,
+        };
+        unsigned int                                      m_Perks;         //active perks
+        unsigned int                                      m_UnlockedPerks; //account unlocked perks (move them to a player class later on?)
     public:
         Dderidex(
             Scene& scene,

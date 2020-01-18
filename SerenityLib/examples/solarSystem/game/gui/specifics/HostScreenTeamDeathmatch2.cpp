@@ -1,5 +1,5 @@
 #include "HostScreenTeamDeathmatch2.h"
-#include "HostScreen.h"
+#include "HostScreen1.h"
 #include "MapDescriptionWindow.h"
 #include "ServerLobbyChatWindow.h"
 #include "../../Menu.h"
@@ -24,12 +24,13 @@
 using namespace Engine;
 using namespace std;
 
-const auto padding_x = 100.0f;
-const auto padding_y = 100.0f;
-const auto bottom_bar_height = 50.0f;
-const auto bottom_bar_button_width = 150.0f;
+constexpr auto padding_x = 100.0f;
+constexpr auto padding_y = 100.0f;
+constexpr auto bottom_bar_height = 50.0f;
+constexpr auto bottom_bar_button_width = 150.0f;
 
-const auto bottom_bar_height_total = 80;
+constexpr auto bottom_bar_height_total = 80;
+constexpr auto top_bar_height_total = 60;
 
 struct Host2TD_ButtonBack_OnClick { void operator()(Button* button) const {
     auto& hostScreenTD = *static_cast<HostScreenTeamDeathmatch2*>(button->getUserPointer());
@@ -95,27 +96,27 @@ struct Host2TD_ButtonNext_OnClick { void operator()(Button* button) const {
 }};
 
 
-HostScreenTeamDeathmatch2::HostScreenTeamDeathmatch2(HostScreen& hostScreen1, Menu& menu, Font& font) : m_HostScreen1(hostScreen1), m_Menu(menu) {
+HostScreenTeamDeathmatch2::HostScreenTeamDeathmatch2(HostScreen1& hostScreen1, Menu& menu, Font& font) : m_HostScreen1(hostScreen1), m_Menu(menu) {
     const auto winSize = glm::vec2(Resources::getWindowSize());
     const auto contentSize = winSize - glm::vec2(padding_x * 2.0f, (padding_y * 2.0f) + bottom_bar_height);
     const auto top_content_height = contentSize.y / 2.0f;
     const auto first_2_boxes_width_top = contentSize.x - top_content_height;
 
-    m_BackgroundEdgeGraphicTop = NEW Button(font, winSize.x / 2.0f, winSize.y, winSize.x, bottom_bar_height_total);
+    m_BackgroundEdgeGraphicTop = NEW Button(font, winSize.x / 2.0f, winSize.y, winSize.x, top_bar_height_total);
     m_BackgroundEdgeGraphicTop->setColor(Factions::Database[FactionEnum::Federation].GUIColorDark);
     m_BackgroundEdgeGraphicTop->setAlignment(Alignment::TopCenter);
-    m_BackgroundEdgeGraphicTop->setDepth(0.512f);
+    m_BackgroundEdgeGraphicTop->setDepth(0.2f);
     m_BackgroundEdgeGraphicTop->disable();
     m_BackgroundEdgeGraphicTop->setTextureCorner(nullptr);
     m_BackgroundEdgeGraphicTop->enableTextureCorner(false);
-    m_TopLabel = new Text(winSize.x / 2.0f, winSize.y - (bottom_bar_height_total / 2.0f) + 15.0f, font);
+    m_TopLabel = new Text(winSize.x / 2.0f, winSize.y - (top_bar_height_total / 2.0f) + 15.0f, font);
     m_TopLabel->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_TopLabel->setAlignment(Alignment::Center);
     m_TopLabel->setTextAlignment(TextAlignment::Center);
 
     m_BackgroundEdgeGraphicBottom = NEW Button(font, winSize.x / 2.0f, bottom_bar_height_total / 2.0f, winSize.x, bottom_bar_height_total);
     m_BackgroundEdgeGraphicBottom->setColor(Factions::Database[FactionEnum::Federation].GUIColorDark);
-    m_BackgroundEdgeGraphicBottom->setDepth(0.512f);
+    m_BackgroundEdgeGraphicBottom->setDepth(0.2f);
     m_BackgroundEdgeGraphicBottom->disable();
     m_BackgroundEdgeGraphicBottom->setTextureCorner(nullptr);
     m_BackgroundEdgeGraphicBottom->enableTextureCorner(false);
@@ -157,10 +158,10 @@ void HostScreenTeamDeathmatch2::onResize(const unsigned int newWidth, const unsi
     m_BackgroundEdgeGraphicBottom->setPosition(winSize.x / 2.0f, bottom_bar_height_total / 2.0f);
     m_BackgroundEdgeGraphicBottom->setSize(winSize.x, bottom_bar_height_total);
 
-    m_BackgroundEdgeGraphicTop->setSize(winSize.x, bottom_bar_height_total);
+    m_BackgroundEdgeGraphicTop->setSize(winSize.x, top_bar_height_total);
     m_BackgroundEdgeGraphicTop->setPosition(winSize.x / 2.0f, winSize.y);
 
-    m_TopLabel->setPosition(winSize.x / 2.0f, winSize.y - (bottom_bar_height_total / 2.0f) + 15.0f);
+    m_TopLabel->setPosition(winSize.x / 2.0f, winSize.y - (top_bar_height_total / 2.0f) + 15.0f);
 }
 
 void HostScreenTeamDeathmatch2::update(const double& dt) {

@@ -8,7 +8,11 @@ struct EventType final { enum Type {
     WindowResized,
     WindowGainedFocus,
     WindowLostFocus,
-    WindowClosed,
+
+    WindowRequestedToBeClosed,
+    WindowHasClosed,
+    GameEnded,
+
     WindowFullscreenChanged,
     SoundStatusChanged,
     KeyPressed,

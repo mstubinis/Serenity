@@ -1,6 +1,6 @@
 #include "MapSelectionWindow.h"
 #include "MapDescriptionWindow.h"
-#include "HostScreen.h"
+#include "HostScreen1.h"
 #include "../../factions/Faction.h"
 #include "../../map/MapDatabase.h"
 #include "../../networking/server/Server.h"
@@ -20,8 +20,8 @@ using namespace Engine;
 using namespace std;
 namespace boost_io = boost::iostreams;
 
-const float button_size = 40.0f;
-const auto scroll_frame_padding = 30.0f;
+constexpr auto button_size          = 40.0f;
+constexpr auto scroll_frame_padding = 30.0f;
 
 struct MapSelectorButtonOnClick final { void operator()(Button* button) const {
     auto& button_data          = *static_cast<MapSelectionWindow::ButtonPtr*>(button->getUserPointer());
@@ -59,7 +59,7 @@ struct CycleGameModeRightButtonOnClick final { void operator()(Button* button) c
     mapSelectionWindow.m_HostScreen.setCurrentGameMode(static_cast<GameplayModeType::Mode>(num));
 }};
 
-MapSelectionWindow::MapSelectionWindow(HostScreen& hostScreen, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const string& labelText)
+MapSelectionWindow::MapSelectionWindow(HostScreen1& hostScreen, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const string& labelText)
 :RoundedWindow(font,x,y,width,height,depth,borderSize,labelText), m_HostScreen(hostScreen), m_Font(font){
 
     m_ChangeGameModeLeftButton = new Button(font, x - (width / 2.0f) - (scroll_frame_padding - 1.0f), y + (height / 2.0f) - 5.0f, button_size, button_size);
@@ -87,6 +87,7 @@ MapSelectionWindow::MapSelectionWindow(HostScreen& hostScreen, Font& font, const
     m_Label->setColor(Factions::Database[FactionEnum::Federation].GUIColorText1);
 }
 MapSelectionWindow::~MapSelectionWindow() {
+    clearWindow();
     SAFE_DELETE(m_MapFileScrollFrame);
     SAFE_DELETE(m_ChangeGameModeLeftButton);
     SAFE_DELETE(m_ChangeGameModeRightButton);

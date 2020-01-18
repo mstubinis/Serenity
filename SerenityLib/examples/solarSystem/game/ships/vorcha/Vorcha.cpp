@@ -35,6 +35,9 @@ Vorcha::Vorcha(Scene& scene, glm::vec3 position, glm::vec3 scale)
 Vorcha::Vorcha(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
 :Ship(team,client, CLASS, map, ai_type, name, position, scale, collisionType) {
 
+    m_Perks         = Vorcha::Perks::None;
+    m_UnlockedPerks = Vorcha::Perks::None;
+
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;

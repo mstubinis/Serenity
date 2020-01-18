@@ -31,7 +31,6 @@ epriv::ResourceManager* resourceManager;
 
 epriv::ResourceManager::ResourceManager(const char* name, const uint& width, const uint& height){
     m_CurrentScene     = nullptr;
-    m_Window           = nullptr;
     m_DynamicMemory    = false;
     m_Resources        = NEW ObjectPool<EngineResource>(32768);
     resourceManager    = this;
@@ -41,11 +40,12 @@ epriv::ResourceManager::~ResourceManager(){
 }
 void epriv::ResourceManager::cleanup() {
     SAFE_DELETE(m_Resources);
-    SAFE_DELETE(m_Window);
+    SAFE_DELETE_VECTOR(m_Windows);
     SAFE_DELETE_VECTOR(m_Scenes);
 }
 void epriv::ResourceManager::_init(const char* name, const uint& width, const uint& height){
-    m_Window = NEW Engine_Window(name, width, height);
+    auto* window = NEW Engine_Window(name, width, height);
+    m_Windows.push_back(window);
 }
 vector<Scene*>& epriv::ResourceManager::scenes() {
     return m_Scenes;
@@ -89,6 +89,9 @@ string Engine::Data::reportTime() {
 const double Resources::dt() {
     return epriv::Core::m_Engine->m_DebugManager.dt();
 }
+const double Resources::applicationTime() {
+    return epriv::Core::m_Engine->m_DebugManager.totalTime();
+}
 Scene* Resources::getCurrentScene() {
     return resourceManager->m_CurrentScene;
 }
@@ -99,11 +102,20 @@ void Resources::Settings::disableDynamicMemory(){
     resourceManager->m_DynamicMemory = false; 
 }
 Engine_Window& Resources::getWindow(){ 
-    return *resourceManager->m_Window; 
+    return *resourceManager->m_Windows[0]; 
 }
 glm::uvec2 Resources::getWindowSize(){ 
-    return resourceManager->m_Window->getSize(); 
+    return resourceManager->m_Windows[0]->getSize(); 
 }
+
+Engine_Window& Resources::getWindow(const unsigned int& index) {
+    return *resourceManager->m_Windows[index];
+}
+glm::uvec2 Resources::getWindowSize(const unsigned int& index) {
+    return resourceManager->m_Windows[index]->getSize();
+}
+
+
 const bool Resources::deleteScene(const string& sceneName) {
     for (auto& scene_ptr : resourceManager->m_Scenes) {
         if (scene_ptr && scene_ptr->name() == sceneName) {
@@ -284,9 +296,8 @@ const bool Resources::setCurrentScene(Scene* newScene){
     Scene* oldScene = resourceManager->m_CurrentScene;
 
     epriv::EventSceneChanged e(oldScene, newScene);
-    Event ev;
+    Event ev(EventType::SceneChanged);
     ev.eventSceneChanged = e;
-    ev.type = EventType::SceneChanged;
     epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
     
     if(!oldScene){

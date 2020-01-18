@@ -30,6 +30,9 @@ Akira::Akira(Scene& scene, glm::vec3 position, glm::vec3 scale)
 Akira::Akira(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
 :Ship(team,client, CLASS, map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f, 0.15f, 0.0f)) {
 
+    m_Perks         = Akira::Perks::None;
+    m_UnlockedPerks = Akira::Perks::None;
+
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem*        system = nullptr;

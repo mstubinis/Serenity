@@ -93,8 +93,9 @@ const glm::vec4 ShipStatusDisplay::getPercentColor(const float percent) {
 
 
 void ShipStatusDisplay::renderShipHullStatus(const glm::vec2& bottomLeftCorner) {
-    Texture& texture = *((Texture*)(Ships::Database.at(m_TargetAsShip->getClass()).IconTextureHandle).get());
-    Texture& textureBorder = *((Texture*)(Ships::Database.at(m_TargetAsShip->getClass()).IconBorderTextureHandle).get());
+    auto& data = Ships::Database.at(m_TargetAsShip->getClass());
+    Texture& texture = *((Texture*)(data.IconTextureHandle).get());
+    Texture& textureBorder = *((Texture*)(data.IconBorderTextureHandle).get());
 
     auto* hull = static_cast<ShipSystemHull*>(m_TargetAsShip->getShipSystem(ShipSystemType::Hull));
 

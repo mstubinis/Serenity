@@ -11,6 +11,7 @@ struct ConfigDataStruct final {
     unsigned int    window_width;
     unsigned int    window_height;
     std::string     window_mode; //"fullscreen" or "windowed" or "windowed_fullscreen"
+    bool            window_maximized;
 
     //sound options
     unsigned int    volume_music;
@@ -40,6 +41,7 @@ struct ConfigDataStruct final {
         window_width            = sf::VideoMode::getDesktopMode().width - 30;
         window_height           = sf::VideoMode::getDesktopMode().height - 120;
         window_mode             = "fullscreen";
+        window_maximized        = false;
     }
     ~ConfigDataStruct() = default;
 

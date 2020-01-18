@@ -32,6 +32,10 @@ Venerex::Venerex(Scene& scene, glm::vec3 position, glm::vec3 scale)
 Venerex::Venerex(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
 :Ship(team, client, CLASS, map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f,0.3f,0.0f)) {
 
+    m_Perks         = Venerex::Perks::None;
+    m_UnlockedPerks = Venerex::Perks::None;
+
+
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem*        system = nullptr;

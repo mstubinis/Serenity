@@ -187,7 +187,7 @@ void ServerMapSpecificData::update(const double& dt) {
             finalAnchor = map.getRootAnchor();
             list = map.getClosestAnchor(nullptr, &ship);
             for (auto& closest : list) {
-                finalAnchor = finalAnchor->getChildren().at(closest);
+                finalAnchor = finalAnchor->getChild(closest);
             }
             PacketPhysicsUpdate p(ship, map, finalAnchor, list, ship.getName());
             p.PacketType = PacketType::Server_To_Client_Ship_Physics_Update;

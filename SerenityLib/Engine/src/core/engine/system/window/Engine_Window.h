@@ -8,6 +8,7 @@ namespace sf {
 namespace Engine {
     namespace epriv {
         class  EngineCore;
+        class  EventManager;
     };
 };
 class  Texture;
@@ -31,8 +32,10 @@ class Engine_Window_Flags final { public: enum Flag: unsigned int {
 
 class Engine_Window final{
     friend class Engine::epriv::EngineCore;
+    friend class Engine::epriv::EventManager;
     class Engine_WindowData final {
         friend class Engine::epriv::EngineCore;
+        friend class Engine::epriv::EventManager;
         friend class Engine_Window;
         private:
             glm::uvec2          m_OldWindowSize;
@@ -45,6 +48,12 @@ class Engine_Window final{
             unsigned int        m_Flags;
 
 
+            glm::vec2           m_MousePosition;
+            glm::vec2           m_MousePosition_Previous;
+            glm::vec2           m_MouseDifference;
+            double              m_MouseDelta;
+
+
             int                 m_OpenGLMajorVersion;
             int                 m_OpenGLMinorVersion;
             int                 m_GLSLVersion;
@@ -52,6 +61,18 @@ class Engine_Window final{
 
             void restore_state();
             const sf::ContextSettings create(Engine_Window&, const std::string& _name, const unsigned int& _width, const unsigned int& _height);
+            void update_mouse_position_internal(Engine_Window&, const float x, const float y, const bool resetDifference, const bool resetPrevious);
+            void on_fullscreen_internal(Engine_Window&, const bool isToBeFullscreen, const bool isMaximized, const bool isMinimized);
+            sf::VideoMode get_default_desktop_video_mode();
+
+            void on_mouse_wheel_scrolled(const int& delta, const int& x, const int& y);
+
+            void on_reset_events(const double& dt);
+
+            const bool remove_flag(const Engine_Window_Flags::Flag& flag);
+            const bool add_flag(const Engine_Window_Flags::Flag& flag);
+            const bool has_flag(const Engine_Window_Flags::Flag& flag);
+
         public:
             Engine_WindowData();
             ~Engine_WindowData();
@@ -59,12 +80,7 @@ class Engine_Window final{
 
     private:
         Engine_WindowData m_Data;
-        void internal_on_fullscreen(const bool isToBeFullscreen, const bool isMaximized, const bool isMinimized);
-        const bool remove_flag(const Engine_Window_Flags::Flag& flag);
-        const bool add_flag(const Engine_Window_Flags::Flag& flag);
-        const bool has_flag(const Engine_Window_Flags::Flag& flag);
         void restore_state();
-        sf::VideoMode get_default_desktop_video_mode();
     public:
         Engine_Window(const char* name, const unsigned int& width, const unsigned int& height);
         ~Engine_Window();
@@ -72,6 +88,37 @@ class Engine_Window final{
         const char* name() const;
         const glm::uvec2 getSize();
         const glm::uvec2 getPosition();
+
+        const unsigned int getFramerateLimit() const;
+
+        sf::Window& getSFMLHandle() const;
+
+        const glm::vec2& getMousePositionDifference() const;
+        const glm::vec2& getMousePositionPrevious() const;
+        const glm::vec2& getMousePosition() const;
+        const double& getMouseWheelDelta() const;
+
+        const bool hasFocus();
+        const bool isOpen();
+
+        //returns true if the window is in fullscreen OR windowed fullscreen mode
+        const bool isFullscreen();
+
+        //returns true if the window is in windowed fullscreen mode
+        const bool isFullscreenWindowed();
+
+        //returns true if the window is in regular fullscreen mode
+        const bool isFullscreenNonWindowed();
+
+        //currently specific to windows os only
+        const bool isMaximized();
+        //currently specific to windows os only
+        const bool isMinimized();
+
+        const bool isActive();
+
+        void updateMousePosition(const float x, const float y, const bool resetDifference = false, const bool resetPreviousPosition = false);
+        void updateMousePosition(const glm::vec2& position, const bool resetDifference = false, const bool resetPreviousPosition = false);
 
         void setName(const char* name);
         void setSize(const unsigned int& width, const unsigned int& height);
@@ -113,31 +160,16 @@ class Engine_Window final{
         //This is not to be confused with requestFocus().
         void setActive(const bool active = true);
 
-        const unsigned int getStyle();
-        const bool hasFocus();
-        const bool isOpen();
-
-        //returns true if the window is in fullscreen OR windowed fullscreen mode
-        const bool isFullscreen();
-
-        //returns true if the window is in windowed fullscreen mode
-        const bool isFullscreenWindowed();
-
-        //returns true if the window is in regular fullscreen mode
-        const bool isFullscreenNonWindowed();
-
-        //currently specific to windows os only
-        const bool isMaximized();
-        //currently specific to windows os only
-        const bool isMinimized();
-
-        const bool isActive();
-
+        //sets the window to be full screen
         const bool setFullscreen(const bool isFullscreen = true);
+
+        //sets the window to be windowed fullscreen, this is a window with no style, stretched to the monitor's size
         const bool setFullscreenWindowed(const bool isFullscreen = true);
 
-        void setStyle(const unsigned int& style);
-
+        /*
+        Display the rendered elements to the screen. This is called automatically during the Engine's render loop. You may want to call this yourself in certain parts of the update loop
+        when you want the window to display something and cannot wait for the render loop to begin, like non async loading.
+        */
         void display();
 
         //Grab or release the mouse cursor. If set, grabs the mouse cursor inside this window's client area so it may no
@@ -151,8 +183,8 @@ class Engine_Window final{
         //(for example, you can get 65 FPS when requesting 60).
         void setFramerateLimit(const unsigned int& limit);
 
-        const unsigned int getFramerateLimit() const;
-
-        sf::Window& getSFMLHandle() const;
+        
+        //const unsigned int getStyle();
+        //void setStyle(const unsigned int& style);
 };
 #endif

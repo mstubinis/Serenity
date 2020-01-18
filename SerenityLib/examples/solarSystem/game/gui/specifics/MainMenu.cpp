@@ -10,7 +10,7 @@ using namespace std;
 
 struct Button_Host_OnClick { void operator()(Button* button) const {
     Menu& menu = *static_cast<Menu*>(button->getUserPointer());
-    menu.setGameState(GameState::Host_Screen_Setup_1);
+    menu.setGameState(GameState::Host_Screen_Setup_0);
     menu.setErrorText("", 0.2f);
 }};
 struct Button_Join_OnClick { void operator()(Button* button) const {

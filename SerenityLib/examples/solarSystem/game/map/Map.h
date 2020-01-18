@@ -47,9 +47,9 @@ class Map: public Scene{
 
         Freelist<PrimaryWeaponCannonProjectile*>             m_ActiveCannonProjectiles;
         Freelist<SecondaryWeaponTorpedoProjectile*>          m_ActiveTorpedoProjectiles;
-    private:
-        std::tuple<std::string, Anchor*>                     m_RootAnchor;
-        std::vector<std::tuple<std::string, Anchor*>>        m_SpawnAnchors;
+
+        //[0] is the root anchor, rest are spawn anchors
+        std::vector<Anchor*>                                 m_SpawnAnchors;
 
         //give the map its essentials, but do not load everything needed
         void basic_init(const std::string& file);

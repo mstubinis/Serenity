@@ -16,7 +16,7 @@ using namespace Engine;
 
 void _preTicCallback(btDynamicsWorld* world, btScalar timeStep) {}
 void _postTicCallback(btDynamicsWorld* world, btScalar timeStep) {}
-epriv::PhysicsWorld::PhysicsWorld(const unsigned int numCores) {
+epriv::PhysicsWorld::PhysicsWorld() {
     broadphase             = new btDbvtBroadphase();
     collisionConfiguration = new btDefaultCollisionConfiguration();
     dispatcher             = new btCollisionDispatcher(collisionConfiguration);

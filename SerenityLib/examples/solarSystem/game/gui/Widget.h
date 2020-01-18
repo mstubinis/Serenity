@@ -53,7 +53,7 @@ class Widget : public IWidget {
         virtual const glm::vec2 position(const bool local = true) const;
         const glm::vec4& color() const;
 
-        void setAlignment(const Alignment::Type& alignment);
+        virtual void setAlignment(const Alignment::Type& alignment);
         const Alignment::Type& getAlignment() const;
 
         void* getUserPointer() const;

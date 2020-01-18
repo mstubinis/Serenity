@@ -29,8 +29,8 @@ int main(int argc, char* argv[]) {
     options.width          = info.window_width;
     options.height         = info.window_height;
     options.window_mode    = info.getWindowModeInt();
-    //options.show_console = true;
-    options.maximized      = false;
+    options.show_console   = true;
+    options.maximized      = info.window_maximized;
     options.aa_algorithm   = AntiAliasingAlgorithm::SMAA;
     options.argv           = argv;
     options.argc           = argc;

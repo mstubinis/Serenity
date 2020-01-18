@@ -83,39 +83,42 @@ const PacketGameplayModeInfo GameplayMode::serialize() const {
 
     for (auto& team_itr : m_Teams) {
         Team& team = const_cast<Team&>(team_itr.second);
-        res.data += "," + team.getTeamNumberAsString();
-        res.data += "," + to_string(team.getNumberOfPlayersOnTeam());
+        res.team_data += "," + team.getTeamNumberAsString();
+        res.team_data += "," + to_string(team.getNumberOfPlayersOnTeam());
 
-        res.data += "," + to_string(team.getAllyTeams().size());
-        res.data += "," + to_string(team.getEnemyTeams().size());
+        res.team_data += "," + to_string(team.getAllyTeams().size());
+        res.team_data += "," + to_string(team.getEnemyTeams().size());
 
-        for (auto& ally_team : team.getAllyTeams()) {
-            res.data += "," + to_string(static_cast<unsigned int>(ally_team));
+        for (auto& ally_team_number_enum : team.getAllyTeams()) {
+            res.team_data += "," + to_string(static_cast<unsigned int>(ally_team_number_enum));
         }
-        for (auto& enemy_team : team.getEnemyTeams()) {
-            res.data += "," + to_string(static_cast<unsigned int>(enemy_team));
+        for (auto& enemy_team_number_enum : team.getEnemyTeams()) {
+            res.team_data += "," + to_string(static_cast<unsigned int>(enemy_team_number_enum));
         }
         for (auto& playerMapKey : team.getPlayers()) {
-            res.data += "," + playerMapKey;
+            res.team_data += "," + playerMapKey;
         }
     }
-    res.data += "," + to_string(m_AllowedShipClasses.size());
+    res.team_data.erase(0, 1); //remove first ","
+
+
+    res.allowed_ships += to_string(m_AllowedShipClasses.size());
     for (auto& ship_class : m_AllowedShipClasses) {
-        res.data += "," + ship_class;
+        res.allowed_ships += "," + ship_class;
     }
-    res.data.erase(0, 1); //remove first ","
     return res;
 }
 void GameplayMode::deserialize(const PacketGameplayModeInfo& packet) {
 
-    const auto list            = Helper::SeparateStringByCharacter(packet.data, ',');
-    m_GameplayModeType         = static_cast<GameplayModeType::Mode>(packet.gameplay_mode_type);
-    m_MaxAmountOfPlayers       = static_cast<unsigned int>(packet.gameplay_mode_max_number_of_players);
-    size_t start_index         = 0;
+    const auto list_team_data     = Helper::SeparateStringByCharacter(packet.team_data, ',');
+    const auto list_allowed_ships = Helper::SeparateStringByCharacter(packet.allowed_ships, ',');
+    m_GameplayModeType            = static_cast<GameplayModeType::Mode>(packet.gameplay_mode_type);
+    m_MaxAmountOfPlayers          = static_cast<unsigned int>(packet.gameplay_mode_max_number_of_players);
+    size_t start_index            = 0;
 
-    TeamNumber::Enum    ally_team;
-    TeamNumber::Enum    enemy_team;
-    TeamNumber::Enum    team_number;
+    TeamNumber::Enum    ally_team_number_enum;
+    TeamNumber::Enum    enemy_team_number_enum;
+    TeamNumber::Enum    team_number_enum;
     unsigned int        num_ally_teams;
     unsigned int        num_enemy_teams;
     unsigned int        num_players_on_team;
@@ -123,44 +126,42 @@ void GameplayMode::deserialize(const PacketGameplayModeInfo& packet) {
     for (unsigned int i = 0; i < packet.gameplay_mode_team_sizes; ++i) {
 
         unsigned int count  = 0;
-        team_number         = static_cast<TeamNumber::Enum>(stoi(list[start_index + 0]));
-        num_players_on_team =                               stoi(list[start_index + 1]);
-        num_ally_teams      =                               stoi(list[start_index + 2]);
-        num_enemy_teams     =                               stoi(list[start_index + 3]);
+        team_number_enum    = static_cast<TeamNumber::Enum>(stoi(list_team_data[start_index + 0]));
+        num_players_on_team =                               stoi(list_team_data[start_index + 1]);
+        num_ally_teams      =                               stoi(list_team_data[start_index + 2]);
+        num_enemy_teams     =                               stoi(list_team_data[start_index + 3]);
         count += 4;
 
         //add team
         Team* newTeam = nullptr;
-        if (!m_Teams.count(team_number)) {
-            newTeam = NEW Team(team_number);
-            m_Teams.emplace(team_number, *newTeam);
+        if (!m_Teams.count(team_number_enum)) {
+            newTeam = NEW Team(team_number_enum);
+            m_Teams.emplace(team_number_enum, *newTeam);
             SAFE_DELETE(newTeam);
         }
-        newTeam = &(m_Teams.at(team_number));
+        newTeam = &(m_Teams.at(team_number_enum));
 
         for (unsigned int j = 0; j < num_ally_teams; ++j) {
-            ally_team = static_cast<TeamNumber::Enum>(stoi(list[start_index + count]));
-            newTeam->addAllyTeam(ally_team);
+            ally_team_number_enum = static_cast<TeamNumber::Enum>(stoi(list_team_data[start_index + count]));
+            newTeam->addAllyTeam(ally_team_number_enum);
             ++count;
         }
         for (unsigned int j = 0; j < num_enemy_teams; ++j) {
-            enemy_team = static_cast<TeamNumber::Enum>(stoi(list[start_index + count]));
-            newTeam->addEnemyTeam(enemy_team);
+            enemy_team_number_enum = static_cast<TeamNumber::Enum>(stoi(list_team_data[start_index + count]));
+            newTeam->addEnemyTeam(enemy_team_number_enum);
             ++count;
         }
         for (unsigned int j = 0; j < num_players_on_team; ++j) {
-            player_map_key = list[start_index + count];
+            player_map_key = list_team_data[start_index + count];
             newTeam->addPlayerToTeam(player_map_key);
             ++count;
         }
         start_index += count;
     }
-    int amount_of_ship_classes = stoi(list[start_index]);
-    if (amount_of_ship_classes > 0) {
-        for (int i = 0; i < amount_of_ship_classes; ++i) {
-            const auto ship_class = list[start_index + i];
-            addAllowedShipClass(ship_class);
-            ++start_index;
-        }
+
+
+
+    for (auto& ship_class : list_allowed_ships) {
+        addAllowedShipClass(ship_class);
     }
 }

@@ -38,6 +38,8 @@ const ConfigDataStruct& ConfigFile::readFromFile() {
                             CONFIG_DATA.window_width = stoi(value);
                         }else if (key == "window_height") {
                             CONFIG_DATA.window_height = stoi(value);
+                        }else if(key == "window_maximized"){
+                            CONFIG_DATA.window_maximized = static_cast<bool>(stoi(value));
                         }else if (key == "window_mode") {
                             CONFIG_DATA.window_mode = (value);
                         }else if (key == "volume_music") {
@@ -112,12 +114,21 @@ void ConfigFile::updateWindowSize(const unsigned int& width, const unsigned int&
     CONFIG_DATA.window_height = height;
     writeToFile();
 }
+void ConfigFile::updateWindowMaximized(const bool& maximized) {
+    if (CONFIG_DATA.window_maximized == maximized) {
+        return;
+    }
+    CONFIG_DATA.window_maximized = maximized;
+    writeToFile();
+}
+
 void ConfigFile::write_to_file(boost::filesystem::ofstream& stream) {
     stream.clear();
     stream << "# Basic Info" << std::endl;
     stream << "window_width="  + to_string(CONFIG_DATA.window_width) << std::endl;
     stream << "window_height=" + to_string(CONFIG_DATA.window_height) << std::endl;
     stream << "window_mode="   + (CONFIG_DATA.window_mode) << std::endl;
+    stream << "window_maximized=" + to_string(static_cast<int>(CONFIG_DATA.window_maximized)) << std::endl;
     stream << std::endl;
     stream << "# Sound Info" << std::endl;
     stream << "volume_music=" + to_string(CONFIG_DATA.volume_music) << std::endl;

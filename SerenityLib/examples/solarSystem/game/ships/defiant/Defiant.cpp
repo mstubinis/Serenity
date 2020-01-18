@@ -33,7 +33,7 @@ Defiant::Defiant(Scene& scene, glm::vec3 position, glm::vec3 scale)
 Defiant::Defiant(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
 :Ship(team,client, CLASS,map,ai_type,name,position,scale, collisionType){
 
-    m_Perks = Defiant::Perks::None;
+    m_Perks         = Defiant::Perks::None;
     m_UnlockedPerks = Defiant::Perks::None;
 
     auto& _this = *this;
@@ -49,7 +49,7 @@ Defiant::Defiant(AIType::Type& ai_type, Team& team, Client& client, Map& map, co
         else if (i == 7)  system = NEW ShipSystemWarpDrive(_this);
         else if (i == 8)  system = NEW ShipSystemSensors(_this, map);
         else if (i == 9)  system = NEW ShipSystemWeapons(_this);
-        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 17000.0f);
+        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 17000.0f + (m_UnlockedPerks & Defiant::Perks::AblativeArmor) ? 4000.0f : 0.0f);
         m_ShipSystems.emplace(i, system);
     }
     internal_finialize_init(ai_type);
@@ -192,7 +192,7 @@ Defiant::~Defiant() {
 void Defiant::fireBeams(ShipSystemWeapons& weapons, EntityWrapper* target, Ship* target_as_ship) {
     vector<ShipSystemWeapons::WeaponBeam> beams;
     auto& weapon_beams = weapons.getBeams();
-    if (m_Perks & Defiant::Perks::DefiantPerk1BeamReplaceCannons) {
+    if (m_Perks & Defiant::Perks::FrequencyModulators) {
         beams = weapon_beams;
     }else{
         for (int i = 0; i < weapon_beams.size() - 4; ++i) { //omit the 4 perk beams
@@ -202,13 +202,13 @@ void Defiant::fireBeams(ShipSystemWeapons& weapons, EntityWrapper* target, Ship*
     weapons.fireBeamWeapons(target, target_as_ship, beams);
 }
 void Defiant::fireCannons(ShipSystemWeapons& weapons, EntityWrapper* target, Ship* target_as_ship) {
-    if (m_Perks & Defiant::Perks::DefiantPerk1BeamReplaceCannons) {
+    if (m_Perks & Defiant::Perks::FrequencyModulators) {
         return; //perk is active, cannons are now beams, so we cannot fire cannons
     }
     weapons.fireCannonWeapons(target, target_as_ship, weapons.getCannons());
 }
 bool Defiant::cloak(const bool sendPacket) {
-    if (m_UnlockedPerks & Defiant::Perks::DefiantPerk3CloakingDevice) {
+    if (m_UnlockedPerks & Defiant::Perks::CloakingDevice) {
         return Ship::cloak(sendPacket);
     }
     return false;
@@ -218,18 +218,18 @@ bool Defiant::decloak(const bool sendPacket) {
     return Ship::decloak(sendPacket);
 }
 void Defiant::togglePerk1CannonsToBeams() {
-    if (m_UnlockedPerks & Defiant::Perks::DefiantPerk1BeamReplaceCannons) {
+    if (m_UnlockedPerks & Defiant::Perks::FrequencyModulators) {
         auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
-        if (m_Perks & Defiant::Perks::DefiantPerk1BeamReplaceCannons) {
-            m_Perks &= ~(Defiant::Perks::DefiantPerk1BeamReplaceCannons); //turn beams off, enable cannons
+        if (m_Perks & Defiant::Perks::FrequencyModulators) {
+            m_Perks &= ~(Defiant::Perks::FrequencyModulators); //turn beams off, enable cannons
 
             for (auto& cannon : weapons.getCannons()) {
                 cannon.cannon->numRounds = 0;
                 cannon.cannon->rechargeTimer = 0.0f;
             }
         }else {
-            m_Perks |= Defiant::Perks::DefiantPerk1BeamReplaceCannons; //turn beams on, disable cannons
+            m_Perks |= Defiant::Perks::FrequencyModulators; //turn beams on, disable cannons
 
             auto& beams = weapons.getBeams();
             for (size_t i = beams.size() - 4; i < beams.size(); ++i) {

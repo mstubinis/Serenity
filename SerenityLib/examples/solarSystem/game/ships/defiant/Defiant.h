@@ -8,18 +8,17 @@
 
 class Defiant final : public Ship {
     private:
-
         enum Perks : unsigned int {
-            None = 0,
-            DefiantPerk1BeamReplaceCannons = 1 << 0,
-            DefiantPerk2AblativeArmor = 1 << 1,
-            DefiantPerk3CloakingDevice = 1 << 2,
-            All = 4294967295,
+            None                = 0,
+            FrequencyModulators = 1 << 0,  //maybe (can be turned on and off)
+            AblativeArmor       = 1 << 1,  //(will always be active once unlocked)
+            CloakingDevice      = 1 << 2,  //(can be turned on and off)
+            All                 = 4294967295,
         };
 
 
-        unsigned int                                      m_Perks;
-        unsigned int                                      m_UnlockedPerks;
+        unsigned int                                      m_Perks;         //active perks
+        unsigned int                                      m_UnlockedPerks; //account unlocked perks (move them to a player class later on?)
 
         std::vector<ShipSystemWeapons::WeaponBeam>        m_BonusBeams;
     public:

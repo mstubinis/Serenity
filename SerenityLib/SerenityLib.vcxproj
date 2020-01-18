@@ -367,7 +367,6 @@
     <ClInclude Include="Engine\src\core\engine\threading\Engine_ThreadManager.h" />
     <ClInclude Include="Engine\src\core\engine\threading\Queue_ThreadSafe.h" />
     <ClInclude Include="Engine\src\core\engine\threading\ThreadPool.h" />
-    <ClInclude Include="Engine\src\core\engine\threading\WorkerThread.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Engine_Debugging.h" />
     <ClInclude Include="Engine\src\core\engine\utils\ForcedInclude.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Utils.h" />
@@ -501,7 +500,6 @@
     <ClCompile Include="Engine\src\core\engine\textures\TextureRequest.cpp" />
     <ClCompile Include="Engine\src\core\engine\threading\Engine_ThreadManager.cpp" />
     <ClCompile Include="Engine\src\core\engine\threading\ThreadPool.cpp" />
-    <ClCompile Include="Engine\src\core\engine\threading\WorkerThread.cpp" />
     <ClCompile Include="Engine\src\core\engine\utils\Engine_Debugging.cpp" />
     <ClCompile Include="Engine\src\core\Terrain.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentBaseClass.cpp" />
