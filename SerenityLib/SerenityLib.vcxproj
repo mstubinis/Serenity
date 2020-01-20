@@ -275,6 +275,7 @@
     <ClInclude Include="Engine\src\core\engine\math\Engine_Math.h" />
     <ClInclude Include="Engine\src\core\engine\math\Numbers.h" />
     <ClInclude Include="Engine\src\core\engine\math\SimplexNoise.h" />
+    <ClInclude Include="Engine\src\core\engine\mesh\BuiltInMeshes.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\Mesh.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\MeshCollisionFactory.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\MeshImportedData.h" />
@@ -332,7 +333,6 @@
     <ClInclude Include="Engine\src\core\engine\renderer\RendererState.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\RenderGraph.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\SMAA_LUT.h" />
-    <ClInclude Include="Engine\src\core\engine\resources\Engine_BuiltInResources.h" />
     <ClInclude Include="Engine\src\core\engine\resources\Engine_BuiltInShaders.h" />
     <ClInclude Include="Engine\src\core\engine\resources\Engine_ResourceBasic.h" />
     <ClInclude Include="Engine\src\core\engine\resources\Engine_Resources.h" />
@@ -428,6 +428,7 @@
     <ClCompile Include="Engine\src\core\engine\materials\MaterialRequest.cpp" />
     <ClCompile Include="Engine\src\core\engine\math\Engine_Math.cpp" />
     <ClCompile Include="Engine\src\core\engine\math\SimplexNoise.cpp" />
+    <ClCompile Include="Engine\src\core\engine\mesh\BuiltInMeshes.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\Mesh.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshCollisionFactory.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshImportedData.cpp" />

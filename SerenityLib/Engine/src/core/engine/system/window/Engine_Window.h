@@ -17,6 +17,7 @@ class  Texture;
 #include <string>
 #include <SFML/Window.hpp>
 #include <glm/vec2.hpp>
+#include <core/engine/threading/Queue_ThreadSafe.h>
 
 class Engine_Window_Flags final { public: enum Flag: unsigned int {
     WindowedFullscreen = 1 << 0,
@@ -37,14 +38,26 @@ class Engine_Window final{
         friend class Engine::epriv::EngineCore;
         friend class Engine::epriv::EventManager;
         friend class Engine_Window;
+
+        struct EventThreadOnlyCommands final { enum Command : unsigned int {
+            ShowMouse,
+            HideMouse,
+        };};
+
         private:
+            #ifndef __APPLE__
+                Engine::epriv::Queue_ThreadSafe<sf::Event>                          m_Queue;
+                Engine::epriv::Queue_ThreadSafe<EventThreadOnlyCommands::Command>   m_MainThreadToEventThreadQueueShowMouse;
+                std::unique_ptr<std::thread> m_EventThread;
+            #endif
+
             glm::uvec2          m_OldWindowSize;
             unsigned int        m_Style;
             sf::VideoMode       m_VideoMode;
             const char*         m_WindowName;
             sf::Window          m_SFMLWindow;
             unsigned int        m_FramerateLimit;
-
+            bool                m_UndergoingClosing;
             unsigned int        m_Flags;
 
 
@@ -89,6 +102,7 @@ class Engine_Window final{
         const glm::uvec2 getSize();
         const glm::uvec2 getPosition();
 
+
         const unsigned int getFramerateLimit() const;
 
         sf::Window& getSFMLHandle() const;
@@ -97,6 +111,8 @@ class Engine_Window final{
         const glm::vec2& getMousePositionPrevious() const;
         const glm::vec2& getMousePosition() const;
         const double& getMouseWheelDelta() const;
+
+        const bool pollEvents(sf::Event&);
 
         const bool hasFocus();
         const bool isOpen();
@@ -183,8 +199,5 @@ class Engine_Window final{
         //(for example, you can get 65 FPS when requesting 60).
         void setFramerateLimit(const unsigned int& limit);
 
-        
-        //const unsigned int getStyle();
-        //void setStyle(const unsigned int& style);
 };
 #endif

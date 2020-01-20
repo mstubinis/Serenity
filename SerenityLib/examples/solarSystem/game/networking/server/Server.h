@@ -29,13 +29,17 @@ class ServerHostData final {
         unsigned short            m_ServerPort;
         GameplayMode              m_GameplayMode;
         unsigned int              m_ExpectedMatchDurationInSeconds;
+        double                    m_LobbyTimeInSeconds;
         double                    m_CurrentLobbyTimeInSeconds;
     public:
         const MapEntryData& getMapChoice() const;
         void setMapChoice(const MapEntryData&);
 
-        void setCurrentLobbyTimeInSeconds(const unsigned int& seconds);
-        const double getCurrentLobbyTime() const;
+        void setCurrentLobbyTimeInSeconds(const double& seconds);
+        const double& getCurrentLobbyTime() const;
+
+        void setLobbyTimeInSeconds(const double& seconds);
+        const double& getLobbyTime() const;
 
         void setMatchDurationInMinutes(const unsigned int& minutes);
         void setMatchDurationInSeconds(const unsigned int& seconds);

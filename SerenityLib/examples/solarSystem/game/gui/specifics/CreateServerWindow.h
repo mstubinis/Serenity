@@ -6,6 +6,7 @@ class  Font;
 class  Client;
 class  HostScreen1Persistent;
 class  ScrollFrame;
+class  TextBox;
 
 #include "../RoundedWindow.h"
 #include <string>
@@ -13,21 +14,30 @@ class  ScrollFrame;
 #include "../../map/MapEntry.h"
 #include "../../modes/GameplayMode.h"
 
+struct ServerCreateOnClick;
+
 class CreateServerWindow final : public RoundedWindow {
     friend class  Client;
     friend class  HostScreen1Persistent;
+    friend struct ServerCreateOnClick;
     private:
         HostScreen1Persistent& m_HostScreen1Persistent;
-        Button* m_ChangeGameModeLeftButton;
-        Button* m_ChangeGameModeRightButton;
-        ScrollFrame* m_MapFileScrollFrame;
+
+        ScrollFrame* m_ScrollFrame;
         Font& m_Font;
+
+        Button* m_CreateButton;
 
     public:
         CreateServerWindow(HostScreen1Persistent& hostScreen1Persistent, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const std::string& labelText);
         ~CreateServerWindow();
 
         void resetWindow();
+
+        TextBox& getServerNameTextBox();
+        TextBox& getServerPortTextBox();
+        TextBox& getUsernameTextBox();
+        TextBox& getPasswordTextBox();
 
         void onResize(const unsigned int& newWidth, const unsigned int& newHeight);
 

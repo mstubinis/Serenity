@@ -44,19 +44,30 @@ Database Server::DATABASE;
 ServerHostData::ServerHostData() {
     setGameplayModeType(GameplayModeType::FFA);
     setServerPort(55000);
-    setCurrentLobbyTimeInSeconds(0);
+    setCurrentLobbyTimeInSeconds(0.0);
+    setLobbyTimeInSeconds(0.0);
     setMatchDurationInMinutes(15); //15 mins
 }
 ServerHostData::~ServerHostData() {
 
 }
 
-void ServerHostData::setCurrentLobbyTimeInSeconds(const unsigned int& seconds) {
-    m_CurrentLobbyTimeInSeconds = static_cast<double>(seconds);
+void ServerHostData::setCurrentLobbyTimeInSeconds(const double& seconds) {
+    m_CurrentLobbyTimeInSeconds = (seconds);
 }
-const double ServerHostData::getCurrentLobbyTime() const {
+const double& ServerHostData::getCurrentLobbyTime() const {
     return m_CurrentLobbyTimeInSeconds;
 }
+
+
+void ServerHostData::setLobbyTimeInSeconds(const double& seconds) {
+    m_LobbyTimeInSeconds = (seconds);
+}
+const double& ServerHostData::getLobbyTime() const {
+    return m_LobbyTimeInSeconds;
+}
+
+
 const MapEntryData& ServerHostData::getMapChoice() const {
     return m_CurrentMapChoice;
 }

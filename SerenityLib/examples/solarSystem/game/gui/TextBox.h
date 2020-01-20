@@ -11,6 +11,12 @@
 struct OnClick;
 class TextBox : public Button, public EventObserver {
     friend struct OnClick;
+    public:
+        struct TextDisplayMode final { enum Mode : unsigned int {
+            Normal,
+            Password,
+            PasswordRevealLastChar,
+        };};
     protected:
         bool                      m_Active;
         bool                      m_Locked;
@@ -20,6 +26,10 @@ class TextBox : public Button, public EventObserver {
         boost::function<void()>   m_OnEnter;
         glm::vec4                 m_LabelTextColor;
 
+        std::string               m_ActualInput;
+        TextDisplayMode::Mode     m_TextDisplayMode;
+
+        std::string process_input(const std::string& input);
         void internalUpdateSize();
     public:
         TextBox(const std::string& label, const Font& font, const unsigned short maxCharacters, const float x, const float y);
@@ -32,6 +42,13 @@ class TextBox : public Button, public EventObserver {
         template<class T> void setOnEnterFunctor(const T& functor) { 
             m_OnEnter = boost::bind<void>(functor, this);
         }
+
+        const TextDisplayMode::Mode& getTextDisplayMode() const;
+        void setTextDisplayMode(const TextDisplayMode::Mode& textDisplayMode);
+
+        //returns the text that was inputed by the user, not necessairly what is displayed visually on the text field
+        //(example, will return an actual password instead of "******")
+        const std::string& getRealText() const;
 
         void lock();
         void unlock();

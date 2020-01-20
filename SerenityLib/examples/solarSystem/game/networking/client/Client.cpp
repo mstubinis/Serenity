@@ -507,7 +507,7 @@ void Client::on_receive_server_approve_map_entry(Packet& basePacket, Menu& menu)
     const auto list             = Helper::SeparateStringByCharacter(pI.data, ','); //shipclass,map,teamNumber
     TeamNumber::Enum teamNumber = static_cast<TeamNumber::Enum>(stoi(list[2]));
 
-    //menu.m_ServerLobbyShipSelectorWindow->setShipViewportActive(false);
+
     m_Core.enterMap(*m_MapSpecificData.m_GameplayMode.getTeam(teamNumber), list[1], list[0], pI.name, pI.r, pI.g, pI.b);
     menu.m_Next->setText("Next");
     menu.m_GameState = GameState::Game;//ok, ive entered the map

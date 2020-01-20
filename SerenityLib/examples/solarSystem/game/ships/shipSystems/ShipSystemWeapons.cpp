@@ -17,6 +17,7 @@
 #include <core/engine/shaders/ShaderProgram.h>
 #include <BulletCollision/CollisionShapes/btMultiSphereShape.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
+#include <core/engine/system/Engine.h>
 #include <glm/gtx/norm.hpp>
 
 #include "../../ships/shipSystems/ShipSystemShields.h"
@@ -331,7 +332,8 @@ PrimaryWeaponBeam::PrimaryWeaponBeam(WeaponType::Type _type, Ship& _ship, Map& m
     auto* body = beamGraphic.addComponent<ComponentBody>();
 
     beamEndPointGraphic = map.createEntity();
-    auto& modelEndPt = *beamEndPointGraphic.addComponent<ComponentModel>(Mesh::Plane, (Material*)ResourceManifest::TorpedoGlowMaterial.get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& planeMesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
+    auto& modelEndPt = *beamEndPointGraphic.addComponent<ComponentModel>(&planeMesh, (Material*)ResourceManifest::TorpedoGlowMaterial.get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& beamModelEnd = modelEndPt.getModel(0);
     beamModelEnd.hide();
 

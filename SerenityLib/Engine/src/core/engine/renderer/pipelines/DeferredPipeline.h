@@ -36,7 +36,7 @@ namespace Engine {
                 glm::mat4                    m_2DProjectionMatrix;
                 GBuffer*                     m_GBuffer;
 
-                void internal_render_pre();
+                void internal_render_per_frame_preparation();
                 void internal_pass_geometry();
                 void internal_pass_ssao();
                 void internal_pass_stencil();

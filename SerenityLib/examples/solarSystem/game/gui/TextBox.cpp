@@ -18,12 +18,14 @@ struct OnEnter final {void operator()(TextBox* textBox) const {
 
 
 TextBox::TextBox(const string& label, const Font& font, const unsigned short maxCharacters, const float x, const float y) : Button(font, x, y, 25.0f, 25.0f) {
-    m_MaxCharacters = maxCharacters;
-    m_TextAlignment = TextAlignment::Left;
-    m_Active = false;
+    m_ActualInput     = "";
+    m_Timer           = 0.0f;
+    m_LabelTextColor  = glm::vec4(1.0f);
+    m_TextDisplayMode = TextDisplayMode::Normal;
+    m_TextAlignment   = TextAlignment::Left;
+    m_Active          = false;
+    m_MaxCharacters   = maxCharacters;
     unlock();
-    m_Timer = 0.0f;
-    m_LabelTextColor = glm::vec4(1.0f);
     setText("");
     setLabel(label);
 
@@ -58,6 +60,15 @@ void TextBox::unlock() {
     m_Locked = false;
     enable();
     enableMouseover();
+}
+const string& TextBox::getRealText() const {
+    return m_ActualInput;
+}
+const TextBox::TextDisplayMode::Mode& TextBox::getTextDisplayMode() const {
+    return m_TextDisplayMode;
+}
+void TextBox::setTextDisplayMode(const TextBox::TextDisplayMode::Mode& textDisplayMode) {
+    m_TextDisplayMode = textDisplayMode;
 }
 const bool TextBox::isLocked() const{
     return m_Locked;
@@ -134,28 +145,58 @@ void TextBox::setTextScale(const glm::vec2& scale) {
     m_TextScale = scale;
     internalUpdateSize();
 }
+string TextBox::process_input(const string& input) {
+    string ret = "";
+    if (input.size() == 0)
+        return ret;
+    switch (m_TextDisplayMode) {
+        case TextDisplayMode::Normal: {
+            ret = input;
+            break;
+        }case TextDisplayMode::Password: {
+            for (size_t i = 0; i < input.size(); ++i) {
+                ret += "*";
+            }
+            break;
+        }case TextDisplayMode::PasswordRevealLastChar: {
+            for (size_t i = 0; i < input.size() - 1; ++i) {
+                ret += "*";
+            }
+            ret += input[input.size() - 1];
+            break;
+        }default: {
+            ret = input;
+            break;
+        }
+    }
+    return ret;
+}
 void TextBox::setText(const string& text) {
     if (text.size() > m_MaxCharacters)
         return;
-    m_Text = text;
+
+    m_Text = process_input(text);
+    m_ActualInput = text;
 }
 void TextBox::onEvent(const Event& e) {
     if (m_Active && !m_Locked) {
         if (e.type == EventType::TextEntered) {
-            auto input = e.eventTextEntered.convert();
-            auto unicode = e.eventTextEntered.unicode;
+            const auto  input   = e.eventTextEntered.convert();
+            const auto& unicode = e.eventTextEntered.unicode;
             if (unicode == 8) { //backspace
-                if (m_Text.size() > 0) {
-                    m_Text.pop_back();
+                if (m_ActualInput.size() > 0) {
+                    m_ActualInput.pop_back();
+                    m_Text = process_input(m_ActualInput);
                 }
             }else{
-                if (m_Text.size() < m_MaxCharacters) {
+                if (m_ActualInput.size() < m_MaxCharacters) {
                     if (!input.empty()) {
-                        if (m_Text.size() == 0) {
-                            m_Text += std::toupper(input[0]);
+                        if (m_ActualInput.size() == 0) {
+                            m_ActualInput += std::toupper(input[0]);
                         }else{
-                            m_Text += input;
+                            m_ActualInput += input;
                         }
+                        m_Text = process_input(m_ActualInput);
                     }
                 }
             }

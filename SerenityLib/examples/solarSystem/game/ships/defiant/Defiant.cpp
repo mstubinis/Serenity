@@ -49,7 +49,7 @@ Defiant::Defiant(AIType::Type& ai_type, Team& team, Client& client, Map& map, co
         else if (i == 7)  system = NEW ShipSystemWarpDrive(_this);
         else if (i == 8)  system = NEW ShipSystemSensors(_this, map);
         else if (i == 9)  system = NEW ShipSystemWeapons(_this);
-        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 17000.0f + (m_UnlockedPerks & Defiant::Perks::AblativeArmor) ? 4000.0f : 0.0f);
+        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 17000.0f + ((m_UnlockedPerks & Defiant::Perks::AblativeArmor) ? 4000.0f : 0.0f));
         m_ShipSystems.emplace(i, system);
     }
     internal_finialize_init(ai_type);

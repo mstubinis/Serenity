@@ -73,7 +73,7 @@ HostScreen1Persistent::HostScreen1Persistent(Menu& menu, Font& font) : m_Menu(me
             winSize.y - (padding_y / 2.0f) - (window_height / 2.0f),
             left_window_width,
             window_height,
-            0.05f, 1, "Your Servers");
+        0.05f, 1, "Your Servers");
         struct LeftSizeFunctor { glm::vec2 operator()(RoundedWindow* window) const {
             const auto winSize = Resources::getWindowSize();
             const auto window_height = (winSize.y - bottom_bar_height_total - padding_y);
@@ -96,7 +96,7 @@ HostScreen1Persistent::HostScreen1Persistent(Menu& menu, Font& font) : m_Menu(me
             winSize.y - (padding_y / 2.0f) - (window_height / 2.0f),
             right_window_width,
             window_height,
-            0.035f, 1, "Create Server");
+        0.035f, 1, "Create Server");
         struct RightSizeFunctor { glm::vec2 operator()(RoundedWindow* window) const {
             const auto winSize = Resources::getWindowSize();
             const auto window_height = (winSize.y - bottom_bar_height_total - padding_y);

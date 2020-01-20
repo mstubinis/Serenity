@@ -27,7 +27,6 @@ class LobbyScreenFFA final {
         Core& m_Core;
         Font& m_Font;
 
-        double m_TimeLeftUntilMatchStarts;
         /*
         ChatRoomMessages
         ChatRoomPlayerList

@@ -62,7 +62,7 @@ struct CycleGameModeRightButtonOnClick final { void operator()(Button* button) c
 MapSelectionWindow::MapSelectionWindow(HostScreen1& hostScreen, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const string& labelText)
 :RoundedWindow(font,x,y,width,height,depth,borderSize,labelText), m_HostScreen(hostScreen), m_Font(font){
 
-    m_ChangeGameModeLeftButton = new Button(font, x - (width / 2.0f) - (scroll_frame_padding - 1.0f), y + (height / 2.0f) - 5.0f, button_size, button_size);
+    m_ChangeGameModeLeftButton = NEW Button(font, x - (width / 2.0f) - (scroll_frame_padding - 1.0f), y + (height / 2.0f) - 5.0f, button_size, button_size);
     m_ChangeGameModeLeftButton->setText("<");
     m_ChangeGameModeLeftButton->setAlignment(Alignment::TopLeft);
     m_ChangeGameModeLeftButton->setDepth(depth - 0.002f);
@@ -72,7 +72,7 @@ MapSelectionWindow::MapSelectionWindow(HostScreen1& hostScreen, Font& font, cons
     m_ChangeGameModeLeftButton->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
     
     
-    m_ChangeGameModeRightButton = new Button(font, x + (width / 2.0f) + (scroll_frame_padding - 1.0f), y + (height / 2.0f) - 5.0f, button_size, button_size);
+    m_ChangeGameModeRightButton = NEW Button(font, x + (width / 2.0f) + (scroll_frame_padding - 1.0f), y + (height / 2.0f) - 5.0f, button_size, button_size);
     m_ChangeGameModeRightButton->setText(">");
     m_ChangeGameModeRightButton->setAlignment(Alignment::TopRight);
     m_ChangeGameModeRightButton->setDepth(depth - 0.002f);
@@ -81,7 +81,7 @@ MapSelectionWindow::MapSelectionWindow(HostScreen1& hostScreen, Font& font, cons
     m_ChangeGameModeRightButton->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_ChangeGameModeRightButton->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    m_MapFileScrollFrame = new ScrollFrame(font, x, y - (height / 2.0f) + scroll_frame_padding, width - (scroll_frame_padding * 2.0f), height - 110.0f, depth - 0.001f);
+    m_MapFileScrollFrame = NEW ScrollFrame(font, x, y - (height / 2.0f) + scroll_frame_padding, width - (scroll_frame_padding * 2.0f), height - 110.0f, depth - 0.001f);
     m_MapFileScrollFrame->setAlignment(Alignment::BottomCenter);
 
     m_Label->setColor(Factions::Database[FactionEnum::Federation].GUIColorText1);

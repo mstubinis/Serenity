@@ -66,8 +66,6 @@ class Mesh final: public BindableResource, public EventObserver{
 
         Mesh();
     public:
-        static Mesh *Plane, *Cube, *Triangle; //loaded in renderer
-
         Mesh(const std::string& name, const btHeightfieldTerrainShape& heightfield, float threshold);
         Mesh(VertexData*, const std::string& name, float threshold = 0.0005f);
         Mesh(const std::string& name,float width, float height,float threshold); //plane

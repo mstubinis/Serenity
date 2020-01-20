@@ -54,9 +54,9 @@ struct Host2FFA_ButtonBack_OnClick { void operator()(Button* button) const {
 struct Host2FFA_ButtonNext_OnClick { void operator()(Button* button) const {
     auto& hostScreenFFA           = *static_cast<HostScreenFFA2*>(button->getUserPointer());
     auto& menu                    = hostScreenFFA.getMenu();
-    const auto& username          = hostScreenFFA.m_ServerInfoWindow->getYourNameTextBox().text();
-    const auto& port_text         = hostScreenFFA.m_ServerInfoWindow->getServerPortTextBox().text();
-    const auto& max_players_text  = hostScreenFFA.m_ServerInfoWindow->getMaxPlayersTextBox().text();
+    const auto& username          = hostScreenFFA.m_SetupServerInfoWindow->getYourNameTextBox().text();
+    const auto& port_text         = hostScreenFFA.m_SetupServerInfoWindow->getServerPortTextBox().text();
+    const auto& max_players_text  = hostScreenFFA.m_SetupServerInfoWindow->getMaxPlayersTextBox().text();
     const auto& map               = Server::SERVER_HOST_DATA.getMapChoice();
 
     if (hostScreenFFA.validateShipSelector()) {
@@ -81,6 +81,7 @@ struct Host2FFA_ButtonNext_OnClick { void operator()(Button* button) const {
                         Server::SERVER_HOST_DATA.addTeam(team1);
                         Server::SERVER_HOST_DATA.setMatchDurationInSeconds(hostScreenFFA.getMatchDurationFromTextBoxInSeconds());
                         Server::SERVER_HOST_DATA.setServerPort(port);
+                        Server::SERVER_HOST_DATA.setLobbyTimeInSeconds(hostScreenFFA.getLobbyDurationFromTextBoxInSeconds());
                         Server::SERVER_HOST_DATA.setCurrentLobbyTimeInSeconds(hostScreenFFA.getLobbyDurationFromTextBoxInSeconds());
 
                         core.getClient()->getGameplayMode() = Server::SERVER_HOST_DATA.getGameplayMode();
@@ -133,7 +134,7 @@ HostScreenFFA2::HostScreenFFA2(HostScreen1& hostScreen1, Menu& menu, Font& font)
     m_BackgroundEdgeGraphicTop->disable();
     m_BackgroundEdgeGraphicTop->setTextureCorner(nullptr);
     m_BackgroundEdgeGraphicTop->enableTextureCorner(false);
-    m_TopLabel = new Text(winSize.x / 2.0f, winSize.y - (top_bar_height_total / 2.0f) + 15.0f, font);
+    m_TopLabel = NEW Text(winSize.x / 2.0f, winSize.y - (top_bar_height_total / 2.0f) + 15.0f, font);
     m_TopLabel->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_TopLabel->setAlignment(Alignment::Center);
     m_TopLabel->setTextAlignment(TextAlignment::Center);
@@ -164,7 +165,7 @@ HostScreenFFA2::HostScreenFFA2(HostScreen1& hostScreen1, Menu& menu, Font& font)
     const auto left_window_width = winSize.x - right_window_width - padding_x - (padding_x / 2.0f);
 
     {
-        m_ShipSelectorWindow = new FFAShipSelector(*this, font,
+        m_SetupShipSelectorWindow = NEW FFAShipSelector(*this, font,
             (padding_x / 2.0f) + (left_window_width / 2.0f),
             winSize.y - (padding_y / 2.0f) - (window_height / 2.0f),
             left_window_width,
@@ -185,11 +186,11 @@ HostScreenFFA2::HostScreenFFA2(HostScreen1& hostScreen1, Menu& menu, Font& font)
             const auto y                   = winSize.y - (padding_y / 2.0f) - (window_height_2 / 2.0f) - (top_bar_height_total);
             return glm::vec2(x, y);
         }};
-        m_ShipSelectorWindow->setPositionFunctor(LeftPositionFunctor());
-        m_ShipSelectorWindow->setSizeFunctor(LeftSizeFunctor());
+        m_SetupShipSelectorWindow->setPositionFunctor(LeftPositionFunctor());
+        m_SetupShipSelectorWindow->setSizeFunctor(LeftSizeFunctor());
     }
     {
-        m_ServerInfoWindow = new FFAServerInfo(*this, font,
+        m_SetupServerInfoWindow = NEW FFAServerInfo(*this, font,
             winSize.x - (right_window_width / 2.0f) - padding_x,
             winSize.y - (padding_y / 2.0f) - (window_height / 2.0f),
             right_window_width,
@@ -208,8 +209,8 @@ HostScreenFFA2::HostScreenFFA2(HostScreen1& hostScreen1, Menu& menu, Font& font)
             const auto y               = winSize.y - (padding_y / 2.0f) - (window_height_2 / 2.0f) - (top_bar_height_total);
             return glm::vec2(x, y);
         }};
-        m_ServerInfoWindow->setPositionFunctor(RightPositionFunctor());
-        m_ServerInfoWindow->setSizeFunctor(RightSizeFunctor());
+        m_SetupServerInfoWindow->setPositionFunctor(RightPositionFunctor());
+        m_SetupServerInfoWindow->setSizeFunctor(RightSizeFunctor());
     }
 }
 HostScreenFFA2::~HostScreenFFA2() {
@@ -219,8 +220,8 @@ HostScreenFFA2::~HostScreenFFA2() {
     SAFE_DELETE(m_BackgroundEdgeGraphicTop);
     SAFE_DELETE(m_TopLabel);
 
-    SAFE_DELETE(m_ShipSelectorWindow);
-    SAFE_DELETE(m_ServerInfoWindow);
+    SAFE_DELETE(m_SetupShipSelectorWindow);
+    SAFE_DELETE(m_SetupServerInfoWindow);
 }
 void HostScreenFFA2::setTopText(const string& text) {
     m_TopLabel->setText(text);
@@ -229,14 +230,14 @@ Menu& HostScreenFFA2::getMenu() {
     return m_Menu;
 }
 const bool HostScreenFFA2::validateShipSelector() {
-    if (m_ShipSelectorWindow->getAllowedShips().size() <= 0) {
+    if (m_SetupShipSelectorWindow->getAllowedShips().size() <= 0) {
         m_Menu.setErrorText("Please add at least one allowed ship");
         return false;
     }
     return true;
 }
 const bool HostScreenFFA2::validateMaxNumPlayersTextBox() {
-    auto max_players_text = m_ServerInfoWindow->getMaxPlayersTextBox().text();
+    auto max_players_text = m_SetupServerInfoWindow->getMaxPlayersTextBox().text();
 
     if (max_players_text.empty()) {
         m_Menu.setErrorText("Max players cannot be empty");
@@ -263,7 +264,7 @@ const bool HostScreenFFA2::validateMaxNumPlayersTextBox() {
     return true;
 }
 const bool HostScreenFFA2::validateServerPortTextBox() {
-    auto port_text = m_ServerInfoWindow->getServerPortTextBox().text();
+    auto port_text = m_SetupServerInfoWindow->getServerPortTextBox().text();
 
     if (port_text.empty()) {
         m_Menu.setErrorText("The server port cannot be empty");
@@ -290,7 +291,7 @@ const bool HostScreenFFA2::validateServerPortTextBox() {
     return true;
 }
 const bool HostScreenFFA2::validateUsernameTextBox() {
-    auto username = m_ServerInfoWindow->getYourNameTextBox().text();
+    auto username = m_SetupServerInfoWindow->getYourNameTextBox().text();
     const bool space_check = username.find_first_of(' ') != std::string::npos;
     const bool letters_check = !(std::regex_match(username, std::regex("[a-zA-ZäöüßÄÖÜ]+")));
     if (username.empty()) {
@@ -308,7 +309,7 @@ const bool HostScreenFFA2::validateUsernameTextBox() {
     return true;
 }
 const bool HostScreenFFA2::validateMatchDurationTextBox() {
-    auto text_box_text = m_ServerInfoWindow->getMatchDurationTextBox().text();
+    auto text_box_text = m_SetupServerInfoWindow->getMatchDurationTextBox().text();
     auto list = Helper::SeparateStringByCharacter(text_box_text, ':');
     if (list.size() == 2) {
         for (auto& number_as_str : list) {
@@ -335,7 +336,7 @@ const bool HostScreenFFA2::validateMatchDurationTextBox() {
     return false;
 }
 const bool HostScreenFFA2::validateLobbyDurationTextBox() {
-    auto text_box_text = m_ServerInfoWindow->getLobbyDurationTextBox().text();
+    auto text_box_text = m_SetupServerInfoWindow->getLobbyDurationTextBox().text();
     auto list = Helper::SeparateStringByCharacter(text_box_text, ':');
     if (list.size() == 2) {
         for (auto& number_as_str : list) {
@@ -374,19 +375,19 @@ const float HostScreenFFA2::get_duration_min_helper(TextBox& box) {
     return mins + (secs / 60.0f);
 }
 const unsigned int HostScreenFFA2::getMatchDurationFromTextBoxInSeconds() {
-    return get_duration_sec_helper(m_ServerInfoWindow->getMatchDurationTextBox());
+    return get_duration_sec_helper(m_SetupServerInfoWindow->getMatchDurationTextBox());
 }
 const float HostScreenFFA2::getMatchDurationFromTextBoxInMinutes() {
-    return get_duration_min_helper(m_ServerInfoWindow->getMatchDurationTextBox());
+    return get_duration_min_helper(m_SetupServerInfoWindow->getMatchDurationTextBox());
 }
 const unsigned int HostScreenFFA2::getLobbyDurationFromTextBoxInSeconds() {
-    return get_duration_sec_helper(m_ServerInfoWindow->getLobbyDurationTextBox());
+    return get_duration_sec_helper(m_SetupServerInfoWindow->getLobbyDurationTextBox());
 }
 const float HostScreenFFA2::getLobbyDurationFromTextBoxInMinutes() {
-    return get_duration_min_helper(m_ServerInfoWindow->getLobbyDurationTextBox());
+    return get_duration_min_helper(m_SetupServerInfoWindow->getLobbyDurationTextBox());
 }
 void HostScreenFFA2::onResize(const unsigned int newWidth, const unsigned int newHeight) {
-    const auto winSize = glm::vec2(glm::uvec2(newWidth, newHeight));
+    const auto winSize = glm::vec2(newWidth, newHeight);
 
     m_BackButton->setPosition(padding_x + (bottom_bar_button_width / 2.0f), bottom_bar_height_total / 2.0f);
     m_ForwardButton->setPosition(winSize.x - (padding_x + (bottom_bar_button_width / 2.0f)), bottom_bar_height_total / 2.0f);
@@ -399,8 +400,8 @@ void HostScreenFFA2::onResize(const unsigned int newWidth, const unsigned int ne
 
     m_TopLabel->setPosition(winSize.x / 2.0f, winSize.y - (top_bar_height_total / 2.0f) + 15.0f);
 
-    m_ShipSelectorWindow->onResize(newWidth, newHeight);
-    m_ServerInfoWindow->onResize(newWidth, newHeight);
+    m_SetupShipSelectorWindow->onResize(newWidth, newHeight);
+    m_SetupServerInfoWindow->onResize(newWidth, newHeight);
 }
 
 void HostScreenFFA2::update(const double& dt) {
@@ -412,8 +413,8 @@ void HostScreenFFA2::update(const double& dt) {
 
     m_TopLabel->update(dt);
 
-    m_ShipSelectorWindow->update(dt);
-    m_ServerInfoWindow->update(dt);
+    m_SetupShipSelectorWindow->update(dt);
+    m_SetupServerInfoWindow->update(dt);
 }
 void HostScreenFFA2::render() {
     m_BackButton->render();
@@ -424,6 +425,6 @@ void HostScreenFFA2::render() {
 
     m_TopLabel->render();
 
-    m_ShipSelectorWindow->render();
-    m_ServerInfoWindow->render();
+    m_SetupShipSelectorWindow->render();
+    m_SetupServerInfoWindow->render();
 }

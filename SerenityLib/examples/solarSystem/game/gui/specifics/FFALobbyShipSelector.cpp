@@ -32,7 +32,7 @@ struct ShipTokenOnClick final { void operator()(Button* button) const {
 FFALobbyShipSelector::FFALobbyShipSelector(LobbyScreenFFA& lobbyFFA, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const string& labelText)
 : m_Font(font), m_FFALobby(lobbyFFA){
     m_ChosenShipClass = "";
-    m_ShipsFrame = new ScrollFrame(font, x, y, width, height, depth - 0.001f);
+    m_ShipsFrame = NEW ScrollFrame(font, x, y, width, height, depth - 0.001f);
 
     //setLabelText("Ships");
     //m_Label->setColor(Factions::Database[FactionEnum::Federation].GUIColorText1);
@@ -78,7 +78,7 @@ void FFALobbyShipSelector::init_window_contents(const PacketConnectionAccepted& 
                     continue;
                 }
 
-                ShipToken* ship_button = new ShipToken(ship_info, m_Font, 0, 0,  0.004f, true, this);
+                ShipToken* ship_button = NEW ShipToken(ship_info, m_Font, 0, 0,  0.004f, true, this);
                 ship_button->setOnClickFunctor(ShipTokenOnClick());
 
                 m_ShipsFrame->addContent(ship_button, i);

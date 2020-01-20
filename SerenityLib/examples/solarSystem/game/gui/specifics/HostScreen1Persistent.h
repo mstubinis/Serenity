@@ -12,9 +12,12 @@ class  CreateServerWindow;
 struct Host1Persistent_ButtonBack_OnClick;
 struct Host1Persistent_ButtonNext_OnClick;
 
+struct ServerCreateOnClick;
+
 class HostScreen1Persistent final {
     friend struct Host1Persistent_ButtonBack_OnClick;
     friend struct Host1Persistent_ButtonNext_OnClick;
+    friend struct ServerCreateOnClick;
     private:
         Font&   m_Font;
         Menu&   m_Menu;

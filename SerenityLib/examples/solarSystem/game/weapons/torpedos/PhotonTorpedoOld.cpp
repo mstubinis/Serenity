@@ -161,8 +161,9 @@ PhotonTorpedoOldProjectile::PhotonTorpedoOldProjectile(EntityWrapper* target, Ph
     EntityDataRequest request(entity);
     EntityDataRequest shipRequest(source.ship.entity());
 
-    auto& model    = *entity.addComponent<ComponentModel>(request, Mesh::Plane, (Material*)(ResourceManifest::TorpedoCoreMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles_2);
-    auto& glow     = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::TorpedoGlowMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& planeMesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
+    auto& model    = *entity.addComponent<ComponentModel>(request, &planeMesh, (Material*)(ResourceManifest::TorpedoCoreMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles_2);
+    auto& glow     = model.addModel(&planeMesh, (Material*)(ResourceManifest::TorpedoGlowMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& body     = *entity.addComponent<ComponentBody>(request, CollisionType::Sphere);
     
     auto& core = model.getModel(0);

@@ -10,9 +10,9 @@ constexpr auto text_to_scroll_frame_break_height = 20.0f;
 using namespace std;
 
 ShipDescription::ShipDescription(Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth) : m_Font(font){
-    m_Text = new Text(x, y, font, " ");
+    m_Text = NEW Text(x, y - (text_to_scroll_frame_break_height / 2.0f), font, " ");
     m_Text->setColor(Factions::Database[FactionEnum::Federation].GUIColorText1);
-    m_ScrollFrame = new ScrollFrame(font, x, y - m_Text->singleLineHeight() - text_to_scroll_frame_break_height, width, height - m_Text->singleLineHeight() - text_to_scroll_frame_break_height, depth);
+    m_ScrollFrame = NEW ScrollFrame(font, x, y - m_Text->singleLineHeight() - text_to_scroll_frame_break_height, width, height - m_Text->singleLineHeight() - text_to_scroll_frame_break_height, depth);
 
     setShipClass("");
 }
@@ -40,7 +40,7 @@ const bool ShipDescription::setShipClass(const string& shipClass) {
     m_Text->setText(data.ClassVerbose);
 
     m_ScrollFrame->clear();
-    Text* text = new Text(0, 0, m_Font, data.Description);
+    Text* text = NEW Text(0, 0, m_Font, data.Description);
     text->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     text->setTextScale(0.61f, 0.61f);
     m_ScrollFrame->addContent(text);
@@ -49,7 +49,7 @@ const bool ShipDescription::setShipClass(const string& shipClass) {
 }
 void ShipDescription::setPosition(const float& x, const float& y) {
     m_ScrollFrame->setPosition(x, y - m_Text->height() - text_to_scroll_frame_break_height);
-    m_Text->setPosition(x, y);
+    m_Text->setPosition(x, y - (text_to_scroll_frame_break_height / 2.0f));
 }
 void ShipDescription::setPosition(const glm::vec2& position) {
     ShipDescription::setPosition(position.x, position.y);

@@ -11,16 +11,16 @@
 using namespace std;
 using namespace Engine;
 
-constexpr auto bottom_bar_height = 50.0f;
+constexpr auto bottom_bar_height       = 50.0f;
 constexpr auto bottom_bar_button_width = 150.0f;
 constexpr auto bottom_bar_height_total = 80;
 
-constexpr auto padding_x = 100.0f;
-constexpr auto padding_y = 100.0f;
+constexpr auto padding_x               = 100.0f;
+constexpr auto padding_y               = 100.0f;
 
-constexpr auto button_width = 350.0f;
-constexpr auto button_height = 100.0f;
-constexpr auto seperation_size = 225.0f;
+constexpr auto button_width            = 350.0f;
+constexpr auto button_height           = 100.0f;
+constexpr auto seperation_size         = 225.0f;
 
 struct Host0_ButtonBack_OnClick final { void operator()(Button* button) const {
     auto& hostScreen0 = *static_cast<HostScreen0*>(button->getUserPointer());
@@ -36,7 +36,7 @@ struct HostTempServClick final { void operator()(Button* button) const {
 struct HostPersServClick final { void operator()(Button* button) const {
     auto& hostScreen0 = *static_cast<HostScreen0*>(button->getUserPointer());
 
-    Server::DATABASE.connect_to_database("servers");
+    Server::DATABASE.connect_to_database("STHS_servers");
 
     hostScreen0.m_Menu.setGameState(GameState::Host_Screen_Setup_1_Persistent);
     hostScreen0.m_Menu.setErrorText("", 0.2f);

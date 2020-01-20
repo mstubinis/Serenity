@@ -19,7 +19,7 @@ RoundedWindow::RoundedWindow(Font& font, const float& x, const float& y, const f
     setSizeFunctor(emptySizeFunctor());
     setPositionFunctor(emptyPosFunctor());
     
-    m_Label = new Text(0, (height / 2.0f) - 10.0f, font, labelText);
+    m_Label = NEW Text(0, (height / 2.0f) - 10.0f, font, labelText);
     m_Label->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_Label->setAlignment(Alignment::Center);
     m_Label->setTextAlignment(TextAlignment::Center);

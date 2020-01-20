@@ -59,7 +59,9 @@ struct FFALobbyBackOnClick final { void operator()(Button* button) const {
 struct FFALobbyForwardOnClick final { void operator()(Button* button) const {
     auto& lobby = *static_cast<LobbyScreenFFA*>(button->getUserPointer());
     if (lobby.isHost()) { //redundant (as only the host should see this button...), but it's safe...
-        if (lobby.m_TimeLeftUntilMatchStarts > 6.0) {
+
+        auto& lobbyTime = (Server::SERVER_HOST_DATA.getCurrentLobbyTime());
+        if (lobbyTime > 6.0) {
             PacketUpdateLobbyTimeLeft pOut;
             pOut.PacketType = PacketType::Server_To_Client_Update_Lobby_Time_Left;
             pOut.time_left = 5.5;
@@ -71,8 +73,6 @@ struct FFALobbyForwardOnClick final { void operator()(Button* button) const {
 LobbyScreenFFA::LobbyScreenFFA(Font& font, Menu& menu, Core& core, Scene& scene, Camera& camera): m_Menu(menu), m_Core(core), m_Font(font){
     const auto& winSize = glm::vec2(Resources::getWindowSize());
    
-    m_TimeLeftUntilMatchStarts = 0.0;
-
     m_BackgroundEdgeGraphicBottom = NEW Button(font, winSize.x / 2.0f, 0, winSize.x, bottom_bar_height_total);
     m_BackgroundEdgeGraphicBottom->setColor(Factions::Database[FactionEnum::Federation].GUIColorDark);
     m_BackgroundEdgeGraphicBottom->setAlignment(Alignment::BottomCenter);
@@ -123,7 +123,7 @@ LobbyScreenFFA::LobbyScreenFFA(Font& font, Menu& menu, Core& core, Scene& scene,
         ends_size,
     0.17f, 1, "Ship Database");
 
-    m_Ship3DViewer = new Ship3DViewer(core, scene, camera, 
+    m_Ship3DViewer = NEW Ship3DViewer(core, scene, camera,
         winSize.x - ((padding_x / 2.0f) + inner_padding_x),
         winSize.y - (padding_y / 2.0f) - inner_padding_y,
         ends_size * 1.2f,
@@ -132,14 +132,14 @@ LobbyScreenFFA::LobbyScreenFFA(Font& font, Menu& menu, Core& core, Scene& scene,
     m_Ship3DViewer->hide();
 
 
-    m_ShipDescription = new ShipDescription(font, 
+    m_ShipDescription = NEW ShipDescription(font,
         (padding_x / 2.0f) + inner_padding_x + (ends_size * 1.2f),
         winSize.y - (padding_y / 2.0f) - inner_padding_y,
         (winSize.x - (padding_x + (inner_padding_x * 2.0f))) - ((ends_size * 1.2f) * 2.0f) - 10.0f,
         ends_size,
     0.15f);
 
-    m_ChooseShipMessage = new MessageWithArrow(font, "Choose a ship. If you do not choose one, you will\nbe given a ship at random when the match starts",
+    m_ChooseShipMessage = NEW MessageWithArrow(font, "Choose a ship. If you do not choose one, you will\nbe given a ship at random when the match starts",
         (padding_x / 2.0f) + inner_padding_x + (ends_size),
         (winSize.y - (padding_y / 2.0f) - inner_padding_y) - 25.0f,
     0.7f);
@@ -158,7 +158,8 @@ LobbyScreenFFA::~LobbyScreenFFA() {
     SAFE_DELETE(m_ChooseShipMessage);
 }
 void LobbyScreenFFA::setTimeLeftUntilMatchStartsInSeconds(const double& seconds) {
-    m_TimeLeftUntilMatchStarts = (seconds);
+    auto& lobbyTime = const_cast<double&>(Server::SERVER_HOST_DATA.getCurrentLobbyTime());
+    lobbyTime = (seconds);
 }
 void LobbyScreenFFA::showShipViewer() {
     m_Ship3DViewer->show();
@@ -256,11 +257,11 @@ void LobbyScreenFFA::onResize(const unsigned int newWidth, const unsigned int ne
     }
 }
 void LobbyScreenFFA::update(const double& dt) {
-
-    if (m_TimeLeftUntilMatchStarts > 0.0) {
-        m_TimeLeftUntilMatchStarts -= dt;
-        if (m_TimeLeftUntilMatchStarts < 0.0) {
-            m_TimeLeftUntilMatchStarts = 0.0;
+    auto& lobbyTime = const_cast<double&>(Server::SERVER_HOST_DATA.getCurrentLobbyTime());
+    if (lobbyTime > 0.0) {
+        lobbyTime -= dt;
+        if (lobbyTime < 0.0) {
+            Server::SERVER_HOST_DATA.setCurrentLobbyTimeInSeconds(0.0);
 
 
             
@@ -303,15 +304,16 @@ void LobbyScreenFFA::update(const double& dt) {
 void LobbyScreenFFA::render() {
     const auto pos = m_RoundedWindow->positionWorld();
 
-    const double mins_as_double = m_TimeLeftUntilMatchStarts / 60.0;
+    auto& lobbyTime = (Server::SERVER_HOST_DATA.getCurrentLobbyTime());
+    const double mins_as_double = lobbyTime / 60.0;
     const unsigned int mins = static_cast<unsigned int>(mins_as_double);
     const double remainder = mins_as_double - static_cast<double>(mins);
     const unsigned int secs = static_cast<unsigned int>(remainder * 60.0);
 
     string time_as_str = Helper::FormatTimeAsMinThenSecs(mins, secs);
 
-    if (m_TimeLeftUntilMatchStarts > 5.9) {
-        Renderer::renderText("Match starts: " + time_as_str, m_Font, glm::vec2(pos.x + (m_RoundedWindow->width() / 2.0f) - 260.0f, pos.y + (m_RoundedWindow->height() / 2.0f) - 12.0f), glm::vec4(0.35f, 0.35f, 0.35f, 1.0f), 0.0f, glm::vec2(0.8f), 0.001f, TextAlignment::Left);
+    if (lobbyTime > 5.9) {
+        Renderer::renderText("Match starts: " + time_as_str, m_Font, glm::vec2(pos.x + (m_RoundedWindow->width() / 2.0f) - 260.0f, pos.y + (m_RoundedWindow->height() / 2.0f) - 12.0f), glm::vec4(0.45f, 0.45f, 0.45f, 1.0f), 0.0f, glm::vec2(0.8f), 0.001f, TextAlignment::Left);
     }else {
         Renderer::renderText("Match starts: " + time_as_str, m_Font, glm::vec2(pos.x + (m_RoundedWindow->width() / 2.0f) - 260.0f, pos.y + (m_RoundedWindow->height() / 2.0f) - 12.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 0.0f, glm::vec2(0.8f), 0.001f, TextAlignment::Left);
     }

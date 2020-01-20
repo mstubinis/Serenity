@@ -96,6 +96,9 @@ void Ships::createShipEntry(const string& shipClass, const string& shipClassVerb
                 }else if (boost::algorithm::contains(path_string, ship_class_lower + "_icon")) { //ship icon texture
                     auto handle = Resources::loadTextureAsync(path_string); //TODO: include and modify second parameter?
                     info.IconTextureHandle = handle;
+                }else if (boost::algorithm::contains(path_string, "screen.")) { //ship loading screen screenshot
+                    auto handle = Resources::loadTextureAsync(path_string);
+                    info.ScreenshotLoadingScreenHandle = handle;
                 }
             }
         }
@@ -227,7 +230,7 @@ void Ships::init() {
     createShipEntry("Vor'cha",
         "Vor'cha class cruiser",
         "A relatively new Klingon design featuring some Federation technology in the warp nacelles, it was once considered the flagship of the Klingon fleet. "
-        "It is a good jack-of-all trades cruiser with mostly cannon based weaponry."
+        "It is a good jack-of-all trades cruiser with mostly cannon based weapons."
         "\n\n"
         "    Armaments: \n"
         "        - 2 forward disruptor cannons\n"
@@ -251,7 +254,7 @@ void Ships::init() {
     );
     createShipEntry("Negh'var",
         "Negh'var class flagship",
-        "The newest Klingon design, the Negh'var is the flagship of the Klingon Empire and is the personal vessel of the Klingon chacellor. "
+        "The newest Klingon design, the Negh'var is the flagship of the Klingon Empire and is the personal vessel of the Klingon chancellor. "
         "It is the least armored of the flagships but the most maneuverable. It is a heavy attack orientated vessel and contains many forward facing weapons. "
         "Although powerful, it will not last as long as the other flagships, and so relies on firepower to quickly take out targets versus getting into an extended war of attrition, which is not the Klingon way."
         "\n\n"
@@ -285,8 +288,8 @@ void Ships::init() {
     );
     createShipEntry("Venerex",
         "Venerex class cruiser",
-        "A new design that provides a medium between the fast Shrike and slow D'deridex, it is an all around cruiser that provide a much more powerful arsenal compared to the Shrike, while being much more maneuverable than the D'deridex class flagship. "
-        "It has a healthy balance of cannon and beam based weaponry."
+        "A new design that provides a medium between the fast Shrike and slow D'deridex, it is an all around cruiser that provide a much more powerful arsenal compared to the Shrike, while being much more maneuverable than the D'deridex. "
+        "It has a healthy balance of cannon and beam weapons."
         "\n\n"
         "    Armaments: \n"
         //"        - 4 forward plasma cannons\n"

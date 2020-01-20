@@ -38,7 +38,7 @@ Shrike::Shrike(AIType::Type& ai_type, Team& team, Client& client, Map& map,  con
     auto& _this = *this;
     for (uint i = 0; i < ShipSystemType::_TOTAL; ++i) {
         ShipSystem* system = nullptr;
-        if (i == 0)  system = NEW ShipSystemReactor(_this, 1000);
+        if      (i == 0)  system = NEW ShipSystemReactor(_this, 1000);
         else if (i == 1)  system = NEW ShipSystemPitchThrusters(_this);
         else if (i == 2)  system = NEW ShipSystemYawThrusters(_this);
         else if (i == 3)  system = NEW ShipSystemRollThrusters(_this);
@@ -48,7 +48,7 @@ Shrike::Shrike(AIType::Type& ai_type, Team& team, Client& client, Map& map,  con
         else if (i == 7)  system = NEW ShipSystemWarpDrive(_this);
         else if (i == 8)  system = NEW ShipSystemSensors(_this, map);
         else if (i == 9)  system = NEW ShipSystemWeapons(_this);
-        else if (i == 10)  system = NEW ShipSystemHull(_this, map, 16500.0f);
+        else if (i == 10) system = NEW ShipSystemHull(_this, map, 16500.0f);
         m_ShipSystems.emplace(i, system);
     }
     internal_finialize_init(ai_type);
@@ -56,6 +56,7 @@ Shrike::Shrike(AIType::Type& ai_type, Team& team, Client& client, Map& map,  con
     auto& weapons = *static_cast<ShipSystemWeapons*>(getShipSystem(ShipSystemType::Weapons));
 
     const float base_cannon_dmg = 250.0f;
+    const float base_beam_dmg = 750.0f;
     const float base_torpedo_dmg = 6650.0f;
 
     auto* leftTop     = NEW PlasmaCannon(_this, map, glm::vec3(-0.934207f, 0.02951f, -0.224055f), glm::vec3(0.009f, 0, -1), 17.0f, 6, base_cannon_dmg, 0.7f, 2.5f, 1.8f, 40.5f, 75.0f);
@@ -68,16 +69,16 @@ Shrike::Shrike(AIType::Type& ai_type, Team& team, Client& client, Map& map,  con
     weapons.addPrimaryWeaponCannon(*rightBottom, true);
     weapons.addPrimaryWeaponCannon(*rightTop, true);
 
-    auto* frontTorp = NEW PlasmaTorpedo(_this, map, glm::vec3(0.0f, -0.049485f, -1.23634f), glm::vec3(0, 0, -1), 15.0f, 1, base_torpedo_dmg);
+    auto* frontTorp  = NEW PlasmaTorpedo(_this, map, glm::vec3(0.0f, -0.049485f, -1.23634f), glm::vec3(0, 0, -1), 15.0f, 1, base_torpedo_dmg);
     auto* frontTorp1 = NEW PlasmaTorpedo(_this, map, glm::vec3(0.0f, -0.049485f, -1.23634f), glm::vec3(0, 0, -1), 15.0f, 1, base_torpedo_dmg);
-    auto* aftTorp = NEW PlasmaTorpedo(_this, map, glm::vec3(0.0f, -0.055816f, 1.46661f), glm::vec3(0, 0, 1), 15.0f, base_torpedo_dmg);
+    auto* aftTorp    = NEW PlasmaTorpedo(_this, map, glm::vec3(0.0f, -0.055816f, 1.46661f), glm::vec3(0, 0, 1), 15.0f, 1, base_torpedo_dmg);
 
     weapons.addSecondaryWeaponTorpedo(*frontTorp, true);
     weapons.addSecondaryWeaponTorpedo(*frontTorp1, true);
     weapons.addSecondaryWeaponTorpedo(*aftTorp);
 
     vector<glm::vec3> beam_pt{ glm::vec3(0.0f, -0.049803f, -1.26533f) };
-    auto* frontBeam = NEW PlasmaBeam(_this, map, beam_pt[0], glm::vec3(0, 0, -1), 30.0f, beam_pt, 750.0f);
+    auto* frontBeam = NEW PlasmaBeam(_this, map, beam_pt[0], glm::vec3(0, 0, -1), 30.0f, beam_pt, base_beam_dmg);
     weapons.addPrimaryWeaponBeam(*frontBeam, true);
 
 

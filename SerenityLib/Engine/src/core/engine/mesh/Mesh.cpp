@@ -35,27 +35,23 @@ using namespace Engine;
 using namespace Engine::epriv;
 namespace boostm = boost::math;
 
-Mesh* Mesh::Plane     = nullptr;
-Mesh* Mesh::Cube      = nullptr;
-Mesh* Mesh::Triangle  = nullptr;
-
 namespace Engine {
     namespace epriv {
         struct DefaultMeshBindFunctor final{void operator()(BindableResource* r) const {
             const auto& mesh = *static_cast<Mesh*>(r);
             if (mesh.isLoaded()) {
                 mesh.m_VertexData->bind();
-            }else{
-                Mesh::Cube->m_VertexData->bind();
-            }
+            }//else{
+            //    Mesh::Cube->m_VertexData->bind();
+            //}
         }};
         struct DefaultMeshUnbindFunctor final {void operator()(BindableResource* r) const {
             const auto& mesh = *static_cast<Mesh*>(r);
             if (mesh.isLoaded()) {
                 mesh.m_VertexData->unbind();
-            }else{
-                Mesh::Cube->m_VertexData->unbind();
-            }
+            }//else{
+            //    Mesh::Cube->m_VertexData->unbind();
+            //}
         }};
     };
 };

@@ -109,7 +109,7 @@ HostScreen1::HostScreen1(Menu& menu, Font& font) : m_Menu(menu), m_Font(font){
 
     const auto window_height = (winSize.y - bottom_bar_height_total - padding_y);
     {
-        m_LeftWindow = new MapSelectionWindow(*this, font, 
+        m_LeftWindow = NEW MapSelectionWindow(*this, font,
             (padding_x / 2.0f) + (left_window_width / 2.0f),
             winSize.y - (padding_y / 2.0f) - (window_height / 2.0f),
             left_window_width,
@@ -132,7 +132,7 @@ HostScreen1::HostScreen1(Menu& menu, Font& font) : m_Menu(menu), m_Font(font){
 
     }
     {
-        m_RightWindow = new MapDescriptionWindow(font,
+        m_RightWindow = NEW MapDescriptionWindow(font,
             winSize.x - (padding_x / 2.0f) - (window_height / 2.0f),
             winSize.y - (padding_y / 2.0f) - (window_height / 2.0f),
             window_height,

@@ -54,6 +54,7 @@ struct ShipInformation final {
     std::vector<Handle>            MaterialHandles;
     Handle                         IconTextureHandle;
     Handle                         IconBorderTextureHandle;
+    Handle                         ScreenshotLoadingScreenHandle;
     double                         RespawnTime;
     float                          ThreatModifier;
     bool                           PrintClassNameOnHUD;

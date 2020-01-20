@@ -159,7 +159,8 @@ QuantumTorpedoProjectile::QuantumTorpedoProjectile(EntityWrapper* target, Quantu
     EntityDataRequest request(entity);
     EntityDataRequest shipRequest(source.ship.entity());
 
-    auto& model    = *entity.addComponent<ComponentModel>(request, Mesh::Plane, (Material*)(ResourceManifest::TorpedoCoreMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles_2);
+    auto& planeMesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
+    auto& model    = *entity.addComponent<ComponentModel>(request, &planeMesh, (Material*)(ResourceManifest::TorpedoCoreMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles_2);
     auto& body     = *entity.addComponent<ComponentBody>(request, CollisionType::Sphere);
 
     auto& core = model.getModel(0);
@@ -175,7 +176,7 @@ QuantumTorpedoProjectile::QuantumTorpedoProjectile(EntityWrapper* target, Quantu
     sph.setImplicitShapeDimensions(_scl);
     sph.recalcLocalAabb();
     
-    auto& glow = model.addModel(Mesh::Plane, (Material*)(ResourceManifest::TorpedoGlow2Material).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
+    auto& glow = model.addModel(&planeMesh, (Material*)(ResourceManifest::TorpedoGlow2Material).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
     glow.setColor(quantumBlue);
     glow.setScale(5.6f);
     glow.setCustomBindFunctor(QuantumTorpedoInstanceGlowBindFunctor());

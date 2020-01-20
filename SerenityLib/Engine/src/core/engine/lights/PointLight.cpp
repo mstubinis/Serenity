@@ -2,9 +2,6 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/resources/Engine_Resources.h>
 
-#include <core/engine/resources/Engine_BuiltInResources.h>
-#include <core/engine/mesh/Mesh.h>
-
 #include <ecs/ComponentBody.h>
 
 using namespace Engine;

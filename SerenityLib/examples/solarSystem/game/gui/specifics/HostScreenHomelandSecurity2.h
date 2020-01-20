@@ -24,13 +24,9 @@ class HostScreenHomelandSecurity2 final {
         Button* m_BackgroundEdgeGraphicTop;
         Text* m_TopLabel;
 
-        TextBox* m_UserName_TextBox;
-        TextBox* m_ServerPort_TextBox;
-
         Button* m_BackgroundEdgeGraphicBottom;
         Button* m_BackButton;
         Button* m_ForwardButton;
-
     public:
         HostScreenHomelandSecurity2(HostScreen1& hostScreen1, Menu&, Font& font);
         ~HostScreenHomelandSecurity2();

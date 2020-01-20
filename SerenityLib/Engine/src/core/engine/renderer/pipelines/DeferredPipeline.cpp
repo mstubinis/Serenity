@@ -3,7 +3,6 @@
 #include <core/engine/renderer/opengl/UniformBufferObject.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/lights/Lights.h>
-#include <core/engine/resources/Engine_BuiltInResources.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/textures/Texture.h>
@@ -42,7 +41,7 @@ void GLScissor(const glm::vec4& s) {
 DeferredPipeline::DeferredPipeline() {
     const auto window_size = Resources::getWindowSize();
     m_2DProjectionMatrix = glm::ortho(0.0f, static_cast<float>(window_size.x), 0.0f, static_cast<float>(window_size.y), 0.005f, 3000.0f);
-    m_GBuffer = nullptr;
+    m_GBuffer   = nullptr;
     m_UBOCamera = nullptr;
 }
 DeferredPipeline::~DeferredPipeline() {
@@ -161,7 +160,7 @@ void DeferredPipeline::renderPointLight(Camera& c, PointLight& p) {
     }else{
         cullFace(GL_BACK);
     }
-    auto& pointLightMesh = *epriv::InternalMeshes::PointLightBounds;
+    auto& pointLightMesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPointLightBounds();
 
     pointLightMesh.bind();
     pointLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
@@ -197,7 +196,7 @@ void DeferredPipeline::renderSpotLight(Camera& c, SpotLight& s) {
     }else{
         cullFace(GL_BACK);
     }
-    auto& spotLightMesh = *epriv::InternalMeshes::SpotLightBounds;
+    auto& spotLightMesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getSpotLightBounds();
 
     spotLightMesh.bind();
     spotLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
@@ -236,7 +235,7 @@ void DeferredPipeline::renderRodLight(Camera& c, RodLight& r) {
     }else{
         cullFace(GL_BACK);
     }
-    auto& rodLightMesh = *epriv::InternalMeshes::RodLightBounds;
+    auto& rodLightMesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getRodLightBounds();
 
     rodLightMesh.bind();
     rodLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
@@ -263,7 +262,7 @@ void DeferredPipeline::renderParticle(Particle& particle) {
 
     Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
 
-    Mesh::Plane->render();
+    epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh().render();
 }
 
 
@@ -402,7 +401,7 @@ void DeferredPipeline::render2DText(const string& text, const Font& font, const 
     m_Text_UVs.clear();
     m_Text_Indices.clear();
 
-    auto& mesh = *epriv::InternalMeshes::FontPlane;
+    auto& mesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getFontMesh();
     mesh.bind();
     sendUniform1("DiffuseTextureEnabled", 1);
 
@@ -435,7 +434,7 @@ void DeferredPipeline::render2DText(const string& text, const Font& font, const 
 void render2DTexture(const Texture* texture, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const Alignment::Type& align, const glm::vec4& scissor) {
     GLScissor(scissor);
 
-    auto& mesh = *Mesh::Plane;
+    auto& mesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
     mesh.bind();
 
     float translationX = position.x;
@@ -464,7 +463,7 @@ void render2DTexture(const Texture* texture, const glm::vec2& position, const gl
 void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& alignment, const glm::vec4& scissor) {
     GLScissor(scissor);
 
-    auto& mesh = *Mesh::Triangle;
+    auto& mesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getTriangleMesh();
     mesh.bind();
 
     float translationX = position.x;
@@ -486,7 +485,7 @@ void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::ve
 }
 
 
-void DeferredPipeline::internal_render_pre() {
+void DeferredPipeline::internal_render_per_frame_preparation() {
 
 }
 void DeferredPipeline::internal_pass_geometry() {
@@ -539,7 +538,7 @@ void DeferredPipeline::update(const double& dt) {
 
 }
 void DeferredPipeline::render() {
-    internal_render_pre();
+    internal_render_per_frame_preparation();
     internal_pass_geometry();
     internal_pass_ssao();
     internal_pass_stencil();

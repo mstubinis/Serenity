@@ -39,7 +39,7 @@ ScrollBar::ScrollBar(const Font& font, const float x, const float y, const float
     m_DragSnapshot                   = 0.0f;
 
 
-    m_ScrollArea = new Button(font, x, y, w, h - w - w);
+    m_ScrollArea = NEW Button(font, x, y, w, h - w - w);
     m_ScrollArea->setDepth(depth - 0.002f);
     m_ScrollArea->setPaddingSize(default_padding);
     m_ScrollArea->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
@@ -53,7 +53,7 @@ ScrollBar::ScrollBar(const Font& font, const float x, const float y, const float
     m_ScrollArea->setUserPointer(this);
     m_ScrollArea->setOnClickFunctor(ScrollBar_Functor());
 
-    m_ScrollAreaBackground = new Button(font, x, y, w, h - w - w);
+    m_ScrollAreaBackground = NEW Button(font, x, y, w, h - w - w);
     m_ScrollAreaBackground->setDepth(depth + 0.001f);
     m_ScrollAreaBackground->setPaddingSize(default_padding);
     m_ScrollAreaBackground->setColor(Factions::Database[FactionEnum::Federation].GUIColorSlightlyDarker);

@@ -45,54 +45,7 @@ struct Host2TD_ButtonBack_OnClick { void operator()(Button* button) const {
 struct Host2TD_ButtonNext_OnClick { void operator()(Button* button) const {
     auto& hostScreenTD       = *static_cast<HostScreenTeamDeathmatch2*>(button->getUserPointer());
     auto& menu               = hostScreenTD.getMenu();
-    const string& username   = hostScreenTD.m_UserName_TextBox->text();
-    const string& portstring = hostScreenTD.m_ServerPort_TextBox->text();
-    const auto& map          = Server::SERVER_HOST_DATA.getMapChoice();
-    if (!portstring.empty() && !username.empty() && !map.map_file_path.empty()) {
-        //TODO: prevent special characters in usename
-        if (std::regex_match(portstring, std::regex("^(0|[1-9][0-9]*)$"))) { //port must have numbers only
-            if (username.find_first_not_of(' ') != std::string::npos) {
-                if (std::regex_match(username, std::regex("[a-zA-ZäöüßÄÖÜ]+"))) { //letters only please
-
-                    auto& core = menu.getCore();
-
-                    const int port = stoi(portstring);
-                    core.startServer(port);
-                    core.startClient(nullptr, port, username, "127.0.0.1"); //the client will request validation at this stage
-
-
-                    //TODO: replace this hard coded test case with real input values
-                    vector<TeamNumber::Enum> nil;
-                    vector<TeamNumber::Enum> team1enemies{ TeamNumber::Team_2 };
-                    vector<TeamNumber::Enum> team2enemies{ TeamNumber::Team_1 };
-                    Team team1 = Team(TeamNumber::Team_1, nil, team1enemies);
-                    Team team2 = Team(TeamNumber::Team_2, nil, team2enemies);
-                    Server::SERVER_HOST_DATA.setGameplayModeType(GameplayModeType::TeamDeathmatch);
-                    Server::SERVER_HOST_DATA.setMaxAmountOfPlayers(50);
-                    Server::SERVER_HOST_DATA.addTeam(team1);
-                    Server::SERVER_HOST_DATA.addTeam(team2);
-                    core.getClient()->getGameplayMode() = Server::SERVER_HOST_DATA.getGameplayMode();
-
-                    core.getServer()->startupMap(map);
-
-                    menu.m_ServerLobbyChatWindow->setUserPointer(core.getClient());
-
-
-                    menu.setGameState(GameState::Host_Screen_Lobby_FFA_3);
-                    menu.setErrorText("");
-
-                }else {
-                    menu.setErrorText("The username must only contain letters");
-                }
-            }else {
-                menu.setErrorText("The username must have some letters in it");
-            }
-        }else {
-            menu.setErrorText("Server port must contain numbers only");
-        }
-    }else {
-        menu.setErrorText("Do not leave any fields blank");
-    }
+    
 }};
 
 
@@ -109,7 +62,7 @@ HostScreenTeamDeathmatch2::HostScreenTeamDeathmatch2(HostScreen1& hostScreen1, M
     m_BackgroundEdgeGraphicTop->disable();
     m_BackgroundEdgeGraphicTop->setTextureCorner(nullptr);
     m_BackgroundEdgeGraphicTop->enableTextureCorner(false);
-    m_TopLabel = new Text(winSize.x / 2.0f, winSize.y - (top_bar_height_total / 2.0f) + 15.0f, font);
+    m_TopLabel = NEW Text(winSize.x / 2.0f, winSize.y - (top_bar_height_total / 2.0f) + 15.0f, font);
     m_TopLabel->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_TopLabel->setAlignment(Alignment::Center);
     m_TopLabel->setTextAlignment(TextAlignment::Center);
@@ -136,8 +89,6 @@ HostScreenTeamDeathmatch2::HostScreenTeamDeathmatch2(HostScreen1& hostScreen1, M
     m_ForwardButton->setOnClickFunctor(Host2TD_ButtonNext_OnClick());
 }
 HostScreenTeamDeathmatch2::~HostScreenTeamDeathmatch2() {
-    SAFE_DELETE(m_UserName_TextBox);
-    SAFE_DELETE(m_ServerPort_TextBox);
     SAFE_DELETE(m_BackButton);
     SAFE_DELETE(m_ForwardButton);
     SAFE_DELETE(m_BackgroundEdgeGraphicBottom);
@@ -165,9 +116,6 @@ void HostScreenTeamDeathmatch2::onResize(const unsigned int newWidth, const unsi
 }
 
 void HostScreenTeamDeathmatch2::update(const double& dt) {
-    //m_ServerPort_TextBox->update(dt);
-    //m_UserName_TextBox->update(dt);
-
     m_BackButton->update(dt);
     m_ForwardButton->update(dt);
 
@@ -177,9 +125,6 @@ void HostScreenTeamDeathmatch2::update(const double& dt) {
     m_TopLabel->update(dt);
 }
 void HostScreenTeamDeathmatch2::render() {
-    //m_ServerPort_TextBox->render();
-    //m_UserName_TextBox->render();
-
     m_BackButton->render();
     m_ForwardButton->render();
 

@@ -25,8 +25,8 @@ class HostScreenFFA2 final {
         HostScreen1& m_HostScreen1;
         Menu&       m_Menu;
 
-        FFAShipSelector* m_ShipSelectorWindow;
-        FFAServerInfo*   m_ServerInfoWindow;
+        FFAShipSelector* m_SetupShipSelectorWindow;
+        FFAServerInfo*   m_SetupServerInfoWindow;
 
         Button*     m_BackgroundEdgeGraphicTop;
         Text*       m_TopLabel;

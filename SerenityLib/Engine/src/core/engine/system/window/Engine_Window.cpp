@@ -10,6 +10,8 @@
 #include <ecs/ECS.h>
 #include <ecs/ComponentCamera.h>
 
+#include <chrono>
+
 #include <iostream>
 
 using namespace Engine;
@@ -19,7 +21,7 @@ using namespace std;
 
 Engine_Window::Engine_WindowData::Engine_WindowData() {
     m_FramerateLimit     = 0;
-
+    m_UndergoingClosing = false;
     m_MouseDelta = 0.0;
     m_OldWindowSize = glm::uvec2(0, 0);
     m_Flags = (Engine_Window_Flags::Windowed | Engine_Window_Flags::MouseVisible | Engine_Window_Flags::Active);
@@ -27,7 +29,14 @@ Engine_Window::Engine_WindowData::Engine_WindowData() {
     m_MousePosition = m_MousePosition_Previous = m_MouseDifference = glm::vec2(0.0f);
 }
 Engine_Window::Engine_WindowData::~Engine_WindowData() {
+    m_UndergoingClosing = true;
+    m_SFMLWindow.setVisible(false);
+    m_SFMLWindow.close();
 
+    #ifndef __APPLE__
+        if(m_EventThread && m_EventThread->joinable())
+            m_EventThread->join();
+    #endif
 }
 void Engine_Window::Engine_WindowData::on_mouse_wheel_scrolled(const int& delta, const int& x, const int& y) {
     m_MouseDelta += (static_cast<double>(delta) * 10.0);
@@ -44,32 +53,44 @@ void Engine_Window::Engine_WindowData::restore_state() {
     m_SFMLWindow.setMouseCursorGrabbed(m_Flags & Engine_Window_Flags::MouseGrabbed);
 }
 const sf::ContextSettings Engine_Window::Engine_WindowData::create(Engine_Window& super, const char* _name, const unsigned int& _width, const unsigned int& _height) {
-    sf::ContextSettings settings;
-    settings.depthBits         = 24;
-    settings.stencilBits       = 0;
-    settings.antialiasingLevel = 0;
-    settings.majorVersion      = m_OpenGLMajorVersion;
-    settings.minorVersion      = m_OpenGLMinorVersion;
+    m_UndergoingClosing = true;
+    m_SFMLWindow.close();
+    #ifndef __APPLE__
+        if (m_EventThread && m_EventThread->joinable())
+            m_EventThread->join();
 
-#ifdef _DEBUG
-    settings.attributeFlags = settings.Debug;
-#else
-    settings.attributeFlags = settings.Core;
-#endif
-
-    m_OldWindowSize = glm::uvec2(m_VideoMode.width, m_VideoMode.height);
-
-    m_VideoMode.width        = _width;
-    m_VideoMode.height       = _height;
-    m_VideoMode.bitsPerPixel = 32;
-    m_Style                  = sf::Style::Default;
-    if (_width == 0 || _height == 0) {
-        m_Style = sf::Style::None;
-        m_VideoMode = get_default_desktop_video_mode();
-    }
-    m_SFMLWindow.create(m_VideoMode, _name, m_Style, settings);
-    unsigned int opengl_version = stoi(to_string(settings.majorVersion) + to_string(settings.minorVersion));
-    epriv::Core::m_Engine->m_RenderManager._onOpenGLContextCreation(m_VideoMode.width, m_VideoMode.height, m_GLSLVersion, opengl_version);
+        auto lamda = [](const char* name_, unsigned int style_, sf::VideoMode videoMode_, sf::ContextSettings settings_, Engine_Window::Engine_WindowData& data_) {
+            data_.m_SFMLWindow.create(videoMode_, name_, style_, settings_);
+            data_.m_SFMLWindow.setActive(false);
+            data_.m_UndergoingClosing = false;
+            sf::Event e;
+            while (!data_.m_UndergoingClosing){
+                while (!data_.m_UndergoingClosing && data_.m_SFMLWindow.pollEvent(e)) {
+                    data_.m_Queue.push(e);
+                }
+                
+                auto command_ptr = data_.m_MainThreadToEventThreadQueueShowMouse.try_pop();
+                while (command_ptr) {
+                    auto& command = *command_ptr;
+                    if (command == EventThreadOnlyCommands::HideMouse) {
+                        data_.m_SFMLWindow.setMouseCursorVisible(false);
+                        data_.add_flag(Engine_Window_Flags::MouseVisible);
+                    }else if (command == EventThreadOnlyCommands::ShowMouse) {
+                        data_.m_SFMLWindow.setMouseCursorVisible(true);
+                        data_.add_flag(Engine_Window_Flags::MouseVisible);
+                    }
+                    command_ptr = data_.m_MainThreadToEventThreadQueueShowMouse.try_pop();
+                }
+            }
+        };
+        m_EventThread.reset(NEW std::thread(lamda, _name, m_Style, m_VideoMode, m_SFContextSettings, std::ref(*this)));
+        std::this_thread::sleep_for(std::chrono::milliseconds(350));
+        m_SFMLWindow.setActive(true);
+        m_SFMLWindow.requestFocus();
+    #else
+        m_SFMLWindow.create(m_VideoMode, _name, m_Style, settings);
+        m_UndergoingClosing = false;
+    #endif
 
     return m_SFMLWindow.getSettings();
 }
@@ -92,7 +113,9 @@ void Engine_Window::Engine_WindowData::on_fullscreen_internal(Engine_Window& sup
         m_VideoMode.width = m_OldWindowSize.x;
         m_VideoMode.height = m_OldWindowSize.y;
     }
-    m_SFMLWindow.create(m_VideoMode, m_WindowName, m_Style, m_SFContextSettings);
+    create(super, m_WindowName, m_VideoMode.width, m_VideoMode.height);
+
+    //m_SFMLWindow.create(m_VideoMode, m_WindowName, m_Style, m_SFContextSettings);
 
     epriv::Core::m_Engine->m_RenderManager._onFullscreen();
 
@@ -111,7 +134,7 @@ void Engine_Window::Engine_WindowData::on_fullscreen_internal(Engine_Window& sup
         Engine_Window::minimize();
     }
     */
-
+    m_SFMLWindow.requestFocus();
 
     //event dispatch
     epriv::EventWindowFullscreenChanged e;
@@ -161,8 +184,38 @@ Engine_Window::Engine_Window(const char* name, const unsigned int& width, const 
     m_Data.m_OpenGLMajorVersion = 4;
     m_Data.m_OpenGLMinorVersion = 6;
     m_Data.m_GLSLVersion        = 330;
+
+
+    m_Data.m_SFContextSettings.depthBits         = 24;
+    m_Data.m_SFContextSettings.stencilBits       = 0;
+    m_Data.m_SFContextSettings.antialiasingLevel = 0;
+    m_Data.m_SFContextSettings.majorVersion      = m_Data.m_OpenGLMajorVersion;
+    m_Data.m_SFContextSettings.minorVersion      = m_Data.m_OpenGLMinorVersion;
+
+    #ifdef _DEBUG
+        m_Data.m_SFContextSettings.attributeFlags = m_Data.m_SFContextSettings.Debug;
+    #else
+        m_Data.m_SFContextSettings.attributeFlags = m_Data.m_SFContextSettings.Core;
+    #endif
+
+    m_Data.m_OldWindowSize = glm::uvec2(m_Data.m_VideoMode.width, m_Data.m_VideoMode.height);
+
+    m_Data.m_VideoMode.width = width;
+    m_Data.m_VideoMode.height = height;
+    m_Data.m_VideoMode.bitsPerPixel = 32;
+    m_Data.m_Style = sf::Style::Default;
+    if (width == 0 || height == 0) {
+        m_Data.m_Style = sf::Style::None;
+        m_Data.m_VideoMode = m_Data.get_default_desktop_video_mode();
+    }
+
+
     m_Data.m_SFContextSettings  = m_Data.create(*this, name, width, height);
     
+
+    unsigned int opengl_version = stoi(to_string(m_Data.m_SFContextSettings.majorVersion) + to_string(m_Data.m_SFContextSettings.minorVersion));
+    epriv::Core::m_Engine->m_RenderManager._onOpenGLContextCreation(m_Data.m_VideoMode.width, m_Data.m_VideoMode.height, m_Data.m_GLSLVersion, opengl_version);
+
     std::cout << "Using OpenGL: " << 
         m_Data.m_SFContextSettings.majorVersion << "." << 
         m_Data.m_SFContextSettings.minorVersion << ", with depth bits: " << 
@@ -272,13 +325,20 @@ void Engine_Window::setKeyRepeatEnabled(const bool isToBeEnabled){
 void Engine_Window::setMouseCursorVisible(const bool isToBeVisible){
     if (isToBeVisible) {
         if (!m_Data.has_flag(Engine_Window_Flags::MouseVisible)) {
-            m_Data.m_SFMLWindow.setMouseCursorVisible(true);
-            m_Data.add_flag(Engine_Window_Flags::MouseVisible);
+
+            Engine_WindowData::EventThreadOnlyCommands::Command command = Engine_WindowData::EventThreadOnlyCommands::ShowMouse;
+            m_Data.m_MainThreadToEventThreadQueueShowMouse.push(command);
+
+
+            //m_Data.add_flag(Engine_Window_Flags::MouseVisible);
         }
     }else{
         if (m_Data.has_flag(Engine_Window_Flags::MouseVisible)) {
-            m_Data.m_SFMLWindow.setMouseCursorVisible(false);
-            m_Data.remove_flag(Engine_Window_Flags::MouseVisible);
+
+            Engine_WindowData::EventThreadOnlyCommands::Command command = Engine_WindowData::EventThreadOnlyCommands::HideMouse;
+            m_Data.m_MainThreadToEventThreadQueueShowMouse.push(command);
+ 
+            //m_Data.remove_flag(Engine_Window_Flags::MouseVisible);
         }
     }
 }
@@ -369,9 +429,6 @@ const bool Engine_Window::setFullscreenWindowed(const bool isToBeFullscreen) {
         if (!isFullscreenWindowed())
             return false;
     }
-    //if (!m_Data.m_SFMLWindow.hasFocus())
-        //return false;
-
     const bool old_max = isMaximized();
     const bool old_min = isMinimized();
 
@@ -397,9 +454,6 @@ const bool Engine_Window::setFullscreen(const bool isToBeFullscreen){
         if (!isFullscreenNonWindowed())
             return false;
     }
-    //if (!m_Data.m_SFMLWindow.hasFocus())
-        //return false;
-
     const bool old_max = isMaximized();
     const bool old_min = isMinimized();
 
@@ -409,7 +463,7 @@ const bool Engine_Window::setFullscreen(const bool isToBeFullscreen){
         m_Data.remove_flag(Engine_Window_Flags::Fullscreen);
         m_Data.remove_flag(Engine_Window_Flags::WindowedFullscreen);
     }else{
-        m_Data.m_Style = sf::Style::Fullscreen; //fullscreen      
+        m_Data.m_Style = sf::Style::Fullscreen; //fullscreen   
         m_Data.add_flag(Engine_Window_Flags::Fullscreen);
         m_Data.remove_flag(Engine_Window_Flags::WindowedFullscreen);
         m_Data.remove_flag(Engine_Window_Flags::Windowed);
@@ -442,19 +496,19 @@ const unsigned int Engine_Window::getFramerateLimit() const{
 }
 
 
+const bool Engine_Window::pollEvents(sf::Event& e) {
+    #ifndef __APPLE__
+        auto x = m_Data.m_Queue.try_pop(); //expensive as it uses lock & mutex
+        if (x) {
+            e = std::move(*x);
+            return true;
+        }
+        return false;
+    #else
+        return m_Data.m_SFMLWindow.pollEvent(e);
+    #endif
+}
 
 
-/*
-const unsigned int Engine_Window::getStyle(){
-    return m_Data.m_Style;
-}
-void Engine_Window::setStyle(const unsigned int& style){
-    if (m_Data.m_Style == style)
-        return;
-    m_Data.m_Style = style;
-    m_Data.m_SFMLWindow.close();
-    m_Data.m_SFContextSettings = m_Data.create(*this, m_Data.m_WindowName, m_Data.m_VideoMode.width, m_Data.m_VideoMode.height);
-}
-*/
 
 #pragma endregion

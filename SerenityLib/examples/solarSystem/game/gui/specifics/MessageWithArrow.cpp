@@ -12,7 +12,7 @@ using namespace std;
 using namespace Engine;
 
 MessageWithArrow::MessageWithArrow(Font& font, const string& text, const float& x, const float& y, const float& textScale) {
-    m_Text = new Text(x, y, font, text);
+    m_Text = NEW Text(x, y, font, text);
     m_Text->setAlignment(Alignment::TopLeft);
     m_Text->setTextAlignment(TextAlignment::Left);
     m_Text->setColor(1.0f, 0.0f, 0.0f, 1.0f);

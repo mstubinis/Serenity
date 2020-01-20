@@ -38,7 +38,7 @@ m_ThreadManager()
 }
 
 EngineCore::~EngineCore(){
-
+    m_Misc.m_BuiltInMeshes.cleanup();
 }
 
 bool Engine::paused(){ 
@@ -130,6 +130,7 @@ void EngineCore::init(const EngineOptions& options) {
     m_ResourceManager._init(options.window_title, options.width, options.height);
 
     m_DebugManager._init(options.window_title, options.width, options.height);
+    m_Misc.m_BuiltInMeshes.init();
     m_RenderManager._init(options.window_title, options.width, options.height);
     m_PhysicsManager._init(options.window_title, options.width, options.height);
 
@@ -457,7 +458,7 @@ const bool Engine::setFullscreenWindowed(const bool& b) {
 }
 void EngineCore::handle_events(Engine_Window& window){
     sf::Event e;
-    while (window.getSFMLHandle().pollEvent(e)) {
+    while (window.pollEvents(e)) {
         switch (e.type) {
             case sf::Event::Closed: {
                 on_event_window_requested_closed(window); break;
@@ -499,7 +500,6 @@ void EngineCore::handle_events(Engine_Window& window){
                 break;
             }
         }
-
     }
 }
 

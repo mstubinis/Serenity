@@ -24,6 +24,8 @@ void epriv::EventDispatcher::registerObject(EventObserver* observerToRegister, c
     observers_with_event_type.push_back(observerToRegister);
 }
 void epriv::EventDispatcher::unregisterObject(EventObserver* obj, const EventType::Type& eventType){
+    if (m_Observers.size() <= eventType)
+        return;
     auto& observers_with_event_type = m_Observers[eventType];
     removeFromVector(observers_with_event_type, obj);
 }

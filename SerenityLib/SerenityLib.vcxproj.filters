@@ -348,9 +348,6 @@
     <ClInclude Include="Engine\src\core\engine\textures\TextureIncludes.h">
       <Filter>Header Files\Engine\Core\Textures</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\resources\Engine_BuiltInResources.h">
-      <Filter>Header Files\Engine\Core\Resources</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\resources\Engine_BuiltInShaders.h">
       <Filter>Header Files\Engine\Core\Resources</Filter>
     </ClInclude>
@@ -707,6 +704,9 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\discord\src\voice_manager.h">
       <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\BuiltInMeshes.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1075,6 +1075,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\discord\src\voice_manager.cpp">
       <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\mesh\BuiltInMeshes.cpp">
+      <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

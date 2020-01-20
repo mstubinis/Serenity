@@ -335,5 +335,6 @@ void Particle::render(Engine::epriv::GBuffer& gBuffer) {
 
     Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
 
-    Mesh::Plane->render();
+    auto& mesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
+    mesh.render();
 }

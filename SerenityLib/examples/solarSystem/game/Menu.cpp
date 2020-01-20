@@ -128,16 +128,16 @@ Menu::Menu(Scene& menu_scene, Camera& game_camera, GameState::State& _state, Cor
 
     const auto& windowDimensions = Resources::getWindowSize();
     
-    m_MainMenuScreen = new MainMenu(*this, *m_Font, 0.1f);
-    m_HostScreen0 = new HostScreen0(*this, *m_Font);
-    m_HostScreen1 = new HostScreen1(*this, *m_Font);
-    m_HostScreen1Persistent = new HostScreen1Persistent(*this, *m_Font);
+    m_MainMenuScreen = NEW MainMenu(*this, *m_Font, 0.1f);
+    m_HostScreen0 = NEW HostScreen0(*this, *m_Font);
+    m_HostScreen1 = NEW HostScreen1(*this, *m_Font);
+    m_HostScreen1Persistent = NEW HostScreen1Persistent(*this, *m_Font);
 
-    m_HostScreenFFA2 = new HostScreenFFA2(*m_HostScreen1 , *this, *m_Font);
-    m_HostScreenTeamDeathmatch2 = new HostScreenTeamDeathmatch2(*m_HostScreen1, *this, *m_Font);
-    m_HostScreenHomelandSecurity2 = new HostScreenHomelandSecurity2(*m_HostScreen1, *this, *m_Font);
+    m_HostScreenFFA2 = NEW HostScreenFFA2(*m_HostScreen1 , *this, *m_Font);
+    m_HostScreenTeamDeathmatch2 = NEW HostScreenTeamDeathmatch2(*m_HostScreen1, *this, *m_Font);
+    m_HostScreenHomelandSecurity2 = NEW HostScreenHomelandSecurity2(*m_HostScreen1, *this, *m_Font);
 
-    m_LobbyScreenFFA = new LobbyScreenFFA(*m_Font, *this, core, menu_scene, game_camera);
+    m_LobbyScreenFFA = NEW LobbyScreenFFA(*m_Font, *this, core, menu_scene, game_camera);
 
     //todo: remove
     m_Back = NEW Button(*m_Font, 100.0f, 50.0f, 150.0f, 50.0f);

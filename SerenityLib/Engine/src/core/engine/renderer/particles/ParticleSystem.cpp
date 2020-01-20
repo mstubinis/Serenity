@@ -8,6 +8,7 @@
 #include <core/engine/scene/Camera.h>
 #include <core/engine/threading/Engine_ThreadManager.h>
 #include <core/engine/shaders/ShaderProgram.h>
+#include <core/engine/system/Engine.h>
 
 #include <execution>
 #include <glm/gtx/norm.hpp>
@@ -109,10 +110,14 @@ void epriv::ParticleSystem::render(Camera& camera, ShaderProgram& program, GBuff
 
     const auto cameraPosition = glm::vec3(camera.getPosition());
 
+    auto& planeMesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
+
     auto lamda_culler = [&](pair<size_t, size_t>& pair_, const glm::vec3& camPos) {
+        
         for (size_t j = pair_.first; j <= pair_.second; ++j) {
             auto& particle = m_Particles[j];
-            const float radius = Mesh::Plane->getRadius() * Math::Max(particle.m_Data.m_Scale.x, particle.m_Data.m_Scale.y);
+
+            const float radius = planeMesh.getRadius() * Math::Max(particle.m_Data.m_Scale.x, particle.m_Data.m_Scale.y);
             const uint sphereTest = camera.sphereIntersectTest(particle.m_Position, radius); //per mesh instance radius instead?
             float comparison = radius * 3100.0f; //TODO: this is obviously different from the other culling functions
             if (particle.m_Hidden || sphereTest == 0 || glm::distance2(particle.m_Position, cameraPosition) > comparison * comparison) {
@@ -137,7 +142,7 @@ void epriv::ParticleSystem::render(Camera& camera, ShaderProgram& program, GBuff
     std::sort(std::execution::par_unseq, seen.begin(), seen.end(), std::bind(lambda_sorter, std::placeholders::_1, std::placeholders::_2, cameraPosition));
 
     program.bind();
-    Mesh::Plane->bind();
+    planeMesh.bind();
     for (auto& particle : seen) {
         //if (particle.m_PassedRenderCheck) { //TODO: using "seen" vector for now, do not need bool check, should profile using seen vector over using bool and full vector...
             particle.render(gBuffer);

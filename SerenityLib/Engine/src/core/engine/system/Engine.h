@@ -14,6 +14,7 @@ class  Engine_Window;
 #include <core/engine/math/SimplexNoise.h>
 #include <core/engine/threading/Engine_ThreadManager.h>
 #include <core/engine/discord/Discord.h>
+#include <core/engine/mesh/BuiltInMeshes.h>
 
 
 namespace Engine{
@@ -163,6 +164,7 @@ namespace Engine{
 
             public:
                 struct Misc final {
+                    Engine::epriv::BuiltInMeshses  m_BuiltInMeshes;
                     Engine::Discord::DiscordCore   m_DiscordCore;
                     SimplexNoise                   m_SimplexNoise;
                     bool                           m_Paused;

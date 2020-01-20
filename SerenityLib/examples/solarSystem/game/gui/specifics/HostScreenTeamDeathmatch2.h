@@ -24,13 +24,9 @@ class HostScreenTeamDeathmatch2 final {
         Button* m_BackgroundEdgeGraphicTop;
         Text* m_TopLabel;
 
-        TextBox*      m_UserName_TextBox;
-        TextBox*      m_ServerPort_TextBox;
-
         Button*       m_BackgroundEdgeGraphicBottom;
         Button*       m_BackButton;
         Button*       m_ForwardButton;
-
     public:
         HostScreenTeamDeathmatch2(HostScreen1& hostScreen1, Menu&, Font& font);
         ~HostScreenTeamDeathmatch2();

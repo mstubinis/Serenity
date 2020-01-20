@@ -10,6 +10,7 @@
 #include "../../ships/Ships.h"
 #include "../../networking/server/Server.h"
 #include "../../config/ConfigFile.h"
+#include "../../database/Database.h"
 
 #include <core/engine/fonts/Font.h>
 #include <core/engine/resources/Engine_Resources.h>
@@ -27,6 +28,7 @@ constexpr auto scroll_frame_padding = 30.0f;
 
 FFAServerInfo::FFAServerInfo(HostScreenFFA2& hostScreen, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const string& labelText)
 :RoundedWindow(font, x, y, width, height, depth, borderSize, labelText), m_HostScreen(hostScreen), m_Font(font){
+
     m_IsPersistent = false;
     m_ScrollFrame           = NEW ScrollFrame(font, x, y - (height / 2.0f) + scroll_frame_padding, width - (scroll_frame_padding * 2.0f), height - 110.0f, depth);
     m_ScrollFrame->setAlignment(Alignment::BottomCenter);
@@ -37,7 +39,7 @@ FFAServerInfo::FFAServerInfo(HostScreenFFA2& hostScreen, Font& font, const float
     const auto txt_scale = 0.72f;
     const auto padding = 0;
 
-    auto* your_name = NEW TextBox("Your name  ", font, 14, x, y);
+    auto* your_name = NEW TextBox("Your name  ", font, Database::CONST_USERNAME_LENGTH_MAX, x, y);
     your_name->setAlignment(Alignment::TopLeft);
     your_name->setColor(Factions::Database[FactionEnum::Federation].GUIColorDark);
     your_name->setBorderColor(Factions::Database[FactionEnum::Federation].GUIColor);
@@ -47,6 +49,7 @@ FFAServerInfo::FFAServerInfo(HostScreenFFA2& hostScreen, Font& font, const float
     your_name->setText(ConfigFile::CONFIG_DATA.host_server_player_name);
     your_name->setPaddingSize(padding);
     your_name->setBorderSize(1);
+    
 
     auto* server_port = NEW TextBox("Server port  ", font, 6, x, y);
     server_port->setAlignment(Alignment::TopLeft);
