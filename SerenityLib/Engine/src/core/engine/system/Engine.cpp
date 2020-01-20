@@ -27,10 +27,10 @@ EngineCore* Core::m_Engine = nullptr;
 
 EngineCore::EngineCore(const EngineOptions& options) :
 m_EventManager(),
-m_ResourceManager(options.window_title, options.width, options.height),
+m_ResourceManager(options),
 m_DebugManager(),
 m_SoundManager(),
-m_RenderManager(options.window_title, options.width, options.height),
+m_RenderManager(options),
 m_PhysicsManager(),
 m_ThreadManager()
 {
@@ -88,12 +88,6 @@ void EngineCore::cleanup_os_specific() {
 void EngineCore::init_window(const EngineOptions& options) {
     auto& window = Resources::getWindow();
 
-    if (options.window_mode == 1)      window.setFullscreen(true);
-    else if (options.window_mode == 2) window.setFullscreenWindowed(true);
-    else                               window.setFullscreen(false);
-
-    window.setSize(options.width, options.height);
-
     //TODO: fix this crap... (position the window in the middle of the screen)
     /*
     float x_other = 0.0f;
@@ -118,21 +112,16 @@ void EngineCore::init_window(const EngineOptions& options) {
     */
     //window.setPosition(0, 0);
 
-    if (options.maximized) {
-        window.maximize();
-    }
-    window.requestFocus();
-    window.display();
 }
 void EngineCore::init(const EngineOptions& options) {
     init_os_specific(options);
 
-    m_ResourceManager._init(options.window_title, options.width, options.height);
+    m_ResourceManager._init(options);
 
-    m_DebugManager._init(options.window_title, options.width, options.height);
+    m_DebugManager._init();
     m_Misc.m_BuiltInMeshes.init();
-    m_RenderManager._init(options.window_title, options.width, options.height);
-    m_PhysicsManager._init(options.window_title, options.width, options.height);
+    m_RenderManager._init();
+    m_PhysicsManager._init();
 
     init_window(options);
 
@@ -268,6 +257,9 @@ void EngineCore::on_event_game_ended() {
     m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_window_closed(Engine_Window& window) {
+    Game::onWindowClosed(window);
+    window.m_Data.on_close();
+
     Event ev(EventType::WindowHasClosed);
     m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
@@ -327,7 +319,7 @@ void EngineCore::on_event_key_released(Engine_Window& window, const unsigned int
     ev.eventKeyboard = e;
     m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
-void EngineCore::on_event_mouse_wheel_scrolled(Engine_Window& window, const int& delta, const int& mouseWheelX, const int& mouseWheelY){
+void EngineCore::on_event_mouse_wheel_scrolled(Engine_Window& window, const float& delta, const int& mouseWheelX, const int& mouseWheelY){
     window.m_Data.on_mouse_wheel_scrolled(delta, mouseWheelX, mouseWheelY);
 
     Game::onMouseWheelScrolled(window, delta, mouseWheelX, mouseWheelY);

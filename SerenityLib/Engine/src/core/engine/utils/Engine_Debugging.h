@@ -33,7 +33,7 @@ namespace Engine {
 
                 void cleanup();
 
-                void _init(const char* name, uint w, uint h);
+                void _init();
 
                 void addDebugLine(const char* message);
                 void addDebugLine(std::string& message);

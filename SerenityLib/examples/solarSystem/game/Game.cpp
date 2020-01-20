@@ -25,9 +25,6 @@ using namespace std;
 Core* m_Core = nullptr;
 
 void Game::initResources(){
-    auto& window = Resources::getWindow();
-    window.setIcon("../data/Textures/icon.png");
-
     Discord::activate(661384805786845214);
     
     m_Core = NEW Core();
@@ -69,7 +66,7 @@ void Game::onWindowRequestedToBeClosed(Engine_Window& window) {
 
 }
 void Game::onWindowClosed(Engine_Window& window) {
-
+    Engine::stop();
 }
 void Game::onGameEnded(){
     auto& window = Resources::getWindow();
@@ -97,7 +94,7 @@ void Game::onKeyPressed(Engine_Window& window, const uint& key){
 }
 void Game::onKeyReleased(Engine_Window& window, const uint& key){
 }
-void Game::onMouseWheelScrolled(Engine_Window& window, const int& delta, const int& x, const int& y){
+void Game::onMouseWheelScrolled(Engine_Window& window, const float& delta, const int& x, const int& y){
 }
 void Game::onMouseButtonPressed(Engine_Window& window, const uint& button){
 }

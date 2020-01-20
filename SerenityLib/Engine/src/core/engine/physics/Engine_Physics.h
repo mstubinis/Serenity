@@ -38,7 +38,7 @@ namespace Engine{
 
                 void cleanup();
 
-                void _init(const char* name, const unsigned int& w, const unsigned int& h);
+                void _init();
 
                 void _update(const double& dt, int maxSteps = 1, float = 0.0166666f);
                 void _render(Camera& camera);

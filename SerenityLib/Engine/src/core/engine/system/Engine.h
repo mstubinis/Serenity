@@ -116,7 +116,7 @@ namespace Engine{
                 The member associated with this event is event.mouseWheelScroll, it contains the number of ticks the wheel has moved,
                 what the orientation of the wheel is and the current position of the mouse cursor.
                 */
-                void on_event_mouse_wheel_scrolled(Engine_Window&, const int& delta, const int& mouseWheelX, const int& mouseWheelY);
+                void on_event_mouse_wheel_scrolled(Engine_Window&, const float& delta, const int& mouseWheelX, const int& mouseWheelY);
 
                 /*
                 The sf::Event::MouseButtonPressed and sf::Event::MouseButtonReleased events are

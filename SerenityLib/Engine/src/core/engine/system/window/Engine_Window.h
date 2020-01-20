@@ -2,6 +2,14 @@
 #ifndef ENGINE_WINDOW_H
 #define ENGINE_WINDOW_H
 
+
+#if !defined(_APPLE_) && !defined(ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS)
+    #ifndef ENGINE_THREAD_WINDOW_EVENTS
+    #define ENGINE_THREAD_WINDOW_EVENTS
+    #endif
+#endif
+
+
 namespace sf {
     class Window;
 };
@@ -12,6 +20,7 @@ namespace Engine {
     };
 };
 class  Texture;
+struct EngineOptions;
 
 #include <memory>
 #include <string>
@@ -42,45 +51,44 @@ class Engine_Window final{
         struct EventThreadOnlyCommands final { enum Command : unsigned int {
             ShowMouse,
             HideMouse,
+            RequestFocus,
         };};
 
         private:
-            #ifndef __APPLE__
+            #ifdef ENGINE_THREAD_WINDOW_EVENTS
                 Engine::epriv::Queue_ThreadSafe<sf::Event>                          m_Queue;
                 Engine::epriv::Queue_ThreadSafe<EventThreadOnlyCommands::Command>   m_MainThreadToEventThreadQueueShowMouse;
-                std::unique_ptr<std::thread> m_EventThread;
+                std::unique_ptr<std::thread>                                        m_EventThread;
             #endif
 
             glm::uvec2          m_OldWindowSize;
             unsigned int        m_Style;
             sf::VideoMode       m_VideoMode;
-            const char*         m_WindowName;
+            std::string         m_WindowName;
             sf::Window          m_SFMLWindow;
             unsigned int        m_FramerateLimit;
             bool                m_UndergoingClosing;
             unsigned int        m_Flags;
-
+            std::string         m_IconFile;
 
             glm::vec2           m_MousePosition;
             glm::vec2           m_MousePosition_Previous;
             glm::vec2           m_MouseDifference;
             double              m_MouseDelta;
 
-
-            int                 m_OpenGLMajorVersion;
-            int                 m_OpenGLMinorVersion;
-            int                 m_GLSLVersion;
             sf::ContextSettings m_SFContextSettings;
 
             void restore_state();
-            const sf::ContextSettings create(Engine_Window&, const char* _name, const unsigned int& _width, const unsigned int& _height);
+            const sf::ContextSettings create(Engine_Window&, const std::string& _name, const unsigned int& _width, const unsigned int& _height);
             void update_mouse_position_internal(Engine_Window&, const float x, const float y, const bool resetDifference, const bool resetPrevious);
             void on_fullscreen_internal(Engine_Window&, const bool isToBeFullscreen, const bool isMaximized, const bool isMinimized);
             sf::VideoMode get_default_desktop_video_mode();
 
-            void on_mouse_wheel_scrolled(const int& delta, const int& x, const int& y);
+            void on_mouse_wheel_scrolled(const float& delta, const int& x, const int& y);
 
             void on_reset_events(const double& dt);
+
+            void on_close();
 
             const bool remove_flag(const Engine_Window_Flags::Flag& flag);
             const bool add_flag(const Engine_Window_Flags::Flag& flag);
@@ -95,10 +103,10 @@ class Engine_Window final{
         Engine_WindowData m_Data;
         void restore_state();
     public:
-        Engine_Window(const char* name, const unsigned int& width, const unsigned int& height);
+        Engine_Window(const EngineOptions& options);
         ~Engine_Window();
 
-        const char* name() const;
+        const std::string& name() const;
         const glm::uvec2 getSize();
         const glm::uvec2 getPosition();
 

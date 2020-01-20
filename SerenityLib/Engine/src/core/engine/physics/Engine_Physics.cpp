@@ -142,7 +142,7 @@ void epriv::PhysicsManager::cleanup() {
     }
     SAFE_DELETE(m_Data);
 }
-void epriv::PhysicsManager::_init(const char* name, const unsigned int& w, const unsigned int& h){
+void epriv::PhysicsManager::_init(){
     m_Data = NEW epriv::PhysicsWorld();
     m_Data->debugDrawer->initRenderingContext();
 

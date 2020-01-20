@@ -28,7 +28,7 @@ using namespace std;
 
 epriv::ResourceManager* resourceManager;
 
-epriv::ResourceManager::ResourceManager(const char* name, const uint& width, const uint& height){
+epriv::ResourceManager::ResourceManager(const EngineOptions& options){
     m_CurrentScene     = nullptr;
     m_DynamicMemory    = false;
     m_Resources        = NEW ObjectPool<EngineResource>(32768);
@@ -42,8 +42,8 @@ void epriv::ResourceManager::cleanup() {
     SAFE_DELETE_VECTOR(m_Windows);
     SAFE_DELETE_VECTOR(m_Scenes);
 }
-void epriv::ResourceManager::_init(const char* name, const uint& width, const uint& height){
-    auto* window = NEW Engine_Window(name, width, height);
+void epriv::ResourceManager::_init(const EngineOptions& options){
+    auto* window = NEW Engine_Window(options);
     m_Windows.push_back(window);
 }
 vector<Scene*>& epriv::ResourceManager::scenes() {

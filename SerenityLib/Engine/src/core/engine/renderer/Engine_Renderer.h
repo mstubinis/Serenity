@@ -21,6 +21,7 @@ class  Font;
 class  Decal;
 struct Entity;
 struct BufferObject;
+struct EngineOptions;
 
 namespace Engine{
 namespace epriv{
@@ -36,7 +37,7 @@ namespace epriv{
             class impl;
             std::unique_ptr<impl> m_i;
 
-            RenderManager(const char* name,uint w,uint h);
+            RenderManager(const EngineOptions& options);
             ~RenderManager();
 
             static uint GLSL_VERSION;
@@ -44,7 +45,7 @@ namespace epriv{
 
             void cleanup();
 
-            void _init(const char* name,uint w,uint h);
+            void _init();
             void _resize(uint width, uint height);
 
             void _render(const double& dt, Viewport&, const bool mainRenderFunc = true, const GLuint display_fbo = 0, const GLuint display_rbo = 0);

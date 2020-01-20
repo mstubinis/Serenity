@@ -20,7 +20,7 @@ Engine::Discord::DiscordActivity::DiscordActivity() {
         const auto& window = Resources::getWindow();
 
         m_Activity.SetApplicationId(discordManager->m_ClientID);
-        m_Activity.SetName(window.name());
+        m_Activity.SetName(window.name().c_str());
         m_Activity.SetDetails("");
         m_Activity.SetState("");
         m_Activity.SetInstance(false);

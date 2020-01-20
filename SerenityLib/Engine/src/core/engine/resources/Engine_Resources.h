@@ -3,6 +3,7 @@
 #define ENGINE_ENGINE_RESOURCES_H
 
 struct Handle;
+struct EngineOptions;
 class  EngineResource;
 class  Engine_Window;
 class  Scene;
@@ -39,14 +40,14 @@ namespace Engine{
                 std::vector<Scene*>                m_ScenesToBeDeleted;
             public:
 
-                ResourceManager(const char* name, const uint& width, const uint& height);
+                ResourceManager(const EngineOptions& options);
                 ~ResourceManager();
 
                 void cleanup();
 
                 void onPostUpdate();
 
-                void _init(const char* name, const uint& width, const uint& height);
+                void _init(const EngineOptions& options);
  
                 Handle _addTexture(Texture*);
                 Scene& _getSceneByID(const uint& id);

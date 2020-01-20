@@ -20,7 +20,7 @@ namespace Game {
     void onTextEntered(Engine_Window&, const unsigned int& unicode);
     void onKeyPressed(Engine_Window&, const unsigned int& key);
     void onKeyReleased(Engine_Window&, const unsigned int& key);
-    void onMouseWheelScrolled(Engine_Window&, const int& delta, const int& x, const int& y);
+    void onMouseWheelScrolled(Engine_Window&, const float& delta, const int& x, const int& y);
     void onMouseButtonPressed(Engine_Window&, const unsigned int& button);
     void onMouseButtonReleased(Engine_Window&, const unsigned int& button);
     void onMouseMoved(Engine_Window&, const float& mouseX, const float& mouseY);

@@ -1,4 +1,5 @@
 #include <core/engine/system/Engine.h>
+#include <core/engine/system/EngineOptions.h>
 #include <core/engine/utils/Engine_Debugging.h>
 #include <core/engine/renderer/Engine_Renderer.h>
 #include <core/engine/system/window/Engine_Window.h>
@@ -201,7 +202,7 @@ class epriv::RenderManager::impl final{
         epriv::UBOCamera m_UBOCameraData;
         #pragma endregion
 
-        void _init(const char* name, const uint& w, const uint& h){
+        void _init(const EngineOptions& options){
             #pragma region LightingInfo
             lighting = true;
             lighting_gi_contribution_diffuse = 1.0f;
@@ -222,13 +223,13 @@ class epriv::RenderManager::impl final{
             #endif
 
             m_GBuffer = nullptr;
-            m_2DProjectionMatrix = glm::ortho(0.0f,static_cast<float>(w),0.0f, static_cast<float>(h),0.0005f,1000.0f);
+            m_2DProjectionMatrix = glm::ortho(0.0f,static_cast<float>(options.width),0.0f, static_cast<float>(options.height),0.0005f,1000.0f);
             m_IdentityMat4 = glm::mat4(1.0f);
             m_IdentityMat3 = glm::mat3(1.0f);
             m_RotationAxis2D = glm::vec3(0, 0, 1);
             #pragma endregion
         }      
-        void _postInit(const char* name, const uint& width, const uint& height) {
+        void _postInit() {
             glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &UniformBufferObject::MAX_UBO_BINDINGS);
 
             float init_border_color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -1372,12 +1373,12 @@ class epriv::RenderManager::impl final{
 };
 
 
-epriv::RenderManager::RenderManager(const char* name, uint windowWidth, uint windowHeight) : m_i(NEW impl){
-    m_i->_init(name, windowWidth, windowHeight);
+epriv::RenderManager::RenderManager(const EngineOptions& options) : m_i(NEW impl){
+    m_i->_init(options);
     renderManagerImpl = m_i.get();
     renderManager = this;
 
-    OpenGLStateMachine = OpenGLState(windowWidth, windowHeight);
+    OpenGLStateMachine = OpenGLState(options.width, options.height);
 }
 epriv::RenderManager::~RenderManager(){ 
     cleanup();
@@ -1385,8 +1386,8 @@ epriv::RenderManager::~RenderManager(){
 void epriv::RenderManager::cleanup() {
     m_i->_destruct();
 }
-void epriv::RenderManager::_init(const char* name,uint w,uint h){ 
-    m_i->_postInit(name, w, h);
+void epriv::RenderManager::_init(){
+    m_i->_postInit();
 }
 void epriv::RenderManager::_render(const double& dt, Viewport& viewport,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){
     m_i->_render(dt, *m_i->m_GBuffer, viewport, mainFunc, display_fbo, display_rbo);

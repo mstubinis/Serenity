@@ -2,6 +2,7 @@
 #ifndef ENGINE_ENGINE_OPTIONS_H
 #define ENGINE_ENGINE_OPTIONS_H
 
+#include <string>
 #include <core/engine/renderer/RendererIncludes.h>
 
 struct EngineOptions final {
@@ -19,9 +20,11 @@ struct EngineOptions final {
     bool                               maximized;
     unsigned int                       width;
     unsigned int                       height;
-    const char*                        window_title;
+    std::string                        window_title;
+    std::string                        icon;
     EngineOptions() {
         window_title      = "Engine";
+        icon              = "";
         width             = 1024;
         height            = 768;
         ssao_enabled      = true;

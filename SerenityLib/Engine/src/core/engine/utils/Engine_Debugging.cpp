@@ -28,7 +28,7 @@ epriv::DebugManager::~DebugManager() {
 void epriv::DebugManager::cleanup() {
 
 }
-void epriv::DebugManager::_init(const char* name, uint w, uint h) {
+void epriv::DebugManager::_init() {
 	GLuint cast = static_cast<GLuint>(queryID);
     glGenQueries(1, &cast);
     glQueryCounter(queryID, GL_TIMESTAMP);// dummy query to prevent OpenGL errors from popping out 

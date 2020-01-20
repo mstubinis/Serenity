@@ -24,6 +24,7 @@ int main(int argc, char* argv[]) {
 
     EngineOptions options;
     options.window_title   = "Star Trek: Homeland Security";
+    options.icon           = "../data/Textures/icon.png";
     options.width          = info.window_width;
     options.height         = info.window_height;
     options.window_mode    = info.getWindowModeInt();
