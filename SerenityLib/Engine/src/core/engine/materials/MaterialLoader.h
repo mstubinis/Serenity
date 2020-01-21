@@ -8,7 +8,7 @@
 class Material;
 class Texture;
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct MaterialLoader final {
             static Texture* LoadTextureDiffuse(const std::string& file);
             static Texture* LoadTextureNormal(const std::string& file);

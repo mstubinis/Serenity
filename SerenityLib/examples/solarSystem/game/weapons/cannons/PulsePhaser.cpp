@@ -141,7 +141,7 @@ PulsePhaserProjectile::PulsePhaserProjectile(EntityWrapper* target, PulsePhaser&
 
     auto& model   = *entity.addComponent<ComponentModel>(request, ResourceManifest::CannonEffectMesh, Material::WhiteShadeless,ShaderProgram::Forward,RenderStage::ForwardParticles);
     auto& outline = model.addModel(ResourceManifest::CannonEffectOutlineMesh, ResourceManifest::CannonOutlineMaterial, ShaderProgram::Forward, RenderStage::ForwardParticles);
-    auto& planeMesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
+    auto& planeMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
     auto& head    = model.addModel(&planeMesh, (Material*)(ResourceManifest::CannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& tail    = model.addModel(&planeMesh, (Material*)(ResourceManifest::CannonTailMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
 

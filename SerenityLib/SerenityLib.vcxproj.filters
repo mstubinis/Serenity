@@ -360,9 +360,6 @@
     <ClInclude Include="Engine\src\core\engine\resources\Handle.h">
       <Filter>Header Files\Engine\Core\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\renderer\Engine_Renderer.h">
-      <Filter>Header Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\renderer\FramebufferObject.h">
       <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
@@ -639,9 +636,6 @@
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventIncludes.h">
       <Filter>Header Files\Engine\Core\Events</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\system\window\Engine_Window.h">
-      <Filter>Header Files\Engine\Core\System\Window</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\system\Engine.h">
       <Filter>Header Files\Engine\Core\System</Filter>
     </ClInclude>
@@ -707,6 +701,12 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\mesh\BuiltInMeshes.h">
       <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\system\window\Window.h">
+      <Filter>Header Files\Engine\Core\System\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\Renderer.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -790,9 +790,6 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\mesh\VertexDataFormat.cpp">
       <Filter>Source Files\Engine\Core\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\renderer\Engine_Renderer.cpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\FramebufferObject.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
@@ -1025,9 +1022,6 @@
     <ClCompile Include="Engine\src\core\engine\scene\SceneOptions.cpp">
       <Filter>Source Files\Engine\Core\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\system\window\Engine_Window.cpp">
-      <Filter>Source Files\Engine\Core\System\Window</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\system\Engine.cpp">
       <Filter>Source Files\Engine\Core\System</Filter>
     </ClCompile>
@@ -1078,6 +1072,12 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\mesh\BuiltInMeshes.cpp">
       <Filter>Source Files\Engine\Core\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\system\window\Window.cpp">
+      <Filter>Source Files\Engine\Core\System\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\Renderer.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -28,17 +28,17 @@ int main(int argc, char* argv[]) {
     options.width          = info.window_width;
     options.height         = info.window_height;
     options.window_mode    = info.getWindowModeInt();
-    //options.show_console   = true;
+    options.show_console   = true;
     options.maximized      = info.window_maximized;
     options.aa_algorithm   = AntiAliasingAlgorithm::SMAA;
     options.argv           = argv;
     options.argc           = argc;
 
-    Engine::epriv::Core::m_Engine = NEW Engine::epriv::EngineCore(options);
-    Engine::epriv::Core::m_Engine->init(options);
-    Engine::epriv::Core::m_Engine->run();
+    Engine::priv::Core::m_Engine = NEW Engine::priv::EngineCore(options);
+    Engine::priv::Core::m_Engine->init(options);
+    Engine::priv::Core::m_Engine->run();
 
-    SAFE_DELETE(Engine::epriv::Core::m_Engine);
+    SAFE_DELETE(Engine::priv::Core::m_Engine);
 
     return 0;
 }

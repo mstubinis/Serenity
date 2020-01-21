@@ -9,7 +9,7 @@
 #include <core/engine/mesh/Mesh.h>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) {
@@ -242,19 +242,19 @@ void ComponentModel::setUserPointer(void* UserPointer) {
 
 #pragma region System
 
-struct epriv::ComponentModel_UpdateFunction final { void operator()(void* componentPool, const double& dt, Scene& scene) const {
+struct priv::ComponentModel_UpdateFunction final { void operator()(void* componentPool, const double& dt, Scene& scene) const {
 
 }};
-struct epriv::ComponentModel_ComponentAddedToEntityFunction final {void operator()(void* component, Entity& entity) const {
+struct priv::ComponentModel_ComponentAddedToEntityFunction final {void operator()(void* component, Entity& entity) const {
 
 }};
-struct epriv::ComponentModel_EntityAddedToSceneFunction final {void operator()(void* componentPool, Entity& entity, Scene& scene) const { 
+struct priv::ComponentModel_EntityAddedToSceneFunction final {void operator()(void* componentPool, Entity& entity, Scene& scene) const { 
 
 }};
-struct epriv::ComponentModel_SceneEnteredFunction final {void operator()(void* componentPool, Scene& scene) const {
+struct priv::ComponentModel_SceneEnteredFunction final {void operator()(void* componentPool, Scene& scene) const {
 
 }};
-struct epriv::ComponentModel_SceneLeftFunction final {void operator()(void* componentPool, Scene& scene) const {
+struct priv::ComponentModel_SceneLeftFunction final {void operator()(void* componentPool, Scene& scene) const {
 
 }};
 

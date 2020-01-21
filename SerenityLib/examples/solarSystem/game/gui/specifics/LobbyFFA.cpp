@@ -23,7 +23,7 @@
 
 #include <core/engine/fonts/Font.h>
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 
 using namespace std;
 using namespace Engine;
@@ -140,7 +140,7 @@ LobbyScreenFFA::LobbyScreenFFA(Font& font, Menu& menu, Core& core, Scene& scene,
     0.15f);
 
     m_ChooseShipMessage = NEW MessageWithArrow(font, "Choose a ship. If you do not choose one, you will\nbe given a ship at random when the match starts",
-        (padding_x / 2.0f) + inner_padding_x + (ends_size),
+        m_ShipSelector->m_ShipsFrame->positionWorld().x + m_ShipSelector->m_ShipsFrame->width() + 15.0f,
         (winSize.y - (padding_y / 2.0f) - inner_padding_y) - 25.0f,
     0.7f);
 
@@ -251,7 +251,7 @@ void LobbyScreenFFA::onResize(const unsigned int newWidth, const unsigned int ne
     }
     if (m_ChooseShipMessage) {
         m_ChooseShipMessage->setPosition(
-            (padding_x / 2.0f) + inner_padding_x + (rounded_win_size.y - chat_box_height),
+            m_ShipSelector->m_ShipsFrame->positionWorld().x + m_ShipSelector->m_ShipsFrame->width() + 15.0f,
             (winSize.y - (padding_y / 2.0f) - inner_padding_y) - 25.0f
         );
     }

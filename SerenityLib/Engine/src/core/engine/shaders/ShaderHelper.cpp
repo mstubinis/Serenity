@@ -4,7 +4,7 @@
 #include <sstream>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 const bool ShaderHelper::sfind(const string& whole, const string& part) {

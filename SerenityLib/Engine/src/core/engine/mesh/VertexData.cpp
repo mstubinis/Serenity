@@ -1,5 +1,5 @@
 #include <core/engine/mesh/VertexData.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 
 using namespace Engine;
 using namespace std;
@@ -18,12 +18,12 @@ VertexData::VertexData(const VertexDataFormat& _format) : format(const_cast<Vert
     buffers.push_back(std::make_unique<VertexBufferObject>());
 }
 VertexData::~VertexData() {
-    Renderer::deleteVAO(vao);
+    Engine::Renderer::deleteVAO(vao);
 }
 
 void VertexData::finalize() {
-    Renderer::deleteVAO(vao);
-    if (epriv::RenderManager::OPENGL_VERSION >= 30) {
+    Engine::Renderer::deleteVAO(vao);
+    if (priv::Renderer::OPENGL_VERSION >= 30) {
         //build the vao itself
         Engine::Renderer::genAndBindVAO(vao);
         sendDataToGPU(false, -1);
@@ -68,7 +68,7 @@ void VertexData::setIndices(vector<unsigned short>& _data, const bool addToGPU, 
             triangles.clear();
             triangles.reserve(_data.size() / 3);
             size_t j = 0;
-            Engine::epriv::Triangle tri;
+            Engine::priv::Triangle tri;
             for (size_t i = 0; i < indices.size(); ++i) {
                 ++j;
                 auto& index = indices[i];

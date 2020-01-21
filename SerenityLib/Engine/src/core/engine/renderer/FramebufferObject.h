@@ -10,7 +10,7 @@
 
 class Texture;
 namespace Engine{
-    namespace epriv{
+    namespace priv{
         class FramebufferObject;
         class FramebufferObjectAttatchment;
         class FramebufferTexture;
@@ -19,7 +19,7 @@ namespace Engine{
         struct FramebufferObjectDefaultUnbindFunctor;
         
         class FramebufferObjectAttatchment{
-            friend class  Engine::epriv::FramebufferObject;
+            friend class  Engine::priv::FramebufferObject;
             private:
                 GLuint                     m_InternalFormat;
                 GLuint                     m_GL_Attatchment;
@@ -39,7 +39,7 @@ namespace Engine{
                 virtual void unbind();
         };
         class FramebufferTexture final: public FramebufferObjectAttatchment{
-            friend class  Engine::epriv::FramebufferObject;
+            friend class  Engine::priv::FramebufferObject;
             private:
                 Texture*       m_Texture;
                 GLuint         m_PixelFormat;
@@ -55,7 +55,7 @@ namespace Engine{
                 void unbind();
         };
         class RenderbufferObject final: public FramebufferObjectAttatchment{
-            friend class  Engine::epriv::FramebufferObject;
+            friend class  Engine::priv::FramebufferObject;
             private:
                 GLuint         m_RBO;
                 unsigned int   m_Width;
@@ -70,10 +70,10 @@ namespace Engine{
                 void unbind();
         };
         class FramebufferObject final: public BindableResource{
-            friend class  Engine::epriv::FramebufferTexture;
-            friend class  Engine::epriv::RenderbufferObject;
-            friend struct Engine::epriv::FramebufferObjectDefaultBindFunctor;
-            friend struct Engine::epriv::FramebufferObjectDefaultUnbindFunctor;
+            friend class  Engine::priv::FramebufferTexture;
+            friend class  Engine::priv::RenderbufferObject;
+            friend struct Engine::priv::FramebufferObjectDefaultBindFunctor;
+            friend struct Engine::priv::FramebufferObjectDefaultUnbindFunctor;
             private:
                 size_t                                                             m_CurrentFBOIndex;
                 unsigned int                                                       m_FramebufferWidth;

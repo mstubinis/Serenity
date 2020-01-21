@@ -15,7 +15,7 @@ SpotLight::SpotLight(const glm::vec3 pos, const glm::vec3 direction, const float
     }
 
     if (m_Type == LightType::Spot) {
-        auto& spotLights = epriv::InternalScenePublicInterface::GetSpotLights(*scene);
+        auto& spotLights = priv::InternalScenePublicInterface::GetSpotLights(*scene);
         spotLights.push_back(this);
     }
 }
@@ -36,6 +36,6 @@ const float SpotLight::getCutoffOuter() const {
 }
 void SpotLight::destroy() {
     EntityWrapper::destroy();
-    removeFromVector(epriv::InternalScenePublicInterface::GetSpotLights(m_Entity.scene()), this);
-    removeFromVector(epriv::InternalScenePublicInterface::GetLights(m_Entity.scene()), this);
+    removeFromVector(priv::InternalScenePublicInterface::GetSpotLights(m_Entity.scene()), this);
+    removeFromVector(priv::InternalScenePublicInterface::GetLights(m_Entity.scene()), this);
 }

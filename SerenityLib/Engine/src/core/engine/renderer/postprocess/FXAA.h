@@ -4,7 +4,7 @@
 
 class  ShaderProgram;
 namespace Engine {
-namespace epriv {
+namespace priv {
     class  GBuffer;
     class  FXAA final {
         public:

@@ -6,7 +6,7 @@
 #include <core/engine/math/Numbers.h>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct DefaultDecalBindFunctor;
         struct DefaultDecalUnbindFunctor;
     };
@@ -14,8 +14,8 @@ namespace Engine {
 
 class Material;
 class Decal final: public EntityWrapper{
-    friend struct Engine::epriv::DefaultDecalBindFunctor;
-    friend struct Engine::epriv::DefaultDecalUnbindFunctor;
+    friend struct Engine::priv::DefaultDecalBindFunctor;
+    friend struct Engine::priv::DefaultDecalUnbindFunctor;
     private:
         float      m_LifetimeCurrent;
         float      m_LifetimeMax;

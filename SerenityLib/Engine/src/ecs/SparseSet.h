@@ -5,7 +5,7 @@
 #include <utility>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
 
         template <typename...>      class SparseSet;
         template <typename TID>     class SparseSet<TID> {

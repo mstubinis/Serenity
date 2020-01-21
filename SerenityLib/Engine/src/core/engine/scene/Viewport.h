@@ -8,8 +8,8 @@ class  Scene;
 class  Camera;
 
 namespace Engine {
-    namespace epriv {
-        class RenderManager;
+    namespace priv {
+        class Renderer;
     };
 };
 
@@ -29,7 +29,7 @@ struct ViewportRenderingFlag final { enum Flag: unsigned int {
 
 class Viewport final {
     friend class Scene;
-    friend class Engine::epriv::RenderManager;
+    friend class Engine::priv::Renderer;
     private:
         Scene&         m_Scene;
         Camera*        m_Camera;

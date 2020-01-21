@@ -24,7 +24,7 @@ const bool Handle::null() const {
 const EngineResource* Handle::get() const {
     if (null()) 
         return nullptr;
-    return epriv::Core::m_Engine->m_ResourceManager.m_Resources->getAsFast<EngineResource>(index);
+    return priv::Core::m_Engine->m_ResourceManager.m_Resources->getAsFast<EngineResource>(index);
 }
 const EngineResource* Handle::operator ->() const { 
     return get(); 

@@ -11,7 +11,7 @@ class ComponentModel;
 class ComponentCamera;
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct ComponentCamera_UpdateFunction;
         struct ComponentCamera_EntityAddedToSceneFunction;
         struct ComponentCamera_ComponentAddedToEntityFunction;
@@ -30,12 +30,12 @@ namespace Engine {
 };
 
 class ComponentCamera : public ComponentBaseClass {
-    friend struct Engine::epriv::ComponentCamera_UpdateFunction;
-    friend struct Engine::epriv::ComponentCamera_EntityAddedToSceneFunction;
-    friend struct Engine::epriv::ComponentCamera_ComponentAddedToEntityFunction;
-    friend struct Engine::epriv::ComponentCamera_SceneEnteredFunction;
-    friend struct Engine::epriv::ComponentCamera_SceneLeftFunction;
-    friend struct Engine::epriv::ComponentCamera_Functions;
+    friend struct Engine::priv::ComponentCamera_UpdateFunction;
+    friend struct Engine::priv::ComponentCamera_EntityAddedToSceneFunction;
+    friend struct Engine::priv::ComponentCamera_ComponentAddedToEntityFunction;
+    friend struct Engine::priv::ComponentCamera_SceneEnteredFunction;
+    friend struct Engine::priv::ComponentCamera_SceneLeftFunction;
+    friend struct Engine::priv::ComponentCamera_Functions;
     friend class  ::Camera;
     friend class  ::ComponentModel;
     private:
@@ -92,7 +92,7 @@ class ComponentCamera : public ComponentBaseClass {
 		const unsigned int sphereIntersectTest(const glm_vec3& objectPosition, const float& objectRadius) const;
 };
 
-class ComponentCamera_System_CI : public Engine::epriv::ECSSystemCI {
+class ComponentCamera_System_CI : public Engine::priv::ECSSystemCI {
     public:
         ComponentCamera_System_CI();
         ~ComponentCamera_System_CI() = default;

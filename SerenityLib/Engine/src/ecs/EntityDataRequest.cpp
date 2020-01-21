@@ -2,7 +2,7 @@
 #include <ecs/Entity.h>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 
 EntityDataRequest::EntityDataRequest(const unsigned int& data) {
     serialize(data); 
@@ -46,7 +46,7 @@ EntityPOD::EntityPOD(EntityPOD&& other) noexcept {
     sceneID   = other.sceneID;
     versionID = other.versionID;
 }
-EntityPOD& epriv::EntityPOD::operator=(EntityPOD&& other) noexcept {
+EntityPOD& priv::EntityPOD::operator=(EntityPOD&& other) noexcept {
     if (&other != this) {
         ID        = other.ID;
         sceneID   = other.sceneID;

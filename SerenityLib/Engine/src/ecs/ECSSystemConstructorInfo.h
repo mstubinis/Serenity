@@ -13,7 +13,7 @@ typedef std::function<void(void*, Entity&)>                std_func_component;
 typedef std::function<void(void*, Scene&)>                 std_func_scene;
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct FunctorUpdateEmpty final { void operator()(void* cPool, const double& dt, Scene&) const { } };
         struct FunctorComponentEmpty final { void operator()(void* compt, Entity&) const { } };
         struct FunctorEntityEmpty final { void operator()(void* cPool, Entity&, Scene&) const { } };

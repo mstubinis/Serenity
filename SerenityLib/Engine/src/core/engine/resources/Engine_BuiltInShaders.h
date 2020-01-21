@@ -5,7 +5,7 @@
 #include <string>
 
 namespace Engine{
-    namespace epriv{
+    namespace priv{
         class EShaders{
             public:
                 static void init();

@@ -8,7 +8,7 @@
 typedef unsigned short ushort;
 
 namespace Engine {
-namespace epriv {
+namespace priv {
     struct MeshImportedData final {
         std::map<uint, VertexBoneData> m_Bones;
         std::vector<glm::vec3>         file_points;

@@ -3,7 +3,7 @@
 #define ENGINE_LUAENGINE_H_INCLUDE_GUARD
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class LUAEngine final {
             private:
 

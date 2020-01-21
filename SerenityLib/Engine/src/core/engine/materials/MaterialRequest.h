@@ -67,7 +67,7 @@ struct MaterialRequest final {
 };
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct InternalMaterialRequestPublicInterface final {
             friend class  Material;
             static void Request(MaterialRequest&);

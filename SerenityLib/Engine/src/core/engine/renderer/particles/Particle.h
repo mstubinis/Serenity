@@ -14,7 +14,7 @@ class  Scene;
 class  Material;
 struct Entity;
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct InternalScenePublicInterface;
         class  ParticleSystem;
         class  GBuffer;
@@ -42,8 +42,8 @@ struct ParticleData final {
 };
 
 class Particle {
-    friend struct Engine::epriv::InternalScenePublicInterface;
-    friend class  Engine::epriv::ParticleSystem;
+    friend struct Engine::priv::InternalScenePublicInterface;
+    friend class  Engine::priv::ParticleSystem;
     friend struct ParticleData;
     private:
         ParticleEmitter*   m_EmitterSource;
@@ -76,8 +76,8 @@ class Particle {
         const glm::vec4& color() const;
         const glm::vec3& velocity() const;
         const double lifetime() const;
-        void update(const size_t& index, const double& dt, Engine::epriv::ParticleSystem& particleSystem);
-        void update_multithreaded(const size_t& index, const double& dt, Engine::epriv::ParticleSystem& particleSystem);
+        void update(const size_t& index, const double& dt, Engine::priv::ParticleSystem& particleSystem);
+        void update_multithreaded(const size_t& index, const double& dt, Engine::priv::ParticleSystem& particleSystem);
 
 
 
@@ -95,7 +95,7 @@ class Particle {
         const glm::vec4& getUserData() const;
 
 
-        void render(Engine::epriv::GBuffer&);
+        void render(Engine::priv::GBuffer&);
 
 };
 

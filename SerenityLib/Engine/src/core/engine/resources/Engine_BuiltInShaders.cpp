@@ -22,57 +22,57 @@ GLSL Version    OpenGL Version
 */
 
 #pragma region Declarations
-string epriv::EShaders::conditional_functions;
-string epriv::EShaders::decal_vertex;
-string epriv::EShaders::decal_frag;
-string epriv::EShaders::bullet_physics_vert;
-string epriv::EShaders::bullet_physcis_frag;
-string epriv::EShaders::fullscreen_quad_vertex;
-string epriv::EShaders::vertex_basic;
-string epriv::EShaders::vertex_2DAPI;
-string epriv::EShaders::vertex_skybox;
-string epriv::EShaders::particle_vertex;
-string epriv::EShaders::lighting_vert;
-string epriv::EShaders::stencil_passover;
-string epriv::EShaders::depth_of_field;
-string epriv::EShaders::smaa_common;
-string epriv::EShaders::smaa_vertex_1;
-string epriv::EShaders::smaa_frag_1;
-string epriv::EShaders::smaa_vertex_2;
-string epriv::EShaders::smaa_frag_2;
-string epriv::EShaders::smaa_vertex_3;
-string epriv::EShaders::smaa_frag_3;
-string epriv::EShaders::smaa_vertex_4;
-string epriv::EShaders::smaa_frag_4;
-string epriv::EShaders::fxaa_frag;
-string epriv::EShaders::forward_frag;
-string epriv::EShaders::particle_frag;
-string epriv::EShaders::deferred_frag;
-string epriv::EShaders::zprepass_frag;
-string epriv::EShaders::deferred_frag_hud;
-string epriv::EShaders::deferred_frag_skybox;
-string epriv::EShaders::copy_depth_frag;
-string epriv::EShaders::cubemap_convolude_frag;
-string epriv::EShaders::cubemap_prefilter_envmap_frag;
-string epriv::EShaders::brdf_precompute;
-string epriv::EShaders::ssao_frag;
-string epriv::EShaders::bloom_frag;
-string epriv::EShaders::hdr_frag;
-string epriv::EShaders::godRays_frag;
-string epriv::EShaders::blur_frag;
-string epriv::EShaders::ssao_blur_frag;
-string epriv::EShaders::greyscale_frag;
-string epriv::EShaders::final_frag;
-string epriv::EShaders::depth_and_transparency_frag;
-string epriv::EShaders::lighting_frag;
-string epriv::EShaders::lighting_frag_gi;
+string priv::EShaders::conditional_functions;
+string priv::EShaders::decal_vertex;
+string priv::EShaders::decal_frag;
+string priv::EShaders::bullet_physics_vert;
+string priv::EShaders::bullet_physcis_frag;
+string priv::EShaders::fullscreen_quad_vertex;
+string priv::EShaders::vertex_basic;
+string priv::EShaders::vertex_2DAPI;
+string priv::EShaders::vertex_skybox;
+string priv::EShaders::particle_vertex;
+string priv::EShaders::lighting_vert;
+string priv::EShaders::stencil_passover;
+string priv::EShaders::depth_of_field;
+string priv::EShaders::smaa_common;
+string priv::EShaders::smaa_vertex_1;
+string priv::EShaders::smaa_frag_1;
+string priv::EShaders::smaa_vertex_2;
+string priv::EShaders::smaa_frag_2;
+string priv::EShaders::smaa_vertex_3;
+string priv::EShaders::smaa_frag_3;
+string priv::EShaders::smaa_vertex_4;
+string priv::EShaders::smaa_frag_4;
+string priv::EShaders::fxaa_frag;
+string priv::EShaders::forward_frag;
+string priv::EShaders::particle_frag;
+string priv::EShaders::deferred_frag;
+string priv::EShaders::zprepass_frag;
+string priv::EShaders::deferred_frag_hud;
+string priv::EShaders::deferred_frag_skybox;
+string priv::EShaders::copy_depth_frag;
+string priv::EShaders::cubemap_convolude_frag;
+string priv::EShaders::cubemap_prefilter_envmap_frag;
+string priv::EShaders::brdf_precompute;
+string priv::EShaders::ssao_frag;
+string priv::EShaders::bloom_frag;
+string priv::EShaders::hdr_frag;
+string priv::EShaders::godRays_frag;
+string priv::EShaders::blur_frag;
+string priv::EShaders::ssao_blur_frag;
+string priv::EShaders::greyscale_frag;
+string priv::EShaders::final_frag;
+string priv::EShaders::depth_and_transparency_frag;
+string priv::EShaders::lighting_frag;
+string priv::EShaders::lighting_frag_gi;
 #pragma endregion
 
-void epriv::EShaders::init(){
+void priv::EShaders::init(){
 
 #pragma region Functions
 
-epriv::EShaders::conditional_functions =
+priv::EShaders::conditional_functions =
     "\n"
     "vec4 when_eq(vec4 x, vec4 y) { return 1.0 - abs(sign(x - y)); }\n"
     "vec4 when_neq(vec4 x, vec4 y) { return abs(sign(x - y)); }\n"
@@ -133,7 +133,7 @@ epriv::EShaders::conditional_functions =
 #pragma endregion
 
 #pragma region LightingVertex
-epriv::EShaders::lighting_vert = 
+priv::EShaders::lighting_vert = 
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec2 uv;\n"
     "\n"
@@ -174,7 +174,7 @@ epriv::EShaders::lighting_vert =
 #pragma endregion
 
 #pragma region BulletPhysicsVertex
-epriv::EShaders::bullet_physics_vert =
+priv::EShaders::bullet_physics_vert =
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec3 color;\n"
     "\n"
@@ -190,7 +190,7 @@ epriv::EShaders::bullet_physics_vert =
 #pragma endregion
 
 #pragma region BulletPhysicsFragment
-epriv::EShaders::bullet_physcis_frag =
+priv::EShaders::bullet_physcis_frag =
     "in vec3 OutColor;\n"
     "void main(){\n"
     "	gl_FragColor = vec4(OutColor,1.0);\n"
@@ -199,7 +199,7 @@ epriv::EShaders::bullet_physcis_frag =
 
 #pragma region DecalVertex
 //TODO: get rid of the useless info here
-epriv::EShaders::decal_vertex =  
+priv::EShaders::decal_vertex =  
 "USE_LOG_DEPTH_VERTEX\n"
 "\n"
 "layout (location = 0) in vec3 position;\n"
@@ -249,7 +249,7 @@ epriv::EShaders::decal_vertex =
 #pragma endregion
 
 #pragma region ParticleVertex
-epriv::EShaders::particle_vertex =
+priv::EShaders::particle_vertex =
 "USE_LOG_DEPTH_VERTEX\n"
 "\n"
 "layout (location = 0) in vec3 position;\n"
@@ -275,7 +275,7 @@ epriv::EShaders::particle_vertex =
 
 #pragma region DecalFrag
 //TODO: get rid of the useless info here
-epriv::EShaders::decal_frag =
+priv::EShaders::decal_frag =
     "USE_LOG_DEPTH_FRAGMENT\n"
     "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
     "USE_MAX_MATERIAL_COMPONENTS\n"
@@ -392,7 +392,7 @@ normal = tangentToView * normal;
 #pragma endregion
 
 #pragma region VertexBasic
-epriv::EShaders::vertex_basic = 
+priv::EShaders::vertex_basic = 
     "USE_LOG_DEPTH_VERTEX\n"
     "\n"
     "layout (location = 0) in vec3 position;\n"
@@ -456,7 +456,7 @@ epriv::EShaders::vertex_basic =
 #pragma endregion
 
 #pragma region Vertex2DAPI
-epriv::EShaders::vertex_2DAPI =
+priv::EShaders::vertex_2DAPI =
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec2 uv;\n"
     "\n"
@@ -470,7 +470,7 @@ epriv::EShaders::vertex_2DAPI =
 #pragma endregion
 
 #pragma region VertexSkybox
-epriv::EShaders::vertex_skybox =
+priv::EShaders::vertex_skybox =
     "\n"
     "layout (location = 0) in vec3 position;\n"
     "uniform mat4 VP;\n"
@@ -483,7 +483,7 @@ epriv::EShaders::vertex_skybox =
 #pragma endregion
 
 #pragma region CubemapConvoludeFrag
-epriv::EShaders::cubemap_convolude_frag =
+priv::EShaders::cubemap_convolude_frag =
     "\n"
     "varying vec3 UV;\n"
     "uniform samplerCube cubemap;\n"
@@ -516,7 +516,7 @@ epriv::EShaders::cubemap_convolude_frag =
 //
 // this shader is heavily modified based on optimizations in the link above. the optimizations are not complete yet, and 
 // what seems to look correct may not be. this shader might have to be modified against the original later on.
-epriv::EShaders::cubemap_prefilter_envmap_frag =
+priv::EShaders::cubemap_prefilter_envmap_frag =
     "varying vec3 UV;\n"
     "uniform samplerCube cubemap;\n"
     "uniform float roughness;\n"
@@ -588,7 +588,7 @@ epriv::EShaders::cubemap_prefilter_envmap_frag =
 
 #pragma region BRDFPrecompute
 
-epriv::EShaders::brdf_precompute =
+priv::EShaders::brdf_precompute =
     "const float PI2 = 6.283185;\n"
     "uniform int NUM_SAMPLES;\n"
     "varying vec2 texcoords;\n"
@@ -670,7 +670,7 @@ epriv::EShaders::brdf_precompute =
 #pragma endregion
 
 #pragma region FXAA
-epriv::EShaders::fxaa_frag =
+priv::EShaders::fxaa_frag =
     "uniform float FXAA_REDUCE_MIN;\n"
     "uniform float FXAA_REDUCE_MUL;\n"
     "uniform float FXAA_SPAN_MAX;\n"
@@ -718,7 +718,7 @@ epriv::EShaders::fxaa_frag =
 
 #pragma region LightingStencilPass
 
-epriv::EShaders::stencil_passover =
+priv::EShaders::stencil_passover =
     "\n"
     "const vec3 comparison = vec3(1.0,1.0,1.0);\n"
     "uniform sampler2D gNormalMap;\n"
@@ -733,7 +733,7 @@ epriv::EShaders::stencil_passover =
 #pragma endregion
 
 #pragma region FullscreenQuadVertex
-epriv::EShaders::fullscreen_quad_vertex = 
+priv::EShaders::fullscreen_quad_vertex = 
     "\n"
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec2 uv;\n"
@@ -753,7 +753,7 @@ epriv::EShaders::fullscreen_quad_vertex =
 #pragma endregion
 
 #pragma region DepthOfField
-epriv::EShaders::depth_of_field =
+priv::EShaders::depth_of_field =
     "\n"
     "const float DOFWeight[4] = float[](1.0,0.9,0.7,0.4);\n"
     "\n"
@@ -809,7 +809,7 @@ epriv::EShaders::depth_of_field =
 
 #pragma region SMAA
    
-epriv::EShaders::smaa_common = 
+priv::EShaders::smaa_common = 
     "vec4 mad(vec4 a, vec4 b, vec4 c){ return (a * b) + c; }\n"
     "vec3 mad(vec3 a, vec3 b, vec3 c){ return (a * b) + c; }\n"
     "vec2 mad(vec2 a, vec2 b, vec2 c){ return (a * b) + c; }\n"
@@ -842,7 +842,7 @@ epriv::EShaders::smaa_common =
     //"bool API_V_ABOVE(float v1, float v2){ if(v1 < v2) return true; return false; }\n"
     "\n";
 
-epriv::EShaders::smaa_vertex_1 = epriv::EShaders::smaa_common +
+priv::EShaders::smaa_vertex_1 = priv::EShaders::smaa_common +
     "\n"//edge vert
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec2 UV;\n"
@@ -866,7 +866,7 @@ epriv::EShaders::smaa_vertex_1 = epriv::EShaders::smaa_common +
     "    gl_Position = VP * Model * vec4(vert,1.0);\n"
     "}\n";  
     
-epriv::EShaders::smaa_frag_1 = epriv::EShaders::smaa_common +
+priv::EShaders::smaa_frag_1 = priv::EShaders::smaa_common +
     "\n"//edge frag
     "\n"
     "uniform int SMAA_PREDICATION;\n"
@@ -970,7 +970,7 @@ epriv::EShaders::smaa_frag_1 = epriv::EShaders::smaa_common +
     //"    gl_FragColor = vec4(SMAADepthEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
     //"    gl_FragColor = vec4(SMAALumaEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
     "}\n";
-epriv::EShaders::smaa_vertex_2 = epriv::EShaders::smaa_common +
+priv::EShaders::smaa_vertex_2 = priv::EShaders::smaa_common +
     "\n"//blend vert
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec2 UV;\n"
@@ -999,7 +999,7 @@ epriv::EShaders::smaa_vertex_2 = epriv::EShaders::smaa_common +
     "    gl_Position = VP * Model * vec4(vert,1.0);\n"
     "    _SMAA_PIXEL_SIZE = SMAA_PIXEL_SIZE;\n"
     "}\n";
-epriv::EShaders::smaa_frag_2 = epriv::EShaders::smaa_common +
+priv::EShaders::smaa_frag_2 = priv::EShaders::smaa_common +
     "\n"
     "\n"//blend frag
     "uniform sampler2D edge_tex;\n"
@@ -1233,7 +1233,7 @@ epriv::EShaders::smaa_frag_2 = epriv::EShaders::smaa_common +
     "    vec4 subSamples = vec4( 0.0 , 0.0 , 0.0 , 0.0 );\n"
     "    gl_FragColor = SMAABlendingWeightCalculationPS(uv,pixCoord,_offset,edge_tex,area_tex,search_tex,subSamples);\n"
     "}\n";
-epriv::EShaders::smaa_vertex_3 = epriv::EShaders::smaa_common +
+priv::EShaders::smaa_vertex_3 = priv::EShaders::smaa_common +
     "\n"//neightbor vert
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec2 UV;\n"
@@ -1257,7 +1257,7 @@ epriv::EShaders::smaa_vertex_3 = epriv::EShaders::smaa_common +
     "    gl_Position = VP * Model * vec4(vert,1.0);\n"
     "    _SMAA_PIXEL_SIZE = SMAA_PIXEL_SIZE;\n"
     "}\n";
-epriv::EShaders::smaa_frag_3 = epriv::EShaders::smaa_common +
+priv::EShaders::smaa_frag_3 = priv::EShaders::smaa_common +
     "\n"//neighbor frag
     "uniform sampler2D textureMap;\n"
     "uniform sampler2D blend_tex;\n"
@@ -1293,7 +1293,7 @@ epriv::EShaders::smaa_frag_3 = epriv::EShaders::smaa_common +
     "}";
 
 //vertex & frag 4 are optional passes
-epriv::EShaders::smaa_vertex_4 = epriv::EShaders::smaa_common +
+priv::EShaders::smaa_vertex_4 = priv::EShaders::smaa_common +
     "\n"
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec2 UV;\n"
@@ -1315,7 +1315,7 @@ epriv::EShaders::smaa_vertex_4 = epriv::EShaders::smaa_common +
     "    vert.y *= screenSizeDivideBy2.y;\n"
     "    gl_Position = VP * Model * vec4(vert,1.0);\n"
     "}";
-epriv::EShaders::smaa_frag_4 = epriv::EShaders::smaa_common +
+priv::EShaders::smaa_frag_4 = priv::EShaders::smaa_common +
     "\n"
     "varying vec2 uv;\n"
     "vec4 SMAAResolvePS(vec2 texcoord,sampler2D currentColorTex,sampler2D previousColorTex){\n"
@@ -1329,7 +1329,7 @@ epriv::EShaders::smaa_frag_4 = epriv::EShaders::smaa_common +
 #pragma endregion
    
 #pragma region ForwardFrag
-epriv::EShaders::forward_frag =
+priv::EShaders::forward_frag =
     "\n"
     "USE_LOG_DEPTH_FRAGMENT\n"
     "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
@@ -1489,7 +1489,7 @@ epriv::EShaders::forward_frag =
 #pragma endregion
 
 #pragma region ParticleFrag
-epriv::EShaders::particle_frag =
+priv::EShaders::particle_frag =
     "\n"
     "USE_LOG_DEPTH_FRAGMENT\n"
     "\n"
@@ -1515,7 +1515,7 @@ epriv::EShaders::particle_frag =
 #pragma endregion
 
 #pragma region DeferredFrag
-epriv::EShaders::deferred_frag =
+priv::EShaders::deferred_frag =
     "\n"
     "USE_LOG_DEPTH_FRAGMENT\n"
     "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
@@ -1602,7 +1602,7 @@ epriv::EShaders::deferred_frag =
 #pragma endregion
 
 #pragma region ZPrepassFrag
-epriv::EShaders::zprepass_frag =
+priv::EShaders::zprepass_frag =
     "USE_LOG_DEPTH_FRAGMENT\n"
     "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
     "USE_MAX_MATERIAL_COMPONENTS\n"
@@ -1612,7 +1612,7 @@ epriv::EShaders::zprepass_frag =
 #pragma endregion
 
 #pragma region DeferredFragHUD
-epriv::EShaders::deferred_frag_hud =
+priv::EShaders::deferred_frag_hud =
     "\n"
     "uniform sampler2D DiffuseTexture;\n"
     "uniform int DiffuseTextureEnabled;\n"
@@ -1630,7 +1630,7 @@ epriv::EShaders::deferred_frag_hud =
 #pragma endregion
 
 #pragma region DeferredFragSkybox
-epriv::EShaders::deferred_frag_skybox =
+priv::EShaders::deferred_frag_skybox =
     "\n"
     "uniform vec4 Color;\n"
     "uniform int IsFake;\n"
@@ -1649,7 +1649,7 @@ epriv::EShaders::deferred_frag_skybox =
 #pragma endregion
 
 #pragma region CopyDepthFrag
-epriv::EShaders::copy_depth_frag =
+priv::EShaders::copy_depth_frag =
     "\n"
     "uniform sampler2D gDepthMap;\n"
     "varying vec2 texcoords;\n"
@@ -1660,7 +1660,7 @@ epriv::EShaders::copy_depth_frag =
 
 #pragma region SSAO
 
-epriv::EShaders::ssao_frag =
+priv::EShaders::ssao_frag =
     "USE_LOG_DEPTH_FRAG_WORLD_POSITION\n"
     "\n"
     "uniform sampler2D gNormalMap;\n"
@@ -1685,7 +1685,7 @@ epriv::EShaders::ssao_frag =
 #pragma endregion
 
 #pragma region Bloom
-epriv::EShaders::bloom_frag =
+priv::EShaders::bloom_frag =
     "const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);\n"
     "uniform sampler2D SceneTexture;\n"
     "\n"
@@ -1702,7 +1702,7 @@ epriv::EShaders::bloom_frag =
 #pragma endregion
 
 #pragma region HDR
-epriv::EShaders::hdr_frag =
+priv::EShaders::hdr_frag =
     "\n"
     "uniform sampler2D lightingBuffer;\n"
     "uniform sampler2D gDiffuseMap;\n"
@@ -1744,7 +1744,7 @@ epriv::EShaders::hdr_frag =
 #pragma endregion
 
 #pragma region Blur
-epriv::EShaders::blur_frag =
+priv::EShaders::blur_frag =
     "uniform sampler2D image;\n"
     "uniform vec4 DataA;\n"//radius, UNUSED, H,V
     "uniform vec4 strengthModifier;\n"
@@ -1768,7 +1768,7 @@ epriv::EShaders::blur_frag =
 #pragma endregion
 
 #pragma region SSAO Blur
-epriv::EShaders::ssao_blur_frag =
+priv::EShaders::ssao_blur_frag =
     "uniform sampler2D image;\n"
     "uniform vec4 Data;\n"//radius, UNUSED, H,V
     "uniform float strengthModifier;\n"
@@ -1792,7 +1792,7 @@ epriv::EShaders::ssao_blur_frag =
 #pragma endregion
 
 #pragma region GodRays
-epriv::EShaders::godRays_frag = 
+priv::EShaders::godRays_frag = 
     "uniform vec4 RaysInfo;\n"//exposure | decay | density | weight
     "\n"
     "uniform vec2 lightPositionOnScreen;\n"
@@ -1822,7 +1822,7 @@ epriv::EShaders::godRays_frag =
 #pragma endregion
 
 #pragma region Greyscale
-epriv::EShaders::greyscale_frag =
+priv::EShaders::greyscale_frag =
     "\n"
     "uniform sampler2D textureMap;\n"
     "varying vec2 texcoords;\n"
@@ -1834,7 +1834,7 @@ epriv::EShaders::greyscale_frag =
 #pragma endregion
     
 #pragma region FinalFrag
-epriv::EShaders::final_frag =
+priv::EShaders::final_frag =
     "\n"
     "uniform sampler2D SceneTexture;\n"
     "uniform sampler2D gBloomMap;\n"
@@ -1874,7 +1874,7 @@ epriv::EShaders::final_frag =
 
 #pragma region DepthAndTransparency
 
-epriv::EShaders::depth_and_transparency_frag = 
+priv::EShaders::depth_and_transparency_frag = 
     "\n"
     "uniform sampler2D SceneTexture;\n"
     "uniform sampler2D gDepthMap;\n"
@@ -1886,7 +1886,7 @@ epriv::EShaders::depth_and_transparency_frag =
     "\n"
     "varying vec2 texcoords;\n"
     "\n";
-epriv::EShaders::depth_and_transparency_frag +=
+priv::EShaders::depth_and_transparency_frag +=
     "\n"
     "void main(){\n"
     "    vec4 scene = texture2D(SceneTexture,texcoords);\n"
@@ -1903,7 +1903,7 @@ epriv::EShaders::depth_and_transparency_frag +=
 #pragma endregion
 
 #pragma region LightingFrag
-epriv::EShaders::lighting_frag =
+priv::EShaders::lighting_frag =
     "#define MATERIAL_COUNT_LIMIT 255\n"
     "\n"
     "struct Light{\n"
@@ -1953,7 +1953,7 @@ epriv::EShaders::lighting_frag =
 #pragma endregion
 
 #pragma region LightingFragGI
-epriv::EShaders::lighting_frag_gi =
+priv::EShaders::lighting_frag_gi =
     "#define MATERIAL_COUNT_LIMIT 255\n"
     "\n"
     "const float MAX_REFLECTION_LOD = 5.0;\n"

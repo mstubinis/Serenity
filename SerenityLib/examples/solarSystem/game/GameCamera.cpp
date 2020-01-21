@@ -4,7 +4,7 @@
 
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/math/Engine_Math.h>
 
@@ -185,7 +185,7 @@ Entity GameCamera::getObjectInCenterRay(vector<Entity>& exclusions) {
     Scene& scene = m_Entity.scene();
     Entity ret = Entity::_null;
     vector<Entity> objs;
-    for (auto& data : epriv::InternalScenePublicInterface::GetEntities(scene)) {
+    for (auto& data : priv::InternalScenePublicInterface::GetEntities(scene)) {
         Entity e = scene.getEntity(data);
         if (rayIntersectSphere(e)) {
             bool is_valid = true;

@@ -22,7 +22,7 @@ class  Viewport;
 class  ModelInstance;
 class  Collision;
 namespace Engine{
-    namespace epriv{
+    namespace priv{
         struct DefaultModelInstanceBindFunctor;
         struct DefaultModelInstanceUnbindFunctor;
         struct ModelInstanceAnimation;
@@ -33,8 +33,8 @@ namespace Engine{
     };
 };
 class ModelInstance final: public BindableResource{
-    friend struct Engine::epriv::DefaultModelInstanceBindFunctor;
-    friend struct Engine::epriv::DefaultModelInstanceUnbindFunctor;
+    friend struct Engine::priv::DefaultModelInstanceBindFunctor;
+    friend struct Engine::priv::DefaultModelInstanceUnbindFunctor;
     friend class  ComponentModel;
     friend class  Collision;
     private:
@@ -42,7 +42,7 @@ class ModelInstance final: public BindableResource{
         static unsigned int                                  m_ViewportFlagDefault;
         unsigned int                                         m_ViewportFlag; //determine what viewports this can be seen in
         void*                                                m_UserPointer;
-        std::vector<Engine::epriv::ModelInstanceAnimation*>  m_AnimationQueue;
+        std::vector<Engine::priv::ModelInstanceAnimation*>  m_AnimationQueue;
         Entity                                               m_Parent;
         ShaderProgram*                                       m_ShaderProgram;
         Mesh*                                                m_Mesh;

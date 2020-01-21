@@ -8,7 +8,7 @@
 #include <condition_variable>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         template<typename T> class Queue_ThreadSafe {
             private:
                 mutable std::queue<T>     m_Queue;

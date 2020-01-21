@@ -36,7 +36,7 @@ void ResourceManifest::init(){
     CapsuleRibbonMeshA = Resources::loadMeshAsync(BasePath + "data/Models/ribbon1.objcc").at(0);
     CapsuleRibbonMeshB = Resources::loadMeshAsync(BasePath + "data/Models/ribbon2.objcc").at(0);
 
-    Engine::epriv::threading::waitForAll();
+    Engine::priv::threading::waitForAll();
 
     DreadnaughtMaterial = Resources::addMaterial("Dreadnaught", BasePath + "data/Textures/dreadnaught.dds", BasePath + "data/Textures/dreadnaught_Normal.dds", BasePath + "data/Textures/dreadnaught_Glow.dds");
 

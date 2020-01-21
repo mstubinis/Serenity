@@ -11,7 +11,7 @@ const string Security::argon2id(const string& salt, const string& input_password
     hash.resize(hash_len, 0);
 
     uint8_t* pwd = (uint8_t*)_strdup(input_password.c_str());
-    uint32_t pwdlen = strlen((char*)pwd);
+    uint32_t pwdlen = (uint32_t)strlen((char*)pwd);
 
     const auto process_res = argon2id_hash_raw(iterations, memory_cost, parallelism, pwd, pwdlen, (void*)salt.data(), salt_len, (void*)hash.data(), hash_len);
     string res;
@@ -25,7 +25,7 @@ const string Security::argon2i(const string& salt, const string& input_password,
     hash.resize(hash_len, 0);
 
     uint8_t* pwd = (uint8_t*)_strdup(input_password.c_str());
-    uint32_t pwdlen = strlen((char*)pwd);
+    uint32_t pwdlen = (uint32_t)strlen((char*)pwd);
 
     const auto process_res = argon2i_hash_raw(iterations, memory_cost, parallelism, pwd, pwdlen, (void*)salt.data(), salt_len, (void*)hash.data(), hash_len);
     string res;
@@ -39,7 +39,7 @@ const string Security::argon2d(const string& salt, const string& input_password,
     hash.resize(hash_len, 0);
 
     uint8_t* pwd = (uint8_t*)_strdup(input_password.c_str());
-    uint32_t pwdlen = strlen((char*)pwd);
+    uint32_t pwdlen = (uint32_t)strlen((char*)pwd);
 
     const auto process_res = argon2d_hash_raw(iterations, memory_cost, parallelism, pwd, pwdlen, (void*)salt.data(), salt_len, (void*)hash.data(), hash_len);
     string res = "";
@@ -62,7 +62,7 @@ const string Security::generate_user_salt(const string& username, const uint32_t
     for (auto& character : username) {
         user += (character + static_cast<char>(distribution(mt_1))) / 2;
     }
-    std::mt19937 mt(device() * time(0) * user);
+    std::mt19937 mt(device() + static_cast<unsigned int>(time(0)) - user);
     for (size_t i = 0; i < salt_len; ++i) {
         const char c = static_cast<char>(distribution_1(mt));
         res += c;

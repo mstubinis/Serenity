@@ -10,7 +10,7 @@ class Texture;
 class Viewport;
 class Camera;
 namespace Engine{
-namespace epriv{
+namespace priv{
     class FramebufferTexture;
     class FramebufferObject;
     struct GBufferType{enum Type{

@@ -12,7 +12,7 @@
 
 using namespace std;
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 
 MaterialRequest::MaterialRequest() {
     async = false;

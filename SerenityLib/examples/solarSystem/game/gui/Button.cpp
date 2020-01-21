@@ -1,7 +1,7 @@
 #include "Button.h"
 
 
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/fonts/Font.h>
@@ -13,7 +13,7 @@ using namespace Engine;
 using namespace std;
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct emptyFunctor { template<class T> void operator()(T* t) const {} };
     };
 };
@@ -21,7 +21,7 @@ namespace Engine {
 Button::Button(const Font& font, const float x, const float y, const float width, const float height) : Widget(x, y, width, height), GUIRenderElement(this){
     setFont(font);
     setText("Button");
-    setOnClickFunctor(epriv::emptyFunctor());
+    setOnClickFunctor(priv::emptyFunctor());
     setTextScale(1.0f, 1.0f);
     m_Padding = 20.0f;
     setAlignment(Alignment::Center);

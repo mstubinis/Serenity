@@ -1,6 +1,6 @@
 #include <core/engine/shaders/Shader.h>
 #include <core/engine/shaders/ShaderHelper.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 
 #include <core/engine/renderer/opengl/glsl/Common.h>
 #include <core/engine/renderer/opengl/glsl/Compression.h>
@@ -21,7 +21,6 @@
 
 using namespace std;
 using namespace Engine;
-using namespace Engine::epriv;
 
 typedef boost::iostreams::stream<boost::iostreams::mapped_file_source> boost_stream_mapped_file;
 
@@ -79,7 +78,7 @@ Shader::Shader(const string& filenameOrCode, const ShaderType::Type& shaderType,
         m_FileName = "";
         m_Code = filenameOrCode;
     }
-    InternalShaderPublicInterface::ConvertCode(*this);
+    priv::InternalShaderPublicInterface::ConvertCode(*this);
 }
 Shader::~Shader() {
 }
@@ -94,7 +93,7 @@ const bool& Shader::fromFile() const {
 }
 
 
-void InternalShaderPublicInterface::ConvertCode(Shader& shader) {
+void priv::InternalShaderPublicInterface::ConvertCode(Shader& shader) {
     //load initial code
     if (shader.m_FromFile) {
         string code = "";
@@ -117,9 +116,9 @@ void InternalShaderPublicInterface::ConvertCode(Shader& shader) {
     }else{
         //generate one
         string core = "";
-        if (RenderManager::GLSL_VERSION >= 330)
+        if (Engine::priv::Renderer::GLSL_VERSION >= 330)
             core = " core";
-        versionLine = "#version " + to_string(RenderManager::GLSL_VERSION) + core + "\n";
+        versionLine = "#version " + to_string(Engine::priv::Renderer::GLSL_VERSION) + core + "\n";
         ShaderHelper::insertStringAtLine(shader.m_Code, versionLine, 0);
     }
     const uint versionNumber = boost::lexical_cast<uint>(regex_replace(versionLine, regex("([^0-9])"), ""));

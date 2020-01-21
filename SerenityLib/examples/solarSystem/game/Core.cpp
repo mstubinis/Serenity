@@ -17,7 +17,7 @@
 #include <core/engine/system/Engine.h>
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/lights/SunLight.h>
-#include <core/engine/system/window/Engine_Window.h>
+#include <core/engine/system/window/Window.h>
 #include <ecs/Components.h>
 
 

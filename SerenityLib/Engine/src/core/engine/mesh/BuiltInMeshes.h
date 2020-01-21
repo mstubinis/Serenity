@@ -7,7 +7,7 @@ class  Mesh;
 #include <vector>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class BuiltInMeshses final {
 
             public: struct BuiltInMeshEnum final {enum Mesh : unsigned int {

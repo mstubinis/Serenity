@@ -4,7 +4,7 @@
 
 using namespace std;
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 
 struct EmptyCallback final {void operator()() const {}};
 

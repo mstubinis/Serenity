@@ -5,7 +5,7 @@
 #include <core/engine/utils/Utils.h>
 
 namespace Engine {
-namespace epriv {
+namespace priv {
 namespace textures {
     class DXGI_FORMAT { public: enum Format {
         DXGI_FORMAT_UNKNOWN,

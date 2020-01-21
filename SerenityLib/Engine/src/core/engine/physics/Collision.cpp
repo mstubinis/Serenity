@@ -11,7 +11,7 @@
 #include <LinearMath/btIDebugDraw.h>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 void Collision::_init(ComponentBody* body, vector<ModelInstance*>& modelInstances, const float& _mass, const CollisionType::Type _type) {

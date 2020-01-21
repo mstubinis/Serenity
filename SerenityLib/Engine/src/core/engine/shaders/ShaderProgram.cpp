@@ -10,7 +10,7 @@
 #include <iostream>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 ShaderProgram* ShaderProgram::Deferred = nullptr;
@@ -18,18 +18,18 @@ ShaderProgram* ShaderProgram::Forward  = nullptr;
 ShaderProgram* ShaderProgram::Decal    = nullptr;
 
 namespace Engine{
-    namespace epriv{
+    namespace priv{
         struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
             Scene* scene = Resources::getCurrentScene();  if(!scene) return;
             Camera* camera = scene->getActiveCamera();    if(!camera) return;
             Camera& c = *camera;
 
             const float fcoeff = (2.0f / glm::log2(c.getFar() + 1.0f)) * 0.5f;
-            Renderer::sendUniform1Safe("fcoeff",fcoeff);
+            Engine::Renderer::sendUniform1Safe("fcoeff",fcoeff);
 
             //yes this is needed
-            if(RenderManager::GLSL_VERSION < 140){
-                Renderer::sendUniformMatrix4Safe("CameraViewProj",c.getViewProjection());
+            if(priv::Renderer::GLSL_VERSION < 140){
+                Engine::Renderer::sendUniformMatrix4Safe("CameraViewProj",c.getViewProjection());
             }
         }};
         struct DefaultShaderUnbindFunctor{void operator()(EngineResource* r) const {
@@ -192,7 +192,7 @@ void ShaderProgram::unload(){
         EngineResource::unload();
     }
 }
-void ShaderProgram::bind(){ 
+void ShaderProgram::bind() {
     Core::m_Engine->m_RenderManager._bindShaderProgram(this); 
 }
 void ShaderProgram::unbind(){ 

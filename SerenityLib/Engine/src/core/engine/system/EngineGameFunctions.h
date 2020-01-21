@@ -2,7 +2,7 @@
 #ifndef ENGINE_ENGINE_GAME_FUNCTIONS_H
 #define ENGINE_ENGINE_GAME_FUNCTIONS_H
 
-class  Engine_Window;
+class  Window;
 
 namespace Game {
     void initResources();
@@ -11,21 +11,21 @@ namespace Game {
     void render();
     void cleanup();
 
-    void onResize(Engine_Window&, const unsigned int& width, const unsigned int& height);
-    void onWindowRequestedToBeClosed(Engine_Window&);
-    void onWindowClosed(Engine_Window&);
+    void onResize(Window&, const unsigned int& width, const unsigned int& height);
+    void onWindowRequestedToBeClosed(Window&);
+    void onWindowClosed(Window&);
     void onGameEnded();
-    void onLostFocus(Engine_Window&);
-    void onGainedFocus(Engine_Window&);
-    void onTextEntered(Engine_Window&, const unsigned int& unicode);
-    void onKeyPressed(Engine_Window&, const unsigned int& key);
-    void onKeyReleased(Engine_Window&, const unsigned int& key);
-    void onMouseWheelScrolled(Engine_Window&, const float& delta, const int& x, const int& y);
-    void onMouseButtonPressed(Engine_Window&, const unsigned int& button);
-    void onMouseButtonReleased(Engine_Window&, const unsigned int& button);
-    void onMouseMoved(Engine_Window&, const float& mouseX, const float& mouseY);
-    void onMouseEntered(Engine_Window&);
-    void onMouseLeft(Engine_Window&);
+    void onLostFocus(Window&);
+    void onGainedFocus(Window&);
+    void onTextEntered(Window&, const unsigned int& unicode);
+    void onKeyPressed(Window&, const unsigned int& key);
+    void onKeyReleased(Window&, const unsigned int& key);
+    void onMouseWheelScrolled(Window&, const float& delta, const int& x, const int& y);
+    void onMouseButtonPressed(Window&, const unsigned int& button);
+    void onMouseButtonReleased(Window&, const unsigned int& button);
+    void onMouseMoved(Window&, const float& mouseX, const float& mouseY);
+    void onMouseEntered(Window&);
+    void onMouseLeft(Window&);
     void onPreUpdate(const double& dt);
     void onPostUpdate(const double& dt);
     void onJoystickButtonPressed();

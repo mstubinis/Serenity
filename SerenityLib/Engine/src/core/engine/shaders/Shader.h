@@ -8,7 +8,7 @@
 class ShaderProgram;
 class Shader;
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct InternalShaderProgramPublicInterface;
         struct InternalShaderPublicInterface final {
             static void ConvertCode(Shader&);
@@ -17,8 +17,8 @@ namespace Engine {
 };
 class Shader final : public EngineResource {
     friend class  ShaderProgram;
-    friend struct Engine::epriv::InternalShaderPublicInterface;
-    friend struct Engine::epriv::InternalShaderProgramPublicInterface;
+    friend struct Engine::priv::InternalShaderPublicInterface;
+    friend struct Engine::priv::InternalShaderProgramPublicInterface;
     private:
         ShaderType::Type   m_Type;
         bool               m_FromFile;

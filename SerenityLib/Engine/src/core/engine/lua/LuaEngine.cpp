@@ -4,17 +4,17 @@ using namespace Engine;
 using namespace std;
 
 
-epriv::LUAEngine::LUAEngine() {
+priv::LUAEngine::LUAEngine() {
 
 }
-epriv::LUAEngine::~LUAEngine() {
+priv::LUAEngine::~LUAEngine() {
 
 
 }
 
-void epriv::LUAEngine::init() {
+void priv::LUAEngine::init() {
 
 }
-void epriv::LUAEngine::cleanup() {
+void priv::LUAEngine::cleanup() {
 
 }

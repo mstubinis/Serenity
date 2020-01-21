@@ -4,9 +4,9 @@
 using namespace Engine;
 using namespace std;
 
-epriv::MeshImportedData::MeshImportedData() {
+priv::MeshImportedData::MeshImportedData() {
 }
-epriv::MeshImportedData::~MeshImportedData() {
+priv::MeshImportedData::~MeshImportedData() {
     vector_clear(file_points);
     vector_clear(file_uvs);
     vector_clear(file_normals);

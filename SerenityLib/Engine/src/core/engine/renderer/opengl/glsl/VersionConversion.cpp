@@ -10,7 +10,7 @@
 #include <boost/lexical_cast.hpp>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 

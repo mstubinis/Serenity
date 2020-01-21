@@ -23,7 +23,7 @@
 #include "../../teams/Team.h"
 
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/discord/Discord.h>
 
@@ -44,7 +44,14 @@ constexpr auto left_window_width       = 550;
 struct Host_ButtonBack_OnClick { void operator()(Button* button) const {
     HostScreen1& hostScreen = *static_cast<HostScreen1*>(button->getUserPointer());
     auto& menu             = hostScreen.getMenu();
-    menu.setGameState(GameState::Host_Screen_Setup_0);
+
+    if (hostScreen.isPersistent()) {
+        menu.setGameState(GameState::Host_Screen_Setup_1_Persistent);
+    }else{
+        menu.setGameState(GameState::Host_Screen_Setup_0);
+    }
+
+
     menu.setErrorText("", 0.2f);
 }};
 struct Host_ButtonNext_OnClick { void operator()(Button* button) const {

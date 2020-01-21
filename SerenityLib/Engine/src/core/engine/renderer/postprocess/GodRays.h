@@ -8,7 +8,7 @@
 class  ShaderProgram;
 struct Entity;
 namespace Engine {
-namespace epriv {
+namespace priv {
     class  GBuffer;
     class  GodRays final {
         public:

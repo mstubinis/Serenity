@@ -18,7 +18,7 @@
 
 using namespace std;
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace Engine::Renderer;
 
 
@@ -160,7 +160,7 @@ void DeferredPipeline::renderPointLight(Camera& c, PointLight& p) {
     }else{
         cullFace(GL_BACK);
     }
-    auto& pointLightMesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPointLightBounds();
+    auto& pointLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPointLightBounds();
 
     pointLightMesh.bind();
     pointLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
@@ -196,7 +196,7 @@ void DeferredPipeline::renderSpotLight(Camera& c, SpotLight& s) {
     }else{
         cullFace(GL_BACK);
     }
-    auto& spotLightMesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getSpotLightBounds();
+    auto& spotLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getSpotLightBounds();
 
     spotLightMesh.bind();
     spotLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
@@ -235,7 +235,7 @@ void DeferredPipeline::renderRodLight(Camera& c, RodLight& r) {
     }else{
         cullFace(GL_BACK);
     }
-    auto& rodLightMesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getRodLightBounds();
+    auto& rodLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getRodLightBounds();
 
     rodLightMesh.bind();
     rodLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
@@ -246,12 +246,12 @@ void DeferredPipeline::renderRodLight(Camera& c, RodLight& r) {
 void DeferredPipeline::renderParticle(Particle& particle) {
     particle.getMaterial()->bind();
 
-    auto maxTextures = epriv::Core::m_Engine->m_RenderManager.OpenGLStateMachine.getMaxTextureUnits() - 1;
+    auto maxTextures = priv::Core::m_Engine->m_RenderManager.OpenGLStateMachine.getMaxTextureUnits() - 1;
 
     Camera& camera = *particle.scene().getActiveCamera();
-    Renderer::sendTextureSafe("gDepthMap", m_GBuffer->getTexture(Engine::epriv::GBufferType::Depth), maxTextures);
-    Renderer::sendUniform4Safe("Object_Color", particle.color());
-    Renderer::sendUniform2Safe("ScreenData", glm::vec2(Resources::getWindowSize()));
+    Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer->getTexture(Engine::priv::GBufferType::Depth), maxTextures);
+    Engine::Renderer::sendUniform4Safe("Object_Color", particle.color());
+    Engine::Renderer::sendUniform2Safe("ScreenData", glm::vec2(Resources::getWindowSize()));
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, particle.position());
@@ -260,9 +260,9 @@ void DeferredPipeline::renderParticle(Particle& particle) {
     const auto& scale = particle.getScale();
     modelMatrix = glm::scale(modelMatrix, glm::vec3(scale.x, scale.y, 1.0f));
 
-    Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
+    Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
 
-    epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh().render();
+    priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh().render();
 }
 
 
@@ -401,7 +401,7 @@ void DeferredPipeline::render2DText(const string& text, const Font& font, const 
     m_Text_UVs.clear();
     m_Text_Indices.clear();
 
-    auto& mesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getFontMesh();
+    auto& mesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getFontMesh();
     mesh.bind();
     sendUniform1("DiffuseTextureEnabled", 1);
 
@@ -431,10 +431,10 @@ void DeferredPipeline::render2DText(const string& text, const Font& font, const 
     mesh.modifyIndices(m_Text_Indices);
     mesh.render();
 }
-void render2DTexture(const Texture* texture, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const Alignment::Type& align, const glm::vec4& scissor) {
+void DeferredPipeline::render2DTexture(const Texture* texture, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const Alignment::Type& align, const glm::vec4& scissor) {
     GLScissor(scissor);
 
-    auto& mesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
+    auto& mesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
     mesh.bind();
 
     float translationX = position.x;
@@ -451,7 +451,7 @@ void render2DTexture(const Texture* texture, const glm::vec2& position, const gl
         sendUniform1("DiffuseTextureEnabled", 0);
     }
     sendUniform4("Object_Color", color);
-    Renderer::alignmentOffset(align, translationX, translationY, totalSizeX, totalSizeY);
+    Engine::Renderer::alignmentOffset(align, translationX, translationY, totalSizeX, totalSizeY);
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     modelMatrix           = glm::translate(modelMatrix, glm::vec3(translationX, translationY, -0.001f - depth));
@@ -463,13 +463,13 @@ void render2DTexture(const Texture* texture, const glm::vec2& position, const gl
 void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& alignment, const glm::vec4& scissor) {
     GLScissor(scissor);
 
-    auto& mesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getTriangleMesh();
+    auto& mesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getTriangleMesh();
     mesh.bind();
 
     float translationX = position.x;
     float translationY = position.y;
 
-    Renderer::alignmentOffset(alignment, translationX, translationY, width, height);
+    Engine::Renderer::alignmentOffset(alignment, translationX, translationY, width, height);
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     modelMatrix           = glm::translate(modelMatrix, glm::vec3(translationX, translationY, -0.001f - depth));

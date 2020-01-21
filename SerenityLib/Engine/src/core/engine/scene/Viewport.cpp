@@ -1,7 +1,7 @@
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/scene/Camera.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/resources/Engine_Resources.h>
 
 using namespace Engine;
@@ -77,7 +77,7 @@ const bool Viewport::isActive() const {
     return m_Active;
 }
 bool Viewport::setCamera(const Camera& camera) {
-    auto& scene_cameras = epriv::InternalScenePublicInterface::GetCameras(m_Scene);
+    auto& scene_cameras = priv::InternalScenePublicInterface::GetCameras(m_Scene);
     if (isInVector(scene_cameras, &camera)) {
         m_Camera = &const_cast<Camera&>(camera);
         return true;

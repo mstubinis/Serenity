@@ -3,7 +3,7 @@
 using namespace Engine;
 using namespace std;
 
-epriv::FullscreenTriangle::FullscreenTriangle(){ 
+priv::FullscreenTriangle::FullscreenTriangle(){ 
     MeshVertexDataFullscreen v1, v2, v3;
     m_VAO = 0;
     v1.position = glm::vec3(-1.0f, -1.0f, 0.0f); v1.uv = glm::vec2(0.0f, 0.0f);
@@ -28,20 +28,20 @@ epriv::FullscreenTriangle::FullscreenTriangle(){
     buildVAO();
     registerEvent(EventType::WindowFullscreenChanged);
 }
-epriv::FullscreenTriangle::~FullscreenTriangle(){ 
+priv::FullscreenTriangle::~FullscreenTriangle(){ 
     for (uint i = 0; i < m_Buffers.size(); ++i)
         glDeleteBuffers(1, &m_Buffers[i]);
-    Renderer::deleteVAO(m_VAO);
+    Engine::Renderer::deleteVAO(m_VAO);
 }
-void epriv::FullscreenTriangle::buildVAO() {
-    Renderer::deleteVAO(m_VAO);
-    if (RenderManager::OPENGL_VERSION >= 30) {
-        Renderer::genAndBindVAO(m_VAO);
+void priv::FullscreenTriangle::buildVAO() {
+    Engine::Renderer::deleteVAO(m_VAO);
+    if (Engine::priv::Renderer::OPENGL_VERSION >= 30) {
+        Engine::Renderer::genAndBindVAO(m_VAO);
         bindToGPU();
-        Renderer::bindVAO(0);
+        Engine::Renderer::bindVAO(0);
     }
 }
-void epriv::FullscreenTriangle::bindToGPU() {
+void priv::FullscreenTriangle::bindToGPU() {
     glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[0]);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertexDataFullscreen), (void*)0);
@@ -51,9 +51,9 @@ void epriv::FullscreenTriangle::bindToGPU() {
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[1]);
 }
-void epriv::FullscreenTriangle::render(){ 
+void priv::FullscreenTriangle::render(){ 
     if (m_VAO) {
-        Renderer::bindVAO(m_VAO);
+        Engine::Renderer::bindVAO(m_VAO);
         glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_Indices.size()), GL_UNSIGNED_SHORT, 0);
         //Renderer::bindVAO(0);
     }else{
@@ -63,7 +63,7 @@ void epriv::FullscreenTriangle::render(){
         glDisableVertexAttribArray(1);
     }
 }
-void epriv::FullscreenTriangle::onEvent(const Event& e) {
+void priv::FullscreenTriangle::onEvent(const Event& e) {
     if (e.type == EventType::WindowFullscreenChanged) {
         buildVAO();
     }
@@ -76,7 +76,7 @@ void epriv::FullscreenTriangle::onEvent(const Event& e) {
 
 
 
-epriv::FullscreenQuad::FullscreenQuad(){ 
+priv::FullscreenQuad::FullscreenQuad(){ 
     MeshVertexDataFullscreen v1, v2, v3, v4;
     m_VAO = 0;
     v1.position = glm::vec3(-1.0f, -1.0f, 0.0f); v1.uv = glm::vec2(0.0f, 0.0f);
@@ -102,20 +102,20 @@ epriv::FullscreenQuad::FullscreenQuad(){
     buildVAO();
     registerEvent(EventType::WindowFullscreenChanged);
 }
-epriv::FullscreenQuad::~FullscreenQuad(){ 
+priv::FullscreenQuad::~FullscreenQuad(){ 
     for (uint i = 0; i < m_Buffers.size(); ++i)
         glDeleteBuffers(1, &m_Buffers[i]);
-    Renderer::deleteVAO(m_VAO);
+    Engine::Renderer::deleteVAO(m_VAO);
 }
-void epriv::FullscreenQuad::buildVAO() {
-    Renderer::deleteVAO(m_VAO);
-    if (RenderManager::OPENGL_VERSION >= 30) {
-        Renderer::genAndBindVAO(m_VAO);
+void priv::FullscreenQuad::buildVAO() {
+    Engine::Renderer::deleteVAO(m_VAO);
+    if (Engine::priv::Renderer::OPENGL_VERSION >= 30) {
+        Engine::Renderer::genAndBindVAO(m_VAO);
         bindToGPU();
-        Renderer::bindVAO(0);
+        Engine::Renderer::bindVAO(0);
     }
 }
-void epriv::FullscreenQuad::bindToGPU() {
+void priv::FullscreenQuad::bindToGPU() {
     glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[0]);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertexDataFullscreen), (void*)0);
@@ -123,9 +123,9 @@ void epriv::FullscreenQuad::bindToGPU() {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(MeshVertexDataFullscreen), (void*)offsetof(MeshVertexDataFullscreen, uv));
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[1]);
 }
-void epriv::FullscreenQuad::render(){ 
+void priv::FullscreenQuad::render(){ 
     if (m_VAO) {
-        Renderer::bindVAO(m_VAO);
+        Engine::Renderer::bindVAO(m_VAO);
         glDrawElements(GL_QUADS, static_cast<GLsizei>(m_Indices.size()), GL_UNSIGNED_SHORT, 0);
         //Renderer::bindVAO(0);
     }else{
@@ -135,7 +135,7 @@ void epriv::FullscreenQuad::render(){
         glDisableVertexAttribArray(1);
     }
 }
-void epriv::FullscreenQuad::onEvent(const Event& e) {
+void priv::FullscreenQuad::onEvent(const Event& e) {
     if (e.type == EventType::WindowFullscreenChanged) {
         buildVAO();
     }

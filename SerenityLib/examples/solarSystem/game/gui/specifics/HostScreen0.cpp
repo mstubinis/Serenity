@@ -1,4 +1,6 @@
 #include "HostScreen0.h"
+#include "HostScreen1Persistent.h"
+#include "OwnedServersSelectionWindow.h"
 #include "../Button.h"
 #include "../../Menu.h"
 #include "../../database/Database.h"
@@ -25,22 +27,23 @@ constexpr auto seperation_size         = 225.0f;
 struct Host0_ButtonBack_OnClick final { void operator()(Button* button) const {
     auto& hostScreen0 = *static_cast<HostScreen0*>(button->getUserPointer());
     hostScreen0.m_Menu.go_to_main_menu();
-};};
+}};
 
 struct HostTempServClick final { void operator()(Button* button) const {
     auto& hostScreen0 = *static_cast<HostScreen0*>(button->getUserPointer());
     hostScreen0.m_Menu.setGameState(GameState::Host_Screen_Setup_1);
     hostScreen0.m_Menu.setErrorText("", 0.2f);
-};};
-
+}};
 struct HostPersServClick final { void operator()(Button* button) const {
     auto& hostScreen0 = *static_cast<HostScreen0*>(button->getUserPointer());
 
-    Server::DATABASE.connect_to_database("STHS_servers");
+    Server::DATABASE.connect_to_database("database");
+
+    hostScreen0.m_Menu.m_HostScreen1Persistent->m_OwnedServersWindow->populateWindow();
 
     hostScreen0.m_Menu.setGameState(GameState::Host_Screen_Setup_1_Persistent);
     hostScreen0.m_Menu.setErrorText("", 0.2f);
-};};
+}};
 
 
 

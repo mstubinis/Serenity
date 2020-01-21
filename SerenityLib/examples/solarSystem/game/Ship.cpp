@@ -73,7 +73,7 @@ void ShipModelInstanceBindFunctor::operator()(EngineResource* r) const {
     Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
 
     if (stage == RenderStage::ForwardTransparentTrianglesSorted || stage == RenderStage::ForwardTransparent || stage == RenderStage::ForwardOpaque) {
-        auto& lights = epriv::InternalScenePublicInterface::GetLights(scene);
+        auto& lights = priv::InternalScenePublicInterface::GetLights(scene);
         const int maxLights = glm::min(static_cast<int>(lights.size()), MAX_LIGHTS_PER_PASS);
         Renderer::sendUniform1Safe("numLights", maxLights);
         for (int i = 0; i < maxLights; ++i) {
@@ -138,8 +138,8 @@ void ShipModelInstanceBindFunctor::operator()(EngineResource* r) const {
             }
         }
         Skybox* skybox = scene.skybox();
-        Renderer::sendUniform4Safe("ScreenData", epriv::Core::m_Engine->m_RenderManager._getGIPackedData(), Renderer::Settings::getGamma(), 0.0f, 0.0f);
-        auto maxTextures = epriv::Core::m_Engine->m_RenderManager.OpenGLStateMachine.getMaxTextureUnits() - 1;
+        Renderer::sendUniform4Safe("ScreenData", priv::Core::m_Engine->m_RenderManager._getGIPackedData(), Renderer::Settings::getGamma(), 0.0f, 0.0f);
+        auto maxTextures = priv::Core::m_Engine->m_RenderManager.OpenGLStateMachine.getMaxTextureUnits() - 1;
         if (skybox && skybox->texture()->numAddresses() >= 3) {
             Renderer::sendTextureSafe("irradianceMap", skybox->texture()->address(1), maxTextures - 2, GL_TEXTURE_CUBE_MAP);
             Renderer::sendTextureSafe("prefilterMap", skybox->texture()->address(2), maxTextures - 1, GL_TEXTURE_CUBE_MAP);
@@ -823,7 +823,7 @@ void Ship::internal_update_player_you_logic(const double& dt, Map& map) {
     if (!Engine::paused()) {
         if (m_IsWarping && m_WarpFactor > 0) {
             auto speed = getWarpSpeedVector3() * static_cast<decimal>(dt);
-            for (auto& pod : epriv::InternalScenePublicInterface::GetEntities(map)) {
+            for (auto& pod : priv::InternalScenePublicInterface::GetEntities(map)) {
                 Entity e = map.getEntity(pod);
                 const EntityDataRequest dataRequest(e);
                 auto* cam = e.getComponent<ComponentCamera>(dataRequest);
@@ -836,7 +836,7 @@ void Ship::internal_update_player_you_logic(const double& dt, Map& map) {
                     }
                 }
             }
-            for (auto& particle : epriv::InternalScenePublicInterface::GetParticles(map)) {
+            for (auto& particle : priv::InternalScenePublicInterface::GetParticles(map)) {
                 particle.setPosition(particle.position() + glm::vec3(speed));
             }
         }

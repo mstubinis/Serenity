@@ -11,7 +11,7 @@ struct CameraType final{enum Type {
     Orthographic,
 };};
 class Camera: public EntityWrapper{
-    friend struct Engine::epriv::ComponentCamera_Functions;
+    friend struct Engine::priv::ComponentCamera_Functions;
     public:
         Camera(const float angle, const float aspectRatio, const float nearPlane, const float farPlane,Scene* = nullptr);
         Camera(const float left, const float right, const float bottom, const float top, const float nearPlane, const float farPlane,Scene* = nullptr);

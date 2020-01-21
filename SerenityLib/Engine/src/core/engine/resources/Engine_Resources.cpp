@@ -8,7 +8,7 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/fonts/Font.h>
 #include <core/engine/scene/Scene.h>
-#include <core/engine/system/window/Engine_Window.h>
+#include <core/engine/system/window/Window.h>
 
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/shaders/Shader.h>
@@ -26,30 +26,30 @@
 using namespace Engine;
 using namespace std;
 
-epriv::ResourceManager* resourceManager;
+priv::ResourceManager* resourceManager;
 
-epriv::ResourceManager::ResourceManager(const EngineOptions& options){
+priv::ResourceManager::ResourceManager(const EngineOptions& options){
     m_CurrentScene     = nullptr;
     m_DynamicMemory    = false;
     m_Resources        = NEW ObjectPool<EngineResource>(32768);
     resourceManager    = this;
 }
-epriv::ResourceManager::~ResourceManager(){ 
+priv::ResourceManager::~ResourceManager(){ 
     cleanup();
 }
-void epriv::ResourceManager::cleanup() {
+void priv::ResourceManager::cleanup() {
     SAFE_DELETE(m_Resources);
     SAFE_DELETE_VECTOR(m_Windows);
     SAFE_DELETE_VECTOR(m_Scenes);
 }
-void epriv::ResourceManager::_init(const EngineOptions& options){
-    auto* window = NEW Engine_Window(options);
+void priv::ResourceManager::_init(const EngineOptions& options){
+    auto* window = NEW Window(options);
     m_Windows.push_back(window);
 }
-vector<Scene*>& epriv::ResourceManager::scenes() {
+vector<Scene*>& priv::ResourceManager::scenes() {
     return m_Scenes;
 }
-void epriv::ResourceManager::onPostUpdate() {
+void priv::ResourceManager::onPostUpdate() {
     if (m_ScenesToBeDeleted.size() > 0) {
         for (size_t i = 0; i < m_ScenesToBeDeleted.size(); ++i) {
             size_t index = 0;
@@ -65,13 +65,13 @@ void epriv::ResourceManager::onPostUpdate() {
         m_ScenesToBeDeleted.clear();
     }   
 }
-Handle epriv::ResourceManager::_addTexture(Texture* t) {
+Handle priv::ResourceManager::_addTexture(Texture* t) {
     return m_Resources->add(t, ResourceType::Texture);
 }
-Scene& epriv::ResourceManager::_getSceneByID(const uint& id) {
+Scene& priv::ResourceManager::_getSceneByID(const uint& id) {
     return *m_Scenes[id - 1];
 }
-const unsigned int epriv::ResourceManager::AddScene(Scene& s){
+const unsigned int priv::ResourceManager::AddScene(Scene& s){
     for (size_t i = 0; i < m_Scenes.size(); ++i) {
         if (m_Scenes[i] == nullptr) {
             m_Scenes[i] = &s;
@@ -83,13 +83,13 @@ const unsigned int epriv::ResourceManager::AddScene(Scene& s){
     return static_cast<unsigned int>(m_Scenes.size());
 }
 string Engine::Data::reportTime() {
-    return epriv::Core::m_Engine->m_DebugManager.reportTime();
+    return priv::Core::m_Engine->m_DebugManager.reportTime();
 }
 const double Resources::dt() {
-    return epriv::Core::m_Engine->m_DebugManager.dt();
+    return priv::Core::m_Engine->m_DebugManager.dt();
 }
 const double Resources::applicationTime() {
-    return epriv::Core::m_Engine->m_DebugManager.totalTime();
+    return priv::Core::m_Engine->m_DebugManager.totalTime();
 }
 Scene* Resources::getCurrentScene() {
     return resourceManager->m_CurrentScene;
@@ -100,14 +100,14 @@ void Resources::Settings::enableDynamicMemory(const bool b){
 void Resources::Settings::disableDynamicMemory(){ 
     resourceManager->m_DynamicMemory = false; 
 }
-Engine_Window& Resources::getWindow(){ 
+Window& Resources::getWindow(){
     return *resourceManager->m_Windows[0]; 
 }
 glm::uvec2 Resources::getWindowSize(){ 
     return resourceManager->m_Windows[0]->getSize(); 
 }
 
-Engine_Window& Resources::getWindow(const unsigned int& index) {
+Window& Resources::getWindow(const unsigned int& index) {
     return *resourceManager->m_Windows[index];
 }
 glm::uvec2 Resources::getWindowSize(const unsigned int& index) {
@@ -294,15 +294,15 @@ Handle Resources::addSoundData(const string& file){
 const bool Resources::setCurrentScene(Scene* newScene){
     Scene* oldScene = resourceManager->m_CurrentScene;
 
-    epriv::EventSceneChanged e(oldScene, newScene);
+    priv::EventSceneChanged e(oldScene, newScene);
     Event ev(EventType::SceneChanged);
     ev.eventSceneChanged = e;
-    epriv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    priv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
     
     if(!oldScene){
         cout << "---- Initial scene set to: " << newScene->name() << endl;
         resourceManager->m_CurrentScene = newScene; 
-        epriv::InternalScenePublicInterface::GetECS(*newScene).onSceneEntered(*newScene);
+        priv::InternalScenePublicInterface::GetECS(*newScene).onSceneEntered(*newScene);
         return false;
     }
     if(oldScene != newScene){
@@ -310,9 +310,9 @@ const bool Resources::setCurrentScene(Scene* newScene){
         if(resourceManager->m_DynamicMemory){
             //mark game object resources to minus use count
         }
-        epriv::InternalScenePublicInterface::GetECS(*oldScene).onSceneLeft(*oldScene);
+        priv::InternalScenePublicInterface::GetECS(*oldScene).onSceneLeft(*oldScene);
         resourceManager->m_CurrentScene = newScene;    
-        epriv::InternalScenePublicInterface::GetECS(*newScene).onSceneEntered(*newScene);
+        priv::InternalScenePublicInterface::GetECS(*newScene).onSceneEntered(*newScene);
         if(resourceManager->m_DynamicMemory){
             //mark game object resources to add use count
         }

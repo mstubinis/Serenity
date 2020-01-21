@@ -12,7 +12,7 @@
 #include "../hud/HUD.h"
 
 #include <core/engine/events/Engine_Events.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/lights/Lights.h>
 #include <core/engine/model/ModelInstance.h>
@@ -281,7 +281,7 @@ Anchor* Map::internalCreateDeepspaceAnchor(const decimal& x, const decimal& y, c
     Anchor* root_anchor = m_SpawnAnchors[0];
 
     string key = (name.empty()) ? "Deepspace Anchor 0" : name;
-    unsigned int count = (root_anchor->m_Children.size());
+    unsigned int count = static_cast<unsigned int>(root_anchor->m_Children.size());
     key = "Deepspace Anchor " + to_string(count - 1);
 
     Anchor* new_deepspace_anchor = NEW Anchor(key, *this, x, y, z);

@@ -5,7 +5,7 @@
 struct Handle;
 struct EngineOptions;
 class  EngineResource;
-class  Engine_Window;
+class  Window;
 class  Scene;
 class  Font;
 class  Texture;
@@ -25,7 +25,7 @@ class  ShaderProgram;
 #include <glm/vec2.hpp>
 
 namespace Engine{
-    namespace epriv{
+    namespace priv{
         class ResourceManager final{
             friend class  Scene;
             private:
@@ -33,7 +33,7 @@ namespace Engine{
             public:
                 //http://gamesfromwithin.com/managing-data-relationships
                 ObjectPool<EngineResource>*        m_Resources;
-                std::vector<Engine_Window*>        m_Windows;
+                std::vector<Window*>        m_Windows;
                 Scene*                             m_CurrentScene;
                 bool                               m_DynamicMemory;
                 std::vector<Scene*>                m_Scenes;
@@ -82,10 +82,10 @@ namespace Engine{
         const double dt();
         const double applicationTime();
 
-        Engine_Window& getWindow();
+        Window& getWindow();
         glm::uvec2 getWindowSize();
 
-        Engine_Window& getWindow(const unsigned int& index);
+        Window& getWindow(const unsigned int& index);
         glm::uvec2 getWindowSize(const unsigned int& index);
 
         Scene* getScene(const std::string& sceneName);

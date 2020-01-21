@@ -14,7 +14,7 @@ class  ModelInstance;
 struct Entity;
 class  Viewport;
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct InternalScenePublicInterface;
         struct InstanceNode final {
             ModelInstance* instance;
@@ -44,7 +44,7 @@ namespace Engine {
         };
         class RenderGraph final {
             friend class  Scene;
-            friend struct Engine::epriv::InternalScenePublicInterface;
+            friend struct Engine::priv::InternalScenePublicInterface;
             private:
                 ShaderProgram&               shaderProgram;
                 std::vector<MaterialNode*>   materialNodes;

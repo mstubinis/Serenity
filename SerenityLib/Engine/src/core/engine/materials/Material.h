@@ -16,25 +16,25 @@ class  Mesh;
 class  MaterialComponent;
 class  Texture;
 namespace Engine{
-    namespace epriv{
+    namespace priv{
         struct DefaultMaterialBindFunctor;
         struct DefaultMaterialUnbindFunctor;
         struct InternalMaterialPublicInterface;
         struct InternalMaterialRequestPublicInterface;
         struct InternalScenePublicInterface;
         struct MaterialLoader;
-        class  RenderManager;
+        class  Renderer;
     };
 };
 
 class Material final: public BindableResource{
-    friend struct Engine::epriv::DefaultMaterialBindFunctor;
-    friend struct Engine::epriv::DefaultMaterialUnbindFunctor;
-    friend struct Engine::epriv::InternalScenePublicInterface;
-    friend struct Engine::epriv::InternalMaterialRequestPublicInterface;
-    friend struct Engine::epriv::InternalMaterialPublicInterface;
-    friend struct Engine::epriv::MaterialLoader;
-    friend class  Engine::epriv::RenderManager;
+    friend struct Engine::priv::DefaultMaterialBindFunctor;
+    friend struct Engine::priv::DefaultMaterialUnbindFunctor;
+    friend struct Engine::priv::InternalScenePublicInterface;
+    friend struct Engine::priv::InternalMaterialRequestPublicInterface;
+    friend struct Engine::priv::InternalMaterialPublicInterface;
+    friend struct Engine::priv::MaterialLoader;
+    friend class  Engine::priv::Renderer;
     public:
         static Material                  *Checkers, *WhiteShadeless; //loaded in renderer
     private:

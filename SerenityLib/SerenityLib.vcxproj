@@ -300,7 +300,7 @@
     <ClInclude Include="Engine\src\core\engine\physics\PhysicsIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\physics\World.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\Decal.h" />
-    <ClInclude Include="Engine\src\core\engine\renderer\Engine_Renderer.h" />
+    <ClInclude Include="Engine\src\core\engine\renderer\Renderer.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\FramebufferObject.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\FullscreenItems.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\GBuffer.h" />
@@ -358,7 +358,7 @@
     <ClInclude Include="Engine\src\core\engine\system\Engine.h" />
     <ClInclude Include="Engine\src\core\engine\system\EngineGameFunctions.h" />
     <ClInclude Include="Engine\src\core\engine\system\EngineOptions.h" />
-    <ClInclude Include="Engine\src\core\engine\system\window\Engine_Window.h" />
+    <ClInclude Include="Engine\src\core\engine\system\window\Window.h" />
     <ClInclude Include="Engine\src\core\engine\textures\DDS.h" />
     <ClInclude Include="Engine\src\core\engine\textures\Texture.h" />
     <ClInclude Include="Engine\src\core\engine\textures\TextureIncludes.h" />
@@ -447,7 +447,7 @@
     <ClCompile Include="Engine\src\core\engine\physics\Engine_Physics.cpp" />
     <ClCompile Include="Engine\src\core\engine\physics\World.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\Decal.cpp" />
-    <ClCompile Include="Engine\src\core\engine\renderer\Engine_Renderer.cpp" />
+    <ClCompile Include="Engine\src\core\engine\renderer\Renderer.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\FramebufferObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\FullscreenItems.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\GBuffer.cpp" />
@@ -494,7 +494,7 @@
     <ClCompile Include="Engine\src\core\engine\sounds\SoundMusic.cpp" />
     <ClCompile Include="Engine\src\core\engine\sounds\SoundQueue.cpp" />
     <ClCompile Include="Engine\src\core\engine\system\Engine.cpp" />
-    <ClCompile Include="Engine\src\core\engine\system\window\Engine_Window.cpp" />
+    <ClCompile Include="Engine\src\core\engine\system\window\Window.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\Texture.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\TextureIncludes.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\TextureLoader.cpp" />

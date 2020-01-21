@@ -4,7 +4,7 @@
 #include <core/engine/physics/DebugDrawer.h>
 
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/mesh/Mesh.h>
@@ -112,18 +112,18 @@ bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionOb
     return true;
 }
 
-epriv::PhysicsManager* physicsManager;
+priv::PhysicsManager* physicsManager;
 
-epriv::PhysicsManager::PhysicsManager(){ 
+priv::PhysicsManager::PhysicsManager(){ 
     m_Paused = false;
     m_Data = nullptr;
     physicsManager = this;
     m_NumberOfStepsPerFrame = 1;
 }
-epriv::PhysicsManager::~PhysicsManager(){ 
+priv::PhysicsManager::~PhysicsManager(){ 
     cleanup();
 }
-void epriv::PhysicsManager::cleanup() {
+void priv::PhysicsManager::cleanup() {
     if (!m_Data)
         return;
     auto& world = *m_Data->world;
@@ -142,13 +142,13 @@ void epriv::PhysicsManager::cleanup() {
     }
     SAFE_DELETE(m_Data);
 }
-void epriv::PhysicsManager::_init(){
-    m_Data = NEW epriv::PhysicsWorld();
+void priv::PhysicsManager::_init(){
+    m_Data = NEW priv::PhysicsWorld();
     m_Data->debugDrawer->initRenderingContext();
 
     gContactAddedCallback = CustomMaterialContactAddedCallback;
 }
-void epriv::PhysicsManager::_update(const double& dt,int maxsteps, float other){ 
+void priv::PhysicsManager::_update(const double& dt,int maxsteps, float other){ 
     if (m_Paused)
         return;
     m_Data->world->stepSimulation(static_cast<btScalar>(dt), maxsteps, static_cast<btScalar>(other));
@@ -196,12 +196,12 @@ void epriv::PhysicsManager::_update(const double& dt,int maxsteps, float other){
         }
     }
 }
-void epriv::PhysicsManager::_render(Camera& camera){
+void priv::PhysicsManager::_render(Camera& camera){
     m_Data->world->debugDrawWorld();
     const glm::vec3 camPos = camera.getPosition();
     const glm::mat4 model = glm::mat4(1.0f);
-    Renderer::sendUniformMatrix4("Model", model);
-    Renderer::sendUniformMatrix4("VP", camera.getViewProjection());
+    Engine::Renderer::sendUniformMatrix4("Model", model);
+    Engine::Renderer::sendUniformMatrix4("VP", camera.getViewProjection());
     m_Data->debugDrawer->drawAccumulatedLines();
     m_Data->debugDrawer->postRender();
 }

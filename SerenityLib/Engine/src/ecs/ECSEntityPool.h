@@ -6,9 +6,9 @@
 #include <core/engine/scene/Scene.h>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         template<typename TEntity> class ECSEntityPool final{
-            friend struct Engine::epriv::InternalScenePublicInterface;
+            friend struct Engine::priv::InternalScenePublicInterface;
             private:
                 std::vector<EntityPOD>       _pool;
                 std::vector<unsigned int>    _freelist;

@@ -33,6 +33,7 @@ struct ButtonNext_OnClick;
 struct Host_ButtonBack_OnClick;
 struct Host_ButtonNext_OnClick;
 struct Host1Persistent_ButtonNext_OnClick;
+struct HostPersServClick;
 
 class  MainMenu;
 
@@ -52,6 +53,7 @@ class Menu final{
     friend struct Host_ButtonBack_OnClick;
     friend struct Host_ButtonNext_OnClick;
     friend struct Host1Persistent_ButtonNext_OnClick;
+    friend struct HostPersServClick;
     friend struct ButtonBack_OnClick;
     friend struct ButtonNext_OnClick;
     friend class  Core;

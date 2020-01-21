@@ -130,7 +130,7 @@ PlasmaBeam::PlasmaBeam(Ship& ship, Map& map, const glm_vec3& position, const glm
 
     auto& firstWindupBody = *firstWindupGraphic.addComponent<ComponentBody>();
     auto& secondWindupBody = *secondWindupGraphic.addComponent<ComponentBody>();
-    auto& planeMesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
+    auto& planeMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
     auto& firstWindupModel = *firstWindupGraphic.addComponent<ComponentModel>(&planeMesh, (Material*)(ResourceManifest::TorpedoGlowMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& secondWindupModel = *secondWindupGraphic.addComponent<ComponentModel>(&planeMesh, (Material*)(ResourceManifest::TorpedoGlowMaterial).get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
 

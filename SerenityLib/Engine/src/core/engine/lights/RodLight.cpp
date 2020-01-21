@@ -14,7 +14,7 @@ RodLight::RodLight(const glm::vec3 pos, const float rodLength, Scene* scene) : P
     }
 
     if (m_Type == LightType::Rod) {
-        auto& rodLights = epriv::InternalScenePublicInterface::GetRodLights(*scene);
+        auto& rodLights = priv::InternalScenePublicInterface::GetRodLights(*scene);
         rodLights.push_back(this);
     }
 }
@@ -36,6 +36,6 @@ const float RodLight::rodLength() const {
 }
 void RodLight::destroy() {
     EntityWrapper::destroy();
-    removeFromVector(epriv::InternalScenePublicInterface::GetRodLights(m_Entity.scene()), this);
-    removeFromVector(epriv::InternalScenePublicInterface::GetLights(m_Entity.scene()), this);
+    removeFromVector(priv::InternalScenePublicInterface::GetRodLights(m_Entity.scene()), this);
+    removeFromVector(priv::InternalScenePublicInterface::GetLights(m_Entity.scene()), this);
 }

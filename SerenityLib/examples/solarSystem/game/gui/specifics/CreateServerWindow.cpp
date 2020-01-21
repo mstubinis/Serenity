@@ -1,6 +1,8 @@
 #include "CreateServerWindow.h"
+#include "OwnedServersSelectionWindow.h"
 #include "HostScreen1Persistent.h"
 #include "../../factions/Faction.h"
+#include "../../Menu.h"
 #include "../Text.h"
 #include "../TextBox.h"
 #include "../ScrollFrame.h"
@@ -11,16 +13,32 @@ using namespace std;
 
 constexpr auto scroll_frame_padding = 30.0f;
 
-struct ServerCreateOnClick final { void operator()(Button* button) {
-    auto& hostScreen1Persistent = *static_cast<HostScreen1Persistent*>(button->getUserPointer());
-    /*
-        add a new server using the input provided. check / sanitize the input
-    */
+struct ServerCreateOnClick final { void operator()(Button* button) const {
+    auto& createServerWindow         = *static_cast<CreateServerWindow*>(button->getUserPointer());
+    auto& hostScreen1Pers            = createServerWindow.m_HostScreen1Persistent;
+
+    const auto server_name           = createServerWindow.getServerNameTextBox().getRealText();
+    const auto server_port           = createServerWindow.getServerPortTextBox().getRealText();
+    const auto server_username       = createServerWindow.getUsernameTextBox().getRealText();
+    const auto server_password       = createServerWindow.getPasswordTextBox().getRealText();
+
+    const bool valid_server_name     = hostScreen1Pers.validateNewServerName();
+    const bool valid_server_port     = hostScreen1Pers.validateNewServerPort();
+    const bool valid_server_username = hostScreen1Pers.validateNewServerUsername();
+    const bool valid_server_password = hostScreen1Pers.validateNewServerPassword();
+
+    if (valid_server_name && valid_server_port && valid_server_username && valid_server_password) {
+        if (!hostScreen1Pers.m_OwnedServersWindow->hasServer(server_name)) {
+            //add to the server database
+            hostScreen1Pers.m_OwnedServersWindow->addServer(server_name, stoi(server_port), server_username, server_password);
+            createServerWindow.resetWindow();
+        }else {
+            hostScreen1Pers.m_Menu.setErrorText("There is already a server with that name");
+        }
+    }
+}};
 
 
-
-    hostScreen1Persistent.m_CreateServersWindow->resetWindow();
-};};
 
 CreateServerWindow::CreateServerWindow(HostScreen1Persistent& hostScreen1Persistent, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const string& labelText)
 :RoundedWindow(font, x, y, width, height, depth, borderSize, labelText), m_Font(font), m_HostScreen1Persistent(hostScreen1Persistent) {
@@ -89,12 +107,12 @@ CreateServerWindow::CreateServerWindow(HostScreen1Persistent& hostScreen1Persist
     m_ScrollFrame->addContent(username, 2);
     m_ScrollFrame->addContent(password, 3);
 
-    m_CreateButton = new Button(font, x,y - (height / 2.0f) + 160, 170, 50);
+    m_CreateButton = NEW Button(font, x,y - (height / 2.0f) + 160, 170, 50);
     m_CreateButton->setText("Create");
     m_CreateButton->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_CreateButton->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
-    m_CreateButton->setDepth(depth);
-    m_CreateButton->setUserPointer(&hostScreen1Persistent);
+    m_CreateButton->setDepth(depth - 0.001f);
+    m_CreateButton->setUserPointer(this);
     m_CreateButton->setOnClickFunctor(ServerCreateOnClick());
 }
 CreateServerWindow::~CreateServerWindow() {

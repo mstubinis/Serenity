@@ -16,7 +16,7 @@
 
 class Mesh;
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct BoneNode;
         struct AssimpSceneImport final {
             Assimp::Importer importer;
@@ -48,8 +48,8 @@ struct MeshRequest final {
     bool                                                        fileExists;
     std::vector<MeshRequestPart>                                parts;
     bool                                                        async;
-    Engine::epriv::AssimpSceneImport                            importer;
-    std::unordered_map<std::string, Engine::epriv::BoneNode*>   map;
+    Engine::priv::AssimpSceneImport                            importer;
+    std::unordered_map<std::string, Engine::priv::BoneNode*>   map;
 
     MeshRequest();
     MeshRequest(const std::string& filenameOrData, float threshold);
@@ -61,7 +61,7 @@ struct MeshRequest final {
 
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct InternalMeshRequestPublicInterface final {
             friend class  Mesh;
             static void Request(MeshRequest&);

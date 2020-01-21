@@ -12,7 +12,7 @@
 #include <execution>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 //TODO: profile std::execution::par_unseq compared to regular execution, the overhead to set up par_unseq might be more trouble than it's worth for these, unlike in the mesh triangle sorter
@@ -181,7 +181,7 @@ void RenderGraph::clean(const uint entityData) {
 }
 void RenderGraph::validate_model_instances_for_rendering(Viewport& viewport, Camera& camera) {
     //sf::Clock c;
-    auto lambda = [&](vector<epriv::InstanceNode*>& vector, const glm_vec3& camPos) {
+    auto lambda = [&](vector<priv::InstanceNode*>& vector, const glm_vec3& camPos) {
         for (auto& instanceNode : vector) {
             auto& _modelInstance = *instanceNode->instance;
             auto* body = _modelInstance.parent().getComponent<ComponentBody>();
@@ -217,15 +217,15 @@ void RenderGraph::validate_model_instances_for_rendering(Viewport& viewport, Cam
     auto camPos = camera.getPosition();
     lambda(instancesTotal, camPos);
     //this block is for multi-threading this section of code
-    //auto vec = epriv::threading::splitVector(instancesTotal);
+    //auto vec = priv::threading::splitVector(instancesTotal);
     //for (auto& vector : vec) {
-    //    epriv::threading::addJobRef(lambda, vector, camPos);
+    //    priv::threading::addJobRef(lambda, vector, camPos);
     //}
     //epriv::threading::waitForAll();
     //std::cout << c.restart().asMicroseconds() << std::endl;
 }
 void RenderGraph::render(Viewport& viewport, Camera& camera, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
-    if(useDefaultShaders) 
+    if(useDefaultShaders)
         shaderProgram.bind();
     for (auto& materialNode : materialNodes) {
         if (materialNode->meshNodes.size() > 0) {

@@ -23,7 +23,7 @@ using namespace Engine;
 using namespace std;
 namespace boostm = boost::math;
 
-void epriv::MeshLoader::LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap& _map) {
+void priv::MeshLoader::LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap& _map) {
     if (!_map.count(node.mName.data)) {
         BoneNode* bone_node = NEW BoneNode();
         bone_node->Name = node.mName.data;
@@ -35,7 +35,7 @@ void epriv::MeshLoader::LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap&
     }
 }
 
-void epriv::MeshLoader::LoadProcessNodeNames(const string& file,vector<MeshRequestPart>& _parts, const aiScene& scene, const aiNode& node, BoneNodeMap& _map) {
+void priv::MeshLoader::LoadProcessNodeNames(const string& file,vector<MeshRequestPart>& _parts, const aiScene& scene, const aiNode& node, BoneNodeMap& _map) {
     //just find names and meshes
     auto& root = *(scene.mRootNode);
     for (uint i = 0; i < node.mNumMeshes; ++i) {
@@ -45,14 +45,14 @@ void epriv::MeshLoader::LoadProcessNodeNames(const string& file,vector<MeshReque
         part.mesh = NEW Mesh();
         part.name = file + " - " + /*string(scene.mRootNode->mName.C_Str()) +*/ string(aimesh.mName.C_Str());
         part.mesh->setName(part.name);
-        part.handle = epriv::Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
+        part.handle = priv::Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
         _parts.push_back(part);
     }
     for (uint i = 0; i < node.mNumChildren; ++i) {
         MeshLoader::LoadProcessNodeNames(file, _parts, scene, *node.mChildren[i], _map);
     }
 }
-void epriv::MeshLoader::LoadProcessNodeData(vector<MeshRequestPart>& _parts, const aiScene& scene, const aiNode& node, BoneNodeMap& _map,uint& count) {
+void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequestPart>& _parts, const aiScene& scene, const aiNode& node, BoneNodeMap& _map,uint& count) {
     auto& root = *(scene.mRootNode);
 
     for (uint i = 0; i < node.mNumMeshes; ++i) {
@@ -135,7 +135,7 @@ void epriv::MeshLoader::LoadProcessNodeData(vector<MeshRequestPart>& _parts, con
                 for (uint j = 0; j < assimpBone.mNumWeights; ++j) {
                     uint VertexID = assimpBone.mWeights[j].mVertexId;
                     float Weight = assimpBone.mWeights[j].mWeight;
-                    epriv::VertexBoneData d;
+                    priv::VertexBoneData d;
                     d.AddBoneData(BoneIndex, Weight);
                     data.m_Bones.emplace(VertexID, std::move(d));
                 }
@@ -195,7 +195,7 @@ void epriv::MeshLoader::LoadProcessNodeData(vector<MeshRequestPart>& _parts, con
     }
 }
 
-void epriv::MeshLoader::FinalizeData(Mesh& mesh, epriv::MeshImportedData& data, float threshold) {
+void priv::MeshLoader::FinalizeData(Mesh& mesh, priv::MeshImportedData& data, float threshold) {
     mesh.m_threshold = threshold;
     InternalMeshPublicInterface::FinalizeVertexData(mesh, data);
     InternalMeshPublicInterface::CalculateRadius(mesh);
@@ -203,30 +203,30 @@ void epriv::MeshLoader::FinalizeData(Mesh& mesh, epriv::MeshImportedData& data, 
     mesh.m_CollisionFactory = NEW MeshCollisionFactory(mesh);
 }
 
-bool epriv::MeshLoader::IsNear(float& v1, float& v2, const float& threshold) {
+bool priv::MeshLoader::IsNear(float& v1, float& v2, const float& threshold) {
     return std::abs(v1 - v2) < threshold;
 }
-bool epriv::MeshLoader::IsNear(glm::vec2& v1, glm::vec2& v2, const float& threshold) {
+bool priv::MeshLoader::IsNear(glm::vec2& v1, glm::vec2& v2, const float& threshold) {
     return (std::abs(v1.x - v2.x) < threshold && std::abs(v1.y - v2.y) < threshold) ? true : false;
 }
-bool epriv::MeshLoader::IsNear(glm::vec3& v1, glm::vec3& v2, const float& threshold) {
+bool priv::MeshLoader::IsNear(glm::vec3& v1, glm::vec3& v2, const float& threshold) {
     return (std::abs(v1.x - v2.x) < threshold && std::abs(v1.y - v2.y) < threshold && std::abs(v1.z - v2.z) < threshold) ? true : false;
 }
-bool epriv::MeshLoader::IsSpecialFloat(const float& f) {
+bool priv::MeshLoader::IsSpecialFloat(const float& f) {
     if (boostm::isnan(f) || boostm::isinf(f)) return true;
     return false;
 }
-bool epriv::MeshLoader::IsSpecialFloat(const glm::vec2& v) {
+bool priv::MeshLoader::IsSpecialFloat(const glm::vec2& v) {
     if (boostm::isnan(v.x) || boostm::isnan(v.y)) return true;
     if (boostm::isinf(v.x) || boostm::isinf(v.y)) return true;
     return false;
 }
-bool epriv::MeshLoader::IsSpecialFloat(const glm::vec3& v) {
+bool priv::MeshLoader::IsSpecialFloat(const glm::vec3& v) {
     if (boostm::isnan(v.x) || boostm::isnan(v.y) || boostm::isnan(v.z)) return true;
     if (boostm::isinf(v.x) || boostm::isinf(v.y) || boostm::isinf(v.z)) return true;
     return false;
 }
-bool epriv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, vector<glm::vec3>& pts, vector<glm::vec2>& uvs, vector<glm::vec3>& norms, unsigned short& result, const float& threshold) {
+bool priv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, vector<glm::vec3>& pts, vector<glm::vec2>& uvs, vector<glm::vec3>& norms, unsigned short& result, const float& threshold) {
     for (size_t t = 0; t < pts.size(); ++t) {
         if (IsNear(in_pos, pts[t], threshold) && IsNear(in_uv, uvs[t], threshold) && IsNear(in_norm, norms[t], threshold)) {
             result = static_cast<unsigned short>(t);
@@ -235,7 +235,7 @@ bool epriv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_u
     }
     return false;
 }
-void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
+void priv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
     if (data.normals.size() == 0) 
         return;
     const auto pointsSize(data.points.size());
@@ -332,7 +332,7 @@ void epriv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
         t = glm::normalize(t - n * glm::dot(n, t)); // Gram-Schmidt orthogonalize
     }
 };
-VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
+VertexData* priv::MeshLoader::LoadFrom_OBJCC(string& filename) {
     boost::iostreams::mapped_file_source stream(filename.c_str());
     //TODO: try possible optimizations
 
@@ -455,7 +455,7 @@ VertexData* epriv::MeshLoader::LoadFrom_OBJCC(string& filename) {
     return returnData;
 }
 
-void epriv::MeshLoader::SaveTo_OBJCC(VertexData& data, string filename) {
+void priv::MeshLoader::SaveTo_OBJCC(VertexData& data, string filename) {
     ofstream stream(filename, ios::binary);
 
     vector<vector<size_t>> _indices;

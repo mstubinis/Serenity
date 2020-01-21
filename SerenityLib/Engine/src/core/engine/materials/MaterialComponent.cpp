@@ -1,5 +1,5 @@
 #include <core/engine/materials/MaterialComponent.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/scene/Scene.h>
@@ -11,7 +11,7 @@
 #include <boost/tuple/tuple.hpp>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 MaterialComponent::MaterialComponent(const MaterialComponentType::Type& type, Texture* texture, Texture* mask, Texture* cubemap) {
@@ -107,8 +107,8 @@ const MaterialComponentType::Type& MaterialComponent::type() const {
 
 void MaterialComponent::bind(const size_t& component_index, size_t& textureUnit) {
     const string wholeString = "components[" + to_string(component_index) + "].";
-    Renderer::sendUniform1Safe((wholeString + "numLayers").c_str(), static_cast<int>(m_NumLayers));
-    Renderer::sendUniform1Safe((wholeString + "componentType").c_str(), static_cast<int>(m_ComponentType));
+    Engine::Renderer::sendUniform1Safe((wholeString + "numLayers").c_str(), static_cast<int>(m_NumLayers));
+    Engine::Renderer::sendUniform1Safe((wholeString + "componentType").c_str(), static_cast<int>(m_ComponentType));
     for (unsigned int layerIndex = 0; layerIndex < m_NumLayers; ++layerIndex) {
         m_Layers[layerIndex].sendDataToGPU(wholeString, component_index, layerIndex, textureUnit);
     }

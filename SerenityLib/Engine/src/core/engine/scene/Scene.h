@@ -17,7 +17,7 @@ struct Entity;
 struct SceneOptions;
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class  RenderGraph;
         class  ResourceManager;
         struct EntityPOD;
@@ -34,9 +34,9 @@ namespace Engine {
 #include <functional>
 
 class Scene: public EngineResource, public EventObserver{
-    friend class  Engine::epriv::RenderGraph;
-    friend class  Engine::epriv::ResourceManager;
-    friend struct Engine::epriv::InternalScenePublicInterface;
+    friend class  Engine::priv::RenderGraph;
+    friend class  Engine::priv::ResourceManager;
+    friend struct Engine::priv::InternalScenePublicInterface;
     public:
         virtual void update(const double& dt);
         virtual void render();
@@ -49,7 +49,7 @@ class Scene: public EngineResource, public EventObserver{
     private:
         std::vector<Viewport*>                                m_Viewports;
         std::vector<Camera*>                                  m_Cameras;
-        std::vector<std::vector<Engine::epriv::RenderGraph*>> m_RenderGraphs;
+        std::vector<std::vector<Engine::priv::RenderGraph*>> m_RenderGraphs;
 
         std::vector<SunLight*>                                m_Lights;
         std::vector<SunLight*>                                m_SunLights;
@@ -77,7 +77,7 @@ class Scene: public EngineResource, public EventObserver{
 
         //ecs
         Entity createEntity();
-        Entity getEntity(const Engine::epriv::EntityPOD&);
+        Entity getEntity(const Engine::priv::EntityPOD&);
         void removeEntity(const unsigned int& entityID);
         void removeEntity(Entity& entity);
 
@@ -107,10 +107,10 @@ class Scene: public EngineResource, public EventObserver{
         void centerSceneToObject(const Entity& centerEntity);
 };
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct InternalScenePublicInterface final {
             friend class Scene;
-            friend class Engine::epriv::RenderGraph;
+            friend class Engine::priv::RenderGraph;
 
             static std::vector<Particle>&            GetParticles(Scene&);
             static std::vector<EntityPOD>&           GetEntities(Scene&);

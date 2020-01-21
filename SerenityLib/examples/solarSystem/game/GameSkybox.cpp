@@ -2,8 +2,8 @@
 #include "ResourceManifest.h"
 
 #include <core/engine/math/Engine_Math.h>
-#include <core/engine/renderer/Engine_Renderer.h>
-#include <core/engine/system/window/Engine_Window.h>
+#include <core/engine/renderer/Renderer.h>
+#include <core/engine/system/window/Window.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/scene/Camera.h>

@@ -5,7 +5,7 @@
 #include <core/engine/lights/SunLight.h>
 
 class PointLight : public SunLight {
-    friend class ::Engine::epriv::RenderManager;
+    friend class ::Engine::priv::Renderer;
     protected:
         float                    m_C;
         float                    m_L;

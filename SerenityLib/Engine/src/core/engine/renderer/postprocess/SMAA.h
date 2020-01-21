@@ -12,7 +12,7 @@ struct SMAAQualityLevel {enum Level {
 
 class  ShaderProgram;
 namespace Engine {
-namespace epriv {
+namespace priv {
     class  GBuffer;
     class  SMAA final {
         public:

@@ -126,7 +126,7 @@ void HUD::render() {
 
 #pragma region DrawDebugStuff
     m_Font.renderText(Engine::Data::reportTime() +
-        epriv::Core::m_Engine->m_DebugManager.reportDebug(),
+        priv::Core::m_Engine->m_DebugManager.reportDebug(),
         glm::vec2(10.0f, Resources::getWindowSize().y - 10.0f), glm::vec4(1,1,0, 1.0f), 0, glm::vec2(0.8f, 0.8f), 0.1f);
 
 #pragma endregion

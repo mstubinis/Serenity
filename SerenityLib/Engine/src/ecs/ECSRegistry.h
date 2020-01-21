@@ -15,7 +15,7 @@ template <typename T> const boost_type_index type_ID(T* t) {
 }
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class ECSRegistry final{
             private:
                 static unsigned int                                          lastIndex;

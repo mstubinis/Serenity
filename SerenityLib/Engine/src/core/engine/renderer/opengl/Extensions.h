@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class OpenGLExtensions final {
             public: enum Extension {
                 EXT_Ansiotropic_Filtering,

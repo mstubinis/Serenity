@@ -20,7 +20,7 @@
 #include <iostream>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 #pragma region CollisionCallbackParticipant
@@ -621,7 +621,7 @@ void ComponentBody::setScale(const decimal& p_X, const decimal& p_Y, const decim
     }
     auto* models = m_Owner.getComponent<ComponentModel>();
     if (models) {
-        epriv::ComponentModel_Functions::CalculateRadius(*models);
+        priv::ComponentModel_Functions::CalculateRadius(*models);
     }
 }
 const glm_vec3 ComponentBody::position() const { //theres prob a better way to do this
@@ -1101,7 +1101,7 @@ void ComponentBody::setMass(const float p_Mass) {
 
 #pragma region System
 
-struct epriv::ComponentBody_UpdateFunction final { void operator()(void* p_ComponentPool, const double& dt, Scene& p_Scene) const {
+struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_ComponentPool, const double& dt, Scene& p_Scene) const {
     auto& pool = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool);
     auto& components = pool.pool();
     auto lamda_update = [&](pair<size_t, size_t>& pair_) {
@@ -1121,16 +1121,16 @@ struct epriv::ComponentBody_UpdateFunction final { void operator()(void* p_Compo
             }
         }
     };
-    auto split = epriv::threading::splitVectorPairs(components);
+    auto split = priv::threading::splitVectorPairs(components);
     const auto fdt = static_cast<float>(dt);
     for (auto& pair : split) {
-        epriv::threading::addJobRef(lamda_update, pair);
+        priv::threading::addJobRef(lamda_update, pair);
     }
-    epriv::threading::waitForAll();
+    priv::threading::waitForAll();
 }};
-struct epriv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* p_Component, Entity& p_Entity) const {
+struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* p_Component, Entity& p_Entity) const {
 }};
-struct epriv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* p_ComponentPool,Entity& p_Entity, Scene& p_Scene) const {
+struct priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* p_ComponentPool,Entity& p_Entity, Scene& p_Scene) const {
     auto& pool = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool);
     auto* _component = pool.getComponent(p_Entity);
     if (_component) {
@@ -1145,7 +1145,7 @@ struct epriv::ComponentBody_EntityAddedToSceneFunction final {void operator()(vo
         }
     }
 }};
-struct epriv::ComponentBody_SceneEnteredFunction final {void operator()(void* p_ComponentPool,Scene& p_Scene) const {
+struct priv::ComponentBody_SceneEnteredFunction final {void operator()(void* p_ComponentPool,Scene& p_Scene) const {
 	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool)).pool();
     for (auto& component : pool) { 
         if (component.m_Physics) {
@@ -1153,7 +1153,7 @@ struct epriv::ComponentBody_SceneEnteredFunction final {void operator()(void* p_
         } 
     }
 }};
-struct epriv::ComponentBody_SceneLeftFunction final {void operator()(void* p_ComponentPool, Scene& p_Scene) const {
+struct priv::ComponentBody_SceneLeftFunction final {void operator()(void* p_ComponentPool, Scene& p_Scene) const {
 	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool)).pool();
     for (auto& component : pool) { 
         if (component.m_Physics) {

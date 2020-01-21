@@ -196,7 +196,7 @@ void Ships::init() {
         "Sovereign class flagship",
         "The most advanced Federation starship ever created, the Sovereign class is the flagship of the Federation fleet. "
         "It is a very well balanced flagship, containing adequate maneuverability, shields, and hull. "
-        "It has very large beam coverage, the most out of the other flagships and thus can defend herself against maneuverable escorts pretty well."
+        "It has very large beam coverage, the most out of the other flagships and thus can defend itself against maneuverable escorts pretty well."
         "\n\nThe famous U.S.S. Enterprise-E is of the Sovereign class."
         "\n\n"
         "    Armaments: \n"

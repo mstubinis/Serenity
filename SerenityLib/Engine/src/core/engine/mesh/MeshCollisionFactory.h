@@ -17,7 +17,7 @@ class  btScaledBvhTriangleMeshShape;
 class  btGImpactMeshShape;
 
 namespace Engine {
-namespace epriv {
+namespace priv {
     class MeshCollisionFactory final {
         private:
             Mesh&                          m_Mesh;

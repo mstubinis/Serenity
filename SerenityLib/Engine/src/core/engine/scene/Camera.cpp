@@ -20,7 +20,7 @@ Camera::Camera(const float angle, const float aspectRatio, const float _near, co
     cam.lookAt(body.position(), body.position() + body.forward(), body.up());
     logic.setUserPointer(this);
 
-    epriv::InternalScenePublicInterface::GetCameras(*scene).push_back(this);
+    priv::InternalScenePublicInterface::GetCameras(*scene).push_back(this);
 }
 Camera::Camera(const float left, const float right, const float bottom, const float top, const float _near, const float _far,Scene* scene) : EntityWrapper(*scene){//create an orthographic camera
     if (!scene)
@@ -32,7 +32,7 @@ Camera::Camera(const float left, const float right, const float bottom, const fl
     cam.lookAt(body.position(), body.position() + body.forward(), body.up());
     logic.setUserPointer(this);
 
-    epriv::InternalScenePublicInterface::GetCameras(*scene).push_back(this);
+    priv::InternalScenePublicInterface::GetCameras(*scene).push_back(this);
 }
 Camera::~Camera(){ 
 }

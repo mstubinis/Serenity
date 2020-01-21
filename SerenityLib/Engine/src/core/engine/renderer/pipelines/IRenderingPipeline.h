@@ -23,7 +23,7 @@ class Font;
 class Texture;
 class Particle;
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class IRenderingPipeline {
             public:
                 virtual ~IRenderingPipeline() = 0;

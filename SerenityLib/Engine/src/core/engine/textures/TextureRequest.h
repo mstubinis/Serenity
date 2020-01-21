@@ -50,7 +50,7 @@ struct TextureRequest final {
 };
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct InternalTextureRequestPublicInterface final {
             friend class  Texture;
             static void Request(TextureRequest&);

@@ -13,20 +13,20 @@
 #include <memory>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct InternalTextureRequestPublicInterface;
     };
 };
 
 class Texture: public EngineResource{
-    friend struct Engine::epriv::TextureLoader;
-    friend struct Engine::epriv::InternalTexturePublicInterface;
-    friend struct Engine::epriv::InternalTextureRequestPublicInterface;
+    friend struct Engine::priv::TextureLoader;
+    friend struct Engine::priv::InternalTexturePublicInterface;
+    friend struct Engine::priv::InternalTextureRequestPublicInterface;
 
     public:
         static Texture *White, *Black, *Checkers, *BRDF; //loaded in renderer
     private:
-        std::vector<std::unique_ptr<Engine::epriv::ImageLoadedStructure>>   m_ImagesDatas;
+        std::vector<std::unique_ptr<Engine::priv::ImageLoadedStructure>>   m_ImagesDatas;
         std::vector<GLuint>                                                 m_TextureAddress;
         GLuint                                                              m_Type;
         TextureType::Type                                                   m_TextureType;

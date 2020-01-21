@@ -3,7 +3,7 @@
 #define ENGINE_THREADING_THREAD_POOL_H
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class WorkerThread;
         class ThreadPool;
     };
@@ -18,9 +18,9 @@ namespace Engine {
 #include <memory>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class ThreadPoolFuture final {
-            friend class Engine::epriv::ThreadPool;
+            friend class Engine::priv::ThreadPool;
             private:
                 std::shared_future<void>    m_Future;
                 std::function<void()>       m_Callback;
@@ -36,13 +36,13 @@ namespace Engine {
                 ThreadPoolFuture& operator=(ThreadPoolFuture&& other) noexcept;
         };
         class ThreadPool final{
-            friend class Engine::epriv::WorkerThread;
+            friend class Engine::priv::WorkerThread;
             private:
                 std::condition_variable                                         m_ConditionVariable;
                 std::mutex                                                      m_Mutex;
                 std::queue<std::shared_ptr<std::packaged_task<void()>>>         m_TaskQueue;
                 std::vector<std::thread>                                        m_WorkerThreads;
-                std::vector<Engine::epriv::ThreadPoolFuture>                    m_Futures;
+                std::vector<Engine::priv::ThreadPoolFuture>                    m_Futures;
                 bool                                                            m_Stopped;
 
                 void init(const unsigned int num_threads);

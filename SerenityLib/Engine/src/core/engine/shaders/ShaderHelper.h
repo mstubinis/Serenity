@@ -5,7 +5,7 @@
 #include <string>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class ShaderHelper final {
             public:
                 static const bool sfind(const std::string& whole, const std::string& part);

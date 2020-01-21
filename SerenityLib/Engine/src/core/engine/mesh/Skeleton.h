@@ -8,7 +8,7 @@
 
 class  Mesh;
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct InternalMeshPublicInterface;
         struct DefaultMeshBindFunctor;
         struct DefaultMeshUnbindFunctor;
@@ -36,11 +36,11 @@ namespace Engine {
         };
         class MeshSkeleton final {
             friend class  Mesh;
-            friend class  Engine::epriv::MeshLoader;
-            friend class  Engine::epriv::AnimationData;
-            friend struct Engine::epriv::DefaultMeshBindFunctor;
-            friend struct Engine::epriv::DefaultMeshUnbindFunctor;
-            friend struct Engine::epriv::InternalMeshPublicInterface;
+            friend class  Engine::priv::MeshLoader;
+            friend class  Engine::priv::AnimationData;
+            friend struct Engine::priv::DefaultMeshBindFunctor;
+            friend struct Engine::priv::DefaultMeshUnbindFunctor;
+            friend struct Engine::priv::InternalMeshPublicInterface;
             private:
                 BoneNode*                                       m_RootNode;
                 unsigned int                                    m_NumBones;
@@ -50,13 +50,13 @@ namespace Engine {
                 std::unordered_map<std::string, AnimationData>  m_AnimationData;
                 glm::mat4                                       m_GlobalInverseTransform;
 
-                void fill(const Engine::epriv::MeshImportedData& data);
+                void fill(const Engine::priv::MeshImportedData& data);
                 void populateCleanupMap(BoneNode* node, std::unordered_map<std::string, BoneNode*>& _map);
                 void cleanup();
                 void clear();
             public:
                 MeshSkeleton();
-                MeshSkeleton(const Engine::epriv::MeshImportedData& data);
+                MeshSkeleton(const Engine::priv::MeshImportedData& data);
                 ~MeshSkeleton();
 
                 MeshSkeleton(const MeshSkeleton&)                      = delete;
@@ -88,7 +88,7 @@ namespace Engine {
             std::vector<Vector3Key>  ScalingKeys;
         };
         class AnimationData final {
-            friend class Engine::epriv::MeshSkeleton;
+            friend class Engine::priv::MeshSkeleton;
             friend class Mesh;
             private:
                 MeshSkeleton*                                      m_MeshSkeleton;
@@ -106,7 +106,7 @@ namespace Engine {
                 const size_t FindScaling(const float AnimationTime, const AnimationChannel& node);
             public:
                 AnimationData() = delete;
-                AnimationData(const Engine::epriv::MeshSkeleton&, const aiAnimation&);
+                AnimationData(const Engine::priv::MeshSkeleton&, const aiAnimation&);
 
                 AnimationData(const AnimationData&)                      = delete;
                 AnimationData& operator=(const AnimationData&)           = delete;

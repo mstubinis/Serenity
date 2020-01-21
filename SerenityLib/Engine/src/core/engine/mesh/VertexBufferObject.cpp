@@ -1,4 +1,4 @@
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/mesh/VertexBufferObject.h>
 
 using namespace std;

@@ -26,26 +26,26 @@ struct Entity{
     const bool null();
     template<typename TComponent, typename... ARGS> inline TComponent* addComponent(ARGS&&... args) {
         auto& _this = *this;
-        auto& ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
+        auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(_this);
         return ecs.addComponent<TComponent>(_this, std::forward<ARGS>(args)...);
     }
     template<typename TComponent, typename... ARGS> inline TComponent* addComponent(EntityDataRequest& request, ARGS&&... args) {
         auto& _this = *this;
-        auto& ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
+        auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(_this);
         return ecs.addComponent<TComponent>(request, _this, std::forward<ARGS>(args)...);
     }
     template<typename TComponent> inline const bool removeComponent() {
         auto& _this = *this;
-        auto& ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
+        auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(_this);
         return ecs.removeComponent<TComponent>(_this);
     }
     template<typename TComponent> inline TComponent* getComponent() {
         auto& _this = *this;
-        auto& ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(_this);
+        auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(_this);
         return ecs.getComponent<TComponent>(_this);
     }
     template<typename TComponent> inline TComponent* getComponent(const EntityDataRequest& dataRequest) {
-        auto& ecs = Engine::epriv::InternalEntityPublicInterface::GetECS(*this);
+        auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
         return ecs.getComponent<TComponent>(dataRequest);
     }
     static Entity _null;
@@ -54,11 +54,11 @@ struct Entity{
 
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct InternalEntityPublicInterface final {
             static ECS<Entity>& GetECS(Entity& entity) {
 			    const EntityDataRequest dataRequest(entity);
-                return Engine::epriv::InternalScenePublicInterface::GetECS(entity.scene());
+                return Engine::priv::InternalScenePublicInterface::GetECS(entity.scene());
             }
         };
     };

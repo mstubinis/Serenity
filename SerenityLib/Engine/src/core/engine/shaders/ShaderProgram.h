@@ -18,7 +18,7 @@ class  UniformBufferObject;
 #include <core/engine/shaders/ShaderIncludes.h>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct InternalShaderProgramPublicInterface final {
             static void LoadCPU(ShaderProgram&);
             static void LoadGPU(ShaderProgram&);
@@ -30,7 +30,7 @@ namespace Engine {
 class ShaderProgram final: public BindableResource{
     friend class  UniformBufferObject;
     friend class  Shader;
-    friend struct Engine::epriv::InternalShaderProgramPublicInterface;
+    friend struct Engine::priv::InternalShaderProgramPublicInterface;
     public:
         static ShaderProgram                      *Deferred, *Forward, *Decal; //loaded in renderer
     private:
@@ -45,18 +45,18 @@ class ShaderProgram final: public BindableResource{
         ShaderProgram(const std::string& name, Shader& vertexShader, Shader& fragmentShader);
         virtual ~ShaderProgram();
 
-        ShaderProgram(const ShaderProgram& other) = default;
-        ShaderProgram& operator=(const ShaderProgram& other) = delete;
-        ShaderProgram(ShaderProgram&& other) noexcept = default;
+        ShaderProgram(const ShaderProgram& other)                = delete;
+        ShaderProgram& operator=(const ShaderProgram& other)     = delete;
+        ShaderProgram(ShaderProgram&& other) noexcept            = default;
         ShaderProgram& operator=(ShaderProgram&& other) noexcept = default;
 
         inline operator GLuint() const { return m_ShaderProgram; }
 
-        void load();
-        void unload();
+        void load() override;
+        void unload() override;
 
-        void bind();
-        void unbind();
+        void bind() override;
+        void unbind() override;
 
         const GLuint& program() const;
 

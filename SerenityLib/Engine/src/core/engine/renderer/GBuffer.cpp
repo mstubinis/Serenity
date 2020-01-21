@@ -1,5 +1,5 @@
 #include <core/engine/renderer/GBuffer.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/renderer/FramebufferObject.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/scene/Viewport.h>
@@ -7,11 +7,9 @@
 
 #include <boost/tuple/tuple.hpp>
 
-using namespace Engine;
-using namespace Engine::epriv;
 using namespace std;
 
-GBuffer::GBuffer(const uint& width, const uint& height){
+Engine::priv::GBuffer::GBuffer(const uint& width, const uint& height){
     m_FBO = m_SmallFBO = nullptr;
     internalDestruct(); //just incase this method is called on resize, we want to delete any previous buffers
 
@@ -39,33 +37,33 @@ GBuffer::GBuffer(const uint& width, const uint& height){
 
     //this should be better performance wise, but clean up this code a bit
     auto& depthTexture = m_Buffers[GBufferType::Depth]->texture();
-    Renderer::bindTextureForModification(depthTexture.type(), depthTexture.address());
+    Engine::Renderer::bindTextureForModification(depthTexture.type(), depthTexture.address());
     depthTexture.setFilter(TextureFilter::Nearest);
 
     auto& diffuseTexture = m_Buffers[GBufferType::Diffuse]->texture();
-    Renderer::bindTextureForModification(diffuseTexture.type(), diffuseTexture.address());
+    Engine::Renderer::bindTextureForModification(diffuseTexture.type(), diffuseTexture.address());
     diffuseTexture.setFilter(TextureFilter::Nearest);
 
     auto& normalTexture = m_Buffers[GBufferType::Normal]->texture();
-    Renderer::bindTextureForModification(normalTexture.type(), normalTexture.address());
+    Engine::Renderer::bindTextureForModification(normalTexture.type(), normalTexture.address());
     normalTexture.setFilter(TextureFilter::Nearest);
 
     auto& godRaysTexture = m_Buffers[GBufferType::GodRays]->texture();
-    Renderer::bindTextureForModification(godRaysTexture.type(), godRaysTexture.address());
+    Engine::Renderer::bindTextureForModification(godRaysTexture.type(), godRaysTexture.address());
     godRaysTexture.setFilter(TextureFilter::Nearest);
 }
-void GBuffer::internalDestruct() {
+void Engine::priv::GBuffer::internalDestruct() {
     m_Width  = 0; 
     m_Height = 0;
     SAFE_DELETE(m_FBO);
     SAFE_DELETE(m_SmallFBO);
-    Renderer::unbindFBO();
+    Engine::Renderer::unbindFBO();
     vector_clear(m_Buffers);
 }
-GBuffer::~GBuffer(){ 
+Engine::priv::GBuffer::~GBuffer(){
     internalDestruct();
 }
-void GBuffer::internalBuildTextureBuffer(FramebufferObject* fbo, const GBufferType::Type gbufferType, const uint& w, const uint& h) {
+void Engine::priv::GBuffer::internalBuildTextureBuffer(FramebufferObject* fbo, const GBufferType::Type gbufferType, const uint& w, const uint& h) {
     vector<boost::tuple<ImageInternalFormat::Format, ImagePixelFormat::Format, ImagePixelType::Type, FramebufferAttatchment::Attatchment>> GBUFFER_TYPE_DATA = []() {
         vector<boost::tuple<ImageInternalFormat::Format, ImagePixelFormat::Format, ImagePixelType::Type, FramebufferAttatchment::Attatchment>> m;
         m.resize(static_cast<uint>(GBufferType::_TOTAL));
@@ -88,7 +86,7 @@ void GBuffer::internalBuildTextureBuffer(FramebufferObject* fbo, const GBufferTy
     Texture* texture = NEW Texture(w, h, i.get<2>(), i.get<1>(), i.get<0>(), fbo->divisor());
     m_Buffers[static_cast<uint>(gbufferType)] = fbo->attatchTexture(texture, attatchment);
 }
-bool GBuffer::resize(const uint& width, const uint& height){
+bool Engine::priv::GBuffer::resize(const uint& width, const uint& height){
     if (m_Width == width && m_Height == height)
         return false;
     m_Width = width;
@@ -97,7 +95,7 @@ bool GBuffer::resize(const uint& width, const uint& height){
     m_SmallFBO->resize(width, height);
     return true;
 }
-void GBuffer::internalStart(const unsigned int* types, const unsigned int& size, const string& channels, const bool first_fbo) {
+void Engine::priv::GBuffer::internalStart(const unsigned int* types, const unsigned int& size, const string& channels, const bool first_fbo) {
     if (first_fbo) { m_FBO->bind(); }
     else { m_SmallFBO->bind(); }
     bool r, g, b, a;
@@ -106,48 +104,48 @@ void GBuffer::internalStart(const unsigned int* types, const unsigned int& size,
     channels.find("B") != string::npos ? b = true : b = false;
     channels.find("A") != string::npos ? a = true : a = false;
     glDrawBuffers(size, types);
-    Renderer::colorMask(r, g, b, a);
+    Engine::Renderer::colorMask(r, g, b, a);
 }
-void GBuffer::bindFramebuffers(const unsigned int t1, const string& c, const bool mainFBO){
+void Engine::priv::GBuffer::bindFramebuffers(const unsigned int t1, const string& c, const bool mainFBO){
     unsigned int t[1] = { m_Buffers[t1]->attatchment() };
     internalStart(t, 1, c, mainFBO);
 }
-void GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const string& c, const bool mainFBO){
+void Engine::priv::GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const string& c, const bool mainFBO){
     unsigned int t[2] = { m_Buffers[t1]->attatchment(),m_Buffers[t2]->attatchment() };
     internalStart(t, 2, c, mainFBO);
 }
-void GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const unsigned int t3, const string& c, const bool mainFBO){
+void Engine::priv::GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const unsigned int t3, const string& c, const bool mainFBO){
     unsigned int t[3] = { m_Buffers[t1]->attatchment(),m_Buffers[t2]->attatchment(),m_Buffers[t3]->attatchment() };
     internalStart(t, 3, c, mainFBO);
 }
-void GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const unsigned int t3, const unsigned int t4, const string& c, const bool mainFBO){
+void Engine::priv::GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const unsigned int t3, const unsigned int t4, const string& c, const bool mainFBO){
     unsigned int t[4] = { m_Buffers[t1]->attatchment(),m_Buffers[t2]->attatchment(),m_Buffers[t3]->attatchment(),m_Buffers[t4]->attatchment() };
     internalStart(t, 4, c, mainFBO);
 }
-void GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const unsigned int t3, const unsigned int t4, const unsigned int t5, const string& c, const bool mainFBO){
+void Engine::priv::GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const unsigned int t3, const unsigned int t4, const unsigned int t5, const string& c, const bool mainFBO){
     unsigned int t[5] = { m_Buffers[t1]->attatchment(),m_Buffers[t2]->attatchment(),m_Buffers[t3]->attatchment(),m_Buffers[t4]->attatchment(),m_Buffers[t5]->attatchment() };
     internalStart(t, 5, c, mainFBO);
 }
 
-void GBuffer::bindBackbuffer(Viewport& viewport, const GLuint final_fbo, const GLuint final_rbo){
-    Renderer::bindFBO(final_fbo);
-    Renderer::bindRBO(final_rbo); //probably dont even need this. or only implement this if final_rbo != 0
-    Renderer::colorMask(true, true, true, true);
+void Engine::priv::GBuffer::bindBackbuffer(Viewport& viewport, const GLuint final_fbo, const GLuint final_rbo){
+    Engine::Renderer::bindFBO(final_fbo);
+    Engine::Renderer::bindRBO(final_rbo); //probably dont even need this. or only implement this if final_rbo != 0
+    Engine::Renderer::colorMask(true, true, true, true);
     auto& dimensions = viewport.getViewportDimensions();
-    Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
+    Engine::Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
 }
-const vector<FramebufferTexture*>& GBuffer::getBuffers() const{ 
+const vector<Engine::priv::FramebufferTexture*>& Engine::priv::GBuffer::getBuffers() const{
     return m_Buffers; 
 }
-Texture& GBuffer::getTexture(const uint t){
+Texture& Engine::priv::GBuffer::getTexture(const uint t){
     return m_Buffers[t]->texture();
 }
-FramebufferTexture& GBuffer::getBuffer(const uint t){
+Engine::priv::FramebufferTexture& Engine::priv::GBuffer::getBuffer(const uint t){
     return *m_Buffers[t]; 
 }
-FramebufferObject* GBuffer::getMainFBO(){ 
+Engine::priv::FramebufferObject* Engine::priv::GBuffer::getMainFBO(){
     return m_FBO; 
 }
-FramebufferObject* GBuffer::getSmallFBO(){ 
+Engine::priv::FramebufferObject* Engine::priv::GBuffer::getSmallFBO(){
     return m_SmallFBO; 
 }

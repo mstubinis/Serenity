@@ -9,7 +9,7 @@
 using namespace Engine;
 using namespace std;
 
-epriv::DebugManager::DebugManager(){ 
+priv::DebugManager::DebugManager(){ 
     clock = sf::Clock();
     output = "";
     m_logicTime = m_physicsTime = m_renderTime = m_soundTime = 0;
@@ -22,28 +22,28 @@ epriv::DebugManager::DebugManager(){
     output_frame = 0;
     decimals = 4;
 }
-epriv::DebugManager::~DebugManager() {
+priv::DebugManager::~DebugManager() {
     cleanup();
 }
-void epriv::DebugManager::cleanup() {
+void priv::DebugManager::cleanup() {
 
 }
-void epriv::DebugManager::_init() {
+void priv::DebugManager::_init() {
 	GLuint cast = static_cast<GLuint>(queryID);
     glGenQueries(1, &cast);
     glQueryCounter(queryID, GL_TIMESTAMP);// dummy query to prevent OpenGL errors from popping out 
 }
 
-void epriv::DebugManager::addDebugLine(const char* message) {
+void priv::DebugManager::addDebugLine(const char* message) {
     text_queue.emplace_back(message);
 }
-void epriv::DebugManager::addDebugLine(string& message) {
+void priv::DebugManager::addDebugLine(string& message) {
     text_queue.emplace_back(message);
 }
-void epriv::DebugManager::addDebugLine(string message) {
+void priv::DebugManager::addDebugLine(string message) {
     text_queue.emplace_back(message);
 }
-void epriv::DebugManager::calculate() {
+void priv::DebugManager::calculate() {
     m_deltaTime = (m_logicTime + m_physicsTime + m_renderTime + m_soundTime);
     m_totalTime += dt();
     ++output_frame;
@@ -51,36 +51,36 @@ void epriv::DebugManager::calculate() {
         output_frame = 0;
     }
 }
-void epriv::DebugManager::beginGLQuery() { 
+void priv::DebugManager::beginGLQuery() { 
     glBeginQuery(GL_TIME_ELAPSED, queryID); 
 }
-void epriv::DebugManager::endGLQuery(const char* tag) { 
+void priv::DebugManager::endGLQuery(const char* tag) { 
     string msg = string(tag) + ": %f ms\n";
     glEndQuery(GL_TIME_ELAPSED);
     glGetQueryObjectuiv(queryID, GL_QUERY_RESULT, &queryObject);
     printf(msg.c_str(), queryObject / 1000000.0);
 }
-void epriv::DebugManager::stop_clock() { clock.restart(); }
+void priv::DebugManager::stop_clock() { clock.restart(); }
 
-void epriv::DebugManager::calculate_logic() { m_logicTime = clock.restart().asMicroseconds(); }
-void epriv::DebugManager::calculate_physics() { m_physicsTime = clock.restart().asMicroseconds(); }
-void epriv::DebugManager::calculate_sounds() { m_soundTime = clock.restart().asMicroseconds(); }
-void epriv::DebugManager::calculate_render() { m_renderTime = clock.restart().asMicroseconds(); }
+void priv::DebugManager::calculate_logic() { m_logicTime = clock.restart().asMicroseconds(); }
+void priv::DebugManager::calculate_physics() { m_physicsTime = clock.restart().asMicroseconds(); }
+void priv::DebugManager::calculate_sounds() { m_soundTime = clock.restart().asMicroseconds(); }
+void priv::DebugManager::calculate_render() { m_renderTime = clock.restart().asMicroseconds(); }
 
-const double epriv::DebugManager::dt() const { return (double)((double)m_deltaTime / divisor); }
-const double epriv::DebugManager::logicTime() const { return (double)((double)m_logicTime / divisor); }
-const double epriv::DebugManager::physicsTime() const { return (double)((double)m_physicsTime / divisor); }
-const double epriv::DebugManager::renderTime() const { return (double)((double)m_renderTime / divisor); }
-const double epriv::DebugManager::soundsTime() const { return (double)((double)m_soundTime / divisor); }
-const double epriv::DebugManager::totalTime() const{ return m_totalTime; }
+const double priv::DebugManager::dt() const { return (double)((double)m_deltaTime / divisor); }
+const double priv::DebugManager::logicTime() const { return (double)((double)m_logicTime / divisor); }
+const double priv::DebugManager::physicsTime() const { return (double)((double)m_physicsTime / divisor); }
+const double priv::DebugManager::renderTime() const { return (double)((double)m_renderTime / divisor); }
+const double priv::DebugManager::soundsTime() const { return (double)((double)m_soundTime / divisor); }
+const double priv::DebugManager::totalTime() const{ return m_totalTime; }
 
-string epriv::DebugManager::timestamp() {
+string priv::DebugManager::timestamp() {
     const auto end = std::chrono::system_clock::now();
     const std::time_t end_time = std::chrono::system_clock::to_time_t(end);
     return std::ctime(&end_time);
 }
-string& epriv::DebugManager::reportTime() { return reportTime(decimals); }
-string& epriv::DebugManager::reportTime(uint _decimals) {
+string& priv::DebugManager::reportTime() { return reportTime(decimals); }
+string& priv::DebugManager::reportTime(uint _decimals) {
     decimals = _decimals;
     if ((output_frame >= output_frame_delay - 1) || output_frame_delay == 0) {
         uint fps = uint(1.0 / ((double)m_deltaTime / divisor));
@@ -98,7 +98,7 @@ string& epriv::DebugManager::reportTime(uint _decimals) {
     }
     return output;
 }
-string epriv::DebugManager::reportDebug() {
+string priv::DebugManager::reportDebug() {
     string out = "\n";
     for (auto& str : text_queue) {
         out += str + "\n";

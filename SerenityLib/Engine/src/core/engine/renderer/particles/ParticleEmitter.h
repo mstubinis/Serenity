@@ -10,16 +10,16 @@
 
 class  ParticleEmissionProperties;
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct InternalScenePublicInterface;
         class  ParticleSystem;
     };
 };
 class ParticleEmitter final : public EntityWrapper{
-    friend class  Engine::epriv::ParticleSystem;
+    friend class  Engine::priv::ParticleSystem;
     friend class  Particle;
     friend struct ParticleData;
-    friend struct Engine::epriv::InternalScenePublicInterface;
+    friend struct Engine::priv::InternalScenePublicInterface;
     public:
         glm::vec4                      m_UserData;
     private:
@@ -96,8 +96,8 @@ class ParticleEmitter final : public EntityWrapper{
         ParticleEmissionProperties* getProperties();
         void setProperties(ParticleEmissionProperties& properties);
 
-        void update(const size_t& index, const double& dt, Engine::epriv::ParticleSystem& particleSystem);
-        void update_multithreaded(const size_t& index, const double& dt, Engine::epriv::ParticleSystem& particleSystem);
+        void update(const size_t& index, const double& dt, Engine::priv::ParticleSystem& particleSystem);
+        void update_multithreaded(const size_t& index, const double& dt, Engine::priv::ParticleSystem& particleSystem);
 };
 
 #endif

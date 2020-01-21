@@ -261,7 +261,7 @@ const double Particle::lifetime() const {
 
 
 
-void Particle::update(const size_t& index, const double& dt, Engine::epriv::ParticleSystem& particleSystem) {
+void Particle::update(const size_t& index, const double& dt, Engine::priv::ParticleSystem& particleSystem) {
     if (m_Data.m_Active) {
         m_Data.m_Timer += dt;
         const auto fdt  = static_cast<float>(dt);
@@ -288,7 +288,7 @@ void Particle::update(const size_t& index, const double& dt, Engine::epriv::Part
         }
     }
 }
-void Particle::update_multithreaded(const size_t& index, const double& dt, Engine::epriv::ParticleSystem& particleSystem) {
+void Particle::update_multithreaded(const size_t& index, const double& dt, Engine::priv::ParticleSystem& particleSystem) {
     if (m_Data.m_Active) {
         m_Data.m_Timer += dt;
         const auto fdt  = static_cast<float>(dt);
@@ -317,13 +317,13 @@ void Particle::update_multithreaded(const size_t& index, const double& dt, Engin
         }
     }
 }
-void Particle::render(Engine::epriv::GBuffer& gBuffer) {
+void Particle::render(Engine::priv::GBuffer& gBuffer) {
     m_Material->bind();
 
-    auto maxTextures = epriv::Core::m_Engine->m_RenderManager.OpenGLStateMachine.getMaxTextureUnits() - 1;
+    auto maxTextures = priv::Core::m_Engine->m_RenderManager.OpenGLStateMachine.getMaxTextureUnits() - 1;
 
     Camera& camera = *m_Scene->getActiveCamera();
-    Renderer::sendTextureSafe("gDepthMap", gBuffer.getTexture(Engine::epriv::GBufferType::Depth), maxTextures);
+    Renderer::sendTextureSafe("gDepthMap", gBuffer.getTexture(Engine::priv::GBufferType::Depth), maxTextures);
     Renderer::sendUniform4Safe("Object_Color", m_Data.m_Color);
     Renderer::sendUniform2Safe("ScreenData", glm::vec2(Resources::getWindowSize()));
 
@@ -335,6 +335,6 @@ void Particle::render(Engine::epriv::GBuffer& gBuffer) {
 
     Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
 
-    auto& mesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
+    auto& mesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
     mesh.render();
 }

@@ -117,7 +117,7 @@ void ParticleEmitter::setProperties(ParticleEmissionProperties& properties) {
 }
 
 
-void ParticleEmitter::update_multithreaded(const size_t& index, const double& dt, epriv::ParticleSystem& particleSystem) {
+void ParticleEmitter::update_multithreaded(const size_t& index, const double& dt, priv::ParticleSystem& particleSystem) {
     //handle spawning
     if (m_Active) {
         m_Timer += dt;
@@ -140,7 +140,7 @@ void ParticleEmitter::update_multithreaded(const size_t& index, const double& dt
         }
     }
 }
-void ParticleEmitter::update(const size_t& index, const double& dt, epriv::ParticleSystem& particleSystem) {
+void ParticleEmitter::update(const size_t& index, const double& dt, priv::ParticleSystem& particleSystem) {
     //handle spawning
     if (m_Active) {
         m_Timer += dt;

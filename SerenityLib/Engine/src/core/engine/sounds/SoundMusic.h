@@ -8,7 +8,7 @@
 struct Handle;
 class  SoundQueue;
 class  SoundMusic : public SoundBaseClass {
-    friend class Engine::epriv::SoundManager;
+    friend class Engine::priv::SoundManager;
     friend class SoundQueue;
     private:
         sf::Music   m_Sound;

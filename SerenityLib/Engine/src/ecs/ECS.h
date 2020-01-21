@@ -10,10 +10,10 @@ struct SceneOptions;
 #include <ecs/ECSSystem.h>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct InternalScenePublicInterface;
         template<typename TEntity> class ECS final{
-            friend struct Engine::epriv::InternalScenePublicInterface;
+            friend struct Engine::priv::InternalScenePublicInterface;
             private:
                 ECSEntityPool<TEntity>              m_EntityPool;
                 std::vector<TEntity>                m_JustAddedEntities;
@@ -146,7 +146,7 @@ namespace Engine {
                     const EntityDataRequest dataRequest(entity);
                     m_DestroyedEntities.push_back(dataRequest.ID);
                 }
-                epriv::EntityPOD* getEntity(const unsigned int& entityID) { 
+                priv::EntityPOD* getEntity(const unsigned int& entityID) { 
                     return m_EntityPool.getEntity(entityID); 
                 }
                 template<typename TComponent, typename... ARGS> TComponent* addComponent(TEntity& entity, ARGS&&... args) {

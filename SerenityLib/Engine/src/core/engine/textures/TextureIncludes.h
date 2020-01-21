@@ -36,7 +36,7 @@ namespace sf {
     class Image; 
 }
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class  FramebufferObject;
         struct ImageMipmap final {
             uint32_t width;
@@ -51,7 +51,7 @@ namespace Engine {
             ImageInternalFormat::Format           internalFormat;
             ImagePixelFormat::Format              pixelFormat;
             ImagePixelType::Type                  pixelType;
-            std::vector<epriv::ImageMipmap>       mipmaps;
+            std::vector<priv::ImageMipmap>       mipmaps;
             std::string                           filename;
 
             ImageLoadedStructure();

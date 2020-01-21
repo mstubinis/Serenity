@@ -16,7 +16,7 @@ using namespace Engine;
 
 void _preTicCallback(btDynamicsWorld* world, btScalar timeStep) {}
 void _postTicCallback(btDynamicsWorld* world, btScalar timeStep) {}
-epriv::PhysicsWorld::PhysicsWorld() {
+priv::PhysicsWorld::PhysicsWorld() {
     broadphase             = new btDbvtBroadphase();
     collisionConfiguration = new btDefaultCollisionConfiguration();
     dispatcher             = new btCollisionDispatcher(collisionConfiguration);
@@ -37,7 +37,7 @@ epriv::PhysicsWorld::PhysicsWorld() {
     world->setInternalTickCallback(_preTicCallback, (void*)world, true);
     world->setInternalTickCallback(_postTicCallback, (void*)world, false);
 }
-epriv::PhysicsWorld::~PhysicsWorld() {
+priv::PhysicsWorld::~PhysicsWorld() {
     SAFE_DELETE(debugDrawer);
     SAFE_DELETE(world);
     SAFE_DELETE(solver);

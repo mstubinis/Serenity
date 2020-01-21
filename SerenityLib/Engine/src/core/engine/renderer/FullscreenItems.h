@@ -4,14 +4,14 @@
 
 #include <vector>
 #include <core/engine/events/Engine_EventObject.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
 typedef unsigned short ushort;
 
 namespace Engine{
-namespace epriv{
+namespace priv{
     struct MeshVertexDataFullscreen final {
         glm::vec3 position;
         glm::vec2 uv;

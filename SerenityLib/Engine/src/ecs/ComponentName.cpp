@@ -1,7 +1,7 @@
 #include <ecs/ComponentName.h>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 #pragma region Component
@@ -30,15 +30,15 @@ const bool ComponentName::empty() const {
 
 #pragma region System
 
-struct epriv::ComponentName_UpdateFunction final {void operator()(void* _componentPool, const double& dt, Scene& _scene) const {
+struct priv::ComponentName_UpdateFunction final {void operator()(void* _componentPool, const double& dt, Scene& _scene) const {
 }};
-struct epriv::ComponentName_ComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
+struct priv::ComponentName_ComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
 }};
-struct epriv::ComponentName_EntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
+struct priv::ComponentName_EntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
 }};
-struct epriv::ComponentName_SceneEnteredFunction final {void operator()(void* _componentPool, Scene& _scene) const {
+struct priv::ComponentName_SceneEnteredFunction final {void operator()(void* _componentPool, Scene& _scene) const {
 }};
-struct epriv::ComponentName_SceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
+struct priv::ComponentName_SceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
 }};
 
 ComponentName_System_CI::ComponentName_System_CI() {

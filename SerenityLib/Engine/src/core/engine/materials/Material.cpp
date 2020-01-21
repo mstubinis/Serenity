@@ -13,7 +13,7 @@
 #include <boost/tuple/tuple.hpp>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 vector<glm::vec4> Material::m_MaterialProperities;

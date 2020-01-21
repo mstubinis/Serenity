@@ -10,7 +10,7 @@
 
 using namespace std;
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 
 TextureRequest::TextureRequest() {
     file          = "";

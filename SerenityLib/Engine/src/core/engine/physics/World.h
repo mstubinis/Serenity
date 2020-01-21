@@ -15,7 +15,7 @@ class btTransform;
 class btVector3;
 class btDiscreteDynamicsWorld;
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class  GLDebugDrawer;
         class PhysicsWorld final{
             public:

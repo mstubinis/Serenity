@@ -2,7 +2,7 @@
 #include "../ships/shipSystems/ShipSystemSensors.h"
 #include "../ships/shipSystems/ShipSystemCloakingDevice.h"
 
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/materials/MaterialComponent.h>

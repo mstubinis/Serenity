@@ -14,7 +14,7 @@
 using namespace Engine;
 using namespace std;
 
-epriv::MeshCollisionFactory::MeshCollisionFactory(Mesh& _mesh) :m_Mesh(_mesh) {
+priv::MeshCollisionFactory::MeshCollisionFactory(Mesh& _mesh) :m_Mesh(_mesh) {
     auto& data            = *_mesh.m_VertexData;
     m_ConvexHullData      = nullptr;
     m_ConvesHullShape     = nullptr;
@@ -23,13 +23,13 @@ epriv::MeshCollisionFactory::MeshCollisionFactory(Mesh& _mesh) :m_Mesh(_mesh) {
     _initConvexData(data);
     _initTriangleData(data);
 }
-epriv::MeshCollisionFactory::~MeshCollisionFactory() {
+priv::MeshCollisionFactory::~MeshCollisionFactory() {
     SAFE_DELETE(m_ConvexHullData);
     SAFE_DELETE(m_ConvesHullShape);
     SAFE_DELETE(m_TriangleStaticData);
     SAFE_DELETE(m_TriangleStaticShape);
 }
-void epriv::MeshCollisionFactory::_initConvexData(VertexData& data) {
+void priv::MeshCollisionFactory::_initConvexData(VertexData& data) {
     const auto& positions = data.getData<glm::vec3>(0);
     if (!m_ConvexHullData) {
         m_ConvesHullShape = new btConvexHullShape();
@@ -48,7 +48,7 @@ void epriv::MeshCollisionFactory::_initConvexData(VertexData& data) {
         m_ConvesHullShape->recalcLocalAabb();
     }
 }
-void epriv::MeshCollisionFactory::_initTriangleData(VertexData& data) {
+void priv::MeshCollisionFactory::_initTriangleData(VertexData& data) {
     if (!m_TriangleStaticData) {
         const auto& positions = data.getData<glm::vec3>(0);
         vector<glm::vec3> triangles;
@@ -76,7 +76,7 @@ void epriv::MeshCollisionFactory::_initTriangleData(VertexData& data) {
         m_TriangleStaticShape->recalcLocalAabb();
     }
 }
-btMultiSphereShape* epriv::MeshCollisionFactory::buildSphereShape(ModelInstance* modelInstance, const bool isCompoundChild) {
+btMultiSphereShape* priv::MeshCollisionFactory::buildSphereShape(ModelInstance* modelInstance, const bool isCompoundChild) {
     const auto& rad = static_cast<btScalar>(m_Mesh.getRadius());
     auto v = btVector3(0, 0, 0);
     btMultiSphereShape* sphere = new btMultiSphereShape(&v, &rad, 1);
@@ -86,7 +86,7 @@ btMultiSphereShape* epriv::MeshCollisionFactory::buildSphereShape(ModelInstance*
         sphere->setUserPointer(modelInstance);
     return sphere;
 }
-btBoxShape* epriv::MeshCollisionFactory::buildBoxShape(ModelInstance* modelInstance, const bool isCompoundChild) {
+btBoxShape* priv::MeshCollisionFactory::buildBoxShape(ModelInstance* modelInstance, const bool isCompoundChild) {
     btBoxShape* box = new btBoxShape(Math::btVectorFromGLM(m_Mesh.getRadiusBox()));
     box->setMargin(static_cast<btScalar>(0.001));
     if (isCompoundChild) {
@@ -94,7 +94,7 @@ btBoxShape* epriv::MeshCollisionFactory::buildBoxShape(ModelInstance* modelInsta
     }
     return box;
 }
-btUniformScalingShape* epriv::MeshCollisionFactory::buildConvexHull(ModelInstance* modelInstance, const bool isCompoundChild) {
+btUniformScalingShape* priv::MeshCollisionFactory::buildConvexHull(ModelInstance* modelInstance, const bool isCompoundChild) {
     btUniformScalingShape* uniformScalingShape = new btUniformScalingShape(m_ConvesHullShape, static_cast<btScalar>(1.0));
     uniformScalingShape->setMargin(static_cast<btScalar>(0.001));
     if (isCompoundChild) {
@@ -103,7 +103,7 @@ btUniformScalingShape* epriv::MeshCollisionFactory::buildConvexHull(ModelInstanc
     }
     return uniformScalingShape;
 }
-btScaledBvhTriangleMeshShape* epriv::MeshCollisionFactory::buildTriangleShape(ModelInstance* modelInstance, const bool isCompoundChild) {
+btScaledBvhTriangleMeshShape* priv::MeshCollisionFactory::buildTriangleShape(ModelInstance* modelInstance, const bool isCompoundChild) {
     btScaledBvhTriangleMeshShape* scaledBVH = new btScaledBvhTriangleMeshShape(m_TriangleStaticShape, btVector3(static_cast<btScalar>(1.0), static_cast<btScalar>(1.0), static_cast<btScalar>(1.0)));
     if (isCompoundChild) {
         scaledBVH->getChildShape()->setUserPointer(modelInstance);
@@ -111,7 +111,7 @@ btScaledBvhTriangleMeshShape* epriv::MeshCollisionFactory::buildTriangleShape(Mo
     }
     return scaledBVH;
 }
-btGImpactMeshShape* epriv::MeshCollisionFactory::buildTriangleShapeGImpact(ModelInstance* modelInstance, const bool isCompoundChild) {
+btGImpactMeshShape* priv::MeshCollisionFactory::buildTriangleShapeGImpact(ModelInstance* modelInstance, const bool isCompoundChild) {
     btGImpactMeshShape* gImpact = new btGImpactMeshShape(m_TriangleStaticData);
     gImpact->setMargin(static_cast<btScalar>(0.001));
     gImpact->updateBound();

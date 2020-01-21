@@ -11,10 +11,10 @@ this class provides a cpu side implementation of opengl's state machine, includi
 #include <vector>
 
 namespace Engine {
-    namespace epriv {
-        class  RenderManager;
+    namespace priv {
+        class  Renderer;
         class  OpenGLState final {
-            friend class  RenderManager;
+            friend class  Renderer;
             private:
                 #pragma region TextureUnits
                 struct TextureUnitState final {

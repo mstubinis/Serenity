@@ -7,11 +7,10 @@
 #include <iostream>
 
 using namespace Engine;
-using namespace Engine::epriv;
 using namespace std;
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct DefaultMaterialBindFunctor {
             void operator()(BindableResource* r) const {
                 auto& material = *static_cast<Material*>(r);
@@ -23,11 +22,11 @@ namespace Engine {
                         component.bind(i, textureUnit);
                     }
                 }
-                Renderer::sendUniform1Safe("numComponents", int(numComponents));
-                Renderer::sendUniform1Safe("Shadeless", static_cast<int>(material.m_Shadeless));
-                Renderer::sendUniform4Safe("Material_F0AndID", material.m_F0Color.r, material.m_F0Color.g, material.m_F0Color.b, static_cast<float>(material.m_ID));
-                Renderer::sendUniform4Safe("MaterialBasePropertiesOne", material.m_BaseGlow, material.m_BaseAO, material.m_BaseMetalness, material.m_BaseSmoothness);
-                Renderer::sendUniform4Safe("MaterialBasePropertiesTwo", material.m_BaseAlpha, static_cast<float>(material.m_DiffuseModel), static_cast<float>(material.m_SpecularModel), 0.0f);
+                Engine::Renderer::sendUniform1Safe("numComponents", int(numComponents));
+                Engine::Renderer::sendUniform1Safe("Shadeless", static_cast<int>(material.m_Shadeless));
+                Engine::Renderer::sendUniform4Safe("Material_F0AndID", material.m_F0Color.r, material.m_F0Color.g, material.m_F0Color.b, static_cast<float>(material.m_ID));
+                Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesOne", material.m_BaseGlow, material.m_BaseAO, material.m_BaseMetalness, material.m_BaseSmoothness);
+                Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesTwo", material.m_BaseAlpha, static_cast<float>(material.m_DiffuseModel), static_cast<float>(material.m_SpecularModel), 0.0f);
             }
         };
         struct DefaultMaterialUnbindFunctor {
@@ -38,8 +37,8 @@ namespace Engine {
     };
 };
 
-void MaterialLoader::InternalInit(Material& material, Texture* diffuse_ptr, Texture* normal_ptr, Texture* glow_ptr, Texture* specular_ptr, Texture* ao_ptr, Texture* metalness_ptr, Texture* smoothness_ptr) {
-    InternalInitBase(material);
+void priv::MaterialLoader::InternalInit(Material& material, Texture* diffuse_ptr, Texture* normal_ptr, Texture* glow_ptr, Texture* specular_ptr, Texture* ao_ptr, Texture* metalness_ptr, Texture* smoothness_ptr) {
+    priv::MaterialLoader::InternalInitBase(material);
     if (diffuse_ptr)     material.internalAddComponentGeneric(MaterialComponentType::Diffuse,  diffuse_ptr);
     if (normal_ptr)      material.internalAddComponentGeneric(MaterialComponentType::Normal,   normal_ptr);
     if (glow_ptr)        material.internalAddComponentGeneric(MaterialComponentType::Glow,     glow_ptr);
@@ -48,7 +47,7 @@ void MaterialLoader::InternalInit(Material& material, Texture* diffuse_ptr, Text
     if (metalness_ptr)   material.internalAddComponentGeneric(MaterialComponentType::Metalness, metalness_ptr);
     if (smoothness_ptr)  material.internalAddComponentGeneric(MaterialComponentType::Smoothness, smoothness_ptr);
 }
-void MaterialLoader::InternalInitBase(Material& material) {
+void priv::MaterialLoader::InternalInitBase(Material& material) {
     material.m_Components.reserve(MAX_MATERIAL_COMPONENTS);
     material.internalUpdateGlobalMaterialPool(true);
     material.setDiffuseModel(DiffuseModel::Lambert);
@@ -63,113 +62,113 @@ void MaterialLoader::InternalInitBase(Material& material) {
     material.setAlpha(1.0f);
     material.setAO(1.0f);
     material.setF0Color(0.04f, 0.04f, 0.04f);
-    material.setCustomBindFunctor(epriv::DefaultMaterialBindFunctor());
-    material.setCustomUnbindFunctor(epriv::DefaultMaterialUnbindFunctor());
+    material.setCustomBindFunctor(priv::DefaultMaterialBindFunctor());
+    material.setCustomUnbindFunctor(priv::DefaultMaterialUnbindFunctor());
 }
 
-Texture* MaterialLoader::LoadTextureDiffuse(const string& file) {
+Texture* priv::MaterialLoader::LoadTextureDiffuse(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
+        texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
             texture = NEW Texture(file, true, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_2D);
-            Core::m_Engine->m_ResourceManager._addTexture(texture);
+            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
     return texture;
 }
-Texture* MaterialLoader::LoadTextureNormal(const string& file) {
+Texture* priv::MaterialLoader::LoadTextureNormal(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
+        texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
             texture = NEW Texture(file, true, ImageInternalFormat::RGB8, GL_TEXTURE_2D);
-            Core::m_Engine->m_ResourceManager._addTexture(texture);
+            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
     return texture;
 }
-Texture* MaterialLoader::LoadTextureGlow(const string& file) {
+Texture* priv::MaterialLoader::LoadTextureGlow(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
         texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
             texture = NEW Texture(file, true, ImageInternalFormat::R8, GL_TEXTURE_2D);
-            Core::m_Engine->m_ResourceManager._addTexture(texture);
+            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
     return texture;
 }
-Texture* MaterialLoader::LoadTextureSpecular(const string& file) {
+Texture* priv::MaterialLoader::LoadTextureSpecular(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
+        texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
             texture = NEW Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
-            Core::m_Engine->m_ResourceManager._addTexture(texture);
+            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
     return texture;
 }
-Texture* MaterialLoader::LoadTextureAO(const string& file) {
+Texture* priv::MaterialLoader::LoadTextureAO(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
+        texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
             texture = NEW Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
-            Core::m_Engine->m_ResourceManager._addTexture(texture);
+            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
     return texture;
 }
-Texture* MaterialLoader::LoadTextureMetalness(const string& file) {
+Texture* priv::MaterialLoader::LoadTextureMetalness(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
+        texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
             texture = NEW Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
-            Core::m_Engine->m_ResourceManager._addTexture(texture);
+            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
     return texture;
 }
-Texture* MaterialLoader::LoadTextureSmoothness(const string& file) {
+Texture* priv::MaterialLoader::LoadTextureSmoothness(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
+        texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
             texture = NEW Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
-            Core::m_Engine->m_ResourceManager._addTexture(texture);
+            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
     return texture;
 }
-Texture* MaterialLoader::LoadTextureMask(const string& file) {
+Texture* priv::MaterialLoader::LoadTextureMask(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
+        texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
             texture = NEW Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
-            Core::m_Engine->m_ResourceManager._addTexture(texture);
+            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
     return texture;
 }
-Texture* MaterialLoader::LoadTextureCubemap(const string& file) {
+Texture* priv::MaterialLoader::LoadTextureCubemap(const string& file) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
+        texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
             texture = NEW Texture(file, false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_CUBE_MAP);
-            Core::m_Engine->m_ResourceManager._addTexture(texture);
+            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
     return texture;
 }
-void InternalMaterialPublicInterface::LoadCPU(Material& material) {
+void priv::InternalMaterialPublicInterface::LoadCPU(Material& material) {
 
 }
-void InternalMaterialPublicInterface::LoadGPU(Material& material) {
+void priv::InternalMaterialPublicInterface::LoadGPU(Material& material) {
     /*
     for (auto& component : m_Components) {
         if (component) {
@@ -193,11 +192,11 @@ void InternalMaterialPublicInterface::LoadGPU(Material& material) {
     cout << "(Material) ";
     material.EngineResource::load();
 }
-void InternalMaterialPublicInterface::UnloadCPU(Material& material) {
+void priv::InternalMaterialPublicInterface::UnloadCPU(Material& material) {
     cout << "(Material) ";
     material.EngineResource::unload();
 }
-void InternalMaterialPublicInterface::UnloadGPU(Material& material) {
+void priv::InternalMaterialPublicInterface::UnloadGPU(Material& material) {
     /*
     for (auto& component : m_Components) {
         if (component) {
@@ -210,15 +209,15 @@ void InternalMaterialPublicInterface::UnloadGPU(Material& material) {
     }
     */
 }
-void InternalMaterialPublicInterface::Load(Material& material) {
+void priv::InternalMaterialPublicInterface::Load(Material& material) {
     if (!material.isLoaded()) {
-        InternalMaterialPublicInterface::LoadCPU(material);
-        InternalMaterialPublicInterface::LoadGPU(material);
+        priv::InternalMaterialPublicInterface::LoadCPU(material);
+        priv::InternalMaterialPublicInterface::LoadGPU(material);
     }
 }
-void InternalMaterialPublicInterface::Unload(Material& material) {
+void priv::InternalMaterialPublicInterface::Unload(Material& material) {
     if (material.isLoaded()) {
-        InternalMaterialPublicInterface::UnloadGPU(material);
-        InternalMaterialPublicInterface::UnloadCPU(material);
+        priv::InternalMaterialPublicInterface::UnloadGPU(material);
+        priv::InternalMaterialPublicInterface::UnloadCPU(material);
     }
 }

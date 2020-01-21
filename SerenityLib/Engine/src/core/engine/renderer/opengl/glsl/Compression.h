@@ -5,7 +5,7 @@
 #include <string>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         namespace opengl {
             namespace glsl {
                 class Compression final {

@@ -8,12 +8,12 @@
 class Texture;
 class Mesh;
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class SkyboxImplInterface;
     };
 };
 class Skybox: public EventObserver{
-    friend class Engine::epriv::SkyboxImplInterface;
+    friend class Engine::priv::SkyboxImplInterface;
     private:
         Texture*  m_Texture;
     public:

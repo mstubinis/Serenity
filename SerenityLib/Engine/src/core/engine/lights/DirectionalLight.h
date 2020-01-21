@@ -5,7 +5,7 @@
 #include <core/engine/lights/SunLight.h>
 
 class DirectionalLight : public SunLight {
-    friend class Engine::epriv::RenderManager;
+    friend class Engine::priv::Renderer;
     public:
         DirectionalLight(
             const glm::vec3 direction = glm::vec3(0.0f, 0.0f, -1.0f),

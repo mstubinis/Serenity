@@ -1,13 +1,13 @@
 #include <core/engine/materials/MaterialLayer.h>
 #include <core/engine/materials/MaterialLoader.h>
 #include <core/engine/textures/Texture.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/system/Engine.h>
 
 using namespace std;
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 
 //TODO: implement the uv modification system
 struct SimpleUVTranslationFunctor { void operator()(const float& dt, MaterialLayer& layer, const float& translationX, const float& translationY) const {
@@ -127,20 +127,20 @@ void MaterialLayer::sendDataToGPU(const string& uniform_component_string, const 
     const string wholeString = uniform_component_string + "layers[" + to_string(layer_index) + "].";
     const auto start = (component_index * (MAX_MATERIAL_LAYERS_PER_COMPONENT * 3)) + (layer_index * 3);
 
-    Renderer::sendUniform4Safe((wholeString + "data1").c_str(), m_Data1);
-    Renderer::sendUniform4Safe((wholeString + "data2").c_str(), m_Data2);
-    Renderer::sendUniform2Safe((wholeString + "uvModifications").c_str(), m_UVModifications);
+    Engine::Renderer::sendUniform4Safe((wholeString + "data1").c_str(), m_Data1);
+    Engine::Renderer::sendUniform4Safe((wholeString + "data2").c_str(), m_Data2);
+    Engine::Renderer::sendUniform2Safe((wholeString + "uvModifications").c_str(), m_UVModifications);
 
     if (m_Texture && m_Texture->address() != 0) {
-        Renderer::sendTextureSafe((wholeString + "texture").c_str(), *m_Texture, int(textureUnit));
+        Engine::Renderer::sendTextureSafe((wholeString + "texture").c_str(), *m_Texture, int(textureUnit));
         ++textureUnit;
     }
     if (m_Mask && m_Mask->address() != 0) {
-        Renderer::sendTextureSafe((wholeString + "mask").c_str(),    *m_Mask,    int(textureUnit));
+        Engine::Renderer::sendTextureSafe((wholeString + "mask").c_str(),    *m_Mask,    int(textureUnit));
         ++textureUnit;
     }
     if (m_Cubemap && m_Cubemap->address() != 0) {
-        Renderer::sendTextureSafe((wholeString + "cubemap").c_str(), *m_Cubemap, int(textureUnit));
+        Engine::Renderer::sendTextureSafe((wholeString + "cubemap").c_str(), *m_Cubemap, int(textureUnit));
         ++textureUnit;
     }
 }

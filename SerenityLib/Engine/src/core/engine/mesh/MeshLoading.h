@@ -10,10 +10,10 @@ struct VertexData;
 struct aiScene;
 struct aiNode;
 
-typedef std::unordered_map<std::string, Engine::epriv::BoneNode*> BoneNodeMap;
+typedef std::unordered_map<std::string, Engine::priv::BoneNode*> BoneNodeMap;
 
 namespace Engine {
-namespace epriv {
+namespace priv {
     struct MeshLoadingFlags final {enum Flag {
         Points = 1 << 0,
         UVs = 1 << 1,
@@ -35,7 +35,7 @@ namespace epriv {
     class MeshLoader final {
         friend class  Mesh;
         friend struct MeshRequest;
-        friend class  Engine::epriv::MeshSkeleton;
+        friend class  Engine::priv::MeshSkeleton;
         public:
 
 

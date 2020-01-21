@@ -15,7 +15,7 @@
 #include <thread>
 
 namespace Engine{
-    namespace epriv{
+    namespace priv{
         class ThreadPool;
         class ThreadManager final{
             public:

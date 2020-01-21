@@ -8,32 +8,32 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 
-void epriv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentCamera& p_ComCamera) {
+void priv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentCamera& p_ComCamera) {
     if (p_ComCamera.m_Type == ComponentCamera::Type::Perspective) {
         p_ComCamera.m_ProjectionMatrix = glm::perspective(p_ComCamera.m_Angle, p_ComCamera.m_AspectRatio,p_ComCamera.m_NearPlane,p_ComCamera.m_FarPlane);
     }else{
         p_ComCamera.m_ProjectionMatrix = glm::ortho(p_ComCamera.m_Left,p_ComCamera.m_Right,p_ComCamera.m_Bottom,p_ComCamera.m_Top,p_ComCamera.m_NearPlane,p_ComCamera.m_FarPlane);
     }
 }
-const glm::mat4 epriv::ComponentCamera_Functions::GetViewNoTranslation(Camera& p_Camera) {
+const glm::mat4 priv::ComponentCamera_Functions::GetViewNoTranslation(Camera& p_Camera) {
     return p_Camera.m_Entity.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation;
 }
-const glm::mat4 epriv::ComponentCamera_Functions::GetViewInverseNoTranslation(Camera& p_Camera) {
+const glm::mat4 priv::ComponentCamera_Functions::GetViewInverseNoTranslation(Camera& p_Camera) {
     return glm::inverse(p_Camera.m_Entity.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation);
 }
-const glm::mat4 epriv::ComponentCamera_Functions::GetViewProjectionNoTranslation(Camera& p_Camera) {
+const glm::mat4 priv::ComponentCamera_Functions::GetViewProjectionNoTranslation(Camera& p_Camera) {
     auto& componentCamera = *p_Camera.m_Entity.getComponent<ComponentCamera>();
     return componentCamera.m_ProjectionMatrix * componentCamera.m_ViewMatrixNoTranslation;
 }
-const glm::mat4 epriv::ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(Camera& p_Camera) {
+const glm::mat4 priv::ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(Camera& p_Camera) {
     auto& componentCamera = *p_Camera.m_Entity.getComponent<ComponentCamera>();
     return glm::inverse(componentCamera.m_ProjectionMatrix * componentCamera.m_ViewMatrixNoTranslation);
 }
-const glm::vec3 epriv::ComponentCamera_Functions::GetViewVectorNoTranslation(Camera& p_Camera) {
+const glm::vec3 priv::ComponentCamera_Functions::GetViewVectorNoTranslation(Camera& p_Camera) {
     auto& viewMatrixNoTranslation = p_Camera.m_Entity.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation;
     return glm::vec3(viewMatrixNoTranslation[0][2], viewMatrixNoTranslation[1][2], viewMatrixNoTranslation[2][2]);
 }
@@ -77,7 +77,7 @@ void ComponentCamera::resize(const unsigned int p_Width, const unsigned int p_He
     if (m_Type == Type::Perspective) {
         m_AspectRatio = p_Width / static_cast<float>(p_Height);
     }
-    epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
+    priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
 }
 const unsigned int ComponentCamera::pointIntersectTest(const glm_vec3& p_Position) const {
     for (unsigned int i = 0; i < 6; ++i) {
@@ -154,26 +154,26 @@ const float ComponentCamera::getFar() const {
 }
 void ComponentCamera::setAngle(const float p_Angle) { 
 	m_Angle = p_Angle;
-	epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
+	priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
 }
 void ComponentCamera::setAspect(const float p_AspectRatio) {
 	m_AspectRatio = p_AspectRatio;
-	epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
+	priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
 }
 void ComponentCamera::setNear(const float p_NearPlane) { 
 	m_NearPlane = p_NearPlane;
-	epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
+	priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
 }
 void ComponentCamera::setFar(const float p_FarPlane) { 
 	m_FarPlane = p_FarPlane;
-	epriv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
+	priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
 }
 
 #pragma endregion
 
 #pragma region System
 
-struct epriv::ComponentCamera_UpdateFunction final { void operator()(void* p_ComponentPool, const double& p_Dt, Scene& p_Scene) const {
+struct priv::ComponentCamera_UpdateFunction final { void operator()(void* p_ComponentPool, const double& p_Dt, Scene& p_Scene) const {
 	auto& pool = *(ECSComponentPool<Entity, ComponentCamera>*)p_ComponentPool;
 	auto& components = pool.pool();
     auto lamda_update = [&](pair<size_t, size_t>& pair_) {
@@ -182,19 +182,19 @@ struct epriv::ComponentCamera_UpdateFunction final { void operator()(void* p_Com
             Math::extractViewFrustumPlanesHartmannGribbs(b.m_ProjectionMatrix * b.m_ViewMatrix, b.m_FrustumPlanes);//update view frustrum 
         }
     };
-	auto split = epriv::threading::splitVectorPairs(components);
+	auto split = priv::threading::splitVectorPairs(components);
     for (auto& pair : split) {
-        epriv::threading::addJobRef(lamda_update, pair);
+        priv::threading::addJobRef(lamda_update, pair);
     }
-    epriv::threading::waitForAll();
+    priv::threading::waitForAll();
 }};
-struct epriv::ComponentCamera_ComponentAddedToEntityFunction final {void operator()(void* p_ComponentCamera, Entity& p_Entity) const {
+struct priv::ComponentCamera_ComponentAddedToEntityFunction final {void operator()(void* p_ComponentCamera, Entity& p_Entity) const {
 }};
-struct epriv::ComponentCamera_EntityAddedToSceneFunction final {void operator()(void* p_ComponentPool, Entity& p_Entity, Scene& p_Scene) const {
+struct priv::ComponentCamera_EntityAddedToSceneFunction final {void operator()(void* p_ComponentPool, Entity& p_Entity, Scene& p_Scene) const {
 }};
-struct epriv::ComponentCamera_SceneEnteredFunction final {void operator()(void* p_ComponentPool, Scene& p_Scene) const {
+struct priv::ComponentCamera_SceneEnteredFunction final {void operator()(void* p_ComponentPool, Scene& p_Scene) const {
 }};
-struct epriv::ComponentCamera_SceneLeftFunction final {void operator()(void* p_ComponentPool, Scene& p_Scene) const {
+struct priv::ComponentCamera_SceneLeftFunction final {void operator()(void* p_ComponentPool, Scene& p_Scene) const {
 }};
 
 ComponentCamera_System_CI::ComponentCamera_System_CI() {

@@ -1,6 +1,6 @@
 #include "GUIRenderElement.h"
 
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include "Widget.h"
 #include "../ResourceManifest.h"
 #include <core/engine/resources/Handle.h>
@@ -362,9 +362,9 @@ void GUIRenderElement::setDepth(const float& depth) {
     m_Depth = depth;
 }
 const float  GUIRenderElement::getBorderSize(unsigned int index) const {
-    return m_BorderSize[index];
+    return static_cast<float>(m_BorderSize[index]);
 }
 
 const float  GUIRenderElement::getPaddingSize(unsigned int index) const {
-    return m_PaddingSize[index];
+    return static_cast<float>(m_PaddingSize[index]);
 }

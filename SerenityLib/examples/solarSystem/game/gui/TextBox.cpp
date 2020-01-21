@@ -2,7 +2,7 @@
 #include "Text.h"
 #include <core/engine/fonts/Font.h>
 #include <core/engine/events/Engine_Events.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 
 using namespace std;
 using namespace Engine;

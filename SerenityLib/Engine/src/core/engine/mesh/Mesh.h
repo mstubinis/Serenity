@@ -20,7 +20,7 @@ class  btHeightfieldTerrainShape;
 class  btCollisionShape;
 class  Collision;
 namespace Engine{
-    namespace epriv{
+    namespace priv{
         class  MeshLoader;
         class  MeshSkeleton;
         class  MeshCollisionFactory;
@@ -47,18 +47,18 @@ namespace Engine{
 };
 
 class Mesh final: public BindableResource, public EventObserver{
-    friend struct ::Engine::epriv::InternalMeshPublicInterface;
-    friend struct ::Engine::epriv::InternalMeshRequestPublicInterface;
-    friend struct ::Engine::epriv::DefaultMeshBindFunctor;
-    friend struct ::Engine::epriv::DefaultMeshUnbindFunctor;
-    friend class  ::Engine::epriv::AnimationData;
-    friend class  ::Engine::epriv::MeshSkeleton;
-    friend class  ::Engine::epriv::MeshLoader;
-    friend class  ::Engine::epriv::MeshCollisionFactory;
+    friend struct ::Engine::priv::InternalMeshPublicInterface;
+    friend struct ::Engine::priv::InternalMeshRequestPublicInterface;
+    friend struct ::Engine::priv::DefaultMeshBindFunctor;
+    friend struct ::Engine::priv::DefaultMeshUnbindFunctor;
+    friend class  ::Engine::priv::AnimationData;
+    friend class  ::Engine::priv::MeshSkeleton;
+    friend class  ::Engine::priv::MeshLoader;
+    friend class  ::Engine::priv::MeshCollisionFactory;
     private:
         VertexData*                            m_VertexData;
-        Engine::epriv::MeshCollisionFactory*   m_CollisionFactory;
-        Engine::epriv::MeshSkeleton*           m_Skeleton;
+        Engine::priv::MeshCollisionFactory*   m_CollisionFactory;
+        Engine::priv::MeshSkeleton*           m_Skeleton;
         std::string                            m_File;
         glm::vec3                              m_radiusBox;
         float                                  m_radius;
@@ -78,7 +78,7 @@ class Mesh final: public BindableResource, public EventObserver{
         Mesh& operator=(Mesh&& other) noexcept = delete;
 
 
-        std::unordered_map<std::string, Engine::epriv::AnimationData>& animationData();
+        std::unordered_map<std::string, Engine::priv::AnimationData>& animationData();
         const glm::vec3& getRadiusBox() const;
         const float getRadius() const;
         const VertexData& getVertexData() const;

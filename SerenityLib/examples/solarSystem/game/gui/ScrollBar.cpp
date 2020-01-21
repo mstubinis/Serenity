@@ -5,7 +5,7 @@
 #include "../ResourceManifest.h"
 
 #include <core/engine/events/Engine_Events.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/utils/Engine_Debugging.h>
 

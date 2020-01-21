@@ -6,11 +6,11 @@
 #include <core/engine/textures/TextureIncludes.h>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct TextureLoader final {
             friend class Texture;
 
-            static void LoadDDSFile(Texture& texture, const std::string& filename, epriv::ImageLoadedStructure& image);
+            static void LoadDDSFile(Texture& texture, const std::string& filename, priv::ImageLoadedStructure& image);
 
             static void LoadTexture2DIntoOpenGL(Texture& texture);
             static void LoadTextureFramebufferIntoOpenGL(Texture& texture);
@@ -25,7 +25,7 @@ namespace Engine {
             static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat, const ImageInternalFormat::Format& inInternalFormat);
 
             static void GeneratePBRData(Texture&, const unsigned int& convoludeTextureSize, const unsigned int& preEnvFilterSize);
-            static void ImportIntoOpengl(Texture&, const Engine::epriv::ImageMipmap& mipmap, const GLuint& openGLType);
+            static void ImportIntoOpengl(Texture&, const Engine::priv::ImageMipmap& mipmap, const GLuint& openGLType);
             static void InitCommon(Texture&, const GLuint& openglTextureType, const bool& toBeMipmapped);
 
 
@@ -42,7 +42,7 @@ namespace Engine {
             static void Load(Texture&);
             static void Unload(Texture&);
 
-            static void Resize(Texture& texture, Engine::epriv::FramebufferObject&, const uint& width, const uint& height);
+            static void Resize(Texture& texture, Engine::priv::FramebufferObject&, const uint& width, const uint& height);
         };
     };
 };

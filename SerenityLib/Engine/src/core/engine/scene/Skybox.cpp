@@ -12,7 +12,7 @@ GLuint m_VAO      = 0;
 vector<glm::vec3> m_Vertices;
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class SkyboxImplInterface final {
             friend class ::Skybox;
             static void bindDataToGPU() {
@@ -21,11 +21,11 @@ namespace Engine {
                 glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
             }
             static void buildVAO() {
-                Renderer::deleteVAO(m_VAO);
-                if (epriv::RenderManager::OPENGL_VERSION >= 30) {
-                    Renderer::genAndBindVAO(m_VAO);
-                    Engine::epriv::SkyboxImplInterface::bindDataToGPU();
-                    Renderer::bindVAO(0);
+                Engine::Renderer::deleteVAO(m_VAO);
+                if (Engine::priv::Renderer::OPENGL_VERSION >= 30) {
+                    Engine::Renderer::genAndBindVAO(m_VAO);
+                    Engine::priv::SkyboxImplInterface::bindDataToGPU();
+                    Engine::Renderer::bindVAO(0);
                 }
             }
             static void initMesh() {
@@ -69,7 +69,7 @@ namespace Engine {
                 glGenBuffers(1, &m_Buffer);
                 glBindBuffer(GL_ARRAY_BUFFER, m_Buffer);
                 glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(glm::vec3), &m_Vertices[0], GL_STATIC_DRAW);
-                Engine::epriv::SkyboxImplInterface::buildVAO();
+                Engine::priv::SkyboxImplInterface::buildVAO();
             }
         };
     };
@@ -77,24 +77,24 @@ namespace Engine {
 
 Skybox::Skybox(const string* files){
     m_Texture = nullptr;
-    Engine::epriv::SkyboxImplInterface::initMesh();
+    Engine::priv::SkyboxImplInterface::initMesh();
 
     string names[6] = { files[0],files[1],files[2],files[3],files[4],files[5] };
     //instead of using files[0] generate a proper name using the directory?
     m_Texture = NEW Texture(names, files[0] + "Cubemap", false, ImageInternalFormat::SRGB8_ALPHA8);
-    epriv::TextureLoader::GeneratePBRData(*m_Texture, 32, m_Texture->width() / 4);
-    epriv::Core::m_Engine->m_ResourceManager._addTexture(m_Texture);
+    priv::TextureLoader::GeneratePBRData(*m_Texture, 32, m_Texture->width() / 4);
+    priv::Core::m_Engine->m_ResourceManager._addTexture(m_Texture);
     registerEvent(EventType::WindowFullscreenChanged);
 }
 Skybox::Skybox(const string& filename){
     m_Texture = nullptr;
-    Engine::epriv::SkyboxImplInterface::initMesh();
+    Engine::priv::SkyboxImplInterface::initMesh();
 
-    m_Texture = epriv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(filename);
+    m_Texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(filename);
     if (!m_Texture) {
         m_Texture = NEW Texture(filename, false, ImageInternalFormat::SRGB8_ALPHA8);
-        epriv::TextureLoader::GeneratePBRData(*m_Texture, 32, m_Texture->width() / 4);
-        epriv::Core::m_Engine->m_ResourceManager._addTexture(m_Texture);
+        priv::TextureLoader::GeneratePBRData(*m_Texture, 32, m_Texture->width() / 4);
+        priv::Core::m_Engine->m_ResourceManager._addTexture(m_Texture);
     }
     registerEvent(EventType::WindowFullscreenChanged);
 }
@@ -103,19 +103,19 @@ Skybox::~Skybox(){
 }
 
 void Skybox::bindMesh(){
-    Engine::epriv::SkyboxImplInterface::initMesh();
+    Engine::priv::SkyboxImplInterface::initMesh();
     if(m_VAO){
-        Renderer::bindVAO(m_VAO);
+        Engine::Renderer::bindVAO(m_VAO);
         glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_Vertices.size()));
     }else{
-        Engine::epriv::SkyboxImplInterface::bindDataToGPU();
+        Engine::priv::SkyboxImplInterface::bindDataToGPU();
         glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_Vertices.size()));
         glDisableVertexAttribArray(0);
     }
 }
 void Skybox::onEvent(const Event& e) {
     if (e.type == EventType::WindowFullscreenChanged) {
-        Engine::epriv::SkyboxImplInterface::buildVAO();
+        Engine::priv::SkyboxImplInterface::buildVAO();
     }
 }
 Texture* Skybox::texture() { 

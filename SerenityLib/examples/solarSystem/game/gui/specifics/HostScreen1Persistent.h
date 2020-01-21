@@ -11,12 +11,14 @@ class  CreateServerWindow;
 
 struct Host1Persistent_ButtonBack_OnClick;
 struct Host1Persistent_ButtonNext_OnClick;
+struct HostPersServClick;
 
 struct ServerCreateOnClick;
 
 class HostScreen1Persistent final {
     friend struct Host1Persistent_ButtonBack_OnClick;
     friend struct Host1Persistent_ButtonNext_OnClick;
+    friend struct HostPersServClick;
     friend struct ServerCreateOnClick;
     private:
         Font&   m_Font;
@@ -32,6 +34,11 @@ class HostScreen1Persistent final {
     public:
         HostScreen1Persistent(Menu&, Font&);
         ~HostScreen1Persistent();
+
+        const bool validateNewServerName() const;
+        const bool validateNewServerPort() const;
+        const bool validateNewServerUsername() const;
+        const bool validateNewServerPassword() const;
 
         void onResize(const unsigned int& newWidth, const unsigned int& newHeight);
 

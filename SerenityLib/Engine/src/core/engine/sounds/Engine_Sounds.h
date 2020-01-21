@@ -13,7 +13,7 @@ struct Handle;
 #include <core/engine/sounds/SoundEffect.h>
 
 namespace Engine{
-    namespace epriv{
+    namespace priv{
         class SoundManager final{
             friend class SoundBaseClass;
             public:

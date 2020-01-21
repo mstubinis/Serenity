@@ -19,7 +19,7 @@ class Camera;
 class ShaderProgram;
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class GBuffer;
         class ParticleSystem final{
             friend class ParticleEmitter;

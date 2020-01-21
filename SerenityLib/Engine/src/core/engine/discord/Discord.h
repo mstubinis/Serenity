@@ -6,7 +6,7 @@
 #include <core/engine/discord/src/types.h>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class EngineCore;
     };
     namespace Discord {
@@ -88,7 +88,7 @@ namespace Engine {
 
         class DiscordCore {
             friend class  DiscordActivity;
-            friend class  Engine::epriv::EngineCore;
+            friend class  Engine::priv::EngineCore;
             private:
                 discord::ClientId  m_ClientID;
                 bool               m_LoggingErrors;

@@ -18,7 +18,7 @@ struct MeshModifyFlags {enum Flag {
 };};
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
 
         struct Vertex final {
             glm::vec3 position = glm::vec3(0.0f);

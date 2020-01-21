@@ -5,7 +5,7 @@
 #include <core/engine/lights/PointLight.h>
 
 class SpotLight : public PointLight {
-    friend class ::Engine::epriv::RenderManager;
+    friend class ::Engine::priv::Renderer;
     private:
         float   m_Cutoff;
         float   m_OuterCutoff;

@@ -35,7 +35,7 @@ ShipToken::ShipToken(const string& shipClass, Font& font, const float& x, const 
 
     m_TokenCenter = NEW Button(font, 0, 0, 1, 1);
     m_TokenCenter->setAlignment(Alignment::TopLeft);
-    m_TokenCenter->setSize(texture_border->width(), texture_border->height());
+    m_TokenCenter->setSize(static_cast<float>(texture_border->width()), static_cast<float>(texture_border->height()));
     m_TokenCenter->setText("");
     m_TokenCenter->setTexture(nullptr);
     m_TokenCenter->setTextureHighlight(texture);

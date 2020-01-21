@@ -10,7 +10,7 @@
 
 #include <core/engine/system/Engine.h>
 #include <core/engine/events/Engine_Events.h>
-#include <core/engine/system/window/Engine_Window.h>
+#include <core/engine/system/window/Window.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/fonts/Font.h>
 #include <core/engine/textures/Texture.h>
@@ -302,7 +302,7 @@ void Menu::update_game(const double& dt) {
 
 }
 void Menu::update_main_menu(const double& dt) {
-    m_Font->renderText(epriv::Core::m_Engine->m_DebugManager.reportDebug(), glm::vec2(50), glm::vec4(1.0), 0);
+    m_Font->renderText(priv::Core::m_Engine->m_DebugManager.reportDebug(), glm::vec2(50), glm::vec4(1.0), 0);
 
     m_MainMenuScreen->update(dt);
 }

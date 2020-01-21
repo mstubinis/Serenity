@@ -11,7 +11,7 @@
 #include <glm/common.hpp>
 
 namespace Engine{
-    namespace epriv{
+    namespace priv{
         class SimplexNoise final{
             private:
                 double              m_Constants[9];

@@ -9,7 +9,7 @@
 
 class UniformBufferObject;
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class GBuffer;
         class DeferredPipeline final : public IRenderingPipeline {
 

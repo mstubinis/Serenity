@@ -6,7 +6,7 @@
 
 class  Scene;
 namespace Engine{
-namespace epriv{
+namespace priv{
     struct EventWindowResized final{ 
         unsigned int  width;
         unsigned int  height;
@@ -73,10 +73,10 @@ namespace epriv{
         }
     };
     struct EventMouseWheel final{ 
-        int delta; 
+        float delta;
         int x, y;
         EventMouseWheel() = default;
-        EventMouseWheel(const int& delta_, const int& x_, const int& y_) {
+        EventMouseWheel(const float& delta_, const int& x_, const int& y_) {
             delta = delta_;
             x = x_;
             y = y_;
@@ -128,18 +128,18 @@ namespace epriv{
 struct Event final{
     EventType::Type type;
     union{
-        Engine::epriv::EventWindowResized              eventWindowResized;
-        Engine::epriv::EventWindowFullscreenChanged    eventWindowFullscreenChanged;
-        Engine::epriv::EventKeyboard                   eventKeyboard;
-        Engine::epriv::EventTextEntered                eventTextEntered;
-        Engine::epriv::EventMouseButton                eventMouseButton;
-        Engine::epriv::EventMouseMove                  eventMouseMoved;
-        Engine::epriv::EventMouseWheel                 eventMouseWheel;
-        Engine::epriv::EventJoystickMoved              eventJoystickMoved;
-        Engine::epriv::EventJoystickButton             eventJoystickButton;
-        Engine::epriv::EventJoystickConnection         eventJoystickConnection;
-        Engine::epriv::EventSoundStatusChanged         eventSoundStatusChanged;
-        Engine::epriv::EventSceneChanged               eventSceneChanged;
+        Engine::priv::EventWindowResized              eventWindowResized;
+        Engine::priv::EventWindowFullscreenChanged    eventWindowFullscreenChanged;
+        Engine::priv::EventKeyboard                   eventKeyboard;
+        Engine::priv::EventTextEntered                eventTextEntered;
+        Engine::priv::EventMouseButton                eventMouseButton;
+        Engine::priv::EventMouseMove                  eventMouseMoved;
+        Engine::priv::EventMouseWheel                 eventMouseWheel;
+        Engine::priv::EventJoystickMoved              eventJoystickMoved;
+        Engine::priv::EventJoystickButton             eventJoystickButton;
+        Engine::priv::EventJoystickConnection         eventJoystickConnection;
+        Engine::priv::EventSoundStatusChanged         eventSoundStatusChanged;
+        Engine::priv::EventSceneChanged               eventSceneChanged;
     };
     Event() = delete;
     Event(const EventType::Type& type_) {

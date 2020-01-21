@@ -12,7 +12,7 @@ class  ShaderProgram;
 #include <string>
 
 namespace Engine {
-namespace epriv {
+namespace priv {
     class  GBuffer;
     class  SSAO final {
         public:

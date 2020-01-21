@@ -130,7 +130,7 @@ void ResourceManifest::init(){
     Planets::init();
 
 
-    epriv::threading::waitForAll();
+    priv::threading::waitForAll();
 
     
     Handle skyFromSpaceVert = Resources::addShader(BasePath + "data/Shaders/AS_skyFromSpace_vert.glsl",ShaderType::Vertex);
@@ -227,7 +227,7 @@ void ResourceManifest::init(){
     
     ((Texture*)RadarMaterial.get())->setFilter(TextureFilter::Nearest);
 
-    epriv::threading::waitForAll();
+    priv::threading::waitForAll();
 
 
     Material& phaserBeamMat = *((Material*)PhaserBeamMaterial.get());

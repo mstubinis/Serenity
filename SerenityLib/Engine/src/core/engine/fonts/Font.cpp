@@ -19,7 +19,7 @@ Font::Font(const string& filename) : EngineResource(ResourceType::Font, filename
         rawname += ".png";
     }
     m_FontTexture = NEW Texture(rawname, false, ImageInternalFormat::SRGB8_ALPHA8);
-    Handle handle = epriv::Core::m_Engine->m_ResourceManager._addTexture(m_FontTexture);
+    Handle handle = priv::Core::m_Engine->m_ResourceManager._addTexture(m_FontTexture);
 
     float min_y_offset = 9999999.0f;
     float max_y_offset = 0.0f;

@@ -1,11 +1,11 @@
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/system/window/Engine_Window.h>
+#include <core/engine/system/window/Window.h>
 
 #include <SFML/Window.hpp>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 EventManager* EventManager::m_EventManager = nullptr;
@@ -125,34 +125,34 @@ const glm::vec2& Engine::getMousePositionPrevious() {
 const glm::vec2& Engine::getMousePosition() {
     return Engine::getMousePosition(Resources::getWindow());
 }
-const glm::vec2& Engine::getMouseDifference(Engine_Window& window){ 
+const glm::vec2& Engine::getMouseDifference(Window& window){
     return window.getMousePositionDifference();
 }
-const glm::vec2& Engine::getMousePositionPrevious(Engine_Window& window){
+const glm::vec2& Engine::getMousePositionPrevious(Window& window){
     return window.getMousePositionPrevious();
 }
-const glm::vec2& Engine::getMousePosition(Engine_Window& window){
+const glm::vec2& Engine::getMousePosition(Window& window){
     return window.getMousePosition();
 }
 const double Engine::getMouseWheelDelta() {
     return Engine::getMouseWheelDelta(Resources::getWindow());
 }
-const double Engine::getMouseWheelDelta(Engine_Window& window){
+const double Engine::getMouseWheelDelta(Window& window){
     return window.getMouseWheelDelta();
 }
-void Engine::setMousePosition(Engine_Window& window, const float x, const float y, const bool resetDifference, const bool resetPreviousPosition){
+void Engine::setMousePosition(Window& window, const float x, const float y, const bool resetDifference, const bool resetPreviousPosition){
     sf::Mouse::setPosition(sf::Vector2i(static_cast<int>(x), static_cast<int>(y)), window.getSFMLHandle());
     window.updateMousePosition(x, y, resetDifference, resetPreviousPosition);
 }
-void Engine::setMousePosition(Engine_Window& window, const unsigned int x, const unsigned int y, const bool resetDifference, const bool resetPreviousPosition){
+void Engine::setMousePosition(Window& window, const unsigned int x, const unsigned int y, const bool resetDifference, const bool resetPreviousPosition){
     sf::Mouse::setPosition(sf::Vector2i(x, y), window.getSFMLHandle());
     window.updateMousePosition(static_cast<float>(x), static_cast<float>(y), resetDifference, resetPreviousPosition);
 }
-void Engine::setMousePosition(Engine_Window& window, const glm::vec2& pos, const bool resetDifference, const bool resetPreviousPosition){
+void Engine::setMousePosition(Window& window, const glm::vec2& pos, const bool resetDifference, const bool resetPreviousPosition){
     sf::Mouse::setPosition(sf::Vector2i(static_cast<int>(pos.x), static_cast<int>(pos.y)), window.getSFMLHandle());
     window.updateMousePosition(pos.x, pos.y, resetDifference, resetPreviousPosition);
 }
-void Engine::setMousePosition(Engine_Window& window, const glm::uvec2& pos, const bool resetDifference, const bool resetPreviousPosition){
+void Engine::setMousePosition(Window& window, const glm::uvec2& pos, const bool resetDifference, const bool resetPreviousPosition){
     sf::Mouse::setPosition(sf::Vector2i(pos.x, pos.y), window.getSFMLHandle());
     window.updateMousePosition(static_cast<float>(pos.x), static_cast<float>(pos.y), resetDifference, resetPreviousPosition);
 }

@@ -1,7 +1,7 @@
 #include <ecs/ComponentLogic.h>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 #pragma region Component
@@ -10,7 +10,7 @@ ComponentLogic::ComponentLogic(const Entity& entity) : ComponentBaseClass(entity
     m_UserPointer  = nullptr;
     m_UserPointer1 = nullptr;
     m_UserPointer2 = nullptr;
-    setFunctor(Engine::epriv::ComponentLogic_EmptyFunctor());
+    setFunctor(Engine::priv::ComponentLogic_EmptyFunctor());
 }
 
 ComponentLogic::~ComponentLogic(){
@@ -78,20 +78,20 @@ void ComponentLogic::call(const double& dt) {
 
 #pragma region System
 
-struct epriv::ComponentLogic_UpdateFunction final { void operator()(void* _componentPool, const double& dt, Scene& _scene) const {
+struct priv::ComponentLogic_UpdateFunction final { void operator()(void* _componentPool, const double& dt, Scene& _scene) const {
     auto& pool = *(ECSComponentPool<Entity, ComponentLogic>*)_componentPool;
     auto& components = pool.pool();
 	for (auto& component : components) {
 		component.call(dt);
 	}
 }};
-struct epriv::ComponentLogic_ComponentAddedToEntityFunction final { void operator()(void* _component, Entity& _entity) const {
+struct priv::ComponentLogic_ComponentAddedToEntityFunction final { void operator()(void* _component, Entity& _entity) const {
 }};
-struct epriv::ComponentLogic_EntityAddedToSceneFunction final { void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
+struct priv::ComponentLogic_EntityAddedToSceneFunction final { void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
 }};
-struct epriv::ComponentLogic_SceneEnteredFunction final { void operator()(void* _componentPool, Scene& _scene) const {
+struct priv::ComponentLogic_SceneEnteredFunction final { void operator()(void* _componentPool, Scene& _scene) const {
 }};
-struct epriv::ComponentLogic_SceneLeftFunction final { void operator()(void* _componentPool, Scene& _scene) const {
+struct priv::ComponentLogic_SceneLeftFunction final { void operator()(void* _componentPool, Scene& _scene) const {
 }};
 
 ComponentLogic_System_CI::ComponentLogic_System_CI() {

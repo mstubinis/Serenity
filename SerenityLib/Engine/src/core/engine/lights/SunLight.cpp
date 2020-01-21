@@ -19,10 +19,10 @@ SunLight::SunLight(const glm_vec3 pos, const LightType::Type type, Scene* scene)
     m_SpecularIntensity = 1.0f;
 
     if (type == LightType::Sun) {
-        auto& sunLights = epriv::InternalScenePublicInterface::GetSunLights(*scene);
+        auto& sunLights = priv::InternalScenePublicInterface::GetSunLights(*scene);
         sunLights.push_back(this);
     }
-    auto& allLights = epriv::InternalScenePublicInterface::GetLights(*scene);
+    auto& allLights = priv::InternalScenePublicInterface::GetLights(*scene);
     allLights.push_back(this);
 
     auto* body = addComponent<ComponentBody>();
@@ -85,6 +85,6 @@ void SunLight::deactivate() {
 }
 void SunLight::destroy() {
     EntityWrapper::destroy();
-    removeFromVector(epriv::InternalScenePublicInterface::GetSunLights(m_Entity.scene()), this);
-    removeFromVector(epriv::InternalScenePublicInterface::GetLights(m_Entity.scene()), this);
+    removeFromVector(priv::InternalScenePublicInterface::GetSunLights(m_Entity.scene()), this);
+    removeFromVector(priv::InternalScenePublicInterface::GetLights(m_Entity.scene()), this);
 }

@@ -1,11 +1,11 @@
 #include <core/engine/renderer/opengl/UniformBufferObject.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/shaders/ShaderProgram.h>
 
 #include <iostream>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 GLint UniformBufferObject::MAX_UBO_BINDINGS;
@@ -14,7 +14,7 @@ UniformBufferObject* UniformBufferObject::UBO_CAMERA = nullptr;
 
 UniformBufferObject::UniformBufferObject(const char* nameInShader, const unsigned int& sizeofStruct, const int& globalBindingPointNumber) {
     m_NameInShader = nameInShader;
-    if (RenderManager::GLSL_VERSION < 140)
+    if (Engine::priv::Renderer::GLSL_VERSION < 140)
         return;
     if (globalBindingPointNumber == -1) {
         //automatic assignment
@@ -38,16 +38,16 @@ UniformBufferObject::~UniformBufferObject() {
     _unload_CPU();
 }
 void UniformBufferObject::_load_CPU() {
-    if (RenderManager::GLSL_VERSION < 140)
+    if (Engine::priv::Renderer::GLSL_VERSION < 140)
         return;
     _unload_CPU();
 }
 void UniformBufferObject::_unload_CPU() {
-    if (RenderManager::GLSL_VERSION < 140)
+    if (Engine::priv::Renderer::GLSL_VERSION < 140)
         return;
 }
 void UniformBufferObject::_load_GPU() {
-    if (RenderManager::GLSL_VERSION < 140)
+    if (Engine::priv::Renderer::GLSL_VERSION < 140)
         return;
     _unload_GPU();
     glGenBuffers(1, &m_UBOObject);
@@ -56,19 +56,19 @@ void UniformBufferObject::_load_GPU() {
     glBindBufferBase(GL_UNIFORM_BUFFER, m_GlobalBindingPointNumber, m_UBOObject);//link UBO to it's global numerical index
 }
 void UniformBufferObject::_unload_GPU() {
-    if (RenderManager::GLSL_VERSION < 140)
+    if (Engine::priv::Renderer::GLSL_VERSION < 140)
         return;
     glDeleteBuffers(1, &m_UBOObject);
 }
 void UniformBufferObject::updateData(void* _data) {
-    if (RenderManager::GLSL_VERSION < 140)
+    if (Engine::priv::Renderer::GLSL_VERSION < 140)
         return;
     glBindBuffer(GL_UNIFORM_BUFFER, m_UBOObject);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, m_SizeOfStruct, _data);
 }
 void UniformBufferObject::attachToShader(const ShaderProgram& shaderProgram) {
     const GLuint& program = shaderProgram.m_ShaderProgram;
-    if (RenderManager::GLSL_VERSION < 140 || shaderProgram.m_AttachedUBOs.count(m_UBOObject))
+    if (Engine::priv::Renderer::GLSL_VERSION < 140 || shaderProgram.m_AttachedUBOs.count(m_UBOObject))
         return;
     const unsigned int programBlockIndex = glGetUniformBlockIndex(program, m_NameInShader);
     glUniformBlockBinding(program, programBlockIndex, m_GlobalBindingPointNumber);

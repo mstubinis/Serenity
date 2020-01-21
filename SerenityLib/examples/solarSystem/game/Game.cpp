@@ -1,5 +1,5 @@
 #include <core/engine/system/EngineGameFunctions.h>
-#include <core/engine/system/window/Engine_Window.h>
+#include <core/engine/system/window/Window.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/physics/Engine_Physics.h>
@@ -54,7 +54,7 @@ void Game::render(){
 }
 
 #pragma region EventHandlers
-void Game::onResize(Engine_Window& window, const uint& width, const uint& height){
+void Game::onResize(Window& window, const uint& width, const uint& height){
     if (m_Core) {
         m_Core->onResize(width, height);
 
@@ -62,10 +62,10 @@ void Game::onResize(Engine_Window& window, const uint& width, const uint& height
         config.updateWindowSize(width, height);
     }
 }
-void Game::onWindowRequestedToBeClosed(Engine_Window& window) {
+void Game::onWindowRequestedToBeClosed(Window& window) {
 
 }
-void Game::onWindowClosed(Engine_Window& window) {
+void Game::onWindowClosed(Window& window) {
     Engine::stop();
 }
 void Game::onGameEnded(){
@@ -74,9 +74,9 @@ void Game::onGameEnded(){
     const bool isMaximized = window.isMaximized();
     config.updateWindowMaximized(isMaximized);
 }
-void Game::onLostFocus(Engine_Window& window){
+void Game::onLostFocus(Window& window){
 }
-void Game::onGainedFocus(Engine_Window& window){
+void Game::onGainedFocus(Window& window){
     if (m_Core && m_Core->gameState() == GameState::Game) {
         window.keepMouseInWindow(true);
         window.setMouseCursorVisible(false);
@@ -88,28 +88,28 @@ void Game::onGainedFocus(Engine_Window& window){
 
     }
 }
-void Game::onTextEntered(Engine_Window& window, const uint& unicode){
+void Game::onTextEntered(Window& window, const uint& unicode){
 }
-void Game::onKeyPressed(Engine_Window& window, const uint& key){
+void Game::onKeyPressed(Window& window, const uint& key){
 }
-void Game::onKeyReleased(Engine_Window& window, const uint& key){
+void Game::onKeyReleased(Window& window, const uint& key){
 }
-void Game::onMouseWheelScrolled(Engine_Window& window, const float& delta, const int& x, const int& y){
+void Game::onMouseWheelScrolled(Window& window, const float& delta, const int& x, const int& y){
 }
-void Game::onMouseButtonPressed(Engine_Window& window, const uint& button){
+void Game::onMouseButtonPressed(Window& window, const uint& button){
 }
-void Game::onMouseButtonReleased(Engine_Window& window, const uint& button){
+void Game::onMouseButtonReleased(Window& window, const uint& button){
 }
-void Game::onMouseMoved(Engine_Window& window, const float& mouseX, const float& mouseY){
+void Game::onMouseMoved(Window& window, const float& mouseX, const float& mouseY){
 }
-void Game::onMouseEntered(Engine_Window& window){
+void Game::onMouseEntered(Window& window){
     window.requestFocus();
     if (m_Core && m_Core->gameState() == GameState::Game) {  
         window.keepMouseInWindow(true);
         window.setMouseCursorVisible(false);
     }
 }
-void Game::onMouseLeft(Engine_Window& window){
+void Game::onMouseLeft(Window& window){
     if (m_Core && m_Core->gameState() == GameState::Game) {
         window.keepMouseInWindow(false);
         window.setMouseCursorVisible(true);

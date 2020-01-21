@@ -1,21 +1,21 @@
 #include <core/engine/physics/DebugDrawer.h>
 
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 
 using namespace Engine;
 using namespace std;
 
 #pragma region PhysicsDebugDrawcallback
 
-epriv::PhysicsDebugDrawcallback::PhysicsDebugDrawcallback(btIDebugDraw* debugDrawer, const btTransform& worldTrans, const btVector3& color) {
+priv::PhysicsDebugDrawcallback::PhysicsDebugDrawcallback(btIDebugDraw* debugDrawer, const btTransform& worldTrans, const btVector3& color) {
     m_DebugDrawer = debugDrawer;
     m_Color = color;
     m_WorldTransform = worldTrans;
 }
-void epriv::PhysicsDebugDrawcallback::internalProcessTriangleIndex(btVector3* triangle, int partId, int  triangleIndex) {
+void priv::PhysicsDebugDrawcallback::internalProcessTriangleIndex(btVector3* triangle, int partId, int  triangleIndex) {
     processTriangle(triangle, partId, triangleIndex);
 }
-void epriv::PhysicsDebugDrawcallback::processTriangle(btVector3* triangle, int partId, int triangleIndex) {
+void priv::PhysicsDebugDrawcallback::processTriangle(btVector3* triangle, int partId, int triangleIndex) {
     (void)partId;
     (void)triangleIndex;
     auto& drawer = *m_DebugDrawer;
@@ -40,34 +40,34 @@ void epriv::PhysicsDebugDrawcallback::processTriangle(btVector3* triangle, int p
 #pragma region GLDebugDrawer
 
 
-epriv::GLDebugDrawer::LineVertex::LineVertex() {
+priv::GLDebugDrawer::LineVertex::LineVertex() {
     position = glm::vec3(0.0f);
     color = glm::vec3(1.0f);
 }
-void epriv::GLDebugDrawer::init() {
+void priv::GLDebugDrawer::init() {
     m_Mode         = btIDebugDraw::DBG_DrawWireframe + btIDebugDraw::DBG_DrawContactPoints + btIDebugDraw::DBG_DrawConstraints + btIDebugDraw::DBG_DrawConstraintLimits;
     C_MAX_POINTS   = 262144;
     m_VAO          = 0;
     m_VertexBuffer = 0;
     registerEvent(EventType::WindowFullscreenChanged);
 }
-void epriv::GLDebugDrawer::destruct() {
+void priv::GLDebugDrawer::destruct() {
     glDeleteBuffers(1, &m_VertexBuffer);
-    Renderer::deleteVAO(m_VAO);
+    Engine::Renderer::deleteVAO(m_VAO);
     vector_clear(vertices);
 }
-void epriv::GLDebugDrawer::bindDataToGPU() {
+void priv::GLDebugDrawer::bindDataToGPU() {
     glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)(offsetof(LineVertex, color)));
 }
-void epriv::GLDebugDrawer::renderLines() {
+void priv::GLDebugDrawer::renderLines() {
     if (m_VAO) {
-        Renderer::bindVAO(m_VAO);
+        Engine::Renderer::bindVAO(m_VAO);
         glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(vertices.size()));
-        Renderer::bindVAO(0);
+        Engine::Renderer::bindVAO(0);
     }else{
         bindDataToGPU();
         glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(vertices.size()));
@@ -75,29 +75,29 @@ void epriv::GLDebugDrawer::renderLines() {
         glDisableVertexAttribArray(1);
     }
 }
-void epriv::GLDebugDrawer::buildVAO() {
-    Renderer::deleteVAO(m_VAO);
-    if (epriv::RenderManager::OPENGL_VERSION >= 30) {
-        Renderer::genAndBindVAO(m_VAO);
+void priv::GLDebugDrawer::buildVAO() {
+    Engine::Renderer::deleteVAO(m_VAO);
+    if (Engine::priv::Renderer::OPENGL_VERSION >= 30) {
+        Engine::Renderer::genAndBindVAO(m_VAO);
         bindDataToGPU();
-        Renderer::bindVAO(0);
+        Engine::Renderer::bindVAO(0);
     }
 }
-void epriv::GLDebugDrawer::postRender() {
+void priv::GLDebugDrawer::postRender() {
     vector_clear(vertices);
 }
 
 
 
 
-epriv::GLDebugDrawer::GLDebugDrawer() {
+priv::GLDebugDrawer::GLDebugDrawer() {
     init();
 }
-epriv::GLDebugDrawer::~GLDebugDrawer() {
+priv::GLDebugDrawer::~GLDebugDrawer() {
     destruct();
 }
 
-void epriv::GLDebugDrawer::initRenderingContext() {
+void priv::GLDebugDrawer::initRenderingContext() {
     vector<LineVertex> temp1;
     temp1.resize(C_MAX_POINTS, LineVertex());
 
@@ -108,27 +108,27 @@ void epriv::GLDebugDrawer::initRenderingContext() {
     //support vao's
     buildVAO();
 }
-void epriv::GLDebugDrawer::drawAccumulatedLines() {
+void priv::GLDebugDrawer::drawAccumulatedLines() {
     if (vertices.size() > 0) {
         glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LineVertex) * vertices.size(), &vertices[0]);
         renderLines();
     }
 }
-void epriv::GLDebugDrawer::onEvent(const Event& e) {
+void priv::GLDebugDrawer::onEvent(const Event& e) {
     if (e.type == EventType::WindowFullscreenChanged) {
         buildVAO();
     }
 }
-void epriv::GLDebugDrawer::drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3&, const btVector3&, const btVector3&, const btVector3& color, btScalar alpha) {
+void priv::GLDebugDrawer::drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3&, const btVector3&, const btVector3&, const btVector3& color, btScalar alpha) {
     drawTriangle(v0, v1, v2, color, alpha);
 }
-void epriv::GLDebugDrawer::drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3& color, btScalar) {
+void priv::GLDebugDrawer::drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3& color, btScalar) {
     drawLine(v0, v1, color);
     drawLine(v1, v2, color);
     drawLine(v2, v0, color);
 }
-void epriv::GLDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) {
+void priv::GLDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) {
     if (vertices.size() >= (C_MAX_POINTS)) 
         return;
     LineVertex v1, v2;
@@ -140,7 +140,7 @@ void epriv::GLDebugDrawer::drawLine(const btVector3& from, const btVector3& to, 
     vertices.push_back(v1);
     vertices.push_back(v2);
 }
-void epriv::GLDebugDrawer::drawSphere(btScalar radius, const btTransform& transform, const btVector3& color) {
+void priv::GLDebugDrawer::drawSphere(btScalar radius, const btTransform& transform, const btVector3& color) {
     btVector3 center = transform.getOrigin();
     btVector3 up     = transform.getBasis().getColumn(1);
     btVector3 axis   = transform.getBasis().getColumn(0);
@@ -152,13 +152,13 @@ void epriv::GLDebugDrawer::drawSphere(btScalar radius, const btTransform& transf
     drawSpherePatch(center, up, axis, radius, minTh, maxTh, minPs, maxPs, color, stepDegrees, false);
     drawSpherePatch(center, up, -axis, radius, minTh, maxTh, minPs, maxPs, color, stepDegrees, false);
 }
-void epriv::GLDebugDrawer::drawSphere(const btVector3& p, btScalar radius, const btVector3& color) {
+void priv::GLDebugDrawer::drawSphere(const btVector3& p, btScalar radius, const btVector3& color) {
     btTransform tr;
     tr.setIdentity();
     tr.setOrigin(p);
     drawSphere(radius, tr, color);
 }
-void epriv::GLDebugDrawer::drawArc(const btVector3& center, const btVector3& normal, const btVector3& axis, btScalar radiusA, btScalar radiusB, btScalar minAngle, btScalar maxAngle, const btVector3& color, bool drawSect, btScalar stepDegrees) {
+void priv::GLDebugDrawer::drawArc(const btVector3& center, const btVector3& normal, const btVector3& axis, btScalar radiusA, btScalar radiusB, btScalar minAngle, btScalar maxAngle, const btVector3& color, bool drawSect, btScalar stepDegrees) {
     const btVector3& vx = axis;
     btVector3 vy = normal.cross(axis);
     btScalar step = stepDegrees * SIMD_RADS_PER_DEG;
@@ -178,7 +178,7 @@ void epriv::GLDebugDrawer::drawArc(const btVector3& center, const btVector3& nor
         drawLine(center, prev, color);
     }
 }
-void epriv::GLDebugDrawer::drawSpherePatch(const btVector3& center, const btVector3& up, const btVector3& axis, btScalar radius, btScalar minTh, btScalar maxTh, btScalar minPs, btScalar maxPs, const btVector3& color, btScalar stepDegrees, bool drawCenter) {
+void priv::GLDebugDrawer::drawSpherePatch(const btVector3& center, const btVector3& up, const btVector3& axis, btScalar radius, btScalar minTh, btScalar maxTh, btScalar minPs, btScalar maxPs, const btVector3& color, btScalar stepDegrees, bool drawCenter) {
     btVector3 vA[74];
     btVector3 vB[74];
     btVector3* pvA = vA, * pvB = vB, * pT;
@@ -259,13 +259,13 @@ void epriv::GLDebugDrawer::drawSpherePatch(const btVector3& center, const btVect
         pvB = pT;
     }
 }
-void epriv::GLDebugDrawer::drawTransform(const btTransform& transform, btScalar orthoLen) {
+void priv::GLDebugDrawer::drawTransform(const btTransform& transform, btScalar orthoLen) {
     btVector3 start = transform.getOrigin();
     drawLine(start, start + transform.getBasis() * btVector3(orthoLen, 0, 0), btVector3(btScalar(1.), btScalar(0.3), btScalar(0.3)));
     drawLine(start, start + transform.getBasis() * btVector3(0, orthoLen, 0), btVector3(btScalar(0.3), btScalar(1.), btScalar(0.3)));
     drawLine(start, start + transform.getBasis() * btVector3(0, 0, orthoLen), btVector3(btScalar(0.3), btScalar(0.3), btScalar(1.)));
 }
-void epriv::GLDebugDrawer::drawAabb(const btVector3& from, const btVector3& to, const btVector3& color) {
+void priv::GLDebugDrawer::drawAabb(const btVector3& from, const btVector3& to, const btVector3& color) {
     btVector3 halfExtents = (to - from) * 0.5f;
     btVector3 center = (to + from) * 0.5f;
     int i, j;
@@ -285,7 +285,7 @@ void epriv::GLDebugDrawer::drawAabb(const btVector3& from, const btVector3& to, 
             edgecoord[i] *= -1.f;
     }
 }
-void epriv::GLDebugDrawer::drawCylinder(btScalar radius, btScalar halfHeight, int upAxis, const btTransform& transform, const btVector3& color) {
+void priv::GLDebugDrawer::drawCylinder(btScalar radius, btScalar halfHeight, int upAxis, const btTransform& transform, const btVector3& color) {
     btVector3 start = transform.getOrigin();
     btVector3	offsetHeight(0, 0, 0);
     offsetHeight[upAxis] = halfHeight;
@@ -307,7 +307,7 @@ void epriv::GLDebugDrawer::drawCylinder(btScalar radius, btScalar halfHeight, in
     drawArc(start - transform.getBasis() * (offsetHeight), transform.getBasis() * yaxis, transform.getBasis() * xaxis, radius, radius, 0, SIMD_2_PI, color, false, btScalar(10.0));
     drawArc(start + transform.getBasis() * (offsetHeight), transform.getBasis() * yaxis, transform.getBasis() * xaxis, radius, radius, 0, SIMD_2_PI, color, false, btScalar(10.0));
 }
-void epriv::GLDebugDrawer::drawCapsule(btScalar radius, btScalar halfHeight, int upAxis, const btTransform& transform, const btVector3& color) {
+void priv::GLDebugDrawer::drawCapsule(btScalar radius, btScalar halfHeight, int upAxis, const btTransform& transform, const btVector3& color) {
     int stepDegrees = 30;
     btVector3 capStart(0.f, 0.f, 0.f);
     capStart[upAxis] = -halfHeight;
@@ -342,7 +342,7 @@ void epriv::GLDebugDrawer::drawCapsule(btScalar radius, btScalar halfHeight, int
         drawLine(start + transform.getBasis() * capStart, start + transform.getBasis() * capEnd, color);
     }
 }
-void epriv::GLDebugDrawer::drawBox(const btVector3& bbMin, const btVector3& bbMax, const btVector3& color) {
+void priv::GLDebugDrawer::drawBox(const btVector3& bbMin, const btVector3& bbMax, const btVector3& color) {
     drawLine(btVector3(bbMin[0], bbMin[1], bbMin[2]), btVector3(bbMax[0], bbMin[1], bbMin[2]), color);
     drawLine(btVector3(bbMax[0], bbMin[1], bbMin[2]), btVector3(bbMax[0], bbMax[1], bbMin[2]), color);
     drawLine(btVector3(bbMax[0], bbMax[1], bbMin[2]), btVector3(bbMin[0], bbMax[1], bbMin[2]), color);
@@ -356,7 +356,7 @@ void epriv::GLDebugDrawer::drawBox(const btVector3& bbMin, const btVector3& bbMa
     drawLine(btVector3(bbMax[0], bbMax[1], bbMax[2]), btVector3(bbMin[0], bbMax[1], bbMax[2]), color);
     drawLine(btVector3(bbMin[0], bbMax[1], bbMax[2]), btVector3(bbMin[0], bbMin[1], bbMax[2]), color);
 }
-void epriv::GLDebugDrawer::drawBox(const btVector3& bbMin, const btVector3& bbMax, const btTransform& trans, const btVector3& color) {
+void priv::GLDebugDrawer::drawBox(const btVector3& bbMin, const btVector3& bbMax, const btTransform& trans, const btVector3& color) {
     drawLine(trans * btVector3(bbMin[0], bbMin[1], bbMin[2]), trans * btVector3(bbMax[0], bbMin[1], bbMin[2]), color);
     drawLine(trans * btVector3(bbMax[0], bbMin[1], bbMin[2]), trans * btVector3(bbMax[0], bbMax[1], bbMin[2]), color);
     drawLine(trans * btVector3(bbMax[0], bbMax[1], bbMin[2]), trans * btVector3(bbMin[0], bbMax[1], bbMin[2]), color);
@@ -370,9 +370,9 @@ void epriv::GLDebugDrawer::drawBox(const btVector3& bbMin, const btVector3& bbMa
     drawLine(trans * btVector3(bbMax[0], bbMax[1], bbMax[2]), trans * btVector3(bbMin[0], bbMax[1], bbMax[2]), color);
     drawLine(trans * btVector3(bbMin[0], bbMax[1], bbMax[2]), trans * btVector3(bbMin[0], bbMin[1], bbMax[2]), color);
 }
-void epriv::GLDebugDrawer::drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) {
+void priv::GLDebugDrawer::drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) {
 }
-void epriv::GLDebugDrawer::drawPlane(const btVector3& planeNormal, btScalar planeConst, const btTransform& transform, const btVector3& color) {
+void priv::GLDebugDrawer::drawPlane(const btVector3& planeNormal, btScalar planeConst, const btTransform& transform, const btVector3& color) {
     btVector3 planeOrigin = planeNormal * planeConst;
     btVector3 vec0, vec1;
     btPlaneSpace1(planeNormal, vec0, vec1);
@@ -384,7 +384,7 @@ void epriv::GLDebugDrawer::drawPlane(const btVector3& planeNormal, btScalar plan
     drawLine(transform * pt0, transform * pt1, color);
     drawLine(transform * pt2, transform * pt3, color);
 }
-void epriv::GLDebugDrawer::drawCone(btScalar radius, btScalar height, int upAxis, const btTransform& transform, const btVector3& color) {
+void priv::GLDebugDrawer::drawCone(btScalar radius, btScalar height, int upAxis, const btTransform& transform, const btVector3& color) {
     int stepDegrees = 30;
     btVector3 start = transform.getOrigin();
     btVector3	offsetHeight(0, 0, 0);
@@ -413,14 +413,14 @@ void epriv::GLDebugDrawer::drawCone(btScalar radius, btScalar height, int upAxis
     xaxis[(upAxis + 1) % 3] = btScalar(1.0);
     drawArc(start - transform.getBasis() * (offsetHeight), transform.getBasis() * yaxis, transform.getBasis() * xaxis, radius, radius, 0, SIMD_2_PI, color, false, 10.0);
 }
-void epriv::GLDebugDrawer::reportErrorWarning(const char* errWarning) {
+void priv::GLDebugDrawer::reportErrorWarning(const char* errWarning) {
 }
-void epriv::GLDebugDrawer::draw3dText(const btVector3& location, const char* text) {
+void priv::GLDebugDrawer::draw3dText(const btVector3& location, const char* text) {
 }
-void epriv::GLDebugDrawer::setDebugMode(int _mode) {
+void priv::GLDebugDrawer::setDebugMode(int _mode) {
     m_Mode = _mode;
 }
-int epriv::GLDebugDrawer::getDebugMode() const {
+int priv::GLDebugDrawer::getDebugMode() const {
     return m_Mode;
 }
 

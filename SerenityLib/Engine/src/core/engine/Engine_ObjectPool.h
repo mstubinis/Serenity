@@ -6,7 +6,7 @@
 #include <core/engine/resources/Handle.h>
 
 namespace Engine{
-    namespace epriv{
+    namespace priv{
         template<typename R> struct HandleEntry final{
             std::uint32_t   nextFreeIndex : 12; //
             std::uint32_t   version : 15;       // 29 bits

@@ -2,7 +2,7 @@
 #ifndef ENGINE_WINDOW_H
 #define ENGINE_WINDOW_H
 
-
+#define ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS
 #if !defined(_APPLE_) && !defined(ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS)
     #ifndef ENGINE_THREAD_WINDOW_EVENTS
     #define ENGINE_THREAD_WINDOW_EVENTS
@@ -14,7 +14,7 @@ namespace sf {
     class Window;
 };
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class  EngineCore;
         class  EventManager;
     };
@@ -28,7 +28,7 @@ struct EngineOptions;
 #include <glm/vec2.hpp>
 #include <core/engine/threading/Queue_ThreadSafe.h>
 
-class Engine_Window_Flags final { public: enum Flag: unsigned int {
+class Window_Flags final { public: enum Flag: unsigned int {
     WindowedFullscreen = 1 << 0,
     Windowed           = 1 << 1,
     Fullscreen         = 1 << 2,
@@ -40,13 +40,13 @@ class Engine_Window_Flags final { public: enum Flag: unsigned int {
 };};
 
 
-class Engine_Window final{
-    friend class Engine::epriv::EngineCore;
-    friend class Engine::epriv::EventManager;
-    class Engine_WindowData final {
-        friend class Engine::epriv::EngineCore;
-        friend class Engine::epriv::EventManager;
-        friend class Engine_Window;
+class Window final{
+    friend class Engine::priv::EngineCore;
+    friend class Engine::priv::EventManager;
+    class WindowData final {
+        friend class Engine::priv::EngineCore;
+        friend class Engine::priv::EventManager;
+        friend class Window;
 
         struct EventThreadOnlyCommands final { enum Command : unsigned int {
             ShowMouse,
@@ -56,8 +56,8 @@ class Engine_Window final{
 
         private:
             #ifdef ENGINE_THREAD_WINDOW_EVENTS
-                Engine::epriv::Queue_ThreadSafe<sf::Event>                          m_Queue;
-                Engine::epriv::Queue_ThreadSafe<EventThreadOnlyCommands::Command>   m_MainThreadToEventThreadQueueShowMouse;
+                Engine::priv::Queue_ThreadSafe<sf::Event>                          m_Queue;
+                Engine::priv::Queue_ThreadSafe<EventThreadOnlyCommands::Command>   m_MainThreadToEventThreadQueueShowMouse;
                 std::unique_ptr<std::thread>                                        m_EventThread;
             #endif
 
@@ -79,9 +79,9 @@ class Engine_Window final{
             sf::ContextSettings m_SFContextSettings;
 
             void restore_state();
-            const sf::ContextSettings create(Engine_Window&, const std::string& _name, const unsigned int& _width, const unsigned int& _height);
-            void update_mouse_position_internal(Engine_Window&, const float x, const float y, const bool resetDifference, const bool resetPrevious);
-            void on_fullscreen_internal(Engine_Window&, const bool isToBeFullscreen, const bool isMaximized, const bool isMinimized);
+            const sf::ContextSettings create(Window&, const std::string& _name, const unsigned int& _width, const unsigned int& _height);
+            void update_mouse_position_internal(Window&, const float x, const float y, const bool resetDifference, const bool resetPrevious);
+            void on_fullscreen_internal(Window&, const bool isToBeFullscreen, const bool isMaximized, const bool isMinimized);
             sf::VideoMode get_default_desktop_video_mode();
 
             void on_mouse_wheel_scrolled(const float& delta, const int& x, const int& y);
@@ -90,28 +90,28 @@ class Engine_Window final{
 
             void on_close();
 
-            const bool remove_flag(const Engine_Window_Flags::Flag& flag);
-            const bool add_flag(const Engine_Window_Flags::Flag& flag);
-            const bool has_flag(const Engine_Window_Flags::Flag& flag);
+            const bool remove_flag(const Window_Flags::Flag& flag);
+            const bool add_flag(const Window_Flags::Flag& flag);
+            const bool has_flag(const Window_Flags::Flag& flag);
 
         public:
-            Engine_WindowData();
-            ~Engine_WindowData();
+            WindowData();
+            ~WindowData();
     };
 
     private:
-        Engine_WindowData m_Data;
+        WindowData m_Data;
         void restore_state();
     public:
-        Engine_Window(const EngineOptions& options);
-        ~Engine_Window();
+        Window(const EngineOptions& options);
+        ~Window();
 
         const std::string& name() const;
         const glm::uvec2 getSize();
         const glm::uvec2 getPosition();
 
 
-        const unsigned int getFramerateLimit() const;
+        const unsigned int& getFramerateLimit() const;
 
         sf::Window& getSFMLHandle() const;
 

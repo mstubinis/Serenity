@@ -1,7 +1,7 @@
 #include "Text.h"
 
 #include <core/engine/fonts/Font.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 
 using namespace Engine;
 using namespace std;

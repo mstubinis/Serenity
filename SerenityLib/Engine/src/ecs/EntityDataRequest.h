@@ -22,7 +22,7 @@ struct EntityDataRequest final {
     void serialize(const unsigned int& entityData);
 };
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct EntityPOD final {
             std::uint32_t        ID : 21;
             std::uint32_t   sceneID : 7;

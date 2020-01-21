@@ -48,7 +48,7 @@ struct ScreenBoxCoordinates {
 };
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct ComponentBody_UpdateFunction;
         struct ComponentBody_EntityAddedToSceneFunction;
         struct ComponentBody_ComponentAddedToEntityFunction;
@@ -62,11 +62,11 @@ namespace Engine {
 };
 
 class ComponentBody : public ComponentBaseClass {
-    friend struct Engine::epriv::ComponentBody_UpdateFunction;
-    friend struct Engine::epriv::ComponentBody_ComponentAddedToEntityFunction;
-    friend struct Engine::epriv::ComponentBody_EntityAddedToSceneFunction;
-    friend struct Engine::epriv::ComponentBody_SceneEnteredFunction;
-    friend struct Engine::epriv::ComponentBody_SceneLeftFunction;
+    friend struct Engine::priv::ComponentBody_UpdateFunction;
+    friend struct Engine::priv::ComponentBody_ComponentAddedToEntityFunction;
+    friend struct Engine::priv::ComponentBody_EntityAddedToSceneFunction;
+    friend struct Engine::priv::ComponentBody_SceneEnteredFunction;
+    friend struct Engine::priv::ComponentBody_SceneLeftFunction;
     friend class  ComponentModel;
     private:
         struct PhysicsData {
@@ -242,7 +242,7 @@ class ComponentBody : public ComponentBaseClass {
         void applyTorqueImpulse(const glm_vec3& torqueImpulse, const bool local = true);
 };
 
-class ComponentBody_System_CI : public Engine::epriv::ECSSystemCI {
+class ComponentBody_System_CI : public Engine::priv::ECSSystemCI {
     public:
         ComponentBody_System_CI();
         ~ComponentBody_System_CI() = default;

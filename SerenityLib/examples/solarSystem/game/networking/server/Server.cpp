@@ -317,7 +317,7 @@ void Server::update(Server* thisServer, const double& dt) {
             return false;
         };
         for (auto& thread : server.m_Threads) {
-            epriv::threading::addJobRef(updateClientThread, *thread);
+            priv::threading::addJobRef(updateClientThread, *thread);
         }
         //epriv::threading::waitForAll();
         

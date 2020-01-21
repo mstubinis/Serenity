@@ -2,19 +2,17 @@
 #ifndef ENGINE_LIGHT_SUN_INCLUDE_GUARD
 #define ENGINE_LIGHT_SUN_INCLUDE_GUARD
 
-//#include <core/engine/scene/Camera.h>
 #include <core/engine/lights/LightIncludes.h>
-//#include <core/engine/math/Numbers.h>
 #include <ecs/EntityWrapper.h>
 
 namespace Engine {
-    namespace epriv {
-        class RenderManager;
+    namespace priv {
+        class Renderer;
     };
 };
 class Scene;
 class SunLight : public EntityWrapper {
-    friend class ::Engine::epriv::RenderManager;
+    friend class ::Engine::priv::Renderer;
     protected:
         bool               m_Active;
         glm::vec4          m_Color;

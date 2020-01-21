@@ -5,7 +5,7 @@
 #include <string>
 
 using namespace std;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 
 BuiltInMeshses::BuiltInMeshses() {
     m_BuiltInMeshes.resize(BuiltInMeshEnum::_TOTAL, nullptr);

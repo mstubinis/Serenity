@@ -14,13 +14,13 @@ struct SoundStatus final {enum Status {
 };};
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class SoundManager;
     };
 };
 
 class SoundBaseClass {
-    friend class Engine::epriv::SoundManager;
+    friend class Engine::priv::SoundManager;
     protected:
         SoundStatus::Status      m_Status;
         unsigned int             m_Loops;

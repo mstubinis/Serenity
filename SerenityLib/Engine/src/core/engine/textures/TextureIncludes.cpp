@@ -6,30 +6,30 @@ using namespace Engine;
 using namespace std;
 
 
-epriv::ImageMipmap::ImageMipmap() {
+priv::ImageMipmap::ImageMipmap() {
     level = width = height = compressedSize = 0;
 }
-epriv::ImageMipmap::~ImageMipmap() {
+priv::ImageMipmap::~ImageMipmap() {
     vector_clear(pixels);
 }
 
 
-epriv::ImageLoadedStructure::ImageLoadedStructure() {
+priv::ImageLoadedStructure::ImageLoadedStructure() {
     ImageMipmap baseImage;
     filename = "";
     baseImage.compressedSize = 0;
     mipmaps.push_back(baseImage);
 }
-epriv::ImageLoadedStructure::~ImageLoadedStructure() {
+priv::ImageLoadedStructure::~ImageLoadedStructure() {
     vector_clear(mipmaps);
 }
-epriv::ImageLoadedStructure::ImageLoadedStructure(const uint _w, const uint _h, const ImagePixelType::Type _pxlType, const ImagePixelFormat::Format _pxlFormat, const ImageInternalFormat::Format _internFormat) {
+priv::ImageLoadedStructure::ImageLoadedStructure(const uint _w, const uint _h, const ImagePixelType::Type _pxlType, const ImagePixelFormat::Format _pxlFormat, const ImageInternalFormat::Format _internFormat) {
     load(_w, _h, _pxlType, _pxlFormat, _internFormat);
 }
-epriv::ImageLoadedStructure::ImageLoadedStructure(const sf::Image& i, const string& _filename) {
+priv::ImageLoadedStructure::ImageLoadedStructure(const sf::Image& i, const string& _filename) {
     load(i, _filename);
 }
-void epriv::ImageLoadedStructure::load(const uint _width, const uint _height, const ImagePixelType::Type _pixelType, const ImagePixelFormat::Format _pixelFormat, const ImageInternalFormat::Format _internalFormat) {
+void priv::ImageLoadedStructure::load(const uint _width, const uint _height, const ImagePixelType::Type _pixelType, const ImagePixelFormat::Format _pixelFormat, const ImageInternalFormat::Format _internalFormat) {
     ImageMipmap* baseImage = nullptr;
     if (mipmaps.size() > 0) {
         baseImage = &(mipmaps[0]);
@@ -48,7 +48,7 @@ void epriv::ImageLoadedStructure::load(const uint _width, const uint _height, co
         SAFE_DELETE(baseImage);
     }
 }
-void epriv::ImageLoadedStructure::load(const sf::Image& i, const string& _filename) {
+void priv::ImageLoadedStructure::load(const sf::Image& i, const string& _filename) {
     ImageMipmap* baseImage = nullptr;
     if (mipmaps.size() > 0) {
         baseImage = &(mipmaps[0]);

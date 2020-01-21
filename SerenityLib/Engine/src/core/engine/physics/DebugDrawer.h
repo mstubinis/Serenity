@@ -17,7 +17,7 @@
 #include <SFML/OpenGL.hpp>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class PhysicsManager;
         class PhysicsDebugDrawcallback final : public btTriangleCallback, public btInternalTriangleIndexCallback {
             private:
@@ -30,7 +30,7 @@ namespace Engine {
                 virtual void processTriangle(btVector3* triangle, int partId, int triangleIndex);
         };
         class GLDebugDrawer final : public btIDebugDraw, public EventObserver {
-            friend class Engine::epriv::PhysicsManager;
+            friend class Engine::priv::PhysicsManager;
             private:
                 GLuint m_Mode, m_VAO, m_VertexBuffer, C_MAX_POINTS;
                 struct LineVertex final {

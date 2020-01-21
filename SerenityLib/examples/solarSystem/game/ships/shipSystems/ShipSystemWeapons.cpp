@@ -332,7 +332,7 @@ PrimaryWeaponBeam::PrimaryWeaponBeam(WeaponType::Type _type, Ship& _ship, Map& m
     auto* body = beamGraphic.addComponent<ComponentBody>();
 
     beamEndPointGraphic = map.createEntity();
-    auto& planeMesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
+    auto& planeMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
     auto& modelEndPt = *beamEndPointGraphic.addComponent<ComponentModel>(&planeMesh, (Material*)ResourceManifest::TorpedoGlowMaterial.get(), ShaderProgram::Forward, RenderStage::ForwardParticles);
     auto& beamModelEnd = modelEndPt.getModel(0);
     beamModelEnd.hide();

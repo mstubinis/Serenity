@@ -6,7 +6,7 @@
 #include <ecs/EntityDataRequest.h> //ok
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         template<typename ...> class ECSComponentPool;
         template <typename TEntity,typename TComponent> class ECSComponentPool<TEntity, TComponent> : public SparseSet<TEntity, TComponent>{
             using super = SparseSet<TEntity, TComponent>;

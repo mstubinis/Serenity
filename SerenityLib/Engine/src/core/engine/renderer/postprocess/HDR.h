@@ -9,7 +9,7 @@ struct HDRAlgorithm {enum Algorithm {
 };};
 
 namespace Engine {
-namespace epriv {
+namespace priv {
     class  GBuffer;
     class  HDR final {
         public:

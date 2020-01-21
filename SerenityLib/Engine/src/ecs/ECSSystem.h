@@ -6,7 +6,7 @@
 #include <ecs/ECSSystemConstructorInfo.h>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         template<typename ...> class ECSSystem;
         template <class TEntity> class ECSSystem<TEntity> {
             protected:

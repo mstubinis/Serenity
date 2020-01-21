@@ -6,7 +6,7 @@
 #include <ecs/ECSSystemConstructorInfo.h>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct ComponentName_UpdateFunction;
         struct ComponentName_EntityAddedToSceneFunction;
         struct ComponentName_ComponentAddedToEntityFunction;
@@ -15,11 +15,11 @@ namespace Engine {
     };
 };
 class ComponentName : public ComponentBaseClass {
-    friend struct Engine::epriv::ComponentName_UpdateFunction;
-    friend struct Engine::epriv::ComponentName_EntityAddedToSceneFunction;
-    friend struct Engine::epriv::ComponentName_ComponentAddedToEntityFunction;
-    friend struct Engine::epriv::ComponentName_SceneEnteredFunction;
-    friend struct Engine::epriv::ComponentName_SceneLeftFunction;
+    friend struct Engine::priv::ComponentName_UpdateFunction;
+    friend struct Engine::priv::ComponentName_EntityAddedToSceneFunction;
+    friend struct Engine::priv::ComponentName_ComponentAddedToEntityFunction;
+    friend struct Engine::priv::ComponentName_SceneEnteredFunction;
+    friend struct Engine::priv::ComponentName_SceneLeftFunction;
     private:
         std::string m_Data;
     public:
@@ -38,7 +38,7 @@ class ComponentName : public ComponentBaseClass {
 
         ~ComponentName();
 };
-class ComponentName_System_CI : public Engine::epriv::ECSSystemCI {
+class ComponentName_System_CI : public Engine::priv::ECSSystemCI {
     public:
         ComponentName_System_CI();
         ~ComponentName_System_CI() = default;

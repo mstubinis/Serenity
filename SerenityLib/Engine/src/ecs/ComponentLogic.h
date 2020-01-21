@@ -7,7 +7,7 @@
 
 class ComponentLogic;
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct ComponentLogic_UpdateFunction;
         struct ComponentLogic_EntityAddedToSceneFunction;
         struct ComponentLogic_ComponentAddedToEntityFunction;
@@ -18,11 +18,11 @@ namespace Engine {
 };
 
 class ComponentLogic : public ComponentBaseClass {
-    friend struct Engine::epriv::ComponentLogic_UpdateFunction;
-    friend struct Engine::epriv::ComponentLogic_ComponentAddedToEntityFunction;
-    friend struct Engine::epriv::ComponentLogic_EntityAddedToSceneFunction;
-    friend struct Engine::epriv::ComponentLogic_SceneEnteredFunction;
-    friend struct Engine::epriv::ComponentLogic_SceneLeftFunction;
+    friend struct Engine::priv::ComponentLogic_UpdateFunction;
+    friend struct Engine::priv::ComponentLogic_ComponentAddedToEntityFunction;
+    friend struct Engine::priv::ComponentLogic_EntityAddedToSceneFunction;
+    friend struct Engine::priv::ComponentLogic_SceneEnteredFunction;
+    friend struct Engine::priv::ComponentLogic_SceneLeftFunction;
 
     private:
         void*                                m_UserPointer;
@@ -58,7 +58,7 @@ class ComponentLogic : public ComponentBaseClass {
         void* getUserPointer2() const;
 };
 
-class ComponentLogic_System_CI : public Engine::epriv::ECSSystemCI {
+class ComponentLogic_System_CI : public Engine::priv::ECSSystemCI {
     public:
         ComponentLogic_System_CI();
         ~ComponentLogic_System_CI() = default;

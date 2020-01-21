@@ -39,7 +39,7 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
     part.name = name;
     part.mesh = NEW Mesh(name, *static_cast<btHeightfieldTerrainShape*>(c->getBtShape()), 0.0005f);
     part.mesh->setName(name);
-    part.handle = epriv::Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
+    part.handle = priv::Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
   
     auto* model = entity().addComponent<ComponentModel>(part.mesh, material);
     physics.setPosition(0, (minH + maxH) * 0.5f, 0);

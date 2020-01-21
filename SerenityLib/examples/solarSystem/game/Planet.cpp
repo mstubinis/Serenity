@@ -115,7 +115,7 @@ struct PlanetaryRingModelInstanceBindFunctor{void operator()(EngineResource* r) 
     glm::mat4 rot = glm::mat4(1.0f);
     rot *= glm::mat4_cast(orientation);
     
-    glm::vec3 lightPos = epriv::InternalScenePublicInterface::GetSunLights(*Resources::getCurrentScene())[0]->position();
+    glm::vec3 lightPos = priv::InternalScenePublicInterface::GetSunLights(*Resources::getCurrentScene())[0]->position();
     glm::vec3 lightDir = glm::normalize(lightPos - pos);
     float Km = 0.0025f;
     float Kr = 0.0015f;
@@ -227,7 +227,7 @@ struct AtmosphericScatteringGroundModelInstanceBindFunctor{void operator()(Engin
     glm::mat4 rot = glm::mat4(1.0f);
     rot *= glm::mat4_cast(orientation);
     
-    glm::vec3 lightPos = epriv::InternalScenePublicInterface::GetSunLights(*Resources::getCurrentScene())[0]->position();
+    glm::vec3 lightPos = priv::InternalScenePublicInterface::GetSunLights(*Resources::getCurrentScene())[0]->position();
     glm::vec3 lightDir = glm::normalize(lightPos - pos);
     float Km = 0.0025f;
     float Kr = 0.0015f;
@@ -305,7 +305,7 @@ struct AtmosphericScatteringSkyModelInstanceBindFunctor{void operator()(EngineRe
 
     int numberSamples = 1;
     
-    glm::vec3 lightPos = epriv::InternalScenePublicInterface::GetSunLights(*Resources::getCurrentScene())[0]->position();
+    glm::vec3 lightPos = priv::InternalScenePublicInterface::GetSunLights(*Resources::getCurrentScene())[0]->position();
     glm::vec3 lightDir = glm::normalize(lightPos - thisPos);
     float Km = 0.0025f;
     float Kr = 0.0015f;
@@ -566,7 +566,7 @@ void Ring::internal_make_ring_image(const vector<RingInfo>& ring_list){
     if (!texture) {
         texture = NEW Texture(ringImage, texture_name, false, ImageInternalFormat::SRGB8_ALPHA8);
         texture->setAnisotropicFiltering(2.0f);
-        epriv::Core::m_Engine->m_ResourceManager._addTexture(texture);
+        priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
     }
     auto handle = Resources::loadMaterial(material_name, texture);
     m_MaterialHandle = handle;

@@ -1,7 +1,7 @@
 #include <core/engine/system/Engine.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/textures/DDS.h>
-#include <core/engine/system/window/Engine_Window.h>
+#include <core/engine/system/window/Window.h>
 #include <core/engine/math/Engine_Math.h>
 
 #include <boost/algorithm/string/case_conv.hpp>
@@ -12,8 +12,8 @@
 #include <fstream>
 
 using namespace Engine;
-using namespace Engine::epriv;
-using namespace Engine::epriv::textures;
+using namespace Engine::priv;
+using namespace Engine::priv::textures;
 using namespace std;
 
 Texture* Texture::White    = nullptr;
@@ -47,7 +47,7 @@ Texture::~Texture(){
 void Texture::render(const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth){
     if (m_TextureType == TextureType::CubeMap)
         return;
-    Renderer::renderTexture(*this, position, color, angle, scale, depth);
+    Engine::Renderer::renderTexture(*this, position, color, angle, scale, depth);
 }
 void Texture::setXWrapping(const TextureWrap::Wrap& wrap){
     //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
@@ -115,8 +115,8 @@ void Texture::setFilter(const GLuint& type, const TextureFilter::Filter& filter)
     Texture::setMaxFilter(type, filter);
 }
 void Texture::setAnisotropicFiltering(const float& anisotropicFiltering){
-    Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
-    if(RenderManager::OPENGL_VERSION >= 46){
+    Engine::Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
+    if(Engine::priv::Renderer::OPENGL_VERSION >= 46){
     	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, const_cast<GLfloat*>(&anisotropicFiltering));
     	glTexParameterf(m_Type, GL_TEXTURE_MAX_ANISOTROPY, anisotropicFiltering);
     }else{     

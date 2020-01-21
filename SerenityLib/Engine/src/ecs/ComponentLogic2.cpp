@@ -1,7 +1,7 @@
 #include <ecs/ComponentLogic2.h>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 #pragma region Component
@@ -10,7 +10,7 @@ ComponentLogic2::ComponentLogic2(const Entity& entity) : ComponentBaseClass(enti
     m_UserPointer  = nullptr;
     m_UserPointer1 = nullptr;
     m_UserPointer2 = nullptr;
-    setFunctor(Engine::epriv::ComponentLogic2_EmptyFunctor());
+    setFunctor(Engine::priv::ComponentLogic2_EmptyFunctor());
 }
 ComponentLogic2::~ComponentLogic2() {
 }
@@ -75,22 +75,22 @@ void ComponentLogic2::call(const double& dt) {
 
 #pragma region System
 
-struct epriv::ComponentLogic2_UpdateFunction final {void operator()(void* _componentPool, const double& dt, Scene& _scene) const {
+struct priv::ComponentLogic2_UpdateFunction final {void operator()(void* _componentPool, const double& dt, Scene& _scene) const {
     auto& pool = *(ECSComponentPool<Entity, ComponentLogic2>*)_componentPool;
     auto& components = pool.pool();
 	for (auto& component : components) {
 		component.call(dt);
 	}
 }};
-struct epriv::ComponentLogic2_ComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
+struct priv::ComponentLogic2_ComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
 
 }};
-struct epriv::ComponentLogic2_EntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
+struct priv::ComponentLogic2_EntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
 }};
-struct epriv::ComponentLogic2_SceneEnteredFunction final {void operator()(void* _componentPool, Scene& _scene) const {
+struct priv::ComponentLogic2_SceneEnteredFunction final {void operator()(void* _componentPool, Scene& _scene) const {
 
 }};
-struct epriv::ComponentLogic2_SceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
+struct priv::ComponentLogic2_SceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
 
 }};
 

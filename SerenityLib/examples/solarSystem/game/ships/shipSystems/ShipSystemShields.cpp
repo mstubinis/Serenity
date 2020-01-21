@@ -10,7 +10,7 @@
 #include <core/engine/model/ModelInstance.h>
 #include <ecs/Components.h>
 #include <core/engine/mesh/Mesh.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/physics/Collision.h>

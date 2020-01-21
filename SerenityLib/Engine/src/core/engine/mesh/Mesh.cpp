@@ -5,7 +5,7 @@
 #include <core/engine/mesh/MeshCollisionFactory.h>
 
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/physics/Engine_Physics.h>
 #include <core/engine/physics/Collision.h>
 #include <core/engine/math/Engine_Math.h>
@@ -32,11 +32,11 @@
 
 using namespace std;
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 namespace boostm = boost::math;
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct DefaultMeshBindFunctor final{void operator()(BindableResource* r) const {
             const auto& mesh = *static_cast<Mesh*>(r);
             if (mesh.isLoaded()) {
@@ -83,7 +83,7 @@ void InternalMeshPublicInterface::InitBlankMesh(Mesh& mesh) {
 }
 
 bool InternalMeshPublicInterface::SupportsInstancing(){
-    if(RenderManager::OPENGL_VERSION >= 31 || OpenGLExtensions::supported(OpenGLExtensions::EXT_draw_instanced) || OpenGLExtensions::supported(OpenGLExtensions::ARB_draw_instanced)){
+    if(Renderer::OPENGL_VERSION >= 31 || OpenGLExtensions::supported(OpenGLExtensions::EXT_draw_instanced) || OpenGLExtensions::supported(OpenGLExtensions::ARB_draw_instanced)){
         return true;
     }
     return false;
@@ -181,7 +181,7 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
         vector<glm::vec3> temp_tangents; temp_tangents.reserve(data.tangents.size());
         for (uint i = 0; i < data.points.size(); ++i) {
             ushort index;
-            bool found = epriv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, mesh.m_threshold);
+            bool found = priv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, mesh.m_threshold);
             if (found) {
                 _indices.emplace_back(index);
                 //average out TBN. But it cancels out normal mapping on some flat surfaces
@@ -284,7 +284,7 @@ Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, flo
             heightfield.getVertex1(i, j + 1, vert3);
             heightfield.getVertex1(i + 1, j + 1, vert4);
 
-            epriv::Vertex v1, v2, v3, v4;
+            priv::Vertex v1, v2, v3, v4;
             v1.position = glm::vec3(vert1.x(), vert1.y(), vert1.z());
             v2.position = glm::vec3(vert2.x(), vert2.y(), vert2.z());
             v3.position = glm::vec3(vert3.x(), vert3.y(), vert3.z());
@@ -331,7 +331,7 @@ Mesh::Mesh(const string& name,float width, float height,float threshold) : Binda
 
     MeshImportedData data;
 
-    vector<epriv::Vertex> quad; quad.resize(4);
+    vector<priv::Vertex> quad; quad.resize(4);
 
     quad[0].uv = glm::vec2(0.0f, height);
     quad[1].uv = glm::vec2(width, height);
@@ -448,11 +448,11 @@ void Mesh::render(const bool instancing, const ModelDrawingMode::Mode mode){
     const auto indicesSize = m_VertexData->indices.size();
     if (indicesSize == 0) 
         return;
-    if (instancing && epriv::InternalMeshPublicInterface::SupportsInstancing()) {
+    if (instancing && priv::InternalMeshPublicInterface::SupportsInstancing()) {
         //const uint& instancesCount = m_InstanceCount;
         //if (instancesCount == 0) 
         //    return;
-        //if (RenderManager::OPENGL_VERSION >= 31) {
+        //if (Renderer::OPENGL_VERSION >= 31) {
         //    glDrawElementsInstanced(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
         //} else if (OpenGLExtension::supported(OpenGLExtension::EXT_draw_instanced)) {
         //    glDrawElementsInstancedEXT(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
@@ -500,7 +500,7 @@ void Mesh::sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat
 
     const glm::vec3 camPos = camera.getPosition();
 
-    const auto& lambda_sorter = [&](epriv::Triangle& lhs, epriv::Triangle& rhs) {
+    const auto& lambda_sorter = [&](priv::Triangle& lhs, priv::Triangle& rhs) {
         glm::mat4 model1 = instance.modelMatrix() * bodyModelMatrix;
         glm::mat4 model2 = model1;
 

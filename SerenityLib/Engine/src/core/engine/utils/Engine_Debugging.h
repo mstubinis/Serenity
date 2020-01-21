@@ -9,7 +9,7 @@
 #include <SFML/System.hpp>
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         class DebugManager {
             private:
                 sf::Clock clock;

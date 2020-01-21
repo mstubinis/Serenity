@@ -3,7 +3,7 @@
 #include "Text.h"
 
 #include <core/engine/events/Engine_Events.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/fonts/Font.h>
 
 using namespace Engine;
@@ -163,7 +163,7 @@ void ScrollFrame::fit_widget_to_window(WidgetEntry& widgetEntry) {
         actual_content_width = m_Width;
     }
     if (textWidget) {
-        const auto threshold = actual_content_width - 50.0f; //TODO: re-eval this hardcoded number
+        const auto threshold = actual_content_width - 80.0f; //TODO: re-eval this hardcoded number
         float text_width = 0.0f;
         bool changed = false;
         string text = widgetEntry.original_text;
@@ -310,7 +310,7 @@ void ScrollFrame::render(const glm::vec4& scissor) {
 
     const auto pos = positionWorld();
 
-    //Renderer::renderBorder(1, pos, m_Color, m_Width, m_Height, 0, 0.0001f, m_Alignment, scissor);
+    //Engine::Renderer::renderBorder(1, pos, m_Color, m_Width, m_Height, 0, 0.0001f, m_Alignment, scissor);
 
     for (auto& row : m_Content) {
         for (auto& widgetEntry : row.widgets) {
@@ -326,7 +326,7 @@ void ScrollFrame::render() {
     const auto pos  = positionWorld();
     const auto pos2 = positionFromAlignmentWorld();
 
-    //Renderer::renderBorder(1, pos, m_Color, m_Width, m_Height, 0, 0.0001f, m_Alignment);
+    //Engine::Renderer::renderBorder(1, pos, m_Color, m_Width, m_Height, 0, 0.0001f, m_Alignment);
 
     auto scissor = glm::vec4(pos2.x, pos2.y, m_Width, m_Height);
     //auto scissor = glm::vec4(-1.0f);

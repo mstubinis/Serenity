@@ -8,7 +8,7 @@
 struct EventObserver;
 struct Event;
 namespace Engine{
-    namespace epriv{
+    namespace priv{
         class EventDispatcher final{
             private:
                 std::vector<std::vector<EventObserver*>> m_Observers;

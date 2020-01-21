@@ -15,7 +15,7 @@ using namespace std;
 using namespace Engine;
 
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct DefaultDecalBindFunctor { void operator()(EngineResource* r) const {
             auto& i = *static_cast<ModelInstance*>(r);
             const auto& stage = i.stage();
@@ -26,22 +26,22 @@ namespace Engine {
             auto& body = *(parent.getComponent<ComponentBody>());
             glm::mat4 parentModel = body.modelMatrix();
 
-            auto& renderMgr = epriv::Core::m_Engine->m_RenderManager;
+            auto& renderMgr = priv::Core::m_Engine->m_RenderManager;
             auto maxTextures = renderMgr.OpenGLStateMachine.getMaxTextureUnits() - 1;
             auto& gbuffer = renderMgr.getGbuffer();
-            Renderer::sendTextureSafe("gDepthMap", gbuffer.getTexture(GBufferType::Depth), maxTextures);
+            Engine::Renderer::sendTextureSafe("gDepthMap", gbuffer.getTexture(GBufferType::Depth), maxTextures);
 
-            Renderer::sendUniform4Safe("Object_Color", i.color());
-            Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
+            Engine::Renderer::sendUniform4Safe("Object_Color", i.color());
+            Engine::Renderer::sendUniform3Safe("Gods_Rays_Color", i.godRaysColor());
 
             glm::mat4 modelMatrix = parentModel * i.modelMatrix();
 
             glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
 
             const auto& winSize = Resources::getWindowSize();
-            Renderer::sendUniform4Safe("Resolution", static_cast<float>(winSize.x), static_cast<float>(winSize.y), 0.0f, 0.0f);
-            Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
-            Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
+            Engine::Renderer::sendUniform4Safe("Resolution", static_cast<float>(winSize.x), static_cast<float>(winSize.y), 0.0f, 0.0f);
+            Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
+            Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
         }};
         struct DefaultDecalUnbindFunctor { void operator()(EngineResource* r) const {
             //auto& i = *static_cast<ModelInstance*>(r);
@@ -51,7 +51,7 @@ namespace Engine {
 
 Decal::Decal(Material& material, const glm_vec3& position, const glm::vec3& hitNormal, const float& size, Scene& scene, const float& lifetimeMax, const RenderStage::Stage stage):EntityWrapper(scene) {
     auto& body = *addComponent<ComponentBody>();
-    auto& cubeMesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh();
+    auto& cubeMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh();
     auto& model = *addComponent<ComponentModel>(&cubeMesh, &material, ShaderProgram::Decal, stage);
 
     body.setPosition(position);
@@ -61,8 +61,8 @@ Decal::Decal(Material& material, const glm_vec3& position, const glm::vec3& hitN
     const decimal factor = static_cast<decimal>(0.2f * size);
     body.setScale(factor, factor, static_cast<decimal>(0.04));
 
-    model.setCustomBindFunctor(Engine::epriv::DefaultDecalBindFunctor());
-    model.setCustomUnbindFunctor(Engine::epriv::DefaultDecalUnbindFunctor());
+    model.setCustomBindFunctor(Engine::priv::DefaultDecalBindFunctor());
+    model.setCustomUnbindFunctor(Engine::priv::DefaultDecalUnbindFunctor());
 
     m_LifetimeCurrent = 0.0f;
     m_LifetimeMax = lifetimeMax;

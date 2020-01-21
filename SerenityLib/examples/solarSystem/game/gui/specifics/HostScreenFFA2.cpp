@@ -21,7 +21,7 @@
 #include "../../teams/Team.h"
 
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/discord/Discord.h>
 #include <boost/algorithm/string/replace.hpp>

@@ -13,7 +13,7 @@ class  Material;
 class  ComponentModel;
 class  ComponentCamera;
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct ComponentModel_UpdateFunction;
         struct ComponentModel_EntityAddedToSceneFunction;
         struct ComponentModel_ComponentAddedToEntityFunction;
@@ -26,12 +26,12 @@ namespace Engine {
 };
 
 class ComponentModel: public ComponentBaseClass {
-    friend struct Engine::epriv::ComponentModel_UpdateFunction;
-    friend struct Engine::epriv::ComponentModel_EntityAddedToSceneFunction;
-    friend struct Engine::epriv::ComponentModel_ComponentAddedToEntityFunction;
-    friend struct Engine::epriv::ComponentModel_SceneEnteredFunction;
-    friend struct Engine::epriv::ComponentModel_SceneLeftFunction;
-    friend struct Engine::epriv::ComponentModel_Functions;
+    friend struct Engine::priv::ComponentModel_UpdateFunction;
+    friend struct Engine::priv::ComponentModel_EntityAddedToSceneFunction;
+    friend struct Engine::priv::ComponentModel_ComponentAddedToEntityFunction;
+    friend struct Engine::priv::ComponentModel_SceneEnteredFunction;
+    friend struct Engine::priv::ComponentModel_SceneLeftFunction;
+    friend struct Engine::priv::ComponentModel_Functions;
     friend class  ComponentCamera;
     private:
         std::vector<ModelInstance*>  m_ModelInstances;
@@ -101,7 +101,7 @@ class ComponentModel: public ComponentBaseClass {
         }
 };
 
-class ComponentModel_System_CI : public Engine::epriv::ECSSystemCI {
+class ComponentModel_System_CI : public Engine::priv::ECSSystemCI {
     public:
         ComponentModel_System_CI();
         ~ComponentModel_System_CI() = default;

@@ -9,7 +9,7 @@ struct Handle;
 class  SoundData;
 class  SoundQueue;
 class  SoundEffect : public SoundBaseClass {
-    friend class Engine::epriv::SoundManager;
+    friend class Engine::priv::SoundManager;
     friend class SoundQueue;
     private:
         sf::Sound   m_Sound;

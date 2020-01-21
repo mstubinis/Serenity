@@ -9,10 +9,10 @@
 using namespace Engine;
 using namespace std;
 
-epriv::SoundManager* soundManager;
+priv::SoundManager* soundManager;
 
 
-epriv::SoundManager::SoundManager(){ 
+priv::SoundManager::SoundManager(){ 
     soundManager = this;
     for (unsigned int i = 0; i < SoundManager::MAX_SOUND_EFFECTS; ++i) {
         m_FreelistEffects.push(i);
@@ -21,13 +21,13 @@ epriv::SoundManager::SoundManager(){
         m_FreelistMusics.push(i);
     }
 }
-epriv::SoundManager::~SoundManager(){ 
+priv::SoundManager::~SoundManager(){ 
     cleanup();
 }
-void epriv::SoundManager::cleanup() {
+void priv::SoundManager::cleanup() {
     SAFE_DELETE_VECTOR(m_SoundQueues);
 }
-void epriv::SoundManager::_setSoundInformation(Handle& handle, SoundEffect& sound) {
+void priv::SoundManager::_setSoundInformation(Handle& handle, SoundEffect& sound) {
     SoundData& data = *Resources::getSoundData(handle);
     auto buffer = data.getBuffer();
     if (!buffer) {
@@ -37,7 +37,7 @@ void epriv::SoundManager::_setSoundInformation(Handle& handle, SoundEffect& soun
     sound.m_Sound.setBuffer(*buffer);
     sound.setVolume(data.getVolume());
 }
-void epriv::SoundManager::_setSoundInformation(Handle& handle, SoundMusic& sound) {
+void priv::SoundManager::_setSoundInformation(Handle& handle, SoundMusic& sound) {
     SoundData& data = *Resources::getSoundData(handle);
     auto buffer = data.getBuffer();
     bool res = sound.m_Sound.openFromFile(data.getFilename());
@@ -47,7 +47,7 @@ void epriv::SoundManager::_setSoundInformation(Handle& handle, SoundMusic& sound
     sound.m_Duration = data.getDuration();
 }
 
-void epriv::SoundManager::_update(const double& dt){
+void priv::SoundManager::_update(const double& dt){
     auto* scene = Resources::getCurrentScene();
     if (scene) {
         auto* camera = scene->getActiveCamera();
@@ -92,7 +92,7 @@ void epriv::SoundManager::_update(const double& dt){
     }
 }
 
-SoundEffect* epriv::SoundManager::_getFreeEffect() {
+SoundEffect* priv::SoundManager::_getFreeEffect() {
     if (m_FreelistEffects.size() > 0) {
         auto& index = m_FreelistEffects.top();
         m_FreelistEffects.pop();
@@ -100,7 +100,7 @@ SoundEffect* epriv::SoundManager::_getFreeEffect() {
     }
     return nullptr;
 }
-SoundMusic* epriv::SoundManager::_getFreeMusic() {
+SoundMusic* priv::SoundManager::_getFreeMusic() {
     if (m_FreelistMusics.size() > 0) {
         auto& index = m_FreelistMusics.top();
         m_FreelistMusics.pop();

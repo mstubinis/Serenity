@@ -7,7 +7,7 @@ class  btRigidBody;
 class  ComponentBody;
 class  Camera;
 namespace Engine {
-    namespace epriv {
+    namespace priv {
         struct MeshImportedData;
         class  GLDebugDrawer;
         class  PhysicsWorld;
@@ -26,10 +26,10 @@ namespace Engine{
             hitNormal = hitPosition = glm::vec3(0.0f);
         }
     };
-    namespace epriv{
+    namespace priv{
         class PhysicsManager final{
             public:
-                Engine::epriv::PhysicsWorld*  m_Data;
+                Engine::priv::PhysicsWorld*  m_Data;
                 bool                          m_Paused;
                 unsigned int                  m_NumberOfStepsPerFrame;
             public:

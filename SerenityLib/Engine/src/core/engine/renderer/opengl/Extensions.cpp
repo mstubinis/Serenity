@@ -5,7 +5,7 @@
 #include <SFML/OpenGL.hpp>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 vector<bool> OpenGLExtensions::OPENGL_EXTENSIONS = []() {

@@ -2,7 +2,7 @@
 #ifndef ENGINE_ENGINE_EVENTS_H
 #define ENGINE_ENGINE_EVENTS_H
 
-class Engine_Window;
+class Window;
 
 #include <core/engine/events/Engine_EventDispatcher.h>
 #include <core/engine/events/Engine_EventIncludes.h>
@@ -12,7 +12,7 @@ class Engine_Window;
 #include <unordered_set>
 
 namespace Engine{
-    namespace epriv{
+    namespace priv{
         class EventManager final{
             public:
                 static EventManager*                     m_EventManager;
@@ -65,11 +65,11 @@ namespace Engine{
     const glm::vec2& getMousePositionPrevious();
     const glm::vec2& getMousePosition();
 
-    const glm::vec2& getMouseDifference(Engine_Window&);
-    const glm::vec2& getMousePositionPrevious(Engine_Window&);
-    const glm::vec2& getMousePosition(Engine_Window&);
+    const glm::vec2& getMouseDifference(Window&);
+    const glm::vec2& getMousePositionPrevious(Window&);
+    const glm::vec2& getMousePosition(Window&);
 
-    const double     getMouseWheelDelta(Engine_Window&);
+    const double     getMouseWheelDelta(Window&);
     const double     getMouseWheelDelta();
 
     void setMousePosition(const float x, const float y, const bool resetDifference = false, const bool resetPreviousPosition = false);
@@ -77,9 +77,9 @@ namespace Engine{
     void setMousePosition(const glm::vec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
     void setMousePosition(const glm::uvec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
 
-    void setMousePosition(Engine_Window&, const float x, const float y, const bool resetDifference = false, const bool resetPreviousPosition = false);
-    void setMousePosition(Engine_Window&, const unsigned int x, const unsigned int y, const bool resetDifference = false, const bool resetPreviousPosition = false);
-    void setMousePosition(Engine_Window&, const glm::vec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
-    void setMousePosition(Engine_Window&, const glm::uvec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
+    void setMousePosition(Window&, const float x, const float y, const bool resetDifference = false, const bool resetPreviousPosition = false);
+    void setMousePosition(Window&, const unsigned int x, const unsigned int y, const bool resetDifference = false, const bool resetPreviousPosition = false);
+    void setMousePosition(Window&, const glm::vec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
+    void setMousePosition(Window&, const glm::uvec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
 };
 #endif

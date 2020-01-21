@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 
 OpenGLState::OpenGLState() {
 

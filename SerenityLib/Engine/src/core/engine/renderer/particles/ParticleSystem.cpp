@@ -17,16 +17,16 @@
 using namespace std;
 using namespace Engine;
 
-epriv::ParticleSystem::ParticleSystem() {
+priv::ParticleSystem::ParticleSystem() {
     m_ParticleEmitters.reserve(NUMBER_OF_PARTICLE_EMITTERS_LIMIT);
     m_Particles.reserve(NUMBER_OF_PARTICLE_LIMIT);
 }
-epriv::ParticleSystem::~ParticleSystem() {
+priv::ParticleSystem::~ParticleSystem() {
 
 }
 
 
-void epriv::ParticleSystem::internal_update_emitters(const double& dt) {
+void priv::ParticleSystem::internal_update_emitters(const double& dt) {
     if (m_ParticleEmitters.size() == 0)
         return;
 
@@ -36,13 +36,13 @@ void epriv::ParticleSystem::internal_update_emitters(const double& dt) {
             m_ParticleEmitters[j].update_multithreaded(j, dt, *this);
         }
     };
-    auto split = epriv::threading::splitVectorPairs(m_ParticleEmitters);
+    auto split = priv::threading::splitVectorPairs(m_ParticleEmitters);
     for (auto& pair_ : split) {
-        epriv::threading::addJobRef(lamda_update_emitters, pair_);
+        priv::threading::addJobRef(lamda_update_emitters, pair_);
     }
-    epriv::threading::waitForAll();
+    priv::threading::waitForAll();
 }
-void epriv::ParticleSystem::internal_update_particles(const double& dt) {
+void priv::ParticleSystem::internal_update_particles(const double& dt) {
     if (m_Particles.size() == 0)
         return;
     auto lamda_update_particles = [&](pair<size_t, size_t>& pair_) {
@@ -50,14 +50,14 @@ void epriv::ParticleSystem::internal_update_particles(const double& dt) {
             m_Particles[j].update_multithreaded(j, dt, *this);
         }
     };
-    auto split = epriv::threading::splitVectorPairs(m_Particles);
+    auto split = priv::threading::splitVectorPairs(m_Particles);
     for (auto& pair_ : split) {
-        epriv::threading::addJobRef(lamda_update_particles, pair_);
+        priv::threading::addJobRef(lamda_update_particles, pair_);
     }
-    epriv::threading::waitForAll();
+    priv::threading::waitForAll();
 }
 
-ParticleEmitter* epriv::ParticleSystem::add_emitter(ParticleEmitter& emitter) {
+ParticleEmitter* priv::ParticleSystem::add_emitter(ParticleEmitter& emitter) {
     if (m_ParticleEmitterFreelist.size() > 0) { //first, try to reuse an empty
         const auto freeindex = m_ParticleEmitterFreelist.top();
         m_ParticleEmitterFreelist.pop();
@@ -74,7 +74,7 @@ ParticleEmitter* epriv::ParticleSystem::add_emitter(ParticleEmitter& emitter) {
     }
     return nullptr;
 }
-const bool epriv::ParticleSystem::add_particle(ParticleEmitter& emitter, const glm::vec3& emitterPosition, const glm::quat& emitterRotation) {
+const bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter, const glm::vec3& emitterPosition, const glm::quat& emitterRotation) {
     if (m_ParticleFreelist.size() > 0) { //first, try to reuse an empty
         const auto freeindex = m_ParticleFreelist.top();
         m_ParticleFreelist.pop();
@@ -92,16 +92,16 @@ const bool epriv::ParticleSystem::add_particle(ParticleEmitter& emitter, const g
     }
     return false;
 }
-const bool epriv::ParticleSystem::add_particle(ParticleEmitter& emitter) {
+const bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter) {
     auto& body = *emitter.getComponent<ComponentBody>();
     return add_particle(emitter, body.position(), body.rotation());
 }
 
-void epriv::ParticleSystem::update(const double& dt) {
+void priv::ParticleSystem::update(const double& dt) {
     internal_update_particles(dt);
     internal_update_emitters(dt);
 }
-void epriv::ParticleSystem::render(Camera& camera, ShaderProgram& program, GBuffer& gBuffer) {
+void priv::ParticleSystem::render(Camera& camera, ShaderProgram& program, GBuffer& gBuffer) {
     if (m_Particles.size() == 0)
         return;
 
@@ -110,7 +110,7 @@ void epriv::ParticleSystem::render(Camera& camera, ShaderProgram& program, GBuff
 
     const auto cameraPosition = glm::vec3(camera.getPosition());
 
-    auto& planeMesh = epriv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
+    auto& planeMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
 
     auto lamda_culler = [&](pair<size_t, size_t>& pair_, const glm::vec3& camPos) {
         
@@ -130,11 +130,11 @@ void epriv::ParticleSystem::render(Camera& camera, ShaderProgram& program, GBuff
             }
         }
     };
-    auto split = epriv::threading::splitVectorPairs(m_Particles);
+    auto split = priv::threading::splitVectorPairs(m_Particles);
     for (auto& pair_ : split) {
-        epriv::threading::addJobRef(lamda_culler, pair_, cameraPosition);
+        priv::threading::addJobRef(lamda_culler, pair_, cameraPosition);
     }
-    epriv::threading::waitForAll();
+    priv::threading::waitForAll();
 
     auto lambda_sorter = [&](Particle& lhs, Particle& rhs, const glm::vec3& camPos) {
         return glm::distance2(lhs.m_Position, camPos) > glm::distance2(rhs.m_Position, camPos);
@@ -150,15 +150,15 @@ void epriv::ParticleSystem::render(Camera& camera, ShaderProgram& program, GBuff
     }
 }
 
-vector<ParticleEmitter>& epriv::ParticleSystem::getParticleEmitters() {
+vector<ParticleEmitter>& priv::ParticleSystem::getParticleEmitters() {
     return m_ParticleEmitters;
 }
-vector<Particle>& epriv::ParticleSystem::getParticles() {
+vector<Particle>& priv::ParticleSystem::getParticles() {
     return m_Particles;
 }
-stack<size_t>& epriv::ParticleSystem::getParticleEmittersFreelist() {
+stack<size_t>& priv::ParticleSystem::getParticleEmittersFreelist() {
     return m_ParticleEmitterFreelist;
 }
-stack<size_t>& epriv::ParticleSystem::getParticlesFreelist() {
+stack<size_t>& priv::ParticleSystem::getParticlesFreelist() {
     return m_ParticleFreelist;
 }

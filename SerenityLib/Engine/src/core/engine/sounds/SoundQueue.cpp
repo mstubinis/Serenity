@@ -5,7 +5,7 @@
 
 using namespace std;
 
-SoundQueue::SoundQueue(Engine::epriv::SoundManager& manager, const float& delay):m_SoundManager(manager){
+SoundQueue::SoundQueue(Engine::priv::SoundManager& manager, const float& delay):m_SoundManager(manager){
     m_DelayInSeconds = delay;
     m_DelayTimer     = 0;
     m_IsDelayProcess = false;

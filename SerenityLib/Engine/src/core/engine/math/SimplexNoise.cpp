@@ -2,7 +2,7 @@
 #include <ctime>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 SimplexNoise noise;

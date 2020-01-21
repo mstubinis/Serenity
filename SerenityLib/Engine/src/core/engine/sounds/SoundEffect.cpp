@@ -8,7 +8,7 @@
 #include <core/engine/events/Engine_EventObject.h>
 
 using namespace Engine;
-using namespace Engine::epriv;
+using namespace Engine::priv;
 using namespace std;
 
 SoundEffect::SoundEffect() : SoundBaseClass(1) {

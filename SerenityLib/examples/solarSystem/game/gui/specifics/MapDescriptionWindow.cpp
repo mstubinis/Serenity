@@ -5,7 +5,7 @@
 #include <core/engine/fonts/Font.h>
 
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/renderer/Engine_Renderer.h>
+#include <core/engine/renderer/Renderer.h>
 #include <core/engine/textures/Texture.h>
 
 #include <iostream>
