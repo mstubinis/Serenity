@@ -45,6 +45,12 @@ struct Host_ButtonBack_OnClick { void operator()(Button* button) const {
     HostScreen1& hostScreen = *static_cast<HostScreen1*>(button->getUserPointer());
     auto& menu             = hostScreen.getMenu();
 
+    //TODO: set all persistents to false
+    menu.m_HostScreenFFA2->setPersistent(false);
+    menu.m_HostScreenHomelandSecurity2->setPersistent(false);
+    menu.m_HostScreenTeamDeathmatch2->setPersistent(false);
+    Server::PERSISTENT_INFO.clearInfo();
+
     if (hostScreen.isPersistent()) {
         menu.setGameState(GameState::Host_Screen_Setup_1_Persistent);
     }else{
@@ -64,6 +70,9 @@ struct Host_ButtonNext_OnClick { void operator()(Button* button) const {
         switch (data.getGameplayModeType()) {
             case GameplayModeType::FFA: {
                 menu.m_HostScreenFFA2->setTopText(current_map.map_name + " - " + data.getGameplayModeString());
+                if (Server::PERSISTENT_INFO == true) {
+                    menu.m_HostScreenFFA2->setPersistent(true);
+                }
                 menu.setGameState(GameState::Host_Screen_Setup_FFA_2);
                 break;
             }case GameplayModeType::TeamDeathmatch: {

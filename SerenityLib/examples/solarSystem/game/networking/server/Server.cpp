@@ -38,8 +38,11 @@ using namespace std;
 using namespace Engine;
 using namespace Engine::Networking;
 
-ServerHostData Server::SERVER_HOST_DATA;
-Database Server::DATABASE;
+ServerHostData          Server::SERVER_HOST_DATA;
+Database                Server::DATABASE;
+Server::PersistentInfo  Server::PERSISTENT_INFO;
+
+#pragma region ServerHostData
 
 ServerHostData::ServerHostData() {
     setGameplayModeType(GameplayModeType::FFA);
@@ -119,6 +122,9 @@ void ServerHostData::setAllowedShips(const unordered_set<string>& allowed_ships)
 const string& ServerHostData::getGameplayModeString() const {
     return GameplayMode::GAMEPLAY_TYPE_ENUM_NAMES[m_GameplayMode.m_GameplayModeType];
 }
+
+#pragma endregion
+
 #pragma region ServerClient
 
 ServerClient::ServerClient(const string& hash, Server& server, Core& core, sf::TcpSocket* sfTCPSocket) : m_Core(core), m_Server(server) {
@@ -217,11 +223,48 @@ ServerClientThread::~ServerClientThread() {
 }
 #pragma endregion
 
+#pragma region PersistentInfo
+
+Server::PersistentInfo::PersistentInfo() {
+    clearInfo();
+}
+const string& Server::PersistentInfo::getOwnerName() const {
+    return m_OwnerName;
+}
+const string& Server::PersistentInfo::getServerName() const {
+    return m_ServerName;
+}
+const unsigned short& Server::PersistentInfo::getPort() const {
+    return m_Port;
+}
+bool Server::PersistentInfo::operator==(const bool& rhs) const {
+    if (rhs == true) {
+        return (!m_ServerName.empty() && !m_OwnerName.empty() && m_Port != 0) ? true : false;
+    }else{
+        return (!m_ServerName.empty() && !m_OwnerName.empty() && m_Port != 0) ? false : true;
+    }
+}
+Server::PersistentInfo::operator bool() const {
+    return (!m_ServerName.empty() && !m_OwnerName.empty() && m_Port != 0) ? true : false;
+}
+void Server::PersistentInfo::setInfo(const string& serverName, const unsigned short& port, const string& ownerName) {
+    m_ServerName = serverName;
+    m_Port       = port;
+    m_OwnerName  = ownerName;
+}
+void Server::PersistentInfo::clearInfo() {
+    m_ServerName = "";
+    m_OwnerName  = "";
+    m_Port       = 0;
+}
+
+#pragma endregion
+
 #pragma region Server
 
 Server::Server(Core& core, const unsigned int& port, const string& ipRestriction) : m_Core(core), m_MapSpecificData(*this){
     m_OwnerClient                      = nullptr;
-    m_port                             = port;
+    m_Port                             = port;
     m_TCPListener                      = NEW ListenerTCP(port, ipRestriction);
     m_UdpSocket                        = NEW SocketUDP(port, ipRestriction);
     m_UdpSocket->setBlocking(false);
@@ -898,7 +941,7 @@ void Server::send_to_all_but_client_udp(ServerClient& c, Packet& packet) {
             if (client.second != &c) {
                 const auto clientIP = client.second->m_IP;
                 const auto clientID = client.second->m_ID;
-                auto status = m_UdpSocket->send(m_port + 1 + clientID, sf_packet, clientIP);
+                auto status = m_UdpSocket->send(m_Port + 1 + clientID, sf_packet, clientIP);
             }
         }
     }
@@ -909,7 +952,7 @@ void Server::send_to_all_but_client_udp(ServerClient& c, sf::Packet& packet) {
             if (client.second != &c) {
                 const auto clientIP = client.second->m_IP;
                 const auto clientID = client.second->m_ID;
-                auto status = m_UdpSocket->send(m_port + 1 + clientID, packet, clientIP);
+                auto status = m_UdpSocket->send(m_Port + 1 + clientID, packet, clientIP);
             }
         }
     }
@@ -920,7 +963,7 @@ void Server::send_to_all_but_client_udp(ServerClient& c, const void* data, size_
             if (client.second != &c) {
                 const auto clientIP = client.second->m_IP;
                 const auto clientID = client.second->m_ID;
-                auto status = m_UdpSocket->send(m_port + 1 + clientID, data, size, clientIP);
+                auto status = m_UdpSocket->send(m_Port + 1 + clientID, data, size, clientIP);
             }
         }
     }
@@ -933,7 +976,7 @@ void Server::send_to_all_udp(Packet& packet) {
         for (auto& client : clientThread->m_Clients) {
             const auto clientIP = client.second->m_IP;
             const auto clientID = client.second->m_ID;
-            auto status = m_UdpSocket->send(m_port + 1 + clientID, sf_packet, clientIP);
+            auto status = m_UdpSocket->send(m_Port + 1 + clientID, sf_packet, clientIP);
         }
     }
 }
@@ -942,7 +985,7 @@ void Server::send_to_all_udp(sf::Packet& packet) {
         for (auto& client : clientThread->m_Clients) {
             const auto clientIP = client.second->m_IP;
             const auto clientID = client.second->m_ID;
-            auto status = m_UdpSocket->send(m_port + 1 + clientID, packet, clientIP);
+            auto status = m_UdpSocket->send(m_Port + 1 + clientID, packet, clientIP);
         }
     }
 }
@@ -951,7 +994,7 @@ void Server::send_to_all_udp(const void* data, size_t size) {
         for (auto& client : clientThread->m_Clients) {
             const auto clientIP = client.second->m_IP;
             const auto clientID = client.second->m_ID;
-            auto status = m_UdpSocket->send(m_port + 1 + clientID, data, size, clientIP);
+            auto status = m_UdpSocket->send(m_Port + 1 + clientID, data, size, clientIP);
         }
     }
 }

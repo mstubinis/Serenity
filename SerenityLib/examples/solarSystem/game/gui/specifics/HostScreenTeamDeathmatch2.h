@@ -27,11 +27,16 @@ class HostScreenTeamDeathmatch2 final {
         Button*       m_BackgroundEdgeGraphicBottom;
         Button*       m_BackButton;
         Button*       m_ForwardButton;
+
+        bool m_IsPersistent;
     public:
         HostScreenTeamDeathmatch2(HostScreen1& hostScreen1, Menu&, Font& font);
         ~HostScreenTeamDeathmatch2();
 
         Menu& getMenu();
+
+        void setPersistent(const bool& persistent);
+        const bool isPersistent() const;
 
         void setTopText(const std::string& text);
 

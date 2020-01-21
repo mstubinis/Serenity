@@ -34,11 +34,11 @@ class OwnedServersSelectionWindow final : public RoundedWindow {
         Font&                  m_Font;
 
         void add_button(const std::string& serverName, const unsigned int& serverPort, const std::string& username);
-        void clear_selected_server();
     public:
         OwnedServersSelectionWindow(HostScreen1Persistent& hostScreen1Persistent, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const std::string& labelText);
         ~OwnedServersSelectionWindow();
 
+        void clearSelectedServer();
         void clearWindow();
         void populateWindow();
 

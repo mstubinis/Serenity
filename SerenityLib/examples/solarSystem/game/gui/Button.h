@@ -21,6 +21,7 @@ class Button : public Widget, public GUIRenderElement {
         float                     m_Padding;
         bool                      m_Enabled;
         bool                      m_PulseClicked;
+        //bool                      m_WasJustClicked;
         TextAlignment::Type       m_TextAlignment;
     public:
         Button(const Font& font, const float x, const float y, const float width, const float height);

@@ -56,6 +56,8 @@ HostScreenHomelandSecurity2::HostScreenHomelandSecurity2(HostScreen1& hostScreen
     const auto top_content_height = contentSize.y / 2.0f;
     const auto first_2_boxes_width_top = contentSize.x - top_content_height;
 
+    m_IsPersistent = false;
+
     m_BackgroundEdgeGraphicTop = NEW Button(font, winSize.x / 2.0f, winSize.y, winSize.x, top_bar_height_total);
     m_BackgroundEdgeGraphicTop->setColor(Factions::Database[FactionEnum::Federation].GUIColorDark);
     m_BackgroundEdgeGraphicTop->setAlignment(Alignment::TopCenter);
@@ -101,6 +103,39 @@ void HostScreenHomelandSecurity2::setTopText(const string& text) {
 }
 Menu& HostScreenHomelandSecurity2::getMenu() {
     return m_Menu;
+}
+const bool HostScreenHomelandSecurity2::isPersistent() const {
+    return m_IsPersistent;
+}
+void HostScreenHomelandSecurity2::setPersistent(const bool& persistent) {
+    if (persistent) {
+        if (Server::PERSISTENT_INFO == false) {
+            return;
+        }
+        m_IsPersistent = true;
+        /*
+        TextBox& your_name = m_SetupServerInfoWindow->getYourNameTextBox();
+        TextBox& server_port = m_SetupServerInfoWindow->getServerPortTextBox();
+
+        your_name.setText(Server::PERSISTENT_INFO.getOwnerName());
+        server_port.setText(Server::PERSISTENT_INFO.getServerName());
+
+        your_name.lock();
+        server_port.lock();
+        */
+    }else{
+        m_IsPersistent = false;
+        /*
+        TextBox& your_name = m_SetupServerInfoWindow->getYourNameTextBox();
+        TextBox& server_port = m_SetupServerInfoWindow->getServerPortTextBox();
+
+        your_name.setText(ConfigFile::CONFIG_DATA.host_server_player_name);
+        server_port.setText(to_string(ConfigFile::CONFIG_DATA.host_server_port));
+
+        your_name.unlock();
+        server_port.unlock();
+        */
+    }
 }
 void HostScreenHomelandSecurity2::onResize(const unsigned int newWidth, const unsigned int newHeight) {
     const auto winSize = glm::vec2(glm::uvec2(newWidth, newHeight));

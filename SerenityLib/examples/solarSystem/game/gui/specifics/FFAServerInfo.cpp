@@ -29,7 +29,6 @@ constexpr auto scroll_frame_padding = 30.0f;
 FFAServerInfo::FFAServerInfo(HostScreenFFA2& hostScreen, Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth, const unsigned int& borderSize, const string& labelText)
 :RoundedWindow(font, x, y, width, height, depth, borderSize, labelText), m_HostScreen(hostScreen), m_Font(font){
 
-    m_IsPersistent = false;
     m_ScrollFrame           = NEW ScrollFrame(font, x, y - (height / 2.0f) + scroll_frame_padding, width - (scroll_frame_padding * 2.0f), height - 110.0f, depth);
     m_ScrollFrame->setAlignment(Alignment::BottomCenter);
     m_ScrollFrame->setPaddingSize(15, 2);
@@ -106,21 +105,6 @@ FFAServerInfo::FFAServerInfo(HostScreenFFA2& hostScreen, Font& font, const float
 }
 FFAServerInfo::~FFAServerInfo() {
     SAFE_DELETE(m_ScrollFrame);
-}
-const bool FFAServerInfo::isPersistent() const {
-    return m_IsPersistent;
-}
-void FFAServerInfo::setPersistent() {
-    m_IsPersistent = true;
-
-    TextBox& your_name = getYourNameTextBox();
-    TextBox& server_port = getServerPortTextBox();
-
-    //TODO: fill info via database query
-    //auto res = hostScreen.getMenu().getCore().getServer()->getDatabase().execute_query();
-
-    your_name.lock();
-    server_port.lock();
 }
 TextBox& FFAServerInfo::getYourNameTextBox() {
     return *static_cast<TextBox*>(m_ScrollFrame->content()[0].widgets[0].widget);

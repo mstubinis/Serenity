@@ -40,7 +40,6 @@ struct HostPersServClick final { void operator()(Button* button) const {
     Server::DATABASE.connect_to_database("database");
 
     hostScreen0.m_Menu.m_HostScreen1Persistent->m_OwnedServersWindow->populateWindow();
-
     hostScreen0.m_Menu.setGameState(GameState::Host_Screen_Setup_1_Persistent);
     hostScreen0.m_Menu.setErrorText("", 0.2f);
 }};
@@ -74,7 +73,7 @@ HostScreen0::HostScreen0(Menu& menu, Font& font) : m_Font(font), m_Menu(menu) {
     m_HostTemporaryServer->setUserPointer(this);
     m_HostTemporaryServer->setOnClickFunctor(HostTempServClick());
 
-    m_HostPersistentServer = NEW Button(font, 0.0f, -seperation_size, button_width, button_height);
+    m_HostPersistentServer = NEW Button(font, winSize.x / 2.0f, -seperation_size, button_width, button_height);
     m_HostPersistentServer->setText("Persistent Server");
     m_HostPersistentServer->setColor(Factions::Database[FactionEnum::Federation].GUIColor);
     m_HostPersistentServer->setTextColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -82,11 +81,10 @@ HostScreen0::HostScreen0(Menu& menu, Font& font) : m_Font(font), m_Menu(menu) {
     m_HostPersistentServer->setDepth(0.2f);
     m_HostPersistentServer->setUserPointer(this);
     m_HostPersistentServer->setOnClickFunctor(HostPersServClick());
-
-    m_HostTemporaryServer->addChild(m_HostPersistentServer);
 }
 HostScreen0::~HostScreen0() {
     SAFE_DELETE(m_HostTemporaryServer);
+    SAFE_DELETE(m_HostPersistentServer);
     SAFE_DELETE(m_BackButton);
     SAFE_DELETE(m_BackgroundEdgeGraphicBottom);
 }
@@ -101,7 +99,14 @@ Button& HostScreen0::getHostPersistentServerButton() {
 void HostScreen0::onResize(const unsigned int newWidth, const unsigned int newHeight) {
     const auto winSize = glm::vec2(newWidth, newHeight);
 
-    m_HostTemporaryServer->setPosition((newWidth / 2.0f), (newHeight / 2.0f) + (seperation_size / 2.0f));
+    m_HostTemporaryServer->setPosition(
+        (newWidth / 2.0f), 
+        (newHeight / 2.0f) + (seperation_size / 2.0f)
+    );
+    m_HostPersistentServer->setPosition(
+        (newWidth / 2.0f),
+        (newHeight / 2.0f) - (seperation_size / 2.0f)
+    );
 
     m_BackButton->setPosition(padding_x + (bottom_bar_button_width / 2.0f), bottom_bar_height_total / 2.0f);
     m_BackgroundEdgeGraphicBottom->setPosition(winSize.x / 2.0f, bottom_bar_height_total / 2.0f);

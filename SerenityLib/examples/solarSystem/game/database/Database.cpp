@@ -350,7 +350,6 @@ const bool Database::connect_to_database(const string& databaseName) {
             init_database_with_defaults();
         }
     }
-    std::cout << "test\n";
     return true;
 }
 int Database::disconnect_from_database() {

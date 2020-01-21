@@ -35,6 +35,8 @@ class HostScreenFFA2 final {
         Button*     m_BackButton;
         Button*     m_ForwardButton;
 
+        bool m_IsPersistent;
+
         const unsigned int get_duration_sec_helper(TextBox&);
         const float get_duration_min_helper(TextBox&);
 
@@ -43,6 +45,9 @@ class HostScreenFFA2 final {
         ~HostScreenFFA2();
 
         Menu& getMenu();
+
+        void setPersistent(const bool& persistent);
+        const bool isPersistent() const;
         
         const bool validateMaxNumPlayersTextBox();
         const bool validateShipSelector();

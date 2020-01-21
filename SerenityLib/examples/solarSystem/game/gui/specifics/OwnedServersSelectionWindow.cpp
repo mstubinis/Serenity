@@ -15,7 +15,7 @@ constexpr auto scroll_frame_padding = 30.0f;
 struct ServerButtonOnClick final { void operator()(Button* button) const {
     auto& ptr = *static_cast<OwnedServersSelectionWindow::UserPointer*>(button->getUserPointer());
 
-    ptr.window->clear_selected_server();
+    ptr.window->clearSelectedServer();
     ptr.window->m_SelectedServer = &ptr;
     button->setColor(Factions::Database[FactionEnum::Federation].GUIColorHighlight);
     button->disableMouseover();
@@ -78,7 +78,7 @@ void OwnedServersSelectionWindow::populateWindow() {
     }
     
 }
-void OwnedServersSelectionWindow::clear_selected_server() {
+void OwnedServersSelectionWindow::clearSelectedServer() {
     for (auto& row : m_ScrollFrame->content()) {
         for (auto& widget_ptr : row.widgets) {
             auto& button = *static_cast<Button*>(widget_ptr.widget);

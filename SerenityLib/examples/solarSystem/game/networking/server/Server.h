@@ -118,7 +118,29 @@ class Server {
     friend class ServerClient;
     friend class ServerClientThread;
     friend class ServerMapSpecificData;
+
+    public: class PersistentInfo final {
+        private:
+            std::string m_ServerName;
+            std::string m_OwnerName;
+            unsigned short m_Port;
+
+        public:
+            PersistentInfo();
+
+            const std::string& getOwnerName() const;
+            const std::string& getServerName() const;
+            const unsigned short& getPort() const;
+
+            void setInfo(const std::string& serverName, const unsigned short& port, const std::string& ownerName);
+            void clearInfo();
+
+            bool operator==(const bool& rhs) const;
+            explicit operator bool() const;
+    };
+
     public:
+        static PersistentInfo                          PERSISTENT_INFO;
         static ServerHostData                          SERVER_HOST_DATA;
         static Database                                DATABASE;
     private:
@@ -127,7 +149,7 @@ class Server {
         std::mutex                                     m_Mutex;
         std::vector<ServerClientThread*>               m_Threads;
         Engine::Networking::ListenerTCP*               m_TCPListener;
-        unsigned short                                 m_port;
+        unsigned short                                 m_Port;
         std::atomic<unsigned int>                      m_Active;
         Core&                                          m_Core;
         ServerClient*                                  m_OwnerClient;

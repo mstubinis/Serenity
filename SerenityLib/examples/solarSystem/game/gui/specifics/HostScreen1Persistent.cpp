@@ -6,6 +6,7 @@
 #include <core/engine/resources/Engine_Resources.h>
 
 #include "../../factions/Faction.h"
+#include "../../networking/server/Server.h"
 #include "../../Menu.h"
 #include "../TextBox.h"
 
@@ -28,14 +29,17 @@ constexpr auto right_window_width = 550;
 
 struct Host1Persistent_ButtonBack_OnClick final { void operator()(Button* button) const {
     auto& hostScreen1Persistent = *static_cast<HostScreen1Persistent*>(button->getUserPointer());
+    hostScreen1Persistent.m_OwnedServersWindow->clearSelectedServer();
     hostScreen1Persistent.m_Menu.setGameState(GameState::Host_Screen_Setup_0);
     hostScreen1Persistent.m_Menu.setErrorText("", 0.2f);
 }};
 struct Host1Persistent_ButtonNext_OnClick final { void operator()(Button* button) const {
     auto& hostScreen1Persistent = *static_cast<HostScreen1Persistent*>(button->getUserPointer());
 
-    if (hostScreen1Persistent.m_OwnedServersWindow->getSelectedServer()) {
+    auto* selectedServer = hostScreen1Persistent.m_OwnedServersWindow->getSelectedServer();
+    if (selectedServer) {
         hostScreen1Persistent.m_Menu.m_HostScreen1->setPersistent();
+        Server::PERSISTENT_INFO.setInfo(selectedServer->serverName, selectedServer->port, selectedServer->ownerName);
         hostScreen1Persistent.m_Menu.setGameState(GameState::Host_Screen_Setup_1);
         hostScreen1Persistent.m_Menu.setErrorText("", 0.2f);
     }else{

@@ -19,6 +19,8 @@ namespace Engine {
 };
 
 Button::Button(const Font& font, const float x, const float y, const float width, const float height) : Widget(x, y, width, height), GUIRenderElement(this){
+    //m_WasJustClicked = false;
+
     setFont(font);
     setText("Button");
     setOnClickFunctor(priv::emptyFunctor());
@@ -125,16 +127,20 @@ void Button::update(const double& dt) {
     if (!m_Hidden) {
         if (m_Enabled) {
             if (!m_PulseClicked) {
-                if (m_MouseIsOver && Engine::isMouseButtonDownOnce(MouseButton::Left)) {
+                if (m_MouseIsOver && Engine::isMouseButtonDownOnce(MouseButton::Left) /* && !m_WasJustClicked */ ) {
                     m_FunctorOnClick();
+                    //m_WasJustClicked = true;
+                    return;
                 }
             }else{
                 if (m_MouseIsOver && Engine::isMouseButtonDown(MouseButton::Left)) {
                     m_FunctorOnClick();
+                    return;
                 }
             }
         }
     }
+    //m_WasJustClicked = false;
 }
 void Button::render(const glm::vec4& scissor) {
     if (!m_Hidden) {
