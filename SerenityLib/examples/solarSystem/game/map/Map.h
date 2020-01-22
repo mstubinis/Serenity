@@ -14,6 +14,7 @@ class HUD;
 class GameplayMode;
 class Team;
 class Server;
+class LoadingScreen;
 
 #include <core/engine/scene/Scene.h>
 #include <unordered_map>
@@ -44,6 +45,7 @@ class Map: public Scene{
         Client&                                              m_Client;
         HUD*                                                 m_HUD;
         bool                                                 m_IsServer;
+        unsigned int                                         m_TotalItemsCountForLoading;
 
         Freelist<PrimaryWeaponCannonProjectile*>             m_ActiveCannonProjectiles;
         Freelist<SecondaryWeaponTorpedoProjectile*>          m_ActiveTorpedoProjectiles;
@@ -53,6 +55,8 @@ class Map: public Scene{
 
         //give the map its essentials, but do not load everything needed
         void basic_init(const std::string& file);
+
+        void loading_screen_render(LoadingScreen* loadingScreen, const float& progress);
  
         Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const decimal& x = 0, const decimal& y = 0, const decimal& z = 0);
         Anchor* internalCreateAnchor(const std::string& parentAnchor, const std::string& thisName, std::unordered_map<std::string, Anchor*>& loadedAnchors, const glm_vec3& position);
@@ -68,7 +72,9 @@ class Map: public Scene{
         Map(GameplayMode& mode, Client& client, const std::string& name, const std::string& file);
         virtual ~Map();
 
-        const bool full_load();
+        const bool full_load(LoadingScreen* loadingScreen = nullptr);
+        const bool isFullyLoaded() const;
+
         const bool& isServer() const;
         void cleanup();
 
@@ -91,6 +97,7 @@ class Map: public Scene{
         Ship* getPlayer();
         void setPlayer(Ship* p);
 
+        const std::string& getFilename() const;
         const std::string& skyboxFile() const;
 
         std::vector<std::string> allowedShips();

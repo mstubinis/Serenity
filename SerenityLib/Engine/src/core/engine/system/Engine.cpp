@@ -198,6 +198,21 @@ void EngineCore::update(Window& window, const double& dt){
     update_logic(window, dt);
     update_sounds(window, dt);
 }
+void EngineCore::render2DApi(Window& window, const double& dt) {
+    Game::render();
+    auto& scene = *Resources::getCurrentScene();
+    scene.render();
+    m_RenderManager._sort2DAPICommands();
+    auto& scene_viewports = InternalScenePublicInterface::GetViewports(scene);
+    for (auto& viewport_ptr : scene_viewports) {
+        auto& viewport = *viewport_ptr;
+        if (viewport.isActive()) {
+            m_RenderManager._render2DApi(dt, viewport, true, 0, 0);
+        }
+    }
+    window.display();
+    m_RenderManager._clear2DAPICommands();
+}
 void EngineCore::render(Window& window, const double& dt){
     m_DebugManager.stop_clock();
     Game::render();

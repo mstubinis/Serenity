@@ -24,13 +24,13 @@ const string& EngineResource::name() const {
 void EngineResource::load(){
     if(!m_IsLoaded){
         m_IsLoaded = true;
-        std::cout << ": " << m_Name << " - loaded." << std::endl;
+        //std::cout << ": " << m_Name << " - loaded." << std::endl;
     }
 }
 void EngineResource::unload(){
     if(m_IsLoaded /*&& m_UsageCount == 0*/){
         m_IsLoaded = false;
-        std::cout << ": " << m_Name << " - unloaded." << std::endl;
+        //std::cout << ": " << m_Name << " - unloaded." << std::endl;
     }
 }
 const bool EngineResource::isLoaded() const {

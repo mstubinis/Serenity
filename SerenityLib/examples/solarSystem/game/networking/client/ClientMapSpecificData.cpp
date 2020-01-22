@@ -16,15 +16,29 @@ const double DISTANCE_CHECK_NEAREST_ANCHOR       = 1000000.0 * 1000000.0;
 const double DISTANCE_CHECK_NEAREST_OTHER_PLAYER = 100000.0  * 100000.0;
 
 ClientMapSpecificData::ClientMapSpecificData(Client& client) : m_Client(client){
-    m_Team         = nullptr;
-    m_Map          = nullptr;
-    m_PingTimeHealthUpdate = 0.0;
-    m_PingTimePhysicsUpdate = 0.0;
+    cleanup();
 }
 ClientMapSpecificData::~ClientMapSpecificData() {
     cleanup();
 }
+
+bool ClientMapSpecificData::operator==(const bool& rhs) const {
+    if (rhs == true) {
+        return (m_Map) ? true : false;
+    }else{
+        return (m_Map) ? false : true;
+    }
+    return false;
+}
+ClientMapSpecificData::operator bool() const {
+    return (m_Map) ? true : false;
+}
+
 void ClientMapSpecificData::cleanup() {
+    m_Team                  = nullptr;
+    m_Map                   = nullptr;
+    m_PingTimeHealthUpdate  = 0.0;
+    m_PingTimePhysicsUpdate = 0.0;
 }
 void ClientMapSpecificData::update(const double& dt) {
     m_PingTimeHealthUpdate += dt;

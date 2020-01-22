@@ -30,6 +30,13 @@ class Database final {
 
         void eval_sqlite3_statement(int sql_return_val);
         void process_row_and_save(sqlite3_stmt* statement);
+
+        void init_tables();
+        void init_default_ship_designs();
+        void init_default_ship_perks();
+
+        const bool init_database_with_defaults(const bool forceDeleteOfPrevData = false);
+
     public:
 
         static const unsigned int CONST_USERNAME_LENGTH_MAX = 18;
@@ -49,8 +56,6 @@ class Database final {
         Database();
         ~Database();
 
-        const bool init_database_with_defaults(const bool forceDeleteOfPrevData = false);
-
         //attempts to remove common harmful sql from the user input string. this should not be the only method of safety you use, use prepared statements and parameter binding as well whenever possible
         //this is an expensive cpu operation. returns true if the input was modified in some way (sanitized). false otherwise.
         const bool sanitize_user_input(std::string& input);
@@ -62,13 +67,20 @@ class Database final {
         const DatabaseQueryResult execute_query_and_return_results(const std::string& sql_query, const bool printRes = false);
 
         int prepare_sql_statement(const std::string& sql_query, sqlite3_stmt** statement);
+
+        void execute_query(sqlite3_stmt* statement);
         const DatabaseQueryResult execute_query_and_return_results(sqlite3_stmt* statement);
+
+
 
         const bool connect_to_database(const std::string& databaseFile);
         int disconnect_from_database();
 
         const bool create_new_server(const std::string& serverName, const unsigned short& serverPort, const std::string& ownerName, const std::string& ownerPassword);
         const bool create_new_account(std::string& serverName, const std::string& accountName, const std::string& accountPassword);
+
+        const DatabaseQueryResult get_account(const std::string& username, const int& server_id);
+        const int get_server_id(const std::string& serverName);
 };
 
 

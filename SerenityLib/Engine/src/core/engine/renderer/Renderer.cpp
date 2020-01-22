@@ -1342,9 +1342,9 @@ class priv::Renderer::impl final{
             #pragma region 2DAPI
             Engine::Renderer::GLEnable(GL_DEPTH_TEST);
             glDepthMask(GL_TRUE);
-            if(mainRenderFunc){
-                if((viewport.getRenderFlags() & ViewportRenderingFlag::API2D)){
-                    Engine::Renderer::Settings::clear(false,true,false); //clear depth only
+            if (mainRenderFunc) {
+                if ((viewport.getRenderFlags() & ViewportRenderingFlag::API2D)) {
+                    Engine::Renderer::Settings::clear(false, true, false); //clear depth only
                     m_InternalShaderPrograms[EngineInternalShaderPrograms::Deferred2DAPI]->bind();
                     Engine::Renderer::sendUniformMatrix4("VP", m_2DProjectionMatrix);
                     Engine::Renderer::sendUniform1Safe("ScreenGamma", gamma);
@@ -1358,6 +1358,58 @@ class priv::Renderer::impl final{
             #pragma endregion
 
             
+        }
+        void _render2DApi(const double& dt, GBuffer& gbuffer, Viewport& viewport, const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo) {
+            Camera& camera = const_cast<Camera&>(viewport.getCamera());
+            const glm::uvec4& dimensions = viewport.getViewportDimensions();
+
+            const auto& winSize = Resources::getWindowSize();
+            if (viewport.isAspectRatioSynced()) {
+                camera.setAspect(dimensions.z / static_cast<float>(dimensions.w));
+            }
+            Engine::Renderer::setViewport(static_cast<float>(dimensions.x), static_cast<float>(dimensions.y), static_cast<float>(dimensions.z), static_cast<float>(dimensions.w));
+
+            glScissor(0, 0, winSize.x, winSize.y);
+
+            m_2DProjectionMatrix = glm::ortho(0.0f, static_cast<float>(winSize.x), 0.0f, static_cast<float>(winSize.y), 0.005f, 3000.0f);
+            //this is god awful and ugly, but its needed. definately find a way to refactor this properly
+            for (uint i = 0; i < 9; ++i) {
+                glActiveTexture(GL_TEXTURE0 + i);
+                glBindTexture(GL_TEXTURE_2D, 0);
+                glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+            }
+            if (Renderer::GLSL_VERSION >= 140 && UniformBufferObject::UBO_CAMERA) {
+                m_UBOCameraData.View = ComponentCamera_Functions::GetViewNoTranslation(camera);
+                m_UBOCameraData.Proj = camera.getProjection();
+                m_UBOCameraData.ViewProj = ComponentCamera_Functions::GetViewProjectionNoTranslation(camera);
+                m_UBOCameraData.InvProj = camera.getProjectionInverse();
+                m_UBOCameraData.InvView = ComponentCamera_Functions::GetViewInverseNoTranslation(camera);
+                m_UBOCameraData.InvViewProj = ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(camera);
+                m_UBOCameraData.Info1 = glm::vec4(0.0001f, 0.0001f, 0.0001f, camera.getNear());
+                m_UBOCameraData.Info2 = glm::vec4(ComponentCamera_Functions::GetViewVectorNoTranslation(camera), camera.getFar());
+                m_UBOCameraData.Info3 = glm::vec4(camera.getPosition(), 0.0f);
+
+                UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);
+            }
+            Engine::Renderer::setDepthFunc(GL_LEQUAL);
+            Engine::Renderer::Settings::clear(true, true, true);
+            Engine::Renderer::GLEnablei(GL_BLEND, 0); //this is needed for sure
+
+            Engine::Renderer::GLDisable(GL_STENCIL_TEST);
+            Engine::Renderer::GLEnable(GL_DEPTH_TEST);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glDepthMask(GL_TRUE);
+            if ((viewport.getRenderFlags() & ViewportRenderingFlag::API2D)) {
+                Engine::Renderer::Settings::clear(false, true, false); //clear depth only
+                m_InternalShaderPrograms[EngineInternalShaderPrograms::Deferred2DAPI]->bind();
+                Engine::Renderer::sendUniformMatrix4("VP", m_2DProjectionMatrix);
+                Engine::Renderer::sendUniform1Safe("ScreenGamma", gamma);
+                Engine::Renderer::GLEnable(GL_SCISSOR_TEST);
+                for (auto& command : m_2DAPICommands) {
+                    command.func();
+                }
+                Engine::Renderer::GLDisable(GL_SCISSOR_TEST);
+            }
         }
 };
 
@@ -1380,6 +1432,9 @@ void priv::Renderer::_init(){
 }
 void priv::Renderer::_render(const double& dt, Viewport& viewport,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){
     m_i->_render(dt, *m_i->m_GBuffer, viewport, mainFunc, display_fbo, display_rbo);
+}
+void priv::Renderer::_render2DApi(const double& dt, Viewport& viewport, const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo) {
+    m_i->_render2DApi(dt, *m_i->m_GBuffer, viewport, mainFunc, display_fbo, display_rbo);
 }
 void priv::Renderer::_resize(uint w,uint h){
     m_i->_resize(w, h);

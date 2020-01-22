@@ -44,8 +44,14 @@
 
 #include "../../particles/Fire.h"
 #include "../../particles/Sparks.h"
+
+#include "../../security/Security.h"
+#include "../../database/Database.h"
+#include "../server/Server.h"
+
 #include <core/engine/physics/Collision.h>
 #include <memory>
+#include <random>
 
 #include <iostream>
 
@@ -82,6 +88,13 @@ void Client::internal_init(const unsigned short& server_port, const string& serv
     m_Username                = "";
     m_InitialConnectionThread = nullptr;
 }
+const sf::Uint32 Client::generate_nonce() {
+    std::random_device device;
+    std::mt19937 mt(device());
+    std::uniform_int_distribution<sf::Uint32> distribution;
+    const sf::Uint32 res = distribution(mt);
+    return res;
+}
 void Client::setClientID(const unsigned int id) {
     SAFE_DELETE(m_UdpSocket);
     m_UdpSocket = NEW Networking::SocketUDP(m_Port + 1 + id, m_ServerIP);
@@ -110,7 +123,7 @@ void Client::connect(const unsigned short& timeout) {
         if (status == sf::Socket::Status::Done) {
             m_Core.m_Menu->setGoodText("Connected!", 2);
             m_TcpSocket->setBlocking(false);
-            m_Core.requestValidation(m_Username);
+            begin_authentication(*m_Core.m_Menu); //start auth process
         }else if (status == sf::Socket::Status::Error) {
             m_Core.m_Menu->setErrorText("Connection to the server failed", 20);
         }else if (status == sf::Socket::Status::Disconnected) {
@@ -237,6 +250,53 @@ void Client::on_receive_physics_update(Packet& basePacket, Map& map) {
         }
         new_client_ship->updatePhysicsFromPacket(pI, map);
     }
+}
+
+void Client::begin_authentication(Menu& menu) {
+    PacketAuthStep1 p;
+    p.PacketType          = PacketType::Client_To_Server_Auth_Part_1;
+
+    string usernameSalt   = Security::generate_user_salt(m_Username, Database::CONST_SALT_LENGTH_MAX);
+    string usernameHashed = Security::argon2id(usernameSalt, m_Username, 1, 2, 1 << 16, Database::CONST_SALT_LENGTH_MAX, Database::CONST_USERNAME_PASSWORD_HASH_LENGTH_MAX);
+    p.secret_key          = Security::string_to_int_hash(usernameHashed);
+
+    const auto& status = send(p);
+    if (status == sf::Socket::Status::Done) {
+        std::cout << "Client: requesting validation connection to the server..." << endl;
+    }else{
+        menu.setErrorText("Connection timed out");
+    }
+}
+
+void Client::on_receive_auth_part_1(Packet& basePacket) {
+    if (m_ServerIP == "127.0.0.1" && Server::PERSISTENT_INFO == true) {
+        //we are the host - skip auth
+        auto& server = *m_Core.getServer();
+        server.getAuthenticationLayer().allow_host_to_pass(m_Username);
+        return;
+    }
+    PacketAuthStep1& pI        = static_cast<PacketAuthStep1&>(basePacket);
+    const auto server_nonce    = pI.server_nonce;
+    const auto client_nonce    = generate_nonce();
+
+    PacketAuthStep2 pOut;
+    pOut.PacketType            = PacketType::Client_To_Server_Auth_Part_2;
+    pOut.server_nonce          = server_nonce;
+    pOut.client_nonce          = client_nonce;
+
+
+    //TODO: this is currently a non-persistent process, in the future, for persistents, add the password too
+    string usernameEncrypted   = Security::encrypt_aes(m_Username, (server_nonce / 2) + (client_nonce / 2), pI.secret_key);
+    string passwordEncryped    = Security::encrypt_aes("" /*TODO: get password via textbox input */, ((server_nonce / 4) + 1) + ((client_nonce / 3) + 1), pI.secret_key);
+
+    pOut.username              = usernameEncrypted;
+    pOut.password              = passwordEncryped;
+
+    send(pOut);
+}
+void Client::on_receive_auth_part_2(Packet& basePacket) {
+    PacketAuthStep2& pI = static_cast<PacketAuthStep2&>(basePacket);
+
 }
 
 void Client::on_receive_lobby_time_update(Packet& basePacket, Menu& menu) {
@@ -757,6 +817,12 @@ void Client::onReceiveTCP() {
             switch (basePacket.PacketType) {
                 case PacketType::Server_To_Client_Request_GameplayMode: {
                     on_receive_server_game_mode(basePacket);
+                    break;
+                }case PacketType::Server_To_Client_Auth_Part_1: {
+                    on_receive_auth_part_1(basePacket);
+                    break;
+                }case PacketType::Server_To_Client_Auth_Part_2: {
+                    on_receive_auth_part_2(basePacket);
                     break;
                 }case PacketType::Server_To_Client_Update_Lobby_Time_Left: {
                     on_receive_lobby_time_update(basePacket, menu);

@@ -40,6 +40,10 @@
 
 #include "gui/specifics/LobbyFFA.h"
 
+#include "gui/specifics/JoinScreen0.h"
+
+#include "gui/specifics/LoadingScreen.h"
+
 #include "hud/HUD.h"
 #include "modes/GameplayMode.h"
 #include "teams/Team.h"
@@ -79,8 +83,8 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
     auto& core = menu.getCore();
     switch (menu.m_GameState) {
         case GameState::Host_Screen_Lobby_FFA_3: {
-            core.getClient()->getMapData().getMap().full_load();
-            menu.enter_the_game();
+            //core.getClient()->getMapData().getMap().full_load();
+            //menu.enter_the_game();
             break;
         }case GameState::Join_Screen_Setup_1: {
             const string& username   = menu.m_UserName->text();
@@ -109,8 +113,8 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
             }
             break;
         }case GameState::Join_Screen_Lobby_2: { 
-            core.getClient()->getMapData().getMap().full_load();
-            menu.enter_the_game();
+            //core.getClient()->getMapData().getMap().full_load();
+            //menu.enter_the_game();
             break;
         }default: {
             menu.go_to_main_menu();
@@ -120,24 +124,28 @@ struct ButtonNext_OnClick {void operator()(Button* button) const {
 }};
 
 Menu::Menu(Scene& menu_scene, Camera& game_camera, GameState::State& _state, Core& core) : m_GameState(_state), m_Core(core) {
-    m_FontHandle = Resources::addFont(ResourceManifest::BasePath + "data/Fonts/consolas.fnt");
-    m_Font = Resources::getFont(m_FontHandle);
-    Engine::Math::setColor(m_Color, 255.0f, 255.0f, 0.0f);
-    m_MessageText = "";
-    m_ErrorTimer = 0.0f;
+    m_FontHandle                  = Resources::addFont(ResourceManifest::BasePath + "data/Fonts/consolas.fnt");
+    m_Font                        = Resources::getFont(m_FontHandle);
+    m_Color                       = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+    m_MessageText                 = "";
+    m_ErrorTimer                  = 0.0f;
 
-    const auto& windowDimensions = Resources::getWindowSize();
+    const auto& windowDimensions  = Resources::getWindowSize();
     
-    m_MainMenuScreen = NEW MainMenu(*this, *m_Font, 0.1f);
-    m_HostScreen0 = NEW HostScreen0(*this, *m_Font);
-    m_HostScreen1 = NEW HostScreen1(*this, *m_Font);
-    m_HostScreen1Persistent = NEW HostScreen1Persistent(*this, *m_Font);
+    m_MainMenuScreen              = NEW MainMenu(*this, *m_Font, 0.1f);
+    m_HostScreen0                 = NEW HostScreen0(*this, *m_Font);
+    m_HostScreen1                 = NEW HostScreen1(*this, *m_Font);
+    m_HostScreen1Persistent       = NEW HostScreen1Persistent(*this, *m_Font);
 
-    m_HostScreenFFA2 = NEW HostScreenFFA2(*m_HostScreen1 , *this, *m_Font);
-    m_HostScreenTeamDeathmatch2 = NEW HostScreenTeamDeathmatch2(*m_HostScreen1, *this, *m_Font);
+    m_HostScreenFFA2              = NEW HostScreenFFA2(*m_HostScreen1 , *this, *m_Font);
+    m_HostScreenTeamDeathmatch2   = NEW HostScreenTeamDeathmatch2(*m_HostScreen1, *this, *m_Font);
     m_HostScreenHomelandSecurity2 = NEW HostScreenHomelandSecurity2(*m_HostScreen1, *this, *m_Font);
 
-    m_LobbyScreenFFA = NEW LobbyScreenFFA(*m_Font, *this, core, menu_scene, game_camera);
+    m_LobbyScreenFFA              = NEW LobbyScreenFFA(*m_Font, *this, core, menu_scene, game_camera);
+
+    m_JoinScreen0                 = NEW JoinScreen0(*this, *m_Font);
+
+    m_LoadingScreen               = NEW LoadingScreen(*this, *m_Font);
 
     //todo: remove
     m_Back = NEW Button(*m_Font, 100.0f, 50.0f, 150.0f, 50.0f);
@@ -188,6 +196,10 @@ Menu::~Menu() {
 
     SAFE_DELETE(m_LobbyScreenFFA);
 
+    SAFE_DELETE(m_JoinScreen0);
+
+    SAFE_DELETE(m_LoadingScreen);
+
     SAFE_DELETE(m_Back);
     SAFE_DELETE(m_Next);
     SAFE_DELETE(m_ServerIp);
@@ -208,28 +220,6 @@ Font& Menu::getFont() {
 }
 Core& Menu::getCore() {
     return m_Core;
-}
-void Menu::enter_the_game() {
-    /*
-    if (!m_ServerLobbyShipSelectorWindow->getShipClass().empty()) {
-        PacketMessage p;
-        p.PacketType = PacketType::Client_To_Server_Request_Map_Entry;
-        p.name = m_Core.m_Client->m_Username;
-
-        p.data = m_ServerLobbyShipSelectorWindow->getShipClass(); //ship class [0]
-
-        p.data += "," + m_Core.m_Client->m_MapSpecificData.m_Map->name(); //map name [1]
-        if (m_Core.m_Client->m_MapSpecificData.m_Team) {
-            p.data += "," + m_Core.m_Client->m_MapSpecificData.m_Team->getTeamNumberAsString();
-        }else{
-            p.data += ",-1"; //error, the client did not choose or was not assigned a team yet
-        }
-
-        m_Core.m_Client->send(p);
-    }else{
-        setErrorText("You must choose your ship", 5.0f);
-    }
-    */
 }
 
 void Menu::go_to_main_menu() {
@@ -283,6 +273,10 @@ void Menu::onResize(const uint& width, const uint& height) {
 
     m_LobbyScreenFFA->onResize(width, height);
 
+    m_JoinScreen0->onResize(width, height);
+
+    m_LoadingScreen->onResize(width, height);
+
     m_Back->setPosition(100.0f, 50.0f);
     m_Next->setPosition(width - 100.0f, 50.0f);
 
@@ -335,13 +329,13 @@ void Menu::update_host_lobby_hs_3(const double& dt) {
 
 }
 void Menu::update_join_setup_1(const double& dt) {
-    
-    m_Back->update(dt);
     m_Next->update(dt);
 
     m_ServerIp->update(dt);
     m_ServerPort->update(dt);
     m_UserName->update(dt);
+
+    m_JoinScreen0->update(dt);
     
 }
 void Menu::update_join_lobby_2(const double& dt) {
@@ -379,9 +373,12 @@ void Menu::update_encyclopedia_ships(const double& dt) {
 void Menu::update_encyclopedia_factions(const double& dt) {
 
 }
-
+void Menu::update_loading_screen_pre_frame(const double& dt) {
+    m_LoadingScreen->startLoadingProcess();
+    Menu::setGameState(GameState::LoadingScreen);
+}
 void Menu::update_loading_screen(const double& dt) {
-
+    m_LoadingScreen->update(dt);
 }
 
 #pragma endregion
@@ -423,12 +420,13 @@ void Menu::render_host_lobby_hs_3() {
 
 }
 void Menu::render_join_setup_1() {
-    m_Back->render();
     m_Next->render();
 
     m_ServerIp->render();
     m_ServerPort->render();
     m_UserName->render();
+
+    m_JoinScreen0->render();
 }
 void Menu::render_join_lobby_2() {   
     m_ServerLobbyChatWindow->render();
@@ -463,8 +461,11 @@ void Menu::render_encyclopedia_ships() {
 void Menu::render_encyclopedia_factions() {
 
 }
+void Menu::render_loading_screen_pre_frame() {
+    m_LoadingScreen->render();
+}
 void Menu::render_loading_screen() {
-
+    m_LoadingScreen->render();
 }
 
 
@@ -510,6 +511,8 @@ void Menu::update(const double& dt) {
             update_options_sounds(dt); break;
         }case GameState::Options_Keybinds: {
             update_options_keybinds(dt); break;
+        }case GameState::LoadingScreenPreFrame: {
+            update_loading_screen_pre_frame(dt); break;
         }case GameState::LoadingScreen: {
             update_loading_screen(dt); break;
         }case GameState::Game: {
@@ -570,6 +573,8 @@ void Menu::render() {
             render_options_keybinds(); break;
         }case GameState::Game: {
             render_game(); break;
+        }case GameState::LoadingScreenPreFrame: {
+            render_loading_screen_pre_frame(); break;
         }case GameState::LoadingScreen: {
             render_loading_screen(); break;
         }default: {

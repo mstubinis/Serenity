@@ -127,12 +127,8 @@ const string& ServerHostData::getGameplayModeString() const {
 
 #pragma region ServerClient
 
-ServerClient::ServerClient(const string& hash, Server& server, Core& core, sf::TcpSocket* sfTCPSocket) : m_Core(core), m_Server(server) {
-    m_TcpSocket = NEW Networking::SocketTCP(sfTCPSocket);
-    internalInit(hash, server.numClients());
-}
-ServerClient::ServerClient(const string& hash, Server& server, Core& core, const unsigned short& port, const string& ipAddress) : m_Core(core), m_Server(server) {
-    m_TcpSocket = NEW Networking::SocketTCP(port, ipAddress);
+ServerClient::ServerClient(const string& hash, Server& server, Core& core, Engine::Networking::SocketTCP& socket) : m_Core(core), m_Server(server) {
+    m_TcpSocket = &socket;
     internalInit(hash, server.numClients());
 }
 ServerClient::~ServerClient() {
@@ -228,6 +224,9 @@ ServerClientThread::~ServerClientThread() {
 Server::PersistentInfo::PersistentInfo() {
     clearInfo();
 }
+AuthenticationLayer& Server::getAuthenticationLayer() {
+    return m_AuthenticationLayer;
+}
 const string& Server::PersistentInfo::getOwnerName() const {
     return m_OwnerName;
 }
@@ -243,6 +242,7 @@ bool Server::PersistentInfo::operator==(const bool& rhs) const {
     }else{
         return (!m_ServerName.empty() && !m_OwnerName.empty() && m_Port != 0) ? false : true;
     }
+    return false;
 }
 Server::PersistentInfo::operator bool() const {
     return (!m_ServerName.empty() && !m_OwnerName.empty() && m_Port != 0) ? true : false;
@@ -262,7 +262,7 @@ void Server::PersistentInfo::clearInfo() {
 
 #pragma region Server
 
-Server::Server(Core& core, const unsigned int& port, const string& ipRestriction) : m_Core(core), m_MapSpecificData(*this){
+Server::Server(Core& core, const unsigned int& port, const string& ipRestriction) : m_Core(core), m_MapSpecificData(*this), m_AuthenticationLayer(*this){
     m_OwnerClient                      = nullptr;
     m_Port                             = port;
     m_TCPListener                      = NEW ListenerTCP(port, ipRestriction);
@@ -342,7 +342,7 @@ void Server::update(Server* thisServer, const double& dt) {
     const auto server_active = server.m_Active.load(std::memory_order_relaxed);
     if (server_active == 1) {      
         updateAcceptNewClients(server);
-
+        server.m_AuthenticationLayer.update(dt);
         server.m_MapSpecificData.update(dt);
 
         server.updateClientsGameLoop(dt);
@@ -379,28 +379,8 @@ void Server::updateAcceptNewClients(Server& server) {
             const auto& client_port    = sfClient.getRemotePort();
             const auto& client_address = client_ip + " " + to_string(client_port);
 
-            //get the first thread with the least amount of clients
-            ServerClientThread* leastThread = nullptr;
-            for (auto& clientThread : server.m_Threads) {
-                if (!leastThread || (leastThread && leastThread->m_Clients.size() < clientThread->m_Clients.size())) {
-                    leastThread = clientThread;
-                }
-            }
-            if (leastThread) { //probably redundant        
-                if (!leastThread->m_Clients.count(client_address)) {
-                    sfClient.setBlocking(false);
-                    ServerClient* client = NEW ServerClient(client_address, server, server.m_Core, sf_client);
-                    //server.m_Mutex.lock();
-                    leastThread->m_Clients.emplace(client_address, client);
-                    leastThread->m_Active.store(1, std::memory_order_relaxed);
-                    if (!server.m_OwnerClient) {
-                        server.m_OwnerClient = client;
-                    }
-                    //server.m_Mutex.unlock();
-                    std::cout << "Server: New client in dictionary: " << client_address << std::endl;
-                }
-                
-            }
+            //initial connection established: start the authentication process
+            server.m_AuthenticationLayer.create_instance(client_address, sf_client);
         }else{
             SAFE_DELETE(sf_client);
         }
@@ -424,7 +404,7 @@ void Server::onReceiveUDP() {
                     //get the client who sent it. TODO: this is sort of expensive
                     ServerClient* client_ptr = getClientByUsername(pI.player_username);
                     if (client_ptr) { //this works...
-                        auto& client = *client_ptr;
+                        auto& client     = *client_ptr;
                         client.m_Timeout = 0.0f;
                         send_to_all_but_client_udp(client, pI);
                     }
@@ -434,20 +414,8 @@ void Server::onReceiveUDP() {
                 }
             }
         }
-        //delete(basePacket_Ptr);
     }
 }
-
-//NOT multithreaded
-//void Server::updateRemoveDisconnectedClients(Server& server) {
-    //while (server.m_ClientsToBeDisconnected.size() > 0) {
-        //std::lock_guard<std::mutex> lock_guard(m_Mutex);
-    //    for (auto& clientThread : server.m_Threads) {
-    //        clientThread->m_Clients.erase(server.m_ClientsToBeDisconnected.front());
-    //    }
-    //    server.m_ClientsToBeDisconnected.pop();
-    //}
-//}
 //NOT multithreaded
 void Server::completely_remove_client(ServerClient& client) {
     if (m_OwnerClient) {
@@ -694,68 +662,12 @@ void Server::updateClient(ServerClient& client) {
                     }
                     pI.data = Helper::Stringify(info, ',');
 
-
-
                     server.send_to_client(client, pI);
                     break;
                 }case PacketType::Client_To_Server_Chat_Message: {
                     PacketMessage& pI = *static_cast<PacketMessage*>(&pIn);
                     pI.PacketType = PacketType::Server_To_Client_Chat_Message;
                     server.send_to_all(pI);
-                    break;
-                }case PacketType::Client_To_Server_Request_Connection: {
-                    PacketMessage& pI = *static_cast<PacketMessage*>(&pIn);
-                    const bool valid = server.isValidName(pI.data);
-                    server.assign_username_to_client(client, pI.data);
-                    if (valid) {
-                        PacketConnectionAccepted pOut;
-                        Map* map = server.m_MapSpecificData.m_Map;
-
-                        //a client wants to connect to the server
-                        client.m_Validated = true;
-                        pOut.PacketType = PacketType::Server_To_Client_Accept_Connection;
-                        pOut.game_mode_type = static_cast<unsigned char>(Server::SERVER_HOST_DATA.getGameplayMode().getGameplayMode());
-                        pOut.already_connected_players = "";
-                        pOut.allowed_ships = Helper::Stringify(Server::SERVER_HOST_DATA.getAllowedShips(), ',');
-                        pOut.lobby_time_left = Server::SERVER_HOST_DATA.getCurrentLobbyTime();
-                        if (client.m_Username == server.m_Core.m_Client->m_Username) {
-                            pOut.is_host = true;
-                        }
-                        for (auto& clientThread : server.m_Threads) {
-                            for (auto& c : clientThread->m_Clients) {
-                                if (!c.second->m_Username.empty() && c.second->m_Username != client.m_Username) {
-                                    pOut.already_connected_players += c.second->m_Username + ",";
-                                }
-                            }
-                        }
-                        pOut.already_connected_players += std::to_string(client.m_ID) + ",";
-                        if (!pOut.already_connected_players.empty())
-                            pOut.already_connected_players.pop_back();
-
-                        pOut.map_file_name = map->m_Filename;
-                        pOut.map_name = map->name();
-
-                        server.send_to_client(client, pOut);
-                        std::cout << "Server: Approving: " + pI.data + "'s connection" << std::endl;
-
-                        //now send the client info about the gameplay mode
-                        if (client.m_Username != server.m_Core.m_Client->m_Username) { //as the host, we already have info about it
-                            PacketGameplayModeInfo info = Server::SERVER_HOST_DATA.getGameplayMode().serialize();
-                            info.PacketType = PacketType::Server_To_Client_Request_GameplayMode;
-                            server.send_to_client(client, info);
-                        }
-
-                        PacketMessage packetClientJustJoined;
-                        packetClientJustJoined.name = client.m_Username;
-                        packetClientJustJoined.PacketType = PacketType::Server_To_Client_Client_Joined_Server;
-                        server.send_to_all(packetClientJustJoined);
-                    }else{
-                        PacketMessage pOut;
-                        pOut.PacketType = PacketType::Server_To_Client_Reject_Connection;
-                        std::cout << "Server: Rejecting: " + pI.data + "'s connection - invalid username" << std::endl;
-                        server.send_to_client(client, pOut);
-                        server.completely_remove_client(client);
-                    }
                     break;
                 }case PacketType::Client_To_Server_Request_Disconnection: {
                     std::cout << "Server: Removing " + client.m_Username + " from the server (after requesting a disconnection)" << std::endl;
@@ -770,9 +682,6 @@ void Server::updateClient(ServerClient& client) {
 
                     client.disconnect();
                     server.completely_remove_client(client);
-                    //server.m_Mutex.lock();
-                    //server.m_ClientsToBeDisconnected.push(client_address);
-                    //server.m_Mutex.unlock();
                     break;
                 }default: {
                     break;
@@ -854,19 +763,28 @@ void Server::assign_username_to_client(ServerClient& client, const string& usern
     client.m_Username = final_username;
     client.m_MapKey   = final_username;
 }
+ServerClientThread* Server::getNextAvailableClientThread() {
+    ServerClientThread* leastThread = nullptr;
+    for (auto& clientThread : m_Threads) {
+        if (!leastThread || (leastThread && leastThread->m_Clients.size() < clientThread->m_Clients.size())) {
+            leastThread = clientThread;
+        }
+    }
+    return leastThread;
+}
 
 #pragma region sending / recieving
-const sf::Socket::Status Server::send_to_client(ServerClient& c, Packet& packet) {
-    return c.send(packet);
+const sf::Socket::Status Server::send_to_client(ServerClient& serverClient, Packet& packet) {
+    return serverClient.send(packet);
 }
-const sf::Socket::Status Server::send_to_client(ServerClient& c, sf::Packet& packet) {
-    return c.send(packet);
+const sf::Socket::Status Server::send_to_client(ServerClient& serverClient, sf::Packet& packet) {
+    return serverClient.send(packet);
 }
-const sf::Socket::Status Server::send_to_client(ServerClient& c, const void* data, size_t size) {
-    return c.send(data, size);
+const sf::Socket::Status Server::send_to_client(ServerClient& serverClient, const void* data, size_t size) {
+    return serverClient.send(data, size);
 }
-const sf::Socket::Status Server::send_to_client(ServerClient& c, const void* data, size_t size, size_t& sent) {
-    return c.send(data, size, sent);
+const sf::Socket::Status Server::send_to_client(ServerClient& serverClient, const void* data, size_t size, size_t& sent) {
+    return serverClient.send(data, size, sent);
 }
 void Server::send_to_all_but_client(ServerClient& c, Packet& packet) {
     for (auto& clientThread : m_Threads) {

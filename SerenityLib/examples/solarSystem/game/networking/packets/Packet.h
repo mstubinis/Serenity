@@ -11,6 +11,14 @@ struct PacketType {enum Type: unsigned int {
     Undefined,
     Server_Shutdown,
 
+    Client_To_Server_Auth_Part_1,
+    Server_To_Client_Auth_Part_1,
+
+    Client_To_Server_Auth_Part_2,
+    Server_To_Client_Auth_Part_2,
+
+
+
     Server_To_Client_Update_Lobby_Time_Left,
 
     Server_To_Client_Notify_Ship_Of_Respawn,
@@ -56,8 +64,9 @@ struct PacketType {enum Type: unsigned int {
     Client_To_Server_Client_Changed_Target,
     Server_To_Client_Client_Changed_Target,
 
-    Client_To_Server_Request_Connection,
+    //Client_To_Server_Request_Connection,
     Client_To_Server_Request_Disconnection,
+
     Client_To_Server_Ship_Physics_Update,
     Client_To_Server_Ship_Cloak_Update,
 

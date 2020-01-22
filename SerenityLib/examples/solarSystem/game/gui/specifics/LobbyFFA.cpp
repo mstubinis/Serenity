@@ -3,6 +3,7 @@
 #include "MessageWithArrow.h"
 #include "Ship3DViewer.h"
 #include "ShipDescription.h"
+#include "LoadingScreen.h"
 
 #include "../../gui/Button.h"
 #include "../../gui/ScrollFrame.h"
@@ -40,6 +41,7 @@ constexpr auto inner_padding_x         = 30.0f;
 constexpr auto inner_padding_y         = 55.0f;
 
 constexpr auto chat_box_height         = 340.0f;
+constexpr auto width_scale             = 1.14f;
 
 struct FFALobbyBackOnClick final { void operator()(Button* button) const {
     auto& lobby = *static_cast<LobbyScreenFFA*>(button->getUserPointer());
@@ -119,23 +121,23 @@ LobbyScreenFFA::LobbyScreenFFA(Font& font, Menu& menu, Core& core, Scene& scene,
     m_ShipSelector = NEW FFALobbyShipSelector(*this, font, 
         (padding_x / 2.0f) + inner_padding_x,
         winSize.y - (padding_y / 2.0f) - inner_padding_y,
-        ends_size * 1.2f,
+        ends_size * width_scale,
         ends_size,
     0.17f, 1, "Ship Database");
 
     m_Ship3DViewer = NEW Ship3DViewer(core, scene, camera,
         winSize.x - ((padding_x / 2.0f) + inner_padding_x),
         winSize.y - (padding_y / 2.0f) - inner_padding_y,
-        ends_size * 1.2f,
+        ends_size * width_scale,
         ends_size
     );
     m_Ship3DViewer->hide();
 
 
     m_ShipDescription = NEW ShipDescription(font,
-        (padding_x / 2.0f) + inner_padding_x + (ends_size * 1.2f),
+        (padding_x / 2.0f) + inner_padding_x + (ends_size * width_scale),
         winSize.y - (padding_y / 2.0f) - inner_padding_y,
-        (winSize.x - (padding_x + (inner_padding_x * 2.0f))) - ((ends_size * 1.2f) * 2.0f) - 10.0f,
+        (winSize.x - (padding_x + (inner_padding_x * 2.0f))) - ((ends_size * width_scale) * 2.0f) - 10.0f,
         ends_size,
     0.15f);
 
@@ -235,19 +237,19 @@ void LobbyScreenFFA::onResize(const unsigned int newWidth, const unsigned int ne
     const auto rounded_win_size = glm::vec2(m_RoundedWindow->width(), m_RoundedWindow->height());
     const auto ends_size = rounded_win_size.y - chat_box_height;
     if (m_ShipSelector) {
-        m_ShipSelector->setSize(ends_size * 1.2f, ends_size);
+        m_ShipSelector->setSize(ends_size * width_scale, ends_size);
         m_ShipSelector->setPosition( (padding_x / 2.0f) + inner_padding_x, winSize.y - (padding_y / 2.0f) - inner_padding_y );
     }
     if (m_Ship3DViewer) {
-        m_Ship3DViewer->setSize(ends_size * 1.2f, ends_size);
+        m_Ship3DViewer->setSize(ends_size * width_scale, ends_size);
         m_Ship3DViewer->setPosition(
             winSize.x - (padding_x / 2.0f) - inner_padding_x - m_Ship3DViewer->getViewportDimensions().z,
             winSize.y - (padding_y / 2.0f) - inner_padding_y - m_Ship3DViewer->getViewportDimensions().w
         );
     }
     if (m_ShipDescription) {
-        m_ShipDescription->setSize(  (winSize.x - (padding_x + (inner_padding_x * 2.0f))) - ((ends_size * 1.2f) * 2.0f) - 10.0f, ends_size);
-        m_ShipDescription->setPosition(  (padding_x / 2.0f) + inner_padding_x + (ends_size * 1.2f), winSize.y - (padding_y / 2.0f) - inner_padding_y );
+        m_ShipDescription->setSize(  (winSize.x - (padding_x + (inner_padding_x * 2.0f))) - ((ends_size * width_scale) * 2.0f) - 10.0f, ends_size);
+        m_ShipDescription->setPosition(  (padding_x / 2.0f) + inner_padding_x + (ends_size * width_scale), winSize.y - (padding_y / 2.0f) - inner_padding_y );
     }
     if (m_ChooseShipMessage) {
         m_ChooseShipMessage->setPosition(
@@ -261,32 +263,13 @@ void LobbyScreenFFA::update(const double& dt) {
     if (lobbyTime > 0.0) {
         lobbyTime -= dt;
         if (lobbyTime < 0.0) {
+            const auto chosen_ship_class = getShipSelector().getChosenShipClass(); //do not make this a reference
+
             Server::SERVER_HOST_DATA.setCurrentLobbyTimeInSeconds(0.0);
-
-
-            
-            m_Core.getClient()->getMapData().getMap().full_load();
             m_Ship3DViewer->hide();
             m_ChooseShipMessage->hide();
-
-            auto& chosen_ship_class = getShipSelector().getChosenShipClass();
-
-            PacketMessage p;
-            p.PacketType = PacketType::Client_To_Server_Request_Map_Entry;
-            p.name = m_Core.getClient()->username();
-
-            p.data = (chosen_ship_class.empty()) ? "NULL" : chosen_ship_class; //ship class [0]
-
-            p.data += "," + m_Core.getClient()->getMapData().getMap().name(); //map name [1]
-            if (&m_Core.getClient()->getMapData().getTeam()) {
-                p.data += "," + m_Core.getClient()->getMapData().getTeam().getTeamNumberAsString();
-            }else{
-                p.data += ",-1"; //error, the client did not choose or was not assigned a team yet
-            }
-
-            m_Core.getClient()->send(p);
-
-
+            m_Menu.m_LoadingScreen->setShipClass(chosen_ship_class);
+            m_Menu.setGameState(GameState::LoadingScreenPreFrame);
         }
     }
 

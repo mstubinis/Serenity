@@ -12,6 +12,8 @@ struct PacketMessage;
 #include <core/engine/networking/SocketTCP.h>
 #include <core/engine/networking/SocketUDP.h>
 
+#include "../auth/AuthenticationLayer.h"
+
 #include "ServerMapSpecificData.h"
 #include "../../modes/GameplayMode.h"
 #include "../../map/MapEntry.h"
@@ -67,6 +69,8 @@ class ServerHostData final {
 
 class ServerClient final {
     friend class Server;
+    friend class AuthenticationLayer;
+    friend class AuthenticationLayer::AuthenticationInstance;
     friend class ServerClientThread;
     private:
         Engine::Networking::SocketTCP*   m_TcpSocket;
@@ -83,8 +87,7 @@ class ServerClient final {
 
         void internalInit(const std::string& hash, const unsigned int& numClients);
     public:
-        ServerClient(const std::string& hash, Server&, Core&, sf::TcpSocket*);
-        ServerClient(const std::string& hash, Server&, Core&, const unsigned short& port, const std::string& ipAddress);
+        ServerClient(const std::string& hash, Server&, Core&, Engine::Networking::SocketTCP&);
         ~ServerClient();
 
         void disconnect();
@@ -103,6 +106,8 @@ class ServerClient final {
 
 class ServerClientThread final {
     friend class ServerClient;
+    friend class AuthenticationLayer;
+    friend class AuthenticationLayer::AuthenticationInstance;
     friend class Server;
     private:
         std::unordered_map<std::string, ServerClient*>   m_Clients;
@@ -118,7 +123,8 @@ class Server {
     friend class ServerClient;
     friend class ServerClientThread;
     friend class ServerMapSpecificData;
-
+    friend class AuthenticationLayer;
+    friend class AuthenticationLayer::AuthenticationInstance;
     public: class PersistentInfo final {
         private:
             std::string m_ServerName;
@@ -144,6 +150,7 @@ class Server {
         static ServerHostData                          SERVER_HOST_DATA;
         static Database                                DATABASE;
     private:
+        AuthenticationLayer                            m_AuthenticationLayer;
         ServerMapSpecificData                          m_MapSpecificData;
         Engine::Networking::SocketUDP*                 m_UdpSocket;
         std::mutex                                     m_Mutex;
@@ -167,6 +174,10 @@ class Server {
         const bool startupMap(const MapEntryData& map_data);
         void shutdown(const bool destructor = false);
         const bool shutdownMap();
+
+        ServerClientThread* getNextAvailableClientThread();
+
+        AuthenticationLayer& getAuthenticationLayer();
 
         const bool isValidName(const std::string& name) const;
         const unsigned int numClients() const;
@@ -202,7 +213,6 @@ class Server {
         static void update(Server* thisServer, const double& dt);
         static void updateAcceptNewClients(Server& thisServer);
         static void updateClient(ServerClient& thisClient);
-        //static void updateRemoveDisconnectedClients(Server& thisServer);
 };
 
 #endif

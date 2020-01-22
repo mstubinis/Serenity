@@ -49,6 +49,10 @@ class  LobbyScreenFFA;
 class  LobbyScreenTeamDeathmatch;
 class  LobbyScreenHomelandSecurity;
 
+class  JoinScreen0;
+
+class  LoadingScreen;
+
 class Menu final{
     friend struct Host_ButtonBack_OnClick;
     friend struct Host_ButtonNext_OnClick;
@@ -60,11 +64,12 @@ class Menu final{
     friend class  Map;
     friend class  Client;
     friend class  Server;
-
+    friend class  LobbyScreenFFA;
+    friend class  LobbyScreenTeamDeathmatch;
+    friend class  LobbyScreenHomelandSecurity;
     public:
         ServerLobbyChatWindow*             m_ServerLobbyChatWindow;
         ServerLobbyConnectedPlayersWindow* m_ServerLobbyConnectedPlayersWindow;
-        //ServerLobbyShipSelectorWindow*     m_ServerLobbyShipSelectorWindow;
 
     private:
         glm::vec3                      m_Color;
@@ -91,6 +96,12 @@ class Menu final{
         LobbyScreenFFA* m_LobbyScreenFFA;
         //LobbyScreenTeamDeathmatch*      m_LobbyScreenTeamDeathmatch;
         //LobbyScreenHomelandSecurity*    m_LobbyScreenHomelandSecurity;
+
+        //join screen(s)
+        JoinScreen0*                   m_JoinScreen0;
+
+        //loading screen
+        LoadingScreen*                 m_LoadingScreen;
 
 
         Button*                        m_Back;
@@ -129,6 +140,7 @@ class Menu final{
         void update_encyclopedia_ships(const double& dt);
         void update_encyclopedia_factions(const double& dt);
 
+        void update_loading_screen_pre_frame(const double& dt);
         void update_loading_screen(const double& dt);
 
 
@@ -160,13 +172,13 @@ class Menu final{
         void render_encyclopedia_ships();
         void render_encyclopedia_factions();
 
+        void render_loading_screen_pre_frame();
         void render_loading_screen();
     public:
         Menu(Scene& scene, Camera& camera, GameState::State& current, Core& core);
         ~Menu();
 
         void go_to_main_menu();
-        void enter_the_game();
 
         void onResize(const uint& width, const uint& height);
 

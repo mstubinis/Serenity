@@ -24,6 +24,14 @@ class ClientMapSpecificData final {
         ClientMapSpecificData(Client&);
         ~ClientMapSpecificData();
 
+        ClientMapSpecificData(const ClientMapSpecificData& other)                = delete;
+        ClientMapSpecificData& operator=(const ClientMapSpecificData& other)     = delete;
+        ClientMapSpecificData(ClientMapSpecificData&& other) noexcept            = delete;
+        ClientMapSpecificData& operator=(ClientMapSpecificData&& other) noexcept = delete;
+
+        bool operator==(const bool& rhs) const;
+        explicit operator bool() const;
+
         Map& getMap();
         Team& getTeam();
         Client& getClient();

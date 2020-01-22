@@ -17,9 +17,9 @@ struct ServerCreateOnClick final { void operator()(Button* button) const {
     auto& createServerWindow         = *static_cast<CreateServerWindow*>(button->getUserPointer());
     auto& hostScreen1Pers            = createServerWindow.m_HostScreen1Persistent;
 
-    const auto server_name           = createServerWindow.getServerNameTextBox().getRealText();
-    const auto server_port           = createServerWindow.getServerPortTextBox().getRealText();
-    const auto server_username       = createServerWindow.getUsernameTextBox().getRealText();
+    const auto server_name           = createServerWindow.getServerNameTextBox().text();
+    const auto server_port           = createServerWindow.getServerPortTextBox().text();
+    const auto server_username       = createServerWindow.getUsernameTextBox().text();
     const auto server_password       = createServerWindow.getPasswordTextBox().getRealText();
 
     const bool valid_server_name     = hostScreen1Pers.validateNewServerName();

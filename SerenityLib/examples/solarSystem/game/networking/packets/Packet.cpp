@@ -12,6 +12,9 @@
 #include "PacketConnectionAccepted.h"
 #include "PacketUpdateLobbyTimeLeft.h"
 
+#include "PacketAuthStep1.h"
+#include "PacketAuthStep2.h"
+
 using namespace std;
 
 Packet* Packet::getPacket(const sf::Packet& sfPacket) {
@@ -26,8 +29,16 @@ Packet* Packet::getPacket(const sf::Packet& sfPacket) {
             return NEW PacketUpdateLobbyTimeLeft();
         }case PacketType::Server_To_Client_Reject_Connection: {
             return NEW PacketMessage();
-        }case PacketType::Client_To_Server_Request_Connection: {
-            return NEW PacketMessage();
+
+        }case PacketType::Client_To_Server_Auth_Part_1: {
+            return NEW PacketAuthStep1();
+        }case PacketType::Server_To_Client_Auth_Part_1: {
+            return NEW PacketAuthStep1();
+        }case PacketType::Client_To_Server_Auth_Part_2: {
+            return NEW PacketAuthStep2();
+        }case PacketType::Server_To_Client_Auth_Part_2: {
+            return NEW PacketAuthStep2();
+
         }case PacketType::Client_To_Server_Request_Disconnection: {
             return NEW PacketMessage();
         }case PacketType::Server_Shutdown: {

@@ -10,7 +10,7 @@
 using namespace std;
 using namespace Engine;
 
-unordered_map<string, ShipInformation> Ships::Database;
+map<string, ShipInformation> Ships::Database;
 
 ShipInformation::ShipInformation() {
     Faction = FactionEnum::Unknown;
@@ -144,16 +144,16 @@ void Ships::createShipEntry(const string& shipClass, const string& shipClassVerb
     Database.emplace(shipClass, info);
 }
 void Ships::init() {
-    //createShipEntry("Nova",       "",    FactionEnum::Federation,   6,    1.0f,    ShipTier::Escort);
-    //createShipEntry("Intrepid",     "",  FactionEnum::Federation,   20,   1.1f,    ShipTier::Cruiser);
-    //createShipEntry("Excelsior",     "", FactionEnum::Federation,   20,   1.2f,    ShipTier::Cruiser);
-    //createShipEntry("Constitution", "",  FactionEnum::Federation,   20,   1.1f,    ShipTier::Cruiser);
-    //createShipEntry("Miranda",      "",  FactionEnum::Federation,   6,    1.0f,    ShipTier::Escort);
-    //createShipEntry("Saber",        "",  FactionEnum::Federation,   6,    1.0f,    ShipTier::Escort);
-    //createShipEntry("Norway",       "",  FactionEnum::Federation,   8,    1.05f,   ShipTier::Escort);
-    //createShipEntry("Steamrunner",   "", FactionEnum::Federation,   20,   1.1f,    ShipTier::Cruiser);
-    //createShipEntry("Galaxy",       "",  FactionEnum::Federation,   30,   1.3f,    ShipTier::Cruiser);
-    //createShipEntry("Nebula",        "", FactionEnum::Federation,   30,   1.25f,   ShipTier::Cruiser);
+    //createShipEntry("Nova",       "Nova class escort","",    FactionEnum::Federation,   6,    1.0f,    ShipTier::Escort);
+    //createShipEntry("Intrepid",     "","",  FactionEnum::Federation,   20,   1.1f,    ShipTier::Cruiser);
+    //createShipEntry("Excelsior",     "","", FactionEnum::Federation,   20,   1.2f,    ShipTier::Cruiser);
+    //createShipEntry("Constitution", "","",  FactionEnum::Federation,   20,   1.1f,    ShipTier::Cruiser);
+    //createShipEntry("Miranda",      "","",FactionEnum::Federation,   6,    1.0f,    ShipTier::Escort);
+    //createShipEntry("Saber",        "","",  FactionEnum::Federation,   6,    1.0f,    ShipTier::Escort);
+    //createShipEntry("Norway",       "","",  FactionEnum::Federation,   8,    1.05f,   ShipTier::Escort);
+    //createShipEntry("Steamrunner",   "","", FactionEnum::Federation,   20,   1.1f,    ShipTier::Cruiser);
+    //createShipEntry("Galaxy",       "","",  FactionEnum::Federation,   30,   1.3f,    ShipTier::Cruiser);
+    //createShipEntry("Nebula",        "","", FactionEnum::Federation,   30,   1.25f,   ShipTier::Cruiser);
 
     createShipEntry("Defiant",
         "Defiant class escort",

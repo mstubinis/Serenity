@@ -556,7 +556,7 @@ void InternalTexturePublicInterface::LoadGPU(Texture& texture) {
         TextureLoader::GenerateMipmapsOpenGL(texture);
     }
 
-    cout << "(Texture) ";
+    //cout << "(Texture) ";
     texture.EngineResource::load();
 }
 void InternalTexturePublicInterface::UnloadCPU(Texture& texture) {
@@ -571,7 +571,7 @@ void InternalTexturePublicInterface::UnloadCPU(Texture& texture) {
     }
     texture.m_Mipmapped = false;
 
-    cout << "(Texture) ";
+    //cout << "(Texture) ";
     texture.EngineResource::unload();
 }
 void InternalTexturePublicInterface::UnloadGPU(Texture& texture) {

@@ -17,6 +17,7 @@ Networking::SocketTCP::SocketTCP(sf::TcpSocket* socket) { //server side client s
 }
 
 Networking::SocketTCP::~SocketTCP() { 
+    m_Socket->disconnect();
     SAFE_DELETE(m_Socket);
 }
 const sf::TcpSocket& Networking::SocketTCP::socket() {

@@ -15,4 +15,7 @@
 #include "PacketConnectionAccepted.h"
 #include "PacketUpdateLobbyTimeLeft.h"
 
+#include "PacketAuthStep1.h"
+#include "PacketAuthStep2.h"
+
 #endif

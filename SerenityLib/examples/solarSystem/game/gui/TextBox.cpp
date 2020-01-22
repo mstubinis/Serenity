@@ -152,6 +152,7 @@ string TextBox::process_input(const string& input) {
     switch (m_TextDisplayMode) {
         case TextDisplayMode::Normal: {
             ret = input;
+            ret[0] = std::toupper(ret[0]);
             break;
         }case TextDisplayMode::Password: {
             for (size_t i = 0; i < input.size(); ++i) {
@@ -191,11 +192,7 @@ void TextBox::onEvent(const Event& e) {
             }else{
                 if (m_ActualInput.size() < m_MaxCharacters) {
                     if (!input.empty()) {
-                        if (m_ActualInput.size() == 0) {
-                            m_ActualInput += std::toupper(input[0]);
-                        }else{
-                            m_ActualInput += input;
-                        }
+                        m_ActualInput += input;
                         m_Text = process_input(m_ActualInput);
                     }
                 }

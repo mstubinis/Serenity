@@ -43,6 +43,7 @@
 
 #include "../hud/SensorStatusDisplay.h"
 #include "../hud/ShipStatusDisplay.h"
+#include "../gui/specifics/LoadingScreen.h"
 
 #include <core/engine/system/Engine.h>
 #include <iostream>
@@ -101,11 +102,10 @@ void Map::basic_init(const string& file) {
                     else if (key == "giSpecular")  gi_specular = stof(value);
                     else if (key == "giGlobal")    gi_global = stof(value);
                 }
-            }else if (count >= 5) {
-                break;
             }
         }
         ++count;
+        ++m_TotalItemsCountForLoading;
     }
     setGlobalIllumination(gi_global, gi_diffuse, gi_specular);
     m_LoadStatus = Map::MapLoadStatus::PartiallyLoaded;
@@ -121,6 +121,7 @@ void Map::cleanup() {
     m_SpawnAnchors.clear();
     m_Player = nullptr;
     m_SkyboxFile = "";
+    m_TotalItemsCountForLoading = 0;
     m_LoadStatus = Map::MapLoadStatus::CompletelyEmpty;
 }
 
@@ -128,7 +129,12 @@ Map::~Map(){
     cleanup();
     SAFE_DELETE(m_HUD);
 }
-
+const bool Map::isFullyLoaded() const {
+    return (m_LoadStatus == Map::MapLoadStatus::FullyLoaded) ? true : false;
+}
+const string& Map::getFilename() const {
+    return m_Filename;
+}
 const bool& Map::isServer() const {
     return m_IsServer;
 }
@@ -312,13 +318,25 @@ Client& Map::getClient() {
 Anchor* Map::internalCreateAnchor(const string& parentAnchor, const string& thisName, unordered_map<string, Anchor*>& loadedAnchors, const glm_vec3& position) {
     return internalCreateAnchor(parentAnchor, thisName, loadedAnchors, position.x, position.y, position.z);
 }
-const bool Map::full_load() {
+
+
+void Map::loading_screen_render(LoadingScreen* loadingScreen, const float& progress) {
+    if (!loadingScreen)
+        return;
+    loadingScreen->setProgress(progress);
+    loadingScreen->render();
+    Engine::priv::Core::m_Engine->render2DApi(Resources::getWindow(), 0.166666);
+}
+
+const bool Map::full_load(LoadingScreen* loadingScreen) {
     if (m_LoadStatus != Map::MapLoadStatus::PartiallyLoaded) {
         return false;
     }
 
+    float progress = 0.0f;
+
     uint                                             count = 0;
-    boost_io::stream<boost_io::mapped_file_source>   str(m_Filename);
+    boost_io::stream<boost_io::mapped_file_source>   stream(m_Filename);
     unordered_map<string, vector<RingInfo>>          planetRings;
     unordered_map<string, Handle>                    loadedMaterials;
     unordered_map<string, Handle>                    loadedMeshes;
@@ -332,14 +350,14 @@ const bool Map::full_load() {
 
     auto& gameplayMode = m_Client.getGameplayMode();
 
-    for (string line; getline(str, line, '\n');) {
+    for (string line; getline(stream, line, '\n');) {
         line.erase(remove(line.begin(), line.end(), '\r'), line.end()); //remove \r from the line
         if (line[0] != '#') {//ignore commented lines
             if (!line.empty() && line[0] != ' ' && line[1] == ' ') {//we got something to work with
                 Planet* planetoid = nullptr;
 
                 string token;
-                istringstream stream(line);
+                istringstream iStringStream(line);
 
                 string NAME;
                 string NAME_ORG;
@@ -375,7 +393,7 @@ const bool Map::full_load() {
 
                 uint BREAK = 0;
 
-                while (getline(stream, token, ' ')) {
+                while (getline(iStringStream, token, ' ')) {
                     size_t pos = token.find("=");
 
                     string key = token.substr(0, pos);
@@ -442,6 +460,7 @@ const bool Map::full_load() {
                 const float x = static_cast<float>(X);
                 const float y = static_cast<float>(Y);
                 const float z = static_cast<float>(Z);
+
                 if (!MATERIAL_NAME.empty()) {
                     string extention  = boost::filesystem::extension(TEXTURE);
                     string normalFile = (TEXTURE.substr(0, TEXTURE.size() - extention.size())) + "_Normal" + extention;
@@ -472,6 +491,7 @@ const bool Map::full_load() {
                     }
                     m_Planets.emplace(NAME, star);
                     internalCreateAnchor("Root", NAME, loadedAnchors, star->getPosition());
+                    loading_screen_render(loadingScreen, progress);
                 }else if (line[0] == 'P') {//Planet
                     planetoid = NEW Planet(loadedMeshes.at(MESH_NAME), loadedMaterials.at(MATERIAL_NAME), TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
                     if (!PARENT.empty()) {
@@ -486,6 +506,7 @@ const bool Map::full_load() {
                     }
                     m_Planets.emplace(NAME, planetoid);
                     internalCreateAnchor(PARENT, NAME, loadedAnchors, planetoid->getPosition());
+                    loading_screen_render(loadingScreen, progress);
                 }else if (line[0] == 'M') {//Moon
                     planetoid = NEW Planet(loadedMeshes.at(MESH_NAME), loadedMaterials.at(MATERIAL_NAME), TYPE, glm::vec3(x, y, z), static_cast<float>(RADIUS), NAME, ATMOSPHERE_HEIGHT, this);
                     if (!PARENT.empty()) {
@@ -500,6 +521,7 @@ const bool Map::full_load() {
                     }
                     m_Planets.emplace(NAME, planetoid);
                     internalCreateAnchor(PARENT, NAME, loadedAnchors, planetoid->getPosition());
+                    loading_screen_render(loadingScreen, progress);
                 }else if (line[0] == '+' && gameplayMode.getGameplayMode() == GameplayModeType::HomelandSecurity) {//ship / station
 
                     //TODO: expand on this
@@ -509,17 +531,19 @@ const bool Map::full_load() {
                         Planet* parent = m_Planets.at(PARENT);
                         ship->setPosition(ship->getPosition() + parent->getPosition());
                     }
-                    
+                    loading_screen_render(loadingScreen, progress);
                 }else if (line[0] == '?') {//Anchor (Primary Spawn) point
                     const auto& parentPos = m_Planets.at(PARENT)->getPosition();
                     auto spawnAnchor = internalCreateAnchor(PARENT, "Spawn", loadedAnchors, parentPos.x + x, parentPos.y + y, parentPos.z + z);
                     spawnAnchor->setName("Spawn Anchor");
                     m_SpawnAnchors.push_back(spawnAnchor);
+                    loading_screen_render(loadingScreen, progress);
                 }else if (line[0] == '>') {//Anchor (Secondary Spawn) point
                     const auto& parentPos = m_Planets.at(PARENT)->getPosition();
                     auto* spawnAnchor = internalCreateAnchor(PARENT, PARENT + " Spawn", loadedAnchors, parentPos.x + x, parentPos.y + y, parentPos.z + z);
                     spawnAnchor->setName(PARENT + " Spawn Anchor");
                     m_SpawnAnchors.push_back(spawnAnchor);
+                    loading_screen_render(loadingScreen, progress);
                 }else if (line[0] == 'R') {//Rings
                     if (!PARENT.empty()) {
                         if (!planetRings.count(PARENT)) {
@@ -533,6 +557,7 @@ const bool Map::full_load() {
             }
         }
         ++count;
+        progress = static_cast<float>(count) / static_cast<float>(m_TotalItemsCountForLoading);
     }
     //add planetary rings
     for (auto& rings : planetRings) {
@@ -541,6 +566,9 @@ const bool Map::full_load() {
 
     centerSceneToObject(loadedAnchors.at("Spawn Anchor")->entity());
     m_LoadStatus = Map::MapLoadStatus::FullyLoaded;
+
+    loading_screen_render(loadingScreen, 1.0f);
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
     return true;
 }
 Ship* Map::createShipDull(const string& shipClass, const glm::vec3& position, Scene* scene) {

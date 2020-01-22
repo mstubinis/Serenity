@@ -189,11 +189,11 @@ void priv::InternalMaterialPublicInterface::LoadGPU(Material& material) {
             }
         }
     }
-    cout << "(Material) ";
+    //cout << "(Material) ";
     material.EngineResource::load();
 }
 void priv::InternalMaterialPublicInterface::UnloadCPU(Material& material) {
-    cout << "(Material) ";
+    //cout << "(Material) ";
     material.EngineResource::unload();
 }
 void priv::InternalMaterialPublicInterface::UnloadGPU(Material& material) {

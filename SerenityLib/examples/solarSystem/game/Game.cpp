@@ -18,15 +18,16 @@
 
 #include "database/Database.h"
 
-
 using namespace Engine;
 using namespace std;
 
 Core* m_Core = nullptr;
 
+
 void Game::initResources(){
     Discord::activate(661384805786845214);
-    
+
+
     m_Core = NEW Core();
     ResourceManifest::init();
 }

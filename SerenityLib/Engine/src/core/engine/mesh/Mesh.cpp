@@ -58,13 +58,13 @@ namespace Engine {
 
 void InternalMeshPublicInterface::LoadGPU(Mesh& mesh){
     mesh.m_VertexData->finalize(); //transfer vertex data to gpu
-    cout << "(Mesh) ";
+    //cout << "(Mesh) ";
     mesh.EngineResource::load();
 }
 void InternalMeshPublicInterface::UnloadCPU(Mesh& mesh){
     SAFE_DELETE(mesh.m_Skeleton);
     SAFE_DELETE(mesh.m_CollisionFactory);
-    cout << "(Mesh) ";
+    //cout << "(Mesh) ";
     mesh.EngineResource::unload();
 }
 void InternalMeshPublicInterface::UnloadGPU(Mesh& mesh){
@@ -428,6 +428,16 @@ Mesh::Mesh(const string& fileOrData, float threshold) : BindableResource(Resourc
 Mesh::~Mesh(){
     unregisterEvent(EventType::WindowFullscreenChanged);
     unload();
+}
+bool Mesh::operator==(const bool& rhs) const {
+    if (rhs == true) {
+        return (m_VertexData) ? true : false;
+    }else{
+        return (m_VertexData) ? false : true;
+    }
+}
+Mesh::operator bool() const {
+    return (m_VertexData) ? true : false;
 }
 
 unordered_map<string, AnimationData>& Mesh::animationData(){ 

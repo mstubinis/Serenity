@@ -9,6 +9,9 @@ class  Server;
 class  Map;
 struct PacketCollisionEvent;
 struct Packet;
+
+#include "../auth/AuthenticationLayer.h"
+
 //a simple data structure to coordinate ship respawning
 class ShipRespawning final {
     private:
@@ -48,6 +51,7 @@ class CollisionEntries final {
 
 class ServerMapSpecificData final {
     friend class Server;
+    friend class AuthenticationLayer::AuthenticationInstance;
     private:
         Server&                                        m_Server;
         Map*                                           m_Map;

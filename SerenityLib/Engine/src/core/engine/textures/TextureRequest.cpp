@@ -31,14 +31,19 @@ TextureRequest::TextureRequest(const string& _filename, const bool& genMipMaps, 
     isToBeMipmapped = genMipMaps;
     type            = openglTextureType;
 
-    if (type == GL_TEXTURE_2D)
-        textureType = TextureType::Texture2D;
-    else if (type == GL_TEXTURE_1D)
-        textureType = TextureType::Texture1D;
-    else if (type == GL_TEXTURE_3D)
-        textureType = TextureType::Texture3D;
-    else if (type == GL_TEXTURE_CUBE_MAP)
-        textureType = TextureType::CubeMap;
+    switch (type) {
+        case GL_TEXTURE_2D: {
+            textureType = TextureType::Texture2D; break;
+        }case GL_TEXTURE_1D: {
+            textureType = TextureType::Texture1D; break;
+        }case GL_TEXTURE_3D: {
+            textureType = TextureType::Texture3D; break;
+        }case GL_TEXTURE_CUBE_MAP: {
+            textureType = TextureType::CubeMap; break;
+        }default: {
+            textureType = TextureType::Texture2D; break;
+        }
+    }
 }
 
 
@@ -71,8 +76,8 @@ void InternalTextureRequestPublicInterface::Request(TextureRequest& request) {
             };
             if (request.async) {
                 const auto& reference = std::ref(request);
-                const auto& job = std::bind(lambda_cpu);
-                const auto& cbk = std::bind(&InternalTextureRequestPublicInterface::LoadGPU, reference);
+                const auto& job       = std::bind(lambda_cpu);
+                const auto& cbk       = std::bind(&InternalTextureRequestPublicInterface::LoadGPU, reference);
                 threading::addJobWithPostCallback(job, cbk);
             }else{
                 lambda_cpu();

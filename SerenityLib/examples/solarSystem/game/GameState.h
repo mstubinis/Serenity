@@ -31,6 +31,7 @@ struct GameState {enum State {
     Options_Keybinds,
     Options_Graphics,
 
+    LoadingScreenPreFrame,
     LoadingScreen,
 
     Game,

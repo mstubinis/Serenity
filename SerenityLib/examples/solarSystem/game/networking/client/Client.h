@@ -40,6 +40,13 @@ class Client{
 
         void internal_init(const unsigned short& server_port, const std::string& server_ipAddress);
 
+        const sf::Uint32 generate_nonce();
+
+        void begin_authentication(Menu& menu);
+
+        void on_receive_auth_part_1(Packet&);
+        void on_receive_auth_part_2(Packet&);
+
         void on_receive_lobby_time_update(Packet&, Menu& menu);
         void on_receive_ship_notified_of_respawn(Packet&, Map& map);
         void on_receive_ship_notified_of_impending_respawn(Packet&, Map& map);

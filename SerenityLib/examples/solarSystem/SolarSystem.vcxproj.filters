@@ -367,6 +367,36 @@
     <Filter Include="Source Files\Game\Security">
       <UniqueIdentifier>{e33d519d-f37e-4488-90a6-bff39b207b6e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\Networking\Authentication">
+      <UniqueIdentifier>{4e9619e5-66c2-44cc-88c2-78f8fd423c43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Networking\Authentication">
+      <UniqueIdentifier>{ed442898-abb0-40eb-91c3-acbaa81cee11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Networking\Packets\Authentication">
+      <UniqueIdentifier>{7df0ebb2-dc3b-4713-ac96-57da48f984f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Networking\Packets\Authentication">
+      <UniqueIdentifier>{1633f0ac-ed9b-4b62-98d1-5d4b4ff4846e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\JoinScreen0">
+      <UniqueIdentifier>{8736f15a-8987-4255-8a1c-9a729125a947}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics\JoinScreen0">
+      <UniqueIdentifier>{0cffcf96-3a4e-4044-a0ff-9700778d2ae9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Account">
+      <UniqueIdentifier>{f65d8821-a2a8-4ee8-8d16-637bb5a5de9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Account">
+      <UniqueIdentifier>{25677723-864c-4b3f-8962-18c722ffd54c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GUI\Specifics\LoadingScreen">
+      <UniqueIdentifier>{7db753a6-8da9-4a2a-a2d9-e094db9d7fc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\GUI\Specifics\LoadingScreen">
+      <UniqueIdentifier>{92640450-9e8a-41d8-815c-12a379238cbe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\GameCamera.h">
@@ -777,6 +807,21 @@
     <ClInclude Include="game\security\Security.h">
       <Filter>Header Files\Game\Security</Filter>
     </ClInclude>
+    <ClInclude Include="game\networking\auth\AuthenticationLayer.h">
+      <Filter>Header Files\Game\Networking\Authentication</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\packets\PacketAuthStep1.h">
+      <Filter>Header Files\Game\Networking\Packets\Authentication</Filter>
+    </ClInclude>
+    <ClInclude Include="game\networking\packets\PacketAuthStep2.h">
+      <Filter>Header Files\Game\Networking\Packets\Authentication</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\JoinScreen0.h">
+      <Filter>Header Files\Game\GUI\Specifics\JoinScreen0</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gui\specifics\LoadingScreen.h">
+      <Filter>Header Files\Game\GUI\Specifics\LoadingScreen</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game\main.cpp">
@@ -1156,6 +1201,21 @@
     </ClCompile>
     <ClCompile Include="game\security\Security.cpp">
       <Filter>Source Files\Game\Security</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\auth\AuthenticationLayer.cpp">
+      <Filter>Source Files\Game\Networking\Authentication</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\packets\PacketAuthStep1.cpp">
+      <Filter>Source Files\Game\Networking\Packets\Authentication</Filter>
+    </ClCompile>
+    <ClCompile Include="game\networking\packets\PacketAuthStep2.cpp">
+      <Filter>Source Files\Game\Networking\Packets\Authentication</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\JoinScreen0.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\JoinScreen0</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\specifics\LoadingScreen.cpp">
+      <Filter>Source Files\Game\GUI\Specifics\LoadingScreen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

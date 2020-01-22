@@ -4,6 +4,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
+#include "../ships/Ships.h"
+
 #include <iostream>
 
 using namespace std;
@@ -81,14 +83,92 @@ Database::~Database() {
     disconnect_from_database();
 }
 
+
+void Database::init_tables() {
+    string sql1 = ("CREATE TABLE IF NOT EXISTS " + server_list_table_name + "("
+        "ServerID INTEGER, "
+        "Name varchar(" + to_string(CONST_SERVER_NAME_LENGTH_MAX) + ") NOT NULL UNIQUE, "
+        "OwnerUsername varchar(" + to_string(CONST_USERNAME_LENGTH_MAX) + ") NOT NULL, "
+        "Port INTEGER NOT NULL, "
+        "PRIMARY KEY(ServerID), "
+        "FOREIGN KEY(OwnerUsername) REFERENCES " + account_table_name + "(Username)"
+        ");");
+    (sqlite3_exec(m_Database.database, sql1.c_str(), Callbacks::callback_empty, 0, &m_ErrorMsg));
+
+    string sql2 = ("CREATE TABLE IF NOT EXISTS " + account_table_name + "("
+        "AccountID INTEGER, "
+        "ServerID INTEGER, "
+        "Username varchar(" + to_string(CONST_USERNAME_LENGTH_MAX) + ") NOT NULL, "
+        "Password CHAR(" + to_string(CONST_USERNAME_PASSWORD_HASH_LENGTH_MAX) + ") NOT NULL, " //stored as a hash
+        "Salt varchar(" + to_string(CONST_SALT_LENGTH_MAX) + ") NOT NULL, "
+        "PRIMARY KEY(AccountID), "
+        "FOREIGN KEY(ServerID) REFERENCES " + server_list_table_name + "(ServerID)"
+        ");");
+    (sqlite3_exec(m_Database.database, sql2.c_str(), Callbacks::callback_empty, 0, &m_ErrorMsg));
+
+    string sql3 = ("CREATE TABLE IF NOT EXISTS " + ship_perk_table_name + "("
+        "PerkID INTEGER, "
+        "ShipID INTEGER NOT NULL, "
+        "ExperienceNeeded UNSIGNED BIG INT NOT NULL, "
+        "PRIMARY KEY(PerkID), "
+        "FOREIGN KEY(ShipID) REFERENCES " + ship_table_name + "(ShipID) "
+        ");");
+    (sqlite3_exec(m_Database.database, sql3.c_str(), Callbacks::callback_empty, 0, &m_ErrorMsg));
+
+    string sql4 = ("CREATE TABLE IF NOT EXISTS " + account_ship_exp_table_name + "("
+        "AccountID INTEGER NOT NULL, "
+        "ServerID INTEGER NOT NULL, "
+        "ShipID INTEGER NOT NULL, "
+        "TotalExperience UNSIGNED BIG INT, "
+        "FOREIGN KEY(AccountID) REFERENCES " + account_table_name + "(AccountID), "
+        "FOREIGN KEY(ShipID) REFERENCES " + ship_perk_table_name + "(ShipID), "
+        "FOREIGN KEY(ServerID) REFERENCES " + server_list_table_name + "(ServerID), "
+        "PRIMARY KEY(AccountID, ServerID, ShipID)"
+        ");");
+    (sqlite3_exec(m_Database.database, sql4.c_str(), Callbacks::callback_empty, 0, &m_ErrorMsg));
+
+    string sql5 = ("CREATE TABLE IF NOT EXISTS " + ship_table_name + "("
+        "ShipID INTEGER, "
+        "ShipClass varchar(" + to_string(CONST_SHIP_CLASS_LENGTH_MAX) + ") NOT NULL, "
+        "PRIMARY KEY(ShipID)"
+        ");");
+    (sqlite3_exec(m_Database.database, sql5.c_str(), Callbacks::callback_empty, 0, &m_ErrorMsg));
+}
+void Database::init_default_ship_designs() {
+    string query = "INSERT INTO " + ship_table_name + "(ShipClass) VALUES (?)";
+
+    for (auto& ship_info : Ships::Database) {
+        auto& ship_class = ship_info.second.Class;
+
+        sqlite3_stmt* statement_add_ship;
+        prepare_sql_statement(query, &statement_add_ship);
+        (sqlite3_bind_text(statement_add_ship, 1, ship_class.c_str(), ship_class.length(), SQLITE_STATIC));
+
+        execute_query(statement_add_ship);
+    }
+}
+void Database::init_default_ship_perks() {
+    /*
+    string sql3 = ("CREATE TABLE IF NOT EXISTS " + ship_perk_table_name + "("
+        "PerkID INTEGER, "
+        "ShipID INTEGER NOT NULL, "
+        "ExperienceNeeded UNSIGNED BIG INT NOT NULL, "
+        "PRIMARY KEY(PerkID), "
+        "FOREIGN KEY(ShipID) REFERENCES " + ship_table_name + "(ShipID)"
+        ");");
+    (sqlite3_exec(m_Database.database, sql3.c_str(), Callbacks::callback_empty, 0, &m_ErrorMsg));
+    */
+
+}
+
 const bool Database::create_new_server(const string& in_serverName, const unsigned short& in_serverPort, const string& in_ownerName, const string& in_ownerPassword) {
     string sql_add_server = "INSERT INTO " + server_list_table_name + "(Name, OwnerUsername, Port) VALUES (?,?,?)";
     sqlite3_stmt* st_add_server;
 
     (sqlite3_prepare_v2(m_Database.database, sql_add_server.c_str(), -1, &st_add_server, NULL));
     (sqlite3_bind_text(st_add_server, 1, in_serverName.c_str(), in_serverName.length(), SQLITE_STATIC));
-    (sqlite3_bind_text(st_add_server, 2, in_ownerName.c_str(), in_ownerName.length(), SQLITE_STATIC));
-    (sqlite3_bind_int(st_add_server, 3, in_serverPort));
+    (sqlite3_bind_text(st_add_server, 2, in_ownerName.c_str(),  in_ownerName.length(),  SQLITE_STATIC));
+    (sqlite3_bind_int( st_add_server, 3, in_serverPort));
     (sqlite3_step(st_add_server));
     (sqlite3_finalize(st_add_server));
 
@@ -96,28 +176,43 @@ const bool Database::create_new_server(const string& in_serverName, const unsign
 
     return true;
 }
-const bool Database::create_new_account(string& in_serverName, const string& in_accountName, const string& in_accountPassword) {  
-    string salt = Security::generate_user_salt(in_accountName, Database::CONST_SALT_LENGTH_MAX);
-    string pw   = Security::argon2id(salt, in_accountPassword, 1, 2, 1 << 16, Database::CONST_SALT_LENGTH_MAX, Database::CONST_USERNAME_PASSWORD_HASH_LENGTH_MAX);
-
+const DatabaseQueryResult Database::get_account(const string& username, const int& server_id) {
+    string query_account = "SELECT * FROM STHS_Account WHERE ServerID =? AND Username =?;";
+    sqlite3_stmt* st_get_acc;
+    prepare_sql_statement(query_account, &st_get_acc);
+    sqlite3_bind_int(st_get_acc, 1, server_id);
+    sqlite3_bind_text(st_get_acc, 2, username.c_str(), username.length(), SQLITE_STATIC);
+    auto res_acc = execute_query_and_return_results(st_get_acc);
+    return std::move(res_acc);
+}
+const int Database::get_server_id(const string& serverName) {
     // now retrieve server id
     int server_id = -1;
     string query = "SELECT ServerID FROM " + server_list_table_name + " WHERE Name =?;";
     sqlite3_stmt* st_get_server_id;
     prepare_sql_statement(query, &st_get_server_id);
-    sqlite3_bind_text(st_get_server_id, 1, in_serverName.c_str(), in_serverName.length(), SQLITE_STATIC);
+    sqlite3_bind_text(st_get_server_id, 1, serverName.c_str(), serverName.length(), SQLITE_STATIC);
     auto results = execute_query_and_return_results(st_get_server_id);
     server_id = stoi(results.get(0, "ServerID"));
+    return server_id;
+}
+const bool Database::create_new_account(string& in_serverName, const string& in_accountName, const string& in_accountPassword) {  
+    string account_salt      = Security::generate_user_salt(in_accountName, Database::CONST_SALT_LENGTH_MAX);
+    string pepper            = "gjsuwmejfidlskdfig59dgfkkdfiejrmfj";
+    string peppered_password = Security::sha256(pepper + in_accountPassword);
+    string hashed_password   = Security::argon2id(account_salt, peppered_password, 1, 2, 1 << 16, Database::CONST_SALT_LENGTH_MAX, Database::CONST_USERNAME_PASSWORD_HASH_LENGTH_MAX);
+
+    int server_id = get_server_id(in_serverName);
 
     //TODO: handle when this fails?
     if (server_id != -1) {
         string sql_add_account = "INSERT INTO " + account_table_name + "(ServerID, Username, Password, Salt) VALUES (?,?,?,?)";
         sqlite3_stmt* st_add_account;
         (sqlite3_prepare_v2(m_Database.database, sql_add_account.c_str(), -1, &st_add_account, NULL));
-        (sqlite3_bind_int(st_add_account, 1, server_id));
-        (sqlite3_bind_text(st_add_account, 2, in_accountName.c_str(), in_accountName.length(), SQLITE_STATIC));
-        (sqlite3_bind_text(st_add_account, 3, pw.c_str(), pw.size(), SQLITE_STATIC));
-        (sqlite3_bind_text(st_add_account, 4, salt.c_str(), salt.size(), SQLITE_STATIC));
+        (sqlite3_bind_int( st_add_account, 1, server_id));
+        (sqlite3_bind_text(st_add_account, 2, in_accountName.c_str(),   in_accountName.length(), SQLITE_STATIC));
+        (sqlite3_bind_text(st_add_account, 3, hashed_password.c_str(),  hashed_password.size(),  SQLITE_STATIC));
+        (sqlite3_bind_text(st_add_account, 4, account_salt.c_str(),     account_salt.size(),     SQLITE_STATIC));
         (sqlite3_step(st_add_account));
         (sqlite3_finalize(st_add_account));
 
@@ -206,55 +301,9 @@ const bool Database::init_database_with_defaults(const bool forceDeleteOfPrevDat
         }
     }
 
-    string sql1 = ("CREATE TABLE IF NOT EXISTS " + server_list_table_name + "("
-        "ServerID INTEGER, "
-        "Name varchar(" + to_string(CONST_SERVER_NAME_LENGTH_MAX) + ") NOT NULL UNIQUE, "
-        "OwnerUsername varchar(" + to_string(CONST_USERNAME_LENGTH_MAX) + ") NOT NULL, "
-        "Port INTEGER NOT NULL, "
-        "PRIMARY KEY(ServerID), "
-        "FOREIGN KEY(OwnerUsername) REFERENCES " + account_table_name + "(Username)"
-    ");");
-    (sqlite3_exec(m_Database.database, sql1.c_str(), Callbacks::callback_empty, 0, &m_ErrorMsg));
-
-    string sql2 = ("CREATE TABLE IF NOT EXISTS " + account_table_name + "("
-        "AccountID INTEGER, "
-        "ServerID INTEGER, "
-        "Username varchar(" + to_string(CONST_USERNAME_LENGTH_MAX) + ") NOT NULL, "
-        "Password CHAR(" + to_string(CONST_USERNAME_PASSWORD_HASH_LENGTH_MAX) + ") NOT NULL, " //stored as a hash
-        "Salt varchar(" + to_string(CONST_SALT_LENGTH_MAX) + ") NOT NULL, "
-        "PRIMARY KEY(AccountID), "
-        "FOREIGN KEY(ServerID) REFERENCES " + server_list_table_name + "(ServerID)"
-    ");");
-    (sqlite3_exec(m_Database.database, sql2.c_str(), Callbacks::callback_empty, 0, &m_ErrorMsg));
-
-    string sql3 = ("CREATE TABLE IF NOT EXISTS " + ship_perk_table_name + "("
-        "PerkID INTEGER, "
-        "ShipID INTEGER NOT NULL, "
-        "ShipClass varchar(" + to_string(CONST_SHIP_CLASS_LENGTH_MAX) + ") NOT NULL, "
-        "ExperienceNeeded UNSIGNED BIG INT NOT NULL, "
-        "PRIMARY KEY(PerkID), "
-        "FOREIGN KEY(ShipID) REFERENCES " + ship_table_name + "(ShipID)"
-    ");");
-    (sqlite3_exec(m_Database.database, sql3.c_str(), Callbacks::callback_empty, 0, &m_ErrorMsg));
-
-    string sql4 = ("CREATE TABLE IF NOT EXISTS " + account_ship_exp_table_name + "("
-        "AccountID INTEGER NOT NULL, "
-        "ServerID INTEGER NOT NULL, "
-        "ShipID INTEGER NOT NULL, "
-        "TotalExperience UNSIGNED BIG INT, "
-        "FOREIGN KEY(AccountID) REFERENCES " + account_table_name + "(AccountID), "
-        "FOREIGN KEY(ShipID) REFERENCES " + ship_perk_table_name + "(ShipID), "
-        "FOREIGN KEY(ServerID) REFERENCES " + server_list_table_name + "(ServerID), "
-        "PRIMARY KEY(AccountID, ServerID, ShipID)"
-    ");");
-    (sqlite3_exec(m_Database.database, sql4.c_str(), Callbacks::callback_empty, 0, &m_ErrorMsg));
-
-    string sql5 = ("CREATE TABLE IF NOT EXISTS " + ship_table_name + "("
-        "ShipID INTEGER, "
-        "ShipClass varchar(" + to_string(CONST_SHIP_CLASS_LENGTH_MAX) + ") NOT NULL, "
-        "PRIMARY KEY(ShipID)"
-    ");");
-    (sqlite3_exec(m_Database.database, sql5.c_str(), Callbacks::callback_empty, 0, &m_ErrorMsg));
+    init_tables();
+    init_default_ship_designs();
+    init_default_ship_perks();
 
     return true;
 }
@@ -320,6 +369,7 @@ void Database::process_row_and_save(sqlite3_stmt* statement) {
         }    
     }
 }
+
 const DatabaseQueryResult Database::execute_query_and_return_results(sqlite3_stmt* statement) {
     query_result.clear();
     while (sqlite3_step(statement) == SQLITE_ROW) {
@@ -330,6 +380,12 @@ const DatabaseQueryResult Database::execute_query_and_return_results(sqlite3_stm
     results = query_result;
     query_result.clear();
     return results;
+}
+void Database::execute_query(sqlite3_stmt* statement) {
+    query_result.clear();
+    while (sqlite3_step(statement) == SQLITE_ROW) {
+    }
+    sqlite3_finalize(statement);
 }
 
 const bool Database::connect_to_database(const string& databaseName) {  

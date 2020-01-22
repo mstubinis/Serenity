@@ -72,6 +72,9 @@ class Mesh final: public BindableResource, public EventObserver{
         Mesh(const std::string& fileOrData, float threshold = 0.0005f); //file or data
         ~Mesh();
 
+        bool operator==(const bool& rhs) const;
+        explicit operator bool() const;
+
         Mesh(const Mesh&)                      = delete;
         Mesh& operator=(const Mesh&)           = delete;
         Mesh(Mesh&& other) noexcept            = delete;

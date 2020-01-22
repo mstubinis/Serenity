@@ -35,6 +35,7 @@
 
 #include "../factions/Faction.h"
 #include <core/engine/resources/Handle.h>
+#include <map>
 
 struct ShipTier final { enum Tier {
     Escort,
@@ -65,7 +66,7 @@ struct ShipInformation final {
 };
 class Ships final{
     public:
-        static std::unordered_map<std::string, ShipInformation> Database;
+        static std::map<std::string, ShipInformation> Database;
 
         static std::vector<std::string> getShipClassesSortedByFaction(const ShipTier::Tier& tier);
 

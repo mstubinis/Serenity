@@ -161,7 +161,6 @@ namespace Engine{
                 void update(Window& window, const double& dt);
                 void render(Window& window, const double& dt);
                 void cleanup(Window& window, const double& dt);
-
             public:
                 struct Misc final {
                     Engine::priv::BuiltInMeshses  m_BuiltInMeshes;
@@ -187,6 +186,8 @@ namespace Engine{
                 void init(const EngineOptions& options);
                 void run();
                 void handle_events(Window& window);
+
+                void render2DApi(Window& window, const double& dt);
         };
         struct Core final{
             static EngineCore*          m_Engine;

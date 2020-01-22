@@ -179,7 +179,7 @@ void ShaderProgram::load(){
         auto& _this = *this;
         InternalShaderProgramPublicInterface::LoadCPU(_this);
         InternalShaderProgramPublicInterface::LoadGPU(_this);
-        cout << "(Shader Program) ";
+        //cout << "(Shader Program) ";
         EngineResource::load();
     }
 }
@@ -188,7 +188,7 @@ void ShaderProgram::unload(){
         auto& _this = *this;
         InternalShaderProgramPublicInterface::UnloadGPU(_this);
         InternalShaderProgramPublicInterface::UnloadCPU(_this);
-        cout << "(Shader Program) ";
+        //cout << "(Shader Program) ";
         EngineResource::unload();
     }
 }

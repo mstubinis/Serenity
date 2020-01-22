@@ -6,6 +6,7 @@
 #include "Ship.h"
 #include "map/Map.h"
 #include "networking/packets/PacketMessage.h"
+#include "networking/packets/PacketAuthStep1.h"
 #include "Planet.h"
 #include "GameCamera.h"
 #include "GameSkybox.h"
@@ -79,17 +80,6 @@ void Core::shutdownClient(const bool& serverShutdownFirst) {
         client.m_TcpSocket->setBlocking(false);
         client.disconnect();
         client.cleanup();
-    }
-}
-void Core::requestValidation(const string& name) {
-    PacketMessage p;
-    p.PacketType = PacketType::Client_To_Server_Request_Connection;
-    p.data = name;
-    const auto& status = m_Client->send(p);
-    if (status == sf::Socket::Status::Done) {
-        std::cout << "Client: requesting validation connection to the server..." << endl;
-    }else{
-        m_Menu->setErrorText("Connection timed out");
     }
 }
 void Core::enterMap(Team& playerTeam, const string& mapFile, const string& playerShipClass, const string& playername, const float& x, const float& y, const float& z) {
