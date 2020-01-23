@@ -3,6 +3,7 @@
 #define GAME_GUI_LOADING_SCREEN_H
 
 #include <string>
+#include <thread>
 
 class Menu;
 class Font;
@@ -14,13 +15,14 @@ class LoadingScreen final {
         Font&         m_Font;
         std::string   m_ShipClass;
         bool          m_SentPacket;
+        std::thread   m_Thread;
 
         float         m_Progress;
     public:
         LoadingScreen(Menu& menu, Font& font);
         ~LoadingScreen();
 
-        void setProgress(const float& progress);
+        void setProgress(const float progress);
 
         const bool setShipClass(const std::string& ship_class);
         const bool startLoadingProcess();

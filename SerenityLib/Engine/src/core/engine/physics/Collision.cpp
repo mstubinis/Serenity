@@ -66,7 +66,7 @@ Collision::Collision(ComponentBody& body, const CollisionType::Type _type, Model
         if (mesh == false) {
             m_BtShape = InternalMeshPublicInterface::BuildCollision(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), _type);
             m_DeferredMeshes.push_back(&mesh);
-            m_DeferredLoading = std::bind<void>(Collision::DeferredLoading::load_1, std::ref(*this), _type, std::ref(mesh), _mass);
+            m_DeferredLoading = [&]() { Collision::DeferredLoading::load_1(*this, _type, mesh, _mass); };
             registerEvent(EventType::MeshLoaded);
         }else{
             m_BtShape = InternalMeshPublicInterface::BuildCollision(modelInstance, _type);
@@ -81,7 +81,7 @@ Collision::Collision(ComponentBody& body, const CollisionType::Type _type, Mesh&
     if (mesh == false) {
         m_BtShape = InternalMeshPublicInterface::BuildCollision(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), _type);
         m_DeferredMeshes.push_back(&mesh);
-        m_DeferredLoading = std::bind<void>(Collision::DeferredLoading::load_1, std::ref(*this), _type, std::ref(mesh), _mass);
+        m_DeferredLoading = [&]() { Collision::DeferredLoading::load_1(*this, _type, mesh, _mass); };
         registerEvent(EventType::MeshLoaded);
     }else{
         m_BtShape = InternalMeshPublicInterface::BuildCollision(&mesh, _type);
@@ -114,7 +114,7 @@ Collision::Collision(ComponentBody& body, ComponentModel& _modelComponent, const
         }
     }
     if (unfinishedModels.size() > 0) {
-        m_DeferredLoading = std::bind<void>(Collision::DeferredLoading::load_2, std::ref(*this), std::ref(btCompound), std::ref(unfinishedModels), _mass, _type);
+        m_DeferredLoading = [&]() { Collision::DeferredLoading::load_2(*this, btCompound, unfinishedModels, _mass, _type); };
         registerEvent(EventType::MeshLoaded);
     }
     btCompound->setMargin(0.001f);

@@ -6,10 +6,10 @@
 
 template<typename T> class Freelist {
     private:
-        T                         m_NULL;
-        std::vector<T>            m_Items;
-        std::vector<unsigned int> m_Freelist;
-        size_t                    m_Size;
+        T                          m_NULL;
+        std::vector<T>             m_Items;
+        std::vector<unsigned int>  m_Freelist;
+        size_t                     m_Size;
     public:
         Freelist() {
             m_Size = 0;

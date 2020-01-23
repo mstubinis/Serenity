@@ -16,10 +16,10 @@ class BindableResource: public EngineResource{
         virtual void unbind();
 
         template<class T> void setCustomBindFunctor  (const T& functor){ 
-            m_CustomBindFunctor   = std::bind<void>(functor, this); 
+            m_CustomBindFunctor = [&]() { functor(this); };
         }
         template<class T> void setCustomUnbindFunctor(const T& functor){ 
-            m_CustomUnbindFunctor = std::bind<void>(functor, this); 
+            m_CustomUnbindFunctor = [&]() { functor(this); };
         }
 };
 #endif

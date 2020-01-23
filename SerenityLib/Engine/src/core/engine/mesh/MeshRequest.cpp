@@ -46,9 +46,8 @@ void InternalMeshRequestPublicInterface::Request(MeshRequest& meshRequest) {
             const bool valid = InternalMeshRequestPublicInterface::Populate(meshRequest);
             if (valid){
                 if (meshRequest.async){
-                    const auto& reference = std::ref(meshRequest);
-                    const auto& job = std::bind(&InternalMeshRequestPublicInterface::LoadCPU, reference);
-                    const auto& cbk = std::bind(&InternalMeshRequestPublicInterface::LoadGPU, reference);
+                    const auto& job = [&]() { InternalMeshRequestPublicInterface::LoadCPU(meshRequest); };
+                    const auto& cbk = [&]() { InternalMeshRequestPublicInterface::LoadGPU(meshRequest); };
                     threading::addJobWithPostCallback(job, cbk);
                 }else{
                     InternalMeshRequestPublicInterface::LoadCPU(meshRequest);

@@ -33,7 +33,7 @@ class Button : public Widget, public GUIRenderElement {
         void setOnClickToBePulsed(const bool pulsed = true);
 
         template<class T> void setOnClickFunctor(const T& functor) { 
-            m_FunctorOnClick = std::bind<void>(functor, this); 
+            m_FunctorOnClick = [&]() { functor(this); };
         }
 
         void enable();

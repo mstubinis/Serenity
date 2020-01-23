@@ -1879,25 +1879,25 @@ void Renderer::alignmentOffset(const Alignment::Type& align, float& x, float& y,
 }
 void Renderer::renderTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& align, const glm::vec4& scissor) {
     priv::API2DCommand command;
-    command.func = std::bind<void>(&RenderingAPI2D::RenderTriangle, position, color, angle, width, height, depth, align, scissor);
+    command.func = [=]() { RenderingAPI2D::RenderTriangle(position, color, angle, width, height, depth, align, scissor); };
     command.depth = depth;
     renderManagerImpl->m_2DAPICommands.push_back(std::move(command));
 }
 void Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float width, const float height, const float angle, const float depth, const Alignment::Type& align, const glm::vec4& scissor){
     priv::API2DCommand command;
-    command.func = std::bind<void>(&RenderingAPI2D::Render2DTexture, nullptr, pos, col, angle, glm::vec2(width, height), depth, align, scissor);
+    command.func = [=]() { RenderingAPI2D::Render2DTexture(nullptr, pos, col, angle, glm::vec2(width, height), depth, align, scissor); };
     command.depth = depth;
     renderManagerImpl->m_2DAPICommands.push_back(std::move(command));
 }
 void Renderer::renderTexture(const Texture& tex, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const Alignment::Type& align, const glm::vec4& scissor){
     priv::API2DCommand command;
-    command.func = std::bind<void>(&RenderingAPI2D::Render2DTexture, &tex, p, c, a, s, d, align, scissor);
+    command.func = [=, &tex]() { RenderingAPI2D::Render2DTexture(&tex, p, c, a, s, d, align, scissor); };
     command.depth = d;
     renderManagerImpl->m_2DAPICommands.push_back(std::move(command));
 }
 void Renderer::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const TextAlignment::Type& align, const glm::vec4& scissor) {
     priv::API2DCommand command;
-    command.func = std::bind<void>(&RenderingAPI2D::Render2DText, t, std::ref(fnt), p, c, a, s, d, align, scissor);
+    command.func = [=, &fnt]() { RenderingAPI2D::Render2DText(t, fnt, p, c, a, s, d, align, scissor); };
     command.depth = d;
     renderManagerImpl->m_2DAPICommands.push_back(std::move(command));
 }

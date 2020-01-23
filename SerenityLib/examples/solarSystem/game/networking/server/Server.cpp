@@ -349,7 +349,7 @@ void Server::update(Server* thisServer, const double& dt) {
 
         //TODO: it works but it's kind of hacky, in the future create a standalone server exe ///////////////////////////////////////////////////
         
-        auto updateClientThread = [&](ServerClientThread& clientThread) {
+        auto lambda_updateClientThread = [&](ServerClientThread& clientThread) {
             for (auto& clientItr : clientThread.m_Clients) {
                 auto& client = *clientItr.second;
                 const auto thread_active = clientThread.m_Active.load(std::memory_order_relaxed);
@@ -360,10 +360,8 @@ void Server::update(Server* thisServer, const double& dt) {
             return false;
         };
         for (auto& thread : server.m_Threads) {
-            priv::threading::addJobRef(updateClientThread, *thread);
+            priv::threading::addJobRef(lambda_updateClientThread, *thread);
         }
-        //epriv::threading::waitForAll();
-        
         //////////////////////////////////////////////////////////////////////////////////////////////
         //updateRemoveDisconnectedClients(server);
     }

@@ -524,10 +524,10 @@ Ring::Ring(vector<RingInfo>& ring_list, Planet* parent){
 Ring::~Ring(){
 }
 void Ring::internal_make_ring_image(const vector<RingInfo>& ring_list){
-    sf::Image ringImage;
-    ringImage.create(1024, 2, sf::Color(0,0,0,0));
-    const auto ringImageX = ringImage.getSize().x;
-    const auto ringImageY = ringImage.getSize().y;
+    sf::Image sf_ringImage;
+    sf_ringImage.create(1024, 2, sf::Color(0,0,0,0));
+    const auto ringImageX = sf_ringImage.getSize().x;
+    const auto ringImageY = sf_ringImage.getSize().y;
     const auto two_fifty_five = static_cast<sf::Uint8>(255);
     for(auto& ringInfo: ring_list){
         sf::Color paint_color(static_cast<sf::Uint8>(ringInfo.color.r), static_cast<sf::Uint8>(ringInfo.color.g), static_cast<sf::Uint8>(ringInfo.color.b), two_fifty_five);
@@ -543,8 +543,8 @@ void Ring::internal_make_ring_image(const vector<RingInfo>& ring_list){
             int xBack  =  ringInfo.position - i;
             int xFront =  ringInfo.position + i;
             if (xBack > 0 && xFront < static_cast<int>(ringImageX)) {
-                const sf::Color& canvas_color_front = ringImage.getPixel(xFront, 0);
-                const sf::Color& canvas_color_back = ringImage.getPixel(xBack,  0);
+                const sf::Color& canvas_color_front = sf_ringImage.getPixel(xFront, 0);
+                const sf::Color& canvas_color_back = sf_ringImage.getPixel(xBack,  0);
                 sf::Color finalColorFront = Math::PaintersAlgorithm(paint_color, canvas_color_front);
                 sf::Color finalColorBack  = Math::PaintersAlgorithm(paint_color, canvas_color_back);
                 if (ringInfo.color.r < 0 && ringInfo.color.g < 0 && ringInfo.color.b < 0) {
@@ -553,8 +553,8 @@ void Ring::internal_make_ring_image(const vector<RingInfo>& ring_list){
                     finalColorBack  = sf::Color(canvas_color_back.r,  canvas_color_back.g,  canvas_color_back.b, two_fifty_five - paint_color.a);
                 }
                 for (uint s = 0; s < ringImageY; ++s) {
-                    ringImage.setPixel(xFront, s, finalColorFront);
-                    ringImage.setPixel(xBack,  s, finalColorBack);
+                    sf_ringImage.setPixel(xFront, s, finalColorFront);
+                    sf_ringImage.setPixel(xBack,  s, finalColorBack);
                 }
             }
         }
@@ -564,9 +564,8 @@ void Ring::internal_make_ring_image(const vector<RingInfo>& ring_list){
     auto material_name = m_Parent->getName() + "RingMaterial_" + to_string(size);
     auto* texture = Resources::getTexture(texture_name);
     if (!texture) {
-        texture = NEW Texture(ringImage, texture_name, false, ImageInternalFormat::SRGB8_ALPHA8);
-        texture->setAnisotropicFiltering(2.0f);
-        priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
+        auto texture_handle = Resources::loadTextureAsync(sf_ringImage, texture_name, ImageInternalFormat::SRGB8_ALPHA8, false);
+        texture = (Texture*)texture_handle.get();
     }
     auto handle = Resources::loadMaterial(material_name, texture);
     m_MaterialHandle = handle;

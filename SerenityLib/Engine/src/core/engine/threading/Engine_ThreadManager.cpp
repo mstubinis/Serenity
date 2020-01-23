@@ -21,6 +21,9 @@ void priv::ThreadManager::cleanup() {
 void priv::ThreadManager::_update(const double& dt){ 
     m_ThreadPool->update();
 }
+void priv::threading::addJobRef(std::function<void()>& func) {
+    finalizeJob(func);
+}
 void priv::threading::finalizeJob(std::function<void()>& task){
     threadManager->m_ThreadPool->addJob(std::move(task));  
 }

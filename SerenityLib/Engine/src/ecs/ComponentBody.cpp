@@ -1100,7 +1100,6 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_Compon
         }
     };
     auto split = priv::threading::splitVectorPairs(components);
-    const auto fdt = static_cast<float>(dt);
     for (auto& pair : split) {
         priv::threading::addJobRef(lamda_update, pair);
     }

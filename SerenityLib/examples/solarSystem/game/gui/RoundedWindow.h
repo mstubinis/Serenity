@@ -19,11 +19,11 @@ class RoundedWindow: public Button {
         std::function<glm::vec2()> m_PositionFunctor;
     public:
         template<typename T> void setSizeFunctor(const T& functor) {
-            m_SizeFunctor = std::bind<glm::vec2>(functor, this);
+            m_SizeFunctor = [&]() -> glm::vec2 { return functor(this); };
         }
 
         template<typename T> void setPositionFunctor(const T& functor) {
-            m_PositionFunctor = std::bind<glm::vec2>(functor, this);
+            m_PositionFunctor = [&]() -> glm::vec2 { return functor(this); };
         }
     public:
         RoundedWindow(Font& font, const float& x, const float& y, const float& width, const float& height, const float& depth,const unsigned int& borderSize = 1, const std::string& labelText = "");

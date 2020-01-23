@@ -72,7 +72,7 @@ void ThreadPool::init(const unsigned int num_threads) {
 }
 void ThreadPool::addJob(std::function<void()>&& job) {
     EmptyCallback emptyCallback;
-    internal_create_packaged_task(std::move(job), std::bind<void>(std::move(emptyCallback)));
+    internal_create_packaged_task(std::move(job), std::move(emptyCallback));
 }
 void ThreadPool::addJob(std::function<void()>&& job, std::function<void()>&& callback) {
     internal_create_packaged_task(std::move(job), std::move(callback));

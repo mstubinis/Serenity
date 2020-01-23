@@ -21,10 +21,10 @@ MaterialRequest::MaterialRequest(const string& name, const string& diffuse, cons
     auto d  = NEW TextureRequest(diffuse,    false,  ImageInternalFormat::SRGB8_ALPHA8);
     auto n  = NEW TextureRequest(normal,     false,  ImageInternalFormat::RGBA8);
     auto g  = NEW TextureRequest(glow,       false,  ImageInternalFormat::R8);
-    auto s  = NEW TextureRequest(specular,   false, ImageInternalFormat::R8);
-    auto a  = NEW TextureRequest(ao,         false, ImageInternalFormat::R8);
-    auto m  = NEW TextureRequest(metalness,  false, ImageInternalFormat::R8);
-    auto sm = NEW TextureRequest(smoothness, false, ImageInternalFormat::R8);
+    auto s  = NEW TextureRequest(specular,   false,  ImageInternalFormat::R8);
+    auto a  = NEW TextureRequest(ao,         false,  ImageInternalFormat::R8);
+    auto m  = NEW TextureRequest(metalness,  false,  ImageInternalFormat::R8);
+    auto sm = NEW TextureRequest(smoothness, false,  ImageInternalFormat::R8);
 
     part.textureRequests.push_back(d);
     part.textureRequests.push_back(n);
@@ -73,9 +73,8 @@ void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {
             textureRequest->selfClean = false;
             textureRequest->requestAsync();
         }
-        const auto& reference = std::ref(request);
-        const auto& job = std::bind(&InternalMaterialRequestPublicInterface::LoadCPU, reference);
-        const auto& cbk = std::bind(&InternalMaterialRequestPublicInterface::LoadGPU, reference);
+        const auto& job = [&]() { InternalMaterialRequestPublicInterface::LoadCPU(request); };
+        const auto& cbk = [&]() { InternalMaterialRequestPublicInterface::LoadGPU(request); };
         threading::addJobWithPostCallback(job, cbk);
     }else{
         for (auto& textureRequest : request.part.textureRequests) {

@@ -2,6 +2,10 @@
 #ifndef ENGINE_ENGINE_RESOURCES_H
 #define ENGINE_ENGINE_RESOURCES_H
 
+namespace sf {
+    class Image;
+};
+
 struct Handle;
 struct EngineOptions;
 class  EngineResource;
@@ -125,6 +129,12 @@ namespace Engine{
         );
         Handle loadTextureAsync(
             const std::string& file,
+            const ImageInternalFormat::Format& = ImageInternalFormat::SRGB8_ALPHA8,
+            const bool& mipmaps = false
+        );
+        Handle loadTextureAsync(
+            sf::Image& sfImage,
+            const std::string& texture_name,
             const ImageInternalFormat::Format& = ImageInternalFormat::SRGB8_ALPHA8,
             const bool& mipmaps = false
         );

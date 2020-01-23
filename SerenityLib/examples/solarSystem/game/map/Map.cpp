@@ -326,7 +326,6 @@ void Map::loading_screen_render(LoadingScreen* loadingScreen, const float& progr
     loadingScreen->setProgress(progress);
     loadingScreen->render();
     Engine::priv::Core::m_Engine->render2DApi(Resources::getWindow(), 0.166666);
-    std::this_thread::sleep_for(std::chrono::milliseconds(55));
 }
 
 const bool Map::full_load(LoadingScreen* loadingScreen) {

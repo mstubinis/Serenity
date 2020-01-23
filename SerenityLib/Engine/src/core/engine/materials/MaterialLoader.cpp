@@ -170,17 +170,6 @@ void priv::InternalMaterialPublicInterface::LoadCPU(Material& material) {
 
 }
 void priv::InternalMaterialPublicInterface::LoadGPU(Material& material) {
-    /*
-    for (auto& component : m_Components) {
-        if (component) {
-            Texture& texture = *component->texture();
-            texture.incrementUseCount();
-            if (!texture.isLoaded() && texture.useCount() > 0) {
-                texture.load();
-            }
-        }
-    }
-    */
     //TODO: move this to somewhere with more user control
     for (auto& component : material.m_Components) {
         if (component) {
@@ -193,7 +182,6 @@ void priv::InternalMaterialPublicInterface::LoadGPU(Material& material) {
     //cout << "(Material) ";
     material.EngineResource::load();
 
-
     Event e(EventType::MaterialLoaded);
     e.eventMaterialLoaded = EventMaterialLoaded(&material);
     priv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(e);
@@ -203,17 +191,7 @@ void priv::InternalMaterialPublicInterface::UnloadCPU(Material& material) {
     material.EngineResource::unload();
 }
 void priv::InternalMaterialPublicInterface::UnloadGPU(Material& material) {
-    /*
-    for (auto& component : m_Components) {
-        if (component) {
-            Texture& texture = *component->texture();
-            texture.decrementUseCount();
-            if (texture.useCount() == 0 && texture.isLoaded()) {
-                texture.unload();
-            }
-        }
-    }
-    */
+
 }
 void priv::InternalMaterialPublicInterface::Load(Material& material) {
     if (!material.isLoaded()) {

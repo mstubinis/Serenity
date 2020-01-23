@@ -13,7 +13,10 @@ namespace Engine {
                 std::vector<EntityPOD>       _pool;
                 std::vector<unsigned int>    _freelist;
             public:
-                ECSEntityPool() {}
+                ECSEntityPool() {
+                    _pool.reserve(5000);
+                    _freelist.reserve(5000);
+                }
                 ~ECSEntityPool() {}
                 ECSEntityPool(const ECSEntityPool&)                      = delete;
                 ECSEntityPool& operator=(const ECSEntityPool&)           = delete;
@@ -30,12 +33,12 @@ namespace Engine {
                         _pool.emplace_back(0, 0);
                         _freelist.emplace_back(static_cast<unsigned int>(_pool.size()) - 1U);
                     }
-                    const auto id = _freelist.back();
+                    const auto id      = _freelist.back();
                     _freelist.pop_back();
                     EntityPOD& element = _pool[id];
-                    element.ID = id + 1;
-                    element.sceneID = scene.id();
-                    TEntity entity = TEntity(element.ID, element.sceneID, element.versionID);
+                    element.ID         = id + 1;
+                    element.sceneID    = scene.id();
+                    TEntity entity     = TEntity(element.ID, element.sceneID, element.versionID);
                     return std::move(entity);
                 }
                 EntityPOD* getEntity(const unsigned int& entityData) {

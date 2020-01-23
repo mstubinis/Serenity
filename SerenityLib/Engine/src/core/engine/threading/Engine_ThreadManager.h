@@ -122,7 +122,11 @@ namespace Engine{
                 std::function<void()> job = std::bind(_job, std::ref(std::forward<ARGS>(_args))...);
                 finalizeJob(job);
             }
-            template<typename Job, typename... ARGS> void addJob(Job& _job,ARGS&&... _args){
+
+            void addJobRef(std::function<void()>& func);
+
+
+            template<typename Job, typename... ARGS> void addJob(Job& _job, ARGS&&... _args){
                 std::function<void()> job = std::bind(_job, std::forward<ARGS>(_args)...);
                 finalizeJob(job);
             }
@@ -135,7 +139,7 @@ namespace Engine{
                 std::function<void()> then = std::bind(_then);
                 finalizeJob(job, then);
             }
-            template<typename Job, typename Then, typename... ARGS> void addJobWithPostCallback(Job& _job, Then& _then,ARGS&&... _args){
+            template<typename Job, typename Then, typename... ARGS> void addJobWithPostCallback(Job& _job, Then& _then, ARGS&&... _args){
                 std::function<void()> job = std::bind(_job, std::forward<ARGS>(_args)...);
                 std::function<void()> then = std::bind(_then);
                 finalizeJob(job, then);

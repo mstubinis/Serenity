@@ -20,7 +20,7 @@ class ShipToken final : public Button {
         ~ShipToken();
 
         template<class T> void setOnClickFunctor(const T& functor) {
-            m_FunctorOnClick = std::bind<void>(functor, this);
+            m_FunctorOnClick = [&]() { functor(this); };
         }
 
         void lightUp();

@@ -115,6 +115,8 @@ void Texture::setFilter(const GLuint& type, const TextureFilter::Filter& filter)
     Texture::setMaxFilter(type, filter);
 }
 void Texture::setAnisotropicFiltering(const float& anisotropicFiltering){
+    if (m_TextureAddress.size() == 0)
+        return;
     Engine::Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     if(Engine::priv::Renderer::OPENGL_VERSION >= 46){
     	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, const_cast<GLfloat*>(&anisotropicFiltering));
@@ -134,6 +136,8 @@ const bool Texture::mipmapped() const {
     return m_Mipmapped; 
 }
 const bool Texture::compressed() const {
+    if (m_ImagesDatas.size() == 0)
+        return false;
     const auto& img = m_ImagesDatas[0].get();
     auto& mip       = img->mipmaps[0];
     return (mip.compressedSize > 0) ? true : false;

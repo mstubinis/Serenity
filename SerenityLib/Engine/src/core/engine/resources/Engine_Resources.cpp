@@ -243,6 +243,15 @@ Handle Resources::loadTextureAsync(const string& file, const ImageInternalFormat
     }
     return Resources::getTextureHandle(texture);
 }
+Handle Resources::loadTextureAsync(sf::Image& sfImage, const string& texture_name, const ImageInternalFormat::Format& internalFormat, const bool& mipmaps) {
+    auto* texture = resourceManager->HasResource<Texture>(texture_name);
+    if (!texture) {
+        auto* request = NEW TextureRequestFromMemory(sfImage, texture_name, mipmaps, internalFormat); //to extend the lifetime to the threads, we manually delete later
+        request->requestAsync();
+        return request->part.handle;
+    }
+    return Resources::getTextureHandle(texture);
+}
 
 Handle Resources::loadMaterial(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) {
     auto* material = resourceManager->HasResource<Material>(name);
