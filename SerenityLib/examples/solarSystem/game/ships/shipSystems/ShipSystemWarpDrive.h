@@ -10,6 +10,11 @@ class ShipSystemWarpDrive final : public ShipSystem {
         ShipSystemWarpDrive(Ship&);
         ~ShipSystemWarpDrive();
 
+        ShipSystemWarpDrive(const ShipSystemWarpDrive& other)                = delete;
+        ShipSystemWarpDrive& operator=(const ShipSystemWarpDrive& other)     = delete;
+        ShipSystemWarpDrive(ShipSystemWarpDrive&& other) noexcept            = delete;
+        ShipSystemWarpDrive& operator=(ShipSystemWarpDrive&& other) noexcept = delete;
+
         void update(const double& dt);
 };
 

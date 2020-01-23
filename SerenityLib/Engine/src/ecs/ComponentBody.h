@@ -61,7 +61,7 @@ namespace Engine {
     };
 };
 
-class ComponentBody : public ComponentBaseClass {
+class ComponentBody : public ComponentBaseClass, public EventObserver {
     friend struct Engine::priv::ComponentBody_UpdateFunction;
     friend struct Engine::priv::ComponentBody_ComponentAddedToEntityFunction;
     friend struct Engine::priv::ComponentBody_EntityAddedToSceneFunction;
@@ -122,6 +122,8 @@ class ComponentBody : public ComponentBaseClass {
         ComponentBody& operator=(ComponentBody&& other) noexcept;
 
         ~ComponentBody();
+
+        void onEvent(const Event& _event) override;
 
         template<typename T> void setCollisionFunctor(const T& functor) {
             m_CollisionFunctor = std::bind<void>(functor, std::placeholders::_1);

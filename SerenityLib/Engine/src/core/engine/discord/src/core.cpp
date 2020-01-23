@@ -16,7 +16,7 @@ discord::Result discord::Core::Create(ClientId clientId, std::uint64_t flags, Co
         return Result::InternalError;
     }
 
-    (*instance) = new Core();
+    (*instance) = NEW Core();
     DiscordCreateParams params{};
     DiscordCreateParamsSetDefault(&params);
     params.client_id = clientId;

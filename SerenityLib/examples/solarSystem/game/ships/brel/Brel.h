@@ -31,7 +31,6 @@ class Brel final : public Ship {
 
         Brel::BrelWingSpanState::State m_WingState;
         glm_vec3 m_ShieldScale;
-        glm_vec3 m_InitialCamera;
         float m_WingRotation;
     public:
         Brel(

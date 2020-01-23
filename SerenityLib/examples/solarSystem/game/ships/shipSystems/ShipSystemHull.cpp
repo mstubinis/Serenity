@@ -28,7 +28,7 @@ ShipSystemHull::ShipSystemHull(Ship& _ship, Map& map, const float health, const 
     m_RechargeTimer = 0.0f;
 
     auto& hullBody = *m_HullEntity.addComponent<ComponentBody>(CollisionType::TriangleShapeStatic);
-    auto* col = NEW Collision(&hullBody, *_ship.getComponent<ComponentModel>(), _ship.getComponent<ComponentBody>()->mass(), CollisionType::TriangleShapeStatic);
+    auto* col = NEW Collision(hullBody, *_ship.getComponent<ComponentModel>(), _ship.getComponent<ComponentBody>()->mass(), CollisionType::TriangleShapeStatic);
     hullBody.setCollision(col);
     hullBody.addCollisionFlag(CollisionFlag::NoContactResponse);
     hullBody.setCollisionGroup(CollisionFilter::_Custom_3); //group 3 are hull

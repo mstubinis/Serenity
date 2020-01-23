@@ -173,7 +173,7 @@ ShipSystemShields::ShipSystemShields(Ship& _ship, Map& map, float fwd, float aft
     shieldBody.setUserPointer1(&_ship);
     shieldBody.setUserPointer2(&_ship);
     Mesh& shieldColMesh = *(Mesh*)ResourceManifest::ShieldColMesh.get();
-    Collision* c = NEW Collision(CollisionType::TriangleShapeStatic, shieldColMesh, shieldBody.mass());
+    Collision* c = NEW Collision(shieldBody, CollisionType::TriangleShapeStatic, shieldColMesh, shieldBody.mass());
     c->getBtShape()->setMargin(0.08f);
     shieldBody.setCollision(c);
 

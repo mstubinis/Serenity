@@ -15,11 +15,12 @@ Constraint::Constraint(btRigidBody* a, btRigidBody* b){
     m_RigidBodyB->addConstraintRef(m_Constraint);
 }
 Constraint::~Constraint() {
+    SAFE_DELETE(m_Constraint);
 }
 void Constraint::makeHingeConstraint(glm::vec3& axisA, glm::vec3& axisB,glm::vec3 locationA, glm::vec3 locationB){
     m_RigidBodyA->removeConstraintRef(m_Constraint);
     m_RigidBodyB->removeConstraintRef(m_Constraint);
-    delete(m_Constraint);
+    SAFE_DELETE(m_Constraint);
     m_ConstraintType = ConstraintType::Hinge;
 
     btVector3 la(locationA.x,locationA.y,locationA.z);

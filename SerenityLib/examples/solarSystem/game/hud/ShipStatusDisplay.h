@@ -39,6 +39,11 @@ class ShipStatusDisplay final {
         ShipStatusDisplay(HUD&, const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, const Alignment::Type& alignment);
         ~ShipStatusDisplay();
 
+        ShipStatusDisplay(const ShipStatusDisplay& other)                = delete;
+        ShipStatusDisplay& operator=(const ShipStatusDisplay& other)     = delete;
+        ShipStatusDisplay(ShipStatusDisplay&& other) noexcept            = delete;
+        ShipStatusDisplay& operator=(ShipStatusDisplay&& other) noexcept = delete;
+
         void onResize(const unsigned int& width, const unsigned int& height);
 
         void setTarget(Planet*);

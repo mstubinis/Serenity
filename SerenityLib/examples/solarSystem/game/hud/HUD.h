@@ -26,6 +26,11 @@ class HUD final {
         HUD(Map&, Font&);
         ~HUD();
 
+        HUD(const HUD& other)                = delete;
+        HUD& operator=(const HUD& other)     = delete;
+        HUD(HUD&& other) noexcept            = delete;
+        HUD& operator=(HUD&& other) noexcept = delete;
+
         SensorStatusDisplay& getSensorDisplay();
         ShipStatusDisplay&   getShipStatusDisplay();
         ShipStatusDisplay&   getShipTargetStatusDisplay();

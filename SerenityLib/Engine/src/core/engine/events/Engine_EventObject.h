@@ -5,8 +5,40 @@
 #include <core/engine/events/Engine_EventIncludes.h>
 
 class  Scene;
+class  Mesh;
+class  Material;
+class  Texture;
 namespace Engine{
 namespace priv{
+
+    struct EventMeshLoaded final {
+        Mesh* mesh;
+        EventMeshLoaded() {
+            mesh = nullptr;
+        }
+        EventMeshLoaded(Mesh* mesh_) {
+            mesh = mesh_;
+        }
+    };
+    struct EventMaterialLoaded final {
+        Material* material;
+        EventMaterialLoaded() {
+            material = nullptr;
+        }
+        EventMaterialLoaded(Material* material_) {
+            material = material_;
+        }
+    };
+    struct EventTextureLoaded final {
+        Texture* texture;
+        EventTextureLoaded() {
+            texture = nullptr;
+        }
+        EventTextureLoaded(Texture* texture_) {
+            texture = texture_;
+        }
+    };
+
     struct EventWindowResized final{ 
         unsigned int  width;
         unsigned int  height;
@@ -140,6 +172,9 @@ struct Event final{
         Engine::priv::EventJoystickConnection         eventJoystickConnection;
         Engine::priv::EventSoundStatusChanged         eventSoundStatusChanged;
         Engine::priv::EventSceneChanged               eventSceneChanged;
+        Engine::priv::EventMeshLoaded                 eventMeshLoaded;
+        Engine::priv::EventMaterialLoaded             eventMaterialLoaded;
+        Engine::priv::EventTextureLoaded              eventTextureLoaded;
     };
     Event() = delete;
     Event(const EventType::Type& type_) {

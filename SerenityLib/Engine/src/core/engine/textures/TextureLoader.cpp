@@ -4,6 +4,7 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/renderer/FramebufferObject.h>
+#include <core/engine/events/Engine_EventObject.h>
 
 #include <boost/filesystem.hpp>
 
@@ -558,6 +559,10 @@ void InternalTexturePublicInterface::LoadGPU(Texture& texture) {
 
     //cout << "(Texture) ";
     texture.EngineResource::load();
+
+    Event e(EventType::TextureLoaded);
+    e.eventTextureLoaded = EventTextureLoaded(&texture);
+    priv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(e);
 }
 void InternalTexturePublicInterface::UnloadCPU(Texture& texture) {
     for (auto& image : texture.m_ImagesDatas) {

@@ -326,6 +326,7 @@ void Map::loading_screen_render(LoadingScreen* loadingScreen, const float& progr
     loadingScreen->setProgress(progress);
     loadingScreen->render();
     Engine::priv::Core::m_Engine->render2DApi(Resources::getWindow(), 0.166666);
+    std::this_thread::sleep_for(std::chrono::milliseconds(55));
 }
 
 const bool Map::full_load(LoadingScreen* loadingScreen) {
@@ -472,13 +473,13 @@ const bool Map::full_load(LoadingScreen* loadingScreen) {
                         glowFile = "";
                     }
                     if (!loadedMaterials.count(MATERIAL_NAME)) {
-                        Handle material_handle = Resources::loadMaterial(MATERIAL_NAME, TEXTURE, normalFile, glowFile, "", "", "", "");
+                        Handle material_handle = Resources::loadMaterialAsync(MATERIAL_NAME, TEXTURE, normalFile, glowFile, "", "", "", "");
                         loadedMaterials.emplace(MATERIAL_NAME, material_handle);
                     }
                 }
                 if (!MESH_NAME.empty()) {
                     if (!loadedMeshes.count(MESH_NAME)) {
-                        Handle mesh_handle = Resources::loadMesh(MESH)[0];
+                        Handle mesh_handle = Resources::loadMeshAsync(MESH)[0];
                         loadedMeshes.emplace(MESH_NAME, mesh_handle);
                     }
                 }
@@ -547,10 +548,9 @@ const bool Map::full_load(LoadingScreen* loadingScreen) {
                 }else if (line[0] == 'R') {//Rings
                     if (!PARENT.empty()) {
                         if (!planetRings.count(PARENT)) {
-                            vector<RingInfo> rings;
-                            planetRings.emplace(PARENT, rings);
+                            planetRings.emplace(PARENT, vector<RingInfo>{});
                         }
-                        planetRings.at(PARENT).push_back(RingInfo(static_cast<uint>(POSITION) / 10, static_cast<uint>(RADIUS) / 10, glm::ivec3(R, G, B), BREAK));
+                        planetRings.at(PARENT).emplace_back(static_cast<uint>(POSITION) / 10, static_cast<uint>(RADIUS) / 10, glm::ivec3(R, G, B), BREAK);
                     }
                 }else if (line[0] == 'L') {//Lagrange Point               
                 }
@@ -568,7 +568,7 @@ const bool Map::full_load(LoadingScreen* loadingScreen) {
     m_LoadStatus = Map::MapLoadStatus::FullyLoaded;
 
     loading_screen_render(loadingScreen, 1.0f);
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     return true;
 }
 Ship* Map::createShipDull(const string& shipClass, const glm::vec3& position, Scene* scene) {

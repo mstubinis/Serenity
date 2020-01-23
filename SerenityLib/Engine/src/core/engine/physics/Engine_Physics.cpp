@@ -106,7 +106,7 @@ bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionOb
 
             a.collisionResponse(dataA);
             b.collisionResponse(dataB);
-            cp.setDistance((btScalar)9999999999999.0); //hacky way of saying "dont process this again"
+            cp.setDistance((btScalar)999999999999999999.0); //hacky way of saying "dont process this again"
         }
     }
     return true;
@@ -115,9 +115,9 @@ bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionOb
 priv::PhysicsManager* physicsManager;
 
 priv::PhysicsManager::PhysicsManager(){ 
-    m_Paused = false;
-    m_Data = nullptr;
-    physicsManager = this;
+    m_Paused                = false;
+    m_Data                  = nullptr;
+    physicsManager          = this;
     m_NumberOfStepsPerFrame = 1;
 }
 priv::PhysicsManager::~PhysicsManager(){ 
@@ -131,11 +131,11 @@ void priv::PhysicsManager::cleanup() {
     for (int i = 0; i < collisionObjCount; ++i) {
         btCollisionObject* obj = world.getCollisionObjectArray()[i];
         if (obj) {
-            //btRigidBody* body = btRigidBody::upcast(obj);
-            //if (body) {
-                //auto* motionState = body->getMotionState();
-                //SAFE_DELETE(motionState);
-            //}
+            btRigidBody* body = btRigidBody::upcast(obj);
+            if (body) {
+                auto* motionState = body->getMotionState();
+                SAFE_DELETE(motionState);
+            }
             world.removeCollisionObject(obj);
             SAFE_DELETE(obj);
         }
@@ -153,9 +153,8 @@ void priv::PhysicsManager::_update(const double& dt,int maxsteps, float other){
         return;
     m_Data->world->stepSimulation(static_cast<btScalar>(dt), maxsteps, static_cast<btScalar>(other));
 
-    auto& dispatcher = *m_Data->dispatcher;
-    for (int i = 0; i < dispatcher.getNumManifolds(); ++i) {
-        btPersistentManifold& contactManifold = *dispatcher.getManifoldByIndexInternal(i);
+    for (int i = 0; i < m_Data->dispatcher->getNumManifolds(); ++i) {
+        btPersistentManifold& contactManifold = *m_Data->dispatcher->getManifoldByIndexInternal(i);
 
         for (int j = 0; j < contactManifold.getNumContacts(); ++j) {
             btManifoldPoint& cp = contactManifold.getContactPoint(j);
@@ -164,12 +163,9 @@ void priv::PhysicsManager::_update(const double& dt,int maxsteps, float other){
                 btCollisionObject* collisionObjectB = const_cast<btCollisionObject*>(contactManifold.getBody1());
                 auto aPtr = collisionObjectA->getUserPointer();
                 auto bPtr = collisionObjectB->getUserPointer();
-                ComponentBody* _a = static_cast<ComponentBody*>(aPtr);
-                ComponentBody* _b = static_cast<ComponentBody*>(bPtr);
-                if (_a && _b) {
-                    ComponentBody& a = *_a;
-                    ComponentBody& b = *_b;
-
+                ComponentBody* a_ = static_cast<ComponentBody*>(aPtr);
+                ComponentBody* b_ = static_cast<ComponentBody*>(bPtr);
+                if (a_ && b_) {
                     glm::vec3 ptA = Math::btVectorToGLM(cp.getPositionWorldOnA());
                     glm::vec3 ptB = Math::btVectorToGLM(cp.getPositionWorldOnB());
                     glm::vec3 normalOnB = Math::btVectorToGLM(cp.m_normalWorldOnB);
@@ -180,15 +176,15 @@ void priv::PhysicsManager::_update(const double& dt,int maxsteps, float other){
                     glm::vec3 normalA = glm::normalize(ptB - ptA);
                     glm::vec3 normalB = glm::normalize(ptA - ptB);
 
-                    CollisionCallbackEventData dataA(a, b, ptA, ptB, normalOnB, localA, localB, normalA);
+                    CollisionCallbackEventData dataA(*a_, *b_, ptA, ptB, normalOnB, localA, localB, normalA);
                     dataA.ownerCollisionObj = collisionObjectA;
                     dataA.otherCollisionObj = collisionObjectB;
-                    CollisionCallbackEventData dataB(b, a, ptB, ptA, normalOnB, localB, localA, normalB);
+                    CollisionCallbackEventData dataB(*b_, *a_, ptB, ptA, normalOnB, localB, localA, normalB);
                     dataB.ownerCollisionObj = collisionObjectB;
                     dataB.otherCollisionObj = collisionObjectA;
 
-                    a.collisionResponse(dataA);
-                    b.collisionResponse(dataB);
+                    a_->collisionResponse(dataA);
+                    b_->collisionResponse(dataB);
 
                     cp.setDistance((btScalar)9999999999999.0); //hacky way of saying "dont process this again"
                 }
@@ -266,11 +262,17 @@ void Physics::removeRigidBody(btRigidBody* rigidBody){
         }
     }
 }
+void Physics::removeCollisionObject(btCollisionObject* object) {
+    physicsManager->m_Data->world->removeCollisionObject(object);
+}
+
 void Physics::updateRigidBody(btRigidBody* rigidBody){ 
     physicsManager->m_Data->world->updateSingleAabb(rigidBody);
 }
 void Physics::addRigidBody(ComponentBody& body) {
-    Physics::addRigidBody(&const_cast<btRigidBody&>(body.getBtBody()), body.getCollisionGroup(), body.getCollisionMask());
+    auto* btBody = &body.getBtBody();
+    if(btBody)
+        Physics::addRigidBody(const_cast<btRigidBody*>(btBody), body.getCollisionGroup(), body.getCollisionMask());
 }
 void Physics::removeRigidBody(ComponentBody& body) {
     Physics::removeRigidBody(&const_cast<btRigidBody&>(body.getBtBody()));
@@ -298,9 +300,6 @@ RayCastResult _rayCastInternal_Nearest(const btVector3& start, const btVector3& 
     }
     return result;
 }
-
-
-
 vector<RayCastResult> _rayCastInternal(const btVector3& start, const btVector3& end, const unsigned short group, const unsigned short mask) {
     btCollisionWorld::AllHitsRayResultCallback RayCallback(start, end);
     RayCallback.m_collisionFilterMask = mask;
@@ -373,10 +372,6 @@ vector<RayCastResult> Physics::rayCast(const glm::vec3& start, const glm::vec3& 
     }
     return Physics::rayCast(start_, end_, objs, group, mask);
 }
-
-
-
-
 
 RayCastResult Physics::rayCastNearest(const btVector3& start, const btVector3& end, ComponentBody* ignored, const unsigned short group, const unsigned short mask) {
     if (ignored) {

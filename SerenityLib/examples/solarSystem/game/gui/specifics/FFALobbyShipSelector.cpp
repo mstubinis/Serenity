@@ -81,7 +81,7 @@ void FFALobbyShipSelector::init_window_contents(const PacketConnectionAccepted& 
                 ShipToken* ship_button = NEW ShipToken(ship_info, m_Font, 0, 0,  0.004f, true, this);
                 ship_button->setOnClickFunctor(ShipTokenOnClick());
 
-                m_ShipsFrame->addContent(ship_button, i);
+                m_ShipsFrame->addContent(ship_button, static_cast<unsigned int>(i));
             }
         }
     }

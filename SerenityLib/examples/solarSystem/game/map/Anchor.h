@@ -20,6 +20,11 @@ class Anchor final : public EntityWrapper {
         Anchor(const std::string& name, Map& map, const glm_vec3& position);
         ~Anchor();
 
+        Anchor(const Anchor& other)                = delete;
+        Anchor& operator=(const Anchor& other)     = delete;
+        Anchor(Anchor&& other) noexcept            = delete;
+        Anchor& operator=(Anchor&& other) noexcept = delete;
+
         const std::vector<Anchor*>& getChildren() const;
 
         void setName(const std::string&);

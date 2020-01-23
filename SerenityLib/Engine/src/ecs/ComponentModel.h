@@ -25,7 +25,7 @@ namespace Engine {
     };
 };
 
-class ComponentModel: public ComponentBaseClass {
+class ComponentModel: public ComponentBaseClass, public EventObserver {
     friend struct Engine::priv::ComponentModel_UpdateFunction;
     friend struct Engine::priv::ComponentModel_EntityAddedToSceneFunction;
     friend struct Engine::priv::ComponentModel_ComponentAddedToEntityFunction;
@@ -55,6 +55,8 @@ class ComponentModel: public ComponentBaseClass {
         ComponentModel& operator=(ComponentModel&& other) noexcept = default;
 
         ~ComponentModel();
+
+        void onEvent(const Event& _event) override;
 
         void setViewportFlag(const unsigned int flag);
         void addViewportFlag(const unsigned int flag);

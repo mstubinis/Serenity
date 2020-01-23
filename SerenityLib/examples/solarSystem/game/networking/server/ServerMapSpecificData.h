@@ -21,6 +21,11 @@ class ShipRespawning final {
         ShipRespawning(Server&);
         ~ShipRespawning();
 
+        ShipRespawning(const ShipRespawning& other)                = delete;
+        ShipRespawning& operator=(const ShipRespawning& other)     = delete;
+        ShipRespawning(ShipRespawning&& other) noexcept            = delete;
+        ShipRespawning& operator=(ShipRespawning&& other) noexcept = delete;
+
         void processShip(const std::string& shipMapKey, const std::string& shipClass, const std::string& closest_spawn_anchor);
 
         void removeShip(const std::string& shipMapKey);
@@ -39,6 +44,11 @@ class CollisionEntries final {
     public:
         CollisionEntries(Server&);
         ~CollisionEntries();
+
+        CollisionEntries(const CollisionEntries& other)                = delete;
+        CollisionEntries& operator=(const CollisionEntries& other)     = delete;
+        CollisionEntries(CollisionEntries&& other) noexcept            = delete;
+        CollisionEntries& operator=(CollisionEntries&& other) noexcept = delete;
 
         void removeShip(const std::string& shipMapKey);
 
@@ -65,6 +75,11 @@ class ServerMapSpecificData final {
     public:
         ServerMapSpecificData(Server&);
         ~ServerMapSpecificData();
+
+        ServerMapSpecificData(const ServerMapSpecificData& other)                = delete;
+        ServerMapSpecificData& operator=(const ServerMapSpecificData& other)     = delete;
+        ServerMapSpecificData(ServerMapSpecificData&& other) noexcept            = delete;
+        ServerMapSpecificData& operator=(ServerMapSpecificData&& other) noexcept = delete;
 
         void removeShip(const std::string& shipMapKey);
         void cleanup();

@@ -14,6 +14,11 @@ class ShipSystemReactor final : public ShipSystem {
         ShipSystemReactor(Ship&, const float maxPower, const float currentPower = -1);
         ~ShipSystemReactor();
 
+        ShipSystemReactor(const ShipSystemReactor& other)                = delete;
+        ShipSystemReactor& operator=(const ShipSystemReactor& other)     = delete;
+        ShipSystemReactor(ShipSystemReactor&& other) noexcept            = delete;
+        ShipSystemReactor& operator=(ShipSystemReactor&& other) noexcept = delete;
+
         void update(const double& dt);
 };
 

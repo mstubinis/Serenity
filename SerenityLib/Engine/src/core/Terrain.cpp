@@ -18,6 +18,7 @@
 using namespace Engine;
 
 Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& material, Scene* scene):EntityWrapper(*scene){
+    /*
     for(unsigned int i = 0; i < heightmapImage.getSize().x; ++i){
         for(unsigned int j = 0; j < heightmapImage.getSize().y; ++j){
             float pixel(heightmapImage.getPixel(i,j).r / 255.0f);
@@ -46,6 +47,7 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
     physics.setDynamic(false);
     physics.setGravity(0, 0, 0);
     Terrain::setScale(1,1,1);
+    */
 }
 Terrain::~Terrain(){
     m_Pixels.clear();

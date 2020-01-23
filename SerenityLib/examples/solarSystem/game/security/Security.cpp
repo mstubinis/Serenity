@@ -85,7 +85,7 @@ const string Security::argon2id(const string& salt, const string& input_password
 
     vector<uint8_t> salt_array;
     salt_array.reserve(salt_len);
-    for (int i = 0; i < salt_len; ++i) {
+    for (uint32_t i = 0; i < salt_len; ++i) {
         salt_array.push_back(static_cast<uint8_t>(salt[i]));
     }
 
@@ -105,7 +105,7 @@ const string Security::argon2i(const string& salt, const string& input_password,
 
     vector<uint8_t> salt_array;
     salt_array.reserve(salt_len);
-    for (int i = 0; i < salt_len; ++i) {
+    for (uint32_t i = 0; i < salt_len; ++i) {
         salt_array.push_back(static_cast<uint8_t>(salt[i]));
     }
 
@@ -125,7 +125,7 @@ const string Security::argon2d(const string& salt, const string& input_password,
 
     vector<uint8_t> salt_array;
     salt_array.reserve(salt_len);
-    for (int i = 0; i < salt_len; ++i) {
+    for (uint32_t i = 0; i < salt_len; ++i) {
         salt_array.push_back(static_cast<uint8_t>(salt[i]));
     }
 

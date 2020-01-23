@@ -304,6 +304,10 @@ class ShipSystemWeapons final : public ShipSystem {
         ShipSystemWeapons(Ship&);
         ~ShipSystemWeapons();
 
+        ShipSystemWeapons(const ShipSystemWeapons& other)                = delete;
+        ShipSystemWeapons& operator=(const ShipSystemWeapons& other)     = delete;
+        ShipSystemWeapons(ShipSystemWeapons&& other) noexcept            = delete;
+        ShipSystemWeapons& operator=(ShipSystemWeapons&& other) noexcept = delete;
 
         void fireBeamWeapons(EntityWrapper* target, Ship* target_as_ship, std::vector<ShipSystemWeapons::WeaponBeam>& beamWeapons);
         void fireCannonWeapons(EntityWrapper* target, Ship* target_as_ship, std::vector<ShipSystemWeapons::WeaponCannon>& cannonWeapons);

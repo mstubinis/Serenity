@@ -58,7 +58,7 @@ void OverlayManager::SetLocked(bool locked, std::function<void(Result)> callback
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->set_locked(internal_, (locked ? 1 : 0), cb.release(), wrapper);
 }
 
@@ -74,7 +74,7 @@ void OverlayManager::OpenActivityInvite(ActivityActionType type,
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->open_activity_invite(
       internal_, static_cast<EDiscordActivityActionType>(type), cb.release(), wrapper);
 }
@@ -90,7 +90,7 @@ void OverlayManager::OpenGuildInvite(char const* code, std::function<void(Result
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->open_guild_invite(internal_, const_cast<char*>(code), cb.release(), wrapper);
 }
 
@@ -105,7 +105,7 @@ void OverlayManager::OpenVoiceSettings(std::function<void(Result)> callback)
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->open_voice_settings(internal_, cb.release(), wrapper);
 }
 

@@ -51,7 +51,7 @@ void UserManager::GetUser(UserId userId, std::function<void(Result, User const&)
         (*cb)(static_cast<Result>(result), *reinterpret_cast<User const*>(user));
     };
     std::unique_ptr<std::function<void(Result, User const&)>> cb{};
-    cb.reset(new std::function<void(Result, User const&)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result, User const&)>(std::move(callback)));
     internal_->get_user(internal_, userId, cb.release(), wrapper);
 }
 

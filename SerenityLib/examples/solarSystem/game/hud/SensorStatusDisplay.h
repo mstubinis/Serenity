@@ -34,6 +34,11 @@ class SensorStatusDisplay final {
         SensorStatusDisplay(HUD&, Map&, const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, const Alignment::Type& alignment);
         ~SensorStatusDisplay();
 
+        SensorStatusDisplay(const SensorStatusDisplay& other)                = delete;
+        SensorStatusDisplay& operator=(const SensorStatusDisplay& other)     = delete;
+        SensorStatusDisplay(SensorStatusDisplay&& other) noexcept            = delete;
+        SensorStatusDisplay& operator=(SensorStatusDisplay&& other) noexcept = delete;
+
         void setShip(Ship*);
 
         const Entity& radarRingEntity() const;

@@ -81,6 +81,21 @@ ComponentModel::ComponentModel(const Entity& entity, Mesh* mesh, Material* mater
 ComponentModel::~ComponentModel() {
     SAFE_DELETE_VECTOR(m_ModelInstances);
 }
+void ComponentModel::onEvent(const Event& _event) {
+    if (_event.type == EventType::MeshLoaded) {
+        auto* mesh = _event.eventMeshLoaded.mesh;
+        vector<Mesh*> unfinishedMeshes;
+        for (auto& instance : m_ModelInstances) {
+            if (instance->m_Mesh && instance->m_Mesh == false) {
+                unfinishedMeshes.push_back(instance->m_Mesh);
+            }
+        }
+        if (unfinishedMeshes.size() == 0) {
+            ComponentModel_Functions::CalculateRadius(*this);
+            unregisterEvent(EventType::MeshLoaded);
+        }
+    }
+}
 void ComponentModel::removeModel(const size_t& index) {
     auto* ptr = m_ModelInstances[index];
     m_ModelInstances.erase(m_ModelInstances.begin() + index);
@@ -131,6 +146,11 @@ ModelInstance& ComponentModel::addModel(Handle& mesh, Handle& material, ShaderPr
     return ComponentModel::addModel((Mesh*)mesh.get(), (Material*)material.get(), shaderProgram, stage);
 }
 ModelInstance& ComponentModel::addModel(Mesh* mesh, Material* material, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
+
+    if (mesh && *mesh == false) {
+        registerEvent(EventType::MeshLoaded);
+    }
+
     auto* modelInstance_ptr = NEW ModelInstance(m_Owner, mesh, material, shaderProgram);
     auto& modelInstance     = *modelInstance_ptr;
     auto& _scene            = m_Owner.scene();
@@ -166,6 +186,11 @@ void ComponentModel::setModel(Handle& mesh, Handle& material, const size_t& inde
     ComponentModel::setModel((Mesh*)mesh.get(), (Material*)material.get(), index, shaderProgram, stage);
 }
 void ComponentModel::setModel(Mesh* mesh, Material* material, const size_t& index, ShaderProgram* shaderProgram, const RenderStage::Stage& stage) {
+
+    if (mesh && *mesh == false) {
+        registerEvent(EventType::MeshLoaded);
+    }
+
     auto& instance = *m_ModelInstances[index];
     auto& _scene = m_Owner.scene();
     InternalScenePublicInterface::RemoveModelInstanceFromPipeline(_scene, instance, instance.stage());
@@ -202,6 +227,11 @@ void ComponentModel::setStage(const RenderStage::Stage& stage, const size_t& ind
     InternalScenePublicInterface::AddModelInstanceToPipeline(scene, instance, stage);
 }
 void ComponentModel::setModelMesh(Mesh* mesh, const size_t& index, const RenderStage::Stage& stage) {
+
+    if (mesh && *mesh == false) {
+        registerEvent(EventType::MeshLoaded);
+    }
+
     auto& instance = *m_ModelInstances[index];
     auto& scene   = m_Owner.scene();
 

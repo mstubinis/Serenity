@@ -156,6 +156,12 @@ class Ship: public EntityWrapper, public EventObserver {
         );
         virtual ~Ship();
 
+
+        Ship(const Ship& other)                = delete;
+        Ship& operator=(const Ship& other)     = delete;
+        Ship(Ship&& other) noexcept            = delete;
+        Ship& operator=(Ship&& other) noexcept = delete;
+
         virtual void update(const double& dt);
 
         void onEvent(const Event&);

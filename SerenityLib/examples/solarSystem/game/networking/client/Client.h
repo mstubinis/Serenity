@@ -80,6 +80,11 @@ class Client{
         Client(Team* ,Core&, const unsigned short& server_port, const std::string& server_ipAddress, const unsigned int& id);
         ~Client();
 
+        Client(const Client& other)                = delete;
+        Client& operator=(const Client& other)     = delete;
+        Client(Client&& other) noexcept            = delete;
+        Client& operator=(Client&& other) noexcept = delete;
+
         void cleanup();
 
         Core& getCore();

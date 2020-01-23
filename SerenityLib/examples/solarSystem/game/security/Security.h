@@ -12,8 +12,8 @@ class Security final {
 
         static const unsigned int string_to_int_hash(const std::string& input);
 
-        static const std::string encrypt_aes(const std::string& input, const unsigned int& nonce, const const unsigned int& key);
-        static const std::string decrypt_aes(const std::string& input, const unsigned int& nonce, const const unsigned int& key);
+        static const std::string encrypt_aes(const std::string& input, const unsigned int& nonce, const unsigned int& key);
+        static const std::string decrypt_aes(const std::string& input, const unsigned int& nonce, const unsigned int& key);
 
         static const std::string generate_user_salt(
             const std::string& username, 

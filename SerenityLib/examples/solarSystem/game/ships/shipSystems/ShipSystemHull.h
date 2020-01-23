@@ -25,6 +25,11 @@ class ShipSystemHull final : public ShipSystem {
         ShipSystemHull(Ship&, Map&, const float health, const float recharge_amount = 50.0f, const float recharge_rate = 5.0f);
         ~ShipSystemHull();
 
+        ShipSystemHull(const ShipSystemHull& other)                = delete;
+        ShipSystemHull& operator=(const ShipSystemHull& other)     = delete;
+        ShipSystemHull(ShipSystemHull&& other) noexcept            = delete;
+        ShipSystemHull& operator=(ShipSystemHull&& other) noexcept = delete;
+
         Entity getEntity();
 
         void apply_damage_amount(const std::string& source, const float& damage);

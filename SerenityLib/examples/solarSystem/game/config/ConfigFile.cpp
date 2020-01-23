@@ -65,7 +65,6 @@ const ConfigDataStruct& ConfigFile::readFromFile() {
             stream.close();
         }
     }else{
-        //create new file
         writeToFile();
     }
     return CONFIG_DATA;

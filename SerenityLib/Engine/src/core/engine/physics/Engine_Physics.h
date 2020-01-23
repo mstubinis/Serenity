@@ -4,6 +4,7 @@
 
 struct Entity;
 class  btRigidBody;
+class  btCollisionObject;
 class  ComponentBody;
 class  Camera;
 namespace Engine {
@@ -72,6 +73,8 @@ namespace Engine{
 
         void addRigidBody(ComponentBody&);
         void removeRigidBody(ComponentBody&);
+
+        void removeCollisionObject(btCollisionObject* object);
     };
 };
 #endif

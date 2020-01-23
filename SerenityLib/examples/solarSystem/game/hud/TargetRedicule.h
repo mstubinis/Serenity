@@ -12,6 +12,11 @@ class TargetRedicule {
         TargetRedicule(Map&, Font&);
         ~TargetRedicule();
 
+        TargetRedicule(const TargetRedicule& other)                = delete;
+        TargetRedicule& operator=(const TargetRedicule& other)     = delete;
+        TargetRedicule(TargetRedicule&& other) noexcept            = delete;
+        TargetRedicule& operator=(TargetRedicule&& other) noexcept = delete;
+
         void update(const double& dt);
         void render();
 };

@@ -47,8 +47,8 @@ ComponentBody::PhysicsData::PhysicsData(){
 }
 ComponentBody::PhysicsData::~PhysicsData() {
     //destructor
-    SAFE_DELETE(collision);
     Physics::removeRigidBody(bullet_rigidBody);
+    SAFE_DELETE(collision);
     SAFE_DELETE(bullet_rigidBody);
 }
 ComponentBody::PhysicsData::PhysicsData(ComponentBody::PhysicsData&& other) noexcept {
@@ -154,20 +154,19 @@ ComponentBody::ComponentBody(const Entity& p_Entity) : ComponentBaseClass(p_Enti
     Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
 }
 ComponentBody::ComponentBody(const Entity& p_Entity, const CollisionType::Type p_CollisionType) : ComponentBaseClass(p_Entity) {
+    m_Forward               = glm_vec3(static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(-1.0));
+    m_Right                 = glm_vec3(static_cast<decimal>(1.0), static_cast<decimal>(0.0), static_cast<decimal>(0.0));
+    m_Up                    = glm_vec3(static_cast<decimal>(0.0), static_cast<decimal>(1.0), static_cast<decimal>(0.0));
     m_Physics               = true;
     m_UserPointer           = nullptr;
     m_UserPointer1          = nullptr;
     m_UserPointer2          = nullptr;
     data.n                  = nullptr;
     data.p                  = NEW PhysicsData();
-    auto& physicsData       = *data.p;
-    m_Forward               = glm_vec3(static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(-1.0));
-	m_Right                 = glm_vec3(static_cast<decimal>(1.0), static_cast<decimal>(0.0), static_cast<decimal>(0.0));
-	m_Up                    = glm_vec3(static_cast<decimal>(0.0), static_cast<decimal>(1.0), static_cast<decimal>(0.0));
 
     setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
 
-    physicsData.bullet_motionState = btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1)));
+    data.p->bullet_motionState = btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1)));
     setCollision(p_CollisionType, 1.0f);
     rebuildRigidBody(false);
 }
@@ -220,35 +219,39 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& p_Other) noexcept {
     setInternalPhysicsUserPointer(this);
     return *this;
 }
+
+void ComponentBody::onEvent(const Event& _event) {
+
+}
+
 void ComponentBody::rebuildRigidBody(const bool addBodyToPhysicsWorld) {
     if (m_Physics) {
-        auto& physics = *data.p;
-        if (physics.bullet_rigidBody) {
-            removePhysicsFromWorld(true);
-            SAFE_DELETE(physics.bullet_rigidBody);
+        auto& inertia = data.p->collision->getBtInertia();
+        auto* shape = data.p->collision->getBtShape();
+        if (shape) {
+            if (data.p->bullet_rigidBody) {
+                removePhysicsFromWorld(true);
+                SAFE_DELETE(data.p->bullet_rigidBody);
+            }
+            btRigidBody::btRigidBodyConstructionInfo CI(data.p->mass, &data.p->bullet_motionState, shape, inertia);
+            data.p->bullet_rigidBody = new btRigidBody(CI);
+            data.p->bullet_rigidBody->setSleepingThresholds(0.015f, 0.015f);
+            data.p->bullet_rigidBody->setFriction(0.3f);
+            setDamping(static_cast<decimal>(0.1), static_cast<decimal>(0.4));
+            data.p->bullet_rigidBody->setMassProps(static_cast<btScalar>(data.p->mass), inertia);
+            data.p->bullet_rigidBody->updateInertiaTensor();
+            setInternalPhysicsUserPointer(this);
+            if (addBodyToPhysicsWorld)
+                addPhysicsToWorld(true);
         }
-        auto& inertia = physics.collision->getBtInertia();
-        auto& shape = *physics.collision->getBtShape();
-        btRigidBody::btRigidBodyConstructionInfo CI(physics.mass, &physics.bullet_motionState, &shape, inertia);
-        physics.bullet_rigidBody = new btRigidBody(CI);
-        auto& rigidBody = *physics.bullet_rigidBody;
-        rigidBody.setSleepingThresholds(0.015f, 0.015f);
-        rigidBody.setFriction(0.3f);
-        setDamping(static_cast<decimal>(0.1), static_cast<decimal>(0.4));
-        rigidBody.setMassProps(static_cast<btScalar>(physics.mass), inertia);
-        rigidBody.updateInertiaTensor();
-        setInternalPhysicsUserPointer(this);
-        if (addBodyToPhysicsWorld)
-            addPhysicsToWorld(true);
     }
 }
 //kinda ugly
 void ComponentBody::setInternalPhysicsUserPointer(void* userPtr) {
     if (m_Physics) {
-        auto* rigid = data.p->bullet_rigidBody;
-        if (rigid) {
-            rigid->setUserPointer(userPtr);
-            auto* shape = rigid->getCollisionShape();
+        if (data.p->bullet_rigidBody) {
+            data.p->bullet_rigidBody->setUserPointer(userPtr);
+            auto* shape = data.p->bullet_rigidBody->getCollisionShape();
             if (shape) {
                 shape->setUserPointer(userPtr);
             }
@@ -274,7 +277,7 @@ const bool& ComponentBody::hasPhysics() const {
     return m_Physics;
 }
 void ComponentBody::setUserPointer(void* userPtr) {
-    m_UserPointer = userPtr;
+    m_UserPointer  = userPtr;
 }
 void ComponentBody::setUserPointer1(void* userPtr) {
     m_UserPointer1 = userPtr;
@@ -323,11 +326,10 @@ const unsigned long long ComponentBody::getDistanceLL(const Entity& p_Other) {
 }
 void ComponentBody::alignTo(const glm_vec3& p_Direction) {
     if (m_Physics) {
-        auto& rigidBody = *data.p->bullet_rigidBody;
         //recheck this
         btTransform tr;
-        rigidBody.getMotionState()->getWorldTransform(tr);
-        Math::recalculateForwardRightUp(rigidBody, m_Forward, m_Right, m_Up);
+        data.p->bullet_rigidBody->getMotionState()->getWorldTransform(tr);
+        Math::recalculateForwardRightUp(*data.p->bullet_rigidBody, m_Forward, m_Right, m_Up);
     }else{
         auto& normalData = *data.n;
         Math::alignTo(normalData.rotation, p_Direction);
@@ -341,47 +343,38 @@ Collision* ComponentBody::getCollision() {
     return nullptr;
 }
 void ComponentBody::setCollision(const CollisionType::Type p_CollisionType, const float p_Mass) {
-    auto& physicsData = *data.p;
-    if (!physicsData.collision) { //TODO: clean this up, its hacky and evil. its being used on the ComponentBody_EntityAddedToSceneFunction
+    if (!data.p->collision) { //TODO: clean this up, its hacky and evil. its being used on the ComponentBody_EntityAddedToSceneFunction
         auto* modelComponent = m_Owner.getComponent<ComponentModel>();
         if (modelComponent) {
             if (p_CollisionType == CollisionType::Compound) {
-                physicsData.collision = NEW Collision(this, *modelComponent, p_Mass);
+                data.p->collision = NEW Collision(*this, *modelComponent, p_Mass);
             }else{
-                physicsData.collision = NEW Collision(p_CollisionType, &modelComponent->getModel(), p_Mass);
+                data.p->collision = NEW Collision(*this, p_CollisionType, &modelComponent->getModel(), p_Mass);
             }
         }else{
-            physicsData.collision = NEW Collision(p_CollisionType, nullptr, p_Mass);
+            data.p->collision = NEW Collision(*this, p_CollisionType, nullptr, p_Mass);
         }
     }
-    physicsData.mass = p_Mass;
-    Collision& collision = *physicsData.collision;
-    auto& shape = *collision.getBtShape();
-    collision.setMass(physicsData.mass);
-    if (physicsData.bullet_rigidBody) {
-        auto& bt_rigidBody = *physicsData.bullet_rigidBody;
-        bt_rigidBody.setCollisionShape(&shape);
-        bt_rigidBody.setMassProps(static_cast<btScalar>(physicsData.mass), collision.getBtInertia());
-        bt_rigidBody.updateInertiaTensor();
+    data.p->mass = p_Mass;
+    data.p->collision->setMass(data.p->mass);
+    if (data.p->bullet_rigidBody) {
+        data.p->bullet_rigidBody->setCollisionShape(data.p->collision->getBtShape());
+        data.p->bullet_rigidBody->setMassProps(static_cast<btScalar>(data.p->mass), data.p->collision->getBtInertia());
+        data.p->bullet_rigidBody->updateInertiaTensor();
     }
     setInternalPhysicsUserPointer(this);
 }
 //double check this...
 void ComponentBody::setCollision(Collision* p_Collision) {
-    auto& physicsData = *data.p;
-    if (physicsData.collision) {
+    if (data.p->collision) {
         removePhysicsFromWorld(false);
-        SAFE_DELETE(physicsData.collision);
+        SAFE_DELETE(data.p->collision);
     }
-    physicsData.collision = p_Collision;
-    Collision& collision = *physicsData.collision;
-    auto& shape = *collision.getBtShape();
-    if (physicsData.bullet_rigidBody) {
-        auto& bt_rigidBody = *physicsData.bullet_rigidBody;
-        bt_rigidBody.setCollisionShape(&shape);
-        auto& inertia = collision.getBtInertia();
-        bt_rigidBody.setMassProps(static_cast<btScalar>(physicsData.mass), inertia);
-        bt_rigidBody.updateInertiaTensor();
+    data.p->collision = p_Collision;
+    if (data.p->bullet_rigidBody) {
+        data.p->bullet_rigidBody->setCollisionShape(data.p->collision->getBtShape());
+        data.p->bullet_rigidBody->setMassProps(static_cast<btScalar>(data.p->mass), data.p->collision->getBtInertia());
+        data.p->bullet_rigidBody->updateInertiaTensor();
         addPhysicsToWorld(false);
     }
     setInternalPhysicsUserPointer(this);
@@ -395,10 +388,9 @@ void ComponentBody::translate(const decimal& p_Translation, const bool p_Local) 
 }
 void ComponentBody::translate(const decimal& p_X, const decimal& p_Y, const decimal& p_Z, const bool p_Local) {
     if (m_Physics) {
-        auto& bt_rigidBody = *data.p->bullet_rigidBody;
-        bt_rigidBody.activate();
+        data.p->bullet_rigidBody->activate();
         btVector3 v(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
-        Math::translate(bt_rigidBody, v, p_Local);
+        Math::translate(*data.p->bullet_rigidBody, v, p_Local);
         ComponentBody::setPosition(position() + Engine::Math::btVectorToGLM(v));
     }else{
         auto& normalData = *data.n;
@@ -414,6 +406,9 @@ void ComponentBody::rotate(const glm_vec3& p_Rotation, const bool p_Local) {
 }
 void ComponentBody::rotate(const decimal& p_Pitch, const decimal& p_Yaw, const decimal& p_Roll, const bool p_Local) {
     if (m_Physics) {
+        //if (!data.p->bullet_rigidBody) {
+        //    return;
+        //}
         auto& bt_rigidBody = *data.p->bullet_rigidBody;
         btQuaternion quat = bt_rigidBody.getWorldTransform().getRotation().normalize();
         glm_quat glmquat(quat.w(), quat.x(), quat.y(), quat.z());
@@ -505,31 +500,29 @@ void ComponentBody::setPosition(const decimal& p_NewPosition) {
 }
 void ComponentBody::setPosition(const decimal& p_X, const decimal& p_Y, const decimal& p_Z) {
     if (m_Physics) {
-        auto& physicsData = *data.p;
         btTransform tr;
         tr.setOrigin(btVector3(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z)));
-        tr.setRotation(physicsData.bullet_rigidBody->getOrientation());
-        Collision& collision = *physicsData.collision;
-        if (collision.getType() == CollisionType::TriangleShapeStatic) {
+        tr.setRotation(data.p->bullet_rigidBody->getOrientation());
+        if (data.p->collision->getType() == CollisionType::TriangleShapeStatic) {
             removePhysicsFromWorld(false);
         }
-        physicsData.bullet_motionState.setWorldTransform(tr);
-        physicsData.bullet_rigidBody->setMotionState(&physicsData.bullet_motionState); //is this needed?
-        physicsData.bullet_rigidBody->setWorldTransform(tr);
-        physicsData.bullet_rigidBody->setCenterOfMassTransform(tr);
-        if (collision.getType() == CollisionType::TriangleShapeStatic) {
+        data.p->bullet_motionState.setWorldTransform(tr);
+        data.p->bullet_rigidBody->setMotionState(&data.p->bullet_motionState); //is this needed?
+        data.p->bullet_rigidBody->setWorldTransform(tr);
+        data.p->bullet_rigidBody->setCenterOfMassTransform(tr);
+        if (data.p->collision->getType() == CollisionType::TriangleShapeStatic) {
             addPhysicsToWorld(false);
         }
     }else{
-        auto& normalData = *data.n;
-        auto& position_ = normalData.position;
-        auto& modelMatrix_ = normalData.modelMatrix;
-		position_.x = p_X;
-		position_.y = p_Y;
-		position_.z = p_Z;
-		modelMatrix_[3][0] = p_X;
-		modelMatrix_[3][1] = p_Y;
-		modelMatrix_[3][2] = p_Z;
+        auto& normalData    = *data.n;
+        auto& position_     = normalData.position;
+        auto& modelMatrix_  = normalData.modelMatrix;
+		position_.x         = p_X;
+		position_.y         = p_Y;
+		position_.z         = p_Z;
+		modelMatrix_[3][0]  = p_X;
+		modelMatrix_[3][1]  = p_Y;
+		modelMatrix_[3][2]  = p_Z;
     }
 }
 void ComponentBody::setGravity(const decimal& p_X, const decimal& p_Y, const decimal& p_Z) {
@@ -570,7 +563,7 @@ void ComponentBody::setScale(const decimal& p_NewScale) {
 }
 void ComponentBody::setScale(const decimal& p_X, const decimal& p_Y, const decimal& p_Z) {
     if (m_Physics) {
-        const auto& newScale = btVector3(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
+        const auto  newScale = btVector3(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
         const auto& physicsData = *data.p;
         Collision& collision_ = *physicsData.collision;
         auto collisionShape = collision_.getBtShape();
@@ -1074,21 +1067,6 @@ void ComponentBody::setMass(const float p_Mass) {
         physicsData.mass = p_Mass;
         Collision& collision = *physicsData.collision;
         if (collision.getBtShape()) {
-            /*
-            auto* compound = dynamic_cast<btCompoundShape*>(collision.getBtShape());
-            if (compound) {
-                btVector3& inertia = const_cast<btVector3&>(collision.getBtInertia());
-                const auto numChildren = compound->getNumChildShapes();
-                if (numChildren > 0) {
-                    for (int i = 0; i < numChildren; ++i) {
-                        auto* child_shape = compound->getChildShape(i);
-                        if (child_shape) {
-                            child_shape->calculateLocalInertia(physicsData.mass, inertia);
-                        }
-                    }
-                }
-            }
-            */
             collision.setMass(physicsData.mass);
             if (physicsData.bullet_rigidBody) {
                 physicsData.bullet_rigidBody->setMassProps(static_cast<btScalar>(physicsData.mass), collision.getBtInertia());

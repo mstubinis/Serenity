@@ -178,6 +178,11 @@ class Menu final{
         Menu(Scene& scene, Camera& camera, GameState::State& current, Core& core);
         ~Menu();
 
+        Menu(const Menu& other)                = delete;
+        Menu& operator=(const Menu& other)     = delete;
+        Menu(Menu&& other) noexcept            = delete;
+        Menu& operator=(Menu&& other) noexcept = delete;
+
         void go_to_main_menu();
 
         void onResize(const uint& width, const uint& height);

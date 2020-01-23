@@ -13,6 +13,10 @@ struct EventType final { enum Type {
     WindowHasClosed,
     GameEnded,
 
+    MeshLoaded,
+    MaterialLoaded,
+    TextureLoaded,
+
     WindowFullscreenChanged,
     SoundStatusChanged,
     KeyPressed,

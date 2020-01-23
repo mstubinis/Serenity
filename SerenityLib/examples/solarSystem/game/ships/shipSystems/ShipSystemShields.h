@@ -2,6 +2,10 @@
 #ifndef GAME_SHIP_SYSTEM_SHIELDS_H
 #define GAME_SHIP_SYSTEM_SHIELDS_H
 
+class  Map;
+struct ShieldInstanceBindFunctor;
+struct ShieldInstanceUnbindFunctor;
+
 #include "ShipSystemBaseClass.h"
 #include <ecs/Entity.h>
 #include <core/engine/utils/Utils.h>
@@ -12,8 +16,6 @@
 #define MAX_IMPACT_POINTS 256
 #define SHIELD_SCALE_FACTOR 1.37f
 
-struct ShieldInstanceBindFunctor;
-struct ShieldInstanceUnbindFunctor;
 struct ShipSystemShieldsImpactPoint final {
     bool       active;
     glm::vec3  impactLocation;
@@ -24,13 +26,14 @@ struct ShipSystemShieldsImpactPoint final {
 
     ShipSystemShieldsImpactPoint();
     ShipSystemShieldsImpactPoint(const unsigned int& index);
+
+
+
     void impact(const glm::vec3& _impactLocation, const float& _impactRadius, const float& _maxTime, std::vector<uint>& freelist);
     const bool update(const float& dt, std::vector<uint>& freelist, size_t& maxIndex);
     void reset(const unsigned int& index);
 };
 
-
-class Map;
 class ShipSystemShields final : public ShipSystem {
     struct ShieldSide final { enum Side {
         Forward = 0,
@@ -97,6 +100,11 @@ class ShipSystemShields final : public ShipSystem {
              float recharge_amnt = 650.0f
         );
         ~ShipSystemShields();
+
+        ShipSystemShields(const ShipSystemShields& other)                = delete;
+        ShipSystemShields& operator=(const ShipSystemShields& other)     = delete;
+        ShipSystemShields(ShipSystemShields&& other) noexcept            = delete;
+        ShipSystemShields& operator=(ShipSystemShields&& other) noexcept = delete;
 
         const bool isPointInside(const glm::vec3& ptInModelSpace);
 

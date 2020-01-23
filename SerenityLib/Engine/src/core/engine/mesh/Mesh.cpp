@@ -3,6 +3,8 @@
 #include <core/engine/mesh/MeshImportedData.h>
 #include <core/engine/mesh/Skeleton.h>
 #include <core/engine/mesh/MeshCollisionFactory.h>
+#include <core/engine/events/Engine_EventObject.h>
+#include <core/engine/system/Engine.h>
 
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/renderer/Renderer.h>
@@ -60,6 +62,10 @@ void InternalMeshPublicInterface::LoadGPU(Mesh& mesh){
     mesh.m_VertexData->finalize(); //transfer vertex data to gpu
     //cout << "(Mesh) ";
     mesh.EngineResource::load();
+
+    Event e(EventType::MeshLoaded);
+    e.eventMeshLoaded = EventMeshLoaded(&mesh);
+    Engine::priv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(e);
 }
 void InternalMeshPublicInterface::UnloadCPU(Mesh& mesh){
     SAFE_DELETE(mesh.m_Skeleton);
@@ -90,22 +96,25 @@ bool InternalMeshPublicInterface::SupportsInstancing(){
 }
 
 btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, const CollisionType::Type& type, const bool isCompoundChild) {
-    if (!mesh)
-        return new btEmptyShape();
-    auto& factory = *mesh->m_CollisionFactory;
+    Engine::priv::MeshCollisionFactory* factory = nullptr;
+    if (!mesh) {
+        factory = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().m_CollisionFactory;
+    }else{
+        factory = mesh->m_CollisionFactory;
+    }
     switch (type) {
         case CollisionType::None: {
             return new btEmptyShape();
         }case CollisionType::Box: {
-            return factory.buildBoxShape(nullptr, isCompoundChild);
+            return factory->buildBoxShape(nullptr, isCompoundChild);
         }case CollisionType::ConvexHull: {
-            return factory.buildConvexHull(nullptr, isCompoundChild);
+            return factory->buildConvexHull(nullptr, isCompoundChild);
         }case CollisionType::Sphere: {
-            return factory.buildSphereShape(nullptr, isCompoundChild);
+            return factory->buildSphereShape(nullptr, isCompoundChild);
         }case CollisionType::TriangleShapeStatic: {
-            return factory.buildTriangleShape(nullptr, isCompoundChild);
+            return factory->buildTriangleShape(nullptr, isCompoundChild);
         }case CollisionType::TriangleShape: {
-            return factory.buildTriangleShapeGImpact(nullptr, isCompoundChild);
+            return factory->buildTriangleShapeGImpact(nullptr, isCompoundChild);
         }default: {
             return new btEmptyShape();
         }
@@ -113,25 +122,32 @@ btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, const 
     return new btEmptyShape();
 }
 btCollisionShape* InternalMeshPublicInterface::BuildCollision(ModelInstance* modelInstance, const CollisionType::Type& type, const bool isCompoundChild) {
-    if(!modelInstance)
-        return new btEmptyShape();
-    auto* mesh = modelInstance->mesh();
-    if(!mesh)
-        return new btEmptyShape();
-    auto& factory = *mesh->m_CollisionFactory;
+    Mesh* mesh = nullptr;
+    if (modelInstance) {
+        if (modelInstance->mesh()) {
+            mesh = modelInstance->mesh();
+        }
+    }
+    Engine::priv::MeshCollisionFactory* factory = nullptr;
+    if (!mesh) {
+        factory = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().m_CollisionFactory;
+    }else{
+        factory = mesh->m_CollisionFactory;
+    }
+
     switch (type) {
         case CollisionType::None: { 
             return new btEmptyShape(); 
         }case CollisionType::Box: { 
-            return factory.buildBoxShape(modelInstance, isCompoundChild);
+            return factory->buildBoxShape(modelInstance, isCompoundChild);
         }case CollisionType::ConvexHull: { 
-            return factory.buildConvexHull(modelInstance, isCompoundChild);
+            return factory->buildConvexHull(modelInstance, isCompoundChild);
         }case CollisionType::Sphere: { 
-            return factory.buildSphereShape(modelInstance, isCompoundChild);
+            return factory->buildSphereShape(modelInstance, isCompoundChild);
         }case CollisionType::TriangleShapeStatic: { 
-            return factory.buildTriangleShape(modelInstance, isCompoundChild);
+            return factory->buildTriangleShape(modelInstance, isCompoundChild);
         }case CollisionType::TriangleShape: { 
-            return factory.buildTriangleShapeGImpact(modelInstance, isCompoundChild);
+            return factory->buildTriangleShapeGImpact(modelInstance, isCompoundChild);
         }default: { 
             return new btEmptyShape(); 
         }

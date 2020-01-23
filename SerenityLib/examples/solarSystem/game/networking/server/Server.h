@@ -65,6 +65,11 @@ class ServerHostData final {
 
         ServerHostData();
         ~ServerHostData();
+
+        ServerHostData(const ServerHostData& other)                = delete;
+        ServerHostData& operator=(const ServerHostData& other)     = delete;
+        ServerHostData(ServerHostData&& other) noexcept            = delete;
+        ServerHostData& operator=(ServerHostData&& other) noexcept = delete;
 };
 
 class ServerClient final {
@@ -89,6 +94,11 @@ class ServerClient final {
     public:
         ServerClient(const std::string& hash, Server&, Core&, Engine::Networking::SocketTCP&);
         ~ServerClient();
+
+        ServerClient(const ServerClient& other)                = delete;
+        ServerClient& operator=(const ServerClient& other)     = delete;
+        ServerClient(ServerClient&& other) noexcept            = delete;
+        ServerClient& operator=(ServerClient&& other) noexcept = delete;
 
         void disconnect();
         const bool disconnected() const;
@@ -117,6 +127,11 @@ class ServerClientThread final {
     public:
         ServerClientThread();
         ~ServerClientThread();
+
+        ServerClientThread(const ServerClientThread& other)                = delete;
+        ServerClientThread& operator=(const ServerClientThread& other)     = delete;
+        ServerClientThread(ServerClientThread&& other) noexcept            = delete;
+        ServerClientThread& operator=(ServerClientThread&& other) noexcept = delete;
 };
 
 class Server {
@@ -133,6 +148,11 @@ class Server {
 
         public:
             PersistentInfo();
+
+            PersistentInfo(const PersistentInfo& other)                = delete;
+            PersistentInfo& operator=(const PersistentInfo& other)     = delete;
+            PersistentInfo(PersistentInfo&& other) noexcept            = delete;
+            PersistentInfo& operator=(PersistentInfo&& other) noexcept = delete;
 
             const std::string& getOwnerName() const;
             const std::string& getServerName() const;
@@ -169,6 +189,11 @@ class Server {
     public:
         Server(Core& core, const unsigned int& port, const std::string& ipRestriction = "");
         ~Server();
+
+        Server(const Server& other)                = delete;
+        Server& operator=(const Server& other)     = delete;
+        Server(Server&& other) noexcept            = delete;
+        Server& operator=(Server&& other) noexcept = delete;
 
         const bool startup();
         const bool startupMap(const MapEntryData& map_data);

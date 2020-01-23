@@ -647,7 +647,7 @@ void Server::updateClient(ServerClient& client) {
                     //choose random ship if applicable
                     if (info[0] == "NULL") {
                         auto& allowed_ships = Server::SERVER_HOST_DATA.getAllowedShips();
-                        const int rand_index = Helper::GetRandomIntFromTo(0, allowed_ships.size() - 1);
+                        const int rand_index = Helper::GetRandomIntFromTo(0, static_cast<int>(allowed_ships.size()) - 1);
                         string rand_ship = "";
 
                         size_t i = 0;

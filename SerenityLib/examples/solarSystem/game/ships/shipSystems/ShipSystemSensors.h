@@ -63,6 +63,11 @@ class ShipSystemSensors final : public ShipSystem {
         ShipSystemSensors(Ship&, Map&, const decimal& range = static_cast<decimal>(1000.0), const double AntiCloakScanTimerMax = 5.0);
         ~ShipSystemSensors();
 
+        ShipSystemSensors(const ShipSystemSensors& other)                = delete;
+        ShipSystemSensors& operator=(const ShipSystemSensors& other)     = delete;
+        ShipSystemSensors(ShipSystemSensors&& other) noexcept            = delete;
+        ShipSystemSensors& operator=(ShipSystemSensors&& other) noexcept = delete;
+
         const ShipSystemSensors::Detection validateDetection(Ship& othership, const glm_vec3& thisShipPos);
         const decimal& getRadarRange() const;
 

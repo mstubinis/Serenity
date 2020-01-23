@@ -52,7 +52,7 @@ void StoreManager::FetchSkus(std::function<void(Result)> callback)
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->fetch_skus(internal_, cb.release(), wrapper);
 }
 
@@ -96,7 +96,7 @@ void StoreManager::FetchEntitlements(std::function<void(Result)> callback)
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->fetch_entitlements(internal_, cb.release(), wrapper);
 }
 
@@ -153,7 +153,7 @@ void StoreManager::StartPurchase(Snowflake skuId, std::function<void(Result)> ca
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->start_purchase(internal_, skuId, cb.release(), wrapper);
 }
 

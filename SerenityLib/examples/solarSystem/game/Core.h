@@ -36,6 +36,11 @@ class Core final {
         Core();
         ~Core();
 
+        Core(const Core& other)                = delete;
+        Core& operator=(const Core& other)     = delete;
+        Core(Core&& other) noexcept            = delete;
+        Core& operator=(Core&& other) noexcept = delete;
+
         Server* getServer();
         Client* getClient();
 

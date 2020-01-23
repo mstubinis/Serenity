@@ -12,6 +12,11 @@ class ShipSystemPitchThrusters final : public ShipSystem {
         ShipSystemPitchThrusters(Ship&, const float additional_strength = 1.0f);
         ~ShipSystemPitchThrusters();
 
+        ShipSystemPitchThrusters(const ShipSystemPitchThrusters& other)                = delete;
+        ShipSystemPitchThrusters& operator=(const ShipSystemPitchThrusters& other)     = delete;
+        ShipSystemPitchThrusters(ShipSystemPitchThrusters&& other) noexcept            = delete;
+        ShipSystemPitchThrusters& operator=(ShipSystemPitchThrusters&& other) noexcept = delete;
+
         void update(const double& dt);
 };
 

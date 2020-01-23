@@ -42,7 +42,7 @@ void StorageManager::ReadAsync(char const* name,
         (*cb)(static_cast<Result>(result), data, dataLength);
     };
     std::unique_ptr<std::function<void(Result, std::uint8_t*, std::uint32_t)>> cb{};
-    cb.reset(new std::function<void(Result, std::uint8_t*, std::uint32_t)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result, std::uint8_t*, std::uint32_t)>(std::move(callback)));
     internal_->read_async(internal_, const_cast<char*>(name), cb.release(), wrapper);
 }
 
@@ -63,7 +63,7 @@ void StorageManager::ReadAsyncPartial(
         (*cb)(static_cast<Result>(result), data, dataLength);
     };
     std::unique_ptr<std::function<void(Result, std::uint8_t*, std::uint32_t)>> cb{};
-    cb.reset(new std::function<void(Result, std::uint8_t*, std::uint32_t)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result, std::uint8_t*, std::uint32_t)>(std::move(callback)));
     internal_->read_async_partial(
       internal_, const_cast<char*>(name), offset, length, cb.release(), wrapper);
 }
@@ -89,7 +89,7 @@ void StorageManager::WriteAsync(char const* name,
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->write_async(internal_,
                            const_cast<char*>(name),
                            reinterpret_cast<uint8_t*>(data),

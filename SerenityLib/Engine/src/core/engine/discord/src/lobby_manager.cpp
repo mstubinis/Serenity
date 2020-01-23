@@ -169,7 +169,7 @@ void LobbyManager::CreateLobby(LobbyTransaction const& transaction,
         (*cb)(static_cast<Result>(result), *reinterpret_cast<Lobby const*>(lobby));
     };
     std::unique_ptr<std::function<void(Result, Lobby const&)>> cb{};
-    cb.reset(new std::function<void(Result, Lobby const&)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result, Lobby const&)>(std::move(callback)));
     internal_->create_lobby(
       internal_, const_cast<LobbyTransaction&>(transaction).Internal(), cb.release(), wrapper);
 }
@@ -187,7 +187,7 @@ void LobbyManager::UpdateLobby(LobbyId lobbyId,
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->update_lobby(internal_,
                             lobbyId,
                             const_cast<LobbyTransaction&>(transaction).Internal(),
@@ -206,7 +206,7 @@ void LobbyManager::DeleteLobby(LobbyId lobbyId, std::function<void(Result)> call
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->delete_lobby(internal_, lobbyId, cb.release(), wrapper);
 }
 
@@ -224,7 +224,7 @@ void LobbyManager::ConnectLobby(LobbyId lobbyId,
         (*cb)(static_cast<Result>(result), *reinterpret_cast<Lobby const*>(lobby));
     };
     std::unique_ptr<std::function<void(Result, Lobby const&)>> cb{};
-    cb.reset(new std::function<void(Result, Lobby const&)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result, Lobby const&)>(std::move(callback)));
     internal_->connect_lobby(internal_, lobbyId, const_cast<char*>(secret), cb.release(), wrapper);
 }
 
@@ -242,7 +242,7 @@ void LobbyManager::ConnectLobbyWithActivitySecret(
         (*cb)(static_cast<Result>(result), *reinterpret_cast<Lobby const*>(lobby));
     };
     std::unique_ptr<std::function<void(Result, Lobby const&)>> cb{};
-    cb.reset(new std::function<void(Result, Lobby const&)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result, Lobby const&)>(std::move(callback)));
     internal_->connect_lobby_with_activity_secret(
       internal_, const_cast<char*>(activitySecret), cb.release(), wrapper);
 }
@@ -258,7 +258,7 @@ void LobbyManager::DisconnectLobby(LobbyId lobbyId, std::function<void(Result)> 
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->disconnect_lobby(internal_, lobbyId, cb.release(), wrapper);
 }
 
@@ -405,7 +405,7 @@ void LobbyManager::UpdateMember(LobbyId lobbyId,
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->update_member(internal_,
                              lobbyId,
                              userId,
@@ -428,7 +428,7 @@ void LobbyManager::SendLobbyMessage(LobbyId lobbyId,
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->send_lobby_message(
       internal_, lobbyId, reinterpret_cast<uint8_t*>(data), dataLength, cb.release(), wrapper);
 }
@@ -454,7 +454,7 @@ void LobbyManager::Search(LobbySearchQuery const& query, std::function<void(Resu
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->search(
       internal_, const_cast<LobbySearchQuery&>(query).Internal(), cb.release(), wrapper);
 }
@@ -489,7 +489,7 @@ void LobbyManager::ConnectVoice(LobbyId lobbyId, std::function<void(Result)> cal
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->connect_voice(internal_, lobbyId, cb.release(), wrapper);
 }
 
@@ -504,7 +504,7 @@ void LobbyManager::DisconnectVoice(LobbyId lobbyId, std::function<void(Result)> 
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->disconnect_voice(internal_, lobbyId, cb.release(), wrapper);
 }
 

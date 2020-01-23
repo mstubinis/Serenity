@@ -12,6 +12,11 @@ class ShipSystemMainThrusters final : public ShipSystem {
         ShipSystemMainThrusters(Ship&, const float additional_force_strength = 1.0f);
         ~ShipSystemMainThrusters();
 
+        ShipSystemMainThrusters(const ShipSystemMainThrusters& other)                = delete;
+        ShipSystemMainThrusters& operator=(const ShipSystemMainThrusters& other)     = delete;
+        ShipSystemMainThrusters(ShipSystemMainThrusters&& other) noexcept            = delete;
+        ShipSystemMainThrusters& operator=(ShipSystemMainThrusters&& other) noexcept = delete;
+
         void update(const double& dt);
 };
 

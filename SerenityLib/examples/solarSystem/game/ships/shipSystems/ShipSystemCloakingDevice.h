@@ -16,6 +16,11 @@ class ShipSystemCloakingDevice final : public ShipSystem {
         ShipSystemCloakingDevice(Ship&, const float cloakTimerSpeed = 1.0f, const float maxAlphaWhileCloaked = 0.2f);
         ~ShipSystemCloakingDevice();
 
+        ShipSystemCloakingDevice(const ShipSystemCloakingDevice& other)                = delete;
+        ShipSystemCloakingDevice& operator=(const ShipSystemCloakingDevice& other)     = delete;
+        ShipSystemCloakingDevice(ShipSystemCloakingDevice&& other) noexcept            = delete;
+        ShipSystemCloakingDevice& operator=(ShipSystemCloakingDevice&& other) noexcept = delete;
+
         const bool  isCloakActive() const;
         const float getCloakTimer() const;
         const float getMaxAlphaWhileCloaked() const;

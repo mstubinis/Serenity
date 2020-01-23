@@ -30,6 +30,11 @@ class ShipSystem {
         ShipSystem(const uint& type, Ship&);
         virtual ~ShipSystem();
 
+        ShipSystem(const ShipSystem& other)                = delete;
+        ShipSystem& operator=(const ShipSystem& other)     = delete;
+        ShipSystem(ShipSystem&& other) noexcept            = delete;
+        ShipSystem& operator=(ShipSystem&& other) noexcept = delete;
+
         virtual void destroy();
 
         const bool isOnline() const;

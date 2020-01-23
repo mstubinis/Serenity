@@ -171,14 +171,19 @@ void GameCamera::internal_update_orbit(EntityWrapper* target, const double& dt) 
     const glm::vec3& pos = (glm::vec3(0, 0, 1) * glm::length(targetModel.radius()) * 0.37f) + (glm::vec3(0, 0, 1) * glm::length(targetModel.radius() * (1.0f + m_OrbitRadius)));
 
     glm::mat4 cameraModel = glm::mat4(1.0f);
-    cameraModel = glm::translate(cameraModel, glm::vec3(targetBody.position()));
+    Ship* targetAsShip = dynamic_cast<Ship*>(target);
+    glm::vec3 offset = glm::vec3(0.0f);
+    if (targetAsShip) {
+        offset += targetAsShip->m_CameraOffsetDefault;
+    }
+    cameraModel = glm::translate(cameraModel, glm::vec3(targetBody.position()  + ((thisBody.rotation() * glm_vec3(offset)))));
     cameraModel *= glm::mat4_cast(glm::quat(thisBody.rotation()));
     cameraModel = glm::translate(cameraModel, pos);
 
     const glm::vec3 eye = Math::getMatrixPosition(cameraModel);
     thisBody.setPosition(eye);
 
-    thisCamera.lookAt(eye, targetBody.position(), thisBody.up());
+    thisCamera.lookAt(eye, targetBody.position() + (thisBody.rotation() * glm_vec3(offset)), thisBody.up());
 }
 
 Entity GameCamera::getObjectInCenterRay(vector<Entity>& exclusions) {

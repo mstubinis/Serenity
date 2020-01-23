@@ -49,10 +49,7 @@ Brel::Brel(Scene& scene, glm::vec3 position, glm::vec3 scale)
     model.setUserPointer(this);
 }
 Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const string& name, glm::vec3 position, glm::vec3 scale, CollisionType::Type collisionType)
-:Ship(team,client, CLASS, map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f,0.7f,0.7f)) {
-
-    m_InitialCamera = glm::vec3(0.0f, 0.7f, 0.7f);
-
+:Ship(team,client, CLASS, map, ai_type, name, position, scale, collisionType, glm::vec3(0.0f,0.32f,0.4f)) {
     m_Perks         = Brel::Perks::None;
     m_UnlockedPerks = Brel::Perks::None;
 
@@ -73,7 +70,7 @@ Brel::Brel(AIType::Type& ai_type, Team& team, Client& client, Map& map, const st
     const auto mass = updateShipDimensions();
 
     auto& body = *getComponent<ComponentBody>();
-    auto* c = NEW Collision(&body, model, mass, CollisionType::ConvexHull);
+    auto* c = NEW Collision(body, model, mass, CollisionType::ConvexHull);
     body.setCollision(c);
     //the body is using a convex hull for ship to ship ramming
 
@@ -212,12 +209,6 @@ void Brel::updateWingSpan(const double& dt, const BrelWingSpanState::State end, 
     auto* shields = static_cast<ShipSystemShields*>(getShipSystem(ShipSystemType::Shields));
     auto& shieldsModel = *shields->getEntity().getComponent<ComponentModel>();
     auto& shieldsBody  = *shields->getEntity().getComponent<ComponentBody>();
-
-    glm_vec3 newLocalPos = glm_vec3(0, m_WingRotation * 0.5f, 0);
-    m_CameraOffsetDefault = m_InitialCamera - (newLocalPos * static_cast<decimal>(0.5));
-
-    auto& model1 = shieldsModel.getModel(0);
-    model1.setPosition(newLocalPos);
 
     auto shieldScale = m_ShieldScale + glm_vec3(m_WingRotation * 0.3f, 0.0f, 0.0f);
     shieldsBody.setScale(shieldScale);

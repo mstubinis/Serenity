@@ -12,6 +12,11 @@ class ShipSystemRollThrusters final : public ShipSystem {
         ShipSystemRollThrusters(Ship&, const float additional_strength = 1.0f);
         ~ShipSystemRollThrusters();
 
+        ShipSystemRollThrusters(const ShipSystemRollThrusters& other)                = delete;
+        ShipSystemRollThrusters& operator=(const ShipSystemRollThrusters& other)     = delete;
+        ShipSystemRollThrusters(ShipSystemRollThrusters&& other) noexcept            = delete;
+        ShipSystemRollThrusters& operator=(ShipSystemRollThrusters&& other) noexcept = delete;
+
         void update(const double& dt);
 };
 

@@ -3,6 +3,7 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/system/Engine.h>
+#include <core/engine/events/Engine_EventObject.h>
 
 #include <iostream>
 
@@ -191,6 +192,11 @@ void priv::InternalMaterialPublicInterface::LoadGPU(Material& material) {
     }
     //cout << "(Material) ";
     material.EngineResource::load();
+
+
+    Event e(EventType::MaterialLoaded);
+    e.eventMaterialLoaded = EventMaterialLoaded(&material);
+    priv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(e);
 }
 void priv::InternalMaterialPublicInterface::UnloadCPU(Material& material) {
     //cout << "(Material) ";

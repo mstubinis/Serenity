@@ -2,15 +2,10 @@
 #ifndef GAME_PLANET_H
 #define GAME_PLANET_H
 
-#include <ecs/Components.h>
-#include <ecs/EntityWrapper.h>
-#include <core/engine/resources/Handle.h>
-#include <unordered_map>
-
-class SunLight;
-class Ring;
-class Planet;
-class Map;
+class  SunLight;
+class  Ring;
+class  Planet;
+class  Map;
 
 struct PlanetLogicFunctor;
 struct PlanetaryRingModelInstanceBindFunctor;
@@ -21,7 +16,10 @@ struct AtmosphericScatteringSkyModelInstanceUnbindFunctor;
 struct StarModelInstanceBindFunctor;
 struct StarModelInstanceUnbindFunctor;
 
-
+#include <ecs/Components.h>
+#include <ecs/EntityWrapper.h>
+#include <core/engine/resources/Handle.h>
+#include <unordered_map>
 
 struct PlanetType{ enum Type {
     Rocky,
@@ -38,6 +36,11 @@ struct RotationInfo final{
         tilt = _tilt;
         speed = 1.0f / (_days * 86400.0f * 360.0f);
     }
+
+    RotationInfo(const RotationInfo& other)                = delete;
+    RotationInfo& operator=(const RotationInfo& other)     = delete;
+    RotationInfo(RotationInfo&& other) noexcept            = delete;
+    RotationInfo& operator=(RotationInfo&& other) noexcept = delete;
 };
 class OrbitInfo final{
     public:
@@ -47,14 +50,19 @@ class OrbitInfo final{
         Planet* parent;
 
         OrbitInfo(const float eccentricity, const float days, const float majorRadius, const decimal angle, Planet& parent, const decimal inclination = 0);
-        ~OrbitInfo(){}
+
+        OrbitInfo(const OrbitInfo& other)                = delete;
+        OrbitInfo& operator=(const OrbitInfo& other)     = delete;
+        OrbitInfo(OrbitInfo&& other) noexcept            = delete;
+        OrbitInfo& operator=(OrbitInfo&& other) noexcept = delete;
+
         void setOrbitalPosition(const decimal angle, Planet& planet);
         const glm_vec3 getOrbitalPosition(const decimal angle, Planet& planet);
 };
 struct RingInfo final{
-    uint position;
-    uint size;
-    uint alphaBreakpoint;
+    uint       position;
+    uint       size;
+    uint       alphaBreakpoint;
     glm::ivec3 color;
     RingInfo(uint p, uint s, glm::ivec3 col,uint ab = 1){ 
         position = p;
@@ -62,6 +70,11 @@ struct RingInfo final{
         color = col; 
         alphaBreakpoint = ab;
     }
+
+    RingInfo(const RingInfo& other)                = delete;
+    RingInfo& operator=(const RingInfo& other)     = delete;
+    RingInfo(RingInfo&& other) noexcept            = default;
+    RingInfo& operator=(RingInfo&& other) noexcept = default;
 };
 class Planets final {
     public:
@@ -104,6 +117,11 @@ class Planet: public EntityWrapper {
         );
         virtual ~Planet();
 
+        Planet(const Planet& other)                = delete;
+        Planet& operator=(const Planet& other)     = delete;
+        Planet(Planet&& other) noexcept            = delete;
+        Planet& operator=(Planet&& other) noexcept = delete;
+
         const std::string getName();
         const glm_vec3 getPosition();
         const glm::vec2 getGravityInfo();
@@ -139,6 +157,11 @@ class Star: public Planet{
             const std::string& star_type_name = ""
         );
         virtual ~Star();
+
+        Star(const Star& other)                = delete;
+        Star& operator=(const Star& other)     = delete;
+        Star(Star&& other) noexcept            = delete;
+        Star& operator=(Star&& other) noexcept = delete;
 };
 class Ring final{
     friend class ::Planet;
@@ -150,5 +173,10 @@ class Ring final{
     public:
         Ring(std::vector<RingInfo>&, Planet*);
         ~Ring();
+
+        Ring(const Ring& other)                = delete;
+        Ring& operator=(const Ring& other)     = delete;
+        Ring(Ring&& other) noexcept            = delete;
+        Ring& operator=(Ring&& other) noexcept = delete;
 };
 #endif
