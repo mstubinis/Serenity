@@ -30,6 +30,9 @@ namespace Engine {
                 ThreadPoolFuture(std::future<void>&& future, std::function<void()>&& callback);
                 ~ThreadPoolFuture() = default;
 
+                const bool isReady();
+                void operator()() const;
+
                 ThreadPoolFuture(const ThreadPoolFuture& other) noexcept = delete;
                 ThreadPoolFuture& operator=(const ThreadPoolFuture& other) noexcept = delete;
                 ThreadPoolFuture(ThreadPoolFuture&& other) noexcept;

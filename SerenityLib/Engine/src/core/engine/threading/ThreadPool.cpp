@@ -27,6 +27,15 @@ ThreadPoolFuture& ThreadPoolFuture::operator=(ThreadPoolFuture&& other) noexcept
     swap(m_Callback, other.m_Callback);
     return *this;
 }
+const bool ThreadPoolFuture::isReady() {
+    return m_Future._Is_ready() && m_Future.valid();
+}
+void ThreadPoolFuture::operator()() const {
+    //if (future.m_Callback) { //hacky, try to fix it without the hack
+        m_Callback();
+    //}
+}
+
 
 #pragma endregion
 
@@ -51,7 +60,6 @@ void ThreadPool::init(const unsigned int num_threads) {
     m_Stopped = false;
     m_WorkerThreads.reserve(num_threads);
     for (unsigned int i = 0; i < num_threads; ++i) {
-
         auto thread_exec_func = [&]() {
             while (!m_Stopped) {
                 std::shared_ptr<std::packaged_task<void()>> job;
@@ -92,10 +100,8 @@ void ThreadPool::update() {
         return;
     for (auto it = m_Futures.begin(); it != m_Futures.end();) {
         auto& future = (*it);
-        if (future.m_Future._Is_ready() && future.m_Future.valid()) {
-            //if (future.m_Callback) { //hacky, try to fix it without the hack
-                future.m_Callback();
-            //}
+        if (future.isReady()) {
+            future();
             it = m_Futures.erase(it);
         }
         else { ++it; }
