@@ -16,10 +16,55 @@
 
 namespace Engine{
     namespace priv{
-        class ThreadPool;
+        class  ThreadPool;
+        struct ComponentCamera_UpdateFunction;
+        struct ComponentBody_UpdateFunction;
         class ThreadManager final{
+            friend struct ComponentCamera_UpdateFunction;
+            friend struct ComponentBody_UpdateFunction;
+            private:
+                void wait_for_all_engine_controlled();
+
+
+                void finalize_job_engine_controlled(std::function<void()>& task);
+                void finalize_job_engine_controlled(std::function<void()>& task, std::function<void()>& then_task);
+
+                template<typename Job, typename... ARGS> void add_job_ref_engine_controlled(Job& _job, ARGS&& ... _args) {
+                    std::function<void()> job = std::bind(_job, std::ref(std::forward<ARGS>(_args))...);
+                    finalize_job_engine_controlled(job);
+                }
+
+                void add_job_ref_engine_controlled(std::function<void()>& func);
+
+
+                template<typename Job, typename... ARGS> void add_job_engine_controlled(Job& _job, ARGS&& ... _args) {
+                    std::function<void()> job = std::bind(_job, std::forward<ARGS>(_args)...);
+                    finalize_job_engine_controlled(job);
+                }
+                template<typename Job> void add_job_engine_controlled(Job& _job) {
+                    std::function<void()> job = std::bind(_job);
+                    finalize_job_engine_controlled(job);
+                }
+                template<typename Job, typename Then, typename... ARGS> void add_job_with_post_callback_ref_engine_controlled(Job& _job, Then& _then, ARGS&& ... _args) {
+                    std::function<void()> job = std::bind(_job, std::ref(std::forward<ARGS>(_args))...);
+                    std::function<void()> then = std::bind(_then);
+                    finalize_job_engine_controlled(job, then);
+                }
+                template<typename Job, typename Then, typename... ARGS> void add_job_with_post_callback_engine_controlled(Job& _job, Then& _then, ARGS&& ... _args) {
+                    std::function<void()> job = std::bind(_job, std::forward<ARGS>(_args)...);
+                    std::function<void()> then = std::bind(_then);
+                    finalize_job_engine_controlled(job, then);
+                }
+                template<typename Job, typename Then> void add_job_with_post_callback_engine_controlled(Job& _job, Then& _then) {
+                    std::function<void()> job = std::bind(_job);
+                    std::function<void()> then = std::bind(_then);
+                    finalize_job_engine_controlled(job, then);
+                }
+
+
             public:
                 ThreadPool* m_ThreadPool;
+                ThreadPool* m_ThreadPoolEngineControlled;
 
                 ThreadManager();
                 ~ThreadManager();

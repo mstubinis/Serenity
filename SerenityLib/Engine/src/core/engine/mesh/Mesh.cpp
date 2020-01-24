@@ -277,7 +277,7 @@ void InternalMeshPublicInterface::CalculateRadius(Mesh& mesh) {
 }
 
 
-Mesh::Mesh():BindableResource(ResourceType::Mesh) {
+Mesh::Mesh() : BindableResource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
 }
 

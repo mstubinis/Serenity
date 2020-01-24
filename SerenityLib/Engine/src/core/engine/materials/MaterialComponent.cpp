@@ -80,8 +80,7 @@ MaterialLayer* MaterialComponent::addLayer(Texture* texture, Texture* mask, Text
             break;
         }case MaterialComponentType::ParallaxOcclusion: {
             break;
-        }
-        default: {
+        }default: {
             break;
         }
     }

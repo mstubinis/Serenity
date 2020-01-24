@@ -2,6 +2,7 @@
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/threading/Engine_ThreadManager.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/scene/Camera.h>
 
 #include <glm/glm.hpp>
@@ -184,9 +185,9 @@ struct priv::ComponentCamera_UpdateFunction final { void operator()(void* p_Comp
     };
 	auto split = priv::threading::splitVectorPairs(components);
     for (auto& pair : split) {
-        priv::threading::addJobRef(lamda_update, pair);
+        priv::Core::m_Engine->m_ThreadManager.add_job_ref_engine_controlled(lamda_update, pair);
     }
-    priv::threading::waitForAll();
+    priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
 }};
 struct priv::ComponentCamera_ComponentAddedToEntityFunction final {void operator()(void* p_ComponentCamera, Entity& p_Entity) const {
 }};

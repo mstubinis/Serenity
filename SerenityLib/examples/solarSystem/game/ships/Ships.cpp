@@ -107,9 +107,9 @@ void Ships::createShipEntry(const string& shipClass, const string& shipClassVerb
     //get objcc files
 #pragma region Meshes
     for(auto& path : objcc_files){
-        auto handles = Resources::loadMeshAsync(path.second.string());
-        for (auto& handle : handles) {
-            info.MeshHandles.push_back(handle);
+        const auto mesh_handles = Resources::loadMeshAsync(path.second.string());
+        for (auto& mesh_handle : mesh_handles) {
+            info.MeshHandles.push_back(std::move(mesh_handle));
         }
     }
 #pragma endregion
@@ -135,9 +135,8 @@ void Ships::createShipEntry(const string& shipClass, const string& shipClassVerb
             }
         }
     }
-    auto mat_handle = Resources::loadMaterialAsync(shipClass + "Material", diffuse, normal, glow, specular, ao, metalness, smoothness);
-    auto& mat = *(Material*)mat_handle.get();
-    info.MaterialHandles.push_back(mat_handle);
+    const auto material_handle = Resources::loadMaterialAsync(shipClass + "Material", diffuse, normal, glow, specular, ao, metalness, smoothness);
+    info.MaterialHandles.push_back(std::move(material_handle));
 
 #pragma endregion
 

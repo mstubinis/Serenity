@@ -147,6 +147,8 @@ const uchar* Texture::pixels(){
     return &(m_ImagesDatas[0]->mipmaps[0].pixels)[0]; 
 }
 const GLuint& Texture::address(const uint& index) const { 
+    if (m_TextureAddress.size() == 0)
+        return 0;
     return m_TextureAddress[index]; 
 }
 const size_t Texture::numAddresses() const {

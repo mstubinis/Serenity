@@ -18,13 +18,8 @@ struct TextureRequestPart final {
     Handle       handle;
     std::string  name;
 
-    TextureRequestPart() {
-        texture = nullptr;
-        name = "";
-        handle = Handle();
-    }
-    ~TextureRequestPart() {
-    }
+    TextureRequestPart();
+    ~TextureRequestPart();
 };
 struct TextureRequest final {
     std::string          file;
@@ -32,7 +27,6 @@ struct TextureRequest final {
     bool                 fileExists;
     TextureRequestPart   part;
     bool                 async;
-    bool                 selfClean;
 
 
     GLuint                       type;
@@ -60,8 +54,6 @@ struct TextureRequestFromMemory final {
     bool                 fileExists;
     TextureRequestPart   part;
     bool                 async;
-    bool                 selfClean;
-
 
     GLuint                       type;
     TextureType::Type            textureType;

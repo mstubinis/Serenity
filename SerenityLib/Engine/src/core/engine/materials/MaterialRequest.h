@@ -4,28 +4,24 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 #include <core/engine/resources/Handle.h>
 #include <core/engine/textures/TextureRequest.h>
 
 class Material;
 class Texture;
 struct MaterialRequestPart final {
-    Material*                     material;
-    Handle                        handle;
-    std::string                   name;
-    std::vector<TextureRequest*>  textureRequests;
+    Material*                                     material;
+    Handle                                        handle;
+    std::string                                   name;
+    std::vector<std::shared_ptr<TextureRequest>>  textureRequests;
 
-    MaterialRequestPart() {
-        material = nullptr;
-        name = "";
-        handle = Handle();
-    }
-    ~MaterialRequestPart() {
-        textureRequests.clear();
-    }
-    MaterialRequestPart(const MaterialRequestPart&)                      = delete;
-    MaterialRequestPart& operator=(const MaterialRequestPart&)           = delete;
-    MaterialRequestPart(MaterialRequestPart&& other) noexcept            = delete;
+    MaterialRequestPart();
+    ~MaterialRequestPart();
+
+    MaterialRequestPart(const MaterialRequestPart&);
+    MaterialRequestPart& operator=(const MaterialRequestPart&);
+    MaterialRequestPart(MaterialRequestPart&& other) noexcept = delete;
     MaterialRequestPart& operator=(MaterialRequestPart&& other) noexcept = delete;
 
 };
@@ -34,7 +30,7 @@ struct MaterialRequest final {
     MaterialRequestPart  part;
     bool                 async;
 
-    MaterialRequest();
+    MaterialRequest() = delete;
     MaterialRequest(
         const std::string& name,
         const std::string& diffuse,
@@ -57,10 +53,8 @@ struct MaterialRequest final {
     );
     ~MaterialRequest();
 
-    MaterialRequest(const MaterialRequest&)                      = delete;
-    MaterialRequest& operator=(const MaterialRequest&)           = delete;
-    MaterialRequest(MaterialRequest&& other) noexcept            = delete;
-    MaterialRequest& operator=(MaterialRequest&& other) noexcept = delete;
+    MaterialRequest(const MaterialRequest&);
+    MaterialRequest& operator=(const MaterialRequest&);
 
     void request();
     void requestAsync();

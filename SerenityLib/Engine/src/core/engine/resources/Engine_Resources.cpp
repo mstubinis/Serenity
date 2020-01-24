@@ -217,10 +217,10 @@ vector<Handle> Resources::loadMesh(const string& fileOrData, const float& thresh
     return handles;
 }
 vector<Handle> Resources::loadMeshAsync(const string& fileOrData, const float& threshhold) {
-    auto* request = NEW MeshRequest(fileOrData, threshhold); //to extend the lifetime to the threads, we manually delete later
-    request->requestAsync();
+    MeshRequest request(fileOrData, threshhold);
+    request.requestAsync();
     vector<Handle> handles;
-    for (auto& part : request->parts) {
+    for (auto& part : request.parts) {
         handles.push_back(part.handle);
     }
     return handles;
@@ -237,18 +237,18 @@ Handle Resources::loadTexture(const string& file, const ImageInternalFormat::For
 Handle Resources::loadTextureAsync(const string& file, const ImageInternalFormat::Format& internalFormat, const bool& mipmaps) {
     auto* texture = resourceManager->HasResource<Texture>(file);
     if (!texture) {
-        auto* request = NEW TextureRequest(file, mipmaps, internalFormat); //to extend the lifetime to the threads, we manually delete later
-        request->requestAsync();
-        return request->part.handle;
+        TextureRequest request(file, mipmaps, internalFormat);
+        request.requestAsync();
+        return request.part.handle;
     }
     return Resources::getTextureHandle(texture);
 }
 Handle Resources::loadTextureAsync(sf::Image& sfImage, const string& texture_name, const ImageInternalFormat::Format& internalFormat, const bool& mipmaps) {
     auto* texture = resourceManager->HasResource<Texture>(texture_name);
     if (!texture) {
-        auto* request = NEW TextureRequestFromMemory(sfImage, texture_name, mipmaps, internalFormat); //to extend the lifetime to the threads, we manually delete later
-        request->requestAsync();
-        return request->part.handle;
+        TextureRequestFromMemory request(sfImage, texture_name, mipmaps, internalFormat);
+        request.requestAsync();
+        return request.part.handle;
     }
     return Resources::getTextureHandle(texture);
 }
@@ -263,12 +263,13 @@ Handle Resources::loadMaterial(const string& name, const string& diffuse, const 
     return Resources::getMaterialHandle(material);
 }
 Handle Resources::loadMaterialAsync(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) {
-    if (!resourceManager->HasResource<Material>(name)) {
-        auto* request = NEW MaterialRequest(name, diffuse, normal, glow, specular, ao, metalness, smoothness); //to extend the lifetime to the threads, we manually delete later
-        request->requestAsync();
-        return request->part.handle;
+    auto* material = resourceManager->HasResource<Material>(name);
+    if (!material) {
+        MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
+        request.requestAsync();
+        return request.part.handle;
     }
-    return Handle();
+    return Resources::getMaterialHandle(material);
 }
 Handle Resources::loadMaterial(const string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) {
     auto* material = resourceManager->HasResource<Material>(name);

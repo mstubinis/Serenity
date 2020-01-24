@@ -17,14 +17,14 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace std;
 
-void Collision::DeferredLoading::load_1(Collision& collision, const CollisionType::Type collisionType, Mesh& mesh, const float& mass) {
+void Collision::DeferredLoading::load_1(Collision& collision, const CollisionType::Type collisionType, Mesh* mesh, const float& mass) {
     collision.m_DeferredMeshes.clear();
     const auto scale = collision.m_OwnerBody.getScale();
-    Physics::removeRigidBody(collision.m_OwnerBody);
+    Physics::removeRigidBodyThreadSafe(collision.m_OwnerBody);
     collision.free_memory();
 
-    collision.m_BtShape = InternalMeshPublicInterface::BuildCollision(&mesh, collisionType);
-    collision.m_OwnerBody.rebuildRigidBody();
+    collision.m_BtShape = InternalMeshPublicInterface::BuildCollision(mesh, collisionType);
+    collision.m_OwnerBody.rebuildRigidBody(true, true);
     collision.m_OwnerBody.setScale(scale);
     auto* model = collision.m_OwnerBody.getOwner().getComponent<ComponentModel>();
     if (model)
@@ -40,7 +40,7 @@ void Collision::DeferredLoading::load_2(Collision& collision, btCompoundShape* b
         built_collision_shape->calculateLocalInertia(mass, collision.m_BtInertia); //this is important
         btCompound->addChildShape(localTransform, built_collision_shape);
     }
-    collision.m_OwnerBody.rebuildRigidBody();
+    collision.m_OwnerBody.rebuildRigidBody(true, true);
     collision.m_OwnerBody.setScale(scale);
 
     auto* model = collision.m_OwnerBody.getOwner().getComponent<ComponentModel>();
@@ -62,26 +62,27 @@ Collision::Collision(ComponentBody& body) : m_OwnerBody(body){
 Collision::Collision(ComponentBody& body, const CollisionType::Type _type, ModelInstance* modelInstance, const float& _mass) : m_OwnerBody(body) {
     m_BtShape = nullptr;
     if (modelInstance) {
-        auto& mesh = *modelInstance->mesh();
-        if (mesh == false) {
+        auto* mesh_ptr = modelInstance->mesh();
+        if (*mesh_ptr == false || !mesh_ptr->m_CollisionFactory) {
             m_BtShape = InternalMeshPublicInterface::BuildCollision(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), _type);
-            m_DeferredMeshes.push_back(&mesh);
-            m_DeferredLoading = [&]() { Collision::DeferredLoading::load_1(*this, _type, mesh, _mass); };
+            m_DeferredMeshes.push_back(mesh_ptr);
+            m_DeferredLoading = [_type, this, _mass, mesh_ptr]() { Collision::DeferredLoading::load_1(*this, _type, mesh_ptr, _mass); };
             registerEvent(EventType::MeshLoaded);
         }else{
             m_BtShape = InternalMeshPublicInterface::BuildCollision(modelInstance, _type);
         }
     }else{
-        m_BtShape = InternalMeshPublicInterface::BuildCollision(modelInstance, _type);
+        m_BtShape = InternalMeshPublicInterface::BuildCollision(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), _type);
     }
     _baseInit(_type, _mass);
 }
 Collision::Collision(ComponentBody& body, const CollisionType::Type _type, Mesh& mesh, const float& _mass) : m_OwnerBody(body) {
     m_BtShape = nullptr;
-    if (mesh == false) {
+    if (mesh == false || !mesh.m_CollisionFactory) {
         m_BtShape = InternalMeshPublicInterface::BuildCollision(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), _type);
-        m_DeferredMeshes.push_back(&mesh);
-        m_DeferredLoading = [&]() { Collision::DeferredLoading::load_1(*this, _type, mesh, _mass); };
+        auto* mesh_ptr = &mesh;
+        m_DeferredMeshes.push_back(mesh_ptr);
+        m_DeferredLoading = [_type, this, _mass, mesh_ptr]() { Collision::DeferredLoading::load_1(*this, _type, mesh_ptr, _mass); };
         registerEvent(EventType::MeshLoaded);
     }else{
         m_BtShape = InternalMeshPublicInterface::BuildCollision(&mesh, _type);
@@ -114,7 +115,7 @@ Collision::Collision(ComponentBody& body, ComponentModel& _modelComponent, const
         }
     }
     if (unfinishedModels.size() > 0) {
-        m_DeferredLoading = [&]() { Collision::DeferredLoading::load_2(*this, btCompound, unfinishedModels, _mass, _type); };
+        m_DeferredLoading = [=]() { Collision::DeferredLoading::load_2(*this, btCompound, unfinishedModels, _mass, _type); };
         registerEvent(EventType::MeshLoaded);
     }
     btCompound->setMargin(0.001f);
@@ -214,7 +215,7 @@ void Collision::onEvent(const Event& _event) {
         auto it = m_DeferredMeshes.begin();
         while (it != m_DeferredMeshes.end()) {
             Mesh& deferred_mesh = *(*it);
-            if (ev.mesh == (*it) || deferred_mesh == true) {
+            if (ev.mesh == (*it) || (deferred_mesh == true && deferred_mesh.m_CollisionFactory)) {
                 it = m_DeferredMeshes.erase(it);
             }else{
                 ++it;

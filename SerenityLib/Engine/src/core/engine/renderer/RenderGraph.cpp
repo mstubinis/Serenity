@@ -180,7 +180,6 @@ void RenderGraph::clean(const uint entityData) {
     std::move(kept_nodes_total.begin(), kept_nodes_total.end(), std::back_inserter(instancesTotal));
 }
 void RenderGraph::validate_model_instances_for_rendering(Viewport& viewport, Camera& camera) {
-    //sf::Clock c;
     auto lambda = [&](vector<priv::InstanceNode*>& vector, const glm_vec3& camPos) {
         for (auto& instanceNode : vector) {
             auto& _modelInstance = *instanceNode->instance;
@@ -216,13 +215,6 @@ void RenderGraph::validate_model_instances_for_rendering(Viewport& viewport, Cam
     };
     auto camPos = camera.getPosition();
     lambda(instancesTotal, camPos);
-    //this block is for multi-threading this section of code
-    //auto vec = priv::threading::splitVector(instancesTotal);
-    //for (auto& vector : vec) {
-    //    priv::threading::addJobRef(lambda, vector, camPos);
-    //}
-    //epriv::threading::waitForAll();
-    //std::cout << c.restart().asMicroseconds() << std::endl;
 }
 void RenderGraph::render(Viewport& viewport, Camera& camera, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
     if(useDefaultShaders)

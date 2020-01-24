@@ -17,6 +17,7 @@ namespace Engine {
 
 #include <core/engine/math/Numbers.h>
 #include <vector>
+#include <mutex>
 #include <LinearMath/btVector3.h>
 
 namespace Engine{
@@ -30,7 +31,8 @@ namespace Engine{
     namespace priv{
         class PhysicsManager final{
             public:
-                Engine::priv::PhysicsWorld*  m_Data;
+                Engine::priv::PhysicsWorld*   m_Data;
+                std::mutex                    m_Mutex;
                 bool                          m_Paused;
                 unsigned int                  m_NumberOfStepsPerFrame;
             public:
@@ -66,15 +68,24 @@ namespace Engine{
         void setGravity(const glm::vec3& gravity);
         void pause(bool paused = true);
         void unpause();
+
         void addRigidBody(btRigidBody*, short group, short mask);
         void addRigidBody(btRigidBody*);
         void removeRigidBody(btRigidBody*);
         void updateRigidBody(btRigidBody*);
-
         void addRigidBody(ComponentBody&);
         void removeRigidBody(ComponentBody&);
-
         void removeCollisionObject(btCollisionObject* object);
+
+
+
+        void addRigidBodyThreadSafe(btRigidBody*, short group, short mask);
+        void addRigidBodyThreadSafe(btRigidBody*);
+        void removeRigidBodyThreadSafe(btRigidBody*);
+        void updateRigidBodyThreadSafe(btRigidBody*);
+        void addRigidBodyThreadSafe(ComponentBody&);
+        void removeRigidBodyThreadSafe(ComponentBody&);
+        void removeCollisionObjectThreadSafe(btCollisionObject* object);
     };
 };
 #endif

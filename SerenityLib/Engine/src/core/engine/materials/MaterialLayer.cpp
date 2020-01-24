@@ -131,7 +131,6 @@ void MaterialLayer::sendDataToGPU(const string& uniform_component_string, const 
     //m_Data1.z = (m_Mask && m_Texture->compressed()) ? 0.5f : 1.0f;
     //m_Data1.w = (m_Cubemap && m_Texture->compressed()) ? 0.5f : 1.0f;
 
-
     if (m_Texture && m_Texture->address() != 0) {
         Engine::Renderer::sendTextureSafe((wholeString + "texture").c_str(), *m_Texture, int(textureUnit));
         ++textureUnit;

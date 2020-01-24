@@ -23,12 +23,12 @@ int main(int argc, char* argv[]) {
     const auto& info = config.readFromFile();
 
     EngineOptions options;
+    //options.show_console = true;
     options.window_title   = "Star Trek: Homeland Security";
     options.icon           = "../data/Textures/icon.png";
     options.width          = info.window_width;
     options.height         = info.window_height;
     options.window_mode    = info.getWindowModeInt();
-    options.show_console   = true;
     options.maximized      = info.window_maximized;
     options.aa_algorithm   = AntiAliasingAlgorithm::SMAA;
     options.argv           = argv;

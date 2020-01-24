@@ -55,10 +55,11 @@ class Mesh final: public BindableResource, public EventObserver{
     friend class  ::Engine::priv::MeshSkeleton;
     friend class  ::Engine::priv::MeshLoader;
     friend class  ::Engine::priv::MeshCollisionFactory;
+    friend class  Collision;
     private:
         VertexData*                            m_VertexData;
-        Engine::priv::MeshCollisionFactory*   m_CollisionFactory;
-        Engine::priv::MeshSkeleton*           m_Skeleton;
+        Engine::priv::MeshCollisionFactory*    m_CollisionFactory;
+        Engine::priv::MeshSkeleton*            m_Skeleton;
         std::string                            m_File;
         glm::vec3                              m_radiusBox;
         float                                  m_radius;

@@ -130,10 +130,10 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
         }
         void collisionResponse(CollisionCallbackEventData& data);
 
-        void rebuildRigidBody(const bool addBodyToPhysicsWorld = true);
+        void rebuildRigidBody(const bool addBodyToPhysicsWorld = true, const bool threadSafe = false);
 
-        void removePhysicsFromWorld(const bool force = true);
-        void addPhysicsToWorld(const bool force = true);
+        void removePhysicsFromWorld(const bool force = true, const bool threadSafe = false);
+        void addPhysicsToWorld(const bool force = true, const bool threadSafe = false);
 
         void setInternalPhysicsUserPointer(void* userPtr);
         void setUserPointer(void* userPtr);

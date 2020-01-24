@@ -9,6 +9,7 @@ priv::ThreadManager* threadManager;
 
 priv::ThreadManager::ThreadManager(){ 
     m_ThreadPool = NEW ThreadPool(std::thread::hardware_concurrency());
+    m_ThreadPoolEngineControlled = NEW ThreadPool(std::thread::hardware_concurrency());
     threadManager = this;
 }
 priv::ThreadManager::~ThreadManager(){ 
@@ -16,7 +17,9 @@ priv::ThreadManager::~ThreadManager(){
 }
 void priv::ThreadManager::cleanup() {
     m_ThreadPool->shutdown();
+    m_ThreadPoolEngineControlled->shutdown();
     SAFE_DELETE(m_ThreadPool);
+    SAFE_DELETE(m_ThreadPoolEngineControlled);
 }
 void priv::ThreadManager::_update(const double& dt){ 
     m_ThreadPool->update();
@@ -32,4 +35,20 @@ void priv::threading::finalizeJob(std::function<void()>& task, std::function<voi
 }
 void priv::threading::waitForAll(){ 
     threadManager->m_ThreadPool->wait_for_all();
+}
+
+
+
+
+void priv::ThreadManager::add_job_ref_engine_controlled(std::function<void()>& func) {
+    finalize_job_engine_controlled(func);
+}
+void priv::ThreadManager::wait_for_all_engine_controlled() {
+    m_ThreadPoolEngineControlled->wait_for_all();
+}
+void priv::ThreadManager::finalize_job_engine_controlled(std::function<void()>& task) {
+    m_ThreadPoolEngineControlled->addJob(std::move(task));
+}
+void priv::ThreadManager::finalize_job_engine_controlled(std::function<void()>& task, std::function<void()>& then_task) {
+    m_ThreadPoolEngineControlled->addJob(std::move(task), std::move(then_task));
 }

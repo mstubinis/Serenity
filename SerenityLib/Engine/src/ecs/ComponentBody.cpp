@@ -2,6 +2,7 @@
 #include <ecs/ComponentModel.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/threading/Engine_ThreadManager.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/physics/Engine_Physics.h>
 #include <core/engine/model/ModelInstance.h>
 #include <core/engine/mesh/Mesh.h>
@@ -224,13 +225,13 @@ void ComponentBody::onEvent(const Event& _event) {
 
 }
 
-void ComponentBody::rebuildRigidBody(const bool addBodyToPhysicsWorld) {
+void ComponentBody::rebuildRigidBody(const bool addBodyToPhysicsWorld, const bool threadSafe) {
     if (m_Physics) {
         auto& inertia = data.p->collision->getBtInertia();
         auto* shape = data.p->collision->getBtShape();
         if (shape) {
             if (data.p->bullet_rigidBody) {
-                removePhysicsFromWorld(true);
+                removePhysicsFromWorld(true, threadSafe);
                 SAFE_DELETE(data.p->bullet_rigidBody);
             }
             btRigidBody::btRigidBodyConstructionInfo CI(data.p->mass, &data.p->bullet_motionState, shape, inertia);
@@ -242,7 +243,7 @@ void ComponentBody::rebuildRigidBody(const bool addBodyToPhysicsWorld) {
             data.p->bullet_rigidBody->updateInertiaTensor();
             setInternalPhysicsUserPointer(this);
             if (addBodyToPhysicsWorld)
-                addPhysicsToWorld(true);
+                addPhysicsToWorld(true, threadSafe);
         }
     }
 }
@@ -258,19 +259,22 @@ void ComponentBody::setInternalPhysicsUserPointer(void* userPtr) {
         }
     }
 }
-void ComponentBody::removePhysicsFromWorld(const bool force) {
-    if (force) {
-        Physics::removeRigidBody(*this);
+void ComponentBody::removePhysicsFromWorld(const bool force, const bool threadSafe) {
+    if (force) {    
         data.p->forcedOut = true;
-        return;
-    }else{
-        Physics::removeRigidBody(*this);
     }
+    if(threadSafe)
+        Physics::removeRigidBodyThreadSafe(*this);
+    else
+        Physics::removeRigidBody(*this);
 }
-void ComponentBody::addPhysicsToWorld(const bool force) {
+void ComponentBody::addPhysicsToWorld(const bool force, const bool threadSafe) {
     if (!force && data.p->forcedOut)
         return;
-    Physics::addRigidBody(*this);
+    if(threadSafe)
+        Physics::addRigidBodyThreadSafe(*this);
+    else
+        Physics::addRigidBody(*this);
     data.p->forcedOut = false;
 }
 const bool& ComponentBody::hasPhysics() const {
@@ -367,7 +371,7 @@ void ComponentBody::setCollision(const CollisionType::Type p_CollisionType, cons
 //double check this...
 void ComponentBody::setCollision(Collision* p_Collision) {
     if (data.p->collision) {
-        removePhysicsFromWorld(false);
+        removePhysicsFromWorld(false, false);
         SAFE_DELETE(data.p->collision);
     }
     data.p->collision = p_Collision;
@@ -375,7 +379,7 @@ void ComponentBody::setCollision(Collision* p_Collision) {
         data.p->bullet_rigidBody->setCollisionShape(data.p->collision->getBtShape());
         data.p->bullet_rigidBody->setMassProps(static_cast<btScalar>(data.p->mass), data.p->collision->getBtInertia());
         data.p->bullet_rigidBody->updateInertiaTensor();
-        addPhysicsToWorld(false);
+        addPhysicsToWorld(false, false);
     }
     setInternalPhysicsUserPointer(this);
 }
@@ -1101,9 +1105,9 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_Compon
     };
     auto split = priv::threading::splitVectorPairs(components);
     for (auto& pair : split) {
-        priv::threading::addJobRef(lamda_update, pair);
+        priv::Core::m_Engine->m_ThreadManager.add_job_ref_engine_controlled(lamda_update, pair);
     }
-    priv::threading::waitForAll();
+    priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
 }};
 struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* p_Component, Entity& p_Entity) const {
 }};

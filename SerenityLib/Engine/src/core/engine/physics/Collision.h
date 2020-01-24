@@ -22,7 +22,7 @@ class Collision final: public EventObserver {
         class DeferredLoading final {
             friend class Collision;
             private:
-                static void load_1(Collision&, const CollisionType::Type, Mesh& mesh, const float& mass);
+                static void load_1(Collision&, const CollisionType::Type, Mesh* mesh, const float& mass);
                 static void load_2(Collision&, btCompoundShape*, std::vector<ModelInstance*>, const float& mass, const CollisionType::Type);
         };
     private:

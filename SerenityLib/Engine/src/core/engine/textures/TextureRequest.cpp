@@ -12,6 +12,15 @@ using namespace std;
 using namespace Engine;
 using namespace Engine::priv;
 
+TextureRequestPart::TextureRequestPart() {
+    texture = nullptr;
+    name    = "";
+    handle  = Handle();
+}
+TextureRequestPart::~TextureRequestPart() {
+}
+
+
 #pragma region TextureRequest
 
 TextureRequest::TextureRequest() {
@@ -19,7 +28,6 @@ TextureRequest::TextureRequest() {
     fileExtension = "";
     fileExists    = false;
     async         = false;
-    selfClean     = true;
 }
 TextureRequest::TextureRequest(const string& _filename, const bool& genMipMaps, const ImageInternalFormat::Format& _internal, const GLuint& openglTextureType) : TextureRequest() {
     file = _filename;
@@ -63,15 +71,14 @@ void TextureRequest::requestAsync() {
 
 #pragma region TextureRequestFromMemory
 TextureRequestFromMemory::TextureRequestFromMemory() {
-    file = "";
-    fileExtension = "";
-    fileExists = false;
-    async = false;
-    selfClean = true;
-    image = nullptr;
+    file           = "";
+    fileExtension  = "";
+    fileExists     = false;
+    async          = false;
+    image          = nullptr;
 }
 TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const string& _filename, const bool& genMipMaps, const ImageInternalFormat::Format& _internal, const GLuint& openglTextureType) : TextureRequestFromMemory() {
-    file = _filename;
+    file  = _filename;
     image = &sfImage;
     if (!file.empty()) {
         fileExtension = boost::filesystem::extension(file);
@@ -120,13 +127,16 @@ void InternalTextureRequestPublicInterface::Request(TextureRequest& request) {
             request.part.texture->setName(request.part.name);
             request.part.handle  = Core::m_Engine->m_ResourceManager.m_Resources->add(request.part.texture, ResourceType::Texture);
 
-            const auto lambda_cpu = [&]() {
-                if (request.textureType == TextureType::Texture2D)
+            const auto lambda_cpu = [=]() {
+                if (request.textureType == TextureType::Texture2D) {
                     TextureLoader::InitFromFile(*request.part.texture, request.file, request.isToBeMipmapped, request.internalFormat, request.type);
-                InternalTextureRequestPublicInterface::LoadCPU(request);
+                }
+                InternalTextureRequestPublicInterface::LoadCPU(const_cast<TextureRequest&>(request));
             };
             if (request.async) {
-                const auto cbk = [&]() { InternalTextureRequestPublicInterface::LoadGPU(request); };
+                const auto cbk = [=]() { 
+                    InternalTextureRequestPublicInterface::LoadGPU(const_cast<TextureRequest&>(request)); 
+                };
                 threading::addJobWithPostCallback(lambda_cpu, cbk);
             }else{
                 lambda_cpu();
@@ -142,8 +152,6 @@ void InternalTextureRequestPublicInterface::LoadCPU(TextureRequest& request) {
 }
 void InternalTextureRequestPublicInterface::LoadGPU(TextureRequest& request) {
     InternalTexturePublicInterface::LoadGPU(*request.part.texture);
-    if (request.selfClean && request.async)
-        delete(&request); //yes its ugly, but its needed. see Resources::loadTextureAsync()
 }
 
 
@@ -156,13 +164,16 @@ void InternalTextureRequestPublicInterface::RequestMem(TextureRequestFromMemory&
             request.part.texture->setName(request.part.name);
             request.part.handle  = Core::m_Engine->m_ResourceManager.m_Resources->add(request.part.texture, ResourceType::Texture);
 
-            const auto lambda_cpu = [&]() {
-                if (request.textureType == TextureType::Texture2D)
+            const auto lambda_cpu = [=]() {
+                if (request.textureType == TextureType::Texture2D) {
                     TextureLoader::InitFromMemory(*request.part.texture, std::ref(*request.image), request.file, request.isToBeMipmapped, request.internalFormat, request.type);
-                InternalTextureRequestPublicInterface::LoadCPUMem(request);
+                }
+                InternalTextureRequestPublicInterface::LoadCPUMem(const_cast<TextureRequestFromMemory&>(request));
             };
             if (request.async) {
-                const auto cbk = [&]() { InternalTextureRequestPublicInterface::LoadGPUMem(request); };
+                const auto cbk = [=]() {
+                    InternalTextureRequestPublicInterface::LoadGPUMem(const_cast<TextureRequestFromMemory&>(request));
+                };
                 threading::addJobWithPostCallback(lambda_cpu, cbk);
             }else{
                 lambda_cpu();
@@ -178,6 +189,4 @@ void InternalTextureRequestPublicInterface::LoadCPUMem(TextureRequestFromMemory&
 }
 void InternalTextureRequestPublicInterface::LoadGPUMem(TextureRequestFromMemory& request) {
     InternalTexturePublicInterface::LoadGPU(*request.part.texture);
-    if (request.selfClean && request.async)
-        delete(&request); //yes its ugly, but its needed. see Resources::loadTextureAsync()
 }

@@ -53,8 +53,8 @@ const bool LoadingScreen::startLoadingProcess() {
         const_cast<Map&>(map).full_load(this);
     };
 
-    //m_Thread = std::thread(lamda);
-    lamda();
+    m_Thread = std::thread(lamda);
+    //lamda();
     return true;
 }
 void LoadingScreen::onResize(const unsigned int& newWidth, const unsigned int& newHeight) {

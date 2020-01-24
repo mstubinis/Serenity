@@ -21,44 +21,43 @@
 
 using namespace Engine;
 using namespace std;
-namespace boostm = boost::math;
 
-void priv::MeshLoader::LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap& _map) {
-    if (!_map.count(node.mName.data)) {
-        BoneNode* bone_node = NEW BoneNode();
-        bone_node->Name = node.mName.data;
-        bone_node->Transform = Math::assimpToGLMMat4(const_cast<aiMatrix4x4&>(node.mTransformation));
-        _map.emplace(node.mName.data, bone_node);
+void priv::MeshLoader::LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap& inMap) {
+    if (!inMap.count(node.mName.data)) {
+        BoneNode* bone_node   = NEW BoneNode();
+        bone_node->Name       = node.mName.data;
+        bone_node->Transform  = Math::assimpToGLMMat4(const_cast<aiMatrix4x4&>(node.mTransformation));
+        inMap.emplace(node.mName.data, bone_node);
     }
-    for (uint i = 0; i < node.mNumChildren; ++i) {
-        MeshLoader::LoadPopulateGlobalNodes(*node.mChildren[i], _map);
+    for (unsigned int i = 0; i < node.mNumChildren; ++i) {
+        MeshLoader::LoadPopulateGlobalNodes(*node.mChildren[i], inMap);
     }
 }
 
-void priv::MeshLoader::LoadProcessNodeNames(const string& file,vector<MeshRequestPart>& _parts, const aiScene& scene, const aiNode& node, BoneNodeMap& _map) {
+void priv::MeshLoader::LoadProcessNodeNames(const string& file, vector<MeshRequest::MeshRequestPart>& _parts, const aiScene& scene, const aiNode& node, BoneNodeMap& _map) {
     //just find names and meshes
     auto& root = *(scene.mRootNode);
-    for (uint i = 0; i < node.mNumMeshes; ++i) {
+    for (unsigned int i = 0; i < node.mNumMeshes; ++i) {
         const aiMesh& aimesh = *scene.mMeshes[node.mMeshes[i]];
 
-        MeshRequestPart part;
-        part.mesh = NEW Mesh();
-        part.name = file + " - " + /*string(scene.mRootNode->mName.C_Str()) +*/ string(aimesh.mName.C_Str());
+        MeshRequest::MeshRequestPart part;
+        part.mesh   = NEW Mesh();
+        part.name   = file + " - " + string(aimesh.mName.C_Str());
         part.mesh->setName(part.name);
         part.handle = priv::Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
-        _parts.push_back(part);
+        _parts.push_back(std::move(part));
     }
-    for (uint i = 0; i < node.mNumChildren; ++i) {
+    for (unsigned int i = 0; i < node.mNumChildren; ++i) {
         MeshLoader::LoadProcessNodeNames(file, _parts, scene, *node.mChildren[i], _map);
     }
 }
-void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequestPart>& _parts, const aiScene& scene, const aiNode& node, BoneNodeMap& _map,uint& count) {
+void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequest::MeshRequestPart>& _parts, const aiScene& scene, const aiNode& node, BoneNodeMap& _map, uint& count) {
     auto& root = *(scene.mRootNode);
 
-    for (uint i = 0; i < node.mNumMeshes; ++i) {
+    for (unsigned int i = 0; i < node.mNumMeshes; ++i) {
         const aiMesh& aimesh = *scene.mMeshes[node.mMeshes[i]];
 
-        MeshRequestPart part = _parts.at(count);
+        MeshRequest::MeshRequestPart& part = _parts[count];
         MeshImportedData data;
 
         #pragma region vertices
@@ -67,7 +66,7 @@ void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequestPart>& _parts, cons
         if (aimesh.mNormals) { data.normals.reserve(aimesh.mNumVertices); }
         if (aimesh.mBitangents) { data.binormals.reserve(aimesh.mNumVertices); }
         if (aimesh.mTangents) { data.tangents.reserve(aimesh.mNumVertices); }
-        for (uint j = 0; j < aimesh.mNumVertices; ++j) {
+        for (unsigned int j = 0; j < aimesh.mNumVertices; ++j) {
             //pos
             auto& pos = aimesh.mVertices[j];
             data.points.emplace_back(pos.x, pos.y, pos.z);
@@ -98,7 +97,7 @@ void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequestPart>& _parts, cons
 
         #pragma region indices
         data.indices.reserve(aimesh.mNumFaces * 3);
-        for (uint j = 0; j < aimesh.mNumFaces; ++j) {
+        for (unsigned int j = 0; j < aimesh.mNumFaces; ++j) {
             const auto& face = aimesh.mFaces[j];
 
             const auto& index0 = face.mIndices[0];
@@ -118,23 +117,22 @@ void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequestPart>& _parts, cons
 
             #pragma region IndividualBones
             //build bone information
-            for (uint k = 0; k < aimesh.mNumBones; ++k) {
-                auto& boneNode = *(_map.at(aimesh.mBones[k]->mName.data));
+            for (unsigned int k = 0; k < aimesh.mNumBones; ++k) {
+                auto& boneNode   = *(_map.at(aimesh.mBones[k]->mName.data));
                 auto& assimpBone = *aimesh.mBones[k];
-                uint BoneIndex(0);
+                unsigned int BoneIndex(0);
                 if (!skeleton.m_BoneMapping.count(boneNode.Name)) {
                     BoneIndex = skeleton.m_NumBones;
                     ++skeleton.m_NumBones;
                     skeleton.m_BoneInfo.emplace_back();
-                }
-                else {
+                }else{
                     BoneIndex = skeleton.m_BoneMapping.at(boneNode.Name);
                 }
                 skeleton.m_BoneMapping.emplace(boneNode.Name, BoneIndex);
                 skeleton.m_BoneInfo[BoneIndex].BoneOffset = Math::assimpToGLMMat4(assimpBone.mOffsetMatrix);
-                for (uint j = 0; j < assimpBone.mNumWeights; ++j) {
-                    uint VertexID = assimpBone.mWeights[j].mVertexId;
-                    float Weight = assimpBone.mWeights[j].mWeight;
+                for (unsigned int j = 0; j < assimpBone.mNumWeights; ++j) {
+                    unsigned int VertexID = assimpBone.mWeights[j].mVertexId;
+                    float Weight          = assimpBone.mWeights[j].mWeight;
                     priv::VertexBoneData d;
                     d.AddBoneData(BoneIndex, Weight);
                     data.m_Bones.emplace(VertexID, std::move(d));
@@ -166,7 +164,7 @@ void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequestPart>& _parts, cons
 
             #pragma region Animations
             if (scene.mAnimations && scene.mNumAnimations > 0) {
-                for (uint k = 0; k < scene.mNumAnimations; ++k) {
+                for (unsigned int k = 0; k < scene.mNumAnimations; ++k) {
                     const aiAnimation& anim = *scene.mAnimations[k];
                     string key(anim.mName.C_Str());
                     if (key == "") {
@@ -190,7 +188,7 @@ void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequestPart>& _parts, cons
         MeshLoader::FinalizeData(*part.mesh, data, 0.0005f);
         ++count;
     }
-    for (uint i = 0; i < node.mNumChildren; ++i) {
+    for (unsigned int i = 0; i < node.mNumChildren; ++i) {
         MeshLoader::LoadProcessNodeData(_parts, scene, *node.mChildren[i], _map, count);
     }
 }
@@ -213,17 +211,18 @@ bool priv::MeshLoader::IsNear(glm::vec3& v1, glm::vec3& v2, const float& thresho
     return (std::abs(v1.x - v2.x) < threshold && std::abs(v1.y - v2.y) < threshold && std::abs(v1.z - v2.z) < threshold) ? true : false;
 }
 bool priv::MeshLoader::IsSpecialFloat(const float& f) {
-    if (boostm::isnan(f) || boostm::isinf(f)) return true;
+    if (boost::math::isnan(f)) return true;
+    if (boost::math::isinf(f)) return true;
     return false;
 }
 bool priv::MeshLoader::IsSpecialFloat(const glm::vec2& v) {
-    if (boostm::isnan(v.x) || boostm::isnan(v.y)) return true;
-    if (boostm::isinf(v.x) || boostm::isinf(v.y)) return true;
+    if (boost::math::isnan(v.x) || boost::math::isnan(v.y)) return true;
+    if (boost::math::isinf(v.x) || boost::math::isinf(v.y)) return true;
     return false;
 }
 bool priv::MeshLoader::IsSpecialFloat(const glm::vec3& v) {
-    if (boostm::isnan(v.x) || boostm::isnan(v.y) || boostm::isnan(v.z)) return true;
-    if (boostm::isinf(v.x) || boostm::isinf(v.y) || boostm::isinf(v.z)) return true;
+    if (boost::math::isnan(v.x) || boost::math::isnan(v.y) || boost::math::isnan(v.z)) return true;
+    if (boost::math::isinf(v.x) || boost::math::isinf(v.y) || boost::math::isinf(v.z)) return true;
     return false;
 }
 bool priv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, vector<glm::vec3>& pts, vector<glm::vec2>& uvs, vector<glm::vec3>& norms, unsigned short& result, const float& threshold) {

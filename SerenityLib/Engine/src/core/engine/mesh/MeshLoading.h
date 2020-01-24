@@ -39,8 +39,8 @@ namespace priv {
         public:
 
 
-            static void        LoadProcessNodeNames(const std::string& file,std::vector<MeshRequestPart>&, const aiScene& scene, const aiNode& node, BoneNodeMap& _map);
-            static void        LoadProcessNodeData(std::vector<MeshRequestPart>&, const aiScene& scene, const aiNode& node, BoneNodeMap& _map, uint& count);
+            static void        LoadProcessNodeNames(const std::string& file,std::vector<MeshRequest::MeshRequestPart>&, const aiScene& scene, const aiNode& node, BoneNodeMap& _map);
+            static void        LoadProcessNodeData(std::vector<MeshRequest::MeshRequestPart>&, const aiScene& scene, const aiNode& node, BoneNodeMap& _map, uint& count);
 
             static void        LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap& _map);
             static void        FinalizeData(Mesh& mesh,MeshImportedData& data, float threshold);

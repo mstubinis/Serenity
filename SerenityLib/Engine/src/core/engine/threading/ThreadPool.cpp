@@ -93,7 +93,9 @@ void ThreadPool::update() {
     for (auto it = m_Futures.begin(); it != m_Futures.end();) {
         auto& future = (*it);
         if (future.m_Future._Is_ready()) {
-            future.m_Callback();
+            //if (future.m_Callback) { //hacky, try to fix it without the hack
+                future.m_Callback();
+            //}
             it = m_Futures.erase(it);
         }
         else { ++it; }

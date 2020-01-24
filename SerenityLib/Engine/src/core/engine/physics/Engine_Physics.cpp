@@ -270,13 +270,47 @@ void Physics::updateRigidBody(btRigidBody* rigidBody){
     physicsManager->m_Data->world->updateSingleAabb(rigidBody);
 }
 void Physics::addRigidBody(ComponentBody& body) {
-    auto* btBody = &body.getBtBody();
-    if(btBody)
-        Physics::addRigidBody(const_cast<btRigidBody*>(btBody), body.getCollisionGroup(), body.getCollisionMask());
+    //auto* btBody = &body.getBtBody();
+    //if(btBody)
+    Physics::addRigidBody(const_cast<btRigidBody*>(&body.getBtBody()), body.getCollisionGroup(), body.getCollisionMask());
 }
 void Physics::removeRigidBody(ComponentBody& body) {
     Physics::removeRigidBody(&const_cast<btRigidBody&>(body.getBtBody()));
 }
+
+
+
+
+void Physics::addRigidBodyThreadSafe(btRigidBody* body, short group, short mask) {
+    std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
+    Physics::addRigidBody(body, group, mask);
+}
+void Physics::addRigidBodyThreadSafe(btRigidBody* body) {
+    std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
+    Physics::addRigidBody(body);
+}
+void Physics::removeRigidBodyThreadSafe(btRigidBody* body) {
+    std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
+    Physics::removeRigidBody(body);
+}
+void Physics::updateRigidBodyThreadSafe(btRigidBody* body) {
+    std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
+    Physics::updateRigidBody(body);
+}
+
+void Physics::addRigidBodyThreadSafe(ComponentBody& body){
+    Physics::addRigidBodyThreadSafe(const_cast<btRigidBody*>(&body.getBtBody()), body.getCollisionGroup(), body.getCollisionMask());
+}
+void Physics::removeRigidBodyThreadSafe(ComponentBody& body) {
+    Physics::removeRigidBodyThreadSafe(&const_cast<btRigidBody&>(body.getBtBody()));
+}
+
+void Physics::removeCollisionObjectThreadSafe(btCollisionObject* object) {
+    std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
+    physicsManager->m_Data->world->removeCollisionObject(object);
+}
+
+
 
 
 RayCastResult _rayCastInternal_Nearest(const btVector3& start, const btVector3& end, const unsigned short group, const unsigned short mask) {
