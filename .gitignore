@@ -5,7 +5,7 @@
 #EXE
 *.exe
 
-[Ee]xamples*/
+examples/
 
 #Visual Studio files
 .vs/
