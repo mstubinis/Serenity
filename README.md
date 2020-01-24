@@ -25,8 +25,4 @@ The project uses several library dependencies. The current solution file is desi
 > * Boost (filesystem, iostreams, systems)
 > * LUA
 
-The solution contains 3 projects: the engine itself, which will be built into Serenity.lib, and 2 sample applications that will be built into .exe's.
-
-In order for the exe's to run, the `SerenityLib/Engine/data` folder will have to be copied over to the parent directory of any exe, which are located in the builds folder and will be generated upon compiling the solution.
-
 In the future, the engine will receive an overhaul with the intention of opening it up to client usage. Part of this endeavour will be a wiki section with API documentation as well as continued refactoring of the engine code for readability and understanding.
