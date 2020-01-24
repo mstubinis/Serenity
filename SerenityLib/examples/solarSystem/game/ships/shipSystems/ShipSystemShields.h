@@ -1,0 +1,185 @@
+#pragma once
+#ifndef GAME_SHIP_SYSTEM_SHIELDS_H
+#define GAME_SHIP_SYSTEM_SHIELDS_H
+
+class  Map;
+struct ShieldInstanceBindFunctor;
+struct ShieldInstanceUnbindFunctor;
+
+#include "ShipSystemBaseClass.h"
+#include <ecs/Entity.h>
+#include <core/engine/utils/Utils.h>
+#include <glm/vec3.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <vector>
+
+#define MAX_IMPACT_POINTS 256
+#define SHIELD_SCALE_FACTOR 1.37f
+
+struct ShipSystemShieldsImpactPoint final {
+    bool       active;
+    glm::vec3  impactLocation;
+    float      impactRadius;
+    float      currentTime;
+    float      maxTime;
+    uint       indexInArray;
+
+    ShipSystemShieldsImpactPoint();
+    ShipSystemShieldsImpactPoint(const unsigned int& index);
+
+
+
+    void impact(const glm::vec3& _impactLocation, const float& _impactRadius, const float& _maxTime, std::vector<uint>& freelist);
+    const bool update(const float& dt, std::vector<uint>& freelist, size_t& maxIndex);
+    void reset(const unsigned int& index);
+};
+
+class ShipSystemShields final : public ShipSystem {
+    struct ShieldSide final { enum Side {
+        Forward = 0,
+        Aft = 1,
+        Port = 2,
+        Starboard = 3,
+        Dorsal = 4,
+        Ventral = 5,
+        Err,
+    };};
+    struct Plane final {
+        glm::vec3 a, b, c, normal;
+        Plane();
+        Plane(const glm::vec3& _a, const glm::vec3& _b, const glm::vec3& _c);
+        const float CalcSide(const glm::vec3& impactLocationModelSpace);
+    };
+    struct Pyramid final {
+        std::vector<Plane> planes;
+        Pyramid();
+        Pyramid(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& p4, const glm::vec3& p5);
+        const bool isInside(const glm::vec3& impactLocationModelSpace);
+    };
+    friend struct ShieldInstanceBindFunctor;
+    friend struct ShieldInstanceUnbindFunctor;
+    friend class  Ship;
+    private:
+        ShipSystemShieldsImpactPoint  m_ImpactPoints[MAX_IMPACT_POINTS];
+        std::vector<uint>             m_ImpactPointsFreelist;
+        size_t                        m_MaxIndex; //optimization for update()
+
+        Entity                        m_ShieldEntity;
+
+        std::vector<float>            m_HealthPointsCurrent;
+        std::vector<float>            m_HealthPointsMax;
+        
+        glm::vec3                     m_ShieldsOffset;
+        glm::vec3                     m_AdditionalShieldScale;
+
+        float                         m_RechargeAmount;
+        float                         m_RechargeRate;
+        float                         m_RechargeTimer;
+        bool                          m_ShieldsAreUp;
+        std::vector<Pyramid>          m_Pyramids;
+    public:
+        ShipSystemShields(
+            Ship&,
+            Map&,
+             float avg_health,
+             glm::vec3 offset = glm::vec3(0.0f),
+             glm::vec3 additional_size_scale = glm::vec3(1.0f),
+             float recharge_amnt = 650.0f
+        );
+        ShipSystemShields(
+            Ship&,
+            Map&,
+             float fwd,
+             float aft,
+             float port,
+             float starboard,
+             float dorsal,
+             float ventral,
+             glm::vec3 offset = glm::vec3(0.0f),
+             glm::vec3 additional_size_scale = glm::vec3(1.0f),
+             float recharge_amnt = 650.0f
+        );
+        ~ShipSystemShields();
+
+        ShipSystemShields(const ShipSystemShields& other)                = delete;
+        ShipSystemShields& operator=(const ShipSystemShields& other)     = delete;
+        ShipSystemShields(ShipSystemShields&& other) noexcept            = delete;
+        ShipSystemShields& operator=(ShipSystemShields&& other) noexcept = delete;
+
+        const bool isPointInside(const glm::vec3& ptInModelSpace);
+
+        Entity getEntity();
+
+        void apply_damage_amount(const std::string& source, const float& damage, const uint& shield_side);
+
+        void destroy();
+
+        void update(const double& dt);
+
+        void reset_all_impact_points();
+
+        const glm::vec3& getAdditionalShieldSizeScale() const;
+
+        const float getActualShieldHealthCurrent(const size_t& index) const;
+        const float getHealthCurrent(const size_t& index) const;
+        const float getHealthMax(const size_t& index) const;
+        const float getHealthPercent(const size_t& index) const; //returns percent from 0.0f to 1.0f
+
+
+        const float getHealthCurrentForward() const;
+        const float getHealthMaxForward() const;
+        const float getHealthPercentForward() const; //returns percent from 0.0f to 1.0f
+
+        const float getHealthCurrentAft() const;
+        const float getHealthMaxAft() const;
+        const float getHealthPercentAft() const; //returns percent from 0.0f to 1.0f
+
+        const float getHealthCurrentPort() const;
+        const float getHealthMaxPort() const;
+        const float getHealthPercentPort() const; //returns percent from 0.0f to 1.0f
+
+        const float getHealthCurrentStarboard() const;
+        const float getHealthMaxStarboard() const;
+        const float getHealthPercentStarboard() const; //returns percent from 0.0f to 1.0f
+
+        const float getHealthCurrentDorsal() const;
+        const float getHealthMaxDorsal() const;
+        const float getHealthPercentDorsal() const; //returns percent from 0.0f to 1.0f
+
+        const float getHealthCurrentVentral() const;
+        const float getHealthMaxVentral() const;
+        const float getHealthPercentVentral() const; //returns percent from 0.0f to 1.0f
+
+
+        const bool shieldsAreUp() const;
+        void restoreToFull();
+
+        void turnOffShields();
+        void turnOnShields();
+
+        void receiveHit(
+            const std::string& source,
+            const glm::vec3& impactNormal,
+            const glm::vec3& impactLocation,
+            const float& impactRadius,
+            const float& maxTime,
+            const float damage,
+            const uint shieldSide,
+            const bool doImpactGraphic = true
+        );
+        void receiveHitBleedDamage(
+            const std::string& source,
+            const glm::vec3& impactNormal,
+            const glm::vec3& impactLocation,
+            const float& impactRadius,
+            const float damage,
+            const uint shieldSide
+        );
+
+        void addShieldImpact(const glm::vec3& impactLocation, const float& impactRadius, const float& maxTime);
+
+        ShieldSide::Side getImpactSide(const glm::vec3& impactLocationLocal);
+        const std::string getImpactSideString(const ShieldSide::Side);
+};
+
+#endif

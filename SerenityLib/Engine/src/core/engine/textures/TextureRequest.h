@@ -20,11 +20,6 @@ struct TextureRequestPart final {
 
     TextureRequestPart();
     ~TextureRequestPart();
-
-    TextureRequestPart(const TextureRequestPart& other);
-    TextureRequestPart& operator=(const TextureRequestPart& other);
-    TextureRequestPart(TextureRequestPart&& other) noexcept = delete;
-    TextureRequestPart& operator=(TextureRequestPart&& other) noexcept = delete;
 };
 struct TextureRequest final {
     std::string          file;
@@ -47,20 +42,13 @@ struct TextureRequest final {
     );
     ~TextureRequest();
 
-    TextureRequest(const TextureRequest& other);
-    TextureRequest& operator=(const TextureRequest& other);
-    TextureRequest(TextureRequest&& other) noexcept = delete;
-    TextureRequest& operator=(TextureRequest&& other) noexcept = delete;
-
     void request();
     void requestAsync();
 };
 
 struct TextureRequestFromMemory final {
     sf::Image*           image;
-    std::string          file;
-    std::string          fileExtension;
-    bool                 fileExists;
+    std::string          textureName;
     TextureRequestPart   part;
     bool                 async;
 
@@ -71,17 +59,12 @@ struct TextureRequestFromMemory final {
 
     TextureRequestFromMemory(
         sf::Image& sfImage,
-        const std::string& filenameOrData,
+        const std::string& textureName,
         const bool& genMipMaps = true,
         const ImageInternalFormat::Format& _internal = ImageInternalFormat::Format::SRGB8_ALPHA8,
         const GLuint& openglTextureType = GL_TEXTURE_2D
     );
     ~TextureRequestFromMemory();
-
-    TextureRequestFromMemory(const TextureRequestFromMemory& other);
-    TextureRequestFromMemory& operator=(const TextureRequestFromMemory& other);
-    TextureRequestFromMemory(TextureRequestFromMemory&& other) noexcept = delete;
-    TextureRequestFromMemory& operator=(TextureRequestFromMemory&& other) noexcept = delete;
 
     void request();
     void requestAsync();

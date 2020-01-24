@@ -22,12 +22,12 @@ namespace Engine {
         class ThreadPoolFuture final {
             friend class Engine::priv::ThreadPool;
             private:
-                std::shared_future<void>    m_Future;
+                std::future<void>           m_Future;
                 std::function<void()>       m_Callback;
 
                 ThreadPoolFuture() = delete;
             public:
-                ThreadPoolFuture(std::shared_future<void>&& future, std::function<void()>&& callback);
+                ThreadPoolFuture(std::future<void>&& future, std::function<void()>&& callback);
                 ~ThreadPoolFuture() = default;
 
                 ThreadPoolFuture(const ThreadPoolFuture& other) noexcept = delete;

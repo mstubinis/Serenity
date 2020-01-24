@@ -10,9 +10,10 @@ struct EmptyCallback final {void operator()() const {}};
 
 #pragma region ThreadPoolFuture
 
-ThreadPoolFuture::ThreadPoolFuture(std::shared_future<void>&& future, std::function<void()>&& callback) {
-    m_Future   = future;
-    m_Callback = callback;
+ThreadPoolFuture::ThreadPoolFuture(std::future<void>&& future, std::function<void()>&& callback) {
+    using std::swap;
+    std::swap(m_Future, future);
+    std::swap(m_Callback, callback);
 }
 
 ThreadPoolFuture::ThreadPoolFuture(ThreadPoolFuture&& other) noexcept {
@@ -48,26 +49,25 @@ void ThreadPool::shutdown() {
 }
 void ThreadPool::init(const unsigned int num_threads) {
     m_Stopped = false;
+    m_WorkerThreads.reserve(num_threads);
     for (unsigned int i = 0; i < num_threads; ++i) {
 
-        auto thread_exec_func = [&](ThreadPool& pool_) {
-            while (!pool_.m_Stopped) {
+        auto thread_exec_func = [&]() {
+            while (!m_Stopped) {
                 std::shared_ptr<std::packaged_task<void()>> job;
                 {
-                    std::unique_lock<std::mutex> lock(pool_.m_Mutex);
-                    pool_.m_ConditionVariable.wait(lock, [&] { return !(pool_.m_TaskQueue.empty() && !pool_.m_Stopped); });
-
-                    if (pool_.m_Stopped) {
+                    std::unique_lock<std::mutex> lock(m_Mutex);
+                    m_ConditionVariable.wait(lock, [&] { return !(m_TaskQueue.empty() && !m_Stopped); });
+                    if (m_Stopped) {
                         return;
                     }
-
-                    job = (pool_.m_TaskQueue.front());
-                    pool_.m_TaskQueue.pop();
+                    job = (m_TaskQueue.front());
+                    m_TaskQueue.pop();
                 }
                 (*job)();
             }
         };
-        m_WorkerThreads.push_back(std::move(std::thread(std::move(thread_exec_func), std::ref(const_cast<ThreadPool&>(*this)))));
+        m_WorkerThreads.push_back(std::move(std::thread(std::move(thread_exec_func))));
     }
 }
 void ThreadPool::addJob(std::function<void()>&& job) {
@@ -79,7 +79,7 @@ void ThreadPool::addJob(std::function<void()>&& job, std::function<void()>&& cal
 }
 void ThreadPool::internal_create_packaged_task(std::function<void()>&& job, std::function<void()>&& callback) {
     const auto task = std::make_shared<std::packaged_task<void()>>(std::move(job));
-    ThreadPoolFuture thread_pool_future(std::move(std::shared_future<void>(task->get_future())), std::move(callback));
+    ThreadPoolFuture thread_pool_future(std::move(task->get_future()), std::move(callback));
     m_Futures.push_back(std::move(thread_pool_future));
     {
         std::lock_guard<std::mutex> lock(m_Mutex);
@@ -92,7 +92,7 @@ void ThreadPool::update() {
         return;
     for (auto it = m_Futures.begin(); it != m_Futures.end();) {
         auto& future = (*it);
-        if (future.m_Future._Is_ready()) {
+        if (future.m_Future._Is_ready() && future.m_Future.valid()) {
             //if (future.m_Callback) { //hacky, try to fix it without the hack
                 future.m_Callback();
             //}
