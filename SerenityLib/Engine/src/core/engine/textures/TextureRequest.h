@@ -20,6 +20,11 @@ struct TextureRequestPart final {
 
     TextureRequestPart();
     ~TextureRequestPart();
+
+    TextureRequestPart(const TextureRequestPart& other);
+    TextureRequestPart& operator=(const TextureRequestPart& other);
+    TextureRequestPart(TextureRequestPart&& other) noexcept = delete;
+    TextureRequestPart& operator=(TextureRequestPart&& other) noexcept = delete;
 };
 struct TextureRequest final {
     std::string          file;
@@ -34,7 +39,6 @@ struct TextureRequest final {
     bool                         isToBeMipmapped;
     ImageInternalFormat::Format  internalFormat;
 
-    TextureRequest();
     TextureRequest(
         const std::string& filenameOrData,
         const bool& genMipMaps = true,
@@ -42,6 +46,11 @@ struct TextureRequest final {
         const GLuint& openglTextureType = GL_TEXTURE_2D
     );
     ~TextureRequest();
+
+    TextureRequest(const TextureRequest& other);
+    TextureRequest& operator=(const TextureRequest& other);
+    TextureRequest(TextureRequest&& other) noexcept = delete;
+    TextureRequest& operator=(TextureRequest&& other) noexcept = delete;
 
     void request();
     void requestAsync();
@@ -60,7 +69,6 @@ struct TextureRequestFromMemory final {
     bool                         isToBeMipmapped;
     ImageInternalFormat::Format  internalFormat;
 
-    TextureRequestFromMemory();
     TextureRequestFromMemory(
         sf::Image& sfImage,
         const std::string& filenameOrData,
@@ -69,6 +77,11 @@ struct TextureRequestFromMemory final {
         const GLuint& openglTextureType = GL_TEXTURE_2D
     );
     ~TextureRequestFromMemory();
+
+    TextureRequestFromMemory(const TextureRequestFromMemory& other);
+    TextureRequestFromMemory& operator=(const TextureRequestFromMemory& other);
+    TextureRequestFromMemory(TextureRequestFromMemory&& other) noexcept = delete;
+    TextureRequestFromMemory& operator=(TextureRequestFromMemory&& other) noexcept = delete;
 
     void request();
     void requestAsync();

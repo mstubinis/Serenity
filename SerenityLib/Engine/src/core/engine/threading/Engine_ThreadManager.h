@@ -17,11 +17,13 @@
 namespace Engine{
     namespace priv{
         class  ThreadPool;
+        class  ParticleSystem;
         struct ComponentCamera_UpdateFunction;
         struct ComponentBody_UpdateFunction;
         class ThreadManager final{
             friend struct ComponentCamera_UpdateFunction;
             friend struct ComponentBody_UpdateFunction;
+            friend class  Engine::priv::ParticleSystem;
             private:
                 void wait_for_all_engine_controlled();
 

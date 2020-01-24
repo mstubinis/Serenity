@@ -234,6 +234,17 @@ Handle Resources::loadTexture(const string& file, const ImageInternalFormat::For
     }
     return Resources::getTextureHandle(texture);
 }
+Handle Resources::loadTexture(sf::Image& sfImage, const string& texture_name, const ImageInternalFormat::Format& internalFormat, const bool& mipmaps) {
+    auto* texture = resourceManager->HasResource<Texture>(texture_name);
+    if (!texture) {
+        TextureRequestFromMemory request(sfImage, texture_name, mipmaps, internalFormat);
+        request.request();
+        return request.part.handle;
+    }
+    return Resources::getTextureHandle(texture);
+}
+
+
 Handle Resources::loadTextureAsync(const string& file, const ImageInternalFormat::Format& internalFormat, const bool& mipmaps) {
     auto* texture = resourceManager->HasResource<Texture>(file);
     if (!texture) {

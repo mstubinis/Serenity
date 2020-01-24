@@ -12,24 +12,38 @@ using namespace std;
 using namespace Engine;
 using namespace Engine::priv;
 
+#pragma region TextureRequestPart
+
 TextureRequestPart::TextureRequestPart() {
     texture = nullptr;
     name    = "";
     handle  = Handle();
 }
 TextureRequestPart::~TextureRequestPart() {
+
+}
+TextureRequestPart::TextureRequestPart(const TextureRequestPart& other) {
+    texture = other.texture;
+    name    = other.name;
+    handle  = other.handle;
+}
+TextureRequestPart& TextureRequestPart::operator=(const TextureRequestPart& other) {
+    texture = other.texture;
+    name    = other.name;
+    handle  = other.handle;
+    return *this;
 }
 
+#pragma endregion
 
 #pragma region TextureRequest
 
-TextureRequest::TextureRequest() {
-    file          = "";
+
+TextureRequest::TextureRequest(const string& _filename, const bool& genMipMaps, const ImageInternalFormat::Format& _internal, const GLuint& openglTextureType){
     fileExtension = "";
-    fileExists    = false;
-    async         = false;
-}
-TextureRequest::TextureRequest(const string& _filename, const bool& genMipMaps, const ImageInternalFormat::Format& _internal, const GLuint& openglTextureType) : TextureRequest() {
+    fileExists = false;
+    async = false;
+    
     file = _filename;
     if (!file.empty()) {
         fileExtension = boost::filesystem::extension(file);
@@ -58,6 +72,30 @@ TextureRequest::TextureRequest(const string& _filename, const bool& genMipMaps, 
 TextureRequest::~TextureRequest() {
 
 }
+TextureRequest::TextureRequest(const TextureRequest& other) {
+    file            = other.file;
+    fileExists      = other.fileExists;
+    fileExtension   = other.fileExtension;
+    internalFormat  = other.internalFormat;
+    async           = other.async;
+    isToBeMipmapped = other.isToBeMipmapped;
+    textureType     = other.textureType;
+    type            = other.type;
+    part            = other.part;
+}
+TextureRequest& TextureRequest::operator=(const TextureRequest& other) {
+    file            = other.file;
+    fileExists      = other.fileExists;
+    fileExtension   = other.fileExtension;
+    internalFormat  = other.internalFormat;
+    async           = other.async;
+    isToBeMipmapped = other.isToBeMipmapped;
+    textureType     = other.textureType;
+    type            = other.type;
+    part            = other.part;
+    return *this;
+}
+
 void TextureRequest::request() {
     async = false;
     InternalTextureRequestPublicInterface::Request(*this);
@@ -70,14 +108,13 @@ void TextureRequest::requestAsync() {
 #pragma endregion
 
 #pragma region TextureRequestFromMemory
-TextureRequestFromMemory::TextureRequestFromMemory() {
-    file           = "";
-    fileExtension  = "";
-    fileExists     = false;
-    async          = false;
-    image          = nullptr;
-}
-TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const string& _filename, const bool& genMipMaps, const ImageInternalFormat::Format& _internal, const GLuint& openglTextureType) : TextureRequestFromMemory() {
+
+
+TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const string& _filename, const bool& genMipMaps, const ImageInternalFormat::Format& _internal, const GLuint& openglTextureType){
+    fileExtension = "";
+    fileExists = false;
+    async = false;
+    
     file  = _filename;
     image = &sfImage;
     if (!file.empty()) {
@@ -107,6 +144,31 @@ TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const str
 TextureRequestFromMemory::~TextureRequestFromMemory() {
 
 }
+TextureRequestFromMemory::TextureRequestFromMemory(const TextureRequestFromMemory& other) {
+    file            = other.file;
+    fileExists      = other.fileExists;
+    fileExtension   = other.fileExtension;
+    internalFormat  = other.internalFormat;
+    async           = other.async;
+    isToBeMipmapped = other.isToBeMipmapped;
+    textureType     = other.textureType;
+    type            = other.type;
+    image           = other.image;
+    part            = other.part;
+}
+TextureRequestFromMemory& TextureRequestFromMemory::operator=(const TextureRequestFromMemory& other) {
+    file            = other.file;
+    fileExists      = other.fileExists;
+    fileExtension   = other.fileExtension;
+    internalFormat  = other.internalFormat;
+    async           = other.async;
+    isToBeMipmapped = other.isToBeMipmapped;
+    textureType     = other.textureType;
+    type            = other.type;
+    image           = other.image;
+    part            = other.part;
+    return *this;
+}
 void TextureRequestFromMemory::request() {
     async = false;
     InternalTextureRequestPublicInterface::RequestMem(*this);
@@ -115,6 +177,7 @@ void TextureRequestFromMemory::requestAsync() {
     async = true;
     InternalTextureRequestPublicInterface::RequestMem(*this);
 }
+
 #pragma endregion
 
 void InternalTextureRequestPublicInterface::Request(TextureRequest& request) {
@@ -164,9 +227,9 @@ void InternalTextureRequestPublicInterface::RequestMem(TextureRequestFromMemory&
             request.part.texture->setName(request.part.name);
             request.part.handle  = Core::m_Engine->m_ResourceManager.m_Resources->add(request.part.texture, ResourceType::Texture);
 
-            const auto lambda_cpu = [=]() {
+            const auto lambda_cpu_mem = [=]() {
                 if (request.textureType == TextureType::Texture2D) {
-                    TextureLoader::InitFromMemory(*request.part.texture, std::ref(*request.image), request.file, request.isToBeMipmapped, request.internalFormat, request.type);
+                    TextureLoader::InitFromMemory(*request.part.texture, *request.image, request.file, request.isToBeMipmapped, request.internalFormat, request.type);
                 }
                 InternalTextureRequestPublicInterface::LoadCPUMem(const_cast<TextureRequestFromMemory&>(request));
             };
@@ -174,9 +237,9 @@ void InternalTextureRequestPublicInterface::RequestMem(TextureRequestFromMemory&
                 const auto cbk = [=]() {
                     InternalTextureRequestPublicInterface::LoadGPUMem(const_cast<TextureRequestFromMemory&>(request));
                 };
-                threading::addJobWithPostCallback(lambda_cpu, cbk);
+                threading::addJobWithPostCallback(lambda_cpu_mem, cbk);
             }else{
-                lambda_cpu();
+                lambda_cpu_mem();
                 InternalTextureRequestPublicInterface::LoadGPUMem(request);
             }
         }else{

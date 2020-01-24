@@ -584,19 +584,18 @@ double Math::grad(const int hash, const double x, const double y, const double z
 	return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
 }
 glm::vec4 Math::PaintersAlgorithm(const glm::vec4& paint_color, const glm::vec4& canvas_color){
-	const float& alpha = paint_color.a + canvas_color.a * (1.0f - paint_color.a);
+	const float alpha = paint_color.a + canvas_color.a * (1.0f - paint_color.a);
     glm::vec4 ret(0.0f);
     ret   = ((paint_color * paint_color.a + canvas_color * canvas_color.a * (1.0f - paint_color.a)) / alpha);
     ret.a = alpha;
     return ret;
 }
-sf::Color Math::PaintersAlgorithm(const sf::Color& paint_color, const sf::Color& canvas_color) {
-    const glm::vec4 cC = glm::vec4(static_cast<float>(canvas_color.r) / 255.0f, static_cast<float>(canvas_color.g) / 255.0f, static_cast<float>(canvas_color.b) / 255.0f, static_cast<float>(canvas_color.a) / 255.0f);
-    const glm::vec4 pC = glm::vec4(static_cast<float>(paint_color.r) / 255.0f, static_cast<float>(paint_color.g) / 255.0f, static_cast<float>(paint_color.b) / 255.0f, static_cast<float>(paint_color.a) / 255.0f);
-    const float full = 1.0f;
-    const float alpha = pC.a + cC.a * (full - pC.a);
+sf::Color Math::PaintersAlgorithm(const sf::Color& sf_paint_color, const sf::Color& sf_canvas_color) {
+    const glm::vec4 canvas_color = glm::vec4(static_cast<float>(sf_canvas_color.r) / 255.0f, static_cast<float>(sf_canvas_color.g) / 255.0f, static_cast<float>(sf_canvas_color.b) / 255.0f, static_cast<float>(sf_canvas_color.a) / 255.0f);
+    const glm::vec4 paint_color = glm::vec4(static_cast<float>(sf_paint_color.r) / 255.0f, static_cast<float>(sf_paint_color.g) / 255.0f, static_cast<float>(sf_paint_color.b) / 255.0f, static_cast<float>(sf_paint_color.a) / 255.0f);
+    const float alpha = paint_color.a + canvas_color.a * (1.0f - paint_color.a);
     glm::vec4 ret(0.0f);
-    ret = (pC * pC.a + cC * cC.a * (full - pC.a) / alpha);
+    ret = ((paint_color * paint_color.a + canvas_color * canvas_color.a * (1.0f - paint_color.a)) / alpha);
     ret.a = alpha;
     const sf::Uint8 finalR = static_cast<sf::Uint8>(ret.r * 255.0f);
     const sf::Uint8 finalG = static_cast<sf::Uint8>(ret.g * 255.0f);

@@ -127,6 +127,12 @@ namespace Engine{
             const ImageInternalFormat::Format& = ImageInternalFormat::SRGB8_ALPHA8,
             const bool& mipmaps = false
         );
+        Handle loadTexture(
+            sf::Image& sfImage,
+            const std::string& texture_name,
+            const ImageInternalFormat::Format & = ImageInternalFormat::SRGB8_ALPHA8,
+            const bool& mipmaps = false
+        );
         Handle loadTextureAsync(
             const std::string& file,
             const ImageInternalFormat::Format& = ImageInternalFormat::SRGB8_ALPHA8,
