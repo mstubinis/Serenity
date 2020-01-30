@@ -170,3 +170,10 @@ void Engine::setMousePosition(const glm::vec2& pos, const bool resetDifference, 
 void Engine::setMousePosition(const glm::uvec2& pos, const bool resetDifference, const bool resetPreviousPosition) {
     Engine::setMousePosition(Resources::getWindow(), pos, resetDifference, resetPreviousPosition);
 }
+
+
+
+void Engine::events::dispatchEvent(const unsigned int& eventType) {
+    auto& mgr = *EventManager::m_EventManager;
+    mgr.m_EventDispatcher.dispatchEvent(eventType);
+}

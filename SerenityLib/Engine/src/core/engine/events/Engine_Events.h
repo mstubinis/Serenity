@@ -40,6 +40,9 @@ namespace Engine{
                 void onResetEvents(const double& dt);
         };
     };
+    namespace events {
+        void dispatchEvent(const unsigned int& eventType);
+    };
     //keyboard functions
     const unsigned int getNumPressedKeys();
     const std::unordered_set<unsigned int>& getPressedKeys();

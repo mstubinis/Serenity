@@ -11,3 +11,11 @@ void EventObserver::registerEvent(const EventType::Type& type) {
 void EventObserver::unregisterEvent(const EventType::Type& type){
     priv::Core::m_Engine->m_EventManager.m_EventDispatcher.unregisterObject(this, type);
 }
+
+
+void EventObserver::registerEvent(const unsigned int& type) {
+    priv::Core::m_Engine->m_EventManager.m_EventDispatcher.registerObject(this, type);
+}
+void EventObserver::unregisterEvent(const unsigned int& type) {
+    priv::Core::m_Engine->m_EventManager.m_EventDispatcher.unregisterObject(this, type);
+}

@@ -31,9 +31,9 @@ const bool ThreadPoolFuture::isReady() {
     return m_Future._Is_ready() && m_Future.valid();
 }
 void ThreadPoolFuture::operator()() const {
-    //if (future.m_Callback) { //hacky, try to fix it without the hack
+    if (m_Callback) { //hacky, still trying to find out why this is needed
         m_Callback();
-    //}
+    }
 }
 
 
@@ -88,9 +88,10 @@ void ThreadPool::addJob(std::function<void()>&& job, std::function<void()>&& cal
 void ThreadPool::internal_create_packaged_task(std::function<void()>&& job, std::function<void()>&& callback) {
     const auto task = std::make_shared<std::packaged_task<void()>>(std::move(job));
     ThreadPoolFuture thread_pool_future(std::move(task->get_future()), std::move(callback));
-    m_Futures.push_back(std::move(thread_pool_future));
+    //m_Futures.push_back(std::move(thread_pool_future));
     {
         std::lock_guard<std::mutex> lock(m_Mutex);
+        m_Futures.push_back(std::move(thread_pool_future)); //TODO: see if this really needs to be in the critical section 
         m_TaskQueue.push(std::move(task));
     }
     m_ConditionVariable.notify_one();

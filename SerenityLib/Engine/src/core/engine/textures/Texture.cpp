@@ -44,37 +44,96 @@ Texture::~Texture(){
     InternalTexturePublicInterface::Unload(*this);
     //SAFE_DELETE_VECTOR(m_ImagesDatas); //TODO: see if this is needed
 }
+bool Texture::operator==(const bool& rhs) const {
+    if (rhs == true) {
+        return (m_TextureAddress.size() > 0) ? true : false;
+    }
+    return (m_TextureAddress.size() > 0) ? false : true;
+}
+Texture::operator bool() const {
+    return (m_TextureAddress.size() > 0) ? true : false;
+}
+
 void Texture::render(const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth){
     if (m_TextureType == TextureType::CubeMap)
         return;
     Engine::Renderer::renderTexture(*this, position, color, angle, scale, depth);
 }
 void Texture::setXWrapping(const TextureWrap::Wrap& wrap){
+    if (*this == false) {
+        auto lambda = [=]() {
+            setXWrapping(wrap);
+        };
+        m_CommandQueue.push(lambda);
+        return;
+    }
     //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setXWrapping(m_Type, wrap);
 }
 void Texture::setYWrapping(const TextureWrap::Wrap& wrap){
+    if (*this == false) {
+        auto lambda = [=]() {
+            setYWrapping(wrap);
+        };
+        m_CommandQueue.push(lambda);
+        return;
+    }
     //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setYWrapping(m_Type, wrap);
 }
 void Texture::setZWrapping(const TextureWrap::Wrap& wrap){
+    if (*this == false) {
+        auto lambda = [=]() {
+            setZWrapping(wrap);
+        };
+        m_CommandQueue.push(lambda);
+        return;
+    }
     //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setZWrapping(m_Type, wrap);
 }
 void Texture::setWrapping(const TextureWrap::Wrap& wrap){
+    if (*this == false) {
+        auto lambda = [=]() {
+            setWrapping(wrap);
+        };
+        m_CommandQueue.push(lambda);
+        return;
+    }
     //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setWrapping(m_Type, wrap);
 }
 void Texture::setMinFilter(const TextureFilter::Filter& filter){
+    if (*this == false) {
+        auto lambda = [=]() {
+            setMinFilter(filter);
+        };
+        m_CommandQueue.push(lambda);
+        return;
+    }
     //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setMinFilter(m_Type, filter);
     m_MinFilter = filter;
 }
 void Texture::setMaxFilter(const TextureFilter::Filter& filter){
+    if (*this == false) {
+        auto lambda = [=]() {
+            setMaxFilter(filter);
+        };
+        m_CommandQueue.push(lambda);
+        return;
+    }
     //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setMaxFilter(m_Type, filter);
 }
 void Texture::setFilter(const TextureFilter::Filter& filter){
+    if (*this == false) {
+        auto lambda = [=]() {
+            setFilter(filter);
+        };
+        m_CommandQueue.push(lambda);
+        return;
+    }
     //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setFilter(m_Type, filter);
 }
@@ -115,8 +174,13 @@ void Texture::setFilter(const GLuint& type, const TextureFilter::Filter& filter)
     Texture::setMaxFilter(type, filter);
 }
 void Texture::setAnisotropicFiltering(const float& anisotropicFiltering){
-    if (m_TextureAddress.size() == 0)
+    if (*this == false) {
+        auto lambda = [&]() {
+            setAnisotropicFiltering(anisotropicFiltering);
+        };
+        m_CommandQueue.push(lambda);
         return;
+    }
     Engine::Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     if(Engine::priv::Renderer::OPENGL_VERSION >= 46){
     	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, const_cast<GLfloat*>(&anisotropicFiltering));

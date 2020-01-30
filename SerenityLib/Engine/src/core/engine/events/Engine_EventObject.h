@@ -191,8 +191,15 @@ Inherit from this struct to expose your class to events and event dispatching, s
 struct EventObserver{
     virtual ~EventObserver(){}
 
+    template <class T> void registerEvent(const T&) = delete;
+    template <class T> void unregisterEvent(const T&) = delete;
+
     void registerEvent(const EventType::Type& type);
     void unregisterEvent(const EventType::Type& type);
+
+    void registerEvent(const unsigned int& type);
+    void unregisterEvent(const unsigned int& type);
+
     virtual void onEvent(const Event& e) {}
 };
 #endif

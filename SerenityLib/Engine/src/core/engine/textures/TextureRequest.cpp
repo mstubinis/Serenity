@@ -74,7 +74,7 @@ TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const str
     async = false;
 
     textureName = _filename;
-    image = &sfImage;
+    image = sfImage;
     internalFormat = _internal;
     isToBeMipmapped = genMipMaps;
     type = openglTextureType;
@@ -96,6 +96,28 @@ TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const str
 TextureRequestFromMemory::~TextureRequestFromMemory() {
 
 }
+TextureRequestFromMemory::TextureRequestFromMemory(const TextureRequestFromMemory& other) {
+    image = other.image;
+    textureName = other.textureName;
+    part = other.part;
+    async = other.async;
+    type = other.type;
+    textureType = other.textureType;
+    isToBeMipmapped = other.isToBeMipmapped;
+    internalFormat = other.internalFormat;
+}
+TextureRequestFromMemory& TextureRequestFromMemory::operator=(const TextureRequestFromMemory& other) {
+    image = other.image;
+    textureName = other.textureName;
+    part = other.part;
+    async = other.async;
+    type = other.type;
+    textureType = other.textureType;
+    isToBeMipmapped = other.isToBeMipmapped;
+    internalFormat = other.internalFormat;
+    return *this;
+}
+
 void TextureRequestFromMemory::request() {
     async = false;
     InternalTextureRequestPublicInterface::RequestMem(*this);
@@ -145,7 +167,8 @@ void InternalTextureRequestPublicInterface::LoadGPU(TextureRequest& request) {
 
 
 void InternalTextureRequestPublicInterface::RequestMem(TextureRequestFromMemory& request) {
-    if (request.image) {
+    auto imgSize = request.image.getSize();
+    if (imgSize.x > 0 && imgSize.y > 0) {
         request.part.name    = request.textureName;
         request.part.texture = NEW Texture();
         request.part.texture->m_TextureType = request.textureType;
@@ -154,7 +177,7 @@ void InternalTextureRequestPublicInterface::RequestMem(TextureRequestFromMemory&
 
         const auto lambda_cpu = [=]() {
             if (request.textureType == TextureType::Texture2D) {
-                TextureLoader::InitFromMemory(*request.part.texture, std::ref(*request.image), request.textureName, request.isToBeMipmapped, request.internalFormat, request.type);
+                TextureLoader::InitFromMemory(*request.part.texture, request.image, request.textureName, request.isToBeMipmapped, request.internalFormat, request.type);
             }
             InternalTextureRequestPublicInterface::LoadCPUMem(const_cast<TextureRequestFromMemory&>(request));
         };

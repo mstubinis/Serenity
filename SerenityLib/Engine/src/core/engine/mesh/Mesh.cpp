@@ -43,17 +43,17 @@ namespace Engine {
             const auto& mesh = *static_cast<Mesh*>(r);
             if (mesh.isLoaded()) {
                 mesh.m_VertexData->bind();
-            }//else{
-            //    Mesh::Cube->m_VertexData->bind();
-            //}
+            }else{
+                priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().m_VertexData->bind();
+            }
         }};
         struct DefaultMeshUnbindFunctor final {void operator()(BindableResource* r) const {
             const auto& mesh = *static_cast<Mesh*>(r);
             if (mesh.isLoaded()) {
                 mesh.m_VertexData->unbind();
-            }//else{
-            //    Mesh::Cube->m_VertexData->unbind();
-            //}
+            }else{
+                priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().m_VertexData->unbind();
+            }
         }};
     };
 };
@@ -448,9 +448,8 @@ Mesh::~Mesh(){
 bool Mesh::operator==(const bool& rhs) const {
     if (rhs == true) {
         return (m_VertexData) ? true : false;
-    }else{
-        return (m_VertexData) ? false : true;
     }
+    return (m_VertexData) ? false : true;
 }
 Mesh::operator bool() const {
     return (m_VertexData) ? true : false;
@@ -470,6 +469,7 @@ const glm::vec3& Mesh::getRadiusBox() const {
 const float Mesh::getRadius() const { 
     return m_radius; 
 }
+//TODO: move to renderer
 void Mesh::render(const bool instancing, const ModelDrawingMode::Mode mode){
     const auto indicesSize = m_VertexData->indices.size();
     if (indicesSize == 0) 

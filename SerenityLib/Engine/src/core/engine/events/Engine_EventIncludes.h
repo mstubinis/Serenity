@@ -4,8 +4,10 @@
 
 #include <SFML/System.hpp>
 
-struct EventType final { enum Type {
-    WindowResized,
+constexpr unsigned int CONST_EVENT_TYPE_ENGINE_OFFSET = 32768U;
+
+struct EventType final { enum Type: unsigned int {
+    WindowResized = CONST_EVENT_TYPE_ENGINE_OFFSET,
     WindowGainedFocus,
     WindowLostFocus,
 

@@ -11,6 +11,8 @@
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <memory>
+#include <queue>
+#include <functional>
 
 namespace Engine {
     namespace priv {
@@ -24,9 +26,10 @@ class Texture: public EngineResource{
     friend struct Engine::priv::InternalTextureRequestPublicInterface;
 
     public:
-        static Texture *White, *Black, *Checkers, *BRDF; //loaded in renderer
+        static Texture *White, *Black, *Checkers, *BRDF; //loaded in renderer. TODO: move these to built in class (separate from client side interface)
     private:
-        std::vector<std::unique_ptr<Engine::priv::ImageLoadedStructure>>   m_ImagesDatas;
+        std::queue<std::function<void()>>                                   m_CommandQueue; //for commands that were not available until the texture was properly loaded
+        std::vector<std::unique_ptr<Engine::priv::ImageLoadedStructure>>    m_ImagesDatas;
         std::vector<GLuint>                                                 m_TextureAddress;
         GLuint                                                              m_Type;
         TextureType::Type                                                   m_TextureType;
@@ -45,6 +48,9 @@ class Texture: public EngineResource{
         //Cubemap from 6 files
         Texture(const std::string files[],const std::string& name = "Cubemap",const bool& genMipmaps = false,const ImageInternalFormat::Format& = ImageInternalFormat::Format::SRGB8_ALPHA8);
         virtual ~Texture();
+
+        bool operator==(const bool& rhs) const;
+        explicit operator bool() const;
 
         Texture(const Texture&)                      = delete;
         Texture& operator=(const Texture&)           = delete;

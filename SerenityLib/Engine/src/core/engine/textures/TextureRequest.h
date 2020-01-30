@@ -4,10 +4,7 @@
 
 class Texture;
 
-namespace sf {
-    class Image;
-};
-
+#include <SFML/Graphics/Image.hpp>
 #include <vector>
 #include <string>
 #include <core/engine/resources/Handle.h>
@@ -47,7 +44,7 @@ struct TextureRequest final {
 };
 
 struct TextureRequestFromMemory final {
-    sf::Image*           image;
+    sf::Image            image;
     std::string          textureName;
     TextureRequestPart   part;
     bool                 async;
@@ -65,6 +62,11 @@ struct TextureRequestFromMemory final {
         const GLuint& openglTextureType = GL_TEXTURE_2D
     );
     ~TextureRequestFromMemory();
+
+    TextureRequestFromMemory(const TextureRequestFromMemory&);
+    TextureRequestFromMemory& operator=(const TextureRequestFromMemory&);
+    TextureRequestFromMemory(TextureRequestFromMemory&& other) noexcept = delete;
+    TextureRequestFromMemory& operator=(TextureRequestFromMemory&& other) noexcept = delete;
 
     void request();
     void requestAsync();

@@ -657,7 +657,7 @@ class priv::Renderer::impl final{
                     x += chr.xadvance;
                 }
             }
-            if (lines.size() == 0) {
+            if (!line_accumulator.empty()) {
                 lines.push_back(line_accumulator);
                 lines_sizes.push_back(static_cast<unsigned short>(x));
             }

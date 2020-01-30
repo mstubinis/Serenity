@@ -58,10 +58,7 @@ void TextureLoader::InitFromFile(Texture& texture, const string& filename, const
     image->internalFormat = _internal;
     if (extension == ".dds") {
         TextureLoader::LoadDDSFile(texture, filename, *image);
-    }/*else{
-        image->pixelType = ImagePixelType::UNSIGNED_BYTE;
-        image->internalFormat = _internal;
-    }*/
+    }
     TextureLoader::ChoosePixelFormat(image->pixelFormat, image->internalFormat);
     texture.m_ImagesDatas.insert(texture.m_ImagesDatas.begin(), std::move(image)); //yes, this NEEDS to be pushed into the front, not the back
 
@@ -484,7 +481,7 @@ void TextureLoader::GeneratePBRData(Texture& texture, const unsigned int& convol
     if (texture.m_TextureAddress.size() == 1) {
         texture.m_TextureAddress.push_back(0);
         Engine::Renderer::genAndBindTexture(texture.m_Type, texture.m_TextureAddress[1]);
-        for (uint32_t i = 0; i < 6; ++i) {
+        for (unsigned int i = 0; i < 6; ++i) {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, convoludeTextureSize, convoludeTextureSize, 0, GL_RGB, GL_FLOAT, NULL);
         }
         texture.setWrapping(TextureWrap::ClampToEdge);
@@ -493,7 +490,7 @@ void TextureLoader::GeneratePBRData(Texture& texture, const unsigned int& convol
     if (texture.m_TextureAddress.size() == 2) {
         texture.m_TextureAddress.push_back(0);
         Engine::Renderer::genAndBindTexture(texture.m_Type, texture.m_TextureAddress[2]);
-        for (uint32_t i = 0; i < 6; ++i) {
+        for (unsigned int i = 0; i < 6; ++i) {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, preEnvFilterSize, preEnvFilterSize, 0, GL_RGB, GL_FLOAT, NULL);
         }
         texture.setWrapping(TextureWrap::ClampToEdge);
@@ -505,8 +502,6 @@ void TextureLoader::GeneratePBRData(Texture& texture, const unsigned int& convol
 }
 
 void InternalTexturePublicInterface::LoadCPU(Texture& texture) {
-    if (texture.m_TextureAddress.size() == 0)
-        texture.m_TextureAddress.push_back(0);
     for (auto& image : texture.m_ImagesDatas) {
         if (!image->filename.empty()) {
             bool _do = false;
@@ -535,6 +530,8 @@ void InternalTexturePublicInterface::LoadCPU(Texture& texture) {
     }
 }
 void InternalTexturePublicInterface::LoadGPU(Texture& texture) {
+    if (texture.m_TextureAddress.size() == 0)
+        texture.m_TextureAddress.emplace_back(0);
     Engine::Renderer::genAndBindTexture(texture.m_Type, texture.m_TextureAddress[0]);
     switch (texture.m_TextureType) {
         case TextureType::RenderTarget: {
@@ -550,11 +547,19 @@ void InternalTexturePublicInterface::LoadGPU(Texture& texture) {
         }case TextureType::CubeMap: {
             TextureLoader::LoadTextureCubemapIntoOpenGL(texture);
             break;
+        }default: { 
+            break; 
         }
-        default: { break; }
     }
     if (texture.m_IsToBeMipmapped) {
         TextureLoader::GenerateMipmapsOpenGL(texture);
+    }
+
+
+    while (texture.m_CommandQueue.size() > 0) {
+        auto front = texture.m_CommandQueue.front();
+        front();
+        texture.m_CommandQueue.pop();
     }
 
     //cout << "(Texture) ";

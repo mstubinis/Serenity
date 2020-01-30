@@ -51,7 +51,7 @@ namespace Engine {
             ImageInternalFormat::Format           internalFormat;
             ImagePixelFormat::Format              pixelFormat;
             ImagePixelType::Type                  pixelType;
-            std::vector<priv::ImageMipmap>       mipmaps;
+            std::vector<priv::ImageMipmap>        mipmaps;
             std::string                           filename;
 
             ImageLoadedStructure();
