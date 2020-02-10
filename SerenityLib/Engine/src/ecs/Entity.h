@@ -53,14 +53,12 @@ struct Entity{
 
 
 
-namespace Engine {
-    namespace priv {
-        struct InternalEntityPublicInterface final {
-            static ECS<Entity>& GetECS(Entity& entity) {
-			    const EntityDataRequest dataRequest(entity);
-                return Engine::priv::InternalScenePublicInterface::GetECS(entity.scene());
-            }
-        };
+namespace Engine::priv {
+    struct InternalEntityPublicInterface final {
+        static ECS<Entity>& GetECS(Entity& entity) {
+			const EntityDataRequest dataRequest(entity);
+            return Engine::priv::InternalScenePublicInterface::GetECS(entity.scene());
+        }
     };
 };
 

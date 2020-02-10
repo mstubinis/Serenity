@@ -18,6 +18,8 @@ SoundEffect::SoundEffect() : SoundBaseClass(1) {
 SoundEffect::~SoundEffect() {
 
 }
+
+
 void SoundEffect::update(const double& dt) {
     const auto sfStatus = m_Sound.getStatus();
     if (sfStatus == sf::SoundSource::Status::Stopped) {

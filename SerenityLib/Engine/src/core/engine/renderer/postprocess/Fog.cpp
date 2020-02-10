@@ -13,6 +13,7 @@ Engine::priv::Fog::Fog() {
     distNull   = 5.0f;
     distBlend  = 50.0f;
     color      = glm::vec4(1.0f, 1.0f, 1.0f, 0.97f);
+
 }
 Engine::priv::Fog::~Fog() {
 }

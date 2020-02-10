@@ -9,10 +9,10 @@
 using namespace Engine;
 using namespace std;
 
-priv::SoundManager* soundManager;
+priv::SoundManager* soundManager = nullptr;
 
 
-priv::SoundManager::SoundManager(){ 
+priv::SoundManager::SoundManager(){
     soundManager = this;
     for (unsigned int i = 0; i < SoundManager::MAX_SOUND_EFFECTS; ++i) {
         m_FreelistEffects.push(i);
@@ -26,6 +26,22 @@ priv::SoundManager::~SoundManager(){
 }
 void priv::SoundManager::cleanup() {
     SAFE_DELETE_VECTOR(m_SoundQueues);
+}
+SoundEffect* priv::SoundManager::_getNextFreeEffect() {
+    if (m_FreelistEffects.size() > 0){
+        auto index = m_FreelistEffects.top();
+        m_FreelistEffects.pop();
+        return &m_SoundEffects[index];
+    }
+    return nullptr;
+}
+SoundMusic* priv::SoundManager::_getNextFreeMusic() {
+    if (m_FreelistMusics.size() > 0) {
+        auto index = m_FreelistMusics.top();
+        m_FreelistMusics.pop();
+        return &m_SoundMusics[index];
+    }
+    return nullptr;
 }
 void priv::SoundManager::_setSoundInformation(Handle& handle, SoundEffect& sound) {
     SoundData& data = *Resources::getSoundData(handle);
@@ -92,31 +108,13 @@ void priv::SoundManager::_update(const double& dt){
     }
 }
 
-SoundEffect* priv::SoundManager::_getFreeEffect() {
-    if (m_FreelistEffects.size() > 0) {
-        auto& index = m_FreelistEffects.top();
-        m_FreelistEffects.pop();
-        return &m_SoundEffects[index];
-    }
-    return nullptr;
-}
-SoundMusic* priv::SoundManager::_getFreeMusic() {
-    if (m_FreelistMusics.size() > 0) {
-        auto& index = m_FreelistMusics.top();
-        m_FreelistMusics.pop();
-        return &m_SoundMusics[index];
-    }
-    return nullptr;
-}
-
-
 SoundQueue* Sound::createQueue(const float& delay) {
     SoundQueue* queue = NEW SoundQueue(*soundManager, delay);
     return queue;
 }
 
 SoundEffect* Sound::playEffect(Handle& handle, const unsigned int& loops){
-    SoundEffect* effect = soundManager->_getFreeEffect();
+    SoundEffect* effect = soundManager->_getNextFreeEffect();
     if (effect) {
         soundManager->_setSoundInformation(handle, *effect);
         effect->play(loops);
@@ -124,7 +122,7 @@ SoundEffect* Sound::playEffect(Handle& handle, const unsigned int& loops){
     return effect;
 }
 SoundMusic* Sound::playMusic(Handle& handle, const unsigned int& loops){
-    SoundMusic* music = soundManager->_getFreeMusic();
+    SoundMusic* music = soundManager->_getNextFreeMusic();
     if (music) {
         soundManager->_setSoundInformation(handle, *music);
         music->play(loops);

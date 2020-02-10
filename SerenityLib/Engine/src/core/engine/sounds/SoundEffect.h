@@ -16,11 +16,14 @@ class  SoundEffect : public SoundBaseClass {
         float       m_Duration;
         bool        m_Active;
 
-        SoundEffect();
     public:
-        SoundEffect& operator=(const SoundEffect&) = delete;
-        SoundEffect(const SoundEffect&) = default;
-        SoundEffect(SoundEffect&&) noexcept = default;
+        SoundEffect();
+
+        SoundEffect(const SoundEffect& other)                = delete;
+        SoundEffect& operator=(const SoundEffect& other)     = delete;
+        SoundEffect(SoundEffect&& other) noexcept            = default;
+        SoundEffect& operator=(SoundEffect&& other) noexcept = default;
+
         ~SoundEffect();
 
         void update(const double& dt);

@@ -165,7 +165,7 @@ vector<Camera*>& priv::InternalScenePublicInterface::GetCameras(Scene& scene) {
     return scene.m_Cameras;
 }
 vector<Engine::priv::EntityPOD>& priv::InternalScenePublicInterface::GetEntities(Scene& scene) {
-    return scene.m_i->m_ECS.m_EntityPool._pool;
+    return scene.m_i->m_ECS.m_EntityPool.m_Pool;
 }
 vector<SunLight*>& priv::InternalScenePublicInterface::GetLights(Scene& scene) {
     return scene.m_Lights;

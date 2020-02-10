@@ -226,6 +226,12 @@
     <Filter Include="Source Files\Engine\Core\Discord\src">
       <UniqueIdentifier>{5fbcc608-e9d1-41e6-8a71-1c9b3bdc25be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Containers">
+      <UniqueIdentifier>{7e0e9cd0-d69e-4a0b-a72c-145c62587007}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Containers">
+      <UniqueIdentifier>{2d0ac183-7fb4-4254-9fab-37aa4c59245d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h">
@@ -376,9 +382,6 @@
       <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\BindableResource.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\Engine_ObjectPool.h">
       <Filter>Header Files\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\Constraint.h">
@@ -707,6 +710,18 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\renderer\Renderer.h">
       <Filter>Header Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\lights\LightProbe.h">
+      <Filter>Header Files\Engine\Core\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\utils\Logger.h">
+      <Filter>Header Files\Engine\Core\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\containers\Freelist.h">
+      <Filter>Header Files\Engine\Core\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\resources\ResourcePool.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1078,6 +1093,12 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\Renderer.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\lights\LightProbe.cpp">
+      <Filter>Source Files\Engine\Core\Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\utils\Logger.cpp">
+      <Filter>Source Files\Engine\Core\Utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

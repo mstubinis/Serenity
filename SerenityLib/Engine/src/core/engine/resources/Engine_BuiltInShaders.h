@@ -27,20 +27,6 @@ namespace Engine{
                 static std::string lighting_vert;
                 static std::string stencil_passover;
 
-                static std::string depth_of_field;
-
-                static std::string smaa_common;
-                static std::string smaa_vertex_1;
-                static std::string smaa_frag_1;
-                static std::string smaa_vertex_2;
-                static std::string smaa_frag_2;
-                static std::string smaa_vertex_3;
-                static std::string smaa_frag_3;
-                static std::string smaa_vertex_4;
-                static std::string smaa_frag_4;
-
-                static std::string fxaa_frag;
-
                 static std::string forward_frag;
                 static std::string particle_frag;
                 static std::string deferred_frag;
@@ -53,14 +39,9 @@ namespace Engine{
                 static std::string cubemap_prefilter_envmap_frag;
                 static std::string brdf_precompute;
 
-                static std::string ssao_frag;
-                static std::string bloom_frag;
-                static std::string hdr_frag;
-                static std::string godRays_frag;
                 static std::string blur_frag;
-                static std::string ssao_blur_frag;
 
-                static std::string greyscale_frag;
+                //static std::string greyscale_frag;
 
                 static std::string final_frag;
 

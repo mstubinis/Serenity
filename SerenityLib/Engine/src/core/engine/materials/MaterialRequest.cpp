@@ -52,7 +52,7 @@ MaterialRequest::MaterialRequest(const string& name, Texture* diffuse, Texture* 
     async         = false;
     part.name     = name;
     part.material = NEW Material(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
-    part.handle   = Core::m_Engine->m_ResourceManager.m_Resources->add(part.material, ResourceType::Material);
+    part.handle   = Core::m_Engine->m_ResourceManager.m_Resources.add(part.material, ResourceType::Material);
 }
 
 MaterialRequest::~MaterialRequest() {
@@ -100,7 +100,7 @@ void MaterialRequest::requestAsync() {
 void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {
     request.part.material = NEW Material();
     request.part.material->setName(request.part.name);
-    request.part.handle = Core::m_Engine->m_ResourceManager.m_Resources->add(request.part.material, ResourceType::Material);
+    request.part.handle = Core::m_Engine->m_ResourceManager.m_Resources.add(request.part.material, ResourceType::Material);
 
     const auto size = request.part.textureRequests.size();
     for (size_t i = 0; i < size; ++i) {

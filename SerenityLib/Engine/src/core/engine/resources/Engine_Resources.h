@@ -23,7 +23,7 @@ class  ShaderProgram;
 
 #include <core/engine/renderer/GLImageConstants.h>
 #include <core/engine/shaders/ShaderIncludes.h>
-#include <core/engine/Engine_ObjectPool.h>
+#include <core/engine/resources/ResourcePool.h>
 #include <core/engine/utils/Utils.h>
 
 #include <glm/vec2.hpp>
@@ -36,8 +36,8 @@ namespace Engine{
                 const unsigned int AddScene(Scene&);
             public:
                 //http://gamesfromwithin.com/managing-data-relationships
-                ObjectPool<EngineResource>*        m_Resources;
-                std::vector<Window*>        m_Windows;
+                ResourcePool<EngineResource>       m_Resources;
+                std::vector<Window*>               m_Windows;
                 Scene*                             m_CurrentScene;
                 bool                               m_DynamicMemory;
                 std::vector<Scene*>                m_Scenes;
@@ -59,9 +59,8 @@ namespace Engine{
                 std::vector<Scene*>& scenes();
 
                 template<typename T> T* HasResource(const std::string& resource_name) {
-                    auto& resourcePool = *m_Resources;
-                    for (unsigned int i = 0; i < resourcePool.maxEntries(); ++i) {
-                        EngineResource* r = resourcePool.getAsFast<EngineResource>(i + 1U);
+                    for (size_t i = 0; i < m_Resources.size(); ++i) {
+                        EngineResource* r = m_Resources.getAsFast<EngineResource>(static_cast<unsigned int>(i) + 1U);
                         if (r) {
                             T* resource = dynamic_cast<T*>(r);
                             if (resource && resource->name() == resource_name) {
@@ -84,6 +83,7 @@ namespace Engine{
         const bool setCurrentScene(const std::string& sceneName);
 
         const double dt();
+        const double timeScale();
         const double applicationTime();
 
         Window& getWindow();
@@ -104,15 +104,11 @@ namespace Engine{
         void     getTexture(Handle& inHandle, Texture*& outPtr);
         Texture* getTexture(Handle& inHandle);
         Texture* getTexture(const std::string& name);
-        Handle   getTextureHandle(const std::string& name);
-        Handle   getTextureHandle(Texture*);
 
         void getMesh(Handle& inHandle,Mesh*& outPtr);                      Mesh*      getMesh(Handle& inHandle);
 
         void      getMaterial(Handle& inHandle,Material*& outPtr);
         Material* getMaterial(Handle& inHandle);
-        Handle    getMaterialHandle(const std::string& name);
-        Handle    getMaterialHandle(Material*);
 
         void getShaderProgram(Handle& inHandle,ShaderProgram*& outPtr);    ShaderProgram*   getShaderProgram(Handle& inHandle);
 
@@ -154,9 +150,9 @@ namespace Engine{
             const std::string& normal = "",
             const std::string& glow = "",
             const std::string& specular = "",
-            const std::string & ao = "",
-            const std::string & metalness = "",
-            const std::string & smoothness = ""
+            const std::string& ao = "",
+            const std::string& metalness = "",
+            const std::string& smoothness = ""
         );
         Handle loadMaterial(
             const std::string& name,

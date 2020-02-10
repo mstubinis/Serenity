@@ -28,6 +28,7 @@ namespace Engine{
     void setWindowIcon(const Texture& texture);
     void showMouseCursor();
     void hideMouseCursor();
+    void setTimeScale(const double timeScale);
     void stop();
     const bool setFullscreen(const bool& isFullscreen);
     const bool setFullscreenWindowed(const bool& isFullscreen);
@@ -163,7 +164,7 @@ namespace Engine{
                 void cleanup(Window& window, const double& dt);
             public:
                 struct Misc final {
-                    Engine::priv::BuiltInMeshses  m_BuiltInMeshes;
+                    Engine::priv::BuiltInMeshses   m_BuiltInMeshes;
                     Engine::Discord::DiscordCore   m_DiscordCore;
                     SimplexNoise                   m_SimplexNoise;
                     bool                           m_Paused;

@@ -18,7 +18,7 @@ SoundQueue::~SoundQueue() {
 }
 void SoundQueue::enqueueEffect(Handle& handle, const unsigned int& loops) {
     if (!m_Current) {
-        m_Current = m_SoundManager._getFreeEffect();
+        m_Current = m_SoundManager._getNextFreeEffect();
         if (m_Current) {
             handle.type = 1;
             m_SoundManager._setSoundInformation(handle, *static_cast<SoundEffect*>(m_Current));
@@ -28,7 +28,7 @@ void SoundQueue::enqueueEffect(Handle& handle, const unsigned int& loops) {
 }
 void SoundQueue::enqueueMusic(Handle& handle, const unsigned int& loops) {
     if (!m_Current) {
-        m_Current = m_SoundManager._getFreeMusic();
+        m_Current = m_SoundManager._getNextFreeMusic();
         if (m_Current) {
             handle.type = 2;
             m_SoundManager._setSoundInformation(handle, *static_cast<SoundMusic*>(m_Current));
@@ -56,12 +56,12 @@ void SoundQueue::update(const double& dt) {
                 if (!m_Current) {
                     auto& handle = m_Queue.front();
                     if (handle.type == 1) {
-                        m_Current = m_SoundManager._getFreeEffect();
+                        m_Current = m_SoundManager._getNextFreeEffect();
                         if (m_Current) {
                             m_SoundManager._setSoundInformation(handle, *static_cast<SoundEffect*>(m_Current));
                         }
                     }else if (handle.type == 2) {
-                        m_Current = m_SoundManager._getFreeMusic();
+                        m_Current = m_SoundManager._getNextFreeMusic();
                         if (m_Current) {
                             m_SoundManager._setSoundInformation(handle, *static_cast<SoundMusic*>(m_Current));
                         }

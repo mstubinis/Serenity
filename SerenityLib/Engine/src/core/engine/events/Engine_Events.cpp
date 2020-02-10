@@ -8,13 +8,13 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace std;
 
-EventManager* EventManager::m_EventManager = nullptr;
+EventManager* eventManager = nullptr;
 
 EventManager::EventManager(){
     m_CurrentKeyboardKey = m_PreviousKeyboardKey = KeyboardKey::Unknown;
     m_CurrentMouseButton = m_PreviousMouseButton = MouseButton::Unknown;
 
-    m_EventManager = this;
+    eventManager = this;
 }
 EventManager::~EventManager(){
     cleanup();
@@ -59,61 +59,61 @@ void EventManager::onResetEvents(const double& dt){
     m_CurrentMouseButton = MouseButton::Unknown;
 }
 const KeyboardKey::Key Engine::getPressedKey() {
-    return static_cast<KeyboardKey::Key>(EventManager::m_EventManager->m_CurrentKeyboardKey);
+    return static_cast<KeyboardKey::Key>(eventManager->m_CurrentKeyboardKey);
 }
 const MouseButton::Button Engine::getPressedButton() {
-    return static_cast<MouseButton::Button>(EventManager::m_EventManager->m_CurrentMouseButton);
+    return static_cast<MouseButton::Button>(eventManager->m_CurrentMouseButton);
 }
 const bool Engine::isKeyDown(const KeyboardKey::Key& key){
-    return EventManager::m_EventManager->m_KeyboardKeyStatus.count(key);
+    return eventManager->m_KeyboardKeyStatus.count(key);
 }
 const bool Engine::isKeyDownOnce() {
-    auto& mgr = *EventManager::m_EventManager;
+    auto& mgr = *eventManager;
     return (mgr.m_CurrentKeyboardKey != mgr.m_PreviousKeyboardKey) ? true : false;
 }
 
 
 
 const unsigned int Engine::getNumPressedKeys() {
-    auto& mgr = *EventManager::m_EventManager;
+    auto& mgr = *eventManager;
     return static_cast<unsigned int>(mgr.m_KeyboardKeyStatus.size());
 }
 const unordered_set<unsigned int>& Engine::getPressedKeys() {
-    auto& mgr = *EventManager::m_EventManager;
+    auto& mgr = *eventManager;
     return mgr.m_KeyboardKeyStatus;
 }
 const unordered_set<unsigned int>& Engine::getPressedMouseButtons() {
-    auto& mgr = *EventManager::m_EventManager;
+    auto& mgr = *eventManager;
     return mgr.m_MouseStatus;
 }
 const bool Engine::isKeyDownOnce(const KeyboardKey::Key& key){
     const bool res = Engine::isKeyDown(key);
-    auto& mgr = *EventManager::m_EventManager;
+    auto& mgr = *eventManager;
     return (res && mgr.m_CurrentKeyboardKey == key && (mgr.m_CurrentKeyboardKey != mgr.m_PreviousKeyboardKey)) ? true : false;
 }
 
 const bool Engine::isKeyDownOnce(const KeyboardKey::Key& first, const KeyboardKey::Key& second) {
     const bool resFirst = Engine::isKeyDown(first);
     const bool resSecond = Engine::isKeyDown(second);
-    auto& mgr = *EventManager::m_EventManager;
+    auto& mgr = *eventManager;
     return ( resFirst && resSecond && mgr.m_CurrentKeyboardKey == first && (mgr.m_CurrentKeyboardKey != mgr.m_PreviousKeyboardKey)) ? true : false;
 }
 const bool Engine::isKeyDownOnce(const KeyboardKey::Key& first, const KeyboardKey::Key& second, const KeyboardKey::Key& third) {
     const bool resFirst = Engine::isKeyDown(first);
     const bool resSecond = Engine::isKeyDown(second);
     const bool resThird = Engine::isKeyDown(third);
-    auto& mgr = *EventManager::m_EventManager;
+    auto& mgr = *eventManager;
     return (resFirst && resSecond && resThird && mgr.m_CurrentKeyboardKey == first && (mgr.m_CurrentKeyboardKey != mgr.m_PreviousKeyboardKey)) ? true : false;
 }
-const bool Engine::isKeyUp(const KeyboardKey::Key key){ 
+const bool Engine::isKeyUp(const KeyboardKey::Key& key){ 
     return !Engine::isKeyDown(key); 
 }
 const bool Engine::isMouseButtonDown(const MouseButton::Button& button){
-    return EventManager::m_EventManager->m_MouseStatus.count(button);
+    return eventManager->m_MouseStatus.count(button);
 }
 const bool Engine::isMouseButtonDownOnce(const MouseButton::Button& button){
     const bool res = Engine::isMouseButtonDown(button);
-    auto& mgr = *EventManager::m_EventManager;
+    auto& mgr = *eventManager;
     return (res && mgr.m_CurrentMouseButton == button && (mgr.m_CurrentMouseButton != mgr.m_PreviousMouseButton)) ? true : false;
 }
 const glm::vec2& Engine::getMouseDifference() {
@@ -174,6 +174,6 @@ void Engine::setMousePosition(const glm::uvec2& pos, const bool resetDifference,
 
 
 void Engine::events::dispatchEvent(const unsigned int& eventType) {
-    auto& mgr = *EventManager::m_EventManager;
+    auto& mgr = *eventManager;
     mgr.m_EventDispatcher.dispatchEvent(eventType);
 }

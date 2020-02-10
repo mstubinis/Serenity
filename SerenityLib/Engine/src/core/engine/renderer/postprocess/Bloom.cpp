@@ -3,6 +3,9 @@
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/FramebufferObject.h>
 #include <core/engine/shaders/ShaderProgram.h>
+#include <core/engine/shaders/Shader.h>
+#include <core/engine/resources/Engine_BuiltInShaders.h>
+#include <core/engine/threading/Engine_ThreadManager.h>
 
 #include <glm/common.hpp>
 
@@ -11,18 +14,58 @@ using namespace std;
 Engine::priv::Bloom Engine::priv::Bloom::bloom;
 
 Engine::priv::Bloom::Bloom() {
-    num_passes    = 3;
-    bloom_active  = true;
-    blur_radius   = 1.24f;
-    blur_strength = 0.62f;
-    scale         = 0.27f;
-    threshold     = 0.55f;
-    exposure      = 1.6f;
+    num_passes        = 3;
+    bloom_active      = true;
+    blur_radius       = 1.24f;
+    blur_strength     = 0.62f;
+    scale             = 0.27f;
+    threshold         = 0.55f;
+    exposure          = 1.6f;
+
+    m_GLSL_frag_code  = "";
+    m_Vertex_Shader   = nullptr;
+    m_Fragment_Shader = nullptr;
+    m_Shader_Program  = nullptr;
 }
 Engine::priv::Bloom::~Bloom() {
+    SAFE_DELETE(m_Vertex_Shader);
+    SAFE_DELETE(m_Fragment_Shader);
+    SAFE_DELETE(m_Shader_Program);
 }
-void Engine::priv::Bloom::pass(ShaderProgram& program, Engine::priv::GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTextureEnum) {
-    program.bind();
+const bool Engine::priv::Bloom::init_shaders() {
+    if (!m_GLSL_frag_code.empty())
+        return false;
+
+#pragma region Bloom
+    m_GLSL_frag_code =
+        "const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);\n"
+        "uniform sampler2D SceneTexture;\n"
+        "\n"
+        "uniform vec4 Data;\n" //x = scale y = threshold z = exposure w = UNUSED
+        "varying vec2 texcoords;\n"
+        "\n"
+        "void main(){\n"
+        "    vec3 sceneColor = texture2D(SceneTexture,texcoords).rgb;\n"
+        //                                               exposure
+        "    sceneColor = vec3(1.0) - exp(-sceneColor * Data.z);\n"
+        //                                                         threshold       scale
+        "    gl_FragColor.rgb = max(ConstantZeroVec3,sceneColor - vec3(Data.y)) * Data.x;\n"
+        "}";
+#pragma endregion
+
+    auto lambda_part_a = [&]() {
+        m_Vertex_Shader = NEW Shader(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
+        m_Fragment_Shader = NEW Shader(m_GLSL_frag_code, ShaderType::Fragment, false);
+    };
+    auto lambda_part_b = [&]() {
+        m_Shader_Program = NEW ShaderProgram("Bloom", *m_Vertex_Shader, *m_Fragment_Shader);
+    };
+    Engine::priv::threading::addJobWithPostCallback(lambda_part_a, lambda_part_b);
+
+    return true;
+}
+void Engine::priv::Bloom::pass(Engine::priv::GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTextureEnum) {
+    m_Shader_Program->bind();
     const float& divisor = gbuffer.getSmallFBO()->divisor();
 
     Engine::Renderer::sendUniform4("Data", scale, threshold, exposure, 0.0f);

@@ -5,58 +5,56 @@
 #include <ecs/EntityDataRequest.h>
 #include <core/engine/scene/Scene.h>
 
-namespace Engine {
-    namespace priv {
-        template<typename TEntity> class ECSEntityPool final{
-            friend struct Engine::priv::InternalScenePublicInterface;
-            private:
-                std::vector<EntityPOD>       _pool;
-                std::vector<unsigned int>    _freelist;
-            public:
-                ECSEntityPool() {
-                    _pool.reserve(5000);
-                    _freelist.reserve(5000);
-                }
-                ~ECSEntityPool() {}
-                ECSEntityPool(const ECSEntityPool&)                      = delete;
-                ECSEntityPool& operator=(const ECSEntityPool&)           = delete;
-                ECSEntityPool(ECSEntityPool&& other) noexcept            = delete;
-                ECSEntityPool& operator=(ECSEntityPool&& other) noexcept = delete;
+namespace Engine::priv {
+    template<typename TEntity> class ECSEntityPool final{
+        friend struct Engine::priv::InternalScenePublicInterface;
+        private:
+            std::vector<EntityPOD>       m_Pool;
+            std::vector<unsigned int>    m_Freelist;
+        public:
+            ECSEntityPool() {
+                m_Pool.reserve(5000);
+                m_Freelist.reserve(5000);
+            }
+            ~ECSEntityPool() {}
+            ECSEntityPool(const ECSEntityPool&)                      = delete;
+            ECSEntityPool& operator=(const ECSEntityPool&)           = delete;
+            ECSEntityPool(ECSEntityPool&& other) noexcept            = delete;
+            ECSEntityPool& operator=(ECSEntityPool&& other) noexcept = delete;
 
-                void destroyFlaggedEntity(const unsigned int& entityID) {
-                    const auto index = entityID - 1;
-                    ++_pool[index].versionID;
-                    _freelist.emplace_back(index);
+            void destroyFlaggedEntity(const unsigned int& entityID) {
+                const auto index = entityID - 1;
+                ++m_Pool[index].versionID;
+                m_Freelist.emplace_back(index);
+            }
+            TEntity addEntity(const Scene& scene) {
+                if (m_Freelist.empty()) {
+                    m_Pool.emplace_back(0, 0);
+                    m_Freelist.emplace_back(static_cast<unsigned int>(m_Pool.size()) - 1U);
                 }
-                TEntity addEntity(const Scene& scene) {
-                    if (_freelist.empty()) {
-                        _pool.emplace_back(0, 0);
-                        _freelist.emplace_back(static_cast<unsigned int>(_pool.size()) - 1U);
-                    }
-                    const auto id      = _freelist.back();
-                    _freelist.pop_back();
-                    EntityPOD& element = _pool[id];
-                    element.ID         = id + 1;
-                    element.sceneID    = scene.id();
-                    TEntity entity     = TEntity(element.ID, element.sceneID, element.versionID);
-                    return std::move(entity);
-                }
-                EntityPOD* getEntity(const unsigned int& entityData) {
-                    if (entityData == 0) {
-                        return nullptr;
-                    }
-                    const EntityDataRequest dataRequest(entityData);
-                    const auto index = dataRequest.ID - 1;
-                    if (index < _pool.size() && _pool[index].versionID == dataRequest.versionID) {
-                        return &_pool[index];
-                    }
+                const auto id          = m_Freelist.back();
+                m_Freelist.pop_back();
+                EntityPOD& entityPOD   = m_Pool[id];
+                entityPOD.ID           = id + 1;
+                entityPOD.sceneID      = scene.id();
+                TEntity entity         = TEntity(entityPOD.ID, entityPOD.sceneID, entityPOD.versionID);
+                return std::move(entity);
+            }
+            EntityPOD* getEntity(const unsigned int& entityData) {
+                if (entityData == 0) {
                     return nullptr;
                 }
-                EntityPOD* getEntity(const TEntity& entity) {
-                    return getEntity(entity.data);
+                const EntityDataRequest dataRequest(entityData);
+                const auto index = dataRequest.ID - 1;
+                if (index < m_Pool.size() && m_Pool[index].versionID == dataRequest.versionID) {
+                    return &m_Pool[index];
                 }
-            };
-    };
+                return nullptr;
+            }
+            EntityPOD* getEntity(const TEntity& entity) {
+                return getEntity(entity.data);
+            }
+        };
 };
 
 #endif

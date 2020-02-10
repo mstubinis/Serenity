@@ -1,0 +1,159 @@
+#pragma once
+#ifndef ENGINE_CONTAINERS_FREELIST_H
+#define ENGINE_CONTAINERS_FREELIST_H
+
+#include <vector>
+
+namespace Engine {
+    template<typename T> class freelist {
+        private:
+            std::vector<T>             m_Items;
+            std::vector<std::uint32_t> m_Freelist;
+            size_t                     m_Size;
+            std::uint32_t              m_Auto_Reserve_Count;
+
+            void initialize(const size_t capacity_) {
+                m_Items.reserve(capacity_);
+                m_Freelist.reserve(capacity_);
+                for (int i = static_cast<int>(capacity_) - 1; i >= 0; --i) {
+                    m_Freelist.push_back(static_cast<std::uint32_t>(i));
+                }
+            }
+
+        public:
+            freelist() {
+                m_Size = 0;
+                m_Auto_Reserve_Count = 25;
+            }
+            freelist(const size_t capacity_) : freelist(){
+                initialize(capacity_);
+            }
+            ~freelist() {
+                clear(false);
+            }
+            void set_auto_reserve_count(const std::uint32_t& auto_reserve_count_) {
+                m_Auto_Reserve_Count = auto_reserve_count_;
+            }
+
+            const size_t& size() const {
+                return m_Size;
+            }
+            //resets the element at the specified index to T. if the index is invalid, returns false
+            const bool reset_element(const size_t& index) {
+                if (m_Items.size() >= index) {
+                    return false;
+                }
+                m_Items[index] = T();
+                m_Freelist.push_back(static_cast<std::uint32_t>(index));
+                return true;
+            }
+            //adds data to the container. if the container has an available index, it will use that, otherwise it will push this element in the container
+            const int add_element(T& data) {
+                if (m_Freelist.size() == 0) {
+                    return push_back(data);
+                }
+                const auto available_index = m_Freelist[m_Freelist.size() - 1];
+                m_Freelist.pop_back();
+                m_Items[available_index] = data;
+                return available_index;
+            }
+            //clears the elements of the container AND FREES each element from memory. will re-initialize the container if parameter = true
+            void delete_and_clear(const bool reinitialize = true) {
+                for (size_t i = 0; i < m_Items.size(); ++i) {
+                    SAFE_DELETE(m_Items[i]);
+                }
+                clear(reinitialize);
+            }
+            //clears the elements of the container, does NOT free each element from memory. will re-initialize the container if parameter = true
+            void clear(const bool reinitialize = true) {
+                const auto old_capacity = m_Items.capacity();
+                m_Items.clear();
+                m_Freelist.clear();
+                m_Size = 0;
+                if (reinitialize) {
+                    initialize(old_capacity);
+                }
+            }
+            //adds data to the container by pushing this element in the container even if there is an available freelist index
+            const int push_back(T& data) {
+                if (m_Items.size() >= m_Items.capacity()) {
+                    m_Items.reserve(m_Items.capacity() + m_Auto_Reserve_Count);
+                }
+                if (m_Freelist.size() == 0) {
+                    m_Items.push_back(std::move(data));
+                    ++m_Size;
+                    return static_cast<int>(m_Items.size()) - 1;
+                }
+                //get a freelist index
+                const auto available_index = m_Freelist[m_Freelist.size() - 1];
+                m_Freelist.pop_back();
+                m_Items.push_back(std::move(data));
+                ++m_Size;
+                return static_cast<int>(available_index);
+            }
+            //adds data to the container by emplacing this element in the container even if there is an available freelist index
+            template<typename... ARGS> const int emplace_back(ARGS&& ... args) {
+                if (m_Items.size() >= m_Items.capacity()) {
+                    m_Items.reserve(m_Items.capacity() + m_Auto_Reserve_Count);
+                }
+                if (m_Freelist.size() == 0) {
+                    m_Items.emplace_back(std::forward<ARGS>(args)...);
+                    ++m_Size;
+                    return static_cast<int>(m_Items.size()) - 1;
+                }
+                //get a freelist index
+                const auto available_index = m_Freelist[m_Freelist.size() - 1];
+                m_Freelist.pop_back();
+                m_Items.emplace_back(std::forward<ARGS>(args)...);
+                ++m_Size;
+                return static_cast<int>(available_index);
+            }
+            const bool set_element(T& data, const size_t index) {
+                if (index >= m_Items.size()) {
+                    return false;
+                }
+                m_Items[index] = std::move(data);
+                return true;
+            }
+            T* get_next_free() {
+                if (m_Freelist.size() > 0) {
+                    const auto available_index = m_Freelist[m_Freelist.size() - 1];
+                    m_Freelist.pop_back();
+                    T& item = const_cast<T&>(m_Items[available_index]);
+                    return &item;
+                }
+                return nullptr;
+            }
+
+            const T& get(const size_t index) const {
+                return m_Items[index];
+            }
+            T& get(const size_t index) {
+                return m_Items[index];
+            }
+            T& operator[](const size_t index) {
+                return m_Items[index];
+            }
+            const T& operator[](const size_t index) const {
+                return m_Items[index];
+            }
+
+            std::vector<T>& data() {
+                return m_Items;
+            }
+           
+            typename std::vector<T>::iterator begin() {
+                return m_Items.begin();
+            }
+            typename std::vector<T>::iterator end() {
+                return m_Items.end();
+            }
+            typename std::vector<T>::const_iterator begin() const {
+                return m_Items.begin();
+            }
+            typename std::vector<T>::const_iterator end() const {
+                return m_Items.end();
+            }        
+    };
+};
+#endif

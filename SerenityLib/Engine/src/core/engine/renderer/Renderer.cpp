@@ -71,7 +71,6 @@ namespace Engine{
             DecalVertex,
             DecalFrag,
             FullscreenVertex,
-            FXAAFrag,
             BulletPhysicsVertex,
             BulletPhysicsFrag,
             VertexBasic,
@@ -84,13 +83,7 @@ namespace Engine{
             DeferredFrag2DAPI,
             DeferredFragSkybox,
             CopyDepthFrag,
-            SSAOFrag,
-            BloomFrag,
-            HDRFrag,
             BlurFrag,
-            DOFFrag,
-            SSAOBlurFrag,
-            GodRaysFrag,
             FinalFrag,
             DepthAndTransparencyFrag,
             LightingFrag,
@@ -98,16 +91,8 @@ namespace Engine{
             CubemapConvoludeFrag,
             CubemapPrefilterEnvFrag,
             BRDFPrecomputeFrag,
-            GrayscaleFrag,
+            //GrayscaleFrag,
             StencilPassFrag,
-            SMAAVertex1,
-            SMAAVertex2,
-            SMAAVertex3,
-            SMAAVertex4,
-            SMAAFrag1,
-            SMAAFrag2,
-            SMAAFrag3,
-            SMAAFrag4,
             ParticleVertex,
             ParticleFrag,
         _TOTAL};};
@@ -115,16 +100,9 @@ namespace Engine{
             BulletPhysics,
             ZPrepass,
             Deferred2DAPI,
-            DeferredGodRays,
             DeferredBlur,
-            DeferredBlurSSAO,
-            DeferredHDR,
-            DeferredSSAO,
-            DeferredDOF,
-            DeferredBloom,
             DeferredFinal,
             DepthAndTransparency,
-            DeferredFXAA,
             DeferredSkybox,
             CopyDepth,
             DeferredLighting,
@@ -132,12 +110,8 @@ namespace Engine{
             CubemapConvolude,
             CubemapPrefilterEnv,
             BRDFPrecomputeCookTorrance,
-            Grayscale,
+            //Grayscale,
             StencilPass,
-            SMAA1,
-            SMAA2,
-            SMAA3,
-            SMAA4,
             Particle,
         _TOTAL};};
 
@@ -251,52 +225,45 @@ class priv::Renderer::impl final{
             m_InternalShaders.resize(EngineInternalShaders::_TOTAL, nullptr);
             m_InternalShaderPrograms.resize(EngineInternalShaderPrograms::_TOTAL, nullptr);
 
+            FXAA::fxaa.init_shaders();
+            SSAO::ssao.init_shaders();
+            HDR::hdr.init_shaders();
+            DepthOfField::DOF.init_shaders();
+            Bloom::bloom.init_shaders();
+            GodRays::godRays.init_shaders();
+            SMAA::smaa.init_shaders();
+
             priv::threading::addJob(emplaceShader, 0, boost::ref(EShaders::decal_vertex), boost::ref(m_InternalShaders), ShaderType::Vertex);
             priv::threading::addJob(emplaceShader, 1, boost::ref(EShaders::decal_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
             priv::threading::addJob(emplaceShader, 2, boost::ref(EShaders::fullscreen_quad_vertex), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            priv::threading::addJob(emplaceShader, 3, boost::ref(EShaders::fxaa_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 4, boost::ref(EShaders::bullet_physics_vert), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            priv::threading::addJob(emplaceShader, 5, boost::ref(EShaders::bullet_physcis_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 6, boost::ref(EShaders::vertex_basic), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            priv::threading::addJob(emplaceShader, 7, boost::ref(EShaders::vertex_2DAPI), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            priv::threading::addJob(emplaceShader, 8, boost::ref(EShaders::vertex_skybox), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            priv::threading::addJob(emplaceShader, 9, boost::ref(EShaders::lighting_vert), boost::ref(m_InternalShaders), ShaderType::Vertex);
+            priv::threading::addJob(emplaceShader, 3, boost::ref(EShaders::bullet_physics_vert), boost::ref(m_InternalShaders), ShaderType::Vertex);
+            priv::threading::addJob(emplaceShader, 4, boost::ref(EShaders::bullet_physcis_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob(emplaceShader, 5, boost::ref(EShaders::vertex_basic), boost::ref(m_InternalShaders), ShaderType::Vertex);
+            priv::threading::addJob(emplaceShader, 6, boost::ref(EShaders::vertex_2DAPI), boost::ref(m_InternalShaders), ShaderType::Vertex);
+            priv::threading::addJob(emplaceShader, 7, boost::ref(EShaders::vertex_skybox), boost::ref(m_InternalShaders), ShaderType::Vertex);
+            priv::threading::addJob(emplaceShader, 8, boost::ref(EShaders::lighting_vert), boost::ref(m_InternalShaders), ShaderType::Vertex);
 
-            priv::threading::addJob(emplaceShader, 10, boost::ref(EShaders::forward_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 11, boost::ref(EShaders::deferred_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 12, boost::ref(EShaders::zprepass_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 13, boost::ref(EShaders::deferred_frag_hud), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 14, boost::ref(EShaders::deferred_frag_skybox), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob(emplaceShader, 9, boost::ref(EShaders::forward_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob(emplaceShader, 10, boost::ref(EShaders::deferred_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob(emplaceShader, 11, boost::ref(EShaders::zprepass_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob(emplaceShader, 12, boost::ref(EShaders::deferred_frag_hud), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob(emplaceShader, 13, boost::ref(EShaders::deferred_frag_skybox), boost::ref(m_InternalShaders), ShaderType::Fragment);
 
-            priv::threading::addJob(emplaceShader, 15, boost::ref(EShaders::copy_depth_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 16, boost::ref(EShaders::ssao_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 17, boost::ref(EShaders::bloom_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 18, boost::ref(EShaders::hdr_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 19, boost::ref(EShaders::blur_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob(emplaceShader, 14, boost::ref(EShaders::copy_depth_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob(emplaceShader, 15, boost::ref(EShaders::blur_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
 
-            priv::threading::addJob(emplaceShader, 20, boost::ref(EShaders::depth_of_field), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 21, boost::ref(EShaders::ssao_blur_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 22, boost::ref(EShaders::godRays_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 23, boost::ref(EShaders::final_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 24, boost::ref(EShaders::depth_and_transparency_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob(emplaceShader, 16, boost::ref(EShaders::final_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob(emplaceShader, 17, boost::ref(EShaders::depth_and_transparency_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
 
-            priv::threading::addJob(emplaceShader, 25, boost::ref(EShaders::lighting_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 26, boost::ref(EShaders::lighting_frag_gi), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 27, boost::ref(EShaders::cubemap_convolude_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 28, boost::ref(EShaders::cubemap_prefilter_envmap_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 29, boost::ref(EShaders::brdf_precompute), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 30, boost::ref(EShaders::greyscale_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 31, boost::ref(EShaders::stencil_passover), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 32, boost::ref(EShaders::smaa_vertex_1), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            priv::threading::addJob(emplaceShader, 33, boost::ref(EShaders::smaa_vertex_2), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            priv::threading::addJob(emplaceShader, 34, boost::ref(EShaders::smaa_vertex_3), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            priv::threading::addJob(emplaceShader, 35, boost::ref(EShaders::smaa_vertex_4), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            priv::threading::addJob(emplaceShader, 36, boost::ref(EShaders::smaa_frag_1), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 37, boost::ref(EShaders::smaa_frag_2), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 38, boost::ref(EShaders::smaa_frag_3), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 39, boost::ref(EShaders::smaa_frag_4), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 40, boost::ref(EShaders::particle_vertex), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            priv::threading::addJob(emplaceShader, 41, boost::ref(EShaders::particle_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob(emplaceShader, 18, boost::ref(EShaders::lighting_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob(emplaceShader, 19, boost::ref(EShaders::lighting_frag_gi), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob(emplaceShader, 20, boost::ref(EShaders::cubemap_convolude_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob(emplaceShader, 21, boost::ref(EShaders::cubemap_prefilter_envmap_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob(emplaceShader, 22, boost::ref(EShaders::brdf_precompute), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            //priv::threading::addJob(emplaceShader, 23, boost::ref(EShaders::greyscale_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob(emplaceShader, 23, boost::ref(EShaders::stencil_passover), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob(emplaceShader, 24, boost::ref(EShaders::particle_vertex), boost::ref(m_InternalShaders), ShaderType::Vertex);
+            priv::threading::addJob(emplaceShader, 25, boost::ref(EShaders::particle_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
 
 
             priv::threading::waitForAll();
@@ -308,16 +275,9 @@ class priv::Renderer::impl final{
             m_InternalShaderPrograms[EngineInternalShaderPrograms::BulletPhysics] = NEW ShaderProgram("Bullet_Physics", *m_InternalShaders[EngineInternalShaders::BulletPhysicsVertex], *m_InternalShaders[EngineInternalShaders::BulletPhysicsFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::ZPrepass] = NEW ShaderProgram("ZPrepass", *m_InternalShaders[EngineInternalShaders::VertexBasic], *m_InternalShaders[EngineInternalShaders::ZPrepassFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::Deferred2DAPI] = NEW ShaderProgram("Deferred_2DAPI", *m_InternalShaders[EngineInternalShaders::Vertex2DAPI], *m_InternalShaders[EngineInternalShaders::DeferredFrag2DAPI]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredGodRays] = NEW ShaderProgram("Deferred_GodsRays", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::GodRaysFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlur] = NEW ShaderProgram("Deferred_Blur", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::BlurFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlurSSAO] = NEW ShaderProgram("Deferred_Blur_SSAO", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::SSAOBlurFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHDR] = NEW ShaderProgram("Deferred_HDR", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::HDRFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSSAO] = NEW ShaderProgram("Deferred_SSAO", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::SSAOFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredDOF] = NEW ShaderProgram("Deferred_DOF", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::DOFFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBloom] = NEW ShaderProgram("Deferred_Bloom", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::BloomFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFinal] = NEW ShaderProgram("Deferred_Final", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::FinalFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DepthAndTransparency] = NEW ShaderProgram("DepthAndTransparency", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::DepthAndTransparencyFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFXAA] = NEW ShaderProgram("Deferred_FXAA", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::FXAAFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox] = NEW ShaderProgram("Deferred_Skybox", *m_InternalShaders[EngineInternalShaders::VertexSkybox], *m_InternalShaders[EngineInternalShaders::DeferredFragSkybox]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::CopyDepth] = NEW ShaderProgram("Copy_Depth", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::CopyDepthFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLighting] = NEW ShaderProgram("Deferred_Light", *m_InternalShaders[EngineInternalShaders::LightingVertex], *m_InternalShaders[EngineInternalShaders::LightingFrag]);
@@ -325,12 +285,8 @@ class priv::Renderer::impl final{
             m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapConvolude] = NEW ShaderProgram("Cubemap_Convolude", *m_InternalShaders[EngineInternalShaders::VertexSkybox], *m_InternalShaders[EngineInternalShaders::CubemapConvoludeFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapPrefilterEnv] = NEW ShaderProgram("Cubemap_Prefilter_Env", *m_InternalShaders[EngineInternalShaders::VertexSkybox], *m_InternalShaders[EngineInternalShaders::CubemapPrefilterEnvFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::BRDFPrecomputeCookTorrance] = NEW ShaderProgram("BRDF_Precompute_CookTorrance", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::BRDFPrecomputeFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::Grayscale] = NEW ShaderProgram("Greyscale_Frag", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::GrayscaleFrag]);
+            //m_InternalShaderPrograms[EngineInternalShaderPrograms::Grayscale] = NEW ShaderProgram("Greyscale_Frag", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::GrayscaleFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::StencilPass] = NEW ShaderProgram("Stencil_Pass", *m_InternalShaders[EngineInternalShaders::LightingVertex], *m_InternalShaders[EngineInternalShaders::StencilPassFrag]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA1] = NEW ShaderProgram("Deferred_SMAA_1", *m_InternalShaders[EngineInternalShaders::SMAAVertex1], *m_InternalShaders[EngineInternalShaders::SMAAFrag1]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA2] = NEW ShaderProgram("Deferred_SMAA_2", *m_InternalShaders[EngineInternalShaders::SMAAVertex2], *m_InternalShaders[EngineInternalShaders::SMAAFrag2]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA3] = NEW ShaderProgram("Deferred_SMAA_3", *m_InternalShaders[EngineInternalShaders::SMAAVertex3], *m_InternalShaders[EngineInternalShaders::SMAAFrag3]);
-            m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA4] = NEW ShaderProgram("Deferred_SMAA_4", *m_InternalShaders[EngineInternalShaders::SMAAVertex4], *m_InternalShaders[EngineInternalShaders::SMAAFrag4]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::Particle] = NEW ShaderProgram("Particle", *m_InternalShaders[EngineInternalShaders::ParticleVertex], *m_InternalShaders[EngineInternalShaders::ParticleFrag]);
 #pragma endregion
 
@@ -1174,16 +1130,14 @@ class priv::Renderer::impl final{
             if (SSAO::ssao.m_ssao && (viewport.getRenderFlags() & ViewportRenderingFlag::SSAO)) {
                 Engine::Renderer::GLEnablei(GL_BLEND, 0);//i dont think this is needed anymore
                 gbuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
-                auto& ssaoShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSSAO];
-                SSAO::ssao.passSSAO(ssaoShader, gbuffer, dimensions.z, dimensions.w, camera);
+                SSAO::ssao.passSSAO(gbuffer, dimensions.z, dimensions.w, camera);
                 if (SSAO::ssao.m_ssao_do_blur) {
                     Engine::Renderer::GLDisablei(GL_BLEND, 0); //yes this is absolutely needed
-                    auto& ssaoBlurShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlurSSAO];
                     for (uint i = 0; i < SSAO::ssao.m_ssao_blur_num_passes; ++i) {
                         gbuffer.bindFramebuffers(GBufferType::GodRays, "A", false);
-                        SSAO::ssao.passBlur(ssaoBlurShader, gbuffer, dimensions.z, dimensions.w, "H", GBufferType::Bloom);
+                        SSAO::ssao.passBlur(gbuffer, dimensions.z, dimensions.w, "H", GBufferType::Bloom);
                         gbuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
-                        SSAO::ssao.passBlur(ssaoBlurShader, gbuffer, dimensions.z, dimensions.w, "V", GBufferType::GodRays);
+                        SSAO::ssao.passBlur(gbuffer, dimensions.z, dimensions.w, "V", GBufferType::GodRays);
                     }
                 }  
             }
@@ -1235,8 +1189,8 @@ class priv::Renderer::impl final{
                         alpha = 0.01f;
                     }
                     alpha = 1.0f - alpha;
-                    auto& godRaysShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredGodRays];
-                    godRaysPlatform.pass(godRaysShader, gbuffer, dimensions.z, dimensions.w, glm::vec2(sp.x, sp.y), alpha);
+                    //auto& godRaysShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredGodRays];
+                    godRaysPlatform.pass(gbuffer, dimensions.z, dimensions.w, glm::vec2(sp.x, sp.y), alpha);
                 }
             }
             #pragma endregion
@@ -1246,16 +1200,14 @@ class priv::Renderer::impl final{
 
             #pragma region HDR and GodRays addition
             gbuffer.bindFramebuffers(GBufferType::Misc);
-            auto& hdrShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredHDR];
-            HDR::hdr.pass(hdrShader, gbuffer, dimensions.z, dimensions.w, godRaysPlatform.godRays_active, lighting, godRaysPlatform.factor);
+            HDR::hdr.pass(gbuffer, dimensions.z, dimensions.w, godRaysPlatform.godRays_active, lighting, godRaysPlatform.factor);
             #pragma endregion
             
             #pragma region Bloom
             //TODO: possible optimization: use stencil buffer to reject completely black pixels during blur passes
             if (Bloom::bloom.bloom_active && (viewport.getRenderFlags() & ViewportRenderingFlag::Bloom)) {
                 gbuffer.bindFramebuffers(GBufferType::Bloom, "RGB", false);
-                auto& bloomShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBloom];
-                Bloom::bloom.pass(bloomShader, gbuffer, dimensions.z, dimensions.w, GBufferType::Lighting);
+                Bloom::bloom.pass(gbuffer, dimensions.z, dimensions.w, GBufferType::Lighting);
                 for (uint i = 0; i < Bloom::bloom.num_passes; ++i) {
                     gbuffer.bindFramebuffers(GBufferType::GodRays, "RGB", false);
                     _passBlur(gbuffer, dimensions.z, dimensions.w, "H", GBufferType::Bloom);
@@ -1269,9 +1221,8 @@ class priv::Renderer::impl final{
             GBufferType::Type outTexture = GBufferType::Lighting;
             #pragma region DOF
             if (DepthOfField::DOF.dof && (viewport.getRenderFlags() & ViewportRenderingFlag::DepthOfField)) {
-                auto& dofShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredDOF];
                 gbuffer.bindFramebuffers(outTexture);
-                DepthOfField::DOF.pass(dofShader,gbuffer, dimensions.z, dimensions.w, sceneTexture);
+                DepthOfField::DOF.pass(gbuffer, dimensions.z, dimensions.w, sceneTexture);
                 sceneTexture = GBufferType::Lighting;
                 outTexture = GBufferType::Misc;
             }
@@ -1287,8 +1238,7 @@ class priv::Renderer::impl final{
                 gbuffer.bindFramebuffers(outTexture);
                 _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
                 gbuffer.bindFramebuffers(sceneTexture);
-                auto& fxaaShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFXAA];
-                FXAA::fxaa.pass(fxaaShader, gbuffer, dimensions.z, dimensions.w, outTexture);
+                FXAA::fxaa.pass(gbuffer, dimensions.z, dimensions.w, outTexture);
 
                 gbuffer.bindBackbuffer(viewport, fbo, rbo);
                 _passDepthAndTransparency(gbuffer, dimensions.z, dimensions.w, viewport, camera, sceneTexture);
@@ -1299,25 +1249,17 @@ class priv::Renderer::impl final{
 
                 std::swap(sceneTexture, outTexture);
 
-
                 const float& _fboWidth  = static_cast<float>(dimensions.z);
                 const float& _fboHeight = static_cast<float>(dimensions.w);
                 const glm::vec4& SMAA_PIXEL_SIZE = glm::vec4(1.0f / _fboWidth, 1.0f / _fboHeight, _fboWidth, _fboHeight);
 
-                auto& edgeProgram     = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA1];
-                auto& blendProgram    = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA2];
-                auto& neighborProgram = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA3];
-                auto& finalProgram    = *m_InternalShaderPrograms[EngineInternalShaderPrograms::SMAA4];
-
-                SMAA::smaa.passEdge(edgeProgram, gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, sceneTexture, outTexture);
-
-                SMAA::smaa.passBlend(blendProgram, gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, outTexture);
-
+                SMAA::smaa.passEdge(gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, sceneTexture, outTexture);
+                SMAA::smaa.passBlend(gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, outTexture);
                 gbuffer.bindFramebuffers(outTexture);
-                SMAA::smaa.passNeighbor(neighborProgram, gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, sceneTexture);
+                SMAA::smaa.passNeighbor(gbuffer, SMAA_PIXEL_SIZE, dimensions.z, dimensions.w, sceneTexture);
                 //gbuffer.bindFramebuffers(sceneTexture);
 
-                //SMAA::smaa.passFinal(finalProgram, gbuffer, dimensions.z, dimensions.w);//unused
+                //SMAA::smaa.passFinal(gbuffer, dimensions.z, dimensions.w);//unused
 
                 gbuffer.bindBackbuffer(viewport, fbo, rbo);
                 _passDepthAndTransparency(gbuffer, dimensions.z, dimensions.w, viewport, camera, outTexture);

@@ -1,6 +1,5 @@
 #include <core/engine/resources/Engine_ResourceBasic.h>
-
-#include <iostream>
+#include <core/engine/utils/Logger.h>
 
 using namespace std;
 
@@ -24,13 +23,13 @@ const string& EngineResource::name() const {
 void EngineResource::load(){
     if(!m_IsLoaded){
         m_IsLoaded = true;
-        //std::cout << ": " << m_Name << " - loaded." << std::endl;
+        ENGINE_LOG(typeid(*this).name() << ": " << m_Name << " - loaded.");
     }
 }
 void EngineResource::unload(){
     if(m_IsLoaded /*&& m_UsageCount == 0*/){
         m_IsLoaded = false;
-        //std::cout << ": " << m_Name << " - unloaded." << std::endl;
+        ENGINE_LOG(typeid(*this).name() << ": " << m_Name << " - unloaded.");
     }
 }
 const bool EngineResource::isLoaded() const {

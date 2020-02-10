@@ -3,10 +3,18 @@
 #define ENGINE_RENDERER_POSTPROCESS_BLOOM_H_INCLUDE_GUARD
 
 class  ShaderProgram;
-namespace Engine {
-namespace priv {
+class  Shader;
+
+#include <string>
+
+namespace Engine::priv {
     class  GBuffer;
     class  Bloom final {
+        private:
+            Shader*         m_Vertex_Shader;
+            Shader*         m_Fragment_Shader;
+            ShaderProgram*  m_Shader_Program;
+            std::string     m_GLSL_frag_code;
         public:
             unsigned int num_passes;
             bool         bloom_active;
@@ -19,13 +27,14 @@ namespace priv {
             Bloom();
             ~Bloom();
 
-            void pass(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const unsigned int& sceneTextureEnum);
+            const bool init_shaders();
+
+            void pass(GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const unsigned int& sceneTextureEnum);
 
             static Bloom bloom;
     };
 };
-namespace Renderer {
-namespace bloom {
+namespace Engine::Renderer::bloom {
     const unsigned int getNumPasses();
     void setNumPasses(const unsigned int);
     void enable(const bool b = true);
@@ -42,8 +51,4 @@ namespace bloom {
     const float getScale();
     void setScale(const float s);
 };
-};
-};
-
-
 #endif

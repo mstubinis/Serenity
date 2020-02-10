@@ -54,11 +54,6 @@ Texture::operator bool() const {
     return (m_TextureAddress.size() > 0) ? true : false;
 }
 
-void Texture::render(const glm::vec2& position, const glm::vec4& color, const float& angle, const glm::vec2& scale, const float& depth){
-    if (m_TextureType == TextureType::CubeMap)
-        return;
-    Engine::Renderer::renderTexture(*this, position, color, angle, scale, depth);
-}
 void Texture::setXWrapping(const TextureWrap::Wrap& wrap){
     if (*this == false) {
         auto lambda = [=]() {
@@ -210,7 +205,7 @@ const uchar* Texture::pixels(){
     TextureLoader::WithdrawPixelsFromOpenGLMemory(*this); 
     return &(m_ImagesDatas[0]->mipmaps[0].pixels)[0]; 
 }
-const GLuint& Texture::address(const uint& index) const { 
+const GLuint Texture::address(const uint& index) const { 
     if (m_TextureAddress.size() == 0)
         return 0;
     return m_TextureAddress[index]; 

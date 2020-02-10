@@ -3,11 +3,19 @@
 #define ENGINE_RENDERER_POSTPROCESS_DOF_H_INCLUDE_GUARD
 
 class  ShaderProgram;
+class  Shader;
 
-namespace Engine {
-namespace priv {
+#include <string>
+
+namespace Engine::priv {
     class  GBuffer;
     class  DepthOfField final {
+        private:
+            Shader*        m_Vertex_Shader;
+            Shader*        m_Fragment_Shader;
+            ShaderProgram* m_Shader_Program;
+
+            std::string    m_GLSL_frag_code;
         public:
             float bias;
             float focus;
@@ -17,13 +25,14 @@ namespace priv {
             DepthOfField();
             ~DepthOfField();
 
-            void pass(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const unsigned int& sceneTextureEnum);
+            const bool init_shaders();
+
+            void pass(GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const unsigned int& sceneTextureEnum);
 
             static DepthOfField DOF;
     };
 };
-namespace Renderer {
-namespace depthOfField {
+namespace Engine::Renderer::depthOfField {
     void enable(const bool b = true);
     void disable();
     const bool enabled();
@@ -33,8 +42,6 @@ namespace depthOfField {
     void setBias(const float);
     const float getBlurRadius();
     void setBlurRadius(const float);
-};
-};
 };
 
 #endif

@@ -16,20 +16,18 @@ class  ModelInstance;
 struct Entity;
 struct SceneOptions;
 
-namespace Engine {
-    namespace priv {
-        class  RenderGraph;
-        class  ResourceManager;
-        struct EntityPOD;
-        struct InternalScenePublicInterface;
-        template<typename T> class ECS;
-        class  GBuffer;
-    };
+namespace Engine::priv {
+    class  RenderGraph;
+    class  ResourceManager;
+    class  EntityPOD;
+    struct InternalScenePublicInterface;
+    template<typename T> class ECS;
+    class  GBuffer;
 };
 
-#include <core/engine/renderer/RendererIncludes.h> //ok
-#include <core/engine/resources/Engine_ResourceBasic.h> //ok
-#include <core/engine/events/Engine_EventObject.h> //ok
+#include <core/engine/renderer/RendererIncludes.h>
+#include <core/engine/resources/Engine_ResourceBasic.h>
+#include <core/engine/events/Engine_EventObject.h>
 #include <core/engine/renderer/particles/ParticleSystem.h>
 #include <functional>
 
@@ -49,7 +47,7 @@ class Scene: public EngineResource, public EventObserver{
     private:
         std::vector<Viewport*>                                m_Viewports;
         std::vector<Camera*>                                  m_Cameras;
-        std::vector<std::vector<Engine::priv::RenderGraph*>> m_RenderGraphs;
+        std::vector<std::vector<Engine::priv::RenderGraph*>>  m_RenderGraphs;
 
         std::vector<SunLight*>                                m_Lights;
         std::vector<SunLight*>                                m_SunLights;

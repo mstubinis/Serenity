@@ -58,7 +58,7 @@ class Texture: public EngineResource{
         Texture& operator=(Texture&& other) noexcept = delete;
 
         const unsigned char* pixels();
-        const GLuint& address(const uint& index = 0) const;
+        const GLuint address(const uint& index = 0) const;
         const GLuint type() const;
         const uint width() const;
         const uint height() const;
@@ -89,7 +89,5 @@ class Texture: public EngineResource{
         static void setMinFilter(const GLuint& type, const TextureFilter::Filter&);
         static void setMaxFilter(const GLuint& type, const TextureFilter::Filter&);
         static void setFilter(const GLuint& type, const TextureFilter::Filter&);
-
-        void render(const glm::vec2& pos, const glm::vec4& color, const float& angle = 0.0f, const glm::vec2& scale = glm::vec2(1.0f), const float& depth = 0.1f);
 };
 #endif

@@ -136,7 +136,7 @@ void InternalTextureRequestPublicInterface::Request(TextureRequest& request) {
             request.part.texture = NEW Texture();
             request.part.texture->m_TextureType = request.textureType;
             request.part.texture->setName(request.part.name);
-            request.part.handle  = Core::m_Engine->m_ResourceManager.m_Resources->add(request.part.texture, ResourceType::Texture);
+            request.part.handle  = Core::m_Engine->m_ResourceManager.m_Resources.add(request.part.texture, ResourceType::Texture);
 
             const auto lambda_cpu = [=]() {
                 if (request.textureType == TextureType::Texture2D) {
@@ -173,7 +173,7 @@ void InternalTextureRequestPublicInterface::RequestMem(TextureRequestFromMemory&
         request.part.texture = NEW Texture();
         request.part.texture->m_TextureType = request.textureType;
         request.part.texture->setName(request.part.name);
-        request.part.handle  = Core::m_Engine->m_ResourceManager.m_Resources->add(request.part.texture, ResourceType::Texture);
+        request.part.handle  = Core::m_Engine->m_ResourceManager.m_Resources.add(request.part.texture, ResourceType::Texture);
 
         const auto lambda_cpu = [=]() {
             if (request.textureType == TextureType::Texture2D) {

@@ -207,6 +207,9 @@ void Physics::setNumberOfStepsPerFrame(const unsigned int numSteps) {
 const unsigned int Physics::getNumberOfStepsPerFrame() {
     return physicsManager->m_NumberOfStepsPerFrame;
 }
+
+
+
 void Physics::pause(bool b){ 
     physicsManager->m_Paused = b; 
 }

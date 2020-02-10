@@ -21,6 +21,7 @@ priv::DebugManager::DebugManager(){
     output_frame_delay = 4;
     output_frame = 0;
     decimals = 4;
+    m_TimeScale = 1.0;
 }
 priv::DebugManager::~DebugManager() {
     cleanup();
@@ -73,6 +74,11 @@ const double priv::DebugManager::physicsTime() const { return (double)((double)m
 const double priv::DebugManager::renderTime() const { return (double)((double)m_renderTime / divisor); }
 const double priv::DebugManager::soundsTime() const { return (double)((double)m_soundTime / divisor); }
 const double priv::DebugManager::totalTime() const{ return m_totalTime; }
+const double priv::DebugManager::timeScale() const { return m_TimeScale; }
+
+void priv::DebugManager::setTimeScale(const double timeScale) {
+    m_TimeScale = glm::max(0.0, timeScale);
+}
 
 string priv::DebugManager::timestamp() {
     const auto end = std::chrono::system_clock::now();

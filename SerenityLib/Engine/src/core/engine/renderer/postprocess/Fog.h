@@ -4,9 +4,7 @@
 
 #include <glm/vec4.hpp>
 
-class  ShaderProgram;
-namespace Engine {
-namespace priv {
+namespace Engine::priv {
     class  GBuffer;
     class  Fog final {
         public:
@@ -19,10 +17,9 @@ namespace priv {
             ~Fog();
 
             static Fog fog;
-        };
+    };
 };
-namespace Renderer {
-namespace fog {
+namespace Engine::Renderer::fog {
     void enable(const bool b = true);
     void disable();
     const bool enabled();
@@ -33,8 +30,4 @@ namespace fog {
     const float getNullDistance();
     const float getBlendDistance();
 };
-};
-};
-
-
 #endif

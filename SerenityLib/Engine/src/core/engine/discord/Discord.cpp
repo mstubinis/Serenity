@@ -115,7 +115,7 @@ Engine::Discord::DiscordCore::DiscordCore() {
     discordManager = this;
 }
 Engine::Discord::DiscordCore::~DiscordCore() {
-
+    SAFE_DELETE(core);
 }
 
 void Engine::Discord::DiscordCore::update_activity(const discord::Activity& activity) {

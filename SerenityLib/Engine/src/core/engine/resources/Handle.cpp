@@ -10,21 +10,21 @@ Handle::Handle() {
     version = 0; 
     type    = 0; 
 }
-Handle::Handle(uint32_t _index, uint32_t _version, uint32_t _type) {
-    index   = _index; 
-    version = _version; 
-    type    = _type; 
+Handle::Handle(const std::uint32_t index_, const std::uint32_t version_, const std::uint32_t type_) {
+    index   = index_; 
+    version = version_; 
+    type    = type_; 
 }
-Handle::operator uint32_t() const {
+Handle::operator std::uint32_t() const {
     return type << 27 | version << 12 | index; 
 }
 const bool Handle::null() const { 
-    return (type == ResourceType::Empty) ? true : false; 
+    return (type == ResourceType::Empty || (index == 0 && version == 0 && type == 0)) ? true : false; 
 }
 const EngineResource* Handle::get() const {
     if (null()) 
         return nullptr;
-    return priv::Core::m_Engine->m_ResourceManager.m_Resources->getAsFast<EngineResource>(index);
+    return priv::Core::m_Engine->m_ResourceManager.m_Resources.getAsFast<EngineResource>(index);
 }
 const EngineResource* Handle::operator ->() const { 
     return get(); 

@@ -2,15 +2,22 @@
 #ifndef ENGINE_RENDERER_POSTPROCESS_GODRAYS_H_INCLUDE_GUARD
 #define ENGINE_RENDERER_POSTPROCESS_GODRAYS_H_INCLUDE_GUARD
 
+class  ShaderProgram;
+class  Shader;
+struct Entity;
+
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
+#include <string>
 
-class  ShaderProgram;
-struct Entity;
-namespace Engine {
-namespace priv {
+namespace Engine::priv {
     class  GBuffer;
     class  GodRays final {
+        private:
+            Shader*          m_Vertex_Shader;
+            Shader*          m_Fragment_Shader;
+            ShaderProgram*   m_Shader_Program;
+            std::string      m_GLSL_frag_code;
         public:
             bool        godRays_active;
             glm::vec4   clearColor;
@@ -26,13 +33,14 @@ namespace priv {
             GodRays();
             ~GodRays();
 
-            void pass(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const glm::vec2& lightScrnPos,const float& alpha);
+            const bool init_shaders();
+
+            void pass(GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const glm::vec2& lightScrnPos,const float& alpha);
 
             static GodRays godRays;
     };
 };
-namespace Renderer {
-namespace godRays {
+namespace Engine::Renderer::godRays {
     const bool enabled();
     void enable(const bool b);
     void disable();
@@ -55,8 +63,4 @@ namespace godRays {
     void setSun(Entity*);
     Entity* getSun();
 };
-};
-};
-
-
 #endif

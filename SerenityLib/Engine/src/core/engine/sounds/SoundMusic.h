@@ -15,11 +15,15 @@ class  SoundMusic : public SoundBaseClass {
         float       m_Duration;
         bool        m_Active;
 
-        SoundMusic();
     public:
-        SoundMusic& operator=(const SoundMusic&) = delete;
-        SoundMusic(const SoundMusic&) = default;
-        SoundMusic(SoundMusic&&) noexcept = default;
+        SoundMusic();
+
+        SoundMusic(const SoundMusic& other)                = delete;
+        SoundMusic& operator=(const SoundMusic& other)     = delete;
+        SoundMusic(SoundMusic&& other) noexcept            = default;
+        SoundMusic& operator=(SoundMusic&& other) noexcept = default;
+
+
         ~SoundMusic();
 
         void update(const double& dt);

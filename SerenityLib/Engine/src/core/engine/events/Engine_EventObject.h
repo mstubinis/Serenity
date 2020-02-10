@@ -2,15 +2,14 @@
 #ifndef ENGINE_EVENT_OBJECT_H
 #define ENGINE_EVENT_OBJECT_H
 
-#include <core/engine/events/Engine_EventIncludes.h>
-
 class  Scene;
 class  Mesh;
 class  Material;
 class  Texture;
-namespace Engine{
-namespace priv{
 
+#include <core/engine/events/Engine_EventIncludes.h>
+
+namespace Engine::priv{
     struct EventMeshLoaded final {
         Mesh* mesh;
         EventMeshLoaded() {
@@ -43,35 +42,35 @@ namespace priv{
         unsigned int  width;
         unsigned int  height;
         EventWindowResized() = default;
-        EventWindowResized(const unsigned int& _width, const unsigned int& _height) {
-            width = _width;
-            height = _height;
+        EventWindowResized(const unsigned int& width_, const unsigned int& height_) {
+            width = width_;
+            height = height_;
         }
     };
     struct EventWindowFullscreenChanged final{ 
         bool isFullscreen; 
         EventWindowFullscreenChanged() = default;
-        EventWindowFullscreenChanged(const bool& _isFullscreen) {
-            isFullscreen = _isFullscreen;
+        EventWindowFullscreenChanged(const bool& isFullscreen_) {
+            isFullscreen = isFullscreen_;
         }
     };
     struct EventKeyboard final{ 
         KeyboardKey::Key  key;
         bool              alt, control, shift, system;
         EventKeyboard() = default;
-        EventKeyboard(const KeyboardKey::Key& _key, const bool& _alt, const bool& _control, const bool& _shift, const bool& _system) {
-            key     = _key;
-            alt     = _alt;
-            control = _control;
-            shift   = _shift;
-            system  = _system;
+        EventKeyboard(const KeyboardKey::Key& key_, const bool& alt_, const bool& control_, const bool& shift_, const bool& system_) {
+            key     = key_;
+            alt     = alt_;
+            control = control_;
+            shift   = shift_;
+            system  = system_;
         }
     };
     struct EventTextEntered final{ 
         std::uint32_t  unicode;
         EventTextEntered() = default;
-        EventTextEntered(const std::uint32_t& _unicode) {
-            unicode = _unicode;
+        EventTextEntered(const std::uint32_t& unicode_) {
+            unicode = unicode_;
         }
         const std::string convert() const {
             if (unicode == 27 || unicode == 13 || unicode == 9 || unicode == 8) { //27 = esc, 13 = enter, 9 = tab, 8 = backspace
@@ -90,18 +89,18 @@ namespace priv{
     struct EventMouseButton final{ 
         MouseButton::Button button; float x, y; 
         EventMouseButton() = default;
-        EventMouseButton(const MouseButton::Button& _button, const float& _x, const float& _y) {
-            button = _button;
-            x      = _x;
-            y      = _y;
+        EventMouseButton(const MouseButton::Button& button_, const float& x_, const float& y_) {
+            button = button_;
+            x      = x_;
+            y      = y_;
         }
     };
     struct EventMouseMove final{ 
         float x,y;
         EventMouseMove() = default;
-        EventMouseMove(const float& _x, const float& _y) {
-            x = _x;
-            y = _y;
+        EventMouseMove(const float& x_, const float& y_) {
+            x = x_;
+            y = y_;
         }
     };
     struct EventMouseWheel final{ 
@@ -119,43 +118,43 @@ namespace priv{
         JoystickAxis::Axis  axis;
         float               position;
         EventJoystickMoved() = default;
-        EventJoystickMoved(const unsigned int& _joystickID, const JoystickAxis::Axis& _axis, const float& _position) {
-            joystickID = _joystickID;
-            axis       = _axis;
-            position   = _position;
+        EventJoystickMoved(const unsigned int& joystickID_, const JoystickAxis::Axis& axis_, const float& position_) {
+            joystickID = joystickID_;
+            axis       = axis_;
+            position   = position_;
         }
     };
     struct EventJoystickButton final{ 
         unsigned int  joystickID;
         unsigned int  button;
         EventJoystickButton() = default;
-        EventJoystickButton(const unsigned int& _joystickID, const unsigned int& _button) {
-            joystickID = _joystickID;
-            button     = _button;
+        EventJoystickButton(const unsigned int& joystickID_, const unsigned int& button_) {
+            joystickID = joystickID_;
+            button     = button_;
         }
     };
     struct EventJoystickConnection final{ 
         unsigned int  joystickID;
         EventJoystickConnection() = default;
-        EventJoystickConnection(const unsigned int& _joystickID) {
-            joystickID = _joystickID;
+        EventJoystickConnection(const unsigned int& joystickID_) {
+            joystickID = joystickID_;
         }
     };
     struct EventSoundStatusChanged final {
         unsigned int  status;
         EventSoundStatusChanged() = default;
-        EventSoundStatusChanged(const unsigned int& _status) {
-            status = _status;
+        EventSoundStatusChanged(const unsigned int& status_) {
+            status = status_;
         }
     };
     struct EventSceneChanged final{ 
         Scene *oldScene, *newScene; 
         EventSceneChanged() = default;
-        EventSceneChanged(Scene* _old, Scene* _new) {
-            oldScene = _old; newScene = _new;
+        EventSceneChanged(Scene* old_, Scene* new_) {
+            oldScene = old_; 
+            newScene = new_;
         }
     };
-};
 };
 struct Event final{
     EventType::Type type;

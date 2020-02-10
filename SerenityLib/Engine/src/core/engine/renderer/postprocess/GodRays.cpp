@@ -5,28 +5,83 @@
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/FramebufferObject.h>
 #include <core/engine/shaders/ShaderProgram.h>
-
+#include <core/engine/shaders/Shader.h>
+#include <core/engine/resources/Engine_BuiltInShaders.h>
+#include <core/engine/threading/Engine_ThreadManager.h>
 
 using namespace std;
 
 Engine::priv::GodRays Engine::priv::GodRays::godRays;
 
 Engine::priv::GodRays::GodRays() {
-    godRays_active = true;
-    clearColor = glm::vec4(0.030f, 0.023f, 0.032f, 1.0f);
-    exposure = 0.03f;
-    factor = 1.0f;
-    decay = 0.97f;
-    density = 1.5f;
-    weight = 0.567f;
-    samples = 80;
-    fovDegrees = 75.0f;
-    alphaFalloff = 2.0f;
+    godRays_active    = true;
+    clearColor        = glm::vec4(0.030f, 0.023f, 0.032f, 1.0f);
+    exposure          = 0.03f;
+    factor            = 1.0f;
+    decay             = 0.97f;
+    density           = 1.5f;
+    weight            = 0.567f;
+    samples           = 80;
+    fovDegrees        = 75.0f;
+    alphaFalloff      = 2.0f;
+
+    m_GLSL_frag_code  = "";
+    m_Vertex_Shader   = nullptr;
+    m_Fragment_Shader = nullptr;
+    m_Shader_Program  = nullptr;
 }
 Engine::priv::GodRays::~GodRays() {
+    SAFE_DELETE(m_Vertex_Shader);
+    SAFE_DELETE(m_Fragment_Shader);
+    SAFE_DELETE(m_Shader_Program);
 }
-void Engine::priv::GodRays::pass(ShaderProgram& program, GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight,const glm::vec2& lightScrnPos,const float& alpha) {
-    program.bind();
+const bool Engine::priv::GodRays::init_shaders() {
+    if (!m_GLSL_frag_code.empty())
+        return false;
+
+#pragma region GodRays
+    m_GLSL_frag_code =
+        "uniform vec4 RaysInfo;\n"//exposure | decay | density | weight
+        "\n"
+        "uniform vec2 lightPositionOnScreen;\n"
+        "uniform sampler2D firstPass;\n"
+        "uniform int samples;\n"
+        "\n"
+        "uniform float alpha;\n"
+        "varying vec2 texcoords;\n"
+        "void main(){\n"
+        "    vec2 uv = texcoords;\n"
+        "    vec2 deltaUV = vec2(uv - lightPositionOnScreen);\n"
+        "    deltaUV *= 1.0 /  float(samples) * RaysInfo.z;\n"
+        "    float illuminationDecay = 1.0;\n"
+        "    vec3 totalColor = vec3(0.0);\n"
+        "    for(int i = 0; i < samples; ++i){\n"
+        "        uv -= deltaUV / 2.0;\n"
+        "        vec2 sampleData = texture2D(firstPass,uv).ba;\n"
+        "        vec2 unpackedRG = Unpack2NibblesFrom8BitChannel(sampleData.r);\n"
+        "        vec3 realSample = vec3(unpackedRG.r,unpackedRG.g,sampleData.g);\n"
+        "        realSample *= illuminationDecay * RaysInfo.w;\n"
+        "        totalColor += realSample;\n"
+        "        illuminationDecay *= RaysInfo.y;\n"
+        "    }\n"
+        "    gl_FragColor.rgb = (totalColor * alpha) * RaysInfo.x;\n"
+        "    gl_FragColor.a = 1.0;\n"
+        "}";
+#pragma endregion
+
+    auto lambda_part_a = [&]() {
+        m_Vertex_Shader = NEW Shader(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
+        m_Fragment_Shader = NEW Shader(m_GLSL_frag_code, ShaderType::Fragment, false);
+    };
+    auto lambda_part_b = [&]() {
+        m_Shader_Program = NEW ShaderProgram("GodRays", *m_Vertex_Shader, *m_Fragment_Shader);
+    };
+    Engine::priv::threading::addJobWithPostCallback(lambda_part_a, lambda_part_b);
+
+    return true;
+}
+void Engine::priv::GodRays::pass(GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight,const glm::vec2& lightScrnPos,const float& alpha) {
+    m_Shader_Program->bind();
     const float& divisor = gbuffer.getSmallFBO()->divisor();
     Engine::Renderer::sendUniform4("RaysInfo", exposure, decay, density, weight);
     Engine::Renderer::sendUniform2("lightPositionOnScreen", lightScrnPos.x / static_cast<float>(fboWidth), lightScrnPos.y / static_cast<float>(fboHeight));

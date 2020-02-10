@@ -38,33 +38,33 @@ typedef unsigned short  ushort;
 typedef std::uint64_t   uint64;
 typedef std::uint32_t   uint32;
 
-template <typename Stream> void readUint32tBigEndian(uint32_t& out, Stream& stream) {
-    uint8_t buf[4];
+template <typename Stream> void readUint32tBigEndian(std::uint32_t& out, Stream& stream) {
+    std::uint8_t buf[4];
     stream.read((char *)buf, 4);
-    out  = (uint32_t)buf[0] << 24;
-    out |= (uint32_t)buf[1] << 16;
-    out |= (uint32_t)buf[2] << 8;
-    out |= (uint32_t)buf[3];
+    out  = (std::uint32_t)buf[0] << 24;
+    out |= (std::uint32_t)buf[1] << 16;
+    out |= (std::uint32_t)buf[2] << 8;
+    out |= (std::uint32_t)buf[3];
 }
-template <typename Stream> void readUint16tBigEndian(uint16_t& out, Stream& stream) {
-    uint8_t buf[2];
+template <typename Stream> void readUint16tBigEndian(std::uint16_t& out, Stream& stream) {
+    std::uint8_t buf[2];
     stream.read((char *)buf, 2);
-    out  = (uint32_t)buf[0] << 8;
-    out |= (uint32_t)buf[1];
+    out  = (std::uint32_t)buf[0] << 8;
+    out |= (std::uint32_t)buf[1];
 }
-template <typename Stream> void writeUint32tBigEndian(uint32_t& in, Stream& stream) {
-    uint8_t buf[4];
+template <typename Stream> void writeUint32tBigEndian(std::uint32_t& in, Stream& stream) {
+    std::uint8_t buf[4];
     buf[0] = (in & 0xff000000) >> 24;
     buf[1] = (in & 0x00ff0000) >> 16;
     buf[2] = (in & 0x0000ff00) >> 8;
     buf[3] = (in & 0x000000ff);
-    stream.write((char *)buf, sizeof(buf));
+    stream.write((char*)buf, sizeof(buf));
 }
-template <typename Stream> void writeUint16tBigEndian(uint16_t& in, Stream& stream) {
-    uint8_t buf[2];
+template <typename Stream> void writeUint16tBigEndian(std::uint16_t& in, Stream& stream) {
+    std::uint8_t buf[2];
     buf[0] = (in & 0xff00) >> 8;
     buf[1] = (in & 0x00ff);
-    stream.write((char *)buf, sizeof(buf));
+    stream.write((char*)buf, sizeof(buf));
 }
 
 //specifies if a specific pointer element is in a vector

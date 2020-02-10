@@ -7,13 +7,13 @@
 class  EngineResource;
 
 struct Handle final {
-    uint32_t index : 12;
-    uint32_t version : 15;
-    uint32_t type : 5;
+    std::uint32_t index   : 12;
+    std::uint32_t version : 15;
+    std::uint32_t type    : 5;
 
     explicit Handle();
-    explicit Handle(uint32_t _index, uint32_t _version, uint32_t _type);
-    operator uint32_t() const;
+    explicit Handle(const std::uint32_t index_, const std::uint32_t version_, const std::uint32_t type_);
+    operator std::uint32_t() const;
     const bool null() const;
     const EngineResource* get() const;
     const EngineResource* operator ->() const;

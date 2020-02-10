@@ -29,7 +29,8 @@ namespace Engine {
                 }
             }
             static void initMesh() {
-                if (m_Vertices.size() > 0) return;
+                if (m_Vertices.size() > 0) 
+                    return;
 
                 vector<glm::vec3> temp;
                 temp.emplace_back(-1, 1, 1);//1

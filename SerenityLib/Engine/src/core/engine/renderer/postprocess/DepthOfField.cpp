@@ -2,21 +2,102 @@
 #include <core/engine/renderer/Renderer.h>
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/shaders/ShaderProgram.h>
+#include <core/engine/shaders/Shader.h>
+#include <core/engine/resources/Engine_BuiltInShaders.h>
+#include <core/engine/threading/Engine_ThreadManager.h>
 
 using namespace std;
 
 Engine::priv::DepthOfField Engine::priv::DepthOfField::DOF;
 
 Engine::priv::DepthOfField::DepthOfField() {
-    bias         = 0.6f;
-    focus        = 2.0f;
-    blur_radius  = 3.0f;
-    dof          = false;
-}
+    bias              = 0.6f;
+    focus             = 2.0f;
+    blur_radius       = 3.0f;
+    dof               = false;
+
+    m_Vertex_Shader   = nullptr;
+    m_Fragment_Shader = nullptr;
+    m_Shader_Program  = nullptr;
+    m_GLSL_frag_code  = "";
+} 
 Engine::priv::DepthOfField::~DepthOfField() {
+    SAFE_DELETE(m_Vertex_Shader);
+    SAFE_DELETE(m_Fragment_Shader);
+    SAFE_DELETE(m_Shader_Program);
 }
-void Engine::priv::DepthOfField::pass(ShaderProgram& program,GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture) {
-    program.bind();
+const bool Engine::priv::DepthOfField::init_shaders() {
+    if (!m_GLSL_frag_code.empty())
+        return false;
+
+#pragma region DepthOfField
+    m_GLSL_frag_code =
+        "\n"
+        "const float DOFWeight[4] = float[](1.0,0.9,0.7,0.4);\n"
+        "\n"
+        "uniform sampler2D inTexture;\n"
+        "uniform sampler2D depthTexture;\n"
+        "\n"
+        "uniform vec4 Data;\n" //x = blurClamp, y = bias, z = focus, w = aspectRatio
+        "\n"
+        "varying vec2 texcoords;\n"
+        "void main(){\n"
+        "    vec2 aspectcorrect = vec2(1.0, Data.w);\n"
+        "    float depth = texture2D(depthTexture, texcoords).r;\n"
+        "    float factor = (depth - Data.z);\n"
+        "    vec2 dofblur = vec2(clamp(factor * Data.y, -Data.x, Data.x));\n"
+        //   vec4 col = DOFExecute(inTexture, texcoords, aspectcorrect, dofblur);
+        //TODO: use the above commented function only and test if it works.
+        "    vec4 col = vec4(0.0);\n"
+        "    col += texture2D(inTexture, texcoords);\n"
+        "    col += texture2D(inTexture, texcoords + (vec2(0.0, 0.4) * aspectcorrect)     * dofblur);\n"
+        "    col += texture2D(inTexture, texcoords + (vec2(0.0, -0.4) * aspectcorrect)    * dofblur);\n"
+        "    col += texture2D(inTexture, texcoords + (vec2(0.4, 0.0) * aspectcorrect)     * dofblur);\n"
+        "    col += texture2D(inTexture, texcoords + (vec2(-0.4, 0.0) * aspectcorrect)    * dofblur);\n"
+        "    col += texture2D(inTexture, texcoords + (vec2(0.29, 0.29) * aspectcorrect)   * dofblur);\n"
+        "    col += texture2D(inTexture, texcoords + (vec2(-0.29, 0.29) * aspectcorrect)  * dofblur);\n"
+        "    col += texture2D(inTexture, texcoords + (vec2(0.29, -0.29) * aspectcorrect)  * dofblur);\n"
+        "    col += texture2D(inTexture, texcoords + (vec2(-0.29, -0.29) * aspectcorrect) * dofblur);\n"
+        "    for (int i = 0; i < 2; ++i) {\n"
+        "        int k = i+2;\n"
+        "        col += texture2D(inTexture, texcoords + (vec2(0.15, 0.37) * aspectcorrect)   * dofblur * DOFWeight[i]);\n"
+        "        col += texture2D(inTexture, texcoords + (vec2(-0.15, -0.37) * aspectcorrect) * dofblur * DOFWeight[i]);\n"
+        "        col += texture2D(inTexture, texcoords + (vec2(-0.15, 0.37) * aspectcorrect)  * dofblur * DOFWeight[i]);\n"
+        "        col += texture2D(inTexture, texcoords + (vec2(0.15, -0.37) * aspectcorrect)  * dofblur * DOFWeight[i]);\n"
+        "        col += texture2D(inTexture, texcoords + (vec2(-0.37, 0.15) * aspectcorrect)  * dofblur * DOFWeight[i]);\n"
+        "        col += texture2D(inTexture, texcoords + (vec2(0.37, -0.15) * aspectcorrect)  * dofblur * DOFWeight[i]);\n"
+        "        col += texture2D(inTexture, texcoords + (vec2(0.37, 0.15) * aspectcorrect)   * dofblur * DOFWeight[i]);\n"
+        "        col += texture2D(inTexture, texcoords + (vec2(-0.37, -0.15) * aspectcorrect) * dofblur * DOFWeight[i]);\n"
+        "\n"
+        "        col += texture2D(inTexture, texcoords + (vec2(0.29, 0.29) * aspectcorrect)   * dofblur * DOFWeight[k]);\n"
+        "        col += texture2D(inTexture, texcoords + (vec2(0.4, 0.0) * aspectcorrect)     * dofblur * DOFWeight[k]);\n"
+        "        col += texture2D(inTexture, texcoords + (vec2(0.29, -0.29) * aspectcorrect)  * dofblur * DOFWeight[k]);\n"
+        "        col += texture2D(inTexture, texcoords + (vec2(0.0, -0.4) * aspectcorrect)    * dofblur * DOFWeight[k]);\n"
+        "        col += texture2D(inTexture, texcoords + (vec2(-0.29, 0.29) * aspectcorrect)  * dofblur * DOFWeight[k]);\n"
+        "        col += texture2D(inTexture, texcoords + (vec2(-0.4, 0.0) * aspectcorrect)    * dofblur * DOFWeight[k]);\n"
+        "        col += texture2D(inTexture, texcoords + (vec2(-0.29, -0.29) * aspectcorrect) * dofblur * DOFWeight[k]);\n"
+        "        col += texture2D(inTexture, texcoords + (vec2(0.0, 0.4) * aspectcorrect)     * dofblur * DOFWeight[k]);\n"
+        "    }\n"
+        "    gl_FragColor.rgb = col.rgb * 0.02439; \n" //0.02439 = 1.0 / 41.0
+
+        //"    gl_FragColor.a = 1.0; \n"
+        "}\n"
+        "\n";
+#pragma endregion
+
+    auto lambda_part_a = [&]() {
+        m_Vertex_Shader = NEW Shader(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
+        m_Fragment_Shader = NEW Shader(m_GLSL_frag_code, ShaderType::Fragment, false);
+    };
+    auto lambda_part_b = [&]() {
+        m_Shader_Program = NEW ShaderProgram("DepthOfField", *m_Vertex_Shader, *m_Fragment_Shader);
+    };
+    Engine::priv::threading::addJobWithPostCallback(lambda_part_a, lambda_part_b);
+
+    return true;
+}
+void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture) {
+    m_Shader_Program->bind();
     Engine::Renderer::sendUniform4Safe("Data", blur_radius, bias, focus, fboWidth / static_cast<float>(fboHeight));
 
     Engine::Renderer::sendTextureSafe("inTexture", gbuffer.getTexture(sceneTexture), 0);

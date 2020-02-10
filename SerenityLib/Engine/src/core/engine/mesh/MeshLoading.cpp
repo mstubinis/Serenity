@@ -44,7 +44,7 @@ void priv::MeshLoader::LoadProcessNodeNames(const string& file, vector<MeshReque
         part.mesh   = NEW Mesh();
         part.name   = file + " - " + string(aimesh.mName.C_Str());
         part.mesh->setName(part.name);
-        part.handle = priv::Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
+        part.handle = priv::Core::m_Engine->m_ResourceManager.m_Resources.add(part.mesh, ResourceType::Mesh);
         _parts.push_back(std::move(part));
     }
     for (unsigned int i = 0; i < node.mNumChildren; ++i) {
@@ -357,8 +357,7 @@ VertexData* priv::MeshLoader::LoadFrom_OBJCC(string& filename) {
     }else{
         returnData = NEW VertexData(VertexDataFormat::VertexDataBasic);
     }
-    auto& data = *returnData;
-    data.indices.reserve(sizes_indices);
+    returnData->indices.reserve(sizes_indices);
 
     vector<glm::vec3> temp_pos;
     vector<glm::vec2> temp_uvs;
@@ -439,18 +438,18 @@ VertexData* priv::MeshLoader::LoadFrom_OBJCC(string& filename) {
         inindices   = static_cast<uint16_t>(_data[blockStart + 0] << 8);
         inindices  |= static_cast<uint16_t>(_data[blockStart + 1]);
         blockStart += 2;
-        data.indices.push_back(static_cast<uint16_t>(inindices));
+        returnData->indices.push_back(static_cast<uint16_t>(inindices));
     }
-    data.setData(0, temp_pos);
-    data.setData(1, temp_uvs);
-    data.setData(2, temp_norm);
-    data.setData(3, temp_binorm);
-    data.setData(4, temp_tang);
+    returnData->setData(0, temp_pos);
+    returnData->setData(1, temp_uvs);
+    returnData->setData(2, temp_norm);
+    returnData->setData(3, temp_binorm);
+    returnData->setData(4, temp_tang);
     if (temp_bID.size() > 0) {
-        data.setData(5, temp_bID);
-        data.setData(6, temp_bW);
+        returnData->setData(5, temp_bID);
+        returnData->setData(6, temp_bW);
     }
-    data.setIndices(data.indices, false, false, true);
+    returnData->setIndices(returnData->indices, false, false, true);
     return returnData;
 }
 

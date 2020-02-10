@@ -6,7 +6,7 @@
 
 class EntityWrapper {
     protected:
-        Entity m_Entity;
+        Entity   m_Entity;
     public:
         EntityWrapper(Scene& scene);
         virtual ~EntityWrapper();
@@ -35,5 +35,4 @@ class EntityWrapper {
             return m_Entity.getComponent<TComponent>(dataRequest);
         }
 };
-
 #endif

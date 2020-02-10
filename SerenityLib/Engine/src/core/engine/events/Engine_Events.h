@@ -11,68 +11,65 @@ class Window;
 #include <glm/vec2.hpp>
 #include <unordered_set>
 
-namespace Engine{
-    namespace priv{
-        class EventManager final{
-            public:
-                static EventManager*                     m_EventManager;
-                EventDispatcher                          m_EventDispatcher;
+namespace Engine::priv {
+    class EventManager final {
+        public:
+            EventDispatcher                          m_EventDispatcher;
 
-                std::unordered_set<unsigned int>         m_KeyboardKeyStatus;
-                std::unordered_set<unsigned int>         m_MouseStatus;
+            std::unordered_set<unsigned int>         m_KeyboardKeyStatus;
+            std::unordered_set<unsigned int>         m_MouseStatus;
 
-                unsigned int                             m_CurrentKeyboardKey;
-                unsigned int                             m_PreviousKeyboardKey;
+            unsigned int                             m_CurrentKeyboardKey;
+            unsigned int                             m_PreviousKeyboardKey;
 
-                unsigned int                             m_CurrentMouseButton;
-                unsigned int                             m_PreviousMouseButton;
+            unsigned int                             m_CurrentMouseButton;
+            unsigned int                             m_PreviousMouseButton;
 
 
-                EventManager();
-                ~EventManager();
+            EventManager();
+            ~EventManager();
 
-                void cleanup();
+            void cleanup();
 
-                void onEventKeyPressed(const unsigned int& key);
-                void onEventKeyReleased(const unsigned int& key);
-                void onEventMouseButtonPressed(const unsigned int& mouseButton);
-                void onEventMouseButtonReleased(const unsigned int& mouseButton);
-                void onResetEvents(const double& dt);
+            void onEventKeyPressed(const unsigned int& key);
+            void onEventKeyReleased(const unsigned int& key);
+            void onEventMouseButtonPressed(const unsigned int& mouseButton);
+            void onEventMouseButtonReleased(const unsigned int& mouseButton);
+            void onResetEvents(const double& dt);
         };
-    };
-    namespace events {
-        void dispatchEvent(const unsigned int& eventType);
-    };
-    //keyboard functions
+};
+namespace Engine::events {
+    void dispatchEvent(const unsigned int& eventType);
+};
+namespace Engine{
     const unsigned int getNumPressedKeys();
     const std::unordered_set<unsigned int>& getPressedKeys();
     const std::unordered_set<unsigned int>& getPressedMouseButtons();
 
-    const bool isKeyDown(const KeyboardKey::Key&);
-    const bool isKeyDownOnce(const KeyboardKey::Key&);
+    const bool isKeyDown(const KeyboardKey::Key& key);
+    const bool isKeyDownOnce(const KeyboardKey::Key& key);
     const bool isKeyDownOnce(const KeyboardKey::Key& first, const KeyboardKey::Key& second);
     const bool isKeyDownOnce(const KeyboardKey::Key& first, const KeyboardKey::Key& second, const KeyboardKey::Key& third);
     const bool isKeyDownOnce();
 
-    const bool isKeyUp(const KeyboardKey::Key);
+    const bool isKeyUp(const KeyboardKey::Key& key);
 
 
     const KeyboardKey::Key getPressedKey();
     const MouseButton::Button getPressedButton();
 
-    //mouse functions
-    const bool isMouseButtonDown(const MouseButton::Button&);
-    const bool isMouseButtonDownOnce(const MouseButton::Button&);
+    const bool isMouseButtonDown(const MouseButton::Button& mouseButton);
+    const bool isMouseButtonDownOnce(const MouseButton::Button& mouseButton);
 
     const glm::vec2& getMouseDifference();
     const glm::vec2& getMousePositionPrevious();
     const glm::vec2& getMousePosition();
 
-    const glm::vec2& getMouseDifference(Window&);
-    const glm::vec2& getMousePositionPrevious(Window&);
-    const glm::vec2& getMousePosition(Window&);
+    const glm::vec2& getMouseDifference(Window& window);
+    const glm::vec2& getMousePositionPrevious(Window& window);
+    const glm::vec2& getMousePosition(Window& window);
 
-    const double     getMouseWheelDelta(Window&);
+    const double     getMouseWheelDelta(Window& window);
     const double     getMouseWheelDelta();
 
     void setMousePosition(const float x, const float y, const bool resetDifference = false, const bool resetPreviousPosition = false);
@@ -80,9 +77,9 @@ namespace Engine{
     void setMousePosition(const glm::vec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
     void setMousePosition(const glm::uvec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
 
-    void setMousePosition(Window&, const float x, const float y, const bool resetDifference = false, const bool resetPreviousPosition = false);
-    void setMousePosition(Window&, const unsigned int x, const unsigned int y, const bool resetDifference = false, const bool resetPreviousPosition = false);
-    void setMousePosition(Window&, const glm::vec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
-    void setMousePosition(Window&, const glm::uvec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
+    void setMousePosition(Window& window, const float x, const float y, const bool resetDifference = false, const bool resetPreviousPosition = false);
+    void setMousePosition(Window& window, const unsigned int x, const unsigned int y, const bool resetDifference = false, const bool resetPreviousPosition = false);
+    void setMousePosition(Window& window, const glm::vec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
+    void setMousePosition(Window& window, const glm::uvec2&, const bool resetDifference = false, const bool resetPreviousPosition = false);
 };
 #endif

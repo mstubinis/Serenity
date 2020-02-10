@@ -18,6 +18,9 @@ SoundMusic::SoundMusic() : SoundBaseClass(1) {
 SoundMusic::~SoundMusic() {
 
 }
+
+
+
 const float SoundMusic::getDuration() const {
     return m_Duration;
 }

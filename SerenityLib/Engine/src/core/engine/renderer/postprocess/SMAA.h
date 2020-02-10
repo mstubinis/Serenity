@@ -3,19 +3,41 @@
 #ifndef ENGINE_RENDERER_POSTPROCESS_SMAA_H_INCLUDE_GUARD
 #define ENGINE_RENDERER_POSTPROCESS_SMAA_H_INCLUDE_GUARD
 
+class  ShaderProgram;
+class  Shader;
+
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
+#include <string>
+#include <vector>
 
 struct SMAAQualityLevel {enum Level {
     Low, Medium, High, Ultra,
 };};
 
-class  ShaderProgram;
-namespace Engine {
-namespace priv {
+
+namespace Engine::priv {
     class  GBuffer;
     class  SMAA final {
+        private:
+            struct PassStage final { enum Stage : unsigned int {
+                Edge,
+                Blend,
+                Neighbor,
+                Final,
+                _TOTAL,
+            };};
+
+            std::vector<Shader*>        m_Vertex_Shaders;
+            std::vector<Shader*>        m_Fragment_Shaders;
+            std::vector<ShaderProgram*> m_Shader_Programs;
+
+            std::vector<std::string>    m_Vertex_Shaders_Code;
+            std::vector<std::string>    m_Fragment_Shaders_Code;
+
         public:
+
+
             unsigned int  AreaTexture;
             unsigned int  SearchTexture;
             float         THRESHOLD;
@@ -40,16 +62,17 @@ namespace priv {
 
             void init();
 
-            void passEdge(ShaderProgram&, GBuffer&, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture, const unsigned int& outTexture);
-            void passBlend(ShaderProgram&, GBuffer&, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& outTexture);
-            void passNeighbor(ShaderProgram&, GBuffer&, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture);
-            void passFinal(ShaderProgram&, GBuffer&, const unsigned int& fboWidth, const unsigned int& fboHeight); //currently unused
+            const bool init_shaders();
+
+            void passEdge(GBuffer&, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture, const unsigned int& outTexture);
+            void passBlend(GBuffer&, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& outTexture);
+            void passNeighbor(GBuffer&, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture);
+            void passFinal(GBuffer&, const unsigned int& fboWidth, const unsigned int& fboHeight); //currently unused
 
             static SMAA smaa;
     };
 };
-namespace Renderer {
-namespace smaa {
+namespace Engine::Renderer::smaa {
     void setThreshold(const float threshold);
     void setSearchSteps(const unsigned int steps);
     void disableCornerDetection();
@@ -66,8 +89,4 @@ namespace smaa {
     void enableReprojection(const bool b = true);
     void disableReprojection();
 };
-};
-};
-
-
 #endif

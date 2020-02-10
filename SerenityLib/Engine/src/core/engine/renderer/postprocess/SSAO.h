@@ -7,14 +7,26 @@
 
 class  Camera;
 class  ShaderProgram;
+class  Shader;
 
 #include <glm/vec3.hpp>
 #include <string>
 
-namespace Engine {
-namespace priv {
+namespace Engine::priv {
     class  GBuffer;
     class  SSAO final {
+        private:
+            Shader* m_Vertex_Shader;
+            Shader* m_Fragment_Shader;
+            ShaderProgram* m_Shader_Program;
+
+
+            Shader* m_Vertex_Shader_Blur;
+            Shader* m_Fragment_Shader_Blur;
+            ShaderProgram* m_Shader_Program_Blur;
+
+            std::string     m_GLSL_frag_code;
+            std::string     m_GLSL_frag_code_blur;
         public:
             bool           m_ssao;
             bool           m_ssao_do_blur;
@@ -28,21 +40,22 @@ namespace priv {
             float          m_ssao_bias;
             float          m_ssao_radius;
             //glm::vec3      m_ssao_Kernels[SSAO_MAX_KERNEL_SIZE];
-            
+
             SSAO();
             ~SSAO();
 
+            const bool init_shaders();
+
             void init();
 
-            void passSSAO(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,Camera&);
-            void passBlur(ShaderProgram&,GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const std::string& type,const unsigned int& texture);
+            void passSSAO(GBuffer&, const unsigned int& fboWidth, const unsigned int& fboHeight, Camera&);
+            void passBlur(GBuffer&, const unsigned int& fboWidth, const unsigned int& fboHeight, const std::string& type, const unsigned int& texture);
 
             static SSAO ssao;
     };
 };
 
-namespace Renderer {
-namespace ssao {
+namespace Engine::Renderer::ssao {
     const bool enabled();
     void enable(const bool b = true);
     void disable();
@@ -62,8 +75,6 @@ namespace ssao {
     void setBias(const float b);
     const unsigned int getSamples();
     void setSamples(const unsigned int s);
-};
-};
 };
 
 #endif

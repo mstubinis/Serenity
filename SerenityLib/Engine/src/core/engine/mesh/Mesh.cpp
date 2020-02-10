@@ -60,7 +60,7 @@ namespace Engine {
 
 void InternalMeshPublicInterface::LoadGPU(Mesh& mesh){
     mesh.m_VertexData->finalize(); //transfer vertex data to gpu
-    //cout << "(Mesh) ";
+
     mesh.EngineResource::load();
 
     Event e(EventType::MeshLoaded);
@@ -70,7 +70,7 @@ void InternalMeshPublicInterface::LoadGPU(Mesh& mesh){
 void InternalMeshPublicInterface::UnloadCPU(Mesh& mesh){
     SAFE_DELETE(mesh.m_Skeleton);
     SAFE_DELETE(mesh.m_CollisionFactory);
-    //cout << "(Mesh) ";
+
     mesh.EngineResource::unload();
 }
 void InternalMeshPublicInterface::UnloadGPU(Mesh& mesh){

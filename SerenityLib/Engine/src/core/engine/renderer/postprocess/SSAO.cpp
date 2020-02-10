@@ -4,7 +4,10 @@
 #include <core/engine/renderer/Renderer.h>
 
 #include <core/engine/shaders/ShaderProgram.h>
+#include <core/engine/shaders/Shader.h>
 #include <core/engine/scene/Camera.h>
+#include <core/engine/threading/Engine_ThreadManager.h>
+#include <core/engine/resources/Engine_BuiltInShaders.h>
 
 #include <glm/vec4.hpp>
 #include <random>
@@ -25,9 +28,24 @@ Engine::priv::SSAO::SSAO() {
     m_ssao_bias            = 0.048f;
     m_ssao_radius          = 0.175f;
     m_ssao_noise_texture   = 0;
+    m_GLSL_frag_code       = "";
+    m_GLSL_frag_code_blur  = "";
+    m_Vertex_Shader        = nullptr;
+    m_Fragment_Shader      = nullptr;
+    m_Shader_Program       = nullptr;
+    m_Vertex_Shader_Blur   = nullptr;
+    m_Fragment_Shader_Blur = nullptr;
+    m_Shader_Program_Blur  = nullptr;
 }
 Engine::priv::SSAO::~SSAO() {
     glDeleteTextures(1, &m_ssao_noise_texture);
+    SAFE_DELETE(m_Shader_Program);
+    SAFE_DELETE(m_Fragment_Shader);
+    SAFE_DELETE(m_Vertex_Shader);
+
+    SAFE_DELETE(m_Vertex_Shader_Blur);
+    SAFE_DELETE(m_Fragment_Shader_Blur);
+    SAFE_DELETE(m_Shader_Program_Blur);
 }
 void Engine::priv::SSAO::init() {
     uniform_real_distribution<float> rand(0.0f, 1.0f);
@@ -58,8 +76,84 @@ void Engine::priv::SSAO::init() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
-void Engine::priv::SSAO::passSSAO(ShaderProgram& program, Engine::priv::GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, Camera& camera) {
-    program.bind();
+const bool Engine::priv::SSAO::init_shaders() {
+    if (!m_GLSL_frag_code.empty())
+        return false;
+
+    m_GLSL_frag_code =
+        "USE_LOG_DEPTH_FRAG_WORLD_POSITION\n"
+        "\n"
+        "uniform sampler2D gNormalMap;\n"
+        "uniform sampler2D gRandomMap;\n"
+        "uniform sampler2D gDepthMap;\n"
+        "\n"
+        "uniform vec2  ScreenSize;\n"
+        "uniform vec4  SSAOInfo;\n"  //   x = radius     y = intensity    z = bias        w = scale
+        "uniform ivec4 SSAOInfoA;\n"//    x = UNUSED     y = UNUSED       z = Samples     w = NoiseTextureSize
+        "\n"
+        "varying vec2 texcoords;\n"
+        "void main(){\n"
+        "    vec3 Pos = GetViewPosition(texcoords, CameraNear, CameraFar);\n"
+        "    vec3 Normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);\n"
+        "    Normal = GetViewNormalsFromWorld(Normal, CameraView);\n"
+        "    vec2 RandVector = normalize(texture2D(gRandomMap, ScreenSize * texcoords / SSAOInfoA.w).xy);\n"
+        //"    float CamZ = distance(Pos, CameraPosition);\n"
+        "    float Radius = SSAOInfo.x / max(Pos.z,100.0);\n"
+        //"    float Radius = SSAOInfo.x / Pos.z;\n"
+        "    gl_FragColor.a = SSAOExecute(texcoords, SSAOInfoA.z, SSAOInfoA.w, RandVector, Radius, Pos, Normal, SSAOInfo.y, SSAOInfo.z, SSAOInfo.w);\n"
+        "}";
+
+
+
+
+    m_GLSL_frag_code_blur =
+        "uniform sampler2D image;\n"
+        "uniform vec4 Data;\n"//radius, UNUSED, H,V
+        "uniform float strengthModifier;\n"
+        "uniform ivec2 Resolution;\n"
+        "\n"
+        "varying vec2 texcoords;\n"
+        "\n"
+        "const int NUM_SAMPLES = 9;\n"
+        "const float weight[NUM_SAMPLES] = float[](0.227,0.21,0.1946,0.162,0.12,0.08,0.054,0.03,0.016);\n"
+        "\n"
+        "void main(){\n"
+        "    float Sum = 0.0;\n"
+        "    vec2 inverseResolution = vec2(1.0) / Resolution;\n"
+        "    for(int i = 0; i < NUM_SAMPLES; ++i){\n"
+        "        vec2 offset = (inverseResolution * float(i)) * Data.x;\n"
+        "        Sum += texture2D(image,texcoords + vec2(offset.x * Data.z,offset.y * Data.w)).a * weight[i] * strengthModifier;\n"
+        "        Sum += texture2D(image,texcoords - vec2(offset.x * Data.z,offset.y * Data.w)).a * weight[i] * strengthModifier;\n"
+        "    }\n"
+        "    gl_FragColor.a = Sum;\n"
+        "}";
+
+
+    auto lambda_part_a = [&]() {
+        m_Vertex_Shader   = NEW Shader(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
+        m_Fragment_Shader = NEW Shader(m_GLSL_frag_code, ShaderType::Fragment, false);
+    };
+    auto lambda_part_b = [&]() {
+        m_Shader_Program  = NEW ShaderProgram("SSAO", *m_Vertex_Shader, *m_Fragment_Shader);
+    };
+    Engine::priv::threading::addJobWithPostCallback(lambda_part_a, lambda_part_b);
+
+
+    auto lambda_part_a_blur = [&]() {
+        m_Vertex_Shader_Blur   = NEW Shader(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
+        m_Fragment_Shader_Blur = NEW Shader(m_GLSL_frag_code_blur, ShaderType::Fragment, false);
+    };
+    auto lambda_part_b_blur = [&]() {
+        m_Shader_Program_Blur  = NEW ShaderProgram("SSAO_Blur", *m_Vertex_Shader_Blur, *m_Fragment_Shader_Blur);
+    };
+    Engine::priv::threading::addJobWithPostCallback(lambda_part_a_blur, lambda_part_b_blur);
+
+
+
+    return true;
+}
+void Engine::priv::SSAO::passSSAO(Engine::priv::GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, Camera& camera) {
+    m_Shader_Program->bind();
     if (Renderer::GLSL_VERSION < 140) {
         Engine::Renderer::sendUniformMatrix4Safe("CameraInvViewProj", camera.getViewProjectionInverse());
         Engine::Renderer::sendUniformMatrix4Safe("CameraInvProj", camera.getProjectionInverse());
@@ -80,8 +174,8 @@ void Engine::priv::SSAO::passSSAO(ShaderProgram& program, Engine::priv::GBuffer&
 
     Engine::Renderer::renderFullscreenTriangle(screen_width, screen_height);
 }
-void Engine::priv::SSAO::passBlur(ShaderProgram& program, Engine::priv::GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const string& type, const unsigned int& texture) {
-    program.bind();
+void Engine::priv::SSAO::passBlur(Engine::priv::GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const string& type, const unsigned int& texture) {
+    m_Shader_Program_Blur->bind();
     glm::vec2 hv(0.0f);
     if (type == "H") { hv = glm::vec2(1.0f, 0.0f); }
     else { hv = glm::vec2(0.0f, 1.0f); }

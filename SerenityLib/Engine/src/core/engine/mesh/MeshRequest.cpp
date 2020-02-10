@@ -174,7 +174,7 @@ bool InternalMeshRequestPublicInterface::Populate(MeshRequest& meshRequest) {
         part.name = meshRequest.fileOrData;
         part.mesh = NEW Mesh();
         part.mesh->setName(part.name);
-        part.handle = Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
+        part.handle = Core::m_Engine->m_ResourceManager.m_Resources.add(part.mesh, ResourceType::Mesh);
         meshRequest.parts.push_back(part);
     }
     return true;
@@ -192,6 +192,7 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
         mesh.m_VertexData        = vertexData;
         mesh.m_threshold         = meshRequest.threshold;
         InternalMeshPublicInterface::CalculateRadius(mesh);
+        SAFE_DELETE(mesh.m_CollisionFactory);
         mesh.m_CollisionFactory  = NEW MeshCollisionFactory(mesh);
     }
 }

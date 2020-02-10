@@ -28,17 +28,15 @@ using namespace std;
 
 priv::ResourceManager* resourceManager;
 
-priv::ResourceManager::ResourceManager(const EngineOptions& options){
+priv::ResourceManager::ResourceManager(const EngineOptions& options) : m_Resources(32768){
     m_CurrentScene     = nullptr;
     m_DynamicMemory    = false;
-    m_Resources        = NEW ObjectPool<EngineResource>(32768);
     resourceManager    = this;
 }
 priv::ResourceManager::~ResourceManager(){ 
     cleanup();
 }
 void priv::ResourceManager::cleanup() {
-    SAFE_DELETE(m_Resources);
     SAFE_DELETE_VECTOR(m_Windows);
     SAFE_DELETE_VECTOR(m_Scenes);
 }
@@ -66,7 +64,7 @@ void priv::ResourceManager::onPostUpdate() {
     }   
 }
 Handle priv::ResourceManager::_addTexture(Texture* t) {
-    return m_Resources->add(t, ResourceType::Texture);
+    return m_Resources.add(t, ResourceType::Texture);
 }
 Scene& priv::ResourceManager::_getSceneByID(const uint& id) {
     return *m_Scenes[id - 1];
@@ -87,6 +85,9 @@ string Engine::Data::reportTime() {
 }
 const double Resources::dt() {
     return priv::Core::m_Engine->m_DebugManager.dt();
+}
+const double Resources::timeScale(){
+    return priv::Core::m_Engine->m_DebugManager.timeScale();
 }
 const double Resources::applicationTime() {
     return priv::Core::m_Engine->m_DebugManager.totalTime();
@@ -143,67 +144,40 @@ Scene* Resources::getScene(const string& sceneName){
     return nullptr;
 }
 
-void Resources::getShader(Handle& h, Shader*& p) { resourceManager->m_Resources->getAs(h, p); }
-Shader* Resources::getShader(Handle& h) { Shader* p; resourceManager->m_Resources->getAs(h, p); return p; }
-void Resources::getSoundData(Handle& h, SoundData*& p) { resourceManager->m_Resources->getAs(h, p); }
-SoundData* Resources::getSoundData(Handle& h) { SoundData* p; resourceManager->m_Resources->getAs(h, p); return p; }
-void Resources::getCamera(Handle& h, Camera*& p) { resourceManager->m_Resources->getAs(h, p); }
-Camera* Resources::getCamera(Handle& h) { Camera* p; resourceManager->m_Resources->getAs(h, p); return p; }
-void Resources::getFont(Handle& h, Font*& p) { resourceManager->m_Resources->getAs(h, p); }
-Font* Resources::getFont(Handle& h) { Font* p; resourceManager->m_Resources->getAs(h, p); return p; }
-void Resources::getMesh(Handle& h, Mesh*& p) { resourceManager->m_Resources->getAs(h, p); }
-Mesh* Resources::getMesh(Handle& h) { Mesh* p; resourceManager->m_Resources->getAs(h, p); return p; }
-void Resources::getShaderProgram(Handle& h, ShaderProgram*& p) { resourceManager->m_Resources->getAs(h, p); }
-ShaderProgram* Resources::getShaderProgram(Handle& h) { ShaderProgram* p; resourceManager->m_Resources->getAs(h, p); return p; }
+void Resources::getShader(Handle& h, Shader*& p) { resourceManager->m_Resources.getAs(h, p); }
+Shader* Resources::getShader(Handle& h) { Shader* p; resourceManager->m_Resources.getAs(h, p); return p; }
+void Resources::getSoundData(Handle& h, SoundData*& p) { resourceManager->m_Resources.getAs(h, p); }
+SoundData* Resources::getSoundData(Handle& h) { SoundData* p; resourceManager->m_Resources.getAs(h, p); return p; }
+void Resources::getCamera(Handle& h, Camera*& p) { resourceManager->m_Resources.getAs(h, p); }
+Camera* Resources::getCamera(Handle& h) { Camera* p; resourceManager->m_Resources.getAs(h, p); return p; }
+void Resources::getFont(Handle& h, Font*& p) { resourceManager->m_Resources.getAs(h, p); }
+Font* Resources::getFont(Handle& h) { Font* p; resourceManager->m_Resources.getAs(h, p); return p; }
+void Resources::getMesh(Handle& h, Mesh*& p) { resourceManager->m_Resources.getAs(h, p); }
+Mesh* Resources::getMesh(Handle& h) { Mesh* p; resourceManager->m_Resources.getAs(h, p); return p; }
+void Resources::getShaderProgram(Handle& h, ShaderProgram*& p) { resourceManager->m_Resources.getAs(h, p); }
+ShaderProgram* Resources::getShaderProgram(Handle& h) { ShaderProgram* p; resourceManager->m_Resources.getAs(h, p); return p; }
 
 void Resources::getTexture(Handle& h, Texture*& p) { 
-    resourceManager->m_Resources->getAs(h, p); 
+    resourceManager->m_Resources.getAs(h, p); 
 }
 Texture* Resources::getTexture(Handle& h) { 
     Texture* p; 
-    resourceManager->m_Resources->getAs(h, p); 
+    resourceManager->m_Resources.getAs(h, p); 
     return p; 
 }
 Texture* Resources::getTexture(const string& name) {
     return resourceManager->HasResource<Texture>(name); 
 }
-Handle Resources::getTextureHandle(const string& name) {
-    auto* texture = resourceManager->HasResource<Texture>(name);
-    if (texture) {
-        return resourceManager->m_Resources->getHandle<Texture>(*texture);
-    }
-    return Handle();
-}
-Handle Resources::getTextureHandle(Texture* texture) {
-    if (texture) {
-        return resourceManager->m_Resources->getHandle<Texture>(*texture);
-    }
-    return Handle();
-}
 void Resources::getMaterial(Handle& h, Material*& p) { 
-    resourceManager->m_Resources->getAs(h, p); 
+    resourceManager->m_Resources.getAs(h, p); 
 }
 Material* Resources::getMaterial(Handle& h) { 
     Material* p; 
-    resourceManager->m_Resources->getAs(h, p); 
+    resourceManager->m_Resources.getAs(h, p); 
     return p; 
 }
-Handle Resources::getMaterialHandle(const string& name) {
-    auto* material = resourceManager->HasResource<Material>(name);
-    if (material) {
-        return resourceManager->m_Resources->getHandle<Material>(*material);
-    }
-    return Handle();
-}
-Handle Resources::getMaterialHandle(Material* material) {
-    if (material) {
-        return resourceManager->m_Resources->getHandle<Material>(*material);
-    }
-    return Handle();
-}
-
 Handle Resources::addFont(const string& filename){
-    return resourceManager->m_Resources->add(NEW Font(filename),ResourceType::Font);
+    return resourceManager->m_Resources.add(NEW Font(filename),ResourceType::Font);
 }
 
 
@@ -232,7 +206,7 @@ Handle Resources::loadTexture(const string& file, const ImageInternalFormat::For
         request.request();
         return request.part.handle;
     }
-    return Resources::getTextureHandle(texture);
+    return Handle();
 }
 Handle Resources::loadTextureAsync(const string& file, const ImageInternalFormat::Format& internalFormat, const bool& mipmaps) {
     auto* texture = resourceManager->HasResource<Texture>(file);
@@ -241,7 +215,7 @@ Handle Resources::loadTextureAsync(const string& file, const ImageInternalFormat
         request.requestAsync();
         return request.part.handle;
     }
-    return Resources::getTextureHandle(texture);
+    return Handle();
 }
 Handle Resources::loadTextureAsync(sf::Image& sfImage, const string& texture_name, const ImageInternalFormat::Format& internalFormat, const bool& mipmaps) {
     auto* texture = resourceManager->HasResource<Texture>(texture_name);
@@ -250,7 +224,7 @@ Handle Resources::loadTextureAsync(sf::Image& sfImage, const string& texture_nam
         request.requestAsync();
         return request.part.handle;
     }
-    return Resources::getTextureHandle(texture);
+    return Handle();
 }
 
 Handle Resources::loadMaterial(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) {
@@ -260,7 +234,7 @@ Handle Resources::loadMaterial(const string& name, const string& diffuse, const 
         request.request();
         return request.part.handle;
     }
-    return Resources::getMaterialHandle(material);
+    return Handle();
 }
 Handle Resources::loadMaterialAsync(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) {
     auto* material = resourceManager->HasResource<Material>(name);
@@ -269,7 +243,7 @@ Handle Resources::loadMaterialAsync(const string& name, const string& diffuse, c
         request.requestAsync();
         return request.part.handle;
     }
-    return Resources::getMaterialHandle(material);
+    return Handle();
 }
 Handle Resources::loadMaterial(const string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) {
     auto* material = resourceManager->HasResource<Material>(name);
@@ -277,28 +251,28 @@ Handle Resources::loadMaterial(const string& name, Texture* diffuse, Texture* no
         MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
         return request.part.handle;
     }
-    return Resources::getMaterialHandle(material);
+    return Handle();
 }
 
 Handle Resources::addShader(const string& fileOrData, const ShaderType::Type& type, const bool& fromFile){
     Shader* shader = NEW Shader(fileOrData, type, fromFile);
-    return resourceManager->m_Resources->add(shader, ResourceType::Shader);
+    return resourceManager->m_Resources.add(shader, ResourceType::Shader);
 }
 
 Handle Resources::addShaderProgram(const string& n, Shader& v, Shader& f){
     ShaderProgram* program = NEW ShaderProgram(n, v, f);
-    return resourceManager->m_Resources->add(program, ResourceType::ShaderProgram);
+    return resourceManager->m_Resources.add(program, ResourceType::ShaderProgram);
 }
 Handle Resources::addShaderProgram(const string& n, Handle& v, Handle& f){
-    Shader* vertexShader   = resourceManager->m_Resources->getAsFast<Shader>(v);
-    Shader* fragmentShader = resourceManager->m_Resources->getAsFast<Shader>(f);
+    Shader* vertexShader   = resourceManager->m_Resources.getAsFast<Shader>(v);
+    Shader* fragmentShader = resourceManager->m_Resources.getAsFast<Shader>(f);
     ShaderProgram* program = NEW ShaderProgram(n, *vertexShader, *fragmentShader);
-    return resourceManager->m_Resources->add(program, ResourceType::ShaderProgram);
+    return resourceManager->m_Resources.add(program, ResourceType::ShaderProgram);
 }
 
 Handle Resources::addSoundData(const string& file){
     SoundData* soundData = NEW SoundData(file);
-    return resourceManager->m_Resources->add(soundData,ResourceType::SoundData);
+    return resourceManager->m_Resources.add(soundData,ResourceType::SoundData);
 }
 
 const bool Resources::setCurrentScene(Scene* newScene){

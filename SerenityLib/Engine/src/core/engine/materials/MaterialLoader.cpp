@@ -179,7 +179,6 @@ void priv::InternalMaterialPublicInterface::LoadGPU(Material& material) {
             }
         }
     }
-    //cout << "(Material) ";
     material.EngineResource::load();
 
     Event e(EventType::MaterialLoaded);
@@ -187,7 +186,6 @@ void priv::InternalMaterialPublicInterface::LoadGPU(Material& material) {
     priv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(e);
 }
 void priv::InternalMaterialPublicInterface::UnloadCPU(Material& material) {
-    //cout << "(Material) ";
     material.EngineResource::unload();
 }
 void priv::InternalMaterialPublicInterface::UnloadGPU(Material& material) {

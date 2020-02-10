@@ -52,6 +52,9 @@ void Engine::unpause(){
     Engine::Physics::unpause();
     Core::m_Engine->m_Misc.m_Paused = false;
 }
+void Engine::setTimeScale(const double timeScale) {
+    Core::m_Engine->m_DebugManager.setTimeScale(timeScale);
+}
 void EngineCore::init_os_specific(const EngineOptions& options) {
     #ifdef _WIN32
 
@@ -151,13 +154,14 @@ void EngineCore::init(const EngineOptions& options) {
 }
 void EngineCore::update_physics(Window& window, const double& dt) {
     m_DebugManager.stop_clock();
-    //It's important that dt < actual_steps * PHYSICS_MIN_STEP / static_cast<float>(requested_steps), otherwise you are losing time. dt < maxSubSteps * fixedTimeStep
 
-    auto requested_steps = Physics::getNumberOfStepsPerFrame();
-    int actual_steps     = requested_steps;
-    auto fixed_time_step = PHYSICS_MIN_STEP / static_cast<double>(requested_steps);
+    //It's important that dt < actual_steps * PHYSICS_MIN_STEP / static_cast<float>(requested_steps), otherwise you are losing time. dt < maxSubSteps * fixedTimeStep
+    const auto requested_steps = Physics::getNumberOfStepsPerFrame();
+    int actual_steps           = requested_steps;
+    const auto fixed_time_step = PHYSICS_MIN_STEP / static_cast<double>(requested_steps);
+
     while (true) {
-        auto threshold = static_cast<double>(actual_steps) * fixed_time_step;
+        const double threshold = static_cast<double>(actual_steps) * fixed_time_step;
         if (actual_steps == 1 || dt >= threshold) {
             break;
         }
@@ -512,7 +516,7 @@ void EngineCore::handle_events(Window& window){
 
 void EngineCore::run(){
     while(!m_Misc.m_Destroyed){
-        double dt = m_DebugManager.dt();
+        double dt = m_DebugManager.dt() * m_DebugManager.timeScale();
         for (auto& window_itr : m_ResourceManager.m_Windows) {
             auto& window = *window_itr;
             handle_events(window);
