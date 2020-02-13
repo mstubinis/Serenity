@@ -29,7 +29,7 @@ void priv::SoundManager::cleanup() {
 }
 SoundEffect* priv::SoundManager::_getNextFreeEffect() {
     if (m_FreelistEffects.size() > 0){
-        auto index = m_FreelistEffects.top();
+        const auto index = m_FreelistEffects.top();
         m_FreelistEffects.pop();
         return &m_SoundEffects[index];
     }
@@ -37,7 +37,7 @@ SoundEffect* priv::SoundManager::_getNextFreeEffect() {
 }
 SoundMusic* priv::SoundManager::_getNextFreeMusic() {
     if (m_FreelistMusics.size() > 0) {
-        auto index = m_FreelistMusics.top();
+        const auto index = m_FreelistMusics.top();
         m_FreelistMusics.pop();
         return &m_SoundMusics[index];
     }
@@ -45,7 +45,7 @@ SoundMusic* priv::SoundManager::_getNextFreeMusic() {
 }
 void priv::SoundManager::_setSoundInformation(Handle& handle, SoundEffect& sound) {
     SoundData& data = *Resources::getSoundData(handle);
-    auto buffer = data.getBuffer();
+    auto* buffer = data.getBuffer();
     if (!buffer) {
         data.buildBuffer();
     }
@@ -55,15 +55,15 @@ void priv::SoundManager::_setSoundInformation(Handle& handle, SoundEffect& sound
 }
 void priv::SoundManager::_setSoundInformation(Handle& handle, SoundMusic& sound) {
     SoundData& data = *Resources::getSoundData(handle);
-    auto buffer = data.getBuffer();
-    bool res = sound.m_Sound.openFromFile(data.getFilename());
+    //auto buffer = data.getBuffer();
+    const bool res = sound.m_Sound.openFromFile(data.getFilename());
     if (res) {
         sound.m_Sound.setVolume(data.getVolume());
     }
     sound.m_Duration = data.getDuration();
 }
 
-void priv::SoundManager::_update(const double& dt){
+void priv::SoundManager::_update(const float& dt){
     auto* scene = Resources::getCurrentScene();
     if (scene) {
         auto* camera = scene->getActiveCamera();

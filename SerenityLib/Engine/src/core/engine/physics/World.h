@@ -14,27 +14,25 @@ class btCollisionShape;
 class btTransform;
 class btVector3;
 class btDiscreteDynamicsWorld;
-namespace Engine {
-    namespace priv {
-        class  GLDebugDrawer;
-        class PhysicsWorld final{
-            public:
-                btBroadphaseInterface*                  broadphase;
-                btDefaultCollisionConfiguration*        collisionConfiguration;
-                btCollisionDispatcher*                  dispatcher;
-                btSequentialImpulseConstraintSolver*    solver;
-                btSequentialImpulseConstraintSolverMt*  solverMT;
-                btDiscreteDynamicsWorld*                world;
-                GLDebugDrawer*                          debugDrawer;
-            public:
-                PhysicsWorld();
-                ~PhysicsWorld();
+namespace Engine::priv {
+    class  GLDebugDrawer;
+    class PhysicsWorld final{
+        public:
+            btBroadphaseInterface*                  broadphase;
+            btDefaultCollisionConfiguration*        collisionConfiguration;
+            btCollisionDispatcher*                  dispatcher;
+            btSequentialImpulseConstraintSolver*    solver;
+            btSequentialImpulseConstraintSolverMt*  solverMT;
+            btDiscreteDynamicsWorld*                world;
+            GLDebugDrawer*                          debugDrawer;
+        public:
+            PhysicsWorld();
+            ~PhysicsWorld();
 
-                PhysicsWorld(const PhysicsWorld&)                      = delete;
-                PhysicsWorld& operator=(const PhysicsWorld&)           = delete;
-                PhysicsWorld(PhysicsWorld&& other) noexcept            = delete;
-                PhysicsWorld& operator=(PhysicsWorld&& other) noexcept = delete;
-        };
+            PhysicsWorld(const PhysicsWorld&)                      = delete;
+            PhysicsWorld& operator=(const PhysicsWorld&)           = delete;
+            PhysicsWorld(PhysicsWorld&& other) noexcept            = delete;
+            PhysicsWorld& operator=(PhysicsWorld&& other) noexcept = delete;
     };
 };
 #endif

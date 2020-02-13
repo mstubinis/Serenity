@@ -73,7 +73,7 @@ namespace Engine{
 
                 void cleanup();
 
-                void _update(const double& dt);
+                void _update(const float& dt);
         };
         namespace threading{
 

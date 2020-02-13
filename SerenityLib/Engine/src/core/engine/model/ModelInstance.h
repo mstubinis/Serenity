@@ -21,15 +21,13 @@ class  ComponentModel;
 class  Viewport;
 class  ModelInstance;
 class  Collision;
-namespace Engine{
-    namespace priv{
-        struct DefaultModelInstanceBindFunctor;
-        struct DefaultModelInstanceUnbindFunctor;
-        struct ModelInstanceAnimation;
+namespace Engine::priv{
+    struct DefaultModelInstanceBindFunctor;
+    struct DefaultModelInstanceUnbindFunctor;
+    struct ModelInstanceAnimation;
 
-        struct InternalModelInstancePublicInterface final {
-            static const bool IsViewportValid(ModelInstance&, Viewport&);
-        };
+    struct InternalModelInstancePublicInterface final {
+        static const bool IsViewportValid(ModelInstance&, Viewport&);
     };
 };
 class ModelInstance final: public BindableResource{

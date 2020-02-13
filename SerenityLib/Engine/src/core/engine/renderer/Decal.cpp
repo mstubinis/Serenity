@@ -74,10 +74,9 @@ Decal::Decal(Material& material, const glm_vec3& position, const glm::vec3& hitN
 Decal::~Decal() {
 
 }
-void Decal::update(const double& dt) {
-    const float fdt = static_cast<float>(dt);
+void Decal::update(const float& dt) {
     if (m_Active) {
-        m_LifetimeCurrent += fdt;
+        m_LifetimeCurrent += dt;
         if (m_LifetimeCurrent < m_LifetimeMax && m_LifetimeCurrent >= m_LifetimeMax - 1.0f) {
             auto& model = *getComponent<ComponentModel>();
             auto& instance = model.getModel();

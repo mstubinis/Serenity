@@ -3,14 +3,11 @@
 #define ENGINE_SOUND_QUEUE_H
 
 #include <queue>
-
 #include <core/engine/resources/Handle.h>
 
 class  SoundBaseClass;
-namespace Engine {
-    namespace priv {
-        class SoundManager;
-    };
+namespace Engine::priv {
+    class SoundManager;
 };
 class SoundQueue final {
     friend class Engine::priv::SoundManager;
@@ -23,13 +20,14 @@ class SoundQueue final {
         bool                           m_IsDelayProcess;
         bool                           m_Active;
     public:
+        SoundQueue() = delete;
         SoundQueue(Engine::priv::SoundManager& manager, const float& delay = 0.5f);
         ~SoundQueue();
 
-        void enqueueEffect(Handle&, const unsigned int& loops = 1); //need a clone handle due to type conversion for determining effect or music
-        void enqueueMusic(Handle&, const unsigned int& loops = 1); //need a clone handle due to type conversion for determining effect or music
+        void enqueueEffect(Handle& soundEffectHandle, const unsigned int& loops = 1);
+        void enqueueMusic(Handle& soundMusicHandle, const unsigned int& loops = 1);
         void dequeue();
-        void update(const double& dt);
+        void update(const float& dt);
         void clear();
         const bool empty() const;
         const bool& active() const;

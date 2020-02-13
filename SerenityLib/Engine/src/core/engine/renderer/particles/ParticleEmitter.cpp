@@ -13,30 +13,33 @@
 using namespace std;
 using namespace Engine;
 
-struct EmptyUpdate final { void operator()(ParticleEmitter* emitter, const double& dt, ParticleEmissionProperties& properties, std::mutex& mutex_) {
+struct EmptyUpdate final { void operator()(ParticleEmitter* emitter, const float& dt, ParticleEmissionProperties& properties, std::mutex& mutex_) {
 
 };};
 
 ParticleEmitter::ParticleEmitter() : EntityWrapper(*Resources::getCurrentScene()) {
     m_Properties = nullptr;
-    m_Active = false;
-    m_Parent = Entity::_null;
-    m_Lifetime = 0.0;
+    m_Active     = false;
+    m_Parent     = Entity::null_;
+    m_Lifetime   = 0.0;
     internal_init();
 
 }
-ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, EntityWrapper* parent) : ParticleEmitter(properties, scene, lifetime, (parent) ? parent->entity() : Entity::_null){}
+ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, EntityWrapper* parent) 
+: ParticleEmitter(properties, scene, lifetime, (parent) ? parent->entity() : Entity::null_){
+
+}
 ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, Entity& parent) : EntityWrapper(scene){
     setProperties(properties);
-    m_Active = true;
-    m_Parent = parent;
+    m_Active   = true;
+    m_Parent   = parent;
     m_Lifetime = lifetime;
     internal_init();
 }
 void ParticleEmitter::internal_init() {
     m_SpawningTimer = m_Properties->m_SpawnRate - 0.01f;
-    m_Timer = 0.0;
-    m_UserData = glm::vec4(0.0f);
+    m_Timer         = 0.0;
+    m_UserData      = glm::vec4(0.0f);
     addComponent<ComponentBody>();
     setUpdateFunctor(EmptyUpdate());
 
@@ -52,33 +55,34 @@ ParticleEmitter::~ParticleEmitter() {
 
 
 ParticleEmitter::ParticleEmitter(const ParticleEmitter& other) : EntityWrapper(other) {
-    m_Properties = other.m_Properties;
-    m_SpawningTimer = other.m_SpawningTimer;
-    m_Active = other.m_Active;
-    m_Timer = other.m_Timer;
-    m_Lifetime = other.m_Lifetime;
-    m_Parent = other.m_Parent;
-    m_Entity = other.m_Entity;
-    m_UpdateFunctor = other.m_UpdateFunctor;
-    m_UserData = other.m_UserData;
+    m_Properties     = other.m_Properties;
+    m_SpawningTimer  = other.m_SpawningTimer;
+    m_Active         = other.m_Active;
+    m_Timer          = other.m_Timer;
+    m_Lifetime       = other.m_Lifetime;
+    m_Parent         = other.m_Parent;
+    m_Entity         = other.m_Entity;
+    m_UpdateFunctor  = other.m_UpdateFunctor;
+    m_UserData       = other.m_UserData;
 }
 ParticleEmitter& ParticleEmitter::operator=(const ParticleEmitter& other) {
     if (&other == this)
         return *this;
-    m_Properties = other.m_Properties;
-    m_SpawningTimer = other.m_SpawningTimer;
-    m_Active = other.m_Active;
-    m_Timer = other.m_Timer;
-    m_Lifetime = other.m_Lifetime;
-    m_Parent = other.m_Parent;
-    m_Entity = other.m_Entity;
-    m_UpdateFunctor = other.m_UpdateFunctor;
-    m_UserData = other.m_UserData;
+    m_Properties     = other.m_Properties;
+    m_SpawningTimer  = other.m_SpawningTimer;
+    m_Active         = other.m_Active;
+    m_Timer          = other.m_Timer;
+    m_Lifetime       = other.m_Lifetime;
+    m_Parent         = other.m_Parent;
+    m_Entity         = other.m_Entity;
+    m_UpdateFunctor  = other.m_UpdateFunctor;
+    m_UserData       = other.m_UserData;
     return *this;
 }
 ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept : EntityWrapper(other) {
     using std::swap;
-    swap(m_Properties, other.m_Properties);
+    m_Properties      = std::exchange(other.m_Properties, nullptr);
+    /*
     swap(m_SpawningTimer, other.m_SpawningTimer);
     swap(m_Active, other.m_Active);
     swap(m_Timer, other.m_Timer);
@@ -87,18 +91,27 @@ ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept : EntityWrapp
     swap(m_Entity, other.m_Entity);
     swap(m_UpdateFunctor, other.m_UpdateFunctor);
     swap(m_UserData, other.m_UserData);
+    */
+    m_SpawningTimer   = std::move(other.m_SpawningTimer);
+    m_Active          = std::move(other.m_Active);
+    m_Timer           = std::move(other.m_Timer);
+    m_Lifetime        = std::move(other.m_Lifetime);
+    m_Parent          = std::move(other.m_Parent);
+    m_Entity          = std::move(other.m_Entity);
+    m_UpdateFunctor   = std::move(other.m_UpdateFunctor);
+    m_UserData        = std::move(other.m_UserData);
 }
 ParticleEmitter& ParticleEmitter::operator=(ParticleEmitter&& other) noexcept {
     using std::swap;
-    swap(m_Properties, other.m_Properties);
-    swap(m_SpawningTimer, other.m_SpawningTimer);
-    swap(m_Active, other.m_Active);
-    swap(m_Timer, other.m_Timer);
-    swap(m_Lifetime, other.m_Lifetime);
-    swap(m_Parent, other.m_Parent);
-    swap(m_Entity, other.m_Entity);
-    swap(m_UpdateFunctor, other.m_UpdateFunctor);
-    swap(m_UserData, other.m_UserData);
+    m_Properties      = std::exchange(other.m_Properties, nullptr);
+    m_SpawningTimer   = std::move(other.m_SpawningTimer);
+    m_Active          = std::move(other.m_Active);
+    m_Timer           = std::move(other.m_Timer);
+    m_Lifetime        = std::move(other.m_Lifetime);
+    m_Parent          = std::move(other.m_Parent);
+    m_Entity          = std::move(other.m_Entity);
+    m_UpdateFunctor   = std::move(other.m_UpdateFunctor);
+    m_UserData        = std::move(other.m_UserData);
     return *this;
 }
 
@@ -117,7 +130,7 @@ void ParticleEmitter::setProperties(ParticleEmissionProperties& properties) {
 }
 
 
-void ParticleEmitter::update_multithreaded(const size_t& index, const double& dt, priv::ParticleSystem& particleSystem) {
+void ParticleEmitter::update_multithreaded(const size_t& index, const float& dt, priv::ParticleSystem& particleSystem) {
     //handle spawning
     if (m_Active) {
         m_Timer += dt;
@@ -140,7 +153,7 @@ void ParticleEmitter::update_multithreaded(const size_t& index, const double& dt
         }
     }
 }
-void ParticleEmitter::update(const size_t& index, const double& dt, priv::ParticleSystem& particleSystem) {
+void ParticleEmitter::update(const size_t& index, const float& dt, priv::ParticleSystem& particleSystem) {
     //handle spawning
     if (m_Active) {
         m_Timer += dt;

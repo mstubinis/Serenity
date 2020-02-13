@@ -27,7 +27,10 @@ struct VertexDataFormat {
     void bind(const VertexData& vertData);
     void unbind();
 
-    static VertexDataFormat   VertexDataPositionsOnly, VertexDataNoLighting, VertexDataBasic, VertexDataAnimated;
+    static VertexDataFormat   VertexDataPositionsOnly, 
+                              VertexDataNoLighting, 
+                              VertexDataBasic, 
+                              VertexDataAnimated;
 };
 
 #endif

@@ -7,19 +7,18 @@
 
 typedef unsigned short ushort;
 
-namespace Engine {
-namespace priv {
+namespace Engine::priv {
     struct MeshImportedData final {
-        std::map<uint, VertexBoneData> m_Bones;
-        std::vector<glm::vec3>         file_points;
-        std::vector<glm::vec2>         file_uvs;
-        std::vector<glm::vec3>         file_normals;
-        std::vector<glm::vec3>         points;
-        std::vector<glm::vec2>         uvs;
-        std::vector<glm::vec3>         normals;
-        std::vector<glm::vec3>         binormals;
-        std::vector<glm::vec3>         tangents;
-        std::vector<ushort>            indices;
+        std::map<unsigned int, VertexBoneData>  m_Bones;
+        std::vector<glm::vec3>                  file_points;
+        std::vector<glm::vec2>                  file_uvs;
+        std::vector<glm::vec3>                  file_normals;
+        std::vector<glm::vec3>                  points;
+        std::vector<glm::vec2>                  uvs;
+        std::vector<glm::vec3>                  normals;
+        std::vector<glm::vec3>                  binormals;
+        std::vector<glm::vec3>                  tangents;
+        std::vector<ushort>                     indices;
           
         MeshImportedData();
         ~MeshImportedData();
@@ -30,6 +29,4 @@ namespace priv {
         MeshImportedData& operator=(MeshImportedData&& other) noexcept = delete;
     };
 };
-};
-
 #endif

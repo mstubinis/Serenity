@@ -20,7 +20,7 @@ SoundEffect::~SoundEffect() {
 }
 
 
-void SoundEffect::update(const double& dt) {
+void SoundEffect::update(const float& dt) {
     const auto sfStatus = m_Sound.getStatus();
     if (sfStatus == sf::SoundSource::Status::Stopped) {
         if (m_Loops >= 2) {//handle the looping logic

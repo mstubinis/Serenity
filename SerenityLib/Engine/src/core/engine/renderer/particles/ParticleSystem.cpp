@@ -27,7 +27,7 @@ priv::ParticleSystem::~ParticleSystem() {
 }
 
 
-void priv::ParticleSystem::internal_update_emitters(const double& dt) {
+void priv::ParticleSystem::internal_update_emitters(const float& dt) {
     if (m_ParticleEmitters.size() == 0)
         return;
 
@@ -45,7 +45,7 @@ void priv::ParticleSystem::internal_update_emitters(const double& dt) {
     priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
     //priv::threading::waitForAll();
 }
-void priv::ParticleSystem::internal_update_particles(const double& dt) {
+void priv::ParticleSystem::internal_update_particles(const float& dt) {
     if (m_Particles.size() == 0)
         return;
     auto lamda_update_particles = [&](pair<size_t, size_t>& pair_) {
@@ -102,7 +102,7 @@ const bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter) {
     return add_particle(emitter, body.position(), body.rotation());
 }
 
-void priv::ParticleSystem::update(const double& dt) {
+void priv::ParticleSystem::update(const float& dt) {
     internal_update_particles(dt);
     internal_update_emitters(dt);
 }

@@ -126,6 +126,6 @@ class Material final: public BindableResource{
         void bind();
         void unbind();
 
-        void update(const double& dt);
+        void update(const float& dt);
 };
 #endif

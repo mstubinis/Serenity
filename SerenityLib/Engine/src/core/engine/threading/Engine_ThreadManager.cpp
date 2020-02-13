@@ -21,7 +21,7 @@ void priv::ThreadManager::cleanup() {
     SAFE_DELETE(m_ThreadPool);
     SAFE_DELETE(m_ThreadPoolEngineControlled);
 }
-void priv::ThreadManager::_update(const double& dt){ 
+void priv::ThreadManager::_update(const float& dt){ 
     m_ThreadPool->update();
 }
 void priv::threading::addJobRef(std::function<void()>& func) {

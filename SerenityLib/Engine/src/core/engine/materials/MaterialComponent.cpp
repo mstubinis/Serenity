@@ -114,7 +114,7 @@ void MaterialComponent::bind(const size_t& component_index, size_t& textureUnit)
 }
 void MaterialComponent::unbind() {
 }
-void MaterialComponent::update(const double& dt) {
+void MaterialComponent::update(const float& dt) {
     for (unsigned int i = 0; i < m_NumLayers; ++i) {
         m_Layers[i].update(dt);
     }

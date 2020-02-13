@@ -5,40 +5,35 @@
 #include <core/engine/networking/SocketInterface.h>
 #include <string>
 
-namespace Engine {
-    namespace Networking {
-        class SocketTCP: public ISocket {
-            private:
-                sf::TcpSocket*  m_Socket;
-                std::string     m_IP;
-                unsigned short  m_Port;
-            public: 
-                SocketTCP(const unsigned short port, const std::string& ip = ""); //client side socket
-                SocketTCP(sf::TcpSocket*); //server side client socket
-                ~SocketTCP();
+namespace Engine::Networking {
+    class SocketTCP: public ISocket {
+        private:
+            sf::TcpSocket*  m_Socket;
+            std::string     m_IP;
+            unsigned short  m_Port;
+        public: 
+            SocketTCP(const unsigned short port, const std::string& ip = ""); //client side socket
+            SocketTCP(sf::TcpSocket*); //server side client socket
+            ~SocketTCP();
 
-                void                       disconnect();
+            void                       disconnect();
 
-                void                       setBlocking(const bool blocking);
-                const bool                 isBlocking();
-                const sf::TcpSocket&       socket();
-                const unsigned short       localPort();
+            void                       setBlocking(const bool blocking);
+            const bool                 isBlocking();
+            const sf::TcpSocket&       socket();
+            const unsigned short       localPort();
 
-                const std::string          ip();
-                const unsigned short       remotePort();
+            const std::string          ip();
+            const unsigned short       remotePort();
     
-                const sf::Socket::Status   connect(const unsigned short& timeout = 0);
+            const sf::Socket::Status   connect(const unsigned short& timeout = 0);
 
-                const sf::Socket::Status   send(sf::Packet& packet);
-                const sf::Socket::Status   send(const void* data, size_t size);
-                const sf::Socket::Status   send(const void* data, size_t size, size_t& sent);
+            const sf::Socket::Status   send(sf::Packet& packet);
+            const sf::Socket::Status   send(const void* data, size_t size);
+            const sf::Socket::Status   send(const void* data, size_t size, size_t& sent);
 
-                const sf::Socket::Status   receive(sf::Packet& packet);
-                const sf::Socket::Status   receive(void* data, size_t size, size_t& received);
-        };
+            const sf::Socket::Status   receive(sf::Packet& packet);
+            const sf::Socket::Status   receive(void* data, size_t size, size_t& received);
     };
 };
-
-
-
 #endif

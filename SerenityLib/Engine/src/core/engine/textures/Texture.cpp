@@ -89,7 +89,7 @@ void Texture::setZWrapping(const TextureWrap::Wrap& wrap){
 }
 void Texture::setWrapping(const TextureWrap::Wrap& wrap){
     if (*this == false) {
-        auto lambda = [=]() {
+        auto lambda = [this, wrap]() {
             setWrapping(wrap);
         };
         m_CommandQueue.push(lambda);
@@ -100,7 +100,7 @@ void Texture::setWrapping(const TextureWrap::Wrap& wrap){
 }
 void Texture::setMinFilter(const TextureFilter::Filter& filter){
     if (*this == false) {
-        auto lambda = [=]() {
+        auto lambda = [this, filter]() {
             setMinFilter(filter);
         };
         m_CommandQueue.push(lambda);
@@ -112,7 +112,7 @@ void Texture::setMinFilter(const TextureFilter::Filter& filter){
 }
 void Texture::setMaxFilter(const TextureFilter::Filter& filter){
     if (*this == false) {
-        auto lambda = [=]() {
+        auto lambda = [this, filter]() {
             setMaxFilter(filter);
         };
         m_CommandQueue.push(lambda);
@@ -123,7 +123,7 @@ void Texture::setMaxFilter(const TextureFilter::Filter& filter){
 }
 void Texture::setFilter(const TextureFilter::Filter& filter){
     if (*this == false) {
-        auto lambda = [=]() {
+        auto lambda = [this, filter]() {
             setFilter(filter);
         };
         m_CommandQueue.push(lambda);
@@ -143,8 +143,9 @@ void Texture::setYWrapping(const GLuint& type, const TextureWrap::Wrap& wrap){
     glTexParameteri(type, GL_TEXTURE_WRAP_T, gl);
 }
 void Texture::setZWrapping(const GLuint& type, const TextureWrap::Wrap& wrap){
-    if (type != GL_TEXTURE_CUBE_MAP)
+    if (type != GL_TEXTURE_CUBE_MAP) {
         return;
+    }
     GLuint gl;
     TextureLoader::EnumWrapToGL(gl, wrap);
     glTexParameteri(type, GL_TEXTURE_WRAP_R, gl);
@@ -168,9 +169,9 @@ void Texture::setFilter(const GLuint& type, const TextureFilter::Filter& filter)
     Texture::setMinFilter(type, filter);
     Texture::setMaxFilter(type, filter);
 }
-void Texture::setAnisotropicFiltering(const float& anisotropicFiltering){
+void Texture::setAnisotropicFiltering(const float anisotropicFiltering){
     if (*this == false) {
-        auto lambda = [&]() {
+        auto lambda = [this, anisotropicFiltering]() {
             setAnisotropicFiltering(anisotropicFiltering);
         };
         m_CommandQueue.push(lambda);
@@ -195,8 +196,9 @@ const bool Texture::mipmapped() const {
     return m_Mipmapped; 
 }
 const bool Texture::compressed() const {
-    if (m_ImagesDatas.size() == 0)
+    if (m_ImagesDatas.size() == 0) {
         return false;
+    }
     const auto& img = m_ImagesDatas[0].get();
     auto& mip       = img->mipmaps[0];
     return (mip.compressedSize > 0) ? true : false;
@@ -206,9 +208,7 @@ const uchar* Texture::pixels(){
     return &(m_ImagesDatas[0]->mipmaps[0].pixels)[0]; 
 }
 const GLuint Texture::address(const uint& index) const { 
-    if (m_TextureAddress.size() == 0)
-        return 0;
-    return m_TextureAddress[index]; 
+    return (m_TextureAddress.size() == 0) ? 0 : m_TextureAddress[index];
 }
 const size_t Texture::numAddresses() const {
     return m_TextureAddress.size(); 
@@ -225,7 +225,6 @@ const uint Texture::height() const {
 const glm::uvec2 Texture::size() const {
     return glm::uvec2(width(), height());
 }
-
 const ImageInternalFormat::Format Texture::internalFormat() const { 
     return m_ImagesDatas[0]->internalFormat; 
 }

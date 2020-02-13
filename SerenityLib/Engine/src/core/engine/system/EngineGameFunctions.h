@@ -7,7 +7,7 @@ class  Window;
 namespace Game {
     void initResources();
     void initLogic();
-    void update(const double& dt);
+    void update(const float& dt);
     void render();
     void cleanup();
 
@@ -26,8 +26,8 @@ namespace Game {
     void onMouseMoved(Window&, const float& mouseX, const float& mouseY);
     void onMouseEntered(Window&);
     void onMouseLeft(Window&);
-    void onPreUpdate(const double& dt);
-    void onPostUpdate(const double& dt);
+    void onPreUpdate(const float& dt);
+    void onPostUpdate(const float& dt);
     void onJoystickButtonPressed();
     void onJoystickButtonReleased();
     void onJoystickMoved();

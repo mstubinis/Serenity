@@ -11,7 +11,7 @@ LightProbe::~LightProbe() {
 
 }
 
-void LightProbe::update(const double& dt) {
+void LightProbe::update(const float& dt) {
 
 }
 

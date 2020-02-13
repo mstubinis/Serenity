@@ -292,7 +292,7 @@ void Material::bind(){
 void Material::unbind(){ 
     Core::m_Engine->m_RenderManager._unbindMaterial(); 
 }
-void Material::update(const double& dt) {
+void Material::update(const float& dt) {
     for (size_t i = 0; i < m_Components.size(); ++i) {
         auto* component = m_Components[i];
         if (!component)

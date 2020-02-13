@@ -32,6 +32,6 @@ class MaterialComponent {
 
         const MaterialComponentType::Type& type() const;
 
-        void update(const double& dt);
+        void update(const float& dt);
 };
 #endif

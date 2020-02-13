@@ -59,27 +59,18 @@ MaterialRequest::~MaterialRequest() {
 
 }
 MaterialRequest::MaterialRequest(const MaterialRequest& other) {
-    auto& other_ = const_cast<MaterialRequest&>(other);
-    async = other_.async;
-    part.handle = other_.part.handle;
-    part.material = other_.part.material;
-    part.name = other_.part.name;
-    part.textureRequests.reserve(other_.part.textureRequests.size());
-    for (auto& ptr : other_.part.textureRequests) {
-        part.textureRequests.push_back((ptr));
-    }
-
+    async                = other.async;
+    part.handle          = other.part.handle;
+    part.material        = other.part.material;
+    part.name            = other.part.name;
+    part.textureRequests = other.part.textureRequests;
 }
 MaterialRequest& MaterialRequest::operator=(const MaterialRequest& other) {
-    auto& other_ = const_cast<MaterialRequest&>(other);
-    async = other_.async;
-    part.handle = other_.part.handle;
-    part.material = other_.part.material;
-    part.name = other_.part.name;
-    part.textureRequests.reserve(other_.part.textureRequests.size());
-    for (auto& ptr : other_.part.textureRequests) {
-        part.textureRequests.push_back((ptr));
-    }
+    async                = other.async;
+    part.handle          = other.part.handle;
+    part.material        = other.part.material;
+    part.name            = other.part.name;
+    part.textureRequests = other.part.textureRequests;
     return *this;
 }
 

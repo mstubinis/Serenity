@@ -25,9 +25,13 @@ namespace Engine::priv {
             unsigned int                             m_CurrentMouseButton;
             unsigned int                             m_PreviousMouseButton;
 
-
             EventManager();
             ~EventManager();
+
+            EventManager(const EventManager&)                      = delete;
+            EventManager& operator=(const EventManager&)           = delete;
+            EventManager(EventManager&& other) noexcept            = delete;
+            EventManager& operator=(EventManager&& other) noexcept = delete;
 
             void cleanup();
 
@@ -35,7 +39,7 @@ namespace Engine::priv {
             void onEventKeyReleased(const unsigned int& key);
             void onEventMouseButtonPressed(const unsigned int& mouseButton);
             void onEventMouseButtonReleased(const unsigned int& mouseButton);
-            void onResetEvents(const double& dt);
+            void onResetEvents(const float& dt);
         };
 };
 namespace Engine::events {

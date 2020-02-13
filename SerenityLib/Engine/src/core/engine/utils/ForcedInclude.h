@@ -6,27 +6,18 @@
 #include <stdint.h>
 
 #ifdef _DEBUG
-
-// Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the allocations to be of _CLIENT_BLOCK type
-
+    // Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the allocations to be of _CLIENT_BLOCK type
     #define _CRTDBG_MAP_ALLOC
     #define NEW new( _NORMAL_BLOCK, __FILE__, __LINE__)
     #define MALLOC(size) _malloc_dbg(size, _NORMAL_BLOCK, __FILE__, __LINE__)
     #define FREE(block) _free_dbg(block, _NORMAL_BLOCK)
-  
-/*
-    #define NEW new
-    #define MALLOC malloc
-    #define FREE free
-    */
-
 #else
     #define NEW new
     #define MALLOC malloc
     #define FREE free
 #endif
 
-#endif
+#pragma region DeleteMacros
 
 #define SAFE_DELETE_FUTURE(x){ \
     if (x) { \
@@ -81,3 +72,26 @@
         x.clear(); \
     } \
 }
+
+#pragma endregion
+
+namespace Engine {
+    class NonCopyable {
+        public:
+            NonCopyable()  = default;
+            ~NonCopyable() = default;
+        private:
+            NonCopyable(const NonCopyable&)                = delete;
+            NonCopyable& operator=(const NonCopyable&)     = delete;
+    };
+    class NonMoveable {
+        public:
+            NonMoveable()  = default;
+            ~NonMoveable() = default;
+        private:
+            NonMoveable(NonMoveable&&) noexcept            = delete;
+            NonMoveable& operator=(NonMoveable&&) noexcept = delete;
+    };
+};
+
+#endif

@@ -24,7 +24,7 @@ SoundMusic::~SoundMusic() {
 const float SoundMusic::getDuration() const {
     return m_Duration;
 }
-void SoundMusic::update(const double& dt) {
+void SoundMusic::update(const float& dt) {
     const auto sfStatus = m_Sound.getStatus();
     if (sfStatus == sf::SoundSource::Status::Stopped) {
         const auto& loopsLeft = getLoopsLeft();

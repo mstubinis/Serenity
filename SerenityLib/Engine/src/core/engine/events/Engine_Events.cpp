@@ -52,7 +52,7 @@ void EventManager::onEventMouseButtonReleased(const unsigned int& mouseButton){
     if(m_MouseStatus.count(mouseButton))
         m_MouseStatus.erase(mouseButton);
 }
-void EventManager::onResetEvents(const double& dt){
+void EventManager::onResetEvents(const float& dt){
     m_PreviousKeyboardKey = KeyboardKey::Unknown;
     m_CurrentKeyboardKey = KeyboardKey::Unknown;
     m_PreviousMouseButton = MouseButton::Unknown;

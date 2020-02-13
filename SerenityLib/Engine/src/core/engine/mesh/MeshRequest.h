@@ -15,22 +15,20 @@ class Mesh;
 
 #include <core/engine/resources/Handle.h>
 
-namespace Engine {
-    namespace priv {
-        struct BoneNode;
-        struct AssimpSceneImport final {
-            std::shared_ptr<Assimp::Importer>  importer_ptr;
-            aiScene*                           scene;
-            aiNode*                            root;
+namespace Engine::priv {
+    struct BoneNode;
+    struct AssimpSceneImport final {
+        std::shared_ptr<Assimp::Importer>  importer_ptr;
+        aiScene*                           scene;
+        aiNode*                            root;
 
-            AssimpSceneImport();
-            ~AssimpSceneImport();
+        AssimpSceneImport();
+        ~AssimpSceneImport();
 
-            AssimpSceneImport(const AssimpSceneImport& other);
-            AssimpSceneImport& operator=(const AssimpSceneImport& other);
-            AssimpSceneImport(AssimpSceneImport&& other) noexcept            = delete;
-            AssimpSceneImport& operator=(AssimpSceneImport&& other) noexcept = delete;
-        };
+        AssimpSceneImport(const AssimpSceneImport& other);
+        AssimpSceneImport& operator=(const AssimpSceneImport& other);
+        AssimpSceneImport(AssimpSceneImport&& other) noexcept            = delete;
+        AssimpSceneImport& operator=(AssimpSceneImport&& other) noexcept = delete;
     };
 };
 
@@ -66,22 +64,20 @@ struct MeshRequest final {
 
     MeshRequest(const MeshRequest& other);
     MeshRequest& operator=(const MeshRequest& other);
-    MeshRequest(MeshRequest&& other) noexcept            = delete;
-    MeshRequest& operator=(MeshRequest&& other) noexcept = delete;
+    MeshRequest(MeshRequest&& other) noexcept;
+    MeshRequest& operator=(MeshRequest&& other) noexcept;
 
     void request();
     void requestAsync();
 };
 
-namespace Engine {
-    namespace priv {
-        struct InternalMeshRequestPublicInterface final {
-            friend class  Mesh;
-            static void Request(MeshRequest&);
-            static bool Populate(MeshRequest&);
-            static void LoadGPU(MeshRequest&);
-            static void LoadCPU(MeshRequest&);
-        };
+namespace Engine::priv {
+    struct InternalMeshRequestPublicInterface final {
+        friend class  Mesh;
+        static void Request(MeshRequest&);
+        static bool Populate(MeshRequest&);
+        static void LoadGPU(MeshRequest&);
+        static void LoadCPU(MeshRequest&);
     };
 };
 

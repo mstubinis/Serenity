@@ -48,7 +48,7 @@ struct Entity{
         auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
         return ecs.getComponent<TComponent>(dataRequest);
     }
-    static Entity _null;
+    static Entity null_;
 };
 
 

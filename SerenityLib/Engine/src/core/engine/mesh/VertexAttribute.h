@@ -21,6 +21,7 @@ struct VertexAttributeInfo final{
     }
     VertexAttributeInfo()                                                = delete;
     ~VertexAttributeInfo()                                               = default;
+
     VertexAttributeInfo(const VertexAttributeInfo& other)                = delete;
     VertexAttributeInfo& operator=(const VertexAttributeInfo& other)     = delete;
     VertexAttributeInfo(VertexAttributeInfo&& other) noexcept            = default;

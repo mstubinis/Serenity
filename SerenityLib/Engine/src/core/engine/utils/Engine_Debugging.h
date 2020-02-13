@@ -15,7 +15,7 @@ namespace Engine {
                 sf::Clock clock;
                 sf::Int64 m_logicTime, m_physicsTime, m_renderTime, m_soundTime;
                 sf::Int64 m_deltaTime;
-                double m_TimeScale;
+                float m_TimeScale;
                 double m_totalTime;
                 double divisor;
                 uint output_frame_delay, output_frame;
@@ -50,16 +50,16 @@ namespace Engine {
                 void calculate_sounds();
                 void calculate_render();
 
-                const double dt() const;
+                const float dt() const;
                 const double logicTime() const;
                 const double physicsTime() const;
                 const double soundsTime() const;
                 const double renderTime() const;
                 const double totalTime() const;
 
-                void setTimeScale(const double timeScale);
+                void setTimeScale(const float timeScale);
 
-                const double timeScale() const;
+                const float timeScale() const;
 
                 std::string timestamp();
                 std::string& reportTime();

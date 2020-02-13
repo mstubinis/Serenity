@@ -86,7 +86,7 @@ class Window final{
 
             void on_mouse_wheel_scrolled(const float& delta, const int& x, const int& y);
 
-            void on_reset_events(const double& dt);
+            void on_reset_events(const float& dt);
 
             void on_close();
 

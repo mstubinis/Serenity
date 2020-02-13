@@ -2,6 +2,10 @@
 #ifndef ENGINE_TEXTURE_INCLUDE_GUARD
 #define ENGINE_TEXTURE_INCLUDE_GUARD
 
+namespace Engine::priv {
+    struct InternalTextureRequestPublicInterface;
+};
+
 #include <core/engine/textures/TextureLoader.h>
 #include <core/engine/resources/Engine_ResourceBasic.h>
 #include <core/engine/renderer/GLImageConstants.h>
@@ -13,12 +17,6 @@
 #include <memory>
 #include <queue>
 #include <functional>
-
-namespace Engine {
-    namespace priv {
-        struct InternalTextureRequestPublicInterface;
-    };
-};
 
 class Texture: public EngineResource{
     friend struct Engine::priv::TextureLoader;
@@ -66,7 +64,7 @@ class Texture: public EngineResource{
         const size_t numAddresses() const;
         const bool mipmapped() const;
         const bool compressed() const;
-        void setAnisotropicFiltering(const float& anisotropicFiltering);
+        void setAnisotropicFiltering(const float anisotropicFiltering);
         
         const ImageInternalFormat::Format internalFormat() const;
         const ImagePixelFormat::Format pixelFormat() const;

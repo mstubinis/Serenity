@@ -23,11 +23,11 @@ class ParticleEmissionProperties final {
         static ParticleEmissionProperties DefaultProperties;
     private:
 
-        std::function<glm::vec4(const double& lifetime, const double& dt, ParticleEmitter*, Particle& particle)>   m_ColorFunctor;
-        std::function<float(const double& lifetime, const double& dt, ParticleEmitter*, Particle& particle)>       m_ChangeInAngularVelocityFunctor;
-        std::function<glm::vec3(const double& lifetime, const double& dt, ParticleEmitter*, Particle& particle)>   m_ChangeInVelocityFunctor;
-        std::function<glm::vec2(const double& lifetime, const double& dt, ParticleEmitter*, Particle& particle)>   m_ChangeInScaleFunctor;
-        std::function<float(const double& lifetime, const double& dt, ParticleEmitter*, Particle& particle)>       m_DepthFunctor;
+        std::function<glm::vec4(const double& lifetime, const float& dt, ParticleEmitter*, Particle& particle)>   m_ColorFunctor;
+        std::function<float(const double& lifetime, const float& dt, ParticleEmitter*, Particle& particle)>       m_ChangeInAngularVelocityFunctor;
+        std::function<glm::vec3(const double& lifetime, const float& dt, ParticleEmitter*, Particle& particle)>   m_ChangeInVelocityFunctor;
+        std::function<glm::vec2(const double& lifetime, const float& dt, ParticleEmitter*, Particle& particle)>   m_ChangeInScaleFunctor;
+        std::function<float(const double& lifetime, const float& dt, ParticleEmitter*, Particle& particle)>       m_DepthFunctor;
 
         std::function<glm::vec3(ParticleEmitter& emitter, Particle& particle, ParticleData& data)>   m_InitialVelocityFunctor;
         std::function<glm::vec2(ParticleEmitter& emitter, Particle& particle, ParticleData& data)>   m_InitialScaleFunctor;

@@ -7,12 +7,10 @@ class  btRigidBody;
 class  btCollisionObject;
 class  ComponentBody;
 class  Camera;
-namespace Engine {
-    namespace priv {
-        struct MeshImportedData;
-        class  GLDebugDrawer;
-        class  PhysicsWorld;
-    };
+namespace Engine::priv {
+    struct MeshImportedData;
+    class  GLDebugDrawer;
+    class  PhysicsWorld;
 };
 
 #include <core/engine/math/Numbers.h>
@@ -43,7 +41,7 @@ namespace Engine{
 
                 void _init();
 
-                void _update(const double& dt, int maxSteps = 1, float = 0.0166666f);
+                void _update(const float& dt, int maxSteps = 1, float = 0.0166666f);
                 void _render(Camera& camera);
         };
     };

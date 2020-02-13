@@ -15,7 +15,7 @@ using namespace Engine;
 using namespace std;
 
 
-struct EmptyOnUpdateFunctor final {void operator()(Scene* scene, const double& dt) const {
+struct EmptyOnUpdateFunctor final {void operator()(Scene* scene, const float& dt) const {
 
 }};
 
@@ -187,7 +187,7 @@ vector<RodLight*>& priv::InternalScenePublicInterface::GetRodLights(Scene& scene
 }
 
 
-void priv::InternalScenePublicInterface::UpdateMaterials(Scene& scene, const double& dt) {
+void priv::InternalScenePublicInterface::UpdateMaterials(Scene& scene, const float& dt) {
     for (uint i = 0; i < RenderStage::_TOTAL; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             for (auto& materialNode : render_graph_ptr->materialNodes) {
@@ -209,7 +209,7 @@ void priv::InternalScenePublicInterface::UpdateMaterials(Scene& scene, const dou
         }
     }
 }
-void priv::InternalScenePublicInterface::UpdateParticleSystem(Scene& scene, const double& dt) {
+void priv::InternalScenePublicInterface::UpdateParticleSystem(Scene& scene, const float& dt) {
     scene.m_i->m_ParticleSystem.update(dt);
 }
 
@@ -402,7 +402,7 @@ void Scene::setActiveCamera(Camera& camera){
 void Scene::centerSceneToObject(const Entity& centerEntity){
     return m_i->_centerToObject(*this, centerEntity);
 }
-void Scene::update(const double& dt){
+void Scene::update(const float& dt){
     m_OnUpdateFunctor(dt);
 }
 void Scene::onResize(const unsigned int& width, const unsigned int& height) {

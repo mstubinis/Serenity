@@ -261,10 +261,9 @@ const double Particle::lifetime() const {
 
 
 
-void Particle::update(const size_t& index, const double& dt, Engine::priv::ParticleSystem& particleSystem) {
+void Particle::update(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem) {
     if (m_Data.m_Active) {
         m_Data.m_Timer += dt;
-        const auto fdt  = static_cast<float>(dt);
         auto& prop      = *m_Data.m_Properties;
         
         m_Data.m_Scale           += prop.m_ChangeInScaleFunctor(m_Data.m_Timer, dt , m_EmitterSource, *this);
@@ -274,7 +273,7 @@ void Particle::update(const size_t& index, const double& dt, Engine::priv::Parti
         m_Data.m_Velocity        += prop.m_ChangeInVelocityFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
         m_Data.m_Depth            = prop.m_DepthFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
 
-        m_Position               += (m_Data.m_Velocity * fdt);
+        m_Position               += (m_Data.m_Velocity * dt);
 
         
         auto& camera = *m_Scene->getActiveCamera();
@@ -288,10 +287,9 @@ void Particle::update(const size_t& index, const double& dt, Engine::priv::Parti
         }
     }
 }
-void Particle::update_multithreaded(const size_t& index, const double& dt, Engine::priv::ParticleSystem& particleSystem) {
+void Particle::update_multithreaded(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem) {
     if (m_Data.m_Active) {
         m_Data.m_Timer += dt;
-        const auto fdt  = static_cast<float>(dt);
         auto& prop      = *m_Data.m_Properties;
 
         m_Data.m_Scale           += prop.m_ChangeInScaleFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
@@ -301,7 +299,7 @@ void Particle::update_multithreaded(const size_t& index, const double& dt, Engin
         m_Data.m_Velocity        += prop.m_ChangeInVelocityFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
         m_Data.m_Depth            = prop.m_DepthFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
 
-        m_Position               += (m_Data.m_Velocity * fdt);
+        m_Position               += (m_Data.m_Velocity * dt);
 
 
         auto& camera = *m_Scene->getActiveCamera();

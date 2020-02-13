@@ -54,38 +54,32 @@ ComponentBody::PhysicsData::~PhysicsData() {
 }
 ComponentBody::PhysicsData::PhysicsData(ComponentBody::PhysicsData&& other) noexcept {
     //move constructor
-    using std::swap;
-    swap(mass, other.mass);
-    swap(bullet_motionState, other.bullet_motionState);
-    swap(group, other.group);
-    swap(mask, other.mask);
-    swap(forcedOut, other.forcedOut);
-
-    if (other.collision)
-        swap(collision, other.collision);
-    else
-        collision = nullptr;
-    if (other.bullet_rigidBody)
-        swap(bullet_rigidBody, other.bullet_rigidBody);
-    else
-        bullet_rigidBody = nullptr;
+    mass               = std::move(other.mass);
+    bullet_motionState = std::move(other.bullet_motionState);
+    group              = std::move(other.group);
+    mask               = std::move(other.mask);
+    forcedOut          = std::move(other.forcedOut);
+    collision          = std::exchange(other.collision, nullptr);
+    bullet_rigidBody   = std::exchange(other.bullet_rigidBody, nullptr);  
 }
 ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(ComponentBody::PhysicsData&& other) noexcept {
     //move assignment
-    using std::swap;
-    swap(mass, other.mass);
-    swap(bullet_motionState, other.bullet_motionState);
-    swap(group, other.group);
-    swap(mask, other.mask);
-    swap(forcedOut, other.forcedOut);
-    if (other.collision)
-        swap(collision, other.collision);
-    else                   
-        collision = nullptr;
-    if (other.bullet_rigidBody)
-        swap(bullet_rigidBody, other.bullet_rigidBody);
-    else                   
-        bullet_rigidBody = nullptr;
+    if(&other != this){
+        mass               = std::move(other.mass);
+        bullet_motionState = std::move(other.bullet_motionState);
+        group              = std::move(other.group);
+        mask               = std::move(other.mask);
+        forcedOut          = std::move(other.forcedOut);
+
+        SAFE_DELETE(collision);
+        collision          = std::exchange(other.collision, nullptr);
+
+        if (bullet_rigidBody) {
+            Physics::removeRigidBody(bullet_rigidBody);
+            SAFE_DELETE(bullet_rigidBody);
+        }
+        bullet_rigidBody   = std::exchange(other.bullet_rigidBody, nullptr);
+    }
     return *this;
 }
 
@@ -95,37 +89,35 @@ ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(ComponentBody:
 
 ComponentBody::NormalData::NormalData(){
     //constructor
-    scale          = glm_vec3(static_cast<decimal>(1.0));
-    position       = glm_vec3(static_cast<decimal>(0.0));
-    rotation       = glm_quat(
-        static_cast<decimal>(1.0), 
-        static_cast<decimal>(0.0),
-        static_cast<decimal>(0.0),
-        static_cast<decimal>(0.0)
-    );
-    modelMatrix    = glm_mat4(static_cast<decimal>(1.0));
-    linearVelocity = glm_vec3(static_cast<decimal>(0.0));
+    const auto one  = static_cast<decimal>(1.0);
+    const auto zero = static_cast<decimal>(0.0);
+
+    scale          = glm_vec3(one);
+    position       = glm_vec3(zero);
+    rotation       = glm_quat(one, zero, zero, zero);
+    modelMatrix    = glm_mat4(one);
+    linearVelocity = glm_vec3(zero);
 }
 ComponentBody::NormalData::~NormalData() {
     //destructor
 }
 ComponentBody::NormalData::NormalData(ComponentBody::NormalData&& other) noexcept {
     //move constructor
-    using std::swap;
-    swap(position, other.position);
-    swap(rotation, other.rotation);
-    swap(scale, other.scale);
-    swap(modelMatrix, other.modelMatrix);
-    swap(linearVelocity, other.linearVelocity);
+    position       = std::move(other.position);
+    rotation       = std::move(other.rotation);
+    scale          = std::move(other.scale);
+    modelMatrix    = std::move(other.modelMatrix);
+    linearVelocity = std::move(other.linearVelocity);
 }
 ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::NormalData&& other) noexcept {
     //move assignment
-    using std::swap;
-    swap(position, other.position);
-    swap(rotation, other.rotation);
-    swap(scale, other.scale);
-    swap(modelMatrix, other.modelMatrix);
-    swap(linearVelocity, other.linearVelocity);
+    if (&other != this) {
+        position       = std::move(other.position);
+        rotation       = std::move(other.rotation);
+        scale          = std::move(other.scale);
+        modelMatrix    = std::move(other.modelMatrix);
+        linearVelocity = std::move(other.linearVelocity);
+    }
     return *this;
 }
 
@@ -135,6 +127,9 @@ ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::N
 #pragma region Component
 
 ComponentBody::ComponentBody(const Entity& p_Entity) : ComponentBaseClass(p_Entity) {
+    const auto one  = static_cast<decimal>(1.0);
+    const auto zero = static_cast<decimal>(0.0);
+
     m_Physics                 = false;
     m_UserPointer             = nullptr;
     m_UserPointer1            = nullptr;
@@ -143,21 +138,19 @@ ComponentBody::ComponentBody(const Entity& p_Entity) : ComponentBaseClass(p_Enti
     data.n                    = NEW NormalData();
     setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
     auto& normalData          = *data.n;
-    normalData.position       = glm_vec3(static_cast<decimal>(0.0));
-    normalData.scale          = glm_vec3(static_cast<decimal>(1.0));
-    normalData.rotation       = glm_quat(
-        static_cast<decimal>(1.0),
-        static_cast<decimal>(0.0),
-        static_cast<decimal>(0.0),
-        static_cast<decimal>(0.0)
-    );
-    normalData.modelMatrix    = glm_mat4(static_cast<decimal>(1.0));
+    normalData.position       = glm_vec3(zero);
+    normalData.scale          = glm_vec3(one);
+    normalData.rotation       = glm_quat(one, zero, zero, zero);
+    normalData.modelMatrix    = glm_mat4(one);
     Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
 }
 ComponentBody::ComponentBody(const Entity& p_Entity, const CollisionType::Type p_CollisionType) : ComponentBaseClass(p_Entity) {
-    m_Forward               = glm_vec3(static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(-1.0));
-    m_Right                 = glm_vec3(static_cast<decimal>(1.0), static_cast<decimal>(0.0), static_cast<decimal>(0.0));
-    m_Up                    = glm_vec3(static_cast<decimal>(0.0), static_cast<decimal>(1.0), static_cast<decimal>(0.0));
+    const auto one  = static_cast<decimal>(1.0);
+    const auto zero = static_cast<decimal>(0.0);
+
+    m_Forward               = glm_vec3(zero,  zero,  -one);
+    m_Right                 = glm_vec3(one,   zero,  zero);
+    m_Up                    = glm_vec3(zero,  one,   zero);
     m_Physics               = true;
     m_UserPointer           = nullptr;
     m_UserPointer1          = nullptr;
@@ -179,45 +172,45 @@ ComponentBody::~ComponentBody() {
         SAFE_DELETE(data.n);
     }
 }
-ComponentBody::ComponentBody(ComponentBody&& p_Other) noexcept {
+ComponentBody::ComponentBody(ComponentBody&& other) noexcept {
     //move constructor
-    using std::swap;
-    swap(m_Physics,p_Other.m_Physics);
-    swap(m_Forward, p_Other.m_Forward);
-    swap(m_Right, p_Other.m_Right);
-    swap(m_Up, p_Other.m_Up);
-    swap(m_Owner.data, p_Other.m_Owner.data);
-    swap(m_CollisionFunctor, p_Other.m_CollisionFunctor);
-    swap(m_UserPointer, p_Other.m_UserPointer);
-    swap(m_UserPointer1, p_Other.m_UserPointer1);
-    swap(m_UserPointer2, p_Other.m_UserPointer2);
-    if (p_Other.m_Physics) {
-        swap(data.p, p_Other.data.p);
-		p_Other.data.p = nullptr;
+    m_Physics          = std::move(other.m_Physics);
+    m_Forward          = std::move(other.m_Forward);
+    m_Right            = std::move(other.m_Right);
+    m_Up               = std::move(other.m_Up);
+    m_Owner.data       = std::move(other.m_Owner.data);
+    m_CollisionFunctor = std::move(other.m_CollisionFunctor);
+    m_UserPointer      = std::exchange(other.m_UserPointer, nullptr);
+    m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
+    m_UserPointer2     = std::exchange(other.m_UserPointer2, nullptr);
+    if (other.m_Physics) {
+        data.p         = std::exchange(other.data.p, nullptr);
     }else{
-        swap(data.n, p_Other.data.n);
-		p_Other.data.n = nullptr;
+        data.n         = std::exchange(other.data.n, nullptr);
     }
     setInternalPhysicsUserPointer(this);
 }
-ComponentBody& ComponentBody::operator=(ComponentBody&& p_Other) noexcept {
+ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
     //move assignment
-    using std::swap;
-    swap(m_Physics,p_Other.m_Physics);
-    swap(m_Forward, p_Other.m_Forward);
-    swap(m_Right, p_Other.m_Right);
-    swap(m_Up, p_Other.m_Up);
-    swap(m_Owner.data, p_Other.m_Owner.data);
-    swap(m_CollisionFunctor, p_Other.m_CollisionFunctor);
-    swap(m_UserPointer, p_Other.m_UserPointer);
-    swap(m_UserPointer1, p_Other.m_UserPointer1);
-    swap(m_UserPointer2, p_Other.m_UserPointer2);
-    if (p_Other.m_Physics) {
-        swap(data.p, p_Other.data.p);
-    }else{
-        swap(data.n, p_Other.data.n);
+    if (&other != this) {
+        m_Physics          = std::move(other.m_Physics);
+        m_Forward          = std::move(other.m_Forward);
+        m_Right            = std::move(other.m_Right);
+        m_Up               = std::move(other.m_Up);
+        m_Owner.data       = std::move(other.m_Owner.data);
+        m_CollisionFunctor = std::move(other.m_CollisionFunctor);
+        m_UserPointer      = std::exchange(other.m_UserPointer, nullptr);
+        m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
+        m_UserPointer2     = std::exchange(other.m_UserPointer2, nullptr);
+        if (other.m_Physics) {
+            SAFE_DELETE(data.p);
+            data.p         = std::exchange(other.data.p, nullptr);
+        }else{
+            SAFE_DELETE(data.n);
+            data.n         = std::exchange(other.data.n, nullptr);
+        }
+        setInternalPhysicsUserPointer(this);
     }
-    setInternalPhysicsUserPointer(this);
     return *this;
 }
 
@@ -1083,9 +1076,10 @@ void ComponentBody::setMass(const float p_Mass) {
 
 #pragma region System
 
-struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_ComponentPool, const double& dt, Scene& p_Scene) const {
-    auto& pool = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool);
-    auto& components = pool.pool();
+struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_ComponentPool, const float& dt, Scene& p_Scene) const {
+    auto& pool              = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool);
+    auto& components        = pool.pool();
+    const decimal double_dt = static_cast<decimal>(dt);
     auto lamda_update = [&](pair<size_t, size_t>& pair_) {
         for (size_t j = pair_.first; j <= pair_.second; ++j) {
             ComponentBody& b = components[j];
@@ -1094,7 +1088,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_Compon
                 Engine::Math::recalculateForwardRightUp(rigidBody, b.m_Forward, b.m_Right, b.m_Up);
             }else{
                 auto& n = *b.data.n;
-                n.position += (n.linearVelocity * dt);
+                n.position += (n.linearVelocity * double_dt);
                 //TODO: implement parent->child relations
                 //n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale) * n.modelMatrix;
                 n.modelMatrix = glm::mat4(1.0f);

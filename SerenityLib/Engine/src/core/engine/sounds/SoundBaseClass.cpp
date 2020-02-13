@@ -11,7 +11,7 @@ SoundBaseClass::~SoundBaseClass() {
 const SoundStatus::Status& SoundBaseClass::status() {
     return m_Status;
 }
-void SoundBaseClass::update(const double& dt) {
+void SoundBaseClass::update(const float& dt) {
 }
 const bool SoundBaseClass::play(const unsigned int& numLoops) {
     return false;

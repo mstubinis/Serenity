@@ -148,7 +148,7 @@ void priv::PhysicsManager::_init(){
 
     gContactAddedCallback = CustomMaterialContactAddedCallback;
 }
-void priv::PhysicsManager::_update(const double& dt,int maxsteps, float other){ 
+void priv::PhysicsManager::_update(const float& dt,int maxsteps, float other){ 
     if (m_Paused)
         return;
     m_Data->world->stepSimulation(static_cast<btScalar>(dt), maxsteps, static_cast<btScalar>(other));

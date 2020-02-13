@@ -274,7 +274,7 @@ void ComponentModel::setUserPointer(void* UserPointer) {
 
 #pragma region System
 
-struct priv::ComponentModel_UpdateFunction final { void operator()(void* componentPool, const double& dt, Scene& scene) const {
+struct priv::ComponentModel_UpdateFunction final { void operator()(void* componentPool, const float& dt, Scene& scene) const {
 
 }};
 struct priv::ComponentModel_ComponentAddedToEntityFunction final {void operator()(void* component, Entity& entity) const {

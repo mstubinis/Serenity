@@ -31,7 +31,7 @@ class LightProbe{
         void setProbeType(const ProbeType::Type& type);
         const LightProbe::ProbeType::Type& getProbeType() const;
 
-        void update(const double& dt);
+        void update(const float& dt);
 
         void activate(const bool = true);
         void deactivate();

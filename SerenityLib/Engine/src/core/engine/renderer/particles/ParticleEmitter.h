@@ -2,19 +2,18 @@
 #ifndef ENGINE_RENDERER_PARTICLE_EMITTER_H
 #define ENGINE_RENDERER_PARTICLE_EMITTER_H
 
+class  ParticleEmissionProperties;
+namespace Engine::priv {
+    struct InternalScenePublicInterface;
+    class  ParticleSystem;
+};
+
 #include <core/engine/renderer/particles/Particle.h>
 #include <ecs/EntityWrapper.h>
 #include <vector>
 #include <mutex>
 #include <core/engine/math/Numbers.h>
 
-class  ParticleEmissionProperties;
-namespace Engine {
-    namespace priv {
-        struct InternalScenePublicInterface;
-        class  ParticleSystem;
-    };
-};
 class ParticleEmitter final : public EntityWrapper{
     friend class  Engine::priv::ParticleSystem;
     friend class  Particle;
@@ -23,18 +22,19 @@ class ParticleEmitter final : public EntityWrapper{
     public:
         glm::vec4                      m_UserData;
     private:
-        std::function<void(const double& dt, ParticleEmissionProperties& properties, std::mutex&)> m_UpdateFunctor;
         ParticleEmissionProperties*    m_Properties;
         bool                           m_Active;
         double                         m_SpawningTimer;
         double                         m_Timer;
         double                         m_Lifetime;
         Entity                         m_Parent;
+        std::function<void(const float& dt, ParticleEmissionProperties&, std::mutex&)> m_UpdateFunctor;
+
         void internal_init();
     public:
         ParticleEmitter();
         ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, EntityWrapper* parent = nullptr);
-        ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, Entity& parent = Entity::_null);
+        ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, Entity& parent = Entity::null_);
         ~ParticleEmitter();
 
         ParticleEmitter(const ParticleEmitter& other);
@@ -96,8 +96,8 @@ class ParticleEmitter final : public EntityWrapper{
         ParticleEmissionProperties* getProperties();
         void setProperties(ParticleEmissionProperties& properties);
 
-        void update(const size_t& index, const double& dt, Engine::priv::ParticleSystem& particleSystem);
-        void update_multithreaded(const size_t& index, const double& dt, Engine::priv::ParticleSystem& particleSystem);
+        void update(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem);
+        void update_multithreaded(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem);
 };
 
 #endif

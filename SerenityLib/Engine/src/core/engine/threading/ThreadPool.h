@@ -2,11 +2,9 @@
 #ifndef ENGINE_THREADING_THREAD_POOL_H
 #define ENGINE_THREADING_THREAD_POOL_H
 
-namespace Engine {
-    namespace priv {
-        class WorkerThread;
-        class ThreadPool;
-    };
+namespace Engine::priv {
+    class WorkerThread;
+    class ThreadPool;
 };
 
 #include <queue>
@@ -17,65 +15,63 @@ namespace Engine {
 #include <condition_variable>
 #include <memory>
 
-namespace Engine {
-    namespace priv {
-        class ThreadPoolFuture final {
-            friend class Engine::priv::ThreadPool;
-            private:
-                std::future<void>           m_Future;
-                std::function<void()>       m_Callback;
+namespace Engine::priv {
+    class ThreadPoolFuture final {
+        friend class Engine::priv::ThreadPool;
+        private:
+            std::future<void>           m_Future;
+            std::function<void()>       m_Callback;
 
-                ThreadPoolFuture() = delete;
-            public:
-                ThreadPoolFuture(std::future<void>&& future, std::function<void()>&& callback);
-                ~ThreadPoolFuture() = default;
+            ThreadPoolFuture() = delete;
+        public:
+            ThreadPoolFuture(std::future<void>&& future, std::function<void()>&& callback);
+            ~ThreadPoolFuture() = default;
 
-                const bool isReady();
-                void operator()() const;
+            const bool isReady();
+            void operator()() const;
 
-                ThreadPoolFuture(const ThreadPoolFuture& other) noexcept = delete;
-                ThreadPoolFuture& operator=(const ThreadPoolFuture& other) noexcept = delete;
-                ThreadPoolFuture(ThreadPoolFuture&& other) noexcept;
-                ThreadPoolFuture& operator=(ThreadPoolFuture&& other) noexcept;
-        };
-        class ThreadPool final{
-            friend class Engine::priv::WorkerThread;
-            private:
-                std::condition_variable                                         m_ConditionVariable;
-                std::mutex                                                      m_Mutex;
-                std::queue<std::shared_ptr<std::packaged_task<void()>>>         m_TaskQueue;
-                std::vector<std::thread>                                        m_WorkerThreads;
-                std::vector<Engine::priv::ThreadPoolFuture>                    m_Futures;
-                bool                                                            m_Stopped;
+            ThreadPoolFuture(const ThreadPoolFuture& other) noexcept = delete;
+            ThreadPoolFuture& operator=(const ThreadPoolFuture& other) noexcept = delete;
+            ThreadPoolFuture(ThreadPoolFuture&& other) noexcept;
+            ThreadPoolFuture& operator=(ThreadPoolFuture&& other) noexcept;
+    };
+    class ThreadPool final{
+        friend class Engine::priv::WorkerThread;
+        private:
+            std::condition_variable                                         m_ConditionVariable;
+            std::mutex                                                      m_Mutex;
+            std::queue<std::shared_ptr<std::packaged_task<void()>>>         m_TaskQueue;
+            std::vector<std::thread>                                        m_WorkerThreads;
+            std::vector<Engine::priv::ThreadPoolFuture>                    m_Futures;
+            bool                                                            m_Stopped;
 
-                void init(const unsigned int num_threads);
+            void init(const unsigned int num_threads);
 
-                void internal_create_packaged_task(std::function<void()>&& job, std::function<void()>&& callback);
+            void internal_create_packaged_task(std::function<void()>&& job, std::function<void()>&& callback);
 
-                ThreadPool() = delete;
-            public:
-                ThreadPool(const unsigned int num_threads);
-                ~ThreadPool();
+            ThreadPool() = delete;
+        public:
+            ThreadPool(const unsigned int num_threads);
+            ~ThreadPool();
 
-                ThreadPool(const ThreadPool& other) noexcept = delete;
-                ThreadPool& operator=(const ThreadPool& other) noexcept = delete;
-                ThreadPool(ThreadPool&& other) noexcept = delete;
-                ThreadPool& operator=(ThreadPool&& other) noexcept = delete;
+            ThreadPool(const ThreadPool& other) noexcept = delete;
+            ThreadPool& operator=(const ThreadPool& other) noexcept = delete;
+            ThreadPool(ThreadPool&& other) noexcept = delete;
+            ThreadPool& operator=(ThreadPool&& other) noexcept = delete;
 
-                const size_t size() const;
+            const size_t size() const;
 
-                void addJob(std::function<void()>&& job);
-                void addJob(std::function<void()>&& job, std::function<void()>&& callback);
+            void addJob(std::function<void()>&& job);
+            void addJob(std::function<void()>&& job, std::function<void()>&& callback);
 
-                void update();
+            void update();
 
-                void join_all();
-                void wait_for_all();
+            void join_all();
+            void wait_for_all();
 
-                void shutdown();
+            void shutdown();
 
-                //void clear_all_jobs();
-        };
+            //void clear_all_jobs();
     };
 };
 #endif

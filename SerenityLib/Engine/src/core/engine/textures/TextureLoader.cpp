@@ -25,22 +25,22 @@ void TextureLoader::InitCommon(Texture& texture, const GLuint& openglTextureType
     texture.m_Type            = openglTextureType;
 }
 
-void TextureLoader::InitFramebuffer(Texture& texture, const uint& w, const uint& h, const ImagePixelType::Type& pxlType, const ImagePixelFormat::Format& pxlFormat, const ImageInternalFormat::Format& _internal, const float& divisor) {
+void TextureLoader::InitFramebuffer(Texture& texture, const uint& w, const uint& h, const ImagePixelType::Type& pxlType, const ImagePixelFormat::Format& pxlFormat, const ImageInternalFormat::Format& internal_, const float& divisor) {
     texture.m_TextureType = TextureType::RenderTarget;
-    const uint _width(static_cast<uint>(static_cast<float>(w) * divisor));
-    const uint _height(static_cast<uint>(static_cast<float>(h) * divisor));
-    auto image = std::make_unique<ImageLoadedStructure>(_width, _height, pxlType, pxlFormat, _internal);
+    const uint width_(static_cast<uint>(static_cast<float>(w) * divisor));
+    const uint height_(static_cast<uint>(static_cast<float>(h) * divisor));
+    auto image = std::make_unique<ImageLoadedStructure>(width_, height_, pxlType, pxlFormat, internal_);
 
     TextureLoader::InitCommon(texture, GL_TEXTURE_2D, false);
 
     texture.m_ImagesDatas.push_back(std::move(image));
     texture.setName("RenderTarget");
 }
-void TextureLoader::InitFromMemory(Texture& texture, const sf::Image& sfImage, const string& name, const bool& genMipMaps, const ImageInternalFormat::Format& _internal, const GLuint& openglTextureType) {
-    texture.m_TextureType = TextureType::Texture2D;
-    auto image = std::make_unique<ImageLoadedStructure>(sfImage, name);
-    image->pixelType = ImagePixelType::UNSIGNED_BYTE;
-    image->internalFormat = _internal;
+void TextureLoader::InitFromMemory(Texture& texture, const sf::Image& sfImage, const string& name, const bool& genMipMaps, const ImageInternalFormat::Format& internal_, const GLuint& openglTextureType) {
+    texture.m_TextureType   = TextureType::Texture2D;
+    auto image              = std::make_unique<ImageLoadedStructure>(sfImage, name);
+    image->pixelType        = ImagePixelType::UNSIGNED_BYTE;
+    image->internalFormat   = internal_;
 
     TextureLoader::InitCommon(texture, openglTextureType, genMipMaps);
 
@@ -48,14 +48,14 @@ void TextureLoader::InitFromMemory(Texture& texture, const sf::Image& sfImage, c
     texture.m_ImagesDatas.push_back(std::move(image));
     texture.setName(name);
 }
-void TextureLoader::InitFromFile(Texture& texture, const string& filename, const bool& genMipMaps, const ImageInternalFormat::Format& _internal, const GLuint& openglTextureType) {
-    texture.m_TextureType = TextureType::Texture2D;
-    auto image = std::make_unique<ImageLoadedStructure>();
-    image->filename = filename;
+void TextureLoader::InitFromFile(Texture& texture, const string& filename, const bool& genMipMaps, const ImageInternalFormat::Format& internal_, const GLuint& openglTextureType) {
+    texture.m_TextureType   = TextureType::Texture2D;
+    auto image              = std::make_unique<ImageLoadedStructure>();
+    image->filename         = filename;
     const string& extension = boost::filesystem::extension(filename);
     TextureLoader::InitCommon(texture, openglTextureType, genMipMaps);
-    image->pixelType = ImagePixelType::UNSIGNED_BYTE;
-    image->internalFormat = _internal;
+    image->pixelType        = ImagePixelType::UNSIGNED_BYTE;
+    image->internalFormat   = internal_;
     if (extension == ".dds") {
         TextureLoader::LoadDDSFile(texture, filename, *image);
     }
@@ -66,7 +66,7 @@ void TextureLoader::InitFromFile(Texture& texture, const string& filename, const
 }
 void TextureLoader::InitFromFilesCubemap(Texture& texture, const string files[], const string& name, const bool& genMipMaps, const ImageInternalFormat::Format& _internal) {
     texture.m_TextureType = TextureType::CubeMap;
-    for (uint j = 0; j < 6; ++j) {
+    for (unsigned int j = 0; j < 6; ++j) {
         auto image = std::make_unique<ImageLoadedStructure>();
         image->filename = files[j];
         texture.m_ImagesDatas.push_back(std::move(image));
@@ -83,17 +83,18 @@ void TextureLoader::InitFromFilesCubemap(Texture& texture, const string files[],
 
 void TextureLoader::ImportIntoOpengl(Texture& texture, const Engine::priv::ImageMipmap& mipmap, const GLuint& openGLType) {
     auto& imageData = *texture.m_ImagesDatas[0];
-    if (TextureLoader::IsCompressedType(imageData.internalFormat) && mipmap.compressedSize != 0)
+    if (TextureLoader::IsCompressedType(imageData.internalFormat) && mipmap.compressedSize != 0) {
         glCompressedTexImage2D(openGLType, mipmap.level, imageData.internalFormat, mipmap.width, mipmap.height, 0, mipmap.compressedSize, &mipmap.pixels[0]);
-    else
+    }else{
         glTexImage2D(openGLType, mipmap.level, imageData.internalFormat, mipmap.width, mipmap.height, 0, imageData.pixelFormat, imageData.pixelType, &mipmap.pixels[0]);
+    }
 }
 
 void TextureLoader::LoadDDSFile(Texture& texture, const string& filename, ImageLoadedStructure& image_loaded_struct) {
     ifstream stream(filename.c_str(), ios::binary);
-    if (!stream)
+    if (!stream) {
         return;
-
+    }
     std::streampos fileSize;
     stream.unsetf(ios::skipws);
     stream.seekg(0, ios::end);
@@ -223,8 +224,8 @@ void TextureLoader::LoadDDSFile(Texture& texture, const string& filename, ImageL
     }
     image_loaded_struct.pixelFormat = ImagePixelFormat::RGBA;
     image_loaded_struct.pixelType   = ImagePixelType::UNSIGNED_BYTE;
-    uint32_t _width  = head.w;
-    uint32_t _height = head.h;
+    uint32_t width_  = head.w;
+    uint32_t height_ = head.h;
     for (uint32_t mainImageLevel = 0; mainImageLevel < numberOfMainImages; ++mainImageLevel) {
         ImageLoadedStructure* imgPtr = nullptr;
         if (mainImageLevel == 0) {
@@ -238,33 +239,34 @@ void TextureLoader::LoadDDSFile(Texture& texture, const string& filename, ImageL
         }else{
             imgPtr = texture.m_ImagesDatas[mainImageLevel].get();
         }
-        _width  = head.w;
-        _height = head.h;
-        for (uint32_t level = 0; level < head.mipMapCount && (_width || _height); ++level) {
-            if (level > 0 && (_width < 64 || _height < 64)) 
+        width_  = head.w;
+        height_ = head.h;
+        for (uint32_t level = 0; level < head.mipMapCount && (width_ || height_); ++level) {
+            if (level > 0 && (width_ < 64 || height_ < 64)) {
                 break;
-            ImageMipmap* mipmap = nullptr;
+            }
+            ImageMipmap* mipmap            = nullptr;
             ImageMipmap  mipMapCon;
             if (level >= 1) { 
-                mipmap = &mipMapCon; 
+                mipmap                     = &mipMapCon; 
             }else{ 
-                mipmap = &imgPtr->mipmaps[0]; 
+                mipmap                     = &imgPtr->mipmaps[0]; 
             }
-            mipmap->level              = level;
-            mipmap->width              = _width;
-            mipmap->height             = _height;
-            const uint32_t compressed_size = ((_width + 3U) / 4U) * ((_height + 3U) / 4U) * blockSize;
-            mipmap->compressedSize = compressed_size;
+            mipmap->level                  = level;
+            mipmap->width                  = width_;
+            mipmap->height                 = height_;
+            const uint32_t compressed_size = ((width_ + 3U) / 4U) * ((height_ + 3U) / 4U) * blockSize;
+            mipmap->compressedSize         = compressed_size;
 
-            auto& pixels = mipmap->pixels;
+            auto& pixels                   = mipmap->pixels;
             pixels.reserve(compressed_size);
             for (uint32_t t = 0; t < compressed_size; ++t) {
                 const uint32_t pxl_stream_index = offset + t;
                 pixels.push_back( file_data[pxl_stream_index] );
             }
-            _width  = Math::Max(_width / 2U, 1U);
-            _height = Math::Max(_height / 2U, 1U);
-            offset += compressed_size;
+            width_                         = Math::Max(width_ / 2U, 1U);
+            height_                        = Math::Max(height_ / 2U, 1U);
+            offset                        += compressed_size;
             if (level >= 1) { 
                 imgPtr->mipmaps.push_back(*mipmap); 
             }
@@ -283,9 +285,9 @@ void TextureLoader::LoadTexture2DIntoOpenGL(Texture& texture) {
 void TextureLoader::LoadTextureFramebufferIntoOpenGL(Texture& texture) {
     Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress[0]);
     const auto& image = *texture.m_ImagesDatas[0];
-    const uint32_t& _w = image.mipmaps[0].width;
-    const uint32_t& _h = image.mipmaps[0].height;
-    glTexImage2D(texture.m_Type, 0, image.internalFormat, _w, _h, 0, image.pixelFormat, image.pixelType, NULL);
+    const uint32_t& w = image.mipmaps[0].width;
+    const uint32_t& h = image.mipmaps[0].height;
+    glTexImage2D(texture.m_Type, 0, image.internalFormat, w, h, 0, image.pixelFormat, image.pixelType, NULL);
     texture.setFilter(TextureFilter::Linear);
     texture.setWrapping(TextureWrap::ClampToEdge);
 }
@@ -304,12 +306,12 @@ void TextureLoader::LoadTextureCubemapIntoOpenGL(Texture& texture) {
 }
 void TextureLoader::WithdrawPixelsFromOpenGLMemory(Texture& texture, const uint& imageIndex, const uint& mipmapLevel) {
     auto& image = *texture.m_ImagesDatas[imageIndex];
-    auto& pxls = image.mipmaps[mipmapLevel].pixels;
+    auto& pxls  = image.mipmaps[mipmapLevel].pixels;
     if (pxls.size() != 0)
         return;
-    const uint32_t& _w = image.mipmaps[mipmapLevel].width;
-    const uint32_t& _h = image.mipmaps[mipmapLevel].height;
-    pxls.resize(_w * _h * 4);
+    const uint32_t& w = image.mipmaps[mipmapLevel].width;
+    const uint32_t& h = image.mipmaps[mipmapLevel].height;
+    pxls.resize(w * h * 4);
     Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress[0]);
     glGetTexImage(texture.m_Type, 0, image.pixelFormat, image.pixelType, &pxls[0]);
 }
@@ -504,26 +506,26 @@ void TextureLoader::GeneratePBRData(Texture& texture, const unsigned int& convol
 void InternalTexturePublicInterface::LoadCPU(Texture& texture) {
     for (auto& image : texture.m_ImagesDatas) {
         if (!image->filename.empty()) {
-            bool _do = false;
+            bool do_ = false;
             if (image->mipmaps.size() == 0) { 
-                _do = true; 
+                do_ = true;
             }
-            if (!_do) {
+            if (!do_) {
                 for (auto& mip : image->mipmaps) {
                     if (mip.pixels.size() == 0) {
-                        _do = true;
+                        do_ = true;
                         break;
                     }
                 }
             }
-            if (_do) {
+            if (do_) {
                 const string& extension = boost::filesystem::extension(image->filename);
                 if (extension == ".dds") {
                     TextureLoader::LoadDDSFile(texture, image->filename, *image);
                 }else{
-                    sf::Image _sfImage;
-                    _sfImage.loadFromFile(image->filename);
-                    image->load(_sfImage, image->filename);
+                    sf::Image sfImage;
+                    sfImage.loadFromFile(image->filename);
+                    image->load(sfImage, image->filename);
                 }
             }
         }
@@ -604,15 +606,15 @@ void InternalTexturePublicInterface::Unload(Texture& texture) {
 }
 void InternalTexturePublicInterface::Resize(Texture& texture, Engine::priv::FramebufferObject& fbo, const uint& width, const uint& height) {
     if (texture.m_TextureType != TextureType::RenderTarget) {
-        cout << "Error: Non-framebuffer texture cannot be resized. Returning..." << endl;
+        cout << "Error: Non-framebuffer texture cannot be resized. Returning..." << "\n";
         return;
     }
-    const float _divisor = fbo.divisor();
+    const float divisor = fbo.divisor();
     Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress[0]);
-    const uint32_t _w = static_cast<uint32_t>(static_cast<float>(width) * _divisor);
-    const uint32_t _h = static_cast<uint32_t>(static_cast<float>(height) * _divisor);
+    const uint32_t w = static_cast<uint32_t>(static_cast<float>(width) * divisor);
+    const uint32_t h = static_cast<uint32_t>(static_cast<float>(height) * divisor);
     auto& imageData = *texture.m_ImagesDatas[0];
-    imageData.mipmaps[0].width = _w;
-    imageData.mipmaps[0].height = _h;
-    glTexImage2D(texture.m_Type, 0, imageData.internalFormat, _w, _h, 0, imageData.pixelFormat, imageData.pixelType, NULL);
+    imageData.mipmaps[0].width = w;
+    imageData.mipmaps[0].height = h;
+    glTexImage2D(texture.m_Type, 0, imageData.internalFormat, w, h, 0, imageData.pixelFormat, imageData.pixelType, NULL);
 }

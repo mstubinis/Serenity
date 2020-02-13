@@ -34,7 +34,7 @@ class SoundBaseClass {
         virtual ~SoundBaseClass();
 
         const SoundStatus::Status& status();
-        virtual void update(const double& dt);
+        virtual void update(const float& dt);
         virtual const bool play(const unsigned int& numLoops = 1);
         virtual const bool pause();
         virtual const bool stop();

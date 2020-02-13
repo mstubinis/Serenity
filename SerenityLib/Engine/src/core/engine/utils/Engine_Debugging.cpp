@@ -68,16 +68,16 @@ void priv::DebugManager::calculate_physics() { m_physicsTime = clock.restart().a
 void priv::DebugManager::calculate_sounds() { m_soundTime = clock.restart().asMicroseconds(); }
 void priv::DebugManager::calculate_render() { m_renderTime = clock.restart().asMicroseconds(); }
 
-const double priv::DebugManager::dt() const { return (double)((double)m_deltaTime / divisor); }
+const float priv::DebugManager::dt() const { return (float)((float)m_deltaTime / divisor); }
 const double priv::DebugManager::logicTime() const { return (double)((double)m_logicTime / divisor); }
 const double priv::DebugManager::physicsTime() const { return (double)((double)m_physicsTime / divisor); }
 const double priv::DebugManager::renderTime() const { return (double)((double)m_renderTime / divisor); }
 const double priv::DebugManager::soundsTime() const { return (double)((double)m_soundTime / divisor); }
 const double priv::DebugManager::totalTime() const{ return m_totalTime; }
-const double priv::DebugManager::timeScale() const { return m_TimeScale; }
+const float priv::DebugManager::timeScale() const { return m_TimeScale; }
 
-void priv::DebugManager::setTimeScale(const double timeScale) {
-    m_TimeScale = glm::max(0.0, timeScale);
+void priv::DebugManager::setTimeScale(const float timeScale) {
+    m_TimeScale = glm::max(0.0f, timeScale);
 }
 
 string priv::DebugManager::timestamp() {

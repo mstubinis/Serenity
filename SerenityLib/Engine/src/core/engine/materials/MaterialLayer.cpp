@@ -116,7 +116,7 @@ const glm::vec2& MaterialLayer::getUVModifications() const {
     return m_UVModifications;
 }
 
-void MaterialLayer::update(const double& dt) {
+void MaterialLayer::update(const float& dt) {
     const float& fDT = static_cast<float>(dt);
     //calculate uv modifications
     for (auto& command : m_UVModificationQueue) {

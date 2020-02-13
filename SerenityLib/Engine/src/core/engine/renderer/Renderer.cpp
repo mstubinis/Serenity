@@ -811,7 +811,7 @@ class priv::Renderer::impl final{
             plane.render();
         }
 
-        void _passGeometry(const double& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
+        void _passGeometry(const float& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
             Scene& scene = viewport.m_Scene;
             const glm::vec4& clear = viewport.m_BackgroundColor;
             const float colors[4] = { clear.r, clear.g, clear.b, clear.a };
@@ -839,7 +839,7 @@ class priv::Renderer::impl final{
             InternalScenePublicInterface::RenderGeometryTransparent(scene, viewport, camera);
             InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(scene, viewport, camera, true);
         }
-        void _passForwardRendering(const double& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
+        void _passForwardRendering(const float& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
             Scene& scene = viewport.m_Scene;
             gbuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, GBufferType::Lighting, "RGBA");
             InternalScenePublicInterface::RenderForwardOpaque(scene, viewport, camera, dt);
@@ -1075,7 +1075,7 @@ class priv::Renderer::impl final{
             }
         }
         
-        void _render(const double& dt, GBuffer& gbuffer, Viewport& viewport,const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo){
+        void _render(const float& dt, GBuffer& gbuffer, Viewport& viewport,const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo){
             const Scene& scene           = viewport.m_Scene;
             Camera& camera               = const_cast<Camera&>(viewport.getCamera());
             const glm::uvec4& dimensions = viewport.getViewportDimensions();
@@ -1301,7 +1301,7 @@ class priv::Renderer::impl final{
 
             
         }
-        void _render2DApi(const double& dt, GBuffer& gbuffer, Viewport& viewport, const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo) {
+        void _render2DApi(const float& dt, GBuffer& gbuffer, Viewport& viewport, const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo) {
             Camera& camera = const_cast<Camera&>(viewport.getCamera());
             const glm::uvec4& dimensions = viewport.getViewportDimensions();
 
@@ -1372,10 +1372,10 @@ void priv::Renderer::cleanup() {
 void priv::Renderer::_init(){
     m_i->_postInit();
 }
-void priv::Renderer::_render(const double& dt, Viewport& viewport,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){
+void priv::Renderer::_render(const float& dt, Viewport& viewport,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){
     m_i->_render(dt, *m_i->m_GBuffer, viewport, mainFunc, display_fbo, display_rbo);
 }
-void priv::Renderer::_render2DApi(const double& dt, Viewport& viewport, const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo) {
+void priv::Renderer::_render2DApi(const float& dt, Viewport& viewport, const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo) {
     m_i->_render2DApi(dt, *m_i->m_GBuffer, viewport, mainFunc, display_fbo, display_rbo);
 }
 void priv::Renderer::_resize(uint w,uint h){

@@ -36,7 +36,7 @@ class Scene: public EngineResource, public EventObserver{
     friend class  Engine::priv::ResourceManager;
     friend struct Engine::priv::InternalScenePublicInterface;
     public:
-        virtual void update(const double& dt);
+        virtual void update(const float& dt);
         virtual void render();
         virtual void onEvent(const Event& _event);
         virtual void onResize(const unsigned int& width, const unsigned int& height);
@@ -64,7 +64,7 @@ class Scene: public EngineResource, public EventObserver{
         Skybox* m_Skybox;
 
         class impl; impl*                      m_i;
-        std::function<void(const double&)>     m_OnUpdateFunctor;
+        std::function<void(const float&)>     m_OnUpdateFunctor;
     public:
         Scene(const std::string& name);
         Scene(const std::string& name, const SceneOptions& options);
@@ -121,8 +121,8 @@ namespace Engine {
             static std::vector<SpotLight*>&          GetSpotLights(Scene&);
             static std::vector<RodLight*>&           GetRodLights(Scene&);
 
-            static void           UpdateMaterials(Scene&, const double& dt);
-            static void           UpdateParticleSystem(Scene&, const double& dt);
+            static void           UpdateMaterials(Scene&, const float& dt);
+            static void           UpdateParticleSystem(Scene&, const float& dt);
             static void           RenderGeometryOpaque(Scene&, Viewport&, Camera&, const bool useDefaultShaders = true);
             static void           RenderGeometryTransparent(Scene&, Viewport&, Camera&, const bool useDefaultShaders = true);
             static void           RenderGeometryTransparentTrianglesSorted(Scene&, Viewport&, Camera&, const bool useDefaultShaders = true);

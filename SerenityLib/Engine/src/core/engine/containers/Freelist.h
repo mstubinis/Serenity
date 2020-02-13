@@ -3,6 +3,7 @@
 #define ENGINE_CONTAINERS_FREELIST_H
 
 #include <vector>
+#include <type_traits>
 
 namespace Engine {
     template<typename T> class freelist {
@@ -38,15 +39,46 @@ namespace Engine {
             const size_t& size() const {
                 return m_Size;
             }
-            //resets the element at the specified index to T. if the index is invalid, returns false
+            const size_t& capacity() const {
+                return m_Items.capacity();
+            }
+            //resets the element at the specified index to default constructor of T. if the index is invalid, returns false
             const bool reset_element(const size_t& index) {
                 if (m_Items.size() >= index) {
                     return false;
                 }
-                m_Items[index] = T();
+                if (std::is_pointer<T>::value) {
+                    SAFE_DELETE(m_Items[index]);
+                }else{
+                    m_Items[index] = T();
+                }
                 m_Freelist.push_back(static_cast<std::uint32_t>(index));
                 return true;
             }
+            //resets the element at the specified index to parameter: data. if the index is invalid, returns false
+            const bool reset_element(const T& data, const size_t& index) {
+                if (m_Items.size() >= index) {
+                    return false;
+                }
+                m_Items[index] = data;
+                m_Freelist.push_back(static_cast<std::uint32_t>(index));
+                return true;
+            }
+            //resets the element at the specified index to parameter: data. Frees the heap allocated memory before hand. if the index is invalid, returns false
+            const bool reset_and_delete_element(const T& data, const size_t& index) {
+                if (m_Items.size() >= index) {
+                    return false;
+                }
+                delete(m_Items[index]);
+                m_Items[index] = data;
+                m_Freelist.push_back(static_cast<std::uint32_t>(index));
+                return true;
+            }
+            const bool reset_and_delete_element(const size_t& index) {
+                return reset_and_delete_element(nullptr, index);
+            }
+
+
             //adds data to the container. if the container has an available index, it will use that, otherwise it will push this element in the container
             const int add_element(T& data) {
                 if (m_Freelist.size() == 0) {
@@ -57,14 +89,7 @@ namespace Engine {
                 m_Items[available_index] = data;
                 return available_index;
             }
-            //clears the elements of the container AND FREES each element from memory. will re-initialize the container if parameter = true
-            void delete_and_clear(const bool reinitialize = true) {
-                for (size_t i = 0; i < m_Items.size(); ++i) {
-                    SAFE_DELETE(m_Items[i]);
-                }
-                clear(reinitialize);
-            }
-            //clears the elements of the container, does NOT free each element from memory. will re-initialize the container if parameter = true
+            //clears the elements of the container. will re-initialize the container's capacity if parameter = true. user must manually free heap allocated memory
             void clear(const bool reinitialize = true) {
                 const auto old_capacity = m_Items.capacity();
                 m_Items.clear();
@@ -76,6 +101,22 @@ namespace Engine {
             }
             //adds data to the container by pushing this element in the container even if there is an available freelist index
             const int push_back(T& data) {
+                if (m_Items.size() >= m_Items.capacity()) {
+                    m_Items.reserve(m_Items.capacity() + m_Auto_Reserve_Count);
+                }
+                if (m_Freelist.size() == 0) {
+                    m_Items.push_back(std::move(data));
+                    ++m_Size;
+                    return static_cast<int>(m_Items.size()) - 1;
+                }
+                //get a freelist index
+                const auto available_index = m_Freelist[m_Freelist.size() - 1];
+                m_Freelist.pop_back();
+                m_Items.push_back(std::move(data));
+                ++m_Size;
+                return static_cast<int>(available_index);
+            }
+            const int push_back(const T& data) {
                 if (m_Items.size() >= m_Items.capacity()) {
                     m_Items.reserve(m_Items.capacity() + m_Auto_Reserve_Count);
                 }
@@ -115,6 +156,10 @@ namespace Engine {
                 m_Items[index] = std::move(data);
                 return true;
             }
+            const int get_next_free_index() {
+                return (m_Freelist.size() > 0) ? static_cast<int>(m_Freelist[m_Freelist.size() - 1]) : -1;
+            }
+            /*
             T* get_next_free() {
                 if (m_Freelist.size() > 0) {
                     const auto available_index = m_Freelist[m_Freelist.size() - 1];
@@ -124,7 +169,7 @@ namespace Engine {
                 }
                 return nullptr;
             }
-
+            */
             const T& get(const size_t index) const {
                 return m_Items[index];
             }

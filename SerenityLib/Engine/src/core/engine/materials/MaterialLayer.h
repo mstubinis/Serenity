@@ -63,7 +63,7 @@ class MaterialLayer final{
 
         const glm::vec2& getUVModifications() const;
 
-        void update(const double& dt);
+        void update(const float& dt);
 };
 
 #endif

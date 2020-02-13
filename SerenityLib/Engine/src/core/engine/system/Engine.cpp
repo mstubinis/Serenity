@@ -52,7 +52,7 @@ void Engine::unpause(){
     Engine::Physics::unpause();
     Core::m_Engine->m_Misc.m_Paused = false;
 }
-void Engine::setTimeScale(const double timeScale) {
+void Engine::setTimeScale(const float timeScale) {
     Core::m_Engine->m_DebugManager.setTimeScale(timeScale);
 }
 void EngineCore::init_os_specific(const EngineOptions& options) {
@@ -152,7 +152,7 @@ void EngineCore::init(const EngineOptions& options) {
     Engine::Renderer::fog::enable(options.fog_enabled);
     Engine::Renderer::Settings::setAntiAliasingAlgorithm(options.aa_algorithm);
 }
-void EngineCore::update_physics(Window& window, const double& dt) {
+void EngineCore::update_physics(Window& window, const float& dt) {
     m_DebugManager.stop_clock();
 
     //It's important that dt < actual_steps * PHYSICS_MIN_STEP / static_cast<float>(requested_steps), otherwise you are losing time. dt < maxSubSteps * fixedTimeStep
@@ -171,7 +171,7 @@ void EngineCore::update_physics(Window& window, const double& dt) {
 
     m_DebugManager.calculate_physics();
 }
-void EngineCore::update_logic(Window& window, const double& dt){
+void EngineCore::update_logic(Window& window, const float& dt){
     m_DebugManager.stop_clock();
     Scene& scene = *Resources::getCurrentScene();
     auto& ecs = InternalScenePublicInterface::GetECS(scene); 
@@ -193,16 +193,16 @@ void EngineCore::update_logic(Window& window, const double& dt){
 
     m_Misc.m_DiscordCore.update();
 }
-void EngineCore::update_sounds(Window& window, const double& dt){
+void EngineCore::update_sounds(Window& window, const float& dt){
     m_DebugManager.stop_clock();
     m_SoundManager._update(dt);
     m_DebugManager.calculate_sounds();
 }
-void EngineCore::update(Window& window, const double& dt){
+void EngineCore::update(Window& window, const float& dt){
     update_logic(window, dt);
     update_sounds(window, dt);
 }
-void EngineCore::render2DApi(Window& window, const double& dt) {
+void EngineCore::render2DApi(Window& window, const float& dt) {
     Game::render();
     auto& scene = *Resources::getCurrentScene();
     scene.render();
@@ -217,7 +217,7 @@ void EngineCore::render2DApi(Window& window, const double& dt) {
     window.display();
     m_RenderManager._clear2DAPICommands();
 }
-void EngineCore::render(Window& window, const double& dt){
+void EngineCore::render(Window& window, const float& dt){
     m_DebugManager.stop_clock();
     Game::render();
     auto& scene = *Resources::getCurrentScene();
@@ -234,7 +234,7 @@ void EngineCore::render(Window& window, const double& dt){
     m_RenderManager._clear2DAPICommands();
     m_DebugManager.calculate_render();
 }
-void EngineCore::cleanup(Window& window, const double& dt) {
+void EngineCore::cleanup(Window& window, const float& dt) {
     m_ResourceManager.onPostUpdate();
 }
 void EngineCore::on_event_resize(Window& window, const unsigned int& newWindowWidth, const unsigned int& newWindowHeight, const bool& saveSize){
@@ -516,7 +516,7 @@ void EngineCore::handle_events(Window& window){
 
 void EngineCore::run(){
     while(!m_Misc.m_Destroyed){
-        double dt = m_DebugManager.dt() * m_DebugManager.timeScale();
+        float dt = m_DebugManager.dt() * m_DebugManager.timeScale();
         for (auto& window_itr : m_ResourceManager.m_Windows) {
             auto& window = *window_itr;
             handle_events(window);

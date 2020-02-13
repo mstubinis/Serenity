@@ -16,23 +16,24 @@ struct Handle;
 namespace Engine::priv {
     class SoundManager final {
         friend class SoundBaseClass;
-        public:
+        friend class SoundQueue;
+        private:
             static const unsigned int              MAX_SOUND_EFFECTS = 128;
             static const unsigned int              MAX_SOUND_MUSIC = 6;
-
-            SoundEffect                            m_SoundEffects[MAX_SOUND_EFFECTS];
-            SoundMusic                             m_SoundMusics[MAX_SOUND_MUSIC];
             std::stack<unsigned int>               m_FreelistEffects;
             std::stack<unsigned int>               m_FreelistMusics;
 
             std::vector<SoundQueue*>               m_SoundQueues;
+        public:
+            SoundEffect                            m_SoundEffects[MAX_SOUND_EFFECTS];
+            SoundMusic                             m_SoundMusics[MAX_SOUND_MUSIC];
 
             SoundManager();
             ~SoundManager();
 
             void cleanup();
 
-            void _update(const double& dt);
+            void _update(const float& dt);
 
             SoundEffect* _getNextFreeEffect();
             SoundMusic*  _getNextFreeMusic();

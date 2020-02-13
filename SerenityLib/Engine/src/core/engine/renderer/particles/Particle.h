@@ -76,8 +76,8 @@ class Particle {
         const glm::vec4& color() const;
         const glm::vec3& velocity() const;
         const double lifetime() const;
-        void update(const size_t& index, const double& dt, Engine::priv::ParticleSystem& particleSystem);
-        void update_multithreaded(const size_t& index, const double& dt, Engine::priv::ParticleSystem& particleSystem);
+        void update(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem);
+        void update_multithreaded(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem);
 
 
 

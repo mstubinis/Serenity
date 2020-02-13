@@ -2,6 +2,12 @@
 #ifndef ENGINE_MESH_H
 #define ENGINE_MESH_H
 
+class  Mesh;
+class  Camera;
+class  btHeightfieldTerrainShape;
+class  btCollisionShape;
+class  Collision;
+
 #include <core/engine/mesh/VertexData.h>
 #include <core/engine/mesh/MeshIncludes.h>
 
@@ -14,35 +20,28 @@
 
 #include <assimp/scene.h>
 
-class  Mesh;
-class  Camera;
-class  btHeightfieldTerrainShape;
-class  btCollisionShape;
-class  Collision;
-namespace Engine{
-    namespace priv{
-        class  MeshLoader;
-        class  MeshSkeleton;
-        class  MeshCollisionFactory;
-        struct MeshImportedData;
-        struct DefaultMeshBindFunctor;
-        struct DefaultMeshUnbindFunctor;
-        struct BoneNode;
-        class  AnimationData;
-        struct InternalMeshRequestPublicInterface;
-        struct InternalMeshPublicInterface final {
-            static void InitBlankMesh(Mesh&);
-            static void LoadGPU(Mesh&);
-            static void UnloadCPU(Mesh&);
-            static void UnloadGPU(Mesh&);
-            static bool SupportsInstancing();
-            static btCollisionShape* BuildCollision(ModelInstance*, const CollisionType::Type&, const bool isCompoundChild = false);
-            static btCollisionShape* BuildCollision(Mesh*, const CollisionType::Type&, const bool isCompoundChild = false);
+namespace Engine::priv{
+    class  MeshLoader;
+    class  MeshSkeleton;
+    class  MeshCollisionFactory;
+    struct MeshImportedData;
+    struct DefaultMeshBindFunctor;
+    struct DefaultMeshUnbindFunctor;
+    struct BoneNode;
+    class  AnimationData;
+    struct InternalMeshRequestPublicInterface;
+    struct InternalMeshPublicInterface final {
+        static void InitBlankMesh(Mesh&);
+        static void LoadGPU(Mesh&);
+        static void UnloadCPU(Mesh&);
+        static void UnloadGPU(Mesh&);
+        static bool SupportsInstancing();
+        static btCollisionShape* BuildCollision(ModelInstance*, const CollisionType::Type&, const bool isCompoundChild = false);
+        static btCollisionShape* BuildCollision(Mesh*, const CollisionType::Type&, const bool isCompoundChild = false);
 
-            static void FinalizeVertexData(Mesh&, MeshImportedData& data);
-            static void TriangulateComponentIndices(Mesh&, MeshImportedData& data, std::vector<std::vector<uint>>& indices, const unsigned char flags);
-            static void CalculateRadius(Mesh&);
-        };
+        static void FinalizeVertexData(Mesh&, MeshImportedData& data);
+        static void TriangulateComponentIndices(Mesh&, MeshImportedData& data, std::vector<std::vector<uint>>& indices, const unsigned char flags);
+        static void CalculateRadius(Mesh&);
     };
 };
 

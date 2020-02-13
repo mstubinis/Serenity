@@ -82,7 +82,7 @@ namespace Engine{
         const bool setCurrentScene(Scene* scene);
         const bool setCurrentScene(const std::string& sceneName);
 
-        const double dt();
+        const float dt();
         const double timeScale();
         const double applicationTime();
 

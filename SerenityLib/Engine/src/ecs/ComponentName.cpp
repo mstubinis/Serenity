@@ -30,7 +30,7 @@ const bool ComponentName::empty() const {
 
 #pragma region System
 
-struct priv::ComponentName_UpdateFunction final {void operator()(void* _componentPool, const double& dt, Scene& _scene) const {
+struct priv::ComponentName_UpdateFunction final {void operator()(void* _componentPool, const float& dt, Scene& _scene) const {
 }};
 struct priv::ComponentName_ComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
 }};

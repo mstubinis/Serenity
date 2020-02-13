@@ -83,7 +83,7 @@ const unsigned int priv::ResourceManager::AddScene(Scene& s){
 string Engine::Data::reportTime() {
     return priv::Core::m_Engine->m_DebugManager.reportTime();
 }
-const double Resources::dt() {
+const float Resources::dt() {
     return priv::Core::m_Engine->m_DebugManager.dt();
 }
 const double Resources::timeScale(){

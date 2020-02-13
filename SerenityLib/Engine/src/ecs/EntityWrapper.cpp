@@ -11,7 +11,7 @@ EntityWrapper::EntityWrapper(Scene& scene) {
     m_Entity = scene_->createEntity();
 }
 EntityWrapper::~EntityWrapper() {
-    m_Entity = Entity::_null;
+    m_Entity = Entity::null_;
 }
 EntityWrapper::EntityWrapper(const EntityWrapper& other) {
     m_Entity = other.m_Entity;

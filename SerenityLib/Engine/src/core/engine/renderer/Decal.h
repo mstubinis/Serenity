@@ -34,7 +34,7 @@ class Decal final: public EntityWrapper{
         );
         ~Decal();
 
-        void update(const double& dt);
+        void update(const float& dt);
         const bool& active() const;
         const glm_vec3 position();
         const glm_quat rotation();

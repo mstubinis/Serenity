@@ -7,13 +7,13 @@
 class  Scene;
 struct Entity;
 
-typedef std::function<void(void*, const double&, Scene&)>  std_func_update;
-typedef std::function<void(void*, Entity&, Scene&)>        std_func_entity;
-typedef std::function<void(void*, Entity&)>                std_func_component;
-typedef std::function<void(void*, Scene&)>                 std_func_scene;
+typedef std::function<void(void*, const float&, Scene&)> std_func_update;
+typedef std::function<void(void*, Entity&, Scene&)>      std_func_entity;
+typedef std::function<void(void*, Entity&)>              std_func_component;
+typedef std::function<void(void*, Scene&)>               std_func_scene;
 
 namespace Engine::priv {
-    struct FunctorUpdateEmpty final { void operator()(void* cPool, const double& dt, Scene&) const { } };
+    struct FunctorUpdateEmpty final { void operator()(void* cPool, const float& dt, Scene&) const { } };
     struct FunctorComponentEmpty final { void operator()(void* compt, Entity&) const { } };
     struct FunctorEntityEmpty final { void operator()(void* cPool, Entity&, Scene&) const { } };
     struct FunctorSceneEmpty final { void operator()(void* cPool, Scene&) const { } };

@@ -6,19 +6,19 @@ using namespace std;
 using namespace Engine;
 
 
-struct DefaultColorFunctor final { glm::vec4 operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const double& dt, ParticleEmitter* emitter, Particle& particle) const {
+struct DefaultColorFunctor final { glm::vec4 operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const float& dt, ParticleEmitter* emitter, Particle& particle) const {
     return glm::vec4(1.0f);
 } };
-struct DefaultAngularVelocityFunctor final { float operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const double& dt, ParticleEmitter* emitter, Particle& particle) const {
+struct DefaultAngularVelocityFunctor final { float operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const float& dt, ParticleEmitter* emitter, Particle& particle) const {
     return 0.0f;
 }};
-struct DefaultVelocityFunctor final { glm::vec3 operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const double& dt, ParticleEmitter* emitter, Particle& particle) const {
+struct DefaultVelocityFunctor final { glm::vec3 operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const float& dt, ParticleEmitter* emitter, Particle& particle) const {
     return glm::vec3(0.0f);
 }};
-struct DefaultScaleFunctor final { glm::vec2 operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const double& dt, ParticleEmitter* emitter, Particle& particle) const {
+struct DefaultScaleFunctor final { glm::vec2 operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const float& dt, ParticleEmitter* emitter, Particle& particle) const {
     return glm::vec2(0.0f);
 }};
-struct DefaultDepthFunctor final { float operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const double& dt, ParticleEmitter* emitter, Particle& particle) const {
+struct DefaultDepthFunctor final { float operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const float& dt, ParticleEmitter* emitter, Particle& particle) const {
     return 0.0f;
 }};
 

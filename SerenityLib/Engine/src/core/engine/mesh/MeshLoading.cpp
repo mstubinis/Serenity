@@ -72,8 +72,8 @@ void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequest::MeshRequestPart>&
             data.points.emplace_back(pos.x, pos.y, pos.z);
             //uv
             if (aimesh.mTextureCoords[0]) {
-                //this is to prevent uv compression from beign f-ed up at the poles.
                 auto& uv = aimesh.mTextureCoords[0][j];
+                //this is to fix uv compression errors near the poles.
                 //if(uv.y <= 0.0001f){ uv.y = 0.001f; }
                 //if(uv.y >= 0.9999f){ uv.y = 0.999f; }
                 data.uvs.emplace_back(uv.x, uv.y);
@@ -167,7 +167,7 @@ void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequest::MeshRequestPart>&
                 for (unsigned int k = 0; k < scene.mNumAnimations; ++k) {
                     const aiAnimation& anim = *scene.mAnimations[k];
                     string key(anim.mName.C_Str());
-                    if (key == "") {
+                    if (key.empty()) {
                         key = "Animation " + to_string(skeleton.m_AnimationData.size());
                     }
                     if (!skeleton.m_AnimationData.count(key)) {
@@ -176,7 +176,6 @@ void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequest::MeshRequestPart>&
                 }
             }
             #pragma endregion
-            //TODO: remove "fill" function from MeshSkeleton
             for (auto& _b : data.m_Bones) {
                 const VertexBoneData& b = _b.second;
                 skeleton.m_BoneIDs.push_back(glm::vec4(b.IDs[0], b.IDs[1], b.IDs[2], b.IDs[3]));
@@ -332,6 +331,7 @@ void priv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
     }
 };
 VertexData* priv::MeshLoader::LoadFrom_OBJCC(string& filename) {
+    VertexData* returnData = nullptr;
     boost::iostreams::mapped_file_source stream(filename.c_str());
     //TODO: try possible optimizations
 
@@ -348,7 +348,7 @@ VertexData* priv::MeshLoader::LoadFrom_OBJCC(string& filename) {
         sizes[i] |= static_cast<uint32_t>(_data[blockStart + 3]);
         blockStart += 4;
     }
-    VertexData* returnData;
+    
     const auto& sizes_attr     = sizes[0];
     const auto& sizes_indices  = sizes[1];
     const auto& sizes_skeleton = sizes[2];

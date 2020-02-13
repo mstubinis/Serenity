@@ -22,9 +22,7 @@ const bool Handle::null() const {
     return (type == ResourceType::Empty || (index == 0 && version == 0 && type == 0)) ? true : false; 
 }
 const EngineResource* Handle::get() const {
-    if (null()) 
-        return nullptr;
-    return priv::Core::m_Engine->m_ResourceManager.m_Resources.getAsFast<EngineResource>(index);
+    return (null()) ? nullptr : priv::Core::m_Engine->m_ResourceManager.m_Resources.getAsFast<EngineResource>(index);
 }
 const EngineResource* Handle::operator ->() const { 
     return get(); 

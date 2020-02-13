@@ -28,7 +28,7 @@ namespace Engine{
     void setWindowIcon(const Texture& texture);
     void showMouseCursor();
     void hideMouseCursor();
-    void setTimeScale(const double timeScale);
+    void setTimeScale(const float timeScale);
     void stop();
     const bool setFullscreen(const bool& isFullscreen);
     const bool setFullscreenWindowed(const bool& isFullscreen);
@@ -156,12 +156,12 @@ namespace Engine{
                 void on_event_joystick_connected(Window&, const unsigned int& id);
                 void on_event_joystick_disconnected(Window&, const unsigned int& id);
 
-                void update_logic(Window& window, const double& dt);
-                void update_sounds(Window& window, const double& dt);
-                void update_physics(Window& window, const double& dt);
-                void update(Window& window, const double& dt);
-                void render(Window& window, const double& dt);
-                void cleanup(Window& window, const double& dt);
+                void update_logic(Window& window, const float& dt);
+                void update_sounds(Window& window, const float& dt);
+                void update_physics(Window& window, const float& dt);
+                void update(Window& window, const float& dt);
+                void render(Window& window, const float& dt);
+                void cleanup(Window& window, const float& dt);
             public:
                 struct Misc final {
                     Engine::priv::BuiltInMeshses   m_BuiltInMeshes;
@@ -188,7 +188,7 @@ namespace Engine{
                 void run();
                 void handle_events(Window& window);
 
-                void render2DApi(Window& window, const double& dt);
+                void render2DApi(Window& window, const float& dt);
         };
         struct Core final{
             static EngineCore*          m_Engine;

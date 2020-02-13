@@ -26,7 +26,7 @@ class  SoundEffect : public SoundBaseClass {
 
         ~SoundEffect();
 
-        void update(const double& dt);
+        void update(const float& dt);
         const bool play(const unsigned int& numLoops = 1);
         const bool pause();
         const bool stop(const bool& stopAllLoops = false);

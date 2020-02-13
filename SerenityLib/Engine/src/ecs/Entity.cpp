@@ -5,7 +5,7 @@
 using namespace Engine;
 using namespace std;
 
-Entity Entity::_null = Entity(0,0,0);
+Entity Entity::null_ = Entity(0,0,0);
 
 Entity::Entity() {
     data = 0;

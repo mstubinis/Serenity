@@ -534,7 +534,7 @@ void DeferredPipeline::internal_pass_blur() {
 
 
 
-void DeferredPipeline::update(const double& dt) {
+void DeferredPipeline::update(const float& dt) {
 
 }
 void DeferredPipeline::render() {

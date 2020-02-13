@@ -43,7 +43,7 @@ void SoundQueue::dequeue() {
         m_IsDelayProcess = true;
     }
 }
-void SoundQueue::update(const double& dt) {
+void SoundQueue::update(const float& dt) {
     if (m_Active) {
         if (m_IsDelayProcess) {
             m_DelayTimer += static_cast<float>(dt);

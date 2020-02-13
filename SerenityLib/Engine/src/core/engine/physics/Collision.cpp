@@ -147,36 +147,26 @@ Collision::Collision(const Collision& other) : m_OwnerBody(other.m_OwnerBody) {
     //copy constructor
     m_BtInertia = other.m_BtInertia;
     m_Type      = other.m_Type;
-    if (other.m_BtShape) 
-        m_BtShape = other.m_BtShape;
-    else                 
-        m_BtShape = nullptr;
+    m_BtShape   = other.m_BtShape;
 }
 Collision& Collision::operator=(const Collision& other) {
     //copy assignment
     m_BtInertia = other.m_BtInertia;
     m_Type      = other.m_Type;
-    if (other.m_BtShape) 
-        m_BtShape = other.m_BtShape;
-    else                 
-        m_BtShape = nullptr;
+    m_BtShape   = other.m_BtShape;
     return *this;
 }
 Collision::Collision(Collision&& other) noexcept : m_OwnerBody(other.m_OwnerBody) {
     //move constructor
-    using std::swap;
-    swap(m_BtInertia, other.m_BtInertia);
-    swap(m_Type, other.m_Type);
-    swap(m_BtShape, other.m_BtShape);
-    other.m_BtShape = nullptr;
+    m_BtInertia = std::move(other.m_BtInertia);
+    m_Type      = std::move(other.m_Type);
+    m_BtShape   = std::exchange(other.m_BtShape, nullptr);
 }
 Collision& Collision::operator=(Collision&& other) noexcept {
     //move assignment
-    using std::swap;
-    swap(m_BtInertia, other.m_BtInertia);
-    swap(m_Type, other.m_Type);
-    swap(m_BtShape, other.m_BtShape);
-    other.m_BtShape = nullptr;
+    m_BtInertia = std::move(other.m_BtInertia);
+    m_Type      = std::move(other.m_Type);
+    m_BtShape   = std::exchange(other.m_BtShape, nullptr);
     return *this;
 }
 void Collision::setMass(const float _mass) {

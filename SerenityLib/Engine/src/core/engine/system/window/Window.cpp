@@ -173,7 +173,7 @@ const bool Window::WindowData::add_flag(const Window_Flags::Flag& flag) {
 const bool Window::WindowData::has_flag(const Window_Flags::Flag& flag) {
     return (m_Flags & flag) ? true : false;
 }
-void Window::WindowData::on_reset_events(const double& dt) {
+void Window::WindowData::on_reset_events(const float& dt) {
     m_MouseDifference.x = 0.0f;
     m_MouseDifference.y = 0.0f;
 

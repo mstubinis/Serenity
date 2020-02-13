@@ -16,8 +16,7 @@ class  btUniformScalingShape;
 class  btScaledBvhTriangleMeshShape;
 class  btGImpactMeshShape;
 
-namespace Engine {
-namespace priv {
+namespace Engine::priv {
     class MeshCollisionFactory final {
         private:
             Mesh&                          m_Mesh;
@@ -42,7 +41,6 @@ namespace priv {
             btScaledBvhTriangleMeshShape*  buildTriangleShape(ModelInstance* modelInstance, const bool isCompoundChild = false);
             btGImpactMeshShape*            buildTriangleShapeGImpact(ModelInstance* modelInstance, const bool isCompoundChild = false);
     };
-};
 };
 
 #endif

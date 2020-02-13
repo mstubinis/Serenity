@@ -86,7 +86,7 @@ namespace Engine {
         const bool activate(const discord::ClientId& clientID);
 
 
-        class DiscordCore {
+        class DiscordCore final : public Engine::NonCopyable, public Engine::NonMoveable {
             friend class  DiscordActivity;
             friend class  Engine::priv::EngineCore;
             private:

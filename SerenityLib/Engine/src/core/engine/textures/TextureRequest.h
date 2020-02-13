@@ -17,6 +17,11 @@ struct TextureRequestPart final {
 
     TextureRequestPart();
     ~TextureRequestPart();
+
+    TextureRequestPart(const TextureRequestPart&);
+    TextureRequestPart& operator=(const TextureRequestPart&);
+    TextureRequestPart(TextureRequestPart&& other) noexcept = delete;
+    TextureRequestPart& operator=(TextureRequestPart&& other) noexcept = delete;
 };
 struct TextureRequest final {
     std::string          file;
@@ -72,18 +77,16 @@ struct TextureRequestFromMemory final {
     void requestAsync();
 };
 
-namespace Engine {
-    namespace priv {
-        struct InternalTextureRequestPublicInterface final {
-            friend class  Texture;
-            static void Request(TextureRequest&);
-            static void LoadGPU(TextureRequest&);
-            static void LoadCPU(TextureRequest&);
+namespace Engine::priv {
+    struct InternalTextureRequestPublicInterface final {
+        friend class  Texture;
+        static void Request(TextureRequest&);
+        static void LoadGPU(TextureRequest&);
+        static void LoadCPU(TextureRequest&);
 
-            static void RequestMem(TextureRequestFromMemory&);
-            static void LoadGPUMem(TextureRequestFromMemory&);
-            static void LoadCPUMem(TextureRequestFromMemory&);
-        };
+        static void RequestMem(TextureRequestFromMemory&);
+        static void LoadGPUMem(TextureRequestFromMemory&);
+        static void LoadCPUMem(TextureRequestFromMemory&);
     };
 };
 

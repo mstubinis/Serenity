@@ -65,7 +65,7 @@ namespace Engine::priv {
                     camera.resize(width, height);
                 }
             }
-            void update(const double& dt, Scene& scene) {
+            void update(const float& dt, Scene& scene) {
                 for (size_t i = 0; i < m_Systems.size(); ++i) { 
                     m_Systems[i]->onUpdate(dt, scene);
                 }
@@ -84,7 +84,7 @@ namespace Engine::priv {
                 }
             }
             //add newly created entities to the scene with their components as defined in their m_Systems, etc
-            void preUpdate(Scene& scene, const double& dt) {
+            void preUpdate(Scene& scene, const float& dt) {
                 if (m_JustAddedEntities.size() > 0) {
                     for (size_t i = 0; i < m_Systems.size(); ++i) {
                         for (size_t j = 0; j < m_JustAddedEntities.size(); ++j) {
@@ -95,7 +95,7 @@ namespace Engine::priv {
                 }
             }
             //destroy flagged entities & their components, if any
-            void postUpdate(Scene& scene, const double& dt) {
+            void postUpdate(Scene& scene, const float& dt) {
                 if (m_DestroyedEntities.size() > 0) {
                     for (auto& entityID : m_DestroyedEntities) {
                         m_EntityPool.destroyFlaggedEntity(entityID);

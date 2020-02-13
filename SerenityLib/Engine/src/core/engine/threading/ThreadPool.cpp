@@ -11,24 +11,20 @@ struct EmptyCallback final {void operator()() const {}};
 #pragma region ThreadPoolFuture
 
 ThreadPoolFuture::ThreadPoolFuture(std::future<void>&& future, std::function<void()>&& callback) {
-    using std::swap;
-    std::swap(m_Future, future);
-    std::swap(m_Callback, callback);
+    m_Future   = std::move(future);
+    m_Callback = std::move(callback);
 }
-
 ThreadPoolFuture::ThreadPoolFuture(ThreadPoolFuture&& other) noexcept {
-    using std::swap;
-    swap(m_Future, other.m_Future);
-    swap(m_Callback, other.m_Callback);
+    m_Future   = std::move(other.m_Future);
+    m_Callback = std::move(other.m_Callback);
 }
 ThreadPoolFuture& ThreadPoolFuture::operator=(ThreadPoolFuture&& other) noexcept {
-    using std::swap;
-    swap(m_Future, other.m_Future);
-    swap(m_Callback, other.m_Callback);
+    m_Future   = std::move(other.m_Future);
+    m_Callback = std::move(other.m_Callback);
     return *this;
 }
 const bool ThreadPoolFuture::isReady() {
-    return m_Future._Is_ready() && m_Future.valid();
+    return (m_Future._Is_ready() && m_Future.valid());
 }
 void ThreadPoolFuture::operator()() const {
     if (m_Callback) { //hacky, still trying to find out why this is needed
