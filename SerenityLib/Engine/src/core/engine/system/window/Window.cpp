@@ -226,6 +226,7 @@ Window::Window(const EngineOptions& options){
     if (options.maximized) {
         maximize();
     }
+    setVerticalSyncEnabled(options.vsync);
 
     requestFocus();
     display();
@@ -445,51 +446,47 @@ void Window::restore_state() {
 }
 const bool Window::setFullscreenWindowed(const bool isToBeFullscreen) {
     if (isToBeFullscreen) {
-        if (isFullscreenWindowed())
+        if (isFullscreenWindowed()) {
             return false;
-    }else{
-        if (!isFullscreenWindowed())
-            return false;
-    }
-    const bool old_max = isMaximized();
-    const bool old_min = isMinimized();
-
-    if (!isToBeFullscreen) {
-        m_Data.m_Style = sf::Style::Default; //windowed
-        m_Data.add_flag(Window_Flags::Windowed);
-        m_Data.remove_flag(Window_Flags::Fullscreen);
-        m_Data.remove_flag(Window_Flags::WindowedFullscreen);
-    }else{
+        }
         m_Data.m_Style = sf::Style::None;    //windowed_fullscreen
         m_Data.add_flag(Window_Flags::WindowedFullscreen);
         m_Data.remove_flag(Window_Flags::Fullscreen);
         m_Data.remove_flag(Window_Flags::Windowed);
+    }else{
+        if (!isFullscreen()) {
+            return false;
+        }
+        m_Data.m_Style = sf::Style::Default; //windowed
+        m_Data.add_flag(Window_Flags::Windowed);
+        m_Data.remove_flag(Window_Flags::Fullscreen);
+        m_Data.remove_flag(Window_Flags::WindowedFullscreen);
     }
+    const bool old_max = isMaximized();
+    const bool old_min = isMinimized();
     m_Data.on_fullscreen_internal(*this, isToBeFullscreen, old_max, old_min);
     return true;
 }
 const bool Window::setFullscreen(const bool isToBeFullscreen){
     if (isToBeFullscreen) {
-        if (isFullscreenNonWindowed())
+        if (isFullscreenNonWindowed()) {
             return false;
-    }else{
-        if (!isFullscreenNonWindowed())
-            return false;
-    }
-    const bool old_max = isMaximized();
-    const bool old_min = isMinimized();
-
-    if (!isToBeFullscreen) {
-        m_Data.m_Style = sf::Style::Default;    //windowed
-        m_Data.add_flag(Window_Flags::Windowed);
-        m_Data.remove_flag(Window_Flags::Fullscreen);
-        m_Data.remove_flag(Window_Flags::WindowedFullscreen);
-    }else{
+        }
         m_Data.m_Style = sf::Style::Fullscreen; //fullscreen   
         m_Data.add_flag(Window_Flags::Fullscreen);
         m_Data.remove_flag(Window_Flags::WindowedFullscreen);
         m_Data.remove_flag(Window_Flags::Windowed);
+    }else{
+        if (!isFullscreen()) {
+            return false;
+        }
+        m_Data.m_Style = sf::Style::Default;    //windowed
+        m_Data.add_flag(Window_Flags::Windowed);
+        m_Data.remove_flag(Window_Flags::Fullscreen);
+        m_Data.remove_flag(Window_Flags::WindowedFullscreen);
     }
+    const bool old_max = isMaximized();
+    const bool old_min = isMinimized();
     m_Data.on_fullscreen_internal(*this, isToBeFullscreen, old_max, old_min);
     return true;
 }

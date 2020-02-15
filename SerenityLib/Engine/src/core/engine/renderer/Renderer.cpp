@@ -1243,7 +1243,9 @@ class priv::Renderer::impl final{
                 gbuffer.bindBackbuffer(viewport, fbo, rbo);
                 _passDepthAndTransparency(gbuffer, dimensions.z, dimensions.w, viewport, camera, sceneTexture);
 
-            }else if (mainRenderFunc && aa_algorithm == AntiAliasingAlgorithm::SMAA && (viewport.getRenderFlags() & ViewportRenderingFlag::AntiAliasing)){
+            }else if (mainRenderFunc && 
+            (aa_algorithm == AntiAliasingAlgorithm::SMAA_LOW || aa_algorithm == AntiAliasingAlgorithm::SMAA_MED || aa_algorithm == AntiAliasingAlgorithm::SMAA_HIGH || aa_algorithm == AntiAliasingAlgorithm::SMAA_ULTRA)
+            && (viewport.getRenderFlags() & ViewportRenderingFlag::AntiAliasing)){
                 gbuffer.bindFramebuffers(outTexture);
                 _passFinal(gbuffer, dimensions.z, dimensions.w, sceneTexture);
 
@@ -1501,8 +1503,29 @@ void Renderer::Settings::Lighting::setGIContribution(const float g, const float 
 
 const bool Renderer::Settings::setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm& algorithm){
     auto& i = *renderManagerImpl;
+    switch (algorithm) {
+        case AntiAliasingAlgorithm::None: {
+            break;
+        }case AntiAliasingAlgorithm::FXAA: {
+            break;
+        }case AntiAliasingAlgorithm::SMAA_LOW: {
+            Renderer::smaa::setQuality(SMAAQualityLevel::Low);
+            break;
+        }case AntiAliasingAlgorithm::SMAA_MED: {
+            Renderer::smaa::setQuality(SMAAQualityLevel::Medium);
+            break;
+        }case AntiAliasingAlgorithm::SMAA_HIGH: {
+            Renderer::smaa::setQuality(SMAAQualityLevel::High);
+            break;
+        }case AntiAliasingAlgorithm::SMAA_ULTRA: {
+            Renderer::smaa::setQuality(SMAAQualityLevel::Ultra);
+            break;
+        }default: {
+            break;
+        }
+    }
     if(i.aa_algorithm != algorithm){ 
-        i.aa_algorithm = algorithm; 
+        i.aa_algorithm = algorithm;
         return true;
     }
     return false;

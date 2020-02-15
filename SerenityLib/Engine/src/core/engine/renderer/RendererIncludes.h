@@ -12,17 +12,22 @@ struct SortingMode final { enum Mode {
 };};
 
 struct DepthFunc final { enum Func {
-    Never = GL_NEVER,
-    Less = GL_LESS,
-    Equal = GL_EQUAL,
-    LEqual = GL_LEQUAL,
-    Greater = GL_GREATER,
+    Never    = GL_NEVER,
+    Less     = GL_LESS,
+    Equal    = GL_EQUAL,
+    LEqual   = GL_LEQUAL,
+    Greater  = GL_GREATER,
     NotEqual = GL_NOTEQUAL,
-    GEqual = GL_GEQUAL,
-    Always = GL_ALWAYS,
+    GEqual   = GL_GEQUAL,
+    Always   = GL_ALWAYS,
 };};
 struct AntiAliasingAlgorithm final { enum Algorithm {
-    None, FXAA, SMAA,
+    None, 
+    FXAA, 
+    SMAA_LOW,
+    SMAA_MED,
+    SMAA_HIGH,
+    SMAA_ULTRA,
 };};
 
 struct Alignment final { enum Type {

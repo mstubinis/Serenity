@@ -101,6 +101,26 @@ class ComponentModel: public ComponentBaseClass, public EventObserver {
         template<class T> void setCustomUnbindFunctor(const T& functor, const size_t& index = 0) {
             m_ModelInstances[index]->setCustomUnbindFunctor(functor);
         }
+
+        ModelInstance* operator[](const size_t index) {
+            return m_ModelInstances[index];
+        }
+        const ModelInstance* operator[](const size_t index) const {
+            return m_ModelInstances[index];
+        }
+
+        std::vector<ModelInstance*>::iterator begin() {
+            return m_ModelInstances.begin();
+        }
+        std::vector<ModelInstance*>::iterator end() {
+            return m_ModelInstances.end();
+        }
+        std::vector<ModelInstance*>::const_iterator begin() const {
+            return m_ModelInstances.begin();
+        }
+        std::vector<ModelInstance*>::const_iterator end() const {
+            return m_ModelInstances.end();
+        }
 };
 
 class ComponentModel_System_CI : public Engine::priv::ECSSystemCI {

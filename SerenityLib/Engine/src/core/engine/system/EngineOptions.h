@@ -18,6 +18,7 @@ struct EngineOptions final {
     bool                               fog_enabled;
     bool                               show_console;
     bool                               maximized;
+    bool                               vsync;
     unsigned int                       width;
     unsigned int                       height;
     std::string                        window_title;
@@ -30,6 +31,7 @@ struct EngineOptions final {
         ssao_enabled      = true;
         hdr_enabled       = true;
         god_rays_enabled  = true;
+        vsync             = true;
         window_mode       = 0;
         fog_enabled       = false;
         show_console      = false;
