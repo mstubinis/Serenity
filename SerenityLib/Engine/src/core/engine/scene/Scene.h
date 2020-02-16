@@ -29,6 +29,7 @@ namespace Engine::priv {
 #include <core/engine/resources/Engine_ResourceBasic.h>
 #include <core/engine/events/Engine_EventObject.h>
 #include <core/engine/renderer/particles/ParticleSystem.h>
+#include <core/engine/scene/Viewport.h>
 #include <functional>
 
 class Scene: public EngineResource, public EventObserver{
@@ -45,9 +46,9 @@ class Scene: public EngineResource, public EventObserver{
             m_OnUpdateFunctor = std::bind<void>(functor, this, std::placeholders::_1);
         }
     private:
-        std::vector<Viewport*>                                m_Viewports;
+        std::vector<Viewport>                                 m_Viewports;
         std::vector<Camera*>                                  m_Cameras;
-        std::vector<std::vector<Engine::priv::RenderGraph*>>  m_RenderGraphs;
+        std::vector<std::vector<Engine::priv::RenderGraph>>   m_RenderGraphs;
 
         std::vector<SunLight*>                                m_Lights;
         std::vector<SunLight*>                                m_SunLights;
@@ -112,7 +113,7 @@ namespace Engine {
 
             static std::vector<Particle>&            GetParticles(Scene&);
             static std::vector<EntityPOD>&           GetEntities(Scene&);
-            static std::vector<Viewport*>&           GetViewports(Scene&);
+            static std::vector<Viewport>&            GetViewports(Scene&);
             static std::vector<Camera*>&             GetCameras(Scene&);
             static std::vector<SunLight*>&           GetLights(Scene&);
             static std::vector<SunLight*>&           GetSunLights(Scene&);

@@ -2,10 +2,6 @@
 #ifndef ENGINE_ECS_COMPONENT_MODEL_H
 #define ENGINE_ECS_COMPONENT_MODEL_H
 
-#include <ecs/ComponentBaseClass.h>
-#include <ecs/ECSSystemConstructorInfo.h>
-#include <core/engine/model/ModelInstance.h>
-
 struct Handle;
 class  ShaderProgram;
 class  Mesh;
@@ -25,6 +21,12 @@ namespace Engine {
     };
 };
 
+#include <ecs/ComponentBaseClass.h>
+#include <ecs/ECSSystemConstructorInfo.h>
+#include <core/engine/model/ModelInstance.h>
+
+typedef std::vector<ModelInstance*> ModelInstanceVector;
+
 class ComponentModel: public ComponentBaseClass, public EventObserver {
     friend struct Engine::priv::ComponentModel_UpdateFunction;
     friend struct Engine::priv::ComponentModel_EntityAddedToSceneFunction;
@@ -34,7 +36,7 @@ class ComponentModel: public ComponentBaseClass, public EventObserver {
     friend struct Engine::priv::ComponentModel_Functions;
     friend class  ComponentCamera;
     private:
-        std::vector<ModelInstance*>  m_ModelInstances;
+        ModelInstanceVector          m_ModelInstances;
         float                        m_Radius;
         glm::vec3                    m_RadiusBox;
     public:
@@ -51,8 +53,8 @@ class ComponentModel: public ComponentBaseClass, public EventObserver {
 
         ComponentModel(const ComponentModel& other)                = delete;
         ComponentModel& operator=(const ComponentModel& other)     = delete;
-        ComponentModel(ComponentModel&& other) noexcept            = default;
-        ComponentModel& operator=(ComponentModel&& other) noexcept = default;
+        ComponentModel(ComponentModel&& other) noexcept;
+        ComponentModel& operator=(ComponentModel&& other) noexcept;
 
         ~ComponentModel();
 
@@ -102,23 +104,23 @@ class ComponentModel: public ComponentBaseClass, public EventObserver {
             m_ModelInstances[index]->setCustomUnbindFunctor(functor);
         }
 
-        ModelInstance* operator[](const size_t index) {
-            return m_ModelInstances[index];
+        ModelInstance& operator[](const size_t index) {
+            return *m_ModelInstances[index];
         }
-        const ModelInstance* operator[](const size_t index) const {
-            return m_ModelInstances[index];
+        const ModelInstance& operator[](const size_t index) const {
+            return *m_ModelInstances[index];
         }
 
-        std::vector<ModelInstance*>::iterator begin() {
+        ModelInstanceVector::iterator begin() {
             return m_ModelInstances.begin();
         }
-        std::vector<ModelInstance*>::iterator end() {
+        ModelInstanceVector::iterator end() {
             return m_ModelInstances.end();
         }
-        std::vector<ModelInstance*>::const_iterator begin() const {
+        ModelInstanceVector::const_iterator begin() const {
             return m_ModelInstances.begin();
         }
-        std::vector<ModelInstance*>::const_iterator end() const {
+        ModelInstanceVector::const_iterator end() const {
             return m_ModelInstances.end();
         }
 };

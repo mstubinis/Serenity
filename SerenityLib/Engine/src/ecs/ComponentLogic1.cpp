@@ -10,11 +10,10 @@ ComponentLogic1::ComponentLogic1(const Entity& entity) : ComponentBaseClass(enti
     m_UserPointer  = nullptr;
     m_UserPointer1 = nullptr;
     m_UserPointer2 = nullptr;
-    setFunctor(Engine::priv::ComponentLogic1_EmptyFunctor());
 }
 ComponentLogic1::~ComponentLogic1() {
 }
-
+/*
 ComponentLogic1::ComponentLogic1(const ComponentLogic1& other) {
     m_Owner        = other.m_Owner;
     m_Functor      = other.m_Functor;
@@ -32,6 +31,7 @@ ComponentLogic1& ComponentLogic1::operator=(const ComponentLogic1& other) {
     }
     return *this;
 }
+*/
 ComponentLogic1::ComponentLogic1(ComponentLogic1&& other) noexcept {
     m_Owner        = std::move(other.m_Owner);
     m_Functor      = std::move(other.m_Functor);
@@ -68,7 +68,8 @@ void* ComponentLogic1::getUserPointer2() const {
     return m_UserPointer2;
 }
 void ComponentLogic1::call(const float& dt) { 
-    m_Functor(dt); 
+    if(m_Functor)
+        m_Functor(dt); 
 }
 
 #pragma endregion

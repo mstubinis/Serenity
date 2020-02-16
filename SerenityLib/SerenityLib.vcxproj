@@ -276,6 +276,8 @@
     <ClInclude Include="Engine\src\core\engine\math\Engine_Math.h" />
     <ClInclude Include="Engine\src\core\engine\math\Numbers.h" />
     <ClInclude Include="Engine\src\core\engine\math\SimplexNoise.h" />
+    <ClInclude Include="Engine\src\core\engine\mesh\AnimationData.h" />
+    <ClInclude Include="Engine\src\core\engine\mesh\AnimationIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\BuiltInMeshes.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\Mesh.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\MeshCollisionFactory.h" />
@@ -289,6 +291,7 @@
     <ClInclude Include="Engine\src\core\engine\mesh\VertexData.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\VertexDataFormat.h" />
     <ClInclude Include="Engine\src\core\engine\model\ModelInstance.h" />
+    <ClInclude Include="Engine\src\core\engine\model\ModelInstanceAnimation.h" />
     <ClInclude Include="Engine\src\core\engine\model\ModelInstanceIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\networking\Networking.h" />
     <ClInclude Include="Engine\src\core\engine\networking\ListenerTCP.h" />
@@ -414,6 +417,7 @@
     <ClCompile Include="Engine\src\core\engine\discord\src\user_manager.cpp" />
     <ClCompile Include="Engine\src\core\engine\discord\src\voice_manager.cpp" />
     <ClCompile Include="Engine\src\core\engine\events\Engine_EventDispatcher.cpp" />
+    <ClCompile Include="Engine\src\core\engine\events\Engine_EventIncludes.cpp" />
     <ClCompile Include="Engine\src\core\engine\events\Engine_EventObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\events\Engine_Events.cpp" />
     <ClCompile Include="Engine\src\core\engine\fonts\Font.cpp" />
@@ -432,6 +436,7 @@
     <ClCompile Include="Engine\src\core\engine\materials\MaterialRequest.cpp" />
     <ClCompile Include="Engine\src\core\engine\math\Engine_Math.cpp" />
     <ClCompile Include="Engine\src\core\engine\math\SimplexNoise.cpp" />
+    <ClCompile Include="Engine\src\core\engine\mesh\AnimationData.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\BuiltInMeshes.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\Mesh.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshCollisionFactory.cpp" />
@@ -443,6 +448,7 @@
     <ClCompile Include="Engine\src\core\engine\mesh\VertexData.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\VertexDataFormat.cpp" />
     <ClCompile Include="Engine\src\core\engine\model\ModelInstance.cpp" />
+    <ClCompile Include="Engine\src\core\engine\model\ModelInstanceAnimation.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\ListenerTCP.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\SocketTCP.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\SocketUDP.cpp" />
@@ -506,6 +512,7 @@
     <ClCompile Include="Engine\src\core\engine\threading\Engine_ThreadManager.cpp" />
     <ClCompile Include="Engine\src\core\engine\threading\ThreadPool.cpp" />
     <ClCompile Include="Engine\src\core\engine\utils\Engine_Debugging.cpp" />
+    <ClCompile Include="Engine\src\core\engine\utils\ForcedInclude.cpp" />
     <ClCompile Include="Engine\src\core\engine\utils\Logger.cpp" />
     <ClCompile Include="Engine\src\core\Terrain.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentBaseClass.cpp" />

@@ -102,7 +102,7 @@ namespace Engine::priv {
             }
             T* get(const unsigned int& entityID) {
                 const auto entityIndexInSparse = entityID - 1;
-                const auto sparseSize  = super::sparse.size();
+                const auto sparseSize          = super::sparse.size();
                 if (sparseSize == 0 || entityIndexInSparse >= sparseSize || super::sparse[entityIndexInSparse] == 0) {
                     return nullptr;
                 }

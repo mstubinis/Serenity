@@ -92,6 +92,52 @@ namespace Engine {
             NonMoveable(NonMoveable&&) noexcept            = delete;
             NonMoveable& operator=(NonMoveable&&) noexcept = delete;
     };
+
+    template<typename T> class Flag final {
+        private:
+            T m_Flags;
+        public:
+            Flag() {
+                m_Flags = 0;
+            }
+            ~Flag() {
+
+            }
+
+            Flag& operator=(const T& other) {
+                m_Flags = other;
+                return *this;
+            }
+            const T& get() const {
+                return m_Flags;
+            }
+            T operator&(const T& other) {
+                return m_Flags & other;
+            }
+            T operator|(const T& other) {
+                return m_Flags | other;
+            }
+            T operator&=(const T& other) {
+                return m_Flags &= other;
+            }
+            T operator|=(const T& other) {
+                return m_Flags |= other;
+            }
+
+            void add(const T& flag) {
+                if (m_Flags != (m_Flags | flag)) {
+                    m_Flags = m_Flags | flag;
+                }
+            }
+            void remove(const T& flag) {
+                if (m_Flags != (m_Flags & ~flag)) {
+                    m_Flags = m_Flags & ~flag;
+                }
+            }
+            const bool has(const T& flag) const {
+                return (m_Flags & flag) ? true : false;
+            }
+    };
 };
 
 #endif

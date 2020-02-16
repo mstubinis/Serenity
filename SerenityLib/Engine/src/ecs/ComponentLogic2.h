@@ -13,11 +13,10 @@ namespace Engine {
         struct ComponentLogic2_ComponentAddedToEntityFunction;
         struct ComponentLogic2_SceneEnteredFunction;
         struct ComponentLogic2_SceneLeftFunction;
-        struct ComponentLogic2_EmptyFunctor final { void operator()(ComponentLogic2& _component, const float& dt) const {} };
     };
 };
 
-class ComponentLogic2 : public ComponentBaseClass {
+class ComponentLogic2 : public ComponentBaseClass, public Engine::NonCopyable {
     friend struct Engine::priv::ComponentLogic2_UpdateFunction;
     friend struct Engine::priv::ComponentLogic2_ComponentAddedToEntityFunction;
     friend struct Engine::priv::ComponentLogic2_EntityAddedToSceneFunction;
@@ -37,8 +36,8 @@ class ComponentLogic2 : public ComponentBaseClass {
             m_UserPointer2 = UserPointer2;
             setFunctor(Functor);
         }
-        ComponentLogic2(const ComponentLogic2& other);
-        ComponentLogic2& operator=(const ComponentLogic2& other);
+        ComponentLogic2(const ComponentLogic2& other) = delete;
+        ComponentLogic2& operator=(const ComponentLogic2& other) = delete;
         ComponentLogic2(ComponentLogic2&& other) noexcept;
         ComponentLogic2& operator=(ComponentLogic2&& other) noexcept;
 
@@ -47,7 +46,7 @@ class ComponentLogic2 : public ComponentBaseClass {
         void call(const float& dt);
 
         template<typename T> void setFunctor(const T& functor) { 
-            m_Functor = std::bind<void>(std::move(functor), *this, std::placeholders::_1);
+            m_Functor = std::bind<void>(std::move(functor), this, std::placeholders::_1);
         }
 
         void setUserPointer(void* UserPointer);

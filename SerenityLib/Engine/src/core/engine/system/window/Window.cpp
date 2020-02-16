@@ -60,7 +60,7 @@ const sf::ContextSettings Window::WindowData::create(Window& super, const string
     on_close();
 
     #ifdef ENGINE_THREAD_WINDOW_EVENTS
-        auto lamda = [](Window& super, const string& name_, unsigned int style_, sf::VideoMode videoMode_, sf::ContextSettings settings_, Engine_Window::Engine_WindowData& data_) {
+        auto lamda = [](Window& super, const string& name_, unsigned int style_, sf::VideoMode videoMode_, sf::ContextSettings settings_, Window::WindowData& data_) {
             data_.m_SFMLWindow.create(videoMode_, name_, style_, settings_);
             if(!data_.m_IconFile.empty())
                 super.setIcon(data_.m_IconFile);
@@ -71,18 +71,18 @@ const sf::ContextSettings Window::WindowData::create(Window& super, const string
                 while (!data_.m_UndergoingClosing && data_.m_SFMLWindow.pollEvent(e)) {
                     data_.m_Queue.push(e);
                 }
-                auto command_ptr = data_.m_MainThreadToEventThreadQueueShowMouse.try_pop();
+                auto command_ptr = data_.m_MainThreadToEventThreadQueue.try_pop();
                 while (command_ptr) {
                     auto& command = *command_ptr;
 
                     switch (command) {
                         case EventThreadOnlyCommands::HideMouse: {
                             data_.m_SFMLWindow.setMouseCursorVisible(false);
-                            data_.add_flag(Window_Flags::MouseVisible);
+                            data_.m_Flags.add(Window_Flags::MouseVisible);
                             break;
                         }case EventThreadOnlyCommands::ShowMouse: {
                             data_.m_SFMLWindow.setMouseCursorVisible(true);
-                            data_.add_flag(Window_Flags::MouseVisible);
+                            data_.m_Flags.add(Window_Flags::MouseVisible);
                             break;
                         }case EventThreadOnlyCommands::RequestFocus: {
                             data_.m_SFMLWindow.requestFocus();
@@ -91,7 +91,7 @@ const sf::ContextSettings Window::WindowData::create(Window& super, const string
                             break;
                         }
                     }
-                    command_ptr = data_.m_MainThreadToEventThreadQueueShowMouse.try_pop();
+                    command_ptr = data_.m_MainThreadToEventThreadQueue.try_pop();
                 }
             }
         };
@@ -156,23 +156,6 @@ sf::VideoMode Window::WindowData::get_default_desktop_video_mode() {
     const auto validModes = sf::VideoMode::getFullscreenModes();
     return (validModes.size() > 0) ? validModes[0] : sf::VideoMode::getDesktopMode();
 }
-const bool Window::WindowData::remove_flag(const Window_Flags::Flag& flag) {
-    if (m_Flags != (m_Flags & ~flag)) {
-        m_Flags = m_Flags & ~flag;
-        return true;
-    }
-    return false;
-}
-const bool Window::WindowData::add_flag(const Window_Flags::Flag& flag) {
-    if (m_Flags != (m_Flags | flag)) {
-        m_Flags = m_Flags | flag;
-        return true;
-    }
-    return false;
-}
-const bool Window::WindowData::has_flag(const Window_Flags::Flag& flag) {
-    return (m_Flags & flag) ? true : false;
-}
 void Window::WindowData::on_reset_events(const float& dt) {
     m_MouseDifference.x = 0.0f;
     m_MouseDifference.y = 0.0f;
@@ -226,10 +209,11 @@ Window::Window(const EngineOptions& options){
     if (options.maximized) {
         maximize();
     }
-    setVerticalSyncEnabled(options.vsync);
 
     requestFocus();
     display();
+
+    //setVerticalSyncEnabled(options.vsync); //unfortunately this will not work until a few frames after the window creation
 
     if (options.show_console) {
         std::cout << "Using OpenGL: " << m_Data.m_SFContextSettings.majorVersion << "." << m_Data.m_SFContextSettings.minorVersion << ", with depth bits: " << m_Data.m_SFContextSettings.depthBits << " and stencil bits: " << m_Data.m_SFContextSettings.stencilBits << std::endl;
@@ -313,49 +297,47 @@ void Window::setName(const char* name){
 }
 void Window::setVerticalSyncEnabled(const bool isToBeEnabled){
     if (isToBeEnabled) {
-        if (!m_Data.has_flag(Window_Flags::Vsync)) {
+        if (!m_Data.m_Flags.has(Window_Flags::Vsync)) {
             m_Data.m_SFMLWindow.setVerticalSyncEnabled(true);
-            m_Data.add_flag(Window_Flags::Vsync);
+            m_Data.m_Flags.add(Window_Flags::Vsync);
         }
     }else{
-        if (m_Data.has_flag(Window_Flags::Vsync)) {
+        if (m_Data.m_Flags.has(Window_Flags::Vsync)) {
             m_Data.m_SFMLWindow.setVerticalSyncEnabled(false);
-            m_Data.remove_flag(Window_Flags::Vsync);
+            m_Data.m_Flags.remove(Window_Flags::Vsync);
         }
     }
 }
 void Window::setKeyRepeatEnabled(const bool isToBeEnabled){
     if (isToBeEnabled) {
-        if (!m_Data.has_flag(Window_Flags::KeyRepeat)) {
+        if (!m_Data.m_Flags.has(Window_Flags::KeyRepeat)) {
             m_Data.m_SFMLWindow.setKeyRepeatEnabled(true);
-            m_Data.add_flag(Window_Flags::KeyRepeat);
+            m_Data.m_Flags.add(Window_Flags::KeyRepeat);
         }
     }else{
-        if (m_Data.has_flag(Window_Flags::KeyRepeat)) {
+        if (m_Data.m_Flags.has(Window_Flags::KeyRepeat)) {
             m_Data.m_SFMLWindow.setKeyRepeatEnabled(false);
-            m_Data.remove_flag(Window_Flags::KeyRepeat);
+            m_Data.m_Flags.remove(Window_Flags::KeyRepeat);
         }
     }
 }
 void Window::setMouseCursorVisible(const bool isToBeVisible){
     if (isToBeVisible) {
-        if (!m_Data.has_flag(Window_Flags::MouseVisible)) {
+        if (!m_Data.m_Flags.has(Window_Flags::MouseVisible)) {
             #ifdef ENGINE_THREAD_WINDOW_EVENTS
-                auto command = WindowData::EventThreadOnlyCommands::ShowMouse;
-                m_Data.m_MainThreadToEventThreadQueueShowMouse.push(command);
+                m_Data.m_MainThreadToEventThreadQueue.push(WindowData::EventThreadOnlyCommands::ShowMouse);
             #else
                 m_Data.m_SFMLWindow.setMouseCursorVisible(true);
-                m_Data.add_flag(Window_Flags::MouseVisible);
+                m_Data.m_Flags.add(Window_Flags::MouseVisible);
             #endif
         }
     }else{
-        if (m_Data.has_flag(Window_Flags::MouseVisible)) {
+        if (m_Data.m_Flags.has(Window_Flags::MouseVisible)) {
             #ifdef ENGINE_THREAD_WINDOW_EVENTS
-                auto command = WindowData::EventThreadOnlyCommands::HideMouse;
-                m_Data.m_MainThreadToEventThreadQueueShowMouse.push(command);
+                m_Data.m_MainThreadToEventThreadQueue.push(WindowData::EventThreadOnlyCommands::HideMouse);
             #else
                 m_Data.m_SFMLWindow.setMouseCursorVisible(false);
-                m_Data.remove_flag(Window_Flags::MouseVisible);
+                m_Data.m_Flags.remove(Window_Flags::MouseVisible);
             #endif
         }
     }
@@ -363,8 +345,7 @@ void Window::setMouseCursorVisible(const bool isToBeVisible){
 void Window::requestFocus(){
 
     #ifdef ENGINE_THREAD_WINDOW_EVENTS
-        auto command = WindowData::EventThreadOnlyCommands::RequestFocus;
-        m_Data.m_MainThreadToEventThreadQueueShowMouse.push(command);
+        m_Data.m_MainThreadToEventThreadQueue.push(WindowData::EventThreadOnlyCommands::RequestFocus);
     #else
         m_Data.m_SFMLWindow.requestFocus();
     #endif
@@ -380,16 +361,16 @@ const bool Window::isOpen(){
     return m_Data.m_SFMLWindow.isOpen();
 }
 const bool Window::isActive(){
-    return m_Data.has_flag(Window_Flags::Active);
+    return m_Data.m_Flags.has(Window_Flags::Active);
 }
 const bool Window::isFullscreen(){
     return isFullscreenNonWindowed() || isFullscreenWindowed();
 }
 const bool Window::isFullscreenWindowed() {
-    return m_Data.has_flag(Window_Flags::WindowedFullscreen);
+    return m_Data.m_Flags.has(Window_Flags::WindowedFullscreen);
 }
 const bool Window::isFullscreenNonWindowed() {
-    return m_Data.has_flag(Window_Flags::Fullscreen);
+    return m_Data.m_Flags.has(Window_Flags::Fullscreen);
 }
 void Window::display(){
     m_Data.m_SFMLWindow.display();
@@ -416,14 +397,14 @@ const bool Window::isMinimized() {
 }
 void Window::setActive(const bool isToBeActive){
     if (isToBeActive) {
-        if (!m_Data.has_flag(Window_Flags::Active)) {
+        if (!m_Data.m_Flags.has(Window_Flags::Active)) {
             m_Data.m_SFMLWindow.setActive(true);
-            m_Data.add_flag(Window_Flags::Active);
+            m_Data.m_Flags.add(Window_Flags::Active);
         }
     }else{
-        if (m_Data.has_flag(Window_Flags::Active)) {
+        if (m_Data.m_Flags.has(Window_Flags::Active)) {
             m_Data.m_SFMLWindow.setActive(false);
-            m_Data.remove_flag(Window_Flags::Active);
+            m_Data.m_Flags.remove(Window_Flags::Active);
         }
     }
 }
@@ -450,17 +431,17 @@ const bool Window::setFullscreenWindowed(const bool isToBeFullscreen) {
             return false;
         }
         m_Data.m_Style = sf::Style::None;    //windowed_fullscreen
-        m_Data.add_flag(Window_Flags::WindowedFullscreen);
-        m_Data.remove_flag(Window_Flags::Fullscreen);
-        m_Data.remove_flag(Window_Flags::Windowed);
+        m_Data.m_Flags.add(Window_Flags::WindowedFullscreen);
+        m_Data.m_Flags.remove(Window_Flags::Fullscreen);
+        m_Data.m_Flags.remove(Window_Flags::Windowed);
     }else{
         if (!isFullscreen()) {
             return false;
         }
         m_Data.m_Style = sf::Style::Default; //windowed
-        m_Data.add_flag(Window_Flags::Windowed);
-        m_Data.remove_flag(Window_Flags::Fullscreen);
-        m_Data.remove_flag(Window_Flags::WindowedFullscreen);
+        m_Data.m_Flags.add(Window_Flags::Windowed);
+        m_Data.m_Flags.remove(Window_Flags::Fullscreen);
+        m_Data.m_Flags.remove(Window_Flags::WindowedFullscreen);
     }
     const bool old_max = isMaximized();
     const bool old_min = isMinimized();
@@ -473,17 +454,17 @@ const bool Window::setFullscreen(const bool isToBeFullscreen){
             return false;
         }
         m_Data.m_Style = sf::Style::Fullscreen; //fullscreen   
-        m_Data.add_flag(Window_Flags::Fullscreen);
-        m_Data.remove_flag(Window_Flags::WindowedFullscreen);
-        m_Data.remove_flag(Window_Flags::Windowed);
+        m_Data.m_Flags.add(Window_Flags::Fullscreen);
+        m_Data.m_Flags.remove(Window_Flags::WindowedFullscreen);
+        m_Data.m_Flags.remove(Window_Flags::Windowed);
     }else{
         if (!isFullscreen()) {
             return false;
         }
         m_Data.m_Style = sf::Style::Default;    //windowed
-        m_Data.add_flag(Window_Flags::Windowed);
-        m_Data.remove_flag(Window_Flags::Fullscreen);
-        m_Data.remove_flag(Window_Flags::WindowedFullscreen);
+        m_Data.m_Flags.add(Window_Flags::Windowed);
+        m_Data.m_Flags.remove(Window_Flags::Fullscreen);
+        m_Data.m_Flags.remove(Window_Flags::WindowedFullscreen);
     }
     const bool old_max = isMaximized();
     const bool old_min = isMinimized();
@@ -492,14 +473,14 @@ const bool Window::setFullscreen(const bool isToBeFullscreen){
 }
 void Window::keepMouseInWindow(const bool isToBeKept){
     if (isToBeKept) {
-        if (!m_Data.has_flag(Window_Flags::MouseGrabbed)) {
+        if (!m_Data.m_Flags.has(Window_Flags::MouseGrabbed)) {
             m_Data.m_SFMLWindow.setMouseCursorGrabbed(true);
-            m_Data.add_flag(Window_Flags::MouseGrabbed);
+            m_Data.m_Flags.add(Window_Flags::MouseGrabbed);
         }
     }else{
-        if (m_Data.has_flag(Window_Flags::MouseGrabbed)) {
+        if (m_Data.m_Flags.has(Window_Flags::MouseGrabbed)) {
             m_Data.m_SFMLWindow.setMouseCursorGrabbed(false);
-            m_Data.remove_flag(Window_Flags::MouseGrabbed);
+            m_Data.m_Flags.remove(Window_Flags::MouseGrabbed);
         }
     }
 }

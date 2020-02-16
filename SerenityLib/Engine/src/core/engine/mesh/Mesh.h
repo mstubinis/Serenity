@@ -7,6 +7,17 @@ class  Camera;
 class  btHeightfieldTerrainShape;
 class  btCollisionShape;
 class  Collision;
+namespace Engine::priv {
+    class  MeshLoader;
+    class  MeshSkeleton;
+    class  MeshCollisionFactory;
+    struct MeshImportedData;
+    struct DefaultMeshBindFunctor;
+    struct DefaultMeshUnbindFunctor;
+    struct BoneNode;
+    class  AnimationData;
+    struct InternalMeshRequestPublicInterface;
+};
 
 #include <core/engine/mesh/VertexData.h>
 #include <core/engine/mesh/MeshIncludes.h>
@@ -21,15 +32,6 @@ class  Collision;
 #include <assimp/scene.h>
 
 namespace Engine::priv{
-    class  MeshLoader;
-    class  MeshSkeleton;
-    class  MeshCollisionFactory;
-    struct MeshImportedData;
-    struct DefaultMeshBindFunctor;
-    struct DefaultMeshUnbindFunctor;
-    struct BoneNode;
-    class  AnimationData;
-    struct InternalMeshRequestPublicInterface;
     struct InternalMeshPublicInterface final {
         static void InitBlankMesh(Mesh&);
         static void LoadGPU(Mesh&);

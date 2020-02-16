@@ -2,6 +2,15 @@
 #ifndef ENGINE_MESH_INSTANCE_H
 #define ENGINE_MESH_INSTANCE_H
 
+struct Handle;
+class  ShaderProgram;
+class  Material;
+class  Mesh;
+class  ComponentModel;
+class  Viewport;
+class  ModelInstance;
+class  Collision;
+
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -13,14 +22,6 @@
 #include <core/engine/model/ModelInstanceIncludes.h>
 #include <core/engine/scene/ViewportIncludes.h>
 
-struct Handle;
-class  ShaderProgram;
-class  Material;
-class  Mesh;
-class  ComponentModel;
-class  Viewport;
-class  ModelInstance;
-class  Collision;
 namespace Engine::priv{
     struct DefaultModelInstanceBindFunctor;
     struct DefaultModelInstanceUnbindFunctor;
@@ -36,11 +37,12 @@ class ModelInstance final: public BindableResource{
     friend class  ComponentModel;
     friend class  Collision;
     private:
-        ModelDrawingMode::Mode                               m_DrawingMode;
         static unsigned int                                  m_ViewportFlagDefault;
-        unsigned int                                         m_ViewportFlag; //determine what viewports this can be seen in
+    private:
+        ModelDrawingMode::Mode                               m_DrawingMode;
+        Engine::Flag<unsigned int>                           m_ViewportFlag; //determine what viewports this can be seen in
         void*                                                m_UserPointer;
-        std::vector<Engine::priv::ModelInstanceAnimation*>  m_AnimationQueue;
+        std::vector<Engine::priv::ModelInstanceAnimation*>   m_AnimationQueue;
         Entity                                               m_Parent;
         ShaderProgram*                                       m_ShaderProgram;
         Mesh*                                                m_Mesh;
@@ -63,10 +65,10 @@ class ModelInstance final: public BindableResource{
         ModelInstance(Entity&, Mesh*, Handle mat, ShaderProgram* = 0);
         ModelInstance(Entity&, Handle mesh, Material*, ShaderProgram* = 0);
 
-        ModelInstance(const ModelInstance& other)                = default;
-        ModelInstance& operator=(const ModelInstance& other)     = default;
-        ModelInstance(ModelInstance&& other) noexcept            = default;
-        ModelInstance& operator=(ModelInstance&& other) noexcept = default;
+        ModelInstance(const ModelInstance& other)                = delete;
+        ModelInstance& operator=(const ModelInstance& other)     = delete;
+        ModelInstance(ModelInstance&& other) noexcept;
+        ModelInstance& operator=(ModelInstance&& other) noexcept;
 
         ~ModelInstance();
 
@@ -79,9 +81,12 @@ class ModelInstance final: public BindableResource{
 
         void setViewportFlag(const unsigned int flag);
         void addViewportFlag(const unsigned int flag);
+        void removeViewportFlag(const unsigned int flag);
         void setViewportFlag(const ViewportFlag::Flag flag);
         void addViewportFlag(const ViewportFlag::Flag flag);
-        const unsigned int getViewportFlags() const;
+        void removeViewportFlag(const ViewportFlag::Flag flag);
+
+        const unsigned int& getViewportFlags() const;
 
         void forceRender(const bool forced = true);
         const bool isForceRendered() const;

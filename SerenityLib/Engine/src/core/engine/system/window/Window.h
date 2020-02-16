@@ -2,7 +2,7 @@
 #ifndef ENGINE_WINDOW_H
 #define ENGINE_WINDOW_H
 
-#define ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS
+//#define ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS
 #if !defined(_APPLE_) && !defined(ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS)
     #ifndef ENGINE_THREAD_WINDOW_EVENTS
     #define ENGINE_THREAD_WINDOW_EVENTS
@@ -28,7 +28,7 @@ struct EngineOptions;
 #include <glm/vec2.hpp>
 #include <core/engine/threading/Queue_ThreadSafe.h>
 
-class Window_Flags final { public: enum Flag: unsigned int {
+class Window_Flags final { public: enum Flag: unsigned short {
     WindowedFullscreen = 1 << 0,
     Windowed           = 1 << 1,
     Fullscreen         = 1 << 2,
@@ -57,8 +57,8 @@ class Window final{
         private:
             #ifdef ENGINE_THREAD_WINDOW_EVENTS
                 Engine::priv::Queue_ThreadSafe<sf::Event>                          m_Queue;
-                Engine::priv::Queue_ThreadSafe<EventThreadOnlyCommands::Command>   m_MainThreadToEventThreadQueueShowMouse;
-                std::unique_ptr<std::thread>                                        m_EventThread;
+                Engine::priv::Queue_ThreadSafe<EventThreadOnlyCommands::Command>   m_MainThreadToEventThreadQueue;
+                std::unique_ptr<std::thread>                                       m_EventThread;
             #endif
 
             glm::uvec2          m_OldWindowSize;
@@ -68,7 +68,7 @@ class Window final{
             sf::Window          m_SFMLWindow;
             unsigned int        m_FramerateLimit;
             bool                m_UndergoingClosing;
-            unsigned int        m_Flags;
+            Engine::Flag<unsigned short>        m_Flags;
             std::string         m_IconFile;
 
             glm::vec2           m_MousePosition;
@@ -89,11 +89,6 @@ class Window final{
             void on_reset_events(const float& dt);
 
             void on_close();
-
-            const bool remove_flag(const Window_Flags::Flag& flag);
-            const bool add_flag(const Window_Flags::Flag& flag);
-            const bool has_flag(const Window_Flags::Flag& flag);
-
         public:
             WindowData();
             ~WindowData();

@@ -2,9 +2,6 @@
 #ifndef ENGINE_RENDER_GRAPH_INCLUDE_GUARD
 #define ENGINE_RENDER_GRAPH_INCLUDE_GUARD
 
-#include <core/engine/utils/Utils.h>
-#include <core/engine/renderer/RendererIncludes.h>
-
 class  ShaderProgram;
 class  Camera;
 class  Scene;
@@ -13,58 +10,93 @@ class  Mesh;
 class  ModelInstance;
 struct Entity;
 class  Viewport;
-namespace Engine {
-    namespace priv {
-        struct InternalScenePublicInterface;
-        struct InstanceNode final {
-            ModelInstance* instance;
-            InstanceNode(const ModelInstance& modelInstance) : instance(&const_cast<ModelInstance&>(modelInstance)) {
-            }
-            ~InstanceNode() {
+namespace Engine::priv {
+    class  RenderGraph;
+    struct InternalScenePublicInterface;
+};
 
-            }
-        };
-        struct MeshNode final {
-            Mesh* mesh;
-            std::vector<InstanceNode*> instanceNodes;
-            MeshNode(const Mesh& mesh_) : mesh(&const_cast<Mesh&>(mesh_)) {
-            }
-            ~MeshNode() {
-                SAFE_DELETE_VECTOR(instanceNodes);
-            }
-        };
-        struct MaterialNode final {
-            Material* material;
-            std::vector<MeshNode*> meshNodes;
-            MaterialNode(const Material& material_) : material(&const_cast<Material&>(material_)) {
-            }
-            ~MaterialNode() {
-                SAFE_DELETE_VECTOR(meshNodes);
-            }
-        };
-        class RenderGraph final {
-            friend class  Scene;
-            friend struct Engine::priv::InternalScenePublicInterface;
-            private:
-                ShaderProgram&               shaderProgram;
-                std::vector<MaterialNode*>   materialNodes;
-                std::vector<InstanceNode*>   instancesTotal;
-            public:
-                RenderGraph(ShaderProgram&);
-                ~RenderGraph();
+#include <core/engine/utils/Utils.h>
+#include <core/engine/renderer/RendererIncludes.h>
 
-                void clean(const uint entityData);
-                void sort(Camera& camera, const SortingMode::Mode sortingMode);
-                void sort_cheap(Camera& camera, const SortingMode::Mode sortingMode);
+namespace Engine::priv {
+    class InstanceNode final : public Engine::NonCopyable {
+        friend class  RenderGraph;
+        friend struct InternalScenePublicInterface;
+        private:
+            ModelInstance*   instance;
 
-                void sort_bruteforce(Camera& camera, const SortingMode::Mode sortingMode);
-                void sort_cheap_bruteforce(Camera& camera, const SortingMode::Mode sortingMode);
+            InstanceNode() = delete;
+        public:
+            InstanceNode(const ModelInstance& modelInstance);
+            ~InstanceNode();
 
-                void render(Viewport& viewport, Camera& camera, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
-                void render_bruteforce(Viewport& viewport, Camera& camera, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
-                void validate_model_instances_for_rendering(Viewport& viewport, Camera& camera);
+            InstanceNode(InstanceNode&& other) noexcept;
+            InstanceNode& operator=(InstanceNode&& other) noexcept;
+    };
+    class MeshNode final : public Engine::NonCopyable {
+        friend class  RenderGraph;
+        friend struct InternalScenePublicInterface;
+        private:
+            Mesh*                        mesh;
+            std::vector<InstanceNode*>   instanceNodes;
 
-        };
+            MeshNode() = delete;
+        public:
+            MeshNode(const Mesh& mesh);
+            ~MeshNode();
+
+            MeshNode(MeshNode&& other) noexcept;
+            MeshNode& operator=(MeshNode&& other) noexcept;
+    };
+    class MaterialNode final : public Engine::NonCopyable{
+        friend class  RenderGraph;
+        friend struct InternalScenePublicInterface;
+        private:
+            Material*                material;
+            std::vector<MeshNode>    meshNodes;
+
+            MaterialNode() = delete;
+        public:
+            MaterialNode(const Material& material);
+            ~MaterialNode();
+
+            MaterialNode(MaterialNode&& other) noexcept;
+            MaterialNode& operator=(MaterialNode&& other) noexcept;
+    };
+    class RenderGraph final : public Engine::NonCopyable {
+        friend class  Scene;
+        friend struct Engine::priv::InternalScenePublicInterface;
+        private:
+            ShaderProgram*               m_ShaderProgram;
+            std::vector<MaterialNode>    m_MaterialNodes;
+            std::vector<InstanceNode*>   m_InstancesTotal;
+
+            RenderGraph() = delete;
+
+            void addModelInstanceToPipeline(ModelInstance& modelInstance);
+            void removeModelInstanceFromPipeline(ModelInstance& modelInstance);
+        public:
+            RenderGraph(ShaderProgram&);
+            ~RenderGraph();
+
+            RenderGraph(RenderGraph&& other) noexcept;
+            RenderGraph& operator=(RenderGraph&& other) noexcept;
+
+            const bool remove_material_node(const MaterialNode& materialNode);
+            const bool remove_mesh_node(MaterialNode& materialNode, const MeshNode& meshNode);
+            const bool remove_instance_node(MeshNode& meshNode, const InstanceNode& instanceNode);
+
+            void clean(const uint entityData);
+            void sort(Camera& camera, const SortingMode::Mode sortingMode);
+            void sort_cheap(Camera& camera, const SortingMode::Mode sortingMode);
+
+            void sort_bruteforce(Camera& camera, const SortingMode::Mode sortingMode);
+            void sort_cheap_bruteforce(Camera& camera, const SortingMode::Mode sortingMode);
+
+            void render(Viewport& viewport, Camera& camera, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
+            void render_bruteforce(Viewport& viewport, Camera& camera, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
+            void validate_model_instances_for_rendering(Viewport& viewport, Camera& camera);
+
     };
 };
 #endif

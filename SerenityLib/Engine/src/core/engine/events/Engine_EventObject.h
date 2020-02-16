@@ -182,23 +182,24 @@ struct Event final{
 
 };
 /*
-Inherit from this struct to expose your class to events and event dispatching, specifically the following functions:
+Inherit from this class to expose your class to events and event dispatching, specifically the following functions:
     void registerEvent(const EventType::Type& type)    -  register this object as an observer to the parameterized event type
     void unregisterEvent(const EventType::Type& type)  -  unregister this object as an observer to the parameterized event type
     virtual void onEvent(const Event& e)               -  execute this function when the parameter event occurs
 */
-struct EventObserver{
-    virtual ~EventObserver(){}
+class EventObserver{
+    public:
+        virtual ~EventObserver(){}
 
-    template <class T> void registerEvent(const T&) = delete;
-    template <class T> void unregisterEvent(const T&) = delete;
+        template <typename T> void registerEvent(const T&) = delete;
+        template <typename T> void unregisterEvent(const T&) = delete;
 
-    void registerEvent(const EventType::Type& type);
-    void unregisterEvent(const EventType::Type& type);
+        void registerEvent(const EventType::Type& type);
+        void unregisterEvent(const EventType::Type& type);
 
-    void registerEvent(const unsigned int& type);
-    void unregisterEvent(const unsigned int& type);
+        void registerEvent(const unsigned int& type);
+        void unregisterEvent(const unsigned int& type);
 
-    virtual void onEvent(const Event& e) {}
+        virtual void onEvent(const Event& e) {}
 };
 #endif

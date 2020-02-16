@@ -69,7 +69,7 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
     friend struct Engine::priv::ComponentBody_SceneLeftFunction;
     friend class  ComponentModel;
     private:
-        struct PhysicsData {
+        struct PhysicsData final {
             Collision*           collision;
             btRigidBody*         bullet_rigidBody;
             btDefaultMotionState bullet_motionState;
@@ -85,7 +85,7 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
             PhysicsData(PhysicsData&& other) noexcept;
             ~PhysicsData();         
         };
-        struct NormalData {
+        struct NormalData final {
             glm_vec3 scale;
             glm_vec3 position;
             glm_quat rotation;

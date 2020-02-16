@@ -812,7 +812,7 @@ class priv::Renderer::impl final{
         }
 
         void _passGeometry(const float& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
-            Scene& scene = viewport.m_Scene;
+            Scene& scene = *viewport.m_Scene;
             const glm::vec4& clear = viewport.m_BackgroundColor;
             const float colors[4] = { clear.r, clear.g, clear.b, clear.a };
     
@@ -840,7 +840,7 @@ class priv::Renderer::impl final{
             InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(scene, viewport, camera, true);
         }
         void _passForwardRendering(const float& dt, GBuffer& gbuffer, Viewport& viewport, Camera& camera){
-            Scene& scene = viewport.m_Scene;
+            Scene& scene = *viewport.m_Scene;
             gbuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, GBufferType::Lighting, "RGBA");
             InternalScenePublicInterface::RenderForwardOpaque(scene, viewport, camera, dt);
 
@@ -874,7 +874,7 @@ class priv::Renderer::impl final{
             Engine::Renderer::colorMask(true, true, true, true);
         }
         void _passLighting(GBuffer& gbuffer, Viewport& viewport, Camera& camera, const uint& fboWidth, const uint& fboHeight,bool mainRenderFunc){
-            Scene& scene = viewport.m_Scene;
+            Scene& scene = *viewport.m_Scene;
 
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLighting]->bind();
 
@@ -1076,7 +1076,7 @@ class priv::Renderer::impl final{
         }
         
         void _render(const float& dt, GBuffer& gbuffer, Viewport& viewport,const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo){
-            const Scene& scene           = viewport.m_Scene;
+            const Scene& scene           = *viewport.m_Scene;
             Camera& camera               = const_cast<Camera&>(viewport.getCamera());
             const glm::uvec4& dimensions = viewport.getViewportDimensions();
 
@@ -1549,6 +1549,12 @@ void Renderer::Settings::clear(const bool color, const bool depth, const bool st
     if(depth)   clearBit |= GL_DEPTH_BUFFER_BIT;
     if(stencil) clearBit |= GL_STENCIL_BUFFER_BIT;
     glClear(clearBit);
+}
+void Renderer::Settings::applyGlobalAnisotropicFiltering(const float filtering) {
+    const auto textures = Engine::priv::Core::m_Engine->m_ResourceManager.GetAllResourcesOfType<Texture>();
+    for (auto& texture : textures) {
+        texture->setAnisotropicFiltering(filtering);
+    }
 }
 void Renderer::Settings::enableDrawPhysicsInfo(const bool b){
     renderManagerImpl->draw_physics_debug = b; 

@@ -208,8 +208,7 @@ void EngineCore::render2DApi(Window& window, const float& dt) {
     scene.render();
     m_RenderManager._sort2DAPICommands();
     auto& scene_viewports = InternalScenePublicInterface::GetViewports(scene);
-    for (auto& viewport_ptr : scene_viewports) {
-        auto& viewport = *viewport_ptr;
+    for (auto& viewport : scene_viewports) {
         if (viewport.isActive()) {
             m_RenderManager._render2DApi(dt, viewport, true, 0, 0);
         }
@@ -224,8 +223,7 @@ void EngineCore::render(Window& window, const float& dt){
     scene.render();
     m_RenderManager._sort2DAPICommands();
     auto& scene_viewports = InternalScenePublicInterface::GetViewports(scene);
-    for (auto& viewport_ptr : scene_viewports) {
-        auto& viewport = *viewport_ptr;
+    for (auto& viewport : scene_viewports) {
         if (viewport.isActive()) {
             m_RenderManager._render(dt, viewport, true, 0, 0);
         }
@@ -251,7 +249,7 @@ void EngineCore::on_event_resize(Window& window, const unsigned int& newWindowWi
         if (scene) {
             scene->onResize(newWindowWidth, newWindowHeight);
             InternalScenePublicInterface::GetECS(*scene).onResize<ComponentCamera>(newWindowWidth, newWindowHeight);
-            InternalScenePublicInterface::GetViewports(*scene)[0]->setViewportDimensions(0.0f, 0.0f, static_cast<float>(newWindowWidth), static_cast<float>(newWindowHeight));
+            InternalScenePublicInterface::GetViewports(*scene)[0].setViewportDimensions(0.0f, 0.0f, static_cast<float>(newWindowWidth), static_cast<float>(newWindowHeight));
         }
     }
 

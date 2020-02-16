@@ -25,6 +25,7 @@ class  ShaderProgram;
 #include <core/engine/shaders/ShaderIncludes.h>
 #include <core/engine/resources/ResourcePool.h>
 #include <core/engine/utils/Utils.h>
+#include <list>
 
 #include <glm/vec2.hpp>
 
@@ -70,6 +71,22 @@ namespace Engine{
                     }
                     return nullptr;
                 }
+
+                template<typename T> std::list<T*> GetAllResourcesOfType() {
+                    std::list<T*> ret;
+                    for (size_t i = 0; i < m_Resources.size(); ++i) {
+                        EngineResource* r = m_Resources.getAsFast<EngineResource>(static_cast<unsigned int>(i) + 1U);
+                        if (r) {
+                            T* resource = dynamic_cast<T*>(r);
+                            if (resource) {
+                                ret.push_back(resource);
+                            }
+                        }
+                    }
+                    return ret;
+                }
+
+
         };
     };
     namespace Resources{

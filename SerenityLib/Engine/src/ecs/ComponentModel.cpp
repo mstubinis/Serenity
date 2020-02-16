@@ -78,6 +78,19 @@ ComponentModel::ComponentModel(const Entity& entity, Handle& mesh, Material* mat
 ComponentModel::ComponentModel(const Entity& entity, Mesh* mesh, Material* material, Handle& shaderProgram, const RenderStage::Stage& stage) : ComponentBaseClass(entity) {
     addModel(mesh, material, (ShaderProgram*)shaderProgram.get(), stage);
 }
+ComponentModel::ComponentModel(ComponentModel&& other) noexcept {
+    m_ModelInstances = std::move(other.m_ModelInstances);
+    m_Radius         = std::move(other.m_Radius);
+    m_RadiusBox      = std::move(other.m_RadiusBox);
+}
+ComponentModel& ComponentModel::operator=(ComponentModel&& other) noexcept {
+    if (&other != this) {
+        m_ModelInstances = std::move(other.m_ModelInstances);
+        m_Radius         = std::move(other.m_Radius);
+        m_RadiusBox      = std::move(other.m_RadiusBox);
+    }
+    return *this;
+}
 ComponentModel::~ComponentModel() {
     SAFE_DELETE_VECTOR(m_ModelInstances);
 }
@@ -103,22 +116,22 @@ void ComponentModel::removeModel(const size_t& index) {
 }
 void ComponentModel::setViewportFlag(const unsigned int flag) {
     for (auto& model_instance : m_ModelInstances) {
-        if(model_instance) model_instance->setViewportFlag(flag);
+        model_instance->setViewportFlag(flag);
     }
 }
 void ComponentModel::addViewportFlag(const unsigned int flag) {
     for (auto& model_instance : m_ModelInstances) {
-        if (model_instance) model_instance->addViewportFlag(flag);
+        model_instance->addViewportFlag(flag);
     }
 }
 void ComponentModel::setViewportFlag(const ViewportFlag::Flag flag) {
     for (auto& model_instance : m_ModelInstances) {
-        if (model_instance) model_instance->setViewportFlag(flag);
+        model_instance->setViewportFlag(flag);
     }
 }
 void ComponentModel::addViewportFlag(const ViewportFlag::Flag flag) {
     for (auto& model_instance : m_ModelInstances) {
-        if (model_instance) model_instance->addViewportFlag(flag);
+        model_instance->addViewportFlag(flag);
     }
 }
 
@@ -129,12 +142,14 @@ ModelInstance& ComponentModel::getModel(const size_t& index) {
     return *m_ModelInstances[index];
 }
 void ComponentModel::show() { 
-    for (auto& modelInstance : m_ModelInstances)
+    for (auto& modelInstance : m_ModelInstances) {
         modelInstance->show();
+    }
 }
 void ComponentModel::hide() { 
-    for (auto& modelInstance : m_ModelInstances)
+    for (auto& modelInstance : m_ModelInstances) {
         modelInstance->hide();
+    }
 }
 const float& ComponentModel::radius() const {
     return m_Radius; 
@@ -151,10 +166,10 @@ ModelInstance& ComponentModel::addModel(Mesh* mesh, Material* material, ShaderPr
         registerEvent(EventType::MeshLoaded);
     }
 
-    auto* modelInstance_ptr = NEW ModelInstance(m_Owner, mesh, material, shaderProgram);
-    auto& modelInstance     = *modelInstance_ptr;
+    auto modelInstance = NEW ModelInstance(m_Owner, mesh, material, shaderProgram);
     auto& _scene            = m_Owner.scene();
-    modelInstance.m_Stage   = stage;
+    modelInstance->m_Stage   = stage;
+    /*
     bool did_early = false;
     for (size_t i = 0; i < m_ModelInstances.size(); ++i) {
         if (m_ModelInstances[i] == nullptr) {
@@ -164,14 +179,15 @@ ModelInstance& ComponentModel::addModel(Mesh* mesh, Material* material, ShaderPr
             break;
         }
     }
-    if (!did_early) {
+    */
+    //if (!did_early) {
         const auto index = m_ModelInstances.size();
-        modelInstance.m_Index = index;
-        m_ModelInstances.push_back(modelInstance_ptr);
-    }
-    InternalScenePublicInterface::AddModelInstanceToPipeline(_scene, modelInstance, stage);
+        modelInstance->m_Index = index;
+        m_ModelInstances.push_back(std::move(modelInstance));
+    //}
+    InternalScenePublicInterface::AddModelInstanceToPipeline(_scene, *modelInstance, stage);
     ComponentModel_Functions::CalculateRadius(*this);
-    return modelInstance;
+    return *modelInstance;
 }
 
 ModelInstance& ComponentModel::addModel(Handle& mesh, Handle& material, Handle& shaderProgram, const RenderStage::Stage& stage) {

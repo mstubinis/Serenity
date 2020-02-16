@@ -57,7 +57,7 @@ namespace Engine::priv {
                 m_Queue.pop();
                 return res;
             }
-            void push(T& pushedValue){
+            void push(const T& pushedValue){
                 std::lock_guard<std::mutex> lock(m_Mutex);
                 m_Queue.push(std::move(pushedValue));
                 m_ConditionVariable.notify_one();

@@ -5,7 +5,7 @@
 #include <core/engine/model/ModelInstance.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Skybox.h>
-#include <core/engine/scene/Viewport.h>
+//#include <core/engine/scene/Viewport.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/renderer/particles/ParticleEmitter.h>
 #include <core/engine/renderer/RenderGraph.h>
@@ -59,106 +59,37 @@ class Scene::impl final {
             }
             centerBody.setPosition(static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(0.0));
         }
-        void _addModelInstanceToPipeline(Scene& _scene, ModelInstance& _modelInstance, const vector<priv::RenderGraph*>& render_graph_list, const RenderStage::Stage& _stage) {
+        void _addModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, const vector<priv::RenderGraph>& render_graph_list, const RenderStage::Stage& stage) {
             priv::RenderGraph* renderGraph = nullptr;
         
             for (auto& render_graph_ptr : render_graph_list) {
-                if (&render_graph_ptr->shaderProgram == _modelInstance.shaderProgram()) {
-                    renderGraph = render_graph_ptr;
+                if (render_graph_ptr.m_ShaderProgram == modelInstance.shaderProgram()) {
+                    renderGraph = &const_cast<priv::RenderGraph&>(render_graph_ptr);
                     break;
                 }
             }
             if (!renderGraph) {
-                renderGraph = NEW priv::RenderGraph(*_modelInstance.shaderProgram());
-                _scene.m_RenderGraphs[_stage].push_back(renderGraph);
+                renderGraph = &scene.m_RenderGraphs[stage].emplace_back(*modelInstance.shaderProgram());
             }
-            //material node check
-            priv::MaterialNode* materialNode = nullptr;
-            priv::MeshNode*     meshNode     = nullptr;
-            priv::InstanceNode* instanceNode = nullptr;
-            for (auto& itr : renderGraph->materialNodes) {
-                if (itr->material == _modelInstance.material()) {
-                    materialNode = itr;
-                    //mesh node check
-                    for (auto& itr1 : materialNode->meshNodes) {
-                        if (itr1->mesh == _modelInstance.mesh()) {
-                            meshNode = itr1;
-                            //instance check
-                            for (auto& itr2 : meshNode->instanceNodes) {
-                                if (itr2->instance == &_modelInstance) {
-                                    instanceNode = itr2;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (!materialNode) {
-                materialNode = NEW priv::MaterialNode(*_modelInstance.material());
-                renderGraph->materialNodes.push_back(materialNode);
-            }
-            if (!meshNode) {
-                meshNode = NEW priv::MeshNode(*_modelInstance.mesh());
-                materialNode->meshNodes.push_back(meshNode);
-            }
-            if (!instanceNode) {
-                instanceNode = NEW priv::InstanceNode(_modelInstance);
-                meshNode->instanceNodes.push_back(instanceNode);
-                renderGraph->instancesTotal.push_back(instanceNode);
-            }
+            renderGraph->addModelInstanceToPipeline(modelInstance);
         }
-        void _removeModelInstanceFromPipeline(Scene& _scene, ModelInstance& _modelInstance, const vector<priv::RenderGraph*>& render_graph_list, const RenderStage::Stage& _stage) {
+        void _removeModelInstanceFromPipeline(ModelInstance& modelInstance, const vector<priv::RenderGraph>& render_graph_list) {
             priv::RenderGraph* renderGraph = nullptr;
             for (auto& render_graph_ptr : render_graph_list) {
-                if (&render_graph_ptr->shaderProgram == _modelInstance.shaderProgram()) {
-                    renderGraph = render_graph_ptr;
+                if (render_graph_ptr.m_ShaderProgram == modelInstance.shaderProgram()) {
+                    renderGraph = &const_cast<priv::RenderGraph&>(render_graph_ptr);
                     break;
                 }
             }
             if (renderGraph) {
-                //material node check
-                priv::MaterialNode* materialNode = nullptr;
-                priv::MeshNode*     meshNode     = nullptr;
-                priv::InstanceNode* instanceNode = nullptr;
-                for (auto& itr : renderGraph->materialNodes) {
-                    if (itr->material == _modelInstance.material()) {
-                        materialNode = itr;
-                        //mesh node check
-                        for (auto& itr1 : materialNode->meshNodes) {
-                            if (itr1->mesh == _modelInstance.mesh()) {
-                                meshNode = itr1;
-                                //instance check
-                                for (auto& itr2 : meshNode->instanceNodes) {
-                                    if (itr2->instance == &_modelInstance) {
-                                        instanceNode = itr2;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                if (meshNode) {
-                    removeFromVector(meshNode->instanceNodes, instanceNode);
-                    removeFromVector(renderGraph->instancesTotal, instanceNode);
-                    SAFE_DELETE(instanceNode);
-                    if (meshNode->instanceNodes.size() == 0) {
-                        removeFromVector(materialNode->meshNodes, meshNode);
-                        SAFE_DELETE(meshNode);
-                        if (materialNode->meshNodes.size() == 0) {
-                            removeFromVector(renderGraph->materialNodes, materialNode);
-                            SAFE_DELETE(materialNode);
-                        }
-                    }
-                }
+                renderGraph->removeModelInstanceFromPipeline(modelInstance);
             }
         }
 };
 vector<Particle>& priv::InternalScenePublicInterface::GetParticles(Scene& scene) {
     return scene.m_i->m_ParticleSystem.getParticles();
 }
-vector<Viewport*>& priv::InternalScenePublicInterface::GetViewports(Scene& scene) {
+vector<Viewport>& priv::InternalScenePublicInterface::GetViewports(Scene& scene) {
     return scene.m_Viewports;
 }
 vector<Camera*>& priv::InternalScenePublicInterface::GetCameras(Scene& scene) {
@@ -190,16 +121,16 @@ vector<RodLight*>& priv::InternalScenePublicInterface::GetRodLights(Scene& scene
 void priv::InternalScenePublicInterface::UpdateMaterials(Scene& scene, const float& dt) {
     for (uint i = 0; i < RenderStage::_TOTAL; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            for (auto& materialNode : render_graph_ptr->materialNodes) {
-                auto& _material = *materialNode->material;
+            for (auto& materialNode : render_graph_ptr.m_MaterialNodes) {
+                auto& _material = *materialNode.material;
                 _material.m_UpdatedThisFrame = false;
             }
         }
     }
     for (uint i = 0; i < RenderStage::_TOTAL; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            for (auto& materialNode : render_graph_ptr->materialNodes) {
-                auto& _material = *materialNode->material;
+            for (auto& materialNode : render_graph_ptr.m_MaterialNodes) {
+                auto& _material = *materialNode.material;
                 if (!_material.m_UpdatedThisFrame) {
                     _material.update(dt);
                     _material.m_UpdatedThisFrame = true;
@@ -216,7 +147,7 @@ void priv::InternalScenePublicInterface::UpdateParticleSystem(Scene& scene, cons
 void priv::InternalScenePublicInterface::RenderGeometryOpaque(Scene& scene, Viewport& viewport, Camera& camera, const bool useDefaultShaders) {
     for (uint i = RenderStage::GeometryOpaque; i < RenderStage::GeometryOpaque_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            auto& render_graph = *render_graph_ptr;
+            auto& render_graph = render_graph_ptr;
             render_graph.validate_model_instances_for_rendering(viewport, camera);
             render_graph.render(viewport, camera, useDefaultShaders, SortingMode::None);
         }
@@ -225,7 +156,7 @@ void priv::InternalScenePublicInterface::RenderGeometryOpaque(Scene& scene, View
 void priv::InternalScenePublicInterface::RenderGeometryTransparent(Scene& scene, Viewport& viewport, Camera& camera, const bool useDefaultShaders) {
     for (uint i = RenderStage::GeometryTransparent; i < RenderStage::GeometryTransparent_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            auto& render_graph = *render_graph_ptr;
+            auto& render_graph = render_graph_ptr;
             render_graph.sort(camera, SortingMode::BackToFront);
             render_graph.validate_model_instances_for_rendering(viewport, camera);
             render_graph.render(viewport, camera, useDefaultShaders, SortingMode::None);
@@ -235,7 +166,7 @@ void priv::InternalScenePublicInterface::RenderGeometryTransparent(Scene& scene,
 void priv::InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(Scene& scene, Viewport& viewport, Camera& camera, const bool useDefaultShaders) {
     for (uint i = RenderStage::GeometryTransparentTrianglesSorted; i < RenderStage::GeometryTransparentTrianglesSorted_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            auto& render_graph = *render_graph_ptr;
+            auto& render_graph = render_graph_ptr;
             render_graph.sort(camera, SortingMode::FrontToBack);
             render_graph.validate_model_instances_for_rendering(viewport, camera);
             render_graph.render(viewport, camera, useDefaultShaders, SortingMode::FrontToBack);
@@ -245,7 +176,7 @@ void priv::InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorte
 void priv::InternalScenePublicInterface::RenderForwardOpaque(Scene& scene, Viewport& viewport, Camera& camera, const bool useDefaultShaders) {
     for (uint i = RenderStage::ForwardOpaque; i < RenderStage::ForwardOpaque_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            auto& render_graph = *render_graph_ptr;
+            auto& render_graph = render_graph_ptr;
             render_graph.validate_model_instances_for_rendering(viewport, camera);
             render_graph.render(viewport, camera, useDefaultShaders, SortingMode::None);
         }
@@ -254,7 +185,7 @@ void priv::InternalScenePublicInterface::RenderForwardOpaque(Scene& scene, Viewp
 void priv::InternalScenePublicInterface::RenderForwardTransparent(Scene& scene, Viewport& viewport, Camera& camera, const bool useDefaultShaders) {
     for (uint i = RenderStage::ForwardTransparent; i < RenderStage::ForwardTransparent_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            auto& render_graph = *render_graph_ptr;
+            auto& render_graph = render_graph_ptr;
             render_graph.sort_bruteforce(camera, SortingMode::BackToFront);
             render_graph.validate_model_instances_for_rendering(viewport, camera);
             render_graph.render_bruteforce(viewport, camera, useDefaultShaders, SortingMode::None);
@@ -265,7 +196,7 @@ void priv::InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted
     for (uint i = RenderStage::ForwardTransparentTrianglesSorted; i < RenderStage::ForwardTransparentTrianglesSorted_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             //TODO: sort_bruteforce and render_bruteforce doesn't work here... probably has to do with custom binds and unbinds and custom shader(s)
-            auto& render_graph = *render_graph_ptr;
+            auto& render_graph = render_graph_ptr;
             render_graph.sort(camera, SortingMode::FrontToBack);
             render_graph.validate_model_instances_for_rendering(viewport, camera);
             render_graph.render(viewport, camera, useDefaultShaders, SortingMode::FrontToBack);
@@ -275,7 +206,7 @@ void priv::InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted
 void priv::InternalScenePublicInterface::RenderForwardParticles(Scene& scene, Viewport& viewport, Camera& camera, const bool useDefaultShaders) {
     for (uint i = RenderStage::ForwardParticles; i < RenderStage::ForwardParticles_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            auto& render_graph = *render_graph_ptr;
+            auto& render_graph = render_graph_ptr;
             render_graph.sort_cheap_bruteforce(camera, SortingMode::BackToFront);
             render_graph.validate_model_instances_for_rendering(viewport, camera);
             render_graph.render_bruteforce(viewport, camera, useDefaultShaders, SortingMode::None);
@@ -285,7 +216,7 @@ void priv::InternalScenePublicInterface::RenderForwardParticles(Scene& scene, Vi
 void priv::InternalScenePublicInterface::RenderDecals(Scene& scene, Viewport& viewport, Camera& camera, const bool useDefaultShaders) {
     for (uint i = RenderStage::Decals; i < RenderStage::Decals_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            auto& render_graph = *render_graph_ptr;
+            auto& render_graph = render_graph_ptr;
             render_graph.sort(camera, SortingMode::None);
             render_graph.validate_model_instances_for_rendering(viewport, camera);
             render_graph.render(viewport, camera, useDefaultShaders, SortingMode::None);
@@ -302,8 +233,8 @@ priv::ECS<Entity>& priv::InternalScenePublicInterface::GetECS(Scene& scene) {
 }
 void priv::InternalScenePublicInterface::CleanECS(Scene& scene, const uint entityData) {
     for (auto& pipelines : scene.m_RenderGraphs) {
-        for (auto& pipeline : pipelines) {
-            pipeline->clean(entityData);
+        for (auto& graph : pipelines) {
+            graph.clean(entityData);
         }
     }
 }
@@ -312,7 +243,7 @@ void priv::InternalScenePublicInterface::AddModelInstanceToPipeline(Scene& scene
     scene.m_i->_addModelInstanceToPipeline(scene, modelInstance, scene.m_RenderGraphs[stage], stage);
 }
 void priv::InternalScenePublicInterface::RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance& modelInstance, const RenderStage::Stage& stage){
-    scene.m_i->_removeModelInstanceFromPipeline(scene, modelInstance, scene.m_RenderGraphs[stage], stage);
+    scene.m_i->_removeModelInstanceFromPipeline(modelInstance, scene.m_RenderGraphs[stage]);
 }
 
 Scene::Scene(const string& name) : Scene(name, SceneOptions::DEFAULT_OPTIONS){
@@ -333,12 +264,8 @@ Scene::Scene(const string& name, const SceneOptions& options) : EngineResource(R
 Scene::~Scene() {
     m_i->_destruct();
     SAFE_DELETE(m_i);
-    for (size_t i = 0; i < m_RenderGraphs.size(); ++i) {
-        auto& graph = m_RenderGraphs[i];
-        SAFE_DELETE_VECTOR(graph);
-    }
     SAFE_DELETE(m_Skybox);
-    SAFE_DELETE_VECTOR(m_Viewports);
+    //SAFE_DELETE_VECTOR(m_Viewports);
     SAFE_DELETE_VECTOR(m_Lights);
     SAFE_DELETE_VECTOR(m_Cameras);
     unregisterEvent(EventType::SceneChanged);
@@ -361,12 +288,14 @@ ParticleEmitter* Scene::addParticleEmitter(ParticleEmitter& emitter) {
 }
 
 Viewport& Scene::addViewport(const float x, const float y, const float width, const float height, const Camera& camera) {
-    Viewport* viewport = (NEW Viewport(*this, camera));
-    viewport->setViewportDimensions(x, y, width, height);
+    //auto viewport = NEW Viewport(*this, camera);
+    //viewport->setViewportDimensions(x, y, width, height);
     unsigned int id = numViewports();
-    viewport->m_ID = id;
-    m_Viewports.push_back(viewport);
-    return *viewport;
+    //viewport->m_ID = id;
+    auto& viewport = m_Viewports.emplace_back(*this, camera);
+    viewport.m_ID = id;
+    viewport.setViewportDimensions(x, y, width, height);
+    return viewport;
 }
 Entity Scene::createEntity() { 
     return m_i->m_ECS.createEntity(*this); 
@@ -382,22 +311,23 @@ void Scene::removeEntity(Entity& entity) {
     m_i->m_ECS.removeEntity(dataRequest.ID);
 }
 Viewport& Scene::getMainViewport() {
-    return *m_Viewports[0];
+    return m_Viewports[0];
 }
 Camera* Scene::getActiveCamera() const {
     if (m_Viewports.size() == 0)
         return nullptr;
-    return &(const_cast<Camera&>(m_Viewports[0]->getCamera()));
+    return &(const_cast<Camera&>(m_Viewports[0].getCamera()));
 }
 void Scene::setActiveCamera(Camera& camera){
     if (m_Viewports.size() == 0) {
-        Viewport* viewport = (NEW Viewport(*this, camera));
+        //Viewport* viewport = (NEW Viewport(*this, camera));
         unsigned int id = numViewports();
-        viewport->m_ID = id;
-        m_Viewports.push_back(viewport);
+        //viewport->m_ID = id;
+        auto& viewport = m_Viewports.emplace_back(*this, camera);
+        viewport.m_ID = id;
         return;
     }
-    m_Viewports[0]->setCamera(camera);
+    m_Viewports[0].setCamera(camera);
 }
 void Scene::centerSceneToObject(const Entity& centerEntity){
     return m_i->_centerToObject(*this, centerEntity);
@@ -413,10 +343,10 @@ void Scene::render() {
 }
 
 const glm::vec4& Scene::getBackgroundColor() const {
-    return m_Viewports[0]->m_BackgroundColor;
+    return m_Viewports[0].m_BackgroundColor;
 }
 void Scene::setBackgroundColor(const float& r, const float& g, const float& b, const float& a) {
-    Math::setColor(m_Viewports[0]->m_BackgroundColor, r, g, b, a);
+    Math::setColor(m_Viewports[0].m_BackgroundColor, r, g, b, a);
 }
 void Scene::setBackgroundColor(const glm::vec4& backgroundColor) {
     setBackgroundColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);

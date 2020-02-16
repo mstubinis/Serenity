@@ -36,8 +36,8 @@ class ComponentLogic3 : public ComponentBaseClass {
             m_UserPointer2 = UserPointer2;
             setFunctor(Functor);
         }
-        ComponentLogic3(const ComponentLogic3& other);
-        ComponentLogic3& operator=(const ComponentLogic3& other);
+        ComponentLogic3(const ComponentLogic3& other) = delete;
+        ComponentLogic3& operator=(const ComponentLogic3& other) = delete;
         ComponentLogic3(ComponentLogic3&& other) noexcept;
         ComponentLogic3& operator=(ComponentLogic3&& other) noexcept;
 

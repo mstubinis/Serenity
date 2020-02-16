@@ -3,6 +3,7 @@
 #include <core/engine/system/window/Window.h>
 
 #include <SFML/Window.hpp>
+#include <unordered_map>
 
 using namespace Engine;
 using namespace Engine::priv;

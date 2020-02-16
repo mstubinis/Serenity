@@ -70,6 +70,7 @@ namespace Renderer{
 
         void clear(const bool color = true, const bool depth = true, const bool stencil = true);
         
+        void applyGlobalAnisotropicFiltering(const float filtering);
 
         const bool setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm&);
 

@@ -723,6 +723,15 @@
     <ClInclude Include="Engine\src\core\engine\resources\ResourcePool.h">
       <Filter>Header Files\Engine\Core\Resources</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\model\ModelInstanceAnimation.h">
+      <Filter>Header Files\Engine\Core\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\AnimationData.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\AnimationIncludes.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -1099,6 +1108,18 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\utils\Logger.cpp">
       <Filter>Source Files\Engine\Core\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\events\Engine_EventIncludes.cpp">
+      <Filter>Source Files\Engine\Core\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\utils\ForcedInclude.cpp">
+      <Filter>Source Files\Engine\Core\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\model\ModelInstanceAnimation.cpp">
+      <Filter>Source Files\Engine\Core\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\mesh\AnimationData.cpp">
+      <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

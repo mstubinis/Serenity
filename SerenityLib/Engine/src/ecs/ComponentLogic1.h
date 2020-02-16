@@ -13,7 +13,6 @@ namespace Engine {
         struct ComponentLogic1_ComponentAddedToEntityFunction;
         struct ComponentLogic1_SceneEnteredFunction;
         struct ComponentLogic1_SceneLeftFunction;
-        struct ComponentLogic1_EmptyFunctor final { void operator()(ComponentLogic1& _component, const float& dt) const {} };
     };
 };
 
@@ -36,8 +35,8 @@ class ComponentLogic1 : public ComponentBaseClass {
             m_UserPointer2 = UserPointer2;
             setFunctor(Functor);
         }
-        ComponentLogic1(const ComponentLogic1& other);
-        ComponentLogic1& operator=(const ComponentLogic1& other);
+        ComponentLogic1(const ComponentLogic1& other) = delete;
+        ComponentLogic1& operator=(const ComponentLogic1& other) = delete;
         ComponentLogic1(ComponentLogic1&& other) noexcept;
         ComponentLogic1& operator=(ComponentLogic1&& other) noexcept;
 
@@ -46,7 +45,7 @@ class ComponentLogic1 : public ComponentBaseClass {
         void call(const float& dt);
 
         template<typename T> void setFunctor(const T& functor) { 
-            m_Functor = std::bind<void>(std::move(functor), *this, std::placeholders::_1);
+            m_Functor = std::bind<void>(std::move(functor), this, std::placeholders::_1);
         }
 
         void setUserPointer(void* UserPointer);
