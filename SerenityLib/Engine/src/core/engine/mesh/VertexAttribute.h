@@ -7,17 +7,17 @@ struct VertexAttributeInfo final{
     int      size;
     int      type;
     size_t   typeSize;
-    bool     normalized;
     int      stride;
     size_t   offset;
+    bool     normalized;
 
-    VertexAttributeInfo(const int _size, const int _type, const bool _normalized, const int _stride, const size_t _offset, const size_t _typeSize) {
-        size       = _size;
-        type       = _type;
-        normalized = _normalized;
-        stride     = _stride;
-        offset     = _offset;
-        typeSize   = _typeSize;
+    VertexAttributeInfo(const int size_, const int type_, const bool normalized_, const int stride_, const size_t offset_, const size_t typeSize_) {
+        size       = size_;
+        type       = type_;
+        normalized = normalized_;
+        stride     = stride_;
+        offset     = offset_;
+        typeSize   = typeSize_;
     }
     VertexAttributeInfo()                                                = delete;
     ~VertexAttributeInfo()                                               = default;

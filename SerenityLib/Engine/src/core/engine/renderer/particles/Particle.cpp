@@ -145,45 +145,45 @@ void Particle::init(ParticleData& data, const glm::vec3& emitterPosition, const 
 }
 
 Particle::Particle(const Particle& other){
-    m_Data = other.m_Data;
-    m_Scene = other.m_Scene;
-    m_Hidden = other.m_Hidden;
-    m_Position = other.m_Position;
+    m_Data              = other.m_Data;
+    m_Scene             = other.m_Scene;
+    m_Hidden            = other.m_Hidden;
+    m_Position          = other.m_Position;
     m_PassedRenderCheck = other.m_PassedRenderCheck;
-    m_Material = other.m_Material;
-    m_EmitterSource = other.m_EmitterSource;
+    m_Material          = other.m_Material;
+    m_EmitterSource     = other.m_EmitterSource;
 }
 Particle& Particle::operator=(const Particle& other) {
-    if (&other == this)
-        return *this;
-    m_Data = other.m_Data;
-    m_Scene = other.m_Scene;
-    m_Hidden = other.m_Hidden;
-    m_Position = other.m_Position;
-    m_PassedRenderCheck = other.m_PassedRenderCheck;
-    m_Material = other.m_Material;
-    m_EmitterSource = other.m_EmitterSource;
+    if (&other != this) {
+        m_Data              = other.m_Data;
+        m_Scene             = other.m_Scene;
+        m_Hidden            = other.m_Hidden;
+        m_Position          = other.m_Position;
+        m_PassedRenderCheck = other.m_PassedRenderCheck;
+        m_Material          = other.m_Material;
+        m_EmitterSource     = other.m_EmitterSource;
+    }
     return *this;
 }
 Particle::Particle(Particle&& other) noexcept{
-    using std::swap;
-    swap(m_Data, other.m_Data);
-    swap(m_Scene, other.m_Scene);
-    swap(m_Hidden, other.m_Hidden);
-    swap(m_Position, other.m_Position);
-    swap(m_PassedRenderCheck, other.m_PassedRenderCheck);
-    swap(m_Material, other.m_Material);
-    swap(m_EmitterSource, other.m_EmitterSource);
+    m_Data              = std::move(other.m_Data);
+    m_Hidden            = std::move(other.m_Hidden);
+    m_Position          = std::move(other.m_Position);
+    m_PassedRenderCheck = std::move(other.m_PassedRenderCheck);
+    m_Scene             = std::exchange(other.m_Scene, nullptr);
+    m_Material          = std::exchange(other.m_Material, nullptr);
+    m_EmitterSource     = std::exchange(other.m_EmitterSource, nullptr);
 }
 Particle& Particle::operator=(Particle&& other) noexcept {
-    using std::swap;
-    swap(m_Data, other.m_Data);
-    swap(m_Scene, other.m_Scene);
-    swap(m_Hidden, other.m_Hidden);
-    swap(m_Position, other.m_Position);
-    swap(m_PassedRenderCheck, other.m_PassedRenderCheck);
-    swap(m_Material, other.m_Material);
-    swap(m_EmitterSource, other.m_EmitterSource);
+    if (&other != this) {
+        m_Data              = std::move(other.m_Data);
+        m_Hidden            = std::move(other.m_Hidden);
+        m_Position          = std::move(other.m_Position);
+        m_PassedRenderCheck = std::move(other.m_PassedRenderCheck);
+        m_Scene             = std::exchange(other.m_Scene, nullptr);
+        m_Material          = std::exchange(other.m_Material, nullptr);
+        m_EmitterSource     = std::exchange(other.m_EmitterSource, nullptr);
+    }
     return *this;
 }
 
@@ -234,7 +234,7 @@ Scene& Particle::scene() const {
 void Particle::setPosition(const glm::vec3& newPosition) {
     m_Position = newPosition;
 }
-Material* Particle::getMaterial() {
+Material* Particle::getMaterial() const {
     return m_Material;
 }
 const float& Particle::angle() const {
@@ -309,13 +309,13 @@ void Particle::update_multithreaded(const size_t& index, const float& dt, Engine
             m_Data.m_Active  = false;
             m_Data.m_Timer   = 0.0;
             m_Hidden         = true;
-            particleSystem.m_Mutex.lock();
+
+            std::lock_guard lock(particleSystem.m_Mutex);
             particleSystem.m_ParticleFreelist.push(index);
-            particleSystem.m_Mutex.unlock();
         }
     }
 }
-void Particle::render(Engine::priv::GBuffer& gBuffer) {
+void Particle::render(const Engine::priv::GBuffer& gBuffer) {
     m_Material->bind();
 
     auto maxTextures = priv::Core::m_Engine->m_RenderManager.OpenGLStateMachine.getMaxTextureUnits() - 1;

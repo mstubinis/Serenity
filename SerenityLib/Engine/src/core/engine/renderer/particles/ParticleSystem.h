@@ -53,7 +53,7 @@ namespace Engine {
                 std::stack<size_t>&           getParticlesFreelist();
 
                 void update(const float& dt);
-                void render(Camera& camera, ShaderProgram& program, GBuffer& gBuffer);
+                void render(const Camera& camera, ShaderProgram& program, const GBuffer& gBuffer);
             };
     };
 };

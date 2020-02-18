@@ -170,16 +170,16 @@ namespace Engine {
                 return nullptr;
             }
             */
-            const T& get(const size_t index) const {
+            const T& get(const size_t& index) const {
                 return m_Items[index];
             }
-            T& get(const size_t index) {
+            T& get(const size_t& index) {
                 return m_Items[index];
             }
-            T& operator[](const size_t index) {
+            T& operator[](const size_t& index) {
                 return m_Items[index];
             }
-            const T& operator[](const size_t index) const {
+            const T& operator[](const size_t& index) const {
                 return m_Items[index];
             }
 
@@ -198,7 +198,7 @@ namespace Engine {
             }
             typename std::vector<T>::const_iterator end() const {
                 return m_Items.end();
-            }        
+            }
     };
 };
 #endif

@@ -234,6 +234,8 @@
     <ClInclude Include="Engine\src\core\Constraint.h" />
     <ClInclude Include="Engine\src\core\engine\BindableResource.h" />
     <ClInclude Include="Engine\src\core\engine\containers\Freelist.h" />
+    <ClInclude Include="Engine\src\core\engine\containers\Queue_ts.h" />
+    <ClInclude Include="Engine\src\core\engine\containers\SparseSet.h" />
     <ClInclude Include="Engine\src\core\engine\discord\Discord.h" />
     <ClInclude Include="Engine\src\core\engine\discord\src\achievement_manager.h" />
     <ClInclude Include="Engine\src\core\engine\discord\src\activity_manager.h" />
@@ -370,7 +372,6 @@
     <ClInclude Include="Engine\src\core\engine\textures\TextureLoader.h" />
     <ClInclude Include="Engine\src\core\engine\textures\TextureRequest.h" />
     <ClInclude Include="Engine\src\core\engine\threading\Engine_ThreadManager.h" />
-    <ClInclude Include="Engine\src\core\engine\threading\Queue_ThreadSafe.h" />
     <ClInclude Include="Engine\src\core\engine\threading\ThreadPool.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Engine_Debugging.h" />
     <ClInclude Include="Engine\src\core\engine\utils\ForcedInclude.h" />
@@ -396,7 +397,6 @@
     <ClInclude Include="Engine\src\ecs\Entity.h" />
     <ClInclude Include="Engine\src\ecs\EntityDataRequest.h" />
     <ClInclude Include="Engine\src\ecs\EntityWrapper.h" />
-    <ClInclude Include="Engine\src\ecs\SparseSet.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\core\Constraint.cpp" />

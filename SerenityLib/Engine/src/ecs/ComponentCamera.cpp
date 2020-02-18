@@ -185,7 +185,7 @@ void ComponentCamera::setFar(const float p_FarPlane) {
 
 struct priv::ComponentCamera_UpdateFunction final { void operator()(void* p_ComponentPool, const double& p_Dt, Scene& p_Scene) const {
 	auto& pool = *(ECSComponentPool<Entity, ComponentCamera>*)p_ComponentPool;
-	auto& components = pool.pool();
+	auto& components = pool.data();
     auto lamda_update = [&](pair<size_t, size_t>& pair_) {
         for (size_t j = pair_.first; j <= pair_.second; ++j) {
             ComponentCamera& b = components[j];

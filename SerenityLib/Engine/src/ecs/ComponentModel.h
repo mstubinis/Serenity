@@ -71,7 +71,7 @@ class ComponentModel: public ComponentBaseClass, public EventObserver {
         void show();
         void hide();
 
-        ModelInstance& getModel(const size_t& index = 0);
+        ModelInstance& getModel(const size_t& index = 0) const;
         void removeModel(const size_t& index);
         ModelInstance& addModel(Handle& meshHandle, Handle& materialHandle, ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
         ModelInstance& addModel(Mesh*,              Material*,              ShaderProgram* = 0, const RenderStage::Stage& = RenderStage::GeometryOpaque);
@@ -93,7 +93,7 @@ class ComponentModel: public ComponentBaseClass, public EventObserver {
         void setModelShaderProgram(ShaderProgram*, const size_t& index, const RenderStage::Stage& = RenderStage::GeometryOpaque);
         void setModelShaderProgram(Handle& materialHandle, const size_t& index, const RenderStage::Stage& = RenderStage::GeometryOpaque);
 
-        const bool rayIntersectSphere(const ComponentCamera& camera);
+        const bool rayIntersectSphere(const ComponentCamera& camera) const;
 
         void setUserPointer(void* UserPointer);
 

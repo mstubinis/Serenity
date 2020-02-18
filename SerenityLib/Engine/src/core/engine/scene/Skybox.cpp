@@ -119,7 +119,7 @@ void Skybox::onEvent(const Event& e) {
         Engine::priv::SkyboxImplInterface::buildVAO();
     }
 }
-Texture* Skybox::texture() { 
+Texture* Skybox::texture() const {
     return m_Texture; 
 }
 void Skybox::update(){}

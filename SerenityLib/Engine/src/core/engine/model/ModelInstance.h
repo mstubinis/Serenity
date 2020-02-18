@@ -10,6 +10,15 @@ class  ComponentModel;
 class  Viewport;
 class  ModelInstance;
 class  Collision;
+namespace Engine::priv {
+    struct DefaultModelInstanceBindFunctor;
+    struct DefaultModelInstanceUnbindFunctor;
+    struct ComponentModel_UpdateFunction;
+    class  ModelInstanceAnimation;
+    struct InternalModelInstancePublicInterface final {
+        static const bool IsViewportValid(const ModelInstance&, const Viewport&);
+    };
+};
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
@@ -20,20 +29,13 @@ class  Collision;
 #include <ecs/Entity.h>
 
 #include <core/engine/model/ModelInstanceIncludes.h>
+#include <core/engine/model/ModelInstanceAnimation.h>
 #include <core/engine/scene/ViewportIncludes.h>
 
-namespace Engine::priv{
-    struct DefaultModelInstanceBindFunctor;
-    struct DefaultModelInstanceUnbindFunctor;
-    struct ModelInstanceAnimation;
-
-    struct InternalModelInstancePublicInterface final {
-        static const bool IsViewportValid(ModelInstance&, Viewport&);
-    };
-};
 class ModelInstance final: public BindableResource{
     friend struct Engine::priv::DefaultModelInstanceBindFunctor;
     friend struct Engine::priv::DefaultModelInstanceUnbindFunctor;
+    friend struct Engine::priv::ComponentModel_UpdateFunction;
     friend class  ComponentModel;
     friend class  Collision;
     private:
@@ -42,13 +44,15 @@ class ModelInstance final: public BindableResource{
         ModelDrawingMode::Mode                               m_DrawingMode;
         Engine::Flag<unsigned int>                           m_ViewportFlag; //determine what viewports this can be seen in
         void*                                                m_UserPointer;
-        std::vector<Engine::priv::ModelInstanceAnimation*>   m_AnimationQueue;
+        Engine::priv::ModelInstanceAnimationVector           m_AnimationVector;
         Entity                                               m_Parent;
         ShaderProgram*                                       m_ShaderProgram;
         Mesh*                                                m_Mesh;
         Material*                                            m_Material;
         RenderStage::Stage                                   m_Stage;
-        glm::vec3                                            m_Position, m_Scale, m_GodRaysColor;
+        glm::vec3                                            m_Position;
+        glm::vec3                                            m_Scale;
+        glm::vec3                                            m_GodRaysColor;
         glm::quat                                            m_Orientation;
         glm::mat4                                            m_ModelMatrix;
         glm::vec4                                            m_Color;
@@ -57,8 +61,10 @@ class ModelInstance final: public BindableResource{
         bool                                                 m_ForceRender;
         size_t                                               m_Index;
 
-        void internalInit(Mesh* mesh, Material* mat, ShaderProgram* program);
-        void internalUpdateModelMatrix();
+        void internal_init(Mesh* mesh, Material* mat, ShaderProgram* program);
+        void internal_update_model_matrix();
+
+        ModelInstance() = delete;
     public:
         ModelInstance(Entity&, Mesh*, Material*, ShaderProgram* = 0);
         ModelInstance(Entity&, Handle mesh, Handle mat, ShaderProgram* = 0);
@@ -91,12 +97,12 @@ class ModelInstance final: public BindableResource{
         void forceRender(const bool forced = true);
         const bool isForceRendered() const;
 
-        ShaderProgram* shaderProgram();
-        Mesh* mesh();
-        Material* material();
+        ShaderProgram* shaderProgram() const;
+        Mesh* mesh() const;
+        Material* material() const;
         void* getUserPointer() const;
         void setUserPointer(void* UserPointer);
-        Entity& parent();
+        const Entity& parent() const;
 
         const glm::vec4& color() const;
         const glm::vec3& godRaysColor() const;
@@ -112,7 +118,8 @@ class ModelInstance final: public BindableResource{
         void hide();
 
         const RenderStage::Stage& stage() const;
-        void setStage(const RenderStage::Stage& stage);
+        //void setStage(const RenderStage::Stage& stage);
+        void setStage(const RenderStage::Stage& stage, ComponentModel&);
 
         void playAnimation(const std::string& animName, const float& startTime, const float& endTime = -1.0f, const unsigned int& requestedLoops = 1);
 
@@ -139,6 +146,7 @@ class ModelInstance final: public BindableResource{
         void setOrientation(const float& x, const float& y, const float& z);
 
         void setScale(const float& scale);
+
         void setScale(const float& x, const float& y, const float& z);
         void setScale(const glm::vec3& scale);
 

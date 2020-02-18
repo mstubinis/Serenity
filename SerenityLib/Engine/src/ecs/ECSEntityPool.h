@@ -6,7 +6,8 @@
 #include <core/engine/scene/Scene.h>
 
 namespace Engine::priv {
-    template<typename TEntity> class ECSEntityPool final{
+    template<typename TEntity> 
+    class ECSEntityPool final{
         friend struct Engine::priv::InternalScenePublicInterface;
         private:
             std::vector<EntityPOD>       m_Pool;
@@ -40,14 +41,15 @@ namespace Engine::priv {
                 TEntity entity         = TEntity(entityPOD.ID, entityPOD.sceneID, entityPOD.versionID);
                 return std::move(entity);
             }
-            EntityPOD* getEntity(const unsigned int& entityData) {
+            EntityPOD* getEntity(const unsigned int& entityData) const {
                 if (entityData == 0) {
                     return nullptr;
                 }
                 const EntityDataRequest dataRequest(entityData);
                 const auto index = dataRequest.ID - 1;
                 if (index < m_Pool.size() && m_Pool[index].versionID == dataRequest.versionID) {
-                    return &m_Pool[index];
+                    EntityPOD* ret = &m_Pool[index];
+                    return const_cast<EntityPOD*>(ret);
                 }
                 return nullptr;
             }

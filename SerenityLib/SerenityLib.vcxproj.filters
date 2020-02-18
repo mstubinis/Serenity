@@ -232,6 +232,12 @@
     <Filter Include="Source Files\Engine\Core\Containers">
       <UniqueIdentifier>{2d0ac183-7fb4-4254-9fab-37aa4c59245d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Core\Renderer\interfaces">
+      <UniqueIdentifier>{6786444b-e1dd-490b-b433-2c392bcdc8e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Renderer\interfaces">
+      <UniqueIdentifier>{9daea2d8-92a3-4811-9f1f-5bd9e36f193f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h">
@@ -280,9 +286,6 @@
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\ecs\Entity.h">
-      <Filter>Header Files\Engine\Core\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\ecs\SparseSet.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventDispatcher.h">
@@ -570,9 +573,6 @@
     <ClInclude Include="Engine\src\core\engine\threading\ThreadPool.h">
       <Filter>Header Files\Engine\Core\Threading</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\threading\Queue_ThreadSafe.h">
-      <Filter>Header Files\Engine\Core\Threading</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\textures\TextureLoader.h">
       <Filter>Header Files\Engine\Core\Textures</Filter>
     </ClInclude>
@@ -731,6 +731,12 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\mesh\AnimationIncludes.h">
       <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\containers\Queue_ts.h">
+      <Filter>Header Files\Engine\Core\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\containers\SparseSet.h">
+      <Filter>Header Files\Engine\Core\Containers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,6 @@
 #define BT_THREADSAFE 1
 #include <core/engine/physics/Engine_Physics.h>
-#include <core/engine/physics/World.h>
+//#include <core/engine/physics/World.h>
 #include <core/engine/physics/DebugDrawer.h>
 
 #include <core/engine/resources/Engine_Resources.h>
@@ -112,11 +112,10 @@ bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionOb
     return true;
 }
 
-priv::PhysicsManager* physicsManager;
+priv::PhysicsManager* physicsManager = nullptr;
 
 priv::PhysicsManager::PhysicsManager(){ 
     m_Paused                = false;
-    m_Data                  = nullptr;
     physicsManager          = this;
     m_NumberOfStepsPerFrame = 1;
 }
@@ -124,9 +123,7 @@ priv::PhysicsManager::~PhysicsManager(){
     cleanup();
 }
 void priv::PhysicsManager::cleanup() {
-    if (!m_Data)
-        return;
-    auto& world = *m_Data->world;
+    auto& world = *m_Data.m_World;
     int collisionObjCount = world.getNumCollisionObjects();
     for (int i = 0; i < collisionObjCount; ++i) {
         btCollisionObject* obj = world.getCollisionObjectArray()[i];
@@ -140,41 +137,39 @@ void priv::PhysicsManager::cleanup() {
             SAFE_DELETE(obj);
         }
     }
-    SAFE_DELETE(m_Data);
 }
 void priv::PhysicsManager::_init(){
-    m_Data = NEW priv::PhysicsWorld();
-    m_Data->debugDrawer->initRenderingContext();
+    m_Data.m_DebugDrawer.init();
 
     gContactAddedCallback = CustomMaterialContactAddedCallback;
 }
 void priv::PhysicsManager::_update(const float& dt,int maxsteps, float other){ 
     if (m_Paused)
         return;
-    m_Data->world->stepSimulation(static_cast<btScalar>(dt), maxsteps, static_cast<btScalar>(other));
+    m_Data.m_World->stepSimulation(static_cast<btScalar>(dt), maxsteps, static_cast<btScalar>(other));
 
-    for (int i = 0; i < m_Data->dispatcher->getNumManifolds(); ++i) {
-        btPersistentManifold& contactManifold = *m_Data->dispatcher->getManifoldByIndexInternal(i);
+    for (int i = 0; i < m_Data.m_Dispatcher->getNumManifolds(); ++i) {
+        btPersistentManifold& contactManifold = *m_Data.m_Dispatcher->getManifoldByIndexInternal(i);
 
         for (int j = 0; j < contactManifold.getNumContacts(); ++j) {
             btManifoldPoint& cp = contactManifold.getContactPoint(j);
             if (cp.getDistance() < 0.0f) {
                 btCollisionObject* collisionObjectA = const_cast<btCollisionObject*>(contactManifold.getBody0());
                 btCollisionObject* collisionObjectB = const_cast<btCollisionObject*>(contactManifold.getBody1());
-                auto aPtr = collisionObjectA->getUserPointer();
-                auto bPtr = collisionObjectB->getUserPointer();
-                ComponentBody* a_ = static_cast<ComponentBody*>(aPtr);
-                ComponentBody* b_ = static_cast<ComponentBody*>(bPtr);
+                auto aPtr                           = collisionObjectA->getUserPointer();
+                auto bPtr                           = collisionObjectB->getUserPointer();
+                ComponentBody* a_                   = static_cast<ComponentBody*>(aPtr);
+                ComponentBody* b_                   = static_cast<ComponentBody*>(bPtr);
                 if (a_ && b_) {
-                    glm::vec3 ptA = Math::btVectorToGLM(cp.getPositionWorldOnA());
-                    glm::vec3 ptB = Math::btVectorToGLM(cp.getPositionWorldOnB());
+                    glm::vec3 ptA       = Math::btVectorToGLM(cp.getPositionWorldOnA());
+                    glm::vec3 ptB       = Math::btVectorToGLM(cp.getPositionWorldOnB());
                     glm::vec3 normalOnB = Math::btVectorToGLM(cp.m_normalWorldOnB);
 
-                    glm::vec3 localA = Math::btVectorToGLM(cp.m_localPointA);
-                    glm::vec3 localB = Math::btVectorToGLM(cp.m_localPointB);
+                    glm::vec3 localA    = Math::btVectorToGLM(cp.m_localPointA);
+                    glm::vec3 localB    = Math::btVectorToGLM(cp.m_localPointB);
 
-                    glm::vec3 normalA = glm::normalize(ptB - ptA);
-                    glm::vec3 normalB = glm::normalize(ptA - ptB);
+                    glm::vec3 normalA   = glm::normalize(ptB - ptA);
+                    glm::vec3 normalB   = glm::normalize(ptA - ptB);
 
                     CollisionCallbackEventData dataA(*a_, *b_, ptA, ptB, normalOnB, localA, localB, normalA);
                     dataA.ownerCollisionObj = collisionObjectA;
@@ -193,13 +188,13 @@ void priv::PhysicsManager::_update(const float& dt,int maxsteps, float other){
     }
 }
 void priv::PhysicsManager::_render(Camera& camera){
-    m_Data->world->debugDrawWorld();
+    m_Data.m_World->debugDrawWorld();
     const glm::vec3 camPos = camera.getPosition();
     const glm::mat4 model = glm::mat4(1.0f);
     Engine::Renderer::sendUniformMatrix4("Model", model);
     Engine::Renderer::sendUniformMatrix4("VP", camera.getViewProjection());
-    m_Data->debugDrawer->drawAccumulatedLines();
-    m_Data->debugDrawer->postRender();
+    m_Data.m_DebugDrawer.drawAccumulatedLines();
+    m_Data.m_DebugDrawer.postRender();
 }
 void Physics::setNumberOfStepsPerFrame(const unsigned int numSteps) {
     physicsManager->m_NumberOfStepsPerFrame = glm::max(1U, numSteps);
@@ -217,60 +212,60 @@ void Physics::unpause(){
     physicsManager->m_Paused = false; 
 }
 void Physics::setGravity(const float x, const float y, const float z){ 
-    physicsManager->m_Data->world->setGravity(btVector3(x,y,z));
+    physicsManager->m_Data.m_World->setGravity(btVector3(x,y,z));
 }
 void Physics::setGravity(const glm::vec3& gravity){ 
     Physics::setGravity(gravity.x,gravity.y,gravity.z); 
 }
 void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ 
-    auto& data = *physicsManager->m_Data;
-    int collisionObjCount = data.world->getNumCollisionObjects();
+    auto& data = physicsManager->m_Data;
+    int collisionObjCount = data.m_World->getNumCollisionObjects();
     for (int i = 0; i < collisionObjCount; ++i) {
-        btRigidBody* body = btRigidBody::upcast(data.world->getCollisionObjectArray()[i]);
+        btRigidBody* body = btRigidBody::upcast(data.m_World->getCollisionObjectArray()[i]);
         if (body) {
             if (body == rigidBody) {
                 return;
             }
         }
     }
-    data.world->addRigidBody(rigidBody, group, mask);
+    data.m_World->addRigidBody(rigidBody, group, mask);
 }
 void Physics::addRigidBody(btRigidBody* rigidBody){ 
-    auto& data = *physicsManager->m_Data;
-    int collisionObjCount = data.world->getNumCollisionObjects();
+    auto& data = physicsManager->m_Data;
+    int collisionObjCount = data.m_World->getNumCollisionObjects();
     for (int i = 0; i < collisionObjCount; ++i) {
-        btRigidBody* body = btRigidBody::upcast(data.world->getCollisionObjectArray()[i]);
+        btRigidBody* body = btRigidBody::upcast(data.m_World->getCollisionObjectArray()[i]);
         if (body) {
             if (body == rigidBody) {
                 return;
             }
         }
     }
-    data.world->addRigidBody(rigidBody);
+    data.m_World->addRigidBody(rigidBody);
 }
 void Physics::removeRigidBody(btRigidBody* rigidBody){ 
-    auto& data = *physicsManager->m_Data;
-    int collisionObjCount = data.world->getNumCollisionObjects();
+    auto& data = physicsManager->m_Data;
+    int collisionObjCount = data.m_World->getNumCollisionObjects();
     for (int i = 0; i < collisionObjCount; ++i) {
-        btRigidBody* body = btRigidBody::upcast(data.world->getCollisionObjectArray()[i]);
+        btRigidBody* body = btRigidBody::upcast(data.m_World->getCollisionObjectArray()[i]);
         if (body) {
             if (body == rigidBody) {
                 for (int i = body->getNumConstraintRefs() - 1; i >= 0; i--) {
                     btTypedConstraint* con = body->getConstraintRef(i);
-                    data.world->removeConstraint(con);
+                    data.m_World->removeConstraint(con);
                 }
-                data.world->removeRigidBody(rigidBody);
+                data.m_World->removeRigidBody(rigidBody);
                 return;
             }
         }
     }
 }
 void Physics::removeCollisionObject(btCollisionObject* object) {
-    physicsManager->m_Data->world->removeCollisionObject(object);
+    physicsManager->m_Data.m_World->removeCollisionObject(object);
 }
 
 void Physics::updateRigidBody(btRigidBody* rigidBody){ 
-    physicsManager->m_Data->world->updateSingleAabb(rigidBody);
+    physicsManager->m_Data.m_World->updateSingleAabb(rigidBody);
 }
 void Physics::addRigidBody(ComponentBody& body) {
     //auto* btBody = &body.getBtBody();
@@ -310,7 +305,7 @@ void Physics::removeRigidBodyThreadSafe(ComponentBody& body) {
 
 void Physics::removeCollisionObjectThreadSafe(btCollisionObject* object) {
     std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
-    physicsManager->m_Data->world->removeCollisionObject(object);
+    physicsManager->m_Data.m_World->removeCollisionObject(object);
 }
 
 
@@ -321,8 +316,8 @@ RayCastResult _rayCastInternal_Nearest(const btVector3& start, const btVector3& 
     RayCallback.m_collisionFilterMask = mask;
     RayCallback.m_collisionFilterGroup = group;
 
-    physicsManager->m_Data->world->rayTest(start, end, RayCallback);
-    //physicsManager->m_Data->world->getDebugDrawer()->drawLine(start, end, btVector4(1, 1, 0, 1));
+    physicsManager->m_Data.m_World->rayTest(start, end, RayCallback);
+    //physicsManager->m_Data.m_World->getDebugDrawer()->drawLine(start, end, btVector4(1, 1, 0, 1));
 
     RayCastResult result;
     if (RayCallback.hasHit()) {
@@ -342,8 +337,8 @@ vector<RayCastResult> _rayCastInternal(const btVector3& start, const btVector3& 
     RayCallback.m_collisionFilterMask = mask;
     RayCallback.m_collisionFilterGroup = group;
 
-    physicsManager->m_Data->world->rayTest(start, end, RayCallback);
-    //physicsManager->m_Data->world->getDebugDrawer()->drawLine(start, end, btVector4(1, 1, 0, 1));
+    physicsManager->m_Data.m_World->rayTest(start, end, RayCallback);
+    //physicsManager->m_Data.m_World->getDebugDrawer()->drawLine(start, end, btVector4(1, 1, 0, 1));
 
     vector<RayCastResult> result;
     if (RayCallback.hasHit()) {

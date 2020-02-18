@@ -19,7 +19,7 @@ namespace Engine {
         struct DefaultDecalBindFunctor { void operator()(EngineResource* r) const {
             auto& i = *static_cast<ModelInstance*>(r);
             const auto& stage = i.stage();
-            Entity& parent = i.parent();
+            const Entity& parent = i.parent();
             auto& scene = parent.scene();
             Camera& cam = *scene.getActiveCamera();
             glm::vec3 camPos = cam.getPosition();

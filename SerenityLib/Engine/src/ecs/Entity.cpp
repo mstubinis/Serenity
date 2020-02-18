@@ -17,7 +17,7 @@ Entity::~Entity() {
     data = 0;
 }
 
-Scene& Entity::scene() {
+Scene& Entity::scene() const {
 	const EntityDataRequest dataRequest(*this);
     return priv::Core::m_Engine->m_ResourceManager._getSceneByID(dataRequest.sceneID);
 }
@@ -43,6 +43,6 @@ const bool Entity::operator==(const Entity& other) const {
 const bool Entity::operator!=(const Entity& other) const {
     return (data == other.data) ? false : true;
 }
-const bool Entity::null() {
+const bool Entity::null() const {
     return (data == 0) ? true : false;
 }

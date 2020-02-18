@@ -23,7 +23,7 @@ class Skybox: public EventObserver{
 
         virtual void update();
 
-        Texture* texture();
+        Texture* texture() const;
 
         static void bindMesh();
 

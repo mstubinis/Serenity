@@ -40,10 +40,8 @@ void priv::ParticleSystem::internal_update_emitters(const float& dt) {
     auto split = priv::threading::splitVectorPairs(m_ParticleEmitters);
     for (auto& pair_ : split) {
         priv::Core::m_Engine->m_ThreadManager.add_job_ref_engine_controlled(lamda_update_emitters, pair_);
-        //priv::threading::addJobRef(lamda_update_emitters, pair_);
     }
     priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
-    //priv::threading::waitForAll();
 }
 void priv::ParticleSystem::internal_update_particles(const float& dt) {
     if (m_Particles.size() == 0)
@@ -56,10 +54,8 @@ void priv::ParticleSystem::internal_update_particles(const float& dt) {
     auto split = priv::threading::splitVectorPairs(m_Particles);
     for (auto& pair_ : split) {
         priv::Core::m_Engine->m_ThreadManager.add_job_ref_engine_controlled(lamda_update_particles, pair_);
-        //priv::threading::addJobRef(lamda_update_particles, pair_);
     }
     priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
-    //priv::threading::waitForAll();
 }
 
 ParticleEmitter* priv::ParticleSystem::add_emitter(ParticleEmitter& emitter) {
@@ -98,7 +94,7 @@ const bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter, const gl
     return false;
 }
 const bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter) {
-    auto& body = *emitter.getComponent<ComponentBody>();
+    const auto& body = *emitter.getComponent<ComponentBody>();
     return add_particle(emitter, body.position(), body.rotation());
 }
 
@@ -106,7 +102,7 @@ void priv::ParticleSystem::update(const float& dt) {
     internal_update_particles(dt);
     internal_update_emitters(dt);
 }
-void priv::ParticleSystem::render(Camera& camera, ShaderProgram& program, GBuffer& gBuffer) {
+void priv::ParticleSystem::render(const Camera& camera, ShaderProgram& program, const GBuffer& gBuffer) {
     if (m_Particles.size() == 0)
         return;
 
@@ -137,10 +133,8 @@ void priv::ParticleSystem::render(Camera& camera, ShaderProgram& program, GBuffe
     auto split = priv::threading::splitVectorPairs(m_Particles);
     for (auto& pair_ : split) {
         priv::Core::m_Engine->m_ThreadManager.add_job_ref_engine_controlled(lamda_culler, pair_, cameraPosition);
-        //priv::threading::addJobRef(lamda_culler, pair_, cameraPosition);
     }
     priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
-    //priv::threading::waitForAll();
 
     auto lambda_sorter = [&](Particle& lhs, Particle& rhs, const glm::vec3& camPos) {
         return glm::distance2(lhs.m_Position, camPos) > glm::distance2(rhs.m_Position, camPos);

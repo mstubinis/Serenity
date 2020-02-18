@@ -1,5 +1,4 @@
 #include <core/engine/physics/World.h>
-#include <core/engine/physics/DebugDrawer.h>
 #include <core/engine/utils/Utils.h>
 
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
@@ -16,33 +15,32 @@ using namespace Engine;
 
 void _preTicCallback(btDynamicsWorld* world, btScalar timeStep) {}
 void _postTicCallback(btDynamicsWorld* world, btScalar timeStep) {}
+
 priv::PhysicsWorld::PhysicsWorld() {
-    broadphase             = new btDbvtBroadphase();
-    collisionConfiguration = new btDefaultCollisionConfiguration();
-    dispatcher             = new btCollisionDispatcher(collisionConfiguration);
+    m_Broadphase             = new btDbvtBroadphase();
+    m_CollisionConfiguration = new btDefaultCollisionConfiguration();
+    m_Dispatcher             = new btCollisionDispatcher(m_CollisionConfiguration);
     //if (numCores <= 1) {
-    solver                 = new btSequentialImpulseConstraintSolver();
-    solverMT               = nullptr;
-    world                  = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+    m_Solver                 = new btSequentialImpulseConstraintSolver();
+    m_SolverMT               = nullptr;
+    m_World                  = new btDiscreteDynamicsWorld(m_Dispatcher, m_Broadphase, m_Solver, m_CollisionConfiguration);
     //}else{
-    //    solver           = new btSequentialImpulseConstraintSolver();
-    //    solverMT         = new btSequentialImpulseConstraintSolverMt();
-    //    world            = new btDiscreteDynamicsWorldMt(dispatcher,broadphase,(btConstraintSolverPoolMt*)solverMT, solver, collisionConfiguration);
+    //    m_Solver           = new btSequentialImpulseConstraintSolver();
+    //    m_SolverMT         = new btSequentialImpulseConstraintSolverMt();
+    //    m_World            = new btDiscreteDynamicsWorldMt(m_Dispatcher,m_Broadphase,(btConstraintSolverPoolMt*)m_SolverMT, m_Solver, m_CollisionConfiguration);
     //}
-    debugDrawer = NEW GLDebugDrawer();
-    debugDrawer->setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
-    world->setDebugDrawer(debugDrawer);
-    world->setGravity(btVector3(static_cast<btScalar>(0.0), static_cast<btScalar>(0.0), static_cast<btScalar>(0.0)));
-    btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher);
-    world->setInternalTickCallback(_preTicCallback, (void*)world, true);
-    world->setInternalTickCallback(_postTicCallback, (void*)world, false);
+    m_DebugDrawer.setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
+    m_World->setDebugDrawer(&m_DebugDrawer);
+    m_World->setGravity(btVector3(static_cast<btScalar>(0.0), static_cast<btScalar>(0.0), static_cast<btScalar>(0.0)));
+    btGImpactCollisionAlgorithm::registerAlgorithm(m_Dispatcher);
+    m_World->setInternalTickCallback(_preTicCallback, (void*)m_World, true);
+    m_World->setInternalTickCallback(_postTicCallback, (void*)m_World, false);
 }
 priv::PhysicsWorld::~PhysicsWorld() {
-    SAFE_DELETE(debugDrawer);
-    SAFE_DELETE(world);
-    SAFE_DELETE(solver);
-    SAFE_DELETE(solverMT);
-    SAFE_DELETE(dispatcher);
-    SAFE_DELETE(collisionConfiguration);
-    SAFE_DELETE(broadphase);
+    SAFE_DELETE(m_World);
+    SAFE_DELETE(m_Solver);
+    SAFE_DELETE(m_SolverMT);
+    SAFE_DELETE(m_Dispatcher);
+    SAFE_DELETE(m_CollisionConfiguration);
+    SAFE_DELETE(m_Broadphase);
 }

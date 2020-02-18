@@ -205,7 +205,7 @@ const bool RenderGraph::remove_instance_node(MeshNode& meshNode, const InstanceN
 
 
 //TODO: correct this
-void RenderGraph::sort_bruteforce(Camera& camera, const SortingMode::Mode sortingMode) {
+void RenderGraph::sort_bruteforce(const Camera& camera, const SortingMode::Mode sortingMode) {
 #ifndef _DEBUG
     auto lambda_sorter = [&](InstanceNode* lhs, InstanceNode* rhs, const glm_vec3& camPos) {
         auto& lhsParent = lhs->instance->parent();
@@ -237,10 +237,12 @@ void RenderGraph::sort_bruteforce(Camera& camera, const SortingMode::Mode sortin
             return false;
         return false;
     };
-    std::sort(/*std::execution::par_unseq, */ m_InstancesTotal.begin(), m_InstancesTotal.end(), std::bind(lambda_sorter, std::placeholders::_1, std::placeholders::_2, camera.getPosition()));
+    std::sort(/*std::execution::par_unseq, */ m_InstancesTotal.begin(), m_InstancesTotal.end(), 
+        std::bind(lambda_sorter, std::placeholders::_1, std::placeholders::_2, camera.getPosition())
+    );
 #endif
 }
-void RenderGraph::sort_cheap_bruteforce(Camera& camera, const SortingMode::Mode sortingMode) {
+void RenderGraph::sort_cheap_bruteforce(const Camera& camera, const SortingMode::Mode sortingMode) {
 #ifndef _DEBUG
     const auto& lambda_sorter = [&](InstanceNode* lhs, InstanceNode* rhs, const glm::vec3& camPos) {
         auto& lhsInstance   = *lhs->instance;
@@ -260,11 +262,13 @@ void RenderGraph::sort_cheap_bruteforce(Camera& camera, const SortingMode::Mode 
             return false;
         return false;
     };
-    std::sort(/*std::execution::par_unseq, */ m_InstancesTotal.begin(), m_InstancesTotal.end(), std::bind(lambda_sorter, std::placeholders::_1, std::placeholders::_2, glm::vec3(camera.getPosition())));
+    std::sort(/*std::execution::par_unseq, */ m_InstancesTotal.begin(), m_InstancesTotal.end(), 
+        std::bind(lambda_sorter, std::placeholders::_1, std::placeholders::_2, glm::vec3(camera.getPosition()))
+    );
 #endif
 }
 
-void RenderGraph::sort_cheap(Camera& camera, const SortingMode::Mode sortingMode) {
+void RenderGraph::sort_cheap(const Camera& camera, const SortingMode::Mode sortingMode) {
 #ifndef _DEBUG
     for (auto& materialNode : m_MaterialNodes) {
         for (auto& meshNode : materialNode.meshNodes) {
@@ -289,13 +293,15 @@ void RenderGraph::sort_cheap(Camera& camera, const SortingMode::Mode sortingMode
                 return false;
             };
 
-            std::sort(/*std::execution::par_unseq, */ vect.begin(), vect.end(), std::bind(lambda_sorter, std::placeholders::_1, std::placeholders::_2, glm::vec3(camera.getPosition())));
+            std::sort(/*std::execution::par_unseq, */ vect.begin(), vect.end(), 
+                std::bind(lambda_sorter, std::placeholders::_1, std::placeholders::_2, glm::vec3(camera.getPosition()))
+            );
         }
     }
 #endif
 }
 //TODO: correct this
-void RenderGraph::sort(Camera& camera, const SortingMode::Mode sortingMode) {
+void RenderGraph::sort(const Camera& camera, const SortingMode::Mode sortingMode) {
 #ifndef _DEBUG
     for (auto& materialNode : m_MaterialNodes) {
         for (auto& meshNode : materialNode.meshNodes) {
@@ -360,7 +366,7 @@ void RenderGraph::clean(const uint entityData) {
     m_InstancesTotal.clear();
     std::move(kept_nodes_total.begin(), kept_nodes_total.end(), std::back_inserter(m_InstancesTotal));
 }
-void RenderGraph::validate_model_instances_for_rendering(Viewport& viewport, Camera& camera) {
+void RenderGraph::validate_model_instances_for_rendering(const Viewport& viewport, const Camera& camera) {
     auto lambda = [&](vector<priv::InstanceNode*>& vector, const glm_vec3& camPos) {
         for (auto& instanceNode : vector) {
             auto& _modelInstance = *instanceNode->instance;
@@ -394,10 +400,10 @@ void RenderGraph::validate_model_instances_for_rendering(Viewport& viewport, Cam
             }
         }
     };
-    auto camPos = camera.getPosition();
+    const auto camPos = camera.getPosition();
     lambda(m_InstancesTotal, camPos);
 }
-void RenderGraph::render(Viewport& viewport, Camera& camera, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
+void RenderGraph::render(const Viewport& viewport, const Camera& camera, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
     if(useDefaultShaders)
         m_ShaderProgram->bind();
     for (auto& materialNode : m_MaterialNodes) {
@@ -435,7 +441,7 @@ void RenderGraph::render(Viewport& viewport, Camera& camera, const bool useDefau
         }
     }
 }
-void RenderGraph::render_bruteforce(Viewport& viewport, Camera& camera, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
+void RenderGraph::render_bruteforce(const Viewport& viewport, const Camera& camera, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
     if (useDefaultShaders)
         m_ShaderProgram->bind();
     for (auto& instance : m_InstancesTotal) {

@@ -19,36 +19,36 @@ class Camera: public EntityWrapper{
 
         void lookAt(const glm_vec3& eye, const glm_vec3& center, const glm_vec3& up);
 
-        const glm_vec3 getPosition();
-        const glm_vec3 forward();
-        const glm_vec3 right();
-        const glm_vec3 up();
-        const glm::quat getOrientation();
+        const glm_vec3 getPosition() const;
+        const glm_vec3 forward() const;
+        const glm_vec3 right() const;
+        const glm_vec3 up() const;
+        const glm::quat getOrientation() const;
 
-        const decimal getDistance(Entity&);
-        const decimal getDistance(const glm_vec3&);
-        const decimal getDistanceSquared(Entity&);
-        const decimal getDistanceSquared(const glm_vec3&);
-        const decimal getDistanceSquared(Entity& e, const glm_vec3& this_pos);
-        const decimal getDistanceSquared(const glm_vec3& objPos, const glm_vec3& this_pos);
+        const decimal getDistance(const Entity&) const;
+        const decimal getDistance(const glm_vec3&) const;
+        const decimal getDistanceSquared(const Entity&) const;
+        const decimal getDistanceSquared(const glm_vec3&) const;
+        const decimal getDistanceSquared(const Entity& e, const glm_vec3& this_pos) const;
+        const decimal getDistanceSquared(const glm_vec3& objPos, const glm_vec3& this_pos) const;
 
-        const float& getAngle();    void setAngle(const float angle);
-        const float& getAspect();   void setAspect(const float aspectRatio);
-        const float& getNear();     void setNear(const float nearPlane);
-        const float& getFar();      void setFar(const float farPlane);
+        const float& getAngle() const;    void setAngle(const float angle);
+        const float& getAspect() const;   void setAspect(const float aspectRatio);
+        const float& getNear() const;     void setNear(const float nearPlane);
+        const float& getFar() const;      void setFar(const float farPlane);
 
-        const glm::mat4 getProjection();
-        const glm::mat4 getProjectionInverse();
-        const glm::vec3 getViewVector();
+        const glm::mat4 getProjection() const;
+        const glm::mat4 getProjectionInverse() const;
+        const glm::vec3 getViewVector() const;
 
-        const glm::mat4 getView();
-        const glm::mat4 getViewInverse();
-        const glm::mat4 getViewProjection();
-        const glm::mat4 getViewProjectionInverse();
+        const glm::mat4 getView() const;
+        const glm::mat4 getViewInverse() const;
+        const glm::mat4 getViewProjection() const;
+        const glm::mat4 getViewProjectionInverse() const;
 
-        const unsigned int sphereIntersectTest(const glm_vec3& pos, const float radius);
-        const unsigned int pointIntersectTest(const glm_vec3& pos);
+        const unsigned int sphereIntersectTest(const glm_vec3& pos, const float radius) const;
+        const unsigned int pointIntersectTest(const glm_vec3& pos) const;
 
-        const bool rayIntersectSphere(Entity&);
+        const bool rayIntersectSphere(const Entity&) const;
 };
 #endif

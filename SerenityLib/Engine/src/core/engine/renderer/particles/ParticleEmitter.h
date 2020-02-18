@@ -34,7 +34,7 @@ class ParticleEmitter final : public EntityWrapper{
     public:
         ParticleEmitter();
         ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, EntityWrapper* parent = nullptr);
-        ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, Entity& parent = Entity::null_);
+        ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, const Entity& parent = Entity::null_);
         ~ParticleEmitter();
 
         ParticleEmitter(const ParticleEmitter& other);
@@ -76,24 +76,24 @@ class ParticleEmitter final : public EntityWrapper{
         void applyLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
         void applyLinearVelocity(glm_vec3& velocity, const bool local = true);
 
-        const glm_vec3 getScale(EntityDataRequest& request);
-        const glm_vec3 getScale();
+        const glm_vec3 getScale(EntityDataRequest& request) const;
+        const glm_vec3 getScale() const;
 
-        const glm_vec3 position(EntityDataRequest& request);
-        const glm_vec3 position();
+        const glm_vec3 position(EntityDataRequest& request) const;
+        const glm_vec3 position() const;
 
-        const glm_quat rotation(EntityDataRequest& request);
-        const glm_quat rotation();
+        const glm_quat rotation(EntityDataRequest& request) const;
+        const glm_quat rotation() const;
 
-        const glm_vec3 linearVelocity(EntityDataRequest& request);
-        const glm_vec3 linearVelocity();
+        const glm_vec3 linearVelocity(EntityDataRequest& request) const;
+        const glm_vec3 linearVelocity() const;
 
         const bool& isActive() const;
 
         void activate();
         void deactivate();
 
-        ParticleEmissionProperties* getProperties();
+        ParticleEmissionProperties* getProperties() const;
         void setProperties(ParticleEmissionProperties& properties);
 
         void update(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem);

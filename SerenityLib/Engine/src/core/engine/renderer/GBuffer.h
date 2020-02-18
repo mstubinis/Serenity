@@ -32,7 +32,7 @@ namespace priv{
             GBuffer(const uint& width, const uint& height);
             ~GBuffer();
 
-            bool resize(const uint& width, const uint& height);
+            const bool resize(const uint& width, const uint& height);
 
             void bindFramebuffers(const unsigned int, const std::string& channels = "RGBA", const bool isMainFBO = true);
             void bindFramebuffers(const unsigned int, const unsigned int, const std::string& channels = "RGBA", const bool isMainFBO = true);
@@ -40,14 +40,14 @@ namespace priv{
             void bindFramebuffers(const unsigned int, const unsigned int, const unsigned int, const unsigned int, const std::string& channels = "RGBA", const bool isMainFBO = true);
             void bindFramebuffers(const unsigned int, const unsigned int, const unsigned int, const unsigned int, const unsigned int, const std::string& channels = "RGBA", const bool isMainFBO = true);
 
-            void bindBackbuffer(Viewport&, const GLuint final_fbo = 0, const GLuint final_rbo = 0);
+            void bindBackbuffer(const Viewport&, const GLuint final_fbo = 0, const GLuint final_rbo = 0);
 
             const std::vector<FramebufferTexture*>& getBuffers() const;
-            FramebufferTexture& getBuffer(const uint);
-            Texture& getTexture(const uint);
+            FramebufferTexture& getBuffer(const uint) const;
+            Texture& getTexture(const uint) const;
 
-            FramebufferObject* getMainFBO();
-            FramebufferObject* getSmallFBO();
+            FramebufferObject* getMainFBO() const;
+            FramebufferObject* getSmallFBO() const;
     };
 };
 };

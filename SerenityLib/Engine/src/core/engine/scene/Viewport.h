@@ -37,13 +37,12 @@ class Viewport final : public Engine::NonCopyable {
         Engine::Flag<unsigned char>   m_StateFlags;
         Engine::Flag<unsigned short>  m_RenderFlags;
 
-        Scene*         m_Scene;
-        Camera*        m_Camera;
-        glm::vec4      m_Viewport_Dimensions;
-        glm::vec4      m_BackgroundColor;
-        float          m_DepthMaskValue;
-        unsigned int   m_ID;
-
+        Scene*                        m_Scene;
+        Camera*                       m_Camera;
+        glm::vec4                     m_Viewport_Dimensions;
+        glm::vec4                     m_BackgroundColor;
+        float                         m_DepthMaskValue;
+        unsigned int                  m_ID;
 
         Viewport() = delete;
     public:

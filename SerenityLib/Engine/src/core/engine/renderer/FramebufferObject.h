@@ -31,8 +31,9 @@ namespace Engine{
 
                 const unsigned int width() const;
                 const unsigned int height() const;
-                GLuint internalFormat();
-                unsigned int attatchment();
+                const GLuint internalFormat() const;
+                const unsigned int attatchment() const;
+
                 virtual void resize(FramebufferObject&, const unsigned int& width, const unsigned int& height);
                 virtual const GLuint address() const;
                 virtual void bind();
@@ -48,11 +49,11 @@ namespace Engine{
                 FramebufferTexture(const FramebufferObject&, const FramebufferAttatchment::Attatchment&, const Texture&);
                 virtual ~FramebufferTexture();
 
-                void resize(FramebufferObject&, const unsigned int& width, const unsigned int& height);
-                const GLuint address() const;
-                Texture& texture();
-                void bind();
-                void unbind();
+                void resize(FramebufferObject&, const unsigned int& width, const unsigned int& height) override;
+                const GLuint address() const override;
+                Texture& texture() const;
+                void bind() override;
+                void unbind() override;
         };
         class RenderbufferObject final: public FramebufferObjectAttatchment{
             friend class  Engine::priv::FramebufferObject;
@@ -64,10 +65,10 @@ namespace Engine{
                 RenderbufferObject(FramebufferObject&, FramebufferAttatchment::Attatchment, ImageInternalFormat::Format);
                 virtual ~RenderbufferObject();
 
-                void resize(FramebufferObject&, const unsigned int& width, const unsigned int& height);
-                const GLuint address() const;
-                void bind();
-                void unbind();
+                void resize(FramebufferObject&, const unsigned int& width, const unsigned int& height) override;
+                const GLuint address() const override;
+                void bind() override;
+                void unbind() override;
         };
         class FramebufferObject final: public BindableResource{
             friend class  Engine::priv::FramebufferTexture;

@@ -42,7 +42,7 @@ namespace Engine::priv {
             std::mutex                                                      m_Mutex;
             std::queue<std::shared_ptr<std::packaged_task<void()>>>         m_TaskQueue;
             std::vector<std::thread>                                        m_WorkerThreads;
-            std::vector<Engine::priv::ThreadPoolFuture>                    m_Futures;
+            std::vector<Engine::priv::ThreadPoolFuture>                     m_Futures;
             bool                                                            m_Stopped;
 
             void init(const unsigned int num_threads);

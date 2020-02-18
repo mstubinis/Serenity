@@ -1,5 +1,4 @@
 #include <core/engine/model/ModelInstance.h>
-#include <core/engine/model/ModelInstanceAnimation.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/mesh/Mesh.h>
@@ -35,7 +34,7 @@ namespace Engine::priv {
         const glm::vec3 camPos        = scene.getActiveCamera()->getPosition();
         auto& body                    = *(i.m_Parent.getComponent<ComponentBody>());
         const glm::mat4 parentModel   = body.modelMatrixRendering();
-        auto& animationQueue          = i.m_AnimationQueue;
+        auto& animationVector         = i.m_AnimationVector;
 
         Engine::Renderer::sendUniform4Safe("Object_Color", i.m_Color);
         Engine::Renderer::sendUniform3Safe("Gods_Rays_Color", i.m_GodRaysColor);
@@ -118,32 +117,9 @@ namespace Engine::priv {
                 Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF, maxTextures);
             }
         }
-        if (animationQueue.size() > 0) {
-            vector<glm::mat4> transforms;
-            //process the animation here
-            for (size_t j = 0; j < animationQueue.size(); ++j) {
-                auto& a = *(animationQueue[j]);
-                if (a.m_Mesh == i.m_Mesh) {
-                    a.m_CurrentTime += Resources::dt();
-                    a.m_Mesh->playAnimation(transforms, a.m_AnimationName, a.m_CurrentTime);
-                    if (a.m_CurrentTime >= a.m_EndTime) {
-                        a.m_CurrentTime = 0;
-                        ++a.m_CurrentLoops;
-                    }
-                }
-            }
+        if (animationVector.size() > 0) {
             Engine::Renderer::sendUniform1Safe("AnimationPlaying", 1);
-            Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", transforms, static_cast<uint>(transforms.size()));
-            //cleanup the animation queue
-            for (auto it = animationQueue.cbegin(); it != animationQueue.cend();) {
-                ModelInstanceAnimation* anim = (*it);
-                auto& a = *((*it));
-                if (a.m_RequestedLoops > 0 && (a.m_CurrentLoops >= a.m_RequestedLoops)) {
-                    SAFE_DELETE(anim); //do we need this?
-                    it = animationQueue.erase(it);
-                }
-                else { ++it; }
-            }
+            Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationVector.m_Transforms, static_cast<unsigned int>(animationVector.m_Transforms.size()));
         }else{
             Engine::Renderer::sendUniform1Safe("AnimationPlaying", 0);
         }
@@ -163,7 +139,7 @@ namespace Engine::priv {
         //auto& i = *static_cast<ModelInstance*>(r);
     }};
 };
-const bool priv::InternalModelInstancePublicInterface::IsViewportValid(ModelInstance& modelInstance, Viewport& viewport) {
+const bool priv::InternalModelInstancePublicInterface::IsViewportValid(const ModelInstance& modelInstance, const Viewport& viewport) {
     const auto flags = modelInstance.getViewportFlags();
     return !(flags & (1 << viewport.id()) || flags == 0) ? false : true;
 }
@@ -171,11 +147,11 @@ const bool priv::InternalModelInstancePublicInterface::IsViewportValid(ModelInst
 
 
 ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Material* mat, ShaderProgram* program) : m_Parent(parent), BindableResource(ResourceType::Empty){
-    internalInit(mesh, mat, program);
+    internal_init(mesh, mat, program);
     setCustomBindFunctor(priv::DefaultModelInstanceBindFunctor());
     setCustomUnbindFunctor(priv::DefaultModelInstanceUnbindFunctor());
 }
-ModelInstance::ModelInstance(Entity& parent, Handle mesh, Handle mat, ShaderProgram* program) :ModelInstance(parent, (Mesh*)mesh.get(), (Material*)mat.get(), program) {
+ModelInstance::ModelInstance(Entity& parent, Handle mesh, Handle mat, ShaderProgram* program) : ModelInstance(parent, (Mesh*)mesh.get(), (Material*)mat.get(), program) {
 }
 ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Handle mat, ShaderProgram* program) : ModelInstance(parent, mesh, (Material*)mat.get(), program) {
 }
@@ -186,7 +162,7 @@ ModelInstance::ModelInstance(ModelInstance&& other) noexcept : BindableResource(
     m_DrawingMode            = std::move(other.m_DrawingMode);
     m_ViewportFlagDefault    = std::move(other.m_ViewportFlagDefault);
     m_ViewportFlag           = std::move(other.m_ViewportFlagDefault);
-    m_AnimationQueue         = std::move(other.m_AnimationQueue);
+    m_AnimationVector        = std::move(other.m_AnimationVector);
     m_Parent                 = std::move(other.m_Parent);
     m_Stage                  = std::move(other.m_Stage);
     m_Position               = std::move(other.m_Position);
@@ -209,7 +185,7 @@ ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
         m_DrawingMode            = std::move(other.m_DrawingMode);
         m_ViewportFlagDefault    = std::move(other.m_ViewportFlagDefault);
         m_ViewportFlag           = std::move(other.m_ViewportFlagDefault);
-        m_AnimationQueue         = std::move(other.m_AnimationQueue);
+        m_AnimationVector        = std::move(other.m_AnimationVector);
         m_Parent                 = std::move(other.m_Parent);
         m_Stage                  = std::move(other.m_Stage);
         m_Position               = std::move(other.m_Position);
@@ -231,7 +207,6 @@ ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
 }
 
 ModelInstance::~ModelInstance() {
-    SAFE_DELETE_VECTOR(m_AnimationQueue);
 }
 
 void ModelInstance::setDefaultViewportFlag(const unsigned int flag) {
@@ -241,7 +216,7 @@ void ModelInstance::setDefaultViewportFlag(const ViewportFlag::Flag flag) {
     m_ViewportFlagDefault = flag;
 }
 
-void ModelInstance::internalInit(Mesh* mesh, Material* mat, ShaderProgram* program) {
+void ModelInstance::internal_init(Mesh* mesh, Material* mat, ShaderProgram* program) {
     if (!program) {
         program = ShaderProgram::Deferred;
     }
@@ -262,7 +237,7 @@ void ModelInstance::internalInit(Mesh* mesh, Material* mat, ShaderProgram* progr
     m_Scale             = glm::vec3(1.0f, 1.0f, 1.0f);
     m_Index             = 0;
 
-    internalUpdateModelMatrix();
+    internal_update_model_matrix();
 }
 const size_t& ModelInstance::index() const {
     return m_Index;
@@ -301,7 +276,7 @@ void ModelInstance::removeViewportFlag(const ViewportFlag::Flag flag) {
 const unsigned int& ModelInstance::getViewportFlags() const {
     return m_ViewportFlag.get();
 }
-void ModelInstance::internalUpdateModelMatrix() {
+void ModelInstance::internal_update_model_matrix() {
     auto* model = m_Parent.getComponent<ComponentModel>();
     if(model)
         Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
@@ -313,11 +288,15 @@ void* ModelInstance::getUserPointer() const {
 void ModelInstance::setUserPointer(void* UserPointer) {
     m_UserPointer = UserPointer;
 }
-Entity& ModelInstance::parent() {
+const Entity& ModelInstance::parent() const {
     return m_Parent; 
 }
-void ModelInstance::setStage(const RenderStage::Stage& stage) {
+//void ModelInstance::setStage(const RenderStage::Stage& stage) {
+//    m_Stage = stage;
+//}
+void ModelInstance::setStage(const RenderStage::Stage& stage, ComponentModel& componentModel) {
     m_Stage = stage;
+    componentModel.setStage(stage, m_Index);
 }
 void ModelInstance::show() {
     m_Visible = true; 
@@ -338,63 +317,63 @@ void ModelInstance::setColor(const float& r, const float& g, const float& b, con
     Math::setColor(m_Color, r, g, b, a);
 }
 void ModelInstance::setColor(const glm::vec4& color){
-    setColor(color.r, color.g, color.b, color.a);
+    ModelInstance::setColor(color.r, color.g, color.b, color.a);
 }
 void ModelInstance::setColor(const glm::vec3& color) {
-    setColor(color.r, color.g, color.b, 1.0f); 
+    ModelInstance::setColor(color.r, color.g, color.b, 1.0f);
 }
 void ModelInstance::setGodRaysColor(const float& r, const float& g, const float& b) {
     Math::setColor(m_GodRaysColor, r, g, b);
 }
 void ModelInstance::setGodRaysColor(const glm::vec3& color){
-    setGodRaysColor(color.r, color.g, color.b);
+    ModelInstance::setGodRaysColor(color.r, color.g, color.b);
 }
 void ModelInstance::setPosition(const float& x, const float& y, const float& z){
     m_Position = glm::vec3(x, y, z);
-    internalUpdateModelMatrix();
+    internal_update_model_matrix();
 }
 void ModelInstance::setOrientation(const glm::quat& orientation) {
     m_Orientation = orientation;
-    internalUpdateModelMatrix();
+    internal_update_model_matrix();
 }
 void ModelInstance::setOrientation(const float& x, const float& y, const float& z) {
     Math::setRotation(m_Orientation, x, y, z);
-    internalUpdateModelMatrix();
+    internal_update_model_matrix();
 }
 void ModelInstance::setScale(const float& scale) {
     m_Scale = glm::vec3(scale, scale, scale);
-    internalUpdateModelMatrix();
+    internal_update_model_matrix();
 }
 void ModelInstance::setScale(const float& x, const float& y, const float& z){
     m_Scale = glm::vec3(x, y, z);
-    internalUpdateModelMatrix();
+    internal_update_model_matrix();
 }
 void ModelInstance::translate(const float& x, const float& y, const float& z){
     m_Position += glm::vec3(x, y, z);
-    internalUpdateModelMatrix();
+    internal_update_model_matrix();
 }
 void ModelInstance::rotate(const float& x, const float& y, const float& z){
     Math::rotate(m_Orientation, x, y, z);
-    internalUpdateModelMatrix();
+    internal_update_model_matrix();
 }
 void ModelInstance::scale(const float& x, const float& y, const float& z){
     m_Scale += glm::vec3(x, y, z); 
-    internalUpdateModelMatrix();
+    internal_update_model_matrix();
 }
 void ModelInstance::setPosition(const glm::vec3& v){
-    setPosition(v.x, v.y, v.z);
+    ModelInstance::setPosition(v.x, v.y, v.z);
 }
 void ModelInstance::setScale(const glm::vec3& v){
-    setScale(v.x, v.y, v.z);
+    ModelInstance::setScale(v.x, v.y, v.z);
 }
 void ModelInstance::translate(const glm::vec3& v){
-    translate(v.x, v.y, v.z);
+    ModelInstance::translate(v.x, v.y, v.z);
 }
 void ModelInstance::rotate(const glm::vec3& v){
-    rotate(v.x, v.y, v.z);
+    ModelInstance::rotate(v.x, v.y, v.z);
 }
 void ModelInstance::scale(const glm::vec3& v) {
-    scale(v.x, v.y, v.z);
+    ModelInstance::scale(v.x, v.y, v.z);
 }
 const glm::vec4& ModelInstance::color() const {
     return m_Color; 
@@ -414,39 +393,40 @@ const glm::vec3& ModelInstance::position() const {
 const glm::quat& ModelInstance::orientation() const {
     return m_Orientation; 
 }
-ShaderProgram* ModelInstance::shaderProgram() {
+ShaderProgram* ModelInstance::shaderProgram() const {
     return m_ShaderProgram; 
 }
-Mesh* ModelInstance::mesh() {
+Mesh* ModelInstance::mesh() const {
     return m_Mesh; 
 }
-Material* ModelInstance::material() {
+Material* ModelInstance::material() const {
     return m_Material; 
 }
 const RenderStage::Stage& ModelInstance::stage() const {
     return m_Stage; 
 }
-void ModelInstance::setShaderProgram(const Handle& shaderPHandle, ComponentModel& componentModel) {
-    setShaderProgram(((ShaderProgram*)shaderPHandle.get()), componentModel);
+void ModelInstance::setShaderProgram(const Handle& shaderProgramHandle, ComponentModel& componentModel) {
+    ModelInstance::setShaderProgram(((ShaderProgram*)shaderProgramHandle.get()), componentModel);
 }
 void ModelInstance::setShaderProgram(ShaderProgram* shaderProgram, ComponentModel& componentModel) {
     if (!shaderProgram) { 
         shaderProgram = ShaderProgram::Deferred;
     }
-    componentModel.setModel(m_Mesh, m_Material, 0, shaderProgram, m_Stage);
+    componentModel.setModel(m_Mesh, m_Material, m_Index, shaderProgram, m_Stage);
 }
 void ModelInstance::setMesh(const Handle& meshHandle, ComponentModel& componentModel){
-    setMesh(((Mesh*)meshHandle.get()), componentModel);
+    ModelInstance::setMesh(((Mesh*)meshHandle.get()), componentModel);
 }
 void ModelInstance::setMesh(Mesh* mesh, ComponentModel& componentModel){
-    componentModel.setModel(mesh, m_Material, 0, m_ShaderProgram, m_Stage);
+    m_AnimationVector.clear();
+    componentModel.setModel(mesh, m_Material, m_Index, m_ShaderProgram, m_Stage);
 }
 void ModelInstance::setMaterial(const Handle& materialHandle, ComponentModel& componentModel){
-    setMaterial(((Material*)materialHandle.get()), componentModel);
+    ModelInstance::setMaterial(((Material*)materialHandle.get()), componentModel);
 }
 void ModelInstance::setMaterial(Material* material, ComponentModel& componentModel){
-    componentModel.setModel(m_Mesh, material, 0, m_ShaderProgram, m_Stage);
+    componentModel.setModel(m_Mesh, material, m_Index, m_ShaderProgram, m_Stage);
 }
-void ModelInstance::playAnimation(const string& animName, const float& start, const float& end, const unsigned int& reqLoops){
-    m_AnimationQueue.push_back(NEW priv::ModelInstanceAnimation(*mesh(), animName, start, end, reqLoops));
+void ModelInstance::playAnimation(const string& animationName, const float& start, const float& end, const unsigned int& requestedLoops){
+    m_AnimationVector.emplace_animation(*m_Mesh, animationName, start, end, requestedLoops);
 }

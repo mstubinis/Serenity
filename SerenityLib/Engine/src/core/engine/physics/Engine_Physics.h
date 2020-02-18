@@ -10,13 +10,16 @@ class  Camera;
 namespace Engine::priv {
     struct MeshImportedData;
     class  GLDebugDrawer;
-    class  PhysicsWorld;
+    //class  PhysicsWorld;
 };
 
+#include <core/engine/physics/World.h>
 #include <core/engine/math/Numbers.h>
 #include <vector>
 #include <mutex>
 #include <LinearMath/btVector3.h>
+
+#define PHYSICS_MIN_STEP 0.016666666666666666
 
 namespace Engine{
     struct RayCastResult {
@@ -29,7 +32,7 @@ namespace Engine{
     namespace priv{
         class PhysicsManager final{
             public:
-                Engine::priv::PhysicsWorld*   m_Data;
+                Engine::priv::PhysicsWorld    m_Data;
                 std::mutex                    m_Mutex;
                 bool                          m_Paused;
                 unsigned int                  m_NumberOfStepsPerFrame;

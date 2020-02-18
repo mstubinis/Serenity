@@ -21,23 +21,18 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace std;
 
-#define PHYSICS_MIN_STEP 0.016666666666666666
 
 EngineCore* Core::m_Engine = nullptr;
 
-EngineCore::EngineCore(const EngineOptions& options) :
-m_EventManager(),
-m_ResourceManager(options),
-m_DebugManager(),
-m_SoundManager(),
-m_RenderManager(options),
-m_PhysicsManager(),
-m_ThreadManager()
-{
+EngineCore::EngineCore(const EngineOptions& options) : m_ResourceManager(options), m_RenderManager(options){
     m_Misc.m_Destroyed = m_Misc.m_Paused = false;
 }
 
 EngineCore::~EngineCore(){
+    on_event_game_ended();
+    Game::cleanup();
+    cleanup_os_specific();
+
     m_Misc.m_BuiltInMeshes.cleanup();
 }
 
@@ -236,8 +231,7 @@ void EngineCore::cleanup(Window& window, const float& dt) {
     m_ResourceManager.onPostUpdate();
 }
 void EngineCore::on_event_resize(Window& window, const unsigned int& newWindowWidth, const unsigned int& newWindowHeight, const bool& saveSize){
-    m_EventManager.m_KeyboardKeyStatus.clear();
-    m_EventManager.m_MouseStatus.clear();
+    m_EventManager.cleanup();
     m_RenderManager._resize(newWindowWidth, newWindowHeight);
 
     if (saveSize) {
@@ -281,16 +275,14 @@ void EngineCore::on_event_window_closed(Window& window) {
     m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_lost_focus(Window& window){
-    m_EventManager.m_KeyboardKeyStatus.clear();
-    m_EventManager.m_MouseStatus.clear();
+    m_EventManager.cleanup();
     Game::onLostFocus(window);
 
     Event ev(EventType::WindowLostFocus);
     m_EventManager.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_gained_focus(Window& window){
-    m_EventManager.m_KeyboardKeyStatus.clear();
-    m_EventManager.m_MouseStatus.clear();
+    m_EventManager.cleanup();
     Game::onGainedFocus(window);
 
     window.m_Data.on_reset_events(0.0);
@@ -524,8 +516,5 @@ void EngineCore::run(){
         }
         m_DebugManager.calculate();
     }
-    on_event_game_ended();
-    Game::cleanup();
-    cleanup_os_specific();
     SAFE_DELETE(Core::m_Engine);
 }

@@ -14,25 +14,22 @@ class btCollisionShape;
 class btTransform;
 class btVector3;
 class btDiscreteDynamicsWorld;
+
+#include <core/engine/physics/DebugDrawer.h>
+
 namespace Engine::priv {
-    class  GLDebugDrawer;
-    class PhysicsWorld final{
+    class PhysicsWorld final : public Engine::NonCopyable, public Engine::NonMoveable{
         public:
-            btBroadphaseInterface*                  broadphase;
-            btDefaultCollisionConfiguration*        collisionConfiguration;
-            btCollisionDispatcher*                  dispatcher;
-            btSequentialImpulseConstraintSolver*    solver;
-            btSequentialImpulseConstraintSolverMt*  solverMT;
-            btDiscreteDynamicsWorld*                world;
-            GLDebugDrawer*                          debugDrawer;
+            btBroadphaseInterface*                  m_Broadphase;
+            btDefaultCollisionConfiguration*        m_CollisionConfiguration;
+            btCollisionDispatcher*                  m_Dispatcher;
+            btSequentialImpulseConstraintSolver*    m_Solver;
+            btSequentialImpulseConstraintSolverMt*  m_SolverMT;
+            btDiscreteDynamicsWorld*                m_World;
+            GLDebugDrawer                           m_DebugDrawer;
         public:
             PhysicsWorld();
             ~PhysicsWorld();
-
-            PhysicsWorld(const PhysicsWorld&)                      = delete;
-            PhysicsWorld& operator=(const PhysicsWorld&)           = delete;
-            PhysicsWorld(PhysicsWorld&& other) noexcept            = delete;
-            PhysicsWorld& operator=(PhysicsWorld&& other) noexcept = delete;
     };
 };
 #endif

@@ -87,15 +87,15 @@ namespace Engine::priv {
             const bool remove_instance_node(MeshNode& meshNode, const InstanceNode& instanceNode);
 
             void clean(const uint entityData);
-            void sort(Camera& camera, const SortingMode::Mode sortingMode);
-            void sort_cheap(Camera& camera, const SortingMode::Mode sortingMode);
+            void sort(const Camera& camera, const SortingMode::Mode sortingMode);
+            void sort_cheap(const Camera& camera, const SortingMode::Mode sortingMode);
 
-            void sort_bruteforce(Camera& camera, const SortingMode::Mode sortingMode);
-            void sort_cheap_bruteforce(Camera& camera, const SortingMode::Mode sortingMode);
+            void sort_bruteforce(const Camera& camera, const SortingMode::Mode sortingMode);
+            void sort_cheap_bruteforce(const Camera& camera, const SortingMode::Mode sortingMode);
 
-            void render(Viewport& viewport, Camera& camera, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
-            void render_bruteforce(Viewport& viewport, Camera& camera, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
-            void validate_model_instances_for_rendering(Viewport& viewport, Camera& camera);
+            void render(const Viewport& viewport, const Camera& camera, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
+            void render_bruteforce(const Viewport& viewport, const Camera& camera, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
+            void validate_model_instances_for_rendering(const Viewport& viewport, const Camera& camera);
 
     };
 };

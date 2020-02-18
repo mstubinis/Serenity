@@ -26,7 +26,7 @@ struct EngineOptions;
 #include <string>
 #include <SFML/Window.hpp>
 #include <glm/vec2.hpp>
-#include <core/engine/threading/Queue_ThreadSafe.h>
+#include <core/engine/containers/Queue_ts.h>
 
 class Window_Flags final { public: enum Flag: unsigned short {
     WindowedFullscreen = 1 << 0,
@@ -56,9 +56,9 @@ class Window final{
 
         private:
             #ifdef ENGINE_THREAD_WINDOW_EVENTS
-                Engine::priv::Queue_ThreadSafe<sf::Event>                          m_Queue;
-                Engine::priv::Queue_ThreadSafe<EventThreadOnlyCommands::Command>   m_MainThreadToEventThreadQueue;
-                std::unique_ptr<std::thread>                                       m_EventThread;
+                Engine::queue_ts<sf::Event>                          m_Queue;
+                Engine::queue_ts<EventThreadOnlyCommands::Command>   m_MainThreadToEventThreadQueue;
+                std::unique_ptr<std::thread>                         m_EventThread;
             #endif
 
             glm::uvec2          m_OldWindowSize;

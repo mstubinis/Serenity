@@ -47,17 +47,15 @@ struct ScreenBoxCoordinates {
     glm::vec2 bottomRight;
 };
 
-namespace Engine {
-    namespace priv {
-        struct ComponentBody_UpdateFunction;
-        struct ComponentBody_EntityAddedToSceneFunction;
-        struct ComponentBody_ComponentAddedToEntityFunction;
-        struct ComponentBody_SceneEnteredFunction;
-        struct ComponentBody_SceneLeftFunction;
-        struct ComponentBody_EmptyCollisionFunctor final { 
-            void operator()(CollisionCallbackEventData& data) const {
-            } 
-        };
+namespace Engine::priv {
+    struct ComponentBody_UpdateFunction;
+    struct ComponentBody_EntityAddedToSceneFunction;
+    struct ComponentBody_ComponentAddedToEntityFunction;
+    struct ComponentBody_SceneEnteredFunction;
+    struct ComponentBody_SceneLeftFunction;
+    struct ComponentBody_EmptyCollisionFunctor final { 
+        void operator()(CollisionCallbackEventData& data) const {
+        } 
     };
 };
 
@@ -139,11 +137,11 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
         void setUserPointer(void* userPtr);
         void setUserPointer1(void* userPtr);
         void setUserPointer2(void* userPtr);
-        void* getUserPointer();
-        void* getUserPointer1();
-        void* getUserPointer2();
+        void* getUserPointer() const;
+        void* getUserPointer1() const;
+        void* getUserPointer2() const;
 
-        const bool&  hasPhysics() const;
+        const bool& hasPhysics() const;
         const unsigned short getCollisionGroup() const; //get the groups this body belongs to
         const unsigned short getCollisionMask() const;  //get the groups this body will register collisions with
         const unsigned short getCollisionFlags() const;
@@ -173,11 +171,11 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
         void setScale(const decimal& s);
 
 		const float mass() const;
-        const decimal getDistance(const Entity& other);
-        const unsigned long long getDistanceLL(const Entity& other);
-        glm::vec3 getScreenCoordinates(const bool clampToEdge = false);
+        const decimal getDistance(const Entity& other) const;
+        const unsigned long long getDistanceLL(const Entity& other) const;
+        const glm::vec3 getScreenCoordinates(const bool clampToEdge = false) const;
 
-        ScreenBoxCoordinates getScreenBoxCoordinates(const float minOffset = 10.0f);
+        const ScreenBoxCoordinates getScreenBoxCoordinates(const float minOffset = 10.0f) const;
 
 		const glm_quat rotation() const;
 		const glm_vec3 getScale() const;
@@ -194,7 +192,7 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
 
         void setCollision(const CollisionType::Type collisionType, const float mass);
         void setCollision(Collision* collision);
-        Collision* getCollision();
+        Collision* getCollision() const;
 
         void setCollisionGroup(const short& group);  //set the groups this body belongs to
         void setCollisionMask(const short& mask); //set the groups this body will register collisions with

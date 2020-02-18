@@ -18,17 +18,19 @@
 
 namespace Engine::priv {
     class PhysicsManager;
-    class PhysicsDebugDrawcallback final : public btTriangleCallback, public btInternalTriangleIndexCallback {
+    class PhysicsDebugDrawcallback final : public btTriangleCallback, public btInternalTriangleIndexCallback, public Engine::NonCopyable, public Engine::NonMoveable {
         private:
-            btIDebugDraw* m_DebugDrawer;
+            btIDebugDraw& m_DebugDrawer;
             btVector3	  m_Color;
             btTransform   m_WorldTransform;
+
+            PhysicsDebugDrawcallback() = delete;
         public:
             PhysicsDebugDrawcallback(btIDebugDraw* debugDrawer, const btTransform& worldTrans, const btVector3& color);
             virtual void internalProcessTriangleIndex(btVector3* triangle, int partId, int  triangleIndex);
             virtual void processTriangle(btVector3* triangle, int partId, int triangleIndex);
     };
-    class GLDebugDrawer final : public btIDebugDraw, public EventObserver {
+    class GLDebugDrawer final : public btIDebugDraw, public EventObserver, public Engine::NonCopyable, public Engine::NonMoveable {
         friend class Engine::priv::PhysicsManager;
         private:
             GLuint m_Mode, m_VAO, m_VertexBuffer, C_MAX_POINTS;
@@ -37,20 +39,20 @@ namespace Engine::priv {
                 glm::vec3 color;
                 LineVertex();
             };
-            std::vector<LineVertex> vertices;
+            std::vector<LineVertex> m_LineVertices;
 
             void init();
             void destruct();
             void bindDataToGPU();
-            void renderLines();
+            void render();
             void buildVAO();
             void postRender();
         public:
             GLDebugDrawer();
             ~GLDebugDrawer();
-            void initRenderingContext();
+
             void drawAccumulatedLines();
-            void onEvent(const Event& e);
+            void onEvent(const Event& e) override;
             void drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3&, const btVector3&, const btVector3&, const btVector3& color, btScalar alpha);
             void drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3& color, btScalar);
             void drawLine(const btVector3& from, const btVector3& to, const btVector3& color);

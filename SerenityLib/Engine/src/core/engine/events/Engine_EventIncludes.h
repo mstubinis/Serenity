@@ -149,6 +149,7 @@ struct KeyboardKey final{
         Unknown = 4294967295, //-1
     };
     static const std::string& toString(const KeyboardKey::Key keyboard_key);
+    static const bool isModifierKey(const KeyboardKey::Key keyboard_key);
 };
 struct MouseButton final{
     enum Button : unsigned int{

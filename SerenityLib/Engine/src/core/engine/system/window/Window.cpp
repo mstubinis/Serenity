@@ -69,7 +69,7 @@ const sf::ContextSettings Window::WindowData::create(Window& super, const string
             sf::Event e;
             while (!data_.m_UndergoingClosing){
                 while (!data_.m_UndergoingClosing && data_.m_SFMLWindow.pollEvent(e)) {
-                    data_.m_Queue.push(e);
+                    data_.m_Queue.push(std::move(e));
                 }
                 auto command_ptr = data_.m_MainThreadToEventThreadQueue.try_pop();
                 while (command_ptr) {

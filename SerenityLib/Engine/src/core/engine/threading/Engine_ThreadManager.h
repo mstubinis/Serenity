@@ -9,6 +9,14 @@
 #define BOOST_RESULT_OF_USE_DECLTYPE
 #endif
 
+namespace Engine::priv {
+    class  ThreadPool;
+    class  ParticleSystem;
+    struct ComponentCamera_UpdateFunction;
+    struct ComponentBody_UpdateFunction;
+    struct ComponentModel_UpdateFunction;
+};
+
 #include <memory>
 #include <functional>
 #include <utility>
@@ -16,13 +24,10 @@
 
 namespace Engine{
     namespace priv{
-        class  ThreadPool;
-        class  ParticleSystem;
-        struct ComponentCamera_UpdateFunction;
-        struct ComponentBody_UpdateFunction;
         class ThreadManager final{
             friend struct ComponentCamera_UpdateFunction;
             friend struct ComponentBody_UpdateFunction;
+            friend struct ComponentModel_UpdateFunction;
             friend class  Engine::priv::ParticleSystem;
             private:
                 void wait_for_all_engine_controlled();

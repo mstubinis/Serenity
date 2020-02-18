@@ -389,8 +389,8 @@ class priv::Renderer::impl final{
             //TODO: add cleanup() from ssao / smaa here?
         }
         void _renderSkybox(Skybox* skybox, Scene& scene, Viewport& viewport, Camera& camera){
-            glm::mat4 view = camera.getView();
-            Math::removeMatrixPosition(view);
+            glm::mat4 view_no_position = camera.getView();
+            Math::removeMatrixPosition(view_no_position);
 
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredSkybox]->bind();
             if (skybox) {
@@ -401,7 +401,7 @@ class priv::Renderer::impl final{
                 const auto& bgColor = scene.getBackgroundColor();
                 Engine::Renderer::sendUniform4Safe("Color", bgColor.r, bgColor.g, bgColor.b, bgColor.a);
             }
-            Engine::Renderer::sendUniformMatrix4("VP", camera.getProjection() * view);
+            Engine::Renderer::sendUniformMatrix4("VP", camera.getProjection() * view_no_position);
             Skybox::bindMesh();
 
             Engine::Renderer::sendTextureSafe("Texture", 0, 0, GL_TEXTURE_CUBE_MAP); //this is needed to render stuff in geometry transparent using the normal deferred shader. i do not know why just yet...
@@ -421,19 +421,20 @@ class priv::Renderer::impl final{
             m_GBuffer = NEW GBuffer(width,height);
         }
         void _generatePBREnvMapData(Texture& texture, const uint& convoludeTextureSize, const uint& preEnvFilterSize){
-            uint texType = texture.type();
+            const uint texType = texture.type();
             if(texType != GL_TEXTURE_CUBE_MAP){
-                cout << "(Texture) : Only cubemaps can be precomputed for IBL. Ignoring genPBREnvMapData() call..." << endl; return;
+                cout << "(Texture) : Only cubemaps can be precomputed for IBL. Ignoring genPBREnvMapData() call..." << endl; 
+                return;
             }
             uint size = convoludeTextureSize;
             Engine::Renderer::bindTextureForModification(texType, texture.address(1));
             Engine::Renderer::unbindFBO();
-            priv::FramebufferObject* fbo = NEW priv::FramebufferObject(texture.name() + "_fbo_envData",size,size); //try without a depth format
-            fbo->bind();
+            priv::FramebufferObject fbo(texture.name() + "_fbo_envData",size,size); //try without a depth format
+            fbo.bind();
     
             //make these 2 variables global in the renderer class?
-            glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f),1.0f,0.1f,3000000.0f);
-            glm::mat4 captureViews[] = {
+            const glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f),1.0f,0.1f,3000000.0f);
+            const glm::mat4 captureViews[] = {
                 glm::lookAt(glm::vec3(0.0f),glm::vec3(1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
                 glm::lookAt(glm::vec3(0.0f),glm::vec3(-1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
                 glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,1.0f,0.0f),glm::vec3(0.0f,0.0f,1.0f)),
@@ -462,32 +463,31 @@ class priv::Renderer::impl final{
             Engine::Renderer::sendTexture("cubemap",texture.address(),0,texType);
             Engine::Renderer::sendUniform1("PiFourDividedByResSquaredTimesSix",12.56637f / float((texture.width() * texture.width())*6));
             Engine::Renderer::sendUniform1("NUM_SAMPLES",32);
-            uint maxMipLevels = 5;
+            const uint maxMipLevels = 5;
             for (uint m = 0; m < maxMipLevels; ++m){
-                uint mipSize  = uint(size * glm::pow(0.5,m)); // reisze framebuffer according to mip-level size.
-                fbo->resize(mipSize,mipSize);
-                float roughness = (float)m/(float)(maxMipLevels-1);
+                const uint mipSize  = uint(size * glm::pow(0.5,m)); // reisze framebuffer according to mip-level size.
+                fbo.resize(mipSize,mipSize);
+                const float roughness = (float)m/(float)(maxMipLevels-1);
                 Engine::Renderer::sendUniform1("roughness",roughness);
-                float a = roughness * roughness;
+                const float a = roughness * roughness;
                 Engine::Renderer::sendUniform1("a2",a*a);
                 for (uint i = 0; i < 6; ++i){
-                    glm::mat4 vp = captureProjection * captureViews[i];
+                    const glm::mat4 vp = captureProjection * captureViews[i];
                     Engine::Renderer::sendUniformMatrix4("VP", vp);
-                    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,texture.address(2),m);
+                    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture.address(2), m);
                     Engine::Renderer::Settings::clear(true,true,false);
                     Skybox::bindMesh();
                 }
             }
             Resources::getWindow().display(); //prevent opengl & windows timeout
-            fbo->unbind();
-            SAFE_DELETE(fbo);
+            fbo.unbind();
         }
         void _generateBRDFLUTCookTorrance(const uint& brdfSize){
             //uint& prevReadBuffer = renderManager->glSM.current_bound_read_fbo;
             //uint& prevDrawBuffer = renderManager->glSM.current_bound_draw_fbo;
 
-            FramebufferObject* fbo = NEW FramebufferObject("BRDFLUT_Gen_CookTorr_FBO", brdfSize, brdfSize); //try without a depth format
-            fbo->bind();
+            FramebufferObject fbo("BRDFLUT_Gen_CookTorr_FBO", brdfSize, brdfSize); //try without a depth format
+            fbo.bind();
 
             Engine::Renderer::bindTextureForModification(GL_TEXTURE_2D, Texture::BRDF->address());
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, brdfSize, brdfSize, 0, GL_RG, GL_FLOAT, 0);
@@ -502,7 +502,7 @@ class priv::Renderer::impl final{
             Engine::Renderer::renderFullscreenTriangle(brdfSize, brdfSize);
             Engine::Renderer::colorMask(true, true, true, true);
 
-            SAFE_DELETE(fbo);
+            //SAFE_DELETE(fbo);
             //Renderer::bindReadFBO(prevReadBuffer);
             //Renderer::bindDrawFBO(prevDrawBuffer);
         }

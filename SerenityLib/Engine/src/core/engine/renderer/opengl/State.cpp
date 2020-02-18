@@ -18,8 +18,8 @@ const unsigned int OpenGLState::getMaxTextureUnits() const {
 }
 void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth, const unsigned int& windowHeight) {
     GLint     int_value;
-    GLfloat   float_value;
-    GLboolean boolean_value;
+    //GLfloat   float_value;
+    //GLboolean boolean_value;
 
     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &int_value); //what about GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS?
     textureUnits.reserve(int_value);

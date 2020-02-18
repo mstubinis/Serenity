@@ -7,9 +7,8 @@ using namespace std;
 
 #pragma region PhysicsDebugDrawcallback
 
-priv::PhysicsDebugDrawcallback::PhysicsDebugDrawcallback(btIDebugDraw* debugDrawer, const btTransform& worldTrans, const btVector3& color) {
-    m_DebugDrawer = debugDrawer;
-    m_Color = color;
+priv::PhysicsDebugDrawcallback::PhysicsDebugDrawcallback(btIDebugDraw* debugDrawer, const btTransform& worldTrans, const btVector3& color) : m_DebugDrawer(*debugDrawer) {
+    m_Color          = color;
     m_WorldTransform = worldTrans;
 }
 void priv::PhysicsDebugDrawcallback::internalProcessTriangleIndex(btVector3* triangle, int partId, int  triangleIndex) {
@@ -18,21 +17,20 @@ void priv::PhysicsDebugDrawcallback::internalProcessTriangleIndex(btVector3* tri
 void priv::PhysicsDebugDrawcallback::processTriangle(btVector3* triangle, int partId, int triangleIndex) {
     (void)partId;
     (void)triangleIndex;
-    auto& drawer = *m_DebugDrawer;
     btVector3 wv0, wv1, wv2;
     wv0 = m_WorldTransform * triangle[0];
     wv1 = m_WorldTransform * triangle[1];
     wv2 = m_WorldTransform * triangle[2];
     btVector3 center = (wv0 + wv1 + wv2) * btScalar(1.0 / 3.0);
-    if (drawer.getDebugMode() & btIDebugDraw::DBG_DrawNormals) {
+    if (m_DebugDrawer.getDebugMode() & btIDebugDraw::DBG_DrawNormals) {
         btVector3 normal = (wv1 - wv0).cross(wv2 - wv0);
         normal.normalize();
         btVector3 normalColor(1, 1, 0);
-        drawer.drawLine(center, center + normal, normalColor);
+        m_DebugDrawer.drawLine(center, center + normal, normalColor);
     }
-    drawer.drawLine(wv0, wv1, m_Color);
-    drawer.drawLine(wv1, wv2, m_Color);
-    drawer.drawLine(wv2, wv0, m_Color);
+    m_DebugDrawer.drawLine(wv0, wv1, m_Color);
+    m_DebugDrawer.drawLine(wv1, wv2, m_Color);
+    m_DebugDrawer.drawLine(wv2, wv0, m_Color);
 }
 
 #pragma endregion
@@ -42,19 +40,25 @@ void priv::PhysicsDebugDrawcallback::processTriangle(btVector3* triangle, int pa
 
 priv::GLDebugDrawer::LineVertex::LineVertex() {
     position = glm::vec3(0.0f);
-    color = glm::vec3(1.0f);
+    color    = glm::vec3(1.0f);
 }
 void priv::GLDebugDrawer::init() {
-    m_Mode         = btIDebugDraw::DBG_DrawWireframe + btIDebugDraw::DBG_DrawContactPoints + btIDebugDraw::DBG_DrawConstraints + btIDebugDraw::DBG_DrawConstraintLimits;
-    C_MAX_POINTS   = 262144;
-    m_VAO          = 0;
-    m_VertexBuffer = 0;
+    vector<LineVertex> temp1;
+    temp1.resize(C_MAX_POINTS, LineVertex());
+
+    glGenBuffers(1, &m_VertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(LineVertex) * C_MAX_POINTS, &temp1[0], GL_DYNAMIC_DRAW);
+
+    //support vao's
+    buildVAO();
+
     registerEvent(EventType::WindowFullscreenChanged);
 }
 void priv::GLDebugDrawer::destruct() {
     glDeleteBuffers(1, &m_VertexBuffer);
     Engine::Renderer::deleteVAO(m_VAO);
-    vector_clear(vertices);
+    vector_clear(m_LineVertices);
 }
 void priv::GLDebugDrawer::bindDataToGPU() {
     glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
@@ -63,14 +67,14 @@ void priv::GLDebugDrawer::bindDataToGPU() {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)(offsetof(LineVertex, color)));
 }
-void priv::GLDebugDrawer::renderLines() {
+void priv::GLDebugDrawer::render() {
     if (m_VAO) {
         Engine::Renderer::bindVAO(m_VAO);
-        glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(vertices.size()));
+        glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_LineVertices.size()));
         Engine::Renderer::bindVAO(0);
     }else{
         bindDataToGPU();
-        glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(vertices.size()));
+        glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_LineVertices.size()));
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
     }
@@ -84,35 +88,27 @@ void priv::GLDebugDrawer::buildVAO() {
     }
 }
 void priv::GLDebugDrawer::postRender() {
-    vector_clear(vertices);
+    vector_clear(m_LineVertices);
 }
 
 
 
 
 priv::GLDebugDrawer::GLDebugDrawer() {
-    init();
+    C_MAX_POINTS   = 262144;
+    m_VAO          = 0U;
+    m_VertexBuffer = 0U;
+    m_Mode         = btIDebugDraw::DBG_DrawWireframe + btIDebugDraw::DBG_DrawContactPoints + btIDebugDraw::DBG_DrawConstraints + btIDebugDraw::DBG_DrawConstraintLimits;
 }
 priv::GLDebugDrawer::~GLDebugDrawer() {
     destruct();
 }
 
-void priv::GLDebugDrawer::initRenderingContext() {
-    vector<LineVertex> temp1;
-    temp1.resize(C_MAX_POINTS, LineVertex());
-
-    glGenBuffers(1, &m_VertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(LineVertex) * C_MAX_POINTS, &temp1[0], GL_DYNAMIC_DRAW);
-
-    //support vao's
-    buildVAO();
-}
 void priv::GLDebugDrawer::drawAccumulatedLines() {
-    if (vertices.size() > 0) {
+    if (m_LineVertices.size() > 0) {
         glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LineVertex) * vertices.size(), &vertices[0]);
-        renderLines();
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LineVertex) * m_LineVertices.size(), &m_LineVertices[0]);
+        render();
     }
 }
 void priv::GLDebugDrawer::onEvent(const Event& e) {
@@ -129,7 +125,7 @@ void priv::GLDebugDrawer::drawTriangle(const btVector3& v0, const btVector3& v1,
     drawLine(v2, v0, color);
 }
 void priv::GLDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) {
-    if (vertices.size() >= (C_MAX_POINTS)) 
+    if (m_LineVertices.size() >= C_MAX_POINTS)
         return;
     LineVertex v1, v2;
     glm::vec3 _color = glm::vec3(color.x(), color.y(), color.z());
@@ -137,20 +133,16 @@ void priv::GLDebugDrawer::drawLine(const btVector3& from, const btVector3& to, c
     v2.color = _color;
     v1.position = glm::vec3(from.x(), from.y(), from.z());
     v2.position = glm::vec3(to.x(), to.y(), to.z());
-    vertices.push_back(v1);
-    vertices.push_back(v2);
+    m_LineVertices.push_back(v1);
+    m_LineVertices.push_back(v2);
 }
 void priv::GLDebugDrawer::drawSphere(btScalar radius, const btTransform& transform, const btVector3& color) {
-    btVector3 center = transform.getOrigin();
-    btVector3 up     = transform.getBasis().getColumn(1);
-    btVector3 axis   = transform.getBasis().getColumn(0);
-    btScalar minTh   = -SIMD_HALF_PI;
-    btScalar maxTh   = SIMD_HALF_PI;
-    btScalar minPs   = -SIMD_HALF_PI;
-    btScalar maxPs   = SIMD_HALF_PI;
-    btScalar stepDegrees = 30.f;
-    drawSpherePatch(center, up, axis, radius, minTh, maxTh, minPs, maxPs, color, stepDegrees, false);
-    drawSpherePatch(center, up, -axis, radius, minTh, maxTh, minPs, maxPs, color, stepDegrees, false);
+    const btVector3 center     = transform.getOrigin();
+    const btVector3 up         = transform.getBasis().getColumn(1);
+    const btVector3 axis       = transform.getBasis().getColumn(0);
+    const btScalar stepDegrees = 30.f;
+    drawSpherePatch(center, up, axis, radius, -SIMD_HALF_PI, SIMD_HALF_PI, -SIMD_HALF_PI, SIMD_HALF_PI, color, stepDegrees, false);
+    drawSpherePatch(center, up, -axis, radius, -SIMD_HALF_PI, SIMD_HALF_PI, -SIMD_HALF_PI, SIMD_HALF_PI, color, stepDegrees, false);
 }
 void priv::GLDebugDrawer::drawSphere(const btVector3& p, btScalar radius, const btVector3& color) {
     btTransform tr;
@@ -160,17 +152,18 @@ void priv::GLDebugDrawer::drawSphere(const btVector3& p, btScalar radius, const 
 }
 void priv::GLDebugDrawer::drawArc(const btVector3& center, const btVector3& normal, const btVector3& axis, btScalar radiusA, btScalar radiusB, btScalar minAngle, btScalar maxAngle, const btVector3& color, bool drawSect, btScalar stepDegrees) {
     const btVector3& vx = axis;
-    btVector3 vy = normal.cross(axis);
-    btScalar step = stepDegrees * SIMD_RADS_PER_DEG;
-    int nSteps = (int)btFabs((maxAngle - minAngle) / step);
-    if (!nSteps) nSteps = 1;
-    btVector3 prev = center + radiusA * vx * btCos(minAngle) + radiusB * vy * btSin(minAngle);
+    btVector3 vy        = normal.cross(axis);
+    btScalar step       = stepDegrees * SIMD_RADS_PER_DEG;
+    int nSteps          = (int)btFabs((maxAngle - minAngle) / step);
+    if (!nSteps) 
+        nSteps = 1;
+    btVector3 prev      = center + radiusA * vx * btCos(minAngle) + radiusB * vy * btSin(minAngle);
     if (drawSect) {
         drawLine(center, prev, color);
     }
     for (int i = 1; i <= nSteps; i++) {
-        btScalar angle = minAngle + (maxAngle - minAngle) * btScalar(i) / btScalar(nSteps);
-        btVector3 next = center + radiusA * vx * btCos(angle) + radiusB * vy * btSin(angle);
+        btScalar angle  = minAngle + (maxAngle - minAngle) * btScalar(i) / btScalar(nSteps);
+        btVector3 next  = center + radiusA * vx * btCos(angle) + radiusB * vy * btSin(angle);
         drawLine(prev, next, color);
         prev = next;
     }
@@ -181,54 +174,56 @@ void priv::GLDebugDrawer::drawArc(const btVector3& center, const btVector3& norm
 void priv::GLDebugDrawer::drawSpherePatch(const btVector3& center, const btVector3& up, const btVector3& axis, btScalar radius, btScalar minTh, btScalar maxTh, btScalar minPs, btScalar maxPs, const btVector3& color, btScalar stepDegrees, bool drawCenter) {
     btVector3 vA[74];
     btVector3 vB[74];
-    btVector3* pvA = vA, * pvB = vB, * pT;
-    btVector3 npole = center + up * radius;
-    btVector3 spole = center - up * radius;
+    btVector3* pvA      = vA, * pvB = vB, * pT;
+    btVector3 npole     = center + up * radius;
+    btVector3 spole     = center - up * radius;
     btVector3 arcStart;
-    btScalar step = stepDegrees * SIMD_RADS_PER_DEG;
+    btScalar step       = stepDegrees * SIMD_RADS_PER_DEG;
     const btVector3& kv = up;
     const btVector3& iv = axis;
-    btVector3 jv = kv.cross(iv);
-    bool drawN = false;
-    bool drawS = false;
+    btVector3 jv        = kv.cross(iv);
+    bool drawN          = false;
+    bool drawS          = false;
     if (minTh <= -SIMD_HALF_PI) {
-        minTh = -SIMD_HALF_PI + step;
-        drawN = true;
+        minTh           = -SIMD_HALF_PI + step;
+        drawN           = true;
     }
     if (maxTh >= SIMD_HALF_PI) {
-        maxTh = SIMD_HALF_PI - step;
-        drawS = true;
+        maxTh           = SIMD_HALF_PI - step;
+        drawS           = true;
     }
     if (minTh > maxTh) {
-        minTh = -SIMD_HALF_PI + step;
-        maxTh = SIMD_HALF_PI - step;
-        drawN = drawS = true;
+        minTh           = -SIMD_HALF_PI + step;
+        maxTh           = SIMD_HALF_PI - step;
+        drawN           = drawS = true;
     }
-    int n_hor = (int)((maxTh - minTh) / step) + 1;
-    if (n_hor < 2) n_hor = 2;
-    btScalar step_h = (maxTh - minTh) / btScalar(n_hor - 1);
-    bool isClosed = false;
+    int n_hor           = (int)((maxTh - minTh) / step) + 1;
+    if (n_hor < 2) 
+        n_hor = 2;
+    btScalar step_h     = (maxTh - minTh) / btScalar(n_hor - 1);
+    bool isClosed       = false;
     if (minPs > maxPs) {
-        minPs = -SIMD_PI + step;
-        maxPs = SIMD_PI;
+        minPs    = -SIMD_PI + step;
+        maxPs    = SIMD_PI;
         isClosed = true;
     }else if ((maxPs - minPs) >= SIMD_PI * btScalar(2.f)) {
         isClosed = true;
     }else{
         isClosed = false;
     }
-    int n_vert = (int)((maxPs - minPs) / step) + 1;
-    if (n_vert < 2) n_vert = 2;
-    btScalar step_v = (maxPs - minPs) / btScalar(n_vert - 1);
+    int n_vert           = (int)((maxPs - minPs) / step) + 1;
+    if (n_vert < 2) 
+        n_vert = 2;
+    btScalar step_v      = (maxPs - minPs) / btScalar(n_vert - 1);
     for (int i = 0; i < n_hor; i++) {
-        btScalar th = minTh + btScalar(i) * step_h;
-        btScalar sth = radius * btSin(th);
-        btScalar cth = radius * btCos(th);
+        btScalar th      = minTh + btScalar(i) * step_h;
+        btScalar sth     = radius * btSin(th);
+        btScalar cth     = radius * btCos(th);
         for (int j = 0; j < n_vert; j++) {
             btScalar psi = minPs + btScalar(j) * step_v;
             btScalar sps = btSin(psi);
             btScalar cps = btCos(psi);
-            pvB[j] = center + cth * cps * iv + cth * sps * jv + sth * kv;
+            pvB[j]       = center + cth * cps * iv + cth * sps * jv + sth * kv;
             if (i) {
                 drawLine(pvA[j], pvB[j], color);
             }else if (drawS) {
@@ -267,17 +262,17 @@ void priv::GLDebugDrawer::drawTransform(const btTransform& transform, btScalar o
 }
 void priv::GLDebugDrawer::drawAabb(const btVector3& from, const btVector3& to, const btVector3& color) {
     btVector3 halfExtents = (to - from) * 0.5f;
-    btVector3 center = (to + from) * 0.5f;
+    btVector3 center      = (to + from) * 0.5f;
     int i, j;
     btVector3 edgecoord(1.f, 1.f, 1.f), pa, pb;
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
-            pa = btVector3(edgecoord[0] * halfExtents[0], edgecoord[1] * halfExtents[1], edgecoord[2] * halfExtents[2]);
-            pa += center;
-            int othercoord = j % 3;
+            pa                     = btVector3(edgecoord[0] * halfExtents[0], edgecoord[1] * halfExtents[1], edgecoord[2] * halfExtents[2]);
+            pa                    += center;
+            int othercoord         = j % 3;
             edgecoord[othercoord] *= -1.f;
-            pb = btVector3(edgecoord[0] * halfExtents[0], edgecoord[1] * halfExtents[1], edgecoord[2] * halfExtents[2]);
-            pb += center;
+            pb                     = btVector3(edgecoord[0] * halfExtents[0], edgecoord[1] * halfExtents[1], edgecoord[2] * halfExtents[2]);
+            pb                    += center;
             drawLine(pa, pb, color);
         }
         edgecoord = btVector3(-1.f, -1.f, -1.f);

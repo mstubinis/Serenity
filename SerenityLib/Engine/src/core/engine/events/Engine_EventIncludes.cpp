@@ -167,6 +167,10 @@ const std::string& KeyboardKey::toString(const KeyboardKey::Key keyboard_key) {
     }
     return (keyboard_key == KeyboardKey::Unknown) ? EMPTY_STRING : KEYBOARD_KEY_NAMES[keyboard_key];
 }
+const bool KeyboardKey::isModifierKey(const KeyboardKey::Key key) {
+    return (key == KeyboardKey::LeftShift || key == KeyboardKey::RightShift || key == KeyboardKey::LeftControl || key == KeyboardKey::RightControl || key == KeyboardKey::LeftAlt || key == KeyboardKey::RightAlt) ? true : false;
+}
+
 const std::string& MouseButton::toString(const MouseButton::Button mouse_button) {
     if (MOUSE_BUTTON_NAMES.size() == 0) {
         MOUSE_BUTTON_NAMES = INIT_MOUSE_BUTTON_NAMES();

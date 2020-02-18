@@ -9,18 +9,20 @@ namespace Engine::priv {
     struct DefaultMeshUnbindFunctor;
     struct MeshImportedData;
     class  MeshLoader;
+    class  ModelInstanceAnimation;
 };
 
 #include <core/engine/mesh/AnimationData.h>
 
 namespace Engine::priv {
-    class MeshSkeleton final {
+    class MeshSkeleton final : public Engine::NonCopyable, public Engine::NonMoveable {
         friend class  Mesh;
         friend class  Engine::priv::MeshLoader;
         friend class  Engine::priv::AnimationData;
         friend struct Engine::priv::DefaultMeshBindFunctor;
         friend struct Engine::priv::DefaultMeshUnbindFunctor;
         friend struct Engine::priv::InternalMeshPublicInterface;
+        friend class  Engine::priv::ModelInstanceAnimation;
         private:
             BoneNode*                                       m_RootNode;
             unsigned int                                    m_NumBones;
@@ -30,19 +32,14 @@ namespace Engine::priv {
             std::unordered_map<std::string, AnimationData>  m_AnimationData;
             glm::mat4                                       m_GlobalInverseTransform;
 
-            void fill(const Engine::priv::MeshImportedData& data);
+            //void fill(const Engine::priv::MeshImportedData& data);
             void populateCleanupMap(BoneNode* node, std::unordered_map<std::string, BoneNode*>& _map);
             void cleanup();
             void clear();
+
         public:
             MeshSkeleton();
-            MeshSkeleton(const Engine::priv::MeshImportedData& data);
             ~MeshSkeleton();
-
-            MeshSkeleton(const MeshSkeleton&)                      = delete;
-            MeshSkeleton& operator=(const MeshSkeleton&)           = delete;
-            MeshSkeleton(MeshSkeleton&& other) noexcept            = delete;
-            MeshSkeleton& operator=(MeshSkeleton&& other) noexcept = delete;
 
             const unsigned int& numBones() const;
     };

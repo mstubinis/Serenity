@@ -282,13 +282,13 @@ void ComponentBody::setUserPointer1(void* userPtr) {
 void ComponentBody::setUserPointer2(void* userPtr) {
     m_UserPointer2 = userPtr;
 }
-void* ComponentBody::getUserPointer() {
+void* ComponentBody::getUserPointer() const {
     return m_UserPointer;
 }
-void* ComponentBody::getUserPointer1() {
+void* ComponentBody::getUserPointer1() const {
     return m_UserPointer1;
 }
-void* ComponentBody::getUserPointer2() {
+void* ComponentBody::getUserPointer2() const {
     return m_UserPointer2;
 }
 void ComponentBody::collisionResponse(CollisionCallbackEventData& data) {
@@ -313,12 +313,12 @@ const ushort ComponentBody::getCollisionFlags() const {
     return static_cast<ushort>(0);
 }
 
-const decimal ComponentBody::getDistance(const Entity& p_Other) {
-    const auto& other_position = const_cast<Entity&>(p_Other).getComponent<ComponentBody>()->position();
+const decimal ComponentBody::getDistance(const Entity& p_Other) const {
+    const auto other_position = p_Other.getComponent<ComponentBody>()->position();
     return glm::distance(position(), other_position);
 }
-const unsigned long long ComponentBody::getDistanceLL(const Entity& p_Other) {
-    const auto& other_position = const_cast<Entity&>(p_Other).getComponent<ComponentBody>()->position();
+const unsigned long long ComponentBody::getDistanceLL(const Entity& p_Other) const {
+    const auto other_position = p_Other.getComponent<ComponentBody>()->position();
     return static_cast<unsigned long long>(glm::distance(position(), other_position));
 }
 void ComponentBody::alignTo(const glm_vec3& p_Direction) {
@@ -333,7 +333,7 @@ void ComponentBody::alignTo(const glm_vec3& p_Direction) {
         Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
     }
 }
-Collision* ComponentBody::getCollision() {
+Collision* ComponentBody::getCollision() const {
     if (m_Physics) {
         return data.p->collision;
     }
@@ -632,17 +632,17 @@ const glm::vec3 ComponentBody::position_render() const { //theres prob a better 
     const auto& modelMatrix_ = data.n->modelMatrix;
     return glm::vec3(modelMatrix_[3][0], modelMatrix_[3][1], modelMatrix_[3][2]);
 }
-glm::vec3 ComponentBody::getScreenCoordinates(const bool p_ClampToEdge) {
+const glm::vec3 ComponentBody::getScreenCoordinates(const bool p_ClampToEdge) const {
 	return Math::getScreenCoordinates(position(), *m_Owner.scene().getActiveCamera(), p_ClampToEdge);
 }
-ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(const float p_MinOffset) {
+const ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(const float p_MinOffset) const {
     ScreenBoxCoordinates ret;
     const auto& worldPos    = position();
     auto radius             = 0.0001f;
     auto* model             = m_Owner.getComponent<ComponentModel>();
     auto& camera            = *m_Owner.scene().getActiveCamera();
-    const auto& center2DRes = Math::getScreenCoordinates(worldPos, camera, false);
-    auto center2D           = glm::vec2(center2DRes.x, center2DRes.y);
+    const auto center2DRes  = Math::getScreenCoordinates(worldPos, camera, false);
+    const auto center2D     = glm::vec2(center2DRes.x, center2DRes.y);
     if (model) {
         radius = model->radius();
     }else{
@@ -1078,7 +1078,7 @@ void ComponentBody::setMass(const float p_Mass) {
 
 struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_ComponentPool, const float& dt, Scene& p_Scene) const {
     auto& pool              = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool);
-    auto& components        = pool.pool();
+    auto& components        = pool.data();
     const decimal double_dt = static_cast<decimal>(dt);
     auto lamda_update = [&](pair<size_t, size_t>& pair_) {
         for (size_t j = pair_.first; j <= pair_.second; ++j) {
@@ -1121,7 +1121,7 @@ struct priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(voi
     }
 }};
 struct priv::ComponentBody_SceneEnteredFunction final {void operator()(void* p_ComponentPool,Scene& p_Scene) const {
-	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool)).pool();
+	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool)).data();
     for (auto& component : pool) { 
         if (component.m_Physics) {
             component.addPhysicsToWorld(true);
@@ -1129,7 +1129,7 @@ struct priv::ComponentBody_SceneEnteredFunction final {void operator()(void* p_C
     }
 }};
 struct priv::ComponentBody_SceneLeftFunction final {void operator()(void* p_ComponentPool, Scene& p_Scene) const {
-	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool)).pool();
+	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool)).data();
     for (auto& component : pool) { 
         if (component.m_Physics) {
             component.removePhysicsFromWorld(true);

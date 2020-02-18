@@ -29,7 +29,7 @@ ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& 
 : ParticleEmitter(properties, scene, lifetime, (parent) ? parent->entity() : Entity::null_){
 
 }
-ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, Entity& parent) : EntityWrapper(scene){
+ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, const Entity& parent) : EntityWrapper(scene){
     setProperties(properties);
     m_Active   = true;
     m_Parent   = parent;
@@ -66,32 +66,21 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitter& other) : EntityWrapper(o
     m_UserData       = other.m_UserData;
 }
 ParticleEmitter& ParticleEmitter::operator=(const ParticleEmitter& other) {
-    if (&other == this)
-        return *this;
-    m_Properties     = other.m_Properties;
-    m_SpawningTimer  = other.m_SpawningTimer;
-    m_Active         = other.m_Active;
-    m_Timer          = other.m_Timer;
-    m_Lifetime       = other.m_Lifetime;
-    m_Parent         = other.m_Parent;
-    m_Entity         = other.m_Entity;
-    m_UpdateFunctor  = other.m_UpdateFunctor;
-    m_UserData       = other.m_UserData;
+    if (&other != this) {
+        m_Properties     = other.m_Properties;
+        m_SpawningTimer  = other.m_SpawningTimer;
+        m_Active         = other.m_Active;
+        m_Timer          = other.m_Timer;
+        m_Lifetime       = other.m_Lifetime;
+        m_Parent         = other.m_Parent;
+        m_Entity         = other.m_Entity;
+        m_UpdateFunctor  = other.m_UpdateFunctor;
+        m_UserData       = other.m_UserData;
+    }
     return *this;
 }
 ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept : EntityWrapper(other) {
-    using std::swap;
     m_Properties      = std::exchange(other.m_Properties, nullptr);
-    /*
-    swap(m_SpawningTimer, other.m_SpawningTimer);
-    swap(m_Active, other.m_Active);
-    swap(m_Timer, other.m_Timer);
-    swap(m_Lifetime, other.m_Lifetime);
-    swap(m_Parent, other.m_Parent);
-    swap(m_Entity, other.m_Entity);
-    swap(m_UpdateFunctor, other.m_UpdateFunctor);
-    swap(m_UserData, other.m_UserData);
-    */
     m_SpawningTimer   = std::move(other.m_SpawningTimer);
     m_Active          = std::move(other.m_Active);
     m_Timer           = std::move(other.m_Timer);
@@ -102,16 +91,17 @@ ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept : EntityWrapp
     m_UserData        = std::move(other.m_UserData);
 }
 ParticleEmitter& ParticleEmitter::operator=(ParticleEmitter&& other) noexcept {
-    using std::swap;
-    m_Properties      = std::exchange(other.m_Properties, nullptr);
-    m_SpawningTimer   = std::move(other.m_SpawningTimer);
-    m_Active          = std::move(other.m_Active);
-    m_Timer           = std::move(other.m_Timer);
-    m_Lifetime        = std::move(other.m_Lifetime);
-    m_Parent          = std::move(other.m_Parent);
-    m_Entity          = std::move(other.m_Entity);
-    m_UpdateFunctor   = std::move(other.m_UpdateFunctor);
-    m_UserData        = std::move(other.m_UserData);
+    if (&other != this) {     
+        m_Properties      = std::exchange(other.m_Properties, nullptr);
+        m_SpawningTimer   = std::move(other.m_SpawningTimer);
+        m_Active          = std::move(other.m_Active);
+        m_Timer           = std::move(other.m_Timer);
+        m_Lifetime        = std::move(other.m_Lifetime);
+        m_Parent          = std::move(other.m_Parent);
+        m_Entity          = std::move(other.m_Entity);
+        m_UpdateFunctor   = std::move(other.m_UpdateFunctor);
+        m_UserData        = std::move(other.m_UserData); 
+    }
     return *this;
 }
 
@@ -122,7 +112,7 @@ void ParticleEmitter::deactivate() {
     m_Active = false;
 }
 
-ParticleEmissionProperties* ParticleEmitter::getProperties() {
+ParticleEmissionProperties* ParticleEmitter::getProperties() const {
     return m_Properties;
 }
 void ParticleEmitter::setProperties(ParticleEmissionProperties& properties) {
@@ -226,23 +216,23 @@ void ParticleEmitter::setScale(const glm_vec3& scale) {
     getComponent<ComponentBody>()->setScale(scale);
 }
 
-const glm_vec3 ParticleEmitter::getScale(EntityDataRequest& request) {
+const glm_vec3 ParticleEmitter::getScale(EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->getScale();
 }
-const glm_vec3 ParticleEmitter::getScale() {
+const glm_vec3 ParticleEmitter::getScale() const {
     return getComponent<ComponentBody>()->getScale();
 }
-const glm_vec3 ParticleEmitter::position(EntityDataRequest& request) {
+const glm_vec3 ParticleEmitter::position(EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->position();
 }
-const glm_vec3 ParticleEmitter::position() {
+const glm_vec3 ParticleEmitter::position() const {
     return getComponent<ComponentBody>()->position();
 }
 
-const glm_quat ParticleEmitter::rotation(EntityDataRequest& request) {
+const glm_quat ParticleEmitter::rotation(EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->rotation();
 }
-const glm_quat ParticleEmitter::rotation() {
+const glm_quat ParticleEmitter::rotation() const {
     return getComponent<ComponentBody>()->rotation();
 }
 
@@ -293,9 +283,9 @@ void ParticleEmitter::applyLinearVelocity(glm_vec3& velocity, const bool local) 
 }
 
 
-const glm_vec3 ParticleEmitter::linearVelocity(EntityDataRequest& request) {
+const glm_vec3 ParticleEmitter::linearVelocity(EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->getLinearVelocity();
 }
-const glm_vec3 ParticleEmitter::linearVelocity() {
+const glm_vec3 ParticleEmitter::linearVelocity() const {
     return getComponent<ComponentBody>()->getLinearVelocity();
 }

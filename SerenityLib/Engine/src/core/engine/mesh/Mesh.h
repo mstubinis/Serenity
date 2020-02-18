@@ -17,6 +17,7 @@ namespace Engine::priv {
     struct BoneNode;
     class  AnimationData;
     struct InternalMeshRequestPublicInterface;
+    class  ModelInstanceAnimation;
 };
 
 #include <core/engine/mesh/VertexData.h>
@@ -47,7 +48,7 @@ namespace Engine::priv{
     };
 };
 
-class Mesh final: public BindableResource, public EventObserver{
+class Mesh final: public BindableResource, public EventObserver, public Engine::NonCopyable, public Engine::NonMoveable {
     friend struct ::Engine::priv::InternalMeshPublicInterface;
     friend struct ::Engine::priv::InternalMeshRequestPublicInterface;
     friend struct ::Engine::priv::DefaultMeshBindFunctor;
@@ -56,6 +57,7 @@ class Mesh final: public BindableResource, public EventObserver{
     friend class  ::Engine::priv::MeshSkeleton;
     friend class  ::Engine::priv::MeshLoader;
     friend class  ::Engine::priv::MeshCollisionFactory;
+    friend class  ::Engine::priv::ModelInstanceAnimation;
     friend class  Collision;
     private:
         VertexData*                            m_VertexData;
@@ -77,12 +79,6 @@ class Mesh final: public BindableResource, public EventObserver{
         bool operator==(const bool& rhs) const;
         explicit operator bool() const;
 
-        Mesh(const Mesh&)                      = delete;
-        Mesh& operator=(const Mesh&)           = delete;
-        Mesh(Mesh&& other) noexcept            = delete;
-        Mesh& operator=(Mesh&& other) noexcept = delete;
-
-
         std::unordered_map<std::string, Engine::priv::AnimationData>& animationData();
         const glm::vec3& getRadiusBox() const;
         const float getRadius() const;
@@ -93,7 +89,8 @@ class Mesh final: public BindableResource, public EventObserver{
         void load();
         void unload();
 
-        template<typename T> void modifyVertices(const uint& attributeIndex, std::vector<T>& modifications, const uint MeshModifyFlags = MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU) {
+        template<typename T> 
+        void modifyVertices(const uint& attributeIndex, std::vector<T>& modifications, const uint MeshModifyFlags = MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU) {
             auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
             bool uploadToGPU = false;
             bool orphan = false;
@@ -117,9 +114,8 @@ class Mesh final: public BindableResource, public EventObserver{
             vertexDataStructure.setIndices(modifiedIndices, uploadToGPU, orphan, recalcTriangles);
         }
 
-        void sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, const SortingMode::Mode& sortMode);
+        void sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, const SortingMode::Mode& sortMode);
 
         void render(const bool instancing = false, const ModelDrawingMode::Mode = ModelDrawingMode::Triangles);
-        void playAnimation(std::vector<glm::mat4>&,const std::string& animationName,float time);
 };
 #endif

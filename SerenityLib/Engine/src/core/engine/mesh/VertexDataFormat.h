@@ -5,7 +5,7 @@
 #include <vector>
 #include <core/engine/mesh/VertexAttribute.h>
 
-struct VertexAttributeLayout final {enum Type {
+struct VertexAttributeLayout final { enum Type : unsigned int {
     Interleaved,    // | pos uv norm | pos uv norm | pos uv norm    | ... etc ... 
     NonInterleaved, // | pos pos pos | uv  uv  uv  | norm norm norm | ... etc ... 
 };};

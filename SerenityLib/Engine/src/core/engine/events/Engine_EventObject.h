@@ -191,9 +191,6 @@ class EventObserver{
     public:
         virtual ~EventObserver(){}
 
-        template <typename T> void registerEvent(const T&) = delete;
-        template <typename T> void unregisterEvent(const T&) = delete;
-
         void registerEvent(const EventType::Type& type);
         void unregisterEvent(const EventType::Type& type);
 

@@ -78,7 +78,7 @@ void ComponentLogic2::call(const float& dt) {
 
 struct priv::ComponentLogic2_UpdateFunction final {void operator()(void* _componentPool, const float& dt, Scene& _scene) const {
     auto& pool = *(ECSComponentPool<Entity, ComponentLogic2>*)_componentPool;
-    auto& components = pool.pool();
+    auto& components = pool.data();
 	for (auto& component : components) {
 		component.call(dt);
 	}

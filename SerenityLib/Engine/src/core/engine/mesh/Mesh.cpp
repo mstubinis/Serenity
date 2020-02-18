@@ -489,13 +489,6 @@ void Mesh::render(const bool instancing, const ModelDrawingMode::Mode mode){
         glDrawElements(static_cast<GLenum>(mode), static_cast<GLsizei>(indicesSize), GL_UNSIGNED_SHORT, 0);
     }
 }
-void Mesh::playAnimation(vector<glm::mat4>& transforms,const string& animationName,float time){
-    auto& i = *m_Skeleton;
-    if(transforms.size() == 0){
-        transforms.resize(i.numBones(),glm::mat4(1.0f));
-    }
-    i.m_AnimationData.at(animationName).BoneTransform(animationName,time, transforms);
-}
 void Mesh::load(){
     if(!isLoaded()){
         auto& _this = *this;
@@ -517,14 +510,14 @@ void Mesh::onEvent(const Event& e) {
     }
 }
 //TODO: optimize this a bit more (bubble sort?)
-void Mesh::sortTriangles(Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, const SortingMode::Mode& sortMode) {
+void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, const SortingMode::Mode& sortMode) {
 #ifndef _DEBUG
 
     auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
-    const auto& indices = vertexDataStructure.indices;
-    auto& triangles = vertexDataStructure.triangles;
+    const auto& indices       = vertexDataStructure.indices;
+    auto& triangles           = vertexDataStructure.triangles;
 
-    const glm::vec3 camPos = camera.getPosition();
+    const glm::vec3 camPos    = const_cast<Camera&>(camera).getPosition();
 
     const auto& lambda_sorter = [&](priv::Triangle& lhs, priv::Triangle& rhs) {
         glm::mat4 model1 = instance.modelMatrix() * bodyModelMatrix;

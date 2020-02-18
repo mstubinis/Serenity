@@ -17,8 +17,8 @@ class EntityWrapper {
         EntityWrapper& operator=(EntityWrapper&& other) noexcept;
 
         virtual void destroy();
-        Entity& entity();
-        const bool null();
+        const Entity& entity() const;
+        const bool null() const;
         template<typename TComponent, typename... ARGS> inline TComponent* addComponent(ARGS&& ... args) {
             return m_Entity.addComponent<TComponent>(std::forward<ARGS>(args)...);
         }
@@ -28,10 +28,10 @@ class EntityWrapper {
         template<typename TComponent> inline const bool removeComponent() {
             return m_Entity.removeComponent<TComponent>();
         }
-        template<typename TComponent> inline TComponent* getComponent() {
+        template<typename TComponent> inline TComponent* getComponent() const {
             return m_Entity.getComponent<TComponent>();
         }
-        template<typename TComponent> inline TComponent* getComponent(const EntityDataRequest& dataRequest) {
+        template<typename TComponent> inline TComponent* getComponent(const EntityDataRequest& dataRequest) const {
             return m_Entity.getComponent<TComponent>(dataRequest);
         }
 };

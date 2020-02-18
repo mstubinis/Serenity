@@ -34,9 +34,9 @@ EntityWrapper& EntityWrapper::operator=(EntityWrapper&& other) noexcept {
 void EntityWrapper::destroy() {
     m_Entity.destroy();
 }
-Entity& EntityWrapper::entity() {
+const Entity& EntityWrapper::entity() const {
     return m_Entity;
 }
-const bool EntityWrapper::null() {
+const bool EntityWrapper::null() const {
     return m_Entity.null();
 }

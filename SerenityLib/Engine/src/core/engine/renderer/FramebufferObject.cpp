@@ -21,16 +21,16 @@ priv::FramebufferObjectAttatchment::FramebufferObjectAttatchment(const Framebuff
 }
 priv::FramebufferObjectAttatchment::~FramebufferObjectAttatchment(){ 
 }
-const uint priv::FramebufferObjectAttatchment::width() const {
+const unsigned int priv::FramebufferObjectAttatchment::width() const {
     return m_FBO.width(); 
 }
-const uint priv::FramebufferObjectAttatchment::height() const {
+const unsigned int priv::FramebufferObjectAttatchment::height() const {
     return m_FBO.height(); 
 }
-uint priv::FramebufferObjectAttatchment::attatchment(){ 
+const unsigned int priv::FramebufferObjectAttatchment::attatchment() const {
     return m_GL_Attatchment; 
 }
-void priv::FramebufferObjectAttatchment::resize(FramebufferObject& fbo, const uint& w, const uint& h){
+void priv::FramebufferObjectAttatchment::resize(FramebufferObject& fbo, const unsigned int& w, const unsigned int& h){
 }
 const GLuint priv::FramebufferObjectAttatchment::address() const {
     return 0; 
@@ -39,7 +39,7 @@ void priv::FramebufferObjectAttatchment::bind(){
 }
 void priv::FramebufferObjectAttatchment::unbind(){
 }
-GLuint priv::FramebufferObjectAttatchment::internalFormat(){ 
+const GLuint priv::FramebufferObjectAttatchment::internalFormat() const {
     return m_InternalFormat; 
 }
 
@@ -59,7 +59,7 @@ void priv::FramebufferTexture::resize(FramebufferObject& fbo, const uint& w, con
 const GLuint priv::FramebufferTexture::address() const {
     return m_Texture->address(); 
 }
-Texture& priv::FramebufferTexture::texture() {
+Texture& priv::FramebufferTexture::texture() const {
     return *m_Texture;
 }
 void priv::FramebufferTexture::bind(){

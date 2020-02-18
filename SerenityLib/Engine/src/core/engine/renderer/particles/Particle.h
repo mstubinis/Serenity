@@ -68,7 +68,7 @@ class Particle {
 
         const bool& isActive() const;
         void setPosition(const glm::vec3& newPosition);
-        Material* getMaterial();
+        Material* getMaterial() const;
         Scene& scene() const;
         const float& angle() const;
         const glm::vec2& getScale() const;
@@ -95,7 +95,7 @@ class Particle {
         const glm::vec4& getUserData() const;
 
 
-        void render(Engine::priv::GBuffer&);
+        void render(const Engine::priv::GBuffer&);
 
 };
 
