@@ -13,9 +13,14 @@ using namespace std;
 Camera::Camera(const float angle, const float aspectRatio, const float _near, const float _far,Scene* scene) : EntityWrapper(*scene){//create a perspective camera
     if (!scene)
         scene = Resources::getCurrentScene();
-    auto& cam   = *m_Entity.addComponent<ComponentCamera>(angle, aspectRatio, _near, _far);
-    auto& logic = *m_Entity.addComponent<ComponentLogic2>();
-    auto& body  = *m_Entity.addComponent<ComponentBody>();
+
+    m_Entity.addComponent<ComponentCamera>(angle, aspectRatio, _near, _far);
+    m_Entity.addComponent<ComponentLogic2>();
+    m_Entity.addComponent<ComponentBody>();
+
+    auto& cam   = *m_Entity.getComponent<ComponentCamera>();
+    auto& logic = *m_Entity.getComponent<ComponentLogic2>();
+    auto& body  = *m_Entity.getComponent<ComponentBody>();
 
     cam.lookAt(body.position(), body.position() + body.forward(), body.up());
     logic.setUserPointer(this);
@@ -25,9 +30,14 @@ Camera::Camera(const float angle, const float aspectRatio, const float _near, co
 Camera::Camera(const float left, const float right, const float bottom, const float top, const float _near, const float _far,Scene* scene) : EntityWrapper(*scene){//create an orthographic camera
     if (!scene)
         scene = Resources::getCurrentScene();
-    auto& cam   = *m_Entity.addComponent<ComponentCamera>(left, right, bottom, top, _near, _far);
-    auto& logic = *m_Entity.addComponent<ComponentLogic2>();
-    auto& body  = *m_Entity.addComponent<ComponentBody>();
+
+    m_Entity.addComponent<ComponentCamera>(left, right, bottom, top, _near, _far);
+    m_Entity.addComponent<ComponentLogic2>();
+    m_Entity.addComponent<ComponentBody>();
+
+    auto& cam   = *m_Entity.getComponent<ComponentCamera>();
+    auto& logic = *m_Entity.getComponent<ComponentLogic2>();
+    auto& body  = *m_Entity.getComponent<ComponentBody>();
 
     cam.lookAt(body.position(), body.position() + body.forward(), body.up());
     logic.setUserPointer(this);

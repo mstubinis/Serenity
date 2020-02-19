@@ -25,8 +25,8 @@ SunLight::SunLight(const glm_vec3 pos, const LightType::Type type, Scene* scene)
     auto& allLights = priv::InternalScenePublicInterface::GetLights(*scene);
     allLights.push_back(this);
 
-    auto* body = addComponent<ComponentBody>();
-    body->setPosition(pos);
+    addComponent<ComponentBody>();
+    SunLight::setPosition(pos);
 }
 SunLight::~SunLight() {
 

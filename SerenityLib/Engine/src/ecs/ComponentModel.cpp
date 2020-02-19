@@ -80,24 +80,36 @@ ComponentModel::ComponentModel(const Entity& entity, Mesh* mesh, Material* mater
     addModel(mesh, material, (ShaderProgram*)shaderProgram.get(), stage);
 }
 ComponentModel::ComponentModel(ComponentModel&& other) noexcept {
+    m_Owner          = std::move(other.m_Owner);
     m_ModelInstances = std::move(other.m_ModelInstances);
     m_Radius         = std::move(other.m_Radius);
     m_RadiusBox      = std::move(other.m_RadiusBox);
+
+    if (other.isRegistered(EventType::MeshLoaded)) {
+        registerEvent(EventType::MeshLoaded);
+        other.unregisterEvent(EventType::MeshLoaded);
+    }
 }
 ComponentModel& ComponentModel::operator=(ComponentModel&& other) noexcept {
     if (&other != this) {
+        m_Owner          = std::move(other.m_Owner);
         m_ModelInstances = std::move(other.m_ModelInstances);
         m_Radius         = std::move(other.m_Radius);
         m_RadiusBox      = std::move(other.m_RadiusBox);
+
+        if (other.isRegistered(EventType::MeshLoaded)) {
+            registerEvent(EventType::MeshLoaded);
+            other.unregisterEvent(EventType::MeshLoaded);
+        }
     }
     return *this;
 }
 ComponentModel::~ComponentModel() {
     SAFE_DELETE_VECTOR(m_ModelInstances);
 }
-void ComponentModel::onEvent(const Event& _event) {
-    if (_event.type == EventType::MeshLoaded) {
-        auto* mesh = _event.eventMeshLoaded.mesh;
+void ComponentModel::onEvent(const Event& event_) {
+    if (event_.type == EventType::MeshLoaded) {
+        auto* mesh = event_.eventMeshLoaded.mesh;
         vector<Mesh*> unfinishedMeshes;
         for (auto& instance : m_ModelInstances) {
             if (instance->m_Mesh && instance->m_Mesh == false) {
@@ -294,21 +306,14 @@ void ComponentModel::setUserPointer(void* UserPointer) {
 struct priv::ComponentModel_UpdateFunction final { void operator()(void* componentPool, const float& dt, Scene& scene) const {
     auto& pool       = *static_cast<ECSComponentPool<Entity, ComponentModel>*>(componentPool);
     auto& components = pool.data();
-    auto lamda_update = [&](pair<size_t, size_t>& pair_) {
-        for (size_t j = pair_.first; j <= pair_.second; ++j) {
-            ComponentModel& componentModel = components[j];
-            for (size_t i = 0; i < componentModel.getNumModels(); ++i) {
-                auto& modelInstance = componentModel[i];
-                //process the animations here
-                modelInstance.m_AnimationVector.process(*modelInstance.mesh(), dt);
-            }
+    auto lamda_update_component = [&](ComponentModel& componentModel) {
+        for (size_t i = 0; i < componentModel.getNumModels(); ++i) {
+            auto& modelInstance = componentModel[i];
+            //process the animations here
+            modelInstance.m_AnimationVector.process(*modelInstance.mesh(), dt);
         }
     };
-    auto split = priv::threading::splitVectorPairs(components);
-    for (auto& pair : split) {
-        priv::Core::m_Engine->m_ThreadManager.add_job_ref_engine_controlled(lamda_update, pair);
-    }
-    priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
+    priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);
 }};
 struct priv::ComponentModel_ComponentAddedToEntityFunction final {void operator()(void* component, Entity& entity) const {
 

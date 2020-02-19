@@ -80,6 +80,42 @@ ComponentCamera::ComponentCamera(const Entity& p_Entity, const float p_Left, con
 }
 ComponentCamera::~ComponentCamera() {
 }
+ComponentCamera::ComponentCamera(ComponentCamera&& other) noexcept {
+    m_Owner                   = std::move(other.m_Owner);
+    m_Eye                     = std::move(other.m_Eye);
+    m_Up                      = std::move(other.m_Up);
+    m_Forward                 = std::move(other.m_Forward);
+    m_Angle                   = std::move(other.m_Angle);
+    m_AspectRatio             = std::move(other.m_AspectRatio);
+    m_NearPlane               = std::move(other.m_NearPlane);
+    m_FarPlane                = std::move(other.m_FarPlane);
+    m_Bottom                  = std::move(other.m_Bottom);
+    m_Top                     = std::move(other.m_Top);
+    m_ProjectionMatrix        = std::move(other.m_ProjectionMatrix);
+    m_ViewMatrix              = std::move(other.m_ViewMatrix);
+    m_ViewMatrixNoTranslation = std::move(other.m_ViewMatrixNoTranslation);
+    m_Type                    = std::move(other.m_Type);
+}
+ComponentCamera& ComponentCamera::operator=(ComponentCamera&& other) noexcept {
+    if (&other != this) {
+        m_Owner                   = std::move(other.m_Owner);
+        m_Eye                     = std::move(other.m_Eye);
+        m_Up                      = std::move(other.m_Up);
+        m_Forward                 = std::move(other.m_Forward);
+        m_Angle                   = std::move(other.m_Angle);
+        m_AspectRatio             = std::move(other.m_AspectRatio);
+        m_NearPlane               = std::move(other.m_NearPlane);
+        m_FarPlane                = std::move(other.m_FarPlane);
+        m_Bottom                  = std::move(other.m_Bottom);
+        m_Top                     = std::move(other.m_Top);
+        m_ProjectionMatrix        = std::move(other.m_ProjectionMatrix);
+        m_ViewMatrix              = std::move(other.m_ViewMatrix);
+        m_ViewMatrixNoTranslation = std::move(other.m_ViewMatrixNoTranslation);
+        m_Type                    = std::move(other.m_Type);
+    }
+    return *this;
+}
+
 void ComponentCamera::resize(const unsigned int p_Width, const unsigned int p_Height) {
     if (m_Type == Type::Perspective) {
         m_AspectRatio = p_Width / static_cast<float>(p_Height);
@@ -186,17 +222,10 @@ void ComponentCamera::setFar(const float p_FarPlane) {
 struct priv::ComponentCamera_UpdateFunction final { void operator()(void* p_ComponentPool, const double& p_Dt, Scene& p_Scene) const {
 	auto& pool = *(ECSComponentPool<Entity, ComponentCamera>*)p_ComponentPool;
 	auto& components = pool.data();
-    auto lamda_update = [&](pair<size_t, size_t>& pair_) {
-        for (size_t j = pair_.first; j <= pair_.second; ++j) {
-            ComponentCamera& b = components[j];
-            Math::extractViewFrustumPlanesHartmannGribbs(b.m_ProjectionMatrix * b.m_ViewMatrix, b.m_FrustumPlanes);//update view frustrum 
-        }
+    auto lamda_update_component = [&](ComponentCamera& b) {
+        Math::extractViewFrustumPlanesHartmannGribbs(b.m_ProjectionMatrix * b.m_ViewMatrix, b.m_FrustumPlanes);//update view frustrum 
     };
-	auto split = priv::threading::splitVectorPairs(components);
-    for (auto& pair : split) {
-        priv::Core::m_Engine->m_ThreadManager.add_job_ref_engine_controlled(lamda_update, pair);
-    }
-    priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
+    priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);
 }};
 struct priv::ComponentCamera_ComponentAddedToEntityFunction final {void operator()(void* p_ComponentCamera, Entity& p_Entity) const {
 }};

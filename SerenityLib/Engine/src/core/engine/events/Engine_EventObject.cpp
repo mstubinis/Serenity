@@ -11,6 +11,9 @@ void EventObserver::registerEvent(const EventType::Type& type) {
 void EventObserver::unregisterEvent(const EventType::Type& type){
     priv::Core::m_Engine->m_EventManager.m_EventDispatcher.unregisterObject(*this, type);
 }
+const bool EventObserver::isRegistered(const EventType::Type& type) const {
+    return priv::Core::m_Engine->m_EventManager.m_EventDispatcher.isObjectRegistered(*this, type);
+}
 
 
 void EventObserver::registerEvent(const unsigned int& type) {
@@ -18,4 +21,7 @@ void EventObserver::registerEvent(const unsigned int& type) {
 }
 void EventObserver::unregisterEvent(const unsigned int& type) {
     priv::Core::m_Engine->m_EventManager.m_EventDispatcher.unregisterObject(*this, type);
+}
+const bool EventObserver::isRegistered(const unsigned int& type) const {
+    return priv::Core::m_Engine->m_EventManager.m_EventDispatcher.isObjectRegistered(*this, type);
 }

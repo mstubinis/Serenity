@@ -81,7 +81,7 @@ void InternalMeshPublicInterface::InitBlankMesh(Mesh& mesh) {
     mesh.m_Skeleton         = nullptr;
     mesh.m_VertexData       = nullptr;
     mesh.m_CollisionFactory = nullptr;
-    mesh.m_threshold        = 0.0005f;
+    mesh.m_Threshold        = 0.0005f;
 
     mesh.registerEvent(EventType::WindowFullscreenChanged);
     mesh.setCustomBindFunctor(DefaultMeshBindFunctor());
@@ -169,7 +169,7 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
     auto& vertexData = *mesh.m_VertexData;
     vector<vector<GLuint>> normals;
     normals.resize(3);
-    if (mesh.m_threshold == 0.0f) {
+    if (mesh.m_Threshold == 0.0f) {
 #pragma region No Threshold
         normals[0].reserve(data.normals.size());
         normals[1].reserve(data.binormals.size());
@@ -197,7 +197,7 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
         vector<glm::vec3> temp_tangents; temp_tangents.reserve(data.tangents.size());
         for (uint i = 0; i < data.points.size(); ++i) {
             ushort index;
-            bool found = priv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, mesh.m_threshold);
+            bool found = priv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, mesh.m_Threshold);
             if (found) {
                 _indices.emplace_back(index);
                 //average out TBN. But it cancels out normal mapping on some flat surfaces
@@ -284,7 +284,7 @@ Mesh::Mesh() : BindableResource(ResourceType::Mesh) {
 //TERRAIN MESH
 Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, float threshold) : BindableResource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
-    m_threshold = threshold;
+    m_Threshold = threshold;
     MeshImportedData data;
 
 	//TODO: fix this up
@@ -339,11 +339,11 @@ Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, flo
 Mesh::Mesh(VertexData* data, const string& name, float threshold) : BindableResource(ResourceType::Mesh, name) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_VertexData = data;
-    m_threshold = threshold;
+    m_Threshold = threshold;
 }
 Mesh::Mesh(const string& name,float width, float height,float threshold) : BindableResource(ResourceType::Mesh, name){
     InternalMeshPublicInterface::InitBlankMesh(*this);
-    m_threshold = threshold;
+    m_Threshold = threshold;
 
     MeshImportedData data;
 
@@ -374,7 +374,7 @@ Mesh::Mesh(const string& name,float width, float height,float threshold) : Binda
 }
 Mesh::Mesh(const string& fileOrData, float threshold) : BindableResource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
-    m_threshold = threshold;
+    m_Threshold = threshold;
 
     setName("Custom Mesh");
     unsigned char _flags = MeshLoadingFlags::Points | MeshLoadingFlags::Faces | MeshLoadingFlags::UVs | MeshLoadingFlags::Normals | MeshLoadingFlags::TBN;

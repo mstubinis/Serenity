@@ -193,9 +193,11 @@ class EventObserver{
 
         void registerEvent(const EventType::Type& type);
         void unregisterEvent(const EventType::Type& type);
+        const bool isRegistered(const EventType::Type& type) const;
 
         void registerEvent(const unsigned int& type);
         void unregisterEvent(const unsigned int& type);
+        const bool isRegistered(const unsigned int& type) const;
 
         virtual void onEvent(const Event& e) {}
 };

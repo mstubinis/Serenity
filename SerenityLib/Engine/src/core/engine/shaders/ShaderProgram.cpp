@@ -38,15 +38,19 @@ namespace Engine{
 };
 
 ShaderProgram::ShaderProgram(const string& _name, Shader& vs, Shader& fs):m_VertexShader(vs), m_FragmentShader(fs), BindableResource(ResourceType::ShaderProgram, _name){
-    m_LoadedGPU = m_LoadedCPU = false;
-
-    setCustomBindFunctor(DefaultShaderBindFunctor());
-    setCustomUnbindFunctor(DefaultShaderUnbindFunctor());
+    m_LoadedGPU = false;
+    m_LoadedCPU = false;
     setName(_name);
 
     const string& name_ = name();
-    if (vs.name() == "NULL") vs.setName(name_ + ".vert");
-    if (fs.name() == "NULL") fs.setName(name_ + ".frag");
+    if (vs.name() == "NULL") {
+        vs.setName(name_ + ".vert");
+    }
+    if (fs.name() == "NULL") {
+        fs.setName(name_ + ".frag");
+    }
+    setCustomBindFunctor(DefaultShaderBindFunctor());
+    setCustomUnbindFunctor(DefaultShaderUnbindFunctor());
     load();
 }
 ShaderProgram::~ShaderProgram(){ 

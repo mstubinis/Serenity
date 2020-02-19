@@ -50,9 +50,13 @@ namespace Engine {
 };
 
 Decal::Decal(Material& material, const glm_vec3& position, const glm::vec3& hitNormal, const float& size, Scene& scene, const float& lifetimeMax, const RenderStage::Stage stage):EntityWrapper(scene) {
-    auto& body = *addComponent<ComponentBody>();
     auto& cubeMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh();
-    auto& model = *addComponent<ComponentModel>(&cubeMesh, &material, ShaderProgram::Decal, stage);
+    
+    addComponent<ComponentBody>();
+    addComponent<ComponentModel>(&cubeMesh, &material, ShaderProgram::Decal, stage);
+
+    auto& body = *getComponent<ComponentBody>();
+    auto& model = *getComponent<ComponentModel>();
 
     body.setPosition(position);
     glm_quat q = glm_quat(1.0, 0.0, 0.0, 0.0);

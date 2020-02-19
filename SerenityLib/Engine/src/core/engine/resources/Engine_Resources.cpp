@@ -181,20 +181,20 @@ Handle Resources::addFont(const string& filename){
 }
 
 
-vector<Handle> Resources::loadMesh(const string& fileOrData, const float& threshhold) {
+vector<Handle> Resources::loadMesh(const string& fileOrData, const float threshhold) {
     MeshRequest request(fileOrData, threshhold);
     request.request();
     vector<Handle> handles;
-    for (auto& part : request.parts) {
+    for (auto& part : request.m_Parts) {
         handles.push_back(part.handle);
     }
     return handles;
 }
-vector<Handle> Resources::loadMeshAsync(const string& fileOrData, const float& threshhold) {
+vector<Handle> Resources::loadMeshAsync(const string& fileOrData, const float threshhold) {
     MeshRequest request(fileOrData, threshhold);
     request.requestAsync();
     vector<Handle> handles;
-    for (auto& part : request.parts) {
+    for (auto& part : request.m_Parts) {
         handles.push_back(part.handle);
     }
     return handles;
@@ -236,7 +236,7 @@ Handle Resources::loadMaterial(const string& name, const string& diffuse, const 
     }
     return Handle();
 }
-Handle Resources::loadMaterialAsync(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) {
+Handle Resources::loadMaterialAsync(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) {   
     auto* material = resourceManager->HasResource<Material>(name);
     if (!material) {
         MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness);

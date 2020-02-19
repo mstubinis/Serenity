@@ -15,39 +15,21 @@ ComponentLogic::ComponentLogic(const Entity& entity) : ComponentBaseClass(entity
 ComponentLogic::~ComponentLogic(){
 
 }
-/*
-ComponentLogic::ComponentLogic(const ComponentLogic& other){
-    m_Owner        = other.m_Owner;
-    m_Functor      = other.m_Functor;
-    m_UserPointer  = other.m_UserPointer;
-    m_UserPointer1 = other.m_UserPointer1;
-    m_UserPointer2 = other.m_UserPointer2;
-}
-ComponentLogic& ComponentLogic::operator=(const ComponentLogic& other){
-    if (&other != this) {
-        m_Owner        = other.m_Owner;
-        m_Functor      = other.m_Functor;
-        m_UserPointer  = other.m_UserPointer;
-        m_UserPointer1 = other.m_UserPointer1;
-        m_UserPointer2 = other.m_UserPointer2;
-    }
-    return *this;
-}
-*/
+
 ComponentLogic::ComponentLogic(ComponentLogic&& other) noexcept{
-    m_Owner        = std::move(other.m_Owner);
-    m_Functor      = std::move(other.m_Functor);
     m_UserPointer  = std::exchange(other.m_UserPointer, nullptr);
     m_UserPointer1 = std::exchange(other.m_UserPointer1, nullptr);
     m_UserPointer2 = std::exchange(other.m_UserPointer2, nullptr);
+    m_Owner        = std::move(other.m_Owner);
+    m_Functor      = std::move(other.m_Functor);
 }
 ComponentLogic& ComponentLogic::operator=(ComponentLogic&& other) noexcept{
     if(&other != this){
-        m_Owner        = std::move(other.m_Owner);
-        m_Functor      = std::move(other.m_Functor);
         m_UserPointer  = std::exchange(other.m_UserPointer, nullptr);
         m_UserPointer1 = std::exchange(other.m_UserPointer1, nullptr);
         m_UserPointer2 = std::exchange(other.m_UserPointer2, nullptr);
+        m_Owner        = std::move(other.m_Owner);
+        m_Functor      = std::move(other.m_Functor);
     }
     return *this;
 }

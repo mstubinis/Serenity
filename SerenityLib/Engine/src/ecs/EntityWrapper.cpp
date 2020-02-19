@@ -11,24 +11,14 @@ EntityWrapper::EntityWrapper(Scene& scene) {
     m_Entity = scene_->createEntity();
 }
 EntityWrapper::~EntityWrapper() {
-    m_Entity = Entity::null_;
-}
-EntityWrapper::EntityWrapper(const EntityWrapper& other) {
-    m_Entity = other.m_Entity;
-}
-EntityWrapper& EntityWrapper::operator=(const EntityWrapper& other) {
-    if (&other == this)
-        return *this;
-    m_Entity = other.m_Entity;
-    return *this;
 }
 EntityWrapper::EntityWrapper(EntityWrapper&& other) noexcept {
-    using std::swap;
-    swap(m_Entity, other.m_Entity);
+    m_Entity = std::move(other.m_Entity);
 }
 EntityWrapper& EntityWrapper::operator=(EntityWrapper&& other) noexcept {
-    using std::swap;
-    swap(m_Entity, other.m_Entity);
+    if (&other != this) {
+        m_Entity = std::move(other.m_Entity);
+    }
     return *this;
 }
 void EntityWrapper::destroy() {

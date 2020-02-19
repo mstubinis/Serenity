@@ -338,7 +338,7 @@ vector<RayCastResult> _rayCastInternal(const btVector3& start, const btVector3& 
     RayCallback.m_collisionFilterGroup = group;
 
     physicsManager->m_Data.m_World->rayTest(start, end, RayCallback);
-    //physicsManager->m_Data.m_World->getDebugDrawer()->drawLine(start, end, btVector4(1, 1, 0, 1));
+    //physicsManager->m_Data.m_World->getDebugDrawer()->drawLine(start, end, btVector4(1, 0.5, 0, 1));
 
     vector<RayCastResult> result;
     if (RayCallback.hasHit()) {

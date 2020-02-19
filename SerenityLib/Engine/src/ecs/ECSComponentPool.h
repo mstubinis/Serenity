@@ -12,7 +12,7 @@ namespace Engine::priv {
     class ECSComponentPool<TEntity, TComponent> : public Engine::sparse_set<TComponent>, public Engine::NonCopyable, public Engine::NonMoveable{
         using super = Engine::sparse_set<TComponent>;
         public:
-            ECSComponentPool() : super(100) {
+            ECSComponentPool() : super(2000) {
 
             }
             ~ECSComponentPool() = default;
@@ -45,9 +45,6 @@ namespace Engine::priv {
             }
             inline TComponent* getComponent(const unsigned int& entityID) const {
                 return super::get(entityID);
-            }
-            inline void reserveMore(const unsigned int amount) {
-                super::reserveMore(amount);
             }
     };
 };

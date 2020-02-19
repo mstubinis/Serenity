@@ -18,9 +18,9 @@ class Mesh;
 namespace Engine::priv {
     struct BoneNode;
     struct AssimpSceneImport final {
-        std::shared_ptr<Assimp::Importer>  importer_ptr;
-        aiScene*                           scene;
-        aiNode*                            root;
+        std::shared_ptr<Assimp::Importer>  m_Importer_ptr;
+        aiScene*                           m_AIScene;
+        aiNode*                            m_AIRoot;
 
         AssimpSceneImport();
         ~AssimpSceneImport();
@@ -49,17 +49,17 @@ struct MeshRequest final {
     };
 
 
-    float                                                       threshold;
-    std::string                                                 fileOrData;
-    std::string                                                 fileExtension;
-    bool                                                        fileExists;
-    std::vector<MeshRequest::MeshRequestPart>                   parts;
-    bool                                                        async;
-    Engine::priv::AssimpSceneImport                             importer;
-    std::unordered_map<std::string, Engine::priv::BoneNode*>    map;
+    float                                                       m_Threshold;
+    std::string                                                 m_FileOrData;
+    std::string                                                 m_FileExtension;
+    bool                                                        m_FileExists;
+    std::vector<MeshRequest::MeshRequestPart>                   m_Parts;
+    bool                                                        m_Async;
+    Engine::priv::AssimpSceneImport                             m_Importer;
+    std::unordered_map<std::string, Engine::priv::BoneNode*>    m_Map;
 
     MeshRequest() = delete;
-    MeshRequest(const std::string& filenameOrData, float threshold);
+    MeshRequest(const std::string& filenameOrData, const float threshold);
     ~MeshRequest();
 
     MeshRequest(const MeshRequest& other);

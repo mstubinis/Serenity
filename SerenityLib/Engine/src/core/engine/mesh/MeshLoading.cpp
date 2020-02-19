@@ -193,7 +193,7 @@ void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequest::MeshRequestPart>&
 }
 
 void priv::MeshLoader::FinalizeData(Mesh& mesh, priv::MeshImportedData& data, float threshold) {
-    mesh.m_threshold = threshold;
+    mesh.m_Threshold = threshold;
     InternalMeshPublicInterface::FinalizeVertexData(mesh, data);
     InternalMeshPublicInterface::CalculateRadius(mesh);
     SAFE_DELETE(mesh.m_CollisionFactory);

@@ -132,8 +132,8 @@ namespace Engine{
 
         Handle addFont(const std::string& filename);
 
-        std::vector<Handle> loadMesh(const std::string& fileOrData, const float& threshhold = 0.0005f);
-        std::vector<Handle> loadMeshAsync(const std::string& fileOrData, const float& threshhold = 0.0005f);
+        std::vector<Handle> loadMesh(const std::string& fileOrData, const float threshhold = 0.0005f);
+        std::vector<Handle> loadMeshAsync(const std::string& fileOrData, const float threshhold = 0.0005f);
 
         Handle loadTexture(
             const std::string& file,

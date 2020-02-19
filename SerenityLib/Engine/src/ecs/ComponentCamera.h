@@ -63,8 +63,8 @@ class ComponentCamera : public ComponentBaseClass {
 
         ComponentCamera(const ComponentCamera& other)                = delete;
         ComponentCamera& operator=(const ComponentCamera& other)     = delete;
-        ComponentCamera(ComponentCamera&& other) noexcept            = default;
-        ComponentCamera& operator=(ComponentCamera&& other) noexcept = default;
+        ComponentCamera(ComponentCamera&& other) noexcept;
+        ComponentCamera& operator=(ComponentCamera&& other) noexcept;
 
         ~ComponentCamera();
 

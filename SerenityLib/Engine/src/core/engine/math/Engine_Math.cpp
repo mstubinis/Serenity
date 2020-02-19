@@ -253,24 +253,24 @@ void Math::removeMatrixPosition(glm::mat4& matrix){
 }
 
 bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector, const glm::vec3& point,const float fovRadians){
-    const glm::vec3& diff = glm::normalize(point - conePos);
-    float t = glm::dot(coneVector,diff);
+    const glm::vec3 diff = glm::normalize(point - conePos);
+    float t = glm::dot(coneVector, diff);
     return ( t >= glm::cos( fovRadians ) );
 }
 bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector, const glm::vec3& point,const float fovRadians,const float maxDistance){
-	const glm::vec3& diff = glm::normalize(point - conePos);
-	const float t = glm::dot(coneVector,diff);
-	const float length = glm::length(point-conePos);
+	const glm::vec3 diff = glm::normalize(point - conePos);
+	const float t = glm::dot(coneVector, diff);
+	const float length = glm::length(point - conePos);
     if ( length > maxDistance ){ return false; }
     return ( t >= glm::cos( fovRadians ) );
 }
-glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, Camera& camera, const glm::mat4& view, const glm::mat4& projection, const glm::vec4& viewport, const bool clampToEdge){
-    const glm::vec3& screen = glm::project(position, view, projection, viewport);
+glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& camera, const glm::mat4& view, const glm::mat4& projection, const glm::vec4& viewport, const bool clampToEdge){
+    const glm::vec3 screen = glm::project(position, view, projection, viewport);
     //check if point is behind
     const float dot = glm::dot(camera.getViewVector(), position - glm::vec3(camera.getPosition()));
     float resX = screen.x;
     float resY = screen.y;
-    uint inBounds = 1;
+    unsigned int inBounds = 1;
     if (clampToEdge) {
         if (screen.x < viewport.x) {
             resX = viewport.x;
@@ -307,12 +307,12 @@ glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, Camera& camera, 
     }
     return glm::vec3(resX, resY, inBounds);
 }
-glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, Camera& camera, const glm::vec4& viewport, const bool clampToEdge) {
+glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& camera, const glm::vec4& viewport, const bool clampToEdge) {
     return Math::getScreenCoordinates(position, camera, camera.getView(), camera.getProjection(), viewport, clampToEdge);
 }
-glm::vec3 Math::getScreenCoordinates(const glm::vec3& objPos,Camera& camera, const bool clampToEdge) {
+glm::vec3 Math::getScreenCoordinates(const glm::vec3& objPos, const Camera& camera, const bool clampToEdge) {
     const auto& winSize = Resources::getWindowSize();
-    const glm::vec4& viewport = glm::vec4(0, 0, static_cast<float>(winSize.x), static_cast<float>(winSize.y));
+    const glm::vec4 viewport = glm::vec4(0, 0, static_cast<float>(winSize.x), static_cast<float>(winSize.y));
     return Math::getScreenCoordinates(objPos, camera, viewport, clampToEdge);
 }
 float Math::Max(const glm::vec2& v){

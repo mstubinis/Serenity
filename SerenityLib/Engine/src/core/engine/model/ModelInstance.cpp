@@ -278,8 +278,9 @@ const unsigned int& ModelInstance::getViewportFlags() const {
 }
 void ModelInstance::internal_update_model_matrix() {
     auto* model = m_Parent.getComponent<ComponentModel>();
-    if(model)
+    if (model) {
         Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
+    }
     Math::setFinalModelMatrix(m_ModelMatrix, m_Position, m_Orientation, m_Scale);
 }
 void* ModelInstance::getUserPointer() const {

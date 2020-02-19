@@ -18,7 +18,6 @@
 #include <core/engine/model/ModelInstance.h>
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/materials/Material.h>
-#include <ecs/ComponentBody.h>
 #include <core/engine/renderer/opengl/UniformBufferObject.h>
 #include <core/engine/renderer/Decal.h>
 #include <core/engine/renderer/particles/Particle.h>
@@ -33,6 +32,8 @@
 #include <core/engine/renderer/postprocess/SMAA.h>
 #include <core/engine/renderer/postprocess/GodRays.h>
 #include <core/engine/renderer/postprocess/Fog.h>
+
+#include <ecs/ComponentBody.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
@@ -130,10 +131,7 @@ namespace Engine{
     };
 };
 
-void emplaceShader(const unsigned int index, string& str, vector<Shader*>& collection, const ShaderType::Type type) {
-    Shader* s = NEW Shader(str, type, false);
-    collection[index] = s;
-}
+
 
 class priv::Renderer::impl final{
     public:
@@ -233,37 +231,41 @@ class priv::Renderer::impl final{
             GodRays::godRays.init_shaders();
             SMAA::smaa.init_shaders();
 
-            priv::threading::addJob(emplaceShader, 0, boost::ref(EShaders::decal_vertex), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            priv::threading::addJob(emplaceShader, 1, boost::ref(EShaders::decal_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 2, boost::ref(EShaders::fullscreen_quad_vertex), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            priv::threading::addJob(emplaceShader, 3, boost::ref(EShaders::bullet_physics_vert), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            priv::threading::addJob(emplaceShader, 4, boost::ref(EShaders::bullet_physcis_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 5, boost::ref(EShaders::vertex_basic), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            priv::threading::addJob(emplaceShader, 6, boost::ref(EShaders::vertex_2DAPI), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            priv::threading::addJob(emplaceShader, 7, boost::ref(EShaders::vertex_skybox), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            priv::threading::addJob(emplaceShader, 8, boost::ref(EShaders::lighting_vert), boost::ref(m_InternalShaders), ShaderType::Vertex);
+            auto emplaceShader = [](const unsigned int index, const string& str, vector<Shader*>& collection, const ShaderType::Type type) {
+                Shader* s = NEW Shader(str, type, false);
+                collection[index] = s;
+            };
 
-            priv::threading::addJob(emplaceShader, 9, boost::ref(EShaders::forward_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 10, boost::ref(EShaders::deferred_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 11, boost::ref(EShaders::zprepass_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 12, boost::ref(EShaders::deferred_frag_hud), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 13, boost::ref(EShaders::deferred_frag_skybox), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob([&]() {emplaceShader(0, EShaders::decal_vertex, m_InternalShaders, ShaderType::Vertex); });
+            priv::threading::addJob([&]() {emplaceShader(1, EShaders::decal_frag, m_InternalShaders, ShaderType::Fragment); });
+            priv::threading::addJob([&]() {emplaceShader(2, EShaders::fullscreen_quad_vertex, m_InternalShaders, ShaderType::Vertex); });
+            priv::threading::addJob([&]() {emplaceShader(3, EShaders::bullet_physics_vert, m_InternalShaders, ShaderType::Vertex); });
+            priv::threading::addJob([&]() {emplaceShader(4, EShaders::bullet_physcis_frag, m_InternalShaders, ShaderType::Fragment); });
+            priv::threading::addJob([&]() {emplaceShader(5, EShaders::vertex_basic, m_InternalShaders, ShaderType::Vertex); });
+            priv::threading::addJob([&]() {emplaceShader(6, EShaders::vertex_2DAPI, m_InternalShaders, ShaderType::Vertex); });
+            priv::threading::addJob([&]() {emplaceShader(7, EShaders::vertex_skybox, m_InternalShaders, ShaderType::Vertex); });
+            priv::threading::addJob([&]() {emplaceShader(8, EShaders::lighting_vert, m_InternalShaders, ShaderType::Vertex); });
 
-            priv::threading::addJob(emplaceShader, 14, boost::ref(EShaders::copy_depth_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 15, boost::ref(EShaders::blur_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob([&]() {emplaceShader(9, EShaders::forward_frag, m_InternalShaders, ShaderType::Fragment); });
+            priv::threading::addJob([&]() {emplaceShader(10, EShaders::deferred_frag, m_InternalShaders, ShaderType::Fragment); });
+            priv::threading::addJob([&]() {emplaceShader(11, EShaders::zprepass_frag, m_InternalShaders, ShaderType::Fragment); });
+            priv::threading::addJob([&]() {emplaceShader(12, EShaders::deferred_frag_hud, m_InternalShaders, ShaderType::Fragment); });
+            priv::threading::addJob([&]() {emplaceShader(13, EShaders::deferred_frag_skybox, m_InternalShaders, ShaderType::Fragment); });
 
-            priv::threading::addJob(emplaceShader, 16, boost::ref(EShaders::final_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 17, boost::ref(EShaders::depth_and_transparency_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob([&]() {emplaceShader(14, EShaders::copy_depth_frag, m_InternalShaders, ShaderType::Fragment); });
+            priv::threading::addJob([&]() {emplaceShader(15, EShaders::blur_frag, m_InternalShaders, ShaderType::Fragment); });
 
-            priv::threading::addJob(emplaceShader, 18, boost::ref(EShaders::lighting_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 19, boost::ref(EShaders::lighting_frag_gi), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 20, boost::ref(EShaders::cubemap_convolude_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 21, boost::ref(EShaders::cubemap_prefilter_envmap_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 22, boost::ref(EShaders::brdf_precompute), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            //priv::threading::addJob(emplaceShader, 23, boost::ref(EShaders::greyscale_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 23, boost::ref(EShaders::stencil_passover), boost::ref(m_InternalShaders), ShaderType::Fragment);
-            priv::threading::addJob(emplaceShader, 24, boost::ref(EShaders::particle_vertex), boost::ref(m_InternalShaders), ShaderType::Vertex);
-            priv::threading::addJob(emplaceShader, 25, boost::ref(EShaders::particle_frag), boost::ref(m_InternalShaders), ShaderType::Fragment);
+            priv::threading::addJob([&]() {emplaceShader(16, EShaders::final_frag, m_InternalShaders, ShaderType::Fragment); });
+            priv::threading::addJob([&]() {emplaceShader(17, EShaders::depth_and_transparency_frag, m_InternalShaders, ShaderType::Fragment); });
+
+            priv::threading::addJob([&]() {emplaceShader(18, EShaders::lighting_frag, m_InternalShaders, ShaderType::Fragment); });
+            priv::threading::addJob([&]() {emplaceShader(19, EShaders::lighting_frag_gi, m_InternalShaders, ShaderType::Fragment); });
+            priv::threading::addJob([&]() {emplaceShader(20, EShaders::cubemap_convolude_frag, m_InternalShaders, ShaderType::Fragment); });
+            priv::threading::addJob([&]() {emplaceShader(21, EShaders::cubemap_prefilter_envmap_frag, m_InternalShaders, ShaderType::Fragment); });
+            priv::threading::addJob([&]() {emplaceShader(22, EShaders::brdf_precompute, m_InternalShaders, ShaderType::Fragment); });
+            priv::threading::addJob([&]() {emplaceShader(23, EShaders::stencil_passover, m_InternalShaders, ShaderType::Fragment); });
+            priv::threading::addJob([&]() {emplaceShader(24, EShaders::particle_vertex, m_InternalShaders, ShaderType::Vertex); });
+            priv::threading::addJob([&]() {emplaceShader(25, EShaders::particle_frag, m_InternalShaders, ShaderType::Fragment); });
 
 
             priv::threading::waitForAll();
@@ -288,11 +290,6 @@ class priv::Renderer::impl final{
             //m_InternalShaderPrograms[EngineInternalShaderPrograms::Grayscale] = NEW ShaderProgram("Greyscale_Frag", *m_InternalShaders[EngineInternalShaders::FullscreenVertex], *m_InternalShaders[EngineInternalShaders::GrayscaleFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::StencilPass] = NEW ShaderProgram("Stencil_Pass", *m_InternalShaders[EngineInternalShaders::LightingVertex], *m_InternalShaders[EngineInternalShaders::StencilPassFrag]);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::Particle] = NEW ShaderProgram("Particle", *m_InternalShaders[EngineInternalShaders::ParticleVertex], *m_InternalShaders[EngineInternalShaders::ParticleFrag]);
-#pragma endregion
-
-#pragma region MeshData
-
-
 #pragma endregion
 
 
@@ -1173,15 +1170,16 @@ class priv::Renderer::impl final{
             Engine::Renderer::Settings::clear(true, false, false); //godrays rgb channels cleared to black
             auto& godRaysPlatform = GodRays::godRays;
             auto* sun = Engine::Renderer::godRays::getSun();
-            if ((viewport.getRenderFlags() & ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active && sun) {
-                auto& body = *sun->getComponent<ComponentBody>();
-                const glm::vec3& oPos = body.position();
-                const glm::vec3& camPos = camera.getPosition();
-                const glm::vec3& camVec = camera.getViewVector();
+            if (sun && (viewport.getRenderFlags() & ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active) {
+                const auto& body       = *sun->getComponent<ComponentBody>();
+                const glm::vec3 oPos   = body.position();
+                const glm::vec3 camPos = camera.getPosition();
+                const glm::vec3 camVec = camera.getViewVector();
                 const bool infront = Math::isPointWithinCone(camPos, -camVec, oPos, Math::toRadians(godRaysPlatform.fovDegrees));
                 if (infront) {
-                    const glm::vec3& sp = Math::getScreenCoordinates(oPos, camera, false);
-                    float alpha = Math::getAngleBetweenTwoVectors(camVec, camPos - oPos, true) / godRaysPlatform.fovDegrees;
+                    const auto sp = Math::getScreenCoordinates(oPos, camera, false);
+                    const auto b = glm::normalize(camPos - oPos);
+                    float alpha = Math::getAngleBetweenTwoVectors(camVec, b, true) / godRaysPlatform.fovDegrees;
 
                     alpha = glm::pow(alpha, godRaysPlatform.alphaFalloff);
                     alpha = glm::clamp(alpha, 0.01f, 0.99f);
@@ -1189,7 +1187,6 @@ class priv::Renderer::impl final{
                         alpha = 0.01f;
                     }
                     alpha = 1.0f - alpha;
-                    //auto& godRaysShader = *m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredGodRays];
                     godRaysPlatform.pass(gbuffer, dimensions.z, dimensions.w, glm::vec2(sp.x, sp.y), alpha);
                 }
             }

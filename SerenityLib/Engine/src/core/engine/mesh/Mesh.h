@@ -66,7 +66,7 @@ class Mesh final: public BindableResource, public EventObserver, public Engine::
         std::string                            m_File;
         glm::vec3                              m_radiusBox;
         float                                  m_radius;
-        float                                  m_threshold;
+        float                                  m_Threshold;
 
         Mesh();
     public:

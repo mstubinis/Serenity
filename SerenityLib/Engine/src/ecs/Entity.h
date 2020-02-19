@@ -12,46 +12,40 @@ struct Entity{
     Entity();
     Entity(const unsigned int& entityID, const unsigned int& sceneID, const unsigned int& versionID);
     ~Entity();
-    void process(const unsigned int& entityID, const unsigned int& sceneID, const unsigned int& versionID);
-    Entity(const Entity& other)                = default;
-    Entity& operator=(const Entity& other)     = default;
-    Entity(Entity&& other) noexcept            = default;
-    Entity& operator=(Entity&& other) noexcept = default;
+
+    Entity(const Entity& other);
+    Entity& operator=(const Entity& other);
+    Entity(Entity&& other) noexcept;
+    Entity& operator=(Entity&& other) noexcept;
 
     const bool operator==(const Entity& other) const;
     const bool operator!=(const Entity& other) const;
+
+    void process(const unsigned int& entityID, const unsigned int& sceneID, const unsigned int& versionID);
+
     Scene& scene() const;
     void destroy();
     void move(const Scene& destination);
     const bool null() const;
-    template<typename TComponent, typename... ARGS> 
-    TComponent* addComponent(ARGS&&... args) {
-        auto& _this = *this;
-        auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(_this);
-        return ecs.addComponent<TComponent>(_this, std::forward<ARGS>(args)...);
-    }
-    template<typename TComponent, typename... ARGS> 
-    TComponent* addComponent(EntityDataRequest& request, ARGS&&... args) {
-        auto& _this = *this;
-        auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(_this);
-        return ecs.addComponent<TComponent>(request, _this, std::forward<ARGS>(args)...);
-    }
-    template<typename TComponent> 
-    const bool removeComponent() {
-        auto& _this = *this;
-        auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(_this);
-        return ecs.removeComponent<TComponent>(_this);
-    }
-    template<typename TComponent> 
-    TComponent* getComponent() const {
-        auto& _this = *this;
-        auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(_this);
-        return ecs.getComponent<TComponent>(_this);
-    }
-    template<typename TComponent> 
-    TComponent* getComponent(const EntityDataRequest& dataRequest) const {
+    template<typename T, typename... ARGS> void addComponent(ARGS&&... args) {
         auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
-        return ecs.getComponent<TComponent>(dataRequest);
+        ecs.addComponent<T>(*this, std::forward<ARGS>(args)...);
+    }
+    template<typename T, typename... ARGS> void addComponent(EntityDataRequest& request, ARGS&&... args) {
+        auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
+        ecs.addComponent<T>(request, *this, std::forward<ARGS>(args)...);
+    }
+    template<typename T> const bool removeComponent() {
+        auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
+        return ecs.removeComponent<T>(*this);
+    }
+    template<typename T> T* getComponent() const {
+        const auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
+        return ecs.getComponent<T>(*this);
+    }
+    template<typename T> T* getComponent(const EntityDataRequest& dataRequest) const {
+        const auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
+        return ecs.getComponent<T>(dataRequest);
     }
     static Entity null_;
 };

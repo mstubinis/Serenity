@@ -148,11 +148,9 @@ const bool Engine::priv::SSAO::init_shaders() {
     };
     Engine::priv::threading::addJobWithPostCallback(lambda_part_a_blur, lambda_part_b_blur);
 
-
-
     return true;
 }
-void Engine::priv::SSAO::passSSAO(Engine::priv::GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, Camera& camera) {
+void Engine::priv::SSAO::passSSAO(Engine::priv::GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const Camera& camera) {
     m_Shader_Program->bind();
     if (Renderer::GLSL_VERSION < 140) {
         Engine::Renderer::sendUniformMatrix4Safe("CameraInvViewProj", camera.getViewProjectionInverse());
@@ -160,9 +158,9 @@ void Engine::priv::SSAO::passSSAO(Engine::priv::GBuffer& gbuffer, const unsigned
         Engine::Renderer::sendUniform4Safe("CameraInfo1", glm::vec4(camera.getPosition(), camera.getNear()));
         Engine::Renderer::sendUniform4Safe("CameraInfo2", glm::vec4(camera.getViewVector(), camera.getFar()));
     }
-    const float& divisor      = gbuffer.getSmallFBO()->divisor();
-    const uint& screen_width  = static_cast<uint>(static_cast<float>(fboWidth) * divisor);
-    const uint& screen_height = static_cast<uint>(static_cast<float>(fboHeight) * divisor);
+    const float divisor              = gbuffer.getSmallFBO()->divisor();
+    const unsigned int screen_width  = static_cast<unsigned int>(static_cast<float>(fboWidth) * divisor);
+    const unsigned int screen_height = static_cast<unsigned int>(static_cast<float>(fboHeight) * divisor);
 
     Engine::Renderer::sendUniform2("ScreenSize", static_cast<float>(screen_width), static_cast<float>(screen_height));
     Engine::Renderer::sendUniform4("SSAOInfo", m_ssao_radius, m_ssao_intensity, m_ssao_bias, m_ssao_scale);
@@ -185,9 +183,9 @@ void Engine::priv::SSAO::passBlur(Engine::priv::GBuffer& gbuffer, const unsigned
     Engine::Renderer::sendUniform4("Data", m_ssao_blur_radius, 0.0f, hv.x, hv.y);
     Engine::Renderer::sendTexture("image", gbuffer.getTexture(texture), 0);
 
-    const float& divisor = gbuffer.getSmallFBO()->divisor();
-    const uint& x        = static_cast<uint>(static_cast<float>(fboWidth) * divisor);
-    const uint& y        = static_cast<uint>(static_cast<float>(fboHeight) * divisor);
+    const float divisor  = gbuffer.getSmallFBO()->divisor();
+    const unsigned int x = static_cast<unsigned int>(static_cast<float>(fboWidth) * divisor);
+    const unsigned int y = static_cast<unsigned int>(static_cast<float>(fboHeight) * divisor);
     Engine::Renderer::renderFullscreenTriangle(x, y);
 }
 const bool Engine::Renderer::ssao::enabled() {

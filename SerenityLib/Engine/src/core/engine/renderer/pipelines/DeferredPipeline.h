@@ -9,10 +9,14 @@ class Shader;
 class ShaderProgram;
 namespace Engine::priv {
     class GBuffer;
+    class FullscreenQuad;
+    class FullscreenTriangle;
 };
 
 #include <core/engine/renderer/pipelines/IRenderingPipeline.h>
 #include <core/engine/model/ModelInstanceIncludes.h>
+#include <core/engine/renderer/opengl/State.h>
+#include <core/engine/renderer/opengl/Extensions.h>
 
 #include <glm/mat4x4.hpp>
 #include <vector>
@@ -34,6 +38,12 @@ namespace Engine::priv {
         };
 
         private:
+            OpenGLState                  OpenGLStateMachine;
+            OpenGLExtensions             OpenGLExtensionsManager;
+
+            FullscreenQuad*              m_FullscreenQuad;
+            FullscreenTriangle*          m_FullscreenTriangle;
+
             std::vector<glm::vec3>       m_Text_Points;
             std::vector<glm::vec2>       m_Text_UVs;
             std::vector<unsigned short>  m_Text_Indices;
@@ -48,12 +58,12 @@ namespace Engine::priv {
 
             void internal_render_per_frame_preparation();
             void internal_pass_geometry(const Viewport& viewport, const Camera& camera);
-            void internal_pass_ssao();
+            void internal_pass_ssao(const Viewport& viewport, const Camera& camera);
             void internal_pass_stencil();
             void internal_pass_lighting();
             void internal_pass_forward();
-            void internal_pass_god_rays();
-            void internal_pass_hdr();
+            void internal_pass_god_rays(const Viewport& viewport, const Camera& camera);
+            void internal_pass_hdr(const Viewport& viewport, const Camera& camera);
             void internal_pass_bloom();
             void internal_pass_depth_of_field();
             void internal_pass_aa();

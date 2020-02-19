@@ -53,33 +53,7 @@ ParticleEmitter::~ParticleEmitter() {
 
 }
 
-
-ParticleEmitter::ParticleEmitter(const ParticleEmitter& other) : EntityWrapper(other) {
-    m_Properties     = other.m_Properties;
-    m_SpawningTimer  = other.m_SpawningTimer;
-    m_Active         = other.m_Active;
-    m_Timer          = other.m_Timer;
-    m_Lifetime       = other.m_Lifetime;
-    m_Parent         = other.m_Parent;
-    m_Entity         = other.m_Entity;
-    m_UpdateFunctor  = other.m_UpdateFunctor;
-    m_UserData       = other.m_UserData;
-}
-ParticleEmitter& ParticleEmitter::operator=(const ParticleEmitter& other) {
-    if (&other != this) {
-        m_Properties     = other.m_Properties;
-        m_SpawningTimer  = other.m_SpawningTimer;
-        m_Active         = other.m_Active;
-        m_Timer          = other.m_Timer;
-        m_Lifetime       = other.m_Lifetime;
-        m_Parent         = other.m_Parent;
-        m_Entity         = other.m_Entity;
-        m_UpdateFunctor  = other.m_UpdateFunctor;
-        m_UserData       = other.m_UserData;
-    }
-    return *this;
-}
-ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept : EntityWrapper(other) {
+ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept : EntityWrapper(other.m_Entity.scene()) {
     m_Properties      = std::exchange(other.m_Properties, nullptr);
     m_SpawningTimer   = std::move(other.m_SpawningTimer);
     m_Active          = std::move(other.m_Active);

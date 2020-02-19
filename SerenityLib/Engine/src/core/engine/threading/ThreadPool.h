@@ -38,21 +38,21 @@ namespace Engine::priv {
     class ThreadPool final{
         friend class Engine::priv::WorkerThread;
         private:
-            std::condition_variable                                         m_ConditionVariable;
-            std::mutex                                                      m_Mutex;
-            std::queue<std::shared_ptr<std::packaged_task<void()>>>         m_TaskQueue;
-            std::vector<std::thread>                                        m_WorkerThreads;
-            std::vector<Engine::priv::ThreadPoolFuture>                     m_Futures;
-            bool                                                            m_Stopped;
+            std::condition_variable                                     m_ConditionVariable;
+            std::mutex                                                  m_Mutex;
+            std::queue<std::shared_ptr<std::packaged_task<void()>>>     m_TaskQueue;
+            std::vector<std::thread>                                    m_WorkerThreads;
+            std::vector<Engine::priv::ThreadPoolFuture>                 m_Futures;
+            bool                                                        m_Stopped;
 
-            void init(const unsigned int num_threads);
+            
 
             void internal_create_packaged_task(std::function<void()>&& job, std::function<void()>&& callback);
-
-            ThreadPool() = delete;
         public:
-            ThreadPool(const unsigned int num_threads);
+            ThreadPool();
             ~ThreadPool();
+
+            const bool startup(const unsigned int num_threads);
 
             ThreadPool(const ThreadPool& other) noexcept = delete;
             ThreadPool& operator=(const ThreadPool& other) noexcept = delete;
@@ -61,8 +61,8 @@ namespace Engine::priv {
 
             const size_t size() const;
 
-            void addJob(std::function<void()>&& job);
-            void addJob(std::function<void()>&& job, std::function<void()>&& callback);
+            void add_job(std::function<void()>&& job);
+            void add_job(std::function<void()>&& job, std::function<void()>&& callback);
 
             void update();
 

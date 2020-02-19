@@ -3,7 +3,7 @@
 using namespace std;
 
 ComponentBaseClass::ComponentBaseClass() {
-    m_Owner = Entity::null_; 
+    m_Owner      = Entity::null_; 
 }
 ComponentBaseClass::ComponentBaseClass(const Entity& p_Owner) {
     m_Owner.data = p_Owner.data; 

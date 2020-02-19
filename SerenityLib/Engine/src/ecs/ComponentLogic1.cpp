@@ -13,25 +13,6 @@ ComponentLogic1::ComponentLogic1(const Entity& entity) : ComponentBaseClass(enti
 }
 ComponentLogic1::~ComponentLogic1() {
 }
-/*
-ComponentLogic1::ComponentLogic1(const ComponentLogic1& other) {
-    m_Owner        = other.m_Owner;
-    m_Functor      = other.m_Functor;
-    m_UserPointer  = other.m_UserPointer;
-    m_UserPointer1 = other.m_UserPointer1;
-    m_UserPointer2 = other.m_UserPointer2;
-}
-ComponentLogic1& ComponentLogic1::operator=(const ComponentLogic1& other) {
-    if (&other != this){
-        m_Owner        = other.m_Owner;
-        m_Functor      = other.m_Functor;
-        m_UserPointer  = other.m_UserPointer;
-        m_UserPointer1 = other.m_UserPointer1;
-        m_UserPointer2 = other.m_UserPointer2;
-    }
-    return *this;
-}
-*/
 ComponentLogic1::ComponentLogic1(ComponentLogic1&& other) noexcept {
     m_Owner        = std::move(other.m_Owner);
     m_Functor      = std::move(other.m_Functor);

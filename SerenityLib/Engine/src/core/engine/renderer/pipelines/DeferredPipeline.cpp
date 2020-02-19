@@ -11,6 +11,7 @@
 #include <core/engine/materials/Material.h>
 #include <core/engine/renderer/particles/Particle.h>
 #include <core/engine/shaders/ShaderProgram.h>
+#include <core/engine/shaders/Shader.h>
 #include <core/engine/renderer/FramebufferObject.h>
 
 #include <core/engine/scene/Camera.h>
@@ -26,11 +27,50 @@
 #include <core/engine/renderer/postprocess/GodRays.h>
 #include <core/engine/renderer/postprocess/Fog.h>
 
+#include <core/engine/resources/Engine_BuiltInShaders.h>
+#include <core/engine/renderer/FullscreenItems.h>
+
+#include <boost/math/special_functions/fpclassify.hpp>
+
 using namespace std;
 using namespace Engine;
 using namespace Engine::priv;
 using namespace Engine::Renderer;
 
+priv::DeferredPipeline* pipeline;
+
+struct ShaderEnum final {
+    enum Shader {
+        DecalVertex,
+        DecalFrag,
+        FullscreenVertex,
+        BulletPhysicsVertex,
+        BulletPhysicsFrag,
+        VertexBasic,
+        Vertex2DAPI,
+        VertexSkybox,
+        LightingVertex,
+        ForwardFrag,
+        DeferredFrag,
+        ZPrepassFrag,
+        DeferredFrag2DAPI,
+        DeferredFragSkybox,
+        CopyDepthFrag,
+        BlurFrag,
+        FinalFrag,
+        DepthAndTransparencyFrag,
+        LightingFrag,
+        LightingGIFrag,
+        CubemapConvoludeFrag,
+        CubemapPrefilterEnvFrag,
+        BRDFPrecomputeFrag,
+        //GrayscaleFrag,
+        StencilPassFrag,
+        ParticleVertex,
+        ParticleFrag,
+        _TOTAL,
+    };
+};
 
 struct ShaderProgramEnum final {
     enum Program : unsigned int {
@@ -75,15 +115,174 @@ DeferredPipeline::DeferredPipeline() {
     m_2DProjectionMatrix = glm::ortho(0.0f, static_cast<float>(window_size.x), 0.0f, static_cast<float>(window_size.y), 0.005f, 3000.0f);
     m_GBuffer   = nullptr;
     m_UBOCamera = nullptr;
+    pipeline    = this;
 }
 DeferredPipeline::~DeferredPipeline() {
     SAFE_DELETE(m_GBuffer);
 }
 
 void DeferredPipeline::init() {
+    glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &UniformBufferObject::MAX_UBO_BINDINGS);
+
+    float init_border_color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, init_border_color);
+
+    pipeline->OpenGLExtensionsManager.INIT();
+
+
+    pipeline->OpenGLStateMachine.GL_glEnable(GL_DEPTH_TEST);
+    pipeline->OpenGLStateMachine.GL_glDisable(GL_STENCIL_TEST);
+    pipeline->OpenGLStateMachine.GL_glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //for non Power of Two textures
+    //pipeline->OpenGLStateMachine.GL_glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); //very odd, supported on my gpu and opengl version but it runs REAL slowly, dropping fps to 1
+    pipeline->OpenGLStateMachine.GL_glEnable(GL_DEPTH_CLAMP);
+    Engine::Renderer::setDepthFunc(GL_LEQUAL);
+
+    priv::EShaders::init();
+
     m_UBOCamera = NEW UniformBufferObject("Camera", sizeof(UBOCameraDataStruct));
     m_UBOCamera->updateData(&m_UBOCameraDataStruct);
+
+
+    m_FullscreenQuad = NEW FullscreenQuad();
+    m_FullscreenTriangle = NEW FullscreenTriangle();
+
+    m_InternalShaders.resize(ShaderEnum::_TOTAL, nullptr);
+    m_InternalShaderPrograms.resize(ShaderProgramEnum::_TOTAL, nullptr);
+
+    FXAA::fxaa.init_shaders();
+    SSAO::ssao.init_shaders();
+    HDR::hdr.init_shaders();
+    DepthOfField::DOF.init_shaders();
+    Bloom::bloom.init_shaders();
+    GodRays::godRays.init_shaders();
+    SMAA::smaa.init_shaders();
+
+    m_Text_Points.reserve(Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4);//4 points per char, 4096 chars
+    m_Text_UVs.reserve(Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4);//4 uvs per char
+    m_Text_Indices.reserve(Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 6);//6 ind per char
+    for (size_t i = 0; i < m_Text_Points.capacity(); ++i)
+        m_Text_Points.emplace_back(0.0f);
+    for (size_t i = 0; i < m_Text_UVs.capacity(); ++i)
+        m_Text_UVs.emplace_back(0.0f);
+    for (size_t i = 0; i < m_Text_Indices.capacity(); ++i)
+        m_Text_Indices.emplace_back(0);
+
+    auto& fontPlane = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getFontMesh();
+
+    fontPlane.modifyVertices(0, m_Text_Points, MeshModifyFlags::Default);
+    fontPlane.modifyVertices(1, m_Text_UVs, MeshModifyFlags::Default);
+    fontPlane.modifyIndices(m_Text_Indices, MeshModifyFlags::Default);
+
+    m_Text_Points.clear();
+    m_Text_UVs.clear();
+    m_Text_Indices.clear();
+
+    auto emplaceShader = [](const unsigned int index, const string& str, vector<Shader*>& collection, const ShaderType::Type type) {
+        Shader* s = NEW Shader(str, type, false);
+        collection[index] = s;
+    };
+    
+    priv::threading::addJob([&]() {emplaceShader(0, EShaders::decal_vertex, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([&]() {emplaceShader(1, EShaders::decal_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([&]() {emplaceShader(2, EShaders::fullscreen_quad_vertex, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([&]() {emplaceShader(3, EShaders::bullet_physics_vert, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([&]() {emplaceShader(4, EShaders::bullet_physcis_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([&]() {emplaceShader(5, EShaders::vertex_basic, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([&]() {emplaceShader(6, EShaders::vertex_2DAPI, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([&]() {emplaceShader(7, EShaders::vertex_skybox, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([&]() {emplaceShader(8, EShaders::lighting_vert, m_InternalShaders, ShaderType::Vertex); });
+
+    priv::threading::addJob([&]() {emplaceShader(9, EShaders::forward_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([&]() {emplaceShader(10, EShaders::deferred_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([&]() {emplaceShader(11, EShaders::zprepass_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([&]() {emplaceShader(12, EShaders::deferred_frag_hud, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([&]() {emplaceShader(13, EShaders::deferred_frag_skybox, m_InternalShaders, ShaderType::Fragment); });
+
+    priv::threading::addJob([&]() {emplaceShader(14, EShaders::copy_depth_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([&]() {emplaceShader(15, EShaders::blur_frag, m_InternalShaders, ShaderType::Fragment); });
+
+    priv::threading::addJob([&]() {emplaceShader(16, EShaders::final_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([&]() {emplaceShader(17, EShaders::depth_and_transparency_frag, m_InternalShaders, ShaderType::Fragment); });
+
+    priv::threading::addJob([&]() {emplaceShader(18, EShaders::lighting_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([&]() {emplaceShader(19, EShaders::lighting_frag_gi, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([&]() {emplaceShader(20, EShaders::cubemap_convolude_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([&]() {emplaceShader(21, EShaders::cubemap_prefilter_envmap_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([&]() {emplaceShader(22, EShaders::brdf_precompute, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([&]() {emplaceShader(23, EShaders::stencil_passover, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([&]() {emplaceShader(24, EShaders::particle_vertex, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([&]() {emplaceShader(25, EShaders::particle_frag, m_InternalShaders, ShaderType::Fragment); });
+
+    priv::threading::waitForAll();
+
+    /*
+    ShaderProgram::Deferred = NEW ShaderProgram("Deferred", *m_InternalShaders[ShaderEnum::VertexBasic], *m_InternalShaders[ShaderEnum::DeferredFrag]);
+    ShaderProgram::Forward = NEW ShaderProgram("Forward", *m_InternalShaders[ShaderEnum::VertexBasic], *m_InternalShaders[ShaderEnum::ForwardFrag]);
+    ShaderProgram::Decal = NEW ShaderProgram("Decal", *m_InternalShaders[ShaderEnum::DecalVertex], *m_InternalShaders[ShaderEnum::DecalFrag]);
+
+    m_InternalShaderPrograms[ShaderProgramEnum::BulletPhysics] = NEW ShaderProgram("Bullet_Physics", *m_InternalShaders[ShaderEnum::BulletPhysicsVertex], *m_InternalShaders[ShaderEnum::BulletPhysicsFrag]);
+    m_InternalShaderPrograms[ShaderProgramEnum::ZPrepass] = NEW ShaderProgram("ZPrepass", *m_InternalShaders[ShaderEnum::VertexBasic], *m_InternalShaders[ShaderEnum::ZPrepassFrag]);
+    m_InternalShaderPrograms[ShaderProgramEnum::Deferred2DAPI] = NEW ShaderProgram("Deferred_2DAPI", *m_InternalShaders[ShaderEnum::Vertex2DAPI], *m_InternalShaders[ShaderEnum::DeferredFrag2DAPI]);
+    m_InternalShaderPrograms[ShaderProgramEnum::DeferredBlur] = NEW ShaderProgram("Deferred_Blur", *m_InternalShaders[ShaderEnum::FullscreenVertex], *m_InternalShaders[ShaderEnum::BlurFrag]);
+    m_InternalShaderPrograms[ShaderProgramEnum::DeferredFinal] = NEW ShaderProgram("Deferred_Final", *m_InternalShaders[ShaderEnum::FullscreenVertex], *m_InternalShaders[ShaderEnum::FinalFrag]);
+    m_InternalShaderPrograms[ShaderProgramEnum::DepthAndTransparency] = NEW ShaderProgram("DepthAndTransparency", *m_InternalShaders[ShaderEnum::FullscreenVertex], *m_InternalShaders[ShaderEnum::DepthAndTransparencyFrag]);
+    m_InternalShaderPrograms[ShaderProgramEnum::DeferredSkybox] = NEW ShaderProgram("Deferred_Skybox", *m_InternalShaders[ShaderEnum::VertexSkybox], *m_InternalShaders[ShaderEnum::DeferredFragSkybox]);
+    m_InternalShaderPrograms[ShaderProgramEnum::CopyDepth] = NEW ShaderProgram("Copy_Depth", *m_InternalShaders[ShaderEnum::FullscreenVertex], *m_InternalShaders[ShaderEnum::CopyDepthFrag]);
+    m_InternalShaderPrograms[ShaderProgramEnum::DeferredLighting] = NEW ShaderProgram("Deferred_Light", *m_InternalShaders[ShaderEnum::LightingVertex], *m_InternalShaders[ShaderEnum::LightingFrag]);
+    m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingGI] = NEW ShaderProgram("Deferred_Light_GI", *m_InternalShaders[ShaderEnum::FullscreenVertex], *m_InternalShaders[ShaderEnum::LightingGIFrag]);
+    m_InternalShaderPrograms[ShaderProgramEnum::CubemapConvolude] = NEW ShaderProgram("Cubemap_Convolude", *m_InternalShaders[ShaderEnum::VertexSkybox], *m_InternalShaders[ShaderEnum::CubemapConvoludeFrag]);
+    m_InternalShaderPrograms[ShaderProgramEnum::CubemapPrefilterEnv] = NEW ShaderProgram("Cubemap_Prefilter_Env", *m_InternalShaders[ShaderEnum::VertexSkybox], *m_InternalShaders[ShaderEnum::CubemapPrefilterEnvFrag]);
+    m_InternalShaderPrograms[ShaderProgramEnum::BRDFPrecomputeCookTorrance] = NEW ShaderProgram("BRDF_Precompute_CookTorrance", *m_InternalShaders[ShaderEnum::FullscreenVertex], *m_InternalShaders[ShaderEnum::BRDFPrecomputeFrag]);
+    //m_InternalShaderPrograms[ShaderProgramEnum::Grayscale] = NEW ShaderProgram("Greyscale_Frag", *m_InternalShaders[ShaderEnum::FullscreenVertex], *m_InternalShaders[ShaderEnum::GrayscaleFrag]);
+    m_InternalShaderPrograms[ShaderProgramEnum::StencilPass] = NEW ShaderProgram("Stencil_Pass", *m_InternalShaders[ShaderEnum::LightingVertex], *m_InternalShaders[ShaderEnum::StencilPassFrag]);
+    m_InternalShaderPrograms[ShaderProgramEnum::Particle] = NEW ShaderProgram("Particle", *m_InternalShaders[ShaderEnum::ParticleVertex], *m_InternalShaders[ShaderEnum::ParticleFrag]);
+
+#pragma region MeshData
+
+
+#pragma endregion
+
+
+    sf::Image sfImageWhite;
+    sfImageWhite.create(2, 2, sf::Color::White);
+    sf::Image sfImageBlack;
+    sfImageBlack.create(2, 2, sf::Color::Black);
+
+    sf::Image sfImageCheckers;
+    sfImageCheckers.create(8, 8, sf::Color::White);
+
+    uint count = 0;
+    for (uint i = 0; i < sfImageCheckers.getSize().x; ++i) {
+        for (uint j = 0; j < sfImageCheckers.getSize().y; ++j) {
+            if ((count % 2 == 0 && i % 2 == 0) || (count % 2 != 0 && i % 2 == 1)) {
+                sfImageCheckers.setPixel(i, j, sf::Color::Red);
+            }
+            ++count;
+        }
+    }
+    Texture::White = NEW Texture(sfImageWhite, "WhiteTexturePlaceholder", false, ImageInternalFormat::RGBA8);
+    Texture::Black = NEW Texture(sfImageBlack, "BlackTexturePlaceholder", false, ImageInternalFormat::RGBA8);
+    Texture::Checkers = NEW Texture(sfImageCheckers, "CheckersTexturePlaceholder", false, ImageInternalFormat::RGBA8);
+    Texture::Checkers->setFilter(TextureFilter::Nearest);
+    Material::Checkers = NEW Material("MaterialDefaultCheckers", Texture::Checkers);
+    Material::Checkers->setSpecularModel(SpecularModel::None);
+    Material::Checkers->setSmoothness(0.0f);
+
+    Material::WhiteShadeless = NEW Material("MaterialDefaultWhiteShadeless", Texture::White);
+    Material::WhiteShadeless->setSpecularModel(SpecularModel::None);
+    Material::WhiteShadeless->setSmoothness(0.0f);
+    Material::WhiteShadeless->setShadeless(true);
+
+    Texture::BRDF = NEW Texture(512, 512, ImagePixelType::FLOAT, ImagePixelFormat::RG, ImageInternalFormat::RG16F);
+    Texture::BRDF->setWrapping(TextureWrap::ClampToEdge);
+
+    */
+    SSAO::ssao.init();
+    SMAA::smaa.init();
+
+    internal_generate_brdf_lut(*m_InternalShaderPrograms[ShaderProgramEnum::BRDFPrecomputeCookTorrance], 512);
 }
+//DONE
 void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, const unsigned int& convoludeTextureSize, const unsigned int& preEnvFilterSize) {
     const auto texType = texture.type();
     if (texType != GL_TEXTURE_CUBE_MAP) {
@@ -150,6 +349,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
     //Resources::getWindow().display(); //prevent opengl & windows timeout
     fbo.unbind();
 }
+//DONE
 void DeferredPipeline::internal_generate_brdf_lut(ShaderProgram& program, const unsigned int& brdfSize) {
     FramebufferObject fbo("BRDFLUT_Gen_CookTorr_FBO", brdfSize, brdfSize); //try without a depth format
     fbo.bind();
@@ -364,7 +564,7 @@ void DeferredPipeline::renderRodLight(const Camera& c, const RodLight& r) {
     cullFace(GL_BACK);
     sendUniform1Safe("Type", 0.0f); //is this really needed?
 }
-
+//DONE
 void DeferredPipeline::renderParticle(const Particle& particle) {
     particle.getMaterial()->bind();
 
@@ -386,6 +586,7 @@ void DeferredPipeline::renderParticle(const Particle& particle) {
 
     priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh().render();
 }
+//DONE
 void DeferredPipeline::renderMesh(const Mesh& mesh, const unsigned int mode) {
     const auto indicesSize = mesh.getVertexData().indices.size();
     if (indicesSize == 0)
@@ -687,8 +888,26 @@ void DeferredPipeline::internal_pass_geometry(const Viewport& viewport, const Ca
     InternalScenePublicInterface::RenderGeometryTransparent(scene, viewport, camera);
     InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(scene, viewport, camera, true);
 }
-void DeferredPipeline::internal_pass_ssao() {
+void DeferredPipeline::internal_pass_ssao(const Viewport& viewport, const Camera& camera) {
+    const glm::uvec4& dimensions = viewport.getViewportDimensions();
 
+    //TODO: possible optimization: use stencil buffer to reject completely black (or are they white?) pixels during blur passes
+    m_GBuffer->bindFramebuffers(GBufferType::Bloom, GBufferType::GodRays, "A", false);
+    Engine::Renderer::Settings::clear(true, false, false); //bloom and god rays alpha channels cleared to black 
+    if (SSAO::ssao.m_ssao && (viewport.getRenderFlags() & ViewportRenderingFlag::SSAO)) {
+        Engine::Renderer::GLEnablei(GL_BLEND, 0);//i dont think this is needed anymore
+        m_GBuffer->bindFramebuffers(GBufferType::Bloom, "A", false);
+        SSAO::ssao.passSSAO(*m_GBuffer, dimensions.z, dimensions.w, camera);
+        if (SSAO::ssao.m_ssao_do_blur) {
+            Engine::Renderer::GLDisablei(GL_BLEND, 0); //yes this is absolutely needed
+            for (uint i = 0; i < SSAO::ssao.m_ssao_blur_num_passes; ++i) {
+                m_GBuffer->bindFramebuffers(GBufferType::GodRays, "A", false);
+                SSAO::ssao.passBlur(*m_GBuffer, dimensions.z, dimensions.w, "H", GBufferType::Bloom);
+                m_GBuffer->bindFramebuffers(GBufferType::Bloom, "A", false);
+                SSAO::ssao.passBlur(*m_GBuffer, dimensions.z, dimensions.w, "V", GBufferType::GodRays);
+            }
+        }
+    }
 }
 void DeferredPipeline::internal_pass_stencil() {
 
@@ -699,11 +918,37 @@ void DeferredPipeline::internal_pass_lighting() {
 void DeferredPipeline::internal_pass_forward() {
 
 }
-void DeferredPipeline::internal_pass_god_rays() {
+void DeferredPipeline::internal_pass_god_rays(const Viewport& viewport, const Camera& camera) {
+    m_GBuffer->bindFramebuffers(GBufferType::GodRays, "RGB", false);
+    Engine::Renderer::Settings::clear(true, false, false); //godrays rgb channels cleared to black
+    auto& godRaysPlatform = GodRays::godRays;
+    auto* sun = Engine::Renderer::godRays::getSun();
+    if (sun && (viewport.getRenderFlags() & ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active) {
+        const auto& body       = *sun->getComponent<ComponentBody>();
+        const glm::vec3 oPos   = body.position();
+        const glm::vec3 camPos = camera.getPosition();
+        const glm::vec3 camVec = camera.getViewVector();
+        const bool infront = Engine::Math::isPointWithinCone(camPos, -camVec, oPos, Engine::Math::toRadians(godRaysPlatform.fovDegrees));
+        if (infront) {
+            const glm::uvec4& dimensions = viewport.getViewportDimensions();
 
+            const auto sp = Engine::Math::getScreenCoordinates(oPos, camera, false);
+            const auto b = glm::normalize(camPos - oPos);
+            float alpha = Engine::Math::getAngleBetweenTwoVectors(camVec, b, true) / godRaysPlatform.fovDegrees;
+            alpha = glm::pow(alpha, godRaysPlatform.alphaFalloff);
+            alpha = glm::clamp(alpha, 0.01f, 0.99f);
+            if (boost::math::isnan(alpha) || boost::math::isinf(alpha)) { //yes this is needed...
+                alpha = 0.01f;
+            }
+            alpha = 1.0f - alpha;
+            godRaysPlatform.pass(*m_GBuffer, dimensions.z, dimensions.w, glm::vec2(sp.x, sp.y), alpha);
+        }
+    }
 }
-void DeferredPipeline::internal_pass_hdr() {
-
+void DeferredPipeline::internal_pass_hdr(const Viewport& viewport, const Camera& camera) {
+    const glm::uvec4& dimensions = viewport.getViewportDimensions();
+    m_GBuffer->bindFramebuffers(GBufferType::Misc);
+    //HDR::hdr.pass(*m_GBuffer, dimensions.z, dimensions.w, GodRays::godRays.godRays_active, lighting, GodRays::godRays.factor);
 }
 void DeferredPipeline::internal_pass_bloom() {
 
@@ -734,14 +979,16 @@ void DeferredPipeline::update(const float& dt) {
 
 }
 void DeferredPipeline::render(const Viewport& viewport) {
+    const auto& camera = viewport.getCamera();
+
     internal_render_per_frame_preparation();
-    internal_pass_geometry(viewport, viewport.getCamera());
-    internal_pass_ssao();
+    internal_pass_geometry(viewport, camera);
+    internal_pass_ssao(viewport, camera);
     internal_pass_stencil();
     internal_pass_lighting();
     internal_pass_forward();
-    internal_pass_god_rays();
-    internal_pass_hdr();
+    internal_pass_god_rays(viewport, camera);
+    internal_pass_hdr(viewport, camera);
     internal_pass_bloom();
     internal_pass_depth_of_field();
     internal_pass_aa();

@@ -59,58 +59,33 @@ ParticleData::ParticleData(ParticleEmissionProperties& properties, ParticleEmitt
 
     m_Color = properties.m_ColorFunctor(m_Timer, 0.0, &emitter, particle);
 }
-ParticleData::ParticleData(const ParticleData& other){
-    m_Active = other.m_Active;
-    m_Timer = other.m_Timer;
-    m_Velocity = other.m_Velocity;
-    m_Color = other.m_Color;
-    m_Angle = other.m_Angle;
-    m_Scale = other.m_Scale;
-    m_Depth = other.m_Depth;
-    m_AngularVelocity = other.m_AngularVelocity;
-    m_Properties = other.m_Properties;
-    m_UserData = other.m_UserData;
-}
-ParticleData& ParticleData::operator=(const ParticleData& other) {
-    if (&other == this)
-        return *this;
-    m_Active = other.m_Active;
-    m_Timer = other.m_Timer;
-    m_Velocity = other.m_Velocity;
-    m_Color = other.m_Color;
-    m_Angle = other.m_Angle;
-    m_Scale = other.m_Scale;
-    m_Depth = other.m_Depth;
-    m_AngularVelocity = other.m_AngularVelocity;
-    m_Properties = other.m_Properties;
-    m_UserData = other.m_UserData;
-    return *this;
-}
+
 ParticleData::ParticleData(ParticleData&& other) noexcept{
-    using std::swap;
-    swap(m_Active, other.m_Active);
-    swap(m_Timer, other.m_Timer);
-    swap(m_Velocity, other.m_Velocity);
-    swap(m_Color, other.m_Color);
-    swap(m_Angle, other.m_Angle);
-    swap(m_Scale, other.m_Scale);
-    swap(m_Depth, other.m_Depth);
-    swap(m_AngularVelocity, other.m_AngularVelocity);
-    swap(m_Properties, other.m_Properties);
-    swap(m_UserData, other.m_UserData);
+    m_Active          = std::move(other.m_Active);
+    m_Velocity        = std::move(other.m_Velocity);
+    m_Timer           = std::move(other.m_Timer);
+    m_Color           = std::move(other.m_Color);
+    m_Angle           = std::move(other.m_Angle);
+    m_Scale           = std::move(other.m_Scale);
+    m_Depth           = std::move(other.m_Depth);
+    m_AngularVelocity = std::move(other.m_AngularVelocity);
+    m_UserData        = std::move(other.m_UserData);
+    m_Properties      = std::exchange(other.m_Properties, nullptr);
+
 }
 ParticleData& ParticleData::operator=(ParticleData&& other) noexcept {
-    using std::swap;
-    swap(m_Active, other.m_Active);
-    swap(m_Timer, other.m_Timer);
-    swap(m_Velocity, other.m_Velocity);
-    swap(m_Color, other.m_Color);
-    swap(m_Angle, other.m_Angle);
-    swap(m_Scale, other.m_Scale);
-    swap(m_Depth, other.m_Depth);
-    swap(m_AngularVelocity, other.m_AngularVelocity);
-    swap(m_Properties, other.m_Properties);
-    swap(m_UserData, other.m_UserData);
+    if (&other != this) {
+        m_Active          = std::move(other.m_Active);
+        m_Velocity        = std::move(other.m_Velocity);
+        m_Timer           = std::move(other.m_Timer);
+        m_Color           = std::move(other.m_Color);
+        m_Angle           = std::move(other.m_Angle);
+        m_Scale           = std::move(other.m_Scale);
+        m_Depth           = std::move(other.m_Depth);
+        m_AngularVelocity = std::move(other.m_AngularVelocity);
+        m_UserData        = std::move(other.m_UserData);
+        m_Properties      = std::exchange(other.m_Properties, nullptr);
+    }
     return *this;
 }
 
@@ -131,39 +106,17 @@ Particle::Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRot
     m_Position       = emitterPosition;
 
     auto data        = ParticleData(properties, emitter, *this);
-    init(data, emitterPosition, emitterRotation, emitter.m_Parent);
+    init(std::move(data), emitterPosition, emitterRotation, emitter.m_Parent);
 }
 Particle::~Particle() {
 
 }
-void Particle::init(ParticleData& data, const glm::vec3& emitterPosition, const glm::quat& emitterRotation, Entity& parent) {
+void Particle::init(ParticleData&& data, const glm::vec3& emitterPosition, const glm::quat& emitterRotation, Entity& parent) {
     m_Hidden            = false;
     m_PassedRenderCheck = false;
     m_Data.m_Active     = true;
     m_Position          = emitterPosition;
-    m_Data              = data;
-}
-
-Particle::Particle(const Particle& other){
-    m_Data              = other.m_Data;
-    m_Scene             = other.m_Scene;
-    m_Hidden            = other.m_Hidden;
-    m_Position          = other.m_Position;
-    m_PassedRenderCheck = other.m_PassedRenderCheck;
-    m_Material          = other.m_Material;
-    m_EmitterSource     = other.m_EmitterSource;
-}
-Particle& Particle::operator=(const Particle& other) {
-    if (&other != this) {
-        m_Data              = other.m_Data;
-        m_Scene             = other.m_Scene;
-        m_Hidden            = other.m_Hidden;
-        m_Position          = other.m_Position;
-        m_PassedRenderCheck = other.m_PassedRenderCheck;
-        m_Material          = other.m_Material;
-        m_EmitterSource     = other.m_EmitterSource;
-    }
-    return *this;
+    m_Data              = std::move(data);
 }
 Particle::Particle(Particle&& other) noexcept{
     m_Data              = std::move(other.m_Data);

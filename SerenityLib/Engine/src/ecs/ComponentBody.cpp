@@ -178,7 +178,7 @@ ComponentBody::ComponentBody(ComponentBody&& other) noexcept {
     m_Forward          = std::move(other.m_Forward);
     m_Right            = std::move(other.m_Right);
     m_Up               = std::move(other.m_Up);
-    m_Owner.data       = std::move(other.m_Owner.data);
+    m_Owner            = std::move(other.m_Owner);
     m_CollisionFunctor = std::move(other.m_CollisionFunctor);
     m_UserPointer      = std::exchange(other.m_UserPointer, nullptr);
     m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
@@ -197,7 +197,7 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
         m_Forward          = std::move(other.m_Forward);
         m_Right            = std::move(other.m_Right);
         m_Up               = std::move(other.m_Up);
-        m_Owner.data       = std::move(other.m_Owner.data);
+        m_Owner            = std::move(other.m_Owner);
         m_CollisionFunctor = std::move(other.m_CollisionFunctor);
         m_UserPointer      = std::exchange(other.m_UserPointer, nullptr);
         m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
@@ -292,7 +292,8 @@ void* ComponentBody::getUserPointer2() const {
     return m_UserPointer2;
 }
 void ComponentBody::collisionResponse(CollisionCallbackEventData& data) {
-    m_CollisionFunctor( std::ref(data) );
+    if(m_CollisionFunctor)
+        m_CollisionFunctor( std::ref(data) );
 }
 const ushort ComponentBody::getCollisionGroup() const {
     if (m_Physics) {
@@ -1080,28 +1081,22 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_Compon
     auto& pool              = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool);
     auto& components        = pool.data();
     const decimal double_dt = static_cast<decimal>(dt);
-    auto lamda_update = [&](pair<size_t, size_t>& pair_) {
-        for (size_t j = pair_.first; j <= pair_.second; ++j) {
-            ComponentBody& b = components[j];
-            if (b.m_Physics) {
-                auto& rigidBody = *b.data.p->bullet_rigidBody;
-                Engine::Math::recalculateForwardRightUp(rigidBody, b.m_Forward, b.m_Right, b.m_Up);
-            }else{
-                auto& n = *b.data.n;
-                n.position += (n.linearVelocity * double_dt);
-                //TODO: implement parent->child relations
-                //n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale) * n.modelMatrix;
-                n.modelMatrix = glm::mat4(1.0f);
-                n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
-                //Engine::Math::recalculateForwardRightUp(n.rotation, b._forward, b._right, b._up); //double check if this is needed
-            }
+
+    auto lamda_update_component = [double_dt](ComponentBody& b) {
+        if (b.m_Physics) {
+            auto& rigidBody = *b.data.p->bullet_rigidBody;
+            Engine::Math::recalculateForwardRightUp(rigidBody, b.m_Forward, b.m_Right, b.m_Up);
+        }else{
+            auto& n = *b.data.n;
+            n.position += (n.linearVelocity * double_dt);
+            //TODO: implement parent->child relations
+            //n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale) * n.modelMatrix;
+            n.modelMatrix = glm::mat4(1.0f);
+            n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
+            //Engine::Math::recalculateForwardRightUp(n.rotation, b._forward, b._right, b._up); //double check if this is needed
         }
     };
-    auto split = priv::threading::splitVectorPairs(components);
-    for (auto& pair : split) {
-        priv::Core::m_Engine->m_ThreadManager.add_job_ref_engine_controlled(lamda_update, pair);
-    }
-    priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
+    priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);
 }};
 struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* p_Component, Entity& p_Entity) const {
 }};

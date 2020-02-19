@@ -37,8 +37,8 @@ class ParticleEmitter final : public EntityWrapper{
         ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, const Entity& parent = Entity::null_);
         ~ParticleEmitter();
 
-        ParticleEmitter(const ParticleEmitter& other);
-        ParticleEmitter& operator=(const ParticleEmitter& other);
+        ParticleEmitter(const ParticleEmitter& other) = delete;
+        ParticleEmitter& operator=(const ParticleEmitter& other) = delete;
         ParticleEmitter(ParticleEmitter&& other) noexcept;
         ParticleEmitter& operator=(ParticleEmitter&& other) noexcept;
 

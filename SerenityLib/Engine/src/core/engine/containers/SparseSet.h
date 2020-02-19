@@ -4,6 +4,9 @@
 
 #include <utility>
 
+#include <ecs/ECSRegistry.h>
+#include <iostream>
+
 namespace Engine {
     namespace priv {
         class sparse_set_base {
@@ -34,7 +37,6 @@ namespace Engine {
         using super = Engine::priv::sparse_set_base;
         private:
             std::vector<T> m_Dense;
-
         public:
             sparse_set() : super(0) {
             }
@@ -46,10 +48,10 @@ namespace Engine {
             }
 
             void reserve(const unsigned int amount) override {
-                if (super::m_Sparse.size() > super::m_Sparse.capacity() - 1) {
+                if (super::m_Sparse.size() == super::m_Sparse.capacity()) {
                     super::m_Sparse.reserve(super::m_Sparse.capacity() + amount);
                 }
-                if (m_Dense.size() > m_Dense.capacity() - 1) {
+                if (m_Dense.size() == m_Dense.capacity()) {
                     m_Dense.reserve(m_Dense.capacity() + amount);
                 }
             }

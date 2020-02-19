@@ -75,8 +75,12 @@ void TextureRequest::request() {
     InternalTextureRequestPublicInterface::Request(*this);
 }
 void TextureRequest::requestAsync() {
-    async = true;
-    InternalTextureRequestPublicInterface::Request(*this);
+    if (Engine::priv::threading::hardware_concurrency() > 1) {
+        async = true;
+        InternalTextureRequestPublicInterface::Request(*this);
+    }else{
+        TextureRequest::request();
+    }
 }
 void InternalTextureRequestPublicInterface::Request(TextureRequest& request) {
     if (!request.file.empty()) {
@@ -172,8 +176,12 @@ void TextureRequestFromMemory::request() {
     InternalTextureRequestPublicInterface::RequestMem(*this);
 }
 void TextureRequestFromMemory::requestAsync() {
-    async = true;
-    InternalTextureRequestPublicInterface::RequestMem(*this);
+    if (Engine::priv::threading::hardware_concurrency() > 1) {
+        async = true;
+        InternalTextureRequestPublicInterface::RequestMem(*this);
+    }else{
+        TextureRequestFromMemory::request();
+    }
 }
 void InternalTextureRequestPublicInterface::RequestMem(TextureRequestFromMemory& request) {
     auto imgSize = request.image.getSize();

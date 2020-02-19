@@ -12,23 +12,23 @@ using namespace Engine::priv;
 using namespace std;
 
 Engine::priv::AssimpSceneImport::AssimpSceneImport() {
-    importer_ptr.reset(NEW Assimp::Importer{});
-    scene    = nullptr;
-    root     = nullptr;
+    m_Importer_ptr.reset(NEW Assimp::Importer{});
+    m_AIScene    = nullptr;
+    m_AIRoot     = nullptr;
 }
 Engine::priv::AssimpSceneImport::~AssimpSceneImport() {
 
 }
 Engine::priv::AssimpSceneImport::AssimpSceneImport(const AssimpSceneImport& other) {
-    importer_ptr = other.importer_ptr;
-    scene        = other.scene;
-    root         = other.root;
+    m_Importer_ptr   = other.m_Importer_ptr;
+    m_AIScene        = other.m_AIScene;
+    m_AIRoot         = other.m_AIRoot;
 }
 Engine::priv::AssimpSceneImport& Engine::priv::AssimpSceneImport::operator=(const AssimpSceneImport& other) {
     if (&other != this) {
-        importer_ptr = other.importer_ptr;
-        scene        = other.scene;
-        root         = other.root;
+        m_Importer_ptr = other.m_Importer_ptr;
+        m_AIScene      = other.m_AIScene;
+        m_AIRoot       = other.m_AIRoot;
     }
     return *this;
 }
@@ -74,66 +74,66 @@ MeshRequest::MeshRequestPart& MeshRequest::MeshRequestPart::operator=(MeshReques
 
 
 
-MeshRequest::MeshRequest(const string& filenameOrData, float threshold){
-    fileExtension = "";
-    fileExists    = false;
-    async         = false;
-    fileOrData    = filenameOrData;
-    threshold     = threshold;
-    if (!fileOrData.empty()) {
-        fileExtension = boost::filesystem::extension(fileOrData);
-        if (boost::filesystem::exists(fileOrData)) {
-            fileExists = true;
+MeshRequest::MeshRequest(const string& filenameOrData, const float threshold){
+    m_FileExtension = "";
+    m_FileExists    = false;
+    m_Async         = false;
+    m_FileOrData    = filenameOrData;
+    m_Threshold     = threshold;
+    if (!m_FileOrData.empty()) {
+        m_FileExtension = boost::filesystem::extension(m_FileOrData);
+        if (boost::filesystem::exists(m_FileOrData)) {
+            m_FileExists = true;
         }
     }
 }
 MeshRequest::~MeshRequest() {
-    SAFE_DELETE_MAP(map);
+    SAFE_DELETE_MAP(m_Map);
 }
 
 MeshRequest::MeshRequest(const MeshRequest& other) {
-    fileOrData    = other.fileOrData;
-    fileExtension = other.fileExtension;
-    fileExists    = other.fileExists;
-    async         = other.async;
-    threshold     = other.threshold;
-    importer      = other.importer;
-    map           = other.map;
-    parts         = other.parts;
+    m_FileOrData     = other.m_FileOrData;
+    m_FileExtension  = other.m_FileExtension;
+    m_FileExists     = other.m_FileExists;
+    m_Async          = other.m_Async;
+    m_Threshold      = other.m_Threshold;
+    m_Importer       = other.m_Importer;
+    m_Map            = other.m_Map;
+    m_Parts          = other.m_Parts;
 }
 MeshRequest& MeshRequest::operator=(const MeshRequest& other) {
     if (&other != this) {
-        fileOrData    = other.fileOrData;
-        fileExtension = other.fileExtension;
-        fileExists    = other.fileExists;
-        async         = other.async;
-        threshold     = other.threshold;
-        importer      = other.importer;
-        map           = other.map;
-        parts         = other.parts;
+        m_FileOrData    = other.m_FileOrData;
+        m_FileExtension = other.m_FileExtension;
+        m_FileExists    = other.m_FileExists;
+        m_Async         = other.m_Async;
+        m_Threshold     = other.m_Threshold;
+        m_Importer      = other.m_Importer;
+        m_Map           = other.m_Map;
+        m_Parts         = other.m_Parts;
     }
     return *this;
 }
 MeshRequest::MeshRequest(MeshRequest&& other) noexcept {
-    fileOrData    = std::move(other.fileOrData);
-    fileExtension = std::move(other.fileExtension);
-    fileExists    = std::move(other.fileExists);
-    async         = std::move(other.async);
-    threshold     = std::move(other.threshold);
-    map           = std::move(other.map);
-    parts         = std::move(other.parts);
-    importer      = (other.importer);
+    m_FileOrData    = std::move(other.m_FileOrData);
+    m_FileExtension = std::move(other.m_FileExtension);
+    m_FileExists    = std::move(other.m_FileExists);
+    m_Async         = std::move(other.m_Async);
+    m_Threshold     = std::move(other.m_Threshold);
+    m_Map           = std::move(other.m_Map);
+    m_Parts         = std::move(other.m_Parts);
+    m_Importer      = (other.m_Importer);
 }
 MeshRequest& MeshRequest::operator=(MeshRequest&& other) noexcept {
     if (&other != this) {
-        fileOrData    = std::move(other.fileOrData);
-        fileExtension = std::move(other.fileExtension);
-        fileExists    = std::move(other.fileExists);
-        async         = std::move(other.async);
-        threshold     = std::move(other.threshold);
-        map           = std::move(other.map);
-        parts         = std::move(other.parts);
-        importer      = (other.importer);
+        m_FileOrData    = std::move(other.m_FileOrData);
+        m_FileExtension = std::move(other.m_FileExtension);
+        m_FileExists    = std::move(other.m_FileExists);
+        m_Async         = std::move(other.m_Async);
+        m_Threshold     = std::move(other.m_Threshold);
+        m_Map           = std::move(other.m_Map);
+        m_Parts         = std::move(other.m_Parts);
+        m_Importer      = (other.m_Importer);
     }
     return *this;
 }
@@ -141,20 +141,24 @@ MeshRequest& MeshRequest::operator=(MeshRequest&& other) noexcept {
 
 
 void MeshRequest::request() {
-    async = false;
+    m_Async = false;
     InternalMeshRequestPublicInterface::Request(*this);
 }
 void MeshRequest::requestAsync() {
-    async = true;
-    InternalMeshRequestPublicInterface::Request(*this);
+    if (Engine::priv::threading::hardware_concurrency() > 1) {
+        m_Async = true;
+        InternalMeshRequestPublicInterface::Request(*this);
+    }else{
+        MeshRequest::request();
+    }
 }
 
 void InternalMeshRequestPublicInterface::Request(MeshRequest& meshRequest) {
-    if (!meshRequest.fileOrData.empty()) {
-        if (meshRequest.fileExists) {
+    if (!meshRequest.m_FileOrData.empty()) {
+        if (meshRequest.m_FileExists) {
             const bool valid = InternalMeshRequestPublicInterface::Populate(meshRequest);
             if (valid){
-                if (meshRequest.async){
+                if (meshRequest.m_Async){
                     const auto& job = [meshRequest]() {
                         InternalMeshRequestPublicInterface::LoadCPU(const_cast<MeshRequest&>(meshRequest)); 
                     };
@@ -171,47 +175,47 @@ void InternalMeshRequestPublicInterface::Request(MeshRequest& meshRequest) {
     }
 }
 bool InternalMeshRequestPublicInterface::Populate(MeshRequest& meshRequest) {
-    if (meshRequest.fileExtension != ".objcc") {
-        meshRequest.importer.scene = const_cast<aiScene*>(meshRequest.importer.importer_ptr->ReadFile(meshRequest.fileOrData, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace));
-        meshRequest.importer.root  = meshRequest.importer.scene->mRootNode;
+    if (meshRequest.m_FileExtension != ".objcc") {
+        meshRequest.m_Importer.m_AIScene = const_cast<aiScene*>(meshRequest.m_Importer.m_Importer_ptr->ReadFile(meshRequest.m_FileOrData, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace));
+        meshRequest.m_Importer.m_AIRoot  = meshRequest.m_Importer.m_AIScene->mRootNode;
 
-        auto& scene = *meshRequest.importer.scene;
-        auto& root  = *meshRequest.importer.root;
+        auto& scene = *meshRequest.m_Importer.m_AIScene;
+        auto& root  = *meshRequest.m_Importer.m_AIRoot;
 
         if (!&scene || (scene.mFlags & AI_SCENE_FLAGS_INCOMPLETE) || !&root) {
             return false;
         }
-        MeshLoader::LoadPopulateGlobalNodes(root, meshRequest.map);
-        MeshLoader::LoadProcessNodeNames(meshRequest.fileOrData, meshRequest.parts, scene, root, meshRequest.map);
+        MeshLoader::LoadPopulateGlobalNodes(root, meshRequest.m_Map);
+        MeshLoader::LoadProcessNodeNames(meshRequest.m_FileOrData, meshRequest.m_Parts, scene, root, meshRequest.m_Map);
     }else{
         MeshRequest::MeshRequestPart part;
-        part.name   = meshRequest.fileOrData;
+        part.name   = meshRequest.m_FileOrData;
         part.mesh   = NEW Mesh();
         part.mesh->setName(part.name);
         part.handle = Core::m_Engine->m_ResourceManager.m_Resources.add(part.mesh, ResourceType::Mesh);
-        meshRequest.parts.push_back(std::move(part));
+        meshRequest.m_Parts.push_back(std::move(part));
     }
     return true;
 }
 void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
-    if (meshRequest.fileExtension != ".objcc") {
-        auto& root   = *meshRequest.importer.root;
-        auto& scene  = *meshRequest.importer.scene;
+    if (meshRequest.m_FileExtension != ".objcc") {
+        auto& scene  = *meshRequest.m_Importer.m_AIScene;
+        auto& root   = *meshRequest.m_Importer.m_AIRoot;
         uint count   = 0;
-        MeshLoader::LoadProcessNodeData(meshRequest.parts, scene, root, meshRequest.map, count);
-        MeshLoader::SaveTo_OBJCC(*const_cast<VertexData*>(meshRequest.parts[0].mesh->m_VertexData), meshRequest.fileOrData + ".objcc");
+        MeshLoader::LoadProcessNodeData(meshRequest.m_Parts, scene, root, meshRequest.m_Map, count);
+        MeshLoader::SaveTo_OBJCC(*const_cast<VertexData*>(meshRequest.m_Parts[0].mesh->m_VertexData), meshRequest.m_FileOrData + ".objcc");
     }else{ //objcc
-        VertexData* vertexData   = MeshLoader::LoadFrom_OBJCC(meshRequest.fileOrData);
-        Mesh& mesh               = *meshRequest.parts[0].mesh;
+        VertexData* vertexData   = MeshLoader::LoadFrom_OBJCC(meshRequest.m_FileOrData);
+        Mesh& mesh               = *meshRequest.m_Parts[0].mesh;
         mesh.m_VertexData        = vertexData;
-        mesh.m_threshold         = meshRequest.threshold;
+        mesh.m_Threshold         = meshRequest.m_Threshold;
         InternalMeshPublicInterface::CalculateRadius(mesh);
         SAFE_DELETE(mesh.m_CollisionFactory);
         mesh.m_CollisionFactory  = NEW MeshCollisionFactory(mesh);
     }
 }
 void InternalMeshRequestPublicInterface::LoadGPU(MeshRequest& meshRequest) {
-    for (auto& part : meshRequest.parts) {
+    for (auto& part : meshRequest.m_Parts) {
         InternalMeshPublicInterface::LoadGPU(*part.mesh);
         part.mesh->EngineResource::load();
     }

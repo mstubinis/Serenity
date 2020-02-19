@@ -48,7 +48,7 @@ namespace Engine::priv {
 
             void init();
 
-            void passSSAO(GBuffer&, const unsigned int& fboWidth, const unsigned int& fboHeight, Camera&);
+            void passSSAO(GBuffer&, const unsigned int& fboWidth, const unsigned int& fboHeight, const Camera&);
             void passBlur(GBuffer&, const unsigned int& fboWidth, const unsigned int& fboHeight, const std::string& type, const unsigned int& texture);
 
             static SSAO ssao;

@@ -42,9 +42,9 @@ namespace Math{
     glm::mat4 assimpToGLMMat4(const aiMatrix4x4&);
     glm::mat3 assimpToGLMMat3(const aiMatrix3x3&);
 
-    glm::vec3 getScreenCoordinates(const glm::vec3& position, Camera&, const bool clampToEdge = true);
-    glm::vec3 getScreenCoordinates(const glm::vec3& position, Camera&, const glm::vec4& viewport, const bool clampToEdge = true);
-    glm::vec3 getScreenCoordinates(const glm::vec3& position, Camera&, const glm::mat4& view, const glm::mat4& projection, const glm::vec4& viewport, const bool clampToEdge = true);
+    glm::vec3 getScreenCoordinates(const glm::vec3& position, const Camera&, const bool clampToEdge = true);
+    glm::vec3 getScreenCoordinates(const glm::vec3& position, const Camera&, const glm::vec4& viewport, const bool clampToEdge = true);
+    glm::vec3 getScreenCoordinates(const glm::vec3& position, const Camera&, const glm::mat4& view, const glm::mat4& projection, const glm::vec4& viewport, const bool clampToEdge = true);
 
     glm::vec3 midpoint(const glm::vec3& a, const glm::vec3& b);
 

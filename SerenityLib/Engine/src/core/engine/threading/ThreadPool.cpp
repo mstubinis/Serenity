@@ -19,8 +19,10 @@ ThreadPoolFuture::ThreadPoolFuture(ThreadPoolFuture&& other) noexcept {
     m_Callback = std::move(other.m_Callback);
 }
 ThreadPoolFuture& ThreadPoolFuture::operator=(ThreadPoolFuture&& other) noexcept {
-    m_Future   = std::move(other.m_Future);
-    m_Callback = std::move(other.m_Callback);
+    if (&other != this) {
+        m_Future   = std::move(other.m_Future);
+        m_Callback = std::move(other.m_Callback);
+    }
     return *this;
 }
 const bool ThreadPoolFuture::isReady() {
@@ -37,64 +39,84 @@ void ThreadPoolFuture::operator()() const {
 
 #pragma region ThreadPool
 
-ThreadPool::ThreadPool(const unsigned int num_threads) {
-    const unsigned int numberOfThreads = std::max(1U, num_threads);
-    init(numberOfThreads);
+ThreadPool::ThreadPool() {
+    m_Stopped = true;
 }
 ThreadPool::~ThreadPool() {
-    if (!m_Stopped) {
-        shutdown();
+    shutdown();
+}
+void ThreadPool::shutdown() {
+    if (m_Stopped == false) {
+        std::lock_guard<std::mutex> lock(m_Mutex);
+        m_Stopped = true;
+        m_ConditionVariable.notify_all();// wake up all threads.
     }
     join_all();
 }
-void ThreadPool::shutdown() {
-    std::lock_guard<std::mutex> lock(m_Mutex);
-    m_Stopped = true;
-    m_ConditionVariable.notify_all();// wake up all threads.
-}
-void ThreadPool::init(const unsigned int num_threads) {
-    m_Stopped = false;
-    m_WorkerThreads.reserve(num_threads);
-    for (unsigned int i = 0; i < num_threads; ++i) {
-        auto thread_exec_func = [&]() {
-            while (!m_Stopped) {
-                std::shared_ptr<std::packaged_task<void()>> job;
-                {
-                    std::unique_lock<std::mutex> lock(m_Mutex);
-                    m_ConditionVariable.wait(lock, [&] { return !(m_TaskQueue.empty() && !m_Stopped); });
-                    if (m_Stopped) {
-                        return;
-                    }
-                    job = (m_TaskQueue.front());
-                    m_TaskQueue.pop();
-                }
-                (*job)();
-            }
-        };
-        m_WorkerThreads.push_back(std::move(std::thread(std::move(thread_exec_func))));
+const bool ThreadPool::startup(const unsigned int num_threads) {
+    if (num_threads != size()) { //only shutdown if we want a different amount of threads
+        shutdown();
     }
+    if (m_Stopped) { //only start up if we did not start up yet or if we shutdowned
+        m_Stopped = false;
+        m_WorkerThreads.reserve(num_threads);
+        for (unsigned int i = 0; i < num_threads; ++i) {
+            auto thread_exec_func = [&]() {
+                while (!m_Stopped) {
+                    std::shared_ptr<std::packaged_task<void()>> job;
+                    {
+                        std::unique_lock<std::mutex> lock(m_Mutex);
+                        m_ConditionVariable.wait(lock, [&] {
+                            return !(m_TaskQueue.empty() && !m_Stopped);
+                        });
+                        if (m_Stopped) {
+                            return;
+                        }
+                        job = (m_TaskQueue.front());
+                        m_TaskQueue.pop();
+                    }
+                    (*job)();
+                }
+            };
+            m_WorkerThreads.push_back(std::move(std::thread(std::move(thread_exec_func))));
+        }
+        return true;
+    }
+    return false;
 }
-void ThreadPool::addJob(std::function<void()>&& job) {
-    EmptyCallback emptyCallback;
-    internal_create_packaged_task(std::move(job), std::move(emptyCallback));
+void ThreadPool::add_job(std::function<void()>&& job) {
+    EmptyCallback empty;
+    internal_create_packaged_task(std::move(job), std::move(empty));
 }
-void ThreadPool::addJob(std::function<void()>&& job, std::function<void()>&& callback) {
+void ThreadPool::add_job(std::function<void()>&& job, std::function<void()>&& callback) {
     internal_create_packaged_task(std::move(job), std::move(callback));
 }
+
 void ThreadPool::internal_create_packaged_task(std::function<void()>&& job, std::function<void()>&& callback) {
     const auto task = std::make_shared<std::packaged_task<void()>>(std::move(job));
     ThreadPoolFuture thread_pool_future(std::move(task->get_future()), std::move(callback));
-    //m_Futures.push_back(std::move(thread_pool_future));
-    {
-        std::lock_guard<std::mutex> lock(m_Mutex);
-        m_Futures.push_back(std::move(thread_pool_future)); //TODO: see if this really needs to be in the critical section 
+    if (size() > 0) {
+        {
+            std::lock_guard<std::mutex> lock(m_Mutex);
+            m_Futures.push_back(std::move(thread_pool_future)); //TODO: see if this really needs to be in the critical section 
+            m_TaskQueue.push(std::move(task));
+        }
+        m_ConditionVariable.notify_one();
+    }else{
+        //on single threaded, we just execute the tasks on the main thread below in update()
+        m_Futures.push_back(std::move(thread_pool_future));
         m_TaskQueue.push(std::move(task));
     }
-    m_ConditionVariable.notify_one();
 }
 void ThreadPool::update() {
-    if (m_Futures.size() == 0)
-        return;
+    if (size() == 0) { //for single threaded stuff
+        while (m_TaskQueue.size() > 0) {
+            auto job = (m_TaskQueue.front());
+            m_TaskQueue.pop();
+            (*job)();
+        }
+    }
+    //this executes the "then" functions
     for (auto it = m_Futures.begin(); it != m_Futures.end();) {
         auto& future = (*it);
         if (future.isReady()) {
@@ -115,10 +137,8 @@ void ThreadPool::join_all() {
     }
 }
 void ThreadPool::wait_for_all() {
-    if (m_Futures.size() > 0) {
-        for (auto& future : m_Futures) {
-            future.m_Future.wait();
-        }
+    for (auto& future : m_Futures) {
+        future.m_Future.wait();
     }
     update();
 }

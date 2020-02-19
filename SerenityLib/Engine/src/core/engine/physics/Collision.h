@@ -14,6 +14,7 @@ class  btCompoundShape;
 #include <core/engine/physics/PhysicsIncludes.h>
 #include <core/engine/events/Engine_EventObject.h>
 #include <LinearMath/btVector3.h>
+#include <ecs/Entity.h>
 #include <vector>
 #include <functional>
 
@@ -22,11 +23,11 @@ class Collision final: public EventObserver {
         class DeferredLoading final {
             friend class Collision;
             private:
-                static void load_1(Collision&, const CollisionType::Type, Mesh* mesh, const float& mass);
-                static void load_2(Collision&, btCompoundShape*, std::vector<ModelInstance*>, const float& mass, const CollisionType::Type);
+                static void load_1(Collision*, const CollisionType::Type, Mesh* mesh, const float& mass);
+                static void load_2(Collision*, btCompoundShape*, std::vector<ModelInstance*>, const float& mass, const CollisionType::Type);
         };
     private:
-        ComponentBody&          m_OwnerBody;
+        Entity                  m_Owner;
         std::vector<Mesh*>      m_DeferredMeshes;
         std::function<void()>   m_DeferredLoading;
 

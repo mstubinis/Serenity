@@ -29,9 +29,11 @@ MaterialRequestPart::MaterialRequestPart(const MaterialRequestPart& other) {
     handle   = other.handle;
 }
 MaterialRequestPart& MaterialRequestPart::operator=(const MaterialRequestPart& other) {
-    material = other.material;
-    name     = other.name;
-    handle   = other.handle;
+    if (&other != this) {
+        material = other.material;
+        name     = other.name;
+        handle   = other.handle;
+    }
     return *this;
 }
 
@@ -66,11 +68,13 @@ MaterialRequest::MaterialRequest(const MaterialRequest& other) {
     part.textureRequests = other.part.textureRequests;
 }
 MaterialRequest& MaterialRequest::operator=(const MaterialRequest& other) {
-    async                = other.async;
-    part.handle          = other.part.handle;
-    part.material        = other.part.material;
-    part.name            = other.part.name;
-    part.textureRequests = other.part.textureRequests;
+    if (&other != this) {
+        async                = other.async;
+        part.handle          = other.part.handle;
+        part.material        = other.part.material;
+        part.name            = other.part.name;
+        part.textureRequests = other.part.textureRequests;
+    }
     return *this;
 }
 
@@ -81,11 +85,15 @@ void MaterialRequest::request() {
     InternalMaterialRequestPublicInterface::Request(*this);
 }
 void MaterialRequest::requestAsync() {
-    async = true;
-    for (auto& textureRequest : part.textureRequests) {
-        textureRequest->async = true;
+    if (Engine::priv::threading::hardware_concurrency() > 1) {
+        async = true;
+        for (auto& textureRequest : part.textureRequests) {
+            textureRequest->async = true;
+        }
+        InternalMaterialRequestPublicInterface::Request(*this);
+    }else{
+        MaterialRequest::request();
     }
-    InternalMaterialRequestPublicInterface::Request(*this);
 }
 
 void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {

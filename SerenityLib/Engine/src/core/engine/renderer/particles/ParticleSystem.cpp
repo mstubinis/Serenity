@@ -83,12 +83,11 @@ const bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter, const gl
             return false;
         }
         ParticleData data(*emitter.m_Properties, emitter, m_Particles[freeindex]);
-        m_Particles[freeindex].init(data, emitterPosition, emitterRotation, emitter.m_Parent);
+        m_Particles[freeindex].init(std::move(data), emitterPosition, emitterRotation, emitter.m_Parent);
         return true;
     }
     if (m_Particles.size() < m_Particles.capacity()) {
-        Particle particle(emitterPosition, emitterRotation, emitter);
-        m_Particles.push_back(std::move(particle));
+        m_Particles.emplace_back(emitterPosition, emitterRotation, emitter);
         return true;
     }
     return false;
@@ -106,7 +105,7 @@ void priv::ParticleSystem::render(const Camera& camera, ShaderProgram& program, 
     if (m_Particles.size() == 0)
         return;
 
-    vector<Particle> seen;
+    vector<Particle*> seen;
     seen.reserve(m_Particles.size());
 
     const auto cameraPosition = glm::vec3(camera.getPosition());
@@ -126,7 +125,7 @@ void priv::ParticleSystem::render(const Camera& camera, ShaderProgram& program, 
             }else{
                 particle.m_PassedRenderCheck = true;
                 std::lock_guard<std::mutex> lock(m_Mutex);
-                seen.push_back(particle);
+                seen.push_back(&particle);
             }
         }
     };
@@ -136,8 +135,8 @@ void priv::ParticleSystem::render(const Camera& camera, ShaderProgram& program, 
     }
     priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
 
-    auto lambda_sorter = [&](Particle& lhs, Particle& rhs, const glm::vec3& camPos) {
-        return glm::distance2(lhs.m_Position, camPos) > glm::distance2(rhs.m_Position, camPos);
+    auto lambda_sorter = [&](Particle* lhs, Particle* rhs, const glm::vec3& camPos) {
+        return glm::distance2(lhs->m_Position, camPos) > glm::distance2(rhs->m_Position, camPos);
     };
     std::sort(std::execution::par_unseq, seen.begin(), seen.end(), std::bind(lambda_sorter, std::placeholders::_1, std::placeholders::_2, cameraPosition));
 
@@ -145,7 +144,7 @@ void priv::ParticleSystem::render(const Camera& camera, ShaderProgram& program, 
     planeMesh.bind();
     for (auto& particle : seen) {
         //if (particle.m_PassedRenderCheck) { //TODO: using "seen" vector for now, do not need bool check, should profile using seen vector over using bool and full vector...
-            particle.render(gBuffer);
+            particle->render(gBuffer);
         //}
     }
 }

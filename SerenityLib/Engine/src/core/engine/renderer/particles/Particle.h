@@ -2,24 +2,23 @@
 #ifndef ENGINE_RENDERER_PARTICLE_H
 #define ENGINE_RENDERER_PARTICLE_H
 
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
-#include <glm/gtc/quaternion.hpp>
-
 class  Particle;
 class  ParticleEmitter;
 class  ParticleEmissionProperties;
 class  Scene;
 class  Material;
 struct Entity;
-namespace Engine {
-    namespace priv {
-        struct InternalScenePublicInterface;
-        class  ParticleSystem;
-        class  GBuffer;
-    };
+namespace Engine::priv {
+    struct InternalScenePublicInterface;
+    class  ParticleSystem;
+    class  GBuffer;
 };
+
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 struct ParticleData final {
     ParticleEmissionProperties*  m_Properties;
     glm::vec4                    m_UserData;
@@ -35,8 +34,8 @@ struct ParticleData final {
     ParticleData();
     ParticleData(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle);
 
-    ParticleData(const ParticleData& other);
-    ParticleData& operator=(const ParticleData& other);
+    ParticleData(const ParticleData& other) = delete;
+    ParticleData& operator=(const ParticleData& other) = delete;
     ParticleData(ParticleData&& other) noexcept;
     ParticleData& operator=(ParticleData&& other) noexcept;
 };
@@ -59,12 +58,12 @@ class Particle {
         Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmitter& emitter);
         ~Particle();
 
-        Particle(const Particle& other);
-        Particle& operator=(const Particle& other);
+        Particle(const Particle& other) = delete;
+        Particle& operator=(const Particle& other) = delete;
         Particle(Particle&& other) noexcept;
         Particle& operator=(Particle&& other) noexcept;
 
-        void init(ParticleData& data, const glm::vec3& emitterPosition, const glm::quat& emitterRotation, Entity& parent);
+        void init(ParticleData&& data, const glm::vec3& emitterPosition, const glm::quat& emitterRotation, Entity& parent);
 
         const bool& isActive() const;
         void setPosition(const glm::vec3& newPosition);
