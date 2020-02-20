@@ -20,9 +20,6 @@ ComponentLogic3::ComponentLogic3(ComponentLogic3&& other) noexcept {
     m_Owner        = std::move(other.m_Owner);
 
     m_Functor.swap(other.m_Functor);
-
-    //make it empty
-    other.m_Functor = std::function<void(const float&)>();
 }
 ComponentLogic3& ComponentLogic3::operator=(ComponentLogic3&& other) noexcept {
     if (&other != this) {
@@ -32,9 +29,6 @@ ComponentLogic3& ComponentLogic3::operator=(ComponentLogic3&& other) noexcept {
         m_Owner        = std::move(other.m_Owner);
 
         m_Functor.swap(other.m_Functor);
-
-        //make it empty
-        other.m_Functor = std::function<void(const float&)>();
     }
     return *this;
 }
@@ -58,7 +52,7 @@ void* ComponentLogic3::getUserPointer2() const {
 }
 void ComponentLogic3::call(const float& dt) const { 
     if (m_Functor) {
-        m_Functor(dt);
+        m_Functor(this, dt);
     }
 }
 

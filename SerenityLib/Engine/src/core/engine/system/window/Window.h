@@ -81,10 +81,11 @@ class Window final{
             sf::ContextSettings m_SFContextSettings;
 
             void restore_state();
-            const sf::ContextSettings create(Window& window, const std::string& name);
-            void update_mouse_position_internal(Window& window, const float x, const float y, const bool resetDifference, const bool resetPrevious);
-            void on_fullscreen_internal(Window& window, const bool isToBeFullscreen, const bool isMaximized, const bool isMinimized);
+            const sf::ContextSettings create(Window& super, const std::string& name);
+            void update_mouse_position_internal(Window& super, const float x, const float y, const bool resetDifference, const bool resetPrevious);
+            void on_fullscreen_internal(Window& super, const bool isToBeFullscreen, const bool isMaximized, const bool isMinimized);
             sf::VideoMode get_default_desktop_video_mode();
+            void init_position(Window& super);
 
             void on_mouse_wheel_scrolled(const float& delta, const int& x, const int& y);
 

@@ -40,8 +40,6 @@ namespace Engine{
                 void init_os_specific(const EngineOptions& options);
                 void cleanup_os_specific();
 
-                void init_window(const EngineOptions& options);
-
                 /*
                 The sf::Event::Resized event is triggered when the window is resized,
                 either through user action or programmatically by calling window.setSize.

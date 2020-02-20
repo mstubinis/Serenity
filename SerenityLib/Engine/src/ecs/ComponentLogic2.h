@@ -24,16 +24,17 @@ class ComponentLogic2 : public ComponentBaseClass, public Engine::NonCopyable {
     friend struct Engine::priv::ComponentLogic2_SceneLeftFunction;
 
     private:
-        void*                                m_UserPointer;
-        void*                                m_UserPointer1;
-        void*                                m_UserPointer2;
-        std::function<void(const float&)>    m_Functor;
+        void*                                                        m_UserPointer;
+        void*                                                        m_UserPointer1;
+        void*                                                        m_UserPointer2;
+        std::function<void(const ComponentLogic2*, const float&)>    m_Functor;
     public:
         ComponentLogic2(const Entity& entity);
-        template<typename T> ComponentLogic2(const Entity& entity, const T& Functor, void* UserPointer = 0, void* UserPointer1 = 0, void* UserPointer2 = 0) : ComponentBaseClass(entity) {
-            m_UserPointer  = UserPointer;
-            m_UserPointer1 = UserPointer1;
-            m_UserPointer2 = UserPointer2;
+        template<typename T> 
+        ComponentLogic2(const Entity& entity, const T& Functor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr) : ComponentBaseClass(entity) {
+            m_UserPointer  = Ptr1;
+            m_UserPointer1 = Ptr2;
+            m_UserPointer2 = Ptr3;
             setFunctor(Functor);
         }
         ComponentLogic2(const ComponentLogic2& other) = delete;
@@ -46,7 +47,7 @@ class ComponentLogic2 : public ComponentBaseClass, public Engine::NonCopyable {
         void call(const float& dt) const;
 
         template<typename T> void setFunctor(const T& functor) { 
-            m_Functor = std::bind<void>(std::move(functor), this, std::placeholders::_1);
+            m_Functor = std::bind<void>(std::move(functor), std::placeholders::_1, std::placeholders::_2);
         }
 
         void setUserPointer(void* UserPointer);

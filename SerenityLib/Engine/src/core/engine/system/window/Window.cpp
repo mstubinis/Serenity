@@ -64,6 +64,26 @@ void Window::WindowData::restore_state() {
     m_SFMLWindow.setVerticalSyncEnabled(m_Flags & Window_Flags::Vsync);
     m_SFMLWindow.setMouseCursorGrabbed(m_Flags & Window_Flags::MouseGrabbed);
 }
+void Window::WindowData::init_position(Window& super) {
+    const auto winSize = glm::vec2(super.getSize());
+    const auto desktopSize = sf::VideoMode::getDesktopMode();
+
+    float final_desktop_width = static_cast<float>(desktopSize.width);
+    float final_desktop_height = static_cast<float>(desktopSize.height);
+    float x_other = 0.0f;
+    float y_other = 0.0f;
+    #ifdef _WIN32
+        //get the dimensions of the desktop's bottom task bar. Only tested on Windows 10
+        const auto os_handle = super.getSFMLHandle().getSystemHandle();
+        //            left   right   top   bottom
+        RECT rect; //[0,     1920,   0,    1040]  //bottom task bar
+        SystemParametersInfoA(SPI_GETWORKAREA, 0, &rect, 0);
+        y_other = desktopSize.height - rect.bottom;
+        final_desktop_height -= y_other;
+    #endif
+
+    super.setPosition(  (final_desktop_width - winSize.x) / 2.0f,   (final_desktop_height - winSize.y) / 2.0f   );
+}
 const sf::ContextSettings Window::WindowData::create(Window& super, const string& name) {
     on_close();
 
@@ -212,6 +232,9 @@ Window::Window(const EngineOptions& options){
     
     unsigned int opengl_version = stoi(to_string(m_Data.m_SFContextSettings.majorVersion) + to_string(m_Data.m_SFContextSettings.minorVersion));
     priv::Core::m_Engine->m_RenderManager._onOpenGLContextCreation(m_Data.m_VideoMode.width, m_Data.m_VideoMode.height, 330, opengl_version);
+
+    m_Data.init_position(*this);
+
     if (!options.icon.empty()) {
         setIcon(options.icon);
     }

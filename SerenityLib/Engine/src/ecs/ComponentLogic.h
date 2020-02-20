@@ -24,16 +24,17 @@ class ComponentLogic : public ComponentBaseClass {
     friend struct Engine::priv::ComponentLogic_SceneLeftFunction;
 
     private:
-        void*                                m_UserPointer;
-        void*                                m_UserPointer1;
-        void*                                m_UserPointer2;
-        std::function<void(const float&)>    m_Functor;
+        void*                                                       m_UserPointer;
+        void*                                                       m_UserPointer1;
+        void*                                                       m_UserPointer2;
+        std::function<void(const ComponentLogic*, const float&)>    m_Functor;
     public:
         ComponentLogic(const Entity& entity);
-        template<typename T> ComponentLogic(const Entity& entity, const T& Functor, void* UserPointer = 0, void* UserPointer1 = 0, void* UserPointer2 = 0) : ComponentBaseClass(entity) {
-            m_UserPointer  = UserPointer;
-            m_UserPointer1 = UserPointer1;
-            m_UserPointer2 = UserPointer2;
+        template<typename T> 
+        ComponentLogic(const Entity& entity, const T& Functor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr) : ComponentBaseClass(entity) {
+            m_UserPointer  = Ptr1;
+            m_UserPointer1 = Ptr2;
+            m_UserPointer2 = Ptr3;
             setFunctor(Functor);
         }
         ComponentLogic(const ComponentLogic& other) = delete;
@@ -45,9 +46,11 @@ class ComponentLogic : public ComponentBaseClass {
 
         void call(const float& dt) const;
 
-        template<typename T> void setFunctor(const T& functor) { 
-            m_Functor = std::bind<void>(std::move(functor), this, std::placeholders::_1); 
+        template<typename T> 
+        void setFunctor(const T& functor) { 
+            m_Functor = std::bind<void>(std::move(functor), std::placeholders::_1, std::placeholders::_2); 
         }
+
         void setUserPointer(void* UserPointer);
         void setUserPointer1(void* UserPointer1);
         void setUserPointer2(void* UserPointer2);

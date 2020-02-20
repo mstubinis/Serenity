@@ -83,34 +83,6 @@ void EngineCore::cleanup_os_specific() {
     //    }
     //#endif
 }
-void EngineCore::init_window(const EngineOptions& options) {
-    auto& window = Resources::getWindow();
-
-    //TODO: fix this crap... (position the window in the middle of the screen)
-    /*
-    float x_other = 0.0f;
-    float y_other = 0.0f;
-    #ifdef _WIN32
-        //attempt to get the dimensions of the desktop's bottom task bar
-        const auto os_handle = window.getSFMLHandle().getSystemHandle();
-        HMONITOR HMONITOR_ = ::MonitorFromWindow(os_handle, MONITOR_DEFAULTTOPRIMARY);
-        MONITORINFO mi;
-        mi.cbSize = sizeof(MONITORINFO);
-        GetMonitorInfo(HMONITOR_, &mi);
-
-        //x_other = mi.rcWork.right - mi.rcWork.left;
-        //y_other = mi.rcWork.bottom - mi.rcWork.top;
-    #endif
-
-    const auto winSize = window.getSize();
-    const auto desktopSize = sf::VideoMode::getDesktopMode();
-
-    float x_room = (static_cast<float>(desktopSize.width) - static_cast<float>(winSize.x)) / 2.0f;
-    float y_room = ((static_cast<float>(desktopSize.height) - static_cast<float>(winSize.y)) - y_other) / 2.0f;
-    */
-    //window.setPosition(0, 0);
-
-}
 void EngineCore::init(const EngineOptions& options) {
     init_os_specific(options);
 
@@ -120,8 +92,6 @@ void EngineCore::init(const EngineOptions& options) {
     m_Misc.m_BuiltInMeshes.init();
     m_RenderManager._init();
     m_PhysicsManager._init();
-
-    init_window(options);
 
     //init the game here
     Engine::setMousePosition(options.width / 2, options.height / 2);
