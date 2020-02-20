@@ -150,8 +150,9 @@ const bool Engine::priv::SSAO::init_shaders() {
 
     return true;
 }
-void Engine::priv::SSAO::passSSAO(Engine::priv::GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const Camera& camera) {
+void Engine::priv::SSAO::passSSAO(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, const Camera& camera) {
     m_Shader_Program->bind();
+    const auto& dimensions = viewport.getViewportDimensions();
     if (Renderer::GLSL_VERSION < 140) {
         Engine::Renderer::sendUniformMatrix4Safe("CameraInvViewProj", camera.getViewProjectionInverse());
         Engine::Renderer::sendUniformMatrix4Safe("CameraInvProj", camera.getProjectionInverse());
@@ -159,8 +160,8 @@ void Engine::priv::SSAO::passSSAO(Engine::priv::GBuffer& gbuffer, const unsigned
         Engine::Renderer::sendUniform4Safe("CameraInfo2", glm::vec4(camera.getViewVector(), camera.getFar()));
     }
     const float divisor              = gbuffer.getSmallFBO().divisor();
-    const unsigned int screen_width  = static_cast<unsigned int>(static_cast<float>(fboWidth) * divisor);
-    const unsigned int screen_height = static_cast<unsigned int>(static_cast<float>(fboHeight) * divisor);
+    const unsigned int screen_width  = static_cast<unsigned int>(static_cast<float>(dimensions.z) * divisor);
+    const unsigned int screen_height = static_cast<unsigned int>(static_cast<float>(dimensions.y) * divisor);
 
     Engine::Renderer::sendUniform2("ScreenSize", static_cast<float>(screen_width), static_cast<float>(screen_height));
     Engine::Renderer::sendUniform4("SSAOInfo", m_ssao_radius, m_ssao_intensity, m_ssao_bias, m_ssao_scale);
@@ -170,23 +171,24 @@ void Engine::priv::SSAO::passSSAO(Engine::priv::GBuffer& gbuffer, const unsigned
     Engine::Renderer::sendTexture("gRandomMap", m_ssao_noise_texture, 1, GL_TEXTURE_2D);
     Engine::Renderer::sendTexture("gDepthMap", gbuffer.getTexture(GBufferType::Depth), 2);
 
-    Engine::Renderer::renderFullscreenTriangle(screen_width, screen_height);
+    Engine::Renderer::renderFullscreenTriangle(0,0,screen_width, screen_height);
 }
-void Engine::priv::SSAO::passBlur(Engine::priv::GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const string& type, const unsigned int& texture) {
+void Engine::priv::SSAO::passBlur(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, const string& type, const unsigned int& texture) {
     m_Shader_Program_Blur->bind();
+    const auto& dimensions = viewport.getViewportDimensions();
     glm::vec2 hv(0.0f);
     if (type == "H") { hv = glm::vec2(1.0f, 0.0f); }
     else { hv = glm::vec2(0.0f, 1.0f); }
-    glm::ivec2 Res(fboWidth, fboHeight);
+    glm::ivec2 Res(dimensions.z, dimensions.y);
     Engine::Renderer::sendUniform1("strengthModifier", m_ssao_blur_strength);
     Engine::Renderer::sendUniform2("Resolution", Res);
     Engine::Renderer::sendUniform4("Data", m_ssao_blur_radius, 0.0f, hv.x, hv.y);
     Engine::Renderer::sendTexture("image", gbuffer.getTexture(texture), 0);
 
     const float divisor  = gbuffer.getSmallFBO().divisor();
-    const unsigned int x = static_cast<unsigned int>(static_cast<float>(fboWidth) * divisor);
-    const unsigned int y = static_cast<unsigned int>(static_cast<float>(fboHeight) * divisor);
-    Engine::Renderer::renderFullscreenTriangle(x, y);
+    const unsigned int x = static_cast<unsigned int>(static_cast<float>(dimensions.z) * divisor);
+    const unsigned int y = static_cast<unsigned int>(static_cast<float>(dimensions.y) * divisor);
+    Engine::Renderer::renderFullscreenTriangle(0,0,x, y);
 }
 const bool Engine::Renderer::ssao::enabled() {
     return Engine::priv::SSAO::ssao.m_ssao;

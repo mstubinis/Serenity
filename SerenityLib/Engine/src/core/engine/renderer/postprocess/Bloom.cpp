@@ -6,6 +6,7 @@
 #include <core/engine/shaders/Shader.h>
 #include <core/engine/resources/Engine_BuiltInShaders.h>
 #include <core/engine/threading/Engine_ThreadManager.h>
+#include <core/engine/scene/Viewport.h>
 
 #include <glm/common.hpp>
 
@@ -64,16 +65,19 @@ const bool Engine::priv::Bloom::init_shaders() {
 
     return true;
 }
-void Engine::priv::Bloom::pass(Engine::priv::GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTextureEnum) {
+void Engine::priv::Bloom::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, const unsigned int& sceneTextureEnum) {
     m_Shader_Program->bind();
+
+    const auto& dimensions = viewport.getViewportDimensions();
     const float& divisor = gbuffer.getSmallFBO().divisor();
+
 
     Engine::Renderer::sendUniform4("Data", scale, threshold, exposure, 0.0f);
     Engine::Renderer::sendTexture("SceneTexture", gbuffer.getTexture(sceneTextureEnum), 0);
 
-    const unsigned int& screen_width = static_cast<unsigned int>(static_cast<float>(fboWidth) * divisor);
-    const unsigned int& screen_height = static_cast<unsigned int>(static_cast<float>(fboHeight) * divisor);
-    Engine::Renderer::renderFullscreenTriangle(screen_width, screen_height);
+    const unsigned int& screen_width = static_cast<unsigned int>(static_cast<float>(dimensions.z) * divisor);
+    const unsigned int& screen_height = static_cast<unsigned int>(static_cast<float>(dimensions.w) * divisor);
+    Engine::Renderer::renderFullscreenTriangle(0,0,screen_width, screen_height);
 }
 
 

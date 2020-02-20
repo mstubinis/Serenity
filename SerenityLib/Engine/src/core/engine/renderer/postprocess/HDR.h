@@ -4,6 +4,7 @@
 
 class  ShaderProgram;
 class  Shader;
+class  Viewport;
 
 struct HDRAlgorithm {enum Algorithm {
     None,
@@ -34,7 +35,7 @@ namespace Engine::priv {
 
             const bool init_shaders();
 
-            void pass(GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const bool& godRays,const bool& lighting,const float& godRaysFactor);
+            void pass(GBuffer&, const Viewport& viewport,const bool& godRays,const bool& lighting,const float& godRaysFactor);
 
             static HDR hdr;
     };

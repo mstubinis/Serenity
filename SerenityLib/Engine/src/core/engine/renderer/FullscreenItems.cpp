@@ -127,7 +127,6 @@ void priv::FullscreenQuad::render(){
     if (m_VAO) {
         Engine::Renderer::bindVAO(m_VAO);
         glDrawElements(GL_QUADS, static_cast<GLsizei>(m_Indices.size()), GL_UNSIGNED_SHORT, 0);
-        //Renderer::bindVAO(0);
     }else{
         bindToGPU();
         glDrawElements(GL_QUADS, static_cast<GLsizei>(m_Indices.size()), GL_UNSIGNED_SHORT, 0);

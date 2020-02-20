@@ -183,6 +183,7 @@ void EngineCore::render(Window& window, const float& dt){
     window.display();
     m_RenderManager._clear2DAPICommands();
     m_DebugManager.calculate_render();
+    std::cout << m_DebugManager.renderTime() * 1000.0 << "\n";
 }
 void EngineCore::cleanup(Window& window, const float& dt) {
     m_ResourceManager.onPostUpdate();

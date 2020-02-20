@@ -25,10 +25,10 @@ void TextureLoader::InitCommon(Texture& texture, const GLuint& openglTextureType
     texture.m_Type            = openglTextureType;
 }
 
-void TextureLoader::InitFramebuffer(Texture& texture, const uint& w, const uint& h, const ImagePixelType::Type& pxlType, const ImagePixelFormat::Format& pxlFormat, const ImageInternalFormat::Format& internal_, const float& divisor) {
+void TextureLoader::InitFramebuffer(Texture& texture, const unsigned int& w, const unsigned int& h, const ImagePixelType::Type& pxlType, const ImagePixelFormat::Format& pxlFormat, const ImageInternalFormat::Format& internal_, const float& divisor) {
     texture.m_TextureType = TextureType::RenderTarget;
-    const uint width_(static_cast<uint>(static_cast<float>(w) * divisor));
-    const uint height_(static_cast<uint>(static_cast<float>(h) * divisor));
+    const unsigned int width_(static_cast<unsigned int>(static_cast<float>(w) * divisor));
+    const unsigned int height_(static_cast<unsigned int>(static_cast<float>(h) * divisor));
     auto image = std::make_unique<ImageLoadedStructure>(width_, height_, pxlType, pxlFormat, internal_);
 
     TextureLoader::InitCommon(texture, GL_TEXTURE_2D, false);
@@ -563,8 +563,6 @@ void InternalTexturePublicInterface::LoadGPU(Texture& texture) {
         front();
         texture.m_CommandQueue.pop();
     }
-
-    //cout << "(Texture) ";
     texture.EngineResource::load();
 
     Event e(EventType::TextureLoaded);
@@ -582,8 +580,6 @@ void InternalTexturePublicInterface::UnloadCPU(Texture& texture) {
         }
     }
     texture.m_Mipmapped = false;
-
-    //cout << "(Texture) ";
     texture.EngineResource::unload();
 }
 void InternalTexturePublicInterface::UnloadGPU(Texture& texture) {
@@ -613,8 +609,9 @@ void InternalTexturePublicInterface::Resize(Texture& texture, Engine::priv::Fram
     Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress[0]);
     const uint32_t w = static_cast<uint32_t>(static_cast<float>(width) * divisor);
     const uint32_t h = static_cast<uint32_t>(static_cast<float>(height) * divisor);
-    auto& imageData = *texture.m_ImagesDatas[0];
-    imageData.mipmaps[0].width = w;
+    auto& imageData  = *texture.m_ImagesDatas[0];
+    imageData.mipmaps[0].width  = w;
     imageData.mipmaps[0].height = h;
+
     glTexImage2D(texture.m_Type, 0, imageData.internalFormat, w, h, 0, imageData.pixelFormat, imageData.pixelType, NULL);
 }

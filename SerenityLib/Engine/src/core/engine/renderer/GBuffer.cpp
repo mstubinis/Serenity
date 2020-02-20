@@ -32,7 +32,7 @@ void Engine::priv::GBuffer::init(const uint& width, const uint& height){
     if (!m_FBO.check()) 
         return;
 
-    m_SmallFBO.init(m_Width, m_Height, 0.5f, 2);
+    m_SmallFBO.init(m_Width, m_Height, 1.0f, 2);
     internalBuildTextureBuffer(m_SmallFBO, GBufferType::Bloom, m_Width, m_Height);
     internalBuildTextureBuffer(m_SmallFBO, GBufferType::GodRays, m_Width, m_Height);
 
@@ -59,8 +59,6 @@ void Engine::priv::GBuffer::init(const uint& width, const uint& height){
 void Engine::priv::GBuffer::internalDestruct() {
     m_Width  = 0; 
     m_Height = 0;
-    //SAFE_DELETE(m_FBO);
-    //SAFE_DELETE(m_SmallFBO);
     Engine::Renderer::unbindFBO();
     vector_clear(m_Buffers);
 }

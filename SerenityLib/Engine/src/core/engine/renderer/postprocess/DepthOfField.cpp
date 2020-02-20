@@ -5,6 +5,7 @@
 #include <core/engine/shaders/Shader.h>
 #include <core/engine/resources/Engine_BuiltInShaders.h>
 #include <core/engine/threading/Engine_ThreadManager.h>
+#include <core/engine/scene/Viewport.h>
 
 using namespace std;
 
@@ -96,14 +97,17 @@ const bool Engine::priv::DepthOfField::init_shaders() {
 
     return true;
 }
-void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture) {
+void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport, const unsigned int& sceneTexture) {
     m_Shader_Program->bind();
-    Engine::Renderer::sendUniform4Safe("Data", blur_radius, bias, focus, fboWidth / static_cast<float>(fboHeight));
+
+    const auto& dimensions = viewport.getViewportDimensions();
+
+    Engine::Renderer::sendUniform4Safe("Data", blur_radius, bias, focus, dimensions.z / static_cast<float>(dimensions.w));
 
     Engine::Renderer::sendTextureSafe("inTexture", gbuffer.getTexture(sceneTexture), 0);
     Engine::Renderer::sendTextureSafe("textureDepth", gbuffer.getTexture(GBufferType::Depth), 1);
 
-    Engine::Renderer::renderFullscreenTriangle(fboWidth, fboHeight);
+    Engine::Renderer::renderFullscreenTriangle(0,0, dimensions.z, dimensions.w);
 }
 
 void Engine::Renderer::depthOfField::enable(const bool b) {

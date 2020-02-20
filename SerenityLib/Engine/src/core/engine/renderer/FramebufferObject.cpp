@@ -77,7 +77,8 @@ priv::RenderbufferObject::~RenderbufferObject(){
 }
 void priv::RenderbufferObject::resize(FramebufferObject& fbo, const unsigned int& w, const unsigned int& h){
     Engine::Renderer::bindRBO(m_RBO);
-    m_Width = w;  m_Height = h;
+    m_Width = w; 
+    m_Height = h;
     glRenderbufferStorage(GL_RENDERBUFFER, attatchment(), m_Width, m_Height);
     Engine::Renderer::unbindRBO();
 }

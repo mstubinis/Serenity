@@ -880,22 +880,20 @@ void DeferredPipeline::internal_pass_geometry(const Viewport& viewport, const Ca
     InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(scene, viewport, camera, true);
 }
 void DeferredPipeline::internal_pass_ssao(const Viewport& viewport, const Camera& camera) {
-    const glm::uvec4& dimensions = viewport.getViewportDimensions();
-
     //TODO: possible optimization: use stencil buffer to reject completely black (or are they white?) pixels during blur passes
     m_GBuffer.bindFramebuffers(GBufferType::Bloom, GBufferType::GodRays, "A", false);
     Engine::Renderer::Settings::clear(true, false, false); //bloom and god rays alpha channels cleared to black 
     if (SSAO::ssao.m_ssao && (viewport.getRenderFlags() & ViewportRenderingFlag::SSAO)) {
         Engine::Renderer::GLEnablei(GL_BLEND, 0);//i dont think this is needed anymore
         m_GBuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
-        SSAO::ssao.passSSAO(m_GBuffer, dimensions.z, dimensions.w, camera);
+        SSAO::ssao.passSSAO(m_GBuffer, viewport, camera);
         if (SSAO::ssao.m_ssao_do_blur) {
             Engine::Renderer::GLDisablei(GL_BLEND, 0); //yes this is absolutely needed
             for (uint i = 0; i < SSAO::ssao.m_ssao_blur_num_passes; ++i) {
                 m_GBuffer.bindFramebuffers(GBufferType::GodRays, "A", false);
-                SSAO::ssao.passBlur(m_GBuffer, dimensions.z, dimensions.w, "H", GBufferType::Bloom);
+                SSAO::ssao.passBlur(m_GBuffer, viewport, "H", GBufferType::Bloom);
                 m_GBuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
-                SSAO::ssao.passBlur(m_GBuffer, dimensions.z, dimensions.w, "V", GBufferType::GodRays);
+                SSAO::ssao.passBlur(m_GBuffer, viewport, "V", GBufferType::GodRays);
             }
         }
     }
@@ -921,8 +919,6 @@ void DeferredPipeline::internal_pass_god_rays(const Viewport& viewport, const Ca
         const glm::vec3 camVec = camera.getViewVector();
         const bool infront = Engine::Math::isPointWithinCone(camPos, -camVec, oPos, Engine::Math::toRadians(godRaysPlatform.fovDegrees));
         if (infront) {
-            const glm::uvec4& dimensions = viewport.getViewportDimensions();
-
             const auto sp = Engine::Math::getScreenCoordinates(oPos, camera, false);
             const auto b = glm::normalize(camPos - oPos);
             float alpha = Engine::Math::getAngleBetweenTwoVectors(camVec, b, true) / godRaysPlatform.fovDegrees;
@@ -932,7 +928,7 @@ void DeferredPipeline::internal_pass_god_rays(const Viewport& viewport, const Ca
                 alpha = 0.01f;
             }
             alpha = 1.0f - alpha;
-            godRaysPlatform.pass(m_GBuffer, dimensions.z, dimensions.w, glm::vec2(sp.x, sp.y), alpha);
+            godRaysPlatform.pass(m_GBuffer, viewport, glm::vec2(sp.x, sp.y), alpha);
         }
     }
 }

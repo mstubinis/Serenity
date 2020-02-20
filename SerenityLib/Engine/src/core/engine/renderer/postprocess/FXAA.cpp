@@ -6,6 +6,7 @@
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/shaders/Shader.h>
+#include <core/engine/scene/Viewport.h>
 
 #include <core/engine/resources/Engine_BuiltInShaders.h>
 
@@ -95,19 +96,20 @@ Engine::priv::FXAA::~FXAA() {
     SAFE_DELETE(m_Fragment_shader);
     SAFE_DELETE(m_Vertex_shader);
 }
-void Engine::priv::FXAA::pass(GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTextureEnum) {
+void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, const unsigned int& sceneTextureEnum) {
+    const auto& dimensions = viewport.getViewportDimensions();
     m_Shader_program->bind();
 
     Engine::Renderer::sendUniform1("FXAA_REDUCE_MIN", reduce_min);
     Engine::Renderer::sendUniform1("FXAA_REDUCE_MUL", reduce_mul);
     Engine::Renderer::sendUniform1("FXAA_SPAN_MAX", span_max);
 
-    Engine::Renderer::sendUniform2("invRes", 1.0f / static_cast<float>(fboWidth), 1.0f / static_cast<float>(fboHeight));
+    Engine::Renderer::sendUniform2("invRes", 1.0f / static_cast<float>(dimensions.z), 1.0f / static_cast<float>(dimensions.w));
     Engine::Renderer::sendTexture("inTexture", gbuffer.getTexture(sceneTextureEnum), 0);
     Engine::Renderer::sendTextureSafe("edgeTexture", gbuffer.getTexture(GBufferType::Misc), 1);
     Engine::Renderer::sendTexture("depthTexture", gbuffer.getTexture(GBufferType::Depth), 2);
 
-    Engine::Renderer::renderFullscreenTriangle(fboWidth, fboHeight);
+    Engine::Renderer::renderFullscreenTriangle(0,0, dimensions.z, dimensions.w);
 }
 void Engine::Renderer::fxaa::setReduceMin(const float r) {
     Engine::priv::FXAA::fxaa.reduce_min = glm::max(0.0f, r);

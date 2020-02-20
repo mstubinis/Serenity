@@ -5,6 +5,7 @@
 
 class  ShaderProgram;
 class  Shader;
+class  Viewport;
 
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
@@ -64,10 +65,10 @@ namespace Engine::priv {
 
             const bool init_shaders();
 
-            void passEdge(GBuffer&, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture, const unsigned int& outTexture);
-            void passBlend(GBuffer&, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& outTexture);
-            void passNeighbor(GBuffer&, const glm::vec4& PIXEL_SIZE, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTexture);
-            void passFinal(GBuffer&, const unsigned int& fboWidth, const unsigned int& fboHeight); //currently unused
+            void passEdge(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& sceneTexture, const unsigned int& outTexture);
+            void passBlend(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& outTexture);
+            void passNeighbor(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& sceneTexture);
+            void passFinal(GBuffer&, const Viewport& viewport); //currently unused
 
             static SMAA smaa;
     };

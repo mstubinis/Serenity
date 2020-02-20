@@ -5,6 +5,7 @@
 class  ShaderProgram;
 class  Shader;
 struct Entity;
+class  Viewport;
 
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
@@ -35,7 +36,7 @@ namespace Engine::priv {
 
             const bool init_shaders();
 
-            void pass(GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const glm::vec2& lightScrnPos,const float& alpha);
+            void pass(GBuffer&,const Viewport& viewport,const glm::vec2& lightScrnPos,const float& alpha);
 
             static GodRays godRays;
     };

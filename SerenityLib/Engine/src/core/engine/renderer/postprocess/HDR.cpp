@@ -6,6 +6,7 @@
 #include <core/engine/shaders/Shader.h>
 #include <core/engine/resources/Engine_BuiltInShaders.h>
 #include <core/engine/threading/Engine_ThreadManager.h>
+#include <core/engine/scene/Viewport.h>
 
 using namespace std;
 
@@ -84,8 +85,10 @@ const bool Engine::priv::HDR::init_shaders() {
 
     return true;
 }
-void Engine::priv::HDR::pass(Engine::priv::GBuffer& gbuffer,const unsigned int& fboWidth,const unsigned int& fboHeight,const bool& godRays,const bool& lighting,const float& godRaysFactor) {
+void Engine::priv::HDR::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport,const bool& godRays,const bool& lighting,const float& godRaysFactor) {
     m_Shader_Program->bind();
+
+    const auto& dimensions = viewport.getViewportDimensions();
 
     Engine::Renderer::sendUniform4Safe("HDRInfo", exposure, 0.0f, godRaysFactor, static_cast<float>(algorithm));
     Engine::Renderer::sendUniform2Safe("Has", static_cast<int>(godRays), static_cast<int>(lighting));
@@ -95,17 +98,8 @@ void Engine::priv::HDR::pass(Engine::priv::GBuffer& gbuffer,const unsigned int& 
     Engine::Renderer::sendTextureSafe("gNormalMap", gbuffer.getTexture(GBufferType::Normal), 2);
     Engine::Renderer::sendTextureSafe("gGodsRaysMap", gbuffer.getTexture(GBufferType::GodRays), 3);
 
-    Engine::Renderer::renderFullscreenTriangle(fboWidth, fboHeight);
+    Engine::Renderer::renderFullscreenTriangle(0,0, dimensions.z, dimensions.w);
 }
-//const bool Engine::Renderer::hdr::enabled() {
-//    return Engine::priv::HDR::hdr.hdr_active;
-//}
-//void Engine::Renderer::hdr::enable(const bool b) {
-//    Engine::priv::HDR::hdr.hdr_active = b;
-//}
-//void Engine::Renderer::hdr::disable() {
-//    Engine::priv::HDR::hdr.hdr_active = false;
-//}
 const float Engine::Renderer::hdr::getExposure() {
     return Engine::priv::HDR::hdr.exposure;
 }

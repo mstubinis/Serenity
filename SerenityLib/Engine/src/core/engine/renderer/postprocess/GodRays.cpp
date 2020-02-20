@@ -80,18 +80,19 @@ const bool Engine::priv::GodRays::init_shaders() {
 
     return true;
 }
-void Engine::priv::GodRays::pass(GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight,const glm::vec2& lightScrnPos,const float& alpha) {
+void Engine::priv::GodRays::pass(GBuffer& gbuffer, const Viewport& viewport, const glm::vec2& lightScrnPos,const float& alpha) {
+    const auto& dimensions = viewport.getViewportDimensions();
     m_Shader_Program->bind();
     const float& divisor = gbuffer.getSmallFBO().divisor();
     Engine::Renderer::sendUniform4("RaysInfo", exposure, decay, density, weight);
-    Engine::Renderer::sendUniform2("lightPositionOnScreen", lightScrnPos.x / static_cast<float>(fboWidth), lightScrnPos.y / static_cast<float>(fboHeight));
+    Engine::Renderer::sendUniform2("lightPositionOnScreen", lightScrnPos.x / static_cast<float>(dimensions.z), lightScrnPos.y / static_cast<float>(dimensions.w));
     Engine::Renderer::sendUniform1("samples", samples);
     Engine::Renderer::sendUniform1("alpha", alpha);
     Engine::Renderer::sendTexture("firstPass", gbuffer.getTexture(GBufferType::Misc), 0);
 
-    const unsigned int& screen_width = static_cast<unsigned int>(static_cast<float>(fboWidth) * divisor);
-    const unsigned int& screen_height = static_cast<unsigned int>(static_cast<float>(fboHeight) * divisor);
-    Engine::Renderer::renderFullscreenTriangle(screen_width, screen_height);
+    const unsigned int& screen_width = static_cast<unsigned int>(static_cast<float>(dimensions.z) * divisor);
+    const unsigned int& screen_height = static_cast<unsigned int>(static_cast<float>(dimensions.w) * divisor);
+    Engine::Renderer::renderFullscreenTriangle(0,0,screen_width, screen_height);
 }
 const bool Engine::Renderer::godRays::enabled() {
     return Engine::priv::GodRays::godRays.godRays_active;

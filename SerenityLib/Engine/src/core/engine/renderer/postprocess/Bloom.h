@@ -4,6 +4,7 @@
 
 class  ShaderProgram;
 class  Shader;
+class  Viewport;
 
 #include <string>
 
@@ -29,7 +30,7 @@ namespace Engine::priv {
 
             const bool init_shaders();
 
-            void pass(GBuffer&,const unsigned int& fboWidth,const unsigned int& fboHeight,const unsigned int& sceneTextureEnum);
+            void pass(GBuffer&,const Viewport& viewport,const unsigned int& sceneTextureEnum);
 
             static Bloom bloom;
     };

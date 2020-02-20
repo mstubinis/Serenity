@@ -8,6 +8,7 @@
 class  Camera;
 class  ShaderProgram;
 class  Shader;
+class  Viewport;
 
 #include <glm/vec3.hpp>
 #include <string>
@@ -48,8 +49,8 @@ namespace Engine::priv {
 
             void init();
 
-            void passSSAO(GBuffer&, const unsigned int& fboWidth, const unsigned int& fboHeight, const Camera&);
-            void passBlur(GBuffer&, const unsigned int& fboWidth, const unsigned int& fboHeight, const std::string& type, const unsigned int& texture);
+            void passSSAO(GBuffer&, const Viewport& viewport, const Camera&);
+            void passBlur(GBuffer&, const Viewport& viewport, const std::string& type, const unsigned int& texture);
 
             static SSAO ssao;
     };
