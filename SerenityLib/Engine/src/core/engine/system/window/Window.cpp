@@ -28,6 +28,14 @@ Window::WindowData::WindowData() {
     m_OldWindowSize       = glm::uvec2(0, 0);
     m_Flags               = (Window_Flags::Windowed | Window_Flags::MouseVisible | Window_Flags::Active);
     m_MousePosition       = m_MousePosition_Previous = m_MouseDifference = glm::vec2(0.0f);
+
+    #ifdef ENGINE_THREAD_WINDOW_EVENTS
+        m_EventThread = nullptr;
+    #endif
+
+    #ifdef _WIN32
+        m_OldWindowSize = glm::uvec2(0, 0);
+    #endif
 }
 Window::WindowData::~WindowData() {
     on_close();
@@ -56,50 +64,58 @@ void Window::WindowData::restore_state() {
     m_SFMLWindow.setVerticalSyncEnabled(m_Flags & Window_Flags::Vsync);
     m_SFMLWindow.setMouseCursorGrabbed(m_Flags & Window_Flags::MouseGrabbed);
 }
-const sf::ContextSettings Window::WindowData::create(Window& super, const string& _name, const unsigned int& _width, const unsigned int& _height) {
+const sf::ContextSettings Window::WindowData::create(Window& super, const string& name) {
     on_close();
 
     #ifdef ENGINE_THREAD_WINDOW_EVENTS
-        auto lamda = [](Window& super, const string& name_, unsigned int style_, sf::VideoMode videoMode_, sf::ContextSettings settings_, Window::WindowData& data_) {
-            data_.m_SFMLWindow.create(videoMode_, name_, style_, settings_);
-            if(!data_.m_IconFile.empty())
-                super.setIcon(data_.m_IconFile);
-            data_.m_SFMLWindow.setActive(false);
-            data_.m_UndergoingClosing = false;
+        auto lamda = [&]() {
+            m_SFMLWindow.create(m_VideoMode, name, m_Style, m_SFContextSettings);
+            if(!m_IconFile.empty())
+                super.setIcon(m_IconFile);
+            m_SFMLWindow.setActive(false);
+            m_UndergoingClosing = false;
             sf::Event e;
-            while (!data_.m_UndergoingClosing){
-                while (!data_.m_UndergoingClosing && data_.m_SFMLWindow.pollEvent(e)) {
-                    data_.m_Queue.push(std::move(e));
+            while (!m_UndergoingClosing){
+                while (!m_UndergoingClosing && m_SFMLWindow.pollEvent(e)) {
+                    m_Queue.push(std::move(e));
                 }
-                auto command_ptr = data_.m_MainThreadToEventThreadQueue.try_pop();
+                auto command_ptr = m_MainThreadToEventThreadQueue.try_pop();
                 while (command_ptr) {
                     auto& command = *command_ptr;
 
                     switch (command) {
                         case EventThreadOnlyCommands::HideMouse: {
-                            data_.m_SFMLWindow.setMouseCursorVisible(false);
-                            data_.m_Flags.add(Window_Flags::MouseVisible);
+                            m_SFMLWindow.setMouseCursorVisible(false);
+                            m_Flags.add(Window_Flags::MouseVisible);
                             break;
                         }case EventThreadOnlyCommands::ShowMouse: {
-                            data_.m_SFMLWindow.setMouseCursorVisible(true);
-                            data_.m_Flags.add(Window_Flags::MouseVisible);
+                            m_SFMLWindow.setMouseCursorVisible(true);
+                            m_Flags.add(Window_Flags::MouseVisible);
                             break;
                         }case EventThreadOnlyCommands::RequestFocus: {
-                            data_.m_SFMLWindow.requestFocus();
+                            m_SFMLWindow.requestFocus();
+                            break;
+                        }case EventThreadOnlyCommands::KeepMouseInWindow: {
+                            m_SFMLWindow.setMouseCursorGrabbed(true);
+                            m_Flags.add(Window_Flags::MouseGrabbed);
+                            break;
+                        }case EventThreadOnlyCommands::FreeMouseFromWindow: {
+                            m_SFMLWindow.setMouseCursorGrabbed(false);
+                            m_Flags.remove(Window_Flags::MouseGrabbed);
                             break;
                         }default: {
                             break;
                         }
                     }
-                    command_ptr = data_.m_MainThreadToEventThreadQueue.try_pop();
+                    command_ptr = m_MainThreadToEventThreadQueue.try_pop();
                 }
             }
         };
-        m_EventThread.reset(NEW std::thread(lamda, std::ref(super), _name, m_Style, m_VideoMode, m_SFContextSettings, std::ref(*this)));
+        m_EventThread.reset(NEW std::thread(lamda));
         std::this_thread::sleep_for(std::chrono::milliseconds(450));
         m_SFMLWindow.setActive(true);
     #else
-        m_SFMLWindow.create(m_VideoMode, _name, m_Style, m_SFContextSettings);
+        m_SFMLWindow.create(m_VideoMode, name, m_Style, m_SFContextSettings);
         if (!m_IconFile.empty())
             super.setIcon(m_IconFile);
         m_UndergoingClosing = false;
@@ -125,7 +141,7 @@ void Window::WindowData::on_fullscreen_internal(Window& super, const bool isToBe
         m_VideoMode.width  = m_OldWindowSize.x;
         m_VideoMode.height = m_OldWindowSize.y;
     }
-    create(super, m_WindowName, m_VideoMode.width, m_VideoMode.height);  
+    create(super, m_WindowName);  
     m_SFMLWindow.requestFocus();
     priv::Core::m_Engine->m_RenderManager._onFullscreen(m_VideoMode.width, m_VideoMode.height);
 
@@ -192,7 +208,7 @@ Window::Window(const EngineOptions& options){
     m_Data.m_VideoMode.bitsPerPixel  = 32;
     m_Data.m_Style                   = sf::Style::Default;
 
-    m_Data.m_SFContextSettings       = m_Data.create(*this, options.window_title, options.width, options.height);
+    m_Data.m_SFContextSettings       = m_Data.create(*this, options.window_title);
     
     unsigned int opengl_version = stoi(to_string(m_Data.m_SFContextSettings.majorVersion) + to_string(m_Data.m_SFContextSettings.minorVersion));
     priv::Core::m_Engine->m_RenderManager._onOpenGLContextCreation(m_Data.m_VideoMode.width, m_Data.m_VideoMode.height, 330, opengl_version);
@@ -354,28 +370,39 @@ void Window::close(){
     priv::Core::m_Engine->on_event_window_closed(*this);
     m_Data.m_SFMLWindow.close();
 }
-const bool Window::hasFocus(){
+const bool Window::isWindowOnSeparateThread() const {
+    #ifdef ENGINE_THREAD_WINDOW_EVENTS
+        if (m_Data.m_EventThread != nullptr) {
+            return true;
+        }
+    #endif
+    return false;
+}
+const bool Window::hasFocus() const {
     return m_Data.m_SFMLWindow.hasFocus();
 }
-const bool Window::isOpen(){
+const bool Window::isOpen() const {
     return m_Data.m_SFMLWindow.isOpen();
 }
-const bool Window::isActive(){
+const bool Window::isActive() const {
     return m_Data.m_Flags.has(Window_Flags::Active);
 }
-const bool Window::isFullscreen(){
+const bool Window::isFullscreen() const {
     return isFullscreenNonWindowed() || isFullscreenWindowed();
 }
-const bool Window::isFullscreenWindowed() {
+const bool Window::isFullscreenWindowed() const {
     return m_Data.m_Flags.has(Window_Flags::WindowedFullscreen);
 }
-const bool Window::isFullscreenNonWindowed() {
+const bool Window::isFullscreenNonWindowed() const {
     return m_Data.m_Flags.has(Window_Flags::Fullscreen);
+}
+const bool Window::isMouseKeptInWindow() const {
+    return m_Data.m_Flags.has(Window_Flags::MouseGrabbed);
 }
 void Window::display(){
     m_Data.m_SFMLWindow.display();
 }
-const bool Window::isMaximized() {
+const bool Window::isMaximized() const {
     #ifdef _WIN32
         WINDOWPLACEMENT info;
         info.length = sizeof(WINDOWPLACEMENT);
@@ -385,7 +412,7 @@ const bool Window::isMaximized() {
     #endif
     return false;
 }
-const bool Window::isMinimized() {
+const bool Window::isMinimized() const {
     #ifdef _WIN32
         WINDOWPLACEMENT info;
         info.length = sizeof(WINDOWPLACEMENT);
@@ -473,15 +500,23 @@ const bool Window::setFullscreen(const bool isToBeFullscreen){
 }
 void Window::keepMouseInWindow(const bool isToBeKept){
     if (isToBeKept) {
-        if (!m_Data.m_Flags.has(Window_Flags::MouseGrabbed)) {
-            m_Data.m_SFMLWindow.setMouseCursorGrabbed(true);
-            m_Data.m_Flags.add(Window_Flags::MouseGrabbed);
-        }
+        #ifdef ENGINE_THREAD_WINDOW_EVENTS
+            m_Data.m_MainThreadToEventThreadQueue.push(WindowData::EventThreadOnlyCommands::KeepMouseInWindow);
+        #else
+            if (!m_Data.m_Flags.has(Window_Flags::MouseGrabbed)) {
+                m_Data.m_SFMLWindow.setMouseCursorGrabbed(true);
+                m_Data.m_Flags.add(Window_Flags::MouseGrabbed);
+            }
+        #endif
     }else{
-        if (m_Data.m_Flags.has(Window_Flags::MouseGrabbed)) {
-            m_Data.m_SFMLWindow.setMouseCursorGrabbed(false);
-            m_Data.m_Flags.remove(Window_Flags::MouseGrabbed);
-        }
+        #ifdef ENGINE_THREAD_WINDOW_EVENTS
+            m_Data.m_MainThreadToEventThreadQueue.push(WindowData::EventThreadOnlyCommands::FreeMouseFromWindow);
+        #else
+            if (m_Data.m_Flags.has(Window_Flags::MouseGrabbed)) {
+                m_Data.m_SFMLWindow.setMouseCursorGrabbed(false);
+                m_Data.m_Flags.remove(Window_Flags::MouseGrabbed);
+            }
+        #endif
     }
 }
 void Window::setFramerateLimit(const unsigned int& limit){
@@ -494,6 +529,21 @@ sf::Window& Window::getSFMLHandle() const {
 const unsigned int& Window::getFramerateLimit() const{
     return m_Data.m_FramerateLimit;
 }
+void Window::on_dynamic_resize() {
+    #ifdef _WIN32
+        WINDOWINFO wiInfo;
+        GetWindowInfo(m_Data.m_SFMLWindow.getSystemHandle(), &wiInfo);
+        const glm::uvec2 current_size = glm::uvec2(wiInfo.rcClient.right - wiInfo.rcClient.left, wiInfo.rcClient.bottom - wiInfo.rcClient.top);
+        const glm::uvec2 old_size = getSize();
+
+        if (current_size.x != old_size.x || current_size.y != old_size.y) {
+            setSize(current_size.x, current_size.y);
+            priv::Core::m_Engine->on_event_resize(*this, current_size.x, current_size.y, true);
+        }
+    #endif
+}
+
+
 
 
 const bool Window::pollEvents(sf::Event& e) {

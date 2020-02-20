@@ -15,9 +15,9 @@ BindableResource::BindableResource(const ResourceType::Type& type, const string&
 }
 BindableResource::~BindableResource(){
 }
-void BindableResource::bind(){ 
+void BindableResource::bind() const { 
     m_CustomBindFunctor(); 
 }
-void BindableResource::unbind(){ 
+void BindableResource::unbind() const { 
     m_CustomUnbindFunctor(); 
 }

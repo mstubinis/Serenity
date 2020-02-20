@@ -138,6 +138,12 @@ void priv::PhysicsManager::cleanup() {
         }
     }
 }
+void priv::PhysicsManager::debug_draw_line(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color) {
+    priv::PhysicsManager::debug_draw_line(start, end, color.r, color.g, color.b, color.a);
+}
+void priv::PhysicsManager::debug_draw_line(const glm::vec3& start, const glm::vec3& end, const float r, const float g, const float b, const float a) {
+    m_Data.m_World->getDebugDrawer()->drawLine(Math::btVectorFromGLM(start), Math::btVectorFromGLM(end), btVector4(r, g, b, a));
+}
 void priv::PhysicsManager::_init(){
     m_Data.m_DebugDrawer.init();
 
@@ -196,15 +202,16 @@ void priv::PhysicsManager::_render(Camera& camera){
     m_Data.m_DebugDrawer.drawAccumulatedLines();
     m_Data.m_DebugDrawer.postRender();
 }
+
+
+
+
 void Physics::setNumberOfStepsPerFrame(const unsigned int numSteps) {
     physicsManager->m_NumberOfStepsPerFrame = glm::max(1U, numSteps);
 }
 const unsigned int Physics::getNumberOfStepsPerFrame() {
     return physicsManager->m_NumberOfStepsPerFrame;
 }
-
-
-
 void Physics::pause(bool b){ 
     physicsManager->m_Paused = b; 
 }
@@ -317,7 +324,9 @@ RayCastResult _rayCastInternal_Nearest(const btVector3& start, const btVector3& 
     RayCallback.m_collisionFilterGroup = group;
 
     physicsManager->m_Data.m_World->rayTest(start, end, RayCallback);
-    //physicsManager->m_Data.m_World->getDebugDrawer()->drawLine(start, end, btVector4(1, 1, 0, 1));
+#ifdef _DEBUG
+    physicsManager->m_Data.m_World->getDebugDrawer()->drawLine(start, end, btVector4(1, 1, 0, 1));
+#endif
 
     RayCastResult result;
     if (RayCallback.hasHit()) {
@@ -338,7 +347,9 @@ vector<RayCastResult> _rayCastInternal(const btVector3& start, const btVector3& 
     RayCallback.m_collisionFilterGroup = group;
 
     physicsManager->m_Data.m_World->rayTest(start, end, RayCallback);
-    //physicsManager->m_Data.m_World->getDebugDrawer()->drawLine(start, end, btVector4(1, 0.5, 0, 1));
+#ifdef _DEBUG
+    physicsManager->m_Data.m_World->getDebugDrawer()->drawLine(start, end, btVector4(1, 0.5, 0, 1));
+#endif
 
     vector<RayCastResult> result;
     if (RayCallback.hasHit()) {

@@ -1,5 +1,4 @@
 #include <core/engine/renderer/pipelines/DeferredPipeline.h>
-#include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/opengl/UniformBufferObject.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/lights/Lights.h>
@@ -31,6 +30,7 @@
 #include <core/engine/renderer/FullscreenItems.h>
 
 #include <boost/math/special_functions/fpclassify.hpp>
+
 
 using namespace std;
 using namespace Engine;
@@ -112,13 +112,12 @@ void GLScissor(const glm::vec4& s) {
 
 DeferredPipeline::DeferredPipeline() {
     const auto window_size = Resources::getWindowSize();
-    m_2DProjectionMatrix = glm::ortho(0.0f, static_cast<float>(window_size.x), 0.0f, static_cast<float>(window_size.y), 0.005f, 3000.0f);
-    m_GBuffer   = nullptr;
-    m_UBOCamera = nullptr;
-    pipeline    = this;
+    m_2DProjectionMatrix   = glm::ortho(0.0f, static_cast<float>(window_size.x), 0.0f, static_cast<float>(window_size.y), 0.005f, 3000.0f);
+    m_UBOCamera            = nullptr;
+    pipeline               = this;
 }
 DeferredPipeline::~DeferredPipeline() {
-    SAFE_DELETE(m_GBuffer);
+
 }
 
 void DeferredPipeline::init() {
@@ -292,7 +291,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
     unsigned int size = convoludeTextureSize;
     Engine::Renderer::bindTextureForModification(texType, texture.address(1));
     Engine::Renderer::unbindFBO();
-    priv::FramebufferObject fbo(texture.name() + "_fbo_envData", size, size); //try without a depth format
+    priv::FramebufferObject fbo(size, size); //try without a depth format
     fbo.bind();
 
     //make these 2 variables global in the renderer class?
@@ -305,7 +304,6 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
         glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,1.0f),glm::vec3(0.0f,-1.0f,0.0f)),
         glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,-1.0f,0.0f))
     };
-    //m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapConvolude]->bind();
     covoludeShaderProgram.bind();
 
     Engine::Renderer::sendTexture("cubemap", texture.address(), 0, texType);
@@ -324,7 +322,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
     //now gen EnvPrefilterMap for specular IBL
     size = preEnvFilterSize;
     Engine::Renderer::bindTextureForModification(texType, texture.address(2));
-    //m_InternalShaderPrograms[EngineInternalShaderPrograms::CubemapPrefilterEnv]->bind();
+
     prefilterShaderProgram.bind();
     Engine::Renderer::sendTexture("cubemap", texture.address(), 0, texType);
     Engine::Renderer::sendUniform1("PiFourDividedByResSquaredTimesSix", 12.56637f / float((texture.width() * texture.width()) * 6));
@@ -351,7 +349,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
 }
 //DONE
 void DeferredPipeline::internal_generate_brdf_lut(ShaderProgram& program, const unsigned int& brdfSize) {
-    FramebufferObject fbo("BRDFLUT_Gen_CookTorr_FBO", brdfSize, brdfSize); //try without a depth format
+    FramebufferObject fbo(brdfSize, brdfSize); //try without a depth format
     fbo.bind();
 
     Engine::Renderer::bindTextureForModification(GL_TEXTURE_2D, Texture::BRDF->address());
@@ -360,7 +358,6 @@ void DeferredPipeline::internal_generate_brdf_lut(ShaderProgram& program, const 
     Texture::setWrapping(GL_TEXTURE_2D, TextureWrap::ClampToEdge);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Texture::BRDF->address(), 0);
 
-    //m_InternalShaderPrograms[ShaderProgramEnum::BRDFPrecomputeCookTorrance]->bind();
     program.bind();
     Engine::Renderer::sendUniform1("NUM_SAMPLES", 256);
     Engine::Renderer::Settings::clear(true, true, false);
@@ -373,24 +370,19 @@ void DeferredPipeline::onPipelineChanged() {
 }
 
 void DeferredPipeline::onFullscreen() {
-    SAFE_DELETE(m_GBuffer);
-
     //TODO: move these lines to a more generic area, all rendering pipelines will pretty much do this
     restoreCurrentOpenGLState();
-    //sfWindow->create(videoMode, winName, style, settings);
-
-
 
     GLEnable(GL_CULL_FACE);
     GLEnable(GL_DEPTH_CLAMP);
 
     const auto winSize = Resources::getWindowSize();
-    m_GBuffer = NEW GBuffer(winSize.x, winSize.y);
+    m_GBuffer.init(winSize.x, winSize.y);
 }
 //DONE
 void DeferredPipeline::onResize(const unsigned int& newWidth, const unsigned int& newHeight) {
     m_2DProjectionMatrix = glm::ortho(0.0f, static_cast<float>(newWidth), 0.0f, static_cast<float>(newHeight), 0.005f, 3000.0f);
-    m_GBuffer->resize(newWidth, newHeight);
+    m_GBuffer.resize(newWidth, newHeight);
 }
 void DeferredPipeline::onOpenGLContextCreation() {
     const auto winSize = Resources::getWindowSize();
@@ -400,8 +392,7 @@ void DeferredPipeline::onOpenGLContextCreation() {
     //epriv::RenderManager::OPENGL_VERSION = _openglVersion;
 
     GLEnable(GL_CULL_FACE);
-    SAFE_DELETE(m_GBuffer);
-    m_GBuffer = NEW GBuffer(winSize.x, winSize.y);
+    m_GBuffer.init(winSize.x, winSize.y);
 }
 //DONE
 void DeferredPipeline::renderSkybox(Skybox* skybox, ShaderProgram& shaderProgram, const Scene& scene, const Viewport& viewport, const Camera& camera) {
@@ -571,7 +562,7 @@ void DeferredPipeline::renderParticle(const Particle& particle) {
     auto maxTextures = priv::Core::m_Engine->m_RenderManager.OpenGLStateMachine.getMaxTextureUnits() - 1;
 
     Camera& camera = *particle.scene().getActiveCamera();
-    Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer->getTexture(Engine::priv::GBufferType::Depth), maxTextures);
+    Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(Engine::priv::GBufferType::Depth), maxTextures);
     Engine::Renderer::sendUniform4Safe("Object_Color", particle.color());
     Engine::Renderer::sendUniform2Safe("ScreenData", glm::vec2(Resources::getWindowSize()));
 
@@ -604,7 +595,7 @@ void DeferredPipeline::renderMesh(const Mesh& mesh, const unsigned int mode) {
         //}
     //}
     //else {
-        glDrawElements(mode, indicesSize, GL_UNSIGNED_SHORT, nullptr);
+        glDrawElements(mode, (GLsizei)indicesSize, GL_UNSIGNED_SHORT, nullptr);
     //}
 }
 //DONE
@@ -865,7 +856,7 @@ void DeferredPipeline::internal_pass_geometry(const Viewport& viewport, const Ca
     const glm::vec4& clear = viewport.getBackgroundColor();
     const float colors[4]  = { clear.r, clear.g, clear.b, clear.a };
 
-    m_GBuffer->bindFramebuffers(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, "RGBA");
+    m_GBuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, "RGBA");
 
     Engine::Renderer::Settings::clear(true, true, true); // (0,0,0,0)
 
@@ -892,19 +883,19 @@ void DeferredPipeline::internal_pass_ssao(const Viewport& viewport, const Camera
     const glm::uvec4& dimensions = viewport.getViewportDimensions();
 
     //TODO: possible optimization: use stencil buffer to reject completely black (or are they white?) pixels during blur passes
-    m_GBuffer->bindFramebuffers(GBufferType::Bloom, GBufferType::GodRays, "A", false);
+    m_GBuffer.bindFramebuffers(GBufferType::Bloom, GBufferType::GodRays, "A", false);
     Engine::Renderer::Settings::clear(true, false, false); //bloom and god rays alpha channels cleared to black 
     if (SSAO::ssao.m_ssao && (viewport.getRenderFlags() & ViewportRenderingFlag::SSAO)) {
         Engine::Renderer::GLEnablei(GL_BLEND, 0);//i dont think this is needed anymore
-        m_GBuffer->bindFramebuffers(GBufferType::Bloom, "A", false);
-        SSAO::ssao.passSSAO(*m_GBuffer, dimensions.z, dimensions.w, camera);
+        m_GBuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
+        SSAO::ssao.passSSAO(m_GBuffer, dimensions.z, dimensions.w, camera);
         if (SSAO::ssao.m_ssao_do_blur) {
             Engine::Renderer::GLDisablei(GL_BLEND, 0); //yes this is absolutely needed
             for (uint i = 0; i < SSAO::ssao.m_ssao_blur_num_passes; ++i) {
-                m_GBuffer->bindFramebuffers(GBufferType::GodRays, "A", false);
-                SSAO::ssao.passBlur(*m_GBuffer, dimensions.z, dimensions.w, "H", GBufferType::Bloom);
-                m_GBuffer->bindFramebuffers(GBufferType::Bloom, "A", false);
-                SSAO::ssao.passBlur(*m_GBuffer, dimensions.z, dimensions.w, "V", GBufferType::GodRays);
+                m_GBuffer.bindFramebuffers(GBufferType::GodRays, "A", false);
+                SSAO::ssao.passBlur(m_GBuffer, dimensions.z, dimensions.w, "H", GBufferType::Bloom);
+                m_GBuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
+                SSAO::ssao.passBlur(m_GBuffer, dimensions.z, dimensions.w, "V", GBufferType::GodRays);
             }
         }
     }
@@ -919,7 +910,7 @@ void DeferredPipeline::internal_pass_forward() {
 
 }
 void DeferredPipeline::internal_pass_god_rays(const Viewport& viewport, const Camera& camera) {
-    m_GBuffer->bindFramebuffers(GBufferType::GodRays, "RGB", false);
+    m_GBuffer.bindFramebuffers(GBufferType::GodRays, "RGB", false);
     Engine::Renderer::Settings::clear(true, false, false); //godrays rgb channels cleared to black
     auto& godRaysPlatform = GodRays::godRays;
     auto* sun = Engine::Renderer::godRays::getSun();
@@ -941,13 +932,13 @@ void DeferredPipeline::internal_pass_god_rays(const Viewport& viewport, const Ca
                 alpha = 0.01f;
             }
             alpha = 1.0f - alpha;
-            godRaysPlatform.pass(*m_GBuffer, dimensions.z, dimensions.w, glm::vec2(sp.x, sp.y), alpha);
+            godRaysPlatform.pass(m_GBuffer, dimensions.z, dimensions.w, glm::vec2(sp.x, sp.y), alpha);
         }
     }
 }
 void DeferredPipeline::internal_pass_hdr(const Viewport& viewport, const Camera& camera) {
     const glm::uvec4& dimensions = viewport.getViewportDimensions();
-    m_GBuffer->bindFramebuffers(GBufferType::Misc);
+    m_GBuffer.bindFramebuffers(GBufferType::Misc);
     //HDR::hdr.pass(*m_GBuffer, dimensions.z, dimensions.w, GodRays::godRays.godRays_active, lighting, GodRays::godRays.factor);
 }
 void DeferredPipeline::internal_pass_bloom() {

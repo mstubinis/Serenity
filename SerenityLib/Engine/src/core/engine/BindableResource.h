@@ -7,13 +7,14 @@
 
 class BindableResource: public EngineResource{
     private:
-        std::function<void()> m_CustomBindFunctor, m_CustomUnbindFunctor;
+        std::function<void()>   m_CustomBindFunctor;
+        std::function<void()>   m_CustomUnbindFunctor;
     public:
         BindableResource(const ResourceType::Type& type, const std::string& name = "");
         virtual ~BindableResource();
 
-        virtual void bind();
-        virtual void unbind();
+        virtual void bind() const;
+        virtual void unbind() const;
 
         template<class T> void setCustomBindFunctor  (const T& functor){ 
             m_CustomBindFunctor = [&]() { functor(this); };

@@ -187,8 +187,6 @@ namespace Engine{
                 void init(const EngineOptions& options);
                 void run();
                 void handle_events(Window& window);
-
-                void render2DApi(Window& window, const float& dt);
         };
         struct Core final{
             static EngineCore*          m_Engine;

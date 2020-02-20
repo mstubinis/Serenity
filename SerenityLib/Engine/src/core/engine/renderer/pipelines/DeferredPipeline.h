@@ -17,6 +17,7 @@ namespace Engine::priv {
 #include <core/engine/model/ModelInstanceIncludes.h>
 #include <core/engine/renderer/opengl/State.h>
 #include <core/engine/renderer/opengl/Extensions.h>
+#include <core/engine/renderer/GBuffer.h>
 
 #include <glm/mat4x4.hpp>
 #include <vector>
@@ -51,7 +52,7 @@ namespace Engine::priv {
             UBOCameraDataStruct          m_UBOCameraDataStruct;
             UniformBufferObject*         m_UBOCamera;
             glm::mat4                    m_2DProjectionMatrix;
-            GBuffer*                     m_GBuffer;
+            GBuffer                      m_GBuffer;
 
             std::vector<Shader*>         m_InternalShaders;
             std::vector<ShaderProgram*>  m_InternalShaderPrograms;

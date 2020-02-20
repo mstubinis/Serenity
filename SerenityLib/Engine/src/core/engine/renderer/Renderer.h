@@ -9,7 +9,6 @@
 
 #include <core/engine/renderer/opengl/State.h>
 #include <core/engine/renderer/opengl/Extensions.h>
-
 #include <core/engine/fonts/FontIncludes.h>
 
 #include <glm/gtc/type_ptr.hpp>
@@ -48,7 +47,6 @@ namespace priv{
             void _resize(uint width, uint height);
 
             void _render(const float& dt, Viewport&, const bool mainRenderFunc = true, const GLuint display_fbo = 0, const GLuint display_rbo = 0);
-            void _render2DApi(const float& dt, Viewport&, const bool mainRenderFunc = true, const GLuint display_fbo = 0, const GLuint display_rbo = 0);
 
             void _onFullscreen(const unsigned int& width, const unsigned int& height);
             void _onOpenGLContextCreation(uint width,uint height,uint glslVersion,uint openglVersion);

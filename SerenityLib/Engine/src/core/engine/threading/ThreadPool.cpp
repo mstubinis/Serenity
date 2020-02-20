@@ -78,7 +78,7 @@ const bool ThreadPool::startup(const unsigned int num_threads) {
                     (*job)();
                 }
             };
-            m_WorkerThreads.push_back(std::move(std::thread(std::move(thread_exec_func))));
+            m_WorkerThreads.emplace_back(thread_exec_func);
         }
         return true;
     }
@@ -137,8 +137,10 @@ void ThreadPool::join_all() {
     }
 }
 void ThreadPool::wait_for_all() {
-    for (auto& future : m_Futures) {
-        future.m_Future.wait();
+    if (m_WorkerThreads.size() > 0) {
+        for (auto& future : m_Futures) {
+            future.m_Future.wait();
+        }
     }
     update();
 }

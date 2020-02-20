@@ -66,7 +66,7 @@ const bool Engine::priv::Bloom::init_shaders() {
 }
 void Engine::priv::Bloom::pass(Engine::priv::GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight, const unsigned int& sceneTextureEnum) {
     m_Shader_Program->bind();
-    const float& divisor = gbuffer.getSmallFBO()->divisor();
+    const float& divisor = gbuffer.getSmallFBO().divisor();
 
     Engine::Renderer::sendUniform4("Data", scale, threshold, exposure, 0.0f);
     Engine::Renderer::sendTexture("SceneTexture", gbuffer.getTexture(sceneTextureEnum), 0);

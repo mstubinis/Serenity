@@ -14,19 +14,27 @@ ComponentLogic3::ComponentLogic3(const Entity& entity) : ComponentBaseClass(enti
 ComponentLogic3::~ComponentLogic3() {
 }
 ComponentLogic3::ComponentLogic3(ComponentLogic3&& other) noexcept {
-    m_Owner        = std::move(other.m_Owner);
-    m_Functor      = std::move(other.m_Functor);
     m_UserPointer  = std::exchange(other.m_UserPointer, nullptr);
     m_UserPointer1 = std::exchange(other.m_UserPointer1, nullptr);
     m_UserPointer2 = std::exchange(other.m_UserPointer2, nullptr);
+    m_Owner        = std::move(other.m_Owner);
+
+    m_Functor.swap(other.m_Functor);
+
+    //make it empty
+    other.m_Functor = std::function<void(const float&)>();
 }
 ComponentLogic3& ComponentLogic3::operator=(ComponentLogic3&& other) noexcept {
     if (&other != this) {
-        m_Owner        = std::move(other.m_Owner);
-        m_Functor      = std::move(other.m_Functor);
         m_UserPointer  = std::exchange(other.m_UserPointer, nullptr);
         m_UserPointer1 = std::exchange(other.m_UserPointer1, nullptr);
         m_UserPointer2 = std::exchange(other.m_UserPointer2, nullptr);
+        m_Owner        = std::move(other.m_Owner);
+
+        m_Functor.swap(other.m_Functor);
+
+        //make it empty
+        other.m_Functor = std::function<void(const float&)>();
     }
     return *this;
 }
@@ -48,31 +56,32 @@ void* ComponentLogic3::getUserPointer1() const {
 void* ComponentLogic3::getUserPointer2() const {
     return m_UserPointer2;
 }
-void ComponentLogic3::call(const float& dt) { 
-    if(m_Functor)
-        m_Functor(dt); 
+void ComponentLogic3::call(const float& dt) const { 
+    if (m_Functor) {
+        m_Functor(dt);
+    }
 }
 
 #pragma endregion
 
 #pragma region System
 
-struct priv::ComponentLogic3_UpdateFunction final {void operator()(void* _componentPool, const float& dt, Scene& _scene) const {
-    auto& pool = *(ECSComponentPool<Entity, ComponentLogic3>*)_componentPool;
-    auto& components = pool.data();
+struct priv::ComponentLogic3_UpdateFunction final {void operator()(void* componentPool, const float& dt, Scene& scene) const {
+    auto& pool = *static_cast<ECSComponentPool<Entity, ComponentLogic3>*>(componentPool);
+    const auto& components = pool.data();
 	for (auto& component : components) {
 		component.call(dt);
 	}
 }};
-struct priv::ComponentLogic3_ComponentAddedToEntityFunction final {void operator()(void* _component, Entity& _entity) const {
+struct priv::ComponentLogic3_ComponentAddedToEntityFunction final {void operator()(void* component, Entity& entity) const {
 
 }};
-struct priv::ComponentLogic3_EntityAddedToSceneFunction final {void operator()(void* _componentPool, Entity& _entity, Scene& _scene) const {
+struct priv::ComponentLogic3_EntityAddedToSceneFunction final {void operator()(void* componentPool, Entity& entity, Scene& scene) const {
 }};
-struct priv::ComponentLogic3_SceneEnteredFunction final {void operator()(void* _componentPool, Scene& _scene) const {
+struct priv::ComponentLogic3_SceneEnteredFunction final {void operator()(void* componentPool, Scene& scene) const {
 
 }};
-struct priv::ComponentLogic3_SceneLeftFunction final {void operator()(void* _componentPool, Scene& _scene) const {
+struct priv::ComponentLogic3_SceneLeftFunction final {void operator()(void* componentPool, Scene& scene) const {
 
 }};
 

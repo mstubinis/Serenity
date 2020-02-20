@@ -111,7 +111,7 @@ namespace Engine::priv {
                     m_DestroyedEntities.clear();
                 }
                 for (auto& component_pool : m_ComponentPools) {
-                    component_pool->reserve(150);
+                    component_pool->reserve(15);
                 }
             }
 

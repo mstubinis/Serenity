@@ -31,31 +31,19 @@ void priv::ParticleSystem::internal_update_emitters(const float& dt) {
     if (m_ParticleEmitters.size() == 0)
         return;
 
-    //TODO: determine when the overhead for creating the threading calls will out-perform the single core call for not so many emitters on the screen
-    auto lamda_update_emitters = [&](pair<size_t, size_t>& pair_) {
-        for (size_t j = pair_.first; j <= pair_.second; ++j) {
-            m_ParticleEmitters[j].update_multithreaded(j, dt, *this);
-        }
+    auto lamda_update_emitter = [&](ParticleEmitter& emitter, const size_t& j) {
+        emitter.update_multithreaded(j, dt, *this);
     };
-    auto split = priv::threading::splitVectorPairs(m_ParticleEmitters);
-    for (auto& pair_ : split) {
-        priv::Core::m_Engine->m_ThreadManager.add_job_ref_engine_controlled(lamda_update_emitters, pair_);
-    }
-    priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
+    priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_emitter, m_ParticleEmitters, true);
 }
 void priv::ParticleSystem::internal_update_particles(const float& dt) {
     if (m_Particles.size() == 0)
         return;
-    auto lamda_update_particles = [&](pair<size_t, size_t>& pair_) {
-        for (size_t j = pair_.first; j <= pair_.second; ++j) {
-            m_Particles[j].update_multithreaded(j, dt, *this);
-        }
+
+    auto lamda_update_particle = [&](Particle& particle, const size_t& j) {
+        particle.update(j, dt, *this, true);
     };
-    auto split = priv::threading::splitVectorPairs(m_Particles);
-    for (auto& pair_ : split) {
-        priv::Core::m_Engine->m_ThreadManager.add_job_ref_engine_controlled(lamda_update_particles, pair_);
-    }
-    priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
+    priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_particle, m_Particles, true);
 }
 
 ParticleEmitter* priv::ParticleSystem::add_emitter(ParticleEmitter& emitter) {

@@ -12,7 +12,7 @@ namespace Engine::priv {
     class ECSComponentPool<TEntity, TComponent> : public Engine::sparse_set<TComponent>, public Engine::NonCopyable, public Engine::NonMoveable{
         using super = Engine::sparse_set<TComponent>;
         public:
-            ECSComponentPool() : super(2000) {
+            ECSComponentPool() : super(15) {
 
             }
             ~ECSComponentPool() = default;

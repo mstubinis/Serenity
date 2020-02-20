@@ -158,7 +158,7 @@ void Engine::priv::SSAO::passSSAO(Engine::priv::GBuffer& gbuffer, const unsigned
         Engine::Renderer::sendUniform4Safe("CameraInfo1", glm::vec4(camera.getPosition(), camera.getNear()));
         Engine::Renderer::sendUniform4Safe("CameraInfo2", glm::vec4(camera.getViewVector(), camera.getFar()));
     }
-    const float divisor              = gbuffer.getSmallFBO()->divisor();
+    const float divisor              = gbuffer.getSmallFBO().divisor();
     const unsigned int screen_width  = static_cast<unsigned int>(static_cast<float>(fboWidth) * divisor);
     const unsigned int screen_height = static_cast<unsigned int>(static_cast<float>(fboHeight) * divisor);
 
@@ -183,7 +183,7 @@ void Engine::priv::SSAO::passBlur(Engine::priv::GBuffer& gbuffer, const unsigned
     Engine::Renderer::sendUniform4("Data", m_ssao_blur_radius, 0.0f, hv.x, hv.y);
     Engine::Renderer::sendTexture("image", gbuffer.getTexture(texture), 0);
 
-    const float divisor  = gbuffer.getSmallFBO()->divisor();
+    const float divisor  = gbuffer.getSmallFBO().divisor();
     const unsigned int x = static_cast<unsigned int>(static_cast<float>(fboWidth) * divisor);
     const unsigned int y = static_cast<unsigned int>(static_cast<float>(fboHeight) * divisor);
     Engine::Renderer::renderFullscreenTriangle(x, y);

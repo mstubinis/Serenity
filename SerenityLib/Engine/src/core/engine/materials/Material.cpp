@@ -283,13 +283,13 @@ void Material::setAlpha(const float& alpha) {
     m_BaseAlpha = glm::clamp(alpha, 0.0f, 1.0f);
     internalUpdateGlobalMaterialPool(false);
 }
-void Material::bind(){
+void Material::bind() const {
     if(isLoaded())
-        Core::m_Engine->m_RenderManager._bindMaterial(this); 
+        Core::m_Engine->m_RenderManager._bindMaterial(const_cast<Material*>(this));
     else
         Core::m_Engine->m_RenderManager._bindMaterial(Material::Checkers);
 }
-void Material::unbind(){ 
+void Material::unbind() const { 
     Core::m_Engine->m_RenderManager._unbindMaterial(); 
 }
 void Material::update(const float& dt) {

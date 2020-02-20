@@ -69,7 +69,7 @@ namespace Engine::priv{
                     auto lamda = [&](const std::pair<size_t, size_t>& pair) {
                         for (size_t j = pair.first; j <= pair.second; ++j) {
                             T& thing = collection[j];
-                            job(thing, std::forward<ARGS>(args)...);
+                            job(thing, j, std::forward<ARGS>(args)...);
                         }
                     };
                     for (auto& pair : split) {
@@ -78,8 +78,8 @@ namespace Engine::priv{
                     if (waitForAll)
                         Engine::priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
                 }else{
-                    for (auto& thing : collection) {
-                        job(thing, std::forward<ARGS>(args)...);
+                    for (size_t j = 0; j < collection.size(); ++j) {
+                        job(collection[j], j, std::forward<ARGS>(args)...);
                     }
                 }
             }

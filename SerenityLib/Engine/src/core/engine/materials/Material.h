@@ -123,8 +123,8 @@ class Material final: public BindableResource{
         const unsigned int& diffuseModel() const;
         void setDiffuseModel(const DiffuseModel::Model& diffuseModel);
 
-        void bind();
-        void unbind();
+        void bind() const override;
+        void unbind() const override;
 
         void update(const float& dt);
 };

@@ -150,7 +150,7 @@ class priv::Renderer::impl final{
         DepthFunc::Func depth_func;
         bool draw_physics_debug;
 
-        GBuffer* m_GBuffer;
+        GBuffer m_GBuffer;
         glm::mat4 m_2DProjectionMatrix;
 
         vector<API2DCommand> m_2DAPICommands;
@@ -193,7 +193,7 @@ class priv::Renderer::impl final{
                 draw_physics_debug = false;
             #endif
 
-            m_GBuffer = nullptr;
+            //m_GBuffer = nullptr;
             m_2DProjectionMatrix = glm::ortho(0.0f,static_cast<float>(options.width),0.0f, static_cast<float>(options.height),0.0005f,1000.0f);
             m_IdentityMat4 = glm::mat4(1.0f);
             m_IdentityMat3 = glm::mat3(1.0f);
@@ -366,7 +366,7 @@ class priv::Renderer::impl final{
         void _destruct(){
             SAFE_DELETE(UniformBufferObject::UBO_CAMERA);
 
-            SAFE_DELETE(m_GBuffer);
+            //SAFE_DELETE(m_GBuffer);
             SAFE_DELETE(m_FullscreenQuad);
             SAFE_DELETE(m_FullscreenTriangle);
 
@@ -407,15 +407,15 @@ class priv::Renderer::impl final{
         }
         void _resize(const uint& w, const uint& h){
             m_2DProjectionMatrix = glm::ortho(0.0f, static_cast<float>(w), 0.0f, static_cast<float>(h), 0.005f, 3000.0f);
-            m_GBuffer->resize(w, h);
+            m_GBuffer.resize(w, h);
         }
 
         void _onOpenGLContextCreation(const uint& width, const uint& height, const uint& _glslVersion, const uint& _openglVersion){
             priv::Renderer::GLSL_VERSION = _glslVersion;
             priv::Renderer::OPENGL_VERSION = _openglVersion;
             Engine::Renderer::GLEnable(GL_CULL_FACE);
-            SAFE_DELETE(m_GBuffer);
-            m_GBuffer = NEW GBuffer(width,height);
+            //SAFE_DELETE(m_GBuffer);
+            m_GBuffer.init(width,height);
         }
         void _generatePBREnvMapData(Texture& texture, const uint& convoludeTextureSize, const uint& preEnvFilterSize){
             const uint texType = texture.type();
@@ -426,7 +426,7 @@ class priv::Renderer::impl final{
             uint size = convoludeTextureSize;
             Engine::Renderer::bindTextureForModification(texType, texture.address(1));
             Engine::Renderer::unbindFBO();
-            priv::FramebufferObject fbo(texture.name() + "_fbo_envData",size,size); //try without a depth format
+            priv::FramebufferObject fbo(size, size); //try without a depth format
             fbo.bind();
     
             //make these 2 variables global in the renderer class?
@@ -480,10 +480,7 @@ class priv::Renderer::impl final{
             fbo.unbind();
         }
         void _generateBRDFLUTCookTorrance(const uint& brdfSize){
-            //uint& prevReadBuffer = renderManager->glSM.current_bound_read_fbo;
-            //uint& prevDrawBuffer = renderManager->glSM.current_bound_draw_fbo;
-
-            FramebufferObject fbo("BRDFLUT_Gen_CookTorr_FBO", brdfSize, brdfSize); //try without a depth format
+            FramebufferObject fbo(brdfSize, brdfSize); //try without a depth format
             fbo.bind();
 
             Engine::Renderer::bindTextureForModification(GL_TEXTURE_2D, Texture::BRDF->address());
@@ -498,10 +495,6 @@ class priv::Renderer::impl final{
             Engine::Renderer::colorMask(true, true, false, false);
             Engine::Renderer::renderFullscreenTriangle(brdfSize, brdfSize);
             Engine::Renderer::colorMask(true, true, true, true);
-
-            //SAFE_DELETE(fbo);
-            //Renderer::bindReadFBO(prevReadBuffer);
-            //Renderer::bindDrawFBO(prevDrawBuffer);
         }
         void _renderTextLeft(const string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
             unsigned int i = 0;
@@ -790,7 +783,7 @@ class priv::Renderer::impl final{
 
             auto maxTextures = priv::Core::m_Engine->m_RenderManager.OpenGLStateMachine.getMaxTextureUnits() - 1;
 
-            Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer->getTexture(GBufferType::Depth), maxTextures);
+            Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), maxTextures);
             Engine::Renderer::sendUniform4Safe("Object_Color", p.color());
             Engine::Renderer::sendUniform2Safe("ScreenData", glm::vec2(Resources::getWindowSize()));
 
@@ -952,7 +945,7 @@ class priv::Renderer::impl final{
             Engine::Renderer::colorMask(false, false, false, false);
             m_InternalShaderPrograms[EngineInternalShaderPrograms::StencilPass]->bind();
 
-            gbuffer.getMainFBO()->bind();
+            gbuffer.getMainFBO().bind();
 
             Engine::Renderer::GLEnable(GL_STENCIL_TEST);
             Engine::Renderer::Settings::clear(false,false,true); //stencil is completely filled with 0's
@@ -978,7 +971,7 @@ class priv::Renderer::impl final{
         void _passBlur(GBuffer& gbuffer, const uint& fboWidth, const uint& fboHeight,string type, GLuint texture){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredBlur]->bind();
 
-            const float& divisor = gbuffer.getSmallFBO()->divisor();
+            const float& divisor = gbuffer.getSmallFBO().divisor();
             glm::vec2 hv(0.0f);
             if(type == "H"){ hv = glm::vec2(1.0f,0.0f); }
             else{            hv = glm::vec2(0.0f,1.0f); }
@@ -1078,23 +1071,22 @@ class priv::Renderer::impl final{
             const glm::uvec4& dimensions = viewport.getViewportDimensions();
 
             _startupRenderFrame(gbuffer, viewport, camera, dimensions);
-
             if(mainRenderFunc){
                 #pragma region Camera UBO
                 if(Renderer::GLSL_VERSION >= 140 && UniformBufferObject::UBO_CAMERA){  
                     //TODO: change the manual camera uniform sending (for when glsl version < 140) to give a choice between the two render spaces
-                    /*
+                    
                     //same simulation and render space
-                    m_UBOCameraData.View        = camera.getView();
-                    m_UBOCameraData.Proj        = camera.getProjection();
-                    m_UBOCameraData.ViewProj    = camera.getViewProjection();
-                    m_UBOCameraData.InvProj     = camera.getProjectionInverse();
-                    m_UBOCameraData.InvView     = camera.getViewInverse();
-                    m_UBOCameraData.InvViewProj = camera.getViewProjectionInverse();
-                    m_UBOCameraData.Info1       = glm::vec4(camera.getPosition(),camera.getNear());
-                    m_UBOCameraData.Info2       = glm::vec4(camera.getViewVector(),camera.getFar());
-                    m_UBOCameraData.Info3       = glm::vec4(0.0f,0.0f,0.0f, 0.0f);
-                    */
+                    //m_UBOCameraData.View        = camera.getView();
+                    //m_UBOCameraData.Proj        = camera.getProjection();
+                    //m_UBOCameraData.ViewProj    = camera.getViewProjection();
+                    //m_UBOCameraData.InvProj     = camera.getProjectionInverse();
+                    //m_UBOCameraData.InvView     = camera.getViewInverse();
+                    //m_UBOCameraData.InvViewProj = camera.getViewProjectionInverse();
+                    //m_UBOCameraData.Info1       = glm::vec4(camera.getPosition(),camera.getNear());
+                    //m_UBOCameraData.Info2       = glm::vec4(camera.getViewVector(),camera.getFar());
+                    //m_UBOCameraData.Info3       = glm::vec4(0.0f,0.0f,0.0f, 0.0f);
+                    
                     
                     //this render space places the camera at the origin and offsets submitted model matrices to the vertex shaders
                     //by the camera's real simulation position
@@ -1114,6 +1106,7 @@ class priv::Renderer::impl final{
                 #pragma endregion
             }
             _passGeometry(dt, gbuffer, viewport, camera);
+
             Engine::Renderer::GLDisable(GL_DEPTH_TEST);
             glDepthMask(GL_FALSE);
 
@@ -1278,10 +1271,10 @@ class priv::Renderer::impl final{
                 }
             }
             #pragma endregion
-            
          
             #pragma region 2DAPI
             Engine::Renderer::GLEnable(GL_DEPTH_TEST);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDepthMask(GL_TRUE);
             if (mainRenderFunc) {
                 if ((viewport.getRenderFlags() & ViewportRenderingFlag::API2D)) {
@@ -1299,58 +1292,6 @@ class priv::Renderer::impl final{
             #pragma endregion
 
             
-        }
-        void _render2DApi(const float& dt, GBuffer& gbuffer, Viewport& viewport, const bool& mainRenderFunc, const GLuint& fbo, const GLuint& rbo) {
-            Camera& camera = const_cast<Camera&>(viewport.getCamera());
-            const glm::uvec4& dimensions = viewport.getViewportDimensions();
-
-            const auto& winSize = Resources::getWindowSize();
-            if (viewport.isAspectRatioSynced()) {
-                camera.setAspect(dimensions.z / static_cast<float>(dimensions.w));
-            }
-            Engine::Renderer::setViewport(static_cast<float>(dimensions.x), static_cast<float>(dimensions.y), static_cast<float>(dimensions.z), static_cast<float>(dimensions.w));
-
-            glScissor(0, 0, winSize.x, winSize.y);
-
-            m_2DProjectionMatrix = glm::ortho(0.0f, static_cast<float>(winSize.x), 0.0f, static_cast<float>(winSize.y), 0.005f, 3000.0f);
-            //this is god awful and ugly, but its needed. definately find a way to refactor this properly
-            for (uint i = 0; i < 9; ++i) {
-                glActiveTexture(GL_TEXTURE0 + i);
-                glBindTexture(GL_TEXTURE_2D, 0);
-                glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-            }
-            if (Renderer::GLSL_VERSION >= 140 && UniformBufferObject::UBO_CAMERA) {
-                m_UBOCameraData.View = ComponentCamera_Functions::GetViewNoTranslation(camera);
-                m_UBOCameraData.Proj = camera.getProjection();
-                m_UBOCameraData.ViewProj = ComponentCamera_Functions::GetViewProjectionNoTranslation(camera);
-                m_UBOCameraData.InvProj = camera.getProjectionInverse();
-                m_UBOCameraData.InvView = ComponentCamera_Functions::GetViewInverseNoTranslation(camera);
-                m_UBOCameraData.InvViewProj = ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(camera);
-                m_UBOCameraData.Info1 = glm::vec4(0.0001f, 0.0001f, 0.0001f, camera.getNear());
-                m_UBOCameraData.Info2 = glm::vec4(ComponentCamera_Functions::GetViewVectorNoTranslation(camera), camera.getFar());
-                m_UBOCameraData.Info3 = glm::vec4(camera.getPosition(), 0.0f);
-
-                UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraData);
-            }
-            Engine::Renderer::setDepthFunc(GL_LEQUAL);
-            Engine::Renderer::Settings::clear(true, true, true);
-            Engine::Renderer::GLEnablei(GL_BLEND, 0); //this is needed for sure
-
-            Engine::Renderer::GLDisable(GL_STENCIL_TEST);
-            Engine::Renderer::GLEnable(GL_DEPTH_TEST);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glDepthMask(GL_TRUE);
-            if ((viewport.getRenderFlags() & ViewportRenderingFlag::API2D)) {
-                Engine::Renderer::Settings::clear(false, true, false); //clear depth only
-                m_InternalShaderPrograms[EngineInternalShaderPrograms::Deferred2DAPI]->bind();
-                Engine::Renderer::sendUniformMatrix4("VP", m_2DProjectionMatrix);
-                Engine::Renderer::sendUniform1Safe("ScreenGamma", gamma);
-                Engine::Renderer::GLEnable(GL_SCISSOR_TEST);
-                for (auto& command : m_2DAPICommands) {
-                    command.func();
-                }
-                Engine::Renderer::GLDisable(GL_SCISSOR_TEST);
-            }
         }
 };
 
@@ -1372,22 +1313,19 @@ void priv::Renderer::_init(){
     m_i->_postInit();
 }
 void priv::Renderer::_render(const float& dt, Viewport& viewport,const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo){
-    m_i->_render(dt, *m_i->m_GBuffer, viewport, mainFunc, display_fbo, display_rbo);
-}
-void priv::Renderer::_render2DApi(const float& dt, Viewport& viewport, const bool mainFunc, const GLuint display_fbo, const GLuint display_rbo) {
-    m_i->_render2DApi(dt, *m_i->m_GBuffer, viewport, mainFunc, display_fbo, display_rbo);
+    m_i->_render(dt, m_i->m_GBuffer, viewport, mainFunc, display_fbo, display_rbo);
 }
 void priv::Renderer::_resize(uint w,uint h){
     m_i->_resize(w, h);
 }
 void priv::Renderer::_onFullscreen(const unsigned int& width, const unsigned int& height){
-    SAFE_DELETE(m_i->m_GBuffer);
+    //SAFE_DELETE(m_i->m_GBuffer);
     //oh yea the opengl context is lost, gotta restore the state machine
     renderManager->OpenGLStateMachine.GL_RESTORE_CURRENT_STATE_MACHINE();
 
     Engine::Renderer::GLEnable(GL_CULL_FACE);
     Engine::Renderer::GLEnable(GL_DEPTH_CLAMP);
-    m_i->m_GBuffer = NEW GBuffer(width, height);
+    m_i->m_GBuffer.init(width, height);
 }
 void priv::Renderer::_onOpenGLContextCreation(uint windowWidth,uint windowHeight,uint _glslVersion,uint _openglVersion){
     OpenGLStateMachine.GL_INIT_DEFAULT_STATE_MACHINE(windowWidth, windowHeight);
@@ -1404,7 +1342,7 @@ void priv::Renderer::_sort2DAPICommands() {
     std::sort( std::execution::par_unseq, commands.begin(), commands.end(), lambda_sorter);
 }
 priv::GBuffer& priv::Renderer::getGbuffer() {
-    return *m_i->m_GBuffer;
+    return m_i->m_GBuffer;
 }
 const float priv::Renderer::_getGIPackedData() {
     return m_i->lighting_gi_pack;

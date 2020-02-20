@@ -52,6 +52,8 @@ class Window final{
             ShowMouse,
             HideMouse,
             RequestFocus,
+            KeepMouseInWindow,
+            FreeMouseFromWindow,
         };};
 
         private:
@@ -79,9 +81,9 @@ class Window final{
             sf::ContextSettings m_SFContextSettings;
 
             void restore_state();
-            const sf::ContextSettings create(Window&, const std::string& _name, const unsigned int& _width, const unsigned int& _height);
-            void update_mouse_position_internal(Window&, const float x, const float y, const bool resetDifference, const bool resetPrevious);
-            void on_fullscreen_internal(Window&, const bool isToBeFullscreen, const bool isMaximized, const bool isMinimized);
+            const sf::ContextSettings create(Window& window, const std::string& name);
+            void update_mouse_position_internal(Window& window, const float x, const float y, const bool resetDifference, const bool resetPrevious);
+            void on_fullscreen_internal(Window& window, const bool isToBeFullscreen, const bool isMaximized, const bool isMinimized);
             sf::VideoMode get_default_desktop_video_mode();
 
             void on_mouse_wheel_scrolled(const float& delta, const int& x, const int& y);
@@ -96,6 +98,11 @@ class Window final{
 
     private:
         WindowData m_Data;
+
+        //Whenever the window's size changes, this function executes. Different from SFML's onResize Event, this fires constantly if you are changing the size of the window via mouse dragging.
+        //This currently only performs actions on the windows platform.
+        void on_dynamic_resize();
+
         void restore_state();
     public:
         Window(const EngineOptions& options);
@@ -117,24 +124,27 @@ class Window final{
 
         const bool pollEvents(sf::Event&);
 
-        const bool hasFocus();
-        const bool isOpen();
+        const bool hasFocus() const;
+        const bool isOpen() const;
 
         //returns true if the window is in fullscreen OR windowed fullscreen mode
-        const bool isFullscreen();
+        const bool isFullscreen() const;
+
+        const bool isWindowOnSeparateThread() const;
 
         //returns true if the window is in windowed fullscreen mode
-        const bool isFullscreenWindowed();
+        const bool isFullscreenWindowed() const;
 
         //returns true if the window is in regular fullscreen mode
-        const bool isFullscreenNonWindowed();
+        const bool isFullscreenNonWindowed() const;
 
         //currently specific to windows os only
-        const bool isMaximized();
+        const bool isMaximized() const;
         //currently specific to windows os only
-        const bool isMinimized();
+        const bool isMinimized() const;
 
-        const bool isActive();
+        const bool isActive() const;
+        const bool isMouseKeptInWindow() const;
 
         void updateMousePosition(const float x, const float y, const bool resetDifference = false, const bool resetPreviousPosition = false);
         void updateMousePosition(const glm::vec2& position, const bool resetDifference = false, const bool resetPreviousPosition = false);

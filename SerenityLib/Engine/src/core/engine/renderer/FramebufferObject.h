@@ -70,7 +70,7 @@ namespace Engine{
                 void bind() override;
                 void unbind() override;
         };
-        class FramebufferObject final: public BindableResource{
+        class FramebufferObject final : public BindableResource {
             friend class  Engine::priv::FramebufferTexture;
             friend class  Engine::priv::RenderbufferObject;
             friend struct Engine::priv::FramebufferObjectDefaultBindFunctor;
@@ -83,9 +83,13 @@ namespace Engine{
                 std::vector<GLuint>                                                m_FBO;
                 std::unordered_map<unsigned int, FramebufferObjectAttatchment*>    m_Attatchments;
             public:
-                FramebufferObject(const std::string& name, const unsigned int& width, const unsigned int& height, const float& divisor = 1.0f, const unsigned int& swapBufferCount = 1);
-                FramebufferObject(const std::string& name, const unsigned int& width, const unsigned int& height, const ImageInternalFormat::Format&, const float& divisor = 1.0f, const unsigned int& swapBufferCount = 1);
+                FramebufferObject();
+                FramebufferObject(const unsigned int& width, const unsigned int& height, const float& divisor = 1.0f, const unsigned int& swapBufferCount = 1);
+                FramebufferObject(const unsigned int& width, const unsigned int& height, const ImageInternalFormat::Format&, const float& divisor = 1.0f, const unsigned int& swapBufferCount = 1);
                 virtual ~FramebufferObject();
+
+                void init(const unsigned int& width, const unsigned int& height, const float& divisor = 1.0f, const unsigned int& swapBufferCount = 1);
+                void init(const unsigned int& width, const unsigned int& height, const ImageInternalFormat::Format&, const float& divisor = 1.0f, const unsigned int& swapBufferCount = 1);
 
                 void resize(const unsigned int& width, const unsigned int& height);
                 FramebufferTexture* attatchTexture(Texture*, const FramebufferAttatchment::Attatchment);

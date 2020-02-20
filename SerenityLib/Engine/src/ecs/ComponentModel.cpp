@@ -306,9 +306,9 @@ void ComponentModel::setUserPointer(void* UserPointer) {
 struct priv::ComponentModel_UpdateFunction final { void operator()(void* componentPool, const float& dt, Scene& scene) const {
     auto& pool       = *static_cast<ECSComponentPool<Entity, ComponentModel>*>(componentPool);
     auto& components = pool.data();
-    auto lamda_update_component = [&](ComponentModel& componentModel) {
-        for (size_t i = 0; i < componentModel.getNumModels(); ++i) {
-            auto& modelInstance = componentModel[i];
+    auto lamda_update_component = [&](ComponentModel& componentModel, const size_t& i) {
+        for (size_t j = 0; j < componentModel.getNumModels(); ++j) {
+            auto& modelInstance = componentModel[j];
             //process the animations here
             modelInstance.m_AnimationVector.process(*modelInstance.mesh(), dt);
         }

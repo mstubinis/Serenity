@@ -196,10 +196,10 @@ void ShaderProgram::unload(){
         EngineResource::unload();
     }
 }
-void ShaderProgram::bind() {
-    Core::m_Engine->m_RenderManager._bindShaderProgram(this); 
+void ShaderProgram::bind() const {
+    Core::m_Engine->m_RenderManager._bindShaderProgram(const_cast<ShaderProgram*>(this)); 
 }
-void ShaderProgram::unbind(){ 
+void ShaderProgram::unbind() const {
     Core::m_Engine->m_RenderManager._unbindShaderProgram(); 
 }
 const unordered_map<string,GLint>& ShaderProgram::uniforms() const { 

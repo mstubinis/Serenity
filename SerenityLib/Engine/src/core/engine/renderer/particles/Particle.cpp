@@ -214,7 +214,7 @@ const double Particle::lifetime() const {
 
 
 
-void Particle::update(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem) {
+void Particle::update(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem, const bool multi_threaded) {
     if (m_Data.m_Active) {
         m_Data.m_Timer += dt;
         auto& prop      = *m_Data.m_Properties;
@@ -236,38 +236,17 @@ void Particle::update(const size_t& index, const float& dt, Engine::priv::Partic
             m_Data.m_Active  = false;
             m_Data.m_Timer   = 0.0;
             m_Hidden         = true;
-            particleSystem.m_ParticleFreelist.push(index);
+
+            if (multi_threaded) {
+                std::lock_guard lock(particleSystem.m_Mutex);
+                particleSystem.m_ParticleFreelist.push(index);
+            }else{
+                particleSystem.m_ParticleFreelist.push(index);
+            }
         }
     }
 }
-void Particle::update_multithreaded(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem) {
-    if (m_Data.m_Active) {
-        m_Data.m_Timer += dt;
-        auto& prop      = *m_Data.m_Properties;
 
-        m_Data.m_Scale           += prop.m_ChangeInScaleFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
-        m_Data.m_Color            = prop.m_ColorFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
-        m_Data.m_AngularVelocity += prop.m_ChangeInAngularVelocityFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
-        m_Data.m_Angle           += m_Data.m_AngularVelocity;
-        m_Data.m_Velocity        += prop.m_ChangeInVelocityFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
-        m_Data.m_Depth            = prop.m_DepthFunctor(m_Data.m_Timer, dt, m_EmitterSource, *this);
-
-        m_Position               += (m_Data.m_Velocity * dt);
-
-
-        auto& camera = *m_Scene->getActiveCamera();
-        auto vec = glm::normalize(m_Position - glm::vec3(camera.getPosition())) * m_Data.m_Depth;
-        m_Position += vec;
-        if (m_Data.m_Timer >= prop.m_Lifetime) {
-            m_Data.m_Active  = false;
-            m_Data.m_Timer   = 0.0;
-            m_Hidden         = true;
-
-            std::lock_guard lock(particleSystem.m_Mutex);
-            particleSystem.m_ParticleFreelist.push(index);
-        }
-    }
-}
 void Particle::render(const Engine::priv::GBuffer& gBuffer) {
     m_Material->bind();
 

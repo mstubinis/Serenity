@@ -4,13 +4,14 @@
 
 #include <string>
 #include <core/engine/renderer/RendererIncludes.h>
+#include <core/engine/renderer/postprocess/HDR.h>
 
 struct EngineOptions final {
     AntiAliasingAlgorithm::Algorithm   aa_algorithm;
     char**                             argv;
     int                                argc;
     bool                               ssao_enabled;
-    bool                               hdr_enabled;
+    unsigned int                       hdr;
 
     int                                window_mode; //0 = normal, 1 = fullscreen, 2 = windowed_fullscreen
 
@@ -29,14 +30,14 @@ struct EngineOptions final {
         width             = 1024;
         height            = 768;
         ssao_enabled      = true;
-        hdr_enabled       = true;
+        hdr               = HDRAlgorithm::None;
         god_rays_enabled  = true;
         vsync             = true;
         window_mode       = 0;
         fog_enabled       = false;
         show_console      = false;
         maximized         = false;
-        aa_algorithm      = AntiAliasingAlgorithm::FXAA;
+        aa_algorithm      = AntiAliasingAlgorithm::None;
         argc              = 0;
     }
 };

@@ -143,7 +143,7 @@ void EngineCore::init(const EngineOptions& options) {
 
     Engine::Renderer::ssao::enable(options.ssao_enabled);
     Engine::Renderer::godRays::enable(options.god_rays_enabled);
-    Engine::Renderer::hdr::enable(options.hdr_enabled);
+    Engine::Renderer::hdr::setAlgorithm(static_cast<HDRAlgorithm::Algorithm>(options.hdr));
     Engine::Renderer::fog::enable(options.fog_enabled);
     Engine::Renderer::Settings::setAntiAliasingAlgorithm(options.aa_algorithm);
 }
@@ -168,6 +168,7 @@ void EngineCore::update_physics(Window& window, const float& dt) {
 }
 void EngineCore::update_logic(Window& window, const float& dt){
     m_DebugManager.stop_clock();
+    window.on_dynamic_resize();
     Scene& scene = *Resources::getCurrentScene();
     auto& ecs = InternalScenePublicInterface::GetECS(scene); 
     ecs.preUpdate(scene, dt);
@@ -196,20 +197,6 @@ void EngineCore::update_sounds(Window& window, const float& dt){
 void EngineCore::update(Window& window, const float& dt){
     update_logic(window, dt);
     update_sounds(window, dt);
-}
-void EngineCore::render2DApi(Window& window, const float& dt) {
-    Game::render();
-    auto& scene = *Resources::getCurrentScene();
-    scene.render();
-    m_RenderManager._sort2DAPICommands();
-    auto& scene_viewports = InternalScenePublicInterface::GetViewports(scene);
-    for (auto& viewport : scene_viewports) {
-        if (viewport.isActive()) {
-            m_RenderManager._render2DApi(dt, viewport, true, 0, 0);
-        }
-    }
-    window.display();
-    m_RenderManager._clear2DAPICommands();
 }
 void EngineCore::render(Window& window, const float& dt){
     m_DebugManager.stop_clock();

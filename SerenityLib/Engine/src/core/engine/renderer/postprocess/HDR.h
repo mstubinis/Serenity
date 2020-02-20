@@ -6,7 +6,11 @@ class  ShaderProgram;
 class  Shader;
 
 struct HDRAlgorithm {enum Algorithm {
-    Reinhard, Filmic, Exposure, Uncharted,
+    None,
+    Reinhard, 
+    Filmic, 
+    Exposure, 
+    Uncharted,
 };};
 
 #include <string>
@@ -36,12 +40,13 @@ namespace Engine::priv {
     };
 };
 namespace Engine::Renderer::hdr {
-    const bool enabled();
-    void enable(const bool b = true);
-    void disable();
+    //const bool enabled();
+    //void enable(const bool b = true);
+    //void disable();
     const float getExposure();
     void setExposure(const float e);
     void setAlgorithm(const HDRAlgorithm::Algorithm a);
+    const HDRAlgorithm::Algorithm getAlgorithm();
 };
 
 

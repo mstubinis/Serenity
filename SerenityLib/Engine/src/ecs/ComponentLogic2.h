@@ -43,7 +43,7 @@ class ComponentLogic2 : public ComponentBaseClass, public Engine::NonCopyable {
 
         ~ComponentLogic2();
 
-        void call(const float& dt);
+        void call(const float& dt) const;
 
         template<typename T> void setFunctor(const T& functor) { 
             m_Functor = std::bind<void>(std::move(functor), this, std::placeholders::_1);

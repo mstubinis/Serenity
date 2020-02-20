@@ -82,7 +82,7 @@ const bool Engine::priv::GodRays::init_shaders() {
 }
 void Engine::priv::GodRays::pass(GBuffer& gbuffer, const unsigned int& fboWidth, const unsigned int& fboHeight,const glm::vec2& lightScrnPos,const float& alpha) {
     m_Shader_Program->bind();
-    const float& divisor = gbuffer.getSmallFBO()->divisor();
+    const float& divisor = gbuffer.getSmallFBO().divisor();
     Engine::Renderer::sendUniform4("RaysInfo", exposure, decay, density, weight);
     Engine::Renderer::sendUniform2("lightPositionOnScreen", lightScrnPos.x / static_cast<float>(fboWidth), lightScrnPos.y / static_cast<float>(fboHeight));
     Engine::Renderer::sendUniform1("samples", samples);

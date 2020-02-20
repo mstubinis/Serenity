@@ -19,6 +19,7 @@ namespace Engine::priv {
 #include <glm/vec4.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+
 struct ParticleData final {
     ParticleEmissionProperties*  m_Properties;
     glm::vec4                    m_UserData;
@@ -75,9 +76,7 @@ class Particle {
         const glm::vec4& color() const;
         const glm::vec3& velocity() const;
         const double lifetime() const;
-        void update(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem);
-        void update_multithreaded(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem);
-
+        void update(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem, const bool multi_threaded);
 
 
         void setUserDataX(const float x);

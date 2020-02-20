@@ -42,7 +42,7 @@ class ComponentLogic1 : public ComponentBaseClass {
 
         ~ComponentLogic1();
 
-        void call(const float& dt);
+        void call(const float& dt) const;
 
         template<typename T> void setFunctor(const T& functor) { 
             m_Functor = std::bind<void>(std::move(functor), this, std::placeholders::_1);

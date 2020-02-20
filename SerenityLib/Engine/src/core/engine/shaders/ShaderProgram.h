@@ -55,8 +55,8 @@ class ShaderProgram final: public BindableResource{
         void load() override;
         void unload() override;
 
-        void bind() override;
-        void unbind() override;
+        void bind() const override;
+        void unbind() const override;
 
         const GLuint& program() const;
 

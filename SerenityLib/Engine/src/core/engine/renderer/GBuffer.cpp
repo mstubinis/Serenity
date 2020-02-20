@@ -1,6 +1,5 @@
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/Renderer.h>
-#include <core/engine/renderer/FramebufferObject.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/scene/Camera.h>
@@ -9,30 +8,35 @@
 
 using namespace std;
 
-Engine::priv::GBuffer::GBuffer(const uint& width, const uint& height){
-    m_FBO = m_SmallFBO = nullptr;
+Engine::priv::GBuffer::GBuffer() {
+    m_Width = 0;
+    m_Height = 0;
+}
+
+
+void Engine::priv::GBuffer::init(const uint& width, const uint& height){
     internalDestruct(); //just incase this method is called on resize, we want to delete any previous buffers
 
     m_Width  = width;
     m_Height = height;
 
-    m_Buffers.resize(GBufferType::_TOTAL);
+    m_Buffers.resize(GBufferType::_TOTAL, nullptr);
 
-    m_FBO = NEW FramebufferObject("GBuffer_FBO", m_Width, m_Height, 1.0f, 2);
+    m_FBO.init(m_Width, m_Height, 1.0f, 2);
     internalBuildTextureBuffer(m_FBO, GBufferType::Diffuse, m_Width, m_Height);
     internalBuildTextureBuffer(m_FBO, GBufferType::Normal, m_Width, m_Height);
     internalBuildTextureBuffer(m_FBO, GBufferType::Misc, m_Width, m_Height);
     internalBuildTextureBuffer(m_FBO, GBufferType::Lighting, m_Width, m_Height);
     internalBuildTextureBuffer(m_FBO, GBufferType::Depth, m_Width, m_Height);
 
-    if (!m_FBO->check()) 
+    if (!m_FBO.check()) 
         return;
 
-    m_SmallFBO = NEW FramebufferObject("GBuffer_Small_FBO", m_Width, m_Height, 0.5f, 2);
+    m_SmallFBO.init(m_Width, m_Height, 0.5f, 2);
     internalBuildTextureBuffer(m_SmallFBO, GBufferType::Bloom, m_Width, m_Height);
     internalBuildTextureBuffer(m_SmallFBO, GBufferType::GodRays, m_Width, m_Height);
 
-    if (!m_SmallFBO->check()) 
+    if (!m_SmallFBO.check()) 
         return;
 
     //this should be better performance wise, but clean up this code a bit
@@ -55,15 +59,24 @@ Engine::priv::GBuffer::GBuffer(const uint& width, const uint& height){
 void Engine::priv::GBuffer::internalDestruct() {
     m_Width  = 0; 
     m_Height = 0;
-    SAFE_DELETE(m_FBO);
-    SAFE_DELETE(m_SmallFBO);
+    //SAFE_DELETE(m_FBO);
+    //SAFE_DELETE(m_SmallFBO);
     Engine::Renderer::unbindFBO();
     vector_clear(m_Buffers);
 }
 Engine::priv::GBuffer::~GBuffer(){
     internalDestruct();
 }
-void Engine::priv::GBuffer::internalBuildTextureBuffer(FramebufferObject* fbo, const GBufferType::Type gbufferType, const uint& w, const uint& h) {
+const bool Engine::priv::GBuffer::resize(const uint& width, const uint& height) {
+    if (m_Width == width && m_Height == height)
+        return false;
+    m_Width = width;
+    m_Height = height;
+    m_FBO.resize(width, height);
+    m_SmallFBO.resize(width, height);
+    return true;
+}
+void Engine::priv::GBuffer::internalBuildTextureBuffer(FramebufferObject& fbo, const GBufferType::Type gbufferType, const uint& w, const uint& h) {
     vector<boost::tuple<ImageInternalFormat::Format, ImagePixelFormat::Format, ImagePixelType::Type, FramebufferAttatchment::Attatchment>> GBUFFER_TYPE_DATA = []() {
         vector<boost::tuple<ImageInternalFormat::Format, ImagePixelFormat::Format, ImagePixelType::Type, FramebufferAttatchment::Attatchment>> m;
         m.resize(static_cast<uint>(GBufferType::_TOTAL));
@@ -83,21 +96,11 @@ void Engine::priv::GBuffer::internalBuildTextureBuffer(FramebufferObject* fbo, c
     const auto i = GBUFFER_TYPE_DATA[gbufferType];
 
     const auto attatchment = i.get<3>();
-    Texture* texture = NEW Texture(w, h, i.get<2>(), i.get<1>(), i.get<0>(), fbo->divisor());
-    m_Buffers[static_cast<uint>(gbufferType)] = fbo->attatchTexture(texture, attatchment);
-}
-const bool Engine::priv::GBuffer::resize(const uint& width, const uint& height) {
-    if (m_Width == width && m_Height == height)
-        return false;
-    m_Width = width;
-    m_Height = height;
-    m_FBO->resize(width, height);
-    m_SmallFBO->resize(width, height);
-    return true;
+    Texture* texture = NEW Texture(w, h, i.get<2>(), i.get<1>(), i.get<0>(), fbo.divisor());
+    m_Buffers[static_cast<uint>(gbufferType)] = fbo.attatchTexture(texture, attatchment);
 }
 void Engine::priv::GBuffer::internalStart(const unsigned int* types, const unsigned int& size, const string& channels, const bool first_fbo) {
-    if (first_fbo) { m_FBO->bind(); }
-    else { m_SmallFBO->bind(); }
+     (first_fbo) ? m_FBO.bind() : m_SmallFBO.bind();
     bool r, g, b, a;
     channels.find("R") != string::npos ? r = true : r = false;
     channels.find("G") != string::npos ? g = true : g = false;
@@ -143,9 +146,9 @@ Texture& Engine::priv::GBuffer::getTexture(const uint t) const {
 Engine::priv::FramebufferTexture& Engine::priv::GBuffer::getBuffer(const uint t) const {
     return *m_Buffers[t]; 
 }
-Engine::priv::FramebufferObject* Engine::priv::GBuffer::getMainFBO() const {
+const Engine::priv::FramebufferObject& Engine::priv::GBuffer::getMainFBO() const {
     return m_FBO; 
 }
-Engine::priv::FramebufferObject* Engine::priv::GBuffer::getSmallFBO() const {
+const Engine::priv::FramebufferObject& Engine::priv::GBuffer::getSmallFBO() const {
     return m_SmallFBO; 
 }

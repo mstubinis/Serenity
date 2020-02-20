@@ -5,6 +5,26 @@
 #include <locale>
 #include <stdint.h>
 
+#if _WIN32 || _WIN64
+    #if _WIN64
+        #define ENVIRONMENT64
+    #else
+        #define ENVIRONMENT32
+    #endif
+#endif
+
+#if __GNUC__
+    #if __x86_64__ || __ppc64__
+        #define ENVIRONMENT64
+    #else
+        #define ENVIRONMENT32
+    #endif
+#endif
+
+#ifdef ENVIRONMENT64
+#else
+#endif
+
 #ifdef _DEBUG
     // Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the allocations to be of _CLIENT_BLOCK type
     #define _CRTDBG_MAP_ALLOC

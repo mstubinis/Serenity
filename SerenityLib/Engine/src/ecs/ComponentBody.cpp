@@ -18,6 +18,7 @@
 
 #include <BulletCollision/Gimpact/btGImpactShape.h>
 
+
 #include <iostream>
 
 using namespace Engine;
@@ -1082,7 +1083,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_Compon
     auto& components        = pool.data();
     const decimal double_dt = static_cast<decimal>(dt);
 
-    auto lamda_update_component = [double_dt](ComponentBody& b) {
+    auto lamda_update_component = [double_dt](ComponentBody& b, const size_t& i) {
         if (b.m_Physics) {
             auto& rigidBody = *b.data.p->bullet_rigidBody;
             Engine::Math::recalculateForwardRightUp(rigidBody, b.m_Forward, b.m_Right, b.m_Up);
@@ -1097,6 +1098,34 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_Compon
         }
     };
     priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);
+
+
+
+#ifdef _DEBUG
+    for (auto& componentBody : components) {
+        auto* model = componentBody.getOwner().getComponent<ComponentModel>();
+        if (model) {
+            const auto world_pos = glm::vec3(componentBody.position());
+            const auto world_rot = glm::quat(componentBody.rotation());
+            const auto world_scl = glm::vec3(componentBody.getScale());
+            for (size_t i = 0; i < model->getNumModels(); ++i) {
+                auto& modelInstance = (*model)[i];
+
+                const auto rotation = world_rot * modelInstance.orientation();
+                const auto fwd      = Math::getForward(rotation);
+                const auto right    = Math::getRight(rotation);
+                const auto up       = Math::getUp(rotation);
+
+                auto& physics = Engine::priv::Core::m_Engine->m_PhysicsManager;
+                physics.debug_draw_line(world_pos, (world_pos+fwd) * glm::length(world_scl), 1, 0, 0, 1);
+                physics.debug_draw_line(world_pos, (world_pos+right) * glm::length(world_scl), 0, 1, 0, 1);
+                physics.debug_draw_line(world_pos, (world_pos+up) * glm::length(world_scl), 0, 0, 1, 1);
+            }
+        }
+    }
+#endif
+
+
 }};
 struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* p_Component, Entity& p_Entity) const {
 }};
