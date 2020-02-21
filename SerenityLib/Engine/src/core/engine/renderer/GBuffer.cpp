@@ -15,10 +15,13 @@ Engine::priv::GBuffer::GBuffer() {
 
 
 void Engine::priv::GBuffer::init(const uint& width, const uint& height){
-    internalDestruct(); //just incase this method is called on resize, we want to delete any previous buffers
+    //internalDestruct(); //just incase this method is called on resize, we want to delete any previous buffers
 
     m_Width  = width;
     m_Height = height;
+
+    m_FBO.cleanup();
+    m_SmallFBO.cleanup();
 
     m_Buffers.resize(GBufferType::_TOTAL, nullptr);
 
@@ -29,15 +32,17 @@ void Engine::priv::GBuffer::init(const uint& width, const uint& height){
     internalBuildTextureBuffer(m_FBO, GBufferType::Lighting, m_Width, m_Height);
     internalBuildTextureBuffer(m_FBO, GBufferType::Depth, m_Width, m_Height);
 
-    if (!m_FBO.check()) 
+    if (!m_FBO.check()) {
         return;
+    }
 
-    m_SmallFBO.init(m_Width, m_Height, 1.0f, 2);
+    m_SmallFBO.init(m_Width, m_Height, 0.5f, 2);
     internalBuildTextureBuffer(m_SmallFBO, GBufferType::Bloom, m_Width, m_Height);
     internalBuildTextureBuffer(m_SmallFBO, GBufferType::GodRays, m_Width, m_Height);
 
-    if (!m_SmallFBO.check()) 
+    if (!m_SmallFBO.check()) {
         return;
+    }
 
     //this should be better performance wise, but clean up this code a bit
     auto& depthTexture = m_Buffers[GBufferType::Depth]->texture();

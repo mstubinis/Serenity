@@ -90,9 +90,6 @@ namespace Renderer{
     void restoreDefaultOpenGLState();
     void restoreCurrentOpenGLState();
 
-    void renderFullscreenQuad(const uint& width, const uint& height, const uint& startX = 0, const uint& startY = 0);
-    void renderFullscreenTriangle(const uint& width, const uint& height, const uint& startX = 0, const uint& startY = 0);
-
     void renderFullscreenQuad();
     void renderFullscreenTriangle();
 

@@ -183,7 +183,6 @@ void EngineCore::render(Window& window, const float& dt){
     window.display();
     m_RenderManager._clear2DAPICommands();
     m_DebugManager.calculate_render();
-    std::cout << m_DebugManager.renderTime() * 1000.0 << "\n";
 }
 void EngineCore::cleanup(Window& window, const float& dt) {
     m_ResourceManager.onPostUpdate();
@@ -196,7 +195,7 @@ void EngineCore::on_event_resize(Window& window, const unsigned int& newWindowWi
         window.m_Data.m_VideoMode.width = newWindowWidth;
         window.m_Data.m_VideoMode.height = newWindowHeight;
     }
-    //resize cameras here
+    //resize cameras and viewports here
     for (auto& scene : m_ResourceManager.scenes()) {
         if (scene) {
             scene->onResize(newWindowWidth, newWindowHeight);

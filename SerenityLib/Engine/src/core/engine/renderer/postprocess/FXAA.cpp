@@ -109,7 +109,7 @@ void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, const 
     Engine::Renderer::sendTextureSafe("edgeTexture", gbuffer.getTexture(GBufferType::Misc), 1);
     Engine::Renderer::sendTexture("depthTexture", gbuffer.getTexture(GBufferType::Depth), 2);
 
-    Engine::Renderer::renderFullscreenTriangle(0,0, dimensions.z, dimensions.w);
+    Engine::Renderer::renderFullscreenQuad();
 }
 void Engine::Renderer::fxaa::setReduceMin(const float r) {
     Engine::priv::FXAA::fxaa.reduce_min = glm::max(0.0f, r);

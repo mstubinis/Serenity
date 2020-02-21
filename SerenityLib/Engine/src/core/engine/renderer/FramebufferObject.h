@@ -91,6 +91,8 @@ namespace Engine{
                 void init(const unsigned int& width, const unsigned int& height, const float& divisor = 1.0f, const unsigned int& swapBufferCount = 1);
                 void init(const unsigned int& width, const unsigned int& height, const ImageInternalFormat::Format&, const float& divisor = 1.0f, const unsigned int& swapBufferCount = 1);
 
+                void cleanup();
+
                 void resize(const unsigned int& width, const unsigned int& height);
                 FramebufferTexture* attatchTexture(Texture*, const FramebufferAttatchment::Attatchment);
                 RenderbufferObject* attatchRenderBuffer(RenderbufferObject&);

@@ -162,8 +162,8 @@ class priv::Renderer::impl final{
         glm::vec3           m_RotationAxis2D;
         glm::mat4           m_IdentityMat4;
         glm::mat3           m_IdentityMat3;
-        FullscreenQuad*     m_FullscreenQuad;
-        FullscreenTriangle* m_FullscreenTriangle;
+        FullscreenQuad      m_FullscreenQuad;
+        FullscreenTriangle  m_FullscreenTriangle;
         #pragma endregion
 
         #pragma region EngineInternalShadersAndPrograms
@@ -347,8 +347,8 @@ class priv::Renderer::impl final{
             Texture::BRDF = NEW Texture(512,512,ImagePixelType::FLOAT,ImagePixelFormat::RG,ImageInternalFormat::RG16F);
             Texture::BRDF->setWrapping(TextureWrap::ClampToEdge);
 
-            m_FullscreenQuad = NEW FullscreenQuad();
-            m_FullscreenTriangle = NEW FullscreenTriangle();
+            m_FullscreenQuad.init();
+            m_FullscreenTriangle.init();
 
             SSAO::ssao.init();
 
@@ -365,9 +365,6 @@ class priv::Renderer::impl final{
         }
         void _destruct(){
             SAFE_DELETE(UniformBufferObject::UBO_CAMERA);
-
-            SAFE_DELETE(m_FullscreenQuad);
-            SAFE_DELETE(m_FullscreenTriangle);
 
             SAFE_DELETE(Texture::White);
             SAFE_DELETE(Texture::Black);
@@ -406,6 +403,10 @@ class priv::Renderer::impl final{
         }
         void _resize(const uint& w, const uint& h){
             m_2DProjectionMatrix = glm::ortho(0.0f, static_cast<float>(w), 0.0f, static_cast<float>(h), 0.005f, 3000.0f);
+
+            m_FullscreenQuad.changeDimensions(static_cast<float>(w), static_cast<float>(h));
+            m_FullscreenTriangle.changeDimensions(static_cast<float>(w), static_cast<float>(h));
+
             m_GBuffer.resize(w, h);
         }
 
@@ -491,7 +492,7 @@ class priv::Renderer::impl final{
             Engine::Renderer::sendUniform1("NUM_SAMPLES", 256);
             Engine::Renderer::Settings::clear(true, true, false);
             Engine::Renderer::colorMask(true, true, false, false);
-            Engine::Renderer::renderFullscreenTriangle(0,0,brdfSize, brdfSize);
+            Engine::Renderer::renderFullscreenQuad();
             Engine::Renderer::colorMask(true, true, true, true);
         }
         void _renderTextLeft(const string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
@@ -643,7 +644,7 @@ class priv::Renderer::impl final{
                 x = 0.0f;
             }
         }
-        void _renderSunLight(Camera& c, SunLight& s) {
+        void _renderSunLight(Camera& c, SunLight& s, const Viewport& viewport) {
             if (!s.isActive())
                 return;
             auto& body = *s.getComponent<ComponentBody>();
@@ -653,7 +654,7 @@ class priv::Renderer::impl final{
             Engine::Renderer::sendUniform4("light.DataD", s.m_Color.x, s.m_Color.y, s.m_Color.z, static_cast<float>(s.m_Type));
             Engine::Renderer::sendUniform1Safe("Type", 0.0f);
 
-            Engine::Renderer::renderFullscreenTriangle();
+            Engine::Renderer::renderFullscreenQuad();
         }
         void _renderPointLight(Camera& c, PointLight& p) {
             if (!p.isActive()) 
@@ -688,7 +689,7 @@ class priv::Renderer::impl final{
             pointLightMesh.unbind();
             Engine::Renderer::cullFace(GL_BACK);
         }
-        void _renderDirectionalLight(Camera& c, DirectionalLight& d) {
+        void _renderDirectionalLight(Camera& c, DirectionalLight& d, const Viewport& viewport) {
             if (!d.isActive()) 
                 return;
             auto& body = *d.getComponent<ComponentBody>();
@@ -697,7 +698,8 @@ class priv::Renderer::impl final{
             Engine::Renderer::sendUniform4("light.DataB", _forward.y, _forward.z, 0.0f, 0.0f);
             Engine::Renderer::sendUniform4("light.DataD", d.m_Color.x, d.m_Color.y, d.m_Color.z, static_cast<float>(d.m_Type));
             Engine::Renderer::sendUniform1Safe("Type", 0.0f);
-            Engine::Renderer::renderFullscreenTriangle();
+
+            Engine::Renderer::renderFullscreenQuad();
         }
         void _renderSpotLight(Camera& c, SpotLight& s) {
             if (!s.isActive()) 
@@ -859,16 +861,14 @@ class priv::Renderer::impl final{
 
             Engine::Renderer::sendTexture("gDepthMap", gbuffer.getTexture(GBufferType::Depth), 0);
 
-            const auto& dimensions = viewport.getViewportDimensions();
-
-            _renderFullscreenTriangle(0,0, dimensions.z, dimensions.w);
+            Engine::Renderer::renderFullscreenQuad();
             Engine::Renderer::colorMask(true, true, true, true);
         }
         void _passLighting(GBuffer& gbuffer, const Viewport& viewport, Camera& camera, const bool mainRenderFunc){
             Scene& scene = *viewport.m_Scene;
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredLighting]->bind();
 
-            const auto& dimensions = viewport.getViewportDimensions();
+            const auto& winSize = glm::vec2(Engine::Resources::getWindowSize());
 
             if(Renderer::GLSL_VERSION < 140){
                 Engine::Renderer::sendUniformMatrix4Safe("CameraView", camera.getView());
@@ -882,7 +882,7 @@ class priv::Renderer::impl final{
             }
 
             Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, static_cast<uint>(Material::m_MaterialProperities.size()));
-            Engine::Renderer::sendUniform4("ScreenData", 0.0f, gamma, dimensions.z, dimensions.w);
+            Engine::Renderer::sendUniform4Safe("ScreenData", 0.0f, gamma, winSize.x, winSize.y);
 
             Engine::Renderer::sendTexture("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 0);
             Engine::Renderer::sendTexture("gNormalMap", gbuffer.getTexture(GBufferType::Normal), 1);
@@ -904,10 +904,10 @@ class priv::Renderer::impl final{
             Engine::Renderer::setDepthFunc(GL_LEQUAL);
             Engine::Renderer::GLDisable(GL_DEPTH_TEST);
             for (const auto& light : InternalScenePublicInterface::GetSunLights(scene)) {
-                _renderSunLight(camera, *light);
+                _renderSunLight(camera, *light, viewport);
             }
             for (const auto& light : InternalScenePublicInterface::GetDirectionalLights(scene)) {
-                _renderDirectionalLight(camera, *light);
+                _renderDirectionalLight(camera, *light, viewport);
             }
 
             if(mainRenderFunc){
@@ -922,7 +922,7 @@ class priv::Renderer::impl final{
                 }
                 
                 Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, static_cast<uint>(Material::m_MaterialProperities.size()));
-                Engine::Renderer::sendUniform4("ScreenData", lighting_gi_pack, gamma, dimensions.z, dimensions.w);
+                Engine::Renderer::sendUniform4Safe("ScreenData", lighting_gi_pack, gamma, winSize.x, winSize.y);
                 Engine::Renderer::sendTexture("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 0);
                 Engine::Renderer::sendTexture("gNormalMap", gbuffer.getTexture(GBufferType::Normal), 1);
                 Engine::Renderer::sendTexture("gDepthMap", gbuffer.getTexture(GBufferType::Depth), 2);
@@ -938,7 +938,7 @@ class priv::Renderer::impl final{
                     Engine::Renderer::sendTextureSafe("prefilterMap", Texture::Black->address(0), 6, GL_TEXTURE_2D);
                     Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF, 7);
                 }
-                _renderFullscreenTriangle(0, 0, dimensions.z, dimensions.w);
+                Engine::Renderer::renderFullscreenQuad();
             }
         }
         void _passStencil(GBuffer& gbuffer, const Viewport& viewport){
@@ -955,12 +955,9 @@ class priv::Renderer::impl final{
             //exclude shadeless normals
             Engine::Renderer::stencilOp(GL_KEEP, GL_INCR_WRAP, GL_INCR_WRAP);
 
-            const auto& dimensions = viewport.getViewportDimensions();
-
-
             Engine::Renderer::sendTexture("gNormalMap",gbuffer.getTexture(GBufferType::Normal),0);
             Engine::Renderer::sendUniform1("Type",0.0f);
-            _renderFullscreenTriangle(0, 0, dimensions.z, dimensions.w);
+            Engine::Renderer::renderFullscreenQuad();
 
             Engine::Renderer::stencilMask(0xFFFFFFFF);
             Engine::Renderer::stencilFunc(GL_NOTEQUAL, 0x00000000, 0xFFFFFFFF);
@@ -989,16 +986,12 @@ class priv::Renderer::impl final{
             Engine::Renderer::sendUniform4("DataA", bloom.blur_radius,0.0f,hv.x,hv.y);
             Engine::Renderer::sendTexture("image",gbuffer.getTexture(texture),0);
 
-            const uint screen_width = static_cast<uint>(static_cast<float>(dimensions.z) * divisor);
-            const uint screen_height = static_cast<uint>(static_cast<float>(dimensions.w) * divisor);
-            _renderFullscreenTriangle(0, 0, screen_width, screen_height);
+            Engine::Renderer::renderFullscreenQuad();
         }
         void _passFinal(GBuffer& gbuffer, const Viewport& viewport, GBufferType::Type sceneTexture){
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DeferredFinal]->bind();
             Engine::Renderer::sendUniform1Safe("HasBloom", static_cast<int>(Bloom::bloom.bloom_active));
             Engine::Renderer::sendUniform1Safe("HasFog", static_cast<int>(Fog::fog.fog_active));
-
-            const auto& dimensions = viewport.getViewportDimensions();
 
             if(Fog::fog.fog_active){
                 Engine::Renderer::sendUniform1Safe("FogDistNull", Fog::fog.distNull);
@@ -1009,12 +1002,10 @@ class priv::Renderer::impl final{
             Engine::Renderer::sendTextureSafe("SceneTexture", gbuffer.getTexture(sceneTexture), 0);
             Engine::Renderer::sendTextureSafe("gBloomMap", gbuffer.getTexture(GBufferType::Bloom), 1);
             Engine::Renderer::sendTextureSafe("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 2);
-            _renderFullscreenTriangle(0, 0, dimensions.z, dimensions.w);
+            Engine::Renderer::renderFullscreenQuad();
         }
         void _passDepthAndTransparency(GBuffer& gbuffer , const Viewport& viewport, Camera& camera, GBufferType::Type sceneTexture) {
             m_InternalShaderPrograms[EngineInternalShaderPrograms::DepthAndTransparency]->bind();
-
-            const auto& dimensions = viewport.getViewportDimensions();
 
             Engine::Renderer::sendTextureSafe("SceneTexture", gbuffer.getTexture(sceneTexture), 0);
             Engine::Renderer::sendTextureSafe("gDepthMap", gbuffer.getTexture(GBufferType::Depth), 1);
@@ -1027,42 +1018,45 @@ class priv::Renderer::impl final{
             Engine::Renderer::sendUniform1Safe("DepthMaskValue", viewport.getDepthMaskValue());
             Engine::Renderer::sendUniform1Safe("DepthMaskActive", static_cast<int>(viewport.isDepthMaskActive()));
 
-            _renderFullscreenTriangle(0, 0, dimensions.z, dimensions.w);
+            Engine::Renderer::renderFullscreenQuad();
 
             Engine::Renderer::GLDisable(GL_BLEND);
         }
-        void _renderFullscreenQuad(const uint& x, const uint& y, const uint& width, const uint& height){
-            const float w2 = static_cast<float>(width) * 0.5f;
-            const float h2 = static_cast<float>(height) * 0.5f;
-            const glm::mat4 p = glm::ortho(-w2, w2, -h2, h2);
+        
+        
+        void _renderFullscreenQuad(){
+            const auto& winSize = glm::vec2(Resources::getWindowSize());
+
+            const glm::mat4 p = glm::ortho(0.0f, winSize.x, 0.0f, winSize.y);
             Engine::Renderer::sendUniformMatrix4("Model", m_IdentityMat4);
-            Engine::Renderer::sendUniformMatrix4("VP", p);
-            Engine::Renderer::sendUniform2("screenSizeDivideBy2", w2, h2);
-            m_FullscreenQuad->render();
+            Engine::Renderer::sendUniformMatrix4Safe("VP", p);
+            Engine::Renderer::sendUniform2Safe("screenSizeDivideBy2", 1.0f, 1.0f);
+
+            m_FullscreenQuad.render();
         }
-        void _renderFullscreenTriangle(const uint& x, const uint& y, const uint& width, const uint& height){
-            const float w2 = static_cast<float>(width) * 0.5f;
-            const float h2 = static_cast<float>(height) * 0.5f;
-            const glm::mat4 p = glm::ortho(-w2, w2, -h2, h2);
+        
+        
+        void _renderFullscreenTriangle(){
+            const auto& winSize = glm::vec2(Resources::getWindowSize());
+
+            const glm::mat4 p = glm::ortho(0.0f, winSize.x, 0.0f, winSize.y);
             Engine::Renderer::sendUniformMatrix4("Model", m_IdentityMat4);
-            Engine::Renderer::sendUniformMatrix4("VP", p);
-            Engine::Renderer::sendUniform2("screenSizeDivideBy2", w2, h2);
-            m_FullscreenTriangle->render();
+            Engine::Renderer::sendUniformMatrix4Safe("VP", p);
+            Engine::Renderer::sendUniform2Safe("screenSizeDivideBy2", 1.0f, 1.0f);
+            m_FullscreenTriangle.render();
         }
         
         void _startupRenderFrame(GBuffer& gbuffer, const Viewport& viewport, Camera& camera) {
             const auto& winSize = Resources::getWindowSize();
-            const auto& dimensions = viewport.getViewportDimensions();
+            const auto& dimensions = glm::vec4(viewport.getViewportDimensions());
             if (viewport.isAspectRatioSynced()) {
-                camera.setAspect(dimensions.z / static_cast<float>(dimensions.w));
+                camera.setAspect(dimensions.z / dimensions.w);
             }
-            gbuffer.resize(dimensions.z, dimensions.w);
-            Engine::Renderer::setViewport(static_cast<float>(dimensions.x), static_cast<float>(dimensions.y), static_cast<float>(dimensions.z), static_cast<float>(dimensions.w));
-            //scissor disabling
+            //Engine::Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w); //gbuffer.bind already does this
             glScissor(0, 0, winSize.x, winSize.y);
 
-            m_2DProjectionMatrix = glm::ortho(0.0f, static_cast<float>(winSize.x), 0.0f, static_cast<float>(winSize.y), 0.005f, 3000.0f);
-            //this is god awful and ugly, but its needed. definately find a way to refactor this properly
+            m_2DProjectionMatrix = glm::ortho(0.0f, dimensions.z, 0.0f, dimensions.w, 0.005f, 3000.0f); //might have to recheck this
+            //this is god awful and ugly, but it's needed. find a way to refactor this properly
             for (uint i = 0; i < 9; ++i) {
                 glActiveTexture(GL_TEXTURE0 + i);
                 glBindTexture(GL_TEXTURE_2D, 0);
@@ -1241,11 +1235,8 @@ class priv::Renderer::impl final{
 
                 std::swap(sceneTexture, outTexture);
 
-                const auto& dimensions = viewport.getViewportDimensions();
-
-                const float& _fboWidth  = static_cast<float>(dimensions.z);
-                const float& _fboHeight = static_cast<float>(dimensions.w);
-                const glm::vec4& SMAA_PIXEL_SIZE = glm::vec4(1.0f / dimensions.z, 1.0f / dimensions.w, dimensions.z, dimensions.w);
+                const auto winSize = glm::vec2(Resources::getWindowSize());
+                const glm::vec4& SMAA_PIXEL_SIZE = glm::vec4(1.0f / winSize.x, 1.0f / winSize.y, winSize.x, winSize.y);
 
                 SMAA::smaa.passEdge(gbuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, outTexture);
                 SMAA::smaa.passBlend(gbuffer, SMAA_PIXEL_SIZE, viewport, outTexture);
@@ -1265,12 +1256,16 @@ class priv::Renderer::impl final{
             #pragma region RenderPhysics
             Engine::Renderer::GLEnablei(GL_BLEND, 0);
             if(mainRenderFunc && (viewport.getRenderFlags() & ViewportRenderingFlag::PhysicsDebug)){
-                if(draw_physics_debug  &&  &camera == scene.getActiveCamera()){
-                    Engine::Renderer::GLDisable(GL_DEPTH_TEST);
-                    glDepthMask(GL_FALSE);
-                    m_InternalShaderPrograms[EngineInternalShaderPrograms::BulletPhysics]->bind();
-                    Core::m_Engine->m_PhysicsManager._render(camera);
-                }
+                #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
+                    if(draw_physics_debug  &&  &camera == scene.getActiveCamera()){
+                #endif
+                        Engine::Renderer::GLDisable(GL_DEPTH_TEST);
+                        glDepthMask(GL_FALSE);
+                        m_InternalShaderPrograms[EngineInternalShaderPrograms::BulletPhysics]->bind();
+                        Core::m_Engine->m_PhysicsManager._render(camera);
+                #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
+                    }
+                #endif
             }
             #pragma endregion
          
@@ -1824,17 +1819,10 @@ void Renderer::renderBorder(const float borderSize, const glm::vec2& pos, const 
     Renderer::renderRectangle(newPos + glm::vec2(0.0f, halfHeight + borderSize), col, w, borderSize, angle, depth,Alignment::BottomCenter, scissor);
 }
 
-void Renderer::renderFullscreenQuad(const uint& y, const uint& x, const uint& width, const uint& height) {
-    renderManagerImpl->_renderFullscreenQuad(x, y, width, height);
-}
-void Renderer::renderFullscreenTriangle(const uint& x, const uint& y, const uint& width, const uint& height) {
-    renderManagerImpl->_renderFullscreenTriangle(x, y, width, height);
-}
 void Renderer::renderFullscreenQuad() {
-    const auto& size = Resources::getWindowSize();
-    renderManagerImpl->_renderFullscreenQuad(0, 0, size.x, size.y);
+    renderManagerImpl->_renderFullscreenQuad();
 }
+
 void Renderer::renderFullscreenTriangle() {
-    const auto& size = Resources::getWindowSize();
-    renderManagerImpl->_renderFullscreenTriangle(0, 0, size.x, size.y);
+    renderManagerImpl->_renderFullscreenTriangle();
 }

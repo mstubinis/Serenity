@@ -10,11 +10,13 @@
 
 typedef unsigned short ushort;
 
-namespace Engine{
-namespace priv{
+namespace Engine::priv{
     struct MeshVertexDataFullscreen final {
         glm::vec3 position;
         glm::vec2 uv;
+
+        MeshVertexDataFullscreen() {}
+        ~MeshVertexDataFullscreen() {}
     };
     class FullscreenTriangle final: public EventObserver{
         private:
@@ -28,6 +30,10 @@ namespace priv{
         public:
             FullscreenTriangle();
             ~FullscreenTriangle();
+
+            void init();
+
+            void changeDimensions(const float width, const float height);
 
             void render();
             void onEvent(const Event& e);
@@ -45,9 +51,12 @@ namespace priv{
             FullscreenQuad();
             ~FullscreenQuad();
 
+            void init();
+
+            void changeDimensions(const float width, const float height);
+
             void render();
             void onEvent(const Event& e);
     };
-};
 };
 #endif

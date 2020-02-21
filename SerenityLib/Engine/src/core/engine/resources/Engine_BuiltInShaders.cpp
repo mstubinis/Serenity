@@ -125,7 +125,7 @@ priv::EShaders::lighting_vert =
     "uniform mat4 VP;\n"
     "uniform vec2 VertexShaderData;\n" //x = outercutoff, y = radius
     "uniform float Type;\n" // 2.0 = spot light. 1.0 = any other light. 0.0 = fullscreen quad / triangle
-    "uniform vec2 screenSizeDivideBy2;\n"  //x = width/2, y = height/2
+    "uniform vec2 screenSizeDivideBy2;\n"  //x = width, y = height
     "\n"
     "varying vec2 texcoords;\n"
     "flat varying vec3 CamRealPosition;\n"
@@ -148,8 +148,8 @@ priv::EShaders::lighting_vert =
     "        ModelClone[3][1] -= CameraRealPosition.y;\n"
     "        ModelClone[3][2] -= CameraRealPosition.z;\n"
     "    }else if(Type == 0.0){\n" //fullscreen quad / triangle
-    "        vert.x *= screenSizeDivideBy2.x;\n"
-    "        vert.y *= screenSizeDivideBy2.y;\n"
+    "        vert.x *= (screenSizeDivideBy2.x );\n"
+    "        vert.y *= (screenSizeDivideBy2.y );\n"
     "    }\n"
     "    texcoords = uv;\n"
     "    CamRealPosition = CameraRealPosition;\n"
@@ -1202,7 +1202,6 @@ priv::EShaders::lighting_frag_gi =
     "    return ret;\n"
     "}\n"
     "void main(){\n"
-    //"  //vec2 uv = texcoords;\n" //this cannot be used for non fullscreen quad meshes
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);\n"
     "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
     "    float Glow = texture2D(gMiscMap, uv).r;\n"

@@ -16,12 +16,14 @@ ThreadPoolFuture::ThreadPoolFuture(std::future<void>&& future, std::function<voi
 }
 ThreadPoolFuture::ThreadPoolFuture(ThreadPoolFuture&& other) noexcept {
     m_Future   = std::move(other.m_Future);
-    m_Callback = std::move(other.m_Callback);
+    //m_Callback = std::move(other.m_Callback);
+    m_Callback.swap(other.m_Callback);
 }
 ThreadPoolFuture& ThreadPoolFuture::operator=(ThreadPoolFuture&& other) noexcept {
     if (&other != this) {
         m_Future   = std::move(other.m_Future);
-        m_Callback = std::move(other.m_Callback);
+        //m_Callback = std::move(other.m_Callback);
+        m_Callback.swap(other.m_Callback);
     }
     return *this;
 }
@@ -41,6 +43,7 @@ void ThreadPoolFuture::operator()() const {
 
 ThreadPool::ThreadPool() {
     m_Stopped = true;
+    m_Futures.reserve(500);
 }
 ThreadPool::~ThreadPool() {
     shutdown();

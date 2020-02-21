@@ -362,7 +362,9 @@ void DeferredPipeline::internal_generate_brdf_lut(ShaderProgram& program, const 
     Engine::Renderer::sendUniform1("NUM_SAMPLES", 256);
     Engine::Renderer::Settings::clear(true, true, false);
     Engine::Renderer::colorMask(true, true, false, false);
-    Engine::Renderer::renderFullscreenTriangle(brdfSize, brdfSize);
+
+    Engine::Renderer::renderFullscreenQuad();
+
     Engine::Renderer::colorMask(true, true, true, true);
 }
 void DeferredPipeline::onPipelineChanged() {
@@ -415,7 +417,7 @@ void DeferredPipeline::renderSkybox(Skybox* skybox, ShaderProgram& shaderProgram
     //could also change sendTexture("Texture", skybox->texture()->address(0),0, GL_TEXTURE_CUBE_MAP); above to use a different slot...
 }
 //DONE
-void DeferredPipeline::renderDirectionalLight(const Camera& c, const DirectionalLight& d) {
+void DeferredPipeline::renderDirectionalLight(const Camera& c, const DirectionalLight& d, const Viewport& viewport) {
     if (!d.isActive())
         return;
     const auto& body    = *d.getComponent<ComponentBody>();
@@ -425,10 +427,11 @@ void DeferredPipeline::renderDirectionalLight(const Camera& c, const Directional
     sendUniform4("light.DataB", forward.y, forward.z, 0.0f, 0.0f);
     sendUniform4("light.DataD", col.x, col.y, col.z, static_cast<float>(d.type()));
     sendUniform1Safe("Type", 0.0f);
-    renderFullscreenTriangle();
+
+    renderFullscreenQuad();
 }
 //DONE
-void DeferredPipeline::renderSunLight(const Camera& c, const SunLight& s) {
+void DeferredPipeline::renderSunLight(const Camera& c, const SunLight& s, const Viewport& viewport) {
     if (!s.isActive())
         return;
     const auto& body = *s.getComponent<ComponentBody>();
@@ -438,7 +441,8 @@ void DeferredPipeline::renderSunLight(const Camera& c, const SunLight& s) {
     sendUniform4("light.DataC", 0.0f, pos.x, pos.y, pos.z);
     sendUniform4("light.DataD", col.x, col.y, col.z, static_cast<float>(s.type()));
     sendUniform1Safe("Type", 0.0f);
-    renderFullscreenTriangle();
+
+    renderFullscreenQuad();
 }
 //DONE
 void DeferredPipeline::renderPointLight(const Camera& c, const PointLight& p) {

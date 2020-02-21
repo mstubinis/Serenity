@@ -90,9 +90,7 @@ void Engine::priv::GodRays::pass(GBuffer& gbuffer, const Viewport& viewport, con
     Engine::Renderer::sendUniform1("alpha", alpha);
     Engine::Renderer::sendTexture("firstPass", gbuffer.getTexture(GBufferType::Misc), 0);
 
-    const unsigned int& screen_width = static_cast<unsigned int>(static_cast<float>(dimensions.z) * divisor);
-    const unsigned int& screen_height = static_cast<unsigned int>(static_cast<float>(dimensions.w) * divisor);
-    Engine::Renderer::renderFullscreenTriangle(0,0,screen_width, screen_height);
+    Engine::Renderer::renderFullscreenQuad();
 }
 const bool Engine::Renderer::godRays::enabled() {
     return Engine::priv::GodRays::godRays.godRays_active;

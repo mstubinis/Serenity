@@ -36,9 +36,9 @@ namespace Engine::priv {
             virtual void onOpenGLContextCreation() = 0;
 
             virtual void renderSkybox(Skybox*, ShaderProgram& shaderProgram, const Scene& scene, const Viewport& viewport, const Camera& camera) = 0;
-            virtual void renderSunLight(const Camera& camera, const SunLight& sunLight) = 0;
+            virtual void renderSunLight(const Camera& camera, const SunLight& sunLight, const Viewport& viewport) = 0;
             virtual void renderPointLight(const Camera& camera, const PointLight& pointLight) = 0;
-            virtual void renderDirectionalLight(const Camera& camera, const DirectionalLight& directionalLight) = 0;
+            virtual void renderDirectionalLight(const Camera& camera, const DirectionalLight& directionalLight, const Viewport& viewport) = 0;
             virtual void renderSpotLight(const Camera& camera, const SpotLight& spotLight) = 0;
             virtual void renderRodLight(const Camera& camera, const RodLight& rodLight) = 0;
             virtual void renderMesh(const Mesh& mesh, const unsigned int mode) = 0;

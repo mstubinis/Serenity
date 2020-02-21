@@ -156,11 +156,13 @@ void priv::FramebufferObject::init(const unsigned int& width, const unsigned int
         rbo = NEW RenderbufferObject(*this, FramebufferAttatchment::Depth, depthInternalFormat);
     attatchRenderBuffer(*rbo);
 }
-
-priv::FramebufferObject::~FramebufferObject(){ 
+void priv::FramebufferObject::cleanup() {
     SAFE_DELETE_MAP(m_Attatchments);
-    for (uint i = 0; i < m_FBO.size(); ++i)
+    for (unsigned int i = 0; i < m_FBO.size(); ++i)
         glDeleteFramebuffers(1, &m_FBO[i]);
+}
+priv::FramebufferObject::~FramebufferObject(){ 
+    cleanup();
 }
 void priv::FramebufferObject::resize(const unsigned int& w, const unsigned int& h){
     m_FramebufferWidth  = static_cast<unsigned int>(static_cast<float>(w) * m_Divisor);

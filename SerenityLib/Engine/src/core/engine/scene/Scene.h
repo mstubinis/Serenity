@@ -36,15 +36,7 @@ class Scene: public EngineResource, public EventObserver{
     friend class  Engine::priv::RenderGraph;
     friend class  Engine::priv::ResourceManager;
     friend struct Engine::priv::InternalScenePublicInterface;
-    public:
-        virtual void update(const float& dt);
-        virtual void render();
-        virtual void onEvent(const Event& _event);
-        virtual void onResize(const unsigned int& width, const unsigned int& height);
 
-        template<typename T> void setOnUpdateFunctor(const T& functor) {
-            m_OnUpdateFunctor = std::bind<void>(functor, this, std::placeholders::_1);
-        }
     private:
         std::vector<Viewport>                                 m_Viewports;
         std::vector<Camera*>                                  m_Cameras;
@@ -57,19 +49,29 @@ class Scene: public EngineResource, public EventObserver{
         std::vector<SpotLight*>                               m_SpotLights;
         std::vector<RodLight*>                                m_RodLights;
 
-        std::vector<unsigned int>              m_Entities;
-        unsigned int                           m_ID;
-        glm::vec3                              m_GI;
+        std::vector<unsigned int>                             m_Entities;
+        unsigned int                                          m_ID;
+        glm::vec3                                             m_GI;
 
         Entity* m_Sun;
         Skybox* m_Skybox;
 
-        class impl; impl*                      m_i;
-        std::function<void(const float&)>     m_OnUpdateFunctor;
+        class impl; impl*                                     m_i;
+        std::function<void(Scene*, const float&)>             m_OnUpdateFunctor;
     public:
         Scene(const std::string& name);
         Scene(const std::string& name, const SceneOptions& options);
         virtual ~Scene();
+
+
+        virtual void update(const float& dt);
+        virtual void render();
+        virtual void onEvent(const Event& event);
+        virtual void onResize(const unsigned int& width, const unsigned int& height);
+
+        template<typename T> void setOnUpdateFunctor(const T& functor) {
+            m_OnUpdateFunctor = std::bind<void>(functor, std::placeholders::_1, std::placeholders::_2);
+        }
 
         const unsigned int id() const;
         const unsigned int numViewports() const;

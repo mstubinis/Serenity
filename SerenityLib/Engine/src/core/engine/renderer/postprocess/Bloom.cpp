@@ -68,16 +68,10 @@ const bool Engine::priv::Bloom::init_shaders() {
 void Engine::priv::Bloom::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, const unsigned int& sceneTextureEnum) {
     m_Shader_Program->bind();
 
-    const auto& dimensions = viewport.getViewportDimensions();
-    const float& divisor = gbuffer.getSmallFBO().divisor();
-
-
     Engine::Renderer::sendUniform4("Data", scale, threshold, exposure, 0.0f);
     Engine::Renderer::sendTexture("SceneTexture", gbuffer.getTexture(sceneTextureEnum), 0);
 
-    const unsigned int& screen_width = static_cast<unsigned int>(static_cast<float>(dimensions.z) * divisor);
-    const unsigned int& screen_height = static_cast<unsigned int>(static_cast<float>(dimensions.w) * divisor);
-    Engine::Renderer::renderFullscreenTriangle(0,0,screen_width, screen_height);
+    Engine::Renderer::renderFullscreenQuad();
 }
 
 

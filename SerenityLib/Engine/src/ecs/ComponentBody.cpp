@@ -1101,7 +1101,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_Compon
 
 
 
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
     for (auto& componentBody : components) {
         auto* model = componentBody.getOwner().getComponent<ComponentModel>();
         if (model) {
@@ -1117,9 +1117,9 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_Compon
                 const auto up       = Math::getUp(rotation);
 
                 auto& physics = Engine::priv::Core::m_Engine->m_PhysicsManager;
-                physics.debug_draw_line(world_pos, (world_pos+fwd) * glm::length(world_scl), 1, 0, 0, 1);
-                physics.debug_draw_line(world_pos, (world_pos+right) * glm::length(world_scl), 0, 1, 0, 1);
-                physics.debug_draw_line(world_pos, (world_pos+up) * glm::length(world_scl), 0, 0, 1, 1);
+                physics.debug_draw_line(world_pos, (world_pos+fwd) /* * glm::length(world_scl) */, 1, 0, 0, 1);
+                physics.debug_draw_line(world_pos, (world_pos+right) /* * glm::length(world_scl) */, 0, 1, 0, 1);
+                physics.debug_draw_line(world_pos, (world_pos+up) /* * glm::length(world_scl) */, 0, 0, 1, 1);
             }
         }
     }
@@ -1127,33 +1127,33 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_Compon
 
 
 }};
-struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* p_Component, Entity& p_Entity) const {
+struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* component, Entity& entity) const {
 }};
-struct priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* p_ComponentPool,Entity& p_Entity, Scene& p_Scene) const {
-    auto& pool = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool);
-    auto* _component = pool.getComponent(p_Entity);
+struct priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* componentPool,Entity& entity, Scene& scene) const {
+    auto& pool = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool);
+    auto* _component = pool.getComponent(entity);
     if (_component) {
         auto& component = *_component;
         if (component.m_Physics) {
             auto& physicsData = *component.data.p;
             component.setCollision(static_cast<CollisionType::Type>(physicsData.collision->getType()), physicsData.mass);
             auto currentScene = Resources::getCurrentScene();
-            if (currentScene && currentScene == &p_Scene) {
+            if (currentScene && currentScene == &scene) {
                 component.addPhysicsToWorld(true);
             }
         }
     }
 }};
-struct priv::ComponentBody_SceneEnteredFunction final {void operator()(void* p_ComponentPool,Scene& p_Scene) const {
-	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool)).data();
+struct priv::ComponentBody_SceneEnteredFunction final {void operator()(void* componentPool,Scene& scene) const {
+	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool)).data();
     for (auto& component : pool) { 
         if (component.m_Physics) {
             component.addPhysicsToWorld(true);
         } 
     }
 }};
-struct priv::ComponentBody_SceneLeftFunction final {void operator()(void* p_ComponentPool, Scene& p_Scene) const {
-	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool)).data();
+struct priv::ComponentBody_SceneLeftFunction final {void operator()(void* componentPool, Scene& scene) const {
+	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool)).data();
     for (auto& component : pool) { 
         if (component.m_Physics) {
             component.removePhysicsFromWorld(true);

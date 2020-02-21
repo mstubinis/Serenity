@@ -327,7 +327,7 @@ void Scene::centerSceneToObject(const Entity& centerEntity){
     return m_i->_centerToObject(*this, centerEntity);
 }
 void Scene::update(const float& dt){
-    m_OnUpdateFunctor(dt);
+    m_OnUpdateFunctor(this, dt);
 }
 void Scene::onResize(const unsigned int& width, const unsigned int& height) {
 

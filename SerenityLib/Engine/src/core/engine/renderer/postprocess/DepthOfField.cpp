@@ -107,7 +107,7 @@ void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport
     Engine::Renderer::sendTextureSafe("inTexture", gbuffer.getTexture(sceneTexture), 0);
     Engine::Renderer::sendTextureSafe("textureDepth", gbuffer.getTexture(GBufferType::Depth), 1);
 
-    Engine::Renderer::renderFullscreenTriangle(0,0, dimensions.z, dimensions.w);
+    Engine::Renderer::renderFullscreenQuad();
 }
 
 void Engine::Renderer::depthOfField::enable(const bool b) {

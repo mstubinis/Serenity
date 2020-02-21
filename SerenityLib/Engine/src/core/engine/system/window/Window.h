@@ -2,7 +2,6 @@
 #ifndef ENGINE_WINDOW_H
 #define ENGINE_WINDOW_H
 
-//#define ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS
 #if !defined(_APPLE_) && !defined(ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS)
     #ifndef ENGINE_THREAD_WINDOW_EVENTS
     #define ENGINE_THREAD_WINDOW_EVENTS
@@ -13,14 +12,13 @@
 namespace sf {
     class Window;
 };
-namespace Engine {
-    namespace priv {
-        class  EngineCore;
-        class  EventManager;
-    };
+namespace Engine::priv {
+    class  EngineCore;
+    class  EventManager;
 };
 class  Texture;
 struct EngineOptions;
+class  Window;
 
 #include <memory>
 #include <string>
@@ -43,11 +41,11 @@ class Window_Flags final { public: enum Flag: unsigned short {
 class Window final{
     friend class Engine::priv::EngineCore;
     friend class Engine::priv::EventManager;
+
     class WindowData final {
         friend class Engine::priv::EngineCore;
         friend class Engine::priv::EventManager;
         friend class Window;
-
         struct EventThreadOnlyCommands final { enum Command : unsigned int {
             ShowMouse,
             HideMouse,
@@ -56,11 +54,30 @@ class Window final{
             FreeMouseFromWindow,
         };};
 
-        private:
-            #ifdef ENGINE_THREAD_WINDOW_EVENTS
+        class WindowThread final {
+            friend class WindowData;
+            friend class Window;
+            private:
+                WindowData&                                          m_Data;
                 Engine::queue_ts<sf::Event>                          m_Queue;
                 Engine::queue_ts<EventThreadOnlyCommands::Command>   m_MainThreadToEventThreadQueue;
                 std::unique_ptr<std::thread>                         m_EventThread;
+
+                void cleanup();
+                void startup(Window& super, const std::string& name);
+                void push(const EventThreadOnlyCommands::Command&);
+                std::optional<sf::Event> try_pop();
+            public:
+                WindowThread(WindowData&);
+                ~WindowThread();
+
+                bool operator==(const bool& rhs) const;
+                explicit operator bool() const;
+        };
+
+        private:
+            #ifdef ENGINE_THREAD_WINDOW_EVENTS
+                WindowThread    m_WindowThread;
             #endif
 
             glm::uvec2          m_OldWindowSize;

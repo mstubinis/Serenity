@@ -5,6 +5,13 @@
 #include <locale>
 #include <stdint.h>
 
+//#define ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS //this will force the engine and window to use the same thread, which will prevent the engine logic from executing if the user modifies the window. this can cause some flickering on resize however
+//#define ENGINE_FORCE_PHYSICS_DEBUG_DRAW //this will force the renderer to output physics debugging info regardless if the build is debug or release
+
+
+
+#pragma region EnvironmentDefines
+
 #if _WIN32 || _WIN64
     #if _WIN64
         #define ENVIRONMENT64
@@ -25,6 +32,10 @@
 #else
 #endif
 
+#pragma endregion
+
+#pragma region MemoryLeakDetection
+
 #ifdef _DEBUG
     // Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the allocations to be of _CLIENT_BLOCK type
     #define _CRTDBG_MAP_ALLOC
@@ -36,6 +47,8 @@
     #define MALLOC malloc
     #define FREE free
 #endif
+
+#pragma endregion
 
 #pragma region DeleteMacros
 
@@ -117,12 +130,8 @@ namespace Engine {
         private:
             T m_Flags;
         public:
-            Flag() {
-                m_Flags = 0;
-            }
-            ~Flag() {
-
-            }
+            Flag() : m_Flags(0) {}
+            ~Flag() {}
 
             Flag& operator=(const T& other) {
                 m_Flags = other;

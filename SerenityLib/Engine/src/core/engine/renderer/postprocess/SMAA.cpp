@@ -639,8 +639,6 @@ void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec
     gbuffer.bindFramebuffers(outTexture); //probably the lighting buffer
     m_Shader_Programs[PassStage::Edge]->bind();
 
-    const auto& dimensions = viewport.getViewportDimensions();
-
     Engine::Renderer::Settings::clear(true, false, true);//lighting rgba, stencil is completely filled with 0's
 
     Engine::Renderer::stencilMask(0xFFFFFFFF);
@@ -658,7 +656,7 @@ void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec
     Engine::Renderer::sendTexture("textureMap", gbuffer.getTexture(sceneTexture), 0);
     Engine::Renderer::sendTextureSafe("texturePredication", gbuffer.getTexture(GBufferType::Diffuse), 1);
 
-    Engine::Renderer::renderFullscreenTriangle(0,0, dimensions.z, dimensions.w);
+    Engine::Renderer::renderFullscreenQuad();
 
     Engine::Renderer::stencilMask(0xFFFFFFFF);
     Engine::Renderer::stencilFunc(GL_EQUAL, 0x00000001, 0x00000001);
@@ -667,8 +665,6 @@ void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec
 void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& outTexture) {
     gbuffer.bindFramebuffers(GBufferType::Normal);
     Engine::Renderer::Settings::clear(true, false, false); //clear color only
-
-    const auto& dimensions = viewport.getViewportDimensions();
 
     m_Shader_Programs[PassStage::Blend]->bind();
     Engine::Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
@@ -682,20 +678,19 @@ void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::ve
     Engine::Renderer::sendUniform4Safe("SMAAInfo2Ints", MAX_SEARCH_STEPS_DIAG, AREATEX_MAX_DISTANCE, AREATEX_MAX_DISTANCE_DIAG, CORNER_ROUNDING);
     Engine::Renderer::sendUniform4Safe("SMAAInfo2Floats", AREATEX_PIXEL_SIZE.x, AREATEX_PIXEL_SIZE.y, AREATEX_SUBTEX_SIZE, (static_cast<float>(CORNER_ROUNDING) / 100.0f));
 
-    Engine::Renderer::renderFullscreenTriangle(0,0, dimensions.z, dimensions.w);
+    Engine::Renderer::renderFullscreenQuad();
 
     Engine::Renderer::GLDisable(GL_STENCIL_TEST);
 }
 void Engine::priv::SMAA::passNeighbor(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& sceneTexture) {
     m_Shader_Programs[PassStage::Neighbor]->bind();
 
-    const auto& dimensions = viewport.getViewportDimensions();
 
     Engine::Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
     Engine::Renderer::sendTextureSafe("textureMap", gbuffer.getTexture(sceneTexture), 0); //need original final image from first smaa pass
     Engine::Renderer::sendTextureSafe("blend_tex", gbuffer.getTexture(GBufferType::Normal), 1);
 
-    Engine::Renderer::renderFullscreenTriangle(0,0, dimensions.z, dimensions.w);
+    Engine::Renderer::renderFullscreenQuad();
 }
 void Engine::priv::SMAA::passFinal(Engine::priv::GBuffer& gbuffer, const Viewport& viewport) {
     /*
