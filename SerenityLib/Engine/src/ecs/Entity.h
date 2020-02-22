@@ -27,23 +27,23 @@ struct Entity{
     void destroy();
     void move(const Scene& destination);
     const bool null() const;
-    template<typename T, typename... ARGS> void addComponent(ARGS&&... args) {
+    template<typename T, typename... ARGS> inline void addComponent(ARGS&&... args) {
         auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
         ecs.addComponent<T>(*this, std::forward<ARGS>(args)...);
     }
-    template<typename T, typename... ARGS> void addComponent(EntityDataRequest& request, ARGS&&... args) {
+    template<typename T, typename... ARGS> inline void addComponent(EntityDataRequest& request, ARGS&&... args) {
         auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
         ecs.addComponent<T>(request, *this, std::forward<ARGS>(args)...);
     }
-    template<typename T> const bool removeComponent() {
+    template<typename T> inline const bool removeComponent() {
         auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
         return ecs.removeComponent<T>(*this);
     }
-    template<typename T> T* getComponent() const {
+    template<typename T> inline T* getComponent() const {
         const auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
         return ecs.getComponent<T>(*this);
     }
-    template<typename T> T* getComponent(const EntityDataRequest& dataRequest) const {
+    template<typename T> inline T* getComponent(const EntityDataRequest& dataRequest) const {
         const auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
         return ecs.getComponent<T>(dataRequest);
     }

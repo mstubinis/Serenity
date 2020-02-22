@@ -61,7 +61,7 @@ ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept : EntityWrapp
     m_Lifetime        = std::move(other.m_Lifetime);
     m_Parent          = std::move(other.m_Parent);
     m_Entity          = std::move(other.m_Entity);
-    m_UpdateFunctor   = std::move(other.m_UpdateFunctor);
+    m_UpdateFunctor.swap(other.m_UpdateFunctor);
     m_UserData        = std::move(other.m_UserData);
 }
 ParticleEmitter& ParticleEmitter::operator=(ParticleEmitter&& other) noexcept {
@@ -73,7 +73,7 @@ ParticleEmitter& ParticleEmitter::operator=(ParticleEmitter&& other) noexcept {
         m_Lifetime        = std::move(other.m_Lifetime);
         m_Parent          = std::move(other.m_Parent);
         m_Entity          = std::move(other.m_Entity);
-        m_UpdateFunctor   = std::move(other.m_UpdateFunctor);
+        m_UpdateFunctor.swap(other.m_UpdateFunctor);
         m_UserData        = std::move(other.m_UserData); 
     }
     return *this;
@@ -94,44 +94,38 @@ void ParticleEmitter::setProperties(ParticleEmissionProperties& properties) {
 }
 
 
-void ParticleEmitter::update_multithreaded(const size_t& index, const float& dt, priv::ParticleSystem& particleSystem) {
+void ParticleEmitter::update(const size_t& index, const float& dt, priv::ParticleSystem& particleSystem, const bool multi_threaded) {
     //handle spawning
     if (m_Active) {
-        m_Timer += dt;
-        m_SpawningTimer += dt;
-        auto& properties = *m_Properties;
-        m_UpdateFunctor(dt, std::ref(properties), std::ref(particleSystem.m_Mutex));
+        m_Timer           += dt;
+        m_SpawningTimer   += dt;
+        auto& properties   = *m_Properties;
+        m_UpdateFunctor(this, dt, std::ref(properties), std::ref(particleSystem.m_Mutex));
         if (m_SpawningTimer > properties.m_SpawnRate) {
-            particleSystem.m_Mutex.lock();
-            for(unsigned int i = 0; i < properties.m_ParticlesPerSpawn; ++i)
-                particleSystem.add_particle(*this);
-            particleSystem.m_Mutex.unlock();
+            {
+                if (multi_threaded) {
+                    std::lock_guard lock(particleSystem.m_Mutex);
+                    for (unsigned int i = 0; i < properties.m_ParticlesPerSpawn; ++i) {
+                        particleSystem.add_particle(*this);
+                    }
+                }else{
+                    for (unsigned int i = 0; i < properties.m_ParticlesPerSpawn; ++i) {
+                        particleSystem.add_particle(*this);
+                    }
+                }
+            }
             m_SpawningTimer = 0.0;
         }
         if (m_Lifetime > 0.0 && m_Timer >= m_Lifetime) {
             m_Active = false;
-            m_Timer = 0.0;
-            particleSystem.m_Mutex.lock();
-            particleSystem.m_ParticleEmitterFreelist.push(index);
-            particleSystem.m_Mutex.unlock();
-        }
-    }
-}
-void ParticleEmitter::update(const size_t& index, const float& dt, priv::ParticleSystem& particleSystem) {
-    //handle spawning
-    if (m_Active) {
-        m_Timer += dt;
-        m_SpawningTimer += dt;
-        auto& properties = *m_Properties;
-        if (m_SpawningTimer > properties.m_SpawnRate) {
-            for (unsigned int i = 0; i < properties.m_ParticlesPerSpawn; ++i)
-                particleSystem.add_particle(*this);
-            m_SpawningTimer = 0.0;
-        }
-        if (m_Lifetime > 0.0 && m_Timer >= m_Lifetime) {
-            m_Active = false;
-            m_Timer = 0.0;
-            particleSystem.m_ParticleEmitterFreelist.push(index);
+            m_Timer  = 0.0;
+
+            if (multi_threaded) {
+                std::lock_guard lock(particleSystem.m_Mutex);
+                particleSystem.m_ParticleEmitterFreelist.push(index);
+            }else{
+                particleSystem.m_ParticleEmitterFreelist.push(index);
+            }
         }
     }
 }

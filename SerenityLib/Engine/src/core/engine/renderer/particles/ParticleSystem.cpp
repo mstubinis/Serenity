@@ -28,20 +28,23 @@ priv::ParticleSystem::~ParticleSystem() {
 
 
 void priv::ParticleSystem::internal_update_emitters(const float& dt) {
-    if (m_ParticleEmitters.size() == 0)
+    if (m_ParticleEmitters.size() == 0) {
         return;
+    }
 
     auto lamda_update_emitter = [&](ParticleEmitter& emitter, const size_t& j) {
-        emitter.update_multithreaded(j, dt, *this);
+        emitter.update(j, dt, *this, true);
     };
     priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_emitter, m_ParticleEmitters, true);
 }
-void priv::ParticleSystem::internal_update_particles(const float& dt) {
-    if (m_Particles.size() == 0)
+void priv::ParticleSystem::internal_update_particles(const float& dt, const Camera& camera) {
+    if (m_Particles.size() == 0) {
         return;
+    }
 
+    const auto camPos = glm::vec3(camera.getPosition());
     auto lamda_update_particle = [&](Particle& particle, const size_t& j) {
-        particle.update(j, dt, *this, true);
+        particle.update(j, dt, *this, camPos, true);
     };
     priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_particle, m_Particles, true);
 }
@@ -85,13 +88,15 @@ const bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter) {
     return add_particle(emitter, body.position(), body.rotation());
 }
 
-void priv::ParticleSystem::update(const float& dt) {
-    internal_update_particles(dt);
+
+void priv::ParticleSystem::update(const float& dt, const Camera& camera) {
+    internal_update_particles(dt, camera);
     internal_update_emitters(dt);
 }
 void priv::ParticleSystem::render(const Camera& camera, ShaderProgram& program, const GBuffer& gBuffer) {
-    if (m_Particles.size() == 0)
+    if (m_Particles.size() == 0) {
         return;
+    }
 
     vector<Particle*> seen;
     seen.reserve(m_Particles.size());
@@ -100,33 +105,25 @@ void priv::ParticleSystem::render(const Camera& camera, ShaderProgram& program, 
 
     auto& planeMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
 
-    auto lamda_culler = [&](pair<size_t, size_t>& pair_, const glm::vec3& camPos) {
-        
-        for (size_t j = pair_.first; j <= pair_.second; ++j) {
-            auto& particle = m_Particles[j];
-
-            const float radius = planeMesh.getRadius() * Math::Max(particle.m_Data.m_Scale.x, particle.m_Data.m_Scale.y);
-            const uint sphereTest = camera.sphereIntersectTest(particle.m_Position, radius); //per mesh instance radius instead?
-            float comparison = radius * 3100.0f; //TODO: this is obviously different from the other culling functions
-            if (particle.m_Hidden || sphereTest == 0 || glm::distance2(particle.m_Position, cameraPosition) > comparison * comparison) {
-                particle.m_PassedRenderCheck = false;
-            }else{
-                particle.m_PassedRenderCheck = true;
-                std::lock_guard<std::mutex> lock(m_Mutex);
-                seen.push_back(&particle);
-            }
+    auto lamda_culler_particle = [&](Particle& particle, const size_t& j) {
+        const float radius    = planeMesh.getRadius() * Math::Max(particle.m_Data.m_Scale.x, particle.m_Data.m_Scale.y);
+        const uint sphereTest = camera.sphereIntersectTest(particle.m_Position, radius); //per mesh instance radius instead?
+        float comparison      = radius * 3100.0f; //TODO: this is obviously different from the other culling functions
+        if (particle.m_Hidden || sphereTest == 0 || glm::distance2(particle.m_Position, cameraPosition) > comparison * comparison) {
+            particle.m_PassedRenderCheck = false;
+        }else{
+            particle.m_PassedRenderCheck = true;
+            std::lock_guard<std::mutex> lock(m_Mutex);
+            seen.push_back(&particle);
         }
     };
-    auto split = priv::threading::splitVectorPairs(m_Particles);
-    for (auto& pair_ : split) {
-        priv::Core::m_Engine->m_ThreadManager.add_job_ref_engine_controlled(lamda_culler, pair_, cameraPosition);
-    }
-    priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
+    priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_culler_particle, m_Particles, true);
 
-    auto lambda_sorter = [&](Particle* lhs, Particle* rhs, const glm::vec3& camPos) {
-        return glm::distance2(lhs->m_Position, camPos) > glm::distance2(rhs->m_Position, camPos);
+
+    auto lambda_sorter = [&](const Particle* lhs, const Particle* rhs) {
+        return glm::distance2(lhs->m_Position, cameraPosition) > glm::distance2(rhs->m_Position, cameraPosition);
     };
-    std::sort(std::execution::par_unseq, seen.begin(), seen.end(), std::bind(lambda_sorter, std::placeholders::_1, std::placeholders::_2, cameraPosition));
+    std::sort(std::execution::par_unseq, seen.begin(), seen.end(), lambda_sorter);
 
     program.bind();
     planeMesh.bind();

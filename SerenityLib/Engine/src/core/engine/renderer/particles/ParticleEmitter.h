@@ -28,7 +28,7 @@ class ParticleEmitter final : public EntityWrapper{
         double                         m_Timer;
         double                         m_Lifetime;
         Entity                         m_Parent;
-        std::function<void(const float& dt, ParticleEmissionProperties&, std::mutex&)> m_UpdateFunctor;
+        std::function<void(ParticleEmitter*, const float& dt, ParticleEmissionProperties&, std::mutex&)> m_UpdateFunctor;
 
         void internal_init();
     public:
@@ -43,7 +43,7 @@ class ParticleEmitter final : public EntityWrapper{
         ParticleEmitter& operator=(ParticleEmitter&& other) noexcept;
 
         template<typename T> void setUpdateFunctor(const T& functor) {
-            m_UpdateFunctor = std::bind<void>(std::move(functor), this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+            m_UpdateFunctor = std::bind<void>(std::move(functor), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
         }
 
         void setPosition(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request);
@@ -96,8 +96,7 @@ class ParticleEmitter final : public EntityWrapper{
         ParticleEmissionProperties* getProperties() const;
         void setProperties(ParticleEmissionProperties& properties);
 
-        void update(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem);
-        void update_multithreaded(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem);
+        void update(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem, const bool multi_threaded);
 };
 
 #endif

@@ -13,12 +13,16 @@ namespace Engine {
         class DebugManager {
             private:
                 sf::Clock clock;
-                sf::Int64 m_logicTime, m_physicsTime, m_renderTime, m_soundTime;
+                sf::Int64 m_logicTime;
+                sf::Int64 m_physicsTime;
+                sf::Int64 m_renderTime;
+                sf::Int64 m_soundTime;
                 sf::Int64 m_deltaTime;
                 float m_TimeScale;
                 double m_totalTime;
                 double divisor;
-                uint output_frame_delay, output_frame;
+                uint output_frame_delay;
+                uint output_frame;
                 uint decimals;
                 std::string output;
 
@@ -61,9 +65,8 @@ namespace Engine {
 
                 const float timeScale() const;
 
-                std::string timestamp();
                 std::string& reportTime();
-                std::string& reportTime(uint decimals);
+                std::string& reportTime(const uint& decimals);
                 std::string reportDebug();
         };
     };

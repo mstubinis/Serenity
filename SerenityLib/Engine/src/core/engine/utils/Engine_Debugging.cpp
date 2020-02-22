@@ -9,6 +9,7 @@
 using namespace Engine;
 using namespace std;
 
+
 priv::DebugManager::DebugManager(){ 
     clock = sf::Clock();
     output = "";
@@ -30,6 +31,7 @@ void priv::DebugManager::cleanup() {
 
 }
 void priv::DebugManager::_init() {
+    //TODO: check if this is still needed
 	GLuint cast = static_cast<GLuint>(queryID);
     glGenQueries(1, &cast);
     glQueryCounter(queryID, GL_TIMESTAMP);// dummy query to prevent OpenGL errors from popping out 
@@ -80,27 +82,25 @@ void priv::DebugManager::setTimeScale(const float timeScale) {
     m_TimeScale = glm::max(0.0f, timeScale);
 }
 
-string priv::DebugManager::timestamp() {
-    const auto end = std::chrono::system_clock::now();
-    const std::time_t end_time = std::chrono::system_clock::to_time_t(end);
-    return std::ctime(&end_time);
-}
 string& priv::DebugManager::reportTime() { return reportTime(decimals); }
-string& priv::DebugManager::reportTime(uint _decimals) {
-    decimals = _decimals;
+string& priv::DebugManager::reportTime(const uint& decimals_) {
+    decimals = decimals_;
     if ((output_frame >= output_frame_delay - 1) || output_frame_delay == 0) {
-        uint fps = uint(1.0 / ((double)m_deltaTime / divisor));
+        uint fps = uint(1.0f / dt());
         stringstream st1, st2, st3, st4, st5;
         st1 << std::fixed << std::setprecision(decimals) << logicTime() * 1000.0;
         st2 << std::fixed << std::setprecision(decimals) << physicsTime() * 1000.0;
         st5 << std::fixed << std::setprecision(decimals) << soundsTime() * 1000.0;
         st3 << std::fixed << std::setprecision(decimals) << renderTime() * 1000.0;
-        st4 << std::fixed << std::setprecision(decimals) << dt() * 1000.0;
+        st4 << std::fixed << std::setprecision(decimals) << dt() * 1000.0f;
         string s1 = st1.str(); string s2 = st2.str(); string s3 = st3.str(); string s4 = st4.str(); string s5 = st5.str();
 
-        output = "Update Time:  " + s1 + " ms" + "\nPhysics Time: " + s2 + " ms" + "\nSounds Time:  " + s5 + " ms" +
-            "\nRender Time:  " + s3 + " ms" + "\nDelta Time:   " + s4 + " ms" +
-            "\nFPS: " + to_string(fps);
+        output = "Update Time:  " + s1 + " ms" + 
+               "\nPhysics Time: " + s2 + " ms" + 
+                "\nSounds Time:  " + s5 + " ms" +
+                "\nRender Time:  " + s3 + " ms" + 
+                "\nDelta Time:   " + s4 + " ms" +
+                "\nFPS: " + to_string(fps);
     }
     return output;
 }

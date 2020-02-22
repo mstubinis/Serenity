@@ -150,11 +150,11 @@ void Window::WindowData::init_position(Window& super) {
         //            left   right   top   bottom
         RECT rect; //[0,     1920,   0,    1040]  //bottom task bar
         SystemParametersInfoA(SPI_GETWORKAREA, 0, &rect, 0);
-        y_other = desktopSize.height - rect.bottom;
+        y_other = final_desktop_height - static_cast<float>(rect.bottom);
         final_desktop_height -= y_other;
     #endif
 
-    super.setPosition(  (final_desktop_width - winSize.x) / 2.0f,   (final_desktop_height - winSize.y) / 2.0f   );
+    super.setPosition(  static_cast<unsigned int>((final_desktop_width - winSize.x) / 2.0f),   static_cast<unsigned int>((final_desktop_height - winSize.y) / 2.0f)   );
 }
 const sf::ContextSettings Window::WindowData::create(Window& super, const string& name) {
     on_close();

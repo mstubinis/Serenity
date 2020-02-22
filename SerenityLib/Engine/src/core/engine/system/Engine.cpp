@@ -144,20 +144,19 @@ void EngineCore::update_logic(Window& window, const float& dt){
     ecs.preUpdate(scene, dt);
     Game::onPreUpdate(dt);
     Game::update(dt);
-    scene.update(dt);
     InternalScenePublicInterface::UpdateParticleSystem(scene, dt);
-    update_physics(window, dt);
+    scene.update(dt);
     ecs.update(dt, scene);
     ecs.postUpdate(scene,dt);
     InternalScenePublicInterface::UpdateMaterials(scene, dt);
     m_ThreadManager._update(dt);
     Game::onPostUpdate(dt);
-    m_DebugManager.calculate_logic();
     m_EventManager.onResetEvents(dt);
 
     window.m_Data.on_reset_events(dt);
 
     m_Misc.m_DiscordCore.update();
+    m_DebugManager.calculate_logic();
 }
 void EngineCore::update_sounds(Window& window, const float& dt){
     m_DebugManager.stop_clock();
@@ -165,6 +164,7 @@ void EngineCore::update_sounds(Window& window, const float& dt){
     m_DebugManager.calculate_sounds();
 }
 void EngineCore::update(Window& window, const float& dt){
+    update_physics(window, dt);
     update_logic(window, dt);
     update_sounds(window, dt);
 }

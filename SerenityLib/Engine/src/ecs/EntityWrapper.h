@@ -22,10 +22,10 @@ class EntityWrapper {
         const Entity& entity() const;
         const bool null() const;
 
-        template<typename T, typename... ARGS> void addComponent(ARGS&& ... args) {
+        template<typename T, typename... ARGS> inline void addComponent(ARGS&& ... args) {
             m_Entity.addComponent<T>(std::forward<ARGS>(args)...);
         }
-        template<typename T, typename... ARGS> void addComponent(EntityDataRequest& request, ARGS&& ... args) {
+        template<typename T, typename... ARGS> inline void addComponent(EntityDataRequest& request, ARGS&& ... args) {
             m_Entity.addComponent<T>(request, std::forward<ARGS>(args)...);
         }
         template<typename T> inline const bool removeComponent() {

@@ -32,7 +32,7 @@ namespace Engine {
                 std::mutex                             m_Mutex;
 
                 void internal_update_emitters(const float& dt);
-                void internal_update_particles(const float& dt);
+                void internal_update_particles(const float& dt, const Camera& camera);
             public:
                 ParticleSystem();
                 ~ParticleSystem();
@@ -52,7 +52,7 @@ namespace Engine {
                 std::stack<size_t>&           getParticleEmittersFreelist();
                 std::stack<size_t>&           getParticlesFreelist();
 
-                void update(const float& dt);
+                void update(const float& dt, const Camera& camera);
                 void render(const Camera& camera, ShaderProgram& program, const GBuffer& gBuffer);
             };
     };

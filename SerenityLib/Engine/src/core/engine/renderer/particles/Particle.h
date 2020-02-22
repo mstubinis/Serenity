@@ -26,6 +26,7 @@ struct ParticleData final {
     glm::vec2                    m_Scale;
     glm::vec3                    m_Velocity;
     glm::vec4                    m_Color;
+
     float                        m_Depth;
     float                        m_Angle;
     float                        m_AngularVelocity;
@@ -76,7 +77,7 @@ class Particle {
         const glm::vec4& color() const;
         const glm::vec3& velocity() const;
         const double lifetime() const;
-        void update(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem, const bool multi_threaded);
+        void update(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem, const glm::vec3& cameraPosition, const bool multi_threaded);
 
 
         void setUserDataX(const float x);

@@ -141,7 +141,8 @@ void priv::InternalScenePublicInterface::UpdateMaterials(Scene& scene, const flo
     }
 }
 void priv::InternalScenePublicInterface::UpdateParticleSystem(Scene& scene, const float& dt) {
-    scene.m_i->m_ParticleSystem.update(dt);
+    auto& camera = *scene.getActiveCamera();
+    scene.m_i->m_ParticleSystem.update(dt, camera);
 }
 
 void priv::InternalScenePublicInterface::RenderGeometryOpaque(const Scene& scene, const Viewport& viewport, const Camera& camera, const bool useDefaultShaders) {
