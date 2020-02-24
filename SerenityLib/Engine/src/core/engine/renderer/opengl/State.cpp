@@ -5,14 +5,7 @@
 using namespace Engine;
 using namespace Engine::priv;
 
-OpenGLState::OpenGLState() {
 
-}
-OpenGLState::OpenGLState(const unsigned int& windowWidth, const unsigned int& windowHeight) {
-    viewportState = ViewportState(static_cast<GLsizei>(windowWidth), static_cast<GLsizei>(windowHeight));
-}
-OpenGLState::~OpenGLState() {
-}
 const unsigned int OpenGLState::getMaxTextureUnits() const {
     return static_cast<unsigned int>(textureUnits.capacity());
 }
@@ -21,25 +14,31 @@ void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth,
     //GLfloat   float_value;
     //GLboolean boolean_value;
 
+    viewportState = ViewportState(static_cast<GLsizei>(windowWidth), static_cast<GLsizei>(windowHeight));
+
     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &int_value); //what about GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS?
     textureUnits.reserve(int_value);
-    for (unsigned int i = 0; i < textureUnits.capacity(); ++i)
+    for (unsigned int i = 0; i < textureUnits.capacity(); ++i) {
         textureUnits.push_back(TextureUnitState());
+    }
 
 
     glGetIntegerv(GL_MAX_DRAW_BUFFERS, &int_value);
     enabledState.blendState.reserve(int_value);
     blendEquationState.reserve(int_value);
-    for (unsigned int i = 0; i < enabledState.blendState.capacity(); ++i)
+    for (unsigned int i = 0; i < enabledState.blendState.capacity(); ++i) {
         enabledState.blendState.push_back(EnabledState::GLBlendState());
-    for (unsigned int i = 0; i < blendEquationState.capacity(); ++i)
+    }
+    for (unsigned int i = 0; i < blendEquationState.capacity(); ++i) {
         blendEquationState.push_back(BlendEquationState());
+    }
 
 
     glGetIntegerv(GL_MAX_VIEWPORTS, &int_value);
     enabledState.scissorState.reserve(int_value);
-    for (unsigned int i = 0; i < enabledState.scissorState.capacity(); ++i)
+    for (unsigned int i = 0; i < enabledState.scissorState.capacity(); ++i) {
         enabledState.scissorState.push_back(EnabledState::GLScissorTestState());
+    }
 
 
     GL_RESTORE_DEFAULT_STATE_MACHINE(windowWidth, windowHeight);

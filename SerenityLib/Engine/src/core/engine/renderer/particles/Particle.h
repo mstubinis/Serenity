@@ -11,7 +11,6 @@ struct Entity;
 namespace Engine::priv {
     struct InternalScenePublicInterface;
     class  ParticleSystem;
-    class  GBuffer;
 };
 
 #include <glm/vec2.hpp>
@@ -90,10 +89,6 @@ class Particle {
         const float getUserDataZ() const;
         const float getUserDataW() const;
         const glm::vec4& getUserData() const;
-
-
-        void render(const Engine::priv::GBuffer&);
-
 };
 
 #endif

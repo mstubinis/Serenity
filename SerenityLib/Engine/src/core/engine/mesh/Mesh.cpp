@@ -469,26 +469,6 @@ const glm::vec3& Mesh::getRadiusBox() const {
 const float Mesh::getRadius() const { 
     return m_radius; 
 }
-//TODO: move to renderer
-void Mesh::render(const bool instancing, const ModelDrawingMode::Mode mode){
-    const auto indicesSize = m_VertexData->indices.size();
-    if (indicesSize == 0) 
-        return;
-    if (instancing && priv::InternalMeshPublicInterface::SupportsInstancing()) {
-        //const uint& instancesCount = m_InstanceCount;
-        //if (instancesCount == 0) 
-        //    return;
-        //if (Renderer::OPENGL_VERSION >= 31) {
-        //    glDrawElementsInstanced(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
-        //} else if (OpenGLExtension::supported(OpenGLExtension::EXT_draw_instanced)) {
-        //    glDrawElementsInstancedEXT(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
-        //} else if (OpenGLExtension::supported(OpenGLExtension::ARB_draw_instanced)) {
-        //    glDrawElementsInstancedARB(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
-        //}
-    }else{
-        glDrawElements(static_cast<GLenum>(mode), static_cast<GLsizei>(indicesSize), GL_UNSIGNED_SHORT, 0);
-    }
-}
 void Mesh::load(){
     if(!isLoaded()){
         auto& _this = *this;

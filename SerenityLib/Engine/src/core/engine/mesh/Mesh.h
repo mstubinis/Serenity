@@ -115,7 +115,5 @@ class Mesh final: public BindableResource, public EventObserver, public Engine::
         }
 
         void sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, const SortingMode::Mode& sortMode);
-
-        void render(const bool instancing = false, const ModelDrawingMode::Mode = ModelDrawingMode::Triangles);
 };
 #endif

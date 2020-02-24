@@ -24,7 +24,6 @@ unsigned int priv::Renderer::GLSL_VERSION;
 unsigned int priv::Renderer::OPENGL_VERSION;
 
 priv::Renderer::Renderer(const EngineOptions& options){
-    OpenGLStateMachine = OpenGLState(options.width, options.height);
     m_GI_Pack          = Engine::Math::pack3FloatsInto1FloatUnsigned(m_GI_Diffuse, m_GI_Specular, m_GI_Global);
     m_Pipeline         = NEW Engine::priv::DeferredPipeline(*this);
     renderManager      = this;

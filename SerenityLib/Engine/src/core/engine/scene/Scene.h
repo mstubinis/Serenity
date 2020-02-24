@@ -136,7 +136,7 @@ namespace Engine {
             static void           RenderForwardTransparentTrianglesSorted( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
             static void           RenderForwardParticles( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
             static void           RenderDecals( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-            static void           RenderParticles( Renderer&, const Scene& scene, const Viewport&, const Camera&, ShaderProgram& program, const GBuffer&);
+            static void           RenderParticles( Renderer&, const Scene& scene, const Camera&, ShaderProgram& program);
 
             static void           AddModelInstanceToPipeline(Scene& scene, ModelInstance&, const RenderStage::Stage& stage);
             static void           RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance&, const RenderStage::Stage& stage);

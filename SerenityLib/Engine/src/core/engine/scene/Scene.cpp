@@ -224,8 +224,8 @@ void priv::InternalScenePublicInterface::RenderDecals( Renderer& renderer, const
         }
     }
 }
-void priv::InternalScenePublicInterface::RenderParticles( Renderer& renderer, const Scene& scene, const Viewport& viewport, const Camera& camera, ShaderProgram& program, const GBuffer& gBuffer) {
-    scene.m_i->m_ParticleSystem.render(camera, program, gBuffer);
+void priv::InternalScenePublicInterface::RenderParticles( Renderer& renderer, const Scene& scene, const Camera& camera, ShaderProgram& program) {
+    scene.m_i->m_ParticleSystem.render(camera, program, renderer);
 }
 
 

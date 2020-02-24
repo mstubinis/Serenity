@@ -105,6 +105,10 @@ namespace Engine::priv {
             void clear2DAPI() override;
             void sort2DAPI() override;
 
+            ShaderProgram* getCurrentBoundShaderProgram() override;
+            Material* getCurrentBoundMaterial() override;
+            Mesh* getCurrentBoundMesh() override;
+
             const unsigned int getUniformLocation(const char* location) override;
             const unsigned int getUniformLocationUnsafe(const char* location) override;
 

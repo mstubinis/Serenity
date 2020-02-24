@@ -1,6 +1,7 @@
 #include <core/engine/renderer/particles/ParticleSystem.h>
 #include <core/engine/renderer/particles/ParticleEmitter.h>
 #include <core/engine/renderer/particles/Particle.h>
+#include <core/engine/renderer/pipelines/IRenderingPipeline.h>
 
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/materials/Material.h>
@@ -93,7 +94,7 @@ void priv::ParticleSystem::update(const float& dt, const Camera& camera) {
     internal_update_particles(dt, camera);
     internal_update_emitters(dt);
 }
-void priv::ParticleSystem::render(const Camera& camera, ShaderProgram& program, const GBuffer& gBuffer) {
+void priv::ParticleSystem::render(const Camera& camera, ShaderProgram& program, Renderer& renderer) {
     if (m_Particles.size() == 0) {
         return;
     }
@@ -129,7 +130,7 @@ void priv::ParticleSystem::render(const Camera& camera, ShaderProgram& program, 
     planeMesh.bind();
     for (auto& particle : seen) {
         //if (particle.m_PassedRenderCheck) { //TODO: using "seen" vector for now, do not need bool check, should profile using seen vector over using bool and full vector...
-            particle->render(gBuffer);
+            renderer.m_Pipeline->renderParticle(*particle);
         //}
     }
 }

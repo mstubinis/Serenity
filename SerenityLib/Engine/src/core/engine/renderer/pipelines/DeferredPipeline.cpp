@@ -414,6 +414,16 @@ void DeferredPipeline::sort2DAPI() {
     };
     std::sort(std::execution::par_unseq, m_2DAPICommands.begin(), m_2DAPICommands.end(), lambda_sorter);
 }
+ShaderProgram* DeferredPipeline::getCurrentBoundShaderProgram() {
+    return m_RendererState.current_bound_shader_program;
+}
+Material* DeferredPipeline::getCurrentBoundMaterial() {
+    return m_RendererState.current_bound_material;
+}
+Mesh* DeferredPipeline::getCurrentBoundMesh() {
+    return m_RendererState.current_bound_mesh;
+}
+
 
 const bool DeferredPipeline::stencilOperation(const unsigned int stencilFail, const unsigned int depthFail, const unsigned int depthPass) {
     return m_OpenGLStateMachine.GL_glStencilOp(stencilFail, depthFail, depthPass);
@@ -688,7 +698,7 @@ void DeferredPipeline::renderPointLight(const Camera& c, const PointLight& p) {
     auto& pointLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPointLightBounds();
 
     pointLightMesh.bind();
-    pointLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
+    renderMesh(pointLightMesh); //this can bug out if we pass in custom uv's like in the renderQuad method
     pointLightMesh.unbind();
     cullFace(GL_BACK);
 }
@@ -725,7 +735,7 @@ void DeferredPipeline::renderSpotLight(const Camera& c, const SpotLight& s) {
     auto& spotLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getSpotLightBounds();
 
     spotLightMesh.bind();
-    spotLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
+    renderMesh(spotLightMesh); //this can bug out if we pass in custom uv's like in the renderQuad method
     spotLightMesh.unbind();
     cullFace(GL_BACK);
     sendUniform1Safe("Type", 0.0f); //is this really needed?
@@ -765,7 +775,7 @@ void DeferredPipeline::renderRodLight(const Camera& c, const RodLight& r) {
     auto& rodLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getRodLightBounds();
 
     rodLightMesh.bind();
-    rodLightMesh.render(false); //this can bug out if we pass in custom uv's like in the renderQuad method
+    renderMesh(rodLightMesh); //this can bug out if we pass in custom uv's like in the renderQuad method
     rodLightMesh.unbind();
     cullFace(GL_BACK);
     sendUniform1Safe("Type", 0.0f); //is this really needed?
@@ -811,7 +821,7 @@ void DeferredPipeline::renderParticle(const Particle& particle) {
 
     Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
 
-    priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh().render();
+    renderMesh(priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh());
 }
 void DeferredPipeline::renderMesh(const Mesh& mesh, const unsigned int mode) {
     const auto indicesSize = mesh.getVertexData().indices.size();
@@ -1010,7 +1020,7 @@ void DeferredPipeline::render2DText(const string& text, const Font& font, const 
     fontPlane.modifyVertices(0, m_Text_Points, MeshModifyFlags::Default); //prevent gpu upload until after all the data is collected
     fontPlane.modifyVertices(1, m_Text_UVs);
     fontPlane.modifyIndices(m_Text_Indices);
-    fontPlane.render();
+    renderMesh(fontPlane);
 
 
 }
@@ -1043,7 +1053,7 @@ void DeferredPipeline::render2DTexture(const Texture* texture, const glm::vec2& 
     Engine::Renderer::sendUniform4("Object_Color", color);
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
 
-    plane.render();
+    renderMesh(plane);
 }
 void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& alignment, const glm::vec4& scissor) {
     GLScissor(scissor);
@@ -1066,7 +1076,7 @@ void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::ve
     Engine::Renderer::sendUniform4("Object_Color", color);
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
 
-    triangle.render();
+    renderMesh(triangle);
 }
 
 
@@ -1253,7 +1263,7 @@ void DeferredPipeline::internal_pass_forward(const Viewport& viewport, const Cam
     glDepthMask(GL_FALSE);
     InternalScenePublicInterface::RenderDecals(m_Renderer, scene, viewport, camera);
     InternalScenePublicInterface::RenderForwardParticles(m_Renderer, scene, viewport, camera);
-    InternalScenePublicInterface::RenderParticles(m_Renderer, scene, viewport, camera, *m_InternalShaderPrograms[ShaderProgramEnum::Particle], m_GBuffer);
+    InternalScenePublicInterface::RenderParticles(m_Renderer, scene, camera, *m_InternalShaderPrograms[ShaderProgramEnum::Particle]);
 
     for (unsigned int i = 0; i < 4; ++i) {
         Engine::Renderer::GLDisablei(GL_BLEND, i); //this is needed for smaa at least
@@ -1442,15 +1452,15 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, const Viewport& 
             //this render space places the camera at the origin and offsets submitted model matrices to the vertex shaders
             //by the camera's real simulation position
             //this helps to deal with shading inaccuracies for when the camera is very far away from the origin
-            m_UBOCameraDataStruct.View        = ComponentCamera_Functions::GetViewNoTranslation(camera);
-            m_UBOCameraDataStruct.Proj        = camera.getProjection();
-            m_UBOCameraDataStruct.ViewProj    = ComponentCamera_Functions::GetViewProjectionNoTranslation(camera);
-            m_UBOCameraDataStruct.InvProj     = camera.getProjectionInverse();
-            m_UBOCameraDataStruct.InvView     = ComponentCamera_Functions::GetViewInverseNoTranslation(camera);
-            m_UBOCameraDataStruct.InvViewProj = ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(camera);
-            m_UBOCameraDataStruct.Info1       = glm::vec4(0.0001f, 0.0001f, 0.0001f, camera.getNear());
-            m_UBOCameraDataStruct.Info2       = glm::vec4(ComponentCamera_Functions::GetViewVectorNoTranslation(camera), camera.getFar());
-            m_UBOCameraDataStruct.Info3       = glm::vec4(camera.getPosition(), 0.0f);
+            m_UBOCameraDataStruct.View          = ComponentCamera_Functions::GetViewNoTranslation(camera);
+            m_UBOCameraDataStruct.Proj          = camera.getProjection();
+            m_UBOCameraDataStruct.ViewProj      = ComponentCamera_Functions::GetViewProjectionNoTranslation(camera);
+            m_UBOCameraDataStruct.InvProj       = camera.getProjectionInverse();
+            m_UBOCameraDataStruct.InvView       = ComponentCamera_Functions::GetViewInverseNoTranslation(camera);
+            m_UBOCameraDataStruct.InvViewProj   = ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(camera);
+            m_UBOCameraDataStruct.Info1         = glm::vec4(0.0001f, 0.0001f, 0.0001f, camera.getNear());
+            m_UBOCameraDataStruct.Info2         = glm::vec4(ComponentCamera_Functions::GetViewVectorNoTranslation(camera), camera.getFar());
+            m_UBOCameraDataStruct.Info3         = glm::vec4(camera.getPosition(), 0.0f);
 
             UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraDataStruct);
         }

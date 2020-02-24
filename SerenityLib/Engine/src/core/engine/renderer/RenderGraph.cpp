@@ -1,4 +1,5 @@
 #include <core/engine/renderer/RenderGraph.h>
+#include <core/engine/renderer/pipelines/IRenderingPipeline.h>
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/materials/Material.h>
@@ -423,13 +424,13 @@ void RenderGraph::render(const Engine::priv::Renderer& renderer, const Viewport&
                                 _mesh.sortTriangles(camera, _modelInstance, modelMatrix, sortingMode);
                             }
                             _modelInstance.bind(renderer);
-                            _mesh.render(false, _modelInstance.getDrawingMode());
+                            renderer.m_Pipeline->renderMesh(_mesh, _modelInstance.getDrawingMode());
                             _modelInstance.unbind(renderer);
                         }
                     }
                     //protect against any custom changes by restoring to the regular shader and material
                     if (useDefaultShaders) {
-                        if (Core::m_Engine->m_RenderManager.RendererState.current_bound_shader_program != m_ShaderProgram) {
+                        if (renderer.m_Pipeline->getCurrentBoundShaderProgram() != m_ShaderProgram) {
                             m_ShaderProgram->bind();
                             _material.bind();
                         }
@@ -457,14 +458,16 @@ void RenderGraph::render_bruteforce(const Engine::priv::Renderer& renderer, cons
             _material.bind();
             _mesh.bind();
             _modelInstance.bind(renderer);
-            _mesh.render(false, _modelInstance.getDrawingMode());
+
+            renderer.m_Pipeline->renderMesh(_mesh, _modelInstance.getDrawingMode());
+
             _modelInstance.unbind(renderer);
             _mesh.unbind();
             _material.unbind();
         }
         //protect against any custom changes by restoring to the regular shader and material
         if (useDefaultShaders) {
-            if (Core::m_Engine->m_RenderManager.RendererState.current_bound_shader_program != m_ShaderProgram) {
+            if (renderer.m_Pipeline->getCurrentBoundShaderProgram() != m_ShaderProgram) {
                 m_ShaderProgram->bind();
                 _material.bind();
             }

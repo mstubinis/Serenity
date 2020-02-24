@@ -44,6 +44,12 @@ namespace Engine::priv {
             virtual void clear2DAPI() = 0;
             virtual void sort2DAPI() = 0;
 
+
+            virtual ShaderProgram* getCurrentBoundShaderProgram() = 0;
+            virtual Material* getCurrentBoundMaterial() = 0;
+            virtual Mesh* getCurrentBoundMesh() = 0;
+
+
             virtual const unsigned int getUniformLocation(const char* location) = 0;
             virtual const unsigned int getUniformLocationUnsafe(const char* location) = 0;
 

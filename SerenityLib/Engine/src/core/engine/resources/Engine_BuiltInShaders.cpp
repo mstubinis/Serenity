@@ -140,13 +140,13 @@ priv::EShaders::lighting_vert =
     "    vec3 vert = position;\n"
     "    if(Type == 2.0){\n" //spot light
     "        vert = doSpotLightStuff(vert);\n"
-    "        ModelClone[3][0] -= CameraRealPosition.x;\n"
-    "        ModelClone[3][1] -= CameraRealPosition.y;\n"
-    "        ModelClone[3][2] -= CameraRealPosition.z;\n"
+    //"        ModelClone[3][0] -= CameraRealPosition.x;\n"
+    //"        ModelClone[3][1] -= CameraRealPosition.y;\n"
+    //"        ModelClone[3][2] -= CameraRealPosition.z;\n"
     "    }else if(Type == 1.0){\n" //point / rod / etc
-    "        ModelClone[3][0] -= CameraRealPosition.x;\n"
-    "        ModelClone[3][1] -= CameraRealPosition.y;\n"
-    "        ModelClone[3][2] -= CameraRealPosition.z;\n"
+    //"        ModelClone[3][0] -= CameraRealPosition.x;\n"
+    //"        ModelClone[3][1] -= CameraRealPosition.y;\n"
+    //"        ModelClone[3][2] -= CameraRealPosition.z;\n"
     "    }else if(Type == 0.0){\n" //fullscreen quad / triangle
     "        vert.x *= (screenSizeDivideBy2.x );\n"
     "        vert.y *= (screenSizeDivideBy2.y );\n"

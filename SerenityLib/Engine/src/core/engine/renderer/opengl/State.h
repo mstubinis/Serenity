@@ -18,148 +18,109 @@ namespace Engine {
             private:
                 #pragma region TextureUnits
                 struct TextureUnitState final {
-                    GLuint targetTexture1D;
-                    GLuint targetTexture2D;
-                    GLuint targetTexture3D;
-                    GLuint targetTextureCube;
-                    TextureUnitState() {
-                        targetTexture1D   = 999999;
-                        targetTexture2D   = 999999;
-                        targetTexture3D   = 999999;
-                        targetTextureCube = 999999;
-                    }
+                    GLuint targetTexture1D   = 999999;
+                    GLuint targetTexture2D   = 999999;
+                    GLuint targetTexture3D   = 999999;
+                    GLuint targetTextureCube = 999999;
+                    TextureUnitState() = default;
                 };
                 std::vector<TextureUnitState> textureUnits;
-                GLuint                        currentTextureUnit;
+                GLuint                        currentTextureUnit = 0;
                 #pragma endregion
 
                 #pragma region ClearColor
                 struct ClearColorState final {
-                    GLfloat r;
-                    GLfloat g;
-                    GLfloat b;
-                    GLfloat a;
-                    ClearColorState() {
-                        r = 0.0f;
-                        g = 0.0f;
-                        b = 0.0f;
-                        a = 0.0f;
-                    }
+                    GLfloat r = 0.0f;
+                    GLfloat g = 0.0f;
+                    GLfloat b = 0.0f;
+                    GLfloat a = 0.0f;
+                    ClearColorState() = default;
                 };
                 ClearColorState clearColor;
                 #pragma endregion
 
                 #pragma region ColorMask
                 struct ColorMaskState final {
-                    GLboolean r;
-                    GLboolean g;
-                    GLboolean b;
-                    GLboolean a;
-                    ColorMaskState() {
-                        r = GL_TRUE;
-                        g = GL_TRUE;
-                        b = GL_TRUE;
-                        a = GL_TRUE;
-                    }
+                    GLboolean r = GL_TRUE;
+                    GLboolean g = GL_TRUE;
+                    GLboolean b = GL_TRUE;
+                    GLboolean a = GL_TRUE;
+                    ColorMaskState() = default;
                 };
                 ColorMaskState colorMaskState;
                 #pragma endregion
 
                 #pragma region ClearDepth
                 struct ClearDepthState final {
-                    GLdouble depth;
-                    GLfloat  depthf;
-                    ClearDepthState() {
-                        depth  = 1.0;
-                        depthf = 1.0f;
-                    }
+                    GLdouble depth  = 1.0;
+                    GLfloat  depthf = 1.0f;
+                    ClearDepthState() = default;
                 };
                 ClearDepthState clearDepth;
                 #pragma endregion
 
                 #pragma region ClearStencil
                 struct ClearStencilState final {
-                    GLint stencil;
-                    ClearStencilState() {
-                        stencil = 0;
-                    }
+                    GLint stencil = 0;
+                    ClearStencilState() = default;
                 };
                 ClearStencilState clearStencil;
                 #pragma endregion
 
                 #pragma region StencilMask
                 struct StencilMaskState final {
-                    GLuint front_mask;
-                    GLuint back_mask;
-                    StencilMaskState() {
-                        front_mask = 0xFFFFFFFF;
-                        back_mask = 0xFFFFFFFF;
-                    }
+                    GLuint front_mask = 0xFFFFFFFF;
+                    GLuint back_mask  = 0xFFFFFFFF;
+                    StencilMaskState() = default;
                 };
                 StencilMaskState stencilMask;
                 #pragma endregion
 
                 #pragma region StencilOp
                 struct StencilOpState final {
-                    GLenum sFail_front;
-                    GLenum dpFail_front;
-                    GLenum dpPass_front;
+                    GLenum sFail_front  = GL_KEEP;
+                    GLenum dpFail_front = GL_KEEP;
+                    GLenum dpPass_front = GL_KEEP;
 
-                    GLenum sFail_back;
-                    GLenum dpFail_back;
-                    GLenum dpPass_back;
+                    GLenum sFail_back   = GL_KEEP;
+                    GLenum dpFail_back  = GL_KEEP;
+                    GLenum dpPass_back  = GL_KEEP;
 
-                    StencilOpState() {
-                        sFail_front  = GL_KEEP;
-                        dpFail_front = GL_KEEP;
-                        dpPass_front = GL_KEEP;
-
-                        sFail_back   = GL_KEEP;
-                        dpFail_back  = GL_KEEP;
-                        dpPass_back  = GL_KEEP;
-                    }
+                    StencilOpState() = default;
                 };
                 StencilOpState stencilOp;
                 #pragma endregion
 
                 #pragma region UseProgram
                 struct UseProgramState final {
-                    GLuint program;
-                    UseProgramState() {
-                        program = 0;
-                    }
+                    GLuint program = 0;
+
+                    UseProgramState() = default;
                 };
                 UseProgramState useProgram;
                 #pragma endregion
 
                 #pragma region VAO
                 struct VertexArrayObjState final {
-                    GLuint vao;
-                    VertexArrayObjState() {
-                        vao = 0;
-                    }
+                    GLuint vao = 0;
+                    VertexArrayObjState() = default;
                 };
                 VertexArrayObjState vaoState;
                 #pragma endregion
 
                 #pragma region Viewport
                 struct ViewportState final {
-                    GLint   x;
-                    GLint   y;
-                    GLsizei width;
-                    GLsizei height;
-                    ViewportState() {
-                        x = 0;
-                        y = 0;
-                        width = 0;
-                        height = 0;
-                    }
+                    GLint   x      = 0;
+                    GLint   y      = 0;
+                    GLsizei width  = 0;
+                    GLsizei height = 0;
+                    ViewportState() = default;
                     //note - this is the real default glViewport state
-                    ViewportState(const GLsizei& _width, const GLsizei& _height) {
-                        x = 0;
-                        y = 0;
-                        width = _width;
-                        height = _height;
+                    ViewportState(const GLsizei& width_, const GLsizei& height_) {
+                        x      = 0;
+                        y      = 0;
+                        width  = width_;
+                        height = height_;
                     }
                 };
                 ViewportState viewportState;
@@ -167,64 +128,48 @@ namespace Engine {
 
                 #pragma region CullFace
                 struct CullFaceState final {
-                    GLenum mode;
-                    CullFaceState() {
-                        mode = GL_BACK;
-                    }
+                    GLenum mode = GL_BACK;
+                    CullFaceState() = default;
                 };
                 CullFaceState cullFaceState;
                 #pragma endregion
 
                 #pragma region FrontFace
                 struct FrontFaceState final {
-                    GLenum mode;
-                    FrontFaceState() {
-                        mode = GL_CCW;
-                    }
+                    GLenum mode = GL_CCW;
+                    FrontFaceState() = default;
                 };
                 FrontFaceState frontFaceState;
                 #pragma endregion
 
                 #pragma region DepthFunc
                 struct DepthFuncState final {
-                    GLenum func;
-                    DepthFuncState() {
-                        func = GL_LESS;
-                    }
+                    GLenum func = GL_LESS;
+                    DepthFuncState() = default;
                 };
                 DepthFuncState depthFuncState;
                 #pragma endregion
 
                 #pragma region PixelStorei
                 struct PixelStoreiState final {
-                    GLenum pack_alignment;
-                    GLenum unpack_alignment;
-                    PixelStoreiState() {
-                        pack_alignment = 4;
-                        unpack_alignment = 4;
-                    }
+                    GLenum pack_alignment   = 4;
+                    GLenum unpack_alignment = 4;
+                    PixelStoreiState() = default;
                 };
                 PixelStoreiState pixelStoreiState;
                 #pragma endregion
 
                 #pragma region StencilFunc
                 struct StencilFuncState final {
-                    GLenum func_front;
-                    GLint  ref_front;
-                    GLuint mask_front;
+                    GLenum func_front  = GL_ALWAYS;
+                    GLint  ref_front   = 0;
+                    GLuint mask_front  = 0xFFFFFFFF;
 
-                    GLenum func_back;
-                    GLint  ref_back;
-                    GLuint mask_back;
-                    StencilFuncState() {
-                        func_front = GL_ALWAYS;
-                        ref_front = 0;
-                        mask_front = 0xFFFFFFFF;
+                    GLenum func_back   = GL_ALWAYS;
+                    GLint  ref_back    = 0;
+                    GLuint mask_back   = 0xFFFFFFFF;
 
-                        func_back = GL_ALWAYS;
-                        ref_back = 0;
-                        mask_back = 0xFFFFFFFF;
-                    }
+                    StencilFuncState() = default;
                 };
                 StencilFuncState stencilFuncState;
                 #pragma endregion
@@ -232,108 +177,66 @@ namespace Engine {
                 #pragma region Enable
                 struct EnabledState final {
                     struct GLBlendState final {
-                        GLenum gl_blend; //index​ must be less than GL_MAX_DRAW_BUFFERS
-                        GLBlendState() {
-                            gl_blend = GL_FALSE;
-                        }
+                        GLenum gl_blend = GL_FALSE; //index​ must be less than GL_MAX_DRAW_BUFFERS
+                        GLBlendState() = default;
                     };
                     struct GLScissorTestState final {
-                        GLenum gl_scissor_test; //index​ must be less than GL_MAX_VIEWPORTS
-                        GLScissorTestState() {
-                            gl_scissor_test = GL_FALSE;
-                        }
+                        GLenum gl_scissor_test = GL_FALSE; //index​ must be less than GL_MAX_VIEWPORTS
+                        GLScissorTestState() = default;
                     };
                     std::vector<GLBlendState>       blendState;
                     std::vector<GLScissorTestState> scissorState;
 
-                    GLenum gl_clip_distance_1;
-                    GLenum gl_clip_distance_2;
-                    GLenum gl_clip_distance_3;
-                    GLenum gl_clip_distance_4;
-                    GLenum gl_clip_distance_5;
-                    GLenum gl_color_logic_op;
-                    GLenum gl_cull_face;
-                    GLenum gl_debug_output;
-                    GLenum gl_debug_output_syncronous;
-                    GLenum gl_depth_clamp;
-                    GLenum gl_depth_test;
-                    GLenum gl_dither;
-                    GLenum gl_framebuffer_srgb;
-                    GLenum gl_line_smooth;
-                    GLenum gl_multisample;
-                    GLenum gl_polygon_offset_fill;
-                    GLenum gl_polygon_offset_line;
-                    GLenum gl_polygon_offset_point;
-                    GLenum gl_polygon_smooth;
-                    GLenum gl_primitive_restart;
-                    GLenum gl_primitive_restart_fixed_index;
-                    GLenum gl_rasterizer_discard;
-                    GLenum gl_sample_alpha_to_coverage;
-                    GLenum gl_sample_alpha_to_one;
-                    GLenum gl_sample_coverage;
-                    GLenum gl_sample_shading;
-                    GLenum gl_sample_mask;
-                    GLenum gl_stencil_test;
-                    GLenum gl_texture_cube_map_seamless;
-                    GLenum gl_program_point_size;
+                    GLenum gl_clip_distance_1               = GL_FALSE;
+                    GLenum gl_clip_distance_2               = GL_FALSE;
+                    GLenum gl_clip_distance_3               = GL_FALSE;
+                    GLenum gl_clip_distance_4               = GL_FALSE;
+                    GLenum gl_clip_distance_5               = GL_FALSE;
+                    GLenum gl_color_logic_op                = GL_FALSE;
+                    GLenum gl_cull_face                     = GL_FALSE;
+                    GLenum gl_debug_output                  = GL_FALSE;
+                    GLenum gl_debug_output_syncronous       = GL_FALSE;
+                    GLenum gl_depth_clamp                   = GL_FALSE;
+                    GLenum gl_depth_test                    = GL_FALSE;
+                    GLenum gl_dither                        = GL_TRUE;
+                    GLenum gl_framebuffer_srgb              = GL_FALSE;
+                    GLenum gl_line_smooth                   = GL_FALSE;
+                    GLenum gl_multisample                   = GL_TRUE;
+                    GLenum gl_polygon_offset_fill           = GL_FALSE;
+                    GLenum gl_polygon_offset_line           = GL_FALSE;
+                    GLenum gl_polygon_offset_point          = GL_FALSE;
+                    GLenum gl_polygon_smooth                = GL_FALSE;
+                    GLenum gl_primitive_restart             = GL_FALSE;
+                    GLenum gl_primitive_restart_fixed_index = GL_FALSE;
+                    GLenum gl_rasterizer_discard            = GL_FALSE;
+                    GLenum gl_sample_alpha_to_coverage      = GL_FALSE;
+                    GLenum gl_sample_alpha_to_one           = GL_FALSE;
+                    GLenum gl_sample_coverage               = GL_FALSE;
+                    GLenum gl_sample_shading                = GL_FALSE;
+                    GLenum gl_sample_mask                   = GL_FALSE;
+                    GLenum gl_stencil_test                  = GL_FALSE;
+                    GLenum gl_texture_cube_map_seamless     = GL_FALSE;
+                    GLenum gl_program_point_size            = GL_FALSE;
 
-                    EnabledState() {
-                        gl_multisample = GL_TRUE;
-                        gl_dither = GL_TRUE;
-
-                        gl_clip_distance_1 = GL_FALSE;
-                        gl_clip_distance_2 = GL_FALSE;
-                        gl_clip_distance_3 = GL_FALSE;
-                        gl_clip_distance_4 = GL_FALSE;
-                        gl_clip_distance_5 = GL_FALSE;
-                        gl_color_logic_op = GL_FALSE;
-                        gl_cull_face = GL_FALSE;
-                        gl_debug_output = GL_FALSE;
-                        gl_debug_output_syncronous = GL_FALSE;
-                        gl_depth_clamp = GL_FALSE;
-                        gl_depth_test = GL_FALSE;
-                        gl_framebuffer_srgb = GL_FALSE;
-                        gl_line_smooth = GL_FALSE;
-                        gl_polygon_offset_fill = GL_FALSE;
-                        gl_polygon_offset_line = GL_FALSE;
-                        gl_polygon_offset_point = GL_FALSE;
-                        gl_polygon_smooth = GL_FALSE;
-                        gl_primitive_restart = GL_FALSE;
-                        gl_primitive_restart_fixed_index = GL_FALSE;
-                        gl_rasterizer_discard = GL_FALSE;
-                        gl_sample_alpha_to_coverage = GL_FALSE;
-                        gl_sample_alpha_to_one = GL_FALSE;
-                        gl_sample_coverage = GL_FALSE;
-                        gl_sample_shading = GL_FALSE;
-                        gl_sample_mask = GL_FALSE;
-                        gl_stencil_test = GL_FALSE;
-                        gl_texture_cube_map_seamless = GL_FALSE;
-                        gl_program_point_size = GL_FALSE;
-                    }
+                    EnabledState() = default;
                 };
                 EnabledState enabledState;
                 #pragma endregion
 
                 #pragma region Framebuffer
                 struct FramebufferState final {
-                    GLuint framebuffer_read;
-                    GLuint framebuffer_draw;
-                    GLuint renderbuffer;
-                    FramebufferState() {
-                        framebuffer_read = 0;
-                        framebuffer_draw = 0;
-                        renderbuffer = 0;
-                    }
+                    GLuint framebuffer_read = 0;
+                    GLuint framebuffer_draw = 0;
+                    GLuint renderbuffer     = 0;
+                    FramebufferState() = default;
                 };
                 FramebufferState framebufferState;
                 #pragma endregion
 
                 #pragma region BlendEquation
                 struct BlendEquationState final {
-                    GLenum mode;
-                    BlendEquationState(){
-                        mode = GL_FUNC_ADD;
-                    }
+                    GLenum mode = GL_FUNC_ADD;
+                    BlendEquationState() = default;
                 };
                 std::vector<BlendEquationState> blendEquationState;
                 #pragma endregion
@@ -380,9 +283,8 @@ namespace Engine {
                 void GL_RESTORE_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth, const unsigned int& windowHeight);
                 void GL_RESTORE_CURRENT_STATE_MACHINE();
 
-                OpenGLState();
-                OpenGLState(const unsigned int& windowWidth, const unsigned int& windowHeight);
-                ~OpenGLState();
+                OpenGLState() = default;
+                ~OpenGLState() = default;
         };
     };
 };

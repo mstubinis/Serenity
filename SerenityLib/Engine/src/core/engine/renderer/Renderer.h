@@ -41,9 +41,6 @@ namespace priv{
             DepthFunc::Func                    m_Depth_Function   = DepthFunc::Less;
 
         public:
-            RendererState            RendererState;
-            OpenGLState              OpenGLStateMachine;
-            OpenGLExtensions         OpenGLExtensionsManager;
             IRenderingPipeline*      m_Pipeline                   = nullptr;
 
             Renderer(const EngineOptions& options);
