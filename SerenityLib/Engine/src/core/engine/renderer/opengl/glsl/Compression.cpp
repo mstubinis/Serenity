@@ -144,6 +144,24 @@ void opengl::glsl::Compression::convert(string& code, const unsigned int& versio
     }
 #pragma endregion
 
+#pragma region Unpack32BitUIntTo4ColorFloats
+    if (ShaderHelper::sfind(code, "Unpack32BitUIntTo4ColorFloats")) {
+        if (!ShaderHelper::sfind(code, "vec4 Unpack32BitUIntTo4ColorFloats")) {
+            const string inserted_code =
+                "vec4 Unpack32BitUIntTo4ColorFloats(uint n) {\n"
+                "    int nasInt = int(n);\n"
+                "    vec4 ret;\n"
+                "    ret.r = (nasInt >> 24) & 255;\n"
+                "    ret.g = (nasInt >> 16) & 255; \n"
+                "    ret.b = (nasInt >> 8) & 255; \n"
+                "    ret.a = (nasInt & 255); \n"
+                "    return ret * 0.00392156862; \n"
+                "}\n";
+            ShaderHelper::insertStringAtLine(code, inserted_code, 1);
+        }
+    }
+#pragma endregion
+
 #pragma region SignNotZero
     if (ShaderHelper::sfind(code, "SignNotZero")) {
         if (!ShaderHelper::sfind(code, "vec2 SignNotZero")) {

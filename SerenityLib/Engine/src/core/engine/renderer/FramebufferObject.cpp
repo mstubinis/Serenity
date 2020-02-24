@@ -136,13 +136,14 @@ priv::FramebufferObject::FramebufferObject(const unsigned int& w, const unsigned
     init(w, h, depthInternalFormat, divisor, swapBufferCount);
 }
 void priv::FramebufferObject::init(const unsigned int& width, const unsigned int& height, const float& divisor, const unsigned int& swapBufferCount) {
-    m_CurrentFBOIndex = 0;
-    m_Divisor = divisor;
-    m_FramebufferWidth = static_cast<unsigned int>(static_cast<float>(width) * m_Divisor);
+    m_CurrentFBOIndex   = 0;
+    m_Divisor           = divisor;
+    m_FramebufferWidth  = static_cast<unsigned int>(static_cast<float>(width) * m_Divisor);
     m_FramebufferHeight = static_cast<unsigned int>(static_cast<float>(height) * m_Divisor);
     m_FBO.resize(swapBufferCount, GLuint(0));
-    for (unsigned int i = 0; i < m_FBO.size(); ++i)
+    for (unsigned int i = 0; i < m_FBO.size(); ++i) {
         glGenFramebuffers(1, &m_FBO[i]);
+    }
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }

@@ -19,7 +19,7 @@ namespace Engine::priv {
 #include <mutex>
 #include <LinearMath/btVector3.h>
 
-#define PHYSICS_MIN_STEP 0.016666666666666666
+#define PHYSICS_MIN_STEP 0.016666666666666666f
 
 namespace Engine{
     struct RayCastResult {
@@ -34,8 +34,8 @@ namespace Engine{
             public:
                 Engine::priv::PhysicsWorld    m_Data;
                 std::mutex                    m_Mutex;
-                bool                          m_Paused;
-                unsigned int                  m_NumberOfStepsPerFrame;
+                bool                          m_Paused                = false;
+                unsigned int                  m_NumberOfStepsPerFrame = 1;
             public:
                 PhysicsManager();
                 ~PhysicsManager();
@@ -47,8 +47,8 @@ namespace Engine{
 
                 void _init();
 
-                void _update(const float& dt, int maxSteps = 1, float = 0.0166666f);
-                void _render(Camera& camera);
+                void _update(const float& dt, int maxSubSteps = 1, float fixedTimeStep = 0.0166666f);
+                void _render(const Camera& camera);
         };
     };
     namespace Physics{

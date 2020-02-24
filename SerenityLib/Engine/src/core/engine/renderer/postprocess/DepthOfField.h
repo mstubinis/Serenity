@@ -12,18 +12,18 @@ namespace Engine::priv {
     class  GBuffer;
     class  DepthOfField final {
         private:
-            Shader*        m_Vertex_Shader;
-            Shader*        m_Fragment_Shader;
-            ShaderProgram* m_Shader_Program;
+            Shader*        m_Vertex_Shader   = nullptr;
+            Shader*        m_Fragment_Shader = nullptr;
+            ShaderProgram* m_Shader_Program  = nullptr;
 
-            std::string    m_GLSL_frag_code;
+            std::string    m_GLSL_frag_code  = "";
         public:
-            float bias;
-            float focus;
-            float blur_radius;
-            bool  dof;
+            float bias                       = 0.6f;
+            float focus                      = 2.0f;
+            float blur_radius                = 3.0f;
+            bool  dof                        = false;
 
-            DepthOfField();
+            DepthOfField() = default;
             ~DepthOfField();
 
             const bool init_shaders();

@@ -17,6 +17,7 @@
 #include <core/engine/lights/RodLight.h>
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/textures/Texture.h>
+#include <core/engine/renderer/pipelines/IRenderingPipeline.h>
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -24,20 +25,20 @@
 using namespace Engine;
 using namespace std;
 
+
 unsigned int ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
 
 namespace Engine::priv {
-    struct DefaultModelInstanceBindFunctor {void operator()(EngineResource* r) const {
-        auto& i                       = *static_cast<ModelInstance*>(r);
-        const auto& stage             = i.stage();
+    struct DefaultModelInstanceBindFunctor {void operator()(ModelInstance* i, const Engine::priv::Renderer* renderer) const {
+        const auto& stage             = i->stage();
         auto& scene                   = *Resources::getCurrentScene();
         const glm::vec3 camPos        = scene.getActiveCamera()->getPosition();
-        auto& body                    = *(i.m_Parent.getComponent<ComponentBody>());
+        auto& body                    = *(i->m_Parent.getComponent<ComponentBody>());
         const glm::mat4 parentModel   = body.modelMatrixRendering();
-        auto& animationVector         = i.m_AnimationVector;
+        auto& animationVector         = i->m_AnimationVector;
 
-        Engine::Renderer::sendUniform4Safe("Object_Color", i.m_Color);
-        Engine::Renderer::sendUniform3Safe("Gods_Rays_Color", i.m_GodRaysColor);
+        Engine::Renderer::sendUniform1Safe("Object_Color", i->m_Color.toPackedInt());
+        Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", i->m_GodRaysColor.toPackedInt());
 
         if (stage == RenderStage::ForwardTransparentTrianglesSorted || stage == RenderStage::ForwardTransparent || stage == RenderStage::ForwardOpaque) {
             auto& lights     = priv::InternalScenePublicInterface::GetLights(scene);
@@ -105,8 +106,9 @@ namespace Engine::priv {
                 }
             }
             Skybox* skybox          = scene.skybox();
-            const auto maxTextures  = priv::Core::m_Engine->m_RenderManager.OpenGLStateMachine.getMaxTextureUnits() - 1;
-            Engine::Renderer::sendUniform4Safe("ScreenData", priv::Core::m_Engine->m_RenderManager._getGIPackedData(), Engine::Renderer::Settings::getGamma(), 0.0f, 0.0f);
+            const auto maxTextures  = renderer->m_Pipeline->getMaxNumTextureUnits() - 1U;
+
+            Engine::Renderer::sendUniform4Safe("ScreenData", renderer->m_GI_Pack, Engine::Renderer::Settings::getGamma(), 0.0f, 0.0f);
             if (skybox && skybox->texture()->numAddresses() >= 3) {
                 Engine::Renderer::sendTextureSafe("irradianceMap", skybox->texture()->address(1), maxTextures - 2, GL_TEXTURE_CUBE_MAP);
                 Engine::Renderer::sendTextureSafe("prefilterMap", skybox->texture()->address(2), maxTextures - 1, GL_TEXTURE_CUBE_MAP);
@@ -123,7 +125,7 @@ namespace Engine::priv {
         }else{
             Engine::Renderer::sendUniform1Safe("AnimationPlaying", 0);
         }
-        glm::mat4 modelMatrix = parentModel * i.m_ModelMatrix;
+        glm::mat4 modelMatrix = parentModel * i->m_ModelMatrix;
 
         //world space normals
         glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
@@ -135,7 +137,7 @@ namespace Engine::priv {
         Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
         Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
     }};
-    struct DefaultModelInstanceUnbindFunctor {void operator()(EngineResource* r) const {
+    struct DefaultModelInstanceUnbindFunctor {void operator()(ModelInstance* i, const Engine::priv::Renderer* renderer) const {
         //auto& i = *static_cast<ModelInstance*>(r);
     }};
 };
@@ -146,7 +148,7 @@ const bool priv::InternalModelInstancePublicInterface::IsViewportValid(const Mod
 
 
 
-ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Material* mat, ShaderProgram* program) : m_Parent(parent), BindableResource(ResourceType::Empty){
+ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Material* mat, ShaderProgram* program) : m_Parent(parent){
     internal_init(mesh, mat, program);
     setCustomBindFunctor(priv::DefaultModelInstanceBindFunctor());
     setCustomUnbindFunctor(priv::DefaultModelInstanceUnbindFunctor());
@@ -158,7 +160,7 @@ ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Handle mat, ShaderProgr
 ModelInstance::ModelInstance(Entity& parent, Handle mesh, Material* mat, ShaderProgram* program) : ModelInstance(parent, (Mesh*)mesh.get(), mat, program) {
 }
 
-ModelInstance::ModelInstance(ModelInstance&& other) noexcept : BindableResource(ResourceType::Empty) {
+ModelInstance::ModelInstance(ModelInstance&& other) noexcept {
     m_DrawingMode            = std::move(other.m_DrawingMode);
     m_ViewportFlagDefault    = std::move(other.m_ViewportFlagDefault);
     m_ViewportFlag           = std::move(other.m_ViewportFlagDefault);
@@ -179,6 +181,8 @@ ModelInstance::ModelInstance(ModelInstance&& other) noexcept : BindableResource(
     m_ShaderProgram          = std::exchange(other.m_ShaderProgram, nullptr);
     m_Mesh                   = std::exchange(other.m_Mesh, nullptr);
     m_Material               = std::exchange(other.m_Material, nullptr);
+    m_CustomBindFunctor.swap(other.m_CustomBindFunctor);
+    m_CustomUnbindFunctor.swap(other.m_CustomUnbindFunctor);
 }
 ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
     if (&other != this) {
@@ -202,11 +206,20 @@ ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
         m_ShaderProgram          = std::exchange(other.m_ShaderProgram, nullptr);
         m_Mesh                   = std::exchange(other.m_Mesh, nullptr);
         m_Material               = std::exchange(other.m_Material, nullptr);
+        m_CustomBindFunctor.swap(other.m_CustomBindFunctor);
+        m_CustomUnbindFunctor.swap(other.m_CustomUnbindFunctor);
     }
     return *this;
 }
 
 ModelInstance::~ModelInstance() {
+}
+
+void ModelInstance::bind(const Engine::priv::Renderer& renderer) {
+    m_CustomBindFunctor(this, &renderer);
+}
+void ModelInstance::unbind(const Engine::priv::Renderer& renderer) {
+    m_CustomUnbindFunctor(this, &renderer);
 }
 
 void ModelInstance::setDefaultViewportFlag(const unsigned int flag) {
@@ -220,22 +233,10 @@ void ModelInstance::internal_init(Mesh* mesh, Material* mat, ShaderProgram* prog
     if (!program) {
         program = ShaderProgram::Deferred;
     }
-    m_DrawingMode       = ModelDrawingMode::Triangles;
     m_ViewportFlag      = ModelInstance::m_ViewportFlagDefault;
-    m_UserPointer       = nullptr;
-    m_Stage             = RenderStage::GeometryOpaque;
-    m_PassedRenderCheck = false;
-    m_ForceRender       = false;
-    m_Visible           = true;
     m_ShaderProgram     = program;
     m_Material          = mat;
     m_Mesh              = mesh;
-    m_Color             = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    m_GodRaysColor      = glm::vec3(0.0f, 0.0f, 0.0f);
-    m_Position          = glm::vec3(0.0f, 0.0f, 0.0f);
-    m_Orientation       = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-    m_Scale             = glm::vec3(1.0f, 1.0f, 1.0f);
-    m_Index             = 0;
 
     internal_update_model_matrix();
 }
@@ -315,7 +316,10 @@ void ModelInstance::setPassedRenderCheck(const bool& b) {
     m_PassedRenderCheck = b; 
 }
 void ModelInstance::setColor(const float& r, const float& g, const float& b, const float& a) {
-    Math::setColor(m_Color, r, g, b, a);
+    m_Color = Engine::color_vector_4(r, g, b, a);
+}
+void ModelInstance::setColor(const unsigned char& r, const unsigned char& g, const unsigned char& b, const unsigned char& a) {
+    m_Color = Engine::color_vector_4(r, g, b, a);
 }
 void ModelInstance::setColor(const glm::vec4& color){
     ModelInstance::setColor(color.r, color.g, color.b, color.a);
@@ -324,7 +328,7 @@ void ModelInstance::setColor(const glm::vec3& color) {
     ModelInstance::setColor(color.r, color.g, color.b, 1.0f);
 }
 void ModelInstance::setGodRaysColor(const float& r, const float& g, const float& b) {
-    Math::setColor(m_GodRaysColor, r, g, b);
+    m_GodRaysColor = Engine::color_vector_4(r, g, b, m_GodRaysColor.a());
 }
 void ModelInstance::setGodRaysColor(const glm::vec3& color){
     ModelInstance::setGodRaysColor(color.r, color.g, color.b);
@@ -376,10 +380,10 @@ void ModelInstance::rotate(const glm::vec3& v){
 void ModelInstance::scale(const glm::vec3& v) {
     ModelInstance::scale(v.x, v.y, v.z);
 }
-const glm::vec4& ModelInstance::color() const {
+const Engine::color_vector_4& ModelInstance::color() const {
     return m_Color; 
 }
-const glm::vec3& ModelInstance::godRaysColor() const {
+const Engine::color_vector_4& ModelInstance::godRaysColor() const {
     return m_GodRaysColor; 
 }
 const glm::mat4& ModelInstance::modelMatrix() const {

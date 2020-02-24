@@ -22,21 +22,21 @@ void priv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentCamera& c
             = glm::ortho(componentCamera.m_Left, componentCamera.m_Right, componentCamera.m_Bottom, componentCamera.m_Top, componentCamera.m_NearPlane, componentCamera.m_FarPlane);
     }
 }
-const glm::mat4 priv::ComponentCamera_Functions::GetViewNoTranslation(Camera& camera) {
+const glm::mat4 priv::ComponentCamera_Functions::GetViewNoTranslation(const Camera& camera) {
     return camera.m_Entity.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation;
 }
-const glm::mat4 priv::ComponentCamera_Functions::GetViewInverseNoTranslation(Camera& camera) {
+const glm::mat4 priv::ComponentCamera_Functions::GetViewInverseNoTranslation(const Camera& camera) {
     return glm::inverse(camera.m_Entity.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation);
 }
-const glm::mat4 priv::ComponentCamera_Functions::GetViewProjectionNoTranslation(Camera& camera) {
+const glm::mat4 priv::ComponentCamera_Functions::GetViewProjectionNoTranslation(const Camera& camera) {
     const auto& componentCamera = *camera.m_Entity.getComponent<ComponentCamera>();
     return componentCamera.m_ProjectionMatrix * componentCamera.m_ViewMatrixNoTranslation;
 }
-const glm::mat4 priv::ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(Camera& camera) {
+const glm::mat4 priv::ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(const Camera& camera) {
     const auto& componentCamera = *camera.m_Entity.getComponent<ComponentCamera>();
     return glm::inverse(componentCamera.m_ProjectionMatrix * componentCamera.m_ViewMatrixNoTranslation);
 }
-const glm::vec3 priv::ComponentCamera_Functions::GetViewVectorNoTranslation(Camera& camera) {
+const glm::vec3 priv::ComponentCamera_Functions::GetViewVectorNoTranslation(const Camera& camera) {
     const auto& viewMatrixNoTranslation = camera.m_Entity.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation;
     return glm::vec3(viewMatrixNoTranslation[0][2], viewMatrixNoTranslation[1][2], viewMatrixNoTranslation[2][2]);
 }
@@ -227,7 +227,15 @@ struct priv::ComponentCamera_UpdateFunction final { void operator()(void* compon
     auto lamda_update_component = [&](ComponentCamera& b, const size_t& i) {
         Math::extractViewFrustumPlanesHartmannGribbs(b.m_ProjectionMatrix * b.m_ViewMatrix, b.m_FrustumPlanes);//update view frustrum 
     };
-    priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);
+
+
+    if (components.size() < 50) {
+        for (size_t i = 0; i < components.size(); ++i) {
+            lamda_update_component(components[i], i);
+        }
+    }else{
+        priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);
+    }
 }};
 struct priv::ComponentCamera_ComponentAddedToEntityFunction final {void operator()(void* componentCamera, Entity& entity) const {
 }};

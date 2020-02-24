@@ -4,6 +4,7 @@
 
 #include <locale>
 #include <stdint.h>
+#include <glm/vec4.hpp>
 
 //#define ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS //this will force the engine and window to use the same thread, which will prevent the engine logic from executing if the user modifies the window. this can cause some flickering on resize however
 //#define ENGINE_FORCE_PHYSICS_DEBUG_DRAW //this will force the renderer to output physics debugging info regardless if the build is debug or release
@@ -108,6 +109,10 @@
 
 #pragma endregion
 
+inline constexpr unsigned char operator "" _uc(unsigned long long arg) noexcept{
+    return static_cast<unsigned char>(arg);
+}
+
 namespace Engine {
     class NonCopyable {
         public:
@@ -167,6 +172,31 @@ namespace Engine {
                 return (m_Flags & flag) ? true : false;
             }
     };
+
+
+    struct color_vector_4 {
+        glm::vec<4, unsigned char, glm::packed_highp> color = glm::vec<4, unsigned char, glm::packed_highp>(0);
+
+
+        color_vector_4() = default;
+        explicit color_vector_4(const float color);
+        explicit color_vector_4(const float r, const float g, const float b, const float a);
+        explicit color_vector_4(const glm::vec4& color);
+        explicit color_vector_4(const unsigned char r, const unsigned char g, const unsigned char b, const unsigned char a);
+        explicit color_vector_4(const unsigned char color);
+
+        const float toPackedFloat() const;
+        glm::vec4 unpackFloat(float v) const;
+
+        const uint32_t toPackedInt() const;
+        glm::vec4 unpackInt(uint32_t i) const;
+
+        inline float r() const { return static_cast<float>(color.r) * 0.003921568627451f; }
+        inline float g() const { return static_cast<float>(color.g) * 0.003921568627451f; }
+        inline float b() const { return static_cast<float>(color.b) * 0.003921568627451f; }
+        inline float a() const { return static_cast<float>(color.a) * 0.003921568627451f; }
+    };
+
 };
 
 #endif

@@ -39,24 +39,24 @@ namespace Engine::priv {
         public:
 
 
-            unsigned int  AreaTexture;
-            unsigned int  SearchTexture;
-            float         THRESHOLD;
-            int           MAX_SEARCH_STEPS;
-            int           MAX_SEARCH_STEPS_DIAG;
-            int           CORNER_ROUNDING;
-            float         LOCAL_CONTRAST_ADAPTATION_FACTOR;
-            float         DEPTH_THRESHOLD;
-            bool          PREDICATION;
-            float         PREDICATION_THRESHOLD;
-            float         PREDICATION_SCALE;
-            float         PREDICATION_STRENGTH;
-            bool          REPROJECTION;
-            float         REPROJECTION_WEIGHT_SCALE;
-            int           AREATEX_MAX_DISTANCE;
-            int           AREATEX_MAX_DISTANCE_DIAG;
-            glm::vec2     AREATEX_PIXEL_SIZE;
-            float         AREATEX_SUBTEX_SIZE;
+            unsigned int  AreaTexture                             = 0;
+            unsigned int  SearchTexture                           = 0;
+            unsigned char MAX_SEARCH_STEPS                        = 32;
+            unsigned char MAX_SEARCH_STEPS_DIAG                   = 16;
+            unsigned char CORNER_ROUNDING                         = 25;
+            unsigned char AREATEX_MAX_DISTANCE                    = 16;
+            unsigned char AREATEX_MAX_DISTANCE_DIAG               = 20;
+            float         THRESHOLD                               = 0.05f;
+            float         LOCAL_CONTRAST_ADAPTATION_FACTOR        = 2.0f;
+            float         DEPTH_THRESHOLD                         = (0.1f * THRESHOLD);
+            float         PREDICATION_THRESHOLD                   = 0.01f;
+            float         PREDICATION_SCALE                       = 2.0f;
+            float         PREDICATION_STRENGTH                    = 0.4f;
+            float         REPROJECTION_WEIGHT_SCALE               = 30.0f;
+            float         AREATEX_SUBTEX_SIZE                     = 0.14285714285f; //(1 / 7)
+            glm::vec2     AREATEX_PIXEL_SIZE                      = glm::vec2(glm::vec2(1.0f) / glm::vec2(160.0f, 560.0f));
+            bool          PREDICATION                             = false;
+            bool          REPROJECTION                            = false;
 
             SMAA();
             ~SMAA();

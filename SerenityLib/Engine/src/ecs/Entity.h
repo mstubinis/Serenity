@@ -7,7 +7,7 @@
 #include <ecs/EntityDataRequest.h>
 
 struct Entity{   
-    std::uint32_t data;
+    std::uint32_t data = 0;
 
     Entity();
     Entity(const unsigned int& entityID, const unsigned int& sceneID, const unsigned int& versionID);

@@ -14,16 +14,6 @@ using namespace std;
 
 Engine::priv::FXAA Engine::priv::FXAA::fxaa;
 
-Engine::priv::FXAA::FXAA() {
-    reduce_min        = 0.0078125f; // (1 / 128)
-    reduce_mul        = 0.125f;     // (1 / 8)
-    span_max          = 8.0f;
-
-    m_GLSL_frag_code = "";
-    m_Shader_program    = nullptr;
-    m_Vertex_shader     = nullptr;
-    m_Fragment_shader   = nullptr;
-}
 const bool Engine::priv::FXAA::init_shaders() {
     if (!m_GLSL_frag_code.empty())
         return false;

@@ -403,7 +403,7 @@ void RenderGraph::validate_model_instances_for_rendering(const Viewport& viewpor
     const auto camPos = camera.getPosition();
     lambda(m_InstancesTotal, camPos);
 }
-void RenderGraph::render(const Viewport& viewport, const Camera& camera, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
+void RenderGraph::render(const Engine::priv::Renderer& renderer, const Viewport& viewport, const Camera& camera, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
     if(useDefaultShaders)
         m_ShaderProgram->bind();
     for (auto& materialNode : m_MaterialNodes) {
@@ -422,9 +422,9 @@ void RenderGraph::render(const Viewport& viewport, const Camera& camera, const b
                             if (sortingMode != SortingMode::None) {
                                 _mesh.sortTriangles(camera, _modelInstance, modelMatrix, sortingMode);
                             }
-                            _modelInstance.bind();
+                            _modelInstance.bind(renderer);
                             _mesh.render(false, _modelInstance.getDrawingMode());
-                            _modelInstance.unbind();
+                            _modelInstance.unbind(renderer);
                         }
                     }
                     //protect against any custom changes by restoring to the regular shader and material
@@ -441,7 +441,7 @@ void RenderGraph::render(const Viewport& viewport, const Camera& camera, const b
         }
     }
 }
-void RenderGraph::render_bruteforce(const Viewport& viewport, const Camera& camera, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
+void RenderGraph::render_bruteforce(const Engine::priv::Renderer& renderer, const Viewport& viewport, const Camera& camera, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
     if (useDefaultShaders)
         m_ShaderProgram->bind();
     for (auto& instance : m_InstancesTotal) {
@@ -456,9 +456,9 @@ void RenderGraph::render_bruteforce(const Viewport& viewport, const Camera& came
             }
             _material.bind();
             _mesh.bind();
-            _modelInstance.bind();
+            _modelInstance.bind(renderer);
             _mesh.render(false, _modelInstance.getDrawingMode());
-            _modelInstance.unbind();
+            _modelInstance.unbind(renderer);
             _mesh.unbind();
             _material.unbind();
         }

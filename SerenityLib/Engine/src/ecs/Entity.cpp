@@ -8,7 +8,6 @@ using namespace std;
 Entity Entity::null_ = Entity(0,0,0);
 
 Entity::Entity() {
-    data = 0;
 }
 Entity::Entity(const unsigned int& entityID, const unsigned int& sceneID, const unsigned int& versionID) {
     process(entityID, sceneID, versionID);

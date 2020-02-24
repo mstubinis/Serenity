@@ -23,6 +23,7 @@ namespace Engine::priv {
     struct InternalScenePublicInterface;
     template<typename T> class ECS;
     class  GBuffer;
+    class  Renderer;
 };
 
 #include <core/engine/renderer/RendererIncludes.h>
@@ -38,16 +39,16 @@ class Scene: public EngineResource, public EventObserver{
     friend struct Engine::priv::InternalScenePublicInterface;
 
     private:
-        std::vector<Viewport>                                 m_Viewports;
-        std::vector<Camera*>                                  m_Cameras;
-        std::vector<std::vector<Engine::priv::RenderGraph>>   m_RenderGraphs;
+        mutable std::vector<Viewport>                                 m_Viewports;
+        mutable std::vector<Camera*>                                  m_Cameras;
+        mutable std::vector<std::vector<Engine::priv::RenderGraph>>   m_RenderGraphs;
 
-        std::vector<SunLight*>                                m_Lights;
-        std::vector<SunLight*>                                m_SunLights;
-        std::vector<DirectionalLight*>                        m_DirectionalLights;
-        std::vector<PointLight*>                              m_PointLights;
-        std::vector<SpotLight*>                               m_SpotLights;
-        std::vector<RodLight*>                                m_RodLights;
+        mutable std::vector<SunLight*>                                m_Lights;
+        mutable std::vector<SunLight*>                                m_SunLights;
+        mutable std::vector<DirectionalLight*>                        m_DirectionalLights;
+        mutable std::vector<PointLight*>                              m_PointLights;
+        mutable std::vector<SpotLight*>                               m_SpotLights;
+        mutable std::vector<RodLight*>                                m_RodLights;
 
         std::vector<unsigned int>                             m_Entities;
         unsigned int                                          m_ID;
@@ -113,28 +114,29 @@ namespace Engine {
             friend class Scene;
             friend class Engine::priv::RenderGraph;
 
-            static std::vector<Particle>&            GetParticles( Scene& scene);
-            static std::vector<EntityPOD>&           GetEntities( Scene& scene);
-            static std::vector<Viewport>&            GetViewports( Scene& scene);
-            static std::vector<Camera*>&             GetCameras( Scene& scene);
-            static std::vector<SunLight*>&           GetLights( Scene& scene);
-            static std::vector<SunLight*>&           GetSunLights( Scene& scene);
-            static std::vector<DirectionalLight*>&   GetDirectionalLights( Scene& scene);
-            static std::vector<PointLight*>&         GetPointLights( Scene& scene);
-            static std::vector<SpotLight*>&          GetSpotLights( Scene& scene);
-            static std::vector<RodLight*>&           GetRodLights( Scene& scene);
+            static std::vector<Particle>&            GetParticles(const Scene& scene);
+            static std::vector<EntityPOD>&           GetEntities(const Scene& scene);
+            static std::vector<Viewport>&            GetViewports(const Scene& scene);
+            static std::vector<Camera*>&             GetCameras(const Scene& scene);
+            static std::vector<SunLight*>&           GetLights(const Scene& scene);
+            static std::vector<SunLight*>&           GetSunLights(const Scene& scene);
+            static std::vector<DirectionalLight*>&   GetDirectionalLights(const Scene& scene);
+            static std::vector<PointLight*>&         GetPointLights(const Scene& scene);
+            static std::vector<SpotLight*>&          GetSpotLights(const Scene& scene);
+            static std::vector<RodLight*>&           GetRodLights(const Scene& scene);
 
             static void           UpdateMaterials(Scene& scene, const float& dt);
             static void           UpdateParticleSystem(Scene& scene, const float& dt);
-            static void           RenderGeometryOpaque(const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-            static void           RenderGeometryTransparent(const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-            static void           RenderGeometryTransparentTrianglesSorted(const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-            static void           RenderForwardOpaque(const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-            static void           RenderForwardTransparent(const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-            static void           RenderForwardTransparentTrianglesSorted(const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-            static void           RenderForwardParticles(const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-            static void           RenderDecals(const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-            static void           RenderParticles(const Scene& scene, const Viewport&, const Camera&, ShaderProgram& program, const GBuffer&);
+
+            static void           RenderGeometryOpaque( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
+            static void           RenderGeometryTransparent( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
+            static void           RenderGeometryTransparentTrianglesSorted( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
+            static void           RenderForwardOpaque( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
+            static void           RenderForwardTransparent( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
+            static void           RenderForwardTransparentTrianglesSorted( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
+            static void           RenderForwardParticles( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
+            static void           RenderDecals( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
+            static void           RenderParticles( Renderer&, const Scene& scene, const Viewport&, const Camera&, ShaderProgram& program, const GBuffer&);
 
             static void           AddModelInstanceToPipeline(Scene& scene, ModelInstance&, const RenderStage::Stage& stage);
             static void           RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance&, const RenderStage::Stage& stage);

@@ -117,22 +117,24 @@ void EngineCore::init(const EngineOptions& options) {
     Engine::Renderer::fog::enable(options.fog_enabled);
     Engine::Renderer::Settings::setAntiAliasingAlgorithm(options.aa_algorithm);
 }
-void EngineCore::update_physics(Window& window, const float& dt) {
+void EngineCore::update_physics(Window& window, const float& timeStep) {
     m_DebugManager.stop_clock();
 
-    //It's important that dt < actual_steps * PHYSICS_MIN_STEP / static_cast<float>(requested_steps), otherwise you are losing time. dt < maxSubSteps * fixedTimeStep
-    const auto requested_steps = Physics::getNumberOfStepsPerFrame();
-    int actual_steps           = requested_steps;
-    const auto fixed_time_step = PHYSICS_MIN_STEP / static_cast<double>(requested_steps);
+    const unsigned int requestedStepsPerFrame  = Physics::getNumberOfStepsPerFrame();
+    const float fixed_time_step                = PHYSICS_MIN_STEP / static_cast<float>(requestedStepsPerFrame);
 
+    /*
+    //If you don't want your simulation to lose time, then set maxSubSteps to a number where: timeStep < maxSubSteps * fixedTimeStep
+    int max_sub_steps = requestedStepsPerFrame;
     while (true) {
-        const double threshold = static_cast<double>(actual_steps) * fixed_time_step;
-        if (actual_steps == 1 || dt >= threshold) {
+        if (max_sub_steps == 1 || timeStep >= static_cast<float>(max_sub_steps) * fixed_time_step) {
             break;
         }
-        --actual_steps;
+        --max_sub_steps;
     }
-    m_PhysicsManager._update(dt, actual_steps, static_cast<float>(fixed_time_step));
+    m_PhysicsManager._update(timeStep, glm::max(50, max_sub_steps), fixed_time_step);
+    */
+    m_PhysicsManager._update(timeStep, 50, fixed_time_step);
 
     m_DebugManager.calculate_physics();
 }
@@ -177,7 +179,7 @@ void EngineCore::render(Window& window, const float& dt){
     auto& scene_viewports = InternalScenePublicInterface::GetViewports(scene);
     for (auto& viewport : scene_viewports) {
         if (viewport.isActive()) {
-            m_RenderManager._render(dt, viewport, true, 0, 0);
+            m_RenderManager._render( viewport, true );
         }
     }
     window.display();

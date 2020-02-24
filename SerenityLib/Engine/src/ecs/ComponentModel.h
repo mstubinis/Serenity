@@ -97,10 +97,12 @@ class ComponentModel: public ComponentBaseClass, public EventObserver {
 
         void setUserPointer(void* UserPointer);
 
-        template<class T> void setCustomBindFunctor(const T& functor, const size_t& index = 0) {
+        template<typename T> 
+        void setCustomBindFunctor(const T& functor, const size_t& index = 0) {
             m_ModelInstances[index]->setCustomBindFunctor(functor);
         }
-        template<class T> void setCustomUnbindFunctor(const T& functor, const size_t& index = 0) {
+        template<typename T> 
+        void setCustomUnbindFunctor(const T& functor, const size_t& index = 0) {
             m_ModelInstances[index]->setCustomUnbindFunctor(functor);
         }
 

@@ -19,19 +19,17 @@ namespace Engine::priv {
 #include <glm/vec4.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-
 struct ParticleData final {
-    ParticleEmissionProperties*  m_Properties;
-    glm::vec4                    m_UserData;
-    glm::vec2                    m_Scale;
-    glm::vec3                    m_Velocity;
-    glm::vec4                    m_Color;
-
-    float                        m_Depth;
-    float                        m_Angle;
-    float                        m_AngularVelocity;
-    double                       m_Timer;
-    bool                         m_Active;
+    ParticleEmissionProperties*  m_Properties      = nullptr;
+    glm::vec4                    m_UserData        = glm::vec4(0.0f);
+    glm::vec2                    m_Scale           = glm::vec2(1.0f);
+    glm::vec3                    m_Velocity        = glm::vec3(0.0f);
+    float                        m_Depth           = 0.0f;
+    Engine::color_vector_4       m_Color           = Engine::color_vector_4(255_uc);
+    float                        m_Angle           = 0.0f;
+    float                        m_AngularVelocity = 0.0f;
+    double                       m_Timer           = 0.0;
+    bool                         m_Active          = true;
 
     ParticleData();
     ParticleData(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle);
@@ -47,12 +45,12 @@ class Particle {
     friend class  Engine::priv::ParticleSystem;
     friend struct ParticleData;
     private:
-        ParticleEmitter*   m_EmitterSource;
-        Material*          m_Material;
-        Scene*             m_Scene;
-        bool               m_Hidden;
-        bool               m_PassedRenderCheck;
-        glm::vec3          m_Position;
+        ParticleEmitter*   m_EmitterSource     = nullptr;
+        Material*          m_Material          = nullptr;
+        Scene*             m_Scene             = nullptr;
+        bool               m_Hidden            = false;
+        bool               m_PassedRenderCheck = false;
+        glm::vec3          m_Position          = glm::vec3(0.0f);
     public:
         ParticleData       m_Data;
 
@@ -74,7 +72,7 @@ class Particle {
         const float& angle() const;
         const glm::vec2& getScale() const;
         const glm::vec3& position() const;
-        const glm::vec4& color() const;
+        const Engine::color_vector_4& color() const;
         const glm::vec3& velocity() const;
         const double lifetime() const;
         void update(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem, const glm::vec3& cameraPosition, const bool multi_threaded);

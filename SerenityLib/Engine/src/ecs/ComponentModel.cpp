@@ -276,8 +276,8 @@ void ComponentModel::setModelMesh(Handle& mesh, const size_t& index, const Rende
     ComponentModel::setModelMesh((Mesh*)mesh.get(), index, stage); 
 }
 void ComponentModel::setModelMaterial(Material* material, const size_t& index, const RenderStage::Stage& stage) {
-    auto& model_instance = *m_ModelInstances[index];
-    auto& scene   = m_Owner.scene();
+    auto& model_instance      = *m_ModelInstances[index];
+    auto& scene               = m_Owner.scene();
     InternalScenePublicInterface::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
 
     model_instance.m_Material = material;
@@ -313,7 +313,15 @@ struct priv::ComponentModel_UpdateFunction final { void operator()(void* compone
             modelInstance.m_AnimationVector.process(*modelInstance.mesh(), dt);
         }
     };
-    priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);
+
+    if (components.size() < 30) {
+        for (size_t i = 0; i < components.size(); ++i) {
+            lamda_update_component(components[i], i);
+        }
+    }else{
+        priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);
+    }
+
 }};
 struct priv::ComponentModel_ComponentAddedToEntityFunction final {void operator()(void* component, Entity& entity) const {
 

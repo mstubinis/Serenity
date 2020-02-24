@@ -6,8 +6,8 @@ using namespace std;
 using namespace Engine;
 
 
-struct DefaultColorFunctor final { glm::vec4 operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const float& dt, ParticleEmitter* emitter, Particle& particle) const {
-    return glm::vec4(1.0f);
+struct DefaultColorFunctor final { Engine::color_vector_4 operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const float& dt, ParticleEmitter* emitter, Particle& particle) const {
+    return Engine::color_vector_4(255_uc);
 } };
 struct DefaultAngularVelocityFunctor final { float operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const float& dt, ParticleEmitter* emitter, Particle& particle) const {
     return 0.0f;

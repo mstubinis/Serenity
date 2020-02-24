@@ -115,9 +115,7 @@ bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionOb
 priv::PhysicsManager* physicsManager = nullptr;
 
 priv::PhysicsManager::PhysicsManager(){ 
-    m_Paused                = false;
     physicsManager          = this;
-    m_NumberOfStepsPerFrame = 1;
 }
 priv::PhysicsManager::~PhysicsManager(){ 
     cleanup();
@@ -149,10 +147,10 @@ void priv::PhysicsManager::_init(){
 
     gContactAddedCallback = CustomMaterialContactAddedCallback;
 }
-void priv::PhysicsManager::_update(const float& dt,int maxsteps, float other){ 
+void priv::PhysicsManager::_update(const float& dt, int maxSubSteps, float fixedTimeStep){ 
     if (m_Paused)
         return;
-    m_Data.m_World->stepSimulation(static_cast<btScalar>(dt), maxsteps, static_cast<btScalar>(other));
+    m_Data.m_World->stepSimulation(static_cast<btScalar>(dt), maxSubSteps, static_cast<btScalar>(fixedTimeStep));
 
     for (int i = 0; i < m_Data.m_Dispatcher->getNumManifolds(); ++i) {
         btPersistentManifold& contactManifold = *m_Data.m_Dispatcher->getManifoldByIndexInternal(i);
@@ -193,7 +191,7 @@ void priv::PhysicsManager::_update(const float& dt,int maxsteps, float other){
         }
     }
 }
-void priv::PhysicsManager::_render(Camera& camera){
+void priv::PhysicsManager::_render(const Camera& camera){
     m_Data.m_World->debugDrawWorld();
     const glm::vec3 camPos = camera.getPosition();
     const glm::mat4 model = glm::mat4(1.0f);

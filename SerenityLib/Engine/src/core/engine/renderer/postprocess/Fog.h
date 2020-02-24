@@ -8,12 +8,12 @@ namespace Engine::priv {
     class  GBuffer;
     class  Fog final {
         public:
-            bool        fog_active;
-            float       distNull;
-            float       distBlend;
-            glm::vec4   color;
+            bool        fog_active = false;
+            float       distNull   = 5.0f;
+            float       distBlend  = 50.0f;
+            glm::vec4   color      = glm::vec4(1.0f, 1.0f, 1.0f, 0.97f);
 
-            Fog();
+            Fog() = default;
             ~Fog();
 
             static Fog fog;

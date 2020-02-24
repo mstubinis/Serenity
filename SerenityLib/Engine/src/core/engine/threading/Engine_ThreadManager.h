@@ -102,7 +102,7 @@ namespace Engine::priv{
         //splits vec into n subvectors of equal (or almost equal) number of elements in each split vector. if n is zero, then n will be equal to the number of cores your computer processor has.
         template<typename T> std::vector<std::vector<T>> splitVector(const std::vector<T>& v, size_t num_cores = 0) {
             if (num_cores == 0)
-                num_cores = std::thread::hardware_concurrency();
+                num_cores = Engine::priv::threading::hardware_concurrency();
             const auto vs = v.size();
             std::vector<std::vector<T>> outVec;
             auto length = vs / num_cores;
@@ -119,7 +119,7 @@ namespace Engine::priv{
         //splits vec into n subvectors of equal (or almost equal) number of elements in each split vector. if n is zero, then n will be equal to the number of cores your computer processor has.
         template<typename T> std::vector<std::vector<unsigned int>> splitVectorIndices(const std::vector<T>& v, size_t num_cores = 0) {
             if (num_cores == 0)
-                num_cores = std::thread::hardware_concurrency();
+                num_cores = Engine::priv::threading::hardware_concurrency();
             const auto vs = v.size();
             std::vector<std::vector<unsigned int>> outVec;
             auto length = vs / num_cores;
@@ -142,7 +142,7 @@ namespace Engine::priv{
         //creates a vector of pairs, each pair contains a start and ending index to iterate over a very large single vector
         template<typename T> std::vector<std::pair<size_t, size_t>> splitVectorPairs(const std::vector<T>& v, size_t num_cores = 0) {
             if (num_cores == 0)
-                num_cores = std::thread::hardware_concurrency();
+                num_cores = Engine::priv::threading::hardware_concurrency();
 
             std::vector<std::pair<size_t, size_t>> outVec;
             if (v.size() <= num_cores) {

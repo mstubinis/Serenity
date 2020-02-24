@@ -135,10 +135,10 @@ const bool& ParticleEmitter::isActive() const {
 }
 
 
-void ParticleEmitter::setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w, EntityDataRequest& request) {
+void ParticleEmitter::setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w, const EntityDataRequest& request) {
     getComponent<ComponentBody>(request)->setRotation(x, y, z, w);
 }
-void ParticleEmitter::setRotation(const glm_quat& rotation, EntityDataRequest& request) {
+void ParticleEmitter::setRotation(const glm_quat& rotation, const EntityDataRequest& request) {
     getComponent<ComponentBody>(request)->setRotation(rotation);
 }
 void ParticleEmitter::setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w) {
@@ -149,7 +149,7 @@ void ParticleEmitter::setRotation(const glm_quat& rotation) {
 }
 
 
-void ParticleEmitter::rotate(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request) {
+void ParticleEmitter::rotate(const decimal& x, const decimal& y, const decimal& z, const EntityDataRequest& request) {
     getComponent<ComponentBody>(request)->rotate(x, y, z);
 }
 void ParticleEmitter::rotate(const decimal& x, const decimal& y, const decimal& z) {
@@ -157,10 +157,10 @@ void ParticleEmitter::rotate(const decimal& x, const decimal& y, const decimal& 
 }
 
 
-void ParticleEmitter::setPosition(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request) {
+void ParticleEmitter::setPosition(const decimal& x, const decimal& y, const decimal& z, const EntityDataRequest& request) {
     getComponent<ComponentBody>(request)->setPosition(x, y, z);
 }
-void ParticleEmitter::setPosition(const glm_vec3& position, EntityDataRequest& request) {
+void ParticleEmitter::setPosition(const glm_vec3& position, const EntityDataRequest& request) {
     getComponent<ComponentBody>(request)->setPosition(position);
 }
 void ParticleEmitter::setPosition(const decimal& x, const decimal& y, const decimal& z) {
@@ -171,10 +171,10 @@ void ParticleEmitter::setPosition(const glm_vec3& position) {
 }
 
 
-void ParticleEmitter::setScale(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request) {
+void ParticleEmitter::setScale(const decimal& x, const decimal& y, const decimal& z, const EntityDataRequest& request) {
     getComponent<ComponentBody>(request)->setScale(x, y, z);
 }
-void ParticleEmitter::setScale(const glm_vec3& scale, EntityDataRequest& request) {
+void ParticleEmitter::setScale(const glm_vec3& scale, const EntityDataRequest& request) {
     getComponent<ComponentBody>(request)->setScale(scale);
 }
 void ParticleEmitter::setScale(const decimal& x, const decimal& y, const decimal& z) {
@@ -184,30 +184,30 @@ void ParticleEmitter::setScale(const glm_vec3& scale) {
     getComponent<ComponentBody>()->setScale(scale);
 }
 
-const glm_vec3 ParticleEmitter::getScale(EntityDataRequest& request) const {
+const glm_vec3 ParticleEmitter::getScale(const EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->getScale();
 }
 const glm_vec3 ParticleEmitter::getScale() const {
     return getComponent<ComponentBody>()->getScale();
 }
-const glm_vec3 ParticleEmitter::position(EntityDataRequest& request) const {
+const glm_vec3 ParticleEmitter::position(const EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->position();
 }
 const glm_vec3 ParticleEmitter::position() const {
     return getComponent<ComponentBody>()->position();
 }
 
-const glm_quat ParticleEmitter::rotation(EntityDataRequest& request) const {
+const glm_quat ParticleEmitter::rotation(const EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->rotation();
 }
 const glm_quat ParticleEmitter::rotation() const {
     return getComponent<ComponentBody>()->rotation();
 }
 
-void ParticleEmitter::setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request, const bool local) {
+void ParticleEmitter::setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const EntityDataRequest& request, const bool local) {
     getComponent<ComponentBody>(request)->setLinearVelocity(x, y, z, local);
 }
-void ParticleEmitter::setLinearVelocity(const glm_vec3& lv, EntityDataRequest& request, const bool local) {
+void ParticleEmitter::setLinearVelocity(const glm_vec3& lv, const EntityDataRequest& request, const bool local) {
     getComponent<ComponentBody>(request)->setLinearVelocity(lv, local);
 }
 void ParticleEmitter::setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local) {
@@ -219,7 +219,7 @@ void ParticleEmitter::setLinearVelocity(const glm_vec3& lv, const bool local) {
 
 
 
-void ParticleEmitter::applyLinearVelocity(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request, const bool local) {
+void ParticleEmitter::applyLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const EntityDataRequest& request, const bool local) {
     auto& body = *getComponent<ComponentBody>(request);
     const auto currVel = body.getLinearVelocity();
     auto newVel = glm_vec3(x, y, z);
@@ -227,7 +227,7 @@ void ParticleEmitter::applyLinearVelocity(const decimal& x, const decimal& y, co
         newVel = body.rotation() * newVel;
     body.setLinearVelocity(currVel + newVel, false);
 }
-void ParticleEmitter::applyLinearVelocity(glm_vec3& velocity, EntityDataRequest& request, const bool local) {
+void ParticleEmitter::applyLinearVelocity(glm_vec3& velocity, const EntityDataRequest& request, const bool local) {
     auto& body = *getComponent<ComponentBody>(request);
     const auto currVel = body.getLinearVelocity();
     if (local)
@@ -251,7 +251,7 @@ void ParticleEmitter::applyLinearVelocity(glm_vec3& velocity, const bool local) 
 }
 
 
-const glm_vec3 ParticleEmitter::linearVelocity(EntityDataRequest& request) const {
+const glm_vec3 ParticleEmitter::linearVelocity(const EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->getLinearVelocity();
 }
 const glm_vec3 ParticleEmitter::linearVelocity() const {

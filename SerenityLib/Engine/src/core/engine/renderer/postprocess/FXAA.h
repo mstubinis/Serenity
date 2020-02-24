@@ -12,16 +12,16 @@ namespace Engine::priv {
     class  GBuffer;
     class  FXAA final {
         private:
-            Shader*         m_Vertex_shader;
-            Shader*         m_Fragment_shader;
-            ShaderProgram*  m_Shader_program;
-            std::string     m_GLSL_frag_code;
+            Shader*         m_Vertex_shader   = nullptr;
+            Shader*         m_Fragment_shader = nullptr;
+            ShaderProgram*  m_Shader_program  = nullptr;
+            std::string     m_GLSL_frag_code  = "";
         public:
-            float reduce_min;
-            float reduce_mul;
-            float span_max;
+            float reduce_min                  = 0.0078125f; // (1 / 128);
+            float reduce_mul                  = 0.125f;     // (1 / 8);
+            float span_max                    = 8.0f;
 
-            FXAA();
+            FXAA() = default;
             ~FXAA();
 
             const bool init_shaders();

@@ -68,13 +68,13 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
     friend class  ComponentModel;
     private:
         struct PhysicsData final {
-            Collision*           collision;
-            btRigidBody*         bullet_rigidBody;
+            Collision*           collision              = nullptr;
+            btRigidBody*         bullet_rigidBody       = nullptr;
             btDefaultMotionState bullet_motionState;
-            float                mass;
-            unsigned short       group;
-            unsigned short       mask;
-            bool                 forcedOut;
+            float                mass                   = 0.0f;
+            unsigned short       group                  = CollisionFilter::DefaultFilter;;
+            unsigned short       mask                   = CollisionFilter::AllFilter;
+            bool                 forcedOut              = false;
 
             PhysicsData();
             PhysicsData(const PhysicsData& other)            = delete;
@@ -84,11 +84,11 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
             ~PhysicsData();         
         };
         struct NormalData final {
-            glm_vec3 scale;
-            glm_vec3 position;
-            glm_quat rotation;
-            glm_mat4 modelMatrix;
-            glm_vec3 linearVelocity;
+            glm_vec3 scale          = glm_vec3(1.0);
+            glm_vec3 position       = glm_vec3(0.0);
+            glm_quat rotation       = glm_quat(1.0, 0.0, 0.0, 0.0);
+            glm_mat4 modelMatrix    = glm_mat4(1.0);
+            glm_vec3 linearVelocity = glm_vec3(0.0);
 
             NormalData();
             NormalData(const NormalData& other)            = delete;
@@ -102,10 +102,12 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
             PhysicsData* p;
         } data;
         bool  m_Physics;
-        void* m_UserPointer;
-        void* m_UserPointer1;
-        void* m_UserPointer2;
-        glm_vec3 m_Forward, m_Right, m_Up;
+        void* m_UserPointer  = nullptr;
+        void* m_UserPointer1 = nullptr;
+        void* m_UserPointer2 = nullptr;
+        glm_vec3 m_Forward;
+        glm_vec3 m_Right;
+        glm_vec3 m_Up;
 
         std::function<void(CollisionCallbackEventData& data)> m_CollisionFunctor;
 

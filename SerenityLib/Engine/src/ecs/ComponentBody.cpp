@@ -40,12 +40,6 @@ ownerBody(a), otherBody(b), ownerHit(c), otherHit(d), normalOnB(e), ownerLocalHi
 
 ComponentBody::PhysicsData::PhysicsData(){ 
     //constructor
-    mass             = 0;
-    group            = CollisionFilter::DefaultFilter;
-    mask             = CollisionFilter::AllFilter;
-    bullet_rigidBody = nullptr;
-    collision        = nullptr;
-    forcedOut        = false;
 }
 ComponentBody::PhysicsData::~PhysicsData() {
     //destructor
@@ -90,14 +84,6 @@ ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(ComponentBody:
 
 ComponentBody::NormalData::NormalData(){
     //constructor
-    const auto one  = static_cast<decimal>(1.0);
-    const auto zero = static_cast<decimal>(0.0);
-
-    scale          = glm_vec3(one);
-    position       = glm_vec3(zero);
-    rotation       = glm_quat(one, zero, zero, zero);
-    modelMatrix    = glm_mat4(one);
-    linearVelocity = glm_vec3(zero);
 }
 ComponentBody::NormalData::~NormalData() {
     //destructor
@@ -132,9 +118,6 @@ ComponentBody::ComponentBody(const Entity& p_Entity) : ComponentBaseClass(p_Enti
     const auto zero = static_cast<decimal>(0.0);
 
     m_Physics                 = false;
-    m_UserPointer             = nullptr;
-    m_UserPointer1            = nullptr;
-    m_UserPointer2            = nullptr;
     data.p                    = nullptr;
     data.n                    = NEW NormalData();
     setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
@@ -153,9 +136,6 @@ ComponentBody::ComponentBody(const Entity& p_Entity, const CollisionType::Type p
     m_Right                 = glm_vec3(one,   zero,  zero);
     m_Up                    = glm_vec3(zero,  one,   zero);
     m_Physics               = true;
-    m_UserPointer           = nullptr;
-    m_UserPointer1          = nullptr;
-    m_UserPointer2          = nullptr;
     data.n                  = nullptr;
     data.p                  = NEW PhysicsData();
 
@@ -1097,7 +1077,14 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_Compon
             //Engine::Math::recalculateForwardRightUp(n.rotation, b._forward, b._right, b._up); //double check if this is needed
         }
     };
-    priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);
+
+    if (components.size() < 100) {
+        for (size_t i = 0; i < components.size(); ++i) {
+            lamda_update_component(components[i], i);
+        }
+    }else{
+        priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);
+    }
 
 
 

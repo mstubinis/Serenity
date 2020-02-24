@@ -46,46 +46,46 @@ class ParticleEmitter final : public EntityWrapper{
             m_UpdateFunctor = std::bind<void>(std::move(functor), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
         }
 
-        void setPosition(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request);
-        void setPosition(const glm_vec3& position, EntityDataRequest& request);
+        void setPosition(const decimal& x, const decimal& y, const decimal& z, const EntityDataRequest& request);
+        void setPosition(const glm_vec3& position, const EntityDataRequest& request);
         void setPosition(const decimal& x, const decimal& y, const decimal& z);
         void setPosition(const glm_vec3& position);
 
 
-        void setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w, EntityDataRequest& request);
-        void setRotation(const glm_quat& rotation, EntityDataRequest& request);
+        void setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w, const EntityDataRequest& request);
+        void setRotation(const glm_quat& rotation, const EntityDataRequest& request);
         void setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w);
         void setRotation(const glm_quat& rotation);
 
-        void rotate(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request);
+        void rotate(const decimal& x, const decimal& y, const decimal& z, const EntityDataRequest& request);
         void rotate(const decimal& x, const decimal& y, const decimal& z);
 
 
-        void setScale(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request);
-        void setScale(const glm_vec3& scale, EntityDataRequest& request);
+        void setScale(const decimal& x, const decimal& y, const decimal& z, const EntityDataRequest& request);
+        void setScale(const glm_vec3& scale, const EntityDataRequest& request);
         void setScale(const decimal& x, const decimal& y, const decimal& z);
         void setScale(const glm_vec3& scale);
 
-        void setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request, const bool local = true);
-        void setLinearVelocity(const glm_vec3& velocity, EntityDataRequest& request, const bool local = true);
+        void setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const EntityDataRequest& request, const bool local = true);
+        void setLinearVelocity(const glm_vec3& velocity, const EntityDataRequest& request, const bool local = true);
         void setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
         void setLinearVelocity(const glm_vec3& velocity, const bool local = true);
  
-        void applyLinearVelocity(const decimal& x, const decimal& y, const decimal& z, EntityDataRequest& request, const bool local = true);
-        void applyLinearVelocity(glm_vec3& velocity, EntityDataRequest& request, const bool local = true);
+        void applyLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const EntityDataRequest& request, const bool local = true);
+        void applyLinearVelocity(glm_vec3& velocity, const EntityDataRequest& request, const bool local = true);
         void applyLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
         void applyLinearVelocity(glm_vec3& velocity, const bool local = true);
 
-        const glm_vec3 getScale(EntityDataRequest& request) const;
+        const glm_vec3 getScale(const EntityDataRequest& request) const;
         const glm_vec3 getScale() const;
 
-        const glm_vec3 position(EntityDataRequest& request) const;
+        const glm_vec3 position(const EntityDataRequest& request) const;
         const glm_vec3 position() const;
 
-        const glm_quat rotation(EntityDataRequest& request) const;
+        const glm_quat rotation(const EntityDataRequest& request) const;
         const glm_quat rotation() const;
 
-        const glm_vec3 linearVelocity(EntityDataRequest& request) const;
+        const glm_vec3 linearVelocity(const EntityDataRequest& request) const;
         const glm_vec3 linearVelocity() const;
 
         const bool& isActive() const;

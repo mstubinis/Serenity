@@ -19,23 +19,9 @@ using namespace Engine;
 
 ParticleData::ParticleData() {
     m_Properties      = &ParticleEmissionProperties::DefaultProperties;
-    m_Active          = true;
-    m_Timer           = 0.0;
-    m_Depth           = 0.0f;
-    m_Angle           = 0.0f;
-    m_Velocity        = glm::vec3(0.0f);
-    m_Scale           = glm::vec2(1.0f);
-    m_AngularVelocity = 0.0f;
-    m_Color           = glm::vec4(1.0f);
-    m_UserData        = glm::vec4(0.0f);
 }
 ParticleData::ParticleData(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle){
     m_Properties      = &properties;
-    m_Active          = true;
-    m_Timer           = 0.0;
-    m_Depth           = 0.0f;
-    m_Angle           = 0.0f;
-    m_UserData        = glm::vec4(0.0f);
 
     particle.m_Material = &const_cast<Material&>(properties.getParticleMaterialRandom());
 
@@ -91,11 +77,7 @@ ParticleData& ParticleData::operator=(ParticleData&& other) noexcept {
 
 
 Particle::Particle(){
-    m_EmitterSource     = nullptr;
     m_Scene             = Resources::getCurrentScene();
-    m_Hidden            = false;
-    m_PassedRenderCheck = false;
-    m_Position          = glm::vec3(0.0f);
     m_Material          = Material::Checkers;
 }
 
@@ -202,7 +184,7 @@ const glm::vec3& Particle::position() const {
 const bool& Particle::isActive() const {
     return m_Data.m_Active;
 }
-const glm::vec4& Particle::color() const {
+const Engine::color_vector_4& Particle::color() const {
     return m_Data.m_Color;
 }
 const glm::vec3& Particle::velocity() const {
@@ -248,11 +230,11 @@ void Particle::update(const size_t& index, const float& dt, Engine::priv::Partic
 void Particle::render(const Engine::priv::GBuffer& gBuffer) {
     m_Material->bind();
 
-    auto maxTextures = priv::Core::m_Engine->m_RenderManager.OpenGLStateMachine.getMaxTextureUnits() - 1;
+    const auto maxTextures = priv::Core::m_Engine->m_RenderManager.OpenGLStateMachine.getMaxTextureUnits() - 1;
 
     Camera& camera = *m_Scene->getActiveCamera();
     Renderer::sendTextureSafe("gDepthMap", gBuffer.getTexture(Engine::priv::GBufferType::Depth), maxTextures);
-    Renderer::sendUniform4Safe("Object_Color", m_Data.m_Color);
+    Renderer::sendUniform1Safe("Object_Color", m_Data.m_Color.toPackedInt());
     Renderer::sendUniform2Safe("ScreenData", glm::vec2(Resources::getWindowSize()));
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);

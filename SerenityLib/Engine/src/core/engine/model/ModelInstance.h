@@ -15,6 +15,7 @@ namespace Engine::priv {
     struct DefaultModelInstanceUnbindFunctor;
     struct ComponentModel_UpdateFunction;
     class  ModelInstanceAnimation;
+    class  Renderer;
     struct InternalModelInstancePublicInterface final {
         static const bool IsViewportValid(const ModelInstance&, const Viewport&);
     };
@@ -24,15 +25,16 @@ namespace Engine::priv {
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <core/engine/BindableResource.h>
 #include <core/engine/events/Engine_EventObject.h>
 #include <ecs/Entity.h>
 
 #include <core/engine/model/ModelInstanceIncludes.h>
 #include <core/engine/model/ModelInstanceAnimation.h>
 #include <core/engine/scene/ViewportIncludes.h>
+#include <functional>
 
-class ModelInstance final: public BindableResource{
+
+class ModelInstance final{
     friend struct Engine::priv::DefaultModelInstanceBindFunctor;
     friend struct Engine::priv::DefaultModelInstanceUnbindFunctor;
     friend struct Engine::priv::ComponentModel_UpdateFunction;
@@ -41,25 +43,28 @@ class ModelInstance final: public BindableResource{
     private:
         static unsigned int                                  m_ViewportFlagDefault;
     private:
-        ModelDrawingMode::Mode                               m_DrawingMode;
+        std::function<void(ModelInstance*, const Engine::priv::Renderer*)>  m_CustomBindFunctor;
+        std::function<void(ModelInstance*, const Engine::priv::Renderer*)>  m_CustomUnbindFunctor;
+
+        ModelDrawingMode::Mode                               m_DrawingMode       = ModelDrawingMode::Triangles;
         Engine::Flag<unsigned int>                           m_ViewportFlag; //determine what viewports this can be seen in
-        void*                                                m_UserPointer;
+        void*                                                m_UserPointer       = nullptr;
         Engine::priv::ModelInstanceAnimationVector           m_AnimationVector;
         Entity                                               m_Parent;
-        ShaderProgram*                                       m_ShaderProgram;
-        Mesh*                                                m_Mesh;
-        Material*                                            m_Material;
-        RenderStage::Stage                                   m_Stage;
-        glm::vec3                                            m_Position;
-        glm::vec3                                            m_Scale;
-        glm::vec3                                            m_GodRaysColor;
-        glm::quat                                            m_Orientation;
-        glm::mat4                                            m_ModelMatrix;
-        glm::vec4                                            m_Color;
-        bool                                                 m_PassedRenderCheck;
-        bool                                                 m_Visible;
-        bool                                                 m_ForceRender;
-        size_t                                               m_Index;
+        ShaderProgram*                                       m_ShaderProgram     = nullptr;
+        Mesh*                                                m_Mesh              = nullptr;
+        Material*                                            m_Material          = nullptr;
+        RenderStage::Stage                                   m_Stage             = RenderStage::GeometryOpaque;
+        glm::vec3                                            m_Position          = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3                                            m_Scale             = glm::vec3(1.0f, 1.0f, 1.0f);
+        Engine::color_vector_4                               m_GodRaysColor      = Engine::color_vector_4(0_uc);
+        glm::quat                                            m_Orientation       = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+        glm::mat4                                            m_ModelMatrix       = glm::mat4(1.0f);
+        Engine::color_vector_4                               m_Color             = Engine::color_vector_4(255_uc);
+        bool                                                 m_PassedRenderCheck = false;
+        bool                                                 m_Visible           = true;
+        bool                                                 m_ForceRender       = false;
+        size_t                                               m_Index             = 0;
 
         void internal_init(Mesh* mesh, Material* mat, ShaderProgram* program);
         void internal_update_model_matrix();
@@ -77,6 +82,18 @@ class ModelInstance final: public BindableResource{
         ModelInstance& operator=(ModelInstance&& other) noexcept;
 
         ~ModelInstance();
+
+
+        template<typename T>
+        void setCustomBindFunctor(const T& functor) {
+            m_CustomBindFunctor   = std::bind<void>(functor, std::placeholders::_1, std::placeholders::_2);
+        }
+        template<typename T>
+        void setCustomUnbindFunctor(const T& functor) {
+            m_CustomUnbindFunctor = std::bind<void>(functor, std::placeholders::_1, std::placeholders::_2);
+        }
+        void bind(const Engine::priv::Renderer& renderer);
+        void unbind(const Engine::priv::Renderer& renderer);
 
         static void setDefaultViewportFlag(const unsigned int flag);
         static void setDefaultViewportFlag(const ViewportFlag::Flag flag);
@@ -104,8 +121,8 @@ class ModelInstance final: public BindableResource{
         void setUserPointer(void* UserPointer);
         const Entity& parent() const;
 
-        const glm::vec4& color() const;
-        const glm::vec3& godRaysColor() const;
+        const Engine::color_vector_4& color() const;
+        const Engine::color_vector_4& godRaysColor() const;
         const glm::mat4& modelMatrix() const;
         const glm::vec3& position() const;
         const glm::quat& orientation() const;
@@ -124,6 +141,7 @@ class ModelInstance final: public BindableResource{
         void playAnimation(const std::string& animName, const float& startTime, const float& endTime = -1.0f, const unsigned int& requestedLoops = 1);
 
         void setColor(const float& r, const float& g, const float& b, const float& a = 1.0f);
+        void setColor(const unsigned char& r, const unsigned char& g, const unsigned char& b, const unsigned char& a = 255);
         void setColor(const glm::vec4& color);
         void setColor(const glm::vec3& color);
 

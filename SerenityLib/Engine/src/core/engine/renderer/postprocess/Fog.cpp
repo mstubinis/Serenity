@@ -8,13 +8,6 @@ using namespace std;
 
 Engine::priv::Fog Engine::priv::Fog::fog;
 
-Engine::priv::Fog::Fog() {
-    fog_active = false;
-    distNull   = 5.0f;
-    distBlend  = 50.0f;
-    color      = glm::vec4(1.0f, 1.0f, 1.0f, 0.97f);
-
-}
 Engine::priv::Fog::~Fog() {
 }
 const bool Engine::Renderer::fog::enabled() {

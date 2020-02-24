@@ -20,17 +20,17 @@ namespace Engine::priv {
     class  GBuffer;
     class  HDR final {
         private:
-            Shader*          m_Vertex_Shader;
-            Shader*          m_Fragment_Shader;
-            ShaderProgram*   m_Shader_Program;
+            Shader*          m_Vertex_Shader     = nullptr;
+            Shader*          m_Fragment_Shader   = nullptr;
+            ShaderProgram*   m_Shader_Program    = nullptr;
 
-            std::string      m_GLSL_frag_code;
+            std::string      m_GLSL_frag_code    = "";
         public:
-            bool                      hdr_active;
-            float                     exposure;
-            HDRAlgorithm::Algorithm   algorithm;
+            bool                      hdr_active = true;
+            float                     exposure   = 3.0f;
+            HDRAlgorithm::Algorithm   algorithm  = HDRAlgorithm::Uncharted;
 
-            HDR();
+            HDR() = default;
             ~HDR();
 
             const bool init_shaders();

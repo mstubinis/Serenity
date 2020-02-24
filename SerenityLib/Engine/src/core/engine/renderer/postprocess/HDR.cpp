@@ -12,16 +12,6 @@ using namespace std;
 
 Engine::priv::HDR Engine::priv::HDR::hdr;
 
-Engine::priv::HDR::HDR() {
-    hdr_active        = true;
-    exposure          = 3.0f;
-    algorithm         = HDRAlgorithm::Uncharted;
-
-    m_Vertex_Shader   = nullptr;
-    m_Fragment_Shader = nullptr;
-    m_Shader_Program  = nullptr;
-    m_GLSL_frag_code  = "";
-}
 Engine::priv::HDR::~HDR() {
     SAFE_DELETE(m_Vertex_Shader);
     SAFE_DELETE(m_Fragment_Shader);

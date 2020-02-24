@@ -12,20 +12,20 @@ namespace Engine::priv {
     class  GBuffer;
     class  Bloom final {
         private:
-            Shader*         m_Vertex_Shader;
-            Shader*         m_Fragment_Shader;
-            ShaderProgram*  m_Shader_Program;
-            std::string     m_GLSL_frag_code;
+            Shader*         m_Vertex_Shader   = nullptr;
+            Shader*         m_Fragment_Shader = nullptr;
+            ShaderProgram*  m_Shader_Program  = nullptr;
+            std::string     m_GLSL_frag_code  = "";
         public:
-            unsigned int num_passes;
-            bool         bloom_active;
-            float        blur_radius;
-            float        blur_strength;
-            float        scale;
-            float        threshold;
-            float        exposure;
+            unsigned int num_passes           = 3;
+            bool         bloom_active         = true;
+            float        blur_radius          = 1.24f;
+            float        blur_strength        = 0.62f;
+            float        scale                = 0.27f;
+            float        threshold            = 0.55f;
+            float        exposure             = 1.6f;
 
-            Bloom();
+            Bloom() = default;
             ~Bloom();
 
             const bool init_shaders();

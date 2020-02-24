@@ -16,13 +16,11 @@ ThreadPoolFuture::ThreadPoolFuture(std::future<void>&& future, std::function<voi
 }
 ThreadPoolFuture::ThreadPoolFuture(ThreadPoolFuture&& other) noexcept {
     m_Future   = std::move(other.m_Future);
-    //m_Callback = std::move(other.m_Callback);
     m_Callback.swap(other.m_Callback);
 }
 ThreadPoolFuture& ThreadPoolFuture::operator=(ThreadPoolFuture&& other) noexcept {
     if (&other != this) {
         m_Future   = std::move(other.m_Future);
-        //m_Callback = std::move(other.m_Callback);
         m_Callback.swap(other.m_Callback);
     }
     return *this;
@@ -31,7 +29,7 @@ const bool ThreadPoolFuture::isReady() {
     return (m_Future._Is_ready() && m_Future.valid());
 }
 void ThreadPoolFuture::operator()() const {
-    if (m_Callback) { //hacky, still trying to find out why this is needed
+    if (m_Callback) {
         m_Callback();
     }
 }

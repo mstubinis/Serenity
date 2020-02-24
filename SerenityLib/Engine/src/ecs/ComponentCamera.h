@@ -20,11 +20,11 @@ namespace Engine {
 
         struct ComponentCamera_Functions final {
             static void            RebuildProjectionMatrix(ComponentCamera& componentCamera);
-            static const glm::mat4 GetViewNoTranslation(Camera& camera);
-            static const glm::mat4 GetViewInverseNoTranslation(Camera& camera);
-            static const glm::mat4 GetViewProjectionNoTranslation(Camera& camera);
-            static const glm::mat4 GetViewProjectionInverseNoTranslation(Camera& camera);
-            static const glm::vec3 GetViewVectorNoTranslation(Camera& camera);
+            static const glm::mat4 GetViewNoTranslation(const Camera& camera);
+            static const glm::mat4 GetViewInverseNoTranslation(const Camera& camera);
+            static const glm::mat4 GetViewProjectionNoTranslation(const Camera& camera);
+            static const glm::mat4 GetViewProjectionInverseNoTranslation(const Camera& camera);
+            static const glm::vec3 GetViewVectorNoTranslation(const Camera& camera);
         };
     };
 };

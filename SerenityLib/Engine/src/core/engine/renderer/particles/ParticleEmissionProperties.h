@@ -23,7 +23,7 @@ class ParticleEmissionProperties final {
         static ParticleEmissionProperties DefaultProperties;
     private:
 
-        std::function<glm::vec4(ParticleEmissionProperties&, const double& lifetime, const float& dt, ParticleEmitter*, Particle& particle)>   m_ColorFunctor;
+        std::function<Engine::color_vector_4(ParticleEmissionProperties&, const double& lifetime, const float& dt, ParticleEmitter*, Particle& particle)>   m_ColorFunctor;
         std::function<float(ParticleEmissionProperties&, const double& lifetime, const float& dt, ParticleEmitter*, Particle& particle)>       m_ChangeInAngularVelocityFunctor;
         std::function<glm::vec3(ParticleEmissionProperties&, const double& lifetime, const float& dt, ParticleEmitter*, Particle& particle)>   m_ChangeInVelocityFunctor;
         std::function<glm::vec2(ParticleEmissionProperties&, const double& lifetime, const float& dt, ParticleEmitter*, Particle& particle)>   m_ChangeInScaleFunctor;
@@ -60,7 +60,7 @@ class ParticleEmissionProperties final {
         const Material& getParticleMaterial(const size_t index = 0) const;
 
         template<typename T> void setColorFunctor(const T& functor) {
-            m_ColorFunctor = std::bind<glm::vec4>(std::move(functor), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
+            m_ColorFunctor = std::bind<Engine::color_vector_4>(std::move(functor), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
         }
         template<typename T> void setChangeInAngularVelocityFunctor(const T& functor) {
             m_ChangeInAngularVelocityFunctor = std::bind<float>(std::move(functor), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);

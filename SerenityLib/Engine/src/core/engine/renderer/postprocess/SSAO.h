@@ -2,8 +2,8 @@
 #ifndef ENGINE_RENDERER_POSTPROCESS_SSAO_H_INCLUDE_GUARD
 #define ENGINE_RENDERER_POSTPROCESS_SSAO_H_INCLUDE_GUARD
 
-#define SSAO_MAX_KERNEL_SIZE 16
-#define SSAO_NORMALMAP_SIZE 16
+#define SSAO_MAX_KERNEL_SIZE 16U
+#define SSAO_NORMALMAP_SIZE 16U
 
 class  Camera;
 class  ShaderProgram;
@@ -17,32 +17,30 @@ namespace Engine::priv {
     class  GBuffer;
     class  SSAO final {
         private:
-            Shader* m_Vertex_Shader;
-            Shader* m_Fragment_Shader;
-            ShaderProgram* m_Shader_Program;
+            Shader*        m_Vertex_Shader         = nullptr;
+            Shader*        m_Fragment_Shader       = nullptr;
+            ShaderProgram* m_Shader_Program        = nullptr;
+            Shader*        m_Vertex_Shader_Blur    = nullptr;
+            Shader*        m_Fragment_Shader_Blur  = nullptr;
+            ShaderProgram* m_Shader_Program_Blur   = nullptr;
 
-
-            Shader* m_Vertex_Shader_Blur;
-            Shader* m_Fragment_Shader_Blur;
-            ShaderProgram* m_Shader_Program_Blur;
-
-            std::string     m_GLSL_frag_code;
-            std::string     m_GLSL_frag_code_blur;
+            std::string    m_GLSL_frag_code        = "";
+            std::string    m_GLSL_frag_code_blur   = "";
         public:
-            bool           m_ssao;
-            bool           m_ssao_do_blur;
-            unsigned int   m_ssao_samples;
-            unsigned int   m_ssao_blur_num_passes;
-            unsigned int   m_ssao_noise_texture;
-            float          m_ssao_blur_radius;
-            float          m_ssao_blur_strength;
-            float          m_ssao_scale;
-            float          m_ssao_intensity;
-            float          m_ssao_bias;
-            float          m_ssao_radius;
+            bool           m_ssao                  = true;
+            bool           m_ssao_do_blur          = true;
+            unsigned int   m_ssao_samples          = 8;
+            unsigned int   m_ssao_blur_num_passes  = 2;
+            unsigned int   m_ssao_noise_texture    = 0;
+            float          m_ssao_blur_radius      = 0.66f;
+            float          m_ssao_blur_strength    = 0.48f;
+            float          m_ssao_scale            = 1.0;
+            float          m_ssao_intensity        = 1.8f;
+            float          m_ssao_bias             = 0.048f;
+            float          m_ssao_radius           = 0.175f;
             //glm::vec3      m_ssao_Kernels[SSAO_MAX_KERNEL_SIZE];
 
-            SSAO();
+            SSAO() = default;
             ~SSAO();
 
             const bool init_shaders();
@@ -50,12 +48,11 @@ namespace Engine::priv {
             void init();
 
             void passSSAO(GBuffer&, const Viewport& viewport, const Camera&);
-            void passBlur(GBuffer&, const Viewport& viewport, const std::string& type, const unsigned int& texture);
+            void passBlur(GBuffer&, const Viewport& viewport, const std::string& type, const unsigned int texture);
 
             static SSAO ssao;
     };
 };
-
 namespace Engine::Renderer::ssao {
     const bool enabled();
     void enable(const bool b = true);
@@ -77,5 +74,4 @@ namespace Engine::Renderer::ssao {
     const unsigned int getSamples();
     void setSamples(const unsigned int s);
 };
-
 #endif

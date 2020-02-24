@@ -13,23 +13,6 @@ using namespace std;
 
 Engine::priv::GodRays Engine::priv::GodRays::godRays;
 
-Engine::priv::GodRays::GodRays() {
-    godRays_active    = true;
-    clearColor        = glm::vec4(0.030f, 0.023f, 0.032f, 1.0f);
-    exposure          = 0.03f;
-    factor            = 1.0f;
-    decay             = 0.97f;
-    density           = 1.5f;
-    weight            = 0.567f;
-    samples           = 80;
-    fovDegrees        = 75.0f;
-    alphaFalloff      = 2.0f;
-
-    m_GLSL_frag_code  = "";
-    m_Vertex_Shader   = nullptr;
-    m_Fragment_Shader = nullptr;
-    m_Shader_Program  = nullptr;
-}
 Engine::priv::GodRays::~GodRays() {
     SAFE_DELETE(m_Vertex_Shader);
     SAFE_DELETE(m_Fragment_Shader);

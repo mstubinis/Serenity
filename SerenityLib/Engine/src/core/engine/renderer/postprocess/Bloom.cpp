@@ -14,20 +14,6 @@ using namespace std;
 
 Engine::priv::Bloom Engine::priv::Bloom::bloom;
 
-Engine::priv::Bloom::Bloom() {
-    num_passes        = 3;
-    bloom_active      = true;
-    blur_radius       = 1.24f;
-    blur_strength     = 0.62f;
-    scale             = 0.27f;
-    threshold         = 0.55f;
-    exposure          = 1.6f;
-
-    m_GLSL_frag_code  = "";
-    m_Vertex_Shader   = nullptr;
-    m_Fragment_Shader = nullptr;
-    m_Shader_Program  = nullptr;
-}
 Engine::priv::Bloom::~Bloom() {
     SAFE_DELETE(m_Vertex_Shader);
     SAFE_DELETE(m_Fragment_Shader);

@@ -2,6 +2,19 @@
 #ifndef ENGINE_MATERIAL_H
 #define ENGINE_MATERIAL_H
 
+class  ShaderProgram;
+class  Mesh;
+class  MaterialComponent;
+class  Texture;
+namespace Engine::priv {
+    struct DefaultMaterialBindFunctor;
+    struct DefaultMaterialUnbindFunctor;
+    struct InternalMaterialPublicInterface;
+    struct InternalMaterialRequestPublicInterface;
+    struct InternalScenePublicInterface;
+    struct MaterialLoader;
+};
+
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <glm/vec4.hpp>
@@ -11,22 +24,6 @@
 #include <core/engine/BindableResource.h>
 #include <core/engine/materials/MaterialEnums.h>
 
-class  ShaderProgram;
-class  Mesh;
-class  MaterialComponent;
-class  Texture;
-namespace Engine{
-    namespace priv{
-        struct DefaultMaterialBindFunctor;
-        struct DefaultMaterialUnbindFunctor;
-        struct InternalMaterialPublicInterface;
-        struct InternalMaterialRequestPublicInterface;
-        struct InternalScenePublicInterface;
-        struct MaterialLoader;
-        class  Renderer;
-    };
-};
-
 class Material final: public BindableResource{
     friend struct Engine::priv::DefaultMaterialBindFunctor;
     friend struct Engine::priv::DefaultMaterialUnbindFunctor;
@@ -34,11 +31,11 @@ class Material final: public BindableResource{
     friend struct Engine::priv::InternalMaterialRequestPublicInterface;
     friend struct Engine::priv::InternalMaterialPublicInterface;
     friend struct Engine::priv::MaterialLoader;
-    friend class  Engine::priv::Renderer;
     public:
         static Material                  *Checkers, *WhiteShadeless; //loaded in renderer
-    private:
+
         static std::vector<glm::vec4>     m_MaterialProperities;
+    private:
         std::vector<MaterialComponent*>   m_Components;
         unsigned int                      m_DiffuseModel;
         unsigned int                      m_SpecularModel;

@@ -11,17 +11,6 @@ using namespace std;
 
 Engine::priv::DepthOfField Engine::priv::DepthOfField::DOF;
 
-Engine::priv::DepthOfField::DepthOfField() {
-    bias              = 0.6f;
-    focus             = 2.0f;
-    blur_radius       = 3.0f;
-    dof               = false;
-
-    m_Vertex_Shader   = nullptr;
-    m_Fragment_Shader = nullptr;
-    m_Shader_Program  = nullptr;
-    m_GLSL_frag_code  = "";
-} 
 Engine::priv::DepthOfField::~DepthOfField() {
     SAFE_DELETE(m_Vertex_Shader);
     SAFE_DELETE(m_Fragment_Shader);

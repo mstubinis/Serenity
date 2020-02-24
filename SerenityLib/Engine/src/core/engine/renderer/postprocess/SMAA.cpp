@@ -12,27 +12,9 @@ using namespace std;
 
 Engine::priv::SMAA Engine::priv::SMAA::smaa;
 
+constexpr int x = sizeof(Engine::priv::SMAA);
+
 Engine::priv::SMAA::SMAA() {
-    THRESHOLD                        = 0.05f;
-    MAX_SEARCH_STEPS                 = 32;
-    MAX_SEARCH_STEPS_DIAG            = 16;
-    CORNER_ROUNDING                  = 25;
-    LOCAL_CONTRAST_ADAPTATION_FACTOR = 2.0f;
-    DEPTH_THRESHOLD                  = (0.1f * THRESHOLD);
-    PREDICATION                      = false;
-    PREDICATION_THRESHOLD            = 0.01f;
-    PREDICATION_SCALE                = 2.0f;
-    PREDICATION_STRENGTH             = 0.4f;
-    REPROJECTION                     = false;
-    REPROJECTION_WEIGHT_SCALE        = 30.0f;
-    AREATEX_MAX_DISTANCE             = 16;
-    AREATEX_MAX_DISTANCE_DIAG        = 20;
-    AREATEX_PIXEL_SIZE               = glm::vec2(glm::vec2(1.0f) / glm::vec2(160.0f, 560.0f));
-    AREATEX_SUBTEX_SIZE              = 0.14285714285f; //(1 / 7)
-    AreaTexture                      = 0;
-    SearchTexture                    = 0;
-
-
     m_Vertex_Shaders.resize(PassStage::_TOTAL, nullptr);
     m_Fragment_Shaders.resize(PassStage::_TOTAL, nullptr);
     m_Shader_Programs.resize(PassStage::_TOTAL, nullptr);
