@@ -45,7 +45,7 @@ const GLuint priv::FramebufferObjectAttatchment::internalFormat() const {
 
 #pragma endregion
 
-priv::FramebufferTexture::FramebufferTexture(const FramebufferObject& fbo,const FramebufferAttatchment::Attatchment& a, const Texture& t):FramebufferObjectAttatchment(fbo, a, t){
+priv::FramebufferTexture::FramebufferTexture(const FramebufferObject& fbo,const FramebufferAttatchment::Attatchment& a, const Texture& t) : FramebufferObjectAttatchment(fbo, a, t){
     m_Texture     = &const_cast<Texture&>(t);
     m_PixelFormat = t.pixelFormat();
     m_PixelType   = t.pixelType();
@@ -67,7 +67,7 @@ void priv::FramebufferTexture::bind(){
 void priv::FramebufferTexture::unbind(){
 }
 
-priv::RenderbufferObject::RenderbufferObject(FramebufferObject& f,FramebufferAttatchment::Attatchment a,ImageInternalFormat::Format i):FramebufferObjectAttatchment(f,a,i){
+priv::RenderbufferObject::RenderbufferObject(FramebufferObject& f, FramebufferAttatchment::Attatchment a, ImageInternalFormat::Format i) : FramebufferObjectAttatchment(f,a,i) {
     m_Width = m_Height = 0;
     glGenRenderbuffers(1, &m_RBO);
 }
@@ -93,43 +93,42 @@ void priv::RenderbufferObject::unbind(){
     Engine::Renderer::unbindRBO();
 }
 
-namespace Engine {
-    namespace priv {
-        struct FramebufferObjectDefaultBindFunctor final {void operator()(BindableResource* r) const {
-            FramebufferObject& fbo = *static_cast<FramebufferObject*>(r);
-            Engine::Renderer::setViewport(0.0f, 0.0f, static_cast<float>(fbo.width()), static_cast<float>(fbo.height()));
+namespace Engine::priv {
+    struct FramebufferObjectDefaultBindFunctor final {void operator()(const FramebufferObject* fbo_ptr) const {
+        const FramebufferObject& fbo = *fbo_ptr;
+        Engine::Renderer::setViewport(0.0f, 0.0f, static_cast<float>(fbo.width()), static_cast<float>(fbo.height()));
 
-            //swap buffers
-            ++fbo.m_CurrentFBOIndex;
-            if (fbo.m_CurrentFBOIndex >= fbo.m_FBO.size())
-                fbo.m_CurrentFBOIndex = 0;
+        //swap buffers
+        ++fbo.m_CurrentFBOIndex;
+        if (fbo.m_CurrentFBOIndex >= fbo.m_FBO.size()) {
+            fbo.m_CurrentFBOIndex = 0;
+        }
 
-            Engine::Renderer::bindFBO(fbo);
-            for (auto& attatchment : fbo.attatchments()) { 
-                attatchment.second->bind(); 
-            }
-        }};
-        struct FramebufferObjectDefaultUnbindFunctor final {void operator()(BindableResource* r) const {
-            FramebufferObject& fbo = *static_cast<FramebufferObject*>(r);
-            for (auto& attatchment : fbo.attatchments()) { 
-                attatchment.second->unbind(); 
-            }
-            Engine::Renderer::unbindFBO();
-            const auto winSize = Resources::getWindowSize();
-            Engine::Renderer::setViewport(0.0f, 0.0f, static_cast<float>(winSize.x), static_cast<float>(winSize.y));
-        }};
-    };
+        Engine::Renderer::bindFBO(fbo);
+        for (const auto& attatchment : fbo.attatchments()) { 
+            attatchment.second->bind(); 
+        }
+    }};
+    struct FramebufferObjectDefaultUnbindFunctor final {void operator()(const FramebufferObject* fbo_ptr) const {
+        const FramebufferObject& fbo = *fbo_ptr;
+        for (auto& attatchment : fbo.attatchments()) { 
+            attatchment.second->unbind(); 
+        }
+        Engine::Renderer::unbindFBO();
+        const auto winSize = Resources::getWindowSize();
+        Engine::Renderer::setViewport(0.0f, 0.0f, static_cast<float>(winSize.x), static_cast<float>(winSize.y));
+    }};
 };
 
 priv::FramebufferObjectDefaultBindFunctor   DEFAULT_BIND_FUNCTOR;
 priv::FramebufferObjectDefaultUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
 
-priv::FramebufferObject::FramebufferObject() : BindableResource(ResourceType::Empty) {
+priv::FramebufferObject::FramebufferObject() {
     m_FramebufferWidth  = 0;
     m_FramebufferHeight = 0;
     m_Divisor           = 1.0f;
 }
-priv::FramebufferObject::FramebufferObject(const unsigned int& w, const unsigned int& h, const float& divisor, const unsigned int& swapBufferCount) : BindableResource(ResourceType::Empty) {
+priv::FramebufferObject::FramebufferObject(const unsigned int& w, const unsigned int& h, const float& divisor, const unsigned int& swapBufferCount) {
     init(w, h, divisor, swapBufferCount);
 }
 priv::FramebufferObject::FramebufferObject(const unsigned int& w, const unsigned int& h, const ImageInternalFormat::Format& depthInternalFormat, const float& divisor, const unsigned int& swapBufferCount) : FramebufferObject(w, h, divisor, swapBufferCount) {
@@ -149,18 +148,21 @@ void priv::FramebufferObject::init(const unsigned int& width, const unsigned int
 }
 void priv::FramebufferObject::init(const unsigned int& width, const unsigned int& height, const ImageInternalFormat::Format& depthInternalFormat, const float& divisor, const unsigned int& swapBufferCount) {
     RenderbufferObject* rbo;
-    if (depthInternalFormat == ImageInternalFormat::Depth24Stencil8 || depthInternalFormat == ImageInternalFormat::Depth32FStencil8)
+    if (depthInternalFormat == ImageInternalFormat::Depth24Stencil8 || depthInternalFormat == ImageInternalFormat::Depth32FStencil8) {
         rbo = NEW RenderbufferObject(*this, FramebufferAttatchment::DepthAndStencil, depthInternalFormat);
-    else if (depthInternalFormat == ImageInternalFormat::StencilIndex8)
+    }else if (depthInternalFormat == ImageInternalFormat::StencilIndex8) {
         rbo = NEW RenderbufferObject(*this, FramebufferAttatchment::Stencil, depthInternalFormat);
-    else
+    }else {
         rbo = NEW RenderbufferObject(*this, FramebufferAttatchment::Depth, depthInternalFormat);
+    }
     attatchRenderBuffer(*rbo);
 }
 void priv::FramebufferObject::cleanup() {
     SAFE_DELETE_MAP(m_Attatchments);
-    for (unsigned int i = 0; i < m_FBO.size(); ++i)
+    for (unsigned int i = 0; i < m_FBO.size(); ++i) {
         glDeleteFramebuffers(1, &m_FBO[i]);
+    }
+    m_Attatchments.clear();
 }
 priv::FramebufferObject::~FramebufferObject(){ 
     cleanup();
@@ -177,8 +179,9 @@ void priv::FramebufferObject::resize(const unsigned int& w, const unsigned int& 
     }
 }
 priv::FramebufferTexture* priv::FramebufferObject::attatchTexture(Texture* texture, const FramebufferAttatchment::Attatchment attatchment){
-    if (m_Attatchments.count(attatchment))
+    if (m_Attatchments.count(attatchment)) {
         return nullptr;
+    }
     FramebufferTexture* framebufferTexture = NEW FramebufferTexture(*this, attatchment, *texture);
     for (unsigned int i = 0; i < m_FBO.size(); ++i) {
         Engine::Renderer::bindFBO(m_FBO[i]);
@@ -188,9 +191,16 @@ priv::FramebufferTexture* priv::FramebufferObject::attatchTexture(Texture* textu
     Engine::Renderer::unbindFBO();
     return framebufferTexture;
 }
+void priv::FramebufferObject::bind() const {
+    m_CustomBindFunctor(this);
+}
+void priv::FramebufferObject::unbind() const {
+    m_CustomUnbindFunctor(this);
+}
 priv::RenderbufferObject* priv::FramebufferObject::attatchRenderBuffer(priv::RenderbufferObject& rbo){ 
-    if (m_Attatchments.count(rbo.attatchment()))
-        return nullptr; 
+    if (m_Attatchments.count(rbo.attatchment())) {
+        return nullptr;
+    }
     for (unsigned int i = 0; i < m_FBO.size(); ++i) {
         Engine::Renderer::bindFBO(m_FBO[i]);
         Engine::Renderer::bindRBO(rbo);
@@ -212,7 +222,7 @@ const unsigned int priv::FramebufferObject::height() const {
 const GLuint priv::FramebufferObject::address() const { 
     return m_FBO[m_CurrentFBOIndex]; 
 }
-unordered_map<unsigned int, priv::FramebufferObjectAttatchment*>& priv::FramebufferObject::attatchments(){
+const unordered_map<unsigned int, priv::FramebufferObjectAttatchment*>& priv::FramebufferObject::attatchments() const {
     return m_Attatchments; 
 }
 const bool priv::FramebufferObject::check(){

@@ -58,12 +58,12 @@ namespace priv{
 
             void _onFullscreen(const unsigned int& width, const unsigned int& height);
             void _onOpenGLContextCreation(uint width,uint height,uint glslVersion,uint openglVersion);
-            const bool _bindShaderProgram(ShaderProgram*);
-            const bool _unbindShaderProgram();
+            const bool _bindShaderProgram(ShaderProgram*) const;
+            const bool _unbindShaderProgram() const;
             void _clear2DAPICommands();
             void _sort2DAPICommands();
-            const bool _bindMaterial(Material*);
-            const bool _unbindMaterial();
+            const bool _bindMaterial(Material*) const;
+            const bool _unbindMaterial() const;
             const float _getGIPackedData();
             void _genPBREnvMapData(Texture&,uint,uint);
     };
@@ -112,7 +112,7 @@ namespace Renderer{
     const bool stencilOp(const GLenum& sfail, const GLenum& dpfail, const GLenum& dppass);
 
     void bindFBO(const GLuint& fbo);
-    void bindFBO(priv::FramebufferObject& rbo);
+    void bindFBO(const priv::FramebufferObject& rbo);
     const bool bindRBO(const GLuint& rbo);
     const bool bindRBO(priv::RenderbufferObject& rbo);
     const bool bindReadFBO(const GLuint& fbo);

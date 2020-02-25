@@ -17,30 +17,30 @@ ShaderProgram* ShaderProgram::Deferred = nullptr;
 ShaderProgram* ShaderProgram::Forward  = nullptr;
 ShaderProgram* ShaderProgram::Decal    = nullptr;
 
-namespace Engine{
-    namespace priv{
-        struct DefaultShaderBindFunctor{void operator()(EngineResource* r) const {
-            Scene* scene = Resources::getCurrentScene();  if(!scene) return;
-            Camera* camera = scene->getActiveCamera();    if(!camera) return;
-            Camera& c = *camera;
+namespace Engine::priv {
+    struct DefaultShaderBindFunctor{void operator()(ShaderProgram* shaderProgram) const {
+        Scene* scene = Resources::getCurrentScene();  
+        if(!scene) 
+            return;
+        Camera* camera = scene->getActiveCamera();    
+        if(!camera) 
+            return;
+        Camera& c = *camera;
 
-            const float fcoeff = (2.0f / glm::log2(c.getFar() + 1.0f)) * 0.5f;
-            Engine::Renderer::sendUniform1Safe("fcoeff",fcoeff);
+        const float fcoeff = (2.0f / glm::log2(c.getFar() + 1.0f)) * 0.5f;
+        Engine::Renderer::sendUniform1Safe("fcoeff",fcoeff);
 
-            //yes this is needed
-            if(priv::Renderer::GLSL_VERSION < 140){
-                Engine::Renderer::sendUniformMatrix4Safe("CameraViewProj",c.getViewProjection());
-            }
-        }};
-        struct DefaultShaderUnbindFunctor{void operator()(EngineResource* r) const {
-        }};
-    };
+        //yes this is needed
+        if(priv::Renderer::GLSL_VERSION < 140){
+            Engine::Renderer::sendUniformMatrix4Safe("CameraViewProj",c.getViewProjection());
+        }
+    }};
 };
 
-ShaderProgram::ShaderProgram(const string& _name, Shader& vs, Shader& fs):m_VertexShader(vs), m_FragmentShader(fs), BindableResource(ResourceType::ShaderProgram, _name){
+ShaderProgram::ShaderProgram(const string& in_name, Shader& vs, Shader& fs):m_VertexShader(vs), m_FragmentShader(fs), EngineResource(ResourceType::ShaderProgram, in_name){
     m_LoadedGPU = false;
     m_LoadedCPU = false;
-    setName(_name);
+    setName(in_name);
 
     const string& name_ = name();
     if (vs.name() == "NULL") {
@@ -50,7 +50,6 @@ ShaderProgram::ShaderProgram(const string& _name, Shader& vs, Shader& fs):m_Vert
         fs.setName(name_ + ".frag");
     }
     setCustomBindFunctor(DefaultShaderBindFunctor());
-    setCustomUnbindFunctor(DefaultShaderUnbindFunctor());
     load();
 }
 ShaderProgram::~ShaderProgram(){ 
@@ -195,12 +194,6 @@ void ShaderProgram::unload(){
 
         EngineResource::unload();
     }
-}
-void ShaderProgram::bind() const {
-    Core::m_Engine->m_RenderManager._bindShaderProgram(const_cast<ShaderProgram*>(this)); 
-}
-void ShaderProgram::unbind() const {
-    Core::m_Engine->m_RenderManager._unbindShaderProgram(); 
 }
 const unordered_map<string,GLint>& ShaderProgram::uniforms() const { 
     return m_UniformLocations; 

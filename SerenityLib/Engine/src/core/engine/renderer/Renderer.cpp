@@ -2,6 +2,8 @@
 #include <core/engine/renderer/Renderer.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/textures/Texture.h>
+#include <core/engine/materials/Material.h>
+#include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/system/Engine.h>
 
 #include <core/engine/renderer/postprocess/SSAO.h>
@@ -58,16 +60,27 @@ void priv::Renderer::_sort2DAPICommands() {
 const float priv::Renderer::_getGIPackedData() {
     return m_GI_Pack;
 }
-const bool priv::Renderer::_bindShaderProgram(ShaderProgram* program){
-    return m_Pipeline->bindShaderProgram(program);
+const bool priv::Renderer::_bindShaderProgram(ShaderProgram* program) const {
+    const bool res = m_Pipeline->bindShaderProgram(program);
+    if (res) {
+        program->m_CustomBindFunctor(program);
+    }
+    return res;
 }
-const bool priv::Renderer::_unbindShaderProgram() {
+const bool priv::Renderer::_unbindShaderProgram() const {
     return m_Pipeline->unbindShaderProgram();
 }
-const bool priv::Renderer::_bindMaterial(Material* material){
-    return m_Pipeline->bindMaterial(material);
+const bool priv::Renderer::_bindMaterial(Material* material) const {
+    const bool res = m_Pipeline->bindMaterial(material);
+    if (res) {
+        if (material->isLoaded())
+            material->m_CustomBindFunctor(material);
+        else
+            Material::Checkers->m_CustomBindFunctor(Material::Checkers);
+    }
+    return res;
 }
-const bool priv::Renderer::_unbindMaterial(){
+const bool priv::Renderer::_unbindMaterial() const {
     return m_Pipeline->unbindMaterial();
 }
 void priv::Renderer::_genPBREnvMapData(Texture& texture, uint size1, uint size2){
@@ -232,7 +245,7 @@ const bool Renderer::bindReadFBO(const GLuint& fbo){
 const bool Renderer::bindDrawFBO(const GLuint& fbo) {
     return renderManager->m_Pipeline->bindDrawFBO(fbo);
 }
-void Renderer::bindFBO(priv::FramebufferObject& fbo){ 
+void Renderer::bindFBO(const priv::FramebufferObject& fbo){ 
     Renderer::bindFBO(fbo.address()); 
 }
 const bool Renderer::bindRBO(priv::RenderbufferObject& rbo){

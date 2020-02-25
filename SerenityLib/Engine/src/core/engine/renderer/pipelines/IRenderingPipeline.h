@@ -32,7 +32,7 @@ namespace Engine::priv {
     class IRenderingPipeline {
         friend class Renderer;
         public:
-            //virtual ~IRenderingPipeline() = 0;
+            virtual ~IRenderingPipeline(){}
 
             virtual void init() = 0;
             virtual void onPipelineChanged() = 0;

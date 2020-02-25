@@ -6,14 +6,15 @@
 #include <string>
 
 namespace Engine::Networking {
-    class SocketTCP: public ISocket {
+    class SocketTCP: public ISocket, public Engine::NonCopyable {
         private:
-            sf::TcpSocket*  m_Socket;
-            std::string     m_IP;
-            unsigned short  m_Port;
+            sf::TcpSocket   m_Socket;
+            std::string     m_IP       = "";
+            unsigned short  m_Port     = 0;
+
         public: 
+            SocketTCP() = default;
             SocketTCP(const unsigned short port, const std::string& ip = ""); //client side socket
-            SocketTCP(sf::TcpSocket*); //server side client socket
             ~SocketTCP();
 
             void                       disconnect();

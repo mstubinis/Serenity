@@ -405,12 +405,13 @@ void RenderGraph::validate_model_instances_for_rendering(const Viewport& viewpor
     lambda(m_InstancesTotal, camPos);
 }
 void RenderGraph::render(const Engine::priv::Renderer& renderer, const Viewport& viewport, const Camera& camera, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
-    if(useDefaultShaders)
-        m_ShaderProgram->bind();
+    if (useDefaultShaders) {
+        renderer._bindShaderProgram(m_ShaderProgram);
+    }
     for (auto& materialNode : m_MaterialNodes) {
         if (materialNode.meshNodes.size() > 0) {
             auto& _material = *materialNode.material;
-            _material.bind();
+            renderer._bindMaterial(&_material);
             for (auto& meshNode : materialNode.meshNodes) {
                 if (meshNode.instanceNodes.size() > 0) {
                     auto& _mesh = *meshNode.mesh;
@@ -431,20 +432,21 @@ void RenderGraph::render(const Engine::priv::Renderer& renderer, const Viewport&
                     //protect against any custom changes by restoring to the regular shader and material
                     if (useDefaultShaders) {
                         if (renderer.m_Pipeline->getCurrentBoundShaderProgram() != m_ShaderProgram) {
-                            m_ShaderProgram->bind();
-                            _material.bind();
+                            renderer._bindShaderProgram(m_ShaderProgram);
+                            renderer._bindMaterial(&_material);
                         }
                     }
                     _mesh.unbind();
                 }
             }
-            _material.unbind();
+            renderer._unbindMaterial();
         }
     }
 }
 void RenderGraph::render_bruteforce(const Engine::priv::Renderer& renderer, const Viewport& viewport, const Camera& camera, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
-    if (useDefaultShaders)
-        m_ShaderProgram->bind();
+    if (useDefaultShaders) {
+        renderer._bindShaderProgram(m_ShaderProgram);
+    }
     for (auto& instance : m_InstancesTotal) {
         auto& _modelInstance = *instance->instance;
         auto& _mesh          = *_modelInstance.mesh();
@@ -455,7 +457,7 @@ void RenderGraph::render_bruteforce(const Engine::priv::Renderer& renderer, cons
             if (sortingMode != SortingMode::None) {
                 _mesh.sortTriangles(camera, _modelInstance, modelMatrix, sortingMode);
             }
-            _material.bind();
+            renderer._bindMaterial(&_material);
             _mesh.bind();
             _modelInstance.bind(renderer);
 
@@ -463,13 +465,13 @@ void RenderGraph::render_bruteforce(const Engine::priv::Renderer& renderer, cons
 
             _modelInstance.unbind(renderer);
             _mesh.unbind();
-            _material.unbind();
+            renderer._unbindMaterial();
         }
         //protect against any custom changes by restoring to the regular shader and material
         if (useDefaultShaders) {
             if (renderer.m_Pipeline->getCurrentBoundShaderProgram() != m_ShaderProgram) {
-                m_ShaderProgram->bind();
-                _material.bind();
+                renderer._bindShaderProgram(m_ShaderProgram);
+                renderer._bindMaterial(&_material);
             }
         }
     }

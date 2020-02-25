@@ -86,8 +86,8 @@ const bool Engine::priv::DepthOfField::init_shaders() {
 
     return true;
 }
-void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport, const unsigned int& sceneTexture) {
-    m_Shader_Program->bind();
+void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport, const unsigned int& sceneTexture, const Engine::priv::Renderer& renderer) {
+    renderer._bindShaderProgram(m_Shader_Program);
 
     const auto& dimensions = viewport.getViewportDimensions();
 

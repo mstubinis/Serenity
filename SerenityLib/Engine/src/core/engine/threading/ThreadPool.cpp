@@ -48,7 +48,7 @@ ThreadPool::~ThreadPool() {
 }
 void ThreadPool::shutdown() {
     if (m_Stopped == false) {
-        std::lock_guard<std::mutex> lock(m_Mutex);
+        std::lock_guard lock(m_Mutex);
         m_Stopped = true;
         m_ConditionVariable.notify_all();// wake up all threads.
     }
@@ -66,7 +66,7 @@ const bool ThreadPool::startup(const unsigned int num_threads) {
                 while (!m_Stopped) {
                     std::shared_ptr<std::packaged_task<void()>> job;
                     {
-                        std::unique_lock<std::mutex> lock(m_Mutex);
+                        std::unique_lock lock(m_Mutex);
                         m_ConditionVariable.wait(lock, [&] {
                             return !(m_TaskQueue.empty() && !m_Stopped);
                         });
@@ -98,7 +98,7 @@ void ThreadPool::internal_create_packaged_task(std::function<void()>&& job, std:
     ThreadPoolFuture thread_pool_future(std::move(task->get_future()), std::move(callback));
     if (size() > 0) {
         {
-            std::lock_guard<std::mutex> lock(m_Mutex);
+            std::lock_guard lock(m_Mutex);
             m_Futures.push_back(std::move(thread_pool_future)); //TODO: see if this really needs to be in the critical section 
             m_TaskQueue.push(std::move(task));
         }

@@ -617,9 +617,9 @@ void Engine::priv::SMAA::init() {
     Texture::setWrapping(GL_TEXTURE_2D, TextureWrap::ClampToBorder);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, 64, 16, 0, GL_RED, GL_UNSIGNED_BYTE, SMAA_searchTexBytes);
 }
-void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& sceneTexture, const unsigned int& outTexture) {
+void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& sceneTexture, const unsigned int& outTexture, const Engine::priv::Renderer& renderer) {
     gbuffer.bindFramebuffers(outTexture); //probably the lighting buffer
-    m_Shader_Programs[PassStage::Edge]->bind();
+    renderer._bindShaderProgram(m_Shader_Programs[PassStage::Edge]);
 
     Engine::Renderer::Settings::clear(true, false, true);//lighting rgba, stencil is completely filled with 0's
 
@@ -644,11 +644,12 @@ void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec
     Engine::Renderer::stencilFunc(GL_EQUAL, 0x00000001, 0x00000001);
     Engine::Renderer::stencilOp(GL_KEEP, GL_KEEP, GL_KEEP); //Do not change stencil
 }
-void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& outTexture) {
+void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& outTexture, const Engine::priv::Renderer& renderer) {
     gbuffer.bindFramebuffers(GBufferType::Normal);
     Engine::Renderer::Settings::clear(true, false, false); //clear color only
 
-    m_Shader_Programs[PassStage::Blend]->bind();
+    renderer._bindShaderProgram(m_Shader_Programs[PassStage::Blend]);
+
     Engine::Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
 
     Engine::Renderer::sendTexture("edge_tex", gbuffer.getTexture(outTexture), 0);
@@ -664,9 +665,8 @@ void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::ve
 
     Engine::Renderer::GLDisable(GL_STENCIL_TEST);
 }
-void Engine::priv::SMAA::passNeighbor(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& sceneTexture) {
-    m_Shader_Programs[PassStage::Neighbor]->bind();
-
+void Engine::priv::SMAA::passNeighbor(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& sceneTexture, const Engine::priv::Renderer& renderer) {
+    renderer._bindShaderProgram(m_Shader_Programs[PassStage::Neighbor]);
 
     Engine::Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
     Engine::Renderer::sendTextureSafe("textureMap", gbuffer.getTexture(sceneTexture), 0); //need original final image from first smaa pass
@@ -674,12 +674,14 @@ void Engine::priv::SMAA::passNeighbor(Engine::priv::GBuffer& gbuffer, const glm:
 
     Engine::Renderer::renderFullscreenQuad();
 }
-void Engine::priv::SMAA::passFinal(Engine::priv::GBuffer& gbuffer, const Viewport& viewport) {
+void Engine::priv::SMAA::passFinal(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, const Engine::priv::Renderer& renderer) {
     /*
     //this pass is optional. lets skip it for now
     //gbuffer.bindFramebuffers(GBufferType::Lighting);
     gbuffer.stop();
-    m_Shader_Programs[PassStage::Final]->bind();
+
+    renderer._bindShaderProgram(m_Shader_Programs[PassStage::Final]);
+
     Engine::Renderer::renderFullscreenTriangle(0,0,fboWidth,fboHeight);
     */
 }

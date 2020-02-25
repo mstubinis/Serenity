@@ -10,6 +10,7 @@ class  Viewport;
 
 namespace Engine::priv {
     class  GBuffer;
+    class  Renderer;
     class  FXAA final {
         private:
             Shader*         m_Vertex_shader   = nullptr;
@@ -26,7 +27,7 @@ namespace Engine::priv {
 
             const bool init_shaders();
 
-            void pass(GBuffer&, const Viewport& viewport, const unsigned int& sceneTextureEnum);
+            void pass(GBuffer&, const Viewport& viewport, const unsigned int& sceneTextureEnum, const Engine::priv::Renderer& renderer);
 
             static FXAA fxaa;
     };

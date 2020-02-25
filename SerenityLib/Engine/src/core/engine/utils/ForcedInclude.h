@@ -107,6 +107,45 @@
     } \
 }
 
+///
+#define DELETE_FUTURE(x){ \
+    if (x->_Is_ready() || x->_Is_ready_at_thread_exit()) { \
+        x->get(); \
+    } \
+    delete x; \
+}
+#define DELETE_THREAD(x){ \
+    if (x->joinable()) { \
+        x->join(); \
+    } \
+    delete x; \
+}
+#define DELETE_COM(x) { \
+    x->Release(); \
+    x = 0; \
+}
+#define DELETE_VECTOR(x){ \
+    for (size_t i = 0; i < x.size(); ++i) { \
+        delete(x[i]); \
+    } \
+    x.clear(); \
+}
+#define DELETE_QUEUE(x){ \
+    while (x.size() > 0) { \
+        auto& val = x.front(); \
+        delete(val); \
+        x.pop(); \
+    } \
+}
+#define DELETE_MAP(x){ \
+    for(auto& it : x){ \
+        delete(it.second); \
+    } \
+    x.clear(); \
+}
+
+
+
 #pragma endregion
 
 inline constexpr unsigned char operator "" _uc(unsigned long long arg) noexcept{
@@ -184,9 +223,6 @@ namespace Engine {
         explicit color_vector_4(const glm::vec4& color);
         explicit color_vector_4(const unsigned char r, const unsigned char g, const unsigned char b, const unsigned char a);
         explicit color_vector_4(const unsigned char color);
-
-        const float toPackedFloat() const;
-        glm::vec4 unpackFloat(float v) const;
 
         const uint32_t toPackedInt() const;
         glm::vec4 unpackInt(uint32_t i) const;

@@ -2,6 +2,10 @@
 #ifndef ENGINE_MATERIAL_LAYER_H
 #define ENGINE_MATERIAL_LAYER_H
 
+class  MaterialLayer;
+class  Texture;
+struct SimpleUVTranslationFunctor;
+
 #include <glm/vec4.hpp>
 #include <glm/vec2.hpp>
 
@@ -12,20 +16,17 @@
 
 typedef std::function<void(const float& dt)> std_uv_func;
 
-class  MaterialLayer;
-class  Texture;
-struct SimpleUVTranslationFunctor;
 class MaterialLayer final{
     friend struct SimpleUVTranslationFunctor;
     private:
-        Texture*                   m_Texture;
-        Texture*                   m_Mask;
-        Texture*                   m_Cubemap;
+        Texture*                   m_Texture          = nullptr;
+        Texture*                   m_Mask             = nullptr;
+        Texture*                   m_Cubemap          = nullptr;
 
         //x = blend mode? | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
-        glm::vec4                  m_Data1;
-        glm::vec4                  m_Data2; 
-        glm::vec2                  m_UVModifications;
+        glm::vec4                  m_Data1            = glm::vec4(0.0f);
+        glm::vec4                  m_Data2            = glm::vec4(0.0f);
+        glm::vec2                  m_UVModifications  = glm::vec2(0.0f);
 
         std::vector<std_uv_func>   m_UVModificationQueue;
     public:
@@ -59,7 +60,7 @@ class MaterialLayer final{
         void setData1(const float& x, const float& y, const float& z, const float& w);
         void setData2(const float& x, const float& y, const float& z, const float& w);
 
-        void sendDataToGPU(const std::string& uniform_component_string, const size_t& component_index, const size_t& layer_index, size_t& textureUnit);
+        void sendDataToGPU(const std::string& uniform_component_string, const size_t& component_index, const size_t& layer_index, size_t& textureUnit) const;
 
         const glm::vec2& getUVModifications() const;
 

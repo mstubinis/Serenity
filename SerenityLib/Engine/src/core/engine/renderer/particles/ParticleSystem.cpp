@@ -126,7 +126,8 @@ void priv::ParticleSystem::render(const Camera& camera, ShaderProgram& program, 
     };
     std::sort(std::execution::par_unseq, seen.begin(), seen.end(), lambda_sorter);
 
-    program.bind();
+    renderer._bindShaderProgram(&program);
+
     planeMesh.bind();
     for (auto& particle : seen) {
         //if (particle.m_PassedRenderCheck) { //TODO: using "seen" vector for now, do not need bool check, should profile using seen vector over using bool and full vector...

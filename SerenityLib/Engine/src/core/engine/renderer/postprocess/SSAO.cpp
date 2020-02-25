@@ -124,8 +124,8 @@ const bool Engine::priv::SSAO::init_shaders() {
 
     return true;
 }
-void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, const Camera& camera) {
-    m_Shader_Program->bind();
+void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, const Camera& camera, const Engine::priv::Renderer& renderer) {
+    renderer._bindShaderProgram(m_Shader_Program);
     const auto& dimensions    = viewport.getViewportDimensions();
     if (Renderer::GLSL_VERSION < 140) {
         Engine::Renderer::sendUniformMatrix4Safe("CameraInvViewProj", camera.getViewProjectionInverse());
@@ -147,8 +147,8 @@ void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, co
 
     Engine::Renderer::renderFullscreenQuad();
 }
-void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, const string& type, const unsigned int texture) {
-    m_Shader_Program_Blur->bind();
+void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, const string& type, const unsigned int texture, const Engine::priv::Renderer& renderer) {
+    renderer._bindShaderProgram(m_Shader_Program_Blur);
     const auto& dimensions = viewport.getViewportDimensions();
     glm::vec2 hv(0.0f);
     if (type == "H") { 

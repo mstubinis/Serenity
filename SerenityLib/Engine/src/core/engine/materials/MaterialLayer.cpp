@@ -20,9 +20,6 @@ struct SimpleUVTranslationFunctor { void operator()(const float& dt, MaterialLay
 } };
 
 MaterialLayer::MaterialLayer() {
-    m_Texture = m_Mask = m_Cubemap = nullptr;
-    m_Data1 = m_Data2 = glm::vec4(0.0f);
-    m_UVModifications = glm::vec2(0.0f);
     setBlendMode(MaterialLayerBlendMode::Default);
 }
 MaterialLayer::~MaterialLayer() {
@@ -123,7 +120,7 @@ void MaterialLayer::update(const float& dt) {
         command(fDT);
     }
 }
-void MaterialLayer::sendDataToGPU(const string& uniform_component_string, const size_t& component_index, const size_t& layer_index, size_t& textureUnit) {
+void MaterialLayer::sendDataToGPU(const string& uniform_component_string, const size_t& component_index, const size_t& layer_index, size_t& textureUnit) const {
     const string wholeString = uniform_component_string + "layers[" + to_string(layer_index) + "].";
     const auto start = (component_index * (MAX_MATERIAL_LAYERS_PER_COMPONENT * 3)) + (layer_index * 3);
 

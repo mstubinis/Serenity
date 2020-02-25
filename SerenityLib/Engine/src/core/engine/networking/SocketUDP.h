@@ -6,11 +6,13 @@
 #include <string>
 
 namespace Engine::Networking {
-    class SocketUDP : public ISocket {
+    class SocketUDP : public ISocket, public Engine::NonCopyable {
         private:
-            sf::UdpSocket*  m_Socket;
-            unsigned short  m_Port;
-            sf::IpAddress   m_IP;
+            sf::UdpSocket   m_Socket;
+            unsigned short  m_Port      = 0;
+            sf::IpAddress   m_IP        = "";
+
+            SocketUDP() = delete;
         public:
             SocketUDP(const unsigned short port, const std::string& _ip = "");
             ~SocketUDP();

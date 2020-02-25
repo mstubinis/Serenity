@@ -10,32 +10,40 @@
 using namespace Engine;
 using namespace std;
 
-namespace Engine {
-    namespace priv {
-        struct DefaultMaterialBindFunctor {
-            void operator()(BindableResource* r) const {
-                auto& material = *static_cast<Material*>(r);
-                const size_t numComponents = material.m_Components.size();
-                size_t textureUnit = 0;
-                for (size_t i = 0; i < numComponents; ++i) {
-                    if (material.m_Components[i]) {
-                        auto& component = *material.m_Components[i];
-                        component.bind(i, textureUnit);
-                    }
-                }
-                Engine::Renderer::sendUniform1Safe("numComponents", int(numComponents));
-                Engine::Renderer::sendUniform1Safe("Shadeless", static_cast<int>(material.m_Shadeless));
-                Engine::Renderer::sendUniform4Safe("Material_F0AndID", material.m_F0Color.r, material.m_F0Color.g, material.m_F0Color.b, static_cast<float>(material.m_ID));
-                Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesOne", material.m_BaseGlow, material.m_BaseAO, material.m_BaseMetalness, material.m_BaseSmoothness);
-                Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesTwo", material.m_BaseAlpha, static_cast<float>(material.m_DiffuseModel), static_cast<float>(material.m_SpecularModel), 0.0f);
+namespace Engine::priv {
+    struct DefaultMaterialBindFunctor { void operator()(Material* material_ptr) const {
+        auto& material             = *material_ptr;
+        const size_t numComponents = material.m_Components.size();
+        size_t textureUnit         = 0;
+
+        for (size_t i = 0; i < numComponents; ++i) {
+            if (material.m_Components[i]) {
+                const auto& c = *material.m_Components[i];
+                c.bind(i, textureUnit);
             }
-        };
-        struct DefaultMaterialUnbindFunctor {
-            void operator()(BindableResource* r) const {
-                //auto& material = *static_cast<Material*>(r);
-            }
-        };
-    };
+        }
+
+        Engine::Renderer::sendUniform1Safe("numComponents", int(numComponents));
+        Engine::Renderer::sendUniform1Safe("Shadeless", static_cast<int>(material.m_Shadeless));
+        Engine::Renderer::sendUniform4Safe("Material_F0AndID", 
+            material.m_F0Color.r(), 
+            material.m_F0Color.g(), 
+            material.m_F0Color.b(), 
+            static_cast<float>(material.m_ID)
+        );
+        Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesOne", 
+            static_cast<float>(material.m_BaseGlow) * 0.003921568627451f, 
+            static_cast<float>(material.m_BaseAO) * 0.003921568627451f,
+            static_cast<float>(material.m_BaseMetalness) * 0.003921568627451f,
+            static_cast<float>(material.m_BaseSmoothness) * 0.003921568627451f
+        );
+        Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesTwo", 
+            static_cast<float>(material.m_BaseAlpha) * 0.003921568627451f,
+            static_cast<float>(material.m_DiffuseModel), 
+            static_cast<float>(material.m_SpecularModel), 
+            0.0f
+        );
+    }};
 };
 
 void priv::MaterialLoader::InternalInit(Material& material, Texture* diffuse_ptr, Texture* normal_ptr, Texture* glow_ptr, Texture* specular_ptr, Texture* ao_ptr, Texture* metalness_ptr, Texture* smoothness_ptr) {
@@ -50,21 +58,9 @@ void priv::MaterialLoader::InternalInit(Material& material, Texture* diffuse_ptr
 }
 void priv::MaterialLoader::InternalInitBase(Material& material) {
     material.m_Components.reserve(MAX_MATERIAL_COMPONENTS);
-    material.internalUpdateGlobalMaterialPool(true);
-    material.setDiffuseModel(DiffuseModel::Lambert);
-    material.setSpecularModel(SpecularModel::GGX);
-    material.m_UpdatedThisFrame = false;
-    material.setShadeless(false);
-    material.setGlow(0.0f);
 
-    material.setMetalness(0.0f);
-    material.setSmoothness(0.25f);
-
-    material.setAlpha(1.0f);
-    material.setAO(1.0f);
-    material.setF0Color(0.04f, 0.04f, 0.04f);
     material.setCustomBindFunctor(priv::DefaultMaterialBindFunctor());
-    material.setCustomUnbindFunctor(priv::DefaultMaterialUnbindFunctor());
+    material.internalUpdateGlobalMaterialPool(true);
 }
 
 Texture* priv::MaterialLoader::LoadTextureDiffuse(const string& file) {

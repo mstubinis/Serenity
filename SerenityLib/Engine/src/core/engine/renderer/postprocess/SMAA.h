@@ -19,6 +19,7 @@ struct SMAAQualityLevel {enum Level {
 
 namespace Engine::priv {
     class  GBuffer;
+    class  Renderer;
     class  SMAA final {
         private:
             struct PassStage final { enum Stage : unsigned int {
@@ -65,10 +66,10 @@ namespace Engine::priv {
 
             const bool init_shaders();
 
-            void passEdge(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& sceneTexture, const unsigned int& outTexture);
-            void passBlend(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& outTexture);
-            void passNeighbor(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& sceneTexture);
-            void passFinal(GBuffer&, const Viewport& viewport); //currently unused
+            void passEdge(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& sceneTexture, const unsigned int& outTexture, const Engine::priv::Renderer& renderer);
+            void passBlend(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& outTexture, const Engine::priv::Renderer& renderer);
+            void passNeighbor(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& sceneTexture, const Engine::priv::Renderer& renderer);
+            void passFinal(GBuffer&, const Viewport& viewport, const Engine::priv::Renderer& renderer); //currently unused
 
             static SMAA smaa;
     };

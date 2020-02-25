@@ -15,6 +15,7 @@ class  Viewport;
 
 namespace Engine::priv {
     class  GBuffer;
+    class  Renderer;
     class  SSAO final {
         private:
             Shader*        m_Vertex_Shader         = nullptr;
@@ -47,8 +48,8 @@ namespace Engine::priv {
 
             void init();
 
-            void passSSAO(GBuffer&, const Viewport& viewport, const Camera&);
-            void passBlur(GBuffer&, const Viewport& viewport, const std::string& type, const unsigned int texture);
+            void passSSAO(GBuffer&, const Viewport& viewport, const Camera&, const Engine::priv::Renderer& renderer);
+            void passBlur(GBuffer&, const Viewport& viewport, const std::string& type, const unsigned int texture, const Engine::priv::Renderer& renderer);
 
             static SSAO ssao;
     };

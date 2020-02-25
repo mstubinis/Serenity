@@ -35,21 +35,8 @@ Engine::color_vector_4::color_vector_4(const unsigned char color_) {
     color.a = color_;
 }
 
-constexpr auto one_over_255 = 1.0f / 255.0f;
+constexpr float one_over_255 = 1.0f / 255.0f;
 
-const float Engine::color_vector_4::toPackedFloat() const {
-    unsigned char chars[4] = { color.r, color.g, color.b, color.a };
-    return *(reinterpret_cast<float*>(chars));
-}
-glm::vec4 Engine::color_vector_4::unpackFloat(float v) const {
-    unsigned char* chars = reinterpret_cast<unsigned char*>(&v);
-    return glm::vec4(
-        static_cast<float>(chars[0]) * one_over_255,
-        static_cast<float>(chars[1]) * one_over_255,
-        static_cast<float>(chars[2]) * one_over_255,
-        static_cast<float>(chars[3]) * one_over_255
-    );  
-}
 const uint32_t Engine::color_vector_4::toPackedInt() const {
     auto res  = (color.r << 24) | (color.g << 16) | (color.b << 8) | color.a;
     return res;

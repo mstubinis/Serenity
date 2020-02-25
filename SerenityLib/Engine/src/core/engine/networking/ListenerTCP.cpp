@@ -4,10 +4,9 @@
 using namespace Engine;
 using namespace std;
 
-
 Networking::ListenerTCP::ListenerTCP(const unsigned short _port, const string& ip){
     m_Port = _port;
-    m_Ip = ip;
+    m_Ip   = ip;
     m_Listener.setBlocking(false);
 }
 Networking::ListenerTCP::~ListenerTCP() { 
@@ -28,11 +27,11 @@ const bool Networking::ListenerTCP::isBlocking() {
 void Networking::ListenerTCP::close() { 
     m_Listener.close();
 }
-const sf::Socket::Status Networking::ListenerTCP::accept(sf::TcpSocket& _client) {
-    return m_Listener.accept(_client);
+const sf::Socket::Status Networking::ListenerTCP::accept(sf::TcpSocket& client) {
+    return m_Listener.accept(client);
 }
-const sf::Socket::Status Networking::ListenerTCP::accept(SocketTCP& _client) {
-    sf::TcpSocket& s = const_cast<sf::TcpSocket&>(_client.socket());
+const sf::Socket::Status Networking::ListenerTCP::accept(SocketTCP& client) {
+    sf::TcpSocket& s = const_cast<sf::TcpSocket&>(client.socket());
     return m_Listener.accept(s);
 }
 const sf::Socket::Status Networking::ListenerTCP::listen() {

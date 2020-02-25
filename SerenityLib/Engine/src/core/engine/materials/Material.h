@@ -13,6 +13,8 @@ namespace Engine::priv {
     struct InternalMaterialRequestPublicInterface;
     struct InternalScenePublicInterface;
     struct MaterialLoader;
+    class  Renderer;
+    class  IRenderingPipeline;
 };
 
 #include <GL/glew.h>
@@ -21,33 +23,40 @@ namespace Engine::priv {
 #include <glm/vec3.hpp>
 #include <vector>
 
-#include <core/engine/BindableResource.h>
+#include <core/engine/resources/Engine_ResourceBasic.h>
 #include <core/engine/materials/MaterialEnums.h>
+#include <functional>
 
-class Material final: public BindableResource{
+class Material final : public EngineResource{
     friend struct Engine::priv::DefaultMaterialBindFunctor;
     friend struct Engine::priv::DefaultMaterialUnbindFunctor;
     friend struct Engine::priv::InternalScenePublicInterface;
     friend struct Engine::priv::InternalMaterialRequestPublicInterface;
     friend struct Engine::priv::InternalMaterialPublicInterface;
     friend struct Engine::priv::MaterialLoader;
+    friend class  Engine::priv::Renderer;
+    friend class  Engine::priv::IRenderingPipeline;
     public:
         static Material                  *Checkers, *WhiteShadeless; //loaded in renderer
 
         static std::vector<glm::vec4>     m_MaterialProperities;
     private:
+        std::function<void(Material*)>    m_CustomBindFunctor;
+
+
         std::vector<MaterialComponent*>   m_Components;
-        unsigned int                      m_DiffuseModel;
-        unsigned int                      m_SpecularModel;
-        bool                              m_Shadeless;
-        bool                              m_UpdatedThisFrame;
-        glm::vec3                         m_F0Color;
-        float                             m_BaseGlow;
-        float                             m_BaseAO;
-        float                             m_BaseMetalness;
-        float                             m_BaseSmoothness;
-        float                             m_BaseAlpha;
-        size_t                            m_ID;
+        unsigned char                     m_DiffuseModel       = DiffuseModel::Lambert;
+        unsigned char                     m_SpecularModel      = SpecularModel::GGX;
+        bool                              m_Shadeless          = false;
+        bool                              m_UpdatedThisFrame   = false;
+        //glm::vec3                         m_F0Color            = glm::vec3(0.04f, 0.04f, 0.04f);
+        Engine::color_vector_4            m_F0Color            = Engine::color_vector_4(10_uc, 10_uc, 10_uc, 255_uc);
+        unsigned char                     m_BaseGlow           = 1_uc;
+        unsigned char                     m_BaseAO             = 254_uc;
+        unsigned char                     m_BaseMetalness      = 1_uc;
+        unsigned char                     m_BaseSmoothness     = 64_uc;
+        unsigned char                     m_BaseAlpha          = 254_uc;
+        std::uint32_t                     m_ID;
 
         MaterialComponent* internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
         void internalUpdateGlobalMaterialPool(const bool& addToDatabase);
@@ -75,6 +84,13 @@ class Material final: public BindableResource{
         );
         ~Material();
 
+
+        template<typename T>
+        void setCustomBindFunctor(const T& functor) {
+            m_CustomBindFunctor = std::bind<void>(std::move(functor), std::placeholders::_1);
+        }
+
+
         Material(const Material&)                      = delete;
         Material& operator=(const Material&)           = delete;
         Material(Material&& other) noexcept            = delete;
@@ -87,41 +103,38 @@ class Material final: public BindableResource{
         MaterialComponent& addComponentNormal(const std::string& textureFile);
         MaterialComponent& addComponentGlow(const std::string& textureFile);
         MaterialComponent& addComponentSpecular(const std::string& textureFile);
-        MaterialComponent& addComponentAO(const std::string& textureFile, const float baseValue = 1.0f);
-        MaterialComponent& addComponentMetalness(const std::string& textureFile, const float baseValue = 1.0f);
-        MaterialComponent& addComponentSmoothness(const std::string& textureFile, const float baseValue = 1.0f);
+        MaterialComponent& addComponentAO(const std::string& textureFile, const unsigned char baseValue = 255_uc);
+        MaterialComponent& addComponentMetalness(const std::string& textureFile, const unsigned char baseValue = 255_uc);
+        MaterialComponent& addComponentSmoothness(const std::string& textureFile, const unsigned char baseValue = 255_uc);
         MaterialComponent& addComponentReflection(const std::string& cubeMapName, const std::string& mapFile, const float mixFactor = 1.0f);
         MaterialComponent& addComponentRefraction(const std::string& cubeMapName, const std::string& mapFile, const float refractiveIndex = 1.0f, const float mixFactor = 1.0f);
         MaterialComponent& addComponentParallaxOcclusion(const std::string& textureFile, const float heightScale = 0.1f);
 
-        const size_t& id() const;
+        const std::uint32_t& id() const;
     
         const bool& shadeless() const;
-        const glm::vec3& f0() const;
-        const float& glow() const;
-        const float& smoothness() const;
-        const float& metalness() const;
-        const float& ao() const;
-        const float& alpha() const;
+        const Engine::color_vector_4& f0() const;
+        const unsigned char glow() const;
+        const unsigned char smoothness() const;
+        const unsigned char metalness() const;
+        const unsigned char ao() const;
+        const unsigned char alpha() const;
         
         void setF0Color(const glm::vec3& f0Color);
         void setF0Color(const float& r, const float& g, const float& b);
 
         void setMaterialPhysics(const MaterialPhysics::Physics& materialPhysics);
         void setShadeless(const bool& shadeless);
-        void setGlow(const float& glow);
-        void setSmoothness(const float& smoothness);
-        void setAO(const float& ao);
-        void setMetalness(const float& metalness);
-        void setAlpha(const float& alpha);
+        void setGlow(const unsigned char glow);
+        void setSmoothness(const unsigned char smoothness);
+        void setAO(const unsigned char ao);
+        void setMetalness(const unsigned char metalness);
+        void setAlpha(const unsigned char alpha);
     
-        const unsigned int& specularModel() const;
-        void setSpecularModel(const SpecularModel::Model& specularModel);
-        const unsigned int& diffuseModel() const;
-        void setDiffuseModel(const DiffuseModel::Model& diffuseModel);
-
-        void bind() const override;
-        void unbind() const override;
+        const unsigned char specularModel() const;
+        void setSpecularModel(const SpecularModel::Model specularModel);
+        const unsigned char diffuseModel() const;
+        void setDiffuseModel(const DiffuseModel::Model diffuseModel);
 
         void update(const float& dt);
 };

@@ -7,11 +7,13 @@
 
 namespace Engine::Networking {
     class SocketTCP;
-    class ListenerTCP : public ISocket {
+    class ListenerTCP : public ISocket, public Engine::NonCopyable {
         private:
             sf::TcpListener  m_Listener;
-            unsigned short   m_Port;
-            std::string      m_Ip;
+            unsigned short   m_Port        = 0;
+            std::string      m_Ip          = "";
+
+            ListenerTCP() = delete;
         public:
             ListenerTCP(const unsigned short port, const std::string& ip = "");
             ~ListenerTCP();

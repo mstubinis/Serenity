@@ -74,14 +74,14 @@ struct MaterialPhysics final { enum Physics {
     Platinum,
     Nickel,
 _TOTAL};};
-struct DiffuseModel final { enum Model {
+struct DiffuseModel final { enum Model : unsigned char {
     None,
     Lambert,
     Oren_Nayar,
     Ashikhmin_Shirley,
     Minnaert,
 _TOTAL};};
-struct SpecularModel final {enum Model {
+struct SpecularModel final {enum Model : unsigned char {
     None,
     Blinn_Phong,
     Phong,

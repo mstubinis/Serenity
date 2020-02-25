@@ -86,9 +86,9 @@ Engine::priv::FXAA::~FXAA() {
     SAFE_DELETE(m_Fragment_shader);
     SAFE_DELETE(m_Vertex_shader);
 }
-void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, const unsigned int& sceneTextureEnum) {
+void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, const unsigned int& sceneTextureEnum, const Engine::priv::Renderer& renderer) {
     const auto& dimensions = viewport.getViewportDimensions();
-    m_Shader_program->bind();
+    renderer._bindShaderProgram(m_Shader_program);
 
     Engine::Renderer::sendUniform1("FXAA_REDUCE_MIN", reduce_min);
     Engine::Renderer::sendUniform1("FXAA_REDUCE_MUL", reduce_mul);
