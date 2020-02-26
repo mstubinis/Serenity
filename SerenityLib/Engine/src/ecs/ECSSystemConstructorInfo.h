@@ -7,16 +7,18 @@
 class  Scene;
 struct Entity;
 
-typedef std::function<void(void*, const float&, Scene&)> std_func_update;
-typedef std::function<void(void*, Entity&, Scene&)>      std_func_entity;
-typedef std::function<void(void*, Entity&)>              std_func_component;
-typedef std::function<void(void*, Scene&)>               std_func_scene;
+typedef std::function<void(void*, void*, const float&, Scene&)> std_func_update;
+typedef std::function<void(void*, void*, Entity&, Scene&)>      std_func_entity;
+typedef std::function<void(void*, void*, Entity&)>              std_func_component;
+typedef std::function<void(void*, Entity&)>                     std_func_component_removed;
+typedef std::function<void(void*, void*, Scene&)>               std_func_scene;
 
 namespace Engine::priv {
-    struct FunctorUpdateEmpty final { void operator()(void* cPool, const float& dt, Scene&) const { } };
-    struct FunctorComponentEmpty final { void operator()(void* compt, Entity&) const { } };
-    struct FunctorEntityEmpty final { void operator()(void* cPool, Entity&, Scene&) const { } };
-    struct FunctorSceneEmpty final { void operator()(void* cPool, Scene&) const { } };
+    struct FunctorUpdateEmpty final { void operator()(void* system, void* componentPool, const float& dt, Scene& scene) const { } };
+    struct FunctorComponentEmpty final { void operator()(void* system, void* component, Entity& entity) const { } };
+    struct FunctorComponentRemovedEmpty final { void operator()(void* system, Entity& entity) const { } };
+    struct FunctorEntityEmpty final { void operator()(void* system, void* componentPool, Entity& entity, Scene& scene) const { } };
+    struct FunctorSceneEmpty final { void operator()(void* system, void* componentPool, Scene& scene) const { } };
 
     template<class T> struct FunctorHolder {
         T functor;
@@ -38,6 +40,10 @@ namespace Engine::priv {
         FunctorComponent() { FunctorHolder<std_func_component>::functor = FunctorComponentEmpty(); }
         FunctorComponent(const std_func_component& f) { FunctorHolder<std_func_component>::functor = f; }
     };
+    struct FunctorComponentRemoved : public FunctorHolder<std_func_component_removed> {
+        FunctorComponentRemoved() { FunctorHolder<std_func_component_removed>::functor = FunctorComponentRemovedEmpty(); }
+        FunctorComponentRemoved(const std_func_component_removed& f) { FunctorHolder<std_func_component_removed>::functor = f; }
+    };
     struct FunctorEntity final : public FunctorHolder<std_func_entity> {
         FunctorEntity() { FunctorHolder<std_func_entity>::functor = FunctorEntityEmpty(); }
         FunctorEntity(const std_func_entity& f) { FunctorHolder<std_func_entity>::functor = f; }
@@ -48,17 +54,19 @@ namespace Engine::priv {
     };
 
     struct ECSSystemCI {
-        FunctorUpdate        onUpdateFunction;
-        FunctorComponent     onComponentAddedToEntityFunction;
-        FunctorEntity        onEntityAddedToSceneFunction;
-        FunctorScene         onSceneEnteredFunction;
-        FunctorScene         onSceneLeftFunction;
+        FunctorUpdate               onUpdateFunction;
+        FunctorComponent            onComponentAddedToEntityFunction;
+        FunctorComponentRemoved     onComponentRemovedFromEntityFunction;
+        FunctorEntity               onEntityAddedToSceneFunction;
+        FunctorScene                onSceneEnteredFunction;
+        FunctorScene                onSceneLeftFunction;
 
-        ECSSystemCI() = default;
-        virtual ~ECSSystemCI() = default;
-        ECSSystemCI(const ECSSystemCI&) = delete;
-        ECSSystemCI& operator=(const ECSSystemCI&) = delete;
-        ECSSystemCI(ECSSystemCI&& other) noexcept = delete;
+        ECSSystemCI()                                        = default;
+        virtual ~ECSSystemCI()                               = default;
+
+        ECSSystemCI(const ECSSystemCI&)                      = delete;
+        ECSSystemCI& operator=(const ECSSystemCI&)           = delete;
+        ECSSystemCI(ECSSystemCI&& other) noexcept            = delete;
         ECSSystemCI& operator=(ECSSystemCI&& other) noexcept = delete;
 
         template<class T> void setUpdateFunction(const T& functor) {
@@ -66,6 +74,9 @@ namespace Engine::priv {
         }
         template<class T> void setOnComponentAddedToEntityFunction(const T& functor) {
             onComponentAddedToEntityFunction = FunctorComponent(functor);
+        }
+        template<class T> void setOnComponentRemovedFromEntityFunction(const T& functor) {
+            onComponentRemovedFromEntityFunction = FunctorComponentRemoved(functor);
         }
         template<class T> void setOnEntityAddedToSceneFunction(const T& functor) {
             onEntityAddedToSceneFunction = FunctorEntity(functor);

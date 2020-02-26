@@ -30,3 +30,25 @@ const Entity& EntityWrapper::entity() const {
 const bool EntityWrapper::null() const {
     return m_Entity.null();
 }
+const std::uint32_t EntityWrapper::id() const {
+    return m_Entity.id();
+}
+const std::uint32_t EntityWrapper::sceneID() const {
+    return m_Entity.sceneID();
+}
+void EntityWrapper::addChild(const Entity& child) const {
+    m_Entity.addChild(child);
+}
+void EntityWrapper::removeChild(const Entity& child) const {
+    m_Entity.removeChild(child);
+}
+
+void EntityWrapper::addChild(const EntityWrapper& child) const {
+    m_Entity.addChild(child.entity());
+}
+void EntityWrapper::removeChild(const EntityWrapper& child) const {
+    m_Entity.removeChild(child.entity());
+}
+const bool EntityWrapper::hasParent() const {
+    return m_Entity.hasParent();
+}

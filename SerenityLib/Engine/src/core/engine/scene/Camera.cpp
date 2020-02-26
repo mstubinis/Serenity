@@ -10,11 +10,11 @@ using namespace boost;
 using namespace std;
 
 
-Camera::Camera(const float angle, const float aspectRatio, const float _near, const float _far,Scene* scene) : EntityWrapper(*scene){//create a perspective camera
+Camera::Camera(const float angle, const float aspectRatio, const float near_, const float far_, Scene* scene) : EntityWrapper(*scene){//create a perspective camera
     if (!scene)
         scene = Resources::getCurrentScene();
 
-    m_Entity.addComponent<ComponentCamera>(angle, aspectRatio, _near, _far);
+    m_Entity.addComponent<ComponentCamera>(angle, aspectRatio, near_, far_);
     m_Entity.addComponent<ComponentLogic2>();
     m_Entity.addComponent<ComponentBody>();
 
@@ -22,16 +22,16 @@ Camera::Camera(const float angle, const float aspectRatio, const float _near, co
     auto& logic = *m_Entity.getComponent<ComponentLogic2>();
     auto& body  = *m_Entity.getComponent<ComponentBody>();
 
-    cam.lookAt(body.position(), body.position() + body.forward(), body.up());
+    cam.lookAt(glm_vec3(0.0), glm_vec3(0.0) + body.forward(), body.up());
     logic.setUserPointer(this);
 
     priv::InternalScenePublicInterface::GetCameras(*scene).push_back(this);
 }
-Camera::Camera(const float left, const float right, const float bottom, const float top, const float _near, const float _far,Scene* scene) : EntityWrapper(*scene){//create an orthographic camera
+Camera::Camera(const float left, const float right, const float bottom, const float top, const float near_, const float far_, Scene* scene) : EntityWrapper(*scene){//create an orthographic camera
     if (!scene)
         scene = Resources::getCurrentScene();
 
-    m_Entity.addComponent<ComponentCamera>(left, right, bottom, top, _near, _far);
+    m_Entity.addComponent<ComponentCamera>(left, right, bottom, top, near_, far_);
     m_Entity.addComponent<ComponentLogic2>();
     m_Entity.addComponent<ComponentBody>();
 
@@ -39,7 +39,7 @@ Camera::Camera(const float left, const float right, const float bottom, const fl
     auto& logic = *m_Entity.getComponent<ComponentLogic2>();
     auto& body  = *m_Entity.getComponent<ComponentBody>();
 
-    cam.lookAt(body.position(), body.position() + body.forward(), body.up());
+    cam.lookAt(glm_vec3(0.0), glm_vec3(0.0) + body.forward(), body.up());
     logic.setUserPointer(this);
 
     priv::InternalScenePublicInterface::GetCameras(*scene).push_back(this);
@@ -67,17 +67,17 @@ const float& Camera::getNear() const {
 const float& Camera::getFar() const {
     return m_Entity.getComponent<ComponentCamera>()->m_FarPlane; 
 }
-void Camera::setAngle(const float _Angle) const {
-    m_Entity.getComponent<ComponentCamera>()->setAngle(_Angle); 
+void Camera::setAngle(const float Angle) const {
+    m_Entity.getComponent<ComponentCamera>()->setAngle(Angle); 
 }
-void Camera::setAspect(const float _Aspect) const {
-    m_Entity.getComponent<ComponentCamera>()->setAspect(_Aspect); 
+void Camera::setAspect(const float Aspect) const {
+    m_Entity.getComponent<ComponentCamera>()->setAspect(Aspect); 
 }
-void Camera::setNear(const float _near) const {
-    m_Entity.getComponent<ComponentCamera>()->setNear(_near); 
+void Camera::setNear(const float Near_) const {
+    m_Entity.getComponent<ComponentCamera>()->setNear(Near_);
 }
-void Camera::setFar(const float _far) const {
-    m_Entity.getComponent<ComponentCamera>()->setFar(_far); 
+void Camera::setFar(const float Far_) const {
+    m_Entity.getComponent<ComponentCamera>()->setFar(Far_);
 }
 const glm::mat4 Camera::getViewProjectionInverse() const {
     return m_Entity.getComponent<ComponentCamera>()->getViewProjectionInverse(); 

@@ -18,6 +18,9 @@ struct Entity{
     Entity(Entity&& other) noexcept;
     Entity& operator=(Entity&& other) noexcept;
 
+    const std::uint32_t id() const;
+    const std::uint32_t sceneID() const;
+
     const bool operator==(const Entity& other) const;
     const bool operator!=(const Entity& other) const;
 
@@ -27,6 +30,12 @@ struct Entity{
     void destroy();
     void move(const Scene& destination);
     const bool null() const;
+
+    const bool hasParent() const;
+
+    void addChild(const Entity& child) const;
+    void removeChild(const Entity& child) const;
+
     template<typename T, typename... ARGS> inline void addComponent(ARGS&&... args) {
         auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
         ecs.addComponent<T>(*this, std::forward<ARGS>(args)...);

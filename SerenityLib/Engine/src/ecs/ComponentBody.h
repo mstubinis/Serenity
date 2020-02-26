@@ -2,17 +2,17 @@
 #ifndef ENGINE_ECS_COMPONENT_BODY_H
 #define ENGINE_ECS_COMPONENT_BODY_H
 
-#include <ecs/ComponentBaseClass.h>
-#include <ecs/ECSSystemConstructorInfo.h>
-#include <core/engine/physics/PhysicsIncludes.h>
-#include <LinearMath/btDefaultMotionState.h>
-#include <core/engine/math/Numbers.h>
-
 class Collision;
 class ComponentModel;
 class ComponentBody;
 class btCollisionObject;
 class btRigidBody;
+
+#include <ecs/ComponentBaseClass.h>
+#include <ecs/ECS.h>
+#include <core/engine/physics/PhysicsIncludes.h>
+#include <LinearMath/btDefaultMotionState.h>
+#include <core/engine/math/Numbers.h>
 
 struct CollisionCallbackEventData final {
     ComponentBody& ownerBody;
@@ -51,6 +51,7 @@ namespace Engine::priv {
     struct ComponentBody_UpdateFunction;
     struct ComponentBody_EntityAddedToSceneFunction;
     struct ComponentBody_ComponentAddedToEntityFunction;
+    struct ComponentBody_ComponentRemovedFromEntityFunction;
     struct ComponentBody_SceneEnteredFunction;
     struct ComponentBody_SceneLeftFunction;
     struct ComponentBody_EmptyCollisionFunctor final { 
@@ -62,6 +63,7 @@ namespace Engine::priv {
 class ComponentBody : public ComponentBaseClass, public EventObserver {
     friend struct Engine::priv::ComponentBody_UpdateFunction;
     friend struct Engine::priv::ComponentBody_ComponentAddedToEntityFunction;
+    friend struct Engine::priv::ComponentBody_ComponentRemovedFromEntityFunction;
     friend struct Engine::priv::ComponentBody_EntityAddedToSceneFunction;
     friend struct Engine::priv::ComponentBody_SceneEnteredFunction;
     friend struct Engine::priv::ComponentBody_SceneLeftFunction;
@@ -76,26 +78,28 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
             unsigned short       mask                   = CollisionFilter::AllFilter;
             bool                 forcedOut              = false;
 
-            PhysicsData();
+            PhysicsData() = default;
+            ~PhysicsData();
+
             PhysicsData(const PhysicsData& other)            = delete;
             PhysicsData& operator=(const PhysicsData& other) = delete;
             PhysicsData& operator=(PhysicsData&& other) noexcept;
-            PhysicsData(PhysicsData&& other) noexcept;
-            ~PhysicsData();         
+            PhysicsData(PhysicsData&& other) noexcept;        
         };
         struct NormalData final {
             glm_vec3 scale          = glm_vec3(1.0);
             glm_vec3 position       = glm_vec3(0.0);
             glm_quat rotation       = glm_quat(1.0, 0.0, 0.0, 0.0);
-            glm_mat4 modelMatrix    = glm_mat4(1.0);
+            //glm_mat4 modelMatrix    = glm_mat4(1.0);
             glm_vec3 linearVelocity = glm_vec3(0.0);
 
-            NormalData();
+            NormalData() = default;
+            ~NormalData() = default;
+
             NormalData(const NormalData& other)            = delete;
             NormalData& operator=(const NormalData& other) = delete;
             NormalData& operator=(NormalData&& other) noexcept;
             NormalData(NormalData&& other) noexcept;
-            ~NormalData();
         };
         union {
             NormalData*  n;
@@ -124,6 +128,14 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
         ~ComponentBody();
 
         void onEvent(const Event& _event) override;
+
+        const bool hasParent() const;
+
+        void addChild(const Entity& child) const;
+        void addChild(const ComponentBody& child) const;
+        void removeChild(const Entity& child) const;
+        void removeChild(const ComponentBody& child) const;
+
 
         template<typename T> void setCollisionFunctor(const T& functor) {
             m_CollisionFunctor = std::bind<void>(functor, std::placeholders::_1);
@@ -182,6 +194,7 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
 		const glm_quat rotation() const;
 		const glm_vec3 getScale() const;
 		const glm_vec3 position() const;
+        const glm_vec3 localPosition() const;
         const glm::vec3 position_render() const;
 		const glm_vec3& forward() const;
 		const glm_vec3& right() const;
@@ -248,6 +261,35 @@ class ComponentBody_System_CI : public Engine::priv::ECSSystemCI {
     public:
         ComponentBody_System_CI();
         ~ComponentBody_System_CI() = default;
+};
+
+namespace Engine::priv {
+    class ComponentBody_System final : public Engine::priv::ECSSystem<Entity, ComponentBody> {
+
+
+        class ParentChildVector final {
+            public:
+                std::vector<glm_mat4>         WorldTransforms;
+                std::vector<glm_mat4>         LocalTransforms;
+                std::vector<std::uint32_t>    Parents;
+                std::vector<std::uint32_t>    Order;
+                std::uint32_t                 OrderHead        = 0;
+
+                void resize(const size_t size);
+                void insert(const std::uint32_t& parent, const std::uint32_t& child);
+                void remove(const std::uint32_t& parent, const std::uint32_t& child);
+
+                const std::uint32_t size() const;
+                const size_t capacity() const;
+        };
+
+
+        public:
+            ParentChildVector ParentChildSystem;
+
+            ComponentBody_System(const Engine::priv::ECSSystemCI& systemCI, Engine::priv::ECS<Entity>& ecs);
+            ~ComponentBody_System();
+    };
 };
 
 #endif

@@ -5,19 +5,19 @@
 #include <ecs/ComponentBaseClass.h>
 #include <ecs/ECSSystemConstructorInfo.h>
 
-namespace Engine {
-    namespace priv {
-        struct ComponentName_UpdateFunction;
-        struct ComponentName_EntityAddedToSceneFunction;
-        struct ComponentName_ComponentAddedToEntityFunction;
-        struct ComponentName_SceneEnteredFunction;
-        struct ComponentName_SceneLeftFunction;
-    };
+namespace Engine::priv {
+    struct ComponentName_UpdateFunction;
+    struct ComponentName_EntityAddedToSceneFunction;
+    struct ComponentName_ComponentAddedToEntityFunction;
+    struct ComponentName_ComponentRemovedFromEntityFunction;
+    struct ComponentName_SceneEnteredFunction;
+    struct ComponentName_SceneLeftFunction;
 };
 class ComponentName : public ComponentBaseClass {
     friend struct Engine::priv::ComponentName_UpdateFunction;
     friend struct Engine::priv::ComponentName_EntityAddedToSceneFunction;
     friend struct Engine::priv::ComponentName_ComponentAddedToEntityFunction;
+    friend struct Engine::priv::ComponentName_ComponentRemovedFromEntityFunction;
     friend struct Engine::priv::ComponentName_SceneEnteredFunction;
     friend struct Engine::priv::ComponentName_SceneLeftFunction;
     private:

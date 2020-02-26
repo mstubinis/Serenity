@@ -5,7 +5,6 @@
 #include <core/engine/model/ModelInstance.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Skybox.h>
-//#include <core/engine/scene/Viewport.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/renderer/particles/ParticleEmitter.h>
 #include <core/engine/renderer/RenderGraph.h>
@@ -26,7 +25,7 @@ class Scene::impl final {
 
         void _init(Scene& super, const string& _name, const SceneOptions& options) {
             m_ECS.assignSystem<ComponentLogic> (ComponentLogic_System_CI());
-            m_ECS.assignSystem<ComponentBody>  (ComponentBody_System_CI());
+            m_ECS.assignSystem<ComponentBody, Engine::priv::ComponentBody_System>  (ComponentBody_System_CI());
             m_ECS.assignSystem<ComponentLogic1>(ComponentLogic1_System_CI());
             m_ECS.assignSystem<ComponentCamera>(ComponentCamera_System_CI());
             m_ECS.assignSystem<ComponentLogic2>(ComponentLogic2_System_CI());
@@ -41,16 +40,16 @@ class Scene::impl final {
             //TODO: handle parent->child relationship
             auto& centerBody = *const_cast<Entity&>(centerEntity).getComponent<ComponentBody>();
             auto centerPos = centerBody.position();
-            glm_vec3 _eBody_pos;
             Entity e;
             for (auto& data : priv::InternalScenePublicInterface::GetEntities(super)) {
                 e = super.getEntity(data);
                 if (e != centerEntity) {
                     auto* eBody = e.getComponent<ComponentBody>();
                     if (eBody) {
-                        auto& _eBody = *eBody;
-                        _eBody_pos = _eBody.position();
-                        _eBody.setPosition(_eBody_pos - centerPos);
+                        if (!eBody->hasParent()) {
+                            auto& _eBody = *eBody;
+                            _eBody.setPosition(_eBody.position() - centerPos);
+                        }
                     }
                 }
             }
@@ -300,12 +299,8 @@ Entity Scene::createEntity() {
 Entity Scene::getEntity(const Engine::priv::EntityPOD& data) { 
     return Entity(data.ID, data.sceneID, data.versionID); 
 }
-void Scene::removeEntity(const unsigned int& entityID) {
-    m_i->m_ECS.removeEntity(entityID);
-}
 void Scene::removeEntity(Entity& entity) { 
-    EntityDataRequest dataRequest(entity);
-    m_i->m_ECS.removeEntity(dataRequest.ID);
+    m_i->m_ECS.removeEntity(entity);
 }
 Viewport& Scene::getMainViewport() {
     return m_Viewports[0];

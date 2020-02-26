@@ -25,7 +25,7 @@ ThreadPoolFuture& ThreadPoolFuture::operator=(ThreadPoolFuture&& other) noexcept
     }
     return *this;
 }
-const bool ThreadPoolFuture::isReady() {
+const bool ThreadPoolFuture::isReady() const {
     return (m_Future._Is_ready() && m_Future.valid());
 }
 void ThreadPoolFuture::operator()() const {
@@ -122,9 +122,13 @@ void ThreadPool::update() {
         auto& future = (*it);
         if (future.isReady()) {
             future();
-            it = m_Futures.erase(it);
+            {
+                std::lock_guard lock(m_Mutex); //hrmm....
+                it = m_Futures.erase(it);
+            }
+        }else{ 
+            ++it; 
         }
-        else { ++it; }
     }
 }
 const size_t ThreadPool::size() const {

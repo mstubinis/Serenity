@@ -303,7 +303,7 @@ void ComponentModel::setUserPointer(void* UserPointer) {
 
 #pragma region System
 
-struct priv::ComponentModel_UpdateFunction final { void operator()(void* componentPool, const float& dt, Scene& scene) const {
+struct priv::ComponentModel_UpdateFunction final { void operator()(void* system, void* componentPool, const float& dt, Scene& scene) const {
     auto& pool       = *static_cast<ECSComponentPool<Entity, ComponentModel>*>(componentPool);
     auto& components = pool.data();
     auto lamda_update_component = [&](ComponentModel& componentModel, const size_t& i) {
@@ -323,16 +323,19 @@ struct priv::ComponentModel_UpdateFunction final { void operator()(void* compone
     }
 
 }};
-struct priv::ComponentModel_ComponentAddedToEntityFunction final {void operator()(void* component, Entity& entity) const {
+struct priv::ComponentModel_ComponentAddedToEntityFunction final {void operator()(void* system, void* component, Entity& entity) const {
 
 }};
-struct priv::ComponentModel_EntityAddedToSceneFunction final {void operator()(void* componentPool, Entity& entity, Scene& scene) const { 
+struct priv::ComponentModel_ComponentRemovedFromEntityFunction final { void operator()(void* system, Entity& entity) const {
 
 }};
-struct priv::ComponentModel_SceneEnteredFunction final {void operator()(void* componentPool, Scene& scene) const {
+struct priv::ComponentModel_EntityAddedToSceneFunction final {void operator()(void* system, void* componentPool, Entity& entity, Scene& scene) const {
 
 }};
-struct priv::ComponentModel_SceneLeftFunction final {void operator()(void* componentPool, Scene& scene) const {
+struct priv::ComponentModel_SceneEnteredFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
+
+}};
+struct priv::ComponentModel_SceneLeftFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
 
 }};
 
@@ -340,6 +343,7 @@ struct priv::ComponentModel_SceneLeftFunction final {void operator()(void* compo
 ComponentModel_System_CI::ComponentModel_System_CI() {
     setUpdateFunction(ComponentModel_UpdateFunction());
     setOnComponentAddedToEntityFunction(ComponentModel_ComponentAddedToEntityFunction());
+    setOnComponentRemovedFromEntityFunction(ComponentModel_ComponentRemovedFromEntityFunction());
     setOnEntityAddedToSceneFunction(ComponentModel_EntityAddedToSceneFunction());
     setOnSceneEnteredFunction(ComponentModel_SceneEnteredFunction());
     setOnSceneLeftFunction(ComponentModel_SceneLeftFunction());

@@ -184,77 +184,77 @@ priv::EShaders::bullet_physcis_frag =
 #pragma region DecalVertex
 //TODO: get rid of the useless info here
 priv::EShaders::decal_vertex =  
-"USE_LOG_DEPTH_VERTEX\n"
-"\n"
-"layout (location = 0) in vec3 position;\n"
-"layout (location = 1) in vec2 uv;\n"
-"layout (location = 2) in vec4 normal;\n" //Order is ZYXW
-"layout (location = 3) in vec4 binormal;\n"//Order is ZYXW
-"layout (location = 4) in vec4 tangent;\n"//Order is ZYXW
-"\n"
-"uniform mat4 Model;\n"
-"uniform mat3 NormalMatrix;\n"
-"\n"
-"varying vec3 Normals;\n"
-"varying mat3 TBN;\n"
-"flat varying mat4 WorldMatrix;\n"
-"flat varying vec3 CamPosition;\n"
-"flat varying vec3 CamRealPosition;\n"
-"varying vec4 VertexPositionsClipSpace;\n"
-"varying vec4 VertexPositionsViewSpace;\n"
-"varying vec3 TangentCameraPos;\n"
-"varying vec3 TangentFragPos;\n"
-"\n"
-"void main(){\n"
-"    mat4 ModelMatrix = Model;\n"
-"    ModelMatrix[3][0] -= CameraRealPosition.x;\n"
-"    ModelMatrix[3][1] -= CameraRealPosition.y;\n"
-"    ModelMatrix[3][2] -= CameraRealPosition.z;\n"
-"    WorldMatrix = ModelMatrix;\n"
+    "USE_LOG_DEPTH_VERTEX\n"
+    "\n"
+    "layout (location = 0) in vec3 position;\n"
+    "layout (location = 1) in vec2 uv;\n"
+    "layout (location = 2) in vec4 normal;\n" //Order is ZYXW
+    "layout (location = 3) in vec4 binormal;\n"//Order is ZYXW
+    "layout (location = 4) in vec4 tangent;\n"//Order is ZYXW
+    "\n"
+    "uniform mat4 Model;\n"
+    "uniform mat3 NormalMatrix;\n"
+    "\n"
+    "varying vec3 Normals;\n"
+    "varying mat3 TBN;\n"
+    "flat varying mat4 WorldMatrix;\n"
+    "flat varying vec3 CamPosition;\n"
+    "flat varying vec3 CamRealPosition;\n"
+    "varying vec4 VertexPositionsClipSpace;\n"
+    "varying vec4 VertexPositionsViewSpace;\n"
+    "varying vec3 TangentCameraPos;\n"
+    "varying vec3 TangentFragPos;\n"
+    "\n"
+    "void main(){\n"
+    "    mat4 ModelMatrix = Model;\n"
+    "    ModelMatrix[3][0] -= CameraRealPosition.x;\n"
+    "    ModelMatrix[3][1] -= CameraRealPosition.y;\n"
+    "    ModelMatrix[3][2] -= CameraRealPosition.z;\n"
+    "    WorldMatrix = ModelMatrix;\n"
 
-"    vec4 worldPos = (ModelMatrix * vec4(position, 1.0));\n"
-"    gl_Position = CameraViewProj * worldPos;\n"
-"    VertexPositionsViewSpace = CameraView * worldPos;\n"
-"    VertexPositionsClipSpace = gl_Position;\n"
+    "    vec4 worldPos = (ModelMatrix * vec4(position, 1.0));\n"
+    "    gl_Position = CameraViewProj * worldPos;\n"
+    "    VertexPositionsViewSpace = CameraView * worldPos;\n"
+    "    VertexPositionsClipSpace = gl_Position;\n"
 
-"    vec3 NormalTrans   =  vec4(normal.zyx,   0.0).xyz;\n"  //Order is ZYXW so to bring it to XYZ we need to use ZYX
-"    vec3 BinormalTrans =  vec4(binormal.zyx, 0.0).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
-"    vec3 TangentTrans  =  vec4(tangent.zyx,  0.0).xyz;\n" //Order is ZYXW so to bring it to XYZ we need to use ZYX
-"\n"
-"           Normals = NormalMatrix * NormalTrans;\n"
-"    vec3 Binormals = NormalMatrix * BinormalTrans;\n"
-"    vec3  Tangents = NormalMatrix * TangentTrans;\n"
-"    TBN = mat3(Tangents,Binormals,Normals);\n"
-"    CamPosition = CameraPosition;\n"
-"    CamRealPosition = CameraRealPosition;\n"
-"    TangentCameraPos = TBN * CameraPosition;\n"
-"    TangentFragPos = TBN * worldPos.xyz;\n"
-"}";
+    "    vec3 NormalTrans   =  vec4(normal.zyx,   0.0).xyz;\n"  //Order is ZYXW so to bring it to XYZ we need to use ZYX
+    "    vec3 BinormalTrans =  vec4(binormal.zyx, 0.0).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
+    "    vec3 TangentTrans  =  vec4(tangent.zyx,  0.0).xyz;\n" //Order is ZYXW so to bring it to XYZ we need to use ZYX
+    "\n"
+    "           Normals = NormalMatrix * NormalTrans;\n"
+    "    vec3 Binormals = NormalMatrix * BinormalTrans;\n"
+    "    vec3  Tangents = NormalMatrix * TangentTrans;\n"
+    "    TBN = mat3(Tangents,Binormals,Normals);\n"
+    "    CamPosition = CameraPosition;\n"
+    "    CamRealPosition = CameraRealPosition;\n"
+    "    TangentCameraPos = TBN * CameraPosition;\n"
+    "    TangentFragPos = TBN * worldPos.xyz;\n"
+    "}";
 #pragma endregion
 
 #pragma region ParticleVertex
 priv::EShaders::particle_vertex =
-"USE_LOG_DEPTH_VERTEX\n"
-"\n"
-"layout (location = 0) in vec3 position;\n"
-"layout (location = 1) in vec2 uv;\n"
-"\n"
-"uniform mat4 Model;\n"
-"varying vec2 UV;\n"
-"varying vec3 WorldPosition;\n"
-"\n"
-"void main(){\n"
-"    mat4 ModelMatrix = Model;\n"
-"    ModelMatrix[3][0] -= CameraRealPosition.x;\n"
-"    ModelMatrix[3][1] -= CameraRealPosition.y;\n"
-"    ModelMatrix[3][2] -= CameraRealPosition.z;\n"
-"\n"
-"    vec4 worldPos = (ModelMatrix * vec4(position, 1.0));\n"
-"    gl_Position = CameraViewProj * worldPos;\n"
-"\n"
-"    WorldPosition = worldPos.xyz;\n"
-"    UV = uv;\n"
-"}";
+    "USE_LOG_DEPTH_VERTEX\n"
+    "\n"
+    "layout (location = 0) in vec3 position;\n"
+    "layout (location = 1) in vec2 uv;\n"
+    "\n"
+    "uniform mat4 Model;\n"
+    "varying vec2 UV;\n"
+    "varying vec3 WorldPosition;\n"
+    "\n"
+    "void main(){\n"
+    "    mat4 ModelMatrix = Model;\n"
+    "    ModelMatrix[3][0] -= CameraRealPosition.x;\n"
+    "    ModelMatrix[3][1] -= CameraRealPosition.y;\n"
+    "    ModelMatrix[3][2] -= CameraRealPosition.z;\n"
+    "\n"
+    "    vec4 worldPos = (ModelMatrix * vec4(position, 1.0));\n"
+    "    gl_Position = CameraViewProj * worldPos;\n"
+    "\n"
+    "    WorldPosition = worldPos.xyz;\n"
+    "    UV = uv;\n"
+    "}";
 #pragma endregion
 
 #pragma region DecalFrag

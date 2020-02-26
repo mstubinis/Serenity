@@ -6,19 +6,19 @@
 #include <ecs/ECSSystemConstructorInfo.h>
 
 class ComponentLogic3;
-namespace Engine {
-    namespace priv {
-        struct ComponentLogic3_UpdateFunction;
-        struct ComponentLogic3_EntityAddedToSceneFunction;
-        struct ComponentLogic3_ComponentAddedToEntityFunction;
-        struct ComponentLogic3_SceneEnteredFunction;
-        struct ComponentLogic3_SceneLeftFunction;
-    };
+namespace Engine::priv {
+    struct ComponentLogic3_UpdateFunction;
+    struct ComponentLogic3_EntityAddedToSceneFunction;
+    struct ComponentLogic3_ComponentAddedToEntityFunction;
+    struct ComponentLogic3_ComponentRemovedFromEntityFunction;
+    struct ComponentLogic3_SceneEnteredFunction;
+    struct ComponentLogic3_SceneLeftFunction;
 };
 
 class ComponentLogic3 : public ComponentBaseClass {
     friend struct Engine::priv::ComponentLogic3_UpdateFunction;
     friend struct Engine::priv::ComponentLogic3_ComponentAddedToEntityFunction;
+    friend struct Engine::priv::ComponentLogic3_ComponentRemovedFromEntityFunction;
     friend struct Engine::priv::ComponentLogic3_EntityAddedToSceneFunction;
     friend struct Engine::priv::ComponentLogic3_SceneEnteredFunction;
     friend struct Engine::priv::ComponentLogic3_SceneLeftFunction;

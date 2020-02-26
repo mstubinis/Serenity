@@ -342,7 +342,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
     Engine::Renderer::sendUniform1("NUM_SAMPLES", 32);
     const unsigned int maxMipLevels = 5;
     for (unsigned int m = 0; m < maxMipLevels; ++m) {
-        const unsigned int mipSize(size * glm::pow(0.5, m)); // reisze framebuffer according to mip-level size.
+        const unsigned int mipSize(size * static_cast<unsigned int>(glm::pow(0.5, m))); // reisze framebuffer according to mip-level size.
         fbo.resize(mipSize, mipSize);
         const float roughness = static_cast<float>(m) / static_cast<float>(maxMipLevels - 1);
         Engine::Renderer::sendUniform1("roughness", roughness);
@@ -788,9 +788,9 @@ void DeferredPipeline::renderDecal(ModelInstance& decalModelInstance) {
 
     const glm::mat4 modelMatrix  = parentModel * decalModelInstance.modelMatrix();
     const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
-    const auto& winSize          = Resources::getWindowSize();
+    const auto winSize           = glm::vec2(Resources::getWindowSize());
 
-    Engine::Renderer::sendUniform4Safe("Resolution", static_cast<float>(winSize.x), static_cast<float>(winSize.y), 0.0f, 0.0f);
+    Engine::Renderer::sendUniform4Safe("Resolution", winSize.x, winSize.y, 0.0f, 0.0f);
     Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }
@@ -1512,14 +1512,14 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, const Viewport& 
     Engine::Renderer::GLEnablei(GL_BLEND, 0);
     if (mainRenderFunction && (viewport.getRenderFlags() & ViewportRenderingFlag::PhysicsDebug)) {
         #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
-            if (m_Renderer.m_DrawPhysicsDebug && &camera == scene.getActiveCamera()) {
+            //if (m_Renderer.m_DrawPhysicsDebug && &camera == scene.getActiveCamera()) {
         #endif
                 Engine::Renderer::GLDisable(GL_DEPTH_TEST);
                 glDepthMask(GL_FALSE);
                 m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::BulletPhysics]);
                 Core::m_Engine->m_PhysicsManager._render(camera);
         #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
-            }
+            //}
         #endif
     }
     #pragma endregion

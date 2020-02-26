@@ -24,18 +24,21 @@ namespace Engine::priv {
     }};
 };
 
-Decal::Decal(Material& material, const glm_vec3& position, const glm::vec3& hitNormal, const float& size, Scene& scene, const float& lifetimeMax, const RenderStage::Stage stage):EntityWrapper(scene) {
+Decal::Decal(Material& material, const glm_vec3& localPosition, const glm::vec3& hitNormal, const float& size, Scene& scene, const float& lifetimeMax, const RenderStage::Stage stage):EntityWrapper(scene) {
     auto& cubeMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh();
     
     addComponent<ComponentBody>();
     addComponent<ComponentModel>(&cubeMesh, &material, ShaderProgram::Decal, stage);
 
-    auto& body = *getComponent<ComponentBody>();
+    auto& body  = *getComponent<ComponentBody>();
     auto& model = *getComponent<ComponentModel>();
 
-    body.setPosition(position);
+    m_InitialPosition = localPosition;
+
+    body.setPosition(localPosition);
     glm_quat q = glm_quat(1.0, 0.0, 0.0, 0.0);
     Math::alignTo(q, hitNormal);
+    m_InitialRotation = q;
     body.setRotation(q);
     const decimal factor = static_cast<decimal>(0.2f * size);
     body.setScale(factor, factor, static_cast<decimal>(0.04));
@@ -46,9 +49,6 @@ Decal::Decal(Material& material, const glm_vec3& position, const glm::vec3& hitN
     m_LifetimeCurrent = 0.0f;
     m_LifetimeMax = lifetimeMax;
     m_Active = true;
-
-    m_InitialPosition = position;
-    m_InitialRotation = q;
 }
 Decal::~Decal() {
 
@@ -72,6 +72,7 @@ void Decal::update(const float& dt) {
 const bool& Decal::active() const {
     return m_Active;
 }
+
 const glm_vec3& Decal::initialPosition() const {
     return m_InitialPosition;
 }
@@ -79,13 +80,16 @@ const glm_quat& Decal::initialRotation() const {
     return m_InitialRotation;
 }
 
-
 const glm_vec3 Decal::position() const {
     return getComponent<ComponentBody>()->position();
+}
+const glm_vec3 Decal::localPosition() const {
+    return getComponent<ComponentBody>()->localPosition();
 }
 const glm_quat Decal::rotation() const {
     return getComponent<ComponentBody>()->rotation();
 }
+
 const glm::vec3 Decal::getScale() const {
     return getComponent<ComponentBody>()->getScale();
 }
@@ -103,13 +107,16 @@ void Decal::setRotation(const decimal& x, const decimal& y, const decimal& z, co
 }
 
 
-
 const glm_vec3 Decal::position(const EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->position();
+}
+const glm_vec3 Decal::localPosition(const EntityDataRequest& request) const {
+    return getComponent<ComponentBody>(request)->localPosition();
 }
 const glm_quat Decal::rotation(const EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->rotation();
 }
+
 const glm::vec3 Decal::getScale(const EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->getScale();
 }

@@ -35,14 +35,9 @@ ownerBody(a), otherBody(b), ownerHit(c), otherHit(d), normalOnB(e), ownerLocalHi
 }
 #pragma endregion
 
-
 #pragma region PhysicsData
 
-ComponentBody::PhysicsData::PhysicsData(){ 
-    //constructor
-}
 ComponentBody::PhysicsData::~PhysicsData() {
-    //destructor
     Physics::removeRigidBody(bullet_rigidBody);
     SAFE_DELETE(collision);
     SAFE_DELETE(bullet_rigidBody);
@@ -82,18 +77,12 @@ ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(ComponentBody:
 
 #pragma region NormalData
 
-ComponentBody::NormalData::NormalData(){
-    //constructor
-}
-ComponentBody::NormalData::~NormalData() {
-    //destructor
-}
 ComponentBody::NormalData::NormalData(ComponentBody::NormalData&& other) noexcept {
     //move constructor
     position       = std::move(other.position);
     rotation       = std::move(other.rotation);
     scale          = std::move(other.scale);
-    modelMatrix    = std::move(other.modelMatrix);
+    //modelMatrix    = std::move(other.modelMatrix);
     linearVelocity = std::move(other.linearVelocity);
 }
 ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::NormalData&& other) noexcept {
@@ -102,7 +91,7 @@ ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::N
         position       = std::move(other.position);
         rotation       = std::move(other.rotation);
         scale          = std::move(other.scale);
-        modelMatrix    = std::move(other.modelMatrix);
+        //modelMatrix    = std::move(other.modelMatrix);
         linearVelocity = std::move(other.linearVelocity);
     }
     return *this;
@@ -113,24 +102,21 @@ ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::N
 
 #pragma region Component
 
-ComponentBody::ComponentBody(const Entity& p_Entity) : ComponentBaseClass(p_Entity) {
-    const auto one  = static_cast<decimal>(1.0);
-    const auto zero = static_cast<decimal>(0.0);
+ComponentBody::ComponentBody(const Entity& entity) : ComponentBaseClass(entity) {
+    const auto one            = static_cast<decimal>(1.0);
+    const auto zero           = static_cast<decimal>(0.0);
 
     m_Physics                 = false;
     data.p                    = nullptr;
     data.n                    = NEW NormalData();
-    setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
     auto& normalData          = *data.n;
-    normalData.position       = glm_vec3(zero);
-    normalData.scale          = glm_vec3(one);
-    normalData.rotation       = glm_quat(one, zero, zero, zero);
-    normalData.modelMatrix    = glm_mat4(one);
     Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
+
+    setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
 }
-ComponentBody::ComponentBody(const Entity& p_Entity, const CollisionType::Type p_CollisionType) : ComponentBaseClass(p_Entity) {
-    const auto one  = static_cast<decimal>(1.0);
-    const auto zero = static_cast<decimal>(0.0);
+ComponentBody::ComponentBody(const Entity& entity, const CollisionType::Type collisionType) : ComponentBaseClass(entity) {
+    const auto one          = static_cast<decimal>(1.0);
+    const auto zero         = static_cast<decimal>(0.0);
 
     m_Forward               = glm_vec3(zero,  zero,  -one);
     m_Right                 = glm_vec3(one,   zero,  zero);
@@ -139,11 +125,11 @@ ComponentBody::ComponentBody(const Entity& p_Entity, const CollisionType::Type p
     data.n                  = nullptr;
     data.p                  = NEW PhysicsData();
 
-    setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
-
     data.p->bullet_motionState = btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1)));
-    setCollision(p_CollisionType, 1.0f);
+    setCollision(collisionType, 1.0f);
     rebuildRigidBody(false);
+
+    setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
 }
 ComponentBody::~ComponentBody() {
     //destructor
@@ -495,13 +481,35 @@ void ComponentBody::setPosition(const decimal& p_X, const decimal& p_Y, const de
     }else{
         auto& normalData    = *data.n;
         auto& position_     = normalData.position;
-        auto& modelMatrix_  = normalData.modelMatrix;
+
+        auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+        auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
+
+        const auto entityIndex = m_Owner.id() - 1U;
+
+
+
 		position_.x         = p_X;
 		position_.y         = p_Y;
 		position_.z         = p_Z;
-		modelMatrix_[3][0]  = p_X;
-		modelMatrix_[3][1]  = p_Y;
-		modelMatrix_[3][2]  = p_Z;
+
+        //normalData.modelMatrix[3][0] = p_X;
+        //normalData.modelMatrix[3][1] = p_Y;
+        //normalData.modelMatrix[3][2] = p_Z;
+
+
+
+
+
+        auto& localMatrix = system.ParentChildSystem.LocalTransforms[entityIndex];
+        localMatrix[3][0] = p_X;
+        localMatrix[3][1] = p_Y;
+        localMatrix[3][2] = p_Z;
+
+        auto& worldMatrix = system.ParentChildSystem.WorldTransforms[entityIndex];
+        worldMatrix[3][0] = p_X;
+        worldMatrix[3][1] = p_Y;
+        worldMatrix[3][2] = p_Z;
     }
 }
 void ComponentBody::setGravity(const decimal& p_X, const decimal& p_Y, const decimal& p_Z) {
@@ -596,6 +604,17 @@ void ComponentBody::setScale(const decimal& p_X, const decimal& p_Y, const decim
         priv::ComponentModel_Functions::CalculateRadius(*models);
     }
 }
+
+const glm_vec3 ComponentBody::localPosition() const { //theres prob a better way to do this
+    if (m_Physics) {
+        auto& physicsData = *data.p;
+        btTransform tr;
+        physicsData.bullet_rigidBody->getMotionState()->getWorldTransform(tr);
+        return Math::btVectorToGLM(tr.getOrigin());
+    }
+    return data.n->position;
+}
+
 const glm_vec3 ComponentBody::position() const { //theres prob a better way to do this
     if (m_Physics) {
         auto& physicsData = *data.p;
@@ -603,16 +622,28 @@ const glm_vec3 ComponentBody::position() const { //theres prob a better way to d
         physicsData.bullet_rigidBody->getMotionState()->getWorldTransform(tr);
         return Math::btVectorToGLM(tr.getOrigin());
     }
-    const auto& modelMatrix_ = data.n->modelMatrix;
-    return Math::getMatrixPosition(modelMatrix_);
+    //const auto& modelMatrix_ = data.n->modelMatrix;
+    //return Math::getMatrixPosition(modelMatrix_);
+
+    auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
+    //const auto& matrix = system.ParentChildSystem.LocalTransforms[m_Owner.id() - 1U];
+    const auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
+    return Math::getMatrixPosition(matrix);
 }
 const glm::vec3 ComponentBody::position_render() const { //theres prob a better way to do this
     if (m_Physics) {
         auto tr = data.p->bullet_rigidBody->getWorldTransform();
         return Math::btVectorToGLM(tr.getOrigin());
     }
-    const auto& modelMatrix_ = data.n->modelMatrix;
-    return glm::vec3(modelMatrix_[3][0], modelMatrix_[3][1], modelMatrix_[3][2]);
+    //const auto& modelMatrix_ = data.n->modelMatrix;
+    //return glm::vec3(modelMatrix_[3][0], modelMatrix_[3][1], modelMatrix_[3][2]);
+
+    auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
+    //const auto& matrix = system.ParentChildSystem.LocalTransforms[m_Owner.id() - 1U];
+    const auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
+    return Math::getMatrixPosition(matrix);
 }
 const glm::vec3 ComponentBody::getScreenCoordinates(const bool p_ClampToEdge) const {
 	return Math::getScreenCoordinates(position(), *m_Owner.scene().getActiveCamera(), p_ClampToEdge);
@@ -716,6 +747,7 @@ const glm_quat ComponentBody::rotation() const {
     }
     return data.n->rotation;
 }
+
 const glm_vec3& ComponentBody::forward() const {
 	return m_Forward; 
 }
@@ -762,7 +794,15 @@ const glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way t
         }
         return modelMatrix_;
     }
-    return data.n->modelMatrix;
+    //return data.n->modelMatrix;
+
+
+
+    auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
+    //const auto& matrix = system.ParentChildSystem.LocalTransforms[m_Owner.id() - 1U];
+    const auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
+    return matrix;
 }
 const glm::mat4 ComponentBody::modelMatrixRendering() const {
     glm::mat4 ret;
@@ -1053,28 +1093,63 @@ void ComponentBody::setMass(const float p_Mass) {
         }
     }
 }
+void ComponentBody::addChild(const Entity& child) const {
+    if (child.sceneID() == m_Owner.sceneID()) {
+        auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+        auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
+
+        system.ParentChildSystem.insert(m_Owner.id(), child.id());
+    }
+}
+void ComponentBody::addChild(const ComponentBody& child) const {
+    ComponentBody::addChild(child.m_Owner);
+}
+void ComponentBody::removeChild(const Entity& child) const {
+    if (child.sceneID() == m_Owner.sceneID()) {
+        auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+        auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
+        system.ParentChildSystem.remove(m_Owner.id(), child.id());
+    }
+}
+void ComponentBody::removeChild(const ComponentBody& child) const {
+    ComponentBody::removeChild(child.m_Owner);
+}
+const bool ComponentBody::hasParent() const {
+    auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
+    return (system.ParentChildSystem.Parents[m_Owner.id() - 1U] > 0);
+}
+
 
 #pragma endregion
 
-#pragma region System
+#pragma region SystemCI
 
-struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_ComponentPool, const float& dt, Scene& p_Scene) const {
-    auto& pool              = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(p_ComponentPool);
+constexpr glm_mat4 IDENTITY_MATRIX = glm_mat4(1.0);
+
+struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPtr, void* componentPool, const float& dt, Scene& scene) const {
+    auto& system            = *static_cast<Engine::priv::ComponentBody_System*>(systemPtr);
+    auto& pool              = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool);
     auto& components        = pool.data();
     const decimal double_dt = static_cast<decimal>(dt);
 
-    auto lamda_update_component = [double_dt](ComponentBody& b, const size_t& i) {
+    auto lamda_update_component = [double_dt, &system](ComponentBody& b, const size_t& i) {
+        const auto entityIndex = b.m_Owner.id() - 1U;
+        auto& localMatrix = system.ParentChildSystem.LocalTransforms[entityIndex];
+        auto& worldMatrix = system.ParentChildSystem.WorldTransforms[entityIndex];
         if (b.m_Physics) {
             auto& rigidBody = *b.data.p->bullet_rigidBody;
             Engine::Math::recalculateForwardRightUp(rigidBody, b.m_Forward, b.m_Right, b.m_Up);
+
+            localMatrix = b.modelMatrix();
+            worldMatrix = localMatrix;
         }else{
             auto& n = *b.data.n;
             n.position += (n.linearVelocity * double_dt);
-            //TODO: implement parent->child relations
-            //n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale) * n.modelMatrix;
-            n.modelMatrix = glm::mat4(1.0f);
-            n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
-            //Engine::Math::recalculateForwardRightUp(n.rotation, b._forward, b._right, b._up); //double check if this is needed
+            //n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
+
+            localMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
+            worldMatrix = localMatrix;
         }
     };
 
@@ -1085,10 +1160,26 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_Compon
     }else{
         priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);
     }
+    
+    auto& pcs = system.ParentChildSystem;
+    for (size_t i = 0; i < pcs.Order.size(); ++i) {
+        const unsigned int entityID = pcs.Order[i];
+        if (entityID > 0) {
+            const unsigned int entityIndex = entityID - 1U;
+            const auto& parentID = pcs.Parents[entityIndex];
+            if (parentID == 0) {
+                pcs.WorldTransforms[entityIndex] = pcs.LocalTransforms[entityIndex];
+            }else{
+                const unsigned int parentIndex = parentID - 1U;
+                pcs.WorldTransforms[entityIndex] = pcs.WorldTransforms[parentIndex] * pcs.LocalTransforms[entityIndex];
+            }
+        }else{
+            break;
+        }
+    }
+    
 
-
-
-#if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
+//#if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
     for (auto& componentBody : components) {
         auto* model = componentBody.getOwner().getComponent<ComponentModel>();
         if (model) {
@@ -1099,9 +1190,9 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_Compon
                 auto& modelInstance = (*model)[i];
 
                 const auto rotation = world_rot * modelInstance.orientation();
-                const auto fwd      = Math::getForward(rotation);
-                const auto right    = Math::getRight(rotation);
-                const auto up       = Math::getUp(rotation);
+                const auto fwd      = glm::normalize(Math::getForward(rotation)) * 0.3f;
+                const auto right    = glm::normalize(Math::getRight(rotation)) * 0.3f;
+                const auto up       = glm::normalize(Math::getUp(rotation)) * 0.3f;
 
                 auto& physics = Engine::priv::Core::m_Engine->m_PhysicsManager;
                 physics.debug_draw_line(world_pos, (world_pos+fwd) /* * glm::length(world_scl) */, 1, 0, 0, 1);
@@ -1110,17 +1201,29 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* p_Compon
             }
         }
     }
-#endif
-
+//#endif
 
 }};
-struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* component, Entity& entity) const {
+struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* systemPtr, void* component, Entity& entity) const {
+    auto& system  = *static_cast<Engine::priv::ComponentBody_System*>(systemPtr);
+    const auto id = entity.id();
+    system.ParentChildSystem.resize(id);
 }};
-struct priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* componentPool,Entity& entity, Scene& scene) const {
+struct priv::ComponentBody_ComponentRemovedFromEntityFunction final { void operator()(void* systemPtr, Entity& entity) const {
+    auto& system  = *static_cast<Engine::priv::ComponentBody_System*>(systemPtr);
+    const auto id = entity.id();
+    auto& pcs     = system.ParentChildSystem;
+
+    if (pcs.Parents[id - 1U] > 0) {
+        pcs.remove(pcs.Parents[id - 1U], id);
+    }
+
+}};
+struct priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* systemPtr, void* componentPool,Entity& entity, Scene& scene) const {
     auto& pool = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool);
-    auto* _component = pool.getComponent(entity);
-    if (_component) {
-        auto& component = *_component;
+    auto* component_ptr = pool.getComponent(entity);
+    if (component_ptr) {
+        auto& component = *component_ptr;
         if (component.m_Physics) {
             auto& physicsData = *component.data.p;
             component.setCollision(static_cast<CollisionType::Type>(physicsData.collision->getType()), physicsData.mass);
@@ -1131,7 +1234,7 @@ struct priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(voi
         }
     }
 }};
-struct priv::ComponentBody_SceneEnteredFunction final {void operator()(void* componentPool,Scene& scene) const {
+struct priv::ComponentBody_SceneEnteredFunction final {void operator()(void* systemPtr, void* componentPool,Scene& scene) const {
 	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool)).data();
     for (auto& component : pool) { 
         if (component.m_Physics) {
@@ -1139,7 +1242,7 @@ struct priv::ComponentBody_SceneEnteredFunction final {void operator()(void* com
         } 
     }
 }};
-struct priv::ComponentBody_SceneLeftFunction final {void operator()(void* componentPool, Scene& scene) const {
+struct priv::ComponentBody_SceneLeftFunction final {void operator()(void* systemPtr, void* componentPool, Scene& scene) const {
 	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool)).data();
     for (auto& component : pool) { 
         if (component.m_Physics) {
@@ -1151,9 +1254,130 @@ struct priv::ComponentBody_SceneLeftFunction final {void operator()(void* compon
 ComponentBody_System_CI::ComponentBody_System_CI() {
     setUpdateFunction(ComponentBody_UpdateFunction());
     setOnComponentAddedToEntityFunction(ComponentBody_ComponentAddedToEntityFunction());
+    setOnComponentRemovedFromEntityFunction(ComponentBody_ComponentRemovedFromEntityFunction());
     setOnEntityAddedToSceneFunction(ComponentBody_EntityAddedToSceneFunction());
     setOnSceneEnteredFunction(ComponentBody_SceneEnteredFunction());
     setOnSceneLeftFunction(ComponentBody_SceneLeftFunction());
 }
+
+#pragma endregion
+
+
+
+
+#pragma region System
+
+void Engine::priv::ComponentBody_System::ParentChildVector::resize(const size_t size) {
+    Parents.resize(size, 0U);
+    Order.resize(size, 0U);
+    WorldTransforms.resize(size, IDENTITY_MATRIX);
+    LocalTransforms.resize(size, IDENTITY_MATRIX);
+}
+void Engine::priv::ComponentBody_System::ParentChildVector::insert(const std::uint32_t& parentID, const std::uint32_t& childID) {
+    if (Parents.size() <= parentID || Parents.size() <= childID) {
+        resize(std::max(parentID, childID));
+    }
+
+    Parents[childID - 1U] = parentID;
+
+    bool added = false;
+    for (size_t i = 0; i < Order.size(); ++i) {
+        const auto& entityID = Order[i];
+        if (entityID == parentID) {
+            for (size_t j = i+1; j < Order.size(); ++j) {
+                const auto& entityIDCaseOne = Order[j];
+                if (entityIDCaseOne == 0 || Parents[entityIDCaseOne - 1U] == 0) {
+                    Order.insert(Order.begin() + j, childID);
+                    Order.pop_back();
+                    ++OrderHead;
+                    added = true;
+                    break;
+                }
+            }       
+            if (added) {
+                break;
+            }
+        }else if (entityID == childID) {
+            Order.insert(Order.begin() + i, parentID);
+            Order.pop_back();
+            ++OrderHead;
+            added = true;
+            break;
+        }
+    }
+    if (!added) {
+        /* add both at order head */
+        Order[OrderHead]     = parentID;
+        Order[OrderHead + 1] = childID;
+        OrderHead += 2;
+    }
+}
+void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::uint32_t& parentID, const std::uint32_t& childID) {
+    size_t parentIndex = 0;
+    bool foundParent = false;
+    Parents[childID - 1U] = 0;
+
+    for (size_t i = 0; i < Order.size(); ++i) {
+        const auto& entityID = Order[i];
+        if (entityID == parentID) {
+            parentIndex = i;
+            foundParent = true;
+            break;
+        }
+    }
+    if (!foundParent) {
+        return;
+    }
+    for (size_t i = parentIndex; i < Order.size(); ++i) {
+        const auto& entityID = Order[i];
+        if (entityID == childID) {
+            Order[i] = 0;
+
+            //now move all children of parent to be next to parent
+            for (size_t j = i + 1; j < Order.size(); ++j) {
+                const auto& entityIDCaseOne = Order[j];
+                if (Order[j] == 0) {
+                    break;
+                }
+                if (Parents[entityIDCaseOne - 1U] == parentID) {
+                    std::swap(Order[j-1], Order[j]);
+                }else if (Parents[entityIDCaseOne - 1U] == childID && Order[j-1] == 0) {
+                    Order[j - 1] = childID;
+                }else if (Parents[entityIDCaseOne - 1U] == 0) {
+                    break;
+                }
+            }
+            //cleanup / edge cases
+            if (Order[i + 1] == 0) {
+                Order.erase(Order.begin() + i);
+                --OrderHead;
+            }
+            if (parentIndex > 0 && Order[parentIndex + 1] == 0) {
+                Order[parentIndex] = 0;
+                Order.erase(Order.begin() + parentIndex);
+                --OrderHead;
+            }
+            break;
+        }
+    }
+}
+const std::uint32_t Engine::priv::ComponentBody_System::ParentChildVector::size() const {
+    return OrderHead;
+}
+const size_t Engine::priv::ComponentBody_System::ParentChildVector::capacity() const {
+    return Order.capacity();
+}
+
+
+Engine::priv::ComponentBody_System::ComponentBody_System(const Engine::priv::ECSSystemCI& systemCI, Engine::priv::ECS<Entity>& ecs) : Engine::priv::ECSSystem<Entity, ComponentBody>(systemCI, ecs) {
+
+}
+Engine::priv::ComponentBody_System::~ComponentBody_System() {
+
+}
+
+
+
+
 
 #pragma endregion

@@ -80,7 +80,6 @@ class Scene: public EngineResource, public EventObserver{
         //ecs
         Entity createEntity();
         Entity getEntity(const Engine::priv::EntityPOD&);
-        void removeEntity(const unsigned int& entityID);
         void removeEntity(Entity& entity);
 
         

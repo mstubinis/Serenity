@@ -221,7 +221,7 @@ void ComponentCamera::setFar(const float farPlane) {
 
 #pragma region System
 
-struct priv::ComponentCamera_UpdateFunction final { void operator()(void* componentPool, const float& dt, Scene& scene) const {
+struct priv::ComponentCamera_UpdateFunction final { void operator()(void* system, void* componentPool, const float& dt, Scene& scene) const {
 	auto& pool = *static_cast<ECSComponentPool<Entity, ComponentCamera>*>(componentPool);
 	auto& components = pool.data();
     auto lamda_update_component = [&](ComponentCamera& b, const size_t& i) {
@@ -237,18 +237,21 @@ struct priv::ComponentCamera_UpdateFunction final { void operator()(void* compon
         priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);
     }
 }};
-struct priv::ComponentCamera_ComponentAddedToEntityFunction final {void operator()(void* componentCamera, Entity& entity) const {
+struct priv::ComponentCamera_ComponentAddedToEntityFunction final {void operator()(void* system, void* componentCamera, Entity& entity) const {
 }};
-struct priv::ComponentCamera_EntityAddedToSceneFunction final {void operator()(void* componentPool, Entity& p_Entity, Scene& scene) const {
+struct priv::ComponentCamera_ComponentRemovedFromEntityFunction final { void operator()(void* system, Entity& entity) const {
 }};
-struct priv::ComponentCamera_SceneEnteredFunction final {void operator()(void* componentPool, Scene& scene) const {
+struct priv::ComponentCamera_EntityAddedToSceneFunction final {void operator()(void* system, void* componentPool, Entity& p_Entity, Scene& scene) const {
 }};
-struct priv::ComponentCamera_SceneLeftFunction final {void operator()(void* componentPool, Scene& scene) const {
+struct priv::ComponentCamera_SceneEnteredFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
+}};
+struct priv::ComponentCamera_SceneLeftFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
 }};
 
 ComponentCamera_System_CI::ComponentCamera_System_CI() {
     setUpdateFunction(ComponentCamera_UpdateFunction());
     setOnComponentAddedToEntityFunction(ComponentCamera_ComponentAddedToEntityFunction());
+    setOnComponentRemovedFromEntityFunction(ComponentCamera_ComponentRemovedFromEntityFunction());
     setOnEntityAddedToSceneFunction(ComponentCamera_EntityAddedToSceneFunction());
     setOnSceneEnteredFunction(ComponentCamera_SceneEnteredFunction());
     setOnSceneLeftFunction(ComponentCamera_SceneLeftFunction());

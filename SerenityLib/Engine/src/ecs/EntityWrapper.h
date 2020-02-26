@@ -18,9 +18,21 @@ class EntityWrapper {
         EntityWrapper(EntityWrapper&& other) noexcept;
         EntityWrapper& operator=(EntityWrapper&& other) noexcept;
 
+        const std::uint32_t id() const;
+        const std::uint32_t sceneID() const;
+
         virtual void destroy();
         const Entity& entity() const;
         const bool null() const;
+
+        const bool hasParent() const;
+
+        void addChild(const Entity& child) const;
+        void removeChild(const Entity& child) const;
+
+        void addChild(const EntityWrapper& child) const;
+        void removeChild(const EntityWrapper& child) const;
+
 
         template<typename T, typename... ARGS> inline void addComponent(ARGS&& ... args) {
             m_Entity.addComponent<T>(std::forward<ARGS>(args)...);

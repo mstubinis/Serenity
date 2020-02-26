@@ -10,22 +10,21 @@ class Camera;
 class ComponentModel;
 class ComponentCamera;
 
-namespace Engine {
-    namespace priv {
-        struct ComponentCamera_UpdateFunction;
-        struct ComponentCamera_EntityAddedToSceneFunction;
-        struct ComponentCamera_ComponentAddedToEntityFunction;
-        struct ComponentCamera_SceneEnteredFunction;
-        struct ComponentCamera_SceneLeftFunction;
+namespace Engine::priv {
+    struct ComponentCamera_UpdateFunction;
+    struct ComponentCamera_EntityAddedToSceneFunction;
+    struct ComponentCamera_ComponentAddedToEntityFunction;
+    struct ComponentCamera_ComponentRemovedFromEntityFunction;
+    struct ComponentCamera_SceneEnteredFunction;
+    struct ComponentCamera_SceneLeftFunction;
 
-        struct ComponentCamera_Functions final {
-            static void            RebuildProjectionMatrix(ComponentCamera& componentCamera);
-            static const glm::mat4 GetViewNoTranslation(const Camera& camera);
-            static const glm::mat4 GetViewInverseNoTranslation(const Camera& camera);
-            static const glm::mat4 GetViewProjectionNoTranslation(const Camera& camera);
-            static const glm::mat4 GetViewProjectionInverseNoTranslation(const Camera& camera);
-            static const glm::vec3 GetViewVectorNoTranslation(const Camera& camera);
-        };
+    struct ComponentCamera_Functions final {
+        static void            RebuildProjectionMatrix(ComponentCamera& componentCamera);
+        static const glm::mat4 GetViewNoTranslation(const Camera& camera);
+        static const glm::mat4 GetViewInverseNoTranslation(const Camera& camera);
+        static const glm::mat4 GetViewProjectionNoTranslation(const Camera& camera);
+        static const glm::mat4 GetViewProjectionInverseNoTranslation(const Camera& camera);
+        static const glm::vec3 GetViewVectorNoTranslation(const Camera& camera);
     };
 };
 
@@ -33,6 +32,7 @@ class ComponentCamera : public ComponentBaseClass {
     friend struct Engine::priv::ComponentCamera_UpdateFunction;
     friend struct Engine::priv::ComponentCamera_EntityAddedToSceneFunction;
     friend struct Engine::priv::ComponentCamera_ComponentAddedToEntityFunction;
+    friend struct Engine::priv::ComponentCamera_ComponentRemovedFromEntityFunction;
     friend struct Engine::priv::ComponentCamera_SceneEnteredFunction;
     friend struct Engine::priv::ComponentCamera_SceneLeftFunction;
     friend struct Engine::priv::ComponentCamera_Functions;

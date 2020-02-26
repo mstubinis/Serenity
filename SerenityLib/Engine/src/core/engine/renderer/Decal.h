@@ -36,10 +36,12 @@ class Decal final: public EntityWrapper{
 
         void update(const float& dt);
         const bool& active() const;
+
         const glm_vec3& initialPosition() const;
         const glm_quat& initialRotation() const;
 
         const glm_vec3 position() const;
+        const glm_vec3 localPosition() const;
         const glm_quat rotation() const;
         const glm::vec3 getScale() const;
         void setPosition(const glm_vec3& position);
@@ -49,6 +51,7 @@ class Decal final: public EntityWrapper{
 
 
         const glm_vec3 position(const EntityDataRequest& request) const;
+        const glm_vec3 localPosition(const EntityDataRequest& request) const;
         const glm_quat rotation(const EntityDataRequest& request) const;
         const glm::vec3 getScale(const EntityDataRequest& request) const;
         void setPosition(const EntityDataRequest& request, const glm_vec3& position);

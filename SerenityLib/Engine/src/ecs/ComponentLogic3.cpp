@@ -60,28 +60,30 @@ void ComponentLogic3::call(const float& dt) const {
 
 #pragma region System
 
-struct priv::ComponentLogic3_UpdateFunction final {void operator()(void* componentPool, const float& dt, Scene& scene) const {
+struct priv::ComponentLogic3_UpdateFunction final {void operator()(void* system, void* componentPool, const float& dt, Scene& scene) const {
     auto& pool = *static_cast<ECSComponentPool<Entity, ComponentLogic3>*>(componentPool);
     const auto& components = pool.data();
 	for (auto& component : components) {
 		component.call(dt);
 	}
 }};
-struct priv::ComponentLogic3_ComponentAddedToEntityFunction final {void operator()(void* component, Entity& entity) const {
+struct priv::ComponentLogic3_ComponentAddedToEntityFunction final {void operator()(void* system, void* component, Entity& entity) const {
+}};
+struct priv::ComponentLogic3_ComponentRemovedFromEntityFunction final { void operator()(void* system, Entity& entity) const {
+}};
+struct priv::ComponentLogic3_EntityAddedToSceneFunction final {void operator()(void* system, void* componentPool, Entity& entity, Scene& scene) const {
+}};
+struct priv::ComponentLogic3_SceneEnteredFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
 
 }};
-struct priv::ComponentLogic3_EntityAddedToSceneFunction final {void operator()(void* componentPool, Entity& entity, Scene& scene) const {
-}};
-struct priv::ComponentLogic3_SceneEnteredFunction final {void operator()(void* componentPool, Scene& scene) const {
-
-}};
-struct priv::ComponentLogic3_SceneLeftFunction final {void operator()(void* componentPool, Scene& scene) const {
+struct priv::ComponentLogic3_SceneLeftFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
 
 }};
 
 ComponentLogic3_System_CI::ComponentLogic3_System_CI() {
     setUpdateFunction(ComponentLogic3_UpdateFunction());
     setOnComponentAddedToEntityFunction(ComponentLogic3_ComponentAddedToEntityFunction());
+    setOnComponentRemovedFromEntityFunction(ComponentLogic3_ComponentRemovedFromEntityFunction());
     setOnEntityAddedToSceneFunction(ComponentLogic3_EntityAddedToSceneFunction());
     setOnSceneEnteredFunction(ComponentLogic3_SceneEnteredFunction());
     setOnSceneLeftFunction(ComponentLogic3_SceneLeftFunction());

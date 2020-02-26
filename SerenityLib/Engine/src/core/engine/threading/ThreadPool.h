@@ -27,7 +27,7 @@ namespace Engine::priv {
             ThreadPoolFuture(std::future<void>&& future, std::function<void()>&& callback);
             ~ThreadPoolFuture() = default;
 
-            const bool isReady();
+            const bool isReady() const;
             void operator()() const;
 
             ThreadPoolFuture(const ThreadPoolFuture& other) noexcept = delete;
