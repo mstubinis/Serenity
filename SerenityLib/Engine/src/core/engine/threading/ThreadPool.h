@@ -20,10 +20,11 @@ namespace Engine::priv {
         friend class Engine::priv::ThreadPool;
         private:
             std::future<void>           m_Future;
-            std::function<void()>       m_Callback;
+            std::function<void()>       m_Callback = []() {};
 
             ThreadPoolFuture() = delete;
         public:
+            ThreadPoolFuture(std::future<void>&& future);
             ThreadPoolFuture(std::future<void>&& future, std::function<void()>&& callback);
             ~ThreadPoolFuture() = default;
 
@@ -46,7 +47,7 @@ namespace Engine::priv {
             bool                                                        m_Stopped;
 
             
-
+            void internal_create_packaged_task(std::function<void()>&& job);
             void internal_create_packaged_task(std::function<void()>&& job, std::function<void()>&& callback);
         public:
             ThreadPool();
@@ -70,8 +71,6 @@ namespace Engine::priv {
             void wait_for_all();
 
             void shutdown();
-
-            //void clear_all_jobs();
     };
 };
 #endif

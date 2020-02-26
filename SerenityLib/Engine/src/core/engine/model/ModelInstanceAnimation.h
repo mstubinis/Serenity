@@ -31,7 +31,7 @@ namespace Engine::priv {
             ModelInstanceAnimation(ModelInstanceAnimation&& other) noexcept;
             ModelInstanceAnimation& operator=(ModelInstanceAnimation&& other) noexcept;
 
-            void process(const float& dt, std::vector<glm::mat4>& transforms);
+            void process(const float dt, std::vector<glm::mat4>& transforms);
 
     };
     class ModelInstanceAnimationVector final : public Engine::NonCopyable {
@@ -46,11 +46,11 @@ namespace Engine::priv {
             ModelInstanceAnimationVector(ModelInstanceAnimationVector&& other) noexcept;
             ModelInstanceAnimationVector& operator=(ModelInstanceAnimationVector&& other) noexcept;
 
-            void emplace_animation(Mesh&, const std::string& animationName, const float& start, const float& end, const unsigned int& requestedLoops);
+            void emplace_animation(Mesh&, const std::string& animationName, const float start, const float end, const unsigned int requestedLoops);
 
             const size_t size() const;
             void clear();
-            void process(Mesh& mesh, const float& dt);
+            void process(Mesh& mesh, const float dt);
     };
 };
 

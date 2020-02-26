@@ -24,17 +24,17 @@ class ParticleEmitter final : public EntityWrapper{
     private:
         ParticleEmissionProperties*    m_Properties;
         bool                           m_Active;
-        double                         m_SpawningTimer;
-        double                         m_Timer;
-        double                         m_Lifetime;
+        float                          m_SpawningTimer;
+        float                          m_Timer;
+        float                          m_Lifetime;
         Entity                         m_Parent;
-        std::function<void(ParticleEmitter*, const float& dt, ParticleEmissionProperties&, std::mutex&)> m_UpdateFunctor;
+        std::function<void(ParticleEmitter*, const float dt, ParticleEmissionProperties&, std::mutex&)> m_UpdateFunctor;
 
         void internal_init();
     public:
         ParticleEmitter();
-        ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, EntityWrapper* parent = nullptr);
-        ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, const Entity& parent = Entity::null_);
+        ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, EntityWrapper* parent = nullptr);
+        ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity& parent = Entity::null_);
         ~ParticleEmitter();
 
         ParticleEmitter(const ParticleEmitter& other) = delete;
@@ -88,7 +88,7 @@ class ParticleEmitter final : public EntityWrapper{
         const glm_vec3 linearVelocity(const EntityDataRequest& request) const;
         const glm_vec3 linearVelocity() const;
 
-        const bool& isActive() const;
+        const bool isActive() const;
 
         void activate();
         void deactivate();
@@ -96,7 +96,7 @@ class ParticleEmitter final : public EntityWrapper{
         ParticleEmissionProperties* getProperties() const;
         void setProperties(ParticleEmissionProperties& properties);
 
-        void update(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem, const bool multi_threaded);
+        void update(const size_t index, const float dt, Engine::priv::ParticleSystem& particleSystem, const bool multi_threaded);
 };
 
 #endif

@@ -43,7 +43,7 @@ ParticleData::ParticleData(ParticleEmissionProperties& properties, ParticleEmitt
     m_Scale           = properties.m_InitialScaleFunctor(properties, emitter, particle, *this) * Math::Max(emitterScale.x, emitterScale.y, emitterScale.z);
     m_AngularVelocity = properties.m_InitialAngularVelocityFunctor(properties, emitter, particle, *this);
 
-    m_Color           = properties.m_ColorFunctor(properties, m_Timer, 0.0, &emitter, particle);
+    m_Color           = properties.m_ColorFunctor(properties, m_Timer, 0.0f, &emitter, particle);
 }
 
 ParticleData::ParticleData(ParticleData&& other) noexcept{
@@ -172,7 +172,7 @@ void Particle::setPosition(const glm::vec3& newPosition) {
 Material* Particle::getMaterial() const {
     return m_Material;
 }
-const float& Particle::angle() const {
+const float Particle::angle() const {
     return m_Data.m_Angle;
 }
 const glm::vec2& Particle::getScale() const {
@@ -181,7 +181,7 @@ const glm::vec2& Particle::getScale() const {
 const glm::vec3& Particle::position() const {
     return m_Position;
 }
-const bool& Particle::isActive() const {
+const bool Particle::isActive() const {
     return m_Data.m_Active;
 }
 const Engine::color_vector_4& Particle::color() const {
@@ -196,7 +196,7 @@ const double Particle::lifetime() const {
 
 
 
-void Particle::update(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem, const glm::vec3& cameraPosition, const bool multi_threaded) {
+void Particle::update(const size_t index, const float dt, Engine::priv::ParticleSystem& particleSystem, const glm::vec3& cameraPosition, const bool multi_threaded) {
     if (m_Data.m_Active) {
         m_Data.m_Timer           += dt;
         auto& prop                = *m_Data.m_Properties;
@@ -214,7 +214,7 @@ void Particle::update(const size_t& index, const float& dt, Engine::priv::Partic
         m_Position               += vec;
         if (m_Data.m_Timer >= prop.m_Lifetime) {
             m_Data.m_Active       = false;
-            m_Data.m_Timer        = 0.0;
+            m_Data.m_Timer        = 0.0f;
             m_Hidden              = true;
 
             if (multi_threaded) {

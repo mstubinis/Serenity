@@ -25,7 +25,7 @@ namespace Engine {
                     m_MaxLastIndex = 0;
                     m_Sparse.clear();
                 }
-                virtual const bool remove(const unsigned int& id) {
+                virtual const bool remove(const unsigned int id) {
                     return false;
                 }
                 virtual void reserve(const unsigned int amount) {
@@ -56,7 +56,7 @@ namespace Engine {
                 }
             }
             template<typename... ARGS> 
-            T* add(const unsigned int& id, ARGS&& ... args) {
+            T* add(const unsigned int id, ARGS&& ... args) {
                 const unsigned int sparseIndex = id - 1U;
                 if (static_cast<size_t>(sparseIndex) >= super::m_Sparse.size()) {
                     super::m_Sparse.resize(static_cast<size_t>(sparseIndex) + 1U, 0);
@@ -71,7 +71,7 @@ namespace Engine {
                 return &m_Dense[super::m_Sparse[sparseIndex] - 1];
             }
             //TODO: this entire function needs a serious look at
-            const bool remove(const unsigned int& id) override {
+            const bool remove(const unsigned int id) override {
                 const auto removedEntityIndex = id - 1;
                 if (removedEntityIndex >= super::m_Sparse.size()) {
                     return false;
@@ -104,7 +104,7 @@ namespace Engine {
                 m_Dense.pop_back();
                 return true;
             }
-            T* get(const unsigned int& id) const {
+            T* get(const unsigned int id) const {
                 const auto entityIndexInSparse = id - 1;
                 const auto sparseSize          = super::m_Sparse.size();
                 if (sparseSize == 0 || entityIndexInSparse >= sparseSize || super::m_Sparse[entityIndexInSparse] == 0) {

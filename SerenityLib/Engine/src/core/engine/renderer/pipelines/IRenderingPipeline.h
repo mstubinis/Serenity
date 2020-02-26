@@ -37,7 +37,7 @@ namespace Engine::priv {
             virtual void init() = 0;
             virtual void onPipelineChanged() = 0;
             virtual void onFullscreen() = 0;
-            virtual void onResize(const unsigned int& newWidth, const unsigned int& newHeight) = 0;
+            virtual void onResize(const unsigned int newWidth, const unsigned int newHeight) = 0;
             virtual void onOpenGLContextCreation(const unsigned int windowWidth, const unsigned int windowHeight, const unsigned int glslVersion, const unsigned int openglVersion) = 0;
             virtual void restoreDefaultState() = 0;
             virtual void restoreCurrentState() = 0;
@@ -78,9 +78,9 @@ namespace Engine::priv {
 
 
             virtual void sendTexture(const char* location, const Texture& texture, const int slot) = 0;
-            virtual void sendTexture(const char* location, const unsigned int textureObject, const int slot, const unsigned int& textureTarget) = 0;
+            virtual void sendTexture(const char* location, const unsigned int textureObject, const int slot, const unsigned int textureTarget) = 0;
             virtual void sendTextureSafe(const char* location, const Texture& texture, const int slot) = 0;
-            virtual void sendTextureSafe(const char* location, const unsigned int textureObject, const int slot, const unsigned int& textureTarget) = 0;
+            virtual void sendTextureSafe(const char* location, const unsigned int textureObject, const int slot, const unsigned int textureTarget) = 0;
 
             virtual const bool bindReadFBO(const unsigned int fbo) = 0;
             virtual const bool bindDrawFBO(const unsigned int fbo) = 0;
@@ -94,7 +94,7 @@ namespace Engine::priv {
             virtual const bool unbindMaterial() = 0;
             virtual const bool unbindMesh() = 0;
 
-            virtual void generatePBRData(Texture& texture, const unsigned int& convoludeSize, const unsigned int& prefilterSize) = 0;
+            virtual void generatePBRData(Texture& texture, const unsigned int convoludeSize, const unsigned int prefilterSize) = 0;
 
             virtual void renderSkybox(Skybox*, ShaderProgram& shaderProgram, const Scene& scene, const Viewport& viewport, const Camera& camera) = 0;
             virtual void renderSunLight(const Camera& camera, const SunLight& sunLight, const Viewport& viewport) = 0;
@@ -123,7 +123,7 @@ namespace Engine::priv {
 
 
 
-            virtual void update(const float& dt) = 0;
+            virtual void update(const float dt) = 0;
             virtual void render(Engine::priv::Renderer& renderer, const Viewport& viewport, const bool mainRenderFunction) = 0;
 
     };

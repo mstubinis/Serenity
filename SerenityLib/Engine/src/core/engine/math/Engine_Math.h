@@ -50,11 +50,11 @@ namespace Math{
 
     glm::vec3 direction(const glm::vec3& eye, const glm::vec3& target);
 
-    void translate(const btRigidBody&,btVector3&,bool local);
+    void translate(const btRigidBody&,btVector3&, bool local);
     void rotate(glm_quat& orientation, const decimal& pitch, const decimal& yaw, const decimal& roll);
-    void rotate(glm::quat& orientation, const float& pitch, const float& yaw, const float& roll);
+    void rotate(glm::quat& orientation, const float pitch, const float yaw, const float roll);
     void setRotation(glm_quat& orientation, const decimal& pitch, const decimal& yaw, const decimal& roll);
-    void setRotation(glm::quat& orientation, const float& pitch, const float& yaw, const float& roll);
+    void setRotation(glm::quat& orientation, const float pitch, const float yaw, const float roll);
     void setFinalModelMatrix(glm_mat4& modelMatrix, const glm_vec3& position,const glm_quat& rotation, const glm_vec3& scale);
     void setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
 
@@ -64,10 +64,10 @@ namespace Math{
     glm::vec2 unpack2NibblesFromCharBasic(const float);
 
     const std::uint32_t pack3NormalsInto32Int(const float x, const float y, const float z);
-    const glm::vec3     unpack3NormalsFrom32Int(const std::uint32_t&);
+    const glm::vec3     unpack3NormalsFrom32Int(const std::uint32_t);
     const std::uint32_t pack3NormalsInto32Int(const glm::vec3&);
 
-    float pack3FloatsInto1Float(float,float,float);
+    float pack3FloatsInto1Float(float, float, float);
     float pack3FloatsInto1Float(const glm::vec3&);
     glm::vec3 unpack3FloatsInto1Float(float i);
 
@@ -91,12 +91,12 @@ namespace Math{
     glm::vec3 getForward(const glm_quat& q);
     glm::vec3 getRight(const glm_quat& q);
     glm::vec3 getUp(const glm_quat& q);
-    glm::vec3 getColumnVector(const btRigidBody& b, const uint& column);
+    glm::vec3 getColumnVector(const btRigidBody& b, const unsigned int column);
     glm::vec3 getForward(const btRigidBody& b);
     glm::vec3 getRight(const btRigidBody& b);
     glm::vec3 getUp(const btRigidBody& b);
 
-    float getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bool degrees = true);
+    float getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, const bool degrees = true);
     void alignTo(glm_quat& o, const glm_vec3& direction);
 
     void setColor(glm::vec3& color, float r, float g, float b);

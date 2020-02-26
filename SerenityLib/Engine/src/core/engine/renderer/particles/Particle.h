@@ -27,7 +27,7 @@ struct ParticleData final {
     Engine::color_vector_4       m_Color           = Engine::color_vector_4(255_uc);
     float                        m_Angle           = 0.0f;
     float                        m_AngularVelocity = 0.0f;
-    double                       m_Timer           = 0.0;
+    float                        m_Timer           = 0.0f;
     bool                         m_Active          = true;
 
     ParticleData();
@@ -47,6 +47,7 @@ class Particle {
         ParticleEmitter*   m_EmitterSource     = nullptr;
         Material*          m_Material          = nullptr;
         Scene*             m_Scene             = nullptr;
+
         bool               m_Hidden            = false;
         bool               m_PassedRenderCheck = false;
         glm::vec3          m_Position          = glm::vec3(0.0f);
@@ -64,17 +65,17 @@ class Particle {
 
         void init(ParticleData&& data, const glm::vec3& emitterPosition, const glm::quat& emitterRotation, Entity& parent);
 
-        const bool& isActive() const;
+        const bool isActive() const;
         void setPosition(const glm::vec3& newPosition);
         Material* getMaterial() const;
         Scene& scene() const;
-        const float& angle() const;
+        const float angle() const;
         const glm::vec2& getScale() const;
         const glm::vec3& position() const;
         const Engine::color_vector_4& color() const;
         const glm::vec3& velocity() const;
         const double lifetime() const;
-        void update(const size_t& index, const float& dt, Engine::priv::ParticleSystem& particleSystem, const glm::vec3& cameraPosition, const bool multi_threaded);
+        void update(const size_t index, const float dt, Engine::priv::ParticleSystem& particleSystem, const glm::vec3& cameraPosition, const bool multi_threaded);
 
 
         void setUserDataX(const float x);

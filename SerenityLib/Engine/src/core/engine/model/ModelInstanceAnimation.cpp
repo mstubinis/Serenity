@@ -42,7 +42,7 @@ ModelInstanceAnimation& ModelInstanceAnimation::operator=(ModelInstanceAnimation
     return *this;
 }
 
-void ModelInstanceAnimation::process(const float& dt, vector<glm::mat4>& transforms) {
+void ModelInstanceAnimation::process(const float dt, vector<glm::mat4>& transforms) {
     m_CurrentTime += dt;
 
     if(transforms.size() == 0){
@@ -72,7 +72,7 @@ ModelInstanceAnimationVector& ModelInstanceAnimationVector::operator=(ModelInsta
     }
     return *this;
 }
-void ModelInstanceAnimationVector::emplace_animation(Mesh& mesh, const string& animationName, const float& start, const float& end, const unsigned int& requestedLoops) {
+void ModelInstanceAnimationVector::emplace_animation(Mesh& mesh, const string& animationName, const float start, const float end, const unsigned int requestedLoops) {
     m_Animation_Instances.emplace_back(mesh, animationName, start, end, requestedLoops);
 }
 
@@ -83,7 +83,7 @@ void ModelInstanceAnimationVector::clear() {
     m_Animation_Instances.clear();
     m_Transforms.clear();
 }
-void ModelInstanceAnimationVector::process(Mesh& mesh, const float& dt) {
+void ModelInstanceAnimationVector::process(Mesh& mesh, const float dt) {
     if (m_Animation_Instances.size() == 0)
         return;
     m_Transforms.clear();

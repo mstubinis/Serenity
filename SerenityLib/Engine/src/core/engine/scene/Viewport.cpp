@@ -57,14 +57,14 @@ void Viewport::setID(const unsigned int id) {
 }
 
 
-const float& Viewport::getDepthMaskValue() const {
+const float Viewport::getDepthMaskValue() const {
     return m_DepthMaskValue;
 }
-void Viewport::setDepthMaskValue(const float& depth) {
+void Viewport::setDepthMaskValue(const float depth) {
     m_DepthMaskValue = depth;
 }
 
-void Viewport::activateDepthMask(const bool& active) {
+void Viewport::activateDepthMask(const bool active) {
     if (active) {
         m_StateFlags.add(StateFlags::DepthMaskActive);
     }else{
@@ -77,14 +77,14 @@ const bool Viewport::isDepthMaskActive() const {
 const glm::vec4& Viewport::getBackgroundColor() const {
     return m_BackgroundColor;
 }
-void Viewport::setBackgroundColor(const float& r, const float& g, const float& b, const float& a) {
+void Viewport::setBackgroundColor(const float r, const float g, const float b, const float a) {
     m_BackgroundColor.r = r;
     m_BackgroundColor.g = g;
     m_BackgroundColor.b = b;
     m_BackgroundColor.a = a;
 }
 
-void Viewport::setAspectRatioSynced(const bool& synced) {
+void Viewport::setAspectRatioSynced(const bool synced) {
     if (synced) {
         m_StateFlags.add(StateFlags::AspectRatioSynced);
     }else{
@@ -101,7 +101,7 @@ const Scene& Viewport::getScene() const {
 const Camera& Viewport::getCamera() const {
     return *m_Camera;
 }
-void Viewport::activate(const bool& active) {
+void Viewport::activate(const bool active) {
     if (active) {
         m_StateFlags.add(StateFlags::Active);
     }else{
@@ -128,15 +128,15 @@ void Viewport::setViewportDimensions(const float x, const float y, const float w
 const glm::vec4& Viewport::getViewportDimensions() const {
     return m_Viewport_Dimensions;
 }
-const unsigned short& Viewport::getRenderFlags() const {
+const unsigned short Viewport::getRenderFlags() const {
     return m_RenderFlags.get();
 }
-void Viewport::setRenderFlag(const ViewportRenderingFlag::Flag& flag) {
+void Viewport::setRenderFlag(const ViewportRenderingFlag::Flag flag) {
     m_RenderFlags = flag;
 }
-void Viewport::addRenderFlag(const ViewportRenderingFlag::Flag& flag) {
+void Viewport::addRenderFlag(const ViewportRenderingFlag::Flag flag) {
     m_RenderFlags.add(flag);
 }
-void Viewport::removeRenderFlag(const ViewportRenderingFlag::Flag& flag) {
+void Viewport::removeRenderFlag(const ViewportRenderingFlag::Flag flag) {
     m_RenderFlags.remove(flag);
 }

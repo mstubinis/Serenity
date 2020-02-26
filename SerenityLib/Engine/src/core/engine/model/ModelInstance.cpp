@@ -240,13 +240,13 @@ void ModelInstance::internal_init(Mesh* mesh, Material* mat, ShaderProgram* prog
 
     internal_update_model_matrix();
 }
-const size_t& ModelInstance::index() const {
+const size_t ModelInstance::index() const {
     return m_Index;
 }
-const ModelDrawingMode::Mode& ModelInstance::getDrawingMode() const {
+const ModelDrawingMode::Mode ModelInstance::getDrawingMode() const {
     return m_DrawingMode;
 }
-void ModelInstance::setDrawingMode(const ModelDrawingMode::Mode& drawMode) {
+void ModelInstance::setDrawingMode(const ModelDrawingMode::Mode drawMode) {
     m_DrawingMode = drawMode;
 }
 
@@ -274,7 +274,7 @@ void ModelInstance::addViewportFlag(const ViewportFlag::Flag flag) {
 void ModelInstance::removeViewportFlag(const ViewportFlag::Flag flag) {
     m_ViewportFlag.remove(flag);
 }
-const unsigned int& ModelInstance::getViewportFlags() const {
+const unsigned int ModelInstance::getViewportFlags() const {
     return m_ViewportFlag.get();
 }
 void ModelInstance::internal_update_model_matrix() {
@@ -296,7 +296,7 @@ const Entity& ModelInstance::parent() const {
 //void ModelInstance::setStage(const RenderStage::Stage& stage) {
 //    m_Stage = stage;
 //}
-void ModelInstance::setStage(const RenderStage::Stage& stage, ComponentModel& componentModel) {
+void ModelInstance::setStage(const RenderStage::Stage stage, ComponentModel& componentModel) {
     m_Stage = stage;
     componentModel.setStage(stage, m_Index);
 }
@@ -306,19 +306,19 @@ void ModelInstance::show() {
 void ModelInstance::hide() {
     m_Visible = false; 
 }
-const bool& ModelInstance::visible() const {
+const bool ModelInstance::visible() const {
     return m_Visible; 
 }
-const bool& ModelInstance::passedRenderCheck() const {
+const bool ModelInstance::passedRenderCheck() const {
     return m_PassedRenderCheck; 
 }
-void ModelInstance::setPassedRenderCheck(const bool& b) {
+void ModelInstance::setPassedRenderCheck(const bool b) {
     m_PassedRenderCheck = b; 
 }
-void ModelInstance::setColor(const float& r, const float& g, const float& b, const float& a) {
+void ModelInstance::setColor(const float r, const float g, const float b, const float a) {
     m_Color = Engine::color_vector_4(r, g, b, a);
 }
-void ModelInstance::setColor(const unsigned char& r, const unsigned char& g, const unsigned char& b, const unsigned char& a) {
+void ModelInstance::setColor(const unsigned char r, const unsigned char g, const unsigned char b, const unsigned char a) {
     m_Color = Engine::color_vector_4(r, g, b, a);
 }
 void ModelInstance::setColor(const glm::vec4& color){
@@ -327,13 +327,13 @@ void ModelInstance::setColor(const glm::vec4& color){
 void ModelInstance::setColor(const glm::vec3& color) {
     ModelInstance::setColor(color.r, color.g, color.b, 1.0f);
 }
-void ModelInstance::setGodRaysColor(const float& r, const float& g, const float& b) {
+void ModelInstance::setGodRaysColor(const float r, const float g, const float b) {
     m_GodRaysColor = Engine::color_vector_4(r, g, b, m_GodRaysColor.a());
 }
 void ModelInstance::setGodRaysColor(const glm::vec3& color){
     ModelInstance::setGodRaysColor(color.r, color.g, color.b);
 }
-void ModelInstance::setPosition(const float& x, const float& y, const float& z){
+void ModelInstance::setPosition(const float x, const float y, const float z){
     m_Position = glm::vec3(x, y, z);
     internal_update_model_matrix();
 }
@@ -341,27 +341,27 @@ void ModelInstance::setOrientation(const glm::quat& orientation) {
     m_Orientation = orientation;
     internal_update_model_matrix();
 }
-void ModelInstance::setOrientation(const float& x, const float& y, const float& z) {
+void ModelInstance::setOrientation(const float x, const float y, const float z) {
     Math::setRotation(m_Orientation, x, y, z);
     internal_update_model_matrix();
 }
-void ModelInstance::setScale(const float& scale) {
+void ModelInstance::setScale(const float scale) {
     m_Scale = glm::vec3(scale, scale, scale);
     internal_update_model_matrix();
 }
-void ModelInstance::setScale(const float& x, const float& y, const float& z){
+void ModelInstance::setScale(const float x, const float y, const float z){
     m_Scale = glm::vec3(x, y, z);
     internal_update_model_matrix();
 }
-void ModelInstance::translate(const float& x, const float& y, const float& z){
+void ModelInstance::translate(const float x, const float y, const float z){
     m_Position += glm::vec3(x, y, z);
     internal_update_model_matrix();
 }
-void ModelInstance::rotate(const float& x, const float& y, const float& z){
+void ModelInstance::rotate(const float x, const float y, const float z){
     Math::rotate(m_Orientation, x, y, z);
     internal_update_model_matrix();
 }
-void ModelInstance::scale(const float& x, const float& y, const float& z){
+void ModelInstance::scale(const float x, const float y, const float z){
     m_Scale += glm::vec3(x, y, z); 
     internal_update_model_matrix();
 }
@@ -407,10 +407,10 @@ Mesh* ModelInstance::mesh() const {
 Material* ModelInstance::material() const {
     return m_Material; 
 }
-const RenderStage::Stage& ModelInstance::stage() const {
+const RenderStage::Stage ModelInstance::stage() const {
     return m_Stage; 
 }
-void ModelInstance::setShaderProgram(const Handle& shaderProgramHandle, ComponentModel& componentModel) {
+void ModelInstance::setShaderProgram(const Handle shaderProgramHandle, ComponentModel& componentModel) {
     ModelInstance::setShaderProgram(((ShaderProgram*)shaderProgramHandle.get()), componentModel);
 }
 void ModelInstance::setShaderProgram(ShaderProgram* shaderProgram, ComponentModel& componentModel) {
@@ -419,19 +419,19 @@ void ModelInstance::setShaderProgram(ShaderProgram* shaderProgram, ComponentMode
     }
     componentModel.setModel(m_Mesh, m_Material, m_Index, shaderProgram, m_Stage);
 }
-void ModelInstance::setMesh(const Handle& meshHandle, ComponentModel& componentModel){
+void ModelInstance::setMesh(const Handle meshHandle, ComponentModel& componentModel){
     ModelInstance::setMesh(((Mesh*)meshHandle.get()), componentModel);
 }
 void ModelInstance::setMesh(Mesh* mesh, ComponentModel& componentModel){
     m_AnimationVector.clear();
     componentModel.setModel(mesh, m_Material, m_Index, m_ShaderProgram, m_Stage);
 }
-void ModelInstance::setMaterial(const Handle& materialHandle, ComponentModel& componentModel){
+void ModelInstance::setMaterial(const Handle materialHandle, ComponentModel& componentModel){
     ModelInstance::setMaterial(((Material*)materialHandle.get()), componentModel);
 }
 void ModelInstance::setMaterial(Material* material, ComponentModel& componentModel){
     componentModel.setModel(m_Mesh, material, m_Index, m_ShaderProgram, m_Stage);
 }
-void ModelInstance::playAnimation(const string& animationName, const float& start, const float& end, const unsigned int& requestedLoops){
+void ModelInstance::playAnimation(const string& animationName, const float start, const float end, const unsigned int requestedLoops){
     m_AnimationVector.emplace_animation(*m_Mesh, animationName, start, end, requestedLoops);
 }

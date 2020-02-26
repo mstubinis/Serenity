@@ -121,10 +121,10 @@ class Material final : public EngineResource{
         const unsigned char alpha() const;
         
         void setF0Color(const glm::vec3& f0Color);
-        void setF0Color(const float& r, const float& g, const float& b);
+        void setF0Color(const float r, const float g, const float b);
 
-        void setMaterialPhysics(const MaterialPhysics::Physics& materialPhysics);
-        void setShadeless(const bool& shadeless);
+        void setMaterialPhysics(const MaterialPhysics::Physics materialPhysics);
+        void setShadeless(const bool shadeless);
         void setGlow(const unsigned char glow);
         void setSmoothness(const unsigned char smoothness);
         void setAO(const unsigned char ao);
@@ -136,6 +136,6 @@ class Material final : public EngineResource{
         const unsigned char diffuseModel() const;
         void setDiffuseModel(const DiffuseModel::Model diffuseModel);
 
-        void update(const float& dt);
+        void update(const float dt);
 };
 #endif

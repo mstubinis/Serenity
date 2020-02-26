@@ -7,9 +7,7 @@ using namespace std;
 #pragma region Component
 
 ComponentLogic3::ComponentLogic3(const Entity& entity) : ComponentBaseClass(entity) {
-    m_UserPointer  = nullptr;
-    m_UserPointer1 = nullptr;
-    m_UserPointer2 = nullptr;
+
 }
 ComponentLogic3::~ComponentLogic3() {
 }
@@ -50,17 +48,17 @@ void* ComponentLogic3::getUserPointer1() const {
 void* ComponentLogic3::getUserPointer2() const {
     return m_UserPointer2;
 }
-void ComponentLogic3::call(const float& dt) const { 
-    if (m_Functor) {
+void ComponentLogic3::call(const float dt) const { 
+    //if (m_Functor) {
         m_Functor(this, dt);
-    }
+    //}
 }
 
 #pragma endregion
 
 #pragma region System
 
-struct priv::ComponentLogic3_UpdateFunction final {void operator()(void* system, void* componentPool, const float& dt, Scene& scene) const {
+struct priv::ComponentLogic3_UpdateFunction final {void operator()(void* system, void* componentPool, const float dt, Scene& scene) const {
     auto& pool = *static_cast<ECSComponentPool<Entity, ComponentLogic3>*>(componentPool);
     const auto& components = pool.data();
 	for (auto& component : components) {

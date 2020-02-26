@@ -27,7 +27,7 @@ namespace Engine::priv {
 
             //builds a component pool and system for the component type if it is not built already.
             template<typename TComponent> 
-            void buildPool(const unsigned int& type_slot) {
+            void buildPool(const unsigned int type_slot) {
                 if (type_slot >= m_ComponentPools.size()) {
                     m_ComponentPools.resize(type_slot + 1, nullptr);
                 }
@@ -60,7 +60,7 @@ namespace Engine::priv {
 
             //"event handlers"
             template<typename TComponent> 
-            void onResize(const unsigned int& width, const unsigned int& height) {
+            void onResize(const unsigned int width, const unsigned int height) {
                 using CPoolType       = ECSComponentPool<TEntity, TComponent>;
                 const auto& type_slot = ECSRegistry::type_slot_fast<TComponent>();
                 auto& components      = (*static_cast<CPoolType*>(m_ComponentPools[type_slot])).data();
@@ -68,15 +68,15 @@ namespace Engine::priv {
                     camera.resize(width, height);
                 }
             }
-            void update(const float& dt, Scene& scene) {
+            void update(const float dt, Scene& scene) {
                 for (size_t i = 0; i < m_Systems.size(); ++i) { 
                     m_Systems[i]->onUpdate(dt, scene);
                 }
             }
-            void onComponentAddedToEntity(void* component, TEntity& entity, const unsigned int& type_slot) {
+            void onComponentAddedToEntity(void* component, TEntity& entity, const unsigned int type_slot) {
                 m_Systems[type_slot]->onComponentAddedToEntity(component, entity);
             }
-            void onComponentRemovedFromEntity(TEntity& entity, const unsigned int& type_slot) {
+            void onComponentRemovedFromEntity(TEntity& entity, const unsigned int type_slot) {
                 m_Systems[type_slot]->onComponentRemovedFromEntity(entity);
             }
             void onSceneEntered(Scene& scene) { 
@@ -90,7 +90,7 @@ namespace Engine::priv {
                 }
             }
             //add newly created entities to the scene with their components as defined in their m_Systems, etc
-            void preUpdate(Scene& scene, const float& dt) {
+            void preUpdate(Scene& scene, const float dt) {
                 if (m_JustAddedEntities.size() > 0) {
                     for (size_t i = 0; i < m_Systems.size(); ++i) {
                         for (size_t j = 0; j < m_JustAddedEntities.size(); ++j) {
@@ -101,7 +101,7 @@ namespace Engine::priv {
                 }
             }
             //destroy flagged entities & their components, if any
-            void postUpdate(Scene& scene, const float& dt) {
+            void postUpdate(Scene& scene, const float dt) {
                 /*
                 if (m_DestroyedEntities.size() > 0) {
                     for (auto& entityID : m_DestroyedEntities) {
@@ -197,7 +197,7 @@ namespace Engine::priv {
             void removeEntity(const TEntity& entity) { 
                 m_DestroyedEntities.push_back(entity);
             }
-            priv::EntityPOD* getEntity(const unsigned int& entityID) const { 
+            priv::EntityPOD* getEntity(const unsigned int entityID) const { 
                 return m_EntityPool.getEntity(entityID); 
             }
             template<class T, typename... ARGS> void addComponent(TEntity& entity, ARGS&&... args) {

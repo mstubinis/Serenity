@@ -192,7 +192,7 @@ void priv::PhysicsManager::_update(const float& dt, int maxSubSteps, float fixed
     }
 }
 void priv::PhysicsManager::_render(const Camera& camera){
-    //m_Data.m_World->debugDrawWorld();
+    m_Data.m_World->debugDrawWorld();
     const glm::vec3 camPos = camera.getPosition();
     const glm::mat4 model = glm::mat4(1.0f);
     Engine::Renderer::sendUniformMatrix4("Model", model);

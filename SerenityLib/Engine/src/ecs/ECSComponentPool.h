@@ -33,7 +33,7 @@ namespace Engine::priv {
             inline const bool removeComponent(const EntityDataRequest& dataRequest) {
                 return super::remove(dataRequest.ID);
             }
-            inline const bool removeComponent(const unsigned int& entityID) {
+            inline const bool removeComponent(const unsigned int entityID) {
                 return super::remove(entityID);
             }
             inline TComponent* getComponent(const TEntity& entity) const {
@@ -43,7 +43,7 @@ namespace Engine::priv {
             inline TComponent* getComponent(const EntityDataRequest& dataRequest) const {
                 return super::get(dataRequest.ID);
             }
-            inline TComponent* getComponent(const unsigned int& entityID) const {
+            inline TComponent* getComponent(const unsigned int entityID) const {
                 return super::get(entityID);
             }
     };

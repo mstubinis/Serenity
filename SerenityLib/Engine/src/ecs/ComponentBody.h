@@ -127,7 +127,7 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
 
         ~ComponentBody();
 
-        void onEvent(const Event& _event) override;
+        void onEvent(const Event& event_) override;
 
         const bool hasParent() const;
 
@@ -209,24 +209,24 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
         void setCollision(Collision* collision);
         Collision* getCollision() const;
 
-        void setCollisionGroup(const short& group);  //set the groups this body belongs to
-        void setCollisionMask(const short& mask); //set the groups this body will register collisions with
-        void setCollisionFlag(const short& flag);
-        void setCollisionGroup(const CollisionFilter::Filter& group);  //set the groups this body belongs to
-        void setCollisionMask(const CollisionFilter::Filter& mask); //set the groups this body will register collisions with
-        void setCollisionFlag(const CollisionFlag::Flag& flag);
-        void addCollisionGroup(const short& group);  //add to the groups this body belongs to
-        void addCollisionMask(const short& mask); //add to the groups this body will register collisions with
-        void addCollisionFlag(const short& flag);
-        void addCollisionGroup(const CollisionFilter::Filter& group); //add to the groups this body belongs to
-        void addCollisionMask(const CollisionFilter::Filter& mask); //add to the groups this body will register collisions with
-        void addCollisionFlag(const CollisionFlag::Flag& flag);
-        void removeCollisionGroup(const short& group);
-        void removeCollisionMask(const short& mask);
-        void removeCollisionFlag(const short& flag);
-        void removeCollisionGroup(const CollisionFilter::Filter& group);
-        void removeCollisionMask(const CollisionFilter::Filter& mask);
-        void removeCollisionFlag(const CollisionFlag::Flag& flag);
+        void setCollisionGroup(const short group);  //set the groups this body belongs to
+        void setCollisionMask(const short mask); //set the groups this body will register collisions with
+        void setCollisionFlag(const short flag);
+        void setCollisionGroup(const CollisionFilter::Filter group);  //set the groups this body belongs to
+        void setCollisionMask(const CollisionFilter::Filter mask); //set the groups this body will register collisions with
+        void setCollisionFlag(const CollisionFlag::Flag flag);
+        void addCollisionGroup(const short group);  //add to the groups this body belongs to
+        void addCollisionMask(const short mask); //add to the groups this body will register collisions with
+        void addCollisionFlag(const short flag);
+        void addCollisionGroup(const CollisionFilter::Filter group); //add to the groups this body belongs to
+        void addCollisionMask(const CollisionFilter::Filter mask); //add to the groups this body will register collisions with
+        void addCollisionFlag(const CollisionFlag::Flag flag);
+        void removeCollisionGroup(const short group);
+        void removeCollisionMask(const short mask);
+        void removeCollisionFlag(const short flag);
+        void removeCollisionGroup(const CollisionFilter::Filter group);
+        void removeCollisionMask(const CollisionFilter::Filter mask);
+        void removeCollisionFlag(const CollisionFlag::Flag flag);
 
         void setDamping(const decimal& linear, const decimal& angular);
 
@@ -242,13 +242,13 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
         void setLinearVelocity(const glm_vec3& velocity, const bool local = true);
 
         void setAngularVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
-        void setAngularVelocity(const glm_vec3& velocity, bool local = true);
+        void setAngularVelocity(const glm_vec3& velocity, const bool local = true);
 
         void applyForce(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
-        void applyForce(const glm_vec3& force, const glm_vec3& origin = glm_vec3(0.0f), bool local = true);
+        void applyForce(const glm_vec3& force, const glm_vec3& origin = glm_vec3(0.0f), const bool local = true);
 
         void applyImpulse(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
-        void applyImpulse(const glm_vec3& impulse, const glm_vec3& origin = glm_vec3(0.0f), bool local = true);
+        void applyImpulse(const glm_vec3& impulse, const glm_vec3& origin = glm_vec3(0.0f), const bool local = true);
 
         void applyTorque(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
         void applyTorque(const glm_vec3& torque, const bool local = true);
@@ -276,8 +276,9 @@ namespace Engine::priv {
                 std::uint32_t                 OrderHead        = 0;
 
                 void resize(const size_t size);
-                void insert(const std::uint32_t& parent, const std::uint32_t& child);
-                void remove(const std::uint32_t& parent, const std::uint32_t& child);
+                void reserve(const size_t size);
+                void insert(const std::uint32_t parent, const std::uint32_t child);
+                void remove(const std::uint32_t parent, const std::uint32_t child);
 
                 const std::uint32_t size() const;
                 const size_t capacity() const;

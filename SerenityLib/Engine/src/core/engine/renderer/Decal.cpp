@@ -24,7 +24,7 @@ namespace Engine::priv {
     }};
 };
 
-Decal::Decal(Material& material, const glm_vec3& localPosition, const glm::vec3& hitNormal, const float& size, Scene& scene, const float& lifetimeMax, const RenderStage::Stage stage):EntityWrapper(scene) {
+Decal::Decal(Material& material, const glm_vec3& localPosition, const glm::vec3& hitNormal, const float size, Scene& scene, const float lifetimeMax, const RenderStage::Stage stage) : EntityWrapper(scene) {
     auto& cubeMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh();
     
     addComponent<ComponentBody>();
@@ -51,9 +51,9 @@ Decal::Decal(Material& material, const glm_vec3& localPosition, const glm::vec3&
     m_Active = true;
 }
 Decal::~Decal() {
-
+    destroy();
 }
-void Decal::update(const float& dt) {
+void Decal::update(const float dt) {
     if (m_Active) {
         m_LifetimeCurrent += dt;
         if (m_LifetimeCurrent < m_LifetimeMax && m_LifetimeCurrent >= m_LifetimeMax - 1.0f) {
@@ -69,7 +69,7 @@ void Decal::update(const float& dt) {
         }
     }
 }
-const bool& Decal::active() const {
+const bool Decal::active() const {
     return m_Active;
 }
 

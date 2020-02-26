@@ -73,8 +73,8 @@ class ComponentCamera : public ComponentBaseClass {
 
 		const float getAngle() const;    void setAngle(const float angle);
 		const float getAspect() const;   void setAspect(const float aspectRatio);
-		const float getNear() const;     void setNear(const float near);
-		const float getFar() const;      void setFar(const float far);
+		const float getNear() const;     void setNear(const float Near);
+		const float getFar() const;      void setFar(const float Far);
 
 		const glm::mat4 getProjection() const;
 		const glm::mat4 getProjectionInverse() const;
@@ -89,7 +89,7 @@ class ComponentCamera : public ComponentBaseClass {
 		const glm_vec3 up() const;
 
 		const unsigned int pointIntersectTest(const glm_vec3& objectPosition) const;
-		const unsigned int sphereIntersectTest(const glm_vec3& objectPosition, const float& objectRadius) const;
+		const unsigned int sphereIntersectTest(const glm_vec3& objectPosition, const float objectRadius) const;
 };
 
 class ComponentCamera_System_CI : public Engine::priv::ECSSystemCI {

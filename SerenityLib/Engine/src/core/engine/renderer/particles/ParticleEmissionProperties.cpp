@@ -6,19 +6,19 @@ using namespace std;
 using namespace Engine;
 
 
-struct DefaultColorFunctor final { Engine::color_vector_4 operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const float& dt, ParticleEmitter* emitter, Particle& particle) const {
+struct DefaultColorFunctor final { Engine::color_vector_4 operator()(ParticleEmissionProperties& properties, const float particle_lifetime, const float dt, ParticleEmitter* emitter, Particle& particle) const {
     return Engine::color_vector_4(255_uc);
 } };
-struct DefaultAngularVelocityFunctor final { float operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const float& dt, ParticleEmitter* emitter, Particle& particle) const {
+struct DefaultAngularVelocityFunctor final { float operator()(ParticleEmissionProperties& properties, const float particle_lifetime, const float dt, ParticleEmitter* emitter, Particle& particle) const {
     return 0.0f;
 }};
-struct DefaultVelocityFunctor final { glm::vec3 operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const float& dt, ParticleEmitter* emitter, Particle& particle) const {
+struct DefaultVelocityFunctor final { glm::vec3 operator()(ParticleEmissionProperties& properties, const float particle_lifetime, const float dt, ParticleEmitter* emitter, Particle& particle) const {
     return glm::vec3(0.0f);
 }};
-struct DefaultScaleFunctor final { glm::vec2 operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const float& dt, ParticleEmitter* emitter, Particle& particle) const {
+struct DefaultScaleFunctor final { glm::vec2 operator()(ParticleEmissionProperties& properties, const float particle_lifetime, const float dt, ParticleEmitter* emitter, Particle& particle) const {
     return glm::vec2(0.0f);
 }};
-struct DefaultDepthFunctor final { float operator()(ParticleEmissionProperties& properties, const double& particle_lifetime, const float& dt, ParticleEmitter* emitter, Particle& particle) const {
+struct DefaultDepthFunctor final { float operator()(ParticleEmissionProperties& properties, const float particle_lifetime, const float dt, ParticleEmitter* emitter, Particle& particle) const {
     return 0.0f;
 }};
 
@@ -42,7 +42,7 @@ ParticleEmissionProperties ParticleEmissionProperties::DefaultProperties;
 
 ParticleEmissionProperties::ParticleEmissionProperties(){
     m_Lifetime = 4.0;
-    m_SpawnRate = 0.4;
+    m_SpawnRate = 0.4f;
 
     setColorFunctor(DefaultColorFunctor());
     setChangeInAngularVelocityFunctor(DefaultAngularVelocityFunctor());
@@ -55,7 +55,7 @@ ParticleEmissionProperties::ParticleEmissionProperties(){
     setInitialAngularVelocityFunctor(DefaultInitialAngularVelocityFunctor());
 }
 
-ParticleEmissionProperties::ParticleEmissionProperties(Handle& materialHandle, const double lifeTime, const double spawnRate, const unsigned int ParticlesPerSpawn, const float drag) : ParticleEmissionProperties(){
+ParticleEmissionProperties::ParticleEmissionProperties(Handle& materialHandle, const float lifeTime, const float spawnRate, const unsigned int ParticlesPerSpawn, const float drag) : ParticleEmissionProperties(){
     m_Lifetime = lifeTime;
     m_Drag = drag;
     m_SpawnRate = spawnRate;
@@ -100,10 +100,10 @@ ParticleEmissionProperties& ParticleEmissionProperties::operator=(ParticleEmissi
     return *this;
 }
 
-const double& ParticleEmissionProperties::getLifetime() const {
+const float ParticleEmissionProperties::getLifetime() const {
     return m_Lifetime;
 }
-const double& ParticleEmissionProperties::getSpawnRate() const {
+const float ParticleEmissionProperties::getSpawnRate() const {
     return m_SpawnRate;
 }
 

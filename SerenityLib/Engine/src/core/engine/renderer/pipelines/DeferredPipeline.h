@@ -83,12 +83,12 @@ namespace Engine::priv {
             void internal_pass_copy_depth();
             void internal_pass_blur(const Viewport& viewport, const GLuint texture, const std::string& type);
 
-            void internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, const unsigned int& convoludeTextureSize, const unsigned int& preEnvFilterSize);
-            void internal_generate_brdf_lut(ShaderProgram& program, const unsigned int& brdfSize);
+            void internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, const unsigned int convoludeTextureSize, const unsigned int preEnvFilterSize);
+            void internal_generate_brdf_lut(ShaderProgram& program, const unsigned int brdfSize);
 
-            void internal_render_2d_text_left(const std::string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z);
-            void internal_render_2d_text_center(const std::string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z);
-            void internal_render_2d_text_right(const std::string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z);
+            void internal_render_2d_text_left(const std::string& text, const Font& font, const float newLineGlyphHeight, float& x, float& y, const float z);
+            void internal_render_2d_text_center(const std::string& text, const Font& font, const float newLineGlyphHeight, float& x, float& y, const float z);
+            void internal_render_2d_text_right(const std::string& text, const Font& font, const float newLineGlyphHeight, float& x, float& y, const float z);
 
             DeferredPipeline() = delete;
         public:
@@ -98,7 +98,7 @@ namespace Engine::priv {
             void init() override;
             void onPipelineChanged() override;
             void onFullscreen() override;
-            void onResize(const unsigned int& newWidth, const unsigned int& newHeight) override;
+            void onResize(const unsigned int newWidth, const unsigned int newHeight) override;
             void onOpenGLContextCreation(const unsigned int windowWidth, const unsigned int windowHeight, const unsigned int glslVersion, const unsigned int openglVersion) override;
             void restoreDefaultState() override;
             void restoreCurrentState() override;
@@ -137,9 +137,9 @@ namespace Engine::priv {
 
 
             void sendTexture(const char* location, const Texture& texture, const int slot) override;
-            void sendTexture(const char* location, const unsigned int textureObject, const int slot, const unsigned int& textureTarget) override;
+            void sendTexture(const char* location, const unsigned int textureObject, const int slot, const unsigned int textureTarget) override;
             void sendTextureSafe(const char* location, const Texture& texture, const int slot) override;
-            void sendTextureSafe(const char* location, const unsigned int textureObject, const int slot, const unsigned int& textureTarget) override;
+            void sendTextureSafe(const char* location, const unsigned int textureObject, const int slot, const unsigned int textureTarget) override;
 
             const bool bindReadFBO(const unsigned int fbo) override;
             const bool bindDrawFBO(const unsigned int fbo) override;
@@ -153,7 +153,7 @@ namespace Engine::priv {
             const bool unbindMaterial() override;
             const bool unbindMesh() override;
 
-            void generatePBRData(Texture& texture, const unsigned int& convoludeSize, const unsigned int& prefilterSize) override;
+            void generatePBRData(Texture& texture, const unsigned int convoludeSize, const unsigned int prefilterSize) override;
 
             void renderSkybox(Skybox*, ShaderProgram& shaderProgram, const Scene& scene, const Viewport& viewport, const Camera& camera) override;
             void renderSunLight(const Camera& c, const SunLight& s, const Viewport& viewport) override;
@@ -181,7 +181,7 @@ namespace Engine::priv {
 
 
 
-            void update(const float& dt) override;
+            void update(const float dt) override;
             void render(Engine::priv::Renderer& renderer, const Viewport& viewport, const bool mainRenderFunction) override;
     };
 };

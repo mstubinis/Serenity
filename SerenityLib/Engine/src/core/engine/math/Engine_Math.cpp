@@ -17,7 +17,7 @@ using namespace std;
 
 typedef unsigned char uchar;
 
-const float ROTATION_THRESHOLD = 0.00001f;
+constexpr float ROTATION_THRESHOLD = 0.00001f;
 
 const glm_vec3 Math::rotate_vec3(const glm_quat& rotation, const glm_vec3& vec) {
     return rotation * vec;
@@ -145,7 +145,7 @@ void Math::setRotation(glm_quat& orientation, const decimal& pitch, const decima
     if (abs(roll) > ROTATION_THRESHOLD)
         orientation = orientation * (glm::angleAxis(roll,   glm_vec3(0, 0, 1)));   //roll
 }
-void Math::setRotation(glm::quat& orientation, const float& pitch, const float& yaw, const float& roll) {
+void Math::setRotation(glm::quat& orientation, const float pitch, const float yaw, const float roll) {
     if (abs(pitch) > ROTATION_THRESHOLD)
         orientation               = (glm::angleAxis(pitch, glm::vec3(-1, 0, 0)));   //pitch
     if (abs(yaw) > ROTATION_THRESHOLD)
@@ -161,7 +161,7 @@ void Math::rotate(glm_quat& orientation, const decimal& pitch, const decimal& ya
     if (abs(roll) > ROTATION_THRESHOLD)
         orientation = orientation * (glm::angleAxis(roll,   glm_vec3(0, 0, 1)));   //roll
 }
-void Math::rotate(glm::quat& orientation, const float& pitch, const float& yaw, const float& roll) {
+void Math::rotate(glm::quat& orientation, const float pitch, const float yaw, const float roll) {
     if (abs(pitch) > ROTATION_THRESHOLD)
         orientation = orientation * (glm::angleAxis(pitch, glm::vec3(-1, 0, 0)));   //pitch
     if (abs(yaw) > ROTATION_THRESHOLD)
@@ -343,7 +343,7 @@ uint Math::Max(const uint x, const uint y, const uint z, const uint w){
 	return glm::max(x,glm::max(y,glm::max(z,w))); 
 }
 
-const glm::vec3 Math::unpack3NormalsFrom32Int(const uint32_t& data) {
+const glm::vec3 Math::unpack3NormalsFrom32Int(const uint32_t data) {
     glm::vec3 conversions;
     glm::vec3 negatives = glm::vec3(1.0f);
     //X
@@ -500,7 +500,7 @@ glm::vec3 Math::getRight(const glm_quat& q){
 glm::vec3 Math::getUp(const glm_quat& q){
     return glm::normalize(q * glm_vec3(0, 1, 0));
 }
-glm::vec3 Math::getColumnVector(const btRigidBody& b, const uint& column){
+glm::vec3 Math::getColumnVector(const btRigidBody& b, const unsigned int column){
     btTransform t;
     b.getMotionState()->getWorldTransform(t);
     btVector3 v = t.getBasis().getColumn(column);
@@ -525,7 +525,7 @@ void Math::recalculateForwardRightUp(const btRigidBody& b,glm_vec3& f,glm_vec3& 
 	r = Math::getRight(b);
 	u = Math::getUp(b);
 }
-float Math::getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bool degrees){
+float Math::getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, const bool degrees){
 	if (a == b) 
         return 0.0f;
 	float angle = glm::acos(glm::dot(a, b));

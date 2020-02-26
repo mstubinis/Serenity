@@ -141,12 +141,13 @@ ComponentBody::~ComponentBody() {
 }
 ComponentBody::ComponentBody(ComponentBody&& other) noexcept {
     //move constructor
+    using std::swap;
     m_Physics          = std::move(other.m_Physics);
     m_Forward          = std::move(other.m_Forward);
     m_Right            = std::move(other.m_Right);
     m_Up               = std::move(other.m_Up);
-    m_Owner            = std::move(other.m_Owner);
-    m_CollisionFunctor = std::move(other.m_CollisionFunctor);
+    swap(m_Owner,other.m_Owner);
+    m_CollisionFunctor.swap(other.m_CollisionFunctor);
     m_UserPointer      = std::exchange(other.m_UserPointer, nullptr);
     m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
     m_UserPointer2     = std::exchange(other.m_UserPointer2, nullptr);
@@ -160,12 +161,13 @@ ComponentBody::ComponentBody(ComponentBody&& other) noexcept {
 ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
     //move assignment
     if (&other != this) {
+        using std::swap;
         m_Physics          = std::move(other.m_Physics);
         m_Forward          = std::move(other.m_Forward);
         m_Right            = std::move(other.m_Right);
         m_Up               = std::move(other.m_Up);
-        m_Owner            = std::move(other.m_Owner);
-        m_CollisionFunctor = std::move(other.m_CollisionFunctor);
+        swap(m_Owner,other.m_Owner);
+        m_CollisionFunctor.swap(other.m_CollisionFunctor);
         m_UserPointer      = std::exchange(other.m_UserPointer, nullptr);
         m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
         m_UserPointer2     = std::exchange(other.m_UserPointer2, nullptr);
@@ -815,7 +817,7 @@ const btRigidBody& ComponentBody::getBtBody() const {
 void ComponentBody::setDamping(const decimal& p_LinearFactor, const decimal& p_AngularFactor) {
 	data.p->bullet_rigidBody->setDamping(static_cast<btScalar>(p_LinearFactor), static_cast<btScalar>(p_AngularFactor));
 }
-void ComponentBody::setCollisionGroup(const short& group) {
+void ComponentBody::setCollisionGroup(const short group) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.group != group) {
@@ -825,7 +827,7 @@ void ComponentBody::setCollisionGroup(const short& group) {
         }
     }
 }
-void ComponentBody::setCollisionMask(const short& mask) {
+void ComponentBody::setCollisionMask(const short mask) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.mask != mask) {
@@ -835,13 +837,13 @@ void ComponentBody::setCollisionMask(const short& mask) {
         }
     }
 }
-void ComponentBody::setCollisionGroup(const CollisionFilter::Filter& group) {
+void ComponentBody::setCollisionGroup(const CollisionFilter::Filter group) {
     ComponentBody::setCollisionGroup(static_cast<short>(group));
 }
-void ComponentBody::setCollisionMask(const CollisionFilter::Filter& mask) {
+void ComponentBody::setCollisionMask(const CollisionFilter::Filter mask) {
     ComponentBody::setCollisionMask(static_cast<short>(mask));
 }
-void ComponentBody::addCollisionGroup(const short& group) {
+void ComponentBody::addCollisionGroup(const short group) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.group != (phyData.group | group)) {
@@ -851,7 +853,7 @@ void ComponentBody::addCollisionGroup(const short& group) {
         }
     }
 }
-void ComponentBody::addCollisionMask(const short& mask) {
+void ComponentBody::addCollisionMask(const short mask) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.mask != (phyData.mask | mask)) {
@@ -861,13 +863,13 @@ void ComponentBody::addCollisionMask(const short& mask) {
         }
     }
 }
-void ComponentBody::addCollisionGroup(const CollisionFilter::Filter& group) {
+void ComponentBody::addCollisionGroup(const CollisionFilter::Filter group) {
     ComponentBody::addCollisionGroup(static_cast<short>(group));
 }
-void ComponentBody::addCollisionMask(const CollisionFilter::Filter& mask) {
+void ComponentBody::addCollisionMask(const CollisionFilter::Filter mask) {
     ComponentBody::addCollisionMask(static_cast<short>(mask));
 }
-void ComponentBody::setCollisionFlag(const short& flag) {
+void ComponentBody::setCollisionFlag(const short flag) {
     if (m_Physics) {
         auto& phyData = *data.p;
         auto& rigidBody = *phyData.bullet_rigidBody;
@@ -879,10 +881,10 @@ void ComponentBody::setCollisionFlag(const short& flag) {
         }
     }
 }
-void ComponentBody::setCollisionFlag(const CollisionFlag::Flag& flag) {
+void ComponentBody::setCollisionFlag(const CollisionFlag::Flag flag) {
     ComponentBody::setCollisionFlag(static_cast<short>(flag));
 }
-void ComponentBody::addCollisionFlag(const short& flag) {
+void ComponentBody::addCollisionFlag(const short flag) {
     if (m_Physics) {
         auto& phyData = *data.p;
         auto& rigidBody = *phyData.bullet_rigidBody;
@@ -894,10 +896,10 @@ void ComponentBody::addCollisionFlag(const short& flag) {
         }
     }
 }
-void ComponentBody::addCollisionFlag(const CollisionFlag::Flag& flag) {
+void ComponentBody::addCollisionFlag(const CollisionFlag::Flag flag) {
     ComponentBody::addCollisionFlag(static_cast<short>(flag));
 }
-void ComponentBody::removeCollisionGroup(const short& group) {
+void ComponentBody::removeCollisionGroup(const short group) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.group != (phyData.group & ~group)) {
@@ -907,7 +909,7 @@ void ComponentBody::removeCollisionGroup(const short& group) {
         }
     }
 }
-void ComponentBody::removeCollisionMask(const short& mask) {
+void ComponentBody::removeCollisionMask(const short mask) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.mask != (phyData.mask & ~mask)) {
@@ -917,7 +919,7 @@ void ComponentBody::removeCollisionMask(const short& mask) {
         }
     }
 }
-void ComponentBody::removeCollisionFlag(const short& flag) {
+void ComponentBody::removeCollisionFlag(const short flag) {
     if (m_Physics) {
         auto& phyData = *data.p;
         auto& rigidBody = *phyData.bullet_rigidBody;
@@ -929,23 +931,23 @@ void ComponentBody::removeCollisionFlag(const short& flag) {
         }
     }
 }
-void ComponentBody::removeCollisionGroup(const CollisionFilter::Filter& group) {
+void ComponentBody::removeCollisionGroup(const CollisionFilter::Filter group) {
     ComponentBody::removeCollisionGroup(static_cast<short>(group));
 }
-void ComponentBody::removeCollisionMask(const CollisionFilter::Filter& mask) {
+void ComponentBody::removeCollisionMask(const CollisionFilter::Filter mask) {
     ComponentBody::removeCollisionMask(static_cast<short>(mask));
 }
-void ComponentBody::removeCollisionFlag(const CollisionFlag::Flag& flag) {
+void ComponentBody::removeCollisionFlag(const CollisionFlag::Flag flag) {
     ComponentBody::removeCollisionFlag(static_cast<short>(flag));
 }
 
 
 //TODO: reconsider how this works
-void ComponentBody::setDynamic(const bool p_Dynamic) {
+void ComponentBody::setDynamic(const bool dynamic) {
     if (m_Physics) {
         auto& physicsData = *data.p;
         auto& rigidBody = *physicsData.bullet_rigidBody;
-        if (p_Dynamic) {
+        if (dynamic) {
             removePhysicsFromWorld(false);
             rigidBody.setCollisionFlags(btCollisionObject::CF_ANISOTROPIC_FRICTION_DISABLED);
             addPhysicsToWorld(false);
@@ -990,69 +992,69 @@ void ComponentBody::setAngularVelocity(const decimal& x, const decimal& y, const
 void ComponentBody::setAngularVelocity(const glm_vec3& velocity, const bool local) {
 	ComponentBody::setAngularVelocity(velocity.x, velocity.y, velocity.z, local);
 }
-void ComponentBody::applyForce(const decimal& p_X, const decimal& p_Y, const decimal& p_Z, const bool p_Local) {
+void ComponentBody::applyForce(const decimal& x, const decimal& y, const decimal& z, const bool local) {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
-        btVector3 v(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
-        Math::translate(rigidBody, v, p_Local);
+        btVector3 v(static_cast<btScalar>(x), static_cast<btScalar>(y), static_cast<btScalar>(z));
+        Math::translate(rigidBody, v, local);
         rigidBody.applyCentralForce(v);
     }
 }
-void ComponentBody::applyForce(const glm_vec3& p_Force, const glm_vec3& p_Origin, const bool p_Local) {
+void ComponentBody::applyForce(const glm_vec3& force, const glm_vec3& origin, const bool local) {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
-        btVector3 v(static_cast<btScalar>(p_Force.x), static_cast<btScalar>(p_Force.y), static_cast<btScalar>(p_Force.z));
-        Math::translate(rigidBody, v, p_Local);
-        rigidBody.applyForce(v, btVector3(static_cast<btScalar>(p_Origin.x), static_cast<btScalar>(p_Origin.y), static_cast<btScalar>(p_Origin.z)));
+        btVector3 v(static_cast<btScalar>(force.x), static_cast<btScalar>(force.y), static_cast<btScalar>(force.z));
+        Math::translate(rigidBody, v, local);
+        rigidBody.applyForce(v, btVector3(static_cast<btScalar>(origin.x), static_cast<btScalar>(origin.y), static_cast<btScalar>(origin.z)));
     }
 }
-void ComponentBody::applyImpulse(const decimal& p_X, const decimal& p_Y, const decimal& p_Z, const bool p_Local) {
+void ComponentBody::applyImpulse(const decimal& x, const decimal& y, const decimal& z, const bool local) {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
-        btVector3 v(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
-        Math::translate(rigidBody, v, p_Local);
+        btVector3 v(static_cast<btScalar>(x), static_cast<btScalar>(y), static_cast<btScalar>(z));
+        Math::translate(rigidBody, v, local);
         rigidBody.applyCentralImpulse(v);
     }
 }
-void ComponentBody::applyImpulse(const glm_vec3& p_Impulse, const glm_vec3& p_Origin, const bool p_Local) {
+void ComponentBody::applyImpulse(const glm_vec3& impulse, const glm_vec3& origin, const bool local) {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
-        btVector3 v(static_cast<btScalar>(p_Impulse.x), static_cast<btScalar>(p_Impulse.y), static_cast<btScalar>(p_Impulse.z));
-        Math::translate(rigidBody, v, p_Local);
-        rigidBody.applyImpulse(v, btVector3(static_cast<btScalar>(p_Origin.x), static_cast<btScalar>(p_Origin.y), static_cast<btScalar>(p_Origin.z)));
+        btVector3 v(static_cast<btScalar>(impulse.x), static_cast<btScalar>(impulse.y), static_cast<btScalar>(impulse.z));
+        Math::translate(rigidBody, v, local);
+        rigidBody.applyImpulse(v, btVector3(static_cast<btScalar>(origin.x), static_cast<btScalar>(origin.y), static_cast<btScalar>(origin.z)));
     }
 }
-void ComponentBody::applyTorque(const decimal& p_X, const decimal& p_Y, const decimal& p_Z, const bool p_Local) {
+void ComponentBody::applyTorque(const decimal& x, const decimal& y, const decimal& z, const bool local) {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
-        btVector3 t(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
-        if (p_Local) {
+        btVector3 t(static_cast<btScalar>(x), static_cast<btScalar>(y), static_cast<btScalar>(z));
+        if (local) {
             t = rigidBody.getInvInertiaTensorWorld().inverse() * (rigidBody.getWorldTransform().getBasis() * t);
         }
         rigidBody.applyTorque(t);
     }
 }
-void ComponentBody::applyTorque(const glm_vec3& p_Torque, const bool p_Local) {
-	ComponentBody::applyTorque(p_Torque.x, p_Torque.y, p_Torque.z, p_Local);
+void ComponentBody::applyTorque(const glm_vec3& torque, const bool local) {
+	ComponentBody::applyTorque(torque.x, torque.y, torque.z, local);
 }
-void ComponentBody::applyTorqueImpulse(const decimal& p_X, const decimal& p_Y, const decimal& p_Z, const bool p_Local) {
+void ComponentBody::applyTorqueImpulse(const decimal& x, const decimal& y, const decimal& z, const bool local) {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
-        btVector3 t(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
-        if (p_Local) {
+        btVector3 t(static_cast<btScalar>(x), static_cast<btScalar>(y), static_cast<btScalar>(z));
+        if (local) {
             t = rigidBody.getInvInertiaTensorWorld().inverse() * (rigidBody.getWorldTransform().getBasis() * t);
         }
         rigidBody.applyTorqueImpulse(t);
     }
 }
-void ComponentBody::applyTorqueImpulse(const glm_vec3& p_TorqueImpulse, const bool p_Local) {
-	ComponentBody::applyTorqueImpulse(p_TorqueImpulse.x, p_TorqueImpulse.y, p_TorqueImpulse.z, p_Local);
+void ComponentBody::applyTorqueImpulse(const glm_vec3& torqueImpulse, const bool local) {
+	ComponentBody::applyTorqueImpulse(torqueImpulse.x, torqueImpulse.y, torqueImpulse.z, local);
 }
 void ComponentBody::clearLinearForces() {
     if (m_Physics) {
@@ -1080,10 +1082,10 @@ void ComponentBody::clearAllForces() {
         rigidBody.setAngularVelocity(v);
     }
 }
-void ComponentBody::setMass(const float p_Mass) {
+void ComponentBody::setMass(const float mass) {
     if (m_Physics) {
         auto& physicsData = *data.p;
-        physicsData.mass = p_Mass;
+        physicsData.mass = mass;
         Collision& collision = *physicsData.collision;
         if (collision.getBtShape()) {
             collision.setMass(physicsData.mass);
@@ -1097,8 +1099,8 @@ void ComponentBody::addChild(const Entity& child) const {
     if (child.sceneID() == m_Owner.sceneID()) {
         auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
         auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
-
-        system.ParentChildSystem.insert(m_Owner.id(), child.id());
+        auto& pcs = system.ParentChildSystem;
+        pcs.insert(m_Owner.id(), child.id());
     }
 }
 void ComponentBody::addChild(const ComponentBody& child) const {
@@ -1108,7 +1110,8 @@ void ComponentBody::removeChild(const Entity& child) const {
     if (child.sceneID() == m_Owner.sceneID()) {
         auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
         auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
-        system.ParentChildSystem.remove(m_Owner.id(), child.id());
+        auto& pcs = system.ParentChildSystem;
+        pcs.remove(m_Owner.id(), child.id());
     }
 }
 void ComponentBody::removeChild(const ComponentBody& child) const {
@@ -1117,7 +1120,8 @@ void ComponentBody::removeChild(const ComponentBody& child) const {
 const bool ComponentBody::hasParent() const {
     auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
     auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
-    return (system.ParentChildSystem.Parents[m_Owner.id() - 1U] > 0);
+    auto& pcs = system.ParentChildSystem;
+    return (pcs.Parents[m_Owner.id() - 1U] > 0);
 }
 
 
@@ -1127,7 +1131,7 @@ const bool ComponentBody::hasParent() const {
 
 constexpr glm_mat4 IDENTITY_MATRIX = glm_mat4(1.0);
 
-struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPtr, void* componentPool, const float& dt, Scene& scene) const {
+struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPtr, void* componentPool, const float dt, Scene& scene) const {
     auto& system            = *static_cast<Engine::priv::ComponentBody_System*>(systemPtr);
     auto& pool              = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool);
     auto& components        = pool.data();
@@ -1166,7 +1170,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
         const unsigned int entityID = pcs.Order[i];
         if (entityID > 0) {
             const unsigned int entityIndex = entityID - 1U;
-            const auto& parentID = pcs.Parents[entityIndex];
+            const unsigned int parentID = pcs.Parents[entityIndex];
             if (parentID == 0) {
                 pcs.WorldTransforms[entityIndex] = pcs.LocalTransforms[entityIndex];
             }else{
@@ -1176,10 +1180,9 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
         }else{
             break;
         }
-    }
-    
+    }   
 
-//#if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
+#if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
     for (auto& componentBody : components) {
         auto* model = componentBody.getOwner().getComponent<ComponentModel>();
         if (model) {
@@ -1201,13 +1204,20 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
             }
         }
     }
-//#endif
+#endif
 
 }};
 struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* systemPtr, void* component, Entity& entity) const {
     auto& system  = *static_cast<Engine::priv::ComponentBody_System*>(systemPtr);
+    auto& pcs     = system.ParentChildSystem;
     const auto id = entity.id();
-    system.ParentChildSystem.resize(id);
+
+    if (pcs.Parents.capacity() < id) {
+        pcs.reserve(id + 50U);
+    }
+    if (pcs.Parents.size() < id) {
+        pcs.resize(id);
+    }
 }};
 struct priv::ComponentBody_ComponentRemovedFromEntityFunction final { void operator()(void* systemPtr, Entity& entity) const {
     auto& system  = *static_cast<Engine::priv::ComponentBody_System*>(systemPtr);
@@ -1217,7 +1227,6 @@ struct priv::ComponentBody_ComponentRemovedFromEntityFunction final { void opera
     if (pcs.Parents[id - 1U] > 0) {
         pcs.remove(pcs.Parents[id - 1U], id);
     }
-
 }};
 struct priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* systemPtr, void* componentPool,Entity& entity, Scene& scene) const {
     auto& pool = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool);
@@ -1273,8 +1282,19 @@ void Engine::priv::ComponentBody_System::ParentChildVector::resize(const size_t 
     WorldTransforms.resize(size, IDENTITY_MATRIX);
     LocalTransforms.resize(size, IDENTITY_MATRIX);
 }
-void Engine::priv::ComponentBody_System::ParentChildVector::insert(const std::uint32_t& parentID, const std::uint32_t& childID) {
-    if (Parents.size() <= parentID || Parents.size() <= childID) {
+void Engine::priv::ComponentBody_System::ParentChildVector::reserve(const size_t size) {
+    Parents.reserve(size);
+    Order.reserve(size);
+    WorldTransforms.reserve(size);
+    LocalTransforms.reserve(size);
+}
+void Engine::priv::ComponentBody_System::ParentChildVector::insert(const std::uint32_t parentID, const std::uint32_t childID) {
+    //if (Parents.size() <= parentID || Parents.size() <= childID) {
+
+    if (Parents.capacity() < parentID || Parents.capacity() < childID) {
+        reserve(std::max(parentID, childID) + 50U);
+    }
+    if (Parents.size() < parentID || Parents.size() < childID) {
         resize(std::max(parentID, childID));
     }
 
@@ -1293,7 +1313,7 @@ void Engine::priv::ComponentBody_System::ParentChildVector::insert(const std::ui
                     added = true;
                     break;
                 }
-            }       
+            }
             if (added) {
                 break;
             }
@@ -1307,14 +1327,16 @@ void Engine::priv::ComponentBody_System::ParentChildVector::insert(const std::ui
     }
     if (!added) {
         /* add both at order head */
-        Order[OrderHead]     = parentID;
-        Order[OrderHead + 1] = childID;
-        OrderHead += 2;
+        Order[OrderHead]       = parentID;
+        Order[OrderHead + 1U]  = childID;
+        OrderHead             += 2;
     }
+
+    WorldTransforms[childID - 1U] = WorldTransforms[parentID - 1U] * LocalTransforms[childID - 1U];
 }
-void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::uint32_t& parentID, const std::uint32_t& childID) {
-    size_t parentIndex = 0;
-    bool foundParent = false;
+void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::uint32_t parentID, const std::uint32_t childID) {
+    size_t parentIndex    = 0;
+    bool foundParent      = false;
     Parents[childID - 1U] = 0;
 
     for (size_t i = 0; i < Order.size(); ++i) {
@@ -1334,25 +1356,25 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::ui
             Order[i] = 0;
 
             //now move all children of parent to be next to parent
-            for (size_t j = i + 1; j < Order.size(); ++j) {
+            for (size_t j = i + 1U; j < Order.size(); ++j) {
                 const auto& entityIDCaseOne = Order[j];
                 if (Order[j] == 0) {
                     break;
                 }
                 if (Parents[entityIDCaseOne - 1U] == parentID) {
-                    std::swap(Order[j-1], Order[j]);
-                }else if (Parents[entityIDCaseOne - 1U] == childID && Order[j-1] == 0) {
-                    Order[j - 1] = childID;
+                    std::swap(Order[j - 1U], Order[j]);
+                }else if (Parents[entityIDCaseOne - 1U] == childID && Order[j - 1U] == 0) {
+                    Order[j - 1U] = childID;
                 }else if (Parents[entityIDCaseOne - 1U] == 0) {
                     break;
                 }
             }
             //cleanup / edge cases
-            if (Order[i + 1] == 0) {
+            if (Order[i + 1U] == 0) {
                 Order.erase(Order.begin() + i);
                 --OrderHead;
             }
-            if (parentIndex > 0 && Order[parentIndex + 1] == 0) {
+            if (parentIndex > 0 && Order[parentIndex + 1U] == 0) {
                 Order[parentIndex] = 0;
                 Order.erase(Order.begin() + parentIndex);
                 --OrderHead;

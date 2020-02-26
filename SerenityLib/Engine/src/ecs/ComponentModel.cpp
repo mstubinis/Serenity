@@ -303,7 +303,7 @@ void ComponentModel::setUserPointer(void* UserPointer) {
 
 #pragma region System
 
-struct priv::ComponentModel_UpdateFunction final { void operator()(void* system, void* componentPool, const float& dt, Scene& scene) const {
+struct priv::ComponentModel_UpdateFunction final { void operator()(void* system, void* componentPool, const float dt, Scene& scene) const {
     auto& pool       = *static_cast<ECSComponentPool<Entity, ComponentModel>*>(componentPool);
     auto& components = pool.data();
     auto lamda_update_component = [&](ComponentModel& componentModel, const size_t& i) {

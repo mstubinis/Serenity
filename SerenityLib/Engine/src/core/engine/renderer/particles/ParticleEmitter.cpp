@@ -13,7 +13,7 @@
 using namespace std;
 using namespace Engine;
 
-struct EmptyUpdate final { void operator()(ParticleEmitter* emitter, const float& dt, ParticleEmissionProperties& properties, std::mutex& mutex_) {
+struct EmptyUpdate final { void operator()(ParticleEmitter* emitter, const float dt, ParticleEmissionProperties& properties, std::mutex& mutex_) {
 
 };};
 
@@ -25,11 +25,11 @@ ParticleEmitter::ParticleEmitter() : EntityWrapper(*Resources::getCurrentScene()
     internal_init();
 
 }
-ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, EntityWrapper* parent) 
+ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, EntityWrapper* parent) 
 : ParticleEmitter(properties, scene, lifetime, (parent) ? parent->entity() : Entity::null_){
 
 }
-ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const double lifetime, const Entity& parent) : EntityWrapper(scene){
+ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity& parent) : EntityWrapper(scene){
     setProperties(properties);
     m_Active   = true;
     m_Parent   = parent;
@@ -94,7 +94,7 @@ void ParticleEmitter::setProperties(ParticleEmissionProperties& properties) {
 }
 
 
-void ParticleEmitter::update(const size_t& index, const float& dt, priv::ParticleSystem& particleSystem, const bool multi_threaded) {
+void ParticleEmitter::update(const size_t index, const float dt, priv::ParticleSystem& particleSystem, const bool multi_threaded) {
     //handle spawning
     if (m_Active) {
         m_Timer           += dt;
@@ -130,7 +130,7 @@ void ParticleEmitter::update(const size_t& index, const float& dt, priv::Particl
     }
 }
 
-const bool& ParticleEmitter::isActive() const {
+const bool ParticleEmitter::isActive() const {
     return m_Active;
 }
 

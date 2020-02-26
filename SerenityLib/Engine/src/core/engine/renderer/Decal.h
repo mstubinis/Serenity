@@ -27,15 +27,15 @@ class Decal final: public EntityWrapper{
             Material& material,
             const glm_vec3& position,
             const glm::vec3& hitNormal,
-            const float& size,
+            const float size,
             Scene& scene,
-            const float& lifetimeMax,
+            const float lifetimeMax,
             const RenderStage::Stage stage = RenderStage::Decals
         );
         ~Decal();
 
-        void update(const float& dt);
-        const bool& active() const;
+        void update(const float dt);
+        const bool active() const;
 
         const glm_vec3& initialPosition() const;
         const glm_quat& initialRotation() const;

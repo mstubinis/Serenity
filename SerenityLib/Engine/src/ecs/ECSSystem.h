@@ -24,7 +24,7 @@ namespace Engine::priv {
             ECSSystem(ECSSystem&& other) noexcept            = delete;
             ECSSystem& operator=(ECSSystem&& other) noexcept = delete;
 
-            virtual void onUpdate(const float& dt, Scene&) {}
+            virtual void onUpdate(const float dt, Scene&) {}
             virtual void onComponentAddedToEntity(void*, TEntity&) {}
             virtual void onComponentRemovedFromEntity(TEntity&) {}
             virtual void onEntityAddedToScene(TEntity&, Scene&) {}
@@ -74,7 +74,7 @@ namespace Engine::priv {
             ECSSystem(ECSSystem&& other) noexcept            = delete;
             ECSSystem& operator=(ECSSystem&& other) noexcept = delete;
 
-            void onUpdate(const float& dt, Scene& scene) { 
+            void onUpdate(const float dt, Scene& scene) { 
                 super::SUF(this, &componentPool, dt, scene); 
 			}
             void onComponentAddedToEntity(void* component, TEntity& entity) { 

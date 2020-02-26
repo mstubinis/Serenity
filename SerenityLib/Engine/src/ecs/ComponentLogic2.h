@@ -24,10 +24,10 @@ class ComponentLogic2 : public ComponentBaseClass, public Engine::NonCopyable {
     friend struct Engine::priv::ComponentLogic2_SceneLeftFunction;
 
     private:
-        void*                                                        m_UserPointer;
-        void*                                                        m_UserPointer1;
-        void*                                                        m_UserPointer2;
-        std::function<void(const ComponentLogic2*, const float&)>    m_Functor;
+        void*                                                        m_UserPointer  = nullptr;
+        void*                                                        m_UserPointer1 = nullptr;
+        void*                                                        m_UserPointer2 = nullptr;
+        std::function<void(const ComponentLogic2*, const float)>     m_Functor      = [](const ComponentLogic2*, const float) {};
     public:
         ComponentLogic2(const Entity& entity);
         template<typename T> 
@@ -44,7 +44,7 @@ class ComponentLogic2 : public ComponentBaseClass, public Engine::NonCopyable {
 
         ~ComponentLogic2();
 
-        void call(const float& dt) const;
+        void call(const float dt) const;
 
         template<typename T> void setFunctor(const T& functor) { 
             m_Functor = std::bind<void>(std::move(functor), std::placeholders::_1, std::placeholders::_2);

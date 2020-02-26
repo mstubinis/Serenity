@@ -98,9 +98,9 @@ class ModelInstance final{
         static void setDefaultViewportFlag(const unsigned int flag);
         static void setDefaultViewportFlag(const ViewportFlag::Flag flag);
 
-        const size_t& index() const;
-        const ModelDrawingMode::Mode& getDrawingMode() const;
-        void setDrawingMode(const ModelDrawingMode::Mode&);
+        const size_t index() const;
+        const ModelDrawingMode::Mode getDrawingMode() const;
+        void setDrawingMode(const ModelDrawingMode::Mode);
 
         void setViewportFlag(const unsigned int flag);
         void addViewportFlag(const unsigned int flag);
@@ -109,7 +109,7 @@ class ModelInstance final{
         void addViewportFlag(const ViewportFlag::Flag flag);
         void removeViewportFlag(const ViewportFlag::Flag flag);
 
-        const unsigned int& getViewportFlags() const;
+        const unsigned int getViewportFlags() const;
 
         void forceRender(const bool forced = true);
         const bool isForceRendered() const;
@@ -128,53 +128,53 @@ class ModelInstance final{
         const glm::quat& orientation() const;
         const glm::vec3& getScale() const;
 
-        const bool& visible() const;
-        const bool& passedRenderCheck() const;
-        void setPassedRenderCheck(const bool&);
+        const bool visible() const;
+        const bool passedRenderCheck() const;
+        void setPassedRenderCheck(const bool);
         void show();
         void hide();
 
-        const RenderStage::Stage& stage() const;
+        const RenderStage::Stage stage() const;
         //void setStage(const RenderStage::Stage& stage);
-        void setStage(const RenderStage::Stage& stage, ComponentModel&);
+        void setStage(const RenderStage::Stage stage, ComponentModel&);
 
-        void playAnimation(const std::string& animName, const float& startTime, const float& endTime = -1.0f, const unsigned int& requestedLoops = 1);
+        void playAnimation(const std::string& animName, const float startTime, const float endTime = -1.0f, const unsigned int requestedLoops = 1);
 
-        void setColor(const float& r, const float& g, const float& b, const float& a = 1.0f);
-        void setColor(const unsigned char& r, const unsigned char& g, const unsigned char& b, const unsigned char& a = 255);
+        void setColor(const float r, const float g, const float b, const float a = 1.0f);
+        void setColor(const unsigned char r, const unsigned char g, const unsigned char b, const unsigned char a = 255);
         void setColor(const glm::vec4& color);
         void setColor(const glm::vec3& color);
 
-        void setGodRaysColor(const float& r, const float& g, const float& b);
+        void setGodRaysColor(const float r, const float g, const float b);
         void setGodRaysColor(const glm::vec3& color);
 
-        void setShaderProgram(const Handle& shaderPHandle, ComponentModel&);
+        void setShaderProgram(const Handle shaderPHandle, ComponentModel&);
         void setShaderProgram(ShaderProgram*, ComponentModel&);
 
-        void setMesh(const Handle& meshHandle, ComponentModel&);
+        void setMesh(const Handle meshHandle, ComponentModel&);
         void setMesh(Mesh*, ComponentModel&);
 
-        void setMaterial(const Handle& materialHandle, ComponentModel&);
+        void setMaterial(const Handle materialHandle, ComponentModel&);
         void setMaterial(Material*, ComponentModel&);
 
-        void setPosition(const float& x, const float& y, const float& z);
+        void setPosition(const float x, const float y, const float z);
         void setPosition(const glm::vec3& position);
 
         void setOrientation(const glm::quat& orientation);
-        void setOrientation(const float& x, const float& y, const float& z);
+        void setOrientation(const float x, const float y, const float z);
 
-        void setScale(const float& scale);
+        void setScale(const float scale);
 
-        void setScale(const float& x, const float& y, const float& z);
+        void setScale(const float x, const float y, const float z);
         void setScale(const glm::vec3& scale);
 
-        void translate(const float& x, const float& y, const float& z);
+        void translate(const float x, const float y, const float z);
         void translate(const glm::vec3& translation);
 
-        void rotate(const float& pitch, const float& yaw, const float& roll);
+        void rotate(const float pitch, const float yaw, const float roll);
         void rotate(const glm::vec3& rotation);
 
-        void scale(const float& x, const float& y, const float& z);
+        void scale(const float x, const float y, const float z);
         void scale(const glm::vec3& scale);
 };
 

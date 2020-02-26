@@ -293,7 +293,7 @@ void DeferredPipeline::init() {
     internal_generate_brdf_lut(*m_InternalShaderPrograms[ShaderProgramEnum::BRDFPrecomputeCookTorrance], 512);
 }
 //DONE
-void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, const unsigned int& convoludeTextureSize, const unsigned int& preEnvFilterSize) {
+void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, const unsigned int convoludeTextureSize, const unsigned int preEnvFilterSize) {
     const auto texType = texture.type();
     if (texType != GL_TEXTURE_CUBE_MAP) {
         //cout << "(Texture) : Only cubemaps can be precomputed for IBL. Ignoring genPBREnvMapData() call..." << endl;
@@ -361,7 +361,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
     fbo.unbind();
 }
 //DONE
-void DeferredPipeline::internal_generate_brdf_lut(ShaderProgram& program, const unsigned int& brdfSize) {
+void DeferredPipeline::internal_generate_brdf_lut(ShaderProgram& program, const unsigned int brdfSize) {
     FramebufferObject fbo(brdfSize, brdfSize); //try without a depth format
     fbo.bind();
 
@@ -500,7 +500,7 @@ void DeferredPipeline::sendTexture(const char* location, const Texture& texture,
     m_OpenGLStateMachine.GL_glBindTextureForRendering(texture.type(), texture.address());
     Engine::Renderer::sendUniform1(location, slot);
 }
-void DeferredPipeline::sendTexture(const char* location, const unsigned int textureObject, const int slot, const unsigned int& textureTarget) {
+void DeferredPipeline::sendTexture(const char* location, const unsigned int textureObject, const int slot, const unsigned int textureTarget) {
     m_OpenGLStateMachine.GL_glActiveTexture(slot);
     m_OpenGLStateMachine.GL_glBindTextureForRendering(textureTarget, textureObject);
     Engine::Renderer::sendUniform1(location, slot);
@@ -510,7 +510,7 @@ void DeferredPipeline::sendTextureSafe(const char* location, const Texture& text
     m_OpenGLStateMachine.GL_glBindTextureForRendering(texture.type(), texture.address());
     Engine::Renderer::sendUniform1Safe(location, slot);
 }
-void DeferredPipeline::sendTextureSafe(const char* location, const unsigned int textureObject, const int slot, const unsigned int& textureTarget) {
+void DeferredPipeline::sendTextureSafe(const char* location, const unsigned int textureObject, const int slot, const unsigned int textureTarget) {
     m_OpenGLStateMachine.GL_glActiveTexture(slot);
     m_OpenGLStateMachine.GL_glBindTextureForRendering(textureTarget, textureObject);
     Engine::Renderer::sendUniform1Safe(location, slot);
@@ -567,7 +567,7 @@ const bool DeferredPipeline::unbindMesh() {
 }
 
 
-void DeferredPipeline::generatePBRData(Texture& texture, const unsigned int& convoludeSize, const unsigned int& prefilterSize) {
+void DeferredPipeline::generatePBRData(Texture& texture, const unsigned int convoludeSize, const unsigned int prefilterSize) {
     internal_generate_pbr_data_for_texture(
         *m_InternalShaderPrograms[ShaderProgramEnum::CubemapConvolude], 
         *m_InternalShaderPrograms[ShaderProgramEnum::CubemapPrefilterEnv], 
@@ -588,7 +588,7 @@ void DeferredPipeline::onFullscreen() {
     m_GBuffer.init(winSize.x, winSize.y);
 }
 //DONE
-void DeferredPipeline::onResize(const unsigned int& newWidth, const unsigned int& newHeight) {
+void DeferredPipeline::onResize(const unsigned int newWidth, const unsigned int newHeight) {
     const float floatWidth  = static_cast<float>(newWidth);
     const float floatHeight = static_cast<float>(newHeight);
 
@@ -835,7 +835,7 @@ void DeferredPipeline::renderMesh(const Mesh& mesh, const unsigned int mode) {
     //}
 }
 
-void DeferredPipeline::internal_render_2d_text_left(const string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
+void DeferredPipeline::internal_render_2d_text_left(const string& text, const Font& font, const float newLineGlyphHeight, float& x, float& y, const float z) {
     unsigned int i = 0;
     for (auto& character : text) {
         if (character == '\n') {
@@ -865,7 +865,7 @@ void DeferredPipeline::internal_render_2d_text_left(const string& text, const Fo
         }
     }
 }
-void DeferredPipeline::internal_render_2d_text_center(const string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
+void DeferredPipeline::internal_render_2d_text_center(const string& text, const Font& font, const float newLineGlyphHeight, float& x, float& y, const float z) {
     vector<string> lines;
     vector<unsigned short> lines_sizes;
     string line_accumulator = "";
@@ -920,7 +920,7 @@ void DeferredPipeline::internal_render_2d_text_center(const string& text, const 
         x = 0.0f;
     }
 }
-void DeferredPipeline::internal_render_2d_text_right(const string& text, const Font& font, const float& newLineGlyphHeight, float& x, float& y, const float& z) {
+void DeferredPipeline::internal_render_2d_text_right(const string& text, const Font& font, const float newLineGlyphHeight, float& x, float& y, const float z) {
     vector<string> lines;
     string line_accumulator = "";
     for (auto& character : text) {
@@ -1415,7 +1415,7 @@ void DeferredPipeline::internal_pass_blur(const Viewport& viewport, const GLuint
 
 
 
-void DeferredPipeline::update(const float& dt) {
+void DeferredPipeline::update(const float dt) {
 
 }
 void DeferredPipeline::render(Engine::priv::Renderer& renderer, const Viewport& viewport, const bool mainRenderFunction) {
@@ -1512,14 +1512,14 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, const Viewport& 
     Engine::Renderer::GLEnablei(GL_BLEND, 0);
     if (mainRenderFunction && (viewport.getRenderFlags() & ViewportRenderingFlag::PhysicsDebug)) {
         #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
-            //if (m_Renderer.m_DrawPhysicsDebug && &camera == scene.getActiveCamera()) {
+            if (m_Renderer.m_DrawPhysicsDebug && &camera == scene.getActiveCamera()) {
         #endif
                 Engine::Renderer::GLDisable(GL_DEPTH_TEST);
                 glDepthMask(GL_FALSE);
                 m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::BulletPhysics]);
                 Core::m_Engine->m_PhysicsManager._render(camera);
         #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
-            //}
+            }
         #endif
     }
     #pragma endregion
@@ -1587,7 +1587,7 @@ void DeferredPipeline::renderTriangle(const glm::vec2& position, const glm::vec4
 }
 
 void DeferredPipeline::renderFullscreenTriangle() {
-    const auto& winSize = glm::vec2(Resources::getWindowSize());
+    const glm::vec2 winSize = glm::vec2(Resources::getWindowSize());
 
     const glm::mat4 p = glm::ortho(0.0f, winSize.x, 0.0f, winSize.y);
     Engine::Renderer::sendUniformMatrix4("Model", glm::mat4(1.0f));
@@ -1596,7 +1596,7 @@ void DeferredPipeline::renderFullscreenTriangle() {
     m_FullscreenTriangle.render();
 }
 void DeferredPipeline::renderFullscreenQuad() {
-    const auto& winSize = glm::vec2(Resources::getWindowSize());
+    const glm::vec2 winSize = glm::vec2(Resources::getWindowSize());
 
     const glm::mat4 p = glm::ortho(0.0f, winSize.x, 0.0f, winSize.y);
     Engine::Renderer::sendUniformMatrix4("Model", glm::mat4(1.0f));

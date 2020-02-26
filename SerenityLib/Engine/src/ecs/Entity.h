@@ -10,7 +10,7 @@ struct Entity{
     std::uint32_t data = 0;
 
     Entity();
-    Entity(const unsigned int& entityID, const unsigned int& sceneID, const unsigned int& versionID);
+    Entity(const unsigned int entityID, const unsigned int sceneID, const unsigned int versionID);
     ~Entity();
 
     Entity(const Entity& other);
@@ -24,7 +24,7 @@ struct Entity{
     const bool operator==(const Entity& other) const;
     const bool operator!=(const Entity& other) const;
 
-    void process(const unsigned int& entityID, const unsigned int& sceneID, const unsigned int& versionID);
+    void process(const unsigned int entityID, const unsigned int sceneID, const unsigned int versionID);
 
     Scene& scene() const;
     void destroy();

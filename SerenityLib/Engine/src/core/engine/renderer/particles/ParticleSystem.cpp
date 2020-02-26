@@ -28,7 +28,7 @@ priv::ParticleSystem::~ParticleSystem() {
 }
 
 
-void priv::ParticleSystem::internal_update_emitters(const float& dt) {
+void priv::ParticleSystem::internal_update_emitters(const float dt) {
     if (m_ParticleEmitters.size() == 0) {
         return;
     }
@@ -38,7 +38,7 @@ void priv::ParticleSystem::internal_update_emitters(const float& dt) {
     };
     priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_emitter, m_ParticleEmitters, true);
 }
-void priv::ParticleSystem::internal_update_particles(const float& dt, const Camera& camera) {
+void priv::ParticleSystem::internal_update_particles(const float dt, const Camera& camera) {
     if (m_Particles.size() == 0) {
         return;
     }
@@ -90,7 +90,7 @@ const bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter) {
 }
 
 
-void priv::ParticleSystem::update(const float& dt, const Camera& camera) {
+void priv::ParticleSystem::update(const float dt, const Camera& camera) {
     internal_update_particles(dt, camera);
     internal_update_emitters(dt);
 }

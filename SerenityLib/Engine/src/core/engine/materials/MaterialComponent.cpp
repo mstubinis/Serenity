@@ -14,7 +14,7 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace std;
 
-MaterialComponent::MaterialComponent(const MaterialComponentType::Type& type, Texture* texture, Texture* mask, Texture* cubemap) {
+MaterialComponent::MaterialComponent(const MaterialComponentType::Type type, Texture* texture, Texture* mask, Texture* cubemap) {
     m_ComponentType = type;
     m_NumLayers = 0;
 
@@ -88,23 +88,23 @@ MaterialLayer* MaterialComponent::addLayer(Texture* texture, Texture* mask, Text
     return &layer;
 }
 
-Texture* MaterialComponent::texture(const size_t& index) const {
+Texture* MaterialComponent::texture(const size_t index) const {
     return m_Layers[index].getTexture();
 }
-Texture* MaterialComponent::mask(const size_t& index) const {
+Texture* MaterialComponent::mask(const size_t index) const {
     return m_Layers[index].getMask();
 }
-Texture* MaterialComponent::cubemap(const size_t& index) const {
+Texture* MaterialComponent::cubemap(const size_t index) const {
     return m_Layers[index].getCubemap();
 }
-MaterialLayer& MaterialComponent::layer(const size_t& index) {
+MaterialLayer& MaterialComponent::layer(const size_t index) {
     return m_Layers[index];
 }
-const MaterialComponentType::Type& MaterialComponent::type() const {
+const MaterialComponentType::Type MaterialComponent::type() const {
     return m_ComponentType;
 }
 
-void MaterialComponent::bind(const size_t& component_index, size_t& textureUnit) const {
+void MaterialComponent::bind(const size_t component_index, size_t& textureUnit) const {
     const string wholeString = "components[" + to_string(component_index) + "].";
     Engine::Renderer::sendUniform1Safe((wholeString + "numLayers").c_str(), static_cast<int>(m_NumLayers));
     Engine::Renderer::sendUniform1Safe((wholeString + "componentType").c_str(), static_cast<int>(m_ComponentType));
@@ -114,7 +114,7 @@ void MaterialComponent::bind(const size_t& component_index, size_t& textureUnit)
 }
 void MaterialComponent::unbind() {
 }
-void MaterialComponent::update(const float& dt) {
+void MaterialComponent::update(const float dt) {
     for (unsigned int i = 0; i < m_NumLayers; ++i) {
         m_Layers[i].update(dt);
     }

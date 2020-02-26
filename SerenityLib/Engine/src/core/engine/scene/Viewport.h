@@ -56,24 +56,24 @@ class Viewport final : public Engine::NonCopyable {
         const unsigned int id() const;
         void setID(const unsigned int id);
 
-        const unsigned short& getRenderFlags() const;
-        void setRenderFlag(const ViewportRenderingFlag::Flag& flag);
-        void addRenderFlag(const ViewportRenderingFlag::Flag& flag);
-        void removeRenderFlag(const ViewportRenderingFlag::Flag& flag);
+        const unsigned short getRenderFlags() const;
+        void setRenderFlag(const ViewportRenderingFlag::Flag flag);
+        void addRenderFlag(const ViewportRenderingFlag::Flag flag);
+        void removeRenderFlag(const ViewportRenderingFlag::Flag flag);
 
-        const float& getDepthMaskValue() const;
-        void setDepthMaskValue(const float& depth);
+        const float getDepthMaskValue() const;
+        void setDepthMaskValue(const float depth);
 
-        void activateDepthMask(const bool& active = true);
+        void activateDepthMask(const bool active = true);
         const bool isDepthMaskActive() const;
 
         const glm::vec4& getBackgroundColor() const;
-        void setBackgroundColor(const float& r, const float& g, const float& b, const float& a);
+        void setBackgroundColor(const float r, const float g, const float b, const float a);
 
-        void setAspectRatioSynced(const bool& synced);
+        void setAspectRatioSynced(const bool synced);
         const bool isAspectRatioSynced() const;
 
-        void activate(const bool& activate = true);
+        void activate(const bool activate = true);
         const bool isActive() const;
 
 

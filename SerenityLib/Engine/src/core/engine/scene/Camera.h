@@ -32,10 +32,10 @@ class Camera: public EntityWrapper{
         const decimal getDistanceSquared(const Entity& e, const glm_vec3& this_pos) const;
         const decimal getDistanceSquared(const glm_vec3& objPos, const glm_vec3& this_pos) const;
 
-        const float& getAngle() const;    void setAngle(const float angle) const;
-        const float& getAspect() const;   void setAspect(const float aspectRatio) const;
-        const float& getNear() const;     void setNear(const float nearPlane) const;
-        const float& getFar() const;      void setFar(const float farPlane) const;
+        const float getAngle() const;    void setAngle(const float angle) const;
+        const float getAspect() const;   void setAspect(const float aspectRatio) const;
+        const float getNear() const;     void setNear(const float nearPlane) const;
+        const float getFar() const;      void setFar(const float farPlane) const;
 
         const glm::mat4 getProjection() const;
         const glm::mat4 getProjectionInverse() const;

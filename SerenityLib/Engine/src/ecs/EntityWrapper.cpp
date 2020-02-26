@@ -11,6 +11,7 @@ EntityWrapper::EntityWrapper(Scene& scene) {
     m_Entity = scene_->createEntity();
 }
 EntityWrapper::~EntityWrapper() {
+
 }
 EntityWrapper::EntityWrapper(EntityWrapper&& other) noexcept {
     m_Entity = std::move(other.m_Entity);

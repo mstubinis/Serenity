@@ -23,10 +23,10 @@ class ComponentLogic1 : public ComponentBaseClass {
     friend struct Engine::priv::ComponentLogic1_SceneEnteredFunction;
     friend struct Engine::priv::ComponentLogic1_SceneLeftFunction;
     private:
-        void*                                                        m_UserPointer;
-        void*                                                        m_UserPointer1;
-        void*                                                        m_UserPointer2;
-        std::function<void(const ComponentLogic1*, const float&)>    m_Functor;
+        void*                                                        m_UserPointer  = nullptr;
+        void*                                                        m_UserPointer1 = nullptr;
+        void*                                                        m_UserPointer2 = nullptr;
+        std::function<void(const ComponentLogic1*, const float)>     m_Functor      = [](const ComponentLogic1*, const float) {};
     public:
         ComponentLogic1(const Entity& entity);
         template<typename T> 
@@ -43,7 +43,7 @@ class ComponentLogic1 : public ComponentBaseClass {
 
         ~ComponentLogic1();
 
-        void call(const float& dt) const;
+        void call(const float dt) const;
 
         template<typename T> void setFunctor(const T& functor) { 
             m_Functor = std::bind<void>(std::move(functor), std::placeholders::_1, std::placeholders::_2);

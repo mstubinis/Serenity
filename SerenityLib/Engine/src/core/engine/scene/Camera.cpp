@@ -11,9 +11,9 @@ using namespace std;
 
 
 Camera::Camera(const float angle, const float aspectRatio, const float near_, const float far_, Scene* scene) : EntityWrapper(*scene){//create a perspective camera
-    if (!scene)
+    if (!scene) {
         scene = Resources::getCurrentScene();
-
+    }
     m_Entity.addComponent<ComponentCamera>(angle, aspectRatio, near_, far_);
     m_Entity.addComponent<ComponentLogic2>();
     m_Entity.addComponent<ComponentBody>();
@@ -28,9 +28,9 @@ Camera::Camera(const float angle, const float aspectRatio, const float near_, co
     priv::InternalScenePublicInterface::GetCameras(*scene).push_back(this);
 }
 Camera::Camera(const float left, const float right, const float bottom, const float top, const float near_, const float far_, Scene* scene) : EntityWrapper(*scene){//create an orthographic camera
-    if (!scene)
+    if (!scene) {
         scene = Resources::getCurrentScene();
-
+    }
     m_Entity.addComponent<ComponentCamera>(left, right, bottom, top, near_, far_);
     m_Entity.addComponent<ComponentLogic2>();
     m_Entity.addComponent<ComponentBody>();
@@ -55,16 +55,16 @@ const glm_vec3 Camera::getPosition() const {
 const glm::quat Camera::getOrientation() const {
     return glm::conjugate(glm::quat_cast(m_Entity.getComponent<ComponentCamera>()->getView())); 
 }
-const float& Camera::getAngle() const {
+const float Camera::getAngle() const {
     return m_Entity.getComponent<ComponentCamera>()->m_Angle; 
 }
-const float& Camera::getAspect() const {
+const float Camera::getAspect() const {
     return m_Entity.getComponent<ComponentCamera>()->m_AspectRatio; 
 }
-const float& Camera::getNear() const {
+const float Camera::getNear() const {
     return m_Entity.getComponent<ComponentCamera>()->m_NearPlane; 
 }
-const float& Camera::getFar() const {
+const float Camera::getFar() const {
     return m_Entity.getComponent<ComponentCamera>()->m_FarPlane; 
 }
 void Camera::setAngle(const float Angle) const {

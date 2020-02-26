@@ -235,7 +235,7 @@ const unsigned char Material::smoothness() const {
 const unsigned char Material::alpha() const {
     return m_BaseAlpha;
 }
-void Material::setShadeless(const bool& shadeless){
+void Material::setShadeless(const bool shadeless){
     m_Shadeless = shadeless;
     internalUpdateGlobalMaterialPool(false);
 }
@@ -246,7 +246,7 @@ void Material::setGlow(const unsigned char glow){
 void Material::setF0Color(const glm::vec3& color){
     Material::setF0Color(color.r, color.g, color.b);
 }
-void Material::setF0Color(const float& r, const float& g, const float& b){
+void Material::setF0Color(const float r, const float g, const float b){
     m_F0Color = Engine::color_vector_4(
         glm::clamp(r, 0.01f, 0.99f),
         glm::clamp(g, 0.01f, 0.99f),
@@ -255,7 +255,7 @@ void Material::setF0Color(const float& r, const float& g, const float& b){
     );
     internalUpdateGlobalMaterialPool(false);
 }
-void Material::setMaterialPhysics(const MaterialPhysics::Physics& materialPhysics){
+void Material::setMaterialPhysics(const MaterialPhysics::Physics materialPhysics){
     const auto& t = MATERIAL_PROPERTIES[materialPhysics];
     setF0Color(get<0>(t), get<1>(t), get<2>(t));
     setSmoothness(get<3>(t));
@@ -286,7 +286,7 @@ void Material::setAlpha(const unsigned char alpha) {
     m_BaseAlpha = glm::clamp(alpha, 1_uc, 255_uc);
     internalUpdateGlobalMaterialPool(false);
 }
-void Material::update(const float& dt) {
+void Material::update(const float dt) {
     for (size_t i = 0; i < m_Components.size(); ++i) {
         auto* component = m_Components[i];
         if (!component)

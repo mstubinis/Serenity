@@ -6,7 +6,7 @@ using namespace Engine::priv;
 
 #pragma region EntityDataRequest
 
-EntityDataRequest::EntityDataRequest(const unsigned int& data) {
+EntityDataRequest::EntityDataRequest(const unsigned int data) {
     serialize(data); 
 }
 EntityDataRequest::EntityDataRequest(const Entity& entity) {
@@ -36,7 +36,7 @@ EntityDataRequest& EntityDataRequest::operator=(EntityDataRequest&& other) noexc
     }
     return *this;
 }
-void EntityDataRequest::serialize(const unsigned int& entityData) {
+void EntityDataRequest::serialize(const unsigned int entityData) {
     ID        = (entityData & 4'194'303)    >> 0;  //   = 21    (2 ^ 22 = 419,304)
     sceneID   = (entityData & 534'773'760)  >> 21; //+7 = 28    (2 ^ 29 = 536,870,912)
     versionID = (entityData & 4'026'531'840) >> 28; //+4 = 32    (2 ^ 32 = 4,294,967,296)
@@ -46,14 +46,14 @@ void EntityDataRequest::serialize(const unsigned int& entityData) {
 
 #pragma region EntityPOD
 
-EntityPOD::EntityPOD(const unsigned int& entityID, Scene& scene) {
+EntityPOD::EntityPOD(const unsigned int entityID, Scene& scene) {
     ID        = entityID;
     sceneID   = scene.id();
     versionID = 0; 
 }
-EntityPOD::EntityPOD(const unsigned int& entityID, const unsigned int& _sceneID) {
+EntityPOD::EntityPOD(const unsigned int entityID, const unsigned int sceneID_) {
     ID        = entityID;
-    sceneID   = _sceneID;
+    sceneID   = sceneID_;
     versionID = 0; 
 }
 EntityPOD::~EntityPOD() {

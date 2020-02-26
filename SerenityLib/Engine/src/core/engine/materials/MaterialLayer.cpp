@@ -10,7 +10,7 @@ using namespace Engine;
 using namespace Engine::priv;
 
 //TODO: implement the uv modification system
-struct SimpleUVTranslationFunctor { void operator()(const float& dt, MaterialLayer& layer, const float& translationX, const float& translationY) const {
+struct SimpleUVTranslationFunctor { void operator()(const float dt, MaterialLayer& layer, const float translationX, const float translationY) const {
     auto& currentUVs = layer.getUVModifications();
     layer.m_UVModifications = currentUVs + glm::vec2(translationX * dt, translationY * dt);
     if (layer.m_UVModifications.x >= 5.0f)
@@ -40,7 +40,7 @@ const glm::vec4& MaterialLayer::data1() const {
 const glm::vec4& MaterialLayer::data2() const {
     return m_Data2;
 }
-void MaterialLayer::addUVModificationSimpleTranslation(const float& translationX, const float& translationY) {
+void MaterialLayer::addUVModificationSimpleTranslation(const float translationX, const float translationY) {
     SimpleUVTranslationFunctor functor;
     std_uv_func f = std::bind<void>(functor, std::placeholders::_1, std::ref(*this), translationX, translationY);
     m_UVModificationQueue.push_back(std::move(f));
@@ -48,19 +48,19 @@ void MaterialLayer::addUVModificationSimpleTranslation(const float& translationX
 void MaterialLayer::addUVModificationFunctor(const std_uv_func& functor) {
     m_UVModificationQueue.push_back(std::move(functor));
 }
-void MaterialLayer::setBlendMode(const MaterialLayerBlendMode::Mode& mode) {
+void MaterialLayer::setBlendMode(const MaterialLayerBlendMode::Mode mode) {
     m_Data1.x = static_cast<float>(mode);
 }
 const MaterialLayerBlendMode::Mode MaterialLayer::blendMode() const {
     return static_cast<MaterialLayerBlendMode::Mode>(static_cast<int>(m_Data1.x));
 }
-void MaterialLayer::setData1(const float& x, const float& y, const float& z, const float& w) {
+void MaterialLayer::setData1(const float x, const float y, const float z, const float w) {
     m_Data1.x = x;
     m_Data1.y = y;
     m_Data1.z = z;
     m_Data1.w = w;
 }
-void MaterialLayer::setData2(const float& x, const float& y, const float& z, const float& w) {
+void MaterialLayer::setData2(const float x, const float y, const float z, const float w) {
     m_Data2.x = x;
     m_Data2.y = y;
     m_Data2.z = z;
@@ -120,7 +120,7 @@ void MaterialLayer::update(const float& dt) {
         command(fDT);
     }
 }
-void MaterialLayer::sendDataToGPU(const string& uniform_component_string, const size_t& component_index, const size_t& layer_index, size_t& textureUnit) const {
+void MaterialLayer::sendDataToGPU(const string& uniform_component_string, const size_t component_index, const size_t layer_index, size_t& textureUnit) const {
     const string wholeString = uniform_component_string + "layers[" + to_string(layer_index) + "].";
     const auto start = (component_index * (MAX_MATERIAL_LAYERS_PER_COMPONENT * 3)) + (layer_index * 3);
 

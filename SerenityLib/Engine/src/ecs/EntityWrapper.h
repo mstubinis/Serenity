@@ -34,19 +34,24 @@ class EntityWrapper {
         void removeChild(const EntityWrapper& child) const;
 
 
-        template<typename T, typename... ARGS> inline void addComponent(ARGS&& ... args) {
+        template<typename T, typename... ARGS> 
+        inline void addComponent(ARGS&& ... args) {
             m_Entity.addComponent<T>(std::forward<ARGS>(args)...);
         }
-        template<typename T, typename... ARGS> inline void addComponent(EntityDataRequest& request, ARGS&& ... args) {
+        template<typename T, typename... ARGS> 
+        inline void addComponent(EntityDataRequest& request, ARGS&& ... args) {
             m_Entity.addComponent<T>(request, std::forward<ARGS>(args)...);
         }
-        template<typename T> inline const bool removeComponent() {
+        template<typename T> 
+        inline const bool removeComponent() {
             return m_Entity.removeComponent<T>();
         }
-        template<typename T> inline T* getComponent() const {
+        template<typename T> 
+        inline T* getComponent() const {
             return m_Entity.getComponent<T>();
         }
-        template<typename T> inline T* getComponent(const EntityDataRequest& dataRequest) const {
+        template<typename T> 
+        inline T* getComponent(const EntityDataRequest& dataRequest) const {
             return m_Entity.getComponent<T>(dataRequest);
         }
 };
