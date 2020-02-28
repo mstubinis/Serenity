@@ -4,7 +4,7 @@
 using namespace Engine;
 using namespace std;
 
-VertexData::VertexData(const VertexDataFormat& _format) : format(const_cast<VertexDataFormat&>(_format)), vao(0) {
+VertexData::VertexData(const VertexDataFormat& _format) : format(const_cast<VertexDataFormat&>(_format)){
     data.reserve(_format.attributes.size());
     for (size_t i = 0; i < data.capacity(); ++i) { 
         data.emplace_back();

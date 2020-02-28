@@ -1,4 +1,4 @@
-#include <core/engine/renderer/opengl/glsl/VersionConversion.h>
+﻿#include <core/engine/renderer/opengl/glsl/VersionConversion.h>
 #include <core/engine/renderer/opengl/Extensions.h>
 #include <core/engine/shaders/ShaderHelper.h>
 #include <core/engine/materials/MaterialEnums.h>
@@ -13,63 +13,41 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace std;
 
+//TODO: change from string_view to string in c++20?
+constexpr std::array<std::string_view, 30> TYPES {
+    "float",
+    "vec2",
+    "vec3",
+    "vec4",
+    "mat3",
+    "mat4",
+    "double",
+    "dvec2",
+    "dvec3",
+    "dvec4",
+    "dmat3",
+    "dmat4",
+    "int",
+    "ivec2",
+    "ivec3",
+    "ivec4",
+    "imat3",
+    "imat4",
+    "bool",
+    "bvec2",
+    "bvec3",
+    "bvec4",
+    "bmat3",
+    "bmat4",
+    "uint",
+    "uvec2",
+    "uvec3",
+    "uvec4",
+    "umat3",
+    "umat4",
+};
 
-void opengl::glsl::VersionConversion::convert(string& code, const unsigned int& versionNumber, const ShaderType::Type& shaderType) {
-    vector<string> _types;
-    _types.emplace_back("float");  _types.emplace_back("vec2");   _types.emplace_back("vec3");
-    _types.emplace_back("vec4");   _types.emplace_back("mat3");   _types.emplace_back("mat4");
-
-    _types.emplace_back("double"); _types.emplace_back("dvec2");  _types.emplace_back("dvec3");
-    _types.emplace_back("dvec4");  _types.emplace_back("dmat3");  _types.emplace_back("dmat4");
-
-    _types.emplace_back("int");    _types.emplace_back("ivec2");  _types.emplace_back("ivec3");
-    _types.emplace_back("ivec4");  _types.emplace_back("imat3");  _types.emplace_back("imat4");
-
-    _types.emplace_back("bool");   _types.emplace_back("bvec2");  _types.emplace_back("bvec3");
-    _types.emplace_back("bvec4");  _types.emplace_back("bmat3");  _types.emplace_back("bmat4");
-
-    _types.emplace_back("uint");   _types.emplace_back("uvec2");  _types.emplace_back("uvec3");
-    _types.emplace_back("uvec4");  _types.emplace_back("umat3");  _types.emplace_back("umat4");
-
-    //deal with layout (location = X) in
-    if (versionNumber < 330) {
-        if (shaderType == ShaderType::Vertex) {
-            if (ShaderHelper::sfind(code, "layout") && ShaderHelper::sfind(code, "location") && ShaderHelper::sfind(code, "=")) {
-                if (versionNumber > 130) {
-                    if (OpenGLExtensions::supported(OpenGLExtensions::EXT_separate_shader_objects)) {
-                        ShaderHelper::insertStringAtLine(code, "#extension GL_EXT_seperate_shader_objects : enable", 1);
-                    }else if (OpenGLExtensions::supported(OpenGLExtensions::ARB_separate_shader_objects)) {
-                        ShaderHelper::insertStringAtLine(code, "#extension GL_ARB_seperate_shader_objects : enable", 1);
-                    }if (OpenGLExtensions::supported(OpenGLExtensions::EXT_explicit_attrib_location)) {
-                        ShaderHelper::insertStringAtLine(code, "#extension GL_EXT_explicit_attrib_location : enable", 1);
-                    }else if (OpenGLExtensions::supported(OpenGLExtensions::ARB_explicit_attrib_location)) {
-                        ShaderHelper::insertStringAtLine(code, "#extension GL_ARB_explicit_attrib_location : enable", 1);
-                    }
-                }else{
-                    //replace with attribute
-                    istringstream str(code);
-                    string line;
-                    unsigned int count = 0;
-                    while (getline(str, line)) {
-                        if (ShaderHelper::sfind(line, "layout") && ShaderHelper::sfind(line, "location") && ShaderHelper::sfind(line, "=")) {
-                            for (auto& type : _types) {
-                                const size_t found = line.find(type);
-                                const size_t firstFound = line.find("layout");
-                                if (firstFound != string::npos && found != string::npos) {
-                                    const string _part1 = line.substr(0, firstFound);
-                                    line.erase(0, found);
-                                    line = _part1 + "attribute " + line;
-                                    ShaderHelper::insertStringAtAndReplaceLine(code, line, count);
-                                    break;
-                                }
-                            }
-                        }
-                        ++count;
-                    }
-                }
-            }
-        }
-    }
+void opengl::glsl::VersionConversion::convert(string& code, const unsigned int versionNumber, const ShaderType::Type shaderType) {
     //deal with MRT binding points
     if (versionNumber >= 130) {
         for (unsigned int i = 0; i < 100; ++i) {
@@ -108,7 +86,7 @@ void opengl::glsl::VersionConversion::convert(string& code, const unsigned int& 
             boost::replace_all(code, " varying", "in");
             boost::replace_all(code, "varying", "in");
             boost::replace_all(code, "gl_FragColor", "FRAG_COL");
-            ShaderHelper::insertStringAtLine(code, "out vec4 FRAG_COL;", 1);
+            code = "out vec4 FRAG_COL;\n" + code;
         }
     }
     if (versionNumber >= 140) {
@@ -134,7 +112,7 @@ void opengl::glsl::VersionConversion::convert(string& code, const unsigned int& 
             unsigned int aCount = 0;
             while (getline(str, line)) {
                 if (ShaderHelper::sfind(line, "attribute")) {
-                    for (auto& type : _types) {
+                    for (const auto& type : TYPES) {
                         const size_t found = line.find(type);
                         const size_t firstFound = line.find("attribute");
                         if (firstFound != string::npos && found != string::npos) {
@@ -152,6 +130,63 @@ void opengl::glsl::VersionConversion::convert(string& code, const unsigned int& 
                 ++count;
             }
         }else if (shaderType == ShaderType::Fragment) {
+        }
+    }
+    //deal with layout (location = X) in
+    if (versionNumber < 330) {
+        if (shaderType == ShaderType::Vertex) {
+            if (ShaderHelper::sfind(code, "layout") && ShaderHelper::sfind(code, "location") && ShaderHelper::sfind(code, "=")) {
+                if (versionNumber > 130) {
+                    if (OpenGLExtensions::supported(OpenGLExtensions::EXT_separate_shader_objects)) {
+                        code = "#extension GL_EXT_seperate_shader_objects : enable\n" + code;
+                    }else if (OpenGLExtensions::supported(OpenGLExtensions::ARB_separate_shader_objects)) {
+                        code = "#extension GL_ARB_seperate_shader_objects : enable\n" + code;
+                    }if (OpenGLExtensions::supported(OpenGLExtensions::EXT_explicit_attrib_location)) {
+                        code = "#extension GL_EXT_explicit_attrib_location : enable\n" + code;
+                    }else if (OpenGLExtensions::supported(OpenGLExtensions::ARB_explicit_attrib_location)) {
+                        code = "#extension GL_ARB_explicit_attrib_location : enable\n" + code;
+                    }
+                }else{
+                    //replace with attribute
+                    istringstream str(code);
+                    string line;
+                    unsigned int count = 0;
+                    while (getline(str, line)) {
+                        if (ShaderHelper::sfind(line, "layout") && ShaderHelper::sfind(line, "location") && ShaderHelper::sfind(line, "=")) {
+                            for (const auto& type : TYPES) {
+                                const size_t found = line.find(type);
+                                const size_t firstFound = line.find("layout");
+                                if (firstFound != string::npos && found != string::npos) {
+                                    const string _part1 = line.substr(0, firstFound);
+                                    line.erase(0, found);
+                                    line = _part1 + "attribute " + line;
+                                    ShaderHelper::insertStringAtAndReplaceLine(code, line, count);
+                                    break;
+                                }
+                            }
+                        }
+                        ++count;
+                    }
+                }
+            }
+        }
+    }
+    //deal with bindless textures
+    if (OpenGLExtensions::isBindlessTexturesSupported()) {
+        if (shaderType == ShaderType::Fragment) {
+            //         ShaderHelper::insertStringAtLine(code, "layout(bindless_sampler) uniform", 1);
+
+            if (OpenGLExtensions::supported(OpenGLExtensions::ARB_bindless_texture)) {
+                code = "#extension GL_ARB_bindless_texture : require\n" + code; //yes this is very much needed
+            }else if (OpenGLExtensions::supported(OpenGLExtensions::NV_bindless_texture)) {
+                code = "#extension GL_NV_bindless_texture : require\n" + code; //yes this is very much needed
+            }
+
+            if (OpenGLExtensions::supported(OpenGLExtensions::ARB_gpu_shader_int64)) {
+                code = "#extension GL_ARB_gpu_shader_int64 : require\n" + code; // for uint64_t
+            }else if (OpenGLExtensions::supported(OpenGLExtensions::NV_gpu_shader5)) {
+                code = "#extension GL_NV_gpu_shader5 : require\n" + code; // for uint64_t
+            }
         }
     }
 }

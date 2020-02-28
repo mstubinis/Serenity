@@ -15,8 +15,7 @@ using namespace Engine::priv;
 using namespace std;
 
 
-void opengl::glsl::Materials::convert(string& code, const unsigned int& versionNumber, const ShaderType::Type& shaderType) {
-
+void opengl::glsl::Materials::convert(string& code, const unsigned int versionNumber, const ShaderType::Type shaderType) {
 
 #pragma region process component
     if (ShaderHelper::sfind(code, "ProcessComponent(") || ShaderHelper::sfind(code, "ProcessComponentLOD(")) {

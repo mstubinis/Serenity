@@ -43,7 +43,7 @@ SoundMusic* priv::SoundManager::_getNextFreeMusic() {
     }
     return nullptr;
 }
-void priv::SoundManager::_setSoundInformation(Handle& handle, SoundEffect& sound) {
+void priv::SoundManager::_setSoundInformation(Handle handle, SoundEffect& sound) {
     SoundData& data = *Resources::getSoundData(handle);
     auto* buffer = data.getBuffer();
     if (!buffer) {
@@ -53,7 +53,7 @@ void priv::SoundManager::_setSoundInformation(Handle& handle, SoundEffect& sound
     sound.m_Sound.setBuffer(*buffer);
     sound.setVolume(data.getVolume());
 }
-void priv::SoundManager::_setSoundInformation(Handle& handle, SoundMusic& sound) {
+void priv::SoundManager::_setSoundInformation(Handle handle, SoundMusic& sound) {
     SoundData& data = *Resources::getSoundData(handle);
     //auto buffer = data.getBuffer();
     const bool res = sound.m_Sound.openFromFile(data.getFilename());
@@ -63,7 +63,7 @@ void priv::SoundManager::_setSoundInformation(Handle& handle, SoundMusic& sound)
     sound.m_Duration = data.getDuration();
 }
 
-void priv::SoundManager::_update(const float& dt){
+void priv::SoundManager::_update(const float dt){
     auto* scene = Resources::getCurrentScene();
     if (scene) {
         auto* camera = scene->getActiveCamera();
@@ -108,12 +108,12 @@ void priv::SoundManager::_update(const float& dt){
     }
 }
 
-SoundQueue* Sound::createQueue(const float& delay) {
+SoundQueue* Sound::createQueue(const float delay) {
     SoundQueue* queue = NEW SoundQueue(*soundManager, delay);
     return queue;
 }
 
-SoundEffect* Sound::playEffect(Handle& handle, const unsigned int& loops){
+SoundEffect* Sound::playEffect(Handle handle, const unsigned int loops){
     SoundEffect* effect = soundManager->_getNextFreeEffect();
     if (effect) {
         soundManager->_setSoundInformation(handle, *effect);
@@ -121,7 +121,7 @@ SoundEffect* Sound::playEffect(Handle& handle, const unsigned int& loops){
     }
     return effect;
 }
-SoundMusic* Sound::playMusic(Handle& handle, const unsigned int& loops){
+SoundMusic* Sound::playMusic(Handle handle, const unsigned int loops){
     SoundMusic* music = soundManager->_getNextFreeMusic();
     if (music) {
         soundManager->_setSoundInformation(handle, *music);

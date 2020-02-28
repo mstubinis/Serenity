@@ -14,7 +14,7 @@ namespace Engine::priv {
 #include <functional>
 
 namespace Engine::priv {
-    class AnimationData final {
+    class AnimationData final : public Engine::NonCopyable, public Engine::NonMoveable {
         friend class Engine::priv::MeshSkeleton;
         friend class Engine::priv::ModelInstanceAnimation;
         friend class Mesh;
@@ -49,11 +49,6 @@ namespace Engine::priv {
             AnimationData() = delete;
         public:
             AnimationData(const Engine::priv::MeshSkeleton&, const aiAnimation&);
-
-            AnimationData(const AnimationData&) = delete;
-            AnimationData& operator=(const AnimationData&) = delete;
-            AnimationData(AnimationData&&) noexcept = delete;
-            AnimationData& operator=(AnimationData&& other) noexcept = delete;
             ~AnimationData();
 
             const float duration() const;

@@ -15,7 +15,7 @@ using namespace Engine::priv;
 using namespace std;
 
 
-void opengl::glsl::Lighting::convert(string& code, const unsigned int& versionNumber, const ShaderType::Type& shaderType) {
+void opengl::glsl::Lighting::convert(string& code, const unsigned int versionNumber, const ShaderType::Type shaderType) {
 
 #pragma region Rod Light
     if (ShaderHelper::sfind(code, "CalcRodLight(")) {

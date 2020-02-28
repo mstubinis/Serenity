@@ -5,7 +5,7 @@
 
 using namespace std;
 
-SoundQueue::SoundQueue(Engine::priv::SoundManager& manager, const float& delay):m_SoundManager(manager){
+SoundQueue::SoundQueue(Engine::priv::SoundManager& manager, const float delay) : m_SoundManager(manager){
     m_DelayInSeconds = delay;
     m_DelayTimer     = 0;
     m_IsDelayProcess = false;
@@ -16,7 +16,7 @@ SoundQueue::SoundQueue(Engine::priv::SoundManager& manager, const float& delay):
 SoundQueue::~SoundQueue() {
     clear();
 }
-void SoundQueue::enqueueEffect(Handle& handle, const unsigned int& loops) {
+void SoundQueue::enqueueEffect(Handle handle, const unsigned int loops) {
     if (!m_Current) {
         m_Current = m_SoundManager._getNextFreeEffect();
         if (m_Current) {
@@ -26,7 +26,7 @@ void SoundQueue::enqueueEffect(Handle& handle, const unsigned int& loops) {
     }
     m_Queue.push(handle);
 }
-void SoundQueue::enqueueMusic(Handle& handle, const unsigned int& loops) {
+void SoundQueue::enqueueMusic(Handle handle, const unsigned int loops) {
     if (!m_Current) {
         m_Current = m_SoundManager._getNextFreeMusic();
         if (m_Current) {
@@ -43,10 +43,10 @@ void SoundQueue::dequeue() {
         m_IsDelayProcess = true;
     }
 }
-void SoundQueue::update(const float& dt) {
+void SoundQueue::update(const float dt) {
     if (m_Active) {
         if (m_IsDelayProcess) {
-            m_DelayTimer += static_cast<float>(dt);
+            m_DelayTimer += dt;
             if (m_DelayTimer > m_DelayInSeconds) {
                 m_IsDelayProcess = false;
                 m_DelayTimer = 0;
@@ -73,7 +73,7 @@ void SoundQueue::update(const float& dt) {
                 }else if (status == SoundStatus::Playing || status == SoundStatus::PlayingLooped) {
                     m_Current->update(dt);
                 }else if (status == SoundStatus::Stopped) {
-                    const auto& loopsLeft = m_Current->getLoopsLeft();
+                    const auto loopsLeft = m_Current->getLoopsLeft();
                     if (loopsLeft <= 1) {
                         m_Queue.pop();
                         m_IsDelayProcess = true;
@@ -85,14 +85,16 @@ void SoundQueue::update(const float& dt) {
     }
 }
 void SoundQueue::clear() {
-    if (m_Current)
+    if (m_Current) {
         m_Current->stop();
-    while (m_Queue.size() > 0)
+    }
+    while (m_Queue.size() > 0) {
         m_Queue.pop();
-    m_Current = nullptr;
-    m_DelayTimer = 0;
+    }
+    m_Current        = nullptr;
+    m_DelayTimer     = 0;
     m_IsDelayProcess = false;
-    m_Active = false;
+    m_Active         = false;
 }
 const bool SoundQueue::empty() const {
     return m_Queue.empty();

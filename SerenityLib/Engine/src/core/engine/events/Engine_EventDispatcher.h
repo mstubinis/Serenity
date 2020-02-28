@@ -21,16 +21,16 @@ namespace Engine::priv{
             template <class T> void unregisterObject(EventObserver&, const T&) = delete;
             template <class T> const bool isObjectRegistered(EventObserver&, const T&) const = delete;
 
-            void registerObject(EventObserver&, const EventType::Type& eventType);
-            void unregisterObject(EventObserver&, const EventType::Type& eventType);
-            const bool isObjectRegistered(const EventObserver&, const EventType::Type& eventType) const;
+            void registerObject(EventObserver&, const EventType::Type eventType);
+            void unregisterObject(EventObserver&, const EventType::Type eventType);
+            const bool isObjectRegistered(const EventObserver&, const EventType::Type eventType) const;
 
-            void registerObject(EventObserver&, const unsigned int& eventType);
-            void unregisterObject(EventObserver&, const unsigned int& eventType);
-            const bool isObjectRegistered(const EventObserver&, const unsigned int& eventType) const;
+            void registerObject(EventObserver&, const unsigned int eventType);
+            void unregisterObject(EventObserver&, const unsigned int eventType);
+            const bool isObjectRegistered(const EventObserver&, const unsigned int eventType) const;
 
-            void dispatchEvent(const Event& _event);
-            void dispatchEvent(const unsigned int& _eventType);
+            void dispatchEvent(const Event& event_);
+            void dispatchEvent(const unsigned int eventType);
     };
 };
 #endif

@@ -34,21 +34,21 @@ const bool Networking::SocketTCP::isBlocking() {
 void Networking::SocketTCP::disconnect() {
     m_Socket.disconnect();
 }
-const sf::Socket::Status Networking::SocketTCP::connect(const unsigned short& timeout) {
+const sf::Socket::Status Networking::SocketTCP::connect(const unsigned short timeout) {
     return m_Socket.connect(m_IP, m_Port, sf::seconds(timeout));
 }
-const sf::Socket::Status Networking::SocketTCP::send(sf::Packet& _packet) {
-    return m_Socket.send(_packet);
+const sf::Socket::Status Networking::SocketTCP::send(sf::Packet& packet) {
+    return m_Socket.send(packet);
 }
-const sf::Socket::Status Networking::SocketTCP::send(const void* _data, size_t _size) {
-    return m_Socket.send(_data, _size);
+const sf::Socket::Status Networking::SocketTCP::send(const void* data, size_t size) {
+    return m_Socket.send(data, size);
 }
-const sf::Socket::Status Networking::SocketTCP::send(const void* _data, size_t _size, size_t& _sent) {
-    return m_Socket.send(_data, _size, _sent);
+const sf::Socket::Status Networking::SocketTCP::send(const void* data, size_t size, size_t sent) {
+    return m_Socket.send(data, size, sent);
 }
-const sf::Socket::Status Networking::SocketTCP::receive(sf::Packet& _packet) {
-    return m_Socket.receive(_packet);
+const sf::Socket::Status Networking::SocketTCP::receive(sf::Packet& packet) {
+    return m_Socket.receive(packet);
 }
-const sf::Socket::Status Networking::SocketTCP::receive(void* _data, size_t _size, size_t& _sent) {
-    return m_Socket.receive(_data, _size, _sent);
+const sf::Socket::Status Networking::SocketTCP::receive(void* data, size_t size, size_t sent) {
+    return m_Socket.receive(data, size, sent);
 }

@@ -92,9 +92,9 @@ const bool Engine::priv::SMAA::init_shaders() {
         "    vec3 vert = position;\n"
         "    vert.x *= screenSizeDivideBy2.x;\n"
         "    vert.y *= screenSizeDivideBy2.y;\n"
-        "    _offset[0] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-1.0, 0.0, 0.0, API_V_DIR(-1.0)),uv.xyxy);\n"
-        "    _offset[1] = mad(SMAA_PIXEL_SIZE.xyxy,vec4( 1.0, 0.0, 0.0,  API_V_DIR(1.0)),uv.xyxy);\n"
-        "    _offset[2] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-2.0, 0.0, 0.0, API_V_DIR(-2.0)),uv.xyxy);\n"
+        "    _offset[0] = mad(SMAA_PIXEL_SIZE.xyxy, vec4(-1.0, 0.0, 0.0, API_V_DIR(-1.0)), uv.xyxy);\n"
+        "    _offset[1] = mad(SMAA_PIXEL_SIZE.xyxy, vec4( 1.0, 0.0, 0.0,  API_V_DIR(1.0)), uv.xyxy);\n"
+        "    _offset[2] = mad(SMAA_PIXEL_SIZE.xyxy, vec4(-2.0, 0.0, 0.0, API_V_DIR(-2.0)), uv.xyxy);\n"
         "    gl_Position = VP * Model * vec4(vert,1.0);\n"
         "}\n";
 
@@ -108,8 +108,8 @@ const bool Engine::priv::SMAA::init_shaders() {
         "uniform int SMAA_PREDICATION;\n"
         "const vec2 comparison = vec2(1.0,1.0);\n"
         "\n"
-        "uniform sampler2D textureMap;\n"
-        "uniform sampler2D texturePredication;\n"
+        "uniform SAMPLER_TYPE_2D textureMap;\n"
+        "uniform SAMPLER_TYPE_2D texturePredication;\n"
         "\n"
         "uniform vec4 SMAAInfo1Floats;\n" //SMAA_THRESHOLD,SMAA_DEPTH_THRESHOLD,SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR,SMAA_PREDICATION_THRESHOLD
         "uniform vec4 SMAAInfo1FloatsA;\n" //SMAA_PREDICATION_SCALE,SMAA_PREDICATION_STRENGTH
@@ -117,19 +117,19 @@ const bool Engine::priv::SMAA::init_shaders() {
         "varying vec2 uv;\n"
         "varying vec4 _offset[3];\n"
         "\n"
-        "vec3 SMAAGatherNeighbours(vec2 texcoord,vec4 offset[3],sampler2D tex) {\n"
-        "    float P = texture2D(tex, texcoord).r;\n"
-        "    float Pleft = texture2D(tex, offset[0].xy).r;\n"
-        "    float Ptop  = texture2D(tex, offset[0].zw).r;\n"
+        "vec3 SMAAGatherNeighbours(vec2 texcoord, vec4 offset[3], sampler2D inTexture) {\n"
+        "    float P = texture2D(inTexture, texcoord).r;\n"
+        "    float Pleft = texture2D(inTexture, offset[0].xy).r;\n"
+        "    float Ptop  = texture2D(inTexture, offset[0].zw).r;\n"
         "    return vec3(P, Pleft, Ptop);\n"
         "}\n"
-        "vec2 SMAACalculatePredicatedThreshold(vec2 texcoord,vec4 offset[3]){\n"
-        "    vec3 neighbours = SMAAGatherNeighbours(texcoord, offset,texturePredication);\n"
+        "vec2 SMAACalculatePredicatedThreshold(vec2 texcoord, vec4 offset[3], sampler2D inTexturePredication){\n"
+        "    vec3 neighbours = SMAAGatherNeighbours(texcoord, offset, inTexturePredication);\n"
         "    vec2 delta = abs(neighbours.xx - neighbours.yz);\n"
         "    vec2 edges = step(SMAAInfo1Floats.w, delta);\n"
         "    return SMAAInfo1FloatsA.x * SMAAInfo1Floats.x * (1.0 - SMAAInfo1FloatsA.y * edges);\n"
         "}\n"
-        "vec2 SMAADepthEdgeDetectionPS(vec2 texcoord,vec4 offset[3],sampler2D depthTex) {\n"
+        "vec2 SMAADepthEdgeDetectionPS(vec2 texcoord, vec4 offset[3],sampler2D depthTex) {\n"
         "    vec3 neighbours = SMAAGatherNeighbours(texcoord, offset, depthTex);\n"
         "    vec2 delta = abs(neighbours.xx - vec2(neighbours.y, neighbours.z));\n"
         "    vec2 edges = step(SMAAInfo1Floats.y, delta);\n"
@@ -137,10 +137,10 @@ const bool Engine::priv::SMAA::init_shaders() {
         "        discard;\n"
         "    return edges;\n"
         "}\n"
-        "vec2 SMAAColorEdgeDetectionPS(vec2 texcoord,vec4 offset[3],sampler2D colorTex){\n"
+        "vec2 SMAAColorEdgeDetectionPS(vec2 texcoord, vec4 offset[3], sampler2D colorTex, sampler2D inTexturePredication){\n"
         "    vec2 threshold;\n"
         "    if(SMAA_PREDICATION == 1){\n"
-        "        threshold = SMAACalculatePredicatedThreshold(texcoord, offset);\n"
+        "        threshold = SMAACalculatePredicatedThreshold(texcoord, offset, inTexturePredication);\n"
         "    }else{\n"
         "        threshold = vec2(SMAAInfo1Floats.x, SMAAInfo1Floats.x);\n"
         "    }\n"
@@ -173,10 +173,10 @@ const bool Engine::priv::SMAA::init_shaders() {
         "    edges.xy *= step((finalDelta), (SMAAInfo1Floats.z) * delta.xy);\n" //do we need this line in opengl?
         "    return edges;\n"
         "}\n"
-        "vec2 SMAALumaEdgeDetectionPS(vec2 texcoord,vec4 offset[3],sampler2D colorTex) {\n"
+        "vec2 SMAALumaEdgeDetectionPS(vec2 texcoord,vec4 offset[3], sampler2D colorTex, sampler2D inTexturePredication) {\n"
         "    vec2 threshold;\n"
         "    if(SMAA_PREDICATION == 1){\n"
-        "        threshold = SMAACalculatePredicatedThreshold(texcoord, offset);\n"
+        "        threshold = SMAACalculatePredicatedThreshold(texcoord, offset, inTexturePredication);\n"
         "    }else{\n"
         "        threshold = vec2(SMAAInfo1Floats.x, SMAAInfo1Floats.x);\n"
         "    }\n"
@@ -202,9 +202,9 @@ const bool Engine::priv::SMAA::init_shaders() {
         "    return edges;\n"
         "}\n"
         "void main(){\n"
-        "    gl_FragColor = vec4(SMAAColorEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
-        //"    gl_FragColor = vec4(SMAADepthEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
-        //"    gl_FragColor = vec4(SMAALumaEdgeDetectionPS(uv, _offset, textureMap),0.0,1.0);\n"
+        "    gl_FragColor = vec4(SMAAColorEdgeDetectionPS(uv, _offset, USE_SAMPLER_2D(textureMap), USE_SAMPLER_2D(texturePredication)), 0.0, 1.0);\n"
+        //"    gl_FragColor = vec4(SMAADepthEdgeDetectionPS(uv, _offset, USE_SAMPLER_2D(textureMap), USE_SAMPLER_2D(texturePredication)), 0.0, 1.0);\n"
+        //"    gl_FragColor = vec4(SMAALumaEdgeDetectionPS(uv, _offset, USE_SAMPLER_2D(textureMap), USE_SAMPLER_2D(texturePredication)), 0.0, 1.0);\n"
         "}\n";
 
 #pragma endregion
@@ -248,9 +248,9 @@ const bool Engine::priv::SMAA::init_shaders() {
     m_Fragment_Shaders_Code[PassStage::Blend] = smaa_common +
         "\n"
         "\n"//blend frag
-        "uniform sampler2D edge_tex;\n"
-        "uniform sampler2D area_tex;\n"
-        "uniform sampler2D search_tex;\n"
+        "uniform SAMPLER_TYPE_2D edge_tex;\n"
+        "uniform SAMPLER_TYPE_2D area_tex;\n"
+        "uniform SAMPLER_TYPE_2D search_tex;\n"
         "\n"
         "varying vec2 uv;\n"
         "varying vec2 pixCoord;\n"
@@ -477,7 +477,7 @@ const bool Engine::priv::SMAA::init_shaders() {
         "}\n"
         "void main(){\n"
         "    vec4 subSamples = vec4( 0.0 , 0.0 , 0.0 , 0.0 );\n"
-        "    gl_FragColor = SMAABlendingWeightCalculationPS(uv,pixCoord,_offset,edge_tex,area_tex,search_tex,subSamples);\n"
+        "    gl_FragColor = SMAABlendingWeightCalculationPS(uv, pixCoord, _offset, USE_SAMPLER_2D(edge_tex), USE_SAMPLER_2D(area_tex), USE_SAMPLER_2D(search_tex), subSamples);\n"
         "}\n";
 
 #pragma endregion
@@ -515,21 +515,21 @@ const bool Engine::priv::SMAA::init_shaders() {
 
     m_Fragment_Shaders_Code[PassStage::Neighbor] = smaa_common +
         "\n"//neighbor frag
-        "uniform sampler2D textureMap;\n"
-        "uniform sampler2D blend_tex;\n"
+        "uniform SAMPLER_TYPE_2D textureMap;\n"
+        "uniform SAMPLER_TYPE_2D blend_tex;\n"
         "\n"
         "varying vec2 uv;\n"
         "varying vec4 _offset;\n"
         "\n"
         "flat varying vec4 _SMAA_PIXEL_SIZE;\n"
         "\n"
-        "vec4 SMAANeighborhoodBlendingPS(vec2 texcoord,vec4 offset,sampler2D colorTex,sampler2D blendTex) {\n"
+        "vec4 SMAANeighborhoodBlendingPS(vec2 texcoord, vec4 offset, sampler2D inColorTexture, sampler2D inBlendTexture) {\n"
         "    vec4 a;\n"
-        "    a.x = texture2D(blendTex, offset.xy).a;\n"
-        "    a.y = texture2D(blendTex, offset.zw).g;\n"
-        "    a.wz = texture2D(blendTex, texcoord).xz;\n"
+        "    a.x = texture2D(inBlendTexture, offset.xy).a;\n"
+        "    a.y = texture2D(inBlendTexture, offset.zw).g;\n"
+        "    a.wz = texture2D(inBlendTexture, texcoord).xz;\n"
         "    if (dot(a, vec4(1.0, 1.0, 1.0, 1.0)) <= 1e-5) {\n"
-        "        vec4 color = texture2DLod(colorTex, texcoord,0.0);\n"
+        "        vec4 color = texture2DLod(inColorTexture, texcoord,0.0);\n"
         "        return color;\n"
         "    }else{\n"
         "        bool h = max(a.x, a.z) > max(a.y, a.w);\n"
@@ -539,13 +539,13 @@ const bool Engine::priv::SMAA::init_shaders() {
         "        SMAAMovc(bvec2(h, h), blendingWeight, a.xz);\n"
         "        blendingWeight /= dot(blendingWeight, vec2(1.0, 1.0));\n"
         "        vec4 blendingCoord = mad(blendingOffset, vec4(_SMAA_PIXEL_SIZE.xy, -_SMAA_PIXEL_SIZE.xy), texcoord.xyxy);\n"
-        "        vec4 color = blendingWeight.x * texture2D(colorTex, blendingCoord.xy);\n"
-        "        color += blendingWeight.y * texture2D(colorTex, blendingCoord.zw);\n"
+        "        vec4 color = blendingWeight.x * texture2D(inColorTexture, blendingCoord.xy);\n"
+        "        color += blendingWeight.y * texture2D(inColorTexture, blendingCoord.zw);\n"
         "        return color;\n"
         "    }\n"
         "}\n"
         "void main(){\n"
-        "    gl_FragColor = SMAANeighborhoodBlendingPS(uv, _offset, textureMap, blend_tex);\n"
+        "    gl_FragColor = SMAANeighborhoodBlendingPS(uv, _offset, USE_SAMPLER_2D(textureMap), USE_SAMPLER_2D(blend_tex));\n"
         "}";
 
 #pragma endregion
@@ -582,7 +582,8 @@ const bool Engine::priv::SMAA::init_shaders() {
     m_Fragment_Shaders_Code[PassStage::Final] = smaa_common +
         "\n"
         "varying vec2 uv;\n"
-        "vec4 SMAAResolvePS(vec2 texcoord,sampler2D currentColorTex,sampler2D previousColorTex){\n"
+        "\n"
+        "vec4 SMAAResolvePS(vec2 texcoord, sampler2D currentColorTex, sampler2D previousColorTex){\n"
         "    vec4 current = texture2D(currentColorTex, texcoord);\n"
         "    vec4 previous = texture2D(previousColorTex, texcoord);\n"
         "    return mix(current, previous, 0.5);\n"
@@ -617,7 +618,7 @@ void Engine::priv::SMAA::init() {
     Texture::setWrapping(GL_TEXTURE_2D, TextureWrap::ClampToBorder);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, 64, 16, 0, GL_RED, GL_UNSIGNED_BYTE, SMAA_searchTexBytes);
 }
-void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& sceneTexture, const unsigned int& outTexture, const Engine::priv::Renderer& renderer) {
+void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int sceneTexture, const unsigned int outTexture, const Engine::priv::Renderer& renderer) {
     gbuffer.bindFramebuffers(outTexture); //probably the lighting buffer
     renderer._bindShaderProgram(m_Shader_Programs[PassStage::Edge]);
 
@@ -644,7 +645,7 @@ void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec
     Engine::Renderer::stencilFunc(GL_EQUAL, 0x00000001, 0x00000001);
     Engine::Renderer::stencilOp(GL_KEEP, GL_KEEP, GL_KEEP); //Do not change stencil
 }
-void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& outTexture, const Engine::priv::Renderer& renderer) {
+void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int outTexture, const Engine::priv::Renderer& renderer) {
     gbuffer.bindFramebuffers(GBufferType::Normal);
     Engine::Renderer::Settings::clear(true, false, false); //clear color only
 
@@ -653,6 +654,7 @@ void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::ve
     Engine::Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
 
     Engine::Renderer::sendTexture("edge_tex", gbuffer.getTexture(outTexture), 0);
+
     Engine::Renderer::sendTexture("area_tex", AreaTexture, 1, GL_TEXTURE_2D);
     Engine::Renderer::sendTexture("search_tex", SearchTexture, 2, GL_TEXTURE_2D);
 
@@ -665,7 +667,7 @@ void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::ve
 
     Engine::Renderer::GLDisable(GL_STENCIL_TEST);
 }
-void Engine::priv::SMAA::passNeighbor(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& sceneTexture, const Engine::priv::Renderer& renderer) {
+void Engine::priv::SMAA::passNeighbor(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int sceneTexture, const Engine::priv::Renderer& renderer) {
     renderer._bindShaderProgram(m_Shader_Programs[PassStage::Neighbor]);
 
     Engine::Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);

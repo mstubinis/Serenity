@@ -7,16 +7,12 @@ using namespace Engine;
 using namespace std;
 
 
-SunLight::SunLight(const glm_vec3 pos, const LightType::Type type, Scene* scene) : EntityWrapper(*scene){
+SunLight::SunLight(const glm_vec3& pos, const LightType::Type type, Scene* scene) : EntityWrapper(*scene){
     if (!scene) {
         scene = Resources::getCurrentScene();
     }
-    m_Active            = true;
-    m_Color             = glm::vec4(1.0f);
+
     m_Type              = type;
-    m_AmbientIntensity  = 0.005f;
-    m_DiffuseIntensity  = 2.0f;
-    m_SpecularIntensity = 1.0f;
 
     if (type == LightType::Sun) {
         auto& sunLights = priv::InternalScenePublicInterface::GetSunLights(*scene);

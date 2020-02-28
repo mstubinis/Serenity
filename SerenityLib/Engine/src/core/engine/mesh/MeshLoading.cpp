@@ -200,16 +200,16 @@ void priv::MeshLoader::FinalizeData(Mesh& mesh, priv::MeshImportedData& data, fl
     mesh.m_CollisionFactory = NEW MeshCollisionFactory(mesh);
 }
 
-bool priv::MeshLoader::IsNear(float& v1, float& v2, const float& threshold) {
-    return std::abs(v1 - v2) < threshold;
+bool priv::MeshLoader::IsNear(float v1, float v2, const float threshold) {
+    return (std::abs(v1 - v2) < threshold);
 }
-bool priv::MeshLoader::IsNear(glm::vec2& v1, glm::vec2& v2, const float& threshold) {
-    return (std::abs(v1.x - v2.x) < threshold && std::abs(v1.y - v2.y) < threshold) ? true : false;
+bool priv::MeshLoader::IsNear(glm::vec2& v1, glm::vec2& v2, const float threshold) {
+    return (std::abs(v1.x - v2.x) < threshold && std::abs(v1.y - v2.y) < threshold);
 }
-bool priv::MeshLoader::IsNear(glm::vec3& v1, glm::vec3& v2, const float& threshold) {
-    return (std::abs(v1.x - v2.x) < threshold && std::abs(v1.y - v2.y) < threshold && std::abs(v1.z - v2.z) < threshold) ? true : false;
+bool priv::MeshLoader::IsNear(glm::vec3& v1, glm::vec3& v2, const float threshold) {
+    return (std::abs(v1.x - v2.x) < threshold && std::abs(v1.y - v2.y) < threshold && std::abs(v1.z - v2.z) < threshold);
 }
-bool priv::MeshLoader::IsSpecialFloat(const float& f) {
+bool priv::MeshLoader::IsSpecialFloat(const float f) {
     if (boost::math::isnan(f)) return true;
     if (boost::math::isinf(f)) return true;
     return false;
@@ -224,7 +224,7 @@ bool priv::MeshLoader::IsSpecialFloat(const glm::vec3& v) {
     if (boost::math::isinf(v.x) || boost::math::isinf(v.y) || boost::math::isinf(v.z)) return true;
     return false;
 }
-bool priv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, vector<glm::vec3>& pts, vector<glm::vec2>& uvs, vector<glm::vec3>& norms, unsigned short& result, const float& threshold) {
+bool priv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, vector<glm::vec3>& pts, vector<glm::vec2>& uvs, vector<glm::vec3>& norms, unsigned short& result, const float threshold) {
     for (size_t t = 0; t < pts.size(); ++t) {
         if (IsNear(in_pos, pts[t], threshold) && IsNear(in_uv, uvs[t], threshold) && IsNear(in_norm, norms[t], threshold)) {
             result = static_cast<unsigned short>(t);

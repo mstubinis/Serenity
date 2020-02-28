@@ -16,7 +16,6 @@ struct SMAAQualityLevel {enum Level {
     Low, Medium, High, Ultra,
 };};
 
-
 namespace Engine::priv {
     class  GBuffer;
     class  Renderer;
@@ -38,8 +37,6 @@ namespace Engine::priv {
             std::vector<std::string>    m_Fragment_Shaders_Code;
 
         public:
-
-
             unsigned int  AreaTexture                             = 0;
             unsigned int  SearchTexture                           = 0;
             unsigned char MAX_SEARCH_STEPS                        = 32;
@@ -66,9 +63,9 @@ namespace Engine::priv {
 
             const bool init_shaders();
 
-            void passEdge(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& sceneTexture, const unsigned int& outTexture, const Engine::priv::Renderer& renderer);
-            void passBlend(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& outTexture, const Engine::priv::Renderer& renderer);
-            void passNeighbor(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int& sceneTexture, const Engine::priv::Renderer& renderer);
+            void passEdge(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int sceneTexture, const unsigned int outTexture, const Engine::priv::Renderer& renderer);
+            void passBlend(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int outTexture, const Engine::priv::Renderer& renderer);
+            void passNeighbor(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int sceneTexture, const Engine::priv::Renderer& renderer);
             void passFinal(GBuffer&, const Viewport& viewport, const Engine::priv::Renderer& renderer); //currently unused
 
             static SMAA smaa;

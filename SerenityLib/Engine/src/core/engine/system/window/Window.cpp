@@ -1,6 +1,7 @@
 #include <core/engine/system/Engine.h>
 #include <core/engine/system/EngineOptions.h>
 #include <core/engine/system/window/Window.h>
+#include <core/engine/renderer/opengl/OpenGL.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/events/Engine_EventDispatcher.h>
 #include <core/engine/renderer/Renderer.h>
@@ -25,7 +26,7 @@ Window::WindowData::WindowThread::WindowThread(WindowData& data) : m_Data(data){
 Window::WindowData::WindowThread::~WindowThread() {
     cleanup();
 }
-bool Window::WindowData::WindowThread::operator==(const bool& rhs) const {
+bool Window::WindowData::WindowThread::operator==(const bool rhs) const {
     if (rhs == true) {
         return (m_EventThread) ? true : false;
     }
@@ -38,8 +39,8 @@ std::optional<sf::Event> Window::WindowData::WindowThread::try_pop() {
     auto x = m_Queue.try_pop();
     return std::move(x);
 }
-void Window::WindowData::WindowThread::push(const EventThreadOnlyCommands::Command& cmd) {
-    m_MainThreadToEventThreadQueue.push(cmd);
+void Window::WindowData::WindowThread::push(const EventThreadOnlyCommands::Command command) {
+    m_MainThreadToEventThreadQueue.push(command);
 }
 void Window::WindowData::WindowThread::startup(Window& super, const string& name) {
     auto lamda = [&]() {
@@ -122,7 +123,7 @@ void Window::WindowData::on_close() {
         m_WindowThread.cleanup();
     #endif
 }
-void Window::WindowData::on_mouse_wheel_scrolled(const float& delta, const int& x, const int& y) {
+void Window::WindowData::on_mouse_wheel_scrolled(const float delta, const int x, const int y) {
     m_MouseDelta += (static_cast<double>(delta) * 10.0);
 }
 void Window::WindowData::restore_state() {
@@ -221,7 +222,7 @@ sf::VideoMode Window::WindowData::get_default_desktop_video_mode() {
     const auto validModes = sf::VideoMode::getFullscreenModes();
     return (validModes.size() > 0) ? validModes[0] : sf::VideoMode::getDesktopMode();
 }
-void Window::WindowData::on_reset_events(const float& dt) {
+void Window::WindowData::on_reset_events(const float dt) {
     m_MouseDifference.x = 0.0f;
     m_MouseDifference.y = 0.0f;
 
@@ -259,8 +260,12 @@ Window::Window(const EngineOptions& options){
 
     m_Data.m_SFContextSettings       = m_Data.create(*this, options.window_title);
     
+
+
+    unsigned int requested_glsl_version = stoi(Engine::priv::OpenGL::getHighestGLSLVersion(*this));
+ 
     unsigned int opengl_version = stoi(to_string(m_Data.m_SFContextSettings.majorVersion) + to_string(m_Data.m_SFContextSettings.minorVersion));
-    priv::Core::m_Engine->m_RenderManager._onOpenGLContextCreation(m_Data.m_VideoMode.width, m_Data.m_VideoMode.height, 330, opengl_version);
+    priv::Core::m_Engine->m_RenderManager._onOpenGLContextCreation(m_Data.m_VideoMode.width, m_Data.m_VideoMode.height, requested_glsl_version, opengl_version);
 
     m_Data.init_position(*this);
 
@@ -284,7 +289,10 @@ Window::Window(const EngineOptions& options){
     //setVerticalSyncEnabled(options.vsync); //unfortunately this will not work until a few frames after the window creation
 
     if (options.show_console) {
-        std::cout << "Using OpenGL: " << m_Data.m_SFContextSettings.majorVersion << "." << m_Data.m_SFContextSettings.minorVersion << ", with depth bits: " << m_Data.m_SFContextSettings.depthBits << " and stencil bits: " << m_Data.m_SFContextSettings.stencilBits << std::endl;
+        std::cout << "Using OpenGL: " << m_Data.m_SFContextSettings.majorVersion << "." << m_Data.m_SFContextSettings.minorVersion << 
+            ", with depth bits: " << m_Data.m_SFContextSettings.depthBits << 
+            " and stencil bits: " << m_Data.m_SFContextSettings.stencilBits << 
+            " and glsl version: " << requested_glsl_version << std::endl;
     }
 }
 Window::~Window(){
@@ -322,7 +330,7 @@ const bool Window::minimize() {
     #endif
     return false;
 }
-void Window::setPosition(const unsigned int& x, const unsigned int& y) {
+void Window::setPosition(const unsigned int x, const unsigned int y) {
     m_Data.m_SFMLWindow.setPosition(sf::Vector2i(x, y));
 }
 const glm::uvec2 Window::getPosition() {
@@ -487,7 +495,7 @@ void Window::setActive(const bool isToBeActive){
         }
     }
 }
-void Window::setSize(const unsigned int& width, const unsigned int& height){
+void Window::setSize(const unsigned int width, const unsigned int height){
     if (m_Data.m_VideoMode.width == width && m_Data.m_VideoMode.height == height) {
         return;
     }
@@ -571,14 +579,14 @@ void Window::keepMouseInWindow(const bool isToBeKept){
         #endif
     }
 }
-void Window::setFramerateLimit(const unsigned int& limit){
+void Window::setFramerateLimit(const unsigned int limit){
     m_Data.m_SFMLWindow.setFramerateLimit(limit);
     m_Data.m_FramerateLimit = limit;
 }
 sf::Window& Window::getSFMLHandle() const {
     return const_cast<sf::Window&>(m_Data.m_SFMLWindow);
 }
-const unsigned int& Window::getFramerateLimit() const{
+const unsigned int Window::getFramerateLimit() const{
     return m_Data.m_FramerateLimit;
 }
 void Window::on_dynamic_resize() {

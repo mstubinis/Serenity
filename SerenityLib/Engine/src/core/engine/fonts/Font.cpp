@@ -13,7 +13,7 @@ using namespace std;
 Font::Font(const string& filename) : EngineResource(ResourceType::Font, filename){ 
     string rawname = filename;
     m_MaxHeight = 0.0f;
-    const size_t& lastindex = filename.find_last_of(".");
+    const size_t lastindex = filename.find_last_of(".");
     if (lastindex != string::npos) {
         rawname = filename.substr(0, lastindex);
         rawname += ".png";
@@ -65,13 +65,13 @@ Font::Font(const string& filename) : EngineResource(ResourceType::Font, filename
             fontGlyph.pts.emplace_back(0.0f, fontGlyph.height, 0.0f);
             fontGlyph.pts.emplace_back(fontGlyph.width, 0.0f, 0.0f);
 
-            const float& textureHeight = static_cast<float>(m_FontTexture->height());
-            const float& textureWidth = static_cast<float>(m_FontTexture->width());
+            const float textureHeight = static_cast<float>(m_FontTexture->height());
+            const float textureWidth = static_cast<float>(m_FontTexture->width());
 
-            const float& uvW1 = static_cast<float>(fontGlyph.x) / textureWidth;
-            const float& uvW2 = uvW1 + (static_cast<float>(fontGlyph.width) / textureWidth);
-            const float& uvH1 = static_cast<float>(fontGlyph.y) / textureHeight;
-            const float& uvH2 = uvH1 + (static_cast<float>(fontGlyph.height) / textureHeight);
+            const float uvW1 = static_cast<float>(fontGlyph.x) / textureWidth;
+            const float uvW2 = uvW1 + (static_cast<float>(fontGlyph.width) / textureWidth);
+            const float uvH1 = static_cast<float>(fontGlyph.y) / textureHeight;
+            const float uvH2 = uvH1 + (static_cast<float>(fontGlyph.height) / textureHeight);
 
             fontGlyph.uvs.emplace_back(uvW1, uvH2);
             fontGlyph.uvs.emplace_back(uvW2, uvH1);
@@ -87,9 +87,9 @@ Font::~Font(){
 }
 
 
-const float Font::getTextWidth(const string& text) const {
+const float Font::getTextWidth(string_view text) const {
     float row_width = 0.0f;
-    float maxWidth = 0.0f;
+    float maxWidth  = 0.0f;
     for (int i = 0; i < text.size(); ++i) {
         auto& character = text[i];
         if (character != '\0' && character != '\r') {
@@ -97,9 +97,8 @@ const float Font::getTextWidth(const string& text) const {
                 const auto& glyph = getGlyphData(character);
                 row_width += (static_cast<float>(glyph.xoffset) + static_cast<float>(glyph.xadvance));
             }else{
-
                 //backtrack spaces
-                int j = i-1;
+                int j = i - 1;
                 while (j >= 0) {
                     auto& character_backtrack = text[j];
                     if (character_backtrack != ' ') {
@@ -107,10 +106,8 @@ const float Font::getTextWidth(const string& text) const {
                     }
                     const auto& glyph_space = getGlyphData(character_backtrack);
                     row_width -= (static_cast<float>(glyph_space.xoffset) + static_cast<float>(glyph_space.xadvance));
-
                     --j;
                 }
-
                 if (row_width > maxWidth) {
                     maxWidth = row_width;
                 }
@@ -123,28 +120,29 @@ const float Font::getTextWidth(const string& text) const {
     }
     return maxWidth;
 }
-const float& Font::getMaxHeight() const {
+const float Font::getMaxHeight() const {
     return m_MaxHeight;
 }
-const float Font::getTextHeight(const string& text) const {
-    if (text.empty())
+const float Font::getTextHeight(string_view text) const {
+    if (text.empty()) {
         return 0.0f;
+    }
     float lineCount = 0;
-    for (auto& character : text) {
+    for (const auto& character : text) {
         if (character == '\n') {
             ++lineCount;
         }
     }
-    return (lineCount == 0) ? (m_MaxHeight) : ((lineCount+1) * m_MaxHeight);
+    return (lineCount == 0) ? (m_MaxHeight) : ((lineCount + 1) * m_MaxHeight);
 }
 const Texture& Font::getGlyphTexture() const {
     return *m_FontTexture; 
 }
-const FontGlyph& Font::getGlyphData(const unsigned char& character) const {
+const FontGlyph& Font::getGlyphData(const unsigned char character) const {
     if (!m_FontGlyphs.count(character))
         return m_FontGlyphs.at('?');
     return m_FontGlyphs.at(character);
 }
-void Font::renderText(const string& t, const glm::vec2& p, const glm::vec4& c, const float& a, const glm::vec2& s, const float& d, const TextAlignment::Type& al, const glm::vec4& scissor){
+void Font::renderText(const string& t, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const TextAlignment::Type al, const glm::vec4& scissor){
     Renderer::renderText(t, *this, p, c, a, s, d, al, scissor);
 }

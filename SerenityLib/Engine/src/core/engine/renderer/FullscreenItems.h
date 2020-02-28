@@ -23,12 +23,12 @@ namespace Engine::priv{
             std::vector<ushort>                     m_Indices;
             std::vector<MeshVertexDataFullscreen>   m_Vertices;
             std::vector<GLuint>                     m_Buffers;
-            GLuint                                  m_VAO;
+            GLuint                                  m_VAO = 0;
 
             void bindToGPU();
             void buildVAO();
         public:
-            FullscreenTriangle();
+            FullscreenTriangle() = default;
             ~FullscreenTriangle();
 
             void init();
@@ -43,12 +43,12 @@ namespace Engine::priv{
             std::vector<ushort>                     m_Indices;
             std::vector<MeshVertexDataFullscreen>   m_Vertices;
             std::vector<GLuint>                     m_Buffers;
-            GLuint                                  m_VAO;
+            GLuint                                  m_VAO = 0;
 
             void bindToGPU();
             void buildVAO();
         public:
-            FullscreenQuad();
+            FullscreenQuad() = default;
             ~FullscreenQuad();
 
             void init();

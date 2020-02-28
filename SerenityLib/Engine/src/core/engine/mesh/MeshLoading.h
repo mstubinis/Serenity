@@ -45,13 +45,13 @@ namespace Engine::priv {
             static VertexData* LoadFrom_OBJCC(std::string& filename);
             static void        SaveTo_OBJCC(VertexData& data, std::string filename);
 
-            static bool        IsNear(float& v1, float& v2, const float& threshold);
-            static bool        IsNear(glm::vec2& v1, glm::vec2& v2, const float& threshold);
-            static bool        IsNear(glm::vec3& v1, glm::vec3& v2, const float& threshold);
-            static bool        IsSpecialFloat(const float& _float);
+            static bool        IsNear(float v1, float v2, const float threshold);
+            static bool        IsNear(glm::vec2& v1, glm::vec2& v2, const float threshold);
+            static bool        IsNear(glm::vec3& v1, glm::vec3& v2, const float threshold);
+            static bool        IsSpecialFloat(const float _float);
             static bool        IsSpecialFloat(const glm::vec2& _vector);
             static bool        IsSpecialFloat(const glm::vec3& _vector);
-            static bool        GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& pts, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& norms, unsigned short& result, const float& threshold);
+            static bool        GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& pts, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& norms, unsigned short& result, const float threshold);
             static void        CalculateTBNAssimp(MeshImportedData& data);
     };
 };

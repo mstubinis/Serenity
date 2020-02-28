@@ -38,6 +38,8 @@ namespace Engine::priv {
             glm::vec4 Info1; //renderPosX, renderPosY, renderPosZ, near
             glm::vec4 Info2; //viewVecX, viewVecY, viewVecZ, far
             glm::vec4 Info3; //realposX, realposY, realposZ, UNUSED
+
+            glm::vec4 Info4; //mainWindowSizeX, mainWindowSizeY, viewportSizeX, viewportSizeY
         };
 
         private:
@@ -81,7 +83,7 @@ namespace Engine::priv {
             void internal_pass_final(const GBufferType::Type& sceneTexture);
             void internal_pass_depth_and_transparency(const Viewport& viewport, const GBufferType::Type& sceneTexture); //TODO: recheck this
             void internal_pass_copy_depth();
-            void internal_pass_blur(const Viewport& viewport, const GLuint texture, const std::string& type);
+            void internal_pass_blur(const Viewport& viewport, const GLuint texture, std::string_view type);
 
             void internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, const unsigned int convoludeTextureSize, const unsigned int preEnvFilterSize);
             void internal_generate_brdf_lut(ShaderProgram& program, const unsigned int brdfSize);
@@ -151,7 +153,7 @@ namespace Engine::priv {
 
             const bool unbindShaderProgram() override;
             const bool unbindMaterial() override;
-            const bool unbindMesh() override;
+            const bool unbindMesh(Mesh* mesh) override;
 
             void generatePBRData(Texture& texture, const unsigned int convoludeSize, const unsigned int prefilterSize) override;
 
@@ -163,18 +165,18 @@ namespace Engine::priv {
             void renderRodLight(const Camera& c, const RodLight& r) override;
             void renderMesh(const Mesh& mesh, const unsigned int mode = ModelDrawingMode::Triangles) override;
             void renderDecal(ModelInstance& decalModelInstance) override;
-            void renderParticle(const Particle& particle) override;
+            void renderParticle(const Particle& particle, const Camera& camera) override;
 
-            void render2DText(const std::string& text, const Font& font, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const TextAlignment::Type& textAlignment, const glm::vec4& scissor = glm::vec4(-1.0f)) override;
-            void render2DTexture(const Texture* texture, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const Alignment::Type& align, const glm::vec4& scissor = glm::vec4(-1.0f)) override;
-            void render2DTriangle(const glm::vec2& pos, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& align, const glm::vec4& scissor = glm::vec4(-1.0f)) override;
+            void render2DText(const std::string& text, const Font& font, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const TextAlignment::Type textAlignment, const glm::vec4& scissor = glm::vec4(-1.0f)) override;
+            void render2DTexture(const Texture* texture, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const Alignment::Type align, const glm::vec4& scissor = glm::vec4(-1.0f)) override;
+            void render2DTriangle(const glm::vec2& pos, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type align, const glm::vec4& scissor = glm::vec4(-1.0f)) override;
 
 
-            void renderTexture(const Texture& tex, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const Alignment::Type& align, const glm::vec4& scissor) override;
-            void renderText(const std::string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const TextAlignment::Type& align, const glm::vec4& scissor) override;
-            void renderBorder(const float borderSize, const glm::vec2& pos, const glm::vec4& col, const float w, const float h, const float angle, const float depth, const Alignment::Type& align, const glm::vec4& scissor) override;
-            void renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float width, const float height, const float angle, const float depth, const Alignment::Type& align, const glm::vec4& scissor) override;
-            void renderTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& align, const glm::vec4& scissor) override;
+            void renderTexture(const Texture& tex, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const Alignment::Type align, const glm::vec4& scissor) override;
+            void renderText(const std::string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const TextAlignment::Type align, const glm::vec4& scissor) override;
+            void renderBorder(const float borderSize, const glm::vec2& pos, const glm::vec4& col, const float w, const float h, const float angle, const float depth, const Alignment::Type align, const glm::vec4& scissor) override;
+            void renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float width, const float height, const float angle, const float depth, const Alignment::Type align, const glm::vec4& scissor) override;
+            void renderTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type align, const glm::vec4& scissor) override;
 
             void renderFullscreenTriangle() override;
             void renderFullscreenQuad() override;

@@ -83,7 +83,7 @@ MaterialComponent* Material::internalAddComponentGeneric(const MaterialComponent
     m_Components.push_back(newMaterialComponent);
     return newMaterialComponent;
 }
-void Material::internalUpdateGlobalMaterialPool(const bool& addToDatabase) {
+void Material::internalUpdateGlobalMaterialPool(const bool addToDatabase) {
     //this data is kept around to be deferred to the lighting pass
     glm::vec4* data = nullptr;
     if (!addToDatabase) {
@@ -205,7 +205,7 @@ MaterialComponent& Material::addComponentParallaxOcclusion(const string& texture
 MaterialComponent& Material::getComponent(const unsigned int& index) {
     return *m_Components[index];
 }
-const bool& Material::shadeless() const { 
+const bool Material::shadeless() const { 
     return m_Shadeless; 
 }
 const Engine::color_vector_4& Material::f0() const{
@@ -214,7 +214,7 @@ const Engine::color_vector_4& Material::f0() const{
 const unsigned char Material::glow() const {
     return m_BaseGlow; 
 }
-const std::uint32_t& Material::id() const { 
+const std::uint32_t Material::id() const { 
     return m_ID; 
 }
 const unsigned char Material::diffuseModel() const {

@@ -71,7 +71,7 @@ namespace Engine::priv {
             void drawCone(btScalar radius, btScalar height, int upAxis, const btTransform& transform, const btVector3& color);
             void reportErrorWarning(const char* errWarning);
             void draw3dText(const btVector3& location, const char* text);
-            void setDebugMode(int _mode);
+            void setDebugMode(int Mode);
             int getDebugMode() const;
     };
 };

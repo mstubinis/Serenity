@@ -23,11 +23,8 @@ namespace Engine::priv {
 
 namespace Engine{
     struct RayCastResult {
-        glm::vec3 hitPosition;
-        glm::vec3 hitNormal;
-        RayCastResult() {
-            hitNormal = hitPosition = glm::vec3(0.0f);
-        }
+        glm::vec3 hitPosition = glm::vec3(0.0f);
+        glm::vec3 hitNormal   = glm::vec3(0.0f);
     };
     namespace priv{
         class PhysicsManager final{
@@ -47,7 +44,7 @@ namespace Engine{
 
                 void _init();
 
-                void _update(const float& dt, int maxSubSteps = 1, float fixedTimeStep = 0.0166666f);
+                void _update(const float dt, int maxSubSteps = 1, float fixedTimeStep = 0.0166666f);
                 void _render(const Camera& camera);
         };
     };

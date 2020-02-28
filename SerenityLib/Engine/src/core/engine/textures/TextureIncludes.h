@@ -37,35 +37,34 @@ namespace sf {
 }
 namespace Engine::priv {
     class  FramebufferObject;
+};
+
+namespace Engine::priv {
     struct ImageMipmap final {
-        uint32_t width;
-        uint32_t height;
-        uint32_t compressedSize;
-        uint32_t level;
-        std::vector<uint8_t> pixels;
-        ImageMipmap();
-        ~ImageMipmap();
+        std::uint32_t               width          = 0;
+        std::uint32_t               height         = 0;
+        std::uint32_t               compressedSize = 0;
+        std::uint32_t               level          = 0;
+        std::vector<std::uint8_t>   pixels;
     };
     struct ImageLoadedStructure final {
-        ImageInternalFormat::Format           internalFormat;
-        ImagePixelFormat::Format              pixelFormat;
-        ImagePixelType::Type                  pixelType;
-        std::vector<priv::ImageMipmap>        mipmaps;
-        std::string                           filename;
+        ImageInternalFormat::Format           m_InternalFormat;
+        ImagePixelFormat::Format              m_PixelFormat;
+        ImagePixelType::Type                  m_PixelType;
+        std::vector<priv::ImageMipmap>        m_Mipmaps         = { ImageMipmap() };
+        std::string                           m_Filename        = "";
 
-        ImageLoadedStructure();
-        ImageLoadedStructure(const uint width, const uint height, const ImagePixelType::Type _pxlType, const ImagePixelFormat::Format _pxlFormat, const ImageInternalFormat::Format _internFormat);
+        ImageLoadedStructure() = default;
+        ImageLoadedStructure(const unsigned int width, const unsigned int height, const ImagePixelType::Type pixelType, const ImagePixelFormat::Format pixelFormat, const ImageInternalFormat::Format internalFormat);
         ImageLoadedStructure(const sf::Image& sfImage, const std::string& filename = "");
+        ~ImageLoadedStructure();
 
         ImageLoadedStructure(const ImageLoadedStructure&)                      = delete;
         ImageLoadedStructure& operator=(const ImageLoadedStructure&)           = delete;
-        ImageLoadedStructure(ImageLoadedStructure&& other) noexcept            = default;
-        ImageLoadedStructure& operator=(ImageLoadedStructure&& other) noexcept = default;
+        ImageLoadedStructure(ImageLoadedStructure&& other) noexcept;
+        ImageLoadedStructure& operator=(ImageLoadedStructure&& other) noexcept;
 
-
-        ~ImageLoadedStructure();
-
-        void load(const uint width, const uint height, const ImagePixelType::Type _pixelType, const ImagePixelFormat::Format _pixelFormat, const ImageInternalFormat::Format _internalFormat);
+        void load(const unsigned int width, const unsigned int height, const ImagePixelType::Type pixelType, const ImagePixelFormat::Format pixelFormat, const ImageInternalFormat::Format internalFormat);
         void load(const sf::Image& sfImage, const std::string& filename = "");
     };
 };

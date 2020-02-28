@@ -234,7 +234,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\core\Constraint.h" />
-    <ClInclude Include="Engine\src\core\engine\BindableResource.h" />
     <ClInclude Include="Engine\src\core\engine\containers\Freelist.h" />
     <ClInclude Include="Engine\src\core\engine\containers\Queue_ts.h" />
     <ClInclude Include="Engine\src\core\engine\containers\SparseSet.h" />
@@ -308,6 +307,7 @@
     <ClInclude Include="Engine\src\core\engine\physics\PhysicsIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\physics\World.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\Decal.h" />
+    <ClInclude Include="Engine\src\core\engine\renderer\opengl\OpenGL.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\Renderer.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\FramebufferObject.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\FullscreenItems.h" />
@@ -402,7 +402,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\core\Constraint.cpp" />
-    <ClCompile Include="Engine\src\core\engine\BindableResource.cpp" />
     <ClCompile Include="Engine\src\core\engine\discord\Discord.cpp" />
     <ClCompile Include="Engine\src\core\engine\discord\src\achievement_manager.cpp" />
     <ClCompile Include="Engine\src\core\engine\discord\src\activity_manager.cpp" />
@@ -459,6 +458,7 @@
     <ClCompile Include="Engine\src\core\engine\physics\Engine_Physics.cpp" />
     <ClCompile Include="Engine\src\core\engine\physics\World.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\Decal.cpp" />
+    <ClCompile Include="Engine\src\core\engine\renderer\opengl\OpenGL.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\Renderer.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\FramebufferObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\FullscreenItems.cpp" />

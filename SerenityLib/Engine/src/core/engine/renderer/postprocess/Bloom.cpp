@@ -26,7 +26,7 @@ const bool Engine::priv::Bloom::init_shaders() {
 #pragma region Bloom
     m_GLSL_frag_code =
         "const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);\n"
-        "uniform sampler2D SceneTexture;\n"
+        "uniform SAMPLER_TYPE_2D SceneTexture;\n"
         "\n"
         "uniform vec4 Data;\n" //x = scale y = threshold z = exposure w = UNUSED
         "varying vec2 texcoords;\n"
@@ -51,11 +51,11 @@ const bool Engine::priv::Bloom::init_shaders() {
 
     return true;
 }
-void Engine::priv::Bloom::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, const unsigned int& sceneTextureEnum, const Engine::priv::Renderer& renderer) {
+void Engine::priv::Bloom::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, const unsigned int sceneTexture, const Engine::priv::Renderer& renderer) {
     renderer._bindShaderProgram(m_Shader_Program);
 
     Engine::Renderer::sendUniform4("Data", scale, threshold, exposure, 0.0f);
-    Engine::Renderer::sendTexture("SceneTexture", gbuffer.getTexture(sceneTextureEnum), 0);
+    Engine::Renderer::sendTexture("SceneTexture", gbuffer.getTexture(sceneTexture), 0);
 
     Engine::Renderer::renderFullscreenQuad();
 }

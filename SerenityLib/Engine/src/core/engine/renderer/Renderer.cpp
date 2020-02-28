@@ -3,6 +3,7 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/materials/Material.h>
+#include <core/engine/mesh/Mesh.h>
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/system/Engine.h>
 
@@ -45,7 +46,7 @@ void priv::Renderer::_render(Viewport& viewport,const bool mainFunc){
 void priv::Renderer::_resize(uint w,uint h){
     m_Pipeline->onResize(w, h);
 }
-void priv::Renderer::_onFullscreen(const unsigned int& width, const unsigned int& height) {
+void priv::Renderer::_onFullscreen(const unsigned int width, const unsigned int height) {
     m_Pipeline->onFullscreen();
 }
 void priv::Renderer::_onOpenGLContextCreation(uint windowWidth,uint windowHeight,uint _glslVersion,uint _openglVersion){
@@ -70,13 +71,37 @@ const bool priv::Renderer::_bindShaderProgram(ShaderProgram* program) const {
 const bool priv::Renderer::_unbindShaderProgram() const {
     return m_Pipeline->unbindShaderProgram();
 }
+
+const bool priv::Renderer::_bindMesh(Mesh* mesh) const {
+    const bool res = m_Pipeline->bindMesh(mesh);
+    if (res) {
+        if (mesh->isLoaded()) {
+            mesh->m_CustomBindFunctor(mesh);
+        }else{
+            Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().m_VertexData->bind();
+        }
+    }
+    return res;
+}
+const bool priv::Renderer::_unbindMesh(Mesh* mesh) const {
+    const bool res = m_Pipeline->unbindMesh(mesh);
+    if (mesh->isLoaded()) {
+        mesh->m_CustomUnbindFunctor(mesh);
+    }else{
+        Mesh* defaultUnbind = &Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh();
+        defaultUnbind->m_CustomUnbindFunctor(defaultUnbind);
+    }
+    return true;
+}
+
 const bool priv::Renderer::_bindMaterial(Material* material) const {
     const bool res = m_Pipeline->bindMaterial(material);
     if (res) {
-        if (material->isLoaded())
+        if (material->isLoaded()) {
             material->m_CustomBindFunctor(material);
-        else
+        }else{
             Material::Checkers->m_CustomBindFunctor(Material::Checkers);
+        }
     }
     return res;
 }
@@ -126,7 +151,7 @@ void Renderer::Settings::Lighting::setGIContribution(const float g, const float 
     renderManager->m_GI_Pack = Math::pack3FloatsInto1FloatUnsigned(renderManager->m_GI_Diffuse, renderManager->m_GI_Specular, renderManager->m_GI_Global);
 }
 
-const bool Renderer::Settings::setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm& algorithm){
+const bool Renderer::Settings::setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm algorithm){
     switch (algorithm) {
         case AntiAliasingAlgorithm::None: {
             break;
@@ -154,13 +179,13 @@ const bool Renderer::Settings::setAntiAliasingAlgorithm(const AntiAliasingAlgori
     }
     return false;
 }
-const bool Renderer::stencilOp(const GLenum& sfail, const GLenum& dpfail, const GLenum& dppass) {
+const bool Renderer::stencilOp(const GLenum sfail, const GLenum dpfail, const GLenum dppass) {
     return renderManager->m_Pipeline->stencilOperation(sfail, dpfail, dppass);
 }
-const bool Renderer::stencilMask(const GLuint& mask) {
+const bool Renderer::stencilMask(const GLuint mask) {
     return renderManager->m_Pipeline->stencilMask(mask);
 }
-const bool Renderer::cullFace(const GLenum& state){
+const bool Renderer::cullFace(const GLenum state){
     return renderManager->m_Pipeline->cullFace(state);
 }
 void Renderer::Settings::clear(const bool color, const bool depth, const bool stencil){
@@ -184,19 +209,19 @@ void Renderer::Settings::setGamma(const float g){
 const float Renderer::Settings::getGamma(){
     return renderManager->m_Gamma;
 }
-const bool Renderer::setDepthFunc(const GLenum& func){
+const bool Renderer::setDepthFunc(const GLenum func){
     return renderManager->m_Pipeline->setDepthFunction(func);
 }
-const bool Renderer::setViewport(const float& x, const float& y, const float& w, const float& h){
+const bool Renderer::setViewport(const float x, const float y, const float w, const float h){
     return renderManager->m_Pipeline->setViewport(x, y, w, h);
 }
-const bool Renderer::stencilFunc(const GLenum& func, const GLint& ref, const GLuint& mask) {
+const bool Renderer::stencilFunc(const GLenum func, const GLint ref, const GLuint mask) {
     return renderManager->m_Pipeline->stencilFunction(func, ref, mask);
 }
-const bool Renderer::colorMask(const bool& r, const bool& g, const bool& b, const bool& a) {
+const bool Renderer::colorMask(const bool r, const bool g, const bool b, const bool a) {
     return renderManager->m_Pipeline->colorMask(r, g, b, a);
 }
-const bool Renderer::clearColor(const float& r, const float& g, const float& b, const float& a) {
+const bool Renderer::clearColor(const float r, const float g, const float b, const float a) {
     return renderManager->m_Pipeline->clearColor(r, g, b, a);
 }
 const bool Renderer::bindTextureForModification(const GLuint textureType, const GLuint textureObject) {
@@ -215,28 +240,28 @@ void Renderer::genAndBindTexture(const GLuint textureType, GLuint& textureObject
 void Renderer::genAndBindVAO(GLuint& vaoObject){
     renderManager->m_Pipeline->generateAndBindVAO(vaoObject);
 }
-const bool Renderer::GLEnable(const GLenum& apiEnum) {
+const bool Renderer::GLEnable(const GLenum apiEnum) {
     return renderManager->m_Pipeline->enableAPI(apiEnum);
 }
-const bool Renderer::GLDisable(const GLenum& apiEnum) {
+const bool Renderer::GLDisable(const GLenum apiEnum) {
     return renderManager->m_Pipeline->disableAPI(apiEnum);
 }
-const bool Renderer::GLEnablei(const GLenum& apiEnum, const GLuint& index) {
+const bool Renderer::GLEnablei(const GLenum apiEnum, const GLuint index) {
     return renderManager->m_Pipeline->enableAPI_i(apiEnum, index);
 }
-const bool Renderer::GLDisablei(const GLenum& apiEnum, const GLuint& index) {
+const bool Renderer::GLDisablei(const GLenum apiEnum, const GLuint index) {
     return renderManager->m_Pipeline->disableAPI_i(apiEnum, index);
 }
-void Renderer::sendTexture(const char* location, const Texture& texture,const int& slot){
+void Renderer::sendTexture(const char* location, const Texture& texture, const int slot){
     renderManager->m_Pipeline->sendTexture(location, texture, slot);
 }
-void Renderer::sendTexture(const char* location,const GLuint textureObject,const int& slot,const GLuint& textureTarget){
+void Renderer::sendTexture(const char* location,const GLuint textureObject, const int slot,const GLuint textureTarget){
     renderManager->m_Pipeline->sendTexture(location, textureObject, slot, textureTarget);
 }
-void Renderer::sendTextureSafe(const char* location, const Texture& texture,const int& slot){
+void Renderer::sendTextureSafe(const char* location, const Texture& texture, const int slot){
     renderManager->m_Pipeline->sendTextureSafe(location, texture, slot);
 }
-void Renderer::sendTextureSafe(const char* location,const GLuint textureObject,const int& slot,const GLuint& textureTarget){
+void Renderer::sendTextureSafe(const char* location,const GLuint textureObject, const int slot,const GLuint textureTarget){
     renderManager->m_Pipeline->sendTextureSafe(location, textureObject, slot, textureTarget);
 }
 const bool Renderer::bindReadFBO(const GLuint& fbo){
@@ -277,7 +302,7 @@ const unsigned int Renderer::getUniformLocUnsafe(const char* location) {
     return renderManager->m_Pipeline->getUniformLocationUnsafe(location);
 }
 
-void Renderer::alignmentOffset(const Alignment::Type& align, float& x, float& y, const float& width, const float& height) {
+void Renderer::alignmentOffset(const Alignment::Type align, float& x, float& y, const float width, const float height) {
     switch (align) {
         case Alignment::TopLeft: {
             x += width / 2;
@@ -314,19 +339,19 @@ void Renderer::alignmentOffset(const Alignment::Type& align, float& x, float& y,
         }
     }
 }
-void Renderer::renderTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& align, const glm::vec4& scissor) {
+void Renderer::renderTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type align, const glm::vec4& scissor) {
     renderManager->m_Pipeline->renderTriangle(position, color, angle, width, height, depth, align, scissor);
 }
-void Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float width, const float height, const float angle, const float depth, const Alignment::Type& align, const glm::vec4& scissor) {
+void Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float width, const float height, const float angle, const float depth, const Alignment::Type align, const glm::vec4& scissor) {
     renderManager->m_Pipeline->renderRectangle(pos, col, width, height, angle, depth, align, scissor);
 }
-void Renderer::renderTexture(const Texture& tex, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const Alignment::Type& align, const glm::vec4& scissor){
+void Renderer::renderTexture(const Texture& tex, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const Alignment::Type align, const glm::vec4& scissor){
     renderManager->m_Pipeline->renderTexture(tex, p, c, a, s, d, align, scissor);
 }
-void Renderer::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const TextAlignment::Type& align, const glm::vec4& scissor) {
+void Renderer::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const TextAlignment::Type align, const glm::vec4& scissor) {
     renderManager->m_Pipeline->renderText(t, fnt, p, c, a, s, d, align, scissor);
 }
-void Renderer::renderBorder(const float borderSize, const glm::vec2& pos, const glm::vec4& col, const float w, const float h, const float angle, const float depth, const Alignment::Type& align, const glm::vec4& scissor) {
+void Renderer::renderBorder(const float borderSize, const glm::vec2& pos, const glm::vec4& col, const float w, const float h, const float angle, const float depth, const Alignment::Type align, const glm::vec4& scissor) {
     renderManager->m_Pipeline->renderBorder(borderSize, pos, col, w, h, angle, depth, align, scissor);
 }
 

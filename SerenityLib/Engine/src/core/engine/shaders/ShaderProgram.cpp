@@ -56,7 +56,7 @@ ShaderProgram::~ShaderProgram(){
     unload(); 
 }
 
-const GLuint& ShaderProgram::program() const {
+const GLuint ShaderProgram::program() const {
     return m_ShaderProgram; 
 }
 
@@ -140,18 +140,18 @@ void InternalShaderProgramPublicInterface::LoadGPU(ShaderProgram& shaderP){
         }
         //populate uniform table
         if (res == GL_TRUE) {
-            GLint _i, _count, _size;
-            GLenum _type;
-            const GLsizei _bufSize = 256; // maximum name length
-            GLchar _name[_bufSize]; // variable name in GLSL
-            GLsizei _length; // name length
-            glGetProgramiv(shaderP.m_ShaderProgram, GL_ACTIVE_UNIFORMS, &_count);
-            for (_i = 0; _i < _count; ++_i) {
-                glGetActiveUniform(shaderP.m_ShaderProgram, static_cast<GLuint>(_i), _bufSize, &_length, &_size, &_type, _name);
-                if (_length > 0) {
-                    string _name1(static_cast<char*>(_name), _length);
-                    GLint _loc = glGetUniformLocation(shaderP.m_ShaderProgram, _name);
-                    shaderP.m_UniformLocations.emplace(_name1, _loc);
+            GLint i_, count_, size_;
+            GLenum type_;
+            const GLsizei bufSize_ = 256; // maximum name length
+            GLchar name_[bufSize_]; // variable name in GLSL
+            GLsizei length_; // name length
+            glGetProgramiv(shaderP.m_ShaderProgram, GL_ACTIVE_UNIFORMS, &count_);
+            for (i_ = 0; i_ < count_; ++i_) {
+                glGetActiveUniform(shaderP.m_ShaderProgram, static_cast<GLuint>(i_), bufSize_, &length_, &size_, &type_, name_);
+                if (length_ > 0) {
+                    string name1_(static_cast<char*>(name_), length_);
+                    GLint loc_ = glGetUniformLocation(shaderP.m_ShaderProgram, name_);
+                    shaderP.m_UniformLocations.emplace(name1_, loc_);
                 }
             }
         }

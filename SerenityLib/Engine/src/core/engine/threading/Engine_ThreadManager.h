@@ -93,7 +93,7 @@ namespace Engine::priv{
 
             void cleanup();
 
-            void _update(const float& dt);
+            void _update(const float dt);
     };
     namespace threading{
 

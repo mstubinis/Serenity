@@ -27,7 +27,7 @@ const bool Engine::priv::GodRays::init_shaders() {
         "uniform vec4 RaysInfo;\n"//exposure | decay | density | weight
         "\n"
         "uniform vec2 lightPositionOnScreen;\n"
-        "uniform sampler2D firstPass;\n"
+        "uniform SAMPLER_TYPE_2D firstPass;\n"
         "uniform int samples;\n"
         "\n"
         "uniform float alpha;\n"
@@ -63,11 +63,11 @@ const bool Engine::priv::GodRays::init_shaders() {
 
     return true;
 }
-void Engine::priv::GodRays::pass(GBuffer& gbuffer, const Viewport& viewport, const glm::vec2& lightScrnPos,const float& alpha, const Engine::priv::Renderer& renderer) {
+void Engine::priv::GodRays::pass(GBuffer& gbuffer, const Viewport& viewport, const glm::vec2& lightScrnPos, const float alpha, const Engine::priv::Renderer& renderer) {
     const auto& dimensions = viewport.getViewportDimensions();
     renderer._bindShaderProgram(m_Shader_Program);
     Engine::Renderer::sendUniform4("RaysInfo", exposure, decay, density, weight);
-    Engine::Renderer::sendUniform2("lightPositionOnScreen", lightScrnPos.x / static_cast<float>(dimensions.z), lightScrnPos.y / static_cast<float>(dimensions.w));
+    Engine::Renderer::sendUniform2("lightPositionOnScreen", lightScrnPos.x / dimensions.z, lightScrnPos.y / dimensions.w);
     Engine::Renderer::sendUniform1("samples", samples);
     Engine::Renderer::sendUniform1("alpha", alpha);
     Engine::Renderer::sendTexture("firstPass", gbuffer.getTexture(GBufferType::Misc), 0);

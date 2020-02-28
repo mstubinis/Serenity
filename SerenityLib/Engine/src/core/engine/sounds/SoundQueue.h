@@ -21,13 +21,13 @@ class SoundQueue final {
         bool                           m_Active;
     public:
         SoundQueue() = delete;
-        SoundQueue(Engine::priv::SoundManager& manager, const float& delay = 0.5f);
+        SoundQueue(Engine::priv::SoundManager& manager, const float delay = 0.5f);
         ~SoundQueue();
 
-        void enqueueEffect(Handle& soundEffectHandle, const unsigned int& loops = 1);
-        void enqueueMusic(Handle& soundMusicHandle, const unsigned int& loops = 1);
+        void enqueueEffect(Handle soundEffectHandle, const unsigned int loops = 1);
+        void enqueueMusic(Handle soundMusicHandle, const unsigned int loops = 1);
         void dequeue();
-        void update(const float& dt);
+        void update(const float dt);
         void clear();
         const bool empty() const;
         const bool& active() const;

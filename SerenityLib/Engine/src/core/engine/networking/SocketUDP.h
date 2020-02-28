@@ -14,7 +14,7 @@ namespace Engine::Networking {
 
             SocketUDP() = delete;
         public:
-            SocketUDP(const unsigned short port, const std::string& _ip = "");
+            SocketUDP(const unsigned short port, const std::string& ip = "");
             ~SocketUDP();
 
             void                       setBlocking(const bool blocking);
@@ -22,17 +22,17 @@ namespace Engine::Networking {
             const sf::UdpSocket&       socket();
             const unsigned short       localPort();
 
-            const sf::Socket::Status   bind(const std::string& _ip = "");
+            const sf::Socket::Status   bind(const std::string& ip = "");
             void                       unbind();
 
-            const sf::Socket::Status   send(sf::Packet& packet, const std::string& _ip = "");
-            const sf::Socket::Status   send(const void* data, size_t size, const std::string& _ip = "");
+            const sf::Socket::Status   send(sf::Packet& packet, const std::string& ip = "");
+            const sf::Socket::Status   send(const void* data, size_t size, const std::string& ip = "");
             const sf::Socket::Status   receive(sf::Packet& packet);
-            const sf::Socket::Status   receive(void* data, size_t size, size_t& received);
+            const sf::Socket::Status   receive(void* data, size_t size, size_t received);
 
 
-            const sf::Socket::Status   send(const unsigned short port, sf::Packet& packet, const std::string& _ip = "");
-            const sf::Socket::Status   send(const unsigned short port, const void* data, size_t size, const std::string& _ip = "");
+            const sf::Socket::Status   send(const unsigned short port, sf::Packet& packet, const std::string& ip = "");
+            const sf::Socket::Status   send(const unsigned short port, const void* data, size_t size, const std::string& ip = "");
     };
 };
 

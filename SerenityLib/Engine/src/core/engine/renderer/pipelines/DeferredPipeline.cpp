@@ -534,10 +534,9 @@ const bool DeferredPipeline::bindRBO(const unsigned int rbo) {
 }
 
 const bool DeferredPipeline::bindShaderProgram(ShaderProgram* program) {
-    auto& currentShaderPgrm = m_RendererState.current_bound_shader_program;
-    if (currentShaderPgrm != program) {
+    if (m_RendererState.current_bound_shader_program != program) {
         m_OpenGLStateMachine.GL_glUseProgram(program->program());
-        currentShaderPgrm = program;
+        m_RendererState.current_bound_shader_program = program;
         return true;
     }
     return false;
@@ -548,9 +547,8 @@ const bool DeferredPipeline::unbindShaderProgram() {
     return true;
 }
 const bool DeferredPipeline::bindMaterial(Material* material) {
-    auto& currentMaterial = m_RendererState.current_bound_material;
-    if (currentMaterial != material) {
-        currentMaterial = material;
+    if (m_RendererState.current_bound_material != material) {
+        m_RendererState.current_bound_material = material;
         return true;
     }
     return false;
@@ -560,10 +558,15 @@ const bool DeferredPipeline::unbindMaterial() {
     return true;
 }
 const bool DeferredPipeline::bindMesh(Mesh* mesh) {
+    if (m_RendererState.current_bound_mesh != mesh) {
+        m_RendererState.current_bound_mesh = mesh;
+        return true;
+    }
     return false;
 }
-const bool DeferredPipeline::unbindMesh() {
-    return false;
+const bool DeferredPipeline::unbindMesh(Mesh* mesh) {
+    m_RendererState.current_bound_mesh = nullptr;
+    return true;
 }
 
 
@@ -576,7 +579,6 @@ void DeferredPipeline::generatePBRData(Texture& texture, const unsigned int conv
         prefilterSize
     );
 }
-
 void DeferredPipeline::onFullscreen() {
     //TODO: move these lines to a more generic area, all rendering pipelines will pretty much do this
     restoreCurrentOpenGLState();
@@ -587,7 +589,6 @@ void DeferredPipeline::onFullscreen() {
     const auto winSize = Resources::getWindowSize();
     m_GBuffer.init(winSize.x, winSize.y);
 }
-//DONE
 void DeferredPipeline::onResize(const unsigned int newWidth, const unsigned int newHeight) {
     const float floatWidth  = static_cast<float>(newWidth);
     const float floatHeight = static_cast<float>(newHeight);
@@ -607,7 +608,6 @@ void DeferredPipeline::onOpenGLContextCreation(const unsigned int windowWidth, c
     Engine::Renderer::GLEnable(GL_CULL_FACE);
     m_GBuffer.init(windowWidth, windowHeight);
 }
-//DONE
 void DeferredPipeline::renderSkybox(Skybox* skybox, ShaderProgram& shaderProgram, const Scene& scene, const Viewport& viewport, const Camera& camera) {
     glm::mat4 view_no_position = camera.getView();
     Math::removeMatrixPosition(view_no_position);
@@ -628,7 +628,6 @@ void DeferredPipeline::renderSkybox(Skybox* skybox, ShaderProgram& shaderProgram
     Engine::Renderer::sendTextureSafe("Texture", 0, 0, GL_TEXTURE_CUBE_MAP); //this is needed to render stuff in geometry transparent using the normal deferred shader. i do not know why just yet...
     //could also change sendTexture("Texture", skybox->texture()->address(0),0, GL_TEXTURE_CUBE_MAP); above to use a different slot...
 }
-//DONE
 void DeferredPipeline::renderDirectionalLight(const Camera& c, const DirectionalLight& d, const Viewport& viewport) {
     if (!d.isActive()) {
         return;
@@ -643,7 +642,6 @@ void DeferredPipeline::renderDirectionalLight(const Camera& c, const Directional
 
     renderFullscreenQuad();
 }
-//DONE
 void DeferredPipeline::renderSunLight(const Camera& c, const SunLight& s, const Viewport& viewport) {
     if (!s.isActive()) {
         return;
@@ -658,7 +656,6 @@ void DeferredPipeline::renderSunLight(const Camera& c, const SunLight& s, const 
 
     renderFullscreenQuad();
 }
-//DONE
 void DeferredPipeline::renderPointLight(const Camera& c, const PointLight& p) {
     if (!p.isActive()) {
         return;
@@ -690,11 +687,15 @@ void DeferredPipeline::renderPointLight(const Camera& c, const PointLight& p) {
     }else{
         cullFace(GL_BACK);
     }
-    const auto& pointLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPointLightBounds();
+    auto& pointLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPointLightBounds();
 
-    pointLightMesh.bind();
+
+    m_Renderer._bindMesh(&pointLightMesh);
+
     renderMesh(pointLightMesh); //this can bug out if we pass in custom uv's like in the renderQuad method
-    pointLightMesh.unbind();
+
+    m_Renderer._unbindMesh(&pointLightMesh);
+
     cullFace(GL_BACK);
 }
 void DeferredPipeline::renderSpotLight(const Camera& c, const SpotLight& s) {
@@ -727,11 +728,13 @@ void DeferredPipeline::renderSpotLight(const Camera& c, const SpotLight& s) {
     }else{
         cullFace(GL_BACK);
     }
-    const auto& spotLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getSpotLightBounds();
+    auto& spotLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getSpotLightBounds();
 
-    spotLightMesh.bind();
+
+    m_Renderer._bindMesh(&spotLightMesh);
     renderMesh(spotLightMesh); //this can bug out if we pass in custom uv's like in the renderQuad method
-    spotLightMesh.unbind();
+    m_Renderer._unbindMesh(&spotLightMesh);
+
     cullFace(GL_BACK);
     sendUniform1Safe("Type", 0.0f); //is this really needed?
 }
@@ -768,11 +771,11 @@ void DeferredPipeline::renderRodLight(const Camera& c, const RodLight& r) {
     }else{
         cullFace(GL_BACK);
     }
-    const auto& rodLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getRodLightBounds();
+    auto& rodLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getRodLightBounds();
 
-    rodLightMesh.bind();
+    m_Renderer._bindMesh(&rodLightMesh);
     renderMesh(rodLightMesh); //this can bug out if we pass in custom uv's like in the renderQuad method
-    rodLightMesh.unbind();
+    m_Renderer._unbindMesh(&rodLightMesh);
     cullFace(GL_BACK);
     sendUniform1Safe("Type", 0.0f); //is this really needed?
 }
@@ -788,21 +791,21 @@ void DeferredPipeline::renderDecal(ModelInstance& decalModelInstance) {
 
     const glm::mat4 modelMatrix  = parentModel * decalModelInstance.modelMatrix();
     const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
-    const auto winSize           = glm::vec2(Resources::getWindowSize());
 
-    Engine::Renderer::sendUniform4Safe("Resolution", winSize.x, winSize.y, 0.0f, 0.0f);
     Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }
-void DeferredPipeline::renderParticle(const Particle& particle) {
+void DeferredPipeline::renderParticle(const Particle& particle, const Camera& camera) {
     m_Renderer._bindMaterial(particle.getMaterial());
 
     const auto maxTextures = m_OpenGLStateMachine.getMaxTextureUnits() - 1U;
-    const Camera& camera   = *particle.scene().getActiveCamera();
     Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(Engine::priv::GBufferType::Depth), maxTextures);
     Engine::Renderer::sendUniform1Safe("Object_Color", particle.color().toPackedInt());
-    Engine::Renderer::sendUniform2Safe("ScreenData", glm::vec2(Resources::getWindowSize()));
 
+    Engine::Renderer::sendUniform3Safe("ParticlePosition", particle.position() - glm::vec3(camera.getPosition()));
+    const glm::vec2& scl = particle.getScale();
+    Engine::Renderer::sendUniform3Safe("ParticleScaleAndRot", scl.x, scl.y, 1.0f);
+    /*
     glm::mat4 modelMatrix  = glm::mat4(1.0f);
     modelMatrix            = glm::translate(modelMatrix, particle.position());
     modelMatrix           *= glm::mat4_cast(camera.getOrientation());
@@ -810,16 +813,19 @@ void DeferredPipeline::renderParticle(const Particle& particle) {
     const auto& scale      = particle.getScale();
     modelMatrix            = glm::scale(modelMatrix, glm::vec3(scale.x, scale.y, 1.0f));
 
-    Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
+    glm::mat4 modelView = camera.getView() * modelMatrix;
 
+    Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
+    */
     renderMesh(priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh());
 }
 void DeferredPipeline::renderMesh(const Mesh& mesh, const unsigned int mode) {
     const auto indicesSize = mesh.getVertexData().indices.size();
-    if (indicesSize == 0)
+    if (indicesSize == 0) {
         return;
+    }
     //if (instancing && priv::InternalMeshPublicInterface::SupportsInstancing()) {
-        //const uint& instancesCount = m_InstanceCount;
+        //const unsigned int& instancesCount = m_InstanceCount;
         //if (instancesCount == 0) 
         //    return;
         //if (Renderer::OPENGL_VERSION >= 31) {
@@ -975,7 +981,7 @@ void DeferredPipeline::internal_render_2d_text_right(const string& text, const F
 }
 
 
-void DeferredPipeline::render2DText(const string& text, const Font& font, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const TextAlignment::Type& textAlignment, const glm::vec4& scissor) {
+void DeferredPipeline::render2DText(const string& text, const Font& font, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const TextAlignment::Type textAlignment, const glm::vec4& scissor) {
     GLScissor(scissor);
 
     m_Text_Points.clear();
@@ -983,7 +989,7 @@ void DeferredPipeline::render2DText(const string& text, const Font& font, const 
     m_Text_Indices.clear();
 
     auto& fontPlane = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getFontMesh();
-    fontPlane.bind();
+    m_Renderer._bindMesh(&fontPlane);
 
     const auto  newLineGlyphHeight = font.getGlyphData('X').height + 12;
     const auto& texture = font.getGlyphTexture();
@@ -1012,14 +1018,11 @@ void DeferredPipeline::render2DText(const string& text, const Font& font, const 
     fontPlane.modifyVertices(1, m_Text_UVs);
     fontPlane.modifyIndices(m_Text_Indices);
     renderMesh(fontPlane);
-
+    m_Renderer._unbindMesh(&fontPlane);
 
 }
-void DeferredPipeline::render2DTexture(const Texture* texture, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const Alignment::Type& align, const glm::vec4& scissor) {
+void DeferredPipeline::render2DTexture(const Texture* texture, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const Alignment::Type align, const glm::vec4& scissor) {
     GLScissor(scissor);
-
-    auto& plane = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
-    plane.bind();
 
     float translationX = position.x;
     float translationY = position.y;
@@ -1044,13 +1047,13 @@ void DeferredPipeline::render2DTexture(const Texture* texture, const glm::vec2& 
     Engine::Renderer::sendUniform4("Object_Color", color);
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
 
+    auto& plane = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
+    m_Renderer._bindMesh(&plane);
     renderMesh(plane);
+    m_Renderer._unbindMesh(&plane);
 }
-void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& alignment, const glm::vec4& scissor) {
+void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type alignment, const glm::vec4& scissor) {
     GLScissor(scissor);
-
-    auto& triangle = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getTriangleMesh();
-    triangle.bind();
 
     float translationX = position.x;
     float translationY = position.y;
@@ -1067,7 +1070,10 @@ void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::ve
     Engine::Renderer::sendUniform4("Object_Color", color);
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
 
+    auto& triangle = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getTriangleMesh();
+    m_Renderer._bindMesh(&triangle);
     renderMesh(triangle);
+    m_Renderer._unbindMesh(&triangle);
 }
 
 
@@ -1385,12 +1391,9 @@ void DeferredPipeline::internal_pass_depth_and_transparency(const Viewport& view
 void DeferredPipeline::internal_pass_copy_depth() {
 
 }
-void DeferredPipeline::internal_pass_blur(const Viewport& viewport, const GLuint texture, const string& type) {
+void DeferredPipeline::internal_pass_blur(const Viewport& viewport, const GLuint texture, string_view type) {
     m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::DeferredBlur]);
 
-    const auto& dimensions = viewport.getViewportDimensions();
-
-    const float& divisor = m_GBuffer.getSmallFBO().divisor();
     glm::vec2 hv(0.0f);
     if (type == "H") { 
         hv = glm::vec2(1.0f, 0.0f); 
@@ -1398,7 +1401,6 @@ void DeferredPipeline::internal_pass_blur(const Viewport& viewport, const GLuint
         hv = glm::vec2(0.0f, 1.0f); 
     }
 
-    const glm::ivec2 Res(dimensions.z, dimensions.w);
     auto& bloom = Bloom::bloom;
     Engine::Renderer::sendUniform4("strengthModifier",
         bloom.blur_strength,
@@ -1406,7 +1408,6 @@ void DeferredPipeline::internal_pass_blur(const Viewport& viewport, const GLuint
         bloom.blur_strength,
         SSAO::ssao.m_ssao_blur_strength
     );
-    Engine::Renderer::sendUniform2("Resolution", Res);
     Engine::Renderer::sendUniform4("DataA", bloom.blur_radius, 0.0f, hv.x, hv.y);
     Engine::Renderer::sendTexture("image", m_GBuffer.getTexture(texture), 0);
 
@@ -1419,8 +1420,10 @@ void DeferredPipeline::update(const float dt) {
 
 }
 void DeferredPipeline::render(Engine::priv::Renderer& renderer, const Viewport& viewport, const bool mainRenderFunction) {
-    const auto& camera = viewport.getCamera();
-    const auto& scene  = viewport.getScene();
+    const auto& camera     = viewport.getCamera();
+    const auto& scene      = viewport.getScene();
+    const auto& dimensions = viewport.getViewportDimensions();
+    const auto winSize     = glm::vec2(m_GBuffer.width(), m_GBuffer.height());
 
     internal_render_per_frame_preparation(viewport, camera);
 
@@ -1439,6 +1442,7 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, const Viewport& 
             //m_UBOCameraDataStruct.Info1       = glm::vec4(camera.getPosition(),camera.getNear());
             //m_UBOCameraDataStruct.Info2       = glm::vec4(camera.getViewVector(),camera.getFar());
             //m_UBOCameraDataStruct.Info3       = glm::vec4(0.0f,0.0f,0.0f, 0.0f);
+            //m_UBOCameraDataStruct.Info4       = glm::vec4(winSize.x, winSize.y, dimensions.z, dimensions.w);
 
 
             //this render space places the camera at the origin and offsets submitted model matrices to the vertex shaders
@@ -1453,6 +1457,7 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, const Viewport& 
             m_UBOCameraDataStruct.Info1         = glm::vec4(0.0001f, 0.0001f, 0.0001f, camera.getNear());
             m_UBOCameraDataStruct.Info2         = glm::vec4(ComponentCamera_Functions::GetViewVectorNoTranslation(camera), camera.getFar());
             m_UBOCameraDataStruct.Info3         = glm::vec4(camera.getPosition(), 0.0f);
+            m_UBOCameraDataStruct.Info4         = glm::vec4(winSize.x, winSize.y, dimensions.z, dimensions.w);
 
             UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraDataStruct);
         }
@@ -1546,19 +1551,19 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, const Viewport& 
 
 
 
-void DeferredPipeline::renderTexture(const Texture& tex, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const Alignment::Type& align, const glm::vec4& scissor) {
+void DeferredPipeline::renderTexture(const Texture& tex, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const Alignment::Type align, const glm::vec4& scissor) {
     API2DCommand command;
     command.func = [=, &tex]() { DeferredPipeline::render2DTexture(&tex, p, c, a, s, d, align, scissor); };
     command.depth = d;
     m_2DAPICommands.push_back(std::move(command));
 }
-void DeferredPipeline::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const TextAlignment::Type& align, const glm::vec4& scissor) {
+void DeferredPipeline::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const TextAlignment::Type align, const glm::vec4& scissor) {
     API2DCommand command;
     command.func = [=, &fnt]() { DeferredPipeline::render2DText(t, fnt, p, c, a, s, d, align, scissor); };
     command.depth = d;
     m_2DAPICommands.push_back(std::move(command));
 }
-void DeferredPipeline::renderBorder(const float borderSize, const glm::vec2& pos, const glm::vec4& col, const float w, const float h, const float angle, const float depth, const Alignment::Type& align, const glm::vec4& scissor) {
+void DeferredPipeline::renderBorder(const float borderSize, const glm::vec2& pos, const glm::vec4& col, const float w, const float h, const float angle, const float depth, const Alignment::Type align, const glm::vec4& scissor) {
     const float doubleBorder = borderSize * 2.0f;
     const float halfWidth    = w / 2.0f;
     const float halfHeight   = h / 2.0f;
@@ -1573,13 +1578,13 @@ void DeferredPipeline::renderBorder(const float borderSize, const glm::vec2& pos
     Engine::Renderer::renderRectangle(newPos - glm::vec2(0.0f, halfHeight), col, w, borderSize, angle, depth, Alignment::TopCenter, scissor);
     Engine::Renderer::renderRectangle(newPos + glm::vec2(0.0f, halfHeight + borderSize), col, w, borderSize, angle, depth, Alignment::BottomCenter, scissor);
 }
-void DeferredPipeline::renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float width, const float height, const float angle, const float depth, const Alignment::Type& align, const glm::vec4& scissor) {
+void DeferredPipeline::renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float width, const float height, const float angle, const float depth, const Alignment::Type align, const glm::vec4& scissor) {
     API2DCommand command;
     command.func = [=]() { DeferredPipeline::render2DTexture(nullptr, pos, col, angle, glm::vec2(width, height), depth, align, scissor); };
     command.depth = depth;
     m_2DAPICommands.push_back(std::move(command));
 }
-void DeferredPipeline::renderTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& align, const glm::vec4& scissor) {
+void DeferredPipeline::renderTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type align, const glm::vec4& scissor) {
     API2DCommand command;
     command.func = [=]() { DeferredPipeline::render2DTriangle(position, color, angle, width, height, depth, align, scissor); };
     command.depth = depth;

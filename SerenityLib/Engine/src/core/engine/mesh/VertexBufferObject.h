@@ -19,12 +19,12 @@ struct BufferDataDrawType final{enum Type {
 _TOTAL};};
 
 struct BufferObject {
-    GLuint                    buffer;
-    BufferDataDrawType::Type  drawType;
+    GLuint                    buffer   = 0;
+    BufferDataDrawType::Type  drawType = BufferDataDrawType::Unassigned;
     BufferDataType::Type      type;
-    size_t                    capacity;
+    size_t                    capacity = 0;
 
-    BufferObject();
+    BufferObject() = default;
     BufferObject(const BufferObject& other)                = delete;
     BufferObject& operator=(const BufferObject& other)     = delete;
     BufferObject(BufferObject&& other) noexcept            = delete;
@@ -49,13 +49,15 @@ struct BufferObject {
         glBufferData(type, _size, _data.data(), drawType);
     }
     template<typename T> void setData(size_t _startingIndex, const std::vector<T>& _data) {
-        if (drawType == BufferDataDrawType::Unassigned) 
+        if (drawType == BufferDataDrawType::Unassigned) {
             return;
+        }
         glBufferSubData(type, _startingIndex, _data.size() * sizeof(T), _data.data());
     }
     template<typename T> void setDataOrphan(const std::vector<T>& _data) {
-        if (capacity == 0) 
+        if (capacity == 0) {
             return;
+        }
         glBufferData(type, capacity, nullptr, drawType);
         glBufferSubData(type, 0, capacity, _data.data());
     }

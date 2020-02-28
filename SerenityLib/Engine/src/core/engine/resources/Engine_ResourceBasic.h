@@ -12,7 +12,7 @@ class EngineResource{
         unsigned int         m_UsageCount;
         ResourceType::Type   m_ResourceType;
     public:
-        EngineResource(const ResourceType::Type& type, const std::string& name = "");
+        EngineResource(const ResourceType::Type type, const std::string& name = "");
         virtual ~EngineResource();
 
         const std::string& name() const;

@@ -4,16 +4,10 @@
 
 #include <string>
 
-namespace Engine {
-    namespace priv {
-        namespace opengl {
-            namespace glsl {
-                class Compression final {
-                    public:
-                        static void convert(std::string& code, const unsigned int& versionNumber);
-                };
-            };
-        };
+namespace Engine::priv::opengl::glsl {
+    class Compression final {
+        public:
+            static void convert(std::string& code, const unsigned int versionNumber);
     };
 };
 

@@ -65,13 +65,13 @@ class Window final{
 
                 void cleanup();
                 void startup(Window& super, const std::string& name);
-                void push(const EventThreadOnlyCommands::Command&);
+                void push(const EventThreadOnlyCommands::Command command);
                 std::optional<sf::Event> try_pop();
             public:
                 WindowThread(WindowData&);
                 ~WindowThread();
 
-                bool operator==(const bool& rhs) const;
+                bool operator==(const bool rhs) const;
                 explicit operator bool() const;
         };
 
@@ -104,9 +104,9 @@ class Window final{
             sf::VideoMode get_default_desktop_video_mode();
             void init_position(Window& super);
 
-            void on_mouse_wheel_scrolled(const float& delta, const int& x, const int& y);
+            void on_mouse_wheel_scrolled(const float delta, const int x, const int y);
 
-            void on_reset_events(const float& dt);
+            void on_reset_events(const float dt);
 
             void on_close();
         public:
@@ -131,7 +131,7 @@ class Window final{
         const glm::uvec2 getPosition();
 
 
-        const unsigned int& getFramerateLimit() const;
+        const unsigned int getFramerateLimit() const;
 
         sf::Window& getSFMLHandle() const;
 
@@ -140,7 +140,7 @@ class Window final{
         const glm::vec2& getMousePosition() const;
         const double& getMouseWheelDelta() const;
 
-        const bool pollEvents(sf::Event&);
+        const bool pollEvents(sf::Event& InSFEvent);
 
         const bool hasFocus() const;
         const bool isOpen() const;
@@ -168,12 +168,12 @@ class Window final{
         void updateMousePosition(const glm::vec2& position, const bool resetDifference = false, const bool resetPreviousPosition = false);
 
         void setName(const char* name);
-        void setSize(const unsigned int& width, const unsigned int& height);
+        void setSize(const unsigned int width, const unsigned int height);
         void setIcon(const Texture& texture);
         void setIcon(const char* file);
         void setIcon(const std::string& file);
         void setMouseCursorVisible(const bool);
-        void setPosition(const unsigned int& x, const unsigned int& y);
+        void setPosition(const unsigned int x, const unsigned int y);
 
         //currently specific to windows os only
         const bool maximize();
@@ -221,14 +221,14 @@ class Window final{
 
         //Grab or release the mouse cursor. If set, grabs the mouse cursor inside this window's client area so it may no
         //longer be moved outside its bounds. Note that grabbing is only active while the window has focus.
-        void keepMouseInWindow(const bool=true);
+        void keepMouseInWindow(const bool = true);
 
         //Limit the framerate to a maximum fixed frequency. If a limit is set, the window will use a small delay after
         //each call to display() to ensure that the current frame lasted long enough to match the framerate limit.
         //SFML will try to match the given limit as much as it can, but since it internally uses sf::sleep,
         //whose precision depends on the underlying OS, the results may be a little unprecise as well
         //(for example, you can get 65 FPS when requesting 60).
-        void setFramerateLimit(const unsigned int& limit);
+        void setFramerateLimit(const unsigned int limit);
 
 };
 #endif

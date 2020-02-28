@@ -18,7 +18,7 @@ class  Window;
 
 
 namespace Engine{
-    void pause(const bool& pause = true);
+    void pause(const bool pause = true);
     bool paused();
     void unpause();
 
@@ -30,8 +30,8 @@ namespace Engine{
     void hideMouseCursor();
     void setTimeScale(const float timeScale);
     void stop();
-    const bool setFullscreen(const bool& isFullscreen);
-    const bool setFullscreenWindowed(const bool& isFullscreen);
+    const bool setFullscreen(const bool isFullscreen);
+    const bool setFullscreenWindowed(const bool isFullscreen);
     namespace priv{
         class EngineCore final {
             friend class Window;
@@ -44,7 +44,7 @@ namespace Engine{
                 The sf::Event::Resized event is triggered when the window is resized,
                 either through user action or programmatically by calling window.setSize.
                 */
-                void on_event_resize(Window&, const unsigned int& w, const unsigned int& h, const bool& saveSize);
+                void on_event_resize(Window&, const unsigned int w, const unsigned int h, const bool saveSize);
 
                 /*
                 Triggered when the game application fully closes, by calling Engine::stop(). This triggers Game::onGameEnded(), and this will be called before Game::cleanup()
@@ -87,7 +87,7 @@ namespace Engine{
                 It works with all the input methods provided by the operating system, even the most specific or complex ones.
                 This event is typically used to catch user input in a text field.
                 */
-                void on_event_text_entered(Window&, const unsigned int& unicode);
+                void on_event_text_entered(Window&, const unsigned int unicode);
 
 
                 /*
@@ -98,7 +98,7 @@ namespace Engine{
                 This event is the one to use if you want to trigger an action exactly once when a key is pressed or released,
                 like making a character jump with space, or exiting something with escape.
                 */
-                void on_event_key_pressed(Window&, const unsigned int& key);
+                void on_event_key_pressed(Window&, const unsigned int key);
 
                 /*
                 The sf::Event::KeyPressed and sf::Event::KeyReleased events are triggered when a keyboard key is pressed/released.
@@ -108,35 +108,35 @@ namespace Engine{
                 This event is the one to use if you want to trigger an action exactly once when a key is pressed or released,
                 like making a character jump with space, or exiting something with escape.
                 */
-                void on_event_key_released(Window&, const unsigned int& key);
+                void on_event_key_released(Window&, const unsigned int key);
 
                 /*
                 The sf::Event::MouseWheelScrolled event is triggered when a mouse wheel moves up or down, but also laterally if the mouse supports it.
                 The member associated with this event is event.mouseWheelScroll, it contains the number of ticks the wheel has moved,
                 what the orientation of the wheel is and the current position of the mouse cursor.
                 */
-                void on_event_mouse_wheel_scrolled(Window&, const float& delta, const int& mouseWheelX, const int& mouseWheelY);
+                void on_event_mouse_wheel_scrolled(Window&, const float delta, const int mouseWheelX, const int mouseWheelY);
 
                 /*
                 The sf::Event::MouseButtonPressed and sf::Event::MouseButtonReleased events are
                 triggered when a mouse button is pressed/released.
                 SFML supports 5 mouse buttons: left, right, middle (wheel), extra #1 and extra #2 (side buttons).
                 */
-                void on_event_mouse_button_pressed(Window&, const unsigned int& mouseButton);
+                void on_event_mouse_button_pressed(Window&, const unsigned int mouseButton);
 
                 /*
                 The sf::Event::MouseButtonPressed and sf::Event::MouseButtonReleased events are
                 triggered when a mouse button is pressed/released.
                 SFML supports 5 mouse buttons: left, right, middle (wheel), extra #1 and extra #2 (side buttons).
                 */
-                void on_event_mouse_button_released(Window&, const unsigned int& mouseButton);
+                void on_event_mouse_button_released(Window&, const unsigned int mouseButton);
 
                 /*
                 The sf::Event::MouseMoved event is triggered when the mouse moves within the window.
                 This event is triggered even if the window isn't focused. However, it is triggered
                 only when the mouse moves within the inner area of the window, not when it moves over the title bar or borders.
                 */
-                void on_event_mouse_moved(Window&, const int& mouseX, const int& mouseY);
+                void on_event_mouse_moved(Window&, const int mouseX, const int mouseY);
 
                 /*
                 The sf::Event::MouseEntered and sf::Event::MouseLeft events are triggered when the mouse cursor enters/leaves the window.
@@ -148,18 +148,18 @@ namespace Engine{
                 void on_event_mouse_left(Window&);
 
 
-                void on_event_joystick_button_pressed(Window&, const unsigned int& button, const unsigned int& id);
-                void on_event_joystick_button_released(Window&, const unsigned int& button, const unsigned int& id);
-                void on_event_joystick_moved(Window&, const unsigned int& id, const float& position, const unsigned int axis);
-                void on_event_joystick_connected(Window&, const unsigned int& id);
-                void on_event_joystick_disconnected(Window&, const unsigned int& id);
+                void on_event_joystick_button_pressed(Window&, const unsigned int button, const unsigned int id);
+                void on_event_joystick_button_released(Window&, const unsigned int button, const unsigned int id);
+                void on_event_joystick_moved(Window&, const unsigned int id, const float position, const unsigned int axis);
+                void on_event_joystick_connected(Window&, const unsigned int id);
+                void on_event_joystick_disconnected(Window&, const unsigned int id);
 
-                void update_logic(Window& window, const float& dt);
-                void update_sounds(Window& window, const float& dt);
-                void update_physics(Window& window, const float& dt);
-                void update(Window& window, const float& dt);
-                void render(Window& window, const float& dt);
-                void cleanup(Window& window, const float& dt);
+                void update_logic(Window& window, const float dt);
+                void update_sounds(Window& window, const float dt);
+                void update_physics(Window& window, const float dt);
+                void update(Window& window, const float dt);
+                void render(Window& window, const float dt);
+                void cleanup(Window& window, const float dt);
             public:
                 struct Misc final {
                     Engine::priv::BuiltInMeshses   m_BuiltInMeshes;

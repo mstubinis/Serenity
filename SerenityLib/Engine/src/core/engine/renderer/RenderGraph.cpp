@@ -415,7 +415,9 @@ void RenderGraph::render(const Engine::priv::Renderer& renderer, const Viewport&
             for (auto& meshNode : materialNode.meshNodes) {
                 if (meshNode.instanceNodes.size() > 0) {
                     auto& _mesh = *meshNode.mesh;
-                    _mesh.bind();
+
+                    renderer._bindMesh(&_mesh);
+
                     for (auto& instanceNode : meshNode.instanceNodes) {
                         auto& _modelInstance = *instanceNode->instance;
                         auto* body = _modelInstance.parent().getComponent<ComponentBody>();
@@ -436,7 +438,7 @@ void RenderGraph::render(const Engine::priv::Renderer& renderer, const Viewport&
                             renderer._bindMaterial(&_material);
                         }
                     }
-                    _mesh.unbind();
+                    renderer._unbindMesh(&_mesh);
                 }
             }
             renderer._unbindMaterial();
@@ -458,13 +460,13 @@ void RenderGraph::render_bruteforce(const Engine::priv::Renderer& renderer, cons
                 _mesh.sortTriangles(camera, _modelInstance, modelMatrix, sortingMode);
             }
             renderer._bindMaterial(&_material);
-            _mesh.bind();
+            renderer._bindMesh(&_mesh);
             _modelInstance.bind(renderer);
 
             renderer.m_Pipeline->renderMesh(_mesh, _modelInstance.getDrawingMode());
 
             _modelInstance.unbind(renderer);
-            _mesh.unbind();
+            renderer._unbindMesh(&_mesh);
             renderer._unbindMaterial();
         }
         //protect against any custom changes by restoring to the regular shader and material

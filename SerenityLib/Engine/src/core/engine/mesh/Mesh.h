@@ -18,17 +18,19 @@ namespace Engine::priv {
     class  AnimationData;
     struct InternalMeshRequestPublicInterface;
     class  ModelInstanceAnimation;
+    class  Renderer;
 };
 
 #include <core/engine/mesh/VertexData.h>
 #include <core/engine/mesh/MeshIncludes.h>
 
-#include <core/engine/BindableResource.h>
+#include <core/engine/resources/Engine_ResourceBasic.h>
 #include <core/engine/events/Engine_EventObject.h>
 #include <core/engine/physics/PhysicsIncludes.h>
 #include <core/engine/model/ModelInstance.h>
 
 #include <unordered_map>
+#include <functional>
 
 #include <assimp/scene.h>
 
@@ -39,8 +41,8 @@ namespace Engine::priv{
         static void UnloadCPU(Mesh&);
         static void UnloadGPU(Mesh&);
         static bool SupportsInstancing();
-        static btCollisionShape* BuildCollision(ModelInstance*, const CollisionType::Type&, const bool isCompoundChild = false);
-        static btCollisionShape* BuildCollision(Mesh*, const CollisionType::Type&, const bool isCompoundChild = false);
+        static btCollisionShape* BuildCollision(ModelInstance*, const CollisionType::Type, const bool isCompoundChild = false);
+        static btCollisionShape* BuildCollision(Mesh*, const CollisionType::Type, const bool isCompoundChild = false);
 
         static void FinalizeVertexData(Mesh&, MeshImportedData& data);
         static void TriangulateComponentIndices(Mesh&, MeshImportedData& data, std::vector<std::vector<uint>>& indices, const unsigned char flags);
@@ -48,35 +50,48 @@ namespace Engine::priv{
     };
 };
 
-class Mesh final: public BindableResource, public EventObserver, public Engine::NonCopyable, public Engine::NonMoveable {
-    friend struct ::Engine::priv::InternalMeshPublicInterface;
-    friend struct ::Engine::priv::InternalMeshRequestPublicInterface;
-    friend struct ::Engine::priv::DefaultMeshBindFunctor;
-    friend struct ::Engine::priv::DefaultMeshUnbindFunctor;
-    friend class  ::Engine::priv::AnimationData;
-    friend class  ::Engine::priv::MeshSkeleton;
-    friend class  ::Engine::priv::MeshLoader;
-    friend class  ::Engine::priv::MeshCollisionFactory;
-    friend class  ::Engine::priv::ModelInstanceAnimation;
+class Mesh final: public EngineResource, public EventObserver, public Engine::NonCopyable, public Engine::NonMoveable {
+    friend struct Engine::priv::InternalMeshPublicInterface;
+    friend struct Engine::priv::InternalMeshRequestPublicInterface;
+    friend struct Engine::priv::DefaultMeshBindFunctor;
+    friend struct Engine::priv::DefaultMeshUnbindFunctor;
+    friend class  Engine::priv::AnimationData;
+    friend class  Engine::priv::MeshSkeleton;
+    friend class  Engine::priv::MeshLoader;
+    friend class  Engine::priv::MeshCollisionFactory;
+    friend class  Engine::priv::ModelInstanceAnimation;
+    friend class  Engine::priv::Renderer;
     friend class  Collision;
     private:
-        VertexData*                            m_VertexData;
-        Engine::priv::MeshCollisionFactory*    m_CollisionFactory;
-        Engine::priv::MeshSkeleton*            m_Skeleton;
-        std::string                            m_File;
-        glm::vec3                              m_radiusBox;
-        float                                  m_radius;
-        float                                  m_Threshold;
+        std::function<void(Mesh*)>             m_CustomBindFunctor   = [](Mesh*) {};
+        std::function<void(Mesh*)>             m_CustomUnbindFunctor = [](Mesh*) {};
+
+        VertexData*                            m_VertexData          = nullptr;
+        Engine::priv::MeshCollisionFactory*    m_CollisionFactory    = nullptr;
+        Engine::priv::MeshSkeleton*            m_Skeleton            = nullptr;
+        std::string                            m_File                = "";
+        glm::vec3                              m_radiusBox           = glm::vec3(0.0f);
+        float                                  m_radius              = 0.0f;
+        float                                  m_Threshold           = 0.0005f;
 
         Mesh();
     public:
         Mesh(const std::string& name, const btHeightfieldTerrainShape& heightfield, float threshold);
         Mesh(VertexData*, const std::string& name, float threshold = 0.0005f);
-        Mesh(const std::string& name,float width, float height,float threshold); //plane
+        Mesh(const std::string& name, float width, float height, float threshold); //plane
         Mesh(const std::string& fileOrData, float threshold = 0.0005f); //file or data
         ~Mesh();
 
-        bool operator==(const bool& rhs) const;
+        template<typename T>
+        void setCustomBindFunctor(const T& functor) {
+            m_CustomBindFunctor = std::bind(std::move(functor), std::placeholders::_1);
+        }
+        template<typename T>
+        void setCustomUnbindFunctor(const T& functor) {
+            m_CustomUnbindFunctor = std::bind(std::move(functor), std::placeholders::_1);
+        }
+
+        bool operator==(const bool rhs) const;
         explicit operator bool() const;
 
         std::unordered_map<std::string, Engine::priv::AnimationData>& animationData();

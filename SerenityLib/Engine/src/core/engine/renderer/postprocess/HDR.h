@@ -36,7 +36,7 @@ namespace Engine::priv {
 
             const bool init_shaders();
 
-            void pass(GBuffer&, const Viewport& viewport,const bool& godRays,const bool& lighting,const float& godRaysFactor, const Engine::priv::Renderer& renderer);
+            void pass(GBuffer&, const Viewport& viewport, const bool godRays, const bool lighting, const float godRaysFactor, const Engine::priv::Renderer& renderer);
 
             static HDR hdr;
     };

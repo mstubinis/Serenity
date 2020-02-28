@@ -13,7 +13,7 @@ using namespace Engine::priv;
 using namespace std;
 
 
-void opengl::glsl::Compression::convert(string& code, const unsigned int& versionNumber) {
+void opengl::glsl::Compression::convert(string& code, const unsigned int versionNumber) {
 #pragma region Unpack3FloatsInto1FloatUnsigned
     if (ShaderHelper::sfind(code, "Unpack3FloatsInto1FloatUnsigned")) {
         if (!ShaderHelper::sfind(code, "vec3 Unpack3FloatsInto1FloatUnsigned")) {

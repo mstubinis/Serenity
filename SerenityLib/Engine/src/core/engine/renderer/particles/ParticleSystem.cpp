@@ -127,13 +127,14 @@ void priv::ParticleSystem::render(const Camera& camera, ShaderProgram& program, 
     std::sort(std::execution::par_unseq, seen.begin(), seen.end(), lambda_sorter);
 
     renderer._bindShaderProgram(&program);
+    renderer._bindMesh(&planeMesh);
 
-    planeMesh.bind();
     for (auto& particle : seen) {
         //if (particle.m_PassedRenderCheck) { //TODO: using "seen" vector for now, do not need bool check, should profile using seen vector over using bool and full vector...
-            renderer.m_Pipeline->renderParticle(*particle);
+            renderer.m_Pipeline->renderParticle(*particle, camera);
         //}
     }
+    renderer._unbindMesh(&planeMesh);
 }
 
 vector<ParticleEmitter>& priv::ParticleSystem::getParticleEmitters() {

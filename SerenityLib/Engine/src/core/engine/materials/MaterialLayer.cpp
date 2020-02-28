@@ -84,28 +84,28 @@ void MaterialLayer::setCubemap(const string& cubemapFile) {
     Texture* _texture = MaterialLoader::LoadTextureCubemap(cubemapFile);
     setCubemap(_texture);
 }
-void MaterialLayer::setTexture(Texture* _texture) {
-    if (!_texture /*|| _texture->type() != GL_TEXTURE_2D*/) {
+void MaterialLayer::setTexture(Texture* texture) {
+    if (!texture /*|| _texture->type() != GL_TEXTURE_2D*/) {
         m_Data1.y = 0.0f;
         return;
     }
-    m_Texture = _texture;
+    m_Texture = texture;
     m_Data1.y = m_Texture->compressed() ? 0.5f : 1.0f;
 }
-void MaterialLayer::setMask(Texture* _mask) {
-    if (!_mask /*|| _mask->type() != GL_TEXTURE_2D*/) {
+void MaterialLayer::setMask(Texture* mask) {
+    if (!mask /*|| _mask->type() != GL_TEXTURE_2D*/) {
         m_Data1.z = 0.0f;
         return;
     }
-    m_Mask = _mask;
+    m_Mask = mask;
     m_Data1.z = m_Mask->compressed() ? 0.5f : 1.0f;
 }
-void MaterialLayer::setCubemap(Texture* _cubemap) {
-    if (!_cubemap /*|| _cubemap->type() != GL_TEXTURE_CUBE_MAP*/) {
+void MaterialLayer::setCubemap(Texture* cubemap) {
+    if (!cubemap /*|| _cubemap->type() != GL_TEXTURE_CUBE_MAP*/) {
         m_Data1.w = 0.0f;
         return;
     }
-    m_Cubemap = _cubemap;
+    m_Cubemap = cubemap;
     m_Data1.w = m_Cubemap->compressed() ? 0.5f : 1.0f;
 }
 
@@ -113,11 +113,10 @@ const glm::vec2& MaterialLayer::getUVModifications() const {
     return m_UVModifications;
 }
 
-void MaterialLayer::update(const float& dt) {
-    const float& fDT = static_cast<float>(dt);
+void MaterialLayer::update(const float dt) {
     //calculate uv modifications
     for (auto& command : m_UVModificationQueue) {
-        command(fDT);
+        command(dt);
     }
 }
 void MaterialLayer::sendDataToGPU(const string& uniform_component_string, const size_t component_index, const size_t layer_index, size_t& textureUnit) const {
@@ -129,15 +128,15 @@ void MaterialLayer::sendDataToGPU(const string& uniform_component_string, const 
     //m_Data1.w = (m_Cubemap && m_Texture->compressed()) ? 0.5f : 1.0f;
 
     if (m_Texture && m_Texture->address() != 0) {
-        Engine::Renderer::sendTextureSafe((wholeString + "texture").c_str(), *m_Texture, int(textureUnit));
+        Engine::Renderer::sendTextureSafe((wholeString + "texture").c_str(), *m_Texture, static_cast<int>(textureUnit));
         ++textureUnit;
     }
     if (m_Mask && m_Mask->address() != 0) {
-        Engine::Renderer::sendTextureSafe((wholeString + "mask").c_str(),    *m_Mask,    int(textureUnit));
+        Engine::Renderer::sendTextureSafe((wholeString + "mask").c_str(),    *m_Mask,    static_cast<int>(textureUnit));
         ++textureUnit;
     }
     if (m_Cubemap && m_Cubemap->address() != 0) {
-        Engine::Renderer::sendTextureSafe((wholeString + "cubemap").c_str(), *m_Cubemap, int(textureUnit));
+        Engine::Renderer::sendTextureSafe((wholeString + "cubemap").c_str(), *m_Cubemap, static_cast<int>(textureUnit));
         ++textureUnit;
     }
     Engine::Renderer::sendUniform4Safe((wholeString + "data1").c_str(), m_Data1);

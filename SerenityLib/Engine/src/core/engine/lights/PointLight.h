@@ -7,21 +7,22 @@
 class PointLight : public SunLight {
     friend class ::Engine::priv::Renderer;
     protected:
-        float                    m_C;
-        float                    m_L;
-        float                    m_E;
+        LightAttenuation::Model  m_AttenuationModel = LightAttenuation::Constant_Linear_Exponent;
+        float                    m_C                = 0.1f;
+        float                    m_L                = 0.1f;
+        float                    m_E                = 0.1f;
         float                    m_CullingRadius;
-        LightAttenuation::Model  m_AttenuationModel;
+
         virtual float            calculateCullingRadius();
     public:
         PointLight(
-            const glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
-            Scene* scene             = nullptr
+            const glm_vec3& position  = glm_vec3(0.0f, 0.0f, 0.0f),
+            Scene* scene              = nullptr
         );
         PointLight(
             const LightType::Type type,
-            const glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
-            Scene* scene             = nullptr
+            const glm_vec3& position  = glm_vec3(0.0f, 0.0f, 0.0f),
+            Scene* scene              = nullptr
         );
         virtual ~PointLight();
 
@@ -38,6 +39,6 @@ class PointLight : public SunLight {
         const float getConstant() const;
         const float getLinear() const;
         const float getExponent() const;
-        const LightAttenuation::Model& getAttenuationModel() const;
+        const LightAttenuation::Model getAttenuationModel() const;
 };
 #endif

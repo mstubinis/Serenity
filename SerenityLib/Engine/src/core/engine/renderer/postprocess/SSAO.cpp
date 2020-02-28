@@ -1,4 +1,5 @@
 #include <core/engine/renderer/postprocess/SSAO.h>
+#include <core/engine/renderer/opengl/Extensions.h>
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/FramebufferObject.h>
 #include <core/engine/renderer/Renderer.h>
@@ -14,6 +15,7 @@
 #include <random>
 
 using namespace std;
+using namespace Engine::priv;
 
 Engine::priv::SSAO Engine::priv::SSAO::ssao;
 
@@ -63,9 +65,9 @@ const bool Engine::priv::SSAO::init_shaders() {
     m_GLSL_frag_code =
         "USE_LOG_DEPTH_FRAG_WORLD_POSITION\n"
         "\n"
-        "uniform sampler2D gNormalMap;\n"
-        "uniform sampler2D gRandomMap;\n"
-        "uniform sampler2D gDepthMap;\n"
+        "uniform SAMPLER_TYPE_2D gNormalMap;\n"
+        "uniform SAMPLER_TYPE_2D gRandomMap;\n"
+        "uniform SAMPLER_TYPE_2D gDepthMap;\n"
         "\n"
         "uniform vec2  ScreenSize;\n"
         "uniform vec4  SSAOInfo;\n"  //   x = radius     y = intensity    z = bias        w = scale
@@ -73,20 +75,19 @@ const bool Engine::priv::SSAO::init_shaders() {
         "\n"
         "varying vec2 texcoords;\n"
         "void main(){\n"
-        "    vec3 Pos = GetViewPosition(texcoords, CameraNear, CameraFar);\n"
-        "    vec3 Normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);\n"
+        "    vec3 Pos = GetViewPosition(USE_SAMPLER_2D(gDepthMap), texcoords, CameraNear, CameraFar);\n"
+        "    vec3 Normal = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), texcoords).rg);\n"
         "    Normal = GetViewNormalsFromWorld(Normal, CameraView);\n"
-        "    vec2 RandVector = normalize(texture2D(gRandomMap, ScreenSize * texcoords / SSAOInfoA.w).xy);\n"
+        "    vec2 RandVector = normalize(texture2D(USE_SAMPLER_2D(gRandomMap), ScreenSize * texcoords / SSAOInfoA.w).xy);\n"
         //"  float CamZ = distance(Pos, CameraPosition);\n"
         "    float Radius = SSAOInfo.x / max(Pos.z, 100.0);\n"
         //"  float Radius = SSAOInfo.x / Pos.z;\n"
-        "    gl_FragColor.a = SSAOExecute(texcoords, SSAOInfoA.z, SSAOInfoA.w, RandVector, Radius, Pos, Normal, SSAOInfo.y, SSAOInfo.z, SSAOInfo.w);\n"
+        "    gl_FragColor.a = SSAOExecute(USE_SAMPLER_2D(gDepthMap), texcoords, SSAOInfoA.z, SSAOInfoA.w, RandVector, Radius, Pos, Normal, SSAOInfo.y, SSAOInfo.z, SSAOInfo.w);\n"
         "}";
 
     m_GLSL_frag_code_blur =
         "uniform sampler2D image;\n"
         "uniform vec4 Data;\n"//radius, strengthModifier, H,V
-        "uniform vec2 inverseResolution;\n"
         "\n"
         "varying vec2 texcoords;\n"
         "\n"
@@ -95,10 +96,23 @@ const bool Engine::priv::SSAO::init_shaders() {
         "\n"
         "void main(){\n"
         "    float Sum = 0.0;\n"
+        "    vec2 inverseResolution = vec2(1.0) / vec2(ScreenInfo.z, ScreenInfo.w);\n"
         "    for(int i = 0; i < NUM_SAMPLES; ++i){\n"
-        "        vec2 offset = (inverseResolution * float(i)) * Data.x;\n"
-        "        Sum += texture2D(image, texcoords + vec2(offset.x * Data.z, offset.y * Data.w)).a * weight[i] * Data.y;\n"
-        "        Sum += texture2D(image, texcoords - vec2(offset.x * Data.z, offset.y * Data.w)).a * weight[i] * Data.y;\n"
+        "        vec2 offset = (inverseResolution * float(i)) * Data.x;\n";
+
+    string varName = "image";
+    if (OpenGLExtensions::isBindlessTexturesSupported()) {
+        varName = "imageSampler";
+        m_GLSL_frag_code_blur += "sampler2D " + varName + " = USE_SAMPLER_2D(image);\n";
+    }
+
+    m_GLSL_frag_code_blur +=
+        "        Sum += texture2D(" + varName + ", texcoords + vec2(offset.x * Data.z, offset.y * Data.w)).a * weight[i] * Data.y;\n"
+        "        Sum += texture2D(" + varName + ", texcoords - vec2(offset.x * Data.z, offset.y * Data.w)).a * weight[i] * Data.y;\n";
+
+
+
+    m_GLSL_frag_code_blur +=
         "    }\n"
         "    gl_FragColor.a = Sum;\n"
         "}";
@@ -127,19 +141,13 @@ const bool Engine::priv::SSAO::init_shaders() {
 void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, const Camera& camera, const Engine::priv::Renderer& renderer) {
     renderer._bindShaderProgram(m_Shader_Program);
     const auto& dimensions    = viewport.getViewportDimensions();
-    if (Renderer::GLSL_VERSION < 140) {
-        Engine::Renderer::sendUniformMatrix4Safe("CameraInvViewProj", camera.getViewProjectionInverse());
-        Engine::Renderer::sendUniformMatrix4Safe("CameraInvProj", camera.getProjectionInverse());
-        Engine::Renderer::sendUniform4Safe("CameraInfo1", glm::vec4(camera.getPosition(), camera.getNear()));
-        Engine::Renderer::sendUniform4Safe("CameraInfo2", glm::vec4(camera.getViewVector(), camera.getFar()));
-    }
     const float divisor       = gbuffer.getSmallFBO().divisor();
     const float screen_width  = dimensions.z * divisor;
     const float screen_height = dimensions.w * divisor;
 
     Engine::Renderer::sendUniform2("ScreenSize", screen_width, screen_height);
     Engine::Renderer::sendUniform4("SSAOInfo", m_ssao_radius, m_ssao_intensity, m_ssao_bias, m_ssao_scale);
-    Engine::Renderer::sendUniform4("SSAOInfoA", 0, 0, static_cast<int>(m_ssao_samples), static_cast<int>(SSAO_NORMALMAP_SIZE));//change to 4f eventually?
+    Engine::Renderer::sendUniform4("SSAOInfoA", 0, 0, static_cast<int>(m_ssao_samples), static_cast<int>(SSAO_NORMALMAP_SIZE)); //change to 4f eventually?
 
     Engine::Renderer::sendTexture("gNormalMap", gbuffer.getTexture(GBufferType::Normal), 0);
     Engine::Renderer::sendTexture("gRandomMap", m_ssao_noise_texture, 1, GL_TEXTURE_2D);
@@ -147,18 +155,15 @@ void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, co
 
     Engine::Renderer::renderFullscreenQuad();
 }
-void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, const string& type, const unsigned int texture, const Engine::priv::Renderer& renderer) {
+void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, string_view type, const unsigned int texture, const Engine::priv::Renderer& renderer) {
     renderer._bindShaderProgram(m_Shader_Program_Blur);
-    const auto& dimensions = viewport.getViewportDimensions();
     glm::vec2 hv(0.0f);
     if (type == "H") { 
         hv = glm::vec2(1.0f, 0.0f); 
     }else{ 
         hv = glm::vec2(0.0f, 1.0f); 
     }
-    const glm::vec2 inverseResolution(1.0f / dimensions.z, 1.0f / dimensions.w);
     Engine::Renderer::sendUniform4("Data", m_ssao_blur_radius, m_ssao_blur_strength, hv.x, hv.y);
-    Engine::Renderer::sendUniform2("inverseResolution", inverseResolution);
     Engine::Renderer::sendTexture("image", gbuffer.getTexture(texture), 0);
 
     Engine::Renderer::renderFullscreenQuad();

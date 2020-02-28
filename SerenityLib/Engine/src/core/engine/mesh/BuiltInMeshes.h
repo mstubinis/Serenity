@@ -33,13 +33,13 @@ namespace Engine::priv {
             BuiltInMeshses();
             ~BuiltInMeshses();
 
-                Mesh& getPointLightBounds();
-                Mesh& getSpotLightBounds();
-                Mesh& getRodLightBounds();
-                Mesh& getTriangleMesh();
-                Mesh& getCubeMesh();
-                Mesh& getPlaneMesh();
-                Mesh& getFontMesh();
+            Mesh& getPointLightBounds();
+            Mesh& getSpotLightBounds();
+            Mesh& getRodLightBounds();
+            Mesh& getTriangleMesh();
+            Mesh& getCubeMesh();
+            Mesh& getPlaneMesh();
+            Mesh& getFontMesh();
 
             const bool init();
             const bool cleanup();

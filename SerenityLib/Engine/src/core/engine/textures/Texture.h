@@ -27,7 +27,7 @@ class Texture: public EngineResource{
         static Texture *White, *Black, *Checkers, *BRDF; //loaded in renderer. TODO: move these to built in class (separate from client side interface)
     private:
         std::queue<std::function<void()>>                                   m_CommandQueue; //for commands that were not available until the texture was properly loaded
-        std::vector<std::unique_ptr<Engine::priv::ImageLoadedStructure>>    m_ImagesDatas;
+        std::vector<Engine::priv::ImageLoadedStructure>                     m_ImagesDatas;
         std::vector<GLuint>                                                 m_TextureAddress;
         GLuint                                                              m_Type;
         TextureType::Type                                                   m_TextureType;
@@ -38,16 +38,16 @@ class Texture: public EngineResource{
         Texture();
     public:
         //Framebuffer
-        Texture(const uint& renderTgtWidth,const uint& renderTgtHeight,const ImagePixelType::Type&,const ImagePixelFormat::Format&,const ImageInternalFormat::Format&,const float& divisor = 1.0f);
+        Texture(const uint renderTgtWidth, const uint renderTgtHeight,const ImagePixelType::Type,const ImagePixelFormat::Format,const ImageInternalFormat::Format,const float divisor = 1.0f);
         //Single File
-        Texture(const std::string& filename,const bool& genMipmaps = true,const ImageInternalFormat::Format& = ImageInternalFormat::Format::SRGB8_ALPHA8,const GLuint& openglTexType = GL_TEXTURE_2D);
+        Texture(const std::string& filename,const bool genMipmaps = true,const ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8,const GLuint openglTexType = GL_TEXTURE_2D);
         //Pixels From Memory
-        Texture(const sf::Image& sfImage,const std::string& name = "CustomTexture",const bool& genMipmaps = false,const ImageInternalFormat::Format& = ImageInternalFormat::Format::SRGB8_ALPHA8,const GLuint& openglTexType = GL_TEXTURE_2D);
+        Texture(const sf::Image& sfImage,const std::string& name = "CustomTexture",const bool genMipmaps = false,const ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8,const GLuint openglTexType = GL_TEXTURE_2D);
         //Cubemap from 6 files
-        Texture(const std::string files[],const std::string& name = "Cubemap",const bool& genMipmaps = false,const ImageInternalFormat::Format& = ImageInternalFormat::Format::SRGB8_ALPHA8);
+        Texture(const std::string files[],const std::string& name = "Cubemap",const bool genMipmaps = false,const ImageInternalFormat::Format = ImageInternalFormat::Format::SRGB8_ALPHA8);
         virtual ~Texture();
 
-        bool operator==(const bool& rhs) const;
+        bool operator==(const bool rhs) const;
         explicit operator bool() const;
 
         Texture(const Texture&)                      = delete;
@@ -56,7 +56,7 @@ class Texture: public EngineResource{
         Texture& operator=(Texture&& other) noexcept = delete;
 
         const unsigned char* pixels();
-        const GLuint address(const uint& index = 0) const;
+        const GLuint address(const uint index = 0) const;
         const GLuint type() const;
         const uint width() const;
         const uint height() const;
@@ -70,22 +70,22 @@ class Texture: public EngineResource{
         const ImagePixelFormat::Format pixelFormat() const;
         const ImagePixelType::Type pixelType() const;
 
-        void setXWrapping(const TextureWrap::Wrap&);
-        void setYWrapping(const TextureWrap::Wrap&);
-        void setZWrapping(const TextureWrap::Wrap&);
-        void setWrapping(const TextureWrap::Wrap&);
+        void setXWrapping(const TextureWrap::Wrap);
+        void setYWrapping(const TextureWrap::Wrap);
+        void setZWrapping(const TextureWrap::Wrap);
+        void setWrapping(const TextureWrap::Wrap);
 
-        void setMinFilter(const TextureFilter::Filter&);
-        void setMaxFilter(const TextureFilter::Filter&);
-        void setFilter(const TextureFilter::Filter&);
+        void setMinFilter(const TextureFilter::Filter);
+        void setMaxFilter(const TextureFilter::Filter);
+        void setFilter(const TextureFilter::Filter);
 
-        static void setXWrapping(const GLuint& type, const TextureWrap::Wrap&);
-        static void setYWrapping(const GLuint& type, const TextureWrap::Wrap&);
-        static void setZWrapping(const GLuint& type, const TextureWrap::Wrap&);
-        static void setWrapping(const GLuint& type, const TextureWrap::Wrap&);
+        static void setXWrapping(const GLuint type, const TextureWrap::Wrap);
+        static void setYWrapping(const GLuint type, const TextureWrap::Wrap);
+        static void setZWrapping(const GLuint type, const TextureWrap::Wrap);
+        static void setWrapping(const GLuint type, const TextureWrap::Wrap);
 
-        static void setMinFilter(const GLuint& type, const TextureFilter::Filter&);
-        static void setMaxFilter(const GLuint& type, const TextureFilter::Filter&);
-        static void setFilter(const GLuint& type, const TextureFilter::Filter&);
+        static void setMinFilter(const GLuint type, const TextureFilter::Filter);
+        static void setMaxFilter(const GLuint type, const TextureFilter::Filter);
+        static void setFilter(const GLuint type, const TextureFilter::Filter);
 };
 #endif

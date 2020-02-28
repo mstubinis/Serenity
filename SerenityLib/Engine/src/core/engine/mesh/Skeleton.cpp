@@ -7,13 +7,12 @@ using namespace Engine::priv;
 using namespace std;
 
 MeshSkeleton::MeshSkeleton() {
-    m_RootNode = nullptr;
     clear();
 }
 MeshSkeleton::~MeshSkeleton() {
 
 }
-const unsigned int& MeshSkeleton::numBones() const {
+const unsigned int MeshSkeleton::numBones() const {
     return m_NumBones; 
 }
 //void MeshSkeleton::fill(const MeshImportedData& meshImportedData) {

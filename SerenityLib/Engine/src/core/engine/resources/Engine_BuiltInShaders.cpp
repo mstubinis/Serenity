@@ -235,23 +235,28 @@ priv::EShaders::decal_vertex =
 #pragma region ParticleVertex
 priv::EShaders::particle_vertex =
     "USE_LOG_DEPTH_VERTEX\n"
-    "\n"
+
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec2 uv;\n"
-    "\n"
-    "uniform mat4 Model;\n"
+
     "varying vec2 UV;\n"
     "varying vec3 WorldPosition;\n"
-    "\n"
+
+    "uniform vec3 ParticlePosition;\n"
+    "uniform vec3 ParticleScaleAndRot;\n"
+
     "void main(){\n"
-    "    mat4 ModelMatrix = Model;\n"
-    "    ModelMatrix[3][0] -= CameraRealPosition.x;\n"
-    "    ModelMatrix[3][1] -= CameraRealPosition.y;\n"
-    "    ModelMatrix[3][2] -= CameraRealPosition.z;\n"
-    "\n"
-    "    vec4 worldPos = (ModelMatrix * vec4(position, 1.0));\n"
+    "    float sine = sin(ParticleScaleAndRot.z);\n"
+    "    float cose = cos(ParticleScaleAndRot.z);\n"
+    "    float xPrime = position.x * cose - position.y * sine;\n"
+    "    float yPrime = position.x * sine + position.y * cose;\n"
+
+    "    vec3 CameraRight = vec3(CameraView[0][0], CameraView[1][0], CameraView[2][0]);\n"
+    "    vec3 CameraUp = vec3(CameraView[0][1], CameraView[1][1], CameraView[2][1]);\n"
+    "    vec3 VertexWorldSpace = ParticlePosition + CameraRight * (xPrime) * ParticleScaleAndRot.x + CameraUp * (yPrime) * ParticleScaleAndRot.y;\n"
+
+    "    vec4 worldPos = vec4(VertexWorldSpace, 1.0);\n"
     "    gl_Position = CameraViewProj * worldPos;\n"
-    "\n"
     "    WorldPosition = worldPos.xyz;\n"
     "    UV = uv;\n"
     "}";
@@ -279,9 +284,9 @@ priv::EShaders::decal_frag =
     "struct Layer {\n"
     "    vec4 data1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
     "    vec4 data2;\n"
-    "    sampler2D texture;\n"
-    "    sampler2D mask;\n"
-    "    samplerCube cubemap;\n"
+    "    SAMPLER_TYPE_2D texture;\n"
+    "    SAMPLER_TYPE_2D mask;\n"
+    "    SAMPLER_TYPE_Cube cubemap;\n"
     "    vec2 uvModifications;\n"
     "};\n"
     "struct Component {\n"
@@ -298,12 +303,11 @@ priv::EShaders::decal_frag =
     "\n"
     "uniform int Shadeless;\n"
     "\n"
-    //"uniform vec4 Object_Color;\n"
     "uniform uint Object_Color;\n"
     "uniform vec4 Material_F0AndID;\n"
-    //"uniform vec3 Gods_Rays_Color;\n"
     "uniform uint Gods_Rays_Color;\n"
-    "uniform sampler2D gDepthMap;\n"
+    "\n"
+    "uniform SAMPLER_TYPE_2D gDepthMap;\n"
     "\n"
     "varying vec3 Normals;\n"
     "varying mat3 TBN;\n"
@@ -314,10 +318,10 @@ priv::EShaders::decal_frag =
     "varying vec3 TangentFragPos;\n"
     "varying vec4 VertexPositionsClipSpace;\n"
     "varying vec4 VertexPositionsViewSpace;\n"
-    "uniform vec4 Resolution;\n"
+    "\n"
     "void main(){\n"
-    "    vec2 screenPos = gl_FragCoord.xy / vec2(Resolution.x, Resolution.y); \n"
-    "    vec3 WorldPosition = GetWorldPosition(screenPos, CameraNear, CameraFar);\n"
+    "    vec2 screenPos = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y); \n"
+    "    vec3 WorldPosition = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), screenPos, CameraNear, CameraFar);\n"
     "    vec4 ObjectPosition = inverse(WorldMatrix) * vec4(WorldPosition, 1.0);\n"
     "    float x = 1.0 - abs(ObjectPosition.x);\n"
     "    float y = 1.0 - abs(ObjectPosition.y);\n"
@@ -472,7 +476,7 @@ priv::EShaders::vertex_skybox =
 priv::EShaders::cubemap_convolude_frag =
     "\n"
     "varying vec3 UV;\n"
-    "uniform samplerCube cubemap;\n"
+    "uniform SAMPLER_TYPE_Cube cubemap;\n"
     "const float PI = 3.14159265;\n"
     "void main(){\n"
     "    vec3 N = normalize(UV);\n"
@@ -504,7 +508,7 @@ priv::EShaders::cubemap_convolude_frag =
 // what seems to look correct may not be. this shader might have to be modified against the original later on.
 priv::EShaders::cubemap_prefilter_envmap_frag =
     "varying vec3 UV;\n"
-    "uniform samplerCube cubemap;\n"
+    "uniform SAMPLER_TYPE_Cube cubemap;\n"
     "uniform float roughness;\n"
     "uniform float a2;\n"
     "uniform float PiFourDividedByResSquaredTimesSix;\n"
@@ -660,7 +664,7 @@ priv::EShaders::brdf_precompute =
 priv::EShaders::stencil_passover =
     "\n"
     "const vec3 comparison = vec3(1.0,1.0,1.0);\n"
-    "uniform sampler2D gNormalMap;\n"
+    "uniform SAMPLER_TYPE_2D gNormalMap;\n"
     "varying vec2 texcoords;\n"
     "void main(){\n"
     "    vec3 normal = DecodeOctahedron(texture2D(gNormalMap,texcoords).rg);\n"
@@ -715,9 +719,9 @@ priv::EShaders::forward_frag =
     "struct Layer {\n"
     "    vec4 data1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
     "    vec4 data2;\n"
-    "    sampler2D texture;\n"
-    "    sampler2D mask;\n"
-    "    samplerCube cubemap;\n"
+    "    SAMPLER_TYPE_2D texture;\n"
+    "    SAMPLER_TYPE_2D mask;\n"
+    "    SAMPLER_TYPE_Cube cubemap;\n"
     "    vec2 uvModifications;\n"
     "};\n"
     "struct Component {\n"
@@ -760,9 +764,9 @@ priv::EShaders::forward_frag =
     "varying vec3 TangentCameraPos;\n"
     "varying vec3 TangentFragPos;\n"
     "\n"
-    "uniform samplerCube irradianceMap;\n"
-    "uniform samplerCube prefilterMap;\n"
-    "uniform sampler2D brdfLUT;\n"
+    "uniform SAMPLER_TYPE_Cube irradianceMap;\n"
+    "uniform SAMPLER_TYPE_Cube prefilterMap;\n"
+    "uniform SAMPLER_TYPE_2D brdfLUT;\n"
     "uniform vec4 ScreenData;\n" //x = GIContribution, y = gamma, z = winSize.x, w = winSize.y
     "\n"
     "const float MAX_REFLECTION_LOD = 5.0;\n"
@@ -858,17 +862,15 @@ priv::EShaders::particle_frag =
     "\n"
     "USE_LOG_DEPTH_FRAGMENT\n"
     "\n"
-    "uniform sampler2D DiffuseTexture;\n"
-    "uniform sampler2D gDepthMap;\n"
-    "uniform vec2 ScreenData;\n"
-    //"uniform vec4 Object_Color;\n"
+    "uniform SAMPLER_TYPE_2D DiffuseTexture;\n"
+    "uniform SAMPLER_TYPE_2D gDepthMap;\n"
     "uniform uint Object_Color;\n"
     "varying vec2 UV;\n"
     "varying vec3 WorldPosition;\n"
     "void main(){\n"
          //this code is for soft particles
-    "    vec2 screen_uv = gl_FragCoord.xy / vec2(ScreenData.x, ScreenData.y);\n"
-    "    vec3 worldPos = GetWorldPosition(screen_uv, CameraNear, CameraFar);\n"
+    "    vec2 screen_uv = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y);\n"
+    "    vec3 worldPos = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), screen_uv, CameraNear, CameraFar);\n"
     "    float dist = distance(worldPos, WorldPosition) * 4.2;\n" //increasing that number will make the particles fade less from edges, but might increase the risk for sharper edges like without soft particles
     "    float alpha = clamp(dist, 0.0, 1.0);\n"
     
@@ -902,9 +904,9 @@ priv::EShaders::deferred_frag =
     "struct Layer {\n"
     "    vec4 data1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
     "    vec4 data2;\n"
-    "    sampler2D texture;\n"
-    "    sampler2D mask;\n"
-    "    samplerCube cubemap;\n"
+    "    SAMPLER_TYPE_2D texture;\n"
+    "    SAMPLER_TYPE_2D mask;\n"
+    "    SAMPLER_TYPE_Cube cubemap;\n"
     "    vec2 uvModifications;\n"
     "};\n"
     "struct Component {\n"
@@ -982,7 +984,8 @@ priv::EShaders::zprepass_frag =
 #pragma region DeferredFragHUD
 priv::EShaders::deferred_frag_hud =
     "\n"
-    "uniform sampler2D DiffuseTexture;\n"
+    "uniform SAMPLER_TYPE_2D DiffuseTexture;\n"
+
     "uniform int DiffuseTextureEnabled;\n"
     "uniform float ScreenGamma;\n"
     "uniform vec4 Object_Color;\n"
@@ -1002,7 +1005,7 @@ priv::EShaders::deferred_frag_skybox =
     "\n"
     "uniform vec4 Color;\n"
     "uniform int IsFake;\n"
-    "uniform samplerCube Texture;\n"
+    "uniform SAMPLER_TYPE_Cube Texture;\n"
     "varying vec3 UV;\n"
     "varying vec3 WorldPosition;\n"
     "void main(){\n"
@@ -1019,19 +1022,19 @@ priv::EShaders::deferred_frag_skybox =
 #pragma region CopyDepthFrag
 priv::EShaders::copy_depth_frag =
     "\n"
-    "uniform sampler2D gDepthMap;\n"
+    "uniform SAMPLER_TYPE_2D gDepthMap;\n"
     "varying vec2 texcoords;\n"
     "void main(){\n"
-    "    gl_FragDepth = texture2D(gDepthMap,texcoords).r;\n"
+    "    gl_FragDepth = texture2D(gDepthMap, texcoords).r;\n"
     "}";
 #pragma endregion
 
 #pragma region Blur
 priv::EShaders::blur_frag =
-    "uniform sampler2D image;\n"
+    "uniform SAMPLER_TYPE_2D image;\n"
+    "\n"
     "uniform vec4 DataA;\n"//radius, UNUSED, H,V
     "uniform vec4 strengthModifier;\n"
-    "uniform ivec2 Resolution;\n"
     "\n"
     "varying vec2 texcoords;\n"
     "\n"
@@ -1040,7 +1043,7 @@ priv::EShaders::blur_frag =
     "\n"
     "void main(){\n"
     "    vec4 Sum = vec4(0.0);\n"
-    "    vec2 inverseResolution = vec2(1.0) / Resolution;\n"
+    "    vec2 inverseResolution = vec2(1.0) / vec2(ScreenInfo.z, ScreenInfo.w);\n"
     "    for(int i = 0; i < NUM_SAMPLES; ++i){\n"
     "        vec2 offset = (inverseResolution * float(i)) * DataA.x;\n"
     "        Sum += (texture2D(image,texcoords + vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;\n"
@@ -1054,7 +1057,7 @@ priv::EShaders::blur_frag =
 /*
 priv::EShaders::greyscale_frag =
     "\n"
-    "uniform sampler2D textureMap;\n"
+    "uniform SAMPLER_TYPE_2D textureMap;\n"
     "varying vec2 texcoords;\n"
     "void main(){\n"
     "    vec4 col = texture2D(textureMap, texcoords);\n"
@@ -1067,10 +1070,10 @@ priv::EShaders::greyscale_frag =
 #pragma region FinalFrag
 priv::EShaders::final_frag =
     "\n"
-    "uniform sampler2D SceneTexture;\n"
-    "uniform sampler2D gBloomMap;\n"
-    "uniform sampler2D gDepthMap;\n"
-    "uniform sampler2D gDiffuseMap;\n"
+    "uniform SAMPLER_TYPE_2D SceneTexture;\n"
+    "uniform SAMPLER_TYPE_2D gBloomMap;\n"
+    "uniform SAMPLER_TYPE_2D gDepthMap;\n"
+    "uniform SAMPLER_TYPE_2D gDiffuseMap;\n"
     "\n"
     "uniform int HasBloom;\n"
     "uniform int HasFog;\n"
@@ -1090,7 +1093,7 @@ priv::EShaders::final_frag =
     "    }\n"
     "    gl_FragColor = scene;\n"
     "    if(HasFog == 1){\n"
-    "        float distFrag = distance(GetWorldPosition(texcoords,CameraNear,CameraFar),CameraPosition);\n"
+    "        float distFrag = distance(GetWorldPosition(USE_SAMPLER_2D(gDepthMap), texcoords,CameraNear,CameraFar),CameraPosition);\n"
     "        float distVoid = FogDistNull + FogDistBlend;\n"
     "        float distBlendIn = FogDistBlend - (distVoid - distFrag);\n"
     "        float omega = smoothstep(0.0,1.0,(distBlendIn / FogDistBlend));\n"
@@ -1107,8 +1110,8 @@ priv::EShaders::final_frag =
 
 priv::EShaders::depth_and_transparency_frag = 
     "\n"
-    "uniform sampler2D SceneTexture;\n"
-    "uniform sampler2D gDepthMap;\n"
+    "uniform SAMPLER_TYPE_2D SceneTexture;\n"
+    "uniform SAMPLER_TYPE_2D gDepthMap;\n"
     "\n"
     //"uniform vec4 TransparencyMaskColor;\n"
     //"uniform int TransparencyMaskActive;\n"
@@ -1121,7 +1124,7 @@ priv::EShaders::depth_and_transparency_frag +=
     "\n"
     "void main(){\n"
     "    vec4 scene = texture2D(SceneTexture,texcoords);\n"
-    "    float depth = distance(GetWorldPosition(texcoords,CameraNear,CameraFar),CameraPosition);\n"
+    "    float depth = distance(GetWorldPosition(USE_SAMPLER_2D(gDepthMap), texcoords,CameraNear,CameraFar),CameraPosition);\n"
     //"    if(TransparencyMaskActive == 1 && scene.rgb == TransparencyMaskColor.rgb){\n"
     //"        scene.a = 0;\n"
     //"    }\n"
@@ -1147,11 +1150,11 @@ priv::EShaders::lighting_frag =
     "\n"
     "uniform Light light;\n"
     "\n"
-    "uniform sampler2D gDiffuseMap;\n"
-    "uniform sampler2D gNormalMap;\n"
-    "uniform sampler2D gMiscMap;\n"
-    "uniform sampler2D gDepthMap;\n"
-    "uniform sampler2D gSSAOMap;\n"
+    "uniform SAMPLER_TYPE_2D gDiffuseMap;\n"
+    "uniform SAMPLER_TYPE_2D gNormalMap;\n"
+    "uniform SAMPLER_TYPE_2D gMiscMap;\n"
+    "uniform SAMPLER_TYPE_2D gDepthMap;\n"
+    "uniform SAMPLER_TYPE_2D gSSAOMap;\n"
     "\n"
     "uniform vec4 ScreenData;\n" //x = UNUSED, y = screenGamma, z = winSize.x, w = winSize.y
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
@@ -1160,9 +1163,10 @@ priv::EShaders::lighting_frag =
     "flat varying vec3 CamRealPosition;\n"
     "\n"
     "void main(){\n"                      //windowX      //windowY
+
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z, ScreenData.w);\n"
     "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
-    "    vec3 PxlPosition = GetWorldPosition(uv, CameraNear, CameraFar);\n"
+    "    vec3 PxlPosition = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv, CameraNear, CameraFar);\n"
     "\n"
     "    vec3 lightCalculation = ConstantZeroVec3;\n"
     "    vec3 LightPosition = vec3(light.DataC.yzw) - CamRealPosition;\n"
@@ -1189,14 +1193,15 @@ priv::EShaders::lighting_frag_gi =
     "\n"
     "const float MAX_REFLECTION_LOD = 5.0;\n"
     "\n"
-    "uniform sampler2D gDiffuseMap;\n"
-    "uniform sampler2D gNormalMap;\n"
-    "uniform sampler2D gDepthMap;\n"
-    "uniform sampler2D gSSAOMap;\n"
-    "uniform sampler2D gMiscMap;\n"
-    "uniform samplerCube irradianceMap;\n"
-    "uniform samplerCube prefilterMap;\n"
-    "uniform sampler2D brdfLUT;\n"
+    "uniform SAMPLER_TYPE_2D gDiffuseMap;\n"
+    "uniform SAMPLER_TYPE_2D gNormalMap;\n"
+    "uniform SAMPLER_TYPE_2D gDepthMap;\n"
+    "uniform SAMPLER_TYPE_2D gSSAOMap;\n"
+    "uniform SAMPLER_TYPE_2D gMiscMap;\n"
+    "uniform SAMPLER_TYPE_2D brdfLUT;\n"
+    "\n"
+    "uniform SAMPLER_TYPE_Cube irradianceMap;\n"
+    "uniform SAMPLER_TYPE_Cube prefilterMap;\n"
     "\n"
     "uniform vec4 ScreenData;\n" //x = GIContribution, y = gamma, z = winSize.x, w = winSize.y
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
@@ -1209,11 +1214,12 @@ priv::EShaders::lighting_frag_gi =
     "    return ret;\n"
     "}\n"
     "void main(){\n"
+
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);\n"
     "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
     "    float Glow = texture2D(gMiscMap, uv).r;\n"
     "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap,uv).rgb;\n"
-    "    vec3 PxlWorldPos = GetWorldPosition(uv,CameraNear,CameraFar);\n"
+    "    vec3 PxlWorldPos = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv,CameraNear,CameraFar);\n"
     "    vec3 ViewDir = normalize(CameraPosition - PxlWorldPos);\n"
     "    vec3 R = reflect(-ViewDir, PxlNormal);\n"
     "    float VdotN = max(0.0, dot(ViewDir,PxlNormal));\n"

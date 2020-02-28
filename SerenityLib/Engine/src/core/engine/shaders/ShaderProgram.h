@@ -62,7 +62,7 @@ class ShaderProgram final : public EngineResource, public Engine::NonCopyable{
         void load() override;
         void unload() override;
 
-        const GLuint& program() const;
+        const GLuint program() const;
 
         const std::unordered_map<std::string, GLint>& uniforms() const;
 };

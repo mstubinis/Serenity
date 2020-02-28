@@ -33,19 +33,19 @@ namespace Engine::priv {
 
             void cleanup();
 
-            void _update(const float& dt);
+            void _update(const float dt);
 
             SoundEffect* _getNextFreeEffect();
             SoundMusic*  _getNextFreeMusic();
 
-            void _setSoundInformation(Handle& soundHandle, SoundEffect& soundEffect);
-            void _setSoundInformation(Handle& soundHandle, SoundMusic& soundMusic);
+            void _setSoundInformation(Handle soundHandle, SoundEffect& soundEffect);
+            void _setSoundInformation(Handle soundHandle, SoundMusic& soundMusic);
     };
 };
 namespace Engine::Sound{
-    SoundQueue* createQueue(const float& delay);
-    SoundEffect* playEffect(Handle&, const unsigned int& numLoops = 1);
-    SoundMusic* playMusic(Handle&, const unsigned int& numLoops = 1);
+    SoundQueue* createQueue(const float delay);
+    SoundEffect* playEffect(Handle, const unsigned int numLoops = 1);
+    SoundMusic* playMusic(Handle, const unsigned int numLoops = 1);
 
     void stop_all_music();
     void stop_all_effects();

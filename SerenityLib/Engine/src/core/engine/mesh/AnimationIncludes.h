@@ -9,23 +9,14 @@
 
 namespace Engine::priv {
     struct BoneInfo final {
-        glm::mat4   BoneOffset;
-        glm::mat4   FinalTransform;
-        BoneInfo() {
-            BoneOffset     = glm::mat4(0.0f);
-            FinalTransform = glm::mat4(1.0f);
-        }
+        glm::mat4   BoneOffset     = glm::mat4(0.0f);
+        glm::mat4   FinalTransform = glm::mat4(1.0f);
     };
     struct BoneNode final {
-        std::string             Name;
-        BoneNode*               Parent;
+        std::string             Name      = "";
+        BoneNode*               Parent    = nullptr;
+        glm::mat4               Transform = glm::mat4(1.0f);
         std::vector<BoneNode*>  Children;
-        glm::mat4               Transform;
-        BoneNode() {
-            Name      = "";
-            Parent    = nullptr;
-            Transform = glm::mat4(1.0f);
-        }
     };
     struct AnimationKeyBaseClass {
         double     time;

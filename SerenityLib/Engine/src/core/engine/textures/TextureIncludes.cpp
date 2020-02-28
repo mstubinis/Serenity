@@ -1,69 +1,49 @@
 #include <core/engine/textures/TextureIncludes.h>
-
 #include <SFML/Graphics/Image.hpp>
 
-using namespace Engine;
+using namespace Engine::priv;
 using namespace std;
 
+ImageLoadedStructure::ImageLoadedStructure(const unsigned int width, const unsigned int height, const ImagePixelType::Type pixelType, const ImagePixelFormat::Format pixelFormat, const ImageInternalFormat::Format internalFormat){
+    load(width, height, pixelType, pixelFormat, internalFormat);
+}
+ImageLoadedStructure::ImageLoadedStructure(const sf::Image& i, const string& filename){
+    load(i, filename);
+}
+ImageLoadedStructure::~ImageLoadedStructure() {
+}
 
-priv::ImageMipmap::ImageMipmap() {
-    level = width = height = compressedSize = 0;
+ImageLoadedStructure::ImageLoadedStructure(ImageLoadedStructure&& other) noexcept {
+    m_InternalFormat = std::move(other.m_InternalFormat);
+    m_PixelFormat    = std::move(other.m_PixelFormat);
+    m_PixelType      = std::move(other.m_PixelType);
+    m_Mipmaps        = std::move(other.m_Mipmaps);
+    m_Filename       = std::move(other.m_Filename);
 }
-priv::ImageMipmap::~ImageMipmap() {
-    vector_clear(pixels);
-}
-
-
-priv::ImageLoadedStructure::ImageLoadedStructure() {
-    ImageMipmap baseImage;
-    filename = "";
-    baseImage.compressedSize = 0;
-    mipmaps.push_back(baseImage);
-}
-priv::ImageLoadedStructure::~ImageLoadedStructure() {
-    vector_clear(mipmaps);
-}
-priv::ImageLoadedStructure::ImageLoadedStructure(const uint _w, const uint _h, const ImagePixelType::Type _pxlType, const ImagePixelFormat::Format _pxlFormat, const ImageInternalFormat::Format _internFormat) {
-    load(_w, _h, _pxlType, _pxlFormat, _internFormat);
-}
-priv::ImageLoadedStructure::ImageLoadedStructure(const sf::Image& i, const string& _filename) {
-    load(i, _filename);
-}
-void priv::ImageLoadedStructure::load(const uint _width, const uint _height, const ImagePixelType::Type _pixelType, const ImagePixelFormat::Format _pixelFormat, const ImageInternalFormat::Format _internalFormat) {
-    ImageMipmap* baseImage = nullptr;
-    if (mipmaps.size() > 0) {
-        baseImage = &(mipmaps[0]);
-    }else{
-        baseImage = NEW ImageMipmap();
+ImageLoadedStructure& ImageLoadedStructure::operator=(ImageLoadedStructure&& other) noexcept {
+    if (&other != this) {
+        m_InternalFormat = std::move(other.m_InternalFormat);
+        m_PixelFormat    = std::move(other.m_PixelFormat);
+        m_PixelType      = std::move(other.m_PixelType);
+        m_Mipmaps        = std::move(other.m_Mipmaps);
+        m_Filename       = std::move(other.m_Filename);
     }
-    filename                  = "";
-    pixelFormat               = _pixelFormat;
-    pixelType                 = _pixelType;
-    internalFormat            = _internalFormat;
-    baseImage->width          = _width;
-    baseImage->height         = _height;
-    baseImage->compressedSize = 0;
-    if (mipmaps.size() == 0) {
-        mipmaps.push_back(ImageMipmap(*baseImage));
-        SAFE_DELETE(baseImage);
-    }
+    return *this;
 }
-void priv::ImageLoadedStructure::load(const sf::Image& i, const string& _filename) {
-    ImageMipmap* baseImage = nullptr;
-    if (mipmaps.size() > 0) {
-        baseImage = &(mipmaps[0]);
-    }else{
-        baseImage = NEW ImageMipmap();
-    }
-    filename = _filename;
-    const auto imgSize = i.getSize();
-    baseImage->width = imgSize.x;
-    baseImage->height = imgSize.y;
-    baseImage->compressedSize = 0;
-    auto* pxls = i.getPixelsPtr();
-    baseImage->pixels.assign(pxls, pxls + baseImage->width * baseImage->height * 4);
-    if (mipmaps.size() == 0) {
-        mipmaps.push_back(ImageMipmap(*baseImage));
-        SAFE_DELETE(baseImage);
-    }
+void ImageLoadedStructure::load(const unsigned int width, const unsigned int height, const ImagePixelType::Type pixelType, const ImagePixelFormat::Format pixelFormat, const ImageInternalFormat::Format internalFormat) {
+    m_PixelFormat                 = pixelFormat;
+    m_PixelType                   = pixelType;
+    m_InternalFormat              = internalFormat;
+    m_Mipmaps[0].width            = width;
+    m_Mipmaps[0].height           = height;
+    m_Mipmaps[0].compressedSize   = 0;
+}
+void ImageLoadedStructure::load(const sf::Image& sfImage, const string& filename) {
+    m_Filename                    = filename;
+    const auto imgSize            = sfImage.getSize();
+    m_Mipmaps[0].width            = imgSize.x;
+    m_Mipmaps[0].height           = imgSize.y;
+    m_Mipmaps[0].compressedSize   = 0;
+    auto* pxls = sfImage.getPixelsPtr();
+    m_Mipmaps[0].pixels.assign(pxls, pxls + m_Mipmaps[0].width * m_Mipmaps[0].height * 4);
 }

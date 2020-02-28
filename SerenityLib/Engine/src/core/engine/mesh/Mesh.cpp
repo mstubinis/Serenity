@@ -37,25 +37,13 @@ using namespace Engine;
 using namespace Engine::priv;
 namespace boostm = boost::math;
 
-namespace Engine {
-    namespace priv {
-        struct DefaultMeshBindFunctor final{void operator()(BindableResource* r) const {
-            const auto& mesh = *static_cast<Mesh*>(r);
-            if (mesh.isLoaded()) {
-                mesh.m_VertexData->bind();
-            }else{
-                priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().m_VertexData->bind();
-            }
-        }};
-        struct DefaultMeshUnbindFunctor final {void operator()(BindableResource* r) const {
-            const auto& mesh = *static_cast<Mesh*>(r);
-            if (mesh.isLoaded()) {
-                mesh.m_VertexData->unbind();
-            }else{
-                priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().m_VertexData->unbind();
-            }
-        }};
-    };
+namespace Engine::priv {
+    struct DefaultMeshBindFunctor final { void operator()(Mesh* mesh_ptr) const {
+        mesh_ptr->m_VertexData->bind();
+    }};
+    struct DefaultMeshUnbindFunctor final { void operator()(Mesh* mesh_ptr) const {
+        mesh_ptr->m_VertexData->unbind();
+    }};
 };
 
 void InternalMeshPublicInterface::LoadGPU(Mesh& mesh){
@@ -77,11 +65,6 @@ void InternalMeshPublicInterface::UnloadGPU(Mesh& mesh){
     SAFE_DELETE(mesh.m_VertexData);
 }
 void InternalMeshPublicInterface::InitBlankMesh(Mesh& mesh) {
-    mesh.m_File             = "";
-    mesh.m_Skeleton         = nullptr;
-    mesh.m_VertexData       = nullptr;
-    mesh.m_CollisionFactory = nullptr;
-    mesh.m_Threshold        = 0.0005f;
 
     mesh.registerEvent(EventType::WindowFullscreenChanged);
     mesh.setCustomBindFunctor(DefaultMeshBindFunctor());
@@ -95,7 +78,7 @@ bool InternalMeshPublicInterface::SupportsInstancing(){
     return false;
 }
 
-btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, const CollisionType::Type& type, const bool isCompoundChild) {
+btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, const CollisionType::Type type, const bool isCompoundChild) {
     Engine::priv::MeshCollisionFactory* factory = nullptr;
     if (!mesh) {
         factory = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().m_CollisionFactory;
@@ -121,7 +104,7 @@ btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, const 
     }
     return new btEmptyShape();
 }
-btCollisionShape* InternalMeshPublicInterface::BuildCollision(ModelInstance* modelInstance, const CollisionType::Type& type, const bool isCompoundChild) {
+btCollisionShape* InternalMeshPublicInterface::BuildCollision(ModelInstance* modelInstance, const CollisionType::Type type, const bool isCompoundChild) {
     Mesh* mesh = nullptr;
     if (modelInstance) {
         if (modelInstance->mesh()) {
@@ -277,12 +260,12 @@ void InternalMeshPublicInterface::CalculateRadius(Mesh& mesh) {
 }
 
 
-Mesh::Mesh() : BindableResource(ResourceType::Mesh) {
+Mesh::Mesh() : EngineResource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
 }
 
 //TERRAIN MESH
-Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, float threshold) : BindableResource(ResourceType::Mesh) {
+Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, float threshold) : EngineResource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_Threshold = threshold;
     MeshImportedData data;
@@ -336,12 +319,12 @@ Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, flo
 }
 
 
-Mesh::Mesh(VertexData* data, const string& name, float threshold) : BindableResource(ResourceType::Mesh, name) {
+Mesh::Mesh(VertexData* data, const string& name, float threshold) : EngineResource(ResourceType::Mesh, name) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_VertexData = data;
     m_Threshold = threshold;
 }
-Mesh::Mesh(const string& name,float width, float height,float threshold) : BindableResource(ResourceType::Mesh, name){
+Mesh::Mesh(const string& name,float width, float height,float threshold) : EngineResource(ResourceType::Mesh, name){
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_Threshold = threshold;
 
@@ -372,7 +355,7 @@ Mesh::Mesh(const string& name,float width, float height,float threshold) : Binda
 
     load();
 }
-Mesh::Mesh(const string& fileOrData, float threshold) : BindableResource(ResourceType::Mesh) {
+Mesh::Mesh(const string& fileOrData, float threshold) : EngineResource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_Threshold = threshold;
 
@@ -445,14 +428,14 @@ Mesh::~Mesh(){
     unregisterEvent(EventType::WindowFullscreenChanged);
     unload();
 }
-bool Mesh::operator==(const bool& rhs) const {
+bool Mesh::operator==(const bool rhs) const {
     if (rhs == true) {
-        return (m_VertexData) ? true : false;
+        return (m_VertexData);
     }
-    return (m_VertexData) ? false : true;
+    return !(m_VertexData);
 }
 Mesh::operator bool() const {
-    return (m_VertexData) ? true : false;
+    return (m_VertexData);
 }
 
 unordered_map<string, AnimationData>& Mesh::animationData(){ 

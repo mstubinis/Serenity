@@ -58,17 +58,17 @@ class Scene: public EngineResource, public EventObserver{
         Skybox* m_Skybox;
 
         class impl; impl*                                     m_i;
-        std::function<void(Scene*, const float&)>             m_OnUpdateFunctor;
+        std::function<void(Scene*, const float)>              m_OnUpdateFunctor = [](Scene*, const float) {};
     public:
         Scene(const std::string& name);
         Scene(const std::string& name, const SceneOptions& options);
         virtual ~Scene();
 
 
-        virtual void update(const float& dt);
+        virtual void update(const float dt);
         virtual void render();
         virtual void onEvent(const Event& event);
-        virtual void onResize(const unsigned int& width, const unsigned int& height);
+        virtual void onResize(const unsigned int width, const unsigned int height);
 
         template<typename T> void setOnUpdateFunctor(const T& functor) {
             m_OnUpdateFunctor = std::bind<void>(functor, std::placeholders::_1, std::placeholders::_2);
@@ -92,7 +92,7 @@ class Scene: public EngineResource, public EventObserver{
 
 
         const glm::vec4& getBackgroundColor() const;
-        void setBackgroundColor(const float& r, const float& g, const float& b, const float& a);
+        void setBackgroundColor(const float r, const float g, const float b, const float a);
         void setBackgroundColor(const glm::vec4& backgroundColor);
 
         const glm::vec3& getGlobalIllumination() const;
@@ -124,8 +124,8 @@ namespace Engine {
             static std::vector<SpotLight*>&          GetSpotLights(const Scene& scene);
             static std::vector<RodLight*>&           GetRodLights(const Scene& scene);
 
-            static void           UpdateMaterials(Scene& scene, const float& dt);
-            static void           UpdateParticleSystem(Scene& scene, const float& dt);
+            static void           UpdateMaterials(Scene& scene, const float dt);
+            static void           UpdateParticleSystem(Scene& scene, const float dt);
 
             static void           RenderGeometryOpaque( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
             static void           RenderGeometryTransparent( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);

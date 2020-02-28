@@ -8,9 +8,6 @@ using namespace std;
 
 #pragma region Triangle
 
-priv::FullscreenTriangle::FullscreenTriangle(){ 
-    m_VAO = 0;
-}
 void priv::FullscreenTriangle::init() {
     MeshVertexDataFullscreen v1, v2, v3;
     const auto winSize = glm::vec2(Resources::getWindowSize());
@@ -104,9 +101,6 @@ void priv::FullscreenTriangle::onEvent(const Event& e) {
 
 #pragma region Quad
 
-priv::FullscreenQuad::FullscreenQuad(){ 
-    m_VAO = 0;
-}
 void priv::FullscreenQuad::init() {
     const auto winSize = glm::vec2(Resources::getWindowSize());
 

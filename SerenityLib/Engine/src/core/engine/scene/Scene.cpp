@@ -13,17 +13,12 @@
 using namespace Engine;
 using namespace std;
 
-
-struct EmptyOnUpdateFunctor final {void operator()(Scene* scene, const float& dt) const {
-
-}};
-
 class Scene::impl final {
     public:
         Engine::priv::ParticleSystem          m_ParticleSystem;
         priv::ECS<Entity>                     m_ECS;
 
-        void _init(Scene& super, const string& _name, const SceneOptions& options) {
+        void _init(Scene& super, const string& name, const SceneOptions& options) {
             m_ECS.assignSystem<ComponentLogic> (ComponentLogic_System_CI());
             m_ECS.assignSystem<ComponentBody, Engine::priv::ComponentBody_System>  (ComponentBody_System_CI());
             m_ECS.assignSystem<ComponentLogic1>(ComponentLogic1_System_CI());
@@ -117,7 +112,7 @@ vector<RodLight*>& priv::InternalScenePublicInterface::GetRodLights(const Scene&
 }
 
 
-void priv::InternalScenePublicInterface::UpdateMaterials(Scene& scene, const float& dt) {
+void priv::InternalScenePublicInterface::UpdateMaterials(Scene& scene, const float dt) {
     for (uint i = 0; i < RenderStage::_TOTAL; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             for (auto& materialNode : render_graph_ptr.m_MaterialNodes) {
@@ -139,7 +134,7 @@ void priv::InternalScenePublicInterface::UpdateMaterials(Scene& scene, const flo
         }
     }
 }
-void priv::InternalScenePublicInterface::UpdateParticleSystem(Scene& scene, const float& dt) {
+void priv::InternalScenePublicInterface::UpdateParticleSystem(Scene& scene, const float dt) {
     auto& camera = *scene.getActiveCamera();
     scene.m_i->m_ParticleSystem.update(dt, camera);
 }
@@ -258,7 +253,7 @@ Scene::Scene(const string& name, const SceneOptions& options) : EngineResource(R
     m_i       = NEW impl();
     m_i->_init(*this, name, options);
     setName(name);
-    setOnUpdateFunctor(EmptyOnUpdateFunctor());
+
     registerEvent(EventType::SceneChanged);
 }
 Scene::~Scene() {
@@ -322,10 +317,10 @@ void Scene::setActiveCamera(Camera& camera){
 void Scene::centerSceneToObject(const Entity& centerEntity){
     return m_i->_centerToObject(*this, centerEntity);
 }
-void Scene::update(const float& dt){
+void Scene::update(const float dt){
     m_OnUpdateFunctor(this, dt);
 }
-void Scene::onResize(const unsigned int& width, const unsigned int& height) {
+void Scene::onResize(const unsigned int width, const unsigned int height) {
 
 }
 void Scene::render() {
@@ -335,7 +330,7 @@ void Scene::render() {
 const glm::vec4& Scene::getBackgroundColor() const {
     return m_Viewports[0].m_BackgroundColor;
 }
-void Scene::setBackgroundColor(const float& r, const float& g, const float& b, const float& a) {
+void Scene::setBackgroundColor(const float r, const float g, const float b, const float a) {
     Math::setColor(m_Viewports[0].m_BackgroundColor, r, g, b, a);
 }
 void Scene::setBackgroundColor(const glm::vec4& backgroundColor) {

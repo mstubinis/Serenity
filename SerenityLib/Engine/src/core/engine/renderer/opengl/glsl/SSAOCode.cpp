@@ -15,8 +15,7 @@ using namespace Engine::priv;
 using namespace std;
 
 
-void opengl::glsl::SSAOCode::convert(string& code, const unsigned int& versionNumber, const ShaderType::Type& shaderType) {
-
+void opengl::glsl::SSAOCode::convert(string& code, const unsigned int versionNumber, const ShaderType::Type shaderType) {
 
     if (shaderType == ShaderType::Fragment) {
 
@@ -24,15 +23,15 @@ void opengl::glsl::SSAOCode::convert(string& code, const unsigned int& versionNu
         if (ShaderHelper::sfind(code, "SSAOExecute(")) {
             if (!ShaderHelper::sfind(code, "float SSAOExecute(")) {
                 const string execute_code =
-                    "float SSAOExecute(vec2 in_uvs, int in_numSamples, int in_noiseTextureSize, vec2 in_randomVector, float in_radius, vec3 in_position, vec3 in_normals, float in_intensity, float in_bias, float in_scale){//generated\n"
+                    "float SSAOExecute(sampler2D inDepthSampler, vec2 in_uvs, int in_numSamples, int in_noiseTextureSize, vec2 in_randomVector, float in_radius, vec3 in_position, vec3 in_normals, float in_intensity, float in_bias, float in_scale){//generated\n"
                     "    float res = 0.0;\n"
                     "    for (int i = 0; i < in_numSamples; ++i) {\n"
                     "       vec2 coord1 = reflect(SSAOPoisson[i].xy * vec2(in_noiseTextureSize), in_randomVector) * in_radius;\n"
                     "       vec2 coord2 = vec2(coord1.x * 0.707 - coord1.y * 0.707, coord1.x * 0.707 + coord1.y * 0.707);\n"
-                    "       res += SSAOOcclude(in_uvs + (coord1 * 0.25), in_position, in_normals, in_intensity, in_bias, in_scale);\n"
-                    "       res += SSAOOcclude(in_uvs + (coord2 * 0.50), in_position, in_normals, in_intensity, in_bias, in_scale);\n"
-                    "       res += SSAOOcclude(in_uvs + (coord1 * 0.75), in_position, in_normals, in_intensity, in_bias, in_scale);\n"
-                    "       res += SSAOOcclude(in_uvs + coord2,          in_position, in_normals, in_intensity, in_bias, in_scale);\n"
+                    "       res += SSAOOcclude(inDepthSampler, in_uvs + (coord1 * 0.25), in_position, in_normals, in_intensity, in_bias, in_scale);\n"
+                    "       res += SSAOOcclude(inDepthSampler, in_uvs + (coord2 * 0.50), in_position, in_normals, in_intensity, in_bias, in_scale);\n"
+                    "       res += SSAOOcclude(inDepthSampler, in_uvs + (coord1 * 0.75), in_position, in_normals, in_intensity, in_bias, in_scale);\n"
+                    "       res += SSAOOcclude(inDepthSampler, in_uvs + coord2,          in_position, in_normals, in_intensity, in_bias, in_scale);\n"
                     "    }\n"
                     "    res /= (in_numSamples * 4.0);\n"
                     "    return res;\n"
@@ -46,8 +45,8 @@ void opengl::glsl::SSAOCode::convert(string& code, const unsigned int& versionNu
         if (ShaderHelper::sfind(code, "SSAOOcclude(")) {
             if (!ShaderHelper::sfind(code, "float SSAOOcclude(")) {
                 const string occlude_code =
-                    "float SSAOOcclude(vec2 in_offsetUV, vec3 in_origin, vec3 in_normal, in float in_intensity, in float in_bias, in float in_scale){//generated\n"
-                    "    vec3 PositionOffset = GetViewPosition(in_offsetUV, CameraNear, CameraFar) - in_origin;\n"
+                    "float SSAOOcclude(sampler2D inDepthSampler, vec2 in_offsetUV, vec3 in_origin, vec3 in_normal, in float in_intensity, in float in_bias, in float in_scale){//generated\n"
+                    "    vec3 PositionOffset = GetViewPosition(inDepthSampler, in_offsetUV, CameraNear, CameraFar) - in_origin;\n"
                     "    float Length = length(PositionOffset);\n"
                     "    vec3 VectorNormalized = PositionOffset / Length;\n"
                     "    float Dist = Length * in_scale;\n"

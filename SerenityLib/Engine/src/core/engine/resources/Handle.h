@@ -2,9 +2,9 @@
 #ifndef ENGINE_RESOURCE_HANDLE_INCLUDE_GUARD
 #define ENGINE_RESOURCE_HANDLE_INCLUDE_GUARD
 
-#include <core/engine/utils/Utils.h>
-
 class  EngineResource;
+
+#include <core/engine/utils/Utils.h>
 
 struct Handle final {
     std::uint32_t index   : 12;

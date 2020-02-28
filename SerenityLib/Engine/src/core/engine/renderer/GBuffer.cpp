@@ -25,12 +25,7 @@ vector<tuple<ImageInternalFormat::Format, ImagePixelFormat::Format, ImagePixelTy
 vector<tuple<ImageInternalFormat::Format, ImagePixelFormat::Format, ImagePixelType::Type, FramebufferAttatchment::Attatchment>> GBUFFER_TYPE_DATA;
 
 
-
-Engine::priv::GBuffer::GBuffer() {
-    m_Width  = 0;
-    m_Height = 0;
-}
-void Engine::priv::GBuffer::init(const unsigned int& width, const unsigned int& height){
+void Engine::priv::GBuffer::init(const unsigned int width, const unsigned int height){
     internalDestruct(); //just incase this method is called on resize, we want to delete any previous buffers
 
     m_Width  = width;
@@ -86,7 +81,7 @@ void Engine::priv::GBuffer::internalDestruct() {
 Engine::priv::GBuffer::~GBuffer(){
     internalDestruct();
 }
-const bool Engine::priv::GBuffer::resize(const unsigned int& width, const unsigned int& height) {
+const bool Engine::priv::GBuffer::resize(const unsigned int width, const unsigned int height) {
     if (m_Width == width && m_Height == height) {
         return false;
     }
@@ -96,7 +91,7 @@ const bool Engine::priv::GBuffer::resize(const unsigned int& width, const unsign
     m_SmallFBO.resize(width, height);
     return true;
 }
-void Engine::priv::GBuffer::internalBuildTextureBuffer(FramebufferObject& fbo, const GBufferType::Type gbufferType, const unsigned int& w, const unsigned int& h) {
+void Engine::priv::GBuffer::internalBuildTextureBuffer(FramebufferObject& fbo, const GBufferType::Type gbufferType, const unsigned int w, const unsigned int h) {
     if (GBUFFER_TYPE_DATA.size() == 0) {
         GBUFFER_TYPE_DATA = POPULATE();
     }
@@ -104,7 +99,7 @@ void Engine::priv::GBuffer::internalBuildTextureBuffer(FramebufferObject& fbo, c
     Texture* texture       = NEW Texture(w, h, get<2>(i), get<1>(i), get<0>(i), fbo.divisor());
     m_FramebufferTextures[static_cast<unsigned int>(gbufferType)] = fbo.attatchTexture(texture, get<3>(i));
 }
-void Engine::priv::GBuffer::internalStart(const unsigned int* types, const unsigned int& size, const string& channels, const bool first_fbo) {
+void Engine::priv::GBuffer::internalStart(const unsigned int* types, const unsigned int size, string_view channels, const bool first_fbo) {
      (first_fbo) ? m_FBO.bind() : m_SmallFBO.bind();
     bool r, g, b, a;
     channels.find("R") != string::npos ? r = true : r = false;
@@ -114,23 +109,23 @@ void Engine::priv::GBuffer::internalStart(const unsigned int* types, const unsig
     glDrawBuffers(size, types);
     Engine::Renderer::colorMask(r, g, b, a);
 }
-void Engine::priv::GBuffer::bindFramebuffers(const unsigned int t1, const string& c, const bool mainFBO){
+void Engine::priv::GBuffer::bindFramebuffers(const unsigned int t1, string_view c, const bool mainFBO){
     const unsigned int t[1] = { m_FramebufferTextures[t1]->attatchment() };
     internalStart(t, 1, c, mainFBO);
 }
-void Engine::priv::GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const string& c, const bool mainFBO){
+void Engine::priv::GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, string_view c, const bool mainFBO){
     const unsigned int t[2] = { m_FramebufferTextures[t1]->attatchment(), m_FramebufferTextures[t2]->attatchment() };
     internalStart(t, 2, c, mainFBO);
 }
-void Engine::priv::GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const unsigned int t3, const string& c, const bool mainFBO){
+void Engine::priv::GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const unsigned int t3, string_view c, const bool mainFBO){
     const unsigned int t[3] = { m_FramebufferTextures[t1]->attatchment(), m_FramebufferTextures[t2]->attatchment(), m_FramebufferTextures[t3]->attatchment() };
     internalStart(t, 3, c, mainFBO);
 }
-void Engine::priv::GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const unsigned int t3, const unsigned int t4, const string& c, const bool mainFBO){
+void Engine::priv::GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const unsigned int t3, const unsigned int t4, string_view c, const bool mainFBO){
     const unsigned int t[4] = { m_FramebufferTextures[t1]->attatchment(), m_FramebufferTextures[t2]->attatchment(), m_FramebufferTextures[t3]->attatchment(), m_FramebufferTextures[t4]->attatchment() };
     internalStart(t, 4, c, mainFBO);
 }
-void Engine::priv::GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const unsigned int t3, const unsigned int t4, const unsigned int t5, const string& c, const bool mainFBO){
+void Engine::priv::GBuffer::bindFramebuffers(const unsigned int t1, const unsigned int t2, const unsigned int t3, const unsigned int t4, const unsigned int t5, string_view c, const bool mainFBO){
     const unsigned int t[5] = { m_FramebufferTextures[t1]->attatchment(), m_FramebufferTextures[t2]->attatchment(), m_FramebufferTextures[t3]->attatchment(), m_FramebufferTextures[t4]->attatchment(), m_FramebufferTextures[t5]->attatchment() };
     internalStart(t, 5, c, mainFBO);
 }
@@ -156,4 +151,10 @@ const Engine::priv::FramebufferObject& Engine::priv::GBuffer::getMainFBO() const
 }
 const Engine::priv::FramebufferObject& Engine::priv::GBuffer::getSmallFBO() const {
     return m_SmallFBO; 
+}
+const unsigned int Engine::priv::GBuffer::width() const {
+    return m_Width;
+}
+const unsigned int Engine::priv::GBuffer::height() const {
+    return m_Height;
 }

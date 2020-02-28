@@ -15,7 +15,7 @@ struct VertexData final{
     std::vector<size_t>                            dataSizesCapacity;
     std::vector<unsigned short>                    indices;
     std::vector<Engine::priv::Triangle>            triangles;
-    GLuint                                         vao;
+    GLuint                                         vao = 0;
     std::vector<std::unique_ptr<BufferObject>>     buffers;
 
     VertexData()                                       = delete;

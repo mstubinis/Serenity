@@ -2,27 +2,26 @@
 #ifndef ENGINE_LIGHT_SUN_INCLUDE_GUARD
 #define ENGINE_LIGHT_SUN_INCLUDE_GUARD
 
+class Scene;
+namespace Engine::priv {
+    class Renderer;
+};
+
 #include <core/engine/lights/LightIncludes.h>
 #include <ecs/EntityWrapper.h>
 
-namespace Engine {
-    namespace priv {
-        class Renderer;
-    };
-};
-class Scene;
 class SunLight : public EntityWrapper {
     friend class ::Engine::priv::Renderer;
     protected:
-        bool               m_Active;
-        glm::vec4          m_Color;
+        bool               m_Active            = true;
+        glm::vec4          m_Color             = glm::vec4(1.0f);
         LightType::Type    m_Type;
-        float              m_AmbientIntensity;
-        float              m_DiffuseIntensity;
-        float              m_SpecularIntensity;
+        float              m_AmbientIntensity  = 0.005f;
+        float              m_DiffuseIntensity  = 2.0f;
+        float              m_SpecularIntensity = 1.0f;
     public:
         SunLight(
-            const glm_vec3 position    = glm_vec3(0.0),
+            const glm_vec3& position    = glm_vec3(0.0),
             const LightType::Type type = LightType::Sun,
             Scene* scene               = nullptr
         );

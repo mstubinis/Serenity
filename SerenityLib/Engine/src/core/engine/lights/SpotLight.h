@@ -11,11 +11,11 @@ class SpotLight : public PointLight {
         float   m_OuterCutoff;
     public:
         SpotLight(
-            const glm::vec3 position  = glm::vec3(0.0f, 0.0f, 0.0f),
-            const glm::vec3 direction = glm::vec3(0.0f, 0.0f, -1.0f),
-            const float innerCutoff   = 11.0f,
-            const float outerCutoff   = 13.0f,
-            Scene* scene              = nullptr
+            const glm_vec3& position   = glm_vec3(0.0f, 0.0f, 0.0f),
+            const glm::vec3& direction = glm::vec3(0.0f, 0.0f, -1.0f),
+            const float innerCutoff    = 11.0f,
+            const float outerCutoff    = 13.0f,
+            Scene* scene               = nullptr
         );
         virtual ~SpotLight();
 

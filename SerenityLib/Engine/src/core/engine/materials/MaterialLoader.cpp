@@ -23,7 +23,7 @@ namespace Engine::priv {
             }
         }
 
-        Engine::Renderer::sendUniform1Safe("numComponents", int(numComponents));
+        Engine::Renderer::sendUniform1Safe("numComponents", static_cast<int>(numComponents));
         Engine::Renderer::sendUniform1Safe("Shadeless", static_cast<int>(material.m_Shadeless));
         Engine::Renderer::sendUniform4Safe("Material_F0AndID", 
             material.m_F0Color.r(), 

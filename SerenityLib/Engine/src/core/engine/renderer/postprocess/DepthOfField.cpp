@@ -25,14 +25,14 @@ const bool Engine::priv::DepthOfField::init_shaders() {
         "\n"
         "const float DOFWeight[4] = float[](1.0,0.9,0.7,0.4);\n"
         "\n"
-        "uniform sampler2D inTexture;\n"
-        "uniform sampler2D depthTexture;\n"
+        "uniform SAMPLER_TYPE_2D inTexture;\n"
+        "uniform SAMPLER_TYPE_2D depthTexture;\n"
         "\n"
-        "uniform vec4 Data;\n" //x = blurClamp, y = bias, z = focus, w = aspectRatio
+        "uniform vec4 Data;\n" //x = blurClamp, y = bias, z = focus, w = UNUSED
         "\n"
         "varying vec2 texcoords;\n"
         "void main(){\n"
-        "    vec2 aspectcorrect = vec2(1.0, Data.w);\n"
+        "    vec2 aspectcorrect = vec2(1.0, ScreenInfo.z / ScreenInfo.w);\n"
         "    float depth = texture2D(depthTexture, texcoords).r;\n"
         "    float factor = (depth - Data.z);\n"
         "    vec2 dofblur = vec2(clamp(factor * Data.y, -Data.x, Data.x));\n"
@@ -86,12 +86,10 @@ const bool Engine::priv::DepthOfField::init_shaders() {
 
     return true;
 }
-void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport, const unsigned int& sceneTexture, const Engine::priv::Renderer& renderer) {
+void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport, const unsigned int sceneTexture, const Engine::priv::Renderer& renderer) {
     renderer._bindShaderProgram(m_Shader_Program);
 
-    const auto& dimensions = viewport.getViewportDimensions();
-
-    Engine::Renderer::sendUniform4Safe("Data", blur_radius, bias, focus, dimensions.z / static_cast<float>(dimensions.w));
+    Engine::Renderer::sendUniform4Safe("Data", blur_radius, bias, focus, 0.0f);
 
     Engine::Renderer::sendTextureSafe("inTexture", gbuffer.getTexture(sceneTexture), 0);
     Engine::Renderer::sendTextureSafe("textureDepth", gbuffer.getTexture(GBufferType::Depth), 1);

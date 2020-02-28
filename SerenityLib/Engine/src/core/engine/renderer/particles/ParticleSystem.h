@@ -10,8 +10,8 @@
 #include <glm/vec4.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#define NUMBER_OF_PARTICLE_EMITTERS_LIMIT 2000
-#define NUMBER_OF_PARTICLE_LIMIT 1000000
+constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 2000U;
+constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT = 1000000U;
 
 class ParticleEmitter;
 class Particle;
@@ -22,13 +22,14 @@ namespace Engine::priv {
 };
 
 namespace Engine::priv {
-    class GBuffer;
     class ParticleSystem final{
         friend class ParticleEmitter;
         friend class Particle;
         private:
             std::vector<ParticleEmitter>           m_ParticleEmitters;
+
             std::vector<Particle>                  m_Particles;
+
             std::stack<size_t>                     m_ParticleEmitterFreelist;
             std::stack<size_t>                     m_ParticleFreelist;
             std::mutex                             m_Mutex;

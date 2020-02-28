@@ -32,6 +32,6 @@ const std::string& SoundData::getFilename() {
 const float SoundData::getVolume() const {
     return m_Volume;
 }
-void SoundData::setVolume(const float& volume) {
+void SoundData::setVolume(const float volume) {
     m_Volume = glm::clamp(volume, 0.0f, 100.0f);
 }

@@ -8,7 +8,8 @@
 typedef unsigned short ushort;
 
 namespace Engine::priv {
-    struct MeshImportedData final {
+    struct MeshImportedData final : public Engine::NonCopyable, public Engine::NonMoveable {
+
         std::map<unsigned int, VertexBoneData>  m_Bones;
         std::vector<glm::vec3>                  file_points;
         std::vector<glm::vec2>                  file_uvs;
@@ -22,11 +23,6 @@ namespace Engine::priv {
           
         MeshImportedData();
         ~MeshImportedData();
-
-        MeshImportedData(const MeshImportedData&)                      = delete;
-        MeshImportedData& operator=(const MeshImportedData&)           = delete;
-        MeshImportedData(MeshImportedData&& other) noexcept            = delete;
-        MeshImportedData& operator=(MeshImportedData&& other) noexcept = delete;
     };
 };
 #endif

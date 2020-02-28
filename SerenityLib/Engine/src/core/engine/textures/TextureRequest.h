@@ -11,11 +11,11 @@ class Texture;
 #include <core/engine/textures/TextureIncludes.h>
 
 struct TextureRequestPart final {
-    Texture*     texture;
-    Handle       handle;
-    std::string  name;
+    Texture*     texture = nullptr;
+    Handle       handle  = Handle();
+    std::string  name    = "";
 
-    TextureRequestPart();
+    TextureRequestPart() = default;
     ~TextureRequestPart();
 
     TextureRequestPart(const TextureRequestPart&);
@@ -24,13 +24,12 @@ struct TextureRequestPart final {
     TextureRequestPart& operator=(TextureRequestPart&& other) noexcept = delete;
 };
 struct TextureRequest final {
-    std::string          file;
-    std::string          fileExtension;
-    bool                 fileExists;
-    TextureRequestPart   part;
-    bool                 async;
+    std::string                  file              = "";
+    std::string                  fileExtension     = "";
+    bool                         fileExists        = false;
 
-
+    TextureRequestPart           part;
+    bool                         async             = false;
     GLuint                       type;
     TextureType::Type            textureType;
     bool                         isToBeMipmapped;
@@ -38,9 +37,9 @@ struct TextureRequest final {
 
     TextureRequest(
         const std::string& filenameOrData,
-        const bool& genMipMaps = true,
-        const ImageInternalFormat::Format& _internal = ImageInternalFormat::Format::SRGB8_ALPHA8,
-        const GLuint& openglTextureType = GL_TEXTURE_2D
+        const bool genMipMaps = true,
+        const ImageInternalFormat::Format _internal = ImageInternalFormat::Format::SRGB8_ALPHA8,
+        const GLuint openglTextureType = GL_TEXTURE_2D
     );
     ~TextureRequest();
 
@@ -49,11 +48,11 @@ struct TextureRequest final {
 };
 
 struct TextureRequestFromMemory final {
-    sf::Image            image;
-    std::string          textureName;
-    TextureRequestPart   part;
-    bool                 async;
+    sf::Image                    image;
+    std::string                  textureName       = "";
 
+    TextureRequestPart           part;
+    bool                         async             = false;
     GLuint                       type;
     TextureType::Type            textureType;
     bool                         isToBeMipmapped;
@@ -62,9 +61,9 @@ struct TextureRequestFromMemory final {
     TextureRequestFromMemory(
         sf::Image& sfImage,
         const std::string& textureName,
-        const bool& genMipMaps = true,
-        const ImageInternalFormat::Format& _internal = ImageInternalFormat::Format::SRGB8_ALPHA8,
-        const GLuint& openglTextureType = GL_TEXTURE_2D
+        const bool genMipMaps = true,
+        const ImageInternalFormat::Format _internal = ImageInternalFormat::Format::SRGB8_ALPHA8,
+        const GLuint openglTextureType = GL_TEXTURE_2D
     );
     ~TextureRequestFromMemory();
 

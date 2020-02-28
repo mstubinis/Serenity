@@ -7,8 +7,8 @@
 #include <SFML/OpenGL.hpp>
 #include <glm/glm.hpp>
 
-const unsigned int NUM_BONES_PER_VERTEX   = 4U;
-const unsigned int NUM_MAX_INSTANCES      = 65536U;
+constexpr unsigned int NUM_BONES_PER_VERTEX   = 4U;
+constexpr unsigned int NUM_MAX_INSTANCES      = 65536U;
 
 struct MeshModifyFlags {enum Flag {
     Default              = 1 << 0,

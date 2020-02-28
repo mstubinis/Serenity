@@ -43,23 +43,21 @@ class Material final : public EngineResource{
     private:
         std::function<void(Material*)>    m_CustomBindFunctor;
 
-
         std::vector<MaterialComponent*>   m_Components;
         unsigned char                     m_DiffuseModel       = DiffuseModel::Lambert;
         unsigned char                     m_SpecularModel      = SpecularModel::GGX;
         bool                              m_Shadeless          = false;
         bool                              m_UpdatedThisFrame   = false;
-        //glm::vec3                         m_F0Color            = glm::vec3(0.04f, 0.04f, 0.04f);
         Engine::color_vector_4            m_F0Color            = Engine::color_vector_4(10_uc, 10_uc, 10_uc, 255_uc);
         unsigned char                     m_BaseGlow           = 1_uc;
         unsigned char                     m_BaseAO             = 254_uc;
         unsigned char                     m_BaseMetalness      = 1_uc;
         unsigned char                     m_BaseSmoothness     = 64_uc;
         unsigned char                     m_BaseAlpha          = 254_uc;
-        std::uint32_t                     m_ID;
+        std::uint32_t                     m_ID                 = 0;
 
         MaterialComponent* internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
-        void internalUpdateGlobalMaterialPool(const bool& addToDatabase);
+        void internalUpdateGlobalMaterialPool(const bool addToDatabase);
         Material();
     public:
         Material(
@@ -110,9 +108,9 @@ class Material final : public EngineResource{
         MaterialComponent& addComponentRefraction(const std::string& cubeMapName, const std::string& mapFile, const float refractiveIndex = 1.0f, const float mixFactor = 1.0f);
         MaterialComponent& addComponentParallaxOcclusion(const std::string& textureFile, const float heightScale = 0.1f);
 
-        const std::uint32_t& id() const;
+        const std::uint32_t id() const;
     
-        const bool& shadeless() const;
+        const bool shadeless() const;
         const Engine::color_vector_4& f0() const;
         const unsigned char glow() const;
         const unsigned char smoothness() const;

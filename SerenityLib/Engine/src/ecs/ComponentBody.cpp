@@ -103,24 +103,13 @@ ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::N
 #pragma region Component
 
 ComponentBody::ComponentBody(const Entity& entity) : ComponentBaseClass(entity) {
-    const auto one            = static_cast<decimal>(1.0);
-    const auto zero           = static_cast<decimal>(0.0);
-
     m_Physics                 = false;
     data.p                    = nullptr;
     data.n                    = NEW NormalData();
     auto& normalData          = *data.n;
     Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
-
-    setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
 }
 ComponentBody::ComponentBody(const Entity& entity, const CollisionType::Type collisionType) : ComponentBaseClass(entity) {
-    const auto one          = static_cast<decimal>(1.0);
-    const auto zero         = static_cast<decimal>(0.0);
-
-    m_Forward               = glm_vec3(zero,  zero,  -one);
-    m_Right                 = glm_vec3(one,   zero,  zero);
-    m_Up                    = glm_vec3(zero,  one,   zero);
     m_Physics               = true;
     data.n                  = nullptr;
     data.p                  = NEW PhysicsData();
@@ -128,8 +117,6 @@ ComponentBody::ComponentBody(const Entity& entity, const CollisionType::Type col
     data.p->bullet_motionState = btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1)));
     setCollision(collisionType, 1.0f);
     rebuildRigidBody(false);
-
-    setCollisionFunctor(ComponentBody_EmptyCollisionFunctor());
 }
 ComponentBody::~ComponentBody() {
     //destructor
@@ -239,7 +226,7 @@ void ComponentBody::addPhysicsToWorld(const bool force, const bool threadSafe) {
         Physics::addRigidBody(*this);
     data.p->forcedOut = false;
 }
-const bool& ComponentBody::hasPhysics() const {
+const bool ComponentBody::hasPhysics() const {
     return m_Physics;
 }
 void ComponentBody::setUserPointer(void* userPtr) {
@@ -260,9 +247,9 @@ void* ComponentBody::getUserPointer1() const {
 void* ComponentBody::getUserPointer2() const {
     return m_UserPointer2;
 }
-void ComponentBody::collisionResponse(CollisionCallbackEventData& data) {
-    if(m_CollisionFunctor)
-        m_CollisionFunctor( std::ref(data) );
+void ComponentBody::collisionResponse(CollisionCallbackEventData& data) const {
+    //if(m_CollisionFunctor)
+    m_CollisionFunctor( std::ref(data) );
 }
 const ushort ComponentBody::getCollisionGroup() const {
     if (m_Physics) {
@@ -489,8 +476,6 @@ void ComponentBody::setPosition(const decimal& p_X, const decimal& p_Y, const de
 
         const auto entityIndex = m_Owner.id() - 1U;
 
-
-
 		position_.x         = p_X;
 		position_.y         = p_Y;
 		position_.z         = p_Z;
@@ -498,9 +483,6 @@ void ComponentBody::setPosition(const decimal& p_X, const decimal& p_Y, const de
         //normalData.modelMatrix[3][0] = p_X;
         //normalData.modelMatrix[3][1] = p_Y;
         //normalData.modelMatrix[3][2] = p_Z;
-
-
-
 
 
         auto& localMatrix = system.ParentChildSystem.LocalTransforms[entityIndex];
@@ -669,14 +651,14 @@ const ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(const float p_
         return ret;
     }
     auto& cam                    = *Resources::getCurrentScene()->getActiveCamera();
-    const auto& camvectest       = cam.up();   
+    const auto camvectest        = cam.up();   
     const auto  testRes          = Math::getScreenCoordinates(worldPos + (camvectest * static_cast<decimal>(radius)), camera, false);
     const auto test              = glm::vec2(testRes.x, testRes.y);
     const auto radius2D          = glm::max(p_MinOffset, glm::distance(test, center2D));
-    const auto& yPlus            = center2D.y + radius2D;
-    const auto& yNeg             = center2D.y - radius2D;
-    const auto& xPlus            = center2D.x + radius2D;
-    const auto& xNeg             = center2D.x - radius2D;
+    const auto yPlus             = center2D.y + radius2D;
+    const auto yNeg              = center2D.y - radius2D;
+    const auto xPlus             = center2D.x + radius2D;
+    const auto xNeg              = center2D.x - radius2D;
     ret.topLeft                  = glm::vec2(xNeg,  yPlus);
     ret.topRight                 = glm::vec2(xPlus, yPlus);
     ret.bottomLeft               = glm::vec2(xNeg,  yNeg);
@@ -798,8 +780,6 @@ const glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way t
     }
     //return data.n->modelMatrix;
 
-
-
     auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
     auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
     //const auto& matrix = system.ParentChildSystem.LocalTransforms[m_Owner.id() - 1U];
@@ -807,8 +787,7 @@ const glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way t
     return matrix;
 }
 const glm::mat4 ComponentBody::modelMatrixRendering() const {
-    glm::mat4 ret;
-    ret = static_cast<glm::mat4>(modelMatrix());
+    glm::mat4 ret = static_cast<glm::mat4>(modelMatrix());
     return ret;
 }
 const btRigidBody& ComponentBody::getBtBody() const {
@@ -1157,7 +1136,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
         }
     };
 
-    if (components.size() < 100) {
+    if (components.size() < 200) {
         for (size_t i = 0; i < components.size(); ++i) {
             lamda_update_component(components[i], i);
         }
@@ -1298,50 +1277,55 @@ void Engine::priv::ComponentBody_System::ParentChildVector::insert(const std::ui
         resize(std::max(parentID, childID));
     }
 
-    Parents[childID - 1U] = parentID;
-
     bool added = false;
     for (size_t i = 0; i < Order.size(); ++i) {
         const auto& entityID = Order[i];
         if (entityID == parentID) {
-            for (size_t j = i+1; j < Order.size(); ++j) {
+            //insert after the parent node where the next available spot is
+            //the next available spot is either the next zero or the next spot where that spot's parent is zero
+            for (size_t j = i + 1; j < Order.size(); ++j) {
                 const auto& entityIDCaseOne = Order[j];
                 if (entityIDCaseOne == 0 || Parents[entityIDCaseOne - 1U] == 0) {
                     Order.insert(Order.begin() + j, childID);
                     Order.pop_back();
                     ++OrderHead;
                     added = true;
-                    break;
+                    goto END_LOOP;
                 }
             }
-            if (added) {
-                break;
-            }
         }else if (entityID == childID) {
+            //insert right before the child node
             Order.insert(Order.begin() + i, parentID);
             Order.pop_back();
             ++OrderHead;
             added = true;
             break;
+        }else if (entityID == 0) {
+            break;
         }
     }
+    END_LOOP:
+
     if (!added) {
         /* add both at order head */
         Order[OrderHead]       = parentID;
         Order[OrderHead + 1U]  = childID;
         OrderHead             += 2;
     }
+    Parents[childID - 1U] = parentID;
+
 
     WorldTransforms[childID - 1U] = WorldTransforms[parentID - 1U] * LocalTransforms[childID - 1U];
 }
 void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::uint32_t parentID, const std::uint32_t childID) {
     size_t parentIndex    = 0;
     bool foundParent      = false;
-    Parents[childID - 1U] = 0;
 
     for (size_t i = 0; i < Order.size(); ++i) {
         const auto& entityID = Order[i];
-        if (entityID == parentID) {
+        if (entityID == 0) {
+            break;
+        }else if (entityID == parentID) {
             parentIndex = i;
             foundParent = true;
             break;
@@ -1350,6 +1334,7 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::ui
     if (!foundParent) {
         return;
     }
+    Parents[childID - 1U] = 0;
     for (size_t i = parentIndex; i < Order.size(); ++i) {
         const auto& entityID = Order[i];
         if (entityID == childID) {

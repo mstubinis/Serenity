@@ -7,31 +7,29 @@
 using namespace Engine;
 using namespace std;
 
-vector<boost::tuple<float, float, float>> LIGHT_RANGES = []() {
-    vector<boost::tuple<float, float, float>> m;
-    m.resize(LightRange::_TOTAL, boost::make_tuple(0.0f, 0.0f, 0.0f));
+vector<tuple<float, float, float>> LIGHT_RANGES;
+vector<tuple<float, float, float>> FILL_LIGHT_RANGES() {
+    vector<tuple<float, float, float>> m;
+    m.resize(LightRange::_TOTAL, make_tuple(0.0f, 0.0f, 0.0f));
 
-    m[LightRange::_7]    = boost::make_tuple(1.0f, 0.7f, 1.8f);
-    m[LightRange::_13]   = boost::make_tuple(1.0f, 0.35f, 0.44f);
-    m[LightRange::_20]   = boost::make_tuple(1.0f, 0.22f, 0.20f);
-    m[LightRange::_32]   = boost::make_tuple(1.0f, 0.14f, 0.07f);
-    m[LightRange::_50]   = boost::make_tuple(1.0f, 0.09f, 0.032f);
-    m[LightRange::_65]   = boost::make_tuple(1.0f, 0.07f, 0.017f);
-    m[LightRange::_100]  = boost::make_tuple(1.0f, 0.045f, 0.0075f);
-    m[LightRange::_160]  = boost::make_tuple(1.0f, 0.027f, 0.0028f);
-    m[LightRange::_200]  = boost::make_tuple(1.0f, 0.022f, 0.0019f);
-    m[LightRange::_325]  = boost::make_tuple(1.0f, 0.014f, 0.0007f);
-    m[LightRange::_600]  = boost::make_tuple(1.0f, 0.007f, 0.0002f);
-    m[LightRange::_3250] = boost::make_tuple(1.0f, 0.0014f, 0.000007f);
+    m[LightRange::_7] = make_tuple(1.0f, 0.7f, 1.8f);
+    m[LightRange::_13] = make_tuple(1.0f, 0.35f, 0.44f);
+    m[LightRange::_20] = make_tuple(1.0f, 0.22f, 0.20f);
+    m[LightRange::_32] = make_tuple(1.0f, 0.14f, 0.07f);
+    m[LightRange::_50] = make_tuple(1.0f, 0.09f, 0.032f);
+    m[LightRange::_65] = make_tuple(1.0f, 0.07f, 0.017f);
+    m[LightRange::_100] = make_tuple(1.0f, 0.045f, 0.0075f);
+    m[LightRange::_160] = make_tuple(1.0f, 0.027f, 0.0028f);
+    m[LightRange::_200] = make_tuple(1.0f, 0.022f, 0.0019f);
+    m[LightRange::_325] = make_tuple(1.0f, 0.014f, 0.0007f);
+    m[LightRange::_600] = make_tuple(1.0f, 0.007f, 0.0002f);
+    m[LightRange::_3250] = make_tuple(1.0f, 0.0014f, 0.000007f);
 
     return m;
-}();
+};
 
-PointLight::PointLight(const LightType::Type type, const glm::vec3 pos, Scene* scene):SunLight(pos, type, scene) {
-    m_C = 0.1f;
-    m_L = 0.1f;
-    m_E = 0.1f;
-    m_AttenuationModel = LightAttenuation::Constant_Linear_Exponent;
+
+PointLight::PointLight(const LightType::Type type, const glm_vec3& pos, Scene* scene) : SunLight(pos, type, scene) {
     m_CullingRadius = calculateCullingRadius();
 
     if (m_Type == LightType::Point) {
@@ -39,7 +37,7 @@ PointLight::PointLight(const LightType::Type type, const glm::vec3 pos, Scene* s
         ptLights.push_back(this);
     }
 }
-PointLight::PointLight(const glm::vec3 pos, Scene* scene):PointLight(LightType::Point, pos, scene) {
+PointLight::PointLight(const glm_vec3& pos, Scene* scene) : PointLight(LightType::Point, pos, scene) {
 
 }
 PointLight::~PointLight() {
@@ -50,7 +48,7 @@ void PointLight::destroy() {
     removeFromVector(priv::InternalScenePublicInterface::GetLights(m_Entity.scene()), this);
 }
 float PointLight::calculateCullingRadius() {
-    float lightMax = Math::Max(m_Color.x, m_Color.y, m_Color.z);
+    const float lightMax = Math::Max(m_Color.x, m_Color.y, m_Color.z);
     float radius = 0;
     //if(m_AttenuationModel == LightAttenuation::Constant_Linear_Exponent){
           radius = (-m_L + glm::sqrt(m_L * m_L - 4.0f * m_E * (m_C - (256.0f / 5.0f) * lightMax))) / (2.0f * m_E);
@@ -77,7 +75,7 @@ const float PointLight::getLinear() const {
 const float PointLight::getExponent() const {
     return m_E; 
 }
-const LightAttenuation::Model& PointLight::getAttenuationModel() const {
+const LightAttenuation::Model PointLight::getAttenuationModel() const {
     return m_AttenuationModel;
 }
 void PointLight::setConstant(const float c) { 
@@ -99,8 +97,11 @@ void PointLight::setAttenuation(const float c, const float l, const float e) {
     m_CullingRadius = calculateCullingRadius(); 
 }
 void PointLight::setAttenuation(const LightRange::Range r) { 
-    auto& d = LIGHT_RANGES[static_cast<uint>(r)];
-    PointLight::setAttenuation(d.get<0>(), d.get<1>(), d.get<2>()); 
+    if (LIGHT_RANGES.size() == 0) {
+        LIGHT_RANGES = FILL_LIGHT_RANGES();
+    }
+    const auto& d = LIGHT_RANGES[static_cast<unsigned int>(r)];
+    PointLight::setAttenuation( get<0>(d), get<1>(d), get<2>(d) ); 
 }
 void PointLight::setAttenuationModel(const LightAttenuation::Model model) {
     m_AttenuationModel = model; 

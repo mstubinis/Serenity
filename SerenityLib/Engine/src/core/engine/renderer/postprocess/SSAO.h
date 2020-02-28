@@ -49,7 +49,7 @@ namespace Engine::priv {
             void init();
 
             void passSSAO(GBuffer&, const Viewport& viewport, const Camera&, const Engine::priv::Renderer& renderer);
-            void passBlur(GBuffer&, const Viewport& viewport, const std::string& type, const unsigned int texture, const Engine::priv::Renderer& renderer);
+            void passBlur(GBuffer&, const Viewport& viewport, std::string_view type, const unsigned int texture, const Engine::priv::Renderer& renderer);
 
             static SSAO ssao;
     };

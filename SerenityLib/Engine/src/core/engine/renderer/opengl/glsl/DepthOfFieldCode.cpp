@@ -15,7 +15,7 @@ using namespace Engine::priv;
 using namespace std;
 
 
-void opengl::glsl::DepthOfFieldCode::convert(string& code, const unsigned int& versionNumber, const ShaderType::Type& shaderType) {
+void opengl::glsl::DepthOfFieldCode::convert(string& code, const unsigned int versionNumber, const ShaderType::Type shaderType) {
     if (shaderType == ShaderType::Fragment) {
         #pragma region DOF function
         if (ShaderHelper::sfind(code, "DOFExecute(")) {

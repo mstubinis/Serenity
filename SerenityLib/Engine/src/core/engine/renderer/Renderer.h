@@ -56,14 +56,20 @@ namespace priv{
 
             void _render(Viewport&, const bool mainRenderFunc = true);
 
-            void _onFullscreen(const unsigned int& width, const unsigned int& height);
+            void _onFullscreen(const unsigned int width, const unsigned int height);
             void _onOpenGLContextCreation(uint width,uint height,uint glslVersion,uint openglVersion);
-            const bool _bindShaderProgram(ShaderProgram*) const;
-            const bool _unbindShaderProgram() const;
             void _clear2DAPICommands();
             void _sort2DAPICommands();
+
+            const bool _bindShaderProgram(ShaderProgram*) const;
+            const bool _unbindShaderProgram() const;
+
+            const bool _bindMesh(Mesh*) const;
+            const bool _unbindMesh(Mesh*) const;
+
             const bool _bindMaterial(Material*) const;
             const bool _unbindMaterial() const;
+
             const float _getGIPackedData();
             void _genPBREnvMapData(Texture&,uint,uint);
     };
@@ -77,7 +83,7 @@ namespace Renderer{
         
         void applyGlobalAnisotropicFiltering(const float filtering);
 
-        const bool setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm&);
+        const bool setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm AA_algorithm);
 
         void enableDrawPhysicsInfo(const bool b = true);
         void disableDrawPhysicsInfo();
@@ -103,13 +109,13 @@ namespace Renderer{
     const unsigned int getUniformLoc(const char* location);
     const unsigned int getUniformLocUnsafe(const char* location);
 
-    const bool cullFace(const GLenum& state);
-    const bool setDepthFunc(const GLenum& func);
-    const bool setViewport(const float& x, const float& y, const float& width, const float& height);
+    const bool cullFace(const GLenum state);
+    const bool setDepthFunc(const GLenum func);
+    const bool setViewport(const float x, const float y, const float width, const float height);
 
-    const bool stencilFunc(const GLenum& func, const GLint& ref, const GLuint& mask);
-    const bool stencilMask(const GLuint& mask);
-    const bool stencilOp(const GLenum& sfail, const GLenum& dpfail, const GLenum& dppass);
+    const bool stencilFunc(const GLenum func, const GLint ref, const GLuint mask);
+    const bool stencilMask(const GLuint mask);
+    const bool stencilOp(const GLenum sfail, const GLenum dpfail, const GLenum dppass);
 
     void bindFBO(const GLuint& fbo);
     void bindFBO(const priv::FramebufferObject& rbo);
@@ -123,10 +129,10 @@ namespace Renderer{
     void unbindReadFBO();
     void unbindDrawFBO();
 
-    const bool GLEnable(const GLenum& capability);
-    const bool GLDisable(const GLenum& capability);
-    const bool GLEnablei(const GLenum& capability, const GLuint& index);
-    const bool GLDisablei(const GLenum& capability, const GLuint& index);
+    const bool GLEnable(const GLenum capability);
+    const bool GLDisable(const GLenum capability);
+    const bool GLEnablei(const GLenum capability, const GLuint index);
+    const bool GLDisablei(const GLenum capability, const GLuint index);
 
     const bool bindTextureForModification(const GLuint _textureType, const GLuint _textureObject);
 
@@ -134,15 +140,15 @@ namespace Renderer{
     void genAndBindTexture(const GLuint _textureType,GLuint& _textureObject);
     void genAndBindVAO(GLuint& _vaoObject);
     const bool deleteVAO(GLuint& _vaoObject);
-    const bool colorMask(const bool& r, const bool& g, const bool& b, const bool& a);
-    const bool clearColor(const float& r, const float& g, const float& b, const float& a);
+    const bool colorMask(const bool r, const bool g, const bool b, const bool a);
+    const bool clearColor(const float r, const float g, const float b, const float a);
 
-    void sendTexture(const char* location,const Texture& texture,const int& slot);
-    void sendTexture(const char* location,const GLuint textureAddress,const int& slot,const GLuint& glTextureType);
-    void sendTextureSafe(const char* location, const Texture& texture,const int& slot);
-    void sendTextureSafe(const char* location,const GLuint textureAddress,const int& slot,const GLuint& glTextureType);
+    void sendTexture(const char* location, const Texture& texture, const int slot);
+    void sendTexture(const char* location, const GLuint textureAddress, const int slot, const GLuint glTextureType);
+    void sendTextureSafe(const char* location, const Texture& texture, const int slot);
+    void sendTextureSafe(const char* location, const GLuint textureAddress, const int slot, const GLuint glTextureType);
     
-    void alignmentOffset(const Alignment::Type& align, float& x, float& y, const float& width, const float& height);
+    void alignmentOffset(const Alignment::Type align, float& x, float& y, const float width, const float height);
 
     void renderTexture(
         const Texture&,
@@ -151,7 +157,7 @@ namespace Renderer{
         const float angle,
         const glm::vec2& scale,
         const float depth,
-        const Alignment::Type& = Alignment::Type::Center,
+        const Alignment::Type = Alignment::Type::Center,
         const glm::vec4& scissor = glm::vec4(-1.0f)
     );
     void renderText(
@@ -162,7 +168,7 @@ namespace Renderer{
         const float angle,
         const glm::vec2& scale,
         const float depth,
-        const TextAlignment::Type& = TextAlignment::Left,
+        const TextAlignment::Type = TextAlignment::Left,
         const glm::vec4& scissor = glm::vec4(-1.0f)
     );
     void renderRectangle(
@@ -172,7 +178,7 @@ namespace Renderer{
         const float height,
         const float angle,
         const float depth,
-        const Alignment::Type& = Alignment::Type::Center,
+        const Alignment::Type = Alignment::Type::Center,
         const glm::vec4& scissor = glm::vec4(-1.0f)
     );
     void renderBorder(
@@ -183,7 +189,7 @@ namespace Renderer{
         const float height,
         const float angle,
         const float depth,
-        const Alignment::Type& = Alignment::Type::Center,
+        const Alignment::Type = Alignment::Type::Center,
         const glm::vec4& scissor = glm::vec4(-1.0f)
     );
     void renderTriangle(
@@ -193,7 +199,7 @@ namespace Renderer{
         const float width,
         const float height,
         const float depth,
-        const Alignment::Type& = Alignment::Type::Center,
+        const Alignment::Type = Alignment::Type::Center,
         const glm::vec4& scissor = glm::vec4(-1.0f)
     );
 

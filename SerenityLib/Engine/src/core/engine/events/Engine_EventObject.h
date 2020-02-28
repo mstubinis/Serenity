@@ -42,7 +42,7 @@ namespace Engine::priv{
         unsigned int  width;
         unsigned int  height;
         EventWindowResized() = default;
-        EventWindowResized(const unsigned int& width_, const unsigned int& height_) {
+        EventWindowResized(const unsigned int width_, const unsigned int height_) {
             width = width_;
             height = height_;
         }
@@ -50,7 +50,7 @@ namespace Engine::priv{
     struct EventWindowFullscreenChanged final{ 
         bool isFullscreen; 
         EventWindowFullscreenChanged() = default;
-        EventWindowFullscreenChanged(const bool& isFullscreen_) {
+        EventWindowFullscreenChanged(const bool isFullscreen_) {
             isFullscreen = isFullscreen_;
         }
     };
@@ -58,7 +58,7 @@ namespace Engine::priv{
         KeyboardKey::Key  key;
         bool              alt, control, shift, system;
         EventKeyboard() = default;
-        EventKeyboard(const KeyboardKey::Key& key_, const bool& alt_, const bool& control_, const bool& shift_, const bool& system_) {
+        EventKeyboard(const KeyboardKey::Key key_, const bool alt_, const bool control_, const bool shift_, const bool system_) {
             key     = key_;
             alt     = alt_;
             control = control_;
@@ -69,7 +69,7 @@ namespace Engine::priv{
     struct EventTextEntered final{ 
         std::uint32_t  unicode;
         EventTextEntered() = default;
-        EventTextEntered(const std::uint32_t& unicode_) {
+        EventTextEntered(const std::uint32_t unicode_) {
             unicode = unicode_;
         }
         const std::string convert() const {
@@ -89,7 +89,7 @@ namespace Engine::priv{
     struct EventMouseButton final{ 
         MouseButton::Button button; float x, y; 
         EventMouseButton() = default;
-        EventMouseButton(const MouseButton::Button& button_, const float& x_, const float& y_) {
+        EventMouseButton(const MouseButton::Button button_, const float x_, const float y_) {
             button = button_;
             x      = x_;
             y      = y_;
@@ -98,7 +98,7 @@ namespace Engine::priv{
     struct EventMouseMove final{ 
         float x,y;
         EventMouseMove() = default;
-        EventMouseMove(const float& x_, const float& y_) {
+        EventMouseMove(const float x_, const float y_) {
             x = x_;
             y = y_;
         }
@@ -107,7 +107,7 @@ namespace Engine::priv{
         float delta;
         int x, y;
         EventMouseWheel() = default;
-        EventMouseWheel(const float& delta_, const int& x_, const int& y_) {
+        EventMouseWheel(const float delta_, const int x_, const int y_) {
             delta = delta_;
             x = x_;
             y = y_;
@@ -118,7 +118,7 @@ namespace Engine::priv{
         JoystickAxis::Axis  axis;
         float               position;
         EventJoystickMoved() = default;
-        EventJoystickMoved(const unsigned int& joystickID_, const JoystickAxis::Axis& axis_, const float& position_) {
+        EventJoystickMoved(const unsigned int joystickID_, const JoystickAxis::Axis axis_, const float position_) {
             joystickID = joystickID_;
             axis       = axis_;
             position   = position_;
@@ -128,7 +128,7 @@ namespace Engine::priv{
         unsigned int  joystickID;
         unsigned int  button;
         EventJoystickButton() = default;
-        EventJoystickButton(const unsigned int& joystickID_, const unsigned int& button_) {
+        EventJoystickButton(const unsigned int joystickID_, const unsigned int button_) {
             joystickID = joystickID_;
             button     = button_;
         }
@@ -136,14 +136,14 @@ namespace Engine::priv{
     struct EventJoystickConnection final{ 
         unsigned int  joystickID;
         EventJoystickConnection() = default;
-        EventJoystickConnection(const unsigned int& joystickID_) {
+        EventJoystickConnection(const unsigned int joystickID_) {
             joystickID = joystickID_;
         }
     };
     struct EventSoundStatusChanged final {
         unsigned int  status;
         EventSoundStatusChanged() = default;
-        EventSoundStatusChanged(const unsigned int& status_) {
+        EventSoundStatusChanged(const unsigned int status_) {
             status = status_;
         }
     };
@@ -191,13 +191,13 @@ class EventObserver{
     public:
         virtual ~EventObserver(){}
 
-        void registerEvent(const EventType::Type& type);
-        void unregisterEvent(const EventType::Type& type);
-        const bool isRegistered(const EventType::Type& type) const;
+        void registerEvent(const EventType::Type type);
+        void unregisterEvent(const EventType::Type type);
+        const bool isRegistered(const EventType::Type type) const;
 
-        void registerEvent(const unsigned int& type);
-        void unregisterEvent(const unsigned int& type);
-        const bool isRegistered(const unsigned int& type) const;
+        void registerEvent(const unsigned int type);
+        void unregisterEvent(const unsigned int type);
+        const bool isRegistered(const unsigned int type) const;
 
         virtual void onEvent(const Event& e) {}
 };

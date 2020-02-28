@@ -55,11 +55,11 @@ namespace Engine{
                 void _init(const EngineOptions& options);
  
                 Handle _addTexture(Texture*);
-                Scene& _getSceneByID(const uint& id);
+                Scene& _getSceneByID(const uint id);
 
                 std::vector<Scene*>& scenes();
 
-                template<typename T> T* HasResource(const std::string& resource_name) {
+                template<typename T> T* HasResource(std::string_view resource_name) {
                     for (size_t i = 0; i < m_Resources.size(); ++i) {
                         EngineResource* r = m_Resources.getAsFast<EngineResource>(static_cast<unsigned int>(i) + 1U);
                         if (r) {
@@ -97,7 +97,7 @@ namespace Engine{
 
         Scene* getCurrentScene();
         const bool setCurrentScene(Scene* scene);
-        const bool setCurrentScene(const std::string& sceneName);
+        const bool setCurrentScene(std::string_view sceneName);
 
         const float dt();
         const double timeScale();
@@ -106,28 +106,28 @@ namespace Engine{
         Window& getWindow();
         glm::uvec2 getWindowSize();
 
-        Window& getWindow(const unsigned int& index);
-        glm::uvec2 getWindowSize(const unsigned int& index);
+        Window& getWindow(const unsigned int index);
+        glm::uvec2 getWindowSize(const unsigned int index);
 
-        Scene* getScene(const std::string& sceneName);
-        const bool deleteScene(const std::string& sceneName);
+        Scene* getScene(std::string_view sceneName);
+        const bool deleteScene(std::string_view sceneName);
         const bool deleteScene(Scene& scene);
 
-        void getShader(Handle& inHandle,Shader*& outPtr);                  Shader*    getShader(Handle& inHandle);
-        void getSoundData(Handle& inHandle,SoundData*& outPtr);            SoundData* getSoundData(Handle& inHandle);
-        void getCamera(Handle& inHandle,Camera*& outPtr);                  Camera*    getCamera(Handle& inHandle);
-        void getFont(Handle& inHandle,Font*& outPtr);                      Font*      getFont(Handle& inHandle);
+        void getShader(const Handle inHandle, Shader*& outPtr);                  Shader*    getShader(const Handle inHandle);
+        void getSoundData(const Handle inHandle, SoundData*& outPtr);            SoundData* getSoundData(const Handle inHandle);
+        void getCamera(const Handle inHandle, Camera*& outPtr);                  Camera*    getCamera(const Handle inHandle);
+        void getFont(const Handle inHandle, Font*& outPtr);                      Font*      getFont(const Handle inHandle);
 
-        void     getTexture(Handle& inHandle, Texture*& outPtr);
-        Texture* getTexture(Handle& inHandle);
-        Texture* getTexture(const std::string& name);
+        void     getTexture(const Handle inHandle, Texture*& outPtr);
+        Texture* getTexture(const Handle inHandle);
+        Texture* getTexture(std::string_view name);
 
-        void getMesh(Handle& inHandle,Mesh*& outPtr);                      Mesh*      getMesh(Handle& inHandle);
+        void getMesh(const Handle inHandle,Mesh*& outPtr);                      Mesh*      getMesh(const Handle inHandle);
 
-        void      getMaterial(Handle& inHandle,Material*& outPtr);
-        Material* getMaterial(Handle& inHandle);
+        void      getMaterial(const Handle inHandle,Material*& outPtr);
+        Material* getMaterial(const Handle inHandle);
 
-        void getShaderProgram(Handle& inHandle,ShaderProgram*& outPtr);    ShaderProgram*   getShaderProgram(Handle& inHandle);
+        void getShaderProgram(const Handle inHandle,ShaderProgram*& outPtr);    ShaderProgram*   getShaderProgram(const Handle inHandle);
 
 
         Handle addFont(const std::string& filename);
@@ -137,19 +137,19 @@ namespace Engine{
 
         Handle loadTexture(
             const std::string& file,
-            const ImageInternalFormat::Format& = ImageInternalFormat::SRGB8_ALPHA8,
-            const bool& mipmaps = false
+            const ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8,
+            const bool mipmaps = false
         );
         Handle loadTextureAsync(
             const std::string& file,
-            const ImageInternalFormat::Format& = ImageInternalFormat::SRGB8_ALPHA8,
-            const bool& mipmaps = false
+            const ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8,
+            const bool mipmaps = false
         );
         Handle loadTextureAsync(
             sf::Image& sfImage,
             const std::string& texture_name,
-            const ImageInternalFormat::Format& = ImageInternalFormat::SRGB8_ALPHA8,
-            const bool& mipmaps = false
+            const ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8,
+            const bool mipmaps = false
         );
         Handle loadMaterial(
             const std::string& name, 
@@ -182,10 +182,10 @@ namespace Engine{
             Texture* smoothness = nullptr
         );
 
-        Handle addShader(const std::string& shaderFileOrData, const ShaderType::Type& shaderType, const bool& fromFile = true);
+        Handle addShader(const std::string& shaderFileOrData, const ShaderType::Type shaderType, const bool fromFile = true);
         Handle addSoundData(const std::string& file);
         Handle addShaderProgram(const std::string& name, Shader& vertexShader, Shader& fragmentShader);
-        Handle addShaderProgram(const std::string& name, Handle& vertexShader, Handle& fragmentShader);
+        Handle addShaderProgram(const std::string& name, const Handle vertexShader, const Handle fragmentShader);
     };
     namespace Data{
         std::string reportTime();

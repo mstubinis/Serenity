@@ -3,9 +3,6 @@
 #include <GL/glew.h>
 #include <GL/GL.h>
 
-VertexDataFormat::VertexDataFormat() {
-    interleavingType = VertexAttributeLayout::Interleaved;
-}
 void VertexDataFormat::add(const int _size, const int _type, const bool _normalized, const int _stride, const size_t _offset, const size_t _typeSize) {
     attributes.emplace_back(_size, _type, _normalized, _stride, _offset, _typeSize);
 }
@@ -39,14 +36,14 @@ void VertexDataFormat::unbind() {
 }
 
 
-VertexDataFormat VertexDataFormat::VertexDataPositionsOnly = [&]() {
+VertexDataFormat VertexDataFormat::VertexDataPositionsOnly = []() {
     VertexDataFormat data;
     const size_t stride = sizeof(glm::vec3);
     data.interleavingType = VertexAttributeLayout::Interleaved;
     data.add(3, GL_FLOAT, false, stride, 0, sizeof(glm::vec3)); //positions
     return data;
 }();
-VertexDataFormat VertexDataFormat::VertexDataNoLighting = [&]() {
+VertexDataFormat VertexDataFormat::VertexDataNoLighting = []() {
     VertexDataFormat data;
     const size_t stride = sizeof(glm::vec3) + sizeof(glm::vec2);
     data.interleavingType = VertexAttributeLayout::Interleaved;
@@ -54,7 +51,7 @@ VertexDataFormat VertexDataFormat::VertexDataNoLighting = [&]() {
     data.add(2, GL_FLOAT, false, stride, 12, sizeof(glm::vec2)); //uvs
     return data;
 }();
-VertexDataFormat VertexDataFormat::VertexDataBasic = [&]() {
+VertexDataFormat VertexDataFormat::VertexDataBasic = []() {
     VertexDataFormat data;
     const size_t stride = sizeof(glm::vec3) + sizeof(glm::vec2) + sizeof(GLuint) + sizeof(GLuint) + sizeof(GLuint);
     data.interleavingType = VertexAttributeLayout::Interleaved;
@@ -65,7 +62,7 @@ VertexDataFormat VertexDataFormat::VertexDataBasic = [&]() {
     data.add(GL_BGRA, GL_INT_2_10_10_10_REV, true,  stride, 28, sizeof(GLuint)); //tangents
     return data;
 }();
-VertexDataFormat VertexDataFormat::VertexDataAnimated = [&]() {
+VertexDataFormat VertexDataFormat::VertexDataAnimated = []() {
     VertexDataFormat data;
     const size_t stride = sizeof(glm::vec3) + sizeof(glm::vec2) + sizeof(GLuint) + sizeof(GLuint) + sizeof(GLuint) + sizeof(glm::vec4) + sizeof(glm::vec4);
     data.interleavingType = VertexAttributeLayout::Interleaved;  

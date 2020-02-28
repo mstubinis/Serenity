@@ -23,8 +23,9 @@ MaterialComponent::MaterialComponent(const MaterialComponentType::Type type, Tex
 MaterialComponent::~MaterialComponent() {
 }
 MaterialLayer* MaterialComponent::addLayer(const string& textureFile, const string& maskFile, const string& cubemapFile) {
-    if (m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT)
+    if (m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT) {
         return nullptr;
+    }
     Texture* texture, * mask, * cubemap;
     texture = mask = cubemap = nullptr;
     texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(textureFile);
@@ -104,12 +105,12 @@ const MaterialComponentType::Type MaterialComponent::type() const {
     return m_ComponentType;
 }
 
-void MaterialComponent::bind(const size_t component_index, size_t& textureUnit) const {
+void MaterialComponent::bind(const size_t component_index, size_t& inTextureUnit) const {
     const string wholeString = "components[" + to_string(component_index) + "].";
     Engine::Renderer::sendUniform1Safe((wholeString + "numLayers").c_str(), static_cast<int>(m_NumLayers));
     Engine::Renderer::sendUniform1Safe((wholeString + "componentType").c_str(), static_cast<int>(m_ComponentType));
     for (unsigned int layerIndex = 0; layerIndex < m_NumLayers; ++layerIndex) {
-        m_Layers[layerIndex].sendDataToGPU(wholeString, component_index, layerIndex, textureUnit);
+        m_Layers[layerIndex].sendDataToGPU(wholeString, component_index, layerIndex, inTextureUnit);
     }
 }
 void MaterialComponent::unbind() {

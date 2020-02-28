@@ -27,14 +27,14 @@ namespace Engine::Networking {
             const std::string          ip();
             const unsigned short       remotePort();
     
-            const sf::Socket::Status   connect(const unsigned short& timeout = 0);
+            const sf::Socket::Status   connect(const unsigned short timeout = 0);
 
             const sf::Socket::Status   send(sf::Packet& packet);
             const sf::Socket::Status   send(const void* data, size_t size);
-            const sf::Socket::Status   send(const void* data, size_t size, size_t& sent);
+            const sf::Socket::Status   send(const void* data, size_t size, size_t sent);
 
             const sf::Socket::Status   receive(sf::Packet& packet);
-            const sf::Socket::Status   receive(void* data, size_t size, size_t& received);
+            const sf::Socket::Status   receive(void* data, size_t size, size_t received);
     };
 };
 #endif

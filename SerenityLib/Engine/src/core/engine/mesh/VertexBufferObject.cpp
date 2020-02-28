@@ -3,9 +3,6 @@
 
 using namespace std;
 
-BufferObject::BufferObject():buffer(0),capacity(0) { 
-    drawType = BufferDataDrawType::Unassigned; 
-}
 void BufferObject::generate() { 
     if (!buffer) { 
         glGenBuffers(1, &buffer); 
@@ -30,14 +27,16 @@ void BufferObject::setData(size_t _size, const void* _data, BufferDataDrawType::
     }
 }
 void BufferObject::setDataOrphan(const void* data) {
-    if (capacity == 0) 
+    if (capacity == 0) {
         return;
+    }
     glBufferData   (type, capacity, nullptr,  drawType);
     glBufferSubData(type, 0,        capacity, data);
 }
 void BufferObject::setData(size_t _size, size_t _startingIndex, const void* _data) {
-    if (drawType == BufferDataDrawType::Unassigned) 
+    if (drawType == BufferDataDrawType::Unassigned) {
         return;
+    }
     glBufferSubData(type, _startingIndex, _size, _data);
 }
 

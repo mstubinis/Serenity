@@ -14,7 +14,7 @@ priv::EventDispatcher::~EventDispatcher(){
     }
     m_Observers.clear();
 }
-void priv::EventDispatcher::registerObject(EventObserver& observer, const EventType::Type& eventType){
+void priv::EventDispatcher::registerObject(EventObserver& observer, const EventType::Type eventType){
     auto& observers_with_event_type = m_Observers[eventType];
     for (auto& o : observers_with_event_type) {
         if (o == &observer) { 
@@ -23,14 +23,14 @@ void priv::EventDispatcher::registerObject(EventObserver& observer, const EventT
     }
     observers_with_event_type.push_back(&observer);
 }
-void priv::EventDispatcher::unregisterObject(EventObserver& observer, const EventType::Type& eventType){
+void priv::EventDispatcher::unregisterObject(EventObserver& observer, const EventType::Type eventType){
     if (m_Observers.size() <= eventType) {
         return;
     }
     auto& observers_with_event_type = m_Observers[eventType];
     removeFromVector(observers_with_event_type, &observer);
 }
-const bool priv::EventDispatcher::isObjectRegistered(const EventObserver& observer, const EventType::Type& eventType) const {
+const bool priv::EventDispatcher::isObjectRegistered(const EventObserver& observer, const EventType::Type eventType) const {
     const auto& observers_with_event_type = m_Observers[eventType];
     for (auto& o : observers_with_event_type) {
         if (o == &observer) {
@@ -48,7 +48,7 @@ void priv::EventDispatcher::dispatchEvent(const Event& event) {
 
 
 
-void priv::EventDispatcher::registerObject(EventObserver& observer, const unsigned int& eventType) {
+void priv::EventDispatcher::registerObject(EventObserver& observer, const unsigned int eventType) {
     if (m_ObserversCustom.size() <= eventType) {
         m_ObserversCustom.resize(static_cast<size_t>(eventType + 1U));
     }
@@ -60,13 +60,13 @@ void priv::EventDispatcher::registerObject(EventObserver& observer, const unsign
     }
     observers_with_event_type.push_back(&observer);
 }
-void priv::EventDispatcher::unregisterObject(EventObserver& observer, const unsigned int& eventType) {
+void priv::EventDispatcher::unregisterObject(EventObserver& observer, const unsigned int eventType) {
     if (m_ObserversCustom.size() <= eventType) {
         return;
     }
     removeFromVector(m_ObserversCustom[eventType], &observer);
 }
-const bool priv::EventDispatcher::isObjectRegistered(const EventObserver& observer, const unsigned int& eventType) const {
+const bool priv::EventDispatcher::isObjectRegistered(const EventObserver& observer, const unsigned int eventType) const {
     const auto& observers_with_event_type = m_ObserversCustom[eventType];
     for (auto& o : observers_with_event_type) {
         if (o == &observer) {
@@ -75,7 +75,7 @@ const bool priv::EventDispatcher::isObjectRegistered(const EventObserver& observ
     }
     return false;
 }
-void priv::EventDispatcher::dispatchEvent(const unsigned int& eventType) {
+void priv::EventDispatcher::dispatchEvent(const unsigned int eventType) {
     if (m_ObserversCustom.size() <= eventType) {
         return;
     }

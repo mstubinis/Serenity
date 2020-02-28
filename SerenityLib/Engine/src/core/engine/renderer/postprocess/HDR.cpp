@@ -25,20 +25,22 @@ const bool Engine::priv::HDR::init_shaders() {
 #pragma region HDR
     m_GLSL_frag_code =
         "\n"
-        "uniform sampler2D lightingBuffer;\n"
-        "uniform sampler2D gDiffuseMap;\n"
-        "uniform sampler2D gNormalMap;\n"
-        "uniform sampler2D gGodsRaysMap;\n"
+        "uniform SAMPLER_TYPE_2D lightingBuffer;\n"
+        "uniform SAMPLER_TYPE_2D gDiffuseMap;\n"
+        "uniform SAMPLER_TYPE_2D gNormalMap;\n"
+        "uniform SAMPLER_TYPE_2D gGodsRaysMap;\n"
+        "\n"
         "varying vec2 texcoords;\n"
+        "\n"
         "uniform vec4 HDRInfo;\n"// exposure | UNUSED | godRays_Factor | HDRAlgorithm
         "uniform ivec2 Has;\n"   //HasGodRays | HasLighting
         "\n"
         "vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f){ return vec3(((x*(a*x+c*b)+d*e)/(x*(a*x+b)+d*f))-e/f); }\n"
         "void main(){\n"
-        "    vec3 diffuse = texture2D(gDiffuseMap,texcoords).rgb;\n"
-        "    vec3 lighting = texture2D(lightingBuffer, texcoords).rgb;\n"
-        "    vec3 normals = DecodeOctahedron(texture2D(gNormalMap,texcoords).rg);\n"
-        "    if(Has.y == 0 || distance(normals,ConstantOneVec3) < 0.01){\n" //if normals are damn near 1.0,1.0,1.0 or no lighting
+        "    vec3 diffuse = texture2D(USE_SAMPLER_2D(gDiffuseMap), texcoords).rgb;\n"
+        "    vec3 lighting = texture2D(USE_SAMPLER_2D(lightingBuffer), texcoords).rgb;\n"
+        "    vec3 normals = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), texcoords).rg);\n"
+        "    if(Has.y == 0 || distance(normals, ConstantOneVec3) < 0.01){\n" //if normals are damn near 1.0,1.0,1.0 or no lighting
         "        lighting = diffuse;\n"
         "    }\n"
         "    if(HDRInfo.w > 0.0){\n"//has hdr?
@@ -57,7 +59,7 @@ const bool Engine::priv::HDR::init_shaders() {
         "        }\n"
         "    }\n"
         "    if(Has.x == 1){\n" //has god rays?
-        "        vec3 rays = texture2D(gGodsRaysMap,texcoords).rgb;\n"
+        "        vec3 rays = texture2D(USE_SAMPLER_2D(gGodsRaysMap), texcoords).rgb;\n"
         "        lighting += (rays * HDRInfo.z);\n"
         "    }\n"
         "    gl_FragColor = vec4(lighting, 1.0);\n"
@@ -75,7 +77,7 @@ const bool Engine::priv::HDR::init_shaders() {
 
     return true;
 }
-void Engine::priv::HDR::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport,const bool& godRays,const bool& lighting,const float& godRaysFactor, const Engine::priv::Renderer& renderer) {
+void Engine::priv::HDR::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, const bool godRays, const bool lighting, const float godRaysFactor, const Engine::priv::Renderer& renderer) {
     renderer._bindShaderProgram(m_Shader_Program);
 
     Engine::Renderer::sendUniform4Safe("HDRInfo", exposure, 0.0f, godRaysFactor, static_cast<float>(algorithm));

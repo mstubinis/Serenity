@@ -25,14 +25,16 @@ const bool Engine::priv::FXAA::init_shaders() {
         "uniform float FXAA_REDUCE_MUL;\n"
         "uniform float FXAA_SPAN_MAX;\n"
         "\n"
-        "uniform sampler2D inTexture;\n"
-        //"uniform sampler2D edgeTexture;\n"
-        "uniform sampler2D depthTexture;\n"
-        "uniform vec2 invRes;\n"
-        "varying vec2 texcoords;\n"
+        "uniform SAMPLER_TYPE_2D inTexture;\n"
+        //"uniform SAMPLER_TYPE_2D edgeTexture;\n"
+        "uniform SAMPLER_TYPE_2D depthTexture;\n"
+        "\n"
+        "varying vec2 texcoords;\n" 
+        "\n"
         "void main(){\n"
-        "   float depth = texture2D(depthTexture,texcoords).r;\n"
-        //"   float edge = texture2D(edgeTexture,texcoords).r;\n"
+        "   vec2 invRes = vec2(1.0) / vec2(ScreenInfo.z / ScreenInfo.w);\n"
+        "   float depth = texture2D(depthTexture, texcoords).r;\n"
+        //"   float edge = texture2D(edgeTexture, texcoords).r;\n"
         "   if(depth >= 0.999){\n"
         "       gl_FragColor = texture2D(inTexture, texcoords);\n"
         "       return;\n"
@@ -57,8 +59,8 @@ const bool Engine::priv::FXAA::init_shaders() {
         "   float dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) * (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);\n"
         "   float rcpDirMin = 1.0/(min(abs(dir.x), abs(dir.y)) + dirReduce);\n"
         "   dir = min(vec2(FXAA_SPAN_MAX,FXAA_SPAN_MAX),max(vec2(-FXAA_SPAN_MAX,-FXAA_SPAN_MAX),dir * rcpDirMin)) * invRes;\n"
-        "   vec3 rgbA = 0.5 * (texture2D(inTexture, texcoords   + dir * (1.0/3.0 - 0.5)).xyz + texture2D(inTexture,texcoords + dir * (2.0/3.0 - 0.5)).xyz);\n"
-        "   vec3 rgbB = rgbA * 0.5 + 0.25 * (texture2D(inTexture,texcoords + dir * - 0.5).xyz + texture2D(inTexture,texcoords + dir * 0.5).xyz);\n"
+        "   vec3 rgbA = 0.5 * (texture2D(inTexture, texcoords   + dir * (1.0/3.0 - 0.5)).xyz + texture2D(inTexture, texcoords + dir * (2.0/3.0 - 0.5)).xyz);\n"
+        "   vec3 rgbB = rgbA * 0.5 + 0.25 * (texture2D(inTexture,texcoords + dir * - 0.5).xyz + texture2D(inTexture, texcoords + dir * 0.5).xyz);\n"
         "   float lumaB = dot(rgbB,luma);\n"
         "   if((lumaB < lumaMin) || (lumaB > lumaMax)){\n"
         "       gl_FragColor = vec4(rgbA, 1.0);\n"
@@ -86,7 +88,7 @@ Engine::priv::FXAA::~FXAA() {
     SAFE_DELETE(m_Fragment_shader);
     SAFE_DELETE(m_Vertex_shader);
 }
-void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, const unsigned int& sceneTextureEnum, const Engine::priv::Renderer& renderer) {
+void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, const unsigned int sceneTexture, const Engine::priv::Renderer& renderer) {
     const auto& dimensions = viewport.getViewportDimensions();
     renderer._bindShaderProgram(m_Shader_program);
 
@@ -94,8 +96,7 @@ void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, const 
     Engine::Renderer::sendUniform1("FXAA_REDUCE_MUL", reduce_mul);
     Engine::Renderer::sendUniform1("FXAA_SPAN_MAX", span_max);
 
-    Engine::Renderer::sendUniform2("invRes", 1.0f / static_cast<float>(dimensions.z), 1.0f / static_cast<float>(dimensions.w));
-    Engine::Renderer::sendTexture("inTexture", gbuffer.getTexture(sceneTextureEnum), 0);
+    Engine::Renderer::sendTexture("inTexture", gbuffer.getTexture(sceneTexture), 0);
     Engine::Renderer::sendTextureSafe("edgeTexture", gbuffer.getTexture(GBufferType::Misc), 1);
     Engine::Renderer::sendTexture("depthTexture", gbuffer.getTexture(GBufferType::Depth), 2);
 

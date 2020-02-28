@@ -22,27 +22,27 @@
 using namespace std;
 using namespace Engine;
 
-typedef boost::iostreams::stream<boost::iostreams::mapped_file_source> boost_stream_mapped_file;
+using boost_stream_mapped_file = boost::iostreams::stream<boost::iostreams::mapped_file_source>;
 
 //seems to be ok for now
 string getLogDepthFunctions() {
     string res = "\n"
-        "vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float depth = texture2D(gDepthMap, _uv).r;\n"
-        "    float position_w = pow(2.0, depth * log2(_far + 1.0)) - 1.0;\n"
-        "    float a = _far / (_far - _near);\n"
-        "    float b = _far * _near / (_near - _far);\n"
+        "vec3 GetWorldPosition(sampler2D inTexture, vec2 inUV, float inNear, float inFar){//generated\n"
+        "    float depth = texture2D(inTexture, inUV).r;\n"
+        "    float position_w = pow(2.0, depth * log2(inFar + 1.0)) - 1.0;\n"
+        "    float a = inFar / (inFar - inNear);\n"
+        "    float b = inFar * inNear / (inNear - inFar);\n"
         "    float linear = a + b / position_w;\n"
-        "    vec4 wpos = CameraInvViewProj * (vec4(_uv, linear, 1.0) * 2.0 - 1.0);\n"
+        "    vec4 wpos = CameraInvViewProj * (vec4(inUV, linear, 1.0) * 2.0 - 1.0);\n"
         "    return wpos.xyz / wpos.w;\n"
         "}\n"
-        "vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float depth = texture2D(gDepthMap, _uv).r;\n"
-        "    float position_w = pow(2.0, depth * log2(_far + 1.0)) - 1.0;\n"
-        "    float a = _far / (_far - _near);\n"
-        "    float b = _far * _near / (_near - _far);\n"
+        "vec3 GetViewPosition(sampler2D inTexture, vec2 inUV, float inNear, float inFar){//generated\n"
+        "    float depth = texture2D(inTexture, inUV).r;\n"
+        "    float position_w = pow(2.0, depth * log2(inFar + 1.0)) - 1.0;\n"
+        "    float a = inFar / (inFar - inNear);\n"
+        "    float b = inFar * inNear / (inNear - inFar);\n"
         "    float linear = a + b / position_w;\n"
-        "    vec4 wpos = CameraInvProj * (vec4(_uv, linear, 1.0) * 2.0 - 1.0);\n"
+        "    vec4 wpos = CameraInvProj * (vec4(inUV, linear, 1.0) * 2.0 - 1.0);\n"
         "    return wpos.xyz / wpos.w;\n"
         "}\n";
     return res;
@@ -50,22 +50,22 @@ string getLogDepthFunctions() {
 //this is working great right now, do not modify
 string getNormalDepthFunctions() {
     string res = "\n"
-        "vec3 GetWorldPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float depth = texture2D(gDepthMap, _uv).r * 2.0 - 1.0;\n"
-        "	 vec4 space = vec4(_uv * 2.0 - 1.0, depth, 1.0);\n"
+        "vec3 GetWorldPosition(sampler2D inTexture, vec2 inUV, float inNear, float inFar){//generated\n"
+        "    float depth = texture2D(inTexture, inUV).r * 2.0 - 1.0;\n"
+        "	 vec4 space = vec4(inUV * 2.0 - 1.0, depth, 1.0);\n"
         "	 space = CameraInvViewProj * space;\n"
         "	 return space.xyz / space.w;\n"
         "}\n"
-        "vec3 GetViewPosition(vec2 _uv,float _near, float _far){//generated\n"
-        "    float depth = texture2D(gDepthMap, _uv).x;\n"
-        "    vec4 space = CameraInvProj * (vec4(_uv, depth, 1.0) * 2.0 - 1.0);\n"
+        "vec3 GetViewPosition(sampler2D inTexture, vec2 inUV, float inNear, float inFar){//generated\n"
+        "    float depth = texture2D(inTexture, inUV).x;\n"
+        "    vec4 space = CameraInvProj * (vec4(inUV, depth, 1.0) * 2.0 - 1.0);\n"
         "    return space.xyz / space.w;\n"
         "}\n";
     return res;
 }
 
 
-Shader::Shader(const string& filenameOrCode, const ShaderType::Type& shaderType, const bool& fromFile) : EngineResource(ResourceType::Shader) {
+Shader::Shader(const string& filenameOrCode, const ShaderType::Type shaderType, const bool fromFile) : EngineResource(ResourceType::Shader) {
     m_FileName = filenameOrCode;
     m_Type = shaderType;
     m_FromFile = fromFile;
@@ -82,13 +82,13 @@ Shader::Shader(const string& filenameOrCode, const ShaderType::Type& shaderType,
 }
 Shader::~Shader() {
 }
-const ShaderType::Type& Shader::type() const {
+const ShaderType::Type Shader::type() const {
     return m_Type;
 }
 const string& Shader::data() const {
     return m_Code;
 }
-const bool& Shader::fromFile() const {
+const bool Shader::fromFile() const {
     return m_FromFile;
 }
 
@@ -116,12 +116,12 @@ void priv::InternalShaderPublicInterface::ConvertCode(Shader& shader) {
     }else{
         //generate one
         string core = "";
-        if (Engine::priv::Renderer::GLSL_VERSION >= 330)
+        if (Engine::priv::Renderer::GLSL_VERSION >= 330 && Engine::priv::Renderer::GLSL_VERSION < 440) {
             core = " core";
+        }
         versionLine = "#version " + to_string(Engine::priv::Renderer::GLSL_VERSION) + core + "\n";
-        ShaderHelper::insertStringAtLine(shader.m_Code, versionLine, 0);
     }
-    const uint versionNumber = boost::lexical_cast<uint>(regex_replace(versionLine, regex("([^0-9])"), ""));
+    const unsigned int versionNumber = boost::lexical_cast<unsigned int>(regex_replace(versionLine, regex("([^0-9])"), ""));
 
     //common code
     opengl::glsl::Materials::convert(shader.m_Code, versionNumber, shader.m_Type);
@@ -129,7 +129,7 @@ void priv::InternalShaderPublicInterface::ConvertCode(Shader& shader) {
     opengl::glsl::SSAOCode::convert(shader.m_Code, versionNumber, shader.m_Type);
     opengl::glsl::DepthOfFieldCode::convert(shader.m_Code, versionNumber, shader.m_Type);
     opengl::glsl::Compression::convert(shader.m_Code, versionNumber);
-    opengl::glsl::Common::convert(shader.m_Code, versionNumber);
+    
 
     //check for log depth - vertex
     if (ShaderHelper::sfind(shader.m_Code, "USE_LOG_DEPTH_VERTEX") && !ShaderHelper::sfind(shader.m_Code, "//USE_LOG_DEPTH_VERTEX") && shader.m_Type == ShaderType::Vertex) {
@@ -188,9 +188,9 @@ void priv::InternalShaderPublicInterface::ConvertCode(Shader& shader) {
         if (ShaderHelper::sfind(shader.m_Code, "GetWorldPosition(") || ShaderHelper::sfind(shader.m_Code, "GetViewPosition(")) {
             if (!ShaderHelper::sfind(shader.m_Code, "vec3 GetWorldPosition(")) {
                 #ifndef ENGINE_FORCE_NO_LOG_DEPTH
-                    ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getLogDepthFunctions(), "uniform sampler2D gDepthMap;");
+                    ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getLogDepthFunctions(), "uniform SAMPLER_TYPE_2D gDepthMap;");
                 #else
-                    ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
+                    ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getNormalDepthFunctions(), "uniform SAMPLER_TYPE_2D gDepthMap;");
                 #endif
             }
         }
@@ -201,19 +201,23 @@ void priv::InternalShaderPublicInterface::ConvertCode(Shader& shader) {
                     //log
                     boost::replace_all(shader.m_Code, "USE_LOG_DEPTH_FRAG_WORLD_POSITION", "");
                         #ifndef ENGINE_FORCE_NO_LOG_DEPTH
-                            ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getLogDepthFunctions(), "uniform sampler2D gDepthMap;");
+                            ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getLogDepthFunctions(), "uniform SAMPLER_TYPE_2D gDepthMap;");
                         #else
-                            ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
+                            ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getNormalDepthFunctions(), "uniform SAMPLER_TYPE_2D gDepthMap;");
                         #endif
                 }else{
                     #ifndef ENGINE_FORCE_NO_LOG_DEPTH
-                        ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getLogDepthFunctions(), "uniform sampler2D gDepthMap;");
+                        ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getLogDepthFunctions(), "uniform SAMPLER_TYPE_2D gDepthMap;");
                     #else
-                        ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getNormalDepthFunctions(), "uniform sampler2D gDepthMap;");
+                        ShaderHelper::insertStringRightAfterLineContent(shader.m_Code, getNormalDepthFunctions(), "uniform SAMPLER_TYPE_2D gDepthMap;");
                     #endif
                 }
             }
-                }
-            }
+        }
+    }
+    opengl::glsl::Common::convert(shader.m_Code, versionNumber);
     opengl::glsl::VersionConversion::convert(shader.m_Code, versionNumber, shader.m_Type);
+
+    //put the version on top as the last step :)
+    shader.m_Code = versionLine + shader.m_Code;
 }

@@ -23,7 +23,7 @@ void priv::ThreadManager::cleanup() {
     m_ThreadPool.shutdown();
     m_ThreadPoolEngineControlled.shutdown();
 }
-void priv::ThreadManager::_update(const float& dt){ 
+void priv::ThreadManager::_update(const float dt){ 
     m_ThreadPoolEngineControlled.update();
     m_ThreadPool.update();
 }

@@ -31,7 +31,7 @@ namespace Engine::priv {
 
             const bool init_shaders();
 
-            void pass(GBuffer&,const Viewport& viewport,const unsigned int& sceneTextureEnum, const Engine::priv::Renderer& renderer);
+            void pass(GBuffer&, const Viewport& viewport, const unsigned int sceneTexture, const Engine::priv::Renderer& renderer);
 
             static Bloom bloom;
     };

@@ -14,11 +14,7 @@ using namespace Engine::priv;
 
 #pragma region TextureRequestPart
 
-TextureRequestPart::TextureRequestPart() {
-    texture = nullptr;
-    name    = "";
-    handle  = Handle();
-}
+
 TextureRequestPart::~TextureRequestPart() {
 }
 TextureRequestPart::TextureRequestPart(const TextureRequestPart& other) {
@@ -38,10 +34,7 @@ TextureRequestPart& TextureRequestPart::operator=(const TextureRequestPart& othe
 
 #pragma region TextureRequest
 
-TextureRequest::TextureRequest(const string& filename, const bool& genMipMaps, const ImageInternalFormat::Format& internal_, const GLuint& openglTextureType) {
-    fileExtension   = "";
-    fileExists      = false;
-    async           = false;
+TextureRequest::TextureRequest(const string& filename, const bool genMipMaps, const ImageInternalFormat::Format internal_, const GLuint openglTextureType) {
     file            = filename;
     internalFormat  = internal_;
     isToBeMipmapped = genMipMaps;
@@ -123,7 +116,7 @@ void InternalTextureRequestPublicInterface::LoadGPU(TextureRequest& request) {
 
 #pragma region TextureRequestFromMemory
 
-TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const string& _filename, const bool& genMipMaps, const ImageInternalFormat::Format& internal_, const GLuint& openglTextureType){
+TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const string& _filename, const bool genMipMaps, const ImageInternalFormat::Format internal_, const GLuint openglTextureType){
     async           = false;
     textureName     = _filename;
     image           = sfImage;

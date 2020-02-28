@@ -54,10 +54,6 @@ namespace Engine::priv {
     struct ComponentBody_ComponentRemovedFromEntityFunction;
     struct ComponentBody_SceneEnteredFunction;
     struct ComponentBody_SceneLeftFunction;
-    struct ComponentBody_EmptyCollisionFunctor final { 
-        void operator()(CollisionCallbackEventData& data) const {
-        } 
-    };
 };
 
 class ComponentBody : public ComponentBaseClass, public EventObserver {
@@ -102,18 +98,19 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
             NormalData(NormalData&& other) noexcept;
         };
         union {
-            NormalData*  n;
+            NormalData*  n   = nullptr;
             PhysicsData* p;
         } data;
-        bool  m_Physics;
+        bool  m_Physics      = false;
         void* m_UserPointer  = nullptr;
         void* m_UserPointer1 = nullptr;
         void* m_UserPointer2 = nullptr;
-        glm_vec3 m_Forward;
-        glm_vec3 m_Right;
-        glm_vec3 m_Up;
 
-        std::function<void(CollisionCallbackEventData& data)> m_CollisionFunctor;
+        glm_vec3 m_Forward   = glm_vec3(0.0,  0.0, -1.0);
+        glm_vec3 m_Right     = glm_vec3(1.0,  0.0,  0.0);
+        glm_vec3 m_Up        = glm_vec3(0.0,  1.0,  0.0);
+
+        std::function<void(CollisionCallbackEventData& data)> m_CollisionFunctor = [](CollisionCallbackEventData&) {};
 
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
@@ -140,7 +137,7 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
         template<typename T> void setCollisionFunctor(const T& functor) {
             m_CollisionFunctor = std::bind<void>(functor, std::placeholders::_1);
         }
-        void collisionResponse(CollisionCallbackEventData& data);
+        void collisionResponse(CollisionCallbackEventData& data) const;
 
         void rebuildRigidBody(const bool addBodyToPhysicsWorld = true, const bool threadSafe = false);
 
@@ -155,7 +152,7 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
         void* getUserPointer1() const;
         void* getUserPointer2() const;
 
-        const bool& hasPhysics() const;
+        const bool hasPhysics() const;
         const unsigned short getCollisionGroup() const; //get the groups this body belongs to
         const unsigned short getCollisionMask() const;  //get the groups this body will register collisions with
         const unsigned short getCollisionFlags() const;
@@ -265,8 +262,6 @@ class ComponentBody_System_CI : public Engine::priv::ECSSystemCI {
 
 namespace Engine::priv {
     class ComponentBody_System final : public Engine::priv::ECSSystem<Entity, ComponentBody> {
-
-
         class ParentChildVector final {
             public:
                 std::vector<glm_mat4>         WorldTransforms;
@@ -283,8 +278,6 @@ namespace Engine::priv {
                 const std::uint32_t size() const;
                 const size_t capacity() const;
         };
-
-
         public:
             ParentChildVector ParentChildSystem;
 

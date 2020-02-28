@@ -7,14 +7,14 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace std;
 
-const bool ShaderHelper::sfind(const string& whole, const string& part) {
-    return whole.find(part) != string::npos ? true : false;
+const bool ShaderHelper::sfind(string_view whole, string_view part) {
+    return (whole.find(part) != string::npos);
 }
-void ShaderHelper::insertStringAtLine(string& src, const string& newcontent, const unsigned int linenumber) {
+void ShaderHelper::insertStringAtLine(string& InSrc, const string& newcontent, const unsigned int linenumber) {
     if (linenumber == 0) {
-        src = newcontent + "\n" + src; 
+        InSrc = newcontent + "\n" + InSrc;
     }else{
-        stringstream str(src);
+        stringstream str(InSrc);
         string line = "";
         vector<string> lines;
         unsigned int count = 0;
@@ -25,41 +25,42 @@ void ShaderHelper::insertStringAtLine(string& src, const string& newcontent, con
             }
             ++count;
         }
-        src = ""; 
+        InSrc = "";
         for (auto& ln : lines) { 
-            src += ln; 
+            InSrc += ln;
         }
     }
 }
-void ShaderHelper::insertStringAtAndReplaceLine(string& src, const string& newcontent, const unsigned int linenumber) {
-    stringstream str(src); 
+void ShaderHelper::insertStringAtAndReplaceLine(string& InSrc, const string& newcontent, const unsigned int linenumber) {
+    stringstream str(InSrc);
     string line = "";
     vector<string> lines; 
     while (std::getline(str, line)) {
         lines.emplace_back(line + "\n");
     }
     unsigned int count = 0; 
-    src = ""; 
+    InSrc = "";
     for (auto& lineItr : lines) { 
-        if (count == linenumber)
+        if (count == linenumber) {
             lineItr = newcontent + "\n";
-        src += lineItr;
+        }
+        InSrc += lineItr;
         ++count;
     }
 }
-void ShaderHelper::insertStringAtEndOfMainFunc(string& src, const string& content) {
-    auto position = src.size() - 1; 
+void ShaderHelper::insertStringAtEndOfMainFunc(string& InSrc, const string& content) {
+    auto position = InSrc.size() - 1;
     while (position > 0) {
-        const char& character = src[position];
+        const char& character = InSrc[position];
         --position;
         if (character == '}') {
             break; 
         } 
     }
-    src.insert(position, content);
+    InSrc.insert(position, content);
 }
-void ShaderHelper::insertStringRightBeforeLineContent(string& src, const string& newContent, const string& lineContent) {
-    stringstream str(src);
+void ShaderHelper::insertStringRightBeforeLineContent(string& InSrc, const string& newContent, const string& lineContent) {
+    stringstream str(InSrc);
     string line = "";
     vector<string> lines;
     bool done = false;
@@ -72,13 +73,13 @@ void ShaderHelper::insertStringRightBeforeLineContent(string& src, const string&
         }
         ++count;
     }
-    src = "";
+    InSrc = "";
     for (auto& lineItr : lines) {
-        src += lineItr;
+        InSrc += lineItr;
     }
 }
-void ShaderHelper::insertStringRightAfterLineContent(string& src, const string& newContent, const string& lineContent) {
-    stringstream str(src); 
+void ShaderHelper::insertStringRightAfterLineContent(string& InSrc, const string& newContent, const string& lineContent) {
+    stringstream str(InSrc);
     string line = "";
     vector<string> lines; 
     bool done = false;
@@ -89,8 +90,8 @@ void ShaderHelper::insertStringRightAfterLineContent(string& src, const string& 
             done = true;
         } 
     }
-    src = ""; 
+    InSrc = "";
     for (auto& lineItr : lines) {
-        src += lineItr;
+        InSrc += lineItr;
     }
 }

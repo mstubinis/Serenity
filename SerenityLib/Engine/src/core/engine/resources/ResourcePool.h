@@ -47,8 +47,8 @@ namespace Engine::priv{
             }
             ~ResourcePool(){
             }
-            Handle add(T* _ptr, const unsigned int _type){
-                const int used_index = super::emplace_back(_ptr);
+            Handle add(T* ptr, const unsigned int type){
+                const int used_index = super::emplace_back(ptr);
                 if (used_index == -1)
                     return Handle();
                 auto& item = super::get(used_index);
@@ -56,41 +56,41 @@ namespace Engine::priv{
                 if (item.version == 0) {
                     item.version = 1;
                 }
-                return Handle(used_index + 1, item.version, _type);
+                return Handle(used_index + 1, item.version, type);
             }
-            T* get(Handle& handle){
+            T* get(const Handle handle){
                 T* outPtr = nullptr;
                 return (!get(handle, outPtr)) ? nullptr : outPtr;
             }
-            const bool get(const Handle& _handle, T*& _outPtr){
-                const auto& item = super::get(_handle.index - 1U);
-                if (item.version != _handle.version){
-                    _outPtr = nullptr;
+            const bool get(const Handle handle, T*& outPtr){
+                const auto& item = super::get(handle.index - 1U);
+                if (item.version != handle.version){
+                    outPtr = nullptr;
                     return false;
                 }
-                _outPtr = item.resource;
+                outPtr = item.resource;
                 return true;
             }
-            template<typename TResource> inline const bool getAs(Handle& _handle, TResource*& _outPtr){
+            template<typename TResource> inline const bool getAs(const Handle handle, TResource*& outPtr){
                 T* _void = nullptr;
-                const bool rv = get(_handle,_void);
-                _outPtr = (TResource*)(_void);
+                const bool rv = get(handle,_void);
+                outPtr = (TResource*)(_void);
                 return rv;
             }
-            template<typename TResource> inline void getAsFast(Handle& _handle, TResource*& _outPtr){
-                const auto& item = super::get(_handle.index - 1U);
+            template<typename TResource> inline void getAsFast(const Handle handle, TResource*& outPtr){
+                const auto& item = super::get(handle.index - 1U);
                 if(!item.resource){
-                    _outPtr = nullptr;
+                    outPtr = nullptr;
                     return;
                 }
-                _outPtr = (TResource*)(item.resource);
+                outPtr = (TResource*)(item.resource);
             }
-            template<typename TResource> inline TResource* getAsFast(Handle& _handle){
-                const auto& item = super::get(_handle.index - 1U);
+            template<typename TResource> inline TResource* getAsFast(const Handle handle){
+                const auto& item = super::get(handle.index - 1U);
                 return (!item.resource) ? nullptr : (TResource*)(item.resource);
             }
-            template<typename TResource> inline TResource* getAsFast(const unsigned int& _index){
-                const auto& item = super::get(_index - 1U);
+            template<typename TResource> inline TResource* getAsFast(const unsigned int index){
+                const auto& item = super::get(index - 1U);
                 return (!item.resource) ? nullptr : (TResource*)(item.resource);
             }
     };

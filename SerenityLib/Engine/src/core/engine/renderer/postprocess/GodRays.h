@@ -37,7 +37,7 @@ namespace Engine::priv {
 
             const bool init_shaders();
 
-            void pass(GBuffer&, const Viewport& viewport, const glm::vec2& lightScrnPos, const float& alpha, const Engine::priv::Renderer& renderer);
+            void pass(GBuffer&, const Viewport& viewport, const glm::vec2& lightScrnPos, const float alpha, const Engine::priv::Renderer& renderer);
 
             static GodRays godRays;
     };

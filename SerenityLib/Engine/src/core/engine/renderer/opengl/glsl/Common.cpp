@@ -1,4 +1,5 @@
 #include <core/engine/renderer/opengl/glsl/Common.h>
+#include <core/engine/renderer/opengl/Extensions.h>
 #include <core/engine/shaders/ShaderHelper.h>
 #include <core/engine/materials/MaterialEnums.h>
 
@@ -13,7 +14,7 @@ using namespace Engine::priv;
 using namespace std;
 
 
-void opengl::glsl::Common::convert(string& code, const unsigned int& versionNumber) {
+void opengl::glsl::Common::convert(string& code, const unsigned int versionNumber) {
 
 #pragma region constants
     if (ShaderHelper::sfind(code, "ConstantOneVec3")) {
@@ -49,6 +50,53 @@ void opengl::glsl::Common::convert(string& code, const unsigned int& versionNumb
     if (ShaderHelper::sfind(code, "KPI")) {
         if (!ShaderHelper::sfind(code, "const float KPI")) {
             ShaderHelper::insertStringAtLine(code, "const float KPI = 3.1415926535898;\n", 1);
+        }
+    }
+#pragma endregion
+
+#pragma region use sampler
+    const bool is_bindless_supported = Engine::priv::OpenGLExtensions::isBindlessTexturesSupported();
+
+    const vector<string> types{
+        "1D",
+        "2D",
+        "3D",
+        "Cube",
+    };
+    auto lambda_sampler_add_code = [&](const string& view) {
+        string sampler_wrapper =
+            "sampler" + view + " USE_SAMPLER_" + view + "(sampler" + view + " inSampler){//generated\n"
+            "    return inSampler;\n"
+            "}\n";
+
+        if (is_bindless_supported) {
+            sampler_wrapper +=
+                "sampler" + view + " USE_SAMPLER_" + view + "(uint64_t inHandle){//generated\n"
+                "    return sampler" + view + "(inHandle);\n"
+                "}\n";
+        }
+        ShaderHelper::insertStringAtLine(code, sampler_wrapper, 1);
+    };
+    auto lambda_sampler_add_code_type = [&](const string& view) {
+        if (is_bindless_supported) {
+            boost::replace_all(code, "SAMPLER_TYPE_" + view, "sampler" + view);
+        }else{
+            boost::replace_all(code, "SAMPLER_TYPE_" + view, "sampler" + view);
+        }
+    };
+
+    if (ShaderHelper::sfind(code, "USE_SAMPLER_")) {
+        for (const auto& type : types) {
+            if (ShaderHelper::sfind(code, "USE_SAMPLER_" + type) && !ShaderHelper::sfind(code, "sampler" + type + " USE_SAMPLER_" + type)) {
+                lambda_sampler_add_code(type);
+            }
+        }
+    }
+    if (ShaderHelper::sfind(code, "SAMPLER_TYPE_")) {
+        for (const auto& type : types) {
+            if (ShaderHelper::sfind(code, "SAMPLER_TYPE_" + type)) {
+                lambda_sampler_add_code_type(type);
+            }
         }
     }
 #pragma endregion
@@ -184,7 +232,7 @@ void opengl::glsl::Common::convert(string& code, const unsigned int& versionNumb
     ShaderHelper::sfind(code, "CameraPosition") || ShaderHelper::sfind(code, "CameraInvView") || ShaderHelper::sfind(code, "CameraInvProj") ||
     ShaderHelper::sfind(code, "CameraInvViewProj") || ShaderHelper::sfind(code, "CameraNear") || ShaderHelper::sfind(code, "CameraFar") ||
     ShaderHelper::sfind(code, "CameraInfo1") || ShaderHelper::sfind(code, "CameraInfo2") || ShaderHelper::sfind(code, "CameraViewVector") ||
-    ShaderHelper::sfind(code, "CameraRealPosition") || ShaderHelper::sfind(code, "CameraInfo3")) {
+    ShaderHelper::sfind(code, "CameraRealPosition") || ShaderHelper::sfind(code, "CameraInfo3") || ShaderHelper::sfind(code, "ScreenInfo")) {
         string uboCameraString;
         if (versionNumber >= 140) { //UBO only supported at 140 or above
             if (!ShaderHelper::sfind(code, "layout (std140) uniform Camera //generated")) {
@@ -200,6 +248,7 @@ void opengl::glsl::Common::convert(string& code, const unsigned int& versionNumb
                     "    vec4 CameraInfo1;\n"
                     "    vec4 CameraInfo2;\n"
                     "    vec4 CameraInfo3;\n"
+                    "    vec4 ScreenInfo;\n"
                     "};\n"
                     "vec3 CameraPosition = CameraInfo1.xyz;\n"
                     "vec3 CameraViewVector = CameraInfo2.xyz;\n"
@@ -221,6 +270,7 @@ void opengl::glsl::Common::convert(string& code, const unsigned int& versionNumb
                     "uniform vec4 CameraInfo1;\n"
                     "uniform vec4 CameraInfo2;\n"
                     "uniform vec4 CameraInfo3;\n"
+                    "uniform vec4 ScreenInfo;\n"
                     "vec3 CameraPosition = CameraInfo1.xyz;\n"
                     "vec3 CameraViewVector = CameraInfo2.xyz;\n"
                     "vec3 CameraRealPosition = CameraInfo3.xyz;\n"

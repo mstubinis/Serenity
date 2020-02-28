@@ -14,12 +14,8 @@
 using namespace Engine;
 using namespace std;
 
-priv::MeshCollisionFactory::MeshCollisionFactory(Mesh& _mesh) :m_Mesh(_mesh) {
-    auto& data            = *_mesh.m_VertexData;
-    m_ConvexHullData      = nullptr;
-    m_ConvesHullShape     = nullptr;
-    m_TriangleStaticData  = nullptr;
-    m_TriangleStaticShape = nullptr;
+priv::MeshCollisionFactory::MeshCollisionFactory(Mesh& mesh) : m_Mesh(mesh) {
+    auto& data            = *mesh.m_VertexData;
     _initConvexData(data);
     _initTriangleData(data);
 }
@@ -82,8 +78,9 @@ btMultiSphereShape* priv::MeshCollisionFactory::buildSphereShape(ModelInstance* 
     btMultiSphereShape* sphere = new btMultiSphereShape(&v, &rad, 1);
     sphere->setMargin(static_cast<btScalar>(0.001));
     sphere->recalcLocalAabb();
-    if(isCompoundChild)
+    if (isCompoundChild) {
         sphere->setUserPointer(modelInstance);
+    }
     return sphere;
 }
 btBoxShape* priv::MeshCollisionFactory::buildBoxShape(ModelInstance* modelInstance, const bool isCompoundChild) {

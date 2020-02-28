@@ -145,15 +145,15 @@ void SimplexNoise::internalInitFromSeed(const unsigned long long& seed) {
         source[r] = source[i];
     }
 }
-double SimplexNoise::internalExtrapolate(const int& xsb, const int& ysb, const double& dx, const double& dy) {
+double SimplexNoise::internalExtrapolate(const int xsb, const int ysb, const double& dx, const double& dy) {
     const int index = m_Perm[(m_Perm[xsb & 0xFF] + ysb) & 0xFF] & 0x0E;
     return m_Grad2[index].x * dx + m_Grad2[index].y * dy;
 }
-double SimplexNoise::internalExtrapolate(const int& xsb, const int& ysb, const int& zsb, const double& dx, const double& dy, const double& dz) {
+double SimplexNoise::internalExtrapolate(const int xsb, const int ysb, const int zsb, const double& dx, const double& dy, const double& dz) {
     const int index = m_PermGradIndex3D[(m_Perm[(m_Perm[xsb & 0xFF] + ysb) & 0xFF] + zsb) & 0xFF];
     return m_Grad3[index].x * dx + m_Grad3[index].y * dy + m_Grad3[index].z * dz;
 }
-double SimplexNoise::internalExtrapolate(const int& xsb, const int& ysb, const int& zsb, const int& wsb, const double& dx, const double& dy, const double& dz, const double& dw) {
+double SimplexNoise::internalExtrapolate(const int xsb, const int ysb, const int zsb, const int wsb, const double& dx, const double& dy, const double& dz, const double& dw) {
     const int index = m_Perm[(m_Perm[(m_Perm[(m_Perm[xsb & 0xFF] + ysb) & 0xFF] + zsb) & 0xFF] + wsb) & 0xFF] & 0xFC;
     return m_Grad4[index].x * dx + m_Grad4[index].y * dy + m_Grad4[index].z * dz + m_Grad4[index].w * dw;
 }

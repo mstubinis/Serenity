@@ -5,7 +5,7 @@
 using namespace Engine;
 using namespace std;
 
-SpotLight::SpotLight(const glm::vec3 pos, const glm::vec3 direction, const float cutoff, const float outerCutoff, Scene* scene) : PointLight(LightType::Spot, pos, scene) {
+SpotLight::SpotLight(const glm_vec3& pos, const glm::vec3& direction, const float cutoff, const float outerCutoff, Scene* scene) : PointLight(LightType::Spot, pos, scene) {
     setCutoff(cutoff);
     setCutoffOuter(outerCutoff);
 

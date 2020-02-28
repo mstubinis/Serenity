@@ -24,10 +24,11 @@ namespace Engine::priv {
         friend struct Engine::priv::InternalMeshPublicInterface;
         friend class  Engine::priv::ModelInstanceAnimation;
         private:
-            BoneNode*                                       m_RootNode;
+            BoneNode*                                       m_RootNode = nullptr;
             unsigned int                                    m_NumBones;
             std::vector<BoneInfo>                           m_BoneInfo;
-            std::vector<glm::vec4>                          m_BoneIDs, m_BoneWeights;
+            std::vector<glm::vec4>                          m_BoneIDs;
+            std::vector<glm::vec4>                          m_BoneWeights;
             std::unordered_map<std::string, unsigned int>   m_BoneMapping; // maps a bone name to its index
             std::unordered_map<std::string, AnimationData>  m_AnimationData;
             glm::mat4                                       m_GlobalInverseTransform;
@@ -41,7 +42,7 @@ namespace Engine::priv {
             MeshSkeleton();
             ~MeshSkeleton();
 
-            const unsigned int& numBones() const;
+            const unsigned int numBones() const;
     };
 };
 

@@ -17,23 +17,19 @@ class  btScaledBvhTriangleMeshShape;
 class  btGImpactMeshShape;
 
 namespace Engine::priv {
-    class MeshCollisionFactory final {
+    class MeshCollisionFactory final : public Engine::NonCopyable, public Engine::NonMoveable {
         private:
             Mesh&                          m_Mesh;
-            btShapeHull*                   m_ConvexHullData;
-            btConvexHullShape*             m_ConvesHullShape;
-            btTriangleMesh*                m_TriangleStaticData;
-            btBvhTriangleMeshShape*        m_TriangleStaticShape;
+            btShapeHull*                   m_ConvexHullData      = nullptr;
+            btConvexHullShape*             m_ConvesHullShape     = nullptr;
+            btTriangleMesh*                m_TriangleStaticData  = nullptr;
+            btBvhTriangleMeshShape*        m_TriangleStaticShape = nullptr;
 
             void  _initConvexData(VertexData& data);
             void  _initTriangleData(VertexData& data);
         public:
-            MeshCollisionFactory(Mesh& _mesh);
+            MeshCollisionFactory(Mesh& mesh);
             ~MeshCollisionFactory();
-            MeshCollisionFactory(const MeshCollisionFactory&)                      = delete;
-            MeshCollisionFactory& operator=(const MeshCollisionFactory&)           = delete;
-            MeshCollisionFactory(MeshCollisionFactory&& other) noexcept            = delete;
-            MeshCollisionFactory& operator=(MeshCollisionFactory&& other) noexcept = delete;
 
             btMultiSphereShape*            buildSphereShape(ModelInstance* modelInstance, const bool isCompoundChild = false);
             btBoxShape*                    buildBoxShape(ModelInstance* modelInstance, const bool isCompoundChild = false);

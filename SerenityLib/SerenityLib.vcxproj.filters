@@ -384,9 +384,6 @@
     <ClInclude Include="Engine\src\core\engine\renderer\SMAA_LUT.h">
       <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\BindableResource.h">
-      <Filter>Header Files\Engine\Core</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\Constraint.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
@@ -738,6 +735,9 @@
     <ClInclude Include="Engine\src\core\engine\containers\SparseSet.h">
       <Filter>Header Files\Engine\Core\Containers</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\opengl\OpenGL.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -850,9 +850,6 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\Constraint.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\BindableResource.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\ecs\EntityDataRequest.cpp">
       <Filter>Source Files\Engine\Core\ECS</Filter>
@@ -1126,6 +1123,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\mesh\AnimationData.cpp">
       <Filter>Source Files\Engine\Core\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\opengl\OpenGL.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\opengl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

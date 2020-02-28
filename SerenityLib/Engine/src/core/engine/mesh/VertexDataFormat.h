@@ -14,9 +14,9 @@ struct VertexData;
 //information about a vertex structure ( a list of all its attributes and the way the attributes are weaved into memory)
 struct VertexDataFormat {
     std::vector<VertexAttributeInfo>    attributes;
-    VertexAttributeLayout::Type         interleavingType;
+    VertexAttributeLayout::Type         interleavingType = VertexAttributeLayout::Interleaved;
 
-    VertexDataFormat();
+    VertexDataFormat() = default;
     ~VertexDataFormat()                                            = default;
     VertexDataFormat(const VertexDataFormat& other)                = delete;
     VertexDataFormat& operator=(const VertexDataFormat& other)     = delete;

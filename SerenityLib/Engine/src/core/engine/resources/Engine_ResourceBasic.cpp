@@ -3,7 +3,7 @@
 
 using namespace std;
 
-EngineResource::EngineResource(const ResourceType::Type& type, const string& name){
+EngineResource::EngineResource(const ResourceType::Type type, const string& name){
     m_Name         = name;
     m_IsLoaded     = false;
     m_UsageCount   = 0;

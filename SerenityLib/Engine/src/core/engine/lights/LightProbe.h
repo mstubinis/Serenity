@@ -23,15 +23,15 @@ class LightProbe{
     public:
         LightProbe(
             const ProbeType::Type type,
-            const glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
+            const glm::vec3& position = glm::vec3(0.0f, 0.0f, 0.0f),
             Scene* scene = nullptr
         );
         virtual ~LightProbe();
 
-        void setProbeType(const ProbeType::Type& type);
-        const LightProbe::ProbeType::Type& getProbeType() const;
+        void setProbeType(const ProbeType::Type type);
+        const LightProbe::ProbeType::Type getProbeType() const;
 
-        void update(const float& dt);
+        void update(const float dt);
 
         void activate(const bool = true);
         void deactivate();

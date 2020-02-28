@@ -19,7 +19,7 @@ Handle::operator std::uint32_t() const {
     return type << 27 | version << 12 | index; 
 }
 const bool Handle::null() const { 
-    return (type == ResourceType::Empty || (index == 0 && version == 0 && type == 0)) ? true : false; 
+    return (type == ResourceType::Empty || index == 0); 
 }
 const EngineResource* Handle::get() const {
     return (null()) ? nullptr : priv::Core::m_Engine->m_ResourceManager.m_Resources.getAsFast<EngineResource>(index);

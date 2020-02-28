@@ -23,9 +23,9 @@ namespace Engine{
                 std::vector<short>   m_Perm;
                 std::vector<short>   m_PermGradIndex3D;
 
-                double internalExtrapolate(const int& xsb, const int& ysb, const double& dx, const double& dy);
-                double internalExtrapolate(const int& xsb, const int& ysb, const int& zsb, const double& dx, const double& dy, const double& dz);
-                double internalExtrapolate(const int& xsb, const int& ysb, const int& zsb, const int& wsb, const double& dx, const double& dy, const double& dz, const double& dw);
+                double internalExtrapolate(const int xsb, const int ysb, const double& dx, const double& dy);
+                double internalExtrapolate(const int xsb, const int ysb, const int zsb, const double& dx, const double& dy, const double& dz);
+                double internalExtrapolate(const int xsb, const int ysb, const int zsb, const int wsb, const double& dx, const double& dy, const double& dz, const double& dw);
 
                 void internalInitFromSeed(const unsigned long long& seed);
             public:

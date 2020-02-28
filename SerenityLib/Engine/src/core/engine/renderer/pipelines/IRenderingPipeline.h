@@ -92,7 +92,7 @@ namespace Engine::priv {
 
             virtual const bool unbindShaderProgram() = 0;
             virtual const bool unbindMaterial() = 0;
-            virtual const bool unbindMesh() = 0;
+            virtual const bool unbindMesh(Mesh* mesh) = 0;
 
             virtual void generatePBRData(Texture& texture, const unsigned int convoludeSize, const unsigned int prefilterSize) = 0;
 
@@ -105,18 +105,93 @@ namespace Engine::priv {
             virtual void renderMesh(const Mesh& mesh, const unsigned int mode) = 0;
             virtual void renderDecal(ModelInstance& decalModelInstance) = 0;
 
-            virtual void renderParticle(const Particle& particle) = 0;
+            virtual void renderParticle(const Particle& particle, const Camera& camera) = 0;
 
-            virtual void render2DText(const std::string& text, const Font& font, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const TextAlignment::Type& textAlignment, const glm::vec4& scissor = glm::vec4(-1.0f)) = 0;
-            virtual void render2DTexture(const Texture* texture, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const Alignment::Type& align, const glm::vec4& scissor = glm::vec4(-1.0f)) = 0;
-            virtual void render2DTriangle(const glm::vec2& pos, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& align, const glm::vec4& scissor = glm::vec4(-1.0f)) = 0;
+            virtual void render2DText(
+                const std::string& text, 
+                const Font& font, 
+                const glm::vec2& position, 
+                const glm::vec4& color, 
+                const float angle, 
+                const glm::vec2& scale, 
+                const float depth, 
+                const TextAlignment::Type textAlignment, 
+                const glm::vec4& scissor = glm::vec4(-1.0f)
+            ) = 0;
+            virtual void render2DTexture(
+                const Texture* texture, 
+                const glm::vec2& position, 
+                const glm::vec4& color, 
+                const float angle, 
+                const glm::vec2& scale, 
+                const float depth, 
+                const Alignment::Type align, 
+                const glm::vec4& scissor = glm::vec4(-1.0f)
+            ) = 0;
+            virtual void render2DTriangle(
+                const glm::vec2& pos, 
+                const glm::vec4& color, 
+                const float angle, 
+                const float width, 
+                const float height, 
+                const float depth, 
+                const Alignment::Type align, 
+                const glm::vec4& scissor = glm::vec4(-1.0f)
+            ) = 0;
 
 
-            virtual void renderTexture(const Texture& tex, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const Alignment::Type& align, const glm::vec4& scissor) = 0;
-            virtual void renderText(const std::string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const TextAlignment::Type& align, const glm::vec4& scissor) = 0;
-            virtual void renderBorder(const float borderSize, const glm::vec2& pos, const glm::vec4& col, const float w, const float h, const float angle, const float depth, const Alignment::Type& align, const glm::vec4& scissor) = 0;
-            virtual void renderRectangle(const glm::vec2& pos, const glm::vec4& col, const float width, const float height, const float angle, const float depth, const Alignment::Type& align, const glm::vec4& scissor) = 0;
-            virtual void renderTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type& align, const glm::vec4& scissor) = 0;
+            virtual void renderTexture(
+                const Texture& tex, 
+                const glm::vec2& p, 
+                const glm::vec4& c, 
+                const float a, 
+                const glm::vec2& s, 
+                const float d, 
+                const Alignment::Type align, 
+                const glm::vec4& scissor
+            ) = 0;
+            virtual void renderText(
+                const std::string& t, 
+                const Font& fnt, 
+                const glm::vec2& p, 
+                const glm::vec4& c, 
+                const float a, 
+                const glm::vec2& s, 
+                const float d, 
+                const TextAlignment::Type align, 
+                const glm::vec4& scissor
+            ) = 0;
+            virtual void renderBorder(
+                const float borderSize, 
+                const glm::vec2& pos, 
+                const glm::vec4& col, 
+                const float w, 
+                const float h, 
+                const float angle, 
+                const float depth, 
+                const Alignment::Type align, 
+                const glm::vec4& scissor
+            ) = 0;
+            virtual void renderRectangle(
+                const glm::vec2& pos, 
+                const glm::vec4& col, 
+                const float width, 
+                const float height, 
+                const float angle, 
+                const float depth, 
+                const Alignment::Type align, 
+                const glm::vec4& scissor
+            ) = 0;
+            virtual void renderTriangle(
+                const glm::vec2& position, 
+                const glm::vec4& color, 
+                const float angle, 
+                const float width, 
+                const float height, 
+                const float depth, 
+                const Alignment::Type align, 
+                const glm::vec4& scissor
+            ) = 0;
 
             virtual void renderFullscreenTriangle() = 0;
             virtual void renderFullscreenQuad() = 0;

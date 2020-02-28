@@ -35,35 +35,35 @@ namespace Engine::priv {
 
             void cleanup();
 
-            void onEventKeyPressed(const unsigned int& key);
-            void onEventKeyReleased(const unsigned int& key);
-            void onEventMouseButtonPressed(const unsigned int& mouseButton);
-            void onEventMouseButtonReleased(const unsigned int& mouseButton);
-            void onResetEvents(const float& dt);
+            void onEventKeyPressed(const unsigned int key);
+            void onEventKeyReleased(const unsigned int key);
+            void onEventMouseButtonPressed(const unsigned int mouseButton);
+            void onEventMouseButtonReleased(const unsigned int mouseButton);
+            void onResetEvents(const float dt);
         };
 };
 namespace Engine::events {
-    void dispatchEvent(const unsigned int& eventType);
+    void dispatchEvent(const unsigned int eventType);
 };
 namespace Engine{
     const unsigned int getNumPressedKeys();
     const std::unordered_set<unsigned int>& getPressedKeys();
     const std::unordered_set<unsigned int>& getPressedMouseButtons();
 
-    const bool isKeyDown(const KeyboardKey::Key& key);
-    const bool isKeyDownOnce(const KeyboardKey::Key& key);
-    const bool isKeyDownOnce(const KeyboardKey::Key& first, const KeyboardKey::Key& second);
-    const bool isKeyDownOnce(const KeyboardKey::Key& first, const KeyboardKey::Key& second, const KeyboardKey::Key& third);
+    const bool isKeyDown(const KeyboardKey::Key key);
+    const bool isKeyDownOnce(const KeyboardKey::Key key);
+    const bool isKeyDownOnce(const KeyboardKey::Key first, const KeyboardKey::Key second);
+    const bool isKeyDownOnce(const KeyboardKey::Key first, const KeyboardKey::Key second, const KeyboardKey::Key third);
     const bool isKeyDownOnce();
 
-    const bool isKeyUp(const KeyboardKey::Key& key);
+    const bool isKeyUp(const KeyboardKey::Key key);
 
 
     const KeyboardKey::Key getPressedKey();
     const MouseButton::Button getPressedButton();
 
-    const bool isMouseButtonDown(const MouseButton::Button& mouseButton);
-    const bool isMouseButtonDownOnce(const MouseButton::Button& mouseButton);
+    const bool isMouseButtonDown(const MouseButton::Button mouseButton);
+    const bool isMouseButtonDownOnce(const MouseButton::Button mouseButton);
 
     const glm::vec2& getMouseDifference();
     const glm::vec2& getMousePositionPrevious();
