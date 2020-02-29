@@ -5,13 +5,14 @@
 #include <string>
 #include <core/engine/renderer/RendererIncludes.h>
 #include <core/engine/renderer/postprocess/HDR.h>
+#include <core/engine/renderer/postprocess/SSAO.h>
 
 struct EngineOptions final {
     AntiAliasingAlgorithm::Algorithm   aa_algorithm;
     char**                             argv;
     int                                argc;
-    bool                               ssao_enabled;
-    unsigned int                       hdr;
+    unsigned char                      ssao_level;
+    unsigned char                      hdr;
 
     int                                window_mode; //0 = normal, 1 = fullscreen, 2 = windowed_fullscreen
 
@@ -29,7 +30,7 @@ struct EngineOptions final {
         icon              = "";
         width             = 1024;
         height            = 768;
-        ssao_enabled      = true;
+        ssao_level        = SSAOLevel::Medium;
         hdr               = HDRAlgorithm::None;
         god_rays_enabled  = true;
         vsync             = true;

@@ -12,12 +12,10 @@ namespace Engine::priv {
 #include <ecs/EntityWrapper.h>
 #include <vector>
 #include <mutex>
-#include <core/engine/math/Numbers.h>
 
 class ParticleEmitter final : public EntityWrapper{
     friend class  Engine::priv::ParticleSystem;
     friend class  Particle;
-    friend struct ParticleData;
     friend struct Engine::priv::InternalScenePublicInterface;
     public:
         glm::vec4                      m_UserData;

@@ -2,7 +2,7 @@
 #ifndef ENGINE_ECS_COMPONENT_MODEL_H
 #define ENGINE_ECS_COMPONENT_MODEL_H
 
-struct Handle;
+class  Handle;
 class  ShaderProgram;
 class  Mesh;
 class  Material;
@@ -20,13 +20,13 @@ namespace Engine::priv {
     };
 };
 
-#include <ecs/ComponentBaseClass.h>
+#include <ecs/Entity.h>
 #include <ecs/ECSSystemConstructorInfo.h>
 #include <core/engine/model/ModelInstance.h>
 
 typedef std::vector<ModelInstance*> ModelInstanceVector;
 
-class ComponentModel: public ComponentBaseClass, public EventObserver {
+class ComponentModel: public EventObserver {
     friend struct Engine::priv::ComponentModel_UpdateFunction;
     friend struct Engine::priv::ComponentModel_EntityAddedToSceneFunction;
     friend struct Engine::priv::ComponentModel_ComponentAddedToEntityFunction;
@@ -36,6 +36,8 @@ class ComponentModel: public ComponentBaseClass, public EventObserver {
     friend struct Engine::priv::ComponentModel_Functions;
     friend class  ComponentCamera;
     private:
+        Entity m_Owner;
+
         ModelInstanceVector          m_ModelInstances;
         float                        m_Radius;
         glm::vec3                    m_RadiusBox;
@@ -57,6 +59,8 @@ class ComponentModel: public ComponentBaseClass, public EventObserver {
         ComponentModel& operator=(ComponentModel&& other) noexcept;
 
         ~ComponentModel();
+
+        const Entity& getOwner() const;
 
         void onEvent(const Event& event_) override;
 

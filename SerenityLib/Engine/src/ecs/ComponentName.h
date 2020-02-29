@@ -2,7 +2,7 @@
 #ifndef ENGINE_ECS_COMPONENT_NAME_H_INCLUDE_GUARD
 #define ENGINE_ECS_COMPONENT_NAME_H_INCLUDE_GUARD
 
-#include <ecs/ComponentBaseClass.h>
+#include <ecs/Entity.h>
 #include <ecs/ECSSystemConstructorInfo.h>
 
 namespace Engine::priv {
@@ -13,7 +13,7 @@ namespace Engine::priv {
     struct ComponentName_SceneEnteredFunction;
     struct ComponentName_SceneLeftFunction;
 };
-class ComponentName : public ComponentBaseClass {
+class ComponentName {
     friend struct Engine::priv::ComponentName_UpdateFunction;
     friend struct Engine::priv::ComponentName_EntityAddedToSceneFunction;
     friend struct Engine::priv::ComponentName_ComponentAddedToEntityFunction;
@@ -21,6 +21,7 @@ class ComponentName : public ComponentBaseClass {
     friend struct Engine::priv::ComponentName_SceneEnteredFunction;
     friend struct Engine::priv::ComponentName_SceneLeftFunction;
     private:
+        Entity m_Owner;
         std::string m_Data;
     public:
         ComponentName(const Entity& entity);

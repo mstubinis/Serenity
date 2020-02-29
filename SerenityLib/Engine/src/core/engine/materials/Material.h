@@ -118,8 +118,8 @@ class Material final : public EngineResource{
         const unsigned char ao() const;
         const unsigned char alpha() const;
         
-        void setF0Color(const glm::vec3& f0Color);
-        void setF0Color(const float r, const float g, const float b);
+        void setF0Color(const Engine::color_vector_4& f0Color);
+        void setF0Color(const unsigned char r, const unsigned char g, const unsigned char b);
 
         void setMaterialPhysics(const MaterialPhysics::Physics materialPhysics);
         void setShadeless(const bool shadeless);

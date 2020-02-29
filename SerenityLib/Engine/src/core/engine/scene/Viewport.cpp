@@ -7,20 +7,18 @@
 using namespace Engine;
 using namespace std;
 
-Viewport::Viewport(const Scene& scene, const Camera& camera){
-    const auto& winSize = Resources::getWindowSize();
-
+Viewport::Viewport() {
     m_RenderFlags = ViewportRenderingFlag::_ALL;
-    m_Scene       = &const_cast<Scene&>(scene);
-    m_ID          = 0;
-    
-    setCamera(camera);
-    setViewportDimensions(0.0f, 0.0f, static_cast<float>(winSize.x), static_cast<float>(winSize.y));
     activate();
     setAspectRatioSynced(true);
-    setDepthMaskValue(50.0f);
     activateDepthMask(false);
-    setBackgroundColor(0.0f, 0.0f, 0.0f, 1.0f);
+}
+Viewport::Viewport(const Scene& scene, const Camera& camera) : Viewport() {
+    const auto& winSize = Resources::getWindowSize();
+    m_Scene             = &const_cast<Scene&>(scene);
+
+    setCamera(camera);
+    setViewportDimensions(0.0f, 0.0f, static_cast<float>(winSize.x), static_cast<float>(winSize.y));
 }
 Viewport::~Viewport() {
 }
@@ -111,13 +109,8 @@ void Viewport::activate(const bool active) {
 const bool Viewport::isActive() const {
     return m_StateFlags.has(StateFlags::Active);
 }
-bool Viewport::setCamera(const Camera& camera) {
-    auto& scene_cameras = priv::InternalScenePublicInterface::GetCameras(*m_Scene);
-    if (isInVector(scene_cameras, &camera)) {
-        m_Camera = &const_cast<Camera&>(camera);
-        return true;
-    }
-    return false;
+void Viewport::setCamera(const Camera& camera) {
+    m_Camera = &const_cast<Camera&>(camera);
 }
 void Viewport::setViewportDimensions(const float x, const float y, const float width, const float height) {
     m_Viewport_Dimensions.x = x;

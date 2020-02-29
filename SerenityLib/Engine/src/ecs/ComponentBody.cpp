@@ -102,14 +102,16 @@ ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::N
 
 #pragma region Component
 
-ComponentBody::ComponentBody(const Entity& entity) : ComponentBaseClass(entity) {
+ComponentBody::ComponentBody(const Entity& entity) {
+    m_Owner = entity;
     m_Physics                 = false;
     data.p                    = nullptr;
     data.n                    = NEW NormalData();
     auto& normalData          = *data.n;
     Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
 }
-ComponentBody::ComponentBody(const Entity& entity, const CollisionType::Type collisionType) : ComponentBaseClass(entity) {
+ComponentBody::ComponentBody(const Entity& entity, const CollisionType::Type collisionType) {
+    m_Owner = entity;
     m_Physics               = true;
     data.n                  = nullptr;
     data.p                  = NEW PhysicsData();
@@ -133,7 +135,7 @@ ComponentBody::ComponentBody(ComponentBody&& other) noexcept {
     m_Forward          = std::move(other.m_Forward);
     m_Right            = std::move(other.m_Right);
     m_Up               = std::move(other.m_Up);
-    swap(m_Owner,other.m_Owner);
+    m_Owner            = std::move(other.m_Owner);
     m_CollisionFunctor.swap(other.m_CollisionFunctor);
     m_UserPointer      = std::exchange(other.m_UserPointer, nullptr);
     m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
@@ -153,7 +155,7 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
         m_Forward          = std::move(other.m_Forward);
         m_Right            = std::move(other.m_Right);
         m_Up               = std::move(other.m_Up);
-        swap(m_Owner,other.m_Owner);
+        m_Owner            = std::move(other.m_Owner);
         m_CollisionFunctor.swap(other.m_CollisionFunctor);
         m_UserPointer      = std::exchange(other.m_UserPointer, nullptr);
         m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
@@ -169,7 +171,9 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
     }
     return *this;
 }
-
+const Entity& ComponentBody::getOwner() const {
+    return m_Owner;
+}
 void ComponentBody::onEvent(const Event& _event) {
 
 }

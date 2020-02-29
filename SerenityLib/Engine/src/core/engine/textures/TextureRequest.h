@@ -77,15 +77,10 @@ struct TextureRequestFromMemory final {
 };
 
 namespace Engine::priv {
-    struct InternalTextureRequestPublicInterface final {
+    struct TextureRequestStaticImpl final {
         friend class  Texture;
         static void Request(TextureRequest&);
-        static void LoadGPU(TextureRequest&);
-        static void LoadCPU(TextureRequest&);
-
         static void RequestMem(TextureRequestFromMemory&);
-        static void LoadGPUMem(TextureRequestFromMemory&);
-        static void LoadCPUMem(TextureRequestFromMemory&);
     };
 };
 

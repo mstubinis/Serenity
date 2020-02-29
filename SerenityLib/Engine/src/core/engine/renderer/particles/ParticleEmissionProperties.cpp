@@ -23,16 +23,16 @@ struct DefaultDepthFunctor final { float operator()(ParticleEmissionProperties& 
 }};
 
 
-struct DefaultInitialVelocityFunctor final { glm::vec3 operator()(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle, ParticleData& data) const {
+struct DefaultInitialVelocityFunctor final { glm::vec3 operator()(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle) const {
     const auto random_amount_x = (static_cast<float>((rand() % 101) - 50) / 50.0f); //0.0f to 1.0f
     const auto random_amount_y = (static_cast<float>((rand() % 101)     ) / 100.0f); //0.0f to 1.0f
     const auto random_amount_z = (static_cast<float>((rand() % 101) - 50) / 50.0f); //0.0f to 1.0f
     return glm::vec3(random_amount_x * 0.008f, random_amount_y * 0.05f, random_amount_z * 0.008f);
 }};
-struct DefaultInitialScaleFunctor final { glm::vec2 operator()(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle, ParticleData& data) const {
+struct DefaultInitialScaleFunctor final { glm::vec2 operator()(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle) const {
     return glm::vec2(0.3f);
 }};
-struct DefaultInitialAngularVelocityFunctor final { float operator()(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle, ParticleData& data) const {
+struct DefaultInitialAngularVelocityFunctor final { float operator()(ParticleEmissionProperties& properties, ParticleEmitter& emitter, Particle& particle) const {
     return 0.0f;
 }};
 

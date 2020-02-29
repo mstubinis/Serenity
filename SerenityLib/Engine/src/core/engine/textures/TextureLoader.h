@@ -20,17 +20,17 @@ namespace Engine::priv {
         static const bool IsCompressedType(const ImageInternalFormat::Format);
 
         static void GenerateMipmapsOpenGL(Texture& texture, const unsigned int addressIndex = 0);
-        static void WithdrawPixelsFromOpenGLMemory(Texture& texture, const uint imageIndex = 0, const uint mipmapLevel = 0);
+        static void WithdrawPixelsFromOpenGLMemory(Texture& texture, const unsigned int imageIndex = 0, const unsigned int mipmapLevel = 0);
         static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat, const ImageInternalFormat::Format inInternalFormat);
 
         static void GeneratePBRData(Texture&, const unsigned int convoludeTextureSize, const unsigned int preEnvFilterSize);
-        static void ImportIntoOpengl(Texture&, const Engine::priv::ImageMipmap& mipmap, const GLuint openGLType);
-        static void InitCommon(Texture&, const GLuint openglTextureType, const bool toBeMipmapped);
+        static void ImportIntoOpengl(Texture&, const Engine::priv::ImageMipmap& mipmap, const unsigned int openGLType);
+        static void InitCommon(Texture&, const unsigned int openglTextureType, const bool toBeMipmapped);
 
 
-        static void InitFramebuffer(Texture&, const uint w, const uint h, const ImagePixelType::Type pxlType, const ImagePixelFormat::Format pxlFormat, const ImageInternalFormat::Format _internal, const float divisor);
-        static void InitFromMemory(Texture&, const sf::Image& sfImage, const std::string& name, const bool genMipMaps, const ImageInternalFormat::Format _internal, const GLuint openglTextureType);
-        static void InitFromFile(Texture&, const std::string& filename, const bool genMipMaps, const ImageInternalFormat::Format _internal, const GLuint openglTextureType);
+        static void InitFramebuffer(Texture&, const unsigned int w, const unsigned int h, const ImagePixelType::Type pxlType, const ImagePixelFormat::Format pxlFormat, const ImageInternalFormat::Format _internal, const float divisor);
+        static void InitFromMemory(Texture&, const sf::Image& sfImage, const std::string& name, const bool genMipMaps, const ImageInternalFormat::Format _internal, const unsigned int openglTextureType);
+        static void InitFromFile(Texture&, const std::string& filename, const bool genMipMaps, const ImageInternalFormat::Format _internal, const unsigned int openglTextureType);
         static void InitFromFilesCubemap(Texture&, const std::string files[], const std::string& name, const bool genMipMaps, const ImageInternalFormat::Format _internal);
     };
     struct InternalTexturePublicInterface final {
@@ -41,7 +41,7 @@ namespace Engine::priv {
         static void Load(Texture&);
         static void Unload(Texture&);
 
-        static void Resize(Texture& texture, Engine::priv::FramebufferObject&, const uint width, const uint height);
+        static void Resize(Texture& texture, Engine::priv::FramebufferObject&, const unsigned int width, const unsigned int height);
     };
 };
 

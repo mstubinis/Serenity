@@ -10,7 +10,6 @@ class  ComponentBody;
 class  btHeightfieldTerrainShape;
 class  btCompoundShape;
 
-#include <core/engine/math/Numbers.h>
 #include <core/engine/physics/PhysicsIncludes.h>
 #include <core/engine/events/Engine_EventObject.h>
 #include <LinearMath/btVector3.h>
@@ -31,9 +30,9 @@ class Collision final: public EventObserver {
         std::vector<Mesh*>      m_DeferredMeshes;
         std::function<void()>   m_DeferredLoading;
 
-        CollisionType::Type     m_Type;
-        btVector3               m_BtInertia;
-        btCollisionShape*       m_BtShape;
+        CollisionType::Type     m_Type              = CollisionType::None;
+        btVector3               m_BtInertia         = btVector3(0.0f, 0.0f, 0.0f);
+        btCollisionShape*       m_BtShape           = nullptr;
 
         void _baseInit(const CollisionType::Type type, const float mass);
 

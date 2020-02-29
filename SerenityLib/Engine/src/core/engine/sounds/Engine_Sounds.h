@@ -5,7 +5,7 @@
 class  SoundQueue;
 class  SoundData;
 class  SoundBaseClass;
-struct Handle;
+class  Handle;
 
 #include <stack>
 #include <vector>

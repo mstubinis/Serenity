@@ -18,8 +18,10 @@ class Font;
 class Texture;
 class Particle;
 class ModelInstance;
+class LightProbe;
 namespace Engine::priv {
     class Renderer;
+    class ParticleSystem;
 };
 #include <string>
 #include <core/engine/fonts/FontIncludes.h>
@@ -27,6 +29,7 @@ namespace Engine::priv {
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#include <mutex>
 
 namespace Engine::priv {
     class IRenderingPipeline {
@@ -104,7 +107,9 @@ namespace Engine::priv {
             virtual void renderRodLight(const Camera& camera, const RodLight& rodLight) = 0;
             virtual void renderMesh(const Mesh& mesh, const unsigned int mode) = 0;
             virtual void renderDecal(ModelInstance& decalModelInstance) = 0;
+            virtual void renderLightProbe(LightProbe& lightProbe) = 0;
 
+            virtual void renderParticles(ParticleSystem& particleSystem, const Camera& camera, ShaderProgram& program, std::mutex& mutex) = 0;
             virtual void renderParticle(const Particle& particle, const Camera& camera) = 0;
 
             virtual void render2DText(

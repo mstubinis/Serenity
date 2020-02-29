@@ -2,19 +2,10 @@
 #ifndef ENGINE_UTILS_H
 #define ENGINE_UTILS_H
 
-#include <core/engine/math/Numbers.h>
 #include <vector>
 #include <string>
 #include <cstdint>
 #include <algorithm>
-
-typedef std::uint32_t   uint;
-
-typedef unsigned char   uchar;
-typedef unsigned short  ushort;
-
-typedef std::uint64_t   uint64;
-typedef std::uint32_t   uint32;
 
 template <typename Stream> void readUint32tBigEndian(std::uint32_t& out, Stream& stream) {
     std::uint8_t buf[4];

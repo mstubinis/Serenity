@@ -108,10 +108,10 @@ void EngineCore::init(const EngineOptions& options) {
     Scene& scene = *m_ResourceManager.m_CurrentScene;
     if (!scene.getActiveCamera()) {
         Camera* default_camera = NEW Camera(60, static_cast<float>(options.width) / static_cast<float>(options.height), 0.01f, 1000.0f, &scene);
-        scene.setActiveCamera(*default_camera);
+        scene.addCamera(*default_camera);
     }
 
-    Engine::Renderer::ssao::enable(options.ssao_enabled);
+    Engine::Renderer::ssao::setLevel(static_cast<SSAOLevel::Level>(options.ssao_level));
     Engine::Renderer::godRays::enable(options.god_rays_enabled);
     Engine::Renderer::hdr::setAlgorithm(static_cast<HDRAlgorithm::Algorithm>(options.hdr));
     Engine::Renderer::fog::enable(options.fog_enabled);

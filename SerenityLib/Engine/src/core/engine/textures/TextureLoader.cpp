@@ -18,14 +18,22 @@ using namespace Engine::priv;
 using namespace Engine::priv::textures;
 using namespace std;
 
-void TextureLoader::InitCommon(Texture& texture, const GLuint openglTextureType, const bool toBeMipmapped) {
+void TextureLoader::InitCommon(Texture& texture, const unsigned int openglTextureType, const bool toBeMipmapped) {
     texture.m_Mipmapped       = false;
     texture.m_IsToBeMipmapped = toBeMipmapped;
     texture.m_MinFilter       = GL_LINEAR;
     texture.m_Type            = openglTextureType;
 }
 
-void TextureLoader::InitFramebuffer(Texture& texture, const unsigned int w, const unsigned int h, const ImagePixelType::Type pxlType, const ImagePixelFormat::Format pxlFormat, const ImageInternalFormat::Format internal_, const float divisor) {
+void TextureLoader::InitFramebuffer(
+Texture& texture, 
+const unsigned int w, 
+const unsigned int h, 
+const ImagePixelType::Type pxlType, 
+const ImagePixelFormat::Format pxlFormat, 
+const ImageInternalFormat::Format internal_, 
+const float divisor
+) {
     texture.m_TextureType     = TextureType::RenderTarget;
     const unsigned int width  = static_cast<unsigned int>(static_cast<float>(w) * divisor);
     const unsigned int height = static_cast<unsigned int>(static_cast<float>(h) * divisor);
@@ -35,7 +43,14 @@ void TextureLoader::InitFramebuffer(Texture& texture, const unsigned int w, cons
     texture.m_ImagesDatas.emplace_back(width, height, pxlType, pxlFormat, internal_);
     texture.setName("RenderTarget");
 }
-void TextureLoader::InitFromMemory(Texture& texture, const sf::Image& sfImage, const string& name, const bool genMipMaps, const ImageInternalFormat::Format internal_, const GLuint openglTextureType) {
+void TextureLoader::InitFromMemory(
+Texture& texture, 
+const sf::Image& sfImage, 
+const string& name, 
+const bool genMipMaps, 
+const ImageInternalFormat::Format internal_, 
+const unsigned int openglTextureType
+) {
     texture.m_TextureType     = TextureType::Texture2D;
     auto image                = ImageLoadedStructure(sfImage, name);
     image.m_PixelType        = ImagePixelType::UNSIGNED_BYTE;
@@ -47,7 +62,13 @@ void TextureLoader::InitFromMemory(Texture& texture, const sf::Image& sfImage, c
     texture.m_ImagesDatas.push_back(std::move(image));
     texture.setName(name);
 }
-void TextureLoader::InitFromFile(Texture& texture, const string& filename, const bool genMipMaps, const ImageInternalFormat::Format internal_, const GLuint openglTextureType) {
+void TextureLoader::InitFromFile(
+Texture& texture, 
+const string& filename, 
+const bool genMipMaps, 
+const ImageInternalFormat::Format internal_, 
+const unsigned int openglTextureType
+) {
     texture.m_TextureType     = TextureType::Texture2D;
     auto image                = ImageLoadedStructure();
     image.m_Filename          = filename;
@@ -63,7 +84,13 @@ void TextureLoader::InitFromFile(Texture& texture, const string& filename, const
 
     texture.setName(filename);
 }
-void TextureLoader::InitFromFilesCubemap(Texture& texture, const string files[], const string& name, const bool genMipMaps, const ImageInternalFormat::Format _internal) {
+void TextureLoader::InitFromFilesCubemap(
+Texture& texture, 
+const string files[], 
+const string& name, 
+const bool genMipMaps, 
+const ImageInternalFormat::Format _internal
+) {
     texture.m_TextureType = TextureType::CubeMap;
     for (unsigned int j = 0; j < 6; ++j) {
         auto image = ImageLoadedStructure();
@@ -80,7 +107,7 @@ void TextureLoader::InitFromFilesCubemap(Texture& texture, const string files[],
     texture.setName(name);
 }
 
-void TextureLoader::ImportIntoOpengl(Texture& texture, const Engine::priv::ImageMipmap& mipmap, const GLuint openGLType) {
+void TextureLoader::ImportIntoOpengl(Texture& texture, const Engine::priv::ImageMipmap& mipmap, const unsigned int openGLType) {
     auto& imageData = texture.m_ImagesDatas[0];
     if (TextureLoader::IsCompressedType(imageData.m_InternalFormat) && mipmap.compressedSize != 0) {
         glCompressedTexImage2D(openGLType, mipmap.level, imageData.m_InternalFormat, mipmap.width, mipmap.height, 0, mipmap.compressedSize, &mipmap.pixels[0]);
@@ -275,7 +302,7 @@ void TextureLoader::LoadDDSFile(Texture& texture, const string& filename, ImageL
     }
 }
 void TextureLoader::LoadTexture2DIntoOpenGL(Texture& texture) {
-    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress[0]);
+    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddresses[0]);
     for (auto& mipmap : texture.m_ImagesDatas[0].m_Mipmaps) {
         TextureLoader::ImportIntoOpengl(texture, mipmap, texture.m_Type);
         //TextureLoader::WithdrawPixelsFromOpenGLMemory(texture,0,mipmap.level);
@@ -284,7 +311,7 @@ void TextureLoader::LoadTexture2DIntoOpenGL(Texture& texture) {
     texture.setWrapping(TextureWrap::Repeat);
 }
 void TextureLoader::LoadTextureFramebufferIntoOpenGL(Texture& texture) {
-    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress[0]);
+    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddresses[0]);
     const auto& image = texture.m_ImagesDatas[0];
     const uint32_t& w = image.m_Mipmaps[0].width;
     const uint32_t& h = image.m_Mipmaps[0].height;
@@ -293,7 +320,7 @@ void TextureLoader::LoadTextureFramebufferIntoOpenGL(Texture& texture) {
     texture.setWrapping(TextureWrap::ClampToEdge);
 }
 void TextureLoader::LoadTextureCubemapIntoOpenGL(Texture& texture) {
-    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress[0]);
+    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddresses[0]);
     uint32_t imageIndex = 0;
     for (auto& image : texture.m_ImagesDatas) {
         for (auto& mipmap : image.m_Mipmaps) {
@@ -305,7 +332,7 @@ void TextureLoader::LoadTextureCubemapIntoOpenGL(Texture& texture) {
     texture.setFilter(TextureFilter::Linear);
     texture.setWrapping(TextureWrap::ClampToEdge);
 }
-void TextureLoader::WithdrawPixelsFromOpenGLMemory(Texture& texture, const uint imageIndex, const uint mipmapLevel) {
+void TextureLoader::WithdrawPixelsFromOpenGLMemory(Texture& texture, const unsigned int imageIndex, const unsigned int mipmapLevel) {
     auto& image = texture.m_ImagesDatas[imageIndex];
     auto& pxls  = image.m_Mipmaps[mipmapLevel].pixels;
     if (pxls.size() != 0)
@@ -313,7 +340,7 @@ void TextureLoader::WithdrawPixelsFromOpenGLMemory(Texture& texture, const uint 
     const uint32_t& w = image.m_Mipmaps[mipmapLevel].width;
     const uint32_t& h = image.m_Mipmaps[mipmapLevel].height;
     pxls.resize(w * h * 4);
-    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress[0]);
+    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddresses[0]);
     glGetTexImage(texture.m_Type, 0, image.m_PixelFormat, image.m_PixelType, &pxls[0]);
 }
 void TextureLoader::ChoosePixelFormat(ImagePixelFormat::Format& out, const ImageInternalFormat::Format in) {
@@ -444,7 +471,7 @@ void TextureLoader::GenerateMipmapsOpenGL(Texture& texture, const unsigned int a
     //const auto& image = *texture.m_ImagesDatas[0];
     //const uint32_t& _w = image.mipmaps[0].width;
     //const uint32_t& _h = image.mipmaps[0].height;
-    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress[addressIndex]);
+    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddresses[addressIndex]);
     glTexParameteri(texture.m_Type, GL_TEXTURE_BASE_LEVEL, 0);
     if (texture.m_MinFilter == GL_LINEAR) {
         texture.m_MinFilter = GL_LINEAR_MIPMAP_LINEAR;
@@ -481,18 +508,18 @@ void TextureLoader::EnumFilterToGL(unsigned int& gl, const TextureFilter::Filter
 }
 
 void TextureLoader::GeneratePBRData(Texture& texture, const unsigned int convoludeTextureSize, const unsigned int preEnvFilterSize) {
-    if (texture.m_TextureAddress.size() == 1) {
-        texture.m_TextureAddress.push_back(0);
-        Engine::Renderer::genAndBindTexture(texture.m_Type, texture.m_TextureAddress[1]);
+    if (texture.m_TextureAddresses.size() == 1) {
+        texture.m_TextureAddresses.push_back(0U);
+        Engine::Renderer::genAndBindTexture(texture.m_Type, texture.m_TextureAddresses[1]);
         for (unsigned int i = 0; i < 6; ++i) {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, convoludeTextureSize, convoludeTextureSize, 0, GL_RGB, GL_FLOAT, NULL);
         }
         texture.setWrapping(TextureWrap::ClampToEdge);
         texture.setFilter(TextureFilter::Linear);
     }
-    if (texture.m_TextureAddress.size() == 2) {
-        texture.m_TextureAddress.push_back(0);
-        Engine::Renderer::genAndBindTexture(texture.m_Type, texture.m_TextureAddress[2]);
+    if (texture.m_TextureAddresses.size() == 2) {
+        texture.m_TextureAddresses.push_back(0U);
+        Engine::Renderer::genAndBindTexture(texture.m_Type, texture.m_TextureAddresses[2]);
         for (unsigned int i = 0; i < 6; ++i) {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, preEnvFilterSize, preEnvFilterSize, 0, GL_RGB, GL_FLOAT, NULL);
         }
@@ -533,9 +560,9 @@ void InternalTexturePublicInterface::LoadCPU(Texture& texture) {
     }
 }
 void InternalTexturePublicInterface::LoadGPU(Texture& texture) {
-    if (texture.m_TextureAddress.size() == 0)
-        texture.m_TextureAddress.emplace_back(0);
-    Engine::Renderer::genAndBindTexture(texture.m_Type, texture.m_TextureAddress[0]);
+    if (texture.m_TextureAddresses.size() == 0)
+        texture.m_TextureAddresses.emplace_back(0);
+    Engine::Renderer::genAndBindTexture(texture.m_Type, texture.m_TextureAddresses[0]);
     switch (texture.m_TextureType) {
         case TextureType::RenderTarget: {
             TextureLoader::LoadTextureFramebufferIntoOpenGL(texture);
@@ -584,10 +611,10 @@ void InternalTexturePublicInterface::UnloadCPU(Texture& texture) {
     texture.EngineResource::unload();
 }
 void InternalTexturePublicInterface::UnloadGPU(Texture& texture) {
-    for (size_t i = 0; i < texture.m_TextureAddress.size(); ++i) {
-        glDeleteTextures(1, &texture.m_TextureAddress[i]);
+    for (size_t i = 0; i < texture.m_TextureAddresses.size(); ++i) {
+        glDeleteTextures(1, &texture.m_TextureAddresses[i]);
     }
-    vector_clear(texture.m_TextureAddress);
+    vector_clear(texture.m_TextureAddresses);
 }
 void InternalTexturePublicInterface::Load(Texture& texture) {
     if (!texture.isLoaded()) {
@@ -601,13 +628,13 @@ void InternalTexturePublicInterface::Unload(Texture& texture) {
         InternalTexturePublicInterface::UnloadCPU(texture);
     }
 }
-void InternalTexturePublicInterface::Resize(Texture& texture, Engine::priv::FramebufferObject& fbo, const uint width, const uint height) {
+void InternalTexturePublicInterface::Resize(Texture& texture, Engine::priv::FramebufferObject& fbo, const unsigned int width, const unsigned int height) {
     if (texture.m_TextureType != TextureType::RenderTarget) {
         cout << "Error: Non-framebuffer texture cannot be resized. Returning..." << "\n";
         return;
     }
     const float divisor = fbo.divisor();
-    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress[0]);
+    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddresses[0]);
     const uint32_t w = static_cast<uint32_t>(static_cast<float>(width) * divisor);
     const uint32_t h = static_cast<uint32_t>(static_cast<float>(height) * divisor);
     auto& imageData  = texture.m_ImagesDatas[0];

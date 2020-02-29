@@ -2,6 +2,14 @@
 #ifndef ENGINE_RENDERER_PARTICLE_SYSTEM_H
 #define ENGINE_RENDERER_PARTICLE_SYSTEM_H
 
+class ParticleEmitter;
+class Particle;
+class Camera;
+class ShaderProgram;
+namespace Engine::priv {
+    class Renderer;
+};
+
 #include <vector>
 #include <stack>
 #include <mutex>
@@ -12,14 +20,6 @@
 
 constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 2000U;
 constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT = 1000000U;
-
-class ParticleEmitter;
-class Particle;
-class Camera;
-class ShaderProgram;
-namespace Engine::priv {
-    class Renderer;
-};
 
 namespace Engine::priv {
     class ParticleSystem final{

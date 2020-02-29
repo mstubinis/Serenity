@@ -11,12 +11,14 @@ using namespace Engine::priv;
 
 //TODO: implement the uv modification system
 struct SimpleUVTranslationFunctor { void operator()(const float dt, MaterialLayer& layer, const float translationX, const float translationY) const {
-    auto& currentUVs = layer.getUVModifications();
+    auto& currentUVs        = layer.getUVModifications();
     layer.m_UVModifications = currentUVs + glm::vec2(translationX * dt, translationY * dt);
-    if (layer.m_UVModifications.x >= 5.0f)
+    if (layer.m_UVModifications.x >= 5.0f) {
         layer.m_UVModifications.x = 0.0f;
-    if (layer.m_UVModifications.y > 5.0f)
+    }
+    if (layer.m_UVModifications.y > 5.0f) {
         layer.m_UVModifications.y = 0.0f;
+    }
 } };
 
 MaterialLayer::MaterialLayer() {
@@ -67,22 +69,22 @@ void MaterialLayer::setData2(const float x, const float y, const float z, const 
     m_Data2.w = w;
 }
 void MaterialLayer::setTexture(const string& textureFile) {
-    Texture* _texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(textureFile);
-    if (!_texture) {
+    Texture* texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(textureFile);
+    if (!texture) {
         if (!textureFile.empty()) {
-            _texture = NEW Texture(textureFile);
-            Core::m_Engine->m_ResourceManager._addTexture(_texture);
+            texture = NEW Texture(textureFile);
+            Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
-    setTexture(_texture);
+    setTexture(texture);
 }
 void MaterialLayer::setMask(const string& maskFile) {
-    Texture* _texture = MaterialLoader::LoadTextureMask(maskFile);
-    setMask(_texture);
+    Texture* texture = MaterialLoader::LoadTextureMask(maskFile);
+    setMask(texture);
 }
 void MaterialLayer::setCubemap(const string& cubemapFile) {
-    Texture* _texture = MaterialLoader::LoadTextureCubemap(cubemapFile);
-    setCubemap(_texture);
+    Texture* texture = MaterialLoader::LoadTextureCubemap(cubemapFile);
+    setCubemap(texture);
 }
 void MaterialLayer::setTexture(Texture* texture) {
     if (!texture /*|| _texture->type() != GL_TEXTURE_2D*/) {

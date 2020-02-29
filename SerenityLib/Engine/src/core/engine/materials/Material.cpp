@@ -10,48 +10,45 @@
 
 #include <algorithm>
 #include <iostream>
+#include <array>
 
 using namespace Engine;
 using namespace Engine::priv;
 using namespace std;
 
 vector<glm::vec4> Material::m_MaterialProperities;
+
 Material* Material::Checkers       = nullptr;
 Material* Material::WhiteShadeless = nullptr;
 
-vector<tuple<unsigned char, unsigned char, unsigned char, unsigned char, unsigned char>> MATERIAL_PROPERTIES = []() {
-    vector<tuple<unsigned char, unsigned char, unsigned char, unsigned char, unsigned char>> m;
-    m.resize(MaterialPhysics::_TOTAL);
-
-    m[MaterialPhysics::Aluminium]            = make_tuple(233_uc, 235_uc, 235_uc, 191_uc, 255_uc);
-    m[MaterialPhysics::Copper]               = make_tuple(243_uc, 162_uc, 137_uc, 229_uc, 255_uc);
-    m[MaterialPhysics::Diamond]              = make_tuple(44_uc, 44_uc, 44_uc, 250_uc, 0_uc);
-    m[MaterialPhysics::Glass_Or_Ruby_High]   = make_tuple(20_uc, 20_uc, 20_uc, 250_uc, 0_uc);
-    m[MaterialPhysics::Gold]                 = make_tuple(237_uc, 177_uc, 0_uc, 229_uc, 255_uc);
-    m[MaterialPhysics::Iron]                 = make_tuple(143_uc, 145_uc, 148_uc, 128_uc, 255_uc);
-    m[MaterialPhysics::Plastic_High]         = make_tuple(13_uc, 13_uc, 13_uc, 234_uc, 0_uc);
-    m[MaterialPhysics::Plastic_Or_Glass_Low] = make_tuple(8_uc, 8_uc, 8_uc, 246_uc, 0_uc);
-    m[MaterialPhysics::Silver]               = make_tuple(242_uc, 237_uc, 224_uc, 240_uc, 255_uc);
-    m[MaterialPhysics::Water]                = make_tuple(5_uc, 5_uc, 5_uc, 128_uc, 0_uc);
-    m[MaterialPhysics::Skin]                 = make_tuple(7_uc, 7_uc, 7_uc, 25_uc, 0_uc);
-    m[MaterialPhysics::Quartz]               = make_tuple(11_uc, 11_uc, 11_uc, 204_uc, 0_uc);
-    m[MaterialPhysics::Crystal]              = make_tuple(28_uc, 28_uc, 28_uc, 229_uc, 0_uc);
-    m[MaterialPhysics::Alcohol]              = make_tuple(5_uc, 5_uc, 5_uc, 204_uc, 0_uc);
-    m[MaterialPhysics::Milk]                 = make_tuple(6_uc, 6_uc, 6_uc, 153_uc, 0_uc);
-    m[MaterialPhysics::Glass]                = make_tuple(10_uc, 10_uc, 10_uc, 247_uc, 0_uc);
-    m[MaterialPhysics::Titanium]             = make_tuple(138_uc, 126_uc, 114_uc, 232_uc, 255_uc);
-    m[MaterialPhysics::Platinum]             = make_tuple(171_uc, 162_uc, 150_uc, 232_uc, 255_uc);
-    m[MaterialPhysics::Nickel]               = make_tuple(168_uc, 155_uc, 134_uc, 242_uc, 255_uc);
-    m[MaterialPhysics::Black_Leather]        = make_tuple(1_uc, 1_uc, 2_uc, 115_uc, 0_uc);
-    m[MaterialPhysics::Yellow_Paint_MERL]    = make_tuple(81_uc, 56_uc, 13_uc, 81_uc, 0_uc);
-    m[MaterialPhysics::Chromium]             = make_tuple(140_uc, 141_uc, 141_uc, 204_uc, 255_uc);
-    m[MaterialPhysics::Red_Plastic_MERL]     = make_tuple(66_uc, 13_uc, 2_uc, 234_uc, 0_uc);
-    m[MaterialPhysics::Blue_Rubber_MERL]     = make_tuple(13_uc, 20_uc, 43_uc, 89_uc, 0_uc);
-    m[MaterialPhysics::Zinc]                 = make_tuple(169_uc, 210_uc, 217_uc, 229_uc, 255_uc);
-    m[MaterialPhysics::Car_Paint_Orange]     = make_tuple(255_uc, 51_uc, 0_uc, 229_uc, 128_uc);
-    return m;
-}();
-
+constexpr std::array<tuple<unsigned char, unsigned char, unsigned char, unsigned char, unsigned char>, MaterialPhysics::_TOTAL> MATERIAL_PROPERTIES {
+    make_tuple(5_uc, 5_uc, 5_uc, 128_uc, 1_uc),                // 0 - water
+    make_tuple(8_uc, 8_uc, 8_uc, 246_uc, 1_uc),                // 1 - plastic or glass low
+    make_tuple(13_uc, 13_uc, 13_uc, 234_uc, 1_uc),             // 2 - plastic high
+    make_tuple(20_uc, 20_uc, 20_uc, 250_uc, 1_uc),             // 3 - glass or ruby high
+    make_tuple(44_uc, 44_uc, 44_uc, 250_uc, 1_uc),             // 4 - diamond
+    make_tuple(143_uc, 145_uc, 148_uc, 128_uc, 255_uc),        // 5 - iron
+    make_tuple(243_uc, 162_uc, 137_uc, 229_uc, 255_uc),        // 6 - copper
+    make_tuple(237_uc, 177_uc, 1_uc, 229_uc, 255_uc),          // 7 - gold
+    make_tuple(233_uc, 235_uc, 235_uc, 191_uc, 255_uc),        // 8 - aluminium
+    make_tuple(242_uc, 237_uc, 224_uc, 240_uc, 255_uc),        // 9 - silver
+    make_tuple(1_uc, 1_uc, 2_uc, 115_uc, 1_uc),                // 10 - black leather
+    make_tuple(81_uc, 56_uc, 13_uc, 81_uc, 1_uc),              // 11 - yellow paint MERL
+    make_tuple(140_uc, 141_uc, 141_uc, 204_uc, 255_uc),        // 12 - chromium
+    make_tuple(66_uc, 13_uc, 2_uc, 234_uc, 1_uc),              // 13 - red plastic MERL
+    make_tuple(13_uc, 20_uc, 43_uc, 89_uc, 1_uc),              // 14 - blue rubber MERL
+    make_tuple(169_uc, 210_uc, 217_uc, 229_uc, 255_uc),        // 15 - zinc
+    make_tuple(255_uc, 51_uc, 1_uc, 229_uc, 128_uc),           // 16 - car paint orange
+    make_tuple(7_uc, 7_uc, 7_uc, 25_uc, 1_uc),                 // 17 - skin
+    make_tuple(11_uc, 11_uc, 11_uc, 204_uc, 1_uc),             // 18 - quartz
+    make_tuple(28_uc, 28_uc, 28_uc, 229_uc, 1_uc),             // 19 - crystal
+    make_tuple(5_uc, 5_uc, 5_uc, 204_uc, 1_uc),                // 20 - alcohol
+    make_tuple(6_uc, 6_uc, 6_uc, 153_uc, 1_uc),                // 21 - milk
+    make_tuple(10_uc, 10_uc, 10_uc, 247_uc, 1_uc),             // 22 - glass
+    make_tuple(138_uc, 126_uc, 114_uc, 232_uc, 255_uc),        // 23 - titanium
+    make_tuple(171_uc, 162_uc, 150_uc, 232_uc, 255_uc),        // 24 - platinum
+    make_tuple(168_uc, 155_uc, 134_uc, 242_uc, 255_uc),        // 25 - nickel
+};
 
 #pragma region Material
 
@@ -243,18 +240,20 @@ void Material::setGlow(const unsigned char glow){
     m_BaseGlow = glm::clamp(glow, 1_uc, 255_uc);
     internalUpdateGlobalMaterialPool(false);
 }
-void Material::setF0Color(const glm::vec3& color){
-    Material::setF0Color(color.r, color.g, color.b);
+
+void Material::setF0Color(const Engine::color_vector_4& f0Color) {
+    Material::setF0Color(f0Color.color.r, f0Color.color.g, f0Color.color.b);
 }
-void Material::setF0Color(const float r, const float g, const float b){
+void Material::setF0Color(const unsigned char r, const unsigned char g, const unsigned char b) {
     m_F0Color = Engine::color_vector_4(
-        glm::clamp(r, 0.01f, 0.99f),
-        glm::clamp(g, 0.01f, 0.99f),
-        glm::clamp(b, 0.01f, 0.99f),
-        0.99f
+        glm::clamp(r, 1_uc, 255_uc),
+        glm::clamp(g, 1_uc, 255_uc),
+        glm::clamp(b, 1_uc, 255_uc),
+        255_uc
     );
     internalUpdateGlobalMaterialPool(false);
 }
+
 void Material::setMaterialPhysics(const MaterialPhysics::Physics materialPhysics){
     const auto& t = MATERIAL_PROPERTIES[materialPhysics];
     setF0Color(get<0>(t), get<1>(t), get<2>(t));

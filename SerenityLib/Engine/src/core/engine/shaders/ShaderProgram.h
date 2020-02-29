@@ -2,7 +2,7 @@
 #ifndef ENGINE_SHADERPROGRAM_H
 #define ENGINE_SHADERPROGRAM_H
 
-struct Handle;
+class  Handle;
 class  Shader;
 class  ShaderProgram;
 class  UniformBufferObject;
@@ -37,14 +37,14 @@ class ShaderProgram final : public EngineResource, public Engine::NonCopyable{
     public:
         static ShaderProgram                      *Deferred, *Forward, *Decal; //loaded in renderer
     private:
-        std::function<void(ShaderProgram*)>       m_CustomBindFunctor;
-        GLuint                                    m_ShaderProgram;
+        std::function<void(ShaderProgram*)>                    m_CustomBindFunctor;
+        GLuint                                                 m_ShaderProgram;
         std::unordered_map<std::string, GLint>    m_UniformLocations;
-        std::unordered_set<GLuint>                m_AttachedUBOs;
-        Shader&                                   m_VertexShader;
-        Shader&                                   m_FragmentShader;
-		bool                                      m_LoadedCPU;
-		bool                                      m_LoadedGPU;
+        std::unordered_set<GLuint>                             m_AttachedUBOs;
+        Shader&                                                m_VertexShader;
+        Shader&                                                m_FragmentShader;
+		bool                                                   m_LoadedCPU;
+		bool                                                   m_LoadedGPU;
     public:
         ShaderProgram(const std::string& name, Shader& vertexShader, Shader& fragmentShader);
         virtual ~ShaderProgram();

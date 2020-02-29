@@ -153,11 +153,11 @@ ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Material* mat, ShaderPr
     setCustomBindFunctor(priv::DefaultModelInstanceBindFunctor());
     setCustomUnbindFunctor(priv::DefaultModelInstanceUnbindFunctor());
 }
-ModelInstance::ModelInstance(Entity& parent, Handle mesh, Handle mat, ShaderProgram* program) : ModelInstance(parent, (Mesh*)mesh.get(), (Material*)mat.get(), program) {
+ModelInstance::ModelInstance(Entity& parent, Handle mesh, Handle mat, ShaderProgram* program) : ModelInstance(parent, mesh.get<Mesh>(), mat.get<Material>(), program) {
 }
-ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Handle mat, ShaderProgram* program) : ModelInstance(parent, mesh, (Material*)mat.get(), program) {
+ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Handle mat, ShaderProgram* program) : ModelInstance(parent, mesh, mat.get<Material>(), program) {
 }
-ModelInstance::ModelInstance(Entity& parent, Handle mesh, Material* mat, ShaderProgram* program) : ModelInstance(parent, (Mesh*)mesh.get(), mat, program) {
+ModelInstance::ModelInstance(Entity& parent, Handle mesh, Material* mat, ShaderProgram* program) : ModelInstance(parent, mesh.get<Mesh>(), mat, program) {
 }
 
 ModelInstance::ModelInstance(ModelInstance&& other) noexcept {
@@ -411,7 +411,7 @@ const RenderStage::Stage ModelInstance::stage() const {
     return m_Stage; 
 }
 void ModelInstance::setShaderProgram(const Handle shaderProgramHandle, ComponentModel& componentModel) {
-    ModelInstance::setShaderProgram(((ShaderProgram*)shaderProgramHandle.get()), componentModel);
+    ModelInstance::setShaderProgram(shaderProgramHandle.get<ShaderProgram>(), componentModel);
 }
 void ModelInstance::setShaderProgram(ShaderProgram* shaderProgram, ComponentModel& componentModel) {
     if (!shaderProgram) { 
@@ -420,14 +420,14 @@ void ModelInstance::setShaderProgram(ShaderProgram* shaderProgram, ComponentMode
     componentModel.setModel(m_Mesh, m_Material, m_Index, shaderProgram, m_Stage);
 }
 void ModelInstance::setMesh(const Handle meshHandle, ComponentModel& componentModel){
-    ModelInstance::setMesh(((Mesh*)meshHandle.get()), componentModel);
+    ModelInstance::setMesh(meshHandle.get<Mesh>(), componentModel);
 }
 void ModelInstance::setMesh(Mesh* mesh, ComponentModel& componentModel){
     m_AnimationVector.clear();
     componentModel.setModel(mesh, m_Material, m_Index, m_ShaderProgram, m_Stage);
 }
 void ModelInstance::setMaterial(const Handle materialHandle, ComponentModel& componentModel){
-    ModelInstance::setMaterial(((Material*)materialHandle.get()), componentModel);
+    ModelInstance::setMaterial(materialHandle.get<Material>(), componentModel);
 }
 void ModelInstance::setMaterial(Material* material, ComponentModel& componentModel){
     componentModel.setModel(m_Mesh, material, m_Index, m_ShaderProgram, m_Stage);

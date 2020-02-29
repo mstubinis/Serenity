@@ -4,6 +4,7 @@
 
 class  Scene;
 class  Camera;
+class  LightProbe;
 namespace Engine::priv {
     class Renderer;
 };
@@ -27,6 +28,7 @@ struct ViewportRenderingFlag final { enum Flag: unsigned short {
 class Viewport final : public Engine::NonCopyable {
     friend class Scene;
     friend class Engine::priv::Renderer;
+    friend class LightProbe;
     private:
         struct StateFlags final { enum Flag : unsigned char {
             Active              = 1 << 0,
@@ -37,14 +39,14 @@ class Viewport final : public Engine::NonCopyable {
         Engine::Flag<unsigned char>   m_StateFlags;
         Engine::Flag<unsigned short>  m_RenderFlags;
 
-        Scene*                        m_Scene;
-        Camera*                       m_Camera;
-        glm::vec4                     m_Viewport_Dimensions;
-        glm::vec4                     m_BackgroundColor;
-        float                         m_DepthMaskValue;
-        unsigned int                  m_ID;
+        Scene*                        m_Scene               = nullptr;
+        Camera*                       m_Camera              = nullptr;
+        glm::vec4                     m_Viewport_Dimensions = glm::vec4(0.0f, 0.0f, 256.0f, 256.0f);
+        glm::vec4                     m_BackgroundColor     = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+        float                         m_DepthMaskValue      = 50.0f;
+        unsigned int                  m_ID                  = 0;
 
-        Viewport() = delete;
+        Viewport();
     public:
         Viewport(const Scene& scene, const Camera& camera);
 
@@ -81,7 +83,7 @@ class Viewport final : public Engine::NonCopyable {
         const Camera& getCamera() const;
         const glm::vec4& getViewportDimensions() const;
 
-        bool setCamera(const Camera& camera);
+        void setCamera(const Camera& camera);
         void setViewportDimensions(const float x, const float y, const float width, const float height);
 };
 

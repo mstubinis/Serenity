@@ -14,7 +14,6 @@ using namespace Engine::priv;
 
 #pragma region TextureRequestPart
 
-
 TextureRequestPart::~TextureRequestPart() {
 }
 TextureRequestPart::TextureRequestPart(const TextureRequestPart& other) {
@@ -65,17 +64,17 @@ TextureRequest::~TextureRequest() {
 }
 void TextureRequest::request() {
     async = false;
-    InternalTextureRequestPublicInterface::Request(*this);
+    TextureRequestStaticImpl::Request(*this);
 }
 void TextureRequest::requestAsync() {
     if (Engine::priv::threading::hardware_concurrency() > 1) {
         async = true;
-        InternalTextureRequestPublicInterface::Request(*this);
+        TextureRequestStaticImpl::Request(*this);
     }else{
         TextureRequest::request();
     }
 }
-void InternalTextureRequestPublicInterface::Request(TextureRequest& request) {
+void TextureRequestStaticImpl::Request(TextureRequest& request) {
     if (!request.file.empty()) {
         if (request.fileExists) {
 
@@ -89,27 +88,21 @@ void InternalTextureRequestPublicInterface::Request(TextureRequest& request) {
                 if (request.textureType == TextureType::Texture2D) {
                     TextureLoader::InitFromFile(*request.part.texture, request.file, request.isToBeMipmapped, request.internalFormat, request.type);
                 }
-                InternalTextureRequestPublicInterface::LoadCPU(const_cast<TextureRequest&>(request));
+                InternalTexturePublicInterface::LoadCPU(*request.part.texture);
             };
             if (request.async) {
                 const auto cbk = [request]() {
-                    InternalTextureRequestPublicInterface::LoadGPU(const_cast<TextureRequest&>(request));
+                    InternalTexturePublicInterface::LoadGPU(*request.part.texture);
                 };
                 threading::addJobWithPostCallback(lambda_cpu, cbk);
             }else{
                 lambda_cpu();
-                InternalTextureRequestPublicInterface::LoadGPU(request);
+                InternalTexturePublicInterface::LoadGPU(*request.part.texture);
             }
         }else{
             //we got either an invalid file or memory data
         }
     }
-}
-void InternalTextureRequestPublicInterface::LoadCPU(TextureRequest& request) {
-    InternalTexturePublicInterface::LoadCPU(*request.part.texture);
-}
-void InternalTextureRequestPublicInterface::LoadGPU(TextureRequest& request) {
-    InternalTexturePublicInterface::LoadGPU(*request.part.texture);
 }
 
 #pragma endregion
@@ -166,17 +159,17 @@ TextureRequestFromMemory& TextureRequestFromMemory::operator=(const TextureReque
 
 void TextureRequestFromMemory::request() {
     async = false;
-    InternalTextureRequestPublicInterface::RequestMem(*this);
+    TextureRequestStaticImpl::RequestMem(*this);
 }
 void TextureRequestFromMemory::requestAsync() {
     if (Engine::priv::threading::hardware_concurrency() > 1) {
         async = true;
-        InternalTextureRequestPublicInterface::RequestMem(*this);
+        TextureRequestStaticImpl::RequestMem(*this);
     }else{
         TextureRequestFromMemory::request();
     }
 }
-void InternalTextureRequestPublicInterface::RequestMem(TextureRequestFromMemory& request) {
+void TextureRequestStaticImpl::RequestMem(TextureRequestFromMemory& request) {
     auto imgSize = request.image.getSize();
     if (imgSize.x > 0 && imgSize.y > 0) {
         request.part.name = request.textureName;
@@ -189,24 +182,18 @@ void InternalTextureRequestPublicInterface::RequestMem(TextureRequestFromMemory&
             if (request.textureType == TextureType::Texture2D) {
                 TextureLoader::InitFromMemory(*request.part.texture, request.image, request.textureName, request.isToBeMipmapped, request.internalFormat, request.type);
             }
-            InternalTextureRequestPublicInterface::LoadCPUMem(const_cast<TextureRequestFromMemory&>(request));
+            InternalTexturePublicInterface::LoadCPU(*request.part.texture);
         };
         if (request.async) {
             const auto cbk = [request]() {
-                InternalTextureRequestPublicInterface::LoadGPUMem(const_cast<TextureRequestFromMemory&>(request));
+                InternalTexturePublicInterface::LoadGPU(*request.part.texture);
             };
             threading::addJobWithPostCallback(lambda_cpu, cbk);
         }else{
             lambda_cpu();
-            InternalTextureRequestPublicInterface::LoadGPUMem(request);
+            InternalTexturePublicInterface::LoadGPU(*request.part.texture);
         }
     }
-}
-void InternalTextureRequestPublicInterface::LoadCPUMem(TextureRequestFromMemory& request) {
-    InternalTexturePublicInterface::LoadCPU(*request.part.texture);
-}
-void InternalTextureRequestPublicInterface::LoadGPUMem(TextureRequestFromMemory& request) {
-    InternalTexturePublicInterface::LoadGPU(*request.part.texture);
 }
 
 #pragma endregion

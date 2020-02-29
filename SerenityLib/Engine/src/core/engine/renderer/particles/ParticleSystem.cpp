@@ -74,8 +74,7 @@ const bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter, const gl
         if (freeindex >= m_Particles.size()) {
             return false;
         }
-        ParticleData data(*emitter.m_Properties, emitter, m_Particles[freeindex]);
-        m_Particles[freeindex].init(std::move(data), emitterPosition, emitterRotation, emitter.m_Parent);
+        m_Particles[freeindex].init(emitterPosition, emitterRotation, emitter);
         return true;
     }
     if (m_Particles.size() < m_Particles.capacity()) {
@@ -90,6 +89,32 @@ const bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter) {
 }
 
 
+
+/*
+template<class T1, class T2>
+std::vector<T1> sort_by(const std::vector<T1>& vin, const std::vector<T2>& keys, const Camera& camera) {
+    std::vector<std::size_t> indices;
+    indices.reserve(vin.size());
+    for (auto&& unused : keys) {
+        indices.push_back(indices.size());
+    }
+
+    const glm::vec3 cameraPosition = glm::vec3(camera.getPosition());
+
+    auto lambda = [&](std::size_t l, std::size_t r) {
+        return glm::distance2(keys[l], cameraPosition) > glm::distance2(keys[r], cameraPosition);
+    };
+
+    std::sort(std::begin(indices), std::end(indices), lambda);
+    std::vector<T1> r;
+    r.reserve(vin.size());
+    for (auto& i : indices) {
+        r.push_back(vin[i]);
+    }
+    return r;
+}
+*/
+
 void priv::ParticleSystem::update(const float dt, const Camera& camera) {
     internal_update_particles(dt, camera);
     internal_update_emitters(dt);
@@ -98,43 +123,7 @@ void priv::ParticleSystem::render(const Camera& camera, ShaderProgram& program, 
     if (m_Particles.size() == 0) {
         return;
     }
-
-    vector<Particle*> seen;
-    seen.reserve(m_Particles.size());
-
-    const auto cameraPosition = glm::vec3(camera.getPosition());
-
-    auto& planeMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
-
-    auto lamda_culler_particle = [&](Particle& particle, const size_t& j) {
-        const float radius    = planeMesh.getRadius() * Math::Max(particle.m_Data.m_Scale.x, particle.m_Data.m_Scale.y);
-        const uint sphereTest = camera.sphereIntersectTest(particle.m_Position, radius); //per mesh instance radius instead?
-        float comparison      = radius * 3100.0f; //TODO: this is obviously different from the other culling functions
-        if (particle.m_Hidden || sphereTest == 0 || glm::distance2(particle.m_Position, cameraPosition) > comparison * comparison) {
-            particle.m_PassedRenderCheck = false;
-        }else{
-            particle.m_PassedRenderCheck = true;
-            std::lock_guard<std::mutex> lock(m_Mutex);
-            seen.push_back(&particle);
-        }
-    };
-    priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_culler_particle, m_Particles, true);
-
-
-    auto lambda_sorter = [&](const Particle* lhs, const Particle* rhs) {
-        return glm::distance2(lhs->m_Position, cameraPosition) > glm::distance2(rhs->m_Position, cameraPosition);
-    };
-    std::sort(std::execution::par_unseq, seen.begin(), seen.end(), lambda_sorter);
-
-    renderer._bindShaderProgram(&program);
-    renderer._bindMesh(&planeMesh);
-
-    for (auto& particle : seen) {
-        //if (particle.m_PassedRenderCheck) { //TODO: using "seen" vector for now, do not need bool check, should profile using seen vector over using bool and full vector...
-            renderer.m_Pipeline->renderParticle(*particle, camera);
-        //}
-    }
-    renderer._unbindMesh(&planeMesh);
+    renderer.m_Pipeline->renderParticles(*this, camera, program, m_Mutex);
 }
 
 vector<ParticleEmitter>& priv::ParticleSystem::getParticleEmitters() {

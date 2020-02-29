@@ -2,6 +2,7 @@
 #include <core/engine/renderer/opengl/UniformBufferObject.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/lights/Lights.h>
+#include <core/engine/lights/LightProbe.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/textures/Texture.h>
@@ -30,6 +31,7 @@
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <SFML/Graphics/Image.hpp>
+#include <glm/gtx/norm.hpp>
 #include <execution>
 
 
@@ -39,6 +41,26 @@ using namespace Engine::priv;
 using namespace Engine::Renderer;
 
 priv::DeferredPipeline* pipeline = nullptr;
+
+/*
+    const glm::mat4 captureViews[6] = {
+        glm::lookAt(glm::vec3(0.0f),glm::vec3(1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
+        glm::lookAt(glm::vec3(0.0f),glm::vec3(-1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
+        glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,1.0f,0.0f),glm::vec3(0.0f,0.0f,1.0f)),
+        glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,-1.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f)),
+        glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,1.0f),glm::vec3(0.0f,-1.0f,0.0f)),
+        glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,-1.0f,0.0f))
+    };
+*/
+
+constexpr glm::mat4 CAPTURE_VEIWS[6] = {
+    glm::mat4(0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+    glm::mat4(0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+    glm::mat4(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+    glm::mat4(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+    glm::mat4(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+    glm::mat4(-1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+};
 
 struct ShaderEnum final {
     enum Shader {
@@ -290,7 +312,7 @@ void DeferredPipeline::init() {
     SSAO::ssao.init();
     SMAA::smaa.init();
 
-    internal_generate_brdf_lut(*m_InternalShaderPrograms[ShaderProgramEnum::BRDFPrecomputeCookTorrance], 512);
+    internal_generate_brdf_lut(*m_InternalShaderPrograms[ShaderProgramEnum::BRDFPrecomputeCookTorrance], 512, 256);
 }
 //DONE
 void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, const unsigned int convoludeTextureSize, const unsigned int preEnvFilterSize) {
@@ -301,33 +323,24 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
     }
     unsigned int size = convoludeTextureSize;
     Engine::Renderer::bindTextureForModification(texType, texture.address(1));
-    Engine::Renderer::unbindFBO();
+    //Engine::Renderer::unbindFBO();
     priv::FramebufferObject fbo(size, size); //try without a depth format
     fbo.bind();
 
     //make these 2 variables global in the renderer class?
     const glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 3000000.0f);
-    const glm::mat4 captureViews[] = {
-        glm::lookAt(glm::vec3(0.0f),glm::vec3(1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
-        glm::lookAt(glm::vec3(0.0f),glm::vec3(-1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f,0.0f)),
-        glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,1.0f,0.0f),glm::vec3(0.0f,0.0f,1.0f)),
-        glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,-1.0f,0.0f),glm::vec3(0.0f,0.0f,-1.0f)),
-        glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,1.0f),glm::vec3(0.0f,-1.0f,0.0f)),
-        glm::lookAt(glm::vec3(0.0f),glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,-1.0f,0.0f))
-    };
+
     m_Renderer._bindShaderProgram(&covoludeShaderProgram);
 
     Engine::Renderer::sendTexture("cubemap", texture.address(), 0, texType);
     Engine::Renderer::setViewport(0.0f, 0.0f, static_cast<float>(size), static_cast<float>(size));
     for (unsigned int i = 0; i < 6; ++i) {
-        const glm::mat4 vp = captureProjection * captureViews[i];
+        const glm::mat4 vp = captureProjection * CAPTURE_VEIWS[i];
         Engine::Renderer::sendUniformMatrix4("VP", vp);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture.address(1), 0);
         Engine::Renderer::Settings::clear(true, true, false);
         Skybox::bindMesh();
     }
-    //TODO: re-check if this is needed
-    //Resources::getWindow().display(); //prevent opengl & windows timeout
 
 
     //now gen EnvPrefilterMap for specular IBL
@@ -349,19 +362,17 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
         const float a = roughness * roughness;
         Engine::Renderer::sendUniform1("a2", a * a);
         for (unsigned int i = 0; i < 6; ++i) {
-            const glm::mat4 vp = captureProjection * captureViews[i];
+            const glm::mat4 vp = captureProjection * CAPTURE_VEIWS[i];
             Engine::Renderer::sendUniformMatrix4("VP", vp);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture.address(2), m);
             Engine::Renderer::Settings::clear(true, true, false);
             Skybox::bindMesh();
         }
     }
-    //TODO: re-check if this is needed
-    //Resources::getWindow().display(); //prevent opengl & windows timeout
     fbo.unbind();
 }
 //DONE
-void DeferredPipeline::internal_generate_brdf_lut(ShaderProgram& program, const unsigned int brdfSize) {
+void DeferredPipeline::internal_generate_brdf_lut(ShaderProgram& program, const unsigned int brdfSize, const int numSamples) {
     FramebufferObject fbo(brdfSize, brdfSize); //try without a depth format
     fbo.bind();
 
@@ -373,7 +384,7 @@ void DeferredPipeline::internal_generate_brdf_lut(ShaderProgram& program, const 
 
     m_Renderer._bindShaderProgram(&program);
 
-    Engine::Renderer::sendUniform1("NUM_SAMPLES", 256);
+    Engine::Renderer::sendUniform1("NUM_SAMPLES", numSamples);
     Engine::Renderer::Settings::clear(true, true, false);
     Engine::Renderer::colorMask(true, true, false, false);
 
@@ -384,7 +395,6 @@ void DeferredPipeline::internal_generate_brdf_lut(ShaderProgram& program, const 
 void DeferredPipeline::onPipelineChanged() {
 
 }
-
 const unsigned int DeferredPipeline::getUniformLocation(const char* location) {
     const auto& uniforms = m_RendererState.current_bound_shader_program->uniforms();
     if (!uniforms.count(location)) {
@@ -423,8 +433,6 @@ Material* DeferredPipeline::getCurrentBoundMaterial() {
 Mesh* DeferredPipeline::getCurrentBoundMesh() {
     return m_RendererState.current_bound_mesh;
 }
-
-
 const bool DeferredPipeline::stencilOperation(const unsigned int stencilFail, const unsigned int depthFail, const unsigned int depthPass) {
     return m_OpenGLStateMachine.GL_glStencilOp(stencilFail, depthFail, depthPass);
 }
@@ -515,11 +523,6 @@ void DeferredPipeline::sendTextureSafe(const char* location, const unsigned int 
     m_OpenGLStateMachine.GL_glBindTextureForRendering(textureTarget, textureObject);
     Engine::Renderer::sendUniform1Safe(location, slot);
 }
-
-
-
-
-
 const bool DeferredPipeline::cullFace(const unsigned int face) {
     return m_OpenGLStateMachine.GL_glCullFace(face);
 }
@@ -532,7 +535,6 @@ const bool DeferredPipeline::bindDrawFBO(const unsigned int fbo) {
 const bool DeferredPipeline::bindRBO(const unsigned int rbo) {
     return m_OpenGLStateMachine.GL_glBindRenderbuffer(rbo);
 }
-
 const bool DeferredPipeline::bindShaderProgram(ShaderProgram* program) {
     if (m_RendererState.current_bound_shader_program != program) {
         m_OpenGLStateMachine.GL_glUseProgram(program->program());
@@ -568,8 +570,6 @@ const bool DeferredPipeline::unbindMesh(Mesh* mesh) {
     m_RendererState.current_bound_mesh = nullptr;
     return true;
 }
-
-
 void DeferredPipeline::generatePBRData(Texture& texture, const unsigned int convoludeSize, const unsigned int prefilterSize) {
     internal_generate_pbr_data_for_texture(
         *m_InternalShaderPrograms[ShaderProgramEnum::CubemapConvolude], 
@@ -795,6 +795,44 @@ void DeferredPipeline::renderDecal(ModelInstance& decalModelInstance) {
     Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }
+void DeferredPipeline::renderParticles(ParticleSystem& particleSystem, const Camera& camera, ShaderProgram& program, std::mutex& particleSystemMutex) {
+    vector<Particle*> seen;
+    seen.reserve(particleSystem.getParticles().size());
+
+    const glm::vec3 cameraPosition = glm::vec3(camera.getPosition());
+
+    auto& planeMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
+
+    auto lamda_culler_particle = [&](Particle& particle, const size_t& j) {
+        const float radius     = planeMesh.getRadius() * Math::Max(particle.m_Scale.x, particle.m_Scale.y);
+        const uint sphereTest  = camera.sphereIntersectTest(particle.position(), radius);
+        const float comparison = radius * 3100.0f; //TODO: this is obviously different from the other culling functions
+        if (!particle.isActive() || sphereTest == 0 || glm::distance2(particle.position(), cameraPosition) > comparison * comparison) {
+            //particle.m_PassedRenderCheck = false;
+        }else{
+            //particle.m_PassedRenderCheck = true;
+            std::lock_guard<std::mutex> lock(particleSystemMutex);
+            seen.push_back(&particle);
+        }
+    };
+    priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_culler_particle, particleSystem.getParticles(), true);
+
+
+    auto lambda_sorter = [&](const Particle* lhs, const Particle* rhs) {
+        return glm::distance2(lhs->position(), cameraPosition) > glm::distance2(rhs->position(), cameraPosition);
+    };
+    std::sort(std::execution::par_unseq, seen.begin(), seen.end(), lambda_sorter);
+
+    m_Renderer._bindShaderProgram(&program);
+    m_Renderer._bindMesh(&planeMesh);
+
+    for (auto& particle : seen) {
+        //if (particle.m_PassedRenderCheck) { //TODO: using "seen" vector for now, do not need bool check, should profile using seen vector over using bool and full vector...
+        renderParticle(*particle, camera);
+        //}
+    }
+    m_Renderer._unbindMesh(&planeMesh);
+}
 void DeferredPipeline::renderParticle(const Particle& particle, const Camera& camera) {
     m_Renderer._bindMaterial(particle.getMaterial());
 
@@ -805,18 +843,7 @@ void DeferredPipeline::renderParticle(const Particle& particle, const Camera& ca
     Engine::Renderer::sendUniform3Safe("ParticlePosition", particle.position() - glm::vec3(camera.getPosition()));
     const glm::vec2& scl = particle.getScale();
     Engine::Renderer::sendUniform3Safe("ParticleScaleAndRot", scl.x, scl.y, 1.0f);
-    /*
-    glm::mat4 modelMatrix  = glm::mat4(1.0f);
-    modelMatrix            = glm::translate(modelMatrix, particle.position());
-    modelMatrix           *= glm::mat4_cast(camera.getOrientation());
-    modelMatrix            = glm::rotate(modelMatrix, particle.angle(), glm::vec3(0, 0, 1));
-    const auto& scale      = particle.getScale();
-    modelMatrix            = glm::scale(modelMatrix, glm::vec3(scale.x, scale.y, 1.0f));
 
-    glm::mat4 modelView = camera.getView() * modelMatrix;
-
-    Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
-    */
     renderMesh(priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh());
 }
 void DeferredPipeline::renderMesh(const Mesh& mesh, const unsigned int mode) {
@@ -839,6 +866,9 @@ void DeferredPipeline::renderMesh(const Mesh& mesh, const unsigned int mode) {
     //else {
         glDrawElements(mode, (GLsizei)indicesSize, GL_UNSIGNED_SHORT, nullptr);
     //}
+}
+void DeferredPipeline::renderLightProbe(LightProbe& lightProbe) {
+    //goal: render all 6 sides into a fbo and into a cubemap, and have that cubemap stored in the light probe to be used for Global Illumination
 }
 
 void DeferredPipeline::internal_render_2d_text_left(const string& text, const Font& font, const float newLineGlyphHeight, float& x, float& y, const float z) {
@@ -1122,11 +1152,42 @@ void DeferredPipeline::internal_pass_geometry(const Viewport& viewport, const Ca
     InternalScenePublicInterface::RenderGeometryTransparent(m_Renderer, scene, viewport, camera);
     InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(m_Renderer, scene, viewport, camera, true);
 }
+void DeferredPipeline::internal_pass_forward(const Viewport& viewport, const Camera& camera) {
+    const Scene& scene = viewport.getScene();
+
+    m_GBuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, GBufferType::Lighting, "RGBA");
+    InternalScenePublicInterface::RenderForwardOpaque(m_Renderer, scene, viewport, camera);
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    for (unsigned int i = 0; i < 4; ++i) {
+        Engine::Renderer::GLEnablei(GL_BLEND, i);
+    }
+
+    glDepthMask(GL_TRUE);
+    InternalScenePublicInterface::RenderForwardTransparent(m_Renderer, scene, viewport, camera);
+    InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(m_Renderer, scene, viewport, camera);
+    glDepthMask(GL_FALSE);
+    InternalScenePublicInterface::RenderDecals(m_Renderer, scene, viewport, camera);
+    InternalScenePublicInterface::RenderForwardParticles(m_Renderer, scene, viewport, camera);
+
+
+
+
+
+    InternalScenePublicInterface::RenderParticles(m_Renderer, scene, camera, *m_InternalShaderPrograms[ShaderProgramEnum::Particle]);
+
+
+
+    for (unsigned int i = 0; i < 4; ++i) {
+        Engine::Renderer::GLDisablei(GL_BLEND, i); //this is needed for smaa at least
+    }
+}
 void DeferredPipeline::internal_pass_ssao(const Viewport& viewport, const Camera& camera) {
     //TODO: possible optimization: use stencil buffer to reject completely black (or are they white?) pixels during blur passes
     m_GBuffer.bindFramebuffers(GBufferType::Bloom, GBufferType::GodRays, "A", false);
     Engine::Renderer::Settings::clear(true, false, false); //bloom and god rays alpha channels cleared to black 
-    if (SSAO::ssao.m_ssao && (viewport.getRenderFlags() & ViewportRenderingFlag::SSAO)) {
+    if (SSAO::ssao.m_SSAOLevel > SSAOLevel::Off && (viewport.getRenderFlags() & ViewportRenderingFlag::SSAO)) {
         Engine::Renderer::GLEnablei(GL_BLEND, 0);//i dont think this is needed anymore
         m_GBuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
         SSAO::ssao.passSSAO(m_GBuffer, viewport, camera, m_Renderer);
@@ -1244,30 +1305,6 @@ void DeferredPipeline::internal_pass_lighting(const Viewport& viewport, const Ca
         Engine::Renderer::renderFullscreenQuad();
     }
 }
-void DeferredPipeline::internal_pass_forward(const Viewport& viewport, const Camera& camera) {
-    const Scene& scene = viewport.getScene();
-
-    m_GBuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, GBufferType::Lighting, "RGBA");
-    InternalScenePublicInterface::RenderForwardOpaque(m_Renderer, scene, viewport, camera);
-
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    for (unsigned int i = 0; i < 4; ++i) {
-        Engine::Renderer::GLEnablei(GL_BLEND, i);
-    }
-
-    glDepthMask(GL_TRUE);
-    InternalScenePublicInterface::RenderForwardTransparent(m_Renderer, scene, viewport, camera);
-    InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(m_Renderer, scene, viewport, camera);
-    glDepthMask(GL_FALSE);
-    InternalScenePublicInterface::RenderDecals(m_Renderer, scene, viewport, camera);
-    InternalScenePublicInterface::RenderForwardParticles(m_Renderer, scene, viewport, camera);
-    InternalScenePublicInterface::RenderParticles(m_Renderer, scene, camera, *m_InternalShaderPrograms[ShaderProgramEnum::Particle]);
-
-    for (unsigned int i = 0; i < 4; ++i) {
-        Engine::Renderer::GLDisablei(GL_BLEND, i); //this is needed for smaa at least
-    }
-}
 void DeferredPipeline::internal_pass_god_rays(const Viewport& viewport, const Camera& camera) {
     m_GBuffer.bindFramebuffers(GBufferType::GodRays, "RGB", false);
     Engine::Renderer::Settings::clear(true, false, false); //godrays rgb channels cleared to black
@@ -1322,7 +1359,7 @@ void DeferredPipeline::internal_pass_aa(const bool mainRenderFunction, const Vie
     if (!mainRenderFunction || m_Renderer.m_AA_algorithm == AntiAliasingAlgorithm::None || !(viewport.getRenderFlags() & ViewportRenderingFlag::AntiAliasing)) {
         m_GBuffer.bindFramebuffers(outTexture);
         internal_pass_final(sceneTexture);
-        m_GBuffer.bindBackbuffer(viewport/*, fbo, rbo*/);
+        m_GBuffer.bindBackbuffer(viewport);
         internal_pass_depth_and_transparency(viewport, outTexture);
     }else if (mainRenderFunction && m_Renderer.m_AA_algorithm == AntiAliasingAlgorithm::FXAA && (viewport.getRenderFlags() & ViewportRenderingFlag::AntiAliasing)) {
         m_GBuffer.bindFramebuffers(outTexture);
@@ -1330,7 +1367,7 @@ void DeferredPipeline::internal_pass_aa(const bool mainRenderFunction, const Vie
         m_GBuffer.bindFramebuffers(sceneTexture);
         FXAA::fxaa.pass(m_GBuffer, viewport, outTexture, m_Renderer);
 
-        m_GBuffer.bindBackbuffer(viewport/*, fbo, rbo*/);
+        m_GBuffer.bindBackbuffer(viewport);
         internal_pass_depth_and_transparency(viewport, sceneTexture);
 
     }else if (mainRenderFunction && (m_Renderer.m_AA_algorithm >= AntiAliasingAlgorithm::SMAA_LOW || m_Renderer.m_AA_algorithm <= AntiAliasingAlgorithm::SMAA_ULTRA) && (viewport.getRenderFlags() & ViewportRenderingFlag::AntiAliasing)) {
@@ -1340,6 +1377,7 @@ void DeferredPipeline::internal_pass_aa(const bool mainRenderFunction, const Vie
         std::swap(sceneTexture, outTexture);
 
         const auto winSize = glm::vec2(Resources::getWindowSize());
+        //const auto& dimensions = viewport.getViewportDimensions();
         const glm::vec4& SMAA_PIXEL_SIZE = glm::vec4(1.0f / winSize.x, 1.0f / winSize.y, winSize.x, winSize.y);
 
         SMAA::smaa.passEdge(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, outTexture, m_Renderer);
@@ -1350,7 +1388,7 @@ void DeferredPipeline::internal_pass_aa(const bool mainRenderFunction, const Vie
 
         //SMAA::smaa.passFinal(m_GBuffer, viewport);//unused
 
-        m_GBuffer.bindBackbuffer(viewport/*, fbo, rbo*/);
+        m_GBuffer.bindBackbuffer(viewport);
         internal_pass_depth_and_transparency(viewport, outTexture);
     }
 }
@@ -1597,7 +1635,6 @@ void DeferredPipeline::renderFullscreenTriangle() {
     const glm::mat4 p = glm::ortho(0.0f, winSize.x, 0.0f, winSize.y);
     Engine::Renderer::sendUniformMatrix4("Model", glm::mat4(1.0f));
     Engine::Renderer::sendUniformMatrix4Safe("VP", p);
-    Engine::Renderer::sendUniform2Safe("screenSizeDivideBy2", 1.0f, 1.0f);
     m_FullscreenTriangle.render();
 }
 void DeferredPipeline::renderFullscreenQuad() {
@@ -1606,6 +1643,5 @@ void DeferredPipeline::renderFullscreenQuad() {
     const glm::mat4 p = glm::ortho(0.0f, winSize.x, 0.0f, winSize.y);
     Engine::Renderer::sendUniformMatrix4("Model", glm::mat4(1.0f));
     Engine::Renderer::sendUniformMatrix4Safe("VP", p);
-    Engine::Renderer::sendUniform2Safe("screenSizeDivideBy2", 1.0f, 1.0f);
     m_FullscreenQuad.render();
 }

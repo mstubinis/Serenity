@@ -21,9 +21,6 @@ Handle::operator std::uint32_t() const {
 const bool Handle::null() const { 
     return (type == ResourceType::Empty || index == 0); 
 }
-const EngineResource* Handle::get() const {
+EngineResource* Handle::get_base() const {
     return (null()) ? nullptr : priv::Core::m_Engine->m_ResourceManager.m_Resources.getAsFast<EngineResource>(index);
-}
-const EngineResource* Handle::operator ->() const { 
-    return get(); 
 }

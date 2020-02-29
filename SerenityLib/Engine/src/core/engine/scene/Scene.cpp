@@ -264,6 +264,12 @@ Scene::~Scene() {
     SAFE_DELETE_VECTOR(m_Cameras);
     unregisterEvent(EventType::SceneChanged);
 }
+void Scene::addCamera(Camera& camera) {
+    m_Cameras.push_back(&camera);
+    if (!getActiveCamera()) {
+        setActiveCamera(camera);
+    }
+}
 void Scene::setGodRaysSun(Entity* sun) {
     m_Sun = sun;
 }
@@ -283,8 +289,8 @@ ParticleEmitter* Scene::addParticleEmitter(ParticleEmitter& emitter) {
 
 Viewport& Scene::addViewport(const float x, const float y, const float width, const float height, const Camera& camera) {
     const unsigned int id = numViewports();
-    auto& viewport = m_Viewports.emplace_back(*this, camera);
-    viewport.m_ID = id;
+    auto& viewport        = m_Viewports.emplace_back(*this, camera);
+    viewport.m_ID         = id;
     viewport.setViewportDimensions(x, y, width, height);
     return viewport;
 }
@@ -308,8 +314,8 @@ Camera* Scene::getActiveCamera() const {
 void Scene::setActiveCamera(Camera& camera){
     if (m_Viewports.size() == 0) {
         const unsigned int id = numViewports();
-        auto& viewport = m_Viewports.emplace_back(*this, camera);
-        viewport.m_ID = id;
+        auto& viewport        = m_Viewports.emplace_back(*this, camera);
+        viewport.m_ID         = id;
         return;
     }
     m_Viewports[0].setCamera(camera);

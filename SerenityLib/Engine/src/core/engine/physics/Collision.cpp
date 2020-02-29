@@ -52,15 +52,11 @@ void Collision::DeferredLoading::load_2(Collision* collision, btCompoundShape* b
 }
 
 void Collision::_baseInit(const CollisionType::Type type, const float mass) {
-    m_BtInertia = btVector3(0.0f, 0.0f, 0.0f);
     m_Type = type;
     setMass(mass);
 }
 Collision::Collision(ComponentBody& body){
     m_Owner = body.getOwner();
-    m_BtShape = nullptr;
-    m_BtInertia = btVector3(0.0f, 0.0f, 0.0f);
-    m_Type = CollisionType::None;
     setMass(0.0f);
 }
 Collision::Collision(ComponentBody& body, const CollisionType::Type type, ModelInstance* modelInstance, const float mass){

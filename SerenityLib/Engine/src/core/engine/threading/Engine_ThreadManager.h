@@ -29,7 +29,7 @@ namespace Engine::priv{
         friend struct ComponentBody_UpdateFunction;
         friend struct ComponentModel_UpdateFunction;
         friend class  Engine::priv::ParticleSystem;
-        private:
+        public:
             void wait_for_all_engine_controlled();
 
             void finalize_job_engine_controlled(std::function<void()>& job);

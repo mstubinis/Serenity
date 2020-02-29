@@ -2,14 +2,9 @@
 #ifndef ENGINE_ECS_COMPONENT_CAMERA_H
 #define ENGINE_ECS_COMPONENT_CAMERA_H
 
-#include <ecs/ComponentBaseClass.h>
-#include <ecs/ECSSystemConstructorInfo.h>
-#include <core/engine/math/Numbers.h>
-
 class Camera;
 class ComponentModel;
 class ComponentCamera;
-
 namespace Engine::priv {
     struct ComponentCamera_UpdateFunction;
     struct ComponentCamera_EntityAddedToSceneFunction;
@@ -17,7 +12,12 @@ namespace Engine::priv {
     struct ComponentCamera_ComponentRemovedFromEntityFunction;
     struct ComponentCamera_SceneEnteredFunction;
     struct ComponentCamera_SceneLeftFunction;
+};
 
+#include <ecs/Entity.h>
+#include <ecs/ECSSystemConstructorInfo.h>
+
+namespace Engine::priv {
     struct ComponentCamera_Functions final {
         static void            RebuildProjectionMatrix(ComponentCamera& componentCamera);
         static const glm::mat4 GetViewNoTranslation(const Camera& camera);
@@ -28,7 +28,7 @@ namespace Engine::priv {
     };
 };
 
-class ComponentCamera : public ComponentBaseClass {
+class ComponentCamera {
     friend struct Engine::priv::ComponentCamera_UpdateFunction;
     friend struct Engine::priv::ComponentCamera_EntityAddedToSceneFunction;
     friend struct Engine::priv::ComponentCamera_ComponentAddedToEntityFunction;
@@ -39,15 +39,25 @@ class ComponentCamera : public ComponentBaseClass {
     friend class  ::Camera;
     friend class  ::ComponentModel;
     private:
-        enum Type { 
+        enum CameraType : unsigned char { 
 			Perspective,
 			Orthographic, 
 		};
-        Type        m_Type;
-        glm_vec3    m_Eye, m_Up, m_Forward;
-        glm::mat4   m_ViewMatrix, m_ViewMatrixNoTranslation, m_ProjectionMatrix;
+
+        Entity m_Owner;
+
+        CameraType  m_Type;
+        glm_vec3    m_Eye                       = glm_vec3(0.0);
+        glm_vec3    m_Up                        = glm_vec3(0.0, 1.0, 0.0);
+        glm_vec3    m_Forward                   = glm_vec3(0.0, 0.0, -1.0);
+        glm::mat4   m_ViewMatrix;
+        glm::mat4   m_ViewMatrixNoTranslation;
+        glm::mat4   m_ProjectionMatrix;
         glm::vec4   m_FrustumPlanes[6];
-        float       m_NearPlane, m_FarPlane, m_Bottom, m_Top;
+        float       m_NearPlane                 = 0.01f;
+        float       m_FarPlane                  = 2000.0f;
+        float       m_Bottom                    = 0.0f;
+        float       m_Top                       = 0.0f;
         union { 
 			float   m_Angle;
 			float   m_Left; 
@@ -70,6 +80,9 @@ class ComponentCamera : public ComponentBaseClass {
 
         void resize(const unsigned int width, const unsigned int height);
         void lookAt(const glm_vec3& eye, const glm_vec3& forward, const glm_vec3& up);
+
+        void setViewMatrix(const glm::mat4& viewMatrix);
+        void setProjectionMatrix(const glm::mat4& projectionMatrix);
 
 		const float getAngle() const;    void setAngle(const float angle);
 		const float getAspect() const;   void setAspect(const float aspectRatio);

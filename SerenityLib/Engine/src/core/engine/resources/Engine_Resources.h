@@ -6,7 +6,7 @@ namespace sf {
     class Image;
 };
 
-struct Handle;
+class  Handle;
 struct EngineOptions;
 class  EngineResource;
 class  Window;

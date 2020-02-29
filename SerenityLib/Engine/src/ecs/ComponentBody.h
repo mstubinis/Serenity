@@ -8,11 +8,10 @@ class ComponentBody;
 class btCollisionObject;
 class btRigidBody;
 
-#include <ecs/ComponentBaseClass.h>
+#include <ecs/Entity.h>
 #include <ecs/ECS.h>
 #include <core/engine/physics/PhysicsIncludes.h>
 #include <LinearMath/btDefaultMotionState.h>
-#include <core/engine/math/Numbers.h>
 
 struct CollisionCallbackEventData final {
     ComponentBody& ownerBody;
@@ -56,7 +55,7 @@ namespace Engine::priv {
     struct ComponentBody_SceneLeftFunction;
 };
 
-class ComponentBody : public ComponentBaseClass, public EventObserver {
+class ComponentBody : public EventObserver {
     friend struct Engine::priv::ComponentBody_UpdateFunction;
     friend struct Engine::priv::ComponentBody_ComponentAddedToEntityFunction;
     friend struct Engine::priv::ComponentBody_ComponentRemovedFromEntityFunction;
@@ -110,6 +109,8 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
         glm_vec3 m_Right     = glm_vec3(1.0,  0.0,  0.0);
         glm_vec3 m_Up        = glm_vec3(0.0,  1.0,  0.0);
 
+        Entity m_Owner;
+
         std::function<void(CollisionCallbackEventData& data)> m_CollisionFunctor = [](CollisionCallbackEventData&) {};
 
     public:
@@ -123,6 +124,8 @@ class ComponentBody : public ComponentBaseClass, public EventObserver {
         ComponentBody& operator=(ComponentBody&& other) noexcept;
 
         ~ComponentBody();
+
+        const Entity& getOwner() const;
 
         void onEvent(const Event& event_) override;
 

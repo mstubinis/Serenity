@@ -2,7 +2,7 @@
 #ifndef ENGINE_ECS_COMPONENT_LOGIC_H
 #define ENGINE_ECS_COMPONENT_LOGIC_H
 
-#include <ecs/ComponentBaseClass.h>
+#include <ecs/Entity.h>
 #include <ecs/ECSSystemConstructorInfo.h>
 
 class ComponentLogic;
@@ -15,7 +15,7 @@ namespace Engine::priv {
     struct ComponentLogic_SceneLeftFunction;
 };
 
-class ComponentLogic : public ComponentBaseClass {
+class ComponentLogic {
     friend struct Engine::priv::ComponentLogic_UpdateFunction;
     friend struct Engine::priv::ComponentLogic_ComponentAddedToEntityFunction;
     friend struct Engine::priv::ComponentLogic_ComponentRemovedFromEntityFunction;
@@ -24,6 +24,8 @@ class ComponentLogic : public ComponentBaseClass {
     friend struct Engine::priv::ComponentLogic_SceneLeftFunction;
 
     private:
+        Entity m_Owner;
+
         void*                                                       m_UserPointer   = nullptr;
         void*                                                       m_UserPointer1  = nullptr;
         void*                                                       m_UserPointer2  = nullptr;
@@ -31,7 +33,8 @@ class ComponentLogic : public ComponentBaseClass {
     public:
         ComponentLogic(const Entity& entity);
         template<typename T> 
-        ComponentLogic(const Entity& entity, const T& Functor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr) : ComponentBaseClass(entity) {
+        ComponentLogic(const Entity& entity, const T& Functor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr) {
+            m_Owner        = entity;
             m_UserPointer  = Ptr1;
             m_UserPointer1 = Ptr2;
             m_UserPointer2 = Ptr3;

@@ -2,7 +2,7 @@
 #ifndef ENGINE_MESH_INSTANCE_H
 #define ENGINE_MESH_INSTANCE_H
 
-struct Handle;
+class  Handle;
 class  ShaderProgram;
 class  Material;
 class  Mesh;

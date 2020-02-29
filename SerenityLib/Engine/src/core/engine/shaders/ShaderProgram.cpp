@@ -195,6 +195,6 @@ void ShaderProgram::unload(){
         EngineResource::unload();
     }
 }
-const unordered_map<string,GLint>& ShaderProgram::uniforms() const { 
+const unordered_map<string, GLint>& ShaderProgram::uniforms() const { 
     return m_UniformLocations; 
 }

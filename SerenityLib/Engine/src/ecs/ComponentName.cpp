@@ -5,13 +5,16 @@ using namespace Engine::priv;
 using namespace std;
 
 #pragma region Component
-ComponentName::ComponentName(const Entity& entity) : ComponentBaseClass(entity){
+ComponentName::ComponentName(const Entity& entity) {
+    m_Owner = entity;
     m_Data = "";
 }
-ComponentName::ComponentName(const Entity& entity, const string& Name) : ComponentBaseClass(entity) {
+ComponentName::ComponentName(const Entity& entity, const string& Name) {
+    m_Owner = entity;
     m_Data = Name;
 }
-ComponentName::ComponentName(const Entity& entity, const char* Name) : ComponentBaseClass(entity) {
+ComponentName::ComponentName(const Entity& entity, const char* Name) {
+    m_Owner = entity;
     m_Data = Name;
 }
 ComponentName::~ComponentName() {

@@ -6,8 +6,8 @@ using namespace std;
 
 #pragma region Component
 
-ComponentLogic1::ComponentLogic1(const Entity& entity) : ComponentBaseClass(entity) {
-
+ComponentLogic1::ComponentLogic1(const Entity& entity) {
+    m_Owner = entity;
 }
 ComponentLogic1::~ComponentLogic1() {
 }

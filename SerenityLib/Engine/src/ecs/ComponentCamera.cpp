@@ -14,7 +14,7 @@ using namespace std;
 
 
 void priv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentCamera& componentCamera) {
-    if (componentCamera.m_Type == ComponentCamera::Type::Perspective) {
+    if (componentCamera.m_Type == ComponentCamera::CameraType::Perspective) {
         componentCamera.m_ProjectionMatrix 
             = glm::perspective(componentCamera.m_Angle, componentCamera.m_AspectRatio, componentCamera.m_NearPlane, componentCamera.m_FarPlane);
     }else{
@@ -44,41 +44,31 @@ const glm::vec3 priv::ComponentCamera_Functions::GetViewVectorNoTranslation(cons
 
 #pragma region Component
 
-ComponentCamera::ComponentCamera(const Entity& entity, const float angleDegrees, const float aspectRatio, const float nearPlane, const float farPlane) : ComponentBaseClass(entity) {
-    const auto one  = static_cast<decimal>(1.0);
-    const auto zero = static_cast<decimal>(0.0);
-
-    m_Eye                     = glm_vec3(zero);
-	m_Up                      = glm_vec3(zero, one, zero);
-    m_Forward                 = glm_vec3(zero, zero, -one);
+ComponentCamera::ComponentCamera(const Entity& entity, const float angleDegrees, const float aspectRatio, const float nearPlane, const float farPlane) {
+    m_Owner = entity;
     m_Angle                   = glm::radians(angleDegrees);
 	m_AspectRatio             = aspectRatio;
 	m_NearPlane               = nearPlane;
 	m_FarPlane                = farPlane;
-	m_Bottom                  = 0.0f;
-	m_Top                     = 0.0f;
-    m_ProjectionMatrix        = glm::perspective(m_Angle, m_AspectRatio, m_NearPlane, m_FarPlane);
-    m_ViewMatrix              = glm::lookAt(m_Eye, m_Forward, m_Up);
-	m_ViewMatrixNoTranslation = m_ViewMatrix;
-    m_Type                    = Type::Perspective;
+
+    setProjectionMatrix(glm::perspective(m_Angle, m_AspectRatio, m_NearPlane, m_FarPlane));
+    setViewMatrix(glm::lookAt(m_Eye, m_Forward, m_Up));
+
+    m_Type                    = CameraType::Perspective;
 }
-ComponentCamera::ComponentCamera(const Entity& entity, const float left, const float right, const float bottom, const float top, const float nearPlane, const float farPlane) : ComponentBaseClass(entity) {
-    const auto one  = static_cast<decimal>(1.0);
-    const auto zero = static_cast<decimal>(0.0);
-    
-    m_Eye                     = glm_vec3(zero);
-    m_Up                      = glm_vec3(zero, one, zero);
-    m_Forward                 = glm_vec3(zero, zero, -one);
+ComponentCamera::ComponentCamera(const Entity& entity, const float left, const float right, const float bottom, const float top, const float nearPlane, const float farPlane) {
+    m_Owner = entity;
     m_Left                    = left;
 	m_Right                   = right;
 	m_Bottom                  = bottom;
 	m_Top                     = top;
 	m_NearPlane               = nearPlane;
 	m_FarPlane                = farPlane;
-    m_ProjectionMatrix        = glm::ortho(m_Left, m_Right, m_Bottom, m_Top, m_NearPlane, m_FarPlane);
-    m_ViewMatrix              = glm::lookAt(m_Eye, m_Forward, m_Up);
-	m_ViewMatrixNoTranslation = m_ViewMatrix;
-    m_Type                    = Type::Orthographic;
+
+    setProjectionMatrix(glm::ortho(m_Left, m_Right, m_Bottom, m_Top, m_NearPlane, m_FarPlane));
+    setViewMatrix(glm::lookAt(m_Eye, m_Forward, m_Up));
+
+    m_Type                    = CameraType::Orthographic;
 }
 ComponentCamera::~ComponentCamera() {
 }
@@ -119,7 +109,7 @@ ComponentCamera& ComponentCamera::operator=(ComponentCamera&& other) noexcept {
 }
 
 void ComponentCamera::resize(const unsigned int width, const unsigned int height) {
-    if (m_Type == Type::Perspective) {
+    if (m_Type == CameraType::Perspective) {
         m_AspectRatio = width / static_cast<float>(height);
     }
     priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
@@ -128,8 +118,9 @@ const unsigned int ComponentCamera::pointIntersectTest(const glm_vec3& position)
     const auto zero = static_cast<decimal>(0.0);
     for (unsigned int i = 0; i < 6; ++i) {
         const auto d = m_FrustumPlanes[i].x * position.x + m_FrustumPlanes[i].y * position.y + m_FrustumPlanes[i].z * position.z + m_FrustumPlanes[i].w;
-        if (d > zero)
+        if (d > zero) {
             return 0; //outside
+        }
     }
     return 1;//inside
 }
@@ -137,23 +128,35 @@ const unsigned int ComponentCamera::sphereIntersectTest(const glm_vec3& position
     unsigned int res = 1; //inside the viewing frustum
     const auto zero = static_cast<decimal>(0.0);
     const auto two = static_cast<decimal>(2.0);
-    if (radius <= zero)
-		return 0;
+    if (radius <= zero) {
+        return 0;
+    }
     for (int i = 0; i < 6; ++i) {
         const auto d = m_FrustumPlanes[i].x * position.x + m_FrustumPlanes[i].y * position.y + m_FrustumPlanes[i].z * position.z + m_FrustumPlanes[i].w;
-        if (d > radius * two)
-			return 0; //outside the viewing frustrum
-        else if (d > zero)
-			res = 2; //intersecting the viewing plane
+        if (d > radius * two) {
+            return 0; //outside the viewing frustrum
+        }else if (d > zero) {
+            res = 2; //intersecting the viewing plane
+        }
     }
     return res;
+}
+void ComponentCamera::setViewMatrix(const glm::mat4& viewMatrix) {
+    m_ViewMatrix = viewMatrix;
+    m_ViewMatrixNoTranslation = viewMatrix;
+    m_ViewMatrixNoTranslation[3][0] = 0.0001f;
+    m_ViewMatrixNoTranslation[3][1] = 0.0001f;
+    m_ViewMatrixNoTranslation[3][2] = 0.0001f;
+}
+void ComponentCamera::setProjectionMatrix(const glm::mat4& projectionMatrix) {
+    m_ProjectionMatrix = projectionMatrix;
 }
 void ComponentCamera::lookAt(const glm_vec3& eye, const glm_vec3& center, const glm_vec3& up) {
     m_Eye                     = eye;
     m_Up                      = up;
     m_Forward                 = glm::normalize(m_Eye - center);
-    m_ViewMatrix              = glm::lookAt(m_Eye, m_Eye - m_Forward, m_Up);
-    m_ViewMatrixNoTranslation = glm::lookAt(glm_vec3(static_cast<decimal>(0.0)), -m_Forward, m_Up);
+
+    setViewMatrix(glm::lookAt(m_Eye, m_Eye - m_Forward, m_Up));
 }
 
 const glm_vec3 ComponentCamera::forward() const {

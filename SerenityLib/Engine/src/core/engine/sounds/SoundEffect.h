@@ -5,7 +5,7 @@
 #include <core/engine/sounds/SoundBaseClass.h>
 #include <SFML/Audio.hpp>
 
-struct Handle;
+class  Handle;
 class  SoundData;
 class  SoundQueue;
 class  SoundEffect : public SoundBaseClass {

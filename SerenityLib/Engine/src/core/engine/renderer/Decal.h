@@ -2,26 +2,23 @@
 #ifndef ENGINE_RENDERER_DECAL_H
 #define ENGINE_RENDERER_DECAL_H
 
-#include <ecs/EntityWrapper.h>
-#include <core/engine/math/Numbers.h>
-
-namespace Engine {
-    namespace priv {
-        struct DefaultDecalBindFunctor;
-        struct DefaultDecalUnbindFunctor;
-    };
+class Material;
+namespace Engine::priv {
+    struct DefaultDecalBindFunctor;
+    struct DefaultDecalUnbindFunctor;
 };
 
-class Material;
+#include <ecs/EntityWrapper.h>
+
 class Decal final: public EntityWrapper{
     friend struct Engine::priv::DefaultDecalBindFunctor;
     friend struct Engine::priv::DefaultDecalUnbindFunctor;
     private:
-        float      m_LifetimeCurrent;
+        float      m_LifetimeCurrent  = 0.0f;
         float      m_LifetimeMax;
-        bool       m_Active;
-        glm_vec3   m_InitialPosition;
-        glm_quat   m_InitialRotation;
+        bool       m_Active           = true;
+        glm_vec3   m_InitialPosition  = glm_vec3(0.0, 0.0, 0.0);
+        glm_quat   m_InitialRotation  = glm_quat(1.0, 0.0, 0.0, 0.0);
     public:
         Decal(
             Material& material,

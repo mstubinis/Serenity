@@ -5,7 +5,7 @@
 #include <core/engine/sounds/SoundBaseClass.h>
 #include <SFML/Audio.hpp>
 
-struct Handle;
+class  Handle;
 class  SoundQueue;
 class  SoundMusic : public SoundBaseClass {
     friend class Engine::priv::SoundManager;

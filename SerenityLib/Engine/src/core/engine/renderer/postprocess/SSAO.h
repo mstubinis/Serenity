@@ -13,33 +13,41 @@ class  Viewport;
 #include <glm/vec3.hpp>
 #include <string>
 
+struct SSAOLevel { enum Level : unsigned char {
+    Off = 0_uc,
+    Low,
+    Medium,
+    High,
+    Ultra,
+};};
+
 namespace Engine::priv {
     class  GBuffer;
     class  Renderer;
     class  SSAO final {
         private:
-            Shader*        m_Vertex_Shader         = nullptr;
-            Shader*        m_Fragment_Shader       = nullptr;
-            ShaderProgram* m_Shader_Program        = nullptr;
-            Shader*        m_Vertex_Shader_Blur    = nullptr;
-            Shader*        m_Fragment_Shader_Blur  = nullptr;
-            ShaderProgram* m_Shader_Program_Blur   = nullptr;
+            Shader*           m_Vertex_Shader         = nullptr;
+            Shader*           m_Fragment_Shader       = nullptr;
+            ShaderProgram*    m_Shader_Program        = nullptr;
+            Shader*           m_Vertex_Shader_Blur    = nullptr;
+            Shader*           m_Fragment_Shader_Blur  = nullptr;
+            ShaderProgram*    m_Shader_Program_Blur   = nullptr;
 
-            std::string    m_GLSL_frag_code        = "";
-            std::string    m_GLSL_frag_code_blur   = "";
+            std::string       m_GLSL_frag_code        = "";
+            std::string       m_GLSL_frag_code_blur   = "";
         public:
-            bool           m_ssao                  = true;
-            bool           m_ssao_do_blur          = true;
-            unsigned int   m_ssao_samples          = 8;
-            unsigned int   m_ssao_blur_num_passes  = 2;
-            unsigned int   m_ssao_noise_texture    = 0;
-            float          m_ssao_blur_radius      = 0.66f;
-            float          m_ssao_blur_strength    = 0.48f;
-            float          m_ssao_scale            = 1.0;
-            float          m_ssao_intensity        = 1.8f;
-            float          m_ssao_bias             = 0.048f;
-            float          m_ssao_radius           = 0.175f;
-            //glm::vec3      m_ssao_Kernels[SSAO_MAX_KERNEL_SIZE];
+            SSAOLevel::Level  m_SSAOLevel             = SSAOLevel::Medium;
+            bool              m_ssao_do_blur          = true;
+            unsigned int      m_ssao_samples          = 8;
+            unsigned int      m_ssao_blur_num_passes  = 2;
+            unsigned int      m_ssao_noise_texture    = 0;
+            float             m_ssao_blur_radius      = 0.66f;
+            float             m_ssao_blur_strength    = 0.48f;
+            float             m_ssao_scale            = 1.0;
+            float             m_ssao_intensity        = 1.8f;
+            float             m_ssao_bias             = 0.048f;
+            float             m_ssao_radius           = 0.175f;
+            //glm::vec3       m_ssao_Kernels[SSAO_MAX_KERNEL_SIZE];
 
             SSAO() = default;
             ~SSAO();
@@ -55,9 +63,8 @@ namespace Engine::priv {
     };
 };
 namespace Engine::Renderer::ssao {
-    const bool enabled();
-    void enable(const bool b = true);
-    void disable();
+    void setLevel(const SSAOLevel::Level);
+
     void enableBlur(const bool b = true);
     void disableBlur();
     const float getBlurRadius();

@@ -107,10 +107,9 @@ const MaterialComponentType::Type MaterialComponent::type() const {
 
 void MaterialComponent::bind(const size_t component_index, size_t& inTextureUnit) const {
     const string wholeString = "components[" + to_string(component_index) + "].";
-    Engine::Renderer::sendUniform1Safe((wholeString + "numLayers").c_str(), static_cast<int>(m_NumLayers));
-    Engine::Renderer::sendUniform1Safe((wholeString + "componentType").c_str(), static_cast<int>(m_ComponentType));
-    for (unsigned int layerIndex = 0; layerIndex < m_NumLayers; ++layerIndex) {
-        m_Layers[layerIndex].sendDataToGPU(wholeString, component_index, layerIndex, inTextureUnit);
+    Engine::Renderer::sendUniform2Safe((wholeString + "componentData").c_str(), static_cast<int>(m_NumLayers), static_cast<int>(m_ComponentType));
+    for (unsigned int layer = 0; layer < m_NumLayers; ++layer) {
+        m_Layers[layer].sendDataToGPU(wholeString, component_index, layer, inTextureUnit);
     }
 }
 void MaterialComponent::unbind() {

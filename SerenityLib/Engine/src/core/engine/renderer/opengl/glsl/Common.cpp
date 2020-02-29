@@ -80,7 +80,8 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
     auto lambda_sampler_add_code_type = [&](const string& view) {
         if (is_bindless_supported) {
             boost::replace_all(code, "SAMPLER_TYPE_" + view, "sampler" + view);
-        }else{
+        }
+        else {
             boost::replace_all(code, "SAMPLER_TYPE_" + view, "sampler" + view);
         }
     };
@@ -100,6 +101,56 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
         }
     }
 #pragma endregion
+
+#pragma region Hammersley
+    if (ShaderHelper::sfind(code, "HammersleySequence(")) {
+        if (!ShaderHelper::sfind(code, "vec2 HammersleySequence(")) {
+            const string hammersley_sequence =
+                "vec2 HammersleySequence(int i, int N){\n"
+                "    return vec2(float(i) / float(N), VanDerCorpus(i));\n"
+                "}\n";
+            ShaderHelper::insertStringAtLine(code, hammersley_sequence, 1);
+        }
+    }
+#pragma endregion
+
+#pragma region VanDerCorpus
+    if (ShaderHelper::sfind(code, "VanDerCorpus(")){
+        if (!ShaderHelper::sfind(code, "float VanDerCorpus(")) {
+            const string van_der_corpus =
+                "float VanDerCorpus(uint bits){\n"
+                "    bits = (bits << 16u) | (bits >> 16u);\n"
+                "    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);\n"
+                "    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);\n"
+                "    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);\n"
+                "    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);\n"
+                "    return float(bits) * 2.3283064365386963e-10;\n" // / 0x100000000
+                "}\n";
+
+                //use this if bit shitfing is not supported
+                /*
+                "float VanDerCorpus(int n){\n"
+                "    float invBase = 0.5;\n"
+                "    float denom   = 1.0;\n"
+                "    float result  = 0.0;\n"
+                "    for(int i = 0; i < 32; ++i){\n"
+                "        if(n > 0){\n"
+                "            denom = mod(float(n), 2.0);\n"
+                "            result += denom * invBase;\n"
+                "            invBase *= 0.5;\n"
+                "            n = int(float(n) * 0.5);\n"
+                "        }\n"
+                "    }\n"
+                "    return result;\n"
+                "}\n"
+                */
+
+            ShaderHelper::insertStringAtLine(code, van_der_corpus, 1);
+        }
+    }
+#pragma endregion
+
+
 
 #pragma region normal map
     if (ShaderHelper::sfind(code, "CalcBumpedNormal(") || ShaderHelper::sfind(code, "CalcBumpedNormalCompressed(") || ShaderHelper::sfind(code, "CalcBumpedNormalLOD(") || ShaderHelper::sfind(code, "CalcBumpedNormalCompressedLOD(")) {

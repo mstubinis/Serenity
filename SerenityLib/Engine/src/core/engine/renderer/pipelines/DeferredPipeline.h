@@ -86,7 +86,7 @@ namespace Engine::priv {
             void internal_pass_blur(const Viewport& viewport, const GLuint texture, std::string_view type);
 
             void internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, const unsigned int convoludeTextureSize, const unsigned int preEnvFilterSize);
-            void internal_generate_brdf_lut(ShaderProgram& program, const unsigned int brdfSize);
+            void internal_generate_brdf_lut(ShaderProgram& program, const unsigned int brdfSize, const int numSamples);
 
             void internal_render_2d_text_left(const std::string& text, const Font& font, const float newLineGlyphHeight, float& x, float& y, const float z);
             void internal_render_2d_text_center(const std::string& text, const Font& font, const float newLineGlyphHeight, float& x, float& y, const float z);
@@ -165,7 +165,11 @@ namespace Engine::priv {
             void renderRodLight(const Camera& c, const RodLight& r) override;
             void renderMesh(const Mesh& mesh, const unsigned int mode = ModelDrawingMode::Triangles) override;
             void renderDecal(ModelInstance& decalModelInstance) override;
+
+            void renderParticles(ParticleSystem& particleSystem, const Camera& camera, ShaderProgram& program, std::mutex& mutex) override;
             void renderParticle(const Particle& particle, const Camera& camera) override;
+
+            void renderLightProbe(LightProbe& lightProbe) override;
 
             void render2DText(const std::string& text, const Font& font, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const TextAlignment::Type textAlignment, const glm::vec4& scissor = glm::vec4(-1.0f)) override;
             void render2DTexture(const Texture* texture, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const Alignment::Type align, const glm::vec4& scissor = glm::vec4(-1.0f)) override;

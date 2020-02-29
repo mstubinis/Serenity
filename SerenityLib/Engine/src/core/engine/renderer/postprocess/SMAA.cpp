@@ -82,7 +82,6 @@ const bool Engine::priv::SMAA::init_shaders() {
         "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
         "uniform mat4 Model;\n"
         "uniform mat4 VP;\n"
-        "uniform vec2 screenSizeDivideBy2;\n"
         "\n"
         "varying vec2 uv;\n"
         "varying vec4 _offset[3];\n"
@@ -90,8 +89,6 @@ const bool Engine::priv::SMAA::init_shaders() {
         "void main(){\n"
         "    uv = UV;\n"
         "    vec3 vert = position;\n"
-        "    vert.x *= screenSizeDivideBy2.x;\n"
-        "    vert.y *= screenSizeDivideBy2.y;\n"
         "    _offset[0] = mad(SMAA_PIXEL_SIZE.xyxy, vec4(-1.0, 0.0, 0.0, API_V_DIR(-1.0)), uv.xyxy);\n"
         "    _offset[1] = mad(SMAA_PIXEL_SIZE.xyxy, vec4( 1.0, 0.0, 0.0,  API_V_DIR(1.0)), uv.xyxy);\n"
         "    _offset[2] = mad(SMAA_PIXEL_SIZE.xyxy, vec4(-2.0, 0.0, 0.0, API_V_DIR(-2.0)), uv.xyxy);\n"
@@ -220,7 +217,6 @@ const bool Engine::priv::SMAA::init_shaders() {
         "uniform mat4 VP;\n"
         "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
         "uniform int SMAA_MAX_SEARCH_STEPS;\n" //make this globally inherit for all smaa shaders
-        "uniform vec2 screenSizeDivideBy2;\n"
         "\n"
         "varying vec2 uv;\n"
         "varying vec2 pixCoord;\n"
@@ -231,8 +227,6 @@ const bool Engine::priv::SMAA::init_shaders() {
         "void main(){\n"
         "    uv = UV;\n"
         "    vec3 vert = position;\n"
-        "    vert.x *= screenSizeDivideBy2.x;\n"
-        "    vert.y *= screenSizeDivideBy2.y;\n"
         "    pixCoord = uv * SMAA_PIXEL_SIZE.zw;\n"
         "    _offset[0] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-0.25,API_V_DIR(-0.125), 1.25,API_V_DIR(-0.125)),uv.xyxy);\n"
         "    _offset[1] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-0.125,API_V_DIR(-0.25),-0.125,API_V_DIR(1.25)),uv.xyxy);\n"
@@ -492,7 +486,6 @@ const bool Engine::priv::SMAA::init_shaders() {
         "uniform mat4 Model;\n"
         "uniform mat4 VP;\n"
         "uniform vec4 SMAA_PIXEL_SIZE;\n" //make this globally inherit for all smaa shaders
-        "uniform vec2 screenSizeDivideBy2;\n"
         "\n"
         "varying vec2 uv;\n"
         "varying vec4 _offset;\n"
@@ -502,8 +495,6 @@ const bool Engine::priv::SMAA::init_shaders() {
         "void main(){\n"
         "    uv = UV;\n"
         "    vec3 vert = position;\n"
-        "    vert.x *= screenSizeDivideBy2.x;\n"
-        "    vert.y *= screenSizeDivideBy2.y;\n"
         "    _offset = mad(SMAA_PIXEL_SIZE.xyxy,vec4(1.0,0.0,0.0,API_V_DIR(1.0)),uv.xyxy);\n"
         "    gl_Position = VP * Model * vec4(vert,1.0);\n"
         "    _SMAA_PIXEL_SIZE = SMAA_PIXEL_SIZE;\n"
@@ -561,7 +552,6 @@ const bool Engine::priv::SMAA::init_shaders() {
         "\n"
         "uniform mat4 Model;\n"
         "uniform mat4 VP;\n"
-        "uniform vec2 screenSizeDivideBy2;\n"
         "\n"
         "varying vec2 uv;\n"
         "\n"
@@ -572,8 +562,6 @@ const bool Engine::priv::SMAA::init_shaders() {
         "void main(){\n"
         "    uv = UV;\n"
         "    vec3 vert = position;\n"
-        "    vert.x *= screenSizeDivideBy2.x;\n"
-        "    vert.y *= screenSizeDivideBy2.y;\n"
         "    gl_Position = VP * Model * vec4(vert,1.0);\n"
         "}";
 #pragma endregion

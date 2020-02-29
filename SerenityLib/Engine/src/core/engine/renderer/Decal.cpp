@@ -46,9 +46,7 @@ Decal::Decal(Material& material, const glm_vec3& localPosition, const glm::vec3&
     model.setCustomBindFunctor(Engine::priv::DefaultDecalBindFunctor());
     model.setCustomUnbindFunctor(Engine::priv::DefaultDecalUnbindFunctor());
 
-    m_LifetimeCurrent = 0.0f;
     m_LifetimeMax = lifetimeMax;
-    m_Active = true;
 }
 Decal::~Decal() {
     destroy();

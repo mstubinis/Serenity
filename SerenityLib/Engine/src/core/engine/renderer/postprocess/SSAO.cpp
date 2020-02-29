@@ -57,6 +57,8 @@ void Engine::priv::SSAO::init() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    Engine::Renderer::ssao::setLevel(m_SSAOLevel);
 }
 const bool Engine::priv::SSAO::init_shaders() {
     if (!m_GLSL_frag_code.empty())
@@ -168,14 +170,56 @@ void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, st
 
     Engine::Renderer::renderFullscreenQuad();
 }
-const bool Engine::Renderer::ssao::enabled() {
-    return Engine::priv::SSAO::ssao.m_ssao;
-}
-void Engine::Renderer::ssao::enable(const bool b) {
-    Engine::priv::SSAO::ssao.m_ssao = b;
-}
-void Engine::Renderer::ssao::disable() {
-    Engine::priv::SSAO::ssao.m_ssao = false;
+
+void Engine::Renderer::ssao::setLevel(const SSAOLevel::Level level) {
+    Engine::priv::SSAO::ssao.m_SSAOLevel = level;
+    switch (level) {
+        case SSAOLevel::Off: {
+            break;
+        }case SSAOLevel::Low: {
+            setSamples(4);
+            setIntensity(1.8f);
+            setBias(0.048f);
+            setRadius(0.175f);
+            setScale(1.0f);
+
+            setBlurRadius(0.66f);
+            setBlurStrength(0.48f);       
+            break;
+        }case SSAOLevel::Medium: {
+            setSamples(8);
+            setIntensity(1.8f);
+            setBias(0.048f);
+            setRadius(0.175f);
+            setScale(1.0f);
+
+            setBlurRadius(0.66f);
+            setBlurStrength(0.48f);
+            break;
+        }case SSAOLevel::High: {
+            setSamples(12);
+            setIntensity(1.8f);
+            setBias(0.048f);
+            setRadius(0.175f);
+            setScale(1.0f);
+
+            setBlurRadius(0.66f);
+            setBlurStrength(0.48f);
+            break;
+        }case SSAOLevel::Ultra: {
+            setSamples(16);
+            setIntensity(1.8f);
+            setBias(0.048f);
+            setRadius(0.175f);
+            setScale(1.0f);
+
+            setBlurRadius(0.66f);
+            setBlurStrength(0.48f);
+            break;
+        }default: {
+            break;
+        }
+    }
 }
 void Engine::Renderer::ssao::enableBlur(const bool b) {
     Engine::priv::SSAO::ssao.m_ssao_do_blur = b;

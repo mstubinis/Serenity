@@ -277,7 +277,6 @@
     <ClInclude Include="Engine\src\core\engine\materials\MaterialLoader.h" />
     <ClInclude Include="Engine\src\core\engine\materials\MaterialRequest.h" />
     <ClInclude Include="Engine\src\core\engine\math\Engine_Math.h" />
-    <ClInclude Include="Engine\src\core\engine\math\Numbers.h" />
     <ClInclude Include="Engine\src\core\engine\math\SimplexNoise.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\AnimationData.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\AnimationIncludes.h" />
@@ -380,7 +379,6 @@
     <ClInclude Include="Engine\src\core\engine\utils\Logger.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Utils.h" />
     <ClInclude Include="Engine\src\core\Terrain.h" />
-    <ClInclude Include="Engine\src\ecs\ComponentBaseClass.h" />
     <ClInclude Include="Engine\src\ecs\ComponentBody.h" />
     <ClInclude Include="Engine\src\ecs\ComponentCamera.h" />
     <ClInclude Include="Engine\src\ecs\ComponentLogic.h" />
@@ -517,7 +515,6 @@
     <ClCompile Include="Engine\src\core\engine\utils\ForcedInclude.cpp" />
     <ClCompile Include="Engine\src\core\engine\utils\Logger.cpp" />
     <ClCompile Include="Engine\src\core\Terrain.cpp" />
-    <ClCompile Include="Engine\src\ecs\ComponentBaseClass.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentCamera.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentLogic.cpp" />

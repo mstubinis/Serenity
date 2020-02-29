@@ -6,7 +6,7 @@ class  ShaderProgram;
 class  Shader;
 class  Viewport;
 
-struct HDRAlgorithm {enum Algorithm {
+struct HDRAlgorithm { enum Algorithm : unsigned char {
     None,
     Reinhard, 
     Filmic, 
@@ -21,11 +21,11 @@ namespace Engine::priv {
     class  Renderer;
     class  HDR final {
         private:
-            Shader*          m_Vertex_Shader     = nullptr;
-            Shader*          m_Fragment_Shader   = nullptr;
-            ShaderProgram*   m_Shader_Program    = nullptr;
+            Shader*                   m_Vertex_Shader     = nullptr;
+            Shader*                   m_Fragment_Shader   = nullptr;
+            ShaderProgram*            m_Shader_Program    = nullptr;
 
-            std::string      m_GLSL_frag_code    = "";
+            std::string               m_GLSL_frag_code    = "";
         public:
             bool                      hdr_active = true;
             float                     exposure   = 3.0f;
@@ -42,9 +42,6 @@ namespace Engine::priv {
     };
 };
 namespace Engine::Renderer::hdr {
-    //const bool enabled();
-    //void enable(const bool b = true);
-    //void disable();
     const float getExposure();
     void setExposure(const float e);
     void setAlgorithm(const HDRAlgorithm::Algorithm a);

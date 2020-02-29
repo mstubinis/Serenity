@@ -13,7 +13,10 @@ class  Viewport;
 #include <vector>
 
 struct SMAAQualityLevel {enum Level {
-    Low, Medium, High, Ultra,
+    Low, 
+    Medium, 
+    High, 
+    Ultra,
 };};
 
 namespace Engine::priv {

@@ -2,19 +2,17 @@
 #include <core/engine/scene/Scene.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/resources/Engine_Resources.h>
-
 #include <glm/gtx/norm.hpp>
 
 using namespace Engine;
 using namespace boost;
 using namespace std;
 
-
-Camera::Camera(const float angle, const float aspectRatio, const float near_, const float far_, Scene* scene) : EntityWrapper(*scene){//create a perspective camera
+Camera::Camera(const float angle, const float aspectRatio, const float Near, const float Far, Scene* scene) : EntityWrapper(*scene){//create a perspective camera
     if (!scene) {
         scene = Resources::getCurrentScene();
     }
-    m_Entity.addComponent<ComponentCamera>(angle, aspectRatio, near_, far_);
+    m_Entity.addComponent<ComponentCamera>(angle, aspectRatio, Near, Far);
     m_Entity.addComponent<ComponentLogic2>();
     m_Entity.addComponent<ComponentBody>();
 
@@ -24,14 +22,12 @@ Camera::Camera(const float angle, const float aspectRatio, const float near_, co
 
     cam.lookAt(glm_vec3(0.0), glm_vec3(0.0) + body.forward(), body.up());
     logic.setUserPointer(this);
-
-    priv::InternalScenePublicInterface::GetCameras(*scene).push_back(this);
 }
-Camera::Camera(const float left, const float right, const float bottom, const float top, const float near_, const float far_, Scene* scene) : EntityWrapper(*scene){//create an orthographic camera
+Camera::Camera(const float left, const float right, const float bottom, const float top, const float Near, const float Far, Scene* scene) : EntityWrapper(*scene){//create an orthographic camera
     if (!scene) {
         scene = Resources::getCurrentScene();
     }
-    m_Entity.addComponent<ComponentCamera>(left, right, bottom, top, near_, far_);
+    m_Entity.addComponent<ComponentCamera>(left, right, bottom, top, Near, Far);
     m_Entity.addComponent<ComponentLogic2>();
     m_Entity.addComponent<ComponentBody>();
 
@@ -41,10 +37,14 @@ Camera::Camera(const float left, const float right, const float bottom, const fl
 
     cam.lookAt(glm_vec3(0.0), glm_vec3(0.0) + body.forward(), body.up());
     logic.setUserPointer(this);
-
-    priv::InternalScenePublicInterface::GetCameras(*scene).push_back(this);
 }
 Camera::~Camera(){ 
+}
+void Camera::setProjectionMatrix(const glm::mat4& projectonMatrix) {
+    m_Entity.getComponent<ComponentCamera>()->setProjectionMatrix(projectonMatrix);
+}
+void Camera::setViewMatrix(const glm::mat4& viewMatrix) {
+    m_Entity.getComponent<ComponentCamera>()->setViewMatrix(viewMatrix);
 }
 void Camera::lookAt(const glm_vec3& eye, const glm_vec3& center, const glm_vec3& up) {
     m_Entity.getComponent<ComponentCamera>()->lookAt(eye, center, up);
@@ -130,8 +130,6 @@ const decimal Camera::getDistanceSquared(const Entity& e, const glm_vec3& this_p
 const decimal Camera::getDistanceSquared(const glm_vec3& objPos, const glm_vec3& this_pos) const {
     return glm::distance2(objPos, this_pos);
 }
-
-
 const unsigned int Camera::sphereIntersectTest(const glm_vec3& pos, const float radius) const {
     return m_Entity.getComponent<ComponentCamera>()->sphereIntersectTest(pos,radius); 
 }
@@ -150,4 +148,3 @@ const bool Camera::rayIntersectSphere(const Entity& entity) const {
         return false;
     return Math::rayIntersectSphere(body->position(), radius, cameraBody.position(), thisCamera.getViewVector());
 }
-
