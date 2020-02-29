@@ -21,26 +21,21 @@ namespace Engine::priv {
 class Particle {
     friend struct Engine::priv::InternalScenePublicInterface;
     friend class  Engine::priv::ParticleSystem;
-    private:
-        ParticleEmitter*   m_EmitterSource     = nullptr;
-        Material*          m_Material          = nullptr;
-
-        bool               m_PassedRenderCheck = false;
-        glm::vec3          m_Position          = glm::vec3(0.0f);
     public:
-        ParticleEmissionProperties*  m_Properties = nullptr;
-        glm::vec4                    m_UserData = glm::vec4(0.0f);
-        glm::vec2                    m_Scale = glm::vec2(1.0f);
-        glm::vec3                    m_Velocity = glm::vec3(0.0f);
-        float                        m_Depth = 0.0f;
-        Engine::color_vector_4       m_Color = Engine::color_vector_4(255_uc);
-        float                        m_Angle = 0.0f;
-        float                        m_AngularVelocity = 0.0f;
-        float                        m_Timer = 0.0f;
-        bool                         m_Active = true;
+        glm::vec3                 m_Position        = glm::vec3(0.0f); //96 bits  (pass to gpu 3 floats)    
+        glm::vec3                 m_Velocity        = glm::vec3(0.0f); //96 bits
 
+        glm::vec2                 m_Scale           = glm::vec2(1.0f); //64 bits (pass to gpu 2 floats)
+        ParticleEmitter*          m_EmitterSource   = nullptr;         //64 bits
+        Material*                 m_Material        = nullptr;         //64 bits (pass to gpu as index (uint))
 
-        Particle();
+        Engine::color_vector_4    m_Color           = Engine::color_vector_4(255_uc); //32 bits (pass to gpu (either as 2 floats or 1 uint))
+
+        float                     m_Angle           = 0.0f;            //  32 bits (pass to gpu as 1 float)
+        float                     m_AngularVelocity = 0.0f;            //  32 bits
+        float                     m_Timer           = 0.0f;            //  32 bits
+
+        Particle() = delete;
         Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmitter& emitter);
         ~Particle();
 
@@ -60,20 +55,5 @@ class Particle {
         const Engine::color_vector_4& color() const;
         const glm::vec3& velocity() const;
         const double lifetime() const;
-        void update(const size_t index, const float dt, Engine::priv::ParticleSystem& particleSystem, const glm::vec3& cameraPosition, const bool multi_threaded);
-
-
-        void setUserDataX(const float x);
-        void setUserDataY(const float y);
-        void setUserDataZ(const float z);
-        void setUserDataW(const float w);
-        void setUserData(const float x, const float y, const float z, const float w);
-        void setUserData(const glm::vec4& data);
-
-        const float getUserDataX() const;
-        const float getUserDataY() const;
-        const float getUserDataZ() const;
-        const float getUserDataW() const;
-        const glm::vec4& getUserData() const;
 };
 #endif

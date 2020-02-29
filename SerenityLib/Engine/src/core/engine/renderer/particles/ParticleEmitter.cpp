@@ -13,18 +13,6 @@
 using namespace std;
 using namespace Engine;
 
-struct EmptyUpdate final { void operator()(ParticleEmitter* emitter, const float dt, ParticleEmissionProperties& properties, std::mutex& mutex_) {
-
-};};
-
-ParticleEmitter::ParticleEmitter() : EntityWrapper(*Resources::getCurrentScene()) {
-    m_Properties = nullptr;
-    m_Active     = false;
-    m_Parent     = Entity::null_;
-    m_Lifetime   = 0.0;
-    internal_init();
-
-}
 ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, EntityWrapper* parent) 
 : ParticleEmitter(properties, scene, lifetime, (parent) ? parent->entity() : Entity::null_){
 
@@ -38,10 +26,7 @@ ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& 
 }
 void ParticleEmitter::internal_init() {
     m_SpawningTimer = m_Properties->m_SpawnRate - 0.01f;
-    m_Timer         = 0.0;
-    m_UserData      = glm::vec4(0.0f);
     addComponent<ComponentBody>();
-    setUpdateFunctor(EmptyUpdate());
 
     /*
     auto& modelComponent = *addComponent<ComponentModel>(Mesh::Cube, Material::Checkers);
@@ -61,21 +46,19 @@ ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept : EntityWrapp
     m_Lifetime        = std::move(other.m_Lifetime);
     m_Parent          = std::move(other.m_Parent);
     m_Entity          = std::move(other.m_Entity);
-    m_UpdateFunctor.swap(other.m_UpdateFunctor);
+    m_UpdateFunctor   = std::move(other.m_UpdateFunctor);
     m_UserData        = std::move(other.m_UserData);
 }
-ParticleEmitter& ParticleEmitter::operator=(ParticleEmitter&& other) noexcept {
-    if (&other != this) {     
-        m_Properties      = std::exchange(other.m_Properties, nullptr);
-        m_SpawningTimer   = std::move(other.m_SpawningTimer);
-        m_Active          = std::move(other.m_Active);
-        m_Timer           = std::move(other.m_Timer);
-        m_Lifetime        = std::move(other.m_Lifetime);
-        m_Parent          = std::move(other.m_Parent);
-        m_Entity          = std::move(other.m_Entity);
-        m_UpdateFunctor.swap(other.m_UpdateFunctor);
-        m_UserData        = std::move(other.m_UserData); 
-    }
+ParticleEmitter& ParticleEmitter::operator=(ParticleEmitter&& other) noexcept {     
+    m_Properties      = std::exchange(other.m_Properties, nullptr);
+    m_SpawningTimer   = std::move(other.m_SpawningTimer);
+    m_Active          = std::move(other.m_Active);
+    m_Timer           = std::move(other.m_Timer);
+    m_Lifetime        = std::move(other.m_Lifetime);
+    m_Parent          = std::move(other.m_Parent);
+    m_Entity          = std::move(other.m_Entity);
+    m_UpdateFunctor   = std::move(other.m_UpdateFunctor);
+    m_UserData        = std::move(other.m_UserData); 
     return *this;
 }
 

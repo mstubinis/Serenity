@@ -13,24 +13,24 @@ namespace Engine::priv {
 #include <vector>
 #include <mutex>
 
-class ParticleEmitter final : public EntityWrapper{
+class ParticleEmitter final : public EntityWrapper {
     friend class  Engine::priv::ParticleSystem;
     friend class  Particle;
     friend struct Engine::priv::InternalScenePublicInterface;
     public:
-        glm::vec4                      m_UserData;
+        glm::vec4                      m_UserData       = glm::vec4(0.0f);
     private:
-        ParticleEmissionProperties*    m_Properties;
-        bool                           m_Active;
-        float                          m_SpawningTimer;
-        float                          m_Timer;
-        float                          m_Lifetime;
-        Entity                         m_Parent;
-        std::function<void(ParticleEmitter*, const float dt, ParticleEmissionProperties&, std::mutex&)> m_UpdateFunctor;
+        ParticleEmissionProperties*    m_Properties     = nullptr;
+        bool                           m_Active         = false;
+        float                          m_SpawningTimer  = 0.0f;
+        float                          m_Timer          = 0.0f;
+        float                          m_Lifetime       = 0.0;
+        Entity                         m_Parent         = Entity::null_;
+        std::function<void(ParticleEmitter*, const float dt, ParticleEmissionProperties&, std::mutex&)> m_UpdateFunctor = [](ParticleEmitter*, const float, ParticleEmissionProperties&, std::mutex&) {};
 
         void internal_init();
     public:
-        ParticleEmitter();
+        ParticleEmitter() = delete;
         ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, EntityWrapper* parent = nullptr);
         ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity& parent = Entity::null_);
         ~ParticleEmitter();

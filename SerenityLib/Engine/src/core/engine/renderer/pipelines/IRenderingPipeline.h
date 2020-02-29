@@ -110,7 +110,6 @@ namespace Engine::priv {
             virtual void renderLightProbe(LightProbe& lightProbe) = 0;
 
             virtual void renderParticles(ParticleSystem& particleSystem, const Camera& camera, ShaderProgram& program, std::mutex& mutex) = 0;
-            virtual void renderParticle(const Particle& particle, const Camera& camera) = 0;
 
             virtual void render2DText(
                 const std::string& text, 

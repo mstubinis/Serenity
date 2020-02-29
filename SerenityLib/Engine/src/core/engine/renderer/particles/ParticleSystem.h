@@ -6,11 +6,13 @@ class ParticleEmitter;
 class Particle;
 class Camera;
 class ShaderProgram;
+class Material;
 namespace Engine::priv {
     class Renderer;
 };
 
 #include <vector>
+#include <unordered_map>
 #include <stack>
 #include <mutex>
 
@@ -18,8 +20,13 @@ namespace Engine::priv {
 #include <glm/vec4.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 2000U;
-constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT = 1000000U;
+#ifdef ENVIRONMENT64
+    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 2'000U;
+    constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT          = 1'000'000U;
+#else
+    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 1'000U;
+    constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT = 500'000U;
+#endif
 
 namespace Engine::priv {
     class ParticleSystem final{
@@ -27,7 +34,6 @@ namespace Engine::priv {
         friend class Particle;
         private:
             std::vector<ParticleEmitter>           m_ParticleEmitters;
-
             std::vector<Particle>                  m_Particles;
 
             std::stack<size_t>                     m_ParticleEmitterFreelist;
@@ -36,6 +42,14 @@ namespace Engine::priv {
 
             void internal_update_emitters(const float dt);
             void internal_update_particles(const float dt, const Camera& camera);
+        public:
+            //DOD
+            std::vector<glm::vec4>  PositionAndScaleX;
+            std::vector<glm::vec2>  ScaleYAndAngle;
+            std::vector<glm::uvec2> MatIDAndPackedColor;
+
+            std::unordered_map<Material*, unsigned int> MaterialToIndex;
+            std::unordered_map<unsigned int, Material*> MaterialToIndexReverse;
         public:
             ParticleSystem();
             ~ParticleSystem();

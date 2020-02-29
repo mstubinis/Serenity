@@ -167,7 +167,6 @@ namespace Engine::priv {
             void renderDecal(ModelInstance& decalModelInstance) override;
 
             void renderParticles(ParticleSystem& particleSystem, const Camera& camera, ShaderProgram& program, std::mutex& mutex) override;
-            void renderParticle(const Particle& particle, const Camera& camera) override;
 
             void renderLightProbe(LightProbe& lightProbe) override;
 
@@ -184,8 +183,6 @@ namespace Engine::priv {
 
             void renderFullscreenTriangle() override;
             void renderFullscreenQuad() override;
-
-
 
             void update(const float dt) override;
             void render(Engine::priv::Renderer& renderer, const Viewport& viewport, const bool mainRenderFunction) override;

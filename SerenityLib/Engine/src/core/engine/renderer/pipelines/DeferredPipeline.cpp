@@ -795,56 +795,34 @@ void DeferredPipeline::renderDecal(ModelInstance& decalModelInstance) {
     Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }
+
 void DeferredPipeline::renderParticles(ParticleSystem& particleSystem, const Camera& camera, ShaderProgram& program, std::mutex& particleSystemMutex) {
-    vector<Particle*> seen;
-    seen.reserve(particleSystem.getParticles().size());
-
-    const glm::vec3 cameraPosition = glm::vec3(camera.getPosition());
-
     auto& planeMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
-
-    auto lamda_culler_particle = [&](Particle& particle, const size_t& j) {
-        const float radius     = planeMesh.getRadius() * Math::Max(particle.m_Scale.x, particle.m_Scale.y);
-        const uint sphereTest  = camera.sphereIntersectTest(particle.position(), radius);
-        const float comparison = radius * 3100.0f; //TODO: this is obviously different from the other culling functions
-        if (!particle.isActive() || sphereTest == 0 || glm::distance2(particle.position(), cameraPosition) > comparison * comparison) {
-            //particle.m_PassedRenderCheck = false;
-        }else{
-            //particle.m_PassedRenderCheck = true;
-            std::lock_guard<std::mutex> lock(particleSystemMutex);
-            seen.push_back(&particle);
-        }
-    };
-    priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_culler_particle, particleSystem.getParticles(), true);
-
-
-    auto lambda_sorter = [&](const Particle* lhs, const Particle* rhs) {
-        return glm::distance2(lhs->position(), cameraPosition) > glm::distance2(rhs->position(), cameraPosition);
-    };
-    std::sort(std::execution::par_unseq, seen.begin(), seen.end(), lambda_sorter);
 
     m_Renderer._bindShaderProgram(&program);
     m_Renderer._bindMesh(&planeMesh);
 
-    for (auto& particle : seen) {
-        //if (particle.m_PassedRenderCheck) { //TODO: using "seen" vector for now, do not need bool check, should profile using seen vector over using bool and full vector...
-        renderParticle(*particle, camera);
-        //}
+    for (size_t i = 0; i < particleSystem.PositionAndScaleX.size(); ++i) {
+        Material* mat = particleSystem.MaterialToIndexReverse[particleSystem.MatIDAndPackedColor[i].x];
+        m_Renderer._bindMaterial(mat);
+
+        const auto maxTextures = m_OpenGLStateMachine.getMaxTextureUnits() - 1U;
+        Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(Engine::priv::GBufferType::Depth), maxTextures);
+        Engine::Renderer::sendUniform1Safe("Object_Color", particleSystem.MatIDAndPackedColor[i].y);
+
+        Engine::Renderer::sendUniform3Safe("ParticlePosition", 
+            particleSystem.PositionAndScaleX[i].x, 
+            particleSystem.PositionAndScaleX[i].y, 
+            particleSystem.PositionAndScaleX[i].z
+        );
+        Engine::Renderer::sendUniform3Safe("ParticleScaleAndRot", 
+            particleSystem.PositionAndScaleX[i].w, 
+            particleSystem.ScaleYAndAngle[i].x, 
+            particleSystem.ScaleYAndAngle[i].y
+        );
+        renderMesh(priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh());
     }
     m_Renderer._unbindMesh(&planeMesh);
-}
-void DeferredPipeline::renderParticle(const Particle& particle, const Camera& camera) {
-    m_Renderer._bindMaterial(particle.getMaterial());
-
-    const auto maxTextures = m_OpenGLStateMachine.getMaxTextureUnits() - 1U;
-    Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(Engine::priv::GBufferType::Depth), maxTextures);
-    Engine::Renderer::sendUniform1Safe("Object_Color", particle.color().toPackedInt());
-
-    Engine::Renderer::sendUniform3Safe("ParticlePosition", particle.position() - glm::vec3(camera.getPosition()));
-    const glm::vec2& scl = particle.getScale();
-    Engine::Renderer::sendUniform3Safe("ParticleScaleAndRot", scl.x, scl.y, 1.0f);
-
-    renderMesh(priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh());
 }
 void DeferredPipeline::renderMesh(const Mesh& mesh, const unsigned int mode) {
     const auto indicesSize = mesh.getVertexData().indices.size();
