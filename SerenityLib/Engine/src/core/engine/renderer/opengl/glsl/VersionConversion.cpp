@@ -65,14 +65,10 @@ void opengl::glsl::VersionConversion::convert(string& code, const unsigned int v
     }
     if (versionNumber >= 110) {
         if (shaderType == ShaderType::Vertex) {
-            boost::replace_all(code, "flat ", "");
-            boost::replace_all(code, "flat", "");
             boost::replace_all(code, "highp ", "");
             boost::replace_all(code, "mediump ", "");
             boost::replace_all(code, "lowp ", "");
         }else if (shaderType == ShaderType::Fragment) {
-            boost::replace_all(code, "flat ", "");
-            boost::replace_all(code, "flat", "");
             boost::replace_all(code, "highp ", "");
             boost::replace_all(code, "mediump ", "");
             boost::replace_all(code, "lowp ", "");
@@ -80,11 +76,9 @@ void opengl::glsl::VersionConversion::convert(string& code, const unsigned int v
     }
     if (versionNumber >= 130) {
         if (shaderType == ShaderType::Vertex) {
-            boost::replace_all(code, " varying", "out");
-            boost::replace_all(code, "varying", "out");
+            boost::replace_all(code, "varying ", "out ");
         }else if (shaderType == ShaderType::Fragment) {
-            boost::replace_all(code, " varying", "in");
-            boost::replace_all(code, "varying", "in");
+            boost::replace_all(code, "varying ", "in ");
             boost::replace_all(code, "gl_FragColor", "FRAG_COL");
             code = "out vec4 FRAG_COL;\n" + code;
         }

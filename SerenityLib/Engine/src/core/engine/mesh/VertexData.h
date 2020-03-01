@@ -59,8 +59,8 @@ struct VertexData final{
     void setIndices(std::vector<unsigned short>& _data, const bool addToGPU = false, const bool orphan = false, const bool reCalcTriangles = false);
 
     void finalize();
-    void bind();
-    void unbind();
+    void bind() const;
+    void unbind() const;
     void sendDataToGPU(const bool orphan, const int attributeIndex = -1);
 };
 

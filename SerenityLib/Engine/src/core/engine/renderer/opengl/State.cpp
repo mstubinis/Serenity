@@ -5,10 +5,9 @@
 using namespace Engine;
 using namespace Engine::priv;
 
+unsigned int OpenGLState::MAX_TEXTURE_UNITS = 0;
 
-const unsigned int OpenGLState::getMaxTextureUnits() const {
-    return static_cast<unsigned int>(textureUnits.capacity());
-}
+
 void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth, const unsigned int& windowHeight) {
     GLint     int_value;
     //GLfloat   float_value;
@@ -18,6 +17,7 @@ void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth,
 
     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &int_value); //what about GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS?
     textureUnits.reserve(int_value);
+    MAX_TEXTURE_UNITS = glm::max(MAX_TEXTURE_UNITS, static_cast<unsigned int>(int_value));
     for (unsigned int i = 0; i < textureUnits.capacity(); ++i) {
         textureUnits.push_back(TextureUnitState());
     }

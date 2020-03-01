@@ -242,7 +242,7 @@ namespace Engine::priv {
 
 
         public:
-            const unsigned int getMaxTextureUnits() const;
+            static unsigned int MAX_TEXTURE_UNITS;
 
             const bool GL_glActiveTexture(const GLenum& textureUnit);
             const bool GL_glBindTextureForModification(const GLenum& textureTarget, const GLuint& textureObject);

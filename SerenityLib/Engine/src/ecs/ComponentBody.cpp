@@ -122,6 +122,11 @@ ComponentBody::ComponentBody(const Entity& entity, const CollisionType::Type col
 }
 ComponentBody::~ComponentBody() {
     //destructor
+    auto& ecs         = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& system      = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
+    auto& pcs         = system.ParentChildSystem;
+    const auto thisID = m_Owner.id();
+
     if (m_Physics) {
         SAFE_DELETE(data.p);
     }else{

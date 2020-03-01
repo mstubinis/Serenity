@@ -21,11 +21,13 @@ namespace Engine::priv {
 #include <glm/vec4.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+constexpr unsigned int MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME = 12U;
+
 #ifdef ENVIRONMENT64
-    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 2'000U;
+    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 4'000U;
     constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT          = 1'000'000U;
 #else
-    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 1'000U;
+    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 2'000U;
     constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT = 500'000U;
 #endif
 
@@ -45,17 +47,19 @@ namespace Engine::priv {
             void internal_update_particles(const float dt, const Camera& camera);
         public:
             //DOD
-            std::vector<glm::vec4>  PositionAndScaleX;
-            std::vector<glm::vec2>  ScaleYAndAngle;
-            std::vector<glm::uvec2> MatIDAndPackedColor;
+            struct ParticleDOD final {
+                glm::vec4 PositionAndScaleX;
+                glm::vec2 ScaleYAndAngle;
+                glm::uvec2 MatIDAndPackedColor;
+            };
+
+            std::vector<ParticleDOD>  ParticlesDOD;
             std::unordered_map<Material*, unsigned int>    MaterialToIndex;
             std::unordered_map<unsigned int, Material*>    MaterialToIndexReverse;
             std::unordered_map<unsigned int, unsigned int> MaterialIDToIndex;
 
             //for the threads...
-            std::vector<std::vector<glm::vec4>>                      THREAD_PART_1;
-            std::vector<std::vector<glm::vec2>>                      THREAD_PART_2;
-            std::vector<std::vector<glm::uvec2>>                     THREAD_PART_3;
+            std::vector<std::vector<ParticleDOD>>                    THREAD_PART_1;
             std::vector<std::unordered_map<Material*, unsigned int>> THREAD_PART_4;
             std::vector<std::unordered_map<unsigned int, Material*>> THREAD_PART_5;
         public:

@@ -41,7 +41,9 @@ const bool BuiltInMeshses::cleanup() {
  Mesh& BuiltInMeshses::getFontMesh() {
     return *m_BuiltInMeshes[BuiltInMeshEnum::Font];
 }
-
+ Mesh& BuiltInMeshses::getParticleMesh() {
+     return *m_BuiltInMeshes[BuiltInMeshEnum::Particle];
+ }
 
 const bool BuiltInMeshses::init() {
     if (m_BuiltInMeshes[0]) {
@@ -64,6 +66,8 @@ const bool BuiltInMeshses::init() {
     if (!build_plane_mesh())
         return false;
     if (!build_font_mesh())
+        return false;
+    if (!build_particle_mesh())
         return false;
 
     return true;
@@ -880,5 +884,11 @@ const bool BuiltInMeshses::build_font_mesh() {
     if (m_BuiltInMeshes[BuiltInMeshEnum::Font])
         return false;
     m_BuiltInMeshes[BuiltInMeshEnum::Font] = NEW Mesh("FontPlane", 1.0f, 1.0f, 0.0005f);
+    return true;
+}
+const bool BuiltInMeshses::build_particle_mesh() {
+    if (m_BuiltInMeshes[BuiltInMeshEnum::Particle])
+        return false;
+    m_BuiltInMeshes[BuiltInMeshEnum::Particle] = NEW Mesh("ParticlePlane", 1.0f, 1.0f, 0.0005f);
     return true;
 }

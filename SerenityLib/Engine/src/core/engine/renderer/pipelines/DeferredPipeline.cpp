@@ -9,6 +9,8 @@
 #include <core/engine/fonts/Font.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/materials/Material.h>
+#include <core/engine/materials/MaterialComponent.h>
+#include <core/engine/materials/MaterialLayer.h>
 #include <core/engine/renderer/particles/Particle.h>
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/shaders/Shader.h>
@@ -61,6 +63,8 @@ constexpr glm::mat4 CAPTURE_VEIWS[6] = {
     glm::mat4(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
     glm::mat4(-1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
 };
+
+constexpr int SIZE_OF_PARTICLE_DOD = sizeof(ParticleSystem::ParticleDOD);
 
 struct ShaderEnum final {
     enum Shader {
@@ -173,7 +177,8 @@ void DeferredPipeline::init() {
     m_OpenGLStateMachine.GL_glEnable(GL_DEPTH_CLAMP);
     Engine::Renderer::setDepthFunc(GL_LEQUAL);
 
-    priv::EShaders::init();
+
+    priv::EShaders::init(Engine::priv::Renderer::OPENGL_VERSION, Engine::priv::Renderer::GLSL_VERSION);
 
 
     UniformBufferObject::UBO_CAMERA = NEW UniformBufferObject("Camera", sizeof(UBOCameraDataStruct));
@@ -313,6 +318,28 @@ void DeferredPipeline::init() {
     SMAA::smaa.init();
 
     internal_generate_brdf_lut(*m_InternalShaderPrograms[ShaderProgramEnum::BRDFPrecomputeCookTorrance], 512, 256);
+
+
+
+    //particle instancing
+    Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh().getVertexData().bind();
+    glGenBuffers(1, &m_Particle_Instance_VBO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_Particle_Instance_VBO);
+    glBufferData(GL_ARRAY_BUFFER, 0, NULL, GL_STREAM_DRAW);
+
+    glEnableVertexAttribArray(2);                          
+    glVertexAttribPointer(2, 4, GL_FLOAT,        GL_FALSE, SIZE_OF_PARTICLE_DOD,  (void*)0  );
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 2, GL_FLOAT,        GL_FALSE, SIZE_OF_PARTICLE_DOD,  (void*)(sizeof(glm::vec4))  );
+    glEnableVertexAttribArray(4);
+    glVertexAttribIPointer(4, 2, GL_UNSIGNED_INT, SIZE_OF_PARTICLE_DOD, (void*)(sizeof(glm::vec4) + sizeof(glm::vec2))  );
+
+    glVertexAttribDivisor(2, 1);
+    glVertexAttribDivisor(3, 1);
+    glVertexAttribDivisor(4, 1);
+
+    Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh().getVertexData().unbind();
 }
 void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, const unsigned int convoludeTextureSize, const unsigned int preEnvFilterSize) {
     const auto texType = texture.type();
@@ -404,7 +431,7 @@ const unsigned int DeferredPipeline::getUniformLocationUnsafe(const char* locati
     return m_RendererState.current_bound_shader_program->uniforms().at(location);
 }
 const unsigned int DeferredPipeline::getMaxNumTextureUnits() {
-    return m_OpenGLStateMachine.getMaxTextureUnits();
+    return Engine::priv::OpenGLState::MAX_TEXTURE_UNITS;
 }
 void DeferredPipeline::restoreDefaultState() {
     const auto winWidth = Resources::getWindowSize();
@@ -795,50 +822,44 @@ void DeferredPipeline::renderDecal(ModelInstance& decalModelInstance) {
 }
 
 void DeferredPipeline::renderParticles(ParticleSystem& system, const Camera& camera, ShaderProgram& program) {
-    auto& planeMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
+    const auto particle_count = system.ParticlesDOD.size();
+    if (particle_count > 0) {
+        auto& particleMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh();
+        m_Renderer._bindShaderProgram(&program);
+        for (auto& pair : system.MaterialToIndexReverse) {
+            system.MaterialIDToIndex.try_emplace(pair.first, system.MaterialIDToIndex.size());
+        }
 
-    m_Renderer._bindShaderProgram(&program);
-    m_Renderer._bindMesh(&planeMesh);
+        for (auto& pod : system.ParticlesDOD) {
+            pod.MatIDAndPackedColor.x = system.MaterialIDToIndex.at(pod.MatIDAndPackedColor.x);
+        }
 
-    for (auto& pair : system.MaterialToIndexReverse) {
-        system.MaterialIDToIndex.try_emplace(pair.first, system.MaterialIDToIndex.size());
+        for (auto& pair : system.MaterialIDToIndex) {
+            Material* mat = system.MaterialToIndexReverse.at(pair.first);
+            Texture& texture = *mat->getComponent(MaterialComponentType::Diffuse).texture(0);
+            const string location = "DiffuseTexture" + to_string(pair.second) + "";
+            Engine::Renderer::sendTextureSafe(location.c_str(), texture, pair.second);
+        }
+
+        const auto maxTextures = getMaxNumTextureUnits() - 1U;
+        Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), maxTextures);
+
+        m_Renderer._bindMesh(&particleMesh);
+        glBindBuffer(GL_ARRAY_BUFFER, m_Particle_Instance_VBO);
+        glBufferData(GL_ARRAY_BUFFER, particle_count * SIZE_OF_PARTICLE_DOD, NULL, GL_STREAM_DRAW);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, particle_count * SIZE_OF_PARTICLE_DOD, &system.ParticlesDOD[0]);
+
+        glDrawElementsInstanced(GL_TRIANGLES, particleMesh.getVertexData().indices.size(), GL_UNSIGNED_SHORT, 0, static_cast<GLsizei>(particle_count));
+
+        m_Renderer._unbindMesh(&particleMesh);
     }
-    //system.MaterialIDToIndex is now {  index  =>  material ID  }, use this later on when populating VBO's
-
-    for (size_t i = 0; i < system.PositionAndScaleX.size(); ++i) {
-        Material* mat = system.MaterialToIndexReverse.at(system.MatIDAndPackedColor[i].x);
-        m_Renderer._bindMaterial(mat);
-
-        const auto maxTextures = m_OpenGLStateMachine.getMaxTextureUnits() - 1U;
-        Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(Engine::priv::GBufferType::Depth), maxTextures);
-        Engine::Renderer::sendUniform1Safe("Object_Color", system.MatIDAndPackedColor[i].y);
-
-        Engine::Renderer::sendUniform3Safe("ParticlePosition", system.PositionAndScaleX[i].x, system.PositionAndScaleX[i].y, system.PositionAndScaleX[i].z);
-        Engine::Renderer::sendUniform3Safe("ParticleScaleAndRot", system.PositionAndScaleX[i].w, system.ScaleYAndAngle[i].x, system.ScaleYAndAngle[i].y);
-        renderMesh(priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh());
-    }
-    m_Renderer._unbindMesh(&planeMesh);
 }
 void DeferredPipeline::renderMesh(const Mesh& mesh, const unsigned int mode) {
     const auto indicesSize = mesh.getVertexData().indices.size();
     if (indicesSize == 0) {
         return;
     }
-    //if (instancing && priv::InternalMeshPublicInterface::SupportsInstancing()) {
-        //const unsigned int& instancesCount = m_InstanceCount;
-        //if (instancesCount == 0) 
-        //    return;
-        //if (Renderer::OPENGL_VERSION >= 31) {
-        //    glDrawElementsInstanced(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
-        //} else if (OpenGLExtension::supported(OpenGLExtension::EXT_draw_instanced)) {
-        //    glDrawElementsInstancedEXT(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
-        //} else if (OpenGLExtension::supported(OpenGLExtension::ARB_draw_instanced)) {
-        //    glDrawElementsInstancedARB(mode, indicesSize, GL_UNSIGNED_SHORT, 0, instancesCount);
-        //}
-    //}
-    //else {
-        glDrawElements(mode, (GLsizei)indicesSize, GL_UNSIGNED_SHORT, nullptr);
-    //}
+    glDrawElements(mode, (GLsizei)indicesSize, GL_UNSIGNED_SHORT, nullptr);
 }
 void DeferredPipeline::renderLightProbe(LightProbe& lightProbe) {
     //goal: render all 6 sides into a fbo and into a cubemap, and have that cubemap stored in the light probe to be used for Global Illumination
@@ -1091,7 +1112,7 @@ void DeferredPipeline::internal_render_per_frame_preparation(const Viewport& vie
 
     m_2DProjectionMatrix = glm::ortho(0.0f, dimensions.z, 0.0f, dimensions.w, 0.005f, 3000.0f); //might have to recheck this
     //this is god awful and ugly, but it's needed. find a way to refactor this properly
-    for (uint i = 0; i < 9; ++i) {
+    for (unsigned int i = 0; i < 9; ++i) {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);

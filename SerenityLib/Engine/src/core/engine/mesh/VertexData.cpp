@@ -34,7 +34,7 @@ void VertexData::finalize() {
         format.bind(*this);
     }
 }
-void VertexData::bind() {
+void VertexData::bind() const {
     if (vao) {
         Renderer::bindVAO(vao);
     }else{
@@ -43,7 +43,7 @@ void VertexData::bind() {
         format.bind(*this);
     }
 }
-void VertexData::unbind() {
+void VertexData::unbind() const {
     if (vao) {
         Renderer::bindVAO(0);
     }else{
@@ -102,7 +102,8 @@ void VertexData::sendDataToGPU(const bool orphan, const int attributeIndex) {
     NonInterleaved, // | pos pos pos | uv  uv  uv  | norm norm norm | ... etc ... 
     */
     auto& _vBuffer = *buffers[0];
-    _vBuffer.generate(); _vBuffer.bind();
+    _vBuffer.generate(); 
+    _vBuffer.bind();
 
     size_t accumulator = 0;
     size_t size = 0;

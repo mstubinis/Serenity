@@ -69,6 +69,9 @@ namespace Engine::priv {
             std::vector<ShaderProgram*>    m_InternalShaderPrograms;
             std::vector<API2DCommand>      m_2DAPICommands;
 
+            //particle instancing
+            unsigned int                   m_Particle_Instance_VBO;
+
             void internal_render_per_frame_preparation(const Viewport& viewport, const Camera& camera);
             void internal_pass_geometry(const Viewport& viewport, const Camera& camera);
             void internal_pass_ssao(const Viewport& viewport, const Camera& camera);

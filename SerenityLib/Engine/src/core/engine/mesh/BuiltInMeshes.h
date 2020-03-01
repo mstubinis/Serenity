@@ -16,6 +16,7 @@ namespace Engine::priv {
             Cube,
             Plane,
             Font,
+            Particle,
         _TOTAL,};};
 
         private:
@@ -28,6 +29,7 @@ namespace Engine::priv {
             const bool build_cube_mesh();
             const bool build_plane_mesh();
             const bool build_font_mesh();
+            const bool build_particle_mesh();
 
         public:
             BuiltInMeshses();
@@ -40,6 +42,7 @@ namespace Engine::priv {
             Mesh& getCubeMesh();
             Mesh& getPlaneMesh();
             Mesh& getFontMesh();
+            Mesh& getParticleMesh();
 
             const bool init();
             const bool cleanup();

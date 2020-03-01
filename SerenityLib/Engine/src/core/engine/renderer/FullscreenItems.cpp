@@ -70,6 +70,7 @@ void priv::FullscreenTriangle::buildVAO() {
 }
 void priv::FullscreenTriangle::bindToGPU() {
     glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[0]);
+
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertexDataFullscreen), (void*)0);
 

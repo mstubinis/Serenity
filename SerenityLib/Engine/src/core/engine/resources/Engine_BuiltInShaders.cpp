@@ -1,5 +1,7 @@
 #include <core/engine/resources/Engine_BuiltInShaders.h>
+#include <core/engine/renderer/particles/ParticleSystem.h>
 #include <core/engine/materials/MaterialEnums.h>
+#include <core/engine/renderer/opengl/State.h>
 
 using namespace Engine;
 using namespace std;
@@ -52,7 +54,7 @@ string priv::EShaders::lighting_frag;
 string priv::EShaders::lighting_frag_gi;
 #pragma endregion
 
-void priv::EShaders::init(){
+void priv::EShaders::init(const unsigned int openglVersion, const unsigned int glslVersion){
 
 #pragma region Functions
 
@@ -182,26 +184,28 @@ priv::EShaders::bullet_physcis_frag =
 //TODO: get rid of the useless info here
 priv::EShaders::decal_vertex =  
     "USE_LOG_DEPTH_VERTEX\n"
-    "\n"
+
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec2 uv;\n"
     "layout (location = 2) in vec4 normal;\n" //Order is ZYXW
     "layout (location = 3) in vec4 binormal;\n"//Order is ZYXW
     "layout (location = 4) in vec4 tangent;\n"//Order is ZYXW
-    "\n"
+
     "uniform mat4 Model;\n"
     "uniform mat3 NormalMatrix;\n"
-    "\n"
+
     "varying vec3 Normals;\n"
     "varying mat3 TBN;\n"
+
     "flat varying mat4 WorldMatrix;\n"
     "flat varying vec3 CamPosition;\n"
     "flat varying vec3 CamRealPosition;\n"
+
     "varying vec4 VertexPositionsClipSpace;\n"
     "varying vec4 VertexPositionsViewSpace;\n"
     "varying vec3 TangentCameraPos;\n"
     "varying vec3 TangentFragPos;\n"
-    "\n"
+
     "void main(){\n"
     "    mat4 ModelMatrix = Model;\n"
     "    ModelMatrix[3][0] -= CameraRealPosition.x;\n"
@@ -217,12 +221,14 @@ priv::EShaders::decal_vertex =
     "    vec3 NormalTrans   =  vec4(normal.zyx,   0.0).xyz;\n"  //Order is ZYXW so to bring it to XYZ we need to use ZYX
     "    vec3 BinormalTrans =  vec4(binormal.zyx, 0.0).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
     "    vec3 TangentTrans  =  vec4(tangent.zyx,  0.0).xyz;\n" //Order is ZYXW so to bring it to XYZ we need to use ZYX
-    "\n"
+
     "           Normals = NormalMatrix * NormalTrans;\n"
     "    vec3 Binormals = NormalMatrix * BinormalTrans;\n"
     "    vec3  Tangents = NormalMatrix * TangentTrans;\n"
     "    TBN = mat3(Tangents,Binormals,Normals);\n"
+
     "    CamPosition = CameraPosition;\n"
+
     "    CamRealPosition = CameraRealPosition;\n"
     "    TangentCameraPos = TBN * CameraPosition;\n"
     "    TangentFragPos = TBN * worldPos.xyz;\n"
@@ -236,26 +242,35 @@ priv::EShaders::particle_vertex =
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec2 uv;\n"
 
+    "layout (location = 2) in vec4 ParticlePositionAndScaleX;\n"
+    "layout (location = 3) in vec2 ParticleScaleYAndRotation;\n"
+    "layout (location = 4) in uvec2 ParticleMaterialIndexAndColorPacked;\n"
+
     "varying vec2 UV;\n"
     "varying vec3 WorldPosition;\n"
 
-    "uniform vec3 ParticlePosition;\n"
-    "uniform vec3 ParticleScaleAndRot;\n"
+    "flat varying uint MaterialIndex;\n"
+    "flat varying vec4 ParticleColor;\n"
 
     "void main(){\n"
-    "    float sine = sin(ParticleScaleAndRot.z);\n"
-    "    float cose = cos(ParticleScaleAndRot.z);\n"
+    "    float sine = sin(ParticleScaleYAndRotation.y);\n"
+    "    float cose = cos(ParticleScaleYAndRotation.y);\n"
+
     "    float xPrime = position.x * cose - position.y * sine;\n"
     "    float yPrime = position.x * sine + position.y * cose;\n"
 
     "    vec3 CameraRight = vec3(CameraView[0][0], CameraView[1][0], CameraView[2][0]);\n"
     "    vec3 CameraUp = vec3(CameraView[0][1], CameraView[1][1], CameraView[2][1]);\n"
-    "    vec3 VertexWorldSpace = ParticlePosition + CameraRight * (xPrime) * ParticleScaleAndRot.x + CameraUp * (yPrime) * ParticleScaleAndRot.y;\n"
+    "    vec3 VertexWorldSpace = (ParticlePositionAndScaleX.xyz - CameraRealPosition) + CameraRight * (xPrime) * ParticlePositionAndScaleX.w + CameraUp * (yPrime) * ParticleScaleYAndRotation.x;\n"
 
     "    vec4 worldPos = vec4(VertexWorldSpace, 1.0);\n"
     "    gl_Position = CameraViewProj * worldPos;\n"
     "    WorldPosition = worldPos.xyz;\n"
     "    UV = uv;\n"
+
+    "    MaterialIndex = ParticleMaterialIndexAndColorPacked.x;\n"
+    "    ParticleColor = Unpack32BitUIntTo4ColorFloats(ParticleMaterialIndexAndColorPacked.y);\n"
+
     "}";
 #pragma endregion
 
@@ -829,27 +844,55 @@ priv::EShaders::forward_frag =
 #pragma endregion
 
 #pragma region ParticleFrag
-priv::EShaders::particle_frag =
+    priv::EShaders::particle_frag =
     "\n"
     "USE_LOG_DEPTH_FRAGMENT\n"
-    "\n"
-    "uniform SAMPLER_TYPE_2D DiffuseTexture;\n"
+
+    "uniform SAMPLER_TYPE_2D DiffuseTexture0;\n";
+
+for (unsigned int i = 1; i < glm::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
+    priv::EShaders::particle_frag +=
+     "uniform SAMPLER_TYPE_2D DiffuseTexture" + to_string(i) + ";\n";
+}
+
+    priv::EShaders::particle_frag +=
+
     "uniform SAMPLER_TYPE_2D gDepthMap;\n"
-    "uniform uint Object_Color;\n"
+
     "varying vec2 UV;\n"
     "varying vec3 WorldPosition;\n"
+
+    "flat varying uint MaterialIndex;\n"
+    "flat varying vec4 ParticleColor;\n"
+
     "void main(){\n"
-         //this code is for soft particles
+    //this code is for soft particles////////////////////////////////////
     "    vec2 screen_uv = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y);\n"
     "    vec3 worldPos = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), screen_uv, CameraNear, CameraFar);\n"
     "    float dist = distance(worldPos, WorldPosition) * 4.2;\n" //increasing that number will make the particles fade less from edges, but might increase the risk for sharper edges like without soft particles
     "    float alpha = clamp(dist, 0.0, 1.0);\n"
-    
-    "    vec4 color = Unpack32BitUIntTo4ColorFloats(Object_Color) * texture2D(DiffuseTexture, UV); \n"
-    "    color.a *= alpha;\n"
+    //////////////////////////////////////////////////////////////////////////
+    "    vec4 finalColor = ParticleColor;\n"
 
-    "    gl_FragData[0] = color;\n"
-    "    gl_FragData[3] = color;\n"
+    "    if(MaterialIndex == 0U)\n"
+    "        finalColor *= texture2D(DiffuseTexture0, UV); \n";
+
+    priv::EShaders::particle_frag += "";
+
+    for (unsigned int i = 1; i < glm::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
+        priv::EShaders::particle_frag +=
+            "    else if (MaterialIndex == " + to_string(i) + "U)\n"
+            "        finalColor *= texture2D(DiffuseTexture" + to_string(i) + ", UV); \n";
+    }
+
+    priv::EShaders::particle_frag +=
+    "    else\n"
+    "        finalColor *= texture2D(DiffuseTexture0, UV); \n"
+
+    "    finalColor.a *= alpha;\n"
+
+    "    gl_FragData[0] = finalColor;\n"
+    "    gl_FragData[3] = finalColor;\n"
     "}";
 #pragma endregion
 

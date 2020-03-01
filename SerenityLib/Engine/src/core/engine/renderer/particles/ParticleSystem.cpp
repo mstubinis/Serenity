@@ -30,8 +30,6 @@ priv::ParticleSystem::ParticleSystem() {
 
     const auto num_cores = Engine::priv::threading::hardware_concurrency();
     THREAD_PART_1.resize(num_cores);
-    THREAD_PART_2.resize(num_cores);
-    THREAD_PART_3.resize(num_cores);
 
     THREAD_PART_4.resize(num_cores);
     THREAD_PART_5.resize(num_cores);
@@ -128,44 +126,6 @@ void priv::ParticleSystem::update(const float dt, const Camera& camera) {
     internal_update_emitters(dt);
 }
 
-template<class T1, class T2, class T3> void sort_multiple_vectors_at_once(vector<T1>& vin1, vector<T2>& vin2, vector<T3>& keys, const Camera& camera) {
-    const glm::vec3 cameraPosition = glm::vec3(camera.getPosition());
-
-    vector<std::size_t> indices; indices.reserve(vin1.size());
-    for (auto&& unused : keys) {
-        indices.push_back(indices.size());
-    }
-
-    auto lambda = [&](const std::size_t l, const std::size_t r) {
-        const glm::vec3 position1 = glm::vec3(keys[l].x, keys[l].y, keys[l].z);
-        const glm::vec3 position2 = glm::vec3(keys[r].x, keys[r].y, keys[r].z);
-        return glm::distance2(position1, cameraPosition) > glm::distance2(position2, cameraPosition);
-    };
-    if (indices.size() < 100)
-        std::sort(std::begin(indices), std::end(indices), lambda);
-    else
-        std::sort(std::execution::par_unseq, std::begin(indices), std::end(indices), lambda);
-
-
-    vector<T1> r1; r1.reserve(vin1.size());
-    for (size_t i = 0; i < vin1.size(); ++i) {
-        r1.push_back(vin1[indices[i]]);
-    }
-
-    vector<T2> r2; r2.reserve(vin2.size());
-    for (size_t i = 0; i < vin2.size(); ++i) {
-        r2.push_back(vin2[indices[i]]);
-    }
-
-    vector<T3> r3; r3.reserve(keys.size());
-    for (size_t i = 0; i < keys.size(); ++i) {
-        r3.push_back(keys[indices[i]]);
-    }
-
-    vin1 = r1;
-    vin2 = r2;
-    keys = r3;
-}
 void priv::ParticleSystem::render(const Viewport& viewport, const Camera& camera, ShaderProgram& program, Renderer& renderer) {
     const auto particles_size = m_Particles.size();
     if (particles_size == 0 || !viewport.getRenderFlags().has(ViewportRenderingFlag::Particles)) {
@@ -174,18 +134,13 @@ void priv::ParticleSystem::render(const Viewport& viewport, const Camera& camera
 
     //now cull, sort, and populate their render lists
     auto& planeMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
-    PositionAndScaleX.clear();
-    ScaleYAndAngle.clear();
-    MatIDAndPackedColor.clear();
+    ParticlesDOD.clear();
 
     MaterialToIndex.clear();
     MaterialToIndexReverse.clear();
     MaterialIDToIndex.clear();
-
-    if (PositionAndScaleX.capacity() < particles_size) {
-        PositionAndScaleX.reserve(particles_size);
-        ScaleYAndAngle.reserve(particles_size);
-        MatIDAndPackedColor.reserve(particles_size);
+    if (ParticlesDOD.capacity() < particles_size) {
+        ParticlesDOD.reserve(particles_size);
     }
 
     //auto start = chrono::high_resolution_clock::now();
@@ -193,14 +148,10 @@ void priv::ParticleSystem::render(const Viewport& viewport, const Camera& camera
     const auto reserve_size = particles_size / Engine::priv::threading::hardware_concurrency();
 
     for (auto& _1 : THREAD_PART_1) _1.clear();
-    for (auto& _2 : THREAD_PART_2) _2.clear();
-    for (auto& _3 : THREAD_PART_3) _3.clear();
     for (auto& _4 : THREAD_PART_4) _4.clear();
     for (auto& _5 : THREAD_PART_5) _5.clear();
 
     for (auto& _1 : THREAD_PART_1) _1.reserve(reserve_size);
-    for (auto& _2 : THREAD_PART_2) _2.reserve(reserve_size);
-    for (auto& _3 : THREAD_PART_3) _3.reserve(reserve_size);
 
     const glm::vec3 camPos = glm::vec3(camera.getPosition());
     auto lamda_culler_particle = [&](Particle& particle, const size_t& j, const unsigned int k) {
@@ -216,17 +167,17 @@ void priv::ParticleSystem::render(const Viewport& viewport, const Camera& camera
             }
             ///////////////////////////////////////////
 
-            THREAD_PART_1[k].emplace_back(pos.x - camPos.x, pos.y - camPos.y, pos.z - camPos.z, particle.m_Scale.x);
-            THREAD_PART_2[k].emplace_back(particle.m_Scale.y, particle.m_Angle);
-            THREAD_PART_3[k].emplace_back(THREAD_PART_4[k].at(particle.m_Material), particle.m_Color.toPackedInt());
+            ParticleDOD dod;
+            dod.PositionAndScaleX   = glm::vec4(pos.x, pos.y, pos.z, particle.m_Scale.x);
+            dod.ScaleYAndAngle      = glm::vec2(particle.m_Scale.y, particle.m_Angle);
+            dod.MatIDAndPackedColor = glm::uvec2(THREAD_PART_4[k].at(particle.m_Material), particle.m_Color.toPackedInt());
+            THREAD_PART_1[k].push_back(std::move(dod));
         }
     };
     Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_culler_particle, m_Particles, true);
 
     //merge the thread collections into the main collections
-    for (auto& _1 : THREAD_PART_1) { PositionAndScaleX.insert(PositionAndScaleX.end(), std::make_move_iterator(_1.begin()), std::make_move_iterator(_1.end())); }
-    for (auto& _2 : THREAD_PART_2) { ScaleYAndAngle.insert(ScaleYAndAngle.end(), std::make_move_iterator(_2.begin()), std::make_move_iterator(_2.end())); }
-    for (auto& _3 : THREAD_PART_3) { MatIDAndPackedColor.insert(MatIDAndPackedColor.end(), std::make_move_iterator(_3.begin()), std::make_move_iterator(_3.end())); }
+    for (auto& _1 : THREAD_PART_1) { ParticlesDOD.insert(ParticlesDOD.end(), std::make_move_iterator(_1.begin()), std::make_move_iterator(_1.end())); }
     for (auto& _4 : THREAD_PART_4) { MaterialToIndex.merge(_4); }
     for (auto& _5 : THREAD_PART_5) { MaterialToIndexReverse.merge(_5); }
 
@@ -235,7 +186,12 @@ void priv::ParticleSystem::render(const Viewport& viewport, const Camera& camera
     //Core::m_Engine->m_DebugManager.addDebugLine(to_string(f));
 
     //sorting
-    sort_multiple_vectors_at_once(ScaleYAndAngle, MatIDAndPackedColor, PositionAndScaleX, camera);
+    auto lambda = [&](const ParticleDOD& l, const ParticleDOD& r) {
+        const glm::vec3 position1 = glm::vec3(l.PositionAndScaleX.x, l.PositionAndScaleX.y, l.PositionAndScaleX.z);
+        const glm::vec3 position2 = glm::vec3(r.PositionAndScaleX.x, r.PositionAndScaleX.y, r.PositionAndScaleX.z);
+        return glm::distance2(position1, camPos) > glm::distance2(position2, camPos);
+    };
+    std::sort(std::execution::par_unseq, std::begin(ParticlesDOD), std::end(ParticlesDOD), lambda);
 
     renderer.m_Pipeline->renderParticles(*this, camera, program);
 }
