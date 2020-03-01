@@ -227,14 +227,14 @@ void ComponentCamera::setFar(const float farPlane) {
 struct priv::ComponentCamera_UpdateFunction final { void operator()(void* system, void* componentPool, const float dt, Scene& scene) const {
 	auto& pool = *static_cast<ECSComponentPool<Entity, ComponentCamera>*>(componentPool);
 	auto& components = pool.data();
-    auto lamda_update_component = [&](ComponentCamera& b, const size_t& i) {
+    auto lamda_update_component = [&](ComponentCamera& b, const size_t& i, const unsigned int k) {
         Math::extractViewFrustumPlanesHartmannGribbs(b.m_ProjectionMatrix * b.m_ViewMatrix, b.m_FrustumPlanes);//update view frustrum 
     };
 
 
     if (components.size() < 50) {
         for (size_t i = 0; i < components.size(); ++i) {
-            lamda_update_component(components[i], i);
+            lamda_update_component(components[i], i, 0);
         }
     }else{
         priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);

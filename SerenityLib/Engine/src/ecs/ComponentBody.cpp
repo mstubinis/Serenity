@@ -1120,7 +1120,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
     auto& components        = pool.data();
     const decimal double_dt = static_cast<decimal>(dt);
 
-    auto lamda_update_component = [double_dt, &system](ComponentBody& b, const size_t& i) {
+    auto lamda_update_component = [double_dt, &system](ComponentBody& b, const size_t& i, const unsigned int k) {
         const auto entityIndex = b.m_Owner.id() - 1U;
         auto& localMatrix = system.ParentChildSystem.LocalTransforms[entityIndex];
         auto& worldMatrix = system.ParentChildSystem.WorldTransforms[entityIndex];
@@ -1142,7 +1142,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
 
     if (components.size() < 200) {
         for (size_t i = 0; i < components.size(); ++i) {
-            lamda_update_component(components[i], i);
+            lamda_update_component(components[i], i, 0);
         }
     }else{
         priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);

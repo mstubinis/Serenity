@@ -317,7 +317,7 @@ void ComponentModel::setUserPointer(void* UserPointer) {
 struct priv::ComponentModel_UpdateFunction final { void operator()(void* system, void* componentPool, const float dt, Scene& scene) const {
     auto& pool       = *static_cast<ECSComponentPool<Entity, ComponentModel>*>(componentPool);
     auto& components = pool.data();
-    auto lamda_update_component = [&](ComponentModel& componentModel, const size_t& i) {
+    auto lamda_update_component = [&](ComponentModel& componentModel, const size_t& i, const unsigned int k) {
         for (size_t j = 0; j < componentModel.getNumModels(); ++j) {
             auto& modelInstance = componentModel[j];
             //process the animations here
@@ -327,7 +327,7 @@ struct priv::ComponentModel_UpdateFunction final { void operator()(void* system,
 
     if (components.size() < 100) {
         for (size_t i = 0; i < components.size(); ++i) {
-            lamda_update_component(components[i], i);
+            lamda_update_component(components[i], i, 0);
         }
     }else{
         priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);

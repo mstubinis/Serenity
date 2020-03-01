@@ -29,7 +29,6 @@ namespace Engine::priv {
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
-#include <mutex>
 
 namespace Engine::priv {
     class IRenderingPipeline {
@@ -109,7 +108,7 @@ namespace Engine::priv {
             virtual void renderDecal(ModelInstance& decalModelInstance) = 0;
             virtual void renderLightProbe(LightProbe& lightProbe) = 0;
 
-            virtual void renderParticles(ParticleSystem& particleSystem, const Camera& camera, ShaderProgram& program, std::mutex& mutex) = 0;
+            virtual void renderParticles(ParticleSystem& particleSystem, const Camera& camera, ShaderProgram& program) = 0;
 
             virtual void render2DText(
                 const std::string& text, 

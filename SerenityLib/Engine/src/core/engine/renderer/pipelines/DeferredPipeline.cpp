@@ -314,7 +314,6 @@ void DeferredPipeline::init() {
 
     internal_generate_brdf_lut(*m_InternalShaderPrograms[ShaderProgramEnum::BRDFPrecomputeCookTorrance], 512, 256);
 }
-//DONE
 void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, const unsigned int convoludeTextureSize, const unsigned int preEnvFilterSize) {
     const auto texType = texture.type();
     if (texType != GL_TEXTURE_CUBE_MAP) {
@@ -371,7 +370,6 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
     }
     fbo.unbind();
 }
-//DONE
 void DeferredPipeline::internal_generate_brdf_lut(ShaderProgram& program, const unsigned int brdfSize, const int numSamples) {
     FramebufferObject fbo(brdfSize, brdfSize); //try without a depth format
     fbo.bind();
@@ -796,30 +794,27 @@ void DeferredPipeline::renderDecal(ModelInstance& decalModelInstance) {
     Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }
 
-void DeferredPipeline::renderParticles(ParticleSystem& particleSystem, const Camera& camera, ShaderProgram& program, std::mutex& particleSystemMutex) {
+void DeferredPipeline::renderParticles(ParticleSystem& system, const Camera& camera, ShaderProgram& program) {
     auto& planeMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
 
     m_Renderer._bindShaderProgram(&program);
     m_Renderer._bindMesh(&planeMesh);
 
-    for (size_t i = 0; i < particleSystem.PositionAndScaleX.size(); ++i) {
-        Material* mat = particleSystem.MaterialToIndexReverse[particleSystem.MatIDAndPackedColor[i].x];
+    for (auto& pair : system.MaterialToIndexReverse) {
+        system.MaterialIDToIndex.try_emplace(pair.first, system.MaterialIDToIndex.size());
+    }
+    //system.MaterialIDToIndex is now {  index  =>  material ID  }, use this later on when populating VBO's
+
+    for (size_t i = 0; i < system.PositionAndScaleX.size(); ++i) {
+        Material* mat = system.MaterialToIndexReverse.at(system.MatIDAndPackedColor[i].x);
         m_Renderer._bindMaterial(mat);
 
         const auto maxTextures = m_OpenGLStateMachine.getMaxTextureUnits() - 1U;
         Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(Engine::priv::GBufferType::Depth), maxTextures);
-        Engine::Renderer::sendUniform1Safe("Object_Color", particleSystem.MatIDAndPackedColor[i].y);
+        Engine::Renderer::sendUniform1Safe("Object_Color", system.MatIDAndPackedColor[i].y);
 
-        Engine::Renderer::sendUniform3Safe("ParticlePosition", 
-            particleSystem.PositionAndScaleX[i].x, 
-            particleSystem.PositionAndScaleX[i].y, 
-            particleSystem.PositionAndScaleX[i].z
-        );
-        Engine::Renderer::sendUniform3Safe("ParticleScaleAndRot", 
-            particleSystem.PositionAndScaleX[i].w, 
-            particleSystem.ScaleYAndAngle[i].x, 
-            particleSystem.ScaleYAndAngle[i].y
-        );
+        Engine::Renderer::sendUniform3Safe("ParticlePosition", system.PositionAndScaleX[i].x, system.PositionAndScaleX[i].y, system.PositionAndScaleX[i].z);
+        Engine::Renderer::sendUniform3Safe("ParticleScaleAndRot", system.PositionAndScaleX[i].w, system.ScaleYAndAngle[i].x, system.ScaleYAndAngle[i].y);
         renderMesh(priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh());
     }
     m_Renderer._unbindMesh(&planeMesh);
@@ -1124,7 +1119,7 @@ void DeferredPipeline::internal_pass_geometry(const Viewport& viewport, const Ca
 
     Engine::Renderer::GLEnablei(GL_BLEND, 0); //this is needed for sure
     InternalScenePublicInterface::RenderGeometryOpaque(m_Renderer, scene, viewport, camera);
-    if ((viewport.getRenderFlags() & ViewportRenderingFlag::Skybox)) {
+    if (viewport.getRenderFlags().has(ViewportRenderingFlag::Skybox)) {
         renderSkybox(scene.skybox(), *m_InternalShaderPrograms[ShaderProgramEnum::DeferredSkybox], scene, viewport, camera);
     }
     InternalScenePublicInterface::RenderGeometryTransparent(m_Renderer, scene, viewport, camera);
@@ -1149,13 +1144,7 @@ void DeferredPipeline::internal_pass_forward(const Viewport& viewport, const Cam
     InternalScenePublicInterface::RenderDecals(m_Renderer, scene, viewport, camera);
     InternalScenePublicInterface::RenderForwardParticles(m_Renderer, scene, viewport, camera);
 
-
-
-
-
-    InternalScenePublicInterface::RenderParticles(m_Renderer, scene, camera, *m_InternalShaderPrograms[ShaderProgramEnum::Particle]);
-
-
+    InternalScenePublicInterface::RenderParticles(m_Renderer, scene, viewport, camera, *m_InternalShaderPrograms[ShaderProgramEnum::Particle]);
 
     for (unsigned int i = 0; i < 4; ++i) {
         Engine::Renderer::GLDisablei(GL_BLEND, i); //this is needed for smaa at least
@@ -1165,7 +1154,7 @@ void DeferredPipeline::internal_pass_ssao(const Viewport& viewport, const Camera
     //TODO: possible optimization: use stencil buffer to reject completely black (or are they white?) pixels during blur passes
     m_GBuffer.bindFramebuffers(GBufferType::Bloom, GBufferType::GodRays, "A", false);
     Engine::Renderer::Settings::clear(true, false, false); //bloom and god rays alpha channels cleared to black 
-    if (SSAO::ssao.m_SSAOLevel > SSAOLevel::Off && (viewport.getRenderFlags() & ViewportRenderingFlag::SSAO)) {
+    if (SSAO::ssao.m_SSAOLevel > SSAOLevel::Off && viewport.getRenderFlags().has(ViewportRenderingFlag::SSAO)) {
         Engine::Renderer::GLEnablei(GL_BLEND, 0);//i dont think this is needed anymore
         m_GBuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
         SSAO::ssao.passSSAO(m_GBuffer, viewport, camera, m_Renderer);
@@ -1288,7 +1277,7 @@ void DeferredPipeline::internal_pass_god_rays(const Viewport& viewport, const Ca
     Engine::Renderer::Settings::clear(true, false, false); //godrays rgb channels cleared to black
     auto& godRaysPlatform = GodRays::godRays;
     auto* sun = Engine::Renderer::godRays::getSun();
-    if (sun && (viewport.getRenderFlags() & ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active) {
+    if (sun && viewport.getRenderFlags().has(ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active) {
         const auto& body       = *sun->getComponent<ComponentBody>();
         const glm::vec3 oPos   = body.position();
         const glm::vec3 camPos = camera.getPosition();
@@ -1314,7 +1303,7 @@ void DeferredPipeline::internal_pass_hdr(const Viewport& viewport, const Camera&
     HDR::hdr.pass(m_GBuffer, viewport, GodRays::godRays.godRays_active, m_Renderer.m_Lighting, GodRays::godRays.factor, m_Renderer);
 }
 void DeferredPipeline::internal_pass_bloom(const Viewport& viewport) {
-    if (Bloom::bloom.bloom_active && (viewport.getRenderFlags() & ViewportRenderingFlag::Bloom)) {
+    if (Bloom::bloom.bloom_active && viewport.getRenderFlags().has(ViewportRenderingFlag::Bloom)) {
         m_GBuffer.bindFramebuffers(GBufferType::Bloom, "RGB", false);
         Bloom::bloom.pass(m_GBuffer, viewport, GBufferType::Lighting, m_Renderer);
         for (unsigned int i = 0; i < Bloom::bloom.num_passes; ++i) {
@@ -1326,7 +1315,7 @@ void DeferredPipeline::internal_pass_bloom(const Viewport& viewport) {
     }
 }
 void DeferredPipeline::internal_pass_depth_of_field(const Viewport& viewport, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture) {
-    if (DepthOfField::DOF.dof && (viewport.getRenderFlags() & ViewportRenderingFlag::DepthOfField)) {
+    if (DepthOfField::DOF.dof && viewport.getRenderFlags().has(ViewportRenderingFlag::DepthOfField)) {
         m_GBuffer.bindFramebuffers(outTexture);
         DepthOfField::DOF.pass(m_GBuffer, viewport, sceneTexture, m_Renderer);
         sceneTexture = GBufferType::Lighting;
@@ -1334,12 +1323,12 @@ void DeferredPipeline::internal_pass_depth_of_field(const Viewport& viewport, GB
     }
 }
 void DeferredPipeline::internal_pass_aa(const bool mainRenderFunction, const Viewport& viewport, const Camera& camera, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture) {
-    if (!mainRenderFunction || m_Renderer.m_AA_algorithm == AntiAliasingAlgorithm::None || !(viewport.getRenderFlags() & ViewportRenderingFlag::AntiAliasing)) {
+    if (!mainRenderFunction || m_Renderer.m_AA_algorithm == AntiAliasingAlgorithm::None || !viewport.getRenderFlags().has(ViewportRenderingFlag::AntiAliasing)) {
         m_GBuffer.bindFramebuffers(outTexture);
         internal_pass_final(sceneTexture);
         m_GBuffer.bindBackbuffer(viewport);
         internal_pass_depth_and_transparency(viewport, outTexture);
-    }else if (mainRenderFunction && m_Renderer.m_AA_algorithm == AntiAliasingAlgorithm::FXAA && (viewport.getRenderFlags() & ViewportRenderingFlag::AntiAliasing)) {
+    }else if (mainRenderFunction && m_Renderer.m_AA_algorithm == AntiAliasingAlgorithm::FXAA && viewport.getRenderFlags().has(ViewportRenderingFlag::AntiAliasing)) {
         m_GBuffer.bindFramebuffers(outTexture);
         internal_pass_final(sceneTexture);
         m_GBuffer.bindFramebuffers(sceneTexture);
@@ -1348,7 +1337,7 @@ void DeferredPipeline::internal_pass_aa(const bool mainRenderFunction, const Vie
         m_GBuffer.bindBackbuffer(viewport);
         internal_pass_depth_and_transparency(viewport, sceneTexture);
 
-    }else if (mainRenderFunction && (m_Renderer.m_AA_algorithm >= AntiAliasingAlgorithm::SMAA_LOW || m_Renderer.m_AA_algorithm <= AntiAliasingAlgorithm::SMAA_ULTRA) && (viewport.getRenderFlags() & ViewportRenderingFlag::AntiAliasing)) {
+    }else if (mainRenderFunction && (m_Renderer.m_AA_algorithm >= AntiAliasingAlgorithm::SMAA_LOW || m_Renderer.m_AA_algorithm <= AntiAliasingAlgorithm::SMAA_ULTRA) && viewport.getRenderFlags().has(ViewportRenderingFlag::AntiAliasing)) {
         m_GBuffer.bindFramebuffers(outTexture);
         internal_pass_final(sceneTexture);
 
@@ -1531,7 +1520,7 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, const Viewport& 
 
     #pragma region RenderPhysics
     Engine::Renderer::GLEnablei(GL_BLEND, 0);
-    if (mainRenderFunction && (viewport.getRenderFlags() & ViewportRenderingFlag::PhysicsDebug)) {
+    if (mainRenderFunction && viewport.getRenderFlags().has(ViewportRenderingFlag::PhysicsDebug)) {
         #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
             if (m_Renderer.m_DrawPhysicsDebug && &camera == scene.getActiveCamera()) {
         #endif
@@ -1550,7 +1539,7 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, const Viewport& 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(GL_TRUE);
     if (mainRenderFunction) {
-        if (viewport.getRenderFlags() & ViewportRenderingFlag::API2D) {
+        if (viewport.getRenderFlags().has(ViewportRenderingFlag::API2D)) {
             Engine::Renderer::Settings::clear(false, true, false); //clear depth only
             m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::Deferred2DAPI]);
             Engine::Renderer::sendUniformMatrix4("VP", m_2DProjectionMatrix);

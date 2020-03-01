@@ -22,6 +22,7 @@ struct ViewportRenderingFlag final { enum Flag: unsigned short {
     DepthOfField = 1 << 7,
     Skybox       = 1 << 8,
     Bloom        = 1 << 9,
+    Particles    = 1 << 10,
     _ALL         = 65535,
 };};
 
@@ -58,7 +59,7 @@ class Viewport final : public Engine::NonCopyable {
         const unsigned int id() const;
         void setID(const unsigned int id);
 
-        const unsigned short getRenderFlags() const;
+        const Engine::Flag<unsigned short> getRenderFlags() const;
         void setRenderFlag(const ViewportRenderingFlag::Flag flag);
         void addRenderFlag(const ViewportRenderingFlag::Flag flag);
         void removeRenderFlag(const ViewportRenderingFlag::Flag flag);

@@ -121,8 +121,8 @@ void Viewport::setViewportDimensions(const float x, const float y, const float w
 const glm::vec4& Viewport::getViewportDimensions() const {
     return m_Viewport_Dimensions;
 }
-const unsigned short Viewport::getRenderFlags() const {
-    return m_RenderFlags.get();
+const Engine::Flag<unsigned short> Viewport::getRenderFlags() const {
+    return m_RenderFlags;
 }
 void Viewport::setRenderFlag(const ViewportRenderingFlag::Flag flag) {
     m_RenderFlags = flag;

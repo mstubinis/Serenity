@@ -206,30 +206,34 @@ void ParticleEmitter::applyLinearVelocity(const decimal& x, const decimal& y, co
     auto& body = *getComponent<ComponentBody>(request);
     const auto currVel = body.getLinearVelocity();
     auto newVel = glm_vec3(x, y, z);
-    if (local)
+    if (local) {
         newVel = body.rotation() * newVel;
+    }
     body.setLinearVelocity(currVel + newVel, false);
 }
 void ParticleEmitter::applyLinearVelocity(glm_vec3& velocity, const EntityDataRequest& request, const bool local) {
     auto& body = *getComponent<ComponentBody>(request);
     const auto currVel = body.getLinearVelocity();
-    if (local)
+    if (local) {
         velocity = body.rotation() * velocity;
+    }
     body.setLinearVelocity(currVel + velocity, false);
 }
 void ParticleEmitter::applyLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local) {
     auto& body = *getComponent<ComponentBody>();
     const auto currVel = body.getLinearVelocity();
     auto newVel = glm_vec3(x, y, z);
-    if (local)
+    if (local) {
         newVel = body.rotation() * newVel;
+    }
     body.setLinearVelocity(currVel + newVel, false);
 }
 void ParticleEmitter::applyLinearVelocity(glm_vec3& velocity, const bool local) {
     auto& body = *getComponent<ComponentBody>();
     const auto currVel = body.getLinearVelocity();
-    if (local)
+    if (local) {
         velocity = body.rotation() * velocity;
+    }
     body.setLinearVelocity(currVel + velocity, false);
 }
 

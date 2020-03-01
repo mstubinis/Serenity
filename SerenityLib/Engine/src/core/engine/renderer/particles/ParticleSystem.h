@@ -7,6 +7,7 @@ class Particle;
 class Camera;
 class ShaderProgram;
 class Material;
+class Viewport;
 namespace Engine::priv {
     class Renderer;
 };
@@ -47,9 +48,16 @@ namespace Engine::priv {
             std::vector<glm::vec4>  PositionAndScaleX;
             std::vector<glm::vec2>  ScaleYAndAngle;
             std::vector<glm::uvec2> MatIDAndPackedColor;
+            std::unordered_map<Material*, unsigned int>    MaterialToIndex;
+            std::unordered_map<unsigned int, Material*>    MaterialToIndexReverse;
+            std::unordered_map<unsigned int, unsigned int> MaterialIDToIndex;
 
-            std::unordered_map<Material*, unsigned int> MaterialToIndex;
-            std::unordered_map<unsigned int, Material*> MaterialToIndexReverse;
+            //for the threads...
+            std::vector<std::vector<glm::vec4>>                      THREAD_PART_1;
+            std::vector<std::vector<glm::vec2>>                      THREAD_PART_2;
+            std::vector<std::vector<glm::uvec2>>                     THREAD_PART_3;
+            std::vector<std::unordered_map<Material*, unsigned int>> THREAD_PART_4;
+            std::vector<std::unordered_map<unsigned int, Material*>> THREAD_PART_5;
         public:
             ParticleSystem();
             ~ParticleSystem();
@@ -70,7 +78,7 @@ namespace Engine::priv {
             std::stack<size_t>&           getParticlesFreelist();
 
             void update(const float dt, const Camera& camera);
-            void render(const Camera& camera, ShaderProgram& program, Renderer& renderer);
+            void render(const Viewport& viewport, const Camera& camera, ShaderProgram& program, Renderer& renderer);
         };
 };
 #endif

@@ -166,7 +166,7 @@ namespace Engine::priv {
             void renderMesh(const Mesh& mesh, const unsigned int mode = ModelDrawingMode::Triangles) override;
             void renderDecal(ModelInstance& decalModelInstance) override;
 
-            void renderParticles(ParticleSystem& particleSystem, const Camera& camera, ShaderProgram& program, std::mutex& mutex) override;
+            void renderParticles(ParticleSystem& particleSystem, const Camera& camera, ShaderProgram& program) override;
 
             void renderLightProbe(LightProbe& lightProbe) override;
 

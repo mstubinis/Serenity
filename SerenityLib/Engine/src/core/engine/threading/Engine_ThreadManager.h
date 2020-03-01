@@ -66,20 +66,19 @@ namespace Engine::priv{
                     
                 if (Engine::priv::threading::hardware_concurrency() > 1) {
                     const auto split = Engine::priv::threading::splitVectorPairs(collection);
-                    auto lamda = [&](const std::pair<size_t, size_t>& pair) {
+                    auto lamda = [&](const std::pair<size_t, size_t>& pair, const unsigned int inK) {
                         for (size_t j = pair.first; j <= pair.second; ++j) {
-                            T& thing = collection[j];
-                            job(thing, j, std::forward<ARGS>(args)...);
+                            job(collection[j], j, inK, std::forward<ARGS>(args)...);
                         }
                     };
-                    for (auto& pair : split) {
-                        Engine::priv::Core::m_Engine->m_ThreadManager.add_job_ref_engine_controlled(lamda, pair);
+                    for (unsigned int k = 0; k < split.size(); ++k) {
+                        Engine::priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled(lamda, std::ref(split[k]), k);
                     }
                     if (waitForAll)
                         Engine::priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
                 }else{
                     for (size_t j = 0; j < collection.size(); ++j) {
-                        job(collection[j], j, std::forward<ARGS>(args)...);
+                        job(collection[j], j, 0, std::forward<ARGS>(args)...);
                     }
                 }
             }
