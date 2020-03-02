@@ -90,7 +90,7 @@ Font::~Font(){
 const float Font::getTextWidth(string_view text) const {
     float row_width = 0.0f;
     float maxWidth  = 0.0f;
-    for (int i = 0; i < text.size(); ++i) {
+    for (size_t i = 0; i < text.size(); ++i) {
         auto& character = text[i];
         if (character != '\0' && character != '\r') {
             if (character != '\n') {

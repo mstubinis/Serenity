@@ -200,8 +200,9 @@ void ComponentBody::rebuildRigidBody(const bool addBodyToPhysicsWorld, const boo
             data.p->bullet_rigidBody->setMassProps(static_cast<btScalar>(data.p->mass), inertia);
             data.p->bullet_rigidBody->updateInertiaTensor();
             setInternalPhysicsUserPointer(this);
-            if (addBodyToPhysicsWorld)
+            if (addBodyToPhysicsWorld) {
                 addPhysicsToWorld(true, threadSafe);
+            }
         }
     }
 }
@@ -221,18 +222,21 @@ void ComponentBody::removePhysicsFromWorld(const bool force, const bool threadSa
     if (force) {    
         data.p->forcedOut = true;
     }
-    if(threadSafe)
+    if (threadSafe) {
         Physics::removeRigidBodyThreadSafe(*this);
-    else
+    }else{
         Physics::removeRigidBody(*this);
+    }
 }
 void ComponentBody::addPhysicsToWorld(const bool force, const bool threadSafe) {
-    if (!force && data.p->forcedOut)
+    if (!force && data.p->forcedOut) {
         return;
-    if(threadSafe)
+    }
+    if (threadSafe) {
         Physics::addRigidBodyThreadSafe(*this);
-    else
+    }else{
         Physics::addRigidBody(*this);
+    }
     data.p->forcedOut = false;
 }
 const bool ComponentBody::hasPhysics() const {
@@ -369,9 +373,6 @@ void ComponentBody::rotate(const glm_vec3& p_Rotation, const bool p_Local) {
 }
 void ComponentBody::rotate(const decimal& p_Pitch, const decimal& p_Yaw, const decimal& p_Roll, const bool p_Local) {
     if (m_Physics) {
-        //if (!data.p->bullet_rigidBody) {
-        //    return;
-        //}
         auto& bt_rigidBody = *data.p->bullet_rigidBody;
         btQuaternion quat = bt_rigidBody.getWorldTransform().getRotation().normalize();
         glm_quat glmquat(quat.w(), quat.x(), quat.y(), quat.z());
@@ -399,8 +400,8 @@ void ComponentBody::scale(const decimal& p_X, const decimal& p_Y, const decimal&
         auto collisionShape = collision_.getBtShape();
         if (collisionShape) {
             if (collision_.getType() == CollisionType::Compound) {
-                btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(collisionShape);
-                if (compoundShapeCast) {
+                if (collisionShape->isCompound()) {
+                    btCompoundShape* compoundShapeCast = static_cast<btCompoundShape*>(collisionShape);
                     const auto numChildren = compoundShapeCast->getNumChildShapes();
                     if (numChildren > 0) {
                         for (int i = 0; i < numChildren; ++i) {
@@ -489,11 +490,6 @@ void ComponentBody::setPosition(const decimal& p_X, const decimal& p_Y, const de
 		position_.y         = p_Y;
 		position_.z         = p_Z;
 
-        //normalData.modelMatrix[3][0] = p_X;
-        //normalData.modelMatrix[3][1] = p_Y;
-        //normalData.modelMatrix[3][2] = p_Z;
-
-
         auto& localMatrix = system.ParentChildSystem.LocalTransforms[entityIndex];
         localMatrix[3][0] = p_X;
         localMatrix[3][1] = p_Y;
@@ -549,8 +545,8 @@ void ComponentBody::setScale(const decimal& p_X, const decimal& p_Y, const decim
         auto collisionShape = collision_.getBtShape();
         if (collisionShape) {
             if (collision_.getType() == CollisionType::Compound) {
-                btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(collisionShape);
-                if (compoundShapeCast) {
+                if (collisionShape->isCompound()) {
+                    btCompoundShape* compoundShapeCast = static_cast<btCompoundShape*>(collisionShape);
                     const int numChildren = compoundShapeCast->getNumChildShapes();
                     if (numChildren > 0) {
                         for (int i = 0; i < numChildren; ++i) {
@@ -586,8 +582,7 @@ void ComponentBody::setScale(const decimal& p_X, const decimal& p_Y, const decim
             }
         }
     }else{
-        auto& normalData = *data.n;
-        auto& scale = normalData.scale;
+        auto& scale = data.n->scale;
         scale.x = p_X;
 		scale.y = p_Y;
 		scale.z = p_Z;
@@ -615,12 +610,9 @@ const glm_vec3 ComponentBody::position() const { //theres prob a better way to d
         physicsData.bullet_rigidBody->getMotionState()->getWorldTransform(tr);
         return Math::btVectorToGLM(tr.getOrigin());
     }
-    //const auto& modelMatrix_ = data.n->modelMatrix;
-    //return Math::getMatrixPosition(modelMatrix_);
-
     auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
     auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
-    //const auto& matrix = system.ParentChildSystem.LocalTransforms[m_Owner.id() - 1U];
+    //const auto& matrix = system.ParentChildSystem.LocalTransforms[m_Owner.id() - 1Ua
     const auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return Math::getMatrixPosition(matrix);
 }
@@ -629,9 +621,6 @@ const glm::vec3 ComponentBody::position_render() const { //theres prob a better 
         auto tr = data.p->bullet_rigidBody->getWorldTransform();
         return Math::btVectorToGLM(tr.getOrigin());
     }
-    //const auto& modelMatrix_ = data.n->modelMatrix;
-    //return glm::vec3(modelMatrix_[3][0], modelMatrix_[3][1], modelMatrix_[3][2]);
-
     auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
     auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
     //const auto& matrix = system.ParentChildSystem.LocalTransforms[m_Owner.id() - 1U];
@@ -682,9 +671,9 @@ const glm_vec3 ComponentBody::getScale() const {
         auto collisionShape = collision_.getBtShape();
         if (collisionShape) {
             if (collision_.getType() == CollisionType::Compound) {
-                btCompoundShape* compoundShapeCast = dynamic_cast<btCompoundShape*>(collisionShape);
-                if (compoundShapeCast) {
-                    const int& numChildren = compoundShapeCast->getNumChildShapes();
+                if (collisionShape->isCompound()) {
+                    btCompoundShape* compoundShapeCast = static_cast<btCompoundShape*>(collisionShape);
+                    const int numChildren = compoundShapeCast->getNumChildShapes();
                     if (numChildren > 0) {
                         for (int i = 0; i < numChildren; ++i) {
                             btCollisionShape* shape = compoundShapeCast->getChildShape(i);
@@ -787,8 +776,6 @@ const glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way t
         }
         return modelMatrix_;
     }
-    //return data.n->modelMatrix;
-
     auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
     auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
     //const auto& matrix = system.ParentChildSystem.LocalTransforms[m_Owner.id() - 1U];

@@ -129,17 +129,16 @@ Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, const 
     setMass(mass);
 }
 void Collision::free_memory() {
-    auto* compound = dynamic_cast<btCompoundShape*>(m_BtShape);
-    if (compound) {
-        const auto numChildren = compound->getNumChildShapes();
+    if (m_BtShape && m_BtShape->isCompound()) {
+        btCompoundShape* compound = static_cast<btCompoundShape*>(m_BtShape);
+        const int numChildren = compound->getNumChildShapes();
         if (numChildren > 0) {
             for (int i = 0; i < numChildren; ++i) {
-                auto* child_shape = compound->getChildShape(i);
-                if (child_shape)
-                    SAFE_DELETE(child_shape);
+                btCollisionShape* child_shape = compound->getChildShape(i);
+                SAFE_DELETE(child_shape);
             }
         }
-    }
+    }  
     SAFE_DELETE(m_BtShape);
 }
 Collision::~Collision() {
@@ -182,20 +181,20 @@ Collision& Collision::operator=(Collision&& other) noexcept {
 void Collision::setMass(const float _mass) {
     if (!m_BtShape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None)
         return;
-    if (m_BtShape->getShapeType() != EMPTY_SHAPE_PROXYTYPE) {
-        /*
-        auto* compound = dynamic_cast<btCompoundShape*>(m_BtShape);
-        if (compound) {
-            const auto numChildren = compound->getNumChildShapes();
+    if (m_BtShape->getShapeType() != EMPTY_SHAPE_PROXYTYPE) {    
+        if (m_BtShape->isCompound()) {
+            btCompoundShape* compound = static_cast<btCompoundShape*>(m_BtShape);
+            const int numChildren = compound->getNumChildShapes();
             if (numChildren > 0) {
                 for (int i = 0; i < numChildren; ++i) {
-                    auto* child_shape = compound->getChildShape(i);
-                    if(child_shape)
+                    btCollisionShape* child_shape = compound->getChildShape(i);
+                    if(child_shape){
                         child_shape->calculateLocalInertia(_mass, m_BtInertia);
+                    }
                 }
             }
         }
-        */
+        
         m_BtShape->calculateLocalInertia(_mass, m_BtInertia);
     }
 }

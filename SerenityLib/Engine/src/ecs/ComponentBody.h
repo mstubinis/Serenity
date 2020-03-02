@@ -14,18 +14,18 @@ class btRigidBody;
 #include <LinearMath/btDefaultMotionState.h>
 
 struct CollisionCallbackEventData final {
-    ComponentBody& ownerBody;
-    ComponentBody& otherBody;
-    glm::vec3& ownerHit;
-    glm::vec3& otherHit;
-    glm::vec3& ownerLocalHit;
-    glm::vec3& otherLocalHit;
-    glm::vec3& normalOnB;
-    glm::vec3& normalFromAB;
+    ComponentBody&     ownerBody;
+    ComponentBody&     otherBody;
+    glm::vec3&         ownerHit;
+    glm::vec3&         otherHit;
+    glm::vec3&         ownerLocalHit;
+    glm::vec3&         otherLocalHit;
+    glm::vec3&         normalOnB;
+    glm::vec3&         normalFromAB;
     btCollisionObject* ownerCollisionObj;
     btCollisionObject* otherCollisionObj;
-    size_t ownerModelInstanceIndex;
-    size_t otherModelInstanceIndex;
+    size_t             ownerModelInstanceIndex;
+    size_t             otherModelInstanceIndex;
     CollisionCallbackEventData(
         ComponentBody& ownerBody_,
         ComponentBody& otherBody_,
@@ -85,7 +85,6 @@ class ComponentBody : public EventObserver {
             glm_vec3 scale          = glm_vec3(1.0);
             glm_vec3 position       = glm_vec3(0.0);
             glm_quat rotation       = glm_quat(1.0, 0.0, 0.0, 0.0);
-            //glm_mat4 modelMatrix    = glm_mat4(1.0);
             glm_vec3 linearVelocity = glm_vec3(0.0);
 
             NormalData() = default;

@@ -68,7 +68,7 @@ using uint64 = std::uint64_t;
 
 #pragma region MemoryLeakDetection
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && !defined(ENVIRONMENT32)
     // Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the allocations to be of _CLIENT_BLOCK type
     #define _CRTDBG_MAP_ALLOC
     #define NEW new( _NORMAL_BLOCK, __FILE__, __LINE__)

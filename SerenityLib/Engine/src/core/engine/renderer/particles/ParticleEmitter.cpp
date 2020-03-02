@@ -1,6 +1,7 @@
 #include <core/engine/renderer/particles/ParticleSystem.h>
 #include <core/engine/renderer/particles/ParticleEmitter.h>
 #include <core/engine/renderer/particles/ParticleEmissionProperties.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <ecs/ComponentBody.h>
 #include <ecs/ComponentModel.h>
@@ -26,13 +27,14 @@ ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& 
 }
 void ParticleEmitter::internal_init() {
     m_SpawningTimer = m_Properties->m_SpawnRate - 0.01f;
+
     addComponent<ComponentBody>();
 
-    /*
-    auto& modelComponent = *addComponent<ComponentModel>(Mesh::Cube, Material::Checkers);
+    Mesh& cube = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh();
+    addComponent<ComponentModel>(&cube, Material::Checkers);
+    auto& modelComponent = *getComponent<ComponentModel>();
     modelComponent.getModel().setScale(0.01f, 0.01f, 0.1f);
-    modelComponent.getModel().translate(0.0f, 0.0f, 0.1f);
-    */
+    modelComponent.getModel().translate(0.0f, 0.0f, 0.1f);  
 }
 ParticleEmitter::~ParticleEmitter() {
 

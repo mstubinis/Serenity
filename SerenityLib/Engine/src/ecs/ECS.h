@@ -49,8 +49,8 @@ namespace Engine::priv {
             ECS(/*const SceneOptions& options*/) {
             }
             ~ECS() {
-                SAFE_DELETE_VECTOR(m_Systems);
                 SAFE_DELETE_VECTOR(m_ComponentPools);
+                SAFE_DELETE_VECTOR(m_Systems);
             }
             ECS(const ECS&)                      = delete;
             ECS& operator=(const ECS&)           = delete;
@@ -102,20 +102,6 @@ namespace Engine::priv {
             }
             //destroy flagged entities & their components, if any
             void postUpdate(Scene& scene, const float dt) {
-                /*
-                if (m_DestroyedEntities.size() > 0) {
-                    for (auto& entityID : m_DestroyedEntities) {
-                        m_EntityPool.destroyFlaggedEntity(entityID);
-                    }
-                    for (auto& component_pool : m_ComponentPools) {
-                        for (auto& entityID : m_DestroyedEntities) {
-                            component_pool->remove(entityID);
-                            onComponentRemovedFromEntity(entityID, type_slot);
-                        }
-                    }
-                    m_DestroyedEntities.clear();
-                }
-                */
                 for (auto& entity : m_DestroyedEntities) {
                     EntityDataRequest request(entity);
 

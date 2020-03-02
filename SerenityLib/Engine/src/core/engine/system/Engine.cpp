@@ -145,8 +145,8 @@ void EngineCore::update_logic(Window& window, const float dt){
     auto& ecs = InternalScenePublicInterface::GetECS(scene); 
     ecs.preUpdate(scene, dt);
     Game::onPreUpdate(dt);
-    Game::update(dt);
     InternalScenePublicInterface::UpdateParticleSystem(scene, dt);
+    Game::update(dt);
     scene.update(dt);
     ecs.update(dt, scene);
     ecs.postUpdate(scene,dt);
