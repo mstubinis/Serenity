@@ -145,31 +145,13 @@ Collision::~Collision() {
     //destructor
     free_memory();
 }
-Collision::Collision(const Collision& other){
-    //copy constructor
-    m_Owner     = other.m_Owner;
-    m_BtInertia = other.m_BtInertia;
-    m_Type      = other.m_Type;
-    m_BtShape   = other.m_BtShape;
-}
-Collision& Collision::operator=(const Collision& other) {
-    //copy assignment
-    if (&other != this) {
-        m_BtInertia = other.m_BtInertia;
-        m_Type      = other.m_Type;
-        m_BtShape   = other.m_BtShape;
-    }
-    return *this;
-}
 Collision::Collision(Collision&& other) noexcept {
-    //move constructor
     m_Owner     = std::move(other.m_Owner);
     m_BtInertia = std::move(other.m_BtInertia);
     m_Type      = std::move(other.m_Type);
     m_BtShape   = std::exchange(other.m_BtShape, nullptr);
 }
 Collision& Collision::operator=(Collision&& other) noexcept {
-    //move assignment
     if (&other != this) {
         m_Owner     = std::move(other.m_Owner);
         m_BtInertia = std::move(other.m_BtInertia);
@@ -179,8 +161,9 @@ Collision& Collision::operator=(Collision&& other) noexcept {
     return *this;
 }
 void Collision::setMass(const float _mass) {
-    if (!m_BtShape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None)
+    if (!m_BtShape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None) {
         return;
+    }
     if (m_BtShape->getShapeType() != EMPTY_SHAPE_PROXYTYPE) {    
         if (m_BtShape->isCompound()) {
             btCompoundShape* compound = static_cast<btCompoundShape*>(m_BtShape);
@@ -193,8 +176,7 @@ void Collision::setMass(const float _mass) {
                     }
                 }
             }
-        }
-        
+        }    
         m_BtShape->calculateLocalInertia(_mass, m_BtInertia);
     }
 }

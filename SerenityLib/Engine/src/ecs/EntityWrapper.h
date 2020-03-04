@@ -6,9 +6,9 @@
 
 class EntityWrapper {
     protected:
-        Entity   m_Entity;
+        Entity   m_Entity = Entity(0,0,0);
 
-        EntityWrapper() = delete;
+        EntityWrapper() = default;
     public:
         EntityWrapper(Scene& scene);
         virtual ~EntityWrapper();

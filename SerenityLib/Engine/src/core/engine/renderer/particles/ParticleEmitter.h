@@ -13,6 +13,7 @@ namespace Engine::priv {
 #include <vector>
 #include <mutex>
 
+
 class ParticleEmitter final : public EntityWrapper {
     friend class  Engine::priv::ParticleSystem;
     friend class  Particle;
@@ -24,21 +25,21 @@ class ParticleEmitter final : public EntityWrapper {
         bool                           m_Active         = false;
         float                          m_SpawningTimer  = 0.0f;
         float                          m_Timer          = 0.0f;
-        float                          m_Lifetime       = 0.0;
+        float                          m_Lifetime       = 0.0f;
         Entity                         m_Parent         = Entity::null_;
         std::function<void(ParticleEmitter*, const float dt, ParticleEmissionProperties&, std::mutex&)> m_UpdateFunctor = [](ParticleEmitter*, const float, ParticleEmissionProperties&, std::mutex&) {};
 
-        void internal_init();
-    public:
         ParticleEmitter() = delete;
-        ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, EntityWrapper* parent = nullptr);
-        ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity& parent = Entity::null_);
+    public:
+        ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent = Entity::null_);
         ~ParticleEmitter();
 
         ParticleEmitter(const ParticleEmitter& other) = delete;
         ParticleEmitter& operator=(const ParticleEmitter& other) = delete;
         ParticleEmitter(ParticleEmitter&& other) noexcept;
         ParticleEmitter& operator=(ParticleEmitter&& other) noexcept;
+
+        void init(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent);
 
         template<typename T> void setUpdateFunctor(const T& functor) {
             m_UpdateFunctor = std::bind<void>(std::move(functor), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);

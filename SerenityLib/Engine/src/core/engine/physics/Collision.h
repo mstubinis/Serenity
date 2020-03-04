@@ -45,8 +45,8 @@ class Collision final: public EventObserver {
         Collision(ComponentBody&, const CollisionType::Type, Mesh& mesh, const float mass = 0);
         Collision(ComponentBody&, ComponentModel&, const float mass = 0, const CollisionType::Type = CollisionType::ConvexHull);
 
-        Collision(const Collision& other);
-        Collision& operator=(const Collision& other);
+        Collision(const Collision& other) = delete;
+        Collision& operator=(const Collision& other) = delete;
         Collision(Collision&& other) noexcept;
         Collision& operator=(Collision&& other) noexcept;
 

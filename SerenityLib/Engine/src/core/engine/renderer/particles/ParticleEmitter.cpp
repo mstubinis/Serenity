@@ -14,33 +14,34 @@
 using namespace std;
 using namespace Engine;
 
-ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, EntityWrapper* parent) 
-: ParticleEmitter(properties, scene, lifetime, (parent) ? parent->entity() : Entity::null_){
+ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent) : EntityWrapper(scene){
+    addComponent<ComponentBody>();
+    addComponent<ComponentModel>(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), Material::Checkers);
 
+    auto& modelComponent = *getComponent<ComponentModel>();
+
+    modelComponent.getModel().setScale(0.01f, 0.01f, 0.1f);
+    modelComponent.getModel().translate(0.0f, 0.0f, 0.1f);
+
+    init(properties, scene, lifetime, parent);
 }
-ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity& parent) : EntityWrapper(scene){
+void ParticleEmitter::init(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent) {
     setProperties(properties);
-    m_Active   = true;
-    m_Parent   = parent;
-    m_Lifetime = lifetime;
-    internal_init();
-}
-void ParticleEmitter::internal_init() {
+    m_Parent        = parent;
+    m_Lifetime      = lifetime;
     m_SpawningTimer = m_Properties->m_SpawnRate - 0.01f;
 
-    addComponent<ComponentBody>();
-
-    Mesh& cube = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh();
-    addComponent<ComponentModel>(&cube, Material::Checkers);
-    auto& modelComponent = *getComponent<ComponentModel>();
-    modelComponent.getModel().setScale(0.01f, 0.01f, 0.1f);
-    modelComponent.getModel().translate(0.0f, 0.0f, 0.1f);  
+    setLinearVelocity(0, 0, 0);
+    setPosition(0, 0, 0);
+    setRotation(0, 0, 0, 1.0);
+    setScale(1, 1, 1);
 }
+
 ParticleEmitter::~ParticleEmitter() {
 
 }
 
-ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept : EntityWrapper(other.m_Entity.scene()) {
+ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept {
     m_Properties      = std::exchange(other.m_Properties, nullptr);
     m_SpawningTimer   = std::move(other.m_SpawningTimer);
     m_Active          = std::move(other.m_Active);
@@ -119,7 +120,6 @@ const bool ParticleEmitter::isActive() const {
     return m_Active;
 }
 
-
 void ParticleEmitter::setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w, const EntityDataRequest& request) {
     getComponent<ComponentBody>(request)->setRotation(x, y, z, w);
 }
@@ -133,14 +133,12 @@ void ParticleEmitter::setRotation(const glm_quat& rotation) {
     getComponent<ComponentBody>()->setRotation(rotation);
 }
 
-
 void ParticleEmitter::rotate(const decimal& x, const decimal& y, const decimal& z, const EntityDataRequest& request) {
     getComponent<ComponentBody>(request)->rotate(x, y, z);
 }
 void ParticleEmitter::rotate(const decimal& x, const decimal& y, const decimal& z) {
     getComponent<ComponentBody>()->rotate(x, y, z);
 }
-
 
 void ParticleEmitter::setPosition(const decimal& x, const decimal& y, const decimal& z, const EntityDataRequest& request) {
     getComponent<ComponentBody>(request)->setPosition(x, y, z);
@@ -154,7 +152,6 @@ void ParticleEmitter::setPosition(const decimal& x, const decimal& y, const deci
 void ParticleEmitter::setPosition(const glm_vec3& position) {
     getComponent<ComponentBody>()->setPosition(position);
 }
-
 
 void ParticleEmitter::setScale(const decimal& x, const decimal& y, const decimal& z, const EntityDataRequest& request) {
     getComponent<ComponentBody>(request)->setScale(x, y, z);
@@ -202,8 +199,6 @@ void ParticleEmitter::setLinearVelocity(const glm_vec3& lv, const bool local) {
     getComponent<ComponentBody>()->setLinearVelocity(lv, local);
 }
 
-
-
 void ParticleEmitter::applyLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const EntityDataRequest& request, const bool local) {
     auto& body = *getComponent<ComponentBody>(request);
     const auto currVel = body.getLinearVelocity();
@@ -238,7 +233,6 @@ void ParticleEmitter::applyLinearVelocity(glm_vec3& velocity, const bool local) 
     }
     body.setLinearVelocity(currVel + velocity, false);
 }
-
 
 const glm_vec3 ParticleEmitter::linearVelocity(const EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->getLinearVelocity();

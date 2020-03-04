@@ -667,7 +667,7 @@ const ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(const float p_
 const glm_vec3 ComponentBody::getScale() const {
     if (m_Physics) {
         const auto& physicsData = *data.p;
-        Collision& collision_ = *physicsData.collision;
+        Collision& collision_   = *physicsData.collision;
         auto collisionShape = collision_.getBtShape();
         if (collisionShape) {
             if (collision_.getType() == CollisionType::Compound) {
@@ -679,13 +679,11 @@ const glm_vec3 ComponentBody::getScale() const {
                             btCollisionShape* shape = compoundShapeCast->getChildShape(i);
                             btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
                             if (convexHullCast) {
-                                const auto ret = Math::btVectorToGLM(convexHullCast->getLocalScaling());
-                                return ret;
+                                return Math::btVectorToGLM(convexHullCast->getLocalScaling());
                             }
                             btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
                             if (triHullCast) {
-                                const auto ret = Math::btVectorToGLM(triHullCast->getLocalScaling());
-                                return ret;
+                                return Math::btVectorToGLM(triHullCast->getLocalScaling());
                             }
                         }
                     }
@@ -693,26 +691,22 @@ const glm_vec3 ComponentBody::getScale() const {
             }else if (collision_.getType() == CollisionType::ConvexHull) {
                 btUniformScalingShape* convex = static_cast<btUniformScalingShape*>(collisionShape);
                 if (convex) {
-                    const auto ret = Math::btVectorToGLM(convex->getLocalScaling());
-                    return ret;
+                    return Math::btVectorToGLM(convex->getLocalScaling());
                 }
             }else if (collision_.getType() == CollisionType::TriangleShapeStatic) {
                 btScaledBvhTriangleMeshShape* tri = static_cast<btScaledBvhTriangleMeshShape*>(collisionShape);
                 if (tri) {
-                    const auto ret = Math::btVectorToGLM(tri->getLocalScaling());
-                    return ret;
+                    return Math::btVectorToGLM(tri->getLocalScaling());
                 }
             }else if (collision_.getType() == CollisionType::Sphere) {
                 btMultiSphereShape* sph = static_cast<btMultiSphereShape*>(collisionShape);
                 if (sph) {
-                    const auto ret = Math::btVectorToGLM(sph->getLocalScaling());
-                    return ret;
+                    return Math::btVectorToGLM(sph->getLocalScaling());
                 }
             }else if (collision_.getType() == CollisionType::TriangleShape) {
                 btGImpactMeshShape* gImpact = static_cast<btGImpactMeshShape*>(collisionShape);
                 if (gImpact) {
-                    const auto ret = Math::btVectorToGLM(gImpact->getLocalScaling());
-                    return ret;
+                    return Math::btVectorToGLM(gImpact->getLocalScaling());
                 }
             }
         }
@@ -1195,12 +1189,13 @@ struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()
     }
 }};
 struct priv::ComponentBody_ComponentRemovedFromEntityFunction final { void operator()(void* systemPtr, Entity& entity) const {
-    auto& system  = *static_cast<Engine::priv::ComponentBody_System*>(systemPtr);
-    const auto id = entity.id();
-    auto& pcs     = system.ParentChildSystem;
+    auto& system         = *static_cast<Engine::priv::ComponentBody_System*>(systemPtr);
+    const auto id        = entity.id();
+    auto& pcs            = system.ParentChildSystem;
+    const auto thisIndex = id - 1U;
 
-    if (pcs.Parents[id - 1U] > 0) {
-        pcs.remove(pcs.Parents[id - 1U], id);
+    if (pcs.Parents[thisIndex] > 0) {
+        pcs.remove(pcs.Parents[thisIndex], id);
     }
 }};
 struct priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* systemPtr, void* componentPool,Entity& entity, Scene& scene) const {
@@ -1247,8 +1242,6 @@ ComponentBody_System_CI::ComponentBody_System_CI() {
 #pragma endregion
 
 
-
-
 #pragma region System
 
 void Engine::priv::ComponentBody_System::ParentChildVector::resize(const size_t size) {
@@ -1264,14 +1257,18 @@ void Engine::priv::ComponentBody_System::ParentChildVector::reserve(const size_t
     LocalTransforms.reserve(size);
 }
 void Engine::priv::ComponentBody_System::ParentChildVector::insert(const std::uint32_t parentID, const std::uint32_t childID) {
-    //if (Parents.size() <= parentID || Parents.size() <= childID) {
-
     if (Parents.capacity() < parentID || Parents.capacity() < childID) {
         reserve(std::max(parentID, childID) + 50U);
     }
     if (Parents.size() < parentID || Parents.size() < childID) {
         resize(std::max(parentID, childID));
     }
+    if (Parents[childID - 1U] == parentID) {
+        //std::cout << parentID << ", " << childID << " - added: already added\n";
+        return;
+    }
+
+    //std::cout << parentID << ", " << childID << " - adding\n";
 
     bool added = false;
     for (size_t i = 0; i < Order.size(); ++i) {
@@ -1315,6 +1312,7 @@ void Engine::priv::ComponentBody_System::ParentChildVector::insert(const std::ui
 }
 void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::uint32_t parentID, const std::uint32_t childID) {
     size_t parentIndex    = 0;
+    size_t erasedIndex    = 0;
     bool foundParent      = false;
 
     for (size_t i = 0; i < Order.size(); ++i) {
@@ -1328,12 +1326,15 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::ui
         }
     }
     if (!foundParent) {
+        //std::cout << parentID << ", " << childID << " - remove: not found\n";
         return;
     }
     Parents[childID - 1U] = 0;
+    erasedIndex = parentIndex;
     for (size_t i = parentIndex; i < Order.size(); ++i) {
         const auto& entityID = Order[i];
         if (entityID == childID) {
+            erasedIndex = i;
             Order[i] = 0;
 
             //now move all children of parent to be next to parent
@@ -1344,6 +1345,7 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::ui
                 }
                 if (Parents[entityIDCaseOne - 1U] == parentID) {
                     std::swap(Order[j - 1U], Order[j]);
+                    ++erasedIndex;
                 }else if (Parents[entityIDCaseOne - 1U] == childID && Order[j - 1U] == 0) {
                     Order[j - 1U] = childID;
                 }else if (Parents[entityIDCaseOne - 1U] == 0) {
@@ -1351,8 +1353,8 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::ui
                 }
             }
             //cleanup / edge cases
-            if (Order[i + 1U] == 0) {
-                Order.erase(Order.begin() + i);
+            if (Order[erasedIndex + 1U] == 0) {
+                Order.erase(Order.begin() + erasedIndex);
                 --OrderHead;
             }
             if (parentIndex > 0 && Order[parentIndex + 1U] == 0) {
@@ -1363,6 +1365,7 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::ui
             break;
         }
     }
+    //std::cout << parentID << ", " << childID << " - removing\n";
 }
 const std::uint32_t Engine::priv::ComponentBody_System::ParentChildVector::size() const {
     return OrderHead;
@@ -1371,16 +1374,12 @@ const size_t Engine::priv::ComponentBody_System::ParentChildVector::capacity() c
     return Order.capacity();
 }
 
-
 Engine::priv::ComponentBody_System::ComponentBody_System(const Engine::priv::ECSSystemCI& systemCI, Engine::priv::ECS<Entity>& ecs) : Engine::priv::ECSSystem<Entity, ComponentBody>(systemCI, ecs) {
 
 }
 Engine::priv::ComponentBody_System::~ComponentBody_System() {
 
 }
-
-
-
 
 
 #pragma endregion

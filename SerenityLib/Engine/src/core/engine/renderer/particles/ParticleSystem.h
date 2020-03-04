@@ -2,12 +2,15 @@
 #ifndef ENGINE_RENDERER_PARTICLE_SYSTEM_H
 #define ENGINE_RENDERER_PARTICLE_SYSTEM_H
 
-class ParticleEmitter;
-class Particle;
-class Camera;
-class ShaderProgram;
-class Material;
-class Viewport;
+class  ParticleEmitter;
+class  ParticleEmissionProperties;
+class  Scene;
+struct Entity;
+class  Particle;
+class  Camera;
+class  ShaderProgram;
+class  Material;
+class  Viewport;
 namespace Engine::priv {
     class Renderer;
 };
@@ -72,7 +75,8 @@ namespace Engine::priv {
             ParticleSystem& operator=(ParticleSystem&& other) noexcept = delete;
 
 
-            ParticleEmitter* add_emitter(ParticleEmitter& emitter);
+            ParticleEmitter* add_emitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent);
+
             const bool add_particle(ParticleEmitter& emitter, const glm::vec3& emitterPosition, const glm::quat& emitterRotation);
             const bool add_particle(ParticleEmitter& emitter);
 

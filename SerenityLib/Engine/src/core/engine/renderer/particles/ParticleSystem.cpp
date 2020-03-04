@@ -49,7 +49,8 @@ void priv::ParticleSystem::internal_update_emitters(const float dt) {
     }
 
     auto lamda_update_emitter = [&](ParticleEmitter& emitter, const size_t& j, const size_t& k) {
-        emitter.update(j, dt, *this, true);
+        if(emitter.isActive())
+            emitter.update(j, dt, *this, true);
     };
     priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_emitter, m_ParticleEmitters, true);
 }
@@ -83,20 +84,21 @@ void priv::ParticleSystem::internal_update_particles(const float dt, const Camer
     priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_particle, m_Particles, true);
 }
 
-ParticleEmitter* priv::ParticleSystem::add_emitter(ParticleEmitter& emitter) {
+ParticleEmitter* priv::ParticleSystem::add_emitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent) {
     if (m_ParticleEmitterFreelist.size() > 0) { //first, try to reuse an empty
         const auto freeindex = m_ParticleEmitterFreelist.top();
         m_ParticleEmitterFreelist.pop();
         if (freeindex >= m_ParticleEmitters.size()) {
             return nullptr;
         }
-        using std::swap;
-        swap(m_ParticleEmitters[freeindex], emitter);
+        m_ParticleEmitters[freeindex].init(properties, scene, lifetime, parent);
+        m_ParticleEmitters[freeindex].activate();
         return &m_ParticleEmitters[freeindex];
     }
     if (m_ParticleEmitters.size() < m_ParticleEmitters.capacity()) {
-        m_ParticleEmitters.push_back(std::move(emitter));
-        return &m_ParticleEmitters[m_ParticleEmitters.size() - 1];
+        m_ParticleEmitters.emplace_back(properties, scene, lifetime, parent);
+        m_ParticleEmitters.back().activate();
+        return &m_ParticleEmitters.back();
     }
     return nullptr;
 }

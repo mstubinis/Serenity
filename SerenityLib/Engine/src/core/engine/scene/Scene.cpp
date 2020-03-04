@@ -283,9 +283,14 @@ const uint Scene::id() const {
     return m_ID;
 }
 
-ParticleEmitter* Scene::addParticleEmitter(ParticleEmitter& emitter) {
-    return m_i->m_ParticleSystem.add_emitter(emitter);
+
+ParticleEmitter* Scene::addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, EntityWrapper* parent) {
+    return m_i->m_ParticleSystem.add_emitter(properties, scene, lifetime, (parent) ? parent->entity() : Entity::null_);
 }
+ParticleEmitter* Scene::addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent) {
+    return m_i->m_ParticleSystem.add_emitter(properties, scene, lifetime, parent);
+}
+
 
 Viewport& Scene::addViewport(const float x, const float y, const float width, const float height, const Camera& camera) {
     const unsigned int id = numViewports();

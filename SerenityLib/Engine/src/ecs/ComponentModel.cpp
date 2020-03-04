@@ -193,22 +193,11 @@ ModelInstance& ComponentModel::addModel(Mesh* mesh, Material* material, ShaderPr
     auto modelInstance      = NEW ModelInstance(m_Owner, mesh, material, shaderProgram);
     auto& _scene            = m_Owner.scene();
     modelInstance->m_Stage  = stage;
-    /*
-    bool did_early = false;
-    for (size_t i = 0; i < m_ModelInstances.size(); ++i) {
-        if (m_ModelInstances[i] == nullptr) {
-            modelInstance.m_Index = i;
-            m_ModelInstances[i] = modelInstance_ptr;
-            did_early = true;
-            break;
-        }
-    }
-    */
-    //if (!did_early) {
-        const auto index = m_ModelInstances.size();
-        modelInstance->m_Index = index;
-        m_ModelInstances.push_back(std::move(modelInstance));
-    //}
+
+    const auto index        = m_ModelInstances.size();
+    modelInstance->m_Index  = index;
+    m_ModelInstances.push_back(std::move(modelInstance));
+
     InternalScenePublicInterface::AddModelInstanceToPipeline(_scene, *modelInstance, stage);
     ComponentModel_Functions::CalculateRadius(*this);
     return *modelInstance;

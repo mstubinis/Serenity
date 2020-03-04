@@ -34,33 +34,30 @@ Entity& Entity::operator=(Entity&& other) noexcept {
     return *this;
 }
 const std::uint32_t Entity::id() const {
-    //const std::uint32_t id = (data & 4'194'303) >> 0;
-    //return id;  // = 21 (2 ^ 22 = 419,304)
-
     const EntityDataRequest dataRequest(*this);
     return dataRequest.ID;
 }
 const std::uint32_t Entity::sceneID() const {
-    //const std::uint32_t scene_id = (data & 534'773'760) >> 21;
-    //return scene_id; //+7 = 28    (2 ^ 29 = 536,870,912)
-
     const EntityDataRequest dataRequest(*this);
     return dataRequest.sceneID;
 }
 void Entity::addChild(const Entity& child) const {
     auto* body = getComponent<ComponentBody>();
-    if (body)
+    if (body) {
         body->addChild(child);
+    }
 }
 void Entity::removeChild(const Entity& child) const {
     auto* body = getComponent<ComponentBody>();
-    if(body)
+    if (body) {
         body->removeChild(child);
+    }
 }
 const bool Entity::hasParent() const {
     auto* body = getComponent<ComponentBody>();
-    if (body)
+    if (body) {
         return body->hasParent();
+    }
     return false;
 }
 
@@ -87,11 +84,11 @@ void Entity::process(const unsigned int entityID, const unsigned int sceneID, co
     data = versionID << 28 | sceneID << 21 | entityID;
 }
 const bool Entity::operator==(const Entity& other) const {
-    return (data == other.data) ? true : false;
+    return (data == other.data);
 }
 const bool Entity::operator!=(const Entity& other) const {
-    return (data == other.data) ? false : true;
+    return !(data == other.data);
 }
 const bool Entity::null() const {
-    return (data == 0) ? true : false;
+    return (data == 0);
 }

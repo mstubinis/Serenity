@@ -27,9 +27,9 @@ struct VertexData final{
 
     ~VertexData();
 
-    template<typename T> const std::vector<T> getData(const size_t& attributeIndex) {
+    template<typename T> const std::vector<T> getData(const size_t& attributeIndex) const {
         auto* buffer = (data[attributeIndex].data());
-        const T* data_as_t_ptr = reinterpret_cast<T*>((buffer));
+        const T* data_as_t_ptr = reinterpret_cast<const T*>((buffer));
         const std::vector<T> data_as_t(data_as_t_ptr, data_as_t_ptr + dataSizes[attributeIndex]);
         return data_as_t;
     }

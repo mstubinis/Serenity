@@ -4,11 +4,13 @@
 using namespace std;
 using namespace Engine;
 
+
 EntityWrapper::EntityWrapper(Scene& scene) {
-    Scene* scene_ = &scene;
-    if (!scene_)
-        scene_ = Resources::getCurrentScene();
-    m_Entity = scene_->createEntity();
+    Scene* scene_ptr = &scene;
+    if (!scene_ptr) {
+        scene_ptr = Resources::getCurrentScene();
+    }
+    m_Entity = scene_ptr->createEntity();
 }
 EntityWrapper::~EntityWrapper() {
 
@@ -17,9 +19,7 @@ EntityWrapper::EntityWrapper(EntityWrapper&& other) noexcept {
     m_Entity = std::move(other.m_Entity);
 }
 EntityWrapper& EntityWrapper::operator=(EntityWrapper&& other) noexcept {
-    if (&other != this) {
-        m_Entity = std::move(other.m_Entity);
-    }
+    m_Entity = std::move(other.m_Entity);
     return *this;
 }
 void EntityWrapper::destroy() {
