@@ -15,6 +15,7 @@ class  btBoxShape;
 class  btUniformScalingShape;
 class  btScaledBvhTriangleMeshShape;
 class  btGImpactMeshShape;
+struct btTriangleInfoMap;
 
 namespace Engine::priv {
     class MeshCollisionFactory final : public Engine::NonCopyable, public Engine::NonMoveable {
@@ -24,6 +25,7 @@ namespace Engine::priv {
             btConvexHullShape*             m_ConvesHullShape     = nullptr;
             btTriangleMesh*                m_TriangleStaticData  = nullptr;
             btBvhTriangleMeshShape*        m_TriangleStaticShape = nullptr;
+            btTriangleInfoMap*             m_TriangleInfoMap     = nullptr;
 
             void  _initConvexData(VertexData& data);
             void  _initTriangleData(VertexData& data);

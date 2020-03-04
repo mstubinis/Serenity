@@ -14,8 +14,19 @@ class btCollisionShape;
 class btTransform;
 class btVector3;
 class btDiscreteDynamicsWorld;
+class btPersistentManifold;
+//struct btCollisionAlgorithmConstructionInfo;
+//struct btCollisionObjectWrapper;
 
 #include <core/engine/physics/DebugDrawer.h>
+#include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
+#include <BulletCollision/CollisionDispatch/btSphereTriangleCollisionAlgorithm.h>
+
+#include <BulletCollision/CollisionDispatch/btActivatingCollisionAlgorithm.h>
+#include <BulletCollision/BroadphaseCollision/btBroadphaseProxy.h>
+//#include <BulletCollision/CollisionDispatch/btCollisionCreateFunc.h>
+//#include <BulletCollision/CollisionDispatch/btCollisionDispatcher.h>
+//#include <BulletCollision/CollisionDispatch/SphereTriangleDetector.h>
 
 namespace Engine::priv {
     class PhysicsWorld final : public Engine::NonCopyable, public Engine::NonMoveable{

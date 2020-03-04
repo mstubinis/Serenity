@@ -3,18 +3,22 @@
 
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 
-#include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 #include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h>
 #include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolverMT.h>
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorldMT.h>
+#include <BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h>
 
 using namespace std;
 using namespace Engine;
 
 void _preTicCallback(btDynamicsWorld* world, btScalar timeStep) {}
 void _postTicCallback(btDynamicsWorld* world, btScalar timeStep) {}
+
+
+
+
 
 priv::PhysicsWorld::PhysicsWorld() {
     m_Broadphase             = new btDbvtBroadphase();

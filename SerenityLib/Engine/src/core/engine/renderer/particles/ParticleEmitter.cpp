@@ -32,8 +32,6 @@ void ParticleEmitter::init(ParticleEmissionProperties& properties, Scene& scene,
     m_SpawningTimer = m_Properties->m_SpawnRate - 0.01f;
 
     setLinearVelocity(0, 0, 0);
-    setPosition(0, 0, 0);
-    setRotation(0, 0, 0, 1.0);
     setScale(1, 1, 1);
 }
 

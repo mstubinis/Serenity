@@ -21,21 +21,14 @@ struct CollisionCallbackEventData final {
     glm::vec3&         ownerLocalHit;
     glm::vec3&         otherLocalHit;
     glm::vec3&         normalOnB;
-    glm::vec3&         normalFromAB;
+    glm::vec3&         normalFromA;
+    glm::vec3&         normalFromB;
     btCollisionObject* ownerCollisionObj;
     btCollisionObject* otherCollisionObj;
     size_t             ownerModelInstanceIndex;
     size_t             otherModelInstanceIndex;
-    CollisionCallbackEventData(
-        ComponentBody& ownerBody_,
-        ComponentBody& otherBody_,
-        glm::vec3& ownerHit_,
-        glm::vec3& otherHit_,
-        glm::vec3& normal_,
-        glm::vec3& ownerLocalHit_,
-        glm::vec3& otherLocalHit_,
-        glm::vec3& normalFromAB_
-    );
+
+    CollisionCallbackEventData(ComponentBody& ownerBody_, ComponentBody& otherBody_, glm::vec3& ownerHit_, glm::vec3& otherHit_, glm::vec3& normal_, glm::vec3& ownerLocalHit_, glm::vec3& otherLocalHit_, glm::vec3& normalFromA_, glm::vec3& normalFromB_);
 };
 
 struct ScreenBoxCoordinates {

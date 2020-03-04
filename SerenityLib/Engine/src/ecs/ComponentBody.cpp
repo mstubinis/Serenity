@@ -26,8 +26,8 @@ using namespace Engine::priv;
 using namespace std;
 
 #pragma region CollisionCallbackParticipant
-CollisionCallbackEventData::CollisionCallbackEventData(ComponentBody& a, ComponentBody& b, glm::vec3& c, glm::vec3& d, glm::vec3& e, glm::vec3& f, glm::vec3& g, glm::vec3& h) :
-ownerBody(a), otherBody(b), ownerHit(c), otherHit(d), normalOnB(e), ownerLocalHit(f), otherLocalHit(g), normalFromAB(h) {
+CollisionCallbackEventData::CollisionCallbackEventData(ComponentBody& a, ComponentBody& b, glm::vec3& c, glm::vec3& d, glm::vec3& e, glm::vec3& f, glm::vec3& g, glm::vec3& h, glm::vec3& i) :
+ownerBody(a), otherBody(b), ownerHit(c), otherHit(d), normalOnB(e), ownerLocalHit(f), otherLocalHit(g), normalFromA(h), normalFromB(i) {
     ownerCollisionObj       = nullptr;
     otherCollisionObj       = nullptr;
     ownerModelInstanceIndex = 0;
@@ -262,7 +262,7 @@ void* ComponentBody::getUserPointer2() const {
 }
 void ComponentBody::collisionResponse(CollisionCallbackEventData& data) const {
     //if(m_CollisionFunctor)
-    m_CollisionFunctor( std::ref(data) );
+    m_CollisionFunctor( data );
 }
 const ushort ComponentBody::getCollisionGroup() const {
     if (m_Physics) {
@@ -1353,7 +1353,8 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::ui
                 }
             }
             //cleanup / edge cases
-            if (Order[erasedIndex + 1U] == 0) {
+            //if (Order[erasedIndex + 1U] == 0) {
+            if (Order[erasedIndex] == 0) {
                 Order.erase(Order.begin() + erasedIndex);
                 --OrderHead;
             }

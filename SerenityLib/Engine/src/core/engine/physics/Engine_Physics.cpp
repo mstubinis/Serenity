@@ -18,8 +18,11 @@
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+#include <BulletCollision/CollisionShapes/btTriangleShape.h>
+#include <BulletCollision/CollisionShapes/btTriangleInfoMap.h>
 #include <btBulletCollisionCommon.h>
 #include <BulletCollision/NarrowPhaseCollision/btRaycastCallback.h>
+#include <BulletCollision/CollisionDispatch/btInternalEdgeUtility.h>
 
 //Multi-threading
 #include <core/engine/threading/Engine_ThreadManager.h>
@@ -38,14 +41,67 @@
 using namespace Engine;
 using namespace std;
 
-bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1) {
-    btCollisionShape* childShapeA = nullptr;
-    btCollisionShape* childShapeB = nullptr;
 
-    btCollisionObjectWrapper* ARoot = const_cast<btCollisionObjectWrapper*>(colObj0Wrap);
-    btCollisionObjectWrapper* BRoot = const_cast<btCollisionObjectWrapper*>(colObj1Wrap);
+void processManifoldContact(btManifoldPoint& cp, btCollisionObject* A, btCollisionObject* B, btCollisionShape* childA, btCollisionShape* childB, const btCollisionShape* shapeA, const btCollisionShape* shapeB) {
+    ComponentBody* a_               = static_cast<ComponentBody*>(A->getUserPointer());
+    ComponentBody* b_               = static_cast<ComponentBody*>(B->getUserPointer());
+    if (a_ && b_) {
+        glm::vec3 ptA               = Math::btVectorToGLM(cp.getPositionWorldOnA());
+        glm::vec3 ptB               = Math::btVectorToGLM(cp.getPositionWorldOnB());
+        glm::vec3 normalOnB         = Math::btVectorToGLM(cp.m_normalWorldOnB);
+        glm::vec3 localPositionA    = Math::btVectorToGLM(cp.m_localPointA);
+        glm::vec3 localPositionB    = Math::btVectorToGLM(cp.m_localPointB);
+        glm::vec3 normalA           = -glm::normalize(ptB - ptA);
+        glm::vec3 normalB           = -glm::normalize(ptA - ptB);
+        
+
+        if (shapeA && shapeA->getShapeType() == TRIANGLE_SHAPE_PROXYTYPE) {
+            const btTriangleShape* triA = static_cast<const btTriangleShape*>(shapeA);
+            btVector3 normal = (triA->m_vertices1[1] - triA->m_vertices1[0]).cross(triA->m_vertices1[2] - triA->m_vertices1[0]);
+            normal.normalize();
+            normalA = Math::btVectorToGLM(normal);
+        }
+        if (shapeB && shapeB->getShapeType() == TRIANGLE_SHAPE_PROXYTYPE) {
+            const btTriangleShape* triB = static_cast<const btTriangleShape*>(shapeB);
+            btVector3 normal = (triB->m_vertices1[1] - triB->m_vertices1[0]).cross(triB->m_vertices1[2] - triB->m_vertices1[0]);
+            normal.normalize();
+            normalB = Math::btVectorToGLM(normal);
+        }
+
+        CollisionCallbackEventData dataA(*a_, *b_, ptA, ptB, normalOnB, localPositionA, localPositionB, normalA, normalB);
+        dataA.ownerCollisionObj = A;
+        dataA.otherCollisionObj = B;
+        CollisionCallbackEventData dataB(*b_, *a_, ptB, ptA, normalOnB, localPositionB, localPositionA, normalB, normalA);
+        dataB.ownerCollisionObj = B;
+        dataB.otherCollisionObj = A;
+
+        if (childA) {
+            auto& modelInstance = *static_cast<ModelInstance*>(childA->getUserPointer());
+            dataA.ownerModelInstanceIndex = modelInstance.index();
+            dataB.otherModelInstanceIndex = modelInstance.index();
+        }
+        if (childB) {
+            auto& modelInstance = *static_cast<ModelInstance*>(childB->getUserPointer());
+            dataA.otherModelInstanceIndex = modelInstance.index();
+            dataB.ownerModelInstanceIndex = modelInstance.index();
+        }
+
+        a_->collisionResponse(dataA);
+        b_->collisionResponse(dataB);
+
+        cp.setDistance((btScalar)9999999999999.0); //hacky way of saying "dont process this again"
+    }
+
+}
+
+bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1) {
+    btCollisionShape* childShapeA       = nullptr;
+    btCollisionShape* childShapeB       = nullptr;
+    btCollisionObjectWrapper* ARoot     = const_cast<btCollisionObjectWrapper*>(colObj0Wrap);
+    btCollisionObjectWrapper* BRoot     = const_cast<btCollisionObjectWrapper*>(colObj1Wrap);
     btCollisionObjectWrapper* ARootPrev = nullptr;
     btCollisionObjectWrapper* BRootPrev = nullptr;
+
     while (ARoot->m_parent) {
         ARootPrev = ARoot;
         ARoot = const_cast<btCollisionObjectWrapper*>(ARoot->m_parent);
@@ -55,59 +111,27 @@ bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionOb
         BRoot = const_cast<btCollisionObjectWrapper*>(BRoot->m_parent);
     }
     if (ARoot->getCollisionShape()->getShapeType() == BroadphaseNativeTypes::COMPOUND_SHAPE_PROXYTYPE) {
-        if(ARootPrev)
+        if (ARootPrev) {
             childShapeA = const_cast<btCollisionShape*>(ARootPrev->getCollisionShape());
+        }
     }
     if (BRoot->getCollisionShape()->getShapeType() == BroadphaseNativeTypes::COMPOUND_SHAPE_PROXYTYPE) {
-        if(BRootPrev)
+        if (BRootPrev) {
             childShapeB = const_cast<btCollisionShape*>(BRootPrev->getCollisionShape());
-    }
-    if (cp.getDistance() < 0.0f) {
-        btCollisionObject* collisionObjectA = const_cast<btCollisionObject*>(colObj0Wrap->getCollisionObject());
-        btCollisionObject* collisionObjectB = const_cast<btCollisionObject*>(colObj1Wrap->getCollisionObject());
-        
-        ComponentBody* _a = static_cast<ComponentBody*>(collisionObjectA->getUserPointer());
-        ComponentBody* _b = static_cast<ComponentBody*>(collisionObjectB->getUserPointer());
-        if (_a && _b) {
-            glm::vec3 ptA       = Math::btVectorToGLM(cp.getPositionWorldOnA());
-            glm::vec3 ptB       = Math::btVectorToGLM(cp.getPositionWorldOnB());
-            glm::vec3 normalOnB = Math::btVectorToGLM(cp.m_normalWorldOnB);
-
-            glm::vec3 localA = Math::btVectorToGLM(cp.m_localPointA);
-            glm::vec3 localB = Math::btVectorToGLM(cp.m_localPointB);
-
-            glm::vec3 normalA = glm::normalize(ptB - ptA);
-            glm::vec3 normalB = glm::normalize(ptA - ptB);
-
-            ComponentBody& a = *_a;
-            ComponentBody& b = *_b;
-
-            CollisionCallbackEventData dataA(a, b, ptA, ptB, normalOnB, localA, localB, normalA);
-            dataA.ownerCollisionObj = collisionObjectA;
-            dataA.otherCollisionObj = collisionObjectB;
-            CollisionCallbackEventData dataB(b, a, ptB, ptA, normalOnB, localB, localA, normalB);
-            dataB.ownerCollisionObj = collisionObjectB;
-            dataB.otherCollisionObj = collisionObjectA;
-
-            if (childShapeA) {
-                void* usrPtr = childShapeA->getUserPointer();
-                auto& modelInstance = *static_cast<ModelInstance*>(usrPtr);
-                const size_t modelIndex = modelInstance.index();
-                dataA.ownerModelInstanceIndex = modelIndex;
-                dataB.otherModelInstanceIndex = modelIndex;
-            }
-            if (childShapeB) {
-                void* usrPtr = childShapeB->getUserPointer();
-                auto& modelInstance = *static_cast<ModelInstance*>(usrPtr);
-                const size_t modelIndex = modelInstance.index();
-                dataA.otherModelInstanceIndex = modelIndex;
-                dataB.ownerModelInstanceIndex = modelIndex;
-            }
-
-            a.collisionResponse(dataA);
-            b.collisionResponse(dataB);
-            cp.setDistance((btScalar)999999999999999999.0); //hacky way of saying "dont process this again"
         }
+    }
+
+    if (cp.getDistance() < 0.0f) {
+        //btAdjustInternalEdgeContacts(cp, colObj1Wrap, colObj0Wrap, partId1, index1);
+        processManifoldContact(
+            cp,
+            const_cast<btCollisionObject*>(colObj0Wrap->getCollisionObject()),
+            const_cast<btCollisionObject*>(colObj1Wrap->getCollisionObject()),
+            childShapeA,
+            childShapeB,
+            colObj0Wrap->m_shape,
+            colObj1Wrap->m_shape
+        );
     }
     return true;
 }
@@ -158,35 +182,15 @@ void priv::PhysicsManager::_update(const float dt, int maxSubSteps, float fixedT
         for (int j = 0; j < contactManifold.getNumContacts(); ++j) {
             btManifoldPoint& cp = contactManifold.getContactPoint(j);
             if (cp.getDistance() < 0.0f) {
-                btCollisionObject* collisionObjectA = const_cast<btCollisionObject*>(contactManifold.getBody0());
-                btCollisionObject* collisionObjectB = const_cast<btCollisionObject*>(contactManifold.getBody1());
-                auto aPtr                           = collisionObjectA->getUserPointer();
-                auto bPtr                           = collisionObjectB->getUserPointer();
-                ComponentBody* a_                   = static_cast<ComponentBody*>(aPtr);
-                ComponentBody* b_                   = static_cast<ComponentBody*>(bPtr);
-                if (a_ && b_) {
-                    glm::vec3 ptA       = Math::btVectorToGLM(cp.getPositionWorldOnA());
-                    glm::vec3 ptB       = Math::btVectorToGLM(cp.getPositionWorldOnB());
-                    glm::vec3 normalOnB = Math::btVectorToGLM(cp.m_normalWorldOnB);
-
-                    glm::vec3 localA    = Math::btVectorToGLM(cp.m_localPointA);
-                    glm::vec3 localB    = Math::btVectorToGLM(cp.m_localPointB);
-
-                    glm::vec3 normalA   = glm::normalize(ptB - ptA);
-                    glm::vec3 normalB   = glm::normalize(ptA - ptB);
-
-                    CollisionCallbackEventData dataA(*a_, *b_, ptA, ptB, normalOnB, localA, localB, normalA);
-                    dataA.ownerCollisionObj = collisionObjectA;
-                    dataA.otherCollisionObj = collisionObjectB;
-                    CollisionCallbackEventData dataB(*b_, *a_, ptB, ptA, normalOnB, localB, localA, normalB);
-                    dataB.ownerCollisionObj = collisionObjectB;
-                    dataB.otherCollisionObj = collisionObjectA;
-
-                    a_->collisionResponse(dataA);
-                    b_->collisionResponse(dataB);
-
-                    cp.setDistance((btScalar)9999999999999.0); //hacky way of saying "dont process this again"
-                }
+                processManifoldContact(
+                    cp,
+                    const_cast<btCollisionObject*>(contactManifold.getBody0()),
+                    const_cast<btCollisionObject*>(contactManifold.getBody1()),
+                    nullptr,
+                    nullptr,
+                    nullptr,
+                    nullptr
+                );
             }
         }
     }
@@ -200,8 +204,6 @@ void priv::PhysicsManager::_render(const Camera& camera){
     m_Data.m_DebugDrawer.drawAccumulatedLines();
     m_Data.m_DebugDrawer.postRender();
 }
-
-
 
 
 void Physics::setNumberOfStepsPerFrame(const unsigned int numSteps) {
@@ -268,22 +270,15 @@ void Physics::removeRigidBody(btRigidBody* rigidBody){
 void Physics::removeCollisionObject(btCollisionObject* object) {
     physicsManager->m_Data.m_World->removeCollisionObject(object);
 }
-
 void Physics::updateRigidBody(btRigidBody* rigidBody){ 
     physicsManager->m_Data.m_World->updateSingleAabb(rigidBody);
 }
 void Physics::addRigidBody(ComponentBody& body) {
-    //auto* btBody = &body.getBtBody();
-    //if(btBody)
     Physics::addRigidBody(const_cast<btRigidBody*>(&body.getBtBody()), body.getCollisionGroup(), body.getCollisionMask());
 }
 void Physics::removeRigidBody(ComponentBody& body) {
     Physics::removeRigidBody(&const_cast<btRigidBody&>(body.getBtBody()));
 }
-
-
-
-
 void Physics::addRigidBodyThreadSafe(btRigidBody* body, short group, short mask) {
     std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
     Physics::addRigidBody(body, group, mask);
@@ -300,20 +295,16 @@ void Physics::updateRigidBodyThreadSafe(btRigidBody* body) {
     std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
     Physics::updateRigidBody(body);
 }
-
 void Physics::addRigidBodyThreadSafe(ComponentBody& body){
     Physics::addRigidBodyThreadSafe(const_cast<btRigidBody*>(&body.getBtBody()), body.getCollisionGroup(), body.getCollisionMask());
 }
 void Physics::removeRigidBodyThreadSafe(ComponentBody& body) {
     Physics::removeRigidBodyThreadSafe(&const_cast<btRigidBody&>(body.getBtBody()));
 }
-
 void Physics::removeCollisionObjectThreadSafe(btCollisionObject* object) {
     std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
     physicsManager->m_Data.m_World->removeCollisionObject(object);
 }
-
-
 
 
 RayCastResult _rayCastInternal_Nearest(const btVector3& start, const btVector3& end, const unsigned short group, const unsigned short mask) {

@@ -123,18 +123,8 @@ void EngineCore::update_physics(Window& window, const float timeStep) {
     const unsigned int requestedStepsPerFrame  = Physics::getNumberOfStepsPerFrame();
     const float fixed_time_step                = PHYSICS_MIN_STEP / static_cast<float>(requestedStepsPerFrame);
 
-    /*
-    //If you don't want your simulation to lose time, then set maxSubSteps to a number where: timeStep < maxSubSteps * fixedTimeStep
-    int max_sub_steps = requestedStepsPerFrame;
-    while (true) {
-        if (max_sub_steps == 1 || timeStep >= static_cast<float>(max_sub_steps) * fixed_time_step) {
-            break;
-        }
-        --max_sub_steps;
-    }
-    m_PhysicsManager._update(timeStep, glm::max(50, max_sub_steps), fixed_time_step);
-    */
-    m_PhysicsManager._update(timeStep, 50, fixed_time_step);
+
+    m_PhysicsManager._update(timeStep, 100, fixed_time_step);
 
     m_DebugManager.calculate_physics();
 }

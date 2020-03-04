@@ -8,6 +8,8 @@
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/Gimpact/btGImpactShape.h>
+#include <BulletCollision/CollisionDispatch/btInternalEdgeUtility.h>
+#include <BulletCollision/CollisionShapes/btTriangleInfoMap.h>
 
 #include <glm/glm.hpp>
 
@@ -23,6 +25,7 @@ priv::MeshCollisionFactory::~MeshCollisionFactory() {
     SAFE_DELETE(m_ConvexHullData);
     SAFE_DELETE(m_ConvesHullShape);
     SAFE_DELETE(m_TriangleStaticData);
+    SAFE_DELETE(m_TriangleInfoMap);
     SAFE_DELETE(m_TriangleStaticShape);
 }
 void priv::MeshCollisionFactory::_initConvexData(VertexData& data) {
@@ -70,6 +73,9 @@ void priv::MeshCollisionFactory::_initTriangleData(VertexData& data) {
         m_TriangleStaticShape = new btBvhTriangleMeshShape(m_TriangleStaticData, true);
         m_TriangleStaticShape->setMargin(static_cast<btScalar>(0.001));
         m_TriangleStaticShape->recalcLocalAabb();
+
+        m_TriangleInfoMap = new btTriangleInfoMap();
+        btGenerateInternalEdgeInfo(m_TriangleStaticShape, m_TriangleInfoMap);
     }
 }
 btMultiSphereShape* priv::MeshCollisionFactory::buildSphereShape(ModelInstance* modelInstance, const bool isCompoundChild) {
