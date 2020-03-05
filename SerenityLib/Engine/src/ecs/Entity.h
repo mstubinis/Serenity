@@ -18,6 +18,8 @@ struct Entity{
     Entity(Entity&& other) noexcept;
     Entity& operator=(Entity&& other) noexcept;
 
+    static Entity null_;
+
     const std::uint32_t id() const;
     const std::uint32_t sceneID() const;
 
@@ -48,6 +50,11 @@ struct Entity{
         auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
         return ecs.removeComponent<T>(*this);
     }
+
+
+
+
+#pragma region 1 component get
     template<typename T> inline T* getComponent() const {
         const auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
         return ecs.getComponent<T>(*this);
@@ -56,7 +63,21 @@ struct Entity{
         const auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
         return ecs.getComponent<T>(dataRequest);
     }
-    static Entity null_;
+#pragma endregion
+
+
+#pragma region variadic component get
+    template<class... Types> 
+    inline std::tuple<Types*...> getComponents() const {
+        const auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
+        return ecs.getComponents<Types...>(*this);
+    }
+    template<class... Types> 
+    inline std::tuple<Types*...> getComponents(const EntityDataRequest& dataRequest) const {
+        const auto& ecs = Engine::priv::InternalEntityPublicInterface::GetECS(*this);
+        return ecs.getComponents<Types...>(dataRequest);
+    }
+#pragma endregion
 };
 
 

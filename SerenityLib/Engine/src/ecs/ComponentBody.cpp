@@ -1,5 +1,6 @@
 #include <ecs/ComponentBody.h>
 #include <ecs/ComponentModel.h>
+#include <core/engine/fonts/Font.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/threading/Engine_ThreadManager.h>
 #include <core/engine/system/Engine.h>
@@ -1104,9 +1105,8 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
     auto& system            = *static_cast<Engine::priv::ComponentBody_System*>(systemPtr);
     auto& pool              = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool);
     auto& components        = pool.data();
-    const decimal double_dt = static_cast<decimal>(dt);
 
-    auto lamda_update_component = [double_dt, &system](ComponentBody& b, const size_t& i, const unsigned int k) {
+    auto lamda_update_component = [dt, &system](ComponentBody& b, const size_t& i, const unsigned int k) {
         const auto entityIndex = b.m_Owner.id() - 1U;
         auto& localMatrix = system.ParentChildSystem.LocalTransforms[entityIndex];
         auto& worldMatrix = system.ParentChildSystem.WorldTransforms[entityIndex];
@@ -1117,8 +1117,8 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
             localMatrix = b.modelMatrix();
             worldMatrix = localMatrix;
         }else{
-            auto& n = *b.data.n;
-            n.position += (n.linearVelocity * double_dt);
+            auto& n     = *b.data.n;
+            n.position += (n.linearVelocity * static_cast<decimal>(dt));
             //n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
 
             localMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
@@ -1139,11 +1139,11 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
         const unsigned int entityID = pcs.Order[i];
         if (entityID > 0) {
             const unsigned int entityIndex = entityID - 1U;
-            const unsigned int parentID = pcs.Parents[entityIndex];
+            const unsigned int parentID    = pcs.Parents[entityIndex];
             if (parentID == 0) {
                 pcs.WorldTransforms[entityIndex] = pcs.LocalTransforms[entityIndex];
             }else{
-                const unsigned int parentIndex = parentID - 1U;
+                const unsigned int parentIndex   = parentID - 1U;
                 pcs.WorldTransforms[entityIndex] = pcs.WorldTransforms[parentIndex] * pcs.LocalTransforms[entityIndex];
             }
         }else{
@@ -1151,9 +1151,11 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
         }
     }   
 
-#if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
+//#if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
     for (auto& componentBody : components) {
-        auto* model = componentBody.getOwner().getComponent<ComponentModel>();
+        const Entity entity = componentBody.getOwner();
+        const auto bodyRenderPos = componentBody.position();
+        auto* model = entity.getComponent<ComponentModel>();
         if (model) {
             const auto world_pos = glm::vec3(componentBody.position());
             const auto world_rot = glm::quat(componentBody.rotation());
@@ -1172,8 +1174,13 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
                 physics.debug_draw_line(world_pos, (world_pos+up) /* * glm::length(world_scl) */, 0, 0, 1, 1);
             }
         }
+        const auto screenPos = Math::getScreenCoordinates(bodyRenderPos, *scene.getActiveCamera(), false);
+        if (screenPos.z > 0) {
+            const string text = "ID: " + to_string(entity.id());
+            Font::renderTextStatic(text, glm::vec2(screenPos.x, screenPos.y), glm::vec4(1.0f), 0.0f, glm::vec2(0.5f), 0.1f, TextAlignment::Left);
+        }
     }
-#endif
+//#endif
 
 }};
 struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* systemPtr, void* component, Entity& entity) const {
@@ -1311,6 +1318,10 @@ void Engine::priv::ComponentBody_System::ParentChildVector::insert(const std::ui
     WorldTransforms[childID - 1U] = WorldTransforms[parentID - 1U] * LocalTransforms[childID - 1U];
 }
 void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::uint32_t parentID, const std::uint32_t childID) {
+    if (Parents[childID - 1U] == 0) {
+        //std::cout << parentID << ", " << childID << " - remove: already removed\n";
+        return;
+    }
     size_t parentIndex    = 0;
     size_t erasedIndex    = 0;
     bool foundParent      = false;
@@ -1331,6 +1342,7 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::ui
     }
     Parents[childID - 1U] = 0;
     erasedIndex = parentIndex;
+    //std::cout << parentID << ", " << childID << " - removing\n";
     for (size_t i = parentIndex; i < Order.size(); ++i) {
         const auto& entityID = Order[i];
         if (entityID == childID) {
@@ -1356,17 +1368,18 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::ui
             //if (Order[erasedIndex + 1U] == 0) {
             if (Order[erasedIndex] == 0) {
                 Order.erase(Order.begin() + erasedIndex);
+                Order.emplace_back(0);
                 --OrderHead;
             }
             if (parentIndex > 0 && Order[parentIndex + 1U] == 0) {
                 Order[parentIndex] = 0;
                 Order.erase(Order.begin() + parentIndex);
+                Order.emplace_back(0);
                 --OrderHead;
             }
             break;
         }
     }
-    //std::cout << parentID << ", " << childID << " - removing\n";
 }
 const std::uint32_t Engine::priv::ComponentBody_System::ParentChildVector::size() const {
     return OrderHead;

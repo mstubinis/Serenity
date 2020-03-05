@@ -46,6 +46,10 @@ class EntityWrapper {
         inline const bool removeComponent() {
             return m_Entity.removeComponent<T>();
         }
+
+
+
+
         template<typename T> 
         inline T* getComponent() const {
             return m_Entity.getComponent<T>();
@@ -54,5 +58,18 @@ class EntityWrapper {
         inline T* getComponent(const EntityDataRequest& dataRequest) const {
             return m_Entity.getComponent<T>(dataRequest);
         }
+
+
+
+#pragma region variadic component get
+        template<class... Types>
+        inline std::tuple<Types*...> getComponents() const {
+            return m_Entity.getComponents<Types...>();
+        }
+        template<class... Types>
+        inline std::tuple<Types*...> getComponents(const EntityDataRequest& dataRequest) const {
+            return m_Entity.getComponents<Types...>(dataRequest);
+        }
+#pragma endregion
 };
 #endif

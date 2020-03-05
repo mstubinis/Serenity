@@ -9,19 +9,22 @@
 
 using namespace Engine;
 using namespace std;
-#include <iostream>
+
+Font* first_font = nullptr;
+
+
 Font::Font(const string& filename) : EngineResource(ResourceType::Font, filename){ 
-    string rawname = filename;
-    m_MaxHeight = 0.0f;
+    string rawname         = filename;
+    m_MaxHeight            = 0.0f;
     const size_t lastindex = filename.find_last_of(".");
     if (lastindex != string::npos) {
-        rawname = filename.substr(0, lastindex);
+        rawname  = filename.substr(0, lastindex);
         rawname += ".png";
     }
     m_FontTexture = NEW Texture(rawname, false, ImageInternalFormat::SRGB8_ALPHA8);
     Handle handle = priv::Core::m_Engine->m_ResourceManager._addTexture(m_FontTexture);
 
-    float min_y_offset = 9999999.0f;
+    float min_y_offset = 99999999999.0f;
     float max_y_offset = 0.0f;
 
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
@@ -48,7 +51,7 @@ Font::Font(const string& filename) : EngineResource(ResourceType::Font, filename
                 }else if (key == "xoffset") {
                     fontGlyph.xoffset = stoi(value);
                 }else if (key == "yoffset") {
-                    fontGlyph.yoffset = stoi(value);
+                    fontGlyph.yoffset  = stoi(value);
                 }else if (key == "xadvance") {
                     fontGlyph.xadvance = stoi(value);
                 }
@@ -82,6 +85,8 @@ Font::Font(const string& filename) : EngineResource(ResourceType::Font, filename
         }
     }
     m_MaxHeight = max_y_offset - min_y_offset;
+    if (!first_font)
+        first_font = this;
 }
 Font::~Font(){ 
 }
@@ -127,22 +132,27 @@ const float Font::getTextHeight(string_view text) const {
     if (text.empty()) {
         return 0.0f;
     }
-    float lineCount = 0;
+    float lineCount = 0.0f;
     for (const auto& character : text) {
         if (character == '\n') {
             ++lineCount;
         }
     }
-    return (lineCount == 0) ? (m_MaxHeight) : ((lineCount + 1) * m_MaxHeight);
+    return (lineCount == 0) ? (m_MaxHeight) : ((lineCount + 1.0f) * m_MaxHeight);
 }
 const Texture& Font::getGlyphTexture() const {
     return *m_FontTexture; 
 }
 const FontGlyph& Font::getGlyphData(const unsigned char character) const {
-    if (!m_FontGlyphs.count(character))
+    if (!m_FontGlyphs.count(character)) {
         return m_FontGlyphs.at('?');
+    }
     return m_FontGlyphs.at(character);
 }
 void Font::renderText(const string& t, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const TextAlignment::Type al, const glm::vec4& scissor){
     Renderer::renderText(t, *this, p, c, a, s, d, al, scissor);
+}
+void Font::renderTextStatic(const string& t, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const TextAlignment::Type al, const glm::vec4& scissor) {
+    if(first_font)
+        Renderer::renderText(t, *first_font, p, c, a, s, d, al, scissor);
 }

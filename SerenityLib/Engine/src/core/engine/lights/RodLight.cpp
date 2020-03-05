@@ -8,7 +8,7 @@ using namespace std;
 RodLight::RodLight(const glm_vec3& pos, const float rodLength, Scene* scene) : PointLight(LightType::Rod, pos, scene) {
     setRodLength(rodLength);
 
-    auto body = getComponent<ComponentBody>();
+    auto* body = getComponent<ComponentBody>();
     if (body) { //evil, but needed. find out why...
         body->setScale(m_CullingRadius, m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius);
     }

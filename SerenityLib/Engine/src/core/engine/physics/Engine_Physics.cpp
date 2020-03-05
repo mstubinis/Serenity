@@ -342,16 +342,16 @@ vector<RayCastResult> _rayCastInternal(const btVector3& start, const btVector3& 
 
     vector<RayCastResult> result;
     if (RayCallback.hasHit()) {
-        auto& pts = RayCallback.m_hitPointWorld;
+        auto& pts     = RayCallback.m_hitPointWorld;
         auto& normals = RayCallback.m_hitNormalWorld;
 
-        for (int i = 0; i < pts.size(); ++i) {
-            const glm::vec3 hitPoint = Math::btVectorToGLM(RayCallback.m_hitPointWorld[i]);
+        for (int i = 0; i < pts.size(); ++i) { 
+            const glm::vec3 hitPoint  = Math::btVectorToGLM(RayCallback.m_hitPointWorld[i]);
             const glm::vec3 hitNormal = Math::btVectorToGLM(RayCallback.m_hitNormalWorld[i]);
 
             RayCastResult res;
             res.hitPosition = hitPoint;
-            res.hitNormal = hitNormal;
+            res.hitNormal   = hitNormal;
             result.push_back(res);
         }
     }

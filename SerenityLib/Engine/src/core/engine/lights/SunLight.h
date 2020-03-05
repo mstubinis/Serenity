@@ -45,8 +45,11 @@ class SunLight : public EntityWrapper {
         void setColor(const float r, const float g, const float b, const float a = 1.0f);    
         void setColor(const glm::vec4& color);
         void setColor(const glm::vec3& color);
+
         void setPosition(const decimal& x, const decimal& y, const decimal& z);
-        void setPosition(const glm_vec3&);
+        void setPosition(const decimal& position);
+        void setPosition(const glm_vec3& position);
+
         void activate(const bool active = true);                          
         void deactivate();
 };

@@ -16,13 +16,13 @@ using namespace Engine;
 
 ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent) : EntityWrapper(scene){
     addComponent<ComponentBody>();
+
+    /*
     addComponent<ComponentModel>(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), Material::Checkers);
-
     auto& modelComponent = *getComponent<ComponentModel>();
-
     modelComponent.getModel().setScale(0.01f, 0.01f, 0.1f);
     modelComponent.getModel().translate(0.0f, 0.0f, 0.1f);
-
+    */
     init(properties, scene, lifetime, parent);
 }
 void ParticleEmitter::init(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent) {

@@ -56,14 +56,20 @@ void SunLight::setColor(const glm::vec4& col) {
     m_Color = col; 
 }
 void SunLight::setColor(const glm::vec3& col) {
-    m_Color.r = col.r; m_Color.g = col.g; m_Color.b = col.b; 
+    m_Color.r = col.r; 
+    m_Color.g = col.g; 
+    m_Color.b = col.b; 
 }
 void SunLight::setPosition(const decimal& x, const decimal& y, const decimal& z) {
     getComponent<ComponentBody>()->setPosition(x, y, z); 
 }
-void SunLight::setPosition(const glm_vec3& pos) { 
-    getComponent<ComponentBody>()->setPosition(pos); 
+void SunLight::setPosition(const decimal& position) {
+    getComponent<ComponentBody>()->setPosition(position, position, position);
 }
+void SunLight::setPosition(const glm_vec3& position) {
+    getComponent<ComponentBody>()->setPosition(position);
+}
+
 void SunLight::setAmbientIntensity(const float a) {
     m_AmbientIntensity = a; 
 }

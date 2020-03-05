@@ -827,7 +827,7 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, const Camera& cam
         auto& particleMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh();
         m_Renderer._bindShaderProgram(&program);
         for (auto& pair : system.MaterialToIndexReverse) {
-            system.MaterialIDToIndex.try_emplace(pair.first, system.MaterialIDToIndex.size());
+            system.MaterialIDToIndex.try_emplace(pair.first, static_cast<unsigned int>(system.MaterialIDToIndex.size()));
         }
 
         for (auto& pod : system.ParticlesDOD) {
@@ -849,7 +849,7 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, const Camera& cam
         glBufferData(GL_ARRAY_BUFFER, particle_count * SIZE_OF_PARTICLE_DOD, NULL, GL_STREAM_DRAW);
         glBufferSubData(GL_ARRAY_BUFFER, 0, particle_count * SIZE_OF_PARTICLE_DOD, &system.ParticlesDOD[0]);
 
-        glDrawElementsInstanced(GL_TRIANGLES, particleMesh.getVertexData().indices.size(), GL_UNSIGNED_SHORT, 0, static_cast<GLsizei>(particle_count));
+        glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(particleMesh.getVertexData().indices.size()), GL_UNSIGNED_SHORT, 0, static_cast<GLsizei>(particle_count));
 
         m_Renderer._unbindMesh(&particleMesh);
     }
@@ -859,7 +859,7 @@ void DeferredPipeline::renderMesh(const Mesh& mesh, const unsigned int mode) {
     if (indicesSize == 0) {
         return;
     }
-    glDrawElements(mode, (GLsizei)indicesSize, GL_UNSIGNED_SHORT, nullptr);
+    glDrawElements(mode, static_cast<GLsizei>(indicesSize), GL_UNSIGNED_SHORT, nullptr);
 }
 void DeferredPipeline::renderLightProbe(LightProbe& lightProbe) {
     //goal: render all 6 sides into a fbo and into a cubemap, and have that cubemap stored in the light probe to be used for Global Illumination
