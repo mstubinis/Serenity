@@ -10,7 +10,7 @@ struct aiNode;
 #include <core/engine/mesh/Skeleton.h>
 #include <core/engine/mesh/MeshRequest.h>
 
-typedef std::unordered_map<std::string, Engine::priv::BoneNode*> BoneNodeMap;
+using BoneNodeMap = std::unordered_map<std::string, Engine::priv::BoneNode*>;
 
 namespace Engine::priv {
     struct MeshLoadingFlags final {enum Flag {

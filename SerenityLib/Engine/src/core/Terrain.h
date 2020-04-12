@@ -5,7 +5,7 @@
 #include <ecs/Components.h>
 #include <SFML/System.hpp>
 #include <core/engine/events/Engine_EventObject.h>
-#include <ecs/EntityWrapper.h>
+#include <ecs/Entity.h>
 
 namespace sf{ 
     class Image;
@@ -13,7 +13,7 @@ namespace sf{
 class Scene;
 class btRigidBody;
 
-class Terrain: public EventObserver, public EntityWrapper {
+class Terrain: public EventObserver, public Entity {
     private:
         std::vector<float> m_Pixels;
     public:

@@ -6,7 +6,7 @@ using namespace std;
 
 #pragma region Component
 
-ComponentLogic3::ComponentLogic3(const Entity& entity) {
+ComponentLogic3::ComponentLogic3(const Entity entity) {
     m_Owner = entity;
 }
 ComponentLogic3::~ComponentLogic3() {

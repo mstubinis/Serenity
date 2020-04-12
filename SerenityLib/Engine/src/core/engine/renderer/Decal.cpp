@@ -24,7 +24,7 @@ namespace Engine::priv {
     }};
 };
 
-Decal::Decal(Material& material, const glm_vec3& localPosition, const glm::vec3& hitNormal, const float size, Scene& scene, const float lifetimeMax, const RenderStage::Stage stage) : EntityWrapper(scene) {
+Decal::Decal(Material& material, const glm_vec3& localPosition, const glm::vec3& hitNormal, const float size, Scene& scene, const float lifetimeMax, const RenderStage::Stage stage) : Entity(scene) {
 
     addComponent<ComponentBody>();
     addComponent<ComponentModel>(&priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), &material, ShaderProgram::Decal, stage);

@@ -15,7 +15,6 @@ class  Skybox;
 class  ModelInstance;
 struct Entity;
 struct SceneOptions;
-class  EntityWrapper;
 
 namespace Engine::priv {
     class  RenderGraph;
@@ -80,15 +79,13 @@ class Scene: public EngineResource, public EventObserver{
 
 
         Entity createEntity();
-        Entity getEntity(const Engine::priv::EntityPOD&);
-        void removeEntity(Entity& entity);
+        void removeEntity(const Entity entity);
 
         
         Viewport& getMainViewport();
         Viewport& addViewport(const float x, const float y, const float width, const float height, const Camera& camera);
 
-        ParticleEmitter* addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, EntityWrapper* parent = nullptr);
-        ParticleEmitter* addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent);
+        ParticleEmitter* addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, Entity* parent = nullptr);
 
 
         Camera* getActiveCamera() const;

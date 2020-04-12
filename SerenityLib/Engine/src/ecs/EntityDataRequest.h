@@ -31,7 +31,7 @@ namespace Engine::priv {
     class EntityPOD final : public Engine::NonCopyable {
         friend class Scene;
         friend class Engine::priv::ECSEntityPool<Entity>;
-        private:
+        public:
             std::uint32_t        ID : 21;
             std::uint32_t   sceneID : 7;
             std::uint32_t versionID : 4;

@@ -6,7 +6,7 @@ using namespace std;
 
 #pragma region Component
 
-ComponentLogic::ComponentLogic(const Entity& entity) {
+ComponentLogic::ComponentLogic(const Entity entity) {
     m_Owner = entity;
 }
 

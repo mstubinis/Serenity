@@ -30,9 +30,9 @@ class ComponentLogic1 {
         void*                                                        m_UserPointer2 = nullptr;
         std::function<void(const ComponentLogic1*, const float)>     m_Functor      = [](const ComponentLogic1*, const float) {};
     public:
-        ComponentLogic1(const Entity& entity);
+        ComponentLogic1(const Entity entity);
         template<typename T> 
-        ComponentLogic1(const Entity& entity, const T& Functor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr) {
+        ComponentLogic1(const Entity entity, const T& Functor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr) {
             m_Owner        = entity;
             m_UserPointer  = Ptr1;
             m_UserPointer1 = Ptr2;

@@ -8,12 +8,11 @@ using namespace std;
 
 Entity Entity::null_ = Entity(0,0,0);
 
-Entity::Entity() {
+Entity::Entity(Scene& scene) {
+    data = scene.createEntity().data;
 }
 Entity::Entity(const unsigned int entityID, const unsigned int sceneID, const unsigned int versionID) {
-    process(entityID, sceneID, versionID);
-}
-Entity::~Entity() {
+    data = versionID << 28 | sceneID << 21 | entityID;
 }
 Entity::Entity(const Entity& other) {
     data = other.data;
@@ -28,11 +27,11 @@ Entity::Entity(Entity&& other) noexcept {
     data = std::move(other.data);
 }
 Entity& Entity::operator=(Entity&& other) noexcept {
-    if (&other != this) {
-        data = std::move(other.data);
-    }
+    data = std::move(other.data);
     return *this;
 }
+
+
 const std::uint32_t Entity::id() const {
     const EntityDataRequest dataRequest(*this);
     return dataRequest.ID;
@@ -41,20 +40,25 @@ const std::uint32_t Entity::sceneID() const {
     const EntityDataRequest dataRequest(*this);
     return dataRequest.sceneID;
 }
-void Entity::addChild(const Entity& child) const {
-    auto* body = getComponent<ComponentBody>();
+const std::uint32_t Entity::versionID() const {
+    const EntityDataRequest dataRequest(*this);
+    return dataRequest.versionID;
+}
+
+void Entity::addChild(const Entity child) const {
+    const auto* body = getComponent<ComponentBody>();
     if (body) {
         body->addChild(child);
     }
 }
-void Entity::removeChild(const Entity& child) const {
-    auto* body = getComponent<ComponentBody>();
+void Entity::removeChild(const Entity child) const {
+    const auto* body = getComponent<ComponentBody>();
     if (body) {
         body->removeChild(child);
     }
 }
 const bool Entity::hasParent() const {
-    auto* body = getComponent<ComponentBody>();
+    const auto* body = getComponent<ComponentBody>();
     if (body) {
         return body->hasParent();
     }
@@ -66,27 +70,15 @@ Scene& Entity::scene() const {
 	const EntityDataRequest dataRequest(*this);
     return priv::Core::m_Engine->m_ResourceManager._getSceneByID(dataRequest.sceneID);
 }
-void Entity::move(const Scene& scene) {
-	const EntityDataRequest dataRequest(*this);
-    const auto sceneID = scene.id();
-    if (sceneID == dataRequest.sceneID) {
-        return;
-    }
-    process(dataRequest.ID, sceneID, dataRequest.versionID);
-}
 void Entity::destroy() {
-    Scene& _scene = scene();
-    priv::InternalScenePublicInterface::CleanECS(_scene, data);
-    auto& ecs = priv::InternalScenePublicInterface::GetECS(_scene);
-    ecs.removeEntity(*this);
+    Scene& scene_ = scene();
+    priv::InternalScenePublicInterface::CleanECS(scene_, data);
+    priv::InternalScenePublicInterface::GetECS(scene_).removeEntity(*this);
 }
-void Entity::process(const unsigned int entityID, const unsigned int sceneID, const unsigned int versionID) {
-    data = versionID << 28 | sceneID << 21 | entityID;
-}
-const bool Entity::operator==(const Entity& other) const {
+const bool Entity::operator==(const Entity other) const {
     return (data == other.data);
 }
-const bool Entity::operator!=(const Entity& other) const {
+const bool Entity::operator!=(const Entity other) const {
     return !(data == other.data);
 }
 const bool Entity::null() const {

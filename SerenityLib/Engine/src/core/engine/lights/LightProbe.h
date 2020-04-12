@@ -5,11 +5,11 @@
 class  Scene;
 
 #include <glm/vec3.hpp>
-#include <ecs/EntityWrapper.h>
+#include <ecs/Entity.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Viewport.h>
 
-class LightProbe : public EntityWrapper, public Engine::NonCopyable, public Engine::NonMoveable {
+class LightProbe : public Entity, public Engine::NonCopyable, public Engine::NonMoveable {
     public: struct ProbeType final { enum Type : unsigned char {
         Static,   //no updating probe
         Dynamic1, //update 1 cube side per frame, MODERATELY EXPENSIVE
@@ -51,8 +51,7 @@ class LightProbe : public EntityWrapper, public Engine::NonCopyable, public Engi
         );
         virtual ~LightProbe();
 
-        void addIgnoredEntity(Entity& entity);
-        void addIgnoredEntity(EntityWrapper& entityWrapper);
+        void addIgnoredEntity(const Entity entity);
 
         const Camera& getCamera() const;
         const Viewport& getViewport() const;

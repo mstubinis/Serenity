@@ -18,28 +18,25 @@ float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) 
     for (size_t i = 0; i < modelComponent.m_ModelInstances.size(); ++i) {
         auto& modelInstance            = *modelComponent.m_ModelInstances[i];
         auto& mesh                     = *modelInstance.mesh();
-        if (mesh == false)
+        if (mesh == false) {
             continue;
-        const auto  modelInstanceScale = Math::Max(modelInstance.getScale());
-        const glm::vec3  localPosition = Math::getMatrixPosition(modelInstance.modelMatrix());
-        auto data = const_cast<VertexData&>(mesh.getVertexData()).getData<glm::vec3>(0);
-        for (size_t j = 0; j < data.size(); ++j) {
-            points_total.push_back(localPosition + (data[j] * modelInstanceScale));
+        }
+        const auto modelInstanceScale = Math::Max(modelInstance.getScale());
+        const glm::vec3 localPosition = Math::getMatrixPosition(modelInstance.modelMatrix());
+        const auto data               = mesh.getVertexData().getData<glm::vec3>(0);
+        for (const auto& vertexPosition : data) {
+            points_total.push_back(localPosition + (vertexPosition * modelInstanceScale));
         }
     }
-    float maxRadius      = 0.0f;
-    auto  maxBoundingBox = glm::vec3(0.0f);
-    for (auto& point : points_total) {
+    float     maxRadius      = 0.0f;
+    glm::vec3 maxBoundingBox = glm::vec3(0.0f);
+    for (const auto& point : points_total) {
         const auto abs_point = glm::abs(point);
         const float radius   = glm::length(abs_point);
-        if (radius > maxRadius)
-            maxRadius = radius;
-        if (abs_point.x > maxBoundingBox.x)
-            maxBoundingBox.x = abs_point.x;
-        if (abs_point.y > maxBoundingBox.y)
-            maxBoundingBox.y = abs_point.y;
-        if (abs_point.z > maxBoundingBox.z)
-            maxBoundingBox.z = abs_point.z;
+        maxRadius            = max(maxRadius, radius);
+        maxBoundingBox.x     = max(maxBoundingBox.x, abs_point.x);
+        maxBoundingBox.y     = max(maxBoundingBox.y, abs_point.y);
+        maxBoundingBox.z     = max(maxBoundingBox.z, abs_point.z);
     }
     modelComponent.m_Radius          = maxRadius;
     modelComponent.m_RadiusBox       = maxBoundingBox;
@@ -51,39 +48,43 @@ float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) 
     }
     return modelComponent.m_Radius; //now modified by the body scale
 };
-
+void ComponentModel_Functions::RegisterDeferredMeshLoaded(ComponentModel& super, Mesh* mesh) {
+    if (mesh && *mesh == false) {
+        super.registerEvent(EventType::MeshLoaded);
+    }
+}
 
 #pragma region Component
 
-ComponentModel::ComponentModel(const Entity& entity, const Handle mesh, const Handle material, ShaderProgram* shaderProgram, const RenderStage::Stage stage) {
+ComponentModel::ComponentModel(const Entity entity, const Handle mesh, const Handle material, ShaderProgram* shaderProgram, const RenderStage::Stage stage) {
     m_Owner = entity;
     addModel(mesh, material, shaderProgram, stage);
 }
-ComponentModel::ComponentModel(const Entity& entity, Mesh* mesh, const Handle material,  ShaderProgram* shaderProgram, const RenderStage::Stage stage) {
+ComponentModel::ComponentModel(const Entity entity, Mesh* mesh, const Handle material,  ShaderProgram* shaderProgram, const RenderStage::Stage stage) {
     m_Owner = entity;
     addModel(mesh, material.get<Material>(), shaderProgram, stage);
 }
-ComponentModel::ComponentModel(const Entity& entity, const Handle mesh, Material* material,  ShaderProgram* shaderProgram, const RenderStage::Stage stage) {
+ComponentModel::ComponentModel(const Entity entity, const Handle mesh, Material* material,  ShaderProgram* shaderProgram, const RenderStage::Stage stage) {
     m_Owner = entity;
     addModel(mesh.get<Mesh>(), material, shaderProgram, stage);
 }
-ComponentModel::ComponentModel(const Entity& entity, Mesh* mesh, Material* material, ShaderProgram* shaderProgram, const RenderStage::Stage stage) {
+ComponentModel::ComponentModel(const Entity entity, Mesh* mesh, Material* material, ShaderProgram* shaderProgram, const RenderStage::Stage stage) {
     m_Owner = entity;
     addModel(mesh, material, shaderProgram, stage);
 }
-ComponentModel::ComponentModel(const Entity& entity, const Handle mesh, const Handle material, const Handle shaderProgram, const RenderStage::Stage stage) {
+ComponentModel::ComponentModel(const Entity entity, const Handle mesh, const Handle material, const Handle shaderProgram, const RenderStage::Stage stage) {
     m_Owner = entity;
     addModel(mesh, material, shaderProgram.get<ShaderProgram>(), stage);
 }
-ComponentModel::ComponentModel(const Entity& entity, Mesh* mesh, const Handle material, const Handle shaderProgram, const RenderStage::Stage stage) {
+ComponentModel::ComponentModel(const Entity entity, Mesh* mesh, const Handle material, const Handle shaderProgram, const RenderStage::Stage stage) {
     m_Owner = entity;
     addModel(mesh, material.get<Material>(), shaderProgram.get<ShaderProgram>(), stage);
 }
-ComponentModel::ComponentModel(const Entity& entity, const Handle mesh, Material* material, const Handle shaderProgram, const RenderStage::Stage stage) {
+ComponentModel::ComponentModel(const Entity entity, const Handle mesh, Material* material, const Handle shaderProgram, const RenderStage::Stage stage) {
     m_Owner = entity;
     addModel(mesh.get<Mesh>(), material, shaderProgram.get<ShaderProgram>(), stage);
 }
-ComponentModel::ComponentModel(const Entity& entity, Mesh* mesh, Material* material, const Handle shaderProgram, const RenderStage::Stage stage) {
+ComponentModel::ComponentModel(const Entity entity, Mesh* mesh, Material* material, const Handle shaderProgram, const RenderStage::Stage stage) {
     m_Owner = entity;
     addModel(mesh, material, shaderProgram.get<ShaderProgram>(), stage);
 }
@@ -115,7 +116,7 @@ ComponentModel& ComponentModel::operator=(ComponentModel&& other) noexcept {
 ComponentModel::~ComponentModel() {
     SAFE_DELETE_VECTOR(m_ModelInstances);
 }
-const Entity& ComponentModel::getOwner() const {
+const Entity ComponentModel::getOwner() const {
     return m_Owner;
 }
 void ComponentModel::onEvent(const Event& event_) {
@@ -185,20 +186,17 @@ ModelInstance& ComponentModel::addModel(const Handle mesh, const Handle material
     return ComponentModel::addModel(mesh.get<Mesh>(), material.get<Material>(), shaderProgram, stage);
 }
 ModelInstance& ComponentModel::addModel(Mesh* mesh, Material* material, ShaderProgram* shaderProgram, const RenderStage::Stage stage) {
-
-    if (mesh && *mesh == false) {
-        registerEvent(EventType::MeshLoaded);
-    }
+    ComponentModel_Functions::RegisterDeferredMeshLoaded(*this, mesh);
 
     auto modelInstance      = NEW ModelInstance(m_Owner, mesh, material, shaderProgram);
-    auto& _scene            = m_Owner.scene();
+    auto& scene             = m_Owner.scene();
     modelInstance->m_Stage  = stage;
 
     const auto index        = m_ModelInstances.size();
     modelInstance->m_Index  = index;
     m_ModelInstances.push_back(std::move(modelInstance));
 
-    InternalScenePublicInterface::AddModelInstanceToPipeline(_scene, *modelInstance, stage);
+    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, *modelInstance, stage);
     ComponentModel_Functions::CalculateRadius(*this);
     return *modelInstance;
 }
@@ -215,26 +213,23 @@ void ComponentModel::setModel(const Handle mesh, const Handle material, const si
     ComponentModel::setModel(mesh.get<Mesh>(), material.get<Material>(), index, shaderProgram, stage);
 }
 void ComponentModel::setModel(Mesh* mesh, Material* material, const size_t& index, ShaderProgram* shaderProgram, const RenderStage::Stage stage) {
+    ComponentModel_Functions::RegisterDeferredMeshLoaded(*this, mesh);
 
-    if (mesh && *mesh == false) {
-        registerEvent(EventType::MeshLoaded);
-    }
-
-    auto& model_instance = *m_ModelInstances[index];
-    auto& _scene = m_Owner.scene();
-    InternalScenePublicInterface::RemoveModelInstanceFromPipeline(_scene, model_instance, model_instance.stage());
+    auto& model_instance           = *m_ModelInstances[index];
+    auto& scene                    = m_Owner.scene();
+    InternalScenePublicInterface::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
 
     model_instance.m_ShaderProgram = shaderProgram;
     model_instance.m_Mesh          = mesh;
     model_instance.m_Material      = material;
     model_instance.m_Stage         = stage;
 
-    InternalScenePublicInterface::AddModelInstanceToPipeline(_scene, model_instance, stage);
+    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, stage);
     ComponentModel_Functions::CalculateRadius(*this);
 }
 void ComponentModel::setModelShaderProgram(ShaderProgram* shaderProgram, const size_t& index, const RenderStage::Stage stage) {
-    auto& model_instance = *m_ModelInstances[index];
-    auto& scene   = m_Owner.scene();
+    auto& model_instance           = *m_ModelInstances[index];
+    auto& scene                    = m_Owner.scene();
     InternalScenePublicInterface::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
 
     model_instance.m_ShaderProgram = shaderProgram;
@@ -247,8 +242,8 @@ void ComponentModel::setModelShaderProgram(const Handle shaderPHandle, const siz
     ComponentModel::setModelShaderProgram(shaderPHandle.get<ShaderProgram>(), index, stage); 
 }
 void ComponentModel::setStage(const RenderStage::Stage& stage, const size_t& index) {
-    auto& model_instance = *m_ModelInstances[index];
-    auto& scene = m_Owner.scene();
+    auto& model_instance   = *m_ModelInstances[index];
+    auto& scene            = m_Owner.scene();
     InternalScenePublicInterface::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
 
     model_instance.m_Stage = stage;
@@ -256,13 +251,10 @@ void ComponentModel::setStage(const RenderStage::Stage& stage, const size_t& ind
     InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, stage);
 }
 void ComponentModel::setModelMesh(Mesh* mesh, const size_t& index, const RenderStage::Stage stage) {
+    ComponentModel_Functions::RegisterDeferredMeshLoaded(*this, mesh);
 
-    if (mesh && *mesh == false) {
-        registerEvent(EventType::MeshLoaded);
-    }
-
-    auto& model_instance = *m_ModelInstances[index];
-    auto& scene   = m_Owner.scene();
+    auto& model_instance   = *m_ModelInstances[index];
+    auto& scene            = m_Owner.scene();
 
     InternalScenePublicInterface::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
 
@@ -338,7 +330,6 @@ struct priv::ComponentModel_SceneEnteredFunction final {void operator()(void* sy
 struct priv::ComponentModel_SceneLeftFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
 
 }};
-
 
 ComponentModel_System_CI::ComponentModel_System_CI() {
     setUpdateFunction(ComponentModel_UpdateFunction());

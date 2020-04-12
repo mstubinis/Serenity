@@ -73,10 +73,10 @@ namespace Engine::priv {
                     m_Systems[i]->onUpdate(dt, scene);
                 }
             }
-            void onComponentAddedToEntity(void* component, TEntity& entity, const unsigned int type_slot) {
+            void onComponentAddedToEntity(void* component, TEntity entity, const unsigned int type_slot) {
                 m_Systems[type_slot]->onComponentAddedToEntity(component, entity);
             }
-            void onComponentRemovedFromEntity(TEntity& entity, const unsigned int type_slot) {
+            void onComponentRemovedFromEntity(TEntity entity, const unsigned int type_slot) {
                 m_Systems[type_slot]->onComponentRemovedFromEntity(entity);
             }
             void onSceneEntered(Scene& scene) { 
@@ -180,7 +180,7 @@ namespace Engine::priv {
                 m_JustAddedEntities.push_back(res);
                 return std::move(res);
             }
-            void removeEntity(const TEntity& entity) { 
+            void removeEntity(const TEntity entity) { 
                 m_DestroyedEntities.push_back(entity);
             }
             priv::EntityPOD* getEntity(const unsigned int entityID) const { 

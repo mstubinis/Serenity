@@ -8,9 +8,9 @@ namespace Engine::priv {
     struct DefaultDecalUnbindFunctor;
 };
 
-#include <ecs/EntityWrapper.h>
+#include <ecs/Entity.h>
 
-class Decal final: public EntityWrapper{
+class Decal final: public Entity{
     friend struct Engine::priv::DefaultDecalBindFunctor;
     friend struct Engine::priv::DefaultDecalUnbindFunctor;
     private:

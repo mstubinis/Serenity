@@ -9,12 +9,12 @@ namespace Engine::priv {
 };
 
 #include <core/engine/renderer/particles/Particle.h>
-#include <ecs/EntityWrapper.h>
+#include <ecs/Entity.h>
 #include <vector>
 #include <mutex>
 
 
-class ParticleEmitter final : public EntityWrapper {
+class ParticleEmitter final : public Entity {
     friend class  Engine::priv::ParticleSystem;
     friend class  Particle;
     friend struct Engine::priv::InternalScenePublicInterface;

@@ -103,7 +103,7 @@ ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::N
 
 #pragma region Component
 
-ComponentBody::ComponentBody(const Entity& entity) {
+ComponentBody::ComponentBody(const Entity entity) {
     m_Owner = entity;
     m_Physics                 = false;
     data.p                    = nullptr;
@@ -111,7 +111,7 @@ ComponentBody::ComponentBody(const Entity& entity) {
     auto& normalData          = *data.n;
     Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
 }
-ComponentBody::ComponentBody(const Entity& entity, const CollisionType::Type collisionType) {
+ComponentBody::ComponentBody(const Entity entity, const CollisionType::Type collisionType) {
     m_Owner = entity;
     m_Physics               = true;
     data.n                  = nullptr;
@@ -177,7 +177,7 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
     }
     return *this;
 }
-const Entity& ComponentBody::getOwner() const {
+const Entity ComponentBody::getOwner() const {
     return m_Owner;
 }
 void ComponentBody::onEvent(const Event& _event) {
@@ -243,6 +243,12 @@ void ComponentBody::addPhysicsToWorld(const bool force, const bool threadSafe) {
 const bool ComponentBody::hasPhysics() const {
     return m_Physics;
 }
+const decimal ComponentBody::getLinearDamping() const {
+    return (m_Physics && data.p->bullet_rigidBody) ? static_cast<decimal>(data.p->bullet_rigidBody->getLinearDamping()) : static_cast<decimal>(0.0);
+}
+const decimal ComponentBody::getAngularDamping() const {
+    return (m_Physics && data.p->bullet_rigidBody) ? static_cast<decimal>(data.p->bullet_rigidBody->getAngularDamping()) : static_cast<decimal>(0.0);
+}
 void ComponentBody::setUserPointer(void* userPtr) {
     m_UserPointer  = userPtr;
 }
@@ -284,12 +290,12 @@ const ushort ComponentBody::getCollisionFlags() const {
     return static_cast<ushort>(0);
 }
 
-const decimal ComponentBody::getDistance(const Entity& p_Other) const {
-    const auto other_position = p_Other.getComponent<ComponentBody>()->position();
+const decimal ComponentBody::getDistance(const Entity other) const {
+    const auto other_position = other.getComponent<ComponentBody>()->position();
     return glm::distance(position(), other_position);
 }
-const unsigned long long ComponentBody::getDistanceLL(const Entity& p_Other) const {
-    const auto other_position = p_Other.getComponent<ComponentBody>()->position();
+const unsigned long long ComponentBody::getDistanceLL(const Entity other) const {
+    const auto other_position = other.getComponent<ComponentBody>()->position();
     return static_cast<unsigned long long>(glm::distance(position(), other_position));
 }
 void ComponentBody::alignTo(const glm_vec3& p_Direction) {
@@ -1065,7 +1071,7 @@ void ComponentBody::setMass(const float mass) {
         }
     }
 }
-void ComponentBody::addChild(const Entity& child) const {
+void ComponentBody::addChild(const Entity child) const {
     if (child.sceneID() == m_Owner.sceneID()) {
         auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
         auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
@@ -1076,7 +1082,7 @@ void ComponentBody::addChild(const Entity& child) const {
 void ComponentBody::addChild(const ComponentBody& child) const {
     ComponentBody::addChild(child.m_Owner);
 }
-void ComponentBody::removeChild(const Entity& child) const {
+void ComponentBody::removeChild(const Entity child) const {
     if (child.sceneID() == m_Owner.sceneID()) {
         auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
         auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
@@ -1151,7 +1157,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
         }
     }   
 
-//#if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
+#if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
     for (auto& componentBody : components) {
         const Entity entity = componentBody.getOwner();
         const auto bodyRenderPos = componentBody.position();
@@ -1180,7 +1186,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
             Font::renderTextStatic(text, glm::vec2(screenPos.x, screenPos.y), glm::vec4(1.0f), 0.0f, glm::vec2(0.5f), 0.1f, TextAlignment::Left);
         }
     }
-//#endif
+#endif
 
 }};
 struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* systemPtr, void* component, Entity& entity) const {
@@ -1205,7 +1211,7 @@ struct priv::ComponentBody_ComponentRemovedFromEntityFunction final { void opera
         pcs.remove(pcs.Parents[thisIndex], id);
     }
 }};
-struct priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* systemPtr, void* componentPool,Entity& entity, Scene& scene) const {
+struct priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* systemPtr, void* componentPool, Entity& entity, Scene& scene) const {
     auto& pool = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool);
     auto* component_ptr = pool.getComponent(entity);
     if (component_ptr) {
@@ -1263,20 +1269,22 @@ void Engine::priv::ComponentBody_System::ParentChildVector::reserve(const size_t
     WorldTransforms.reserve(size);
     LocalTransforms.reserve(size);
 }
-void Engine::priv::ComponentBody_System::ParentChildVector::insert(const std::uint32_t parentID, const std::uint32_t childID) {
+void Engine::priv::ComponentBody_System::ParentChildVector::reserve_from_insert(const std::uint32_t parentID, const std::uint32_t childID) {
     if (Parents.capacity() < parentID || Parents.capacity() < childID) {
         reserve(std::max(parentID, childID) + 50U);
     }
     if (Parents.size() < parentID || Parents.size() < childID) {
         resize(std::max(parentID, childID));
     }
-    if (Parents[childID - 1U] == parentID) {
+}
+void Engine::priv::ComponentBody_System::ParentChildVector::insert(const std::uint32_t parentID, const std::uint32_t childID) {
+    reserve_from_insert(parentID, childID);
+    if (getParent(childID) == parentID) {
         //std::cout << parentID << ", " << childID << " - added: already added\n";
         return;
     }
 
     //std::cout << parentID << ", " << childID << " - adding\n";
-
     bool added = false;
     for (size_t i = 0; i < Order.size(); ++i) {
         const auto& entityID = Order[i];
@@ -1312,13 +1320,12 @@ void Engine::priv::ComponentBody_System::ParentChildVector::insert(const std::ui
         Order[OrderHead + 1U]  = childID;
         OrderHead             += 2;
     }
-    Parents[childID - 1U] = parentID;
+    getParent(childID) = parentID;
 
-
-    WorldTransforms[childID - 1U] = WorldTransforms[parentID - 1U] * LocalTransforms[childID - 1U];
+    getWorld(childID) = getWorld(parentID) * getLocal(childID);
 }
 void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::uint32_t parentID, const std::uint32_t childID) {
-    if (Parents[childID - 1U] == 0) {
+    if (getParent(childID) == 0) {
         //std::cout << parentID << ", " << childID << " - remove: already removed\n";
         return;
     }
@@ -1340,7 +1347,7 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::ui
         //std::cout << parentID << ", " << childID << " - remove: not found\n";
         return;
     }
-    Parents[childID - 1U] = 0;
+    getParent(childID) = 0;
     erasedIndex = parentIndex;
     //std::cout << parentID << ", " << childID << " - removing\n";
     for (size_t i = parentIndex; i < Order.size(); ++i) {
@@ -1355,12 +1362,12 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::ui
                 if (Order[j] == 0) {
                     break;
                 }
-                if (Parents[entityIDCaseOne - 1U] == parentID) {
+                if (getParent(entityIDCaseOne) == parentID) {
                     std::swap(Order[j - 1U], Order[j]);
                     ++erasedIndex;
-                }else if (Parents[entityIDCaseOne - 1U] == childID && Order[j - 1U] == 0) {
+                }else if (getParent(entityIDCaseOne) == childID && Order[j - 1U] == 0) {
                     Order[j - 1U] = childID;
-                }else if (Parents[entityIDCaseOne - 1U] == 0) {
+                }else if (getParent(entityIDCaseOne) == 0) {
                     break;
                 }
             }

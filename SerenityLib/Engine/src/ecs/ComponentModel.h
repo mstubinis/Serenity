@@ -17,6 +17,7 @@ namespace Engine::priv {
     struct ComponentModel_SceneLeftFunction;
     struct ComponentModel_Functions final {
         static float CalculateRadius(ComponentModel& super);
+        static void RegisterDeferredMeshLoaded(ComponentModel& super, Mesh* mesh);
     };
 };
 
@@ -43,15 +44,15 @@ class ComponentModel: public EventObserver {
         glm::vec3                    m_RadiusBox;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        explicit ComponentModel(const Entity&, const Handle meshHandle, const Handle materialHandle, ShaderProgram* = 0, const RenderStage::Stage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(const Entity&, Mesh*, const Handle materialHandle, ShaderProgram* = 0, const RenderStage::Stage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(const Entity&, const Handle meshHandle, Material*, ShaderProgram* = 0, const RenderStage::Stage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(const Entity&, Mesh*, Material*, ShaderProgram* = 0, const RenderStage::Stage = RenderStage::GeometryOpaque);
+        explicit ComponentModel(const Entity, const Handle meshHandle, const Handle materialHandle, ShaderProgram* = 0, const RenderStage::Stage = RenderStage::GeometryOpaque);
+        explicit ComponentModel(const Entity, Mesh*, const Handle materialHandle, ShaderProgram* = 0, const RenderStage::Stage = RenderStage::GeometryOpaque);
+        explicit ComponentModel(const Entity, const Handle meshHandle, Material*, ShaderProgram* = 0, const RenderStage::Stage = RenderStage::GeometryOpaque);
+        explicit ComponentModel(const Entity, Mesh*, Material*, ShaderProgram* = 0, const RenderStage::Stage = RenderStage::GeometryOpaque);
 
-        explicit ComponentModel(const Entity&, const Handle meshHandle, const Handle materialHandle, const Handle shaderPHandle, const RenderStage::Stage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(const Entity&, Mesh*, const Handle materialHandle, const Handle shaderPHandle, const RenderStage::Stage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(const Entity&, const Handle meshHandle, Material*, const Handle shaderPHandle, const RenderStage::Stage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(const Entity&, Mesh*, Material*, const Handle shaderPHandle, const RenderStage::Stage = RenderStage::GeometryOpaque);
+        explicit ComponentModel(const Entity, const Handle meshHandle, const Handle materialHandle, const Handle shaderPHandle, const RenderStage::Stage = RenderStage::GeometryOpaque);
+        explicit ComponentModel(const Entity, Mesh*, const Handle materialHandle, const Handle shaderPHandle, const RenderStage::Stage = RenderStage::GeometryOpaque);
+        explicit ComponentModel(const Entity, const Handle meshHandle, Material*, const Handle shaderPHandle, const RenderStage::Stage = RenderStage::GeometryOpaque);
+        explicit ComponentModel(const Entity, Mesh*, Material*, const Handle shaderPHandle, const RenderStage::Stage = RenderStage::GeometryOpaque);
 
         ComponentModel(const ComponentModel& other)                = delete;
         ComponentModel& operator=(const ComponentModel& other)     = delete;
@@ -60,7 +61,7 @@ class ComponentModel: public EventObserver {
 
         ~ComponentModel();
 
-        const Entity& getOwner() const;
+        const Entity getOwner() const;
 
         void onEvent(const Event& event_) override;
 

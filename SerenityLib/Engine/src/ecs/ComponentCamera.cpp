@@ -23,28 +23,28 @@ void priv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentCamera& c
     }
 }
 const glm::mat4 priv::ComponentCamera_Functions::GetViewNoTranslation(const Camera& camera) {
-    return camera.m_Entity.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation;
+    return camera.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation;
 }
 const glm::mat4 priv::ComponentCamera_Functions::GetViewInverseNoTranslation(const Camera& camera) {
-    return glm::inverse(camera.m_Entity.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation);
+    return glm::inverse(camera.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation);
 }
 const glm::mat4 priv::ComponentCamera_Functions::GetViewProjectionNoTranslation(const Camera& camera) {
-    const auto& componentCamera = *camera.m_Entity.getComponent<ComponentCamera>();
+    const auto& componentCamera = *camera.getComponent<ComponentCamera>();
     return componentCamera.m_ProjectionMatrix * componentCamera.m_ViewMatrixNoTranslation;
 }
 const glm::mat4 priv::ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(const Camera& camera) {
-    const auto& componentCamera = *camera.m_Entity.getComponent<ComponentCamera>();
+    const auto& componentCamera = *camera.getComponent<ComponentCamera>();
     return glm::inverse(componentCamera.m_ProjectionMatrix * componentCamera.m_ViewMatrixNoTranslation);
 }
 const glm::vec3 priv::ComponentCamera_Functions::GetViewVectorNoTranslation(const Camera& camera) {
-    const auto& viewMatrixNoTranslation = camera.m_Entity.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation;
+    const auto& viewMatrixNoTranslation = camera.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation;
     return glm::vec3(viewMatrixNoTranslation[0][2], viewMatrixNoTranslation[1][2], viewMatrixNoTranslation[2][2]);
 }
 
 
 #pragma region Component
 
-ComponentCamera::ComponentCamera(const Entity& entity, const float angleDegrees, const float aspectRatio, const float nearPlane, const float farPlane) {
+ComponentCamera::ComponentCamera(const Entity entity, const float angleDegrees, const float aspectRatio, const float nearPlane, const float farPlane) {
     m_Owner = entity;
     m_Angle                   = glm::radians(angleDegrees);
 	m_AspectRatio             = aspectRatio;
@@ -56,7 +56,7 @@ ComponentCamera::ComponentCamera(const Entity& entity, const float angleDegrees,
 
     m_Type                    = CameraType::Perspective;
 }
-ComponentCamera::ComponentCamera(const Entity& entity, const float left, const float right, const float bottom, const float top, const float nearPlane, const float farPlane) {
+ComponentCamera::ComponentCamera(const Entity entity, const float left, const float right, const float bottom, const float top, const float nearPlane, const float farPlane) {
     m_Owner = entity;
     m_Left                    = left;
 	m_Right                   = right;
@@ -244,7 +244,7 @@ struct priv::ComponentCamera_ComponentAddedToEntityFunction final {void operator
 }};
 struct priv::ComponentCamera_ComponentRemovedFromEntityFunction final { void operator()(void* system, Entity& entity) const {
 }};
-struct priv::ComponentCamera_EntityAddedToSceneFunction final {void operator()(void* system, void* componentPool, Entity& p_Entity, Scene& scene) const {
+struct priv::ComponentCamera_EntityAddedToSceneFunction final {void operator()(void* system, void* componentPool, Entity& entity, Scene& scene) const {
 }};
 struct priv::ComponentCamera_SceneEnteredFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
 }};

@@ -115,11 +115,14 @@ using uint64 = std::uint64_t;
     } \
 }
 #define SAFE_DELETE_VECTOR(x){ \
-    if(x.size() > 0) { \
-        for (size_t i = 0; i < x.size(); ++i) { \
-            SAFE_DELETE(x[i]); \
-        } \
-        x.clear(); \
+    for (size_t i = 0; i < x.size(); ++i) { \
+        SAFE_DELETE(x[i]); \
+    } \
+    x.clear(); \
+}
+#define SAFE_DELETE_ARRAY(x){ \
+    for (size_t i = 0; i < x.size(); ++i) { \
+        SAFE_DELETE(x[i]); \
     } \
 }
 #define SAFE_DELETE_QUEUE(x){ \

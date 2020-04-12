@@ -3,14 +3,14 @@
 #define ENGINE_CAMERA_H
 
 #include <ecs/Components.h>
-#include <ecs/EntityWrapper.h>
+#include <ecs/Entity.h>
 
 class  Scene;
 struct CameraType final{enum Type {
     Perspective, 
     Orthographic,
 };};
-class Camera: public EntityWrapper{
+class Camera: public Entity{
     friend struct Engine::priv::ComponentCamera_Functions;
     public:
         Camera(const float angle, const float aspectRatio, const float nearPlane, const float farPlane,Scene* = nullptr);

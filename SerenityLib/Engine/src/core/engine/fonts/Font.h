@@ -13,21 +13,27 @@ class Texture;
 
 #include <core/engine/fonts/FontIncludes.h>
 
-struct FontGlyph final{
-     unsigned int id, x, y, width, height, xadvance;
-     int xoffset; int yoffset;
+struct CharGlyph final {
+    unsigned int id;
+    unsigned int x;
+    unsigned int y;
+    unsigned int width;
+    unsigned int height;
+    unsigned int xadvance;
+    int xoffset;
+    int yoffset;
 
-     //mesh specific
-     std::vector<glm::vec3> pts;
-     std::vector<glm::vec2> uvs;
+    //mesh specific
+    std::vector<glm::vec3> pts;
+    std::vector<glm::vec2> uvs;
 };
-class Font final: public EngineResource{
+class Font final: public EngineResource {
     public:
         static const unsigned int MAX_CHARACTERS_RENDERED_PER_FRAME = 4096;
     private:
-        Texture* m_FontTexture;
-        float    m_MaxHeight;
-        std::unordered_map<unsigned char, FontGlyph> m_FontGlyphs;
+        Texture* m_FontTexture  = nullptr;
+        float    m_MaxHeight    = 0.0f;
+        std::unordered_map<unsigned char, CharGlyph> m_CharGlyphs;
     public:
         Font(const std::string& filename);
         ~Font();
@@ -60,6 +66,6 @@ class Font final: public EngineResource{
         const float getMaxHeight() const;
 
         const Texture& getGlyphTexture() const;
-        const FontGlyph& getGlyphData(const unsigned char character) const;
+        const CharGlyph& getGlyphData(const unsigned char character) const;
 };
 #endif

@@ -42,7 +42,6 @@ MeshRequest::MeshRequestPart::MeshRequestPart() {
 MeshRequest::MeshRequestPart::~MeshRequestPart() {
 
 }
-
 MeshRequest::MeshRequestPart::MeshRequestPart(const MeshRequest::MeshRequestPart& other) {
     mesh         = other.mesh;
     name         = other.name;
@@ -88,9 +87,9 @@ MeshRequest::MeshRequest(const string& filenameOrData, const float threshold){
     }
 }
 MeshRequest::~MeshRequest() {
+    //TODO: this is causing problems
     SAFE_DELETE_MAP(m_Map);
 }
-
 MeshRequest::MeshRequest(const MeshRequest& other) {
     m_FileOrData     = other.m_FileOrData;
     m_FileExtension  = other.m_FileExtension;
@@ -137,9 +136,6 @@ MeshRequest& MeshRequest::operator=(MeshRequest&& other) noexcept {
     }
     return *this;
 }
-
-
-
 void MeshRequest::request() {
     m_Async = false;
     InternalMeshRequestPublicInterface::Request(*this);

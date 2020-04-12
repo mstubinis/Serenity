@@ -5,7 +5,7 @@ using namespace Engine;
 using namespace std;
 
 DirectionalLight::DirectionalLight(const glm::vec3& dir, Scene* scene) : SunLight(glm::vec3(0), LightType::Directional, scene) {
-    m_Entity.getComponent<ComponentBody>()->alignTo(dir);
+    getComponent<ComponentBody>()->alignTo(dir);
 
     if (m_Type == LightType::Directional) {
         auto& dirLights = priv::InternalScenePublicInterface::GetDirectionalLights(*scene);
@@ -15,7 +15,7 @@ DirectionalLight::DirectionalLight(const glm::vec3& dir, Scene* scene) : SunLigh
 DirectionalLight::~DirectionalLight() {
 }
 void DirectionalLight::destroy() {
-    EntityWrapper::destroy();
-    removeFromVector(priv::InternalScenePublicInterface::GetDirectionalLights(m_Entity.scene()), this);
-    removeFromVector(priv::InternalScenePublicInterface::GetLights(m_Entity.scene()), this);
+    Entity::destroy();
+    removeFromVector(priv::InternalScenePublicInterface::GetDirectionalLights(scene()), this);
+    removeFromVector(priv::InternalScenePublicInterface::GetLights(scene()), this);
 }

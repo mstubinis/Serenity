@@ -615,9 +615,6 @@
     <ClInclude Include="Engine\src\core\engine\scene\ViewportIncludes.h">
       <Filter>Header Files\Engine\Core\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\ecs\EntityWrapper.h">
-      <Filter>Header Files\Engine\Core\ECS</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\ecs\ECSSystemConstructorInfo.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
@@ -1033,9 +1030,6 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\model\ModelInstance.cpp">
       <Filter>Source Files\Engine\Core\Model</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\ecs\EntityWrapper.cpp">
-      <Filter>Source Files\Engine\Core\ECS</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\scene\SceneOptions.cpp">
       <Filter>Source Files\Engine\Core\Scene</Filter>

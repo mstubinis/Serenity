@@ -8,10 +8,10 @@ class ComponentBody;
 class btCollisionObject;
 class btRigidBody;
 
-#include <ecs/Entity.h>
 #include <ecs/ECS.h>
 #include <core/engine/physics/PhysicsIncludes.h>
 #include <LinearMath/btDefaultMotionState.h>
+#include <ecs/Entity.h>
 
 struct CollisionCallbackEventData final {
     ComponentBody&     ownerBody;
@@ -107,8 +107,8 @@ class ComponentBody : public EventObserver {
 
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentBody(const Entity&);
-        ComponentBody(const Entity&, const CollisionType::Type);
+        ComponentBody(const Entity);
+        ComponentBody(const Entity, const CollisionType::Type);
 
         ComponentBody& operator=(const ComponentBody& other) = delete;
         ComponentBody(const ComponentBody& other)            = delete;
@@ -117,15 +117,15 @@ class ComponentBody : public EventObserver {
 
         ~ComponentBody();
 
-        const Entity& getOwner() const;
+        const Entity getOwner() const;
 
         void onEvent(const Event& event_) override;
 
         const bool hasParent() const;
 
-        void addChild(const Entity& child) const;
+        void addChild(const Entity child) const;
         void addChild(const ComponentBody& child) const;
-        void removeChild(const Entity& child) const;
+        void removeChild(const Entity child) const;
         void removeChild(const ComponentBody& child) const;
 
 
@@ -148,6 +148,8 @@ class ComponentBody : public EventObserver {
         void* getUserPointer2() const;
 
         const bool hasPhysics() const;
+        const decimal getLinearDamping() const;
+        const decimal getAngularDamping() const;
         const unsigned short getCollisionGroup() const; //get the groups this body belongs to
         const unsigned short getCollisionMask() const;  //get the groups this body will register collisions with
         const unsigned short getCollisionFlags() const;
@@ -177,8 +179,8 @@ class ComponentBody : public EventObserver {
         void setScale(const decimal& s);
 
 		const float mass() const;
-        const decimal getDistance(const Entity& other) const;
-        const unsigned long long getDistanceLL(const Entity& other) const;
+        const decimal getDistance(const Entity other) const;
+        const unsigned long long getDistanceLL(const Entity other) const;
         const glm::vec3 getScreenCoordinates(const bool clampToEdge = false) const;
 
         const ScreenBoxCoordinates getScreenBoxCoordinates(const float minOffset = 10.0f) const;
@@ -258,6 +260,19 @@ class ComponentBody_System_CI : public Engine::priv::ECSSystemCI {
 namespace Engine::priv {
     class ComponentBody_System final : public Engine::priv::ECSSystem<Entity, ComponentBody> {
         class ParentChildVector final {
+            private:
+                inline std::uint32_t& getParent(const std::uint32_t childID) {
+                    return Parents[childID - 1U];
+                }
+                inline glm_mat4& getWorld(const std::uint32_t ID) {
+                    return WorldTransforms[ID - 1U];
+                }
+                inline glm_mat4& getLocal(const std::uint32_t ID) {
+                    return LocalTransforms[ID - 1U];
+                }
+
+                void reserve_from_insert(const std::uint32_t parentID, const std::uint32_t childID);
+
             public:
                 std::vector<glm_mat4>         WorldTransforms;
                 std::vector<glm_mat4>         LocalTransforms;

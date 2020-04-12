@@ -7,7 +7,7 @@ using namespace Engine;
 using namespace std;
 
 
-SunLight::SunLight(const glm_vec3& pos, const LightType::Type type, Scene* scene) : EntityWrapper(*scene){
+SunLight::SunLight(const glm_vec3& pos, const LightType::Type type, Scene* scene) : Entity(*scene){
     if (!scene) {
         scene = Resources::getCurrentScene();
     }
@@ -86,7 +86,7 @@ void SunLight::deactivate() {
     m_Active = false; 
 }
 void SunLight::destroy() {
-    EntityWrapper::destroy();
-    removeFromVector(priv::InternalScenePublicInterface::GetSunLights(m_Entity.scene()), this);
-    removeFromVector(priv::InternalScenePublicInterface::GetLights(m_Entity.scene()), this);
+    Entity::destroy();
+    removeFromVector(priv::InternalScenePublicInterface::GetSunLights(scene()), this);
+    removeFromVector(priv::InternalScenePublicInterface::GetLights(scene()), this);
 }

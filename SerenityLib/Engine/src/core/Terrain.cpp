@@ -17,7 +17,7 @@
 
 using namespace Engine;
 
-Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& material, Scene* scene):EntityWrapper(*scene){
+Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& material, Scene* scene) : Entity(*scene){
     /*
     for(unsigned int i = 0; i < heightmapImage.getSize().x; ++i){
         for(unsigned int j = 0; j < heightmapImage.getSize().y; ++j){
@@ -55,7 +55,7 @@ Terrain::~Terrain(){
 void Terrain::update(float dt){
 }
 void Terrain::setPosition(float x,float y,float z){
-    ComponentBody& body = *entity().getComponent<ComponentBody>();
+    ComponentBody& body = *getComponent<ComponentBody>();
     body.setPosition(x, y, z);
 
     //Physics::removeRigidBody(m_RigidBody);
@@ -70,7 +70,7 @@ void Terrain::setPosition(glm::vec3 pos){
     Terrain::setPosition(pos.x,pos.y,pos.z);
 }
 void Terrain::setScale(float x,float y,float z){
-    ComponentBody& body = *entity().getComponent<ComponentBody>();
+    ComponentBody& body = *getComponent<ComponentBody>();
     body.setScale(x, y, z);
     Terrain::setPosition(body.position());
 }

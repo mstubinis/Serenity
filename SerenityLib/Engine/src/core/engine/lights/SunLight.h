@@ -8,9 +8,9 @@ namespace Engine::priv {
 };
 
 #include <core/engine/lights/LightIncludes.h>
-#include <ecs/EntityWrapper.h>
+#include <ecs/Entity.h>
 
-class SunLight : public EntityWrapper {
+class SunLight : public Entity {
     friend class ::Engine::priv::Renderer;
     protected:
         bool               m_Active            = true;

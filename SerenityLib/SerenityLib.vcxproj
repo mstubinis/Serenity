@@ -396,7 +396,6 @@
     <ClInclude Include="Engine\src\ecs\ECSSystemConstructorInfo.h" />
     <ClInclude Include="Engine\src\ecs\Entity.h" />
     <ClInclude Include="Engine\src\ecs\EntityDataRequest.h" />
-    <ClInclude Include="Engine\src\ecs\EntityWrapper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\core\Constraint.cpp" />
@@ -526,7 +525,6 @@
     <ClCompile Include="Engine\src\ecs\ECSRegistry.cpp" />
     <ClCompile Include="Engine\src\ecs\Entity.cpp" />
     <ClCompile Include="Engine\src\ecs\EntityDataRequest.cpp" />
-    <ClCompile Include="Engine\src\ecs\EntityWrapper.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

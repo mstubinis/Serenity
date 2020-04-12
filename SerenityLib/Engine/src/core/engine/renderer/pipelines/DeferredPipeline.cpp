@@ -725,7 +725,7 @@ void DeferredPipeline::renderPointLight(const Camera& c, const PointLight& p) {
 }
 void DeferredPipeline::renderSpotLight(const Camera& c, const SpotLight& s) {
     return;
-    const auto& body    = *s.entity().getComponent<ComponentBody>();
+    const auto& body    = *s.getComponent<ComponentBody>();
     const auto pos      = glm::vec3(body.position());
     const auto forward  = glm::vec3(body.forward());
     const auto cull     = s.getCullingRadius();
@@ -767,7 +767,7 @@ void DeferredPipeline::renderRodLight(const Camera& c, const RodLight& r) {
     if (!r.isActive()) {
         return;
     }
-    const auto& body           = *r.entity().getComponent<ComponentBody>();
+    const auto& body           = *r.getComponent<ComponentBody>();
     const auto pos             = glm::vec3(body.position());
     const auto cullingDistance = r.rodLength() + (r.getCullingRadius() * 2.0f);
     const auto factor          = 1100.0f * cullingDistance;
@@ -874,8 +874,8 @@ void DeferredPipeline::internal_render_2d_text_left(const string& text, const Fo
         }else if (character != '\0') {
             const unsigned int accum = i * 4;
             ++i;
-            const FontGlyph& chr = font.getGlyphData(character);
-            const float startingY = -int(chr.height + chr.yoffset) - y;
+            const CharGlyph& glyph = font.getGlyphData(character);
+            const float startingY = -int(glyph.height + glyph.yoffset) - y;
 
             m_Text_Indices.emplace_back(accum + 0);
             m_Text_Indices.emplace_back(accum + 1);
@@ -884,14 +884,14 @@ void DeferredPipeline::internal_render_2d_text_left(const string& text, const Fo
             m_Text_Indices.emplace_back(accum + 1);
             m_Text_Indices.emplace_back(accum + 0);
 
-            const float startingX = x + chr.xoffset;
-            x += chr.xadvance;
+            const float startingX = x + glyph.xoffset;
+            x += glyph.xadvance;
 
             for(unsigned int i = 0; i < 4; ++i)
-                m_Text_Points.emplace_back(startingX + chr.pts[i].x, startingY + chr.pts[i].y, z);
+                m_Text_Points.emplace_back(startingX + glyph.pts[i].x, startingY + glyph.pts[i].y, z);
 
             for (unsigned int i = 0; i < 4; ++i)
-                m_Text_UVs.emplace_back(chr.uvs[i].x, chr.uvs[i].y);
+                m_Text_UVs.emplace_back(glyph.uvs[i].x, glyph.uvs[i].y);
         }
     }
 }
@@ -907,7 +907,7 @@ void DeferredPipeline::internal_render_2d_text_center(const string& text, const 
             x = 0.0f;
             continue;
         }else if (character != '\0') {
-            const FontGlyph& chr = font.getGlyphData(character);
+            const CharGlyph& chr = font.getGlyphData(character);
             line_accumulator += character;
             x += chr.xadvance;
         }
@@ -926,8 +926,8 @@ void DeferredPipeline::internal_render_2d_text_center(const string& text, const 
             if (character != '\0') {
                 const unsigned int accum = i * 4;
                 ++i;
-                const FontGlyph& chr = font.getGlyphData(character);
-                const float startingY = -int(chr.height + chr.yoffset) - y;
+                const CharGlyph& glyph = font.getGlyphData(character);
+                const float startingY = -int(glyph.height + glyph.yoffset) - y;
 
                 m_Text_Indices.emplace_back(accum + 0);
                 m_Text_Indices.emplace_back(accum + 1);
@@ -936,14 +936,14 @@ void DeferredPipeline::internal_render_2d_text_center(const string& text, const 
                 m_Text_Indices.emplace_back(accum + 1);
                 m_Text_Indices.emplace_back(accum + 0);
 
-                const float startingX = x + chr.xoffset;
-                x += chr.xadvance;
+                const float startingX = x + glyph.xoffset;
+                x += glyph.xadvance;
 
                 for (unsigned int i = 0; i < 4; ++i)
-                    m_Text_Points.emplace_back(startingX + chr.pts[i].x - line_size, startingY + chr.pts[i].y, z);
+                    m_Text_Points.emplace_back(startingX + glyph.pts[i].x - line_size, startingY + glyph.pts[i].y, z);
 
                 for (unsigned int i = 0; i < 4; ++i)
-                    m_Text_UVs.emplace_back(chr.uvs[i].x, chr.uvs[i].y);
+                    m_Text_UVs.emplace_back(glyph.uvs[i].x, glyph.uvs[i].y);
             }
         }
         y += newLineGlyphHeight;
@@ -974,8 +974,8 @@ void DeferredPipeline::internal_render_2d_text_right(const string& text, const F
             if (character != '\0') {
                 const unsigned int accum = i * 4;
                 ++i;
-                const FontGlyph& chr = font.getGlyphData(character);
-                const float startingY = -int(chr.height + chr.yoffset) - y;
+                const CharGlyph& glyph = font.getGlyphData(character);
+                const float startingY = -int(glyph.height + glyph.yoffset) - y;
 
                 m_Text_Indices.emplace_back(accum + 0);
                 m_Text_Indices.emplace_back(accum + 1);
@@ -985,16 +985,16 @@ void DeferredPipeline::internal_render_2d_text_right(const string& text, const F
                 m_Text_Indices.emplace_back(accum + 0);
 
                 if (k == 0) {
-                    x -= chr.width;
+                    x -= glyph.width;
                 }
-                const float startingX = x + chr.xoffset;
-                x -= chr.xadvance;
+                const float startingX = x + glyph.xoffset;
+                x -= glyph.xadvance;
 
                 for (unsigned int i = 0; i < 4; ++i)
-                    m_Text_Points.emplace_back(startingX + chr.pts[i].x, startingY + chr.pts[i].y, z);
+                    m_Text_Points.emplace_back(startingX + glyph.pts[i].x, startingY + glyph.pts[i].y, z);
 
                 for (unsigned int i = 0; i < 4; ++i)
-                    m_Text_UVs.emplace_back(chr.uvs[i].x, chr.uvs[i].y);
+                    m_Text_UVs.emplace_back(glyph.uvs[i].x, glyph.uvs[i].y);
 
                 ++k;
             }

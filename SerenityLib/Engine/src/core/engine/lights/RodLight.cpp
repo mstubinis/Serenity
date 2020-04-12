@@ -35,7 +35,7 @@ const float RodLight::rodLength() const {
     return m_RodLength; 
 }
 void RodLight::destroy() {
-    EntityWrapper::destroy();
-    removeFromVector(priv::InternalScenePublicInterface::GetRodLights(m_Entity.scene()), this);
-    removeFromVector(priv::InternalScenePublicInterface::GetLights(m_Entity.scene()), this);
+    Entity::destroy();
+    removeFromVector(priv::InternalScenePublicInterface::GetRodLights(scene()), this);
+    removeFromVector(priv::InternalScenePublicInterface::GetLights(scene()), this);
 }

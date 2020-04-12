@@ -14,7 +14,7 @@
 using namespace std;
 using namespace Engine;
 
-ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent) : EntityWrapper(scene){
+ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent) : Entity(scene){
     addComponent<ComponentBody>();
 
     /*
@@ -46,7 +46,7 @@ ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept {
     m_Timer           = std::move(other.m_Timer);
     m_Lifetime        = std::move(other.m_Lifetime);
     m_Parent          = std::move(other.m_Parent);
-    m_Entity          = std::move(other.m_Entity);
+    data              = std::move(other.data);
     m_UpdateFunctor   = std::move(other.m_UpdateFunctor);
     m_UserData        = std::move(other.m_UserData);
 }
@@ -57,7 +57,7 @@ ParticleEmitter& ParticleEmitter::operator=(ParticleEmitter&& other) noexcept {
     m_Timer           = std::move(other.m_Timer);
     m_Lifetime        = std::move(other.m_Lifetime);
     m_Parent          = std::move(other.m_Parent);
-    m_Entity          = std::move(other.m_Entity);
+    data              = std::move(other.data);
     m_UpdateFunctor   = std::move(other.m_UpdateFunctor);
     m_UserData        = std::move(other.m_UserData); 
     return *this;
