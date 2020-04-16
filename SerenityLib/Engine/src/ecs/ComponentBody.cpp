@@ -244,10 +244,10 @@ const bool ComponentBody::hasPhysics() const {
     return m_Physics;
 }
 const decimal ComponentBody::getLinearDamping() const {
-    return (m_Physics && data.p->bullet_rigidBody) ? static_cast<decimal>(data.p->bullet_rigidBody->getLinearDamping()) : static_cast<decimal>(0.0);
+    return (data.p->bullet_rigidBody) ? static_cast<decimal>(data.p->bullet_rigidBody->getLinearDamping()) : static_cast<decimal>(0.0);
 }
 const decimal ComponentBody::getAngularDamping() const {
-    return (m_Physics && data.p->bullet_rigidBody) ? static_cast<decimal>(data.p->bullet_rigidBody->getAngularDamping()) : static_cast<decimal>(0.0);
+    return (data.p->bullet_rigidBody) ? static_cast<decimal>(data.p->bullet_rigidBody->getAngularDamping()) : static_cast<decimal>(0.0);
 }
 void ComponentBody::setUserPointer(void* userPtr) {
     m_UserPointer  = userPtr;

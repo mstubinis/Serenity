@@ -298,6 +298,7 @@
     <ClInclude Include="Engine\src\core\engine\networking\Networking.h" />
     <ClInclude Include="Engine\src\core\engine\networking\ListenerTCP.h" />
     <ClInclude Include="Engine\src\core\engine\networking\SocketInterface.h" />
+    <ClInclude Include="Engine\src\core\engine\networking\SocketManager.h" />
     <ClInclude Include="Engine\src\core\engine\networking\SocketTCP.h" />
     <ClInclude Include="Engine\src\core\engine\networking\SocketUDP.h" />
     <ClInclude Include="Engine\src\core\engine\physics\Collision.h" />
@@ -365,6 +366,7 @@
     <ClInclude Include="Engine\src\core\engine\sounds\Sounds.h" />
     <ClInclude Include="Engine\src\core\engine\system\Engine.h" />
     <ClInclude Include="Engine\src\core\engine\system\EngineGameFunctions.h" />
+    <ClInclude Include="Engine\src\core\engine\system\EngineMisc.h" />
     <ClInclude Include="Engine\src\core\engine\system\EngineOptions.h" />
     <ClInclude Include="Engine\src\core\engine\system\window\Window.h" />
     <ClInclude Include="Engine\src\core\engine\textures\DDS.h" />
@@ -448,6 +450,7 @@
     <ClCompile Include="Engine\src\core\engine\model\ModelInstance.cpp" />
     <ClCompile Include="Engine\src\core\engine\model\ModelInstanceAnimation.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\ListenerTCP.cpp" />
+    <ClCompile Include="Engine\src\core\engine\networking\SocketManager.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\SocketTCP.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\SocketUDP.cpp" />
     <ClCompile Include="Engine\src\core\engine\physics\Collision.cpp" />
@@ -503,6 +506,7 @@
     <ClCompile Include="Engine\src\core\engine\sounds\SoundMusic.cpp" />
     <ClCompile Include="Engine\src\core\engine\sounds\SoundQueue.cpp" />
     <ClCompile Include="Engine\src\core\engine\system\Engine.cpp" />
+    <ClCompile Include="Engine\src\core\engine\system\EngineMisc.cpp" />
     <ClCompile Include="Engine\src\core\engine\system\window\Window.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\Texture.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\TextureIncludes.cpp" />

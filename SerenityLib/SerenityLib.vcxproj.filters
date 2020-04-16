@@ -729,6 +729,12 @@
     <ClInclude Include="Engine\src\core\engine\renderer\opengl\OpenGL.h">
       <Filter>Header Files\Engine\Core\Renderer\opengl</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\system\EngineMisc.h">
+      <Filter>Header Files\Engine\Core\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\networking\SocketManager.h">
+      <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -1111,6 +1117,12 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\opengl\OpenGL.cpp">
       <Filter>Source Files\Engine\Core\Renderer\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\system\EngineMisc.cpp">
+      <Filter>Source Files\Engine\Core\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\networking\SocketManager.cpp">
+      <Filter>Source Files\Engine\Core\Networking</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

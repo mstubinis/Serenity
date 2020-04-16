@@ -1,19 +1,19 @@
 #include <core/engine/threading/Engine_ThreadManager.h>
 #include <core/engine/utils/Utils.h>
+#include <iostream>
 
 using namespace Engine;
 using namespace std;
 
-priv::ThreadManager* threadManager;
+priv::ThreadManager* threadManager = nullptr;
 
 priv::ThreadManager::ThreadManager(){ 
     const auto hardware_concurrency = priv::threading::hardware_concurrency();
-
     if (hardware_concurrency > 1) {
         m_ThreadPool.startup(hardware_concurrency);
         m_ThreadPoolEngineControlled.startup(hardware_concurrency);
+        cout << "Starting thread pool with " << hardware_concurrency << " threads\n";
     }
-
     threadManager                   = this;
 }
 priv::ThreadManager::~ThreadManager(){ 

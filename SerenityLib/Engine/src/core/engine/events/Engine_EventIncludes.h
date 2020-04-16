@@ -7,9 +7,16 @@
 
 struct EventType final {
     enum Type : unsigned int {
-        WindowResized = 0,
+        Unknown = 0,
+        WindowResized,
         WindowGainedFocus,
         WindowLostFocus,
+
+        SocketConnected,
+        SocketDisconnected,
+
+        PacketSent,
+        PacketReceived,
 
         WindowRequestedToBeClosed,
         WindowHasClosed,

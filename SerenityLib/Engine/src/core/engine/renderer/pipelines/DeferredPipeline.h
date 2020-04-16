@@ -68,7 +68,7 @@ namespace Engine::priv {
             std::vector<Shader*>           m_InternalShaders;
             std::vector<ShaderProgram*>    m_InternalShaderPrograms;
             std::vector<API2DCommand>      m_2DAPICommands;
-
+            std::vector<API2DCommand>      m_2DAPICommandsNonTextured;
             //particle instancing
             unsigned int                   m_Particle_Instance_VBO;
 
@@ -109,6 +109,14 @@ namespace Engine::priv {
             void restoreCurrentState() override;
             void clear2DAPI() override;
             void sort2DAPI() override;
+
+            void renderPhysicsAPI(const bool mainRenderFunc, const Viewport& viewport, const Camera& camera, const Scene& scene) override;
+
+            //non textured 2d api elements will be exposed to anti-aliasing post processing
+            void render2DAPINonTextured(const bool mainRenderFunc, const Viewport& viewport) override;
+
+            void render2DAPI(const bool mainRenderFunc, const Viewport& viewport) override;
+
 
             ShaderProgram* getCurrentBoundShaderProgram() override;
             Material* getCurrentBoundMaterial() override;

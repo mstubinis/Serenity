@@ -12,7 +12,6 @@ using namespace std;
 
 Font* first_font = nullptr;
 
-
 Font::Font(const string& filename) : EngineResource(ResourceType::Font, filename){ 
     string rawname         = filename;
     const size_t lastindex = filename.find_last_of(".");
@@ -96,7 +95,7 @@ const float Font::getTextHeight(string_view text) const {
         return 0.0f;
     }
     float lineCount = 0.0f;
-    for (const auto& character : text) {
+    for (const char character : text) {
         if (character == '\n') {
             ++lineCount;
         }
@@ -107,20 +106,20 @@ const float Font::getTextWidth(string_view text) const {
     float row_width = 0.0f;
     float maxWidth  = 0.0f;
     for (size_t i = 0; i < text.size(); ++i) {
-        auto& character = text[i];
+        const char character = text[i];
         if (character != '\0' && character != '\r') {
             if (character != '\n') {
-                const auto& glyph = getGlyphData(character);
+                const CharGlyph& glyph = getGlyphData(character);
                 row_width += (static_cast<float>(glyph.xadvance));
             }else{
                 //backtrack spaces
                 int j = i - 1;
                 while (j >= 0) {
-                    auto& character_backtrack = text[j];
+                    const char character_backtrack = text[j];
                     if (character_backtrack != ' ') {
                         break;
                     }
-                    const auto& glyph_space = getGlyphData(character_backtrack);
+                    const CharGlyph& glyph_space = getGlyphData(character_backtrack);
                     row_width -= (static_cast<float>(glyph_space.xadvance));
                     --j;
                 }
@@ -139,10 +138,7 @@ const Texture& Font::getGlyphTexture() const {
     return *m_FontTexture; 
 }
 const CharGlyph& Font::getGlyphData(const unsigned char character) const {
-    if (!m_CharGlyphs.count(character)) {
-        return m_CharGlyphs.at('?');
-    }
-    return m_CharGlyphs.at(character);
+    return (m_CharGlyphs.count(character)) ? m_CharGlyphs.at(character) : m_CharGlyphs.at('?');
 }
 void Font::renderText(const string& t, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const TextAlignment::Type al, const glm::vec4& scissor){
     Renderer::renderText(t, *this, p, c, a, s, d, al, scissor);

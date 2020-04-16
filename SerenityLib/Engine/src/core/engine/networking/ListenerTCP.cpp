@@ -1,45 +1,69 @@
 #include <core/engine/networking/ListenerTCP.h>
 #include <core/engine/networking/SocketTCP.h>
+#include <core/engine/events/Engine_Events.h>
+#include <core/engine/events/Engine_EventIncludes.h>
+#include <core/engine/events/Engine_EventObject.h>
+#include <core/engine/system/Engine.h>
+#include <core/engine/utils/Utils.h>
 
 using namespace Engine;
+using namespace Engine::priv;
 using namespace std;
 
 Networking::ListenerTCP::ListenerTCP(const unsigned short _port, const string& ip){
     m_Port = _port;
-    m_Ip   = ip;
+    m_IP   = ip;
     m_Listener.setBlocking(false);
+
+    Core::m_Engine->m_Misc.m_SocketManager.add_tcp_listener(this);
 }
 Networking::ListenerTCP::~ListenerTCP() { 
+    Core::m_Engine->m_Misc.m_SocketManager.remove_tcp_listener(this);
     close(); 
 }
-const sf::TcpListener& Networking::ListenerTCP::socket() { 
+void Networking::ListenerTCP::update(const float dt) {
+
+}
+sf::TcpListener& Networking::ListenerTCP::socket() { 
     return m_Listener; 
 }
-const unsigned short Networking::ListenerTCP::localPort() {
+const unsigned short Networking::ListenerTCP::localPort() const {
     return m_Listener.getLocalPort(); 
 }
 void Networking::ListenerTCP::setBlocking(bool b) { 
     m_Listener.setBlocking(b); 
 }
-const bool Networking::ListenerTCP::isBlocking() { 
+const bool Networking::ListenerTCP::isListening() const {
+    return (localPort() != 0);
+}
+const bool Networking::ListenerTCP::isBlocking() const {
     return m_Listener.isBlocking(); 
 }
 void Networking::ListenerTCP::close() { 
-    m_Listener.close();
+    if (isListening()) {
+        EventSocket e = EventSocket(m_Listener.getLocalPort(), 0, m_IP, SocketType::TCPListener);
+        Event ev(EventType::SocketDisconnected);
+        ev.eventSocket = std::move(e);
+        m_Listener.close();
+        Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    }
+    //TODO: is the following needed outside the if block?
+    //m_Listener.close();
 }
-const sf::Socket::Status Networking::ListenerTCP::accept(sf::TcpSocket& client) {
-    return m_Listener.accept(client);
+const sf::Socket::Status Networking::ListenerTCP::accept(sf::TcpSocket& sfSocketTCP) {
+    return m_Listener.accept(sfSocketTCP);
 }
-const sf::Socket::Status Networking::ListenerTCP::accept(SocketTCP& client) {
-    sf::TcpSocket& s = const_cast<sf::TcpSocket&>(client.socket());
-    return m_Listener.accept(s);
+const sf::Socket::Status Networking::ListenerTCP::accept(SocketTCP& socketTCP) {
+    return m_Listener.accept(socketTCP.socket());
 }
 const sf::Socket::Status Networking::ListenerTCP::listen() {
-    sf::IpAddress _ip;
-    if (m_Ip == "" || m_Ip == "0.0.0.0") {
-        _ip = sf::IpAddress::Any;
-    }else{
-        _ip = sf::IpAddress(m_Ip);
+    m_IP = (m_IP.empty() || m_IP == "0.0.0.0") ? "0.0.0.0" : m_IP;
+    const auto status = m_Listener.listen(m_Port, m_IP);
+    if (status == sf::Socket::Status::Done) {
+        EventSocket e = EventSocket(m_Listener.getLocalPort(), 0, m_IP, SocketType::TCPListener);
+        Event ev(EventType::SocketConnected);
+        ev.eventSocket = std::move(e);
+        Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
     }
-    return m_Listener.listen(m_Port, _ip);
+    return status;
 }

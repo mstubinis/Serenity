@@ -6,41 +6,62 @@ class  Scene;
 class  Mesh;
 class  Material;
 class  Texture;
-
+namespace sf {
+    class Packet;
+}
+#include <SFML/Network/IpAddress.hpp>
 #include <core/engine/events/Engine_EventIncludes.h>
+#include <core/engine/networking/SocketInterface.h>
 
 namespace Engine::priv{
-    struct EventMeshLoaded final {
-        Mesh* mesh;
-        EventMeshLoaded() {
-            mesh = nullptr;
+
+    struct EventSocket final {
+        unsigned short   localPort  = 0;
+        unsigned short   remotePort = 0;
+        sf::IpAddress    remoteIP   = sf::IpAddress::None;
+        SocketType::Type type;
+
+        EventSocket() = default;
+        EventSocket(const unsigned short localPort_, const unsigned short remotePort_, const sf::IpAddress remoteIP_, const SocketType::Type type_) {
+            localPort  = localPort_;
+            remotePort = remotePort_;
+            remoteIP   = remoteIP_;
+            type       = type_;
         }
+    };
+
+    struct EventPacket final {
+        sf::Packet* packet = nullptr;
+        EventPacket() = default;
+        EventPacket(sf::Packet* packet_) {
+            packet = packet_;
+        }
+    };
+    struct EventMeshLoaded final {
+        Mesh* mesh = nullptr;
+        EventMeshLoaded() = default;
         EventMeshLoaded(Mesh* mesh_) {
             mesh = mesh_;
         }
     };
     struct EventMaterialLoaded final {
-        Material* material;
-        EventMaterialLoaded() {
-            material = nullptr;
-        }
+        Material* material = nullptr;
+        EventMaterialLoaded() = default;
         EventMaterialLoaded(Material* material_) {
             material = material_;
         }
     };
     struct EventTextureLoaded final {
-        Texture* texture;
-        EventTextureLoaded() {
-            texture = nullptr;
-        }
+        Texture* texture = nullptr;
+        EventTextureLoaded() = default;
         EventTextureLoaded(Texture* texture_) {
             texture = texture_;
         }
     };
 
     struct EventWindowResized final{ 
-        unsigned int  width;
-        unsigned int  height;
+        unsigned int  width  = 0;
+        unsigned int  height = 0;
         EventWindowResized() = default;
         EventWindowResized(const unsigned int width_, const unsigned int height_) {
             width = width_;
@@ -48,7 +69,7 @@ namespace Engine::priv{
         }
     };
     struct EventWindowFullscreenChanged final{ 
-        bool isFullscreen; 
+        bool isFullscreen = false;
         EventWindowFullscreenChanged() = default;
         EventWindowFullscreenChanged(const bool isFullscreen_) {
             isFullscreen = isFullscreen_;
@@ -114,9 +135,9 @@ namespace Engine::priv{
         }
     };
     struct EventJoystickMoved final{ 
-        unsigned int        joystickID;
-        JoystickAxis::Axis  axis;
-        float               position;
+        unsigned int        joystickID = 0;
+        JoystickAxis::Axis  axis       = JoystickAxis::Axis::Unknown;
+        float               position   = 0.0f;
         EventJoystickMoved() = default;
         EventJoystickMoved(const unsigned int joystickID_, const JoystickAxis::Axis axis_, const float position_) {
             joystickID = joystickID_;
@@ -125,8 +146,8 @@ namespace Engine::priv{
         }
     };
     struct EventJoystickButton final{ 
-        unsigned int  joystickID;
-        unsigned int  button;
+        unsigned int  joystickID = 0;
+        unsigned int  button     = 0;
         EventJoystickButton() = default;
         EventJoystickButton(const unsigned int joystickID_, const unsigned int button_) {
             joystickID = joystickID_;
@@ -134,21 +155,22 @@ namespace Engine::priv{
         }
     };
     struct EventJoystickConnection final{ 
-        unsigned int  joystickID;
+        unsigned int  joystickID = 0;
         EventJoystickConnection() = default;
         EventJoystickConnection(const unsigned int joystickID_) {
             joystickID = joystickID_;
         }
     };
     struct EventSoundStatusChanged final {
-        unsigned int  status;
+        unsigned int  status = 0;
         EventSoundStatusChanged() = default;
         EventSoundStatusChanged(const unsigned int status_) {
             status = status_;
         }
     };
     struct EventSceneChanged final{ 
-        Scene *oldScene, *newScene; 
+        Scene* oldScene = nullptr;
+        Scene* newScene = nullptr;
         EventSceneChanged() = default;
         EventSceneChanged(Scene* old_, Scene* new_) {
             oldScene = old_; 
@@ -157,7 +179,7 @@ namespace Engine::priv{
     };
 };
 struct Event final{
-    EventType::Type type;
+    EventType::Type type = EventType::Type::Unknown;
     union{
         Engine::priv::EventWindowResized              eventWindowResized;
         Engine::priv::EventWindowFullscreenChanged    eventWindowFullscreenChanged;
@@ -174,6 +196,9 @@ struct Event final{
         Engine::priv::EventMeshLoaded                 eventMeshLoaded;
         Engine::priv::EventMaterialLoaded             eventMaterialLoaded;
         Engine::priv::EventTextureLoaded              eventTextureLoaded;
+
+        Engine::priv::EventPacket                     eventPacket;
+        Engine::priv::EventSocket                     eventSocket;
     };
     Event() = delete;
     Event(const EventType::Type& type_) {

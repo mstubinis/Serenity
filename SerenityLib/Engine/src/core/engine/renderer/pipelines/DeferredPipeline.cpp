@@ -441,13 +441,15 @@ void DeferredPipeline::restoreCurrentState() {
     m_OpenGLStateMachine.GL_RESTORE_CURRENT_STATE_MACHINE();
 }
 void DeferredPipeline::clear2DAPI() {
+    m_2DAPICommandsNonTextured.clear();
     m_2DAPICommands.clear();
 }
 void DeferredPipeline::sort2DAPI() {
-    const auto& lambda_sorter = [&](API2DCommand& lhs, API2DCommand& rhs) {
+    const auto& lambda_sorter = [&](const API2DCommand& lhs, const API2DCommand& rhs) {
         return lhs.depth > rhs.depth;
     };
-    std::sort(std::execution::par_unseq, m_2DAPICommands.begin(), m_2DAPICommands.end(), lambda_sorter);
+    std::sort(std::execution::par_unseq, m_2DAPICommands.begin(),            m_2DAPICommands.end(),            lambda_sorter);
+    std::sort(std::execution::par_unseq, m_2DAPICommandsNonTextured.begin(), m_2DAPICommandsNonTextured.end(), lambda_sorter);
 }
 ShaderProgram* DeferredPipeline::getCurrentBoundShaderProgram() {
     return m_RendererState.current_bound_shader_program;
@@ -1344,40 +1346,70 @@ void DeferredPipeline::internal_pass_depth_of_field(const Viewport& viewport, GB
     }
 }
 void DeferredPipeline::internal_pass_aa(const bool mainRenderFunction, const Viewport& viewport, const Camera& camera, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture) {
+
     if (!mainRenderFunction || m_Renderer.m_AA_algorithm == AntiAliasingAlgorithm::None || !viewport.getRenderFlags().has(ViewportRenderingFlag::AntiAliasing)) {
         m_GBuffer.bindFramebuffers(outTexture);
+
         internal_pass_final(sceneTexture);
+        render2DAPINonTextured(mainRenderFunction, viewport);
+
         m_GBuffer.bindBackbuffer(viewport);
+        
         internal_pass_depth_and_transparency(viewport, outTexture);
-    }else if (mainRenderFunction && m_Renderer.m_AA_algorithm == AntiAliasingAlgorithm::FXAA && viewport.getRenderFlags().has(ViewportRenderingFlag::AntiAliasing)) {
-        m_GBuffer.bindFramebuffers(outTexture);
-        internal_pass_final(sceneTexture);
-        m_GBuffer.bindFramebuffers(sceneTexture);
-        FXAA::fxaa.pass(m_GBuffer, viewport, outTexture, m_Renderer);
+    }else{
+        switch (m_Renderer.m_AA_algorithm) {
+            case AntiAliasingAlgorithm::None: {
+                break;
+            }
+            case AntiAliasingAlgorithm::FXAA: {
+                if (mainRenderFunction) {
+                    m_GBuffer.bindFramebuffers(outTexture);
 
-        m_GBuffer.bindBackbuffer(viewport);
-        internal_pass_depth_and_transparency(viewport, sceneTexture);
+                    internal_pass_final(sceneTexture);
+                    render2DAPINonTextured(mainRenderFunction, viewport);
 
-    }else if (mainRenderFunction && (m_Renderer.m_AA_algorithm >= AntiAliasingAlgorithm::SMAA_LOW || m_Renderer.m_AA_algorithm <= AntiAliasingAlgorithm::SMAA_ULTRA) && viewport.getRenderFlags().has(ViewportRenderingFlag::AntiAliasing)) {
-        m_GBuffer.bindFramebuffers(outTexture);
-        internal_pass_final(sceneTexture);
+                    m_GBuffer.bindFramebuffers(sceneTexture);
+                    FXAA::fxaa.pass(m_GBuffer, viewport, outTexture, m_Renderer);
 
-        std::swap(sceneTexture, outTexture);
+                    m_GBuffer.bindBackbuffer(viewport);
+                    internal_pass_depth_and_transparency(viewport, sceneTexture);
+                }
+                break;
+            }
+            case AntiAliasingAlgorithm::SMAA_LOW: {}
+            case AntiAliasingAlgorithm::SMAA_MED: {}
+            case AntiAliasingAlgorithm::SMAA_HIGH: {}
+            case AntiAliasingAlgorithm::SMAA_ULTRA: {
+                if (mainRenderFunction) {
+                    m_GBuffer.bindFramebuffers(outTexture);
 
-        const auto winSize = glm::vec2(Resources::getWindowSize());
-        //const auto& dimensions = viewport.getViewportDimensions();
-        const glm::vec4& SMAA_PIXEL_SIZE = glm::vec4(1.0f / winSize.x, 1.0f / winSize.y, winSize.x, winSize.y);
 
-        SMAA::smaa.passEdge(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, outTexture, m_Renderer);
-        SMAA::smaa.passBlend(m_GBuffer, SMAA_PIXEL_SIZE, viewport, outTexture, m_Renderer);
-        m_GBuffer.bindFramebuffers(outTexture);
-        SMAA::smaa.passNeighbor(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, m_Renderer);
-        //m_GBuffer.bindFramebuffers(sceneTexture);
+                    internal_pass_final(sceneTexture);
+                    render2DAPINonTextured(mainRenderFunction, viewport);
 
-        //SMAA::smaa.passFinal(m_GBuffer, viewport);//unused
+                    std::swap(sceneTexture, outTexture);
 
-        m_GBuffer.bindBackbuffer(viewport);
-        internal_pass_depth_and_transparency(viewport, outTexture);
+                    const auto winSize = glm::vec2(Resources::getWindowSize());
+                    //const auto& dimensions = viewport.getViewportDimensions();
+                    const glm::vec4& SMAA_PIXEL_SIZE = glm::vec4(1.0f / winSize.x, 1.0f / winSize.y, winSize.x, winSize.y);
+
+                    SMAA::smaa.passEdge(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, outTexture, m_Renderer);
+                    SMAA::smaa.passBlend(m_GBuffer, SMAA_PIXEL_SIZE, viewport, outTexture, m_Renderer);
+                    m_GBuffer.bindFramebuffers(outTexture);
+                    SMAA::smaa.passNeighbor(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, m_Renderer);
+                    //m_GBuffer.bindFramebuffers(sceneTexture);
+
+                    //SMAA::smaa.passFinal(m_GBuffer, viewport);//unused
+
+                    m_GBuffer.bindBackbuffer(viewport);
+                    internal_pass_depth_and_transparency(viewport, outTexture);
+                }
+                break;
+            }
+            default: {
+                break;
+            }
+        }
     }
 }
 void DeferredPipeline::internal_pass_final(const GBufferType::Type& sceneTexture) {
@@ -1396,13 +1428,14 @@ void DeferredPipeline::internal_pass_final(const GBufferType::Type& sceneTexture
     Engine::Renderer::sendTextureSafe("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 2);
     Engine::Renderer::renderFullscreenQuad();
 }
-
 void DeferredPipeline::internal_pass_depth_and_transparency(const Viewport& viewport, const GBufferType::Type& sceneTexture) {
     m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::DepthAndTransparency]);
     Engine::Renderer::sendTextureSafe("SceneTexture", m_GBuffer.getTexture(sceneTexture), 0);
     Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), 1);
 
-    Engine::Renderer::GLEnable(GL_BLEND);
+    //Engine::Renderer::GLEnable(GL_BLEND);
+    Engine::Renderer::GLEnablei(GL_BLEND, 0);
+
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     //sendUniform4Safe("TransparencyMaskColor", viewport.getTransparencyMaskColor());
@@ -1412,7 +1445,8 @@ void DeferredPipeline::internal_pass_depth_and_transparency(const Viewport& view
 
     Engine::Renderer::renderFullscreenQuad();
 
-    Engine::Renderer::GLDisable(GL_BLEND);
+    //Engine::Renderer::GLDisable(GL_BLEND);
+    Engine::Renderer::GLDisablei(GL_BLEND, 0);
 }
 void DeferredPipeline::internal_pass_copy_depth() {
 
@@ -1439,17 +1473,90 @@ void DeferredPipeline::internal_pass_blur(const Viewport& viewport, const GLuint
 
     Engine::Renderer::renderFullscreenQuad();
 }
+void DeferredPipeline::renderPhysicsAPI(const bool mainRenderFunc, const Viewport& viewport, const Camera& camera, const Scene& scene) {
+    Engine::Renderer::GLEnablei(GL_BLEND, 0);
+    if (mainRenderFunc && viewport.getRenderFlags().has(ViewportRenderingFlag::PhysicsDebug)) {
+        #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
+            if (m_Renderer.m_DrawPhysicsDebug && &camera == scene.getActiveCamera()) {
+        #endif
+                Engine::Renderer::GLDisable(GL_DEPTH_TEST);
+                glDepthMask(GL_FALSE);
+                m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::BulletPhysics]);
+                Core::m_Engine->m_PhysicsManager._render(camera);
+        #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
+            }
+        #endif
+    }
+}
 
+void DeferredPipeline::render2DAPINonTextured(const bool mainRenderFunc, const Viewport& viewport) {
+    //non textured 2d api elements will be exposed to anti-aliasing processes
+    //TODO: this does not really work in most situations, only some
+    if (m_2DAPICommandsNonTextured.size() > 0) {
+        Engine::Renderer::GLEnablei(GL_BLEND, 0);
+        //Engine::Renderer::GLEnable(GL_DEPTH_TEST);
+        //Engine::Renderer::GLDisable(GL_DEPTH_TEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //glDepthMask(GL_TRUE);
+        //glDepthMask(GL_FALSE);
+        if (mainRenderFunc) {
+            if (viewport.getRenderFlags().has(ViewportRenderingFlag::API2D)) {
+                //Engine::Renderer::Settings::clear(false, true, false); //clear depth only
+                m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::Deferred2DAPI]);
+                Engine::Renderer::sendUniformMatrix4("VP", m_2DProjectionMatrix);
+                Engine::Renderer::sendUniform1Safe("ScreenGamma", m_Renderer.m_Gamma);
+                Engine::Renderer::GLEnable(GL_SCISSOR_TEST);
+                for (const auto& command : m_2DAPICommandsNonTextured) {
+                    command.func();
+                }
+                Engine::Renderer::GLDisable(GL_SCISSOR_TEST);
+            }
+        }
+        Engine::Renderer::GLDisablei(GL_BLEND, 0);
+        //Engine::Renderer::GLEnable(GL_DEPTH_TEST);
+        //glDepthMask(GL_FALSE);   
+    }
+}
+
+void DeferredPipeline::render2DAPI(const bool mainRenderFunc, const Viewport& viewport) {
+    if (m_2DAPICommands.size() > 0) {
+        Engine::Renderer::GLEnablei(GL_BLEND, 0);
+
+        //Engine::Renderer::GLEnable(GL_DEPTH_TEST);
+        //Engine::Renderer::GLDisable(GL_DEPTH_TEST);
+
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDepthMask(GL_TRUE);
+        if (mainRenderFunc) {
+            if (viewport.getRenderFlags().has(ViewportRenderingFlag::API2D)) {
+                Engine::Renderer::Settings::clear(false, true, false); //clear depth only
+                m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::Deferred2DAPI]);
+                Engine::Renderer::sendUniformMatrix4("VP", m_2DProjectionMatrix);
+                Engine::Renderer::sendUniform1Safe("ScreenGamma", m_Renderer.m_Gamma);
+                Engine::Renderer::GLEnable(GL_SCISSOR_TEST);
+                for (const auto& command : m_2DAPICommands) {
+                    command.func();
+                }
+                Engine::Renderer::GLDisable(GL_SCISSOR_TEST);
+            }
+        }
+        Engine::Renderer::GLDisablei(GL_BLEND, 0);
+
+        //Engine::Renderer::GLEnable(GL_DEPTH_TEST);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //glDepthMask(GL_FALSE);
+    }
+}
 
 
 void DeferredPipeline::update(const float dt) {
 
 }
 void DeferredPipeline::render(Engine::priv::Renderer& renderer, const Viewport& viewport, const bool mainRenderFunction) {
-    const auto& camera     = viewport.getCamera();
-    const auto& scene      = viewport.getScene();
-    const auto& dimensions = viewport.getViewportDimensions();
-    const auto winSize     = glm::vec2(m_GBuffer.width(), m_GBuffer.height());
+    const auto& camera             = viewport.getCamera();
+    const auto& scene              = viewport.getScene();
+    const auto& viewportDimensions = viewport.getViewportDimensions();
+    const auto winSize             = glm::vec2(m_GBuffer.width(), m_GBuffer.height());
 
     internal_render_per_frame_preparation(viewport, camera);
 
@@ -1483,7 +1590,7 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, const Viewport& 
             m_UBOCameraDataStruct.Info1         = glm::vec4(0.0001f, 0.0001f, 0.0001f, camera.getNear());
             m_UBOCameraDataStruct.Info2         = glm::vec4(ComponentCamera_Functions::GetViewVectorNoTranslation(camera), camera.getFar());
             m_UBOCameraDataStruct.Info3         = glm::vec4(camera.getPosition(), 0.0f);
-            m_UBOCameraDataStruct.Info4         = glm::vec4(winSize.x, winSize.y, dimensions.z, dimensions.w);
+            m_UBOCameraDataStruct.Info4         = glm::vec4(winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w);
 
             UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraDataStruct);
         }
@@ -1537,45 +1644,12 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, const Viewport& 
 
     internal_pass_aa(mainRenderFunction, viewport, camera, sceneTexture, outTexture);
 
-    internal_pass_copy_depth();
+    //internal_pass_copy_depth();
 
-    #pragma region RenderPhysics
-    Engine::Renderer::GLEnablei(GL_BLEND, 0);
-    if (mainRenderFunction && viewport.getRenderFlags().has(ViewportRenderingFlag::PhysicsDebug)) {
-        #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
-            if (m_Renderer.m_DrawPhysicsDebug && &camera == scene.getActiveCamera()) {
-        #endif
-                Engine::Renderer::GLDisable(GL_DEPTH_TEST);
-                glDepthMask(GL_FALSE);
-                m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::BulletPhysics]);
-                Core::m_Engine->m_PhysicsManager._render(camera);
-        #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
-            }
-        #endif
-    }
-    #pragma endregion
+    renderPhysicsAPI(mainRenderFunction, viewport, camera, scene);
 
-    #pragma region 2DAPI
-    Engine::Renderer::GLEnable(GL_DEPTH_TEST);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDepthMask(GL_TRUE);
-    if (mainRenderFunction) {
-        if (viewport.getRenderFlags().has(ViewportRenderingFlag::API2D)) {
-            Engine::Renderer::Settings::clear(false, true, false); //clear depth only
-            m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::Deferred2DAPI]);
-            Engine::Renderer::sendUniformMatrix4("VP", m_2DProjectionMatrix);
-            Engine::Renderer::sendUniform1Safe("ScreenGamma", m_Renderer.m_Gamma);
-            Engine::Renderer::GLEnable(GL_SCISSOR_TEST);
-            for (auto& command : m_2DAPICommands) {
-                command.func();
-            }
-            Engine::Renderer::GLDisable(GL_SCISSOR_TEST);
-        }
-    }
-    #pragma endregion
+    render2DAPI(mainRenderFunction, viewport);
 }
-
-
 
 void DeferredPipeline::renderTexture(const Texture& tex, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const Alignment::Type align, const glm::vec4& scissor) {
     API2DCommand command;
@@ -1615,6 +1689,7 @@ void DeferredPipeline::renderTriangle(const glm::vec2& position, const glm::vec4
     command.func = [=]() { DeferredPipeline::render2DTriangle(position, color, angle, width, height, depth, align, scissor); };
     command.depth = depth;
     m_2DAPICommands.push_back(std::move(command));
+    //m_2DAPICommandsNonTextured.push_back(std::move(command));
 }
 
 void DeferredPipeline::renderFullscreenTriangle() {

@@ -29,29 +29,33 @@ void EventManager::onEventKeyPressed(const unsigned int key){
     m_PreviousKeyboardKey = m_CurrentKeyboardKey;
     m_CurrentKeyboardKey  = key;
 
-    if (!m_KeyboardKeyStatus.count(key))
+    if (!m_KeyboardKeyStatus.count(key)) {
         m_KeyboardKeyStatus.insert(key);
+    }
 }
 void EventManager::onEventKeyReleased(const unsigned int key){
     m_PreviousKeyboardKey = KeyboardKey::Unknown;
     m_CurrentKeyboardKey  = KeyboardKey::Unknown;
 
-    if (m_KeyboardKeyStatus.count(key))
+    if (m_KeyboardKeyStatus.count(key)) {
         m_KeyboardKeyStatus.erase(key);
+    }
 }
 void EventManager::onEventMouseButtonPressed(const unsigned int mouseButton){
     m_PreviousMouseButton = m_CurrentMouseButton;
     m_CurrentMouseButton  = mouseButton;
 
-    if (!m_MouseStatus.count(mouseButton))
+    if (!m_MouseStatus.count(mouseButton)) {
         m_MouseStatus.insert(mouseButton);
+    }
 }
 void EventManager::onEventMouseButtonReleased(const unsigned int mouseButton){
     m_PreviousMouseButton = MouseButton::Unknown;
     m_CurrentMouseButton  = MouseButton::Unknown;
 
-    if(m_MouseStatus.count(mouseButton))
+    if (m_MouseStatus.count(mouseButton)) {
         m_MouseStatus.erase(mouseButton);
+    }
 }
 void EventManager::onResetEvents(const float dt){
     m_PreviousKeyboardKey = KeyboardKey::Unknown;

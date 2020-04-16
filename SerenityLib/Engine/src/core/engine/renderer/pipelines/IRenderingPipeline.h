@@ -46,6 +46,13 @@ namespace Engine::priv {
             virtual void clear2DAPI() = 0;
             virtual void sort2DAPI() = 0;
 
+            virtual void renderPhysicsAPI(const bool mainRenderFunc, const Viewport& viewport, const Camera& camera, const Scene& scene) = 0;
+
+            //non textured 2d api elements will be exposed to anti-aliasing post processing
+            virtual void render2DAPINonTextured(const bool mainRenderFunc, const Viewport& viewport) = 0;
+
+            virtual void render2DAPI(const bool mainRenderFunc, const Viewport& viewport) = 0;
+
 
             virtual ShaderProgram* getCurrentBoundShaderProgram() = 0;
             virtual Material* getCurrentBoundMaterial() = 0;

@@ -32,7 +32,7 @@ const bool Engine::priv::FXAA::init_shaders() {
         "varying vec2 texcoords;\n" 
         "\n"
         "void main(){\n"
-        "   vec2 invRes = vec2(1.0) / vec2(ScreenInfo.z / ScreenInfo.w);\n"
+        "   vec2 invRes = vec2(0.0004) / vec2(ScreenInfo.z / ScreenInfo.w);\n"
         "   float depth = texture2D(depthTexture, texcoords).r;\n"
         //"   float edge = texture2D(edgeTexture, texcoords).r;\n"
         "   if(depth >= 0.999){\n"

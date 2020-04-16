@@ -15,6 +15,7 @@ class  Window;
 #include <core/engine/threading/Engine_ThreadManager.h>
 #include <core/engine/discord/Discord.h>
 #include <core/engine/mesh/BuiltInMeshes.h>
+#include <core/engine/networking/SocketManager.h>
 
 
 namespace Engine{
@@ -164,6 +165,7 @@ namespace Engine{
                 struct Misc final {
                     Engine::priv::BuiltInMeshses   m_BuiltInMeshes;
                     Engine::Discord::DiscordCore   m_DiscordCore;
+                    Engine::priv::SocketManager    m_SocketManager;
                     SimplexNoise                   m_SimplexNoise;
                     bool                           m_Paused;
                     bool                           m_Destroyed;

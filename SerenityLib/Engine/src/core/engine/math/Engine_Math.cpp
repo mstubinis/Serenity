@@ -265,54 +265,91 @@ bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVecto
     return ( t >= glm::cos( fovRadians ) );
 }
 glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& camera, const glm::mat4& view, const glm::mat4& projection, const glm::vec4& viewport, const bool clampToEdge){
-    const glm::vec3 screen = glm::project(position, view, projection, viewport);
-    //check if point is behind
-    const float dot = glm::dot(camera.getViewVector(), position - glm::vec3(camera.getPosition()));
-    float resX = screen.x;
-    float resY = screen.y;
-    unsigned int inBounds = 1;
+    using v2 = glm::vec2;
+    auto getIntersection = [&](const v2& a1, const v2& a2, const v2& b1, const v2& b2){
+        auto b = a2 - a1;
+        auto d = b2 - b1;
+        auto bDotDPerp = b.x * d.y - b.y * d.x;
+
+        // if b dot d == 0, it means the lines are parallel so have infinite intersection points
+        if (bDotDPerp == 0) {
+            return glm::vec3(-1.0f);
+        }
+        auto c = b1 - a1;
+        auto t = (c.x * d.y - c.y * d.x) / bDotDPerp;
+        if (t < 0 || t > 1){
+            return glm::vec3(-1.0f);
+        }
+        auto u = (c.x * b.y - c.y * b.x) / bDotDPerp;
+        if (u < 0 || u > 1){
+            return glm::vec3(-1.0f);
+        }
+        auto res = a1 + t * b;
+        return glm::vec3(res.x, res.y, 1.0f);
+    };
+    auto getPerimiterIntersection = [&](const v2& p1, const v2& p2, const v2& r1, const v2& r2, const v2& r3, const v2& r4) {
+        auto intersection = getIntersection(p1, p2, r1, r2);
+        if (intersection.z > 0) {
+            return v2(intersection.x, intersection.y); //left
+        }
+        intersection = getIntersection(p1, p2, r2, r3);
+        if (intersection.z > 0) {
+            return v2(intersection.x, intersection.y); //top
+        }
+        intersection = getIntersection(p1, p2, r3, r4);
+        if (intersection.z > 0) {
+            return v2(intersection.x, intersection.y); //right
+        }
+        intersection = getIntersection(p1, p2, r4, r1);
+        if (intersection.z > 0) {
+            return v2(intersection.x, intersection.y); //bottom
+        }
+        return v2(intersection.x, intersection.y);
+    };
+    unsigned int inBounds = 0;
+
+    auto screen_pos       = glm::project(position, view, projection, viewport);
+    const float dot       = glm::dot(camera.getViewVector(), position - glm::vec3(camera.getPosition()));
+    if (screen_pos.x >= viewport.x && screen_pos.x <= viewport.z) {
+        if (screen_pos.y >= viewport.y && screen_pos.y <= viewport.w) {
+            if (dot < 0.0f) { //negative dot means infront
+                inBounds = 1;
+            }
+        }
+    }
+    if (inBounds) {
+        return glm::vec3(screen_pos.x, screen_pos.y, inBounds);
+    }
     if (clampToEdge) {
-        if (screen.x < viewport.x) {
-            resX = viewport.x;
-            inBounds = 0;
-        }else if (screen.x > viewport.z) {
-            resX = viewport.z;
-            inBounds = 0;
+        v2 center(viewport.z / 2.0f, viewport.w / 2.0f);
+        glm::vec3 res(0.0f, 0.0f, inBounds);
+        v2 perm;
+        if (dot >= 0.0f) {
+            //reflect screen_pos along center
+            auto xDiff = screen_pos.x - center.x;
+            auto yDiff = screen_pos.y - center.y;
+            v2 reflected(center.x - xDiff, center.y - yDiff);
+
+            auto norm = reflected - center;
+            norm = glm::normalize(norm);
+            norm *= 9999999.0f;
+
+            perm = getPerimiterIntersection(center, center + norm, v2(0, 0), v2(0, 0 + viewport.w), v2(0 + viewport.z, 0 + viewport.w), v2(0 + viewport.z, 0));
+        }else{
+            perm = getPerimiterIntersection(center, v2(screen_pos.x, screen_pos.y), v2(0, 0), v2(0, 0 + viewport.w), v2(0 + viewport.z, 0 + viewport.w), v2(0 + viewport.z, 0));
         }
-        if (resY < viewport.y) {
-            resY = viewport.y;
-            inBounds = 0;
-        }else if (resY > viewport.w) {
-            resY = viewport.w;
-            inBounds = 0;
-        }
+        res.x = perm.x;
+        res.y = perm.y;
+        return res;
     }
-    if (dot < 0.0f) {
-        return glm::vec3(resX, resY, inBounds);
-    }
-    inBounds = 0;
-    //resX = viewport.z - screen.x;
-    //resY = viewport.w - screen.y;
-    if (clampToEdge) {
-        if (resX < viewport.z / 2) {
-            resX = viewport.x;
-        }else if (resX > viewport.z / 2) {
-            resX = viewport.z;
-        }
-        if (resY < viewport.w / 2) {
-            resY = viewport.y;
-        }else if (resY > viewport.w / 2) {
-            resY = viewport.w;
-        }
-    }
-    return glm::vec3(resX, resY, inBounds);
+    return glm::vec3(screen_pos.x, screen_pos.y, inBounds);
 }
 glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& camera, const glm::vec4& viewport, const bool clampToEdge) {
     return Math::getScreenCoordinates(position, camera, camera.getView(), camera.getProjection(), viewport, clampToEdge);
 }
 glm::vec3 Math::getScreenCoordinates(const glm::vec3& objPos, const Camera& camera, const bool clampToEdge) {
-    const auto& winSize = Resources::getWindowSize();
-    const glm::vec4 viewport = glm::vec4(0, 0, static_cast<float>(winSize.x), static_cast<float>(winSize.y));
+    const glm::vec2 winSize = glm::vec2(Resources::getWindowSize());
+    const glm::vec4 viewport = glm::vec4(0.0f, 0.0f, winSize.x, winSize.y);
     return Math::getScreenCoordinates(objPos, camera, viewport, clampToEdge);
 }
 float Math::Max(const glm::vec2& v){

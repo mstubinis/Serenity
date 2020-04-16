@@ -131,6 +131,7 @@ void EngineCore::update_physics(Window& window, const float timeStep) {
 void EngineCore::update_logic(Window& window, const float dt){
     m_DebugManager.stop_clock();
     window.on_dynamic_resize();
+    m_Misc.m_SocketManager.update(dt);
     Scene& scene = *Resources::getCurrentScene();
     auto& ecs = InternalScenePublicInterface::GetECS(scene); 
     ecs.preUpdate(scene, dt);
