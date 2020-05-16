@@ -25,7 +25,7 @@ void VertexDataFormat::bind(const VertexData& vertData) {
 }
 void VertexDataFormat::unbind() { 
     for (size_t i = 0; i < attributes.size(); ++i) {
-        glDisableVertexAttribArray(i);
+        glDisableVertexAttribArray(static_cast<GLuint>(i));
     }
 }
 

@@ -187,13 +187,27 @@ inline constexpr unsigned char operator "" _uc(unsigned long long arg) noexcept{
 }
 
 namespace Engine {
+    class UserPointer {
+        protected:
+            void* m_UserPointer = nullptr;
+        public:
+            UserPointer() = default;
+            ~UserPointer() = default;
+
+            void setUserPointer(void* userPointer) {
+                m_UserPointer = userPointer;
+            }
+            void* getUserPointer() const {
+                return m_UserPointer;
+            }
+    };
     class NonCopyable {
         public:
             NonCopyable()  = default;
             ~NonCopyable() = default;
         private:
-            NonCopyable(const NonCopyable&)                = delete;
-            NonCopyable& operator=(const NonCopyable&)     = delete;
+            NonCopyable(const NonCopyable& other)            = delete;
+            NonCopyable& operator=(const NonCopyable& other) = delete;
     };
     class NonMoveable {
         public:

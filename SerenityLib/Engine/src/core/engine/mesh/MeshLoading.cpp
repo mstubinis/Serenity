@@ -22,19 +22,19 @@
 using namespace Engine;
 using namespace std;
 
-void priv::MeshLoader::LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap& inMap) {
-    if (!inMap.count(node.mName.data)) {
-        BoneNode* bone_node   = NEW BoneNode();
-        bone_node->Name       = node.mName.data;
-        bone_node->Transform  = Math::assimpToGLMMat4(const_cast<aiMatrix4x4&>(node.mTransformation));
-        inMap.emplace(node.mName.data, bone_node);
+void priv::MeshLoader::LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap& boneNodeMap) {
+    if (!boneNodeMap.count(node.mName.data)) {
+        boneNodeMap.emplace( std::piecewise_construct, std::forward_as_tuple(node.mName.data), std::forward_as_tuple() );
+        auto& newNode      = boneNodeMap.at(node.mName.data);
+        newNode.Name       = node.mName.data;
+        newNode.Transform  = Math::assimpToGLMMat4(node.mTransformation);
     }
     for (unsigned int i = 0; i < node.mNumChildren; ++i) {
-        MeshLoader::LoadPopulateGlobalNodes(*node.mChildren[i], inMap);
+        MeshLoader::LoadPopulateGlobalNodes(*node.mChildren[i], boneNodeMap);
     }
 }
 
-void priv::MeshLoader::LoadProcessNodeNames(const string& file, vector<MeshRequest::MeshRequestPart>& _parts, const aiScene& scene, const aiNode& node, BoneNodeMap& _map) {
+void priv::MeshLoader::LoadProcessNodeNames(const string& file, vector<MeshRequest::MeshRequestPart>& meshRequestParts, const aiScene& scene, const aiNode& node, BoneNodeMap& boneNodeMap) {
     //just find names and meshes
     auto& root = *(scene.mRootNode);
     for (unsigned int i = 0; i < node.mNumMeshes; ++i) {
@@ -45,19 +45,20 @@ void priv::MeshLoader::LoadProcessNodeNames(const string& file, vector<MeshReque
         part.name   = file + " - " + string(aimesh.mName.C_Str());
         part.mesh->setName(part.name);
         part.handle = priv::Core::m_Engine->m_ResourceManager.m_Resources.add(part.mesh, ResourceType::Mesh);
-        _parts.push_back(std::move(part));
+
+        meshRequestParts.push_back(std::move(part));
     }
     for (unsigned int i = 0; i < node.mNumChildren; ++i) {
-        MeshLoader::LoadProcessNodeNames(file, _parts, scene, *node.mChildren[i], _map);
+        MeshLoader::LoadProcessNodeNames(file, meshRequestParts, scene, *node.mChildren[i], boneNodeMap);
     }
 }
-void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequest::MeshRequestPart>& _parts, const aiScene& scene, const aiNode& node, BoneNodeMap& _map, uint& count) {
+void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequest::MeshRequestPart>& meshRequestParts, const aiScene& scene, const aiNode& node, BoneNodeMap& boneNodeMap, uint& count) {
     auto& root = *(scene.mRootNode);
 
     for (unsigned int i = 0; i < node.mNumMeshes; ++i) {
         const aiMesh& aimesh = *scene.mMeshes[node.mMeshes[i]];
 
-        MeshRequest::MeshRequestPart& part = _parts[count];
+        auto& part = meshRequestParts[count];
         MeshImportedData data;
 
         #pragma region vertices
@@ -118,7 +119,7 @@ void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequest::MeshRequestPart>&
             #pragma region IndividualBones
             //build bone information
             for (unsigned int k = 0; k < aimesh.mNumBones; ++k) {
-                auto& boneNode   = *(_map.at(aimesh.mBones[k]->mName.data));
+                auto& boneNode   = boneNodeMap.at(aimesh.mBones[k]->mName.data);
                 auto& assimpBone = *aimesh.mBones[k];
                 unsigned int BoneIndex(0);
                 if (!skeleton.m_BoneMapping.count(boneNode.Name)) {
@@ -139,13 +140,13 @@ void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequest::MeshRequestPart>&
                 }
             }
             //build skeleton parent child relationship
-            for (auto& node : _map) {
+            for (auto& node : boneNodeMap) {
                 const auto& assimpNode = root.FindNode(node.first.c_str());
                 auto iter = assimpNode;
                 while (iter != 0 && iter->mParent != 0) {
-                    if (_map.count(iter->mParent->mName.data)) {
-                        node.second->Parent = _map.at(iter->mParent->mName.data);
-                        node.second->Parent->Children.push_back(node.second);
+                    if (boneNodeMap.count(iter->mParent->mName.data)) {
+                        node.second.Parent = &boneNodeMap.at(iter->mParent->mName.data);
+                        node.second.Parent->Children.push_back(&node.second);
                         break; //might need to double check this
                     }
                     iter = iter->mParent;
@@ -153,9 +154,9 @@ void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequest::MeshRequestPart>&
             }
             //and finalize the root node
             if (!skeleton.m_RootNode) {
-                for (auto& node : _map) {
-                    if (!node.second->Parent) {
-                        skeleton.m_RootNode = node.second;
+                for (auto& node : boneNodeMap) {
+                    if (!node.second.Parent) {
+                        skeleton.m_RootNode = &node.second;
                         break;
                     }
                 }
@@ -188,7 +189,7 @@ void priv::MeshLoader::LoadProcessNodeData(vector<MeshRequest::MeshRequestPart>&
         ++count;
     }
     for (unsigned int i = 0; i < node.mNumChildren; ++i) {
-        MeshLoader::LoadProcessNodeData(_parts, scene, *node.mChildren[i], _map, count);
+        MeshLoader::LoadProcessNodeData(meshRequestParts, scene, *node.mChildren[i], boneNodeMap, count);
     }
 }
 
@@ -249,19 +250,13 @@ void priv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
 
         const auto uvSize(data.uvs.size());
 
-        if (pointsSize > p0) point1 = data.points[p0];
-        else                 point1 = glm::vec3(0.0f);
-        if (pointsSize > p1) point2 = data.points[p1];
-        else                 point2 = glm::vec3(0.0f);
-        if (pointsSize > p2) point3 = data.points[p2];
-        else                 point3 = glm::vec3(0.0f);
+        point1 = (pointsSize > p0) ? data.points[p0] : glm::vec3(0.0f);
+        point2 = (pointsSize > p1) ? data.points[p1] : glm::vec3(0.0f);
+        point3 = (pointsSize > p2) ? data.points[p2] : glm::vec3(0.0f);
 
-        if (uvSize > p0)     uv1   = data.uvs[p0];
-        else                 uv1   = glm::vec2(0.0f);
-        if (uvSize > p1)     uv2   = data.uvs[p1];
-        else                 uv2   = glm::vec2(0.0f);
-        if (uvSize > p2)     uv3   = data.uvs[p2];
-        else                 uv3   = glm::vec2(0.0f);
+        uv1 = (uvSize > p0) ? data.uvs[p0] : glm::vec2(0.0f);
+        uv2 = (uvSize > p1) ? data.uvs[p1] : glm::vec2(0.0f);
+        uv3 = (uvSize > p2) ? data.uvs[p2] : glm::vec2(0.0f);
 
         glm::vec3 v(point2 - point1);
         glm::vec3 w(point3 - point1);
@@ -331,21 +326,21 @@ void priv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
     }
 };
 VertexData* priv::MeshLoader::LoadFrom_OBJCC(string& filename) {
-    VertexData* returnData = nullptr;
+    VertexData* vertexData = nullptr;
     boost::iostreams::mapped_file_source stream(filename.c_str());
     //TODO: try possible optimizations
 
     uint32_t blockStart = 0;
 
-    const uint8_t* _x = (uint8_t*)stream.data();
-    vector<uint8_t> _data(_x, _x + stream.size());
+    const uint8_t* x_ = (uint8_t*)stream.data();
+    vector<uint8_t> data_(x_, x_ + stream.size());
 
     uint32_t sizes[3];
     for (uint32_t i = 0; i < 3; ++i) {
-        sizes[i]  = static_cast<uint32_t>(_data[blockStart + 0] << 24);
-        sizes[i] |= static_cast<uint32_t>(_data[blockStart + 1] << 16);
-        sizes[i] |= static_cast<uint32_t>(_data[blockStart + 2] << 8);
-        sizes[i] |= static_cast<uint32_t>(_data[blockStart + 3]);
+        sizes[i]  = static_cast<uint32_t>(data_[blockStart + 0] << 24);
+        sizes[i] |= static_cast<uint32_t>(data_[blockStart + 1] << 16);
+        sizes[i] |= static_cast<uint32_t>(data_[blockStart + 2] << 8);
+        sizes[i] |= static_cast<uint32_t>(data_[blockStart + 3]);
         blockStart += 4;
     }
     
@@ -353,11 +348,11 @@ VertexData* priv::MeshLoader::LoadFrom_OBJCC(string& filename) {
     const auto& sizes_indices  = sizes[1];
     const auto& sizes_skeleton = sizes[2];
     if (sizes_skeleton == 1) {
-        returnData = NEW VertexData(VertexDataFormat::VertexDataAnimated);
+        vertexData = NEW VertexData(VertexDataFormat::VertexDataAnimated);
     }else{
-        returnData = NEW VertexData(VertexDataFormat::VertexDataBasic);
+        vertexData = NEW VertexData(VertexDataFormat::VertexDataBasic);
     }
-    returnData->indices.reserve(sizes_indices);
+    vertexData->indices.reserve(sizes_indices);
 
     vector<glm::vec3> temp_pos;
     vector<glm::vec2> temp_uvs;
@@ -381,8 +376,8 @@ VertexData* priv::MeshLoader::LoadFrom_OBJCC(string& filename) {
         float    outPos[3];
         uint16_t inPos[3];
         for (uint32_t j = 0; j < 3; ++j) {
-            inPos[j]    = static_cast<uint32_t>(_data[blockStart + 0] << 8);
-            inPos[j]   |= static_cast<uint32_t>(_data[blockStart + 1]);
+            inPos[j]    = static_cast<uint32_t>(data_[blockStart + 0] << 8);
+            inPos[j]   |= static_cast<uint32_t>(data_[blockStart + 1]);
             blockStart += 2;
         }
         Math::Float32From16(outPos, inPos, 3);
@@ -391,8 +386,8 @@ VertexData* priv::MeshLoader::LoadFrom_OBJCC(string& filename) {
         float    outUV[2];
         uint16_t inUV[2];
         for (uint32_t j = 0; j < 2; ++j) {
-            inUV[j]     = static_cast<uint32_t>(_data[blockStart + 0] << 8);
-            inUV[j]    |= static_cast<uint32_t>(_data[blockStart + 1]);
+            inUV[j]     = static_cast<uint32_t>(data_[blockStart + 0] << 8);
+            inUV[j]    |= static_cast<uint32_t>(data_[blockStart + 1]);
             blockStart += 2;
         }
         Math::Float32From16(outUV, inUV, 2);
@@ -400,10 +395,10 @@ VertexData* priv::MeshLoader::LoadFrom_OBJCC(string& filename) {
         //normals (remember they are GLuints right now)
         uint32_t inn[3];
         for (uint32_t j = 0; j < 3; ++j) {
-            inn[j]      = static_cast<uint32_t>(_data[blockStart + 0] << 24);
-            inn[j]     |= static_cast<uint32_t>(_data[blockStart + 1] << 16);
-            inn[j]     |= static_cast<uint32_t>(_data[blockStart + 2] << 8);
-            inn[j]     |= static_cast<uint32_t>(_data[blockStart + 3]);
+            inn[j]      = static_cast<uint32_t>(data_[blockStart + 0] << 24);
+            inn[j]     |= static_cast<uint32_t>(data_[blockStart + 1] << 16);
+            inn[j]     |= static_cast<uint32_t>(data_[blockStart + 2] << 8);
+            inn[j]     |= static_cast<uint32_t>(data_[blockStart + 3]);
             blockStart += 4;
         }
         temp_norm.emplace_back(inn[0]);
@@ -414,8 +409,8 @@ VertexData* priv::MeshLoader::LoadFrom_OBJCC(string& filename) {
             float    outBI[4];
             uint16_t inbI[4];
             for (uint32_t k = 0; k < 4; ++k) {
-                inbI[k]     = static_cast<uint32_t>(_data[blockStart + 0] << 8);
-                inbI[k]    |= static_cast<uint32_t>(_data[blockStart + 1]);
+                inbI[k]     = static_cast<uint32_t>(data_[blockStart + 0] << 8);
+                inbI[k]    |= static_cast<uint32_t>(data_[blockStart + 1]);
                 blockStart += 2;
             }
             Math::Float32From16(outBI, inbI, 4);
@@ -424,8 +419,8 @@ VertexData* priv::MeshLoader::LoadFrom_OBJCC(string& filename) {
             float    outBW[4];
             uint16_t inBW[4];
             for (uint32_t k = 0; k < 4; ++k) {
-                inBW[k]     = static_cast<uint32_t>(_data[blockStart + 0] << 8);
-                inBW[k]    |= static_cast<uint32_t>(_data[blockStart + 1]);
+                inBW[k]     = static_cast<uint32_t>(data_[blockStart + 0] << 8);
+                inBW[k]    |= static_cast<uint32_t>(data_[blockStart + 1]);
                 blockStart += 2;
             }
             Math::Float32From16(outBW, inBW, 4);
@@ -435,29 +430,26 @@ VertexData* priv::MeshLoader::LoadFrom_OBJCC(string& filename) {
     //indices
     for (uint32_t i = 0; i < sizes_indices; ++i) {
         uint16_t      inindices;
-        inindices   = static_cast<uint16_t>(_data[blockStart + 0] << 8);
-        inindices  |= static_cast<uint16_t>(_data[blockStart + 1]);
+        inindices   = static_cast<uint16_t>(data_[blockStart + 0] << 8);
+        inindices  |= static_cast<uint16_t>(data_[blockStart + 1]);
         blockStart += 2;
-        returnData->indices.push_back(static_cast<uint16_t>(inindices));
+        vertexData->indices.push_back(static_cast<uint16_t>(inindices));
     }
-    returnData->setData(0, temp_pos);
-    returnData->setData(1, temp_uvs);
-    returnData->setData(2, temp_norm);
-    returnData->setData(3, temp_binorm);
-    returnData->setData(4, temp_tang);
+    vertexData->setData(0, temp_pos);
+    vertexData->setData(1, temp_uvs);
+    vertexData->setData(2, temp_norm);
+    vertexData->setData(3, temp_binorm);
+    vertexData->setData(4, temp_tang);
     if (temp_bID.size() > 0) {
-        returnData->setData(5, temp_bID);
-        returnData->setData(6, temp_bW);
+        vertexData->setData(5, temp_bID);
+        vertexData->setData(6, temp_bW);
     }
-    returnData->setIndices(returnData->indices, false, false, true);
-    return returnData;
+    vertexData->setIndices(vertexData->indices, false, false, true);
+    return vertexData;
 }
 
 void priv::MeshLoader::SaveTo_OBJCC(VertexData& data, string filename) {
-    ofstream stream(filename, ios::binary);
-
-    vector<vector<size_t>> _indices;
-    _indices.resize(3);
+    std::ofstream stream(filename, ios::binary);
 
     //header - should only be 3 entries, one for m_Vertices , one for m_Indices, and one to tell if animation data is present or not
     uint32_t   sizes[3];
@@ -497,14 +489,14 @@ void priv::MeshLoader::SaveTo_OBJCC(VertexData& data, string filename) {
         Math::Float16From32(&outp[0], position.x);
         Math::Float16From32(&outp[1], position.y);
         Math::Float16From32(&outp[2], position.z);
-        for (uint i = 0; i < 3; ++i) {
+        for (unsigned int i = 0; i < 3; ++i) {
             writeUint16tBigEndian(outp[i], stream);
         }
         //uvs
         uint16_t outu[2];
         Math::Float16From32(&outu[0], uv.x);
         Math::Float16From32(&outu[1], uv.y);
-        for (uint i = 0; i < 2; ++i) {
+        for (unsigned int i = 0; i < 2; ++i) {
             writeUint16tBigEndian(outu[i], stream);
         }
         //normals (remember they are GLuints right now)
@@ -512,14 +504,14 @@ void priv::MeshLoader::SaveTo_OBJCC(VertexData& data, string filename) {
         outn[0] = normal;
         outn[1] = binormal;
         outn[2] = tangent;
-        for (uint i = 0; i < 3; ++i) {
+        for (unsigned int i = 0; i < 3; ++i) {
             writeUint32tBigEndian(outn[i], stream);
         }
         if (sizes[2] == 1) { //animation data is present
             boneID = &(boneIDs[j]);
             boneWeight = &(boneWeights[j]);
-            auto& bID = *boneID;
-            auto& bW = *boneWeight;
+            const auto& bID = *boneID;
+            const auto& bW = *boneWeight;
 
             //boneID's
             uint16_t outbI[4];
@@ -527,7 +519,7 @@ void priv::MeshLoader::SaveTo_OBJCC(VertexData& data, string filename) {
             Math::Float16From32(&outbI[1], bID.y);
             Math::Float16From32(&outbI[2], bID.z);
             Math::Float16From32(&outbI[3], bID.w);
-            for (uint i = 0; i < 4; ++i) {
+            for (unsigned int i = 0; i < 4; ++i) {
                 writeUint16tBigEndian(outbI[i], stream);
             }
             //boneWeight's
@@ -536,15 +528,15 @@ void priv::MeshLoader::SaveTo_OBJCC(VertexData& data, string filename) {
             Math::Float16From32(&outbW[1], bW.y);
             Math::Float16From32(&outbW[2], bW.z);
             Math::Float16From32(&outbW[3], bW.w);
-            for (uint i = 0; i < 4; ++i) {
+            for (unsigned int i = 0; i < 4; ++i) {
                 writeUint16tBigEndian(outbW[i], stream);
             }
         }
     }
     //indices
     for (size_t i = 0; i < sizes[1]; ++i) {
-        uint16_t _ind = data.indices[i];
-        writeUint16tBigEndian(_ind, stream);
+        uint16_t indice = data.indices[i];
+        writeUint16tBigEndian(indice, stream);
     }
     stream.close();
 }

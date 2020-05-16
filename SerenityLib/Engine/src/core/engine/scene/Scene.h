@@ -89,8 +89,11 @@ class Scene: public EngineResource, public EventObserver{
 
 
         Camera* getActiveCamera() const;
-        void setActiveCamera(Camera&);
-        void addCamera(Camera&);
+        void setActiveCamera(Camera& camera);
+
+        void addCamera(Camera& camera);
+        Camera* addCamera(float left, float right, float top, float bottom, float Near, float Far);
+        Camera* addCamera(float angle, float aspectRatio, float Near, float Far);
 
         const glm::vec4& getBackgroundColor() const;
         void setBackgroundColor(const float r, const float g, const float b, const float a);

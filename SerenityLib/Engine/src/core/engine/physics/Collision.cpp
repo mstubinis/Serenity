@@ -29,8 +29,9 @@ void Collision::DeferredLoading::load_1(Collision* collision, const CollisionTyp
     body.rebuildRigidBody(true, true);
     body.setScale(scale);
     auto* model = collision->m_Owner.getComponent<ComponentModel>();
-    if (model)
+    if (model) {
         ComponentModel_Functions::CalculateRadius(*model);
+    }
 }
 void Collision::DeferredLoading::load_2(Collision* collision, btCompoundShape* btCompound, vector<ModelInstance*> instances, const float mass, const CollisionType::Type collisionType) {
     auto& body = *collision->m_Owner.getComponent<ComponentBody>();
@@ -47,8 +48,9 @@ void Collision::DeferredLoading::load_2(Collision* collision, btCompoundShape* b
     body.setScale(scale);
 
     auto* model = collision->m_Owner.getComponent<ComponentModel>();
-    if (model)
+    if (model) {
         ComponentModel_Functions::CalculateRadius(*model);
+    }
 }
 
 void Collision::_baseInit(const CollisionType::Type type, const float mass) {
@@ -96,6 +98,7 @@ Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, const 
     m_Owner = body.getOwner();
     m_BtShape = nullptr;
     vector<ModelInstance*> modelInstances;
+    modelInstances.reserve(modelComponent.getNumModels());
     for (size_t i = 0; i < modelComponent.getNumModels(); ++i) {
         modelInstances.push_back(&modelComponent.getModel(i));
     }
@@ -142,9 +145,8 @@ void Collision::free_memory() {
     SAFE_DELETE(m_BtShape);
 }
 Collision::~Collision() {
-    //destructor
     free_memory();
-}
+} 
 Collision::Collision(Collision&& other) noexcept {
     m_Owner     = std::move(other.m_Owner);
     m_BtInertia = std::move(other.m_BtInertia);
@@ -160,7 +162,10 @@ Collision& Collision::operator=(Collision&& other) noexcept {
     }
     return *this;
 }
-void Collision::setMass(const float _mass) {
+void Collision::setBtShape(btCollisionShape* shape) {
+    m_BtShape = shape;
+}
+void Collision::setMass(const float mass) {
     if (!m_BtShape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None) {
         return;
     }
@@ -172,12 +177,12 @@ void Collision::setMass(const float _mass) {
                 for (int i = 0; i < numChildren; ++i) {
                     btCollisionShape* child_shape = compound->getChildShape(i);
                     if(child_shape){
-                        child_shape->calculateLocalInertia(_mass, m_BtInertia);
+                        child_shape->calculateLocalInertia(mass, m_BtInertia);
                     }
                 }
             }
         }    
-        m_BtShape->calculateLocalInertia(_mass, m_BtInertia);
+        m_BtShape->calculateLocalInertia(mass, m_BtInertia);
     }
 }
 const btVector3& Collision::getBtInertia() const {
@@ -192,8 +197,8 @@ const CollisionType::Type& Collision::getType() const {
 
 void Collision::onEvent(const Event& event) {
     if (event.type == EventType::MeshLoaded && m_DeferredMeshes.size() > 0) {
-        auto& ev = event.eventMeshLoaded;
-        auto it  = m_DeferredMeshes.begin();
+        auto& ev   = event.eventMeshLoaded;
+        auto it    = m_DeferredMeshes.begin();
         while (it != m_DeferredMeshes.end()) {
             Mesh& deferred_mesh = *(*it);
             if (ev.mesh == (*it) || (deferred_mesh == true && deferred_mesh.m_CollisionFactory)) {

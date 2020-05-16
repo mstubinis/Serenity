@@ -1,9 +1,9 @@
 #include "Terrain.h"
 
+#include <ecs/Components.h>
+#include <core/engine/system/Engine.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/system/Engine.h>
-#include <core/engine/physics/Engine_Physics.h>
-#include <core/engine/events/Engine_Events.h>
 #include <core/engine/mesh/MeshRequest.h>
 #include <core/engine/physics/Collision.h>
 
@@ -12,64 +12,85 @@
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
-#include <boost/make_shared.hpp>
 #include <SFML/Graphics.hpp>
 
+using namespace std;
 using namespace Engine;
 
-Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& material, Scene* scene) : Entity(*scene){
-    /*
-    for(unsigned int i = 0; i < heightmapImage.getSize().x; ++i){
-        for(unsigned int j = 0; j < heightmapImage.getSize().y; ++j){
-            float pixel(heightmapImage.getPixel(i,j).r / 255.0f);
-            m_Pixels.push_back(pixel);
+
+void Terrain::Data::calculate_data(sf::Image& heightmapImage) {
+    const auto heightmapSize = heightmapImage.getSize();
+    m_Data.clear();
+    //init the map with points at 0.0
+    m_Data.resize((heightmapSize.y * 2) + 1);
+    for (unsigned int row = 0; row < m_Data.size(); ++row) {
+        for (unsigned int col = 0; col < (heightmapSize.x * 2) + 1; ++col) {
+            m_Data[row].push_back(0.0f);
         }
     }
-    float minH = 0.0f;
-    float maxH = 1.0f;
+    //init all points within a sect to the pixel height
+    for (int i = 0; i < heightmapSize.y; ++i) {
+        for (int j = 0; j < heightmapSize.x; ++j) {
 
-    ComponentBody& physics = *entity().addComponent<ComponentBody>(CollisionType::TriangleShape);
-    Collision* c = NEW Collision(
-        *(new btHeightfieldTerrainShape(heightmapImage.getSize().x, heightmapImage.getSize().y, &m_Pixels[0], 1.0f, minH, maxH, 1, PHY_FLOAT, false)), 
-        CollisionType::TriangleShape, 
-        0.0f
-    );
-    physics.setCollision(c);
+        }
+    }
+}
+btHeightfieldTerrainShape* Terrain::Data::generate_bt_shape() {
+    vector<float> temp;
+    temp.reserve(m_Data.size() * m_Data[0].size());
+    for (const auto& row : m_Data) {
+        for (const auto pixel : row) {
+            temp.push_back(pixel);
+        }
+    }
+    SAFE_DELETE(m_BtHeightfieldShape);
+    m_BtHeightfieldShape = new btHeightfieldTerrainShape(m_Data[0].size(), m_Data.size(), &temp[0], m_HeightScale, m_MinHeight, m_MaxHeight, 1, PHY_FLOAT, false);
+    m_BtHeightfieldShape->setUserIndex(m_Data[0].size());
+    m_BtHeightfieldShape->setUserIndex2(m_Data.size());
+    return m_BtHeightfieldShape;
+}
+void Terrain::Data::subdivide(unsigned int levels) {
 
-    MeshRequestPart part;
-    part.name = name;
-    part.mesh = NEW Mesh(name, *static_cast<btHeightfieldTerrainShape*>(c->getBtShape()), 0.0005f);
-    part.mesh->setName(name);
-    part.handle = priv::Core::m_Engine->m_ResourceManager.m_Resources->add(part.mesh, ResourceType::Mesh);
-  
-    auto* model = entity().addComponent<ComponentModel>(part.mesh, material);
-    physics.setPosition(0, (minH + maxH) * 0.5f, 0);
-    physics.setDynamic(false);
-    physics.setGravity(0, 0, 0);
+}
+
+Terrain::Terrain(const string& name, sf::Image& heightmapImage, Handle& materialHandle, Scene* scene) : Entity(*scene){
+    m_TerrainData.calculate_data(heightmapImage);
+    m_TerrainData.generate_bt_shape();
+
+    m_Mesh = NEW Mesh(name, *m_TerrainData.m_BtHeightfieldShape, 0.0005f);
+    m_Mesh->setName(name);
+    Handle handle  = priv::Core::m_Engine->m_ResourceManager.m_Resources.add(m_Mesh, ResourceType::Mesh);
+
+    addComponent<ComponentModel>(m_Mesh, materialHandle);
+    addComponent<ComponentBody>(CollisionType::TriangleShape); //TODO: check CollisionType::TriangleShapeStatic
+    auto* body   = getComponent<ComponentBody>();
+    auto* model  = getComponent<ComponentModel>();
+    Collision* c = NEW Collision(*body);
+    c->setBtShape(m_TerrainData.m_BtHeightfieldShape);
+    body->setCollision(c);
+    body->setPosition(0, (m_TerrainData.m_MinHeight + m_TerrainData.m_MaxHeight) * 0.5f, 0);
+    body->setDynamic(false);
+    body->setGravity(0, 0, 0);
     Terrain::setScale(1,1,1);
-    */
 }
 Terrain::~Terrain(){
-    m_Pixels.clear();
 }
-void Terrain::update(float dt){
+void Terrain::subdivide(unsigned int levels) {
+    //subdivides the mesh by the number of levels. if levels is zero, the mesh just recalculates using the class's m_TerrainData
+    m_TerrainData.subdivide(levels);
 }
-void Terrain::setPosition(float x,float y,float z){
+void Terrain::update(const float dt){
+}
+void Terrain::setPosition(float x, float y, float z){
     ComponentBody& body = *getComponent<ComponentBody>();
+    Physics::removeRigidBody(body);
     body.setPosition(x, y, z);
-
-    //Physics::removeRigidBody(m_RigidBody);
-    //SAFE_DELETE(m_RigidBody);
-
-    //btRigidBody::btRigidBodyConstructionInfo ci(0,m_MotionState,m_Collision->getCollisionShape(),*m_Collision->getInertia());
-    //m_RigidBody = new btRigidBody(ci);
-    //m_RigidBody->setUserPointer(this);
-    //Physics::addRigidBody(m_RigidBody);
+    Physics::addRigidBody(body);
 }
 void Terrain::setPosition(glm::vec3 pos){
     Terrain::setPosition(pos.x,pos.y,pos.z);
 }
-void Terrain::setScale(float x,float y,float z){
+void Terrain::setScale(float x, float y, float z){
     ComponentBody& body = *getComponent<ComponentBody>();
     body.setScale(x, y, z);
     Terrain::setPosition(body.position());

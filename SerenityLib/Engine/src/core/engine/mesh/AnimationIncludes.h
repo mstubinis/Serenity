@@ -17,6 +17,8 @@ namespace Engine::priv {
         BoneNode*               Parent    = nullptr;
         glm::mat4               Transform = glm::mat4(1.0f);
         std::vector<BoneNode*>  Children;
+
+        BoneNode() = default;
     };
     struct AnimationKeyBaseClass {
         double     time;

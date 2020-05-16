@@ -24,18 +24,18 @@ namespace Engine::Networking {
             ListenerTCP(const unsigned short port, const std::string& ip = "");
             ~ListenerTCP();
 
-            void                     close();
-            void                     setBlocking(const bool blocking) override;
+            void               close();
+            void               setBlocking(bool blocking) override;
 
-            const bool               isListening() const;
-            const bool               isBlocking() const override;
-            sf::TcpListener&         socket() override;
-            const unsigned short     localPort() const override;
+            bool               isListening() const;
+            bool               isBlocking() const override;
+            sf::TcpListener&   socket() override;
+            unsigned short     localPort() const override;
 
-            const sf::Socket::Status accept(SocketTCP& tcpSocket);
-            const sf::Socket::Status accept(sf::TcpSocket& sfmlTcpSocket);
+            sf::Socket::Status accept(SocketTCP& tcpSocket);
+            sf::Socket::Status accept(sf::TcpSocket& sfmlTcpSocket);
 
-            const sf::Socket::Status listen();
+            sf::Socket::Status listen();
     };
 };
 #endif

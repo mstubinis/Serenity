@@ -19,20 +19,20 @@ class Scene::impl final {
         priv::ECS<Entity>                     m_ECS;
 
         void _init(Scene& super, const string& name, const SceneOptions& options) {
+            m_ECS.assignSystem<ComponentBody, Engine::priv::ComponentBody_System>(ComponentBody_System_CI());
             m_ECS.assignSystem<ComponentLogic> (ComponentLogic_System_CI());
-            m_ECS.assignSystem<ComponentBody, Engine::priv::ComponentBody_System>  (ComponentBody_System_CI());
             m_ECS.assignSystem<ComponentLogic1>(ComponentLogic1_System_CI());
-            m_ECS.assignSystem<ComponentCamera>(ComponentCamera_System_CI());
             m_ECS.assignSystem<ComponentLogic2>(ComponentLogic2_System_CI());
-            m_ECS.assignSystem<ComponentModel> (ComponentModel_System_CI());
             m_ECS.assignSystem<ComponentLogic3>(ComponentLogic3_System_CI());
+            m_ECS.assignSystem<ComponentModel> (ComponentModel_System_CI());
+            m_ECS.assignSystem<ComponentCamera>(ComponentCamera_System_CI());
             m_ECS.assignSystem<ComponentName>  (ComponentName_System_CI());
         }
         void _destruct() {
 
         }
         void _centerToObject(Scene& super, const Entity& centerEntity) {
-            auto& centerBody = *centerEntity.getComponent<ComponentBody>();
+            auto& centerBody          = *centerEntity.getComponent<ComponentBody>();
             const auto centerPos      = centerBody.position();
             const auto centerPosFloat = glm::vec3(centerPos);
             for (const auto& data : priv::InternalScenePublicInterface::GetEntities(super)) {
@@ -267,6 +267,16 @@ void Scene::addCamera(Camera& camera) {
     if (!getActiveCamera()) {
         setActiveCamera(camera);
     }
+}
+Camera* Scene::addCamera(float left, float right, float top, float bottom, float Near, float Far) {
+    Camera* camera = NEW Camera(left, right, bottom, top, Near, Far, this);
+    Scene::addCamera(*camera);
+    return camera;
+}
+Camera* Scene::addCamera(float angle, float aspectRatio, float Near, float Far) {
+    Camera* camera = NEW Camera(angle, aspectRatio, Near, Far, this);
+    Scene::addCamera(*camera);
+    return camera;
 }
 void Scene::setGodRaysSun(Entity* sun) {
     m_Sun = sun;

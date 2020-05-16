@@ -4,13 +4,14 @@
 using namespace Engine;
 using namespace std;
 
-VertexData::VertexData(const VertexDataFormat& _format) : format(const_cast<VertexDataFormat&>(_format)){
-    data.reserve(_format.attributes.size());
+VertexData::VertexData(const VertexDataFormat& format) : format(const_cast<VertexDataFormat&>(format)){
+    const auto attributesSize = format.attributes.size();
+    data.reserve(attributesSize);
     for (size_t i = 0; i < data.capacity(); ++i) { 
         data.emplace_back();
 	}
-    dataSizes.reserve(_format.attributes.size());
-    dataSizesCapacity.reserve(_format.attributes.size());
+    dataSizes.reserve(attributesSize);
+    dataSizesCapacity.reserve(attributesSize);
     for (size_t i = 0; i < dataSizes.capacity(); ++i) { 
 		dataSizes.emplace_back(0); 
         dataSizesCapacity.emplace_back(0);
@@ -20,7 +21,19 @@ VertexData::VertexData(const VertexDataFormat& _format) : format(const_cast<Vert
 VertexData::~VertexData() {
     Engine::Renderer::deleteVAO(vao);
 }
-
+void VertexData::clearData() {
+    for (size_t i = 0; i < data.size(); ++i) {
+        data[i].clear();
+    }
+    for (size_t i = 0; i < dataSizes.size(); ++i) {
+        dataSizes[i] = 0;
+    }
+    for (size_t i = 0; i < dataSizesCapacity.size(); ++i) {
+        dataSizesCapacity[i] = 0;
+    }
+    indices.clear();
+    triangles.clear();
+}
 void VertexData::finalize() {
     Engine::Renderer::deleteVAO(vao);
     if (priv::Renderer::OPENGL_VERSION >= 30) {

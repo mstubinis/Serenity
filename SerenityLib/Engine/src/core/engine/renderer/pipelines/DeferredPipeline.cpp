@@ -877,7 +877,7 @@ void DeferredPipeline::internal_render_2d_text_left(const string& text, const Fo
             const unsigned int accum = i * 4;
             ++i;
             const CharGlyph& glyph = font.getGlyphData(character);
-            const float startingY = -int(glyph.height + glyph.yoffset) - y;
+            const float startingY  = y - (glyph.height + glyph.yoffset);
 
             m_Text_Indices.emplace_back(accum + 0);
             m_Text_Indices.emplace_back(accum + 1);
@@ -929,7 +929,7 @@ void DeferredPipeline::internal_render_2d_text_center(const string& text, const 
                 const unsigned int accum = i * 4;
                 ++i;
                 const CharGlyph& glyph = font.getGlyphData(character);
-                const float startingY = -int(glyph.height + glyph.yoffset) - y;
+                const float startingY  = y - (glyph.height + glyph.yoffset);
 
                 m_Text_Indices.emplace_back(accum + 0);
                 m_Text_Indices.emplace_back(accum + 1);
@@ -977,7 +977,7 @@ void DeferredPipeline::internal_render_2d_text_right(const string& text, const F
                 const unsigned int accum = i * 4;
                 ++i;
                 const CharGlyph& glyph = font.getGlyphData(character);
-                const float startingY = -int(glyph.height + glyph.yoffset) - y;
+                const float startingY  = y - (glyph.height + glyph.yoffset);
 
                 m_Text_Indices.emplace_back(accum + 0);
                 m_Text_Indices.emplace_back(accum + 1);
@@ -1017,8 +1017,8 @@ void DeferredPipeline::render2DText(const string& text, const Font& font, const 
     auto& fontPlane = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getFontMesh();
     m_Renderer._bindMesh(&fontPlane);
 
-    const auto  newLineGlyphHeight = font.getGlyphData('X').height + 12;
-    const auto& texture = font.getGlyphTexture();
+    const auto  newLineGlyphHeight = font.getMaxHeight() + font.getLineHeight();
+    const auto* texture = font.getGlyphTexture();
     float y = 0.0f;
     float x = 0.0f;
     float z = -0.001f - depth;
@@ -1029,16 +1029,16 @@ void DeferredPipeline::render2DText(const string& text, const Font& font, const 
     modelMatrix           = glm::scale(modelMatrix, glm::vec3(scale.x, scale.y, 1));
 
     Engine::Renderer::sendUniform1("DiffuseTextureEnabled", 1);
-    Engine::Renderer::sendTexture("DiffuseTexture", texture, 0);
+    Engine::Renderer::sendTexture("DiffuseTexture", *texture, 0);
     Engine::Renderer::sendUniform4("Object_Color", color);
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
 
     if (textAlignment == TextAlignment::Left) {
-        internal_render_2d_text_left(text, font, static_cast<float>(newLineGlyphHeight), x, y, z);
+        internal_render_2d_text_left(text, font, -newLineGlyphHeight, x, y, z);
     }else if (textAlignment == TextAlignment::Right) {
-        internal_render_2d_text_right(text, font, static_cast<float>(newLineGlyphHeight), x, y, z);
+        internal_render_2d_text_right(text, font, -newLineGlyphHeight, x, y, z);
     }else if (textAlignment == TextAlignment::Center) {
-        internal_render_2d_text_center(text, font, static_cast<float>(newLineGlyphHeight), x, y, z);
+        internal_render_2d_text_center(text, font, -newLineGlyphHeight, x, y, z);
     }
     fontPlane.modifyVertices(0, m_Text_Points, MeshModifyFlags::Default); //prevent gpu upload until after all the data is collected
     fontPlane.modifyVertices(1, m_Text_UVs);

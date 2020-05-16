@@ -62,8 +62,7 @@ namespace Engine::priv{
                 std::function<void()> then_ = then;
                 finalize_job_engine_controlled(job_, then_);
             }
-            template<typename Job, typename T, typename... ARGS> void add_job_engine_controlled_split_vectored(Job& job, std::vector<T>& collection, const bool waitForAll, ARGS&& ... args) {
-                    
+            template<typename Job, typename T, typename... ARGS> void add_job_engine_controlled_split_vectored(Job& job, std::vector<T>& collection, const bool waitForAll, ARGS&& ... args) {       
                 if (Engine::priv::threading::hardware_concurrency() > 1) {
                     const auto split = Engine::priv::threading::splitVectorPairs(collection);
                     auto lamda = [&](const std::pair<size_t, size_t>& pair, const unsigned int inK) {
@@ -82,7 +81,6 @@ namespace Engine::priv{
                     }
                 }
             }
-
         public:
             ThreadPool m_ThreadPool;
             ThreadPool m_ThreadPoolEngineControlled;
@@ -99,7 +97,7 @@ namespace Engine::priv{
         const unsigned int hardware_concurrency();
 
         //splits vec into n subvectors of equal (or almost equal) number of elements in each split vector. if n is zero, then n will be equal to the number of cores your computer processor has.
-        template<typename T> std::vector<std::vector<T>> splitVector(const std::vector<T>& v, size_t num_cores = 0) {
+        template<typename T> std::vector<std::vector<T>> splitVector(const std::vector<T>& v, size_t num_cores = 0U) {
             if (num_cores == 0)
                 num_cores = Engine::priv::threading::hardware_concurrency();
             const auto vs = v.size();
@@ -116,7 +114,7 @@ namespace Engine::priv{
             return outVec;
         }
         //splits vec into n subvectors of equal (or almost equal) number of elements in each split vector. if n is zero, then n will be equal to the number of cores your computer processor has.
-        template<typename T> std::vector<std::vector<unsigned int>> splitVectorIndices(const std::vector<T>& v, size_t num_cores = 0) {
+        template<typename T> std::vector<std::vector<unsigned int>> splitVectorIndices(const std::vector<T>& v, size_t num_cores = 0U) {
             if (num_cores == 0)
                 num_cores = Engine::priv::threading::hardware_concurrency();
             const auto vs = v.size();
@@ -139,47 +137,13 @@ namespace Engine::priv{
             return outVec;
         }
         //creates a vector of pairs, each pair contains a start and ending index to iterate over a very large single vector
-        template<typename T> std::vector<std::pair<size_t, size_t>> splitVectorPairs(const std::vector<T>& v, size_t num_cores = 0) {
-            if (num_cores == 0)
-                num_cores = Engine::priv::threading::hardware_concurrency();
-
-            std::vector<std::pair<size_t, size_t>> outVec;
-            if (v.size() <= num_cores) {
-                outVec.emplace_back(  std::make_pair(0, v.size() - 1)  );
-                return outVec;
-            }
-
-
-            const auto vector_size = v.size();
-            outVec.reserve(num_cores);
-
-            size_t c = vector_size / num_cores;
-            size_t remainder = vector_size % num_cores; /* Likely uses the result of the division. */
-
-            size_t accumulator = 0;
-
-            std::pair<size_t, size_t> res;
-            size_t b;
-            size_t e = (num_cores - remainder);
-            for (size_t i = 0; i < std::min(num_cores, vector_size); ++i) {
-                if (c == 0)
-                    b = remainder - 1;
-                else
-                    b = accumulator + (c - 1);
-                if (i == e) {
-                    if (i != (num_cores - remainder)) {
-                        ++accumulator;
-                        ++b;
-                    }
-                    ++b;
-                    ++e;
-                }
-                res = std::make_pair(accumulator, b );
-                outVec.push_back(res);
-                accumulator += c;
-            }
-            return outVec;
+        
+        std::vector<std::pair<size_t, size_t>> splitVectorPairs(size_t vectorSize, size_t num_cores);
+        
+        template<typename T> std::vector<std::pair<size_t, size_t>> splitVectorPairs(const std::vector<T>& v, size_t num_cores = 0U) {
+            return Engine::priv::threading::splitVectorPairs(static_cast<size_t>(v.size()), num_cores);
         }
+        
 
 
         void waitForAll();

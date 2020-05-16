@@ -21,8 +21,8 @@ Networking::SocketTCP::~SocketTCP() {
     disconnect();
 }
 
-const sf::Socket::Status Networking::SocketTCP::internal_send_packet(sf::Packet& packet) {
-    const auto status = m_Socket.send(packet);
+sf::Socket::Status Networking::SocketTCP::internal_send_packet(sf::Packet& packet) {
+    auto status = m_Socket.send(packet);
     switch (status) {
         case sf::Socket::Status::Done: {
             EventPacket e(&packet);
@@ -30,20 +30,15 @@ const sf::Socket::Status Networking::SocketTCP::internal_send_packet(sf::Packet&
             ev.eventPacket = e;
             Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
             break;
-        }
-        case sf::Socket::Status::Disconnected: {
+        }case sf::Socket::Status::Disconnected: {
             break;
-        }
-        case sf::Socket::Status::Error: {
+        }case sf::Socket::Status::Error: {
             break;
-        }
-        case sf::Socket::Status::NotReady: {
+        }case sf::Socket::Status::NotReady: {
             break;
-        }
-        case sf::Socket::Status::Partial: {
+        }case sf::Socket::Status::Partial: {
             break;
-        }
-        default: {
+        }default: {
             break;
         }
     }
@@ -58,25 +53,25 @@ void Networking::SocketTCP::update(const float dt) {
         }
     }
 }
-const bool Networking::SocketTCP::isConnected() const {
+bool Networking::SocketTCP::isConnected() const {
     return (m_Socket.getLocalPort() != 0);
 }
 sf::TcpSocket& Networking::SocketTCP::socket() {
     return m_Socket;
 }
-const string Networking::SocketTCP::ip() const {
+string Networking::SocketTCP::ip() const {
     return m_Socket.getRemoteAddress().toString();
 }
-const unsigned short Networking::SocketTCP::remotePort() const {
+unsigned short Networking::SocketTCP::remotePort() const {
     return m_Socket.getRemotePort();
 }
-const unsigned short Networking::SocketTCP::localPort() const {
+unsigned short Networking::SocketTCP::localPort() const {
     return m_Socket.getLocalPort();
 }
 void Networking::SocketTCP::setBlocking(const bool blocking) {
     m_Socket.setBlocking(blocking);
 }
-const bool Networking::SocketTCP::isBlocking() const {
+bool Networking::SocketTCP::isBlocking() const {
     return m_Socket.isBlocking();
 }
 void Networking::SocketTCP::disconnect() {
@@ -92,8 +87,8 @@ void Networking::SocketTCP::disconnect() {
     //TODO: is this needed outside the if block?
     //m_Socket.disconnect();
 }
-const sf::Socket::Status Networking::SocketTCP::connect(const unsigned short timeout) {
-    const auto status = m_Socket.connect(m_IP, m_Port, sf::seconds(timeout));
+sf::Socket::Status Networking::SocketTCP::connect(const unsigned short timeout) {
+    auto status = m_Socket.connect(m_IP, m_Port, sf::seconds(timeout));
     if (status == sf::Socket::Status::Done) {
         EventSocket e = EventSocket(m_Socket.getLocalPort(), m_Socket.getRemotePort(), m_Socket.getRemoteAddress(), SocketType::TCP);
         Event ev(EventType::SocketConnected);
@@ -102,23 +97,28 @@ const sf::Socket::Status Networking::SocketTCP::connect(const unsigned short tim
     }
     return status;
 }
-const sf::Socket::Status Networking::SocketTCP::send(sf::Packet& packet) {
+sf::Socket::Status Networking::SocketTCP::send(Engine::Networking::Packet& packet) {
+    sf::Packet sf_packet;
+    packet.build(sf_packet);
+    return send(sf_packet);
+}
+sf::Socket::Status Networking::SocketTCP::send(sf::Packet& packet) {
     m_PartialPackets.push(packet);
     auto& front       = m_PartialPackets.front();
-    const auto status = internal_send_packet(front);
+    auto status = internal_send_packet(front);
     if (status == sf::Socket::Status::Done) {
         m_PartialPackets.pop();
     }
     return status;
 }
-const sf::Socket::Status Networking::SocketTCP::send(const void* data, size_t size) {
+sf::Socket::Status Networking::SocketTCP::send(const void* data, size_t size) {
     return m_Socket.send(data, size);
 }
-const sf::Socket::Status Networking::SocketTCP::send(const void* data, size_t size, size_t sent) {
+sf::Socket::Status Networking::SocketTCP::send(const void* data, size_t size, size_t sent) {
     return m_Socket.send(data, size, sent);
 }
-const sf::Socket::Status Networking::SocketTCP::receive(sf::Packet& packet) {
-    const auto status = m_Socket.receive(packet);
+sf::Socket::Status Networking::SocketTCP::receive(sf::Packet& packet) {
+    auto status = m_Socket.receive(packet);
     if (status == sf::Socket::Status::Done) {
         EventPacket e(&packet);
         Event ev(EventType::PacketReceived);
@@ -127,6 +127,6 @@ const sf::Socket::Status Networking::SocketTCP::receive(sf::Packet& packet) {
     }
     return status;
 }
-const sf::Socket::Status Networking::SocketTCP::receive(void* data, size_t size, size_t sent) {
+sf::Socket::Status Networking::SocketTCP::receive(void* data, size_t size, size_t sent) {
     return m_Socket.receive(data, size, sent);
 }

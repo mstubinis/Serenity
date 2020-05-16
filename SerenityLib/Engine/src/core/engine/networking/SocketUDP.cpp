@@ -19,8 +19,8 @@ Networking::SocketUDP::~SocketUDP() {
     Core::m_Engine->m_Misc.m_SocketManager.remove_udp_socket(this);
 }
 
-const sf::Socket::Status Networking::SocketUDP::internal_send_packet(UDPPacketInfo& packet) {
-    const auto status = m_Socket.send(packet.packet, packet.ip, packet.port);
+sf::Socket::Status Networking::SocketUDP::internal_send_packet(UDPPacketInfo& packet) {
+    auto status = m_Socket.send(packet.packet, packet.ip, packet.port);
     switch (status) {
         case sf::Socket::Status::Done: {
             EventPacket e(&packet.packet);
@@ -28,20 +28,15 @@ const sf::Socket::Status Networking::SocketUDP::internal_send_packet(UDPPacketIn
             ev.eventPacket = e;
             Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
             break;
-        }
-        case sf::Socket::Status::Disconnected: {
+        }case sf::Socket::Status::Disconnected: {
             break;
-        }
-        case sf::Socket::Status::Error: {
+        }case sf::Socket::Status::Error: {
             break;
-        }
-        case sf::Socket::Status::NotReady: {
+        }case sf::Socket::Status::NotReady: {
             break;
-        }
-        case sf::Socket::Status::Partial: {
+        }case sf::Socket::Status::Partial: {
             break;
-        }
-        default: {
+        }default: {
             break;
         }
     }
@@ -59,31 +54,31 @@ void Networking::SocketUDP::update(const float dt) {
 sf::IpAddress Networking::SocketUDP::internal_ip(const string& ip) const {
     return (ip.empty()) ? sf::IpAddress::Any : ip;
 }
-const bool Networking::SocketUDP::isBound() const {
+bool Networking::SocketUDP::isBound() const {
     return (m_Socket.getLocalPort() != 0);
 }
 sf::UdpSocket& Networking::SocketUDP::socket() {
     return m_Socket; 
 }
-const unsigned short Networking::SocketUDP::localPort() const {
+unsigned short Networking::SocketUDP::localPort() const {
     return m_Socket.getLocalPort(); 
 }
-void Networking::SocketUDP::setBlocking(bool b) { 
-    m_Socket.setBlocking(b); 
+void Networking::SocketUDP::setBlocking(bool blocking) { 
+    m_Socket.setBlocking(blocking);
 }
-const bool Networking::SocketUDP::isBlocking() const {
+bool Networking::SocketUDP::isBlocking() const {
     return m_Socket.isBlocking(); 
 }
 void Networking::SocketUDP::changePort(const unsigned short newPort) {
-    const bool was_bound = isBound();
+    bool was_bound = isBound();
     unbind();
     m_Port = newPort;
     if (was_bound) {
         bind();
     }
 }
-const sf::Socket::Status Networking::SocketUDP::bind(const string& ip) {
-    const auto status = m_Socket.bind(m_Port, internal_ip(ip));
+sf::Socket::Status Networking::SocketUDP::bind(const string& ip) {
+    auto status = m_Socket.bind(m_Port, internal_ip(ip));
     if (status == sf::Socket::Status::Done) {
         EventSocket e = EventSocket(m_Socket.getLocalPort(), 0, internal_ip(ip), SocketType::UDP);
         Event ev(EventType::SocketConnected);
@@ -105,16 +100,21 @@ void Networking::SocketUDP::unbind() {
     //TODO: is this needed outside the if block?
     //m_Socket.unbind();
 }
-const sf::Socket::Status Networking::SocketUDP::send(sf::Packet& packet, const string& ip) {
+sf::Socket::Status Networking::SocketUDP::send(Engine::Networking::Packet& packet, const string& ip) {
+    sf::Packet sf_packet;
+    packet.build(sf_packet);
+    return send(sf_packet, ip);
+}
+sf::Socket::Status Networking::SocketUDP::send(sf::Packet& packet, const string& ip) {
     return Networking::SocketUDP::send(m_Port, packet, ip);
 }
-const sf::Socket::Status Networking::SocketUDP::send(const void* data, size_t size, const string& ip) {
+sf::Socket::Status Networking::SocketUDP::send(const void* data, size_t size, const string& ip) {
     return m_Socket.send(data, size, internal_ip(ip), m_Port);
 }
-const sf::Socket::Status Networking::SocketUDP::receive(sf::Packet& packet) {
+sf::Socket::Status Networking::SocketUDP::receive(sf::Packet& packet) {
     sf::IpAddress ip;
     unsigned short port;
-    const auto status = m_Socket.receive(packet, ip, port);
+    auto status = m_Socket.receive(packet, ip, port);
     if (status == sf::Socket::Status::Done) {
         EventPacket e(&packet);
         Event ev(EventType::PacketReceived);
@@ -123,14 +123,18 @@ const sf::Socket::Status Networking::SocketUDP::receive(sf::Packet& packet) {
     }
     return status;
 }
-const sf::Socket::Status Networking::SocketUDP::receive(void* data, size_t size, size_t received) {
+sf::Socket::Status Networking::SocketUDP::receive(void* data, size_t size, size_t received) {
     sf::IpAddress ip; 
     unsigned short port;
-    const auto status = m_Socket.receive(data, size, received, ip, port);
+    auto status = m_Socket.receive(data, size, received, ip, port);
     return status;
 }
-
-const sf::Socket::Status Networking::SocketUDP::send(const unsigned short port, sf::Packet& packet, const string& ip) {
+sf::Socket::Status Networking::SocketUDP::send(const unsigned short port, Engine::Networking::Packet& packet, const string& ip) {
+    sf::Packet sf_packet;
+    packet.build(sf_packet);
+    return send(port, sf_packet, ip);
+}
+sf::Socket::Status Networking::SocketUDP::send(const unsigned short port, sf::Packet& packet, const string& ip) {
     UDPPacketInfo data;
     data.packet = packet;
     data.ip     = ip;
@@ -138,12 +142,12 @@ const sf::Socket::Status Networking::SocketUDP::send(const unsigned short port, 
 
     m_PartialPackets.push(std::move(data));
     auto& front = m_PartialPackets.front();
-    const auto status = internal_send_packet(front);
+    auto status = internal_send_packet(front);
     if (status == sf::Socket::Status::Done) {
         m_PartialPackets.pop();
     }
     return status;
 }
-const sf::Socket::Status Networking::SocketUDP::send(const unsigned short port, const void* data, size_t size, const string& ip) {
+sf::Socket::Status Networking::SocketUDP::send(const unsigned short port, const void* data, size_t size, const string& ip) {
     return m_Socket.send(data, size, internal_ip(ip), port);
 }

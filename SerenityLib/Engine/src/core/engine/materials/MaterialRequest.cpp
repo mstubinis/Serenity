@@ -16,9 +16,6 @@ using namespace Engine::priv;
 
 
 MaterialRequestPart::MaterialRequestPart() {
-    material = nullptr;
-    name     = "";
-    handle   = Handle();
 }
 MaterialRequestPart::~MaterialRequestPart() {
 
@@ -40,7 +37,6 @@ MaterialRequestPart& MaterialRequestPart::operator=(const MaterialRequestPart& o
 
 
 MaterialRequest::MaterialRequest(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness){ 
-    async     = false;
     part.name = name;
     part.textureRequests.emplace_back(  NEW TextureRequest( diffuse, false, ImageInternalFormat::SRGB8_ALPHA8 )  );
     part.textureRequests.emplace_back(  NEW TextureRequest( normal, false, ImageInternalFormat::RGBA8 )  );
@@ -51,7 +47,6 @@ MaterialRequest::MaterialRequest(const string& name, const string& diffuse, cons
     part.textureRequests.emplace_back(  NEW TextureRequest( smoothness, false, ImageInternalFormat::R8 )  );
 }
 MaterialRequest::MaterialRequest(const string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) {
-    async         = false;
     part.name     = name;
     part.material = NEW Material(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
     part.handle   = Core::m_Engine->m_ResourceManager.m_Resources.add(part.material, ResourceType::Material);
@@ -112,13 +107,13 @@ void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {
         for (auto& textureRequest : request.part.textureRequests) {
             textureRequest->requestAsync();
         }
-        const auto& job = [=]() { 
+        auto job = [=]() { 
             InternalMaterialRequestPublicInterface::LoadCPU(const_cast<MaterialRequest&>(request));
         };
-        const auto& cbk = [=]() { 
+        auto callback = [=]() { 
             InternalMaterialRequestPublicInterface::LoadGPU(const_cast<MaterialRequest&>(request));
         };
-        threading::addJobWithPostCallback(job, cbk);
+        threading::addJobWithPostCallback(job, callback);
     }else{
         for (auto& textureRequest : request.part.textureRequests) {
             textureRequest->request();

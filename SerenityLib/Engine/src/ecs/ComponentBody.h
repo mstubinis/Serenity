@@ -48,7 +48,7 @@ namespace Engine::priv {
     struct ComponentBody_SceneLeftFunction;
 };
 
-class ComponentBody : public EventObserver {
+class ComponentBody : public EventObserver, public Engine::UserPointer {
     friend struct Engine::priv::ComponentBody_UpdateFunction;
     friend struct Engine::priv::ComponentBody_ComponentAddedToEntityFunction;
     friend struct Engine::priv::ComponentBody_ComponentRemovedFromEntityFunction;
@@ -93,7 +93,6 @@ class ComponentBody : public EventObserver {
             PhysicsData* p;
         } data;
         bool  m_Physics      = false;
-        void* m_UserPointer  = nullptr;
         void* m_UserPointer1 = nullptr;
         void* m_UserPointer2 = nullptr;
 
@@ -140,10 +139,8 @@ class ComponentBody : public EventObserver {
         void addPhysicsToWorld(const bool force = true, const bool threadSafe = false);
 
         void setInternalPhysicsUserPointer(void* userPtr);
-        void setUserPointer(void* userPtr);
         void setUserPointer1(void* userPtr);
         void setUserPointer2(void* userPtr);
-        void* getUserPointer() const;
         void* getUserPointer1() const;
         void* getUserPointer2() const;
 
@@ -185,18 +182,18 @@ class ComponentBody : public EventObserver {
 
         const ScreenBoxCoordinates getScreenBoxCoordinates(const float minOffset = 10.0f) const;
 
-		const glm_quat rotation() const;
-		const glm_vec3 getScale() const;
-		const glm_vec3 position() const;
-        const glm_vec3 localPosition() const;
-        const glm::vec3 position_render() const;
+		glm_quat rotation() const;
+		glm_vec3 getScale() const;
+		glm_vec3 position() const;
+        glm_vec3 localPosition() const;
+        glm::vec3 position_render() const;
 		const glm_vec3& forward() const;
 		const glm_vec3& right() const;
 		const glm_vec3& up() const;
-		const glm_vec3 getLinearVelocity() const;
-		const glm_vec3 getAngularVelocity() const;
-		const glm_mat4 modelMatrix() const;
-        const glm::mat4 modelMatrixRendering() const;
+		glm_vec3 getLinearVelocity() const;
+		glm_vec3 getAngularVelocity() const;
+		glm_mat4 modelMatrix() const;
+        glm::mat4 modelMatrixRendering() const;
 		const btRigidBody& getBtBody() const;
 
         void setCollision(const CollisionType::Type collisionType, const float mass);

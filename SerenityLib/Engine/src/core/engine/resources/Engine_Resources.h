@@ -129,8 +129,7 @@ namespace Engine{
 
         void getShaderProgram(const Handle inHandle,ShaderProgram*& outPtr);    ShaderProgram*   getShaderProgram(const Handle inHandle);
 
-
-        Handle addFont(const std::string& filename);
+        Handle addFont(const std::string& filename, int height, int width = 0, float line_height = 8.0f);
 
         std::vector<Handle> loadMesh(const std::string& fileOrData, const float threshhold = 0.0005f);
         std::vector<Handle> loadMeshAsync(const std::string& fileOrData, const float threshhold = 0.0005f);

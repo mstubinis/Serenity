@@ -122,12 +122,12 @@ const unsigned int ComponentCamera::pointIntersectTest(const glm_vec3& position)
             return 0; //outside
         }
     }
-    return 1;//inside
+    return 1; //inside
 }
-const unsigned int ComponentCamera::sphereIntersectTest(const glm_vec3& position, const float radius) const {
+const unsigned int ComponentCamera::sphereIntersectTest(const glm_vec3& position, const float radius) const { 
     unsigned int res = 1; //inside the viewing frustum
-    const auto zero = static_cast<decimal>(0.0);
-    const auto two = static_cast<decimal>(2.0);
+    const auto zero  = static_cast<decimal>(0.0);
+    const auto two   = static_cast<decimal>(2.0);
     if (radius <= zero) {
         return 0;
     }
@@ -225,13 +225,11 @@ void ComponentCamera::setFar(const float farPlane) {
 #pragma region System
 
 struct priv::ComponentCamera_UpdateFunction final { void operator()(void* system, void* componentPool, const float dt, Scene& scene) const {
-	auto& pool = *static_cast<ECSComponentPool<Entity, ComponentCamera>*>(componentPool);
-	auto& components = pool.data();
+	auto& pool                  = *static_cast<ECSComponentPool<Entity, ComponentCamera>*>(componentPool);
+	auto& components            = pool.data();
     auto lamda_update_component = [&](ComponentCamera& b, const size_t& i, const unsigned int k) {
-        Math::extractViewFrustumPlanesHartmannGribbs(b.m_ProjectionMatrix * b.m_ViewMatrix, b.m_FrustumPlanes);//update view frustrum 
+        Math::extractViewFrustumPlanesHartmannGribbs(b.m_ProjectionMatrix * b.m_ViewMatrix, b.m_FrustumPlanes);//update frustrum planes 
     };
-
-
     if (components.size() < 50) {
         for (size_t i = 0; i < components.size(); ++i) {
             lamda_update_component(components[i], i, 0);

@@ -19,9 +19,10 @@ class Handle final {
         const bool null() const;
 
 
-        template<class T>
-        T* get() const {
-            return reinterpret_cast<T*>(  (get_base())  );
+        template<typename T> T* get() const {
+            EngineResource* resource = get_base();
+            return reinterpret_cast<T*>(resource);
+            //return static_cast<T*>(resource);
         }
 };
 

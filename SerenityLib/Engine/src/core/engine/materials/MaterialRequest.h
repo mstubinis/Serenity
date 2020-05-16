@@ -11,9 +11,9 @@
 class Material;
 class Texture;
 struct MaterialRequestPart final {
-    Material*                                     material;
-    Handle                                        handle;
-    std::string                                   name;
+    Material*                                     material = nullptr;
+    Handle                                        handle   = Handle();
+    std::string                                   name     = "";
     std::vector<std::shared_ptr<TextureRequest>>  textureRequests;
 
     MaterialRequestPart();
@@ -28,7 +28,7 @@ struct MaterialRequestPart final {
 
 struct MaterialRequest final {
     MaterialRequestPart  part;
-    bool                 async;
+    bool                 async = false;
 
     MaterialRequest() = delete;
     MaterialRequest(
@@ -60,14 +60,12 @@ struct MaterialRequest final {
     void requestAsync();
 };
 
-namespace Engine {
-    namespace priv {
-        struct InternalMaterialRequestPublicInterface final {
-            friend class  Material;
-            static void Request(MaterialRequest&);
-            static void LoadGPU(MaterialRequest&);
-            static void LoadCPU(MaterialRequest&);
-        };
+namespace Engine::priv {
+    struct InternalMaterialRequestPublicInterface final {
+        friend class  Material;
+        static void Request(MaterialRequest&);
+        static void LoadGPU(MaterialRequest&);
+        static void LoadCPU(MaterialRequest&);
     };
 };
 

@@ -30,17 +30,14 @@ ComponentLogic1& ComponentLogic1::operator=(ComponentLogic1&& other) noexcept {
     }
     return *this;
 }
-void ComponentLogic1::setUserPointer(void* UserPointer) {
-    m_UserPointer = UserPointer;
+const Entity ComponentLogic1::getOwner() const {
+    return m_Owner;
 }
 void ComponentLogic1::setUserPointer1(void* UserPointer1) {
     m_UserPointer1 = UserPointer1;
 }
 void ComponentLogic1::setUserPointer2(void* UserPointer2) {
     m_UserPointer2 = UserPointer2;
-}
-void* ComponentLogic1::getUserPointer() const {
-    return m_UserPointer;
 }
 void* ComponentLogic1::getUserPointer1() const {
     return m_UserPointer1;

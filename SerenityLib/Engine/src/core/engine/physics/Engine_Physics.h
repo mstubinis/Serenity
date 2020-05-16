@@ -12,7 +12,7 @@ namespace Engine::priv {
     class  GLDebugDrawer;
 };
 
-#include <core/engine/physics/World.h>
+#include <core/engine/physics/PhysicsPipeline.h>
 #include <vector>
 #include <mutex>
 #include <LinearMath/btVector3.h>
@@ -27,10 +27,10 @@ namespace Engine{
     namespace priv{
         class PhysicsManager final{
             public:
-                Engine::priv::PhysicsWorld    m_Data;
-                std::mutex                    m_Mutex;
-                bool                          m_Paused                = false;
-                unsigned int                  m_NumberOfStepsPerFrame = 1;
+                Engine::priv::PhysicsPipeline    m_Pipeline;
+                std::mutex                       m_Mutex;
+                bool                             m_Paused                = false;
+                unsigned int                     m_NumberOfStepsPerFrame = 1;
             public:
                 PhysicsManager();
                 ~PhysicsManager();

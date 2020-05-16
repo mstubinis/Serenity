@@ -27,6 +27,7 @@ using namespace std;
 
 
 unsigned int ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
+decimal ModelInstance::m_GlobalDistanceFactor     = static_cast<decimal>(1100.0);
 
 namespace Engine::priv {
     struct DefaultModelInstanceBindFunctor {void operator()(ModelInstance* i, const Engine::priv::Renderer* renderer) const {
@@ -214,7 +215,12 @@ ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
 
 ModelInstance::~ModelInstance() {
 }
-
+void ModelInstance::setGlobalDistanceFactor(decimal factor) {
+    ModelInstance::m_GlobalDistanceFactor = factor;
+}
+decimal& ModelInstance::getGlobalDistanceFactor() {
+    return ModelInstance::m_GlobalDistanceFactor;
+}
 void ModelInstance::bind(const Engine::priv::Renderer& renderer) {
     m_CustomBindFunctor(this, &renderer);
 }
@@ -283,12 +289,6 @@ void ModelInstance::internal_update_model_matrix() {
         Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
     }
     Math::setFinalModelMatrix(m_ModelMatrix, m_Position, m_Orientation, m_Scale);
-}
-void* ModelInstance::getUserPointer() const {
-    return m_UserPointer; 
-}
-void ModelInstance::setUserPointer(void* UserPointer) {
-    m_UserPointer = UserPointer;
 }
 const Entity& ModelInstance::parent() const {
     return m_Parent; 

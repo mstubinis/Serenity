@@ -10,8 +10,8 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace std;
 
-Networking::ListenerTCP::ListenerTCP(const unsigned short _port, const string& ip){
-    m_Port = _port;
+Networking::ListenerTCP::ListenerTCP(const unsigned short port, const string& ip){
+    m_Port = port;
     m_IP   = ip;
     m_Listener.setBlocking(false);
 
@@ -27,16 +27,16 @@ void Networking::ListenerTCP::update(const float dt) {
 sf::TcpListener& Networking::ListenerTCP::socket() { 
     return m_Listener; 
 }
-const unsigned short Networking::ListenerTCP::localPort() const {
+unsigned short Networking::ListenerTCP::localPort() const {
     return m_Listener.getLocalPort(); 
 }
 void Networking::ListenerTCP::setBlocking(bool b) { 
     m_Listener.setBlocking(b); 
 }
-const bool Networking::ListenerTCP::isListening() const {
+bool Networking::ListenerTCP::isListening() const {
     return (localPort() != 0);
 }
-const bool Networking::ListenerTCP::isBlocking() const {
+bool Networking::ListenerTCP::isBlocking() const {
     return m_Listener.isBlocking(); 
 }
 void Networking::ListenerTCP::close() { 
@@ -50,15 +50,15 @@ void Networking::ListenerTCP::close() {
     //TODO: is the following needed outside the if block?
     //m_Listener.close();
 }
-const sf::Socket::Status Networking::ListenerTCP::accept(sf::TcpSocket& sfSocketTCP) {
+sf::Socket::Status Networking::ListenerTCP::accept(sf::TcpSocket& sfSocketTCP) {
     return m_Listener.accept(sfSocketTCP);
 }
-const sf::Socket::Status Networking::ListenerTCP::accept(SocketTCP& socketTCP) {
+sf::Socket::Status Networking::ListenerTCP::accept(SocketTCP& socketTCP) {
     return m_Listener.accept(socketTCP.socket());
 }
-const sf::Socket::Status Networking::ListenerTCP::listen() {
+sf::Socket::Status Networking::ListenerTCP::listen() {
     m_IP = (m_IP.empty() || m_IP == "0.0.0.0") ? "0.0.0.0" : m_IP;
-    const auto status = m_Listener.listen(m_Port, m_IP);
+    auto status = m_Listener.listen(m_Port, m_IP);
     if (status == sf::Socket::Status::Done) {
         EventSocket e = EventSocket(m_Listener.getLocalPort(), 0, m_IP, SocketType::TCPListener);
         Event ev(EventType::SocketConnected);

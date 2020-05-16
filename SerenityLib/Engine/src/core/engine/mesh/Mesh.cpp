@@ -70,14 +70,12 @@ void InternalMeshPublicInterface::InitBlankMesh(Mesh& mesh) {
     mesh.setCustomBindFunctor(DefaultMeshBindFunctor());
     mesh.setCustomUnbindFunctor(DefaultMeshUnbindFunctor());
 }
-
 bool InternalMeshPublicInterface::SupportsInstancing(){
     if(Renderer::OPENGL_VERSION >= 31 || OpenGLExtensions::supported(OpenGLExtensions::EXT_draw_instanced) || OpenGLExtensions::supported(OpenGLExtensions::ARB_draw_instanced)){
         return true;
     }
     return false;
 }
-
 btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, const CollisionType::Type type, const bool isCompoundChild) {
     Engine::priv::MeshCollisionFactory* factory = nullptr;
     if (!mesh) {
@@ -150,6 +148,7 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
         }
     }
     auto& vertexData = *mesh.m_VertexData;
+    vertexData.clearData();
     vector<vector<GLuint>> normals;
     normals.resize(3);
     if (mesh.m_Threshold == 0.0f) {
@@ -157,12 +156,15 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
         normals[0].reserve(data.normals.size());
         normals[1].reserve(data.binormals.size());
         normals[2].reserve(data.tangents.size());
-        for (size_t i = 0; i < data.normals.size(); ++i)
+        for (size_t i = 0; i < data.normals.size(); ++i) {
             normals[0].push_back(Math::pack3NormalsInto32Int(data.normals[i]));
-        for (size_t i = 0; i < data.binormals.size(); ++i)
+        }
+        for (size_t i = 0; i < data.binormals.size(); ++i) {
             normals[1].push_back(Math::pack3NormalsInto32Int(data.binormals[i]));
-        for (size_t i = 0; i < data.tangents.size(); ++i)
+        }
+        for (size_t i = 0; i < data.tangents.size(); ++i) {
             normals[2].push_back(Math::pack3NormalsInto32Int(data.tangents[i]));
+        }
         vertexData.setData(0, data.points);
         vertexData.setData(1, data.uvs);
         vertexData.setData(2, normals[0]);
@@ -172,17 +174,17 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
 #pragma endregion
     }else{
 #pragma region Some Threshold
-        vector<ushort> _indices;
-        vector<glm::vec3> temp_pos; temp_pos.reserve(data.points.size());
-        vector<glm::vec2> temp_uvs; temp_uvs.reserve(data.uvs.size());
-        vector<glm::vec3> temp_normals; temp_normals.reserve(data.normals.size());
+        vector<ushort> indices;
+        vector<glm::vec3> temp_pos;       temp_pos.reserve(data.points.size());
+        vector<glm::vec2> temp_uvs;       temp_uvs.reserve(data.uvs.size());
+        vector<glm::vec3> temp_normals;   temp_normals.reserve(data.normals.size());
         vector<glm::vec3> temp_binormals; temp_binormals.reserve(data.binormals.size());
-        vector<glm::vec3> temp_tangents; temp_tangents.reserve(data.tangents.size());
+        vector<glm::vec3> temp_tangents;  temp_tangents.reserve(data.tangents.size());
         for (uint i = 0; i < data.points.size(); ++i) {
             ushort index;
             bool found = priv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, mesh.m_Threshold);
             if (found) {
-                _indices.emplace_back(index);
+                indices.emplace_back(index);
                 //average out TBN. But it cancels out normal mapping on some flat surfaces
                 //temp_binormals[index] += data.binormals[i];
                 //temp_tangents[index] += data.tangents[i];
@@ -192,24 +194,27 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
                 temp_normals.emplace_back(data.normals[i]);
                 temp_binormals.emplace_back(data.binormals[i]);
                 temp_tangents.emplace_back(data.tangents[i]);
-                _indices.emplace_back(static_cast<ushort>(temp_pos.size() - 1));
+                indices.emplace_back(static_cast<ushort>(temp_pos.size() - 1));
             }
         }
         normals[0].reserve(temp_normals.size());
         normals[1].reserve(temp_binormals.size());
         normals[2].reserve(temp_tangents.size());
-        for (size_t i = 0; i < temp_normals.size(); ++i)
+        for (size_t i = 0; i < temp_normals.size(); ++i) {
             normals[0].push_back(Math::pack3NormalsInto32Int(temp_normals[i]));
-        for (size_t i = 0; i < temp_binormals.size(); ++i)
+        }
+        for (size_t i = 0; i < temp_binormals.size(); ++i) {
             normals[1].push_back(Math::pack3NormalsInto32Int(temp_binormals[i]));
-        for (size_t i = 0; i < temp_tangents.size(); ++i)
+        }
+        for (size_t i = 0; i < temp_tangents.size(); ++i) {
             normals[2].push_back(Math::pack3NormalsInto32Int(temp_tangents[i]));
+        }
         vertexData.setData(0, temp_pos);
         vertexData.setData(1, temp_uvs);
         vertexData.setData(2, normals[0]);
         vertexData.setData(3, normals[1]);
         vertexData.setData(4, normals[2]);
-        vertexData.setIndices(_indices, false, false, true);
+        vertexData.setIndices(indices, false, false, true);
 #pragma endregion
     }
     if (mesh.m_Skeleton) {
@@ -227,7 +232,7 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
     }
 }
 void InternalMeshPublicInterface::TriangulateComponentIndices(Mesh& mesh, MeshImportedData& data, std::vector<std::vector<uint>>& indices, const unsigned char flags) {
-    for (uint i = 0; i < indices[0].size(); ++i) {
+    for (size_t i = 0; i < indices[0].size(); ++i) {
         glm::vec3 pos(0.0f);
         glm::vec2 uv(0.0f);
         glm::vec3 norm(1.0f);
@@ -248,7 +253,7 @@ void InternalMeshPublicInterface::TriangulateComponentIndices(Mesh& mesh, MeshIm
 void InternalMeshPublicInterface::CalculateRadius(Mesh& mesh) {
     mesh.m_radiusBox = glm::vec3(0.0f);
     const auto& data = (*mesh.m_VertexData).getData<glm::vec3>(0);
-    for (auto& vertex : data) {
+    for (const auto& vertex : data) {
         const float x = abs(vertex.x);
         const float y = abs(vertex.y);
         const float z = abs(vertex.z);
@@ -270,24 +275,26 @@ Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, flo
     m_Threshold = threshold;
     MeshImportedData data;
 
-	//TODO: fix this up
 
-	/*
-    const uint& width = heightfield.getHeightStickWidth();
-    const uint& length = heightfield.getHeightStickLength();
-    for (uint i = 0; i < width - 1; i++) {
-        for (uint j = 0; j < length - 1; j++) {
+    const unsigned int width    = static_cast<unsigned int>(heightfield.getUserIndex());
+    const unsigned int length   = static_cast<unsigned int>(heightfield.getUserIndex2());
+    const float fWidth          = static_cast<float>(width);
+    const float fLength         = static_cast<float>(length);
+    for (unsigned int i = 0; i < width - 1U; ++i) {
+        float fI = static_cast<float>(i);
+        for (unsigned int j = 0; j < length - 1U; ++j) {
+            float fJ = static_cast<float>(j);
             btVector3 vert1, vert2, vert3, vert4;
-            heightfield.getVertex1(i, j, vert1);
-            heightfield.getVertex1(i + 1, j, vert2);
-            heightfield.getVertex1(i, j + 1, vert3);
-            heightfield.getVertex1(i + 1, j + 1, vert4);
+            heightfield.getVertex(i,     j,     vert1);
+            heightfield.getVertex(i + 1, j,     vert2);
+            heightfield.getVertex(i,     j + 1, vert3);
+            heightfield.getVertex(i + 1, j + 1, vert4);
 
             priv::Vertex v1, v2, v3, v4;
-            v1.position = glm::vec3(vert1.x(), vert1.y(), vert1.z());
-            v2.position = glm::vec3(vert2.x(), vert2.y(), vert2.z());
-            v3.position = glm::vec3(vert3.x(), vert3.y(), vert3.z());
-            v4.position = glm::vec3(vert4.x(), vert4.y(), vert4.z());
+            v1.position = Math::btVectorToGLM(vert1);
+            v2.position = Math::btVectorToGLM(vert2);
+            v3.position = Math::btVectorToGLM(vert3);
+            v4.position = Math::btVectorToGLM(vert4);
 
             glm::vec3 a = v4.position - v1.position;
             glm::vec3 b = v2.position - v3.position;
@@ -298,10 +305,10 @@ Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, flo
             v3.normal = normal;
             v4.normal = normal;
 
-            v1.uv = glm::vec2(float(i) / float(width), float(j) / float(length));
-            v2.uv = glm::vec2(float(i + 1) / float(width), float(j) / float(length));
-            v3.uv = glm::vec2(float(i) / float(width), float(j + 1) / float(length));
-            v4.uv = glm::vec2(float(i + 1) / float(width), float(j + 1) / float(length));
+            v1.uv = glm::vec2(fI / fWidth,        fJ / fLength);
+            v2.uv = glm::vec2(fI + 1.0f / fWidth, fJ / fLength);
+            v3.uv = glm::vec2(fI / fWidth,        fJ + 1.0f / fLength);
+            v4.uv = glm::vec2(fI + 1.0f / fWidth, fJ + 1.0f / fLength);
 
             data.points.push_back(v3.position); data.uvs.push_back(v3.uv); data.normals.push_back(v3.normal);
             data.points.push_back(v2.position); data.uvs.push_back(v2.uv); data.normals.push_back(v2.normal);
@@ -314,7 +321,7 @@ Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, flo
     }
     MeshLoader::CalculateTBNAssimp(data);
     MeshLoader::FinalizeData(*this, data, threshold);
-	*/
+
     load();
 }
 
@@ -324,7 +331,7 @@ Mesh::Mesh(VertexData* data, const string& name, float threshold) : EngineResour
     m_VertexData = data;
     m_Threshold = threshold;
 }
-Mesh::Mesh(const string& name,float width, float height,float threshold) : EngineResource(ResourceType::Mesh, name){
+Mesh::Mesh(const string& name, float width, float height, float threshold) : EngineResource(ResourceType::Mesh, name){
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_Threshold = threshold;
 
@@ -342,11 +349,11 @@ Mesh::Mesh(const string& name,float width, float height,float threshold) : Engin
     quad[2].position = glm::vec3(width / 2.0f, height / 2.0f, 0.0f);
     quad[3].position = glm::vec3(-width / 2.0f, height / 2.0f, 0.0f);
 
-    for (uint i = 0; i < 3; ++i) {   //triangle 1 (0, 1, 2)
+    for (unsigned int i = 0; i < 3; ++i) {   //triangle 1 (0, 1, 2)
         data.points.emplace_back(quad[i].position);
         data.uvs.emplace_back(quad[i].uv);
     }
-    for (uint i = 0; i < 3; ++i) {   //triangle 2 (2, 3, 0)
+    for (unsigned int i = 0; i < 3; ++i) {   //triangle 2 (2, 3, 0)
         data.points.emplace_back(quad[(i + 2) % 4].position);
         data.uvs.emplace_back(quad[(i + 2) % 4].uv);
     }
@@ -360,7 +367,7 @@ Mesh::Mesh(const string& fileOrData, float threshold) : EngineResource(ResourceT
     m_Threshold = threshold;
 
     setName("Custom Mesh");
-    unsigned char _flags = MeshLoadingFlags::Points | MeshLoadingFlags::Faces | MeshLoadingFlags::UVs | MeshLoadingFlags::Normals | MeshLoadingFlags::TBN;
+    unsigned char flags = MeshLoadingFlags::Points | MeshLoadingFlags::Faces | MeshLoadingFlags::UVs | MeshLoadingFlags::Normals | MeshLoadingFlags::TBN;
 
     MeshImportedData data;
     vector<vector<uint>> indices;
@@ -372,26 +379,26 @@ Mesh::Mesh(const string& fileOrData, float threshold) : EngineResource(ResourceT
     for (string line; getline(stream, line, '\n');) {
         if (line[0] == 'o') {
         }else if (line[0] == 'v' && line[1] == ' ') {
-            if (_flags && MeshLoadingFlags::Points) {
+            if (flags && MeshLoadingFlags::Points) {
                 glm::vec3 p;
                 auto res = sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &p.x, &p.y, &p.z);
                 data.file_points.push_back(p);
             }
         }else if (line[0] == 'v' && line[1] == 't') {
-            if (_flags && MeshLoadingFlags::UVs) {
+            if (flags && MeshLoadingFlags::UVs) {
                 glm::vec2 uv;
                 auto res = sscanf(line.substr(2, line.size()).c_str(), "%f %f", &uv.x, &uv.y);
                 uv.y = 1.0f - uv.y;
                 data.file_uvs.push_back(uv);
             }
         }else if (line[0] == 'v' && line[1] == 'n') {
-            if (_flags && MeshLoadingFlags::Normals) {
+            if (flags && MeshLoadingFlags::Normals) {
                 glm::vec3 n;
                 auto res = sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &n.x, &n.y, &n.z);
                 data.file_normals.push_back(n);
             }
         }else if (line[0] == 'f' && line[1] == ' ') {
-            if (_flags && MeshLoadingFlags::Faces) {
+            if (flags && MeshLoadingFlags::Faces) {
                 glm::uvec3 f1, f2, f3, f4 = glm::uvec3(1);
                 int matches = sscanf(line.substr(2, line.size()).c_str(), "%d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d", &f1.x, &f1.y, &f1.z, &f2.x, &f2.y, &f2.z, &f3.x, &f3.y, &f3.z, &f4.x, &f4.y, &f4.z);
                 if (matches < 3) {
@@ -414,10 +421,10 @@ Mesh::Mesh(const string& fileOrData, float threshold) : EngineResource(ResourceT
             }
         }
     }
-    if (_flags && MeshLoadingFlags::Faces) {
-        InternalMeshPublicInterface::TriangulateComponentIndices(*this, data, indices, _flags);
+    if (flags && MeshLoadingFlags::Faces) {
+        InternalMeshPublicInterface::TriangulateComponentIndices(*this, data, indices, flags);
     }
-    if (_flags && MeshLoadingFlags::TBN) {
+    if (flags && MeshLoadingFlags::TBN) {
         MeshLoader::CalculateTBNAssimp(data);
     }
     MeshLoader::FinalizeData(*this, data, threshold);

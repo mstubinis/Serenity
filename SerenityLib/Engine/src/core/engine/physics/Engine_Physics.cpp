@@ -1,6 +1,4 @@
-#define BT_THREADSAFE 1
 #include <core/engine/physics/Engine_Physics.h>
-//#include <core/engine/physics/World.h>
 #include <core/engine/physics/DebugDrawer.h>
 
 #include <core/engine/resources/Engine_Resources.h>
@@ -25,7 +23,6 @@
 #include <BulletCollision/CollisionDispatch/btInternalEdgeUtility.h>
 
 //Multi-threading
-#include <core/engine/threading/Engine_ThreadManager.h>
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorldMt.h>
 #include <BulletDynamics/Dynamics/btSimulationIslandManagerMt.h>
 #include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolverMt.h>
@@ -37,10 +34,10 @@
 #include <SFML/OpenGL.hpp>
 #include <GL/freeglut.h>
 
-
 using namespace Engine;
 using namespace std;
 
+priv::PhysicsManager* physicsManager = nullptr;
 
 void processManifoldContact(btManifoldPoint& cp, btCollisionObject* A, btCollisionObject* B, btCollisionShape* childA, btCollisionShape* childB, const btCollisionShape* shapeA, const btCollisionShape* shapeB) {
     ComponentBody* a_               = static_cast<ComponentBody*>(A->getUserPointer());
@@ -52,8 +49,7 @@ void processManifoldContact(btManifoldPoint& cp, btCollisionObject* A, btCollisi
         glm::vec3 localPositionA    = Math::btVectorToGLM(cp.m_localPointA);
         glm::vec3 localPositionB    = Math::btVectorToGLM(cp.m_localPointB);
         glm::vec3 normalA           = -glm::normalize(ptB - ptA);
-        glm::vec3 normalB           = -glm::normalize(ptA - ptB);
-        
+        glm::vec3 normalB           = -glm::normalize(ptA - ptB);      
 
         if (shapeA && shapeA->getShapeType() == TRIANGLE_SHAPE_PROXYTYPE) {
             const btTriangleShape* triA = static_cast<const btTriangleShape*>(shapeA);
@@ -85,7 +81,6 @@ void processManifoldContact(btManifoldPoint& cp, btCollisionObject* A, btCollisi
             dataA.otherModelInstanceIndex = modelInstance.index();
             dataB.ownerModelInstanceIndex = modelInstance.index();
         }
-
         a_->collisionResponse(dataA);
         b_->collisionResponse(dataB);
 
@@ -123,20 +118,11 @@ bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionOb
 
     if (cp.getDistance() < 0.0f) {
         //btAdjustInternalEdgeContacts(cp, colObj1Wrap, colObj0Wrap, partId1, index1);
-        processManifoldContact(
-            cp,
-            const_cast<btCollisionObject*>(colObj0Wrap->getCollisionObject()),
-            const_cast<btCollisionObject*>(colObj1Wrap->getCollisionObject()),
-            childShapeA,
-            childShapeB,
-            colObj0Wrap->m_shape,
-            colObj1Wrap->m_shape
-        );
+        processManifoldContact(cp, const_cast<btCollisionObject*>(colObj0Wrap->getCollisionObject()), const_cast<btCollisionObject*>(colObj1Wrap->getCollisionObject()), childShapeA, childShapeB, colObj0Wrap->m_shape, colObj1Wrap->m_shape);
     }
     return true;
 }
 
-priv::PhysicsManager* physicsManager = nullptr;
 
 priv::PhysicsManager::PhysicsManager(){ 
     physicsManager          = this;
@@ -145,17 +131,17 @@ priv::PhysicsManager::~PhysicsManager(){
     cleanup();
 }
 void priv::PhysicsManager::cleanup() {
-    auto& world = *m_Data.m_World;
-    int collisionObjCount = world.getNumCollisionObjects();
+    auto& pipeline = *m_Pipeline.m_World;
+    int collisionObjCount = pipeline.getNumCollisionObjects();
     for (int i = 0; i < collisionObjCount; ++i) {
-        btCollisionObject* obj = world.getCollisionObjectArray()[i];
+        btCollisionObject* obj = pipeline.getCollisionObjectArray()[i];
         if (obj) {
             btRigidBody* body = btRigidBody::upcast(obj);
             if (body) {
                 auto* motionState = body->getMotionState();
                 SAFE_DELETE(motionState);
             }
-            world.removeCollisionObject(obj);
+            pipeline.removeCollisionObject(obj);
             SAFE_DELETE(obj);
         }
     }
@@ -164,20 +150,20 @@ void priv::PhysicsManager::debug_draw_line(const glm::vec3& start, const glm::ve
     priv::PhysicsManager::debug_draw_line(start, end, color.r, color.g, color.b, color.a);
 }
 void priv::PhysicsManager::debug_draw_line(const glm::vec3& start, const glm::vec3& end, const float r, const float g, const float b, const float a) {
-    m_Data.m_World->getDebugDrawer()->drawLine(Math::btVectorFromGLM(start), Math::btVectorFromGLM(end), btVector4(r, g, b, a));
+    m_Pipeline.m_World->getDebugDrawer()->drawLine(Math::btVectorFromGLM(start), Math::btVectorFromGLM(end), btVector4(r, g, b, a));
 }
 void priv::PhysicsManager::_init(){
-    m_Data.m_DebugDrawer.init();
+    m_Pipeline.m_DebugDrawer.init();
 
     gContactAddedCallback = CustomMaterialContactAddedCallback;
 }
 void priv::PhysicsManager::_update(const float dt, int maxSubSteps, float fixedTimeStep){ 
     if (m_Paused)
         return;
-    m_Data.m_World->stepSimulation(static_cast<btScalar>(dt), maxSubSteps, static_cast<btScalar>(fixedTimeStep));
+    m_Pipeline.m_World->stepSimulation(static_cast<btScalar>(dt), maxSubSteps, static_cast<btScalar>(fixedTimeStep));
 
-    for (int i = 0; i < m_Data.m_Dispatcher->getNumManifolds(); ++i) {
-        btPersistentManifold& contactManifold = *m_Data.m_Dispatcher->getManifoldByIndexInternal(i);
+    for (int i = 0; i < m_Pipeline.m_Dispatcher->getNumManifolds(); ++i) {
+        btPersistentManifold& contactManifold = *m_Pipeline.m_Dispatcher->getManifoldByIndexInternal(i);
 
         for (int j = 0; j < contactManifold.getNumContacts(); ++j) {
             btManifoldPoint& cp = contactManifold.getContactPoint(j);
@@ -196,13 +182,13 @@ void priv::PhysicsManager::_update(const float dt, int maxSubSteps, float fixedT
     }
 }
 void priv::PhysicsManager::_render(const Camera& camera){
-    m_Data.m_World->debugDrawWorld();
+    m_Pipeline.m_World->debugDrawWorld();
     const glm::vec3 camPos = camera.getPosition();
     const glm::mat4 model = glm::mat4(1.0f);
     Engine::Renderer::sendUniformMatrix4("Model", model);
     Engine::Renderer::sendUniformMatrix4("VP", camera.getViewProjection());
-    m_Data.m_DebugDrawer.drawAccumulatedLines();
-    m_Data.m_DebugDrawer.postRender();
+    m_Pipeline.m_DebugDrawer.drawAccumulatedLines();
+    m_Pipeline.m_DebugDrawer.postRender();
 }
 
 
@@ -219,13 +205,13 @@ void Physics::unpause(){
     physicsManager->m_Paused = false; 
 }
 void Physics::setGravity(const float x, const float y, const float z){ 
-    physicsManager->m_Data.m_World->setGravity(btVector3(x,y,z));
+    physicsManager->m_Pipeline.m_World->setGravity(btVector3(x,y,z));
 }
 void Physics::setGravity(const glm::vec3& gravity){ 
     Physics::setGravity(gravity.x,gravity.y,gravity.z); 
 }
 void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){ 
-    auto& data = physicsManager->m_Data;
+    auto& data = physicsManager->m_Pipeline;
     int collisionObjCount = data.m_World->getNumCollisionObjects();
     for (int i = 0; i < collisionObjCount; ++i) {
         btRigidBody* body = btRigidBody::upcast(data.m_World->getCollisionObjectArray()[i]);
@@ -238,40 +224,40 @@ void Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){
     data.m_World->addRigidBody(rigidBody, group, mask);
 }
 void Physics::addRigidBody(btRigidBody* rigidBody){ 
-    auto& data = physicsManager->m_Data;
-    int collisionObjCount = data.m_World->getNumCollisionObjects();
+    auto& pipeline = physicsManager->m_Pipeline;
+    int collisionObjCount = pipeline.m_World->getNumCollisionObjects();
     for (int i = 0; i < collisionObjCount; ++i) {
-        btRigidBody* body = btRigidBody::upcast(data.m_World->getCollisionObjectArray()[i]);
+        btRigidBody* body = btRigidBody::upcast(pipeline.m_World->getCollisionObjectArray()[i]);
         if (body) {
             if (body == rigidBody) {
                 return;
             }
         }
     }
-    data.m_World->addRigidBody(rigidBody);
+    pipeline.m_World->addRigidBody(rigidBody);
 }
 void Physics::removeRigidBody(btRigidBody* rigidBody){ 
-    auto& data = physicsManager->m_Data;
-    int collisionObjCount = data.m_World->getNumCollisionObjects();
+    auto& pipeline = physicsManager->m_Pipeline;
+    int collisionObjCount = pipeline.m_World->getNumCollisionObjects();
     for (int i = 0; i < collisionObjCount; ++i) {
-        btRigidBody* body = btRigidBody::upcast(data.m_World->getCollisionObjectArray()[i]);
+        btRigidBody* body = btRigidBody::upcast(pipeline.m_World->getCollisionObjectArray()[i]);
         if (body) {
             if (body == rigidBody) {
                 for (int i = body->getNumConstraintRefs() - 1; i >= 0; i--) {
                     btTypedConstraint* con = body->getConstraintRef(i);
-                    data.m_World->removeConstraint(con);
+                    pipeline.m_World->removeConstraint(con);
                 }
-                data.m_World->removeRigidBody(rigidBody);
+                pipeline.m_World->removeRigidBody(rigidBody);
                 return;
             }
         }
     }
 }
 void Physics::removeCollisionObject(btCollisionObject* object) {
-    physicsManager->m_Data.m_World->removeCollisionObject(object);
+    physicsManager->m_Pipeline.m_World->removeCollisionObject(object);
 }
 void Physics::updateRigidBody(btRigidBody* rigidBody){ 
-    physicsManager->m_Data.m_World->updateSingleAabb(rigidBody);
+    physicsManager->m_Pipeline.m_World->updateSingleAabb(rigidBody);
 }
 void Physics::addRigidBody(ComponentBody& body) {
     Physics::addRigidBody(const_cast<btRigidBody*>(&body.getBtBody()), body.getCollisionGroup(), body.getCollisionMask());
@@ -303,7 +289,7 @@ void Physics::removeRigidBodyThreadSafe(ComponentBody& body) {
 }
 void Physics::removeCollisionObjectThreadSafe(btCollisionObject* object) {
     std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
-    physicsManager->m_Data.m_World->removeCollisionObject(object);
+    physicsManager->m_Pipeline.m_World->removeCollisionObject(object);
 }
 
 
@@ -312,9 +298,9 @@ RayCastResult _rayCastInternal_Nearest(const btVector3& start, const btVector3& 
     RayCallback.m_collisionFilterMask = mask;
     RayCallback.m_collisionFilterGroup = group;
 
-    physicsManager->m_Data.m_World->rayTest(start, end, RayCallback);
+    physicsManager->m_Pipeline.m_World->rayTest(start, end, RayCallback);
 #ifdef _DEBUG
-    physicsManager->m_Data.m_World->getDebugDrawer()->drawLine(start, end, btVector4(1, 1, 0, 1));
+    physicsManager->m_Pipeline.m_World->getDebugDrawer()->drawLine(start, end, btVector4(1, 1, 0, 1));
 #endif
 
     RayCastResult result;
@@ -335,9 +321,9 @@ vector<RayCastResult> _rayCastInternal(const btVector3& start, const btVector3& 
     RayCallback.m_collisionFilterMask = mask;
     RayCallback.m_collisionFilterGroup = group;
 
-    physicsManager->m_Data.m_World->rayTest(start, end, RayCallback);
+    physicsManager->m_Pipeline.m_World->rayTest(start, end, RayCallback);
 #ifdef _DEBUG
-    physicsManager->m_Data.m_World->getDebugDrawer()->drawLine(start, end, btVector4(1, 0.5, 0, 1));
+    physicsManager->m_Pipeline.m_World->getDebugDrawer()->drawLine(start, end, btVector4(1, 0.5, 0, 1));
 #endif
 
     vector<RayCastResult> result;

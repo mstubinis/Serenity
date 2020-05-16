@@ -34,13 +34,14 @@ namespace Engine::priv {
 #include <functional>
 
 
-class ModelInstance final{
+class ModelInstance final : public Engine::UserPointer {
     friend struct Engine::priv::DefaultModelInstanceBindFunctor;
     friend struct Engine::priv::DefaultModelInstanceUnbindFunctor;
     friend struct Engine::priv::ComponentModel_UpdateFunction;
     friend class  ComponentModel;
     friend class  Collision;
     private:
+        static decimal                                       m_GlobalDistanceFactor;
         static unsigned int                                  m_ViewportFlagDefault;
     private:
         std::function<void(ModelInstance*, const Engine::priv::Renderer*)>  m_CustomBindFunctor;
@@ -48,7 +49,6 @@ class ModelInstance final{
 
         ModelDrawingMode::Mode                               m_DrawingMode       = ModelDrawingMode::Triangles;
         Engine::Flag<unsigned int>                           m_ViewportFlag; //determine what viewports this can be seen in
-        void*                                                m_UserPointer       = nullptr;
         Engine::priv::ModelInstanceAnimationVector           m_AnimationVector;
         Entity                                               m_Parent;
         ShaderProgram*                                       m_ShaderProgram     = nullptr;
@@ -83,6 +83,8 @@ class ModelInstance final{
 
         ~ModelInstance();
 
+        static void setGlobalDistanceFactor(decimal factor);
+        static decimal& getGlobalDistanceFactor();
 
         template<typename T>
         void setCustomBindFunctor(const T& functor) {
@@ -117,8 +119,6 @@ class ModelInstance final{
         ShaderProgram* shaderProgram() const;
         Mesh* mesh() const;
         Material* material() const;
-        void* getUserPointer() const;
-        void setUserPointer(void* UserPointer);
         const Entity& parent() const;
 
         const Engine::color_vector_4& color() const;

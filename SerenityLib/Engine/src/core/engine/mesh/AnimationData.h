@@ -36,7 +36,6 @@ namespace Engine::priv {
                 return 0;
             }
 
-
             void ReadNodeHeirarchy(const std::string& animationName, const float time, const BoneNode* node, const glm::mat4& ParentTransform, std::vector<glm::mat4>& Transforms);
             void BoneTransform(const std::string& animationName, const float TimeInSeconds, std::vector<glm::mat4>& Transforms);
             void CalcInterpolatedPosition(glm::vec3& Out, const float AnimationTime, const AnimationChannel& node);

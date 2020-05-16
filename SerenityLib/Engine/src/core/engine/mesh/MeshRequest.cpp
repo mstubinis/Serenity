@@ -13,8 +13,6 @@ using namespace std;
 
 Engine::priv::AssimpSceneImport::AssimpSceneImport() {
     m_Importer_ptr.reset(NEW Assimp::Importer{});
-    m_AIScene    = nullptr;
-    m_AIRoot     = nullptr;
 }
 Engine::priv::AssimpSceneImport::~AssimpSceneImport() {
 
@@ -35,9 +33,6 @@ Engine::priv::AssimpSceneImport& Engine::priv::AssimpSceneImport::operator=(cons
 
 
 MeshRequest::MeshRequestPart::MeshRequestPart() {
-    mesh   = nullptr;
-    name   = "";
-    handle = Handle();
 }
 MeshRequest::MeshRequestPart::~MeshRequestPart() {
 
@@ -74,9 +69,6 @@ MeshRequest::MeshRequestPart& MeshRequest::MeshRequestPart::operator=(MeshReques
 
 
 MeshRequest::MeshRequest(const string& filenameOrData, const float threshold){
-    m_FileExtension = "";
-    m_FileExists    = false;
-    m_Async         = false;
     m_FileOrData    = filenameOrData;
     m_Threshold     = threshold;
     if (!m_FileOrData.empty()) {
@@ -88,7 +80,7 @@ MeshRequest::MeshRequest(const string& filenameOrData, const float threshold){
 }
 MeshRequest::~MeshRequest() {
     //TODO: this is causing problems
-    SAFE_DELETE_MAP(m_Map);
+    //SAFE_DELETE_MAP(m_Map);
 }
 MeshRequest::MeshRequest(const MeshRequest& other) {
     m_FileOrData     = other.m_FileOrData;

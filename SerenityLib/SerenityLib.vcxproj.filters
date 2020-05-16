@@ -238,6 +238,12 @@
     <Filter Include="Header Files\Engine\Core\Renderer\interfaces">
       <UniqueIdentifier>{9daea2d8-92a3-4811-9f1f-5bd9e36f193f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Networking\Server">
+      <UniqueIdentifier>{2d6247d6-ef42-400b-88d4-c7993153e6a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Networking\Server">
+      <UniqueIdentifier>{d2aab9f0-5173-4125-9177-1605bafdea70}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBody.h">
@@ -558,9 +564,6 @@
     <ClInclude Include="Engine\src\core\engine\physics\DebugDrawer.h">
       <Filter>Header Files\Engine\Core\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\physics\World.h">
-      <Filter>Header Files\Engine\Core\Physics</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\renderer\Decal.h">
       <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
@@ -734,6 +737,24 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\networking\SocketManager.h">
       <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\networking\server\Server.h">
+      <Filter>Header Files\Engine\Core\Networking\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\networking\server\ServerThread.h">
+      <Filter>Header Files\Engine\Core\Networking\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\networking\server\ServerClient.h">
+      <Filter>Header Files\Engine\Core\Networking\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\networking\Packet.h">
+      <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\math\BigNumbers.h">
+      <Filter>Header Files\Engine\Core\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\physics\PhysicsPipeline.h">
+      <Filter>Header Files\Engine\Core\Physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -995,9 +1016,6 @@
     <ClCompile Include="Engine\src\core\engine\physics\DebugDrawer.cpp">
       <Filter>Source Files\Engine\Core\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\physics\World.cpp">
-      <Filter>Source Files\Engine\Core\Physics</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\Decal.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
@@ -1123,6 +1141,21 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\networking\SocketManager.cpp">
       <Filter>Source Files\Engine\Core\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\networking\server\Server.cpp">
+      <Filter>Source Files\Engine\Core\Networking\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\networking\server\ServerThread.cpp">
+      <Filter>Source Files\Engine\Core\Networking\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\networking\server\ServerClient.cpp">
+      <Filter>Source Files\Engine\Core\Networking\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\networking\Packet.cpp">
+      <Filter>Source Files\Engine\Core\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\physics\PhysicsPipeline.cpp">
+      <Filter>Source Files\Engine\Core\Physics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

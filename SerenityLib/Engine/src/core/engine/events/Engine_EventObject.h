@@ -9,6 +9,11 @@ class  Texture;
 namespace sf {
     class Packet;
 }
+namespace Engine::Networking {
+    class Server;
+    class ServerClient;
+    class ServerThread;
+}
 #include <SFML/Network/IpAddress.hpp>
 #include <core/engine/events/Engine_EventIncludes.h>
 #include <core/engine/networking/SocketInterface.h>
@@ -27,6 +32,22 @@ namespace Engine::priv{
             remotePort = remotePort_;
             remoteIP   = remoteIP_;
             type       = type_;
+        }
+    };
+
+    struct EventServer final {
+        Engine::Networking::Server* server = nullptr;
+        EventServer() = default;
+        EventServer(Engine::Networking::Server& server_) {
+            server = &server_;
+        }
+    };
+
+    struct EventClient final {
+        Engine::Networking::ServerClient* client = nullptr;
+        EventClient() = default;
+        EventClient(Engine::Networking::ServerClient& client_) {
+            client = &client_;
         }
     };
 
@@ -199,6 +220,8 @@ struct Event final{
 
         Engine::priv::EventPacket                     eventPacket;
         Engine::priv::EventSocket                     eventSocket;
+        Engine::priv::EventServer                     eventServer;
+        Engine::priv::EventClient                     eventClient;
     };
     Event() = delete;
     Event(const EventType::Type& type_) {

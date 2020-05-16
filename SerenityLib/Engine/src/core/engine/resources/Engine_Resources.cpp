@@ -26,7 +26,7 @@
 using namespace Engine;
 using namespace std;
 
-priv::ResourceManager* resourceManager;
+priv::ResourceManager* resourceManager = nullptr;
 
 priv::ResourceManager::ResourceManager(const EngineOptions& options) : m_Resources(32768){
     m_CurrentScene     = nullptr;
@@ -212,8 +212,8 @@ Material* Resources::getMaterial(const Handle h) {
     resourceManager->m_Resources.getAs(h, p); 
     return p; 
 }
-Handle Resources::addFont(const string& filename){
-    return resourceManager->m_Resources.add(NEW Font(filename), ResourceType::Font);
+Handle Resources::addFont(const string& filename, int height, int width, float line_height){
+    return resourceManager->m_Resources.add(NEW Font(filename, height, width, line_height), ResourceType::Font);
 }
 
 

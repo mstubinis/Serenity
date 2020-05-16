@@ -21,7 +21,6 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace std;
 
-
 EngineCore* Core::m_Engine = nullptr;
 
 EngineCore::EngineCore(const EngineOptions& options) : m_ResourceManager(options), m_RenderManager(options){
@@ -107,8 +106,7 @@ void EngineCore::init(const EngineOptions& options) {
     }
     Scene& scene = *m_ResourceManager.m_CurrentScene;
     if (!scene.getActiveCamera()) {
-        Camera* default_camera = NEW Camera(60, static_cast<float>(options.width) / static_cast<float>(options.height), 0.01f, 1000.0f, &scene);
-        scene.addCamera(*default_camera);
+        Camera* default_camera = scene.addCamera(60, static_cast<float>(options.width) / static_cast<float>(options.height), 0.01f, 1000.0f);
     }
 
     Engine::Renderer::ssao::setLevel(static_cast<SSAOLevel::Level>(options.ssao_level));
@@ -123,7 +121,6 @@ void EngineCore::update_physics(Window& window, const float timeStep) {
     const unsigned int requestedStepsPerFrame  = Physics::getNumberOfStepsPerFrame();
     const float fixed_time_step                = PHYSICS_MIN_STEP / static_cast<float>(requestedStepsPerFrame);
 
-
     m_PhysicsManager._update(timeStep, 100, fixed_time_step);
 
     m_DebugManager.calculate_physics();
@@ -136,9 +133,9 @@ void EngineCore::update_logic(Window& window, const float dt){
     auto& ecs = InternalScenePublicInterface::GetECS(scene); 
     ecs.preUpdate(scene, dt);
     Game::onPreUpdate(dt);
+    scene.update(dt);
     InternalScenePublicInterface::UpdateParticleSystem(scene, dt);
     Game::update(dt);
-    scene.update(dt);
     ecs.update(dt, scene);
     ecs.postUpdate(scene,dt);
     InternalScenePublicInterface::UpdateMaterials(scene, dt);

@@ -10,7 +10,7 @@ struct aiNode;
 #include <core/engine/mesh/Skeleton.h>
 #include <core/engine/mesh/MeshRequest.h>
 
-using BoneNodeMap = std::unordered_map<std::string, Engine::priv::BoneNode*>;
+using BoneNodeMap = std::unordered_map<std::string, Engine::priv::BoneNode>;
 
 namespace Engine::priv {
     struct MeshLoadingFlags final {enum Flag {
@@ -36,10 +36,10 @@ namespace Engine::priv {
         friend struct MeshRequest;
         friend class  Engine::priv::MeshSkeleton;
         public:
-            static void        LoadProcessNodeNames(const std::string& file,std::vector<MeshRequest::MeshRequestPart>&, const aiScene& scene, const aiNode& node, BoneNodeMap& _map);
-            static void        LoadProcessNodeData(std::vector<MeshRequest::MeshRequestPart>&, const aiScene& scene, const aiNode& node, BoneNodeMap& _map, uint& count);
+            static void        LoadProcessNodeNames(const std::string& file,std::vector<MeshRequest::MeshRequestPart>& meshRequestParts, const aiScene& scene, const aiNode& node, BoneNodeMap& boneNodeMap);
+            static void        LoadProcessNodeData(std::vector<MeshRequest::MeshRequestPart>& meshRequestParts, const aiScene& scene, const aiNode& node, BoneNodeMap& boneNodeMap, uint& count);
 
-            static void        LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap& _map);
+            static void        LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap& boneNodeMap);
             static void        FinalizeData(Mesh& mesh,MeshImportedData& data, float threshold);
 
             static VertexData* LoadFrom_OBJCC(std::string& filename);
@@ -48,9 +48,9 @@ namespace Engine::priv {
             static bool        IsNear(float v1, float v2, const float threshold);
             static bool        IsNear(glm::vec2& v1, glm::vec2& v2, const float threshold);
             static bool        IsNear(glm::vec3& v1, glm::vec3& v2, const float threshold);
-            static bool        IsSpecialFloat(const float _float);
-            static bool        IsSpecialFloat(const glm::vec2& _vector);
-            static bool        IsSpecialFloat(const glm::vec3& _vector);
+            static bool        IsSpecialFloat(const float number);
+            static bool        IsSpecialFloat(const glm::vec2& vec);
+            static bool        IsSpecialFloat(const glm::vec3& vec);
             static bool        GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& pts, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& norms, unsigned short& result, const float threshold);
             static void        CalculateTBNAssimp(MeshImportedData& data);
     };

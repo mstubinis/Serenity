@@ -157,11 +157,12 @@ namespace Engine{
 
                 void update_logic(Window& window, const float dt);
                 void update_sounds(Window& window, const float dt);
-                void update_physics(Window& window, const float dt);
+                //void update_physics(Window& window, const float dt);
                 void update(Window& window, const float dt);
                 void render(Window& window, const float dt);
                 void cleanup(Window& window, const float dt);
             public:
+                void update_physics(Window& window, const float dt);
                 struct Misc final {
                     Engine::priv::BuiltInMeshses   m_BuiltInMeshes;
                     Engine::Discord::DiscordCore   m_DiscordCore;

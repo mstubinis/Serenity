@@ -14,9 +14,7 @@ class btRigidBody;
 class btQuaternion;
 class Camera;
 
-namespace Engine{
-namespace Math{
-
+namespace Engine::Math{
     const glm_vec3 rotate_vec3(const glm_quat& rotation, const glm_vec3& vec);
 
     const glm::vec3 polynomial_interpolate_linear(std::vector<glm::vec3>& points, const float time);
@@ -135,6 +133,5 @@ namespace Math{
     sf::Color PaintersAlgorithm(const sf::Color& paintColor, const sf::Color& canvasColor);
 
     bool rayIntersectSphere(const glm::vec3& position, const float radius, const glm::vec3& A, const glm::vec3& rayVector);
-};
 };
 #endif

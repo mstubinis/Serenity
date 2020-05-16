@@ -15,7 +15,7 @@ namespace Engine::priv {
     struct ComponentLogic3_SceneLeftFunction;
 };
 
-class ComponentLogic3 {
+class ComponentLogic3 : public Engine::UserPointer {
     friend struct Engine::priv::ComponentLogic3_UpdateFunction;
     friend struct Engine::priv::ComponentLogic3_ComponentAddedToEntityFunction;
     friend struct Engine::priv::ComponentLogic3_ComponentRemovedFromEntityFunction;
@@ -25,7 +25,6 @@ class ComponentLogic3 {
     private:
         Entity m_Owner;
 
-        void*                                                        m_UserPointer  = nullptr;
         void*                                                        m_UserPointer1 = nullptr;
         void*                                                        m_UserPointer2 = nullptr;
         std::function<void(const ComponentLogic3*, const float)>     m_Functor      = [](const ComponentLogic3*, const float) {};
@@ -46,17 +45,15 @@ class ComponentLogic3 {
 
         ~ComponentLogic3();
 
+        const Entity getOwner() const;
         void call(const float dt) const;
 
         template<typename T> void setFunctor(const T& functor) { 
             m_Functor = std::bind<void>(std::move(functor), std::placeholders::_1, std::placeholders::_2);
         }
-
-        void setUserPointer(void* UserPointer);
         void setUserPointer1(void* UserPointer1);
         void setUserPointer2(void* UserPointer2);
         
-        void* getUserPointer() const;
         void* getUserPointer1() const;
         void* getUserPointer2() const;
 };

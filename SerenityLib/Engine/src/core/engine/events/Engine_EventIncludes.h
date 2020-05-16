@@ -14,6 +14,10 @@ struct EventType final {
 
         SocketConnected,
         SocketDisconnected,
+        ServerStarted,
+        ServerShutdowned,
+        ClientConnected,
+        ClientDisconnected,
 
         PacketSent,
         PacketReceived,

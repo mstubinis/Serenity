@@ -249,17 +249,11 @@ const decimal ComponentBody::getLinearDamping() const {
 const decimal ComponentBody::getAngularDamping() const {
     return (data.p->bullet_rigidBody) ? static_cast<decimal>(data.p->bullet_rigidBody->getAngularDamping()) : static_cast<decimal>(0.0);
 }
-void ComponentBody::setUserPointer(void* userPtr) {
-    m_UserPointer  = userPtr;
-}
 void ComponentBody::setUserPointer1(void* userPtr) {
     m_UserPointer1 = userPtr;
 }
 void ComponentBody::setUserPointer2(void* userPtr) {
     m_UserPointer2 = userPtr;
-}
-void* ComponentBody::getUserPointer() const {
-    return m_UserPointer;
 }
 void* ComponentBody::getUserPointer1() const {
     return m_UserPointer1;
@@ -599,8 +593,7 @@ void ComponentBody::setScale(const decimal& p_X, const decimal& p_Y, const decim
         priv::ComponentModel_Functions::CalculateRadius(*models);
     }
 }
-
-const glm_vec3 ComponentBody::localPosition() const { //theres prob a better way to do this
+glm_vec3 ComponentBody::localPosition() const { //theres prob a better way to do this
     if (m_Physics) {
         auto& physicsData = *data.p;
         btTransform tr;
@@ -609,8 +602,7 @@ const glm_vec3 ComponentBody::localPosition() const { //theres prob a better way
     }
     return data.n->position;
 }
-
-const glm_vec3 ComponentBody::position() const { //theres prob a better way to do this
+glm_vec3 ComponentBody::position() const { //theres prob a better way to do this
     if (m_Physics) {
         auto& physicsData = *data.p;
         btTransform tr;
@@ -619,11 +611,11 @@ const glm_vec3 ComponentBody::position() const { //theres prob a better way to d
     }
     auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
     auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
-    //const auto& matrix = system.ParentChildSystem.LocalTransforms[m_Owner.id() - 1Ua
+    //const auto& matrix = system.ParentChildSystem.LocalTransforms[m_Owner.id() - 1U];
     const auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return Math::getMatrixPosition(matrix);
 }
-const glm::vec3 ComponentBody::position_render() const { //theres prob a better way to do this
+glm::vec3 ComponentBody::position_render() const { //theres prob a better way to do this
     if (m_Physics) {
         auto tr = data.p->bullet_rigidBody->getWorldTransform();
         return Math::btVectorToGLM(tr.getOrigin());
@@ -671,7 +663,7 @@ const ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(const float p_
     ret.inBounds                 = center2DRes.z;
     return ret;
 }
-const glm_vec3 ComponentBody::getScale() const {
+glm_vec3 ComponentBody::getScale() const {
     if (m_Physics) {
         const auto& physicsData = *data.p;
         Collision& collision_   = *physicsData.collision;
@@ -721,7 +713,7 @@ const glm_vec3 ComponentBody::getScale() const {
     }
     return data.n->scale;
 }
-const glm_quat ComponentBody::rotation() const {
+glm_quat ComponentBody::rotation() const {
     if (m_Physics) {
         btTransform tr;
         data.p->bullet_rigidBody->getMotionState()->getWorldTransform(tr);
@@ -740,7 +732,7 @@ const glm_vec3& ComponentBody::right() const {
 const glm_vec3& ComponentBody::up() const {
 	return m_Up; 
 }
-const glm_vec3 ComponentBody::getLinearVelocity() const  {
+glm_vec3 ComponentBody::getLinearVelocity() const  {
     if (m_Physics) {
         const btVector3& v = data.p->bullet_rigidBody->getLinearVelocity();
         return Engine::Math::btVectorToGLM(v);
@@ -748,7 +740,7 @@ const glm_vec3 ComponentBody::getLinearVelocity() const  {
     auto& normalData = *data.n;
     return normalData.linearVelocity;
 }
-const glm_vec3 ComponentBody::getAngularVelocity() const  {
+glm_vec3 ComponentBody::getAngularVelocity() const  {
     if (m_Physics) {
         const btVector3& v = data.p->bullet_rigidBody->getAngularVelocity();
         return Engine::Math::btVectorToGLM(v);
@@ -758,7 +750,7 @@ const glm_vec3 ComponentBody::getAngularVelocity() const  {
 const float ComponentBody::mass() const {
 	return data.p->mass; 
 }
-const glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way to do this
+glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way to do this
     if (m_Physics) {
         auto& physicsData = *data.p;
 #ifndef BT_USE_DOUBLE_PRECISION
@@ -783,9 +775,8 @@ const glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way t
     const auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return matrix;
 }
-const glm::mat4 ComponentBody::modelMatrixRendering() const {
-    glm::mat4 ret = static_cast<glm::mat4>(modelMatrix());
-    return ret;
+glm::mat4 ComponentBody::modelMatrixRendering() const {
+    return static_cast<glm::mat4>(modelMatrix());
 }
 const btRigidBody& ComponentBody::getBtBody() const {
 	return *data.p->bullet_rigidBody;
@@ -1108,27 +1099,27 @@ const bool ComponentBody::hasParent() const {
 constexpr glm_mat4 IDENTITY_MATRIX = glm_mat4(1.0);
 
 struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPtr, void* componentPool, const float dt, Scene& scene) const {
-    auto& system            = *static_cast<Engine::priv::ComponentBody_System*>(systemPtr);
-    auto& pool              = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool);
-    auto& components        = pool.data();
+    auto& system                = *static_cast<Engine::priv::ComponentBody_System*>(systemPtr);
+    auto& pool                  = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool);
+    auto& components            = pool.data();
 
     auto lamda_update_component = [dt, &system](ComponentBody& b, const size_t& i, const unsigned int k) {
-        const auto entityIndex = b.m_Owner.id() - 1U;
-        auto& localMatrix = system.ParentChildSystem.LocalTransforms[entityIndex];
-        auto& worldMatrix = system.ParentChildSystem.WorldTransforms[entityIndex];
+        const auto entityIndex  = b.m_Owner.id() - 1U;
+        auto& localMatrix       = system.ParentChildSystem.LocalTransforms[entityIndex];
+        auto& worldMatrix       = system.ParentChildSystem.WorldTransforms[entityIndex];
         if (b.m_Physics) {
-            auto& rigidBody = *b.data.p->bullet_rigidBody;
+            auto& rigidBody     = *b.data.p->bullet_rigidBody;
             Engine::Math::recalculateForwardRightUp(rigidBody, b.m_Forward, b.m_Right, b.m_Up);
 
-            localMatrix = b.modelMatrix();
-            worldMatrix = localMatrix;
+            localMatrix         = b.modelMatrix();
+            worldMatrix         = localMatrix;
         }else{
-            auto& n     = *b.data.n;
-            n.position += (n.linearVelocity * static_cast<decimal>(dt));
-            //n.modelMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
+            auto& n             = *b.data.n;
+            n.position         += (n.linearVelocity * static_cast<decimal>(dt));
+            //n.modelMatrix      = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
 
-            localMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
-            worldMatrix = localMatrix;
+            localMatrix         = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
+            worldMatrix         = localMatrix;
         }
     };
 
@@ -1156,7 +1147,6 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
             break;
         }
     }   
-
 #if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
     for (auto& componentBody : components) {
         const Entity entity = componentBody.getOwner();
