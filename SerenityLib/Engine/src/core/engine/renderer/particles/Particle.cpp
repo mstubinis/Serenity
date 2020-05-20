@@ -79,7 +79,7 @@ void Particle::setPosition(const glm::vec3& newPosition) {
 Material* Particle::getMaterial() const {
     return m_Material;
 }
-const float Particle::angle() const {
+float Particle::angle() const {
     return m_Angle;
 }
 const glm::vec2& Particle::getScale() const {
@@ -88,7 +88,7 @@ const glm::vec2& Particle::getScale() const {
 const glm::vec3& Particle::position() const {
     return m_Position;
 }
-const bool Particle::isActive() const {
+bool Particle::isActive() const {
     return (m_Timer > 0.0f);
 }
 const Engine::color_vector_4& Particle::color() const {
@@ -97,6 +97,6 @@ const Engine::color_vector_4& Particle::color() const {
 const glm::vec3& Particle::velocity() const {
     return m_Velocity;
 }
-const double Particle::lifetime() const {
+float Particle::lifetime() const {
     return m_EmitterSource->m_Properties->m_Lifetime;
 }

@@ -239,20 +239,17 @@ void priv::InternalScenePublicInterface::RemoveModelInstanceFromPipeline(Scene& 
     scene.m_i->_removeModelInstanceFromPipeline(modelInstance, scene.m_RenderGraphs[stage]);
 }
 
-Scene::Scene(const string& name) : Scene(name, SceneOptions::DEFAULT_OPTIONS){
-
-}
 Scene::Scene(const string& name, const SceneOptions& options) : EngineResource(ResourceType::Scene, name) {
     m_RenderGraphs.resize(RenderStage::_TOTAL);
-    m_GI      = glm::vec3(1.0f);
-    m_Sun     = nullptr;
-    m_Skybox  = nullptr;
     m_ID      = priv::Core::m_Engine->m_ResourceManager.AddScene(*this);
     m_i       = NEW impl();
     m_i->_init(*this, name, options);
     setName(name);
 
     registerEvent(EventType::SceneChanged);
+}
+Scene::Scene(const string& name) : Scene(name, SceneOptions::DEFAULT_OPTIONS) {
+
 }
 Scene::~Scene() {
     m_i->_destruct();
@@ -284,10 +281,10 @@ void Scene::setGodRaysSun(Entity* sun) {
 Entity* Scene::getGodRaysSun() const {
     return m_Sun;
 }
-const unsigned int Scene::numViewports() const {
+unsigned int Scene::numViewports() const {
     return static_cast<unsigned int>(m_Viewports.size());
 }
-const unsigned int Scene::id() const {
+unsigned int Scene::id() const {
     return m_ID;
 }
 
@@ -299,7 +296,7 @@ ParticleEmitter* Scene::addParticleEmitter(ParticleEmissionProperties& propertie
 
 Viewport& Scene::addViewport(const float x, const float y, const float width, const float height, const Camera& camera) {
     const unsigned int id = numViewports();
-    auto& viewport        = m_Viewports.emplace_back(*this, camera);
+    Viewport& viewport    = m_Viewports.emplace_back(*this, camera);
     viewport.m_ID         = id;
     viewport.setViewportDimensions(x, y, width, height);
     return viewport;
@@ -322,7 +319,7 @@ Camera* Scene::getActiveCamera() const {
 void Scene::setActiveCamera(Camera& camera){
     if (m_Viewports.size() == 0) {
         const unsigned int id = numViewports();
-        auto& viewport        = m_Viewports.emplace_back(*this, camera);
+        Viewport& viewport    = m_Viewports.emplace_back(*this, camera);
         viewport.m_ID         = id;
         return;
     }

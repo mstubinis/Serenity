@@ -59,49 +59,50 @@ namespace Engine::priv {
             virtual Mesh* getCurrentBoundMesh() = 0;
 
 
-            virtual const unsigned int getUniformLocation(const char* location) = 0;
-            virtual const unsigned int getUniformLocationUnsafe(const char* location) = 0;
+            virtual unsigned int getUniformLocation(const char* location) = 0;
+            virtual unsigned int getUniformLocationUnsafe(const char* location) = 0;
 
-            virtual const unsigned int getMaxNumTextureUnits() = 0;
+            virtual unsigned int getMaxNumTextureUnits() = 0;
 
-            virtual const bool stencilOperation(const unsigned int stencilFail, const unsigned int depthFail, const unsigned int depthPass) = 0;
-            virtual const bool stencilMask(const unsigned int mask) = 0;
-            virtual const bool stencilFunction(const unsigned int stencilFunction, const unsigned int reference, const unsigned int mask) = 0;
-            virtual const bool cullFace(const unsigned int face) = 0;
-            virtual const bool setDepthFunction(const unsigned int depthFunction) = 0;
-            virtual const bool setViewport(const float x, const float y, const float width, const float height) = 0;
+            virtual bool stencilOperation(const unsigned int stencilFail, const unsigned int depthFail, const unsigned int depthPass) = 0;
+            virtual bool stencilMask(const unsigned int mask) = 0;
+            virtual bool stencilFunction(const unsigned int stencilFunction, const unsigned int reference, const unsigned int mask) = 0;
+            virtual bool cullFace(const unsigned int face) = 0;
+            virtual bool setDepthFunction(const unsigned int depthFunction) = 0;
+            virtual bool setViewport(const float x, const float y, const float width, const float height) = 0;
             virtual void clear(const bool color, const bool depth, const bool stencil) = 0;
-            virtual const bool colorMask(const bool r, const bool g, const bool b, const bool alpha) = 0;
-            virtual const bool clearColor(const bool r, const bool g, const bool b, const bool alpha) = 0;
+            virtual bool colorMask(const bool r, const bool g, const bool b, const bool alpha) = 0;
+            virtual bool clearColor(const bool r, const bool g, const bool b, const bool alpha) = 0;
 
-            virtual const bool bindTextureForModification(const unsigned int textureType, const unsigned int textureObject) = 0;
-            virtual const bool bindVAO(const unsigned int vaoObject) = 0;
-            virtual const bool deleteVAO(unsigned int& vaoObject) = 0;
+            virtual bool bindTextureForModification(const unsigned int textureType, const unsigned int textureObject) = 0;
+            virtual bool bindVAO(const unsigned int vaoObject) = 0;
+            virtual bool deleteVAO(unsigned int& vaoObject) = 0;
             virtual void generateAndBindTexture(const unsigned int textureType, unsigned int& textureObject) = 0;
             virtual void generateAndBindVAO(unsigned int& vaoObject) = 0;
 
-            virtual const bool enableAPI(const unsigned int apiEnum) = 0;
-            virtual const bool disableAPI(const unsigned int apiEnum) = 0;
-            virtual const bool enableAPI_i(const unsigned int apiEnum, const unsigned int index) = 0;
-            virtual const bool disableAPI_i(const unsigned int apiEnum, const unsigned int index) = 0;
-
+            virtual bool enableAPI(const unsigned int apiEnum) = 0;
+            virtual bool disableAPI(const unsigned int apiEnum) = 0;
+            virtual bool enableAPI_i(const unsigned int apiEnum, const unsigned int index) = 0;
+            virtual bool disableAPI_i(const unsigned int apiEnum, const unsigned int index) = 0;
 
             virtual void sendTexture(const char* location, const Texture& texture, const int slot) = 0;
             virtual void sendTexture(const char* location, const unsigned int textureObject, const int slot, const unsigned int textureTarget) = 0;
             virtual void sendTextureSafe(const char* location, const Texture& texture, const int slot) = 0;
             virtual void sendTextureSafe(const char* location, const unsigned int textureObject, const int slot, const unsigned int textureTarget) = 0;
 
-            virtual const bool bindReadFBO(const unsigned int fbo) = 0;
-            virtual const bool bindDrawFBO(const unsigned int fbo) = 0;
-            virtual const bool bindRBO(const unsigned int rbo) = 0;
+            virtual bool bindReadFBO(const unsigned int fbo) = 0;
+            virtual bool bindDrawFBO(const unsigned int fbo) = 0;
+            virtual bool bindRBO(const unsigned int rbo) = 0;
 
-            virtual const bool bindShaderProgram(ShaderProgram* program) = 0;
-            virtual const bool bindMaterial(Material* material) = 0;
-            virtual const bool bindMesh(Mesh* mesh) = 0;
+            virtual bool bind(ModelInstance* modelInstance) = 0;
+            virtual bool bind(ShaderProgram* program) = 0;
+            virtual bool bind(Material* material) = 0;
+            virtual bool bind(Mesh* mesh) = 0;
 
-            virtual const bool unbindShaderProgram() = 0;
-            virtual const bool unbindMaterial() = 0;
-            virtual const bool unbindMesh(Mesh* mesh) = 0;
+            virtual bool unbind(ModelInstance* modelInstance) = 0;
+            virtual bool unbind(ShaderProgram* program) = 0;
+            virtual bool unbind(Material* material) = 0;
+            virtual bool unbind(Mesh* mesh) = 0;
 
             virtual void generatePBRData(Texture& texture, const unsigned int convoludeSize, const unsigned int prefilterSize) = 0;
 
@@ -206,11 +207,8 @@ namespace Engine::priv {
             virtual void renderFullscreenTriangle() = 0;
             virtual void renderFullscreenQuad() = 0;
 
-
-
             virtual void update(const float dt) = 0;
             virtual void render(Engine::priv::Renderer& renderer, const Viewport& viewport, const bool mainRenderFunction) = 0;
-
     };
 };
 

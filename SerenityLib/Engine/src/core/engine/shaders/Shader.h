@@ -7,12 +7,10 @@
 
 class ShaderProgram;
 class Shader;
-namespace Engine {
-    namespace priv {
-        struct InternalShaderProgramPublicInterface;
-        struct InternalShaderPublicInterface final {
-            static void ConvertCode(Shader&);
-        };
+namespace Engine::priv {
+    struct InternalShaderProgramPublicInterface;
+    struct InternalShaderPublicInterface final {
+        static void ConvertCode(Shader&);
     };
 };
 class Shader final : public EngineResource {
@@ -32,9 +30,8 @@ class Shader final : public EngineResource {
         Shader(const Shader&) = default;
         Shader(Shader&&) noexcept = default;
 
-        const ShaderType::Type type() const;
+        ShaderType::Type type() const;
         const std::string& data() const;
-        const bool fromFile() const;
+        bool fromFile() const;
 };
-
 #endif

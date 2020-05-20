@@ -608,7 +608,7 @@ void Engine::priv::SMAA::init() {
 }
 void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int sceneTexture, const unsigned int outTexture, const Engine::priv::Renderer& renderer) {
     gbuffer.bindFramebuffers(outTexture); //probably the lighting buffer
-    renderer._bindShaderProgram(m_Shader_Programs[PassStage::Edge]);
+    renderer.bind(m_Shader_Programs[PassStage::Edge]);
 
     Engine::Renderer::Settings::clear(true, false, true);//lighting rgba, stencil is completely filled with 0's
 
@@ -637,7 +637,7 @@ void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::ve
     gbuffer.bindFramebuffers(GBufferType::Normal);
     Engine::Renderer::Settings::clear(true, false, false); //clear color only
 
-    renderer._bindShaderProgram(m_Shader_Programs[PassStage::Blend]);
+    renderer.bind(m_Shader_Programs[PassStage::Blend]);
 
     Engine::Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
 
@@ -656,7 +656,7 @@ void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::ve
     Engine::Renderer::GLDisable(GL_STENCIL_TEST);
 }
 void Engine::priv::SMAA::passNeighbor(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int sceneTexture, const Engine::priv::Renderer& renderer) {
-    renderer._bindShaderProgram(m_Shader_Programs[PassStage::Neighbor]);
+    renderer.bind(m_Shader_Programs[PassStage::Neighbor]);
 
     Engine::Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
     Engine::Renderer::sendTextureSafe("textureMap", gbuffer.getTexture(sceneTexture), 0); //need original final image from first smaa pass
@@ -670,7 +670,7 @@ void Engine::priv::SMAA::passFinal(Engine::priv::GBuffer& gbuffer, const Viewpor
     //gbuffer.bindFramebuffers(GBufferType::Lighting);
     gbuffer.stop();
 
-    renderer._bindShaderProgram(m_Shader_Programs[PassStage::Final]);
+    renderer.bind(m_Shader_Programs[PassStage::Final]);
 
     Engine::Renderer::renderFullscreenTriangle(0,0,fboWidth,fboHeight);
     */

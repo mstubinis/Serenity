@@ -34,8 +34,8 @@ class ComponentName {
         ComponentName& operator=(ComponentName&& other) noexcept = default;
 
         const std::string& name() const;
-        const size_t size() const;
-        const bool empty() const;
+        size_t size() const;
+        bool empty() const;
 
         ~ComponentName();
 };

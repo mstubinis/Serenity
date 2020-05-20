@@ -58,44 +58,53 @@ void priv::Renderer::_clear2DAPICommands() {
 void priv::Renderer::_sort2DAPICommands() {
     m_Pipeline->sort2DAPI();
 }
-const float priv::Renderer::_getGIPackedData() {
+float priv::Renderer::_getGIPackedData() {
     return m_GI_Pack;
 }
-const bool priv::Renderer::_bindShaderProgram(ShaderProgram* program) const {
-    const bool res = m_Pipeline->bindShaderProgram(program);
+bool priv::Renderer::bind(ModelInstance* modelInstance) const {
+    bool res = m_Pipeline->bind(modelInstance);
+    if (res) {
+        modelInstance->m_CustomBindFunctor(modelInstance, this);
+    }
+    return res;
+}
+bool priv::Renderer::unbind(ModelInstance* modelInstance) const {
+    modelInstance->m_CustomUnbindFunctor(modelInstance, this);
+    return m_Pipeline->unbind(modelInstance);
+}
+bool priv::Renderer::bind(ShaderProgram* program) const {
+    bool res = m_Pipeline->bind(program);
     if (res) {
         program->m_CustomBindFunctor(program);
     }
     return res;
 }
-const bool priv::Renderer::_unbindShaderProgram() const {
-    return m_Pipeline->unbindShaderProgram();
+bool priv::Renderer::unbind(ShaderProgram* program) const {
+    return m_Pipeline->unbind(program);
 }
 
-const bool priv::Renderer::_bindMesh(Mesh* mesh) const {
-    const bool res = m_Pipeline->bindMesh(mesh);
+bool priv::Renderer::bind(Mesh* mesh) const {
+    bool res = m_Pipeline->bind(mesh);
     if (res) {
         if (mesh->isLoaded()) {
-            mesh->m_CustomBindFunctor(mesh);
+            mesh->m_CustomBindFunctor(mesh, this);
         }else{
             Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().m_VertexData->bind();
         }
     }
     return res;
 }
-const bool priv::Renderer::_unbindMesh(Mesh* mesh) const {
-    const bool res = m_Pipeline->unbindMesh(mesh);
+bool priv::Renderer::unbind(Mesh* mesh) const {
+    bool res = m_Pipeline->unbind(mesh);
     if (mesh->isLoaded()) {
-        mesh->m_CustomUnbindFunctor(mesh);
+        mesh->m_CustomUnbindFunctor(mesh, this);
     }else{
-        Mesh* defaultUnbind = &Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh();
-        defaultUnbind->m_CustomUnbindFunctor(defaultUnbind);
+        Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().m_VertexData->unbind();
     }
     return true;
 }
-
-const bool priv::Renderer::_bindMaterial(Material* material) const {
-    const bool res = m_Pipeline->bindMaterial(material);
+bool priv::Renderer::bind(Material* material) const {
+    bool res = m_Pipeline->bind(material);
     if (res) {
         if (material->isLoaded()) {
             material->m_CustomBindFunctor(material);
@@ -105,8 +114,8 @@ const bool priv::Renderer::_bindMaterial(Material* material) const {
     }
     return res;
 }
-const bool priv::Renderer::_unbindMaterial() const {
-    return m_Pipeline->unbindMaterial();
+bool priv::Renderer::unbind(Material* material) const {
+    return m_Pipeline->unbind(material);
 }
 void priv::Renderer::_genPBREnvMapData(Texture& texture, uint size1, uint size2){
     return m_Pipeline->generatePBRData(texture, size1, size2);
@@ -123,21 +132,21 @@ void Renderer::Settings::Lighting::enable(const bool lighting){
 void Renderer::Settings::Lighting::disable(){ 
     renderManager->m_Lighting = false;
 }
-const float Renderer::Settings::Lighting::getGIContributionGlobal(){
+float Renderer::Settings::Lighting::getGIContributionGlobal(){
     return renderManager->m_GI_Global;
 }
 void Renderer::Settings::Lighting::setGIContributionGlobal(const float gi){
     renderManager->m_GI_Global = glm::clamp(gi,0.001f,0.999f);
     renderManager->m_GI_Pack = Math::pack3FloatsInto1FloatUnsigned(renderManager->m_GI_Diffuse, renderManager->m_GI_Specular, renderManager->m_GI_Global);
 }
-const float Renderer::Settings::Lighting::getGIContributionDiffuse(){
+float Renderer::Settings::Lighting::getGIContributionDiffuse(){
     return renderManager->m_GI_Diffuse;
 }
 void Renderer::Settings::Lighting::setGIContributionDiffuse(const float gi){
     renderManager->m_GI_Diffuse = glm::clamp(gi, 0.001f, 0.999f);
     renderManager->m_GI_Pack = Math::pack3FloatsInto1FloatUnsigned(renderManager->m_GI_Diffuse, renderManager->m_GI_Specular, renderManager->m_GI_Global);
 }
-const float Renderer::Settings::Lighting::getGIContributionSpecular(){
+float Renderer::Settings::Lighting::getGIContributionSpecular(){
     return renderManager->m_GI_Specular;
 }
 void Renderer::Settings::Lighting::setGIContributionSpecular(const float gi){
@@ -151,7 +160,7 @@ void Renderer::Settings::Lighting::setGIContribution(const float g, const float 
     renderManager->m_GI_Pack = Math::pack3FloatsInto1FloatUnsigned(renderManager->m_GI_Diffuse, renderManager->m_GI_Specular, renderManager->m_GI_Global);
 }
 
-const bool Renderer::Settings::setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm algorithm){
+bool Renderer::Settings::setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm algorithm){
     switch (algorithm) {
         case AntiAliasingAlgorithm::None: {
             break;
@@ -179,13 +188,13 @@ const bool Renderer::Settings::setAntiAliasingAlgorithm(const AntiAliasingAlgori
     }
     return false;
 }
-const bool Renderer::stencilOp(const GLenum sfail, const GLenum dpfail, const GLenum dppass) {
+bool Renderer::stencilOp(const GLenum sfail, const GLenum dpfail, const GLenum dppass) {
     return renderManager->m_Pipeline->stencilOperation(sfail, dpfail, dppass);
 }
-const bool Renderer::stencilMask(const GLuint mask) {
+bool Renderer::stencilMask(const GLuint mask) {
     return renderManager->m_Pipeline->stencilMask(mask);
 }
-const bool Renderer::cullFace(const GLenum state){
+bool Renderer::cullFace(const GLenum state){
     return renderManager->m_Pipeline->cullFace(state);
 }
 void Renderer::Settings::clear(const bool color, const bool depth, const bool stencil){
@@ -209,29 +218,29 @@ void Renderer::Settings::setGamma(const float g){
 const float Renderer::Settings::getGamma(){
     return renderManager->m_Gamma;
 }
-const bool Renderer::setDepthFunc(const GLenum func){
+bool Renderer::setDepthFunc(const GLenum func){
     return renderManager->m_Pipeline->setDepthFunction(func);
 }
-const bool Renderer::setViewport(const float x, const float y, const float w, const float h){
+bool Renderer::setViewport(const float x, const float y, const float w, const float h){
     return renderManager->m_Pipeline->setViewport(x, y, w, h);
 }
-const bool Renderer::stencilFunc(const GLenum func, const GLint ref, const GLuint mask) {
+bool Renderer::stencilFunc(const GLenum func, const GLint ref, const GLuint mask) {
     return renderManager->m_Pipeline->stencilFunction(func, ref, mask);
 }
-const bool Renderer::colorMask(const bool r, const bool g, const bool b, const bool a) {
+bool Renderer::colorMask(const bool r, const bool g, const bool b, const bool a) {
     return renderManager->m_Pipeline->colorMask(r, g, b, a);
 }
-const bool Renderer::clearColor(const float r, const float g, const float b, const float a) {
+bool Renderer::clearColor(const float r, const float g, const float b, const float a) {
     return renderManager->m_Pipeline->clearColor(r, g, b, a);
 }
-const bool Renderer::bindTextureForModification(const GLuint textureType, const GLuint textureObject) {
+bool Renderer::bindTextureForModification(const GLuint textureType, const GLuint textureObject) {
     return renderManager->m_Pipeline->bindTextureForModification(textureType, textureObject);
 }
 
-const bool Renderer::bindVAO(const GLuint vaoObject){
+bool Renderer::bindVAO(const GLuint vaoObject){
     return renderManager->m_Pipeline->bindVAO(vaoObject);
 }
-const bool Renderer::deleteVAO(GLuint& vaoObject) {
+bool Renderer::deleteVAO(GLuint& vaoObject) {
     return renderManager->m_Pipeline->deleteVAO(vaoObject);
 }
 void Renderer::genAndBindTexture(const GLuint textureType, GLuint& textureObject){
@@ -240,16 +249,16 @@ void Renderer::genAndBindTexture(const GLuint textureType, GLuint& textureObject
 void Renderer::genAndBindVAO(GLuint& vaoObject){
     renderManager->m_Pipeline->generateAndBindVAO(vaoObject);
 }
-const bool Renderer::GLEnable(const GLenum apiEnum) {
+bool Renderer::GLEnable(const GLenum apiEnum) {
     return renderManager->m_Pipeline->enableAPI(apiEnum);
 }
-const bool Renderer::GLDisable(const GLenum apiEnum) {
+bool Renderer::GLDisable(const GLenum apiEnum) {
     return renderManager->m_Pipeline->disableAPI(apiEnum);
 }
-const bool Renderer::GLEnablei(const GLenum apiEnum, const GLuint index) {
+bool Renderer::GLEnablei(const GLenum apiEnum, const GLuint index) {
     return renderManager->m_Pipeline->enableAPI_i(apiEnum, index);
 }
-const bool Renderer::GLDisablei(const GLenum apiEnum, const GLuint index) {
+bool Renderer::GLDisablei(const GLenum apiEnum, const GLuint index) {
     return renderManager->m_Pipeline->disableAPI_i(apiEnum, index);
 }
 void Renderer::sendTexture(const char* location, const Texture& texture, const int slot){
@@ -264,23 +273,23 @@ void Renderer::sendTextureSafe(const char* location, const Texture& texture, con
 void Renderer::sendTextureSafe(const char* location,const GLuint textureObject, const int slot,const GLuint textureTarget){
     renderManager->m_Pipeline->sendTextureSafe(location, textureObject, slot, textureTarget);
 }
-const bool Renderer::bindReadFBO(const GLuint& fbo){
+bool Renderer::bindReadFBO(const GLuint fbo){
     return renderManager->m_Pipeline->bindReadFBO(fbo);
 }
-const bool Renderer::bindDrawFBO(const GLuint& fbo) {
+bool Renderer::bindDrawFBO(const GLuint fbo) {
     return renderManager->m_Pipeline->bindDrawFBO(fbo);
 }
 void Renderer::bindFBO(const priv::FramebufferObject& fbo){ 
     Renderer::bindFBO(fbo.address()); 
 }
-const bool Renderer::bindRBO(priv::RenderbufferObject& rbo){
+bool Renderer::bindRBO(priv::RenderbufferObject& rbo){
     return Renderer::bindRBO(rbo.address()); 
 }
-void Renderer::bindFBO(const GLuint& fbo){
+void Renderer::bindFBO(const GLuint fbo){
     Renderer::bindReadFBO(fbo);
     Renderer::bindDrawFBO(fbo);
 }
-const bool Renderer::bindRBO(const GLuint& rbo){
+bool Renderer::bindRBO(const GLuint rbo){
     return renderManager->m_Pipeline->bindRBO(rbo);
 }
 void Renderer::unbindFBO(){ 
@@ -295,10 +304,10 @@ void Renderer::unbindReadFBO(){
 void Renderer::unbindDrawFBO(){ 
     Renderer::bindDrawFBO(0); 
 }
-const unsigned int Renderer::getUniformLoc(const char* location) {
+unsigned int Renderer::getUniformLoc(const char* location) {
     return renderManager->m_Pipeline->getUniformLocation(location);
 }
-const unsigned int Renderer::getUniformLocUnsafe(const char* location) {
+unsigned int Renderer::getUniformLocUnsafe(const char* location) {
     return renderManager->m_Pipeline->getUniformLocationUnsafe(location);
 }
 

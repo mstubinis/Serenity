@@ -44,7 +44,7 @@ class MaterialLayer final{
 
         const glm::vec4& data1() const;
         const glm::vec4& data2() const;
-        const MaterialLayerBlendMode::Mode blendMode() const;
+        MaterialLayerBlendMode::Mode blendMode() const;
 
         void addUVModificationFunctor(const std_uv_func& functor);
         void addUVModificationSimpleTranslation(const float translationX, const float translationY);

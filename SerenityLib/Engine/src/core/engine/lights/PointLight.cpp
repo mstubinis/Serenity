@@ -63,19 +63,19 @@ float PointLight::calculateCullingRadius() {
     body.setScale(radius, radius, radius);
     return radius;
 }
-const float PointLight::getCullingRadius() const {
+float PointLight::getCullingRadius() const {
     return m_CullingRadius; 
 }
-const float PointLight::getConstant() const {
+float PointLight::getConstant() const {
     return m_C; 
 }
-const float PointLight::getLinear() const {
+float PointLight::getLinear() const {
     return m_L; 
 }
-const float PointLight::getExponent() const {
+float PointLight::getExponent() const {
     return m_E; 
 }
-const LightAttenuation::Model PointLight::getAttenuationModel() const {
+LightAttenuation::Model PointLight::getAttenuationModel() const {
     return m_AttenuationModel;
 }
 void PointLight::setConstant(const float c) { 

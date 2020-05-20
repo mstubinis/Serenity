@@ -14,7 +14,7 @@ Viewport::Viewport() {
     activateDepthMask(false);
 }
 Viewport::Viewport(const Scene& scene, const Camera& camera) : Viewport() {
-    const auto& winSize = Resources::getWindowSize();
+    const auto winSize  = Resources::getWindowSize();
     m_Scene             = &const_cast<Scene&>(scene);
 
     setCamera(camera);
@@ -47,15 +47,14 @@ Viewport& Viewport::operator=(Viewport&& other) noexcept {
 }
 
 
-const unsigned int Viewport::id() const {
+unsigned int Viewport::id() const {
     return m_ID;
 }
 void Viewport::setID(const unsigned int id) {
     m_ID = id;
 }
 
-
-const float Viewport::getDepthMaskValue() const {
+float Viewport::getDepthMaskValue() const {
     return m_DepthMaskValue;
 }
 void Viewport::setDepthMaskValue(const float depth) {
@@ -69,7 +68,7 @@ void Viewport::activateDepthMask(const bool active) {
         m_StateFlags.remove(StateFlags::DepthMaskActive);
     }
 }
-const bool Viewport::isDepthMaskActive() const {
+bool Viewport::isDepthMaskActive() const {
     return m_StateFlags.has(StateFlags::DepthMaskActive);
 }
 const glm::vec4& Viewport::getBackgroundColor() const {
@@ -89,7 +88,7 @@ void Viewport::setAspectRatioSynced(const bool synced) {
         m_StateFlags.remove(StateFlags::AspectRatioSynced);
     }
 }
-const bool Viewport::isAspectRatioSynced() const {
+bool Viewport::isAspectRatioSynced() const {
     return m_StateFlags.has(StateFlags::AspectRatioSynced);
 }
 
@@ -106,7 +105,7 @@ void Viewport::activate(const bool active) {
         m_StateFlags.remove(StateFlags::Active);
     }
 }
-const bool Viewport::isActive() const {
+bool Viewport::isActive() const {
     return m_StateFlags.has(StateFlags::Active);
 }
 void Viewport::setCamera(const Camera& camera) {
@@ -121,7 +120,7 @@ void Viewport::setViewportDimensions(const float x, const float y, const float w
 const glm::vec4& Viewport::getViewportDimensions() const {
     return m_Viewport_Dimensions;
 }
-const Engine::Flag<unsigned short> Viewport::getRenderFlags() const {
+Engine::Flag<unsigned short> Viewport::getRenderFlags() const {
     return m_RenderFlags;
 }
 void Viewport::setRenderFlag(const ViewportRenderingFlag::Flag flag) {

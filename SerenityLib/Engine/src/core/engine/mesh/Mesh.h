@@ -66,8 +66,8 @@ class Mesh final: public EngineResource, public EventObserver, public Engine::No
     friend class  Collision;
     friend class  Terrain;
     private:
-        std::function<void(Mesh*)>             m_CustomBindFunctor   = [](Mesh*) {};
-        std::function<void(Mesh*)>             m_CustomUnbindFunctor = [](Mesh*) {};
+        std::function<void(Mesh*, const Engine::priv::Renderer*)> m_CustomBindFunctor   = [](Mesh*, const Engine::priv::Renderer*) {};
+        std::function<void(Mesh*, const Engine::priv::Renderer*)> m_CustomUnbindFunctor = [](Mesh*, const Engine::priv::Renderer*) {};
 
         VertexData*                            m_VertexData          = nullptr;
         Engine::priv::MeshCollisionFactory*    m_CollisionFactory    = nullptr;
@@ -90,11 +90,11 @@ class Mesh final: public EngineResource, public EventObserver, public Engine::No
 
         template<typename T>
         void setCustomBindFunctor(const T& functor) {
-            m_CustomBindFunctor = std::bind(std::move(functor), std::placeholders::_1);
+            m_CustomBindFunctor = std::bind(std::move(functor), std::placeholders::_1, std::placeholders::_2);
         }
         template<typename T>
         void setCustomUnbindFunctor(const T& functor) {
-            m_CustomUnbindFunctor = std::bind(std::move(functor), std::placeholders::_1);
+            m_CustomUnbindFunctor = std::bind(std::move(functor), std::placeholders::_1, std::placeholders::_2);
         }
 
         bool operator==(const bool rhs) const;

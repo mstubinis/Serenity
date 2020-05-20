@@ -81,7 +81,7 @@ void Engine::priv::GBuffer::internalDestruct() {
 Engine::priv::GBuffer::~GBuffer(){
     internalDestruct();
 }
-const bool Engine::priv::GBuffer::resize(const unsigned int width, const unsigned int height) {
+bool Engine::priv::GBuffer::resize(const unsigned int width, const unsigned int height) {
     if (m_Width == width && m_Height == height) {
         return false;
     }
@@ -152,9 +152,9 @@ const Engine::priv::FramebufferObject& Engine::priv::GBuffer::getMainFBO() const
 const Engine::priv::FramebufferObject& Engine::priv::GBuffer::getSmallFBO() const {
     return m_SmallFBO; 
 }
-const unsigned int Engine::priv::GBuffer::width() const {
+unsigned int Engine::priv::GBuffer::width() const {
     return m_Width;
 }
-const unsigned int Engine::priv::GBuffer::height() const {
+unsigned int Engine::priv::GBuffer::height() const {
     return m_Height;
 }

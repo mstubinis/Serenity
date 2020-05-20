@@ -65,7 +65,7 @@ const bool Engine::priv::GodRays::init_shaders() {
 }
 void Engine::priv::GodRays::pass(GBuffer& gbuffer, const Viewport& viewport, const glm::vec2& lightScrnPos, const float alpha, const Engine::priv::Renderer& renderer) {
     const auto& dimensions = viewport.getViewportDimensions();
-    renderer._bindShaderProgram(m_Shader_Program);
+    renderer.bind(m_Shader_Program);
     Engine::Renderer::sendUniform4("RaysInfo", exposure, decay, density, weight);
     Engine::Renderer::sendUniform2("lightPositionOnScreen", lightScrnPos.x / dimensions.z, lightScrnPos.y / dimensions.w);
     Engine::Renderer::sendUniform1("samples", samples);

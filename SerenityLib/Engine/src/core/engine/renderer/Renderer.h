@@ -9,6 +9,7 @@ class  Decal;
 struct Entity;
 struct BufferObject;
 struct EngineOptions;
+class  ModelInstance;
 namespace Engine::priv {
     class  GBuffer;
     class  FramebufferObject;
@@ -61,16 +62,19 @@ namespace priv{
             void _clear2DAPICommands();
             void _sort2DAPICommands();
 
-            const bool _bindShaderProgram(ShaderProgram*) const;
-            const bool _unbindShaderProgram() const;
+            bool bind(ModelInstance* modelInstance) const;
+            bool unbind(ModelInstance* modelInstance) const;
 
-            const bool _bindMesh(Mesh*) const;
-            const bool _unbindMesh(Mesh*) const;
+            bool bind(ShaderProgram* shaderProgram) const;
+            bool unbind(ShaderProgram* shaderProgram) const;
 
-            const bool _bindMaterial(Material*) const;
-            const bool _unbindMaterial() const;
+            bool bind(Mesh* mesh) const;
+            bool unbind(Mesh* mesh) const;
 
-            const float _getGIPackedData();
+            bool bind(Material* material) const;
+            bool unbind(Material* material) const;
+
+            float _getGIPackedData();
             void _genPBREnvMapData(Texture&,uint,uint);
     };
 };
@@ -83,7 +87,7 @@ namespace Renderer{
         
         void applyGlobalAnisotropicFiltering(const float filtering);
 
-        const bool setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm AA_algorithm);
+        bool setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm AA_algorithm);
 
         void enableDrawPhysicsInfo(const bool b = true);
         void disableDrawPhysicsInfo();
@@ -91,13 +95,13 @@ namespace Renderer{
         namespace Lighting{
             void enable(bool b = true);
             void disable();
-            const float getGIContributionGlobal();
-            void setGIContributionGlobal(const float giGlobal);
-            const float getGIContributionDiffuse();
-            void setGIContributionDiffuse(const float giDiffuse);
-            const float getGIContributionSpecular();
-            void setGIContributionSpecular(const float giSpecular);
-            void setGIContribution(const float global, const float diffuse, const float specular);
+            float getGIContributionGlobal();
+            void setGIContributionGlobal(float giGlobal);
+            float getGIContributionDiffuse();
+            void setGIContributionDiffuse(float giDiffuse);
+            float getGIContributionSpecular();
+            void setGIContributionSpecular(float giSpecular);
+            void setGIContribution(float global, float diffuse, float specular);
         };
     };
     void restoreDefaultOpenGLState();
@@ -106,42 +110,42 @@ namespace Renderer{
     void renderFullscreenQuad();
     void renderFullscreenTriangle();
 
-    const unsigned int getUniformLoc(const char* location);
-    const unsigned int getUniformLocUnsafe(const char* location);
+    unsigned int getUniformLoc(const char* location);
+    unsigned int getUniformLocUnsafe(const char* location);
 
-    const bool cullFace(const GLenum state);
-    const bool setDepthFunc(const GLenum func);
-    const bool setViewport(const float x, const float y, const float width, const float height);
+    bool cullFace(const GLenum state);
+    bool setDepthFunc(const GLenum func);
+    bool setViewport(const float x, const float y, const float width, const float height);
 
-    const bool stencilFunc(const GLenum func, const GLint ref, const GLuint mask);
-    const bool stencilMask(const GLuint mask);
-    const bool stencilOp(const GLenum sfail, const GLenum dpfail, const GLenum dppass);
+    bool stencilFunc(const GLenum func, const GLint ref, const GLuint mask);
+    bool stencilMask(const GLuint mask);
+    bool stencilOp(const GLenum sfail, const GLenum dpfail, const GLenum dppass);
 
-    void bindFBO(const GLuint& fbo);
+    void bindFBO(const GLuint fbo);
     void bindFBO(const priv::FramebufferObject& rbo);
-    const bool bindRBO(const GLuint& rbo);
-    const bool bindRBO(priv::RenderbufferObject& rbo);
-    const bool bindReadFBO(const GLuint& fbo);
-    const bool bindDrawFBO(const GLuint& fbo);
+    bool bindRBO(const GLuint rbo);
+    bool bindRBO(priv::RenderbufferObject& rbo);
+    bool bindReadFBO(const GLuint fbo);
+    bool bindDrawFBO(const GLuint fbo);
 
     void unbindFBO();
     void unbindRBO();
     void unbindReadFBO();
     void unbindDrawFBO();
 
-    const bool GLEnable(const GLenum capability);
-    const bool GLDisable(const GLenum capability);
-    const bool GLEnablei(const GLenum capability, const GLuint index);
-    const bool GLDisablei(const GLenum capability, const GLuint index);
+    bool GLEnable(const GLenum capability);
+    bool GLDisable(const GLenum capability);
+    bool GLEnablei(const GLenum capability, const GLuint index);
+    bool GLDisablei(const GLenum capability, const GLuint index);
 
-    const bool bindTextureForModification(const GLuint _textureType, const GLuint _textureObject);
+    bool bindTextureForModification(const GLuint _textureType, const GLuint _textureObject);
 
-    const bool bindVAO(const GLuint _vaoObject);
-    void genAndBindTexture(const GLuint _textureType,GLuint& _textureObject);
-    void genAndBindVAO(GLuint& _vaoObject);
-    const bool deleteVAO(GLuint& _vaoObject);
-    const bool colorMask(const bool r, const bool g, const bool b, const bool a);
-    const bool clearColor(const float r, const float g, const float b, const float a);
+    bool bindVAO(const GLuint vaoObject);
+    void genAndBindTexture(const GLuint _textureType, GLuint& textureObject);
+    void genAndBindVAO(GLuint& vaoObject);
+    bool deleteVAO(GLuint& vaoObject);
+    bool colorMask(const bool r, const bool g, const bool b, const bool a);
+    bool clearColor(const float r, const float g, const float b, const float a);
 
     void sendTexture(const char* location, const Texture& texture, const int slot);
     void sendTexture(const char* location, const GLuint textureAddress, const int slot, const GLuint glTextureType);

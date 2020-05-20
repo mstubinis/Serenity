@@ -40,10 +40,10 @@ using namespace Engine::priv;
 namespace boostm = boost::math;
 
 namespace Engine::priv {
-    struct DefaultMeshBindFunctor final { void operator()(Mesh* mesh_ptr) const {
+    struct DefaultMeshBindFunctor final { void operator()(Mesh* mesh_ptr, const Engine::priv::Renderer* renderer) const {
         mesh_ptr->m_VertexData->bind();
     }};
-    struct DefaultMeshUnbindFunctor final { void operator()(Mesh* mesh_ptr) const {
+    struct DefaultMeshUnbindFunctor final { void operator()(Mesh* mesh_ptr, const Engine::priv::Renderer* renderer) const {
         mesh_ptr->m_VertexData->unbind();
     }};
 };
@@ -435,9 +435,9 @@ void Mesh::internal_recalc_indices_from_terrain(const Terrain& terrain) {
             }
         }
     }
-    m_CustomBindFunctor(this);
+    m_VertexData->bind();
     modifyIndices(data.indices, MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU);
-    m_CustomUnbindFunctor(this);
+    m_VertexData->unbind();
 }
 Mesh::Mesh(const string& name, const Terrain& terrain, float threshold) : EngineResource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);

@@ -38,7 +38,6 @@ class Material final : public EngineResource{
     friend class  Engine::priv::IRenderingPipeline;
     public:
         static Material                  *Checkers, *WhiteShadeless; //loaded in renderer
-
         static std::vector<glm::vec4>     m_MaterialProperities;
     private:
         std::function<void(Material*)>    m_CustomBindFunctor;
@@ -82,7 +81,6 @@ class Material final : public EngineResource{
         );
         ~Material();
 
-
         template<typename T>
         void setCustomBindFunctor(const T& functor) {
             m_CustomBindFunctor = std::bind<void>(std::move(functor), std::placeholders::_1);
@@ -108,15 +106,15 @@ class Material final : public EngineResource{
         MaterialComponent& addComponentRefraction(const std::string& cubeMapName, const std::string& mapFile, const float refractiveIndex = 1.0f, const float mixFactor = 1.0f);
         MaterialComponent& addComponentParallaxOcclusion(const std::string& textureFile, const float heightScale = 0.1f);
 
-        const std::uint32_t id() const;
+        std::uint32_t id() const;
     
-        const bool shadeless() const;
+        bool shadeless() const;
         const Engine::color_vector_4& f0() const;
-        const unsigned char glow() const;
-        const unsigned char smoothness() const;
-        const unsigned char metalness() const;
-        const unsigned char ao() const;
-        const unsigned char alpha() const;
+        unsigned char glow() const;
+        unsigned char smoothness() const;
+        unsigned char metalness() const;
+        unsigned char ao() const;
+        unsigned char alpha() const;
         
         void setF0Color(const Engine::color_vector_4& f0Color);
         void setF0Color(const unsigned char r, const unsigned char g, const unsigned char b);
@@ -129,9 +127,9 @@ class Material final : public EngineResource{
         void setMetalness(const unsigned char metalness);
         void setAlpha(const unsigned char alpha);
     
-        const unsigned char specularModel() const;
+        unsigned char specularModel() const;
         void setSpecularModel(const SpecularModel::Model specularModel);
-        const unsigned char diffuseModel() const;
+        unsigned char diffuseModel() const;
         void setDiffuseModel(const DiffuseModel::Model diffuseModel);
 
         void update(const float dt);

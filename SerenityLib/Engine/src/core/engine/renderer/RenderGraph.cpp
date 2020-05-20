@@ -413,48 +413,48 @@ void RenderGraph::validate_model_instances_for_rendering(const Viewport& viewpor
 }
 void RenderGraph::render(const Engine::priv::Renderer& renderer, const Viewport& viewport, const Camera& camera, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
     if (useDefaultShaders) {
-        renderer._bindShaderProgram(m_ShaderProgram);
+        renderer.bind(m_ShaderProgram);
     }
     for (auto& materialNode : m_MaterialNodes) {
         if (materialNode.meshNodes.size() > 0) {
-            auto& _material = *materialNode.material;
-            renderer._bindMaterial(&_material);
+            auto& material = *materialNode.material;
+            renderer.bind(&material);
             for (auto& meshNode : materialNode.meshNodes) {
                 if (meshNode.instanceNodes.size() > 0) {
-                    auto& _mesh = *meshNode.mesh;
+                    auto& mesh = *meshNode.mesh;
 
-                    renderer._bindMesh(&_mesh);
+                    renderer.bind(&mesh);
 
                     for (auto& instanceNode : meshNode.instanceNodes) {
-                        auto& _modelInstance = *instanceNode->instance;
-                        auto* body = _modelInstance.parent().getComponent<ComponentBody>();
+                        auto& modelInstance = *instanceNode->instance;
+                        auto* body = modelInstance.parent().getComponent<ComponentBody>();
                         auto modelMatrix = body->modelMatrixRendering();
-                        if (_modelInstance.passedRenderCheck()) {
+                        if (modelInstance.passedRenderCheck()) {
                             if (sortingMode != SortingMode::None) {
-                                _mesh.sortTriangles(camera, _modelInstance, modelMatrix, sortingMode);
+                                mesh.sortTriangles(camera, modelInstance, modelMatrix, sortingMode);
                             }
-                            _modelInstance.bind(renderer);
-                            renderer.m_Pipeline->renderMesh(_mesh, _modelInstance.getDrawingMode());
-                            _modelInstance.unbind(renderer);
+                            renderer.bind(&modelInstance);
+                            renderer.m_Pipeline->renderMesh(mesh, modelInstance.getDrawingMode());
+                            renderer.unbind(&modelInstance);
                         }
                     }
                     //protect against any custom changes by restoring to the regular shader and material
                     if (useDefaultShaders) {
                         if (renderer.m_Pipeline->getCurrentBoundShaderProgram() != m_ShaderProgram) {
-                            renderer._bindShaderProgram(m_ShaderProgram);
-                            renderer._bindMaterial(&_material);
+                            renderer.bind(m_ShaderProgram);
+                            renderer.bind(&material);
                         }
                     }
-                    renderer._unbindMesh(&_mesh);
+                    renderer.unbind(&mesh);
                 }
             }
-            renderer._unbindMaterial();
+            renderer.unbind(&material);
         }
     }
 }
 void RenderGraph::render_bruteforce(const Engine::priv::Renderer& renderer, const Viewport& viewport, const Camera& camera, const bool useDefaultShaders, const SortingMode::Mode sortingMode) {
     if (useDefaultShaders) {
-        renderer._bindShaderProgram(m_ShaderProgram);
+        renderer.bind(m_ShaderProgram);
     }
     for (auto& instance : m_InstancesTotal) {
         auto& _modelInstance = *instance->instance;
@@ -466,21 +466,21 @@ void RenderGraph::render_bruteforce(const Engine::priv::Renderer& renderer, cons
             if (sortingMode != SortingMode::None) {
                 _mesh.sortTriangles(camera, _modelInstance, modelMatrix, sortingMode);
             }
-            renderer._bindMaterial(&_material);
-            renderer._bindMesh(&_mesh);
-            _modelInstance.bind(renderer);
+            renderer.bind(&_material);
+            renderer.bind(&_mesh);
+            renderer.bind(&_modelInstance);
 
             renderer.m_Pipeline->renderMesh(_mesh, _modelInstance.getDrawingMode());
 
-            _modelInstance.unbind(renderer);
-            renderer._unbindMesh(&_mesh);
-            renderer._unbindMaterial();
+            renderer.unbind(&_modelInstance);
+            renderer.unbind(&_mesh);
+            renderer.unbind(&_material);
         }
         //protect against any custom changes by restoring to the regular shader and material
         if (useDefaultShaders) {
             if (renderer.m_Pipeline->getCurrentBoundShaderProgram() != m_ShaderProgram) {
-                renderer._bindShaderProgram(m_ShaderProgram);
-                renderer._bindMaterial(&_material);
+                renderer.bind(m_ShaderProgram);
+                renderer.bind(&_material);
             }
         }
     }

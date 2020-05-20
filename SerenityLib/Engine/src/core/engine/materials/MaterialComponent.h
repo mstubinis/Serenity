@@ -30,7 +30,7 @@ class MaterialComponent {
         Texture* cubemap(const size_t index = 0) const;
         MaterialLayer& layer(const size_t index = 0);
 
-        const MaterialComponentType::Type type() const;
+        MaterialComponentType::Type type() const;
 
         void update(const float dt);
 };

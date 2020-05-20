@@ -31,7 +31,7 @@ void RodLight::setRodLength(const float length) {
     auto& body = *getComponent<ComponentBody>();
     body.setScale(m_CullingRadius, m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius);
 }
-const float RodLight::rodLength() const {
+float RodLight::rodLength() const {
     return m_RodLength; 
 }
 void RodLight::destroy() {

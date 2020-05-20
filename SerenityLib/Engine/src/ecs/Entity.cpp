@@ -32,15 +32,15 @@ Entity& Entity::operator=(Entity&& other) noexcept {
 }
 
 
-const std::uint32_t Entity::id() const {
+std::uint32_t Entity::id() const {
     const EntityDataRequest dataRequest(*this);
     return dataRequest.ID;
 }
-const std::uint32_t Entity::sceneID() const {
+std::uint32_t Entity::sceneID() const {
     const EntityDataRequest dataRequest(*this);
     return dataRequest.sceneID;
 }
-const std::uint32_t Entity::versionID() const {
+std::uint32_t Entity::versionID() const {
     const EntityDataRequest dataRequest(*this);
     return dataRequest.versionID;
 }
@@ -57,7 +57,7 @@ void Entity::removeChild(const Entity child) const {
         body->removeChild(child);
     }
 }
-const bool Entity::hasParent() const {
+bool Entity::hasParent() const {
     const auto* body = getComponent<ComponentBody>();
     if (body) {
         return body->hasParent();
@@ -75,12 +75,12 @@ void Entity::destroy() {
     priv::InternalScenePublicInterface::CleanECS(scene_, data);
     priv::InternalScenePublicInterface::GetECS(scene_).removeEntity(*this);
 }
-const bool Entity::operator==(const Entity other) const {
+bool Entity::operator==(const Entity other) const {
     return (data == other.data);
 }
-const bool Entity::operator!=(const Entity other) const {
+bool Entity::operator!=(const Entity other) const {
     return !(data == other.data);
 }
-const bool Entity::null() const {
+bool Entity::null() const {
     return (data == 0);
 }

@@ -42,7 +42,7 @@ namespace Engine::priv{
             ~GBuffer();
 
             void init(const unsigned int width, const unsigned int height);
-            const bool resize(const unsigned int width, const unsigned int height);
+            bool resize(const unsigned int width, const unsigned int height);
 
             void bindFramebuffers(const unsigned int, std::string_view channels = "RGBA", const bool isMainFBO = true);
             void bindFramebuffers(const unsigned int, const unsigned int, std::string_view channels = "RGBA", const bool isMainFBO = true);
@@ -52,8 +52,8 @@ namespace Engine::priv{
 
             void bindBackbuffer(const Viewport&, const GLuint final_fbo = 0, const GLuint final_rbo = 0);
 
-            const unsigned int width() const;
-            const unsigned int height() const;
+            unsigned int width() const;
+            unsigned int height() const;
 
             const std::vector<FramebufferTexture*>& getBuffers() const;
             FramebufferTexture& getBuffer(const unsigned int) const;

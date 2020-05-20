@@ -31,7 +31,7 @@ constexpr unsigned int MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME = 12U;
     constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT          = 1'000'000U;
 #else
     constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 2'000U;
-    constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT = 500'000U;
+    constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT          = 500'000U;
 #endif
 
 namespace Engine::priv {
@@ -77,8 +77,8 @@ namespace Engine::priv {
 
             ParticleEmitter* add_emitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent);
 
-            const bool add_particle(ParticleEmitter& emitter, const glm::vec3& emitterPosition, const glm::quat& emitterRotation);
-            const bool add_particle(ParticleEmitter& emitter);
+            bool add_particle(ParticleEmitter& emitter, const glm::vec3& emitterPosition, const glm::quat& emitterRotation);
+            bool add_particle(ParticleEmitter& emitter);
 
             std::vector<ParticleEmitter>& getParticleEmitters();
             std::vector<Particle>&        getParticles();

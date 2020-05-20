@@ -238,6 +238,8 @@
     <ClInclude Include="Engine\src\core\engine\containers\Queue_ts.h" />
     <ClInclude Include="Engine\src\core\engine\containers\SparseSet.h" />
     <ClInclude Include="Engine\src\core\engine\discord\Discord.h" />
+    <ClInclude Include="Engine\src\core\engine\discord\DiscordActivityEvent.h" />
+    <ClInclude Include="Engine\src\core\engine\discord\DiscordModule.h" />
     <ClInclude Include="Engine\src\core\engine\discord\src\achievement_manager.h" />
     <ClInclude Include="Engine\src\core\engine\discord\src\activity_manager.h" />
     <ClInclude Include="Engine\src\core\engine\discord\src\application_manager.h" />
@@ -298,6 +300,7 @@
     <ClInclude Include="Engine\src\core\engine\model\ModelInstanceIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\networking\Networking.h" />
     <ClInclude Include="Engine\src\core\engine\networking\ListenerTCP.h" />
+    <ClInclude Include="Engine\src\core\engine\networking\NetworkingModule.h" />
     <ClInclude Include="Engine\src\core\engine\networking\Packet.h" />
     <ClInclude Include="Engine\src\core\engine\networking\server\Server.h" />
     <ClInclude Include="Engine\src\core\engine\networking\server\ServerClient.h" />
@@ -406,7 +409,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\core\Constraint.cpp" />
-    <ClCompile Include="Engine\src\core\engine\discord\Discord.cpp" />
+    <ClCompile Include="Engine\src\core\engine\discord\DiscordActivityEvent.cpp" />
+    <ClCompile Include="Engine\src\core\engine\discord\DiscordModule.cpp" />
     <ClCompile Include="Engine\src\core\engine\discord\src\achievement_manager.cpp" />
     <ClCompile Include="Engine\src\core\engine\discord\src\activity_manager.cpp" />
     <ClCompile Include="Engine\src\core\engine\discord\src\application_manager.cpp" />
@@ -455,6 +459,7 @@
     <ClCompile Include="Engine\src\core\engine\model\ModelInstance.cpp" />
     <ClCompile Include="Engine\src\core\engine\model\ModelInstanceAnimation.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\ListenerTCP.cpp" />
+    <ClCompile Include="Engine\src\core\engine\networking\NetworkingModule.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\Packet.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\server\Server.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\server\ServerClient.cpp" />

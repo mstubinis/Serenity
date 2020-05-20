@@ -38,6 +38,7 @@ class ModelInstance final : public Engine::UserPointer {
     friend struct Engine::priv::DefaultModelInstanceBindFunctor;
     friend struct Engine::priv::DefaultModelInstanceUnbindFunctor;
     friend struct Engine::priv::ComponentModel_UpdateFunction;
+    friend class  Engine::priv::Renderer;
     friend class  ComponentModel;
     friend class  Collision;
     private:
@@ -69,6 +70,9 @@ class ModelInstance final : public Engine::UserPointer {
         void internal_init(Mesh* mesh, Material* mat, ShaderProgram* program);
         void internal_update_model_matrix();
 
+        void bind(const Engine::priv::Renderer& renderer);
+        void unbind(const Engine::priv::Renderer& renderer);
+
         ModelInstance() = delete;
     public:
         ModelInstance(Entity&, Mesh*, Material*, ShaderProgram* = 0);
@@ -86,22 +90,17 @@ class ModelInstance final : public Engine::UserPointer {
         static void setGlobalDistanceFactor(decimal factor);
         static decimal& getGlobalDistanceFactor();
 
-        template<typename T>
-        void setCustomBindFunctor(const T& functor) {
+        template<typename T> void setCustomBindFunctor(const T& functor) {
             m_CustomBindFunctor   = std::bind<void>(functor, std::placeholders::_1, std::placeholders::_2);
         }
-        template<typename T>
-        void setCustomUnbindFunctor(const T& functor) {
+        template<typename T> void setCustomUnbindFunctor(const T& functor) {
             m_CustomUnbindFunctor = std::bind<void>(functor, std::placeholders::_1, std::placeholders::_2);
         }
-        void bind(const Engine::priv::Renderer& renderer);
-        void unbind(const Engine::priv::Renderer& renderer);
-
         static void setDefaultViewportFlag(const unsigned int flag);
         static void setDefaultViewportFlag(const ViewportFlag::Flag flag);
 
-        const size_t index() const;
-        const ModelDrawingMode::Mode getDrawingMode() const;
+        size_t index() const;
+        ModelDrawingMode::Mode getDrawingMode() const;
         void setDrawingMode(const ModelDrawingMode::Mode);
 
         void setViewportFlag(const unsigned int flag);
@@ -111,10 +110,10 @@ class ModelInstance final : public Engine::UserPointer {
         void addViewportFlag(const ViewportFlag::Flag flag);
         void removeViewportFlag(const ViewportFlag::Flag flag);
 
-        const unsigned int getViewportFlags() const;
+        unsigned int getViewportFlags() const;
 
         void forceRender(const bool forced = true);
-        const bool isForceRendered() const;
+        bool isForceRendered() const;
 
         ShaderProgram* shaderProgram() const;
         Mesh* mesh() const;
@@ -128,15 +127,15 @@ class ModelInstance final : public Engine::UserPointer {
         const glm::quat& orientation() const;
         const glm::vec3& getScale() const;
 
-        const bool visible() const;
-        const bool passedRenderCheck() const;
+        bool visible() const;
+        bool passedRenderCheck() const;
         void setPassedRenderCheck(const bool);
         void show();
         void hide();
 
-        const RenderStage::Stage stage() const;
+        RenderStage::Stage stage() const;
         //void setStage(const RenderStage::Stage& stage);
-        void setStage(const RenderStage::Stage stage, ComponentModel&);
+        void setStage(const RenderStage::Stage stage, ComponentModel& componentModel);
 
         void playAnimation(const std::string& animName, const float startTime, const float endTime = -1.0f, const unsigned int requestedLoops = 1);
 

@@ -27,11 +27,10 @@ void SpotLight::setCutoff(const float cutoff) {
 void SpotLight::setCutoffOuter(const float outerCutoff) {
     m_OuterCutoff = glm::cos(glm::radians(outerCutoff));
 }
-
-const float SpotLight::getCutoff() const {
+float SpotLight::getCutoff() const {
     return m_Cutoff;
 }
-const float SpotLight::getCutoffOuter() const {
+float SpotLight::getCutoffOuter() const {
     return m_OuterCutoff;
 }
 void SpotLight::destroy() {

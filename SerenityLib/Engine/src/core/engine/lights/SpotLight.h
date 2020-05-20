@@ -21,8 +21,8 @@ class SpotLight : public PointLight {
 
         inline void destroy();
 
-        const float getCutoff() const;
-        const float getCutoffOuter() const;
+        float getCutoff() const;
+        float getCutoffOuter() const;
 
         void setCutoff(const float innerCutoff);
         void setCutoffOuter(const float outerCutoff);

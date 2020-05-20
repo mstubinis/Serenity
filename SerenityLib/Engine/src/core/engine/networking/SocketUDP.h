@@ -40,7 +40,7 @@ namespace Engine::Networking {
             void                 setBlocking(bool blocking) override;
             bool                 isBlocking() const override;
             bool                 isBound() const;
-            sf::UdpSocket&       socket() override;
+            //sf::UdpSocket&       getSFMLSocket() override;
             unsigned short       localPort() const override;
 
             sf::Socket::Status   bind(const std::string& ip = "");

@@ -49,22 +49,22 @@ void Camera::setViewMatrix(const glm::mat4& viewMatrix) {
 void Camera::lookAt(const glm_vec3& eye, const glm_vec3& center, const glm_vec3& up) {
     getComponent<ComponentCamera>()->lookAt(eye, center, up);
 }
-const glm_vec3 Camera::getPosition() const {
+glm_vec3 Camera::getPosition() const {
     return getComponent<ComponentBody>()->position(); 
 }
-const glm::quat Camera::getOrientation() const {
+glm::quat Camera::getOrientation() const {
     return glm::conjugate(glm::quat_cast(getComponent<ComponentCamera>()->getView())); 
 }
-const float Camera::getAngle() const {
+float Camera::getAngle() const {
     return getComponent<ComponentCamera>()->m_Angle; 
 }
-const float Camera::getAspect() const {
+float Camera::getAspect() const {
     return getComponent<ComponentCamera>()->m_AspectRatio; 
 }
-const float Camera::getNear() const {
+float Camera::getNear() const {
     return getComponent<ComponentCamera>()->m_NearPlane; 
 }
-const float Camera::getFar() const {
+float Camera::getFar() const {
     return getComponent<ComponentCamera>()->m_FarPlane; 
 }
 void Camera::setAngle(const float Angle) const {
@@ -79,71 +79,73 @@ void Camera::setNear(const float Near_) const {
 void Camera::setFar(const float Far_) const {
     getComponent<ComponentCamera>()->setFar(Far_);
 }
-const glm::mat4 Camera::getViewProjectionInverse() const {
+glm::mat4 Camera::getViewProjectionInverse() const {
     return getComponent<ComponentCamera>()->getViewProjectionInverse(); 
 }
-const glm::mat4 Camera::getProjection() const {
+glm::mat4 Camera::getProjection() const {
     return getComponent<ComponentCamera>()->getProjection(); 
 }
-const glm::mat4 Camera::getView() const {
+glm::mat4 Camera::getView() const {
     return getComponent<ComponentCamera>()->getView(); 
 }
-const glm::mat4 Camera::getViewInverse() const {
+glm::mat4 Camera::getViewInverse() const {
     return getComponent<ComponentCamera>()->getViewInverse(); 
 }
-const glm::mat4 Camera::getProjectionInverse() const {
+glm::mat4 Camera::getProjectionInverse() const {
     return getComponent<ComponentCamera>()->getProjectionInverse(); 
 }
-const glm::mat4 Camera::getViewProjection() const {
+glm::mat4 Camera::getViewProjection() const {
     return getComponent<ComponentCamera>()->getViewProjection();
 }
-const glm::vec3 Camera::getViewVector() const {
+glm::vec3 Camera::getViewVector() const {
     return getComponent<ComponentCamera>()->getViewVector(); 
 }
-const glm_vec3 Camera::forward() const {
+glm_vec3 Camera::forward() const {
     return getComponent<ComponentCamera>()->forward(); 
 }
-const glm_vec3 Camera::right() const {
+glm_vec3 Camera::right() const {
     return getComponent<ComponentCamera>()->right(); 
 }
-const glm_vec3 Camera::up() const {
+glm_vec3 Camera::up() const {
     return getComponent<ComponentCamera>()->up(); 
 }
-const decimal Camera::getDistance(const Entity& otherEntity) const {
+decimal Camera::getDistance(const Entity& otherEntity) const {
     auto& otherEntityBody = *otherEntity.getComponent<ComponentBody>();
     return glm::distance(otherEntityBody.position(), getPosition());
 }
-const decimal Camera::getDistance(const glm_vec3& otherPosition) const {
+decimal Camera::getDistance(const glm_vec3& otherPosition) const {
     return glm::distance(otherPosition, getPosition());
 }
-const decimal Camera::getDistanceSquared(const Entity& otherEntity) const {
+decimal Camera::getDistanceSquared(const Entity& otherEntity) const {
     auto& otherEntityBody = *otherEntity.getComponent<ComponentBody>();
     return glm::distance2(otherEntityBody.position(), getPosition());
 }
-const decimal Camera::getDistanceSquared(const glm_vec3& otherPosition) const {
+decimal Camera::getDistanceSquared(const glm_vec3& otherPosition) const {
     return glm::distance2(otherPosition, getPosition());
 }
-const decimal Camera::getDistanceSquared(const Entity& otherEntity, const glm_vec3& thisPosition) const {
+decimal Camera::getDistanceSquared(const Entity& otherEntity, const glm_vec3& thisPosition) const {
     auto& otherEntityBody = *otherEntity.getComponent<ComponentBody>();
     return glm::distance2(otherEntityBody.position(), thisPosition);
 }
-const decimal Camera::getDistanceSquared(const glm_vec3& otherPosition, const glm_vec3& thisPosition) const {
+decimal Camera::getDistanceSquared(const glm_vec3& otherPosition, const glm_vec3& thisPosition) const {
     return glm::distance2(otherPosition, thisPosition);
 }
-const unsigned int Camera::sphereIntersectTest(const glm_vec3& otherPosition, const float otherRadius) const {
+unsigned int Camera::sphereIntersectTest(const glm_vec3& otherPosition, const float otherRadius) const {
     return getComponent<ComponentCamera>()->sphereIntersectTest(otherPosition, otherRadius);
 }
-const unsigned int Camera::pointIntersectTest(const glm_vec3& otherPosition) const {
+unsigned int Camera::pointIntersectTest(const glm_vec3& otherPosition) const {
     return getComponent<ComponentCamera>()->pointIntersectTest(otherPosition);
 }
-const bool Camera::rayIntersectSphere(const Entity& entity) const {
+bool Camera::rayIntersectSphere(const Entity& entity) const {
     auto* entityBody     = entity.getComponent<ComponentBody>();
     auto* entityModel    = entity.getComponent<ComponentModel>();
     auto& thisBody       = *getComponent<ComponentBody>();
     float entityRadius   = 0.0f;
-    if(entityModel)
+    if (entityModel) {
         entityRadius     = entityModel->radius();
-    if (!entityBody)
+    }
+    if (!entityBody) {
         return false;
+    }
     return Math::rayIntersectSphere(entityBody->position(), entityRadius, thisBody.position(), getViewVector());
 }

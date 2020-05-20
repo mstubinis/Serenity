@@ -268,11 +268,22 @@ void Font::init_freetype(const string& filename, int height, int width) {
 
     m_MaxHeight = max_y_offset - min_y_offset;
 }
-const float Font::getTextHeight(string_view text) const {
+float Font::getTextHeight(string_view text) const {
     if (text.empty()) {
         return 0.0f;
     }
-    /*
+    unsigned int line_count = 0;
+    for (const char character : text) {
+        if (character == '\n') {
+            ++line_count;
+        }
+    }
+    return (line_count == 0) ? (m_MaxHeight) : ((line_count + 1) * (m_MaxHeight + m_LineHeight));
+}
+float Font::getTextHeightDynamic(string_view text) const {
+    if (text.empty()) {
+        return 0.0f;
+    }
     float res = 0.0f;
     int min_y = INT_MAX;
     int max_y = INT_MIN;
@@ -287,23 +298,8 @@ const float Font::getTextHeight(string_view text) const {
     }
     res += ((max_y - min_y) );
     return (min_y == INT_MAX || max_y == INT_MIN) ? m_MaxHeight : res;
-    */
-
-
-    
-    unsigned int line_count = 0;
-    for (const char character : text) {
-        if (character == '\n') {
-            ++line_count;
-        }else{
-
-        }
-    }
-    return (line_count == 0) ? (m_MaxHeight) : ((line_count + 1) * (m_MaxHeight + m_LineHeight));
-    
-    
 }
-const float Font::getTextWidth(string_view text) const {
+float Font::getTextWidth(string_view text) const {
     float row_width = 0.0f;
     float maxWidth  = 0.0f;
     for (size_t i = 0; i < text.size(); ++i) {
@@ -332,13 +328,13 @@ const float Font::getTextWidth(string_view text) const {
     maxWidth = max(maxWidth, row_width);
     return maxWidth;
 }
-const float Font::getMaxHeight() const {
+float Font::getMaxHeight() const {
     return m_MaxHeight;
 }
 Texture* Font::getGlyphTexture() const {
     return m_FontTexture; 
 }
-const float Font::getLineHeight() const {
+float Font::getLineHeight() const {
     return m_LineHeight;
 }
 const CharGlyph& Font::getGlyphData(const unsigned char character) const {

@@ -356,7 +356,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
     //make these 2 variables global in the renderer class?
     const glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 3000000.0f);
 
-    m_Renderer._bindShaderProgram(&covoludeShaderProgram);
+    m_Renderer.bind(&covoludeShaderProgram);
 
     Engine::Renderer::sendTexture("cubemap", texture.address(), 0, texType);
     Engine::Renderer::setViewport(0.0f, 0.0f, static_cast<float>(size), static_cast<float>(size));
@@ -374,7 +374,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
     Engine::Renderer::bindTextureForModification(texType, texture.address(2));
 
 
-    m_Renderer._bindShaderProgram(&prefilterShaderProgram);
+    m_Renderer.bind(&prefilterShaderProgram);
 
     Engine::Renderer::sendTexture("cubemap", texture.address(), 0, texType);
     Engine::Renderer::sendUniform1("PiFourDividedByResSquaredTimesSix", 12.56637f / float((texture.width() * texture.width()) * 6));
@@ -407,7 +407,7 @@ void DeferredPipeline::internal_generate_brdf_lut(ShaderProgram& program, const 
     Texture::setWrapping(GL_TEXTURE_2D, TextureWrap::ClampToEdge);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Texture::BRDF->address(), 0);
 
-    m_Renderer._bindShaderProgram(&program);
+    m_Renderer.bind(&program);
 
     Engine::Renderer::sendUniform1("NUM_SAMPLES", numSamples);
     Engine::Renderer::Settings::clear(true, true, false);
@@ -420,17 +420,17 @@ void DeferredPipeline::internal_generate_brdf_lut(ShaderProgram& program, const 
 void DeferredPipeline::onPipelineChanged() {
 
 }
-const unsigned int DeferredPipeline::getUniformLocation(const char* location) {
+unsigned int DeferredPipeline::getUniformLocation(const char* location) {
     const auto& uniforms = m_RendererState.current_bound_shader_program->uniforms();
     if (!uniforms.count(location)) {
         return -1;
     }
     return uniforms.at(location);
 }
-const unsigned int DeferredPipeline::getUniformLocationUnsafe(const char* location) {
+unsigned int DeferredPipeline::getUniformLocationUnsafe(const char* location) {
     return m_RendererState.current_bound_shader_program->uniforms().at(location);
 }
-const unsigned int DeferredPipeline::getMaxNumTextureUnits() {
+unsigned int DeferredPipeline::getMaxNumTextureUnits() {
     return Engine::priv::OpenGLState::MAX_TEXTURE_UNITS;
 }
 void DeferredPipeline::restoreDefaultState() {
@@ -460,19 +460,19 @@ Material* DeferredPipeline::getCurrentBoundMaterial() {
 Mesh* DeferredPipeline::getCurrentBoundMesh() {
     return m_RendererState.current_bound_mesh;
 }
-const bool DeferredPipeline::stencilOperation(const unsigned int stencilFail, const unsigned int depthFail, const unsigned int depthPass) {
+bool DeferredPipeline::stencilOperation(const unsigned int stencilFail, const unsigned int depthFail, const unsigned int depthPass) {
     return m_OpenGLStateMachine.GL_glStencilOp(stencilFail, depthFail, depthPass);
 }
-const bool DeferredPipeline::stencilMask(const unsigned int mask) {
+bool DeferredPipeline::stencilMask(const unsigned int mask) {
     return m_OpenGLStateMachine.GL_glStencilMask(mask);
 }
-const bool DeferredPipeline::stencilFunction(const unsigned int stencilFunction, const unsigned int reference, const unsigned int mask) {
+bool DeferredPipeline::stencilFunction(const unsigned int stencilFunction, const unsigned int reference, const unsigned int mask) {
     return m_OpenGLStateMachine.GL_glStencilFunc(stencilFunction, reference, mask);
 }
-const bool DeferredPipeline::setDepthFunction(const unsigned int depthFunction) {
+bool DeferredPipeline::setDepthFunction(const unsigned int depthFunction) {
     return m_OpenGLStateMachine.GL_glDepthFunc(depthFunction);
 }
-const bool DeferredPipeline::setViewport(const float x, const float y, const float width, const float height) {
+bool DeferredPipeline::setViewport(const float x, const float y, const float width, const float height) {
     return m_OpenGLStateMachine.GL_glViewport(
         static_cast<GLint>(x), 
         static_cast<GLint>(y), 
@@ -490,19 +490,19 @@ void DeferredPipeline::clear(const bool color, const bool depth, const bool sten
     if (stencil) clearBit |= GL_STENCIL_BUFFER_BIT;
     glClear(clearBit);
 }
-const bool DeferredPipeline::colorMask(const bool r, const bool g, const bool b, const bool alpha) {
+bool DeferredPipeline::colorMask(const bool r, const bool g, const bool b, const bool alpha) {
     return m_OpenGLStateMachine.GL_glColorMask(r, g, b, alpha);
 }
-const bool DeferredPipeline::clearColor(const bool r, const bool g, const bool b, const bool alpha) {
+bool DeferredPipeline::clearColor(const bool r, const bool g, const bool b, const bool alpha) {
     return m_OpenGLStateMachine.GL_glClearColor(r, g, b, alpha);
 }
-const bool DeferredPipeline::bindTextureForModification(const unsigned int textureType, const unsigned int textureObject) {
+bool DeferredPipeline::bindTextureForModification(const unsigned int textureType, const unsigned int textureObject) {
     return m_OpenGLStateMachine.GL_glBindTextureForModification(textureType, textureObject);
 }
-const bool DeferredPipeline::bindVAO(const unsigned int vaoObject) {
+bool DeferredPipeline::bindVAO(const unsigned int vaoObject) {
     return m_OpenGLStateMachine.GL_glBindVertexArray(vaoObject);
 }
-const bool DeferredPipeline::deleteVAO(unsigned int& vaoObject) {
+bool DeferredPipeline::deleteVAO(unsigned int& vaoObject) {
     if (vaoObject) {
         glDeleteVertexArrays(1, &vaoObject);
         vaoObject = 0;
@@ -518,16 +518,16 @@ void DeferredPipeline::generateAndBindVAO(unsigned int& vaoObject) {
     glGenVertexArrays(1, &vaoObject);
     DeferredPipeline::bindVAO(vaoObject);
 }
-const bool DeferredPipeline::enableAPI(const unsigned int apiEnum) {
+bool DeferredPipeline::enableAPI(const unsigned int apiEnum) {
     return m_OpenGLStateMachine.GL_glEnable(apiEnum);
 }
-const bool DeferredPipeline::disableAPI(const unsigned int apiEnum) {
+bool DeferredPipeline::disableAPI(const unsigned int apiEnum) {
     return m_OpenGLStateMachine.GL_glDisable(apiEnum);
 }
-const bool DeferredPipeline::enableAPI_i(const unsigned int apiEnum, const unsigned int index) {
+bool DeferredPipeline::enableAPI_i(const unsigned int apiEnum, const unsigned int index) {
     return m_OpenGLStateMachine.GL_glEnablei(apiEnum, index);
 }
-const bool DeferredPipeline::disableAPI_i(const unsigned int apiEnum, const unsigned int index) {
+bool DeferredPipeline::disableAPI_i(const unsigned int apiEnum, const unsigned int index) {
     return m_OpenGLStateMachine.GL_glDisablei(apiEnum, index);
 }
 void DeferredPipeline::sendTexture(const char* location, const Texture& texture, const int slot) {
@@ -550,19 +550,27 @@ void DeferredPipeline::sendTextureSafe(const char* location, const unsigned int 
     m_OpenGLStateMachine.GL_glBindTextureForRendering(textureTarget, textureObject);
     Engine::Renderer::sendUniform1Safe(location, slot);
 }
-const bool DeferredPipeline::cullFace(const unsigned int face) {
+bool DeferredPipeline::cullFace(const unsigned int face) {
     return m_OpenGLStateMachine.GL_glCullFace(face);
 }
-const bool DeferredPipeline::bindReadFBO(const unsigned int fbo) {
+bool DeferredPipeline::bindReadFBO(const unsigned int fbo) {
     return m_OpenGLStateMachine.GL_glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 }
-const bool DeferredPipeline::bindDrawFBO(const unsigned int fbo) {
+bool DeferredPipeline::bindDrawFBO(const unsigned int fbo) {
     return m_OpenGLStateMachine.GL_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 }
-const bool DeferredPipeline::bindRBO(const unsigned int rbo) {
+bool DeferredPipeline::bindRBO(const unsigned int rbo) {
     return m_OpenGLStateMachine.GL_glBindRenderbuffer(rbo);
 }
-const bool DeferredPipeline::bindShaderProgram(ShaderProgram* program) {
+
+
+bool DeferredPipeline::bind(ModelInstance* modelInstance) {
+    return true;
+}
+bool DeferredPipeline::unbind(ModelInstance* modelInstance) {
+    return true;
+}
+bool DeferredPipeline::bind(ShaderProgram* program) {
     if (m_RendererState.current_bound_shader_program != program) {
         m_OpenGLStateMachine.GL_glUseProgram(program->program());
         m_RendererState.current_bound_shader_program = program;
@@ -570,30 +578,30 @@ const bool DeferredPipeline::bindShaderProgram(ShaderProgram* program) {
     }
     return false;
 }
-const bool DeferredPipeline::unbindShaderProgram() {
+bool DeferredPipeline::unbind(ShaderProgram* program) {
     m_RendererState.current_bound_shader_program = nullptr;
     m_OpenGLStateMachine.GL_glUseProgram(0);
     return true;
 }
-const bool DeferredPipeline::bindMaterial(Material* material) {
+bool DeferredPipeline::bind(Material* material) {
     if (m_RendererState.current_bound_material != material) {
         m_RendererState.current_bound_material = material;
         return true;
     }
     return false;
 }
-const bool DeferredPipeline::unbindMaterial() {
+bool DeferredPipeline::unbind(Material* material) {
     m_RendererState.current_bound_material = nullptr;
     return true;
 }
-const bool DeferredPipeline::bindMesh(Mesh* mesh) {
+bool DeferredPipeline::bind(Mesh* mesh) {
     if (m_RendererState.current_bound_mesh != mesh) {
         m_RendererState.current_bound_mesh = mesh;
         return true;
     }
     return false;
 }
-const bool DeferredPipeline::unbindMesh(Mesh* mesh) {
+bool DeferredPipeline::unbind(Mesh* mesh) {
     m_RendererState.current_bound_mesh = nullptr;
     return true;
 }
@@ -639,7 +647,7 @@ void DeferredPipeline::renderSkybox(Skybox* skybox, ShaderProgram& shaderProgram
     glm::mat4 view_no_position = camera.getView();
     Math::removeMatrixPosition(view_no_position);
 
-    m_Renderer._bindShaderProgram(&shaderProgram);
+    m_Renderer.bind(&shaderProgram);
 
     if (skybox) {
         Engine::Renderer::sendUniform1("IsFake", 0);
@@ -717,11 +725,11 @@ void DeferredPipeline::renderPointLight(const Camera& c, const PointLight& p) {
     auto& pointLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPointLightBounds();
 
 
-    m_Renderer._bindMesh(&pointLightMesh);
+    m_Renderer.bind(&pointLightMesh);
 
     renderMesh(pointLightMesh); //this can bug out if we pass in custom uv's like in the renderQuad method
 
-    m_Renderer._unbindMesh(&pointLightMesh);
+    m_Renderer.unbind(&pointLightMesh);
 
     cullFace(GL_BACK);
 }
@@ -758,9 +766,9 @@ void DeferredPipeline::renderSpotLight(const Camera& c, const SpotLight& s) {
     auto& spotLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getSpotLightBounds();
 
 
-    m_Renderer._bindMesh(&spotLightMesh);
+    m_Renderer.bind(&spotLightMesh);
     renderMesh(spotLightMesh); //this can bug out if we pass in custom uv's like in the renderQuad method
-    m_Renderer._unbindMesh(&spotLightMesh);
+    m_Renderer.unbind(&spotLightMesh);
 
     cullFace(GL_BACK);
     sendUniform1Safe("Type", 0.0f); //is this really needed?
@@ -800,9 +808,9 @@ void DeferredPipeline::renderRodLight(const Camera& c, const RodLight& r) {
     }
     auto& rodLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getRodLightBounds();
 
-    m_Renderer._bindMesh(&rodLightMesh);
+    m_Renderer.bind(&rodLightMesh);
     renderMesh(rodLightMesh); //this can bug out if we pass in custom uv's like in the renderQuad method
-    m_Renderer._unbindMesh(&rodLightMesh);
+    m_Renderer.unbind(&rodLightMesh);
     cullFace(GL_BACK);
     sendUniform1Safe("Type", 0.0f); //is this really needed?
 }
@@ -827,7 +835,7 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, const Camera& cam
     const auto particle_count = system.ParticlesDOD.size();
     if (particle_count > 0) {
         auto& particleMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh();
-        m_Renderer._bindShaderProgram(&program);
+        m_Renderer.bind(&program);
         for (auto& pair : system.MaterialToIndexReverse) {
             system.MaterialIDToIndex.try_emplace(pair.first, static_cast<unsigned int>(system.MaterialIDToIndex.size()));
         }
@@ -846,14 +854,14 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, const Camera& cam
         const auto maxTextures = getMaxNumTextureUnits() - 1U;
         Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), maxTextures);
 
-        m_Renderer._bindMesh(&particleMesh);
+        m_Renderer.bind(&particleMesh);
         glBindBuffer(GL_ARRAY_BUFFER, m_Particle_Instance_VBO);
         glBufferData(GL_ARRAY_BUFFER, particle_count * SIZE_OF_PARTICLE_DOD, NULL, GL_STREAM_DRAW);
         glBufferSubData(GL_ARRAY_BUFFER, 0, particle_count * SIZE_OF_PARTICLE_DOD, &system.ParticlesDOD[0]);
 
         glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(particleMesh.getVertexData().m_Indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(particle_count));
 
-        m_Renderer._unbindMesh(&particleMesh);
+        m_Renderer.unbind(&particleMesh);
     }
 }
 void DeferredPipeline::renderMesh(const Mesh& mesh, const unsigned int mode) {
@@ -1015,7 +1023,7 @@ void DeferredPipeline::render2DText(const string& text, const Font& font, const 
     m_Text_Indices.clear();
 
     auto& fontPlane = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getFontMesh();
-    m_Renderer._bindMesh(&fontPlane);
+    m_Renderer.bind(&fontPlane);
 
     const auto  newLineGlyphHeight = font.getMaxHeight() + font.getLineHeight();
     const auto* texture = font.getGlyphTexture();
@@ -1044,7 +1052,7 @@ void DeferredPipeline::render2DText(const string& text, const Font& font, const 
     fontPlane.modifyVertices(1, m_Text_UVs);
     fontPlane.modifyIndices(m_Text_Indices);
     renderMesh(fontPlane);
-    m_Renderer._unbindMesh(&fontPlane);
+    m_Renderer.unbind(&fontPlane);
 
 }
 void DeferredPipeline::render2DTexture(const Texture* texture, const glm::vec2& position, const glm::vec4& color, const float angle, const glm::vec2& scale, const float depth, const Alignment::Type align, const glm::vec4& scissor) {
@@ -1074,9 +1082,9 @@ void DeferredPipeline::render2DTexture(const Texture* texture, const glm::vec2& 
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
 
     auto& plane = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
-    m_Renderer._bindMesh(&plane);
+    m_Renderer.bind(&plane);
     renderMesh(plane);
-    m_Renderer._unbindMesh(&plane);
+    m_Renderer.unbind(&plane);
 }
 void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::vec4& color, const float angle, const float width, const float height, const float depth, const Alignment::Type alignment, const glm::vec4& scissor) {
     GLScissor(scissor);
@@ -1097,9 +1105,9 @@ void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::ve
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
 
     auto& triangle = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getTriangleMesh();
-    m_Renderer._bindMesh(&triangle);
+    m_Renderer.bind(&triangle);
     renderMesh(triangle);
-    m_Renderer._unbindMesh(&triangle);
+    m_Renderer.unbind(&triangle);
 }
 
 
@@ -1195,7 +1203,7 @@ void DeferredPipeline::internal_pass_ssao(const Viewport& viewport, const Camera
 void DeferredPipeline::internal_pass_stencil() {
     Engine::Renderer::colorMask(false, false, false, false);
 
-    m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::StencilPass]);
+    m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::StencilPass]);
 
     m_GBuffer.getMainFBO().bind();
 
@@ -1219,7 +1227,7 @@ void DeferredPipeline::internal_pass_stencil() {
 void DeferredPipeline::internal_pass_lighting(const Viewport& viewport, const Camera& camera, const bool mainRenderFunction) {
     const Scene& scene = viewport.getScene();
 
-    m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLighting]);
+    m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLighting]);
 
     const auto& winSize = glm::vec2(Engine::Resources::getWindowSize());
 
@@ -1266,7 +1274,7 @@ void DeferredPipeline::internal_pass_lighting(const Viewport& viewport, const Ca
     
     if (mainRenderFunction) {
         //do GI here. (only doing GI during the main render pass, not during light probes
-        m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingGI]);
+        m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingGI]);
         if (Renderer::GLSL_VERSION < 140) {
             Engine::Renderer::sendUniformMatrix4Safe("CameraInvView", camera.getViewInverse());
             Engine::Renderer::sendUniformMatrix4Safe("CameraInvProj", camera.getProjectionInverse());
@@ -1413,7 +1421,7 @@ void DeferredPipeline::internal_pass_aa(const bool mainRenderFunction, const Vie
     }
 }
 void DeferredPipeline::internal_pass_final(const GBufferType::Type& sceneTexture) {
-    m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::DeferredFinal]);
+    m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredFinal]);
     Engine::Renderer::sendUniform1Safe("HasBloom", static_cast<int>(Bloom::bloom.bloom_active));
     Engine::Renderer::sendUniform1Safe("HasFog", static_cast<int>(Fog::fog.fog_active));
 
@@ -1429,7 +1437,7 @@ void DeferredPipeline::internal_pass_final(const GBufferType::Type& sceneTexture
     Engine::Renderer::renderFullscreenQuad();
 }
 void DeferredPipeline::internal_pass_depth_and_transparency(const Viewport& viewport, const GBufferType::Type& sceneTexture) {
-    m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::DepthAndTransparency]);
+    m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DepthAndTransparency]);
     Engine::Renderer::sendTextureSafe("SceneTexture", m_GBuffer.getTexture(sceneTexture), 0);
     Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), 1);
 
@@ -1452,7 +1460,7 @@ void DeferredPipeline::internal_pass_copy_depth() {
 
 }
 void DeferredPipeline::internal_pass_blur(const Viewport& viewport, const GLuint texture, string_view type) {
-    m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::DeferredBlur]);
+    m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredBlur]);
 
     glm::vec2 hv(0.0f);
     if (type == "H") { 
@@ -1481,7 +1489,7 @@ void DeferredPipeline::renderPhysicsAPI(const bool mainRenderFunc, const Viewpor
         #endif
                 Engine::Renderer::GLDisable(GL_DEPTH_TEST);
                 glDepthMask(GL_FALSE);
-                m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::BulletPhysics]);
+                m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::BulletPhysics]);
                 Core::m_Engine->m_PhysicsManager._render(camera);
         #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
             }
@@ -1502,7 +1510,7 @@ void DeferredPipeline::render2DAPINonTextured(const bool mainRenderFunc, const V
         if (mainRenderFunc) {
             if (viewport.getRenderFlags().has(ViewportRenderingFlag::API2D)) {
                 //Engine::Renderer::Settings::clear(false, true, false); //clear depth only
-                m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::Deferred2DAPI]);
+                m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::Deferred2DAPI]);
                 Engine::Renderer::sendUniformMatrix4("VP", m_2DProjectionMatrix);
                 Engine::Renderer::sendUniform1Safe("ScreenGamma", m_Renderer.m_Gamma);
                 Engine::Renderer::GLEnable(GL_SCISSOR_TEST);
@@ -1530,7 +1538,7 @@ void DeferredPipeline::render2DAPI(const bool mainRenderFunc, const Viewport& vi
         if (mainRenderFunc) {
             if (viewport.getRenderFlags().has(ViewportRenderingFlag::API2D)) {
                 Engine::Renderer::Settings::clear(false, true, false); //clear depth only
-                m_Renderer._bindShaderProgram(m_InternalShaderPrograms[ShaderProgramEnum::Deferred2DAPI]);
+                m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::Deferred2DAPI]);
                 Engine::Renderer::sendUniformMatrix4("VP", m_2DProjectionMatrix);
                 Engine::Renderer::sendUniform1Safe("ScreenGamma", m_Renderer.m_Gamma);
                 Engine::Renderer::GLEnable(GL_SCISSOR_TEST);

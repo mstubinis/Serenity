@@ -759,6 +759,15 @@
     <ClInclude Include="Engine\src\core\engine\physics\PhysicsPipeline.h">
       <Filter>Header Files\Engine\Core\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\networking\NetworkingModule.h">
+      <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\DiscordModule.h">
+      <Filter>Header Files\Engine\Core\Discord</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\discord\DiscordActivityEvent.h">
+      <Filter>Header Files\Engine\Core\Discord</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -1064,9 +1073,6 @@
     <ClCompile Include="Engine\src\core\engine\system\Engine.cpp">
       <Filter>Source Files\Engine\Core\System</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\discord\Discord.cpp">
-      <Filter>Source Files\Engine\Core\Discord</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\discord\src\achievement_manager.cpp">
       <Filter>Source Files\Engine\Core\Discord\src</Filter>
     </ClCompile>
@@ -1159,6 +1165,15 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\physics\PhysicsPipeline.cpp">
       <Filter>Source Files\Engine\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\networking\NetworkingModule.cpp">
+      <Filter>Source Files\Engine\Core\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\discord\DiscordModule.cpp">
+      <Filter>Source Files\Engine\Core\Discord</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\discord\DiscordActivityEvent.cpp">
+      <Filter>Source Files\Engine\Core\Discord</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

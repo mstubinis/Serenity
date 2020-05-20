@@ -13,9 +13,10 @@ class  Window;
 #include <core/engine/events/Engine_Events.h>
 #include <core/engine/math/SimplexNoise.h>
 #include <core/engine/threading/Engine_ThreadManager.h>
-#include <core/engine/discord/Discord.h>
+#include <core/engine/networking/NetworkingModule.h>
+#include <core/engine/discord/DiscordModule.h>
 #include <core/engine/mesh/BuiltInMeshes.h>
-#include <core/engine/networking/SocketManager.h>
+
 
 namespace Engine{
     void pause(const bool pause = true);
@@ -160,23 +161,24 @@ namespace Engine{
                 void render(Window& window, const float dt);
                 void cleanup(Window& window, const float dt);
             public:
-                struct Misc final {
-                    Engine::priv::BuiltInMeshses   m_BuiltInMeshes;
-                    Engine::Discord::DiscordCore   m_DiscordCore;
-                    Engine::priv::SocketManager    m_SocketManager;
-                    SimplexNoise                   m_SimplexNoise;
-                    bool                           m_Paused;
-                    bool                           m_Destroyed;
+                class Misc final {
+                    public:
+                        Engine::priv::BuiltInMeshses   m_BuiltInMeshes;
+                        SimplexNoise                   m_SimplexNoise;
+                        bool                           m_Paused;
+                        bool                           m_Destroyed;
                 };
                 Misc                  m_Misc;
 
-                EventManager          m_EventManager;
-                Renderer              m_RenderManager;
-                PhysicsManager        m_PhysicsManager;
-                ResourceManager       m_ResourceManager;
-                SoundManager          m_SoundManager;
-                DebugManager          m_DebugManager;
-                ThreadManager         m_ThreadManager;
+                NetworkingModule    m_NetworkingModule;
+                DiscordModule       m_DiscordModule;
+                EventManager        m_EventManager;
+                Renderer            m_RenderManager;
+                PhysicsManager      m_PhysicsManager;
+                ResourceManager     m_ResourceManager;
+                SoundManager        m_SoundManager;
+                DebugManager        m_DebugManager;
+                ThreadManager       m_ThreadManager;
 
 
                 EngineCore(const EngineOptions& options);
@@ -186,8 +188,9 @@ namespace Engine{
                 void run();
                 void handle_events(Window& window);
         };
-        struct Core final{
-            static EngineCore*          m_Engine;
+        class Core final{
+            public:
+                static EngineCore* m_Engine;
         };
     };
 };

@@ -8,8 +8,8 @@ namespace sf {
 namespace Engine::Networking {
     class IPacket {
         public:
-            virtual bool validate(sf::Packet& sfPacket) = 0;
-            virtual bool build(sf::Packet& sfPacket) = 0;
+            virtual bool validate(sf::Packet& sfmlPacket) = 0;
+            virtual bool build(sf::Packet& sfmlPacket) = 0;
     };
     class Packet : public IPacket {
         public:
@@ -25,11 +25,11 @@ namespace Engine::Networking {
             Packet(Packet&& other) noexcept;
             Packet& operator=(Packet&& other) noexcept;
 
-            virtual bool validate(sf::Packet& sfPacket) override;
-            virtual bool build(sf::Packet& sfPacket) override;
+            virtual bool validate(sf::Packet& sfmlPacket) override;
+            virtual bool build(sf::Packet& sfmlPacket) override;
             virtual void print() {}
 
-            static unsigned int getTypeFromSFPacket(const sf::Packet& sfPacket);
+            static unsigned int getTypeFromSFPacket(const sf::Packet& sfmlPacket);
     };
 };
 #endif

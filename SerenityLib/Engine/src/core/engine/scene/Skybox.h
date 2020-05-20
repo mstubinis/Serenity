@@ -13,7 +13,9 @@ namespace Engine::priv {
 class Skybox: public EventObserver{
     friend class Engine::priv::SkyboxImplInterface;
     private:
-        Texture*  m_Texture;
+        Texture*  m_Texture = nullptr;
+    public:
+        static void bindMesh();
     public:
         Skybox(const std::string* files);
         Skybox(const std::string& file);
@@ -22,8 +24,6 @@ class Skybox: public EventObserver{
         virtual void update();
 
         Texture* texture() const;
-
-        static void bindMesh();
 
         void onEvent(const Event& e);
 };

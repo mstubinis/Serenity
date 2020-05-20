@@ -102,7 +102,7 @@ ParticleEmitter* priv::ParticleSystem::add_emitter(ParticleEmissionProperties& p
     }
     return nullptr;
 }
-const bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter, const glm::vec3& emitterPosition, const glm::quat& emitterRotation) {
+bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter, const glm::vec3& emitterPosition, const glm::quat& emitterRotation) {
     if (m_ParticleFreelist.size() > 0) { //first, try to reuse an empty
         const auto freeindex = m_ParticleFreelist.top();
         m_ParticleFreelist.pop();
@@ -118,7 +118,7 @@ const bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter, const gl
     }
     return false;
 }
-const bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter) {
+bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter) {
     const auto& body = *emitter.getComponent<ComponentBody>();
     return add_particle(emitter, body.position(), body.rotation());
 }

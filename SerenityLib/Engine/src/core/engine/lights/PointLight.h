@@ -35,10 +35,10 @@ class PointLight : public SunLight {
         void setAttenuation(const LightRange::Range range);
         void setAttenuationModel(const LightAttenuation::Model model);
 
-        const float getCullingRadius() const;
-        const float getConstant() const;
-        const float getLinear() const;
-        const float getExponent() const;
-        const LightAttenuation::Model getAttenuationModel() const;
+        float getCullingRadius() const;
+        float getConstant() const;
+        float getLinear() const;
+        float getExponent() const;
+        LightAttenuation::Model getAttenuationModel() const;
 };
 #endif

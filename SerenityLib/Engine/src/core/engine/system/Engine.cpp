@@ -128,7 +128,7 @@ void EngineCore::update_physics(Window& window, const float timeStep) {
 void EngineCore::update_logic(Window& window, const float dt){
     m_DebugManager.stop_clock();
     window.on_dynamic_resize();
-    m_Misc.m_SocketManager.update(dt);
+    m_NetworkingModule.update(dt);
     Scene& scene = *Resources::getCurrentScene();
     auto& ecs = InternalScenePublicInterface::GetECS(scene); 
     ecs.preUpdate(scene, dt);
@@ -145,7 +145,7 @@ void EngineCore::update_logic(Window& window, const float dt){
 
     window.m_Data.on_reset_events(dt);
 
-    m_Misc.m_DiscordCore.update();
+    m_DiscordModule.update();
     m_DebugManager.calculate_logic();
 }
 void EngineCore::update_sounds(Window& window, const float dt){

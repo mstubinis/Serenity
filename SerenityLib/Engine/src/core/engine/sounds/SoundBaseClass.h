@@ -30,27 +30,27 @@ class SoundBaseClass {
         SoundBaseClass(SoundBaseClass&&) noexcept = default;
         virtual ~SoundBaseClass();
 
-        const SoundStatus::Status status();
+        SoundStatus::Status status();
         virtual void update(const float dt);
-        virtual const bool play(const unsigned int numLoops = 1);
-        virtual const bool pause();
-        virtual const bool stop();
-        virtual const bool restart();
-        const unsigned int getLoopsLeft();
-        virtual const unsigned int getChannelCount();
-        virtual const float getMinDistance();
+        virtual bool play(const unsigned int numLoops = 1);
+        virtual bool pause();
+        virtual bool stop();
+        virtual bool restart();
+        unsigned int getLoopsLeft();
+        virtual unsigned int getChannelCount();
+        virtual float getMinDistance();
         virtual void setMinDistance(const float minDistance);
-        virtual const bool isRelativeToListener();
+        virtual bool isRelativeToListener();
         virtual void setRelativeToListener(const bool relative = true);
 
-        virtual const float getAttenuation();
+        virtual float getAttenuation();
         virtual void setAttenuation(const float attenuation);
-        virtual const glm::vec3 getPosition();
+        virtual glm::vec3 getPosition();
         virtual void setPosition(const float x, const float y, const float z);
         virtual void setPosition(const glm::vec3& position);
-        virtual const float getVolume();
+        virtual float getVolume();
         virtual void setVolume(const float volume);
-        virtual const float getPitch();
+        virtual float getPitch();
         virtual void setPitch(const float pitch);
 };
 

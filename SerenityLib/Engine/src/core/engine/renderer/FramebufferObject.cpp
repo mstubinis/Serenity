@@ -21,25 +21,25 @@ priv::FramebufferObjectAttatchment::FramebufferObjectAttatchment(const Framebuff
 }
 priv::FramebufferObjectAttatchment::~FramebufferObjectAttatchment(){ 
 }
-const unsigned int priv::FramebufferObjectAttatchment::width() const {
+unsigned int priv::FramebufferObjectAttatchment::width() const {
     return m_FBO.width(); 
 }
-const unsigned int priv::FramebufferObjectAttatchment::height() const {
+unsigned int priv::FramebufferObjectAttatchment::height() const {
     return m_FBO.height(); 
 }
-const unsigned int priv::FramebufferObjectAttatchment::attatchment() const {
+unsigned int priv::FramebufferObjectAttatchment::attatchment() const {
     return m_GL_Attatchment; 
 }
 void priv::FramebufferObjectAttatchment::resize(FramebufferObject& fbo, const unsigned int& w, const unsigned int& h){
 }
-const GLuint priv::FramebufferObjectAttatchment::address() const {
+GLuint priv::FramebufferObjectAttatchment::address() const {
     return 0; 
 }
 void priv::FramebufferObjectAttatchment::bind(){
 }
 void priv::FramebufferObjectAttatchment::unbind(){
 }
-const GLuint priv::FramebufferObjectAttatchment::internalFormat() const {
+GLuint priv::FramebufferObjectAttatchment::internalFormat() const {
     return m_InternalFormat; 
 }
 
@@ -56,7 +56,7 @@ priv::FramebufferTexture::~FramebufferTexture(){
 void priv::FramebufferTexture::resize(FramebufferObject& fbo, const unsigned int& w, const unsigned int& h){
     InternalTexturePublicInterface::Resize(*m_Texture, fbo, w, h);
 }
-const GLuint priv::FramebufferTexture::address() const {
+GLuint priv::FramebufferTexture::address() const {
     return m_Texture->address(); 
 }
 Texture& priv::FramebufferTexture::texture() const {
@@ -82,7 +82,7 @@ void priv::RenderbufferObject::resize(FramebufferObject& fbo, const unsigned int
     glRenderbufferStorage(GL_RENDERBUFFER, attatchment(), m_Width, m_Height);
     Engine::Renderer::unbindRBO();
 }
-const GLuint priv::RenderbufferObject::address() const {
+GLuint priv::RenderbufferObject::address() const {
     return m_RBO; 
 }
 
@@ -213,30 +213,30 @@ priv::RenderbufferObject* priv::FramebufferObject::attatchRenderBuffer(priv::Ren
     Engine::Renderer::unbindFBO();
     return &rbo;
 }
-const unsigned int priv::FramebufferObject::width() const {
+unsigned int priv::FramebufferObject::width() const {
     return m_FramebufferWidth; 
 }
-const unsigned int priv::FramebufferObject::height() const {
+unsigned int priv::FramebufferObject::height() const {
     return m_FramebufferHeight; 
 }
-const GLuint priv::FramebufferObject::address() const { 
+GLuint priv::FramebufferObject::address() const { 
     return m_FBO[m_CurrentFBOIndex]; 
 }
-const unordered_map<unsigned int, priv::FramebufferObjectAttatchment*>& priv::FramebufferObject::attatchments() const {
+unordered_map<unsigned int, priv::FramebufferObjectAttatchment*>& priv::FramebufferObject::attatchments() const {
     return m_Attatchments; 
 }
-const bool priv::FramebufferObject::check(){
-    for (auto& fbo : m_FBO) {
-        Engine::Renderer::bindFBO(fbo);
+bool priv::FramebufferObject::check(){
+    for (const auto fboHandle : m_FBO) {
+        Engine::Renderer::bindFBO(fboHandle);
         GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (err != GL_FRAMEBUFFER_COMPLETE) {
-            cout << "Framebuffer completeness in FramebufferObject::impl _check() (index " + to_string(fbo) + ") is incomplete!" << endl; 
-            cout << "Error is: " << err << endl;
+            cout << "Framebuffer completeness in FramebufferObject::impl _check() (index " + to_string(fboHandle) + ") is incomplete!\n";
+            cout << "Error is: " << err << "\n";
             return false;
         }
     }
     return true;
 }
-const float priv::FramebufferObject::divisor() const {
+float priv::FramebufferObject::divisor() const {
     return m_Divisor; 
 }

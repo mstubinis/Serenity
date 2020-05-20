@@ -113,11 +113,9 @@ void ParticleEmitter::update(const size_t index, const float dt, priv::ParticleS
         }
     }
 }
-
-const bool ParticleEmitter::isActive() const {
+bool ParticleEmitter::isActive() const {
     return m_Active;
 }
-
 void ParticleEmitter::setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w, const EntityDataRequest& request) {
     getComponent<ComponentBody>(request)->setRotation(x, y, z, w);
 }
@@ -164,23 +162,23 @@ void ParticleEmitter::setScale(const glm_vec3& scale) {
     getComponent<ComponentBody>()->setScale(scale);
 }
 
-const glm_vec3 ParticleEmitter::getScale(const EntityDataRequest& request) const {
+glm_vec3 ParticleEmitter::getScale(const EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->getScale();
 }
-const glm_vec3 ParticleEmitter::getScale() const {
+glm_vec3 ParticleEmitter::getScale() const {
     return getComponent<ComponentBody>()->getScale();
 }
-const glm_vec3 ParticleEmitter::position(const EntityDataRequest& request) const {
+glm_vec3 ParticleEmitter::position(const EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->position();
 }
-const glm_vec3 ParticleEmitter::position() const {
+glm_vec3 ParticleEmitter::position() const {
     return getComponent<ComponentBody>()->position();
 }
 
-const glm_quat ParticleEmitter::rotation(const EntityDataRequest& request) const {
+glm_quat ParticleEmitter::rotation(const EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->rotation();
 }
-const glm_quat ParticleEmitter::rotation() const {
+glm_quat ParticleEmitter::rotation() const {
     return getComponent<ComponentBody>()->rotation();
 }
 
@@ -232,9 +230,9 @@ void ParticleEmitter::applyLinearVelocity(glm_vec3& velocity, const bool local) 
     body.setLinearVelocity(currVel + velocity, false);
 }
 
-const glm_vec3 ParticleEmitter::linearVelocity(const EntityDataRequest& request) const {
+glm_vec3 ParticleEmitter::linearVelocity(const EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->getLinearVelocity();
 }
-const glm_vec3 ParticleEmitter::linearVelocity() const {
+glm_vec3 ParticleEmitter::linearVelocity() const {
     return getComponent<ComponentBody>()->getLinearVelocity();
 }

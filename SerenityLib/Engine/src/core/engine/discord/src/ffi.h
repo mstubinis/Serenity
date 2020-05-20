@@ -434,32 +434,13 @@ struct IDiscordActivityEvents {
 };
 
 struct IDiscordActivityManager {
-    enum EDiscordResult (*register_command)(struct IDiscordActivityManager* manager,
-                                            const char* command);
-    enum EDiscordResult (*register_steam)(struct IDiscordActivityManager* manager,
-                                          uint32_t steam_id);
-    void (*update_activity)(struct IDiscordActivityManager* manager,
-                            struct DiscordActivity* activity,
-                            void* callback_data,
-                            void (*callback)(void* callback_data, enum EDiscordResult result));
-    void (*clear_activity)(struct IDiscordActivityManager* manager,
-                           void* callback_data,
-                           void (*callback)(void* callback_data, enum EDiscordResult result));
-    void (*send_request_reply)(struct IDiscordActivityManager* manager,
-                               DiscordUserId user_id,
-                               enum EDiscordActivityJoinRequestReply reply,
-                               void* callback_data,
-                               void (*callback)(void* callback_data, enum EDiscordResult result));
-    void (*send_invite)(struct IDiscordActivityManager* manager,
-                        DiscordUserId user_id,
-                        enum EDiscordActivityActionType type,
-                        const char* content,
-                        void* callback_data,
-                        void (*callback)(void* callback_data, enum EDiscordResult result));
-    void (*accept_invite)(struct IDiscordActivityManager* manager,
-                          DiscordUserId user_id,
-                          void* callback_data,
-                          void (*callback)(void* callback_data, enum EDiscordResult result));
+    enum EDiscordResult (*register_command)(struct IDiscordActivityManager* manager, const char* command);
+    enum EDiscordResult (*register_steam)(struct IDiscordActivityManager* manager, uint32_t steam_id);
+    void (*update_activity)(struct IDiscordActivityManager* manager, struct DiscordActivity* activity, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result));
+    void (*clear_activity)(struct IDiscordActivityManager* manager, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result));
+    void (*send_request_reply)(struct IDiscordActivityManager* manager, DiscordUserId user_id, enum EDiscordActivityJoinRequestReply reply, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result));
+    void (*send_invite)(struct IDiscordActivityManager* manager, DiscordUserId user_id, enum EDiscordActivityActionType type, const char* content, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result));
+    void (*accept_invite)(struct IDiscordActivityManager* manager, DiscordUserId user_id, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result));
 };
 
 struct IDiscordRelationshipEvents {
@@ -468,16 +449,10 @@ struct IDiscordRelationshipEvents {
 };
 
 struct IDiscordRelationshipManager {
-    void (*filter)(struct IDiscordRelationshipManager* manager,
-                   void* filter_data,
-                   bool (*filter)(void* filter_data, struct DiscordRelationship* relationship));
+    void (*filter)(struct IDiscordRelationshipManager* manager, void* filter_data, bool (*filter)(void* filter_data, struct DiscordRelationship* relationship));
     enum EDiscordResult (*count)(struct IDiscordRelationshipManager* manager, int32_t* count);
-    enum EDiscordResult (*get)(struct IDiscordRelationshipManager* manager,
-                               DiscordUserId user_id,
-                               struct DiscordRelationship* relationship);
-    enum EDiscordResult (*get_at)(struct IDiscordRelationshipManager* manager,
-                                  uint32_t index,
-                                  struct DiscordRelationship* relationship);
+    enum EDiscordResult (*get)(struct IDiscordRelationshipManager* manager, DiscordUserId user_id, struct DiscordRelationship* relationship);
+    enum EDiscordResult (*get_at)(struct IDiscordRelationshipManager* manager, uint32_t index, struct DiscordRelationship* relationship);
 };
 
 struct IDiscordLobbyEvents {
@@ -486,18 +461,9 @@ struct IDiscordLobbyEvents {
     void (*on_member_connect)(void* event_data, int64_t lobby_id, int64_t user_id);
     void (*on_member_update)(void* event_data, int64_t lobby_id, int64_t user_id);
     void (*on_member_disconnect)(void* event_data, int64_t lobby_id, int64_t user_id);
-    void (*on_lobby_message)(void* event_data,
-                             int64_t lobby_id,
-                             int64_t user_id,
-                             uint8_t* data,
-                             uint32_t data_length);
+    void (*on_lobby_message)(void* event_data, int64_t lobby_id, int64_t user_id, uint8_t* data, uint32_t data_length);
     void (*on_speaking)(void* event_data, int64_t lobby_id, int64_t user_id, bool speaking);
-    void (*on_network_message)(void* event_data,
-                               int64_t lobby_id,
-                               int64_t user_id,
-                               uint8_t channel_id,
-                               uint8_t* data,
-                               uint32_t data_length);
+    void (*on_network_message)(void* event_data, int64_t lobby_id, int64_t user_id, uint8_t channel_id, uint8_t* data, uint32_t data_length);
 };
 
 struct IDiscordLobbyManager {
@@ -513,114 +479,33 @@ struct IDiscordLobbyManager {
       DiscordLobbyId lobby_id,
       DiscordUserId user_id,
       struct IDiscordLobbyMemberTransaction** transaction);
-    void (*create_lobby)(struct IDiscordLobbyManager* manager,
-                         struct IDiscordLobbyTransaction* transaction,
-                         void* callback_data,
-                         void (*callback)(void* callback_data,
-                                          enum EDiscordResult result,
-                                          struct DiscordLobby* lobby));
-    void (*update_lobby)(struct IDiscordLobbyManager* manager,
-                         DiscordLobbyId lobby_id,
-                         struct IDiscordLobbyTransaction* transaction,
-                         void* callback_data,
-                         void (*callback)(void* callback_data, enum EDiscordResult result));
-    void (*delete_lobby)(struct IDiscordLobbyManager* manager,
-                         DiscordLobbyId lobby_id,
-                         void* callback_data,
-                         void (*callback)(void* callback_data, enum EDiscordResult result));
-    void (*connect_lobby)(struct IDiscordLobbyManager* manager,
-                          DiscordLobbyId lobby_id,
-                          DiscordLobbySecret secret,
-                          void* callback_data,
-                          void (*callback)(void* callback_data,
-                                           enum EDiscordResult result,
-                                           struct DiscordLobby* lobby));
-    void (*connect_lobby_with_activity_secret)(struct IDiscordLobbyManager* manager,
-                                               DiscordLobbySecret activity_secret,
-                                               void* callback_data,
-                                               void (*callback)(void* callback_data,
-                                                                enum EDiscordResult result,
-                                                                struct DiscordLobby* lobby));
-    void (*disconnect_lobby)(struct IDiscordLobbyManager* manager,
-                             DiscordLobbyId lobby_id,
-                             void* callback_data,
-                             void (*callback)(void* callback_data, enum EDiscordResult result));
-    enum EDiscordResult (*get_lobby)(struct IDiscordLobbyManager* manager,
-                                     DiscordLobbyId lobby_id,
-                                     struct DiscordLobby* lobby);
-    enum EDiscordResult (*get_lobby_activity_secret)(struct IDiscordLobbyManager* manager,
-                                                     DiscordLobbyId lobby_id,
-                                                     DiscordLobbySecret* secret);
-    enum EDiscordResult (*get_lobby_metadata_value)(struct IDiscordLobbyManager* manager,
-                                                    DiscordLobbyId lobby_id,
-                                                    DiscordMetadataKey key,
-                                                    DiscordMetadataValue* value);
-    enum EDiscordResult (*get_lobby_metadata_key)(struct IDiscordLobbyManager* manager,
-                                                  DiscordLobbyId lobby_id,
-                                                  int32_t index,
-                                                  DiscordMetadataKey* key);
-    enum EDiscordResult (*lobby_metadata_count)(struct IDiscordLobbyManager* manager,
-                                                DiscordLobbyId lobby_id,
-                                                int32_t* count);
-    enum EDiscordResult (*member_count)(struct IDiscordLobbyManager* manager,
-                                        DiscordLobbyId lobby_id,
-                                        int32_t* count);
-    enum EDiscordResult (*get_member_user_id)(struct IDiscordLobbyManager* manager,
-                                              DiscordLobbyId lobby_id,
-                                              int32_t index,
-                                              DiscordUserId* user_id);
-    enum EDiscordResult (*get_member_user)(struct IDiscordLobbyManager* manager,
-                                           DiscordLobbyId lobby_id,
-                                           DiscordUserId user_id,
-                                           struct DiscordUser* user);
-    enum EDiscordResult (*get_member_metadata_value)(struct IDiscordLobbyManager* manager,
-                                                     DiscordLobbyId lobby_id,
-                                                     DiscordUserId user_id,
-                                                     DiscordMetadataKey key,
-                                                     DiscordMetadataValue* value);
-    enum EDiscordResult (*get_member_metadata_key)(struct IDiscordLobbyManager* manager,
-                                                   DiscordLobbyId lobby_id,
-                                                   DiscordUserId user_id,
-                                                   int32_t index,
-                                                   DiscordMetadataKey* key);
-    enum EDiscordResult (*member_metadata_count)(struct IDiscordLobbyManager* manager,
-                                                 DiscordLobbyId lobby_id,
-                                                 DiscordUserId user_id,
-                                                 int32_t* count);
-    void (*update_member)(struct IDiscordLobbyManager* manager,
-                          DiscordLobbyId lobby_id,
-                          DiscordUserId user_id,
-                          struct IDiscordLobbyMemberTransaction* transaction,
-                          void* callback_data,
-                          void (*callback)(void* callback_data, enum EDiscordResult result));
-    void (*send_lobby_message)(struct IDiscordLobbyManager* manager,
-                               DiscordLobbyId lobby_id,
-                               uint8_t* data,
-                               uint32_t data_length,
-                               void* callback_data,
-                               void (*callback)(void* callback_data, enum EDiscordResult result));
-    enum EDiscordResult (*get_search_query)(struct IDiscordLobbyManager* manager,
-                                            struct IDiscordLobbySearchQuery** query);
-    void (*search)(struct IDiscordLobbyManager* manager,
-                   struct IDiscordLobbySearchQuery* query,
-                   void* callback_data,
-                   void (*callback)(void* callback_data, enum EDiscordResult result));
+    void (*create_lobby)(struct IDiscordLobbyManager* manager, struct IDiscordLobbyTransaction* transaction, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result, struct DiscordLobby* lobby));
+    void (*update_lobby)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, struct IDiscordLobbyTransaction* transaction, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result));
+    void (*delete_lobby)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result));
+    void (*connect_lobby)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordLobbySecret secret, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result, struct DiscordLobby* lobby));
+    void (*connect_lobby_with_activity_secret)(struct IDiscordLobbyManager* manager, DiscordLobbySecret activity_secret, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result, struct DiscordLobby* lobby));
+    void (*disconnect_lobby)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result));
+    enum EDiscordResult (*get_lobby)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, struct DiscordLobby* lobby);
+    enum EDiscordResult (*get_lobby_activity_secret)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordLobbySecret* secret);
+    enum EDiscordResult (*get_lobby_metadata_value)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordMetadataKey key, DiscordMetadataValue* value);
+    enum EDiscordResult (*get_lobby_metadata_key)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, int32_t index, DiscordMetadataKey* key);
+    enum EDiscordResult (*lobby_metadata_count)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, int32_t* count);
+    enum EDiscordResult (*member_count)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, int32_t* count);
+    enum EDiscordResult (*get_member_user_id)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, int32_t index, DiscordUserId* user_id);
+    enum EDiscordResult (*get_member_user)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordUserId user_id, struct DiscordUser* user);
+    enum EDiscordResult (*get_member_metadata_value)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordUserId user_id, DiscordMetadataKey key, DiscordMetadataValue* value);
+    enum EDiscordResult (*get_member_metadata_key)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordUserId user_id, int32_t index, DiscordMetadataKey* key);
+    enum EDiscordResult (*member_metadata_count)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordUserId user_id, int32_t* count);
+    void (*update_member)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, DiscordUserId user_id, struct IDiscordLobbyMemberTransaction* transaction, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result));
+    void (*send_lobby_message)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, uint8_t* data, uint32_t data_length, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result));
+    enum EDiscordResult (*get_search_query)(struct IDiscordLobbyManager* manager, struct IDiscordLobbySearchQuery** query);
+    void (*search)(struct IDiscordLobbyManager* manager, struct IDiscordLobbySearchQuery* query, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result));
     void (*lobby_count)(struct IDiscordLobbyManager* manager, int32_t* count);
-    enum EDiscordResult (*get_lobby_id)(struct IDiscordLobbyManager* manager,
-                                        int32_t index,
-                                        DiscordLobbyId* lobby_id);
-    void (*connect_voice)(struct IDiscordLobbyManager* manager,
-                          DiscordLobbyId lobby_id,
-                          void* callback_data,
-                          void (*callback)(void* callback_data, enum EDiscordResult result));
-    void (*disconnect_voice)(struct IDiscordLobbyManager* manager,
-                             DiscordLobbyId lobby_id,
-                             void* callback_data,
-                             void (*callback)(void* callback_data, enum EDiscordResult result));
-    enum EDiscordResult (*connect_network)(struct IDiscordLobbyManager* manager,
-                                           DiscordLobbyId lobby_id);
-    enum EDiscordResult (*disconnect_network)(struct IDiscordLobbyManager* manager,
-                                              DiscordLobbyId lobby_id);
+    enum EDiscordResult (*get_lobby_id)(struct IDiscordLobbyManager* manager, int32_t index, DiscordLobbyId* lobby_id);
+    void (*connect_voice)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result));
+    void (*disconnect_voice)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id, void* callback_data, void (*callback)(void* callback_data, enum EDiscordResult result));
+    enum EDiscordResult (*connect_network)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id);
+    enum EDiscordResult (*disconnect_network)(struct IDiscordLobbyManager* manager, DiscordLobbyId lobby_id);
     enum EDiscordResult (*flush_network)(struct IDiscordLobbyManager* manager);
     enum EDiscordResult (*open_network_channel)(struct IDiscordLobbyManager* manager,
                                                 DiscordLobbyId lobby_id,

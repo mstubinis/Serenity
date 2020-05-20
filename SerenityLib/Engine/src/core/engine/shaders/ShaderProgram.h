@@ -52,8 +52,7 @@ class ShaderProgram final : public EngineResource, public Engine::NonCopyable{
         ShaderProgram(ShaderProgram&& other) noexcept            = default;
         ShaderProgram& operator=(ShaderProgram&& other) noexcept = default;
 
-        template<typename T>
-        void setCustomBindFunctor(const T& functor) {
+        template<typename T> void setCustomBindFunctor(const T& functor) {
             m_CustomBindFunctor = std::bind<void>(std::move(functor), std::placeholders::_1);
         }
 
@@ -62,7 +61,7 @@ class ShaderProgram final : public EngineResource, public Engine::NonCopyable{
         void load() override;
         void unload() override;
 
-        const GLuint program() const;
+        GLuint program() const;
 
         const std::unordered_map<std::string, GLint>& uniforms() const;
 };

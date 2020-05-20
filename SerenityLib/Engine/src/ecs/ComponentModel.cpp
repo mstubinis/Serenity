@@ -159,8 +159,7 @@ void ComponentModel::addViewportFlag(const ViewportFlag::Flag flag) {
         model_instance->addViewportFlag(flag);
     }
 }
-
-const size_t ComponentModel::getNumModels() const {
+size_t ComponentModel::getNumModels() const {
     return m_ModelInstances.size();
 }
 ModelInstance& ComponentModel::getModel(const size_t& index) const {
@@ -176,7 +175,7 @@ void ComponentModel::hide() {
         modelInstance->hide();
     }
 }
-const float ComponentModel::radius() const {
+float ComponentModel::radius() const {
     return m_Radius; 
 }
 const glm::vec3& ComponentModel::boundingBox() const {
@@ -280,7 +279,7 @@ void ComponentModel::setModelMaterial(Material* material, const size_t& index, c
 void ComponentModel::setModelMaterial(const Handle material, const size_t& index, const RenderStage::Stage stage) {
     ComponentModel::setModelMaterial(material.get<Material>(), index, stage);
 }
-const bool ComponentModel::rayIntersectSphere(const ComponentCamera& camera) const {
+bool ComponentModel::rayIntersectSphere(const ComponentCamera& camera) const {
     const auto& body = *m_Owner.getComponent<ComponentBody>();
     return Math::rayIntersectSphere(body.position(), m_Radius, camera.m_Eye, camera.getViewVector());
 }

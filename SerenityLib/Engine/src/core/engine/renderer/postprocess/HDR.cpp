@@ -78,7 +78,7 @@ const bool Engine::priv::HDR::init_shaders() {
     return true;
 }
 void Engine::priv::HDR::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, const bool godRays, const bool lighting, const float godRaysFactor, const Engine::priv::Renderer& renderer) {
-    renderer._bindShaderProgram(m_Shader_Program);
+    renderer.bind(m_Shader_Program);
 
     Engine::Renderer::sendUniform4Safe("HDRInfo", exposure, 0.0f, godRaysFactor, static_cast<float>(algorithm));
     Engine::Renderer::sendUniform2Safe("Has", static_cast<int>(godRays), static_cast<int>(lighting));

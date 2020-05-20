@@ -15,18 +15,18 @@ Networking::ListenerTCP::ListenerTCP(const unsigned short port, const string& ip
     m_IP   = ip;
     m_Listener.setBlocking(false);
 
-    Core::m_Engine->m_Misc.m_SocketManager.add_tcp_listener(this);
+    Core::m_Engine->m_NetworkingModule.m_SocketManager.add_tcp_listener(this);
 }
 Networking::ListenerTCP::~ListenerTCP() { 
-    Core::m_Engine->m_Misc.m_SocketManager.remove_tcp_listener(this);
+    Core::m_Engine->m_NetworkingModule.m_SocketManager.remove_tcp_listener(this);
     close(); 
 }
 void Networking::ListenerTCP::update(const float dt) {
 
 }
-sf::TcpListener& Networking::ListenerTCP::socket() { 
-    return m_Listener; 
-}
+//sf::TcpListener& Networking::ListenerTCP::getSFMLSocket() {
+//    return m_Listener; 
+//}
 unsigned short Networking::ListenerTCP::localPort() const {
     return m_Listener.getLocalPort(); 
 }
@@ -47,14 +47,12 @@ void Networking::ListenerTCP::close() {
         m_Listener.close();
         Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
     }
-    //TODO: is the following needed outside the if block?
-    //m_Listener.close();
 }
 sf::Socket::Status Networking::ListenerTCP::accept(sf::TcpSocket& sfSocketTCP) {
     return m_Listener.accept(sfSocketTCP);
 }
 sf::Socket::Status Networking::ListenerTCP::accept(SocketTCP& socketTCP) {
-    return m_Listener.accept(socketTCP.socket());
+    return m_Listener.accept(socketTCP.m_SocketTCP);
 }
 sf::Socket::Status Networking::ListenerTCP::listen() {
     m_IP = (m_IP.empty() || m_IP == "0.0.0.0") ? "0.0.0.0" : m_IP;

@@ -70,8 +70,8 @@ class ComponentModel: public EventObserver {
         void setViewportFlag(const ViewportFlag::Flag flag);
         void addViewportFlag(const ViewportFlag::Flag flag);
 
-        const size_t getNumModels() const;
-        const float radius() const;
+        size_t getNumModels() const;
+        float radius() const;
         const glm::vec3& boundingBox() const;
         void show();
         void hide();
@@ -98,16 +98,14 @@ class ComponentModel: public EventObserver {
         void setModelShaderProgram(ShaderProgram*, const size_t& index, const RenderStage::Stage = RenderStage::GeometryOpaque);
         void setModelShaderProgram(const Handle materialHandle, const size_t& index, const RenderStage::Stage = RenderStage::GeometryOpaque);
 
-        const bool rayIntersectSphere(const ComponentCamera& camera) const;
+        bool rayIntersectSphere(const ComponentCamera& camera) const;
 
         void setUserPointer(void* UserPointer);
 
-        template<typename T> 
-        void setCustomBindFunctor(const T& functor, const size_t& index = 0) {
+        template<typename T> void setCustomBindFunctor(const T& functor, const size_t& index = 0) {
             m_ModelInstances[index]->setCustomBindFunctor(functor);
         }
-        template<typename T> 
-        void setCustomUnbindFunctor(const T& functor, const size_t& index = 0) {
+        template<typename T> void setCustomUnbindFunctor(const T& functor, const size_t& index = 0) {
             m_ModelInstances[index]->setCustomUnbindFunctor(functor);
         }
 

@@ -122,49 +122,50 @@ namespace Engine::priv {
             Material* getCurrentBoundMaterial() override;
             Mesh* getCurrentBoundMesh() override;
 
-            const unsigned int getUniformLocation(const char* location) override;
-            const unsigned int getUniformLocationUnsafe(const char* location) override;
+            unsigned int getUniformLocation(const char* location) override;
+            unsigned int getUniformLocationUnsafe(const char* location) override;
 
-            const unsigned int getMaxNumTextureUnits() override;
+            unsigned int getMaxNumTextureUnits() override;
 
-            const bool stencilOperation(const unsigned int stencilFail, const unsigned int depthFail, const unsigned int depthPass) override;
-            const bool stencilMask(const unsigned int mask) override;
-            const bool stencilFunction(const unsigned int stencilFunction, const unsigned int reference, const unsigned int mask) override;
-            const bool cullFace(const unsigned int face) override;
-            const bool setDepthFunction(const unsigned int depthFunction) override;
-            const bool setViewport(const float x, const float y, const float width, const float height) override;
+            bool stencilOperation(const unsigned int stencilFail, const unsigned int depthFail, const unsigned int depthPass) override;
+            bool stencilMask(const unsigned int mask) override;
+            bool stencilFunction(const unsigned int stencilFunction, const unsigned int reference, const unsigned int mask) override;
+            bool cullFace(const unsigned int face) override;
+            bool setDepthFunction(const unsigned int depthFunction) override;
+            bool setViewport(const float x, const float y, const float width, const float height) override;
             void clear(const bool color, const bool depth, const bool stencil) override;
-            const bool colorMask(const bool r, const bool g, const bool b, const bool alpha) override;
-            const bool clearColor(const bool r, const bool g, const bool b, const bool alpha) override;
+            bool colorMask(const bool r, const bool g, const bool b, const bool alpha) override;
+            bool clearColor(const bool r, const bool g, const bool b, const bool alpha) override;
 
-            const bool bindTextureForModification(const unsigned int textureType, const unsigned int textureObject) override;
-            const bool bindVAO(const unsigned int vaoObject) override;
-            const bool deleteVAO(unsigned int& vaoObject) override;
+            bool bindTextureForModification(const unsigned int textureType, const unsigned int textureObject) override;
+            bool bindVAO(const unsigned int vaoObject) override;
+            bool deleteVAO(unsigned int& vaoObject) override;
             void generateAndBindTexture(const unsigned int textureType, unsigned int& textureObject) override;
             void generateAndBindVAO(unsigned int& vaoObject) override;
 
-            const bool enableAPI(const unsigned int apiEnum) override;
-            const bool disableAPI(const unsigned int apiEnum) override;
-            const bool enableAPI_i(const unsigned int apiEnum, const unsigned int index) override;
-            const bool disableAPI_i(const unsigned int apiEnum, const unsigned int index) override;
-
+            bool enableAPI(const unsigned int apiEnum) override;
+            bool disableAPI(const unsigned int apiEnum) override;
+            bool enableAPI_i(const unsigned int apiEnum, const unsigned int index) override;
+            bool disableAPI_i(const unsigned int apiEnum, const unsigned int index) override;
 
             void sendTexture(const char* location, const Texture& texture, const int slot) override;
             void sendTexture(const char* location, const unsigned int textureObject, const int slot, const unsigned int textureTarget) override;
             void sendTextureSafe(const char* location, const Texture& texture, const int slot) override;
             void sendTextureSafe(const char* location, const unsigned int textureObject, const int slot, const unsigned int textureTarget) override;
 
-            const bool bindReadFBO(const unsigned int fbo) override;
-            const bool bindDrawFBO(const unsigned int fbo) override;
-            const bool bindRBO(const unsigned int rbo) override;
+            bool bindReadFBO(const unsigned int fbo) override;
+            bool bindDrawFBO(const unsigned int fbo) override;
+            bool bindRBO(const unsigned int rbo) override;
 
-            const bool bindShaderProgram(ShaderProgram* program) override;
-            const bool bindMaterial(Material* material) override;
-            const bool bindMesh(Mesh* mesh) override;
+            bool bind(ModelInstance* modelInstance) override;
+            bool bind(ShaderProgram* program) override;
+            bool bind(Material* material) override;
+            bool bind(Mesh* mesh) override;
 
-            const bool unbindShaderProgram() override;
-            const bool unbindMaterial() override;
-            const bool unbindMesh(Mesh* mesh) override;
+            bool unbind(ModelInstance* modelInstance) override;
+            bool unbind(ShaderProgram* program) override;
+            bool unbind(Material* material) override;
+            bool unbind(Mesh* mesh) override;
 
             void generatePBRData(Texture& texture, const unsigned int convoludeSize, const unsigned int prefilterSize) override;
 

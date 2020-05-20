@@ -101,7 +101,7 @@ Texture* MaterialComponent::cubemap(const size_t index) const {
 MaterialLayer& MaterialComponent::layer(const size_t index) {
     return m_Layers[index];
 }
-const MaterialComponentType::Type MaterialComponent::type() const {
+MaterialComponentType::Type MaterialComponent::type() const {
     return m_ComponentType;
 }
 

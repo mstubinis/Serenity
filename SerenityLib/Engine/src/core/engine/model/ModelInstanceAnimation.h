@@ -48,7 +48,7 @@ namespace Engine::priv {
 
             void emplace_animation(Mesh&, const std::string& animationName, const float start, const float end, const unsigned int requestedLoops);
 
-            const size_t size() const;
+            size_t size() const;
             void clear();
             void process(Mesh& mesh, const float dt);
     };

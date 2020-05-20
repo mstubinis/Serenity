@@ -7,10 +7,6 @@ using namespace std;
 
 SoundQueue::SoundQueue(Engine::priv::SoundManager& manager, const float delay) : m_SoundManager(manager){
     m_DelayInSeconds = delay;
-    m_DelayTimer     = 0;
-    m_IsDelayProcess = false;
-    m_Current        = nullptr;
-    m_Active         = false;
     m_SoundManager.m_SoundQueues.push_back(this);
 }
 SoundQueue::~SoundQueue() {
@@ -96,10 +92,10 @@ void SoundQueue::clear() {
     m_IsDelayProcess = false;
     m_Active         = false;
 }
-const bool SoundQueue::empty() const {
+bool SoundQueue::empty() const {
     return m_Queue.empty();
 }
-const bool& SoundQueue::active() const {
+bool SoundQueue::active() const {
     return m_Active;
 }
 void SoundQueue::activate() {
@@ -108,6 +104,6 @@ void SoundQueue::activate() {
 void SoundQueue::deactivate() {
     m_Active = false;
 }
-const size_t SoundQueue::size() const {
+size_t SoundQueue::size() const {
     return m_Queue.size();
 }

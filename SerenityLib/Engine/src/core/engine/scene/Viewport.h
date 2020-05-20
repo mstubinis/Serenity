@@ -56,28 +56,28 @@ class Viewport final : public Engine::NonCopyable {
 
         ~Viewport();
 
-        const unsigned int id() const;
+        unsigned int id() const;
         void setID(const unsigned int id);
 
-        const Engine::Flag<unsigned short> getRenderFlags() const;
+        Engine::Flag<unsigned short> getRenderFlags() const;
         void setRenderFlag(const ViewportRenderingFlag::Flag flag);
         void addRenderFlag(const ViewportRenderingFlag::Flag flag);
         void removeRenderFlag(const ViewportRenderingFlag::Flag flag);
 
-        const float getDepthMaskValue() const;
+        float getDepthMaskValue() const;
         void setDepthMaskValue(const float depth);
 
         void activateDepthMask(const bool active = true);
-        const bool isDepthMaskActive() const;
+        bool isDepthMaskActive() const;
 
         const glm::vec4& getBackgroundColor() const;
         void setBackgroundColor(const float r, const float g, const float b, const float a);
 
         void setAspectRatioSynced(const bool synced);
-        const bool isAspectRatioSynced() const;
+        bool isAspectRatioSynced() const;
 
         void activate(const bool activate = true);
-        const bool isActive() const;
+        bool isActive() const;
 
 
         const Scene& getScene() const;

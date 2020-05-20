@@ -19,7 +19,7 @@ class RodLight : public PointLight {
 
         inline void destroy();
 
-        const float rodLength() const;
+        float rodLength() const;
         void setRodLength(const float rodLength);
 };
 #endif

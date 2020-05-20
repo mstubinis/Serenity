@@ -2,14 +2,17 @@
 #ifndef ENGINE_NETWORKING_LISTENER_TCP_H
 #define ENGINE_NETWORKING_LISTENER_TCP_H
 
-#include <core/engine/networking/SocketInterface.h>
-#include <string>
-
+namespace Engine::Networking {
+    class SocketTCP;
+}
 namespace Engine::priv {
     class SocketManager;
 }
+
+#include <core/engine/networking/SocketInterface.h>
+#include <string>
+
 namespace Engine::Networking {
-    class SocketTCP;
     class ListenerTCP : public ISocket, public Engine::NonCopyable {
         friend class Engine::priv::SocketManager;
         private:
@@ -29,7 +32,7 @@ namespace Engine::Networking {
 
             bool               isListening() const;
             bool               isBlocking() const override;
-            sf::TcpListener&   socket() override;
+            //sf::TcpListener&   getSFMLSocket() override;
             unsigned short     localPort() const override;
 
             sf::Socket::Status accept(SocketTCP& tcpSocket);

@@ -55,7 +55,7 @@ class Collision final: public EventObserver {
         void setMass(const float mass);
         const btVector3& getBtInertia() const;
         btCollisionShape* getBtShape() const;
-        const CollisionType::Type& getType() const;
+        CollisionType::Type getType() const;
 
         void onEvent(const Event& event_) override;
 };

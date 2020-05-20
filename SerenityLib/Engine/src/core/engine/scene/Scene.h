@@ -50,15 +50,15 @@ class Scene: public EngineResource, public EventObserver{
         mutable std::vector<SpotLight*>                               m_SpotLights;
         mutable std::vector<RodLight*>                                m_RodLights;
 
-        std::vector<unsigned int>                             m_Entities;
-        unsigned int                                          m_ID;
-        glm::vec3                                             m_GI;
+        std::vector<unsigned int>                                     m_Entities;
+        unsigned int                                                  m_ID                 = 0;
+        glm::vec3                                                     m_GI                 = glm::vec3(1.0f);
 
-        Entity* m_Sun;
-        Skybox* m_Skybox;
+        Entity*                                                       m_Sun                = nullptr;
+        Skybox*                                                       m_Skybox             = nullptr;
 
-        class impl; impl*                                     m_i;
-        std::function<void(Scene*, const float)>              m_OnUpdateFunctor = [](Scene*, const float) {};
+        class impl; impl*                                             m_i                  = nullptr;
+        std::function<void(Scene*, const float)>                      m_OnUpdateFunctor    = [](Scene*, const float) {};
     public:
         Scene(const std::string& name);
         Scene(const std::string& name, const SceneOptions& options);
@@ -74,8 +74,8 @@ class Scene: public EngineResource, public EventObserver{
             m_OnUpdateFunctor = std::bind<void>(functor, std::placeholders::_1, std::placeholders::_2);
         }
 
-        const unsigned int id() const;
-        const unsigned int numViewports() const;
+        unsigned int id() const;
+        unsigned int numViewports() const;
 
 
         Entity createEntity();

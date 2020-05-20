@@ -76,7 +76,7 @@ void ModelInstanceAnimationVector::emplace_animation(Mesh& mesh, const string& a
     m_Animation_Instances.emplace_back(mesh, animationName, start, end, requestedLoops);
 }
 
-const size_t ModelInstanceAnimationVector::size() const {
+size_t ModelInstanceAnimationVector::size() const {
     return m_Animation_Instances.size();
 }
 void ModelInstanceAnimationVector::clear() {
@@ -84,8 +84,9 @@ void ModelInstanceAnimationVector::clear() {
     m_Transforms.clear();
 }
 void ModelInstanceAnimationVector::process(Mesh& mesh, const float dt) {
-    if (m_Animation_Instances.size() == 0)
+    if (m_Animation_Instances.size() == 0) {
         return;
+    }
     m_Transforms.clear();
     for (size_t j = 0; j < m_Animation_Instances.size(); ++j) {
         auto& animation = m_Animation_Instances[j];

@@ -46,14 +46,14 @@ class Particle {
 
         void init(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmitter& parent);
 
-        const bool isActive() const;
+        bool isActive() const;
         void setPosition(const glm::vec3& newPosition);
         Material* getMaterial() const;
-        const float angle() const;
+        float angle() const;
         const glm::vec2& getScale() const;
         const glm::vec3& position() const;
         const Engine::color_vector_4& color() const;
         const glm::vec3& velocity() const;
-        const double lifetime() const;
+        float lifetime() const;
 };
 #endif

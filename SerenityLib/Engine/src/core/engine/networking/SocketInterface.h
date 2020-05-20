@@ -18,7 +18,7 @@ namespace Engine::Networking {
         public:
             virtual void             setBlocking(bool blocking) = 0;
             virtual bool             isBlocking() const = 0;
-            virtual sf::Socket&      socket() = 0;
+            //virtual sf::Socket&      getSFMLSocket() = 0;
             virtual unsigned short   localPort() const = 0;
     };
 };

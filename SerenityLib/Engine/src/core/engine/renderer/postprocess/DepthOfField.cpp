@@ -87,7 +87,7 @@ const bool Engine::priv::DepthOfField::init_shaders() {
     return true;
 }
 void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport, const unsigned int sceneTexture, const Engine::priv::Renderer& renderer) {
-    renderer._bindShaderProgram(m_Shader_Program);
+    renderer.bind(m_Shader_Program);
 
     Engine::Renderer::sendUniform4Safe("Data", blur_radius, bias, focus, 0.0f);
 

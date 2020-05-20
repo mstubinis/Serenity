@@ -13,10 +13,10 @@ Networking::SocketUDP::SocketUDP(const unsigned short port, const string& ip){
     m_Port  = port;
     m_IP    = ip;
 
-    Core::m_Engine->m_Misc.m_SocketManager.add_udp_socket(this);
+    Core::m_Engine->m_NetworkingModule.m_SocketManager.add_udp_socket(this);
 }
 Networking::SocketUDP::~SocketUDP() { 
-    Core::m_Engine->m_Misc.m_SocketManager.remove_udp_socket(this);
+    Core::m_Engine->m_NetworkingModule.m_SocketManager.remove_udp_socket(this);
 }
 
 sf::Socket::Status Networking::SocketUDP::internal_send_packet(UDPPacketInfo& packet) {
@@ -101,8 +101,6 @@ void Networking::SocketUDP::unbind() {
 
         Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
     }
-    //TODO: is this needed outside the if block?
-    //m_Socket.unbind();
 }
 sf::Socket::Status Networking::SocketUDP::send(Engine::Networking::Packet& packet, const string& ip) {
     sf::Packet sf_packet;
@@ -160,9 +158,9 @@ sf::IpAddress Networking::SocketUDP::internal_get_ip(const string& ip) const {
 bool Networking::SocketUDP::isBound() const {
     return (m_SocketUDP.getLocalPort() != 0);
 }
-sf::UdpSocket& Networking::SocketUDP::socket() {
-    return m_SocketUDP;
-}
+//sf::UdpSocket& Networking::SocketUDP::getSFMLSocket() {
+//    return m_SocketUDP;
+//}
 unsigned short Networking::SocketUDP::localPort() const {
     return m_SocketUDP.getLocalPort();
 }

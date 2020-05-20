@@ -30,13 +30,13 @@ namespace Engine::priv {
             FramebufferObjectAttatchment(const FramebufferObject&, const FramebufferAttatchment::Attatchment&, const Texture&);
             virtual ~FramebufferObjectAttatchment();
 
-            const unsigned int width() const;
-            const unsigned int height() const;
-            const GLuint internalFormat() const;
-            const unsigned int attatchment() const;
+            unsigned int width() const;
+            unsigned int height() const;
+            GLuint internalFormat() const;
+            unsigned int attatchment() const;
 
             virtual void resize(FramebufferObject&, const unsigned int& width, const unsigned int& height);
-            virtual const GLuint address() const;
+            virtual GLuint address() const;
             virtual void bind();
             virtual void unbind();
     };
@@ -51,7 +51,7 @@ namespace Engine::priv {
             ~FramebufferTexture();
 
             void resize(FramebufferObject&, const unsigned int& width, const unsigned int& height) override;
-            const GLuint address() const override;
+            GLuint address() const override;
             Texture& texture() const;
             void bind() override;
             void unbind() override;
@@ -67,7 +67,7 @@ namespace Engine::priv {
             ~RenderbufferObject();
 
             void resize(FramebufferObject&, const unsigned int& width, const unsigned int& height) override;
-            const GLuint address() const override;
+            GLuint address() const override;
             void bind() override;
             void unbind() override;
     };
@@ -77,27 +77,25 @@ namespace Engine::priv {
         friend struct Engine::priv::FramebufferObjectDefaultBindFunctor;
         friend struct Engine::priv::FramebufferObjectDefaultUnbindFunctor;
         private:
-            std::function<void(const FramebufferObject*)>                      m_CustomBindFunctor;
-            std::function<void(const FramebufferObject*)>                      m_CustomUnbindFunctor;
+            std::function<void(const FramebufferObject*)>                           m_CustomBindFunctor;
+            std::function<void(const FramebufferObject*)>                           m_CustomUnbindFunctor;
 
-            mutable size_t                                                     m_CurrentFBOIndex;
-            unsigned int                                                       m_FramebufferWidth;
-            unsigned int                                                       m_FramebufferHeight;
-            float                                                              m_Divisor;
-            std::vector<GLuint>                                                m_FBO;
-            std::unordered_map<unsigned int, FramebufferObjectAttatchment*>    m_Attatchments;
+            mutable size_t                                                          m_CurrentFBOIndex;
+            unsigned int                                                            m_FramebufferWidth;
+            unsigned int                                                            m_FramebufferHeight;
+            float                                                                   m_Divisor;
+            std::vector<GLuint>                                                     m_FBO;
+            mutable std::unordered_map<unsigned int, FramebufferObjectAttatchment*> m_Attatchments;
         public:
             FramebufferObject();
             FramebufferObject(const unsigned int& width, const unsigned int& height, const float& divisor = 1.0f, const unsigned int& swapBufferCount = 1);
             FramebufferObject(const unsigned int& width, const unsigned int& height, const ImageInternalFormat::Format&, const float& divisor = 1.0f, const unsigned int& swapBufferCount = 1);
             ~FramebufferObject();
 
-            template<typename T>
-            void setCustomBindFunctor(const T& functor) {
+            template<typename T> void setCustomBindFunctor(const T& functor) {
                 m_CustomBindFunctor = std::bind<void>(std::move(functor), std::placeholders::_1);
             }
-            template<typename T>
-            void setCustomUnbindFunctor(const T& functor) {
+            template<typename T> void setCustomUnbindFunctor(const T& functor) {
                 m_CustomUnbindFunctor = std::bind<void>(std::move(functor), std::placeholders::_1);
             }
             void bind() const;
@@ -111,12 +109,12 @@ namespace Engine::priv {
             void resize(const unsigned int& width, const unsigned int& height);
             FramebufferTexture* attatchTexture(Texture*, const FramebufferAttatchment::Attatchment);
             RenderbufferObject* attatchRenderBuffer(RenderbufferObject&);
-            const unsigned int width() const;
-            const unsigned int height() const;
-            const std::unordered_map<unsigned int, FramebufferObjectAttatchment*>& attatchments() const;
-            const GLuint address() const;
-            const bool check();
-            const float divisor() const;
+            unsigned int width() const;
+            unsigned int height() const;
+            std::unordered_map<unsigned int, FramebufferObjectAttatchment*>& attatchments() const;
+            GLuint address() const;
+            bool check();
+            float divisor() const;
     };
 };
 

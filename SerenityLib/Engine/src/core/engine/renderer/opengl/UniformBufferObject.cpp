@@ -68,25 +68,18 @@ void UniformBufferObject::_unload_GPU() {
 void UniformBufferObject::updateData(void* data) {
     if (Engine::priv::Renderer::GLSL_VERSION < 140) {
         return;
-    }
-    
-    //glBindBuffer(GL_UNIFORM_BUFFER, m_UBOObject);
-    //glBufferSubData(GL_UNIFORM_BUFFER, 0, m_SizeOfStruct, data);
-    
-    
+    } 
     glBindBuffer(GL_UNIFORM_BUFFER, m_UBOObject);
-    GLvoid* p = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-    memcpy(p, data, m_SizeOfStruct);
-    glUnmapBuffer(GL_UNIFORM_BUFFER);
-    
+    //orphaning
+    glBufferData(GL_UNIFORM_BUFFER, m_SizeOfStruct, NULL, GL_STREAM_DRAW);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, m_SizeOfStruct, data);
 }
 void UniformBufferObject::attachToShader(const ShaderProgram& shaderProgram) {
-    const GLuint& program = shaderProgram.m_ShaderProgram;
     if (Engine::priv::Renderer::GLSL_VERSION < 140 || shaderProgram.m_AttachedUBOs.count(m_UBOObject)) {
         return;
     }
-    const unsigned int programBlockIndex = glGetUniformBlockIndex(program, m_NameInShader);
-    glUniformBlockBinding(program, programBlockIndex, m_GlobalBindingPointNumber);
+    const unsigned int programBlockIndex = glGetUniformBlockIndex(shaderProgram.m_ShaderProgram, m_NameInShader);
+    glUniformBlockBinding(shaderProgram.m_ShaderProgram, programBlockIndex, m_GlobalBindingPointNumber);
     const_cast<ShaderProgram&>(shaderProgram).m_AttachedUBOs.emplace(m_UBOObject);
 }
 const GLuint UniformBufferObject::address() const {

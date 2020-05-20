@@ -202,34 +202,34 @@ MaterialComponent& Material::addComponentParallaxOcclusion(const string& texture
 MaterialComponent& Material::getComponent(const unsigned int& index) {
     return *m_Components[index];
 }
-const bool Material::shadeless() const { 
+bool Material::shadeless() const { 
     return m_Shadeless; 
 }
 const Engine::color_vector_4& Material::f0() const{
     return m_F0Color; 
 }
-const unsigned char Material::glow() const {
+unsigned char Material::glow() const {
     return m_BaseGlow; 
 }
-const std::uint32_t Material::id() const { 
+std::uint32_t Material::id() const { 
     return m_ID; 
 }
-const unsigned char Material::diffuseModel() const {
+unsigned char Material::diffuseModel() const {
     return m_DiffuseModel; 
 }
-const unsigned char Material::specularModel() const {
+unsigned char Material::specularModel() const {
     return m_SpecularModel; 
 }
-const unsigned char Material::ao() const {
+unsigned char Material::ao() const {
     return m_BaseAO; 
 }
-const unsigned char Material::metalness() const{
+unsigned char Material::metalness() const{
     return m_BaseMetalness; 
 }
-const unsigned char Material::smoothness() const {
+unsigned char Material::smoothness() const {
     return m_BaseSmoothness; 
 }
-const unsigned char Material::alpha() const {
+unsigned char Material::alpha() const {
     return m_BaseAlpha;
 }
 void Material::setShadeless(const bool shadeless){

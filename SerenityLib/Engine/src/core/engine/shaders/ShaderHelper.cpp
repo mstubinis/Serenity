@@ -7,7 +7,7 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace std;
 
-const bool ShaderHelper::sfind(string_view whole, string_view part) {
+bool ShaderHelper::sfind(string_view whole, string_view part) {
     return (whole.find(part) != string::npos);
 }
 void ShaderHelper::insertStringAtLine(string& InSrc, const string& newcontent, const unsigned int linenumber) {
@@ -26,7 +26,7 @@ void ShaderHelper::insertStringAtLine(string& InSrc, const string& newcontent, c
             ++count;
         }
         InSrc = "";
-        for (auto& ln : lines) { 
+        for (const auto& ln : lines) { 
             InSrc += ln;
         }
     }

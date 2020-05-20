@@ -68,11 +68,11 @@ class Font final: public EngineResource {
             const glm::vec4& scissor = glm::vec4(-1.0f)
         );
 
-
-        const float getTextWidth(std::string_view text) const;
-        const float getTextHeight(std::string_view text) const;
-        const float getLineHeight() const;
-        const float getMaxHeight() const;
+        float getTextWidth(std::string_view text) const;
+        float getTextHeight(std::string_view text) const;
+        float getTextHeightDynamic(std::string_view text) const;
+        float getLineHeight() const;
+        float getMaxHeight() const;
 
         Texture* getGlyphTexture() const;
 

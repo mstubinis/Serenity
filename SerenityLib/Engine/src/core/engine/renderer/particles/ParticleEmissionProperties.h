@@ -66,11 +66,11 @@ class ParticleEmissionProperties final {
         ParticleEmissionProperties(ParticleEmissionProperties&& other) noexcept;
         ParticleEmissionProperties& operator=(ParticleEmissionProperties&& other) noexcept;
         
-        const float getLifetime() const;
-        const float getSpawnRate() const;
+        float getLifetime() const;
+        float getSpawnRate() const;
 
-        const bool addMaterial(Handle& materialHandle);
-        const bool addMaterial(Material& material);
+        bool addMaterial(Handle& materialHandle);
+        bool addMaterial(Material& material);
 
         const Material& getParticleMaterialRandom() const;
         const Material& getParticleMaterial(const size_t index = 0) const;

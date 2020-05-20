@@ -23,10 +23,10 @@ ComponentName::~ComponentName() {
 const string& ComponentName::name() const { 
     return m_Data;
 }
-const size_t ComponentName::size() const {
+size_t ComponentName::size() const {
     return m_Data.size();
 }
-const bool ComponentName::empty() const {
+bool ComponentName::empty() const {
     return m_Data.empty();
 }
 #pragma endregion

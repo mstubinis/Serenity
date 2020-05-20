@@ -246,10 +246,10 @@ void ModelInstance::internal_init(Mesh* mesh, Material* mat, ShaderProgram* prog
 
     internal_update_model_matrix();
 }
-const size_t ModelInstance::index() const {
+size_t ModelInstance::index() const {
     return m_Index;
 }
-const ModelDrawingMode::Mode ModelInstance::getDrawingMode() const {
+ModelDrawingMode::Mode ModelInstance::getDrawingMode() const {
     return m_DrawingMode;
 }
 void ModelInstance::setDrawingMode(const ModelDrawingMode::Mode drawMode) {
@@ -259,7 +259,7 @@ void ModelInstance::setDrawingMode(const ModelDrawingMode::Mode drawMode) {
 void ModelInstance::forceRender(const bool forced) {
     m_ForceRender = forced;
 }
-const bool ModelInstance::isForceRendered() const {
+bool ModelInstance::isForceRendered() const {
     return m_ForceRender;
 }
 void ModelInstance::setViewportFlag(const unsigned int flag) {
@@ -280,7 +280,7 @@ void ModelInstance::addViewportFlag(const ViewportFlag::Flag flag) {
 void ModelInstance::removeViewportFlag(const ViewportFlag::Flag flag) {
     m_ViewportFlag.remove(flag);
 }
-const unsigned int ModelInstance::getViewportFlags() const {
+unsigned int ModelInstance::getViewportFlags() const {
     return m_ViewportFlag.get();
 }
 void ModelInstance::internal_update_model_matrix() {
@@ -306,10 +306,10 @@ void ModelInstance::show() {
 void ModelInstance::hide() {
     m_Visible = false; 
 }
-const bool ModelInstance::visible() const {
+bool ModelInstance::visible() const {
     return m_Visible; 
 }
-const bool ModelInstance::passedRenderCheck() const {
+bool ModelInstance::passedRenderCheck() const {
     return m_PassedRenderCheck; 
 }
 void ModelInstance::setPassedRenderCheck(const bool b) {
@@ -407,7 +407,7 @@ Mesh* ModelInstance::mesh() const {
 Material* ModelInstance::material() const {
     return m_Material; 
 }
-const RenderStage::Stage ModelInstance::stage() const {
+RenderStage::Stage ModelInstance::stage() const {
     return m_Stage; 
 }
 void ModelInstance::setShaderProgram(const Handle shaderProgramHandle, ComponentModel& componentModel) {

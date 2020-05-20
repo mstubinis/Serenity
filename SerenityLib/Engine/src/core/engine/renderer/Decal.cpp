@@ -65,7 +65,7 @@ void Decal::update(const float dt) {
         }
     }
 }
-const bool Decal::active() const {
+bool Decal::active() const {
     return m_Active;
 }
 
@@ -76,17 +76,17 @@ const glm_quat& Decal::initialRotation() const {
     return m_InitialRotation;
 }
 
-const glm_vec3 Decal::position() const {
+glm_vec3 Decal::position() const {
     return getComponent<ComponentBody>()->position();
 }
-const glm_vec3 Decal::localPosition() const {
+glm_vec3 Decal::localPosition() const {
     return getComponent<ComponentBody>()->localPosition();
 }
-const glm_quat Decal::rotation() const {
+glm_quat Decal::rotation() const {
     return getComponent<ComponentBody>()->rotation();
 }
 
-const glm::vec3 Decal::getScale() const {
+glm::vec3 Decal::getScale() const {
     return getComponent<ComponentBody>()->getScale();
 }
 void Decal::setPosition(const glm_vec3& position) {
@@ -103,17 +103,17 @@ void Decal::setRotation(const decimal& x, const decimal& y, const decimal& z, co
 }
 
 
-const glm_vec3 Decal::position(const EntityDataRequest& request) const {
+glm_vec3 Decal::position(const EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->position();
 }
-const glm_vec3 Decal::localPosition(const EntityDataRequest& request) const {
+glm_vec3 Decal::localPosition(const EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->localPosition();
 }
-const glm_quat Decal::rotation(const EntityDataRequest& request) const {
+glm_quat Decal::rotation(const EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->rotation();
 }
 
-const glm::vec3 Decal::getScale(const EntityDataRequest& request) const {
+glm::vec3 Decal::getScale(const EntityDataRequest& request) const {
     return getComponent<ComponentBody>(request)->getScale();
 }
 void Decal::setPosition(const EntityDataRequest& request, const glm_vec3& position) {

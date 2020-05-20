@@ -10,14 +10,14 @@ using namespace Engine::priv;
 using namespace std;
 
 Networking::SocketTCP::SocketTCP(){
-    Core::m_Engine->m_Misc.m_SocketManager.add_tcp_socket(this);
+    Core::m_Engine->m_NetworkingModule.m_SocketManager.add_tcp_socket(this);
 }
 Networking::SocketTCP::SocketTCP(const unsigned short port, const string& ip) : Networking::SocketTCP::SocketTCP() {  //client side socket
     m_IP    = ip;
     m_Port  = port;
 }
 Networking::SocketTCP::~SocketTCP() { 
-    Core::m_Engine->m_Misc.m_SocketManager.remove_tcp_socket(this);
+    Core::m_Engine->m_NetworkingModule.m_SocketManager.remove_tcp_socket(this);
     disconnect();
 }
 
@@ -75,9 +75,9 @@ void Networking::SocketTCP::update(const float dt) {
 bool Networking::SocketTCP::isConnected() const {
     return (m_SocketTCP.getLocalPort() != 0);
 }
-sf::TcpSocket& Networking::SocketTCP::socket() {
-    return m_SocketTCP;
-}
+//sf::TcpSocket& Networking::SocketTCP::getSFMLSocket() {
+//    return m_SocketTCP;
+//}
 string Networking::SocketTCP::ip() const {
     return m_SocketTCP.getRemoteAddress().toString();
 }
@@ -103,8 +103,6 @@ void Networking::SocketTCP::disconnect() {
 
         Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
     }
-    //TODO: is this needed outside the if block?
-    //m_Socket.disconnect();
 }
 sf::Socket::Status Networking::SocketTCP::connect(const unsigned short timeout) {
     auto status = m_SocketTCP.connect(m_IP, m_Port, sf::seconds(timeout));

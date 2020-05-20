@@ -192,7 +192,7 @@ const btVector3& Collision::getBtInertia() const {
 btCollisionShape* Collision::getBtShape() const { 
     return m_BtShape; 
 }
-const CollisionType::Type& Collision::getType() const {
+CollisionType::Type Collision::getType() const {
     return m_Type; 
 }
 

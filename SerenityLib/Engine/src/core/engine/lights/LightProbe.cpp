@@ -46,6 +46,6 @@ void LightProbe::deactivate() {
 void LightProbe::setProbeType(const ProbeType::Type type) {
     m_ProbeType = type;
 }
-const LightProbe::ProbeType::Type LightProbe::getProbeType() const {
+LightProbe::ProbeType::Type LightProbe::getProbeType() const {
     return m_ProbeType;
 }

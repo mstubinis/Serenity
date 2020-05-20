@@ -77,7 +77,6 @@ namespace Engine {
 };
 
 Skybox::Skybox(const string* files){
-    m_Texture = nullptr;
     Engine::priv::SkyboxImplInterface::initMesh();
 
     string names[6] = { files[0],files[1],files[2],files[3],files[4],files[5] };
@@ -88,7 +87,6 @@ Skybox::Skybox(const string* files){
     registerEvent(EventType::WindowFullscreenChanged);
 }
 Skybox::Skybox(const string& filename){
-    m_Texture = nullptr;
     Engine::priv::SkyboxImplInterface::initMesh();
 
     m_Texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(filename);
@@ -122,4 +120,5 @@ void Skybox::onEvent(const Event& e) {
 Texture* Skybox::texture() const {
     return m_Texture; 
 }
-void Skybox::update(){}
+void Skybox::update(){
+}

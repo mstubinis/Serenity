@@ -75,19 +75,19 @@ class ParticleEmitter final : public Entity {
         void applyLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
         void applyLinearVelocity(glm_vec3& velocity, const bool local = true);
 
-        const glm_vec3 getScale(const EntityDataRequest& request) const;
-        const glm_vec3 getScale() const;
+        glm_vec3 getScale(const EntityDataRequest& request) const;
+        glm_vec3 getScale() const;
 
-        const glm_vec3 position(const EntityDataRequest& request) const;
-        const glm_vec3 position() const;
+        glm_vec3 position(const EntityDataRequest& request) const;
+        glm_vec3 position() const;
 
-        const glm_quat rotation(const EntityDataRequest& request) const;
-        const glm_quat rotation() const;
+        glm_quat rotation(const EntityDataRequest& request) const;
+        glm_quat rotation() const;
 
-        const glm_vec3 linearVelocity(const EntityDataRequest& request) const;
-        const glm_vec3 linearVelocity() const;
+        glm_vec3 linearVelocity(const EntityDataRequest& request) const;
+        glm_vec3 linearVelocity() const;
 
-        const bool isActive() const;
+        bool isActive() const;
 
         void activate();
         void deactivate();

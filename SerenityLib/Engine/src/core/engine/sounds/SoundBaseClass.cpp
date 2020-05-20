@@ -8,60 +8,60 @@ SoundBaseClass::SoundBaseClass(const unsigned int numLoops) {
 SoundBaseClass::~SoundBaseClass() {
     m_Status = SoundStatus::Stopped;
 }
-const SoundStatus::Status SoundBaseClass::status() {
+SoundStatus::Status SoundBaseClass::status() {
     return m_Status;
 }
 void SoundBaseClass::update(const float dt) {
 }
-const bool SoundBaseClass::play(const unsigned int numLoops) {
+bool SoundBaseClass::play(const unsigned int numLoops) {
     return false;
 }
-const bool SoundBaseClass::pause() {
+bool SoundBaseClass::pause() {
     return false;
 }
-const bool SoundBaseClass::stop() {
+bool SoundBaseClass::stop() {
     return false;
 }
-const bool SoundBaseClass::restart() {
+bool SoundBaseClass::restart() {
     return false;
 }
-const unsigned int SoundBaseClass::getLoopsLeft() {
+unsigned int SoundBaseClass::getLoopsLeft() {
     return m_Loops - m_CurrentLoop;
 }
-const float SoundBaseClass::getAttenuation() {
+float SoundBaseClass::getAttenuation() {
     return 0;
 }
-const unsigned int SoundBaseClass::getChannelCount() {
+unsigned int SoundBaseClass::getChannelCount() {
     return 0;
 }
 void SoundBaseClass::setAttenuation(const float attenuation) {
 
 }
-const float SoundBaseClass::getMinDistance() {
+float SoundBaseClass::getMinDistance() {
     return 0.0f;
 }
 void SoundBaseClass::setMinDistance(const float minDistance) {
 
 }
-const bool SoundBaseClass::isRelativeToListener() {
+bool SoundBaseClass::isRelativeToListener() {
     return false;
 }
 void SoundBaseClass::setRelativeToListener(const bool relative) {
 
 }
-const glm::vec3 SoundBaseClass::getPosition() {
+glm::vec3 SoundBaseClass::getPosition() {
     return glm::vec3(0.0f);
 }
 void SoundBaseClass::setPosition(const float x, const float y, const float z) {
 }
 void SoundBaseClass::setPosition(const glm::vec3& position) {
 }
-const float SoundBaseClass::getVolume() {
+float SoundBaseClass::getVolume() {
     return 0;
 }
 void SoundBaseClass::setVolume(const float volume) {
 }
-const float SoundBaseClass::getPitch() {
+float SoundBaseClass::getPitch() {
     return 0;
 }
 void SoundBaseClass::setPitch(const float pitch) {

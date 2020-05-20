@@ -33,7 +33,7 @@ void Engine::priv::SSAO::init() {
     uniform_real_distribution<float> rand(0.0f, 1.0f);
     default_random_engine gen;
     /*
-    for (uint i = 0; i < SSAO_MAX_KERNEL_SIZE; ++i) {
+    for (unsigned int i = 0; i < SSAO_MAX_KERNEL_SIZE; ++i) {
         glm::vec3 sample(rand(gen) * 2.0f - 1.0f, rand(gen) * 2.0f - 1.0f, rand(gen));
         sample = glm::normalize(sample);
         sample *= rand(gen);
@@ -48,7 +48,7 @@ void Engine::priv::SSAO::init() {
     */
     vector<glm::vec3> ssaoNoise;
     ssaoNoise.reserve(SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE);
-    for (uint i = 0; i < SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE; ++i) {
+    for (unsigned int i = 0; i < SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE; ++i) {
         ssaoNoise.emplace_back(rand(gen) * 2.0 - 1.0, rand(gen) * 2.0 - 1.0, 0.0f);
     }
     Engine::Renderer::genAndBindTexture(GL_TEXTURE_2D, m_ssao_noise_texture);
@@ -141,7 +141,7 @@ const bool Engine::priv::SSAO::init_shaders() {
     return true;
 }
 void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, const Camera& camera, const Engine::priv::Renderer& renderer) {
-    renderer._bindShaderProgram(m_Shader_Program);
+    renderer.bind(m_Shader_Program);
     const auto& dimensions    = viewport.getViewportDimensions();
     const float divisor       = gbuffer.getSmallFBO().divisor();
     const float screen_width  = dimensions.z * divisor;
@@ -158,7 +158,7 @@ void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, co
     Engine::Renderer::renderFullscreenQuad();
 }
 void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, string_view type, const unsigned int texture, const Engine::priv::Renderer& renderer) {
-    renderer._bindShaderProgram(m_Shader_Program_Blur);
+    renderer.bind(m_Shader_Program_Blur);
     glm::vec2 hv(0.0f);
     if (type == "H") { 
         hv = glm::vec2(1.0f, 0.0f); 

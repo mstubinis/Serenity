@@ -82,13 +82,13 @@ Shader::Shader(const string& filenameOrCode, const ShaderType::Type shaderType, 
 }
 Shader::~Shader() {
 }
-const ShaderType::Type Shader::type() const {
+ShaderType::Type Shader::type() const {
     return m_Type;
 }
 const string& Shader::data() const {
     return m_Code;
 }
-const bool Shader::fromFile() const {
+bool Shader::fromFile() const {
     return m_FromFile;
 }
 

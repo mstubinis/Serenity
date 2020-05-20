@@ -11,8 +11,13 @@ namespace Engine::priv {
     class SocketManager;
 }
 namespace Engine::Networking {
+    class ListenerTCP;
+}
+
+namespace Engine::Networking {
     class SocketTCP: public ISocket, public Engine::NonCopyable {
         friend class Engine::priv::SocketManager;
+        friend class Engine::Networking::ListenerTCP;
         private:
             sf::TcpSocket             m_SocketTCP;
             std::string               m_IP       = "";
@@ -34,7 +39,7 @@ namespace Engine::Networking {
 
             void                 setBlocking(bool blocking) override;
             bool                 isBlocking() const override;
-            sf::TcpSocket&       socket() override;
+            //sf::TcpSocket&       getSFMLSocket() override;
             unsigned short       localPort() const override;
 
             std::string          ip() const;

@@ -57,7 +57,7 @@ class LightProbe : public Entity, public Engine::NonCopyable, public Engine::Non
         const Viewport& getViewport() const;
 
         void setProbeType(const ProbeType::Type type);
-        const LightProbe::ProbeType::Type getProbeType() const;
+        LightProbe::ProbeType::Type getProbeType() const;
 
         void update(const float dt);
 

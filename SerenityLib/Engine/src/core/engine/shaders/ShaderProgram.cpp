@@ -20,11 +20,13 @@ ShaderProgram* ShaderProgram::Decal    = nullptr;
 namespace Engine::priv {
     struct DefaultShaderBindFunctor{void operator()(ShaderProgram* shaderProgram) const {
         Scene* scene = Resources::getCurrentScene();  
-        if(!scene) 
+        if (!scene) {
             return;
+        }
         Camera* camera = scene->getActiveCamera();    
-        if(!camera) 
+        if (!camera) {
             return;
+        }
         Camera& c = *camera;
 
         const float fcoeff = (2.0f / glm::log2(c.getFar() + 1.0f)) * 0.5f;
@@ -56,7 +58,7 @@ ShaderProgram::~ShaderProgram(){
     unload(); 
 }
 
-const GLuint ShaderProgram::program() const {
+GLuint ShaderProgram::program() const {
     return m_ShaderProgram; 
 }
 

@@ -7,18 +7,18 @@
 
 class SoundData final : public EngineResource {
     private:
-        sf::SoundBuffer*  m_Buffer;
-        std::string       m_File;
-        float             m_Volume;
+        sf::SoundBuffer*  m_Buffer   = nullptr;
+        std::string       m_File     = "";
+        float             m_Volume   = 100.0f;
     public:
         SoundData(const std::string& filename);
         ~SoundData();
 
-        const float getDuration() const;
+        float getDuration() const;
         void buildBuffer();
         sf::SoundBuffer* getBuffer();
         const std::string& getFilename();
-        const float getVolume() const;
+        float getVolume() const;
         void setVolume(const float volume);
 };
 

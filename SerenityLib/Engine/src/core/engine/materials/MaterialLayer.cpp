@@ -53,7 +53,7 @@ void MaterialLayer::addUVModificationFunctor(const std_uv_func& functor) {
 void MaterialLayer::setBlendMode(const MaterialLayerBlendMode::Mode mode) {
     m_Data1.x = static_cast<float>(mode);
 }
-const MaterialLayerBlendMode::Mode MaterialLayer::blendMode() const {
+MaterialLayerBlendMode::Mode MaterialLayer::blendMode() const {
     return static_cast<MaterialLayerBlendMode::Mode>(static_cast<int>(m_Data1.x));
 }
 void MaterialLayer::setData1(const float x, const float y, const float z, const float w) {
