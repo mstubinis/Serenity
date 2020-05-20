@@ -244,6 +244,9 @@
     <Filter Include="Source Files\Engine\Core\Networking\Server">
       <UniqueIdentifier>{d2aab9f0-5173-4125-9177-1605bafdea70}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Renderer\software">
+      <UniqueIdentifier>{0de7db4e-4278-402c-9e10-d13180db3809}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBody.h">

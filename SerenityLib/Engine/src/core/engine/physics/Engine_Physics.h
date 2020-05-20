@@ -16,6 +16,7 @@ namespace Engine::priv {
 #include <vector>
 #include <mutex>
 #include <LinearMath/btVector3.h>
+#include <ecs/Entity.h>
 
 #define PHYSICS_MIN_STEP 0.016666666666666666f
 
@@ -68,23 +69,27 @@ namespace Engine{
         void pause(bool paused = true);
         void unpause();
 
+        bool addRigidBody(const Entity entity);
+        void addRigidBody(ComponentBody&);
         void addRigidBody(btRigidBody*, short group, short mask);
         void addRigidBody(btRigidBody*);
+        bool removeRigidBody(const Entity entity);
         void removeRigidBody(btRigidBody*);
-        void updateRigidBody(btRigidBody*);
-        void addRigidBody(ComponentBody&);
         void removeRigidBody(ComponentBody&);
         void removeCollisionObject(btCollisionObject* object);
 
+        void updateRigidBody(btRigidBody*);
 
-
+        bool addRigidBodyThreadSafe(const Entity entity);
+        void addRigidBodyThreadSafe(ComponentBody&);
         void addRigidBodyThreadSafe(btRigidBody*, short group, short mask);
         void addRigidBodyThreadSafe(btRigidBody*);
+        bool removeRigidBodyThreadSafe(const Entity entity);
         void removeRigidBodyThreadSafe(btRigidBody*);
-        void updateRigidBodyThreadSafe(btRigidBody*);
-        void addRigidBodyThreadSafe(ComponentBody&);
         void removeRigidBodyThreadSafe(ComponentBody&);
         void removeCollisionObjectThreadSafe(btCollisionObject* object);
+
+        void updateRigidBodyThreadSafe(btRigidBody*);
     };
 };
 #endif

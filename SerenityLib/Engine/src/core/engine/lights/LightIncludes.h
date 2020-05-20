@@ -3,10 +3,25 @@
 #define ENGINE_LIGHT_INCLUDES_INCLUDE_GUARD
 
 struct LightType {enum Type {
-    Sun, Point, Directional, Spot, Rod,
+    Sun, 
+    Point, 
+    Directional, 
+    Spot, 
+    Rod,
 _TOTAL};};
 struct LightRange {enum Range {
-    _7, _13, _20, _32, _50, _65, _100, _160, _200, _325, _600, _3250,
+    _7, 
+    _13, 
+    _20, 
+    _32, 
+    _50, 
+    _65, 
+    _100, 
+    _160, 
+    _200, 
+    _325, 
+    _600, 
+    _3250,
 _TOTAL};};
 struct LightAttenuation {enum Model {
     Constant,

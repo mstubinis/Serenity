@@ -851,17 +851,17 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, const Camera& cam
         glBufferData(GL_ARRAY_BUFFER, particle_count * SIZE_OF_PARTICLE_DOD, NULL, GL_STREAM_DRAW);
         glBufferSubData(GL_ARRAY_BUFFER, 0, particle_count * SIZE_OF_PARTICLE_DOD, &system.ParticlesDOD[0]);
 
-        glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(particleMesh.getVertexData().indices.size()), GL_UNSIGNED_SHORT, 0, static_cast<GLsizei>(particle_count));
+        glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(particleMesh.getVertexData().m_Indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(particle_count));
 
         m_Renderer._unbindMesh(&particleMesh);
     }
 }
 void DeferredPipeline::renderMesh(const Mesh& mesh, const unsigned int mode) {
-    const auto indicesSize = mesh.getVertexData().indices.size();
+    const auto indicesSize = mesh.getVertexData().m_Indices.size();
     if (indicesSize == 0) {
         return;
     }
-    glDrawElements(mode, static_cast<GLsizei>(indicesSize), GL_UNSIGNED_SHORT, nullptr);
+    glDrawElements(mode, static_cast<GLsizei>(indicesSize), GL_UNSIGNED_INT, nullptr);
 }
 void DeferredPipeline::renderLightProbe(LightProbe& lightProbe) {
     //goal: render all 6 sides into a fbo and into a cubemap, and have that cubemap stored in the light probe to be used for Global Illumination
@@ -1534,6 +1534,7 @@ void DeferredPipeline::render2DAPI(const bool mainRenderFunc, const Viewport& vi
                 Engine::Renderer::sendUniformMatrix4("VP", m_2DProjectionMatrix);
                 Engine::Renderer::sendUniform1Safe("ScreenGamma", m_Renderer.m_Gamma);
                 Engine::Renderer::GLEnable(GL_SCISSOR_TEST);
+
                 for (const auto& command : m_2DAPICommands) {
                     command.func();
                 }

@@ -14,11 +14,12 @@ namespace Engine::Networking {
     class SocketTCP: public ISocket, public Engine::NonCopyable {
         friend class Engine::priv::SocketManager;
         private:
-            sf::TcpSocket             m_Socket;
+            sf::TcpSocket             m_SocketTCP;
             std::string               m_IP       = "";
             unsigned short            m_Port     = 0;
             std::queue<sf::Packet>    m_PartialPackets;
 
+            sf::Socket::Status internal_send_partial_packets_loop();
             sf::Socket::Status internal_send_packet(sf::Packet& sfPacket);
             sf::Socket::Status internal_send_packet(Engine::Networking::Packet& packet);
 
@@ -43,11 +44,16 @@ namespace Engine::Networking {
 
             sf::Socket::Status   send(Engine::Networking::Packet& packet);
             sf::Socket::Status   send(sf::Packet& packet);
+
+            //TODO: handle this case automatically
+            //DO NOT use this send function if your socket is NON BLOCKING, use the one with the sent parameter instead
             sf::Socket::Status   send(const void* data, size_t size);
-            sf::Socket::Status   send(const void* data, size_t size, size_t sent);
+
+
+            sf::Socket::Status   send(const void* data, size_t size, size_t& sent);
 
             sf::Socket::Status   receive(sf::Packet& packet);
-            sf::Socket::Status   receive(void* data, size_t size, size_t received);
+            sf::Socket::Status   receive(void* data, size_t size, size_t& received);
     };
 };
 #endif

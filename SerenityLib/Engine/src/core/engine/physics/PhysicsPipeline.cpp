@@ -20,9 +20,6 @@
 using namespace std;
 using namespace Engine;
 
-void _preTicCallback(btDynamicsWorld* world, btScalar timeStep) {}
-void _postTicCallback(btDynamicsWorld* world, btScalar timeStep) {}
-
 #pragma region PhysicsTaskScheduler
 
 priv::PhysicsTaskScheduler::PhysicsTaskScheduler(const char* name) : btITaskScheduler(name){
@@ -44,7 +41,6 @@ int priv::PhysicsTaskScheduler::getNumThreads() const {
 void priv::PhysicsTaskScheduler::setNumThreads(int numThreads) {
 
 }
-//TODO: profile this
 void priv::PhysicsTaskScheduler::parallelFor(int iBegin, int iEnd, int grainSize, const btIParallelForBody& body) {
     auto parallel = [this, &body, iEnd, iBegin]() {
         auto split = Engine::priv::threading::splitVectorPairs(iEnd - iBegin, 0);
@@ -57,8 +53,11 @@ void priv::PhysicsTaskScheduler::parallelFor(int iBegin, int iEnd, int grainSize
         Engine::priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
     };
     
-    //parallel();
-    body.forLoop(iBegin, iEnd);
+    if (m_DoConcurrency) {
+        parallel();
+    }else{
+        body.forLoop(iBegin, iEnd);
+    }
 }
 btScalar priv::PhysicsTaskScheduler::parallelSum(int iBegin, int iEnd, int grainSize, const btIParallelSumBody& body) {
     auto parallel = [this, &body, iEnd, iBegin]() {
@@ -75,8 +74,11 @@ btScalar priv::PhysicsTaskScheduler::parallelSum(int iBegin, int iEnd, int grain
     };
     
     btScalar res = 0.0;
-    //res = parallel();
-    res = body.sumLoop(iBegin, iEnd);
+    if (m_DoConcurrency) {
+        res = parallel();
+    }else{
+        res = body.sumLoop(iBegin, iEnd);
+    }
     return res;
 
 }
@@ -94,6 +96,39 @@ void priv::PhysicsTaskScheduler::deactivate() {
 #pragma endregion
 
 #pragma region PhysicsPipeline
+
+template <const size_t UID, typename RES, typename... ARGS>
+struct fun_ptr_helper{
+    public:
+        typedef std::function<RES(ARGS...)> function_type;
+        static void bind(function_type&& f){
+            instance().fn_.swap(f);
+        }
+        static void bind(const function_type& f){
+            instance().fn_ = f;
+        }
+        static RES invoke(ARGS... args){
+            return instance().fn_(args...);
+        }
+        typedef decltype(&fun_ptr_helper::invoke) pointer_type;
+        static pointer_type ptr(){
+            return &invoke;
+        }
+    private:
+        static fun_ptr_helper& instance(){
+            static fun_ptr_helper inst_;
+            return inst_;
+        }
+        fun_ptr_helper() {}
+        function_type fn_;
+};
+
+template <const size_t UID, typename RES, typename... ARGS>
+typename fun_ptr_helper<UID, RES, ARGS...>::pointer_type
+get_fn_ptr(const std::function<RES(ARGS...)>& f){
+    fun_ptr_helper<UID, RES, ARGS...>::bind(f);
+    return fun_ptr_helper<UID, RES, ARGS...>::ptr();
+}
 
 priv::PhysicsPipeline::PhysicsPipeline() {
     const auto hardware_concurrency = Engine::priv::threading::hardware_concurrency();
@@ -115,8 +150,29 @@ priv::PhysicsPipeline::PhysicsPipeline() {
     m_World->setDebugDrawer(&m_DebugDrawer);
     m_World->setGravity(btVector3(static_cast<btScalar>(0.0), static_cast<btScalar>(0.0), static_cast<btScalar>(0.0)));
     btGImpactCollisionAlgorithm::registerAlgorithm(m_Dispatcher);
-    m_World->setInternalTickCallback(_preTicCallback, (void*)m_World, true);
-    m_World->setInternalTickCallback(_postTicCallback, (void*)m_World, false);
+    setPreTickCallback(m_PreTickCallback);
+    setPostTickCallback(m_PostTickCallback);
+}
+void priv::PhysicsPipeline::setPreTickCallback(function<void(btDynamicsWorld* world, btScalar timeStep)> preTicCallback) {
+    m_PreTickCallback = preTicCallback;
+    btInternalTickCallback btFunc = get_fn_ptr<0>(preTicCallback);
+    m_World->setInternalTickCallback(btFunc, (void*)m_World, true);
+}
+void priv::PhysicsPipeline::setPostTickCallback(function<void(btDynamicsWorld* world, btScalar timeStep)> postTickCallback) {
+    m_PostTickCallback = postTickCallback;
+    btInternalTickCallback btFunc = get_fn_ptr<0>(postTickCallback);
+    m_World->setInternalTickCallback(btFunc, (void*)m_World, false);
+}
+void priv::PhysicsPipeline::update(const float dt) {
+    /*
+    //Test performance here
+    if (Engine::isKeyDownOnce(KeyboardKey::M)) {
+        m_TaskScheduler->m_DoConcurrency = true;
+    }
+    if (Engine::isKeyDownOnce(KeyboardKey::N)) {
+        m_TaskScheduler->m_DoConcurrency = false;
+    }
+    */
 }
 priv::PhysicsPipeline::~PhysicsPipeline() {
     //btSetTaskScheduler(nullptr);

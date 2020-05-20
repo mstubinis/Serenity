@@ -268,7 +268,7 @@ void Scene::addCamera(Camera& camera) {
         setActiveCamera(camera);
     }
 }
-Camera* Scene::addCamera(float left, float right, float top, float bottom, float Near, float Far) {
+Camera* Scene::addCamera(float left, float right, float bottom, float top, float Near, float Far) {
     Camera* camera = NEW Camera(left, right, bottom, top, Near, Far, this);
     Scene::addCamera(*camera);
     return camera;

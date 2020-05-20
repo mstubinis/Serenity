@@ -19,7 +19,7 @@ namespace Engine::priv {
         std::vector<glm::vec3>                  normals;
         std::vector<glm::vec3>                  binormals;
         std::vector<glm::vec3>                  tangents;
-        std::vector<ushort>                     indices;
+        std::vector<unsigned int>               indices;
           
         MeshImportedData();
         ~MeshImportedData();

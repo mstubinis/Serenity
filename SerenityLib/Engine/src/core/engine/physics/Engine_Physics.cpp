@@ -131,12 +131,12 @@ priv::PhysicsManager::~PhysicsManager(){
     cleanup();
 }
 void priv::PhysicsManager::cleanup() {
-    auto& pipeline = *m_Pipeline.m_World;
+    auto& pipeline        = *m_Pipeline.m_World;
     int collisionObjCount = pipeline.getNumCollisionObjects();
     for (int i = 0; i < collisionObjCount; ++i) {
         btCollisionObject* obj = pipeline.getCollisionObjectArray()[i];
         if (obj) {
-            btRigidBody* body = btRigidBody::upcast(obj);
+            btRigidBody* body  = btRigidBody::upcast(obj);
             if (body) {
                 auto* motionState = body->getMotionState();
                 SAFE_DELETE(motionState);
@@ -158,8 +158,10 @@ void priv::PhysicsManager::_init(){
     gContactAddedCallback = CustomMaterialContactAddedCallback;
 }
 void priv::PhysicsManager::_update(const float dt, int maxSubSteps, float fixedTimeStep){ 
-    if (m_Paused)
+    if (m_Paused) {
         return;
+    }
+    m_Pipeline.update(dt);
     m_Pipeline.m_World->stepSimulation(static_cast<btScalar>(dt), maxSubSteps, static_cast<btScalar>(fixedTimeStep));
 
     for (int i = 0; i < m_Pipeline.m_Dispatcher->getNumManifolds(); ++i) {
@@ -184,14 +186,12 @@ void priv::PhysicsManager::_update(const float dt, int maxSubSteps, float fixedT
 void priv::PhysicsManager::_render(const Camera& camera){
     m_Pipeline.m_World->debugDrawWorld();
     const glm::vec3 camPos = camera.getPosition();
-    const glm::mat4 model = glm::mat4(1.0f);
+    const glm::mat4 model  = glm::mat4(1.0f);
     Engine::Renderer::sendUniformMatrix4("Model", model);
     Engine::Renderer::sendUniformMatrix4("VP", camera.getViewProjection());
     m_Pipeline.m_DebugDrawer.drawAccumulatedLines();
     m_Pipeline.m_DebugDrawer.postRender();
 }
-
-
 void Physics::setNumberOfStepsPerFrame(const unsigned int numSteps) {
     physicsManager->m_NumberOfStepsPerFrame = glm::max(1U, numSteps);
 }
@@ -259,11 +259,31 @@ void Physics::removeCollisionObject(btCollisionObject* object) {
 void Physics::updateRigidBody(btRigidBody* rigidBody){ 
     physicsManager->m_Pipeline.m_World->updateSingleAabb(rigidBody);
 }
+bool Physics::addRigidBody(const Entity entity) {
+    ComponentBody* body = entity.getComponent<ComponentBody>();
+    if (body) {
+        Physics::addRigidBody(*body);
+        return true;
+    }
+    return false;
+}
 void Physics::addRigidBody(ComponentBody& body) {
     Physics::addRigidBody(const_cast<btRigidBody*>(&body.getBtBody()), body.getCollisionGroup(), body.getCollisionMask());
 }
+bool Physics::removeRigidBody(const Entity entity) {
+    ComponentBody* body = entity.getComponent<ComponentBody>();
+    if (body) {
+        Physics::removeRigidBody(*body);
+        return true;
+    }
+    return false;
+}
 void Physics::removeRigidBody(ComponentBody& body) {
     Physics::removeRigidBody(&const_cast<btRigidBody&>(body.getBtBody()));
+}
+bool Physics::addRigidBodyThreadSafe(const Entity entity) {
+    std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
+    return Physics::addRigidBody(entity);
 }
 void Physics::addRigidBodyThreadSafe(btRigidBody* body, short group, short mask) {
     std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
@@ -272,6 +292,10 @@ void Physics::addRigidBodyThreadSafe(btRigidBody* body, short group, short mask)
 void Physics::addRigidBodyThreadSafe(btRigidBody* body) {
     std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
     Physics::addRigidBody(body);
+}
+bool Physics::removeRigidBodyThreadSafe(const Entity entity) {
+    std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
+    return Physics::removeRigidBody(entity);
 }
 void Physics::removeRigidBodyThreadSafe(btRigidBody* body) {
     std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
@@ -282,10 +306,10 @@ void Physics::updateRigidBodyThreadSafe(btRigidBody* body) {
     Physics::updateRigidBody(body);
 }
 void Physics::addRigidBodyThreadSafe(ComponentBody& body){
-    Physics::addRigidBodyThreadSafe(const_cast<btRigidBody*>(&body.getBtBody()), body.getCollisionGroup(), body.getCollisionMask());
+    Physics::addRigidBodyThreadSafe(&body.getBtBody(), body.getCollisionGroup(), body.getCollisionMask());
 }
 void Physics::removeRigidBodyThreadSafe(ComponentBody& body) {
-    Physics::removeRigidBodyThreadSafe(&const_cast<btRigidBody&>(body.getBtBody()));
+    Physics::removeRigidBodyThreadSafe(&body.getBtBody());
 }
 void Physics::removeCollisionObjectThreadSafe(btCollisionObject* object) {
     std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);

@@ -452,12 +452,13 @@ void EngineCore::handle_events(Window& window){
 }
 
 void EngineCore::run(){
-    while(!m_Misc.m_Destroyed){
+    while (!m_Misc.m_Destroyed) {
         float dt = m_DebugManager.dt() * m_DebugManager.timeScale();
         for (auto& window_itr : m_ResourceManager.m_Windows) {
             auto& window = *window_itr;
             handle_events(window);
             update(window, dt);
+            window.setActive(true);
             render(window, dt);
             cleanup(window, dt);
         }

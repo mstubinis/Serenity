@@ -32,11 +32,14 @@ namespace Engine::priv {
     class GLDebugDrawer final : public btIDebugDraw, public EventObserver, public Engine::NonCopyable, public Engine::NonMoveable {
         friend class Engine::priv::PhysicsManager;
         private:
-            GLuint m_Mode, m_VAO, m_VertexBuffer, C_MAX_POINTS;
+            GLuint m_PerFrameCount = 0U;
+            GLuint m_Mode          = btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE;
+            GLuint m_VAO           = 0U;
+            GLuint m_VertexBuffer  = 0U;
+            GLuint C_MAX_POINTS    = 2'097'152U;
             struct LineVertex final {
-                glm::vec3 position;
-                glm::vec3 color;
-                LineVertex();
+                glm::vec3 position = glm::vec3(0.0f);
+                glm::vec3 color    = glm::vec3(1.0f);
             };
             std::vector<LineVertex> m_LineVertices;
 
@@ -47,7 +50,7 @@ namespace Engine::priv {
             void buildVAO();
             void postRender();
         public:
-            GLDebugDrawer();
+            GLDebugDrawer() = default;
             ~GLDebugDrawer();
 
             void drawAccumulatedLines();

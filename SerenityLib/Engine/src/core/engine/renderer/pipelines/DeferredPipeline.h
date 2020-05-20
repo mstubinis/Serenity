@@ -59,7 +59,7 @@ namespace Engine::priv {
 
             std::vector<glm::vec3>         m_Text_Points;
             std::vector<glm::vec2>         m_Text_UVs;
-            std::vector<unsigned short>    m_Text_Indices;
+            std::vector<unsigned int>      m_Text_Indices;
 
             UBOCameraDataStruct            m_UBOCameraDataStruct;
             glm::mat4                      m_2DProjectionMatrix;

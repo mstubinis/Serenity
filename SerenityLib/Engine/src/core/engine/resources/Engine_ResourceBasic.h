@@ -5,7 +5,7 @@
 #include <core/engine/resources/ResourcesIncludes.h>
 #include <string>
 
-class EngineResource{
+class EngineResource {
     private:
         bool                 m_IsLoaded;
         std::string          m_Name;
@@ -18,9 +18,9 @@ class EngineResource{
         const std::string& name() const;
         void setName(const std::string&);
 
-        const ResourceType::Type& type() const;
-        const bool isLoaded() const;
-        const unsigned int useCount() const;
+        ResourceType::Type type() const;
+        bool isLoaded() const;
+        unsigned int useCount() const;
 
         void incrementUseCount();
         void decrementUseCount();

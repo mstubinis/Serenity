@@ -20,16 +20,17 @@ namespace Engine::Networking {
                 sf::IpAddress   ip;
             };
 
-            sf::UdpSocket               m_Socket;
+            sf::UdpSocket               m_SocketUDP;
             unsigned short              m_Port      = 0;
             std::string                 m_IP        = "";
             std::queue<UDPPacketInfo>   m_PartialPackets;
 
             SocketUDP() = delete;
 
-            sf::IpAddress internal_ip(const std::string& ip) const;
+            sf::IpAddress internal_get_ip(const std::string& ipString) const;
 
-            sf::Socket::Status internal_send_packet(UDPPacketInfo&);
+            sf::Socket::Status internal_send_partial_packets_loop();
+            sf::Socket::Status internal_send_packet(UDPPacketInfo& packetInfoUDP);
 
             void update(const float dt) override;
         public:
@@ -50,7 +51,7 @@ namespace Engine::Networking {
             sf::Socket::Status   send(sf::Packet& packet, const std::string& ip = "");
             sf::Socket::Status   send(const void* data, size_t size, const std::string& ip = "");
             sf::Socket::Status   receive(sf::Packet& packet);
-            sf::Socket::Status   receive(void* data, size_t size, size_t received);
+            sf::Socket::Status   receive(void* data, size_t size, size_t& received);
 
             sf::Socket::Status   send(const unsigned short port, Engine::Networking::Packet& packet, const std::string& ip = "");
             sf::Socket::Status   send(const unsigned short port, sf::Packet& packet, const std::string& ip = "");

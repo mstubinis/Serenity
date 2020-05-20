@@ -51,8 +51,8 @@ void priv::MeshCollisionFactory::_initTriangleData(VertexData& data) {
     if (!m_TriangleStaticData) {
         const auto& positions = data.getData<glm::vec3>(0);
         vector<glm::vec3> triangles;
-        triangles.reserve(data.indices.size());
-        for (auto& indice : data.indices) {
+        triangles.reserve(data.m_Indices.size());
+        for (auto& indice : data.m_Indices) {
             triangles.push_back(positions[indice]);
         }
         m_TriangleStaticData = new btTriangleMesh();

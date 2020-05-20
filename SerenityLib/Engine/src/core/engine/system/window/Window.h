@@ -2,6 +2,7 @@
 #ifndef ENGINE_WINDOW_H
 #define ENGINE_WINDOW_H
 
+//#define ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS
 #if !defined(_APPLE_) && !defined(ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS)
     #ifndef ENGINE_THREAD_WINDOW_EVENTS
     #define ENGINE_THREAD_WINDOW_EVENTS
@@ -20,9 +21,11 @@ class  Texture;
 struct EngineOptions;
 class  Window;
 
+#include <atomic>
 #include <memory>
 #include <string>
 #include <SFML/Window.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
 #include <glm/vec2.hpp>
 #include <core/engine/containers/Queue_ts.h>
 
@@ -61,12 +64,13 @@ class Window final{
                 WindowData&                                          m_Data;
                 Engine::queue_ts<sf::Event>                          m_Queue;
                 Engine::queue_ts<EventThreadOnlyCommands::Command>   m_MainThreadToEventThreadQueue;
-                std::unique_ptr<std::thread>                         m_EventThread;
+                std::unique_ptr<std::thread>                         m_EventThread = nullptr;
 
                 void cleanup();
                 void startup(Window& super, const std::string& name);
                 void push(const EventThreadOnlyCommands::Command command);
                 std::optional<sf::Event> try_pop();
+                void updateLoop();
             public:
                 WindowThread(WindowData&);
                 ~WindowThread();
@@ -77,25 +81,25 @@ class Window final{
 
         private:
             #ifdef ENGINE_THREAD_WINDOW_EVENTS
-                WindowThread    m_WindowThread;
+                WindowThread              m_WindowThread;
             #endif
 
-            glm::uvec2          m_OldWindowSize;
-            unsigned int        m_Style;
-            sf::VideoMode       m_VideoMode;
-            std::string         m_WindowName;
-            sf::Window          m_SFMLWindow;
-            unsigned int        m_FramerateLimit;
-            bool                m_UndergoingClosing;
-            Engine::Flag<unsigned short>        m_Flags;
-            std::string         m_IconFile;
+            glm::uvec2                    m_OldWindowSize;
+            unsigned int                  m_Style;
+            sf::VideoMode                 m_VideoMode;
+            std::string                   m_WindowName;
+            sf::RenderWindow              m_SFMLWindow;
+            unsigned int                  m_FramerateLimit;
+            bool                          m_UndergoingClosing;
+            Engine::Flag<unsigned short>  m_Flags;
+            std::string                   m_IconFile;
 
-            glm::vec2           m_MousePosition;
-            glm::vec2           m_MousePosition_Previous;
-            glm::vec2           m_MouseDifference;
-            double              m_MouseDelta;
+            glm::vec2                     m_MousePosition;
+            glm::vec2                     m_MousePosition_Previous;
+            glm::vec2                     m_MouseDifference;
+            double                        m_MouseDelta;
 
-            sf::ContextSettings m_SFContextSettings;
+            sf::ContextSettings           m_SFContextSettings;
 
             void restore_state();
             const sf::ContextSettings create(Window& super, const std::string& name);
@@ -127,42 +131,43 @@ class Window final{
         ~Window();
 
         const std::string& name() const;
-        const glm::uvec2 getSize();
-        const glm::uvec2 getPosition();
+        glm::uvec2 getSize();
+        glm::uvec2 getPosition();
 
 
-        const unsigned int getFramerateLimit() const;
+        unsigned int getFramerateLimit() const;
 
-        sf::Window& getSFMLHandle() const;
+        sf::RenderWindow& getSFMLHandle();
+        sf::WindowHandle getSystemHandle() const;
 
         const glm::vec2& getMousePositionDifference() const;
         const glm::vec2& getMousePositionPrevious() const;
         const glm::vec2& getMousePosition() const;
         const double& getMouseWheelDelta() const;
 
-        const bool pollEvents(sf::Event& InSFEvent);
+        bool pollEvents(sf::Event& InSFEvent);
 
-        const bool hasFocus() const;
-        const bool isOpen() const;
+        bool hasFocus() const;
+        bool isOpen() const;
 
         //returns true if the window is in fullscreen OR windowed fullscreen mode
-        const bool isFullscreen() const;
+        bool isFullscreen() const;
 
-        const bool isWindowOnSeparateThread() const;
+        bool isWindowOnSeparateThread() const;
 
         //returns true if the window is in windowed fullscreen mode
-        const bool isFullscreenWindowed() const;
+        bool isFullscreenWindowed() const;
 
         //returns true if the window is in regular fullscreen mode
-        const bool isFullscreenNonWindowed() const;
+        bool isFullscreenNonWindowed() const;
 
         //currently specific to windows os only
-        const bool isMaximized() const;
+        bool isMaximized() const;
         //currently specific to windows os only
-        const bool isMinimized() const;
+        bool isMinimized() const;
 
-        const bool isActive() const;
-        const bool isMouseKeptInWindow() const;
+        bool isActive() const;
+        bool isMouseKeptInWindow() const;
 
         void updateMousePosition(const float x, const float y, const bool resetDifference = false, const bool resetPreviousPosition = false);
         void updateMousePosition(const glm::vec2& position, const bool resetDifference = false, const bool resetPreviousPosition = false);
@@ -176,9 +181,9 @@ class Window final{
         void setPosition(const unsigned int x, const unsigned int y);
 
         //currently specific to windows os only
-        const bool maximize();
+        bool maximize();
         //currently specific to windows os only
-        const bool minimize();
+        bool minimize();
 
         //If key repeat is enabled, you will receive repeated KeyPressed events while keeping a key pressed.
         //If it is disabled, you will only get a single event when the key is pressed.
@@ -208,10 +213,10 @@ class Window final{
         void setActive(const bool active = true);
 
         //sets the window to be full screen
-        const bool setFullscreen(const bool isFullscreen = true);
+        bool setFullscreen(const bool isFullscreen = true);
 
         //sets the window to be windowed fullscreen, this is a window with no style, stretched to the monitor's size
-        const bool setFullscreenWindowed(const bool isFullscreen = true);
+        bool setFullscreenWindowed(const bool isFullscreen = true);
 
         /*
         Display the rendered elements to the screen. This is called automatically during the Engine's render loop. You may want to call this yourself in certain parts of the update loop

@@ -23,22 +23,22 @@ void SocketManager::update(const float dt) {
     }
 }
 
-void SocketManager::add_tcp_socket(Engine::Networking::SocketTCP* socketTCP) {
-    internal_add_socket(m_TCPSockets, socketTCP);
+void SocketManager::add_tcp_socket(Engine::Networking::SocketTCP* socketTCPPtr) {
+    internal_add_socket(m_TCPSockets, socketTCPPtr);
 }
-void SocketManager::add_udp_socket(Engine::Networking::SocketUDP* socketUDP) {
-    internal_add_socket(m_UDPSockets, socketUDP);
+void SocketManager::add_udp_socket(Engine::Networking::SocketUDP* socketUDPPtr) {
+    internal_add_socket(m_UDPSockets, socketUDPPtr);
 }
-void SocketManager::add_tcp_listener(Engine::Networking::ListenerTCP* listenerTCP) {
-    internal_add_socket(m_TCPListeners, listenerTCP);
+void SocketManager::add_tcp_listener(Engine::Networking::ListenerTCP* listenerTCPPtr) {
+    internal_add_socket(m_TCPListeners, listenerTCPPtr);
 }
 
-void SocketManager::remove_tcp_socket(Engine::Networking::SocketTCP* socketTCP) {
-    internal_remove_socket(m_TCPSockets, socketTCP);
+void SocketManager::remove_tcp_socket(Engine::Networking::SocketTCP* socketTCPPtr) {
+    internal_remove_socket(m_TCPSockets, socketTCPPtr);
 }
-void SocketManager::remove_udp_socket(Engine::Networking::SocketUDP* socketUDP) {
-    internal_remove_socket(m_UDPSockets, socketUDP);
+void SocketManager::remove_udp_socket(Engine::Networking::SocketUDP* socketUDPPtr) {
+    internal_remove_socket(m_UDPSockets, socketUDPPtr);
 }
-void SocketManager::remove_tcp_listener(Engine::Networking::ListenerTCP* listenerTCP) {
-    internal_remove_socket(m_TCPListeners, listenerTCP);
+void SocketManager::remove_tcp_listener(Engine::Networking::ListenerTCP* listenerTCPPtr) {
+    internal_remove_socket(m_TCPListeners, listenerTCPPtr);
 }

@@ -18,6 +18,7 @@
 #include <glm/gtx/norm.hpp>
 
 #include <BulletCollision/Gimpact/btGImpactShape.h>
+#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
 
 #include <iostream>
@@ -70,6 +71,9 @@ ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(ComponentBody:
             SAFE_DELETE(bullet_rigidBody);
         }
         bullet_rigidBody   = std::exchange(other.bullet_rigidBody, nullptr);
+        if (bullet_rigidBody) {
+            bullet_rigidBody->setCollisionShape(collision->getBtShape());
+        }
     }
     return *this;
 }
@@ -180,26 +184,27 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
 const Entity ComponentBody::getOwner() const {
     return m_Owner;
 }
-void ComponentBody::onEvent(const Event& _event) {
+void ComponentBody::onEvent(const Event& e) {
 
 }
 
 void ComponentBody::rebuildRigidBody(const bool addBodyToPhysicsWorld, const bool threadSafe) {
     if (m_Physics) {
-        auto& inertia = data.p->collision->getBtInertia();
-        auto* shape = data.p->collision->getBtShape();
+        auto& p       = *data.p;
+        auto& inertia = p.collision->getBtInertia();
+        auto* shape   = p.collision->getBtShape();
         if (shape) {
-            if (data.p->bullet_rigidBody) {
+            if (p.bullet_rigidBody) {
                 removePhysicsFromWorld(true, threadSafe);
-                SAFE_DELETE(data.p->bullet_rigidBody);
+                SAFE_DELETE(p.bullet_rigidBody);
             }
-            btRigidBody::btRigidBodyConstructionInfo CI(data.p->mass, &data.p->bullet_motionState, shape, inertia);
-            data.p->bullet_rigidBody = new btRigidBody(CI);
-            data.p->bullet_rigidBody->setSleepingThresholds(0.015f, 0.015f);
-            data.p->bullet_rigidBody->setFriction(0.3f);
-            setDamping(static_cast<decimal>(0.1), static_cast<decimal>(0.4));
-            data.p->bullet_rigidBody->setMassProps(static_cast<btScalar>(data.p->mass), inertia);
-            data.p->bullet_rigidBody->updateInertiaTensor();
+            btRigidBody::btRigidBodyConstructionInfo CI(p.mass, &p.bullet_motionState, shape, inertia);
+            p.bullet_rigidBody = new btRigidBody(CI);
+            p.bullet_rigidBody->setSleepingThresholds(0.015f, 0.015f);
+            p.bullet_rigidBody->setFriction(0.3f);
+            ComponentBody::setDamping((decimal)(0.1), (decimal)(0.4));
+            p.bullet_rigidBody->setMassProps((btScalar)(p.mass), inertia);
+            p.bullet_rigidBody->updateInertiaTensor();
             setInternalPhysicsUserPointer(this);
             if (addBodyToPhysicsWorld) {
                 addPhysicsToWorld(true, threadSafe);
@@ -209,13 +214,11 @@ void ComponentBody::rebuildRigidBody(const bool addBodyToPhysicsWorld, const boo
 }
 //kinda ugly
 void ComponentBody::setInternalPhysicsUserPointer(void* userPtr) {
-    if (m_Physics) {
-        if (data.p->bullet_rigidBody) {
-            data.p->bullet_rigidBody->setUserPointer(userPtr);
-            auto* shape = data.p->bullet_rigidBody->getCollisionShape();
-            if (shape) {
-                shape->setUserPointer(userPtr);
-            }
+    if (m_Physics && data.p->bullet_rigidBody) {
+        data.p->bullet_rigidBody->setUserPointer(userPtr);
+        auto* shape = data.p->bullet_rigidBody->getCollisionShape();
+        if (shape) {
+            shape->setUserPointer(userPtr);
         }
     }
 }
@@ -244,10 +247,10 @@ const bool ComponentBody::hasPhysics() const {
     return m_Physics;
 }
 const decimal ComponentBody::getLinearDamping() const {
-    return (data.p->bullet_rigidBody) ? static_cast<decimal>(data.p->bullet_rigidBody->getLinearDamping()) : static_cast<decimal>(0.0);
+    return (data.p->bullet_rigidBody) ? (decimal)(data.p->bullet_rigidBody->getLinearDamping()) : decimal(0.0);
 }
 const decimal ComponentBody::getAngularDamping() const {
-    return (data.p->bullet_rigidBody) ? static_cast<decimal>(data.p->bullet_rigidBody->getAngularDamping()) : static_cast<decimal>(0.0);
+    return (data.p->bullet_rigidBody) ? (decimal)(data.p->bullet_rigidBody->getAngularDamping()) : decimal(0.0);
 }
 void ComponentBody::setUserPointer1(void* userPtr) {
     m_UserPointer1 = userPtr;
@@ -395,62 +398,17 @@ void ComponentBody::scale(const decimal& p_ScaleAmount) {
 }
 void ComponentBody::scale(const decimal& p_X, const decimal& p_Y, const decimal& p_Z) {
     if (m_Physics) {
-        const auto& newScale = btVector3(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
-        const auto& physicsData = *data.p;
-        Collision& collision_ = *physicsData.collision;
+        const auto newScale = btVector3(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
+        Collision& collision_ = *data.p->collision;
         auto collisionShape = collision_.getBtShape();
         if (collisionShape) {
-            if (collision_.getType() == CollisionType::Compound) {
-                if (collisionShape->isCompound()) {
-                    btCompoundShape* compoundShapeCast = static_cast<btCompoundShape*>(collisionShape);
-                    const auto numChildren = compoundShapeCast->getNumChildShapes();
-                    if (numChildren > 0) {
-                        for (int i = 0; i < numChildren; ++i) {
-                            btCollisionShape* shape = compoundShapeCast->getChildShape(i);
-                            btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
-                            if (convexHullCast) {
-                                auto& _convexHullCast = *convexHullCast;
-                                const auto& _scl = _convexHullCast.getLocalScaling() + newScale;
-                                _convexHullCast.setLocalScaling(_scl);
-                                continue;
-                            }
-                            btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
-                            if (triHullCast) {
-                                auto _triHullCast = *triHullCast;
-                                const auto& _scl = _triHullCast.getLocalScaling() + newScale;
-                                _triHullCast.setLocalScaling(_scl);
-                            }
-                        }
-                    }
-                }
-            }else if (collision_.getType() == CollisionType::ConvexHull) {
-                btUniformScalingShape* convex = static_cast<btUniformScalingShape*>(collisionShape);
-                const auto& _scl = convex->getLocalScaling() + newScale;
-                convex->setLocalScaling(_scl);
-            }else if (collision_.getType() == CollisionType::TriangleShapeStatic) {
-                btScaledBvhTriangleMeshShape* tri = static_cast<btScaledBvhTriangleMeshShape*>(collisionShape);
-                const auto& _scl = tri->getLocalScaling() + newScale;
-                tri->setLocalScaling(_scl);
-            }else if (collision_.getType() == CollisionType::Sphere) {
-                btMultiSphereShape* sph = static_cast<btMultiSphereShape*>(collisionShape);
-                const auto& _scl = sph->getLocalScaling() + newScale;
-                sph->setLocalScaling(_scl);
-                sph->setImplicitShapeDimensions(_scl);
-                sph->recalcLocalAabb();
-            }else if (collision_.getType() == CollisionType::TriangleShape) {
-                btGImpactMeshShape* gImpact = static_cast<btGImpactMeshShape*>(collisionShape);
-                const auto& _scl = gImpact->getLocalScaling() + newScale;
-                gImpact->setLocalScaling(_scl);
-                gImpact->updateBound();
-                gImpact->postUpdate();
-            }
+            collisionShape->setLocalScaling(collisionShape->getLocalScaling() + newScale);
         }
     }else{
-        auto& normalData = *data.n;
-        auto& scale_ = normalData.scale;
-		scale_.x += p_X;
-		scale_.y += p_Y;
-		scale_.z += p_Z;
+        auto& scl = data.n->scale;
+        scl.x += p_X;
+        scl.y += p_Y;
+        scl.z += p_Z;
     }
     auto* models = m_Owner.getComponent<ComponentModel>();
     if (models) {
@@ -541,52 +499,16 @@ void ComponentBody::setScale(const decimal& p_NewScale) {
 void ComponentBody::setScale(const decimal& p_X, const decimal& p_Y, const decimal& p_Z) {
     if (m_Physics) {
         const auto  newScale = btVector3(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
-        const auto& physicsData = *data.p;
-        Collision& collision_ = *physicsData.collision;
+        Collision& collision_ = *data.p->collision;
         auto collisionShape = collision_.getBtShape();
         if (collisionShape) {
-            if (collision_.getType() == CollisionType::Compound) {
-                if (collisionShape->isCompound()) {
-                    btCompoundShape* compoundShapeCast = static_cast<btCompoundShape*>(collisionShape);
-                    const int numChildren = compoundShapeCast->getNumChildShapes();
-                    if (numChildren > 0) {
-                        for (int i = 0; i < numChildren; ++i) {
-                            btCollisionShape* shape = compoundShapeCast->getChildShape(i);
-                            btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
-                            if (convexHullCast) {
-                                convexHullCast->setLocalScaling(newScale);
-                                continue;
-                            }
-                            btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
-                            if (triHullCast) {
-                                triHullCast->setLocalScaling(newScale);
-                            }
-                        }
-                    }
-                }
-            }else if (collision_.getType() == CollisionType::ConvexHull) {
-                btUniformScalingShape* convex = static_cast<btUniformScalingShape*>(collisionShape);
-                convex->setLocalScaling(newScale);
-            }else if (collision_.getType() == CollisionType::TriangleShapeStatic) {
-                btScaledBvhTriangleMeshShape* tri = static_cast<btScaledBvhTriangleMeshShape*>(collisionShape);
-                tri->setLocalScaling(newScale);
-            }else if (collision_.getType() == CollisionType::Sphere) {
-                btMultiSphereShape* sph = static_cast<btMultiSphereShape*>(collisionShape);
-                sph->setLocalScaling(newScale);
-                sph->setImplicitShapeDimensions(newScale);
-                sph->recalcLocalAabb();
-            }else if (collision_.getType() == CollisionType::TriangleShape) {
-                btGImpactMeshShape* gImpact = static_cast<btGImpactMeshShape*>(collisionShape);
-                gImpact->setLocalScaling(newScale);
-                gImpact->updateBound();
-                gImpact->postUpdate();
-            }
+            collisionShape->setLocalScaling(newScale);
         }
     }else{
-        auto& scale = data.n->scale;
-        scale.x = p_X;
-		scale.y = p_Y;
-		scale.z = p_Z;
+        auto& scl = data.n->scale;
+        scl.x = p_X;
+        scl.y = p_Y;
+        scl.z = p_Z;
     }
     auto* models = m_Owner.getComponent<ComponentModel>();
     if (models) {
@@ -609,10 +531,9 @@ glm_vec3 ComponentBody::position() const { //theres prob a better way to do this
         physicsData.bullet_rigidBody->getMotionState()->getWorldTransform(tr);
         return Math::btVectorToGLM(tr.getOrigin());
     }
-    auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
     auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
-    //const auto& matrix = system.ParentChildSystem.LocalTransforms[m_Owner.id() - 1U];
-    const auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
+    auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return Math::getMatrixPosition(matrix);
 }
 glm::vec3 ComponentBody::position_render() const { //theres prob a better way to do this
@@ -620,10 +541,9 @@ glm::vec3 ComponentBody::position_render() const { //theres prob a better way to
         auto tr = data.p->bullet_rigidBody->getWorldTransform();
         return Math::btVectorToGLM(tr.getOrigin());
     }
-    auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
     auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
-    //const auto& matrix = system.ParentChildSystem.LocalTransforms[m_Owner.id() - 1U];
-    const auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
+    auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return Math::getMatrixPosition(matrix);
 }
 const glm::vec3 ComponentBody::getScreenCoordinates(const bool p_ClampToEdge) const {
@@ -667,47 +587,9 @@ glm_vec3 ComponentBody::getScale() const {
     if (m_Physics) {
         const auto& physicsData = *data.p;
         Collision& collision_   = *physicsData.collision;
-        auto collisionShape = collision_.getBtShape();
+        auto collisionShape     = collision_.getBtShape();
         if (collisionShape) {
-            if (collision_.getType() == CollisionType::Compound) {
-                if (collisionShape->isCompound()) {
-                    btCompoundShape* compoundShapeCast = static_cast<btCompoundShape*>(collisionShape);
-                    const int numChildren = compoundShapeCast->getNumChildShapes();
-                    if (numChildren > 0) {
-                        for (int i = 0; i < numChildren; ++i) {
-                            btCollisionShape* shape = compoundShapeCast->getChildShape(i);
-                            btUniformScalingShape* convexHullCast = dynamic_cast<btUniformScalingShape*>(shape);
-                            if (convexHullCast) {
-                                return Math::btVectorToGLM(convexHullCast->getLocalScaling());
-                            }
-                            btScaledBvhTriangleMeshShape* triHullCast = dynamic_cast<btScaledBvhTriangleMeshShape*>(shape);
-                            if (triHullCast) {
-                                return Math::btVectorToGLM(triHullCast->getLocalScaling());
-                            }
-                        }
-                    }
-                }
-            }else if (collision_.getType() == CollisionType::ConvexHull) {
-                btUniformScalingShape* convex = static_cast<btUniformScalingShape*>(collisionShape);
-                if (convex) {
-                    return Math::btVectorToGLM(convex->getLocalScaling());
-                }
-            }else if (collision_.getType() == CollisionType::TriangleShapeStatic) {
-                btScaledBvhTriangleMeshShape* tri = static_cast<btScaledBvhTriangleMeshShape*>(collisionShape);
-                if (tri) {
-                    return Math::btVectorToGLM(tri->getLocalScaling());
-                }
-            }else if (collision_.getType() == CollisionType::Sphere) {
-                btMultiSphereShape* sph = static_cast<btMultiSphereShape*>(collisionShape);
-                if (sph) {
-                    return Math::btVectorToGLM(sph->getLocalScaling());
-                }
-            }else if (collision_.getType() == CollisionType::TriangleShape) {
-                btGImpactMeshShape* gImpact = static_cast<btGImpactMeshShape*>(collisionShape);
-                if (gImpact) {
-                    return Math::btVectorToGLM(gImpact->getLocalScaling());
-                }
-            }
+            return Math::btVectorToGLM(collisionShape->getLocalScaling());
         }
         return glm_vec3(static_cast<decimal>(1.0));
     }
@@ -722,7 +604,6 @@ glm_quat ComponentBody::rotation() const {
     }
     return data.n->rotation;
 }
-
 const glm_vec3& ComponentBody::forward() const {
 	return m_Forward; 
 }
@@ -748,7 +629,7 @@ glm_vec3 ComponentBody::getAngularVelocity() const  {
     return glm_vec3(static_cast<decimal>(0.0));
 }
 const float ComponentBody::mass() const {
-	return data.p->mass; 
+	return (m_Physics) ? data.p->mass : 0.0f;
 }
 glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way to do this
     if (m_Physics) {
@@ -771,18 +652,17 @@ glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way to do t
     }
     auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
     auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
-    //const auto& matrix = system.ParentChildSystem.LocalTransforms[m_Owner.id() - 1U];
     const auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return matrix;
 }
 glm::mat4 ComponentBody::modelMatrixRendering() const {
     return static_cast<glm::mat4>(modelMatrix());
 }
-const btRigidBody& ComponentBody::getBtBody() const {
+btRigidBody& ComponentBody::getBtBody() const {
 	return *data.p->bullet_rigidBody;
 }
-void ComponentBody::setDamping(const decimal& p_LinearFactor, const decimal& p_AngularFactor) {
-	data.p->bullet_rigidBody->setDamping(static_cast<btScalar>(p_LinearFactor), static_cast<btScalar>(p_AngularFactor));
+void ComponentBody::setDamping(const decimal& linearFactor, const decimal& angularFactor) {
+	data.p->bullet_rigidBody->setDamping(btScalar(linearFactor), btScalar(angularFactor));
 }
 void ComponentBody::setCollisionGroup(const short group) {
     if (m_Physics) {
@@ -912,18 +792,18 @@ void ComponentBody::removeCollisionFlag(const CollisionFlag::Flag flag) {
 //TODO: reconsider how this works
 void ComponentBody::setDynamic(const bool dynamic) {
     if (m_Physics) {
-        auto& physicsData = *data.p;
-        auto& rigidBody = *physicsData.bullet_rigidBody;
+        auto& p = *data.p;
+        auto& rigidBody = *p.bullet_rigidBody;
         if (dynamic) {
-            removePhysicsFromWorld(false);
+            //ComponentBody::removePhysicsFromWorld(false);
             rigidBody.setCollisionFlags(btCollisionObject::CF_ANISOTROPIC_FRICTION_DISABLED);
-            addPhysicsToWorld(false);
+            //ComponentBody::addPhysicsToWorld(false);
             rigidBody.activate();
         }else{
-            removePhysicsFromWorld(false);
+            //ComponentBody::removePhysicsFromWorld(false);
             rigidBody.setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
             ComponentBody::clearAllForces();
-            addPhysicsToWorld(false);
+            //ComponentBody::addPhysicsToWorld(false);
             rigidBody.activate();
         }
     }
@@ -1057,7 +937,7 @@ void ComponentBody::setMass(const float mass) {
         if (collision.getBtShape()) {
             collision.setMass(physicsData.mass);
             if (physicsData.bullet_rigidBody) {
-                physicsData.bullet_rigidBody->setMassProps(static_cast<btScalar>(physicsData.mass), collision.getBtInertia());
+                physicsData.bullet_rigidBody->setMassProps((btScalar)(physicsData.mass), collision.getBtInertia());
             }
         }
     }
@@ -1319,9 +1199,9 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::ui
         //std::cout << parentID << ", " << childID << " - remove: already removed\n";
         return;
     }
-    size_t parentIndex    = 0;
-    size_t erasedIndex    = 0;
-    bool foundParent      = false;
+    size_t parentIndex = 0;
+    size_t erasedIndex = 0;
+    bool foundParent   = false;
 
     for (size_t i = 0; i < Order.size(); ++i) {
         const auto& entityID = Order[i];

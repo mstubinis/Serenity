@@ -13,8 +13,8 @@ struct VertexData;
 
 //information about a vertex structure ( a list of all its attributes and the way the attributes are weaved into memory)
 struct VertexDataFormat {
-    std::vector<VertexAttributeInfo>    attributes;
-    VertexAttributeLayout::Type         interleavingType = VertexAttributeLayout::Interleaved;
+    std::vector<VertexAttributeInfo>    m_Attributes;
+    VertexAttributeLayout::Type         m_InterleavingType = VertexAttributeLayout::Interleaved;
 
     VertexDataFormat() = default;
     ~VertexDataFormat()                                            = default;

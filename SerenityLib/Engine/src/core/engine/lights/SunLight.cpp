@@ -11,9 +11,7 @@ SunLight::SunLight(const glm_vec3& pos, const LightType::Type type, Scene* scene
     if (!scene) {
         scene = Resources::getCurrentScene();
     }
-
-    m_Type              = type;
-
+    m_Type = type;
     if (type == LightType::Sun) {
         auto& sunLights = priv::InternalScenePublicInterface::GetSunLights(*scene);
         sunLights.push_back(this);
@@ -27,29 +25,35 @@ SunLight::SunLight(const glm_vec3& pos, const LightType::Type type, Scene* scene
 SunLight::~SunLight() {
 
 }
-const glm_vec3 SunLight::position() {
+bool SunLight::isShadowCaster() const {
+    return m_IsShadowCaster;
+}
+void SunLight::setShadowCaster(bool castsShadow) {
+    m_IsShadowCaster = castsShadow;
+}
+glm_vec3 SunLight::position() const {
     return getComponent<ComponentBody>()->position(); 
 }
 const glm::vec4& SunLight::color() const {
     return m_Color;
 }
-const bool SunLight::isActive() const {
+bool SunLight::isActive() const {
     return m_Active;
 }
-const uint SunLight::type() const {
+LightType::Type SunLight::type() const {
     return m_Type;
 }
-const float SunLight::getAmbientIntensity() const {
+float SunLight::getAmbientIntensity() const {
     return m_AmbientIntensity;
 }
-const float SunLight::getDiffuseIntensity() const {
+float SunLight::getDiffuseIntensity() const {
     return m_DiffuseIntensity;
 }
-const float SunLight::getSpecularIntensity() const {
+float SunLight::getSpecularIntensity() const {
     return m_SpecularIntensity;
 }
 
-void SunLight::setColor(const float r, const float g, const float b, const float a) {
+void SunLight::setColor(float r, float g, float b, float a) {
     m_Color = glm::vec4(r, g, b, a); 
 }
 void SunLight::setColor(const glm::vec4& col) {
@@ -70,16 +74,16 @@ void SunLight::setPosition(const glm_vec3& position) {
     getComponent<ComponentBody>()->setPosition(position);
 }
 
-void SunLight::setAmbientIntensity(const float a) {
+void SunLight::setAmbientIntensity(float a) {
     m_AmbientIntensity = a; 
 }
-void SunLight::setDiffuseIntensity(const float d) {
+void SunLight::setDiffuseIntensity(float d) {
     m_DiffuseIntensity = d; 
 }
-void SunLight::setSpecularIntensity(const float s) {
+void SunLight::setSpecularIntensity(float s) {
     m_SpecularIntensity = s; 
 }
-void SunLight::activate(const bool b) {
+void SunLight::activate(bool b) {
     m_Active = b; 
 }
 void SunLight::deactivate() { 

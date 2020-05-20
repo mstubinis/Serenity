@@ -225,21 +225,22 @@ bool priv::MeshLoader::IsSpecialFloat(const glm::vec3& v) {
     if (boost::math::isinf(v.x) || boost::math::isinf(v.y) || boost::math::isinf(v.z)) return true;
     return false;
 }
-bool priv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, vector<glm::vec3>& pts, vector<glm::vec2>& uvs, vector<glm::vec3>& norms, unsigned short& result, const float threshold) {
+bool priv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, vector<glm::vec3>& pts, vector<glm::vec2>& uvs, vector<glm::vec3>& norms, unsigned int& result, const float threshold) {
     for (size_t t = 0; t < pts.size(); ++t) {
         if (IsNear(in_pos, pts[t], threshold) && IsNear(in_uv, uvs[t], threshold) && IsNear(in_norm, norms[t], threshold)) {
-            result = static_cast<unsigned short>(t);
+            result = static_cast<unsigned int>(t);
             return true;
         }
     }
     return false;
 }
-void priv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
-    if (data.normals.size() == 0) 
+void priv::MeshLoader::CalculateTBNAssimp(MeshImportedData& importedData) {
+    if (importedData.normals.size() == 0) {
         return;
-    const auto pointsSize(data.points.size());
-    data.tangents.reserve(data.normals.size());
-    data.binormals.reserve(data.normals.size());
+    }
+    const auto pointsSize(importedData.points.size());
+    importedData.tangents.reserve(importedData.normals.size());
+    importedData.binormals.reserve(importedData.normals.size());
     for (size_t i = 0; i < pointsSize; i += 3) {
         const size_t p0(i + 0);
         const size_t p1(i + 1);
@@ -248,15 +249,15 @@ void priv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
         glm::vec3 point1, point2, point3;
         glm::vec2 uv1, uv2, uv3;
 
-        const auto uvSize(data.uvs.size());
+        const auto uvSize(importedData.uvs.size());
 
-        point1 = (pointsSize > p0) ? data.points[p0] : glm::vec3(0.0f);
-        point2 = (pointsSize > p1) ? data.points[p1] : glm::vec3(0.0f);
-        point3 = (pointsSize > p2) ? data.points[p2] : glm::vec3(0.0f);
+        point1 = (pointsSize > p0) ? importedData.points[p0] : glm::vec3(0.0f);
+        point2 = (pointsSize > p1) ? importedData.points[p1] : glm::vec3(0.0f);
+        point3 = (pointsSize > p2) ? importedData.points[p2] : glm::vec3(0.0f);
 
-        uv1 = (uvSize > p0) ? data.uvs[p0] : glm::vec2(0.0f);
-        uv2 = (uvSize > p1) ? data.uvs[p1] : glm::vec2(0.0f);
-        uv3 = (uvSize > p2) ? data.uvs[p2] : glm::vec2(0.0f);
+        uv1 = (uvSize > p0) ? importedData.uvs[p0] : glm::vec2(0.0f);
+        uv2 = (uvSize > p1) ? importedData.uvs[p1] : glm::vec2(0.0f);
+        uv3 = (uvSize > p2) ? importedData.uvs[p2] : glm::vec2(0.0f);
 
         glm::vec3 v(point2 - point1);
         glm::vec3 w(point3 - point1);
@@ -295,8 +296,8 @@ void priv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
             else if (b == 1) p = p1;
             else             p = p2;
 
-            if (data.normals.size() > p) 
-                normal = data.normals[p];
+            if (importedData.normals.size() > p)
+                normal = importedData.normals[p];
             else                         
                 normal = glm::vec3(0.0f);
 
@@ -313,15 +314,15 @@ void priv::MeshLoader::CalculateTBNAssimp(MeshImportedData& data) {
                 if (invalid_tangent) localTangent   = glm::normalize(glm::cross(normal, localBitangent));
                 else                 localBitangent = glm::normalize(glm::cross(localTangent, normal));
             }
-            data.tangents.push_back(localTangent);
-            data.binormals.push_back(localBitangent);
+            importedData.tangents.push_back(localTangent);
+            importedData.binormals.push_back(localBitangent);
         }
     }
-    for (size_t i = 0; i < data.points.size(); ++i) {
+    for (size_t i = 0; i < importedData.points.size(); ++i) {
         //hmm.. should b and t be swapped here?
-        auto& n = data.normals[i];
-        auto& b = data.tangents[i];
-        auto& t = data.binormals[i];
+        auto& n = importedData.normals[i];
+        auto& b = importedData.tangents[i];
+        auto& t = importedData.binormals[i];
         t = glm::normalize(t - n * glm::dot(n, t)); // Gram-Schmidt orthogonalize
     }
 };
@@ -352,7 +353,7 @@ VertexData* priv::MeshLoader::LoadFrom_OBJCC(string& filename) {
     }else{
         vertexData = NEW VertexData(VertexDataFormat::VertexDataBasic);
     }
-    vertexData->indices.reserve(sizes_indices);
+    vertexData->m_Indices.reserve(sizes_indices);
 
     vector<glm::vec3> temp_pos;
     vector<glm::vec2> temp_uvs;
@@ -433,7 +434,7 @@ VertexData* priv::MeshLoader::LoadFrom_OBJCC(string& filename) {
         inindices   = static_cast<uint16_t>(data_[blockStart + 0] << 8);
         inindices  |= static_cast<uint16_t>(data_[blockStart + 1]);
         blockStart += 2;
-        vertexData->indices.push_back(static_cast<uint16_t>(inindices));
+        vertexData->m_Indices.push_back(static_cast<uint16_t>(inindices));
     }
     vertexData->setData(0, temp_pos);
     vertexData->setData(1, temp_uvs);
@@ -444,18 +445,18 @@ VertexData* priv::MeshLoader::LoadFrom_OBJCC(string& filename) {
         vertexData->setData(5, temp_bID);
         vertexData->setData(6, temp_bW);
     }
-    vertexData->setIndices(vertexData->indices, false, false, true);
+    vertexData->setIndices(vertexData->m_Indices, false, false, true);
     return vertexData;
 }
 
-void priv::MeshLoader::SaveTo_OBJCC(VertexData& data, string filename) {
+void priv::MeshLoader::SaveTo_OBJCC(VertexData& vertexData, string filename) {
     std::ofstream stream(filename, ios::binary);
 
     //header - should only be 3 entries, one for m_Vertices , one for m_Indices, and one to tell if animation data is present or not
     uint32_t   sizes[3];
-    sizes[0] = static_cast<uint32_t>(data.dataSizes[0]);
-    sizes[1] = static_cast<uint32_t>(data.indices.size());
-    if (data.data.size() > 5) { //vertices contain animation data
+    sizes[0] = static_cast<uint32_t>(vertexData.m_DataSizes[0]);
+    sizes[1] = static_cast<uint32_t>(vertexData.m_Indices.size());
+    if (vertexData.m_Data.size() > 5) { //vertices contain animation data
         sizes[2] = 1;
     }else{
         sizes[2] = 0;
@@ -463,17 +464,17 @@ void priv::MeshLoader::SaveTo_OBJCC(VertexData& data, string filename) {
     for (size_t i = 0; i < 3; ++i) {
         writeUint32tBigEndian(sizes[i], stream);
     }
-    const auto& positions   = data.getData<glm::vec3>(0);
-    const auto& uvs         = data.getData<glm::vec2>(1);
-    const auto& normals     = data.getData<GLuint>(2);
-    const auto& binormals   = data.getData<GLuint>(3);
-    const auto& tangents    = data.getData<GLuint>(4);
+    const auto& positions   = vertexData.getData<glm::vec3>(0);
+    const auto& uvs         = vertexData.getData<glm::vec2>(1);
+    const auto& normals     = vertexData.getData<GLuint>(2);
+    const auto& binormals   = vertexData.getData<GLuint>(3);
+    const auto& tangents    = vertexData.getData<GLuint>(4);
     vector<glm::vec4>         boneIDs;
     vector<glm::vec4>         boneWeights;
 
     if (sizes[2] == 1) { //animation data is present
-        boneIDs     = data.getData<glm::vec4>(5);
-        boneWeights = data.getData<glm::vec4>(6);
+        boneIDs     = vertexData.getData<glm::vec4>(5);
+        boneWeights = vertexData.getData<glm::vec4>(6);
     }
     for (size_t j = 0; j < sizes[0]; ++j) {
         const auto& position   = positions[j];
@@ -535,7 +536,7 @@ void priv::MeshLoader::SaveTo_OBJCC(VertexData& data, string filename) {
     }
     //indices
     for (size_t i = 0; i < sizes[1]; ++i) {
-        uint16_t indice = data.indices[i];
+        uint16_t indice = vertexData.m_Indices[i];
         writeUint16tBigEndian(indice, stream);
     }
     stream.close();

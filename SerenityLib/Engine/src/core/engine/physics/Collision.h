@@ -40,7 +40,6 @@ class Collision final: public EventObserver {
 
     public:
         Collision(ComponentBody&);
-        //Collision(ComponentBody&, btHeightfieldTerrainShape&, const CollisionType::Type, const float mass = 0);
         Collision(ComponentBody&, const CollisionType::Type, ModelInstance* modelInstance, const float mass = 0);
         Collision(ComponentBody&, const CollisionType::Type, Mesh& mesh, const float mass = 0);
         Collision(ComponentBody&, ComponentModel&, const float mass = 0, const CollisionType::Type = CollisionType::ConvexHull);

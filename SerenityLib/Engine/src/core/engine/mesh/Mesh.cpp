@@ -5,6 +5,7 @@
 #include <core/engine/mesh/MeshCollisionFactory.h>
 #include <core/engine/events/Engine_EventObject.h>
 #include <core/engine/system/Engine.h>
+#include <core/Terrain.h>
 
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/renderer/Renderer.h>
@@ -31,6 +32,7 @@
 #include <iostream>
 #include <fstream>
 #include <execution>
+#include <iomanip>
 
 using namespace std;
 using namespace Engine;
@@ -45,6 +47,14 @@ namespace Engine::priv {
         mesh_ptr->m_VertexData->unbind();
     }};
 };
+
+string hash_position(glm::vec3& position, unsigned int decimal_places) {
+    stringstream one, two, thr;
+    one << std::fixed << std::setprecision(decimal_places) << position.x;
+    two << std::fixed << std::setprecision(decimal_places) << position.y;
+    thr << std::fixed << std::setprecision(decimal_places) << position.z;
+    return one.str() + "_" + two.str() + "_" + thr.str();
+}
 
 void InternalMeshPublicInterface::LoadGPU(Mesh& mesh){
     mesh.m_VertexData->finalize(); //transfer vertex data to gpu
@@ -83,21 +93,23 @@ btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, const 
     }else{
         factory = mesh->m_CollisionFactory;
     }
-    switch (type) {
-        case CollisionType::None: {
-            return new btEmptyShape();
-        }case CollisionType::Box: {
-            return factory->buildBoxShape(nullptr, isCompoundChild);
-        }case CollisionType::ConvexHull: {
-            return factory->buildConvexHull(nullptr, isCompoundChild);
-        }case CollisionType::Sphere: {
-            return factory->buildSphereShape(nullptr, isCompoundChild);
-        }case CollisionType::TriangleShapeStatic: {
-            return factory->buildTriangleShape(nullptr, isCompoundChild);
-        }case CollisionType::TriangleShape: {
-            return factory->buildTriangleShapeGImpact(nullptr, isCompoundChild);
-        }default: {
-            return new btEmptyShape();
+    if (factory) {
+        switch (type) {
+            case CollisionType::None: {
+                return new btEmptyShape();
+            }case CollisionType::Box: {
+                return factory->buildBoxShape(nullptr, isCompoundChild);
+            }case CollisionType::ConvexHull: {
+                return factory->buildConvexHull(nullptr, isCompoundChild);
+            }case CollisionType::Sphere: {
+                return factory->buildSphereShape(nullptr, isCompoundChild);
+            }case CollisionType::TriangleShapeStatic: {
+                return factory->buildTriangleShape(nullptr, isCompoundChild);
+            }case CollisionType::TriangleShape: {
+                return factory->buildTriangleShapeGImpact(nullptr, isCompoundChild);
+            }default: {
+                return new btEmptyShape();
+            }
         }
     }
     return new btEmptyShape();
@@ -115,22 +127,23 @@ btCollisionShape* InternalMeshPublicInterface::BuildCollision(ModelInstance* mod
     }else{
         factory = mesh->m_CollisionFactory;
     }
-
-    switch (type) {
-        case CollisionType::None: { 
-            return new btEmptyShape(); 
-        }case CollisionType::Box: { 
-            return factory->buildBoxShape(modelInstance, isCompoundChild);
-        }case CollisionType::ConvexHull: { 
-            return factory->buildConvexHull(modelInstance, isCompoundChild);
-        }case CollisionType::Sphere: { 
-            return factory->buildSphereShape(modelInstance, isCompoundChild);
-        }case CollisionType::TriangleShapeStatic: { 
-            return factory->buildTriangleShape(modelInstance, isCompoundChild);
-        }case CollisionType::TriangleShape: { 
-            return factory->buildTriangleShapeGImpact(modelInstance, isCompoundChild);
-        }default: { 
-            return new btEmptyShape(); 
+    if (factory) {
+        switch (type) {
+            case CollisionType::None: {
+                return new btEmptyShape();
+            }case CollisionType::Box: {
+                return factory->buildBoxShape(modelInstance, isCompoundChild);
+            }case CollisionType::ConvexHull: {
+                return factory->buildConvexHull(modelInstance, isCompoundChild);
+            }case CollisionType::Sphere: {
+                return factory->buildSphereShape(modelInstance, isCompoundChild);
+            }case CollisionType::TriangleShapeStatic: {
+                return factory->buildTriangleShape(modelInstance, isCompoundChild);
+            }case CollisionType::TriangleShape: {
+                return factory->buildTriangleShapeGImpact(modelInstance, isCompoundChild);
+            }default: {
+                return new btEmptyShape();
+            }
         }
     }
     return new btEmptyShape();
@@ -174,14 +187,14 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
 #pragma endregion
     }else{
 #pragma region Some Threshold
-        vector<ushort> indices;
+        vector<unsigned int> indices;
         vector<glm::vec3> temp_pos;       temp_pos.reserve(data.points.size());
         vector<glm::vec2> temp_uvs;       temp_uvs.reserve(data.uvs.size());
         vector<glm::vec3> temp_normals;   temp_normals.reserve(data.normals.size());
         vector<glm::vec3> temp_binormals; temp_binormals.reserve(data.binormals.size());
         vector<glm::vec3> temp_tangents;  temp_tangents.reserve(data.tangents.size());
-        for (uint i = 0; i < data.points.size(); ++i) {
-            ushort index;
+        for (unsigned int i = 0; i < data.points.size(); ++i) {
+            unsigned int index;
             bool found = priv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, mesh.m_Threshold);
             if (found) {
                 indices.emplace_back(index);
@@ -270,62 +283,137 @@ Mesh::Mesh() : EngineResource(ResourceType::Mesh) {
 }
 
 //TERRAIN MESH
-Mesh::Mesh(const string& name, const btHeightfieldTerrainShape& heightfield, float threshold) : EngineResource(ResourceType::Mesh) {
-    InternalMeshPublicInterface::InitBlankMesh(*this);
-    m_Threshold = threshold;
+void Mesh::internal_build_from_terrain(const Terrain& terrain, bool finalizeOnGPU) {
     MeshImportedData data;
 
+    unsigned int count = 0;
+    float offsetSectorX = 0.0f;
+    float offsetSectorY = 0.0f;
 
-    const unsigned int width    = static_cast<unsigned int>(heightfield.getUserIndex());
-    const unsigned int length   = static_cast<unsigned int>(heightfield.getUserIndex2());
-    const float fWidth          = static_cast<float>(width);
-    const float fLength         = static_cast<float>(length);
-    for (unsigned int i = 0; i < width - 1U; ++i) {
-        float fI = static_cast<float>(i);
-        for (unsigned int j = 0; j < length - 1U; ++j) {
-            float fJ = static_cast<float>(j);
-            btVector3 vert1, vert2, vert3, vert4;
-            heightfield.getVertex(i,     j,     vert1);
-            heightfield.getVertex(i + 1, j,     vert2);
-            heightfield.getVertex(i,     j + 1, vert3);
-            heightfield.getVertex(i + 1, j + 1, vert4);
+    unordered_map<string, VertexSmoothingGroup> m_VertexMap;
+    auto& heightfields = terrain.m_TerrainData.m_BtHeightfieldShapes;
+    for (size_t sectorX = 0; sectorX < heightfields.size(); ++sectorX) {
+        for (size_t sectorY = 0; sectorY < heightfields[sectorX].size(); ++sectorY) {
+            auto& heightfield = *heightfields[sectorX][sectorY];
+            unsigned int width = static_cast<unsigned int>(heightfield.getUserIndex());
+            unsigned int length = static_cast<unsigned int>(heightfield.getUserIndex2());
+            const float fWidth = static_cast<float>(width);
+            const float fLength = static_cast<float>(length);
+            offsetSectorX = sectorX * fWidth;
+            offsetSectorY = sectorY * fLength;
 
-            priv::Vertex v1, v2, v3, v4;
-            v1.position = Math::btVectorToGLM(vert1);
-            v2.position = Math::btVectorToGLM(vert2);
-            v3.position = Math::btVectorToGLM(vert3);
-            v4.position = Math::btVectorToGLM(vert4);
+            for (unsigned int i = 0; i < width; ++i) {
+                float fI = static_cast<float>(i);
+                for (unsigned int j = 0; j < length; ++j) {
+                    float fJ = static_cast<float>(j);
+                    btVector3 vert1, vert2, vert3, vert4;
 
-            glm::vec3 a = v4.position - v1.position;
-            glm::vec3 b = v2.position - v3.position;
-            glm::vec3 normal = glm::normalize(glm::cross(a, b));
+                    bool valid[4];
+                    valid[0] = heightfield.getAndValidateVertex(i,     j,     vert1, false);
+                    valid[1] = heightfield.getAndValidateVertex(i + 1, j,     vert2, false);
+                    valid[2] = heightfield.getAndValidateVertex(i,     j + 1, vert3, false);
+                    valid[3] = heightfield.getAndValidateVertex(i + 1, j + 1, vert4, false);
 
-            v1.normal = normal;
-            v2.normal = normal;
-            v3.normal = normal;
-            v4.normal = normal;
+                    priv::Vertex v1, v2, v3, v4;
 
-            v1.uv = glm::vec2(fI / fWidth,        fJ / fLength);
-            v2.uv = glm::vec2(fI + 1.0f / fWidth, fJ / fLength);
-            v3.uv = glm::vec2(fI / fWidth,        fJ + 1.0f / fLength);
-            v4.uv = glm::vec2(fI + 1.0f / fWidth, fJ + 1.0f / fLength);
+                    v1.position = glm::vec3(offsetSectorY + vert1.x(), vert1.y(), offsetSectorX + vert1.z());
+                    v2.position = glm::vec3(offsetSectorY + vert2.x(), vert2.y(), offsetSectorX + vert2.z());
+                    v3.position = glm::vec3(offsetSectorY + vert3.x(), vert3.y(), offsetSectorX + vert3.z());
+                    v4.position = glm::vec3(offsetSectorY + vert4.x(), vert4.y(), offsetSectorX + vert4.z());
 
-            data.points.push_back(v3.position); data.uvs.push_back(v3.uv); data.normals.push_back(v3.normal);
-            data.points.push_back(v2.position); data.uvs.push_back(v2.uv); data.normals.push_back(v2.normal);
-            data.points.push_back(v1.position); data.uvs.push_back(v1.uv); data.normals.push_back(v1.normal);
+                    glm::vec3 a = v4.position - v1.position;
+                    glm::vec3 b = v2.position - v3.position;
+                    glm::vec3 normal = glm::normalize(glm::cross(a, b));
 
-            data.points.push_back(v3.position); data.uvs.push_back(v3.uv); data.normals.push_back(v3.normal);
-            data.points.push_back(v4.position); data.uvs.push_back(v4.uv); data.normals.push_back(v4.normal);
-            data.points.push_back(v2.position); data.uvs.push_back(v2.uv); data.normals.push_back(v2.normal);
+                    v1.normal = normal;
+                    v1.uv = glm::vec2(fI / fWidth, fJ / fLength);
+
+                    data.points.push_back(v1.position);
+                    data.uvs.push_back(v1.uv);
+                    data.normals.push_back(v1.normal);
+                        
+                    VertexSmoothingData v1s;
+                    v1s.normal = v1.normal;
+                    v1s.index = data.points.size() - 1;
+                    m_VertexMap[hash_position(v1.position, 4)].data.push_back(std::move(v1s));
+
+                    v2.normal = normal;
+                    v2.uv = glm::vec2((fI + 1.0f) / fWidth, fJ / fLength);
+
+                    data.points.push_back(v2.position);
+                    data.uvs.push_back(v2.uv);
+                    data.normals.push_back(v2.normal);
+                        
+                    VertexSmoothingData v2s;
+                    v2s.normal = v2.normal;
+                    v2s.index = data.points.size() - 1;
+                    m_VertexMap[hash_position(v2.position, 4)].data.push_back(std::move(v2s));
+
+                    v3.normal = normal;
+                    v3.uv = glm::vec2(fI / fWidth, (fJ + 1.0f) / fLength);
+
+                    data.points.push_back(v3.position);
+                    data.uvs.push_back(v3.uv);
+                    data.normals.push_back(v3.normal);
+                        
+                    VertexSmoothingData v3s;
+                    v3s.normal = v3.normal;
+                    v3s.index = data.points.size() - 1;
+                    m_VertexMap[hash_position(v3.position, 4)].data.push_back(std::move(v3s));
+
+                    v4.normal = normal;
+                    v4.uv = glm::vec2((fI + 1.0f) / fWidth, (fJ + 1.0f) / fLength);
+
+                    data.points.push_back(v4.position);
+                    data.uvs.push_back(v4.uv);
+                    data.normals.push_back(v4.normal);
+
+                    VertexSmoothingData v4s;
+                    v4s.normal = v4.normal;
+                    v4s.index = data.points.size() - 1;
+                    m_VertexMap[hash_position(v4.position, 4)].data.push_back(std::move(v4s));
+
+                    if (valid[0] || valid[1] || valid[2] || valid[3]) {
+                        data.indices.push_back(count + 0);
+                        data.indices.push_back(count + 2);
+                        data.indices.push_back(count + 1);
+
+                        data.indices.push_back(count + 2);
+                        data.indices.push_back(count + 3);
+                        data.indices.push_back(count + 1);
+                    }
+                    count += 4;
+                }
+            }
+        }
+    }
+    //TODO: optimize if possible
+    //now smooth the normals
+    for (auto& itr : m_VertexMap) {
+        auto& smoothed = itr.second.smoothedNormal;
+        for (auto& vertex : itr.second.data) {
+            smoothed += vertex.normal;
+        }
+        smoothed = glm::normalize(smoothed);
+        for (auto& vertex : itr.second.data) {
+            data.normals[vertex.index] = smoothed;
         }
     }
     MeshLoader::CalculateTBNAssimp(data);
-    MeshLoader::FinalizeData(*this, data, threshold);
+    InternalMeshPublicInterface::FinalizeVertexData(*this, data);
+    InternalMeshPublicInterface::CalculateRadius(*this);
+    SAFE_DELETE(m_CollisionFactory);
 
+    if (finalizeOnGPU) {
+        m_VertexData->finalize();
+    }
+}
+Mesh::Mesh(const string& name, const Terrain& terrain, float threshold) : EngineResource(ResourceType::Mesh) {
+    InternalMeshPublicInterface::InitBlankMesh(*this);
+    m_Threshold = threshold;
+    internal_build_from_terrain(terrain, false);
     load();
 }
-
-
 Mesh::Mesh(VertexData* data, const string& name, float threshold) : EngineResource(ResourceType::Mesh, name) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_VertexData = data;
@@ -448,11 +536,9 @@ Mesh::operator bool() const {
 unordered_map<string, AnimationData>& Mesh::animationData(){ 
     return m_Skeleton->m_AnimationData; 
 }
-
 const VertexData& Mesh::getVertexData() const { 
     return *m_VertexData; 
 }
-
 const glm::vec3& Mesh::getRadiusBox() const { 
     return m_radiusBox; 
 }
@@ -484,8 +570,8 @@ void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const gl
 #ifndef _DEBUG
 
     auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
-    const auto& indices       = vertexDataStructure.indices;
-    auto& triangles           = vertexDataStructure.triangles;
+    const auto& indices       = vertexDataStructure.m_Indices;
+    auto& triangles           = vertexDataStructure.m_Triangles;
 
     const glm::vec3 camPos    = const_cast<Camera&>(camera).getPosition();
 
@@ -510,9 +596,9 @@ void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const gl
     //std::execution::par_unseq seems to really help here for performance, but keep profiling other related functionality.
     std::sort( std::execution::par_unseq, triangles.begin(), triangles.end(), lambda_sorter);
 
-    vector<ushort> newIndices;
+    vector<unsigned int> newIndices;
     newIndices.reserve(indices.size());
-    for (uint i = 0; i < triangles.size(); ++i) {
+    for (size_t i = 0; i < triangles.size(); ++i) {
         auto& triangle = triangles[i];
         newIndices.push_back(triangle.index1);
         newIndices.push_back(triangle.index2);

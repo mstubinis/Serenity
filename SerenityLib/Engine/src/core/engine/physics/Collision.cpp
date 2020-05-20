@@ -59,7 +59,7 @@ void Collision::_baseInit(const CollisionType::Type type, const float mass) {
 }
 Collision::Collision(ComponentBody& body){
     m_Owner = body.getOwner();
-    setMass(0.0f);
+    _baseInit(body.getCollision()->getType(), body.mass());
 }
 Collision::Collision(ComponentBody& body, const CollisionType::Type type, ModelInstance* modelInstance, const float mass){
     m_Owner = body.getOwner();
@@ -116,7 +116,8 @@ Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, const 
             btCollisionShape* built_collision_shape = InternalMeshPublicInterface::BuildCollision(&instance, type, true);
             localTransform = btTransform(Math::glmToBTQuat(instance.orientation()), Math::btVectorFromGLM(instance.position()));
             built_collision_shape->setMargin(0.001f);
-            built_collision_shape->calculateLocalInertia(mass, m_BtInertia); //this is important
+            if(built_collision_shape->getShapeType() != BroadphaseNativeTypes::EMPTY_SHAPE_PROXYTYPE)
+                built_collision_shape->calculateLocalInertia(mass, m_BtInertia); //this is important
             btCompound->addChildShape(localTransform, built_collision_shape);
         }
     }

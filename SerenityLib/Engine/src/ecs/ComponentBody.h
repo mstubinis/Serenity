@@ -194,7 +194,7 @@ class ComponentBody : public EventObserver, public Engine::UserPointer {
 		glm_vec3 getAngularVelocity() const;
 		glm_mat4 modelMatrix() const;
         glm::mat4 modelMatrixRendering() const;
-		const btRigidBody& getBtBody() const;
+	    btRigidBody& getBtBody() const;
 
         void setCollision(const CollisionType::Type collisionType, const float mass);
         void setCollision(Collision* collision);

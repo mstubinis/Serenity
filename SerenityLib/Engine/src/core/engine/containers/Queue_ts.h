@@ -12,7 +12,7 @@ namespace Engine {
     template<typename T> class queue_ts {
         private:
             std::queue<T>             m_Queue;
-            std::mutex                m_Mutex;
+            mutable std::mutex        m_Mutex;
             std::condition_variable   m_ConditionVariable;
         public:
             queue_ts() = default;
@@ -24,7 +24,7 @@ namespace Engine {
             }
             queue_ts& operator=(const queue_ts& other) = delete;
             /*
-            const bool try_pop(T& value) {
+            bool try_pop(T& value) {
                 std::lock_guard lock(m_Mutex);
                 if (m_Queue.empty()) {
                     return false;
@@ -82,7 +82,7 @@ namespace Engine {
                 }
                 m_ConditionVariable.notify_one();
             }
-            const bool empty() const {
+            bool empty() const {
                 std::lock_guard lock(m_Mutex);
                 return m_Queue.empty();
             }

@@ -51,7 +51,7 @@ namespace Engine::priv {
             static bool        IsSpecialFloat(const float number);
             static bool        IsSpecialFloat(const glm::vec2& vec);
             static bool        IsSpecialFloat(const glm::vec3& vec);
-            static bool        GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& pts, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& norms, unsigned short& result, const float threshold);
+            static bool        GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& pts, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& norms, unsigned int& result, const float threshold);
             static void        CalculateTBNAssimp(MeshImportedData& data);
     };
 };

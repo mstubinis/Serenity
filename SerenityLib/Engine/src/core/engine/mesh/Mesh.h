@@ -7,6 +7,8 @@ class  Camera;
 class  btHeightfieldTerrainShape;
 class  btCollisionShape;
 class  Collision;
+class  Terrain;
+class  TerrainHeightfieldShape;
 namespace Engine::priv {
     class  MeshLoader;
     class  MeshSkeleton;
@@ -62,6 +64,7 @@ class Mesh final: public EngineResource, public EventObserver, public Engine::No
     friend class  Engine::priv::ModelInstanceAnimation;
     friend class  Engine::priv::Renderer;
     friend class  Collision;
+    friend class  Terrain;
     private:
         std::function<void(Mesh*)>             m_CustomBindFunctor   = [](Mesh*) {};
         std::function<void(Mesh*)>             m_CustomUnbindFunctor = [](Mesh*) {};
@@ -74,9 +77,11 @@ class Mesh final: public EngineResource, public EventObserver, public Engine::No
         float                                  m_radius              = 0.0f;
         float                                  m_Threshold           = 0.0005f;
 
+        void internal_build_from_terrain(const Terrain& terrain, bool finalizeOnGPU);
+
         Mesh();
+        Mesh(const std::string& name, const Terrain& terrain, float threshold);
     public:
-        Mesh(const std::string& name, const btHeightfieldTerrainShape& heightfield, float threshold);
         Mesh(VertexData*, const std::string& name, float threshold = 0.0005f);
         Mesh(const std::string& name, float width, float height, float threshold); //plane
         Mesh(const std::string& fileOrData, float threshold = 0.0005f); //file or data
@@ -105,7 +110,7 @@ class Mesh final: public EngineResource, public EventObserver, public Engine::No
         void unload();
 
         template<typename T> 
-        void modifyVertices(const uint& attributeIndex, std::vector<T>& modifications, const uint MeshModifyFlags = MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU) {
+        void modifyVertices(const unsigned int attributeIndex, std::vector<T>& modifications, const unsigned int MeshModifyFlags = MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU) {
             auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
             bool uploadToGPU = false;
             bool orphan = false;
@@ -115,7 +120,7 @@ class Mesh final: public EngineResource, public EventObserver, public Engine::No
                 uploadToGPU = true;
             vertexDataStructure.setData<T>(attributeIndex, modifications, uploadToGPU, orphan);
         }
-        void modifyIndices(std::vector<ushort>& modifiedIndices, const uint MeshModifyFlags = MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU) {
+        void modifyIndices(std::vector<unsigned int>& modifiedIndices, const unsigned int MeshModifyFlags = MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU) {
             auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
             bool uploadToGPU = false;
             bool orphan = false;

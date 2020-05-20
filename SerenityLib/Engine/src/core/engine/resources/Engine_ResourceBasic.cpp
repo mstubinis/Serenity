@@ -14,7 +14,7 @@ EngineResource::~EngineResource(){
 void EngineResource::setName(const string& name){
     m_Name = name;
 }
-const ResourceType::Type& EngineResource::type() const {
+ResourceType::Type EngineResource::type() const {
     return m_ResourceType;
 }
 const string& EngineResource::name() const {
@@ -32,10 +32,10 @@ void EngineResource::unload(){
         ENGINE_LOG(typeid(*this).name() << ": " << m_Name << " - unloaded.");
     }
 }
-const bool EngineResource::isLoaded() const {
+bool EngineResource::isLoaded() const {
     return m_IsLoaded; 
 }
-const unsigned int EngineResource::useCount() const {
+unsigned int EngineResource::useCount() const {
     return m_UsageCount; 
 }
 void EngineResource::incrementUseCount(){ 

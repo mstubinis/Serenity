@@ -9,6 +9,7 @@ unordered_map<string, string> VERSION_MAP;
 unordered_map<string, string> POPULATE_VERSION_MAP() {
     unordered_map<string, string> ret;
 
+    ret["1.1"] = "110";
     ret["2.0"] = "110";
     ret["2.1"] = "120";
     ret["3.0"] = "130";
@@ -31,7 +32,7 @@ const string OpenGL::getHighestGLSLVersion(const Window& window) {
         VERSION_MAP = POPULATE_VERSION_MAP();
     }
     //unordered_map<string, string> VERSION_MAP = POPULATE_VERSION_MAP();
-    const auto& openglContext = window.getSFMLHandle().getSettings();
+    const auto& openglContext = const_cast<Window&>(window).getSFMLHandle().getSettings();
     const string version = to_string(openglContext.majorVersion) + "." + to_string(openglContext.minorVersion);
     return VERSION_MAP.at(version);
 }

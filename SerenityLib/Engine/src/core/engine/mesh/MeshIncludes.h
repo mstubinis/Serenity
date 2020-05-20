@@ -18,6 +18,14 @@ struct MeshModifyFlags {enum Flag {
 };};
 
 namespace Engine::priv {
+    struct VertexSmoothingData final {
+        size_t index     = 0U;
+        glm::vec3 normal = glm::vec3(0.0f);
+    };
+    struct VertexSmoothingGroup final {
+        std::vector<VertexSmoothingData> data;
+        glm::vec3 smoothedNormal = glm::vec3(0.0f);
+    };
     struct Vertex final {
         glm::vec3 position = glm::vec3(0.0f);
         glm::vec2 uv       = glm::vec2(0.0f);
@@ -37,9 +45,9 @@ namespace Engine::priv {
         glm::vec3 position2   = glm::vec3(0.0f);
         glm::vec3 position3   = glm::vec3(0.0f);
         glm::vec3 midpoint    = glm::vec3(0.0f);
-        unsigned short index1 = 0;
-        unsigned short index2 = 0;
-        unsigned short index3 = 0;
+        unsigned int index1   = 0;
+        unsigned int index2   = 0;
+        unsigned int index3   = 0;
 
         Triangle() {}
         ~Triangle() {}

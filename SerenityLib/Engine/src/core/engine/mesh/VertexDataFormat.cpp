@@ -4,27 +4,27 @@
 #include <GL/GL.h>
 
 void VertexDataFormat::add(const int _size, const int _type, const bool _normalized, const int _stride, const size_t _offset, const size_t _typeSize) {
-    attributes.emplace_back(_size, _type, _normalized, _stride, _offset, _typeSize);
+    m_Attributes.emplace_back(_size, _type, _normalized, _stride, _offset, _typeSize);
 }
 void VertexDataFormat::bind(const VertexData& vertData) {
-    if (interleavingType == VertexAttributeLayout::Interleaved) {
-        for (size_t i = 0; i < attributes.size(); ++i) {
-            const auto& attribute = attributes[i];
+    if (m_InterleavingType == VertexAttributeLayout::Interleaved) {
+        for (size_t i = 0; i < m_Attributes.size(); ++i) {
+            const auto& attribute = m_Attributes[i];
             glEnableVertexAttribArray(i);
             glVertexAttribPointer(i, attribute.size, attribute.type, attribute.normalized, attribute.stride, (void*)attribute.offset);
         }
     }else{
         size_t accumulator = 0;
-        for (size_t i = 0; i < attributes.size(); ++i) {
-            const auto& attribute = attributes[i];
+        for (size_t i = 0; i < m_Attributes.size(); ++i) {
+            const auto& attribute = m_Attributes[i];
             glEnableVertexAttribArray(i);
             glVertexAttribPointer(i, attribute.size, attribute.type, attribute.normalized, 0, (void*)accumulator);
-            accumulator += vertData.dataSizes[i] * attribute.typeSize;
+            accumulator += vertData.m_DataSizes[i] * attribute.typeSize;
         }
     }
 }
 void VertexDataFormat::unbind() { 
-    for (size_t i = 0; i < attributes.size(); ++i) {
+    for (size_t i = 0; i < m_Attributes.size(); ++i) {
         glDisableVertexAttribArray(static_cast<GLuint>(i));
     }
 }
@@ -33,14 +33,14 @@ void VertexDataFormat::unbind() {
 VertexDataFormat VertexDataFormat::VertexDataPositionsOnly = []() {
     VertexDataFormat data;
     const size_t stride = sizeof(glm::vec3);
-    data.interleavingType = VertexAttributeLayout::Interleaved;
+    data.m_InterleavingType = VertexAttributeLayout::Interleaved;
     data.add(3, GL_FLOAT, false, stride, 0, sizeof(glm::vec3)); //positions
     return data;
 }();
 VertexDataFormat VertexDataFormat::VertexDataNoLighting = []() {
     VertexDataFormat data;
     const size_t stride = sizeof(glm::vec3) + sizeof(glm::vec2);
-    data.interleavingType = VertexAttributeLayout::Interleaved;
+    data.m_InterleavingType = VertexAttributeLayout::Interleaved;
     data.add(3, GL_FLOAT, false, stride, 0,  sizeof(glm::vec3)); //positions
     data.add(2, GL_FLOAT, false, stride, 12, sizeof(glm::vec2)); //uvs
     return data;
@@ -48,7 +48,7 @@ VertexDataFormat VertexDataFormat::VertexDataNoLighting = []() {
 VertexDataFormat VertexDataFormat::VertexDataBasic = []() {
     VertexDataFormat data;
     const size_t stride = sizeof(glm::vec3) + sizeof(glm::vec2) + sizeof(GLuint) + sizeof(GLuint) + sizeof(GLuint);
-    data.interleavingType = VertexAttributeLayout::Interleaved;
+    data.m_InterleavingType = VertexAttributeLayout::Interleaved;
     data.add(3,       GL_FLOAT,              false, stride,  0, sizeof(glm::vec3)); //positions
     data.add(2,       GL_FLOAT,              false, stride, 12, sizeof(glm::vec2)); //uvs
     data.add(GL_BGRA, GL_INT_2_10_10_10_REV, true,  stride, 20, sizeof(GLuint)); //normals
@@ -59,7 +59,7 @@ VertexDataFormat VertexDataFormat::VertexDataBasic = []() {
 VertexDataFormat VertexDataFormat::VertexDataAnimated = []() {
     VertexDataFormat data;
     const size_t stride = sizeof(glm::vec3) + sizeof(glm::vec2) + sizeof(GLuint) + sizeof(GLuint) + sizeof(GLuint) + sizeof(glm::vec4) + sizeof(glm::vec4);
-    data.interleavingType = VertexAttributeLayout::Interleaved;  
+    data.m_InterleavingType = VertexAttributeLayout::Interleaved;
     data.add(3,       GL_FLOAT,              false, stride,  0, sizeof(glm::vec3)); //positions
     data.add(2,       GL_FLOAT,              false, stride, 12, sizeof(glm::vec2)); //uvs
     data.add(GL_BGRA, GL_INT_2_10_10_10_REV, true,  stride, 20, sizeof(GLuint));    //normals

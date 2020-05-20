@@ -4,87 +4,89 @@
 using namespace Engine;
 using namespace std;
 
-VertexData::VertexData(const VertexDataFormat& format) : format(const_cast<VertexDataFormat&>(format)){
-    const auto attributesSize = format.attributes.size();
-    data.reserve(attributesSize);
-    for (size_t i = 0; i < data.capacity(); ++i) { 
-        data.emplace_back();
+VertexData::VertexData(const VertexDataFormat& format) : m_Format(const_cast<VertexDataFormat&>(format)){
+    const auto attributesSize = format.m_Attributes.size();
+    m_Data.reserve(attributesSize);
+    for (size_t i = 0; i < m_Data.capacity(); ++i) {
+        m_Data.emplace_back();
 	}
-    dataSizes.reserve(attributesSize);
-    dataSizesCapacity.reserve(attributesSize);
-    for (size_t i = 0; i < dataSizes.capacity(); ++i) { 
-		dataSizes.emplace_back(0); 
-        dataSizesCapacity.emplace_back(0);
+    m_DataSizes.reserve(attributesSize);
+    m_DataSizesCapacity.reserve(attributesSize);
+    for (size_t i = 0; i < m_DataSizes.capacity(); ++i) {
+        m_DataSizes.emplace_back(0);
+        m_DataSizesCapacity.emplace_back(0);
 	}
-    buffers.push_back(std::make_unique<VertexBufferObject>());
+    m_Buffers.push_back(std::make_unique<VertexBufferObject>());
 }
 VertexData::~VertexData() {
-    Engine::Renderer::deleteVAO(vao);
+    Engine::Renderer::deleteVAO(m_VAO);
 }
 void VertexData::clearData() {
-    for (size_t i = 0; i < data.size(); ++i) {
-        data[i].clear();
+    for (size_t i = 0; i < m_Data.size(); ++i) {
+        m_Data[i].clear();
     }
-    for (size_t i = 0; i < dataSizes.size(); ++i) {
-        dataSizes[i] = 0;
+    for (size_t i = 0; i < m_DataSizes.size(); ++i) {
+        m_DataSizes[i] = 0;
     }
-    for (size_t i = 0; i < dataSizesCapacity.size(); ++i) {
-        dataSizesCapacity[i] = 0;
+    for (size_t i = 0; i < m_DataSizesCapacity.size(); ++i) {
+        m_DataSizesCapacity[i] = 0;
     }
-    indices.clear();
-    triangles.clear();
+    m_Indices.clear();
+    m_Triangles.clear();
 }
 void VertexData::finalize() {
-    Engine::Renderer::deleteVAO(vao);
+    Engine::Renderer::deleteVAO(m_VAO);
     if (priv::Renderer::OPENGL_VERSION >= 30) {
         //build the vao itself
-        Engine::Renderer::genAndBindVAO(vao);
+        Engine::Renderer::genAndBindVAO(m_VAO);
         sendDataToGPU(false, -1);
-        format.bind(*this);
+        m_Format.bind(*this);
         Engine::Renderer::bindVAO(0);
     }else{
         sendDataToGPU(false, -1);
-        format.bind(*this);
+        m_Format.bind(*this);
     }
 }
 void VertexData::bind() const {
-    if (vao) {
-        Renderer::bindVAO(vao);
+    if (m_VAO) {
+        Renderer::bindVAO(m_VAO);
     }else{
-        for (auto& buffer : buffers)
+        for (auto& buffer : m_Buffers) {
             buffer->bind();
-        format.bind(*this);
+        }
+        m_Format.bind(*this);
     }
 }
 void VertexData::unbind() const {
-    if (vao) {
+    if (m_VAO) {
         Renderer::bindVAO(0);
     }else{
-        format.unbind();
+        m_Format.unbind();
     }
 }
 
-void VertexData::setIndices(vector<unsigned short>& _data, const bool addToGPU, const bool orphan, const bool reCalcTriangles) {
-    if (buffers.size() == 1)
-        buffers.push_back(std::make_unique<ElementBufferObject>());
-    auto& _buffer = *buffers[1];
-    if (&_data != &indices) {
-        indices.clear();
-        indices.reserve(_data.size());
+void VertexData::setIndices(vector<unsigned int>& _data, const bool addToGPU, const bool orphan, const bool reCalcTriangles) {
+    if (m_Buffers.size() == 1) {
+        m_Buffers.push_back(std::make_unique<ElementBufferObject>());
+    }
+    auto& _buffer = *m_Buffers[1];
+    if (&_data != &m_Indices) {
+        m_Indices.clear();
+        m_Indices.reserve(_data.size());
         for (auto& indice : _data) {
-            indices.emplace_back(indice);
+            m_Indices.emplace_back(indice);
         }
     }
     if (reCalcTriangles) {
         auto& positions = getData<glm::vec3>(0);
         if (positions.size() >= 0) {
-            triangles.clear();
-            triangles.reserve(_data.size() / 3);
+            m_Triangles.clear();
+            m_Triangles.reserve(_data.size() / 3);
             size_t j = 0;
             Engine::priv::Triangle tri;
-            for (size_t i = 0; i < indices.size(); ++i) {
+            for (size_t i = 0; i < m_Indices.size(); ++i) {
                 ++j;
-                auto& index = indices[i];
+                auto& index = m_Indices[i];
                 if (j == 1) {
                     tri.position1 = positions[index];
                     tri.index1 = index;
@@ -96,7 +98,7 @@ void VertexData::setIndices(vector<unsigned short>& _data, const bool addToGPU, 
                     tri.index3 = index;
                     tri.midpoint = tri.position1 + tri.position2 + tri.position3;
                     tri.midpoint /= 3.0f;
-                    triangles.push_back(std::move(tri));
+                    m_Triangles.push_back(std::move(tri));
                     j = 0;
                 }
             }
@@ -105,7 +107,7 @@ void VertexData::setIndices(vector<unsigned short>& _data, const bool addToGPU, 
     if (addToGPU) {
         _buffer.generate();
         _buffer.bind();
-        !orphan ? _buffer.setData(indices, BufferDataDrawType::Static) : _buffer.setDataOrphan(indices);
+        !orphan ? _buffer.setData(m_Indices, BufferDataDrawType::Static) : _buffer.setDataOrphan(m_Indices);
     }
 }
 void VertexData::sendDataToGPU(const bool orphan, const int attributeIndex) {
@@ -114,63 +116,63 @@ void VertexData::sendDataToGPU(const bool orphan, const int attributeIndex) {
     Interleaved,    // | pos uv norm | pos uv norm | pos uv norm    | ... etc ... 
     NonInterleaved, // | pos pos pos | uv  uv  uv  | norm norm norm | ... etc ... 
     */
-    auto& _vBuffer = *buffers[0];
-    _vBuffer.generate(); 
-    _vBuffer.bind();
+    auto& vertexBuffer = *m_Buffers[0];
+    vertexBuffer.generate();
+    vertexBuffer.bind();
 
     size_t accumulator = 0;
     size_t size = 0;
     vector<uint8_t> gpu_data_buffer;
-    if (format.interleavingType == VertexAttributeLayout::Interleaved) {
-        size = (format.attributes[0].stride * dataSizes[0]);
+    if (m_Format.m_InterleavingType == VertexAttributeLayout::Interleaved) {
+        size = (m_Format.m_Attributes[0].stride * m_DataSizes[0]);
         gpu_data_buffer.reserve(size);
-        for (size_t i = 0; i < dataSizes[0]; ++i) {
-            for (size_t attribute_index = 0; attribute_index < data.size(); ++attribute_index) {
-                const auto& sizeofT     = format.attributes[attribute_index].typeSize;
+        for (size_t i = 0; i < m_DataSizes[0]; ++i) {
+            for (size_t attribute_index = 0; attribute_index < m_Data.size(); ++attribute_index) {
+                const auto& sizeofT     = m_Format.m_Attributes[attribute_index].typeSize;
                 auto* gpu_destination   = &(gpu_data_buffer.data())[accumulator];
                 const auto at           = i * sizeofT;
-                auto& src_data          = data[attribute_index];
+                auto& src_data          = m_Data[attribute_index];
                 auto* cpu_source        = &(src_data.data())[at];
                 std::memcpy(gpu_destination, cpu_source, sizeofT);
                 accumulator            += sizeofT;
             }
         }
-        (!orphan) ? _vBuffer.setData(size, gpu_data_buffer.data(), BufferDataDrawType::Dynamic) : _vBuffer.setDataOrphan(gpu_data_buffer.data());
+        (!orphan) ? vertexBuffer.setData(size, gpu_data_buffer.data(), BufferDataDrawType::Dynamic) : vertexBuffer.setDataOrphan(gpu_data_buffer.data());
     }else{
         if (attributeIndex == -1) {
-            for (size_t attribute_index = 0; attribute_index < data.size(); ++attribute_index)
-                size += format.attributes[attribute_index].typeSize * dataSizes[attribute_index];
+            for (size_t attribute_index = 0; attribute_index < m_Data.size(); ++attribute_index)
+                size += m_Format.m_Attributes[attribute_index].typeSize * m_DataSizes[attribute_index];
             gpu_data_buffer.reserve(size);
-            for (size_t attribute_index = 0; attribute_index < data.size(); ++attribute_index) {
-                const auto blockSize  = dataSizes[attribute_index] * format.attributes[attribute_index].typeSize;
+            for (size_t attribute_index = 0; attribute_index < m_Data.size(); ++attribute_index) {
+                const auto blockSize  = m_DataSizes[attribute_index] * m_Format.m_Attributes[attribute_index].typeSize;
                 auto* gpu_destination = &(gpu_data_buffer.data())[accumulator];
-                auto& src_data        = data[attribute_index];
+                auto& src_data        = m_Data[attribute_index];
                 auto* cpu_source      = &(src_data.data())[0];
                 std::memcpy(gpu_destination, cpu_source, blockSize);
                 accumulator          += blockSize;
             }
-            (!orphan) ? _vBuffer.setData(size, gpu_data_buffer.data(), BufferDataDrawType::Dynamic) : _vBuffer.setDataOrphan(gpu_data_buffer.data());
+            (!orphan) ? vertexBuffer.setData(size, gpu_data_buffer.data(), BufferDataDrawType::Dynamic) : vertexBuffer.setDataOrphan(gpu_data_buffer.data());
         }else{
-            size += (format.attributes[attributeIndex].typeSize * dataSizes[attributeIndex]);
+            size += (m_Format.m_Attributes[attributeIndex].typeSize * m_DataSizes[attributeIndex]);
             gpu_data_buffer.reserve(size);
-            for (size_t attribute_index = 0; attribute_index < data.size(); ++attribute_index) {
+            for (size_t attribute_index = 0; attribute_index < m_Data.size(); ++attribute_index) {
                 if (attribute_index != attributeIndex) {
-                    accumulator += dataSizes[attribute_index] * format.attributes[attribute_index].typeSize;
+                    accumulator += m_DataSizes[attribute_index] * m_Format.m_Attributes[attribute_index].typeSize;
                 }else{
                     auto* gpu_destination     = &(gpu_data_buffer.data())[0];
-                    auto& src_data            = data[attribute_index];
+                    auto& src_data            = m_Data[attribute_index];
                     auto* cpu_source          = &(src_data.data())[0];
                     std::memcpy(gpu_destination, cpu_source, size);
                     break;
                 }
             }
-            _vBuffer.setData(size, accumulator, gpu_data_buffer.data());
+            vertexBuffer.setData(size, accumulator, gpu_data_buffer.data());
         }
     }
     if (attributeIndex == -1) {
-        auto& _iBuffer = *buffers[1];
-        _iBuffer.generate();
-        _iBuffer.bind();
-        _iBuffer.setData(indices, BufferDataDrawType::Static);
+        auto& indiceBuffer = *m_Buffers[1];
+        indiceBuffer.generate();
+        indiceBuffer.bind();
+        indiceBuffer.setData(m_Indices, BufferDataDrawType::Static);
     }
 }
