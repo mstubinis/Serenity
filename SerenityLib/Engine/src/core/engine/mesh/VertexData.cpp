@@ -69,16 +69,15 @@ void VertexData::setIndices(vector<unsigned int>& _data, const bool addToGPU, co
     if (m_Buffers.size() == 1) {
         m_Buffers.push_back(std::make_unique<ElementBufferObject>());
     }
-    auto& _buffer = *m_Buffers[1];
     if (&_data != &m_Indices) {
         m_Indices.clear();
         m_Indices.reserve(_data.size());
-        for (auto& indice : _data) {
+        for (const auto indice : _data) {
             m_Indices.emplace_back(indice);
         }
     }
     if (reCalcTriangles) {
-        auto& positions = getData<glm::vec3>(0);
+        const auto& positions = getData<glm::vec3>(0);
         if (positions.size() >= 0) {
             m_Triangles.clear();
             m_Triangles.reserve(_data.size() / 3);
@@ -86,17 +85,17 @@ void VertexData::setIndices(vector<unsigned int>& _data, const bool addToGPU, co
             Engine::priv::Triangle tri;
             for (size_t i = 0; i < m_Indices.size(); ++i) {
                 ++j;
-                auto& index = m_Indices[i];
+                const auto index  = m_Indices[i];
                 if (j == 1) {
                     tri.position1 = positions[index];
-                    tri.index1 = index;
+                    tri.index1    = index;
                 }else if (j == 2) {
                     tri.position2 = positions[index];
-                    tri.index2 = index;
+                    tri.index2    = index;
                 }else if (j == 3) {
                     tri.position3 = positions[index];
-                    tri.index3 = index;
-                    tri.midpoint = tri.position1 + tri.position2 + tri.position3;
+                    tri.index3    = index;
+                    tri.midpoint  = tri.position1 + tri.position2 + tri.position3;
                     tri.midpoint /= 3.0f;
                     m_Triangles.push_back(std::move(tri));
                     j = 0;
@@ -105,9 +104,10 @@ void VertexData::setIndices(vector<unsigned int>& _data, const bool addToGPU, co
         }
     }
     if (addToGPU) {
-        _buffer.generate();
-        _buffer.bind();
-        !orphan ? _buffer.setData(m_Indices, BufferDataDrawType::Static) : _buffer.setDataOrphan(m_Indices);
+        auto& indiceBuffer = *m_Buffers[1];
+        indiceBuffer.generate();
+        indiceBuffer.bind();
+        !orphan ? indiceBuffer.setData(m_Indices, BufferDataDrawType::Static) : indiceBuffer.setDataOrphan(m_Indices);
     }
 }
 void VertexData::sendDataToGPU(const bool orphan, const int attributeIndex) {

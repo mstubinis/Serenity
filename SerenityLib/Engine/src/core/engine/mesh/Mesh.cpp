@@ -283,7 +283,7 @@ Mesh::Mesh() : EngineResource(ResourceType::Mesh) {
 }
 
 //TERRAIN MESH
-void Mesh::internal_build_from_terrain(const Terrain& terrain, bool finalizeOnGPU) {
+void Mesh::internal_build_from_terrain(const Terrain& terrain) {
     MeshImportedData data;
 
     unsigned int count = 0;
@@ -403,15 +403,46 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain, bool finalizeOnGP
     InternalMeshPublicInterface::FinalizeVertexData(*this, data);
     InternalMeshPublicInterface::CalculateRadius(*this);
     SAFE_DELETE(m_CollisionFactory);
+}
+void Mesh::internal_recalc_indices_from_terrain(const Terrain& terrain) {
+    MeshImportedData data;
+    unsigned int count = 0;
+    auto& heightfields = terrain.m_TerrainData.m_BtHeightfieldShapes;
+    for (size_t sectorX = 0; sectorX < heightfields.size(); ++sectorX) {
+        for (size_t sectorY = 0; sectorY < heightfields[sectorX].size(); ++sectorY) {
+            auto& heightfield = *heightfields[sectorX][sectorY];
+            unsigned int width  = static_cast<unsigned int>(heightfield.getUserIndex());
+            unsigned int length = static_cast<unsigned int>(heightfield.getUserIndex2());
+            for (unsigned int i = 0; i < width; ++i) {
+                for (unsigned int j = 0; j < length; ++j) {
+                    btVector3 vert1, vert2, vert3, vert4;
+                    bool valid[4];
+                    valid[0] = heightfield.getAndValidateVertex(i, j,         vert1, false);
+                    valid[1] = heightfield.getAndValidateVertex(i + 1, j,     vert2, false);
+                    valid[2] = heightfield.getAndValidateVertex(i, j + 1,     vert3, false);
+                    valid[3] = heightfield.getAndValidateVertex(i + 1, j + 1, vert4, false);
+                    if (valid[0] || valid[1] || valid[2] || valid[3]) {
+                        data.indices.push_back(count + 0);
+                        data.indices.push_back(count + 2);
+                        data.indices.push_back(count + 1);
 
-    if (finalizeOnGPU) {
-        m_VertexData->finalize();
+                        data.indices.push_back(count + 2);
+                        data.indices.push_back(count + 3);
+                        data.indices.push_back(count + 1);
+                    }
+                    count += 4;
+                }
+            }
+        }
     }
+    m_CustomBindFunctor(this);
+    modifyIndices(data.indices, MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU);
+    m_CustomUnbindFunctor(this);
 }
 Mesh::Mesh(const string& name, const Terrain& terrain, float threshold) : EngineResource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_Threshold = threshold;
-    internal_build_from_terrain(terrain, false);
+    internal_build_from_terrain(terrain);
     load();
 }
 Mesh::Mesh(VertexData* data, const string& name, float threshold) : EngineResource(ResourceType::Mesh, name) {

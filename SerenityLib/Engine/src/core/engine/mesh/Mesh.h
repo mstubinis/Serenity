@@ -77,7 +77,8 @@ class Mesh final: public EngineResource, public EventObserver, public Engine::No
         float                                  m_radius              = 0.0f;
         float                                  m_Threshold           = 0.0005f;
 
-        void internal_build_from_terrain(const Terrain& terrain, bool finalizeOnGPU);
+        void internal_recalc_indices_from_terrain(const Terrain& terrain);
+        void internal_build_from_terrain(const Terrain& terrain);
 
         Mesh();
         Mesh(const std::string& name, const Terrain& terrain, float threshold);
@@ -114,10 +115,12 @@ class Mesh final: public EngineResource, public EventObserver, public Engine::No
             auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
             bool uploadToGPU = false;
             bool orphan = false;
-            if (MeshModifyFlags & MeshModifyFlags::Orphan)
+            if (MeshModifyFlags & MeshModifyFlags::Orphan) {
                 orphan = true;
-            if (MeshModifyFlags & MeshModifyFlags::UploadToGPU)
+            }
+            if (MeshModifyFlags & MeshModifyFlags::UploadToGPU) {
                 uploadToGPU = true;
+            }
             vertexDataStructure.setData<T>(attributeIndex, modifications, uploadToGPU, orphan);
         }
         void modifyIndices(std::vector<unsigned int>& modifiedIndices, const unsigned int MeshModifyFlags = MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU) {
@@ -125,12 +128,15 @@ class Mesh final: public EngineResource, public EventObserver, public Engine::No
             bool uploadToGPU = false;
             bool orphan = false;
             bool recalcTriangles = false;
-            if (MeshModifyFlags & MeshModifyFlags::Orphan)
+            if (MeshModifyFlags & MeshModifyFlags::Orphan) {
                 orphan = true;
-            if (MeshModifyFlags & MeshModifyFlags::UploadToGPU)
+            }
+            if (MeshModifyFlags & MeshModifyFlags::UploadToGPU) {
                 uploadToGPU = true;
-            if (MeshModifyFlags & MeshModifyFlags::RecalculateTriangles)
+            }
+            if (MeshModifyFlags & MeshModifyFlags::RecalculateTriangles) {
                 recalcTriangles = true;
+            }
             vertexDataStructure.setIndices(modifiedIndices, uploadToGPU, orphan, recalcTriangles);
         }
 

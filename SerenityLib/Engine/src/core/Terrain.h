@@ -65,6 +65,7 @@ class TerrainData {
         std::vector<std::vector<TerrainHeightfieldShape*>>   m_BtHeightfieldShapes;
         std::pair<float, float>                              m_MinAndMaxHeight;
         btCompoundShape*                                     m_FinalCompoundShape    = nullptr;
+        unsigned int                                         m_VerticesPerSector     = 0;
 
         bool calculate_data(sf::Image& heightmapImage, unsigned int sectorSizeInPixels, unsigned int pointsPerPixel);
 
@@ -82,6 +83,7 @@ class Terrain : public EventObserver, public Entity {
         Mesh*       m_Mesh         = nullptr;
         TerrainData m_TerrainData;
 
+        bool internal_remove_quad(unsigned int indexX, unsigned int indexY);
         bool internal_remove_quad(unsigned int sectorX, unsigned int sectorY, unsigned int indexX, unsigned int indexY);
     public:
         Terrain(const std::string& name, sf::Image& heightmapImage, Handle& material, unsigned int sectorSizeInPixels = 4, unsigned int pointsPerPixel = 3, bool useDiamondSubdivisions = false, Scene* scene = nullptr);
@@ -89,6 +91,8 @@ class Terrain : public EventObserver, public Entity {
 
         bool removeQuad(unsigned int sectorX, unsigned int sectorY, unsigned int indexX, unsigned int indexY);
         bool removeQuads(std::vector<std::tuple<unsigned int, unsigned int, unsigned int, unsigned int>>& quads);
+        bool removeQuad(unsigned int indexX, unsigned int indexY);
+        bool removeQuads(std::vector<std::tuple<unsigned int, unsigned int>>& quads);
 
         void setPosition(float x, float y, float z); 
         void setPosition(const glm::vec3& position);

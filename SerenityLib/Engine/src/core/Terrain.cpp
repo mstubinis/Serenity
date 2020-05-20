@@ -231,9 +231,9 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
     vector<vector<btScalar>> temp; temp.resize(pixelSize.y * pointsPerPixel, vector<btScalar>(pixelSize.x * pointsPerPixel, btScalar(0.0)));
     m_MinAndMaxHeight = make_pair(9999999999999999.9f, -9999999999999999.9f);
 
-    unsigned int pointsPerSector  = sectorSizeInPixels * pointsPerPixel;
-    unsigned int numSectorsWidth  = temp[0].size() / pointsPerSector;
-    unsigned int numSectorsHeight = temp.size() / pointsPerSector;
+    m_VerticesPerSector           = sectorSizeInPixels * pointsPerPixel;
+    unsigned int numSectorsWidth  = temp[0].size() / m_VerticesPerSector;
+    unsigned int numSectorsHeight = temp.size() / m_VerticesPerSector;
     //calculate the point heights based on neighboring pixels
     for (int pxlX = 0; pxlX < pixelSize.x; ++pxlX) {
         for (int pxlY = 0; pxlY < pixelSize.y; ++pxlY) {
@@ -352,9 +352,9 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
         m_BtHeightfieldShapes[sectorX].reserve(numSectorsHeight);
         for (unsigned int sectorY = 0; sectorY < numSectorsHeight; ++sectorY) {
             vector<float> dummy_values = { 1.0f };//Bullet will do an assert check for null data, but i am manually assigning the data later on
-            TerrainHeightfieldShape* shape = new TerrainHeightfieldShape(pointsPerSector + 1, pointsPerSector + 1, dummy_values.data(), m_HeightScale, m_MinAndMaxHeight.first, m_MinAndMaxHeight.second, 1, PHY_ScalarType::PHY_FLOAT, false);
-            shape->setUserIndex(pointsPerSector);
-            shape->setUserIndex2(pointsPerSector);
+            TerrainHeightfieldShape* shape = new TerrainHeightfieldShape(m_VerticesPerSector + 1, m_VerticesPerSector + 1, dummy_values.data(), m_HeightScale, m_MinAndMaxHeight.first, m_MinAndMaxHeight.second, 1, PHY_ScalarType::PHY_FLOAT, false);
+            shape->setUserIndex(m_VerticesPerSector);
+            shape->setUserIndex2(m_VerticesPerSector);
             m_BtHeightfieldShapes[sectorX].push_back(shape);
         }
     }
@@ -362,10 +362,10 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
     for (unsigned int sectorX = 0; sectorX < numSectorsWidth; ++sectorX) {
         for (unsigned int sectorY = 0; sectorY < numSectorsHeight; ++sectorY) {
             auto& shape = *m_BtHeightfieldShapes[sectorX][sectorY];
-            for (unsigned int x = 0; x < pointsPerSector + 1; ++x) {
-                for (unsigned int y = 0; y < pointsPerSector + 1; ++y) {
-                    unsigned int offset_x = (sectorX * pointsPerSector) + x;
-                    unsigned int offset_y = (sectorY * pointsPerSector) + y;
+            for (unsigned int x = 0; x < m_VerticesPerSector + 1; ++x) {
+                for (unsigned int y = 0; y < m_VerticesPerSector + 1; ++y) {
+                    unsigned int offset_x = (sectorX * m_VerticesPerSector) + x;
+                    unsigned int offset_y = (sectorY * m_VerticesPerSector) + y;
                     unsigned int x_       = glm::min(offset_x, (unsigned int)(temp.size() - 1));
                     unsigned int y_       = glm::min(offset_y, (unsigned int)(temp[x].size() - 1));
 
@@ -475,6 +475,15 @@ void Terrain::setUseDiamondSubdivision(bool useDiamond) {
         }
     }
 }
+bool Terrain::internal_remove_quad(unsigned int indexX, unsigned int indexY) {
+    int sectorX = (indexX / m_TerrainData.m_VerticesPerSector);
+    int sectorY = (indexY / m_TerrainData.m_VerticesPerSector);
+
+    int modX    = (indexX % m_TerrainData.m_VerticesPerSector);
+    int modY    = (indexY % m_TerrainData.m_VerticesPerSector);
+
+    return internal_remove_quad(sectorX, sectorY, modX, modY);
+}
 bool Terrain::internal_remove_quad(unsigned int sectorX, unsigned int sectorY, unsigned int indexX, unsigned int indexY) {
     if (sectorX >= m_TerrainData.m_BtHeightfieldShapes.size() || sectorY >= m_TerrainData.m_BtHeightfieldShapes[0].size()) {
         return false;
@@ -492,7 +501,7 @@ bool Terrain::internal_remove_quad(unsigned int sectorX, unsigned int sectorY, u
 bool Terrain::removeQuad(unsigned int sectorX, unsigned int sectorY, unsigned int indexX, unsigned int indexY) {
     bool removal_result = internal_remove_quad(sectorX, sectorY, indexX, indexY);
     if (removal_result) {
-        m_Mesh->internal_build_from_terrain(*this, true);
+        m_Mesh->internal_recalc_indices_from_terrain(*this);
     }
     return removal_result;
 }
@@ -506,16 +515,42 @@ bool Terrain::removeQuads(vector<tuple<unsigned int, unsigned int, unsigned int,
         auto sectorY = std::get<1>(tuple);
         auto indexX  = std::get<2>(tuple);
         auto indexY  = std::get<3>(tuple);
-        auto removal_result = Terrain::removeQuad(sectorX, sectorY, indexX, indexY);
+        auto removal_result = internal_remove_quad(sectorX, sectorY, indexX, indexY);
         if (removal_result) {
             atLeastOne = true;
         }
     }
     if (atLeastOne) {
-        m_Mesh->internal_build_from_terrain(*this, true);
+        m_Mesh->internal_recalc_indices_from_terrain(*this);
     }
     return atLeastOne;
 }
+bool Terrain::removeQuad(unsigned int indexX, unsigned int indexY) {
+    bool removal_result = internal_remove_quad(indexX, indexY);
+    if (removal_result) {
+        m_Mesh->internal_recalc_indices_from_terrain(*this);
+    }
+    return removal_result;
+}
+bool Terrain::removeQuads(vector<tuple<unsigned int, unsigned int>>& quads) {
+    if (quads.size() == 0) {
+        return false;
+    }
+    bool atLeastOne = false;
+    for (const auto& tuple : quads) {
+        auto indexX = std::get<0>(tuple);
+        auto indexY = std::get<1>(tuple);
+        bool removal_result = internal_remove_quad(indexX, indexY);
+        if (removal_result) {
+            atLeastOne = true;
+        }
+    }
+    if (atLeastOne) {
+        m_Mesh->internal_recalc_indices_from_terrain(*this);
+    }
+    return atLeastOne;
+}
+
 
 void Terrain::update(const float dt){
 }
