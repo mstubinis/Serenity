@@ -30,10 +30,7 @@ using namespace std;
 #pragma region CollisionCallbackParticipant
 CollisionCallbackEventData::CollisionCallbackEventData(ComponentBody& a, ComponentBody& b, glm::vec3& c, glm::vec3& d, glm::vec3& e, glm::vec3& f, glm::vec3& g, glm::vec3& h, glm::vec3& i) :
 ownerBody(a), otherBody(b), ownerHit(c), otherHit(d), normalOnB(e), ownerLocalHit(f), otherLocalHit(g), normalFromA(h), normalFromB(i) {
-    ownerCollisionObj       = nullptr;
-    otherCollisionObj       = nullptr;
-    ownerModelInstanceIndex = 0;
-    otherModelInstanceIndex = 0;
+
 }
 #pragma endregion
 
@@ -181,8 +178,11 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
     }
     return *this;
 }
-const Entity ComponentBody::getOwner() const {
+Entity ComponentBody::getOwner() const {
     return m_Owner;
+}
+void ComponentBody::setCollisionFunctor(function<void(CollisionCallbackEventData& data)> functor) {
+    m_CollisionFunctor = functor;
 }
 void ComponentBody::onEvent(const Event& e) {
 
@@ -243,13 +243,13 @@ void ComponentBody::addPhysicsToWorld(const bool force, const bool threadSafe) {
     }
     data.p->forcedOut = false;
 }
-const bool ComponentBody::hasPhysics() const {
+bool ComponentBody::hasPhysics() const {
     return m_Physics;
 }
-const decimal ComponentBody::getLinearDamping() const {
+decimal ComponentBody::getLinearDamping() const {
     return (data.p->bullet_rigidBody) ? (decimal)(data.p->bullet_rigidBody->getLinearDamping()) : decimal(0.0);
 }
-const decimal ComponentBody::getAngularDamping() const {
+decimal ComponentBody::getAngularDamping() const {
     return (data.p->bullet_rigidBody) ? (decimal)(data.p->bullet_rigidBody->getAngularDamping()) : decimal(0.0);
 }
 void ComponentBody::setUserPointer1(void* userPtr) {
@@ -268,30 +268,30 @@ void ComponentBody::collisionResponse(CollisionCallbackEventData& data) const {
     //if(m_CollisionFunctor)
     m_CollisionFunctor( data );
 }
-const ushort ComponentBody::getCollisionGroup() const {
+ushort ComponentBody::getCollisionGroup() const {
     if (m_Physics) {
         return data.p->group;
     }
     return static_cast<ushort>(0);
 }
-const ushort ComponentBody::getCollisionMask() const {
+ushort ComponentBody::getCollisionMask() const {
     if (m_Physics) {
         return data.p->mask;
     }
     return static_cast<ushort>(0);
 }
-const ushort ComponentBody::getCollisionFlags() const {
+ushort ComponentBody::getCollisionFlags() const {
     if (m_Physics) {
         return data.p->bullet_rigidBody->getCollisionFlags();
     }
     return static_cast<ushort>(0);
 }
 
-const decimal ComponentBody::getDistance(const Entity other) const {
+decimal ComponentBody::getDistance(const Entity other) const {
     const auto other_position = other.getComponent<ComponentBody>()->position();
     return glm::distance(position(), other_position);
 }
-const unsigned long long ComponentBody::getDistanceLL(const Entity other) const {
+unsigned long long ComponentBody::getDistanceLL(const Entity other) const {
     const auto other_position = other.getComponent<ComponentBody>()->position();
     return static_cast<unsigned long long>(glm::distance(position(), other_position));
 }
@@ -546,10 +546,10 @@ glm::vec3 ComponentBody::position_render() const { //theres prob a better way to
     auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return Math::getMatrixPosition(matrix);
 }
-const glm::vec3 ComponentBody::getScreenCoordinates(const bool p_ClampToEdge) const {
+glm::vec3 ComponentBody::getScreenCoordinates(const bool p_ClampToEdge) const {
 	return Math::getScreenCoordinates(position(), *m_Owner.scene().getActiveCamera(), p_ClampToEdge);
 }
-const ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(const float p_MinOffset) const {
+ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(const float p_MinOffset) const {
     ScreenBoxCoordinates ret;
     const auto& worldPos    = position();
     auto radius             = 0.0001f;
@@ -628,7 +628,7 @@ glm_vec3 ComponentBody::getAngularVelocity() const  {
     }
     return glm_vec3(static_cast<decimal>(0.0));
 }
-const float ComponentBody::mass() const {
+float ComponentBody::mass() const {
 	return (m_Physics) ? data.p->mass : 0.0f;
 }
 glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way to do this
@@ -964,7 +964,7 @@ void ComponentBody::removeChild(const Entity child) const {
 void ComponentBody::removeChild(const ComponentBody& child) const {
     ComponentBody::removeChild(child.m_Owner);
 }
-const bool ComponentBody::hasParent() const {
+bool ComponentBody::hasParent() const {
     auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
     auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
     auto& pcs = system.ParentChildSystem;

@@ -15,6 +15,7 @@ class  Window;
 #include <core/engine/threading/Engine_ThreadManager.h>
 #include <core/engine/networking/NetworkingModule.h>
 #include <core/engine/discord/DiscordModule.h>
+#include <core/engine/lua/LuaModule.h>
 #include <core/engine/mesh/BuiltInMeshes.h>
 
 
@@ -170,6 +171,7 @@ namespace Engine{
                 };
                 Misc                  m_Misc;
 
+                LUAModule           m_LUAModule;
                 NetworkingModule    m_NetworkingModule;
                 DiscordModule       m_DiscordModule;
                 EventManager        m_EventManager;

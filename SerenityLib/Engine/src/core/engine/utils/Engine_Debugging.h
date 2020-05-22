@@ -54,19 +54,19 @@ namespace Engine {
                 void calculate_sounds();
                 void calculate_render();
 
-                const float dt() const;
-                const double logicTime() const;
-                const double physicsTime() const;
-                const double soundsTime() const;
-                const double renderTime() const;
-                const double totalTime() const;
+                float dt() const;
+                double logicTime() const;
+                double physicsTime() const;
+                double soundsTime() const;
+                double renderTime() const;
+                double totalTime() const;
 
                 void setTimeScale(const float timeScale);
 
-                const float timeScale() const;
+                float timeScale() const;
 
                 std::string& reportTime();
-                std::string& reportTime(const uint& decimals);
+                std::string& reportTime(const unsigned int decimals);
                 std::string reportDebug();
         };
     };

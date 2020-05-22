@@ -1115,7 +1115,7 @@ void DeferredPipeline::internal_render_per_frame_preparation(const Viewport& vie
     const auto& winSize    = Resources::getWindowSize();
     const auto& dimensions = glm::vec4(viewport.getViewportDimensions());
     if (viewport.isAspectRatioSynced()) {
-        camera.setAspect(dimensions.z / dimensions.w);
+        const_cast<Camera&>(camera).setAspect(dimensions.z / dimensions.w);
     }
     //Engine::Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w); //gbuffer.bind already does this
     glScissor(0, 0, winSize.x, winSize.y);

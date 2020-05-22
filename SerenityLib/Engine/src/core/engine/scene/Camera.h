@@ -32,10 +32,10 @@ class Camera: public Entity{
         decimal getDistanceSquared(const Entity& e, const glm_vec3& this_pos) const;
         decimal getDistanceSquared(const glm_vec3& objPos, const glm_vec3& this_pos) const;
 
-        float getAngle() const;    void setAngle(const float angle) const;
-        float getAspect() const;   void setAspect(const float aspectRatio) const;
-        float getNear() const;     void setNear(const float nearPlane) const;
-        float getFar() const;      void setFar(const float farPlane) const;
+        float getAngle() const;    void setAngle(const float angle);
+        float getAspect() const;   void setAspect(const float aspectRatio);
+        float getNear() const;     void setNear(const float nearPlane);
+        float getFar() const;      void setFar(const float farPlane);
 
         void setProjectionMatrix(const glm::mat4& perspectiveMatrix);
         void setViewMatrix(const glm::mat4& viewMatrix);

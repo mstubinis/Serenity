@@ -26,14 +26,14 @@ namespace Engine::priv {
             inline TComponent* addComponent(const EntityDataRequest& dataRequest, const TEntity& entity, ARGS&& ... args) {
                 return super::add(dataRequest.ID, const_cast<TEntity&>(entity), std::forward<ARGS>(args)...);
             }
-            inline const bool removeComponent(const TEntity& entity) {
+            inline bool removeComponent(const TEntity& entity) {
 				const EntityDataRequest dataRequest(entity);
                 return super::remove(dataRequest.ID);
             }
-            inline const bool removeComponent(const EntityDataRequest& dataRequest) {
+            inline bool removeComponent(const EntityDataRequest& dataRequest) {
                 return super::remove(dataRequest.ID);
             }
-            inline const bool removeComponent(const unsigned int entityID) {
+            inline bool removeComponent(const unsigned int entityID) {
                 return super::remove(entityID);
             }
             inline TComponent* getComponent(const TEntity& entity) const {

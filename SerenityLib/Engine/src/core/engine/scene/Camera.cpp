@@ -67,16 +67,16 @@ float Camera::getNear() const {
 float Camera::getFar() const {
     return getComponent<ComponentCamera>()->m_FarPlane; 
 }
-void Camera::setAngle(const float Angle) const {
+void Camera::setAngle(const float Angle) {
     getComponent<ComponentCamera>()->setAngle(Angle); 
 }
-void Camera::setAspect(const float Aspect) const {
+void Camera::setAspect(const float Aspect) {
     getComponent<ComponentCamera>()->setAspect(Aspect); 
 }
-void Camera::setNear(const float Near_) const {
+void Camera::setNear(const float Near_) {
     getComponent<ComponentCamera>()->setNear(Near_);
 }
-void Camera::setFar(const float Far_) const {
+void Camera::setFar(const float Far_) {
     getComponent<ComponentCamera>()->setFar(Far_);
 }
 glm::mat4 Camera::getViewProjectionInverse() const {

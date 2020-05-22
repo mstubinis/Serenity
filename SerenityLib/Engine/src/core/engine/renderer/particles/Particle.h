@@ -7,7 +7,7 @@ class  ParticleEmitter;
 class  ParticleEmissionProperties;
 class  Scene;
 class  Material;
-struct Entity;
+class  Entity;
 namespace Engine::priv {
     struct InternalScenePublicInterface;
     class  ParticleSystem;

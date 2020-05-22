@@ -70,20 +70,20 @@ void priv::DebugManager::calculate_physics() { m_physicsTime = clock.restart().a
 void priv::DebugManager::calculate_sounds() { m_soundTime = clock.restart().asMicroseconds(); }
 void priv::DebugManager::calculate_render() { m_renderTime = clock.restart().asMicroseconds(); }
 
-const float priv::DebugManager::dt() const { return (float)((float)m_deltaTime / divisor); }
-const double priv::DebugManager::logicTime() const { return (double)((double)m_logicTime / divisor); }
-const double priv::DebugManager::physicsTime() const { return (double)((double)m_physicsTime / divisor); }
-const double priv::DebugManager::renderTime() const { return (double)((double)m_renderTime / divisor); }
-const double priv::DebugManager::soundsTime() const { return (double)((double)m_soundTime / divisor); }
-const double priv::DebugManager::totalTime() const{ return m_totalTime; }
-const float priv::DebugManager::timeScale() const { return m_TimeScale; }
+float priv::DebugManager::dt() const { return (float)((float)m_deltaTime / divisor); }
+double priv::DebugManager::logicTime() const { return (double)((double)m_logicTime / divisor); }
+double priv::DebugManager::physicsTime() const { return (double)((double)m_physicsTime / divisor); }
+double priv::DebugManager::renderTime() const { return (double)((double)m_renderTime / divisor); }
+double priv::DebugManager::soundsTime() const { return (double)((double)m_soundTime / divisor); }
+double priv::DebugManager::totalTime() const{ return m_totalTime; }
+float priv::DebugManager::timeScale() const { return m_TimeScale; }
 
 void priv::DebugManager::setTimeScale(const float timeScale) {
     m_TimeScale = glm::max(0.0f, timeScale);
 }
 
 string& priv::DebugManager::reportTime() { return reportTime(decimals); }
-string& priv::DebugManager::reportTime(const uint& decimals_) {
+string& priv::DebugManager::reportTime(const unsigned int decimals_) {
     decimals = decimals_;
     if ((output_frame >= output_frame_delay - 1) || output_frame_delay == 0) {
         uint fps = uint(1.0f / dt());

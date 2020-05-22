@@ -33,6 +33,9 @@ ComponentLogic1& ComponentLogic1::operator=(ComponentLogic1&& other) noexcept {
 const Entity ComponentLogic1::getOwner() const {
     return m_Owner;
 }
+void ComponentLogic1::setFunctor(std::function<void(const ComponentLogic1*, const float)> functor) {
+    m_Functor = functor;
+}
 void ComponentLogic1::setUserPointer1(void* UserPointer1) {
     m_UserPointer1 = UserPointer1;
 }

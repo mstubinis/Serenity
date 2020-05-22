@@ -48,9 +48,7 @@ class ComponentLogic1 : public Engine::UserPointer {
         const Entity getOwner() const;
         void call(const float dt) const;
 
-        template<typename T> void setFunctor(const T& functor) { 
-            m_Functor = std::bind<void>(std::move(functor), std::placeholders::_1, std::placeholders::_2);
-        }
+        void setFunctor(std::function<void(const ComponentLogic1*, const float)> functor);
         void setUserPointer1(void* UserPointer1);
         void setUserPointer2(void* UserPointer2);
         

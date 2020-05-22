@@ -41,8 +41,11 @@ void Window::WindowData::WindowThread::push(const EventThreadOnlyCommands::Comma
 }
 void Window::WindowData::WindowThread::updateLoop(){
     sf::Event e;
-    if (!m_Data.m_UndergoingClosing && m_Data.m_SFMLWindow.waitEvent(e)) {
-        m_Queue.push(e);
+    if (!m_Data.m_UndergoingClosing) {
+        //if (m_Data.m_SFMLWindow.waitEvent(e)) {
+        while (m_Data.m_SFMLWindow.pollEvent(e)) {
+            m_Queue.push(e);
+        }
     }
     while(!m_MainThreadToEventThreadQueue.empty()){
         auto command_ptr = m_MainThreadToEventThreadQueue.try_pop();

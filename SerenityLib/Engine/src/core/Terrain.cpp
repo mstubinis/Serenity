@@ -232,11 +232,11 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
     m_MinAndMaxHeight = make_pair(9999999999999999.9f, -9999999999999999.9f);
 
     m_VerticesPerSector           = sectorSizeInPixels * pointsPerPixel;
-    unsigned int numSectorsWidth  = temp[0].size() / m_VerticesPerSector;
-    unsigned int numSectorsHeight = temp.size() / m_VerticesPerSector;
+    unsigned int numSectorsWidth  = (unsigned int)temp[0].size() / m_VerticesPerSector;
+    unsigned int numSectorsHeight = (unsigned int)temp.size() / m_VerticesPerSector;
     //calculate the point heights based on neighboring pixels
-    for (int pxlX = 0; pxlX < pixelSize.x; ++pxlX) {
-        for (int pxlY = 0; pxlY < pixelSize.y; ++pxlY) {
+    for (int pxlX = 0; pxlX < (int)pixelSize.x; ++pxlX) {
+        for (int pxlY = 0; pxlY < (int)pixelSize.y; ++pxlY) {
             int dataX = (pointsPerPixel * pxlX) + 1;
             int dataY = (pointsPerPixel * pxlY) + 1;
             if ((dataX < 0 || dataX >= temp.size()) || (dataY < 0 || dataX >= temp[0].size()) ) {
@@ -352,7 +352,7 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
         m_BtHeightfieldShapes[sectorX].reserve(numSectorsHeight);
         for (unsigned int sectorY = 0; sectorY < numSectorsHeight; ++sectorY) {
             vector<float> dummy_values = { 1.0f };//Bullet will do an assert check for null data, but i am manually assigning the data later on
-            TerrainHeightfieldShape* shape = new TerrainHeightfieldShape(m_VerticesPerSector + 1, m_VerticesPerSector + 1, dummy_values.data(), m_HeightScale, m_MinAndMaxHeight.first, m_MinAndMaxHeight.second, 1, PHY_ScalarType::PHY_FLOAT, false);
+            TerrainHeightfieldShape* shape = new TerrainHeightfieldShape(m_VerticesPerSector + 1, m_VerticesPerSector + 1, dummy_values.data(), (float)m_HeightScale, m_MinAndMaxHeight.first, m_MinAndMaxHeight.second, 1, PHY_ScalarType::PHY_FLOAT, false);
             shape->setUserIndex(m_VerticesPerSector);
             shape->setUserIndex2(m_VerticesPerSector);
             m_BtHeightfieldShapes[sectorX].push_back(shape);
@@ -369,7 +369,7 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
                     unsigned int x_       = glm::min(offset_x, (unsigned int)(temp.size() - 1));
                     unsigned int y_       = glm::min(offset_y, (unsigned int)(temp[x].size() - 1));
 
-                    float height = temp[x_][y_];
+                    btScalar height = temp[x_][y_];
                     shape.m_Data.push_back(height);
                 }
             }
@@ -382,7 +382,7 @@ TerrainData::AdjacentPixels TerrainData::get_adjacent_pixels(unsigned int x, uns
     AdjacentPixels ret;
     int xSigned = static_cast<int>(x);
     int ySigned = static_cast<int>(y);
-    const auto heightmapSize = heightmapImage.getSize();
+    const auto heightmapSize = glm::ivec2(heightmapImage.getSize().x, heightmapImage.getSize().y);
     ret.imgSizeX = heightmapSize.x;
     ret.imgSizeY = heightmapSize.y;
     //top-left

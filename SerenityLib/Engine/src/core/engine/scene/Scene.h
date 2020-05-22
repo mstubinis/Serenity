@@ -13,7 +13,7 @@ class  ShaderProgram;
 class  Viewport;
 class  Skybox;
 class  ModelInstance;
-struct Entity;
+class  Entity;
 struct SceneOptions;
 
 namespace Engine::priv {

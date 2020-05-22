@@ -36,6 +36,9 @@ ComponentLogic& ComponentLogic::operator=(ComponentLogic&& other) noexcept{
 const Entity ComponentLogic::getOwner() const {
     return m_Owner;
 }
+void ComponentLogic::setFunctor(std::function<void(const ComponentLogic*, const float)> functor) {
+    m_Functor = functor;
+}
 void ComponentLogic::setUserPointer1(void* UserPointer1) {
     m_UserPointer1 = UserPointer1;
 }
@@ -50,9 +53,7 @@ void* ComponentLogic::getUserPointer2() const {
 }
 
 void ComponentLogic::call(const float dt) const { 
-    //if (m_Functor) {
-        m_Functor(this, dt);
-    //}
+    m_Functor(this, dt);
 }
 
 #pragma endregion

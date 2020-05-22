@@ -210,7 +210,7 @@ namespace Engine::priv {
                     onComponentAddedToEntity(res, entity, type_slot);
                 }
             }
-            template<class T> const bool removeComponent(TEntity& entity) {
+            template<class T> bool removeComponent(TEntity& entity) {
                 const auto& type_slot  = ECSRegistry::type_slot_fast<T>();
                 auto& cPool            = *static_cast<ECSComponentPool<TEntity, T>*>(m_ComponentPools[type_slot]);
 
@@ -225,13 +225,11 @@ namespace Engine::priv {
                 return ret_val;
             }
 #pragma region 1 component get
-            template<class T> 
-            inline T* getComponent(TEntity& entity) const {
+            template<class T> inline T* getComponent(TEntity& entity) const {
                 using CPoolType = ECSComponentPool<TEntity, T>;
                 return static_cast<CPoolType*>(m_ComponentPools[ECSRegistry::type_slot_fast<T>()])->getComponent(entity);
             }
-            template<class T> 
-            inline T* getComponent(const EntityDataRequest& dataRequest) const {
+            template<class T> inline T* getComponent(const EntityDataRequest& dataRequest) const {
                 using CPoolType = ECSComponentPool<TEntity, T>;
                 return static_cast<CPoolType*>(m_ComponentPools[ECSRegistry::type_slot_fast<T>()])->getComponent(dataRequest);
             }
@@ -239,13 +237,11 @@ namespace Engine::priv {
 
 
 #pragma region variadic component get
-            template<class... Types>
-            inline std::tuple<Types*...> getComponents(TEntity& entity) const {
+            template<class... Types> inline std::tuple<Types*...> getComponents(TEntity& entity) const {
                 const EntityDataRequest& dataRequest(entity);
                 return ECS::getComponents<Types...>(dataRequest);
             }
-            template<class... Types>
-            inline std::tuple<Types*...> getComponents(const EntityDataRequest& dataRequest) const {
+            template<class... Types> inline std::tuple<Types*...> getComponents(const EntityDataRequest& dataRequest) const {
                 return std::make_tuple(getComponent<Types>(dataRequest)... );
             }
 #pragma endregion

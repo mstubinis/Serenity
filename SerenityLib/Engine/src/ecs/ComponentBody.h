@@ -23,10 +23,10 @@ struct CollisionCallbackEventData final {
     glm::vec3&         normalOnB;
     glm::vec3&         normalFromA;
     glm::vec3&         normalFromB;
-    btCollisionObject* ownerCollisionObj;
-    btCollisionObject* otherCollisionObj;
-    size_t             ownerModelInstanceIndex;
-    size_t             otherModelInstanceIndex;
+    btCollisionObject* ownerCollisionObj       = nullptr;
+    btCollisionObject* otherCollisionObj       = nullptr;
+    size_t             ownerModelInstanceIndex = 0;
+    size_t             otherModelInstanceIndex = 0;
 
     CollisionCallbackEventData(ComponentBody& ownerBody_, ComponentBody& otherBody_, glm::vec3& ownerHit_, glm::vec3& otherHit_, glm::vec3& normal_, glm::vec3& ownerLocalHit_, glm::vec3& otherLocalHit_, glm::vec3& normalFromA_, glm::vec3& normalFromB_);
 };
@@ -116,11 +116,11 @@ class ComponentBody : public EventObserver, public Engine::UserPointer {
 
         ~ComponentBody();
 
-        const Entity getOwner() const;
+        Entity getOwner() const;
 
         void onEvent(const Event& event_) override;
 
-        const bool hasParent() const;
+        bool hasParent() const;
 
         void addChild(const Entity child) const;
         void addChild(const ComponentBody& child) const;
@@ -128,9 +128,7 @@ class ComponentBody : public EventObserver, public Engine::UserPointer {
         void removeChild(const ComponentBody& child) const;
 
 
-        template<typename T> void setCollisionFunctor(const T& functor) {
-            m_CollisionFunctor = std::bind<void>(functor, std::placeholders::_1);
-        }
+        void setCollisionFunctor(std::function<void(CollisionCallbackEventData& data)> functor);
         void collisionResponse(CollisionCallbackEventData& data) const;
 
         void rebuildRigidBody(const bool addBodyToPhysicsWorld = true, const bool threadSafe = false);
@@ -144,12 +142,12 @@ class ComponentBody : public EventObserver, public Engine::UserPointer {
         void* getUserPointer1() const;
         void* getUserPointer2() const;
 
-        const bool hasPhysics() const;
-        const decimal getLinearDamping() const;
-        const decimal getAngularDamping() const;
-        const unsigned short getCollisionGroup() const; //get the groups this body belongs to
-        const unsigned short getCollisionMask() const;  //get the groups this body will register collisions with
-        const unsigned short getCollisionFlags() const;
+        bool hasPhysics() const;
+        decimal getLinearDamping() const;
+        decimal getAngularDamping() const;
+        unsigned short getCollisionGroup() const; //get the groups this body belongs to
+        unsigned short getCollisionMask() const;  //get the groups this body will register collisions with
+        unsigned short getCollisionFlags() const;
 
         void alignTo(const glm_vec3& direction);
 
@@ -175,12 +173,12 @@ class ComponentBody : public EventObserver, public Engine::UserPointer {
         void setScale(const decimal& x, const decimal& y, const decimal& z);
         void setScale(const decimal& s);
 
-		const float mass() const;
-        const decimal getDistance(const Entity other) const;
-        const unsigned long long getDistanceLL(const Entity other) const;
-        const glm::vec3 getScreenCoordinates(const bool clampToEdge = false) const;
+	    float mass() const;
+        decimal getDistance(const Entity other) const;
+        unsigned long long getDistanceLL(const Entity other) const;
+        glm::vec3 getScreenCoordinates(const bool clampToEdge = false) const;
 
-        const ScreenBoxCoordinates getScreenBoxCoordinates(const float minOffset = 10.0f) const;
+        ScreenBoxCoordinates getScreenBoxCoordinates(const float minOffset = 10.0f) const;
 
 		glm_quat rotation() const;
 		glm_vec3 getScale() const;

@@ -2,7 +2,7 @@
 #ifndef ENGINE_ECS_ENTITY_SERIALIZATION_H_INCLUDE_GUARD
 #define ENGINE_ECS_ENTITY_SERIALIZATION_H_INCLUDE_GUARD
 
-struct Entity;
+class  Entity;
 class  Scene;
 namespace Engine::priv {
     template<typename T> class ECSEntityPool;

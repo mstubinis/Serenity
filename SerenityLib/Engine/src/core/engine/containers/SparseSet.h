@@ -25,7 +25,7 @@ namespace Engine {
                     m_MaxLastIndex = 0;
                     m_Sparse.clear();
                 }
-                virtual const bool remove(const unsigned int id) {
+                virtual bool remove(const unsigned int id) {
                     return false;
                 }
                 virtual void reserve(const unsigned int amount) {
@@ -71,7 +71,7 @@ namespace Engine {
                 return &m_Dense[super::m_Sparse[sparseIndex] - 1];
             }
             //TODO: this entire function needs a serious look at
-            const bool remove(const unsigned int id) override {
+            bool remove(const unsigned int id) override {
                 const auto removedEntityIndex = id - 1;
                 if (removedEntityIndex >= super::m_Sparse.size()) {
                     return false;
@@ -125,7 +125,7 @@ namespace Engine {
             const T& operator[](const size_t& index) const {
                 return m_Dense[index];
             }
-            const size_t size() const {
+            size_t size() const {
                 return m_Dense.size();
             }
             std::vector<T>& data() {

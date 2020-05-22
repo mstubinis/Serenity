@@ -96,12 +96,12 @@ namespace Engine{
         }
 
         Scene* getCurrentScene();
-        const bool setCurrentScene(Scene* scene);
-        const bool setCurrentScene(std::string_view sceneName);
+        bool setCurrentScene(Scene* scene);
+        bool setCurrentScene(std::string_view sceneName);
 
-        const float dt();
-        const double timeScale();
-        const double applicationTime();
+        float dt();
+        double timeScale();
+        double applicationTime();
 
         Window& getWindow();
         glm::uvec2 getWindowSize();
@@ -110,8 +110,8 @@ namespace Engine{
         glm::uvec2 getWindowSize(const unsigned int index);
 
         Scene* getScene(std::string_view sceneName);
-        const bool deleteScene(std::string_view sceneName);
-        const bool deleteScene(Scene& scene);
+        bool deleteScene(std::string_view sceneName);
+        bool deleteScene(Scene& scene);
 
         void getShader(const Handle inHandle, Shader*& outPtr);                  Shader*    getShader(const Handle inHandle);
         void getSoundData(const Handle inHandle, SoundData*& outPtr);            SoundData* getSoundData(const Handle inHandle);

@@ -83,13 +83,13 @@ const unsigned int priv::ResourceManager::AddScene(Scene& s){
 string Engine::Data::reportTime() {
     return priv::Core::m_Engine->m_DebugManager.reportTime();
 }
-const float Resources::dt() {
+float Resources::dt() {
     return priv::Core::m_Engine->m_DebugManager.dt();
 }
-const double Resources::timeScale(){
+double Resources::timeScale(){
     return priv::Core::m_Engine->m_DebugManager.timeScale();
 }
-const double Resources::applicationTime() {
+double Resources::applicationTime() {
     return priv::Core::m_Engine->m_DebugManager.totalTime();
 }
 Scene* Resources::getCurrentScene() {
@@ -116,7 +116,7 @@ glm::uvec2 Resources::getWindowSize(const unsigned int index) {
 }
 
 
-const bool Resources::deleteScene(string_view sceneName) {
+bool Resources::deleteScene(string_view sceneName) {
     for (auto& scene_ptr : resourceManager->m_Scenes) {
         if (scene_ptr && scene_ptr->name() == sceneName) {
             return Resources::deleteScene(*scene_ptr);
@@ -124,7 +124,7 @@ const bool Resources::deleteScene(string_view sceneName) {
     }
     return false;
 }
-const bool Resources::deleteScene(Scene& scene) {
+bool Resources::deleteScene(Scene& scene) {
     for (auto& deleted_scene_ptr : resourceManager->m_ScenesToBeDeleted) {
         if (scene.name() == deleted_scene_ptr->name()) {
             return false; //already flagged for deletion
@@ -311,7 +311,7 @@ Handle Resources::addSoundData(const string& file){
     return resourceManager->m_Resources.add(soundData,ResourceType::SoundData);
 }
 
-const bool Resources::setCurrentScene(Scene* newScene){
+bool Resources::setCurrentScene(Scene* newScene){
     Scene* oldScene = resourceManager->m_CurrentScene;
 
     priv::EventSceneChanged e(oldScene, newScene);
@@ -341,6 +341,6 @@ const bool Resources::setCurrentScene(Scene* newScene){
     }
     return false;
 }
-const bool Resources::setCurrentScene(string_view s){ 
+bool Resources::setCurrentScene(string_view s){ 
     return Resources::setCurrentScene(Resources::getScene(s)); 
 }

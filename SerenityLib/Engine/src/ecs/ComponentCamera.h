@@ -84,25 +84,25 @@ class ComponentCamera {
         void setViewMatrix(const glm::mat4& viewMatrix);
         void setProjectionMatrix(const glm::mat4& projectionMatrix);
 
-		const float getAngle() const;    void setAngle(const float angle);
-		const float getAspect() const;   void setAspect(const float aspectRatio);
-		const float getNear() const;     void setNear(const float Near);
-		const float getFar() const;      void setFar(const float Far);
+	    float getAngle() const;    void setAngle(const float angle);
+	    float getAspect() const;   void setAspect(const float aspectRatio);
+	    float getNear() const;     void setNear(const float Near);
+	    float getFar() const;      void setFar(const float Far);
 
-		const glm::mat4 getProjection() const;
-		const glm::mat4 getProjectionInverse() const;
-		const glm::mat4 getView() const;
-		const glm::mat4 getViewInverse() const;
-		const glm::mat4 getViewProjection() const;
-		const glm::mat4 getViewProjectionInverse() const;
-		const glm::vec3 getViewVector() const;
+        glm::mat4 getProjection() const;
+        glm::mat4 getProjectionInverse() const;
+        glm::mat4 getView() const;
+        glm::mat4 getViewInverse() const;
+        glm::mat4 getViewProjection() const;
+        glm::mat4 getViewProjectionInverse() const;
+        glm::vec3 getViewVector() const;
 
-		const glm_vec3 forward() const;
-		const glm_vec3 right() const;
-		const glm_vec3 up() const;
+	    glm_vec3 forward() const;
+		glm_vec3 right() const;
+		glm_vec3 up() const;
 
-		const unsigned int pointIntersectTest(const glm_vec3& objectPosition) const;
-		const unsigned int sphereIntersectTest(const glm_vec3& objectPosition, const float objectRadius) const;
+		unsigned int pointIntersectTest(const glm_vec3& objectPosition) const;
+		unsigned int sphereIntersectTest(const glm_vec3& objectPosition, const float objectRadius) const;
 };
 
 class ComponentCamera_System_CI : public Engine::priv::ECSSystemCI {

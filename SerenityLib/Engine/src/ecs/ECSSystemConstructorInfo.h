@@ -5,7 +5,7 @@
 #include <functional>
 
 class  Scene;
-struct Entity;
+class  Entity;
 
 typedef std::function<void(void*, void*, const float, Scene&)>  std_func_update;
 typedef std::function<void(void*, void*, Entity&, Scene&)>      std_func_entity;

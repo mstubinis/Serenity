@@ -86,7 +86,6 @@ void EngineCore::init(const EngineOptions& options) {
     init_os_specific(options);
 
     m_ResourceManager._init(options);
-
     m_DebugManager._init();
     m_Misc.m_BuiltInMeshes.init();
     m_RenderManager._init();

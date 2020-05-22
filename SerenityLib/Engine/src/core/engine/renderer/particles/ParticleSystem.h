@@ -5,7 +5,7 @@
 class  ParticleEmitter;
 class  ParticleEmissionProperties;
 class  Scene;
-struct Entity;
+class  Entity;
 class  Particle;
 class  Camera;
 class  ShaderProgram;
