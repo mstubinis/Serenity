@@ -233,6 +233,9 @@ LUABinder::LUABinder() {
             .addFunction("versionID", &Entity::versionID)
             .addFunction("addChild", &Entity::addChild)
             .addFunction("removeChild", &Entity::removeChild)
+            .addFunction("removeComponent", static_cast<bool(Entity::*)(const string&)>(&Entity::removeComponent))
+            .addFunction("getComponent", static_cast<luabridge::LuaRef(Entity::*)(const string&)>(&Entity::getComponent))
+            .addFunction("addComponent", &Entity::addComponent)
         .endClass()
         //component name
         .beginClass<ComponentName>("ComponentName")

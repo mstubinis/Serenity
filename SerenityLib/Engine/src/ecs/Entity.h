@@ -7,6 +7,8 @@ class  Entity;
 #include <core/engine/scene/Scene.h>
 #include <ecs/ECS.h>
 #include <ecs/EntityDataRequest.h>
+#include <core/engine/lua/LuaIncludes.h>
+#include <core/engine/lua/LuaState.h>
 
 class Entity {  
     public:
@@ -69,12 +71,20 @@ class Entity {
             }
         #pragma endregion
 
+        void addComponent(const std::string& componentClassName, luabridge::LuaRef arg1, luabridge::LuaRef arg2, luabridge::LuaRef arg3, luabridge::LuaRef arg4, luabridge::LuaRef arg5, luabridge::LuaRef arg6, luabridge::LuaRef arg7, luabridge::LuaRef arg8);
+        bool removeComponent(const std::string& componentClassName);
+        luabridge::LuaRef getComponent(const std::string& componentClassName);
 };
 
 namespace Engine::priv {
     struct InternalEntityPublicInterface final {
         static ECS<Entity>& GetECS(const Entity entity) {
             return Engine::priv::InternalScenePublicInterface::GetECS(entity.scene());
+        }
+
+        template<typename T> static luabridge::LuaRef GetComponent(lua_State* L, Entity entity, const char* globalName){
+            luabridge::setGlobal(L, entity.getComponent<T>(), globalName);
+            return luabridge::getGlobal(L, globalName);
         }
     };
 };
