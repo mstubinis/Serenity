@@ -2,9 +2,6 @@
 #ifndef ENGINE_ECS_COMPONENT_LOGIC_H
 #define ENGINE_ECS_COMPONENT_LOGIC_H
 
-#include <ecs/Entity.h>
-#include <ecs/ECSSystemConstructorInfo.h>
-
 class ComponentLogic;
 namespace Engine::priv {
     struct ComponentLogic_UpdateFunction;
@@ -14,6 +11,13 @@ namespace Engine::priv {
     struct ComponentLogic_SceneEnteredFunction;
     struct ComponentLogic_SceneLeftFunction;
 };
+namespace luabridge {
+    class LuaRef;
+};
+
+#include <ecs/Entity.h>
+#include <ecs/ECSSystemConstructorInfo.h>
+#include <core/engine/lua/Lua.h>
 
 class ComponentLogic : public Engine::UserPointer {
     friend struct Engine::priv::ComponentLogic_UpdateFunction;
@@ -25,9 +29,10 @@ class ComponentLogic : public Engine::UserPointer {
     private:
         Entity m_Owner;
 
-        void*                                                       m_UserPointer1  = nullptr;
-        void*                                                       m_UserPointer2  = nullptr;
-        std::function<void(const ComponentLogic*, const float)>     m_Functor       = [](const ComponentLogic*, const float) {};
+        void*                                                         m_UserPointer1  = nullptr;
+        void*                                                         m_UserPointer2  = nullptr;
+
+        LuaCallableUpdateFunction<ComponentLogic>                     m_Functor;
     public:
         ComponentLogic(const Entity entity);
         template<typename T> 
@@ -49,6 +54,8 @@ class ComponentLogic : public Engine::UserPointer {
         void call(const float dt) const;
 
         void setFunctor(std::function<void(const ComponentLogic*, const float)> functor);
+        void setFunctor(luabridge::LuaRef luaFunction);
+
         void setUserPointer1(void* UserPointer1);
         void setUserPointer2(void* UserPointer2);
         

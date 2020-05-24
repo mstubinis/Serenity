@@ -24,7 +24,7 @@ namespace Engine::priv {
             std::vector<Engine::priv::sparse_set_base*>  m_ComponentPools;
             std::vector<ECSSystem<TEntity>*>             m_Systems;
             std::mutex                                   m_Mutex;
-
+            /*
             //builds a component pool and system for the component type if it is not built already.
             template<typename TComponent> 
             void buildPool(const unsigned int type_slot) {
@@ -45,6 +45,7 @@ namespace Engine::priv {
                     m_Systems[type_slot] = NEW ECSSystem<TEntity, TComponent>(_ci, *this);
                 }
             }
+            */
         public:
             ECS(/*const SceneOptions& options*/) {
             }
@@ -134,7 +135,7 @@ namespace Engine::priv {
 
 
             template<class TComponent>
-            void assignSystem(const ECSSystemCI& systemCI) {
+            void assignSystem(const ECSSystemCI& systemCI/*, unsigned int sortValue*/) {
                 const auto& type_slot = ECSRegistry::type_slot<TComponent>();
                 using CPoolType       = ECSComponentPool<TEntity, TComponent>;
                 using CSystemType     = ECSSystem<TEntity, TComponent>;
@@ -153,7 +154,7 @@ namespace Engine::priv {
                 m_Systems[type_slot] = NEW CSystemType(systemCI, *this);
             }
             template<class TComponent, typename TSystem>
-            void assignSystem(const ECSSystemCI& systemCI) {
+            void assignSystem(const ECSSystemCI& systemCI/*, unsigned int sortValue*/) {
                 const auto& type_slot = ECSRegistry::type_slot<TComponent>();
                 using CPoolType       = ECSComponentPool<TEntity, TComponent>;
                 if (type_slot >= m_ComponentPools.size()) {

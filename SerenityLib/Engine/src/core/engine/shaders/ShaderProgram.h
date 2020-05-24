@@ -39,7 +39,7 @@ class ShaderProgram final : public EngineResource, public Engine::NonCopyable{
     private:
         std::function<void(ShaderProgram*)>                    m_CustomBindFunctor;
         GLuint                                                 m_ShaderProgram;
-        std::unordered_map<std::string, GLint>    m_UniformLocations;
+        std::unordered_map<std::string, GLint>                 m_UniformLocations;
         std::unordered_set<GLuint>                             m_AttachedUBOs;
         Shader&                                                m_VertexShader;
         Shader&                                                m_FragmentShader;

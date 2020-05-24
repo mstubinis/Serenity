@@ -28,6 +28,15 @@ unsigned int Server::num_clients() const {
     }
     return number_of_clients;
 }
+Engine::Networking::ServerThread* Server::getNextAvailableClientThread() {
+    Engine::Networking::ServerThread* leastThread = nullptr;
+    for (auto& clientThread : m_Threads) {
+        if (!leastThread || (leastThread && leastThread->num_clients() < clientThread.num_clients())) {
+            leastThread = (&clientThread);
+        }
+    }
+    return leastThread;
+}
 vector<Engine::Networking::ServerClient*> Server::clients() const {
     vector<Engine::Networking::ServerClient*> ret;
     ret.reserve(num_clients());
@@ -82,7 +91,7 @@ bool Server::startup(unsigned short port, string ip_restriction) {
             break;
         }case ServerType::UDP: {
             if (!m_UdpSocket) {
-                m_UdpSocket = make_unique<SocketUDP>(port, ip_restriction);
+                m_UdpSocket   = make_unique<SocketUDP>(port, ip_restriction);
             }
             break;
         }case ServerType::TCP_AND_UDP: {
@@ -90,7 +99,7 @@ bool Server::startup(unsigned short port, string ip_restriction) {
                 m_TCPListener = make_unique<ListenerTCP>(port, ip_restriction);
             }
             if (!m_UdpSocket) {
-                m_UdpSocket = make_unique<SocketUDP>(port, ip_restriction);
+                m_UdpSocket   = make_unique<SocketUDP>(port, ip_restriction);
             }
             break;
         }default: {
@@ -99,11 +108,11 @@ bool Server::startup(unsigned short port, string ip_restriction) {
     }
     if (m_TCPListener) {
         m_TCPListener->setBlocking(false);
-        auto status = m_TCPListener->listen();
+        auto status  = m_TCPListener->listen();
     }
     if (m_UdpSocket) {
         m_UdpSocket->setBlocking(false);
-        auto status = m_UdpSocket->bind();
+        auto status  = m_UdpSocket->bind();
     }
 
     m_Port           = port;

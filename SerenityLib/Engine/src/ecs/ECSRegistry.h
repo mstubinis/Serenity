@@ -43,13 +43,11 @@ namespace Engine::priv {
             }
 			template <typename T> 
             static const unsigned int type_slot_fast() {
-				const auto& type = type_ID<T>();
-				return slotMap.at(type);
+				return slotMap.at(type_ID<T>());
 			}
 			template <typename T> 
             static const unsigned int type_slot_fast(T* t) {
-				const auto& type = type_ID(t);
-				return slotMap.at(type);
+				return slotMap.at(type_ID(t));
 			}
         };
 };

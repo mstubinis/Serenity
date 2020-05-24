@@ -7,7 +7,7 @@ class LUAState;
 namespace Engine::priv {
     class LUABinder {
         private:
-            LUAState*                      m_LUA_STATE = nullptr;
+            LUAState*   m_LUA_STATE = nullptr;
         public:
             LUABinder();
             virtual ~LUABinder();

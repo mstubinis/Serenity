@@ -5,6 +5,8 @@
 #include <core/engine/lua/LuaState.h>
 
 #include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/sounds/Engine_Sounds.h>
+
 #include <core/engine/scene/Scene.h>
 #include <core/engine/scene/SceneOptions.h>
 #include <core/engine/scene/Camera.h>
@@ -23,55 +25,8 @@
 using namespace std;
 using namespace Engine::priv;
 
-void print(const string& str) { cout << str << "\n"; }
-
-void addComponentBody(Entity entity, const string& type = "") { 
-    string hardCpy = type;
-    transform(hardCpy.begin(), hardCpy.end(), hardCpy.begin(), ::tolower);
-    if (hardCpy == "convex") {
-        entity.addComponent<ComponentBody>(CollisionType::Type::ConvexHull);
-    }else if (hardCpy == "box") {
-        entity.addComponent<ComponentBody>(CollisionType::Type::Box);
-    }else if (hardCpy == "sphere") {
-        entity.addComponent<ComponentBody>(CollisionType::Type::Sphere);
-    }else if (hardCpy == "triangleshape") {
-        entity.addComponent<ComponentBody>(CollisionType::Type::TriangleShape);
-    }else if (hardCpy == "triangleshapestatic") {
-        entity.addComponent<ComponentBody>(CollisionType::Type::TriangleShapeStatic);
-    }else if (hardCpy == "compound") {
-        entity.addComponent<ComponentBody>(CollisionType::Type::Compound);
-    }else if (hardCpy == "none" || type == "null") {
-        entity.addComponent<ComponentBody>(CollisionType::Type::None);
-    }else {
-        entity.addComponent<ComponentBody>();
-    }
-}
-void addComponentModel(Entity entity, Handle mesh, Handle material, Handle shaderProgram, const unsigned int renderStage) { 
-    entity.addComponent<ComponentModel>(mesh, material, shaderProgram, static_cast<RenderStage::Stage>(renderStage));
-}
-void addComponentName(Entity entity, const string& name) { entity.addComponent<ComponentName>(name); }
-void addComponentLogic(Entity entity) { entity.addComponent<ComponentLogic>(); }
-void addComponentLogic1(Entity entity) { entity.addComponent<ComponentLogic1>(); }
-void addComponentLogic2(Entity entity) { entity.addComponent<ComponentLogic2>(); }
-void addComponentLogic3(Entity entity) { entity.addComponent<ComponentLogic3>(); }
-void addComponentCamera(Entity entity, const string& type, const float Near, const float Far) {
-    string hardCpy = type;
-    const auto window = glm::vec2(Engine::Resources::getWindowSize());
-    transform(hardCpy.begin(), hardCpy.end(), hardCpy.begin(), ::tolower);
-    if (hardCpy == "orthographic" || hardCpy == "ortho") {
-        entity.addComponent<ComponentCamera>(0.0f, window.x, 0.0f, window.y, Near, Far);
-    }else{
-        entity.addComponent<ComponentCamera>(60.0f, window.x / window.y, Near, Far);
-    }
-}
-ComponentBody* getComponentBody(Entity entity) { return entity.getComponent<ComponentBody>(); }
-ComponentModel* getComponentModel(Entity entity) { return entity.getComponent<ComponentModel>(); }
-ComponentName* getComponentName(Entity entity) { return entity.getComponent<ComponentName>(); }
-ComponentLogic* getComponentLogic(Entity entity) { return entity.getComponent<ComponentLogic>(); }
-ComponentLogic1* getComponentLogic1(Entity entity) { return entity.getComponent<ComponentLogic1>(); }
-ComponentLogic2* getComponentLogic2(Entity entity) { return entity.getComponent<ComponentLogic2>(); }
-ComponentLogic3* getComponentLogic3(Entity entity) { return entity.getComponent<ComponentLogic3>(); }
-ComponentCamera* getComponentCamera(Entity entity) { return entity.getComponent<ComponentCamera>(); }
+void print(const string& s) { cout << s << "\n"; }
+void tostring(luabridge::LuaRef r) { cout << r.tostring() << "\n"; }
 
 LUABinder::LUABinder() {
     m_LUA_STATE = NEW LUAState();
@@ -79,30 +34,22 @@ LUABinder::LUABinder() {
 
     luabridge::getGlobalNamespace(L)
         .addFunction("print", &print)
+        .addFunction("tostring", &tostring)
         .addFunction("getDeltaTime", &Engine::Resources::dt)
         .addFunction("dt", &Engine::Resources::dt)
 
-        .addFunction("addComponentBody", &addComponentBody)
-        .addFunction("addComponentModel", &addComponentModel)
-        .addFunction("addComponentName", &addComponentName)
-        .addFunction("addComponentLogic", &addComponentLogic)
-        .addFunction("addComponentLogic1", &addComponentLogic1)
-        .addFunction("addComponentLogic2", &addComponentLogic2)
-        .addFunction("addComponentLogic3", &addComponentLogic3)
-        .addFunction("addComponentCamera", &addComponentCamera)
-
-        .addFunction("getComponentBody", &getComponentBody)
-        .addFunction("getComponentModel", &getComponentModel)
-        .addFunction("getComponentName", &getComponentName)
-        .addFunction("getComponentLogic", &getComponentLogic)
-        .addFunction("getComponentLogic1", &getComponentLogic1)
-        .addFunction("getComponentLogic2", &getComponentLogic2)
-        .addFunction("getComponentLogic3", &getComponentLogic3)
-        .addFunction("getComponentCamera", &getComponentCamera)
+        .addFunction("playSoundEffect", &Engine::Sound::playEffect)
+        .addFunction("playSoundMusic", &Engine::Sound::playMusic)
+        .addFunction("stopAllSoundEffects", &Engine::Sound::stop_all_effects)
+        .addFunction("stopAllSoundMusic", &Engine::Sound::stop_all_music)
 
 #pragma region Matrices
         //glm mat4 TODO: add more to this
         .beginClass<glm::mat4>("mat4")
+
+        .endClass()
+        //glm mat3 TODO: add more to this
+        .beginClass<glm::mat3>("mat3")
 
         .endClass()
 #pragma endregion
@@ -321,19 +268,55 @@ LUABinder::LUABinder() {
         //component logics
         .beginClass<ComponentLogic>("ComponentLogic")
             .addFunction("call", &ComponentLogic::call)
-            .addFunction("setFunctor", &ComponentLogic::setFunctor)
+            .addFunction("setFunctor", static_cast<void(ComponentLogic::*)(luabridge::LuaRef)>(&ComponentLogic::setFunctor))
         .endClass()
         .beginClass<ComponentLogic1>("ComponentLogic1")
             .addFunction("call", &ComponentLogic1::call)
-            .addFunction("setFunctor", &ComponentLogic1::setFunctor)
+            .addFunction("setFunctor", static_cast<void(ComponentLogic1::*)(luabridge::LuaRef)>(&ComponentLogic1::setFunctor))
         .endClass()
         .beginClass<ComponentLogic2>("ComponentLogic2")
             .addFunction("call", &ComponentLogic2::call)
-            .addFunction("setFunctor", &ComponentLogic2::setFunctor)
+            .addFunction("setFunctor", static_cast<void(ComponentLogic2::*)(luabridge::LuaRef)>(&ComponentLogic2::setFunctor))
         .endClass()
         .beginClass<ComponentLogic3>("ComponentLogic3")
             .addFunction("call", &ComponentLogic3::call)
-            .addFunction("setFunctor", &ComponentLogic3::setFunctor)
+            .addFunction("setFunctor", static_cast<void(ComponentLogic3::*)(luabridge::LuaRef)>(&ComponentLogic3::setFunctor))
+        .endClass()
+        //component model TODO add more
+        .beginClass<ComponentModel>("ComponentModel")
+            .addFunction("boundingBox", &ComponentModel::boundingBox)
+            .addFunction("radius", &ComponentModel::radius)
+            .addFunction("getNumModels", &ComponentModel::getNumModels)
+            .addFunction("setStage", &ComponentModel::setStage)
+            .addFunction("getOwner", &ComponentModel::getOwner)
+            .addFunction("removeModel", &ComponentModel::removeModel)
+            .addFunction("hide", &ComponentModel::hide)
+            .addFunction("show", &ComponentModel::show)
+            .addFunction("getModel", &ComponentModel::getModel)
+        .endClass()
+        //model instance
+        .beginClass<ModelInstance>("ModelInstance")
+            .addFunction("color", &ModelInstance::color)
+            .addFunction("setColor", static_cast<void(ModelInstance::*)(const float, const float, const float, const float)>(&ModelInstance::setColor))
+            .addFunction("forceRender", &ModelInstance::forceRender)
+            .addFunction("getScale", &ModelInstance::getScale)
+            .addFunction("setScale", static_cast<void(ModelInstance::*)(const float, const float, const float)>(&ModelInstance::setScale))
+            .addFunction("rotate", static_cast<void(ModelInstance::*)(const float, const float, const float)>(&ModelInstance::rotate))
+            .addFunction("translate", static_cast<void(ModelInstance::*)(const float, const float, const float)>(&ModelInstance::translate))
+            .addFunction("scale", static_cast<void(ModelInstance::*)(const float, const float, const float)>(&ModelInstance::scale))
+            .addFunction("position", &ModelInstance::position)
+            .addFunction("orientation", &ModelInstance::orientation)
+            .addFunction("godRaysColor", &ModelInstance::godRaysColor)
+            .addFunction("setGodRaysColor", static_cast<void(ModelInstance::*)(const float, const float, const float)>(&ModelInstance::setGodRaysColor))
+            .addFunction("parent", &ModelInstance::parent)
+            .addFunction("passedRenderCheck", &ModelInstance::passedRenderCheck)
+            .addFunction("hide", &ModelInstance::hide)
+            .addFunction("show", &ModelInstance::show)
+            .addFunction("visible", &ModelInstance::visible)
+            .addFunction("index", &ModelInstance::index)
+            .addFunction("isForceRendered", &ModelInstance::isForceRendered)
+            .addFunction("playAnimation", &ModelInstance::playAnimation)
+            .addFunction("setOrientation", static_cast<void(ModelInstance::*)(const float, const float, const float)>(&ModelInstance::setOrientation))
         .endClass();
 }
 LUABinder::~LUABinder() {

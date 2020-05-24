@@ -116,7 +116,7 @@ ComponentModel& ComponentModel::operator=(ComponentModel&& other) noexcept {
 ComponentModel::~ComponentModel() {
     SAFE_DELETE_VECTOR(m_ModelInstances);
 }
-const Entity ComponentModel::getOwner() const {
+Entity ComponentModel::getOwner() const {
     return m_Owner;
 }
 void ComponentModel::onEvent(const Event& event_) {

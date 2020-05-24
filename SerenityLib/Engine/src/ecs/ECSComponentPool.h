@@ -2,15 +2,23 @@
 #ifndef ENGINE_ECS_COMPONENT_POOL_H
 #define ENGINE_ECS_COMPONENT_POOL_H
 
+namespace Engine::priv {
+    template<typename TEntity>
+    class ECS;
+}
+
 #include <core/engine/containers/SparseSet.h>
-#include <ecs/EntityDataRequest.h> //ok
+#include <ecs/EntityDataRequest.h>
 
 namespace Engine::priv {
     template<typename ...> class ECSComponentPool;
 
     template <typename TEntity,typename TComponent> 
     class ECSComponentPool<TEntity, TComponent> : public Engine::sparse_set<TComponent>, public Engine::NonCopyable, public Engine::NonMoveable{
+        friend class Engine::priv::ECS<TEntity>;
         using super = Engine::sparse_set<TComponent>;
+        private:
+            //unsigned int m_SortValue = 0;
         public:
             ECSComponentPool() : super(400) {
 

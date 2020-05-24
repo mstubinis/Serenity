@@ -42,6 +42,8 @@ class ComponentModel: public EventObserver {
         ModelInstanceVector          m_ModelInstances;
         float                        m_Radius;
         glm::vec3                    m_RadiusBox;
+
+        ComponentModel() = delete;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
         explicit ComponentModel(const Entity, const Handle meshHandle, const Handle materialHandle, ShaderProgram* = 0,         const RenderStage::Stage = RenderStage::GeometryOpaque);
@@ -61,7 +63,7 @@ class ComponentModel: public EventObserver {
 
         ~ComponentModel();
 
-        const Entity getOwner() const;
+        Entity getOwner() const;
 
         void onEvent(const Event& event_) override;
 
@@ -78,24 +80,24 @@ class ComponentModel: public EventObserver {
 
         ModelInstance& getModel(const size_t& index = 0) const;
         void removeModel(const size_t& index);
-        ModelInstance& addModel(const Handle meshHandle, const Handle materialHandle, ShaderProgram* = 0, const RenderStage::Stage = RenderStage::GeometryOpaque);
-        ModelInstance& addModel(Mesh*, Material*, ShaderProgram* = 0, const RenderStage::Stage = RenderStage::GeometryOpaque);
+        ModelInstance& addModel(const Handle meshHandle, const Handle materialHandle, ShaderProgram* = 0,         const RenderStage::Stage = RenderStage::GeometryOpaque);
+        ModelInstance& addModel(Mesh*,                   Material*,                   ShaderProgram* = 0,         const RenderStage::Stage = RenderStage::GeometryOpaque);
         ModelInstance& addModel(const Handle meshHandle, const Handle materialHandle, const Handle shaderProgram, const RenderStage::Stage = RenderStage::GeometryOpaque);
-        ModelInstance& addModel(Mesh*, Material*, const Handle shaderProgram, const RenderStage::Stage = RenderStage::GeometryOpaque);
+        ModelInstance& addModel(Mesh*,                   Material*,                   const Handle shaderProgram, const RenderStage::Stage = RenderStage::GeometryOpaque);
 
 
         void setStage(const RenderStage::Stage& stage, const size_t& index = 0);
 
         void setModel(const Handle meshHandle, const Handle materialHandle, const size_t& index, ShaderProgram* = 0, const RenderStage::Stage = RenderStage::GeometryOpaque);
-        void setModel(Mesh*, Material*, const size_t& index, ShaderProgram* = 0, const RenderStage::Stage = RenderStage::GeometryOpaque);
+        void setModel(Mesh*,                   Material*,                   const size_t& index, ShaderProgram* = 0, const RenderStage::Stage = RenderStage::GeometryOpaque);
 
-        void setModelMesh(Mesh*, const size_t& index, const RenderStage::Stage = RenderStage::GeometryOpaque);
+        void setModelMesh(Mesh*,                   const size_t& index, const RenderStage::Stage = RenderStage::GeometryOpaque);
         void setModelMesh(const Handle meshHandle, const size_t& index, const RenderStage::Stage = RenderStage::GeometryOpaque);
 
-        void setModelMaterial(Material*, const size_t& index, const RenderStage::Stage = RenderStage::GeometryOpaque);
+        void setModelMaterial(Material*,                   const size_t& index, const RenderStage::Stage = RenderStage::GeometryOpaque);
         void setModelMaterial(const Handle materialHandle, const size_t& index, const RenderStage::Stage = RenderStage::GeometryOpaque);
 
-        void setModelShaderProgram(ShaderProgram*, const size_t& index, const RenderStage::Stage = RenderStage::GeometryOpaque);
+        void setModelShaderProgram(ShaderProgram*,              const size_t& index, const RenderStage::Stage = RenderStage::GeometryOpaque);
         void setModelShaderProgram(const Handle materialHandle, const size_t& index, const RenderStage::Stage = RenderStage::GeometryOpaque);
 
         bool rayIntersectSphere(const ComponentCamera& camera) const;

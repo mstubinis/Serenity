@@ -10,14 +10,14 @@ ComponentLogic1::ComponentLogic1(const Entity entity) {
     m_Owner = entity;
 }
 ComponentLogic1::~ComponentLogic1() {
+
 }
 ComponentLogic1::ComponentLogic1(ComponentLogic1&& other) noexcept {
     m_UserPointer  = std::exchange(other.m_UserPointer, nullptr);
     m_UserPointer1 = std::exchange(other.m_UserPointer1, nullptr);
     m_UserPointer2 = std::exchange(other.m_UserPointer2, nullptr);
     m_Owner        = std::move(other.m_Owner);
-
-    m_Functor.swap(other.m_Functor);
+    m_Functor      = std::move(other.m_Functor);
 }
 ComponentLogic1& ComponentLogic1::operator=(ComponentLogic1&& other) noexcept {
     if (&other != this) {
@@ -25,8 +25,7 @@ ComponentLogic1& ComponentLogic1::operator=(ComponentLogic1&& other) noexcept {
         m_UserPointer1 = std::exchange(other.m_UserPointer1, nullptr);
         m_UserPointer2 = std::exchange(other.m_UserPointer2, nullptr);
         m_Owner        = std::move(other.m_Owner);
-
-        m_Functor.swap(other.m_Functor);
+        m_Functor      = std::move(other.m_Functor);
     }
     return *this;
 }
@@ -34,7 +33,12 @@ const Entity ComponentLogic1::getOwner() const {
     return m_Owner;
 }
 void ComponentLogic1::setFunctor(std::function<void(const ComponentLogic1*, const float)> functor) {
-    m_Functor = functor;
+    m_Functor.setFunctor(functor);
+}
+void ComponentLogic1::setFunctor(luabridge::LuaRef luaFunction) {
+    if (!luaFunction.isNil() && luaFunction.isFunction()) {
+        m_Functor.setFunctor(luaFunction);
+    }
 }
 void ComponentLogic1::setUserPointer1(void* UserPointer1) {
     m_UserPointer1 = UserPointer1;
@@ -49,9 +53,7 @@ void* ComponentLogic1::getUserPointer2() const {
     return m_UserPointer2;
 }
 void ComponentLogic1::call(const float dt) const { 
-    //if (m_Functor) {
-        m_Functor(this, dt);
-    //}
+    m_Functor.call(this, dt);
 }
 
 #pragma endregion

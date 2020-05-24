@@ -2,6 +2,11 @@
 #ifndef ENGINE_ECS_SYSTEM_H
 #define ENGINE_ECS_SYSTEM_H
 
+namespace Engine::priv {
+    template<typename TEntity>
+    class ECS;
+}
+
 #include <ecs/ECSComponentPool.h>
 #include <ecs/ECSSystemConstructorInfo.h>
 
@@ -9,6 +14,7 @@ namespace Engine::priv {
     template<typename ...> class ECSSystem;
     template <class TEntity> 
     class ECSSystem<TEntity> {
+        friend class Engine::priv::ECS<TEntity>;
         protected:
             std_func_update               SUF;
             std_func_component            CAE;
@@ -16,6 +22,7 @@ namespace Engine::priv {
             std_func_entity               EAS;
             std_func_scene                SEF;
             std_func_scene                SLF;
+            //unsigned int                  m_SortValue = 0;
         public:
             ECSSystem()                                      = default;
             virtual ~ECSSystem()                             = default;

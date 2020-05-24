@@ -69,6 +69,7 @@ namespace Engine::Networking {
             virtual void onEvent(const Event& e) override;
             virtual bool startup(unsigned short port, std::string ip_restriction = "");
             virtual bool shutdown();
+            virtual Engine::Networking::ServerThread* getNextAvailableClientThread();
 
             void update(const float dt);
 

@@ -11,15 +11,15 @@ namespace Engine {
     namespace priv {
         class sparse_set_base {
             protected:
-                unsigned int                            m_MaxLastIndex;
+                unsigned int                            m_MaxLastIndex = 0;
                 std::vector<unsigned int>               m_Sparse;
 
                 sparse_set_base() = delete;
             public:
                 sparse_set_base(const unsigned int initial_capacity) {
-                    m_MaxLastIndex = 0;
-                    if (initial_capacity > 0) 
+                    if (initial_capacity > 0) {
                         m_Sparse.reserve(initial_capacity);
+                    }
                 }
                 virtual ~sparse_set_base() {
                     m_MaxLastIndex = 0;

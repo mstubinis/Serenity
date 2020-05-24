@@ -2,9 +2,6 @@
 #ifndef ENGINE_SHADER_H
 #define ENGINE_SHADER_H
 
-#include <core/engine/resources/Engine_ResourceBasic.h>
-#include <core/engine/shaders/ShaderIncludes.h>
-
 class ShaderProgram;
 class Shader;
 namespace Engine::priv {
@@ -13,6 +10,10 @@ namespace Engine::priv {
         static void ConvertCode(Shader&);
     };
 };
+
+#include <core/engine/resources/Engine_ResourceBasic.h>
+#include <core/engine/shaders/ShaderIncludes.h>
+
 class Shader final : public EngineResource {
     friend class  ShaderProgram;
     friend struct Engine::priv::InternalShaderPublicInterface;

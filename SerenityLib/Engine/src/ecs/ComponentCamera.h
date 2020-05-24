@@ -66,6 +66,8 @@ class ComponentCamera {
 			float   m_AspectRatio;
 			float   m_Right; 
 		};
+
+        ComponentCamera() = delete;
     public:
         BOOST_TYPE_INDEX_REGISTER_CLASS
         ComponentCamera(const Entity entity, const float angle, const float aspectRatio, const float nearPlane, const float farPlane);
