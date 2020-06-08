@@ -27,7 +27,7 @@ namespace Engine::priv {
 #include <core/engine/mesh/MeshIncludes.h>
 
 #include <core/engine/resources/Engine_ResourceBasic.h>
-#include <core/engine/events/Engine_EventObject.h>
+#include <core/engine/events/Observer.h>
 #include <core/engine/physics/PhysicsIncludes.h>
 #include <core/engine/model/ModelInstance.h>
 
@@ -52,7 +52,7 @@ namespace Engine::priv{
     };
 };
 
-class Mesh final: public EngineResource, public EventObserver, public Engine::NonCopyable, public Engine::NonMoveable {
+class Mesh final: public EngineResource, public Observer, public Engine::NonCopyable, public Engine::NonMoveable {
     friend struct Engine::priv::InternalMeshPublicInterface;
     friend struct Engine::priv::InternalMeshRequestPublicInterface;
     friend struct Engine::priv::DefaultMeshBindFunctor;
@@ -102,7 +102,7 @@ class Mesh final: public EngineResource, public EventObserver, public Engine::No
 
         std::unordered_map<std::string, Engine::priv::AnimationData>& animationData();
         const glm::vec3& getRadiusBox() const;
-        const float getRadius() const;
+        float getRadius() const;
         const VertexData& getVertexData() const;
 
         void onEvent(const Event& e);
@@ -111,35 +111,20 @@ class Mesh final: public EngineResource, public EventObserver, public Engine::No
         void unload();
 
         template<typename T> 
-        void modifyVertices(const unsigned int attributeIndex, std::vector<T>& modifications, const unsigned int MeshModifyFlags = MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU) {
-            auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
-            bool uploadToGPU = false;
-            bool orphan = false;
-            if (MeshModifyFlags & MeshModifyFlags::Orphan) {
-                orphan = true;
-            }
-            if (MeshModifyFlags & MeshModifyFlags::UploadToGPU) {
-                uploadToGPU = true;
-            }
-            vertexDataStructure.setData<T>(attributeIndex, modifications, uploadToGPU, orphan);
+        void modifyVertices(unsigned int attributeIndex, const T* modifications, size_t bufferCount, unsigned int MeshModifyFlags = MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU) {
+            m_VertexData->setData<T>(attributeIndex, modifications, bufferCount, 
+                MeshModifyFlags & MeshModifyFlags::UploadToGPU, 
+                MeshModifyFlags & MeshModifyFlags::Orphan
+            );
         }
-        void modifyIndices(std::vector<unsigned int>& modifiedIndices, const unsigned int MeshModifyFlags = MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU) {
-            auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
-            bool uploadToGPU = false;
-            bool orphan = false;
-            bool recalcTriangles = false;
-            if (MeshModifyFlags & MeshModifyFlags::Orphan) {
-                orphan = true;
-            }
-            if (MeshModifyFlags & MeshModifyFlags::UploadToGPU) {
-                uploadToGPU = true;
-            }
-            if (MeshModifyFlags & MeshModifyFlags::RecalculateTriangles) {
-                recalcTriangles = true;
-            }
-            vertexDataStructure.setIndices(modifiedIndices, uploadToGPU, orphan, recalcTriangles);
+        void modifyIndices(const unsigned int* modifiedIndices, size_t bufferCount, unsigned int MeshModifyFlags = MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU) {
+            m_VertexData->setIndices(modifiedIndices, bufferCount, 
+                MeshModifyFlags & MeshModifyFlags::UploadToGPU, 
+                MeshModifyFlags & MeshModifyFlags::Orphan, 
+                MeshModifyFlags & MeshModifyFlags::RecalculateTriangles
+            );
         }
 
-        void sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, const SortingMode::Mode& sortMode);
+        void sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, SortingMode::Mode sortMode);
 };
 #endif

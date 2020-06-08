@@ -24,20 +24,21 @@ namespace Engine::priv {
     template<typename T> class ECS;
     class  GBuffer;
     class  Renderer;
+    class  EngineCore;
 };
 
 #include <core/engine/renderer/RendererIncludes.h>
 #include <core/engine/resources/Engine_ResourceBasic.h>
-#include <core/engine/events/Engine_EventObject.h>
 #include <core/engine/renderer/particles/ParticleSystem.h>
 #include <core/engine/scene/Viewport.h>
+#include <core/engine/events/Observer.h>
 #include <functional>
 
-class Scene: public EngineResource, public EventObserver{
+class Scene: public EngineResource, public Observer{
     friend class  Engine::priv::RenderGraph;
     friend class  Engine::priv::ResourceManager;
     friend struct Engine::priv::InternalScenePublicInterface;
-
+    friend class  Engine::priv::EngineCore;
     private:
         mutable std::vector<Viewport>                                 m_Viewports;
         mutable std::vector<Camera*>                                  m_Cameras;
@@ -59,20 +60,21 @@ class Scene: public EngineResource, public EventObserver{
 
         class impl; impl*                                             m_i                  = nullptr;
         std::function<void(Scene*, const float)>                      m_OnUpdateFunctor    = [](Scene*, const float) {};
+
+        void preUpdate(const float dt);
+        void postUpdate(const float dt);
     public:
         Scene(const std::string& name);
         Scene(const std::string& name, const SceneOptions& options);
         virtual ~Scene();
 
 
-        virtual void update(const float dt);
+        void update(const float dt);
         virtual void render();
         virtual void onEvent(const Event& event);
         virtual void onResize(const unsigned int width, const unsigned int height);
 
-        template<typename T> void setOnUpdateFunctor(const T& functor) {
-            m_OnUpdateFunctor = std::bind<void>(functor, std::placeholders::_1, std::placeholders::_2);
-        }
+        void setOnUpdateFunctor(std::function<void(Scene*, const float)> functor);
 
         unsigned int id() const;
         unsigned int numViewports() const;
@@ -111,41 +113,38 @@ class Scene: public EngineResource, public EventObserver{
 
         void centerSceneToObject(const Entity& centerEntity);
 };
-namespace Engine {
-    namespace priv {
-        struct InternalScenePublicInterface final {
-            friend class Scene;
-            friend class Engine::priv::RenderGraph;
+namespace Engine::priv {
+    struct InternalScenePublicInterface final {
+        friend class Scene;
+        friend class Engine::priv::RenderGraph;
 
-            static std::vector<Particle>&            GetParticles(const Scene& scene);
-            static std::vector<EntityPOD>&           GetEntities(const Scene& scene);
-            static std::vector<Viewport>&            GetViewports(const Scene& scene);
-            static std::vector<Camera*>&             GetCameras(const Scene& scene);
-            static std::vector<SunLight*>&           GetLights(const Scene& scene);
-            static std::vector<SunLight*>&           GetSunLights(const Scene& scene);
-            static std::vector<DirectionalLight*>&   GetDirectionalLights(const Scene& scene);
-            static std::vector<PointLight*>&         GetPointLights(const Scene& scene);
-            static std::vector<SpotLight*>&          GetSpotLights(const Scene& scene);
-            static std::vector<RodLight*>&           GetRodLights(const Scene& scene);
+        static std::vector<Particle>&            GetParticles(const Scene& scene);
+        static std::vector<EntityPOD>&           GetEntities(const Scene& scene);
+        static std::vector<Viewport>&            GetViewports(const Scene& scene);
+        static std::vector<Camera*>&             GetCameras(const Scene& scene);
+        static std::vector<SunLight*>&           GetLights(const Scene& scene);
+        static std::vector<SunLight*>&           GetSunLights(const Scene& scene);
+        static std::vector<DirectionalLight*>&   GetDirectionalLights(const Scene& scene);
+        static std::vector<PointLight*>&         GetPointLights(const Scene& scene);
+        static std::vector<SpotLight*>&          GetSpotLights(const Scene& scene);
+        static std::vector<RodLight*>&           GetRodLights(const Scene& scene);
 
-            static void           UpdateMaterials(Scene& scene, const float dt);
-            static void           UpdateParticleSystem(Scene& scene, const float dt);
+        static void           UpdateMaterials(Scene& scene, const float dt);
 
-            static void           RenderGeometryOpaque( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-            static void           RenderGeometryTransparent( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-            static void           RenderGeometryTransparentTrianglesSorted( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-            static void           RenderForwardOpaque( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-            static void           RenderForwardTransparent( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-            static void           RenderForwardTransparentTrianglesSorted( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-            static void           RenderForwardParticles( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-            static void           RenderDecals( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-            static void           RenderParticles( Renderer&, const Scene& scene, const Viewport&, const Camera&, ShaderProgram& program);
+        static void           RenderGeometryOpaque( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
+        static void           RenderGeometryTransparent( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
+        static void           RenderGeometryTransparentTrianglesSorted( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
+        static void           RenderForwardOpaque( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
+        static void           RenderForwardTransparent( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
+        static void           RenderForwardTransparentTrianglesSorted( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
+        static void           RenderForwardParticles( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
+        static void           RenderDecals( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
+        static void           RenderParticles( Renderer&, const Scene& scene, const Viewport&, const Camera&, ShaderProgram& program);
 
-            static void           AddModelInstanceToPipeline(Scene& scene, ModelInstance&, const RenderStage::Stage& stage);
-            static void           RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance&, const RenderStage::Stage& stage);
-            static ECS<Entity>&   GetECS(const Scene& scene);
-            static void           CleanECS(Scene& scene, const unsigned int entityData);
-        };
+        static void           AddModelInstanceToPipeline(Scene& scene, ModelInstance&, const RenderStage::Stage& stage);
+        static void           RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance&, const RenderStage::Stage& stage);
+        static ECS<Entity>&   GetECS(const Scene& scene);
+        static void           CleanECS(Scene& scene, const unsigned int entityData);
     };
 };
 

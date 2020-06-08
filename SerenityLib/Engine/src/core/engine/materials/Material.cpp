@@ -75,12 +75,12 @@ Material::~Material(){
     InternalMaterialPublicInterface::Unload(*this);
     SAFE_DELETE_VECTOR(m_Components);
 }
-MaterialComponent* Material::internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture, Texture* mask, Texture* cubemap) {
+MaterialComponent* Material::internalAddComponentGeneric(MaterialComponentType::Type type, Texture* texture, Texture* mask, Texture* cubemap) {
     MaterialComponent* newMaterialComponent = NEW MaterialComponent(type, texture, mask, cubemap);
     m_Components.push_back(newMaterialComponent);
     return newMaterialComponent;
 }
-void Material::internalUpdateGlobalMaterialPool(const bool addToDatabase) {
+void Material::internalUpdateGlobalMaterialPool(bool addToDatabase) {
     //this data is kept around to be deferred to the lighting pass
     glm::vec4* data = nullptr;
     if (!addToDatabase) {
@@ -100,7 +100,7 @@ void Material::internalUpdateGlobalMaterialPool(const bool addToDatabase) {
 }
 
 
-MaterialComponent& Material::addComponent(const MaterialComponentType::Type& type, const string& textureFile, const string& maskFile, const string& cubemapFile) {
+MaterialComponent& Material::addComponent(MaterialComponentType::Type type, const string& textureFile, const string& maskFile, const string& cubemapFile) {
     Texture* texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(textureFile);
     if (!texture) {
         if (!textureFile.empty() && textureFile != "DEFAULT") {
@@ -136,7 +136,7 @@ MaterialComponent& Material::addComponentSpecular(const string& textureFile){
     Texture* texture = MaterialLoader::LoadTextureSpecular(textureFile);
     return *internalAddComponentGeneric(MaterialComponentType::Specular, texture);
 }
-MaterialComponent& Material::addComponentAO(const string& textureFile, const unsigned char baseValue){
+MaterialComponent& Material::addComponentAO(const string& textureFile, unsigned char baseValue){
     Texture* texture = MaterialLoader::LoadTextureAO(textureFile);
     auto& component = *internalAddComponentGeneric(MaterialComponentType::AO, texture);
     auto& layer = component.layer(0);
@@ -145,7 +145,7 @@ MaterialComponent& Material::addComponentAO(const string& textureFile, const uns
     setAO(baseValue);
     return component;
 }
-MaterialComponent& Material::addComponentMetalness(const string& textureFile, const unsigned char baseValue){
+MaterialComponent& Material::addComponentMetalness(const string& textureFile, unsigned char baseValue){
     Texture* texture = MaterialLoader::LoadTextureMetalness(textureFile);
     auto& component = *internalAddComponentGeneric(MaterialComponentType::Metalness, texture);
     auto& layer = component.layer(0);
@@ -154,7 +154,7 @@ MaterialComponent& Material::addComponentMetalness(const string& textureFile, co
     setMetalness(baseValue);
     return component;
 }
-MaterialComponent& Material::addComponentSmoothness(const string& textureFile, const unsigned char baseValue){
+MaterialComponent& Material::addComponentSmoothness(const string& textureFile, unsigned char baseValue){
     Texture* texture = MaterialLoader::LoadTextureSmoothness(textureFile);
     auto& component = *internalAddComponentGeneric(MaterialComponentType::Smoothness, texture);
     auto& layer = component.layer(0);
@@ -163,7 +163,7 @@ MaterialComponent& Material::addComponentSmoothness(const string& textureFile, c
     setSmoothness(baseValue);
     return component;
 }
-MaterialComponent& Material::addComponentReflection(const string& cubemapName, const string& maskFile,float mixFactor){
+MaterialComponent& Material::addComponentReflection(const string& cubemapName, const string& maskFile, float mixFactor){
     //add checks to see if texture was loaded already
     Texture* cubemap = MaterialLoader::LoadTextureCubemap(cubemapName);
     Texture* mask = MaterialLoader::LoadTextureMask(maskFile);
@@ -177,7 +177,7 @@ MaterialComponent& Material::addComponentReflection(const string& cubemapName, c
     layer.setData2(mixFactor, _data2.y, _data2.z, _data2.w);
     return component;
 }
-MaterialComponent& Material::addComponentRefraction(const string& cubemapName, const string& maskFile,float refractiveIndex,float mixFactor){
+MaterialComponent& Material::addComponentRefraction(const string& cubemapName, const string& maskFile, float refractiveIndex, float mixFactor){
     //add checks to see if texture was loaded already
     Texture* cubemap = MaterialLoader::LoadTextureCubemap(cubemapName);
     Texture* mask = MaterialLoader::LoadTextureMask(maskFile);
@@ -191,7 +191,7 @@ MaterialComponent& Material::addComponentRefraction(const string& cubemapName, c
     layer.setData2(mixFactor, refractiveIndex, _data2.z, _data2.w);
     return component;
 }
-MaterialComponent& Material::addComponentParallaxOcclusion(const string& textureFile,float heightScale){
+MaterialComponent& Material::addComponentParallaxOcclusion(const string& textureFile, float heightScale){
     Texture* texture = MaterialLoader::LoadTextureNormal(textureFile);
     auto& component = *internalAddComponentGeneric(MaterialComponentType::ParallaxOcclusion, texture);
     auto& layer = component.layer(0);
@@ -199,7 +199,7 @@ MaterialComponent& Material::addComponentParallaxOcclusion(const string& texture
     layer.setData2(heightScale, _data2.y, _data2.z, _data2.w);
     return component;
 }
-MaterialComponent& Material::getComponent(const unsigned int& index) {
+MaterialComponent& Material::getComponent(unsigned int index) {
     return *m_Components[index];
 }
 bool Material::shadeless() const { 
@@ -232,11 +232,11 @@ unsigned char Material::smoothness() const {
 unsigned char Material::alpha() const {
     return m_BaseAlpha;
 }
-void Material::setShadeless(const bool shadeless){
+void Material::setShadeless(bool shadeless){
     m_Shadeless = shadeless;
     internalUpdateGlobalMaterialPool(false);
 }
-void Material::setGlow(const unsigned char glow){
+void Material::setGlow(unsigned char glow){
     m_BaseGlow = glm::clamp(glow, 1_uc, 255_uc);
     internalUpdateGlobalMaterialPool(false);
 }
@@ -244,7 +244,7 @@ void Material::setGlow(const unsigned char glow){
 void Material::setF0Color(const Engine::color_vector_4& f0Color) {
     Material::setF0Color(f0Color.color.r, f0Color.color.g, f0Color.color.b);
 }
-void Material::setF0Color(const unsigned char r, const unsigned char g, const unsigned char b) {
+void Material::setF0Color(unsigned char r, unsigned char g, unsigned char b) {
     m_F0Color = Engine::color_vector_4(
         glm::clamp(r, 1_uc, 255_uc),
         glm::clamp(g, 1_uc, 255_uc),
@@ -254,34 +254,34 @@ void Material::setF0Color(const unsigned char r, const unsigned char g, const un
     internalUpdateGlobalMaterialPool(false);
 }
 
-void Material::setMaterialPhysics(const MaterialPhysics::Physics materialPhysics){
+void Material::setMaterialPhysics(MaterialPhysics::Physics materialPhysics){
     const auto& t = MATERIAL_PROPERTIES[materialPhysics];
     setF0Color(get<0>(t), get<1>(t), get<2>(t));
     setSmoothness(get<3>(t));
     setMetalness(get<4>(t));
     internalUpdateGlobalMaterialPool(false);
 }
-void Material::setSmoothness(const unsigned char smoothness){
+void Material::setSmoothness(unsigned char smoothness){
     m_BaseSmoothness = glm::clamp(smoothness, 1_uc, 255_uc);
     internalUpdateGlobalMaterialPool(false);
 }
-void Material::setSpecularModel(const SpecularModel::Model specularModel){
+void Material::setSpecularModel(SpecularModel::Model specularModel){
     m_SpecularModel = specularModel;
     internalUpdateGlobalMaterialPool(false);
 }
-void Material::setDiffuseModel(const DiffuseModel::Model diffuseModel){
+void Material::setDiffuseModel(DiffuseModel::Model diffuseModel){
     m_DiffuseModel = diffuseModel;
     internalUpdateGlobalMaterialPool(false);
 }
-void Material::setAO(const unsigned char ao){
+void Material::setAO(unsigned char ao){
     m_BaseAO = glm::clamp(ao, 1_uc, 255_uc);
     internalUpdateGlobalMaterialPool(false);
 }
-void Material::setMetalness(const unsigned char metalness){
+void Material::setMetalness(unsigned char metalness){
     m_BaseMetalness = glm::clamp(metalness, 1_uc, 255_uc);
     internalUpdateGlobalMaterialPool(false);
 }
-void Material::setAlpha(const unsigned char alpha) {
+void Material::setAlpha(unsigned char alpha) {
     m_BaseAlpha = glm::clamp(alpha, 1_uc, 255_uc);
     internalUpdateGlobalMaterialPool(false);
 }

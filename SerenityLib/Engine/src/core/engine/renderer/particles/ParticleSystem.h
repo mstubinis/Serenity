@@ -54,6 +54,12 @@ namespace Engine::priv {
                 glm::vec4 PositionAndScaleX;
                 glm::vec2 ScaleYAndAngle;
                 glm::uvec2 MatIDAndPackedColor;
+
+                ParticleDOD(glm::vec4&& posAndScaleX, glm::vec2&& scaleYAndAngle, glm::uvec2&& matIDAndPackedColor) {
+                    PositionAndScaleX   = std::move(posAndScaleX);
+                    ScaleYAndAngle      = std::move(scaleYAndAngle);
+                    MatIDAndPackedColor = std::move(matIDAndPackedColor);
+                }
             };
 
             std::vector<ParticleDOD>  ParticlesDOD;
@@ -74,8 +80,7 @@ namespace Engine::priv {
             ParticleSystem(ParticleSystem&& other) noexcept            = delete;
             ParticleSystem& operator=(ParticleSystem&& other) noexcept = delete;
 
-
-            ParticleEmitter* add_emitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent);
+            ParticleEmitter* add_emitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent);
 
             bool add_particle(ParticleEmitter& emitter, const glm::vec3& emitterPosition, const glm::quat& emitterRotation);
             bool add_particle(ParticleEmitter& emitter);

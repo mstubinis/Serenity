@@ -12,7 +12,7 @@ MeshSkeleton::MeshSkeleton() {
 MeshSkeleton::~MeshSkeleton() {
 
 }
-const unsigned int MeshSkeleton::numBones() const {
+unsigned int MeshSkeleton::numBones() const {
     return m_NumBones; 
 }
 //void MeshSkeleton::fill(const MeshImportedData& meshImportedData) {

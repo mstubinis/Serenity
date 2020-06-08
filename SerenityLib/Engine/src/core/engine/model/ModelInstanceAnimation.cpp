@@ -5,16 +5,15 @@
 using namespace Engine::priv;
 using namespace std;
 
-ModelInstanceAnimation::ModelInstanceAnimation(Mesh& mesh, const string& animName, const float startTime, const float endTime, const unsigned int requestedLoops) : m_Mesh(&mesh){
-    m_CurrentLoops      = 0;
-    m_RequestedLoops    = requestedLoops;
-    m_CurrentTime       = 0;
-    m_StartTime         = startTime;
-    m_AnimationName     = animName;
+ModelInstanceAnimation::ModelInstanceAnimation(Mesh& mesh, const string& animName, const float startTime, const float endTime, const unsigned int requestedLoops){
+    m_Mesh             = &mesh;
+    m_RequestedLoops   = requestedLoops;
+    m_StartTime        = startTime;
+    m_AnimationName    = animName;
     if (endTime < 0) {
-        m_EndTime = mesh.animationData().at(animName).duration();
+        m_EndTime      = mesh.animationData().at(animName).duration();
     }else{
-        m_EndTime = endTime;
+        m_EndTime      = endTime;
     }
 }
 ModelInstanceAnimation::~ModelInstanceAnimation() {

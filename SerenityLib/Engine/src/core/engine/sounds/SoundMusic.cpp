@@ -3,7 +3,7 @@
 #include <core/engine/resources/Engine_Resources.h>
 
 #include <core/engine/system/Engine.h>
-#include <core/engine/events/Engine_EventDispatcher.h>
+#include <core/engine/events/EventDispatcher.h>
 #include <core/engine/events/Engine_EventObject.h>
 
 using namespace Engine;
@@ -60,7 +60,7 @@ bool SoundMusic::play(const uint numLoops) {
     EventSoundStatusChanged e(m_Status);
     Event ev(EventType::SoundStatusChanged);
     ev.eventSoundStatusChanged = e;
-    Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     return true;
 }
 bool SoundMusic::pause() {
@@ -84,7 +84,7 @@ bool SoundMusic::pause() {
     EventSoundStatusChanged e(m_Status);
     Event ev(EventType::SoundStatusChanged);
     ev.eventSoundStatusChanged = e;
-    Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     return true;
 }
 bool SoundMusic::stop(const bool stopAllLoops) {
@@ -121,7 +121,7 @@ bool SoundMusic::stop(const bool stopAllLoops) {
     EventSoundStatusChanged e(m_Status);
     Event ev(EventType::SoundStatusChanged);
     ev.eventSoundStatusChanged = e;
-    Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     return true;
 }
 bool SoundMusic::restart() {
@@ -146,7 +146,7 @@ bool SoundMusic::restart() {
     EventSoundStatusChanged e(m_Status);
     Event ev(EventType::SoundStatusChanged);
     ev.eventSoundStatusChanged = e;
-    Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     return true;
 }
 float SoundMusic::getAttenuation() const {

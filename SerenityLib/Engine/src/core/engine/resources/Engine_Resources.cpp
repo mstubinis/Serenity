@@ -29,8 +29,6 @@ using namespace std;
 priv::ResourceManager* resourceManager = nullptr;
 
 priv::ResourceManager::ResourceManager(const EngineOptions& options) : m_Resources(32768){
-    m_CurrentScene     = nullptr;
-    m_DynamicMemory    = false;
     resourceManager    = this;
 }
 priv::ResourceManager::~ResourceManager(){ 
@@ -42,6 +40,7 @@ void priv::ResourceManager::cleanup() {
 }
 void priv::ResourceManager::_init(const EngineOptions& options){
     auto* window = NEW Window(options);
+    window->setJoystickProcessingActive(false);
     m_Windows.push_back(window);
 }
 vector<Scene*>& priv::ResourceManager::scenes() {
@@ -317,7 +316,7 @@ bool Resources::setCurrentScene(Scene* newScene){
     priv::EventSceneChanged e(oldScene, newScene);
     Event ev(EventType::SceneChanged);
     ev.eventSceneChanged = e;
-    priv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     
     if(!oldScene){
         cout << "---- Initial scene set to: " << newScene->name() << endl;

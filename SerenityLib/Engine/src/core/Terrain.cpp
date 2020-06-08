@@ -19,14 +19,13 @@ using namespace Engine;
 
 #pragma region TerrainHeightfieldShape
 
-TerrainHeightfieldShape::TerrainHeightfieldShape(int heightWidth, int heightLength, const void* data, float heightScale, float minHeight, float maxHeight, int upAxis, PHY_ScalarType type, bool flipQuads)
-: btHeightfieldTerrainShape(heightWidth, heightLength, data, heightScale, (btScalar)minHeight, (btScalar)maxHeight, upAxis, type, flipQuads) {
+TerrainHeightfieldShape::TerrainHeightfieldShape(int heightWidth, int heightLength, void* data, float heightScale, float minHeight, float maxHeight, int upAxis, PHY_ScalarType type, bool flipQuads) : btHeightfieldTerrainShape(heightWidth, heightLength, data, heightScale, (btScalar)minHeight, (btScalar)maxHeight, upAxis, type, flipQuads) {
     m_ProcessedVertices.resize(heightWidth, vector<bool>(heightLength, true));
 }
 TerrainHeightfieldShape::~TerrainHeightfieldShape() {
 
 }
-void TerrainHeightfieldShape::setData(const void* data) {
+void TerrainHeightfieldShape::setData(void* data) {
     m_ProcessedVertices.clear();
     m_heightfieldDataUnknown = data;
     initialize(m_heightStickWidth, m_heightStickLength, data, m_heightScale, m_minHeight, m_maxHeight, m_upAxis, m_heightDataType, m_flipQuadEdges);
@@ -190,30 +189,14 @@ void TerrainData::clearData() {
 bool TerrainData::AdjacentPixels::valid(unsigned int x, unsigned int y) const {
     if (x >= 0 && x <= (imgSizeX) - 1) {
         if (y >= 0 && y <= (imgSizeY) - 1) {
-            if (topLeft > NULL_VERTEX) {
-                return true;
-            }
-            if (top > NULL_VERTEX) {
-                return true;
-            }
-            if (topRight > NULL_VERTEX) {
-                return true;
-            }
-            if (left > NULL_VERTEX) {
-                return true;
-            }
-            if (right > NULL_VERTEX) {
-                return true;
-            }
-            if (btmLeft > NULL_VERTEX) {
-                return true;
-            }
-            if (btm > NULL_VERTEX) {
-                return true;
-            }
-            if (btmRight > NULL_VERTEX) {
-                return true;
-            }
+            if (topLeft > NULL_VERTEX) { return true; }
+            if (top > NULL_VERTEX) { return true; }
+            if (topRight > NULL_VERTEX) { return true; }
+            if (left > NULL_VERTEX) { return true; }
+            if (right > NULL_VERTEX) { return true; }
+            if (btmLeft > NULL_VERTEX) { return true; }
+            if (btm > NULL_VERTEX) { return true; }
+            if (btmRight > NULL_VERTEX) { return true; }
         }
     }
     return false;
@@ -229,7 +212,7 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
     btScalar scale_by = 0.15;
     //init the map with points at 0.0
     vector<vector<btScalar>> temp; temp.resize(pixelSize.y * pointsPerPixel, vector<btScalar>(pixelSize.x * pointsPerPixel, btScalar(0.0)));
-    m_MinAndMaxHeight = make_pair(9999999999999999.9f, -9999999999999999.9f);
+    m_MinAndMaxHeight = make_pair(std::numeric_limits<float>::max(), std::numeric_limits<float>::min());
 
     m_VerticesPerSector           = sectorSizeInPixels * pointsPerPixel;
     unsigned int numSectorsWidth  = (unsigned int)temp[0].size() / m_VerticesPerSector;

@@ -1,5 +1,5 @@
 #include <core/engine/physics/DebugDrawer.h>
-
+#include <core/engine/events/Engine_EventObject.h>
 #include <core/engine/renderer/Renderer.h>
 
 using namespace Engine;

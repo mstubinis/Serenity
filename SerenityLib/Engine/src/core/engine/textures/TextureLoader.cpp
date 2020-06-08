@@ -116,10 +116,10 @@ void TextureLoader::ImportIntoOpengl(Texture& texture, const Engine::priv::Image
     }
 }
 
-void TextureLoader::LoadDDSFile(Texture& texture, const string& filename, ImageLoadedStructure& image_loaded_struct) {
+bool TextureLoader::LoadDDSFile(Texture& texture, const string& filename, ImageLoadedStructure& image_loaded_struct) {
     ifstream stream(filename.c_str(), ios::binary);
     if (!stream) {
-        return;
+        return false;
     }
     std::streampos fileSize;
     stream.unsetf(ios::skipws);
@@ -141,7 +141,7 @@ void TextureLoader::LoadDDSFile(Texture& texture, const string& filename, ImageL
 
     DDS::DDS_Header head(header_buffer);
     if (head.magic != 0x20534444) {  //check if this is "DDS "
-        return; 
+        return false; 
     }
     //DX10 header here
     DDS::DDS_Header_DX10 headDX10;
@@ -159,7 +159,7 @@ void TextureLoader::LoadDDSFile(Texture& texture, const string& filename, ImageL
         case FourCC_DXT1: {
             factor = 2;
             blockSize = 8;
-            image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
+            image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_S3TC_DXT1_EXT;
             break;
         }case FourCC_DXT2: {
             factor = 4;
@@ -228,7 +228,7 @@ void TextureLoader::LoadDDSFile(Texture& texture, const string& filename, ImageL
         }case FourCC_YUY2: {
             break;
         }default: {
-            return;
+            return false;
         }
     }
 
@@ -300,6 +300,7 @@ void TextureLoader::LoadDDSFile(Texture& texture, const string& filename, ImageL
             }
         }
     }
+    return true;
 }
 void TextureLoader::LoadTexture2DIntoOpenGL(Texture& texture) {
     Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddresses[0]);
@@ -595,7 +596,7 @@ void InternalTexturePublicInterface::LoadGPU(Texture& texture) {
 
     Event e(EventType::TextureLoaded);
     e.eventTextureLoaded = EventTextureLoaded(&texture);
-    priv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(e);
+    priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(e);
 }
 void InternalTexturePublicInterface::UnloadCPU(Texture& texture) {
     for (auto& image : texture.m_ImagesDatas) {

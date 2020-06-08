@@ -84,7 +84,7 @@ void priv::ParticleSystem::internal_update_particles(const float dt, const Camer
     priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_particle, m_Particles, true);
 }
 
-ParticleEmitter* priv::ParticleSystem::add_emitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent) {
+ParticleEmitter* priv::ParticleSystem::add_emitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
     if (m_ParticleEmitterFreelist.size() > 0) { //first, try to reuse an empty
         const auto freeindex = m_ParticleEmitterFreelist.top();
         m_ParticleEmitterFreelist.pop();
@@ -120,7 +120,7 @@ bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter, const glm::vec
 }
 bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter) {
     const auto& body = *emitter.getComponent<ComponentBody>();
-    return add_particle(emitter, body.position(), body.rotation());
+    return add_particle(emitter, body.getPosition(), body.getRotation());
 }
 
 void priv::ParticleSystem::update(const float dt, const Camera& camera) {
@@ -144,7 +144,6 @@ void priv::ParticleSystem::render(const Viewport& viewport, const Camera& camera
     if (ParticlesDOD.capacity() < particles_size) {
         ParticlesDOD.reserve(particles_size);
     }
-
     //auto start = chrono::high_resolution_clock::now();
 
     const auto reserve_size = particles_size / Engine::priv::threading::hardware_concurrency();
@@ -155,25 +154,25 @@ void priv::ParticleSystem::render(const Viewport& viewport, const Camera& camera
 
     for (auto& _1 : THREAD_PART_1) _1.reserve(reserve_size);
 
-    const glm::vec3 camPos = glm::vec3(camera.getPosition());
+    const glm::vec3 camPos     = glm::vec3(camera.getPosition());
     auto lamda_culler_particle = [&](Particle& particle, const size_t& j, const unsigned int k) {
-        const float radius = planeMesh.getRadius() * Math::Max(particle.m_Scale.x, particle.m_Scale.y);
-        const glm::vec3& pos = particle.position();
-        const uint sphereTest = camera.sphereIntersectTest(pos, radius);
+        const float radius     = planeMesh.getRadius() * Math::Max(particle.m_Scale.x, particle.m_Scale.y);
+        const glm::vec3& pos   = particle.position();
+        const uint sphereTest  = camera.sphereIntersectTest(pos, radius);
         const float comparison = radius * 3100.0f; //TODO: this is obviously different from the other culling functions
         if (particle.isActive() && (glm::distance2(pos, camPos) <= (comparison * comparison)) && sphereTest > 0) {
             //is is just pretty expensive in general...
             if (!THREAD_PART_4[k].count(particle.m_Material)) {
-                THREAD_PART_4[k].try_emplace(particle.m_Material, particle.m_Material->id());
+                THREAD_PART_4[k].try_emplace(particle.m_Material,       particle.m_Material->id());
                 THREAD_PART_5[k].try_emplace(particle.m_Material->id(), particle.m_Material);
             }
             ///////////////////////////////////////////
 
-            ParticleDOD dod;
-            dod.PositionAndScaleX   = glm::vec4(pos.x, pos.y, pos.z, particle.m_Scale.x);
-            dod.ScaleYAndAngle      = glm::vec2(particle.m_Scale.y, particle.m_Angle);
-            dod.MatIDAndPackedColor = glm::uvec2(THREAD_PART_4[k].at(particle.m_Material), particle.m_Color.toPackedInt());
-            THREAD_PART_1[k].push_back(std::move(dod));
+            THREAD_PART_1[k].emplace_back(
+                glm::vec4(pos.x, pos.y, pos.z, particle.m_Scale.x),
+                glm::vec2(particle.m_Scale.y, particle.m_Angle),
+                glm::uvec2(THREAD_PART_4[k].at(particle.m_Material), particle.m_Color.toPackedInt())
+            );
         }
     };
     Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_culler_particle, m_Particles, true);
@@ -189,11 +188,11 @@ void priv::ParticleSystem::render(const Viewport& viewport, const Camera& camera
 
     //sorting
     auto lambda = [&](const ParticleDOD& l, const ParticleDOD& r) {
-        const glm::vec3 position1 = glm::vec3(l.PositionAndScaleX.x, l.PositionAndScaleX.y, l.PositionAndScaleX.z);
-        const glm::vec3 position2 = glm::vec3(r.PositionAndScaleX.x, r.PositionAndScaleX.y, r.PositionAndScaleX.z);
+        glm::vec3 position1(l.PositionAndScaleX.x, l.PositionAndScaleX.y, l.PositionAndScaleX.z);
+        glm::vec3 position2(r.PositionAndScaleX.x, r.PositionAndScaleX.y, r.PositionAndScaleX.z);
         return glm::distance2(position1, camPos) > glm::distance2(position2, camPos);
     };
-    std::sort(std::execution::par_unseq, std::begin(ParticlesDOD), std::end(ParticlesDOD), lambda);
+    std::sort(std::execution::par_unseq, ParticlesDOD.begin(), ParticlesDOD.end(), lambda);
 
     renderer.m_Pipeline->renderParticles(*this, camera, program);
 }

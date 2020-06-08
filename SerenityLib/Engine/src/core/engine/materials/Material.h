@@ -40,9 +40,9 @@ class Material final : public EngineResource{
         static Material                  *Checkers, *WhiteShadeless; //loaded in renderer
         static std::vector<glm::vec4>     m_MaterialProperities;
     private:
-        std::function<void(Material*)>    m_CustomBindFunctor;
-
         std::vector<MaterialComponent*>   m_Components;
+        std::function<void(Material*)>    m_CustomBindFunctor  = [](Material*) {};
+
         unsigned char                     m_DiffuseModel       = DiffuseModel::Lambert;
         unsigned char                     m_SpecularModel      = SpecularModel::GGX;
         bool                              m_Shadeless          = false;
@@ -55,8 +55,8 @@ class Material final : public EngineResource{
         unsigned char                     m_BaseAlpha          = 254_uc;
         std::uint32_t                     m_ID                 = 0;
 
-        MaterialComponent* internalAddComponentGeneric(const MaterialComponentType::Type& type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
-        void internalUpdateGlobalMaterialPool(const bool addToDatabase);
+        MaterialComponent* internalAddComponentGeneric(MaterialComponentType::Type type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
+        void internalUpdateGlobalMaterialPool(bool addToDatabase);
         Material();
     public:
         Material(
@@ -86,25 +86,24 @@ class Material final : public EngineResource{
             m_CustomBindFunctor = std::bind<void>(std::move(functor), std::placeholders::_1);
         }
 
-
         Material(const Material&)                      = delete;
         Material& operator=(const Material&)           = delete;
         Material(Material&& other) noexcept            = delete;
         Material& operator=(Material&& other) noexcept = delete;
 
-        MaterialComponent& getComponent(const unsigned int& index);
+        MaterialComponent& getComponent(unsigned int index);
 
-        MaterialComponent& addComponent(const MaterialComponentType::Type& type, const std::string& textureFile = "", const std::string& maskFile = "", const std::string& cubemapFile = "");
+        MaterialComponent& addComponent(MaterialComponentType::Type type, const std::string& textureFile = "", const std::string& maskFile = "", const std::string& cubemapFile = "");
         MaterialComponent& addComponentDiffuse(const std::string& textureFile);
         MaterialComponent& addComponentNormal(const std::string& textureFile);
         MaterialComponent& addComponentGlow(const std::string& textureFile);
         MaterialComponent& addComponentSpecular(const std::string& textureFile);
-        MaterialComponent& addComponentAO(const std::string& textureFile, const unsigned char baseValue = 255_uc);
-        MaterialComponent& addComponentMetalness(const std::string& textureFile, const unsigned char baseValue = 255_uc);
-        MaterialComponent& addComponentSmoothness(const std::string& textureFile, const unsigned char baseValue = 255_uc);
-        MaterialComponent& addComponentReflection(const std::string& cubeMapName, const std::string& mapFile, const float mixFactor = 1.0f);
-        MaterialComponent& addComponentRefraction(const std::string& cubeMapName, const std::string& mapFile, const float refractiveIndex = 1.0f, const float mixFactor = 1.0f);
-        MaterialComponent& addComponentParallaxOcclusion(const std::string& textureFile, const float heightScale = 0.1f);
+        MaterialComponent& addComponentAO(const std::string& textureFile, unsigned char baseValue = 255_uc);
+        MaterialComponent& addComponentMetalness(const std::string& textureFile, unsigned char baseValue = 255_uc);
+        MaterialComponent& addComponentSmoothness(const std::string& textureFile, unsigned char baseValue = 255_uc);
+        MaterialComponent& addComponentReflection(const std::string& cubeMapName, const std::string& mapFile, float mixFactor = 1.0f);
+        MaterialComponent& addComponentRefraction(const std::string& cubeMapName, const std::string& mapFile, float refractiveIndex = 1.0f, float mixFactor = 1.0f);
+        MaterialComponent& addComponentParallaxOcclusion(const std::string& textureFile, float heightScale = 0.1f);
 
         std::uint32_t id() const;
     
@@ -117,20 +116,20 @@ class Material final : public EngineResource{
         unsigned char alpha() const;
         
         void setF0Color(const Engine::color_vector_4& f0Color);
-        void setF0Color(const unsigned char r, const unsigned char g, const unsigned char b);
+        void setF0Color(unsigned char r, unsigned char g, unsigned char b);
 
-        void setMaterialPhysics(const MaterialPhysics::Physics materialPhysics);
-        void setShadeless(const bool shadeless);
-        void setGlow(const unsigned char glow);
-        void setSmoothness(const unsigned char smoothness);
-        void setAO(const unsigned char ao);
-        void setMetalness(const unsigned char metalness);
-        void setAlpha(const unsigned char alpha);
+        void setMaterialPhysics(MaterialPhysics::Physics materialPhysics);
+        void setShadeless(bool shadeless);
+        void setGlow(unsigned char glow);
+        void setSmoothness(unsigned char smoothness);
+        void setAO(unsigned char ao);
+        void setMetalness(unsigned char metalness);
+        void setAlpha(unsigned char alpha);
     
         unsigned char specularModel() const;
-        void setSpecularModel(const SpecularModel::Model specularModel);
+        void setSpecularModel(SpecularModel::Model specularModel);
         unsigned char diffuseModel() const;
-        void setDiffuseModel(const DiffuseModel::Model diffuseModel);
+        void setDiffuseModel(DiffuseModel::Model diffuseModel);
 
         void update(const float dt);
 };

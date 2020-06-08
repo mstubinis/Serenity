@@ -135,6 +135,10 @@ class Window final{
         glm::uvec2 getPosition();
 
 
+        void setJoystickProcessingActive(bool active);
+        bool isJoystickProcessingActive() const;
+
+
         unsigned int getFramerateLimit() const;
 
         sf::RenderWindow& getSFMLHandle();

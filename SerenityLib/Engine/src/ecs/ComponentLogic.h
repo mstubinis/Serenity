@@ -27,12 +27,10 @@ class ComponentLogic : public Engine::UserPointer {
     friend struct Engine::priv::ComponentLogic_SceneEnteredFunction;
     friend struct Engine::priv::ComponentLogic_SceneLeftFunction;
     private:
-        Entity m_Owner;
-
-        void*                                                         m_UserPointer1  = nullptr;
-        void*                                                         m_UserPointer2  = nullptr;
-
-        LuaCallableUpdateFunction<ComponentLogic>                     m_Functor;
+        Entity                                             m_Owner;
+        void*                                              m_UserPointer1  = nullptr;
+        void*                                              m_UserPointer2  = nullptr;
+        LuaCallableFunction<ComponentLogic, const float>   m_Functor;
     public:
         ComponentLogic(const Entity entity);
         template<typename T> 

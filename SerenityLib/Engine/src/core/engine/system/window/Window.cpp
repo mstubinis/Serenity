@@ -3,11 +3,12 @@
 #include <core/engine/system/window/Window.h>
 #include <core/engine/renderer/opengl/OpenGL.h>
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/events/Engine_EventDispatcher.h>
+#include <core/engine/events/EventDispatcher.h>
 #include <core/engine/renderer/Renderer.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/scene/Viewport.h>
+#include <core/engine/events/Engine_EventObject.h>
 
 #include <ecs/ECS.h>
 #include <ecs/ComponentCamera.h>
@@ -217,7 +218,7 @@ void Window::WindowData::on_fullscreen_internal(Window& super, const bool isToBe
     e.isFullscreen = isToBeFullscreen;
     Event ev(EventType::WindowFullscreenChanged);
     ev.eventWindowFullscreenChanged = e;
-    priv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 sf::VideoMode Window::WindowData::get_default_desktop_video_mode() {
     const auto validModes = sf::VideoMode::getFullscreenModes();
@@ -295,6 +296,12 @@ Window::Window(const EngineOptions& options){
 }
 Window::~Window(){
 
+}
+void Window::setJoystickProcessingActive(bool active) {
+    m_Data.m_SFMLWindow.setJoystickManagerActive(active);
+}
+bool Window::isJoystickProcessingActive() const {
+    return m_Data.m_SFMLWindow.isJoystickManagerActive();
 }
 void Window::updateMousePosition(const float x, const float y, const bool resetDifference, const bool resetPrevious) {
     m_Data.update_mouse_position_internal(*this, x, y, resetDifference, resetPrevious);

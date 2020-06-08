@@ -6,34 +6,39 @@
 #include <string>
 #include <cstdint>
 #include <algorithm>
+#include <bitset>
 
-template <typename Stream> void readUint32tBigEndian(std::uint32_t& out, Stream& stream) {
-    std::uint8_t buf[4];
-    stream.read((char *)buf, 4);
-    out  = (std::uint32_t)buf[0] << 24;
-    out |= (std::uint32_t)buf[1] << 16;
-    out |= (std::uint32_t)buf[2] << 8;
-    out |= (std::uint32_t)buf[3];
+template <class OutType, class Data> void readBigEndian(OutType& out, Data& dataBuffer, unsigned int inBufferSizeInBytes, unsigned int& offset) {
+    out = (std::uint32_t)dataBuffer[offset + 0U] << (8U * (inBufferSizeInBytes - 1U));
+    for (unsigned int i = 1U; i < inBufferSizeInBytes; ++i) {
+        out |= (std::uint32_t)dataBuffer[offset + i] << (8U * ((inBufferSizeInBytes - i) - 1U));
+    }
+    offset += inBufferSizeInBytes;
 }
-template <typename Stream> void readUint16tBigEndian(std::uint16_t& out, Stream& stream) {
-    std::uint8_t buf[2];
-    stream.read((char *)buf, 2);
-    out  = (std::uint32_t)buf[0] << 8;
-    out |= (std::uint32_t)buf[1];
+template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutType& out, unsigned int inBufferSizeInBytes) {
+    std::vector<std::uint8_t> buffer(inBufferSizeInBytes, 0);
+    inStream.read((char*)buffer.data(), inBufferSizeInBytes);
+
+    out = (std::uint32_t)buffer[0] << (8U * (inBufferSizeInBytes - 1U));
+    for (unsigned int i = 1U; i < inBufferSizeInBytes; ++i) {
+        out |= (std::uint32_t)buffer[i] << (8U * ((inBufferSizeInBytes - i) - 1U));
+    }
 }
-template <typename Stream> void writeUint32tBigEndian(std::uint32_t& in, Stream& stream) {
-    std::uint8_t buf[4];
-    buf[0] = (in & 0xff000000) >> 24;
-    buf[1] = (in & 0x00ff0000) >> 16;
-    buf[2] = (in & 0x0000ff00) >> 8;
-    buf[3] = (in & 0x000000ff);
-    stream.write((char*)buf, sizeof(buf));
+template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutType& out) {
+    readBigEndian(inStream, out, sizeof(out));
 }
-template <typename Stream> void writeUint16tBigEndian(std::uint16_t& in, Stream& stream) {
-    std::uint8_t buf[2];
-    buf[0] = (in & 0xff00) >> 8;
-    buf[1] = (in & 0x00ff);
-    stream.write((char*)buf, sizeof(buf));
+template <class InType, class Stream> void writeBigEndian(Stream& inStream, InType& in, unsigned int inBufferSizeInBytes) {
+    std::vector<std::uint8_t> buffer(inBufferSizeInBytes, 0);
+    unsigned long long offset = 255U;
+    for (int i = int(inBufferSizeInBytes) - 1; i >= 0; --i) {
+        auto shift = (8U * ((inBufferSizeInBytes - 1U) - i));
+        buffer[i] = (in & offset) >> shift;
+        offset = (offset * 255U) + offset;
+    }
+    inStream.write((char*)buffer.data(), buffer.size());
+}
+template <class InType, class Stream> void writeBigEndian(Stream& inStream, InType& in) {
+    writeBigEndian(inStream, in, sizeof(in));
 }
 
 //specifies if a specific pointer element is in a vector

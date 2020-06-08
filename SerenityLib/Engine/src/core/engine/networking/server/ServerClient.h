@@ -10,11 +10,12 @@ namespace Engine::Networking {
 #include <functional>
 #include <SFML/Network/Socket.hpp>
 #include <SFML/Network/Packet.hpp>
-#include <core/engine/events/Engine_EventObject.h>
 #include <core/engine/networking/Packet.h>
+#include <core/engine/networking/SocketInterface.h>
+#include <core/engine/events/Observer.h>
 
 namespace Engine::Networking {
-    class ServerClient : public EventObserver {
+    class ServerClient : public Observer {
         friend class Engine::Networking::Server;
         public:
             struct ConnectionState final { enum State : unsigned char {
@@ -55,18 +56,17 @@ namespace Engine::Networking {
             bool disconnected() const;
             void setTimeoutTimerLimit(float limit);
 
-            sf::Socket::Status send(Engine::Networking::Packet& packet);
-            sf::Socket::Status send(sf::Packet& sfPacket);
-            sf::Socket::Status send(void* data, size_t size);
-            sf::Socket::Status send(void* data, size_t size, size_t& sent);
-            sf::Socket::Status receive(sf::Packet& packet);
-            sf::Socket::Status receive(void* data, size_t size, size_t& received);
+            SocketStatus::Status send(Engine::Networking::Packet& packet);
+            SocketStatus::Status send(sf::Packet& sfPacket);
+            SocketStatus::Status send(void* data, size_t size);
+            SocketStatus::Status send(void* data, size_t size, size_t& sent);
+            SocketStatus::Status receive(sf::Packet& packet);
+            SocketStatus::Status receive(void* data, size_t size, size_t& received);
 
-            virtual void on_receive_tcp(sf::Packet& sfPacket, const float dt) {}
-            virtual void on_timed_out() {}
-            virtual void on_recovery_timed_out() {}
-            //virtual void on_receive_tcp(void* data, size_t size, size_t& received, const float dt) {}
-            virtual void onEvent(const Event& e) override {}
+            virtual void on_receive_tcp(sf::Packet& sfPacket, const float dt);
+            virtual void on_timed_out();
+            virtual void on_recovery_timed_out();
+            virtual void onEvent(const Event& e) override;
 
             void setUpdateFunction(std::function<void(const float dt)> function);
             void update(const float dt);

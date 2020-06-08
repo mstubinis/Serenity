@@ -15,7 +15,7 @@ namespace Engine::Networking {
     class ServerThread;
 }
 #include <SFML/Network/IpAddress.hpp>
-#include <core/engine/events/Engine_EventIncludes.h>
+#include <core/engine/events/EventIncludes.h>
 #include <core/engine/networking/SocketInterface.h>
 
 namespace Engine::priv{
@@ -129,7 +129,8 @@ namespace Engine::priv{
         }
     };
     struct EventMouseButton final{ 
-        MouseButton::Button button; float x, y; 
+        MouseButton::Button button; 
+        float x, y; 
         EventMouseButton() = default;
         EventMouseButton(const MouseButton::Button button_, const float x_, const float y_) {
             button = button_;
@@ -229,24 +230,5 @@ struct Event final{
     }
 
 };
-/*
-Inherit from this class to expose your class to events and event dispatching, specifically the following functions:
-    void registerEvent(const EventType::Type& type)    -  register this object as an observer to the parameterized event type
-    void unregisterEvent(const EventType::Type& type)  -  unregister this object as an observer to the parameterized event type
-    virtual void onEvent(const Event& e)               -  execute this function when the parameter event occurs
-*/
-class EventObserver{
-    public:
-        virtual ~EventObserver(){}
 
-        void registerEvent(const EventType::Type type);
-        void unregisterEvent(const EventType::Type type);
-        const bool isRegistered(const EventType::Type type) const;
-
-        void registerEvent(const unsigned int type);
-        void unregisterEvent(const unsigned int type);
-        const bool isRegistered(const unsigned int type) const;
-
-        virtual void onEvent(const Event& e) {}
-};
 #endif

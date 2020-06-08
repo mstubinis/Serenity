@@ -14,5 +14,9 @@
     }
 #endif
 #include <LuaBridge/LuaBridge.h>
+#include <LuaBridge/List.h>
+#include <LuaBridge/Map.h>
+#include <LuaBridge/UnorderedMap.h>
+#include <LuaBridge/Vector.h>
 
 #endif

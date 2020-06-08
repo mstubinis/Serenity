@@ -288,12 +288,12 @@ ushort ComponentBody::getCollisionFlags() const {
 }
 
 decimal ComponentBody::getDistance(const Entity other) const {
-    const auto other_position = other.getComponent<ComponentBody>()->position();
-    return glm::distance(position(), other_position);
+    const auto other_position = other.getComponent<ComponentBody>()->getPosition();
+    return glm::distance(getPosition(), other_position);
 }
 unsigned long long ComponentBody::getDistanceLL(const Entity other) const {
-    const auto other_position = other.getComponent<ComponentBody>()->position();
-    return static_cast<unsigned long long>(glm::distance(position(), other_position));
+    const auto other_position = other.getComponent<ComponentBody>()->getPosition();
+    return static_cast<unsigned long long>(glm::distance(getPosition(), other_position));
 }
 void ComponentBody::alignTo(const glm_vec3& p_Direction) {
     if (m_Physics) {
@@ -362,7 +362,7 @@ void ComponentBody::translate(const decimal& p_X, const decimal& p_Y, const deci
         data.p->bullet_rigidBody->activate();
         btVector3 v(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
         Math::translate(*data.p->bullet_rigidBody, v, p_Local);
-        ComponentBody::setPosition(position() + Engine::Math::btVectorToGLM(v));
+        ComponentBody::setPosition(getPosition() + Engine::Math::btVectorToGLM(v));
     }else{
         auto& normalData = *data.n;
         glm_vec3 offset(p_X, p_Y, p_Z);
@@ -515,7 +515,7 @@ void ComponentBody::setScale(const decimal& p_X, const decimal& p_Y, const decim
         priv::ComponentModel_Functions::CalculateRadius(*models);
     }
 }
-glm_vec3 ComponentBody::localPosition() const { //theres prob a better way to do this
+glm_vec3 ComponentBody::getLocalPosition() const { //theres prob a better way to do this
     if (m_Physics) {
         auto& physicsData = *data.p;
         btTransform tr;
@@ -524,7 +524,7 @@ glm_vec3 ComponentBody::localPosition() const { //theres prob a better way to do
     }
     return data.n->position;
 }
-glm_vec3 ComponentBody::position() const { //theres prob a better way to do this
+glm_vec3 ComponentBody::getPosition() const { //theres prob a better way to do this
     if (m_Physics) {
         auto& physicsData = *data.p;
         btTransform tr;
@@ -536,7 +536,7 @@ glm_vec3 ComponentBody::position() const { //theres prob a better way to do this
     auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return Math::getMatrixPosition(matrix);
 }
-glm::vec3 ComponentBody::position_render() const { //theres prob a better way to do this
+glm::vec3 ComponentBody::getPositionRender() const { //theres prob a better way to do this
     if (m_Physics) {
         auto tr = data.p->bullet_rigidBody->getWorldTransform();
         return Math::btVectorToGLM(tr.getOrigin());
@@ -547,11 +547,11 @@ glm::vec3 ComponentBody::position_render() const { //theres prob a better way to
     return Math::getMatrixPosition(matrix);
 }
 glm::vec3 ComponentBody::getScreenCoordinates(const bool p_ClampToEdge) const {
-	return Math::getScreenCoordinates(position(), *m_Owner.scene().getActiveCamera(), p_ClampToEdge);
+	return Math::getScreenCoordinates(getPosition(), *m_Owner.scene().getActiveCamera(), p_ClampToEdge);
 }
 ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(const float p_MinOffset) const {
     ScreenBoxCoordinates ret;
-    const auto& worldPos    = position();
+    const auto& worldPos    = getPosition();
     auto radius             = 0.0001f;
     auto* model             = m_Owner.getComponent<ComponentModel>();
     auto& camera            = *m_Owner.scene().getActiveCamera();
@@ -595,7 +595,7 @@ glm_vec3 ComponentBody::getScale() const {
     }
     return data.n->scale;
 }
-glm_quat ComponentBody::rotation() const {
+glm_quat ComponentBody::getRotation() const {
     if (m_Physics) {
         btTransform tr;
         data.p->bullet_rigidBody->getMotionState()->getWorldTransform(tr);
@@ -1030,11 +1030,11 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
 #if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
     for (auto& componentBody : components) {
         const Entity entity = componentBody.getOwner();
-        const auto bodyRenderPos = componentBody.position();
+        const auto bodyRenderPos = componentBody.getPosition();
         auto* model = entity.getComponent<ComponentModel>();
         if (model) {
-            const auto world_pos = glm::vec3(componentBody.position());
-            const auto world_rot = glm::quat(componentBody.rotation());
+            const auto world_pos = glm::vec3(componentBody.getPosition());
+            const auto world_rot = glm::quat(componentBody.getRotation());
             const auto world_scl = glm::vec3(componentBody.getScale());
             for (size_t i = 0; i < model->getNumModels(); ++i) {
                 auto& modelInstance = (*model)[i];

@@ -19,12 +19,12 @@ class Scene::impl final {
         priv::ECS<Entity>                     m_ECS;
 
         void _init(Scene& super, const string& name, const SceneOptions& options) {
-            m_ECS.assignSystem<ComponentBody, Engine::priv::ComponentBody_System>(ComponentBody_System_CI()/*, 10000*/);
-            m_ECS.assignSystem<ComponentLogic> (ComponentLogic_System_CI()/*, 20000*/);
-            m_ECS.assignSystem<ComponentLogic1>(ComponentLogic1_System_CI()/*, 30000*/);
-            m_ECS.assignSystem<ComponentLogic2>(ComponentLogic2_System_CI()/*, 40000*/);
-            m_ECS.assignSystem<ComponentLogic3>(ComponentLogic3_System_CI()/*, 50000*/);
-            m_ECS.assignSystem<ComponentModel> (ComponentModel_System_CI()/*, 60000*/);
+            m_ECS.assignSystem<ComponentLogic> (ComponentLogic_System_CI()/*, 10000*/);
+            m_ECS.assignSystem<ComponentLogic1>(ComponentLogic1_System_CI()/*, 20000*/);
+            m_ECS.assignSystem<ComponentLogic2>(ComponentLogic2_System_CI()/*, 30000*/);
+            m_ECS.assignSystem<ComponentLogic3>(ComponentLogic3_System_CI()/*, 40000*/);
+            m_ECS.assignSystem<ComponentBody, Engine::priv::ComponentBody_System>(ComponentBody_System_CI()/*, 50000*/);
+            m_ECS.assignSystem<ComponentModel>(ComponentModel_System_CI()/*, 60000*/);
             m_ECS.assignSystem<ComponentCamera>(ComponentCamera_System_CI()/*, 70000*/);
             m_ECS.assignSystem<ComponentName>  (ComponentName_System_CI()/*, 80000*/);
         }
@@ -33,7 +33,7 @@ class Scene::impl final {
         }
         void _centerToObject(Scene& super, const Entity& centerEntity) {
             auto& centerBody          = *centerEntity.getComponent<ComponentBody>();
-            const auto centerPos      = centerBody.position();
+            const auto centerPos      = centerBody.getPosition();
             const auto centerPosFloat = glm::vec3(centerPos);
             for (const auto& data : priv::InternalScenePublicInterface::GetEntities(super)) {
                 Entity e(data.ID, data.sceneID, data.versionID);
@@ -41,7 +41,7 @@ class Scene::impl final {
                     auto* eBody = e.getComponent<ComponentBody>();
                     if (eBody) {
                         if (!eBody->hasParent()) {
-                            eBody->setPosition(eBody->position() - centerPos);
+                            eBody->setPosition(eBody->getPosition() - centerPos);
                         }
                     }
                 }
@@ -114,8 +114,7 @@ void priv::InternalScenePublicInterface::UpdateMaterials(Scene& scene, const flo
     for (unsigned int i = 0; i < RenderStage::_TOTAL; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             for (auto& materialNode : render_graph_ptr.m_MaterialNodes) {
-                auto& material = *materialNode.material;
-                material.m_UpdatedThisFrame = false;
+                materialNode.material->m_UpdatedThisFrame = false;
             }
         }
     }
@@ -128,13 +127,8 @@ void priv::InternalScenePublicInterface::UpdateMaterials(Scene& scene, const flo
                     material.m_UpdatedThisFrame = true;
                 }
             }
-            
         }
     }
-}
-void priv::InternalScenePublicInterface::UpdateParticleSystem(Scene& scene, const float dt) {
-    auto& camera = *scene.getActiveCamera();
-    scene.m_i->m_ParticleSystem.update(dt, camera);
 }
 
 void priv::InternalScenePublicInterface::RenderGeometryOpaque( Renderer& renderer, const Scene& scene, const Viewport& viewport, const Camera& camera, const bool useDefaultShaders) {
@@ -328,8 +322,22 @@ void Scene::setActiveCamera(Camera& camera){
 void Scene::centerSceneToObject(const Entity& centerEntity){
     return m_i->_centerToObject(*this, centerEntity);
 }
+void Scene::setOnUpdateFunctor(std::function<void(Scene*, const float)> functor) {
+    m_OnUpdateFunctor = functor;
+}
 void Scene::update(const float dt){
     m_OnUpdateFunctor(this, dt);
+    m_i->m_ECS.update(dt, *this);
+
+    priv::InternalScenePublicInterface::UpdateMaterials(*this, dt);
+
+    m_i->m_ParticleSystem.update(dt, *getActiveCamera());
+}
+void Scene::preUpdate(const float dt) {
+    m_i->m_ECS.preUpdate(*this, dt);
+}
+void Scene::postUpdate(const float dt) {
+    m_i->m_ECS.postUpdate(*this, dt);
 }
 void Scene::onResize(const unsigned int width, const unsigned int height) {
 

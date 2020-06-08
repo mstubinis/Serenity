@@ -17,7 +17,7 @@ class Entity {
         Entity() = default;
         Entity(Scene&);
         Entity(const unsigned int entityID, const unsigned int sceneID, const unsigned int versionID);
-        ~Entity() = default;
+        virtual ~Entity() = default;
 
         Entity(const Entity& other);
         Entity& operator=(const Entity& other);
@@ -71,7 +71,7 @@ class Entity {
             }
         #pragma endregion
 
-        void addComponent(const std::string& componentClassName, luabridge::LuaRef arg1, luabridge::LuaRef arg2, luabridge::LuaRef arg3, luabridge::LuaRef arg4, luabridge::LuaRef arg5, luabridge::LuaRef arg6, luabridge::LuaRef arg7, luabridge::LuaRef arg8);
+        void addComponent(const std::string& componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8);
         bool removeComponent(const std::string& componentClassName);
         luabridge::LuaRef getComponent(const std::string& componentClassName);
 };

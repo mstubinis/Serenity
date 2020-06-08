@@ -1,5 +1,5 @@
 #include <core/engine/renderer/FullscreenItems.h>
-
+#include <core/engine/events/Engine_EventObject.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/system/window/Window.h>
 

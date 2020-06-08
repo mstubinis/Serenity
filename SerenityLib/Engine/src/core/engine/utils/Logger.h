@@ -25,13 +25,12 @@ class Logger final {
 Logger& Logger_Debug();
 Logger& Logger_Release();
 
-#define ENGINE_LOG_FUNC(Logger_, Message_)                  \
-Logger_(static_cast<std::ostringstream&>(std::ostringstream().flush() << Message_).str(),__FUNCTION__,__FILE__,__LINE__ );
+#define ENGINE_LOG_FUNC(Logger_, Message_) Logger_(static_cast<std::ostringstream&>(std::ostringstream().flush() << Message_).str(), __FUNCTION__, __FILE__, __LINE__ );
 
 #ifdef NDEBUG
-#define ENGINE_LOG(Message_) ENGINE_LOG_FUNC(Logger_Release(), Message_)
+    #define ENGINE_LOG(Message_) ENGINE_LOG_FUNC(Logger_Release(), Message_)
 #else
-#define ENGINE_LOG(Message_) ENGINE_LOG_FUNC(Logger_Debug(), Message_)
+    #define ENGINE_LOG(Message_) ENGINE_LOG_FUNC(Logger_Debug(), Message_)
 #endif
 
 

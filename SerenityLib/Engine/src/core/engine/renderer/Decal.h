@@ -8,9 +8,9 @@ namespace Engine::priv {
     struct DefaultDecalUnbindFunctor;
 };
 
-#include <ecs/Entity.h>
+#include <ecs/EntityBody.h>
 
-class Decal final: public Entity{
+class Decal final: public EntityBody {
     friend struct Engine::priv::DefaultDecalBindFunctor;
     friend struct Engine::priv::DefaultDecalUnbindFunctor;
     private:
@@ -24,10 +24,10 @@ class Decal final: public Entity{
             Material& material,
             const glm_vec3& position,
             const glm::vec3& hitNormal,
-            const float size,
+            float size,
             Scene& scene,
-            const float lifetimeMax,
-            const RenderStage::Stage stage = RenderStage::Decals
+            float lifetimeMax,
+            RenderStage::Stage stage = RenderStage::Decals
         );
         ~Decal();
 
@@ -36,25 +36,5 @@ class Decal final: public Entity{
 
         const glm_vec3& initialPosition() const;
         const glm_quat& initialRotation() const;
-
-        glm_vec3 position() const;
-        glm_vec3 localPosition() const;
-        glm_quat rotation() const;
-        glm::vec3 getScale() const;
-        void setPosition(const glm_vec3& position);
-        void setPosition(const decimal& x, const decimal& y, const decimal& z);
-        void setRotation(const glm_quat& rotation);
-        void setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w);
-
-
-        glm_vec3 position(const EntityDataRequest& request) const;
-        glm_vec3 localPosition(const EntityDataRequest& request) const;
-        glm_quat rotation(const EntityDataRequest& request) const;
-        glm::vec3 getScale(const EntityDataRequest& request) const;
-        void setPosition(const EntityDataRequest& request, const glm_vec3& position);
-        void setPosition(const EntityDataRequest& request, const decimal& x, const decimal& y, const decimal& z);
-        void setRotation(const EntityDataRequest& request, const glm_quat& rotation);
-        void setRotation(const EntityDataRequest& request, const decimal& x, const decimal& y, const decimal& z, const decimal& w);
 };
-
 #endif

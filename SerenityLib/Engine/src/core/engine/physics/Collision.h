@@ -17,13 +17,13 @@ class  btCompoundShape;
 #include <vector>
 #include <functional>
 
-class Collision final: public EventObserver {
+class Collision final: public Observer {
     public:
         class DeferredLoading final {
             friend class Collision;
             private:
-                static void load_1(Collision*, const CollisionType::Type, Mesh* mesh, const float mass);
-                static void load_2(Collision*, btCompoundShape*, std::vector<ModelInstance*>, const float mass, const CollisionType::Type);
+                static void load_1(Collision*, const CollisionType::Type, Mesh* mesh, float mass);
+                static void load_2(Collision*, btCompoundShape*, std::vector<ModelInstance*>, float mass, const CollisionType::Type);
         };
     private:
         Entity                  m_Owner;
@@ -34,15 +34,15 @@ class Collision final: public EventObserver {
         btVector3               m_BtInertia         = btVector3(0.0f, 0.0f, 0.0f);
         btCollisionShape*       m_BtShape           = nullptr;
 
-        void _baseInit(const CollisionType::Type type, const float mass);
+        void _baseInit(CollisionType::Type type, float mass);
 
         void free_memory();
 
     public:
         Collision(ComponentBody&);
-        Collision(ComponentBody&, const CollisionType::Type, ModelInstance* modelInstance, const float mass = 0);
-        Collision(ComponentBody&, const CollisionType::Type, Mesh& mesh, const float mass = 0);
-        Collision(ComponentBody&, ComponentModel&, const float mass = 0, const CollisionType::Type = CollisionType::ConvexHull);
+        Collision(ComponentBody&, CollisionType::Type, ModelInstance* modelInstance, float mass = 0);
+        Collision(ComponentBody&, CollisionType::Type, Mesh& mesh, float mass = 0);
+        Collision(ComponentBody&, ComponentModel&, float mass = 0, CollisionType::Type = CollisionType::ConvexHull);
 
         Collision(const Collision& other) = delete;
         Collision& operator=(const Collision& other) = delete;
@@ -52,7 +52,7 @@ class Collision final: public EventObserver {
         ~Collision();
 
         void setBtShape(btCollisionShape* shape);
-        void setMass(const float mass);
+        void setMass(float mass);
         const btVector3& getBtInertia() const;
         btCollisionShape* getBtShape() const;
         CollisionType::Type getType() const;

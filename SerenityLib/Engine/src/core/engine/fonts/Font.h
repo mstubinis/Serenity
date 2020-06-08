@@ -30,11 +30,11 @@ struct CharGlyph final {
 };
 class Font final: public EngineResource {
     public:
-        static const unsigned int MAX_CHARACTERS_RENDERED_PER_FRAME    = 4096;
+        static constexpr unsigned int MAX_CHARACTERS_RENDERED_PER_FRAME    = 4096;
     private:
-        Texture* m_FontTexture                                         = nullptr;
-        float    m_MaxHeight                                           = 0.0f;
-        float    m_LineHeight                                          = 8.0f;
+        Texture* m_FontTexture                                             = nullptr;
+        float    m_MaxHeight                                               = 0.0f;
+        float    m_LineHeight                                              = 8.0f;
         std::unordered_map<unsigned char, CharGlyph> m_CharGlyphs;
 
         void init_simple(const std::string& filename, int height, int width);

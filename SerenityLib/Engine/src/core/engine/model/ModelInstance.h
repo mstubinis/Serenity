@@ -45,13 +45,13 @@ class ModelInstance final : public Engine::UserPointer {
         static decimal                                       m_GlobalDistanceFactor;
         static unsigned int                                  m_ViewportFlagDefault;
     private:
-        std::function<void(ModelInstance*, const Engine::priv::Renderer*)>  m_CustomBindFunctor;
-        std::function<void(ModelInstance*, const Engine::priv::Renderer*)>  m_CustomUnbindFunctor;
+        std::function<void(ModelInstance*, const Engine::priv::Renderer*)>  m_CustomBindFunctor   = [](ModelInstance*, const Engine::priv::Renderer*) {};
+        std::function<void(ModelInstance*, const Engine::priv::Renderer*)>  m_CustomUnbindFunctor = [](ModelInstance*, const Engine::priv::Renderer*) {};
 
         ModelDrawingMode::Mode                               m_DrawingMode       = ModelDrawingMode::Triangles;
-        Engine::Flag<unsigned int>                           m_ViewportFlag; //determine what viewports this can be seen in
+        Engine::Flag<unsigned int>                           m_ViewportFlag;     //determine what viewports this can be seen in
         Engine::priv::ModelInstanceAnimationVector           m_AnimationVector;
-        Entity                                               m_Parent;
+        Entity                                               m_Parent            = Entity();
         ShaderProgram*                                       m_ShaderProgram     = nullptr;
         Mesh*                                                m_Mesh              = nullptr;
         Material*                                            m_Material          = nullptr;
@@ -65,7 +65,7 @@ class ModelInstance final : public Engine::UserPointer {
         bool                                                 m_PassedRenderCheck = false;
         bool                                                 m_Visible           = true;
         bool                                                 m_ForceRender       = false;
-        size_t                                               m_Index             = 0;
+        size_t                                               m_Index             = 0U;
 
         void internal_init(Mesh* mesh, Material* mat, ShaderProgram* program);
         void internal_update_model_matrix();
@@ -75,10 +75,10 @@ class ModelInstance final : public Engine::UserPointer {
 
         ModelInstance() = delete;
     public:
-        ModelInstance(Entity&, Mesh*, Material*, ShaderProgram* = 0);
-        ModelInstance(Entity&, Handle mesh, Handle mat, ShaderProgram* = 0);
-        ModelInstance(Entity&, Mesh*, Handle mat, ShaderProgram* = 0);
-        ModelInstance(Entity&, Handle mesh, Material*, ShaderProgram* = 0);
+        ModelInstance(Entity, Mesh*,       Material*,  ShaderProgram* = 0);
+        ModelInstance(Entity, Handle mesh, Handle mat, ShaderProgram* = 0);
+        ModelInstance(Entity, Mesh*,       Handle mat, ShaderProgram* = 0);
+        ModelInstance(Entity, Handle mesh, Material*,  ShaderProgram* = 0);
 
         ModelInstance(const ModelInstance& other)                = delete;
         ModelInstance& operator=(const ModelInstance& other)     = delete;
@@ -88,7 +88,7 @@ class ModelInstance final : public Engine::UserPointer {
         ~ModelInstance();
 
         static void setGlobalDistanceFactor(decimal factor);
-        static decimal& getGlobalDistanceFactor();
+        static decimal getGlobalDistanceFactor();
 
         template<typename T> void setCustomBindFunctor(const T& functor) {
             m_CustomBindFunctor   = std::bind<void>(functor, std::placeholders::_1, std::placeholders::_2);
@@ -118,7 +118,7 @@ class ModelInstance final : public Engine::UserPointer {
         ShaderProgram* shaderProgram() const;
         Mesh* mesh() const;
         Material* material() const;
-        const Entity& parent() const;
+        Entity parent() const;
 
         const Engine::color_vector_4& color() const;
         const Engine::color_vector_4& godRaysColor() const;
@@ -147,13 +147,13 @@ class ModelInstance final : public Engine::UserPointer {
         void setGodRaysColor(const float r, const float g, const float b);
         void setGodRaysColor(const glm::vec3& color);
 
-        void setShaderProgram(const Handle shaderPHandle, ComponentModel&);
+        void setShaderProgram(Handle shaderPHandle, ComponentModel&);
         void setShaderProgram(ShaderProgram*, ComponentModel&);
 
-        void setMesh(const Handle meshHandle, ComponentModel&);
+        void setMesh(Handle meshHandle, ComponentModel&);
         void setMesh(Mesh*, ComponentModel&);
 
-        void setMaterial(const Handle materialHandle, ComponentModel&);
+        void setMaterial(Handle materialHandle, ComponentModel&);
         void setMaterial(Material*, ComponentModel&);
 
         void setPosition(const float x, const float y, const float z);

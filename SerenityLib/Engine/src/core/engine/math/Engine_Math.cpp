@@ -26,11 +26,10 @@ const glm_vec3 Math::rotate_vec3(const glm_quat& rotation, const glm_vec3& vec) 
 //could use some fixing
 const glm::vec3 Math::polynomial_interpolate_linear(vector<glm::vec3>& points, const float time) {
     glm::vec3 ret = glm::vec3(0.0f);
-    const auto n = points.size();
+    auto n = points.size();
     assert(n >= 3);
 
     //first get the 3 points we need to work with based on time (0 <= time <= 1)
-
     glm::vec3 P0;
     glm::vec3 P1;
     glm::vec3 P2;
@@ -39,7 +38,7 @@ const glm::vec3 Math::polynomial_interpolate_linear(vector<glm::vec3>& points, c
         P1 = points[1];
         P2 = points[2];
     }else{
-        const float indexFloat = glm::max(0.01f, (n * time) - 1.0f);
+        float indexFloat = glm::max(0.01f, (n * time) - 1.0f);
         size_t index1 = static_cast<size_t>(glm::floor(static_cast<size_t>(indexFloat)));
         size_t index2;
         size_t index3;
@@ -56,18 +55,17 @@ const glm::vec3 Math::polynomial_interpolate_linear(vector<glm::vec3>& points, c
         P2 = points[index3];
     }
     //ok we have the three points
-    const auto timeSquared = time * time;
-    const auto a2 = (P1 - P0) - time * (P2 - P0) / time * (time - 1.0f);
-    const auto a1 = P2 - P0 - a2;
-    const auto a0 = P0;
+    auto timeSquared = time * time;
+    auto a2 = (P1 - P0) - time * (P2 - P0) / time * (time - 1.0f);
+    auto a1 = P2 - P0 - a2;
+    auto a0 = P0;
     ret = a2 * timeSquared + a1 * time + a0;
     return ret;
 }
 //this works perfectly
 const glm::vec3 Math::polynomial_interpolate_cubic(vector<glm::vec3>& points, const float time) {
     glm::vec3 ret = glm::vec3(0.0f);
-
-    const auto n = points.size();
+    auto n = points.size();
     vector<float> xs; xs.reserve(n);
     vector<float> ys; ys.reserve(n);
     vector<float> zs; zs.reserve(n);
@@ -76,7 +74,7 @@ const glm::vec3 Math::polynomial_interpolate_cubic(vector<glm::vec3>& points, co
         ys.push_back(pt.y);
         zs.push_back(pt.z);
     }
-    const auto step = 1.0f / static_cast<float>(n-1);
+    auto step = 1.0f / static_cast<float>(n-1);
     boost::math::cubic_b_spline<float> x_spline(xs.data(), n, 0.0f, step);
     boost::math::cubic_b_spline<float> y_spline(ys.data(), n, 0.0f, step);
     boost::math::cubic_b_spline<float> z_spline(zs.data(), n, 0.0f, step);
@@ -85,33 +83,45 @@ const glm::vec3 Math::polynomial_interpolate_cubic(vector<glm::vec3>& points, co
 }
 
 
-void Math::Float32From16(float*     out, const uint16_t in) {
-    uint32_t t1, t2, t3;
-    t1 = in & 0x7fff;                       // Non-sign bits
-    t2 = in & 0x8000;                       // Sign bit
-    t3 = in & 0x7c00;                       // Exponent
-    t1 <<= 13;                              // Align mantissa on MSB
-    t2 <<= 16;                              // Shift sign bit into position
-    t1 += 0x38000000;                       // Adjust bias
-    t1 = (t3 == 0 ? 0 : t1);                // Denormals-as-zero
-    t1 |= t2;                               // Re-insert sign bit
-    *(uint32_t*)out = t1;
+void Math::Float32From16(float* out, const uint16_t in) {
+    #ifdef ENGINE_SIMD_SUPPORTED
+        _mm256_storeu_ps(out, _mm256_cvtph_ps(_mm_loadu_si128((__m128i*)&in)));
+    #else
+        uint32_t t1, t2, t3;
+        t1 = in & 0x7fff;                       // Non-sign bits
+        t2 = in & 0x8000;                       // Sign bit
+        t3 = in & 0x7c00;                       // Exponent
+        t1 <<= 13;                              // Align mantissa on MSB
+        t2 <<= 16;                              // Shift sign bit into position
+        t1 += 0x38000000;                       // Adjust bias
+        t1 = (t3 == 0 ? 0 : t1);                // Denormals-as-zero
+        t1 |= t2;                               // Re-insert sign bit
+        *(uint32_t*)out = t1;
+    #endif
 }
-void Math::Float16From32(uint16_t*  out, const float    in) {
-    uint32_t inu = *((uint32_t*)&in);
-    uint32_t t1, t2, t3;
-    t1 = inu & 0x7fffffff;                 // Non-sign bits
-    t2 = inu & 0x80000000;                 // Sign bit
-    t3 = inu & 0x7f800000;                 // Exponent
-    t1 >>= 13;                             // Align mantissa on MSB
-    t2 >>= 16;                             // Shift sign bit into position
-    t1 -= 0x1c000;                         // Adjust bias
-    t1 = (t3 < 0x38800000) ? 0 : t1;
-    t1 = (t3 > 0x47000000) ? 0x7bff : t1;
-    t1 = (t3 == 0 ? 0 : t1);               // Denormals-as-zero
-    t1 |= t2;                              // Re-insert sign bit
-    *(uint16_t*)out = t1;
+void Math::Float16From32(uint16_t* out, const float in) {
+    #ifdef ENGINE_SIMD_SUPPORTED
+        _mm_storeu_si128((__m128i*)out, _mm256_cvtps_ph(_mm256_loadu_ps(&in), 0));
+        //__m128  V1 = _mm_set_ss(in);
+        //__m128i V2 = _mm_cvtps_ph(V1, 0);
+        //(*out) = static_cast<uint16_t>(_mm_cvtsi128_si32(V2));
+    #else
+        uint32_t inu = *((uint32_t*)& in);
+        uint32_t t1, t2, t3;
+        t1 = inu & 0x7fffffff;                 // Non-sign bits
+        t2 = inu & 0x80000000;                 // Sign bit
+        t3 = inu & 0x7f800000;                 // Exponent
+        t1 >>= 13;                             // Align mantissa on MSB
+        t2 >>= 16;                             // Shift sign bit into position
+        t1 -= 0x1c000;                         // Adjust bias
+        t1 = (t3 < 0x38800000) ? 0 : t1;
+        t1 = (t3 > 0x47000000) ? 0x7bff : t1;
+        t1 = (t3 == 0 ? 0 : t1);               // Denormals-as-zero
+        t1 |= t2;                              // Re-insert sign bit
+        *(uint16_t*)out = t1;
+    #endif
 }
+
 
 void Math::Float32From16(float*    out, const uint16_t* in, const uint arraySize) {
     for (unsigned i = 0; i < arraySize; ++i) {
@@ -124,18 +134,18 @@ void Math::Float16From32(uint16_t* out, const float*    in, const uint arraySize
     }
 }
 void Math::setFinalModelMatrix(glm_mat4& modelMatrix, const glm_vec3& position, const glm_quat& rotation, const glm_vec3& inScale) {
-    modelMatrix = glm_mat4(1.0);
-    const auto translationMatrix = glm::translate(position);
-    const auto rotationMatrix = glm::mat4_cast(rotation);
-    const auto scaleMatrix = glm::scale(inScale);
-    modelMatrix = translationMatrix * rotationMatrix * scaleMatrix /* * modelMatrix  */;
+    modelMatrix            = glm_mat4(1.0);
+    auto translationMatrix = glm::translate(position);
+    auto rotationMatrix    = glm::mat4_cast(rotation);
+    auto scaleMatrix       = glm::scale(inScale);
+    modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 }
 void Math::setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& inScale) {
-    modelMatrix = glm::mat4(1.0f);
-    const auto translationMatrix = glm::translate(position);
-    const auto rotationMatrix = glm::mat4_cast(rotation);
-    const auto scaleMatrix = glm::scale(inScale);
-    modelMatrix = translationMatrix * rotationMatrix * scaleMatrix /* * modelMatrix  */;
+    modelMatrix            = glm::mat4(1.0f);
+    auto translationMatrix = glm::translate(position);
+    auto rotationMatrix    = glm::mat4_cast(rotation);
+    auto scaleMatrix       = glm::scale(inScale);
+    modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 }
 void Math::setRotation(glm_quat& orientation, const decimal& pitch, const decimal& yaw, const decimal& roll) {
     if (abs(pitch) > ROTATION_THRESHOLD)
@@ -182,25 +192,15 @@ glm::vec2 Math::rotate2DPoint(const glm::vec2& point, const float angle, const g
 
 void Math::extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProjection,glm::vec4* outPlanes){
     glm::vec4 rows[4];
-    for(ushort i = 0; i < 4; ++i)
+    for(unsigned char i = 0; i < 4; ++i)
         rows[i] = glm::row(inViewProjection,i);
     //0 = left, 1 = right, 2 = top, 3 = bottom, 4 = near, 5 = far
-    for(ushort i = 0; i < 3; ++i){
-        ushort index = i * 2;
+    for(unsigned char i = 0; i < 3; ++i){
+        unsigned char index = i * 2;
         outPlanes[index  ] = -(rows[3] + rows[i]);  //0,2,4
         outPlanes[index+1] = -(rows[3] - rows[i]);  //1,3,5
     }
     //https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
-    //avoiding normalization of the planes for now so we can uitilize halfspace and thus negatives (outside frust / inside frust / intersecting frust)
-    /*
-    for(ushort i = 0; i < 6; ++i){
-        float mag = glm::sqrt(outPlanes[i].x * outPlanes[i].x + outPlanes[i].y * outPlanes[i].y + outPlanes[i].z * outPlanes[i].z);
-        outPlanes[i].x = outPlanes[i].x / mag;
-        outPlanes[i].y = outPlanes[i].y / mag;
-        outPlanes[i].z = outPlanes[i].z / mag;
-        outPlanes[i].w = outPlanes[i].w / mag;
-    }
-    */
 }
 const glm_quat Math::btToGLMQuat(const btQuaternion& q){
 	return glm_quat(q.getW(),q.getX(),q.getY(),q.getZ()); 
@@ -253,16 +253,15 @@ void Math::removeMatrixPosition(glm::mat4& matrix){
 }
 
 bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector, const glm::vec3& point,const float fovRadians){
-    const glm::vec3 diff = glm::normalize(point - conePos);
+    glm::vec3 diff = glm::normalize(point - conePos);
     float t = glm::dot(coneVector, diff);
     return ( t >= glm::cos( fovRadians ) );
 }
 bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector, const glm::vec3& point,const float fovRadians,const float maxDistance){
-	const glm::vec3 diff = glm::normalize(point - conePos);
-	const float t = glm::dot(coneVector, diff);
-	const float length = glm::length(point - conePos);
-    if ( length > maxDistance ){ return false; }
-    return ( t >= glm::cos( fovRadians ) );
+    glm::vec3 diff = glm::normalize(point - conePos);
+    float t = glm::dot(coneVector, diff);
+    float length = glm::length(point - conePos);
+    return (length > maxDistance) ? false : (t >= glm::cos(fovRadians));
 }
 glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& camera, const glm::mat4& view, const glm::mat4& projection, const glm::vec4& viewport, const bool clampToEdge){
     using v2 = glm::vec2;
@@ -309,7 +308,7 @@ glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& ca
     unsigned int inBounds = 0;
 
     auto screen_pos       = glm::project(position, view, projection, viewport);
-    const float dot       = glm::dot(camera.getViewVector(), position - glm::vec3(camera.getPosition()));
+    float dot       = glm::dot(camera.getViewVector(), position - glm::vec3(camera.getPosition()));
     if (screen_pos.x >= viewport.x && screen_pos.x <= viewport.z) {
         if (screen_pos.y >= viewport.y && screen_pos.y <= viewport.w) {
             if (dot < 0.0f) { //negative dot means infront
@@ -348,8 +347,8 @@ glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& ca
     return Math::getScreenCoordinates(position, camera, camera.getView(), camera.getProjection(), viewport, clampToEdge);
 }
 glm::vec3 Math::getScreenCoordinates(const glm::vec3& objPos, const Camera& camera, const bool clampToEdge) {
-    const glm::vec2 winSize = glm::vec2(Resources::getWindowSize());
-    const glm::vec4 viewport = glm::vec4(0.0f, 0.0f, winSize.x, winSize.y);
+    glm::vec2 winSize  = glm::vec2(Resources::getWindowSize());
+    glm::vec4 viewport = glm::vec4(0.0f, 0.0f, winSize.x, winSize.y);
     return Math::getScreenCoordinates(objPos, camera, viewport, clampToEdge);
 }
 float Math::Max(const glm::vec2& v){
@@ -407,18 +406,16 @@ const glm::vec3 Math::unpack3NormalsFrom32Int(const uint32_t data) {
     return conversions;
 }
 const uint32_t Math::pack3NormalsInto32Int(const float x, const float y, const float z){
-    //2^10 = 1024, each component uses 10 bits
-    //2^9 = 512
-    const uint32_t xsign = x < 0; //if x < 0, this = 1, else this = 0
-    const uint32_t ysign = y < 0; //if y < 0, this = 1, else this = 0
-    const uint32_t zsign = z < 0; //if z < 0, this = 1, else this = 0
-    const float w = 0.0f;         //2 bits left for w, should i ever want to use it
-    const uint32_t wsign = w < 0; //if w < 0, this = 1, else this = 0
-    const uint32_t intW = ((uint32_t)(w       + (wsign << 1)) & 1);
-    const uint32_t intZ = ((uint32_t)(z * 511 + (zsign << 9)) & 511);
-    const uint32_t intY = ((uint32_t)(y * 511 + (ysign << 9)) & 511);
-    const uint32_t intX = ((uint32_t)(x * 511 + (xsign << 9)) & 511);
-    const uint32_t data = 
+    uint32_t xsign = x < 0; //if x < 0, this = 1, else this = 0
+    uint32_t ysign = y < 0; //if y < 0, this = 1, else this = 0
+    uint32_t zsign = z < 0; //if z < 0, this = 1, else this = 0
+    float w = 0.0f;         //2 bits left for w, should i ever want to use it
+    uint32_t wsign = w < 0; //if w < 0, this = 1, else this = 0
+    uint32_t intW = ((uint32_t)(w       + (wsign << 1)) & 1);
+    uint32_t intZ = ((uint32_t)(z * 511 + (zsign << 9)) & 511);
+    uint32_t intY = ((uint32_t)(y * 511 + (ysign << 9)) & 511);
+    uint32_t intX = ((uint32_t)(x * 511 + (xsign << 9)) & 511);
+    uint32_t data = 
         (wsign << 31 | intW << 30) |
         (zsign << 29 | intZ << 20) |
         (ysign << 19 | intY << 10) |
@@ -432,13 +429,13 @@ const uint32_t Math::pack3NormalsInto32Int(const glm::vec3& v){
 
 float Math::pack3FloatsInto1Float(float r, float g, float b){
     r = (r + 1.0f) * 0.5f;
-	const uchar _r = static_cast<uchar>(r * 255.0f);
+    uchar _r = static_cast<uchar>(r * 255.0f);
     g = (g + 1.0f) * 0.5f;
-	const uchar _g = static_cast<uchar>(g * 255.0f);
+    uchar _g = static_cast<uchar>(g * 255.0f);
     b = (b + 1.0f) * 0.5f;
-	const uchar _b = static_cast<uchar>(b * 255.0f);
-	const uint packedColor = (_r << 16) | (_g << 8) | _b;
-	const float packedFloat = static_cast<float>(static_cast<double>(packedColor) / static_cast<double>(1 << 24));
+    uchar _b = static_cast<uchar>(b * 255.0f);
+    uint packedColor = (_r << 16) | (_g << 8) | _b;
+    float packedFloat = static_cast<float>(static_cast<double>(packedColor) / static_cast<double>(1 << 24));
     return packedFloat;
 }
 float Math::pack3FloatsInto1Float(const glm::vec3& c){ 
@@ -457,11 +454,11 @@ glm::vec3 Math::unpack3FloatsInto1Float(float v){
     return ret;
 }
 float Math::pack3FloatsInto1FloatUnsigned(float r,float g,float b){
-	const uchar _r = static_cast<uchar>(r * 255.0f);
-	const uchar _g = static_cast<uchar>(g * 255.0f);
-	const uchar _b = static_cast<uchar>(b * 255.0f);
-	const uint packedColor = (_r << 16) | (_g << 8) | _b;
-	const float packedFloat = static_cast<float>(static_cast<double>(packedColor) / static_cast<double>(1 << 24) );
+    uchar _r = static_cast<uchar>(r * 255.0f);
+    uchar _g = static_cast<uchar>(g * 255.0f);
+    uchar _b = static_cast<uchar>(b * 255.0f);
+    uint packedColor = (_r << 16) | (_g << 8) | _b;
+    float packedFloat = static_cast<float>(static_cast<double>(packedColor) / static_cast<double>(1 << 24) );
     return packedFloat;
 }
 float Math::pack3FloatsInto1FloatUnsigned(const glm::vec3& c){ 
@@ -477,21 +474,21 @@ glm::vec3 Math::unpack3FloatsInto1FloatUnsigned(float v){
 }
 uchar Math::pack2NibblesIntoChar(const float x, const float y) {
     uchar packedData = 0;
-    const int bits  = static_cast<int>(round(x / 0.066666666666f));
-    const int bits1 = static_cast<int>(round(y / 0.066666666666f));
+    int bits  = static_cast<int>(round(x / 0.066666666666f));
+    int bits1 = static_cast<int>(round(y / 0.066666666666f));
 	packedData |= bits & 15;
 	packedData |= (bits1 << 4) & 240;
     return packedData;
 }
 glm::vec2 Math::unpack2NibblesFromChar(const uchar _packedData) {
-    const int low  = _packedData & 15;
-    const int high = _packedData >> 4;
+    int low  = _packedData & 15;
+    int high = _packedData >> 4;
     return glm::vec2(static_cast<float>(low * 0.066666666666f), static_cast<float>(high * 0.066666666666f));
 }
 //attempt to do the above using non bitwise operations for glsl versions that do not support bitwise operations
 float Math::pack2NibblesIntoCharBasic(const float x, const float y) {
-    const float lowEnd = (round(x / 0.066666666666f));
-    const float highEnd = (round(y / 0.066666666666f) * 16.0f);
+    float lowEnd = (round(x / 0.066666666666f));
+    float highEnd = (round(y / 0.066666666666f) * 16.0f);
     return (lowEnd + highEnd);
 }
 glm::vec2 Math::unpack2NibblesFromCharBasic(const float _packedData) {
@@ -571,8 +568,8 @@ float Math::getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, co
     return angle;
 }
 void Math::alignTo(glm_quat& o, const glm_vec3& direction){ 
-    const auto xaxis = glm::cross(glm_vec3(1.0,0.0,0.0), direction);
-	const auto yaxis = glm::cross(direction, xaxis);
+    auto xaxis = glm::cross(glm_vec3(1.0,0.0,0.0), direction);
+	auto yaxis = glm::cross(direction, xaxis);
     glm::mat3 rot;
     rot[0][0] = float(xaxis.x);      rot[0][1] = float(xaxis.y);      rot[0][2] = float(xaxis.z);
     rot[1][0] = float(yaxis.x);      rot[1][1] = float(yaxis.y);      rot[1][2] = float(yaxis.z);
@@ -611,46 +608,48 @@ double Math::lerp(const double t, const double a, const double b){
 	return a + t * (b - a);
 }
 float Math::grad(const int hash, const float x, const float y, const float z){
-	const int h = hash & 15;
-	const double u = h < 8 ? x : y, v = h < 4 ? y : h == 12 || h == 14 ? x : z;
+	int h = hash & 15;
+	double u = h < 8 ? x : y, v = h < 4 ? y : h == 12 || h == 14 ? x : z;
 	return float(((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v));
 }
 double Math::grad(const int hash, const double x, const double y, const double z){
-	const int h = hash & 15;
-	const double u = h < 8 ? x : y, v = h < 4 ? y : h == 12 || h == 14 ? x : z;
+	int h = hash & 15;
+	double u = h < 8 ? x : y, v = h < 4 ? y : h == 12 || h == 14 ? x : z;
 	return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
 }
 glm::vec4 Math::PaintersAlgorithm(const glm::vec4& paint_color, const glm::vec4& canvas_color){
-	const float alpha = paint_color.a + canvas_color.a * (1.0f - paint_color.a);
+    float alpha = paint_color.a + canvas_color.a * (1.0f - paint_color.a);
     glm::vec4 ret(0.0f);
     ret   = ((paint_color * paint_color.a + canvas_color * canvas_color.a * (1.0f - paint_color.a)) / alpha);
     ret.a = alpha;
     return ret;
 }
 sf::Color Math::PaintersAlgorithm(const sf::Color& paint_color, const sf::Color& canvas_color) {
-    const glm::vec4 cC = glm::vec4(static_cast<float>(canvas_color.r) / 255.0f, static_cast<float>(canvas_color.g) / 255.0f, static_cast<float>(canvas_color.b) / 255.0f, static_cast<float>(canvas_color.a) / 255.0f);
-    const glm::vec4 pC = glm::vec4(static_cast<float>(paint_color.r) / 255.0f, static_cast<float>(paint_color.g) / 255.0f, static_cast<float>(paint_color.b) / 255.0f, static_cast<float>(paint_color.a) / 255.0f);
-    const float full = 1.0f;
-    const float alpha = pC.a + cC.a * (full - pC.a);
+    glm::vec4 cC = glm::vec4(static_cast<float>(canvas_color.r) / 255.0f, static_cast<float>(canvas_color.g) / 255.0f, static_cast<float>(canvas_color.b) / 255.0f, static_cast<float>(canvas_color.a) / 255.0f);
+    glm::vec4 pC = glm::vec4(static_cast<float>(paint_color.r) / 255.0f, static_cast<float>(paint_color.g) / 255.0f, static_cast<float>(paint_color.b) / 255.0f, static_cast<float>(paint_color.a) / 255.0f);
+    float full = 1.0f;
+    float alpha = pC.a + cC.a * (full - pC.a);
     glm::vec4 ret(0.0f);
     ret = (pC * pC.a + cC * cC.a * (full - pC.a) / alpha);
     ret.a = alpha;
-    const sf::Uint8 finalR = static_cast<sf::Uint8>(ret.r * 255.0f);
-    const sf::Uint8 finalG = static_cast<sf::Uint8>(ret.g * 255.0f);
-    const sf::Uint8 finalB = static_cast<sf::Uint8>(ret.b * 255.0f);
-    const sf::Uint8 finalA = static_cast<sf::Uint8>(ret.a * 255.0f);
+    sf::Uint8 finalR = static_cast<sf::Uint8>(ret.r * 255.0f);
+    sf::Uint8 finalG = static_cast<sf::Uint8>(ret.g * 255.0f);
+    sf::Uint8 finalB = static_cast<sf::Uint8>(ret.b * 255.0f);
+    sf::Uint8 finalA = static_cast<sf::Uint8>(ret.a * 255.0f);
     return sf::Color(finalR, finalG, finalB, finalA);
 }
 bool Math::rayIntersectSphere(const glm::vec3& C, const float r, const glm::vec3& A, const glm::vec3& rayVector){
-	const glm::vec3 B = A + rayVector;
-    const float& dot = glm::dot(rayVector, C - A);
-    if(dot >= 0.0f) //check if point is behind
+    glm::vec3 B = A + rayVector;
+    float dot = glm::dot(rayVector, C - A);
+    if (dot >= 0.0f) { //check if point is behind
         return false;
-    const float& a = ((B.x - A.x) * (B.x - A.x)) + ((B.y - A.y) * (B.y - A.y)) + ((B.z - A.z) * (B.z - A.z));
-    const float& b = 2.0f * ((B.x - A.x) * (A.x - C.x) + (B.y - A.y) * (A.y - C.y) + (B.z - A.z) * (A.z - C.z));
-    const float& c = (((A.x - C.x) * (A.x - C.x)) + ((A.y - C.y) * (A.y - C.y)) + ((A.z - C.z) * (A.z - C.z))) - (r * r);
-    const float& d = (b * b) - (4.0f * a * c);
-    if(d < 0.0f)
+    }
+    float a = ((B.x - A.x) * (B.x - A.x)) + ((B.y - A.y) * (B.y - A.y)) + ((B.z - A.z) * (B.z - A.z));
+    float b = 2.0f * ((B.x - A.x) * (A.x - C.x) + (B.y - A.y) * (A.y - C.y) + (B.z - A.z) * (A.z - C.z));
+    float c = (((A.x - C.x) * (A.x - C.x)) + ((A.y - C.y) * (A.y - C.y)) + ((A.z - C.z) * (A.z - C.z))) - (r * r);
+    float d = (b * b) - (4.0f * a * c);
+    if (d < 0.0f) {
         return false;
+    }
     return true;
 }

@@ -14,10 +14,8 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace std;
 
-MaterialComponent::MaterialComponent(const MaterialComponentType::Type type, Texture* texture, Texture* mask, Texture* cubemap) {
+MaterialComponent::MaterialComponent(MaterialComponentType::Type type, Texture* texture, Texture* mask, Texture* cubemap) {
     m_ComponentType = type;
-    m_NumLayers = 0;
-
     addLayer(texture, mask, cubemap);
 }
 MaterialComponent::~MaterialComponent() {
@@ -46,8 +44,9 @@ MaterialLayer* MaterialComponent::addLayer(const string& textureFile, const stri
     return addLayer(texture, mask, cubemap);
 }
 MaterialLayer* MaterialComponent::addLayer(Texture* texture, Texture* mask, Texture* cubemap) {
-    if (m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT)
+    if (m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT) {
         return nullptr;
+    }
     auto& layer = m_Layers[m_NumLayers];
     layer.setTexture(texture);
     layer.setMask(mask);
@@ -89,23 +88,23 @@ MaterialLayer* MaterialComponent::addLayer(Texture* texture, Texture* mask, Text
     return &layer;
 }
 
-Texture* MaterialComponent::texture(const size_t index) const {
+Texture* MaterialComponent::texture(size_t index) const {
     return m_Layers[index].getTexture();
 }
-Texture* MaterialComponent::mask(const size_t index) const {
+Texture* MaterialComponent::mask(size_t index) const {
     return m_Layers[index].getMask();
 }
-Texture* MaterialComponent::cubemap(const size_t index) const {
+Texture* MaterialComponent::cubemap(size_t index) const {
     return m_Layers[index].getCubemap();
 }
-MaterialLayer& MaterialComponent::layer(const size_t index) {
+MaterialLayer& MaterialComponent::layer(size_t index) {
     return m_Layers[index];
 }
 MaterialComponentType::Type MaterialComponent::type() const {
     return m_ComponentType;
 }
 
-void MaterialComponent::bind(const size_t component_index, size_t& inTextureUnit) const {
+void MaterialComponent::bind(size_t component_index, size_t& inTextureUnit) const {
     const string wholeString = "components[" + to_string(component_index) + "].";
     Engine::Renderer::sendUniform2Safe((wholeString + "componentData").c_str(), static_cast<int>(m_NumLayers), static_cast<int>(m_ComponentType));
     for (unsigned int layer = 0; layer < m_NumLayers; ++layer) {

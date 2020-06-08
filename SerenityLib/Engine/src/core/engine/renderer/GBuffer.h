@@ -16,7 +16,7 @@ namespace Engine::priv {
 #include <core/engine/renderer/FramebufferObject.h>
 
 namespace Engine::priv{
-    struct GBufferType{enum Type{
+    struct GBufferType { enum Type : unsigned char {
         Diffuse, 
         Normal, 
         Misc, 
@@ -30,12 +30,12 @@ namespace Engine::priv{
             mutable FramebufferObject           m_FBO;
             mutable FramebufferObject           m_SmallFBO;
             std::vector<FramebufferTexture*>    m_FramebufferTextures;
-            unsigned int                        m_Width  = 0;
-            unsigned int                        m_Height = 0;
+            unsigned int                        m_Width                = 0U;
+            unsigned int                        m_Height               = 0U;
 
-            void internalBuildTextureBuffer(FramebufferObject& fbo, const GBufferType::Type gbuffer_type, const unsigned int w, const unsigned int h);
+            void internalBuildTextureBuffer(FramebufferObject& fbo, GBufferType::Type gbuffer_type, unsigned int w, unsigned int h);
             void internalDestruct();
-            void internalStart(const unsigned int* types, const unsigned int size, std::string_view channels, const bool first_fbo);
+            void internalStart(const unsigned int* types, unsigned int size, std::string_view channels, bool first_fbo);
 
         public:
             GBuffer() = default;
@@ -44,20 +44,20 @@ namespace Engine::priv{
             void init(const unsigned int width, const unsigned int height);
             bool resize(const unsigned int width, const unsigned int height);
 
-            void bindFramebuffers(const unsigned int, std::string_view channels = "RGBA", const bool isMainFBO = true);
-            void bindFramebuffers(const unsigned int, const unsigned int, std::string_view channels = "RGBA", const bool isMainFBO = true);
-            void bindFramebuffers(const unsigned int, const unsigned int, const unsigned int, std::string_view channels = "RGBA", const bool isMainFBO = true);
-            void bindFramebuffers(const unsigned int, const unsigned int, const unsigned int, const unsigned int, std::string_view channels = "RGBA", const bool isMainFBO = true);
-            void bindFramebuffers(const unsigned int, const unsigned int, const unsigned int, const unsigned int, const unsigned int, std::string_view channels = "RGBA", const bool isMainFBO = true);
+            void bindFramebuffers(unsigned int, std::string_view channels = "RGBA", bool isMainFBO = true);
+            void bindFramebuffers(unsigned int, unsigned int, std::string_view channels = "RGBA", bool isMainFBO = true);
+            void bindFramebuffers(unsigned int, unsigned int, unsigned int, std::string_view channels = "RGBA", bool isMainFBO = true);
+            void bindFramebuffers(unsigned int, unsigned int, unsigned int, unsigned int, std::string_view channels = "RGBA", bool isMainFBO = true);
+            void bindFramebuffers(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, std::string_view channels = "RGBA", bool isMainFBO = true);
 
-            void bindBackbuffer(const Viewport&, const GLuint final_fbo = 0, const GLuint final_rbo = 0);
+            void bindBackbuffer(const Viewport& viewport, GLuint final_fbo = 0, GLuint final_rbo = 0);
 
             unsigned int width() const;
             unsigned int height() const;
 
             const std::vector<FramebufferTexture*>& getBuffers() const;
-            FramebufferTexture& getBuffer(const unsigned int) const;
-            Texture& getTexture(const unsigned int) const;
+            FramebufferTexture& getBuffer(unsigned int) const;
+            Texture& getTexture(unsigned int) const;
 
             const FramebufferObject& getMainFBO() const;
             const FramebufferObject& getSmallFBO() const;

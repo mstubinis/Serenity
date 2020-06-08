@@ -53,7 +53,7 @@ void* ComponentLogic1::getUserPointer2() const {
     return m_UserPointer2;
 }
 void ComponentLogic1::call(const float dt) const { 
-    m_Functor.call(this, dt);
+    m_Functor(this, dt);
 }
 
 #pragma endregion

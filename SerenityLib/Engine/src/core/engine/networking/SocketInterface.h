@@ -11,6 +11,18 @@ struct SocketType final { enum Type : unsigned char {
     TCPListener,
 };};
 
+struct SocketStatus final {
+    enum Status : unsigned char {
+        Done         = sf::Socket::Status::Done,         //0
+        NotReady     = sf::Socket::Status::NotReady,     //1
+        Partial      = sf::Socket::Status::Partial,      //2
+        Disconnected = sf::Socket::Status::Disconnected, //3
+        Error        = sf::Socket::Status::Error,        //4
+
+    };
+    static SocketStatus::Status map_status(sf::Socket::Status sfmlStatus);
+};
+
 namespace Engine::Networking {
     class ISocket {
         private:

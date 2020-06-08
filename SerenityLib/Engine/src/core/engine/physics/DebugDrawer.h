@@ -2,7 +2,7 @@
 #ifndef ENGINE_PHYSICS_DEBUG_DRAWER_H
 #define ENGINE_PHYSICS_DEBUG_DRAWER_H
 
-#include <core/engine/events/Engine_EventObject.h>
+#include <core/engine/events/Observer.h>
 #include <BulletCollision/CollisionShapes/btTriangleCallback.h>
 #include <LinearMath/btVector3.h>
 #include <LinearMath/btTransform.h>
@@ -29,7 +29,7 @@ namespace Engine::priv {
             virtual void internalProcessTriangleIndex(btVector3* triangle, int partId, int  triangleIndex);
             virtual void processTriangle(btVector3* triangle, int partId, int triangleIndex);
     };
-    class GLDebugDrawer final : public btIDebugDraw, public EventObserver, public Engine::NonCopyable, public Engine::NonMoveable {
+    class GLDebugDrawer final : public btIDebugDraw, public Observer, public Engine::NonCopyable, public Engine::NonMoveable {
         friend class Engine::priv::PhysicsManager;
         private:
             GLuint m_PerFrameCount = 0U;

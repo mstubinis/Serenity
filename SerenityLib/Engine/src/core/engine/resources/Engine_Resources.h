@@ -39,8 +39,8 @@ namespace Engine{
                 //http://gamesfromwithin.com/managing-data-relationships
                 ResourcePool<EngineResource>       m_Resources;
                 std::vector<Window*>               m_Windows;
-                Scene*                             m_CurrentScene;
-                bool                               m_DynamicMemory;
+                Scene*                             m_CurrentScene       = nullptr;
+                bool                               m_DynamicMemory      = false;
                 std::vector<Scene*>                m_Scenes;
                 std::vector<Scene*>                m_ScenesToBeDeleted;
             public:

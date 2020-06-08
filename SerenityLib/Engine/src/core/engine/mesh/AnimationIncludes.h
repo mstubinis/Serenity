@@ -21,20 +21,20 @@ namespace Engine::priv {
         BoneNode() = default;
     };
     struct AnimationKeyBaseClass {
-        double     time;
-        AnimationKeyBaseClass(const double time_) {
+        float     time;
+        AnimationKeyBaseClass(float time_) {
             time = time_;
         }
     };
     struct Vector3Key final : public AnimationKeyBaseClass {
         glm::vec3  value;
-        Vector3Key(const double time_, const glm::vec3& value_) : AnimationKeyBaseClass(time_){
+        Vector3Key(float time_, const glm::vec3& value_) : AnimationKeyBaseClass(time_){
             value = value_;
         }
     };
     struct QuatKey final : public AnimationKeyBaseClass {
         aiQuaternion  value;
-        QuatKey(const double time_, const aiQuaternion& value_) : AnimationKeyBaseClass(time_){
+        QuatKey(float time_, const aiQuaternion& value_) : AnimationKeyBaseClass(time_){
             value = value_;
         }
     };

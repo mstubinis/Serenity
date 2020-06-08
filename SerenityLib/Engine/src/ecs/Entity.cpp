@@ -73,9 +73,11 @@ Scene& Entity::scene() const {
     return Core::m_Engine->m_ResourceManager._getSceneByID(dataRequest.sceneID);
 }
 void Entity::destroy() {
-    Scene& s = scene();
-    InternalScenePublicInterface::CleanECS(s, data);
-    InternalScenePublicInterface::GetECS(s).removeEntity(*this);
+    if (!null()) {
+        Scene& s = scene();
+        InternalScenePublicInterface::CleanECS(s, data);
+        InternalScenePublicInterface::GetECS(s).removeEntity(*this);
+    }
 }
 bool Entity::operator==(const Entity other) const {
     return (data == other.data);
@@ -87,50 +89,50 @@ bool Entity::null() const {
     return (data == 0);
 }
 
-void Entity::addComponent(const string& componentClassName, luabridge::LuaRef arg1, luabridge::LuaRef arg2, luabridge::LuaRef arg3, luabridge::LuaRef arg4, luabridge::LuaRef arg5, luabridge::LuaRef arg6, luabridge::LuaRef arg7, luabridge::LuaRef arg8) {
+void Entity::addComponent(const string& componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8) {
     if (componentClassName == "ComponentBody") {
-        if (!arg1.isNil()) {
-            addComponent<ComponentBody>(arg1.cast<CollisionType::Type>());
+        if (!a1.isNil()) {
+            addComponent<ComponentBody>(a1.cast<CollisionType::Type>());
         }else{
             addComponent<ComponentBody>();
         }
     }else if (componentClassName == "ComponentModel") {
-        if (!arg3.isNil() && !arg4.isNil()) {
-            addComponent<ComponentModel>(arg1.cast<Handle>(), arg2.cast<Handle>(), arg3.cast<Handle>(), arg4.cast<RenderStage::Stage>());
-        }else if(arg4.isNil()){
-            addComponent<ComponentModel>(arg1.cast<Handle>(), arg2.cast<Handle>(), arg3.cast<Handle>());
+        if (!a3.isNil() && !a4.isNil()) {
+            addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>(), a4.cast<RenderStage::Stage>());
+        }else if(a4.isNil()){
+            addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>());
         }else{
-            addComponent<ComponentModel>(arg1.cast<Handle>(), arg2.cast<Handle>());
+            addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>());
         }
     }else if (componentClassName == "ComponentCamera") {
-        if (!arg5.isNil() || !arg6.isNil()) {
-            addComponent<ComponentCamera>(arg1.cast<const float>(), arg2.cast<const float>(), arg3.cast<const float>(), arg4.cast<const float>(), arg5.cast<const float>(), arg6.cast<const float>());
+        if (!a5.isNil() || !a6.isNil()) {
+            addComponent<ComponentCamera>(a1.cast<const float>(), a2.cast<const float>(), a3.cast<const float>(), a4.cast<const float>(), a5.cast<const float>(), a6.cast<const float>());
         }else{
-            addComponent<ComponentCamera>(arg1.cast<const float>(), arg2.cast<const float>(), arg3.cast<const float>(), arg4.cast<const float>());
+            addComponent<ComponentCamera>(a1.cast<const float>(), a2.cast<const float>(), a3.cast<const float>(), a4.cast<const float>());
         }
     }else if (componentClassName == "ComponentName") {
-        addComponent<ComponentName>(arg1.cast<const char*>());
+        addComponent<ComponentName>(a1.cast<const char*>());
     }else if (componentClassName == "ComponentLogic") {
-        if (!arg1.isNil() && arg1.isFunction()) {
-            addComponent<ComponentLogic>(arg1.cast<const function<void(const ComponentLogic*, const float)>>());
+        if (!a1.isNil() && a1.isFunction()) {
+            addComponent<ComponentLogic>(a1.cast<const function<void(const ComponentLogic*, const float)>>());
         }else{
             addComponent<ComponentLogic>();
         }
     }else if (componentClassName == "ComponentLogic1") {
-        if (!arg1.isNil() && arg1.isFunction()) {
-            addComponent<ComponentLogic1>(arg1.cast<const function<void(const ComponentLogic1*, const float)>>());
+        if (!a1.isNil() && a1.isFunction()) {
+            addComponent<ComponentLogic1>(a1.cast<const function<void(const ComponentLogic1*, const float)>>());
         }else{
             addComponent<ComponentLogic1>();
         }
     }else if (componentClassName == "ComponentLogic2") {
-        if (!arg1.isNil() && arg1.isFunction()) {
-            addComponent<ComponentLogic2>(arg1.cast<const function<void(const ComponentLogic2*, const float)>>());
+        if (!a1.isNil() && a1.isFunction()) {
+            addComponent<ComponentLogic2>(a1.cast<const function<void(const ComponentLogic2*, const float)>>());
         }else{
             addComponent<ComponentLogic2>();
         }
     }else if (componentClassName == "ComponentLogic3") {
-        if (!arg1.isNil() && arg1.isFunction()) {
-            addComponent<ComponentLogic3>(arg1.cast<const function<void(const ComponentLogic3*, const float)>>());
+        if (!a1.isNil() && a1.isFunction()) {
+            addComponent<ComponentLogic3>(a1.cast<const function<void(const ComponentLogic3*, const float)>>());
         }else{
             addComponent<ComponentLogic3>();
         }
@@ -158,7 +160,7 @@ bool Entity::removeComponent(const string& componentClassName) {
 }
 luabridge::LuaRef Entity::getComponent(const string& componentClassName) {
     lua_State* L = Engine::priv::getLUABinder().getState()->getState();
-    string global_name = to_string(data) + "componentClassName";
+    string global_name = to_string(data) + componentClassName;
     auto* global_name_cstr = global_name.c_str();
     if (componentClassName == "ComponentBody") {
         return InternalEntityPublicInterface::GetComponent<ComponentBody>(L, *this, global_name_cstr);

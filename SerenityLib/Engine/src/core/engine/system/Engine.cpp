@@ -129,18 +129,14 @@ void EngineCore::update_logic(Window& window, const float dt){
     window.on_dynamic_resize();
     m_NetworkingModule.update(dt);
     Scene& scene = *Resources::getCurrentScene();
-    auto& ecs = InternalScenePublicInterface::GetECS(scene); 
-    ecs.preUpdate(scene, dt);
+    scene.preUpdate(dt);
     Game::onPreUpdate(dt);
-    scene.update(dt);
-    InternalScenePublicInterface::UpdateParticleSystem(scene, dt);
     Game::update(dt);
-    ecs.update(dt, scene);
-    ecs.postUpdate(scene,dt);
-    InternalScenePublicInterface::UpdateMaterials(scene, dt);
+    scene.update(dt);
+    scene.postUpdate(dt);
     m_ThreadManager._update(dt);
     Game::onPostUpdate(dt);
-    m_EventManager.onResetEvents(dt);
+    m_EventModule.onPostUpdate();
 
     window.m_Data.on_reset_events(dt);
 
@@ -177,7 +173,7 @@ void EngineCore::cleanup(Window& window, const float dt) {
     m_ResourceManager.onPostUpdate();
 }
 void EngineCore::on_event_resize(Window& window, const unsigned int newWindowWidth, const unsigned int newWindowHeight, const bool saveSize){
-    m_EventManager.cleanup();
+    m_EventModule.onClearEvents();
     m_RenderManager._resize(newWindowWidth, newWindowHeight);
 
     if (saveSize) {
@@ -198,11 +194,10 @@ void EngineCore::on_event_resize(Window& window, const unsigned int newWindowWid
     EventWindowResized e(newWindowWidth, newWindowHeight);
     Event ev(EventType::WindowResized);
     ev.eventWindowResized = e;
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_window_requested_closed(Window& window){
-    Event ev(EventType::WindowRequestedToBeClosed);
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowRequestedToBeClosed);
 
     Game::onWindowRequestedToBeClosed(window);
     window.close();
@@ -210,31 +205,27 @@ void EngineCore::on_event_window_requested_closed(Window& window){
 void EngineCore::on_event_game_ended() {
     Game::onGameEnded();
 
-    Event ev(EventType::GameEnded);
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(EventType::GameEnded);
 }
 void EngineCore::on_event_window_closed(Window& window) {
     Game::onWindowClosed(window);
     window.m_Data.on_close();
 
-    Event ev(EventType::WindowHasClosed);
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowHasClosed);
 }
 void EngineCore::on_event_lost_focus(Window& window){
-    m_EventManager.cleanup();
+    m_EventModule.onClearEvents();
     Game::onLostFocus(window);
 
-    Event ev(EventType::WindowLostFocus);
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowLostFocus);
 }
 void EngineCore::on_event_gained_focus(Window& window){
-    m_EventManager.cleanup();
+    m_EventModule.onClearEvents();
     Game::onGainedFocus(window);
 
     window.m_Data.on_reset_events(0.0);
 
-    Event ev(EventType::WindowGainedFocus);
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowGainedFocus);
 }
 void EngineCore::on_event_text_entered(Window& window, const unsigned int unicode){
     Game::onTextEntered(window, unicode);
@@ -242,10 +233,10 @@ void EngineCore::on_event_text_entered(Window& window, const unsigned int unicod
     EventTextEntered e(unicode);
     Event ev(EventType::TextEntered);
     ev.eventTextEntered = e;
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_key_pressed(Window& window, const unsigned int key){
-    m_EventManager.onEventKeyPressed(key);
+    m_EventModule.onEventKeyPressed(key);
     Game::onKeyPressed(window, key);
 
     priv::EventKeyboard e;
@@ -257,10 +248,10 @@ void EngineCore::on_event_key_pressed(Window& window, const unsigned int key){
 
     Event ev(EventType::KeyPressed);
     ev.eventKeyboard = e;
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_key_released(Window& window, const unsigned int key){
-    m_EventManager.onEventKeyReleased(key);
+    m_EventModule.onEventKeyReleased(key);
     Game::onKeyReleased(window, key);
 
     priv::EventKeyboard e;
@@ -272,7 +263,7 @@ void EngineCore::on_event_key_released(Window& window, const unsigned int key){
 
     Event ev(EventType::KeyReleased);
     ev.eventKeyboard = e;
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_mouse_wheel_scrolled(Window& window, const float delta, const int mouseWheelX, const int mouseWheelY){
     window.m_Data.on_mouse_wheel_scrolled(delta, mouseWheelX, mouseWheelY);
@@ -282,27 +273,27 @@ void EngineCore::on_event_mouse_wheel_scrolled(Window& window, const float delta
     priv::EventMouseWheel e(delta, mouseWheelX, mouseWheelY);
     Event ev(EventType::MouseWheelMoved);
     ev.eventMouseWheel = e;
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_mouse_button_pressed(Window& window, const unsigned int mouseButton){
-    m_EventManager.onEventMouseButtonPressed(mouseButton);
+    m_EventModule.onEventMouseButtonPressed(mouseButton);
     Game::onMouseButtonPressed(window, mouseButton);
 
     const glm::uvec2 mpos = Engine::getMousePosition(window);
     EventMouseButton e(static_cast<MouseButton::Button>(mouseButton), static_cast<float>(mpos.x), static_cast<float>(mpos.y));
     Event ev(EventType::MouseButtonPressed);
     ev.eventMouseButton = e;
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_mouse_button_released(Window& window, const unsigned int mouseButton){
-    m_EventManager.onEventMouseButtonReleased(mouseButton);
+    m_EventModule.onEventMouseButtonReleased(mouseButton);
     Game::onMouseButtonReleased(window, mouseButton);
 
     const glm::uvec2 mpos = Engine::getMousePosition(window);
     EventMouseButton e(static_cast<MouseButton::Button>(mouseButton), static_cast<float>(mpos.x), static_cast<float>(mpos.y));
     Event ev(EventType::MouseButtonReleased);
     ev.eventMouseButton = e;
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_mouse_moved(Window& window, const int mouseX, const int mouseY){
     const float& mX = static_cast<float>(mouseX);
@@ -315,7 +306,7 @@ void EngineCore::on_event_mouse_moved(Window& window, const int mouseX, const in
     EventMouseMove e(mX,mY);
     Event ev(EventType::MouseMoved);
     ev.eventMouseMoved = e;
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_mouse_entered(Window& window){
     Game::onMouseEntered(window);
@@ -324,7 +315,7 @@ void EngineCore::on_event_mouse_entered(Window& window){
     EventMouseMove e(static_cast<float>(mpos.x),static_cast<float>(mpos.y));
     Event ev(EventType::MouseEnteredWindow);
     ev.eventMouseMoved = e;
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_mouse_left(Window& window){
     Game::onMouseLeft(window);
@@ -333,7 +324,7 @@ void EngineCore::on_event_mouse_left(Window& window){
     EventMouseMove e(static_cast<float>(mpos.x),static_cast<float>(mpos.y));
     Event ev(EventType::MouseLeftWindow);
     ev.eventMouseMoved = e;
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_joystick_button_pressed(Window& window, const unsigned int button, const unsigned int id){
     Game::onJoystickButtonPressed();
@@ -341,7 +332,7 @@ void EngineCore::on_event_joystick_button_pressed(Window& window, const unsigned
     EventJoystickButton e(id,button);
     Event ev(EventType::JoystickButtonPressed);
     ev.eventJoystickButton = e;
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_joystick_button_released(Window& window, const unsigned int button, const unsigned int id){
     Game::onJoystickButtonReleased();
@@ -349,7 +340,7 @@ void EngineCore::on_event_joystick_button_released(Window& window, const unsigne
     EventJoystickButton e(id,button);
     Event ev(EventType::JoystickButtonReleased);
     ev.eventJoystickButton = e;
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_joystick_moved(Window& window, const unsigned int id, const float position, const unsigned int axis){
     Game::onJoystickMoved();
@@ -357,7 +348,7 @@ void EngineCore::on_event_joystick_moved(Window& window, const unsigned int id, 
     EventJoystickMoved e(id, (JoystickAxis::Axis)axis,position);
     Event ev(EventType::JoystickMoved);
     ev.eventJoystickMoved = e;
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_joystick_connected(Window& window, const unsigned int id){
     Game::onJoystickConnected(); 
@@ -365,7 +356,7 @@ void EngineCore::on_event_joystick_connected(Window& window, const unsigned int 
     EventJoystickConnection e(id);
     Event ev(EventType::JoystickConnected);
     ev.eventJoystickConnection = e;
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_joystick_disconnected(Window& window, const unsigned int id){
     Game::onJoystickDisconnected(); 
@@ -373,7 +364,7 @@ void EngineCore::on_event_joystick_disconnected(Window& window, const unsigned i
     EventJoystickConnection e(id);
     Event ev(EventType::JoystickDisconnected);
     ev.eventJoystickConnection = e;
-    m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+    m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 
 const float Engine::getFPS(){ 

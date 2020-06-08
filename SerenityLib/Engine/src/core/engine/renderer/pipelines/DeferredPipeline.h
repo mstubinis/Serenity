@@ -20,6 +20,8 @@ namespace Engine::priv {
 #include <core/engine/renderer/opengl/Extensions.h>
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/renderer/FullscreenItems.h>
+#include <core/engine/containers/PartialArray.h>
+#include <core/engine/fonts/Font.h>
 
 #include <glm/mat4x4.hpp>
 #include <vector>
@@ -57,9 +59,9 @@ namespace Engine::priv {
             FullscreenQuad                 m_FullscreenQuad;
             FullscreenTriangle             m_FullscreenTriangle;
 
-            std::vector<glm::vec3>         m_Text_Points;
-            std::vector<glm::vec2>         m_Text_UVs;
-            std::vector<unsigned int>      m_Text_Indices;
+            Engine::partial_array<glm::vec3, Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4>    m_Text_Points; //4 points per char
+            Engine::partial_array<glm::vec2, Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4>    m_Text_UVs;//4 uvs per char
+            Engine::partial_array<unsigned int, Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 6> m_Text_Indices;//6 ind per char
 
             UBOCameraDataStruct            m_UBOCameraDataStruct;
             glm::mat4                      m_2DProjectionMatrix;
@@ -83,17 +85,17 @@ namespace Engine::priv {
             void internal_pass_bloom(const Viewport& viewport);
             void internal_pass_depth_of_field(const Viewport& viewport, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture);
             void internal_pass_aa(const bool mainRenderFunction, const Viewport& viewport, const Camera& camera, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture);
-            void internal_pass_final(const GBufferType::Type& sceneTexture);
-            void internal_pass_depth_and_transparency(const Viewport& viewport, const GBufferType::Type& sceneTexture); //TODO: recheck this
+            void internal_pass_final(GBufferType::Type sceneTexture);
+            void internal_pass_depth_and_transparency(const Viewport& viewport, GBufferType::Type sceneTexture); //TODO: recheck this
             void internal_pass_copy_depth();
             void internal_pass_blur(const Viewport& viewport, const GLuint texture, std::string_view type);
 
             void internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, const unsigned int convoludeTextureSize, const unsigned int preEnvFilterSize);
             void internal_generate_brdf_lut(ShaderProgram& program, const unsigned int brdfSize, const int numSamples);
 
-            void internal_render_2d_text_left(const std::string& text, const Font& font, const float newLineGlyphHeight, float& x, float& y, const float z);
-            void internal_render_2d_text_center(const std::string& text, const Font& font, const float newLineGlyphHeight, float& x, float& y, const float z);
-            void internal_render_2d_text_right(const std::string& text, const Font& font, const float newLineGlyphHeight, float& x, float& y, const float z);
+            void internal_render_2d_text_left(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
+            void internal_render_2d_text_center(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
+            void internal_render_2d_text_right(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
 
             DeferredPipeline() = delete;
         public:

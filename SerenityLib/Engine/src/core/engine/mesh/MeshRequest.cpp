@@ -32,17 +32,17 @@ Engine::priv::AssimpSceneImport& Engine::priv::AssimpSceneImport::operator=(cons
 }
 
 
-MeshRequest::MeshRequestPart::MeshRequestPart() {
+MeshRequestPart::MeshRequestPart() {
 }
-MeshRequest::MeshRequestPart::~MeshRequestPart() {
+MeshRequestPart::~MeshRequestPart() {
 
 }
-MeshRequest::MeshRequestPart::MeshRequestPart(const MeshRequest::MeshRequestPart& other) {
+MeshRequestPart::MeshRequestPart(const MeshRequestPart& other) {
     mesh         = other.mesh;
     name         = other.name;
     handle       = other.handle;
 }
-MeshRequest::MeshRequestPart& MeshRequest::MeshRequestPart::operator=(const MeshRequest::MeshRequestPart& other) {
+MeshRequestPart& MeshRequestPart::operator=(const MeshRequestPart& other) {
     if (&other != this) {
         mesh         = other.mesh;
         name         = other.name;
@@ -50,12 +50,12 @@ MeshRequest::MeshRequestPart& MeshRequest::MeshRequestPart::operator=(const Mesh
     }
     return *this;
 }
-MeshRequest::MeshRequestPart::MeshRequestPart(MeshRequest::MeshRequestPart&& other) noexcept {
+MeshRequestPart::MeshRequestPart(MeshRequestPart&& other) noexcept {
     mesh   = std::exchange(other.mesh, nullptr);
     name   = std::move(other.name);
     handle = std::move(other.handle);
 }
-MeshRequest::MeshRequestPart& MeshRequest::MeshRequestPart::operator=(MeshRequest::MeshRequestPart&& other) noexcept {
+MeshRequestPart& MeshRequestPart::operator=(MeshRequestPart&& other) noexcept {
     if (&other != this) {
         mesh   = std::exchange(other.mesh, nullptr);
         name   = std::move(other.name);
@@ -79,8 +79,7 @@ MeshRequest::MeshRequest(const string& filenameOrData, const float threshold){
     }
 }
 MeshRequest::~MeshRequest() {
-    //TODO: this is causing problems
-    //SAFE_DELETE_MAP(m_Map);
+
 }
 MeshRequest::MeshRequest(const MeshRequest& other) {
     m_FileOrData     = other.m_FileOrData;
@@ -176,7 +175,7 @@ bool InternalMeshRequestPublicInterface::Populate(MeshRequest& meshRequest) {
         MeshLoader::LoadPopulateGlobalNodes(root, meshRequest.m_Map);
         MeshLoader::LoadProcessNodeNames(meshRequest.m_FileOrData, meshRequest.m_Parts, scene, root, meshRequest.m_Map);
     }else{
-        MeshRequest::MeshRequestPart part;
+        MeshRequestPart part;
         part.name   = meshRequest.m_FileOrData;
         part.mesh   = NEW Mesh();
         part.mesh->setName(part.name);
@@ -191,7 +190,7 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
         auto& root   = *meshRequest.m_Importer.m_AIRoot;
         uint count   = 0;
         MeshLoader::LoadProcessNodeData(meshRequest.m_Parts, scene, root, meshRequest.m_Map, count);
-        MeshLoader::SaveTo_OBJCC(*const_cast<VertexData*>(meshRequest.m_Parts[0].mesh->m_VertexData), meshRequest.m_FileOrData + ".objcc");
+        MeshLoader::SaveTo_OBJCC(*meshRequest.m_Parts[0].mesh->m_VertexData, meshRequest.m_FileOrData.substr(0, meshRequest.m_FileOrData.find_last_of(".")) + ".objcc");
     }else{ //objcc
         VertexData* vertexData   = MeshLoader::LoadFrom_OBJCC(meshRequest.m_FileOrData);
         Mesh& mesh               = *meshRequest.m_Parts[0].mesh;

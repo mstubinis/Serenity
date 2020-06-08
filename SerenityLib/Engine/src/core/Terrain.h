@@ -22,8 +22,9 @@ class  Mesh;
 #include <ecs/Entity.h>
 #include <LinearMath/btScalar.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+#include <limits>
 
-constexpr btScalar NULL_VERTEX = (btScalar)(-255.0);
+constexpr btScalar NULL_VERTEX = static_cast<btScalar>(-255.0);
 
 class TerrainHeightfieldShape : public btHeightfieldTerrainShape {
     friend class TerrainData;
@@ -33,12 +34,12 @@ class TerrainHeightfieldShape : public btHeightfieldTerrainShape {
         std::vector<btScalar>           m_Data;
         std::vector<std::vector<bool>>  m_ProcessedVertices;
     public:
-        TerrainHeightfieldShape(int heightWidth, int heightLength, const void* data, float heightScale, float minHeight, float maxHeight, int upAxis, PHY_ScalarType type, bool flipQuads = false);
+        TerrainHeightfieldShape(int heightWidth, int heightLength, void* data, float heightScale, float minHeight, float maxHeight, int upAxis, PHY_ScalarType type, bool flipQuads = false);
         virtual ~TerrainHeightfieldShape();
 
         bool getAndValidateVertex(int x, int y, btVector3& vertex, bool doBTScale) const;
         void processAllTriangles(btTriangleCallback* callback, const btVector3& aabbMin, const btVector3& aabbMax) const override;
-        void setData(const void* data);
+        void setData(void* data);
 };
 
 class TerrainData {
@@ -63,7 +64,7 @@ class TerrainData {
         bool                                                 m_UseDiamondSubDivision = false;
         btScalar                                             m_HeightScale           = 1.0;
         std::vector<std::vector<TerrainHeightfieldShape*>>   m_BtHeightfieldShapes;
-        std::pair<float, float>                              m_MinAndMaxHeight;
+        std::pair<float, float>                              m_MinAndMaxHeight       = std::make_pair(std::numeric_limits<float>::max(), std::numeric_limits<float>::min());
         btCompoundShape*                                     m_FinalCompoundShape    = nullptr;
         unsigned int                                         m_VerticesPerSector     = 0;
 
@@ -77,7 +78,7 @@ class TerrainData {
         void clearData();
 };
 
-class Terrain : public EventObserver, public Entity {
+class Terrain : public Observer, public Entity {
     friend class Mesh;
     private:
         Mesh*       m_Mesh         = nullptr;

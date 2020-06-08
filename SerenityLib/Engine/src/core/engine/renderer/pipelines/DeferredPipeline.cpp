@@ -6,7 +6,6 @@
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/textures/Texture.h>
-#include <core/engine/fonts/Font.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/materials/MaterialComponent.h>
@@ -197,18 +196,8 @@ void DeferredPipeline::init() {
     GodRays::godRays.init_shaders();
     SMAA::smaa.init_shaders();
 
-    m_Text_Points.reserve(Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4);//4 points per char, 4096 chars
-    m_Text_UVs.reserve(Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4);//4 uvs per char
-    m_Text_Indices.reserve(Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 6);//6 ind per char
-    for (size_t i = 0; i < m_Text_Points.capacity(); ++i)
-        m_Text_Points.emplace_back(0.0f);
-    for (size_t i = 0; i < m_Text_UVs.capacity(); ++i)
-        m_Text_UVs.emplace_back(0.0f);
-    for (size_t i = 0; i < m_Text_Indices.capacity(); ++i)
-        m_Text_Indices.emplace_back(0);
-
     auto& fontPlane = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getFontMesh();
-
+    /*
     fontPlane.modifyVertices(0, m_Text_Points, MeshModifyFlags::Default);
     fontPlane.modifyVertices(1, m_Text_UVs, MeshModifyFlags::Default);
     fontPlane.modifyIndices(m_Text_Indices, MeshModifyFlags::Default);
@@ -216,7 +205,7 @@ void DeferredPipeline::init() {
     m_Text_Points.clear();
     m_Text_UVs.clear();
     m_Text_Indices.clear();
-
+    */
     auto emplaceShader = [](const unsigned int index, const string& str, vector<Shader*>& collection, const ShaderType::Type type) {
         Shader* s = NEW Shader(str, type, false);
         collection[index] = s;
@@ -657,6 +646,7 @@ void DeferredPipeline::renderSkybox(Skybox* skybox, ShaderProgram& shaderProgram
         const auto& bgColor = scene.getBackgroundColor();
         Engine::Renderer::sendUniform4Safe("Color", bgColor.r, bgColor.g, bgColor.b, bgColor.a);
     }
+    Engine::Renderer::sendUniform1Safe("ScreenGamma", m_Renderer.m_Gamma);
     Engine::Renderer::sendUniformMatrix4("VP", camera.getProjection() * view_no_position);
     Skybox::bindMesh();
 
@@ -682,7 +672,7 @@ void DeferredPipeline::renderSunLight(const Camera& c, const SunLight& s, const 
         return;
     }
     const auto& body = *s.getComponent<ComponentBody>();
-    const auto pos   = glm::vec3(body.position());
+    const auto pos   = glm::vec3(body.getPosition());
     const auto& col  = s.color();
     sendUniform4("light.DataA", s.getAmbientIntensity(), s.getDiffuseIntensity(), s.getSpecularIntensity(), 0.0f);
     sendUniform4("light.DataC", 0.0f, pos.x, pos.y, pos.z);
@@ -696,7 +686,7 @@ void DeferredPipeline::renderPointLight(const Camera& c, const PointLight& p) {
         return;
     }
     const auto& body  = *p.getComponent<ComponentBody>();
-    const auto pos    = glm::vec3(body.position());
+    const auto pos    = glm::vec3(body.getPosition());
     const auto cull   = p.getCullingRadius();
     const auto factor = 1100.0f * cull;
     const auto distSq = static_cast<float>(c.getDistanceSquared(pos));
@@ -736,7 +726,7 @@ void DeferredPipeline::renderPointLight(const Camera& c, const PointLight& p) {
 void DeferredPipeline::renderSpotLight(const Camera& c, const SpotLight& s) {
     return;
     const auto& body    = *s.getComponent<ComponentBody>();
-    const auto pos      = glm::vec3(body.position());
+    const auto pos      = glm::vec3(body.getPosition());
     const auto forward  = glm::vec3(body.forward());
     const auto cull     = s.getCullingRadius();
     const auto factor   = 1100.0f * cull;
@@ -778,7 +768,7 @@ void DeferredPipeline::renderRodLight(const Camera& c, const RodLight& r) {
         return;
     }
     const auto& body           = *r.getComponent<ComponentBody>();
-    const auto pos             = glm::vec3(body.position());
+    const auto pos             = glm::vec3(body.getPosition());
     const auto cullingDistance = r.rodLength() + (r.getCullingRadius() * 2.0f);
     const auto factor          = 1100.0f * cullingDistance;
     const auto distSq          = static_cast<float>(c.getDistanceSquared(pos));
@@ -875,41 +865,41 @@ void DeferredPipeline::renderLightProbe(LightProbe& lightProbe) {
     //goal: render all 6 sides into a fbo and into a cubemap, and have that cubemap stored in the light probe to be used for Global Illumination
 }
 
-void DeferredPipeline::internal_render_2d_text_left(const string& text, const Font& font, const float newLineGlyphHeight, float& x, float& y, const float z) {
+void DeferredPipeline::internal_render_2d_text_left(const string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
     unsigned int i = 0;
-    for (auto& character : text) {
+    for (const auto character : text) {
         if (character == '\n') {
             y += newLineGlyphHeight;
             x = 0.0f;
         }else if (character != '\0') {
-            const unsigned int accum = i * 4;
+            unsigned int accum = i * 4;
             ++i;
             const CharGlyph& glyph = font.getGlyphData(character);
-            const float startingY  = y - (glyph.height + glyph.yoffset);
+            float startingY  = y - (glyph.height + glyph.yoffset);
 
-            m_Text_Indices.emplace_back(accum + 0);
-            m_Text_Indices.emplace_back(accum + 1);
-            m_Text_Indices.emplace_back(accum + 2);
-            m_Text_Indices.emplace_back(accum + 3);
-            m_Text_Indices.emplace_back(accum + 1);
-            m_Text_Indices.emplace_back(accum + 0);
+            m_Text_Indices.put(accum + 0);
+            m_Text_Indices.put(accum + 1);
+            m_Text_Indices.put(accum + 2);
+            m_Text_Indices.put(accum + 3);
+            m_Text_Indices.put(accum + 1);
+            m_Text_Indices.put(accum + 0);
 
-            const float startingX = x + glyph.xoffset;
+            float startingX = x + glyph.xoffset;
             x += glyph.xadvance;
 
             for(unsigned int i = 0; i < 4; ++i)
-                m_Text_Points.emplace_back(startingX + glyph.pts[i].x, startingY + glyph.pts[i].y, z);
+                m_Text_Points.emplace_put(startingX + glyph.pts[i].x, startingY + glyph.pts[i].y, z);
 
             for (unsigned int i = 0; i < 4; ++i)
-                m_Text_UVs.emplace_back(glyph.uvs[i].x, glyph.uvs[i].y);
+                m_Text_UVs.emplace_put(glyph.uvs[i].x, glyph.uvs[i].y);
         }
     }
 }
-void DeferredPipeline::internal_render_2d_text_center(const string& text, const Font& font, const float newLineGlyphHeight, float& x, float& y, const float z) {
+void DeferredPipeline::internal_render_2d_text_center(const string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
     vector<string> lines;
     vector<unsigned short> lines_sizes;
     string line_accumulator = "";
-    for (auto& character : text) {
+    for (const auto character : text) {
         if (character == '\n') {
             lines.push_back(line_accumulator);
             lines_sizes.push_back(static_cast<unsigned short>(x));
@@ -934,36 +924,36 @@ void DeferredPipeline::internal_render_2d_text_center(const string& text, const 
         const auto& line_size = lines_sizes[l] / 2;
         for (auto& character : line) {
             if (character != '\0') {
-                const unsigned int accum = i * 4;
+                unsigned int accum = i * 4;
                 ++i;
                 const CharGlyph& glyph = font.getGlyphData(character);
-                const float startingY  = y - (glyph.height + glyph.yoffset);
+                float startingY  = y - (glyph.height + glyph.yoffset);
 
-                m_Text_Indices.emplace_back(accum + 0);
-                m_Text_Indices.emplace_back(accum + 1);
-                m_Text_Indices.emplace_back(accum + 2);
-                m_Text_Indices.emplace_back(accum + 3);
-                m_Text_Indices.emplace_back(accum + 1);
-                m_Text_Indices.emplace_back(accum + 0);
+                m_Text_Indices.put(accum + 0);
+                m_Text_Indices.put(accum + 1);
+                m_Text_Indices.put(accum + 2);
+                m_Text_Indices.put(accum + 3);
+                m_Text_Indices.put(accum + 1);
+                m_Text_Indices.put(accum + 0);
 
-                const float startingX = x + glyph.xoffset;
+                float startingX = x + glyph.xoffset;
                 x += glyph.xadvance;
 
                 for (unsigned int i = 0; i < 4; ++i)
-                    m_Text_Points.emplace_back(startingX + glyph.pts[i].x - line_size, startingY + glyph.pts[i].y, z);
+                    m_Text_Points.emplace_put(startingX + glyph.pts[i].x - line_size, startingY + glyph.pts[i].y, z);
 
                 for (unsigned int i = 0; i < 4; ++i)
-                    m_Text_UVs.emplace_back(glyph.uvs[i].x, glyph.uvs[i].y);
+                    m_Text_UVs.emplace_put(glyph.uvs[i].x, glyph.uvs[i].y);
             }
         }
         y += newLineGlyphHeight;
         x = 0.0f;
     }
 }
-void DeferredPipeline::internal_render_2d_text_right(const string& text, const Font& font, const float newLineGlyphHeight, float& x, float& y, const float z) {
+void DeferredPipeline::internal_render_2d_text_right(const string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
     vector<string> lines;
     string line_accumulator = "";
-    for (auto& character : text) {
+    for (const auto character : text) {
         if (character == '\n') {
             lines.push_back(line_accumulator);
             line_accumulator = "";
@@ -977,34 +967,34 @@ void DeferredPipeline::internal_render_2d_text_right(const string& text, const F
 
     unsigned int i = 0;
     for (auto& line : lines) {
-        const int line_size = static_cast<int>(line.size());
+        int line_size = static_cast<int>(line.size());
         int k = 0;
         for (int j = line_size; j >= 0; --j) {
             const auto& character = line[j];
             if (character != '\0') {
-                const unsigned int accum = i * 4;
+                unsigned int accum = i * 4;
                 ++i;
                 const CharGlyph& glyph = font.getGlyphData(character);
-                const float startingY  = y - (glyph.height + glyph.yoffset);
+                float startingY  = y - (glyph.height + glyph.yoffset);
 
-                m_Text_Indices.emplace_back(accum + 0);
-                m_Text_Indices.emplace_back(accum + 1);
-                m_Text_Indices.emplace_back(accum + 2);
-                m_Text_Indices.emplace_back(accum + 3);
-                m_Text_Indices.emplace_back(accum + 1);
-                m_Text_Indices.emplace_back(accum + 0);
+                m_Text_Indices.put(accum + 0);
+                m_Text_Indices.put(accum + 1);
+                m_Text_Indices.put(accum + 2);
+                m_Text_Indices.put(accum + 3);
+                m_Text_Indices.put(accum + 1);
+                m_Text_Indices.put(accum + 0);
 
                 if (k == 0) {
                     x -= glyph.width;
                 }
-                const float startingX = x + glyph.xoffset;
+                float startingX = x + glyph.xoffset;
                 x -= glyph.xadvance;
 
                 for (unsigned int i = 0; i < 4; ++i)
-                    m_Text_Points.emplace_back(startingX + glyph.pts[i].x, startingY + glyph.pts[i].y, z);
+                    m_Text_Points.emplace_put(startingX + glyph.pts[i].x, startingY + glyph.pts[i].y, z);
 
                 for (unsigned int i = 0; i < 4; ++i)
-                    m_Text_UVs.emplace_back(glyph.uvs[i].x, glyph.uvs[i].y);
+                    m_Text_UVs.emplace_put(glyph.uvs[i].x, glyph.uvs[i].y);
 
                 ++k;
             }
@@ -1048,9 +1038,9 @@ void DeferredPipeline::render2DText(const string& text, const Font& font, const 
     }else if (textAlignment == TextAlignment::Center) {
         internal_render_2d_text_center(text, font, -newLineGlyphHeight, x, y, z);
     }
-    fontPlane.modifyVertices(0, m_Text_Points, MeshModifyFlags::Default); //prevent gpu upload until after all the data is collected
-    fontPlane.modifyVertices(1, m_Text_UVs);
-    fontPlane.modifyIndices(m_Text_Indices);
+    fontPlane.modifyVertices(0, m_Text_Points.data(), m_Text_Points.size(), MeshModifyFlags::Default); //prevent gpu upload until after all the data is collected
+    fontPlane.modifyVertices(1, m_Text_UVs.data(), m_Text_UVs.size());
+    fontPlane.modifyIndices(m_Text_Indices.data(), m_Text_Indices.size());
     renderMesh(fontPlane);
     m_Renderer.unbind(&fontPlane);
 
@@ -1310,7 +1300,7 @@ void DeferredPipeline::internal_pass_god_rays(const Viewport& viewport, const Ca
     auto* sun = Engine::Renderer::godRays::getSun();
     if (sun && viewport.getRenderFlags().has(ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active) {
         const auto& body       = *sun->getComponent<ComponentBody>();
-        const glm::vec3 oPos   = body.position();
+        const glm::vec3 oPos   = body.getPosition();
         const glm::vec3 camPos = camera.getPosition();
         const glm::vec3 camVec = camera.getViewVector();
         const bool infront     = Engine::Math::isPointWithinCone(camPos, -camVec, oPos, Engine::Math::toRadians(godRaysPlatform.fovDegrees));
@@ -1420,7 +1410,7 @@ void DeferredPipeline::internal_pass_aa(const bool mainRenderFunction, const Vie
         }
     }
 }
-void DeferredPipeline::internal_pass_final(const GBufferType::Type& sceneTexture) {
+void DeferredPipeline::internal_pass_final(GBufferType::Type sceneTexture) {
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredFinal]);
     Engine::Renderer::sendUniform1Safe("HasBloom", static_cast<int>(Bloom::bloom.bloom_active));
     Engine::Renderer::sendUniform1Safe("HasFog", static_cast<int>(Fog::fog.fog_active));
@@ -1436,7 +1426,7 @@ void DeferredPipeline::internal_pass_final(const GBufferType::Type& sceneTexture
     Engine::Renderer::sendTextureSafe("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 2);
     Engine::Renderer::renderFullscreenQuad();
 }
-void DeferredPipeline::internal_pass_depth_and_transparency(const Viewport& viewport, const GBufferType::Type& sceneTexture) {
+void DeferredPipeline::internal_pass_depth_and_transparency(const Viewport& viewport, GBufferType::Type sceneTexture) {
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DepthAndTransparency]);
     Engine::Renderer::sendTextureSafe("SceneTexture", m_GBuffer.getTexture(sceneTexture), 0);
     Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), 1);

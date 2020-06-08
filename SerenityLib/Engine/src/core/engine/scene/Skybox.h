@@ -2,15 +2,16 @@
 #ifndef ENGINE_SKYBOX_H
 #define ENGINE_SKYBOX_H
 
-#include <core/engine/events/Engine_EventObject.h>
-#include <core/engine/utils/Utils.h>
-
 class Texture;
 class Mesh;
 namespace Engine::priv {
     class SkyboxImplInterface;
 };
-class Skybox: public EventObserver{
+
+#include <core/engine/events/Observer.h>
+#include <core/engine/utils/Utils.h>
+
+class Skybox: public Observer{
     friend class Engine::priv::SkyboxImplInterface;
     private:
         Texture*  m_Texture = nullptr;

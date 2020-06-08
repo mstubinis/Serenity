@@ -17,13 +17,13 @@ namespace Engine::priv {
         friend struct DefaultModelInstanceBindFunctor;
         friend class  ModelInstanceAnimationVector;
         private:
-            unsigned int   m_CurrentLoops;
-            unsigned int   m_RequestedLoops;
-            float          m_CurrentTime;
-            float          m_StartTime;
-            float          m_EndTime;
-            std::string    m_AnimationName;
-            Mesh*          m_Mesh;
+            unsigned int   m_CurrentLoops     = 0U;
+            unsigned int   m_RequestedLoops   = 1U;
+            float          m_CurrentTime      = 0.0f;
+            float          m_StartTime        = 0.0f;
+            float          m_EndTime          = 0.0f;
+            std::string    m_AnimationName    = "";
+            Mesh*          m_Mesh             = nullptr;
         public:
             ModelInstanceAnimation(Mesh& mesh, const std::string& animName, const float startTime, const float endTime, const unsigned int requestedLoops = 1);
             ~ModelInstanceAnimation();
@@ -32,7 +32,6 @@ namespace Engine::priv {
             ModelInstanceAnimation& operator=(ModelInstanceAnimation&& other) noexcept;
 
             void process(const float dt, std::vector<glm::mat4>& transforms);
-
     };
     class ModelInstanceAnimationVector final : public Engine::NonCopyable {
         friend struct DefaultModelInstanceBindFunctor;

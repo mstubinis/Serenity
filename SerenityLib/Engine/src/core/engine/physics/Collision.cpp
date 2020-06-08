@@ -17,7 +17,7 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace std;
 
-void Collision::DeferredLoading::load_1(Collision* collision, const CollisionType::Type collisionType, Mesh* mesh, const float mass) {
+void Collision::DeferredLoading::load_1(Collision* collision, const CollisionType::Type collisionType, Mesh* mesh, float mass) {
     auto& body = *collision->m_Owner.getComponent<ComponentBody>();
 
     collision->m_DeferredMeshes.clear();
@@ -33,7 +33,7 @@ void Collision::DeferredLoading::load_1(Collision* collision, const CollisionTyp
         ComponentModel_Functions::CalculateRadius(*model);
     }
 }
-void Collision::DeferredLoading::load_2(Collision* collision, btCompoundShape* btCompound, vector<ModelInstance*> instances, const float mass, const CollisionType::Type collisionType) {
+void Collision::DeferredLoading::load_2(Collision* collision, btCompoundShape* btCompound, vector<ModelInstance*> instances, float mass, const CollisionType::Type collisionType) {
     auto& body = *collision->m_Owner.getComponent<ComponentBody>();
     btTransform localTransform;
     const auto scale = body.getScale();
@@ -53,7 +53,7 @@ void Collision::DeferredLoading::load_2(Collision* collision, btCompoundShape* b
     }
 }
 
-void Collision::_baseInit(const CollisionType::Type type, const float mass) {
+void Collision::_baseInit(CollisionType::Type type, float mass) {
     m_Type = type;
     setMass(mass);
 }
@@ -61,7 +61,7 @@ Collision::Collision(ComponentBody& body){
     m_Owner = body.getOwner();
     _baseInit(body.getCollision()->getType(), body.mass());
 }
-Collision::Collision(ComponentBody& body, const CollisionType::Type type, ModelInstance* modelInstance, const float mass){
+Collision::Collision(ComponentBody& body, CollisionType::Type type, ModelInstance* modelInstance, float mass){
     m_Owner = body.getOwner();
     m_BtShape = nullptr;
     if (modelInstance) {
@@ -79,7 +79,7 @@ Collision::Collision(ComponentBody& body, const CollisionType::Type type, ModelI
     }
     _baseInit(type, mass);
 }
-Collision::Collision(ComponentBody& body, const CollisionType::Type type, Mesh& mesh, const float mass){
+Collision::Collision(ComponentBody& body, CollisionType::Type type, Mesh& mesh, float mass){
     m_Owner = body.getOwner();
     m_BtShape = nullptr;
     if (mesh == false || !mesh.m_CollisionFactory) {
@@ -94,7 +94,7 @@ Collision::Collision(ComponentBody& body, const CollisionType::Type type, Mesh& 
     _baseInit(type, mass);
 }
 
-Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, const float mass, const CollisionType::Type type){
+Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, float mass, CollisionType::Type type){
     m_Owner = body.getOwner();
     m_BtShape = nullptr;
     vector<ModelInstance*> modelInstances;
@@ -166,7 +166,7 @@ Collision& Collision::operator=(Collision&& other) noexcept {
 void Collision::setBtShape(btCollisionShape* shape) {
     m_BtShape = shape;
 }
-void Collision::setMass(const float mass) {
+void Collision::setMass(float mass) {
     if (!m_BtShape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None) {
         return;
     }

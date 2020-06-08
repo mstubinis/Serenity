@@ -32,13 +32,12 @@ namespace Engine::Networking {
 
             bool               isListening() const;
             bool               isBlocking() const override;
-            //sf::TcpListener&   getSFMLSocket() override;
             unsigned short     localPort() const override;
 
-            sf::Socket::Status accept(SocketTCP& tcpSocket);
-            sf::Socket::Status accept(sf::TcpSocket& sfmlTcpSocket);
+            SocketStatus::Status accept(SocketTCP& tcpSocket);
+            SocketStatus::Status accept(sf::TcpSocket& sfmlTcpSocket);
 
-            sf::Socket::Status listen();
+            SocketStatus::Status listen();
     };
 };
 #endif

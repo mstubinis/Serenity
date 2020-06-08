@@ -29,8 +29,8 @@ namespace Engine::Networking {
 
             sf::IpAddress internal_get_ip(const std::string& ipString) const;
 
-            sf::Socket::Status internal_send_partial_packets_loop();
-            sf::Socket::Status internal_send_packet(UDPPacketInfo& packetInfoUDP);
+            SocketStatus::Status internal_send_partial_packets_loop();
+            SocketStatus::Status internal_send_packet(UDPPacketInfo& packetInfoUDP);
 
             void update(const float dt) override;
         public:
@@ -40,22 +40,21 @@ namespace Engine::Networking {
             void                 setBlocking(bool blocking) override;
             bool                 isBlocking() const override;
             bool                 isBound() const;
-            //sf::UdpSocket&       getSFMLSocket() override;
             unsigned short       localPort() const override;
 
-            sf::Socket::Status   bind(const std::string& ip = "");
+            SocketStatus::Status   bind(const std::string& ip = "");
             void                 unbind();
             void                 changePort(const unsigned short newPort);
             
-            sf::Socket::Status   send(Engine::Networking::Packet& packet, const std::string& ip = "");
-            sf::Socket::Status   send(sf::Packet& packet, const std::string& ip = "");
-            sf::Socket::Status   send(const void* data, size_t size, const std::string& ip = "");
-            sf::Socket::Status   receive(sf::Packet& packet);
-            sf::Socket::Status   receive(void* data, size_t size, size_t& received);
+            SocketStatus::Status   send(Engine::Networking::Packet& packet, const std::string& ip = "");
+            SocketStatus::Status   send(sf::Packet& packet, const std::string& ip = "");
+            SocketStatus::Status   send(const void* data, size_t size, const std::string& ip = "");
+            SocketStatus::Status   receive(sf::Packet& packet);
+            SocketStatus::Status   receive(void* data, size_t size, size_t& received);
 
-            sf::Socket::Status   send(const unsigned short port, Engine::Networking::Packet& packet, const std::string& ip = "");
-            sf::Socket::Status   send(const unsigned short port, sf::Packet& packet, const std::string& ip = "");
-            sf::Socket::Status   send(const unsigned short port, const void* data, size_t size, const std::string& ip = "");
+            SocketStatus::Status   send(const unsigned short port, Engine::Networking::Packet& packet, const std::string& ip = "");
+            SocketStatus::Status   send(const unsigned short port, sf::Packet& packet, const std::string& ip = "");
+            SocketStatus::Status   send(const unsigned short port, const void* data, size_t size, const std::string& ip = "");
     };
 };
 

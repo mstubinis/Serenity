@@ -235,6 +235,7 @@
   <ItemGroup>
     <ClInclude Include="Engine\src\core\Constraint.h" />
     <ClInclude Include="Engine\src\core\engine\containers\Freelist.h" />
+    <ClInclude Include="Engine\src\core\engine\containers\PartialArray.h" />
     <ClInclude Include="Engine\src\core\engine\containers\Queue_ts.h" />
     <ClInclude Include="Engine\src\core\engine\containers\SparseSet.h" />
     <ClInclude Include="Engine\src\core\engine\discord\Discord.h" />
@@ -256,10 +257,17 @@
     <ClInclude Include="Engine\src\core\engine\discord\src\types.h" />
     <ClInclude Include="Engine\src\core\engine\discord\src\user_manager.h" />
     <ClInclude Include="Engine\src\core\engine\discord\src\voice_manager.h" />
-    <ClInclude Include="Engine\src\core\engine\events\Engine_EventDispatcher.h" />
-    <ClInclude Include="Engine\src\core\engine\events\Engine_EventIncludes.h" />
+    <ClInclude Include="Engine\src\core\engine\events\EventDispatcher.h" />
+    <ClInclude Include="Engine\src\core\engine\events\EventIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventObject.h" />
-    <ClInclude Include="Engine\src\core\engine\events\Engine_Events.h" />
+    <ClInclude Include="Engine\src\core\engine\events\EventModule.h" />
+    <ClInclude Include="Engine\src\core\engine\events\Joystick\JoystickAxises.h" />
+    <ClInclude Include="Engine\src\core\engine\events\Joystick\JoystickModule.h" />
+    <ClInclude Include="Engine\src\core\engine\events\Keyboard\KeyboardModule.h" />
+    <ClInclude Include="Engine\src\core\engine\events\Keyboard\KeyboardKeys.h" />
+    <ClInclude Include="Engine\src\core\engine\events\Mouse\MouseButtons.h" />
+    <ClInclude Include="Engine\src\core\engine\events\Mouse\MouseModule.h" />
+    <ClInclude Include="Engine\src\core\engine\events\Observer.h" />
     <ClInclude Include="Engine\src\core\engine\fonts\Font.h" />
     <ClInclude Include="Engine\src\core\engine\fonts\FontIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\lights\DirectionalLight.h" />
@@ -295,6 +303,7 @@
     <ClInclude Include="Engine\src\core\engine\mesh\MeshLoading.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\MeshRequest.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\Skeleton.h" />
+    <ClInclude Include="Engine\src\core\engine\mesh\smsh.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\VertexAttribute.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\VertexBufferObject.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\VertexData.h" />
@@ -409,6 +418,7 @@
     <ClInclude Include="Engine\src\ecs\ECSSystem.h" />
     <ClInclude Include="Engine\src\ecs\ECSSystemConstructorInfo.h" />
     <ClInclude Include="Engine\src\ecs\Entity.h" />
+    <ClInclude Include="Engine\src\ecs\EntityBody.h" />
     <ClInclude Include="Engine\src\ecs\EntityDataRequest.h" />
   </ItemGroup>
   <ItemGroup>
@@ -429,10 +439,15 @@
     <ClCompile Include="Engine\src\core\engine\discord\src\types.cpp" />
     <ClCompile Include="Engine\src\core\engine\discord\src\user_manager.cpp" />
     <ClCompile Include="Engine\src\core\engine\discord\src\voice_manager.cpp" />
-    <ClCompile Include="Engine\src\core\engine\events\Engine_EventDispatcher.cpp" />
-    <ClCompile Include="Engine\src\core\engine\events\Engine_EventIncludes.cpp" />
-    <ClCompile Include="Engine\src\core\engine\events\Engine_EventObject.cpp" />
-    <ClCompile Include="Engine\src\core\engine\events\Engine_Events.cpp" />
+    <ClCompile Include="Engine\src\core\engine\events\EventDispatcher.cpp" />
+    <ClCompile Include="Engine\src\core\engine\events\EventModule.cpp" />
+    <ClCompile Include="Engine\src\core\engine\events\Joystick\JoystickAxises.cpp" />
+    <ClCompile Include="Engine\src\core\engine\events\Joystick\JoystickModule.cpp" />
+    <ClCompile Include="Engine\src\core\engine\events\Keyboard\KeyboardModule.cpp" />
+    <ClCompile Include="Engine\src\core\engine\events\Keyboard\KeyboardKeys.cpp" />
+    <ClCompile Include="Engine\src\core\engine\events\Mouse\MouseButtons.cpp" />
+    <ClCompile Include="Engine\src\core\engine\events\Mouse\MouseModule.cpp" />
+    <ClCompile Include="Engine\src\core\engine\events\Observer.cpp" />
     <ClCompile Include="Engine\src\core\engine\fonts\Font.cpp" />
     <ClCompile Include="Engine\src\core\engine\lights\DirectionalLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\lights\LightProbe.cpp" />
@@ -459,6 +474,7 @@
     <ClCompile Include="Engine\src\core\engine\mesh\MeshLoading.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshRequest.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\Skeleton.cpp" />
+    <ClCompile Include="Engine\src\core\engine\mesh\smsh.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\VertexBufferObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\VertexData.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\VertexDataFormat.cpp" />
@@ -470,6 +486,7 @@
     <ClCompile Include="Engine\src\core\engine\networking\server\Server.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\server\ServerClient.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\server\ServerThread.cpp" />
+    <ClCompile Include="Engine\src\core\engine\networking\SocketInterface.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\SocketManager.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\SocketTCP.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\SocketUDP.cpp" />
@@ -548,6 +565,7 @@
     <ClCompile Include="Engine\src\ecs\ComponentName.cpp" />
     <ClCompile Include="Engine\src\ecs\ECSRegistry.cpp" />
     <ClCompile Include="Engine\src\ecs\Entity.cpp" />
+    <ClCompile Include="Engine\src\ecs\EntityBody.cpp" />
     <ClCompile Include="Engine\src\ecs\EntityDataRequest.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

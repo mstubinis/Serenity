@@ -3,7 +3,6 @@
 
 using namespace Engine;
 
-
 Engine::color_vector_4::color_vector_4(const float r_, const float g_, const float b_, const float a_) {
     color.r = static_cast<unsigned char>(r_ * 255.0f);
     color.g = static_cast<unsigned char>(g_ * 255.0f);

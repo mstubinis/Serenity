@@ -27,7 +27,7 @@ namespace Engine::priv {
 
 typedef std::vector<ModelInstance*> ModelInstanceVector;
 
-class ComponentModel: public EventObserver {
+class ComponentModel: public Observer {
     friend struct Engine::priv::ComponentModel_UpdateFunction;
     friend struct Engine::priv::ComponentModel_EntityAddedToSceneFunction;
     friend struct Engine::priv::ComponentModel_ComponentAddedToEntityFunction;

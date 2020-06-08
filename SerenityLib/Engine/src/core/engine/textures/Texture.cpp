@@ -24,43 +24,20 @@ Texture* Texture::BRDF     = nullptr;
 Texture::Texture() : EngineResource(ResourceType::Texture) {
     TextureLoader::InitCommon(*this, GL_TEXTURE_2D, false);
 }
-Texture::Texture(
-const unsigned int w, 
-const unsigned int h, 
-const ImagePixelType::Type pxlType, 
-const ImagePixelFormat::Format pxlFormat, 
-const ImageInternalFormat::Format _internal, 
-const float divisor) 
-: EngineResource(ResourceType::Texture) {
-    TextureLoader::InitFramebuffer(*this, w, h, pxlType, pxlFormat, _internal, divisor);
+Texture::Texture(unsigned int w, unsigned int h, ImagePixelType::Type pxlType, ImagePixelFormat::Format pxlFormat, ImageInternalFormat::Format internal_, float divisor) : EngineResource(ResourceType::Texture) {
+    TextureLoader::InitFramebuffer(*this, w, h, pxlType, pxlFormat, internal_, divisor);
     InternalTexturePublicInterface::Load(*this);
 }
-Texture::Texture(
-const sf::Image& sfImage, 
-const string& name, 
-const bool genMipMaps, 
-const ImageInternalFormat::Format _internal, 
-const unsigned int openglTextureType
-) : EngineResource(ResourceType::Texture, name) {
-    TextureLoader::InitFromMemory(*this, sfImage, name, genMipMaps, _internal, openglTextureType);
+Texture::Texture(const sf::Image& sfImage, const string& name, bool genMipMaps, ImageInternalFormat::Format internal_, unsigned int openglTextureType) : EngineResource(ResourceType::Texture, name) {
+    TextureLoader::InitFromMemory(*this, sfImage, name, genMipMaps, internal_, openglTextureType);
     InternalTexturePublicInterface::Load(*this);
 }
-Texture::Texture(
-const string& filename, 
-const bool genMipMaps, 
-const ImageInternalFormat::Format _internal, 
-const unsigned int openglTextureType
-) : EngineResource(ResourceType::Texture, filename) {
-    TextureLoader::InitFromFile(*this, filename, genMipMaps, _internal, openglTextureType);
+Texture::Texture(const string& filename, bool genMipMaps, ImageInternalFormat::Format internal_, unsigned int openglTextureType) : EngineResource(ResourceType::Texture, filename) {
+    TextureLoader::InitFromFile(*this, filename, genMipMaps, internal_, openglTextureType);
     InternalTexturePublicInterface::Load(*this);
 }
-Texture::Texture(
-const string files[], 
-const string& name, 
-const bool genMipMaps, 
-const ImageInternalFormat::Format _internal
-) : EngineResource(ResourceType::Texture, name) {
-    TextureLoader::InitFromFilesCubemap(*this, files, name, genMipMaps, _internal);
+Texture::Texture(const string files[], const string& name, bool genMipMaps, ImageInternalFormat::Format internal_) : EngineResource(ResourceType::Texture, name) {
+    TextureLoader::InitFromFilesCubemap(*this, files, name, genMipMaps, internal_);
     InternalTexturePublicInterface::Load(*this);
 }
 Texture::~Texture(){
@@ -76,95 +53,74 @@ Texture::operator bool() const {
     return (m_TextureAddresses.size() > 0);
 }
 
-void Texture::setXWrapping(const TextureWrap::Wrap wrap){
+void Texture::setXWrapping(TextureWrap::Wrap wrap){
     if (*this == false) {
-        auto lambda = [=]() {
-            setXWrapping(wrap);
-        };
-        m_CommandQueue.push(lambda);
+        m_CommandQueue.push([this, wrap]() { setXWrapping(wrap); });
         return;
     }
     //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setXWrapping(m_Type, wrap);
 }
-void Texture::setYWrapping(const TextureWrap::Wrap wrap){
+void Texture::setYWrapping(TextureWrap::Wrap wrap){
     if (*this == false) {
-        auto lambda = [=]() {
-            setYWrapping(wrap);
-        };
-        m_CommandQueue.push(lambda);
+        m_CommandQueue.push([this, wrap]() { setYWrapping(wrap); });
         return;
     }
     //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setYWrapping(m_Type, wrap);
 }
-void Texture::setZWrapping(const TextureWrap::Wrap wrap){
+void Texture::setZWrapping(TextureWrap::Wrap wrap){
     if (*this == false) {
-        auto lambda = [=]() {
-            setZWrapping(wrap);
-        };
-        m_CommandQueue.push(lambda);
+        m_CommandQueue.push([this, wrap]() { setZWrapping(wrap); });
         return;
     }
     //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setZWrapping(m_Type, wrap);
 }
-void Texture::setWrapping(const TextureWrap::Wrap wrap){
+void Texture::setWrapping(TextureWrap::Wrap wrap){
     if (*this == false) {
-        auto lambda = [this, wrap]() {
-            setWrapping(wrap);
-        };
-        m_CommandQueue.push(lambda);
+        m_CommandQueue.push([this, wrap]() { setWrapping(wrap); });
         return;
     }
     //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setWrapping(m_Type, wrap);
 }
-void Texture::setMinFilter(const TextureFilter::Filter filter){
+void Texture::setMinFilter(TextureFilter::Filter filter){
     if (*this == false) {
-        auto lambda = [this, filter]() {
-            setMinFilter(filter);
-        };
-        m_CommandQueue.push(lambda);
+        m_CommandQueue.push([this, filter]() { setMinFilter(filter); });
         return;
     }
     //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setMinFilter(m_Type, filter);
     m_MinFilter = filter;
 }
-void Texture::setMaxFilter(const TextureFilter::Filter filter){
+void Texture::setMaxFilter(TextureFilter::Filter filter){
     if (*this == false) {
-        auto lambda = [this, filter]() {
-            setMaxFilter(filter);
-        };
-        m_CommandQueue.push(lambda);
+        m_CommandQueue.push([this, filter]() { setMaxFilter(filter); });
         return;
     }
     //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setMaxFilter(m_Type, filter);
 }
-void Texture::setFilter(const TextureFilter::Filter filter){
+void Texture::setFilter(TextureFilter::Filter filter){
     if (*this == false) {
-        auto lambda = [this, filter]() {
-            setFilter(filter);
-        };
-        m_CommandQueue.push(lambda);
+        m_CommandQueue.push([this, filter]() { setFilter(filter); });
         return;
     }
     //Renderer::bindTextureForModification(m_Type, m_TextureAddress[0]);
     Texture::setFilter(m_Type, filter);
 }
-void Texture::setXWrapping(const unsigned int type, const TextureWrap::Wrap wrap){
+void Texture::setXWrapping(unsigned int type, TextureWrap::Wrap wrap){
     unsigned int gl;
     TextureLoader::EnumWrapToGL(gl, wrap);
     glTexParameteri(type, GL_TEXTURE_WRAP_S, gl);
 }
-void Texture::setYWrapping(const unsigned int type, const TextureWrap::Wrap wrap){
+void Texture::setYWrapping(unsigned int type, TextureWrap::Wrap wrap){
     unsigned int gl;
     TextureLoader::EnumWrapToGL(gl, wrap);
     glTexParameteri(type, GL_TEXTURE_WRAP_T, gl);
 }
-void Texture::setZWrapping(const unsigned int type, const TextureWrap::Wrap wrap){
+void Texture::setZWrapping(unsigned int type, TextureWrap::Wrap wrap){
     if (type != GL_TEXTURE_CUBE_MAP) {
         return;
     }
@@ -172,31 +128,31 @@ void Texture::setZWrapping(const unsigned int type, const TextureWrap::Wrap wrap
     TextureLoader::EnumWrapToGL(gl, wrap);
     glTexParameteri(type, GL_TEXTURE_WRAP_R, gl);
 }
-void Texture::setWrapping(const unsigned int type, const TextureWrap::Wrap wrap){
+void Texture::setWrapping(unsigned int type, TextureWrap::Wrap wrap){
     Texture::setXWrapping(type, wrap);
     Texture::setYWrapping(type, wrap);
     Texture::setZWrapping(type, wrap);
 }
-void Texture::setMinFilter(const unsigned int type, const TextureFilter::Filter filter){
+void Texture::setMinFilter(unsigned int type, TextureFilter::Filter filter){
     unsigned int gl;
     TextureLoader::EnumFilterToGL(gl, filter, true);
     glTexParameteri(type, GL_TEXTURE_MIN_FILTER, gl);
 }
-void Texture::setMaxFilter(const unsigned int type, const TextureFilter::Filter filter){
+void Texture::setMaxFilter(unsigned int type, TextureFilter::Filter filter){
     unsigned int gl;
     TextureLoader::EnumFilterToGL(gl, filter, false);
     glTexParameteri(type, GL_TEXTURE_MAG_FILTER, gl);
 }
-void Texture::setFilter(const unsigned int type, const TextureFilter::Filter filter){
+void Texture::setFilter(unsigned int type, TextureFilter::Filter filter){
     Texture::setMinFilter(type, filter);
     Texture::setMaxFilter(type, filter);
 }
-void Texture::setAnisotropicFiltering(const float anisotropicFiltering){
+void Texture::setAnisotropicFiltering(float anisotropicFiltering){
     if (*this == false) {
-        auto lambda = [this, anisotropicFiltering]() {
+        auto lamda = [this, anisotropicFiltering]() {
             setAnisotropicFiltering(anisotropicFiltering);
         };
-        m_CommandQueue.push(lambda);
+        m_CommandQueue.push(lamda);
         return;
     }
     Engine::Renderer::bindTextureForModification(m_Type, m_TextureAddresses[0]);
@@ -214,45 +170,43 @@ void Texture::setAnisotropicFiltering(const float anisotropicFiltering){
     }
 }
 
-const bool Texture::mipmapped() const {
+bool Texture::mipmapped() const {
     return m_Mipmapped; 
 }
-const bool Texture::compressed() const {
+bool Texture::compressed() const {
     if (m_ImagesDatas.size() == 0) {
         return false;
     }
-    const auto& img = m_ImagesDatas[0];
-    auto& mip       = img.m_Mipmaps[0];
-    return (mip.compressedSize > 0);
+    return (m_ImagesDatas[0].m_Mipmaps[0].compressedSize > 0);
 }
-const uchar* Texture::pixels() {
+unsigned char* Texture::pixels() {
     TextureLoader::WithdrawPixelsFromOpenGLMemory(*this); 
     return &(m_ImagesDatas[0].m_Mipmaps[0].pixels)[0];
 }
-const GLuint Texture::address(const unsigned int index) const {
+GLuint Texture::address(unsigned int index) const {
     return (m_TextureAddresses.size() == 0) ? 0 : m_TextureAddresses[index];
 }
-const size_t Texture::numAddresses() const {
+size_t Texture::numAddresses() const {
     return m_TextureAddresses.size(); 
 }
-const unsigned int Texture::type() const {
+unsigned int Texture::type() const {
     return m_Type; 
 }
-const unsigned int Texture::width() const {
+unsigned int Texture::width() const {
     return m_ImagesDatas[0].m_Mipmaps[0].width;
 }
-const unsigned int Texture::height() const {
+unsigned int Texture::height() const {
     return m_ImagesDatas[0].m_Mipmaps[0].height; 
 }
-const glm::uvec2 Texture::size() const {
+glm::uvec2 Texture::size() const {
     return glm::uvec2(width(), height());
 }
-const ImageInternalFormat::Format Texture::internalFormat() const { 
+ImageInternalFormat::Format Texture::internalFormat() const { 
     return m_ImagesDatas[0].m_InternalFormat; 
 }
-const ImagePixelFormat::Format Texture::pixelFormat() const { 
+ImagePixelFormat::Format Texture::pixelFormat() const { 
     return m_ImagesDatas[0].m_PixelFormat; 
 }
-const ImagePixelType::Type Texture::pixelType() const { 
+ImagePixelType::Type Texture::pixelType() const { 
     return m_ImagesDatas[0].m_PixelType; 
 }

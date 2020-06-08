@@ -32,7 +32,7 @@ void SunLight::setShadowCaster(bool castsShadow) {
     m_IsShadowCaster = castsShadow;
 }
 glm_vec3 SunLight::position() const {
-    return getComponent<ComponentBody>()->position(); 
+    return getComponent<ComponentBody>()->getPosition();
 }
 const glm::vec4& SunLight::color() const {
     return m_Color;

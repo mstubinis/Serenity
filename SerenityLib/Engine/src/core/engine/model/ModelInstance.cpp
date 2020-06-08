@@ -53,7 +53,7 @@ namespace Engine::priv {
                     case LightType::Sun: {
                         SunLight& s          = static_cast<SunLight&>(light);
                         auto& body           = *s.getComponent<ComponentBody>();
-                        const glm::vec3 pos  = body.position();
+                        const glm::vec3 pos  = body.getPosition();
                         Engine::Renderer::sendUniform4Safe((start + "DataA").c_str(), s.getAmbientIntensity(), s.getDiffuseIntensity(), s.getSpecularIntensity(), 0.0f);
                         Engine::Renderer::sendUniform4Safe((start + "DataC").c_str(), 0.0f, pos.x, pos.y, pos.z);
                         Engine::Renderer::sendUniform4Safe((start + "DataD").c_str(), s.color().x, s.color().y, s.color().z, static_cast<float>(lightType));
@@ -69,7 +69,7 @@ namespace Engine::priv {
                     }case LightType::Point: {
                         PointLight& p       = static_cast<PointLight&>(light);
                         auto& body          = *p.getComponent<ComponentBody>();
-                        const glm::vec3 pos = body.position();
+                        const glm::vec3 pos = body.getPosition();
                         Engine::Renderer::sendUniform4Safe((start + "DataA").c_str(), p.getAmbientIntensity(), p.getDiffuseIntensity(), p.getSpecularIntensity(), 0.0f);
                         Engine::Renderer::sendUniform4Safe((start + "DataB").c_str(), 0.0f, 0.0f, p.getConstant(), p.getLinear());
                         Engine::Renderer::sendUniform4Safe((start + "DataC").c_str(), p.getExponent(), pos.x, pos.y, pos.z);
@@ -79,7 +79,7 @@ namespace Engine::priv {
                     }case LightType::Spot: {
                         SpotLight& s                = static_cast<SpotLight&>(light);
                         auto& body                  = *s.getComponent<ComponentBody>();
-                        const glm::vec3 pos         = body.position();
+                        const glm::vec3 pos         = body.getPosition();
                         const glm::vec3& _forward   = body.forward();
                         Engine::Renderer::sendUniform4Safe((start + "DataA").c_str(), s.getAmbientIntensity(), s.getDiffuseIntensity(), s.getSpecularIntensity(), _forward.x);
                         Engine::Renderer::sendUniform4Safe((start + "DataB").c_str(), _forward.y, _forward.z, s.getConstant(), s.getLinear());
@@ -90,7 +90,7 @@ namespace Engine::priv {
                     }case LightType::Rod: {
                         RodLight& r                   = static_cast<RodLight&>(light);
                         auto& body                    = *r.getComponent<ComponentBody>();
-                        const glm::vec3& pos          = body.position();
+                        const glm::vec3& pos          = body.getPosition();
                         const float cullingDistance   = r.rodLength() + (r.getCullingRadius() * 2.0f);
                         const float half              = r.rodLength() / 2.0f;
                         const glm::vec3 firstEndPt    = pos + (glm::vec3(body.forward()) * half);
@@ -149,18 +149,17 @@ const bool priv::InternalModelInstancePublicInterface::IsViewportValid(const Mod
 
 
 
-ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Material* mat, ShaderProgram* program) : m_Parent(parent){
+ModelInstance::ModelInstance(Entity parent, Mesh* mesh, Material* mat, ShaderProgram* program) : m_Parent(parent){
     internal_init(mesh, mat, program);
     setCustomBindFunctor(priv::DefaultModelInstanceBindFunctor());
     setCustomUnbindFunctor(priv::DefaultModelInstanceUnbindFunctor());
 }
-ModelInstance::ModelInstance(Entity& parent, Handle mesh, Handle mat, ShaderProgram* program) : ModelInstance(parent, mesh.get<Mesh>(), mat.get<Material>(), program) {
+ModelInstance::ModelInstance(Entity parent, Handle mesh, Handle mat, ShaderProgram* program) : ModelInstance(parent, mesh.get<Mesh>(), mat.get<Material>(), program) {
 }
-ModelInstance::ModelInstance(Entity& parent, Mesh* mesh, Handle mat, ShaderProgram* program) : ModelInstance(parent, mesh, mat.get<Material>(), program) {
+ModelInstance::ModelInstance(Entity parent, Mesh* mesh, Handle mat, ShaderProgram* program) : ModelInstance(parent, mesh, mat.get<Material>(), program) {
 }
-ModelInstance::ModelInstance(Entity& parent, Handle mesh, Material* mat, ShaderProgram* program) : ModelInstance(parent, mesh.get<Mesh>(), mat, program) {
+ModelInstance::ModelInstance(Entity parent, Handle mesh, Material* mat, ShaderProgram* program) : ModelInstance(parent, mesh.get<Mesh>(), mat, program) {
 }
-
 ModelInstance::ModelInstance(ModelInstance&& other) noexcept {
     m_DrawingMode            = std::move(other.m_DrawingMode);
     m_ViewportFlagDefault    = std::move(other.m_ViewportFlagDefault);
@@ -212,13 +211,12 @@ ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
     }
     return *this;
 }
-
 ModelInstance::~ModelInstance() {
 }
 void ModelInstance::setGlobalDistanceFactor(decimal factor) {
     ModelInstance::m_GlobalDistanceFactor = factor;
 }
-decimal& ModelInstance::getGlobalDistanceFactor() {
+decimal ModelInstance::getGlobalDistanceFactor() {
     return ModelInstance::m_GlobalDistanceFactor;
 }
 void ModelInstance::bind(const Engine::priv::Renderer& renderer) {
@@ -227,14 +225,12 @@ void ModelInstance::bind(const Engine::priv::Renderer& renderer) {
 void ModelInstance::unbind(const Engine::priv::Renderer& renderer) {
     m_CustomUnbindFunctor(this, &renderer);
 }
-
 void ModelInstance::setDefaultViewportFlag(const unsigned int flag) {
     m_ViewportFlagDefault = flag;
 }
 void ModelInstance::setDefaultViewportFlag(const ViewportFlag::Flag flag) {
     m_ViewportFlagDefault = flag;
 }
-
 void ModelInstance::internal_init(Mesh* mesh, Material* mat, ShaderProgram* program) {
     if (!program) {
         program = ShaderProgram::Deferred;
@@ -243,7 +239,6 @@ void ModelInstance::internal_init(Mesh* mesh, Material* mat, ShaderProgram* prog
     m_ShaderProgram     = program;
     m_Material          = mat;
     m_Mesh              = mesh;
-
     internal_update_model_matrix();
 }
 size_t ModelInstance::index() const {
@@ -255,7 +250,6 @@ ModelDrawingMode::Mode ModelInstance::getDrawingMode() const {
 void ModelInstance::setDrawingMode(const ModelDrawingMode::Mode drawMode) {
     m_DrawingMode = drawMode;
 }
-
 void ModelInstance::forceRender(const bool forced) {
     m_ForceRender = forced;
 }
@@ -290,7 +284,7 @@ void ModelInstance::internal_update_model_matrix() {
     }
     Math::setFinalModelMatrix(m_ModelMatrix, m_Position, m_Orientation, m_Scale);
 }
-const Entity& ModelInstance::parent() const {
+Entity ModelInstance::parent() const {
     return m_Parent; 
 }
 //void ModelInstance::setStage(const RenderStage::Stage& stage) {

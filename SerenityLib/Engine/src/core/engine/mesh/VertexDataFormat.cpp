@@ -10,15 +10,15 @@ void VertexDataFormat::bind(const VertexData& vertData) {
     if (m_InterleavingType == VertexAttributeLayout::Interleaved) {
         for (size_t i = 0; i < m_Attributes.size(); ++i) {
             const auto& attribute = m_Attributes[i];
-            glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i, attribute.size, attribute.type, attribute.normalized, attribute.stride, (void*)attribute.offset);
+            glEnableVertexAttribArray(static_cast<GLuint>(i));
+            glVertexAttribPointer(static_cast<GLuint>(i), attribute.size, attribute.type, attribute.normalized, attribute.stride, (void*)attribute.offset);
         }
     }else{
         size_t accumulator = 0;
         for (size_t i = 0; i < m_Attributes.size(); ++i) {
             const auto& attribute = m_Attributes[i];
-            glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i, attribute.size, attribute.type, attribute.normalized, 0, (void*)accumulator);
+            glEnableVertexAttribArray(static_cast<GLuint>(i));
+            glVertexAttribPointer(static_cast<GLuint>(i), attribute.size, attribute.type, attribute.normalized, 0, (void*)accumulator);
             accumulator += vertData.m_DataSizes[i] * attribute.typeSize;
         }
     }

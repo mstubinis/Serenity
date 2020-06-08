@@ -48,14 +48,6 @@ namespace Engine::priv {
     }};
 };
 
-string hash_position(glm::vec3& position, unsigned int decimal_places) {
-    stringstream one, two, thr;
-    one << std::fixed << std::setprecision(decimal_places) << position.x;
-    two << std::fixed << std::setprecision(decimal_places) << position.y;
-    thr << std::fixed << std::setprecision(decimal_places) << position.z;
-    return one.str() + "_" + two.str() + "_" + thr.str();
-}
-
 void InternalMeshPublicInterface::LoadGPU(Mesh& mesh){
     mesh.m_VertexData->finalize(); //transfer vertex data to gpu
 
@@ -63,7 +55,7 @@ void InternalMeshPublicInterface::LoadGPU(Mesh& mesh){
 
     Event e(EventType::MeshLoaded);
     e.eventMeshLoaded = EventMeshLoaded(&mesh);
-    Engine::priv::Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(e);
+    Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(e);
 }
 void InternalMeshPublicInterface::UnloadCPU(Mesh& mesh){
     SAFE_DELETE(mesh.m_Skeleton);
@@ -178,12 +170,12 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
         for (size_t i = 0; i < data.tangents.size(); ++i) {
             normals[2].push_back(Math::pack3NormalsInto32Int(data.tangents[i]));
         }
-        vertexData.setData(0, data.points);
-        vertexData.setData(1, data.uvs);
-        vertexData.setData(2, normals[0]);
-        vertexData.setData(3, normals[1]);
-        vertexData.setData(4, normals[2]);
-        vertexData.setIndices(data.indices, false, false, true);
+        vertexData.setData(0, data.points.data(), data.points.size());
+        vertexData.setData(1, data.uvs.data(), data.uvs.size());
+        vertexData.setData(2, normals[0].data(), normals[0].size());
+        vertexData.setData(3, normals[1].data(), normals[1].size());
+        vertexData.setData(4, normals[2].data(), normals[2].size());
+        vertexData.setIndices(data.indices.data(), data.indices.size(), false, false, true);
 #pragma endregion
     }else{
 #pragma region Some Threshold
@@ -222,12 +214,13 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
         for (size_t i = 0; i < temp_tangents.size(); ++i) {
             normals[2].push_back(Math::pack3NormalsInto32Int(temp_tangents[i]));
         }
-        vertexData.setData(0, temp_pos);
-        vertexData.setData(1, temp_uvs);
-        vertexData.setData(2, normals[0]);
-        vertexData.setData(3, normals[1]);
-        vertexData.setData(4, normals[2]);
-        vertexData.setIndices(indices, false, false, true);
+
+        vertexData.setData(0, temp_pos.data(), temp_pos.size());
+        vertexData.setData(1, temp_uvs.data(), temp_uvs.size());
+        vertexData.setData(2, normals[0].data(), normals[0].size());
+        vertexData.setData(3, normals[1].data(), normals[1].size());
+        vertexData.setData(4, normals[2].data(), normals[2].size());
+        vertexData.setIndices(indices.data(), indices.size(), false, false, true);
 #pragma endregion
     }
     if (mesh.m_Skeleton) {
@@ -240,8 +233,8 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
             boneStuff[0].push_back(_skeleton.m_BoneIDs[i]);
             boneStuff[1].push_back(_skeleton.m_BoneWeights[i]);
         }
-        vertexData.setData(5, boneStuff[0]);
-        vertexData.setData(6, boneStuff[1]);
+        vertexData.setData(5, boneStuff[0].data(), boneStuff[0].size());
+        vertexData.setData(6, boneStuff[1].data(), boneStuff[1].size());
     }
 }
 void InternalMeshPublicInterface::TriangulateComponentIndices(Mesh& mesh, MeshImportedData& data, std::vector<std::vector<uint>>& indices, const unsigned char flags) {
@@ -289,6 +282,14 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
     unsigned int count = 0;
     float offsetSectorX = 0.0f;
     float offsetSectorY = 0.0f;
+
+    auto hash_position = [](glm::vec3& position, unsigned int decimal_places) {
+        stringstream one, two, thr;
+        one << std::fixed << std::setprecision(decimal_places) << position.x;
+        two << std::fixed << std::setprecision(decimal_places) << position.y;
+        thr << std::fixed << std::setprecision(decimal_places) << position.z;
+        return one.str() + "_" + two.str() + "_" + thr.str();
+    };
 
     unordered_map<string, VertexSmoothingGroup> m_VertexMap;
     auto& heightfields = terrain.m_TerrainData.m_BtHeightfieldShapes;
@@ -436,7 +437,7 @@ void Mesh::internal_recalc_indices_from_terrain(const Terrain& terrain) {
         }
     }
     m_VertexData->bind();
-    modifyIndices(data.indices, MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU);
+    modifyIndices(data.indices.data(), data.indices.size(), MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU);
     m_VertexData->unbind();
 }
 Mesh::Mesh(const string& name, const Terrain& terrain, float threshold) : EngineResource(ResourceType::Mesh) {
@@ -573,21 +574,19 @@ const VertexData& Mesh::getVertexData() const {
 const glm::vec3& Mesh::getRadiusBox() const { 
     return m_radiusBox; 
 }
-const float Mesh::getRadius() const { 
+float Mesh::getRadius() const { 
     return m_radius; 
 }
 void Mesh::load(){
     if(!isLoaded()){
-        auto& _this = *this;
-        InternalMeshPublicInterface::LoadGPU(_this);
+        InternalMeshPublicInterface::LoadGPU(*this);
         EngineResource::load();
     }
 }
 void Mesh::unload(){
     if(isLoaded()){
-        auto& _this = *this;
-        InternalMeshPublicInterface::UnloadGPU(_this);
-        InternalMeshPublicInterface::UnloadCPU(_this);
+        InternalMeshPublicInterface::UnloadGPU(*this);
+        InternalMeshPublicInterface::UnloadCPU(*this);
         EngineResource::unload();
     }
 }
@@ -597,12 +596,10 @@ void Mesh::onEvent(const Event& e) {
     }
 }
 //TODO: optimize this a bit more (bubble sort?)
-void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, const SortingMode::Mode& sortMode) {
+void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, SortingMode::Mode sortMode) {
 #ifndef _DEBUG
 
-    auto& vertexDataStructure = const_cast<VertexData&>(*m_VertexData);
-    const auto& indices       = vertexDataStructure.m_Indices;
-    auto& triangles           = vertexDataStructure.m_Triangles;
+    auto& triangles           = m_VertexData->m_Triangles;
 
     const glm::vec3 camPos    = const_cast<Camera&>(camera).getPosition();
 
@@ -613,8 +610,8 @@ void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const gl
         model1 = glm::translate(model1, lhs.midpoint);
         model2 = glm::translate(model2, rhs.midpoint);
 
-        auto model1Pos = Math::getMatrixPosition(model1);
-        auto model2Pos = Math::getMatrixPosition(model2);
+        glm::vec3 model1Pos = Math::getMatrixPosition(model1);
+        glm::vec3 model2Pos = Math::getMatrixPosition(model2);
 
         if (sortMode == SortingMode::FrontToBack)
             return glm::distance2(camPos, model1Pos) < glm::distance2(camPos, model2Pos);
@@ -628,14 +625,14 @@ void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const gl
     std::sort( std::execution::par_unseq, triangles.begin(), triangles.end(), lambda_sorter);
 
     vector<unsigned int> newIndices;
-    newIndices.reserve(indices.size());
+    newIndices.reserve(m_VertexData->m_Indices.size());
     for (size_t i = 0; i < triangles.size(); ++i) {
         auto& triangle = triangles[i];
         newIndices.push_back(triangle.index1);
         newIndices.push_back(triangle.index2);
         newIndices.push_back(triangle.index3);
     }
-    Mesh::modifyIndices(newIndices);
+    Mesh::modifyIndices(newIndices.data(), newIndices.size());
 
 #endif
 }

@@ -48,7 +48,7 @@ void priv::PhysicsTaskScheduler::parallelFor(int iBegin, int iEnd, int grainSize
             body.forLoop((int)p.first, (int)p.second + 1);
         };
         for (size_t i = 0; i < split.size(); ++i) {
-            Engine::priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled(lamda, std::ref(split[i]), i);
+            Engine::priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled(lamda, std::ref(split[i]), static_cast<unsigned int>(i));
         }
         Engine::priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
     };
@@ -67,7 +67,7 @@ btScalar priv::PhysicsTaskScheduler::parallelSum(int iBegin, int iEnd, int grain
             m_sumRes += body.sumLoop((int)p.first, (int)p.second + 1);
         };
         for (size_t i = 0; i < split.size(); ++i) {
-            Engine::priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled(lamda, std::ref(split[i]), i);
+            Engine::priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled(lamda, std::ref(split[i]), static_cast<unsigned int>(i));
         }
         Engine::priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
         return m_sumRes.load(std::memory_order_relaxed);

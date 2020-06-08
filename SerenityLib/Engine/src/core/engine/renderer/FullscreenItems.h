@@ -3,7 +3,7 @@
 #define ENGINE_FULLSCREEN_ITEMS_H
 
 #include <vector>
-#include <core/engine/events/Engine_EventObject.h>
+#include <core/engine/events/Observer.h>
 #include <core/engine/renderer/Renderer.h>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
@@ -18,7 +18,7 @@ namespace Engine::priv{
         MeshVertexDataFullscreen() {}
         ~MeshVertexDataFullscreen() {}
     };
-    class FullscreenTriangle final: public EventObserver{
+    class FullscreenTriangle final: public Observer{
         private:
             std::vector<ushort>                     m_Indices;
             std::vector<MeshVertexDataFullscreen>   m_Vertices;
@@ -38,7 +38,7 @@ namespace Engine::priv{
             void render();
             void onEvent(const Event& e);
     };
-    class FullscreenQuad final: public EventObserver{
+    class FullscreenQuad final: public Observer{
         private:
             std::vector<ushort>                     m_Indices;
             std::vector<MeshVertexDataFullscreen>   m_Vertices;

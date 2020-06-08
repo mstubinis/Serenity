@@ -65,22 +65,22 @@ void VertexData::unbind() const {
     }
 }
 
-void VertexData::setIndices(vector<unsigned int>& _data, const bool addToGPU, const bool orphan, const bool reCalcTriangles) {
+void VertexData::setIndices(const unsigned int* data, size_t bufferCount, bool addToGPU, bool orphan, bool reCalcTriangles) {
     if (m_Buffers.size() == 1) {
         m_Buffers.push_back(std::make_unique<ElementBufferObject>());
     }
-    if (&_data != &m_Indices) {
+    if (data != &m_Indices[0]) {
         m_Indices.clear();
-        m_Indices.reserve(_data.size());
-        for (const auto indice : _data) {
-            m_Indices.emplace_back(indice);
+        m_Indices.reserve(bufferCount);
+        for (unsigned int i = 0; i < bufferCount; ++i) {
+            m_Indices.emplace_back(data[i]);
         }
     }
     if (reCalcTriangles) {
         const auto& positions = getData<glm::vec3>(0);
         if (positions.size() >= 0) {
             m_Triangles.clear();
-            m_Triangles.reserve(_data.size() / 3);
+            m_Triangles.reserve(bufferCount / 3);
             size_t j = 0;
             Engine::priv::Triangle tri;
             for (size_t i = 0; i < m_Indices.size(); ++i) {
@@ -110,7 +110,7 @@ void VertexData::setIndices(vector<unsigned int>& _data, const bool addToGPU, co
         !orphan ? indiceBuffer.setData(m_Indices, BufferDataDrawType::Static) : indiceBuffer.setDataOrphan(m_Indices);
     }
 }
-void VertexData::sendDataToGPU(const bool orphan, const int attributeIndex) {
+void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
     //Interleaved format makes use of attributeIndex = -1
     /*
     Interleaved,    // | pos uv norm | pos uv norm | pos uv norm    | ... etc ... 

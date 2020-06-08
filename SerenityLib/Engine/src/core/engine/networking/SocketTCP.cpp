@@ -1,6 +1,6 @@
 #include <core/engine/networking/SocketTCP.h>
-#include <core/engine/events/Engine_Events.h>
-#include <core/engine/events/Engine_EventIncludes.h>
+#include <core/engine/events/EventModule.h>
+#include <core/engine/events/EventIncludes.h>
 #include <core/engine/events/Engine_EventObject.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/utils/Utils.h>
@@ -21,14 +21,14 @@ Networking::SocketTCP::~SocketTCP() {
     disconnect();
 }
 
-sf::Socket::Status Networking::SocketTCP::internal_send_packet(sf::Packet& packet) {
+SocketStatus::Status Networking::SocketTCP::internal_send_packet(sf::Packet& packet) {
     auto status = m_SocketTCP.send(packet);
     switch (status) {
         case sf::Socket::Status::Done: {
             EventPacket e(&packet);
             Event ev(EventType::PacketSent);
             ev.eventPacket = e;
-            Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+            Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
             break;
         }case sf::Socket::Status::Disconnected: {
             break;
@@ -42,23 +42,23 @@ sf::Socket::Status Networking::SocketTCP::internal_send_packet(sf::Packet& packe
             break;
         }
     }
-    return status;
+    return SocketStatus::map_status(status);
 }
-sf::Socket::Status Networking::SocketTCP::internal_send_partial_packets_loop() {
-    sf::Socket::Status status = sf::Socket::Status::Error;
+SocketStatus::Status Networking::SocketTCP::internal_send_partial_packets_loop() {
+    SocketStatus::Status status = SocketStatus::Error;
     if (!m_PartialPackets.empty()) {
         status = internal_send_packet(m_PartialPackets.front());
         switch (status) {
-            case sf::Socket::Status::Done: {
+            case SocketStatus::Done: {
                 m_PartialPackets.pop();
                 break;
-            }case sf::Socket::Status::Disconnected: {
+            }case SocketStatus::Disconnected: {
                 break;
-            }case sf::Socket::Status::Error: {
+            }case SocketStatus::Error: {
                 break;
-            }case sf::Socket::Status::NotReady: {
+            }case SocketStatus::NotReady: {
                 break;
-            }case sf::Socket::Status::Partial: {
+            }case SocketStatus::Partial: {
                 break;
             }default: {
                 break;
@@ -75,9 +75,6 @@ void Networking::SocketTCP::update(const float dt) {
 bool Networking::SocketTCP::isConnected() const {
     return (m_SocketTCP.getLocalPort() != 0);
 }
-//sf::TcpSocket& Networking::SocketTCP::getSFMLSocket() {
-//    return m_SocketTCP;
-//}
 string Networking::SocketTCP::ip() const {
     return m_SocketTCP.getRemoteAddress().toString();
 }
@@ -101,45 +98,44 @@ void Networking::SocketTCP::disconnect() {
 
         m_SocketTCP.disconnect();
 
-        Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+        Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     }
 }
-sf::Socket::Status Networking::SocketTCP::connect(const unsigned short timeout) {
+SocketStatus::Status Networking::SocketTCP::connect(const unsigned short timeout) {
     auto status = m_SocketTCP.connect(m_IP, m_Port, sf::seconds(timeout));
     if (status == sf::Socket::Status::Done) {
         EventSocket e = EventSocket(m_SocketTCP.getLocalPort(), m_SocketTCP.getRemotePort(), m_SocketTCP.getRemoteAddress(), SocketType::TCP);
         Event ev(EventType::SocketConnected);
         ev.eventSocket = std::move(e);
-        Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+        Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     }
-    return status;
+    return SocketStatus::map_status(status);
 }
-sf::Socket::Status Networking::SocketTCP::send(Engine::Networking::Packet& packet) {
+SocketStatus::Status Networking::SocketTCP::send(Engine::Networking::Packet& packet) {
     sf::Packet sf_packet;
     packet.build(sf_packet);
     return send(sf_packet);
 }
-sf::Socket::Status Networking::SocketTCP::send(sf::Packet& packet) {
+SocketStatus::Status Networking::SocketTCP::send(sf::Packet& packet) {
     m_PartialPackets.push(packet);
-    auto status = internal_send_partial_packets_loop();
-    return status;
+    return internal_send_partial_packets_loop();
 }
-sf::Socket::Status Networking::SocketTCP::send(const void* data, size_t size) {
-    return m_SocketTCP.send(data, size);
+SocketStatus::Status Networking::SocketTCP::send(const void* data, size_t size) {
+    return SocketStatus::map_status(m_SocketTCP.send(data, size));
 }
-sf::Socket::Status Networking::SocketTCP::send(const void* data, size_t size, size_t& sent) {
-    return m_SocketTCP.send(data, size, sent);
+SocketStatus::Status Networking::SocketTCP::send(const void* data, size_t size, size_t& sent) {
+    return SocketStatus::map_status(m_SocketTCP.send(data, size, sent));
 }
-sf::Socket::Status Networking::SocketTCP::receive(sf::Packet& packet) {
+SocketStatus::Status Networking::SocketTCP::receive(sf::Packet& packet) {
     auto status = m_SocketTCP.receive(packet);
     if (status == sf::Socket::Status::Done) {
         EventPacket e(&packet);
         Event ev(EventType::PacketReceived);
         ev.eventPacket = e;
-        Core::m_Engine->m_EventManager.m_EventDispatcher.dispatchEvent(ev);
+        Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     }
-    return status;
+    return SocketStatus::map_status(status);
 }
-sf::Socket::Status Networking::SocketTCP::receive(void* data, size_t size, size_t& received) {
-    return m_SocketTCP.receive(data, size, received);
+SocketStatus::Status Networking::SocketTCP::receive(void* data, size_t size, size_t& received) {
+    return SocketStatus::map_status(m_SocketTCP.receive(data, size, received));
 }

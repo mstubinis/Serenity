@@ -1018,6 +1018,7 @@ priv::EShaders::deferred_frag_skybox =
     "\n"
     "uniform vec4 Color;\n"
     "uniform int IsFake;\n"
+    "uniform float ScreenGamma;\n"
     "uniform SAMPLER_TYPE_Cube Texture;\n"
     "varying vec3 UV;\n"
     "varying vec3 WorldPosition;\n"
@@ -1027,6 +1028,7 @@ priv::EShaders::deferred_frag_skybox =
     "    }else{\n"
     "        gl_FragData[0] = textureCube(Texture, UV);\n"
     "    }\n"
+    "    gl_FragData[0].rgb = pow(gl_FragData[0].rgb, vec3(1.0 / ScreenGamma));\n" //ScreenGamma is gamma
     "    gl_FragData[1].rg = vec2(1.0);\n"
     "    gl_FragData[2]    = vec4(0.0);\n"
     "}";

@@ -2,14 +2,15 @@
 #ifndef ENGINE_MATERIAL_MATERIAL_REQUEST_H
 #define ENGINE_MATERIAL_MATERIAL_REQUEST_H
 
+class Material;
+class Texture;
+
 #include <vector>
 #include <string>
 #include <memory>
 #include <core/engine/resources/Handle.h>
 #include <core/engine/textures/TextureRequest.h>
 
-class Material;
-class Texture;
 struct MaterialRequestPart final {
     Material*                                     material = nullptr;
     Handle                                        handle   = Handle();

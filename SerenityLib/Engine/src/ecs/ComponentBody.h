@@ -48,7 +48,7 @@ namespace Engine::priv {
     struct ComponentBody_SceneLeftFunction;
 };
 
-class ComponentBody : public EventObserver, public Engine::UserPointer {
+class ComponentBody : public Observer, public Engine::UserPointer {
     friend struct Engine::priv::ComponentBody_UpdateFunction;
     friend struct Engine::priv::ComponentBody_ComponentAddedToEntityFunction;
     friend struct Engine::priv::ComponentBody_ComponentRemovedFromEntityFunction;
@@ -180,11 +180,11 @@ class ComponentBody : public EventObserver, public Engine::UserPointer {
 
         ScreenBoxCoordinates getScreenBoxCoordinates(const float minOffset = 10.0f) const;
 
-		glm_quat rotation() const;
+		glm_quat getRotation() const;
 		glm_vec3 getScale() const;
-		glm_vec3 position() const;
-        glm_vec3 localPosition() const;
-        glm::vec3 position_render() const;
+		glm_vec3 getPosition() const;
+        glm_vec3 getLocalPosition() const;
+        glm::vec3 getPositionRender() const;
 		const glm_vec3& forward() const;
 		const glm_vec3& right() const;
 		const glm_vec3& up() const;

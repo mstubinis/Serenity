@@ -69,6 +69,8 @@ namespace Engine::priv {
                     camera.resize(width, height);
                 }
             }
+
+            //update all component systems
             void update(const float dt, Scene& scene) {
                 for (size_t i = 0; i < m_Systems.size(); ++i) { 
                     m_Systems[i]->onUpdate(dt, scene);

@@ -30,8 +30,7 @@ void tostring(luabridge::LuaRef r) { cout << r.tostring() << "\n"; }
 
 LUABinder::LUABinder() {
     m_LUA_STATE = NEW LUAState();
-    auto* L = m_LUA_STATE->getState();
-
+    lua_State* L = m_LUA_STATE->getState();
     luabridge::getGlobalNamespace(L)
         .addFunction("print", &print)
         .addFunction("tostring", &tostring)
@@ -52,22 +51,82 @@ LUABinder::LUABinder() {
         .beginClass<glm::mat3>("mat3")
 
         .endClass()
+        //glm mat2 TODO: add more to this
+        .beginClass<glm::mat2>("mat2")
+
+        .endClass()
 #pragma endregion
 
 #pragma region Vectors
+
+
+
+        //glm ivec2 TODO: add more to this
+        .beginClass<glm::ivec2>("ivec2")
+            .addConstructor<void(*)(int, int)>()
+            .addData("x", &glm::ivec2::x)
+            .addData("y", &glm::ivec2::y)
+        .endClass()
+        //glm ivec3 TODO: add more to this
+        .beginClass<glm::ivec3>("ivec3")
+            .addConstructor<void(*)(int, int, int)>()
+            .addData("x", &glm::ivec3::x)
+            .addData("y", &glm::ivec3::y)
+            .addData("z", &glm::ivec3::z)
+        .endClass()
+        //glm ivec4 TODO: add more to this
+        .beginClass<glm::ivec4>("ivec4")
+            .addConstructor<void(*)(int, int, int, int)>()
+            .addData("x", &glm::ivec4::x)
+            .addData("y", &glm::ivec4::y)
+            .addData("z", &glm::ivec4::z)
+            .addData("w", &glm::ivec4::w)
+        .endClass()
+
+
+
+
+        //glm dvec2 TODO: add more to this
+        .beginClass<glm::dvec2>("dvec2")
+            .addConstructor<void(*)(double, double)>()
+            .addData("x", &glm::dvec2::x)
+            .addData("y", &glm::dvec2::y)
+        .endClass()
+        //glm dvec3 TODO: add more to this
+        .beginClass<glm::dvec3>("dvec3")
+            .addConstructor<void(*)(double, double, double)>()
+            .addData("x", &glm::dvec3::x)
+            .addData("y", &glm::dvec3::y)
+            .addData("z", &glm::dvec3::z)
+        .endClass()
+        //glm dvec4 TODO: add more to this
+        .beginClass<glm::dvec4>("dvec4")
+            .addConstructor<void(*)(double, double, double, double)>()
+            .addData("x", &glm::dvec4::x)
+            .addData("y", &glm::dvec4::y)
+            .addData("z", &glm::dvec4::z)
+            .addData("w", &glm::dvec4::w)
+        .endClass()
+
+
+
+
         //glm vec2 TODO: add more to this
         .beginClass<glm::vec2>("fvec2")
+            .addConstructor<void(*)(float, float)>()
             .addData("x", &glm::vec2::x)
             .addData("y", &glm::vec2::y)
         .endClass()
         //glm vec3 TODO: add more to this
         .beginClass<glm::vec3>("fvec3")
+            .addConstructor<void(*)(float, float, float)>()
             .addData("x", &glm::vec3::x)
             .addData("y", &glm::vec3::y)
             .addData("z", &glm::vec3::z)
         .endClass()
         //glm vec4 TODO: add more to this
         .beginClass<glm::vec4>("fvec4")
+            .addConstructor<void(*)(float, float, float, float)>()
             .addData("x", &glm::vec4::x)
             .addData("y", &glm::vec4::y)
             .addData("z", &glm::vec4::z)
@@ -76,17 +135,20 @@ LUABinder::LUABinder() {
 
         //glm vec2 TODO: add more to this
         .beginClass<glm_vec2>("vec2")
+            .addConstructor<void(*)(decimal, decimal)>()
             .addData("x", &glm_vec2::x)
             .addData("y", &glm_vec2::y)
         .endClass()
         //glm vec3 TODO: add more to this
         .beginClass<glm_vec3>("vec3")
+            .addConstructor<void(*)(decimal, decimal, decimal)>()
             .addData("x", &glm_vec3::x)
             .addData("y", &glm_vec3::y)
             .addData("z", &glm_vec3::z)
         .endClass()
         //glm vec4 TODO: add more to this
         .beginClass<glm_vec4>("vec4")
+            .addConstructor<void(*)(decimal, decimal, decimal, decimal)>()
             .addData("x", &glm_vec4::x)
             .addData("y", &glm_vec4::y)
             .addData("z", &glm_vec4::z)
@@ -211,11 +273,11 @@ LUABinder::LUABinder() {
             .addFunction("getScreenCoordinates", &ComponentBody::getScreenCoordinates)
             .addFunction("alignTo", &ComponentBody::alignTo)
 
-            .addFunction("rotation", &ComponentBody::rotation)
-            .addFunction("position", &ComponentBody::position)
+            .addFunction("getRotation", &ComponentBody::getRotation)
+            .addFunction("getPosition", &ComponentBody::getPosition)
             .addFunction("getScale", &ComponentBody::getScale)
-            .addFunction("localPosition", &ComponentBody::localPosition)
-            .addFunction("position_render", &ComponentBody::position_render)
+            .addFunction("getLocalPosition", &ComponentBody::getLocalPosition)
+            .addFunction("getPositionRender", &ComponentBody::getPositionRender)
             .addFunction("forward", &ComponentBody::forward)
             .addFunction("right", &ComponentBody::right)
             .addFunction("up", &ComponentBody::up)
@@ -243,11 +305,10 @@ LUABinder::LUABinder() {
         .endClass()
         //component camera
         .beginClass<ComponentCamera>("ComponentCamera")
-/*
             .addFunction("forward", &ComponentCamera::forward)
             .addFunction("right", &ComponentCamera::right)
             .addFunction("up", &ComponentCamera::up)
-*/
+
             .addFunction("getAngle", &ComponentCamera::getAngle)
             .addFunction("getAspect", &ComponentCamera::getAspect)
             .addFunction("getNear", &ComponentCamera::getNear)
@@ -317,7 +378,8 @@ LUABinder::LUABinder() {
             .addFunction("isForceRendered", &ModelInstance::isForceRendered)
             .addFunction("playAnimation", &ModelInstance::playAnimation)
             .addFunction("setOrientation", static_cast<void(ModelInstance::*)(const float, const float, const float)>(&ModelInstance::setOrientation))
-        .endClass();
+        .endClass()
+    ;
 }
 LUABinder::~LUABinder() {
     SAFE_DELETE(m_LUA_STATE);

@@ -247,6 +247,24 @@
     <Filter Include="Header Files\Engine\Core\Renderer\software">
       <UniqueIdentifier>{0de7db4e-4278-402c-9e10-d13180db3809}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Events\Keyboard">
+      <UniqueIdentifier>{735dac9c-5805-48c6-ab33-52c2399c09dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Events\Mouse">
+      <UniqueIdentifier>{f07d54c3-3217-4763-a70c-acd390a4c050}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Events\Keyboard">
+      <UniqueIdentifier>{edb0ff82-61d5-4a27-b0fd-6cb4fd8fe8c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Events\Mouse">
+      <UniqueIdentifier>{d65b19ed-b69e-437b-8faf-5baf1fd8971f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Events\Joystick">
+      <UniqueIdentifier>{16947661-bdb4-48e7-998e-7c4544afce4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Events\Joystick">
+      <UniqueIdentifier>{250362dd-5b83-4906-b516-4e4915b13b15}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBody.h">
@@ -294,13 +312,7 @@
     <ClInclude Include="Engine\src\ecs\Entity.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\events\Engine_EventDispatcher.h">
-      <Filter>Header Files\Engine\Core\Events</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\events\Engine_EventObject.h">
-      <Filter>Header Files\Engine\Core\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\events\Engine_Events.h">
       <Filter>Header Files\Engine\Core\Events</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\lights\DirectionalLight.h">
@@ -627,9 +639,6 @@
     <ClInclude Include="Engine\src\core\engine\scene\SceneOptions.h">
       <Filter>Header Files\Engine\Core\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\events\Engine_EventIncludes.h">
-      <Filter>Header Files\Engine\Core\Events</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\system\Engine.h">
       <Filter>Header Files\Engine\Core\System</Filter>
     </ClInclude>
@@ -780,6 +789,45 @@
     <ClInclude Include="Engine\src\core\engine\lua\LuaIncludes.h">
       <Filter>Header Files\Engine\Core\LUA</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\ecs\EntityBody.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\smsh.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\events\Keyboard\KeyboardKeys.h">
+      <Filter>Header Files\Engine\Core\Events\Keyboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\events\Keyboard\KeyboardModule.h">
+      <Filter>Header Files\Engine\Core\Events\Keyboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\events\Mouse\MouseButtons.h">
+      <Filter>Header Files\Engine\Core\Events\Mouse</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\events\Joystick\JoystickAxises.h">
+      <Filter>Header Files\Engine\Core\Events\Joystick</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\events\EventIncludes.h">
+      <Filter>Header Files\Engine\Core\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\events\EventDispatcher.h">
+      <Filter>Header Files\Engine\Core\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\events\Mouse\MouseModule.h">
+      <Filter>Header Files\Engine\Core\Events\Mouse</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\events\Joystick\JoystickModule.h">
+      <Filter>Header Files\Engine\Core\Events\Joystick</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\events\EventModule.h">
+      <Filter>Header Files\Engine\Core\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\events\Observer.h">
+      <Filter>Header Files\Engine\Core\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\containers\PartialArray.h">
+      <Filter>Header Files\Engine\Core\Containers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -811,15 +859,6 @@
     </ClCompile>
     <ClCompile Include="Engine\src\ecs\Entity.cpp">
       <Filter>Source Files\Engine\Core\ECS</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\events\Engine_EventDispatcher.cpp">
-      <Filter>Source Files\Engine\Core\Events</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\events\Engine_EventObject.cpp">
-      <Filter>Source Files\Engine\Core\Events</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\events\Engine_Events.cpp">
-      <Filter>Source Files\Engine\Core\Events</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\lights\DirectionalLight.cpp">
       <Filter>Source Files\Engine\Core\Lights</Filter>
@@ -1139,9 +1178,6 @@
     <ClCompile Include="Engine\src\core\engine\utils\Logger.cpp">
       <Filter>Source Files\Engine\Core\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\events\Engine_EventIncludes.cpp">
-      <Filter>Source Files\Engine\Core\Events</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\utils\ForcedInclude.cpp">
       <Filter>Source Files\Engine\Core\Utils</Filter>
     </ClCompile>
@@ -1192,6 +1228,42 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\lua\LuaState.cpp">
       <Filter>Source Files\Engine\Core\LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\ecs\EntityBody.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\mesh\smsh.cpp">
+      <Filter>Source Files\Engine\Core\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\networking\SocketInterface.cpp">
+      <Filter>Source Files\Engine\Core\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\events\Keyboard\KeyboardKeys.cpp">
+      <Filter>Source Files\Engine\Core\Events\Keyboard</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\events\Keyboard\KeyboardModule.cpp">
+      <Filter>Source Files\Engine\Core\Events\Keyboard</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\events\Mouse\MouseButtons.cpp">
+      <Filter>Source Files\Engine\Core\Events\Mouse</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\events\Joystick\JoystickAxises.cpp">
+      <Filter>Source Files\Engine\Core\Events\Joystick</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\events\EventDispatcher.cpp">
+      <Filter>Source Files\Engine\Core\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\events\Mouse\MouseModule.cpp">
+      <Filter>Source Files\Engine\Core\Events\Mouse</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\events\Joystick\JoystickModule.cpp">
+      <Filter>Source Files\Engine\Core\Events\Joystick</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\events\EventModule.cpp">
+      <Filter>Source Files\Engine\Core\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\events\Observer.cpp">
+      <Filter>Source Files\Engine\Core\Events</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

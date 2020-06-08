@@ -7,10 +7,10 @@ class  ShaderProgram;
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-#include <core/engine/events/Engine_EventObject.h>
+#include <core/engine/events/Observer.h>
 
 //Core since version 3.1 (GLSL 140)
-class UniformBufferObject final : public EventObserver {
+class UniformBufferObject final : public Observer {
     friend class Shader;
     private:
         const char*          m_NameInShader              = "";

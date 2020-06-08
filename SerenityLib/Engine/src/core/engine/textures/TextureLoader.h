@@ -9,7 +9,7 @@ namespace Engine::priv {
     struct TextureLoader final {
         friend class Texture;
 
-        static void LoadDDSFile(Texture& texture, const std::string& filename, priv::ImageLoadedStructure& image);
+        static bool LoadDDSFile(Texture& texture, const std::string& filename, priv::ImageLoadedStructure& image);
 
         static void LoadTexture2DIntoOpenGL(Texture& texture);
         static void LoadTextureFramebufferIntoOpenGL(Texture& texture);

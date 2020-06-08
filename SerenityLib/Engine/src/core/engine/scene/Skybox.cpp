@@ -3,6 +3,7 @@
 #include <core/engine/system/Engine.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/textures/TextureLoader.h>
+#include <core/engine/events/Engine_EventObject.h>
 
 using namespace Engine;
 using namespace std;
@@ -10,6 +11,19 @@ using namespace std;
 GLuint m_Buffer   = 0;
 GLuint m_VAO      = 0;
 vector<glm::vec3> m_Vertices;
+
+/*
+when saving a skybox in gimp, the layer ordering should be:
+    - left
+    - right
+    - top
+    - bottom
+    - back    - should be front file
+    - front   - should be back file
+
+switch the front and back files
+
+*/
 
 namespace Engine {
     namespace priv {

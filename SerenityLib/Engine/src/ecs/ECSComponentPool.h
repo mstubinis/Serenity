@@ -13,7 +13,7 @@ namespace Engine::priv {
 namespace Engine::priv {
     template<typename ...> class ECSComponentPool;
 
-    template <typename TEntity,typename TComponent> 
+    template <typename TEntity, typename TComponent> 
     class ECSComponentPool<TEntity, TComponent> : public Engine::sparse_set<TComponent>, public Engine::NonCopyable, public Engine::NonMoveable{
         friend class Engine::priv::ECS<TEntity>;
         using super = Engine::sparse_set<TComponent>;

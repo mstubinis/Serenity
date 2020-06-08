@@ -281,7 +281,7 @@ void ComponentModel::setModelMaterial(const Handle material, const size_t& index
 }
 bool ComponentModel::rayIntersectSphere(const ComponentCamera& camera) const {
     const auto& body = *m_Owner.getComponent<ComponentBody>();
-    return Math::rayIntersectSphere(body.position(), m_Radius, camera.m_Eye, camera.getViewVector());
+    return Math::rayIntersectSphere(body.getPosition(), m_Radius, camera.m_Eye, camera.getViewVector());
 }
 void ComponentModel::setUserPointer(void* UserPointer) {
     for (auto& instance : m_ModelInstances) {

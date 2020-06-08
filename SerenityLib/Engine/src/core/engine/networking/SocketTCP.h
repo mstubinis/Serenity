@@ -24,9 +24,9 @@ namespace Engine::Networking {
             unsigned short            m_Port     = 0;
             std::queue<sf::Packet>    m_PartialPackets;
 
-            sf::Socket::Status internal_send_partial_packets_loop();
-            sf::Socket::Status internal_send_packet(sf::Packet& sfPacket);
-            sf::Socket::Status internal_send_packet(Engine::Networking::Packet& packet);
+            SocketStatus::Status internal_send_partial_packets_loop();
+            SocketStatus::Status internal_send_packet(sf::Packet& sfPacket);
+            SocketStatus::Status internal_send_packet(Engine::Networking::Packet& packet);
 
             void update(const float dt) override;
         public: 
@@ -39,26 +39,23 @@ namespace Engine::Networking {
 
             void                 setBlocking(bool blocking) override;
             bool                 isBlocking() const override;
-            //sf::TcpSocket&       getSFMLSocket() override;
             unsigned short       localPort() const override;
 
             std::string          ip() const;
             unsigned short       remotePort() const;
     
-            sf::Socket::Status   connect(const unsigned short timeout = 0);
+            SocketStatus::Status   connect(const unsigned short timeout = 0);
 
-            sf::Socket::Status   send(Engine::Networking::Packet& packet);
-            sf::Socket::Status   send(sf::Packet& packet);
+            SocketStatus::Status   send(Engine::Networking::Packet& packet);
+            SocketStatus::Status   send(sf::Packet& packet);
 
             //TODO: handle this case automatically
             //DO NOT use this send function if your socket is NON BLOCKING, use the one with the sent parameter instead
-            sf::Socket::Status   send(const void* data, size_t size);
+            SocketStatus::Status   send(const void* data, size_t size);
+            SocketStatus::Status   send(const void* data, size_t size, size_t& sent);
 
-
-            sf::Socket::Status   send(const void* data, size_t size, size_t& sent);
-
-            sf::Socket::Status   receive(sf::Packet& packet);
-            sf::Socket::Status   receive(void* data, size_t size, size_t& received);
+            SocketStatus::Status   receive(sf::Packet& packet);
+            SocketStatus::Status   receive(void* data, size_t size, size_t& received);
     };
 };
 #endif

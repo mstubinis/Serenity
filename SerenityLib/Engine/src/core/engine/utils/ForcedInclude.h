@@ -10,9 +10,14 @@
 #include <glm/mat3x3.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <chrono>
 
 //#define ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS //this will force the engine and window to use the same thread, which will prevent the engine logic from executing if the user modifies the window. this can cause some flickering on resize however
 //#define ENGINE_FORCE_PHYSICS_DEBUG_DRAW //this will force the renderer to output physics debugging info regardless if the build is debug or release
+
+#if defined(__AVX2__) || defined( __AVX__ ) || (defined(_M_AMD64) || defined(_M_X64)) || _M_IX86_FP || defined(__SSE__) || defined(__SSE2__) || defined(__SSE3__) || defined(__SSE4_1__)
+    #define ENGINE_SIMD_SUPPORTED
+#endif
 
 
 using uint   = std::uint32_t;
@@ -260,6 +265,20 @@ namespace Engine {
             }
     };
 
+    template<typename LOGGER> class ProfileBlock {
+        private:
+            LOGGER& m_Logger;
+            std::chrono::time_point<std::chrono::steady_clock> m_Start;
+        public:
+            ProfileBlock(LOGGER& logger) : m_Logger(logger) {
+                m_Start = std::chrono::high_resolution_clock::now();
+            }
+            ~ProfileBlock() {
+                auto z = (std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - m_Start));
+                float f = static_cast<float>(z.count()) * 0.000001f;
+                m_Logger << f << "\n";
+            }
+    };
 
     struct color_vector_4 {
         glm::vec<4, unsigned char, glm::packed_highp> color = glm::vec<4, unsigned char, glm::packed_highp>(0);

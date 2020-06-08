@@ -47,9 +47,9 @@ class MaterialLayer final{
         MaterialLayerBlendMode::Mode blendMode() const;
 
         void addUVModificationFunctor(const std_uv_func& functor);
-        void addUVModificationSimpleTranslation(const float translationX, const float translationY);
+        void addUVModificationSimpleTranslation(float translationX, float translationY);
 
-        void setBlendMode(const MaterialLayerBlendMode::Mode mode);
+        void setBlendMode(MaterialLayerBlendMode::Mode mode);
         void setTexture(Texture* texture);
         void setMask(Texture* mask);
         void setCubemap(Texture* cubemap);
@@ -57,10 +57,10 @@ class MaterialLayer final{
         void setMask(const std::string& maskFile);
         void setCubemap(const std::string& cubemapFile);
 
-        void setData1(const float x, const float y, const float z, const float w);
-        void setData2(const float x, const float y, const float z, const float w);
+        void setData1(float x, float y, float z, float w);
+        void setData2(float x, float y, float z, float w);
 
-        void sendDataToGPU(const std::string& uniform_component_string, const size_t component_index, const size_t layer_index, size_t& textureUnit) const;
+        void sendDataToGPU(const std::string& uniform_component_string, size_t component_index, size_t layer_index, size_t& textureUnit) const;
 
         const glm::vec2& getUVModifications() const;
 

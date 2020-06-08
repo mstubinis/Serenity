@@ -31,27 +31,28 @@ namespace Engine::priv {
         AssimpSceneImport& operator=(AssimpSceneImport&& other) noexcept = delete;
     };
 };
+
+struct MeshRequestPart final {
+    Mesh* mesh = nullptr;
+    Handle       handle = Handle();
+    std::string  name = "";
+
+    MeshRequestPart();
+    ~MeshRequestPart();
+
+    MeshRequestPart(const MeshRequestPart& other);
+    MeshRequestPart& operator=(const MeshRequestPart& other);
+    MeshRequestPart(MeshRequestPart&& other) noexcept;
+    MeshRequestPart& operator=(MeshRequestPart&& other) noexcept;
+
+};
+
 struct MeshRequest final {
-    struct MeshRequestPart final {
-        Mesh*        mesh    = nullptr;
-        Handle       handle  = Handle();
-        std::string  name    = "";
-
-        MeshRequestPart();
-        ~MeshRequestPart();
-
-        MeshRequestPart(const MeshRequestPart& other);
-        MeshRequestPart& operator=(const MeshRequestPart& other);
-        MeshRequestPart(MeshRequestPart&& other) noexcept;
-        MeshRequestPart& operator=(MeshRequestPart&& other) noexcept;
-
-    };
-
     float                                                       m_Threshold      = 0.005f;
     std::string                                                 m_FileOrData     = "";
     std::string                                                 m_FileExtension  = "";
     bool                                                        m_FileExists     = false;
-    std::vector<MeshRequest::MeshRequestPart>                   m_Parts;
+    std::vector<MeshRequestPart>                                m_Parts;
     bool                                                        m_Async          = false;
     Engine::priv::AssimpSceneImport                             m_Importer;
     std::unordered_map<std::string, Engine::priv::BoneNode>     m_Map;
