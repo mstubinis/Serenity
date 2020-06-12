@@ -11,11 +11,11 @@ using namespace std;
 #pragma region FramebufferObjectAttatchmentBaseClass
 
 
-priv::FramebufferObjectAttatchment::FramebufferObjectAttatchment(const FramebufferObject& fbo, const FramebufferAttatchment::Attatchment& a, const ImageInternalFormat::Format& i) : m_FBO(fbo){
+priv::FramebufferObjectAttatchment::FramebufferObjectAttatchment(const FramebufferObject& fbo, FramebufferAttatchment::Attatchment a, ImageInternalFormat::Format i) : m_FBO(fbo){
     m_GL_Attatchment = a;
     m_InternalFormat = i;
 }
-priv::FramebufferObjectAttatchment::FramebufferObjectAttatchment(const FramebufferObject& fbo, const FramebufferAttatchment::Attatchment& a, const Texture& t) : m_FBO(fbo) {
+priv::FramebufferObjectAttatchment::FramebufferObjectAttatchment(const FramebufferObject& fbo, FramebufferAttatchment::Attatchment a, const Texture& t) : m_FBO(fbo) {
     m_GL_Attatchment = a;
     m_InternalFormat = t.internalFormat();
 }
@@ -30,7 +30,7 @@ unsigned int priv::FramebufferObjectAttatchment::height() const {
 unsigned int priv::FramebufferObjectAttatchment::attatchment() const {
     return m_GL_Attatchment; 
 }
-void priv::FramebufferObjectAttatchment::resize(FramebufferObject& fbo, const unsigned int& w, const unsigned int& h){
+void priv::FramebufferObjectAttatchment::resize(FramebufferObject& fbo, unsigned int w, unsigned int h){
 }
 GLuint priv::FramebufferObjectAttatchment::address() const {
     return 0; 
@@ -45,7 +45,7 @@ GLuint priv::FramebufferObjectAttatchment::internalFormat() const {
 
 #pragma endregion
 
-priv::FramebufferTexture::FramebufferTexture(const FramebufferObject& fbo,const FramebufferAttatchment::Attatchment& a, const Texture& t) : FramebufferObjectAttatchment(fbo, a, t){
+priv::FramebufferTexture::FramebufferTexture(const FramebufferObject& fbo, FramebufferAttatchment::Attatchment a, const Texture& t) : FramebufferObjectAttatchment(fbo, a, t){
     m_Texture     = &const_cast<Texture&>(t);
     m_PixelFormat = t.pixelFormat();
     m_PixelType   = t.pixelType();
@@ -53,7 +53,7 @@ priv::FramebufferTexture::FramebufferTexture(const FramebufferObject& fbo,const 
 priv::FramebufferTexture::~FramebufferTexture(){ 
     SAFE_DELETE(m_Texture);
 }
-void priv::FramebufferTexture::resize(FramebufferObject& fbo, const unsigned int& w, const unsigned int& h){
+void priv::FramebufferTexture::resize(FramebufferObject& fbo, unsigned int w, unsigned int h){
     InternalTexturePublicInterface::Resize(*m_Texture, fbo, w, h);
 }
 GLuint priv::FramebufferTexture::address() const {
@@ -75,7 +75,7 @@ priv::RenderbufferObject::~RenderbufferObject(){
     m_Width = m_Height = 0;
     glDeleteRenderbuffers(1, &m_RBO);
 }
-void priv::RenderbufferObject::resize(FramebufferObject& fbo, const unsigned int& w, const unsigned int& h){
+void priv::RenderbufferObject::resize(FramebufferObject& fbo, unsigned int w, unsigned int h){
     Engine::Renderer::bindRBO(m_RBO);
     m_Width = w; 
     m_Height = h;
@@ -128,13 +128,13 @@ priv::FramebufferObject::FramebufferObject() {
     m_FramebufferHeight = 0;
     m_Divisor           = 1.0f;
 }
-priv::FramebufferObject::FramebufferObject(const unsigned int& w, const unsigned int& h, const float& divisor, const unsigned int& swapBufferCount) {
+priv::FramebufferObject::FramebufferObject(unsigned int w, unsigned int h, float divisor, unsigned int swapBufferCount) {
     init(w, h, divisor, swapBufferCount);
 }
-priv::FramebufferObject::FramebufferObject(const unsigned int& w, const unsigned int& h, const ImageInternalFormat::Format& depthInternalFormat, const float& divisor, const unsigned int& swapBufferCount) : FramebufferObject(w, h, divisor, swapBufferCount) {
+priv::FramebufferObject::FramebufferObject(unsigned int w, unsigned int h, ImageInternalFormat::Format depthInternalFormat, float divisor, unsigned int swapBufferCount) : FramebufferObject(w, h, divisor, swapBufferCount) {
     init(w, h, depthInternalFormat, divisor, swapBufferCount);
 }
-void priv::FramebufferObject::init(const unsigned int& width, const unsigned int& height, const float& divisor, const unsigned int& swapBufferCount) {
+void priv::FramebufferObject::init(unsigned int width, unsigned int height, float divisor, unsigned int swapBufferCount) {
     m_CurrentFBOIndex   = 0;
     m_Divisor           = divisor;
     m_FramebufferWidth  = static_cast<unsigned int>(static_cast<float>(width) * m_Divisor);
@@ -146,7 +146,7 @@ void priv::FramebufferObject::init(const unsigned int& width, const unsigned int
     setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
     setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
 }
-void priv::FramebufferObject::init(const unsigned int& width, const unsigned int& height, const ImageInternalFormat::Format& depthInternalFormat, const float& divisor, const unsigned int& swapBufferCount) {
+void priv::FramebufferObject::init(unsigned int width, unsigned int height, ImageInternalFormat::Format depthInternalFormat, float divisor, unsigned int swapBufferCount) {
     RenderbufferObject* rbo;
     if (depthInternalFormat == ImageInternalFormat::Depth24Stencil8 || depthInternalFormat == ImageInternalFormat::Depth32FStencil8) {
         rbo = NEW RenderbufferObject(*this, FramebufferAttatchment::DepthAndStencil, depthInternalFormat);
@@ -167,7 +167,7 @@ void priv::FramebufferObject::cleanup() {
 priv::FramebufferObject::~FramebufferObject(){ 
     cleanup();
 }
-void priv::FramebufferObject::resize(const unsigned int& w, const unsigned int& h){
+void priv::FramebufferObject::resize(unsigned int w, unsigned int h){
     m_FramebufferWidth  = static_cast<unsigned int>(static_cast<float>(w) * m_Divisor);
     m_FramebufferHeight = static_cast<unsigned int>(static_cast<float>(h) * m_Divisor);
     Engine::Renderer::setViewport(0.0f, 0.0f, static_cast<float>(m_FramebufferWidth), static_cast<float>(m_FramebufferHeight));
@@ -196,6 +196,9 @@ void priv::FramebufferObject::bind() const {
 }
 void priv::FramebufferObject::unbind() const {
     m_CustomUnbindFunctor(this);
+}
+priv::FramebufferObjectAttatchment* priv::FramebufferObject::getAttatchement(unsigned int index) const {
+    return m_Attatchments.at(index);
 }
 priv::RenderbufferObject* priv::FramebufferObject::attatchRenderBuffer(priv::RenderbufferObject& rbo){ 
     if (m_Attatchments.count(rbo.attatchment())) {

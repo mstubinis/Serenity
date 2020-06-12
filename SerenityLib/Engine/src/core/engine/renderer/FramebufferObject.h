@@ -26,8 +26,8 @@ namespace Engine::priv {
             GLuint                     m_GL_Attatchment;
             const FramebufferObject&   m_FBO;
         public:
-            FramebufferObjectAttatchment(const FramebufferObject&, const FramebufferAttatchment::Attatchment&, const ImageInternalFormat::Format&);
-            FramebufferObjectAttatchment(const FramebufferObject&, const FramebufferAttatchment::Attatchment&, const Texture&);
+            FramebufferObjectAttatchment(const FramebufferObject&, FramebufferAttatchment::Attatchment, ImageInternalFormat::Format);
+            FramebufferObjectAttatchment(const FramebufferObject&, FramebufferAttatchment::Attatchment, const Texture&);
             virtual ~FramebufferObjectAttatchment();
 
             unsigned int width() const;
@@ -35,7 +35,7 @@ namespace Engine::priv {
             GLuint internalFormat() const;
             unsigned int attatchment() const;
 
-            virtual void resize(FramebufferObject&, const unsigned int& width, const unsigned int& height);
+            virtual void resize(FramebufferObject&, unsigned int width, unsigned int height);
             virtual GLuint address() const;
             virtual void bind();
             virtual void unbind();
@@ -43,14 +43,14 @@ namespace Engine::priv {
     class FramebufferTexture final: public FramebufferObjectAttatchment{
         friend class  Engine::priv::FramebufferObject;
         private:
-            Texture*       m_Texture;
+            Texture*       m_Texture      = nullptr;
             GLuint         m_PixelFormat;
             GLuint         m_PixelType;
         public:
-            FramebufferTexture(const FramebufferObject&, const FramebufferAttatchment::Attatchment&, const Texture&);
+            FramebufferTexture(const FramebufferObject&, FramebufferAttatchment::Attatchment, const Texture&);
             ~FramebufferTexture();
 
-            void resize(FramebufferObject&, const unsigned int& width, const unsigned int& height) override;
+            void resize(FramebufferObject&, unsigned int width, unsigned int height) override;
             GLuint address() const override;
             Texture& texture() const;
             void bind() override;
@@ -66,7 +66,7 @@ namespace Engine::priv {
             RenderbufferObject(FramebufferObject&, FramebufferAttatchment::Attatchment, ImageInternalFormat::Format);
             ~RenderbufferObject();
 
-            void resize(FramebufferObject&, const unsigned int& width, const unsigned int& height) override;
+            void resize(FramebufferObject&, unsigned int width, unsigned int height) override;
             GLuint address() const override;
             void bind() override;
             void unbind() override;
@@ -77,19 +77,19 @@ namespace Engine::priv {
         friend struct Engine::priv::FramebufferObjectDefaultBindFunctor;
         friend struct Engine::priv::FramebufferObjectDefaultUnbindFunctor;
         private:
-            std::function<void(const FramebufferObject*)>                           m_CustomBindFunctor;
-            std::function<void(const FramebufferObject*)>                           m_CustomUnbindFunctor;
+            std::function<void(const FramebufferObject*)>                           m_CustomBindFunctor   = [](const FramebufferObject*) {};
+            std::function<void(const FramebufferObject*)>                           m_CustomUnbindFunctor = [](const FramebufferObject*) {};
 
             mutable size_t                                                          m_CurrentFBOIndex;
-            unsigned int                                                            m_FramebufferWidth;
-            unsigned int                                                            m_FramebufferHeight;
-            float                                                                   m_Divisor;
+            unsigned int                                                            m_FramebufferWidth  = 0U;
+            unsigned int                                                            m_FramebufferHeight = 0U;
+            float                                                                   m_Divisor           = 1.0f;
             std::vector<GLuint>                                                     m_FBO;
             mutable std::unordered_map<unsigned int, FramebufferObjectAttatchment*> m_Attatchments;
         public:
             FramebufferObject();
-            FramebufferObject(const unsigned int& width, const unsigned int& height, const float& divisor = 1.0f, const unsigned int& swapBufferCount = 1);
-            FramebufferObject(const unsigned int& width, const unsigned int& height, const ImageInternalFormat::Format&, const float& divisor = 1.0f, const unsigned int& swapBufferCount = 1);
+            FramebufferObject(unsigned int width, unsigned int height, float divisor = 1.0f, unsigned int swapBufferCount = 1);
+            FramebufferObject(unsigned int width, unsigned int height, ImageInternalFormat::Format, float divisor = 1.0f, unsigned int swapBufferCount = 1);
             ~FramebufferObject();
 
             template<typename T> void setCustomBindFunctor(const T& functor) {
@@ -101,13 +101,15 @@ namespace Engine::priv {
             void bind() const;
             void unbind() const;
 
-            void init(const unsigned int& width, const unsigned int& height, const float& divisor = 1.0f, const unsigned int& swapBufferCount = 1);
-            void init(const unsigned int& width, const unsigned int& height, const ImageInternalFormat::Format&, const float& divisor = 1.0f, const unsigned int& swapBufferCount = 1);
+            void init(unsigned int width, unsigned int height, float divisor = 1.0f, unsigned int swapBufferCount = 1);
+            void init(unsigned int width, unsigned int height, ImageInternalFormat::Format, float divisor = 1.0f, unsigned int swapBufferCount = 1);
 
             void cleanup();
 
-            void resize(const unsigned int& width, const unsigned int& height);
-            FramebufferTexture* attatchTexture(Texture*, const FramebufferAttatchment::Attatchment);
+            FramebufferObjectAttatchment* getAttatchement(unsigned int) const;
+
+            void resize(unsigned int width, unsigned int height);
+            FramebufferTexture* attatchTexture(Texture*, FramebufferAttatchment::Attatchment);
             RenderbufferObject* attatchRenderBuffer(RenderbufferObject&);
             unsigned int width() const;
             unsigned int height() const;

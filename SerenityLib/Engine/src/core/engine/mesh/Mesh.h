@@ -9,6 +9,7 @@ class  btCollisionShape;
 class  Collision;
 class  Terrain;
 class  TerrainHeightfieldShape;
+class  SMSH_File;
 namespace Engine::priv {
     class  MeshLoader;
     class  MeshSkeleton;
@@ -16,7 +17,7 @@ namespace Engine::priv {
     struct MeshImportedData;
     struct DefaultMeshBindFunctor;
     struct DefaultMeshUnbindFunctor;
-    struct BoneNode;
+    struct MeshInfoNode;
     class  AnimationData;
     struct InternalMeshRequestPublicInterface;
     class  ModelInstanceAnimation;
@@ -43,11 +44,11 @@ namespace Engine::priv{
         static void UnloadCPU(Mesh&);
         static void UnloadGPU(Mesh&);
         static bool SupportsInstancing();
-        static btCollisionShape* BuildCollision(ModelInstance*, const CollisionType::Type, const bool isCompoundChild = false);
-        static btCollisionShape* BuildCollision(Mesh*, const CollisionType::Type, const bool isCompoundChild = false);
+        static btCollisionShape* BuildCollision(ModelInstance*, CollisionType::Type, bool isCompoundChild = false);
+        static btCollisionShape* BuildCollision(Mesh*, CollisionType::Type, bool isCompoundChild = false);
 
         static void FinalizeVertexData(Mesh&, MeshImportedData& data);
-        static void TriangulateComponentIndices(Mesh&, MeshImportedData& data, std::vector<std::vector<uint>>& indices, const unsigned char flags);
+        static void TriangulateComponentIndices(Mesh&, MeshImportedData& data, std::vector<std::vector<uint>>& indices, unsigned char flags);
         static void CalculateRadius(Mesh&);
     };
 };
@@ -65,10 +66,11 @@ class Mesh final: public EngineResource, public Observer, public Engine::NonCopy
     friend class  Engine::priv::Renderer;
     friend class  Collision;
     friend class  Terrain;
+    friend class  SMSH_File;
     private:
         std::function<void(Mesh*, const Engine::priv::Renderer*)> m_CustomBindFunctor   = [](Mesh*, const Engine::priv::Renderer*) {};
         std::function<void(Mesh*, const Engine::priv::Renderer*)> m_CustomUnbindFunctor = [](Mesh*, const Engine::priv::Renderer*) {};
-
+        Engine::priv::MeshInfoNode*            m_RootNode            = nullptr;
         VertexData*                            m_VertexData          = nullptr;
         Engine::priv::MeshCollisionFactory*    m_CollisionFactory    = nullptr;
         Engine::priv::MeshSkeleton*            m_Skeleton            = nullptr;
@@ -88,12 +90,10 @@ class Mesh final: public EngineResource, public Observer, public Engine::NonCopy
         Mesh(const std::string& fileOrData, float threshold = 0.0005f); //file or data
         ~Mesh();
 
-        template<typename T>
-        void setCustomBindFunctor(const T& functor) {
+        template<typename T> void setCustomBindFunctor(const T& functor) {
             m_CustomBindFunctor = std::bind(std::move(functor), std::placeholders::_1, std::placeholders::_2);
         }
-        template<typename T>
-        void setCustomUnbindFunctor(const T& functor) {
+        template<typename T> void setCustomUnbindFunctor(const T& functor) {
             m_CustomUnbindFunctor = std::bind(std::move(functor), std::placeholders::_1, std::placeholders::_2);
         }
 

@@ -23,6 +23,7 @@ class  Mesh;
 #include <LinearMath/btScalar.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <limits>
+#include <array>
 
 constexpr btScalar NULL_VERTEX = static_cast<btScalar>(-255.0);
 
@@ -47,16 +48,14 @@ class TerrainData {
         unsigned int imgSizeX = 0U;
         unsigned int imgSizeY = 0U;
 
-        btScalar topLeft = NULL_VERTEX;
-        btScalar top = NULL_VERTEX;
-        btScalar topRight = NULL_VERTEX;
-        btScalar left = NULL_VERTEX;
-        btScalar right = NULL_VERTEX;
-        btScalar btmLeft = NULL_VERTEX;
-        btScalar btm = NULL_VERTEX;
-        btScalar btmRight = NULL_VERTEX;
+        std::array<std::array<btScalar, 3>, 3> pixels;
 
-        bool valid(unsigned int x, unsigned int y) const;
+        bool valid(int x, int y, int centerX, int centerY) const;
+        AdjacentPixels() {
+            for (size_t i = 0; i < pixels.size(); ++i) {
+                pixels[i].fill(NULL_VERTEX);
+            }
+        }
     };
     friend class Terrain;
     friend class Mesh;

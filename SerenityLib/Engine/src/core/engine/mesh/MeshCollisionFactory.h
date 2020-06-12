@@ -17,6 +17,9 @@ class  btScaledBvhTriangleMeshShape;
 class  btGImpactMeshShape;
 struct btTriangleInfoMap;
 
+#include <vector>
+#include <glm/vec3.hpp>
+
 namespace Engine::priv {
     class MeshCollisionFactory final : public Engine::NonCopyable, public Engine::NonMoveable {
         private:
@@ -27,8 +30,8 @@ namespace Engine::priv {
             btBvhTriangleMeshShape*        m_TriangleStaticShape = nullptr;
             btTriangleInfoMap*             m_TriangleInfoMap     = nullptr;
 
-            void  _initConvexData(VertexData& data);
-            void  _initTriangleData(VertexData& data);
+            void initConvexData(VertexData& data, std::vector<glm::vec3>& positions);
+            void initTriangleData(VertexData& data, std::vector<glm::vec3>& positions);
         public:
             MeshCollisionFactory(Mesh& mesh);
             ~MeshCollisionFactory();

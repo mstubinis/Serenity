@@ -1,5 +1,6 @@
 #include <core/engine/utils/ForcedInclude.h>
 #include <core/engine/math/Engine_Math.h>
+#include <iostream>
 
 using namespace Engine;
 
@@ -46,4 +47,16 @@ glm::vec4 Engine::color_vector_4::unpackInt(uint32_t i) const {
     float zz = static_cast<float>((i >> 8) & 255);
     float ww = static_cast<float>(i & 255);
     return glm::vec4(xx * one_over_255,   yy * one_over_255,   zz * one_over_255,   ww * one_over_255);
+}
+
+void Engine::printEndianness() {
+    std::uint32_t data;
+    std::uint8_t* cptr;
+    data = 1; //Assign data
+    cptr = (std::uint8_t*) & data; //Type cast
+    if (*cptr == 1) {
+        std::cout << ("little-endiann") << "\n";
+    }else if (*cptr == 0) {
+        std::cout << ("big-endiann") << "\n";
+    }
 }

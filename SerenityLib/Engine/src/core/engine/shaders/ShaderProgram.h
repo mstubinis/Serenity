@@ -38,13 +38,13 @@ class ShaderProgram final : public EngineResource, public Engine::NonCopyable{
         static ShaderProgram                      *Deferred, *Forward, *Decal; //loaded in renderer
     private:
         std::function<void(ShaderProgram*)>                    m_CustomBindFunctor;
-        GLuint                                                 m_ShaderProgram;
+        GLuint                                                 m_ShaderProgram      = 0;
         std::unordered_map<std::string, GLint>                 m_UniformLocations;
         std::unordered_set<GLuint>                             m_AttachedUBOs;
         Shader&                                                m_VertexShader;
         Shader&                                                m_FragmentShader;
-		bool                                                   m_LoadedCPU;
-		bool                                                   m_LoadedGPU;
+		bool                                                   m_LoadedCPU          = false;
+		bool                                                   m_LoadedGPU          = false;
     public:
         ShaderProgram(const std::string& name, Shader& vertexShader, Shader& fragmentShader);
         virtual ~ShaderProgram();

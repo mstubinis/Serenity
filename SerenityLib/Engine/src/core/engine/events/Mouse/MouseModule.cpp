@@ -11,6 +11,9 @@ MouseModule::~MouseModule() {
 }
 
 void MouseModule::onButtonPressed(unsigned int button) {
+    if (button == MouseButton::Unknown) {
+        return;
+    }
     m_PreviousMouseButton = m_CurrentMouseButton;
     m_CurrentMouseButton  = button;
 
@@ -19,6 +22,9 @@ void MouseModule::onButtonPressed(unsigned int button) {
     }
 }
 void MouseModule::onButtonReleased(unsigned int button) {
+    if (button == MouseButton::Unknown) {
+        return;
+    }
     m_PreviousMouseButton = static_cast<unsigned int>(MouseButton::Unknown);
     m_CurrentMouseButton  = static_cast<unsigned int>(MouseButton::Unknown);
 

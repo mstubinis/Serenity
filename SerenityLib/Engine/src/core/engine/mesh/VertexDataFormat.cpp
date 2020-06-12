@@ -6,7 +6,7 @@
 void VertexDataFormat::add(const int _size, const int _type, const bool _normalized, const int _stride, const size_t _offset, const size_t _typeSize) {
     m_Attributes.emplace_back(_size, _type, _normalized, _stride, _offset, _typeSize);
 }
-void VertexDataFormat::bind(const VertexData& vertData) {
+void VertexDataFormat::bind(const VertexData& vertData) const {
     if (m_InterleavingType == VertexAttributeLayout::Interleaved) {
         for (size_t i = 0; i < m_Attributes.size(); ++i) {
             const auto& attribute = m_Attributes[i];
@@ -23,7 +23,7 @@ void VertexDataFormat::bind(const VertexData& vertData) {
         }
     }
 }
-void VertexDataFormat::unbind() { 
+void VertexDataFormat::unbind() const {
     for (size_t i = 0; i < m_Attributes.size(); ++i) {
         glDisableVertexAttribArray(static_cast<GLuint>(i));
     }

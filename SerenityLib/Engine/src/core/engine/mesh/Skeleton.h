@@ -3,6 +3,7 @@
 #define ENGINE_MESH_SKELETON_INCLUDE_GUARD
 
 class  Mesh;
+class  SMSH_File;
 namespace Engine::priv {
     struct InternalMeshPublicInterface;
     struct DefaultMeshBindFunctor;
@@ -17,6 +18,7 @@ namespace Engine::priv {
 namespace Engine::priv {
     class MeshSkeleton final : public Engine::NonCopyable, public Engine::NonMoveable {
         friend class  Mesh;
+        friend class  SMSH_File;
         friend class  Engine::priv::MeshLoader;
         friend class  Engine::priv::AnimationData;
         friend struct Engine::priv::DefaultMeshBindFunctor;
@@ -24,18 +26,12 @@ namespace Engine::priv {
         friend struct Engine::priv::InternalMeshPublicInterface;
         friend class  Engine::priv::ModelInstanceAnimation;
         private:
-            BoneNode*                                       m_RootNode                 = nullptr;
             unsigned int                                    m_NumBones                 = 0U;
             std::vector<BoneInfo>                           m_BoneInfo;
-            std::vector<glm::vec4>                          m_BoneIDs;
-            std::vector<glm::vec4>                          m_BoneWeights;
             std::unordered_map<std::string, unsigned int>   m_BoneMapping;             // maps a bone name to its index
             std::unordered_map<std::string, AnimationData>  m_AnimationData;
             glm::mat4                                       m_GlobalInverseTransform   = glm::mat4(1.0f);
 
-            //void fill(const Engine::priv::MeshImportedData& data);
-            void populateCleanupMap(BoneNode* node, std::unordered_map<std::string, BoneNode*>& _map);
-            void cleanup();
             void clear();
         public:
             MeshSkeleton();

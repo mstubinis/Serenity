@@ -17,15 +17,15 @@ struct VertexDataFormat {
     VertexAttributeLayout::Type         m_InterleavingType = VertexAttributeLayout::Interleaved;
 
     VertexDataFormat() = default;
-    ~VertexDataFormat()                                            = default;
-    VertexDataFormat(const VertexDataFormat& other)                = delete;
-    VertexDataFormat& operator=(const VertexDataFormat& other)     = delete;
+    VertexDataFormat(const VertexDataFormat& other)                = default;
+    VertexDataFormat& operator=(const VertexDataFormat& other)     = default;
     VertexDataFormat(VertexDataFormat&& other) noexcept            = default;
     VertexDataFormat& operator=(VertexDataFormat&& other) noexcept = default;
+    ~VertexDataFormat() = default;
 
     void add(const int size, const int type, const bool normalized, const int stride, const size_t offset, const size_t typeSize);
-    void bind(const VertexData& vertData);
-    void unbind();
+    void bind(const VertexData& vertData) const;
+    void unbind() const;
 
     static VertexDataFormat   VertexDataPositionsOnly, 
                               VertexDataNoLighting, 

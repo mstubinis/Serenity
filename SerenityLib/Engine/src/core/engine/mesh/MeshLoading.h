@@ -10,8 +10,6 @@ struct aiNode;
 #include <core/engine/mesh/Skeleton.h>
 #include <core/engine/mesh/MeshRequest.h>
 
-using BoneNodeMap = std::unordered_map<std::string, Engine::priv::BoneNode>;
-
 namespace Engine::priv {
     struct MeshLoadingFlags final {enum Flag {
         Points  = 1 << 0,
@@ -36,10 +34,9 @@ namespace Engine::priv {
         friend struct MeshRequest;
         friend class  Engine::priv::MeshSkeleton;
         public:
-            static void        LoadProcessNodeNames(const std::string& file,std::vector<MeshRequestPart>& meshRequestParts, const aiScene& scene, const aiNode& node, BoneNodeMap& boneNodeMap);
-            static void        LoadProcessNodeData(std::vector<MeshRequestPart>& meshRequestParts, const aiScene& scene, const aiNode& node, BoneNodeMap& boneNodeMap, uint& count);
+            static void        LoadProcessNodeData(MeshRequest& meshRequest, const aiScene& scene, const aiNode& node, uint& count);
 
-            static void        LoadPopulateGlobalNodes(const aiNode& node, BoneNodeMap& boneNodeMap);
+            static void        LoadPopulateGlobalNodes(const aiScene& scene, Engine::priv::MeshInfoNode* root, Engine::priv::MeshInfoNode* parent, Engine::priv::MeshInfoNode* node, aiNode* ai_node, MeshRequest& meshRequest);
             static void        FinalizeData(Mesh& mesh, MeshImportedData& data, float threshold);
 
             static VertexData* LoadFrom_OBJCC(std::string& filename);

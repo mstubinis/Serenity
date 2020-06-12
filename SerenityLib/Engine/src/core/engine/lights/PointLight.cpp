@@ -3,31 +3,25 @@
 #include <core/engine/resources/Engine_Resources.h>
 
 #include <ecs/ComponentBody.h>
+#include <array>
 
 using namespace Engine;
 using namespace std;
 
-vector<tuple<float, float, float>> LIGHT_RANGES;
-vector<tuple<float, float, float>> FILL_LIGHT_RANGES() {
-    vector<tuple<float, float, float>> m;
-    m.resize(LightRange::_TOTAL, make_tuple(0.0f, 0.0f, 0.0f));
-
-    m[LightRange::_7] = make_tuple(1.0f, 0.7f, 1.8f);
-    m[LightRange::_13] = make_tuple(1.0f, 0.35f, 0.44f);
-    m[LightRange::_20] = make_tuple(1.0f, 0.22f, 0.20f);
-    m[LightRange::_32] = make_tuple(1.0f, 0.14f, 0.07f);
-    m[LightRange::_50] = make_tuple(1.0f, 0.09f, 0.032f);
-    m[LightRange::_65] = make_tuple(1.0f, 0.07f, 0.017f);
-    m[LightRange::_100] = make_tuple(1.0f, 0.045f, 0.0075f);
-    m[LightRange::_160] = make_tuple(1.0f, 0.027f, 0.0028f);
-    m[LightRange::_200] = make_tuple(1.0f, 0.022f, 0.0019f);
-    m[LightRange::_325] = make_tuple(1.0f, 0.014f, 0.0007f);
-    m[LightRange::_600] = make_tuple(1.0f, 0.007f, 0.0002f);
-    m[LightRange::_3250] = make_tuple(1.0f, 0.0014f, 0.000007f);
-
-    return m;
-};
-
+constexpr std::array<tuple<float, float, float>, LightRange::_TOTAL> LIGHT_RANGES{ {
+    make_tuple(1.0f, 0.7f, 1.8f),
+    make_tuple(1.0f, 0.35f, 0.44f),
+    make_tuple(1.0f, 0.22f, 0.20f),
+    make_tuple(1.0f, 0.14f, 0.07f),
+    make_tuple(1.0f, 0.09f, 0.032f),
+    make_tuple(1.0f, 0.07f, 0.017f),
+    make_tuple(1.0f, 0.045f, 0.0075f),
+    make_tuple(1.0f, 0.027f, 0.0028f),
+    make_tuple(1.0f, 0.022f, 0.0019f),
+    make_tuple(1.0f, 0.014f, 0.0007f),
+    make_tuple(1.0f, 0.007f, 0.0002f),
+    make_tuple(1.0f, 0.0014f, 0.000007f),
+} };
 
 PointLight::PointLight(const LightType::Type type, const glm_vec3& pos, Scene* scene) : SunLight(pos, type, scene) {
     m_CullingRadius = calculateCullingRadius();
@@ -97,9 +91,6 @@ void PointLight::setAttenuation(const float c, const float l, const float e) {
     m_CullingRadius = calculateCullingRadius(); 
 }
 void PointLight::setAttenuation(const LightRange::Range r) { 
-    if (LIGHT_RANGES.size() == 0) {
-        LIGHT_RANGES = FILL_LIGHT_RANGES();
-    }
     const auto& d = LIGHT_RANGES[static_cast<unsigned int>(r)];
     PointLight::setAttenuation( get<0>(d), get<1>(d), get<2>(d) ); 
 }

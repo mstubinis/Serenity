@@ -23,8 +23,8 @@ float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) 
         }
         const auto modelInstanceScale = Math::Max(modelInstance.getScale());
         const glm::vec3 localPosition = Math::getMatrixPosition(modelInstance.modelMatrix());
-        const auto data               = mesh.getVertexData().getData<glm::vec3>(0);
-        for (const auto& vertexPosition : data) {
+        const auto positions          = mesh.getVertexData().getPositions();
+        for (const auto& vertexPosition : positions) {
             points_total.push_back(localPosition + (vertexPosition * modelInstanceScale));
         }
     }

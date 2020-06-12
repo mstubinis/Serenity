@@ -283,7 +283,6 @@ namespace Engine {
     struct color_vector_4 {
         glm::vec<4, unsigned char, glm::packed_highp> color = glm::vec<4, unsigned char, glm::packed_highp>(0);
 
-
         color_vector_4() = default;
         explicit color_vector_4(const float color);
         explicit color_vector_4(const float r, const float g, const float b, const float a);
@@ -299,6 +298,8 @@ namespace Engine {
         inline float b() const { return static_cast<float>(color.b) * 0.003921568627451f; }
         inline float a() const { return static_cast<float>(color.a) * 0.003921568627451f; }
     };
+
+    void printEndianness();
 
 };
 

@@ -13,6 +13,9 @@ KeyboardModule::~KeyboardModule() {
 
 }
 void KeyboardModule::onKeyPressed(unsigned int key) {
+    if (key == KeyboardKey::Unknown) {
+        return;
+    }
     m_PreviousKeyboardKey = m_CurrentKeyboardKey;
     m_CurrentKeyboardKey  = key;
 
@@ -22,6 +25,9 @@ void KeyboardModule::onKeyPressed(unsigned int key) {
     }
 }
 void KeyboardModule::onKeyReleased(unsigned int key) {
+    if (key == KeyboardKey::Unknown) {
+        return;
+    }
     m_PreviousKeyboardKey = static_cast<unsigned int>(KeyboardKey::Unknown);
     m_CurrentKeyboardKey  = static_cast<unsigned int>(KeyboardKey::Unknown);
 

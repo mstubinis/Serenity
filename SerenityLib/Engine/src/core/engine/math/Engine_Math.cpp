@@ -84,33 +84,31 @@ const glm::vec3 Math::polynomial_interpolate_cubic(vector<glm::vec3>& points, co
 
 
 void Math::Float32From16(float* out, const uint16_t in) {
-    #ifdef ENGINE_SIMD_SUPPORTED
-        _mm256_storeu_ps(out, _mm256_cvtph_ps(_mm_loadu_si128((__m128i*)&in)));
-    #else
-        uint32_t t1, t2, t3;
-        t1 = in & 0x7fff;                       // Non-sign bits
-        t2 = in & 0x8000;                       // Sign bit
-        t3 = in & 0x7c00;                       // Exponent
+    //#if defined(ENGINE_SIMD_SUPPORTED) && !defined(_DEBUG)
+    //    _mm256_storeu_ps(out, _mm256_cvtph_ps(_mm_loadu_si128((__m128i*)&in)));
+    //#else
+        uint32_t t1 = in & 0x7fff;              // Non-sign bits
+        uint32_t t2 = in & 0x8000;              // Sign bit
+        uint32_t t3 = in & 0x7c00;              // Exponent
         t1 <<= 13;                              // Align mantissa on MSB
         t2 <<= 16;                              // Shift sign bit into position
         t1 += 0x38000000;                       // Adjust bias
         t1 = (t3 == 0 ? 0 : t1);                // Denormals-as-zero
         t1 |= t2;                               // Re-insert sign bit
         *(uint32_t*)out = t1;
-    #endif
+    //#endif
 }
 void Math::Float16From32(uint16_t* out, const float in) {
-    #ifdef ENGINE_SIMD_SUPPORTED
-        _mm_storeu_si128((__m128i*)out, _mm256_cvtps_ph(_mm256_loadu_ps(&in), 0));
+    //#if defined(ENGINE_SIMD_SUPPORTED) && !defined(_DEBUG)
+    //    _mm_storeu_si128((__m128i*)out, _mm256_cvtps_ph(_mm256_loadu_ps(&in), 0));
         //__m128  V1 = _mm_set_ss(in);
         //__m128i V2 = _mm_cvtps_ph(V1, 0);
         //(*out) = static_cast<uint16_t>(_mm_cvtsi128_si32(V2));
-    #else
+    //#else
         uint32_t inu = *((uint32_t*)& in);
-        uint32_t t1, t2, t3;
-        t1 = inu & 0x7fffffff;                 // Non-sign bits
-        t2 = inu & 0x80000000;                 // Sign bit
-        t3 = inu & 0x7f800000;                 // Exponent
+        uint32_t t1 = inu & 0x7fffffff;        // Non-sign bits
+        uint32_t t2 = inu & 0x80000000;        // Sign bit
+        uint32_t t3 = inu & 0x7f800000;        // Exponent
         t1 >>= 13;                             // Align mantissa on MSB
         t2 >>= 16;                             // Shift sign bit into position
         t1 -= 0x1c000;                         // Adjust bias
@@ -119,7 +117,7 @@ void Math::Float16From32(uint16_t* out, const float in) {
         t1 = (t3 == 0 ? 0 : t1);               // Denormals-as-zero
         t1 |= t2;                              // Re-insert sign bit
         *(uint16_t*)out = t1;
-    #endif
+    //#endif
 }
 
 

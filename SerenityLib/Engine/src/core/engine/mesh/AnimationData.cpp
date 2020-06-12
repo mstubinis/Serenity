@@ -1,13 +1,14 @@
 #include <core/engine/mesh/AnimationData.h>
 #include <core/engine/math/Engine_Math.h>
+#include <core/engine/mesh/Mesh.h>
 #include <core/engine/mesh/Skeleton.h>
 
 using namespace Engine::priv;
 using namespace std;
 
-AnimationData::AnimationData(MeshSkeleton& meshSkeleton, const aiAnimation& assimpAnimation) : m_MeshSkeleton(meshSkeleton) {
-    m_TicksPerSecond  = assimpAnimation.mTicksPerSecond;
-    m_DurationInTicks = assimpAnimation.mDuration;
+AnimationData::AnimationData(Mesh& mesh, const aiAnimation& assimpAnimation) : m_Mesh(&mesh) {
+    m_TicksPerSecond  = (float)assimpAnimation.mTicksPerSecond;
+    m_DurationInTicks = (float)assimpAnimation.mDuration;
     for (unsigned int c = 0; c < assimpAnimation.mNumChannels; ++c) {
         const aiNodeAnim& aiAnimNode = *assimpAnimation.mChannels[c];
         if (!m_KeyframeData.count(aiAnimNode.mNodeName.data)) {
@@ -25,29 +26,32 @@ AnimationData::AnimationData(MeshSkeleton& meshSkeleton, const aiAnimation& assi
         }
     }
 }
+AnimationData::AnimationData(Mesh& mesh, float ticksPerSecond, float durationInTicks) : m_Mesh(&mesh) {
+    m_TicksPerSecond  = ticksPerSecond;
+    m_DurationInTicks = durationInTicks;
+}
 AnimationData::~AnimationData() {
     m_KeyframeData.clear();
 }
-void AnimationData::ReadNodeHeirarchy(const string& animationName, float time, const BoneNode* node, const glm::mat4& ParentTransform, vector<glm::mat4>& Transforms) {
-    string BoneName(node->Name);
+void AnimationData::ReadNodeHeirarchy(const string& animationName, float time, const MeshInfoNode* node, const glm::mat4& ParentTransform, vector<glm::mat4>& Transforms) {
     glm::mat4 NodeTransform(node->Transform);
-    if (m_KeyframeData.count(BoneName)) {
-        const auto keyframes(m_KeyframeData.at(BoneName));
+    if (m_KeyframeData.count(node->Name)) {
+        AnimationChannel keyframes(m_KeyframeData.at(node->Name));
         glm::vec3 s; CalcInterpolatedScaling(s, time, keyframes);
         aiQuaternion q; CalcInterpolatedRotation(q, time, keyframes);
         glm::mat4 rotation(Math::assimpToGLMMat3(q.GetMatrix()));
         glm::vec3 t; CalcInterpolatedPosition(t, time, keyframes);
-        NodeTransform = glm::mat4(1.0f);
-        NodeTransform = glm::translate(NodeTransform, t);
+        NodeTransform  = glm::mat4(1.0f);
+        NodeTransform  = glm::translate(NodeTransform, t);
         NodeTransform *= rotation;
-        NodeTransform = glm::scale(NodeTransform, s);
+        NodeTransform  = glm::scale(NodeTransform, s);
     }
     glm::mat4 Transform(ParentTransform * NodeTransform);
-    if (m_MeshSkeleton.m_BoneMapping.count(BoneName)) {
-        unsigned int BoneIndex(m_MeshSkeleton.m_BoneMapping.at(BoneName));
-        BoneInfo& boneInfo   = m_MeshSkeleton.m_BoneInfo[BoneIndex];
+    if (m_Mesh->m_Skeleton->m_BoneMapping.count(node->Name)) {
+        unsigned int BoneIndex(m_Mesh->m_Skeleton->m_BoneMapping.at(node->Name));
+        BoneInfo& boneInfo   = m_Mesh->m_Skeleton->m_BoneInfo[BoneIndex];
         glm::mat4& Final     = boneInfo.FinalTransform;
-        Final                = m_MeshSkeleton.m_GlobalInverseTransform * Transform * boneInfo.BoneOffset;
+        Final                = m_Mesh->m_Skeleton->m_GlobalInverseTransform * Transform * boneInfo.BoneOffset;
         //this line allows for animation combinations. only works when additional animations start off in their resting places...
         Final                = Transforms[BoneIndex] * Final;
     }
@@ -60,9 +64,9 @@ void AnimationData::BoneTransform(const string& animationName, float TimeInSecon
     float TimeInTicks(TimeInSeconds * TicksPerSecond);
     float AnimationTime(fmod(TimeInTicks, m_DurationInTicks));
     glm::mat4 ParentIdentity(1.0f);
-    ReadNodeHeirarchy(animationName, AnimationTime, m_MeshSkeleton.m_RootNode, ParentIdentity, Transforms);
-    for (unsigned int i = 0; i < m_MeshSkeleton.m_NumBones; ++i) {
-        Transforms[i] = m_MeshSkeleton.m_BoneInfo[i].FinalTransform;
+    ReadNodeHeirarchy(animationName, AnimationTime, m_Mesh->m_RootNode, ParentIdentity, Transforms);
+    for (unsigned int i = 0; i < m_Mesh->m_Skeleton->m_NumBones; ++i) {
+        Transforms[i] = m_Mesh->m_Skeleton->m_BoneInfo[i].FinalTransform;
     }
 }
 void AnimationData::internal_interpolate_vec3(glm::vec3& Out, float AnimationTime, const vector<Engine::priv::Vector3Key>& keys, function<size_t()> call) {
@@ -83,19 +87,6 @@ void AnimationData::CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime
         return FindPosition(AnimationTime, node);
     };
     return internal_interpolate_vec3(Out, AnimationTime, node.PositionKeys, lambda_find_position);
-    /*
-    if (node.PositionKeys.size() == 1) {
-        Out = node.PositionKeys[0].value;
-        return;
-    }
-    size_t CurrentIndex(FindPosition(AnimationTime, node));
-    size_t NextIndex(CurrentIndex + 1);
-    float DeltaTime(static_cast<float>(node.PositionKeys[NextIndex].time - node.PositionKeys[CurrentIndex].time));
-    float Factor(AnimationTime - static_cast<float>(node.PositionKeys[CurrentIndex].time) / DeltaTime);
-    glm::vec3 Start(node.PositionKeys[CurrentIndex].value);
-    glm::vec3 End(node.PositionKeys[NextIndex].value);
-    Out = Start + Factor * (End - Start);
-    */
 }
 void AnimationData::CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const AnimationChannel& node) {
     if (node.RotationKeys.size() == 1) {
@@ -115,20 +106,7 @@ void AnimationData::CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime,
     auto lambda_find_scaling = [this, &node, AnimationTime]() {
         return FindScaling(AnimationTime, node);
     };
-    return internal_interpolate_vec3(Out, AnimationTime, node.ScalingKeys, lambda_find_scaling);
-    /*
-    if (node.ScalingKeys.size() == 1) {
-        Out = node.ScalingKeys[0].value;
-        return;
-    }
-    size_t CurrentIndex(FindScaling(AnimationTime, node));
-    size_t NextIndex(CurrentIndex + 1);
-    float DeltaTime(static_cast<float>(node.ScalingKeys[NextIndex].time - node.ScalingKeys[CurrentIndex].time));
-    float Factor(AnimationTime - static_cast<float>(node.ScalingKeys[CurrentIndex].time) / DeltaTime);
-    glm::vec3 Start(node.ScalingKeys[CurrentIndex].value);
-    glm::vec3 End(node.ScalingKeys[NextIndex].value);
-    Out = Start + Factor * (End - Start);
-    */
+    return internal_interpolate_vec3(Out, AnimationTime, node.ScalingKeys, lambda_find_scaling); 
 }
 size_t AnimationData::FindPosition(float AnimationTime, const AnimationChannel& node) const {
     return internal_find(AnimationTime, node, node.PositionKeys);
@@ -142,4 +120,10 @@ size_t AnimationData::FindScaling(float AnimationTime, const AnimationChannel& n
 float AnimationData::duration() const {
     float TicksPerSecond( (m_TicksPerSecond != 0.0f) ? m_TicksPerSecond : 25.0f);
     return m_DurationInTicks / TicksPerSecond;
+}
+float AnimationData::durationInTicks() const {
+    return m_DurationInTicks;
+}
+float AnimationData::ticksPerSecond() const {
+    return m_TicksPerSecond;
 }

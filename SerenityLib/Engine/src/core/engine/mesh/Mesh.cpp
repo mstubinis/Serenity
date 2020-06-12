@@ -61,24 +61,44 @@ void InternalMeshPublicInterface::UnloadCPU(Mesh& mesh){
     SAFE_DELETE(mesh.m_Skeleton);
     SAFE_DELETE(mesh.m_CollisionFactory);
 
+    //cleanup the node tree
+    if (mesh.m_RootNode) {
+        std::vector<Engine::priv::MeshInfoNode*> cleanup_vector;
+        std::queue<Engine::priv::MeshInfoNode*> q;
+        q.push(mesh.m_RootNode);
+        while (!q.empty()) {
+            size_t size = q.size();
+            while (size > 0) {
+                auto* front = q.front();
+                cleanup_vector.push_back(front);
+                for (const auto& child : front->Children) {
+                    q.push(child);
+                }
+                q.pop();
+                --size;
+            }
+        }
+        SAFE_DELETE_VECTOR(cleanup_vector);
+    }
+
     mesh.EngineResource::unload();
 }
 void InternalMeshPublicInterface::UnloadGPU(Mesh& mesh){
     SAFE_DELETE(mesh.m_VertexData);
 }
 void InternalMeshPublicInterface::InitBlankMesh(Mesh& mesh) {
-
     mesh.registerEvent(EventType::WindowFullscreenChanged);
     mesh.setCustomBindFunctor(DefaultMeshBindFunctor());
     mesh.setCustomUnbindFunctor(DefaultMeshUnbindFunctor());
 }
 bool InternalMeshPublicInterface::SupportsInstancing(){
-    if(Renderer::OPENGL_VERSION >= 31 || OpenGLExtensions::supported(OpenGLExtensions::EXT_draw_instanced) || OpenGLExtensions::supported(OpenGLExtensions::ARB_draw_instanced)){
-        return true;
-    }
-    return false;
+    return (
+        Renderer::OPENGL_VERSION >= 31 || 
+        OpenGLExtensions::supported(OpenGLExtensions::EXT_draw_instanced) || 
+        OpenGLExtensions::supported(OpenGLExtensions::ARB_draw_instanced)
+    );
 }
-btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, const CollisionType::Type type, const bool isCompoundChild) {
+btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, CollisionType::Type type, bool isCompoundChild) {
     Engine::priv::MeshCollisionFactory* factory = nullptr;
     if (!mesh) {
         factory = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().m_CollisionFactory;
@@ -106,7 +126,7 @@ btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, const 
     }
     return new btEmptyShape();
 }
-btCollisionShape* InternalMeshPublicInterface::BuildCollision(ModelInstance* modelInstance, const CollisionType::Type type, const bool isCompoundChild) {
+btCollisionShape* InternalMeshPublicInterface::BuildCollision(ModelInstance* modelInstance, CollisionType::Type type, bool isCompoundChild) {
     Mesh* mesh = nullptr;
     if (modelInstance) {
         if (modelInstance->mesh()) {
@@ -179,12 +199,15 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
 #pragma endregion
     }else{
 #pragma region Some Threshold
-        vector<unsigned int> indices;
-        vector<glm::vec3> temp_pos;       temp_pos.reserve(data.points.size());
-        vector<glm::vec2> temp_uvs;       temp_uvs.reserve(data.uvs.size());
-        vector<glm::vec3> temp_normals;   temp_normals.reserve(data.normals.size());
-        vector<glm::vec3> temp_binormals; temp_binormals.reserve(data.binormals.size());
-        vector<glm::vec3> temp_tangents;  temp_tangents.reserve(data.tangents.size());
+        vector<uint32_t>  indices;
+        vector<glm::vec3> temp_pos;             temp_pos.reserve(data.points.size());
+        vector<glm::vec2> temp_uvs;             temp_uvs.reserve(data.uvs.size());
+        vector<glm::vec3> temp_normals;         temp_normals.reserve(data.normals.size());
+        vector<glm::vec3> temp_binormals;       temp_binormals.reserve(data.binormals.size());
+        vector<glm::vec3> temp_tangents;        temp_tangents.reserve(data.tangents.size());
+        vector<glm::vec4> boneIDs;              boneIDs.reserve(data.m_Bones.size());
+        vector<glm::vec4> boneWeights;          boneWeights.reserve(data.m_Bones.size());
+
         for (unsigned int i = 0; i < data.points.size(); ++i) {
             unsigned int index;
             bool found = priv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, mesh.m_Threshold);
@@ -199,7 +222,12 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
                 temp_normals.emplace_back(data.normals[i]);
                 temp_binormals.emplace_back(data.binormals[i]);
                 temp_tangents.emplace_back(data.tangents[i]);
-                indices.emplace_back(static_cast<ushort>(temp_pos.size() - 1));
+
+                if (data.m_Bones.size() > 0) {
+                    boneIDs.emplace_back(data.m_Bones[i].IDs[0], data.m_Bones[i].IDs[1], data.m_Bones[i].IDs[2], data.m_Bones[i].IDs[3]);
+                    boneWeights.emplace_back(data.m_Bones[i].Weights[0], data.m_Bones[i].Weights[1], data.m_Bones[i].Weights[2], data.m_Bones[i].Weights[3]);
+                }
+                indices.emplace_back(static_cast<uint32_t>(temp_pos.size() - 1));
             }
         }
         normals[0].reserve(temp_normals.size());
@@ -220,24 +248,15 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
         vertexData.setData(2, normals[0].data(), normals[0].size());
         vertexData.setData(3, normals[1].data(), normals[1].size());
         vertexData.setData(4, normals[2].data(), normals[2].size());
+        if (boneIDs.size() > 0) {
+            vertexData.setData(5, boneIDs.data(), boneIDs.size());
+            vertexData.setData(6, boneWeights.data(), boneWeights.size());
+        }
         vertexData.setIndices(indices.data(), indices.size(), false, false, true);
 #pragma endregion
     }
-    if (mesh.m_Skeleton) {
-        vector<vector<glm::vec4>> boneStuff;
-        boneStuff.resize(2);
-        auto& _skeleton = *mesh.m_Skeleton;
-        boneStuff[0].reserve(_skeleton.m_BoneIDs.size());
-        boneStuff[1].reserve(_skeleton.m_BoneIDs.size());
-        for (uint i = 0; i < _skeleton.m_BoneIDs.size(); ++i) {
-            boneStuff[0].push_back(_skeleton.m_BoneIDs[i]);
-            boneStuff[1].push_back(_skeleton.m_BoneWeights[i]);
-        }
-        vertexData.setData(5, boneStuff[0].data(), boneStuff[0].size());
-        vertexData.setData(6, boneStuff[1].data(), boneStuff[1].size());
-    }
 }
-void InternalMeshPublicInterface::TriangulateComponentIndices(Mesh& mesh, MeshImportedData& data, std::vector<std::vector<uint>>& indices, const unsigned char flags) {
+void InternalMeshPublicInterface::TriangulateComponentIndices(Mesh& mesh, MeshImportedData& data, std::vector<std::vector<uint>>& indices, unsigned char flags) {
     for (size_t i = 0; i < indices[0].size(); ++i) {
         glm::vec3 pos(0.0f);
         glm::vec2 uv(0.0f);
@@ -258,8 +277,8 @@ void InternalMeshPublicInterface::TriangulateComponentIndices(Mesh& mesh, MeshIm
 }
 void InternalMeshPublicInterface::CalculateRadius(Mesh& mesh) {
     mesh.m_radiusBox = glm::vec3(0.0f);
-    const auto& data = (*mesh.m_VertexData).getData<glm::vec3>(0);
-    for (const auto& vertex : data) {
+    vector<glm::vec3> points = mesh.m_VertexData->getPositions();
+    for (const auto& vertex : points) {
         const float x = abs(vertex.x);
         const float y = abs(vertex.y);
         const float z = abs(vertex.z);
@@ -269,7 +288,6 @@ void InternalMeshPublicInterface::CalculateRadius(Mesh& mesh) {
     }
     mesh.m_radius = Math::Max(mesh.m_radiusBox);
 }
-
 
 Mesh::Mesh() : EngineResource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
@@ -597,42 +615,39 @@ void Mesh::onEvent(const Event& e) {
 }
 //TODO: optimize this a bit more (bubble sort?)
 void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, SortingMode::Mode sortMode) {
-#ifndef _DEBUG
+    #ifndef _DEBUG
+        auto& triangles     = m_VertexData->m_Triangles;
+        glm::vec3 camPos    = camera.getPosition();
 
-    auto& triangles           = m_VertexData->m_Triangles;
+        auto lambda_sorter = [&](priv::Triangle& lhs, priv::Triangle& rhs) {
+            glm::mat4 model1 = instance.modelMatrix() * bodyModelMatrix;
+            glm::mat4 model2 = model1;
 
-    const glm::vec3 camPos    = const_cast<Camera&>(camera).getPosition();
+            model1 = glm::translate(model1, lhs.midpoint);
+            model2 = glm::translate(model2, rhs.midpoint);
 
-    const auto& lambda_sorter = [&](priv::Triangle& lhs, priv::Triangle& rhs) {
-        glm::mat4 model1 = instance.modelMatrix() * bodyModelMatrix;
-        glm::mat4 model2 = model1;
+            glm::vec3 model1Pos = Math::getMatrixPosition(model1);
+            glm::vec3 model2Pos = Math::getMatrixPosition(model2);
 
-        model1 = glm::translate(model1, lhs.midpoint);
-        model2 = glm::translate(model2, rhs.midpoint);
-
-        glm::vec3 model1Pos = Math::getMatrixPosition(model1);
-        glm::vec3 model2Pos = Math::getMatrixPosition(model2);
-
-        if (sortMode == SortingMode::FrontToBack)
-            return glm::distance2(camPos, model1Pos) < glm::distance2(camPos, model2Pos);
-        else if (sortMode == SortingMode::BackToFront)
-            return glm::distance2(camPos, model1Pos) > glm::distance2(camPos, model2Pos);
-        else
+            if (sortMode == SortingMode::FrontToBack)
+                return glm::distance2(camPos, model1Pos) < glm::distance2(camPos, model2Pos);
+            else if (sortMode == SortingMode::BackToFront)
+                return glm::distance2(camPos, model1Pos) > glm::distance2(camPos, model2Pos);
+            else
+                return false;
             return false;
-        return false;
-    };
-    //std::execution::par_unseq seems to really help here for performance, but keep profiling other related functionality.
-    std::sort( std::execution::par_unseq, triangles.begin(), triangles.end(), lambda_sorter);
+        };
+        //std::execution::par_unseq seems to really help here for performance, but keep profiling other related functionality.
+        std::sort( std::execution::par_unseq, triangles.begin(), triangles.end(), lambda_sorter);
 
-    vector<unsigned int> newIndices;
-    newIndices.reserve(m_VertexData->m_Indices.size());
-    for (size_t i = 0; i < triangles.size(); ++i) {
-        auto& triangle = triangles[i];
-        newIndices.push_back(triangle.index1);
-        newIndices.push_back(triangle.index2);
-        newIndices.push_back(triangle.index3);
-    }
-    Mesh::modifyIndices(newIndices.data(), newIndices.size());
-
-#endif
+        vector<unsigned int> newIndices;
+        newIndices.reserve(m_VertexData->m_Indices.size());
+        for (size_t i = 0; i < triangles.size(); ++i) {
+            auto& triangle = triangles[i];
+            newIndices.push_back(triangle.index1);
+            newIndices.push_back(triangle.index2);
+            newIndices.push_back(triangle.index3);
+        }
+        Mesh::modifyIndices(newIndices.data(), newIndices.size());
+    #endif
 }

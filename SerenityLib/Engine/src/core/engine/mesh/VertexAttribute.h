@@ -20,11 +20,12 @@ struct VertexAttributeInfo final{
         typeSize   = typeSize_;
     }
     VertexAttributeInfo()                                                = delete;
-    ~VertexAttributeInfo()                                               = default;
 
-    VertexAttributeInfo(const VertexAttributeInfo& other)                = delete;
-    VertexAttributeInfo& operator=(const VertexAttributeInfo& other)     = delete;
+    VertexAttributeInfo(const VertexAttributeInfo& other)                = default;
+    VertexAttributeInfo& operator=(const VertexAttributeInfo& other)     = default;
     VertexAttributeInfo(VertexAttributeInfo&& other) noexcept            = default;
     VertexAttributeInfo& operator=(VertexAttributeInfo&& other) noexcept = default;
+
+    ~VertexAttributeInfo() = default;
 };
 #endif

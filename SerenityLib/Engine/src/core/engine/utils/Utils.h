@@ -37,10 +37,22 @@ template <class InType, class Stream> void writeBigEndian(Stream& inStream, InTy
     }
     inStream.write((char*)buffer.data(), buffer.size());
 }
+template <class InType, class Stream> void writeBigEndian(Stream& inStream, InType&& in, unsigned int inBufferSizeInBytes) {
+    std::vector<std::uint8_t> buffer(inBufferSizeInBytes, 0);
+    unsigned long long offset = 255U;
+    for (int i = int(inBufferSizeInBytes) - 1; i >= 0; --i) {
+        auto shift = (8U * ((inBufferSizeInBytes - 1U) - i));
+        buffer[i]  = (in & offset) >> shift;
+        offset     = (offset * 255U) + offset;
+    }
+    inStream.write((char*)buffer.data(), buffer.size());
+}
 template <class InType, class Stream> void writeBigEndian(Stream& inStream, InType& in) {
     writeBigEndian(inStream, in, sizeof(in));
 }
-
+template <class InType, class Stream> void writeBigEndian(Stream& inStream, InType&& in) {
+    writeBigEndian(inStream, in, sizeof(in));
+}
 //specifies if a specific pointer element is in a vector
 template<typename E, typename B> bool isInVector(std::vector<B*>& v, E* e) {
     for (auto& item : v) {

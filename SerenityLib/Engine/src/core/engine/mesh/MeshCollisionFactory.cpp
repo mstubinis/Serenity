@@ -17,9 +17,10 @@ using namespace Engine;
 using namespace std;
 
 priv::MeshCollisionFactory::MeshCollisionFactory(Mesh& mesh) : m_Mesh(mesh) {
-    auto& data            = *mesh.m_VertexData;
-    _initConvexData(data);
-    _initTriangleData(data);
+    auto& data                  = *mesh.m_VertexData;
+    vector<glm::vec3> positions = data.getPositions();
+    initConvexData(data, positions);
+    initTriangleData(data, positions);
 }
 priv::MeshCollisionFactory::~MeshCollisionFactory() {
     SAFE_DELETE(m_ConvexHullData);
@@ -28,8 +29,7 @@ priv::MeshCollisionFactory::~MeshCollisionFactory() {
     SAFE_DELETE(m_TriangleInfoMap);
     SAFE_DELETE(m_TriangleStaticShape);
 }
-void priv::MeshCollisionFactory::_initConvexData(VertexData& data) {
-    const auto& positions = data.getData<glm::vec3>(0);
+void priv::MeshCollisionFactory::initConvexData(VertexData& data, std::vector<glm::vec3>& positions) {
     if (!m_ConvexHullData) {
         m_ConvesHullShape = new btConvexHullShape();
         for (auto& pos : positions) {
@@ -47,9 +47,8 @@ void priv::MeshCollisionFactory::_initConvexData(VertexData& data) {
         m_ConvesHullShape->recalcLocalAabb();
     }
 }
-void priv::MeshCollisionFactory::_initTriangleData(VertexData& data) {
+void priv::MeshCollisionFactory::initTriangleData(VertexData& data, std::vector<glm::vec3>& positions) {
     if (!m_TriangleStaticData) {
-        const auto& positions = data.getData<glm::vec3>(0);
         vector<glm::vec3> triangles;
         triangles.reserve(data.m_Indices.size());
         for (auto& indice : data.m_Indices) {
@@ -62,9 +61,9 @@ void priv::MeshCollisionFactory::_initTriangleData(VertexData& data) {
             tri.push_back(position);
             ++count;
             if (count == 3) {
-                const btVector3& v1 = Math::btVectorFromGLM(tri[0]);
-                const btVector3& v2 = Math::btVectorFromGLM(tri[1]);
-                const btVector3& v3 = Math::btVectorFromGLM(tri[2]);
+                btVector3 v1 = Engine::Math::btVectorFromGLM(tri[0]);
+                btVector3 v2 = Engine::Math::btVectorFromGLM(tri[1]);
+                btVector3 v3 = Engine::Math::btVectorFromGLM(tri[2]);
                 m_TriangleStaticData->addTriangle(v1, v2, v3, true);
                 vector_clear(tri);
                 count = 0;

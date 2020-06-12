@@ -73,10 +73,10 @@ void TerrainHeightfieldShape::processAllTriangles(btTriangleCallback* callback, 
         quantizedAabbMin[i]--;
         quantizedAabbMax[i]++;
     }
-    int startX  = 0;
-    int endX    = m_heightStickWidth - 1;
-    int startJ  = 0;
-    int endJ    = m_heightStickLength - 1;
+    int startX = 0;
+    int endX = m_heightStickWidth - 1;
+    int startJ = 0;
+    int endJ = m_heightStickLength - 1;
 
     switch (m_upAxis) {
         case 0: {
@@ -126,43 +126,35 @@ void TerrainHeightfieldShape::processAllTriangles(btTriangleCallback* callback, 
             bool      valid[3];
             if (m_flipQuadEdges || (m_useDiamondSubdivision && !((j + x) & 1)) || (m_useZigzagSubdivision && !(j & 1))) {
                 //first triangle
-                {
-                    valid[0] = getAndValidateVertex(x,     j,     vertices[indices[0]], true);
-                    valid[1] = getAndValidateVertex(x,     j + 1, vertices[indices[1]], true);
-                    valid[2] = getAndValidateVertex(x + 1, j + 1, vertices[indices[2]], true);
+                valid[0] = getAndValidateVertex(x, j, vertices[indices[0]], true);
+                valid[1] = getAndValidateVertex(x, j + 1, vertices[indices[1]], true);
+                valid[2] = getAndValidateVertex(x + 1, j + 1, vertices[indices[2]], true);
 
-                    if (valid[0] || valid[1] || valid[2]) {
-                        callback->processTriangle(vertices, 2 * x, j);
-                    }
+                if (valid[0] || valid[1] || valid[2]) {
+                    callback->processTriangle(vertices, 2 * x, j);
                 }
                 //second triangle
-                {
-                    valid[1] = getAndValidateVertex(x + 1, j + 1, vertices[indices[1]], true);
-                    valid[2] = getAndValidateVertex(x + 1, j,     vertices[indices[2]], true);
+                valid[1] = getAndValidateVertex(x + 1, j + 1, vertices[indices[1]], true);
+                valid[2] = getAndValidateVertex(x + 1, j, vertices[indices[2]], true);
 
-                    if (valid[0] || valid[1] || valid[2]) {
-                        callback->processTriangle(vertices, 2 * x + 1, j);
-                    }
+                if (valid[0] || valid[1] || valid[2]) {
+                    callback->processTriangle(vertices, 2 * x + 1, j);
                 }
-            }else{
+            }else {
                 //first triangle
-                {
-                    valid[0] = getAndValidateVertex(x,     j,     vertices[indices[0]], true);
-                    valid[1] = getAndValidateVertex(x,     j + 1, vertices[indices[1]], true);
-                    valid[2] = getAndValidateVertex(x + 1, j,     vertices[indices[2]], true);
+                valid[0] = getAndValidateVertex(x, j, vertices[indices[0]], true);
+                valid[1] = getAndValidateVertex(x, j + 1, vertices[indices[1]], true);
+                valid[2] = getAndValidateVertex(x + 1, j, vertices[indices[2]], true);
 
-                    if (valid[0] || valid[1] || valid[2]) {
-                        callback->processTriangle(vertices, 2 * x, j);
-                    }
+                if (valid[0] || valid[1] || valid[2]) {
+                    callback->processTriangle(vertices, 2 * x, j);
                 }
                 //second triangle 
-                {
-                    valid[0] = getAndValidateVertex(x + 1, j,     vertices[indices[0]], true);
-                    valid[2] = getAndValidateVertex(x + 1, j + 1, vertices[indices[2]], true);
+                valid[0] = getAndValidateVertex(x + 1, j, vertices[indices[0]], true);
+                valid[2] = getAndValidateVertex(x + 1, j + 1, vertices[indices[2]], true);
 
-                    if (valid[0] || valid[1] || valid[2]) {
-                        callback->processTriangle(vertices, 2 * x + 1, j);
-                    }
+                if (valid[0] || valid[1] || valid[2]) {
+                    callback->processTriangle(vertices, 2 * x + 1, j);
                 }
             }
         }
@@ -185,129 +177,54 @@ void TerrainData::clearData() {
     }
     SAFE_DELETE(m_FinalCompoundShape);
 }
-
-bool TerrainData::AdjacentPixels::valid(unsigned int x, unsigned int y) const {
-    if (x >= 0 && x <= (imgSizeX) - 1) {
-        if (y >= 0 && y <= (imgSizeY) - 1) {
-            if (topLeft > NULL_VERTEX) { return true; }
-            if (top > NULL_VERTEX) { return true; }
-            if (topRight > NULL_VERTEX) { return true; }
-            if (left > NULL_VERTEX) { return true; }
-            if (right > NULL_VERTEX) { return true; }
-            if (btmLeft > NULL_VERTEX) { return true; }
-            if (btm > NULL_VERTEX) { return true; }
-            if (btmRight > NULL_VERTEX) { return true; }
+bool TerrainData::AdjacentPixels::valid(int offsetX, int offsetY, int centerX, int centerY) const {
+    int actualX = centerX + offsetX;
+    int actualY = centerY + offsetY;
+    if (actualX >= 0 && actualX <= imgSizeX - 1) {
+        if (actualY >= 0 && actualY <= imgSizeY - 1) {
+            if (pixels[offsetY + 1][offsetX + 1] > NULL_VERTEX) {
+                return true;
+            }
         }
     }
     return false;
 }
-
 
 bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorSizeInPixels, unsigned int pointsPerPixel) {
     const auto pixelSize = heightmapImage.getSize();
     if (pixelSize.x == 0 || pixelSize.y == 0) {
         return false;
     }
-    const btScalar color_scale = 1.0 / static_cast<btScalar>(pointsPerPixel);
+    btScalar color_scale = 1.0 / static_cast<btScalar>(pointsPerPixel);
     btScalar scale_by = 0.15;
     //init the map with points at 0.0
-    vector<vector<btScalar>> temp; temp.resize(pixelSize.y * pointsPerPixel, vector<btScalar>(pixelSize.x * pointsPerPixel, btScalar(0.0)));
+    vector<vector<btScalar>> temp(pixelSize.y * pointsPerPixel, vector<btScalar>(pixelSize.x * pointsPerPixel, btScalar(0.0)));
     m_MinAndMaxHeight = make_pair(std::numeric_limits<float>::max(), std::numeric_limits<float>::min());
 
-    m_VerticesPerSector           = sectorSizeInPixels * pointsPerPixel;
-    unsigned int numSectorsWidth  = (unsigned int)temp[0].size() / m_VerticesPerSector;
+    m_VerticesPerSector = sectorSizeInPixels * pointsPerPixel;
+    unsigned int numSectorsWidth = (unsigned int)temp[0].size() / m_VerticesPerSector;
     unsigned int numSectorsHeight = (unsigned int)temp.size() / m_VerticesPerSector;
     //calculate the point heights based on neighboring pixels
     for (int pxlX = 0; pxlX < (int)pixelSize.x; ++pxlX) {
         for (int pxlY = 0; pxlY < (int)pixelSize.y; ++pxlY) {
             int dataX = (pointsPerPixel * pxlX) + 1;
             int dataY = (pointsPerPixel * pxlY) + 1;
-            if ((dataX < 0 || dataX >= temp.size()) || (dataY < 0 || dataX >= temp[0].size()) ) {
+            if ((dataX < 0 || dataX >= temp.size()) || (dataY < 0 || dataX >= temp[0].size())) {
                 continue;
             }
-            auto pixel          = static_cast<btScalar>(heightmapImage.getPixel(pxlX, pxlY).r);
-            temp[dataX][dataY]  = pixel;
+            auto pixel = static_cast<btScalar>(heightmapImage.getPixel(pxlX, pxlY).r);
+            temp[dataX][dataY] = pixel;
             auto adjacentPixels = get_adjacent_pixels(pxlX, pxlY, heightmapImage);
 
-            //TODO: this works, but is not perfect / ideal. works with points_per_pixel values of 3 and less
+            //TODO: this works, but is not perfect / ideal. works with pointsPerPixel values of 3 and less
             for (int i = 1; i <= glm::max(int(pointsPerPixel) - 2, 1); ++i) {
-                //top-left
-                {
-                    if (dataX - i >= 0 && dataY - i >= 0) {
-                        if (adjacentPixels.valid(pxlX - i, pxlY - i)) {
-                            temp[dataX - i][dataY - i] = pixel + ((adjacentPixels.topLeft - pixel) * color_scale);
-                        }else{
-                            temp[dataX - i][dataY - i] = pixel;
-                        }
-                    }
-                }
-                //top
-                {
-                    if (dataY - i >= 0) {
-                        if (adjacentPixels.valid(pxlX, pxlY - i)) {
-                            temp[dataX][dataY - i] = pixel + ((adjacentPixels.top - pixel) * color_scale);
-                        }else{
-                            temp[dataX][dataY - i] = pixel;
-                        }
-                    }
-                }
-                //top-right
-                {
-                    if (dataX + i < temp.size() && dataY - i >= 0) {
-                        if (adjacentPixels.valid(pxlX + i, pxlY - i)) {
-                            temp[dataX + i][dataY - i] = pixel + ((adjacentPixels.topRight - pixel) * color_scale);
-                        }else{
-                            temp[dataX + i][dataY - i] = pixel;
-                        }
-                    }
-                }
-                //left
-                {
-                    if (dataX - i >= 0) {
-                        if (adjacentPixels.valid(pxlX - i, pxlY)) {
-                            temp[dataX - i][dataY] = pixel + ((adjacentPixels.left - pixel) * color_scale);
-                        }else{
-                            temp[dataX - i][dataY] = pixel;
-                        }
-                    }
-                }
-                //right
-                {
-                    if (dataX + i < temp.size()) {
-                        if (adjacentPixels.valid(pxlX + i, pxlY)) {
-                            temp[dataX + i][dataY] = pixel + ((adjacentPixels.right - pixel) * color_scale);
-                        }else{
-                            temp[dataX + i][dataY] = pixel;
-                        }
-                    }
-                }
-                //btm-left
-                {
-                    if (dataX - i >= 0 && dataY + i < temp[0].size()) {
-                        if (adjacentPixels.valid(pxlX - i, pxlY + i)) {
-                            temp[dataX - i][dataY + i] = pixel + ((adjacentPixels.btmLeft - pixel) * color_scale);
-                        }else{
-                            temp[dataX - i][dataY + i] = pixel;
-                        }
-                    }
-                }
-                //btm
-                {
-                    if (dataY + i < temp[0].size()) {
-                        if (adjacentPixels.valid(pxlX, pxlY + i)) {
-                            temp[dataX][dataY + i] = pixel + ((adjacentPixels.btm - pixel) * color_scale);
-                        }else{
-                            temp[dataX][dataY + i] = pixel;
-                        }
-                    }
-                }
-                //btm-right
-                {
-                    if (dataX + i < temp.size() && dataY + i < temp[0].size()) {
-                        if (adjacentPixels.valid(pxlX + i, pxlY + i)) {
-                            temp[dataX + i][dataY + i] = pixel + ((adjacentPixels.btmRight - pixel) * color_scale);
-                        }else{
-                            temp[dataX + i][dataY + i] = pixel;
+                btScalar valid, heightValue;
+                for (int oX = -1; oX <= 1; ++oX) {
+                    for (int oY = -1; oY <= 1; ++oY) {
+                        if (dataX + oX >= 0 && dataY + oY >= 0) {
+                            valid = static_cast<btScalar>(adjacentPixels.valid(oX, oY, pxlX, pxlY));
+                            heightValue = pixel + (((adjacentPixels.pixels[oY + 1][oX + 1] - pixel) * color_scale) * valid);
+                            temp[dataX + oX][dataY + oY] = heightValue;
                         }
                     }
                 }
@@ -317,9 +234,9 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
     //calculate min and max heights and scale the terrain height
     for (size_t i = 0; i < temp.size(); ++i) {
         for (size_t j = 0; j < temp[i].size(); ++j) {
-            temp[i][j]              *= scale_by;
-            auto pixel               = temp[i][j];
-            m_MinAndMaxHeight.first  = glm::min(m_MinAndMaxHeight.first, (float)pixel);
+            temp[i][j] *= scale_by;
+            auto pixel = temp[i][j];
+            m_MinAndMaxHeight.first = glm::min(m_MinAndMaxHeight.first, (float)pixel);
             m_MinAndMaxHeight.second = glm::max(m_MinAndMaxHeight.second, (float)pixel);
 
         }
@@ -349,8 +266,8 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
                 for (unsigned int y = 0; y < m_VerticesPerSector + 1; ++y) {
                     unsigned int offset_x = (sectorX * m_VerticesPerSector) + x;
                     unsigned int offset_y = (sectorY * m_VerticesPerSector) + y;
-                    unsigned int x_       = glm::min(offset_x, (unsigned int)(temp.size() - 1));
-                    unsigned int y_       = glm::min(offset_y, (unsigned int)(temp[x].size() - 1));
+                    unsigned int x_ = glm::min(offset_x, (unsigned int)(temp.size() - 1));
+                    unsigned int y_ = glm::min(offset_y, (unsigned int)(temp[x].size() - 1));
 
                     btScalar height = temp[x_][y_];
                     shape.m_Data.push_back(height);
@@ -361,44 +278,27 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
     }
     return true;
 }
-TerrainData::AdjacentPixels TerrainData::get_adjacent_pixels(unsigned int x, unsigned int y, sf::Image& heightmapImage) {
+TerrainData::AdjacentPixels TerrainData::get_adjacent_pixels(unsigned int pixelX, unsigned int pixelY, sf::Image& heightmapImage) {
     AdjacentPixels ret;
-    int xSigned = static_cast<int>(x);
-    int ySigned = static_cast<int>(y);
-    const auto heightmapSize = glm::ivec2(heightmapImage.getSize().x, heightmapImage.getSize().y);
-    ret.imgSizeX = heightmapSize.x;
-    ret.imgSizeY = heightmapSize.y;
-    //top-left
-    if (xSigned - 1 >= 0 && ySigned - 1 >= 0) {
-        ret.topLeft = (static_cast<btScalar>(heightmapImage.getPixel(x - 1, y - 1).r));
-    }
-    //top
-    if (ySigned - 1 >= 0) {
-        ret.top = (static_cast<btScalar>(heightmapImage.getPixel(x, y - 1).r));
-    }
-    //top-right
-    if (xSigned + 1 <= heightmapSize.x-1 && ySigned - 1 >= 0) {
-        ret.topRight = (static_cast<btScalar>(heightmapImage.getPixel(x + 1, y - 1).r));
-    }
-    //left
-    if (xSigned - 1 >= 0) {
-        ret.left = (static_cast<btScalar>(heightmapImage.getPixel(x - 1, y).r));
-    }
-    //right
-    if (xSigned + 1 <= heightmapSize.x - 1) {
-        ret.right = (static_cast<btScalar>(heightmapImage.getPixel(x + 1, y).r));
-    }
-    //btm-left
-    if (xSigned - 1 >= 0 && ySigned + 1 <= heightmapSize.y - 1) {
-        ret.btmLeft = (static_cast<btScalar>(heightmapImage.getPixel(x - 1, y + 1).r));
-    }
-    //btm
-    if (ySigned + 1 <= heightmapSize.y - 1) {
-        ret.btm = (static_cast<btScalar>(heightmapImage.getPixel(x, y + 1).r));
-    }
-    //btm-right
-    if (xSigned + 1 <= heightmapSize.x - 1 && ySigned + 1 <= heightmapSize.y - 1) {
-        ret.btmRight = (static_cast<btScalar>(heightmapImage.getPixel(x + 1, y + 1).r));
+    int pxlX = static_cast<int>(pixelX);
+    int pxlY = static_cast<int>(pixelY);
+    const auto size = glm::ivec2(heightmapImage.getSize().x, heightmapImage.getSize().y);
+    ret.imgSizeX = size.x;
+    ret.imgSizeY = size.y;
+
+    int xx = 0;
+    int yy = 0;
+    for (int i = pxlX - 1; i <= pxlX + 1; ++i) {
+        if (i >= 0 && i <= size.x - 1) {
+            yy = 0;
+            for (int j = pxlY - 1; j <= pxlY + 1; ++j) {
+                if (j >= 0 && j <= size.y - 1) {
+                    ret.pixels[yy][xx] = static_cast<btScalar>(heightmapImage.getPixel(i, j).r);
+                }
+                yy++;
+            }
+        }
+        xx++;
     }
     return ret;
 }
@@ -407,28 +307,28 @@ TerrainData::AdjacentPixels TerrainData::get_adjacent_pixels(unsigned int x, uns
 
 #pragma region Terrain
 
-Terrain::Terrain(const string& name, sf::Image& heightmapImage, Handle& materialHandle, unsigned int sectorSizeInPixels, unsigned int pointsPerPixel, bool useDiamondSubdivisions, Scene* scene) : Entity(*scene){
+Terrain::Terrain(const string& name, sf::Image& heightmapImage, Handle& materialHandle, unsigned int sectorSizeInPixels, unsigned int pointsPerPixel, bool useDiamondSubdivisions, Scene* scene) : Entity(*scene) {
     m_TerrainData.calculate_data(heightmapImage, sectorSizeInPixels, pointsPerPixel);
     Terrain::setUseDiamondSubdivision(useDiamondSubdivisions);
     m_Mesh = NEW Mesh(name, *this, 0.000f);
-    Handle handle  = priv::Core::m_Engine->m_ResourceManager.m_Resources.add(m_Mesh, ResourceType::Mesh);
+    Handle handle = priv::Core::m_Engine->m_ResourceManager.m_Resources.add(m_Mesh, ResourceType::Mesh);
 
     addComponent<ComponentModel>(m_Mesh, materialHandle);
     addComponent<ComponentBody>(CollisionType::Compound); //TODO: check CollisionType::TriangleShapeStatic
-    auto* body   = getComponent<ComponentBody>();
-    auto* model  = getComponent<ComponentModel>();
+    auto* body = getComponent<ComponentBody>();
+    auto* model = getComponent<ComponentModel>();
     Collision* c = NEW Collision(*body);
 
     m_TerrainData.m_FinalCompoundShape = new btCompoundShape();
     for (unsigned int sectorX = 0; sectorX < m_TerrainData.m_BtHeightfieldShapes.size(); ++sectorX) {
         for (unsigned int sectorY = 0; sectorY < m_TerrainData.m_BtHeightfieldShapes[sectorX].size(); ++sectorY) {
             auto* heightfield = m_TerrainData.m_BtHeightfieldShapes[sectorX][sectorY];
-            auto  dimensions  = glm::ivec2(heightfield->getUserIndex(), heightfield->getUserIndex2());
+            auto  dimensions = glm::ivec2(heightfield->getUserIndex(), heightfield->getUserIndex2());
 
             btTransform xform;
             xform.setIdentity();
             btVector3 origin;
-            origin = btVector3( btScalar(sectorY * dimensions.y), btScalar(0.0), btScalar(sectorX * dimensions.x) );
+            origin = btVector3(btScalar(sectorY * dimensions.y), btScalar(0.0), btScalar(sectorX * dimensions.x));
             xform.setOrigin(origin);
             m_TerrainData.m_FinalCompoundShape->addChildShape(xform, m_TerrainData.m_BtHeightfieldShapes[sectorX][sectorY]);
             m_TerrainData.m_FinalCompoundShape->recalculateLocalAabb();
@@ -441,7 +341,7 @@ Terrain::Terrain(const string& name, sf::Image& heightmapImage, Handle& material
     body->setGravity(0, 0, 0);
     setScale(25, 25, 25);
 }
-Terrain::~Terrain(){
+Terrain::~Terrain() {
 
 }
 bool Terrain::getUseDiamondSubdivision() const {
@@ -462,8 +362,8 @@ bool Terrain::internal_remove_quad(unsigned int indexX, unsigned int indexY) {
     int sectorX = (indexX / m_TerrainData.m_VerticesPerSector);
     int sectorY = (indexY / m_TerrainData.m_VerticesPerSector);
 
-    int modX    = (indexX % m_TerrainData.m_VerticesPerSector);
-    int modY    = (indexY % m_TerrainData.m_VerticesPerSector);
+    int modX = (indexX % m_TerrainData.m_VerticesPerSector);
+    int modY = (indexY % m_TerrainData.m_VerticesPerSector);
 
     return internal_remove_quad(sectorX, sectorY, modX, modY);
 }
@@ -472,13 +372,13 @@ bool Terrain::internal_remove_quad(unsigned int sectorX, unsigned int sectorY, u
         return false;
     }
     auto* sectorData = m_TerrainData.m_BtHeightfieldShapes[sectorX][sectorY];
-    if (!sectorData || indexX >= sectorData->m_ProcessedVertices.size()-1 || indexY >= sectorData->m_ProcessedVertices[0].size()-1) {
+    if (!sectorData || indexX >= sectorData->m_ProcessedVertices.size() - 1 || indexY >= sectorData->m_ProcessedVertices[0].size() - 1) {
         return false;
     }
-    sectorData->m_ProcessedVertices[indexX    ][indexY    ] = false;
+    sectorData->m_ProcessedVertices[indexX][indexY] = false;
     sectorData->m_ProcessedVertices[indexX + 1][indexY + 1] = false;
-    sectorData->m_ProcessedVertices[indexX    ][indexY + 1] = false;
-    sectorData->m_ProcessedVertices[indexX + 1][indexY    ] = false;
+    sectorData->m_ProcessedVertices[indexX][indexY + 1] = false;
+    sectorData->m_ProcessedVertices[indexX + 1][indexY] = false;
     return true;
 }
 bool Terrain::removeQuad(unsigned int sectorX, unsigned int sectorY, unsigned int indexX, unsigned int indexY) {
@@ -535,24 +435,24 @@ bool Terrain::removeQuads(vector<tuple<unsigned int, unsigned int>>& quads) {
 }
 
 
-void Terrain::update(const float dt){
+void Terrain::update(const float dt) {
 }
-void Terrain::setPosition(float x, float y, float z){
+void Terrain::setPosition(float x, float y, float z) {
     ComponentBody& body = *getComponent<ComponentBody>();
     //Physics::removeRigidBody(body);
     body.setPosition(x, y, z);
     //Physics::addRigidBody(body);
 }
-void Terrain::setPosition(const glm::vec3& position){
+void Terrain::setPosition(const glm::vec3& position) {
     Terrain::setPosition(position.x, position.y, position.z);
 }
-void Terrain::setScale(float x, float y, float z){
+void Terrain::setScale(float x, float y, float z) {
     auto components = getComponents<ComponentModel, ComponentBody>();
-    auto* model     = get<0>(components);
-    auto* body      = get<1>(components);
+    auto* model = get<0>(components);
+    auto* body = get<1>(components);
     body->setScale(x, y, z);
 }
-void Terrain::setScale(const glm::vec3& scl){
+void Terrain::setScale(const glm::vec3& scl) {
     Terrain::setScale(scl.x, scl.y, scl.z);
 }
 

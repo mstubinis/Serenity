@@ -6,6 +6,7 @@
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <glm/glm.hpp>
+#include <array>
 
 constexpr unsigned int NUM_BONES_PER_VERTEX   = 4U;
 constexpr unsigned int NUM_MAX_INSTANCES      = 65536U;
@@ -57,26 +58,25 @@ namespace Engine::priv {
         Triangle& operator=(Triangle&& other) noexcept = default;
 
     };
-    struct VertexBoneData final {
-        float     IDs[NUM_BONES_PER_VERTEX];
-        float Weights[NUM_BONES_PER_VERTEX];
+    struct VertexBoneData final : public Engine::NonCopyable {
+        std::array<float, NUM_BONES_PER_VERTEX> IDs;
+        std::array<float, NUM_BONES_PER_VERTEX> Weights;
 
         VertexBoneData() {
-            for (unsigned int i = 0; i < NUM_BONES_PER_VERTEX; ++i) {
-                IDs[i]     = 0.0f;
-                Weights[i] = 0.0f;
-            }
+            IDs.fill(0.0f);
+            Weights.fill(0.0f);
+        }
+        VertexBoneData(unsigned int BoneID, float Weight) : VertexBoneData(){
+            AddBoneData(BoneID, Weight);
         }
         ~VertexBoneData(){}
-        VertexBoneData(const VertexBoneData&)                      = delete;
-        VertexBoneData& operator=(const VertexBoneData&)           = delete;
         VertexBoneData(VertexBoneData&& other) noexcept            = default;
         VertexBoneData& operator=(VertexBoneData&& other) noexcept = default;
 
-        void AddBoneData(uint BoneID, float Weight) {
+        void AddBoneData(unsigned int BoneID, float Weight) {
             for (unsigned int i = 0; i < NUM_BONES_PER_VERTEX; ++i) {
                 if (Weights[i] == 0.0f) {
-                    IDs[i] = float(BoneID);
+                    IDs[i]     = float(BoneID);
                     Weights[i] = Weight;
                     return;
                 }

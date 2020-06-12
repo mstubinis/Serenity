@@ -14,9 +14,10 @@ class Mesh;
 #include <assimp/postprocess.h>
 
 #include <core/engine/resources/Handle.h>
+#include <core/engine/mesh/AnimationIncludes.h>
 
 namespace Engine::priv {
-    struct BoneNode;
+    struct MeshInfoNode;
     struct AssimpSceneImport final {
         std::shared_ptr<Assimp::Importer>  m_Importer_ptr;
         aiScene*                           m_AIScene        = nullptr;
@@ -55,7 +56,7 @@ struct MeshRequest final {
     std::vector<MeshRequestPart>                                m_Parts;
     bool                                                        m_Async          = false;
     Engine::priv::AssimpSceneImport                             m_Importer;
-    std::unordered_map<std::string, Engine::priv::BoneNode>     m_Map;
+    MeshNodeMap                                                 m_MeshNodeMap;
 
     MeshRequest() = delete;
     MeshRequest(const std::string& filenameOrData, const float threshold);

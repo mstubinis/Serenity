@@ -40,8 +40,6 @@ namespace Engine::priv {
 };
 
 ShaderProgram::ShaderProgram(const string& in_name, Shader& vs, Shader& fs):m_VertexShader(vs), m_FragmentShader(fs), EngineResource(ResourceType::ShaderProgram, in_name){
-    m_LoadedGPU = false;
-    m_LoadedCPU = false;
     setName(in_name);
 
     const string& name_ = name();
@@ -181,18 +179,16 @@ void InternalShaderProgramPublicInterface::UnloadGPU(ShaderProgram& shaderP){
 }
 void ShaderProgram::load(){
     if(!isLoaded()){
-        auto& _this = *this;
-        InternalShaderProgramPublicInterface::LoadCPU(_this);
-        InternalShaderProgramPublicInterface::LoadGPU(_this);
+        InternalShaderProgramPublicInterface::LoadCPU(*this);
+        InternalShaderProgramPublicInterface::LoadGPU(*this);
 
         EngineResource::load();
     }
 }
 void ShaderProgram::unload(){
     if(isLoaded() /*&& useCount() == 0*/){
-        auto& _this = *this;
-        InternalShaderProgramPublicInterface::UnloadGPU(_this);
-        InternalShaderProgramPublicInterface::UnloadCPU(_this);
+        InternalShaderProgramPublicInterface::UnloadGPU(*this);
+        InternalShaderProgramPublicInterface::UnloadCPU(*this);
 
         EngineResource::unload();
     }
