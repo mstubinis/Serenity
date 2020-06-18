@@ -3,7 +3,7 @@
 #define ENGINE_CAMERA_H
 
 #include <ecs/Components.h>
-#include <ecs/Entity.h>
+//#include <ecs/Entity.h>
 
 class  Scene;
 struct CameraType final{enum Type {

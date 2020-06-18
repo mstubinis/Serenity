@@ -24,6 +24,7 @@ namespace Engine::priv {
 #include <ecs/Entity.h>
 #include <ecs/ECSSystemConstructorInfo.h>
 #include <core/engine/model/ModelInstance.h>
+//#include <boost/type_index.hpp>
 
 typedef std::vector<ModelInstance*> ModelInstanceVector;
 
@@ -45,16 +46,16 @@ class ComponentModel: public Observer {
 
         ComponentModel() = delete;
     public:
-        BOOST_TYPE_INDEX_REGISTER_CLASS
-        explicit ComponentModel(const Entity, const Handle meshHandle, const Handle materialHandle, ShaderProgram* = 0,         const RenderStage::Stage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(const Entity, Mesh*,                   const Handle materialHandle, ShaderProgram* = 0,         const RenderStage::Stage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(const Entity, const Handle meshHandle, Material*,                   ShaderProgram* = 0,         const RenderStage::Stage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(const Entity, Mesh*,                   Material*,                   ShaderProgram* = 0,         const RenderStage::Stage = RenderStage::GeometryOpaque);
+        //BOOST_TYPE_INDEX_REGISTER_CLASS
+        explicit ComponentModel(Entity, Handle meshHandle, Handle materialHandle, ShaderProgram* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        explicit ComponentModel(Entity, Mesh*,             Handle materialHandle, ShaderProgram* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        explicit ComponentModel(Entity, Handle meshHandle, Material*,             ShaderProgram* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
+        explicit ComponentModel(Entity, Mesh*,             Material*,             ShaderProgram* = 0, RenderStage::Stage = RenderStage::GeometryOpaque);
 
-        explicit ComponentModel(const Entity, const Handle meshHandle, const Handle materialHandle, const Handle shaderPHandle, const RenderStage::Stage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(const Entity, Mesh*,                   const Handle materialHandle, const Handle shaderPHandle, const RenderStage::Stage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(const Entity, const Handle meshHandle, Material*,                   const Handle shaderPHandle, const RenderStage::Stage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(const Entity, Mesh*,                   Material*,                   const Handle shaderPHandle, const RenderStage::Stage = RenderStage::GeometryOpaque);
+        explicit ComponentModel(Entity, Handle meshHandle, Handle materialHandle, Handle shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        explicit ComponentModel(Entity, Mesh*,             Handle materialHandle, Handle shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        explicit ComponentModel(Entity, Handle meshHandle, Material*,             Handle shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
+        explicit ComponentModel(Entity, Mesh*,             Material*,             Handle shaderPHandle, RenderStage::Stage = RenderStage::GeometryOpaque);
 
         ComponentModel(const ComponentModel& other)                = delete;
         ComponentModel& operator=(const ComponentModel& other)     = delete;

@@ -67,7 +67,7 @@ void TextureRequest::request() {
     TextureRequestStaticImpl::Request(*this);
 }
 void TextureRequest::requestAsync() {
-    if (Engine::priv::threading::hardware_concurrency() > 1) {
+    if (Engine::hardware_concurrency() > 1) {
         async = true;
         TextureRequestStaticImpl::Request(*this);
     }else{
@@ -162,7 +162,7 @@ void TextureRequestFromMemory::request() {
     TextureRequestStaticImpl::RequestMem(*this);
 }
 void TextureRequestFromMemory::requestAsync() {
-    if (Engine::priv::threading::hardware_concurrency() > 1) {
+    if (Engine::hardware_concurrency() > 1) {
         async = true;
         TextureRequestStaticImpl::RequestMem(*this);
     }else{

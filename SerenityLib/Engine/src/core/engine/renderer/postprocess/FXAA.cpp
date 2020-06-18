@@ -1,7 +1,7 @@
 #include <core/engine/renderer/postprocess/FXAA.h>
 #include <core/engine/renderer/Renderer.h>
 
-#include <core/engine/threading/Engine_ThreadManager.h>
+#include <core/engine/threading/ThreadingModule.h>
 
 #include <core/engine/renderer/GBuffer.h>
 #include <core/engine/shaders/ShaderProgram.h>

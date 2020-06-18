@@ -6,7 +6,7 @@
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/shaders/Shader.h>
-#include <core/engine/threading/Engine_ThreadManager.h>
+#include <core/engine/threading/ThreadingModule.h>
 
 using namespace std;
 

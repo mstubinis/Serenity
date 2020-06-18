@@ -11,7 +11,8 @@ class  btHeightfieldTerrainShape;
 class  btCompoundShape;
 
 #include <core/engine/physics/PhysicsIncludes.h>
-#include <core/engine/events/Engine_EventObject.h>
+#include <core/engine/events/Event.h>
+#include <core/engine/events/Observer.h>
 #include <LinearMath/btVector3.h>
 #include <ecs/Entity.h>
 #include <vector>

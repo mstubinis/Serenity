@@ -5,15 +5,15 @@ using namespace Engine::priv;
 using namespace std;
 
 #pragma region Component
-ComponentName::ComponentName(const Entity entity) {
+ComponentName::ComponentName(Entity entity) {
     m_Owner = entity;
     m_Data = "";
 }
-ComponentName::ComponentName(const Entity entity, const string& Name) {
+ComponentName::ComponentName(Entity entity, const string& Name) {
     m_Owner = entity;
     m_Data = Name;
 }
-ComponentName::ComponentName(const Entity entity, const char* Name) {
+ComponentName::ComponentName(Entity entity, const char* Name) {
     m_Owner = entity;
     m_Data = Name;
 }
@@ -35,11 +35,11 @@ bool ComponentName::empty() const {
 
 struct priv::ComponentName_UpdateFunction final {void operator()(void* system, void* componentPool, const float dt, Scene& scene) const {
 }};
-struct priv::ComponentName_ComponentAddedToEntityFunction final {void operator()(void* system, void* component, Entity& entity) const {
+struct priv::ComponentName_ComponentAddedToEntityFunction final {void operator()(void* system, void* component, Entity entity) const {
 }};
-struct priv::ComponentName_ComponentRemovedFromEntityFunction final { void operator()(void* system, Entity& entity) const {
+struct priv::ComponentName_ComponentRemovedFromEntityFunction final { void operator()(void* system, Entity entity) const {
 }};
-struct priv::ComponentName_EntityAddedToSceneFunction final {void operator()(void* system, void* componentPool, Entity& entity, Scene& scene) const {
+struct priv::ComponentName_EntityAddedToSceneFunction final {void operator()(void* system, void* componentPool, Entity entity, Scene& scene) const {
 }};
 struct priv::ComponentName_SceneEnteredFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
 }};

@@ -3,7 +3,7 @@
 #include <core/engine/mesh/MeshImportedData.h>
 #include <core/engine/mesh/Skeleton.h>
 #include <core/engine/mesh/MeshCollisionFactory.h>
-#include <core/engine/events/Engine_EventObject.h>
+#include <core/engine/events/Event.h>
 #include <core/engine/system/Engine.h>
 #include <core/Terrain.h>
 
@@ -617,6 +617,9 @@ void Mesh::onEvent(const Event& e) {
 void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, SortingMode::Mode sortMode) {
     #ifndef _DEBUG
         auto& triangles     = m_VertexData->m_Triangles;
+        if (triangles.size() == 0) {
+            return;
+        }
         glm::vec3 camPos    = camera.getPosition();
 
         auto lambda_sorter = [&](priv::Triangle& lhs, priv::Triangle& rhs) {
@@ -637,7 +640,7 @@ void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const gl
                 return false;
             return false;
         };
-        //std::execution::par_unseq seems to really help here for performance, but keep profiling other related functionality.
+        //std::execution::par_unseq seems to really help here for performance
         std::sort( std::execution::par_unseq, triangles.begin(), triangles.end(), lambda_sorter);
 
         vector<unsigned int> newIndices;

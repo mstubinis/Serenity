@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_LIGHT_SUN_INCLUDE_GUARD
-#define ENGINE_LIGHT_SUN_INCLUDE_GUARD
+#ifndef ENGINE_LIGHT_SUN_H
+#define ENGINE_LIGHT_SUN_H
 
 class Scene;
 namespace Engine::priv {

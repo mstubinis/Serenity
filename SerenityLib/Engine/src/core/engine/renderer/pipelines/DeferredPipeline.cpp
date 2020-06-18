@@ -10,7 +10,8 @@
 #include <core/engine/materials/Material.h>
 #include <core/engine/materials/MaterialComponent.h>
 #include <core/engine/materials/MaterialLayer.h>
-#include <core/engine/renderer/particles/Particle.h>
+//#include <core/engine/renderer/particles/Particle.h>
+#include <core/engine/renderer/particles/ParticleSystem.h>
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/shaders/Shader.h>
 #include <core/engine/renderer/FramebufferObject.h>

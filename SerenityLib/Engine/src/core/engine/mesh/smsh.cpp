@@ -100,8 +100,8 @@ void SMSH_File::LoadFile(Mesh* mesh, const char* filename) {
     //animation data
     if (smsh_header.m_NumberOfBones > 0U) {
         auto lamda_read_mat4_as_half_floats = [&blockStart, &streamDataBuffer](glm::mat4& inMatrix) {
-            for (size_t i = 0U; i < 4U; ++i) {
-                for (size_t j = 0U; j < 4U; ++j) {
+            for (unsigned int i = 0U; i < 4U; ++i) {
+                for (unsigned int j = 0U; j < 4U; ++j) {
                     uint16_t half_float;
                     readBigEndian(half_float, streamDataBuffer, 2, blockStart);
                     Engine::Math::Float32From16(&inMatrix[i][j], half_float);
@@ -421,8 +421,8 @@ void SMSH_File::SaveFile(const char* filename, Mesh& mesh) {
     //animation data
     if (smsh_header.m_NumberOfBones > 0U) {
         auto lamda_write_mat4_as_half_floats = [](std::ofstream& instream, const glm::mat4& inMatrix) {
-            for (size_t i = 0U; i < 4U; ++i) {
-                for (size_t j = 0U; j < 4U; ++j) {
+            for (unsigned int i = 0U; i < 4U; ++i) {
+                for (unsigned int j = 0U; j < 4U; ++j) {
                     uint16_t half_float;
                     Engine::Math::Float16From32(&half_float, inMatrix[i][j]);
                     writeBigEndian(instream, half_float, 2U);

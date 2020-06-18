@@ -5,7 +5,7 @@
 #include <core/engine/lua/LuaState.h>
 
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/sounds/Engine_Sounds.h>
+#include <core/engine/sounds/SoundModule.h>
 
 #include <core/engine/scene/Scene.h>
 #include <core/engine/scene/SceneOptions.h>

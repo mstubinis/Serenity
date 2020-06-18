@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_LIGHT_INCLUDES_INCLUDE_GUARD
-#define ENGINE_LIGHT_INCLUDES_INCLUDE_GUARD
+#ifndef ENGINE_LIGHT_INCLUDES_H
+#define ENGINE_LIGHT_INCLUDES_H
 
 struct LightType {enum Type {
     Sun, 

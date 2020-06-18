@@ -5,7 +5,7 @@
 
 #include <core/engine/system/Engine.h>
 #include <core/engine/events/EventDispatcher.h>
-#include <core/engine/events/Engine_EventObject.h>
+#include <core/engine/events/Event.h>
 
 using namespace Engine;
 using namespace Engine::priv;
@@ -18,7 +18,7 @@ SoundEffect::~SoundEffect() {
 
 }
 void SoundEffect::update(const float dt) {
-    const auto sfStatus = m_Sound.getStatus();
+    auto sfStatus = m_Sound.getStatus();
     if (sfStatus == sf::SoundSource::Status::Stopped) {
         if (m_Loops >= 2) {//handle the looping logic
             if (getLoopsLeft() >= 2) {
@@ -37,8 +37,8 @@ void SoundEffect::update(const float dt) {
 float SoundEffect::getDuration() const {
     return m_Duration;
 }
-bool SoundEffect::play(const uint numLoops) {
-    const auto sfStatus = m_Sound.getStatus();
+bool SoundEffect::play(unsigned int numLoops) {
+    auto sfStatus = m_Sound.getStatus();
     m_Loops = numLoops;
     switch (sfStatus) {
         case sf::SoundSource::Status::Stopped: {//it starts
@@ -64,7 +64,7 @@ bool SoundEffect::play(const uint numLoops) {
     return true;
 }
 bool SoundEffect::pause() {
-    const auto sfStatus = m_Sound.getStatus();
+    auto sfStatus = m_Sound.getStatus();
     switch (sfStatus) {
         case sf::SoundSource::Status::Stopped: {
             m_Status = SoundStatus::Stopped;
@@ -87,8 +87,8 @@ bool SoundEffect::pause() {
     Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     return true;
 }
-bool SoundEffect::stop(const bool stopAllLoops) {
-    const auto sfStatus = m_Sound.getStatus();
+bool SoundEffect::stop(bool stopAllLoops) {
+    auto sfStatus = m_Sound.getStatus();
     switch (sfStatus) {
         case sf::SoundSource::Status::Stopped: {
             if (m_Status != SoundStatus::Stopped) {
@@ -125,7 +125,7 @@ bool SoundEffect::stop(const bool stopAllLoops) {
     return true;
 }
 bool SoundEffect::restart() {
-    const auto sfStatus = m_Sound.getStatus();
+    auto sfStatus = m_Sound.getStatus();
     switch (sfStatus) {
         case sf::SoundSource::Status::Stopped: {
             return false;
@@ -139,8 +139,9 @@ bool SoundEffect::restart() {
             return false;
         }
     }
-    if (status() == SoundStatus::Fresh || m_Sound.getPlayingOffset() == sf::Time::Zero)
+    if (status() == SoundStatus::Fresh || m_Sound.getPlayingOffset() == sf::Time::Zero) {
         return false;
+    }
     m_Sound.setPlayingOffset(sf::Time::Zero); //only if paused or playing. if stopped, has no effect
 
     EventSoundStatusChanged e(m_Status);
@@ -152,33 +153,33 @@ bool SoundEffect::restart() {
 float SoundEffect::getAttenuation() const {
     return m_Sound.getAttenuation();
 }
-glm::vec3 SoundEffect::getPosition() {
+glm::vec3 SoundEffect::getPosition() const {
     const sf::Vector3f v = m_Sound.getPosition();
     return glm::vec3(v.x, v.y, v.z);
 }
-uint SoundEffect::getChannelCount() {
+uint SoundEffect::getChannelCount() const {
     auto buffer = m_Sound.getBuffer();
     if (buffer) {
         return buffer->getChannelCount();
     }
     return 0;
 }
-void SoundEffect::setAttenuation(const float attenuation) {
+void SoundEffect::setAttenuation(float attenuation) {
     m_Sound.setAttenuation(attenuation);
 }
-float SoundEffect::getMinDistance() {
+float SoundEffect::getMinDistance() const {
     return m_Sound.getMinDistance();
 }
-void SoundEffect::setMinDistance(const float minDistance) {
+void SoundEffect::setMinDistance(float minDistance) {
     m_Sound.setMinDistance(minDistance);
 }
-bool SoundEffect::isRelativeToListener() {
+bool SoundEffect::isRelativeToListener() const {
     return m_Sound.isRelativeToListener();
 }
-void SoundEffect::setRelativeToListener(const bool relative) {
+void SoundEffect::setRelativeToListener(bool relative) {
     m_Sound.setRelativeToListener(relative);
 }
-void SoundEffect::setPosition(const float x, const float y, const float z) {
+void SoundEffect::setPosition(float x, float y, float z) {
     m_Sound.setPosition(x, y, z);
 }
 void SoundEffect::setPosition(const glm::vec3& position) {
@@ -187,12 +188,12 @@ void SoundEffect::setPosition(const glm::vec3& position) {
 float SoundEffect::getVolume() const {
     return m_Sound.getVolume();
 }
-void SoundEffect::setVolume(const float volume) {
+void SoundEffect::setVolume(float volume) {
     m_Sound.setVolume(volume);
 }
 float SoundEffect::getPitch() const {
     return m_Sound.getPitch();
 }
-void SoundEffect::setPitch(const float pitch) {
+void SoundEffect::setPitch(float pitch) {
     m_Sound.setPitch(pitch);
 }

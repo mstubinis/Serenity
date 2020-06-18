@@ -2,18 +2,21 @@
 #ifndef ENGINE_RENDERER_PARTICLE_EMITTER_H
 #define ENGINE_RENDERER_PARTICLE_EMITTER_H
 
+class  Particle;
 class  ParticleEmissionProperties;
 namespace Engine::priv {
     struct InternalScenePublicInterface;
     class  ParticleSystem;
 };
 
-#include <core/engine/renderer/particles/Particle.h>
 #include <ecs/Entity.h>
-#include <vector>
+//#include <vector>
 #include <mutex>
+#include <functional>
 
-
+/*
+Class that spawns particles
+*/
 class ParticleEmitter final : public Entity {
     friend class  Engine::priv::ParticleSystem;
     friend class  Particle;
@@ -31,7 +34,7 @@ class ParticleEmitter final : public Entity {
 
         ParticleEmitter() = delete;
     public:
-        ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent = Entity::null_);
+        ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent = Entity::null_);
         ~ParticleEmitter();
 
         ParticleEmitter(const ParticleEmitter& other) = delete;
@@ -39,7 +42,7 @@ class ParticleEmitter final : public Entity {
         ParticleEmitter(ParticleEmitter&& other) noexcept;
         ParticleEmitter& operator=(ParticleEmitter&& other) noexcept;
 
-        void init(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent);
+        void init(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent);
 
         template<typename T> void setUpdateFunctor(const T& functor) {
             m_UpdateFunctor = std::bind<void>(std::move(functor), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
@@ -95,7 +98,7 @@ class ParticleEmitter final : public Entity {
         ParticleEmissionProperties* getProperties() const;
         void setProperties(ParticleEmissionProperties& properties);
 
-        void update(const size_t index, const float dt, Engine::priv::ParticleSystem& particleSystem, const bool multi_threaded);
+        void update(size_t index, const float dt, Engine::priv::ParticleSystem& particleSystem, bool multi_threaded);
 };
 
 #endif

@@ -3,7 +3,7 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/system/Engine.h>
-#include <core/engine/events/Engine_EventObject.h>
+#include <core/engine/events/Event.h>
 
 #include <iostream>
 

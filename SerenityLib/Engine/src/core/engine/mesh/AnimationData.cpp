@@ -60,7 +60,7 @@ void AnimationData::ReadNodeHeirarchy(const string& animationName, float time, c
     }
 }
 void AnimationData::BoneTransform(const string& animationName, float TimeInSeconds, vector<glm::mat4>& Transforms) {
-    float TicksPerSecond = (m_TicksPerSecond != 0.0) ? m_TicksPerSecond : 25.0;
+    float TicksPerSecond = (m_TicksPerSecond != 0.0f) ? m_TicksPerSecond : 25.0f;
     float TimeInTicks(TimeInSeconds * TicksPerSecond);
     float AnimationTime(fmod(TimeInTicks, m_DurationInTicks));
     glm::mat4 ParentIdentity(1.0f);

@@ -9,7 +9,7 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/system/Engine.h>
-#include <core/engine/threading/Engine_ThreadManager.h>
+#include <core/engine/threading/ThreadingModule.h>
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/system/Engine.h>
 
@@ -28,7 +28,7 @@ priv::ParticleSystem::ParticleSystem() {
     MaterialToIndexReverse.reserve(10);
     MaterialIDToIndex.reserve(10);
 
-    const auto num_cores = Engine::priv::threading::hardware_concurrency();
+    auto num_cores = Engine::hardware_concurrency();
     THREAD_PART_1.resize(num_cores);
 
     THREAD_PART_4.resize(num_cores);
@@ -47,12 +47,12 @@ void priv::ParticleSystem::internal_update_emitters(const float dt) {
     if (m_ParticleEmitters.size() == 0) {
         return;
     }
-
-    auto lamda_update_emitter = [&](ParticleEmitter& emitter, const size_t& j, const size_t& k) {
-        if(emitter.isActive())
+    auto lamda_update_emitter = [&](ParticleEmitter& emitter, size_t j, size_t k) {
+        if (emitter.isActive()) {
             emitter.update(j, dt, *this, true);
+        }
     };
-    priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_emitter, m_ParticleEmitters, true);
+    Engine::priv::threading::addJobSplitVectored(lamda_update_emitter, m_ParticleEmitters, true, 0);
 }
 
 void priv::ParticleSystem::internal_update_particles(const float dt, const Camera& camera) {
@@ -61,7 +61,7 @@ void priv::ParticleSystem::internal_update_particles(const float dt, const Camer
     }
 
     //update individual particles
-    auto lamda_update_particle = [&](Particle& particle, const size_t& j, const unsigned int k) {
+    auto lamda_update_particle = [&](Particle& particle, size_t j, size_t k) {
         if (particle.m_Timer > 0.0f) {
             particle.m_Timer           += dt;
             auto& prop                  = *particle.m_EmitterSource->m_Properties;
@@ -76,17 +76,19 @@ void priv::ParticleSystem::internal_update_particles(const float dt, const Camer
 
             if (particle.m_Timer >= prop.m_Lifetime) {
                 particle.m_Timer = 0.0f;
-                std::lock_guard lock(m_Mutex);
-                m_ParticleFreelist.push(j);
+                {
+                    std::lock_guard lock(m_Mutex);
+                    m_ParticleFreelist.push(j);
+                }
             }
         }
     };
-    priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_particle, m_Particles, true);
+    Engine::priv::threading::addJobSplitVectored(lamda_update_particle, m_Particles, true, 0);
 }
 
 ParticleEmitter* priv::ParticleSystem::add_emitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
     if (m_ParticleEmitterFreelist.size() > 0) { //first, try to reuse an empty
-        const auto freeindex = m_ParticleEmitterFreelist.top();
+        size_t freeindex = m_ParticleEmitterFreelist.top();
         m_ParticleEmitterFreelist.pop();
         if (freeindex >= m_ParticleEmitters.size()) {
             return nullptr;
@@ -146,7 +148,7 @@ void priv::ParticleSystem::render(const Viewport& viewport, const Camera& camera
     }
     //auto start = chrono::high_resolution_clock::now();
 
-    const auto reserve_size = particles_size / Engine::priv::threading::hardware_concurrency();
+    const auto reserve_size = particles_size / Engine::hardware_concurrency();
 
     for (auto& _1 : THREAD_PART_1) _1.clear();
     for (auto& _4 : THREAD_PART_4) _4.clear();
@@ -175,7 +177,7 @@ void priv::ParticleSystem::render(const Viewport& viewport, const Camera& camera
             );
         }
     };
-    Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_culler_particle, m_Particles, true);
+    Engine::priv::threading::addJobSplitVectored(lamda_culler_particle, m_Particles, true, 0);
 
     //merge the thread collections into the main collections
     for (auto& _1 : THREAD_PART_1) { ParticlesDOD.insert(ParticlesDOD.end(), std::make_move_iterator(_1.begin()), std::make_move_iterator(_1.end())); }

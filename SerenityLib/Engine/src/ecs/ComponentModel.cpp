@@ -56,35 +56,35 @@ void ComponentModel_Functions::RegisterDeferredMeshLoaded(ComponentModel& super,
 
 #pragma region Component
 
-ComponentModel::ComponentModel(const Entity entity, const Handle mesh, const Handle material, ShaderProgram* shaderProgram, const RenderStage::Stage stage) {
+ComponentModel::ComponentModel(Entity entity, Handle mesh, Handle material, ShaderProgram* shaderProgram, RenderStage::Stage stage) {
     m_Owner = entity;
     addModel(mesh, material, shaderProgram, stage);
 }
-ComponentModel::ComponentModel(const Entity entity, Mesh* mesh, const Handle material,  ShaderProgram* shaderProgram, const RenderStage::Stage stage) {
+ComponentModel::ComponentModel(Entity entity, Mesh* mesh, Handle material,  ShaderProgram* shaderProgram, RenderStage::Stage stage) {
     m_Owner = entity;
     addModel(mesh, material.get<Material>(), shaderProgram, stage);
 }
-ComponentModel::ComponentModel(const Entity entity, const Handle mesh, Material* material,  ShaderProgram* shaderProgram, const RenderStage::Stage stage) {
+ComponentModel::ComponentModel(Entity entity, Handle mesh, Material* material,  ShaderProgram* shaderProgram, RenderStage::Stage stage) {
     m_Owner = entity;
     addModel(mesh.get<Mesh>(), material, shaderProgram, stage);
 }
-ComponentModel::ComponentModel(const Entity entity, Mesh* mesh, Material* material, ShaderProgram* shaderProgram, const RenderStage::Stage stage) {
+ComponentModel::ComponentModel(Entity entity, Mesh* mesh, Material* material, ShaderProgram* shaderProgram, RenderStage::Stage stage) {
     m_Owner = entity;
     addModel(mesh, material, shaderProgram, stage);
 }
-ComponentModel::ComponentModel(const Entity entity, const Handle mesh, const Handle material, const Handle shaderProgram, const RenderStage::Stage stage) {
+ComponentModel::ComponentModel(Entity entity, Handle mesh, Handle material, Handle shaderProgram, RenderStage::Stage stage) {
     m_Owner = entity;
     addModel(mesh, material, shaderProgram.get<ShaderProgram>(), stage);
 }
-ComponentModel::ComponentModel(const Entity entity, Mesh* mesh, const Handle material, const Handle shaderProgram, const RenderStage::Stage stage) {
+ComponentModel::ComponentModel(Entity entity, Mesh* mesh, Handle material, Handle shaderProgram, RenderStage::Stage stage) {
     m_Owner = entity;
     addModel(mesh, material.get<Material>(), shaderProgram.get<ShaderProgram>(), stage);
 }
-ComponentModel::ComponentModel(const Entity entity, const Handle mesh, Material* material, const Handle shaderProgram, const RenderStage::Stage stage) {
+ComponentModel::ComponentModel(Entity entity, Handle mesh, Material* material, Handle shaderProgram, RenderStage::Stage stage) {
     m_Owner = entity;
     addModel(mesh.get<Mesh>(), material, shaderProgram.get<ShaderProgram>(), stage);
 }
-ComponentModel::ComponentModel(const Entity entity, Mesh* mesh, Material* material, const Handle shaderProgram, const RenderStage::Stage stage) {
+ComponentModel::ComponentModel(Entity entity, Mesh* mesh, Material* material, Handle shaderProgram, RenderStage::Stage stage) {
     m_Owner = entity;
     addModel(mesh, material, shaderProgram.get<ShaderProgram>(), stage);
 }
@@ -297,7 +297,7 @@ void ComponentModel::setUserPointer(void* UserPointer) {
 struct priv::ComponentModel_UpdateFunction final { void operator()(void* system, void* componentPool, const float dt, Scene& scene) const {
     auto& pool       = *static_cast<ECSComponentPool<Entity, ComponentModel>*>(componentPool);
     auto& components = pool.data();
-    auto lamda_update_component = [&](ComponentModel& componentModel, const size_t& i, const unsigned int k) {
+    auto lamda_update_component = [&](ComponentModel& componentModel, size_t i, size_t k) {
         for (size_t j = 0; j < componentModel.getNumModels(); ++j) {
             auto& modelInstance = componentModel[j];
             //process the animations here
@@ -310,17 +310,16 @@ struct priv::ComponentModel_UpdateFunction final { void operator()(void* system,
             lamda_update_component(components[i], i, 0);
         }
     }else{
-        priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);
+        Engine::priv::threading::addJobSplitVectored(lamda_update_component, components, true, 0);
     }
+}};
+struct priv::ComponentModel_ComponentAddedToEntityFunction final {void operator()(void* system, void* component, Entity entity) const {
 
 }};
-struct priv::ComponentModel_ComponentAddedToEntityFunction final {void operator()(void* system, void* component, Entity& entity) const {
+struct priv::ComponentModel_ComponentRemovedFromEntityFunction final { void operator()(void* system, Entity entity) const {
 
 }};
-struct priv::ComponentModel_ComponentRemovedFromEntityFunction final { void operator()(void* system, Entity& entity) const {
-
-}};
-struct priv::ComponentModel_EntityAddedToSceneFunction final {void operator()(void* system, void* componentPool, Entity& entity, Scene& scene) const {
+struct priv::ComponentModel_EntityAddedToSceneFunction final {void operator()(void* system, void* componentPool, Entity entity, Scene& scene) const {
 
 }};
 struct priv::ComponentModel_SceneEnteredFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {

@@ -55,7 +55,7 @@ namespace Engine{
                 void _init(const EngineOptions& options);
  
                 Handle _addTexture(Texture*);
-                Scene& _getSceneByID(const uint id);
+                Scene& _getSceneByID(std::uint32_t id);
 
                 std::vector<Scene*>& scenes();
 

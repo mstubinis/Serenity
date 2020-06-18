@@ -5,7 +5,7 @@
 class  Scene;
 
 #include <glm/vec3.hpp>
-#include <ecs/Entity.h>
+//#include <ecs/Entity.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Viewport.h>
 
@@ -45,23 +45,23 @@ class LightProbe : public Entity, public Engine::NonCopyable, public Engine::Non
         Viewport            m_Viewport;
     public:
         LightProbe(
-            const ProbeType::Type type,
+            ProbeType::Type type,
             const glm::vec3& position   = glm::vec3(0.0f, 0.0f, 0.0f),
             Scene* scene = nullptr
         );
         virtual ~LightProbe();
 
-        void addIgnoredEntity(const Entity entity);
+        void addIgnoredEntity(Entity entity);
 
         const Camera& getCamera() const;
         const Viewport& getViewport() const;
 
-        void setProbeType(const ProbeType::Type type);
+        void setProbeType(ProbeType::Type type);
         LightProbe::ProbeType::Type getProbeType() const;
 
         void update(const float dt);
 
-        void activate(const bool = true);
+        void activate(bool = true);
         void deactivate();
 };
 

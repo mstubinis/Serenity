@@ -8,7 +8,7 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/scene/Viewport.h>
-#include <core/engine/events/Engine_EventObject.h>
+#include <core/engine/events/Event.h>
 
 #include <ecs/ECS.h>
 #include <ecs/ComponentCamera.h>

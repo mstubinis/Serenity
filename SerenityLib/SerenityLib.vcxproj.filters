@@ -312,9 +312,6 @@
     <ClInclude Include="Engine\src\ecs\Entity.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\events\Engine_EventObject.h">
-      <Filter>Header Files\Engine\Core\Events</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\lights\DirectionalLight.h">
       <Filter>Header Files\Engine\Core\Lights</Filter>
     </ClInclude>
@@ -440,12 +437,6 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\lights\Lights.h">
       <Filter>Header Files\Engine\Core\Lights</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\threading\Engine_ThreadManager.h">
-      <Filter>Header Files\Engine\Core\Threading</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\sounds\Engine_Sounds.h">
-      <Filter>Header Files\Engine\Core\Sounds</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\physics\Engine_Physics.h">
       <Filter>Header Files\Engine\Core\Physics</Filter>
@@ -828,6 +819,21 @@
     <ClInclude Include="Engine\src\core\engine\containers\PartialArray.h">
       <Filter>Header Files\Engine\Core\Containers</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\sounds\SoundModule.h">
+      <Filter>Header Files\Engine\Core\Sounds</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\events\Event.h">
+      <Filter>Header Files\Engine\Core\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\threading\ThreadingModule.h">
+      <Filter>Header Files\Engine\Core\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\threading\ThreadingHelpers.h">
+      <Filter>Header Files\Engine\Core\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\ecs\ECSIncludes.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -964,12 +970,6 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\Fog.cpp">
       <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\threading\Engine_ThreadManager.cpp">
-      <Filter>Source Files\Engine\Core\Threading</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\sounds\Engine_Sounds.cpp">
-      <Filter>Source Files\Engine\Core\Sounds</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\physics\Engine_Physics.cpp">
       <Filter>Source Files\Engine\Core\Physics</Filter>
@@ -1264,6 +1264,15 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\events\Observer.cpp">
       <Filter>Source Files\Engine\Core\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\sounds\SoundModule.cpp">
+      <Filter>Source Files\Engine\Core\Sounds</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\threading\ThreadingHelpers.cpp">
+      <Filter>Source Files\Engine\Core\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\threading\ThreadingModule.cpp">
+      <Filter>Source Files\Engine\Core\Threading</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

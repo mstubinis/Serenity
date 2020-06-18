@@ -28,7 +28,7 @@ namespace Engine::priv {
             ThreadPoolFuture(std::future<void>&& future, std::function<void()>&& callback);
             ~ThreadPoolFuture() = default;
 
-            const bool isReady() const;
+            bool isReady() const;
             void operator()() const;
 
             ThreadPoolFuture(const ThreadPoolFuture& other) noexcept = delete;
@@ -36,39 +36,43 @@ namespace Engine::priv {
             ThreadPoolFuture(ThreadPoolFuture&& other) noexcept;
             ThreadPoolFuture& operator=(ThreadPoolFuture&& other) noexcept;
     };
+    
     class ThreadPool final{
         friend class Engine::priv::WorkerThread;
         private:
-            std::condition_variable                                     m_ConditionVariable;
-            std::mutex                                                  m_Mutex;
-            std::queue<std::shared_ptr<std::packaged_task<void()>>>     m_TaskQueue;
-            std::vector<std::thread>                                    m_WorkerThreads;
-            std::vector<Engine::priv::ThreadPoolFuture>                 m_Futures;
-            bool                                                        m_Stopped;
+            std::condition_variable                                                  m_ConditionVariable;
+            std::mutex                                                               m_Mutex;
+            std::vector<std::queue<std::shared_ptr<std::packaged_task<void()>>>>     m_TaskQueue;
+            std::vector<std::thread>                                                 m_WorkerThreads;
+            std::vector<std::vector<Engine::priv::ThreadPoolFuture>>                 m_Futures;
+            bool                                                                     m_Stopped = true;
 
             
-            void internal_create_packaged_task(std::function<void()>&& job);
-            void internal_create_packaged_task(std::function<void()>&& job, std::function<void()>&& callback);
+            void internal_create_packaged_task(std::function<void()>&& job, unsigned int section);
+            void internal_create_packaged_task(std::function<void()>&& job, std::function<void()>&& callback, unsigned int section);
+            void internal_update_section(unsigned int section);
+            bool task_queue_is_empty() const;
+            std::shared_ptr<std::packaged_task<void()>> internal_get_next_available_job();
         public:
-            ThreadPool();
+            ThreadPool(unsigned int sections = 2U);
             ~ThreadPool();
 
-            const bool startup(const unsigned int num_threads);
+            bool startup(unsigned int num_threads);
 
             ThreadPool(const ThreadPool& other) noexcept = delete;
             ThreadPool& operator=(const ThreadPool& other) noexcept = delete;
             ThreadPool(ThreadPool&& other) noexcept = delete;
             ThreadPool& operator=(ThreadPool&& other) noexcept = delete;
 
-            const size_t size() const;
+            size_t size() const;
 
-            void add_job(std::function<void()>&& job);
-            void add_job(std::function<void()>&& job, std::function<void()>&& callback);
+            void add_job(std::function<void()>&& job, unsigned int section);
+            void add_job(std::function<void()>&& job, std::function<void()>&& callback, unsigned int section);
 
             void update();
 
             void join_all();
-            void wait_for_all();
+            void wait_for_all(unsigned int section);
 
             void shutdown();
     };

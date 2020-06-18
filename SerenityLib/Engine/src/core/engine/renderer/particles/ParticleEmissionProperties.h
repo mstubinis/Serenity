@@ -17,6 +17,9 @@ namespace Engine::priv {
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
+/*
+Class that contains the properties of particle emitters
+*/
 class ParticleEmissionProperties final {
     friend class  Particle;
     friend class  ParticleEmitter;

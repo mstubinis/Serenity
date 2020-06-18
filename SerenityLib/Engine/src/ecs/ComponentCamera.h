@@ -69,9 +69,9 @@ class ComponentCamera {
 
         ComponentCamera() = delete;
     public:
-        BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentCamera(const Entity entity, const float angle, const float aspectRatio, const float nearPlane, const float farPlane);
-		ComponentCamera(const Entity entity, const float left, const float right, const float bottom, const float top, const float nearPlane, const float farPlane);
+        //BOOST_TYPE_INDEX_REGISTER_CLASS
+        ComponentCamera(Entity entity, float angle, float aspectRatio, float nearPlane, float farPlane);
+		ComponentCamera(Entity entity, float left, float right, float bottom, float top, float nearPlane, float farPlane);
 
         ComponentCamera(const ComponentCamera& other)                = delete;
         ComponentCamera& operator=(const ComponentCamera& other)     = delete;

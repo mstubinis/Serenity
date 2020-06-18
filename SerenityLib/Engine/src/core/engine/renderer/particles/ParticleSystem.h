@@ -2,11 +2,8 @@
 #ifndef ENGINE_RENDERER_PARTICLE_SYSTEM_H
 #define ENGINE_RENDERER_PARTICLE_SYSTEM_H
 
-class  ParticleEmitter;
 class  ParticleEmissionProperties;
 class  Scene;
-class  Entity;
-class  Particle;
 class  Camera;
 class  ShaderProgram;
 class  Material;
@@ -23,21 +20,26 @@ namespace Engine::priv {
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <core/engine/renderer/particles/Particle.h>
+#include <core/engine/renderer/particles/ParticleEmitter.h>
+//#include <ecs/Entity.h>
+
+class Entity;
 
 constexpr unsigned int MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME = 12U;
 
 #ifdef ENVIRONMENT64
-    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 4'000U;
-    constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT          = 1'000'000U;
+    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT  = 4'000U;
+    constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT           = 1'000'000U;
 #else
-    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 2'000U;
-    constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT          = 500'000U;
+    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT  = 2'000U;
+    constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT           = 500'000U;
 #endif
 
 namespace Engine::priv {
     class ParticleSystem final{
-        friend class ParticleEmitter;
-        friend class Particle;
+        friend class ::ParticleEmitter;
+        friend class ::Particle;
         private:
             std::vector<ParticleEmitter>           m_ParticleEmitters;
             std::vector<Particle>                  m_Particles;

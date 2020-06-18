@@ -31,7 +31,7 @@ template <class InType, class Stream> void writeBigEndian(Stream& inStream, InTy
     std::vector<std::uint8_t> buffer(inBufferSizeInBytes, 0);
     unsigned long long offset = 255U;
     for (int i = int(inBufferSizeInBytes) - 1; i >= 0; --i) {
-        auto shift = (8U * ((inBufferSizeInBytes - 1U) - i));
+        unsigned int shift = (8U * ((inBufferSizeInBytes - 1U) - i));
         buffer[i] = (in & offset) >> shift;
         offset = (offset * 255U) + offset;
     }
@@ -41,7 +41,7 @@ template <class InType, class Stream> void writeBigEndian(Stream& inStream, InTy
     std::vector<std::uint8_t> buffer(inBufferSizeInBytes, 0);
     unsigned long long offset = 255U;
     for (int i = int(inBufferSizeInBytes) - 1; i >= 0; --i) {
-        auto shift = (8U * ((inBufferSizeInBytes - 1U) - i));
+        unsigned int shift = (8U * ((inBufferSizeInBytes - 1U) - i));
         buffer[i]  = (in & offset) >> shift;
         offset     = (offset * 255U) + offset;
     }

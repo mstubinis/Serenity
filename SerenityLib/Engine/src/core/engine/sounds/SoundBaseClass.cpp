@@ -1,19 +1,17 @@
 #include <core/engine/sounds/SoundBaseClass.h>
 
-SoundBaseClass::SoundBaseClass(const unsigned int numLoops) {
-    m_Status      = SoundStatus::Fresh;
+SoundBaseClass::SoundBaseClass(unsigned int numLoops) {
     m_Loops       = numLoops;
-    m_CurrentLoop = 0;
 }
 SoundBaseClass::~SoundBaseClass() {
     m_Status = SoundStatus::Stopped;
 }
-SoundStatus::Status SoundBaseClass::status() {
+SoundStatus::Status SoundBaseClass::status() const {
     return m_Status;
 }
 void SoundBaseClass::update(const float dt) {
 }
-bool SoundBaseClass::play(const unsigned int numLoops) {
+bool SoundBaseClass::play(unsigned int numLoops) {
     return false;
 }
 bool SoundBaseClass::pause() {
@@ -25,44 +23,44 @@ bool SoundBaseClass::stop() {
 bool SoundBaseClass::restart() {
     return false;
 }
-unsigned int SoundBaseClass::getLoopsLeft() {
+unsigned int SoundBaseClass::getLoopsLeft() const {
     return m_Loops - m_CurrentLoop;
 }
-float SoundBaseClass::getAttenuation() {
-    return 0;
-}
-unsigned int SoundBaseClass::getChannelCount() {
-    return 0;
-}
-void SoundBaseClass::setAttenuation(const float attenuation) {
-
-}
-float SoundBaseClass::getMinDistance() {
+float SoundBaseClass::getAttenuation() const {
     return 0.0f;
 }
-void SoundBaseClass::setMinDistance(const float minDistance) {
+unsigned int SoundBaseClass::getChannelCount() const {
+    return 0U;
+}
+void SoundBaseClass::setAttenuation(float attenuation) {
 
 }
-bool SoundBaseClass::isRelativeToListener() {
+float SoundBaseClass::getMinDistance() const {
+    return 0.0f;
+}
+void SoundBaseClass::setMinDistance(float minDistance) {
+
+}
+bool SoundBaseClass::isRelativeToListener() const {
     return false;
 }
-void SoundBaseClass::setRelativeToListener(const bool relative) {
+void SoundBaseClass::setRelativeToListener(bool relative) {
 
 }
-glm::vec3 SoundBaseClass::getPosition() {
+glm::vec3 SoundBaseClass::getPosition() const {
     return glm::vec3(0.0f);
 }
-void SoundBaseClass::setPosition(const float x, const float y, const float z) {
+void SoundBaseClass::setPosition(float x, float y, float z) {
 }
 void SoundBaseClass::setPosition(const glm::vec3& position) {
 }
-float SoundBaseClass::getVolume() {
-    return 0;
+float SoundBaseClass::getVolume() const {
+    return 0.0f;
 }
-void SoundBaseClass::setVolume(const float volume) {
+void SoundBaseClass::setVolume(float volume) {
 }
-float SoundBaseClass::getPitch() {
-    return 0;
+float SoundBaseClass::getPitch() const {
+    return 0.0f;
 }
-void SoundBaseClass::setPitch(const float pitch) {
+void SoundBaseClass::setPitch(float pitch) {
 }

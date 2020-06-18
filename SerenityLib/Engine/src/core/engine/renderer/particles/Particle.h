@@ -2,12 +2,8 @@
 #ifndef ENGINE_RENDERER_PARTICLE_H
 #define ENGINE_RENDERER_PARTICLE_H
 
-class  Particle;
 class  ParticleEmitter;
-class  ParticleEmissionProperties;
-class  Scene;
 class  Material;
-class  Entity;
 namespace Engine::priv {
     struct InternalScenePublicInterface;
     class  ParticleSystem;
@@ -18,6 +14,9 @@ namespace Engine::priv {
 #include <glm/vec4.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+/*
+2D Sprite that is optimized to render fast and in very large numbers
+*/
 class Particle {
     friend struct Engine::priv::InternalScenePublicInterface;
     friend class  Engine::priv::ParticleSystem;

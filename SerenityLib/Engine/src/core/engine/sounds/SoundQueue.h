@@ -4,37 +4,38 @@
 
 class  SoundBaseClass;
 namespace Engine::priv {
-    class SoundManager;
+    class SoundModule;
 };
 
 #include <queue>
 #include <core/engine/resources/Handle.h>
 
-class SoundQueue final {
-    friend class Engine::priv::SoundManager;
+class SoundQueue {
+    friend class Engine::priv::SoundModule;
     private:
-        Engine::priv::SoundManager&   m_SoundManager;
+        Engine::priv::SoundModule&     m_SoundModule;
         SoundBaseClass*                m_Current         = nullptr;
         std::queue<Handle>             m_Queue;
         float                          m_DelayInSeconds  = 0.0f;
         float                          m_DelayTimer      = 0.0f;
         bool                           m_IsDelayProcess  = false;
         bool                           m_Active          = false;
-    public:
-        SoundQueue() = delete;
-        SoundQueue(Engine::priv::SoundManager& manager, const float delay = 0.5f);
-        ~SoundQueue();
 
-        void enqueueEffect(Handle soundEffectHandle, const unsigned int loops = 1);
-        void enqueueMusic(Handle soundMusicHandle, const unsigned int loops = 1);
+        SoundQueue() = delete;
+    public:
+        SoundQueue(Engine::priv::SoundModule& manager, float delay = 0.5f);
+        virtual ~SoundQueue();
+
+        void activate(bool active = true);
+        void deactivate();
+        void enqueueEffect(Handle soundEffectHandle, unsigned int loops = 1);
+        void enqueueMusic(Handle soundMusicHandle, unsigned int loops = 1);
         void dequeue();
-        void update(const float dt);
         void clear();
         bool empty() const;
         bool active() const;
         size_t size() const;
 
-        void activate();
-        void deactivate();
+        void update(const float dt);
 };
 #endif

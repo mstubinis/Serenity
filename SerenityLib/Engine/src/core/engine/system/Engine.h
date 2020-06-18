@@ -9,10 +9,10 @@ class  Window;
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/physics/Engine_Physics.h>
 #include <core/engine/renderer/Renderer.h>
-#include <core/engine/sounds/Engine_Sounds.h>
+#include <core/engine/sounds/SoundModule.h>
 #include <core/engine/events/EventModule.h>
 #include <core/engine/math/SimplexNoise.h>
-#include <core/engine/threading/Engine_ThreadManager.h>
+#include <core/engine/threading/ThreadingModule.h>
 #include <core/engine/networking/NetworkingModule.h>
 #include <core/engine/discord/DiscordModule.h>
 #include <core/engine/lua/LuaModule.h>
@@ -149,9 +149,9 @@ namespace Engine{
                 Renderer            m_RenderManager;
                 PhysicsManager      m_PhysicsManager;
                 ResourceManager     m_ResourceManager;
-                SoundManager        m_SoundManager;
+                SoundModule         m_SoundModule;
                 DebugManager        m_DebugManager;
-                ThreadManager       m_ThreadManager;
+                ThreadingModule     m_ThreadingModule;
 
 
                 EngineCore(const EngineOptions& options);

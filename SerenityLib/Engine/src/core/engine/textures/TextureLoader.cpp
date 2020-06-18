@@ -4,7 +4,7 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/renderer/FramebufferObject.h>
-#include <core/engine/events/Engine_EventObject.h>
+#include <core/engine/events/Event.h>
 
 #include <boost/filesystem.hpp>
 

@@ -1,5 +1,6 @@
 #include <core/engine/lights/DirectionalLight.h>
 #include <ecs/ComponentBody.h>
+#include <core/engine/utils/Utils.h>
 
 using namespace Engine;
 using namespace std;

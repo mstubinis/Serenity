@@ -2,7 +2,7 @@
 #include <ecs/ComponentModel.h>
 #include <core/engine/fonts/Font.h>
 #include <core/engine/math/Engine_Math.h>
-#include <core/engine/threading/Engine_ThreadManager.h>
+#include <core/engine/threading/ThreadingModule.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/physics/Engine_Physics.h>
 #include <core/engine/model/ModelInstance.h>
@@ -104,7 +104,7 @@ ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::N
 
 #pragma region Component
 
-ComponentBody::ComponentBody(const Entity entity) {
+ComponentBody::ComponentBody(Entity entity) {
     m_Owner = entity;
     m_Physics                 = false;
     data.p                    = nullptr;
@@ -112,7 +112,7 @@ ComponentBody::ComponentBody(const Entity entity) {
     auto& normalData          = *data.n;
     Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
 }
-ComponentBody::ComponentBody(const Entity entity, const CollisionType::Type collisionType) {
+ComponentBody::ComponentBody(Entity entity, CollisionType::Type collisionType) {
     m_Owner = entity;
     m_Physics               = true;
     data.n                  = nullptr;
@@ -983,7 +983,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
     auto& pool                  = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool);
     auto& components            = pool.data();
 
-    auto lamda_update_component = [dt, &system](ComponentBody& b, const size_t& i, const unsigned int k) {
+    auto lamda_update_component = [dt, &system](ComponentBody& b, size_t i, size_t k) {
         const auto entityIndex  = b.m_Owner.id() - 1U;
         auto& localMatrix       = system.ParentChildSystem.LocalTransforms[entityIndex];
         auto& worldMatrix       = system.ParentChildSystem.WorldTransforms[entityIndex];
@@ -1008,19 +1008,19 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
             lamda_update_component(components[i], i, 0);
         }
     }else{
-        priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);
+        Engine::priv::threading::addJobSplitVectored(lamda_update_component, components, true, 0);
     }
     
     auto& pcs = system.ParentChildSystem;
     for (size_t i = 0; i < pcs.Order.size(); ++i) {
-        const unsigned int entityID = pcs.Order[i];
+        unsigned int entityID = pcs.Order[i];
         if (entityID > 0) {
-            const unsigned int entityIndex = entityID - 1U;
-            const unsigned int parentID    = pcs.Parents[entityIndex];
+            unsigned int entityIndex = entityID - 1U;
+            unsigned int parentID    = pcs.Parents[entityIndex];
             if (parentID == 0) {
                 pcs.WorldTransforms[entityIndex] = pcs.LocalTransforms[entityIndex];
             }else{
-                const unsigned int parentIndex   = parentID - 1U;
+                unsigned int parentIndex   = parentID - 1U;
                 pcs.WorldTransforms[entityIndex] = pcs.WorldTransforms[parentIndex] * pcs.LocalTransforms[entityIndex];
             }
         }else{
@@ -1029,9 +1029,9 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
     }   
 #if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
     for (auto& componentBody : components) {
-        const Entity entity = componentBody.getOwner();
-        const auto bodyRenderPos = componentBody.getPosition();
-        auto* model = entity.getComponent<ComponentModel>();
+        Entity entity      = componentBody.getOwner();
+        auto bodyRenderPos = componentBody.getPosition();
+        auto* model        = entity.getComponent<ComponentModel>();
         if (model) {
             const auto world_pos = glm::vec3(componentBody.getPosition());
             const auto world_rot = glm::quat(componentBody.getRotation());
@@ -1059,7 +1059,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
 #endif
 
 }};
-struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* systemPtr, void* component, Entity& entity) const {
+struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* systemPtr, void* component, Entity entity) const {
     auto& system  = *static_cast<Engine::priv::ComponentBody_System*>(systemPtr);
     auto& pcs     = system.ParentChildSystem;
     const auto id = entity.id();
@@ -1071,7 +1071,7 @@ struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()
         pcs.resize(id);
     }
 }};
-struct priv::ComponentBody_ComponentRemovedFromEntityFunction final { void operator()(void* systemPtr, Entity& entity) const {
+struct priv::ComponentBody_ComponentRemovedFromEntityFunction final { void operator()(void* systemPtr, Entity entity) const {
     auto& system         = *static_cast<Engine::priv::ComponentBody_System*>(systemPtr);
     const auto id        = entity.id();
     auto& pcs            = system.ParentChildSystem;
@@ -1081,7 +1081,7 @@ struct priv::ComponentBody_ComponentRemovedFromEntityFunction final { void opera
         pcs.remove(pcs.Parents[thisIndex], id);
     }
 }};
-struct priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* systemPtr, void* componentPool, Entity& entity, Scene& scene) const {
+struct priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* systemPtr, void* componentPool, Entity entity, Scene& scene) const {
     auto& pool = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool);
     auto* component_ptr = pool.getComponent(entity);
     if (component_ptr) {
@@ -1127,19 +1127,19 @@ ComponentBody_System_CI::ComponentBody_System_CI() {
 
 #pragma region System
 
-void Engine::priv::ComponentBody_System::ParentChildVector::resize(const size_t size) {
+void Engine::priv::ComponentBody_System::ParentChildVector::resize(size_t size) {
     Parents.resize(size, 0U);
     Order.resize(size, 0U);
     WorldTransforms.resize(size, IDENTITY_MATRIX);
     LocalTransforms.resize(size, IDENTITY_MATRIX);
 }
-void Engine::priv::ComponentBody_System::ParentChildVector::reserve(const size_t size) {
+void Engine::priv::ComponentBody_System::ParentChildVector::reserve(size_t size) {
     Parents.reserve(size);
     Order.reserve(size);
     WorldTransforms.reserve(size);
     LocalTransforms.reserve(size);
 }
-void Engine::priv::ComponentBody_System::ParentChildVector::reserve_from_insert(const std::uint32_t parentID, const std::uint32_t childID) {
+void Engine::priv::ComponentBody_System::ParentChildVector::reserve_from_insert(std::uint32_t parentID, std::uint32_t childID) {
     if (Parents.capacity() < parentID || Parents.capacity() < childID) {
         reserve(std::max(parentID, childID) + 50U);
     }
@@ -1147,7 +1147,7 @@ void Engine::priv::ComponentBody_System::ParentChildVector::reserve_from_insert(
         resize(std::max(parentID, childID));
     }
 }
-void Engine::priv::ComponentBody_System::ParentChildVector::insert(const std::uint32_t parentID, const std::uint32_t childID) {
+void Engine::priv::ComponentBody_System::ParentChildVector::insert(std::uint32_t parentID, std::uint32_t childID) {
     reserve_from_insert(parentID, childID);
     if (getParent(childID) == parentID) {
         //std::cout << parentID << ", " << childID << " - added: already added\n";
@@ -1194,7 +1194,7 @@ void Engine::priv::ComponentBody_System::ParentChildVector::insert(const std::ui
 
     getWorld(childID) = getWorld(parentID) * getLocal(childID);
 }
-void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::uint32_t parentID, const std::uint32_t childID) {
+void Engine::priv::ComponentBody_System::ParentChildVector::remove(std::uint32_t parentID, std::uint32_t childID) {
     if (getParent(childID) == 0) {
         //std::cout << parentID << ", " << childID << " - remove: already removed\n";
         return;
@@ -1258,10 +1258,10 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(const std::ui
         }
     }
 }
-const std::uint32_t Engine::priv::ComponentBody_System::ParentChildVector::size() const {
+std::uint32_t Engine::priv::ComponentBody_System::ParentChildVector::size() const {
     return OrderHead;
 }
-const size_t Engine::priv::ComponentBody_System::ParentChildVector::capacity() const {
+size_t Engine::priv::ComponentBody_System::ParentChildVector::capacity() const {
     return Order.capacity();
 }
 

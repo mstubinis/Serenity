@@ -1,7 +1,7 @@
 #include <ecs/ComponentCamera.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/math/Engine_Math.h>
-#include <core/engine/threading/Engine_ThreadManager.h>
+#include <core/engine/threading/ThreadingModule.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/scene/Camera.h>
 
@@ -44,7 +44,7 @@ const glm::vec3 priv::ComponentCamera_Functions::GetViewVectorNoTranslation(cons
 
 #pragma region Component
 
-ComponentCamera::ComponentCamera(const Entity entity, const float angleDegrees, const float aspectRatio, const float nearPlane, const float farPlane) {
+ComponentCamera::ComponentCamera(Entity entity, float angleDegrees, float aspectRatio, float nearPlane, float farPlane) {
     m_Owner = entity;
     m_Angle                   = glm::radians(angleDegrees);
 	m_AspectRatio             = aspectRatio;
@@ -56,7 +56,7 @@ ComponentCamera::ComponentCamera(const Entity entity, const float angleDegrees, 
 
     m_Type                    = CameraType::Perspective;
 }
-ComponentCamera::ComponentCamera(const Entity entity, const float left, const float right, const float bottom, const float top, const float nearPlane, const float farPlane) {
+ComponentCamera::ComponentCamera(Entity entity, float left, float right, float bottom, float top, float nearPlane, float farPlane) {
     m_Owner = entity;
     m_Left                    = left;
 	m_Right                   = right;
@@ -226,7 +226,7 @@ void ComponentCamera::setFar(const float farPlane) {
 struct priv::ComponentCamera_UpdateFunction final { void operator()(void* system, void* componentPool, const float dt, Scene& scene) const {
 	auto& pool                  = *static_cast<ECSComponentPool<Entity, ComponentCamera>*>(componentPool);
 	auto& components            = pool.data();
-    auto lamda_update_component = [&](ComponentCamera& b, const size_t& i, const unsigned int k) {
+    auto lamda_update_component = [&](ComponentCamera& b, size_t i, size_t k) {
         Math::extractViewFrustumPlanesHartmannGribbs(b.m_ProjectionMatrix * b.m_ViewMatrix, b.m_FrustumPlanes);//update frustrum planes 
     };
     if (components.size() < 50) {
@@ -234,14 +234,14 @@ struct priv::ComponentCamera_UpdateFunction final { void operator()(void* system
             lamda_update_component(components[i], i, 0);
         }
     }else{
-        priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled_split_vectored(lamda_update_component, components, true);
+        Engine::priv::threading::addJobSplitVectored(lamda_update_component, components, true, 0);
     }
 }};
-struct priv::ComponentCamera_ComponentAddedToEntityFunction final {void operator()(void* system, void* componentCamera, Entity& entity) const {
+struct priv::ComponentCamera_ComponentAddedToEntityFunction final {void operator()(void* system, void* componentCamera, Entity entity) const {
 }};
-struct priv::ComponentCamera_ComponentRemovedFromEntityFunction final { void operator()(void* system, Entity& entity) const {
+struct priv::ComponentCamera_ComponentRemovedFromEntityFunction final { void operator()(void* system, Entity entity) const {
 }};
-struct priv::ComponentCamera_EntityAddedToSceneFunction final {void operator()(void* system, void* componentPool, Entity& entity, Scene& scene) const {
+struct priv::ComponentCamera_EntityAddedToSceneFunction final {void operator()(void* system, void* componentPool, Entity entity, Scene& scene) const {
 }};
 struct priv::ComponentCamera_SceneEnteredFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
 }};

@@ -105,9 +105,9 @@ class ComponentBody : public Observer, public Engine::UserPointer {
         std::function<void(CollisionCallbackEventData& data)> m_CollisionFunctor = [](CollisionCallbackEventData&) {};
 
     public:
-        BOOST_TYPE_INDEX_REGISTER_CLASS
-        ComponentBody(const Entity);
-        ComponentBody(const Entity, const CollisionType::Type);
+        //BOOST_TYPE_INDEX_REGISTER_CLASS
+        ComponentBody(Entity entity);
+        ComponentBody(Entity entity, CollisionType::Type collisionType);
 
         ComponentBody& operator=(const ComponentBody& other) = delete;
         ComponentBody(const ComponentBody& other)            = delete;
@@ -256,18 +256,16 @@ namespace Engine::priv {
     class ComponentBody_System final : public Engine::priv::ECSSystem<Entity, ComponentBody> {
         class ParentChildVector final {
             private:
-                inline std::uint32_t& getParent(const std::uint32_t childID) {
+                inline std::uint32_t& getParent(std::uint32_t childID) {
                     return Parents[childID - 1U];
                 }
-                inline glm_mat4& getWorld(const std::uint32_t ID) {
+                inline glm_mat4& getWorld(std::uint32_t ID) {
                     return WorldTransforms[ID - 1U];
                 }
-                inline glm_mat4& getLocal(const std::uint32_t ID) {
+                inline glm_mat4& getLocal(std::uint32_t ID) {
                     return LocalTransforms[ID - 1U];
                 }
-
-                void reserve_from_insert(const std::uint32_t parentID, const std::uint32_t childID);
-
+                void reserve_from_insert(std::uint32_t parentID, std::uint32_t childID);
             public:
                 std::vector<glm_mat4>         WorldTransforms;
                 std::vector<glm_mat4>         LocalTransforms;
@@ -275,13 +273,13 @@ namespace Engine::priv {
                 std::vector<std::uint32_t>    Order;
                 std::uint32_t                 OrderHead        = 0;
 
-                void resize(const size_t size);
-                void reserve(const size_t size);
-                void insert(const std::uint32_t parent, const std::uint32_t child);
-                void remove(const std::uint32_t parent, const std::uint32_t child);
+                void resize(size_t size);
+                void reserve(size_t size);
+                void insert(std::uint32_t parent, std::uint32_t child);
+                void remove(std::uint32_t parent, std::uint32_t child);
 
-                const std::uint32_t size() const;
-                const size_t capacity() const;
+                std::uint32_t size() const;
+                size_t capacity() const;
         };
         public:
             ParentChildVector ParentChildSystem;

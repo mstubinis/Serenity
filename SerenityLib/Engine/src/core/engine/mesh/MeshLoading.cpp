@@ -410,7 +410,7 @@ void Engine::priv::MeshLoader::SaveTo_OBJCC(VertexData& vertexData, string filen
     }else{
         sizes[2] = 0;
     }
-    for (auto i = 0; i < sizes.size(); ++i) {
+    for (size_t i = 0; i < sizes.size(); ++i) {
         writeBigEndian(stream, sizes[i], 4);
     }
     auto positions   = vertexData.getPositions();
@@ -425,7 +425,7 @@ void Engine::priv::MeshLoader::SaveTo_OBJCC(VertexData& vertexData, string filen
         boneIDs     = vertexData.getData<glm::vec4>(5);
         boneWeights = vertexData.getData<glm::vec4>(6);
     }
-    for (auto j = 0; j < sizes[0]; ++j) {
+    for (unsigned int j = 0; j < sizes[0]; ++j) {
         const auto& position   = positions[j];
         const auto& uv         = uvs[j];
         const auto& normal     = normals[j];
@@ -436,13 +436,13 @@ void Engine::priv::MeshLoader::SaveTo_OBJCC(VertexData& vertexData, string filen
 
         //positions
         std::vector<uint16_t> outp(3);
-        for (auto i = 0; i < outp.size(); ++i) {
+        for (size_t i = 0; i < outp.size(); ++i) {
             Engine::Math::Float16From32(&outp[i], position[i]);
             writeBigEndian(stream, outp[i], 2);
         }
         //uvs
         std::vector<uint16_t> outu(2);
-        for (auto i = 0; i < outu.size(); ++i) {
+        for (size_t i = 0; i < outu.size(); ++i) {
             Engine::Math::Float16From32(&outu[i], uv[i]);
             writeBigEndian(stream, outu[i], 2);
         }
@@ -462,20 +462,20 @@ void Engine::priv::MeshLoader::SaveTo_OBJCC(VertexData& vertexData, string filen
 
             //boneID's
             std::vector<uint16_t> outbI(4);
-            for (auto i = 0; i < outbI.size(); ++i) {
+            for (size_t i = 0; i < outbI.size(); ++i) {
                 Engine::Math::Float16From32(&outbI[i], bID[i]);
                 writeBigEndian(stream, outbI[i], 2);
             }
             //boneWeight's
             std::vector<uint16_t> outbW(4);
-            for (auto i = 0; i < outbW.size(); ++i) {
+            for (size_t i = 0; i < outbW.size(); ++i) {
                 Engine::Math::Float16From32(&outbW[i], bW[i]);
                 writeBigEndian(stream, outbW[i], 2);
             }
         }
     }
     //indices
-    for (auto i = 0; i < sizes[1]; ++i) {
+    for (unsigned int i = 0; i < sizes[1]; ++i) {
         uint16_t indice = vertexData.m_Indices[i];
         writeBigEndian(stream, indice, 2);
     }

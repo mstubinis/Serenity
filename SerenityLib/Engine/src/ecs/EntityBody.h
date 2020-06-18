@@ -16,7 +16,7 @@ class EntityBody : public Entity {
     public:
         EntityBody() = default;
         EntityBody(Scene&);
-        EntityBody(const unsigned int entityID, const unsigned int sceneID, const unsigned int versionID);
+        EntityBody(unsigned int entityID, unsigned int sceneID, unsigned int versionID);
         ~EntityBody() = default;
 
         virtual float mass() const;

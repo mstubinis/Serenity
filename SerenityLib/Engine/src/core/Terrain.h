@@ -19,7 +19,10 @@ class  Mesh;
 #include <vector>
 #include <glm/vec3.hpp>
 #include <string>
+
 #include <ecs/Entity.h>
+#include <core/engine/events/Observer.h>
+
 #include <LinearMath/btScalar.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <limits>

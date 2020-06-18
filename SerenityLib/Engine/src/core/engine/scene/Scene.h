@@ -16,10 +16,14 @@ class  ModelInstance;
 class  Entity;
 struct SceneOptions;
 
+class ParticleEmitter;
+class ParticleEmissionProperties;
+class Particle;
+
 namespace Engine::priv {
     class  RenderGraph;
     class  ResourceManager;
-    class  EntityPOD;
+    //class  EntityPOD;
     struct InternalScenePublicInterface;
     template<typename T> class ECS;
     class  GBuffer;
@@ -29,12 +33,12 @@ namespace Engine::priv {
 
 #include <core/engine/renderer/RendererIncludes.h>
 #include <core/engine/resources/Engine_ResourceBasic.h>
-#include <core/engine/renderer/particles/ParticleSystem.h>
+//#include <core/engine/renderer/particles/ParticleSystem.h>
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/events/Observer.h>
 #include <functional>
 
-class Scene: public EngineResource, public Observer{
+class Scene: public EngineResource, public Observer {
     friend class  Engine::priv::RenderGraph;
     friend class  Engine::priv::ResourceManager;
     friend struct Engine::priv::InternalScenePublicInterface;
@@ -72,7 +76,7 @@ class Scene: public EngineResource, public Observer{
         void update(const float dt);
         virtual void render();
         virtual void onEvent(const Event& event);
-        virtual void onResize(const unsigned int width, const unsigned int height);
+        virtual void onResize(unsigned int width, unsigned int height);
 
         void setOnUpdateFunctor(std::function<void(Scene*, const float)> functor);
 
@@ -81,13 +85,13 @@ class Scene: public EngineResource, public Observer{
 
 
         Entity createEntity();
-        void removeEntity(const Entity entity);
+        void removeEntity(Entity entity);
 
         
         Viewport& getMainViewport();
-        Viewport& addViewport(const float x, const float y, const float width, const float height, const Camera& camera);
+        Viewport& addViewport(float x, float y, float width, float height, const Camera& camera);
 
-        ParticleEmitter* addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, Entity* parent = nullptr);
+        ParticleEmitter* addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity* parent = nullptr);
 
 
         Camera* getActiveCamera() const;
@@ -111,7 +115,7 @@ class Scene: public EngineResource, public Observer{
         Skybox* skybox() const;
         void setSkybox(Skybox*);
 
-        void centerSceneToObject(const Entity& centerEntity);
+        void centerSceneToObject(Entity centerEntity);
 };
 namespace Engine::priv {
     struct InternalScenePublicInterface final {
@@ -119,7 +123,7 @@ namespace Engine::priv {
         friend class Engine::priv::RenderGraph;
 
         static std::vector<Particle>&            GetParticles(const Scene& scene);
-        static std::vector<EntityPOD>&           GetEntities(const Scene& scene);
+        static std::vector<Entity>&              GetEntities(const Scene& scene);
         static std::vector<Viewport>&            GetViewports(const Scene& scene);
         static std::vector<Camera*>&             GetCameras(const Scene& scene);
         static std::vector<SunLight*>&           GetLights(const Scene& scene);
@@ -131,20 +135,20 @@ namespace Engine::priv {
 
         static void           UpdateMaterials(Scene& scene, const float dt);
 
-        static void           RenderGeometryOpaque( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-        static void           RenderGeometryTransparent( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-        static void           RenderGeometryTransparentTrianglesSorted( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-        static void           RenderForwardOpaque( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-        static void           RenderForwardTransparent( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-        static void           RenderForwardTransparentTrianglesSorted( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-        static void           RenderForwardParticles( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
-        static void           RenderDecals( Renderer&, const Scene& scene, const Viewport&, const Camera&, const bool useDefaultShaders = true);
+        static void           RenderGeometryOpaque( Renderer&, const Scene& scene, const Viewport&, const Camera&, bool useDefaultShaders = true);
+        static void           RenderGeometryTransparent( Renderer&, const Scene& scene, const Viewport&, const Camera&, bool useDefaultShaders = true);
+        static void           RenderGeometryTransparentTrianglesSorted( Renderer&, const Scene& scene, const Viewport&, const Camera&, bool useDefaultShaders = true);
+        static void           RenderForwardOpaque( Renderer&, const Scene& scene, const Viewport&, const Camera&, bool useDefaultShaders = true);
+        static void           RenderForwardTransparent( Renderer&, const Scene& scene, const Viewport&, const Camera&, bool useDefaultShaders = true);
+        static void           RenderForwardTransparentTrianglesSorted( Renderer&, const Scene& scene, const Viewport&, const Camera&, bool useDefaultShaders = true);
+        static void           RenderForwardParticles( Renderer&, const Scene& scene, const Viewport&, const Camera&, bool useDefaultShaders = true);
+        static void           RenderDecals( Renderer&, const Scene& scene, const Viewport&, const Camera&, bool useDefaultShaders = true);
         static void           RenderParticles( Renderer&, const Scene& scene, const Viewport&, const Camera&, ShaderProgram& program);
 
-        static void           AddModelInstanceToPipeline(Scene& scene, ModelInstance&, const RenderStage::Stage& stage);
-        static void           RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance&, const RenderStage::Stage& stage);
+        static void           AddModelInstanceToPipeline(Scene& scene, ModelInstance&, RenderStage::Stage stage);
+        static void           RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance&, RenderStage::Stage stage);
         static ECS<Entity>&   GetECS(const Scene& scene);
-        static void           CleanECS(Scene& scene, const unsigned int entityData);
+        static void           CleanECS(Scene& scene, Entity entity);
     };
 };
 

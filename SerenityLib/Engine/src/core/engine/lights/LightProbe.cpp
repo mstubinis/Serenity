@@ -3,7 +3,7 @@
 
 using namespace std;
 
-LightProbe::LightProbe(const ProbeType::Type type, const glm::vec3& position, Scene* scene) : Entity(*scene), m_Camera(glm::radians(90.0f), 1.0f, 0.1f, 3000000.0f, scene), m_Viewport() {
+LightProbe::LightProbe(ProbeType::Type type, const glm::vec3& position, Scene* scene) : Entity(*scene), m_Camera(glm::radians(90.0f), 1.0f, 0.1f, 3000000.0f, scene), m_Viewport() {
     m_ProbeType  = type;
 
     addComponent<ComponentBody>();
@@ -15,7 +15,7 @@ LightProbe::~LightProbe() {
     destroy();
 }
 
-void LightProbe::addIgnoredEntity(const Entity entity) {
+void LightProbe::addIgnoredEntity(Entity entity) {
     if (!entity.null()) {
         for (auto& itr : m_Ignored) {
             if (entity == itr) {
@@ -37,13 +37,13 @@ void LightProbe::update(const float dt) {
         m_FrameCount = 0_uc;
     }
 }
-void LightProbe::activate(const bool active) {
+void LightProbe::activate(bool active) {
     m_Active = active;
 }
 void LightProbe::deactivate() {
     m_Active = false;
 }
-void LightProbe::setProbeType(const ProbeType::Type type) {
+void LightProbe::setProbeType(ProbeType::Type type) {
     m_ProbeType = type;
 }
 LightProbe::ProbeType::Type LightProbe::getProbeType() const {

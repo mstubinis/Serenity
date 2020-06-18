@@ -3,7 +3,7 @@
 #include <core/engine/networking/SocketTCP.h>
 #include <core/engine/networking/SocketUDP.h>
 #include <core/engine/networking/ListenerTCP.h>
-#include <core/engine/threading/Engine_ThreadManager.h>
+#include <core/engine/threading/ThreadingModule.h>
 
 #include <iostream>
 
@@ -13,7 +13,7 @@ using namespace Engine::Networking;
 
 Engine::Networking::Server::Server(ServerType::Type type) {
     m_ServerType = type;
-    auto hardware_concurrency = Engine::priv::threading::hardware_concurrency();
+    auto hardware_concurrency = Engine::hardware_concurrency();
     for (size_t i = 0; i < hardware_concurrency; ++i) {
         m_Threads.emplace_back();
     }
@@ -322,20 +322,21 @@ void Engine::Networking::Server::internal_update_loop(const float dt) {
         }
 
         //TODO: it works but it's kind of hacky ///////////////////////////////////////////////////
-        auto lambda_update_client_thread = [dt, this, server_active](Engine::Networking::ServerThread& client_thread) {
-            for (auto& client_itr : client_thread.clients()) {
-                if (server_active == 0 || client_thread.num_clients() == 0) { //can be inactive if no clients are using the thread
-                    return true;
-                }
-                if (client_itr.second) {
-                    client_itr.second->internal_update_loop(dt);
-                    client_itr.second->update(dt);
-                }
-            }
-            return false;
-        };
         for (auto& clientThread : m_Threads) {
-            Engine::priv::threading::addJobRef(lambda_update_client_thread, clientThread);
+
+            auto lambda_update_client_thread = [dt, this, server_active, &clientThread]() {
+                for (auto& client_itr : clientThread.clients()) {
+                    if (server_active == 0 || clientThread.num_clients() == 0) { //can be inactive if no clients are using the thread
+                        return true;
+                    }
+                    if (client_itr.second) {
+                        client_itr.second->internal_update_loop(dt);
+                        client_itr.second->update(dt);
+                    }
+                }
+                return false;
+            };
+            Engine::priv::threading::addJob(lambda_update_client_thread);
         }
         //////////////////////////////////////////////////////////////////////////////////////////////
     }

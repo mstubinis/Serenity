@@ -1,6 +1,6 @@
 #include <core/engine/physics/PhysicsPipeline.h>
 #include <core/engine/system/Engine.h>
-#include <core/engine/threading/Engine_ThreadManager.h>
+#include <core/engine/threading/ThreadingModule.h>
 #include <core/engine/utils/Utils.h>
 
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
@@ -33,24 +33,24 @@ const char* priv::PhysicsTaskScheduler::getName() const {
     return m_name; 
 }
 int priv::PhysicsTaskScheduler::getMaxNumThreads() const {
-    return Engine::priv::threading::hardware_concurrency();
+    return Engine::hardware_concurrency();
 }
 int priv::PhysicsTaskScheduler::getNumThreads() const {
-    return Engine::priv::threading::hardware_concurrency();
+    return Engine::hardware_concurrency();
 }
 void priv::PhysicsTaskScheduler::setNumThreads(int numThreads) {
 
 }
 void priv::PhysicsTaskScheduler::parallelFor(int iBegin, int iEnd, int grainSize, const btIParallelForBody& body) {
     auto parallel = [this, &body, iEnd, iBegin]() {
-        auto split = Engine::priv::threading::splitVectorPairs(iEnd - iBegin, 0);
-        auto lamda = [&body](const std::pair<size_t, size_t>& p, const unsigned int inK) {
-            body.forLoop((int)p.first, (int)p.second + 1);
-        };
-        for (size_t i = 0; i < split.size(); ++i) {
-            Engine::priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled(lamda, std::ref(split[i]), static_cast<unsigned int>(i));
+        auto pairs = Engine::splitVectorPairs(iEnd - iBegin, 0);
+        for (size_t i = 0; i < pairs.size(); ++i) {
+            auto lambda = [&body, i, &pairs]() {
+                body.forLoop((int)pairs[i].first, (int)pairs[i].second + 1);
+            };
+            Engine::priv::threading::addJob(lambda, 0);
         }
-        Engine::priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
+        Engine::priv::threading::waitForAll(0);
     };
     
     if (m_DoConcurrency) {
@@ -61,15 +61,15 @@ void priv::PhysicsTaskScheduler::parallelFor(int iBegin, int iEnd, int grainSize
 }
 btScalar priv::PhysicsTaskScheduler::parallelSum(int iBegin, int iEnd, int grainSize, const btIParallelSumBody& body) {
     auto parallel = [this, &body, iEnd, iBegin]() {
-        auto split = Engine::priv::threading::splitVectorPairs(iEnd - iBegin, 0);
+        auto pairs = Engine::splitVectorPairs(iEnd - iBegin, 0);
         m_sumRes.store(btScalar(0.0), std::memory_order_relaxed);
-        auto lamda = [&body, this](const std::pair<size_t, size_t>& p, const unsigned int inK) {
-            m_sumRes += body.sumLoop((int)p.first, (int)p.second + 1);
-        };
-        for (size_t i = 0; i < split.size(); ++i) {
-            Engine::priv::Core::m_Engine->m_ThreadManager.add_job_engine_controlled(lamda, std::ref(split[i]), static_cast<unsigned int>(i));
+        for (size_t i = 0; i < pairs.size(); ++i) {
+            auto lambda = [&body, this, i, &pairs]() {
+                m_sumRes += body.sumLoop((int)pairs[i].first, (int)pairs[i].second + 1);
+            };
+            Engine::priv::threading::addJob(lambda, 0);
         }
-        Engine::priv::Core::m_Engine->m_ThreadManager.wait_for_all_engine_controlled();
+        Engine::priv::threading::waitForAll(0);
         return m_sumRes.load(std::memory_order_relaxed);
     };
     
@@ -131,7 +131,7 @@ get_fn_ptr(const std::function<RES(ARGS...)>& f){
 }
 
 priv::PhysicsPipeline::PhysicsPipeline() {
-    const auto hardware_concurrency = Engine::priv::threading::hardware_concurrency();
+    const auto hardware_concurrency = Engine::hardware_concurrency();
 
     m_Broadphase             = new btDbvtBroadphase();
     m_CollisionConfiguration = new btDefaultCollisionConfiguration();

@@ -1,23 +1,21 @@
 #pragma once
-#ifndef ENGINE_ECS_SYSTEM_CONSTRUCTOR_INFO_H_INCLUDE_GUARD
-#define ENGINE_ECS_SYSTEM_CONSTRUCTOR_INFO_H_INCLUDE_GUARD
+#ifndef ENGINE_ECS_SYSTEM_CONSTRUCTOR_INFO_H
+#define ENGINE_ECS_SYSTEM_CONSTRUCTOR_INFO_H
 
 #include <functional>
+#include <ecs/Entity.h>
 
-class  Scene;
-class  Entity;
-
-typedef std::function<void(void*, void*, const float, Scene&)>  std_func_update;
-typedef std::function<void(void*, void*, Entity&, Scene&)>      std_func_entity;
-typedef std::function<void(void*, void*, Entity&)>              std_func_component;
-typedef std::function<void(void*, Entity&)>                     std_func_component_removed;
-typedef std::function<void(void*, void*, Scene&)>               std_func_scene;
+typedef std::function<void(void*, void*, const float, Scene&)> std_func_update;
+typedef std::function<void(void*, void*, Entity, Scene&)>      std_func_entity;
+typedef std::function<void(void*, void*, Entity)>              std_func_component;
+typedef std::function<void(void*, Entity)>                     std_func_component_removed;
+typedef std::function<void(void*, void*, Scene&)>              std_func_scene;
 
 namespace Engine::priv {
     struct FunctorUpdateEmpty final { void operator()(void* system, void* componentPool, const float dt, Scene& scene) const { } };
-    struct FunctorComponentEmpty final { void operator()(void* system, void* component, Entity& entity) const { } };
-    struct FunctorComponentRemovedEmpty final { void operator()(void* system, Entity& entity) const { } };
-    struct FunctorEntityEmpty final { void operator()(void* system, void* componentPool, Entity& entity, Scene& scene) const { } };
+    struct FunctorComponentEmpty final { void operator()(void* system, void* component, Entity entity) const { } };
+    struct FunctorComponentRemovedEmpty final { void operator()(void* system, Entity entity) const { } };
+    struct FunctorEntityEmpty final { void operator()(void* system, void* componentPool, Entity entity, Scene& scene) const { } };
     struct FunctorSceneEmpty final { void operator()(void* system, void* componentPool, Scene& scene) const { } };
 
     template<class T> struct FunctorHolder {

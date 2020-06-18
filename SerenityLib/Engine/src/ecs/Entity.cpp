@@ -8,85 +8,60 @@
 using namespace Engine::priv;
 using namespace std;
 
-Entity Entity::null_ = Entity(0,0,0);
+Entity Entity::null_ = Entity(0U,0U,0U);
 
 Entity::Entity(Scene& scene) {
-    data = scene.createEntity().data;
+    m_Data = scene.createEntity().m_Data;
 }
-Entity::Entity(const unsigned int entityID, const unsigned int sceneID, const unsigned int versionID) {
-    data = versionID << 28 | sceneID << 21 | entityID;
+Entity::Entity(std::uint32_t entityID, std::uint32_t sceneID, std::uint32_t versionID) {
+    m_Data = versionID << (ENTITY_SIZE - VERSION_BIT_POSITIONS) | sceneID << (ENTITY_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS) | entityID;
 }
 Entity::Entity(const Entity& other) {
-    data = other.data;
+    m_Data = other.m_Data;
 }
 Entity& Entity::operator=(const Entity& other) {
     if (&other != this) {
-        data = other.data;
+        m_Data = other.m_Data;
     }
     return *this;
 }
 Entity::Entity(Entity&& other) noexcept {
-    data = std::move(other.data);
+    m_Data = std::move(other.m_Data);
 }
 Entity& Entity::operator=(Entity&& other) noexcept {
-    data = std::move(other.data);
+    m_Data = std::move(other.m_Data);
     return *this;
 }
 
-
-std::uint32_t Entity::id() const {
-    const EntityDataRequest dataRequest(*this);
-    return dataRequest.ID;
-}
-std::uint32_t Entity::sceneID() const {
-    const EntityDataRequest dataRequest(*this);
-    return dataRequest.sceneID;
-}
-std::uint32_t Entity::versionID() const {
-    const EntityDataRequest dataRequest(*this);
-    return dataRequest.versionID;
-}
-
-void Entity::addChild(const Entity child) const {
-    const auto* body = getComponent<ComponentBody>();
+void Entity::addChild(Entity& child) const {
+    auto* body = getComponent<ComponentBody>();
     if (body) {
         body->addChild(child);
     }
 }
-void Entity::removeChild(const Entity child) const {
-    const auto* body = getComponent<ComponentBody>();
+void Entity::removeChild(Entity& child) const {
+    auto* body = getComponent<ComponentBody>();
     if (body) {
         body->removeChild(child);
     }
 }
 bool Entity::hasParent() const {
-    const auto* body = getComponent<ComponentBody>();
+    auto* body = getComponent<ComponentBody>();
     if (body) {
         return body->hasParent();
     }
     return false;
 }
 
-
 Scene& Entity::scene() const {
-	const EntityDataRequest dataRequest(*this);
-    return Core::m_Engine->m_ResourceManager._getSceneByID(dataRequest.sceneID);
+    return Core::m_Engine->m_ResourceManager._getSceneByID(sceneID());
 }
 void Entity::destroy() {
     if (!null()) {
         Scene& s = scene();
-        InternalScenePublicInterface::CleanECS(s, data);
+        InternalScenePublicInterface::CleanECS(s, *this);
         InternalScenePublicInterface::GetECS(s).removeEntity(*this);
     }
-}
-bool Entity::operator==(const Entity other) const {
-    return (data == other.data);
-}
-bool Entity::operator!=(const Entity other) const {
-    return !(data == other.data);
-}
-bool Entity::null() const {
-    return (data == 0);
 }
 
 void Entity::addComponent(const string& componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8) {
@@ -160,7 +135,7 @@ bool Entity::removeComponent(const string& componentClassName) {
 }
 luabridge::LuaRef Entity::getComponent(const string& componentClassName) {
     lua_State* L = Engine::priv::getLUABinder().getState()->getState();
-    string global_name = to_string(data) + componentClassName;
+    string global_name = to_string(m_Data) + componentClassName;
     auto* global_name_cstr = global_name.c_str();
     if (componentClassName == "ComponentBody") {
         return InternalEntityPublicInterface::GetComponent<ComponentBody>(L, *this, global_name_cstr);

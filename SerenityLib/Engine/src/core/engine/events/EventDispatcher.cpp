@@ -1,7 +1,7 @@
 #include <core/engine/events/EventDispatcher.h>
 #include <core/engine/utils/Utils.h>
 #include <core/engine/events/Observer.h>
-#include <core/engine/events/Engine_EventObject.h>
+#include <core/engine/events/Event.h>
 
 using namespace Engine;
 using namespace std;

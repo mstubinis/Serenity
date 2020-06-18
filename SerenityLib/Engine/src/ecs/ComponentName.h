@@ -24,9 +24,9 @@ class ComponentName {
         Entity m_Owner;
         std::string m_Data;
     public:
-        ComponentName(const Entity entity);
-        ComponentName(const Entity entity, const std::string& name);
-        ComponentName(const Entity entity, const char* name);
+        ComponentName(Entity entity);
+        ComponentName(Entity entity, const std::string& name);
+        ComponentName(Entity entity, const char* name);
 
         ComponentName(const ComponentName& other)                = delete;
         ComponentName& operator=(const ComponentName& other)     = delete;

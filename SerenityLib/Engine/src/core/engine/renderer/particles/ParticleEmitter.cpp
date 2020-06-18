@@ -14,7 +14,7 @@
 using namespace std;
 using namespace Engine;
 
-ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent) : Entity(scene){
+ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) : Entity(scene){
     addComponent<ComponentBody>();
 
     /*
@@ -25,7 +25,7 @@ ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& 
     */
     init(properties, scene, lifetime, parent);
 }
-void ParticleEmitter::init(ParticleEmissionProperties& properties, Scene& scene, const float lifetime, const Entity parent) {
+void ParticleEmitter::init(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
     setProperties(properties);
     m_Parent        = parent;
     m_Lifetime      = lifetime;
@@ -46,7 +46,7 @@ ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept {
     m_Timer           = std::move(other.m_Timer);
     m_Lifetime        = std::move(other.m_Lifetime);
     m_Parent          = std::move(other.m_Parent);
-    data              = std::move(other.data);
+    m_Data            = std::move(other.m_Data);
     m_UpdateFunctor   = std::move(other.m_UpdateFunctor);
     m_UserData        = std::move(other.m_UserData);
 }
@@ -57,7 +57,7 @@ ParticleEmitter& ParticleEmitter::operator=(ParticleEmitter&& other) noexcept {
     m_Timer           = std::move(other.m_Timer);
     m_Lifetime        = std::move(other.m_Lifetime);
     m_Parent          = std::move(other.m_Parent);
-    data              = std::move(other.data);
+    m_Data            = std::move(other.m_Data);
     m_UpdateFunctor   = std::move(other.m_UpdateFunctor);
     m_UserData        = std::move(other.m_UserData); 
     return *this;
@@ -78,7 +78,7 @@ void ParticleEmitter::setProperties(ParticleEmissionProperties& properties) {
 }
 
 
-void ParticleEmitter::update(const size_t index, const float dt, priv::ParticleSystem& particleSystem, const bool multi_threaded) {
+void ParticleEmitter::update(size_t index, const float dt, priv::ParticleSystem& particleSystem, bool multi_threaded) {
     //handle spawning
     if (m_Active) {
         m_Timer           += dt;

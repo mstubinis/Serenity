@@ -16,7 +16,7 @@ namespace Engine::priv {
 #include <vector>
 #include <mutex>
 #include <LinearMath/btVector3.h>
-#include <ecs/Entity.h>
+//#include <ecs/Entity.h>
 
 #define PHYSICS_MIN_STEP 0.016666666666666666f
 

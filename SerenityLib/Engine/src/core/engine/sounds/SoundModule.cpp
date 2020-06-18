@@ -1,4 +1,4 @@
-#include <core/engine/sounds/Engine_Sounds.h>
+#include <core/engine/sounds/SoundModule.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/scene/Camera.h>
@@ -9,41 +9,40 @@
 using namespace Engine;
 using namespace std;
 
-priv::SoundManager* soundManager = nullptr;
+priv::SoundModule* soundModule = nullptr;
 
-
-priv::SoundManager::SoundManager(){
-    soundManager = this;
-    for (unsigned int i = 0; i < SoundManager::MAX_SOUND_EFFECTS; ++i) {
+priv::SoundModule::SoundModule(){
+    soundModule = this;
+    for (unsigned int i = 0; i < MAX_SOUND_EFFECTS; ++i) {
         m_FreelistEffects.push(i);
     }
-    for (unsigned int i = 0; i < SoundManager::MAX_SOUND_MUSIC; ++i) {
+    for (unsigned int i = 0; i < MAX_SOUND_MUSIC; ++i) {
         m_FreelistMusics.push(i);
     }
 }
-priv::SoundManager::~SoundManager(){ 
+priv::SoundModule::~SoundModule(){
     cleanup();
 }
-void priv::SoundManager::cleanup() {
+void priv::SoundModule::cleanup() {
     SAFE_DELETE_VECTOR(m_SoundQueues);
 }
-SoundEffect* priv::SoundManager::_getNextFreeEffect() {
+SoundEffect* priv::SoundModule::getNextFreeEffect() {
     if (m_FreelistEffects.size() > 0){
-        const auto index = m_FreelistEffects.top();
+        auto index = m_FreelistEffects.top();
         m_FreelistEffects.pop();
         return &m_SoundEffects[index];
     }
     return nullptr;
 }
-SoundMusic* priv::SoundManager::_getNextFreeMusic() {
+SoundMusic* priv::SoundModule::getNextFreeMusic() {
     if (m_FreelistMusics.size() > 0) {
-        const auto index = m_FreelistMusics.top();
+        auto index = m_FreelistMusics.top();
         m_FreelistMusics.pop();
         return &m_SoundMusics[index];
     }
     return nullptr;
 }
-void priv::SoundManager::_setSoundInformation(Handle handle, SoundEffect& sound) {
+void priv::SoundModule::setSoundInformation(Handle handle, SoundEffect& sound) {
     SoundData& data = *Resources::getSoundData(handle);
     auto* buffer = data.getBuffer();
     if (!buffer) {
@@ -53,30 +52,31 @@ void priv::SoundManager::_setSoundInformation(Handle handle, SoundEffect& sound)
     sound.m_Sound.setBuffer(*buffer);
     sound.setVolume(data.getVolume());
 }
-void priv::SoundManager::_setSoundInformation(Handle handle, SoundMusic& sound) {
+void priv::SoundModule::setSoundInformation(Handle handle, SoundMusic& sound) {
     SoundData& data = *Resources::getSoundData(handle);
     //auto buffer = data.getBuffer();
-    const bool res = sound.m_Sound.openFromFile(data.getFilename());
+    bool res = sound.m_Sound.openFromFile(data.getFilename());
     if (res) {
         sound.m_Sound.setVolume(data.getVolume());
     }
     sound.m_Duration = data.getDuration();
 }
-
-void priv::SoundManager::_update(const float dt){
+void priv::SoundModule::updateCameraPosition() {
     auto* scene = Resources::getCurrentScene();
     if (scene) {
         auto* camera = scene->getActiveCamera();
         if (camera) {
-            auto& cam             = *camera;
-            const auto camPos     = glm::vec3(cam.getPosition());
-            const auto camForward = glm::vec3(cam.forward());
-            const auto camUp      = glm::vec3(cam.up());
+            auto& cam = *camera;
+            auto camPos = glm::vec3(cam.getPosition());
+            auto camForward = glm::vec3(cam.forward());
+            auto camUp = glm::vec3(cam.up());
             sf::Listener::setPosition(camPos.x, camPos.y, camPos.z);
             sf::Listener::setDirection(camForward.x, camForward.y, camForward.z);
             sf::Listener::setUpVector(camUp.x, camUp.y, camUp.z);
         }
     }
+}
+void priv::SoundModule::updateSoundQueues(const float dt) {
     for (auto it1 = m_SoundQueues.begin(); it1 != m_SoundQueues.end();) {
         SoundQueue& queue = *(*it1);
         queue.update(dt);
@@ -86,7 +86,9 @@ void priv::SoundManager::_update(const float dt){
             ++it1;
         }
     }
-    for (unsigned int i = 0; i < SoundManager::MAX_SOUND_EFFECTS; ++i) {
+}
+void priv::SoundModule::updateSoundEffects(const float dt) {
+    for (unsigned int i = 0; i < MAX_SOUND_EFFECTS; ++i) {
         auto& effect = m_SoundEffects[i];
         if (effect.m_Active) {
             effect.update(dt);
@@ -96,7 +98,9 @@ void priv::SoundManager::_update(const float dt){
             }
         }
     }
-    for (unsigned int i = 0; i < SoundManager::MAX_SOUND_MUSIC; ++i) {
+}
+void priv::SoundModule::updateSoundMusic(const float dt) {
+    for (unsigned int i = 0; i < MAX_SOUND_MUSIC; ++i) {
         auto& music = m_SoundMusics[i];
         if (music.m_Active) {
             music.update(dt);
@@ -107,35 +111,41 @@ void priv::SoundManager::_update(const float dt){
         }
     }
 }
+void priv::SoundModule::update(const float dt){
+    updateCameraPosition();
+    updateSoundQueues(dt);
+    updateSoundEffects(dt);
+    updateSoundMusic(dt);
+}
 
-SoundQueue* Sound::createQueue(const float delay) {
-    SoundQueue* queue = NEW SoundQueue(*soundManager, delay);
+SoundQueue* Sound::createQueue(float delay) {
+    SoundQueue* queue = NEW SoundQueue(*soundModule, delay);
     return queue;
 }
 
-SoundEffect* Sound::playEffect(Handle handle, const unsigned int loops){
-    SoundEffect* effect = soundManager->_getNextFreeEffect();
+SoundEffect* Sound::playEffect(Handle handle, unsigned int loops){
+    SoundEffect* effect = soundModule->getNextFreeEffect();
     if (effect) {
-        soundManager->_setSoundInformation(handle, *effect);
+        soundModule->setSoundInformation(handle, *effect);
         effect->play(loops);
     }
     return effect;
 }
-SoundMusic* Sound::playMusic(Handle handle, const unsigned int loops){
-    SoundMusic* music = soundManager->_getNextFreeMusic();
+SoundMusic* Sound::playMusic(Handle handle, unsigned int loops){
+    SoundMusic* music = soundModule->getNextFreeMusic();
     if (music) {
-        soundManager->_setSoundInformation(handle, *music);
+        soundModule->setSoundInformation(handle, *music);
         music->play(loops);
     }
     return music;
 }
 void Sound::stop_all_music() {
-    for (auto& music : soundManager->m_SoundMusics) {
+    for (auto& music : soundModule->m_SoundMusics) {
         music.stop();
     }
 }
 void Sound::stop_all_effects() {
-    for (auto& effect : soundManager->m_SoundEffects) {
+    for (auto& effect : soundModule->m_SoundEffects) {
         effect.stop();
     }
 }

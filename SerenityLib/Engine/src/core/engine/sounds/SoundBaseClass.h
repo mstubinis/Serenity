@@ -11,47 +11,47 @@ struct SoundStatus final {enum Status {
 };};
 
 namespace Engine::priv {
-    class SoundManager;
+    class SoundModule;
 };
 
 #include <glm/vec3.hpp>
 
 class SoundBaseClass {
-    friend class Engine::priv::SoundManager;
+    friend class Engine::priv::SoundModule;
     protected:
-        SoundStatus::Status      m_Status;
-        unsigned int             m_Loops;
-        unsigned int             m_CurrentLoop;
+        SoundStatus::Status      m_Status      = SoundStatus::Fresh;
+        unsigned int             m_Loops       = 0U;
+        unsigned int             m_CurrentLoop = 0U;
 
-        SoundBaseClass(const unsigned int numLoops);
+        SoundBaseClass(unsigned int numLoops);
     public:
         SoundBaseClass& operator=(const SoundBaseClass&) = delete;
         SoundBaseClass(const SoundBaseClass&) = default;
         SoundBaseClass(SoundBaseClass&&) noexcept = default;
         virtual ~SoundBaseClass();
 
-        SoundStatus::Status status();
+        SoundStatus::Status status() const;
         virtual void update(const float dt);
-        virtual bool play(const unsigned int numLoops = 1);
+        virtual bool play(unsigned int numLoops = 1);
         virtual bool pause();
         virtual bool stop();
         virtual bool restart();
-        unsigned int getLoopsLeft();
-        virtual unsigned int getChannelCount();
-        virtual float getMinDistance();
-        virtual void setMinDistance(const float minDistance);
-        virtual bool isRelativeToListener();
-        virtual void setRelativeToListener(const bool relative = true);
+        unsigned int getLoopsLeft() const;
+        virtual unsigned int getChannelCount() const;
+        virtual float getMinDistance() const;
+        virtual void setMinDistance(float minDistance);
+        virtual bool isRelativeToListener() const;
+        virtual void setRelativeToListener(bool relative = true);
 
-        virtual float getAttenuation();
-        virtual void setAttenuation(const float attenuation);
-        virtual glm::vec3 getPosition();
-        virtual void setPosition(const float x, const float y, const float z);
+        virtual float getAttenuation() const;
+        virtual void setAttenuation(float attenuation);
+        virtual glm::vec3 getPosition() const;
+        virtual void setPosition(float x, float y, float z);
         virtual void setPosition(const glm::vec3& position);
-        virtual float getVolume();
-        virtual void setVolume(const float volume);
-        virtual float getPitch();
-        virtual void setPitch(const float pitch);
+        virtual float getVolume() const;
+        virtual void setVolume(float volume);
+        virtual float getPitch() const;
+        virtual void setPitch(float pitch);
 };
 
 #endif

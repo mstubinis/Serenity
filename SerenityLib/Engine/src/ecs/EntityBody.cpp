@@ -1,10 +1,10 @@
 #include <ecs/EntityBody.h>
 #include <ecs/ComponentBody.h>
 
-EntityBody::EntityBody(Scene& scene) : Entity(scene) {}
-EntityBody::EntityBody(const unsigned int entityID, const unsigned int sceneID, const unsigned int versionID) : Entity(entityID, sceneID, versionID){}
-
-
+EntityBody::EntityBody(Scene& scene) : Entity(scene) {
+}
+EntityBody::EntityBody(unsigned int entityID, unsigned int sceneID, unsigned int versionID) : Entity(entityID, sceneID, versionID){
+}
 
 
 float EntityBody::mass() const {

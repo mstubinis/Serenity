@@ -180,8 +180,8 @@ void TerrainData::clearData() {
 bool TerrainData::AdjacentPixels::valid(int offsetX, int offsetY, int centerX, int centerY) const {
     int actualX = centerX + offsetX;
     int actualY = centerY + offsetY;
-    if (actualX >= 0 && actualX <= imgSizeX - 1) {
-        if (actualY >= 0 && actualY <= imgSizeY - 1) {
+    if (actualX >= 0 && actualX <= (int)imgSizeX - 1) {
+        if (actualY >= 0 && actualY <= (int)imgSizeY - 1) {
             if (pixels[offsetY + 1][offsetX + 1] > NULL_VERTEX) {
                 return true;
             }

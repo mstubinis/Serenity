@@ -65,7 +65,7 @@ void priv::ResourceManager::onPostUpdate() {
 Handle priv::ResourceManager::_addTexture(Texture* t) {
     return m_Resources.add(t, ResourceType::Texture);
 }
-Scene& priv::ResourceManager::_getSceneByID(const uint id) {
+Scene& priv::ResourceManager::_getSceneByID(std::uint32_t id) {
     return *m_Scenes[id - 1];
 }
 const unsigned int priv::ResourceManager::AddScene(Scene& s){

@@ -1,4 +1,5 @@
 #include <ecs/ComponentLogic.h>
+#include <ecs/ECSComponentPool.h>
 
 using namespace Engine;
 using namespace Engine::priv;
@@ -6,7 +7,7 @@ using namespace std;
 
 #pragma region Component
 
-ComponentLogic::ComponentLogic(const Entity entity){
+ComponentLogic::ComponentLogic(Entity entity){
     m_Owner = entity;
 }
 
@@ -68,11 +69,11 @@ struct priv::ComponentLogic_UpdateFunction final { void operator()(void* system,
 		component.call(dt);
 	}
 }};
-struct priv::ComponentLogic_ComponentAddedToEntityFunction final { void operator()(void* system, void* component, Entity& entity) const {
+struct priv::ComponentLogic_ComponentAddedToEntityFunction final { void operator()(void* system, void* component, Entity entity) const {
 }};
-struct priv::ComponentLogic_ComponentRemovedFromEntityFunction final { void operator()(void* system, Entity& entity) const {
+struct priv::ComponentLogic_ComponentRemovedFromEntityFunction final { void operator()(void* system, Entity entity) const {
 }};
-struct priv::ComponentLogic_EntityAddedToSceneFunction final { void operator()(void* system, void* componentPool, Entity& entity, Scene& scene) const {
+struct priv::ComponentLogic_EntityAddedToSceneFunction final { void operator()(void* system, void* componentPool, Entity entity, Scene& scene) const {
 }};
 struct priv::ComponentLogic_SceneEnteredFunction final { void operator()(void* system, void* componentPool, Scene& scene) const {
 }};

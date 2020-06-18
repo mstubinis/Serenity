@@ -18,6 +18,7 @@ namespace Engine::priv {
 
 #include <core/engine/utils/Utils.h>
 #include <core/engine/renderer/RendererIncludes.h>
+//#include <ecs/Entity.h>
 
 namespace Engine::priv {
     class InstanceNode final : public Engine::NonCopyable {
@@ -87,15 +88,15 @@ namespace Engine::priv {
             const bool remove_mesh_node(MaterialNode& materialNode, const MeshNode& meshNode);
             const bool remove_instance_node(MeshNode& meshNode, const InstanceNode& instanceNode);
 
-            void clean(const uint entityData);
-            void sort(const Camera& camera, const SortingMode::Mode sortingMode);
-            void sort_cheap(const Camera& camera, const SortingMode::Mode sortingMode);
+            void clean(Entity entity);
+            void sort(const Camera& camera, SortingMode::Mode sortingMode);
+            void sort_cheap(const Camera& camera, SortingMode::Mode sortingMode);
 
-            void sort_bruteforce(const Camera& camera, const SortingMode::Mode sortingMode);
-            void sort_cheap_bruteforce(const Camera& camera, const SortingMode::Mode sortingMode);
+            void sort_bruteforce(const Camera& camera, SortingMode::Mode sortingMode);
+            void sort_cheap_bruteforce(const Camera& camera, SortingMode::Mode sortingMode);
 
-            void render(const Engine::priv::Renderer& renderer, const Viewport& viewport, const Camera& camera, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
-            void render_bruteforce(const Engine::priv::Renderer& renderer, const Viewport& viewport, const Camera& camera, const bool useDefaultShaders = true, const SortingMode::Mode sortingMode = SortingMode::None);
+            void render(const Engine::priv::Renderer& renderer, const Viewport& viewport, const Camera& camera, bool useDefaultShaders = true, SortingMode::Mode sortingMode = SortingMode::None);
+            void render_bruteforce(const Engine::priv::Renderer& renderer, const Viewport& viewport, const Camera& camera, bool useDefaultShaders = true, SortingMode::Mode sortingMode = SortingMode::None);
             void validate_model_instances_for_rendering(const Viewport& viewport, const Camera& camera);
 
     };

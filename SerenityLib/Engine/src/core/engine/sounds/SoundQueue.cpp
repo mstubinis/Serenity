@@ -1,33 +1,33 @@
 #include <core/engine/sounds/SoundQueue.h>
 #include <core/engine/sounds/SoundEffect.h>
 #include <core/engine/sounds/SoundMusic.h>
-#include <core/engine/sounds/Engine_Sounds.h>
+#include <core/engine/sounds/SoundModule.h>
 
 using namespace std;
 
-SoundQueue::SoundQueue(Engine::priv::SoundManager& manager, const float delay) : m_SoundManager(manager){
+SoundQueue::SoundQueue(Engine::priv::SoundModule& module, float delay) : m_SoundModule(module){
     m_DelayInSeconds = delay;
-    m_SoundManager.m_SoundQueues.push_back(this);
+    m_SoundModule.m_SoundQueues.push_back(this);
 }
 SoundQueue::~SoundQueue() {
     clear();
 }
-void SoundQueue::enqueueEffect(Handle handle, const unsigned int loops) {
+void SoundQueue::enqueueEffect(Handle handle, unsigned int loops) {
     if (!m_Current) {
-        m_Current = m_SoundManager._getNextFreeEffect();
+        m_Current = m_SoundModule.getNextFreeEffect();
         if (m_Current) {
             handle.type = 1;
-            m_SoundManager._setSoundInformation(handle, *static_cast<SoundEffect*>(m_Current));
+            m_SoundModule.setSoundInformation(handle, *static_cast<SoundEffect*>(m_Current));
         }
     }
     m_Queue.push(handle);
 }
-void SoundQueue::enqueueMusic(Handle handle, const unsigned int loops) {
+void SoundQueue::enqueueMusic(Handle handle, unsigned int loops) {
     if (!m_Current) {
-        m_Current = m_SoundManager._getNextFreeMusic();
+        m_Current = m_SoundModule.getNextFreeMusic();
         if (m_Current) {
             handle.type = 2;
-            m_SoundManager._setSoundInformation(handle, *static_cast<SoundMusic*>(m_Current));
+            m_SoundModule.setSoundInformation(handle, *static_cast<SoundMusic*>(m_Current));
         }
     }
     m_Queue.push(handle);
@@ -50,30 +50,38 @@ void SoundQueue::update(const float dt) {
         }else{
             if (m_Queue.size() > 0) {
                 if (!m_Current) {
-                    auto& handle = m_Queue.front();
+                    Handle handle = m_Queue.front();
                     if (handle.type == 1) {
-                        m_Current = m_SoundManager._getNextFreeEffect();
+                        m_Current = m_SoundModule.getNextFreeEffect();
                         if (m_Current) {
-                            m_SoundManager._setSoundInformation(handle, *static_cast<SoundEffect*>(m_Current));
+                            m_SoundModule.setSoundInformation(handle, *static_cast<SoundEffect*>(m_Current));
                         }
                     }else if (handle.type == 2) {
-                        m_Current = m_SoundManager._getNextFreeMusic();
+                        m_Current = m_SoundModule.getNextFreeMusic();
                         if (m_Current) {
-                            m_SoundManager._setSoundInformation(handle, *static_cast<SoundMusic*>(m_Current));
+                            m_SoundModule.setSoundInformation(handle, *static_cast<SoundMusic*>(m_Current));
                         }
                     }
                 }
-                const SoundStatus::Status& status = m_Current->status();
-                if (status == SoundStatus::Fresh) {
-                    m_Current->play();
-                }else if (status == SoundStatus::Playing || status == SoundStatus::PlayingLooped) {
-                    m_Current->update(dt);
-                }else if (status == SoundStatus::Stopped) {
-                    const auto loopsLeft = m_Current->getLoopsLeft();
-                    if (loopsLeft <= 1) {
-                        m_Queue.pop();
-                        m_IsDelayProcess = true;
-                        m_Current = nullptr;
+                SoundStatus::Status status = m_Current->status();
+                switch (status) {
+                    case SoundStatus::Fresh: {
+                        m_Current->play();
+                        break;
+                    }case SoundStatus::Stopped: {
+                        unsigned int loopsLeft = m_Current->getLoopsLeft();
+                        if (loopsLeft <= 1) {
+                            m_Queue.pop();
+                            m_IsDelayProcess = true;
+                            m_Current = nullptr;
+                        }
+                        break;
+                    }case SoundStatus::Playing: {
+                    }case SoundStatus::PlayingLooped: {
+                        m_Current->update(dt);
+                        break;
+                    }default: {
+                        break;
                     }
                 }
             }
@@ -98,8 +106,8 @@ bool SoundQueue::empty() const {
 bool SoundQueue::active() const {
     return m_Active;
 }
-void SoundQueue::activate() {
-    m_Active = true;
+void SoundQueue::activate(bool active) {
+    m_Active = active;
 }
 void SoundQueue::deactivate() {
     m_Active = false;

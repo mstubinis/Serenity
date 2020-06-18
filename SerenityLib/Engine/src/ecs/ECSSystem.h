@@ -3,7 +3,7 @@
 #define ENGINE_ECS_SYSTEM_H
 
 namespace Engine::priv {
-    template<typename TEntity>
+    template<typename ENTITY>
     class ECS;
 }
 
@@ -12,9 +12,9 @@ namespace Engine::priv {
 
 namespace Engine::priv {
     template<typename ...> class ECSSystem;
-    template <class TEntity> 
-    class ECSSystem<TEntity> {
-        friend class Engine::priv::ECS<TEntity>;
+    template <class ENTITY>
+    class ECSSystem<ENTITY> {
+        friend class Engine::priv::ECS<ENTITY>;
         protected:
             std_func_update               SUF;
             std_func_component            CAE;
@@ -32,17 +32,17 @@ namespace Engine::priv {
             ECSSystem& operator=(ECSSystem&& other) noexcept = delete;
 
             virtual void onUpdate(const float dt, Scene&) {}
-            virtual void onComponentAddedToEntity(void*, TEntity&) {}
-            virtual void onComponentRemovedFromEntity(TEntity&) {}
-            virtual void onEntityAddedToScene(TEntity&, Scene&) {}
+            virtual void onComponentAddedToEntity(void*, ENTITY) {}
+            virtual void onComponentRemovedFromEntity(ENTITY) {}
+            virtual void onEntityAddedToScene(ENTITY, Scene&) {}
             virtual void onSceneLeft(Scene&) {}
             virtual void onSceneEntered(Scene&) {}
     };
 
-    template <class TEntity, class TComponent> 
-    class ECSSystem<TEntity, TComponent> : public ECSSystem<TEntity> {
-        using super     = ECSSystem<TEntity>;
-        using CPoolType = ECSComponentPool<TEntity, TComponent>;
+    template <class ENTITY, class COMPONENT>
+    class ECSSystem<ENTITY, COMPONENT> : public ECSSystem<ENTITY> {
+        using super     = ECSSystem<ENTITY>;
+        using CPoolType = ECSComponentPool<ENTITY, COMPONENT>;
         private:
             CPoolType& componentPool;
 
@@ -65,7 +65,7 @@ namespace Engine::priv {
                 super::SLF = std::bind(f.functor, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 			}
         public:
-            ECSSystem(const ECSSystemCI& systemCI, ECS<TEntity>& ecs) : componentPool(ecs.template getPool<TComponent>()){
+            ECSSystem(const ECSSystemCI& systemCI, ECS<ENTITY>& ecs) : componentPool(ecs.template getPool<COMPONENT>()){
                 Bind_SUF(systemCI.onUpdateFunction);
                 Bind_CAE(systemCI.onComponentAddedToEntityFunction);
                 Bind_CRE(systemCI.onComponentRemovedFromEntityFunction);
@@ -84,13 +84,13 @@ namespace Engine::priv {
             void onUpdate(const float dt, Scene& scene) { 
                 super::SUF(this, &componentPool, dt, scene); 
 			}
-            void onComponentAddedToEntity(void* component, TEntity& entity) { 
+            void onComponentAddedToEntity(void* component, ENTITY entity) {
                 super::CAE(this, component, entity);
 			}
-            void onComponentRemovedFromEntity(TEntity& entity) {
+            void onComponentRemovedFromEntity(ENTITY entity) {
                 super::CRE(this, entity);
             }
-            void onEntityAddedToScene(TEntity& entity, Scene& scene) { 
+            void onEntityAddedToScene(ENTITY entity, Scene& scene) {
                 super::EAS(this, &componentPool, entity, scene);
 			}
             void onSceneEntered(Scene& scene) { 

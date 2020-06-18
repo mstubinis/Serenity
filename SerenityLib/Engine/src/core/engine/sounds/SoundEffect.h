@@ -10,13 +10,12 @@ class  SoundQueue;
 #include <SFML/Audio.hpp>
 
 class  SoundEffect : public SoundBaseClass {
-    friend class Engine::priv::SoundManager;
+    friend class Engine::priv::SoundModule;
     friend class SoundQueue;
     private:
         sf::Sound   m_Sound;
         float       m_Duration = 0.0f;
         bool        m_Active   = false;
-
     public:
         SoundEffect();
 
@@ -27,26 +26,26 @@ class  SoundEffect : public SoundBaseClass {
 
         ~SoundEffect();
 
-        void update(const float dt);
-        bool play(const unsigned int numLoops = 1);
-        bool pause();
-        bool stop(const bool stopAllLoops = false);
-        bool restart();
+        bool play(unsigned int numLoops = 1) override;
+        bool pause() override;
+        bool stop(bool stopAllLoops = false);
+        bool restart() override;
         float getDuration() const;
-        unsigned int getChannelCount();
-        float getMinDistance();
-        void setMinDistance(const float minDistance);
-        bool isRelativeToListener();
-        void setRelativeToListener(const bool relative = true);
+        unsigned int getChannelCount() const override;
+        float getMinDistance() const override;
+        void setMinDistance(float minDistance) override;
+        bool isRelativeToListener() const override;
+        void setRelativeToListener(bool relative = true) override;
+        float getAttenuation() const override;
+        void setAttenuation(float attenuation) override;
+        glm::vec3 getPosition() const override;
+        void setPosition(float x, float y, float z) override;
+        void setPosition(const glm::vec3& position) override;
+        float getVolume() const override;
+        void setVolume(float volume) override;
+        float getPitch() const override;
+        void setPitch(float pitch) override;
 
-        float getAttenuation() const;
-        void setAttenuation(const float attenuation);
-        glm::vec3 getPosition();
-        void setPosition(const float, const float, const float);
-        void setPosition(const glm::vec3&);
-        float getVolume() const;
-        void setVolume(const float);
-        float getPitch() const;
-        void setPitch(const float);
+        void update(const float dt) override;
 };
 #endif

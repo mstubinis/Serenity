@@ -134,7 +134,7 @@ void MeshRequest::request() {
     InternalMeshRequestPublicInterface::Request(*this);
 }
 void MeshRequest::requestAsync() {
-    if (Engine::priv::threading::hardware_concurrency() > 1) {
+    if (Engine::hardware_concurrency() > 1) {
         m_Async = true;
         InternalMeshRequestPublicInterface::Request(*this);
     }else{
@@ -192,7 +192,6 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
         auto& root   = *meshRequest.m_Importer.m_AIRoot;
         uint count   = 0;
         MeshLoader::LoadProcessNodeData(meshRequest, scene, root, count);
-        //MeshLoader::SaveTo_OBJCC(*meshRequest.m_Parts[0].mesh->m_VertexData, meshRequest.m_FileOrData.substr(0, meshRequest.m_FileOrData.find_last_of(".")) + ".objcc");
         SMSH_File::SaveFile((meshRequest.m_FileOrData.substr(0, meshRequest.m_FileOrData.find_last_of(".")) + ".smsh").c_str(), *meshRequest.m_Parts[0].mesh);
     }else if (meshRequest.m_FileExtension == ".smsh") {
         Mesh& mesh = *meshRequest.m_Parts[0].mesh;

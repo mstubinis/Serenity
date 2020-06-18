@@ -80,7 +80,7 @@ void MaterialRequest::request() {
     InternalMaterialRequestPublicInterface::Request(*this);
 }
 void MaterialRequest::requestAsync() {
-    if (Engine::priv::threading::hardware_concurrency() > 1) {
+    if (Engine::hardware_concurrency() > 1) {
         async = true;
         for (auto& textureRequest : part.textureRequests) {
             textureRequest->async = true;

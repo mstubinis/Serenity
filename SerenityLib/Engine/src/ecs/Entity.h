@@ -2,21 +2,29 @@
 #ifndef ENGINE_ECS_ENTITY_H
 #define ENGINE_ECS_ENTITY_H
 
-class  Entity;
+//class Scene;
+struct EntityDataRequest;
+namespace Engine::priv {
+    template<typename T> class ECS;
+};
 
 #include <core/engine/scene/Scene.h>
-#include <ecs/ECS.h>
-#include <ecs/EntityDataRequest.h>
+//#include <ecs/ECS.h>
+#include <ecs/ECSIncludes.h>
 #include <core/engine/lua/LuaIncludes.h>
 #include <core/engine/lua/LuaState.h>
 
-class Entity {  
+/*
+The Entity class used in the ECS framework.
+*/
+class Entity {
+    friend struct EntityDataRequest;
+    protected:
+        std::uint32_t m_Data = 0U;
     public:
-        std::uint32_t data = 0;
-
         Entity() = default;
-        Entity(Scene&);
-        Entity(const unsigned int entityID, const unsigned int sceneID, const unsigned int versionID);
+        Entity(Scene& scene);
+        Entity(std::uint32_t entityID, std::uint32_t sceneID, std::uint32_t versionID);
         virtual ~Entity() = default;
 
         Entity(const Entity& other);
@@ -28,20 +36,31 @@ class Entity {
 
         virtual void destroy();
 
-        std::uint32_t id() const;
-        std::uint32_t sceneID() const;
-        std::uint32_t versionID() const;
-
-        bool operator==(const Entity other) const;
-        bool operator!=(const Entity other) const;
+        inline std::uint32_t id() const {
+            return (m_Data & 4'194'303U) >> (ENTITY_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS - ID_BIT_POSITIONS);
+        }
+        inline std::uint32_t sceneID() const {
+            return (m_Data & 534'773'760U) >> (ENTITY_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS);
+        }
+        inline std::uint32_t versionID() const {
+            return (m_Data & 4'026'531'840U) >> (ENTITY_SIZE - VERSION_BIT_POSITIONS);
+        }
+        inline bool operator==(const Entity& other) const {
+            return (m_Data == other.m_Data);
+        }
+        inline bool operator!=(const Entity& other) const {
+            return (m_Data != other.m_Data);
+        }
 
         Scene& scene() const;
-        bool null() const;
+        inline bool null() const {
+            return (m_Data == 0U);
+        }
 
         bool hasParent() const;
 
-        void addChild(const Entity child) const;
-        void removeChild(const Entity child) const;
+        void addChild(Entity& child) const;
+        void removeChild(Entity& child) const;
 
         template<typename T, typename... ARGS> inline void addComponent(ARGS&&... args) {
             Engine::priv::InternalEntityPublicInterface::GetECS(*this).addComponent<T>(*this, std::forward<ARGS>(args)...);
@@ -78,7 +97,7 @@ class Entity {
 
 namespace Engine::priv {
     struct InternalEntityPublicInterface final {
-        static ECS<Entity>& GetECS(const Entity entity) {
+        static ECS<Entity>& GetECS(Entity entity) {
             return Engine::priv::InternalScenePublicInterface::GetECS(entity.scene());
         }
 

@@ -32,9 +32,9 @@ class ComponentLogic : public Engine::UserPointer {
         void*                                              m_UserPointer2  = nullptr;
         LuaCallableFunction<ComponentLogic, const float>   m_Functor;
     public:
-        ComponentLogic(const Entity entity);
+        ComponentLogic(Entity entity);
         template<typename T> 
-        ComponentLogic(const Entity entity, const T& Functor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr) {
+        ComponentLogic(Entity entity, const T& Functor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr) {
             m_Owner        = entity;
             m_UserPointer  = Ptr1;
             m_UserPointer1 = Ptr2;

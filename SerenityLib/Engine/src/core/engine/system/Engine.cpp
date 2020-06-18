@@ -134,7 +134,7 @@ void EngineCore::update_logic(Window& window, const float dt){
     Game::update(dt);
     scene.update(dt);
     scene.postUpdate(dt);
-    m_ThreadManager._update(dt);
+    m_ThreadingModule.update(dt);
     Game::onPostUpdate(dt);
     m_EventModule.onPostUpdate();
 
@@ -145,7 +145,7 @@ void EngineCore::update_logic(Window& window, const float dt){
 }
 void EngineCore::update_sounds(Window& window, const float dt){
     m_DebugManager.stop_clock();
-    m_SoundManager._update(dt);
+    m_SoundModule.update(dt);
     m_DebugManager.calculate_sounds();
 }
 void EngineCore::update(Window& window, const float dt){
