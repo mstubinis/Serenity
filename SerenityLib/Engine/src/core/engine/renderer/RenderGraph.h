@@ -8,7 +8,7 @@ class  Scene;
 class  Material;
 class  Mesh;
 class  ModelInstance;
-class  Entity;
+struct Entity;
 class  Viewport;
 namespace Engine::priv {
     class  RenderGraph;

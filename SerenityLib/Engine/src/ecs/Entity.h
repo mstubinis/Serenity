@@ -2,53 +2,82 @@
 #ifndef ENGINE_ECS_ENTITY_H
 #define ENGINE_ECS_ENTITY_H
 
-//class Scene;
-struct EntityDataRequest;
 namespace Engine::priv {
     template<typename T> class ECS;
 };
 
-#include <core/engine/scene/Scene.h>
-//#include <ecs/ECS.h>
 #include <ecs/ECSIncludes.h>
+#include <core/engine/scene/Scene.h>
 #include <core/engine/lua/LuaIncludes.h>
 #include <core/engine/lua/LuaState.h>
 
+namespace Engine::priv {
+    struct packed_data final {
+        std::uint32_t        ID : ID_BIT_POSITIONS;
+        std::uint32_t   sceneID : SCENE_BIT_POSITIONS;
+        std::uint32_t versionID : VERSION_BIT_POSITIONS;
+    };
+}
 /*
 The Entity class used in the ECS framework.
 */
-class Entity {
-    friend struct EntityDataRequest;
-    protected:
-        std::uint32_t m_Data = 0U;
+
+struct Entity {
     public:
+        std::uint32_t m_Data = 0;
+
         Entity() = default;
         Entity(Scene& scene);
         Entity(std::uint32_t entityID, std::uint32_t sceneID, std::uint32_t versionID);
-        virtual ~Entity() = default;
+        ~Entity() = default;
 
         Entity(const Entity& other);
         Entity& operator=(const Entity& other);
         Entity(Entity&& other) noexcept;
         Entity& operator=(Entity&& other) noexcept;
 
-        static Entity null_;
-
-        virtual void destroy();
+        void destroy();
+        bool isDestroyed() const;
 
         inline std::uint32_t id() const {
-            return (m_Data & 4'194'303U) >> (ENTITY_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS - ID_BIT_POSITIONS);
+            return id(m_Data);
         }
         inline std::uint32_t sceneID() const {
-            return (m_Data & 534'773'760U) >> (ENTITY_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS);
+            return sceneID(m_Data);
         }
         inline std::uint32_t versionID() const {
-            return (m_Data & 4'026'531'840U) >> (ENTITY_SIZE - VERSION_BIT_POSITIONS);
+            return versionID(m_Data);
         }
-        inline bool operator==(const Entity& other) const {
+        static inline std::uint32_t id(Entity entity) {
+            return id(entity.m_Data);
+        }
+        static inline std::uint32_t sceneID(Entity entity) {
+            return sceneID(entity.m_Data);
+        }
+        static inline std::uint32_t versionID(Entity entity) {
+            return versionID(entity.m_Data);
+        }
+        static inline std::uint32_t id(std::uint32_t data) {
+            Engine::priv::packed_data p;
+            p.ID = (data & 4'194'303U) >> (ENTITY_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS - ID_BIT_POSITIONS);
+            return p.ID;
+        }
+        static inline std::uint32_t sceneID(std::uint32_t data) {
+            Engine::priv::packed_data p;
+            p.sceneID = (data & 534'773'760U) >> (ENTITY_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS);
+            return p.sceneID;
+        }
+        static inline std::uint32_t versionID(std::uint32_t data) {
+            Engine::priv::packed_data p;
+            p.versionID = (data & 4'026'531'840U) >> (ENTITY_SIZE - VERSION_BIT_POSITIONS);
+            return p.versionID;
+        }
+
+
+        inline bool operator==(const Entity other) const {
             return (m_Data == other.m_Data);
         }
-        inline bool operator!=(const Entity& other) const {
+        inline bool operator!=(const Entity other) const {
             return (m_Data != other.m_Data);
         }
 
@@ -59,14 +88,11 @@ class Entity {
 
         bool hasParent() const;
 
-        void addChild(Entity& child) const;
-        void removeChild(Entity& child) const;
+        void addChild(Entity child) const;
+        void removeChild(Entity child) const;
 
         template<typename T, typename... ARGS> inline void addComponent(ARGS&&... args) {
             Engine::priv::InternalEntityPublicInterface::GetECS(*this).addComponent<T>(*this, std::forward<ARGS>(args)...);
-        }
-        template<typename T, typename... ARGS> inline void addComponent(EntityDataRequest& request, ARGS&&... args) {
-            Engine::priv::InternalEntityPublicInterface::GetECS(*this).addComponent<T>(request, *this, std::forward<ARGS>(args)...);
         }
         template<typename T> inline bool removeComponent() {
             return Engine::priv::InternalEntityPublicInterface::GetECS(*this).removeComponent<T>(*this);
@@ -76,17 +102,11 @@ class Entity {
             template<typename T> inline T* getComponent() const {
                 return Engine::priv::InternalEntityPublicInterface::GetECS(*this).getComponent<T>(*this);
             }
-            template<typename T> inline T* getComponent(const EntityDataRequest& dataRequest) const {
-                return Engine::priv::InternalEntityPublicInterface::GetECS(*this).getComponent<T>(dataRequest);
-            }
         #pragma endregion
 
         #pragma region variadic component get
             template<class... Types> inline std::tuple<Types*...> getComponents() const {
                 return Engine::priv::InternalEntityPublicInterface::GetECS(*this).getComponents<Types...>(*this);
-            }
-            template<class... Types> inline std::tuple<Types*...> getComponents(const EntityDataRequest& dataRequest) const {
-                return Engine::priv::InternalEntityPublicInterface::GetECS(*this).getComponents<Types...>(dataRequest);
             }
         #pragma endregion
 

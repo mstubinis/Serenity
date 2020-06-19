@@ -47,7 +47,7 @@ Decal::Decal(Material& material, const glm_vec3& localPosition, const glm::vec3&
     model.setCustomUnbindFunctor(Engine::priv::DefaultDecalUnbindFunctor());
 }
 Decal::~Decal() {
-    destroy();
+    Entity::destroy();
 }
 void Decal::update(const float dt) {
     if (m_Active) {
@@ -61,7 +61,7 @@ void Decal::update(const float dt) {
         }
         if (m_LifetimeCurrent >= m_LifetimeMax) {
             m_Active = false;
-            destroy();
+            Entity::destroy();
         }
     }
 }

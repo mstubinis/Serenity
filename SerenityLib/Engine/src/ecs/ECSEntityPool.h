@@ -2,7 +2,6 @@
 #ifndef ENGINE_ECS_ENTITY_POOL_H
 #define ENGINE_ECS_ENTITY_POOL_H
 
-#include <ecs/EntityDataRequest.h>
 #include <core/engine/scene/Scene.h>
 
 namespace Engine::priv {
@@ -22,6 +21,12 @@ namespace Engine::priv {
             ECSEntityPool& operator=(const ECSEntityPool&)           = delete;
             ECSEntityPool(ECSEntityPool&& other) noexcept            = delete;
             ECSEntityPool& operator=(ECSEntityPool&& other) noexcept = delete;
+
+            bool isEntityVersionDifferent(ENTITY entity) const {
+                auto index = entity.id() - 1U;
+                ENTITY storedEntity = m_Pool[index];
+                return (storedEntity.versionID() != entity.versionID());
+            }
 
             void destroyFlaggedEntity(std::uint32_t entityID) {
                 auto index = entityID - 1U;
@@ -48,11 +53,10 @@ namespace Engine::priv {
                 if (entityData == 0) {
                     return nullptr;
                 }
-                EntityDataRequest dataRequest(entityData);
-                auto index = dataRequest.ID - 1U;
+                auto index = Entity::id(entityData) - 1U;
                 if (index < m_Pool.size()) {
                     ENTITY e = m_Pool[index];
-                    if (e.versionID() == dataRequest.versionID) {
+                    if (e.versionID() == Entity::versionID(entityData)) {
                         return e;
                     }
                     //else {
@@ -61,9 +65,6 @@ namespace Engine::priv {
                 }
                 return ENTITY();
             }
-            //ENTITY getEntity(ENTITY inEntity) {
-            //    return getEntity(inEntity.data);
-            //}
         };
 };
 

@@ -2,7 +2,7 @@
 #ifndef ENGINE_ENGINE_PHYSICS_H
 #define ENGINE_ENGINE_PHYSICS_H
 
-class  Entity;
+struct Entity;
 class  btRigidBody;
 class  btCollisionObject;
 class  ComponentBody;

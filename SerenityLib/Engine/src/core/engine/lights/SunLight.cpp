@@ -89,7 +89,7 @@ void SunLight::activate(bool b) {
 void SunLight::deactivate() { 
     m_Active = false; 
 }
-void SunLight::destroy() {
+void SunLight::free() {
     Entity::destroy();
     removeFromVector(priv::InternalScenePublicInterface::GetSunLights(scene()), this);
     removeFromVector(priv::InternalScenePublicInterface::GetLights(scene()), this);

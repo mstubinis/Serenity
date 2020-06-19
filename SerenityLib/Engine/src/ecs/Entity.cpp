@@ -1,14 +1,10 @@
 #include <ecs/Entity.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/system/Engine.h>
-
 #include <ecs/Components.h>
-
 
 using namespace Engine::priv;
 using namespace std;
-
-Entity Entity::null_ = Entity(0U,0U,0U);
 
 Entity::Entity(Scene& scene) {
     m_Data = scene.createEntity().m_Data;
@@ -33,13 +29,13 @@ Entity& Entity::operator=(Entity&& other) noexcept {
     return *this;
 }
 
-void Entity::addChild(Entity& child) const {
+void Entity::addChild(Entity child) const {
     auto* body = getComponent<ComponentBody>();
     if (body) {
         body->addChild(child);
     }
 }
-void Entity::removeChild(Entity& child) const {
+void Entity::removeChild(Entity child) const {
     auto* body = getComponent<ComponentBody>();
     if (body) {
         body->removeChild(child);
@@ -52,7 +48,13 @@ bool Entity::hasParent() const {
     }
     return false;
 }
-
+bool Entity::isDestroyed() const {
+    if (!null()) {
+        Scene& s = scene();
+        return InternalScenePublicInterface::GetECS(s).getEntityPool().isEntityVersionDifferent(*this);
+    }
+    return false;
+}
 Scene& Entity::scene() const {
     return Core::m_Engine->m_ResourceManager._getSceneByID(sceneID());
 }

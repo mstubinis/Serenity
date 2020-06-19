@@ -24,7 +24,7 @@ namespace Engine::priv {
 #include <core/engine/renderer/particles/ParticleEmitter.h>
 //#include <ecs/Entity.h>
 
-class Entity;
+struct Entity;
 
 constexpr unsigned int MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME = 12U;
 

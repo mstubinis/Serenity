@@ -402,9 +402,6 @@
     <ClInclude Include="Engine\src\core\Constraint.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\ecs\EntityDataRequest.h">
-      <Filter>Header Files\Engine\Core\ECS</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\Terrain.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
@@ -937,9 +934,6 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\Constraint.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\ecs\EntityDataRequest.cpp">
-      <Filter>Source Files\Engine\Core\ECS</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\Terrain.cpp">
       <Filter>Source Files\Engine\Objects</Filter>

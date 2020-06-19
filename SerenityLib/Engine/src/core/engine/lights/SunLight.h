@@ -28,7 +28,7 @@ class SunLight : public Entity {
         );
         virtual ~SunLight();
 
-        inline void destroy();
+        void free();
 
         glm_vec3 position() const;
         const glm::vec4& color() const;

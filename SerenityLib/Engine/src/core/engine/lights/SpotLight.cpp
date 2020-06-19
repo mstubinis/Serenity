@@ -33,7 +33,7 @@ float SpotLight::getCutoff() const {
 float SpotLight::getCutoffOuter() const {
     return m_OuterCutoff;
 }
-void SpotLight::destroy() {
+void SpotLight::free() {
     Entity::destroy();
     removeFromVector(priv::InternalScenePublicInterface::GetSpotLights(scene()), this);
     removeFromVector(priv::InternalScenePublicInterface::GetLights(scene()), this);

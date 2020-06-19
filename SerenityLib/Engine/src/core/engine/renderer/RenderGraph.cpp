@@ -211,18 +211,14 @@ void RenderGraph::sort_bruteforce(const Camera& camera, SortingMode::Mode sortin
     const auto lambda_sorter = [&](InstanceNode* lhs, InstanceNode* rhs, const glm_vec3& camPos) {
         auto lhsParent       = lhs->instance->parent();
         auto rhsParent       = rhs->instance->parent();
-        const auto& _dataReq1(lhsParent);
-        const auto& _dataReq2(rhsParent);
 
-        const auto& lhsBody  = *lhsParent.getComponent<ComponentBody>(_dataReq1);
-        const auto& rhsBody  = *rhsParent.getComponent<ComponentBody>(_dataReq2);
-        const auto& lhsModel = *lhsParent.getComponent<ComponentModel>(_dataReq1);
-        const auto& rhsModel = *rhsParent.getComponent<ComponentModel>(_dataReq2);
+        auto lhsComps        = lhsParent.getComponents<ComponentBody, ComponentModel>();
+        auto rhsComps        = rhsParent.getComponents<ComponentBody, ComponentModel>();
 
-        const auto& lhsPos   = lhsBody.getPosition();
-        const auto& rhsPos   = rhsBody.getPosition();
-        const auto& lhsRad   = lhsModel.radius();
-        const auto& rhsRad   = rhsModel.radius();
+        auto lhsPos          = std::get<0>(lhsComps)->getPosition();
+        auto rhsPos          = std::get<0>(rhsComps)->getPosition();
+        auto lhsRad          = std::get<1>(lhsComps)->radius();
+        auto rhsRad          = std::get<1>(rhsComps)->radius();
 
         const auto leftDir   = glm::normalize(lhsPos - camPos);
         const auto rightDir  = glm::normalize(rhsPos - camPos);
@@ -311,18 +307,14 @@ void RenderGraph::sort(const Camera& camera, SortingMode::Mode sortingMode) {
             const auto lambda_sorter = [&](InstanceNode* lhs, InstanceNode* rhs, const glm_vec3& camPos) {
                 auto  lhsParent      = lhs->instance->parent();
                 auto  rhsParent      = rhs->instance->parent();
-                const EntityDataRequest dataReq1(lhsParent);
-                const EntityDataRequest dataReq2(rhsParent);
 
-                const auto& lhsBody  = *lhsParent.getComponent<ComponentBody>(dataReq1);
-                const auto& rhsBody  = *rhsParent.getComponent<ComponentBody>(dataReq2);
-                const auto& lhsModel = *lhsParent.getComponent<ComponentModel>(dataReq1);
-                const auto& rhsModel = *rhsParent.getComponent<ComponentModel>(dataReq2);
+                auto lhsComps        = lhsParent.getComponents<ComponentBody, ComponentModel>();
+                auto rhsComps        = rhsParent.getComponents<ComponentBody, ComponentModel>();
 
-                const auto& lhsPos   = lhsBody.getPosition();
-                const auto& rhsPos   = rhsBody.getPosition();
-                const auto& lhsRad   = lhsModel.radius();
-                const auto& rhsRad   = rhsModel.radius();
+                auto lhsPos          = std::get<0>(lhsComps)->getPosition();
+                auto rhsPos          = std::get<0>(rhsComps)->getPosition();
+                auto lhsRad          = std::get<1>(lhsComps)->radius();
+                auto rhsRad          = std::get<1>(rhsComps)->radius();
 
                 const auto leftDir   = glm::normalize(lhsPos - camPos);
                 const auto rightDir  = glm::normalize(rhsPos - camPos);

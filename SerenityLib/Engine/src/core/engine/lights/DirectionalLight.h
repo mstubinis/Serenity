@@ -13,7 +13,7 @@ class DirectionalLight : public SunLight {
         );
         virtual ~DirectionalLight();
 
-        inline void destroy();
+        void free();
 };
 
 #endif

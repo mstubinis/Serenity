@@ -4,7 +4,7 @@
 
 class  ShaderProgram;
 class  Shader;
-class  Entity;
+struct Entity;
 class  Viewport;
 
 #include <glm/vec2.hpp>

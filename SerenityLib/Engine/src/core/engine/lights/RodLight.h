@@ -17,7 +17,7 @@ class RodLight : public PointLight {
         );
         virtual ~RodLight();
 
-        inline void destroy();
+        void free();
 
         float rodLength() const;
         void setRodLength(const float rodLength);

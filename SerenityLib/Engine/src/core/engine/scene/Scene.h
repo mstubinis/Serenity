@@ -13,7 +13,7 @@ class  ShaderProgram;
 class  Viewport;
 class  Skybox;
 class  ModelInstance;
-class  Entity;
+struct Entity;
 struct SceneOptions;
 
 class ParticleEmitter;

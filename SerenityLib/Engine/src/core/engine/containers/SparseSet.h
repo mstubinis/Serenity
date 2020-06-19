@@ -11,18 +11,18 @@ namespace Engine {
     namespace priv {
         class sparse_set_base {
             protected:
-                std::uint32_t               m_MaxLastIndex = 0U;
+                std::uint32_t               m_MaxLastIndex = 0;
                 std::vector<std::uint32_t>  m_Sparse;
 
                 sparse_set_base() = delete;
             public:
                 sparse_set_base(std::uint32_t initial_capacity) {
-                    if (initial_capacity > 0U) {
+                    if (initial_capacity > 0) {
                         m_Sparse.reserve(initial_capacity);
                     }
                 }
                 virtual ~sparse_set_base() {
-                    m_MaxLastIndex = 0U;
+                    m_MaxLastIndex = 0;
                     m_Sparse.clear();
                 }
                 virtual bool remove(std::uint32_t id) {
@@ -38,7 +38,7 @@ namespace Engine {
         private:
             std::vector<T> m_Dense;
         public:
-            sparse_set() : super(0U) {
+            sparse_set() : super(0) {
             }
             sparse_set(std::uint32_t initial_capacity) : super(initial_capacity) {
                 m_Dense.reserve(initial_capacity);
@@ -57,11 +57,11 @@ namespace Engine {
             }
             template<typename... ARGS> 
             T* add(std::uint32_t id, ARGS&&... args) {
-                std::uint32_t sparseIndex = id - 1U;
+                std::uint32_t sparseIndex = id - 1;
                 if (static_cast<size_t>(sparseIndex) >= super::m_Sparse.size()) {
-                    super::m_Sparse.resize(static_cast<size_t>(sparseIndex) + 1U, 0U);
+                    super::m_Sparse.resize(static_cast<size_t>(sparseIndex) + 1, 0);
                 }
-                if (super::m_Sparse[sparseIndex] != 0U) {
+                if (super::m_Sparse[sparseIndex] != 0) {
                     return nullptr;
                 }
                 m_Dense.emplace_back(std::forward<ARGS>(args)...);
@@ -76,12 +76,12 @@ namespace Engine {
                     return false;
                 }
                 auto removedComponentID = super::m_Sparse[removedEntityIndex];
-                if (removedComponentID == 0U) {
+                if (removedComponentID == 0) {
                     return false;
                 }
-                super::m_Sparse[removedEntityIndex] = 0U;
-                super::m_MaxLastIndex = 0U;
-                std::uint32_t max_val_ = 0U;
+                super::m_Sparse[removedEntityIndex] = 0;
+                super::m_MaxLastIndex  = 0;
+                std::uint32_t max_val_ = 0;
                 for (size_t i = super::m_Sparse.size(); i-- > 0;) {
                     if (super::m_Sparse[i] > 0) {
                         if (super::m_Sparse[i] > max_val_) {
@@ -91,8 +91,8 @@ namespace Engine {
                     }
                 }
                 if (m_Dense.size() > 1) {
-                    auto firstIndex = removedComponentID - 1U;
-                    auto lastIndex  = m_Dense.size() - 1U;
+                    auto firstIndex = removedComponentID - 1;
+                    auto lastIndex  = m_Dense.size() - 1;
                     if (firstIndex != lastIndex) {
                         if (firstIndex < lastIndex) {
                             std::swap(m_Dense[firstIndex], m_Dense[lastIndex]);
@@ -104,19 +104,18 @@ namespace Engine {
                 return true;
             }
             T* get(std::uint32_t id) const {
-                auto entityIndexInSparse = id - 1U;
+                auto entityIndexInSparse = id - 1;
                 auto sparseSize          = super::m_Sparse.size();
-                if (sparseSize == 0 || entityIndexInSparse >= sparseSize || super::m_Sparse[entityIndexInSparse] == 0U) {
+                if (sparseSize == 0 || entityIndexInSparse >= sparseSize || super::m_Sparse[entityIndexInSparse] == 0) {
                     return nullptr;
                 }
-                auto retIndex = super::m_Sparse[entityIndexInSparse] - 1U;
+                auto retIndex = super::m_Sparse[entityIndexInSparse] - 1;
                 if (retIndex >= m_Dense.size()) {
                     return nullptr;
                 }
                 auto* ret = &m_Dense[retIndex];
                 return const_cast<T*>(ret);
             }
-
 
             T& operator[](size_t index) {
                 return m_Dense[index];
