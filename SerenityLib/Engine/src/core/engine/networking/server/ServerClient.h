@@ -40,7 +40,7 @@ namespace Engine::Networking {
             float                                   m_Recovery_Timeout_Timer       = 0.0f;
             float                                   m_Recovery_Timeout_Timer_Limit = 60.0f;
         public:
-            ServerClient(const std::string& hash, Engine::Networking::Server& server, Engine::Networking::SocketTCP* tcp);
+            ServerClient(const std::string& hash, Engine::Networking::Server& server, Engine::Networking::SocketTCP* tcp, std::string& clientIP, unsigned short clientPort);
             virtual ~ServerClient();
       
             ConnectionState::State connectionState() const;
@@ -56,17 +56,22 @@ namespace Engine::Networking {
             bool disconnected() const;
             void setTimeoutTimerLimit(float limit);
 
-            SocketStatus::Status send(Engine::Networking::Packet& packet);
-            SocketStatus::Status send(sf::Packet& sfPacket);
-            SocketStatus::Status send(void* data, size_t size);
-            SocketStatus::Status send(void* data, size_t size, size_t& sent);
-            SocketStatus::Status receive(sf::Packet& packet);
-            SocketStatus::Status receive(void* data, size_t size, size_t& received);
+            SocketStatus::Status send_tcp(Engine::Networking::Packet& packet);
+            SocketStatus::Status send_tcp(sf::Packet& sfPacket);
+            SocketStatus::Status send_tcp(void* data, size_t size);
+            SocketStatus::Status send_tcp(void* data, size_t size, size_t& sent);
+            SocketStatus::Status receive_tcp(sf::Packet& packet);
+            SocketStatus::Status receive_tcp(void* data, size_t size, size_t& received);
 
-            virtual void on_receive_tcp(sf::Packet& sfPacket, const float dt);
-            virtual void on_timed_out();
-            virtual void on_recovery_timed_out();
-            virtual void onEvent(const Event& e) override;
+            void receive_udp(SocketStatus::Status status, sf::Packet& packet, const float dt);
+            void receive_udp(SocketStatus::Status status, void* data, size_t size, size_t& received, const float dt);
+
+            virtual void on_receive_tcp(sf::Packet& sfPacket, const float dt) {}
+            virtual void on_receive_udp(sf::Packet& sfPacket, const float dt) {}
+            virtual void on_receive_udp(void* data, size_t size, size_t& received, const float dt) {}
+            virtual void on_timed_out() {}
+            virtual void on_recovery_timed_out() {}
+            virtual void onEvent(const Event& e) override {}
 
             void setUpdateFunction(std::function<void(const float dt)> function);
             void update(const float dt);

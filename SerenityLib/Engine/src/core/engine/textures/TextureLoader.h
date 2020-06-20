@@ -15,23 +15,23 @@ namespace Engine::priv {
         static void LoadTextureFramebufferIntoOpenGL(Texture& texture);
         static void LoadTextureCubemapIntoOpenGL(Texture& texture);
 
-        static void EnumWrapToGL(unsigned int& gl, const TextureWrap::Wrap wrap);
-        static void EnumFilterToGL(unsigned int& gl, const TextureFilter::Filter filter, const bool min);
-        static const bool IsCompressedType(const ImageInternalFormat::Format);
+        static void EnumWrapToGL(unsigned int& gl, TextureWrap::Wrap wrap);
+        static void EnumFilterToGL(unsigned int& gl, TextureFilter::Filter filter, bool min);
+        static bool IsCompressedType(ImageInternalFormat::Format);
 
-        static void GenerateMipmapsOpenGL(Texture& texture, const unsigned int addressIndex = 0);
-        static void WithdrawPixelsFromOpenGLMemory(Texture& texture, const unsigned int imageIndex = 0, const unsigned int mipmapLevel = 0);
-        static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat, const ImageInternalFormat::Format inInternalFormat);
+        static void GenerateMipmapsOpenGL(Texture& texture, unsigned int addressIndex = 0);
+        static void WithdrawPixelsFromOpenGLMemory(Texture& texture, unsigned int imageIndex = 0, unsigned int mipmapLevel = 0);
+        static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat, ImageInternalFormat::Format inInternalFormat);
 
-        static void GeneratePBRData(Texture&, const unsigned int convoludeTextureSize, const unsigned int preEnvFilterSize);
-        static void ImportIntoOpengl(Texture&, const Engine::priv::ImageMipmap& mipmap, const unsigned int openGLType);
-        static void InitCommon(Texture&, const unsigned int openglTextureType, const bool toBeMipmapped);
+        static void GeneratePBRData(Texture&, unsigned int convoludeTextureSize, unsigned int preEnvFilterSize);
+        static void ImportIntoOpengl(Texture&, const Engine::priv::ImageMipmap& mipmap, unsigned int openGLType);
+        static void InitCommon(Texture&, unsigned int openglTextureType, bool toBeMipmapped);
 
 
-        static void InitFramebuffer(Texture&, const unsigned int w, const unsigned int h, const ImagePixelType::Type pxlType, const ImagePixelFormat::Format pxlFormat, const ImageInternalFormat::Format _internal, const float divisor);
-        static void InitFromMemory(Texture&, const sf::Image& sfImage, const std::string& name, const bool genMipMaps, const ImageInternalFormat::Format _internal, const unsigned int openglTextureType);
-        static void InitFromFile(Texture&, const std::string& filename, const bool genMipMaps, const ImageInternalFormat::Format _internal, const unsigned int openglTextureType);
-        static void InitFromFilesCubemap(Texture&, const std::string files[], const std::string& name, const bool genMipMaps, const ImageInternalFormat::Format _internal);
+        static void InitFramebuffer(Texture&, unsigned int w, unsigned int h, ImagePixelType::Type pxlType, ImagePixelFormat::Format pxlFormat, ImageInternalFormat::Format _internal, float divisor);
+        static void InitFromMemory(Texture&, const sf::Image& sfImage, const std::string& name, bool genMipMaps, ImageInternalFormat::Format _internal, unsigned int openglTextureType);
+        static void InitFromFile(Texture&, const std::string& filename, bool genMipMaps, ImageInternalFormat::Format _internal, unsigned int openglTextureType);
+        static void InitFromFilesCubemap(Texture&, const std::string files[], const std::string& name, bool genMipMaps, ImageInternalFormat::Format _internal);
     };
     struct InternalTexturePublicInterface final {
         static void LoadCPU(Texture&);
@@ -41,7 +41,7 @@ namespace Engine::priv {
         static void Load(Texture&);
         static void Unload(Texture&);
 
-        static void Resize(Texture& texture, Engine::priv::FramebufferObject&, const unsigned int width, const unsigned int height);
+        static void Resize(Texture& texture, Engine::priv::FramebufferObject&, unsigned int width, unsigned int height);
     };
 };
 

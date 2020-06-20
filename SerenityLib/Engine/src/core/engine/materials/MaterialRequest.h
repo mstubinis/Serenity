@@ -12,10 +12,10 @@ class Texture;
 #include <core/engine/textures/TextureRequest.h>
 
 struct MaterialRequestPart final {
-    Material*                                     material = nullptr;
-    Handle                                        handle   = Handle();
-    std::string                                   name     = "";
-    std::vector<std::shared_ptr<TextureRequest>>  textureRequests;
+    Material*                                     m_Material = nullptr;
+    Handle                                        m_Handle   = Handle();
+    std::string                                   m_Name     = "";
+    std::vector<std::shared_ptr<TextureRequest>>  m_TextureRequests;
 
     MaterialRequestPart();
     ~MaterialRequestPart();
@@ -24,12 +24,11 @@ struct MaterialRequestPart final {
     MaterialRequestPart& operator=(const MaterialRequestPart&);
     MaterialRequestPart(MaterialRequestPart&& other) noexcept = delete;
     MaterialRequestPart& operator=(MaterialRequestPart&& other) noexcept = delete;
-
 };
 
 struct MaterialRequest final {
-    MaterialRequestPart  part;
-    bool                 async = false;
+    MaterialRequestPart  m_Part;
+    bool                 m_Async = false;
 
     MaterialRequest() = delete;
     MaterialRequest(
@@ -57,8 +56,7 @@ struct MaterialRequest final {
     MaterialRequest(const MaterialRequest&);
     MaterialRequest& operator=(const MaterialRequest&);
 
-    void request();
-    void requestAsync();
+    void request(bool async = false);
 };
 
 namespace Engine::priv {

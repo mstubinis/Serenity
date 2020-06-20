@@ -17,9 +17,7 @@ namespace Engine {
                 sparse_set_base() = delete;
             public:
                 sparse_set_base(std::uint32_t initial_capacity) {
-                    if (initial_capacity > 0) {
-                        m_Sparse.reserve(initial_capacity);
-                    }
+                    m_Sparse.reserve(initial_capacity);
                 }
                 virtual ~sparse_set_base() {
                     m_MaxLastIndex = 0;
@@ -56,7 +54,7 @@ namespace Engine {
                 }
             }
             template<typename... ARGS> 
-            T* add(std::uint32_t id, ARGS&&... args) {
+            constexpr T* add(std::uint32_t id, ARGS&&... args) {
                 std::uint32_t sparseIndex = id - 1;
                 if (static_cast<size_t>(sparseIndex) >= super::m_Sparse.size()) {
                     super::m_Sparse.resize(static_cast<size_t>(sparseIndex) + 1, 0);
@@ -103,7 +101,7 @@ namespace Engine {
                 m_Dense.pop_back();
                 return true;
             }
-            T* get(std::uint32_t id) const {
+            constexpr T* get(std::uint32_t id) const {
                 auto entityIndexInSparse = id - 1;
                 auto sparseSize          = super::m_Sparse.size();
                 if (sparseSize == 0 || entityIndexInSparse >= sparseSize || super::m_Sparse[entityIndexInSparse] == 0) {
@@ -123,7 +121,7 @@ namespace Engine {
             const T& operator[](size_t index) const {
                 return m_Dense[index];
             }
-            size_t size() const {
+            constexpr size_t size() const {
                 return m_Dense.size();
             }
             std::vector<T>& data() {

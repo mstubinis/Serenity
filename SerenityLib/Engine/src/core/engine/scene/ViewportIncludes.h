@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_SCENE_VIEWPORT_INCLUDES_H_INCLUDE_GUARD
-#define ENGINE_SCENE_VIEWPORT_INCLUDES_H_INCLUDE_GUARD
+#ifndef ENGINE_SCENE_VIEWPORT_INCLUDES_H
+#define ENGINE_SCENE_VIEWPORT_INCLUDES_H
 
 struct ViewportFlag final { enum Flag : unsigned int {
     None   = 0,

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_SCENE_H_INCLUDE_GUARD
-#define ENGINE_SCENE_H_INCLUDE_GUARD
+#ifndef ENGINE_SCENE_H
+#define ENGINE_SCENE_H
 
 class  Scene;
 class  Camera;
@@ -23,7 +23,6 @@ class Particle;
 namespace Engine::priv {
     class  RenderGraph;
     class  ResourceManager;
-    //class  EntityPOD;
     struct InternalScenePublicInterface;
     template<typename T> class ECS;
     class  GBuffer;
@@ -33,7 +32,6 @@ namespace Engine::priv {
 
 #include <core/engine/renderer/RendererIncludes.h>
 #include <core/engine/resources/Engine_ResourceBasic.h>
-//#include <core/engine/renderer/particles/ParticleSystem.h>
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/events/Observer.h>
 #include <functional>
@@ -55,7 +53,6 @@ class Scene: public EngineResource, public Observer {
         mutable std::vector<SpotLight*>                               m_SpotLights;
         mutable std::vector<RodLight*>                                m_RodLights;
 
-        std::vector<unsigned int>                                     m_Entities;
         unsigned int                                                  m_ID                 = 0;
         glm::vec3                                                     m_GI                 = glm::vec3(1.0f);
 
@@ -102,18 +99,18 @@ class Scene: public EngineResource, public Observer {
         Camera* addCamera(float angle, float aspectRatio, float Near, float Far);
 
         const glm::vec4& getBackgroundColor() const;
-        void setBackgroundColor(const float r, const float g, const float b, const float a);
+        void setBackgroundColor(float r, float g, float b, float a);
         void setBackgroundColor(const glm::vec4& backgroundColor);
 
         const glm::vec3& getGlobalIllumination() const;
-        void setGlobalIllumination(const float global, const float diffuse, const float specular);
+        void setGlobalIllumination(float global, float diffuse, float specular);
         void setGlobalIllumination(const glm::vec3& globalIllumination);
 
-        void setGodRaysSun(Entity*);
+        void setGodRaysSun(Entity* sun);
         Entity* getGodRaysSun() const;
 
         Skybox* skybox() const;
-        void setSkybox(Skybox*);
+        void setSkybox(Skybox* skybox);
 
         void centerSceneToObject(Entity centerEntity);
 };

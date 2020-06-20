@@ -9,13 +9,13 @@ struct SceneOptions final {
     
     SceneOptions() {
         #ifdef ENVIRONMENT32
-            maxAmountOfEntities = 200000;
+            maxAmountOfEntities         = 200000;
             maxAmountOfParticleEmitters = 500;
-            maxAmountOfParticles = 250000;
+            maxAmountOfParticles        = 250000;
         #else
-            maxAmountOfEntities = 400000;
+            maxAmountOfEntities         = 400000;
             maxAmountOfParticleEmitters = 1000;
-            maxAmountOfParticles = 500000;
+            maxAmountOfParticles        = 500000;
         #endif
     }
    

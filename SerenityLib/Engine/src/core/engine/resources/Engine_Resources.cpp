@@ -220,6 +220,7 @@ vector<Handle> Resources::loadMesh(const string& fileOrData, const float threshh
     MeshRequest request(fileOrData, threshhold);
     request.request();
     vector<Handle> handles;
+    handles.reserve(request.m_Parts.size());
     for (auto& part : request.m_Parts) {
         handles.push_back(part.handle);
     }
@@ -227,8 +228,9 @@ vector<Handle> Resources::loadMesh(const string& fileOrData, const float threshh
 }
 vector<Handle> Resources::loadMeshAsync(const string& fileOrData, const float threshhold) {
     MeshRequest request(fileOrData, threshhold);
-    request.requestAsync();
+    request.request(true);
     vector<Handle> handles;
+    handles.reserve(request.m_Parts.size());
     for (auto& part : request.m_Parts) {
         handles.push_back(part.handle);
     }
@@ -238,7 +240,7 @@ Handle Resources::loadTexture(const string& file, const ImageInternalFormat::For
     auto* texture = resourceManager->HasResource<Texture>(file);
     if (!texture) {
         TextureRequest request(file, mipmaps, internalFormat);
-        request.request();
+        request.request(false);
         return request.part.handle;
     }
     return Handle();
@@ -247,7 +249,7 @@ Handle Resources::loadTextureAsync(const string& file, const ImageInternalFormat
     auto* texture = resourceManager->HasResource<Texture>(file);
     if (!texture) {
         TextureRequest request(file, mipmaps, internalFormat);
-        request.requestAsync();
+        request.request(true);
         return request.part.handle;
     }
     return Handle();
@@ -256,7 +258,7 @@ Handle Resources::loadTextureAsync(sf::Image& sfImage, const string& texture_nam
     auto* texture = resourceManager->HasResource<Texture>(texture_name);
     if (!texture) {
         TextureRequestFromMemory request(sfImage, texture_name, mipmaps, internalFormat);
-        request.requestAsync();
+        request.request(true);
         return request.part.handle;
     }
     return Handle();
@@ -266,8 +268,8 @@ Handle Resources::loadMaterial(const string& name, const string& diffuse, const 
     auto* material = resourceManager->HasResource<Material>(name);
     if (!material) {
         MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
-        request.request();
-        return request.part.handle;
+        request.request(false);
+        return request.m_Part.m_Handle;
     }
     return Handle();
 }
@@ -275,8 +277,8 @@ Handle Resources::loadMaterialAsync(const string& name, const string& diffuse, c
     auto* material = resourceManager->HasResource<Material>(name);
     if (!material) {
         MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
-        request.requestAsync();
-        return request.part.handle;
+        request.request(true);
+        return request.m_Part.m_Handle;
     }
     return Handle();
 }
@@ -284,7 +286,8 @@ Handle Resources::loadMaterial(const string& name, Texture* diffuse, Texture* no
     auto* material = resourceManager->HasResource<Material>(name);
     if (!material) {
         MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
-        return request.part.handle;
+        request.request(false);
+        return request.m_Part.m_Handle;
     }
     return Handle();
 }

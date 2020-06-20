@@ -157,7 +157,7 @@ void priv::ParticleSystem::render(const Viewport& viewport, const Camera& camera
     for (auto& _1 : THREAD_PART_1) _1.reserve(reserve_size);
 
     const glm::vec3 camPos     = glm::vec3(camera.getPosition());
-    auto lamda_culler_particle = [&](Particle& particle, const size_t& j, const unsigned int k) {
+    auto lamda_culler_particle = [&](Particle& particle, size_t j, size_t k) {
         const float radius     = planeMesh.getRadius() * Math::Max(particle.m_Scale.x, particle.m_Scale.y);
         const glm::vec3& pos   = particle.position();
         const uint sphereTest  = camera.sphereIntersectTest(pos, radius);

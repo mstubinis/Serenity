@@ -5,6 +5,6 @@
 constexpr std::uint32_t ID_BIT_POSITIONS      = 21U;
 constexpr std::uint32_t SCENE_BIT_POSITIONS   = 7U;
 constexpr std::uint32_t VERSION_BIT_POSITIONS = 4U;
-constexpr std::uint32_t ENTITY_SIZE           = sizeof(std::uint32_t) * 8U;
+constexpr std::uint32_t ENTITY_BIT_SIZE       = sizeof(std::uint32_t) * 8U;
 
 #endif

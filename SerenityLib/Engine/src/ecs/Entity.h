@@ -39,50 +39,50 @@ struct Entity {
         void destroy();
         bool isDestroyed() const;
 
-        inline std::uint32_t id() const {
+        inline constexpr std::uint32_t id() const {
             return id(m_Data);
         }
-        inline std::uint32_t sceneID() const {
+        inline constexpr std::uint32_t sceneID() const {
             return sceneID(m_Data);
         }
-        inline std::uint32_t versionID() const {
+        inline constexpr std::uint32_t versionID() const {
             return versionID(m_Data);
         }
-        static inline std::uint32_t id(Entity entity) {
+        static inline constexpr std::uint32_t id(Entity entity) {
             return id(entity.m_Data);
         }
-        static inline std::uint32_t sceneID(Entity entity) {
+        static inline constexpr std::uint32_t sceneID(Entity entity) {
             return sceneID(entity.m_Data);
         }
-        static inline std::uint32_t versionID(Entity entity) {
+        static inline constexpr std::uint32_t versionID(Entity entity) {
             return versionID(entity.m_Data);
         }
-        static inline std::uint32_t id(std::uint32_t data) {
-            Engine::priv::packed_data p;
-            p.ID = (data & 4'194'303U) >> (ENTITY_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS - ID_BIT_POSITIONS);
+        static inline constexpr std::uint32_t id(std::uint32_t data) {
+            Engine::priv::packed_data p{};
+            p.ID = (data & 4'194'303U) >> (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS - ID_BIT_POSITIONS);
             return p.ID;
         }
-        static inline std::uint32_t sceneID(std::uint32_t data) {
-            Engine::priv::packed_data p;
-            p.sceneID = (data & 534'773'760U) >> (ENTITY_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS);
+        static inline constexpr std::uint32_t sceneID(std::uint32_t data) {
+            Engine::priv::packed_data p{};
+            p.sceneID = (data & 534'773'760U) >> (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS);
             return p.sceneID;
         }
-        static inline std::uint32_t versionID(std::uint32_t data) {
-            Engine::priv::packed_data p;
-            p.versionID = (data & 4'026'531'840U) >> (ENTITY_SIZE - VERSION_BIT_POSITIONS);
+        static inline constexpr std::uint32_t versionID(std::uint32_t data) {
+            Engine::priv::packed_data p{};
+            p.versionID = (data & 4'026'531'840U) >> (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS);
             return p.versionID;
         }
 
 
-        inline bool operator==(const Entity other) const {
+        inline constexpr bool operator==(const Entity other) const {
             return (m_Data == other.m_Data);
         }
-        inline bool operator!=(const Entity other) const {
+        inline constexpr bool operator!=(const Entity other) const {
             return (m_Data != other.m_Data);
         }
 
         Scene& scene() const;
-        inline bool null() const {
+        inline constexpr bool null() const {
             return (m_Data == 0U);
         }
 
@@ -97,18 +97,12 @@ struct Entity {
         template<typename T> inline bool removeComponent() {
             return Engine::priv::InternalEntityPublicInterface::GetECS(*this).removeComponent<T>(*this);
         }
-
-        #pragma region 1 component get
-            template<typename T> inline T* getComponent() const {
-                return Engine::priv::InternalEntityPublicInterface::GetECS(*this).getComponent<T>(*this);
-            }
-        #pragma endregion
-
-        #pragma region variadic component get
-            template<class... Types> inline std::tuple<Types*...> getComponents() const {
-                return Engine::priv::InternalEntityPublicInterface::GetECS(*this).getComponents<Types...>(*this);
-            }
-        #pragma endregion
+        template<typename T> inline constexpr T* getComponent() const {
+            return Engine::priv::InternalEntityPublicInterface::GetECS(*this).getComponent<T>(*this);
+        }
+        template<class... Types> inline constexpr std::tuple<Types*...> getComponents() const {
+            return Engine::priv::InternalEntityPublicInterface::GetECS(*this).getComponents<Types...>(*this);
+        }
 
         void addComponent(const std::string& componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8);
         bool removeComponent(const std::string& componentClassName);

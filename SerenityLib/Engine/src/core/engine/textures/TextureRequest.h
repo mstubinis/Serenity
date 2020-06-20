@@ -11,9 +11,14 @@ class Texture;
 #include <core/engine/textures/TextureIncludes.h>
 
 struct TextureRequestPart final {
-    Texture*     texture = nullptr;
-    Handle       handle  = Handle();
-    std::string  name    = "";
+    Texture*                     texture         = nullptr;
+    Handle                       handle          = Handle();
+    std::string                  name            = "";
+    bool                         async           = false;
+    GLuint                       type            = 0U;
+    TextureType::Type            textureType;
+    bool                         isToBeMipmapped = false;
+    ImageInternalFormat::Format  internalFormat;
 
     TextureRequestPart() = default;
     ~TextureRequestPart();
@@ -22,48 +27,54 @@ struct TextureRequestPart final {
     TextureRequestPart& operator=(const TextureRequestPart&);
     TextureRequestPart(TextureRequestPart&& other) noexcept = delete;
     TextureRequestPart& operator=(TextureRequestPart&& other) noexcept = delete;
-};
-struct TextureRequest final {
-    std::string                  file              = "";
-    std::string                  fileExtension     = "";
-    bool                         fileExists        = false;
 
-    TextureRequestPart           part;
-    bool                         async             = false;
-    GLuint                       type;
-    TextureType::Type            textureType;
-    bool                         isToBeMipmapped;
-    ImageInternalFormat::Format  internalFormat;
+    void assignType() {
+        switch (type) {
+            case GL_TEXTURE_2D: {
+                textureType = TextureType::Texture2D; break;
+            }case GL_TEXTURE_1D: {
+                textureType = TextureType::Texture1D; break;
+            }case GL_TEXTURE_3D: {
+                textureType = TextureType::Texture3D; break;
+            }case GL_TEXTURE_CUBE_MAP: {
+                textureType = TextureType::CubeMap; break;
+            }default: {
+                textureType = TextureType::Texture2D; break;
+            }
+        }
+    }
+};
+
+struct TextureRequest final {
+    std::string         file              = "";
+    std::string         fileExtension     = "";
+    bool                fileExists        = false;
+
+    TextureRequestPart  part;
 
     TextureRequest(
         const std::string& filenameOrData,
-        const bool genMipMaps = true,
-        const ImageInternalFormat::Format _internal = ImageInternalFormat::Format::SRGB8_ALPHA8,
-        const GLuint openglTextureType = GL_TEXTURE_2D
+        bool genMipMaps = true,
+        ImageInternalFormat::Format internal_ = ImageInternalFormat::Format::SRGB8_ALPHA8,
+        GLuint openglTextureType = GL_TEXTURE_2D
     );
     ~TextureRequest();
 
-    void request();
-    void requestAsync();
+    void request(bool async = false);
 };
 
 struct TextureRequestFromMemory final {
-    sf::Image                    image;
-    std::string                  textureName       = "";
+    sf::Image              image;
+    std::string            textureName       = "";
 
-    TextureRequestPart           part;
-    bool                         async             = false;
-    GLuint                       type;
-    TextureType::Type            textureType;
-    bool                         isToBeMipmapped;
-    ImageInternalFormat::Format  internalFormat;
+    TextureRequestPart     part;
 
     TextureRequestFromMemory(
         sf::Image& sfImage,
         const std::string& textureName,
-        const bool genMipMaps = true,
-        const ImageInternalFormat::Format _internal = ImageInternalFormat::Format::SRGB8_ALPHA8,
-        const GLuint openglTextureType = GL_TEXTURE_2D
+        bool genMipMaps = true,
+        ImageInternalFormat::Format internal_ = ImageInternalFormat::Format::SRGB8_ALPHA8,
+        GLuint openglTextureType = GL_TEXTURE_2D
     );
     ~TextureRequestFromMemory();
 
@@ -72,15 +83,14 @@ struct TextureRequestFromMemory final {
     TextureRequestFromMemory(TextureRequestFromMemory&& other) noexcept = delete;
     TextureRequestFromMemory& operator=(TextureRequestFromMemory&& other) noexcept = delete;
 
-    void request();
-    void requestAsync();
+    void request(bool async = false);
 };
 
 namespace Engine::priv {
     struct TextureRequestStaticImpl final {
         friend class  Texture;
-        static void Request(TextureRequest&);
-        static void RequestMem(TextureRequestFromMemory&);
+        static void Request(TextureRequest& request);
+        static void Request(TextureRequestFromMemory& requestFromMemory);
     };
 };
 

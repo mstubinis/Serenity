@@ -32,13 +32,12 @@ class Scene::impl final {
 
         }
         void _centerToObject(Scene& super, Entity centerEntity) {
-            auto& centerBody          = *centerEntity.getComponent<ComponentBody>();
-            const auto centerPos      = centerBody.getPosition();
+            ComponentBody* centerBody = centerEntity.getComponent<ComponentBody>();
+            const auto centerPos      = centerBody->getPosition();
             const auto centerPosFloat = glm::vec3(centerPos);
-            auto& entities = priv::InternalScenePublicInterface::GetEntities(super);
-            for (const auto e : entities) {
+            for (const auto e : priv::InternalScenePublicInterface::GetEntities(super)) {
                 if (e != centerEntity) {
-                    auto* eBody = e.getComponent<ComponentBody>();
+                    ComponentBody* eBody = e.getComponent<ComponentBody>();
                     if (eBody) {
                         if (!eBody->hasParent()) {
                             eBody->setPosition(eBody->getPosition() - centerPos);
@@ -49,7 +48,7 @@ class Scene::impl final {
             for (auto& particle : super.m_i->m_ParticleSystem.getParticles()) {
                 particle.setPosition(particle.position() - centerPosFloat);
             }
-            centerBody.setPosition(static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(0.0));
+            centerBody->setPosition(static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(0.0));
         }
         void _addModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, const vector<priv::RenderGraph>& render_graph_list, RenderStage::Stage stage) {
             priv::RenderGraph* renderGraph = nullptr;
@@ -107,6 +106,16 @@ vector<SpotLight*>& priv::InternalScenePublicInterface::GetSpotLights(const Scen
 }
 vector<RodLight*>& priv::InternalScenePublicInterface::GetRodLights(const Scene& scene) {
     return scene.m_RodLights;
+}
+priv::ECS<Entity>& priv::InternalScenePublicInterface::GetECS(const Scene& scene) {
+    return scene.m_i->m_ECS;
+}
+void priv::InternalScenePublicInterface::CleanECS(Scene& scene, Entity inEntity) {
+    for (auto& pipelines : scene.m_RenderGraphs) {
+        for (auto& graph : pipelines) {
+            graph.clean(inEntity);
+        }
+    }
 }
 
 
@@ -213,19 +222,6 @@ void priv::InternalScenePublicInterface::RenderDecals(Renderer& renderer, const 
 void priv::InternalScenePublicInterface::RenderParticles(Renderer& renderer, const Scene& scene, const Viewport& viewport, const Camera& camera, ShaderProgram& program) {
     scene.m_i->m_ParticleSystem.render(viewport, camera, program, renderer);
 }
-
-
-priv::ECS<Entity>& priv::InternalScenePublicInterface::GetECS(const Scene& scene) {
-    return scene.m_i->m_ECS;
-}
-void priv::InternalScenePublicInterface::CleanECS(Scene& scene, Entity inEntity) {
-    for (auto& pipelines : scene.m_RenderGraphs) {
-        for (auto& graph : pipelines) {
-            graph.clean(inEntity);
-        }
-    }
-}
-
 void priv::InternalScenePublicInterface::AddModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage::Stage stage) {
     scene.m_i->_addModelInstanceToPipeline(scene, modelInstance, scene.m_RenderGraphs[stage], stage);
 }
@@ -349,7 +345,7 @@ void Scene::render() {
 const glm::vec4& Scene::getBackgroundColor() const {
     return m_Viewports[0].m_BackgroundColor;
 }
-void Scene::setBackgroundColor(const float r, const float g, const float b, const float a) {
+void Scene::setBackgroundColor(float r, float g, float b, float a) {
     Math::setColor(m_Viewports[0].m_BackgroundColor, r, g, b, a);
 }
 void Scene::setBackgroundColor(const glm::vec4& backgroundColor) {
@@ -367,7 +363,7 @@ const glm::vec3& Scene::getGlobalIllumination() const {
 void Scene::setGlobalIllumination(const glm::vec3& globalIllumination) {
     setGlobalIllumination(globalIllumination.x, globalIllumination.y, globalIllumination.z);
 }
-void Scene::setGlobalIllumination(const float global, const float diffuse, const float specular) {
+void Scene::setGlobalIllumination(float global, float diffuse, float specular) {
     m_GI.x = global;
     m_GI.y = diffuse;
     m_GI.z = specular;

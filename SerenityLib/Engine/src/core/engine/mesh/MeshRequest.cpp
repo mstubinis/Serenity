@@ -129,32 +129,28 @@ MeshRequest& MeshRequest::operator=(MeshRequest&& other) noexcept {
     }
     return *this;
 }
-void MeshRequest::request() {
-    m_Async = false;
-    InternalMeshRequestPublicInterface::Request(*this);
-}
-void MeshRequest::requestAsync() {
-    if (Engine::hardware_concurrency() > 1) {
+void MeshRequest::request(bool inAsync) {
+    if (inAsync && Engine::hardware_concurrency() > 1) {
         m_Async = true;
-        InternalMeshRequestPublicInterface::Request(*this);
     }else{
-        MeshRequest::request();
+        m_Async = false;
     }
+    InternalMeshRequestPublicInterface::Request(*this);
 }
 
 void InternalMeshRequestPublicInterface::Request(MeshRequest& meshRequest) {
     if (!meshRequest.m_FileOrData.empty()) {
         if (meshRequest.m_FileExists) {
-            const bool valid = InternalMeshRequestPublicInterface::Populate(meshRequest);
+            bool valid = InternalMeshRequestPublicInterface::Populate(meshRequest);
             if (valid){
                 if (meshRequest.m_Async){
-                    const auto& job = [meshRequest]() {
+                    auto job = [meshRequest]() {
                         InternalMeshRequestPublicInterface::LoadCPU(const_cast<MeshRequest&>(meshRequest)); 
                     };
-                    const auto& cbk = [meshRequest]() {
+                    auto callback = [meshRequest]() {
                         InternalMeshRequestPublicInterface::LoadGPU(const_cast<MeshRequest&>(meshRequest));
                     };
-                    threading::addJobWithPostCallback(job, cbk);
+                    threading::addJobWithPostCallback(job, callback);
                 }else{
                     InternalMeshRequestPublicInterface::LoadCPU(meshRequest);
                     InternalMeshRequestPublicInterface::LoadGPU(meshRequest);

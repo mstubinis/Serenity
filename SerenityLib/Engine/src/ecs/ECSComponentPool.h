@@ -25,7 +25,7 @@ namespace Engine::priv {
             ~ECSComponentPool() = default;
 
             template<typename... ARGS> 
-            inline COMPONENT* addComponent(ENTITY entity, ARGS&&... args) {
+            inline constexpr COMPONENT* addComponent(ENTITY entity, ARGS&&... args) {
                 return super::add(entity.id(), entity, std::forward<ARGS>(args)...);
             }
             inline bool removeComponent(ENTITY entity) {
@@ -34,10 +34,10 @@ namespace Engine::priv {
             inline bool removeComponent(std::uint32_t entityID) {
                 return super::remove(entityID);
             }
-            inline COMPONENT* getComponent(ENTITY entity) const {
+            inline constexpr COMPONENT* getComponent(ENTITY entity) const {
                 return super::get(entity.id());
             }
-            inline COMPONENT* getComponent(std::uint32_t entityID) const {
+            inline constexpr COMPONENT* getComponent(std::uint32_t entityID) const {
                 return super::get(entityID);
             }
     };

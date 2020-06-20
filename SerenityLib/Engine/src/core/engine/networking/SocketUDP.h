@@ -49,8 +49,8 @@ namespace Engine::Networking {
             SocketStatus::Status   send(Engine::Networking::Packet& packet, const std::string& ip = "");
             SocketStatus::Status   send(sf::Packet& packet, const std::string& ip = "");
             SocketStatus::Status   send(const void* data, size_t size, const std::string& ip = "");
-            SocketStatus::Status   receive(sf::Packet& packet);
-            SocketStatus::Status   receive(void* data, size_t size, size_t& received);
+            SocketStatus::Status   receive(sf::Packet& packet, sf::IpAddress& ip, unsigned short& port);
+            SocketStatus::Status   receive(void* data, size_t size, size_t& received, sf::IpAddress& ip, unsigned short& port);
 
             SocketStatus::Status   send(const unsigned short port, Engine::Networking::Packet& packet, const std::string& ip = "");
             SocketStatus::Status   send(const unsigned short port, sf::Packet& packet, const std::string& ip = "");

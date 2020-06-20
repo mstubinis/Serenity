@@ -22,21 +22,21 @@ void priv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentCamera& c
             = glm::ortho(componentCamera.m_Left, componentCamera.m_Right, componentCamera.m_Bottom, componentCamera.m_Top, componentCamera.m_NearPlane, componentCamera.m_FarPlane);
     }
 }
-const glm::mat4 priv::ComponentCamera_Functions::GetViewNoTranslation(const Camera& camera) {
+glm::mat4 priv::ComponentCamera_Functions::GetViewNoTranslation(const Camera& camera) {
     return camera.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation;
 }
-const glm::mat4 priv::ComponentCamera_Functions::GetViewInverseNoTranslation(const Camera& camera) {
+glm::mat4 priv::ComponentCamera_Functions::GetViewInverseNoTranslation(const Camera& camera) {
     return glm::inverse(camera.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation);
 }
-const glm::mat4 priv::ComponentCamera_Functions::GetViewProjectionNoTranslation(const Camera& camera) {
+glm::mat4 priv::ComponentCamera_Functions::GetViewProjectionNoTranslation(const Camera& camera) {
     const auto& componentCamera = *camera.getComponent<ComponentCamera>();
     return componentCamera.m_ProjectionMatrix * componentCamera.m_ViewMatrixNoTranslation;
 }
-const glm::mat4 priv::ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(const Camera& camera) {
+glm::mat4 priv::ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(const Camera& camera) {
     const auto& componentCamera = *camera.getComponent<ComponentCamera>();
     return glm::inverse(componentCamera.m_ProjectionMatrix * componentCamera.m_ViewMatrixNoTranslation);
 }
-const glm::vec3 priv::ComponentCamera_Functions::GetViewVectorNoTranslation(const Camera& camera) {
+glm::vec3 priv::ComponentCamera_Functions::GetViewVectorNoTranslation(const Camera& camera) {
     const auto& viewMatrixNoTranslation = camera.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation;
     return glm::vec3(viewMatrixNoTranslation[0][2], viewMatrixNoTranslation[1][2], viewMatrixNoTranslation[2][2]);
 }
@@ -69,8 +69,6 @@ ComponentCamera::ComponentCamera(Entity entity, float left, float right, float b
     setViewMatrix(glm::lookAt(m_Eye, m_Forward, m_Up));
 
     m_Type                    = CameraType::Orthographic;
-}
-ComponentCamera::~ComponentCamera() {
 }
 ComponentCamera::ComponentCamera(ComponentCamera&& other) noexcept {
     m_Owner                   = std::move(other.m_Owner);
@@ -108,7 +106,7 @@ ComponentCamera& ComponentCamera::operator=(ComponentCamera&& other) noexcept {
     return *this;
 }
 
-void ComponentCamera::resize(const unsigned int width, const unsigned int height) {
+void ComponentCamera::resize(unsigned int width, unsigned int height) {
     if (m_Type == CameraType::Perspective) {
         m_AspectRatio = width / static_cast<float>(height);
     }
@@ -124,7 +122,7 @@ unsigned int ComponentCamera::pointIntersectTest(const glm_vec3& position) const
     }
     return 1; //inside
 }
-unsigned int ComponentCamera::sphereIntersectTest(const glm_vec3& position, const float radius) const { 
+unsigned int ComponentCamera::sphereIntersectTest(const glm_vec3& position, float radius) const { 
     unsigned int res = 1; //inside the viewing frustum
     const auto zero  = static_cast<decimal>(0.0);
     const auto two   = static_cast<decimal>(2.0);
@@ -158,25 +156,9 @@ void ComponentCamera::lookAt(const glm_vec3& eye, const glm_vec3& center, const 
 
     setViewMatrix(glm::lookAt(m_Eye, m_Eye - m_Forward, m_Up));
 }
-glm_vec3 ComponentCamera::forward() const {
-    return m_Forward;
-}
-glm_vec3 ComponentCamera::right() const {
-    return glm::normalize(glm_vec3(m_ViewMatrixNoTranslation[0][0], m_ViewMatrixNoTranslation[1][0], m_ViewMatrixNoTranslation[2][0]));
-}
-glm_vec3 ComponentCamera::up() const {
-    return (m_Up); //normalize later?
-}
 
-
-glm::mat4 ComponentCamera::getProjection() const {
-	return m_ProjectionMatrix; 
-}
 glm::mat4 ComponentCamera::getProjectionInverse() const {
 	return glm::inverse(m_ProjectionMatrix); 
-}
-glm::mat4 ComponentCamera::getView() const {
-	return m_ViewMatrix; 
 }
 glm::mat4 ComponentCamera::getViewInverse() const {
 	return glm::inverse(m_ViewMatrix); 
@@ -189,18 +171,6 @@ glm::mat4 ComponentCamera::getViewProjectionInverse() const {
 }
 glm::vec3 ComponentCamera::getViewVector() const {
 	return glm::normalize(glm::vec3(m_ViewMatrix[0][2], m_ViewMatrix[1][2], m_ViewMatrix[2][2]));
-}
-float ComponentCamera::getAngle() const {
-	return m_Angle; 
-}
-float ComponentCamera::getAspect() const {
-	return m_AspectRatio; 
-}
-float ComponentCamera::getNear() const {
-	return m_NearPlane; 
-}
-float ComponentCamera::getFar() const {
-	return m_FarPlane; 
 }
 void ComponentCamera::setAngle(const float angle) { 
 	m_Angle = angle;

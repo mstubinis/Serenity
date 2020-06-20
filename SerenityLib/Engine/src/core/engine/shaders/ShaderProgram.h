@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_SHADERPROGRAM_H
-#define ENGINE_SHADERPROGRAM_H
+#ifndef ENGINE_SHADER_PROGRAM_H
+#define ENGINE_SHADER_PROGRAM_H
 
 class  Handle;
 class  Shader;

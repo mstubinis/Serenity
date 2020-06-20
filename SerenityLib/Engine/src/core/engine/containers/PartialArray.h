@@ -40,10 +40,8 @@ namespace Engine {
                 m_Count = 0U;
             }
 
-
             T& operator[](unsigned int index) = delete;
             const T& operator[](unsigned int index) const = delete;
-
 
             T& get(unsigned int index) {
                 return m_Array[index];

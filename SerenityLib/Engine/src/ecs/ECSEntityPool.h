@@ -22,7 +22,7 @@ namespace Engine::priv {
             ECSEntityPool(ECSEntityPool&& other) noexcept            = delete;
             ECSEntityPool& operator=(ECSEntityPool&& other) noexcept = delete;
 
-            bool isEntityVersionDifferent(ENTITY entity) const {
+            constexpr bool isEntityVersionDifferent(ENTITY entity) const {
                 auto index = entity.id() - 1U;
                 ENTITY storedEntity = m_Pool[index];
                 return (storedEntity.versionID() != entity.versionID());
@@ -37,7 +37,7 @@ namespace Engine::priv {
                 m_Pool[index] = std::move(updatedEntity);
                 m_Freelist.emplace_back(index);
             }
-            ENTITY addEntity(const Scene& scene) {
+            constexpr ENTITY addEntity(const Scene& scene) {
                 if (m_Freelist.empty()) {
                     m_Pool.emplace_back(0U, 0U, 0U);
                     m_Freelist.emplace_back(static_cast<std::uint32_t>(m_Pool.size()) - 1U);
@@ -49,7 +49,7 @@ namespace Engine::priv {
                 m_Pool[id] = entity;
                 return std::move(entity);
             }
-            ENTITY getEntity(std::uint32_t entityData) const {
+            constexpr ENTITY getEntity(std::uint32_t entityData) const {
                 if (entityData == 0) {
                     return nullptr;
                 }

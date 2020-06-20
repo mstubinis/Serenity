@@ -21,6 +21,9 @@ Engine::Networking::Server::Server(ServerType::Type type) {
 Engine::Networking::Server::~Server() {
     shutdown();
 }
+ServerType::Type Engine::Networking::Server::getType() const {
+    return m_ServerType;
+}
 unsigned int Engine::Networking::Server::num_clients() const {
     unsigned int number_of_clients = 0;
     for (size_t i = 0; i < m_Threads.size(); ++i) {
@@ -49,11 +52,14 @@ vector<Engine::Networking::ServerClient*> Engine::Networking::Server::clients() 
     }
     return ret;
 }
-void Engine::Networking::Server::setClientHashFunction(function<string(string ip, unsigned short port)> function) {
+void Engine::Networking::Server::setClientHashFunction(function<string(string ip, unsigned short port, std::string extra)> function) {
     m_Client_Hash_Function = function;
 }
-void Engine::Networking::Server::setServerUpdateFunction(std::function<void(const float dt)> function) {
+void Engine::Networking::Server::setServerUpdateFunction(std::function<void(const float dt, bool serverActive)> function) {
     m_Update_Function = function;
+}
+void Engine::Networking::Server::setExtraHashExtractUDPFunction(std::function<std::string(sf::Packet& packet)> function) {
+    m_Extract_Extra_UDP_Function = function;
 }
 void Engine::Networking::Server::setBlockingTCPListener(bool blocking) {
     m_TCPListener->setBlocking(blocking);
@@ -158,7 +164,7 @@ ServerThread* Engine::Networking::Server::internal_get_next_available_thread() {
 void Engine::Networking::Server::internal_send_to_all_tcp(Engine::Networking::ServerClient* exclusion, Engine::Networking::Packet& packet) {
     for (auto& client : clients()) {
         if (client != exclusion) {
-            auto status = client->send(packet);
+            auto status = client->send_tcp(packet);
         }
     }
 }
@@ -175,7 +181,7 @@ void Engine::Networking::Server::internal_send_to_all_udp(Engine::Networking::Se
 void Engine::Networking::Server::internal_send_to_all_tcp(Engine::Networking::ServerClient* exclusion, sf::Packet& sf_packet) {
     for (auto& client : clients()) {
         if (client != exclusion) {
-            auto status = client->send(sf_packet);
+            auto status = client->send_tcp(sf_packet);
         }
     }
 }
@@ -191,7 +197,7 @@ void Engine::Networking::Server::internal_send_to_all_udp(Engine::Networking::Se
 void Engine::Networking::Server::internal_send_to_all_tcp(Engine::Networking::ServerClient* exclusion, void* data, size_t size) {
     for (auto& client : clients()) {
         if (client != exclusion) {
-            auto status = client->send(data, size);
+            auto status = client->send_tcp(data, size);
         }
     }
 }
@@ -206,70 +212,69 @@ void Engine::Networking::Server::internal_send_to_all_udp(Engine::Networking::Se
         }
     }
 }
-SocketStatus::Status Engine::Networking::Server::send_to_client(Engine::Networking::ServerClient& client, Engine::Networking::Packet& packet) {
-    return client.send(packet);
+SocketStatus::Status Engine::Networking::Server::send_tcp_to_client(Engine::Networking::ServerClient& client, Engine::Networking::Packet& packet) {
+    return client.send_tcp(packet);
 }
-SocketStatus::Status Engine::Networking::Server::send_to_client(Engine::Networking::ServerClient& client, sf::Packet& sf_packet) {
-    return client.send(sf_packet);
+SocketStatus::Status Engine::Networking::Server::send_tcp_to_client(Engine::Networking::ServerClient& client, sf::Packet& sf_packet) {
+    return client.send_tcp(sf_packet);
 }
-SocketStatus::Status Engine::Networking::Server::send_to_client(Engine::Networking::ServerClient& client, void* data, size_t size) {
-    return client.send(data, size);
+SocketStatus::Status Engine::Networking::Server::send_tcp_to_client(Engine::Networking::ServerClient& client, void* data, size_t size) {
+    return client.send_tcp(data, size);
 }
-SocketStatus::Status Engine::Networking::Server::send_to_client(Engine::Networking::ServerClient& client, void* data, size_t size, size_t& sent) {
-    return client.send(data, size, sent);
+SocketStatus::Status Engine::Networking::Server::send_tcp_to_client(Engine::Networking::ServerClient& client, void* data, size_t size, size_t& sent) {
+    return client.send_tcp(data, size, sent);
 }
-void Engine::Networking::Server::send_to_all_but_client(Engine::Networking::ServerClient& exclusion, Engine::Networking::Packet& packet) {
+void Engine::Networking::Server::send_tcp_to_all_but_client(Engine::Networking::ServerClient& exclusion, Engine::Networking::Packet& packet) {
     internal_send_to_all_tcp(&exclusion, packet);
 }
-void Engine::Networking::Server::send_to_all_but_client(Engine::Networking::ServerClient& exclusion, sf::Packet& sf_packet) {
+void Engine::Networking::Server::send_tcp_to_all_but_client(Engine::Networking::ServerClient& exclusion, sf::Packet& sf_packet) {
     internal_send_to_all_tcp(&exclusion, sf_packet);
 }
-void Engine::Networking::Server::send_to_all_but_client(Engine::Networking::ServerClient& exclusion, void* data, size_t size) {
+void Engine::Networking::Server::send_tcp_to_all_but_client(Engine::Networking::ServerClient& exclusion, void* data, size_t size) {
     internal_send_to_all_tcp(&exclusion, data, size);
 }
-void Engine::Networking::Server::send_to_all(Engine::Networking::Packet& packet) {
+void Engine::Networking::Server::send_tcp_to_all(Engine::Networking::Packet& packet) {
     internal_send_to_all_tcp(nullptr, packet);
 }
-void Engine::Networking::Server::send_to_all(sf::Packet& packet) {
+void Engine::Networking::Server::send_tcp_to_all(sf::Packet& packet) {
     internal_send_to_all_tcp(nullptr, packet);
 }
-void Engine::Networking::Server::send_to_all(void* data, size_t size) {
+void Engine::Networking::Server::send_tcp_to_all(void* data, size_t size) {
     internal_send_to_all_tcp(nullptr, data, size);
 }
-void Engine::Networking::Server::send_to_all_but_client_udp(Engine::Networking::ServerClient& exclusion, Engine::Networking::Packet& packet) {
+void Engine::Networking::Server::send_udp_to_all_but_client(Engine::Networking::ServerClient& exclusion, Engine::Networking::Packet& packet) {
     internal_send_to_all_udp(&exclusion, packet);
 }
-void Engine::Networking::Server::send_to_all_but_client_udp(Engine::Networking::ServerClient& exclusion, sf::Packet& sf_packet) {
+void Engine::Networking::Server::send_udp_to_all_but_client(Engine::Networking::ServerClient& exclusion, sf::Packet& sf_packet) {
     internal_send_to_all_udp(&exclusion, sf_packet);
 }
-void Engine::Networking::Server::send_to_all_but_client_udp(Engine::Networking::ServerClient& exclusion, void* data, size_t size) {
+void Engine::Networking::Server::send_udp_to_all_but_client(Engine::Networking::ServerClient& exclusion, void* data, size_t size) {
     internal_send_to_all_udp(&exclusion, data, size);
 }
-void Engine::Networking::Server::send_to_all_udp(Engine::Networking::Packet& packet) {
+void Engine::Networking::Server::send_udp_to_all(Engine::Networking::Packet& packet) {
     internal_send_to_all_udp(nullptr, packet);
 }
-void Engine::Networking::Server::send_to_all_udp(sf::Packet& sf_packet) {
+void Engine::Networking::Server::send_udp_to_all(sf::Packet& sf_packet) {
     internal_send_to_all_udp(nullptr, sf_packet);
 }
-void Engine::Networking::Server::send_to_all_udp(void* data, size_t size) {
+void Engine::Networking::Server::send_udp_to_all(void* data, size_t size) {
     internal_send_to_all_udp(nullptr, data, size);
 }
-SocketStatus::Status Engine::Networking::Server::receive_udp(sf::Packet& sf_packet) {
-    return m_UdpSocket->receive(sf_packet);
+SocketStatus::Status Engine::Networking::Server::receive_udp(sf::Packet& sf_packet, sf::IpAddress& sender, unsigned short& port) {
+    return m_UdpSocket->receive(sf_packet, sender, port);
 }
-SocketStatus::Status Engine::Networking::Server::receive_udp(void* data, size_t size, size_t& received) {
-    return m_UdpSocket->receive(data, size, received);
+SocketStatus::Status Engine::Networking::Server::receive_udp(void* data, size_t size, size_t& received, sf::IpAddress& sender, unsigned short& port) {
+    return m_UdpSocket->receive(data, size, received, sender, port);
 }
 
 
-void Engine::Networking::Server::on_recieve_udp(sf::Packet& sf_packet) {
-
-}
 void Engine::Networking::Server::internal_add_client(string& hash, Engine::Networking::ServerClient& client) {
     auto* next_thread = internal_get_next_available_thread();
     if (next_thread) {
-        next_thread->add_client(hash, &client);
-        cout << "Server: TCP listener accepted new client: " << client.ip() << " on port: " << client.port() << "\n";
+        bool result = next_thread->add_client(hash, &client, *this);
+        std::cout << "Server: TCP listener accepted new client: " << client.ip() << " on port: " << client.port() << "\n";
+    }else{
+        std::cout << "Server: TCP listener REJECTED new client: " << client.ip() << " on port: " << client.port() << " due to not finding a next_thread\n";
     }
 }
 void Engine::Networking::Server::remove_client(Engine::Networking::ServerClient& client) {
@@ -289,7 +294,7 @@ void Engine::Networking::Server::remove_client(Engine::Networking::ServerClient&
 }
 
 ServerClient* Engine::Networking::Server::add_new_client(string& hash, string& clientIP, unsigned short clientPort, Engine::Networking::SocketTCP* tcp) {
-    ServerClient* client = NEW ServerClient(hash, *this, tcp);
+    ServerClient* client = NEW ServerClient(hash, *this, tcp, clientIP, clientPort);
     return client;
 }
 void Engine::Networking::Server::internal_update_tcp_listener_loop() {
@@ -299,69 +304,86 @@ void Engine::Networking::Server::internal_update_tcp_listener_loop() {
         if (status == sf::Socket::Status::Done) {
             auto client_ip   = tcp_socket->ip();
             auto client_port = tcp_socket->remotePort();
-            auto client_hash = m_Client_Hash_Function(client_ip, client_port);
+            auto client_hash = m_Client_Hash_Function(client_ip, client_port, "");
             auto* new_client = add_new_client(client_hash, client_ip, client_port, tcp_socket);
             if (new_client) {
                 internal_add_client(client_hash, *new_client);
             }
         }else{
-            delete tcp_socket;
+            SAFE_DELETE(tcp_socket);
         }
     }
 }
-void Engine::Networking::Server::internal_update_loop(const float dt) {
-    const auto server_active = m_Active.load(std::memory_order_relaxed);
-    if (server_active == 1) {
-        internal_update_tcp_listener_loop();
-
-        //server udp socket
-        sf::Packet sf_packet_udp;
-        auto status_udp = receive_udp(sf_packet_udp);
-        if (status_udp == sf::Socket::Done) {
-            on_recieve_udp(sf_packet_udp);
-        }
-
-        //TODO: it works but it's kind of hacky ///////////////////////////////////////////////////
-        for (auto& clientThread : m_Threads) {
-
-            auto lambda_update_client_thread = [dt, this, server_active, &clientThread]() {
-                for (auto& client_itr : clientThread.clients()) {
-                    if (server_active == 0 || clientThread.num_clients() == 0) { //can be inactive if no clients are using the thread
-                        return true;
-                    }
-                    if (client_itr.second) {
-                        client_itr.second->internal_update_loop(dt);
-                        client_itr.second->update(dt);
-                    }
-                }
-                return false;
-            };
-            Engine::priv::threading::addJob(lambda_update_client_thread);
-        }
-        //////////////////////////////////////////////////////////////////////////////////////////////
+void Engine::Networking::Server::internal_update_loop(const float dt, bool serverActive) {
+    if (!serverActive) {
+        return;
     }
+    internal_update_tcp_listener_loop();
+
+    //server udp socket
+    sf::Packet sf_packet_udp;
+    sf::IpAddress ip;
+    std::string ipAsString;
+    unsigned short port;
+    auto status_udp = receive_udp(sf_packet_udp, ip, port);
+    if (status_udp == sf::Socket::Done) {
+        on_recieve_udp(sf_packet_udp);
+        //if the server is only of type udp, then we dont have a tcp listener and thus need a way to add clients
+        if (m_ServerType == ServerType::UDP) {
+            ipAsString = ip.toString();
+            auto extraInfo   = m_Extract_Extra_UDP_Function(sf_packet_udp);
+            auto client_hash = m_Client_Hash_Function(ipAsString, port, extraInfo);
+            if (!m_HashedClients.count(client_hash)) {
+                auto* new_client = add_new_client(client_hash, ipAsString, port, nullptr);
+                if (new_client) {
+                    internal_add_client(client_hash, *new_client);
+                }
+            }else{
+                //forward udp data to proper client
+                m_HashedClients.at(client_hash)->receive_udp(status_udp, sf_packet_udp, dt);
+            }
+        }
+    }
+
+    //TODO: it works but it's kind of hacky ///////////////////////////////////////////////////
+    for (auto& clientThread : m_Threads) {
+        auto lambda_update_client_thread = [dt, this, serverActive, &clientThread]() {
+            for (auto& client_itr : clientThread.clients()) {
+                if (serverActive == 0 || clientThread.num_clients() == 0) { //can be inactive if no clients are using the thread
+                    return true;
+                }
+                if (client_itr.second) {
+                    client_itr.second->internal_update_loop(dt);
+                    client_itr.second->update(dt);
+                }
+            }
+            return false;
+        };
+        Engine::priv::threading::addJob(std::move(lambda_update_client_thread));
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////////
 }
 void Engine::Networking::Server::update(const float dt) {
-    internal_update_loop(dt);
-    m_Update_Function(dt);
+    auto serverActive = m_Active.load(std::memory_order_relaxed);
+    internal_update_loop(dt, serverActive);
+    m_Update_Function(dt, serverActive);
 
     //remove clients
     if (m_RemovedClients.size() > 0) {
         Engine::priv::threading::waitForAll();
-        {
-            for (const auto& pair_itr : m_RemovedClients) {
-                bool complete = false;
-                for (auto& clientThread : m_Threads) {
-                    for (auto& client_itr : clientThread.clients()) {
-                        if (client_itr.first == pair_itr.first) {
-                            clientThread.clients().erase(client_itr.first);
-                            complete = true;
-                            break;
-                        }
-                    }
-                    if (complete) {
+        for (const auto& pair_itr : m_RemovedClients) {
+            bool complete = false;
+            for (auto& clientThread : m_Threads) {
+                for (auto& client_itr : clientThread.clients()) {
+                    if (client_itr.first == pair_itr.first) {
+                        auto& hash = client_itr.first;
+                        bool result = clientThread.remove_client(hash, *this);
+                        complete = true;
                         break;
                     }
+                }
+                if (complete) {
+                    break;
                 }
             }
         }

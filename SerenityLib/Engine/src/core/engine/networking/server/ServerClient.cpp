@@ -6,12 +6,17 @@ using namespace std;
 using namespace Engine;
 using namespace Engine::Networking;
 
-Engine::Networking::ServerClient::ServerClient(const string& hash, Engine::Networking::Server& server, Engine::Networking::SocketTCP* tcp_socket) : m_Server(server){
+Engine::Networking::ServerClient::ServerClient(const string& hash, Engine::Networking::Server& server, Engine::Networking::SocketTCP* tcp_socket, string& inIP, unsigned short inPort) : m_Server(server){
     m_Hash      = hash;
-    m_IP        = tcp_socket->ip();
-    m_Port      = tcp_socket->remotePort();
-    m_TcpSocket = std::move(tcp_socket);
-    m_TcpSocket->setBlocking(false);
+    if (tcp_socket) {
+        m_IP        = (!tcp_socket->ip().empty() ? tcp_socket->ip() : inIP);
+        m_Port      = tcp_socket->remotePort();
+        m_TcpSocket = std::move(tcp_socket);
+        m_TcpSocket->setBlocking(false);
+    }else{
+        m_IP   = inIP;
+        m_Port = inPort;
+    }
 
     registerEvent(EventType::ClientConnected);
     registerEvent(EventType::ClientDisconnected);
@@ -53,7 +58,7 @@ const std::string& Engine::Networking::ServerClient::ip() const {
     return m_IP;
 }
 bool Engine::Networking::ServerClient::connect(unsigned short timeout) {
-    if (!disconnected()) {
+    if (!m_TcpSocket || !disconnected()) {
         return false;
     }
     auto status = m_TcpSocket->connect(timeout);
@@ -66,8 +71,10 @@ Engine::Networking::ServerClient::ConnectionState::State Engine::Networking::Ser
     return m_ConnectionState;
 }
 void Engine::Networking::ServerClient::disconnect() {
-    m_TcpSocket->disconnect();
-    m_ConnectionState = ConnectionState::Disconnected;
+    if (m_TcpSocket) {
+        m_TcpSocket->disconnect();
+        m_ConnectionState = ConnectionState::Disconnected;
+    }
 }
 bool Engine::Networking::ServerClient::disconnected() const {
     return (m_ConnectionState == ConnectionState::Disconnected || m_Timeout_Timer >= m_Timeout_Timer_Limit || socket()->localPort() == 0);
@@ -78,24 +85,37 @@ void Engine::Networking::ServerClient::setTimeoutTimerLimit(float limit) {
 unsigned int Engine::Networking::ServerClient::id() const {
     return m_ID;
 }
-SocketStatus::Status Engine::Networking::ServerClient::send(Engine::Networking::Packet& packet) {
+SocketStatus::Status Engine::Networking::ServerClient::send_tcp(Engine::Networking::Packet& packet) {
     return m_TcpSocket->send(packet);
 }
-SocketStatus::Status Engine::Networking::ServerClient::send(sf::Packet& packet) {
+SocketStatus::Status Engine::Networking::ServerClient::send_tcp(sf::Packet& packet) {
     return m_TcpSocket->send(packet);
 }
-SocketStatus::Status Engine::Networking::ServerClient::send(void* data, size_t size) {
+SocketStatus::Status Engine::Networking::ServerClient::send_tcp(void* data, size_t size) {
     return m_TcpSocket->send(data, size);
 }
-SocketStatus::Status Engine::Networking::ServerClient::send(void* data, size_t size, size_t& sent) {
+SocketStatus::Status Engine::Networking::ServerClient::send_tcp(void* data, size_t size, size_t& sent) {
     return m_TcpSocket->send(data, size, sent);
 }
-SocketStatus::Status Engine::Networking::ServerClient::receive(sf::Packet& packet) {
+SocketStatus::Status Engine::Networking::ServerClient::receive_tcp(sf::Packet& packet) {
     return m_TcpSocket->receive(packet);
 }
-SocketStatus::Status Engine::Networking::ServerClient::receive(void* data, size_t size, size_t& received) {
+SocketStatus::Status Engine::Networking::ServerClient::receive_tcp(void* data, size_t size, size_t& received) {
     return m_TcpSocket->receive(data, size, received);
 }
+void Engine::Networking::ServerClient::receive_udp(SocketStatus::Status status, sf::Packet& packet, const float dt) {
+    if (status == SocketStatus::Done) {
+        internal_on_received_data();
+        on_receive_udp(packet, dt);
+    }
+}
+void Engine::Networking::ServerClient::receive_udp(SocketStatus::Status status, void* data, size_t size, size_t& received, const float dt) {
+    if (status == SocketStatus::Done) {
+        internal_on_received_data();
+        on_receive_udp(data, size, received, dt);
+    }
+}
+
 void Engine::Networking::ServerClient::internal_update_loop(const float dt) {
     switch (m_ConnectionState) {
         case ConnectionState::Active: {
@@ -120,11 +140,13 @@ void Engine::Networking::ServerClient::internal_update_loop(const float dt) {
     }
 
     //tcp
-    sf::Packet sf_packet;
-    auto status = receive(sf_packet);
-    if (status == SocketStatus::Done) {
-        internal_on_received_data();
-        on_receive_tcp(sf_packet, dt);
+    if (m_TcpSocket) {
+        sf::Packet sf_packet;
+        auto status = receive_tcp(sf_packet);
+        if (status == SocketStatus::Done) {
+            internal_on_received_data();
+            on_receive_tcp(sf_packet, dt);
+        }
     }
 }
 void Engine::Networking::ServerClient::internal_on_received_data() {
@@ -137,13 +159,4 @@ void Engine::Networking::ServerClient::internal_on_received_data() {
 void Engine::Networking::ServerClient::update(const float dt) {
     internal_update_loop(dt);
     m_Update_Function(dt);
-}
-
-void Engine::Networking::ServerClient::on_receive_tcp(sf::Packet& sfPacket, const float dt) {
-}
-void Engine::Networking::ServerClient::on_timed_out() {
-}
-void Engine::Networking::ServerClient::on_recovery_timed_out() {
-}
-void Engine::Networking::ServerClient::onEvent(const Event& e) {
 }

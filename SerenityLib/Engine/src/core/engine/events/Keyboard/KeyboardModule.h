@@ -13,24 +13,76 @@ namespace Engine::priv {
             unsigned int                           m_PreviousKeyboardKey = static_cast<unsigned int>(KeyboardKey::Unknown);
             unsigned int                           m_NumPressedKeys      = 0U;
         public:
-            KeyboardModule();
-            virtual ~KeyboardModule();
+            KeyboardModule() {
+                m_KeyboardKeyStatus.fill(false);
+            }
+            virtual ~KeyboardModule() {
 
-            void onKeyPressed(unsigned int key);
-            void onKeyReleased(unsigned int key);
-            void onPostUpdate();
-            void onClearEvents();
+            }
+            constexpr void onKeyPressed(const unsigned int key) {
+                if (key == KeyboardKey::Unknown) {
+                    return;
+                }
+                m_PreviousKeyboardKey = m_CurrentKeyboardKey;
+                m_CurrentKeyboardKey = key;
 
-            KeyboardKey::Key getCurrentPressedKey() const;
+                if (m_KeyboardKeyStatus[key] == false) {
+                    m_KeyboardKeyStatus[key] = true;
+                    ++m_NumPressedKeys;
+                }
+            }
+            constexpr void onKeyReleased(const unsigned int key) {
+                if (key == KeyboardKey::Unknown) {
+                    return;
+                }
+                m_PreviousKeyboardKey = static_cast<unsigned int>(KeyboardKey::Unknown);
+                m_CurrentKeyboardKey  = static_cast<unsigned int>(KeyboardKey::Unknown);
 
-            unsigned int getNumPressedKeys() const;
+                if (m_KeyboardKeyStatus[key] == true) {
+                    m_KeyboardKeyStatus[key] = false;
+                    if (m_NumPressedKeys > 0) {
+                        --m_NumPressedKeys;
+                    }
+                }
+            }
+            constexpr void onPostUpdate() {
+                m_CurrentKeyboardKey  = static_cast<unsigned int>(KeyboardKey::Unknown);
+                m_PreviousKeyboardKey = static_cast<unsigned int>(KeyboardKey::Unknown);
+            }
+            void onClearEvents() {
+                m_KeyboardKeyStatus.fill(false);
+                m_CurrentKeyboardKey  = static_cast<unsigned int>(KeyboardKey::Unknown);
+                m_PreviousKeyboardKey = static_cast<unsigned int>(KeyboardKey::Unknown);
+                m_NumPressedKeys      = 0U;
+            }
 
-            bool isKeyDown(unsigned int key) const;
-            bool isKeyDownOnce() const;
-
-            bool isKeyDownOnce(unsigned int key);
-            bool isKeyDownOnce(unsigned int key1, unsigned int key2);
-            bool isKeyDownOnce(unsigned int key1, unsigned int key2, unsigned int key3);
+            constexpr KeyboardKey::Key getCurrentPressedKey() const {
+                return static_cast<KeyboardKey::Key>(m_CurrentKeyboardKey);
+            }
+            constexpr unsigned int getNumPressedKeys() const {
+                return m_NumPressedKeys;
+            }
+            constexpr bool isKeyDown(const unsigned int key) const {
+                return (m_KeyboardKeyStatus[key] == true);
+            }
+            constexpr bool isKeyDownOnce() const {
+                return m_CurrentKeyboardKey != m_PreviousKeyboardKey;
+            }
+            constexpr bool isKeyDownOnce(unsigned int key) {
+                const bool res = isKeyDown(key);
+                return res && m_CurrentKeyboardKey == key && (m_CurrentKeyboardKey != m_PreviousKeyboardKey);
+            }
+            constexpr bool isKeyDownOnce(unsigned int key1, unsigned int key2) {
+                const bool resFirst  = isKeyDown(key1);
+                const bool resSecond = isKeyDown(key2);
+                return resFirst && resSecond && m_CurrentKeyboardKey == key1 && (m_CurrentKeyboardKey != m_PreviousKeyboardKey);
+            }
+            constexpr bool isKeyDownOnce(unsigned int key1, unsigned int key2, unsigned int key3) {
+                const bool resFirst  = isKeyDown(key1);
+                const bool resSecond = isKeyDown(key2);
+                const bool resThird  = isKeyDown(key3);
+                return resFirst && resSecond && resThird && m_CurrentKeyboardKey == key1 && (m_CurrentKeyboardKey != m_PreviousKeyboardKey);
+            }
     };
 }
 

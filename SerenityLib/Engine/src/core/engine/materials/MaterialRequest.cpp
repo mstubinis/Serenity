@@ -21,15 +21,17 @@ MaterialRequestPart::~MaterialRequestPart() {
 
 }
 MaterialRequestPart::MaterialRequestPart(const MaterialRequestPart& other) {
-    material = other.material;
-    name     = other.name;
-    handle   = other.handle;
+    m_Material = other.m_Material;
+    m_Name     = other.m_Name;
+    m_Handle   = other.m_Handle;
+    m_TextureRequests = other.m_TextureRequests;
 }
 MaterialRequestPart& MaterialRequestPart::operator=(const MaterialRequestPart& other) {
     if (&other != this) {
-        material = other.material;
-        name     = other.name;
-        handle   = other.handle;
+        m_Material = other.m_Material;
+        m_Name     = other.m_Name;
+        m_Handle   = other.m_Handle;
+        m_TextureRequests = other.m_TextureRequests;
     }
     return *this;
 }
@@ -37,85 +39,73 @@ MaterialRequestPart& MaterialRequestPart::operator=(const MaterialRequestPart& o
 
 
 MaterialRequest::MaterialRequest(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness){ 
-    part.name = name;
-    part.textureRequests.emplace_back(  NEW TextureRequest( diffuse, false, ImageInternalFormat::SRGB8_ALPHA8 )  );
-    part.textureRequests.emplace_back(  NEW TextureRequest( normal, false, ImageInternalFormat::RGBA8 )  );
-    part.textureRequests.emplace_back(  NEW TextureRequest( glow, false, ImageInternalFormat::R8 )  );
-    part.textureRequests.emplace_back(  NEW TextureRequest( specular, false, ImageInternalFormat::R8 )  );
-    part.textureRequests.emplace_back(  NEW TextureRequest( ao, false, ImageInternalFormat::R8 )  );
-    part.textureRequests.emplace_back(  NEW TextureRequest( metalness, false, ImageInternalFormat::R8 )  );
-    part.textureRequests.emplace_back(  NEW TextureRequest( smoothness, false, ImageInternalFormat::R8 )  );
+    m_Part.m_Name = name;
+    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( diffuse, false, ImageInternalFormat::SRGB8_ALPHA8 )  );
+    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( normal, false, ImageInternalFormat::RGBA8 )  );
+    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( glow, false, ImageInternalFormat::R8 )  );
+    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( specular, false, ImageInternalFormat::R8 )  );
+    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( ao, false, ImageInternalFormat::R8 )  );
+    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( metalness, false, ImageInternalFormat::R8 )  );
+    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( smoothness, false, ImageInternalFormat::R8 )  );
 }
 MaterialRequest::MaterialRequest(const string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) {
-    part.name     = name;
-    part.material = NEW Material(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
-    part.handle   = Core::m_Engine->m_ResourceManager.m_Resources.add(part.material, ResourceType::Material);
+    m_Part.m_Name     = name;
+    m_Part.m_Material = NEW Material(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
+    m_Part.m_Handle   = Core::m_Engine->m_ResourceManager.m_Resources.add(m_Part.m_Material, ResourceType::Material);
 }
 
 MaterialRequest::~MaterialRequest() {
 
 }
 MaterialRequest::MaterialRequest(const MaterialRequest& other) {
-    async                = other.async;
-    part.handle          = other.part.handle;
-    part.material        = other.part.material;
-    part.name            = other.part.name;
-    part.textureRequests = other.part.textureRequests;
+    m_Async = other.m_Async;
+    m_Part  = other.m_Part;
 }
 MaterialRequest& MaterialRequest::operator=(const MaterialRequest& other) {
     if (&other != this) {
-        async                = other.async;
-        part.handle          = other.part.handle;
-        part.material        = other.part.material;
-        part.name            = other.part.name;
-        part.textureRequests = other.part.textureRequests;
+        m_Async = other.m_Async;
+        m_Part  = other.m_Part;
     }
     return *this;
 }
 
-
-
-void MaterialRequest::request() {
-    async = false;
-    InternalMaterialRequestPublicInterface::Request(*this);
-}
-void MaterialRequest::requestAsync() {
-    if (Engine::hardware_concurrency() > 1) {
-        async = true;
-        for (auto& textureRequest : part.textureRequests) {
-            textureRequest->async = true;
+void MaterialRequest::request(bool inAsync) {
+    if (inAsync && Engine::hardware_concurrency() > 1) {
+        m_Async = true;
+        for (auto& textureRequest : m_Part.m_TextureRequests) {
+            textureRequest->part.async = true;
         }
-        InternalMaterialRequestPublicInterface::Request(*this);
     }else{
-        MaterialRequest::request();
+        m_Async = false;
     }
+    InternalMaterialRequestPublicInterface::Request(*this);
 }
 
 void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {
-    request.part.material = NEW Material();
-    request.part.material->setName(request.part.name);
-    request.part.handle = Core::m_Engine->m_ResourceManager.m_Resources.add(request.part.material, ResourceType::Material);
+    request.m_Part.m_Material = NEW Material();
+    request.m_Part.m_Material->setName(request.m_Part.m_Name);
+    request.m_Part.m_Handle = Core::m_Engine->m_ResourceManager.m_Resources.add(request.m_Part.m_Material, ResourceType::Material);
 
-    const auto size = request.part.textureRequests.size();
+    auto size = request.m_Part.m_TextureRequests.size();
     for (size_t i = 0; i < size; ++i) {
-        if (request.part.textureRequests[i]->fileExists) {
-            auto& component = request.part.material->addComponent(static_cast<MaterialComponentType::Type>(i), "DEFAULT");
+        if (request.m_Part.m_TextureRequests[i]->fileExists) {
+            auto& component = request.m_Part.m_Material->addComponent(static_cast<MaterialComponentType::Type>(i), "DEFAULT");
         }
     }
 
-    if (request.async) {
-        for (auto& textureRequest : request.part.textureRequests) {
-            textureRequest->requestAsync();
+    if (request.m_Async) {
+        for (auto& textureRequest : request.m_Part.m_TextureRequests) {
+            textureRequest->request(true);
         }
-        auto job = [=]() { 
+        auto lambda_cpu = [=]() {
             InternalMaterialRequestPublicInterface::LoadCPU(const_cast<MaterialRequest&>(request));
         };
-        auto callback = [=]() { 
+        auto lambda_gpu = [=]() {
             InternalMaterialRequestPublicInterface::LoadGPU(const_cast<MaterialRequest&>(request));
         };
-        threading::addJobWithPostCallback(job, callback);
+        threading::addJobWithPostCallback(lambda_cpu, lambda_gpu);
     }else{
-        for (auto& textureRequest : request.part.textureRequests) {
+        for (auto& textureRequest : request.m_Part.m_TextureRequests) {
             textureRequest->request();
         }
         InternalMaterialRequestPublicInterface::LoadCPU(request);
@@ -123,16 +113,16 @@ void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {
     }
 }
 void InternalMaterialRequestPublicInterface::LoadCPU(MaterialRequest& request) {
-    InternalMaterialPublicInterface::LoadCPU(*request.part.material);
+    InternalMaterialPublicInterface::LoadCPU(*request.m_Part.m_Material);
 }
 void InternalMaterialRequestPublicInterface::LoadGPU(MaterialRequest& request) {
-    const auto& texture_requests = request.part.textureRequests;
+    const auto& texture_requests = request.m_Part.m_TextureRequests;
     unsigned int count = 0;
     for (size_t i = 0; i < texture_requests.size(); ++i) {
         if (texture_requests[i]->fileExists) {
-            request.part.material->getComponent(count).layer(0).setTexture(texture_requests[i]->file);
+            request.m_Part.m_Material->getComponent(count).layer(0).setTexture(texture_requests[i]->file);
             ++count;
         }
     }
-    InternalMaterialPublicInterface::LoadGPU(*request.part.material);
+    InternalMaterialPublicInterface::LoadGPU(*request.m_Part.m_Material);
 }

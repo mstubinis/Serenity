@@ -36,7 +36,7 @@ namespace Engine::priv {
             ECS(ECS&& other) noexcept            = delete;
             ECS& operator=(ECS&& other) noexcept = delete;
 
-            const ECSEntityPool<ENTITY>& getEntityPool() const {
+            inline const ECSEntityPool<ENTITY>& getEntityPool() const {
                 return m_EntityPool;
             }
 
@@ -103,15 +103,13 @@ namespace Engine::priv {
                 }
             }
 
-            template<class COMPONENT>
-            ECSComponentPool<ENTITY, COMPONENT>& getPool() const {
+            template<class COMPONENT> inline constexpr ECSComponentPool<ENTITY, COMPONENT>& getPool() const {
                 using CPoolType = ECSComponentPool<ENTITY, COMPONENT>;
                 auto type_slot  = ECSRegistry::type_slot_fast<COMPONENT>();
                 return *static_cast<CPoolType*>(m_ComponentPools[type_slot]);
             }
 
-            template<class COMPONENT>
-            inline ECSSystem<ENTITY, COMPONENT>& getSystem() const {
+            template<class COMPONENT> inline constexpr ECSSystem<ENTITY, COMPONENT>& getSystem() const {
                 auto type_slot = ECSRegistry::type_slot_fast<COMPONENT>();
                 return *static_cast<ECSSystem<ENTITY, COMPONENT>*>(m_Systems[type_slot]);
             }
@@ -188,18 +186,15 @@ namespace Engine::priv {
                 }
                 return ret_val;
             }
-#pragma region 1 component get
-            template<class T> inline T* getComponent(ENTITY entity) const {
+
+            template<class T> inline constexpr T* getComponent(ENTITY entity) const {
                 using CPoolType = ECSComponentPool<ENTITY, T>;
                 return static_cast<CPoolType*>(m_ComponentPools[ECSRegistry::type_slot_fast<T>()])->getComponent(entity);
             }
-#pragma endregion
 
-#pragma region variadic component get
-            template<class... Types> inline std::tuple<Types*...> getComponents(ENTITY entity) const {
-                return std::make_tuple(getComponent<Types>(entity)...);
+            template<class... TYPES> inline constexpr std::tuple<TYPES*...> getComponents(ENTITY entity) const {
+                return std::make_tuple(getComponent<TYPES>(entity)...);
             }
-#pragma endregion
     };
 };
 

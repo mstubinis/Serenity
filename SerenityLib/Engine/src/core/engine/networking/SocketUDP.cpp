@@ -113,9 +113,7 @@ SocketStatus::Status Networking::SocketUDP::send(sf::Packet& packet, const strin
 SocketStatus::Status Networking::SocketUDP::send(const void* data, size_t size, const string& ip) {
     return SocketStatus::map_status(m_SocketUDP.send(data, size, internal_get_ip(ip), m_Port));
 }
-SocketStatus::Status Networking::SocketUDP::receive(sf::Packet& packet) {
-    sf::IpAddress ip;
-    unsigned short port;
+SocketStatus::Status Networking::SocketUDP::receive(sf::Packet& packet, sf::IpAddress& ip, unsigned short& port) {
     auto status = m_SocketUDP.receive(packet, ip, port);
     if (status == sf::Socket::Status::Done) {
         EventPacket e(&packet);
@@ -125,9 +123,7 @@ SocketStatus::Status Networking::SocketUDP::receive(sf::Packet& packet) {
     }
     return SocketStatus::map_status(status);
 }
-SocketStatus::Status Networking::SocketUDP::receive(void* data, size_t size, size_t& received) {
-    sf::IpAddress ip; 
-    unsigned short port;
+SocketStatus::Status Networking::SocketUDP::receive(void* data, size_t size, size_t& received, sf::IpAddress& ip, unsigned short& port) {
     return SocketStatus::map_status(m_SocketUDP.receive(data, size, received, ip, port));
 }
 SocketStatus::Status Networking::SocketUDP::send(const unsigned short port, Engine::Networking::Packet& packet, const string& ip) {

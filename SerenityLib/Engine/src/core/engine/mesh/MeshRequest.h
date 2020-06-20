@@ -67,17 +67,16 @@ struct MeshRequest final {
     MeshRequest(MeshRequest&& other) noexcept;
     MeshRequest& operator=(MeshRequest&& other) noexcept;
 
-    void request();
-    void requestAsync();
+    void request(bool async = false);
 };
 
 namespace Engine::priv {
     struct InternalMeshRequestPublicInterface final {
         friend class  Mesh;
-        static void Request(MeshRequest&);
-        static bool Populate(MeshRequest&);
-        static void LoadGPU(MeshRequest&);
-        static void LoadCPU(MeshRequest&);
+        static void Request(MeshRequest& meshRequest);
+        static bool Populate(MeshRequest& meshRequest);
+        static void LoadGPU(MeshRequest& meshRequest);
+        static void LoadCPU(MeshRequest& meshRequest);
     };
 };
 

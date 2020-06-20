@@ -6,6 +6,7 @@
 #include <string>
 
 namespace Engine::Networking {
+    class Server;
     class ServerClient;
 };
 namespace Engine::Networking {
@@ -19,7 +20,8 @@ namespace Engine::Networking {
             ServerThread(ServerThread&& other) noexcept;
             ServerThread& operator=(ServerThread&& other) noexcept;
 
-            bool add_client(std::string& hash, Engine::Networking::ServerClient* client);
+            bool remove_client(const std::string& hash, Engine::Networking::Server& server);
+            bool add_client(std::string& hash, Engine::Networking::ServerClient* client, Engine::Networking::Server& server);
             unsigned int num_clients() const;
             std::unordered_map<std::string, Engine::Networking::ServerClient*>& clients() const;
     };

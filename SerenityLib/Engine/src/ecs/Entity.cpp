@@ -10,7 +10,7 @@ Entity::Entity(Scene& scene) {
     m_Data = scene.createEntity().m_Data;
 }
 Entity::Entity(std::uint32_t entityID, std::uint32_t sceneID, std::uint32_t versionID) {
-    m_Data = versionID << (ENTITY_SIZE - VERSION_BIT_POSITIONS) | sceneID << (ENTITY_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS) | entityID;
+    m_Data = versionID << (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS) | sceneID << (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS) | entityID;
 }
 Entity::Entity(const Entity& other) {
     m_Data = other.m_Data;
