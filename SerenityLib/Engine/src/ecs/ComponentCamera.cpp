@@ -15,11 +15,9 @@ using namespace std;
 
 void priv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentCamera& componentCamera) {
     if (componentCamera.m_Type == ComponentCamera::CameraType::Perspective) {
-        componentCamera.m_ProjectionMatrix 
-            = glm::perspective(componentCamera.m_Angle, componentCamera.m_AspectRatio, componentCamera.m_NearPlane, componentCamera.m_FarPlane);
+        componentCamera.m_ProjectionMatrix = glm::perspective(componentCamera.m_Angle, componentCamera.m_AspectRatio, componentCamera.m_NearPlane, componentCamera.m_FarPlane);
     }else{
-        componentCamera.m_ProjectionMatrix 
-            = glm::ortho(componentCamera.m_Left, componentCamera.m_Right, componentCamera.m_Bottom, componentCamera.m_Top, componentCamera.m_NearPlane, componentCamera.m_FarPlane);
+        componentCamera.m_ProjectionMatrix = glm::ortho(componentCamera.m_Left, componentCamera.m_Right, componentCamera.m_Bottom, componentCamera.m_Top, componentCamera.m_NearPlane, componentCamera.m_FarPlane);
     }
 }
 glm::mat4 priv::ComponentCamera_Functions::GetViewNoTranslation(const Camera& camera) {

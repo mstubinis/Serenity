@@ -18,8 +18,15 @@ namespace Engine::Networking {
 #include <core/engine/events/EventIncludes.h>
 #include <core/engine/networking/SocketInterface.h>
 
-namespace Engine::priv{
+namespace Engine::priv {
 
+    struct EventEnum final {
+        unsigned int enumValue = 0;
+        EventEnum() = default;
+        EventEnum(unsigned int enum_) {
+            enumValue = enum_;
+        }
+    };
     struct EventSocket final {
         unsigned short   localPort  = 0;
         unsigned short   remotePort = 0;
@@ -203,6 +210,7 @@ namespace Engine::priv{
 struct Event final{
     EventType::Type type = EventType::Type::Unknown;
     union{
+        Engine::priv::EventEnum                       eventEnum;
         Engine::priv::EventWindowResized              eventWindowResized;
         Engine::priv::EventWindowFullscreenChanged    eventWindowFullscreenChanged;
         Engine::priv::EventKeyboard                   eventKeyboard;

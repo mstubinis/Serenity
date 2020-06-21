@@ -1,6 +1,8 @@
 #include <core/engine/networking/server/ServerThread.h>
 #include <core/engine/networking/server/ServerClient.h>
 #include <core/engine/networking/server/Server.h>
+#include <core/engine/networking/SocketTCP.h>
+#include <core/engine/threading/ThreadingModule.h>
 
 #include <iostream>
 
@@ -9,61 +11,119 @@ using namespace Engine;
 using namespace Engine::Networking;
 
 ServerThread::ServerThread() {
-
 }
 ServerThread::~ServerThread() {
-    SAFE_DELETE_MAP(m_Clients);
+    SAFE_DELETE_MAP(m_ServerClients);
 }
-unsigned int ServerThread::num_clients() const {
-    return static_cast<unsigned int>(m_Clients.size());
-}
-unordered_map<string, Engine::Networking::ServerClient*>& ServerThread::clients() const {
-    return m_Clients;
-}
-bool ServerThread::remove_client(const std::string& hash, Engine::Networking::Server& server) {
-    bool has_client_hash        = m_Clients.count(hash);
+bool ServerThread::remove_client(const string& hash, Server& server) {
+    bool has_client_hash        = m_ServerClients.count(hash);
     bool has_server_client_hash = server.m_HashedClients.count(hash);
     if (has_client_hash && has_server_client_hash) {
-        auto* client = m_Clients.at(hash);
-        SAFE_DELETE(client);
-        m_Clients.erase(hash);
+        auto* serverClient = m_ServerClients.at(hash);
+        SAFE_DELETE(serverClient);
+        m_ServerClients.erase(hash);
         server.m_HashedClients.erase(hash);
         return true;
-    }else {
-        if (!has_client_hash) {
-            std::cout << "error: client removal - hash: " << hash << " is not in m_Clients\n";
-        }
-        if (!has_server_client_hash) {
-            std::cout << "error: client removal - hash: " << hash << " is not in server.m_HashedClients\n";
-        }
-        return false;
+    }
+    if (!has_client_hash) {
+        std::cout << "error: client removal - hash: " << hash << " is not in m_Clients\n";
+    }
+    if (!has_server_client_hash) {
+        std::cout << "error: client removal - hash: " << hash << " is not in server.m_HashedClients\n";
     }
     return false;
 }
-bool ServerThread::add_client(string& hash, Engine::Networking::ServerClient* client, Engine::Networking::Server& server) {
-    bool has_client_hash        = m_Clients.count(hash);
+bool ServerThread::add_client(const string& hash, ServerClient* serverClient, Server& server) {
+    bool has_client_hash        = m_ServerClients.count(hash);
     bool has_server_client_hash = server.m_HashedClients.count(hash);
     if (!has_client_hash && !has_server_client_hash) {
-        m_Clients.emplace(hash, client);
-        server.m_HashedClients.emplace(hash, client);
+        m_ServerClients.emplace(hash, serverClient);
+        server.m_HashedClients.emplace(hash, serverClient);
         return true;
-    }else{
-        if (has_client_hash) {
-            std::cout << "error: client addition - hash: " << hash << " is already in m_Clients\n";
-        }
-        if (has_server_client_hash) {
-            std::cout << "error: client addition - hash: " << hash << " is already in server.m_HashedClients\n";
-        }
-        return false;
+    }
+    if (has_client_hash) {
+        std::cout << "error: client addition - hash: " << hash << " is already in m_Clients\n";
+    }
+    if (has_server_client_hash) {
+        std::cout << "error: client addition - hash: " << hash << " is already in server.m_HashedClients\n";
     }
     return false;
 }
+
+
 ServerThread::ServerThread(ServerThread&& other) noexcept {
-    m_Clients = std::move(other.m_Clients);
+    m_ServerClients = std::move(other.m_ServerClients);
 }
 ServerThread& ServerThread::operator=(ServerThread&& other) noexcept {
     if (&other != this) {
-        m_Clients = std::move(other.m_Clients);
+        m_ServerClients = std::move(other.m_ServerClients);
     }
     return *this;
+}
+
+
+
+
+
+
+ServerThreadCollection::ServerThreadCollection(size_t threadCount) {
+    m_Threads.resize(threadCount);
+}
+ServerThreadCollection::~ServerThreadCollection() {
+
+}
+void ServerThreadCollection::setBlocking(bool blocking) {
+    for (size_t i = 0; i < m_Threads.size(); ++i) {
+        for (const auto& client : m_Threads[i].m_ServerClients) {
+            client.second->socket()->setBlocking(blocking);
+        }
+    }
+}
+void ServerThreadCollection::setBlocking(const string& hash, bool blocking) {
+    for (auto& thread : m_Threads) {
+        if (thread.m_ServerClients.count(hash)) {
+            thread.m_ServerClients.at(hash)->socket()->setBlocking(blocking);
+            return;
+        }
+    }
+}
+bool ServerThreadCollection::addClient(const string& hash, ServerClient* client, Server& server) {
+    auto next_thread = getNextAvailableClientThread();
+    if (next_thread) {
+        bool result = next_thread->add_client(hash, client, server);
+        if (result) {
+            ++m_NumClients;
+        }
+        return result;
+    }
+    return false;
+}
+bool ServerThreadCollection::removeClient(const string& hash, Server& server) {
+    bool complete = false;
+    bool result   = false;
+    for (auto& thread : m_Threads) {
+        for (auto& client_itr : thread.m_ServerClients) {
+            if (client_itr.first == hash) {
+                result   = thread.remove_client(hash, server);
+                if (result) {
+                    --m_NumClients;
+                }
+                complete = true;
+                break;
+            }
+        }
+        if (complete) {
+            break;
+        }
+    }
+    return result;
+}
+ServerThread* ServerThreadCollection::getNextAvailableClientThread() {
+    Engine::Networking::ServerThread* leastThread = nullptr;
+    for (auto& clientThread : m_Threads) {
+        if (!leastThread || (leastThread && leastThread->num_clients() < clientThread.num_clients())) {
+            leastThread = &clientThread;
+        }
+    }
+    return leastThread;
 }

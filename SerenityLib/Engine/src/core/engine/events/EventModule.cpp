@@ -132,6 +132,3 @@ void Engine::setMousePosition(const glm::uvec2& pos, bool resetDifference, bool 
 }
 #pragma endregion
 
-void Engine::events::dispatchEvent(unsigned int eventType) {
-    eventModule->m_EventDispatcher.dispatchEvent(eventType);
-}

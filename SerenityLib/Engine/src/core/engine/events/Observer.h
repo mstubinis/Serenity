@@ -23,10 +23,6 @@ class Observer {
         void unregisterEvent(EventType::Type type);
         bool isRegistered(EventType::Type type) const;
 
-        void registerEvent(unsigned int type);
-        void unregisterEvent(unsigned int type);
-        bool isRegistered(unsigned int type) const;
-
         virtual void onEvent(const Event& e);
 };
 

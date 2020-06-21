@@ -20,15 +20,6 @@ bool Observer::isRegistered(EventType::Type type) const {
     return priv::Core::m_Engine->m_EventModule.m_EventDispatcher.isObjectRegistered(*this, type);
 }
 
-void Observer::registerEvent(unsigned int type) {
-    priv::Core::m_Engine->m_EventModule.m_EventDispatcher.registerObject(*this, type);
-}
-void Observer::unregisterEvent(unsigned int type) {
-    priv::Core::m_Engine->m_EventModule.m_EventDispatcher.unregisterObject(*this, type);
-}
-bool Observer::isRegistered(unsigned int type) const {
-    return priv::Core::m_Engine->m_EventModule.m_EventDispatcher.isObjectRegistered(*this, type);
-}
 void Observer::onEvent(const Event& event) {
 
 }

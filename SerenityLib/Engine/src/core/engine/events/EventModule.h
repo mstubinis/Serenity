@@ -36,9 +36,6 @@ namespace Engine::priv {
             void onClearEvents();
         };
 };
-namespace Engine::events {
-    void dispatchEvent(unsigned int eventType);
-};
 namespace Engine{
     unsigned int getNumPressedKeys();
     unsigned int getNumPressedMouseButtons();

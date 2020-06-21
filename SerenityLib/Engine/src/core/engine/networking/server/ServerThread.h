@@ -4,27 +4,55 @@
 
 #include <unordered_map>
 #include <string>
+#include <vector>
 
 namespace Engine::Networking {
     class Server;
     class ServerClient;
 };
 namespace Engine::Networking {
-    class ServerThread : public Engine::NonCopyable {
+    class ServerThreadCollection;
+    class ServerThread final : public Engine::NonCopyable, public Engine::NonMoveable {
+        friend class ServerThreadCollection;
         protected:
-            mutable std::unordered_map<std::string, Engine::Networking::ServerClient*>  m_Clients;
+            mutable std::unordered_map<std::string, ServerClient*>  m_ServerClients;
         public:
             ServerThread();
-            virtual ~ServerThread();
+            ~ServerThread();
 
             ServerThread(ServerThread&& other) noexcept;
             ServerThread& operator=(ServerThread&& other) noexcept;
 
-            bool remove_client(const std::string& hash, Engine::Networking::Server& server);
-            bool add_client(std::string& hash, Engine::Networking::ServerClient* client, Engine::Networking::Server& server);
-            unsigned int num_clients() const;
-            std::unordered_map<std::string, Engine::Networking::ServerClient*>& clients() const;
+            bool remove_client(const std::string& hash, Server& server);
+            bool add_client(const std::string& hash, ServerClient* client, Server& server);
+
+            size_t num_clients() const noexcept { return m_ServerClients.size(); }
+            std::unordered_map<std::string, ServerClient*>& clients() const noexcept { return m_ServerClients; }
+    };
+
+    class ServerThreadCollection {
+        private:
+            std::vector<ServerThread> m_Threads;
+            size_t                    m_NumClients = 0;
+        public:
+            ServerThreadCollection(size_t threadCount);
+            ~ServerThreadCollection();
+
+            void setBlocking(bool blocking);
+            void setBlocking(const std::string& hash, bool blocking);
+
+            bool addClient(const std::string& hash, ServerClient* client, Server& server);
+            bool removeClient(const std::string& hash, Server& server);
+
+            constexpr size_t getNumClients() const noexcept { return m_NumClients; }
+            ServerThread* getNextAvailableClientThread();
+
+            std::vector<ServerThread>::iterator begin() noexcept { return m_Threads.begin(); }
+            std::vector<ServerThread>::iterator end() noexcept { return m_Threads.end(); }
+            std::vector<ServerThread>::const_iterator begin() const noexcept { return m_Threads.begin(); }
+            std::vector<ServerThread>::const_iterator end() const noexcept { return m_Threads.end(); }
     };
 };
+
 
 #endif

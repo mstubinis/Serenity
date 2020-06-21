@@ -12,7 +12,6 @@ namespace Engine::priv{
     class EventDispatcher final : public Engine::NonCopyable, public Engine::NonMoveable{
         private:
             std::vector<std::vector<Observer*>> m_Observers;
-            std::vector<std::vector<Observer*>> m_ObserversCustom;
 
             template <typename T> bool internal_check_for_duplicates(const T* observer, const std::vector<T*> vectorContainer) const {
                 for (const auto& o : vectorContainer) {
@@ -32,13 +31,8 @@ namespace Engine::priv{
             void unregisterObject(Observer&, EventType::Type eventType);
             bool isObjectRegistered(const Observer&, EventType::Type eventType) const;
 
-            void registerObject(Observer&, unsigned int eventType);
-            void unregisterObject(Observer&, unsigned int eventType);
-            bool isObjectRegistered(const Observer&, unsigned int eventType) const;
-
             void dispatchEvent(const Event& event);
             void dispatchEvent(EventType::Type eventType);
-            void dispatchEvent(unsigned int eventType);
     };
 };
 #endif
