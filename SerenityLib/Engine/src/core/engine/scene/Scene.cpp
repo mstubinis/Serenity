@@ -33,8 +33,8 @@ class Scene::impl final {
         }
         void _centerToObject(Scene& super, Entity centerEntity) {
             ComponentBody* centerBody = centerEntity.getComponent<ComponentBody>();
-            const auto centerPos      = centerBody->getPosition();
-            const auto centerPosFloat = glm::vec3(centerPos);
+            auto centerPos            = centerBody->getPosition();
+            auto centerPosFloat       = glm::vec3(centerPos);
             for (const auto e : priv::InternalScenePublicInterface::GetEntities(super)) {
                 if (e != centerEntity) {
                     ComponentBody* eBody = e.getComponent<ComponentBody>();
@@ -49,6 +49,8 @@ class Scene::impl final {
                 particle.setPosition(particle.position() - centerPosFloat);
             }
             centerBody->setPosition(static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(0.0));
+
+            ComponentBody::recalculateAllParentChildMatrices(super);
         }
         void _addModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, const vector<priv::RenderGraph>& render_graph_list, RenderStage::Stage stage) {
             priv::RenderGraph* renderGraph = nullptr;

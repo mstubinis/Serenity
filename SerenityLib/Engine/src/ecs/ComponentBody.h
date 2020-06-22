@@ -40,6 +40,7 @@ struct ScreenBoxCoordinates {
 };
 
 namespace Engine::priv {
+    class  ComponentBody_System;
     struct ComponentBody_UpdateFunction;
     struct ComponentBody_EntityAddedToSceneFunction;
     struct ComponentBody_ComponentAddedToEntityFunction;
@@ -49,6 +50,7 @@ namespace Engine::priv {
 };
 
 class ComponentBody : public Observer, public Engine::UserPointer {
+    friend class  Engine::priv::ComponentBody_System;
     friend struct Engine::priv::ComponentBody_UpdateFunction;
     friend struct Engine::priv::ComponentBody_ComponentAddedToEntityFunction;
     friend struct Engine::priv::ComponentBody_ComponentRemovedFromEntityFunction;
@@ -104,7 +106,10 @@ class ComponentBody : public Observer, public Engine::UserPointer {
 
         std::function<void(CollisionCallbackEventData& data)> m_CollisionFunctor = [](CollisionCallbackEventData&) {};
 
+        static void internal_recalculateAllParentChildMatrices(Engine::priv::ComponentBody_System& system);
     public:
+        static void recalculateAllParentChildMatrices(Scene& scene);
+
         //BOOST_TYPE_INDEX_REGISTER_CLASS
         ComponentBody(Entity entity);
         ComponentBody(Entity entity, CollisionType::Type collisionType);

@@ -417,6 +417,10 @@ void ComponentBody::setPosition(decimal p_NewPosition) {
 	ComponentBody::setPosition(p_NewPosition, p_NewPosition, p_NewPosition);
 }
 void ComponentBody::setPosition(decimal p_X, decimal p_Y, decimal p_Z) {
+    auto& ecs        = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& system     = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
+    auto& pcs        = system.ParentChildSystem;
+    auto entityIndex = m_Owner.id() - 1U;
     if (m_Physics) {
         btTransform tr;
         tr.setOrigin(btVector3(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z)));
@@ -435,25 +439,19 @@ void ComponentBody::setPosition(decimal p_X, decimal p_Y, decimal p_Z) {
         auto& normalData    = *data.n;
         auto& position_     = normalData.position;
 
-        auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
-        auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
-
-        auto entityIndex = m_Owner.id() - 1U;
-
 		position_.x         = p_X;
 		position_.y         = p_Y;
 		position_.z         = p_Z;
-
-        auto& localMatrix = system.ParentChildSystem.LocalTransforms[entityIndex];
-        localMatrix[3][0] = p_X;
-        localMatrix[3][1] = p_Y;
-        localMatrix[3][2] = p_Z;
-
-        auto& worldMatrix = system.ParentChildSystem.WorldTransforms[entityIndex];
-        worldMatrix[3][0] = p_X;
-        worldMatrix[3][1] = p_Y;
-        worldMatrix[3][2] = p_Z;
     }
+    auto& localMatrix = pcs.LocalTransforms[entityIndex];
+    localMatrix[3][0] = p_X;
+    localMatrix[3][1] = p_Y;
+    localMatrix[3][2] = p_Z;
+
+    auto& worldMatrix = pcs.WorldTransforms[entityIndex];
+    worldMatrix[3][0] = p_X;
+    worldMatrix[3][1] = p_Y;
+    worldMatrix[3][2] = p_Z;
 }
 void ComponentBody::setGravity(decimal p_X, decimal p_Y, decimal p_Z) {
     if (m_Physics) {
@@ -956,6 +954,29 @@ bool ComponentBody::hasParent() const {
     auto& pcs = system.ParentChildSystem;
     return (pcs.Parents[m_Owner.id() - 1U] > 0);
 }
+void ComponentBody::internal_recalculateAllParentChildMatrices(ComponentBody_System& system) {
+    auto& pcs = system.ParentChildSystem;
+    for (size_t i = 0; i < pcs.Order.size(); ++i) {
+        unsigned int entityID = pcs.Order[i];
+        if (entityID > 0) {
+            unsigned int entityIndex = entityID - 1U;
+            unsigned int parentID = pcs.Parents[entityIndex];
+            if (parentID == 0) {
+                pcs.WorldTransforms[entityIndex] = pcs.LocalTransforms[entityIndex];
+            }else{
+                unsigned int parentIndex = parentID - 1U;
+                pcs.WorldTransforms[entityIndex] = pcs.WorldTransforms[parentIndex] * pcs.LocalTransforms[entityIndex];
+            }
+        }else{
+            break;
+        }
+    }
+}
+void ComponentBody::recalculateAllParentChildMatrices(Scene& scene) {
+    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(scene);
+    auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
+    internal_recalculateAllParentChildMatrices(system);
+}
 
 
 #pragma endregion
@@ -997,22 +1018,8 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
         Engine::priv::threading::addJobSplitVectored(lamda_update_component, components, true, 0);
     }
     
-    auto& pcs = system.ParentChildSystem;
-    for (size_t i = 0; i < pcs.Order.size(); ++i) {
-        unsigned int entityID = pcs.Order[i];
-        if (entityID > 0) {
-            unsigned int entityIndex = entityID - 1U;
-            unsigned int parentID    = pcs.Parents[entityIndex];
-            if (parentID == 0) {
-                pcs.WorldTransforms[entityIndex] = pcs.LocalTransforms[entityIndex];
-            }else{
-                unsigned int parentIndex   = parentID - 1U;
-                pcs.WorldTransforms[entityIndex] = pcs.WorldTransforms[parentIndex] * pcs.LocalTransforms[entityIndex];
-            }
-        }else{
-            break;
-        }
-    }   
+    ComponentBody::internal_recalculateAllParentChildMatrices(system);
+
 #if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
     for (auto& componentBody : components) {
         Entity entity      = componentBody.getOwner();
