@@ -224,8 +224,8 @@ LUABinder::LUABinder() {
             .addFunction("getActiveCamera", &Scene::getActiveCamera)
             .addFunction("centerSceneToObject", &Scene::centerSceneToObject)
             .addFunction("getBackgroundColor", &Scene::getBackgroundColor)
-            .addFunction("setBackgroundColor", static_cast<void(Scene::*)(const float, const float, const float, const float)>(&Scene::setBackgroundColor))
-            .addFunction("setGlobalIllumination", static_cast<void(Scene::*)(const float, const float, const float)>(&Scene::setGlobalIllumination))
+            .addFunction("setBackgroundColor", static_cast<void(Scene::*)(float, float, float, float)>(&Scene::setBackgroundColor))
+            .addFunction("setGlobalIllumination", static_cast<void(Scene::*)(float, float, float)>(&Scene::setGlobalIllumination))
             .addFunction("getGlobalIllumination", &Scene::getGlobalIllumination)
         .endClass()
         .addFunction("getCurrentScene", &Engine::Resources::getCurrentScene)
@@ -254,20 +254,20 @@ LUABinder::LUABinder() {
         .endClass()
         //component body
         .beginClass<ComponentBody>("ComponentBody")
-            .addFunction("addChild", static_cast<void(ComponentBody::*)(const Entity)const>(&ComponentBody::addChild))
-            .addFunction("removeChild", static_cast<void(ComponentBody::*)(const Entity)const>(&ComponentBody::removeChild))
+            .addFunction("addChild", static_cast<void(ComponentBody::*)(Entity)const>(&ComponentBody::addChild))
+            .addFunction("removeChild", static_cast<void(ComponentBody::*)(Entity)const>(&ComponentBody::removeChild))
             //.addFunction("addChildBody", static_cast<void(ComponentBody::*)(const ComponentBody&)const>(&ComponentBody::addChild))
             //.addFunction("removeChildBody", static_cast<void(ComponentBody::*)(const ComponentBody&)const>(&ComponentBody::removeChild))
             .addFunction("hasParent", &ComponentBody::hasParent)
             .addFunction("hasPhysics", &ComponentBody::hasPhysics)
 
-            .addFunction("setPosition", static_cast<void(ComponentBody::*)(const decimal&, const decimal&, const decimal&)>(&ComponentBody::setPosition))
-            .addFunction("setScale",    static_cast<void(ComponentBody::*)(const decimal&, const decimal&, const decimal&)>(&ComponentBody::setScale))
-            .addFunction("setRotation", static_cast<void(ComponentBody::*)(const decimal&, const decimal&, const decimal&, const decimal&)>(&ComponentBody::setRotation))
+            .addFunction("setPosition", static_cast<void(ComponentBody::*)(decimal, decimal, decimal)>(&ComponentBody::setPosition))
+            .addFunction("setScale",    static_cast<void(ComponentBody::*)(decimal, decimal, decimal)>(&ComponentBody::setScale))
+            .addFunction("setRotation", static_cast<void(ComponentBody::*)(decimal, decimal, decimal, decimal)>(&ComponentBody::setRotation))
 
-            .addFunction("translate", static_cast<void(ComponentBody::*)(const decimal&, const decimal&, const decimal&, const bool)>(&ComponentBody::translate))
-            .addFunction("scale", static_cast<void(ComponentBody::*)(const decimal&, const decimal&, const decimal&)>(&ComponentBody::scale))
-            .addFunction("rotate", static_cast<void(ComponentBody::*)(const decimal&, const decimal&, const decimal&, const bool)>(&ComponentBody::rotate))
+            .addFunction("translate", static_cast<void(ComponentBody::*)(decimal, decimal, decimal, bool)>(&ComponentBody::translate))
+            .addFunction("scale", static_cast<void(ComponentBody::*)(decimal, decimal, decimal)>(&ComponentBody::scale))
+            .addFunction("rotate", static_cast<void(ComponentBody::*)(decimal, decimal, decimal, bool)>(&ComponentBody::rotate))
             .addFunction("mass", &ComponentBody::mass)
             .addFunction("getDistance", &ComponentBody::getDistance)
             .addFunction("getScreenCoordinates", &ComponentBody::getScreenCoordinates)
@@ -295,12 +295,12 @@ LUABinder::LUABinder() {
             .addFunction("clearAngularForces", &ComponentBody::clearAngularForces)
             .addFunction("clearAllForces", &ComponentBody::clearAllForces)
 
-            .addFunction("setLinearVelocity", static_cast<void(ComponentBody::*)(const decimal&, const decimal&, const decimal&, const bool)>(&ComponentBody::setLinearVelocity))
-            .addFunction("setAngularVelocity", static_cast<void(ComponentBody::*)(const decimal&, const decimal&, const decimal&, const bool)>(&ComponentBody::setAngularVelocity))
-            .addFunction("applyForce", static_cast<void(ComponentBody::*)(const decimal&, const decimal&, const decimal&, const bool)>(&ComponentBody::applyForce))
-            .addFunction("applyImpulse", static_cast<void(ComponentBody::*)(const decimal&, const decimal&, const decimal&, const bool)>(&ComponentBody::applyImpulse))
-            .addFunction("applyTorque", static_cast<void(ComponentBody::*)(const decimal&, const decimal&, const decimal&, const bool)>(&ComponentBody::applyTorque))
-            .addFunction("applyTorqueImpulse", static_cast<void(ComponentBody::*)(const decimal&, const decimal&, const decimal&, const bool)>(&ComponentBody::applyTorqueImpulse))
+            .addFunction("setLinearVelocity", static_cast<void(ComponentBody::*)(decimal, decimal, decimal, bool)>(&ComponentBody::setLinearVelocity))
+            .addFunction("setAngularVelocity", static_cast<void(ComponentBody::*)(decimal, decimal, decimal, bool)>(&ComponentBody::setAngularVelocity))
+            .addFunction("applyForce", static_cast<void(ComponentBody::*)(decimal, decimal, decimal, bool)>(&ComponentBody::applyForce))
+            .addFunction("applyImpulse", static_cast<void(ComponentBody::*)(decimal, decimal, decimal, bool)>(&ComponentBody::applyImpulse))
+            .addFunction("applyTorque", static_cast<void(ComponentBody::*)(decimal, decimal, decimal, bool)>(&ComponentBody::applyTorque))
+            .addFunction("applyTorqueImpulse", static_cast<void(ComponentBody::*)(decimal, decimal, decimal, bool)>(&ComponentBody::applyTorqueImpulse))
 
         .endClass()
         //component camera
@@ -383,7 +383,4 @@ LUABinder::LUABinder() {
 }
 LUABinder::~LUABinder() {
     SAFE_DELETE(m_LUA_STATE);
-}
-LUAState* LUABinder::getState() const {
-    return m_LUA_STATE;
 }

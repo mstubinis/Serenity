@@ -84,7 +84,6 @@ ComponentBody::NormalData::NormalData(ComponentBody::NormalData&& other) noexcep
     position       = std::move(other.position);
     rotation       = std::move(other.rotation);
     scale          = std::move(other.scale);
-    //modelMatrix    = std::move(other.modelMatrix);
     linearVelocity = std::move(other.linearVelocity);
 }
 ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::NormalData&& other) noexcept {
@@ -93,7 +92,6 @@ ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::N
         position       = std::move(other.position);
         rotation       = std::move(other.rotation);
         scale          = std::move(other.scale);
-        //modelMatrix    = std::move(other.modelMatrix);
         linearVelocity = std::move(other.linearVelocity);
     }
     return *this;
@@ -188,7 +186,7 @@ void ComponentBody::onEvent(const Event& e) {
 
 }
 
-void ComponentBody::rebuildRigidBody(const bool addBodyToPhysicsWorld, const bool threadSafe) {
+void ComponentBody::rebuildRigidBody(bool addBodyToPhysicsWorld, bool threadSafe) {
     if (m_Physics) {
         auto& p       = *data.p;
         auto& inertia = p.collision->getBtInertia();
@@ -222,7 +220,7 @@ void ComponentBody::setInternalPhysicsUserPointer(void* userPtr) {
         }
     }
 }
-void ComponentBody::removePhysicsFromWorld(const bool force, const bool threadSafe) {
+void ComponentBody::removePhysicsFromWorld(bool force, bool threadSafe) {
     if (force) {    
         data.p->forcedOut = true;
     }
@@ -232,7 +230,7 @@ void ComponentBody::removePhysicsFromWorld(const bool force, const bool threadSa
         Physics::removeRigidBody(*this);
     }
 }
-void ComponentBody::addPhysicsToWorld(const bool force, const bool threadSafe) {
+void ComponentBody::addPhysicsToWorld(bool force, bool threadSafe) {
     if (!force && data.p->forcedOut) {
         return;
     }
@@ -242,9 +240,6 @@ void ComponentBody::addPhysicsToWorld(const bool force, const bool threadSafe) {
         Physics::addRigidBody(*this);
     }
     data.p->forcedOut = false;
-}
-bool ComponentBody::hasPhysics() const {
-    return m_Physics;
 }
 decimal ComponentBody::getLinearDamping() const {
     return (data.p->bullet_rigidBody) ? (decimal)(data.p->bullet_rigidBody->getLinearDamping()) : decimal(0.0);
@@ -287,12 +282,12 @@ ushort ComponentBody::getCollisionFlags() const {
     return static_cast<ushort>(0);
 }
 
-decimal ComponentBody::getDistance(const Entity other) const {
-    const auto other_position = other.getComponent<ComponentBody>()->getPosition();
+decimal ComponentBody::getDistance(Entity other) const {
+    glm_vec3 other_position = other.getComponent<ComponentBody>()->getPosition();
     return glm::distance(getPosition(), other_position);
 }
-unsigned long long ComponentBody::getDistanceLL(const Entity other) const {
-    const auto other_position = other.getComponent<ComponentBody>()->getPosition();
+unsigned long long ComponentBody::getDistanceLL(Entity other) const {
+    glm_vec3 other_position = other.getComponent<ComponentBody>()->getPosition();
     return static_cast<unsigned long long>(glm::distance(getPosition(), other_position));
 }
 void ComponentBody::alignTo(const glm_vec3& p_Direction) {
@@ -313,7 +308,7 @@ Collision* ComponentBody::getCollision() const {
     }
     return nullptr;
 }
-void ComponentBody::setCollision(const CollisionType::Type p_CollisionType, const float p_Mass) {
+void ComponentBody::setCollision(CollisionType::Type p_CollisionType, float p_Mass) {
     if (!data.p->collision) { //TODO: clean this up, its hacky and evil. its being used on the ComponentBody_EntityAddedToSceneFunction
         auto* modelComponent = m_Owner.getComponent<ComponentModel>();
         if (modelComponent) {
@@ -351,13 +346,13 @@ void ComponentBody::setCollision(Collision* p_Collision) {
     setInternalPhysicsUserPointer(this);
 }
 
-void ComponentBody::translate(const glm_vec3& p_Translation, const bool p_Local) {
+void ComponentBody::translate(const glm_vec3& p_Translation, bool p_Local) {
 	ComponentBody::translate(p_Translation.x, p_Translation.y, p_Translation.z, p_Local);
 }
-void ComponentBody::translate(const decimal& p_Translation, const bool p_Local) {
+void ComponentBody::translate(decimal p_Translation, bool p_Local) {
 	ComponentBody::translate(p_Translation, p_Translation, p_Translation, p_Local);
 }
-void ComponentBody::translate(const decimal& p_X, const decimal& p_Y, const decimal& p_Z, const bool p_Local) {
+void ComponentBody::translate(decimal p_X, decimal p_Y, decimal p_Z, bool p_Local) {
     if (m_Physics) {
         data.p->bullet_rigidBody->activate();
         btVector3 v(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
@@ -372,10 +367,10 @@ void ComponentBody::translate(const decimal& p_X, const decimal& p_Y, const deci
 		ComponentBody::setPosition(normalData.position + offset);
     }
 }
-void ComponentBody::rotate(const glm_vec3& p_Rotation, const bool p_Local) {
+void ComponentBody::rotate(const glm_vec3& p_Rotation, bool p_Local) {
 	ComponentBody::rotate(p_Rotation.x, p_Rotation.y, p_Rotation.z, p_Local);
 }
-void ComponentBody::rotate(const decimal& p_Pitch, const decimal& p_Yaw, const decimal& p_Roll, const bool p_Local) {
+void ComponentBody::rotate(decimal p_Pitch, decimal p_Yaw, decimal p_Roll, bool p_Local) {
     if (m_Physics) {
         auto& bt_rigidBody = *data.p->bullet_rigidBody;
         btQuaternion quat = bt_rigidBody.getWorldTransform().getRotation().normalize();
@@ -393,10 +388,10 @@ void ComponentBody::rotate(const decimal& p_Pitch, const decimal& p_Yaw, const d
 void ComponentBody::scale(const glm_vec3& p_ScaleAmount) { 
 	ComponentBody::scale(p_ScaleAmount.x, p_ScaleAmount.y, p_ScaleAmount.z);
 }
-void ComponentBody::scale(const decimal& p_ScaleAmount) {
+void ComponentBody::scale(decimal p_ScaleAmount) {
 	ComponentBody::scale(p_ScaleAmount, p_ScaleAmount, p_ScaleAmount);
 }
-void ComponentBody::scale(const decimal& p_X, const decimal& p_Y, const decimal& p_Z) {
+void ComponentBody::scale(decimal p_X, decimal p_Y, decimal p_Z) {
     if (m_Physics) {
         const auto newScale = btVector3(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
         Collision& collision_ = *data.p->collision;
@@ -418,10 +413,10 @@ void ComponentBody::scale(const decimal& p_X, const decimal& p_Y, const decimal&
 void ComponentBody::setPosition(const glm_vec3& p_NewPosition) {
 	ComponentBody::setPosition(p_NewPosition.x, p_NewPosition.y, p_NewPosition.z);
 }
-void ComponentBody::setPosition(const decimal& p_NewPosition) {
+void ComponentBody::setPosition(decimal p_NewPosition) {
 	ComponentBody::setPosition(p_NewPosition, p_NewPosition, p_NewPosition);
 }
-void ComponentBody::setPosition(const decimal& p_X, const decimal& p_Y, const decimal& p_Z) {
+void ComponentBody::setPosition(decimal p_X, decimal p_Y, decimal p_Z) {
     if (m_Physics) {
         btTransform tr;
         tr.setOrigin(btVector3(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z)));
@@ -443,7 +438,7 @@ void ComponentBody::setPosition(const decimal& p_X, const decimal& p_Y, const de
         auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
         auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
 
-        const auto entityIndex = m_Owner.id() - 1U;
+        auto entityIndex = m_Owner.id() - 1U;
 
 		position_.x         = p_X;
 		position_.y         = p_Y;
@@ -460,7 +455,7 @@ void ComponentBody::setPosition(const decimal& p_X, const decimal& p_Y, const de
         worldMatrix[3][2] = p_Z;
     }
 }
-void ComponentBody::setGravity(const decimal& p_X, const decimal& p_Y, const decimal& p_Z) {
+void ComponentBody::setGravity(decimal p_X, decimal p_Y, decimal p_Z) {
     if (m_Physics) {
         auto& physicsData = *data.p;
         physicsData.bullet_rigidBody->setGravity(btVector3(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z)));
@@ -469,7 +464,7 @@ void ComponentBody::setGravity(const decimal& p_X, const decimal& p_Y, const dec
 void ComponentBody::setRotation(const glm_quat& p_NewRotation) {
 	ComponentBody::setRotation(p_NewRotation.x, p_NewRotation.y, p_NewRotation.z, p_NewRotation.w);
 }
-void ComponentBody::setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w) {
+void ComponentBody::setRotation(decimal x, decimal y, decimal z, decimal w) {
     if (m_Physics) {
         auto& physicsData = *data.p;
         btQuaternion quat(static_cast<btScalar>(x), static_cast<btScalar>(y), static_cast<btScalar>(z), static_cast<btScalar>(w));
@@ -493,10 +488,10 @@ void ComponentBody::setRotation(const decimal& x, const decimal& y, const decima
 void ComponentBody::setScale(const glm_vec3& p_NewScale) {
 	ComponentBody::setScale(p_NewScale.x, p_NewScale.y, p_NewScale.z);
 }
-void ComponentBody::setScale(const decimal& p_NewScale) {
+void ComponentBody::setScale(decimal p_NewScale) {
 	ComponentBody::setScale(p_NewScale, p_NewScale, p_NewScale);
 }
-void ComponentBody::setScale(const decimal& p_X, const decimal& p_Y, const decimal& p_Z) {
+void ComponentBody::setScale(decimal p_X, decimal p_Y, decimal p_Z) {
     if (m_Physics) {
         const auto  newScale = btVector3(static_cast<btScalar>(p_X), static_cast<btScalar>(p_Y), static_cast<btScalar>(p_Z));
         Collision& collision_ = *data.p->collision;
@@ -546,10 +541,10 @@ glm::vec3 ComponentBody::getPositionRender() const { //theres prob a better way 
     auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return Math::getMatrixPosition(matrix);
 }
-glm::vec3 ComponentBody::getScreenCoordinates(const bool p_ClampToEdge) const {
+glm::vec3 ComponentBody::getScreenCoordinates(bool p_ClampToEdge) const {
 	return Math::getScreenCoordinates(getPosition(), *m_Owner.scene().getActiveCamera(), p_ClampToEdge);
 }
-ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(const float p_MinOffset) const {
+ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(float p_MinOffset) const {
     ScreenBoxCoordinates ret;
     const auto& worldPos    = getPosition();
     auto radius             = 0.0001f;
@@ -604,15 +599,6 @@ glm_quat ComponentBody::getRotation() const {
     }
     return data.n->rotation;
 }
-const glm_vec3& ComponentBody::forward() const {
-	return m_Forward; 
-}
-const glm_vec3& ComponentBody::right() const {
-	return m_Right; 
-}
-const glm_vec3& ComponentBody::up() const {
-	return m_Up; 
-}
 glm_vec3 ComponentBody::getLinearVelocity() const  {
     if (m_Physics) {
         const btVector3& v = data.p->bullet_rigidBody->getLinearVelocity();
@@ -643,16 +629,16 @@ glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way to do t
         physicsData.bullet_rigidBody->getMotionState()->getWorldTransform(tr);
         btScalar* val_ptr = (btScalar*)glm::value_ptr(modelMatrix_);
         tr.getOpenGLMatrix(val_ptr);
-        auto& collision_ = *physicsData.collision;
+        auto& collision_  = *physicsData.collision;
         if (collision_.getBtShape()) {
-            const auto scale = getScale();
+            auto scale   = getScale();
             modelMatrix_ = glm::scale(modelMatrix_, scale);
         }
         return modelMatrix_;
     }
-    auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
     auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
-    const auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
+    auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return matrix;
 }
 glm::mat4 ComponentBody::modelMatrixRendering() const {
@@ -661,10 +647,10 @@ glm::mat4 ComponentBody::modelMatrixRendering() const {
 btRigidBody& ComponentBody::getBtBody() const {
 	return *data.p->bullet_rigidBody;
 }
-void ComponentBody::setDamping(const decimal& linearFactor, const decimal& angularFactor) {
+void ComponentBody::setDamping(decimal linearFactor, decimal angularFactor) {
 	data.p->bullet_rigidBody->setDamping(btScalar(linearFactor), btScalar(angularFactor));
 }
-void ComponentBody::setCollisionGroup(const short group) {
+void ComponentBody::setCollisionGroup(short group) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.group != group) {
@@ -674,7 +660,7 @@ void ComponentBody::setCollisionGroup(const short group) {
         }
     }
 }
-void ComponentBody::setCollisionMask(const short mask) {
+void ComponentBody::setCollisionMask(short mask) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.mask != mask) {
@@ -684,13 +670,13 @@ void ComponentBody::setCollisionMask(const short mask) {
         }
     }
 }
-void ComponentBody::setCollisionGroup(const CollisionFilter::Filter group) {
+void ComponentBody::setCollisionGroup(CollisionFilter::Filter group) {
     ComponentBody::setCollisionGroup(static_cast<short>(group));
 }
-void ComponentBody::setCollisionMask(const CollisionFilter::Filter mask) {
+void ComponentBody::setCollisionMask(CollisionFilter::Filter mask) {
     ComponentBody::setCollisionMask(static_cast<short>(mask));
 }
-void ComponentBody::addCollisionGroup(const short group) {
+void ComponentBody::addCollisionGroup(short group) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.group != (phyData.group | group)) {
@@ -700,7 +686,7 @@ void ComponentBody::addCollisionGroup(const short group) {
         }
     }
 }
-void ComponentBody::addCollisionMask(const short mask) {
+void ComponentBody::addCollisionMask(short mask) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.mask != (phyData.mask | mask)) {
@@ -710,13 +696,13 @@ void ComponentBody::addCollisionMask(const short mask) {
         }
     }
 }
-void ComponentBody::addCollisionGroup(const CollisionFilter::Filter group) {
+void ComponentBody::addCollisionGroup(CollisionFilter::Filter group) {
     ComponentBody::addCollisionGroup(static_cast<short>(group));
 }
-void ComponentBody::addCollisionMask(const CollisionFilter::Filter mask) {
+void ComponentBody::addCollisionMask(CollisionFilter::Filter mask) {
     ComponentBody::addCollisionMask(static_cast<short>(mask));
 }
-void ComponentBody::setCollisionFlag(const short flag) {
+void ComponentBody::setCollisionFlag(short flag) {
     if (m_Physics) {
         auto& phyData = *data.p;
         auto& rigidBody = *phyData.bullet_rigidBody;
@@ -728,10 +714,10 @@ void ComponentBody::setCollisionFlag(const short flag) {
         }
     }
 }
-void ComponentBody::setCollisionFlag(const CollisionFlag::Flag flag) {
+void ComponentBody::setCollisionFlag(CollisionFlag::Flag flag) {
     ComponentBody::setCollisionFlag(static_cast<short>(flag));
 }
-void ComponentBody::addCollisionFlag(const short flag) {
+void ComponentBody::addCollisionFlag(short flag) {
     if (m_Physics) {
         auto& phyData = *data.p;
         auto& rigidBody = *phyData.bullet_rigidBody;
@@ -743,10 +729,10 @@ void ComponentBody::addCollisionFlag(const short flag) {
         }
     }
 }
-void ComponentBody::addCollisionFlag(const CollisionFlag::Flag flag) {
+void ComponentBody::addCollisionFlag(CollisionFlag::Flag flag) {
     ComponentBody::addCollisionFlag(static_cast<short>(flag));
 }
-void ComponentBody::removeCollisionGroup(const short group) {
+void ComponentBody::removeCollisionGroup(short group) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.group != (phyData.group & ~group)) {
@@ -756,7 +742,7 @@ void ComponentBody::removeCollisionGroup(const short group) {
         }
     }
 }
-void ComponentBody::removeCollisionMask(const short mask) {
+void ComponentBody::removeCollisionMask(short mask) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.mask != (phyData.mask & ~mask)) {
@@ -766,7 +752,7 @@ void ComponentBody::removeCollisionMask(const short mask) {
         }
     }
 }
-void ComponentBody::removeCollisionFlag(const short flag) {
+void ComponentBody::removeCollisionFlag(short flag) {
     if (m_Physics) {
         auto& phyData = *data.p;
         auto& rigidBody = *phyData.bullet_rigidBody;
@@ -778,19 +764,19 @@ void ComponentBody::removeCollisionFlag(const short flag) {
         }
     }
 }
-void ComponentBody::removeCollisionGroup(const CollisionFilter::Filter group) {
+void ComponentBody::removeCollisionGroup(CollisionFilter::Filter group) {
     ComponentBody::removeCollisionGroup(static_cast<short>(group));
 }
-void ComponentBody::removeCollisionMask(const CollisionFilter::Filter mask) {
+void ComponentBody::removeCollisionMask(CollisionFilter::Filter mask) {
     ComponentBody::removeCollisionMask(static_cast<short>(mask));
 }
-void ComponentBody::removeCollisionFlag(const CollisionFlag::Flag flag) {
+void ComponentBody::removeCollisionFlag(CollisionFlag::Flag flag) {
     ComponentBody::removeCollisionFlag(static_cast<short>(flag));
 }
 
 
 //TODO: reconsider how this works
-void ComponentBody::setDynamic(const bool dynamic) {
+void ComponentBody::setDynamic(bool dynamic) {
     if (m_Physics) {
         auto& p = *data.p;
         auto& rigidBody = *p.bullet_rigidBody;
@@ -808,7 +794,7 @@ void ComponentBody::setDynamic(const bool dynamic) {
         }
     }
 }
-void ComponentBody::setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local) {
+void ComponentBody::setLinearVelocity(decimal x, decimal y, decimal z, bool local) {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
@@ -824,10 +810,10 @@ void ComponentBody::setLinearVelocity(const decimal& x, const decimal& y, const 
         normalData.linearVelocity = offset;
     }
 }
-void ComponentBody::setLinearVelocity(const glm_vec3& velocity, const bool local) {
+void ComponentBody::setLinearVelocity(const glm_vec3& velocity, bool local) {
 	ComponentBody::setLinearVelocity(velocity.x, velocity.y, velocity.z, local);
 }
-void ComponentBody::setAngularVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local) {
+void ComponentBody::setAngularVelocity(decimal x, decimal y, decimal z, bool local) {
     if (m_Physics) {
 		auto& rigidBody = *data.p->bullet_rigidBody;
 		rigidBody.activate();
@@ -836,10 +822,10 @@ void ComponentBody::setAngularVelocity(const decimal& x, const decimal& y, const
 		rigidBody.setAngularVelocity(v);
     }
 }
-void ComponentBody::setAngularVelocity(const glm_vec3& velocity, const bool local) {
+void ComponentBody::setAngularVelocity(const glm_vec3& velocity, bool local) {
 	ComponentBody::setAngularVelocity(velocity.x, velocity.y, velocity.z, local);
 }
-void ComponentBody::applyForce(const decimal& x, const decimal& y, const decimal& z, const bool local) {
+void ComponentBody::applyForce(decimal x, decimal y, decimal z, bool local) {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
@@ -848,7 +834,7 @@ void ComponentBody::applyForce(const decimal& x, const decimal& y, const decimal
         rigidBody.applyCentralForce(v);
     }
 }
-void ComponentBody::applyForce(const glm_vec3& force, const glm_vec3& origin, const bool local) {
+void ComponentBody::applyForce(const glm_vec3& force, const glm_vec3& origin, bool local) {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
@@ -857,7 +843,7 @@ void ComponentBody::applyForce(const glm_vec3& force, const glm_vec3& origin, co
         rigidBody.applyForce(v, btVector3(static_cast<btScalar>(origin.x), static_cast<btScalar>(origin.y), static_cast<btScalar>(origin.z)));
     }
 }
-void ComponentBody::applyImpulse(const decimal& x, const decimal& y, const decimal& z, const bool local) {
+void ComponentBody::applyImpulse(decimal x, decimal y, decimal z, bool local) {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
@@ -866,7 +852,7 @@ void ComponentBody::applyImpulse(const decimal& x, const decimal& y, const decim
         rigidBody.applyCentralImpulse(v);
     }
 }
-void ComponentBody::applyImpulse(const glm_vec3& impulse, const glm_vec3& origin, const bool local) {
+void ComponentBody::applyImpulse(const glm_vec3& impulse, const glm_vec3& origin, bool local) {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
@@ -875,7 +861,7 @@ void ComponentBody::applyImpulse(const glm_vec3& impulse, const glm_vec3& origin
         rigidBody.applyImpulse(v, btVector3(static_cast<btScalar>(origin.x), static_cast<btScalar>(origin.y), static_cast<btScalar>(origin.z)));
     }
 }
-void ComponentBody::applyTorque(const decimal& x, const decimal& y, const decimal& z, const bool local) {
+void ComponentBody::applyTorque(decimal x, decimal y, decimal z, bool local) {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
@@ -886,10 +872,10 @@ void ComponentBody::applyTorque(const decimal& x, const decimal& y, const decima
         rigidBody.applyTorque(t);
     }
 }
-void ComponentBody::applyTorque(const glm_vec3& torque, const bool local) {
+void ComponentBody::applyTorque(const glm_vec3& torque, bool local) {
 	ComponentBody::applyTorque(torque.x, torque.y, torque.z, local);
 }
-void ComponentBody::applyTorqueImpulse(const decimal& x, const decimal& y, const decimal& z, const bool local) {
+void ComponentBody::applyTorqueImpulse(decimal x, decimal y, decimal z, bool local) {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
@@ -900,7 +886,7 @@ void ComponentBody::applyTorqueImpulse(const decimal& x, const decimal& y, const
         rigidBody.applyTorqueImpulse(t);
     }
 }
-void ComponentBody::applyTorqueImpulse(const glm_vec3& torqueImpulse, const bool local) {
+void ComponentBody::applyTorqueImpulse(const glm_vec3& torqueImpulse, bool local) {
 	ComponentBody::applyTorqueImpulse(torqueImpulse.x, torqueImpulse.y, torqueImpulse.z, local);
 }
 void ComponentBody::clearLinearForces() {
@@ -929,7 +915,7 @@ void ComponentBody::clearAllForces() {
         rigidBody.setAngularVelocity(v);
     }
 }
-void ComponentBody::setMass(const float mass) {
+void ComponentBody::setMass(float mass) {
     if (m_Physics) {
         auto& physicsData = *data.p;
         physicsData.mass = mass;
@@ -942,7 +928,7 @@ void ComponentBody::setMass(const float mass) {
         }
     }
 }
-void ComponentBody::addChild(const Entity child) const {
+void ComponentBody::addChild(Entity child) const {
     if (child.sceneID() == m_Owner.sceneID()) {
         auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
         auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
@@ -953,7 +939,7 @@ void ComponentBody::addChild(const Entity child) const {
 void ComponentBody::addChild(const ComponentBody& child) const {
     ComponentBody::addChild(child.m_Owner);
 }
-void ComponentBody::removeChild(const Entity child) const {
+void ComponentBody::removeChild(Entity child) const {
     if (child.sceneID() == m_Owner.sceneID()) {
         auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
         auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());

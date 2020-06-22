@@ -122,19 +122,18 @@ class ComponentBody : public Observer, public Engine::UserPointer {
 
         bool hasParent() const;
 
-        void addChild(const Entity child) const;
+        void addChild(Entity child) const;
         void addChild(const ComponentBody& child) const;
-        void removeChild(const Entity child) const;
+        void removeChild(Entity child) const;
         void removeChild(const ComponentBody& child) const;
 
 
         void setCollisionFunctor(std::function<void(CollisionCallbackEventData& data)> functor);
         void collisionResponse(CollisionCallbackEventData& data) const;
 
-        void rebuildRigidBody(const bool addBodyToPhysicsWorld = true, const bool threadSafe = false);
-
-        void removePhysicsFromWorld(const bool force = true, const bool threadSafe = false);
-        void addPhysicsToWorld(const bool force = true, const bool threadSafe = false);
+        void rebuildRigidBody(bool addBodyToPhysicsWorld = true, bool threadSafe = false);
+        void removePhysicsFromWorld(bool force = true, bool threadSafe = false);
+        void addPhysicsToWorld(bool force = true, bool threadSafe = false);
 
         void setInternalPhysicsUserPointer(void* userPtr);
         void setUserPointer1(void* userPtr);
@@ -142,7 +141,7 @@ class ComponentBody : public Observer, public Engine::UserPointer {
         void* getUserPointer1() const;
         void* getUserPointer2() const;
 
-        bool hasPhysics() const;
+        bool hasPhysics() const { return m_Physics; }
         decimal getLinearDamping() const;
         decimal getAngularDamping() const;
         unsigned short getCollisionGroup() const; //get the groups this body belongs to
@@ -151,99 +150,99 @@ class ComponentBody : public Observer, public Engine::UserPointer {
 
         void alignTo(const glm_vec3& direction);
 
-        void translate(const glm_vec3& translation, const bool local = true);
-        void translate(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
-        void translate(const decimal& t, const bool local = true);
+        void translate(const glm_vec3& translation, bool local = true);
+        void translate(decimal x, decimal y, decimal z, bool local = true);
+        void translate(decimal t, bool local = true);
 
-        void rotate(const glm_vec3& rotation, const bool local = true);
-        void rotate(const decimal& pitch_radians, const decimal& yaw_radians, const decimal& roll_radians, const bool local = true);
+        void rotate(const glm_vec3& rotation, bool local = true);
+        void rotate(decimal pitch_radians, decimal yaw_radians, decimal roll_radians, bool local = true);
 
         void scale(const glm_vec3& amount);
-        void scale(const decimal& x, const decimal& y, const decimal& z);
-        void scale(const decimal& s);
+        void scale(decimal x, decimal y, decimal z);
+        void scale(decimal s);
 
         void setPosition(const glm_vec3& newPosition);
-        void setPosition(const decimal& x, const decimal& y, const decimal& z);
-        void setPosition(const decimal& p);
+        void setPosition(decimal x, decimal y, decimal z);
+        void setPosition(decimal p);
 
         void setRotation(const glm_quat& newRotation);
-        void setRotation(const decimal& quat_x, const decimal& quat_y, const decimal& quat_z, const decimal& quat_w);
+        void setRotation(decimal quat_x, decimal quat_y, decimal quat_z, decimal quat_w);
 
         void setScale(const glm_vec3& newScale);
-        void setScale(const decimal& x, const decimal& y, const decimal& z);
-        void setScale(const decimal& s);
+        void setScale(decimal x, decimal y, decimal z);
+        void setScale(decimal s);
 
 	    float mass() const;
-        decimal getDistance(const Entity other) const;
-        unsigned long long getDistanceLL(const Entity other) const;
-        glm::vec3 getScreenCoordinates(const bool clampToEdge = false) const;
+        decimal getDistance(Entity other) const;
+        unsigned long long getDistanceLL(Entity other) const;
+        glm::vec3 getScreenCoordinates(bool clampToEdge = false) const;
 
-        ScreenBoxCoordinates getScreenBoxCoordinates(const float minOffset = 10.0f) const;
+        ScreenBoxCoordinates getScreenBoxCoordinates(float minOffset = 10.0f) const;
 
 		glm_quat getRotation() const;
 		glm_vec3 getScale() const;
 		glm_vec3 getPosition() const;
         glm_vec3 getLocalPosition() const;
         glm::vec3 getPositionRender() const;
-		const glm_vec3& forward() const;
-		const glm_vec3& right() const;
-		const glm_vec3& up() const;
+        const glm_vec3& forward() const { return m_Forward; }
+        const glm_vec3& right() const { return m_Right; }
+        const glm_vec3& up() const { return m_Up; }
 		glm_vec3 getLinearVelocity() const;
 		glm_vec3 getAngularVelocity() const;
 		glm_mat4 modelMatrix() const;
         glm::mat4 modelMatrixRendering() const;
 	    btRigidBody& getBtBody() const;
 
-        void setCollision(const CollisionType::Type collisionType, const float mass);
+        void setCollision(CollisionType::Type collisionType, float mass);
         void setCollision(Collision* collision);
         Collision* getCollision() const;
 
-        void setCollisionGroup(const short group);  //set the groups this body belongs to
-        void setCollisionMask(const short mask); //set the groups this body will register collisions with
-        void setCollisionFlag(const short flag);
-        void setCollisionGroup(const CollisionFilter::Filter group);  //set the groups this body belongs to
-        void setCollisionMask(const CollisionFilter::Filter mask); //set the groups this body will register collisions with
-        void setCollisionFlag(const CollisionFlag::Flag flag);
-        void addCollisionGroup(const short group);  //add to the groups this body belongs to
-        void addCollisionMask(const short mask); //add to the groups this body will register collisions with
-        void addCollisionFlag(const short flag);
-        void addCollisionGroup(const CollisionFilter::Filter group); //add to the groups this body belongs to
-        void addCollisionMask(const CollisionFilter::Filter mask); //add to the groups this body will register collisions with
-        void addCollisionFlag(const CollisionFlag::Flag flag);
-        void removeCollisionGroup(const short group);
-        void removeCollisionMask(const short mask);
-        void removeCollisionFlag(const short flag);
-        void removeCollisionGroup(const CollisionFilter::Filter group);
-        void removeCollisionMask(const CollisionFilter::Filter mask);
-        void removeCollisionFlag(const CollisionFlag::Flag flag);
+        void setCollisionGroup(short group);  //set the groups this body belongs to
+        void setCollisionMask(short mask); //set the groups this body will register collisions with
+        void setCollisionFlag(short flag);
+        void setCollisionGroup(CollisionFilter::Filter group);  //set the groups this body belongs to
+        void setCollisionMask(CollisionFilter::Filter mask); //set the groups this body will register collisions with
+        void setCollisionFlag(CollisionFlag::Flag flag);
+        void addCollisionGroup(short group);  //add to the groups this body belongs to
+        void addCollisionMask(short mask); //add to the groups this body will register collisions with
+        void addCollisionFlag(short flag);
+        void addCollisionGroup(CollisionFilter::Filter group); //add to the groups this body belongs to
+        void addCollisionMask(CollisionFilter::Filter mask); //add to the groups this body will register collisions with
+        void addCollisionFlag(CollisionFlag::Flag flag);
+        void removeCollisionGroup(short group);
+        void removeCollisionMask(short mask);
+        void removeCollisionFlag(short flag);
+        void removeCollisionGroup(CollisionFilter::Filter group);
+        void removeCollisionMask(CollisionFilter::Filter mask);
+        void removeCollisionFlag(CollisionFlag::Flag flag);
 
-        void setDamping(const decimal& linear, const decimal& angular);
+        void setDamping(decimal linear, decimal angular);
 
-        void setDynamic(const bool dynamic);
-        void setMass(const float mass);
-        void setGravity(const decimal& x, const decimal& y, const decimal& z);
+        void setDynamic(bool dynamic);
+        void setMass(float mass);
+        void setGravity(decimal x, decimal y, decimal z);
 
         void clearLinearForces();
         void clearAngularForces();
         void clearAllForces();
 
-        void setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
-        void setLinearVelocity(const glm_vec3& velocity, const bool local = true);
+        void setLinearVelocity(decimal x, decimal y, decimal z, bool local = true);
+        void setLinearVelocity(const glm_vec3& velocity, bool local = true);
 
-        void setAngularVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
-        void setAngularVelocity(const glm_vec3& velocity, const bool local = true);
+        void setAngularVelocity(decimal x, decimal y, decimal z, bool local = true);
+        void setAngularVelocity(const glm_vec3& velocity, bool local = true);
 
-        void applyForce(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
-        void applyForce(const glm_vec3& force, const glm_vec3& origin = glm_vec3(0.0f), const bool local = true);
+        void applyForce(decimal x, decimal y, decimal z, bool local = true);
+        void applyForce(const glm_vec3& force, const glm_vec3& origin = glm_vec3(0.0f), bool local = true);
 
-        void applyImpulse(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
-        void applyImpulse(const glm_vec3& impulse, const glm_vec3& origin = glm_vec3(0.0f), const bool local = true);
+        void applyImpulse(decimal x, decimal y, decimal z, bool local = true);
+        void applyImpulse(const glm_vec3& impulse, const glm_vec3& origin = glm_vec3(0.0f), bool local = true);
 
-        void applyTorque(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
-        void applyTorque(const glm_vec3& torque, const bool local = true);
+        void applyTorque(decimal x, decimal y, decimal z, bool local = true);
+        void applyTorque(const glm_vec3& torque, bool local = true);
 
-        void applyTorqueImpulse(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
-        void applyTorqueImpulse(const glm_vec3& torqueImpulse, const bool local = true);
+        void applyTorqueImpulse(decimal x, decimal y, decimal z, bool local = true);
+        void applyTorqueImpulse(const glm_vec3& torqueImpulse, bool local = true);
 };
 
 class ComponentBody_System_CI : public Engine::priv::ECSSystemCI {

@@ -12,7 +12,8 @@ namespace Engine::priv {
             LUABinder();
             virtual ~LUABinder();
 
-            LUAState* getState() const;
+            constexpr LUAState* getState() const noexcept { return m_LUA_STATE; }
+
     };
 }
 

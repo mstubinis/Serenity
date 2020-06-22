@@ -16,6 +16,14 @@ struct EventType final { enum Type : unsigned int {
     WindowLostFocus,
 
     EnumChanged,
+    EnumChanged2,
+    EnumChanged3,
+    EnumChanged4,
+    EnumChanged5,
+    EnumChanged6,
+    EnumChanged7,
+    EnumChanged8,
+    EnumChanged9,
 
     SocketConnected,
     SocketDisconnected,

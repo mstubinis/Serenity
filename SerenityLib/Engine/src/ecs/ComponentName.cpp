@@ -23,6 +23,12 @@ ComponentName::~ComponentName() {
 const string& ComponentName::name() const { 
     return m_Data;
 }
+void ComponentName::setName(const string& name) {
+    m_Data = name;
+}
+void ComponentName::setName(const char* name) {
+    m_Data = name;
+}
 size_t ComponentName::size() const {
     return m_Data.size();
 }

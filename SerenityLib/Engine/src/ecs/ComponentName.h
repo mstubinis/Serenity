@@ -34,6 +34,8 @@ class ComponentName {
         ComponentName& operator=(ComponentName&& other) noexcept = default;
 
         const std::string& name() const;
+        void setName(const std::string& name);
+        void setName(const char* name);
         size_t size() const;
         bool empty() const;
 
