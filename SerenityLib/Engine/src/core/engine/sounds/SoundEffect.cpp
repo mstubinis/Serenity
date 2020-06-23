@@ -34,9 +34,6 @@ void SoundEffect::update(const float dt) {
         }
     }
 }
-float SoundEffect::getDuration() const {
-    return m_Duration;
-}
 bool SoundEffect::play(unsigned int numLoops) {
     auto sfStatus = m_Sound.getStatus();
     m_Loops = numLoops;

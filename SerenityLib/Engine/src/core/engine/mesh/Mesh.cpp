@@ -297,11 +297,11 @@ Mesh::Mesh() : EngineResource(ResourceType::Mesh) {
 void Mesh::internal_build_from_terrain(const Terrain& terrain) {
     MeshImportedData data;
 
-    unsigned int count = 0;
+    unsigned int count  = 0;
     float offsetSectorX = 0.0f;
     float offsetSectorY = 0.0f;
 
-    auto hash_position = [](glm::vec3& position, unsigned int decimal_places) {
+    auto hash_position  = [](glm::vec3& position, unsigned int decimal_places) {
         stringstream one, two, thr;
         one << std::fixed << std::setprecision(decimal_places) << position.x;
         two << std::fixed << std::setprecision(decimal_places) << position.y;
@@ -310,87 +310,71 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
     };
 
     unordered_map<string, VertexSmoothingGroup> m_VertexMap;
-    auto& heightfields = terrain.m_TerrainData.m_BtHeightfieldShapes;
+    auto& heightfields  = terrain.m_TerrainData.m_BtHeightfieldShapes;
+
+    unsigned int width  = static_cast<unsigned int>(heightfields[0][0]->getUserIndex());
+    unsigned int length = static_cast<unsigned int>(heightfields[0][0]->getUserIndex2());
+    const float fWidth  = static_cast<float>(width);
+    const float fLength = static_cast<float>(length);
+
+    float totalVertexSizeX = fWidth * heightfields.size();
+    float totalVertexSizeY = fLength * heightfields[0].size();
+
     for (size_t sectorX = 0; sectorX < heightfields.size(); ++sectorX) {
         for (size_t sectorY = 0; sectorY < heightfields[sectorX].size(); ++sectorY) {
             auto& heightfield = *heightfields[sectorX][sectorY];
-            unsigned int width = static_cast<unsigned int>(heightfield.getUserIndex());
-            unsigned int length = static_cast<unsigned int>(heightfield.getUserIndex2());
-            const float fWidth = static_cast<float>(width);
-            const float fLength = static_cast<float>(length);
-            offsetSectorX = sectorX * fWidth;
-            offsetSectorY = sectorY * fLength;
+            offsetSectorX     = sectorX * fWidth;
+            offsetSectorY     = sectorY * fLength;
 
             for (unsigned int i = 0; i < width; ++i) {
-                float fI = static_cast<float>(i);
                 for (unsigned int j = 0; j < length; ++j) {
-                    float fJ = static_cast<float>(j);
-                    btVector3 vert1, vert2, vert3, vert4;
 
+                    unsigned int vertexAtX = i + (width * sectorY);
+                    unsigned int vertexAtY = j + (length * sectorX);
+
+                    btVector3 btVerts[4];
+                    priv::Vertex verts[4];
+                    VertexSmoothingData smooths[4];
                     bool valid[4];
-                    valid[0] = heightfield.getAndValidateVertex(i,     j,     vert1, false);
-                    valid[1] = heightfield.getAndValidateVertex(i + 1, j,     vert2, false);
-                    valid[2] = heightfield.getAndValidateVertex(i,     j + 1, vert3, false);
-                    valid[3] = heightfield.getAndValidateVertex(i + 1, j + 1, vert4, false);
 
-                    priv::Vertex v1, v2, v3, v4;
+                    valid[0] = heightfield.getAndValidateVertex(i,     j,     btVerts[0], false);
+                    valid[1] = heightfield.getAndValidateVertex(i + 1, j,     btVerts[1], false);
+                    valid[2] = heightfield.getAndValidateVertex(i,     j + 1, btVerts[2], false);
+                    valid[3] = heightfield.getAndValidateVertex(i + 1, j + 1, btVerts[3], false);
 
-                    v1.position = glm::vec3(offsetSectorY + vert1.x(), vert1.y(), offsetSectorX + vert1.z());
-                    v2.position = glm::vec3(offsetSectorY + vert2.x(), vert2.y(), offsetSectorX + vert2.z());
-                    v3.position = glm::vec3(offsetSectorY + vert3.x(), vert3.y(), offsetSectorX + vert3.z());
-                    v4.position = glm::vec3(offsetSectorY + vert4.x(), vert4.y(), offsetSectorX + vert4.z());
+                    for (int i = 0; i < 4; ++i) {
+                        verts[i].position = glm::vec3(offsetSectorY + btVerts[i].x(), btVerts[i].y(), offsetSectorX + btVerts[i].z());
+                    }
 
-                    glm::vec3 a = v4.position - v1.position;
-                    glm::vec3 b = v2.position - v3.position;
+                    glm::vec3 a = verts[3].position - verts[0].position;
+                    glm::vec3 b = verts[1].position - verts[2].position;
                     glm::vec3 normal = glm::normalize(glm::cross(a, b));
 
-                    v1.normal = normal;
-                    v1.uv = glm::vec2(fI / fWidth, fJ / fLength);
+                    for (int i = 0; i < 4; ++i) {
+                        verts[i].normal = normal;
+                    }
+                    verts[0].uv.x = vertexAtX / totalVertexSizeX;
+                    verts[0].uv.y = vertexAtY / totalVertexSizeY;
 
-                    data.points.push_back(v1.position);
-                    data.uvs.push_back(v1.uv);
-                    data.normals.push_back(v1.normal);
-                        
-                    VertexSmoothingData v1s;
-                    v1s.normal = v1.normal;
-                    v1s.index = data.points.size() - 1;
-                    m_VertexMap[hash_position(v1.position, 4)].data.push_back(std::move(v1s));
+                    verts[1].uv.x = (vertexAtX + 1.0f) / totalVertexSizeX;
+                    verts[1].uv.y = vertexAtY / totalVertexSizeY;
 
-                    v2.normal = normal;
-                    v2.uv = glm::vec2((fI + 1.0f) / fWidth, fJ / fLength);
+                    verts[2].uv.x = vertexAtX / totalVertexSizeX;
+                    verts[2].uv.y = (vertexAtY + 1.0f) / totalVertexSizeY;
 
-                    data.points.push_back(v2.position);
-                    data.uvs.push_back(v2.uv);
-                    data.normals.push_back(v2.normal);
-                        
-                    VertexSmoothingData v2s;
-                    v2s.normal = v2.normal;
-                    v2s.index = data.points.size() - 1;
-                    m_VertexMap[hash_position(v2.position, 4)].data.push_back(std::move(v2s));
+                    verts[3].uv.x = (vertexAtX + 1.0f) / totalVertexSizeX;
+                    verts[3].uv.y = (vertexAtY + 1.0f) / totalVertexSizeY;
 
-                    v3.normal = normal;
-                    v3.uv = glm::vec2(fI / fWidth, (fJ + 1.0f) / fLength);
-
-                    data.points.push_back(v3.position);
-                    data.uvs.push_back(v3.uv);
-                    data.normals.push_back(v3.normal);
-                        
-                    VertexSmoothingData v3s;
-                    v3s.normal = v3.normal;
-                    v3s.index = data.points.size() - 1;
-                    m_VertexMap[hash_position(v3.position, 4)].data.push_back(std::move(v3s));
-
-                    v4.normal = normal;
-                    v4.uv = glm::vec2((fI + 1.0f) / fWidth, (fJ + 1.0f) / fLength);
-
-                    data.points.push_back(v4.position);
-                    data.uvs.push_back(v4.uv);
-                    data.normals.push_back(v4.normal);
-
-                    VertexSmoothingData v4s;
-                    v4s.normal = v4.normal;
-                    v4s.index = data.points.size() - 1;
-                    m_VertexMap[hash_position(v4.position, 4)].data.push_back(std::move(v4s));
+                    for (int i = 0; i < 4; ++i) {
+                        data.points.push_back(verts[i].position);
+                        data.uvs.push_back(verts[i].uv);
+                        data.normals.push_back(verts[i].normal);
+                    }
+                    for (int i = 0; i < 4; ++i) {
+                        smooths[i].normal = verts[i].normal;
+                        smooths[i].index = (data.points.size() - 1) - (3 - i);
+                        m_VertexMap[hash_position(verts[i].position, 4)].data.push_back(std::move(smooths[i]));
+                    }
 
                     if (valid[0] || valid[1] || valid[2] || valid[3]) {
                         data.indices.push_back(count + 0);

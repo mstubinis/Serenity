@@ -9,52 +9,36 @@ using namespace std;
 using namespace Engine;
 using namespace Engine::priv;
 
-//TODO: implement the uv modification system
-struct SimpleUVTranslationFunctor { void operator()(const float dt, MaterialLayer& layer, float translationX, float translationY) const {
-    auto& currentUVs        = layer.getUVModifications();
-    layer.m_UVModifications = currentUVs + glm::vec2(translationX * dt, translationY * dt);
-    if (layer.m_UVModifications.x >= 5.0f) {
-        layer.m_UVModifications.x = 0.0f;
-    }
-    if (layer.m_UVModifications.y > 5.0f) {
-        layer.m_UVModifications.y = 0.0f;
-    }
-} };
-
 MaterialLayer::MaterialLayer() {
-    setBlendMode(MaterialLayerBlendMode::Default);
 }
 MaterialLayer::~MaterialLayer() {
-
-}
-Texture* MaterialLayer::getTexture() const {
-    return m_Texture;
-}
-Texture* MaterialLayer::getMask() const {
-    return m_Mask;
-}
-Texture* MaterialLayer::getCubemap() const {
-    return m_Cubemap;
-}
-const glm::vec4& MaterialLayer::data1() const {
-    return m_Data1;
-}
-const glm::vec4& MaterialLayer::data2() const {
-    return m_Data2;
 }
 void MaterialLayer::addUVModificationSimpleTranslation(float translationX, float translationY) {
-    SimpleUVTranslationFunctor functor;
-    std_uv_func f = std::bind<void>(functor, std::placeholders::_1, std::ref(*this), translationX, translationY);
-    m_UVModificationQueue.push_back(std::move(f));
+    m_UVModificationQueue.push_back([translationX, translationY](const float dt, MaterialLayer& layer) {
+        auto currentUVs           = glm::vec2(layer.getUVModifications().x, layer.getUVModifications().y);
+        auto translatedUVS        = currentUVs + glm::vec2(translationX * dt, translationY * dt);
+        layer.m_UVModifications.x = translatedUVS.x;
+        layer.m_UVModifications.y = translatedUVS.y;
+        if (layer.m_UVModifications.x >= 100.0f) {
+            layer.m_UVModifications.x -= 100.0f;
+        }
+        if (layer.m_UVModifications.y >= 100.0f) {
+            layer.m_UVModifications.y -= 100.0f;
+        }
+    });
 }
-void MaterialLayer::addUVModificationFunctor(const std_uv_func& functor) {
+void MaterialLayer::addUVModificationSimpleMultiplication(float mulX, float mulY) {
+    m_UVModificationQueue.push_back([mulX, mulY](const float dt, MaterialLayer& layer) {
+        layer.m_UVModifications.z = mulX;
+        layer.m_UVModifications.w = mulY;
+    });
+}
+
+void MaterialLayer::addUVModificationFunctor(uv_mod_func functor) {
     m_UVModificationQueue.push_back(std::move(functor));
 }
 void MaterialLayer::setBlendMode(MaterialLayerBlendMode::Mode mode) {
     m_Data1.x = static_cast<float>(mode);
-}
-MaterialLayerBlendMode::Mode MaterialLayer::blendMode() const {
-    return static_cast<MaterialLayerBlendMode::Mode>(static_cast<int>(m_Data1.x));
 }
 void MaterialLayer::setData1(float x, float y, float z, float w) {
     m_Data1.x = x;
@@ -111,14 +95,10 @@ void MaterialLayer::setCubemap(Texture* cubemap) {
     m_Data1.w = m_Cubemap->compressed() ? 0.5f : 1.0f;
 }
 
-const glm::vec2& MaterialLayer::getUVModifications() const {
-    return m_UVModifications;
-}
-
 void MaterialLayer::update(const float dt) {
     //calculate uv modifications
     for (auto& command : m_UVModificationQueue) {
-        command(dt);
+        command(dt, *this);
     }
 }
 void MaterialLayer::sendDataToGPU(const string& uniform_component_string, size_t component_index, size_t layer_index, size_t& textureUnit) const {
@@ -143,5 +123,5 @@ void MaterialLayer::sendDataToGPU(const string& uniform_component_string, size_t
     }
     Engine::Renderer::sendUniform4Safe((wholeString + "data1").c_str(), m_Data1);
     Engine::Renderer::sendUniform4Safe((wholeString + "data2").c_str(), m_Data2);
-    Engine::Renderer::sendUniform2Safe((wholeString + "uvModifications").c_str(), m_UVModifications);
+    Engine::Renderer::sendUniform4Safe((wholeString + "uvModifications").c_str(), m_UVModifications);
 }

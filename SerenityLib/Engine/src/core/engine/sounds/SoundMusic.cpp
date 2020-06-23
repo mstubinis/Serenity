@@ -16,9 +16,6 @@ SoundMusic::SoundMusic() : SoundBaseClass(1) {
 SoundMusic::~SoundMusic() {
 
 }
-float SoundMusic::getDuration() const {
-    return m_Duration;
-}
 void SoundMusic::update(const float dt) {
     auto sfStatus = m_Sound.getStatus();
     if (sfStatus == sf::SoundSource::Status::Stopped) {

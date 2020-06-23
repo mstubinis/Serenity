@@ -46,7 +46,9 @@ class Scene::impl final {
                 }
             }
             for (auto& particle : super.m_i->m_ParticleSystem.getParticles()) {
-                particle.setPosition(particle.position() - centerPosFloat);
+                if (particle.isActive()) {
+                    particle.setPosition(particle.position() - centerPosFloat);
+                }
             }
             centerBody->setPosition(static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(0.0));
 

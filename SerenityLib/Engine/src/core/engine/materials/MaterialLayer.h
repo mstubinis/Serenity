@@ -14,21 +14,23 @@ struct SimpleUVTranslationFunctor;
 #include <functional>
 #include <core/engine/materials/MaterialEnums.h>
 
-typedef std::function<void(const float dt)> std_uv_func;
+typedef std::function<void(const float dt, MaterialLayer& layer)> uv_mod_func;
 
 class MaterialLayer final{
     friend struct SimpleUVTranslationFunctor;
     private:
-        Texture*                   m_Texture          = nullptr;
-        Texture*                   m_Mask             = nullptr;
-        Texture*                   m_Cubemap          = nullptr;
+        Texture*                   m_Texture                       = nullptr;
+        Texture*                   m_Mask                          = nullptr;
+        Texture*                   m_Cubemap                       = nullptr;
 
         //x = blend mode? | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
-        glm::vec4                  m_Data1            = glm::vec4(0.0f);
-        glm::vec4                  m_Data2            = glm::vec4(0.0f);
-        glm::vec2                  m_UVModifications  = glm::vec2(0.0f);
+        glm::vec4                  m_Data1                         = glm::vec4(static_cast<float>(MaterialLayerBlendMode::Default), 0.0f, 0.0f, 0.0f);
+        glm::vec4                  m_Data2                         = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
-        std::vector<std_uv_func>   m_UVModificationQueue;
+        //x = translationX, y = translationY, z = multX, w = multY
+        glm::vec4                  m_UVModifications               = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+
+        std::vector<uv_mod_func>   m_UVModificationQueue;
     public:
         MaterialLayer();
         ~MaterialLayer();
@@ -38,16 +40,18 @@ class MaterialLayer final{
         MaterialLayer(MaterialLayer&& other) noexcept            = delete;
         MaterialLayer& operator=(MaterialLayer&& other) noexcept = delete;
 
-        Texture* getTexture() const;
-        Texture* getMask() const;
-        Texture* getCubemap() const;
+        Texture* getTexture() const noexcept { return m_Texture; }
+        Texture* getMask() const noexcept { return m_Mask; }
+        Texture* getCubemap() const noexcept { return m_Cubemap; }
 
-        const glm::vec4& data1() const;
-        const glm::vec4& data2() const;
-        MaterialLayerBlendMode::Mode blendMode() const;
+        constexpr const glm::vec4& data1() const noexcept { return m_Data1; }
+        constexpr const glm::vec4& data2() const noexcept { return m_Data2; }
+        constexpr MaterialLayerBlendMode::Mode blendMode() const noexcept { return static_cast<MaterialLayerBlendMode::Mode>(static_cast<unsigned int>(m_Data1.x)); }
+        constexpr const glm::vec4& getUVModifications() const noexcept { return m_UVModifications; }
 
-        void addUVModificationFunctor(const std_uv_func& functor);
+        void addUVModificationFunctor(uv_mod_func functor);
         void addUVModificationSimpleTranslation(float translationX, float translationY);
+        void addUVModificationSimpleMultiplication(float mulX, float mulY);
 
         void setBlendMode(MaterialLayerBlendMode::Mode mode);
         void setTexture(Texture* texture);
@@ -62,7 +66,6 @@ class MaterialLayer final{
 
         void sendDataToGPU(const std::string& uniform_component_string, size_t component_index, size_t layer_index, size_t& textureUnit) const;
 
-        const glm::vec2& getUVModifications() const;
 
         void update(const float dt);
 };

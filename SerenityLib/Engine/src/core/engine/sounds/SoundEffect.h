@@ -26,11 +26,12 @@ class  SoundEffect : public SoundBaseClass {
 
         ~SoundEffect();
 
+        constexpr const bool isActive() const noexcept { return m_Active; }
         bool play(unsigned int numLoops = 1) override;
         bool pause() override;
         bool stop(bool stopAllLoops = false);
         bool restart() override;
-        float getDuration() const;
+        constexpr const float getDuration() const noexcept { return m_Duration; }
         unsigned int getChannelCount() const override;
         float getMinDistance() const override;
         void setMinDistance(float minDistance) override;

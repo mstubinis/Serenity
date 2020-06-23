@@ -299,7 +299,7 @@ priv::EShaders::decal_frag =
     "    SAMPLER_TYPE_2D texture;\n"
     "    SAMPLER_TYPE_2D mask;\n"
     "    SAMPLER_TYPE_Cube cubemap;\n"
-    "    vec2 uvModifications;\n"
+    "    vec4 uvModifications;\n"
     "};\n"
     "struct Component {\n"
     "    ivec2 componentData;\n" //x = numLayers, y = componentType
@@ -709,7 +709,7 @@ priv::EShaders::forward_frag =
     "    SAMPLER_TYPE_2D texture;\n"
     "    SAMPLER_TYPE_2D mask;\n"
     "    SAMPLER_TYPE_Cube cubemap;\n"
-    "    vec2 uvModifications;\n"
+    "    vec4 uvModifications;\n"
     "};\n"
     "struct Component {\n"
     "    ivec2 componentData;\n" //x = numLayers, y = componentType
@@ -921,7 +921,7 @@ priv::EShaders::deferred_frag =
     "    SAMPLER_TYPE_2D texture;\n"
     "    SAMPLER_TYPE_2D mask;\n"
     "    SAMPLER_TYPE_Cube cubemap;\n"
-    "    vec2 uvModifications;\n"
+    "    vec4 uvModifications;\n"
     "};\n"
     "struct Component {\n"
     "    ivec2 componentData;\n" //x = numLayers, y = componentType

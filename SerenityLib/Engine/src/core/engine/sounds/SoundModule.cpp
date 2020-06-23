@@ -66,10 +66,9 @@ void priv::SoundModule::updateCameraPosition() {
     if (scene) {
         auto* camera = scene->getActiveCamera();
         if (camera) {
-            auto& cam = *camera;
-            auto camPos = glm::vec3(cam.getPosition());
-            auto camForward = glm::vec3(cam.forward());
-            auto camUp = glm::vec3(cam.up());
+            auto camPos     = glm::vec3(camera->getPosition());
+            auto camForward = glm::vec3(camera->forward());
+            auto camUp      = glm::vec3(camera->up());
             sf::Listener::setPosition(camPos.x, camPos.y, camPos.z);
             sf::Listener::setDirection(camForward.x, camForward.y, camForward.z);
             sf::Listener::setUpVector(camUp.x, camUp.y, camUp.z);
@@ -139,13 +138,19 @@ SoundMusic* Sound::playMusic(Handle handle, unsigned int loops){
     }
     return music;
 }
+void Sound::stop_all_effects() {
+    for (auto& effect : soundModule->m_SoundEffects) {
+        effect.stop();
+    }
+}
 void Sound::stop_all_music() {
     for (auto& music : soundModule->m_SoundMusics) {
         music.stop();
     }
 }
-void Sound::stop_all_effects() {
-    for (auto& effect : soundModule->m_SoundEffects) {
-        effect.stop();
-    }
+std::array<SoundEffect, MAX_SOUND_EFFECTS>& Sound::getAllSoundEffects() {
+    return soundModule->m_SoundEffects;
+}
+std::array<SoundMusic, MAX_SOUND_MUSIC>& Sound::getAllSoundMusics() {
+    return soundModule->m_SoundMusics;
 }
