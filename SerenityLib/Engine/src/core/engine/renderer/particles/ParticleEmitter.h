@@ -20,6 +20,9 @@ class ParticleEmitter final : public Entity {
     friend class  Engine::priv::ParticleSystem;
     friend class  Particle;
     friend struct Engine::priv::InternalScenePublicInterface;
+
+    using update_func = std::function<void(ParticleEmitter*, const float dt, ParticleEmissionProperties&, std::mutex&)>;
+
     public:
         glm::vec4                      m_UserData       = glm::vec4(0.0f);
     private:
@@ -29,12 +32,12 @@ class ParticleEmitter final : public Entity {
         float                          m_Timer          = 0.0f;
         float                          m_Lifetime       = 0.0f;
         Entity                         m_Parent         = Entity();
-        std::function<void(ParticleEmitter*, const float dt, ParticleEmissionProperties&, std::mutex&)> m_UpdateFunctor = [](ParticleEmitter*, const float, ParticleEmissionProperties&, std::mutex&) {};
+        update_func                    m_UpdateFunctor  = [](ParticleEmitter*, const float, ParticleEmissionProperties&, std::mutex&) {};
 
         ParticleEmitter() = delete;
     public:
         ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent = Entity());
-        ~ParticleEmitter();
+        ~ParticleEmitter() {}
 
         ParticleEmitter(const ParticleEmitter& other) = delete;
         ParticleEmitter& operator=(const ParticleEmitter& other) = delete;
@@ -43,27 +46,25 @@ class ParticleEmitter final : public Entity {
 
         void init(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent);
 
-        template<typename T> void setUpdateFunctor(const T& functor) {
-            m_UpdateFunctor = std::bind<void>(std::move(functor), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
-        }
+        void setUpdateFunctor(update_func functor) noexcept { m_UpdateFunctor = functor; }
 
-        void setPosition(const decimal& x, const decimal& y, const decimal& z);
+        void setPosition(decimal x, decimal y, decimal z);
         void setPosition(const glm_vec3& position);
 
 
-        void setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w);
+        void setRotation(decimal x, decimal y, decimal z, decimal w);
         void setRotation(const glm_quat& rotation);
 
-        void rotate(const decimal& x, const decimal& y, const decimal& z);
+        void rotate(decimal x, decimal y, decimal z);
 
-        void setScale(const decimal& x, const decimal& y, const decimal& z);
+        void setScale(decimal x, decimal y, decimal z);
         void setScale(const glm_vec3& scale);
 
-        void setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
-        void setLinearVelocity(const glm_vec3& velocity, const bool local = true);
+        void setLinearVelocity(decimal x, decimal y, decimal z, bool local = true);
+        void setLinearVelocity(const glm_vec3& velocity, bool local = true);
  
-        void applyLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local = true);
-        void applyLinearVelocity(glm_vec3& velocity, const bool local = true);
+        void applyLinearVelocity(decimal x, decimal y, decimal z, bool local = true);
+        void applyLinearVelocity(glm_vec3& velocity, bool local = true);
 
         glm_vec3 getScale() const;
 
@@ -73,12 +74,12 @@ class ParticleEmitter final : public Entity {
 
         glm_vec3 linearVelocity() const;
 
-        bool isActive() const;
+        bool isActive() const noexcept { return m_Active; }
 
-        void activate();
-        void deactivate();
+        void activate() noexcept { m_Active = true; }
+        void deactivate() noexcept { m_Active = false; }
 
-        ParticleEmissionProperties* getProperties() const;
+        ParticleEmissionProperties* getProperties() const noexcept { return m_Properties; }
         void setProperties(ParticleEmissionProperties& properties);
 
         void update(size_t index, const float dt, Engine::priv::ParticleSystem& particleSystem, bool multi_threaded);

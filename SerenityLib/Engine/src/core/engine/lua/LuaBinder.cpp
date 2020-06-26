@@ -199,7 +199,6 @@ LUABinder::LUABinder() {
         .beginClass<Viewport>("Viewport")
             .addFunction("id", &Viewport::id)
             .addFunction("getScene", &Viewport::getScene)
-            .addProperty("camera", &Viewport::getCamera, &Viewport::setCamera)
             .addFunction("getCamera", &Viewport::getCamera)
             .addFunction("setCamera", &Viewport::setCamera)
             //.addFunction("setID", &Viewport::setID)

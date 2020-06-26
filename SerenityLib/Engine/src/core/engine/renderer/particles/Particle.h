@@ -36,7 +36,7 @@ class Particle {
 
         Particle() = delete;
         Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmitter& emitter);
-        ~Particle();
+        ~Particle() {}
 
         Particle(const Particle& other) = delete;
         Particle& operator=(const Particle& other) = delete;
@@ -45,14 +45,14 @@ class Particle {
 
         void init(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmitter& parent);
 
-        bool isActive() const;
+        bool isActive() const noexcept { return (m_Timer > 0.0f); }
         void setPosition(const glm::vec3& newPosition);
-        Material* getMaterial() const;
-        float angle() const;
-        const glm::vec2& getScale() const;
-        const glm::vec3& position() const;
-        const Engine::color_vector_4& color() const;
-        const glm::vec3& velocity() const;
+        Material* getMaterial() const noexcept { return m_Material; }
+        float angle() const noexcept { return m_Angle; }
+        const glm::vec2& getScale() const noexcept { return m_Scale; }
+        const glm::vec3& position() const noexcept { return m_Position; }
+        const Engine::color_vector_4& color() const noexcept { return m_Color; }
+        const glm::vec3& velocity() const noexcept { return m_Velocity; }
         float lifetime() const;
 };
 #endif

@@ -52,10 +52,10 @@ void priv::ParticleSystem::internal_update_emitters(const float dt) {
             emitter.update(j, dt, *this, true);
         }
     };
-    Engine::priv::threading::addJobSplitVectored(lamda_update_emitter, m_ParticleEmitters, true, 0);
+    Engine::priv::threading::addJobSplitVectored(lamda_update_emitter, m_ParticleEmitters, true, 0U);
 }
 
-void priv::ParticleSystem::internal_update_particles(const float dt, const Camera& camera) {
+void priv::ParticleSystem::internal_update_particles(const float dt, Camera& camera) {
     if (m_Particles.size() == 0) {
         return;
     }
@@ -83,7 +83,7 @@ void priv::ParticleSystem::internal_update_particles(const float dt, const Camer
             }
         }
     };
-    Engine::priv::threading::addJobSplitVectored(lamda_update_particle, m_Particles, true, 0);
+    Engine::priv::threading::addJobSplitVectored(lamda_update_particle, m_Particles, true, 0U);
 }
 
 ParticleEmitter* priv::ParticleSystem::add_emitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
@@ -125,12 +125,12 @@ bool priv::ParticleSystem::add_particle(ParticleEmitter& emitter) {
     return add_particle(emitter, body.getPosition(), body.getRotation());
 }
 
-void priv::ParticleSystem::update(const float dt, const Camera& camera) {
+void priv::ParticleSystem::update(const float dt, Camera& camera) {
     internal_update_particles(dt, camera);
     internal_update_emitters(dt);
 }
 
-void priv::ParticleSystem::render(const Viewport& viewport, const Camera& camera, ShaderProgram& program, Renderer& renderer) {
+void priv::ParticleSystem::render(Viewport& viewport, Camera& camera, ShaderProgram& program, Renderer& renderer) {
     const auto particles_size = m_Particles.size();
     if (particles_size == 0 || !viewport.getRenderFlags().has(ViewportRenderingFlag::Particles)) {
         return;

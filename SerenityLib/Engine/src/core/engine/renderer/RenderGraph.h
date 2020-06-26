@@ -18,18 +18,17 @@ namespace Engine::priv {
 
 #include <core/engine/utils/Utils.h>
 #include <core/engine/renderer/RendererIncludes.h>
-//#include <ecs/Entity.h>
 
 namespace Engine::priv {
     class InstanceNode final : public Engine::NonCopyable {
         friend class  RenderGraph;
         friend struct InternalScenePublicInterface;
         private:
-            ModelInstance*   instance;
+            ModelInstance*   instance = nullptr;
 
             InstanceNode() = delete;
         public:
-            InstanceNode(const ModelInstance& modelInstance);
+            InstanceNode(ModelInstance& modelInstance);
             ~InstanceNode();
 
             InstanceNode(InstanceNode&& other) noexcept;
@@ -39,12 +38,12 @@ namespace Engine::priv {
         friend class  RenderGraph;
         friend struct InternalScenePublicInterface;
         private:
-            Mesh*                        mesh;
+            Mesh*                        mesh = nullptr;
             std::vector<InstanceNode*>   instanceNodes;
 
             MeshNode() = delete;
         public:
-            MeshNode(const Mesh& mesh);
+            MeshNode(Mesh& mesh);
             ~MeshNode();
 
             MeshNode(MeshNode&& other) noexcept;
@@ -54,12 +53,12 @@ namespace Engine::priv {
         friend class  RenderGraph;
         friend struct InternalScenePublicInterface;
         private:
-            Material*                material;
+            Material*                material = nullptr;
             std::vector<MeshNode>    meshNodes;
 
             MaterialNode() = delete;
         public:
-            MaterialNode(const Material& material);
+            MaterialNode(Material& material);
             ~MaterialNode();
 
             MaterialNode(MaterialNode&& other) noexcept;
@@ -69,7 +68,7 @@ namespace Engine::priv {
         friend class  Scene;
         friend struct Engine::priv::InternalScenePublicInterface;
         private:
-            ShaderProgram*               m_ShaderProgram;
+            ShaderProgram*               m_ShaderProgram = nullptr;
             std::vector<MaterialNode>    m_MaterialNodes;
             std::vector<InstanceNode*>   m_InstancesTotal;
 
@@ -84,20 +83,20 @@ namespace Engine::priv {
             RenderGraph(RenderGraph&& other) noexcept;
             RenderGraph& operator=(RenderGraph&& other) noexcept;
 
-            const bool remove_material_node(const MaterialNode& materialNode);
-            const bool remove_mesh_node(MaterialNode& materialNode, const MeshNode& meshNode);
-            const bool remove_instance_node(MeshNode& meshNode, const InstanceNode& instanceNode);
+            bool remove_material_node(MaterialNode& materialNode);
+            bool remove_mesh_node(MaterialNode& materialNode, MeshNode& meshNode);
+            bool remove_instance_node(MeshNode& meshNode, InstanceNode& instanceNode);
 
             void clean(Entity entity);
-            void sort(const Camera& camera, SortingMode::Mode sortingMode);
-            void sort_cheap(const Camera& camera, SortingMode::Mode sortingMode);
+            void sort(Camera& camera, SortingMode::Mode sortingMode);
+            void sort_cheap(Camera& camera, SortingMode::Mode sortingMode);
 
-            void sort_bruteforce(const Camera& camera, SortingMode::Mode sortingMode);
-            void sort_cheap_bruteforce(const Camera& camera, SortingMode::Mode sortingMode);
+            void sort_bruteforce(Camera& camera, SortingMode::Mode sortingMode);
+            void sort_cheap_bruteforce(Camera& camera, SortingMode::Mode sortingMode);
 
-            void render(const Engine::priv::Renderer& renderer, const Viewport& viewport, const Camera& camera, bool useDefaultShaders = true, SortingMode::Mode sortingMode = SortingMode::None);
-            void render_bruteforce(const Engine::priv::Renderer& renderer, const Viewport& viewport, const Camera& camera, bool useDefaultShaders = true, SortingMode::Mode sortingMode = SortingMode::None);
-            void validate_model_instances_for_rendering(const Viewport& viewport, const Camera& camera);
+            void render(Engine::priv::Renderer& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders = true, SortingMode::Mode sortingMode = SortingMode::None);
+            void render_bruteforce(Engine::priv::Renderer& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders = true, SortingMode::Mode sortingMode = SortingMode::None);
+            void validate_model_instances_for_rendering(Viewport& viewport, Camera& camera);
 
     };
 };

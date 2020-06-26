@@ -40,13 +40,6 @@ ParticleEmissionProperties& ParticleEmissionProperties::operator=(ParticleEmissi
     return *this;
 }
 
-float ParticleEmissionProperties::getLifetime() const {
-    return m_Lifetime;
-}
-float ParticleEmissionProperties::getSpawnRate() const {
-    return m_SpawnRate;
-}
-
 bool ParticleEmissionProperties::addMaterial(Material& material) {
     for (auto& mat : m_ParticleMaterials) {
         if (&material == mat) {
@@ -59,7 +52,6 @@ bool ParticleEmissionProperties::addMaterial(Material& material) {
 bool ParticleEmissionProperties::addMaterial(Handle& materialHandle) {
     return ParticleEmissionProperties::addMaterial(*Resources::getMaterial(materialHandle));
 }
-
 const Material& ParticleEmissionProperties::getParticleMaterialRandom() const {
     if (m_ParticleMaterials.size() == 0) {
         return *Material::Checkers;

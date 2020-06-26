@@ -4,14 +4,17 @@
 
 #include <gl/glew.h>
 #include <SFML/OpenGL.hpp>
+#include <glm/vec4.hpp>
 
-struct SortingMode final { enum Mode {
+constexpr const glm::vec4 NO_SCISSOR = glm::vec4(-1.0f);
+
+struct SortingMode final { enum Mode : unsigned int {
     None,
     FrontToBack,
     BackToFront,
 };};
 
-struct DepthFunc final { enum Func {
+struct DepthFunc final { enum Func : unsigned int {
     Never    = GL_NEVER,
     Less     = GL_LESS,
     Equal    = GL_EQUAL,
@@ -21,7 +24,7 @@ struct DepthFunc final { enum Func {
     GEqual   = GL_GEQUAL,
     Always   = GL_ALWAYS,
 };};
-struct AntiAliasingAlgorithm final { enum Algorithm {
+struct AntiAliasingAlgorithm final { enum Algorithm : unsigned int {
     None, 
     FXAA, 
     SMAA_LOW,
@@ -30,7 +33,7 @@ struct AntiAliasingAlgorithm final { enum Algorithm {
     SMAA_ULTRA,
 };};
 
-struct Alignment final { enum Type {
+struct Alignment final { enum Type : unsigned int {
     TopLeft,
     TopCenter,
     TopRight,
@@ -42,7 +45,7 @@ struct Alignment final { enum Type {
     BottomRight,
 _TOTAL};};
 
-struct RenderStage { enum Stage {
+struct RenderStage final { enum Stage : unsigned int {
     GeometryOpaque,
     GeometryOpaque_2,
     GeometryOpaque_3,

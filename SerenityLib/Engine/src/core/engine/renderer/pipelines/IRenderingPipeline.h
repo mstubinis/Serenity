@@ -39,19 +39,19 @@ namespace Engine::priv {
             virtual void init() = 0;
             virtual void onPipelineChanged() = 0;
             virtual void onFullscreen() = 0;
-            virtual void onResize(const unsigned int newWidth, const unsigned int newHeight) = 0;
-            virtual void onOpenGLContextCreation(const unsigned int windowWidth, const unsigned int windowHeight, const unsigned int glslVersion, const unsigned int openglVersion) = 0;
+            virtual void onResize(unsigned int newWidth, unsigned int newHeight) = 0;
+            virtual void onOpenGLContextCreation(unsigned int windowWidth, unsigned int windowHeight, unsigned int glslVersion, unsigned int openglVersion) = 0;
             virtual void restoreDefaultState() = 0;
             virtual void restoreCurrentState() = 0;
             virtual void clear2DAPI() = 0;
             virtual void sort2DAPI() = 0;
 
-            virtual void renderPhysicsAPI(const bool mainRenderFunc, const Viewport& viewport, const Camera& camera, const Scene& scene) = 0;
+            virtual void renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport, Camera& camera, Scene& scene) = 0;
 
             //non textured 2d api elements will be exposed to anti-aliasing post processing
-            virtual void render2DAPINonTextured(const bool mainRenderFunc, const Viewport& viewport) = 0;
+            virtual void render2DAPINonTextured(bool mainRenderFunc, Viewport& viewport) = 0;
 
-            virtual void render2DAPI(const bool mainRenderFunc, const Viewport& viewport) = 0;
+            virtual void render2DAPI(bool mainRenderFunc, Viewport& viewport) = 0;
 
 
             virtual ShaderProgram* getCurrentBoundShaderProgram() = 0;
@@ -64,35 +64,35 @@ namespace Engine::priv {
 
             virtual unsigned int getMaxNumTextureUnits() = 0;
 
-            virtual bool stencilOperation(const unsigned int stencilFail, const unsigned int depthFail, const unsigned int depthPass) = 0;
-            virtual bool stencilMask(const unsigned int mask) = 0;
-            virtual bool stencilFunction(const unsigned int stencilFunction, const unsigned int reference, const unsigned int mask) = 0;
-            virtual bool cullFace(const unsigned int face) = 0;
-            virtual bool setDepthFunction(const unsigned int depthFunction) = 0;
-            virtual bool setViewport(const float x, const float y, const float width, const float height) = 0;
-            virtual void clear(const bool color, const bool depth, const bool stencil) = 0;
-            virtual bool colorMask(const bool r, const bool g, const bool b, const bool alpha) = 0;
-            virtual bool clearColor(const bool r, const bool g, const bool b, const bool alpha) = 0;
+            virtual bool stencilOperation(unsigned int stencilFail, unsigned int depthFail, unsigned int depthPass) = 0;
+            virtual bool stencilMask(unsigned int mask) = 0;
+            virtual bool stencilFunction(unsigned int stencilFunction, unsigned int reference, unsigned int mask) = 0;
+            virtual bool cullFace(unsigned int face) = 0;
+            virtual bool setDepthFunction(unsigned int depthFunction) = 0;
+            virtual bool setViewport(float x, float y, float width, float height) = 0;
+            virtual void clear(bool color, bool depth, bool stencil) = 0;
+            virtual bool colorMask(bool r, bool g, bool b, bool alpha) = 0;
+            virtual bool clearColor(bool r, bool g, bool b, bool alpha) = 0;
 
-            virtual bool bindTextureForModification(const unsigned int textureType, const unsigned int textureObject) = 0;
-            virtual bool bindVAO(const unsigned int vaoObject) = 0;
+            virtual bool bindTextureForModification(unsigned int textureType, unsigned int textureObject) = 0;
+            virtual bool bindVAO(unsigned int vaoObject) = 0;
             virtual bool deleteVAO(unsigned int& vaoObject) = 0;
-            virtual void generateAndBindTexture(const unsigned int textureType, unsigned int& textureObject) = 0;
+            virtual void generateAndBindTexture(unsigned int textureType, unsigned int& textureObject) = 0;
             virtual void generateAndBindVAO(unsigned int& vaoObject) = 0;
 
-            virtual bool enableAPI(const unsigned int apiEnum) = 0;
-            virtual bool disableAPI(const unsigned int apiEnum) = 0;
-            virtual bool enableAPI_i(const unsigned int apiEnum, const unsigned int index) = 0;
-            virtual bool disableAPI_i(const unsigned int apiEnum, const unsigned int index) = 0;
+            virtual bool enableAPI(unsigned int apiEnum) = 0;
+            virtual bool disableAPI(unsigned int apiEnum) = 0;
+            virtual bool enableAPI_i(unsigned int apiEnum, unsigned int index) = 0;
+            virtual bool disableAPI_i(unsigned int apiEnum, unsigned int index) = 0;
 
-            virtual void sendTexture(const char* location, const Texture& texture, const int slot) = 0;
-            virtual void sendTexture(const char* location, const unsigned int textureObject, const int slot, const unsigned int textureTarget) = 0;
-            virtual void sendTextureSafe(const char* location, const Texture& texture, const int slot) = 0;
-            virtual void sendTextureSafe(const char* location, const unsigned int textureObject, const int slot, const unsigned int textureTarget) = 0;
+            virtual void sendTexture(const char* location, Texture& texture, int slot) = 0;
+            virtual void sendTexture(const char* location, unsigned int textureObject, int slot, unsigned int textureTarget) = 0;
+            virtual void sendTextureSafe(const char* location, Texture& texture, int slot) = 0;
+            virtual void sendTextureSafe(const char* location, unsigned int textureObject, int slot, unsigned int textureTarget) = 0;
 
-            virtual bool bindReadFBO(const unsigned int fbo) = 0;
-            virtual bool bindDrawFBO(const unsigned int fbo) = 0;
-            virtual bool bindRBO(const unsigned int rbo) = 0;
+            virtual bool bindReadFBO(unsigned int fbo) = 0;
+            virtual bool bindDrawFBO(unsigned int fbo) = 0;
+            virtual bool bindRBO(unsigned int rbo) = 0;
 
             virtual bool bind(ModelInstance* modelInstance) = 0;
             virtual bool bind(ShaderProgram* program) = 0;
@@ -104,61 +104,61 @@ namespace Engine::priv {
             virtual bool unbind(Material* material) = 0;
             virtual bool unbind(Mesh* mesh) = 0;
 
-            virtual void generatePBRData(Texture& texture, const unsigned int convoludeSize, const unsigned int prefilterSize) = 0;
+            virtual void generatePBRData(Texture& texture, unsigned int convoludeSize, unsigned int prefilterSize) = 0;
 
-            virtual void renderSkybox(Skybox*, ShaderProgram& shaderProgram, const Scene& scene, const Viewport& viewport, const Camera& camera) = 0;
-            virtual void renderSunLight(const Camera& camera, const SunLight& sunLight, const Viewport& viewport) = 0;
-            virtual void renderPointLight(const Camera& camera, const PointLight& pointLight) = 0;
-            virtual void renderDirectionalLight(const Camera& camera, const DirectionalLight& directionalLight, const Viewport& viewport) = 0;
-            virtual void renderSpotLight(const Camera& camera, const SpotLight& spotLight) = 0;
-            virtual void renderRodLight(const Camera& camera, const RodLight& rodLight) = 0;
-            virtual void renderMesh(const Mesh& mesh, const unsigned int mode) = 0;
+            virtual void renderSkybox(Skybox*, ShaderProgram& shaderProgram, Scene& scene, Viewport& viewport, Camera& camera) = 0;
+            virtual void renderSunLight(Camera& camera, SunLight& sunLight, Viewport& viewport) = 0;
+            virtual void renderPointLight(Camera& camera, PointLight& pointLight) = 0;
+            virtual void renderDirectionalLight(Camera& camera, DirectionalLight& directionalLight, Viewport& viewport) = 0;
+            virtual void renderSpotLight(Camera& camera, SpotLight& spotLight) = 0;
+            virtual void renderRodLight(Camera& camera, RodLight& rodLight) = 0;
+            virtual void renderMesh(Mesh& mesh, unsigned int mode) = 0;
             virtual void renderDecal(ModelInstance& decalModelInstance) = 0;
             virtual void renderLightProbe(LightProbe& lightProbe) = 0;
 
-            virtual void renderParticles(ParticleSystem& particleSystem, const Camera& camera, ShaderProgram& program) = 0;
+            virtual void renderParticles(ParticleSystem& particleSystem, Camera& camera, ShaderProgram& program) = 0;
 
             virtual void render2DText(
                 const std::string& text, 
                 const Font& font, 
                 const glm::vec2& position, 
                 const glm::vec4& color, 
-                const float angle, 
+                float angle, 
                 const glm::vec2& scale, 
-                const float depth, 
-                const TextAlignment::Type textAlignment, 
-                const glm::vec4& scissor = glm::vec4(-1.0f)
+                float depth, 
+                TextAlignment::Type textAlignment, 
+                const glm::vec4& scissor = NO_SCISSOR
             ) = 0;
             virtual void render2DTexture(
-                const Texture* texture, 
+                Texture* texture, 
                 const glm::vec2& position, 
                 const glm::vec4& color, 
-                const float angle, 
+                float angle, 
                 const glm::vec2& scale, 
-                const float depth, 
-                const Alignment::Type align, 
-                const glm::vec4& scissor = glm::vec4(-1.0f)
+                float depth, 
+                Alignment::Type align, 
+                const glm::vec4& scissor = NO_SCISSOR
             ) = 0;
             virtual void render2DTriangle(
                 const glm::vec2& pos, 
                 const glm::vec4& color, 
-                const float angle, 
-                const float width, 
-                const float height, 
-                const float depth, 
-                const Alignment::Type align, 
-                const glm::vec4& scissor = glm::vec4(-1.0f)
+                float angle, 
+                float width, 
+                float height, 
+                float depth, 
+                Alignment::Type align, 
+                const glm::vec4& scissor = NO_SCISSOR
             ) = 0;
 
 
             virtual void renderTexture(
-                const Texture& tex, 
+                Texture& tex, 
                 const glm::vec2& p, 
                 const glm::vec4& c, 
-                const float a, 
+                float a, 
                 const glm::vec2& s, 
-                const float d, 
-                const Alignment::Type align, 
+                float d, 
+                Alignment::Type align, 
                 const glm::vec4& scissor
             ) = 0;
             virtual void renderText(
@@ -166,41 +166,41 @@ namespace Engine::priv {
                 const Font& fnt, 
                 const glm::vec2& p, 
                 const glm::vec4& c, 
-                const float a, 
+                float a, 
                 const glm::vec2& s, 
-                const float d, 
-                const TextAlignment::Type align, 
+                float d, 
+                TextAlignment::Type align, 
                 const glm::vec4& scissor
             ) = 0;
             virtual void renderBorder(
-                const float borderSize, 
+                float borderSize, 
                 const glm::vec2& pos, 
                 const glm::vec4& col, 
-                const float w, 
-                const float h, 
-                const float angle, 
-                const float depth, 
-                const Alignment::Type align, 
+                float w, 
+                float h, 
+                float angle, 
+                float depth, 
+                Alignment::Type align, 
                 const glm::vec4& scissor
             ) = 0;
             virtual void renderRectangle(
                 const glm::vec2& pos, 
                 const glm::vec4& col, 
-                const float width, 
-                const float height, 
-                const float angle, 
-                const float depth, 
-                const Alignment::Type align, 
+                float width, 
+                float height, 
+                float angle, 
+                float depth, 
+                Alignment::Type align, 
                 const glm::vec4& scissor
             ) = 0;
             virtual void renderTriangle(
                 const glm::vec2& position, 
                 const glm::vec4& color, 
-                const float angle, 
-                const float width, 
-                const float height, 
-                const float depth, 
-                const Alignment::Type align, 
+                float angle, 
+                float width, 
+                float height, 
+                float depth, 
+                Alignment::Type align, 
                 const glm::vec4& scissor
             ) = 0;
 
@@ -208,7 +208,7 @@ namespace Engine::priv {
             virtual void renderFullscreenQuad() = 0;
 
             virtual void update(const float dt) = 0;
-            virtual void render(Engine::priv::Renderer& renderer, const Viewport& viewport, const bool mainRenderFunction) = 0;
+            virtual void render(Engine::priv::Renderer& renderer, Viewport& viewport, bool mainRenderFunction) = 0;
     };
 };
 

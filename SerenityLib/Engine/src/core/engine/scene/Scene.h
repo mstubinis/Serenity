@@ -132,15 +132,15 @@ namespace Engine::priv {
 
         static void           UpdateMaterials(Scene& scene, const float dt);
 
-        static void           RenderGeometryOpaque( Renderer&, const Scene& scene, const Viewport&, const Camera&, bool useDefaultShaders = true);
-        static void           RenderGeometryTransparent( Renderer&, const Scene& scene, const Viewport&, const Camera&, bool useDefaultShaders = true);
-        static void           RenderGeometryTransparentTrianglesSorted( Renderer&, const Scene& scene, const Viewport&, const Camera&, bool useDefaultShaders = true);
-        static void           RenderForwardOpaque( Renderer&, const Scene& scene, const Viewport&, const Camera&, bool useDefaultShaders = true);
-        static void           RenderForwardTransparent( Renderer&, const Scene& scene, const Viewport&, const Camera&, bool useDefaultShaders = true);
-        static void           RenderForwardTransparentTrianglesSorted( Renderer&, const Scene& scene, const Viewport&, const Camera&, bool useDefaultShaders = true);
-        static void           RenderForwardParticles( Renderer&, const Scene& scene, const Viewport&, const Camera&, bool useDefaultShaders = true);
-        static void           RenderDecals( Renderer&, const Scene& scene, const Viewport&, const Camera&, bool useDefaultShaders = true);
-        static void           RenderParticles( Renderer&, const Scene& scene, const Viewport&, const Camera&, ShaderProgram& program);
+        static void           RenderGeometryOpaque( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void           RenderGeometryTransparent( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void           RenderGeometryTransparentTrianglesSorted( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void           RenderForwardOpaque( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void           RenderForwardTransparent( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void           RenderForwardTransparentTrianglesSorted( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void           RenderForwardParticles( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void           RenderDecals( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void           RenderParticles( Renderer&, Scene& scene, Viewport&, Camera&, ShaderProgram& program);
 
         static void           AddModelInstanceToPipeline(Scene& scene, ModelInstance&, RenderStage::Stage stage);
         static void           RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance&, RenderStage::Stage stage);

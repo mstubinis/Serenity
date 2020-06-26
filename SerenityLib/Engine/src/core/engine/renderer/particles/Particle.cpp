@@ -21,9 +21,6 @@ Particle::Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRot
     auto& properties = *emitter.m_Properties;
     init(emitterPosition, emitterRotation, emitter);
 }
-Particle::~Particle() {
-
-}
 void Particle::init(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmitter& emitter) {
     m_Timer = 0.001f;
     m_Position          = emitterPosition;
@@ -75,27 +72,6 @@ Particle& Particle::operator=(Particle&& other) noexcept {
 }
 void Particle::setPosition(const glm::vec3& newPosition) {
     m_Position = newPosition;
-}
-Material* Particle::getMaterial() const {
-    return m_Material;
-}
-float Particle::angle() const {
-    return m_Angle;
-}
-const glm::vec2& Particle::getScale() const {
-    return m_Scale;
-}
-const glm::vec3& Particle::position() const {
-    return m_Position;
-}
-bool Particle::isActive() const {
-    return (m_Timer > 0.0f);
-}
-const Engine::color_vector_4& Particle::color() const {
-    return m_Color;
-}
-const glm::vec3& Particle::velocity() const {
-    return m_Velocity;
 }
 float Particle::lifetime() const {
     return m_EmitterSource->m_Properties->m_Lifetime;

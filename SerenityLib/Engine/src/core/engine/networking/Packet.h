@@ -5,31 +5,29 @@
 namespace sf {
     class Packet;
 };
+
 namespace Engine::Networking {
-    class IPacket {
+    class Packet {
         public:
-            virtual bool validate(sf::Packet& sfmlPacket) = 0;
-            virtual bool build(sf::Packet& sfmlPacket) = 0;
-    };
-    class Packet : public IPacket {
+            bool                      m_Valid       = false;
+            unsigned int              m_PacketType  = 0;
+            std::uint64_t             m_Timestamp;
         public:
-            bool         m_Valid      = false;
-            unsigned int m_PacketType = 0;
-        public:
-            Packet();
-            Packet(sf::Packet& sfPacket);
-            virtual ~Packet();
+            Packet() {}
+            Packet(sf::Packet& inSFMLPacket);
+            //virtual ~Packet() {}
+            ~Packet() {}
 
-            Packet& operator=(const Packet& other);
-            Packet(const Packet& other);
-            Packet(Packet&& other) noexcept;
-            Packet& operator=(Packet&& other) noexcept;
+            Packet& operator=(const Packet& other)     = default;
+            Packet(const Packet& other)                = default;
+            Packet(Packet&& other) noexcept            = default;
+            Packet& operator=(Packet&& other) noexcept = default;
 
-            virtual bool validate(sf::Packet& sfmlPacket) override;
-            virtual bool build(sf::Packet& sfmlPacket) override;
-            virtual void print() {}
+            virtual bool validate(sf::Packet& inSFMLPacket);
+            virtual bool build(sf::Packet& inSFMLPacket);
+            //virtual void print() {}
 
-            static unsigned int getTypeFromSFPacket(const sf::Packet& sfmlPacket);
+            static unsigned int getTypeFromSFPacket(const sf::Packet& inSFMLPacket);
     };
 };
 #endif

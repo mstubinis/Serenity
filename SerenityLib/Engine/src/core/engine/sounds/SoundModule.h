@@ -6,6 +6,7 @@ class  SoundQueue;
 class  SoundData;
 class  SoundBaseClass;
 class  Handle;
+class  Scene;
 
 #include <stack>
 #include <array>
@@ -26,9 +27,9 @@ namespace Engine::priv {
             std::stack<unsigned int>                    m_FreelistMusics;
             std::vector<SoundQueue*>                    m_SoundQueues;
 
-            void updateSoundQueues(const float dt);
-            void updateSoundEffects(const float dt);
-            void updateSoundMusic(const float dt);
+            void updateSoundQueues(Scene& scene, const float dt);
+            void updateSoundEffects(Scene& scene, const float dt);
+            void updateSoundMusic(Scene& scene, const float dt);
         public:
             std::array<SoundEffect, MAX_SOUND_EFFECTS>  m_SoundEffects;
             std::array<SoundMusic, MAX_SOUND_MUSIC>     m_SoundMusics;
@@ -38,8 +39,8 @@ namespace Engine::priv {
 
             void cleanup();
 
-            void updateCameraPosition();
-            void update(const float dt);
+            void updateCameraPosition(Scene& scene);
+            void update(Scene& scene, const float dt);
 
             SoundEffect* getNextFreeEffect();
             SoundMusic*  getNextFreeMusic();

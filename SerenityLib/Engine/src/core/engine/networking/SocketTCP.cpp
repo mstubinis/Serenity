@@ -5,6 +5,8 @@
 #include <core/engine/system/Engine.h>
 #include <core/engine/utils/Utils.h>
 
+#include <chrono>
+
 using namespace Engine;
 using namespace Engine::priv;
 using namespace std;
@@ -113,6 +115,8 @@ SocketStatus::Status Networking::SocketTCP::connect(const unsigned short timeout
 }
 SocketStatus::Status Networking::SocketTCP::send(Engine::Networking::Packet& packet) {
     sf::Packet sf_packet;
+    using cast         = std::chrono::duration<std::uint64_t>;
+    packet.m_Timestamp = std::chrono::duration_cast<cast>(std::chrono::system_clock::now().time_since_epoch()).count();
     packet.build(sf_packet);
     return send(sf_packet);
 }

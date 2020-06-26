@@ -8,6 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_access.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include <btBulletDynamicsCommon.h>
 #include <boost/math/interpolators/cubic_b_spline.hpp>
@@ -566,14 +567,8 @@ float Math::getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, co
     return angle;
 }
 void Math::alignTo(glm_quat& o, const glm_vec3& direction){ 
-    auto xaxis = glm::cross(glm_vec3(1.0,0.0,0.0), direction);
-	auto yaxis = glm::cross(direction, xaxis);
-    glm::mat3 rot;
-    rot[0][0] = float(xaxis.x);      rot[0][1] = float(xaxis.y);      rot[0][2] = float(xaxis.z);
-    rot[1][0] = float(yaxis.x);      rot[1][1] = float(yaxis.y);      rot[1][2] = float(yaxis.z);
-    rot[2][0] = float(direction.x); rot[2][1] = float(direction.y); rot[2][2] = float(direction.z);
-    o = glm::quat_cast(rot);
-    o = glm::normalize(o); 
+    o = glm::conjugate(glm::toQuat(glm::lookAt(glm_vec3(0.0f), -direction, glm_vec3(0, 1, 0))));
+    o = glm::normalize(o);
 }
 void Math::setColor(glm::vec3& c, float r, float g, float b){
     if(r > 1.0f) r /= 255.0f;

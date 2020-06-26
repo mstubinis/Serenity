@@ -22,9 +22,9 @@ class Skybox: public Observer{
         Skybox(const std::string& file);
         virtual ~Skybox();
 
-        virtual void update();
+        virtual void update() {}
 
-        Texture* texture() const;
+        Texture* texture() const noexcept { return m_Texture; }
 
         void onEvent(const Event& e);
 };

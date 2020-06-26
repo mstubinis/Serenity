@@ -34,11 +34,6 @@ void ParticleEmitter::init(ParticleEmissionProperties& properties, Scene& scene,
     setLinearVelocity(0, 0, 0);
     setScale(1, 1, 1);
 }
-
-ParticleEmitter::~ParticleEmitter() {
-
-}
-
 ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept {
     m_Properties      = std::exchange(other.m_Properties, nullptr);
     m_SpawningTimer   = std::move(other.m_SpawningTimer);
@@ -63,21 +58,10 @@ ParticleEmitter& ParticleEmitter::operator=(ParticleEmitter&& other) noexcept {
     return *this;
 }
 
-void ParticleEmitter::activate() {
-    m_Active = true;
-}
-void ParticleEmitter::deactivate() {
-    m_Active = false;
-}
 
-ParticleEmissionProperties* ParticleEmitter::getProperties() const {
-    return m_Properties;
-}
 void ParticleEmitter::setProperties(ParticleEmissionProperties& properties) {
     m_Properties = &properties;
 }
-
-
 void ParticleEmitter::update(size_t index, const float dt, priv::ParticleSystem& particleSystem, bool multi_threaded) {
     //handle spawning
     if (m_Active) {
@@ -113,22 +97,19 @@ void ParticleEmitter::update(size_t index, const float dt, priv::ParticleSystem&
         }
     }
 }
-bool ParticleEmitter::isActive() const {
-    return m_Active;
-}
 
-void ParticleEmitter::setRotation(const decimal& x, const decimal& y, const decimal& z, const decimal& w) {
+void ParticleEmitter::setRotation(decimal x, decimal y, decimal z, decimal w) {
     getComponent<ComponentBody>()->setRotation(x, y, z, w);
 }
 void ParticleEmitter::setRotation(const glm_quat& rotation) {
     getComponent<ComponentBody>()->setRotation(rotation);
 }
 
-void ParticleEmitter::rotate(const decimal& x, const decimal& y, const decimal& z) {
+void ParticleEmitter::rotate(decimal x, decimal y, decimal z) {
     getComponent<ComponentBody>()->rotate(x, y, z);
 }
 
-void ParticleEmitter::setPosition(const decimal& x, const decimal& y, const decimal& z) {
+void ParticleEmitter::setPosition(decimal x, decimal y, decimal z) {
     getComponent<ComponentBody>()->setPosition(x, y, z);
 }
 void ParticleEmitter::setPosition(const glm_vec3& position) {
@@ -136,7 +117,7 @@ void ParticleEmitter::setPosition(const glm_vec3& position) {
 }
 
 
-void ParticleEmitter::setScale(const decimal& x, const decimal& y, const decimal& z) {
+void ParticleEmitter::setScale(decimal x, decimal y, decimal z) {
     getComponent<ComponentBody>()->setScale(x, y, z);
 }
 void ParticleEmitter::setScale(const glm_vec3& scale) {
@@ -154,14 +135,14 @@ glm_quat ParticleEmitter::rotation() const {
     return getComponent<ComponentBody>()->getRotation();
 }
 
-void ParticleEmitter::setLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local) {
+void ParticleEmitter::setLinearVelocity(decimal x, decimal y, decimal z, bool local) {
     getComponent<ComponentBody>()->setLinearVelocity(x, y, z, local);
 }
-void ParticleEmitter::setLinearVelocity(const glm_vec3& lv, const bool local) {
+void ParticleEmitter::setLinearVelocity(const glm_vec3& lv, bool local) {
     getComponent<ComponentBody>()->setLinearVelocity(lv, local);
 }
 
-void ParticleEmitter::applyLinearVelocity(const decimal& x, const decimal& y, const decimal& z, const bool local) {
+void ParticleEmitter::applyLinearVelocity(decimal x, decimal y, decimal z, bool local) {
     auto& body = *getComponent<ComponentBody>();
     const auto currVel = body.getLinearVelocity();
     auto newVel = glm_vec3(x, y, z);

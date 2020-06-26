@@ -15,7 +15,7 @@ namespace Engine::Networking {
         friend class Engine::priv::SocketManager;
         private:
             struct UDPPacketInfo final {
-                sf::Packet      packet;
+                sf::Packet      sfmlPacket;
                 unsigned short  port;
                 sf::IpAddress   ip;
             };
@@ -34,7 +34,7 @@ namespace Engine::Networking {
 
             void update(const float dt) override;
         public:
-            SocketUDP(const unsigned short port, const std::string& ip = "");
+            SocketUDP(unsigned short port, const std::string& ip = "");
             ~SocketUDP();
 
             void                 setBlocking(bool blocking) override;
@@ -44,7 +44,7 @@ namespace Engine::Networking {
 
             SocketStatus::Status   bind(const std::string& ip = "");
             void                 unbind();
-            void                 changePort(const unsigned short newPort);
+            void                 changePort(unsigned short newPort);
             
             SocketStatus::Status   send(Engine::Networking::Packet& packet, const std::string& ip = "");
             SocketStatus::Status   send(sf::Packet& packet, const std::string& ip = "");
@@ -52,9 +52,9 @@ namespace Engine::Networking {
             SocketStatus::Status   receive(sf::Packet& packet, sf::IpAddress& ip, unsigned short& port);
             SocketStatus::Status   receive(void* data, size_t size, size_t& received, sf::IpAddress& ip, unsigned short& port);
 
-            SocketStatus::Status   send(const unsigned short port, Engine::Networking::Packet& packet, const std::string& ip = "");
-            SocketStatus::Status   send(const unsigned short port, sf::Packet& packet, const std::string& ip = "");
-            SocketStatus::Status   send(const unsigned short port, const void* data, size_t size, const std::string& ip = "");
+            SocketStatus::Status   send(unsigned short port, Engine::Networking::Packet& packet, const std::string& ip = "");
+            SocketStatus::Status   send(unsigned short port, sf::Packet& packet, const std::string& ip = "");
+            SocketStatus::Status   send(unsigned short port, const void* data, size_t size, const std::string& ip = "");
     };
 };
 

@@ -126,9 +126,9 @@ namespace Engine{
                 void on_event_joystick_connected(Window&, const unsigned int id);
                 void on_event_joystick_disconnected(Window&, const unsigned int id);
 
-                void update_logic(Window& window, const float dt);
-                void update_sounds(Window& window, const float dt);
-                void update_physics(Window& window, const float dt);
+                void update_logic(Scene&, Window& window, const float dt);
+                void update_sounds(Scene&, Window& window, const float dt);
+                void update_physics(Scene&, Window& window, const float dt);
                 void update(Window& window, const float dt);
                 void render(Window& window, const float dt);
                 void cleanup(Window& window, const float dt);

@@ -5,6 +5,14 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Production|Win32">
+      <Configuration>Production</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Production|x64">
+      <Configuration>Production</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
@@ -43,6 +51,15 @@
     <PreferredToolArchitecture>x86</PreferredToolArchitecture>
     <VCToolsVersion>14.22.27905</VCToolsVersion>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x86</PreferredToolArchitecture>
+    <VCToolsVersion>14.22.27905</VCToolsVersion>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -52,6 +69,15 @@
     <VCToolsVersion>14.22.27905</VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <VCToolsVersion>14.22.27905</VCToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
@@ -71,10 +97,16 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Production|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -102,7 +134,23 @@
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x86;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x86;$(LibraryPath)</LibraryPath>
     <TargetName>Serenity</TargetName>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IntDir>$(SolutionDir)Builds\Serenity\$(Configuration)\objs\</IntDir>
+    <OutDir>$(SolutionDir)Builds\Serenity\$(Configuration)\</OutDir>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\cppwinrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x86;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x86;$(LibraryPath)</LibraryPath>
+    <TargetName>Serenity</TargetName>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)Builds\Serenity64\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Builds\Serenity64\$(Configuration)\objs\</IntDir>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\cppwinrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x64;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x64;C:\Program Files (x86)\Windows Kits\10\lib\10.0.17134.0\um\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17134.0\ucrt\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17763.0\um\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17763.0\ucrt\x64;$(LibraryPath)</LibraryPath>
+    <TargetName>Serenity</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)Builds\Serenity64\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Builds\Serenity64\$(Configuration)\objs\</IntDir>
@@ -203,6 +251,43 @@
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;GLEW_STATIC;SFML_STATIC;ASSIMP_STATIC;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\dev\LuaBridge\Source;D:\dev\freetype\include;$(SolutionDir)Engine\src;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForcedIncludeFiles>core\engine\utils\ForcedInclude.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <AssemblerOutput>All</AssemblerOutput>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying Binary (Release) ...</Message>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>%(AdditionalDependencies);lua.lib;assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision_d.lib;BulletDynamics_d.lib;BulletSoftBody_d.lib;LinearMath_d.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;discord_game_sdk.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Release;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\lib\32\Release;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;D:\dev\discord_game_sdk\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -212,6 +297,35 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;GLEW_STATIC;SFML_STATIC;ASSIMP_STATIC;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\dev\LuaBridge\Source;D:\dev\freetype\include;$(SolutionDir)Engine\src;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForcedIncludeFiles>core\engine\utils\ForcedInclude.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <AssemblerOutput>All</AssemblerOutput>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>D:\dev\lua\lib\64\Release;D:\dev\freetype\lib\64\Release;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\lib\64\Release;D:\dev\SFML\lib\64;D:\dev\SFML\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;assimp.lib;freeglut64.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision_d.lib;BulletDynamics_d.lib;BulletSoftBody_d.lib;LinearMath_d.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;GLEW_STATIC;SFML_STATIC;ASSIMP_STATIC;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_HIGH_PRECISION;ENGINE_PRODUCTION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>D:\dev\LuaBridge\Source;D:\dev\freetype\include;$(SolutionDir)Engine\src;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>

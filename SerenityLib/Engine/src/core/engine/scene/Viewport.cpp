@@ -14,13 +14,11 @@ Viewport::Viewport() {
     activateDepthMask(false);
 }
 Viewport::Viewport(const Scene& scene, const Camera& camera) : Viewport() {
-    const auto winSize  = Resources::getWindowSize();
-    m_Scene             = &const_cast<Scene&>(scene);
+    auto winSize  = Resources::getWindowSize();
+    m_Scene       = &const_cast<Scene&>(scene);
 
     setCamera(camera);
     setViewportDimensions(0.0f, 0.0f, static_cast<float>(winSize.x), static_cast<float>(winSize.y));
-}
-Viewport::~Viewport() {
 }
 Viewport::Viewport(Viewport&& other) noexcept {
     m_Scene                  = std::exchange(other.m_Scene, nullptr);
@@ -47,63 +45,26 @@ Viewport& Viewport::operator=(Viewport&& other) noexcept {
 }
 
 
-unsigned int Viewport::id() const {
-    return m_ID;
-}
-void Viewport::setID(const unsigned int id) {
-    m_ID = id;
-}
-
-float Viewport::getDepthMaskValue() const {
-    return m_DepthMaskValue;
-}
-void Viewport::setDepthMaskValue(const float depth) {
-    m_DepthMaskValue = depth;
-}
-
-void Viewport::activateDepthMask(const bool active) {
-    if (active) {
-        m_StateFlags.add(StateFlags::DepthMaskActive);
-    }else{
-        m_StateFlags.remove(StateFlags::DepthMaskActive);
-    }
+void Viewport::activateDepthMask(bool active) {
+    (active) ? m_StateFlags.add(StateFlags::DepthMaskActive) : m_StateFlags.remove(StateFlags::DepthMaskActive);
 }
 bool Viewport::isDepthMaskActive() const {
     return m_StateFlags.has(StateFlags::DepthMaskActive);
 }
-const glm::vec4& Viewport::getBackgroundColor() const {
-    return m_BackgroundColor;
-}
-void Viewport::setBackgroundColor(const float r, const float g, const float b, const float a) {
+void Viewport::setBackgroundColor(float r, float g, float b, float a) {
     m_BackgroundColor.r = r;
     m_BackgroundColor.g = g;
     m_BackgroundColor.b = b;
     m_BackgroundColor.a = a;
 }
-
-void Viewport::setAspectRatioSynced(const bool synced) {
-    if (synced) {
-        m_StateFlags.add(StateFlags::AspectRatioSynced);
-    }else{
-        m_StateFlags.remove(StateFlags::AspectRatioSynced);
-    }
+void Viewport::setAspectRatioSynced(bool synced) {
+    (synced) ? m_StateFlags.add(StateFlags::AspectRatioSynced) : m_StateFlags.remove(StateFlags::AspectRatioSynced);
 }
 bool Viewport::isAspectRatioSynced() const {
     return m_StateFlags.has(StateFlags::AspectRatioSynced);
 }
-
-const Scene& Viewport::getScene() const {
-    return *m_Scene;
-}
-const Camera& Viewport::getCamera() const {
-    return *m_Camera;
-}
-void Viewport::activate(const bool active) {
-    if (active) {
-        m_StateFlags.add(StateFlags::Active);
-    }else{
-        m_StateFlags.remove(StateFlags::Active);
-    }
+void Viewport::activate(bool active) {
+    (active) ? m_StateFlags.add(StateFlags::Active) : m_StateFlags.remove(StateFlags::Active);
 }
 bool Viewport::isActive() const {
     return m_StateFlags.has(StateFlags::Active);
@@ -111,24 +72,18 @@ bool Viewport::isActive() const {
 void Viewport::setCamera(const Camera& camera) {
     m_Camera = &const_cast<Camera&>(camera);
 }
-void Viewport::setViewportDimensions(const float x, const float y, const float width, const float height) {
+void Viewport::setViewportDimensions(float x, float y, float width, float height) {
     m_Viewport_Dimensions.x = x;
     m_Viewport_Dimensions.y = y;
     m_Viewport_Dimensions.z = width;
     m_Viewport_Dimensions.w = height;
 }
-const glm::vec4& Viewport::getViewportDimensions() const {
-    return m_Viewport_Dimensions;
-}
-Engine::Flag<unsigned short> Viewport::getRenderFlags() const {
-    return m_RenderFlags;
-}
-void Viewport::setRenderFlag(const ViewportRenderingFlag::Flag flag) {
+void Viewport::setRenderFlag(ViewportRenderingFlag::Flag flag) {
     m_RenderFlags = flag;
 }
-void Viewport::addRenderFlag(const ViewportRenderingFlag::Flag flag) {
+void Viewport::addRenderFlag(ViewportRenderingFlag::Flag flag) {
     m_RenderFlags.add(flag);
 }
-void Viewport::removeRenderFlag(const ViewportRenderingFlag::Flag flag) {
+void Viewport::removeRenderFlag(ViewportRenderingFlag::Flag flag) {
     m_RenderFlags.remove(flag);
 }

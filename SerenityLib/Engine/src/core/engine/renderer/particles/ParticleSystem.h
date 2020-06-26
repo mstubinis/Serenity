@@ -49,7 +49,7 @@ namespace Engine::priv {
             std::mutex                             m_Mutex;
 
             void internal_update_emitters(const float dt);
-            void internal_update_particles(const float dt, const Camera& camera);
+            void internal_update_particles(const float dt, Camera& camera);
         public:
             //DOD
             struct ParticleDOD final {
@@ -92,8 +92,8 @@ namespace Engine::priv {
             std::stack<size_t>&           getParticleEmittersFreelist();
             std::stack<size_t>&           getParticlesFreelist();
 
-            void update(const float dt, const Camera& camera);
-            void render(const Viewport& viewport, const Camera& camera, ShaderProgram& program, Renderer& renderer);
+            void update(const float dt, Camera& camera);
+            void render(Viewport& viewport, Camera& camera, ShaderProgram& program, Renderer& renderer);
         };
 };
 #endif

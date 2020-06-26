@@ -54,38 +54,37 @@ class Viewport final : public Engine::NonCopyable {
         Viewport(Viewport&& other) noexcept;
         Viewport& operator=(Viewport&& other) noexcept;
 
-        ~Viewport();
+        ~Viewport() {}
 
-        unsigned int id() const;
-        void setID(const unsigned int id);
+        constexpr unsigned int id() const noexcept { return m_ID; }
+        void setID(unsigned int id) noexcept { m_ID = id; }
 
-        Engine::Flag<unsigned short> getRenderFlags() const;
-        void setRenderFlag(const ViewportRenderingFlag::Flag flag);
-        void addRenderFlag(const ViewportRenderingFlag::Flag flag);
-        void removeRenderFlag(const ViewportRenderingFlag::Flag flag);
+        Engine::Flag<unsigned short> getRenderFlags() const noexcept { return m_RenderFlags; }
+        void setRenderFlag(ViewportRenderingFlag::Flag flag);
+        void addRenderFlag(ViewportRenderingFlag::Flag flag);
+        void removeRenderFlag(ViewportRenderingFlag::Flag flag);
 
-        float getDepthMaskValue() const;
-        void setDepthMaskValue(const float depth);
-
-        void activateDepthMask(const bool active = true);
+        constexpr float getDepthMaskValue() const noexcept { return m_DepthMaskValue; }
+        void setDepthMaskValue(float depth) noexcept { m_DepthMaskValue = depth; }
+        void activateDepthMask(bool active = true);
         bool isDepthMaskActive() const;
 
-        const glm::vec4& getBackgroundColor() const;
-        void setBackgroundColor(const float r, const float g, const float b, const float a);
+        constexpr const glm::vec4& getBackgroundColor() const noexcept { return m_BackgroundColor; }
+        void setBackgroundColor(float r, float g, float b, float a);
 
-        void setAspectRatioSynced(const bool synced);
+        void setAspectRatioSynced(bool synced);
         bool isAspectRatioSynced() const;
 
-        void activate(const bool activate = true);
+        void activate(bool activate = true);
         bool isActive() const;
 
 
-        const Scene& getScene() const;
-        const Camera& getCamera() const;
-        const glm::vec4& getViewportDimensions() const;
+        Scene& getScene() noexcept { return *m_Scene; }
+        Camera& getCamera() noexcept { return *m_Camera; }
+        constexpr const glm::vec4& getViewportDimensions() const noexcept { return m_Viewport_Dimensions; }
 
         void setCamera(const Camera& camera);
-        void setViewportDimensions(const float x, const float y, const float width, const float height);
+        void setViewportDimensions(float x, float y, float width, float height);
 };
 
 #endif

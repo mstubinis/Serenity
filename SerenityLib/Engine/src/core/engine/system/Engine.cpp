@@ -114,7 +114,7 @@ void EngineCore::init(const EngineOptions& options) {
     Engine::Renderer::fog::enable(options.fog_enabled);
     Engine::Renderer::Settings::setAntiAliasingAlgorithm(options.aa_algorithm);
 }
-void EngineCore::update_physics(Window& window, const float timeStep) {
+void EngineCore::update_physics(Scene& scene, Window& window, const float timeStep) {
     m_DebugManager.stop_clock();
 
     const unsigned int requestedStepsPerFrame  = Physics::getNumberOfStepsPerFrame();
@@ -124,11 +124,10 @@ void EngineCore::update_physics(Window& window, const float timeStep) {
 
     m_DebugManager.calculate_physics();
 }
-void EngineCore::update_logic(Window& window, const float dt){
+void EngineCore::update_logic(Scene& scene, Window& window, const float dt){
     m_DebugManager.stop_clock();
     window.on_dynamic_resize();
     m_NetworkingModule.update(dt);
-    Scene& scene = *Resources::getCurrentScene();
     scene.preUpdate(dt);
     Game::onPreUpdate(dt);
     Game::update(dt);
@@ -143,15 +142,16 @@ void EngineCore::update_logic(Window& window, const float dt){
     m_DiscordModule.update();
     m_DebugManager.calculate_logic();
 }
-void EngineCore::update_sounds(Window& window, const float dt){
+void EngineCore::update_sounds(Scene& scene, Window& window, const float dt){
     m_DebugManager.stop_clock();
-    m_SoundModule.update(dt);
+    m_SoundModule.update(scene, dt);
     m_DebugManager.calculate_sounds();
 }
 void EngineCore::update(Window& window, const float dt){
-    update_physics(window, dt);
-    update_logic(window, dt);
-    update_sounds(window, dt);
+    Scene& scene = *Resources::getCurrentScene();
+    update_physics(scene, window, dt);
+    update_logic(scene, window, dt);
+    update_sounds(scene, window, dt);
 }
 void EngineCore::render(Window& window, const float dt){
     m_DebugManager.stop_clock();

@@ -55,9 +55,9 @@ namespace priv{
             void _init();
             void _resize(uint width, uint height);
 
-            void _render(Viewport&, const bool mainRenderFunc = true);
+            void _render(Viewport&, bool mainRenderFunc = true);
 
-            void _onFullscreen(const unsigned int width, const unsigned int height);
+            void _onFullscreen(unsigned int width, unsigned int height);
             void _onOpenGLContextCreation(uint width,uint height,uint glslVersion,uint openglVersion);
             void _clear2DAPICommands();
             void _sort2DAPICommands();
@@ -83,13 +83,13 @@ namespace Renderer{
         void setGamma(const float g);
         const float getGamma();
 
-        void clear(const bool color = true, const bool depth = true, const bool stencil = true);
+        void clear(bool color = true, bool depth = true, bool stencil = true);
         
-        void applyGlobalAnisotropicFiltering(const float filtering);
+        void applyGlobalAnisotropicFiltering(float filtering);
 
-        bool setAntiAliasingAlgorithm(const AntiAliasingAlgorithm::Algorithm AA_algorithm);
+        bool setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm AA_algorithm);
 
-        void enableDrawPhysicsInfo(const bool b = true);
+        void enableDrawPhysicsInfo(bool b = true);
         void disableDrawPhysicsInfo();
 
         namespace Lighting{
@@ -113,113 +113,113 @@ namespace Renderer{
     unsigned int getUniformLoc(const char* location);
     unsigned int getUniformLocUnsafe(const char* location);
 
-    bool cullFace(const GLenum state);
-    bool setDepthFunc(const GLenum func);
-    bool setViewport(const float x, const float y, const float width, const float height);
+    bool cullFace(GLenum state);
+    bool setDepthFunc(GLenum func);
+    bool setViewport(float x, float y, float width, float height);
 
-    bool stencilFunc(const GLenum func, const GLint ref, const GLuint mask);
-    bool stencilMask(const GLuint mask);
-    bool stencilOp(const GLenum sfail, const GLenum dpfail, const GLenum dppass);
+    bool stencilFunc(GLenum func, GLint ref, GLuint mask);
+    bool stencilMask(GLuint mask);
+    bool stencilOp(GLenum sfail, GLenum dpfail, GLenum dppass);
 
-    void bindFBO(const GLuint fbo);
+    void bindFBO(GLuint fbo);
     void bindFBO(const priv::FramebufferObject& rbo);
-    bool bindRBO(const GLuint rbo);
+    bool bindRBO(GLuint rbo);
     bool bindRBO(priv::RenderbufferObject& rbo);
-    bool bindReadFBO(const GLuint fbo);
-    bool bindDrawFBO(const GLuint fbo);
+    bool bindReadFBO(GLuint fbo);
+    bool bindDrawFBO(GLuint fbo);
 
     void unbindFBO();
     void unbindRBO();
     void unbindReadFBO();
     void unbindDrawFBO();
 
-    bool GLEnable(const GLenum capability);
-    bool GLDisable(const GLenum capability);
-    bool GLEnablei(const GLenum capability, const GLuint index);
-    bool GLDisablei(const GLenum capability, const GLuint index);
+    bool GLEnable(GLenum capability);
+    bool GLDisable(GLenum capability);
+    bool GLEnablei(GLenum capability, GLuint index);
+    bool GLDisablei(GLenum capability, GLuint index);
 
-    bool bindTextureForModification(const GLuint _textureType, const GLuint _textureObject);
+    bool bindTextureForModification(GLuint textureType, GLuint textureObject);
 
-    bool bindVAO(const GLuint vaoObject);
-    void genAndBindTexture(const GLuint _textureType, GLuint& textureObject);
+    bool bindVAO(GLuint vaoObject);
+    void genAndBindTexture(GLuint textureType, GLuint& textureObject);
     void genAndBindVAO(GLuint& vaoObject);
     bool deleteVAO(GLuint& vaoObject);
-    bool colorMask(const bool r, const bool g, const bool b, const bool a);
-    bool clearColor(const float r, const float g, const float b, const float a);
+    bool colorMask(bool r, bool g, bool b, bool a);
+    bool clearColor(float r, float g, float b, float a);
 
-    void sendTexture(const char* location, const Texture& texture, const int slot);
-    void sendTexture(const char* location, const GLuint textureAddress, const int slot, const GLuint glTextureType);
-    void sendTextureSafe(const char* location, const Texture& texture, const int slot);
-    void sendTextureSafe(const char* location, const GLuint textureAddress, const int slot, const GLuint glTextureType);
+    void sendTexture(const char* location, Texture& texture, int slot);
+    void sendTexture(const char* location, GLuint textureAddress, int slot, GLuint glTextureType);
+    void sendTextureSafe(const char* location, Texture& texture, int slot);
+    void sendTextureSafe(const char* location, GLuint textureAddress, int slot, GLuint glTextureType);
     
-    void alignmentOffset(const Alignment::Type align, float& x, float& y, const float width, const float height);
+    void alignmentOffset(Alignment::Type align, float& x, float& y, float width, float height);
 
     void renderTexture(
-        const Texture&,
+        Texture&,
         const glm::vec2& position,
         const glm::vec4& color,
-        const float angle,
+        float angle,
         const glm::vec2& scale,
-        const float depth,
-        const Alignment::Type = Alignment::Type::Center,
-        const glm::vec4& scissor = glm::vec4(-1.0f)
+        float depth,
+        Alignment::Type = Alignment::Type::Center,
+        const glm::vec4& scissor = NO_SCISSOR
     );
     void renderText(
         const std::string& text,
         const Font&,
         const glm::vec2& position,
         const glm::vec4& color,
-        const float angle,
+        float angle,
         const glm::vec2& scale,
-        const float depth,
-        const TextAlignment::Type = TextAlignment::Left,
-        const glm::vec4& scissor = glm::vec4(-1.0f)
+        float depth,
+        TextAlignment::Type = TextAlignment::Left,
+        const glm::vec4& scissor = NO_SCISSOR
     );
     void renderRectangle(
         const glm::vec2& pos,
         const glm::vec4& col,
-        const float width,
-        const float height,
-        const float angle,
-        const float depth,
-        const Alignment::Type = Alignment::Type::Center,
-        const glm::vec4& scissor = glm::vec4(-1.0f)
+        float width,
+        float height,
+        float angle,
+        float depth,
+        Alignment::Type = Alignment::Type::Center,
+        const glm::vec4& scissor = NO_SCISSOR
     );
     void renderBorder(
-        const float borderSize,
+        float borderSize,
         const glm::vec2& position,
         const glm::vec4& color,
-        const float width,
-        const float height,
-        const float angle,
-        const float depth,
-        const Alignment::Type = Alignment::Type::Center,
-        const glm::vec4& scissor = glm::vec4(-1.0f)
+        float width,
+        float height,
+        float angle,
+        float depth,
+        Alignment::Type = Alignment::Type::Center,
+        const glm::vec4& scissor = NO_SCISSOR
     );
     void renderTriangle(
         const glm::vec2& position,
         const glm::vec4& color,
-        const float angle,
-        const float width,
-        const float height,
-        const float depth,
-        const Alignment::Type = Alignment::Type::Center,
-        const glm::vec4& scissor = glm::vec4(-1.0f)
+        float angle,
+        float width,
+        float height,
+        float depth,
+        Alignment::Type = Alignment::Type::Center,
+        const glm::vec4& scissor = NO_SCISSOR
     );
 
     #pragma region UniformSending
     //Uniform 1
-    inline void sendUniform1(const char* l,double x){ glUniform1d(getUniformLocUnsafe(l),x); }
-    inline void sendUniform1(const char* l,int x){ glUniform1i(getUniformLocUnsafe(l),x); }
-    inline void sendUniform1(const char* l,float x){ glUniform1f(getUniformLocUnsafe(l),x); }
+    inline void sendUniform1(const char* l, double x){ glUniform1d(getUniformLocUnsafe(l),x); }
+    inline void sendUniform1(const char* l, int x){ glUniform1i(getUniformLocUnsafe(l),x); }
+    inline void sendUniform1(const char* l, float x){ glUniform1f(getUniformLocUnsafe(l),x); }
     inline void sendUniform1(const char* l, uint32_t x) { glUniform1ui(getUniformLocUnsafe(l), x); }
-    inline void sendUniform1Safe(const char* l,double x){ const auto& o=getUniformLoc(l);if(o==-1)return;glUniform1d(o,x); }
-    inline void sendUniform1Safe(const char* l,int x){ const auto& o=getUniformLoc(l);if(o==-1)return;glUniform1i(o,x); }
-    inline void sendUniform1Safe(const char* l,float x){ const auto& o=getUniformLoc(l);if(o==-1)return;glUniform1f(o,x); }
+    inline void sendUniform1Safe(const char* l, double x){ const auto& o=getUniformLoc(l);if(o==-1)return;glUniform1d(o,x); }
+    inline void sendUniform1Safe(const char* l, int x){ const auto& o=getUniformLoc(l);if(o==-1)return;glUniform1i(o,x); }
+    inline void sendUniform1Safe(const char* l, float x){ const auto& o=getUniformLoc(l);if(o==-1)return;glUniform1f(o,x); }
     inline void sendUniform1Safe(const char* l, uint32_t x) { const auto& o=getUniformLoc(l);if(o==-1)return;glUniform1ui(o, x); }
-    inline void sendUniform1Force(const char* l,double x){ glUniform1d(getUniformLoc(l),x); }
-    inline void sendUniform1Force(const char* l,int x){ glUniform1i(getUniformLoc(l),x); }
-    inline void sendUniform1Force(const char* l,float x){ glUniform1f(getUniformLoc(l),x); }
+    inline void sendUniform1Force(const char* l, double x){ glUniform1d(getUniformLoc(l),x); }
+    inline void sendUniform1Force(const char* l, int x){ glUniform1i(getUniformLoc(l),x); }
+    inline void sendUniform1Force(const char* l, float x){ glUniform1f(getUniformLoc(l),x); }
     inline void sendUniform1Force(const char* l, uint32_t x) { glUniform1ui(getUniformLoc(l),x); }
         
     //Uniform 2
@@ -237,25 +237,25 @@ namespace Renderer{
     inline void sendUniform2Force(const char* l, const glm::vec2& v){ glUniform2f(getUniformLoc(l),v.x,v.y); }
     inline void sendUniform2Force(const char* l, const glm::uvec2& v) { glUniform2ui(getUniformLoc(l),v.x,v.y); }
     //seperate
-    inline void sendUniform2(const char* l,double x,double y){ glUniform2d(getUniformLocUnsafe(l),x,y); }
-    inline void sendUniform2(const char* l,int x,int y){ glUniform2i(getUniformLocUnsafe(l),x,y); }
-    inline void sendUniform2(const char* l,float x,float y){ glUniform2f(getUniformLocUnsafe(l),x,y); } 
+    inline void sendUniform2(const char* l, double x, double y){ glUniform2d(getUniformLocUnsafe(l),x,y); }
+    inline void sendUniform2(const char* l, int x, int y){ glUniform2i(getUniformLocUnsafe(l),x,y); }
+    inline void sendUniform2(const char* l, float x, float y){ glUniform2f(getUniformLocUnsafe(l),x,y); } 
     inline void sendUniform2(const char* l, uint32_t x, uint32_t y) { glUniform2ui(getUniformLocUnsafe(l), x, y); }
-    inline void sendUniform2Safe(const char* l,double x,double y){ const auto& o=getUniformLoc(l);if(o==-1)return;glUniform2d(o,x,y); }
-    inline void sendUniform2Safe(const char* l,int x,int y){ const auto& o=getUniformLoc(l);if(o==-1)return;glUniform2i(o,x,y); }
-    inline void sendUniform2Safe(const char* l,float x,float y){ const auto& o=getUniformLoc(l);if(o==-1)return;glUniform2f(o,x,y); }
+    inline void sendUniform2Safe(const char* l, double x, double y){ const auto& o=getUniformLoc(l);if(o==-1)return;glUniform2d(o,x,y); }
+    inline void sendUniform2Safe(const char* l, int x, int y){ const auto& o=getUniformLoc(l);if(o==-1)return;glUniform2i(o,x,y); }
+    inline void sendUniform2Safe(const char* l, float x, float y){ const auto& o=getUniformLoc(l);if(o==-1)return;glUniform2f(o,x,y); }
     inline void sendUniform2Safe(const char* l, uint32_t x, uint32_t y) { const auto& o = getUniformLoc(l); if (o == -1)return; glUniform2ui(o, x, y); }
-    inline void sendUniform2Force(const char* l,double x,double y){ glUniform2d(getUniformLoc(l),x,y); }
-    inline void sendUniform2Force(const char* l,int x,int y){ glUniform2i(getUniformLoc(l),x,y); }
-    inline void sendUniform2Force(const char* l,float x,float y){ glUniform2f(getUniformLoc(l),x,y); }
+    inline void sendUniform2Force(const char* l, double x, double y){ glUniform2d(getUniformLoc(l),x,y); }
+    inline void sendUniform2Force(const char* l, int x, int y){ glUniform2i(getUniformLoc(l),x,y); }
+    inline void sendUniform2Force(const char* l, float x, float y){ glUniform2f(getUniformLoc(l),x,y); }
     inline void sendUniform2Force(const char* l, uint32_t x, uint32_t y) { glUniform2ui(getUniformLoc(l), x, y); }
     //vector and array of values
     inline void sendUniform2v(const char* l, const std::vector<glm::dvec2>& d,const uint i){ glUniform2dv(getUniformLocUnsafe(l),i,glm::value_ptr(d[0])); }
     inline void sendUniform2v(const char* l, const std::vector<glm::ivec2>& d, const uint i){ glUniform2iv(getUniformLocUnsafe(l),i,glm::value_ptr(d[0])); }
     inline void sendUniform2v(const char* l, const std::vector<glm::vec2>& d, const uint i){ glUniform2fv(getUniformLocUnsafe(l),i,glm::value_ptr(d[0])); }
-    inline void sendUniform2v(const char* l,glm::dvec2* d, const uint i){ glUniform2dv(getUniformLocUnsafe(l),i,glm::value_ptr(d[0])); }
-    inline void sendUniform2v(const char* l,glm::ivec2* d, const uint i){ glUniform2iv(getUniformLocUnsafe(l),i,glm::value_ptr(d[0])); }
-    inline void sendUniform2v(const char* l,glm::vec2* d, const uint i){ glUniform2fv(getUniformLocUnsafe(l),i,glm::value_ptr(d[0])); }
+    inline void sendUniform2v(const char* l, glm::dvec2* d, const uint i){ glUniform2dv(getUniformLocUnsafe(l),i,glm::value_ptr(d[0])); }
+    inline void sendUniform2v(const char* l, glm::ivec2* d, const uint i){ glUniform2iv(getUniformLocUnsafe(l),i,glm::value_ptr(d[0])); }
+    inline void sendUniform2v(const char* l, glm::vec2* d, const uint i){ glUniform2fv(getUniformLocUnsafe(l),i,glm::value_ptr(d[0])); }
     inline void sendUniform2vSafe(const char* l, const std::vector<glm::vec2>& d, const uint i){ const auto& o=getUniformLoc(l);if(o==-1)return;glUniform2fv(o,i,glm::value_ptr(d[0])); }
     inline void sendUniform2vSafe(const char* l,glm::vec2* d, const uint i){ const auto& o=getUniformLoc(l);if(o==-1)return;glUniform2fv(o,i,glm::value_ptr(d[0])); }
     inline void sendUniform2vForce(const char* l, const std::vector<glm::vec2>& d, const uint i){ glUniform2fv(getUniformLoc(l),i,glm::value_ptr(d[0])); }

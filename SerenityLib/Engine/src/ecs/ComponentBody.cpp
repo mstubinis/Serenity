@@ -293,12 +293,12 @@ unsigned long long ComponentBody::getDistanceLL(Entity other) const {
 void ComponentBody::alignTo(const glm_vec3& p_Direction) {
     if (m_Physics) {
         //recheck this
-        btTransform tr;
-        data.p->bullet_rigidBody->getMotionState()->getWorldTransform(tr);
-        Math::recalculateForwardRightUp(*data.p->bullet_rigidBody, m_Forward, m_Right, m_Up);
+        glm_quat q(1.0, 0.0, 0.0, 0.0);
+        Math::alignTo(q, glm::normalize(p_Direction));
+        ComponentBody::setRotation(q);
     }else{
         auto& normalData = *data.n;
-        Math::alignTo(normalData.rotation, p_Direction);
+        Math::alignTo(normalData.rotation, glm::normalize(p_Direction));
         Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
     }
 }
@@ -465,10 +465,11 @@ void ComponentBody::setRotation(const glm_quat& p_NewRotation) {
 void ComponentBody::setRotation(decimal x, decimal y, decimal z, decimal w) {
     if (m_Physics) {
         auto& physicsData = *data.p;
-        btQuaternion quat(static_cast<btScalar>(x), static_cast<btScalar>(y), static_cast<btScalar>(z), static_cast<btScalar>(w));
-        quat = quat.normalize();
-        auto& rigidBody = *physicsData.bullet_rigidBody;
-        btTransform tr; tr.setOrigin(rigidBody.getWorldTransform().getOrigin());
+        btQuaternion quat((btScalar)x, (btScalar)y, (btScalar)z, (btScalar)w);
+        quat              = quat.normalize();
+        auto& rigidBody   = *physicsData.bullet_rigidBody;
+        btTransform tr; 
+        tr.setOrigin(rigidBody.getWorldTransform().getOrigin());
         tr.setRotation(quat);
         rigidBody.setWorldTransform(tr);
         rigidBody.setCenterOfMassTransform(tr);
@@ -949,9 +950,9 @@ void ComponentBody::removeChild(const ComponentBody& child) const {
     ComponentBody::removeChild(child.m_Owner);
 }
 bool ComponentBody::hasParent() const {
-    auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
     auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
-    auto& pcs = system.ParentChildSystem;
+    auto& pcs    = system.ParentChildSystem;
     return (pcs.Parents[m_Owner.id() - 1U] > 0);
 }
 void ComponentBody::internal_recalculateAllParentChildMatrices(ComponentBody_System& system) {

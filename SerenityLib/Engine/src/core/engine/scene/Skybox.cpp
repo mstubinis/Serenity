@@ -1,5 +1,4 @@
 #include <core/engine/scene/Skybox.h>
-#include <core/engine/scene/Scene.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/textures/TextureLoader.h>
@@ -10,7 +9,45 @@ using namespace std;
 
 GLuint m_Buffer   = 0;
 GLuint m_VAO      = 0;
-vector<glm::vec3> m_Vertices;
+
+constexpr std::array<glm::vec3, 36> VERTICES = {
+    glm::vec3(-1, 1, 1),
+    glm::vec3(1, 1, 1),
+    glm::vec3(1, -1, 1),
+    glm::vec3(-1, 1, 1),
+    glm::vec3(1, -1, 1),
+    glm::vec3(-1, -1, 1),
+    glm::vec3(-1, 1, -1),
+    glm::vec3(-1, -1, -1),
+    glm::vec3(1, -1, -1),
+    glm::vec3(-1, 1, -1),
+    glm::vec3(1, -1, -1),
+    glm::vec3(1, 1, -1),
+    glm::vec3(-1, 1, 1),
+    glm::vec3(-1, -1, 1),
+    glm::vec3(-1, -1, -1),
+    glm::vec3(-1, 1, 1),
+    glm::vec3(-1, -1, -1),
+    glm::vec3(-1, 1, -1),
+    glm::vec3(-1, -1, 1),
+    glm::vec3(1, -1, 1),
+    glm::vec3(1, -1, -1),
+    glm::vec3(-1, -1, 1),
+    glm::vec3(1, -1, -1),
+    glm::vec3(-1, -1, -1),
+    glm::vec3(1, -1, 1),
+    glm::vec3(1, 1, 1),
+    glm::vec3(1, 1, -1),
+    glm::vec3(1, -1, 1),
+    glm::vec3(1, 1, -1),
+    glm::vec3(1, -1, -1),
+    glm::vec3(1, 1, 1),
+    glm::vec3(-1, 1, 1),
+    glm::vec3(-1, 1, -1),
+    glm::vec3(1, 1, 1),
+    glm::vec3(-1, 1, -1),
+    glm::vec3(1, 1, -1),
+};
 
 /*
 when saving a skybox in gimp, the layer ordering should be:
@@ -21,72 +58,35 @@ when saving a skybox in gimp, the layer ordering should be:
     - back    - should be front file
     - front   - should be back file
 
-switch the front and back files
+(switch the front and back files)
 
 */
 
-namespace Engine {
-    namespace priv {
-        class SkyboxImplInterface final {
-            friend class ::Skybox;
-            static void bindDataToGPU() {
-                glBindBuffer(GL_ARRAY_BUFFER, m_Buffer);
-                glEnableVertexAttribArray(0);
-                glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+namespace Engine::priv {
+    class SkyboxImplInterface final {
+        friend class ::Skybox;
+        static void bindDataToGPU() {
+            glBindBuffer(GL_ARRAY_BUFFER, m_Buffer);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        }
+        static void buildVAO() {
+            Engine::Renderer::deleteVAO(m_VAO);
+            if (Engine::priv::Renderer::OPENGL_VERSION >= 30) {
+                Engine::Renderer::genAndBindVAO(m_VAO);
+                Engine::priv::SkyboxImplInterface::bindDataToGPU();
+                Engine::Renderer::bindVAO(0);
             }
-            static void buildVAO() {
-                Engine::Renderer::deleteVAO(m_VAO);
-                if (Engine::priv::Renderer::OPENGL_VERSION >= 30) {
-                    Engine::Renderer::genAndBindVAO(m_VAO);
-                    Engine::priv::SkyboxImplInterface::bindDataToGPU();
-                    Engine::Renderer::bindVAO(0);
-                }
+        }
+        static void initMesh() {
+            if (m_Buffer != 0U) {
+                return;
             }
-            static void initMesh() {
-                if (m_Vertices.size() > 0) 
-                    return;
-
-                vector<glm::vec3> temp;
-                temp.emplace_back(-1, 1, 1);//1
-                temp.emplace_back(1, 1, 1);//2
-                temp.emplace_back(1, -1, 1);//3
-                temp.emplace_back(-1, -1, 1);//4
-                temp.emplace_back(-1, 1, -1);//5
-                temp.emplace_back(-1, -1, -1);//6
-                temp.emplace_back(1, -1, -1);//7
-                temp.emplace_back(1, 1, -1);//8
-                temp.emplace_back(-1, 1, 1);//9
-                temp.emplace_back(-1, -1, 1);//10
-                temp.emplace_back(-1, -1, -1);//11
-                temp.emplace_back(-1, 1, -1);//12
-                temp.emplace_back(-1, -1, 1);//13
-                temp.emplace_back(1, -1, 1);//14
-                temp.emplace_back(1, -1, -1);//15
-                temp.emplace_back(-1, -1, -1);//16
-                temp.emplace_back(1, -1, 1);//17
-                temp.emplace_back(1, 1, 1);//18
-                temp.emplace_back(1, 1, -1);//19
-                temp.emplace_back(1, -1, -1);//20
-                temp.emplace_back(1, 1, 1);//21
-                temp.emplace_back(-1, 1, 1);//22
-                temp.emplace_back(-1, 1, -1);//23
-                temp.emplace_back(1, 1, -1);//24
-
-                for (uint i = 0; i < 6; ++i) {
-                    glm::vec3 v1, v2, v3, v4;
-                    v1 = temp[0 + (i * 4)];
-                    v2 = temp[1 + (i * 4)];
-                    v3 = temp[2 + (i * 4)];
-                    v4 = temp[3 + (i * 4)];
-                    m_Vertices.push_back(v1); m_Vertices.push_back(v2); m_Vertices.push_back(v3);
-                    m_Vertices.push_back(v1); m_Vertices.push_back(v3); m_Vertices.push_back(v4);
-                }
-                glGenBuffers(1, &m_Buffer);
-                glBindBuffer(GL_ARRAY_BUFFER, m_Buffer);
-                glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(glm::vec3), &m_Vertices[0], GL_STATIC_DRAW);
-                Engine::priv::SkyboxImplInterface::buildVAO();
-            }
-        };
+            glGenBuffers(1, &m_Buffer);
+            glBindBuffer(GL_ARRAY_BUFFER, m_Buffer);
+            glBufferData(GL_ARRAY_BUFFER, VERTICES.size() * sizeof(glm::vec3), &VERTICES[0], GL_STATIC_DRAW);
+            Engine::priv::SkyboxImplInterface::buildVAO();
+        }
     };
 };
 
@@ -119,10 +119,10 @@ void Skybox::bindMesh(){
     Engine::priv::SkyboxImplInterface::initMesh();
     if(m_VAO){
         Engine::Renderer::bindVAO(m_VAO);
-        glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_Vertices.size()));
+        glDrawArrays( GL_TRIANGLES, 0, (GLsizei)VERTICES.size() );
     }else{
         Engine::priv::SkyboxImplInterface::bindDataToGPU();
-        glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_Vertices.size()));
+        glDrawArrays( GL_TRIANGLES, 0, (GLsizei)VERTICES.size() );
         glDisableVertexAttribArray(0);
     }
 }
@@ -130,9 +130,4 @@ void Skybox::onEvent(const Event& e) {
     if (e.type == EventType::WindowFullscreenChanged) {
         Engine::priv::SkyboxImplInterface::buildVAO();
     }
-}
-Texture* Skybox::texture() const {
-    return m_Texture; 
-}
-void Skybox::update(){
 }
