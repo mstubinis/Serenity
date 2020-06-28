@@ -68,7 +68,7 @@ class Window final{
 
                 void cleanup();
                 void startup(Window& super, const std::string& name);
-                void push(const EventThreadOnlyCommands::Command command);
+                void push(EventThreadOnlyCommands::Command command);
                 std::optional<sf::Event> try_pop();
                 void updateLoop();
             public:
@@ -84,31 +84,32 @@ class Window final{
                 WindowThread              m_WindowThread;
             #endif
 
-            glm::uvec2                    m_OldWindowSize;
+            glm::uvec2                    m_OldWindowSize          = glm::uvec2(0, 0);
             unsigned int                  m_Style;
             sf::VideoMode                 m_VideoMode;
             std::string                   m_WindowName;
             sf::RenderWindow              m_SFMLWindow;
-            unsigned int                  m_FramerateLimit;
-            bool                          m_UndergoingClosing;
+            unsigned int                  m_FramerateLimit         = 0U;
+            bool                          m_UndergoingClosing      = false;
             Engine::Flag<unsigned short>  m_Flags;
-            std::string                   m_IconFile;
+            std::string                   m_IconFile               = "";
+            std::thread::id               m_OpenGLThreadID;
 
-            glm::vec2                     m_MousePosition;
-            glm::vec2                     m_MousePosition_Previous;
-            glm::vec2                     m_MouseDifference;
-            double                        m_MouseDelta;
+            glm::vec2                     m_MousePosition          = glm::vec2(0.0f);
+            glm::vec2                     m_MousePosition_Previous = glm::vec2(0.0f);
+            glm::vec2                     m_MouseDifference        = glm::vec2(0.0f);
+            double                        m_MouseDelta             = 0.0;
 
             sf::ContextSettings           m_SFContextSettings;
 
-            void restore_state();
+            void restore_state(Window& super);
             const sf::ContextSettings create(Window& super, const std::string& name);
-            void update_mouse_position_internal(Window& super, const float x, const float y, const bool resetDifference, const bool resetPrevious);
-            void on_fullscreen_internal(Window& super, const bool isToBeFullscreen, const bool isMaximized, const bool isMinimized);
+            void update_mouse_position_internal(Window& super, float x, float y, bool resetDifference, bool resetPrevious);
+            void on_fullscreen_internal(Window& super, bool isToBeFullscreen, bool isMaximized, bool isMinimized);
             sf::VideoMode get_default_desktop_video_mode();
             void init_position(Window& super);
 
-            void on_mouse_wheel_scrolled(const float delta, const int x, const int y);
+            void on_mouse_wheel_scrolled(float delta, int x, int y);
 
             void on_reset_events(const float dt);
 
@@ -138,6 +139,7 @@ class Window final{
         void setJoystickProcessingActive(bool active);
         bool isJoystickProcessingActive() const;
 
+        std::thread::id getOpenglThreadID() const;
 
         unsigned int getFramerateLimit() const;
 
@@ -147,7 +149,7 @@ class Window final{
         const glm::vec2& getMousePositionDifference() const;
         const glm::vec2& getMousePositionPrevious() const;
         const glm::vec2& getMousePosition() const;
-        const double& getMouseWheelDelta() const;
+        double getMouseWheelDelta() const;
 
         bool pollEvents(sf::Event& InSFEvent);
 
@@ -173,16 +175,16 @@ class Window final{
         bool isActive() const;
         bool isMouseKeptInWindow() const;
 
-        void updateMousePosition(const float x, const float y, const bool resetDifference = false, const bool resetPreviousPosition = false);
-        void updateMousePosition(const glm::vec2& position, const bool resetDifference = false, const bool resetPreviousPosition = false);
+        void updateMousePosition(float x, float y, bool resetDifference = false, bool resetPreviousPosition = false);
+        void updateMousePosition(const glm::vec2& position, bool resetDifference = false, bool resetPreviousPosition = false);
 
         void setName(const char* name);
-        void setSize(const unsigned int width, const unsigned int height);
+        void setSize(unsigned int width, unsigned int height);
         void setIcon(const Texture& texture);
         void setIcon(const char* file);
         void setIcon(const std::string& file);
-        void setMouseCursorVisible(const bool);
-        void setPosition(const unsigned int x, const unsigned int y);
+        void setMouseCursorVisible(bool);
+        void setPosition(unsigned int x, unsigned int y);
 
         //currently specific to windows os only
         bool maximize();
@@ -192,12 +194,12 @@ class Window final{
         //If key repeat is enabled, you will receive repeated KeyPressed events while keeping a key pressed.
         //If it is disabled, you will only get a single event when the key is pressed.
         //Key repeat is enabled by default.
-        void setKeyRepeatEnabled(const bool);
+        void setKeyRepeatEnabled(bool);
 
         //Activating vertical synchronization will limit the number of frames displayed to the refresh rate of the monitor.
         //This can avoid some visual artifacts, and limit the framerate to a good value (but not constant across different computers).
         //Vertical synchronization is disabled by default.
-        void setVerticalSyncEnabled(const bool);
+        void setVerticalSyncEnabled(bool);
 
         //Close the window and destroy all the attached resources. After calling this function, the sf::Window instance
         //remains valid and you can call create() to recreate the window. All other functions such as pollEvent() or
@@ -214,13 +216,13 @@ class Window final{
         //if you want to make it active on another thread you have to deactivate it on the previous thread first if it was active.
         //Only one window can be active on a thread at a time, thus the window previously active (if any) automatically gets deactivated.
         //This is not to be confused with requestFocus().
-        void setActive(const bool active = true);
+        void setActive(bool active = true);
 
         //sets the window to be full screen
-        bool setFullscreen(const bool isFullscreen = true);
+        bool setFullscreen(bool isFullscreen = true);
 
         //sets the window to be windowed fullscreen, this is a window with no style, stretched to the monitor's size
-        bool setFullscreenWindowed(const bool isFullscreen = true);
+        bool setFullscreenWindowed(bool isFullscreen = true);
 
         /*
         Display the rendered elements to the screen. This is called automatically during the Engine's render loop. You may want to call this yourself in certain parts of the update loop
@@ -230,14 +232,14 @@ class Window final{
 
         //Grab or release the mouse cursor. If set, grabs the mouse cursor inside this window's client area so it may no
         //longer be moved outside its bounds. Note that grabbing is only active while the window has focus.
-        void keepMouseInWindow(const bool = true);
+        void keepMouseInWindow(bool = true);
 
         //Limit the framerate to a maximum fixed frequency. If a limit is set, the window will use a small delay after
         //each call to display() to ensure that the current frame lasted long enough to match the framerate limit.
         //SFML will try to match the given limit as much as it can, but since it internally uses sf::sleep,
         //whose precision depends on the underlying OS, the results may be a little unprecise as well
         //(for example, you can get 65 FPS when requesting 60).
-        void setFramerateLimit(const unsigned int limit);
+        void setFramerateLimit(unsigned int limit);
 
 };
 #endif

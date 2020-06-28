@@ -4,6 +4,7 @@
 #include <core/engine/mesh/MeshCollisionFactory.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/mesh/smsh.h>
+#include <core/engine/system/window/Window.h>
 
 #include <core/engine/system/Engine.h>
 
@@ -143,14 +144,15 @@ void InternalMeshRequestPublicInterface::Request(MeshRequest& meshRequest) {
         if (meshRequest.m_FileExists) {
             bool valid = InternalMeshRequestPublicInterface::Populate(meshRequest);
             if (valid){
-                if (meshRequest.m_Async){
-                    auto job = [meshRequest]() {
-                        InternalMeshRequestPublicInterface::LoadCPU(const_cast<MeshRequest&>(meshRequest)); 
-                    };
-                    auto callback = [meshRequest]() {
-                        InternalMeshRequestPublicInterface::LoadGPU(const_cast<MeshRequest&>(meshRequest));
-                    };
-                    threading::addJobWithPostCallback(job, callback);
+                if (meshRequest.m_Async || std::this_thread::get_id() != Resources::getWindow().getOpenglThreadID()){
+                    threading::addJobWithPostCallback(
+                        [meshRequest]() mutable {
+                            InternalMeshRequestPublicInterface::LoadCPU(meshRequest);
+                        },
+                        [meshRequest]() mutable {
+                            InternalMeshRequestPublicInterface::LoadGPU(meshRequest);
+                        }
+                    );
                 }else{
                     InternalMeshRequestPublicInterface::LoadCPU(meshRequest);
                     InternalMeshRequestPublicInterface::LoadGPU(meshRequest);

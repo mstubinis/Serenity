@@ -37,7 +37,7 @@ std::optional<sf::Event> Window::WindowData::WindowThread::try_pop() {
     auto x = m_Queue.try_pop();
     return std::move(x);
 }
-void Window::WindowData::WindowThread::push(const EventThreadOnlyCommands::Command command) {
+void Window::WindowData::WindowThread::push(EventThreadOnlyCommands::Command command) {
     m_MainThreadToEventThreadQueue.push(command);
 }
 void Window::WindowData::WindowThread::updateLoop(){
@@ -104,13 +104,7 @@ Window::WindowData::WindowData()
 : m_WindowThread(*this) 
 #endif
 {
-    m_FramerateLimit      = 0;
-    m_IconFile            = "";
-    m_UndergoingClosing   = false;
-    m_MouseDelta          = 0.0;
-    m_OldWindowSize       = glm::uvec2(0, 0);
-    m_Flags               = (Window_Flags::Windowed | Window_Flags::MouseVisible | Window_Flags::Active);
-    m_MousePosition       = m_MousePosition_Previous = m_MouseDifference = glm::vec2(0.0f);
+    m_Flags               = (Window_Flags::Windowed | Window_Flags::MouseVisible);
 }
 Window::WindowData::~WindowData() {
     on_close();
@@ -128,7 +122,7 @@ void Window::WindowData::on_close() {
 void Window::WindowData::on_mouse_wheel_scrolled(const float delta, const int x, const int y) {
     m_MouseDelta += (static_cast<double>(delta) * 10.0);
 }
-void Window::WindowData::restore_state() {
+void Window::WindowData::restore_state(Window& super) {
     if (m_FramerateLimit > 0) {
         m_SFMLWindow.setFramerateLimit(m_FramerateLimit);
     }
@@ -136,6 +130,9 @@ void Window::WindowData::restore_state() {
 
     m_SFMLWindow.setMouseCursorVisible(m_Flags & Window_Flags::MouseVisible);
     m_SFMLWindow.setActive(m_Flags & Window_Flags::Active);
+    if (m_Flags & Window_Flags::Active) {
+        super.m_Data.m_OpenGLThreadID = std::this_thread::get_id();
+    }
     m_SFMLWindow.setVerticalSyncEnabled(m_Flags & Window_Flags::Vsync);
     m_SFMLWindow.setMouseCursorGrabbed(m_Flags & Window_Flags::MouseGrabbed);
 }
@@ -166,6 +163,7 @@ const sf::ContextSettings Window::WindowData::create(Window& super, const string
         m_WindowThread.startup(super, name);
         std::this_thread::sleep_for(std::chrono::milliseconds(450));
         m_SFMLWindow.setActive(true);
+        super.m_Data.m_OpenGLThreadID = std::this_thread::get_id();
     #else
         m_SFMLWindow.create(m_VideoMode, name, m_Style, m_SFContextSettings);
         if (!m_IconFile.empty())
@@ -174,10 +172,10 @@ const sf::ContextSettings Window::WindowData::create(Window& super, const string
     #endif
     return m_SFMLWindow.getSettings();
 }
-void Window::WindowData::update_mouse_position_internal(Window& super, const float x, const float y, const bool resetDifference, const bool resetPrevious) {
-    const auto& sfml_size     = m_SFMLWindow.getSize();
-    const auto winSize        = glm::vec2(sfml_size.x, sfml_size.y);
-    const glm::vec2 newPos    = glm::vec2(x, winSize.y - y); //opengl flipping y axis
+void Window::WindowData::update_mouse_position_internal(Window& super, float x, float y, bool resetDifference, bool resetPrevious) {
+    auto sfml_size            = m_SFMLWindow.getSize();
+    auto winSize              = glm::vec2(sfml_size.x, sfml_size.y);
+    glm::vec2 newPos          = glm::vec2(x, winSize.y - y); //opengl flipping y axis
     m_MousePosition_Previous  = (resetPrevious) ? newPos : m_MousePosition;
     m_MousePosition           = newPos;
     m_MouseDifference        += (m_MousePosition - m_MousePosition_Previous);
@@ -185,7 +183,7 @@ void Window::WindowData::update_mouse_position_internal(Window& super, const flo
         m_MouseDifference     = glm::vec2(0.0f);
     }
 }
-void Window::WindowData::on_fullscreen_internal(Window& super, const bool isToBeFullscreen, const bool isMaximized, const bool isMinimized) {
+void Window::WindowData::on_fullscreen_internal(Window& super, bool isToBeFullscreen, bool isMaximized, bool isMinimized) {
     if (isToBeFullscreen) {
         m_OldWindowSize    = glm::uvec2(m_VideoMode.width, m_VideoMode.height);
         m_VideoMode        = get_default_desktop_video_mode();
@@ -197,13 +195,13 @@ void Window::WindowData::on_fullscreen_internal(Window& super, const bool isToBe
     m_SFMLWindow.requestFocus();
     priv::Core::m_Engine->m_RenderManager._onFullscreen(m_VideoMode.width, m_VideoMode.height);
 
-    const auto& sfml_size = m_SFMLWindow.getSize();
-    const auto winSize    = glm::uvec2(sfml_size.x, sfml_size.y);
+    auto sfml_size = m_SFMLWindow.getSize();
+    auto winSize   = glm::uvec2(sfml_size.x, sfml_size.y);
 
     //this does not trigger the sfml event resize method automatically so we must call it here
     priv::Core::m_Engine->on_event_resize(super, winSize.x, winSize.y, false);
 
-    restore_state();
+    restore_state(super);
     //TODO: very wierd, but there is an after-effect "reflection" of the last frame on the window if maximize() is called. Commenting out until it is fixed
     /*
     if (isMaximized) {
@@ -303,10 +301,10 @@ void Window::setJoystickProcessingActive(bool active) {
 bool Window::isJoystickProcessingActive() const {
     return m_Data.m_SFMLWindow.isJoystickManagerActive();
 }
-void Window::updateMousePosition(const float x, const float y, const bool resetDifference, const bool resetPrevious) {
+void Window::updateMousePosition(float x, float y, bool resetDifference, bool resetPrevious) {
     m_Data.update_mouse_position_internal(*this, x, y, resetDifference, resetPrevious);
 }
-void Window::updateMousePosition(const glm::vec2& position, const bool resetDifference, const bool resetPrevious) {
+void Window::updateMousePosition(const glm::vec2& position, bool resetDifference, bool resetPrevious) {
     m_Data.update_mouse_position_internal(*this, position.x, position.y, resetDifference, resetPrevious);
 }
 const glm::vec2& Window::getMousePositionDifference() const {
@@ -318,9 +316,13 @@ const glm::vec2& Window::getMousePositionPrevious() const {
 const glm::vec2& Window::getMousePosition() const {
     return m_Data.m_MousePosition;
 }
-const double& Window::getMouseWheelDelta() const {
+double Window::getMouseWheelDelta() const {
     return m_Data.m_MouseDelta;
 }
+std::thread::id Window::getOpenglThreadID() const {
+    return m_Data.m_OpenGLThreadID;
+}
+
 bool Window::maximize() {
     #ifdef _WIN32
         ::ShowWindow(m_Data.m_SFMLWindow.getSystemHandle(), SW_MAXIMIZE);
@@ -335,11 +337,11 @@ bool Window::minimize() {
     #endif
     return false;
 }
-void Window::setPosition(const unsigned int x, const unsigned int y) {
+void Window::setPosition(unsigned int x, unsigned int y) {
     m_Data.m_SFMLWindow.setPosition(sf::Vector2i(x, y));
 }
 glm::uvec2 Window::getPosition() {
-    const auto position = m_Data.m_SFMLWindow.getPosition();
+    auto position = m_Data.m_SFMLWindow.getPosition();
     return glm::uvec2(position.x, position.y);
 }
 glm::uvec2 Window::getSize(){
@@ -376,7 +378,7 @@ void Window::setName(const char* name){
     m_Data.m_WindowName = name;
     m_Data.m_SFMLWindow.setTitle(name);
 }
-void Window::setVerticalSyncEnabled(const bool isToBeEnabled){
+void Window::setVerticalSyncEnabled(bool isToBeEnabled){
     if (isToBeEnabled) {
         if (!m_Data.m_Flags.has(Window_Flags::Vsync)) {
             m_Data.m_SFMLWindow.setVerticalSyncEnabled(true);
@@ -389,7 +391,7 @@ void Window::setVerticalSyncEnabled(const bool isToBeEnabled){
         }
     }
 }
-void Window::setKeyRepeatEnabled(const bool isToBeEnabled){
+void Window::setKeyRepeatEnabled(bool isToBeEnabled){
     if (isToBeEnabled) {
         if (!m_Data.m_Flags.has(Window_Flags::KeyRepeat)) {
             m_Data.m_SFMLWindow.setKeyRepeatEnabled(true);
@@ -402,7 +404,7 @@ void Window::setKeyRepeatEnabled(const bool isToBeEnabled){
         }
     }
 }
-void Window::setMouseCursorVisible(const bool isToBeVisible){
+void Window::setMouseCursorVisible(bool isToBeVisible){
     if (isToBeVisible) {
         if (!m_Data.m_Flags.has(Window_Flags::MouseVisible)) {
             #ifdef ENGINE_THREAD_WINDOW_EVENTS
@@ -487,10 +489,11 @@ bool Window::isMinimized() const {
     #endif
     return false;
 }
-void Window::setActive(const bool isToBeActive){
+void Window::setActive(bool isToBeActive){
     if (isToBeActive) {
         if (!m_Data.m_Flags.has(Window_Flags::Active)) {
             m_Data.m_SFMLWindow.setActive(true);
+            m_Data.m_OpenGLThreadID = std::this_thread::get_id();
             m_Data.m_Flags.add(Window_Flags::Active);
         }
     }else{
@@ -500,7 +503,7 @@ void Window::setActive(const bool isToBeActive){
         }
     }
 }
-void Window::setSize(const unsigned int width, const unsigned int height){
+void Window::setSize(unsigned int width, unsigned int height){
     if (m_Data.m_VideoMode.width == width && m_Data.m_VideoMode.height == height) {
         return;
     }
@@ -515,9 +518,9 @@ void Window::setSize(const unsigned int width, const unsigned int height){
     m_Data.m_SFMLWindow.setSize(dimensions);
 }
 void Window::restore_state() {
-    m_Data.restore_state();
+    m_Data.restore_state(*this);
 }
-bool Window::setFullscreenWindowed(const bool isToBeFullscreen) {
+bool Window::setFullscreenWindowed(bool isToBeFullscreen) {
     if (isToBeFullscreen) {
         if (isFullscreenWindowed()) {
             return false;
@@ -540,7 +543,7 @@ bool Window::setFullscreenWindowed(const bool isToBeFullscreen) {
     m_Data.on_fullscreen_internal(*this, isToBeFullscreen, old_max, old_min);
     return true;
 }
-bool Window::setFullscreen(const bool isToBeFullscreen){
+bool Window::setFullscreen(bool isToBeFullscreen){
     if (isToBeFullscreen) {
         if (isFullscreenNonWindowed()) {
             return false;
@@ -563,7 +566,7 @@ bool Window::setFullscreen(const bool isToBeFullscreen){
     m_Data.on_fullscreen_internal(*this, isToBeFullscreen, old_max, old_min);
     return true;
 }
-void Window::keepMouseInWindow(const bool isToBeKept){
+void Window::keepMouseInWindow(bool isToBeKept){
     if (isToBeKept) {
         #ifdef ENGINE_THREAD_WINDOW_EVENTS
             m_Data.m_WindowThread.push(WindowData::EventThreadOnlyCommands::KeepMouseInWindow);
@@ -584,7 +587,7 @@ void Window::keepMouseInWindow(const bool isToBeKept){
         #endif
     }
 }
-void Window::setFramerateLimit(const unsigned int limit){
+void Window::setFramerateLimit(unsigned int limit){
     m_Data.m_SFMLWindow.setFramerateLimit(limit);
     m_Data.m_FramerateLimit = limit;
 }

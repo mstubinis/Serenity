@@ -113,6 +113,7 @@ SocketStatus::Status Networking::SocketTCP::connect(const unsigned short timeout
     }
     return SocketStatus::map_status(status);
 }
+/*
 SocketStatus::Status Networking::SocketTCP::send(Engine::Networking::Packet& packet) {
     sf::Packet sf_packet;
     using cast         = std::chrono::duration<std::uint64_t>;
@@ -120,6 +121,7 @@ SocketStatus::Status Networking::SocketTCP::send(Engine::Networking::Packet& pac
     packet.build(sf_packet);
     return send(sf_packet);
 }
+*/
 SocketStatus::Status Networking::SocketTCP::send(sf::Packet& packet) {
     m_PartialPackets.push(packet);
     return internal_send_partial_packets_loop();

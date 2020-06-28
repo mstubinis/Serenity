@@ -16,16 +16,14 @@
 using namespace Engine;
 using namespace std;
 
-typedef unsigned char uchar;
-
 constexpr float ROTATION_THRESHOLD = 0.00001f;
 
-const glm_vec3 Math::rotate_vec3(const glm_quat& rotation, const glm_vec3& vec) {
+glm_vec3 Math::rotate_vec3(const glm_quat& rotation, const glm_vec3& vec) {
     return rotation * vec;
 }
 
 //could use some fixing
-const glm::vec3 Math::polynomial_interpolate_linear(vector<glm::vec3>& points, const float time) {
+glm::vec3 Math::polynomial_interpolate_linear(vector<glm::vec3>& points, float time) {
     glm::vec3 ret = glm::vec3(0.0f);
     auto n = points.size();
     assert(n >= 3);
@@ -64,7 +62,7 @@ const glm::vec3 Math::polynomial_interpolate_linear(vector<glm::vec3>& points, c
     return ret;
 }
 //this works perfectly
-const glm::vec3 Math::polynomial_interpolate_cubic(vector<glm::vec3>& points, const float time) {
+glm::vec3 Math::polynomial_interpolate_cubic(vector<glm::vec3>& points, float time) {
     glm::vec3 ret = glm::vec3(0.0f);
     auto n = points.size();
     vector<float> xs; xs.reserve(n);
@@ -146,7 +144,7 @@ void Math::setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position
     auto scaleMatrix       = glm::scale(inScale);
     modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 }
-void Math::setRotation(glm_quat& orientation, const decimal& pitch, const decimal& yaw, const decimal& roll) {
+void Math::setRotation(glm_quat& orientation, decimal pitch, decimal yaw, decimal roll) {
     if (abs(pitch) > ROTATION_THRESHOLD)
         orientation               = (glm::angleAxis(pitch, glm_vec3(-1, 0, 0)));   //pitch
     if (abs(yaw) > ROTATION_THRESHOLD)
@@ -154,7 +152,7 @@ void Math::setRotation(glm_quat& orientation, const decimal& pitch, const decima
     if (abs(roll) > ROTATION_THRESHOLD)
         orientation = orientation * (glm::angleAxis(roll,   glm_vec3(0, 0, 1)));   //roll
 }
-void Math::setRotation(glm::quat& orientation, const float pitch, const float yaw, const float roll) {
+void Math::setRotation(glm::quat& orientation, float pitch, float yaw, float roll) {
     if (abs(pitch) > ROTATION_THRESHOLD)
         orientation               = (glm::angleAxis(pitch, glm::vec3(-1, 0, 0)));   //pitch
     if (abs(yaw) > ROTATION_THRESHOLD)
@@ -162,7 +160,7 @@ void Math::setRotation(glm::quat& orientation, const float pitch, const float ya
     if (abs(roll) > ROTATION_THRESHOLD)
         orientation = orientation * (glm::angleAxis(roll, glm::vec3(0, 0, 1)));   //roll
 }
-void Math::rotate(glm_quat& orientation, const decimal& pitch, const decimal& yaw, const decimal& roll) {
+void Math::rotate(glm_quat& orientation, decimal pitch, decimal yaw, decimal roll) {
     if (abs(pitch) > ROTATION_THRESHOLD)
         orientation = orientation * (glm::angleAxis(pitch, glm_vec3(-1, 0, 0)));   //pitch
     if (abs(yaw) > ROTATION_THRESHOLD)
@@ -170,7 +168,7 @@ void Math::rotate(glm_quat& orientation, const decimal& pitch, const decimal& ya
     if (abs(roll) > ROTATION_THRESHOLD)
         orientation = orientation * (glm::angleAxis(roll,   glm_vec3(0, 0, 1)));   //roll
 }
-void Math::rotate(glm::quat& orientation, const float pitch, const float yaw, const float roll) {
+void Math::rotate(glm::quat& orientation, float pitch, float yaw, float roll) {
     if (abs(pitch) > ROTATION_THRESHOLD)
         orientation = orientation * (glm::angleAxis(pitch, glm::vec3(-1, 0, 0)));   //pitch
     if (abs(yaw) > ROTATION_THRESHOLD)
@@ -178,7 +176,7 @@ void Math::rotate(glm::quat& orientation, const float pitch, const float yaw, co
     if (abs(roll) > ROTATION_THRESHOLD)
         orientation = orientation * (glm::angleAxis(roll, glm::vec3(0, 0, 1)));   //roll
 }
-glm::vec2 Math::rotate2DPoint(const glm::vec2& point, const float angle, const glm::vec2& origin) {
+glm::vec2 Math::rotate2DPoint(const glm::vec2& point, float angle, const glm::vec2& origin) {
     float s = glm::sin(angle);
     float c = glm::cos(angle);
     glm::vec2 ret;
@@ -201,7 +199,7 @@ void Math::extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProject
     }
     //https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
 }
-const glm_quat Math::btToGLMQuat(const btQuaternion& q){
+glm_quat Math::btToGLMQuat(const btQuaternion& q){
 	return glm_quat(q.getW(),q.getX(),q.getY(),q.getZ()); 
 }
 btQuaternion Math::glmToBTQuat(const glm_quat& q){
@@ -217,32 +215,32 @@ glm::mat3 Math::assimpToGLMMat3(const aiMatrix3x3& n){
 	return glm::mat3(n.a1,n.b1,n.c1,n.a2,n.b2,n.c2,n.a3,n.b3,n.c3);  
 }
 
-float Math::toRadians(const float degrees){
+float Math::toRadians(float degrees){
 	return degrees * 0.0174533f; 
 }
-float Math::toDegrees(const float radians){
+float Math::toDegrees(float radians){
 	return radians * 57.2958f; 
 }
-float Math::toRadians(const double degrees){
+float Math::toRadians(double degrees){
 	return Math::toRadians(static_cast<float>(degrees)); 
 }
-float Math::toDegrees(const double radians){
+float Math::toDegrees(double radians){
 	return Math::toDegrees(static_cast<float>(radians));
 }
-float Math::remainder(const float x, const float y){
+float Math::remainder(float x, float y){
 	return x - (glm::round(x / y) * y);
 }
 
-const glm_vec3 Math::btVectorToGLM(const btVector3& btvector){
+glm_vec3 Math::btVectorToGLM(const btVector3& btvector){
 	return glm_vec3(btvector.x(), btvector.y(), btvector.z());
 }
 btVector3 Math::btVectorFromGLM(const glm_vec3& vector){ 
 	return btVector3(vector.x, vector.y, vector.z);
 }
-const glm_vec3 Math::getMatrixPosition(const glm_mat4& matrix) {
+glm_vec3 Math::getMatrixPosition(const glm_mat4& matrix) {
     return glm_vec3(matrix[3][0], matrix[3][1], matrix[3][2]);
 }
-const glm::vec3 Math::getMatrixPosition(const glm::mat4& matrix) {
+glm::vec3 Math::getMatrixPosition(const glm::mat4& matrix) {
     return glm::vec3(matrix[3][0], matrix[3][1], matrix[3][2]);
 }
 void Math::removeMatrixPosition(glm::mat4& matrix){
@@ -251,18 +249,18 @@ void Math::removeMatrixPosition(glm::mat4& matrix){
 	matrix[3][2] = 0.0f;
 }
 
-bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector, const glm::vec3& point,const float fovRadians){
+bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector, const glm::vec3& point, float fovRadians){
     glm::vec3 diff = glm::normalize(point - conePos);
     float t = glm::dot(coneVector, diff);
     return ( t >= glm::cos( fovRadians ) );
 }
-bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector, const glm::vec3& point,const float fovRadians,const float maxDistance){
+bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector, const glm::vec3& point, float fovRadians, float maxDistance){
     glm::vec3 diff = glm::normalize(point - conePos);
     float t = glm::dot(coneVector, diff);
     float length = glm::length(point - conePos);
     return (length > maxDistance) ? false : (t >= glm::cos(fovRadians));
 }
-glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& camera, const glm::mat4& view, const glm::mat4& projection, const glm::vec4& viewport, const bool clampToEdge){
+glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& camera, const glm::mat4& view, const glm::mat4& projection, const glm::vec4& viewport, bool clampToEdge){
     using v2 = glm::vec2;
     auto getIntersection = [&](const v2& a1, const v2& a2, const v2& b1, const v2& b2){
         auto b = a2 - a1;
@@ -342,10 +340,10 @@ glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& ca
     }
     return glm::vec3(screen_pos.x, screen_pos.y, inBounds);
 }
-glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& camera, const glm::vec4& viewport, const bool clampToEdge) {
+glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& camera, const glm::vec4& viewport, bool clampToEdge) {
     return Math::getScreenCoordinates(position, camera, camera.getView(), camera.getProjection(), viewport, clampToEdge);
 }
-glm::vec3 Math::getScreenCoordinates(const glm::vec3& objPos, const Camera& camera, const bool clampToEdge) {
+glm::vec3 Math::getScreenCoordinates(const glm::vec3& objPos, const Camera& camera, bool clampToEdge) {
     glm::vec2 winSize  = glm::vec2(Resources::getWindowSize());
     glm::vec4 viewport = glm::vec4(0.0f, 0.0f, winSize.x, winSize.y);
     return Math::getScreenCoordinates(objPos, camera, viewport, clampToEdge);
@@ -359,26 +357,26 @@ float Math::Max(const glm::vec3& v){
 float Math::Max(const glm::vec4& v){
 	return glm::max(v.x,glm::max(v.y,glm::max(v.z,v.w))); 
 }
-float Math::Max(const float x, const float y){
+float Math::Max(float x, float y){
 	return glm::max(x,y); 
 }
-float Math::Max(const float x, const float y, const float z){
+float Math::Max(float x, float y, float z){
 	return glm::max(x,glm::max(y,z)); 
 }
-float Math::Max(const float x, const float y, const float z, const float w){
+float Math::Max(float x, float y, float z, float w){
 	return glm::max(x,glm::max(y,glm::max(z,w))); 
 }
-uint Math::Max(const uint x, const uint y){
+uint Math::Max(uint x, uint y){
 	return glm::max(x,y); 
 }
-uint Math::Max(const uint x, const uint y, const uint z){
+uint Math::Max(uint x, uint y, uint z){
 	return glm::max(x,glm::max(y,z)); 
 }
-uint Math::Max(const uint x, const uint y, const uint z, const uint w){
+uint Math::Max(uint x, uint y, uint z, uint w){
 	return glm::max(x,glm::max(y,glm::max(z,w))); 
 }
 
-const glm::vec3 Math::unpack3NormalsFrom32Int(const uint32_t data) {
+glm::vec3 Math::unpack3NormalsFrom32Int(uint32_t data) {
     glm::vec3 conversions;
     glm::vec3 negatives = glm::vec3(1.0f);
     //X
@@ -404,7 +402,7 @@ const glm::vec3 Math::unpack3NormalsFrom32Int(const uint32_t data) {
     conversions.z /= 536870911.0f * negatives.z; //(2^29) - 1
     return conversions;
 }
-const uint32_t Math::pack3NormalsInto32Int(const float x, const float y, const float z){
+uint32_t Math::pack3NormalsInto32Int(float x, float y, float z){
     uint32_t xsign = x < 0; //if x < 0, this = 1, else this = 0
     uint32_t ysign = y < 0; //if y < 0, this = 1, else this = 0
     uint32_t zsign = z < 0; //if z < 0, this = 1, else this = 0
@@ -421,7 +419,7 @@ const uint32_t Math::pack3NormalsInto32Int(const float x, const float y, const f
         (xsign << 9  | intX      );
     return data;
 }
-const uint32_t Math::pack3NormalsInto32Int(const glm::vec3& v){
+uint32_t Math::pack3NormalsInto32Int(const glm::vec3& v){
 	return Math::pack3NormalsInto32Int(v.x,v.y,v.z); 
 }
 
@@ -471,7 +469,7 @@ glm::vec3 Math::unpack3FloatsInto1FloatUnsigned(float v){
 	);
     return ret;
 }
-uchar Math::pack2NibblesIntoChar(const float x, const float y) {
+uchar Math::pack2NibblesIntoChar(float x, float y) {
     uchar packedData = 0;
     int bits  = static_cast<int>(round(x / 0.066666666666f));
     int bits1 = static_cast<int>(round(y / 0.066666666666f));
@@ -479,24 +477,24 @@ uchar Math::pack2NibblesIntoChar(const float x, const float y) {
 	packedData |= (bits1 << 4) & 240;
     return packedData;
 }
-glm::vec2 Math::unpack2NibblesFromChar(const uchar _packedData) {
+glm::vec2 Math::unpack2NibblesFromChar(unsigned char _packedData) {
     int low  = _packedData & 15;
     int high = _packedData >> 4;
     return glm::vec2(static_cast<float>(low * 0.066666666666f), static_cast<float>(high * 0.066666666666f));
 }
 //attempt to do the above using non bitwise operations for glsl versions that do not support bitwise operations
-float Math::pack2NibblesIntoCharBasic(const float x, const float y) {
+float Math::pack2NibblesIntoCharBasic(float x, float y) {
     float lowEnd = (round(x / 0.066666666666f));
     float highEnd = (round(y / 0.066666666666f) * 16.0f);
     return (lowEnd + highEnd);
 }
-glm::vec2 Math::unpack2NibblesFromCharBasic(const float _packedData) {
+glm::vec2 Math::unpack2NibblesFromCharBasic(float _packedData) {
     float highEnd = (_packedData / 16.0f);
     highEnd = highEnd - glm::floor(highEnd);
     float lowEnd = static_cast<float>(_packedData - (highEnd * 16.0f));
     return glm::vec2(highEnd, static_cast<float>(lowEnd / 255.0));
 }
-float Math::pack2FloatsInto1Float(const float x, const float y){
+float Math::pack2FloatsInto1Float(float x, float y){
     int _x = static_cast<int>((x + 1.0f) * 0.5f);
 	int _y = static_cast<int>((y + 1.0f) * 0.5f);
     return glm::floor(_x * 1000.0f) + _y; 
@@ -504,7 +502,7 @@ float Math::pack2FloatsInto1Float(const float x, const float y){
 float Math::pack2FloatsInto1Float(const glm::vec2& v){
 	return Math::pack2FloatsInto1Float(v.x,v.y); 
 }
-glm::vec2 Math::unpack2FloatsInto1Float(const float i){
+glm::vec2 Math::unpack2FloatsInto1Float(float i){
     glm::vec2 res;
     res.y = i - glm::floor(i);
     res.x = (i - res.y) / 1000.0f;
@@ -533,7 +531,7 @@ glm::vec3 Math::getRight(const glm_quat& q){
 glm::vec3 Math::getUp(const glm_quat& q){
     return glm::normalize(q * glm_vec3(0, 1, 0));
 }
-glm::vec3 Math::getColumnVector(const btRigidBody& b, const unsigned int column){
+glm::vec3 Math::getColumnVector(const btRigidBody& b, unsigned int column){
     btTransform t;
     b.getMotionState()->getWorldTransform(t);
     btVector3 v = t.getBasis().getColumn(column);
@@ -558,7 +556,7 @@ void Math::recalculateForwardRightUp(const btRigidBody& b,glm_vec3& f,glm_vec3& 
 	r = Math::getRight(b);
 	u = Math::getUp(b);
 }
-float Math::getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, const bool degrees){
+float Math::getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bool degrees){
 	if (a == b) 
         return 0.0f;
 	float angle = glm::acos(glm::dot(a, b));
@@ -588,52 +586,51 @@ void Math::setColor(glm::vec4& c, float r, float g, float b, float a){
 	c.z = b;
 	c.w = a; 
 }
-float Math::fade(const float t){ 
+float Math::fade(float t){ 
 	return t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f);
 }
-double Math::fade(const double t){ 
+double Math::fade(double t){ 
 	return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
 }
-float Math::lerp(const float t, const float a, const float b){
+float Math::lerp(float t, float a, float b){
 	return a + t * (b - a);
 }
-double Math::lerp(const double t, const double a, const double b){
+double Math::lerp(double t, double a, double b){
 	return a + t * (b - a);
 }
-float Math::grad(const int hash, const float x, const float y, const float z){
-	int h = hash & 15;
+float Math::grad(int hash, float x, float y, float z){
+	int h    = hash & 15;
 	double u = h < 8 ? x : y, v = h < 4 ? y : h == 12 || h == 14 ? x : z;
 	return float(((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v));
 }
-double Math::grad(const int hash, const double x, const double y, const double z){
-	int h = hash & 15;
+double Math::grad(int hash, double x, double y, double z){
+	int h    = hash & 15;
 	double u = h < 8 ? x : y, v = h < 4 ? y : h == 12 || h == 14 ? x : z;
 	return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
 }
 glm::vec4 Math::PaintersAlgorithm(const glm::vec4& paint_color, const glm::vec4& canvas_color){
+    glm::vec4 output(0.0f);
     float alpha = paint_color.a + canvas_color.a * (1.0f - paint_color.a);
-    glm::vec4 ret(0.0f);
-    ret   = ((paint_color * paint_color.a + canvas_color * canvas_color.a * (1.0f - paint_color.a)) / alpha);
-    ret.a = alpha;
-    return ret;
+    output      = ((paint_color * paint_color.a + canvas_color * canvas_color.a * (1.0f - paint_color.a)) / alpha);
+    output.a    = alpha;
+    return output;
 }
 sf::Color Math::PaintersAlgorithm(const sf::Color& paint_color, const sf::Color& canvas_color) {
-    glm::vec4 cC = glm::vec4(static_cast<float>(canvas_color.r) / 255.0f, static_cast<float>(canvas_color.g) / 255.0f, static_cast<float>(canvas_color.b) / 255.0f, static_cast<float>(canvas_color.a) / 255.0f);
-    glm::vec4 pC = glm::vec4(static_cast<float>(paint_color.r) / 255.0f, static_cast<float>(paint_color.g) / 255.0f, static_cast<float>(paint_color.b) / 255.0f, static_cast<float>(paint_color.a) / 255.0f);
-    float full = 1.0f;
-    float alpha = pC.a + cC.a * (full - pC.a);
-    glm::vec4 ret(0.0f);
-    ret = (pC * pC.a + cC * cC.a * (full - pC.a) / alpha);
-    ret.a = alpha;
-    sf::Uint8 finalR = static_cast<sf::Uint8>(ret.r * 255.0f);
-    sf::Uint8 finalG = static_cast<sf::Uint8>(ret.g * 255.0f);
-    sf::Uint8 finalB = static_cast<sf::Uint8>(ret.b * 255.0f);
-    sf::Uint8 finalA = static_cast<sf::Uint8>(ret.a * 255.0f);
+    glm::vec4 cC = glm::vec4((float)canvas_color.r / 255.0f, (float)canvas_color.g / 255.0f, (float)canvas_color.b / 255.0f, (float)canvas_color.a / 255.0f);
+    glm::vec4 pC = glm::vec4((float)paint_color.r / 255.0f, (float)paint_color.g / 255.0f, (float)paint_color.b / 255.0f, (float)paint_color.a / 255.0f);
+    float alpha  = pC.a + cC.a * (1.0f - pC.a);
+    glm::vec4 calculations(0.0f);
+    calculations = (pC * pC.a + cC * cC.a * (1.0f - pC.a) / alpha);
+    calculations.a = alpha;
+    sf::Uint8 finalR = (sf::Uint8)(calculations.r * 255.0f);
+    sf::Uint8 finalG = (sf::Uint8)(calculations.g * 255.0f);
+    sf::Uint8 finalB = (sf::Uint8)(calculations.b * 255.0f);
+    sf::Uint8 finalA = (sf::Uint8)(calculations.a * 255.0f);
     return sf::Color(finalR, finalG, finalB, finalA);
 }
-bool Math::rayIntersectSphere(const glm::vec3& C, const float r, const glm::vec3& A, const glm::vec3& rayVector){
+bool Math::rayIntersectSphere(const glm::vec3& C, float r, const glm::vec3& A, const glm::vec3& rayVector){
     glm::vec3 B = A + rayVector;
-    float dot = glm::dot(rayVector, C - A);
+    float dot   = glm::dot(rayVector, C - A);
     if (dot >= 0.0f) { //check if point is behind
         return false;
     }
@@ -641,8 +638,5 @@ bool Math::rayIntersectSphere(const glm::vec3& C, const float r, const glm::vec3
     float b = 2.0f * ((B.x - A.x) * (A.x - C.x) + (B.y - A.y) * (A.y - C.y) + (B.z - A.z) * (A.z - C.z));
     float c = (((A.x - C.x) * (A.x - C.x)) + ((A.y - C.y) * (A.y - C.y)) + ((A.z - C.z) * (A.z - C.z))) - (r * r);
     float d = (b * b) - (4.0f * a * c);
-    if (d < 0.0f) {
-        return false;
-    }
-    return true;
+    return !(d < 0.0f);
 }

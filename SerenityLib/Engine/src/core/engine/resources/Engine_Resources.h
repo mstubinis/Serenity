@@ -34,7 +34,7 @@ namespace Engine{
         class ResourceManager final{
             friend class  Scene;
             private:
-                const unsigned int AddScene(Scene&);
+                unsigned int AddScene(Scene& scene);
             public:
                 //http://gamesfromwithin.com/managing-data-relationships
                 ResourcePool<EngineResource>       m_Resources;
@@ -91,7 +91,7 @@ namespace Engine{
     };
     namespace Resources{
         namespace Settings{
-            void enableDynamicMemory(const bool enable = true);
+            void enableDynamicMemory(bool enable = true);
             void disableDynamicMemory();
         }
 
@@ -106,49 +106,55 @@ namespace Engine{
         Window& getWindow();
         glm::uvec2 getWindowSize();
 
-        Window& getWindow(const unsigned int index);
-        glm::uvec2 getWindowSize(const unsigned int index);
+        Window& getWindow(unsigned int index);
+        glm::uvec2 getWindowSize(unsigned int index);
 
         Scene* getScene(std::string_view sceneName);
         bool deleteScene(std::string_view sceneName);
         bool deleteScene(Scene& scene);
 
-        void getShader(const Handle inHandle, Shader*& outPtr);                  Shader*    getShader(const Handle inHandle);
-        void getSoundData(const Handle inHandle, SoundData*& outPtr);            SoundData* getSoundData(const Handle inHandle);
-        void getCamera(const Handle inHandle, Camera*& outPtr);                  Camera*    getCamera(const Handle inHandle);
-        void getFont(const Handle inHandle, Font*& outPtr);                      Font*      getFont(const Handle inHandle);
+        void getShader(Handle inHandle, Shader*& outPtr);                  Shader*    getShader(Handle inHandle);
+        void getSoundData(Handle inHandle, SoundData*& outPtr);            SoundData* getSoundData(Handle inHandle);
+        void getCamera(Handle inHandle, Camera*& outPtr);                  Camera*    getCamera(Handle inHandle);
+        void getFont(Handle inHandle, Font*& outPtr);                      Font*      getFont(Handle inHandle);
 
-        void     getTexture(const Handle inHandle, Texture*& outPtr);
-        Texture* getTexture(const Handle inHandle);
+        void     getTexture(Handle inHandle, Texture*& outPtr);
+        Texture* getTexture(Handle inHandle);
         Texture* getTexture(std::string_view name);
 
-        void getMesh(const Handle inHandle,Mesh*& outPtr);                      Mesh*      getMesh(const Handle inHandle);
+        void getMesh(Handle inHandle, Mesh*& outPtr);                      Mesh*      getMesh(Handle inHandle);
 
-        void      getMaterial(const Handle inHandle,Material*& outPtr);
-        Material* getMaterial(const Handle inHandle);
+        void      getMaterial(Handle inHandle, Material*& outPtr);
+        Material* getMaterial(Handle inHandle);
 
-        void getShaderProgram(const Handle inHandle,ShaderProgram*& outPtr);    ShaderProgram*   getShaderProgram(const Handle inHandle);
+        void getShaderProgram(Handle inHandle, ShaderProgram*& outPtr);    ShaderProgram*   getShaderProgram(Handle inHandle);
 
         Handle addFont(const std::string& filename, int height, int width = 0, float line_height = 8.0f);
 
-        std::vector<Handle> loadMesh(const std::string& fileOrData, const float threshhold = 0.0005f);
-        std::vector<Handle> loadMeshAsync(const std::string& fileOrData, const float threshhold = 0.0005f);
+        std::vector<Handle> loadMesh(const std::string& fileOrData, float threshhold = 0.0005f);
+        std::vector<Handle> loadMeshAsync(const std::string& fileOrData, float threshhold = 0.0005f);
 
         Handle loadTexture(
             const std::string& file,
-            const ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8,
-            const bool mipmaps = false
+            ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8,
+            bool mipmaps = false
+        );
+        Handle loadTexture(
+            sf::Image& sfImage,
+            const std::string& texture_name,
+            ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8,
+            bool mipmaps = false
         );
         Handle loadTextureAsync(
             const std::string& file,
-            const ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8,
-            const bool mipmaps = false
+            ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8,
+            bool mipmaps = false
         );
         Handle loadTextureAsync(
             sf::Image& sfImage,
             const std::string& texture_name,
-            const ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8,
-            const bool mipmaps = false
+            ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8,
+            bool mipmaps = false
         );
         Handle loadMaterial(
             const std::string& name, 
@@ -181,10 +187,10 @@ namespace Engine{
             Texture* smoothness = nullptr
         );
 
-        Handle addShader(const std::string& shaderFileOrData, const ShaderType::Type shaderType, const bool fromFile = true);
+        Handle addShader(const std::string& shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
         Handle addSoundData(const std::string& file);
         Handle addShaderProgram(const std::string& name, Shader& vertexShader, Shader& fragmentShader);
-        Handle addShaderProgram(const std::string& name, const Handle vertexShader, const Handle fragmentShader);
+        Handle addShaderProgram(const std::string& name, Handle vertexShader, Handle fragmentShader);
     };
     namespace Data{
         std::string reportTime();

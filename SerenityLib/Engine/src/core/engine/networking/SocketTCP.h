@@ -46,7 +46,7 @@ namespace Engine::Networking {
     
             SocketStatus::Status   connect(const unsigned short timeout = 0);
 
-            SocketStatus::Status   send(Engine::Networking::Packet& packet);
+            //SocketStatus::Status   send(Engine::Networking::Packet& packet);
             SocketStatus::Status   send(sf::Packet& packet);
 
             //TODO: handle this case automatically

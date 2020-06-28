@@ -1,6 +1,7 @@
 #include <core/engine/textures/TextureRequest.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/textures/TextureLoader.h>
+#include <core/engine/system/window/Window.h>
 
 #include <core/engine/system/Engine.h>
 
@@ -43,7 +44,7 @@ TextureRequestPart& TextureRequestPart::operator=(const TextureRequestPart& othe
 
 #pragma region TextureRequest
 
-TextureRequest::TextureRequest(const string& filename, const bool genMipMaps, const ImageInternalFormat::Format internal_, const GLuint openglTextureType) {
+TextureRequest::TextureRequest(const string& filename, bool genMipMaps, ImageInternalFormat::Format internal_, GLuint openglTextureType) {
     file                 = filename;
     part.internalFormat  = internal_;
     part.isToBeMipmapped = genMipMaps;
@@ -83,11 +84,10 @@ void TextureRequestStaticImpl::Request(TextureRequest& request) {
                 }
                 InternalTexturePublicInterface::LoadCPU(*request.part.texture);
             };
-            if (request.part.async) {
-                auto lambda_gpu = [request]() {
+            if (request.part.async || std::this_thread::get_id() != Resources::getWindow().getOpenglThreadID()) {
+                threading::addJobWithPostCallback(lambda_cpu, [request]() {
                     InternalTexturePublicInterface::LoadGPU(*request.part.texture);
-                };
-                threading::addJobWithPostCallback(lambda_cpu, lambda_gpu);
+                });
             }else{
                 lambda_cpu();
                 InternalTexturePublicInterface::LoadGPU(*request.part.texture);
@@ -102,7 +102,7 @@ void TextureRequestStaticImpl::Request(TextureRequest& request) {
 
 #pragma region TextureRequestFromMemory
 
-TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const string& _filename, const bool genMipMaps, const ImageInternalFormat::Format internal_, const GLuint openglTextureType){
+TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const string& _filename, bool genMipMaps, ImageInternalFormat::Format internal_, GLuint openglTextureType){
     part.async           = false;
     textureName          = _filename;
     image                = sfImage;
@@ -152,11 +152,10 @@ void TextureRequestStaticImpl::Request(TextureRequestFromMemory& request) {
             }
             InternalTexturePublicInterface::LoadCPU(*request.part.texture);
         };
-        if (request.part.async) {
-            auto lambda_gpu = [request]() {
+        if (request.part.async || std::this_thread::get_id() != Resources::getWindow().getOpenglThreadID()) {
+            threading::addJobWithPostCallback(lambda_cpu, [request]() {
                 InternalTexturePublicInterface::LoadGPU(*request.part.texture);
-            };
-            threading::addJobWithPostCallback(lambda_cpu, lambda_gpu);
+            });
         }else{
             lambda_cpu();
             InternalTexturePublicInterface::LoadGPU(*request.part.texture);

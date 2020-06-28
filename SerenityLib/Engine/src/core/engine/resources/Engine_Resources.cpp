@@ -68,7 +68,7 @@ Handle priv::ResourceManager::_addTexture(Texture* t) {
 Scene& priv::ResourceManager::_getSceneByID(std::uint32_t id) {
     return *m_Scenes[id - 1];
 }
-const unsigned int priv::ResourceManager::AddScene(Scene& s){
+unsigned int priv::ResourceManager::AddScene(Scene& s){
     for (size_t i = 0; i < m_Scenes.size(); ++i) {
         if (m_Scenes[i] == nullptr) {
             m_Scenes[i] = &s;
@@ -94,8 +94,8 @@ double Resources::applicationTime() {
 Scene* Resources::getCurrentScene() {
     return resourceManager->m_CurrentScene;
 }
-void Resources::Settings::enableDynamicMemory(const bool b){ 
-    resourceManager->m_DynamicMemory = b; 
+void Resources::Settings::enableDynamicMemory(bool dynamicMemory){ 
+    resourceManager->m_DynamicMemory = dynamicMemory;
 }
 void Resources::Settings::disableDynamicMemory(){ 
     resourceManager->m_DynamicMemory = false; 
@@ -107,10 +107,10 @@ glm::uvec2 Resources::getWindowSize(){
     return resourceManager->m_Windows[0]->getSize(); 
 }
 
-Window& Resources::getWindow(const unsigned int index) {
+Window& Resources::getWindow(unsigned int index) {
     return *resourceManager->m_Windows[index];
 }
-glm::uvec2 Resources::getWindowSize(const unsigned int index) {
+glm::uvec2 Resources::getWindowSize(unsigned int index) {
     return resourceManager->m_Windows[index]->getSize();
 }
 
@@ -143,59 +143,59 @@ Scene* Resources::getScene(string_view sceneName){
     return nullptr;
 }
 
-void Resources::getShader(const Handle h, Shader*& p) { 
+void Resources::getShader(Handle h, Shader*& p) { 
     resourceManager->m_Resources.getAs(h, p); 
 }
-Shader* Resources::getShader(const Handle h) { 
+Shader* Resources::getShader(Handle h) { 
     Shader* p; 
     resourceManager->m_Resources.getAs(h, p); 
     return p; 
 }
-void Resources::getSoundData(const Handle h, SoundData*& p) { 
+void Resources::getSoundData(Handle h, SoundData*& p) { 
     resourceManager->m_Resources.getAs(h, p); 
 }
-SoundData* Resources::getSoundData(const Handle h) { 
+SoundData* Resources::getSoundData(Handle h) { 
     SoundData* p; 
     resourceManager->m_Resources.getAs(h, p); 
     return p; 
 }
-void Resources::getCamera(const Handle h, Camera*& p) { 
+void Resources::getCamera(Handle h, Camera*& p) { 
     resourceManager->m_Resources.getAs(h, p); 
 }
-Camera* Resources::getCamera(const Handle h) { 
+Camera* Resources::getCamera(Handle h) { 
     Camera* p; 
     resourceManager->m_Resources.getAs(h, p); 
     return p; 
 }
-void Resources::getFont(const Handle h, Font*& p) { 
+void Resources::getFont(Handle h, Font*& p) { 
     resourceManager->m_Resources.getAs(h, p); 
 }
-Font* Resources::getFont(const Handle h) { 
+Font* Resources::getFont(Handle h) { 
     Font* p; 
     resourceManager->m_Resources.getAs(h, p); 
     return p; 
 }
-void Resources::getMesh(const Handle h, Mesh*& p) { 
+void Resources::getMesh(Handle h, Mesh*& p) { 
     resourceManager->m_Resources.getAs(h, p); 
 }
-Mesh* Resources::getMesh(const Handle h) { 
+Mesh* Resources::getMesh(Handle h) { 
     Mesh* p; 
     resourceManager->m_Resources.getAs(h, p); 
     return p; 
 }
-void Resources::getShaderProgram(const Handle h, ShaderProgram*& p) { 
+void Resources::getShaderProgram(Handle h, ShaderProgram*& p) { 
     resourceManager->m_Resources.getAs(h, p); 
 }
-ShaderProgram* Resources::getShaderProgram(const Handle h) { 
+ShaderProgram* Resources::getShaderProgram(Handle h) { 
     ShaderProgram* p; 
     resourceManager->m_Resources.getAs(h, p); 
     return p; 
 }
 
-void Resources::getTexture(const Handle h, Texture*& p) {
+void Resources::getTexture(Handle h, Texture*& p) {
     resourceManager->m_Resources.getAs(h, p); 
 }
-Texture* Resources::getTexture(const Handle h) {
+Texture* Resources::getTexture(Handle h) {
     Texture* p; 
     resourceManager->m_Resources.getAs(h, p); 
     return p; 
@@ -203,10 +203,10 @@ Texture* Resources::getTexture(const Handle h) {
 Texture* Resources::getTexture(string_view name) {
     return resourceManager->HasResource<Texture>(name); 
 }
-void Resources::getMaterial(const Handle h, Material*& p) {
+void Resources::getMaterial(Handle h, Material*& p) {
     resourceManager->m_Resources.getAs(h, p); 
 }
-Material* Resources::getMaterial(const Handle h) {
+Material* Resources::getMaterial(Handle h) {
     Material* p; 
     resourceManager->m_Resources.getAs(h, p); 
     return p; 
@@ -216,7 +216,7 @@ Handle Resources::addFont(const string& filename, int height, int width, float l
 }
 
 
-vector<Handle> Resources::loadMesh(const string& fileOrData, const float threshhold) {
+vector<Handle> Resources::loadMesh(const string& fileOrData, float threshhold) {
     MeshRequest request(fileOrData, threshhold);
     request.request();
     vector<Handle> handles;
@@ -226,7 +226,7 @@ vector<Handle> Resources::loadMesh(const string& fileOrData, const float threshh
     }
     return handles;
 }
-vector<Handle> Resources::loadMeshAsync(const string& fileOrData, const float threshhold) {
+vector<Handle> Resources::loadMeshAsync(const string& fileOrData, float threshhold) {
     MeshRequest request(fileOrData, threshhold);
     request.request(true);
     vector<Handle> handles;
@@ -236,7 +236,7 @@ vector<Handle> Resources::loadMeshAsync(const string& fileOrData, const float th
     }
     return handles;
 }
-Handle Resources::loadTexture(const string& file, const ImageInternalFormat::Format internalFormat, const bool mipmaps) {
+Handle Resources::loadTexture(const string& file, ImageInternalFormat::Format internalFormat, bool mipmaps) {
     auto* texture = resourceManager->HasResource<Texture>(file);
     if (!texture) {
         TextureRequest request(file, mipmaps, internalFormat);
@@ -245,7 +245,16 @@ Handle Resources::loadTexture(const string& file, const ImageInternalFormat::For
     }
     return Handle();
 }
-Handle Resources::loadTextureAsync(const string& file, const ImageInternalFormat::Format internalFormat, const bool mipmaps) {
+Handle Resources::loadTexture(sf::Image& sfImage, const string& texture_name, ImageInternalFormat::Format internalFormat, bool mipmaps) {
+    auto* texture = resourceManager->HasResource<Texture>(texture_name);
+    if (!texture) {
+        TextureRequestFromMemory request(sfImage, texture_name, mipmaps, internalFormat);
+        request.request(false);
+        return request.part.handle;
+    }
+    return Handle();
+}
+Handle Resources::loadTextureAsync(const string& file, ImageInternalFormat::Format internalFormat, bool mipmaps) {
     auto* texture = resourceManager->HasResource<Texture>(file);
     if (!texture) {
         TextureRequest request(file, mipmaps, internalFormat);
@@ -254,7 +263,7 @@ Handle Resources::loadTextureAsync(const string& file, const ImageInternalFormat
     }
     return Handle();
 }
-Handle Resources::loadTextureAsync(sf::Image& sfImage, const string& texture_name, const ImageInternalFormat::Format internalFormat, const bool mipmaps) {
+Handle Resources::loadTextureAsync(sf::Image& sfImage, const string& texture_name, ImageInternalFormat::Format internalFormat, bool mipmaps) {
     auto* texture = resourceManager->HasResource<Texture>(texture_name);
     if (!texture) {
         TextureRequestFromMemory request(sfImage, texture_name, mipmaps, internalFormat);
@@ -292,7 +301,7 @@ Handle Resources::loadMaterial(const string& name, Texture* diffuse, Texture* no
     return Handle();
 }
 
-Handle Resources::addShader(const string& fileOrData, const ShaderType::Type type, const bool fromFile){
+Handle Resources::addShader(const string& fileOrData, ShaderType::Type type, bool fromFile){
     Shader* shader = NEW Shader(fileOrData, type, fromFile);
     return resourceManager->m_Resources.add(shader, ResourceType::Shader);
 }
@@ -301,7 +310,7 @@ Handle Resources::addShaderProgram(const string& n, Shader& v, Shader& f){
     ShaderProgram* program = NEW ShaderProgram(n, v, f);
     return resourceManager->m_Resources.add(program, ResourceType::ShaderProgram);
 }
-Handle Resources::addShaderProgram(const string& n, const Handle v, const Handle f){
+Handle Resources::addShaderProgram(const string& n, Handle v, Handle f){
     Shader* vertexShader   = resourceManager->m_Resources.getAsFast<Shader>(v);
     Shader* fragmentShader = resourceManager->m_Resources.getAsFast<Shader>(f);
     ShaderProgram* program = NEW ShaderProgram(n, *vertexShader, *fragmentShader);

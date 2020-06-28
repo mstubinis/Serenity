@@ -22,10 +22,10 @@ Networking::SocketUDP::~SocketUDP() {
 }
 
 SocketStatus::Status Networking::SocketUDP::internal_send_packet(UDPPacketInfo& PacketInfoStruct) {
-    auto status = m_SocketUDP.send(PacketInfoStruct.sfmlPacket, PacketInfoStruct.ip, PacketInfoStruct.port);
+    auto status = m_SocketUDP.send(*PacketInfoStruct.sfmlPacket, PacketInfoStruct.ip, PacketInfoStruct.port);
     switch (status) {
         case sf::Socket::Status::Done: {
-            EventPacket e(&PacketInfoStruct.sfmlPacket);
+            EventPacket e(PacketInfoStruct.sfmlPacket);
             Event ev(EventType::PacketSent);
             ev.eventPacket = e;
             Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
@@ -104,14 +104,27 @@ void Networking::SocketUDP::unbind() {
         Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     }
 }
+
 SocketStatus::Status Networking::SocketUDP::send(Engine::Networking::Packet& packet, const string& ip) {
-    return send(m_Port, packet, ip);
+    return Networking::SocketUDP::send(m_Port, packet, ip);
 }
+
 SocketStatus::Status Networking::SocketUDP::send(sf::Packet& sfpacket, const string& ip) {
     return Networking::SocketUDP::send(m_Port, sfpacket, ip);
 }
+
 SocketStatus::Status Networking::SocketUDP::send(const void* data, size_t size, const string& ip) {
     return SocketStatus::map_status(m_SocketUDP.send(data, size, internal_get_ip(ip), m_Port));
+}
+SocketStatus::Status Networking::SocketUDP::receive(Engine::Networking::Packet& packet, sf::IpAddress& ip, unsigned short& port) {
+    auto status = m_SocketUDP.receive(packet, ip, port);
+    if (status == sf::Socket::Status::Done) {
+        EventPacket e(&packet);
+        Event ev(EventType::PacketReceived);
+        ev.eventPacket = e;
+        Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
+    }
+    return SocketStatus::map_status(status);
 }
 SocketStatus::Status Networking::SocketUDP::receive(sf::Packet& sfpacket, sf::IpAddress& ip, unsigned short& port) {
     auto status = m_SocketUDP.receive(sfpacket, ip, port);
@@ -126,16 +139,19 @@ SocketStatus::Status Networking::SocketUDP::receive(sf::Packet& sfpacket, sf::Ip
 SocketStatus::Status Networking::SocketUDP::receive(void* data, size_t size, size_t& received, sf::IpAddress& ip, unsigned short& port) {
     return SocketStatus::map_status(m_SocketUDP.receive(data, size, received, ip, port));
 }
+
 SocketStatus::Status Networking::SocketUDP::send(unsigned short port, Engine::Networking::Packet& packet, const string& ip) {
-    sf::Packet sf_packet;
-    using cast         = std::chrono::duration<std::uint64_t>;
-    packet.m_Timestamp = std::chrono::duration_cast<cast>(std::chrono::system_clock::now().time_since_epoch()).count();
-    packet.build(sf_packet);
-    return send(port, sf_packet, ip);
+    UDPPacketInfo data(packet);
+    data.ip         = ip;
+    data.port       = port;
+
+    m_PartialPackets.push(std::move(data));
+    auto status = internal_send_partial_packets_loop();
+    return status;
 }
+
 SocketStatus::Status Networking::SocketUDP::send(unsigned short port, sf::Packet& sfpacket, const string& ip) {
-    UDPPacketInfo data;
-    data.sfmlPacket = sfpacket;
+    UDPPacketInfo data(sfpacket);
     data.ip         = ip;
     data.port       = port;
 

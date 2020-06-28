@@ -31,12 +31,12 @@ decimal ModelInstance::m_GlobalDistanceFactor     = static_cast<decimal>(1100.0)
 
 namespace Engine::priv {
     struct DefaultModelInstanceBindFunctor {void operator()(ModelInstance* i, const Engine::priv::Renderer* renderer) const {
-        const auto& stage             = i->stage();
-        auto& scene                   = *Resources::getCurrentScene();
-        const glm::vec3 camPos        = scene.getActiveCamera()->getPosition();
-        auto& body                    = *(i->m_Parent.getComponent<ComponentBody>());
-        const glm::mat4 parentModel   = body.modelMatrixRendering();
-        auto& animationVector         = i->m_AnimationVector;
+        auto stage            = i->stage();
+        auto& scene           = *Resources::getCurrentScene();
+        glm::vec3 camPos      = scene.getActiveCamera()->getPosition();
+        auto& body            = *(i->m_Parent.getComponent<ComponentBody>());
+        glm::mat4 parentModel = body.modelMatrixRendering();
+        auto& animationVector = i->m_AnimationVector;
 
         Engine::Renderer::sendUniform1Safe("Object_Color", i->m_Color.toPackedInt());
         Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", i->m_GodRaysColor.toPackedInt());
@@ -46,14 +46,14 @@ namespace Engine::priv {
             int maxLights    = glm::min(static_cast<int>(lights.size()), MAX_LIGHTS_PER_PASS);
             Engine::Renderer::sendUniform1Safe("numLights", maxLights);
             for (int i = 0; i < maxLights; ++i) {
-                auto& light            = *lights[i];
-                const auto& lightType  = light.type();
-                const auto start       = "light[" + to_string(i) + "].";
+                auto& light     = *lights[i];
+                auto lightType  = light.type();
+                auto start      = "light[" + to_string(i) + "].";
                 switch (lightType) {
                     case LightType::Sun: {
-                        SunLight& s          = static_cast<SunLight&>(light);
-                        auto& body           = *s.getComponent<ComponentBody>();
-                        const glm::vec3 pos  = body.getPosition();
+                        SunLight& s    = static_cast<SunLight&>(light);
+                        auto& body     = *s.getComponent<ComponentBody>();
+                        glm::vec3 pos  = body.getPosition();
                         Engine::Renderer::sendUniform4Safe((start + "DataA").c_str(), s.getAmbientIntensity(), s.getDiffuseIntensity(), s.getSpecularIntensity(), 0.0f);
                         Engine::Renderer::sendUniform4Safe((start + "DataC").c_str(), 0.0f, pos.x, pos.y, pos.z);
                         Engine::Renderer::sendUniform4Safe((start + "DataD").c_str(), s.color().x, s.color().y, s.color().z, static_cast<float>(lightType));
@@ -67,9 +67,9 @@ namespace Engine::priv {
                         Engine::Renderer::sendUniform4Safe((start + "DataD").c_str(), d.color().x, d.color().y, d.color().z, static_cast<float>(lightType));
                         break;
                     }case LightType::Point: {
-                        PointLight& p       = static_cast<PointLight&>(light);
-                        auto& body          = *p.getComponent<ComponentBody>();
-                        const glm::vec3 pos = body.getPosition();
+                        PointLight& p = static_cast<PointLight&>(light);
+                        auto& body    = *p.getComponent<ComponentBody>();
+                        glm::vec3 pos = body.getPosition();
                         Engine::Renderer::sendUniform4Safe((start + "DataA").c_str(), p.getAmbientIntensity(), p.getDiffuseIntensity(), p.getSpecularIntensity(), 0.0f);
                         Engine::Renderer::sendUniform4Safe((start + "DataB").c_str(), 0.0f, 0.0f, p.getConstant(), p.getLinear());
                         Engine::Renderer::sendUniform4Safe((start + "DataC").c_str(), p.getExponent(), pos.x, pos.y, pos.z);
@@ -79,7 +79,7 @@ namespace Engine::priv {
                     }case LightType::Spot: {
                         SpotLight& s                = static_cast<SpotLight&>(light);
                         auto& body                  = *s.getComponent<ComponentBody>();
-                        const glm::vec3 pos         = body.getPosition();
+                        glm::vec3 pos               = body.getPosition();
                         const glm::vec3& _forward   = body.forward();
                         Engine::Renderer::sendUniform4Safe((start + "DataA").c_str(), s.getAmbientIntensity(), s.getDiffuseIntensity(), s.getSpecularIntensity(), _forward.x);
                         Engine::Renderer::sendUniform4Safe((start + "DataB").c_str(), _forward.y, _forward.z, s.getConstant(), s.getLinear());
@@ -88,13 +88,13 @@ namespace Engine::priv {
                         Engine::Renderer::sendUniform4Safe((start + "DataE").c_str(), s.getCutoff(), s.getCutoffOuter(), static_cast<float>(s.getAttenuationModel()), 0.0f);
                         break;
                     }case LightType::Rod: {
-                        RodLight& r                   = static_cast<RodLight&>(light);
-                        auto& body                    = *r.getComponent<ComponentBody>();
-                        const glm::vec3& pos          = body.getPosition();
-                        const float cullingDistance   = r.rodLength() + (r.getCullingRadius() * 2.0f);
-                        const float half              = r.rodLength() / 2.0f;
-                        const glm::vec3 firstEndPt    = pos + (glm::vec3(body.forward()) * half);
-                        const glm::vec3 secndEndPt    = pos - (glm::vec3(body.forward()) * half);
+                        RodLight& r            = static_cast<RodLight&>(light);
+                        auto& body             = *r.getComponent<ComponentBody>();
+                        glm::vec3 pos          = body.getPosition();
+                        float cullingDistance  = r.rodLength() + (r.getCullingRadius() * 2.0f);
+                        float half             = r.rodLength() / 2.0f;
+                        glm::vec3 firstEndPt   = pos + (glm::vec3(body.forward()) * half);
+                        glm::vec3 secndEndPt   = pos - (glm::vec3(body.forward()) * half);
                         Engine::Renderer::sendUniform4Safe((start + "DataA").c_str(), r.getAmbientIntensity(), r.getDiffuseIntensity(), r.getSpecularIntensity(), firstEndPt.x);
                         Engine::Renderer::sendUniform4Safe((start + "DataB").c_str(), firstEndPt.y, firstEndPt.z, r.getConstant(), r.getLinear());
                         Engine::Renderer::sendUniform4Safe((start + "DataC").c_str(), r.getExponent(), secndEndPt.x, secndEndPt.y, secndEndPt.z);
@@ -108,7 +108,6 @@ namespace Engine::priv {
             }
             Skybox* skybox          = scene.skybox();
             const auto maxTextures  = renderer->m_Pipeline->getMaxNumTextureUnits() - 1U;
-
             Engine::Renderer::sendUniform4Safe("ScreenData", renderer->m_GI_Pack, Engine::Renderer::Settings::getGamma(), 0.0f, 0.0f);
             if (skybox && skybox->texture()->numAddresses() >= 3) {
                 Engine::Renderer::sendTextureSafe("irradianceMap", skybox->texture()->address(1), maxTextures - 2, GL_TEXTURE_CUBE_MAP);
@@ -144,7 +143,7 @@ namespace Engine::priv {
 };
 const bool priv::InternalModelInstancePublicInterface::IsViewportValid(const ModelInstance& modelInstance, const Viewport& viewport) {
     const auto flags = modelInstance.getViewportFlags();
-    return !(flags & (1 << viewport.id()) || flags == 0) ? false : true;
+    return (flags & (1 << viewport.id()) || flags == 0);
 }
 
 
@@ -225,10 +224,10 @@ void ModelInstance::bind(const Engine::priv::Renderer& renderer) {
 void ModelInstance::unbind(const Engine::priv::Renderer& renderer) {
     m_CustomUnbindFunctor(this, &renderer);
 }
-void ModelInstance::setDefaultViewportFlag(const unsigned int flag) {
+void ModelInstance::setDefaultViewportFlag(unsigned int flag) {
     m_ViewportFlagDefault = flag;
 }
-void ModelInstance::setDefaultViewportFlag(const ViewportFlag::Flag flag) {
+void ModelInstance::setDefaultViewportFlag(ViewportFlag::Flag flag) {
     m_ViewportFlagDefault = flag;
 }
 void ModelInstance::internal_init(Mesh* mesh, Material* mat, ShaderProgram* program) {
@@ -247,31 +246,31 @@ size_t ModelInstance::index() const {
 ModelDrawingMode::Mode ModelInstance::getDrawingMode() const {
     return m_DrawingMode;
 }
-void ModelInstance::setDrawingMode(const ModelDrawingMode::Mode drawMode) {
+void ModelInstance::setDrawingMode(ModelDrawingMode::Mode drawMode) {
     m_DrawingMode = drawMode;
 }
-void ModelInstance::forceRender(const bool forced) {
+void ModelInstance::forceRender(bool forced) {
     m_ForceRender = forced;
 }
 bool ModelInstance::isForceRendered() const {
     return m_ForceRender;
 }
-void ModelInstance::setViewportFlag(const unsigned int flag) {
+void ModelInstance::setViewportFlag(unsigned int flag) {
     m_ViewportFlag = flag;
 }
-void ModelInstance::addViewportFlag(const unsigned int flag) {
+void ModelInstance::addViewportFlag(unsigned int flag) {
     m_ViewportFlag.add(flag);
 }
-void ModelInstance::removeViewportFlag(const unsigned int flag) {
+void ModelInstance::removeViewportFlag(unsigned int flag) {
     m_ViewportFlag.remove(flag);
 }
-void ModelInstance::setViewportFlag(const ViewportFlag::Flag flag) {
+void ModelInstance::setViewportFlag(ViewportFlag::Flag flag) {
     m_ViewportFlag = flag;
 }
-void ModelInstance::addViewportFlag(const ViewportFlag::Flag flag) {
+void ModelInstance::addViewportFlag(ViewportFlag::Flag flag) {
     m_ViewportFlag.add(flag);
 }
-void ModelInstance::removeViewportFlag(const ViewportFlag::Flag flag) {
+void ModelInstance::removeViewportFlag(ViewportFlag::Flag flag) {
     m_ViewportFlag.remove(flag);
 }
 unsigned int ModelInstance::getViewportFlags() const {
@@ -287,10 +286,7 @@ void ModelInstance::internal_update_model_matrix() {
 Entity ModelInstance::parent() const {
     return m_Parent; 
 }
-//void ModelInstance::setStage(const RenderStage::Stage& stage) {
-//    m_Stage = stage;
-//}
-void ModelInstance::setStage(const RenderStage::Stage stage, ComponentModel& componentModel) {
+void ModelInstance::setStage(RenderStage::Stage stage, ComponentModel& componentModel) {
     m_Stage = stage;
     componentModel.setStage(stage, m_Index);
 }
@@ -306,13 +302,13 @@ bool ModelInstance::visible() const {
 bool ModelInstance::passedRenderCheck() const {
     return m_PassedRenderCheck; 
 }
-void ModelInstance::setPassedRenderCheck(const bool b) {
-    m_PassedRenderCheck = b; 
+void ModelInstance::setPassedRenderCheck(bool passed) {
+    m_PassedRenderCheck = passed;
 }
-void ModelInstance::setColor(const float r, const float g, const float b, const float a) {
+void ModelInstance::setColor(float r, float g, float b, float a) {
     m_Color = Engine::color_vector_4(r, g, b, a);
 }
-void ModelInstance::setColor(const unsigned char r, const unsigned char g, const unsigned char b, const unsigned char a) {
+void ModelInstance::setColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
     m_Color = Engine::color_vector_4(r, g, b, a);
 }
 void ModelInstance::setColor(const glm::vec4& color){
@@ -321,13 +317,13 @@ void ModelInstance::setColor(const glm::vec4& color){
 void ModelInstance::setColor(const glm::vec3& color) {
     ModelInstance::setColor(color.r, color.g, color.b, 1.0f);
 }
-void ModelInstance::setGodRaysColor(const float r, const float g, const float b) {
+void ModelInstance::setGodRaysColor(float r, float g, float b) {
     m_GodRaysColor = Engine::color_vector_4(r, g, b, m_GodRaysColor.a());
 }
 void ModelInstance::setGodRaysColor(const glm::vec3& color){
     ModelInstance::setGodRaysColor(color.r, color.g, color.b);
 }
-void ModelInstance::setPosition(const float x, const float y, const float z){
+void ModelInstance::setPosition(float x, float y, float z){
     m_Position = glm::vec3(x, y, z);
     internal_update_model_matrix();
 }
@@ -335,27 +331,27 @@ void ModelInstance::setOrientation(const glm::quat& orientation) {
     m_Orientation = orientation;
     internal_update_model_matrix();
 }
-void ModelInstance::setOrientation(const float x, const float y, const float z) {
+void ModelInstance::setOrientation(float x, float y, float z) {
     Math::setRotation(m_Orientation, x, y, z);
     internal_update_model_matrix();
 }
-void ModelInstance::setScale(const float scale) {
+void ModelInstance::setScale(float scale) {
     m_Scale = glm::vec3(scale, scale, scale);
     internal_update_model_matrix();
 }
-void ModelInstance::setScale(const float x, const float y, const float z){
+void ModelInstance::setScale(float x, float y, float z){
     m_Scale = glm::vec3(x, y, z);
     internal_update_model_matrix();
 }
-void ModelInstance::translate(const float x, const float y, const float z){
+void ModelInstance::translate(float x, float y, float z){
     m_Position += glm::vec3(x, y, z);
     internal_update_model_matrix();
 }
-void ModelInstance::rotate(const float x, const float y, const float z){
+void ModelInstance::rotate(float x, float y, float z){
     Math::rotate(m_Orientation, x, y, z);
     internal_update_model_matrix();
 }
-void ModelInstance::scale(const float x, const float y, const float z){
+void ModelInstance::scale(float x, float y, float z){
     m_Scale += glm::vec3(x, y, z); 
     internal_update_model_matrix();
 }
@@ -404,7 +400,7 @@ Material* ModelInstance::material() const {
 RenderStage::Stage ModelInstance::stage() const {
     return m_Stage; 
 }
-void ModelInstance::setShaderProgram(const Handle shaderProgramHandle, ComponentModel& componentModel) {
+void ModelInstance::setShaderProgram(Handle shaderProgramHandle, ComponentModel& componentModel) {
     ModelInstance::setShaderProgram(shaderProgramHandle.get<ShaderProgram>(), componentModel);
 }
 void ModelInstance::setShaderProgram(ShaderProgram* shaderProgram, ComponentModel& componentModel) {
@@ -413,19 +409,19 @@ void ModelInstance::setShaderProgram(ShaderProgram* shaderProgram, ComponentMode
     }
     componentModel.setModel(m_Mesh, m_Material, m_Index, shaderProgram, m_Stage);
 }
-void ModelInstance::setMesh(const Handle meshHandle, ComponentModel& componentModel){
+void ModelInstance::setMesh(Handle meshHandle, ComponentModel& componentModel){
     ModelInstance::setMesh(meshHandle.get<Mesh>(), componentModel);
 }
 void ModelInstance::setMesh(Mesh* mesh, ComponentModel& componentModel){
     m_AnimationVector.clear();
     componentModel.setModel(mesh, m_Material, m_Index, m_ShaderProgram, m_Stage);
 }
-void ModelInstance::setMaterial(const Handle materialHandle, ComponentModel& componentModel){
+void ModelInstance::setMaterial(Handle materialHandle, ComponentModel& componentModel){
     ModelInstance::setMaterial(materialHandle.get<Material>(), componentModel);
 }
 void ModelInstance::setMaterial(Material* material, ComponentModel& componentModel){
     componentModel.setModel(m_Mesh, material, m_Index, m_ShaderProgram, m_Stage);
 }
-void ModelInstance::playAnimation(const string& animationName, const float start, const float end, const unsigned int requestedLoops){
+void ModelInstance::playAnimation(const string& animationName, float start, float end, unsigned int requestedLoops){
     m_AnimationVector.emplace_animation(*m_Mesh, animationName, start, end, requestedLoops);
 }

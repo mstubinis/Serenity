@@ -532,8 +532,9 @@ void InternalTexturePublicInterface::LoadCPU(Texture& texture) {
     }
 }
 void InternalTexturePublicInterface::LoadGPU(Texture& texture) {
-    if (texture.m_TextureAddresses.size() == 0)
+    if (texture.m_TextureAddresses.size() == 0) {
         texture.m_TextureAddresses.emplace_back(0);
+    }
     Engine::Renderer::genAndBindTexture(texture.m_Type, texture.m_TextureAddresses[0]);
     switch (texture.m_TextureType) {
         case TextureType::RenderTarget: {

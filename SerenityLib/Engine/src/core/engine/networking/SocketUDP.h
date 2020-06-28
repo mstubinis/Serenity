@@ -15,9 +15,25 @@ namespace Engine::Networking {
         friend class Engine::priv::SocketManager;
         private:
             struct UDPPacketInfo final {
-                sf::Packet      sfmlPacket;
+                sf::Packet*     sfmlPacket = nullptr;
                 unsigned short  port;
                 sf::IpAddress   ip;
+                UDPPacketInfo(sf::Packet& inSFMLPacket) : sfmlPacket(&inSFMLPacket){
+
+                }
+                UDPPacketInfo(UDPPacketInfo&& other) noexcept {
+                    port = std::move(other.port);
+                    ip = std::move(other.ip);
+                    sfmlPacket = std::exchange(other.sfmlPacket, nullptr);
+                }
+                UDPPacketInfo& operator=(UDPPacketInfo&& other) noexcept {
+                    if (&other != this) {
+                        port = std::move(other.port);
+                        ip = std::move(other.ip);
+                        sfmlPacket = std::exchange(other.sfmlPacket, nullptr);
+                    }
+                    return *this;
+                }
             };
 
             sf::UdpSocket               m_SocketUDP;
@@ -50,6 +66,7 @@ namespace Engine::Networking {
             SocketStatus::Status   send(sf::Packet& packet, const std::string& ip = "");
             SocketStatus::Status   send(const void* data, size_t size, const std::string& ip = "");
             SocketStatus::Status   receive(sf::Packet& packet, sf::IpAddress& ip, unsigned short& port);
+            SocketStatus::Status   receive(Engine::Networking::Packet& packet, sf::IpAddress& ip, unsigned short& port);
             SocketStatus::Status   receive(void* data, size_t size, size_t& received, sf::IpAddress& ip, unsigned short& port);
 
             SocketStatus::Status   send(unsigned short port, Engine::Networking::Packet& packet, const std::string& ip = "");

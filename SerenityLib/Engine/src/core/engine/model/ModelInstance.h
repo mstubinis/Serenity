@@ -89,29 +89,29 @@ class ModelInstance final : public Engine::UserPointer {
         static void setGlobalDistanceFactor(decimal factor);
         static decimal getGlobalDistanceFactor();
 
-        template<typename T> void setCustomBindFunctor(const T& functor) {
-            m_CustomBindFunctor   = std::bind<void>(functor, std::placeholders::_1, std::placeholders::_2);
+        void setCustomBindFunctor(std::function<void(ModelInstance*, const Engine::priv::Renderer*)> functor) {
+            m_CustomBindFunctor   = functor;
         }
-        template<typename T> void setCustomUnbindFunctor(const T& functor) {
-            m_CustomUnbindFunctor = std::bind<void>(functor, std::placeholders::_1, std::placeholders::_2);
+        void setCustomUnbindFunctor(std::function<void(ModelInstance*, const Engine::priv::Renderer*)> functor) {
+            m_CustomUnbindFunctor = functor;
         }
-        static void setDefaultViewportFlag(const unsigned int flag);
-        static void setDefaultViewportFlag(const ViewportFlag::Flag flag);
+        static void setDefaultViewportFlag(unsigned int flag);
+        static void setDefaultViewportFlag(ViewportFlag::Flag flag);
 
         size_t index() const;
         ModelDrawingMode::Mode getDrawingMode() const;
-        void setDrawingMode(const ModelDrawingMode::Mode);
+        void setDrawingMode(ModelDrawingMode::Mode);
 
-        void setViewportFlag(const unsigned int flag);
-        void addViewportFlag(const unsigned int flag);
-        void removeViewportFlag(const unsigned int flag);
-        void setViewportFlag(const ViewportFlag::Flag flag);
-        void addViewportFlag(const ViewportFlag::Flag flag);
-        void removeViewportFlag(const ViewportFlag::Flag flag);
+        void setViewportFlag(unsigned int flag);
+        void addViewportFlag(unsigned int flag);
+        void removeViewportFlag(unsigned int flag);
+        void setViewportFlag(ViewportFlag::Flag flag);
+        void addViewportFlag(ViewportFlag::Flag flag);
+        void removeViewportFlag(ViewportFlag::Flag flag);
 
         unsigned int getViewportFlags() const;
 
-        void forceRender(const bool forced = true);
+        void forceRender(bool forced = true);
         bool isForceRendered() const;
 
         ShaderProgram* shaderProgram() const;
@@ -128,22 +128,21 @@ class ModelInstance final : public Engine::UserPointer {
 
         bool visible() const;
         bool passedRenderCheck() const;
-        void setPassedRenderCheck(const bool);
+        void setPassedRenderCheck(bool passed);
         void show();
         void hide();
 
         RenderStage::Stage stage() const;
-        //void setStage(const RenderStage::Stage& stage);
-        void setStage(const RenderStage::Stage stage, ComponentModel& componentModel);
+        void setStage(RenderStage::Stage stage, ComponentModel& componentModel);
 
-        void playAnimation(const std::string& animName, const float startTime, const float endTime = -1.0f, const unsigned int requestedLoops = 1);
+        void playAnimation(const std::string& animName, float startTime, float endTime = -1.0f, unsigned int requestedLoops = 1);
 
-        void setColor(const float r, const float g, const float b, const float a = 1.0f);
-        void setColor(const unsigned char r, const unsigned char g, const unsigned char b, const unsigned char a = 255);
+        void setColor(float r, float g, float b, float a = 1.0f);
+        void setColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255);
         void setColor(const glm::vec4& color);
         void setColor(const glm::vec3& color);
 
-        void setGodRaysColor(const float r, const float g, const float b);
+        void setGodRaysColor(float r, float g, float b);
         void setGodRaysColor(const glm::vec3& color);
 
         void setShaderProgram(Handle shaderPHandle, ComponentModel&);
@@ -155,24 +154,24 @@ class ModelInstance final : public Engine::UserPointer {
         void setMaterial(Handle materialHandle, ComponentModel&);
         void setMaterial(Material*, ComponentModel&);
 
-        void setPosition(const float x, const float y, const float z);
+        void setPosition(float x, float y, float z);
         void setPosition(const glm::vec3& position);
 
         void setOrientation(const glm::quat& orientation);
-        void setOrientation(const float x, const float y, const float z);
+        void setOrientation(float x, float y, float z);
 
-        void setScale(const float scale);
+        void setScale(float scale);
 
-        void setScale(const float x, const float y, const float z);
+        void setScale(float x, float y, float z);
         void setScale(const glm::vec3& scale);
 
-        void translate(const float x, const float y, const float z);
+        void translate(float x, float y, float z);
         void translate(const glm::vec3& translation);
 
-        void rotate(const float pitch, const float yaw, const float roll);
+        void rotate(float pitch, float yaw, float roll);
         void rotate(const glm::vec3& rotation);
 
-        void scale(const float x, const float y, const float z);
+        void scale(float x, float y, float z);
         void scale(const glm::vec3& scale);
 };
 

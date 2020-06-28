@@ -63,18 +63,22 @@ void ServerClient::disconnect() {
 bool ServerClient::disconnected() const {
     return (m_ConnectionState == ConnectionState::Disconnected || m_Timeout_Timer >= m_Timeout_Timer_Limit || (m_TcpSocket && m_TcpSocket->localPort() == 0));
 }
+/*
 SocketStatus::Status ServerClient::send_tcp(Packet& packet) {
-    return m_TcpSocket->send(packet);
+   return m_TcpSocket->send(packet);
 }
+*/
 SocketStatus::Status ServerClient::send_tcp(sf::Packet& packet) {
     return m_TcpSocket->send(packet);
 }
 SocketStatus::Status ServerClient::receive_tcp(sf::Packet& packet) {
     return m_TcpSocket->receive(packet);
 }
+/*
 SocketStatus::Status ServerClient::send_udp(Engine::Networking::Packet& packet) {
     return m_Server.send_udp_to_client(*this, packet);
 }
+*/
 SocketStatus::Status ServerClient::send_udp(sf::Packet& sfPacket) {
     return m_Server.send_udp_to_client(*this, sfPacket);
 }
@@ -88,12 +92,12 @@ void ServerClient::internal_update_tcp(const float dt) {
     if (!m_TcpSocket) {
         return;
     }
-    sf::Packet sf_packet;
-    auto status = receive_tcp(sf_packet);
+    Engine::Networking::Packet packet;
+    auto status = receive_tcp(packet);
     switch (status) {
         case SocketStatus::Done: {
             internal_on_received_data();
-            m_On_Received_TCP_Function(sf_packet, dt);
+            m_On_Received_TCP_Function(packet, dt);
             break;
         }case SocketStatus::NotReady: {
             break;
