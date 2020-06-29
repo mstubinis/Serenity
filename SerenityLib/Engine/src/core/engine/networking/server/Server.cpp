@@ -88,23 +88,6 @@ bool Server::shutdown() {
     return true;
 }
 
-void Server::internal_send_to_all_tcp(ServerClient* exclusion, Engine::Networking::Packet& packet) {
-    for (auto& itr : m_HashedClients) {
-        if (itr.second != exclusion) {
-            auto status = itr.second->send_tcp(packet);
-        }
-    }
-}
-void Server::internal_send_to_all_udp(ServerClient* exclusion, Engine::Networking::Packet& packet) {
-    for (auto& itr : m_HashedClients) {
-        if (itr.second != exclusion) {
-            auto clientIP   = itr.second->ip();
-            auto clientPort = itr.second->port();
-            auto status     = m_UdpSocket->send(clientPort, packet, clientIP);
-        }
-    }
-}
-
 void Server::internal_send_to_all_tcp(ServerClient* exclusion, sf::Packet& sf_packet) {
     for (auto& itr : m_HashedClients) {
         if (itr.second != exclusion) {
@@ -121,56 +104,23 @@ void Server::internal_send_to_all_udp(ServerClient* exclusion, sf::Packet& sf_pa
         }
     }
 }
-
-SocketStatus::Status Server::send_tcp_to_client(ServerClient& client, Engine::Networking::Packet& packet) {
-    return client.send_tcp(packet);
-}
-
 SocketStatus::Status Server::send_tcp_to_client(ServerClient& client, sf::Packet& sf_packet) {
     return client.send_tcp(sf_packet);
 }
-
-void Server::send_tcp_to_all_but_client(ServerClient& exclusion, Engine::Networking::Packet& packet) {
-    internal_send_to_all_tcp(&exclusion, packet);
-}
-
 void Server::send_tcp_to_all_but_client(ServerClient& exclusion, sf::Packet& sf_packet) {
     internal_send_to_all_tcp(&exclusion, sf_packet);
 }
-
-void Server::send_tcp_to_all(Engine::Networking::Packet& packet) {
-    internal_send_to_all_tcp(nullptr, packet);
-}
-
 void Server::send_tcp_to_all(sf::Packet& packet) {
     internal_send_to_all_tcp(nullptr, packet);
 }
-
-SocketStatus::Status Server::send_udp_to_client(ServerClient& client, Engine::Networking::Packet& packet) {
-    return m_UdpSocket->send(client.port(), packet, client.ip());
-}
-
 SocketStatus::Status Server::send_udp_to_client(ServerClient& client, sf::Packet& sf_packet) {
     return m_UdpSocket->send(client.port(), sf_packet, client.ip());
 }
-
-void Server::send_udp_to_all_but_client(ServerClient& exclusion, Engine::Networking::Packet& packet) {
-    internal_send_to_all_udp(&exclusion, packet);
-}
-
 void Server::send_udp_to_all_but_client(ServerClient& exclusion, sf::Packet& sf_packet) {
     internal_send_to_all_udp(&exclusion, sf_packet);
 }
-
-void Server::send_udp_to_all(Engine::Networking::Packet& packet) {
-    internal_send_to_all_udp(nullptr, packet);
-}
-
 void Server::send_udp_to_all(sf::Packet& sf_packet) {
     internal_send_to_all_udp(nullptr, sf_packet);
-}
-SocketStatus::Status Server::receive_udp(Engine::Networking::Packet& packet, sf::IpAddress& sender, unsigned short& port) {
-    return m_UdpSocket->receive(packet, sender, port);
 }
 SocketStatus::Status Server::receive_udp(sf::Packet& sf_packet, sf::IpAddress& sender, unsigned short& port) {
     return m_UdpSocket->receive(sf_packet, sender, port);
@@ -306,8 +256,6 @@ void Server::update(const float dt) {
 
     internal_update_remove_clients();
 }
-
-
 /*
 void Server::internal_send_to_all_tcp(ServerClient* exclusion, void* data, size_t size) {
     for (auto& itr : m_HashedClients) {
@@ -359,5 +307,4 @@ void Server::setBlockingTCPClient(string& hash, bool blocking) {
 void Server::setBlockingUDP(bool blocking) {
     m_UdpSocket->setBlocking(blocking);
 }
-
 */

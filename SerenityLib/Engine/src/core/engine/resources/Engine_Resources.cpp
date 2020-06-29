@@ -295,7 +295,7 @@ Handle Resources::loadMaterial(const string& name, Texture* diffuse, Texture* no
     auto* material = resourceManager->HasResource<Material>(name);
     if (!material) {
         MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
-        request.request(false);
+        //request.request(false); //the above creates the material and is immediately available for use, no need to request
         return request.m_Part.m_Handle;
     }
     return Handle();

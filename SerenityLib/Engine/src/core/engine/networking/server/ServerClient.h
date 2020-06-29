@@ -80,14 +80,12 @@ namespace Engine::Networking {
             bool connect(unsigned short timeout = 0);
             bool disconnected() const;
 
-            //SocketStatus::Status send_tcp(Engine::Networking::Packet& packet);
             SocketStatus::Status send_tcp(sf::Packet& sfPacket);
             //SocketStatus::Status send_tcp(void* data, size_t size);
             //SocketStatus::Status send_tcp(void* data, size_t size, size_t& sent);
             SocketStatus::Status receive_tcp(sf::Packet& packet);
             //SocketStatus::Status receive_tcp(void* data, size_t size, size_t& received);
 
-            //SocketStatus::Status send_udp(Engine::Networking::Packet& packet);
             SocketStatus::Status send_udp(sf::Packet& sfPacket);
             void receive_udp(SocketStatus::Status status, sf::Packet& packet, const float dt);
             //void receive_udp(SocketStatus::Status status, void* data, size_t size, size_t& received, const float dt);

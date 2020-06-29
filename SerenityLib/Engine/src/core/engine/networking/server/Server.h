@@ -38,11 +38,9 @@ namespace Engine::Networking {
             update_func            m_Update_Function            = [](const float dt, bool serverActive) {};
             on_udp_func            m_On_Receive_UDP_Function    = [](sf::Packet& sf_packet, std::string& ip, unsigned short port, const float dt) {};
 
-            void internal_send_to_all_tcp(ServerClient* exclusion, Engine::Networking::Packet& packet);
             void internal_send_to_all_tcp(ServerClient* exclusion, sf::Packet& packet);
             //void internal_send_to_all_tcp(ServerClient* exclusion, void* data, size_t size);
 
-            void internal_send_to_all_udp(ServerClient* exclusion, Engine::Networking::Packet& packet);
             void internal_send_to_all_udp(ServerClient* exclusion, sf::Packet& packet);
             //void internal_send_to_all_udp(ServerClient* exclusion, void* data, size_t size);
 
@@ -90,11 +88,8 @@ namespace Engine::Networking {
             void remove_client(ServerClient& client);
 
             //tcp
-            SocketStatus::Status send_tcp_to_client(ServerClient& client, Engine::Networking::Packet& packet);
             SocketStatus::Status send_tcp_to_client(ServerClient& client, sf::Packet& packet);
-            void send_tcp_to_all_but_client(ServerClient& exclusion, Engine::Networking::Packet& packet);
             void send_tcp_to_all_but_client(ServerClient& exclusion, sf::Packet& packet);
-            void send_tcp_to_all(Engine::Networking::Packet& packet);
             void send_tcp_to_all(sf::Packet& packet);
             //SocketStatus::Status send_tcp_to_client(ServerClient& client, void* data, size_t size);
             //SocketStatus::Status send_tcp_to_client(ServerClient& client, void* data, size_t size, size_t& sent);
@@ -102,14 +97,10 @@ namespace Engine::Networking {
             //void send_tcp_to_all(void* data, size_t size);
 
             //udp
-            SocketStatus::Status send_udp_to_client(ServerClient& client, Engine::Networking::Packet& packet);
             SocketStatus::Status send_udp_to_client(ServerClient& client, sf::Packet& packet);
-            void send_udp_to_all_but_client(ServerClient& exclusion, Engine::Networking::Packet& packet);
             void send_udp_to_all_but_client(ServerClient& exclusion, sf::Packet& packet);
-            void send_udp_to_all(Engine::Networking::Packet& packet);
             void send_udp_to_all(sf::Packet& packet);
             SocketStatus::Status receive_udp(sf::Packet& packet, sf::IpAddress& sender, unsigned short& port);
-            SocketStatus::Status receive_udp(Engine::Networking::Packet& packet, sf::IpAddress& sender, unsigned short& port);
             //void send_udp_to_all_but_client(ServerClient& exclusion, void* data, size_t size);
             //void send_udp_to_all(void* data, size_t size);
             //SocketStatus::Status receive_udp(void* data, size_t size, size_t& received, sf::IpAddress& sender, unsigned short& port);

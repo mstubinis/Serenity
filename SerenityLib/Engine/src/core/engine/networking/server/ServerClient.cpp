@@ -63,22 +63,12 @@ void ServerClient::disconnect() {
 bool ServerClient::disconnected() const {
     return (m_ConnectionState == ConnectionState::Disconnected || m_Timeout_Timer >= m_Timeout_Timer_Limit || (m_TcpSocket && m_TcpSocket->localPort() == 0));
 }
-/*
-SocketStatus::Status ServerClient::send_tcp(Packet& packet) {
-   return m_TcpSocket->send(packet);
-}
-*/
 SocketStatus::Status ServerClient::send_tcp(sf::Packet& packet) {
     return m_TcpSocket->send(packet);
 }
 SocketStatus::Status ServerClient::receive_tcp(sf::Packet& packet) {
     return m_TcpSocket->receive(packet);
 }
-/*
-SocketStatus::Status ServerClient::send_udp(Engine::Networking::Packet& packet) {
-    return m_Server.send_udp_to_client(*this, packet);
-}
-*/
 SocketStatus::Status ServerClient::send_udp(sf::Packet& sfPacket) {
     return m_Server.send_udp_to_client(*this, sfPacket);
 }
