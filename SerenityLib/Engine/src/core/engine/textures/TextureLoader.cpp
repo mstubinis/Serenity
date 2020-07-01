@@ -564,7 +564,7 @@ void InternalTexturePublicInterface::LoadGPU(Texture& texture) {
         front();
         texture.m_CommandQueue.pop();
     }
-    texture.EngineResource::load();
+    texture.Resource::load();
 
     Event e(EventType::TextureLoaded);
     e.eventTextureLoaded = EventTextureLoaded(&texture);
@@ -581,7 +581,7 @@ void InternalTexturePublicInterface::UnloadCPU(Texture& texture) {
         }
     }
     texture.m_Mipmapped = false;
-    texture.EngineResource::unload();
+    texture.Resource::unload();
 }
 void InternalTexturePublicInterface::UnloadGPU(Texture& texture) {
     for (size_t i = 0; i < texture.m_TextureAddresses.size(); ++i) {

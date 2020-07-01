@@ -211,6 +211,6 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
 void InternalMeshRequestPublicInterface::LoadGPU(MeshRequest& meshRequest) {
     for (auto& part : meshRequest.m_Parts) {
         InternalMeshPublicInterface::LoadGPU(*part.mesh);
-        part.mesh->EngineResource::load();
+        part.mesh->Resource::load();
     }
 }

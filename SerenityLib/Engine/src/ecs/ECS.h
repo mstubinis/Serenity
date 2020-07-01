@@ -104,9 +104,9 @@ namespace Engine::priv {
             }
 
             template<class COMPONENT> inline constexpr ECSComponentPool<ENTITY, COMPONENT>& getPool() const {
-                using CPoolType = ECSComponentPool<ENTITY, COMPONENT>;
+                using CPOOL = ECSComponentPool<ENTITY, COMPONENT>;
                 auto type_slot  = ECSRegistry::type_slot_fast<COMPONENT>();
-                return *static_cast<CPoolType*>(m_ComponentPools[type_slot]);
+                return *static_cast<CPOOL*>(m_ComponentPools[type_slot]);
             }
 
             template<class COMPONENT> inline constexpr ECSSystem<ENTITY, COMPONENT>& getSystem() const {
@@ -117,14 +117,14 @@ namespace Engine::priv {
 
             template<class COMPONENT>
             void assignSystem(const ECSSystemCI& systemCI/*, unsigned int sortValue*/) {
-                auto type_slot    = ECSRegistry::type_slot<COMPONENT>();
-                using CPoolType   = ECSComponentPool<ENTITY, COMPONENT>;
-                using CSystemType = ECSSystem<ENTITY, COMPONENT>;
+                auto type_slot = ECSRegistry::type_slot<COMPONENT>();
+                using CPOOL    = ECSComponentPool<ENTITY, COMPONENT>;
+                using SYSTEM   = ECSSystem<ENTITY, COMPONENT>;
                 if (type_slot >= m_ComponentPools.size()) {
                     m_ComponentPools.resize(type_slot + 1, nullptr);
                 }
                 if (!m_ComponentPools[type_slot]) {
-                    m_ComponentPools[type_slot] = NEW CPoolType();
+                    m_ComponentPools[type_slot] = NEW CPOOL();
                 }
                 if (type_slot >= m_Systems.size()) {
                     m_Systems.resize(type_slot + 1, nullptr);
@@ -132,17 +132,17 @@ namespace Engine::priv {
                 if (m_Systems[type_slot]) {
                     SAFE_DELETE(m_Systems[type_slot]);
                 }
-                m_Systems[type_slot] = NEW CSystemType(systemCI, *this);
+                m_Systems[type_slot] = NEW SYSTEM(systemCI, *this);
             }
-            template<class COMPONENT, typename TSystem>
+            template<class COMPONENT, typename SYSTEM>
             void assignSystem(const ECSSystemCI& systemCI/*, unsigned int sortValue*/) {
-                auto type_slot  = ECSRegistry::type_slot<COMPONENT>();
-                using CPoolType = ECSComponentPool<ENTITY, COMPONENT>;
+                auto type_slot = ECSRegistry::type_slot<COMPONENT>();
+                using CPOOL    = ECSComponentPool<ENTITY, COMPONENT>;
                 if (type_slot >= m_ComponentPools.size()) {
                     m_ComponentPools.resize(type_slot + 1, nullptr);
                 }
                 if (!m_ComponentPools[type_slot]) {
-                    m_ComponentPools[type_slot] = NEW CPoolType();
+                    m_ComponentPools[type_slot] = NEW CPOOL();
                 }
                 if (type_slot >= m_Systems.size()) {
                     m_Systems.resize(type_slot + 1, nullptr);
@@ -150,7 +150,7 @@ namespace Engine::priv {
                 if (m_Systems[type_slot]) {
                     SAFE_DELETE(m_Systems[type_slot]);
                 }
-                m_Systems[type_slot] = NEW TSystem(systemCI, *this);
+                m_Systems[type_slot] = NEW SYSTEM(systemCI, *this);
             }
 
             ENTITY createEntity(Scene& scene) {
@@ -188,8 +188,8 @@ namespace Engine::priv {
             }
 
             template<class T> inline constexpr T* getComponent(ENTITY entity) const {
-                using CPoolType = ECSComponentPool<ENTITY, T>;
-                return static_cast<CPoolType*>(m_ComponentPools[ECSRegistry::type_slot_fast<T>()])->getComponent(entity);
+                using CPOOL = ECSComponentPool<ENTITY, T>;
+                return static_cast<CPOOL*>(m_ComponentPools[ECSRegistry::type_slot_fast<T>()])->getComponent(entity);
             }
 
             template<class... TYPES> inline constexpr std::tuple<TYPES*...> getComponents(ENTITY entity) const {

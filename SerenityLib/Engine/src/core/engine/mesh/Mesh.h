@@ -27,7 +27,7 @@ namespace Engine::priv {
 #include <core/engine/mesh/VertexData.h>
 #include <core/engine/mesh/MeshIncludes.h>
 
-#include <core/engine/resources/Engine_ResourceBasic.h>
+#include <core/engine/resources/Resource.h>
 #include <core/engine/events/Observer.h>
 #include <core/engine/physics/PhysicsIncludes.h>
 #include <core/engine/model/ModelInstance.h>
@@ -53,7 +53,7 @@ namespace Engine::priv{
     };
 };
 
-class Mesh final: public EngineResource, public Observer, public Engine::NonCopyable, public Engine::NonMoveable {
+class Mesh final: public Resource, public Observer, public Engine::NonCopyable, public Engine::NonMoveable {
     friend struct Engine::priv::InternalMeshPublicInterface;
     friend struct Engine::priv::InternalMeshRequestPublicInterface;
     friend struct Engine::priv::DefaultMeshBindFunctor;

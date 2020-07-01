@@ -19,7 +19,7 @@ using namespace std;
 
 Font* first_font = nullptr;
 
-Font::Font(const string& filename, int height, int width, float line_height) : EngineResource(ResourceType::Font, filename) {
+Font::Font(const string& filename, int height, int width, float line_height) : Resource(ResourceType::Font, filename) {
     init(filename, height, width);
     m_LineHeight = line_height;
 }

@@ -39,7 +39,7 @@ namespace Engine::priv {
     }};
 };
 
-ShaderProgram::ShaderProgram(const string& in_name, Shader& vs, Shader& fs):m_VertexShader(vs), m_FragmentShader(fs), EngineResource(ResourceType::ShaderProgram, in_name){
+ShaderProgram::ShaderProgram(const string& in_name, Shader& vs, Shader& fs):m_VertexShader(vs), m_FragmentShader(fs), Resource(ResourceType::ShaderProgram, in_name){
     setName(in_name);
 
     const string& name_ = name();
@@ -54,10 +54,6 @@ ShaderProgram::ShaderProgram(const string& in_name, Shader& vs, Shader& fs):m_Ve
 }
 ShaderProgram::~ShaderProgram(){ 
     unload(); 
-}
-
-GLuint ShaderProgram::program() const {
-    return m_ShaderProgram; 
 }
 
 void InternalShaderProgramPublicInterface::LoadCPU(ShaderProgram& shaderP){
@@ -161,13 +157,13 @@ void InternalShaderProgramPublicInterface::LoadGPU(ShaderProgram& shaderP){
         }
         shaderP.m_LoadedGPU = true;
     }
-    shaderP.EngineResource::load();
+    shaderP.Resource::load();
 }
 void InternalShaderProgramPublicInterface::UnloadCPU(ShaderProgram& shaderP){
     if (shaderP.m_LoadedCPU) {
         shaderP.m_LoadedCPU = false;
     }
-    shaderP.EngineResource::unload();
+    shaderP.Resource::unload();
 }
 void InternalShaderProgramPublicInterface::UnloadGPU(ShaderProgram& shaderP){
     if (shaderP.m_LoadedGPU) {
@@ -182,7 +178,7 @@ void ShaderProgram::load(){
         InternalShaderProgramPublicInterface::LoadCPU(*this);
         InternalShaderProgramPublicInterface::LoadGPU(*this);
 
-        EngineResource::load();
+        Resource::load();
     }
 }
 void ShaderProgram::unload(){
@@ -190,9 +186,7 @@ void ShaderProgram::unload(){
         InternalShaderProgramPublicInterface::UnloadGPU(*this);
         InternalShaderProgramPublicInterface::UnloadCPU(*this);
 
-        EngineResource::unload();
+        Resource::unload();
     }
 }
-const unordered_map<string, GLint>& ShaderProgram::uniforms() const { 
-    return m_UniformLocations; 
-}
+

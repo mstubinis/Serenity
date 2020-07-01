@@ -23,11 +23,11 @@ namespace Engine::priv {
 #include <glm/vec3.hpp>
 #include <vector>
 
-#include <core/engine/resources/Engine_ResourceBasic.h>
+#include <core/engine/resources/Resource.h>
 #include <core/engine/materials/MaterialEnums.h>
 #include <functional>
 
-class Material final : public EngineResource{
+class Material final : public Resource {
     friend struct Engine::priv::DefaultMaterialBindFunctor;
     friend struct Engine::priv::DefaultMaterialUnbindFunctor;
     friend struct Engine::priv::InternalScenePublicInterface;
@@ -105,15 +105,16 @@ class Material final : public EngineResource{
         MaterialComponent& addComponentRefraction(const std::string& cubeMapName, const std::string& mapFile, float refractiveIndex = 1.0f, float mixFactor = 1.0f);
         MaterialComponent& addComponentParallaxOcclusion(const std::string& textureFile, float heightScale = 0.1f);
 
-        std::uint32_t id() const;
-    
-        bool shadeless() const;
-        const Engine::color_vector_4& f0() const;
-        unsigned char glow() const;
-        unsigned char smoothness() const;
-        unsigned char metalness() const;
-        unsigned char ao() const;
-        unsigned char alpha() const;
+        constexpr bool shadeless() const noexcept { return m_Shadeless; }
+        constexpr const Engine::color_vector_4& f0() const noexcept { return m_F0Color; }
+        constexpr unsigned char glow() const noexcept { return m_BaseGlow; }
+        constexpr std::uint32_t id() const noexcept { return m_ID; }
+        constexpr unsigned char diffuseModel() const noexcept { return m_DiffuseModel; }
+        constexpr unsigned char specularModel() const noexcept { return m_SpecularModel; }
+        constexpr unsigned char ao() const noexcept { return m_BaseAO; }
+        constexpr unsigned char metalness() const noexcept { return m_BaseMetalness; }
+        constexpr unsigned char smoothness() const noexcept { return m_BaseSmoothness; }
+        constexpr unsigned char alpha() const noexcept { return m_BaseAlpha; }
         
         void setF0Color(const Engine::color_vector_4& f0Color);
         void setF0Color(unsigned char r, unsigned char g, unsigned char b);
@@ -126,9 +127,7 @@ class Material final : public EngineResource{
         void setMetalness(unsigned char metalness);
         void setAlpha(unsigned char alpha);
     
-        unsigned char specularModel() const;
         void setSpecularModel(SpecularModel::Model specularModel);
-        unsigned char diffuseModel() const;
         void setDiffuseModel(DiffuseModel::Model diffuseModel);
 
         void update(const float dt);

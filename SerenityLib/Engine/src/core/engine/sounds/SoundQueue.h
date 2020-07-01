@@ -26,15 +26,15 @@ class SoundQueue {
         SoundQueue(Engine::priv::SoundModule& manager, float delay = 0.5f);
         virtual ~SoundQueue();
 
-        void activate(bool active = true);
-        void deactivate();
+        bool empty() const noexcept { return m_Queue.empty(); }
+        size_t size() const noexcept { return m_Queue.size(); }
+        constexpr bool active() const noexcept { return m_Active; }
+        constexpr void activate(bool active = true) noexcept { m_Active = active; }
+        constexpr void deactivate() noexcept { m_Active = false; }
         void enqueueEffect(Handle soundEffectHandle, unsigned int loops = 1);
         void enqueueMusic(Handle soundMusicHandle, unsigned int loops = 1);
         void dequeue();
         void clear();
-        bool empty() const;
-        bool active() const;
-        size_t size() const;
 
         void update(const float dt);
 };

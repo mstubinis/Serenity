@@ -12,7 +12,7 @@ class MaterialComponent {
         MaterialComponentType::Type  m_ComponentType;
     public:
         MaterialComponent(MaterialComponentType::Type type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
-        virtual ~MaterialComponent();
+        virtual ~MaterialComponent() {}
 
         MaterialComponent(const MaterialComponent&)                      = delete;
         MaterialComponent& operator=(const MaterialComponent&)           = delete;
@@ -20,7 +20,7 @@ class MaterialComponent {
         MaterialComponent& operator=(MaterialComponent&& other) noexcept = delete;
 
         virtual void bind(size_t component_index, size_t& inTextureUnit) const;
-        virtual void unbind();
+        virtual void unbind() {}
 
         MaterialLayer* addLayer(const std::string& textureFile, const std::string& maskFile = "", const std::string& cubemapFile = "");
         MaterialLayer* addLayer(Texture* texture = nullptr, Texture* mask = nullptr, Texture* cubemap = nullptr);
@@ -30,7 +30,7 @@ class MaterialComponent {
         Texture* cubemap(size_t index = 0) const;
         MaterialLayer& layer(size_t index = 0);
 
-        MaterialComponentType::Type type() const;
+        constexpr MaterialComponentType::Type type() const noexcept { return m_ComponentType; }
 
         void update(const float dt);
 };

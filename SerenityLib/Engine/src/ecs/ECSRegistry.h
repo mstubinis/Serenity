@@ -7,12 +7,8 @@
 
 using boost_type_index = boost::typeindex::type_index;
 
-template <typename T> constexpr boost_type_index type_ID() { 
-	return boost::typeindex::type_id<T>(); 
-}
-template <typename T> constexpr boost_type_index type_ID(T* inType) {
-	return boost::typeindex::type_id_runtime(*inType);
-}
+template <typename T> constexpr boost_type_index type_ID() noexcept { return boost::typeindex::type_id<T>();  }
+template <typename T> constexpr boost_type_index type_ID(T* inType) noexcept { return boost::typeindex::type_id_runtime(*inType); }
 
 namespace Engine::priv {
     class ECSRegistry final : public Engine::NonCopyable, public Engine::NonMoveable {
@@ -23,7 +19,7 @@ namespace Engine::priv {
             ECSRegistry() = default;
             ~ECSRegistry() = default;
 
-            template <typename T> static constexpr std::uint32_t type_slot() {
+            template <typename T> static constexpr std::uint32_t type_slot() noexcept {
                 auto type = type_ID<T>();
                 if (!m_SlotMap.count(type)) {
                     m_SlotMap.emplace(type, m_LastIndex);
@@ -31,7 +27,7 @@ namespace Engine::priv {
                 }
                 return m_SlotMap.at(type);
             }
-            template <typename T> static constexpr std::uint32_t type_slot(T* t) {
+            template <typename T> static constexpr std::uint32_t type_slot(T* t) noexcept {
                 auto type = type_ID(t); 
                 if (!m_SlotMap.count(type)) {
                     m_SlotMap.emplace(type, m_LastIndex);
@@ -39,10 +35,10 @@ namespace Engine::priv {
                 }
                 return m_SlotMap.at(type);
             }
-			template <typename T> static constexpr std::uint32_t type_slot_fast() {
+			template <typename T> static constexpr std::uint32_t type_slot_fast() noexcept {
 				return m_SlotMap.at(type_ID<T>());
 			}
-			template <typename T> static constexpr std::uint32_t type_slot_fast(T* t) {
+			template <typename T> static constexpr std::uint32_t type_slot_fast(T* t) noexcept {
 				return m_SlotMap.at(type_ID(t));
 			}
         };

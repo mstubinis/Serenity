@@ -26,6 +26,7 @@ namespace Engine::priv {
         public:
             ECSSystem()                                      = default;
             virtual ~ECSSystem()                             = default;
+
             ECSSystem(const ECSSystem&)                      = delete;
             ECSSystem& operator=(const ECSSystem&)           = delete;
             ECSSystem(ECSSystem&& other) noexcept            = delete;
@@ -45,33 +46,14 @@ namespace Engine::priv {
         using CPoolType = ECSComponentPool<ENTITY, COMPONENT>;
         private:
             CPoolType& componentPool;
-
-            void Bind_SUF(const FunctorUpdate& f) { 
-                super::SUF = std::bind(f.functor, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
-			}
-            void Bind_CAE(const FunctorComponent& f) {
-                super::CAE = std::bind(f.functor, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-			}
-            void Bind_CRE(const FunctorComponentRemoved& f) {
-                super::CRE = std::bind(f.functor, std::placeholders::_1, std::placeholders::_2);
-            }
-            void Bind_EAS(const FunctorEntity& f) {
-                super::EAS = std::bind(f.functor, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
-			}
-            void Bind_SEF(const FunctorScene& f) {
-                super::SEF = std::bind(f.functor, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-			}
-            void Bind_SLF(const FunctorScene& f) {
-                super::SLF = std::bind(f.functor, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-			}
         public:
-            ECSSystem(const ECSSystemCI& systemCI, ECS<ENTITY>& ecs) : componentPool(ecs.template getPool<COMPONENT>()){
-                Bind_SUF(systemCI.onUpdateFunction);
-                Bind_CAE(systemCI.onComponentAddedToEntityFunction);
-                Bind_CRE(systemCI.onComponentRemovedFromEntityFunction);
-                Bind_EAS(systemCI.onEntityAddedToSceneFunction);
-                Bind_SEF(systemCI.onSceneEnteredFunction);
-                Bind_SLF(systemCI.onSceneLeftFunction);
+            ECSSystem(const ECSSystemCI& systemConstructor, ECS<ENTITY>& ecs) : componentPool(ecs.template getPool<COMPONENT>()){
+                super::SUF = systemConstructor.onUpdateFunction;
+                super::CAE = systemConstructor.onComponentAddedToEntityFunction;
+                super::CRE = systemConstructor.onComponentRemovedFromEntityFunction;
+                super::EAS = systemConstructor.onEntityAddedToSceneFunction;
+                super::SEF = systemConstructor.onSceneEnteredFunction;
+                super::SLF = systemConstructor.onSceneLeftFunction;
             }
             ECSSystem()                                      = default;
             virtual ~ECSSystem()                             = default;

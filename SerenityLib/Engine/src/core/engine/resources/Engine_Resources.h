@@ -8,7 +8,7 @@ namespace sf {
 
 class  Handle;
 struct EngineOptions;
-class  EngineResource;
+class  Resource;
 class  Window;
 class  Scene;
 class  Font;
@@ -37,7 +37,7 @@ namespace Engine{
                 unsigned int AddScene(Scene& scene);
             public:
                 //http://gamesfromwithin.com/managing-data-relationships
-                ResourcePool<EngineResource>       m_Resources;
+                ResourcePool<Resource>             m_Resources;
                 std::vector<Window*>               m_Windows;
                 Scene*                             m_CurrentScene       = nullptr;
                 bool                               m_DynamicMemory      = false;
@@ -61,7 +61,7 @@ namespace Engine{
 
                 template<typename T> T* HasResource(std::string_view resource_name) {
                     for (size_t i = 0; i < m_Resources.size(); ++i) {
-                        EngineResource* r = m_Resources.getAsFast<EngineResource>(static_cast<unsigned int>(i) + 1U);
+                        Resource* r = m_Resources.getAsFast<Resource>(static_cast<unsigned int>(i) + 1U);
                         if (r) {
                             T* resource = dynamic_cast<T*>(r);
                             if (resource && resource->name() == resource_name) {
@@ -75,7 +75,7 @@ namespace Engine{
                 template<typename T> std::list<T*> GetAllResourcesOfType() {
                     std::list<T*> ret;
                     for (size_t i = 0; i < m_Resources.size(); ++i) {
-                        EngineResource* r = m_Resources.getAsFast<EngineResource>(static_cast<unsigned int>(i) + 1U);
+                        Resource* r = m_Resources.getAsFast<Resource>(static_cast<unsigned int>(i) + 1U);
                         if (r) {
                             T* resource = dynamic_cast<T*>(r);
                             if (resource) {

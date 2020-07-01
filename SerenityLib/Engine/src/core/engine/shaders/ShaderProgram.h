@@ -17,7 +17,7 @@ namespace Engine::priv {
     };
 };
 
-#include <core/engine/resources/Engine_ResourceBasic.h>
+#include <core/engine/resources/Resource.h>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -28,7 +28,7 @@ namespace Engine::priv {
 
 #include <core/engine/shaders/ShaderIncludes.h>
 
-class ShaderProgram final : public EngineResource, public Engine::NonCopyable{
+class ShaderProgram final : public Resource, public Engine::NonCopyable {
     friend class  UniformBufferObject;
     friend class  Shader;
     friend struct Engine::priv::InternalShaderProgramPublicInterface;
@@ -56,13 +56,12 @@ class ShaderProgram final : public EngineResource, public Engine::NonCopyable{
             m_CustomBindFunctor = std::bind<void>(std::move(functor), std::placeholders::_1);
         }
 
-        inline operator GLuint() const { return m_ShaderProgram; }
+        constexpr inline operator GLuint() const noexcept { return m_ShaderProgram; }
 
         void load() override;
         void unload() override;
 
-        GLuint program() const;
-
-        const std::unordered_map<std::string, GLint>& uniforms() const;
+        constexpr inline GLuint program() const noexcept { return m_ShaderProgram; }
+        inline const std::unordered_map<std::string, GLint>& uniforms() const noexcept { return m_UniformLocations; }
 };
 #endif

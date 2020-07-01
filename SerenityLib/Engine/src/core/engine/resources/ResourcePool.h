@@ -62,8 +62,8 @@ namespace Engine::priv{
                 return get(handle, outPtr);
             }
             const bool get(const Handle handle, T*& outPtr){
-                const auto& item = super::get(handle.index - 1U);
-                if (item.m_Version != handle.version){
+                const auto& item = super::get(handle.index() - 1U);
+                if (item.m_Version != handle.version()){
                     outPtr = nullptr;
                     return false;
                 }
@@ -79,12 +79,12 @@ namespace Engine::priv{
             }
             template<typename RESOURCE>
             inline void getAsFast(const Handle handle, RESOURCE*& outPtr){
-                const auto& item = super::get(handle.index - 1U);
+                const auto& item = super::get(handle.index() - 1U);
                 outPtr = reinterpret_cast<RESOURCE*>(item.m_Resource);
             }
             template<typename RESOURCE>
             inline RESOURCE* getAsFast(const Handle handle){
-                const auto& item = super::get(handle.index - 1U);
+                const auto& item = super::get(handle.index() - 1U);
                 return reinterpret_cast<RESOURCE*>(item.m_Resource);
             }
             template<typename RESOURCE>

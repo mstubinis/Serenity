@@ -31,12 +31,12 @@ namespace Engine::priv {
 };
 
 #include <core/engine/renderer/RendererIncludes.h>
-#include <core/engine/resources/Engine_ResourceBasic.h>
+#include <core/engine/resources/Resource.h>
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/events/Observer.h>
 #include <functional>
 
-class Scene: public EngineResource, public Observer {
+class Scene: public Resource, public Observer {
     friend class  Engine::priv::RenderGraph;
     friend class  Engine::priv::ResourceManager;
     friend struct Engine::priv::InternalScenePublicInterface;

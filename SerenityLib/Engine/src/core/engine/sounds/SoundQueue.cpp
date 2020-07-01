@@ -16,7 +16,7 @@ void SoundQueue::enqueueEffect(Handle handle, unsigned int loops) {
     if (!m_Current) {
         m_Current = m_SoundModule.getNextFreeEffect();
         if (m_Current) {
-            handle.type = 1;
+            handle.m_Type = 1;
             m_SoundModule.setSoundInformation(handle, *static_cast<SoundEffect*>(m_Current));
         }
     }
@@ -26,7 +26,7 @@ void SoundQueue::enqueueMusic(Handle handle, unsigned int loops) {
     if (!m_Current) {
         m_Current = m_SoundModule.getNextFreeMusic();
         if (m_Current) {
-            handle.type = 2;
+            handle.m_Type = 2;
             m_SoundModule.setSoundInformation(handle, *static_cast<SoundMusic*>(m_Current));
         }
     }
@@ -45,18 +45,18 @@ void SoundQueue::update(const float dt) {
             m_DelayTimer += dt;
             if (m_DelayTimer > m_DelayInSeconds) {
                 m_IsDelayProcess = false;
-                m_DelayTimer = 0;
+                m_DelayTimer = 0.0f;
             }
         }else{
             if (m_Queue.size() > 0) {
                 if (!m_Current) {
                     Handle handle = m_Queue.front();
-                    if (handle.type == 1) {
+                    if (handle.type() == 1) {
                         m_Current = m_SoundModule.getNextFreeEffect();
                         if (m_Current) {
                             m_SoundModule.setSoundInformation(handle, *static_cast<SoundEffect*>(m_Current));
                         }
-                    }else if (handle.type == 2) {
+                    }else if (handle.type() == 2) {
                         m_Current = m_SoundModule.getNextFreeMusic();
                         if (m_Current) {
                             m_SoundModule.setSoundInformation(handle, *static_cast<SoundMusic*>(m_Current));
@@ -73,7 +73,7 @@ void SoundQueue::update(const float dt) {
                         if (loopsLeft <= 1) {
                             m_Queue.pop();
                             m_IsDelayProcess = true;
-                            m_Current = nullptr;
+                            m_Current        = nullptr;
                         }
                         break;
                     }case SoundStatus::Playing: {
@@ -96,22 +96,7 @@ void SoundQueue::clear() {
         m_Queue.pop();
     }
     m_Current        = nullptr;
-    m_DelayTimer     = 0;
+    m_DelayTimer     = 0.0f;
     m_IsDelayProcess = false;
     m_Active         = false;
-}
-bool SoundQueue::empty() const {
-    return m_Queue.empty();
-}
-bool SoundQueue::active() const {
-    return m_Active;
-}
-void SoundQueue::activate(bool active) {
-    m_Active = active;
-}
-void SoundQueue::deactivate() {
-    m_Active = false;
-}
-size_t SoundQueue::size() const {
-    return m_Queue.size();
 }

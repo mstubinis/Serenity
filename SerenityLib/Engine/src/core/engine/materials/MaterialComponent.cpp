@@ -18,8 +18,6 @@ MaterialComponent::MaterialComponent(MaterialComponentType::Type type, Texture* 
     m_ComponentType = type;
     addLayer(texture, mask, cubemap);
 }
-MaterialComponent::~MaterialComponent() {
-}
 MaterialLayer* MaterialComponent::addLayer(const string& textureFile, const string& maskFile, const string& cubemapFile) {
     if (m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT) {
         return nullptr;
@@ -100,9 +98,6 @@ Texture* MaterialComponent::cubemap(size_t index) const {
 MaterialLayer& MaterialComponent::layer(size_t index) {
     return m_Layers[index];
 }
-MaterialComponentType::Type MaterialComponent::type() const {
-    return m_ComponentType;
-}
 
 void MaterialComponent::bind(size_t component_index, size_t& inTextureUnit) const {
     const string wholeString = "components[" + to_string(component_index) + "].";
@@ -110,8 +105,6 @@ void MaterialComponent::bind(size_t component_index, size_t& inTextureUnit) cons
     for (unsigned int layer = 0; layer < m_NumLayers; ++layer) {
         m_Layers[layer].sendDataToGPU(wholeString, component_index, layer, inTextureUnit);
     }
-}
-void MaterialComponent::unbind() {
 }
 void MaterialComponent::update(const float dt) {
     for (unsigned int i = 0; i < m_NumLayers; ++i) {

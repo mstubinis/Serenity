@@ -5,59 +5,20 @@
 #include <functional>
 #include <ecs/Entity.h>
 
-typedef std::function<void(void*, void*, const float, Scene&)> std_func_update;
-typedef std::function<void(void*, void*, Entity, Scene&)>      std_func_entity;
-typedef std::function<void(void*, void*, Entity)>              std_func_component;
-typedef std::function<void(void*, Entity)>                     std_func_component_removed;
-typedef std::function<void(void*, void*, Scene&)>              std_func_scene;
+using std_func_update            = std::function<void(void*, void*, const float, Scene&)>;
+using std_func_entity            = std::function<void(void*, void*, Entity, Scene&)>;
+using std_func_component         = std::function<void(void*, void*, Entity)>;
+using std_func_component_removed = std::function<void(void*, Entity)>;
+using std_func_scene             = std::function<void(void*, void*, Scene&)>;
 
 namespace Engine::priv {
-    struct FunctorUpdateEmpty final { void operator()(void* system, void* componentPool, const float dt, Scene& scene) const { } };
-    struct FunctorComponentEmpty final { void operator()(void* system, void* component, Entity entity) const { } };
-    struct FunctorComponentRemovedEmpty final { void operator()(void* system, Entity entity) const { } };
-    struct FunctorEntityEmpty final { void operator()(void* system, void* componentPool, Entity entity, Scene& scene) const { } };
-    struct FunctorSceneEmpty final { void operator()(void* system, void* componentPool, Scene& scene) const { } };
-
-    template<class T> struct FunctorHolder {
-        T functor;
-        FunctorHolder() = default;
-        FunctorHolder(const T& f) { functor = f; }
-
-        FunctorHolder(const FunctorHolder&)                      = default;
-        FunctorHolder& operator=(const FunctorHolder&)           = default;
-        FunctorHolder(FunctorHolder&& other) noexcept            = default;
-        FunctorHolder& operator=(FunctorHolder&& other) noexcept = default;
-
-        virtual ~FunctorHolder() = default;
-    };
-    struct FunctorUpdate final : public FunctorHolder<std_func_update> {
-        FunctorUpdate() { FunctorHolder<std_func_update>::functor = FunctorUpdateEmpty(); }
-        FunctorUpdate(const std_func_update& f) { FunctorHolder<std_func_update>::functor = f; }
-    };
-    struct FunctorComponent : public FunctorHolder<std_func_component> {
-        FunctorComponent() { FunctorHolder<std_func_component>::functor = FunctorComponentEmpty(); }
-        FunctorComponent(const std_func_component& f) { FunctorHolder<std_func_component>::functor = f; }
-    };
-    struct FunctorComponentRemoved : public FunctorHolder<std_func_component_removed> {
-        FunctorComponentRemoved() { FunctorHolder<std_func_component_removed>::functor = FunctorComponentRemovedEmpty(); }
-        FunctorComponentRemoved(const std_func_component_removed& f) { FunctorHolder<std_func_component_removed>::functor = f; }
-    };
-    struct FunctorEntity final : public FunctorHolder<std_func_entity> {
-        FunctorEntity() { FunctorHolder<std_func_entity>::functor = FunctorEntityEmpty(); }
-        FunctorEntity(const std_func_entity& f) { FunctorHolder<std_func_entity>::functor = f; }
-    };
-    struct FunctorScene final : public FunctorHolder<std_func_scene> {
-        FunctorScene() { FunctorHolder<std_func_scene>::functor = FunctorSceneEmpty(); }
-        FunctorScene(const std_func_scene& f) { FunctorHolder<std_func_scene>::functor = f; }
-    };
-
     struct ECSSystemCI {
-        FunctorUpdate               onUpdateFunction;
-        FunctorComponent            onComponentAddedToEntityFunction;
-        FunctorComponentRemoved     onComponentRemovedFromEntityFunction;
-        FunctorEntity               onEntityAddedToSceneFunction;
-        FunctorScene                onSceneEnteredFunction;
-        FunctorScene                onSceneLeftFunction;
+        std_func_update               onUpdateFunction                     = [](void*, void*, const float, Scene&) {};
+        std_func_component            onComponentAddedToEntityFunction     = [](void*, void*, Entity) {};
+        std_func_component_removed    onComponentRemovedFromEntityFunction = [](void*, Entity) {};
+        std_func_entity               onEntityAddedToSceneFunction         = [](void*, void*, Entity, Scene&) {};
+        std_func_scene                onSceneEnteredFunction               = [](void*, void*, Scene&) {};
+        std_func_scene                onSceneLeftFunction                  = [](void*, void*, Scene&) {};
 
         ECSSystemCI()                                        = default;
         virtual ~ECSSystemCI()                               = default;
@@ -67,23 +28,23 @@ namespace Engine::priv {
         ECSSystemCI(ECSSystemCI&& other) noexcept            = delete;
         ECSSystemCI& operator=(ECSSystemCI&& other) noexcept = delete;
 
-        template<class T> void setUpdateFunction(const T& functor) {
-            onUpdateFunction = FunctorUpdate(functor);
+        void setUpdateFunction(std_func_update func) noexcept {
+            onUpdateFunction = func;
         }
-        template<class T> void setOnComponentAddedToEntityFunction(const T& functor) {
-            onComponentAddedToEntityFunction = FunctorComponent(functor);
+        void setOnComponentAddedToEntityFunction(std_func_component func) noexcept {
+            onComponentAddedToEntityFunction = func;
         }
-        template<class T> void setOnComponentRemovedFromEntityFunction(const T& functor) {
-            onComponentRemovedFromEntityFunction = FunctorComponentRemoved(functor);
+        void setOnComponentRemovedFromEntityFunction(std_func_component_removed func) noexcept {
+            onComponentRemovedFromEntityFunction = func;
         }
-        template<class T> void setOnEntityAddedToSceneFunction(const T& functor) {
-            onEntityAddedToSceneFunction = FunctorEntity(functor);
+        void setOnEntityAddedToSceneFunction(std_func_entity func) noexcept {
+            onEntityAddedToSceneFunction = func;
         }
-        template<class T> void setOnSceneEnteredFunction(const T& functor) {
-            onSceneEnteredFunction = FunctorScene(functor);
+        void setOnSceneEnteredFunction(std_func_scene func) noexcept {
+            onSceneEnteredFunction = func;
         }
-        template<class T> void setOnSceneLeftFunction(const T& functor) {
-            onSceneLeftFunction = FunctorScene(functor);
+        void setOnSceneLeftFunction(std_func_scene func) noexcept {
+            onSceneLeftFunction = func;
         }
     };
 };

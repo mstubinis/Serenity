@@ -512,7 +512,7 @@ glm::vec2 Math::unpack2FloatsInto1Float(float i){
 }
 void Math::translate(const btRigidBody& body, btVector3& vec, bool local){
     if(local){
-        const btQuaternion q = body.getWorldTransform().getRotation().normalize();
+        btQuaternion q = body.getWorldTransform().getRotation().normalize();
         vec = vec.rotate(q.getAxis(), q.getAngle());
     }
 }

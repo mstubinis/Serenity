@@ -7,7 +7,7 @@ namespace Engine::priv {
 };
 
 #include <core/engine/textures/TextureLoader.h>
-#include <core/engine/resources/Engine_ResourceBasic.h>
+#include <core/engine/resources/Resource.h>
 #include <core/engine/renderer/GLImageConstants.h>
 
 #include <glm/vec2.hpp>
@@ -18,7 +18,7 @@ namespace Engine::priv {
 #include <queue>
 #include <functional>
 
-class Texture: public EngineResource{
+class Texture: public Resource {
     friend struct Engine::priv::TextureLoader;
     friend struct Engine::priv::InternalTexturePublicInterface;
     friend struct Engine::priv::TextureRequestStaticImpl;

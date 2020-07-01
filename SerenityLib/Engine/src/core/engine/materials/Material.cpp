@@ -52,7 +52,7 @@ constexpr std::array<tuple<unsigned char, unsigned char, unsigned char, unsigned
 
 #pragma region Material
 
-Material::Material(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) : EngineResource(ResourceType::Material, name){
+Material::Material(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) : Resource(ResourceType::Material, name){
     Texture* d  = MaterialLoader::LoadTextureDiffuse(diffuse);
     Texture* n  = MaterialLoader::LoadTextureNormal(normal);
     Texture* g  = MaterialLoader::LoadTextureGlow(glow);
@@ -64,10 +64,10 @@ Material::Material(const string& name, const string& diffuse, const string& norm
     MaterialLoader::InternalInit(*this, d, n, g, s, a, m, sm);
     InternalMaterialPublicInterface::Load(*this);
 }
-Material::Material() : EngineResource(ResourceType::Material) {
+Material::Material() : Resource(ResourceType::Material) {
     MaterialLoader::InternalInitBase(*this);
 }
-Material::Material(const string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) : EngineResource(ResourceType::Material, name){
+Material::Material(const string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) : Resource(ResourceType::Material, name){
     MaterialLoader::InternalInit(*this, diffuse, normal, glow, specular, ao, metalness, smoothness);
     InternalMaterialPublicInterface::Load(*this);
 }
@@ -167,8 +167,9 @@ MaterialComponent& Material::addComponentReflection(const string& cubemapName, c
     //add checks to see if texture was loaded already
     Texture* cubemap = MaterialLoader::LoadTextureCubemap(cubemapName);
     Texture* mask = MaterialLoader::LoadTextureMask(maskFile);
-    if (!cubemap)
+    if (!cubemap) {
         cubemap = Resources::getCurrentScene()->skybox()->texture();
+    }
     auto& component = *internalAddComponentGeneric(MaterialComponentType::Reflection, nullptr);
     auto& layer = component.layer(0);
     auto& _data2 = layer.data2();
@@ -181,8 +182,9 @@ MaterialComponent& Material::addComponentRefraction(const string& cubemapName, c
     //add checks to see if texture was loaded already
     Texture* cubemap = MaterialLoader::LoadTextureCubemap(cubemapName);
     Texture* mask = MaterialLoader::LoadTextureMask(maskFile);
-    if (!cubemap)
+    if (!cubemap) {
         cubemap = Resources::getCurrentScene()->skybox()->texture();
+    }
     auto& component = *internalAddComponentGeneric(MaterialComponentType::Refraction, nullptr);
     auto& layer = component.layer(0);
     auto& _data2 = layer.data2();
@@ -201,36 +203,6 @@ MaterialComponent& Material::addComponentParallaxOcclusion(const string& texture
 }
 MaterialComponent& Material::getComponent(unsigned int index) {
     return *m_Components[index];
-}
-bool Material::shadeless() const { 
-    return m_Shadeless; 
-}
-const Engine::color_vector_4& Material::f0() const{
-    return m_F0Color; 
-}
-unsigned char Material::glow() const {
-    return m_BaseGlow; 
-}
-std::uint32_t Material::id() const { 
-    return m_ID; 
-}
-unsigned char Material::diffuseModel() const {
-    return m_DiffuseModel; 
-}
-unsigned char Material::specularModel() const {
-    return m_SpecularModel; 
-}
-unsigned char Material::ao() const {
-    return m_BaseAO; 
-}
-unsigned char Material::metalness() const{
-    return m_BaseMetalness; 
-}
-unsigned char Material::smoothness() const {
-    return m_BaseSmoothness; 
-}
-unsigned char Material::alpha() const {
-    return m_BaseAlpha;
 }
 void Material::setShadeless(bool shadeless){
     m_Shadeless = shadeless;
@@ -288,8 +260,9 @@ void Material::setAlpha(unsigned char alpha) {
 void Material::update(const float dt) {
     for (size_t i = 0; i < m_Components.size(); ++i) {
         auto* component = m_Components[i];
-        if (!component)
-            break; //this assumes there will never be a null component before defined components. be careful here
+        if (!component) {
+            break; //TODO: this assumes there will never be a null component before defined components. be careful here. Improve this logic to avoid the issue?
+        }
         component->update(dt);
     }
 }

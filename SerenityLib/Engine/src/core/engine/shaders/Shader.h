@@ -11,10 +11,10 @@ namespace Engine::priv {
     };
 };
 
-#include <core/engine/resources/Engine_ResourceBasic.h>
+#include <core/engine/resources/Resource.h>
 #include <core/engine/shaders/ShaderIncludes.h>
 
-class Shader final : public EngineResource {
+class Shader final : public Resource {
     friend class  ShaderProgram;
     friend struct Engine::priv::InternalShaderPublicInterface;
     friend struct Engine::priv::InternalShaderProgramPublicInterface;

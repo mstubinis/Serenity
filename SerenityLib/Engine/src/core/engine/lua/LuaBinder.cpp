@@ -215,7 +215,7 @@ LUABinder::LUABinder() {
         .endClass()
         //scene stuff
         .beginClass<Scene>("Scene")
-            .addProperty("name", &Scene::name, &Scene::setName)
+            //.addProperty("name", &Scene::name, &Scene::setName)
             .addFunction("setName", &Scene::setName)
             .addFunction("createEntity", &Scene::createEntity)
             .addFunction("id", &Scene::id)

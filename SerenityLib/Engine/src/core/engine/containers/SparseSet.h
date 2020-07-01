@@ -68,7 +68,7 @@ namespace Engine {
                 return &m_Dense[super::m_Sparse[sparseIndex] - 1];
             }
             //TODO: this entire function needs a serious look at
-            bool remove(std::uint32_t id) override {
+            constexpr bool remove(std::uint32_t id) override {
                 auto removedEntityIndex = id - 1;
                 if (removedEntityIndex >= super::m_Sparse.size()) {
                     return false;
@@ -127,18 +127,10 @@ namespace Engine {
             std::vector<T>& data() {
                 return m_Dense;
             }
-            typename std::vector<T>::iterator begin() {
-                return m_Dense.begin();
-            }
-            typename std::vector<T>::iterator end() {
-                return m_Dense.end();
-            }
-            typename std::vector<T>::const_iterator begin() const {
-                return m_Dense.begin();
-            }
-            typename std::vector<T>::const_iterator end() const {
-                return m_Dense.end();
-            }
+            typename std::vector<T>::iterator begin() { return m_Dense.begin(); }
+            typename std::vector<T>::iterator end() { return m_Dense.end(); }
+            typename std::vector<T>::const_iterator begin() const { return m_Dense.begin(); }
+            typename std::vector<T>::const_iterator end() const { return m_Dense.end(); }
     };
 };
 

@@ -477,7 +477,7 @@
     <ClInclude Include="Engine\src\core\engine\renderer\RenderGraph.h" />
     <ClInclude Include="Engine\src\core\engine\renderer\SMAA_LUT.h" />
     <ClInclude Include="Engine\src\core\engine\resources\Engine_BuiltInShaders.h" />
-    <ClInclude Include="Engine\src\core\engine\resources\Engine_ResourceBasic.h" />
+    <ClInclude Include="Engine\src\core\engine\resources\Resource.h" />
     <ClInclude Include="Engine\src\core\engine\resources\Engine_Resources.h" />
     <ClInclude Include="Engine\src\core\engine\resources\Handle.h" />
     <ClInclude Include="Engine\src\core\engine\resources\ResourcePool.h" />
@@ -640,7 +640,7 @@
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\SSAO.cpp" />
     <ClCompile Include="Engine\src\core\engine\renderer\RenderGraph.cpp" />
     <ClCompile Include="Engine\src\core\engine\resources\Engine_BuiltInShaders.cpp" />
-    <ClCompile Include="Engine\src\core\engine\resources\Engine_ResourceBasic.cpp" />
+    <ClCompile Include="Engine\src\core\engine\resources\Resource.cpp" />
     <ClCompile Include="Engine\src\core\engine\resources\Engine_Resources.cpp" />
     <ClCompile Include="Engine\src\core\engine\resources\Handle.cpp" />
     <ClCompile Include="Engine\src\core\engine\scene\Camera.cpp" />

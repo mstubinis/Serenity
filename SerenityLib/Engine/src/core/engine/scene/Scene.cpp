@@ -233,7 +233,7 @@ void priv::InternalScenePublicInterface::RemoveModelInstanceFromPipeline(Scene& 
     scene.m_i->_removeModelInstanceFromPipeline(modelInstance, scene.m_RenderGraphs[stage]);
 }
 
-Scene::Scene(const string& name, const SceneOptions& options) : EngineResource(ResourceType::Scene, name) {
+Scene::Scene(const string& name, const SceneOptions& options) : Resource(ResourceType::Scene, name) {
     m_RenderGraphs.resize(RenderStage::_TOTAL);
     m_ID      = priv::Core::m_Engine->m_ResourceManager.AddScene(*this);
     m_i       = NEW impl();

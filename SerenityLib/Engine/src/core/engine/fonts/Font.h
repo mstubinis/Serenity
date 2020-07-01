@@ -5,7 +5,7 @@
 class Texture;
 struct FT_GlyphSlotRec_;
 
-#include <core/engine/resources/Engine_ResourceBasic.h>
+#include <core/engine/resources/Resource.h>
 #include <string>
 #include <unordered_map>
 #include <glm/vec2.hpp>
@@ -28,7 +28,7 @@ struct CharGlyph final {
     std::vector<glm::vec3> pts;
     std::vector<glm::vec2> uvs;
 };
-class Font final: public EngineResource {
+class Font final: public Resource {
     public:
         static constexpr unsigned int MAX_CHARACTERS_RENDERED_PER_FRAME    = 4096;
     private:

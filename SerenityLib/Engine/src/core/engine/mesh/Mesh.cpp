@@ -51,7 +51,7 @@ namespace Engine::priv {
 void InternalMeshPublicInterface::LoadGPU(Mesh& mesh){
     mesh.m_VertexData->finalize(); //transfer vertex data to gpu
 
-    mesh.EngineResource::load();
+    mesh.Resource::load();
 
     Event e(EventType::MeshLoaded);
     e.eventMeshLoaded = EventMeshLoaded(&mesh);
@@ -81,7 +81,7 @@ void InternalMeshPublicInterface::UnloadCPU(Mesh& mesh){
         SAFE_DELETE_VECTOR(cleanup_vector);
     }
 
-    mesh.EngineResource::unload();
+    mesh.Resource::unload();
 }
 void InternalMeshPublicInterface::UnloadGPU(Mesh& mesh){
     SAFE_DELETE(mesh.m_VertexData);
@@ -289,7 +289,7 @@ void InternalMeshPublicInterface::CalculateRadius(Mesh& mesh) {
     mesh.m_radius = Math::Max(mesh.m_radiusBox);
 }
 
-Mesh::Mesh() : EngineResource(ResourceType::Mesh) {
+Mesh::Mesh() : Resource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
 }
 
@@ -442,18 +442,18 @@ void Mesh::internal_recalc_indices_from_terrain(const Terrain& terrain) {
     modifyIndices(data.indices.data(), data.indices.size(), MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU);
     m_VertexData->unbind();
 }
-Mesh::Mesh(const string& name, const Terrain& terrain, float threshold) : EngineResource(ResourceType::Mesh) {
+Mesh::Mesh(const string& name, const Terrain& terrain, float threshold) : Resource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_Threshold = threshold;
     internal_build_from_terrain(terrain);
     load();
 }
-Mesh::Mesh(VertexData* data, const string& name, float threshold) : EngineResource(ResourceType::Mesh, name) {
+Mesh::Mesh(VertexData* data, const string& name, float threshold) : Resource(ResourceType::Mesh, name) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_VertexData = data;
     m_Threshold = threshold;
 }
-Mesh::Mesh(const string& name, float width, float height, float threshold) : EngineResource(ResourceType::Mesh, name){
+Mesh::Mesh(const string& name, float width, float height, float threshold) : Resource(ResourceType::Mesh, name){
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_Threshold = threshold;
 
@@ -484,7 +484,7 @@ Mesh::Mesh(const string& name, float width, float height, float threshold) : Eng
 
     load();
 }
-Mesh::Mesh(const string& fileOrData, float threshold) : EngineResource(ResourceType::Mesh) {
+Mesh::Mesh(const string& fileOrData, float threshold) : Resource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_Threshold = threshold;
 
@@ -582,14 +582,14 @@ float Mesh::getRadius() const {
 void Mesh::load(){
     if(!isLoaded()){
         InternalMeshPublicInterface::LoadGPU(*this);
-        EngineResource::load();
+        Resource::load();
     }
 }
 void Mesh::unload(){
     if(isLoaded()){
         InternalMeshPublicInterface::UnloadGPU(*this);
         InternalMeshPublicInterface::UnloadCPU(*this);
-        EngineResource::unload();
+        Resource::unload();
     }
 }
 void Mesh::onEvent(const Event& e) {

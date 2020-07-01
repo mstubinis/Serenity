@@ -126,7 +126,7 @@ SoundEffect* Sound::playEffect(Handle handle, unsigned int loops){
     }
     #ifndef ENGINE_PRODUCTION
         else {
-            std::cout << "Sound::playEffect returned a null sound effect for handle: " << handle.index << ", " << handle.type << ", " << handle.version << "\n";
+            std::cout << "Sound::playEffect returned a null sound effect for handle: " << handle.index() << ", " << handle.type() << ", " << handle.version() << "\n";
         }
     #endif
     return effect;
@@ -139,7 +139,7 @@ SoundMusic* Sound::playMusic(Handle handle, unsigned int loops){
     }
     #ifndef ENGINE_PRODUCTION
         else {
-            std::cout << "Sound::playMusic returned a null sound music for handle: " << handle.index << ", " << handle.type << ", " << handle.version << "\n";
+            std::cout << "Sound::playMusic returned a null sound music for handle: " << handle.index() << ", " << handle.type() << ", " << handle.version() << "\n";
         }
     #endif
     return music;

@@ -375,9 +375,6 @@
     <ClInclude Include="Engine\src\core\engine\resources\Engine_BuiltInShaders.h">
       <Filter>Header Files\Engine\Core\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\resources\Engine_ResourceBasic.h">
-      <Filter>Header Files\Engine\Core\Resources</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\resources\Engine_Resources.h">
       <Filter>Header Files\Engine\Core\Resources</Filter>
     </ClInclude>
@@ -831,6 +828,9 @@
     <ClInclude Include="Engine\src\ecs\ECSIncludes.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\resources\Resource.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -915,9 +915,6 @@
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\resources\Engine_BuiltInShaders.cpp">
-      <Filter>Source Files\Engine\Core\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\resources\Engine_ResourceBasic.cpp">
       <Filter>Source Files\Engine\Core\Resources</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\resources\Engine_Resources.cpp">
@@ -1267,6 +1264,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\threading\ThreadingModule.cpp">
       <Filter>Source Files\Engine\Core\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\resources\Resource.cpp">
+      <Filter>Source Files\Engine\Core\Resources</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

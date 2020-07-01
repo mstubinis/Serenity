@@ -5,7 +5,7 @@
 
 using namespace std;
 
-SoundData::SoundData(const string& file) : EngineResource(ResourceType::SoundData, file){
+SoundData::SoundData(const string& file) : Resource(ResourceType::SoundData, file){
     m_File   = file;
     buildBuffer();
 }

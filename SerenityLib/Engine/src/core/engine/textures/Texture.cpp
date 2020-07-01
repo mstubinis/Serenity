@@ -21,22 +21,22 @@ Texture* Texture::Black    = nullptr;
 Texture* Texture::Checkers = nullptr;
 Texture* Texture::BRDF     = nullptr;
 
-Texture::Texture() : EngineResource(ResourceType::Texture) {
+Texture::Texture() : Resource(ResourceType::Texture) {
     TextureLoader::InitCommon(*this, GL_TEXTURE_2D, false);
 }
-Texture::Texture(unsigned int w, unsigned int h, ImagePixelType::Type pxlType, ImagePixelFormat::Format pxlFormat, ImageInternalFormat::Format internal_, float divisor) : EngineResource(ResourceType::Texture) {
+Texture::Texture(unsigned int w, unsigned int h, ImagePixelType::Type pxlType, ImagePixelFormat::Format pxlFormat, ImageInternalFormat::Format internal_, float divisor) : Resource(ResourceType::Texture) {
     TextureLoader::InitFramebuffer(*this, w, h, pxlType, pxlFormat, internal_, divisor);
     InternalTexturePublicInterface::Load(*this);
 }
-Texture::Texture(const sf::Image& sfImage, const string& name, bool genMipMaps, ImageInternalFormat::Format internal_, unsigned int openglTextureType) : EngineResource(ResourceType::Texture, name) {
+Texture::Texture(const sf::Image& sfImage, const string& name, bool genMipMaps, ImageInternalFormat::Format internal_, unsigned int openglTextureType) : Resource(ResourceType::Texture, name) {
     TextureLoader::InitFromMemory(*this, sfImage, name, genMipMaps, internal_, openglTextureType);
     InternalTexturePublicInterface::Load(*this);
 }
-Texture::Texture(const string& filename, bool genMipMaps, ImageInternalFormat::Format internal_, unsigned int openglTextureType) : EngineResource(ResourceType::Texture, filename) {
+Texture::Texture(const string& filename, bool genMipMaps, ImageInternalFormat::Format internal_, unsigned int openglTextureType) : Resource(ResourceType::Texture, filename) {
     TextureLoader::InitFromFile(*this, filename, genMipMaps, internal_, openglTextureType);
     InternalTexturePublicInterface::Load(*this);
 }
-Texture::Texture(const string files[], const string& name, bool genMipMaps, ImageInternalFormat::Format internal_) : EngineResource(ResourceType::Texture, name) {
+Texture::Texture(const string files[], const string& name, bool genMipMaps, ImageInternalFormat::Format internal_) : Resource(ResourceType::Texture, name) {
     TextureLoader::InitFromFilesCubemap(*this, files, name, genMipMaps, internal_);
     InternalTexturePublicInterface::Load(*this);
 }
