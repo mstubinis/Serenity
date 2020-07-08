@@ -1,4 +1,4 @@
-#include <core/engine/events/Mouse/MouseButtons.h>
+#include <core/engine/input/Mouse/MouseButtons.h>
 
 #include <array>
 

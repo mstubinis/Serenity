@@ -5,7 +5,7 @@
 using namespace Engine;
 using namespace std;
 
-RodLight::RodLight(const glm_vec3& pos, const float rodLength, Scene* scene) : PointLight(LightType::Rod, pos, scene) {
+RodLight::RodLight(const glm_vec3& pos, float rodLength, Scene* scene) : PointLight(LightType::Rod, pos, scene) {
     setRodLength(rodLength);
 
     auto* body = getComponent<ComponentBody>();
@@ -18,21 +18,16 @@ RodLight::RodLight(const glm_vec3& pos, const float rodLength, Scene* scene) : P
         rodLights.push_back(this);
     }
 }
-RodLight::~RodLight() {
-}
 float RodLight::calculateCullingRadius() {
     float res = PointLight::calculateCullingRadius();
     auto& body = *getComponent<ComponentBody>();
     body.setScale(m_CullingRadius, m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius);
     return res;
 }
-void RodLight::setRodLength(const float length) {
+void RodLight::setRodLength(float length) {
     m_RodLength = length;
     auto& body = *getComponent<ComponentBody>();
     body.setScale(m_CullingRadius, m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius);
-}
-float RodLight::rodLength() const {
-    return m_RodLength; 
 }
 void RodLight::free() {
     Entity::destroy();

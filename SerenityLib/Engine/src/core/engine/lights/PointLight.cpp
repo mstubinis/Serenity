@@ -23,7 +23,7 @@ constexpr std::array<tuple<float, float, float>, LightRange::_TOTAL> LIGHT_RANGE
     make_tuple(1.0f, 0.0014f, 0.000007f),
 } };
 
-PointLight::PointLight(const LightType::Type type, const glm_vec3& pos, Scene* scene) : SunLight(pos, type, scene) {
+PointLight::PointLight(LightType::Type type, const glm_vec3& pos, Scene* scene) : SunLight(pos, type, scene) {
     m_CullingRadius = calculateCullingRadius();
 
     if (m_Type == LightType::Point) {
@@ -34,15 +34,13 @@ PointLight::PointLight(const LightType::Type type, const glm_vec3& pos, Scene* s
 PointLight::PointLight(const glm_vec3& pos, Scene* scene) : PointLight(LightType::Point, pos, scene) {
 
 }
-PointLight::~PointLight() {
-}
 void PointLight::free() {
     Entity::destroy();
     removeFromVector(priv::InternalScenePublicInterface::GetPointLights(scene()), this);
     removeFromVector(priv::InternalScenePublicInterface::GetLights(scene()), this);
 }
 float PointLight::calculateCullingRadius() {
-    const float lightMax = Math::Max(m_Color.x, m_Color.y, m_Color.z);
+    float lightMax = Math::Max(m_Color.x, m_Color.y, m_Color.z);
     float radius = 0;
     //if(m_AttenuationModel == LightAttenuation::Constant_Linear_Exponent){
           radius = (-m_L + glm::sqrt(m_L * m_L - 4.0f * m_E * (m_C - (256.0f / 5.0f) * lightMax))) / (2.0f * m_E);
@@ -57,44 +55,29 @@ float PointLight::calculateCullingRadius() {
     body.setScale(radius, radius, radius);
     return radius;
 }
-float PointLight::getCullingRadius() const {
-    return m_CullingRadius; 
-}
-float PointLight::getConstant() const {
-    return m_C; 
-}
-float PointLight::getLinear() const {
-    return m_L; 
-}
-float PointLight::getExponent() const {
-    return m_E; 
-}
-LightAttenuation::Model PointLight::getAttenuationModel() const {
-    return m_AttenuationModel;
-}
-void PointLight::setConstant(const float c) { 
+void PointLight::setConstant(float c) { 
     m_C = c; 
     m_CullingRadius = calculateCullingRadius(); 
 }
-void PointLight::setLinear(const float l) { 
+void PointLight::setLinear(float l) { 
     m_L = l;
     m_CullingRadius = calculateCullingRadius(); 
 }
-void PointLight::setExponent(const float e) { 
+void PointLight::setExponent(float e) { 
     m_E = e;
     m_CullingRadius = calculateCullingRadius(); 
 }
-void PointLight::setAttenuation(const float c, const float l, const float e) { 
+void PointLight::setAttenuation(float c, float l, float e) { 
     m_C = c;
     m_L = l;
     m_E = e;
     m_CullingRadius = calculateCullingRadius(); 
 }
-void PointLight::setAttenuation(const LightRange::Range r) { 
-    const auto& d = LIGHT_RANGES[static_cast<unsigned int>(r)];
+void PointLight::setAttenuation(LightRange::Range r) { 
+    const auto& d = LIGHT_RANGES[(unsigned int)r];
     PointLight::setAttenuation( get<0>(d), get<1>(d), get<2>(d) ); 
 }
-void PointLight::setAttenuationModel(const LightAttenuation::Model model) {
+void PointLight::setAttenuationModel(LightAttenuation::Model model) {
     m_AttenuationModel = model; 
     m_CullingRadius = calculateCullingRadius();
 }

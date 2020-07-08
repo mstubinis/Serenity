@@ -61,33 +61,24 @@ void ComponentLogic1::call(const float dt) const {
 
 #pragma region System
 
-struct priv::ComponentLogic1_UpdateFunction final {void operator()(void* system, void* componentPool, const float dt, Scene& scene) const {
-    auto& pool = *static_cast<ECSComponentPool<Entity, ComponentLogic1>*>(componentPool);
-    const auto& components = pool.data();
-    for (auto& component: components) {
-        component.call(dt);
-    }
-}};
-struct priv::ComponentLogic1_ComponentAddedToEntityFunction final {void operator()(void* system, void* component, Entity entity) const {
-}};
-struct priv::ComponentLogic1_ComponentRemovedFromEntityFunction final { void operator()(void* system, Entity entity) const {
-}};
-struct priv::ComponentLogic1_EntityAddedToSceneFunction final {void operator()(void* system, void* componentPool, Entity entity, Scene& scene) const {
-}};
-struct priv::ComponentLogic1_SceneEnteredFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
-
-}};
-struct priv::ComponentLogic1_SceneLeftFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
-
-}};
-
 ComponentLogic1_System_CI::ComponentLogic1_System_CI() {
-    setUpdateFunction(ComponentLogic1_UpdateFunction());
-    setOnComponentAddedToEntityFunction(ComponentLogic1_ComponentAddedToEntityFunction());
-    setOnComponentRemovedFromEntityFunction(ComponentLogic1_ComponentRemovedFromEntityFunction());
-    setOnEntityAddedToSceneFunction(ComponentLogic1_EntityAddedToSceneFunction());
-    setOnSceneEnteredFunction(ComponentLogic1_SceneEnteredFunction());
-    setOnSceneLeftFunction(ComponentLogic1_SceneLeftFunction());
+    setUpdateFunction([](void* system, void* componentPool, const float dt, Scene& scene) {
+        auto& pool = *static_cast<ECSComponentPool<Entity, ComponentLogic1>*>(componentPool);
+        const auto& components = pool.data();
+        for (auto& component : components) {
+            component.call(dt);
+        }
+    });
+    setOnComponentAddedToEntityFunction([](void* system, void* component, Entity entity) {
+    });
+    setOnComponentRemovedFromEntityFunction([](void* system, Entity entity) {
+    });
+    setOnEntityAddedToSceneFunction([](void* system, void* componentPool, Entity entity, Scene& scene) {
+    });
+    setOnSceneEnteredFunction([](void* system, void* componentPool, Scene& scene) {
+    });
+    setOnSceneLeftFunction([](void* system, void* componentPool, Scene& scene) {
+    });
 }
 
 #pragma endregion

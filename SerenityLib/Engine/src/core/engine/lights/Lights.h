@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_LIGHT_INCLUDE_GUARD
-#define ENGINE_LIGHT_INCLUDE_GUARD
+#ifndef ENGINE_LIGHT_H
+#define ENGINE_LIGHT_H
 
 #include <core/engine/lights/SunLight.h>
 #include <core/engine/lights/DirectionalLight.h>

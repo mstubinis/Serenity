@@ -24,16 +24,16 @@ namespace Engine{
     bool paused();
     void unpause();
 
-    const float getFPS();
+    float getFPS();
     Window& getWindow();
-    const glm::uvec2 getWindowSize();
+    glm::uvec2 getWindowSize();
     void setWindowIcon(const Texture& texture);
     void showMouseCursor();
     void hideMouseCursor();
     void setTimeScale(float timeScale);
     void stop();
-    const bool setFullscreen(bool isFullscreen);
-    const bool setFullscreenWindowed(bool isFullscreen);
+    bool setFullscreen(bool isFullscreen);
+    bool setFullscreenWindowed(bool isFullscreen);
     namespace priv{
         class EngineCore final {
             friend class Window;
@@ -137,10 +137,10 @@ namespace Engine{
                     public:
                         Engine::priv::BuiltInMeshses   m_BuiltInMeshes;
                         SimplexNoise                   m_SimplexNoise;
-                        bool                           m_Paused;
-                        bool                           m_Destroyed;
+                        bool                           m_Paused         = false;
+                        bool                           m_Destroyed      = false;
                 };
-                Misc                  m_Misc;
+                Misc                m_Misc;
 
                 LUAModule           m_LUAModule;
                 NetworkingModule    m_NetworkingModule;
@@ -152,7 +152,6 @@ namespace Engine{
                 SoundModule         m_SoundModule;
                 DebugManager        m_DebugManager;
                 ThreadingModule     m_ThreadingModule;
-
 
                 EngineCore(const EngineOptions& options);
                 ~EngineCore();

@@ -1,11 +1,10 @@
 #pragma once
-#ifndef ENGINE_LIGHTS_LIGHT_PROBE_INCLUDE_GUARD
-#define ENGINE_LIGHTS_LIGHT_PROBE_INCLUDE_GUARD
+#ifndef ENGINE_LIGHTS_LIGHT_PROBE_H
+#define ENGINE_LIGHTS_LIGHT_PROBE_H
 
 class  Scene;
 
 #include <glm/vec3.hpp>
-//#include <ecs/Entity.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Viewport.h>
 
@@ -53,16 +52,16 @@ class LightProbe : public Entity, public Engine::NonCopyable, public Engine::Non
 
         void addIgnoredEntity(Entity entity);
 
-        const Camera& getCamera() const;
-        const Viewport& getViewport() const;
+        constexpr const Camera& getCamera() const noexcept { return m_Camera; }
+        constexpr const Viewport& getViewport() const noexcept { return m_Viewport; }
 
-        void setProbeType(ProbeType::Type type);
-        LightProbe::ProbeType::Type getProbeType() const;
+        void setProbeType(ProbeType::Type type) noexcept { m_ProbeType = type; }
+        constexpr LightProbe::ProbeType::Type getProbeType() const noexcept { return m_ProbeType; }
 
         void update(const float dt);
 
-        void activate(bool = true);
-        void deactivate();
+        void activate(bool active = true) noexcept { m_Active = active; }
+        void deactivate() noexcept { m_Active = false; }
 };
 
 #endif

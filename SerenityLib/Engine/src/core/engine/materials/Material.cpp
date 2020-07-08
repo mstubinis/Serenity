@@ -50,6 +50,41 @@ constexpr std::array<tuple<unsigned char, unsigned char, unsigned char, unsigned
     make_tuple(168_uc, 155_uc, 134_uc, 242_uc, 255_uc),        // 25 - nickel
 };
 
+namespace Engine::priv {
+    struct DefaultMaterialBindFunctor { void operator()(Material* material_ptr) const {
+        auto& material = *material_ptr;
+        const size_t numComponents = material.m_Components.size();
+        size_t textureUnit = 0;
+
+        for (size_t i = 0; i < numComponents; ++i) {
+            if (material.m_Components[i]) {
+                auto& component = *material.m_Components[i];
+                component.bind(i, textureUnit);
+            }
+        }
+        Engine::Renderer::sendUniform1Safe("numComponents", (int)numComponents);
+        Engine::Renderer::sendUniform1Safe("Shadeless", (int)material.m_Shadeless);
+        Engine::Renderer::sendUniform4Safe("Material_F0AndID",
+            material.m_F0Color.r(),
+            material.m_F0Color.g(),
+            material.m_F0Color.b(),
+            (float)material.m_ID
+        );
+        Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesOne",
+            (float)(material.m_BaseGlow) * 0.003921568627451f,
+            (float)(material.m_BaseAO) * 0.003921568627451f,
+            (float)(material.m_BaseMetalness) * 0.003921568627451f,
+            (float)(material.m_BaseSmoothness) * 0.003921568627451f
+        );
+        Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesTwo",
+            (float)(material.m_BaseAlpha) * 0.003921568627451f,
+            (float)material.m_DiffuseModel,
+            (float)material.m_SpecularModel,
+            0.0f
+        );
+    }};
+};
+
 #pragma region Material
 
 Material::Material(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) : Resource(ResourceType::Material, name){
@@ -63,13 +98,16 @@ Material::Material(const string& name, const string& diffuse, const string& norm
 
     MaterialLoader::InternalInit(*this, d, n, g, s, a, m, sm);
     InternalMaterialPublicInterface::Load(*this);
+    setCustomBindFunctor(Engine::priv::DefaultMaterialBindFunctor());
 }
 Material::Material() : Resource(ResourceType::Material) {
     MaterialLoader::InternalInitBase(*this);
+    setCustomBindFunctor(Engine::priv::DefaultMaterialBindFunctor());
 }
 Material::Material(const string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) : Resource(ResourceType::Material, name){
     MaterialLoader::InternalInit(*this, diffuse, normal, glow, specular, ao, metalness, smoothness);
     InternalMaterialPublicInterface::Load(*this);
+    setCustomBindFunctor(Engine::priv::DefaultMaterialBindFunctor());
 }
 Material::~Material(){
     InternalMaterialPublicInterface::Unload(*this);
@@ -86,13 +124,13 @@ void Material::internalUpdateGlobalMaterialPool(bool addToDatabase) {
     if (!addToDatabase) {
         data = &Material::m_MaterialProperities[m_ID];
     }else{
-        m_ID = static_cast<std::uint32_t>(Material::m_MaterialProperities.size());
+        m_ID = (std::uint32_t)Material::m_MaterialProperities.size();
         data = NEW glm::vec4(0.0f);
     }
     data->r = Math::pack3FloatsInto1FloatUnsigned(m_F0Color.r(), m_F0Color.g(), m_F0Color.b());
-    data->g = static_cast<float>(m_BaseAlpha) * 0.003921568627451f;
-    data->b = static_cast<float>(m_SpecularModel);
-    data->a = static_cast<float>(m_DiffuseModel);
+    data->g = (float)(m_BaseAlpha) * 0.003921568627451f;
+    data->b = (float)m_SpecularModel;
+    data->a = (float)m_DiffuseModel;
     if (addToDatabase) {
         Material::m_MaterialProperities.push_back(std::move(*data));
         SAFE_DELETE(data);
@@ -138,27 +176,27 @@ MaterialComponent& Material::addComponentSpecular(const string& textureFile){
 }
 MaterialComponent& Material::addComponentAO(const string& textureFile, unsigned char baseValue){
     Texture* texture = MaterialLoader::LoadTextureAO(textureFile);
-    auto& component = *internalAddComponentGeneric(MaterialComponentType::AO, texture);
-    auto& layer = component.layer(0);
-    auto& _data2 = layer.data2();
+    auto& component  = *internalAddComponentGeneric(MaterialComponentType::AO, texture);
+    auto& layer      = component.layer(0);
+    auto& _data2     = layer.data2();
     layer.setData2(0.0f, 1.0f, 1.0f, _data2.w);
     setAO(baseValue);
     return component;
 }
 MaterialComponent& Material::addComponentMetalness(const string& textureFile, unsigned char baseValue){
     Texture* texture = MaterialLoader::LoadTextureMetalness(textureFile);
-    auto& component = *internalAddComponentGeneric(MaterialComponentType::Metalness, texture);
-    auto& layer = component.layer(0);
-    auto& _data2 = layer.data2();
+    auto& component  = *internalAddComponentGeneric(MaterialComponentType::Metalness, texture);
+    auto& layer      = component.layer(0);
+    auto& _data2     = layer.data2();
     layer.setData2(0.01f, 0.99f, 1.0f, _data2.w);
     setMetalness(baseValue);
     return component;
 }
 MaterialComponent& Material::addComponentSmoothness(const string& textureFile, unsigned char baseValue){
     Texture* texture = MaterialLoader::LoadTextureSmoothness(textureFile);
-    auto& component = *internalAddComponentGeneric(MaterialComponentType::Smoothness, texture);
-    auto& layer = component.layer(0);
-    auto& _data2 = layer.data2();
+    auto& component  = *internalAddComponentGeneric(MaterialComponentType::Smoothness, texture);
+    auto& layer      = component.layer(0);
+    auto& _data2     = layer.data2();
     layer.setData2(0.01f, 0.99f, 1.0f, _data2.w);
     setSmoothness(baseValue);
     return component;
@@ -166,13 +204,13 @@ MaterialComponent& Material::addComponentSmoothness(const string& textureFile, u
 MaterialComponent& Material::addComponentReflection(const string& cubemapName, const string& maskFile, float mixFactor){
     //add checks to see if texture was loaded already
     Texture* cubemap = MaterialLoader::LoadTextureCubemap(cubemapName);
-    Texture* mask = MaterialLoader::LoadTextureMask(maskFile);
+    Texture* mask    = MaterialLoader::LoadTextureMask(maskFile);
     if (!cubemap) {
         cubemap = Resources::getCurrentScene()->skybox()->texture();
     }
     auto& component = *internalAddComponentGeneric(MaterialComponentType::Reflection, nullptr);
-    auto& layer = component.layer(0);
-    auto& _data2 = layer.data2();
+    auto& layer     = component.layer(0);
+    auto& _data2    = layer.data2();
     layer.setMask(mask);
     layer.setCubemap(cubemap);
     layer.setData2(mixFactor, _data2.y, _data2.z, _data2.w);
@@ -181,13 +219,13 @@ MaterialComponent& Material::addComponentReflection(const string& cubemapName, c
 MaterialComponent& Material::addComponentRefraction(const string& cubemapName, const string& maskFile, float refractiveIndex, float mixFactor){
     //add checks to see if texture was loaded already
     Texture* cubemap = MaterialLoader::LoadTextureCubemap(cubemapName);
-    Texture* mask = MaterialLoader::LoadTextureMask(maskFile);
+    Texture* mask    = MaterialLoader::LoadTextureMask(maskFile);
     if (!cubemap) {
         cubemap = Resources::getCurrentScene()->skybox()->texture();
     }
     auto& component = *internalAddComponentGeneric(MaterialComponentType::Refraction, nullptr);
-    auto& layer = component.layer(0);
-    auto& _data2 = layer.data2();
+    auto& layer     = component.layer(0);
+    auto& _data2    = layer.data2();
     layer.setMask(mask);
     layer.setCubemap(cubemap);
     layer.setData2(mixFactor, refractiveIndex, _data2.z, _data2.w);
@@ -195,9 +233,9 @@ MaterialComponent& Material::addComponentRefraction(const string& cubemapName, c
 }
 MaterialComponent& Material::addComponentParallaxOcclusion(const string& textureFile, float heightScale){
     Texture* texture = MaterialLoader::LoadTextureNormal(textureFile);
-    auto& component = *internalAddComponentGeneric(MaterialComponentType::ParallaxOcclusion, texture);
-    auto& layer = component.layer(0);
-    auto& _data2 = layer.data2();
+    auto& component  = *internalAddComponentGeneric(MaterialComponentType::ParallaxOcclusion, texture);
+    auto& layer      = component.layer(0);
+    auto& _data2     = layer.data2();
     layer.setData2(heightScale, _data2.y, _data2.z, _data2.w);
     return component;
 }

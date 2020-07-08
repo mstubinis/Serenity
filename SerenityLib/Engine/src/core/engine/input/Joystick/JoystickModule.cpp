@@ -1,4 +1,4 @@
-#include <core/engine/events/Joystick/JoystickModule.h>
+#include <core/engine/input/Joystick/JoystickModule.h>
 
 
 using namespace Engine::priv;

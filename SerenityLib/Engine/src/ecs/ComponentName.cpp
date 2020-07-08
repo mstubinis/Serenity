@@ -39,26 +39,19 @@ bool ComponentName::empty() const {
 
 #pragma region System
 
-struct priv::ComponentName_UpdateFunction final {void operator()(void* system, void* componentPool, const float dt, Scene& scene) const {
-}};
-struct priv::ComponentName_ComponentAddedToEntityFunction final {void operator()(void* system, void* component, Entity entity) const {
-}};
-struct priv::ComponentName_ComponentRemovedFromEntityFunction final { void operator()(void* system, Entity entity) const {
-}};
-struct priv::ComponentName_EntityAddedToSceneFunction final {void operator()(void* system, void* componentPool, Entity entity, Scene& scene) const {
-}};
-struct priv::ComponentName_SceneEnteredFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
-}};
-struct priv::ComponentName_SceneLeftFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
-}};
-
 ComponentName_System_CI::ComponentName_System_CI() {
-    setUpdateFunction(ComponentName_UpdateFunction());
-    setOnComponentAddedToEntityFunction(ComponentName_ComponentAddedToEntityFunction());
-    setOnComponentRemovedFromEntityFunction(ComponentName_ComponentRemovedFromEntityFunction());
-    setOnEntityAddedToSceneFunction(ComponentName_EntityAddedToSceneFunction());
-    setOnSceneEnteredFunction(ComponentName_SceneEnteredFunction());
-    setOnSceneLeftFunction(ComponentName_SceneLeftFunction());
+    setUpdateFunction([](void* system, void* componentPool, const float dt, Scene& scene) {
+    });
+    setOnComponentAddedToEntityFunction([](void* system, void* component, Entity entity) {
+    });
+    setOnComponentRemovedFromEntityFunction([](void* system, Entity entity) {
+    });
+    setOnEntityAddedToSceneFunction([](void* system, void* componentPool, Entity entity, Scene& scene) {
+    });
+    setOnSceneEnteredFunction([](void* system, void* componentPool, Scene& scene) {
+    });
+    setOnSceneLeftFunction([](void* system, void* componentPool, Scene& scene) {
+    });
 }
 
 

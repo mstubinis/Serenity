@@ -82,6 +82,7 @@ ComponentCamera::ComponentCamera(ComponentCamera&& other) noexcept {
     m_ProjectionMatrix        = std::move(other.m_ProjectionMatrix);
     m_ViewMatrix              = std::move(other.m_ViewMatrix);
     m_ViewMatrixNoTranslation = std::move(other.m_ViewMatrixNoTranslation);
+    m_FrustumPlanes           = std::move(other.m_FrustumPlanes);
     m_Type                    = std::move(other.m_Type);
 }
 ComponentCamera& ComponentCamera::operator=(ComponentCamera&& other) noexcept {
@@ -99,6 +100,7 @@ ComponentCamera& ComponentCamera::operator=(ComponentCamera&& other) noexcept {
         m_ProjectionMatrix        = std::move(other.m_ProjectionMatrix);
         m_ViewMatrix              = std::move(other.m_ViewMatrix);
         m_ViewMatrixNoTranslation = std::move(other.m_ViewMatrixNoTranslation);
+        m_FrustumPlanes           = std::move(other.m_FrustumPlanes);
         m_Type                    = std::move(other.m_Type);
     }
     return *this;
@@ -106,14 +108,14 @@ ComponentCamera& ComponentCamera::operator=(ComponentCamera&& other) noexcept {
 
 void ComponentCamera::resize(unsigned int width, unsigned int height) {
     if (m_Type == CameraType::Perspective) {
-        m_AspectRatio = width / static_cast<float>(height);
+        m_AspectRatio = width / (float)height;
     }
     priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
 }
 unsigned int ComponentCamera::pointIntersectTest(const glm_vec3& position) const {
-    const auto zero = static_cast<decimal>(0.0);
-    for (unsigned int i = 0; i < 6; ++i) {
-        const auto d = m_FrustumPlanes[i].x * position.x + m_FrustumPlanes[i].y * position.y + m_FrustumPlanes[i].z * position.z + m_FrustumPlanes[i].w;
+    auto zero = (decimal)0.0;
+    for (unsigned int i = 0; i < m_FrustumPlanes.size(); ++i) {
+        auto d = m_FrustumPlanes[i].x * position.x + m_FrustumPlanes[i].y * position.y + m_FrustumPlanes[i].z * position.z + m_FrustumPlanes[i].w;
         if (d > zero) {
             return 0; //outside
         }
@@ -122,13 +124,13 @@ unsigned int ComponentCamera::pointIntersectTest(const glm_vec3& position) const
 }
 unsigned int ComponentCamera::sphereIntersectTest(const glm_vec3& position, float radius) const { 
     unsigned int res = 1; //inside the viewing frustum
-    const auto zero  = static_cast<decimal>(0.0);
-    const auto two   = static_cast<decimal>(2.0);
+    auto zero        = (decimal)0.0;
+    auto two         = (decimal)2.0;
     if (radius <= zero) {
         return 0;
     }
-    for (int i = 0; i < 6; ++i) {
-        const auto d = m_FrustumPlanes[i].x * position.x + m_FrustumPlanes[i].y * position.y + m_FrustumPlanes[i].z * position.z + m_FrustumPlanes[i].w;
+    for (int i = 0; i < m_FrustumPlanes.size(); ++i) {
+        auto d = m_FrustumPlanes[i].x * position.x + m_FrustumPlanes[i].y * position.y + m_FrustumPlanes[i].z * position.z + m_FrustumPlanes[i].w;
         if (d > radius * two) {
             return 0; //outside the viewing frustrum
         }else if (d > zero) {
@@ -170,19 +172,19 @@ glm::mat4 ComponentCamera::getViewProjectionInverse() const {
 glm::vec3 ComponentCamera::getViewVector() const {
 	return glm::normalize(glm::vec3(m_ViewMatrix[0][2], m_ViewMatrix[1][2], m_ViewMatrix[2][2]));
 }
-void ComponentCamera::setAngle(const float angle) { 
+void ComponentCamera::setAngle(float angle) { 
 	m_Angle = angle;
 	priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
 }
-void ComponentCamera::setAspect(const float aspectRatio) {
+void ComponentCamera::setAspect(float aspectRatio) {
 	m_AspectRatio = aspectRatio;
 	priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
 }
-void ComponentCamera::setNear(const float nearPlane) { 
+void ComponentCamera::setNear(float nearPlane) { 
 	m_NearPlane = nearPlane;
 	priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
 }
-void ComponentCamera::setFar(const float farPlane) { 
+void ComponentCamera::setFar(float farPlane) { 
 	m_FarPlane = farPlane;
 	priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
 }
@@ -191,38 +193,31 @@ void ComponentCamera::setFar(const float farPlane) {
 
 #pragma region System
 
-struct priv::ComponentCamera_UpdateFunction final { void operator()(void* system, void* componentPool, const float dt, Scene& scene) const {
-	auto& pool                  = *static_cast<ECSComponentPool<Entity, ComponentCamera>*>(componentPool);
-	auto& components            = pool.data();
-    auto lamda_update_component = [&](ComponentCamera& b, size_t i, size_t k) {
-        Math::extractViewFrustumPlanesHartmannGribbs(b.m_ProjectionMatrix * b.m_ViewMatrix, b.m_FrustumPlanes);//update frustrum planes 
-    };
-    if (components.size() < 50) {
-        for (size_t i = 0; i < components.size(); ++i) {
-            lamda_update_component(components[i], i, 0);
-        }
-    }else{
-        Engine::priv::threading::addJobSplitVectored(lamda_update_component, components, true, 0);
-    }
-}};
-struct priv::ComponentCamera_ComponentAddedToEntityFunction final {void operator()(void* system, void* componentCamera, Entity entity) const {
-}};
-struct priv::ComponentCamera_ComponentRemovedFromEntityFunction final { void operator()(void* system, Entity entity) const {
-}};
-struct priv::ComponentCamera_EntityAddedToSceneFunction final {void operator()(void* system, void* componentPool, Entity entity, Scene& scene) const {
-}};
-struct priv::ComponentCamera_SceneEnteredFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
-}};
-struct priv::ComponentCamera_SceneLeftFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
-}};
-
 ComponentCamera_System_CI::ComponentCamera_System_CI() {
-    setUpdateFunction(ComponentCamera_UpdateFunction());
-    setOnComponentAddedToEntityFunction(ComponentCamera_ComponentAddedToEntityFunction());
-    setOnComponentRemovedFromEntityFunction(ComponentCamera_ComponentRemovedFromEntityFunction());
-    setOnEntityAddedToSceneFunction(ComponentCamera_EntityAddedToSceneFunction());
-    setOnSceneEnteredFunction(ComponentCamera_SceneEnteredFunction());
-    setOnSceneLeftFunction(ComponentCamera_SceneLeftFunction());
+    setUpdateFunction([](void* system, void* componentPool, const float dt, Scene& scene) {
+        auto& pool = *static_cast<ECSComponentPool<Entity, ComponentCamera>*>(componentPool);
+        auto& components = pool.data();
+        auto lamda_update_component = [&](ComponentCamera& b, size_t i, size_t k) {
+            Math::extractViewFrustumPlanesHartmannGribbs(b.getViewProjection(), b.getFrustrumPlanes().data());//update frustrum planes 
+        };
+        if (components.size() < 50) {
+            for (size_t i = 0; i < components.size(); ++i) {
+                lamda_update_component(components[i], i, 0);
+            }
+        }else{
+            Engine::priv::threading::addJobSplitVectored(lamda_update_component, components, true, 0);
+        }
+    });
+    setOnComponentAddedToEntityFunction([](void* system, void* componentCamera, Entity entity) {
+    });
+    setOnComponentRemovedFromEntityFunction([](void* system, Entity entity) {
+    });
+    setOnEntityAddedToSceneFunction([](void* system, void* componentPool, Entity entity, Scene& scene) {
+    });
+    setOnSceneEnteredFunction([](void* system, void* componentPool, Scene& scene) {
+    });
+    setOnSceneLeftFunction([](void* system, void* componentPool, Scene& scene) {
+    });
 }
 
 #pragma endregion

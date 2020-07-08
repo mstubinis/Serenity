@@ -1,4 +1,4 @@
-#include <core/engine/events/Mouse/MouseModule.h>
+#include <core/engine/input/Mouse/MouseModule.h>
 
 using namespace Engine::priv;
 using namespace std;

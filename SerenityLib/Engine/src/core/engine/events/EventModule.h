@@ -7,9 +7,9 @@ class Window;
 #include <core/engine/events/EventDispatcher.h>
 #include <core/engine/events/EventIncludes.h>
 
-#include <core/engine/events/Keyboard/KeyboardModule.h>
-#include <core/engine/events/Mouse/MouseModule.h>
-#include <core/engine/events/Joystick/JoystickModule.h>
+#include <core/engine/input/Keyboard/KeyboardModule.h>
+#include <core/engine/input/Mouse/MouseModule.h>
+#include <core/engine/input/Joystick/JoystickModule.h>
 
 #include <string>
 #include <glm/vec2.hpp>
@@ -66,14 +66,14 @@ namespace Engine{
     double getMouseWheelDelta(Window& window);
     double getMouseWheelDelta();
 
-    void setMousePosition(float x, float y, bool resetDifference = false, bool resetPreviousPosition = false);
+    void setMousePosition(float x, float y,               bool resetDifference = false, bool resetPreviousPosition = false);
     void setMousePosition(unsigned int x, unsigned int y, bool resetDifference = false, bool resetPreviousPosition = false);
-    void setMousePosition(const glm::vec2&, bool resetDifference = false, bool resetPreviousPosition = false);
-    void setMousePosition(const glm::uvec2&, bool resetDifference = false, bool resetPreviousPosition = false);
+    void setMousePosition(const glm::vec2&,               bool resetDifference = false, bool resetPreviousPosition = false);
+    void setMousePosition(const glm::uvec2&,              bool resetDifference = false, bool resetPreviousPosition = false);
 
-    void setMousePosition(Window& window, float x, float y, bool resetDifference = false, bool resetPreviousPosition = false);
+    void setMousePosition(Window& window, float x, float y,               bool resetDifference = false, bool resetPreviousPosition = false);
     void setMousePosition(Window& window, unsigned int x, unsigned int y, bool resetDifference = false, bool resetPreviousPosition = false);
-    void setMousePosition(Window& window, const glm::vec2&, bool resetDifference = false, bool resetPreviousPosition = false);
-    void setMousePosition(Window& window, const glm::uvec2&, bool resetDifference = false, bool resetPreviousPosition = false);
+    void setMousePosition(Window& window, const glm::vec2&,               bool resetDifference = false, bool resetPreviousPosition = false);
+    void setMousePosition(Window& window, const glm::uvec2&,              bool resetDifference = false, bool resetPreviousPosition = false);
 };
 #endif

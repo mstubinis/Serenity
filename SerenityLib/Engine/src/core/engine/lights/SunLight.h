@@ -22,38 +22,38 @@ class SunLight : public Entity {
         float              m_SpecularIntensity = 1.0f;
     public:
         SunLight(
-            const glm_vec3& position    = glm_vec3(0.0),
-            const LightType::Type type = LightType::Sun,
-            Scene* scene               = nullptr
+            const glm_vec3& position = glm_vec3(0.0),
+            LightType::Type type     = LightType::Sun,
+            Scene* scene             = nullptr
         );
-        virtual ~SunLight();
+        virtual ~SunLight() {}
 
         void free();
 
         glm_vec3 position() const;
-        const glm::vec4& color() const;
-        bool isActive() const;
-        LightType::Type type() const;
-        bool isShadowCaster() const;
-        void setShadowCaster(bool castsShadow);
 
-        float getAmbientIntensity() const;
-        float getDiffuseIntensity() const;
-        float getSpecularIntensity() const;
+        constexpr bool isShadowCaster() const noexcept { return m_IsShadowCaster; }
+        void setShadowCaster(bool castsShadow) noexcept { m_IsShadowCaster = castsShadow; }
 
-        void setAmbientIntensity(float a);
-        void setDiffuseIntensity(float d);
-        void setSpecularIntensity(float s);
+        constexpr const glm::vec4& color() const noexcept { return m_Color; }
+        constexpr bool isActive() const noexcept { return m_Active; }
+        constexpr LightType::Type type() const noexcept { return m_Type; }
+        constexpr float getAmbientIntensity() const noexcept { return m_AmbientIntensity; }
+        constexpr float getDiffuseIntensity() const noexcept { return m_DiffuseIntensity; }
+        constexpr float getSpecularIntensity() const noexcept { return m_SpecularIntensity; }
 
-        void setColor(float r, float g, float b, float a = 1.0f);    
-        void setColor(const glm::vec4& color);
-        void setColor(const glm::vec3& color);
+        void setAmbientIntensity(float a) noexcept { m_AmbientIntensity = a; }
+        void setDiffuseIntensity(float d) noexcept { m_DiffuseIntensity = d; }
+        void setSpecularIntensity(float s) noexcept { m_SpecularIntensity = s; }
+        void activate(bool b = true) noexcept { m_Active = b; }
+        void deactivate() noexcept { m_Active = false; }
 
-        void setPosition(const decimal& x, const decimal& y, const decimal& z);
-        void setPosition(const decimal& position);
+        void setColor(float r, float g, float b, float a = 1.0f) noexcept { m_Color = glm::vec4(r, g, b, a); }
+        void setColor(const glm::vec4& color) noexcept { m_Color = color; }
+        void setColor(const glm::vec3& color) noexcept { m_Color.r = color.r; m_Color.g = color.g; m_Color.b = color.b; }
+
+        void setPosition(decimal x, decimal y, decimal z);
+        void setPosition(decimal position);
         void setPosition(const glm_vec3& position);
-
-        void activate(bool active = true);                          
-        void deactivate();
 };
 #endif

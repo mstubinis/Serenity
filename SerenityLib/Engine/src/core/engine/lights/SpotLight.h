@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_LIGHT_SPOT_INCLUDE_GUARD
-#define ENGINE_LIGHT_SPOT_INCLUDE_GUARD
+#ifndef ENGINE_LIGHT_SPOT_H
+#define ENGINE_LIGHT_SPOT_H
 
 #include <core/engine/lights/PointLight.h>
 
@@ -13,18 +13,18 @@ class SpotLight : public PointLight {
         SpotLight(
             const glm_vec3& position   = glm_vec3(0.0f, 0.0f, 0.0f),
             const glm::vec3& direction = glm::vec3(0.0f, 0.0f, -1.0f),
-            const float innerCutoff    = 11.0f,
-            const float outerCutoff    = 13.0f,
+            float innerCutoff    = 11.0f,
+            float outerCutoff    = 13.0f,
             Scene* scene               = nullptr
         );
-        virtual ~SpotLight();
+        virtual ~SpotLight() {}
 
         void free();
 
-        float getCutoff() const;
-        float getCutoffOuter() const;
+        constexpr float getCutoff() const noexcept { return m_Cutoff; }
+        constexpr float getCutoffOuter() const noexcept { return m_OuterCutoff; }
 
-        void setCutoff(const float innerCutoff);
-        void setCutoffOuter(const float outerCutoff);
+        void setCutoff(float innerCutoff);
+        void setCutoffOuter(float outerCutoff);
 };
 #endif

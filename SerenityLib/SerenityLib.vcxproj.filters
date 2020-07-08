@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Header Files\Engine">
       <UniqueIdentifier>{3e65a62f-eb7c-47fe-ac2c-4443fe21f611}</UniqueIdentifier>
     </Filter>
@@ -78,9 +74,6 @@
     </Filter>
     <Filter Include="Source Files\Engine\Core\ECS\Components">
       <UniqueIdentifier>{1972fd49-2f68-43c9-aa69-d7eb9f9f03ed}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resource Files\Shaders">
-      <UniqueIdentifier>{324ed3f3-19a7-463b-9f5d-86e387d6ad66}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Engine\Core\Renderer\postprocess">
       <UniqueIdentifier>{a91900ce-11fc-40bc-bd7e-a9303c756b57}</UniqueIdentifier>
@@ -247,23 +240,29 @@
     <Filter Include="Header Files\Engine\Core\Renderer\software">
       <UniqueIdentifier>{0de7db4e-4278-402c-9e10-d13180db3809}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Engine\Core\Events\Keyboard">
-      <UniqueIdentifier>{735dac9c-5805-48c6-ab33-52c2399c09dd}</UniqueIdentifier>
+    <Filter Include="Header Files\Engine\Core\Input">
+      <UniqueIdentifier>{79704446-e844-448b-b290-db7dcfe604e4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Engine\Core\Events\Mouse">
-      <UniqueIdentifier>{f07d54c3-3217-4763-a70c-acd390a4c050}</UniqueIdentifier>
+    <Filter Include="Source Files\Engine\Core\Input">
+      <UniqueIdentifier>{6d6cf825-761d-4e48-8a19-ac4d81c0e5b0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Engine\Core\Events\Keyboard">
-      <UniqueIdentifier>{edb0ff82-61d5-4a27-b0fd-6cb4fd8fe8c1}</UniqueIdentifier>
+    <Filter Include="Header Files\Engine\Core\Input\Keyboard">
+      <UniqueIdentifier>{c665909a-8afb-49ae-a7be-90d0a3e461b5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Engine\Core\Events\Mouse">
-      <UniqueIdentifier>{d65b19ed-b69e-437b-8faf-5baf1fd8971f}</UniqueIdentifier>
+    <Filter Include="Header Files\Engine\Core\Input\Mouse">
+      <UniqueIdentifier>{8ea46d0c-f53d-4547-adee-3bb7079a9089}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Engine\Core\Events\Joystick">
-      <UniqueIdentifier>{16947661-bdb4-48e7-998e-7c4544afce4e}</UniqueIdentifier>
+    <Filter Include="Header Files\Engine\Core\Input\Joystick">
+      <UniqueIdentifier>{e2487e58-fbf4-409c-81cb-29fb49b34994}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Engine\Core\Events\Joystick">
-      <UniqueIdentifier>{250362dd-5b83-4906-b516-4e4915b13b15}</UniqueIdentifier>
+    <Filter Include="Source Files\Engine\Core\Input\Keyboard">
+      <UniqueIdentifier>{1f44c105-0e9c-4c48-ba69-035859665479}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Input\Mouse">
+      <UniqueIdentifier>{be9a12f4-4599-4fee-ab70-4a5eb9be74d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Input\Joystick">
+      <UniqueIdentifier>{4854aa1e-8514-42ba-848d-0f3a491d36f2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -780,29 +779,11 @@
     <ClInclude Include="Engine\src\core\engine\mesh\smsh.h">
       <Filter>Header Files\Engine\Core\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\events\Keyboard\KeyboardKeys.h">
-      <Filter>Header Files\Engine\Core\Events\Keyboard</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\events\Keyboard\KeyboardModule.h">
-      <Filter>Header Files\Engine\Core\Events\Keyboard</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\events\Mouse\MouseButtons.h">
-      <Filter>Header Files\Engine\Core\Events\Mouse</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\events\Joystick\JoystickAxises.h">
-      <Filter>Header Files\Engine\Core\Events\Joystick</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\events\EventIncludes.h">
       <Filter>Header Files\Engine\Core\Events</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\events\EventDispatcher.h">
       <Filter>Header Files\Engine\Core\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\events\Mouse\MouseModule.h">
-      <Filter>Header Files\Engine\Core\Events\Mouse</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\events\Joystick\JoystickModule.h">
-      <Filter>Header Files\Engine\Core\Events\Joystick</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\events\EventModule.h">
       <Filter>Header Files\Engine\Core\Events</Filter>
@@ -830,6 +811,24 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\resources\Resource.h">
       <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\input\Joystick\JoystickAxises.h">
+      <Filter>Header Files\Engine\Core\Input\Joystick</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\input\Joystick\JoystickModule.h">
+      <Filter>Header Files\Engine\Core\Input\Joystick</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\input\Keyboard\KeyboardKeys.h">
+      <Filter>Header Files\Engine\Core\Input\Keyboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\input\Keyboard\KeyboardModule.h">
+      <Filter>Header Files\Engine\Core\Input\Keyboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\input\Mouse\MouseButtons.h">
+      <Filter>Header Files\Engine\Core\Input\Mouse</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\input\Mouse\MouseModule.h">
+      <Filter>Header Files\Engine\Core\Input\Mouse</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1196,9 +1195,6 @@
     <ClCompile Include="Engine\src\core\engine\networking\server\ServerClient.cpp">
       <Filter>Source Files\Engine\Core\Networking\Server</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\networking\Packet.cpp">
-      <Filter>Source Files\Engine\Core\Networking</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\physics\PhysicsPipeline.cpp">
       <Filter>Source Files\Engine\Core\Physics</Filter>
     </ClCompile>
@@ -1229,26 +1225,8 @@
     <ClCompile Include="Engine\src\core\engine\networking\SocketInterface.cpp">
       <Filter>Source Files\Engine\Core\Networking</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\events\Keyboard\KeyboardKeys.cpp">
-      <Filter>Source Files\Engine\Core\Events\Keyboard</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\events\Keyboard\KeyboardModule.cpp">
-      <Filter>Source Files\Engine\Core\Events\Keyboard</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\events\Mouse\MouseButtons.cpp">
-      <Filter>Source Files\Engine\Core\Events\Mouse</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\events\Joystick\JoystickAxises.cpp">
-      <Filter>Source Files\Engine\Core\Events\Joystick</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\events\EventDispatcher.cpp">
       <Filter>Source Files\Engine\Core\Events</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\events\Mouse\MouseModule.cpp">
-      <Filter>Source Files\Engine\Core\Events\Mouse</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\events\Joystick\JoystickModule.cpp">
-      <Filter>Source Files\Engine\Core\Events\Joystick</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\events\EventModule.cpp">
       <Filter>Source Files\Engine\Core\Events</Filter>
@@ -1267,6 +1245,24 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\resources\Resource.cpp">
       <Filter>Source Files\Engine\Core\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\input\Joystick\JoystickAxises.cpp">
+      <Filter>Source Files\Engine\Core\Input\Joystick</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\input\Joystick\JoystickModule.cpp">
+      <Filter>Source Files\Engine\Core\Input\Joystick</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\input\Keyboard\KeyboardKeys.cpp">
+      <Filter>Source Files\Engine\Core\Input\Keyboard</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\input\Keyboard\KeyboardModule.cpp">
+      <Filter>Source Files\Engine\Core\Input\Keyboard</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\input\Mouse\MouseButtons.cpp">
+      <Filter>Source Files\Engine\Core\Input\Mouse</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\input\Mouse\MouseModule.cpp">
+      <Filter>Source Files\Engine\Core\Input\Mouse</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

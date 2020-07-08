@@ -304,7 +304,6 @@ struct priv::ComponentModel_UpdateFunction final { void operator()(void* system,
             modelInstance.m_AnimationVector.process(*modelInstance.mesh(), dt);
         }
     };
-
     if (components.size() < 100) {
         for (size_t i = 0; i < components.size(); ++i) {
             lamda_update_component(components[i], i, 0);
@@ -313,29 +312,19 @@ struct priv::ComponentModel_UpdateFunction final { void operator()(void* system,
         Engine::priv::threading::addJobSplitVectored(lamda_update_component, components, true, 0);
     }
 }};
-struct priv::ComponentModel_ComponentAddedToEntityFunction final {void operator()(void* system, void* component, Entity entity) const {
-
-}};
-struct priv::ComponentModel_ComponentRemovedFromEntityFunction final { void operator()(void* system, Entity entity) const {
-
-}};
-struct priv::ComponentModel_EntityAddedToSceneFunction final {void operator()(void* system, void* componentPool, Entity entity, Scene& scene) const {
-
-}};
-struct priv::ComponentModel_SceneEnteredFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
-
-}};
-struct priv::ComponentModel_SceneLeftFunction final {void operator()(void* system, void* componentPool, Scene& scene) const {
-
-}};
 
 ComponentModel_System_CI::ComponentModel_System_CI() {
     setUpdateFunction(ComponentModel_UpdateFunction());
-    setOnComponentAddedToEntityFunction(ComponentModel_ComponentAddedToEntityFunction());
-    setOnComponentRemovedFromEntityFunction(ComponentModel_ComponentRemovedFromEntityFunction());
-    setOnEntityAddedToSceneFunction(ComponentModel_EntityAddedToSceneFunction());
-    setOnSceneEnteredFunction(ComponentModel_SceneEnteredFunction());
-    setOnSceneLeftFunction(ComponentModel_SceneLeftFunction());
+    setOnComponentAddedToEntityFunction([](void* system, void* component, Entity entity) {
+    });
+    setOnComponentRemovedFromEntityFunction([](void* system, Entity entity) {
+    });
+    setOnEntityAddedToSceneFunction([](void* system, void* componentPool, Entity entity, Scene& scene) {
+    });
+    setOnSceneEnteredFunction([](void* system, void* componentPool, Scene& scene) {
+    });
+    setOnSceneLeftFunction([](void* system, void* componentPool, Scene& scene) {
+    });
 }
 
 #pragma endregion

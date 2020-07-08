@@ -24,9 +24,7 @@ using namespace std;
 EngineCore* Core::m_Engine = nullptr;
 
 EngineCore::EngineCore(const EngineOptions& options) : m_ResourceManager(options), m_RenderManager(options){
-    m_Misc.m_Destroyed = m_Misc.m_Paused = false;
 }
-
 EngineCore::~EngineCore(){
     on_event_game_ended();
     Game::cleanup();
@@ -34,7 +32,6 @@ EngineCore::~EngineCore(){
 
     m_Misc.m_BuiltInMeshes.cleanup();
 }
-
 bool Engine::paused(){ 
     return Core::m_Engine->m_Misc.m_Paused;
 }
@@ -53,10 +50,11 @@ void EngineCore::init_os_specific(const EngineOptions& options) {
     #ifdef _WIN32
 
         //get args from shortcut, etc
-        unordered_set<string> args; std::locale loc;
+        std::unordered_set<std::string> args;
+        std::locale loc;
         for (int i = 0; i < options.argc; i++) {
-            const string key = string(options.argv[i]);
-            string lowerKey = "";
+            std::string key      = std::string(options.argv[i]);
+            std::string lowerKey = "";
             for (size_t j = 0; j < key.length(); ++j)
                 lowerKey += std::tolower(key[j], loc);
             args.insert(lowerKey);
@@ -105,20 +103,20 @@ void EngineCore::init(const EngineOptions& options) {
     }
     Scene& scene = *m_ResourceManager.m_CurrentScene;
     if (!scene.getActiveCamera()) {
-        Camera* default_camera = scene.addCamera(60, static_cast<float>(options.width) / static_cast<float>(options.height), 0.01f, 1000.0f);
+        Camera* default_camera = scene.addCamera(60, (float)options.width / (float)options.height, 0.01f, 1000.0f);
     }
 
-    Engine::Renderer::ssao::setLevel(static_cast<SSAOLevel::Level>(options.ssao_level));
+    Engine::Renderer::ssao::setLevel((SSAOLevel::Level)options.ssao_level);
     Engine::Renderer::godRays::enable(options.god_rays_enabled);
-    Engine::Renderer::hdr::setAlgorithm(static_cast<HDRAlgorithm::Algorithm>(options.hdr));
+    Engine::Renderer::hdr::setAlgorithm((HDRAlgorithm::Algorithm)options.hdr);
     Engine::Renderer::fog::enable(options.fog_enabled);
     Engine::Renderer::Settings::setAntiAliasingAlgorithm(options.aa_algorithm);
 }
 void EngineCore::update_physics(Scene& scene, Window& window, const float timeStep) {
     m_DebugManager.stop_clock();
 
-    const unsigned int requestedStepsPerFrame  = Physics::getNumberOfStepsPerFrame();
-    const float fixed_time_step                = PHYSICS_MIN_STEP / static_cast<float>(requestedStepsPerFrame);
+    unsigned int requestedStepsPerFrame  = Physics::getNumberOfStepsPerFrame();
+    float fixed_time_step                = PHYSICS_MIN_STEP / (float)requestedStepsPerFrame;
 
     m_PhysicsManager._update(timeStep, 100, fixed_time_step);
 
@@ -128,12 +126,12 @@ void EngineCore::update_logic(Scene& scene, Window& window, const float dt){
     m_DebugManager.stop_clock();
     window.on_dynamic_resize();
     m_NetworkingModule.update(dt);
-    scene.preUpdate(dt);
     Game::onPreUpdate(dt);
-    scene.update(dt);
+    scene.preUpdate(dt);
     Game::update(dt);
-    scene.postUpdate(dt);
+    scene.update(dt);
     Game::onPostUpdate(dt);
+    scene.postUpdate(dt);
     m_ThreadingModule.update(dt);
     m_EventModule.onPostUpdate();
 
@@ -177,7 +175,7 @@ void EngineCore::on_event_resize(Window& window, unsigned int newWindowWidth, un
     m_RenderManager._resize(newWindowWidth, newWindowHeight);
 
     if (saveSize) {
-        window.m_Data.m_VideoMode.width = newWindowWidth;
+        window.m_Data.m_VideoMode.width  = newWindowWidth;
         window.m_Data.m_VideoMode.height = newWindowHeight;
     }
     //resize cameras and viewports here
@@ -185,7 +183,7 @@ void EngineCore::on_event_resize(Window& window, unsigned int newWindowWidth, un
         if (scene) {
             scene->onResize(newWindowWidth, newWindowHeight);
             InternalScenePublicInterface::GetECS(*scene).onResize<ComponentCamera>(newWindowWidth, newWindowHeight);
-            InternalScenePublicInterface::GetViewports(*scene)[0].setViewportDimensions(0.0f, 0.0f, static_cast<float>(newWindowWidth), static_cast<float>(newWindowHeight));
+            InternalScenePublicInterface::GetViewports(*scene)[0].setViewportDimensions(0.0f, 0.0f, (float)newWindowWidth, (float)newWindowHeight);
         }
     }
 
@@ -223,7 +221,7 @@ void EngineCore::on_event_gained_focus(Window& window){
     m_EventModule.onClearEvents();
     Game::onGainedFocus(window);
 
-    window.m_Data.on_reset_events(0.0);
+    window.m_Data.on_reset_events(0.0f);
 
     m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowGainedFocus);
 }
@@ -240,7 +238,7 @@ void EngineCore::on_event_key_pressed(Window& window, unsigned int key){
     Game::onKeyPressed(window, key);
 
     priv::EventKeyboard e;
-    e.key = static_cast<KeyboardKey::Key>(key);
+    e.key = (KeyboardKey::Key)key;
     if(Engine::isKeyDown(KeyboardKey::LeftControl) || Engine::isKeyDown(KeyboardKey::RightControl))      e.control = true;
     if(Engine::isKeyDown(KeyboardKey::LeftAlt)     || Engine::isKeyDown(KeyboardKey::RightAlt))          e.alt = true;
     if(Engine::isKeyDown(KeyboardKey::LeftShift)   || Engine::isKeyDown(KeyboardKey::RightShift))        e.shift = true;
@@ -255,7 +253,7 @@ void EngineCore::on_event_key_released(Window& window, unsigned int key){
     Game::onKeyReleased(window, key);
 
     priv::EventKeyboard e;
-    e.key = static_cast<KeyboardKey::Key>(key);
+    e.key = (KeyboardKey::Key)key;
     if(Engine::isKeyDown(KeyboardKey::LeftControl) || Engine::isKeyDown(KeyboardKey::RightControl))      e.control = true;
     if(Engine::isKeyDown(KeyboardKey::LeftAlt)     || Engine::isKeyDown(KeyboardKey::RightAlt))          e.alt = true;
     if(Engine::isKeyDown(KeyboardKey::LeftShift)   || Engine::isKeyDown(KeyboardKey::RightShift))        e.shift = true;
@@ -279,8 +277,8 @@ void EngineCore::on_event_mouse_button_pressed(Window& window, unsigned int mous
     m_EventModule.onEventMouseButtonPressed(mouseButton);
     Game::onMouseButtonPressed(window, mouseButton);
 
-    const glm::uvec2 mpos = Engine::getMousePosition(window);
-    EventMouseButton e(static_cast<MouseButton::Button>(mouseButton), static_cast<float>(mpos.x), static_cast<float>(mpos.y));
+    const auto& mpos = Engine::getMousePosition(window);
+    EventMouseButton e((MouseButton::Button)mouseButton, mpos.x, mpos.y);
     Event ev(EventType::MouseButtonPressed);
     ev.eventMouseButton = e;
     m_EventModule.m_EventDispatcher.dispatchEvent(ev);
@@ -289,21 +287,21 @@ void EngineCore::on_event_mouse_button_released(Window& window, unsigned int mou
     m_EventModule.onEventMouseButtonReleased(mouseButton);
     Game::onMouseButtonReleased(window, mouseButton);
 
-    const glm::uvec2 mpos = Engine::getMousePosition(window);
-    EventMouseButton e(static_cast<MouseButton::Button>(mouseButton), static_cast<float>(mpos.x), static_cast<float>(mpos.y));
+    const auto& mpos = Engine::getMousePosition(window);
+    EventMouseButton e((MouseButton::Button)mouseButton, mpos.x, mpos.y);
     Event ev(EventType::MouseButtonReleased);
     ev.eventMouseButton = e;
     m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_mouse_moved(Window& window, int mouseX, int mouseY){
-    const float& mX = static_cast<float>(mouseX);
-    const float& mY = static_cast<float>(mouseY);
+    float mX = (float)mouseX;
+    float mY = (float)mouseY;
     if(window.hasFocus()){
         window.updateMousePosition(mX, mY, false, false);
     }
     Game::onMouseMoved(window, mX, mY);
 
-    EventMouseMove e(mX,mY);
+    EventMouseMove e(mX, mY);
     Event ev(EventType::MouseMoved);
     ev.eventMouseMoved = e;
     m_EventModule.m_EventDispatcher.dispatchEvent(ev);
@@ -311,8 +309,8 @@ void EngineCore::on_event_mouse_moved(Window& window, int mouseX, int mouseY){
 void EngineCore::on_event_mouse_entered(Window& window){
     Game::onMouseEntered(window);
 
-    const glm::uvec2 mpos = Engine::getMousePosition(window);
-    EventMouseMove e(static_cast<float>(mpos.x),static_cast<float>(mpos.y));
+    const auto& mpos = Engine::getMousePosition(window);
+    EventMouseMove e(mpos.x, mpos.y);
     Event ev(EventType::MouseEnteredWindow);
     ev.eventMouseMoved = e;
     m_EventModule.m_EventDispatcher.dispatchEvent(ev);
@@ -320,8 +318,8 @@ void EngineCore::on_event_mouse_entered(Window& window){
 void EngineCore::on_event_mouse_left(Window& window){
     Game::onMouseLeft(window);
 
-    const glm::uvec2 mpos = Engine::getMousePosition(window);
-    EventMouseMove e(static_cast<float>(mpos.x),static_cast<float>(mpos.y));
+    const auto& mpos = Engine::getMousePosition(window);
+    EventMouseMove e(mpos.x, mpos.y);
     Event ev(EventType::MouseLeftWindow);
     ev.eventMouseMoved = e;
     m_EventModule.m_EventDispatcher.dispatchEvent(ev);
@@ -329,7 +327,7 @@ void EngineCore::on_event_mouse_left(Window& window){
 void EngineCore::on_event_joystick_button_pressed(Window& window, unsigned int button, unsigned int id){
     Game::onJoystickButtonPressed();
 
-    EventJoystickButton e(id,button);
+    EventJoystickButton e(id, button);
     Event ev(EventType::JoystickButtonPressed);
     ev.eventJoystickButton = e;
     m_EventModule.m_EventDispatcher.dispatchEvent(ev);
@@ -337,7 +335,7 @@ void EngineCore::on_event_joystick_button_pressed(Window& window, unsigned int b
 void EngineCore::on_event_joystick_button_released(Window& window, unsigned int button, unsigned int id){
     Game::onJoystickButtonReleased();
 
-    EventJoystickButton e(id,button);
+    EventJoystickButton e(id, button);
     Event ev(EventType::JoystickButtonReleased);
     ev.eventJoystickButton = e;
     m_EventModule.m_EventDispatcher.dispatchEvent(ev);
@@ -345,7 +343,7 @@ void EngineCore::on_event_joystick_button_released(Window& window, unsigned int 
 void EngineCore::on_event_joystick_moved(Window& window, unsigned int id, float position, unsigned int axis){
     Game::onJoystickMoved();
 
-    EventJoystickMoved e(id, (JoystickAxis::Axis)axis,position);
+    EventJoystickMoved e(id, (JoystickAxis::Axis)axis, position);
     Event ev(EventType::JoystickMoved);
     ev.eventJoystickMoved = e;
     m_EventModule.m_EventDispatcher.dispatchEvent(ev);
@@ -366,14 +364,13 @@ void EngineCore::on_event_joystick_disconnected(Window& window, unsigned int id)
     ev.eventJoystickConnection = e;
     m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
-
-const float Engine::getFPS(){ 
-    return static_cast<float>(1.0 / Resources::dt()); 
+float Engine::getFPS(){ 
+    return 1.0f / Resources::dt(); 
 }
 Window& Engine::getWindow(){
     return Engine::Resources::getWindow();
 }
-const glm::uvec2 Engine::getWindowSize(){ 
+glm::uvec2 Engine::getWindowSize(){ 
     return Engine::Resources::getWindowSize(); 
 }
 void Engine::setWindowIcon(const Texture& texture){ 
@@ -388,11 +385,11 @@ void Engine::hideMouseCursor(){
 void Engine::stop(){ 
     Core::m_Engine->m_Misc.m_Destroyed = true;
 }
-const bool Engine::setFullscreen(bool b){ 
-    return Resources::getWindow().setFullscreen(b); 
+bool Engine::setFullscreen(bool fullscreen){ 
+    return Resources::getWindow().setFullscreen(fullscreen);
 }
-const bool Engine::setFullscreenWindowed(bool b) {
-    return Resources::getWindow().setFullscreenWindowed(b);
+bool Engine::setFullscreenWindowed(bool fullscreenWindowed) {
+    return Resources::getWindow().setFullscreenWindowed(fullscreenWindowed);
 }
 void EngineCore::handle_events(Window& window){
     sf::Event e;

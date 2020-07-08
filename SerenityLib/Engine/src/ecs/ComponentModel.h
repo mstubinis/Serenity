@@ -10,11 +10,6 @@ class  ComponentModel;
 class  ComponentCamera;
 namespace Engine::priv {
     struct ComponentModel_UpdateFunction;
-    struct ComponentModel_EntityAddedToSceneFunction;
-    struct ComponentModel_ComponentAddedToEntityFunction;
-    struct ComponentModel_ComponentRemovedFromEntityFunction;
-    struct ComponentModel_SceneEnteredFunction;
-    struct ComponentModel_SceneLeftFunction;
     struct ComponentModel_Functions final {
         static float CalculateRadius(ComponentModel& super);
         static void RegisterDeferredMeshLoaded(ComponentModel& super, Mesh* mesh);
@@ -26,15 +21,10 @@ namespace Engine::priv {
 #include <core/engine/model/ModelInstance.h>
 //#include <boost/type_index.hpp>
 
-typedef std::vector<ModelInstance*> ModelInstanceVector;
+using ModelInstanceVector = std::vector<ModelInstance*>;
 
 class ComponentModel: public Observer {
     friend struct Engine::priv::ComponentModel_UpdateFunction;
-    friend struct Engine::priv::ComponentModel_EntityAddedToSceneFunction;
-    friend struct Engine::priv::ComponentModel_ComponentAddedToEntityFunction;
-    friend struct Engine::priv::ComponentModel_ComponentRemovedFromEntityFunction;
-    friend struct Engine::priv::ComponentModel_SceneEnteredFunction;
-    friend struct Engine::priv::ComponentModel_SceneLeftFunction;
     friend struct Engine::priv::ComponentModel_Functions;
     friend class  ComponentCamera;
     private:

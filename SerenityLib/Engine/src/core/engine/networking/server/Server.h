@@ -77,6 +77,7 @@ namespace Engine::Networking {
 
             ServerClient* getClientFromUDPData(const std::string& ip, unsigned short port, sf::Packet& sf_packet) const;
 
+            SocketUDP& getUDPSocket() const noexcept { return *m_UdpSocket.get(); }
             constexpr ServerType::Type getType() const noexcept { return m_ServerType; }
             constexpr size_t num_clients() const noexcept { return m_Threads.getNumClients(); }
             void setClientHashFunction(hash_func function) { m_Client_Hash_Function = function; }
@@ -88,22 +89,21 @@ namespace Engine::Networking {
             void remove_client(ServerClient& client);
 
             //tcp
-            SocketStatus::Status send_tcp_to_client(ServerClient& client, sf::Packet& packet);
-            void send_tcp_to_all_but_client(ServerClient& exclusion, sf::Packet& packet);
-            void send_tcp_to_all(sf::Packet& packet);
-            //SocketStatus::Status send_tcp_to_client(ServerClient& client, void* data, size_t size);
-            //SocketStatus::Status send_tcp_to_client(ServerClient& client, void* data, size_t size, size_t& sent);
-            //void send_tcp_to_all_but_client(ServerClient& exclusion, void* data, size_t size);
-            //void send_tcp_to_all(void* data, size_t size);
+            virtual SocketStatus::Status send_tcp_to_client(ServerClient* client, sf::Packet& packet);
+            virtual void send_tcp_to_all_but_client(ServerClient* exclusion, sf::Packet& packet);
+            virtual void send_tcp_to_all(sf::Packet& packet);
 
             //udp
-            SocketStatus::Status send_udp_to_client(ServerClient& client, sf::Packet& packet);
-            void send_udp_to_all_but_client(ServerClient& exclusion, sf::Packet& packet);
-            void send_udp_to_all(sf::Packet& packet);
-            SocketStatus::Status receive_udp(sf::Packet& packet, sf::IpAddress& sender, unsigned short& port);
-            //void send_udp_to_all_but_client(ServerClient& exclusion, void* data, size_t size);
-            //void send_udp_to_all(void* data, size_t size);
-            //SocketStatus::Status receive_udp(void* data, size_t size, size_t& received, sf::IpAddress& sender, unsigned short& port);
+            
+            virtual SocketStatus::Status send_udp_to_client(ServerClient* client, sf::Packet& packet);
+            virtual void send_udp_to_all_but_client(ServerClient* exclusion, sf::Packet& packet);
+            virtual void send_udp_to_all(sf::Packet& packet);
+            
+            virtual SocketStatus::Status send_udp_to_client_important(ServerClient* client, Engine::Networking::Packet& packet);
+            virtual void send_udp_to_all_but_client_important(ServerClient* exclusion, Engine::Networking::Packet& packet);
+            virtual void send_udp_to_all_important(Engine::Networking::Packet& packet);
+
+            virtual SocketStatus::Status receive_udp(sf::Packet& packet, sf::IpAddress& sender, unsigned short& port);
 
             //void setBlockingTCPListener(bool blocking);
             //void setBlockingTCPClients(bool blocking);

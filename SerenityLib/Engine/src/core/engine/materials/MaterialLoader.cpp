@@ -10,42 +10,6 @@
 using namespace Engine;
 using namespace std;
 
-namespace Engine::priv {
-    struct DefaultMaterialBindFunctor { void operator()(Material* material_ptr) const {
-        auto& material             = *material_ptr;
-        const size_t numComponents = material.m_Components.size();
-        size_t textureUnit         = 0;
-
-        for (size_t i = 0; i < numComponents; ++i) {
-            if (material.m_Components[i]) {
-                const auto& c = *material.m_Components[i];
-                c.bind(i, textureUnit);
-            }
-        }
-
-        Engine::Renderer::sendUniform1Safe("numComponents", static_cast<int>(numComponents));
-        Engine::Renderer::sendUniform1Safe("Shadeless", static_cast<int>(material.m_Shadeless));
-        Engine::Renderer::sendUniform4Safe("Material_F0AndID", 
-            material.m_F0Color.r(), 
-            material.m_F0Color.g(), 
-            material.m_F0Color.b(), 
-            static_cast<float>(material.m_ID)
-        );
-        Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesOne", 
-            static_cast<float>(material.m_BaseGlow) * 0.003921568627451f, 
-            static_cast<float>(material.m_BaseAO) * 0.003921568627451f,
-            static_cast<float>(material.m_BaseMetalness) * 0.003921568627451f,
-            static_cast<float>(material.m_BaseSmoothness) * 0.003921568627451f
-        );
-        Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesTwo", 
-            static_cast<float>(material.m_BaseAlpha) * 0.003921568627451f,
-            static_cast<float>(material.m_DiffuseModel), 
-            static_cast<float>(material.m_SpecularModel), 
-            0.0f
-        );
-    }};
-};
-
 void priv::MaterialLoader::InternalInit(Material& material, Texture* diffuse_ptr, Texture* normal_ptr, Texture* glow_ptr, Texture* specular_ptr, Texture* ao_ptr, Texture* metalness_ptr, Texture* smoothness_ptr) {
     priv::MaterialLoader::InternalInitBase(material);
     if (diffuse_ptr)     material.internalAddComponentGeneric(MaterialComponentType::Diffuse,  diffuse_ptr);
@@ -59,7 +23,6 @@ void priv::MaterialLoader::InternalInit(Material& material, Texture* diffuse_ptr
 void priv::MaterialLoader::InternalInitBase(Material& material) {
     material.m_Components.reserve(MAX_MATERIAL_COMPONENTS);
 
-    material.setCustomBindFunctor(priv::DefaultMaterialBindFunctor());
     material.internalUpdateGlobalMaterialPool(true);
 }
 

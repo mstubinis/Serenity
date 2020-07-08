@@ -3,6 +3,8 @@
 #include <core/engine/networking/SocketTCP.h>
 #include <random>
 
+#include <iostream>
+
 using namespace std;
 using namespace Engine;
 using namespace Engine::Networking;
@@ -64,14 +66,19 @@ bool ServerClient::disconnected() const {
     return (m_ConnectionState == ConnectionState::Disconnected || m_Timeout_Timer >= m_Timeout_Timer_Limit || (m_TcpSocket && m_TcpSocket->localPort() == 0));
 }
 SocketStatus::Status ServerClient::send_tcp(sf::Packet& packet) {
-    return m_TcpSocket->send(packet);
+    auto status = m_TcpSocket->send(packet);
+    return status;
 }
 SocketStatus::Status ServerClient::receive_tcp(sf::Packet& packet) {
-    return m_TcpSocket->receive(packet);
+    auto status = m_TcpSocket->receive(packet);
+    return status;
 }
+
 SocketStatus::Status ServerClient::send_udp(sf::Packet& sfPacket) {
-    return m_Server.send_udp_to_client(*this, sfPacket);
+    auto status = m_Server.send_udp_to_client(this, sfPacket);
+    return status;
 }
+
 void ServerClient::receive_udp(SocketStatus::Status status, sf::Packet& packet, const float dt) {
     if (status == SocketStatus::Done) {
         internal_on_received_data();

@@ -2,42 +2,39 @@
 #ifndef ENGINE_EVENTS_KEYBOARD_MODULE_H
 #define ENGINE_EVENTS_KEYBOARD_MODULE_H
 
-#include <core/engine/events/Keyboard/KeyboardKeys.h>
+#include <core/engine/input/Keyboard/KeyboardKeys.h>
 #include <array>
 
 namespace Engine::priv {
     class KeyboardModule {
         private:
             std::array<bool, KeyboardKey::_TOTAL>  m_KeyboardKeyStatus;
-            unsigned int                           m_CurrentKeyboardKey  = static_cast<unsigned int>(KeyboardKey::Unknown);
-            unsigned int                           m_PreviousKeyboardKey = static_cast<unsigned int>(KeyboardKey::Unknown);
+            unsigned int                           m_CurrentKeyboardKey  = (unsigned int)KeyboardKey::Unknown;
+            unsigned int                           m_PreviousKeyboardKey = (unsigned int)KeyboardKey::Unknown;
             unsigned int                           m_NumPressedKeys      = 0U;
         public:
             KeyboardModule() {
                 m_KeyboardKeyStatus.fill(false);
             }
-            virtual ~KeyboardModule() {
+            virtual ~KeyboardModule() {}
 
-            }
-            constexpr void onKeyPressed(const unsigned int key) {
+            constexpr void onKeyPressed(unsigned int key) {
                 if (key == KeyboardKey::Unknown) {
                     return;
                 }
                 m_PreviousKeyboardKey = m_CurrentKeyboardKey;
                 m_CurrentKeyboardKey = key;
-
                 if (m_KeyboardKeyStatus[key] == false) {
                     m_KeyboardKeyStatus[key] = true;
                     ++m_NumPressedKeys;
                 }
             }
-            constexpr void onKeyReleased(const unsigned int key) {
+            constexpr void onKeyReleased(unsigned int key) {
                 if (key == KeyboardKey::Unknown) {
                     return;
                 }
-                m_PreviousKeyboardKey = static_cast<unsigned int>(KeyboardKey::Unknown);
-                m_CurrentKeyboardKey  = static_cast<unsigned int>(KeyboardKey::Unknown);
-
+                m_PreviousKeyboardKey = (unsigned int)KeyboardKey::Unknown;
+                m_CurrentKeyboardKey  = (unsigned int)KeyboardKey::Unknown;
                 if (m_KeyboardKeyStatus[key] == true) {
                     m_KeyboardKeyStatus[key] = false;
                     if (m_NumPressedKeys > 0) {
@@ -46,23 +43,22 @@ namespace Engine::priv {
                 }
             }
             constexpr void onPostUpdate() {
-                m_CurrentKeyboardKey  = static_cast<unsigned int>(KeyboardKey::Unknown);
-                m_PreviousKeyboardKey = static_cast<unsigned int>(KeyboardKey::Unknown);
+                m_CurrentKeyboardKey  = (unsigned int)KeyboardKey::Unknown;
+                m_PreviousKeyboardKey = (unsigned int)KeyboardKey::Unknown;
             }
             void onClearEvents() {
                 m_KeyboardKeyStatus.fill(false);
-                m_CurrentKeyboardKey  = static_cast<unsigned int>(KeyboardKey::Unknown);
-                m_PreviousKeyboardKey = static_cast<unsigned int>(KeyboardKey::Unknown);
+                m_CurrentKeyboardKey  = (unsigned int)KeyboardKey::Unknown;
+                m_PreviousKeyboardKey = (unsigned int)KeyboardKey::Unknown;
                 m_NumPressedKeys      = 0U;
             }
-
             constexpr KeyboardKey::Key getCurrentPressedKey() const {
-                return static_cast<KeyboardKey::Key>(m_CurrentKeyboardKey);
+                return (KeyboardKey::Key)m_CurrentKeyboardKey;
             }
             constexpr unsigned int getNumPressedKeys() const {
                 return m_NumPressedKeys;
             }
-            constexpr bool isKeyDown(const unsigned int key) const {
+            constexpr bool isKeyDown(unsigned int key) const {
                 return (m_KeyboardKeyStatus[key] == true);
             }
             constexpr bool isKeyDownOnce() const {

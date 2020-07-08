@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_LIGHT_POINT_INCLUDE_GUARD
-#define ENGINE_LIGHT_POINT_INCLUDE_GUARD
+#ifndef ENGINE_LIGHT_POINT_H
+#define ENGINE_LIGHT_POINT_H
 
 #include <core/engine/lights/SunLight.h>
 
@@ -20,25 +20,25 @@ class PointLight : public SunLight {
             Scene* scene              = nullptr
         );
         PointLight(
-            const LightType::Type type,
+            LightType::Type type,
             const glm_vec3& position  = glm_vec3(0.0f, 0.0f, 0.0f),
             Scene* scene              = nullptr
         );
-        virtual ~PointLight();
+        virtual ~PointLight() {}
 
         void free();
 
-        void setConstant(const float constant);
-        void setLinear(const float linear);
-        void setExponent(const float exponent);
-        void setAttenuation(const float constant, const float linear, const float exponent);
-        void setAttenuation(const LightRange::Range range);
-        void setAttenuationModel(const LightAttenuation::Model model);
+        void setConstant(float constant);
+        void setLinear(float linear);
+        void setExponent(float exponent);
+        void setAttenuation(float constant, float linear, float exponent);
+        void setAttenuation(LightRange::Range range);
+        void setAttenuationModel(LightAttenuation::Model model);
 
-        float getCullingRadius() const;
-        float getConstant() const;
-        float getLinear() const;
-        float getExponent() const;
-        LightAttenuation::Model getAttenuationModel() const;
+        constexpr float getCullingRadius() const noexcept { return m_CullingRadius; }
+        constexpr float getConstant() const noexcept { return m_C; }
+        constexpr float getLinear() const noexcept { return m_L; }
+        constexpr float getExponent() const noexcept { return m_E; }
+        constexpr LightAttenuation::Model getAttenuationModel() const noexcept { return m_AttenuationModel; }
 };
 #endif

@@ -1,4 +1,4 @@
-#include <core/engine/events/Joystick/JoystickAxises.h>
+#include <core/engine/input/Joystick/JoystickAxises.h>
 #include <array>
 
 constexpr std::array<const char*, JoystickAxis::_TOTAL> JOYSTICK_CONTROL_NAMES{ {

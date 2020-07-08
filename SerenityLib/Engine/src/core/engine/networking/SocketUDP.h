@@ -13,29 +13,18 @@ namespace Engine::priv {
 namespace Engine::Networking {
     class SocketUDP : public ISocket, public Engine::NonCopyable {
         friend class Engine::priv::SocketManager;
-        private:
+        public:
             struct UDPPacketInfo final {
                 sf::Packet*     sfmlPacket = nullptr;
-                unsigned short  port;
-                sf::IpAddress   ip;
-                UDPPacketInfo(sf::Packet& inSFMLPacket) : sfmlPacket(&inSFMLPacket){
+                unsigned short  port       = 0;
+                sf::IpAddress   ip         = sf::IpAddress::LocalHost;
 
-                }
-                UDPPacketInfo(UDPPacketInfo&& other) noexcept {
-                    port = std::move(other.port);
-                    ip = std::move(other.ip);
-                    sfmlPacket = std::exchange(other.sfmlPacket, nullptr);
-                }
-                UDPPacketInfo& operator=(UDPPacketInfo&& other) noexcept {
-                    if (&other != this) {
-                        port = std::move(other.port);
-                        ip = std::move(other.ip);
-                        sfmlPacket = std::exchange(other.sfmlPacket, nullptr);
-                    }
-                    return *this;
-                }
+                UDPPacketInfo(sf::Packet* inSFMLPacket);
+                UDPPacketInfo(UDPPacketInfo&& other) noexcept;
+                UDPPacketInfo& operator=(UDPPacketInfo&& other) noexcept;
+                ~UDPPacketInfo();
             };
-
+        private:
             sf::UdpSocket               m_SocketUDP;
             unsigned short              m_Port      = 0;
             std::string                 m_IP        = "";
@@ -53,14 +42,14 @@ namespace Engine::Networking {
             SocketUDP(unsigned short port, const std::string& ip = "");
             ~SocketUDP();
 
-            void                 setBlocking(bool blocking) override;
-            bool                 isBlocking() const override;
-            bool                 isBound() const;
-            unsigned short       localPort() const override;
+            void                   setBlocking(bool blocking) override;
+            bool                   isBlocking() const override;
+            bool                   isBound() const;
+            unsigned short         localPort() const override;
 
             SocketStatus::Status   bind(const std::string& ip = "");
-            void                 unbind();
-            void                 changePort(unsigned short newPort);
+            void                   unbind();
+            void                   changePort(unsigned short newPort);
             
             SocketStatus::Status   send(Engine::Networking::Packet& packet, const std::string& ip = "");
             SocketStatus::Status   send(sf::Packet& packet, const std::string& ip = "");

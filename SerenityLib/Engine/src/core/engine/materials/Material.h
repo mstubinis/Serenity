@@ -8,7 +8,6 @@ class  MaterialComponent;
 class  Texture;
 namespace Engine::priv {
     struct DefaultMaterialBindFunctor;
-    struct DefaultMaterialUnbindFunctor;
     struct InternalMaterialPublicInterface;
     struct InternalMaterialRequestPublicInterface;
     struct InternalScenePublicInterface;
@@ -29,7 +28,6 @@ namespace Engine::priv {
 
 class Material final : public Resource {
     friend struct Engine::priv::DefaultMaterialBindFunctor;
-    friend struct Engine::priv::DefaultMaterialUnbindFunctor;
     friend struct Engine::priv::InternalScenePublicInterface;
     friend struct Engine::priv::InternalMaterialRequestPublicInterface;
     friend struct Engine::priv::InternalMaterialPublicInterface;
@@ -41,19 +39,20 @@ class Material final : public Resource {
         static std::vector<glm::vec4>     m_MaterialProperities;
     private:
         std::vector<MaterialComponent*>   m_Components;
-        std::function<void(Material*)>    m_CustomBindFunctor  = [](Material*) {};
+        std::function<void(Material*)>    m_CustomBindFunctor   = [](Material*) {};
+      //std::function<void(Material*)>    m_CustomUnbindFunctor = [](Material*) {};
 
-        unsigned char                     m_DiffuseModel       = DiffuseModel::Lambert;
-        unsigned char                     m_SpecularModel      = SpecularModel::GGX;
-        bool                              m_Shadeless          = false;
-        bool                              m_UpdatedThisFrame   = false;
-        Engine::color_vector_4            m_F0Color            = Engine::color_vector_4(10_uc, 10_uc, 10_uc, 255_uc);
-        unsigned char                     m_BaseGlow           = 1_uc;
-        unsigned char                     m_BaseAO             = 254_uc;
-        unsigned char                     m_BaseMetalness      = 1_uc;
-        unsigned char                     m_BaseSmoothness     = 64_uc;
-        unsigned char                     m_BaseAlpha          = 254_uc;
-        std::uint32_t                     m_ID                 = 0;
+        unsigned char                     m_DiffuseModel        = DiffuseModel::Lambert;
+        unsigned char                     m_SpecularModel       = SpecularModel::GGX;
+        bool                              m_Shadeless           = false;
+        bool                              m_UpdatedThisFrame    = false;
+        Engine::color_vector_4            m_F0Color             = Engine::color_vector_4(10_uc, 10_uc, 10_uc, 255_uc);
+        unsigned char                     m_BaseGlow            = 1_uc;
+        unsigned char                     m_BaseAO              = 254_uc;
+        unsigned char                     m_BaseMetalness       = 1_uc;
+        unsigned char                     m_BaseSmoothness      = 64_uc;
+        unsigned char                     m_BaseAlpha           = 254_uc;
+        std::uint32_t                     m_ID                  = 0U;
 
         MaterialComponent* internalAddComponentGeneric(MaterialComponentType::Type type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
         void internalUpdateGlobalMaterialPool(bool addToDatabase);
@@ -81,10 +80,7 @@ class Material final : public Resource {
         );
         ~Material();
 
-        template<typename T>
-        void setCustomBindFunctor(const T& functor) {
-            m_CustomBindFunctor = std::bind<void>(std::move(functor), std::placeholders::_1);
-        }
+        void setCustomBindFunctor(std::function<void(Material*)> functor) noexcept { m_CustomBindFunctor = functor; }
 
         Material(const Material&)                      = delete;
         Material& operator=(const Material&)           = delete;

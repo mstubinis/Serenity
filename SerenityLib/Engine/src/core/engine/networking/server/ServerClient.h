@@ -46,8 +46,8 @@ namespace Engine::Networking {
             mutable Engine::Networking::SocketTCP*  m_TcpSocket                    = nullptr;
             std::string                             m_IP                           = "";
             std::string                             m_Hash                         = "";
-            unsigned short                          m_Port                         = 0;
-            unsigned int                            m_ID                           = 0;
+            unsigned short                          m_Port                         = 0U;
+            std::uint32_t                           m_ID                           = 0U;
             float                                   m_Timeout_Timer                = 0.0f;
             float                                   m_Timeout_Timer_Limit          = 30.0f;
             float                                   m_Recovery_Timeout_Timer       = 0.0f;
@@ -62,7 +62,6 @@ namespace Engine::Networking {
             void setOnReceivedTCPFunction(on_received_tcp_func function) { m_On_Received_TCP_Function = function; }
 
             virtual void on_receive_udp(sf::Packet& sfPacket, const float dt) {}
-            //virtual void on_receive_udp(void* data, size_t size, size_t& received, const float dt) {}
             virtual void onEvent(const Event& e) override {}
 
             constexpr ConnectionState::State connectionState() const noexcept { return m_ConnectionState; }
@@ -70,8 +69,9 @@ namespace Engine::Networking {
             constexpr Engine::Networking::SocketTCP* socket() const noexcept { return m_TcpSocket; }
             constexpr unsigned short port() const noexcept { return m_Port; }
             constexpr const std::string& ip() const noexcept { return m_IP; }
-            constexpr unsigned int id() const noexcept { return m_ID; }
+            constexpr std::uint32_t id() const noexcept { return m_ID; }
             constexpr void setTimeoutTimerLimit(float limit) { m_Timeout_Timer_Limit = limit; }
+            constexpr void setRecoveryTimeoutTimerLimit(float limit) { m_Recovery_Timeout_Timer_Limit = limit; }
             void setUpdateFunction(update_func function) { m_Update_Function = function; }
 
             sf::Uint32 generate_nonce() const;
@@ -81,14 +81,10 @@ namespace Engine::Networking {
             bool disconnected() const;
 
             SocketStatus::Status send_tcp(sf::Packet& sfPacket);
-            //SocketStatus::Status send_tcp(void* data, size_t size);
-            //SocketStatus::Status send_tcp(void* data, size_t size, size_t& sent);
             SocketStatus::Status receive_tcp(sf::Packet& packet);
-            //SocketStatus::Status receive_tcp(void* data, size_t size, size_t& received);
 
             SocketStatus::Status send_udp(sf::Packet& sfPacket);
             void receive_udp(SocketStatus::Status status, sf::Packet& packet, const float dt);
-            //void receive_udp(SocketStatus::Status status, void* data, size_t size, size_t& received, const float dt);
 
             void update(const float dt);
     };

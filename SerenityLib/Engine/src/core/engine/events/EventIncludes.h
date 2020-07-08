@@ -5,9 +5,9 @@
 #include <SFML/System.hpp>
 #include <string>
 
-#include <core/engine/events/Keyboard/KeyboardKeys.h>
-#include <core/engine/events/Mouse/MouseButtons.h>
-#include <core/engine/events/Joystick/JoystickAxises.h>
+#include <core/engine/input/Keyboard/KeyboardKeys.h>
+#include <core/engine/input/Mouse/MouseButtons.h>
+#include <core/engine/input/Joystick/JoystickAxises.h>
 
 struct EventType final { enum Type : unsigned int {
     Unknown = 0,
@@ -33,7 +33,9 @@ struct EventType final { enum Type : unsigned int {
     ClientDisconnected,
 
     PacketSent,
+    PacketSentCustom,
     PacketReceived,
+    PacketReceivedCustom,
 
     WindowRequestedToBeClosed,
     WindowHasClosed,
@@ -60,7 +62,6 @@ struct EventType final { enum Type : unsigned int {
     JoystickMoved,
     TextEntered,
     SceneChanged,
-    _TOTAL,
-};};
+_TOTAL,};};
 
 #endif

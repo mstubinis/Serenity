@@ -14,7 +14,6 @@ LightProbe::LightProbe(ProbeType::Type type, const glm::vec3& position, Scene* s
 LightProbe::~LightProbe() {
     destroy();
 }
-
 void LightProbe::addIgnoredEntity(Entity entity) {
     if (!entity.null()) {
         for (auto& itr : m_Ignored) {
@@ -25,27 +24,9 @@ void LightProbe::addIgnoredEntity(Entity entity) {
     }
     m_Ignored.push_back(entity);
 }
-const Camera& LightProbe::getCamera() const {
-    return m_Camera;
-}
-const Viewport& LightProbe::getViewport() const {
-    return m_Viewport;
-}
 void LightProbe::update(const float dt) {
     m_FrameCount += 1_uc;
     if (m_FrameCount > 5_uc) {
         m_FrameCount = 0_uc;
     }
-}
-void LightProbe::activate(bool active) {
-    m_Active = active;
-}
-void LightProbe::deactivate() {
-    m_Active = false;
-}
-void LightProbe::setProbeType(ProbeType::Type type) {
-    m_ProbeType = type;
-}
-LightProbe::ProbeType::Type LightProbe::getProbeType() const {
-    return m_ProbeType;
 }

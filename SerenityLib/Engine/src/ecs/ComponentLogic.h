@@ -3,14 +3,6 @@
 #define ENGINE_ECS_COMPONENT_LOGIC_H
 
 class ComponentLogic;
-namespace Engine::priv {
-    struct ComponentLogic_UpdateFunction;
-    struct ComponentLogic_EntityAddedToSceneFunction;
-    struct ComponentLogic_ComponentAddedToEntityFunction;
-    struct ComponentLogic_ComponentRemovedFromEntityFunction;
-    struct ComponentLogic_SceneEnteredFunction;
-    struct ComponentLogic_SceneLeftFunction;
-};
 namespace luabridge {
     class LuaRef;
 };
@@ -20,12 +12,6 @@ namespace luabridge {
 #include <core/engine/lua/Lua.h>
 
 class ComponentLogic : public Engine::UserPointer {
-    friend struct Engine::priv::ComponentLogic_UpdateFunction;
-    friend struct Engine::priv::ComponentLogic_ComponentAddedToEntityFunction;
-    friend struct Engine::priv::ComponentLogic_ComponentRemovedFromEntityFunction;
-    friend struct Engine::priv::ComponentLogic_EntityAddedToSceneFunction;
-    friend struct Engine::priv::ComponentLogic_SceneEnteredFunction;
-    friend struct Engine::priv::ComponentLogic_SceneLeftFunction;
     private:
         Entity                                             m_Owner;
         void*                                              m_UserPointer1  = nullptr;

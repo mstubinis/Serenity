@@ -5,21 +5,14 @@
 class Camera;
 class ComponentModel;
 class ComponentCamera;
-namespace Engine::priv {
-    struct ComponentCamera_UpdateFunction;
-    struct ComponentCamera_EntityAddedToSceneFunction;
-    struct ComponentCamera_ComponentAddedToEntityFunction;
-    struct ComponentCamera_ComponentRemovedFromEntityFunction;
-    struct ComponentCamera_SceneEnteredFunction;
-    struct ComponentCamera_SceneLeftFunction;
-};
 
 #include <ecs/Entity.h>
 #include <ecs/ECSSystemConstructorInfo.h>
+#include <array>
 
 namespace Engine::priv {
     struct ComponentCamera_Functions final {
-        static void            RebuildProjectionMatrix(ComponentCamera& componentCamera);
+        static void      RebuildProjectionMatrix(ComponentCamera& componentCamera);
         static glm::mat4 GetViewNoTranslation(const Camera& camera);
         static glm::mat4 GetViewInverseNoTranslation(const Camera& camera);
         static glm::mat4 GetViewProjectionNoTranslation(const Camera& camera);
@@ -28,45 +21,40 @@ namespace Engine::priv {
     };
 };
 
-class ComponentCamera {
-    friend struct Engine::priv::ComponentCamera_UpdateFunction;
-    friend struct Engine::priv::ComponentCamera_EntityAddedToSceneFunction;
-    friend struct Engine::priv::ComponentCamera_ComponentAddedToEntityFunction;
-    friend struct Engine::priv::ComponentCamera_ComponentRemovedFromEntityFunction;
-    friend struct Engine::priv::ComponentCamera_SceneEnteredFunction;
-    friend struct Engine::priv::ComponentCamera_SceneLeftFunction;
+class ComponentCamera final {
+    friend class  Camera;
+    friend class  ComponentModel;
     friend struct Engine::priv::ComponentCamera_Functions;
-    friend class  ::Camera;
-    friend class  ::ComponentModel;
     private:
         enum CameraType : unsigned char { 
 			Perspective,
 			Orthographic, 
 		};
 
-        Entity m_Owner;
+        Entity                   m_Owner;
 
-        CameraType  m_Type                      = CameraType::Perspective;
-        glm_vec3    m_Eye                       = glm_vec3(0.0);
-        glm_vec3    m_Up                        = glm_vec3(0.0, 1.0, 0.0);
-        glm_vec3    m_Forward                   = glm_vec3(0.0, 0.0, -1.0);
-        glm::mat4   m_ViewMatrix                = glm::mat4(1.0f);
-        glm::mat4   m_ViewMatrixNoTranslation   = glm::mat4(1.0f);
-        glm::mat4   m_ProjectionMatrix;
-        glm::vec4   m_FrustumPlanes[6];
-        float       m_NearPlane                 = 0.01f;
-        float       m_FarPlane                  = 2000.0f;
-        float       m_Bottom                    = 0.0f;
-        float       m_Top                       = 0.0f;
+        CameraType               m_Type                      = CameraType::Perspective;
+        glm_vec3                 m_Eye                       = glm_vec3(0.0);
+        glm_vec3                 m_Up                        = glm_vec3(0.0, 1.0, 0.0);
+        glm_vec3                 m_Forward                   = glm_vec3(0.0, 0.0, -1.0);
+        glm::mat4                m_ViewMatrix                = glm::mat4(1.0f);
+        glm::mat4                m_ViewMatrixNoTranslation   = glm::mat4(1.0f);
+        glm::mat4                m_ProjectionMatrix;
+
+        std::array<glm::vec4, 6> m_FrustumPlanes;
+
+        float                    m_NearPlane                 = 0.01f;
+        float                    m_FarPlane                  = 2000.0f;
+        float                    m_Bottom                    = 0.0f;
+        float                    m_Top                       = 0.0f;
         union { 
-			float   m_Angle;
-			float   m_Left; 
+			float                m_Angle;
+			float                m_Left; 
 		};
         union { 
-			float   m_AspectRatio;
-			float   m_Right; 
+			float                m_AspectRatio;
+			float                m_Right; 
 		};
-
         ComponentCamera() = delete;
     public:
         //BOOST_TYPE_INDEX_REGISTER_CLASS
@@ -86,29 +74,29 @@ class ComponentCamera {
         void setViewMatrix(const glm::mat4& viewMatrix);
         void setProjectionMatrix(const glm::mat4& projectionMatrix);
 
-        inline constexpr float getAngle() const {
+        inline constexpr float getAngle() const noexcept {
             return m_Angle;
         }
-        inline constexpr float getAspect() const {
+        inline constexpr float getAspect() const noexcept {
             return m_AspectRatio;
         }
-        inline constexpr float getNear() const {
+        inline constexpr float getNear() const noexcept {
             return m_NearPlane;
         }
-        inline constexpr float getFar() const {
+        inline constexpr float getFar() const noexcept {
             return m_FarPlane;
         }
 
-        void setAngle(const float angle);
-        void setAspect(const float aspectRatio);
-        void setNear(const float Near);
-        void setFar(const float Far);
+        void setAngle(float angle);
+        void setAspect(float aspectRatio);
+        void setNear(float Near);
+        void setFar(float Far);
 
-        inline constexpr glm::mat4 getProjection() const {
+        inline constexpr glm::mat4 getProjection() const noexcept {
             return m_ProjectionMatrix;
         }
         glm::mat4 getProjectionInverse() const;
-        inline constexpr glm::mat4 getView() const {
+        inline constexpr glm::mat4 getView() const noexcept {
             return m_ViewMatrix;
         }
         glm::mat4 getViewInverse() const;
@@ -116,13 +104,16 @@ class ComponentCamera {
         glm::mat4 getViewProjectionInverse() const;
         glm::vec3 getViewVector() const;
 
-        inline constexpr glm_vec3 forward() const {
+        inline constexpr std::array<glm::vec4, 6> getFrustrumPlanes() const noexcept {
+            return m_FrustumPlanes;
+        }
+        inline constexpr glm_vec3 forward() const noexcept {
             return m_Forward;
         }
-        inline glm_vec3 right() const {
+        inline glm_vec3 right() const noexcept {
             return glm::normalize(glm_vec3(m_ViewMatrixNoTranslation[0][0], m_ViewMatrixNoTranslation[1][0], m_ViewMatrixNoTranslation[2][0]));
         }
-        inline constexpr glm_vec3 up() const {
+        inline constexpr glm_vec3 up() const noexcept {
             return m_Up; //normalize later?
         }
 
