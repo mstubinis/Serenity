@@ -40,8 +40,8 @@ using namespace std;
 priv::PhysicsManager* physicsManager = nullptr;
 
 void processManifoldContact(btManifoldPoint& cp, btCollisionObject* A, btCollisionObject* B, btCollisionShape* childA, btCollisionShape* childB, const btCollisionShape* shapeA, const btCollisionShape* shapeB) {
-    ComponentBody* a_               = static_cast<ComponentBody*>(A->getUserPointer());
-    ComponentBody* b_               = static_cast<ComponentBody*>(B->getUserPointer());
+    ComponentBody* a_               = (ComponentBody*)A->getUserPointer();
+    ComponentBody* b_               = (ComponentBody*)B->getUserPointer();
     if (a_ && b_) {
         glm::vec3 ptA               = Math::btVectorToGLM(cp.getPositionWorldOnA());
         glm::vec3 ptB               = Math::btVectorToGLM(cp.getPositionWorldOnB());
@@ -52,13 +52,13 @@ void processManifoldContact(btManifoldPoint& cp, btCollisionObject* A, btCollisi
         glm::vec3 normalB           = -glm::normalize(ptA - ptB);      
 
         if (shapeA && shapeA->getShapeType() == TRIANGLE_SHAPE_PROXYTYPE) {
-            const btTriangleShape* triA = static_cast<const btTriangleShape*>(shapeA);
+            const btTriangleShape* triA = (const btTriangleShape*)shapeA;
             btVector3 normal = (triA->m_vertices1[1] - triA->m_vertices1[0]).cross(triA->m_vertices1[2] - triA->m_vertices1[0]);
             normal.normalize();
             normalA = Math::btVectorToGLM(normal);
         }
         if (shapeB && shapeB->getShapeType() == TRIANGLE_SHAPE_PROXYTYPE) {
-            const btTriangleShape* triB = static_cast<const btTriangleShape*>(shapeB);
+            const btTriangleShape* triB = (const btTriangleShape*)shapeB;
             btVector3 normal = (triB->m_vertices1[1] - triB->m_vertices1[0]).cross(triB->m_vertices1[2] - triB->m_vertices1[0]);
             normal.normalize();
             normalB = Math::btVectorToGLM(normal);
@@ -72,12 +72,12 @@ void processManifoldContact(btManifoldPoint& cp, btCollisionObject* A, btCollisi
         dataB.otherCollisionObj = A;
 
         if (childA) {
-            auto& modelInstance = *static_cast<ModelInstance*>(childA->getUserPointer());
+            auto& modelInstance = *(ModelInstance*)childA->getUserPointer();
             dataA.ownerModelInstanceIndex = modelInstance.index();
             dataB.otherModelInstanceIndex = modelInstance.index();
         }
         if (childB) {
-            auto& modelInstance = *static_cast<ModelInstance*>(childB->getUserPointer());
+            auto& modelInstance = *(ModelInstance*)childB->getUserPointer();
             dataA.otherModelInstanceIndex = modelInstance.index();
             dataB.ownerModelInstanceIndex = modelInstance.index();
         }
@@ -149,7 +149,7 @@ void priv::PhysicsManager::cleanup() {
 void priv::PhysicsManager::debug_draw_line(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color) {
     priv::PhysicsManager::debug_draw_line(start, end, color.r, color.g, color.b, color.a);
 }
-void priv::PhysicsManager::debug_draw_line(const glm::vec3& start, const glm::vec3& end, const float r, const float g, const float b, const float a) {
+void priv::PhysicsManager::debug_draw_line(const glm::vec3& start, const glm::vec3& end, float r, float g, float b, float a) {
     m_Pipeline.m_World->getDebugDrawer()->drawLine(Math::btVectorFromGLM(start), Math::btVectorFromGLM(end), btVector4(r, g, b, a));
 }
 void priv::PhysicsManager::_init(){
@@ -162,7 +162,7 @@ void priv::PhysicsManager::_update(const float dt, int maxSubSteps, float fixedT
         return;
     }
     m_Pipeline.update(dt);
-    m_Pipeline.m_World->stepSimulation(static_cast<btScalar>(dt), maxSubSteps, static_cast<btScalar>(fixedTimeStep));
+    m_Pipeline.m_World->stepSimulation((btScalar)dt, maxSubSteps, (btScalar)fixedTimeStep);
 
     for (int i = 0; i < m_Pipeline.m_Dispatcher->getNumManifolds(); ++i) {
         btPersistentManifold& contactManifold = *m_Pipeline.m_Dispatcher->getManifoldByIndexInternal(i);
@@ -192,10 +192,10 @@ void priv::PhysicsManager::_render(const Camera& camera){
     m_Pipeline.m_DebugDrawer.drawAccumulatedLines();
     m_Pipeline.m_DebugDrawer.postRender();
 }
-void Physics::setNumberOfStepsPerFrame(const unsigned int numSteps) {
+void Physics::setNumberOfStepsPerFrame(unsigned int numSteps) {
     physicsManager->m_NumberOfStepsPerFrame = glm::max(1U, numSteps);
 }
-const unsigned int Physics::getNumberOfStepsPerFrame() {
+unsigned int Physics::getNumberOfStepsPerFrame() {
     return physicsManager->m_NumberOfStepsPerFrame;
 }
 void Physics::pause(bool b){ 
@@ -204,7 +204,7 @@ void Physics::pause(bool b){
 void Physics::unpause(){ 
     physicsManager->m_Paused = false; 
 }
-void Physics::setGravity(const float x, const float y, const float z){ 
+void Physics::setGravity(float x, float y, float z){ 
     physicsManager->m_Pipeline.m_World->setGravity(btVector3(x,y,z));
 }
 void Physics::setGravity(const glm::vec3& gravity){ 
@@ -259,7 +259,7 @@ void Physics::removeCollisionObject(btCollisionObject* object) {
 void Physics::updateRigidBody(btRigidBody* rigidBody){ 
     physicsManager->m_Pipeline.m_World->updateSingleAabb(rigidBody);
 }
-bool Physics::addRigidBody(const Entity entity) {
+bool Physics::addRigidBody(Entity entity) {
     ComponentBody* body = entity.getComponent<ComponentBody>();
     if (body) {
         Physics::addRigidBody(*body);
@@ -268,9 +268,9 @@ bool Physics::addRigidBody(const Entity entity) {
     return false;
 }
 void Physics::addRigidBody(ComponentBody& body) {
-    Physics::addRigidBody(const_cast<btRigidBody*>(&body.getBtBody()), body.getCollisionGroup(), body.getCollisionMask());
+    Physics::addRigidBody(&body.getBtBody(), body.getCollisionGroup(), body.getCollisionMask());
 }
-bool Physics::removeRigidBody(const Entity entity) {
+bool Physics::removeRigidBody(Entity entity) {
     ComponentBody* body = entity.getComponent<ComponentBody>();
     if (body) {
         Physics::removeRigidBody(*body);
@@ -279,9 +279,9 @@ bool Physics::removeRigidBody(const Entity entity) {
     return false;
 }
 void Physics::removeRigidBody(ComponentBody& body) {
-    Physics::removeRigidBody(&const_cast<btRigidBody&>(body.getBtBody()));
+    Physics::removeRigidBody(&body.getBtBody());
 }
-bool Physics::addRigidBodyThreadSafe(const Entity entity) {
+bool Physics::addRigidBodyThreadSafe(Entity entity) {
     std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
     return Physics::addRigidBody(entity);
 }
@@ -293,7 +293,7 @@ void Physics::addRigidBodyThreadSafe(btRigidBody* body) {
     std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
     Physics::addRigidBody(body);
 }
-bool Physics::removeRigidBodyThreadSafe(const Entity entity) {
+bool Physics::removeRigidBodyThreadSafe(Entity entity) {
     std::lock_guard<std::mutex> lock(physicsManager->m_Mutex);
     return Physics::removeRigidBody(entity);
 }
@@ -317,9 +317,9 @@ void Physics::removeCollisionObjectThreadSafe(btCollisionObject* object) {
 }
 
 
-RayCastResult _rayCastInternal_Nearest(const btVector3& start, const btVector3& end, const unsigned short group, const unsigned short mask) {
+RayCastResult _rayCastInternal_Nearest(btVector3& start, btVector3& end, unsigned short group, unsigned short mask) {
     btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
-    RayCallback.m_collisionFilterMask = mask;
+    RayCallback.m_collisionFilterMask  = mask;
     RayCallback.m_collisionFilterGroup = group;
 
     physicsManager->m_Pipeline.m_World->rayTest(start, end, RayCallback);
@@ -329,20 +329,20 @@ RayCastResult _rayCastInternal_Nearest(const btVector3& start, const btVector3& 
 
     RayCastResult result;
     if (RayCallback.hasHit()) {
-        auto& pts = RayCallback.m_hitPointWorld;
-        auto& normals = RayCallback.m_hitNormalWorld;
+        auto& pts           = RayCallback.m_hitPointWorld;
+        auto& normals       = RayCallback.m_hitNormalWorld;
 
-        const glm::vec3 hitPoint = Math::btVectorToGLM(RayCallback.m_hitPointWorld);
-        const glm::vec3 hitNormal = Math::btVectorToGLM(RayCallback.m_hitNormalWorld);
+        glm::vec3 hitPoint  = Math::btVectorToGLM(RayCallback.m_hitPointWorld);
+        glm::vec3 hitNormal = Math::btVectorToGLM(RayCallback.m_hitNormalWorld);
 
-        result.hitPosition = hitPoint;
-        result.hitNormal = hitNormal;
+        result.hitPosition  = hitPoint;
+        result.hitNormal    = hitNormal;
     }
     return result;
 }
-vector<RayCastResult> _rayCastInternal(const btVector3& start, const btVector3& end, const unsigned short group, const unsigned short mask) {
+vector<RayCastResult> _rayCastInternal(btVector3& start, btVector3& end, unsigned short group, unsigned short mask) {
     btCollisionWorld::AllHitsRayResultCallback RayCallback(start, end);
-    RayCallback.m_collisionFilterMask = mask;
+    RayCallback.m_collisionFilterMask  = mask;
     RayCallback.m_collisionFilterGroup = group;
 
     physicsManager->m_Pipeline.m_World->rayTest(start, end, RayCallback);
@@ -367,7 +367,7 @@ vector<RayCastResult> _rayCastInternal(const btVector3& start, const btVector3& 
     }
     return result;
 }
-vector<RayCastResult> Physics::rayCast(const btVector3& start, const btVector3& end, ComponentBody* ignored, const unsigned short group, const unsigned short mask){
+vector<RayCastResult> Physics::rayCast(btVector3& start, btVector3& end, ComponentBody* ignored, unsigned short group, unsigned short mask){
     if(ignored){
         Physics::removeRigidBody(*ignored);
     }
@@ -377,19 +377,19 @@ vector<RayCastResult> Physics::rayCast(const btVector3& start, const btVector3& 
     }
     return result;
 }
-vector<RayCastResult> Physics::rayCast(const btVector3& start, const btVector3& end, vector<ComponentBody*>& ignored, const unsigned short group, const unsigned short mask){
-    for(auto& object:ignored){
-        Physics::removeRigidBody(*object);
+vector<RayCastResult> Physics::rayCast(btVector3& start, btVector3& end, vector<ComponentBody*>& ignored, unsigned short group, unsigned short mask){
+    for(auto& body : ignored){
+        Physics::removeRigidBody(*body);
     }
     vector<RayCastResult> result = _rayCastInternal(start, end, group, mask);
-    for(auto& object:ignored){
-        Physics::addRigidBody(*object);
+    for(auto& body : ignored){
+        Physics::addRigidBody(*body);
     }
     return result;
  }
-vector<RayCastResult> Physics::rayCast(const glm::vec3& start, const glm::vec3& end, Entity* ignored, const unsigned short group, const unsigned short mask){
-    const btVector3 start_ = Math::btVectorFromGLM(start);
-    const btVector3 end_ = Math::btVectorFromGLM(end);
+vector<RayCastResult> Physics::rayCast(glm::vec3& start, glm::vec3& end, Entity* ignored, unsigned short group, unsigned short mask){
+    btVector3 start_ = Math::btVectorFromGLM(start);
+    btVector3 end_   = Math::btVectorFromGLM(end);
     if (ignored) {
         ComponentBody* body = ignored->getComponent<ComponentBody>();
         if (body) {
@@ -400,12 +400,12 @@ vector<RayCastResult> Physics::rayCast(const glm::vec3& start, const glm::vec3& 
     }
     return Physics::rayCast(start_, end_, nullptr, group, mask);
  }
-vector<RayCastResult> Physics::rayCast(const glm::vec3& start, const glm::vec3& end ,vector<Entity>& ignored, const unsigned short group, const unsigned short mask){
-    const btVector3 start_ = Math::btVectorFromGLM(start);
-    const btVector3 end_ = Math::btVectorFromGLM(end);
+vector<RayCastResult> Physics::rayCast(glm::vec3& start, glm::vec3& end ,vector<Entity>& ignored, unsigned short group, unsigned short mask){
+    btVector3 start_ = Math::btVectorFromGLM(start);
+    btVector3 end_   = Math::btVectorFromGLM(end);
     vector<ComponentBody*> objs;
-    for(auto& o : ignored){
-        ComponentBody* body = o.getComponent<ComponentBody>();
+    for(auto& ent : ignored){
+        ComponentBody* body = ent.getComponent<ComponentBody>();
         if(body){
             if (body->hasPhysics()) {
                 objs.push_back(body);
@@ -415,7 +415,7 @@ vector<RayCastResult> Physics::rayCast(const glm::vec3& start, const glm::vec3& 
     return Physics::rayCast(start_, end_, objs, group, mask);
 }
 
-RayCastResult Physics::rayCastNearest(const btVector3& start, const btVector3& end, ComponentBody* ignored, const unsigned short group, const unsigned short mask) {
+RayCastResult Physics::rayCastNearest(btVector3& start, btVector3& end, ComponentBody* ignored, unsigned short group, unsigned short mask) {
     if (ignored) {
         Physics::removeRigidBody(*ignored);
     }
@@ -425,7 +425,7 @@ RayCastResult Physics::rayCastNearest(const btVector3& start, const btVector3& e
     }
     return result;
 }
-RayCastResult Physics::rayCastNearest(const btVector3& start, const btVector3& end, vector<ComponentBody*>& ignored, const unsigned short group, const unsigned short mask) {
+RayCastResult Physics::rayCastNearest(btVector3& start, btVector3& end, vector<ComponentBody*>& ignored, unsigned short group, unsigned short mask) {
     for (auto& object : ignored) {
         Physics::removeRigidBody(*object);
     }
@@ -435,9 +435,9 @@ RayCastResult Physics::rayCastNearest(const btVector3& start, const btVector3& e
     }
     return result;
 }
-RayCastResult Physics::rayCastNearest(const glm::vec3& start, const glm::vec3& end, Entity* ignored, const unsigned short group, const unsigned short mask) {
-    const btVector3 start_ = Math::btVectorFromGLM(start);
-    const btVector3 end_ = Math::btVectorFromGLM(end);
+RayCastResult Physics::rayCastNearest(glm::vec3& start, glm::vec3& end, Entity* ignored, unsigned short group, unsigned short mask) {
+    btVector3 start_ = Math::btVectorFromGLM(start);
+    btVector3 end_   = Math::btVectorFromGLM(end);
     if (ignored) {
         ComponentBody* body = ignored->getComponent<ComponentBody>();
         if (body) {
@@ -448,9 +448,9 @@ RayCastResult Physics::rayCastNearest(const glm::vec3& start, const glm::vec3& e
     }
     return Physics::rayCastNearest(start_, end_, nullptr, group, mask);
 }
-RayCastResult Physics::rayCastNearest(const glm::vec3& start, const glm::vec3& end, vector<Entity>& ignored, const unsigned short group, const unsigned short mask) {
-    const btVector3 start_ = Math::btVectorFromGLM(start);
-    const btVector3 end_ = Math::btVectorFromGLM(end);
+RayCastResult Physics::rayCastNearest(glm::vec3& start, glm::vec3& end, vector<Entity>& ignored, unsigned short group, unsigned short mask) {
+    btVector3 start_ = Math::btVectorFromGLM(start);
+    btVector3 end_   = Math::btVectorFromGLM(end);
     vector<ComponentBody*> objs;
     for (auto& o : ignored) {
         ComponentBody* body = o.getComponent<ComponentBody>();

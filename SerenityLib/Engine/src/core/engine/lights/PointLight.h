@@ -26,7 +26,7 @@ class PointLight : public SunLight {
         );
         virtual ~PointLight() {}
 
-        void free();
+        void free() noexcept override;
 
         void setConstant(float constant);
         void setLinear(float linear);

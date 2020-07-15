@@ -171,12 +171,20 @@ namespace Engine::priv {
 
             void generatePBRData(Texture& texture, unsigned int convoludeSize, unsigned int prefilterSize) override;
 
+            void sendGPUDataSunLight(Camera& camera, SunLight& sunLight, const std::string& start) override;
+            int sendGPUDataPointLight(Camera& camera, PointLight& pointLight, const std::string& start) override;
+            void sendGPUDataDirectionalLight(Camera& camera, DirectionalLight& directionalLight, const std::string& start) override;
+            int sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight, const std::string& start) override;
+            int sendGPUDataRodLight(Camera& camera, RodLight& rodLight, const std::string& start) override;
+            void sendGPUDataProjectionLight(Camera& camera, ProjectionLight& rodLight, const std::string& start) override;
+
             void renderSkybox(Skybox*, ShaderProgram& shaderProgram, Scene& scene, Viewport& viewport, Camera& camera) override;
             void renderSunLight(Camera& c, SunLight& s, Viewport& viewport) override;
             void renderPointLight(Camera& c, PointLight& p) override;
             void renderDirectionalLight(Camera& c, DirectionalLight& d, Viewport& viewport) override;
             void renderSpotLight(Camera& c, SpotLight& s) override;
             void renderRodLight(Camera& c, RodLight& r) override;
+            void renderProjectionLight(Camera& c, ProjectionLight& r) override;
             void renderMesh(Mesh& mesh, unsigned int mode = ModelDrawingMode::Triangles) override;
             void renderDecal(ModelInstance& decalModelInstance) override;
 

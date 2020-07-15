@@ -389,6 +389,7 @@
     <ClInclude Include="Engine\src\core\engine\lights\Lights.h" />
     <ClInclude Include="Engine\src\core\engine\lights\LightIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\lights\PointLight.h" />
+    <ClInclude Include="Engine\src\core\engine\lights\ProjectionLight.h" />
     <ClInclude Include="Engine\src\core\engine\lights\RodLight.h" />
     <ClInclude Include="Engine\src\core\engine\lights\SpotLight.h" />
     <ClInclude Include="Engine\src\core\engine\lights\SunLight.h" />
@@ -567,6 +568,7 @@
     <ClCompile Include="Engine\src\core\engine\lights\DirectionalLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\lights\LightProbe.cpp" />
     <ClCompile Include="Engine\src\core\engine\lights\PointLight.cpp" />
+    <ClCompile Include="Engine\src\core\engine\lights\ProjectionLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\lights\RodLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\lights\SpotLight.cpp" />
     <ClCompile Include="Engine\src\core\engine\lights\SunLight.cpp" />

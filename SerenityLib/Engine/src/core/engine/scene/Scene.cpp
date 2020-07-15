@@ -19,11 +19,11 @@ class Scene::impl final {
         priv::ECS<Entity>                     m_ECS;
 
         void _init(Scene& super, const string& name, const SceneOptions& options) {
-            m_ECS.assignSystem<ComponentBody, Engine::priv::ComponentBody_System>(ComponentBody_System_CI()/*, 10000*/);
             m_ECS.assignSystem<ComponentLogic> (ComponentLogic_System_CI()/*, 20000*/);
             m_ECS.assignSystem<ComponentLogic1>(ComponentLogic1_System_CI()/*, 30000*/);
             m_ECS.assignSystem<ComponentLogic2>(ComponentLogic2_System_CI()/*, 40000*/);
             m_ECS.assignSystem<ComponentLogic3>(ComponentLogic3_System_CI()/*, 50000*/);
+            m_ECS.assignSystem<ComponentBody, Engine::priv::ComponentBody_System>(ComponentBody_System_CI()/*, 10000*/);
             m_ECS.assignSystem<ComponentModel>(ComponentModel_System_CI()/*, 60000*/);
             m_ECS.assignSystem<ComponentCamera>(ComponentCamera_System_CI()/*, 70000*/);
             m_ECS.assignSystem<ComponentName>  (ComponentName_System_CI()/*, 80000*/);
@@ -50,7 +50,7 @@ class Scene::impl final {
                     particle.setPosition(particle.position() - centerPosFloat);
                 }
             }
-            centerBody->setPosition(static_cast<decimal>(0.0), static_cast<decimal>(0.0), static_cast<decimal>(0.0));
+            centerBody->setPosition((decimal)0.0, (decimal)0.0, (decimal)0.0);
 
             ComponentBody::recalculateAllParentChildMatrices(super);
         }
@@ -110,6 +110,9 @@ vector<SpotLight*>& priv::InternalScenePublicInterface::GetSpotLights(const Scen
 }
 vector<RodLight*>& priv::InternalScenePublicInterface::GetRodLights(const Scene& scene) {
     return scene.m_RodLights;
+}
+vector<ProjectionLight*>& priv::InternalScenePublicInterface::GetProjectionLights(const Scene& scene) {
+    return scene.m_ProjectionLights;
 }
 priv::ECS<Entity>& priv::InternalScenePublicInterface::GetECS(const Scene& scene) {
     return scene.m_i->m_ECS;
@@ -276,7 +279,7 @@ Entity* Scene::getGodRaysSun() const {
     return m_Sun;
 }
 unsigned int Scene::numViewports() const {
-    return static_cast<unsigned int>(m_Viewports.size());
+    return (unsigned int)m_Viewports.size();
 }
 unsigned int Scene::id() const {
     return m_ID;
@@ -289,7 +292,7 @@ ParticleEmitter* Scene::addParticleEmitter(ParticleEmissionProperties& propertie
 
 
 Viewport& Scene::addViewport(float x, float y, float width, float height, const Camera& camera) {
-    const unsigned int id = numViewports();
+    unsigned int id       = numViewports();
     Viewport& viewport    = m_Viewports.emplace_back(*this, camera);
     viewport.m_ID         = id;
     viewport.setViewportDimensions(x, y, width, height);
@@ -312,9 +315,9 @@ Camera* Scene::getActiveCamera() const {
 }
 void Scene::setActiveCamera(Camera& camera){
     if (m_Viewports.size() == 0) {
-        const unsigned int id = numViewports();
-        Viewport& viewport    = m_Viewports.emplace_back(*this, camera);
-        viewport.m_ID         = id;
+        unsigned int id    = numViewports();
+        Viewport& viewport = m_Viewports.emplace_back(*this, camera);
+        viewport.m_ID      = id;
         return;
     }
     m_Viewports[0].setCamera(camera);

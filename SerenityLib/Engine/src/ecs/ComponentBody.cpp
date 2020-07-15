@@ -176,9 +176,6 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
     }
     return *this;
 }
-Entity ComponentBody::getOwner() const {
-    return m_Owner;
-}
 void ComponentBody::setCollisionFunctor(function<void(CollisionCallbackEventData& data)> functor) {
     m_CollisionFunctor = functor;
 }
@@ -247,28 +244,16 @@ decimal ComponentBody::getLinearDamping() const {
 decimal ComponentBody::getAngularDamping() const {
     return (data.p->bullet_rigidBody) ? (decimal)(data.p->bullet_rigidBody->getAngularDamping()) : decimal(0.0);
 }
-void ComponentBody::setUserPointer1(void* userPtr) {
-    m_UserPointer1 = userPtr;
-}
-void ComponentBody::setUserPointer2(void* userPtr) {
-    m_UserPointer2 = userPtr;
-}
-void* ComponentBody::getUserPointer1() const {
-    return m_UserPointer1;
-}
-void* ComponentBody::getUserPointer2() const {
-    return m_UserPointer2;
-}
 void ComponentBody::collisionResponse(CollisionCallbackEventData& data) const {
-    m_CollisionFunctor( data );
+    m_CollisionFunctor(data);
 }
-ushort ComponentBody::getCollisionGroup() const {
+unsigned short ComponentBody::getCollisionGroup() const {
     return (m_Physics) ? data.p->group : 0;
 }
-ushort ComponentBody::getCollisionMask() const {
+unsigned short ComponentBody::getCollisionMask() const {
     return (m_Physics) ? data.p->mask : 0;
 }
-ushort ComponentBody::getCollisionFlags() const {
+unsigned short ComponentBody::getCollisionFlags() const {
     return (m_Physics) ? data.p->bullet_rigidBody->getCollisionFlags() : 0;
 }
 
@@ -315,7 +300,7 @@ void ComponentBody::setCollision(CollisionType::Type collisionType, float mass) 
     data.p->collision->setMass(data.p->mass);
     if (data.p->bullet_rigidBody) {
         data.p->bullet_rigidBody->setCollisionShape(data.p->collision->getBtShape());
-        data.p->bullet_rigidBody->setMassProps(static_cast<btScalar>(data.p->mass), data.p->collision->getBtInertia());
+        data.p->bullet_rigidBody->setMassProps((btScalar)data.p->mass, data.p->collision->getBtInertia());
         data.p->bullet_rigidBody->updateInertiaTensor();
     }
     setInternalPhysicsUserPointer(this);
@@ -408,7 +393,7 @@ void ComponentBody::setPosition(decimal newPosition) {
 }
 void ComponentBody::setPosition(decimal x, decimal y, decimal z) {
     auto& ecs        = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
-    auto& system     = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
+    auto& system     = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     auto& pcs        = system.ParentChildSystem;
     auto entityIndex = m_Owner.id() - 1U;
     if (m_Physics) {
@@ -482,7 +467,7 @@ void ComponentBody::setScale(decimal newScale) {
 }
 void ComponentBody::setScale(decimal x, decimal y, decimal z) {
     if (m_Physics) {
-        const auto  newScale = btVector3((btScalar)x, (btScalar)y, (btScalar)z);
+        const auto newScale = btVector3((btScalar)x, (btScalar)y, (btScalar)z);
         Collision& collision_ = *data.p->collision;
         auto collisionShape = collision_.getBtShape();
         if (collisionShape) {
@@ -516,7 +501,7 @@ glm_vec3 ComponentBody::getPosition() const { //theres prob a better way to do t
         return Math::btVectorToGLM(tr.getOrigin());
     }
     auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
-    auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
+    auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return Math::getMatrixPosition(matrix);
 }
@@ -526,7 +511,7 @@ glm::vec3 ComponentBody::getPositionRender() const { //theres prob a better way 
         return Math::btVectorToGLM(tr.getOrigin());
     }
     auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
-    auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
+    auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return Math::getMatrixPosition(matrix);
 }
@@ -575,7 +560,7 @@ glm_vec3 ComponentBody::getScale() const {
         if (collisionShape) {
             return Math::btVectorToGLM(collisionShape->getLocalScaling());
         }
-        return glm_vec3(static_cast<decimal>(1.0));
+        return glm_vec3((decimal)1.0);
     }
     return data.n->scale;
 }
@@ -601,7 +586,7 @@ glm_vec3 ComponentBody::getAngularVelocity() const  {
         const btVector3& v = data.p->bullet_rigidBody->getAngularVelocity();
         return Engine::Math::btVectorToGLM(v);
     }
-    return glm_vec3(static_cast<decimal>(0.0));
+    return glm_vec3((decimal)0.0);
 }
 float ComponentBody::mass() const {
 	return (m_Physics) ? data.p->mass : 0.0f;
@@ -612,7 +597,7 @@ glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way to do t
 #ifndef BT_USE_DOUBLE_PRECISION
         glm::mat4 modelMatrix_(1.0f);
 #else
-        glm_mat4 modelMatrix_(static_cast<decimal>(1.0));
+        glm_mat4 modelMatrix_((decimal)1.0);
 #endif
         btTransform tr;
         physicsData.bullet_rigidBody->getMotionState()->getWorldTransform(tr);
@@ -626,12 +611,12 @@ glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way to do t
         return modelMatrix_;
     }
     auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
-    auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
+    auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return matrix;
 }
 glm::mat4 ComponentBody::modelMatrixRendering() const {
-    return static_cast<glm::mat4>(modelMatrix());
+    return (glm::mat4)modelMatrix();
 }
 btRigidBody& ComponentBody::getBtBody() const {
 	return *data.p->bullet_rigidBody;
@@ -643,9 +628,9 @@ void ComponentBody::setCollisionGroup(short group) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.group != group) {
-            removePhysicsFromWorld(false);
+            removePhysicsFromWorld(true);
             phyData.group = group;
-            addPhysicsToWorld(false);
+            addPhysicsToWorld(true);
         }
     }
 }
@@ -653,114 +638,120 @@ void ComponentBody::setCollisionMask(short mask) {
     if (m_Physics) {
         auto& phyData = *data.p;
         if (phyData.mask != mask) {
-            removePhysicsFromWorld(false);
+            removePhysicsFromWorld(true);
             phyData.mask = mask;
-            addPhysicsToWorld(false);
+            addPhysicsToWorld(true);
         }
     }
 }
 void ComponentBody::setCollisionGroup(CollisionFilter::Filter group) {
-    ComponentBody::setCollisionGroup(static_cast<short>(group));
+    ComponentBody::setCollisionGroup((short)group);
 }
 void ComponentBody::setCollisionMask(CollisionFilter::Filter mask) {
-    ComponentBody::setCollisionMask(static_cast<short>(mask));
+    ComponentBody::setCollisionMask((short)mask);
 }
 void ComponentBody::addCollisionGroup(short group) {
     if (m_Physics) {
         auto& phyData = *data.p;
-        if (phyData.group != (phyData.group | group)) {
-            removePhysicsFromWorld(false);
-            phyData.group = phyData.group | group;
-            addPhysicsToWorld(false);
+        auto added_flags = (phyData.group | group);
+        if (phyData.group != added_flags) {
+            removePhysicsFromWorld(true);
+            phyData.group = added_flags;
+            addPhysicsToWorld(true);
         }
     }
 }
 void ComponentBody::addCollisionMask(short mask) {
     if (m_Physics) {
         auto& phyData = *data.p;
-        if (phyData.mask != (phyData.mask | mask)) {
-            removePhysicsFromWorld(false);
-            phyData.mask = phyData.mask | mask;
-            addPhysicsToWorld(false);
+        auto added_flags = (phyData.mask | mask);
+        if (phyData.mask != added_flags) {
+            removePhysicsFromWorld(true);
+            phyData.mask = added_flags;
+            addPhysicsToWorld(true);
         }
     }
 }
 void ComponentBody::addCollisionGroup(CollisionFilter::Filter group) {
-    ComponentBody::addCollisionGroup(static_cast<short>(group));
+    ComponentBody::addCollisionGroup((short)group);
 }
 void ComponentBody::addCollisionMask(CollisionFilter::Filter mask) {
-    ComponentBody::addCollisionMask(static_cast<short>(mask));
+    ComponentBody::addCollisionMask((short)mask);
 }
 void ComponentBody::setCollisionFlag(short flag) {
     if (m_Physics) {
-        auto& phyData = *data.p;
+        auto& phyData   = *data.p;
         auto& rigidBody = *phyData.bullet_rigidBody;
-        const auto& currFlags = rigidBody.getCollisionFlags();
+        auto currFlags  = rigidBody.getCollisionFlags();
         if (currFlags != flag) {
-            removePhysicsFromWorld(false);
+            removePhysicsFromWorld(true);
             rigidBody.setCollisionFlags(flag);
-            addPhysicsToWorld(false);
+            addPhysicsToWorld(true);
         }
     }
 }
 void ComponentBody::setCollisionFlag(CollisionFlag::Flag flag) {
-    ComponentBody::setCollisionFlag(static_cast<short>(flag));
+    ComponentBody::setCollisionFlag((short)flag);
 }
 void ComponentBody::addCollisionFlag(short flag) {
     if (m_Physics) {
-        auto& phyData = *data.p;
-        auto& rigidBody = *phyData.bullet_rigidBody;
-        const auto& currFlags = rigidBody.getCollisionFlags();
-        if (currFlags != (currFlags | flag)) {
-            removePhysicsFromWorld(false);
-            rigidBody.setCollisionFlags(currFlags | flag);
-            addPhysicsToWorld(false);
+        auto& phyData    = *data.p;
+        auto& rigidBody  = *phyData.bullet_rigidBody;
+        auto currFlags   = rigidBody.getCollisionFlags();
+        auto added_flags = (currFlags | flag);
+        if (currFlags != added_flags) {
+            removePhysicsFromWorld(true);
+            rigidBody.setCollisionFlags(added_flags);
+            addPhysicsToWorld(true);
         }
     }
 }
 void ComponentBody::addCollisionFlag(CollisionFlag::Flag flag) {
-    ComponentBody::addCollisionFlag(static_cast<short>(flag));
+    ComponentBody::addCollisionFlag((short)flag);
 }
 void ComponentBody::removeCollisionGroup(short group) {
     if (m_Physics) {
-        auto& phyData = *data.p;
-        if (phyData.group != (phyData.group & ~group)) {
-            removePhysicsFromWorld(false);
-            phyData.group = phyData.group & ~group;
-            addPhysicsToWorld(false);
+        auto& phyData      = *data.p;
+        auto removed_flags = (phyData.group & ~group);
+        if (phyData.group != removed_flags) {
+            removePhysicsFromWorld(true);
+            phyData.group = removed_flags;
+            addPhysicsToWorld(true);
         }
     }
 }
 void ComponentBody::removeCollisionMask(short mask) {
     if (m_Physics) {
-        auto& phyData = *data.p;
-        if (phyData.mask != (phyData.mask & ~mask)) {
-            removePhysicsFromWorld(false);
-            phyData.mask = phyData.mask & ~mask;
-            addPhysicsToWorld(false);
+        auto& phyData      = *data.p;
+        auto removed_flags = (phyData.mask & ~mask);
+        if (phyData.mask != removed_flags) {
+            removePhysicsFromWorld(true);
+            phyData.mask = removed_flags;
+            addPhysicsToWorld(true);
         }
     }
 }
 void ComponentBody::removeCollisionFlag(short flag) {
     if (m_Physics) {
-        auto& phyData = *data.p;
-        auto& rigidBody = *phyData.bullet_rigidBody;
-        const auto& currFlags = rigidBody.getCollisionFlags();
-        if (currFlags != (currFlags & ~flag)) {
-            removePhysicsFromWorld(false);
-            rigidBody.setCollisionFlags(currFlags & ~flag);
-            addPhysicsToWorld(false);
+        auto& phyData      = *data.p;
+        auto& rigidBody    = *phyData.bullet_rigidBody;
+        auto currFlags     = rigidBody.getCollisionFlags();
+        auto removed_flags = (currFlags & ~flag);
+        if (currFlags != removed_flags) {
+            removePhysicsFromWorld(true);
+            rigidBody.setCollisionFlags(removed_flags);
+            addPhysicsToWorld(true);
         }
     }
 }
 void ComponentBody::removeCollisionGroup(CollisionFilter::Filter group) {
-    ComponentBody::removeCollisionGroup(static_cast<short>(group));
+    ComponentBody::removeCollisionGroup((short)group);
 }
 void ComponentBody::removeCollisionMask(CollisionFilter::Filter mask) {
-    ComponentBody::removeCollisionMask(static_cast<short>(mask));
+    ComponentBody::removeCollisionMask((short)mask);
 }
 void ComponentBody::removeCollisionFlag(CollisionFlag::Flag flag) {
-    ComponentBody::removeCollisionFlag(static_cast<short>(flag));
+    ComponentBody::removeCollisionFlag((short)flag);
 }
 
 
@@ -787,7 +778,7 @@ void ComponentBody::setLinearVelocity(decimal x, decimal y, decimal z, bool loca
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
         rigidBody.activate();
-        btVector3 v(static_cast<btScalar>(x), static_cast<btScalar>(y), static_cast<btScalar>(z));
+        btVector3 v((btScalar)x, (btScalar)y, (btScalar)z);
         Math::translate(rigidBody, v, local);
         rigidBody.setLinearVelocity(v);
     }else{
@@ -806,7 +797,7 @@ void ComponentBody::setAngularVelocity(decimal x, decimal y, decimal z, bool loc
     if (m_Physics) {
 		auto& rigidBody = *data.p->bullet_rigidBody;
 		rigidBody.activate();
-		btVector3 v(static_cast<btScalar>(x), static_cast<btScalar>(y), static_cast<btScalar>(z));
+		btVector3 v((btScalar)x, (btScalar)y, (btScalar)z);
 		Math::translate(rigidBody, v, local);
 		rigidBody.setAngularVelocity(v);
     }
@@ -919,9 +910,9 @@ void ComponentBody::setMass(float mass) {
 }
 void ComponentBody::addChild(Entity child) const {
     if (child.sceneID() == m_Owner.sceneID()) {
-        auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
-        auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
-        auto& pcs = system.ParentChildSystem;
+        auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+        auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
+        auto& pcs    = system.ParentChildSystem;
         pcs.insert(m_Owner.id(), child.id());
     }
 }
@@ -930,9 +921,9 @@ void ComponentBody::addChild(const ComponentBody& child) const {
 }
 void ComponentBody::removeChild(Entity child) const {
     if (child.sceneID() == m_Owner.sceneID()) {
-        auto& ecs = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
-        auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
-        auto& pcs = system.ParentChildSystem;
+        auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+        auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
+        auto& pcs    = system.ParentChildSystem;
         pcs.remove(m_Owner.id(), child.id());
     }
 }
@@ -941,7 +932,7 @@ void ComponentBody::removeChild(const ComponentBody& child) const {
 }
 bool ComponentBody::hasParent() const {
     auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
-    auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
+    auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     auto& pcs    = system.ParentChildSystem;
     return (pcs.Parents[m_Owner.id() - 1U] > 0);
 }
@@ -1015,18 +1006,18 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
     for (auto& componentBody : components) {
         Entity entity      = componentBody.getOwner();
         auto bodyRenderPos = componentBody.getPosition();
-        auto* model        = entity.getComponent<ComponentModel>();
+        ComponentModel* model        = entity.getComponent<ComponentModel>();
         if (model) {
-            const auto world_pos = glm::vec3(componentBody.getPosition());
-            const auto world_rot = glm::quat(componentBody.getRotation());
-            const auto world_scl = glm::vec3(componentBody.getScale());
+            auto world_pos = glm::vec3(componentBody.getPosition());
+            auto world_rot = glm::quat(componentBody.getRotation());
+            auto world_scl = glm::vec3(componentBody.getScale());
             for (size_t i = 0; i < model->getNumModels(); ++i) {
                 auto& modelInstance = (*model)[i];
 
-                const auto rotation = world_rot * modelInstance.orientation();
-                const auto fwd      = glm::normalize(Math::getForward(rotation)) * 0.3f;
-                const auto right    = glm::normalize(Math::getRight(rotation)) * 0.3f;
-                const auto up       = glm::normalize(Math::getUp(rotation)) * 0.3f;
+                auto rotation = world_rot * modelInstance.orientation();
+                auto fwd      = glm::normalize(Math::getForward(rotation)) * 0.3f;
+                auto right    = glm::normalize(Math::getRight(rotation)) * 0.3f;
+                auto up       = glm::normalize(Math::getUp(rotation)) * 0.3f;
 
                 auto& physics = Engine::priv::Core::m_Engine->m_PhysicsManager;
                 physics.debug_draw_line(world_pos, (world_pos+fwd) /* * glm::length(world_scl) */, 1, 0, 0, 1);

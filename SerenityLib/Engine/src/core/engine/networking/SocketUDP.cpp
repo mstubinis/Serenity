@@ -43,6 +43,11 @@ Networking::SocketUDP::SocketUDP(unsigned short port, const string& ip){
 Networking::SocketUDP::~SocketUDP() { 
     Core::m_Engine->m_NetworkingModule.m_SocketManager.remove_udp_socket(this);
 }
+void Networking::SocketUDP::clearPartialPackets() {
+    while (!m_PartialPackets.empty()) {
+        m_PartialPackets.pop();
+    }
+}
 SocketStatus::Status Networking::SocketUDP::internal_send_packet(UDPPacketInfo& PacketInfoStruct) {
     auto status = m_SocketUDP.send(*PacketInfoStruct.sfmlPacket, PacketInfoStruct.ip, PacketInfoStruct.port);
     switch (status) {
@@ -77,8 +82,10 @@ SocketStatus::Status Networking::SocketUDP::internal_send_partial_packets_loop()
                 m_PartialPackets.pop();
                 break;
             }case SocketStatus::Disconnected: {
+                m_PartialPackets.pop();
                 break;
             }case SocketStatus::Error: {
+                m_PartialPackets.pop();
                 break;
             }case SocketStatus::NotReady: {
                 break;
@@ -118,6 +125,8 @@ SocketStatus::Status Networking::SocketUDP::bind(const string& ip) {
 }
 void Networking::SocketUDP::unbind() { 
     if (isBound()) {
+        clearPartialPackets();
+
         EventSocket e = EventSocket(m_SocketUDP.getLocalPort(), 0, internal_get_ip(m_IP), SocketType::UDP);
         Event ev(EventType::SocketDisconnected);
         ev.eventSocket = std::move(e);

@@ -42,6 +42,8 @@ namespace Engine::Networking {
             SocketUDP(unsigned short port, const std::string& ip = "");
             ~SocketUDP();
 
+            void clearPartialPackets();
+
             void                   setBlocking(bool blocking) override;
             bool                   isBlocking() const override;
             bool                   isBound() const;

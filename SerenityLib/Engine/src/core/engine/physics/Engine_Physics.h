@@ -16,7 +16,6 @@ namespace Engine::priv {
 #include <vector>
 #include <mutex>
 #include <LinearMath/btVector3.h>
-//#include <ecs/Entity.h>
 
 #define PHYSICS_MIN_STEP 0.016666666666666666f
 
@@ -37,7 +36,7 @@ namespace Engine{
                 ~PhysicsManager();
 
                 void debug_draw_line(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color);
-                void debug_draw_line(const glm::vec3& start, const glm::vec3& end, const float r, const float g, const float b, const float a);
+                void debug_draw_line(const glm::vec3& start, const glm::vec3& end, float r, float g, float b, float a);
 
                 void cleanup();
 
@@ -48,43 +47,43 @@ namespace Engine{
         };
     };
     namespace Physics{
-        std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, ComponentBody* ignoredObject = nullptr, const unsigned short group = -1, const unsigned short mask = -1);
-        std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, std::vector<ComponentBody*>& ignoredObjects, const unsigned short group = -1, const unsigned short mask = -1);
+        std::vector<RayCastResult> rayCast(btVector3& start, btVector3& end, ComponentBody* ignoredObject = nullptr, unsigned short group = -1, unsigned short mask = -1);
+        std::vector<RayCastResult> rayCast(btVector3& start, btVector3& end, std::vector<ComponentBody*>& ignoredObjects, unsigned short group = -1, unsigned short mask = -1);
 
-        std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, Entity* ignoredObject = nullptr, const unsigned short group = -1, const unsigned short mask = -1);
-        std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredObjects, const unsigned short group = -1, const unsigned short mask = -1);
+        std::vector<RayCastResult> rayCast(glm::vec3& start, glm::vec3& end, Entity* ignoredObject = nullptr, unsigned short group = -1, unsigned short mask = -1);
+        std::vector<RayCastResult> rayCast(glm::vec3& start, glm::vec3& end, std::vector<Entity>& ignoredObjects, unsigned short group = -1, unsigned short mask = -1);
 
 
-        RayCastResult rayCastNearest(const btVector3& start, const btVector3& end, ComponentBody* ignoredObject = nullptr, const unsigned short group = -1, const unsigned short mask = -1);
-        RayCastResult rayCastNearest(const btVector3& start, const btVector3& end, std::vector<ComponentBody*>& ignoredObjects, const unsigned short group = -1, const unsigned short mask = -1);
+        RayCastResult rayCastNearest(btVector3& start, btVector3& end, ComponentBody* ignoredObject = nullptr, unsigned short group = -1, unsigned short mask = -1);
+        RayCastResult rayCastNearest(btVector3& start, btVector3& end, std::vector<ComponentBody*>& ignoredObjects, unsigned short group = -1, unsigned short mask = -1);
 
-        RayCastResult rayCastNearest(const glm::vec3& start, const glm::vec3& end, Entity* ignoredObject = nullptr, const unsigned short group = -1, const unsigned short mask = -1);
-        RayCastResult rayCastNearest(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredObjects, const unsigned short group = -1, const unsigned short mask = -1);
+        RayCastResult rayCastNearest(glm::vec3& start, glm::vec3& end, Entity* ignoredObject = nullptr, unsigned short group = -1, unsigned short mask = -1);
+        RayCastResult rayCastNearest(glm::vec3& start, glm::vec3& end, std::vector<Entity>& ignoredObjects, unsigned short group = -1, unsigned short mask = -1);
 
-        void setNumberOfStepsPerFrame(const unsigned int numSteps);
-        const unsigned int getNumberOfStepsPerFrame();
+        void setNumberOfStepsPerFrame(unsigned int numSteps);
+        unsigned int getNumberOfStepsPerFrame();
 
-        void setGravity(const float x, const float y, const float z);
+        void setGravity(float x, float y, float z);
         void setGravity(const glm::vec3& gravity);
         void pause(bool paused = true);
         void unpause();
 
-        bool addRigidBody(const Entity entity);
+        bool addRigidBody(Entity entity);
         void addRigidBody(ComponentBody&);
         void addRigidBody(btRigidBody*, short group, short mask);
         void addRigidBody(btRigidBody*);
-        bool removeRigidBody(const Entity entity);
+        bool removeRigidBody(Entity entity);
         void removeRigidBody(btRigidBody*);
         void removeRigidBody(ComponentBody&);
         void removeCollisionObject(btCollisionObject* object);
 
         void updateRigidBody(btRigidBody*);
 
-        bool addRigidBodyThreadSafe(const Entity entity);
+        bool addRigidBodyThreadSafe(Entity entity);
         void addRigidBodyThreadSafe(ComponentBody&);
         void addRigidBodyThreadSafe(btRigidBody*, short group, short mask);
         void addRigidBodyThreadSafe(btRigidBody*);
-        bool removeRigidBodyThreadSafe(const Entity entity);
+        bool removeRigidBodyThreadSafe(Entity entity);
         void removeRigidBodyThreadSafe(btRigidBody*);
         void removeRigidBodyThreadSafe(ComponentBody&);
         void removeCollisionObjectThreadSafe(btCollisionObject* object);

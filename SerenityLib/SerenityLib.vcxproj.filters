@@ -830,6 +830,9 @@
     <ClInclude Include="Engine\src\core\engine\input\Mouse\MouseModule.h">
       <Filter>Header Files\Engine\Core\Input\Mouse</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\lights\ProjectionLight.h">
+      <Filter>Header Files\Engine\Core\Lights</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -1263,6 +1266,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\input\Mouse\MouseModule.cpp">
       <Filter>Source Files\Engine\Core\Input\Mouse</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\lights\ProjectionLight.cpp">
+      <Filter>Source Files\Engine\Core\Lights</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

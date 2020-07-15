@@ -19,7 +19,7 @@ class SpotLight : public PointLight {
         );
         virtual ~SpotLight() {}
 
-        void free();
+        void free() noexcept override;
 
         constexpr float getCutoff() const noexcept { return m_Cutoff; }
         constexpr float getCutoffOuter() const noexcept { return m_OuterCutoff; }

@@ -34,7 +34,7 @@ PointLight::PointLight(LightType::Type type, const glm_vec3& pos, Scene* scene) 
 PointLight::PointLight(const glm_vec3& pos, Scene* scene) : PointLight(LightType::Point, pos, scene) {
 
 }
-void PointLight::free() {
+void PointLight::free() noexcept {
     Entity::destroy();
     removeFromVector(priv::InternalScenePublicInterface::GetPointLights(scene()), this);
     removeFromVector(priv::InternalScenePublicInterface::GetLights(scene()), this);

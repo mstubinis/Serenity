@@ -17,6 +17,29 @@ using namespace std;
 
 void opengl::glsl::Lighting::convert(string& code, const unsigned int versionNumber, const ShaderType::Type shaderType) {
 
+#pragma region Projection Light
+    if (ShaderHelper::sfind(code, "CalcProjectionLight(")) {
+        if (!ShaderHelper::sfind(code, "vec3 CalcProjectionLight(")) {
+            const string rod_light =
+                "vec3 CalcProjectionLight(in Light currentLight, vec3 A, vec3 B,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){//generated\n"
+                /*
+                //TODO: implement
+                "    vec3 BMinusA = B - A;\n"
+                "    vec3 CMinusA = PxlWorldPos - A;\n"
+                "    float Dist = length(BMinusA);\n"
+                "    vec3 _Normal = BMinusA / Dist;\n"
+                "    float t = clamp(dot(CMinusA, _Normal / Dist), 0.0, 1.0);\n"
+                "    vec3 LightPos = A + t * BMinusA;\n"
+                "    vec3 c = CalcPointLight(currentLight, LightPos, PxlWorldPos, PxlNormal, uv);\n"
+                "    return c;\n"
+                */
+                "    return vec3(0.0);\n"
+                "}\n";
+            ShaderHelper::insertStringRightBeforeLineContent(code, rod_light, "void main(");
+        }
+    }
+#pragma endregion
+
 #pragma region Rod Light
     if (ShaderHelper::sfind(code, "CalcRodLight(")) {
         if (!ShaderHelper::sfind(code, "vec3 CalcRodLight(")) {
@@ -144,6 +167,29 @@ void opengl::glsl::Lighting::convert(string& code, const unsigned int versionNum
                 "    return TotalLight;\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, lighting_internal, "vec3 CalcPointLight(");
+        }
+    }
+#pragma endregion
+
+#pragma region Projection Light Forward
+    if (ShaderHelper::sfind(code, "CalcProjectionLightForward(")) {
+        if (!ShaderHelper::sfind(code, "vec3 CalcProjectionLightForward(")) {
+            const string rod_light =
+                "vec3 CalcProjectionLightForward(in Light currentLight, vec3 A, vec3 B, vec3 PxlWorldPos, vec3 PxlNormal, in InData inData){//generated\n"
+                /*
+                //TODO: implement
+                "    vec3 BMinusA = B - A;\n"
+                "    vec3 CMinusA = PxlWorldPos - A;\n"
+                "    float Dist = length(BMinusA);\n"
+                "    vec3 _Normal = BMinusA / Dist;\n"
+                "    float t = clamp(dot(CMinusA, _Normal / Dist), 0.0, 1.0);\n"
+                "    vec3 LightPos = A + t * BMinusA;\n"
+                "    vec3 c = CalcPointLightForward(currentLight, LightPos, PxlWorldPos, PxlNormal, inData);\n"
+                "    return c;\n"
+                */
+                "    return vec3(0.0);\n"
+                "}\n";
+            ShaderHelper::insertStringRightBeforeLineContent(code, rod_light, "void main(");
         }
     }
 #pragma endregion

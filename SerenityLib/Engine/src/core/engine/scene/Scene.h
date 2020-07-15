@@ -9,6 +9,7 @@ class  DirectionalLight;
 class  PointLight;
 class  SpotLight;
 class  RodLight;
+class  ProjectionLight;
 class  ShaderProgram;
 class  Viewport;
 class  Skybox;
@@ -52,6 +53,7 @@ class Scene: public Resource, public Observer {
         mutable std::vector<PointLight*>                              m_PointLights;
         mutable std::vector<SpotLight*>                               m_SpotLights;
         mutable std::vector<RodLight*>                                m_RodLights;
+        mutable std::vector<ProjectionLight*>                         m_ProjectionLights;
 
         unsigned int                                                  m_ID                 = 0;
         glm::vec3                                                     m_GI                 = glm::vec3(1.0f);
@@ -129,6 +131,7 @@ namespace Engine::priv {
         static std::vector<PointLight*>&         GetPointLights(const Scene& scene);
         static std::vector<SpotLight*>&          GetSpotLights(const Scene& scene);
         static std::vector<RodLight*>&           GetRodLights(const Scene& scene);
+        static std::vector<ProjectionLight*>&    GetProjectionLights(const Scene& scene);
 
         static void           UpdateMaterials(Scene& scene, const float dt);
 

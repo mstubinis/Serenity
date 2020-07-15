@@ -20,10 +20,7 @@ Server::~Server() {
 }
 ServerClient* Server::getClientFromUDPData(const string& ip, unsigned short port, sf::Packet& sf_packet) const {
     auto hash = m_Client_Hash_Function(ip, port, sf_packet);
-    if (m_HashedClients.count(hash)) {
-        return m_HashedClients.at(hash);
-    }
-    return nullptr;
+    return (m_HashedClients.count(hash)) ? m_HashedClients.at(hash) : nullptr;
 }
 bool Server::startup(unsigned short port, string ip_restriction) {
     if (m_Active.load(std::memory_order_relaxed) == true) {
@@ -47,12 +44,20 @@ bool Server::startup(unsigned short port, string ip_restriction) {
     if (m_TCPListener) {
         m_TCPListener->setBlocking(false);
         auto status  = m_TCPListener->listen();
-        //TODO: print error message if status != Done
+        #ifndef PRODUCTION
+            if (status != SocketStatus::Done) {
+                std::cout << "Server::startup() : could not start up TCP Listener\n";
+            }
+        #endif
     }
     if (m_UdpSocket) {
         m_UdpSocket->setBlocking(false);
         auto status  = m_UdpSocket->bind();
-        //TODO: print error message if status != Done
+        #ifndef PRODUCTION
+            if (status != SocketStatus::Done) {
+                std::cout << "Server::startup() : could not start up UDP Socket\n";
+            }
+        #endif
     }
 
     m_Port           = port;
@@ -79,7 +84,9 @@ bool Server::shutdown() {
     unregisterEvent(EventType::PacketSent);
     unregisterEvent(EventType::PacketReceived);
 
-    m_UdpSocket->unbind();
+    if (m_UdpSocket) {
+        m_UdpSocket->unbind();
+    }
     if (m_TCPListener) {
         m_TCPListener->close();
     }
@@ -113,7 +120,7 @@ void Server::send_tcp_to_all(sf::Packet& packet) {
 }
 
 SocketStatus::Status Server::send_udp_to_client(ServerClient* client, sf::Packet& sf_packet) {
-    return m_UdpSocket->send(client->port(), sf_packet, client->ip());
+    return m_UdpSocket->send(client->port(), sf_packet, client->ip().toString());
 }
 void Server::send_udp_to_all_but_client(ServerClient* exclusion, sf::Packet& sf_packet) {
     internal_send_to_all_udp(exclusion, sf_packet);
@@ -135,22 +142,34 @@ void Server::send_udp_to_all_important(Engine::Networking::Packet& packet) {
 SocketStatus::Status Server::receive_udp(sf::Packet& sf_packet, sf::IpAddress& sender, unsigned short& port) {
     return m_UdpSocket->receive(sf_packet, sender, port);
 }
-void Server::internal_add_client(string& hash, ServerClient& client) {
-    bool result = m_Threads.addClient(hash, &client, *this);
-    if(result){
-        std::cout << "Server: accepted new client: " << client.ip() << " on port: " << client.port() << "\n";
-    }else{
-        std::cout << "Server: REJECTED new client: " << client.ip() << " on port: " << client.port() << " due to not finding a next_thread\n";
+bool Server::internal_add_client(string& hash, ServerClient* client) {
+    if (m_HashedClients.count(hash)) {
+        return false;
     }
+    if (!client) {
+#ifndef PRODUCTION
+        std::cout << "Server::internal_add_client() called with a nullptr client\n";
+#endif
+        return false;
+    }
+    bool result = m_Threads.addClient(hash, client, *this);
+    #ifndef PRODUCTION
+        if(result){
+            std::cout << "Server::internal_add_client() accepted new client: " << client->ip() << " on port: " << client->port() << "\n";
+        }else{
+            std::cout << "Server::internal_add_client() REJECTED new client: " << client->ip() << " on port: " << client->port() << " due to not finding a next_thread\n";
+        }
+    #endif
+    return result;
 }
 void Server::remove_client(ServerClient& client) {
     for (auto& itr : m_HashedClients) {
         if (itr.second == &client) {
-            std::cout << "Client: " << itr.second->ip() << " - has been completely removed from the server" << std::endl;
             {
                 std::lock_guard lock(m_Mutex);
                 m_RemovedClients.push_back(make_pair(itr.first, itr.second));
             }
+            std::cout << "(Server::remove_client) ip: " << itr.second->ip() << ", port: " << itr.second->port() << " - has been completely removed from the server\n";
             return;
         }
     }
@@ -159,6 +178,7 @@ ServerClient* Server::add_new_client(string& hash, string& clientIP, unsigned sh
     ServerClient* client = NEW ServerClient(hash, *this, tcp, clientIP, clientPort);
     return client;
 }
+
 void Server::internal_update_tcp_listener_loop(bool serverActive) {
     if (!serverActive) {
         return;
@@ -167,41 +187,39 @@ void Server::internal_update_tcp_listener_loop(bool serverActive) {
         auto* new_tcp_socket = NEW SocketTCP();
         auto status          = m_TCPListener->accept(*new_tcp_socket);
         if (status == sf::Socket::Status::Done) {
+            sf::Packet dummy;
             auto client_ip   = new_tcp_socket->ip();
             auto client_port = new_tcp_socket->remotePort();
-            sf::Packet dummy;
             auto client_hash = m_Client_Hash_Function(client_ip, client_port, dummy);
-            auto* new_client = add_new_client(client_hash, client_ip, client_port, new_tcp_socket);
-            if (new_client) {
-                internal_add_client(client_hash, *new_client);
-            }
+            internal_add_client(client_hash, add_new_client(client_hash, client_ip, client_port, new_tcp_socket));
         }else{
             SAFE_DELETE(new_tcp_socket);
         }
     }
+}
+
+void Server::onReceiveUDP(Engine::Networking::Packet& packet, sf::IpAddress& ip, unsigned short port, const float dt) {
+    string ipAsString  = ip.toString();
+    string client_hash = m_Client_Hash_Function(ipAsString, port, packet);
+    if (m_ServerType == ServerType::UDP) {
+        internal_add_client(client_hash, add_new_client(client_hash, ipAsString, port, nullptr));
+    }
+    m_HashedClients.at(client_hash)->internal_on_receive_udp(packet, dt);
+    Server::m_On_Receive_UDP_Function(packet, ipAsString, port, dt);
 }
 void Server::internal_update_udp_loop(const float dt, bool serverActive) {
     if (!serverActive) {
         return;
     }
     Engine::Networking::Packet packet;
-    sf::IpAddress   ip;
-    unsigned short  port;
+    sf::IpAddress              ip;
+    unsigned short             port;
+
     auto status = receive_udp(packet, ip, port);
 
     switch (status) {
         case sf::Socket::Status::Done: {
-            string ipAsString = ip.toString();
-            if (m_ServerType == ServerType::UDP) {
-                auto client_hash = m_Client_Hash_Function(ipAsString, port, packet);
-                if (!m_HashedClients.count(client_hash)) {
-                    auto* new_client = add_new_client(client_hash, ipAsString, port, nullptr);
-                    if (new_client) {
-                        internal_add_client(client_hash, *new_client);
-                    }
-                }
-            }
-            m_On_Receive_UDP_Function(packet, ipAsString, port, dt);
+            onReceiveUDP(packet, ip, port, dt);
             break;
         }case sf::Socket::Status::NotReady: {
             break;
@@ -265,17 +283,3 @@ void Server::update(const float dt) {
 
     internal_update_remove_clients();
 }
-/*
-void Server::setBlockingTCPListener(bool blocking) {
-    m_TCPListener->setBlocking(blocking);
-}
-void Server::setBlockingTCPClients(bool blocking) {
-    m_Threads.setBlocking(blocking);
-}
-void Server::setBlockingTCPClient(string& hash, bool blocking) {
-    m_Threads.setBlocking(hash, blocking);
-}
-void Server::setBlockingUDP(bool blocking) {
-    m_UdpSocket->setBlocking(blocking);
-}
-*/

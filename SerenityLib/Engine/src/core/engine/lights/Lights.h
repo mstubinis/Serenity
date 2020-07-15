@@ -7,5 +7,6 @@
 #include <core/engine/lights/PointLight.h>
 #include <core/engine/lights/SpotLight.h>
 #include <core/engine/lights/RodLight.h>
+#include <core/engine/lights/ProjectionLight.h>
 
 #endif

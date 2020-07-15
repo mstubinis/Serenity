@@ -48,7 +48,7 @@ namespace Engine::Networking {
             void internal_update_udp_loop(const float dt, bool serverActive);
             void internal_update_client_threads(const float dt, bool serverActive);
             void internal_update_remove_clients();
-            void internal_add_client(std::string& hash, ServerClient& client);
+            bool internal_add_client(std::string& hash, ServerClient* client);
 
             Server() = delete;
         protected:
@@ -83,6 +83,7 @@ namespace Engine::Networking {
             void setClientHashFunction(hash_func function) { m_Client_Hash_Function = function; }
             void setServerUpdateFunction(update_func function) { m_Update_Function = function; }
             void setOnReceiveUDPFunction(on_udp_func function) { m_On_Receive_UDP_Function = function; }
+            void onReceiveUDP(Engine::Networking::Packet& packet, sf::IpAddress& ip, unsigned short port, const float dt);
 
             void update(const float dt);
 
@@ -104,11 +105,6 @@ namespace Engine::Networking {
             virtual void send_udp_to_all_important(Engine::Networking::Packet& packet);
 
             virtual SocketStatus::Status receive_udp(sf::Packet& packet, sf::IpAddress& sender, unsigned short& port);
-
-            //void setBlockingTCPListener(bool blocking);
-            //void setBlockingTCPClients(bool blocking);
-            //void setBlockingTCPClient(std::string& client_hash, bool blocking);
-            //void setBlockingUDP(bool blocking);
     };
 };
 #endif

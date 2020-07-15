@@ -17,7 +17,7 @@ class RodLight : public PointLight {
         );
         virtual ~RodLight() {}
 
-        void free();
+        void free() noexcept override;
 
         constexpr float rodLength() const noexcept { return m_RodLength; }
 

@@ -218,9 +218,9 @@ priv::EShaders::decal_vertex =
     "    VertexPositionsViewSpace = CameraView * worldPos;\n"
     "    VertexPositionsClipSpace = gl_Position;\n"
 
-    "    vec3 NormalTrans   =  vec4(normal.zyx,   0.0).xyz;\n"  //Order is ZYXW so to bring it to XYZ we need to use ZYX
-    "    vec3 BinormalTrans =  vec4(binormal.zyx, 0.0).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
-    "    vec3 TangentTrans  =  vec4(tangent.zyx,  0.0).xyz;\n" //Order is ZYXW so to bring it to XYZ we need to use ZYX
+    "    vec3 NormalTrans   = vec4(normal.zyx,   0.0).xyz;\n"  //Order is ZYXW so to bring it to XYZ we need to use ZYX
+    "    vec3 BinormalTrans = vec4(binormal.zyx, 0.0).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
+    "    vec3 TangentTrans  = vec4(tangent.zyx,  0.0).xyz;\n" //Order is ZYXW so to bring it to XYZ we need to use ZYX
 
     "           Normals = NormalMatrix * NormalTrans;\n"
     "    vec3 Binormals = NormalMatrix * BinormalTrans;\n"
@@ -229,9 +229,9 @@ priv::EShaders::decal_vertex =
 
     "    CamPosition = CameraPosition;\n"
 
-    "    CamRealPosition = CameraRealPosition;\n"
+    "    CamRealPosition  = CameraRealPosition;\n"
     "    TangentCameraPos = TBN * CameraPosition;\n"
-    "    TangentFragPos = TBN * worldPos.xyz;\n"
+    "    TangentFragPos   = TBN * worldPos.xyz;\n"
     "}";
 #pragma endregion
 
@@ -362,7 +362,7 @@ normal = tangentToView * normal;
     */
     "    InData inData;\n"
     "    inData.uv = uvs;\n"
-    "    inData.diffuse = vec4(0.0,0.0,0.0,0.0001);\n" //this is extremely wierd, but we need some form of alpha to get painters algorithm to work...
+    "    inData.diffuse = vec4(0.0, 0.0, 0.0, 0.0001);\n" //this is extremely wierd, but we need some form of alpha to get painters algorithm to work...
     "    inData.objectColor = Unpack32BitUIntTo4ColorFloats(Object_Color);\n"
     "    inData.normals = normalize(Normals);\n"
     "    inData.glow = MaterialBasePropertiesOne.x;\n"
@@ -753,6 +753,7 @@ priv::EShaders::forward_frag =
     "uniform SAMPLER_TYPE_Cube irradianceMap;\n"
     "uniform SAMPLER_TYPE_Cube prefilterMap;\n"
     "uniform SAMPLER_TYPE_2D brdfLUT;\n"
+    "uniform SAMPLER_TYPE_2D gTextureMap;\n"
     "uniform vec4 ScreenData;\n" //x = GIContribution, y = gamma, z = winSize.x, w = winSize.y
     "\n"
     "const float MAX_REFLECTION_LOD = 5.0;\n"
@@ -800,6 +801,8 @@ priv::EShaders::forward_frag =
     "                lightCalculation = CalcSpotLightForward(currentLight, LightDirection,LightPosition,WorldPosition,inData.normals,inData);\n"
     "            }else if(currentLight.DataD.w == 4.0){\n" //rod
     "                lightCalculation = CalcRodLightForward(currentLight, vec3(currentLight.DataA.w,currentLight.DataB.xy),currentLight.DataC.yzw,WorldPosition,inData.normals,inData);\n"
+        "        }else if(currentLight.DataD.w == 5.0){\n" //projection
+        "            lightCalculation = CalcProjectionLightForward(currentLight, vec3(currentLight.DataA.w,currentLight.DataB.xy),currentLight.DataC.yzw,WorldPosition,inData.normals,inData);\n"
     "            }\n"
     "            lightTotal += lightCalculation;\n"
     "        }\n"
@@ -1171,6 +1174,7 @@ priv::EShaders::lighting_frag =
     "uniform SAMPLER_TYPE_2D gMiscMap;\n"
     "uniform SAMPLER_TYPE_2D gDepthMap;\n"
     "uniform SAMPLER_TYPE_2D gSSAOMap;\n"
+    "uniform SAMPLER_TYPE_2D gTextureMap;\n"
     "\n"
     "uniform vec4 ScreenData;\n" //x = UNUSED, y = screenGamma, z = winSize.x, w = winSize.y
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
@@ -1198,6 +1202,8 @@ priv::EShaders::lighting_frag =
     "        lightCalculation = CalcSpotLight(light, LightDirection, LightPosition, PxlPosition, PxlNormal, uv);\n"
     "    }else if(light.DataD.w == 4.0){\n" //rod
     "        lightCalculation = CalcRodLight(light, vec3(light.DataA.w,light.DataB.xy), light.DataC.yzw, PxlPosition, PxlNormal, uv);\n"
+    "    }else if(light.DataD.w == 5.0){\n" //projection
+    "        lightCalculation = CalcProjectionLight(light, vec3(light.DataA.w, light.DataB.xy), light.DataC.yzw, PxlPosition, PxlNormal, uv);\n"
     "    }\n"
     "    gl_FragData[0].rgb = lightCalculation;\n"
     "}";

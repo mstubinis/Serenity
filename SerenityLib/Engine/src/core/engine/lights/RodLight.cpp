@@ -29,7 +29,7 @@ void RodLight::setRodLength(float length) {
     auto& body = *getComponent<ComponentBody>();
     body.setScale(m_CullingRadius, m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius);
 }
-void RodLight::free() {
+void RodLight::free() noexcept {
     Entity::destroy();
     removeFromVector(priv::InternalScenePublicInterface::GetRodLights(scene()), this);
     removeFromVector(priv::InternalScenePublicInterface::GetLights(scene()), this);

@@ -126,8 +126,6 @@ void EngineCore::update_logic(Scene& scene, Window& window, const float dt){
     m_DebugManager.stop_clock();
     window.on_dynamic_resize();
     m_NetworkingModule.update(dt);
-    Game::onPreUpdate(dt);
-    scene.preUpdate(dt);
     Game::update(dt);
     scene.update(dt);
     Game::onPostUpdate(dt);
@@ -147,6 +145,8 @@ void EngineCore::update_sounds(Scene& scene, Window& window, const float dt){
 }
 void EngineCore::update(Window& window, const float dt){
     Scene& scene = *Resources::getCurrentScene();
+    Game::onPreUpdate(dt);
+    scene.preUpdate(dt);
     update_physics(scene, window, dt);
     update_logic(scene, window, dt);
     update_sounds(scene, window, dt);

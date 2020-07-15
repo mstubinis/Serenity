@@ -13,7 +13,7 @@ class DirectionalLight : public SunLight {
         );
         virtual ~DirectionalLight() {}
 
-        void free();
+        void free() noexcept override;
 };
 
 #endif

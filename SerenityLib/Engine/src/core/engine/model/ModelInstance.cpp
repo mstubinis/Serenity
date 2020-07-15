@@ -10,11 +10,7 @@
 #include <core/engine/shaders/ShaderProgram.h>
 #include <ecs/Components.h>
 
-#include <core/engine/lights/SunLight.h>
-#include <core/engine/lights/DirectionalLight.h>
-#include <core/engine/lights/PointLight.h>
-#include <core/engine/lights/SpotLight.h>
-#include <core/engine/lights/RodLight.h>
+#include <core/engine/lights/Lights.h>
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/renderer/pipelines/IRenderingPipeline.h>
@@ -27,15 +23,16 @@ using namespace std;
 
 
 unsigned int ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
-decimal ModelInstance::m_GlobalDistanceFactor     = static_cast<decimal>(1100.0);
+decimal ModelInstance::m_GlobalDistanceFactor     = (decimal)1100.0;
 
 namespace Engine::priv {
     struct DefaultModelInstanceBindFunctor {void operator()(ModelInstance* i, const Engine::priv::Renderer* renderer) const {
         auto stage            = i->stage();
         auto& scene           = *Resources::getCurrentScene();
-        glm::vec3 camPos      = scene.getActiveCamera()->getPosition();
-        auto& body            = *(i->m_Parent.getComponent<ComponentBody>());
-        glm::mat4 parentModel = body.modelMatrixRendering();
+        auto* camera          = scene.getActiveCamera();
+        glm::vec3 camPos      = camera->getPosition();
+        auto* body            = (i->m_Parent.getComponent<ComponentBody>());
+        glm::mat4 parentModel = body->modelMatrixRendering();
         auto& animationVector = i->m_AnimationVector;
 
         Engine::Renderer::sendUniform1Safe("Object_Color", i->m_Color.toPackedInt());
@@ -43,7 +40,7 @@ namespace Engine::priv {
 
         if (stage == RenderStage::ForwardTransparentTrianglesSorted || stage == RenderStage::ForwardTransparent || stage == RenderStage::ForwardOpaque) {
             auto& lights     = priv::InternalScenePublicInterface::GetLights(scene);
-            int maxLights    = glm::min(static_cast<int>(lights.size()), MAX_LIGHTS_PER_PASS);
+            int maxLights    = glm::min((int)lights.size(), MAX_LIGHTS_PER_PASS);
             Engine::Renderer::sendUniform1Safe("numLights", maxLights);
             for (int i = 0; i < maxLights; ++i) {
                 auto& light     = *lights[i];
@@ -51,55 +48,28 @@ namespace Engine::priv {
                 auto start      = "light[" + to_string(i) + "].";
                 switch (lightType) {
                     case LightType::Sun: {
-                        SunLight& s    = static_cast<SunLight&>(light);
-                        auto& body     = *s.getComponent<ComponentBody>();
-                        glm::vec3 pos  = body.getPosition();
-                        Engine::Renderer::sendUniform4Safe((start + "DataA").c_str(), s.getAmbientIntensity(), s.getDiffuseIntensity(), s.getSpecularIntensity(), 0.0f);
-                        Engine::Renderer::sendUniform4Safe((start + "DataC").c_str(), 0.0f, pos.x, pos.y, pos.z);
-                        Engine::Renderer::sendUniform4Safe((start + "DataD").c_str(), s.color().x, s.color().y, s.color().z, static_cast<float>(lightType));
+                        auto& sunLight         = (SunLight&)light;
+                        renderer->m_Pipeline->sendGPUDataSunLight(*camera, sunLight, start);
                         break;
                     }case LightType::Directional: {
-                        DirectionalLight& d       = static_cast<DirectionalLight&>(light);
-                        auto& body                = *d.getComponent<ComponentBody>();
-                        const glm::vec3& _forward = body.forward();
-                        Engine::Renderer::sendUniform4Safe((start + "DataA").c_str(), d.getAmbientIntensity(), d.getDiffuseIntensity(), d.getSpecularIntensity(), _forward.x);
-                        Engine::Renderer::sendUniform4Safe((start + "DataB").c_str(), _forward.y, _forward.z, 0.0f, 0.0f);
-                        Engine::Renderer::sendUniform4Safe((start + "DataD").c_str(), d.color().x, d.color().y, d.color().z, static_cast<float>(lightType));
+                        auto& directionalLight = (DirectionalLight&)light;
+                        renderer->m_Pipeline->sendGPUDataDirectionalLight(*camera, directionalLight, start);
                         break;
                     }case LightType::Point: {
-                        PointLight& p = static_cast<PointLight&>(light);
-                        auto& body    = *p.getComponent<ComponentBody>();
-                        glm::vec3 pos = body.getPosition();
-                        Engine::Renderer::sendUniform4Safe((start + "DataA").c_str(), p.getAmbientIntensity(), p.getDiffuseIntensity(), p.getSpecularIntensity(), 0.0f);
-                        Engine::Renderer::sendUniform4Safe((start + "DataB").c_str(), 0.0f, 0.0f, p.getConstant(), p.getLinear());
-                        Engine::Renderer::sendUniform4Safe((start + "DataC").c_str(), p.getExponent(), pos.x, pos.y, pos.z);
-                        Engine::Renderer::sendUniform4Safe((start + "DataD").c_str(), p.color().x, p.color().y, p.color().z, static_cast<float>(lightType));
-                        Engine::Renderer::sendUniform4Safe((start + "DataE").c_str(), 0.0f, 0.0f, static_cast<float>(p.getAttenuationModel()), 0.0f);
+                        auto& pointLight       = (PointLight&)light;
+                        renderer->m_Pipeline->sendGPUDataPointLight(*camera, pointLight, start);
                         break;
                     }case LightType::Spot: {
-                        SpotLight& s                = static_cast<SpotLight&>(light);
-                        auto& body                  = *s.getComponent<ComponentBody>();
-                        glm::vec3 pos               = body.getPosition();
-                        const glm::vec3& _forward   = body.forward();
-                        Engine::Renderer::sendUniform4Safe((start + "DataA").c_str(), s.getAmbientIntensity(), s.getDiffuseIntensity(), s.getSpecularIntensity(), _forward.x);
-                        Engine::Renderer::sendUniform4Safe((start + "DataB").c_str(), _forward.y, _forward.z, s.getConstant(), s.getLinear());
-                        Engine::Renderer::sendUniform4Safe((start + "DataC").c_str(), s.getExponent(), pos.x, pos.y, pos.z);
-                        Engine::Renderer::sendUniform4Safe((start + "DataD").c_str(), s.color().x, s.color().y, s.color().z, static_cast<float>(lightType));
-                        Engine::Renderer::sendUniform4Safe((start + "DataE").c_str(), s.getCutoff(), s.getCutoffOuter(), static_cast<float>(s.getAttenuationModel()), 0.0f);
+                        auto& spotLight        = (SpotLight&)light;
+                        renderer->m_Pipeline->sendGPUDataSpotLight(*camera, spotLight, start);
                         break;
                     }case LightType::Rod: {
-                        RodLight& r            = static_cast<RodLight&>(light);
-                        auto& body             = *r.getComponent<ComponentBody>();
-                        glm::vec3 pos          = body.getPosition();
-                        float cullingDistance  = r.rodLength() + (r.getCullingRadius() * 2.0f);
-                        float half             = r.rodLength() / 2.0f;
-                        glm::vec3 firstEndPt   = pos + (glm::vec3(body.forward()) * half);
-                        glm::vec3 secndEndPt   = pos - (glm::vec3(body.forward()) * half);
-                        Engine::Renderer::sendUniform4Safe((start + "DataA").c_str(), r.getAmbientIntensity(), r.getDiffuseIntensity(), r.getSpecularIntensity(), firstEndPt.x);
-                        Engine::Renderer::sendUniform4Safe((start + "DataB").c_str(), firstEndPt.y, firstEndPt.z, r.getConstant(), r.getLinear());
-                        Engine::Renderer::sendUniform4Safe((start + "DataC").c_str(), r.getExponent(), secndEndPt.x, secndEndPt.y, secndEndPt.z);
-                        Engine::Renderer::sendUniform4Safe((start + "DataD").c_str(), r.color().x, r.color().y, r.color().z, static_cast<float>(lightType));
-                        Engine::Renderer::sendUniform4Safe((start + "DataE").c_str(), r.rodLength(), 0.0f, static_cast<float>(r.getAttenuationModel()), 0.0f);
+                        auto& rodLight         = (RodLight&)light;
+                        renderer->m_Pipeline->sendGPUDataRodLight(*camera, rodLight, start);
+                        break;
+                    }case LightType::Projection:{
+                        auto& projectionLight  = (ProjectionLight&)light;
+                        renderer->m_Pipeline->sendGPUDataProjectionLight(*camera, projectionLight, start);
                         break;
                     }default: {
                         break;
@@ -121,7 +91,7 @@ namespace Engine::priv {
         }
         if (animationVector.size() > 0) {
             Engine::Renderer::sendUniform1Safe("AnimationPlaying", 1);
-            Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationVector.m_Transforms, static_cast<unsigned int>(animationVector.m_Transforms.size()));
+            Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationVector.m_Transforms, (unsigned int)animationVector.m_Transforms.size());
         }else{
             Engine::Renderer::sendUniform1Safe("AnimationPlaying", 0);
         }

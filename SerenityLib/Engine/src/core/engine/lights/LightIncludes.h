@@ -8,6 +8,7 @@ struct LightType {enum Type {
     Directional, 
     Spot, 
     Rod,
+    Projection,
 _TOTAL};};
 struct LightRange {enum Range {
     _7, 

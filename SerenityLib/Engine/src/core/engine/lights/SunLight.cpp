@@ -33,7 +33,7 @@ void SunLight::setPosition(decimal position) {
 void SunLight::setPosition(const glm_vec3& position) {
     getComponent<ComponentBody>()->setPosition(position);
 }
-void SunLight::free() {
+void SunLight::free() noexcept {
     Entity::destroy();
     removeFromVector(priv::InternalScenePublicInterface::GetSunLights(scene()), this);
     removeFromVector(priv::InternalScenePublicInterface::GetLights(scene()), this);

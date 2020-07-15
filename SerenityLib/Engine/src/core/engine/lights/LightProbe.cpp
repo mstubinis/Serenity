@@ -16,13 +16,13 @@ LightProbe::~LightProbe() {
 }
 void LightProbe::addIgnoredEntity(Entity entity) {
     if (!entity.null()) {
-        for (auto& itr : m_Ignored) {
+        for (auto itr : m_Ignored) {
             if (entity == itr) {
                 return;
             }
         }
     }
-    m_Ignored.push_back(entity);
+    m_Ignored.emplace_back(entity);
 }
 void LightProbe::update(const float dt) {
     m_FrameCount += 1_uc;

@@ -24,7 +24,7 @@ void SpotLight::setCutoff(float cutoff) {
 void SpotLight::setCutoffOuter(float outerCutoff) {
     m_OuterCutoff = glm::cos(glm::radians(outerCutoff));
 }
-void SpotLight::free() {
+void SpotLight::free() noexcept {
     Entity::destroy();
     removeFromVector(priv::InternalScenePublicInterface::GetSpotLights(scene()), this);
     removeFromVector(priv::InternalScenePublicInterface::GetLights(scene()), this);

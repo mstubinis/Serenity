@@ -13,10 +13,10 @@ namespace Engine::priv {
 class SunLight : public Entity {
     friend class ::Engine::priv::Renderer;
     protected:
+        LightType::Type    m_Type              = LightType::Sun;
         bool               m_IsShadowCaster    = false;
         bool               m_Active            = true;
         glm::vec4          m_Color             = glm::vec4(1.0f);
-        LightType::Type    m_Type;
         float              m_AmbientIntensity  = 0.005f;
         float              m_DiffuseIntensity  = 2.0f;
         float              m_SpecularIntensity = 1.0f;
@@ -28,7 +28,7 @@ class SunLight : public Entity {
         );
         virtual ~SunLight() {}
 
-        void free();
+        virtual void free() noexcept;
 
         glm_vec3 position() const;
 

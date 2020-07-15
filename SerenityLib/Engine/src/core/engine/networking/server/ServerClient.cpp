@@ -9,7 +9,7 @@ using namespace std;
 using namespace Engine;
 using namespace Engine::Networking;
 
-ServerClient::ServerClient(string& hash, Server& server, SocketTCP* tcp_socket, string& in_client_IP, unsigned short inclient_Port) : m_Server(server){
+ServerClient::ServerClient(string& hash, Server& server, SocketTCP* tcp_socket, string& in_client_IP, unsigned short in_client_Port) : m_Server(server){
     m_Hash          = hash;
     if (tcp_socket) {
         m_IP        = (!tcp_socket->ip().empty() ? tcp_socket->ip() : in_client_IP);
@@ -18,7 +18,7 @@ ServerClient::ServerClient(string& hash, Server& server, SocketTCP* tcp_socket, 
         m_TcpSocket->setBlocking(false);
     }else{
         m_IP   = in_client_IP;
-        m_Port = inclient_Port;
+        m_Port = in_client_Port;
     }
     m_ConnectionState = ConnectionState::Active;
 
@@ -39,13 +39,13 @@ ServerClient::~ServerClient() {
 
     SAFE_DELETE(m_TcpSocket);
 }
-sf::Uint32 ServerClient::generate_nonce() const {
+sf::Uint32 ServerClient::generate_nonce() const noexcept {
     std::random_device device;
     std::mt19937 mt(device());
     std::uniform_int_distribution<sf::Uint32> distribution;
     return distribution(mt);
 }
-bool ServerClient::connect(unsigned short timeout) {
+bool ServerClient::connect(unsigned short timeout) noexcept {
     if (!m_TcpSocket || !disconnected()) {
         return false;
     }
@@ -56,36 +56,31 @@ bool ServerClient::connect(unsigned short timeout) {
     m_ConnectionState = ConnectionState::Active;
     return true;
 }
-void ServerClient::disconnect() {
+void ServerClient::disconnect() noexcept {
     if (m_TcpSocket) {
         m_TcpSocket->disconnect();
-        m_ConnectionState = ConnectionState::Disconnected;
     }
+    m_ConnectionState        = ConnectionState::Disconnected;
+    m_Recovery_Timeout_Timer = m_Recovery_Timeout_Timer_Limit;
 }
-bool ServerClient::disconnected() const {
+bool ServerClient::disconnected() const noexcept {
     return (m_ConnectionState == ConnectionState::Disconnected || m_Timeout_Timer >= m_Timeout_Timer_Limit || (m_TcpSocket && m_TcpSocket->localPort() == 0));
 }
-SocketStatus::Status ServerClient::send_tcp(sf::Packet& packet) {
-    auto status = m_TcpSocket->send(packet);
-    return status;
+SocketStatus::Status ServerClient::send_tcp(sf::Packet& packet) noexcept {
+    return m_TcpSocket->send(packet);
 }
-SocketStatus::Status ServerClient::receive_tcp(sf::Packet& packet) {
-    auto status = m_TcpSocket->receive(packet);
-    return status;
+SocketStatus::Status ServerClient::receive_tcp(sf::Packet& packet) noexcept {
+    return m_TcpSocket->receive(packet);
 }
-
-SocketStatus::Status ServerClient::send_udp(sf::Packet& sfPacket) {
-    auto status = m_Server.send_udp_to_client(this, sfPacket);
-    return status;
+SocketStatus::Status ServerClient::send_udp(sf::Packet& sfPacket) noexcept {
+    return m_Server.send_udp_to_client(this, sfPacket);
 }
 
-void ServerClient::receive_udp(SocketStatus::Status status, sf::Packet& packet, const float dt) {
-    if (status == SocketStatus::Done) {
-        internal_on_received_data();
-        on_receive_udp(packet, dt);
-    }
+void ServerClient::internal_on_receive_udp(sf::Packet& packet, const float dt) noexcept {
+    internal_on_received_data();
+    ServerClient::m_On_Received_UDP_Function(packet, dt);
 }
-void ServerClient::internal_update_tcp(const float dt) {
+void ServerClient::internal_update_receive_tcp_packet(const float dt) noexcept {
     if (!m_TcpSocket) {
         return;
     }
@@ -109,7 +104,7 @@ void ServerClient::internal_update_tcp(const float dt) {
         }
     }
 }
-void ServerClient::internal_update_connection_state(const float dt) {
+void ServerClient::internal_update_connection_state(const float dt) noexcept {
     switch (m_ConnectionState) {
         case ConnectionState::Active: {
             m_Timeout_Timer += dt;
@@ -132,34 +127,13 @@ void ServerClient::internal_update_connection_state(const float dt) {
         }
     }
 }
-void ServerClient::internal_on_received_data() {
+void ServerClient::internal_on_received_data() noexcept {
     m_Timeout_Timer          = 0.0f;
     m_Recovery_Timeout_Timer = 0.0f;
-    if (m_ConnectionState != ConnectionState::Active) {
-        m_ConnectionState = ConnectionState::Active;
-    }
+    m_ConnectionState        = ConnectionState::Active;
 }
-void ServerClient::update(const float dt) {
+void ServerClient::update(const float dt) noexcept {
     internal_update_connection_state(dt);
-    internal_update_tcp(dt);
+    internal_update_receive_tcp_packet(dt);
     m_Update_Function(dt);
 }
-
-
-/*
-SocketStatus::Status ServerClient::send_tcp(void* data, size_t size) {
-    return m_TcpSocket->send(data, size);
-}
-SocketStatus::Status ServerClient::send_tcp(void* data, size_t size, size_t& sent) {
-    return m_TcpSocket->send(data, size, sent);
-}
-SocketStatus::Status ServerClient::receive_tcp(void* data, size_t size, size_t& received) {
-    return m_TcpSocket->receive(data, size, received);
-}
-void ServerClient::receive_udp(SocketStatus::Status status, void* data, size_t size, size_t& received, const float dt) {
-    if (status == SocketStatus::Done) {
-        internal_on_received_data();
-        on_receive_udp(data, size, received, dt);
-    }
-}
-*/

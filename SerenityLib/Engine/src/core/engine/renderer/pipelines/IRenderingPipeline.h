@@ -13,6 +13,7 @@ class PointLight;
 class DirectionalLight;
 class SpotLight;
 class RodLight;
+class ProjectionLight;
 class Skybox;
 class Font;
 class Texture;
@@ -106,12 +107,21 @@ namespace Engine::priv {
 
             virtual void generatePBRData(Texture& texture, unsigned int convoludeSize, unsigned int prefilterSize) = 0;
 
-            virtual void renderSkybox(Skybox*, ShaderProgram& shaderProgram, Scene& scene, Viewport& viewport, Camera& camera) = 0;
+            virtual void sendGPUDataSunLight(Camera& camera, SunLight& sunLight, const std::string& start) = 0;
+            virtual int sendGPUDataPointLight(Camera& camera, PointLight& pointLight, const std::string& start) = 0;
+            virtual void sendGPUDataDirectionalLight(Camera& camera, DirectionalLight& directionalLight, const std::string& start) = 0;
+            virtual int sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight, const std::string& start) = 0;
+            virtual int sendGPUDataRodLight(Camera& camera, RodLight& rodLight, const std::string& start) = 0;
+            virtual void sendGPUDataProjectionLight(Camera& camera, ProjectionLight& rodLight, const std::string& start) = 0;
+
             virtual void renderSunLight(Camera& camera, SunLight& sunLight, Viewport& viewport) = 0;
             virtual void renderPointLight(Camera& camera, PointLight& pointLight) = 0;
             virtual void renderDirectionalLight(Camera& camera, DirectionalLight& directionalLight, Viewport& viewport) = 0;
             virtual void renderSpotLight(Camera& camera, SpotLight& spotLight) = 0;
             virtual void renderRodLight(Camera& camera, RodLight& rodLight) = 0;
+            virtual void renderProjectionLight(Camera& camera, ProjectionLight& rodLight) = 0;
+
+            virtual void renderSkybox(Skybox*, ShaderProgram& shaderProgram, Scene& scene, Viewport& viewport, Camera& camera) = 0;
             virtual void renderMesh(Mesh& mesh, unsigned int mode) = 0;
             virtual void renderDecal(ModelInstance& decalModelInstance) = 0;
             virtual void renderLightProbe(LightProbe& lightProbe) = 0;

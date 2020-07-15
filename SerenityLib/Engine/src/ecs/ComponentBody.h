@@ -121,7 +121,7 @@ class ComponentBody : public Observer, public Engine::UserPointer {
 
         ~ComponentBody();
 
-        Entity getOwner() const;
+        constexpr Entity getOwner() const noexcept { return m_Owner; }
 
         void onEvent(const Event& event_) override;
 
@@ -141,10 +141,10 @@ class ComponentBody : public Observer, public Engine::UserPointer {
         void addPhysicsToWorld(bool force = true, bool threadSafe = false);
 
         void setInternalPhysicsUserPointer(void* userPtr);
-        void setUserPointer1(void* userPtr);
-        void setUserPointer2(void* userPtr);
-        void* getUserPointer1() const;
-        void* getUserPointer2() const;
+        void setUserPointer1(void* userPtr) noexcept { m_UserPointer1 = userPtr; }
+        void setUserPointer2(void* userPtr) noexcept { m_UserPointer2 = userPtr; }
+        constexpr void* getUserPointer1() const noexcept { return m_UserPointer1; }
+        constexpr void* getUserPointer2() const noexcept { return m_UserPointer2; }
 
         bool hasPhysics() const { return m_Physics; }
         decimal getLinearDamping() const;
