@@ -3,7 +3,6 @@
 #define ENGINE_EVENTS_MOUSE_MODULE_H
 
 #include <core/engine/input/Mouse/MouseButtons.h>
-#include <array>
 
 namespace Engine::priv {
     class MouseModule {

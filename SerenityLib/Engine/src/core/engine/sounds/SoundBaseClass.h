@@ -14,8 +14,6 @@ namespace Engine::priv {
     class SoundModule;
 };
 
-#include <glm/vec3.hpp>
-
 class SoundBaseClass {
     friend class Engine::priv::SoundModule;
     protected:

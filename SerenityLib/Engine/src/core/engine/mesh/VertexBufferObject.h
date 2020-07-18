@@ -4,7 +4,6 @@
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-#include <vector>
 
 struct BufferDataType final {enum Type {
     VertexArray  = GL_ARRAY_BUFFER,

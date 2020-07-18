@@ -7,34 +7,42 @@ namespace Engine::priv {
     class ThreadPool;
 };
 
-#include <queue>
-#include <vector>
-#include <thread>
-#include <future>
-#include <functional>
-#include <condition_variable>
-#include <memory>
-
 namespace Engine::priv {
     class ThreadPoolFuture final {
         friend class Engine::priv::ThreadPool;
         private:
             std::future<void>           m_Future;
-            std::function<void()>       m_Callback = []() {};
 
             ThreadPoolFuture() = delete;
         public:
             ThreadPoolFuture(std::future<void>&& future);
-            ThreadPoolFuture(std::future<void>&& future, std::function<void()>&& callback);
             ~ThreadPoolFuture() = default;
 
             bool isReady() const;
-            void operator()() const;
 
             ThreadPoolFuture(const ThreadPoolFuture& other) noexcept = delete;
             ThreadPoolFuture& operator=(const ThreadPoolFuture& other) noexcept = delete;
             ThreadPoolFuture(ThreadPoolFuture&& other) noexcept;
             ThreadPoolFuture& operator=(ThreadPoolFuture&& other) noexcept;
+    };
+    class ThreadPoolFutureCallback final {
+        friend class Engine::priv::ThreadPool;
+        private:
+            std::future<void>           m_Future;
+            std::function<void()>       m_Callback = []() {};
+
+            ThreadPoolFutureCallback() = delete;
+        public:
+            ThreadPoolFutureCallback(std::future<void>&& future, std::function<void()>&& callback);
+            ~ThreadPoolFutureCallback() = default;
+
+            bool isReady() const;
+            void operator()() const;
+
+            ThreadPoolFutureCallback(const ThreadPoolFutureCallback& other) noexcept = delete;
+            ThreadPoolFutureCallback& operator=(const ThreadPoolFutureCallback& other) noexcept = delete;
+            ThreadPoolFutureCallback(ThreadPoolFutureCallback&& other) noexcept;
+            ThreadPoolFutureCallback& operator=(ThreadPoolFutureCallback&& other) noexcept;
     };
     
     class ThreadPool final{
@@ -45,6 +53,7 @@ namespace Engine::priv {
             std::vector<std::queue<std::shared_ptr<std::packaged_task<void()>>>>     m_TaskQueue;
             std::vector<std::thread>                                                 m_WorkerThreads;
             std::vector<std::vector<Engine::priv::ThreadPoolFuture>>                 m_Futures;
+            std::vector<std::vector<Engine::priv::ThreadPoolFutureCallback>>         m_FutureCallbacks;
             bool                                                                     m_Stopped = true;
 
             

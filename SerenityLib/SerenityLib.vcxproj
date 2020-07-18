@@ -160,8 +160,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
@@ -171,7 +170,9 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <ForcedIncludeFiles>core\engine\utils\ForcedInclude.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
+      <PrecompiledHeaderFile>core/engine/utils/PrecompiledHeader.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -190,8 +191,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
@@ -201,7 +201,9 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <ForcedIncludeFiles>core\engine\utils\ForcedInclude.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
+      <PrecompiledHeaderFile>core/engine/utils/PrecompiledHeader.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -216,7 +218,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -229,8 +231,10 @@
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <ForcedIncludeFiles>core\engine\utils\ForcedInclude.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
       <AssemblerOutput>All</AssemblerOutput>
+      <PrecompiledHeaderFile>core/engine/utils/PrecompiledHeader.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -253,7 +257,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -266,8 +270,10 @@
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <ForcedIncludeFiles>core\engine\utils\ForcedInclude.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
       <AssemblerOutput>All</AssemblerOutput>
+      <PrecompiledHeaderFile>core/engine/utils/PrecompiledHeader.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -290,7 +296,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -302,8 +308,10 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <ForcedIncludeFiles>core\engine\utils\ForcedInclude.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
       <AssemblerOutput>All</AssemblerOutput>
+      <PrecompiledHeaderFile>core/engine/utils/PrecompiledHeader.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -319,7 +327,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -331,8 +339,10 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <ForcedIncludeFiles>core\engine\utils\ForcedInclude.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
       <AssemblerOutput>All</AssemblerOutput>
+      <PrecompiledHeaderFile>core/engine/utils/PrecompiledHeader.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -505,6 +515,9 @@
     <ClInclude Include="Engine\src\core\engine\system\EngineMisc.h" />
     <ClInclude Include="Engine\src\core\engine\system\EngineOptions.h" />
     <ClInclude Include="Engine\src\core\engine\system\window\Window.h" />
+    <ClInclude Include="Engine\src\core\engine\system\window\WindowData.h" />
+    <ClInclude Include="Engine\src\core\engine\system\window\WindowIncludes.h" />
+    <ClInclude Include="Engine\src\core\engine\system\window\WindowThread.h" />
     <ClInclude Include="Engine\src\core\engine\textures\DDS.h" />
     <ClInclude Include="Engine\src\core\engine\textures\Texture.h" />
     <ClInclude Include="Engine\src\core\engine\textures\TextureIncludes.h" />
@@ -514,8 +527,8 @@
     <ClInclude Include="Engine\src\core\engine\threading\ThreadingModule.h" />
     <ClInclude Include="Engine\src\core\engine\threading\ThreadPool.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Engine_Debugging.h" />
-    <ClInclude Include="Engine\src\core\engine\utils\ForcedInclude.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Logger.h" />
+    <ClInclude Include="Engine\src\core\engine\utils\PrecompiledHeader.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Utils.h" />
     <ClInclude Include="Engine\src\core\Terrain.h" />
     <ClInclude Include="Engine\src\ecs\ComponentBody.h" />
@@ -661,6 +674,8 @@
     <ClCompile Include="Engine\src\core\engine\system\Engine.cpp" />
     <ClCompile Include="Engine\src\core\engine\system\EngineMisc.cpp" />
     <ClCompile Include="Engine\src\core\engine\system\window\Window.cpp" />
+    <ClCompile Include="Engine\src\core\engine\system\window\WindowData.cpp" />
+    <ClCompile Include="Engine\src\core\engine\system\window\WindowThread.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\Texture.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\TextureIncludes.cpp" />
     <ClCompile Include="Engine\src\core\engine\textures\TextureLoader.cpp" />
@@ -669,8 +684,27 @@
     <ClCompile Include="Engine\src\core\engine\threading\ThreadingHelpers.cpp" />
     <ClCompile Include="Engine\src\core\engine\threading\ThreadPool.cpp" />
     <ClCompile Include="Engine\src\core\engine\utils\Engine_Debugging.cpp" />
-    <ClCompile Include="Engine\src\core\engine\utils\ForcedInclude.cpp" />
     <ClCompile Include="Engine\src\core\engine\utils\Logger.cpp" />
+    <ClCompile Include="Engine\src\core\engine\utils\PrecompiledHeader.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Production|x64'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Production|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Engine\src\core\Terrain.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentCamera.cpp" />

@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/system/Engine.h>
 #include <core/engine/system/EngineOptions.h>
 #include <core/engine/system/EngineGameFunctions.h>
@@ -14,7 +15,6 @@
 #include <core/engine/renderer/postprocess/GodRays.h>
 #include <core/engine/renderer/postprocess/Fog.h>
 
-#include <glm/vec2.hpp>
 #include <SFML/System.hpp>
 
 using namespace Engine;

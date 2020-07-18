@@ -1,11 +1,10 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/mesh/smsh.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/mesh/Skeleton.h>
 
 #include <boost/iostreams/device/mapped_file.hpp>
-#include <fstream>
-#include <queue>
 
 using namespace std;
 

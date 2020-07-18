@@ -1,15 +1,11 @@
 #pragma once
-#ifndef ENGINE_RENDERER_POSTPROCESS_GODRAYS_H_INCLUDE_GUARD
-#define ENGINE_RENDERER_POSTPROCESS_GODRAYS_H_INCLUDE_GUARD
+#ifndef ENGINE_RENDERER_POSTPROCESS_GODRAYS_H
+#define ENGINE_RENDERER_POSTPROCESS_GODRAYS_H
 
 class  ShaderProgram;
 class  Shader;
 struct Entity;
 class  Viewport;
-
-#include <glm/vec2.hpp>
-#include <glm/vec4.hpp>
-#include <string>
 
 namespace Engine::priv {
     class  GBuffer;

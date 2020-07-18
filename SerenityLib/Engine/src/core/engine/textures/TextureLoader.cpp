@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/textures/Texture.h>
 #include <core/engine/textures/TextureLoader.h>
 #include <core/engine/textures/DDS.h>
@@ -7,11 +8,7 @@
 #include <core/engine/events/Event.h>
 
 #include <boost/filesystem.hpp>
-
 #include <SFML/Graphics.hpp>
-
-#include <iostream>
-#include <fstream>
 
 using namespace Engine;
 using namespace Engine::priv;

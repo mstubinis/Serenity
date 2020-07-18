@@ -1,9 +1,8 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/renderer/opengl/Extensions.h>
-#include <iostream>
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-#include <array>
 
 using namespace Engine;
 using namespace Engine::priv;

@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/lights/DirectionalLight.h>
 #include <ecs/ComponentBody.h>
 #include <core/engine/utils/Utils.h>

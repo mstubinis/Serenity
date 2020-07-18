@@ -2,7 +2,6 @@
 #ifndef ENGINE_TEXTURE_INCLUDES_INCLUDE_GUARD
 #define ENGINE_TEXTURE_INCLUDES_INCLUDE_GUARD
 
-#include <memory>
 #include <core/engine/renderer/GLImageConstants.h>
 #include <core/engine/utils/Utils.h>
 

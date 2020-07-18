@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <ecs/ComponentBody.h>
 #include <ecs/ComponentModel.h>
 #include <core/engine/fonts/Font.h>
@@ -13,15 +14,9 @@
 
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
-#include <glm/gtx/transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/norm.hpp>
 
 #include <BulletCollision/Gimpact/btGImpactShape.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-
-
-#include <iostream>
 
 using namespace Engine;
 using namespace Engine::priv;
@@ -122,11 +117,12 @@ ComponentBody::ComponentBody(Entity entity, CollisionType::Type collisionType) {
 }
 ComponentBody::~ComponentBody() {
     //destructor
+    /*
     auto& ecs         = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
-    auto& system      = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
+    auto& system      = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     auto& pcs         = system.ParentChildSystem;
     const auto thisID = m_Owner.id();
-
+    */
     if (m_Physics) {
         SAFE_DELETE(data.p);
     }else{
@@ -136,42 +132,42 @@ ComponentBody::~ComponentBody() {
 ComponentBody::ComponentBody(ComponentBody&& other) noexcept {
     //move constructor
     using std::swap;
+    if (other.m_Physics) {
+        data.p = std::exchange(other.data.p, nullptr);
+    }else{
+        data.n = std::exchange(other.data.n, nullptr);
+    }
     m_Physics          = std::move(other.m_Physics);
     m_Forward          = std::move(other.m_Forward);
     m_Right            = std::move(other.m_Right);
     m_Up               = std::move(other.m_Up);
     m_Owner            = std::move(other.m_Owner);
-    m_CollisionFunctor.swap(other.m_CollisionFunctor);
+    m_CollisionFunctor = std::move(other.m_CollisionFunctor);
     m_UserPointer      = std::exchange(other.m_UserPointer, nullptr);
     m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
     m_UserPointer2     = std::exchange(other.m_UserPointer2, nullptr);
-    if (other.m_Physics) {
-        data.p         = std::exchange(other.data.p, nullptr);
-    }else{
-        data.n         = std::exchange(other.data.n, nullptr);
-    }
     setInternalPhysicsUserPointer(this);
 }
 ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
     //move assignment
     if (&other != this) {
         using std::swap;
+        if (other.m_Physics) {
+            SAFE_DELETE(data.p);
+            data.p = std::exchange(other.data.p, nullptr);
+        }else{
+            SAFE_DELETE(data.n);
+            data.n = std::exchange(other.data.n, nullptr);
+        }
         m_Physics          = std::move(other.m_Physics);
         m_Forward          = std::move(other.m_Forward);
         m_Right            = std::move(other.m_Right);
         m_Up               = std::move(other.m_Up);
         m_Owner            = std::move(other.m_Owner);
-        m_CollisionFunctor.swap(other.m_CollisionFunctor);
+        m_CollisionFunctor = std::move(other.m_CollisionFunctor);
         m_UserPointer      = std::exchange(other.m_UserPointer, nullptr);
         m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
         m_UserPointer2     = std::exchange(other.m_UserPointer2, nullptr);
-        if (other.m_Physics) {
-            SAFE_DELETE(data.p);
-            data.p         = std::exchange(other.data.p, nullptr);
-        }else{
-            SAFE_DELETE(data.n);
-            data.n         = std::exchange(other.data.n, nullptr);
-        }
         setInternalPhysicsUserPointer(this);
     }
     return *this;
@@ -245,7 +241,9 @@ decimal ComponentBody::getAngularDamping() const {
     return (data.p->bullet_rigidBody) ? (decimal)(data.p->bullet_rigidBody->getAngularDamping()) : decimal(0.0);
 }
 void ComponentBody::collisionResponse(CollisionCallbackEventData& data) const {
-    m_CollisionFunctor(data);
+    if (m_CollisionFunctor) { //TODO: find out why this is needed and possibly remove this if check
+        m_CollisionFunctor(data);
+    }
 }
 unsigned short ComponentBody::getCollisionGroup() const {
     return (m_Physics) ? data.p->group : 0;

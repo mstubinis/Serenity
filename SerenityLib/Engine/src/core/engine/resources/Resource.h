@@ -3,7 +3,6 @@
 #define ENGINE_RESOURCE_BASIC_H
 
 #include <core/engine/resources/ResourcesIncludes.h>
-#include <string>
 
 class Resource {
     private:

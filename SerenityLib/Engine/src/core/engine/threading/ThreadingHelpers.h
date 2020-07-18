@@ -2,8 +2,6 @@
 #ifndef ENGINE_THREADING_HELPERS_H
 #define ENGINE_THREADING_HELPERS_H
 
-#include <vector>
-
 namespace Engine {
     unsigned int hardware_concurrency();
 

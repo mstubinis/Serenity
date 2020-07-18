@@ -2,125 +2,28 @@
 #ifndef ENGINE_WINDOW_H
 #define ENGINE_WINDOW_H
 
-//#define ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS
-#if !defined(_APPLE_) && !defined(ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS)
-    #ifndef ENGINE_THREAD_WINDOW_EVENTS
-    #define ENGINE_THREAD_WINDOW_EVENTS
-    #endif
-#endif
-
-
 namespace sf {
     class Window;
 };
 namespace Engine::priv {
     class  EngineCore;
     class  EventManager;
+    class  WindowData;
+    class  WindowThread;
 };
 class  Texture;
 struct EngineOptions;
 class  Window;
 
-#include <atomic>
-#include <memory>
-#include <string>
-#include <SFML/Window.hpp>
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <glm/vec2.hpp>
-#include <core/engine/containers/Queue_ts.h>
-
-class Window_Flags final { public: enum Flag: unsigned short {
-    WindowedFullscreen = 1 << 0,
-    Windowed           = 1 << 1,
-    Fullscreen         = 1 << 2,
-    MouseVisible       = 1 << 3,
-    Active             = 1 << 4,
-    Vsync              = 1 << 5,
-    MouseGrabbed       = 1 << 6,
-    KeyRepeat          = 1 << 7,
-};};
-
+#include <core/engine/system/window/WindowData.h>
 
 class Window final{
     friend class Engine::priv::EngineCore;
     friend class Engine::priv::EventManager;
-
-    class WindowData final {
-        friend class Engine::priv::EngineCore;
-        friend class Engine::priv::EventManager;
-        friend class Window;
-        struct EventThreadOnlyCommands final { enum Command : unsigned int {
-            ShowMouse,
-            HideMouse,
-            RequestFocus,
-            KeepMouseInWindow,
-            FreeMouseFromWindow,
-        };};
-
-        class WindowThread final {
-            friend class WindowData;
-            friend class Window;
-            private:
-                WindowData&                                          m_Data;
-                Engine::queue_ts<sf::Event>                          m_Queue;
-                Engine::queue_ts<EventThreadOnlyCommands::Command>   m_MainThreadToEventThreadQueue;
-                std::unique_ptr<std::thread>                         m_EventThread = nullptr;
-
-                void cleanup();
-                void startup(Window& super, const std::string& name);
-                void push(EventThreadOnlyCommands::Command command);
-                std::optional<sf::Event> try_pop();
-                void updateLoop();
-            public:
-                WindowThread(WindowData&);
-                ~WindowThread();
-
-                bool operator==(const bool rhs) const;
-                explicit operator bool() const;
-        };
-
-        private:
-            #ifdef ENGINE_THREAD_WINDOW_EVENTS
-                WindowThread              m_WindowThread;
-            #endif
-
-            glm::uvec2                    m_OldWindowSize          = glm::uvec2(0, 0);
-            unsigned int                  m_Style;
-            sf::VideoMode                 m_VideoMode;
-            std::string                   m_WindowName;
-            sf::RenderWindow              m_SFMLWindow;
-            unsigned int                  m_FramerateLimit         = 0U;
-            bool                          m_UndergoingClosing      = false;
-            Engine::Flag<unsigned short>  m_Flags;
-            std::string                   m_IconFile               = "";
-            std::thread::id               m_OpenGLThreadID;
-
-            glm::vec2                     m_MousePosition          = glm::vec2(0.0f);
-            glm::vec2                     m_MousePosition_Previous = glm::vec2(0.0f);
-            glm::vec2                     m_MouseDifference        = glm::vec2(0.0f);
-            double                        m_MouseDelta             = 0.0;
-
-            sf::ContextSettings           m_SFContextSettings;
-
-            void restore_state(Window& super);
-            const sf::ContextSettings create(Window& super, const std::string& name);
-            void update_mouse_position_internal(Window& super, float x, float y, bool resetDifference, bool resetPrevious);
-            void on_fullscreen_internal(Window& super, bool isToBeFullscreen, bool isMaximized, bool isMinimized);
-            sf::VideoMode get_default_desktop_video_mode();
-            void init_position(Window& super);
-
-            void on_mouse_wheel_scrolled(float delta, int x, int y);
-
-            void on_reset_events(const float dt);
-
-            void on_close();
-        public:
-            WindowData();
-            ~WindowData();
-    };
-
+    friend class Engine::priv::WindowData;
+    friend class Engine::priv::WindowThread;
     private:
-        WindowData m_Data;
+        Engine::priv::WindowData m_Data;
 
         //Whenever the window's size changes, this function executes. Different from SFML's onResize Event, this fires constantly if you are changing the size of the window via mouse dragging.
         //This currently only performs actions on the windows platform.

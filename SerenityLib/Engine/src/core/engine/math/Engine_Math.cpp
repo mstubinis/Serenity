@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/scene/Camera.h>

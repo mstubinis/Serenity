@@ -9,11 +9,6 @@ namespace Engine::priv {
     class  ParticleSystem;
 };
 
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
-#include <glm/gtc/quaternion.hpp>
-
 /*
 2D Sprite that is optimized to render fast and in very large numbers
 */

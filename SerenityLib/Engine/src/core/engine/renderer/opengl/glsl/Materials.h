@@ -3,7 +3,6 @@
 #define ENGINE_RENDERER_OPENGL_GLSL_MATERIALS_H
 
 #include <core/engine/shaders/ShaderIncludes.h>
-#include <string>
 
 namespace Engine::priv::opengl::glsl {
     class Materials final {

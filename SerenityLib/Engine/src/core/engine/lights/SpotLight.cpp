@@ -1,3 +1,5 @@
+#include <core/engine/utils/PrecompiledHeader.h>
+
 #include <core/engine/lights/SpotLight.h>
 #include <core/engine/utils/Utils.h>
 #include <ecs/ComponentBody.h>

@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/model/ModelInstanceAnimation.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/mesh/Skeleton.h>

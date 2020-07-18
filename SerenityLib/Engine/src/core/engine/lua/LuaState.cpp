@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/lua/LuaState.h>
 #include <core/engine/lua/LuaIncludes.h>
 

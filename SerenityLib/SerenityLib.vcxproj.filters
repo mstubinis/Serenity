@@ -632,9 +632,6 @@
     <ClInclude Include="Engine\src\core\engine\system\EngineGameFunctions.h">
       <Filter>Header Files\Engine\Core\System</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\utils\ForcedInclude.h">
-      <Filter>Header Files\Engine\Core\Utils</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\discord\Discord.h">
       <Filter>Header Files\Engine\Core\Discord</Filter>
     </ClInclude>
@@ -832,6 +829,18 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\lights\ProjectionLight.h">
       <Filter>Header Files\Engine\Core\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\system\window\WindowThread.h">
+      <Filter>Header Files\Engine\Core\System\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\system\window\WindowIncludes.h">
+      <Filter>Header Files\Engine\Core\System\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\system\window\WindowData.h">
+      <Filter>Header Files\Engine\Core\System\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\utils\PrecompiledHeader.h">
+      <Filter>Header Files\Engine\Core\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1171,9 +1180,6 @@
     <ClCompile Include="Engine\src\core\engine\utils\Logger.cpp">
       <Filter>Source Files\Engine\Core\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\utils\ForcedInclude.cpp">
-      <Filter>Source Files\Engine\Core\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\model\ModelInstanceAnimation.cpp">
       <Filter>Source Files\Engine\Core\Model</Filter>
     </ClCompile>
@@ -1269,6 +1275,15 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\lights\ProjectionLight.cpp">
       <Filter>Source Files\Engine\Core\Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\system\window\WindowThread.cpp">
+      <Filter>Source Files\Engine\Core\System\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\system\window\WindowData.cpp">
+      <Filter>Source Files\Engine\Core\System\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\utils\PrecompiledHeader.cpp">
+      <Filter>Source Files\Engine\Core\Utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

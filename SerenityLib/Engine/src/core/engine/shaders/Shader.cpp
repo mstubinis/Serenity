@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/shaders/Shader.h>
 #include <core/engine/shaders/ShaderHelper.h>
 #include <core/engine/renderer/Renderer.h>
@@ -15,9 +16,6 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/lexical_cast.hpp>
-
-#include <regex>
-#include <iostream>
 
 using namespace std;
 using namespace Engine;

@@ -10,12 +10,7 @@ namespace Engine::priv {
     class ParticleSystem;
 };
 
-#include <functional>
 #include <core/engine/renderer/RendererIncludes.h>
-
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
 
 /*
 Class that contains the properties of particle emitters

@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/renderer/FullscreenItems.h>
 #include <core/engine/events/Event.h>
 #include <core/engine/resources/Engine_Resources.h>

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_RENDERER_POSTPROCESS_SSAO_H_INCLUDE_GUARD
-#define ENGINE_RENDERER_POSTPROCESS_SSAO_H_INCLUDE_GUARD
+#ifndef ENGINE_RENDERER_POSTPROCESS_SSAO_H
+#define ENGINE_RENDERER_POSTPROCESS_SSAO_H
 
 #define SSAO_MAX_KERNEL_SIZE 16U
 #define SSAO_NORMALMAP_SIZE 16U
@@ -9,9 +9,6 @@ class  Camera;
 class  ShaderProgram;
 class  Shader;
 class  Viewport;
-
-#include <glm/vec3.hpp>
-#include <string>
 
 struct SSAOLevel { enum Level : unsigned char {
     Off = 0_uc,

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_RENDER_GRAPH_INCLUDE_GUARD
-#define ENGINE_RENDER_GRAPH_INCLUDE_GUARD
+#ifndef ENGINE_RENDER_GRAPH_H
+#define ENGINE_RENDER_GRAPH_H
 
 class  ShaderProgram;
 class  Camera;

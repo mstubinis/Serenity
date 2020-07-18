@@ -2,7 +2,6 @@
 #ifndef ENGINE_TEXTURES_TEXTURE_LOADER_H
 #define ENGINE_TEXTURES_TEXTURE_LOADER_H
 
-#include <string>
 #include <core/engine/textures/TextureIncludes.h>
 
 namespace Engine::priv {

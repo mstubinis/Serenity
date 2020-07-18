@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/model/ModelInstance.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/math/Engine_Math.h>
@@ -15,8 +16,6 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/renderer/pipelines/IRenderingPipeline.h>
 
-#include <glm/gtx/transform.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 using namespace Engine;
 using namespace std;

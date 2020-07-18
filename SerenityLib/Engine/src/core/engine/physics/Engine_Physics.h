@@ -13,8 +13,6 @@ namespace Engine::priv {
 };
 
 #include <core/engine/physics/PhysicsPipeline.h>
-#include <vector>
-#include <mutex>
 #include <LinearMath/btVector3.h>
 
 #define PHYSICS_MIN_STEP 0.016666666666666666f

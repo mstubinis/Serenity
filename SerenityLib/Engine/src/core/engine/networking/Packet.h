@@ -3,7 +3,6 @@
 #define ENGINE_NETWORKING_PACKET_H
 
 #include <SFML/Network/Packet.hpp>
-#include <functional>
 
 using PacketSequence  = std::uint16_t;
 using PacketBitfield  = std::uint32_t;

@@ -1,8 +1,6 @@
 #pragma once
-#ifndef ENGINE_RENDERER_POSTPROCESS_FOG_H_INCLUDE_GUARD
-#define ENGINE_RENDERER_POSTPROCESS_FOG_H_INCLUDE_GUARD
-
-#include <glm/vec4.hpp>
+#ifndef ENGINE_RENDERER_POSTPROCESS_FOG_H
+#define ENGINE_RENDERER_POSTPROCESS_FOG_H
 
 namespace Engine::priv {
     class  GBuffer;

@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/physics/Collision.h>
 #include <core/engine/math/Engine_Math.h>
 

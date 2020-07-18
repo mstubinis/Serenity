@@ -7,7 +7,6 @@ namespace discord {
     class Core;
 };
 
-#include <string>
 #include <core/engine/discord/src/types.h>
 
 namespace Engine::priv {

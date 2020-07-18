@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/mesh/MeshLoading.h>
 #include <core/engine/mesh/MeshImportedData.h>
 #include <core/engine/mesh/MeshCollisionFactory.h>
@@ -16,9 +17,6 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
-#include <iostream>
-#include <fstream>
-#include <memory_resource>
 
 using namespace std;
 

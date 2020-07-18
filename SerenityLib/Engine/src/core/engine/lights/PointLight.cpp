@@ -1,9 +1,9 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/lights/PointLight.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/resources/Engine_Resources.h>
 
 #include <ecs/ComponentBody.h>
-#include <array>
 
 using namespace Engine;
 using namespace std;

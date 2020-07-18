@@ -1,13 +1,11 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/textures/TextureRequest.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/textures/TextureLoader.h>
 #include <core/engine/system/window/Window.h>
-
 #include <core/engine/system/Engine.h>
 
 #include <boost/filesystem.hpp>
-
-#include <iostream>
 
 using namespace std;
 using namespace Engine;

@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/renderer/opengl/glsl/Compression.h>
 #include <core/engine/shaders/ShaderHelper.h>
 #include <core/engine/materials/MaterialEnums.h>

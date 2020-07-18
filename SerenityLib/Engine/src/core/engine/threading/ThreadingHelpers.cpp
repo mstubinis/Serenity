@@ -1,6 +1,5 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/threading/ThreadingHelpers.h>
-#include <thread>
-#include <algorithm>
 
 using namespace std;
 

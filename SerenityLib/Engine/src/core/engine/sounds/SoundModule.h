@@ -8,9 +8,6 @@ class  SoundBaseClass;
 class  Handle;
 class  Scene;
 
-#include <stack>
-#include <array>
-#include <vector>
 #include <core/engine/sounds/SoundMusic.h>
 #include <core/engine/sounds/SoundEffect.h>
 #include <core/engine/containers/Freelist.h>

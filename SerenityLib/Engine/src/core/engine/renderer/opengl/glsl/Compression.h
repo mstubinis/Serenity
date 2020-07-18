@@ -2,8 +2,6 @@
 #ifndef ENGINE_RENDERER_OPENGL_GLSL_COMPRESSION_H
 #define ENGINE_RENDERER_OPENGL_GLSL_COMPRESSION_H
 
-#include <string>
-
 namespace Engine::priv::opengl::glsl {
     class Compression final {
         public:

@@ -1,16 +1,11 @@
 #pragma once
 #pragma once
-#ifndef ENGINE_RENDERER_POSTPROCESS_SMAA_H_INCLUDE_GUARD
-#define ENGINE_RENDERER_POSTPROCESS_SMAA_H_INCLUDE_GUARD
+#ifndef ENGINE_RENDERER_POSTPROCESS_SMAA_H
+#define ENGINE_RENDERER_POSTPROCESS_SMAA_H
 
 class  ShaderProgram;
 class  Shader;
 class  Viewport;
-
-#include <glm/vec2.hpp>
-#include <glm/vec4.hpp>
-#include <string>
-#include <vector>
 
 struct SMAAQualityLevel {enum Level {
     Low, 

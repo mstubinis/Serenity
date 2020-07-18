@@ -1,3 +1,4 @@
+#include <core/engine/utils/PrecompiledHeader.h>
 #include "LightProbe.h"
 #include <ecs/ComponentBody.h>
 

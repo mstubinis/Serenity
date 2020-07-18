@@ -2,8 +2,6 @@
 #ifndef ENGINE_UTILS_LOGGER_H
 #define ENGINE_UTILS_LOGGER_H
 
-#include <string>
-#include <iostream>
 #include <ostream>
 #include <sstream>
 

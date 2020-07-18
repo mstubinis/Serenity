@@ -3,7 +3,6 @@
 #define ENGINE_EVENT_INCLUDES_H
 
 #include <SFML/System.hpp>
-#include <string>
 
 #include <core/engine/input/Keyboard/KeyboardKeys.h>
 #include <core/engine/input/Mouse/MouseButtons.h>

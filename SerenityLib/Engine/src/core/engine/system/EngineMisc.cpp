@@ -1,8 +1,5 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/system/EngineMisc.h>
-
-#ifdef _WIN32
-#include <Windows.h>
-#endif
 
 using namespace std;
 

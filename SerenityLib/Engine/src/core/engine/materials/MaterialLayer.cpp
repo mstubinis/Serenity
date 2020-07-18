@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/materials/MaterialLayer.h>
 #include <core/engine/materials/MaterialLoader.h>
 #include <core/engine/textures/Texture.h>

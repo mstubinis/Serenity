@@ -23,9 +23,6 @@ namespace Engine::priv {
 #include <core/engine/containers/PartialArray.h>
 #include <core/engine/fonts/Font.h>
 
-#include <glm/mat4x4.hpp>
-#include <vector>
-
 namespace Engine::priv {
     class DeferredPipeline final : public IRenderingPipeline {
         friend class Renderer;
@@ -176,7 +173,7 @@ namespace Engine::priv {
             void sendGPUDataDirectionalLight(Camera& camera, DirectionalLight& directionalLight, const std::string& start) override;
             int sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight, const std::string& start) override;
             int sendGPUDataRodLight(Camera& camera, RodLight& rodLight, const std::string& start) override;
-            void sendGPUDataProjectionLight(Camera& camera, ProjectionLight& rodLight, const std::string& start) override;
+            int sendGPUDataProjectionLight(Camera& camera, ProjectionLight& projectionLight, const std::string& start) override;
 
             void renderSkybox(Skybox*, ShaderProgram& shaderProgram, Scene& scene, Viewport& viewport, Camera& camera) override;
             void renderSunLight(Camera& c, SunLight& s, Viewport& viewport) override;

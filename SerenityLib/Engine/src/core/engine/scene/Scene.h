@@ -35,7 +35,6 @@ namespace Engine::priv {
 #include <core/engine/resources/Resource.h>
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/events/Observer.h>
-#include <functional>
 
 class Scene: public Resource, public Observer {
     friend class  Engine::priv::RenderGraph;

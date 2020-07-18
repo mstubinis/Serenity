@@ -4,11 +4,6 @@
 
 class Mesh;
 
-#include <vector>
-#include <string>
-#include <memory>
-#include <unordered_map>
-
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>

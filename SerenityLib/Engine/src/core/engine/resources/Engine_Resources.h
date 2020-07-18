@@ -25,9 +25,6 @@ class  ShaderProgram;
 #include <core/engine/shaders/ShaderIncludes.h>
 #include <core/engine/resources/ResourcePool.h>
 #include <core/engine/utils/Utils.h>
-#include <list>
-
-#include <glm/vec2.hpp>
 
 namespace Engine{
     namespace priv{

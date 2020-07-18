@@ -1,9 +1,10 @@
+#include "core/engine/utils/PrecompiledHeader.h"
+
 #include <core/engine/events/EventModule.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/system/window/Window.h>
 
 #include <SFML/Window.hpp>
-#include <unordered_map>
 
 using namespace Engine;
 using namespace Engine::priv;

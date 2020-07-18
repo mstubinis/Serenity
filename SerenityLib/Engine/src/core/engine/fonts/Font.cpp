@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/fonts/Font.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/textures/Texture.h>
@@ -5,9 +6,6 @@
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/filesystem.hpp>
-
-#include <sstream>
-#include <iostream>
 
 #include <ft2build.h>
 #include <freetype/freetype.h> //can be replaced with #include FT_FREETYPE_H

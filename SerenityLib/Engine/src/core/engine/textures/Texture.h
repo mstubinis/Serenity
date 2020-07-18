@@ -10,13 +10,8 @@ namespace Engine::priv {
 #include <core/engine/resources/Resource.h>
 #include <core/engine/renderer/GLImageConstants.h>
 
-#include <glm/vec2.hpp>
-#include <glm/vec4.hpp>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-#include <memory>
-#include <queue>
-#include <functional>
 
 class Texture: public Resource {
     friend struct Engine::priv::TextureLoader;
@@ -83,6 +78,7 @@ class Texture: public Resource {
         unsigned int width() const;
         unsigned int height() const;
         glm::uvec2 size() const;
+        glm::vec2 sizeAsRatio() const;
         size_t numAddresses() const;
         bool mipmapped() const;
         bool compressed() const;

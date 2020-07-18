@@ -6,12 +6,6 @@ class Texture;
 struct FT_GlyphSlotRec_;
 
 #include <core/engine/resources/Resource.h>
-#include <string>
-#include <unordered_map>
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
-
 #include <core/engine/fonts/FontIncludes.h>
 
 struct CharGlyph final {

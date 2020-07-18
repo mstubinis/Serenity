@@ -3,7 +3,6 @@
 #define ENGINE_EVENTS_KEYBOARD_MODULE_H
 
 #include <core/engine/input/Keyboard/KeyboardKeys.h>
-#include <array>
 
 namespace Engine::priv {
     class KeyboardModule {

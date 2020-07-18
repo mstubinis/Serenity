@@ -2,8 +2,6 @@
 #ifndef ENGINE_SHADERS_HELPER_H
 #define ENGINE_SHADERS_HELPER_H
 
-#include <string>
-
 namespace Engine::priv {
     class ShaderHelper final {
         public:

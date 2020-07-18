@@ -9,8 +9,6 @@ namespace Engine::priv {
     class Renderer;
 };
 
-#include <glm/vec4.hpp>
-
 struct ViewportRenderingFlag final { enum Flag: unsigned short {
     GodRays      = 1 << 0,
     SSAO         = 1 << 1,

@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/renderer/postprocess/SSAO.h>
 #include <core/engine/renderer/opengl/Extensions.h>
 #include <core/engine/renderer/GBuffer.h>
@@ -10,9 +11,6 @@
 #include <core/engine/threading/ThreadingModule.h>
 #include <core/engine/resources/Engine_BuiltInShaders.h>
 #include <core/engine/resources/Engine_Resources.h>
-
-#include <glm/vec4.hpp>
-#include <random>
 
 using namespace std;
 using namespace Engine::priv;

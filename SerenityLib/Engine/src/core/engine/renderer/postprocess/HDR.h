@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_RENDERER_POSTPROCESS_HDR_H_INCLUDE_GUARD
-#define ENGINE_RENDERER_POSTPROCESS_HDR_H_INCLUDE_GUARD
+#ifndef ENGINE_RENDERER_POSTPROCESS_HDR_H
+#define ENGINE_RENDERER_POSTPROCESS_HDR_H
 
 class  ShaderProgram;
 class  Shader;
@@ -13,8 +13,6 @@ struct HDRAlgorithm { enum Algorithm : unsigned char {
     Exposure, 
     Uncharted,
 };};
-
-#include <string>
 
 namespace Engine::priv {
     class  GBuffer;

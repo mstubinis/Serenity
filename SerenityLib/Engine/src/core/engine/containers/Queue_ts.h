@@ -2,12 +2,6 @@
 #ifndef ENGINE_CONTAINERS_QUEUE_THREAD_SAFE_H
 #define ENGINE_CONTAINERS_QUEUE_THREAD_SAFE_H
 
-#include <queue>
-#include <memory>
-#include <mutex>
-#include <condition_variable>
-#include <optional>
-
 namespace Engine {
     template<typename T> class queue_ts {
         private:

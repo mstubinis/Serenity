@@ -1,9 +1,8 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/renderer/FramebufferObject.h>
 #include <core/engine/renderer/Renderer.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/textures/Texture.h>
-
-#include <iostream>
 
 using namespace Engine;
 using namespace std;

@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <ecs/ECSRegistry.h>
 
 using namespace Engine::priv;

@@ -4,10 +4,6 @@
 
 class LUAState;
 
-#include <string>
-#include <vector>
-#include <iostream>
-
 #include <core/engine/lua/LuaIncludes.h>
 #include <core/engine/lua/LuaState.h>
 

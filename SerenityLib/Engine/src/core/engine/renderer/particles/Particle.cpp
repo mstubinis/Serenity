@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/renderer/particles/Particle.h>
 #include <core/engine/renderer/particles/ParticleEmitter.h>
 #include <core/engine/renderer/particles/ParticleEmissionProperties.h>
@@ -11,8 +12,6 @@
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/math/Engine_Math.h>
-
-#include <iostream>
 
 using namespace std;
 using namespace Engine;

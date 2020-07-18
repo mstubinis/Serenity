@@ -1,14 +1,11 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/materials/MaterialRequest.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/materials/MaterialLoader.h>
 #include <core/engine/materials/MaterialComponent.h>
 #include <core/engine/textures/Texture.h>
-
 #include <core/engine/system/Engine.h>
-
 #include <boost/filesystem.hpp>
-
-#include <iostream>
 
 using namespace std;
 using namespace Engine;

@@ -1,3 +1,4 @@
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/lights/RodLight.h>
 #include <core/engine/utils/Utils.h>
 #include <ecs/ComponentBody.h>

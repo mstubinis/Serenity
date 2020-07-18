@@ -18,13 +18,9 @@ namespace Engine::priv {
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-#include <glm/vec4.hpp>
-#include <glm/vec3.hpp>
-#include <vector>
 
 #include <core/engine/resources/Resource.h>
 #include <core/engine/materials/MaterialEnums.h>
-#include <functional>
 
 class Material final : public Resource {
     friend struct Engine::priv::DefaultMaterialBindFunctor;

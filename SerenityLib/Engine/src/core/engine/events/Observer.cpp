@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/events/Observer.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/events/EventDispatcher.h>

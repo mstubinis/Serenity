@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/system/Engine.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/textures/DDS.h>
@@ -7,9 +8,6 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-
-#include <iostream>
-#include <fstream>
 
 using namespace Engine;
 using namespace Engine::priv;
@@ -169,7 +167,10 @@ void Texture::setAnisotropicFiltering(float anisotropicFiltering){
         }
     }
 }
-
+glm::vec2 Texture::sizeAsRatio() const {
+    float max_val = glm::max((float)size().x, (float)size().y);
+    return glm::vec2(glm::vec2(size()) / max_val);
+}
 bool Texture::mipmapped() const {
     return m_Mipmapped; 
 }

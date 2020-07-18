@@ -1,6 +1,7 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/renderer/opengl/State.h>
 
-#include <glm/glm.hpp>
+//#include <glm/glm.hpp>
 
 using namespace Engine;
 using namespace Engine::priv;
@@ -8,16 +9,16 @@ using namespace Engine::priv;
 unsigned int OpenGLState::MAX_TEXTURE_UNITS = 0;
 
 
-void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth, const unsigned int& windowHeight) {
+void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(unsigned int windowWidth, unsigned int windowHeight) {
     GLint     int_value;
     //GLfloat   float_value;
     //GLboolean boolean_value;
 
-    viewportState = ViewportState(static_cast<GLsizei>(windowWidth), static_cast<GLsizei>(windowHeight));
+    viewportState = ViewportState((GLsizei)windowWidth, (GLsizei)windowHeight);
 
     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &int_value); //what about GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS?
     textureUnits.reserve(int_value);
-    MAX_TEXTURE_UNITS = glm::max(MAX_TEXTURE_UNITS, static_cast<unsigned int>(int_value));
+    MAX_TEXTURE_UNITS = glm::max(MAX_TEXTURE_UNITS, (unsigned int)int_value);
     for (unsigned int i = 0; i < textureUnits.capacity(); ++i) {
         textureUnits.push_back(TextureUnitState());
     }
@@ -43,7 +44,7 @@ void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth,
 
     GL_RESTORE_DEFAULT_STATE_MACHINE(windowWidth, windowHeight);
 }
-void OpenGLState::GL_RESTORE_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth, const unsigned int& windowHeight) {
+void OpenGLState::GL_RESTORE_DEFAULT_STATE_MACHINE(unsigned int windowWidth, unsigned int windowHeight) {
     glewExperimental = GL_TRUE;
     glewInit(); glGetError();//stupid glew always inits an error. nothing we can do about it.
 
@@ -61,7 +62,7 @@ void OpenGLState::GL_RESTORE_DEFAULT_STATE_MACHINE(const unsigned int& windowWid
     GL_glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     GL_glUseProgram(0);
     GL_glBindVertexArray(0);
-    GL_glViewport(0, 0, static_cast<GLsizei>(windowWidth), static_cast<GLsizei>(windowHeight));
+    GL_glViewport(0, 0, (GLsizei)windowWidth, (GLsizei)windowHeight);
     GL_glCullFace(GL_BACK);
     GL_glFrontFace(GL_CCW);
     GL_glDepthFunc(GL_LESS);
@@ -184,20 +185,20 @@ void OpenGLState::GL_RESTORE_CURRENT_STATE_MACHINE() {
     for (unsigned int i = 0; i < blendEquationState.capacity(); ++i)
         glBlendEquationi(i, blendEquationState[i].mode);
 }
-const bool OpenGLState::GL_glActiveTexture(const GLenum& textureUnit) {
+bool OpenGLState::GL_glActiveTexture(GLenum textureUnit) {
     currentTextureUnit = textureUnit;
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     return true;
 }
 
-const bool OpenGLState::GL_glBindTextureForModification(const GLenum& textureTarget, const GLuint& textureObject) {
-    const auto unit = static_cast<GLenum>(textureUnits.capacity() - 1);
+bool OpenGLState::GL_glBindTextureForModification(GLenum textureTarget, GLuint textureObject) {
+    const auto unit = (GLenum)(textureUnits.capacity() - 1);
     currentTextureUnit = unit;
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(textureTarget, textureObject);
     return true;
 }
-const bool OpenGLState::GL_glBindTextureForRendering(const GLenum& textureTarget, const GLuint& textureObject) {
+bool OpenGLState::GL_glBindTextureForRendering(GLenum textureTarget, GLuint textureObject) {
     auto& unit = textureUnits[currentTextureUnit];
     switch (textureTarget) {
         case GL_TEXTURE_1D: {
@@ -226,12 +227,12 @@ const bool OpenGLState::GL_glBindTextureForRendering(const GLenum& textureTarget
     }
     return false;
 }
-const bool OpenGLState::GL_glClearColor(const GLfloat& r, const GLfloat& g, const GLfloat& b, const GLfloat& a) {
+bool OpenGLState::GL_glClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a) {
     //Values are clamped to the range [0,1]
-    const GLfloat _r = glm::clamp(r, 0.0f, 1.0f);
-    const GLfloat _g = glm::clamp(g, 0.0f, 1.0f);
-    const GLfloat _b = glm::clamp(b, 0.0f, 1.0f);
-    const GLfloat _a = glm::clamp(a, 0.0f, 1.0f);
+    GLfloat _r = glm::clamp(r, 0.0f, 1.0f);
+    GLfloat _g = glm::clamp(g, 0.0f, 1.0f);
+    GLfloat _b = glm::clamp(b, 0.0f, 1.0f);
+    GLfloat _a = glm::clamp(a, 0.0f, 1.0f);
     if (_r == clearColor.r && _g == clearColor.g && _b == clearColor.b && _a == clearColor.a) {
         return false;
     }
@@ -242,7 +243,7 @@ const bool OpenGLState::GL_glClearColor(const GLfloat& r, const GLfloat& g, cons
     clearColor.a = _a;
     return true;
 }
-const bool OpenGLState::GL_glColorMask(const GLboolean& r, const GLboolean& g, const GLboolean& b, const GLboolean& a) {
+bool OpenGLState::GL_glColorMask(GLboolean r, GLboolean g, GLboolean b, GLboolean a) {
     if (r == colorMaskState.r && g == colorMaskState.g && b == colorMaskState.b && a == colorMaskState.a)
         return false;
     glColorMask(r, g, b, a);
@@ -252,9 +253,9 @@ const bool OpenGLState::GL_glColorMask(const GLboolean& r, const GLboolean& g, c
     colorMaskState.a = a;
     return true;
 }
-const bool OpenGLState::GL_glClearDepth(const GLdouble& depth) {
+bool OpenGLState::GL_glClearDepth(GLdouble depth) {
     //Values are clamped to the range [0,1]
-    const GLdouble d = glm::clamp(depth, 0.0, 1.0);
+    GLdouble d = glm::clamp(depth, 0.0, 1.0);
     if (clearDepth.depth == d) {
         return false;
     }
@@ -262,9 +263,9 @@ const bool OpenGLState::GL_glClearDepth(const GLdouble& depth) {
     glClearDepth(d);
     return true;
 }
-const bool OpenGLState::GL_glClearDepthf(const GLfloat& depth_float) {
+bool OpenGLState::GL_glClearDepthf(GLfloat depth_float) {
     //Values are clamped to the range [0,1]
-    const GLfloat f = glm::clamp(depth_float, 0.0f, 1.0f);
+    GLfloat f = glm::clamp(depth_float, 0.0f, 1.0f);
     if (clearDepth.depthf == f) {
         return false;
     }
@@ -272,7 +273,7 @@ const bool OpenGLState::GL_glClearDepthf(const GLfloat& depth_float) {
     glClearDepthf(f);
     return true;
 }
-const bool OpenGLState::GL_glClearStencil(const GLint& stencil) {
+bool OpenGLState::GL_glClearStencil(GLint stencil) {
     if (clearStencil.stencil == stencil) {
         return false;
     }
@@ -280,7 +281,7 @@ const bool OpenGLState::GL_glClearStencil(const GLint& stencil) {
     glClearStencil(stencil);
     return true;
 }
-const bool OpenGLState::GL_glStencilMaskSeparate(const GLenum& face, const GLuint& mask) {
+bool OpenGLState::GL_glStencilMaskSeparate(GLenum face, GLuint mask) {
     switch (face) {
         case GL_FRONT: {
             if (stencilMask.front_mask != mask) {
@@ -313,7 +314,7 @@ const bool OpenGLState::GL_glStencilMaskSeparate(const GLenum& face, const GLuin
     }
     return false;
 }
-const bool OpenGLState::GL_glStencilMask(const GLuint& mask) {
+bool OpenGLState::GL_glStencilMask(GLuint mask) {
     if (stencilMask.back_mask != mask || stencilMask.front_mask != mask) {
         glStencilMask(mask);
         stencilMask.front_mask = mask;
@@ -322,7 +323,7 @@ const bool OpenGLState::GL_glStencilMask(const GLuint& mask) {
     }
     return false;
 }
-const bool OpenGLState::GL_glStencilOp(const GLenum& sfail, const GLenum& dpfail, const GLenum& dppass) {
+bool OpenGLState::GL_glStencilOp(GLenum sfail, GLenum dpfail, GLenum dppass) {
     if (stencilOp.sFail_back != sfail || stencilOp.sFail_front != sfail || stencilOp.dpPass_back != dppass || stencilOp.dpPass_front != dppass || stencilOp.dpFail_back != dpfail || stencilOp.dpFail_front != dpfail) {
         glStencilOp(sfail, dpfail, dppass);
         stencilOp.dpFail_back = dpfail;
@@ -335,7 +336,7 @@ const bool OpenGLState::GL_glStencilOp(const GLenum& sfail, const GLenum& dpfail
     }
     return false;
 }
-const bool OpenGLState::GL_glStencilOpSeparate(const GLenum& face, const GLenum& sfail, const GLenum& dpfail, const GLenum& dppass) {
+bool OpenGLState::GL_glStencilOpSeparate(GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass) {
     switch (face) {
         case GL_FRONT: {
             if (stencilOp.sFail_front != sfail || stencilOp.dpPass_front != dppass || stencilOp.dpFail_front != dpfail) {
@@ -346,8 +347,7 @@ const bool OpenGLState::GL_glStencilOpSeparate(const GLenum& face, const GLenum&
                 return true;
             }
             break;
-        }
-        case GL_BACK: {
+        }case GL_BACK: {
             if (stencilOp.sFail_back != sfail || stencilOp.dpPass_back != dppass || stencilOp.dpFail_back != dpfail) {
                 glStencilOpSeparate(GL_BACK, sfail, dpfail, dppass);
                 stencilOp.dpFail_back = dpfail;
@@ -359,8 +359,7 @@ const bool OpenGLState::GL_glStencilOpSeparate(const GLenum& face, const GLenum&
                 return true;
             }
             break;
-        }
-        case GL_FRONT_AND_BACK: {
+        }case GL_FRONT_AND_BACK: {
             if (stencilOp.sFail_back != sfail || stencilOp.sFail_front != sfail || stencilOp.dpPass_back != dppass || stencilOp.dpPass_front != dppass || stencilOp.dpFail_back != dpfail || stencilOp.dpFail_front != dpfail) {
                 glStencilOpSeparate(GL_FRONT_AND_BACK, sfail, dpfail, dppass);
                 stencilOp.dpFail_back = dpfail;
@@ -372,14 +371,13 @@ const bool OpenGLState::GL_glStencilOpSeparate(const GLenum& face, const GLenum&
                 return true;
             }
             break;
-        }
-        default: {
+        }default: {
             break;
         }
     }
     return false;
 }
-const bool OpenGLState::GL_glUseProgram(const GLuint& program) {
+bool OpenGLState::GL_glUseProgram(GLuint program) {
     if (useProgram.program != program) {
         glUseProgram(program);
         useProgram.program = program;
@@ -387,7 +385,7 @@ const bool OpenGLState::GL_glUseProgram(const GLuint& program) {
     }
     return false;
 }
-const bool OpenGLState::GL_glBindVertexArray(const GLuint& vao) {
+bool OpenGLState::GL_glBindVertexArray(GLuint vao) {
     if (vaoState.vao != vao) {
         glBindVertexArray(vao);
         vaoState.vao = vao;
@@ -395,7 +393,7 @@ const bool OpenGLState::GL_glBindVertexArray(const GLuint& vao) {
     }
     return false;
 }
-const bool OpenGLState::GL_glViewport(const GLint& x, const GLint& y, const GLsizei& width, const GLsizei& height) {
+bool OpenGLState::GL_glViewport(GLint x, GLint y, GLsizei width, GLsizei height) {
     // Viewport width and height are silently clamped to a range that depends on the implementation.To query this range, call glGet with argument GL_MAX_VIEWPORT_DIMS.
     if (x == viewportState.x && y == viewportState.y && width == viewportState.width && height == viewportState.height) {
         return false;
@@ -407,7 +405,7 @@ const bool OpenGLState::GL_glViewport(const GLint& x, const GLint& y, const GLsi
     viewportState.height = height;
     return true;
 }
-const bool OpenGLState::GL_glCullFace(const GLenum& mode) {
+bool OpenGLState::GL_glCullFace(GLenum mode) {
     if (cullFaceState.mode != mode) {
         glCullFace(mode);
         cullFaceState.mode = mode;
@@ -415,7 +413,7 @@ const bool OpenGLState::GL_glCullFace(const GLenum& mode) {
     }
     return false;
 }
-const bool OpenGLState::GL_glFrontFace(const GLenum& mode) {
+bool OpenGLState::GL_glFrontFace(GLenum mode) {
     if (frontFaceState.mode != mode) {
         glFrontFace(mode);
         frontFaceState.mode = mode;
@@ -423,7 +421,7 @@ const bool OpenGLState::GL_glFrontFace(const GLenum& mode) {
     }
     return false;
 }
-const bool OpenGLState::GL_glDepthFunc(const GLenum& func) {
+bool OpenGLState::GL_glDepthFunc(GLenum func) {
     if (depthFuncState.func != func) {
         glDepthFunc(func);
         depthFuncState.func = func;
@@ -431,7 +429,7 @@ const bool OpenGLState::GL_glDepthFunc(const GLenum& func) {
     }
     return false;
 }
-const bool OpenGLState::GL_glPixelStorei(const GLenum& pname, const GLint& param) {
+bool OpenGLState::GL_glPixelStorei(GLenum pname, GLint param) {
     if (param != 1 && param != 2 && param != 4 && param != 8)
         return false;
     switch (pname) {
@@ -455,7 +453,7 @@ const bool OpenGLState::GL_glPixelStorei(const GLenum& pname, const GLint& param
     }
     return false;
 }
-const bool OpenGLState::GL_glStencilFuncSeparate(const GLenum& face, const GLenum& func, const GLint& ref, const GLuint& mask) {
+bool OpenGLState::GL_glStencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint mask) {
     switch (face) {
         case GL_FRONT: {
             if (stencilFuncState.func_front != func || stencilFuncState.ref_front != ref || stencilFuncState.mask_front != mask) {
@@ -466,8 +464,7 @@ const bool OpenGLState::GL_glStencilFuncSeparate(const GLenum& face, const GLenu
                 return true;
             }
             break;
-        }
-        case GL_BACK: {
+        }case GL_BACK: {
             if (stencilFuncState.func_back != func || stencilFuncState.ref_back != ref || stencilFuncState.mask_back != mask) {
                 glStencilFuncSeparate(face, func, ref, mask);
                 stencilFuncState.func_back = func;
@@ -476,8 +473,7 @@ const bool OpenGLState::GL_glStencilFuncSeparate(const GLenum& face, const GLenu
                 return true;
             }
             break;
-        }
-        case GL_FRONT_AND_BACK: {
+        }case GL_FRONT_AND_BACK: {
             if (stencilFuncState.func_front != func || stencilFuncState.ref_front != ref || stencilFuncState.mask_front != mask || stencilFuncState.func_back != func || stencilFuncState.ref_back != ref || stencilFuncState.mask_back != mask) {
                 glStencilFuncSeparate(face, func, ref, mask);
                 stencilFuncState.func_back = func;
@@ -489,14 +485,13 @@ const bool OpenGLState::GL_glStencilFuncSeparate(const GLenum& face, const GLenu
                 return true;
             }
             break;
-        }
-        default: {
+        }default: {
             break;
         }
     }
     return false;
 }
-const bool OpenGLState::GL_glStencilFunc(const GLenum& func, const GLint& ref, const GLuint& mask) {
+bool OpenGLState::GL_glStencilFunc(GLenum func, GLint ref, GLuint mask) {
     if (stencilFuncState.func_front != func || stencilFuncState.ref_front != ref || stencilFuncState.mask_front != mask || stencilFuncState.func_back != func || stencilFuncState.ref_back != ref || stencilFuncState.mask_back != mask) {
         glStencilFunc(func, ref, mask);
         stencilFuncState.func_back = func;
@@ -509,9 +504,7 @@ const bool OpenGLState::GL_glStencilFunc(const GLenum& func, const GLint& ref, c
     }
     return false;
 }
-
-
-const bool OpenGLState::GL_glEnable(const GLenum& capability) {
+bool OpenGLState::GL_glEnable(GLenum capability) {
     const auto& boolean = GL_TRUE;
     switch (capability) {
         case GL_MULTISAMPLE: {
@@ -750,7 +743,7 @@ const bool OpenGLState::GL_glEnable(const GLenum& capability) {
     }
     return false;
 }
-const bool OpenGLState::GL_glDisable(const GLenum& capability) {
+bool OpenGLState::GL_glDisable(GLenum capability) {
     const auto& boolean = GL_FALSE;
     switch (capability) {
         case GL_MULTISAMPLE: {
@@ -989,8 +982,7 @@ const bool OpenGLState::GL_glDisable(const GLenum& capability) {
     }
     return false;
 }
-
-const bool OpenGLState::GL_glEnablei(const GLenum& capability, const GLuint& index) {
+bool OpenGLState::GL_glEnablei(GLenum capability, GLuint index) {
     const auto& boolean = GL_TRUE;
     switch (capability) {
         case GL_BLEND: {
@@ -1015,7 +1007,7 @@ const bool OpenGLState::GL_glEnablei(const GLenum& capability, const GLuint& ind
     }
     return false;
 }
-const bool OpenGLState::GL_glDisablei(const GLenum& capability, const GLuint& index) {
+bool OpenGLState::GL_glDisablei(GLenum capability, GLuint index) {
     const auto& boolean = GL_FALSE;
     switch (capability) {
         case GL_BLEND: {
@@ -1040,7 +1032,7 @@ const bool OpenGLState::GL_glDisablei(const GLenum& capability, const GLuint& in
     }
     return false;
 }
-const bool OpenGLState::GL_glBindFramebuffer(const GLenum& target, const GLuint& framebuffer) {
+bool OpenGLState::GL_glBindFramebuffer(GLenum target, GLuint framebuffer) {
     switch (target) {
         case GL_READ_FRAMEBUFFER: {
             if (framebufferState.framebuffer_read != framebuffer) {
@@ -1076,7 +1068,7 @@ const bool OpenGLState::GL_glBindFramebuffer(const GLenum& target, const GLuint&
     }
     return false;
 }
-const bool OpenGLState::GL_glBindRenderbuffer(const GLuint& renderBuffer) {
+bool OpenGLState::GL_glBindRenderbuffer(GLuint renderBuffer) {
     if (framebufferState.renderbuffer != renderBuffer) {
         glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
         framebufferState.renderbuffer = renderBuffer;
@@ -1084,7 +1076,7 @@ const bool OpenGLState::GL_glBindRenderbuffer(const GLuint& renderBuffer) {
     }
     return false;
 }
-const bool OpenGLState::GL_glBlendEquation(const GLenum& mode) {
+bool OpenGLState::GL_glBlendEquation(GLenum mode) {
     unsigned int buf = 0;
     for (auto& state : blendEquationState) {
         if (state.mode != mode) {
@@ -1095,7 +1087,7 @@ const bool OpenGLState::GL_glBlendEquation(const GLenum& mode) {
     }
     return true;
 }
-const bool OpenGLState::GL_glBlendEquationi(const GLuint& buf, const GLenum& mode) {
+bool OpenGLState::GL_glBlendEquationi(GLuint buf, GLenum mode) {
     auto& state = blendEquationState[buf];
     if (state.mode != mode) {
         glBlendEquationi(buf, mode);

@@ -2,11 +2,7 @@
 #ifndef ENGINE_MESH_ANIMATION_INCLUDES_H
 #define ENGINE_MESH_ANIMATION_INCLUDES_H
 
-#include <string>
-#include <vector>
-#include <glm/mat4x4.hpp>
 #include <assimp/scene.h>
-#include <unordered_map>
 
 namespace Engine::priv {
     struct BoneInfo final {

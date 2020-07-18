@@ -6,7 +6,6 @@ class  Observer;
 struct Event;
 
 #include <core/engine/events/EventIncludes.h>
-#include <vector>
 
 namespace Engine::priv{
     class EventDispatcher final : public Engine::NonCopyable, public Engine::NonMoveable{

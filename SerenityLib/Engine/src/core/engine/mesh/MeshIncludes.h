@@ -6,7 +6,6 @@
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <glm/glm.hpp>
-#include <array>
 
 constexpr unsigned int NUM_BONES_PER_VERTEX   = 4U;
 constexpr unsigned int NUM_MAX_INSTANCES      = 65536U;

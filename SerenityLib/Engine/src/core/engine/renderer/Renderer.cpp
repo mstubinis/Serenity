@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/system/EngineOptions.h>
 #include <core/engine/renderer/Renderer.h>
 #include <core/engine/math/Engine_Math.h>

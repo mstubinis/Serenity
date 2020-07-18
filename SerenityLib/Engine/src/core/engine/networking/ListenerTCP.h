@@ -10,7 +10,6 @@ namespace Engine::priv {
 }
 
 #include <core/engine/networking/SocketInterface.h>
-#include <string>
 
 namespace Engine::Networking {
     class ListenerTCP : public ISocket, public Engine::NonCopyable {

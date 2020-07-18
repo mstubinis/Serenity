@@ -12,17 +12,8 @@ namespace Engine::priv {
     class Renderer;
 };
 
-#include <vector>
-#include <unordered_map>
-#include <stack>
-#include <mutex>
-
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
-#include <glm/gtc/quaternion.hpp>
 #include <core/engine/renderer/particles/Particle.h>
 #include <core/engine/renderer/particles/ParticleEmitter.h>
-//#include <ecs/Entity.h>
 
 struct Entity;
 

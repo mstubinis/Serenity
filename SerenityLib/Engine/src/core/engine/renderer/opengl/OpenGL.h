@@ -4,8 +4,6 @@
 
 class Window;
 
-#include <string>
-
 namespace Engine::priv {
     class OpenGL final {
         private:

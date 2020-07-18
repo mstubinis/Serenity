@@ -10,8 +10,6 @@ namespace Engine::priv {
 };
 
 #include <ecs/Entity.h>
-#include <mutex>
-#include <functional>
 
 /*
 Class that spawns particles

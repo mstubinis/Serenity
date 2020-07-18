@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/renderer/pipelines/DeferredPipeline.h>
 #include <core/engine/renderer/opengl/UniformBufferObject.h>
 #include <core/engine/system/Engine.h>
@@ -32,9 +33,6 @@
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <SFML/Graphics/Image.hpp>
-#include <glm/gtx/norm.hpp>
-#include <execution>
-
 
 using namespace std;
 using namespace Engine;
@@ -43,7 +41,7 @@ using namespace Engine::Renderer;
 
 priv::DeferredPipeline* pipeline = nullptr;
 
-constexpr glm::mat4 CAPTURE_VEIWS[6] = {
+constexpr std::array<glm::mat4, 6> CAPTURE_VIEWS = {
     glm::mat4(0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
     glm::mat4(0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
     glm::mat4(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
@@ -105,15 +103,15 @@ struct ShaderProgramEnum final { enum Program : unsigned int {
     _TOTAL,
 };};
 
-void GLScissorDisable() {
-    const auto winSize = Resources::getWindowSize();
+void GLScissorDisable() noexcept {
+    auto winSize = Resources::getWindowSize();
     glScissor(0, 0, winSize.x, winSize.y);
 }
-void GLScissor(const glm::vec4& s) {
+void GLScissor(const glm::vec4& s) noexcept {
     if (s == glm::vec4(-1.0f)) {
         GLScissorDisable();
     }else{
-        glScissor(static_cast<GLint>(s.x), static_cast<GLint>(s.y), static_cast<GLsizei>(s.z), static_cast<GLsizei>(s.w));
+        glScissor((GLint)s.x, (GLint)s.y, (GLsizei)s.z, (GLsizei)s.w);
     }
 }
 
@@ -142,7 +140,7 @@ DeferredPipeline::~DeferredPipeline() {
 
 void DeferredPipeline::init() {
     const auto window_size = Engine::Resources::getWindowSize();
-    m_2DProjectionMatrix   = glm::ortho(0.0f, static_cast<float>(window_size.x), 0.0f, static_cast<float>(window_size.y), 0.005f, 3000.0f);
+    m_2DProjectionMatrix   = glm::ortho(0.0f, (float)window_size.x, 0.0f, (float)window_size.y, 0.005f, 3000.0f);
 
     float init_border_color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
     m_InternalShaders.resize(ShaderEnum::_TOTAL, nullptr);
@@ -181,7 +179,7 @@ void DeferredPipeline::init() {
     GodRays::godRays.init_shaders();
     SMAA::smaa.init_shaders();
 
-    auto emplaceShader = [](const unsigned int index, const string& str, vector<Shader*>& collection, const ShaderType::Type type) {
+    auto emplaceShader = [](unsigned int index, const string& str, vector<Shader*>& collection, ShaderType::Type type) {
         Shader* s = NEW Shader(str, type, false);
         collection[index] = s;
     };
@@ -218,8 +216,7 @@ void DeferredPipeline::init() {
     priv::threading::addJob([&]() {emplaceShader(25, EShaders::particle_frag, m_InternalShaders, ShaderType::Fragment); });
 
     priv::threading::waitForAll();
-
-    
+  
     ShaderProgram::Deferred = NEW ShaderProgram("Deferred", *m_InternalShaders[ShaderEnum::VertexBasic], *m_InternalShaders[ShaderEnum::DeferredFrag]);
     ShaderProgram::Forward = NEW ShaderProgram("Forward", *m_InternalShaders[ShaderEnum::VertexBasic], *m_InternalShaders[ShaderEnum::ForwardFrag]);
     ShaderProgram::Decal = NEW ShaderProgram("Decal", *m_InternalShaders[ShaderEnum::DecalVertex], *m_InternalShaders[ShaderEnum::DecalFrag]);
@@ -242,7 +239,6 @@ void DeferredPipeline::init() {
     m_InternalShaderPrograms[ShaderProgramEnum::Particle] = NEW ShaderProgram("Particle", *m_InternalShaders[ShaderEnum::ParticleVertex], *m_InternalShaders[ShaderEnum::ParticleFrag]);
 
 
-
     sf::Image sfImageWhite;
     sfImageWhite.create(2, 2, sf::Color::White);
     sf::Image sfImageBlack;
@@ -260,7 +256,6 @@ void DeferredPipeline::init() {
             ++count;
         }
     }
-
 
     Texture::White = NEW Texture(sfImageWhite, "WhiteTexturePlaceholder", false, ImageInternalFormat::RGBA8);
     Texture::Black = NEW Texture(sfImageBlack, "BlackTexturePlaceholder", false, ImageInternalFormat::RGBA8);
@@ -323,9 +318,9 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
     m_Renderer.bind(&covoludeShaderProgram);
 
     Engine::Renderer::sendTexture("cubemap", texture.address(), 0, texType);
-    Engine::Renderer::setViewport(0.0f, 0.0f, static_cast<float>(size), static_cast<float>(size));
+    Engine::Renderer::setViewport(0.0f, 0.0f, (float)size, (float)size);
     for (unsigned int i = 0; i < 6; ++i) {
-        glm::mat4 vp = captureProjection * CAPTURE_VEIWS[i];
+        glm::mat4 vp = captureProjection * CAPTURE_VIEWS[i];
         Engine::Renderer::sendUniformMatrix4("VP", vp);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture.address(1), 0);
         Engine::Renderer::Settings::clear(true, true, false);
@@ -345,14 +340,14 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
     Engine::Renderer::sendUniform1("NUM_SAMPLES", 32);
     unsigned int maxMipLevels = 5;
     for (unsigned int m = 0; m < maxMipLevels; ++m) {
-        const unsigned int mipSize(size * static_cast<unsigned int>(glm::pow(0.5, m))); // reisze framebuffer according to mip-level size.
+        const unsigned int mipSize(size * (unsigned int)glm::pow(0.5, m)); // reisze framebuffer according to mip-level size.
         fbo.resize(mipSize, mipSize);
-        float roughness = static_cast<float>(m) / static_cast<float>(maxMipLevels - 1);
+        float roughness = (float)m / (float)(maxMipLevels - 1);
         Engine::Renderer::sendUniform1("roughness", roughness);
         float a = roughness * roughness;
         Engine::Renderer::sendUniform1("a2", a * a);
         for (unsigned int i = 0; i < 6; ++i) {
-            glm::mat4 vp = captureProjection * CAPTURE_VEIWS[i];
+            glm::mat4 vp = captureProjection * CAPTURE_VIEWS[i];
             Engine::Renderer::sendUniformMatrix4("VP", vp);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture.address(2), m);
             Engine::Renderer::Settings::clear(true, true, false);
@@ -398,7 +393,7 @@ unsigned int DeferredPipeline::getMaxNumTextureUnits() {
     return Engine::priv::OpenGLState::MAX_TEXTURE_UNITS;
 }
 void DeferredPipeline::restoreDefaultState() {
-    const auto winWidth = Resources::getWindowSize();
+    auto winWidth = Resources::getWindowSize();
     m_OpenGLStateMachine.GL_RESTORE_DEFAULT_STATE_MACHINE(winWidth.x, winWidth.y);
 }
 void DeferredPipeline::restoreCurrentState() {
@@ -409,7 +404,7 @@ void DeferredPipeline::clear2DAPI() {
     m_2DAPICommands.clear();
 }
 void DeferredPipeline::sort2DAPI() {
-    const auto& lambda_sorter = [&](const API2DCommand& lhs, const API2DCommand& rhs) {
+    auto lambda_sorter = [&](const API2DCommand& lhs, const API2DCommand& rhs) {
         return lhs.depth > rhs.depth;
     };
     std::sort(std::execution::par_unseq, m_2DAPICommands.begin(),            m_2DAPICommands.end(),            lambda_sorter);
@@ -437,12 +432,7 @@ bool DeferredPipeline::setDepthFunction(unsigned int depthFunction) {
     return m_OpenGLStateMachine.GL_glDepthFunc(depthFunction);
 }
 bool DeferredPipeline::setViewport(float x, float y, float width, float height) {
-    return m_OpenGLStateMachine.GL_glViewport(
-        static_cast<GLint>(x), 
-        static_cast<GLint>(y), 
-        static_cast<GLsizei>(width), 
-        static_cast<GLsizei>(height)
-    );
+    return m_OpenGLStateMachine.GL_glViewport((GLint)x, (GLint)y, (GLsizei)width, (GLsizei)height);
 }
 void DeferredPipeline::clear(bool color, bool depth, bool stencil) {
     if (!color && !depth && !stencil) {
@@ -589,10 +579,9 @@ void DeferredPipeline::onFullscreen() {
     m_GBuffer.init(winSize.x, winSize.y);
 }
 void DeferredPipeline::onResize(unsigned int newWidth, unsigned int newHeight) {
-    float floatWidth  = (float)newWidth;
-    float floatHeight = (float)newHeight;
-
-    m_2DProjectionMatrix    = glm::ortho(0.0f, floatWidth, 0.0f, floatHeight, 0.005f, 3000.0f);
+    float floatWidth     = (float)newWidth;
+    float floatHeight    = (float)newHeight;
+    m_2DProjectionMatrix = glm::ortho(0.0f, floatWidth, 0.0f, floatHeight, 0.005f, 3000.0f);
 
     m_FullscreenQuad.changeDimensions(floatWidth, floatHeight);
     m_FullscreenTriangle.changeDimensions(floatWidth, floatHeight);
@@ -719,8 +708,8 @@ int DeferredPipeline::sendGPUDataRodLight(Camera& camera, RodLight& rodLight, co
     }
     return 2;
 }
-void DeferredPipeline::sendGPUDataProjectionLight(Camera& camera, ProjectionLight& rodLight, const string& start) {
-
+int DeferredPipeline::sendGPUDataProjectionLight(Camera& camera, ProjectionLight& rodLight, const string& start) {
+    return 2;
 }
 
 void DeferredPipeline::renderDirectionalLight(Camera& c, DirectionalLight& d, Viewport& viewport) {
@@ -831,21 +820,34 @@ void DeferredPipeline::renderProjectionLight(Camera& c, ProjectionLight& project
     if (!projectionLight.isActive()) {
         return;
     }
-    projectionLight.recalculateViewMatrix();
+    string start = "light.";
+    int result = sendGPUDataProjectionLight(c, projectionLight, start);
+
     Engine::Renderer::sendTextureSafe("gTextureMap", *projectionLight.getTexture(), 5);
+
+    auto& projLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getProjectionLightBounds();
+
+    projLightMesh.modifyVertices(0, projectionLight.getPoints().data(), projectionLight.getPoints().size());
+    projLightMesh.modifyIndices(projectionLight.getIndices().data(), projectionLight.getIndices().size());
+
+    m_Renderer.bind(&projLightMesh);
+    renderMesh(projLightMesh); //this can bug out if we pass in custom uv's like in the renderQuad method
+    m_Renderer.unbind(&projLightMesh);
+
+    cullFace(GL_BACK);
 }
 void DeferredPipeline::renderDecal(ModelInstance& decalModelInstance) {
-    const Entity& parent         = decalModelInstance.parent();
-    const auto& body             = *(parent.getComponent<ComponentBody>());
-    const glm::mat4 parentModel  = body.modelMatrix();
-    const auto maxTextures       = getMaxNumTextureUnits() - 1U;
+    Entity parent          = decalModelInstance.parent();
+    auto* body             = parent.getComponent<ComponentBody>();
+    glm::mat4 parentModel  = body->modelMatrix();
+    auto maxTextures       = getMaxNumTextureUnits() - 1U;
 
     Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), maxTextures);
     Engine::Renderer::sendUniform1Safe("Object_Color", decalModelInstance.color().toPackedInt());
     Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", decalModelInstance.godRaysColor().toPackedInt());
 
-    const glm::mat4 modelMatrix  = parentModel * decalModelInstance.modelMatrix();
-    const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
+    glm::mat4 modelMatrix  = parentModel * decalModelInstance.modelMatrix();
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
 
     Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
@@ -857,7 +859,7 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, S
         auto& particleMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh();
         m_Renderer.bind(&program);
         for (auto& pair : system.MaterialToIndexReverse) {
-            system.MaterialIDToIndex.try_emplace(pair.first, static_cast<unsigned int>(system.MaterialIDToIndex.size()));
+            system.MaterialIDToIndex.try_emplace(pair.first, (unsigned int)system.MaterialIDToIndex.size());
         }
 
         for (auto& pod : system.ParticlesDOD) {
@@ -879,7 +881,7 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, S
         glBufferData(GL_ARRAY_BUFFER, particle_count * SIZE_OF_PARTICLE_DOD, NULL, GL_STREAM_DRAW);
         glBufferSubData(GL_ARRAY_BUFFER, 0, particle_count * SIZE_OF_PARTICLE_DOD, &system.ParticlesDOD[0]);
 
-        glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(particleMesh.getVertexData().m_Indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(particle_count));
+        glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)particleMesh.getVertexData().m_Indices.size(), GL_UNSIGNED_INT, 0, (GLsizei)particle_count);
 
         m_Renderer.unbind(&particleMesh);
     }
@@ -889,7 +891,7 @@ void DeferredPipeline::renderMesh(Mesh& mesh, unsigned int mode) {
     if (indicesSize == 0) {
         return;
     }
-    glDrawElements(mode, static_cast<GLsizei>(indicesSize), GL_UNSIGNED_INT, nullptr);
+    glDrawElements(mode, (GLsizei)indicesSize, GL_UNSIGNED_INT, nullptr);
 }
 void DeferredPipeline::renderLightProbe(LightProbe& lightProbe) {
     //goal: render all 6 sides into a fbo and into a cubemap, and have that cubemap stored in the light probe to be used for Global Illumination
@@ -932,7 +934,7 @@ void DeferredPipeline::internal_render_2d_text_center(const string& text, const 
     for (const auto character : text) {
         if (character == '\n') {
             lines.push_back(line_accumulator);
-            lines_sizes.push_back(static_cast<unsigned short>(x));
+            lines_sizes.push_back((unsigned short)x);
             line_accumulator = "";
             x = 0.0f;
             continue;
@@ -944,7 +946,7 @@ void DeferredPipeline::internal_render_2d_text_center(const string& text, const 
     }
     if (!line_accumulator.empty()) {
         lines.push_back(line_accumulator);
-        lines_sizes.push_back(static_cast<unsigned short>(x));
+        lines_sizes.push_back((unsigned short)x);
     }
 
     x = 0.0f;
@@ -997,10 +999,10 @@ void DeferredPipeline::internal_render_2d_text_right(const string& text, const F
 
     unsigned int i = 0;
     for (auto& line : lines) {
-        int line_size = static_cast<int>(line.size());
+        int line_size = (int)line.size();
         int k = 0;
         for (int j = line_size; j >= 0; --j) {
-            const auto& character = line[j];
+            auto character = line[j];
             if (character != '\0') {
                 unsigned int accum = i * 4;
                 ++i;
@@ -1033,7 +1035,6 @@ void DeferredPipeline::internal_render_2d_text_right(const string& text, const F
         x = 0.0f;
     }
 }
-
 
 void DeferredPipeline::render2DText(const string& text, const Font& font, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, TextAlignment::Type textAlignment, const glm::vec4& scissor) {
     GLScissor(scissor);
@@ -1129,7 +1130,6 @@ void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::ve
     renderMesh(triangle);
     m_Renderer.unbind(&triangle);
 }
-
 
 void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport, Camera& camera) {
     const auto& winSize    = Resources::getWindowSize();
@@ -1249,7 +1249,7 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
 
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLighting]);
 
-    const auto& winSize = glm::vec2(Engine::Resources::getWindowSize());
+    auto winSize = glm::vec2(Engine::Resources::getWindowSize());
 
     if (Renderer::GLSL_VERSION < 140) {
         Engine::Renderer::sendUniformMatrix4Safe("CameraView", camera.getView());
@@ -1261,8 +1261,7 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
         Engine::Renderer::sendUniform4Safe("CameraInfo1", glm::vec4(camera.getPosition(), camera.getNear()));
         Engine::Renderer::sendUniform4Safe("CameraInfo2", glm::vec4(camera.getViewVector(), camera.getFar()));
     }
-
-    Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, static_cast<unsigned int>(Material::m_MaterialProperities.size()));
+    Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (unsigned int)Material::m_MaterialProperities.size());
     Engine::Renderer::sendUniform4Safe("ScreenData", 0.0f, m_Renderer.m_Gamma, winSize.x, winSize.y);
 
     Engine::Renderer::sendTexture("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0);
@@ -1282,6 +1281,9 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
     }
     for (const auto& light : InternalScenePublicInterface::GetRodLights(scene)) {
         renderRodLight(camera, *light);
+    }
+    for (const auto& light : InternalScenePublicInterface::GetProjectionLights(scene)) {
+        renderProjectionLight(camera, *light);
     }
     Engine::Renderer::setDepthFunc(GL_LEQUAL);
     Engine::Renderer::GLDisable(GL_DEPTH_TEST);
@@ -1303,7 +1305,7 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
             Engine::Renderer::sendUniform4Safe("CameraInfo2", glm::vec4(camera.getViewVector(), camera.getFar()));
         }
 
-        Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, static_cast<unsigned int>(Material::m_MaterialProperities.size()));
+        Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (unsigned int)Material::m_MaterialProperities.size());
         Engine::Renderer::sendUniform4Safe("ScreenData", m_Renderer.m_GI_Pack, m_Renderer.m_Gamma, winSize.x, winSize.y);
         Engine::Renderer::sendTexture("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0);
         Engine::Renderer::sendTexture("gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1);
@@ -1329,11 +1331,11 @@ void DeferredPipeline::internal_pass_god_rays(Viewport& viewport, Camera& camera
     auto& godRaysPlatform = GodRays::godRays;
     auto* sun = Engine::Renderer::godRays::getSun();
     if (sun && viewport.getRenderFlags().has(ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active) {
-        const auto& body       = *sun->getComponent<ComponentBody>();
-        const glm::vec3 oPos   = body.getPosition();
-        const glm::vec3 camPos = camera.getPosition();
-        const glm::vec3 camVec = camera.getViewVector();
-        const bool infront     = Engine::Math::isPointWithinCone(camPos, -camVec, oPos, Engine::Math::toRadians(godRaysPlatform.fovDegrees));
+        auto* body       = sun->getComponent<ComponentBody>();
+        glm::vec3 oPos   = body->getPosition();
+        glm::vec3 camPos = camera.getPosition();
+        glm::vec3 camVec = camera.getViewVector();
+        bool infront     = Engine::Math::isPointWithinCone(camPos, -camVec, oPos, Engine::Math::toRadians(godRaysPlatform.fovDegrees));
         if (infront) {
             const auto sp = Engine::Math::getScreenCoordinates(oPos, camera, false);
             const auto b  = glm::normalize(camPos - oPos);
@@ -1442,8 +1444,8 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
 }
 void DeferredPipeline::internal_pass_final(GBufferType::Type sceneTexture) {
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredFinal]);
-    Engine::Renderer::sendUniform1Safe("HasBloom", static_cast<int>(Bloom::bloom.bloom_active));
-    Engine::Renderer::sendUniform1Safe("HasFog", static_cast<int>(Fog::fog.fog_active));
+    Engine::Renderer::sendUniform1Safe("HasBloom", (int)Bloom::bloom.bloom_active);
+    Engine::Renderer::sendUniform1Safe("HasFog", (int)Fog::fog.fog_active);
 
     if (Fog::fog.fog_active) {
         Engine::Renderer::sendUniform1Safe("FogDistNull", Fog::fog.distNull);
@@ -1467,9 +1469,9 @@ void DeferredPipeline::internal_pass_depth_and_transparency(Viewport& viewport, 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     //sendUniform4Safe("TransparencyMaskColor", viewport.getTransparencyMaskColor());
-    //sendUniform1Safe("TransparencyMaskActive", static_cast<int>(viewport.isTransparencyMaskActive()));
+    //sendUniform1Safe("TransparencyMaskActive", (int)viewport.isTransparencyMaskActive());
     Engine::Renderer::sendUniform1Safe("DepthMaskValue", viewport.getDepthMaskValue());
-    Engine::Renderer::sendUniform1Safe("DepthMaskActive", static_cast<int>(viewport.isDepthMaskActive()));
+    Engine::Renderer::sendUniform1Safe("DepthMaskActive", (int)viewport.isDepthMaskActive());
 
     Engine::Renderer::renderFullscreenQuad();
 

@@ -4,14 +4,13 @@
 
 class  Mesh;
 
-#include <vector>
-
 namespace Engine::priv {
     class BuiltInMeshses final {
-        public: struct BuiltInMeshEnum final {enum Mesh : unsigned int {
+        public: struct BuiltInMeshEnum final { enum Mesh : unsigned int {
             PointLight,
             SpotLight,
             RodLight,
+            ProjectionLight,
             Triangle,
             Cube,
             Plane,
@@ -20,16 +19,17 @@ namespace Engine::priv {
         _TOTAL,};};
 
         private:
-            std::vector<Mesh*> m_BuiltInMeshes;
+            std::array<Mesh*, BuiltInMeshEnum::_TOTAL> m_BuiltInMeshes = { { nullptr} };
 
-            const bool build_point_light_mesh();
-            const bool build_spot_light_mesh();
-            const bool build_rod_light_mesh();
-            const bool build_triangle_mesh();
-            const bool build_cube_mesh();
-            const bool build_plane_mesh();
-            const bool build_font_mesh();
-            const bool build_particle_mesh();
+            bool build_point_light_mesh();
+            bool build_spot_light_mesh();
+            bool build_rod_light_mesh();
+            bool build_projection_light_mesh();
+            bool build_triangle_mesh();
+            bool build_cube_mesh();
+            bool build_plane_mesh();
+            bool build_font_mesh();
+            bool build_particle_mesh();
 
         public:
             BuiltInMeshses();
@@ -38,14 +38,15 @@ namespace Engine::priv {
             Mesh& getPointLightBounds();
             Mesh& getSpotLightBounds();
             Mesh& getRodLightBounds();
+            Mesh& getProjectionLightBounds();
             Mesh& getTriangleMesh();
             Mesh& getCubeMesh();
             Mesh& getPlaneMesh();
             Mesh& getFontMesh();
             Mesh& getParticleMesh();
 
-            const bool init();
-            const bool cleanup();
+            bool init();
+            bool cleanup();
     };
 };
 #endif

@@ -3,7 +3,6 @@
 #define ENGINE_RENDERER_OPENGL_GLSL_LIGHTING_H
 
 #include <core/engine/shaders/ShaderIncludes.h>
-#include <string>
 
 namespace Engine::priv::opengl::glsl {
     class Lighting final {

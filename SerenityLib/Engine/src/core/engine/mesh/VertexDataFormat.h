@@ -2,7 +2,6 @@
 #ifndef ENGINE_VERTEX_DATA_FORMAT_H_INCLUDE_GUARD
 #define ENGINE_VERTEX_DATA_FORMAT_H_INCLUDE_GUARD
 
-#include <vector>
 #include <core/engine/mesh/VertexAttribute.h>
 
 struct VertexAttributeLayout final { enum Type : unsigned int {

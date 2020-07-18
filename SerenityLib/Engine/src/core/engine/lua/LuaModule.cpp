@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/lua/LuaModule.h>
 
 using namespace Engine::priv;

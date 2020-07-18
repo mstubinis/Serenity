@@ -5,7 +5,6 @@
 class Material;
 class Texture;
 
-#include <string>
 #include <core/engine/materials/MaterialEnums.h>
 
 namespace Engine::priv {

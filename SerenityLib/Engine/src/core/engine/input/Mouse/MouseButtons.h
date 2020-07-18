@@ -2,8 +2,6 @@
 #ifndef ENGINE_EVENTS_MOUSE_BUTTONS_H
 #define ENGINE_EVENTS_MOUSE_BUTTONS_H
 
-#include <string>
-
 struct MouseButton final {
     enum Button : unsigned int {
         Left = 0,

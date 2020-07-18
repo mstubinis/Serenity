@@ -1,12 +1,10 @@
 #pragma once
-#ifndef ENGINE_RENDERER_POSTPROCESS_DOF_H_INCLUDE_GUARD
-#define ENGINE_RENDERER_POSTPROCESS_DOF_H_INCLUDE_GUARD
+#ifndef ENGINE_RENDERER_POSTPROCESS_DOF_H
+#define ENGINE_RENDERER_POSTPROCESS_DOF_H
 
 class  ShaderProgram;
 class  Shader;
 class  Viewport;
-
-#include <string>
 
 namespace Engine::priv {
     class  GBuffer;

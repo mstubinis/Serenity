@@ -24,12 +24,9 @@ namespace Engine::priv {
     class Renderer;
     class ParticleSystem;
 };
-#include <string>
+
 #include <core/engine/fonts/FontIncludes.h>
 #include <core/engine/renderer/RendererIncludes.h>
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
 
 namespace Engine::priv {
     class IRenderingPipeline {
@@ -112,7 +109,7 @@ namespace Engine::priv {
             virtual void sendGPUDataDirectionalLight(Camera& camera, DirectionalLight& directionalLight, const std::string& start) = 0;
             virtual int sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight, const std::string& start) = 0;
             virtual int sendGPUDataRodLight(Camera& camera, RodLight& rodLight, const std::string& start) = 0;
-            virtual void sendGPUDataProjectionLight(Camera& camera, ProjectionLight& rodLight, const std::string& start) = 0;
+            virtual int sendGPUDataProjectionLight(Camera& camera, ProjectionLight& projectionLight, const std::string& start) = 0;
 
             virtual void renderSunLight(Camera& camera, SunLight& sunLight, Viewport& viewport) = 0;
             virtual void renderPointLight(Camera& camera, PointLight& pointLight) = 0;

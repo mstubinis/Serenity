@@ -6,8 +6,7 @@ namespace Engine::Networking {
     class SocketTCP;
     class Server;
 };
-#include <string>
-#include <functional>
+
 #include <SFML/Network/Socket.hpp>
 #include <SFML/Network/Packet.hpp>
 #include <core/engine/networking/Packet.h>

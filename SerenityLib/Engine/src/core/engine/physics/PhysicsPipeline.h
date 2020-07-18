@@ -22,10 +22,8 @@ namespace Engine::priv {
     class PhysicsPipeline;
 };
 
-#include <functional>
 #include <core/engine/physics/DebugDrawer.h>
 #include <LinearMath/btThreads.h>
-#include <atomic>
 
 namespace Engine::priv {
     class PhysicsTaskScheduler final : public btITaskScheduler, public Engine::NonCopyable, public Engine::NonMoveable {

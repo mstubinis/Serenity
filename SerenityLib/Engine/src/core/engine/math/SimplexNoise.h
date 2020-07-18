@@ -2,13 +2,7 @@
 #ifndef ENGINE_MATH_SIMPLEX_NOISE_H
 #define ENGINE_MATH_SIMPLEX_NOISE_H
 
-#include <memory>
 #include <core/engine/utils/Utils.h>
-
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
-#include <glm/common.hpp>
 
 namespace Engine{
     namespace priv{

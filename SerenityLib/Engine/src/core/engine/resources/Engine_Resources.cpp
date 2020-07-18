@@ -1,4 +1,4 @@
-#include <boost/make_shared.hpp>
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/system/Engine.h>
 #include <core/engine/scene/Skybox.h>
 #include <core/engine/mesh/Mesh.h>
@@ -21,7 +21,6 @@
 #include <core/engine/sounds/SoundData.h>
 
 #include <ecs/ECS.h>
-#include <iostream>
 
 using namespace Engine;
 using namespace std;

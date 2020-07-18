@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/physics/PhysicsPipeline.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/threading/ThreadingModule.h>
@@ -13,9 +14,6 @@
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 
 #include <LinearMath/btIDebugDraw.h>
-
-#include <algorithm>
-#include <iostream>
 
 using namespace std;
 using namespace Engine;

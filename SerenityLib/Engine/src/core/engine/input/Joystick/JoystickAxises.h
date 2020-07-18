@@ -2,8 +2,6 @@
 #ifndef ENGINE_EVENTS_JOYSTICK_AXISES_H
 #define ENGINE_EVENTS_JOYSTICK_AXISES_H
 
-#include <string>
-
 struct JoystickAxis final {
     enum Axis : unsigned int {
         X = 0,

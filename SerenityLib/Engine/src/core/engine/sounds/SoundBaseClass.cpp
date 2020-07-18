@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/sounds/SoundBaseClass.h>
 
 SoundBaseClass::SoundBaseClass(unsigned int numLoops) {

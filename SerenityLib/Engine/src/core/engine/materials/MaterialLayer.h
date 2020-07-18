@@ -6,12 +6,6 @@ class  MaterialLayer;
 class  Texture;
 struct SimpleUVTranslationFunctor;
 
-#include <glm/vec4.hpp>
-#include <glm/vec2.hpp>
-
-#include <vector>
-#include <string>
-#include <functional>
 #include <core/engine/materials/MaterialEnums.h>
 
 typedef std::function<void(const float dt, MaterialLayer& layer)> uv_mod_func;

@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/renderer/particles/ParticleSystem.h>
 #include <core/engine/renderer/particles/ParticleEmitter.h>
 #include <core/engine/renderer/particles/Particle.h>
@@ -12,10 +13,6 @@
 #include <core/engine/threading/ThreadingModule.h>
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/system/Engine.h>
-
-#include <execution>
-#include <glm/gtx/norm.hpp>
-
 
 using namespace std;
 using namespace Engine;

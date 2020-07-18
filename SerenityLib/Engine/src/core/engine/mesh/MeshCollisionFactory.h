@@ -17,9 +17,6 @@ class  btScaledBvhTriangleMeshShape;
 class  btGImpactMeshShape;
 struct btTriangleInfoMap;
 
-#include <vector>
-#include <glm/vec3.hpp>
-
 namespace Engine::priv {
     class MeshCollisionFactory final : public Engine::NonCopyable, public Engine::NonMoveable {
         private:

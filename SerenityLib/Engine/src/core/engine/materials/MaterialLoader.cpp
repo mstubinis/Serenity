@@ -1,11 +1,10 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/materials/MaterialLoader.h>
 #include <core/engine/materials/MaterialComponent.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/events/Event.h>
-
-#include <iostream>
 
 using namespace Engine;
 using namespace std;

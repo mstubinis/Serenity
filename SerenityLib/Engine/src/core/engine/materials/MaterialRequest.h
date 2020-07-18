@@ -5,9 +5,6 @@
 class Material;
 class Texture;
 
-#include <vector>
-#include <string>
-#include <memory>
 #include <core/engine/resources/Handle.h>
 #include <core/engine/textures/TextureRequest.h>
 

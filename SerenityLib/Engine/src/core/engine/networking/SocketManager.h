@@ -2,8 +2,6 @@
 #ifndef ENGINE_NETWORKING_SOCKET_MANAGER_H
 #define ENGINE_NETWORKING_SOCKET_MANAGER_H
 
-#include <vector>
-
 namespace Engine::Networking {
     class SocketTCP;
     class SocketUDP;

@@ -4,6 +4,9 @@
 
 struct EngineOptions;
 class  Window;
+namespace Engine::priv {
+    class WindowData;
+};
 
 #include <core/engine/utils/Engine_Debugging.h>
 #include <core/engine/resources/Engine_Resources.h>
@@ -17,7 +20,6 @@ class  Window;
 #include <core/engine/discord/DiscordModule.h>
 #include <core/engine/lua/LuaModule.h>
 #include <core/engine/mesh/BuiltInMeshes.h>
-
 
 namespace Engine{
     void pause(bool pause = true);
@@ -37,6 +39,7 @@ namespace Engine{
     namespace priv{
         class EngineCore final {
             friend class Window;
+            friend class Engine::priv::WindowData;
             private:
                 void init_os_specific(const EngineOptions& options);
                 void cleanup_os_specific();

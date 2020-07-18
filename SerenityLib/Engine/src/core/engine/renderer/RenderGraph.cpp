@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/renderer/RenderGraph.h>
 #include <core/engine/renderer/pipelines/IRenderingPipeline.h>
 #include <core/engine/shaders/ShaderProgram.h>
@@ -7,10 +8,6 @@
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/system/Engine.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtx/norm.hpp>
-#include <execution>
 
 using namespace Engine;
 using namespace Engine::priv;

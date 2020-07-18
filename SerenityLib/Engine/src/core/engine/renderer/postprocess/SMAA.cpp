@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/renderer/postprocess/SMAA.h>
 #include <core/engine/renderer/Renderer.h>
 #include <core/engine/renderer/SMAA_LUT.h>

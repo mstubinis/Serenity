@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/mesh/MeshLoading.h>
 #include <core/engine/mesh/MeshImportedData.h>
@@ -14,9 +15,6 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/scene/Camera.h>
 
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/norm.hpp>
-
 #include <boost/filesystem.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -29,10 +27,6 @@
 #include <assimp/postprocess.h>
 
 #include <boost/iostreams/device/mapped_file.hpp>
-#include <iostream>
-#include <fstream>
-#include <execution>
-#include <iomanip>
 
 using namespace std;
 using namespace Engine;

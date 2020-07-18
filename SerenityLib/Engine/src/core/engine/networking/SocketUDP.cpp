@@ -1,11 +1,10 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/networking/SocketUDP.h>
 #include <core/engine/events/EventModule.h>
 #include <core/engine/events/EventIncludes.h>
 #include <core/engine/events/Event.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/utils/Utils.h>
-
-#include <chrono>
 
 using namespace Engine;
 using namespace Engine::priv;

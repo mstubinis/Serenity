@@ -3,7 +3,6 @@
 #define ENGINE_EVENTS_JOYSTICK_MODULE_H
 
 #include <core/engine/input/Joystick/JoystickAxises.h>
-#include <array>
 
 namespace Engine::priv {
     class JoystickModule {

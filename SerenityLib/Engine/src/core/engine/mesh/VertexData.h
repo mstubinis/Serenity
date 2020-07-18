@@ -5,8 +5,6 @@
 #include <core/engine/mesh/VertexBufferObject.h>
 #include <core/engine/mesh/VertexDataFormat.h>
 #include <core/engine/mesh/MeshIncludes.h>
-#include <memory>
-#include <string>
 
 struct VertexData final{
     VertexDataFormat                               m_Format;

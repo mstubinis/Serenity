@@ -8,10 +8,6 @@
 #include <LinearMath/btTransform.h>
 #include <LinearMath/btIDebugDraw.h>
 
-#include <glm/vec3.hpp>
-
-#include <vector>
-
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 

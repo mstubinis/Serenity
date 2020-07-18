@@ -25,7 +25,6 @@ namespace Engine::priv {
 #include <SFML/OpenGL.hpp>
 #include <core/engine/utils/Utils.h>
 #include <core/engine/renderer/FramebufferObject.h>
-#include <array>
 
 namespace Engine::priv{
     class GBuffer final : public Engine::NonCopyable, public Engine::NonMoveable{

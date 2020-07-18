@@ -10,10 +10,6 @@ namespace Engine::priv {
     struct ComponentModel_UpdateFunction;
 };
 
-//#include <memory>
-//#include <functional>
-//#include <utility>
-//#include <thread>
 #include <core/engine/threading/ThreadingHelpers.h>
 #include <core/engine/threading/ThreadPool.h>
 

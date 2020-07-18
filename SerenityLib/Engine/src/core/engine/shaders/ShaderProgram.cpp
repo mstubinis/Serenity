@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/shaders/ShaderHelper.h>
 #include <core/engine/shaders/Shader.h>
@@ -6,8 +7,6 @@
 #include <core/engine/scene/Scene.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/renderer/opengl/UniformBufferObject.h>
-
-#include <iostream>
 
 using namespace Engine;
 using namespace Engine::priv;

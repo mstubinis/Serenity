@@ -1,46 +1,62 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/threading/ThreadPool.h>
 #include <core/engine/utils/Utils.h>
-#include <mutex>
 
 using namespace std;
 using namespace Engine;
 using namespace Engine::priv;
 
 #pragma region ThreadPoolFuture
-
 ThreadPoolFuture::ThreadPoolFuture(std::future<void>&& future) {
     m_Future = std::move(future);
 }
-ThreadPoolFuture::ThreadPoolFuture(std::future<void>&& future, std::function<void()>&& callback) {
-    m_Future   = std::move(future);
-    m_Callback = std::move(callback);
-}
 ThreadPoolFuture::ThreadPoolFuture(ThreadPoolFuture&& other) noexcept {
-    m_Future   = std::move(other.m_Future);
-    m_Callback.swap(other.m_Callback);
+    m_Future = std::move(other.m_Future);
 }
 ThreadPoolFuture& ThreadPoolFuture::operator=(ThreadPoolFuture&& other) noexcept {
     if (&other != this) {
-        m_Future   = std::move(other.m_Future);
-        m_Callback.swap(other.m_Callback);
+        m_Future = std::move(other.m_Future);
     }
     return *this;
 }
 bool ThreadPoolFuture::isReady() const {
     return (m_Future._Is_ready() && m_Future.valid());
 }
-void ThreadPoolFuture::operator()() const {
+#pragma endregion
+
+#pragma region ThreadPoolFutureCallback
+ThreadPoolFutureCallback::ThreadPoolFutureCallback(std::future<void>&& future, std::function<void()>&& callback) {
+    m_Future   = std::move(future);
+    m_Callback = std::move(callback);
+}
+ThreadPoolFutureCallback::ThreadPoolFutureCallback(ThreadPoolFutureCallback&& other) noexcept {
+    m_Future   = std::move(other.m_Future);
+    m_Callback.swap(other.m_Callback);
+}
+ThreadPoolFutureCallback& ThreadPoolFutureCallback::operator=(ThreadPoolFutureCallback&& other) noexcept {
+    if (&other != this) {
+        m_Future   = std::move(other.m_Future);
+        m_Callback.swap(other.m_Callback);
+    }
+    return *this;
+}
+bool ThreadPoolFutureCallback::isReady() const {
+    return (m_Future._Is_ready() && m_Future.valid());
+}
+void ThreadPoolFutureCallback::operator()() const {
     m_Callback();
 }
-
-
 #pragma endregion
 
 #pragma region ThreadPool
 
 ThreadPool::ThreadPool(unsigned int sections) {
     m_Futures.resize(sections);
+    m_FutureCallbacks.resize(sections);
     for (auto& future_section : m_Futures) {
+        future_section.reserve(800);
+    }
+    for (auto& future_section : m_FutureCallbacks) {
         future_section.reserve(800);
     }
     m_TaskQueue.resize(sections);
@@ -91,13 +107,12 @@ void ThreadPool::add_job(std::function<void()>&& job, std::function<void()>&& ca
     internal_create_packaged_task(std::move(job), std::move(callback), section);
 }
 bool ThreadPool::task_queue_is_empty() const {
-    bool res = true;
     for (const auto& queue : m_TaskQueue) {
         if (!queue.empty()) {
             return false;
         }
     }
-    return res;
+    return true;
 }
 std::shared_ptr<std::packaged_task<void()>> ThreadPool::internal_get_next_available_job() {
     std::shared_ptr<std::packaged_task<void()>> ret = nullptr;
@@ -111,23 +126,23 @@ std::shared_ptr<std::packaged_task<void()>> ThreadPool::internal_get_next_availa
     return ret;
 }
 void ThreadPool::internal_create_packaged_task(std::function<void()>&& job, std::function<void()>&& callback, unsigned int section) {
-    const auto task = std::make_shared<std::packaged_task<void()>>(std::move(job));
-    ThreadPoolFuture thread_pool_future(std::move(task->get_future()), std::move(callback));
+    auto task = std::make_shared<std::packaged_task<void()>>(std::move(job));
+    ThreadPoolFutureCallback thread_pool_future(std::move(task->get_future()), std::move(callback));
     if (size() > 0) {
         {
             std::lock_guard lock(m_Mutex);
-            m_Futures[section].push_back(std::move(thread_pool_future));
+            m_FutureCallbacks[section].push_back(std::move(thread_pool_future));
             m_TaskQueue[section].push(std::move(task));
         }
         m_ConditionVariable.notify_one();
     }else{
         //on single threaded, we just execute the tasks on the main thread below in update()
-        m_Futures[section].push_back(std::move(thread_pool_future));
+        m_FutureCallbacks[section].push_back(std::move(thread_pool_future));
         m_TaskQueue[section].push(std::move(task));
     }
 }
 void ThreadPool::internal_create_packaged_task(std::function<void()>&& job, unsigned int section) {
-    const auto task = std::make_shared<std::packaged_task<void()>>(std::move(job));
+    auto task = std::make_shared<std::packaged_task<void()>>(std::move(job));
     ThreadPoolFuture thread_pool_future(std::move(task->get_future()));
     if (size() > 0) {
         {
@@ -147,10 +162,21 @@ void ThreadPool::internal_update_section(unsigned int section) {
     for (auto it = m_Futures[section].begin(); it != m_Futures[section].end();) {
         auto& future = (*it);
         if (future.isReady()) {
-            future();
             {
                 //std::lock_guard lock(m_Mutex); //hrmm....
                 it = m_Futures[section].erase(it);
+            }
+        }else{
+            ++it;
+        }
+    }
+    for (auto it = m_FutureCallbacks[section].begin(); it != m_FutureCallbacks[section].end();) {
+        auto& future = (*it);
+        if (future.isReady()) {
+            future();
+            {
+                //std::lock_guard lock(m_Mutex); //hrmm....
+                it = m_FutureCallbacks[section].erase(it);
             }
         }else{
             ++it;
@@ -169,9 +195,7 @@ void ThreadPool::update() {
     }
     //this executes the "then" functions
     for (size_t i = 0; i < m_Futures.size(); ++i) {
-        if (m_Futures[i].size() > 0) {
-            internal_update_section((unsigned int)i);
-        }
+        internal_update_section((unsigned int)i);
     }
 }
 size_t ThreadPool::size() const {
@@ -187,6 +211,9 @@ void ThreadPool::join_all() {
 void ThreadPool::wait_for_all(unsigned int section) {
     if (ThreadPool::size() > 0) {
         //TODO: use std::experimental::when_all when it becomes available, as it should be faster than individual wait's
+        for (auto& future : m_FutureCallbacks[section]) {
+            future.m_Future.wait();
+        }
         for (auto& future : m_Futures[section]) {
             future.m_Future.wait();
         }

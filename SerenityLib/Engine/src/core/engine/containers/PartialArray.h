@@ -2,8 +2,6 @@
 #ifndef ENGINE_CONTAINERS_PARTIAL_ARRAY_H
 #define ENGINE_CONTAINERS_PARTIAL_ARRAY_H
 
-#include <array>
-
 namespace Engine {
     template<class T, size_t S> class partial_array {
         private:

@@ -2,8 +2,6 @@
 #ifndef ENGINE_BUILT_IN_SHADERS_H
 #define ENGINE_BUILT_IN_SHADERS_H
 
-#include <string>
-
 namespace Engine::priv{
     class EShaders{
         public:

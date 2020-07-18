@@ -1,13 +1,12 @@
 #if !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS
 #endif
-
+#include "core/engine/utils/PrecompiledHeader.h"
 #include "core.h"
 
-#include <cstring>
-#include <memory>
-#include <iostream>
-
+//#include <cstring>
+//#include <memory>
+//#include <iostream>
 
 discord::Result discord::Core::Create(ClientId clientId, std::uint64_t flags, Core** instance)
 {

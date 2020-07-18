@@ -2,11 +2,8 @@
 #ifndef ENGINE_FULLSCREEN_ITEMS_H
 #define ENGINE_FULLSCREEN_ITEMS_H
 
-#include <vector>
 #include <core/engine/events/Observer.h>
 #include <core/engine/renderer/Renderer.h>
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
 
 typedef unsigned short ushort;
 

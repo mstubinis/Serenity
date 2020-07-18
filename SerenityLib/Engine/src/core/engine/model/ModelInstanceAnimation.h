@@ -8,10 +8,6 @@ namespace Engine::priv {
     class  ModelInstanceAnimationVector;
 };
 
-#include <string>
-#include <vector>
-#include <glm/mat4x4.hpp>
-
 namespace Engine::priv {
     class ModelInstanceAnimation final : public Engine::NonCopyable {
         friend struct DefaultModelInstanceBindFunctor;

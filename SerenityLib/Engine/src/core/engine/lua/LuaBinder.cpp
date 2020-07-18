@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/lua/LuaScript.h>
 #include <LuaBridge/LuaBridge.h>
 
@@ -15,12 +16,6 @@
 
 #include <ecs/Entity.h>
 #include <ecs/Components.h>
-
-#include <iostream>
-#include <functional>
-#include <vector>
-#include <algorithm>
-#include <string>
 
 using namespace std;
 using namespace Engine::priv;

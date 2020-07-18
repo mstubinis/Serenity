@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/renderer/opengl/glsl/Common.h>
 #include <core/engine/renderer/opengl/Extensions.h>
 #include <core/engine/shaders/ShaderHelper.h>

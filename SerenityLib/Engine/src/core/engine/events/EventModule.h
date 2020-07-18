@@ -11,10 +11,6 @@ class Window;
 #include <core/engine/input/Mouse/MouseModule.h>
 #include <core/engine/input/Joystick/JoystickModule.h>
 
-#include <string>
-#include <glm/vec2.hpp>
-#include <unordered_set>
-
 namespace Engine::priv {
     class EventModule final : public Engine::NonCopyable, Engine::NonMoveable {
         public:

@@ -15,8 +15,6 @@ class  btCompoundShape;
 #include <core/engine/events/Observer.h>
 #include <LinearMath/btVector3.h>
 #include <ecs/Entity.h>
-#include <vector>
-#include <functional>
 
 class Collision final: public Observer {
     public:

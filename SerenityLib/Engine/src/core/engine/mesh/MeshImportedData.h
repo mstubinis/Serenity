@@ -3,7 +3,6 @@
 #define ENGINE_MESH_IMPORTED_DATA_INCLUDE_GUARD
 
 #include <core/engine/mesh/MeshIncludes.h>
-#include <map>
 
 namespace Engine::priv {
     struct MeshImportedData final : public Engine::NonCopyable, public Engine::NonMoveable {

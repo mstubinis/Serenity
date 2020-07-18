@@ -32,9 +32,6 @@ namespace Engine::priv {
 #include <core/engine/physics/PhysicsIncludes.h>
 #include <core/engine/model/ModelInstance.h>
 
-#include <unordered_map>
-#include <functional>
-
 #include <assimp/scene.h>
 
 namespace Engine::priv{

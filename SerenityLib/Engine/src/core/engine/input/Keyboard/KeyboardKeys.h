@@ -2,8 +2,6 @@
 #ifndef ENGINE_EVENTS_KEYBOARD_KEYS_H
 #define ENGINE_EVENTS_KEYBOARD_KEYS_H
 
-#include <string>
-
 class KeyboardKey final {
     public:
         enum Key : unsigned int {

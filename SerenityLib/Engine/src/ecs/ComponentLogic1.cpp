@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <ecs/ComponentLogic1.h>
 #include <ecs/ECSComponentPool.h>
 

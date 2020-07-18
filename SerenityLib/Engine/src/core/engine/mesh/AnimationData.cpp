@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/mesh/AnimationData.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/mesh/Mesh.h>

@@ -7,7 +7,6 @@ namespace Engine::priv {
     class SoundModule;
 };
 
-#include <queue>
 #include <core/engine/resources/Handle.h>
 
 class SoundQueue {

@@ -4,7 +4,6 @@
 
 #include <gl/glew.h>
 #include <SFML/OpenGL.hpp>
-#include <glm/vec4.hpp>
 
 constexpr const glm::vec4 NO_SCISSOR = glm::vec4(-1.0f);
 

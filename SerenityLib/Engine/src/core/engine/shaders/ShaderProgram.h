@@ -18,14 +18,8 @@ namespace Engine::priv {
 };
 
 #include <core/engine/resources/Resource.h>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
-#include <functional>
-
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-
 #include <core/engine/shaders/ShaderIncludes.h>
 
 class ShaderProgram final : public Resource, public Engine::NonCopyable {

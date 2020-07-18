@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <ecs/ComponentModel.h>
 #include <ecs/ComponentBody.h>
 #include <ecs/ComponentCamera.h>

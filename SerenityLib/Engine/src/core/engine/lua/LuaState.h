@@ -4,8 +4,6 @@
 
 struct lua_State;
 
-#include <string>
-
 class LUAState {
     private:
         lua_State* L = nullptr;

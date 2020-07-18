@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/materials/MaterialComponent.h>
 #include <core/engine/renderer/Renderer.h>
 #include <core/engine/resources/Engine_Resources.h>
@@ -8,7 +9,6 @@
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-#include <boost/tuple/tuple.hpp>
 
 using namespace Engine;
 using namespace Engine::priv;

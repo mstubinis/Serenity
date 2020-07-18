@@ -6,7 +6,6 @@ class btVector3;
 class btTypedConstraint;
 
 #include <glm/fwd.hpp>
-#include <glm/vec3.hpp>
 
 struct ConstraintType final {enum Type {
     Fixed,

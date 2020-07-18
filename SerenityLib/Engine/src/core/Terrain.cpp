@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include "Terrain.h"
 
 #include <ecs/Components.h>

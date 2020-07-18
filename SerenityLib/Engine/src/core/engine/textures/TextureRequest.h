@@ -5,8 +5,6 @@
 class Texture;
 
 #include <SFML/Graphics/Image.hpp>
-#include <vector>
-#include <string>
 #include <core/engine/resources/Handle.h>
 #include <core/engine/textures/TextureIncludes.h>
 

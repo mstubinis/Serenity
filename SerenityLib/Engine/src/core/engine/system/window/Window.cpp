@@ -1,237 +1,12 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/system/Engine.h>
 #include <core/engine/system/EngineOptions.h>
-#include <core/engine/system/window/Window.h>
 #include <core/engine/renderer/opengl/OpenGL.h>
-#include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/events/EventDispatcher.h>
-#include <core/engine/renderer/Renderer.h>
+#include <core/engine/system/window/Window.h>
 #include <core/engine/textures/Texture.h>
-#include <core/engine/scene/Scene.h>
-#include <core/engine/scene/Viewport.h>
-#include <core/engine/events/Event.h>
-
-#include <ecs/ECS.h>
-#include <ecs/ComponentCamera.h>
-
-#include <chrono>
-
-#include <iostream>
 
 using namespace Engine;
 using namespace std;
-
-#pragma region WindowThread
-Window::WindowData::WindowThread::WindowThread(WindowData& data) : m_Data(data){
-}
-Window::WindowData::WindowThread::~WindowThread() {
-    cleanup();
-}
-bool Window::WindowData::WindowThread::operator==(const bool rhs) const {
-    bool res = m_EventThread.get();
-    return (rhs) ? res : !res;
-}
-Window::WindowData::WindowThread::operator bool() const {
-    return static_cast<bool>(m_EventThread.get());
-}
-std::optional<sf::Event> Window::WindowData::WindowThread::try_pop() {
-    auto x = m_Queue.try_pop();
-    return std::move(x);
-}
-void Window::WindowData::WindowThread::push(EventThreadOnlyCommands::Command command) {
-    m_MainThreadToEventThreadQueue.push(command);
-}
-void Window::WindowData::WindowThread::updateLoop(){
-    sf::Event e;
-    if (!m_Data.m_UndergoingClosing) {
-        //if (m_Data.m_SFMLWindow.waitEvent(e)) {
-        while (m_Data.m_SFMLWindow.pollEvent(e)) {
-            m_Queue.push(e);
-        }
-    }
-    while(!m_MainThreadToEventThreadQueue.empty()){
-        auto command_ptr = m_MainThreadToEventThreadQueue.try_pop();
-        switch (*command_ptr) {
-            case EventThreadOnlyCommands::HideMouse: {
-                m_Data.m_SFMLWindow.setMouseCursorVisible(false);
-                m_Data.m_Flags.add(Window_Flags::MouseVisible);
-                break;
-            }case EventThreadOnlyCommands::ShowMouse: {
-                m_Data.m_SFMLWindow.setMouseCursorVisible(true);
-                m_Data.m_Flags.add(Window_Flags::MouseVisible);
-                break;
-            }case EventThreadOnlyCommands::RequestFocus: {
-                m_Data.m_SFMLWindow.requestFocus();
-                break;
-            }case EventThreadOnlyCommands::KeepMouseInWindow: {
-                m_Data.m_SFMLWindow.setMouseCursorGrabbed(true);
-                m_Data.m_Flags.add(Window_Flags::MouseGrabbed);
-                break;
-            }case EventThreadOnlyCommands::FreeMouseFromWindow: {
-                m_Data.m_SFMLWindow.setMouseCursorGrabbed(false);
-                m_Data.m_Flags.remove(Window_Flags::MouseGrabbed);
-                break;
-            }default: {
-                break;
-            }
-        }
-    }
-}
-void Window::WindowData::WindowThread::startup(Window& super, const string& name) {
-    auto lamda = [&]() {
-        m_Data.m_SFMLWindow.create(m_Data.m_VideoMode, name, m_Data.m_Style, m_Data.m_SFContextSettings);
-        if (!m_Data.m_IconFile.empty()) {
-            super.setIcon(m_Data.m_IconFile);
-        }
-        m_Data.m_SFMLWindow.setActive(false);
-        m_Data.m_UndergoingClosing = false;
-        while (!m_Data.m_UndergoingClosing) {
-            updateLoop();
-        }
-    };
-    m_EventThread.reset(NEW std::thread(lamda));
-}
-void Window::WindowData::WindowThread::cleanup() {
-    if (m_EventThread && m_EventThread->joinable()) {
-        m_EventThread->join();
-    }
-}
-#pragma endregion
-
-#pragma region WindowData
-
-Window::WindowData::WindowData() 
-#ifdef ENGINE_THREAD_WINDOW_EVENTS
-: m_WindowThread(*this) 
-#endif
-{
-    m_Flags               = (Window_Flags::Windowed | Window_Flags::MouseVisible);
-}
-Window::WindowData::~WindowData() {
-    on_close();
-}
-void Window::WindowData::on_close() {
-    m_UndergoingClosing = true;
-
-    m_SFMLWindow.setVisible(false);
-    m_SFMLWindow.close();
-
-    #ifdef ENGINE_THREAD_WINDOW_EVENTS
-        m_WindowThread.cleanup();
-    #endif
-}
-void Window::WindowData::on_mouse_wheel_scrolled(const float delta, const int x, const int y) {
-    m_MouseDelta += (static_cast<double>(delta) * 10.0);
-}
-void Window::WindowData::restore_state(Window& super) {
-    if (m_FramerateLimit > 0) {
-        m_SFMLWindow.setFramerateLimit(m_FramerateLimit);
-    }
-    m_SFContextSettings = m_SFMLWindow.getSettings();
-
-    m_SFMLWindow.setMouseCursorVisible(m_Flags & Window_Flags::MouseVisible);
-    m_SFMLWindow.setActive(m_Flags & Window_Flags::Active);
-    if (m_Flags & Window_Flags::Active) {
-        super.m_Data.m_OpenGLThreadID = std::this_thread::get_id();
-    }
-    m_SFMLWindow.setVerticalSyncEnabled(m_Flags & Window_Flags::Vsync);
-    m_SFMLWindow.setMouseCursorGrabbed(m_Flags & Window_Flags::MouseGrabbed);
-}
-void Window::WindowData::init_position(Window& super) {
-    const auto winSize = glm::vec2(super.getSize());
-    const auto desktopSize = sf::VideoMode::getDesktopMode();
-
-    float final_desktop_width = static_cast<float>(desktopSize.width);
-    float final_desktop_height = static_cast<float>(desktopSize.height);
-    float x_other = 0.0f;
-    float y_other = 0.0f;
-    #ifdef _WIN32
-        //get the dimensions of the desktop's bottom task bar. Only tested on Windows 10
-        const auto os_handle = super.getSFMLHandle().getSystemHandle();
-        //            left   right   top   bottom
-        RECT rect; //[0,     1920,   0,    1040]  //bottom task bar
-        SystemParametersInfoA(SPI_GETWORKAREA, 0, &rect, 0);
-        y_other = final_desktop_height - static_cast<float>(rect.bottom);
-        final_desktop_height -= y_other;
-    #endif
-
-    super.setPosition(  static_cast<unsigned int>((final_desktop_width - winSize.x) / 2.0f),   static_cast<unsigned int>((final_desktop_height - winSize.y) / 2.0f)   );
-}
-const sf::ContextSettings Window::WindowData::create(Window& super, const string& name) {
-    on_close();
-
-    #ifdef ENGINE_THREAD_WINDOW_EVENTS
-        m_WindowThread.startup(super, name);
-        std::this_thread::sleep_for(std::chrono::milliseconds(450));
-        m_SFMLWindow.setActive(true);
-        super.m_Data.m_OpenGLThreadID = std::this_thread::get_id();
-    #else
-        m_SFMLWindow.create(m_VideoMode, name, m_Style, m_SFContextSettings);
-        if (!m_IconFile.empty())
-            super.setIcon(m_IconFile);
-        m_UndergoingClosing = false;
-    #endif
-    return m_SFMLWindow.getSettings();
-}
-void Window::WindowData::update_mouse_position_internal(Window& super, float x, float y, bool resetDifference, bool resetPrevious) {
-    auto sfml_size            = m_SFMLWindow.getSize();
-    auto winSize              = glm::vec2(sfml_size.x, sfml_size.y);
-    glm::vec2 newPos          = glm::vec2(x, winSize.y - y); //opengl flipping y axis
-    m_MousePosition_Previous  = (resetPrevious) ? newPos : m_MousePosition;
-    m_MousePosition           = newPos;
-    m_MouseDifference        += (m_MousePosition - m_MousePosition_Previous);
-    if (resetDifference) {
-        m_MouseDifference     = glm::vec2(0.0f);
-    }
-}
-void Window::WindowData::on_fullscreen_internal(Window& super, bool isToBeFullscreen, bool isMaximized, bool isMinimized) {
-    if (isToBeFullscreen) {
-        m_OldWindowSize    = glm::uvec2(m_VideoMode.width, m_VideoMode.height);
-        m_VideoMode        = get_default_desktop_video_mode();
-    }else{
-        m_VideoMode.width  = m_OldWindowSize.x;
-        m_VideoMode.height = m_OldWindowSize.y;
-    }
-    create(super, m_WindowName);  
-    m_SFMLWindow.requestFocus();
-    priv::Core::m_Engine->m_RenderManager._onFullscreen(m_VideoMode.width, m_VideoMode.height);
-
-    auto sfml_size = m_SFMLWindow.getSize();
-    auto winSize   = glm::uvec2(sfml_size.x, sfml_size.y);
-
-    //this does not trigger the sfml event resize method automatically so we must call it here
-    priv::Core::m_Engine->on_event_resize(super, winSize.x, winSize.y, false);
-
-    restore_state(super);
-    //TODO: very wierd, but there is an after-effect "reflection" of the last frame on the window if maximize() is called. Commenting out until it is fixed
-    /*
-    if (isMaximized) {
-        maximize();
-    }else if (isMinimized) {
-        minimize();
-    }
-    */
-
-    //event dispatch
-    priv::EventWindowFullscreenChanged e;
-    e.isFullscreen = isToBeFullscreen;
-    Event ev(EventType::WindowFullscreenChanged);
-    ev.eventWindowFullscreenChanged = e;
-    priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
-}
-sf::VideoMode Window::WindowData::get_default_desktop_video_mode() {
-    const auto validModes = sf::VideoMode::getFullscreenModes();
-    return (validModes.size() > 0) ? validModes[0] : sf::VideoMode::getDesktopMode();
-}
-void Window::WindowData::on_reset_events(const float dt) {
-    m_MouseDifference.x = 0.0f;
-    m_MouseDifference.y = 0.0f;
-
-    const double step   = (1.0 - dt);
-    m_MouseDelta       *= (step * step * step);
-}
-
-#pragma endregion
-
 
 #pragma region Window
 
@@ -408,7 +183,7 @@ void Window::setMouseCursorVisible(bool isToBeVisible){
     if (isToBeVisible) {
         if (!m_Data.m_Flags.has(Window_Flags::MouseVisible)) {
             #ifdef ENGINE_THREAD_WINDOW_EVENTS
-                m_Data.m_WindowThread.push(WindowData::EventThreadOnlyCommands::ShowMouse);
+                m_Data.m_WindowThread.push(WindowEventThreadOnlyCommands::ShowMouse);
             #else
                 m_Data.m_SFMLWindow.setMouseCursorVisible(true);
                 m_Data.m_Flags.add(Window_Flags::MouseVisible);
@@ -417,7 +192,7 @@ void Window::setMouseCursorVisible(bool isToBeVisible){
     }else{
         if (m_Data.m_Flags.has(Window_Flags::MouseVisible)) {
             #ifdef ENGINE_THREAD_WINDOW_EVENTS
-                m_Data.m_WindowThread.push(WindowData::EventThreadOnlyCommands::HideMouse);
+                m_Data.m_WindowThread.push(WindowEventThreadOnlyCommands::HideMouse);
             #else
                 m_Data.m_SFMLWindow.setMouseCursorVisible(false);
                 m_Data.m_Flags.remove(Window_Flags::MouseVisible);
@@ -428,7 +203,7 @@ void Window::setMouseCursorVisible(bool isToBeVisible){
 void Window::requestFocus(){
 
     #ifdef ENGINE_THREAD_WINDOW_EVENTS
-        m_Data.m_WindowThread.push(WindowData::EventThreadOnlyCommands::RequestFocus);
+        m_Data.m_WindowThread.push(WindowEventThreadOnlyCommands::RequestFocus);
     #else
         m_Data.m_SFMLWindow.requestFocus();
     #endif
@@ -538,8 +313,8 @@ bool Window::setFullscreenWindowed(bool isToBeFullscreen) {
         m_Data.m_Flags.remove(Window_Flags::Fullscreen);
         m_Data.m_Flags.remove(Window_Flags::WindowedFullscreen);
     }
-    const bool old_max = isMaximized();
-    const bool old_min = isMinimized();
+    bool old_max = isMaximized();
+    bool old_min = isMinimized();
     m_Data.on_fullscreen_internal(*this, isToBeFullscreen, old_max, old_min);
     return true;
 }
@@ -561,15 +336,15 @@ bool Window::setFullscreen(bool isToBeFullscreen){
         m_Data.m_Flags.remove(Window_Flags::Fullscreen);
         m_Data.m_Flags.remove(Window_Flags::WindowedFullscreen);
     }
-    const bool old_max = isMaximized();
-    const bool old_min = isMinimized();
+    bool old_max = isMaximized();
+    bool old_min = isMinimized();
     m_Data.on_fullscreen_internal(*this, isToBeFullscreen, old_max, old_min);
     return true;
 }
 void Window::keepMouseInWindow(bool isToBeKept){
     if (isToBeKept) {
         #ifdef ENGINE_THREAD_WINDOW_EVENTS
-            m_Data.m_WindowThread.push(WindowData::EventThreadOnlyCommands::KeepMouseInWindow);
+            m_Data.m_WindowThread.push(WindowEventThreadOnlyCommands::KeepMouseInWindow);
         #else
             if (!m_Data.m_Flags.has(Window_Flags::MouseGrabbed)) {
                 m_Data.m_SFMLWindow.setMouseCursorGrabbed(true);
@@ -578,7 +353,7 @@ void Window::keepMouseInWindow(bool isToBeKept){
         #endif
     }else{
         #ifdef ENGINE_THREAD_WINDOW_EVENTS
-            m_Data.m_WindowThread.push(WindowData::EventThreadOnlyCommands::FreeMouseFromWindow);
+            m_Data.m_WindowThread.push(WindowEventThreadOnlyCommands::FreeMouseFromWindow);
         #else
             if (m_Data.m_Flags.has(Window_Flags::MouseGrabbed)) {
                 m_Data.m_SFMLWindow.setMouseCursorGrabbed(false);

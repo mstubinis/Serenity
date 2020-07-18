@@ -2,12 +2,6 @@
 #ifndef ENGINE_UTILS_H
 #define ENGINE_UTILS_H
 
-#include <vector>
-#include <string>
-#include <cstdint>
-#include <algorithm>
-#include <bitset>
-
 template <class OutType, class Data> void readBigEndian(OutType& out, Data& dataBuffer, unsigned int inBufferSizeInBytes, unsigned int& offset) {
     out = (std::uint32_t)dataBuffer[offset + 0U] << (8U * (inBufferSizeInBytes - 1U));
     for (unsigned int i = 1U; i < inBufferSizeInBytes; ++i) {

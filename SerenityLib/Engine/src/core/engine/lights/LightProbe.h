@@ -4,7 +4,6 @@
 
 class  Scene;
 
-#include <glm/vec3.hpp>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/scene/Viewport.h>
 

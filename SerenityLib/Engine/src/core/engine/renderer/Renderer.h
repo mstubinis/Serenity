@@ -6,7 +6,6 @@ class  Viewport;
 class  Texture;
 class  Font;
 class  Decal;
-//struct Entity;
 struct BufferObject;
 struct EngineOptions;
 class  ModelInstance;

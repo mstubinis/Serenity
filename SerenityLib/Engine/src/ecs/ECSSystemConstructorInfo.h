@@ -2,7 +2,6 @@
 #ifndef ENGINE_ECS_SYSTEM_CONSTRUCTOR_INFO_H
 #define ENGINE_ECS_SYSTEM_CONSTRUCTOR_INFO_H
 
-#include <functional>
 #include <ecs/Entity.h>
 
 using std_func_update            = std::function<void(void*, void*, const float, Scene&)>;

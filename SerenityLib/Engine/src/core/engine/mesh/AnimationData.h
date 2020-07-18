@@ -10,9 +10,6 @@ namespace Engine::priv {
 };
 
 #include <core/engine/mesh/AnimationIncludes.h>
-#include <unordered_map>
-#include <glm/vec3.hpp>
-#include <functional>
 
 namespace Engine::priv {
     class AnimationData final {

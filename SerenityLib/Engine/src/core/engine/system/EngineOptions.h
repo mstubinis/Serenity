@@ -2,7 +2,6 @@
 #ifndef ENGINE_ENGINE_OPTIONS_H
 #define ENGINE_ENGINE_OPTIONS_H
 
-#include <string>
 #include <core/engine/renderer/RendererIncludes.h>
 #include <core/engine/renderer/postprocess/HDR.h>
 #include <core/engine/renderer/postprocess/SSAO.h>

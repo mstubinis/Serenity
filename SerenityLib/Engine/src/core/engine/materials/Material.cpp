@@ -1,3 +1,4 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/materials/Material.h>
 #include <core/engine/materials/MaterialLoader.h>
 #include <core/engine/materials/MaterialComponent.h>
@@ -7,10 +8,6 @@
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/scene/Skybox.h>
-
-#include <algorithm>
-#include <iostream>
-#include <array>
 
 using namespace Engine;
 using namespace Engine::priv;

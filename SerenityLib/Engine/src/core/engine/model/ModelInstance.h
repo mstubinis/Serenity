@@ -21,17 +21,12 @@ namespace Engine::priv {
     };
 };
 
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
-#include <glm/gtc/quaternion.hpp>
 #include <core/engine/events/Event.h>
 #include <ecs/Entity.h>
 
 #include <core/engine/model/ModelInstanceIncludes.h>
 #include <core/engine/model/ModelInstanceAnimation.h>
 #include <core/engine/scene/ViewportIncludes.h>
-#include <functional>
 
 class ModelInstance final : public Engine::UserPointer {
     friend struct Engine::priv::DefaultModelInstanceBindFunctor;

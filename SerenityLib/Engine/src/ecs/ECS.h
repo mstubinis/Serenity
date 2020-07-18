@@ -10,7 +10,6 @@ namespace Engine::priv {
 #include <ecs/ECSRegistry.h>
 #include <ecs/ECSEntityPool.h>
 #include <ecs/ECSSystem.h>
-#include <mutex>
 
 namespace Engine::priv {
     template<typename ENTITY> 

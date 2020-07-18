@@ -1,12 +1,10 @@
+#include "core/engine/utils/PrecompiledHeader.h"
 #include <ecs/ComponentCamera.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/threading/ThreadingModule.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/scene/Camera.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 using namespace Engine;
 using namespace Engine::priv;

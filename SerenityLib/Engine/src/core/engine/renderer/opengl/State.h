@@ -8,7 +8,6 @@ this class provides a cpu side implementation of opengl's state machine, includi
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-#include <vector>
 
 namespace Engine::priv {
     class  Renderer;
@@ -17,10 +16,10 @@ namespace Engine::priv {
         private:
             #pragma region TextureUnits
             struct TextureUnitState final {
-                GLuint targetTexture1D   = 999999;
-                GLuint targetTexture2D   = 999999;
-                GLuint targetTexture3D   = 999999;
-                GLuint targetTextureCube = 999999;
+                GLuint targetTexture1D   = std::numeric_limits<GLuint>().max();
+                GLuint targetTexture2D   = std::numeric_limits<GLuint>().max();
+                GLuint targetTexture3D   = std::numeric_limits<GLuint>().max();
+                GLuint targetTextureCube = std::numeric_limits<GLuint>().max();
                 TextureUnitState() = default;
             };
             std::vector<TextureUnitState> textureUnits;
@@ -115,7 +114,7 @@ namespace Engine::priv {
                 GLsizei height = 0;
                 ViewportState() = default;
                 //note - this is the real default glViewport state
-                ViewportState(const GLsizei& width_, const GLsizei& height_) {
+                ViewportState(GLsizei width_, GLsizei height_) {
                     x      = 0;
                     y      = 0;
                     width  = width_;
@@ -244,42 +243,42 @@ namespace Engine::priv {
         public:
             static unsigned int MAX_TEXTURE_UNITS;
 
-            const bool GL_glActiveTexture(const GLenum& textureUnit);
-            const bool GL_glBindTextureForModification(const GLenum& textureTarget, const GLuint& textureObject);
-            const bool GL_glBindTextureForRendering(const GLenum& textureTarget, const GLuint& textureObject);
-            const bool GL_glClearColor(const GLfloat& r, const GLfloat& g, const GLfloat& b, const GLfloat& a);
-            const bool GL_glColorMask(const GLboolean& r, const GLboolean& g, const GLboolean& b, const GLboolean& a);
-            const bool GL_glClearDepth(const GLdouble& depth);
-            const bool GL_glClearDepthf(const GLfloat& depth_float);
-            const bool GL_glClearStencil(const GLint& stencil);
-            const bool GL_glStencilMaskSeparate(const GLenum& face, const GLuint& mask);
-            const bool GL_glStencilMask(const GLuint& mask);
-            const bool GL_glStencilOp(const GLenum& sfail, const GLenum& dpfail, const GLenum& dppass);
-            const bool GL_glStencilOpSeparate(const GLenum& face, const GLenum& sfail, const GLenum& dpfail, const GLenum& dppass);
-            const bool GL_glUseProgram(const GLuint& program);
-            const bool GL_glBindVertexArray(const GLuint& vao);
-            const bool GL_glViewport(const GLint& x, const GLint& y, const GLsizei& width, const GLsizei& height);
-            const bool GL_glCullFace(const GLenum& mode);
-            const bool GL_glFrontFace(const GLenum& mode);
-            const bool GL_glDepthFunc(const GLenum& func);
-            const bool GL_glPixelStorei(const GLenum& pname, const GLint& param);
-            const bool GL_glStencilFuncSeparate(const GLenum& face, const GLenum& func, const GLint& ref, const GLuint& mask);
-            const bool GL_glStencilFunc(const GLenum& func, const GLint& ref, const GLuint& mask);
+            bool GL_glActiveTexture(GLenum textureUnit);
+            bool GL_glBindTextureForModification(GLenum textureTarget, GLuint textureObject);
+            bool GL_glBindTextureForRendering(GLenum textureTarget, GLuint textureObject);
+            bool GL_glClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
+            bool GL_glColorMask(GLboolean r, GLboolean g, GLboolean b, GLboolean a);
+            bool GL_glClearDepth(GLdouble depth);
+            bool GL_glClearDepthf(GLfloat depth_float);
+            bool GL_glClearStencil(GLint stencil);
+            bool GL_glStencilMaskSeparate(GLenum face, GLuint mask);
+            bool GL_glStencilMask(GLuint mask);
+            bool GL_glStencilOp(GLenum sfail, GLenum dpfail, GLenum dppass);
+            bool GL_glStencilOpSeparate(GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass);
+            bool GL_glUseProgram(GLuint program);
+            bool GL_glBindVertexArray(GLuint vao);
+            bool GL_glViewport(GLint x, GLint y, GLsizei width, GLsizei height);
+            bool GL_glCullFace(GLenum mode);
+            bool GL_glFrontFace(GLenum mode);
+            bool GL_glDepthFunc(GLenum func);
+            bool GL_glPixelStorei(GLenum pname, GLint param);
+            bool GL_glStencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint mask);
+            bool GL_glStencilFunc(GLenum func, GLint ref, GLuint mask);
 
-            const bool GL_glEnable(const GLenum& capability);
-            const bool GL_glDisable(const GLenum& capability);
+            bool GL_glEnable(GLenum capability);
+            bool GL_glDisable(GLenum capability);
 
-            const bool GL_glEnablei(const GLenum& capability, const GLuint& index);
-            const bool GL_glDisablei(const GLenum& capability, const GLuint& index);
+            bool GL_glEnablei(GLenum capability, GLuint index);
+            bool GL_glDisablei(GLenum capability, GLuint index);
 
-            const bool GL_glBindFramebuffer(const GLenum& target, const GLuint& framebuffer);
-            const bool GL_glBindRenderbuffer(const GLuint& renderBuffer);
+            bool GL_glBindFramebuffer(GLenum target, GLuint framebuffer);
+            bool GL_glBindRenderbuffer(GLuint renderBuffer);
 
-            const bool GL_glBlendEquation(const GLenum& mode);
-            const bool GL_glBlendEquationi(const GLuint& buf, const GLenum& mode);
+            bool GL_glBlendEquation(GLenum mode);
+            bool GL_glBlendEquationi(GLuint buf, GLenum mode);
 
-            void GL_INIT_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth, const unsigned int& windowHeight);
-            void GL_RESTORE_DEFAULT_STATE_MACHINE(const unsigned int& windowWidth, const unsigned int& windowHeight);
+            void GL_INIT_DEFAULT_STATE_MACHINE(unsigned int windowWidth, unsigned int windowHeight);
+            void GL_RESTORE_DEFAULT_STATE_MACHINE(unsigned int windowWidth, unsigned int windowHeight);
             void GL_RESTORE_CURRENT_STATE_MACHINE();
 
             OpenGLState() = default;
