@@ -2,33 +2,42 @@
 #ifndef ENGINE_UTILS_LOGGER_H
 #define ENGINE_UTILS_LOGGER_H
 
-#include <ostream>
-#include <sstream>
-
 class Logger final {
     public:
         struct Level final { enum Type: unsigned int {
             Debug,
             Release,
         };};
-
     private:
-        Logger::Level::Type m_Type;
+        Logger::Level::Type m_LevelType;
 
     public:
-        Logger(const Logger::Level::Type l);
+        Logger(Logger::Level::Type level) { m_LevelType = level; }
 
-        void operator()(const std::string& message, char const* function, char const* file, int line);
+        void operator()(std::string_view message, const char* function, const char* file, int line) {
+            if (m_LevelType == Logger::Level::Debug) {
+                std::cout << "Function: " << function << ", File: " << file << ", Line: " << line << ", msg: " << message << "\n";
+            }else if (m_LevelType == Logger::Level::Release) {
+                //std::cout << message << "\n";
+            }
+        }
+        constexpr Logger::Level::Type getLevel() const noexcept { return m_LevelType; }
 };
-Logger& Logger_Debug();
-Logger& Logger_Release();
+inline Logger& Logger_Debug() {
+    static Logger logger(Logger::Level::Debug);
+    return logger;
+}
+inline Logger& Logger_Release() {
+    static Logger logger(Logger::Level::Release);
+    return logger;
+}
 
-#define ENGINE_LOG_FUNC(Logger_, Message_) Logger_(static_cast<std::ostringstream&>(std::ostringstream().flush() << Message_).str(), __FUNCTION__, __FILE__, __LINE__ );
+#define ENGINE_LOG_FUNC(LOGGER, MESSAGE) LOGGER(static_cast<std::ostringstream&>(std::ostringstream().flush() << MESSAGE).str(), __FUNCTION__, __FILE__, __LINE__ );
 
 #ifdef NDEBUG
-    #define ENGINE_LOG(Message_) ENGINE_LOG_FUNC(Logger_Release(), Message_)
+    #define ENGINE_LOG(MESSAGE) ENGINE_LOG_FUNC(Logger_Release(), MESSAGE)
 #else
-    #define ENGINE_LOG(Message_) ENGINE_LOG_FUNC(Logger_Debug(), Message_)
+    #define ENGINE_LOG(MESSAGE) ENGINE_LOG_FUNC(Logger_Debug(), MESSAGE)
 #endif
 
 

@@ -57,7 +57,7 @@ constexpr const char* NormalDepthFunctions =
     "    return space.xyz / space.w;\n"
     "}\n";
 
-Shader::Shader(const string& filenameOrCode, const ShaderType::Type shaderType, const bool fromFile) : Resource(ResourceType::Shader) {
+Shader::Shader(const string& filenameOrCode, ShaderType::Type shaderType, bool fromFile) : Resource(ResourceType::Shader) {
     m_FileName = filenameOrCode;
     m_Type     = shaderType;
     m_FromFile = fromFile;
@@ -74,15 +74,7 @@ Shader::Shader(const string& filenameOrCode, const ShaderType::Type shaderType, 
 }
 Shader::~Shader() {
 }
-ShaderType::Type Shader::type() const {
-    return m_Type;
-}
-const string& Shader::data() const {
-    return m_Code;
-}
-bool Shader::fromFile() const {
-    return m_FromFile;
-}
+
 
 
 void priv::InternalShaderPublicInterface::ConvertCode(Shader& shader) {

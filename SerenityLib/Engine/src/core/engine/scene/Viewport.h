@@ -47,41 +47,40 @@ class Viewport final : public Engine::NonCopyable {
 
         Viewport();
     public:
-        Viewport(const Scene& scene, const Camera& camera);
+        Viewport(Scene& scene, Camera& camera);
 
         Viewport(Viewport&& other) noexcept;
         Viewport& operator=(Viewport&& other) noexcept;
 
         ~Viewport() {}
 
-        constexpr unsigned int id() const noexcept { return m_ID; }
+        inline constexpr unsigned int id() const noexcept { return m_ID; }
         void setID(unsigned int id) noexcept { m_ID = id; }
 
         Engine::Flag<unsigned short> getRenderFlags() const noexcept { return m_RenderFlags; }
-        void setRenderFlag(ViewportRenderingFlag::Flag flag);
-        void addRenderFlag(ViewportRenderingFlag::Flag flag);
-        void removeRenderFlag(ViewportRenderingFlag::Flag flag);
+        inline void setRenderFlag(ViewportRenderingFlag::Flag flag) noexcept { m_RenderFlags = flag; }
+        inline void addRenderFlag(ViewportRenderingFlag::Flag flag) noexcept { m_RenderFlags.add(flag); }
+        inline void removeRenderFlag(ViewportRenderingFlag::Flag flag) noexcept { m_RenderFlags.remove(flag); }
 
-        constexpr float getDepthMaskValue() const noexcept { return m_DepthMaskValue; }
-        void setDepthMaskValue(float depth) noexcept { m_DepthMaskValue = depth; }
+        inline constexpr float getDepthMaskValue() const noexcept { return m_DepthMaskValue; }
+        inline void setDepthMaskValue(float depth) noexcept { m_DepthMaskValue = depth; }
         void activateDepthMask(bool active = true);
-        bool isDepthMaskActive() const;
+        inline constexpr bool isDepthMaskActive() const noexcept { return m_StateFlags.has(StateFlags::DepthMaskActive); }
 
-        constexpr const glm::vec4& getBackgroundColor() const noexcept { return m_BackgroundColor; }
+        inline constexpr const glm::vec4& getBackgroundColor() const noexcept { return m_BackgroundColor; }
         void setBackgroundColor(float r, float g, float b, float a);
 
         void setAspectRatioSynced(bool synced);
         bool isAspectRatioSynced() const;
 
         void activate(bool activate = true);
-        bool isActive() const;
+        inline constexpr bool isActive() const noexcept { return m_StateFlags.has(StateFlags::Active); }
 
+        inline Scene& getScene() noexcept { return *m_Scene; }
+        inline Camera& getCamera() noexcept { return *m_Camera; }
+        inline constexpr const glm::vec4& getViewportDimensions() const noexcept { return m_Viewport_Dimensions; }
 
-        Scene& getScene() noexcept { return *m_Scene; }
-        Camera& getCamera() noexcept { return *m_Camera; }
-        constexpr const glm::vec4& getViewportDimensions() const noexcept { return m_Viewport_Dimensions; }
-
-        void setCamera(const Camera& camera);
+        inline void setCamera(Camera& camera) noexcept { m_Camera = &camera; }
         void setViewportDimensions(float x, float y, float width, float height);
 };
 

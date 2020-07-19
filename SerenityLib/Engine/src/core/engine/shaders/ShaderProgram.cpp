@@ -28,8 +28,8 @@ namespace Engine::priv {
         }
         Camera& c = *camera;
 
-        const float fcoeff = (2.0f / glm::log2(c.getFar() + 1.0f)) * 0.5f;
-        Engine::Renderer::sendUniform1Safe("fcoeff",fcoeff);
+        float fcoeff = (2.0f / glm::log2(c.getFar() + 1.0f)) * 0.5f;
+        Engine::Renderer::sendUniform1Safe("fcoeff", fcoeff);
 
         //yes this is needed
         if(priv::Renderer::GLSL_VERSION < 140){
@@ -128,7 +128,7 @@ void InternalShaderProgramPublicInterface::LoadGPU(ShaderProgram& shaderP){
         // Check the program
         glGetProgramiv(shaderP.m_ShaderProgram, GL_LINK_STATUS, &res);
         glGetProgramiv(shaderP.m_ShaderProgram, GL_INFO_LOG_LENGTH, &ll);
-        vector<char>pe(std::max(ll, static_cast<int>(1)));
+        vector<char>pe(std::max(ll, (int)1));
         glGetProgramInfoLog(shaderP.m_ShaderProgram, ll, NULL, &pe[0]);
         if (res == GL_FALSE) {
             cout << "ShaderProgram Log : " << endl; cout << &pe[0] << endl;
@@ -142,9 +142,9 @@ void InternalShaderProgramPublicInterface::LoadGPU(ShaderProgram& shaderP){
             GLsizei length_; // name length
             glGetProgramiv(shaderP.m_ShaderProgram, GL_ACTIVE_UNIFORMS, &count_);
             for (i_ = 0; i_ < count_; ++i_) {
-                glGetActiveUniform(shaderP.m_ShaderProgram, static_cast<GLuint>(i_), bufSize_, &length_, &size_, &type_, name_);
+                glGetActiveUniform(shaderP.m_ShaderProgram, (GLuint)i_, bufSize_, &length_, &size_, &type_, name_);
                 if (length_ > 0) {
-                    string name1_(static_cast<char*>(name_), length_);
+                    string name1_((char*)name_, length_);
                     GLint loc_ = glGetUniformLocation(shaderP.m_ShaderProgram, name_);
                     shaderP.m_UniformLocations.emplace(name1_, loc_);
                 }

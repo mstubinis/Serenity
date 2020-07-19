@@ -31,12 +31,12 @@ class ShaderProgram final : public Resource, public Engine::NonCopyable {
     public:
         static ShaderProgram                      *Deferred, *Forward, *Decal; //loaded in renderer
     private:
-        std::function<void(ShaderProgram*)>                    m_CustomBindFunctor;
+        Shader&                                                m_VertexShader;
+        Shader&                                                m_FragmentShader;
+        std::function<void(ShaderProgram*)>                    m_CustomBindFunctor  = [](ShaderProgram*) {};
         GLuint                                                 m_ShaderProgram      = 0;
         std::unordered_map<std::string, GLint>                 m_UniformLocations;
         std::unordered_set<GLuint>                             m_AttachedUBOs;
-        Shader&                                                m_VertexShader;
-        Shader&                                                m_FragmentShader;
 		bool                                                   m_LoadedCPU          = false;
 		bool                                                   m_LoadedGPU          = false;
     public:
@@ -46,16 +46,16 @@ class ShaderProgram final : public Resource, public Engine::NonCopyable {
         ShaderProgram(ShaderProgram&& other) noexcept            = default;
         ShaderProgram& operator=(ShaderProgram&& other) noexcept = default;
 
-        template<typename T> void setCustomBindFunctor(const T& functor) {
-            m_CustomBindFunctor = std::bind<void>(std::move(functor), std::placeholders::_1);
+        void setCustomBindFunctor(std::function<void(ShaderProgram*)> function) {
+            m_CustomBindFunctor = function;
         }
 
-        constexpr inline operator GLuint() const noexcept { return m_ShaderProgram; }
+        inline constexpr operator GLuint() const noexcept { return m_ShaderProgram; }
 
         void load() override;
         void unload() override;
 
-        constexpr inline GLuint program() const noexcept { return m_ShaderProgram; }
-        inline const std::unordered_map<std::string, GLint>& uniforms() const noexcept { return m_UniformLocations; }
+        inline constexpr GLuint program() const noexcept { return m_ShaderProgram; }
+        inline constexpr const std::unordered_map<std::string, GLint>& uniforms() const noexcept { return m_UniformLocations; }
 };
 #endif

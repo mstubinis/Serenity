@@ -72,14 +72,16 @@ class Scene: public Resource, public Observer {
 
 
         void update(const float dt);
-        virtual void render();
+        virtual void render() {}
         virtual void onEvent(const Event& event);
-        virtual void onResize(unsigned int width, unsigned int height);
+        virtual void onResize(unsigned int width, unsigned int height) {}
 
-        void setOnUpdateFunctor(std::function<void(Scene*, const float)> functor);
+        void setOnUpdateFunctor(std::function<void(Scene*, const float)> functor) noexcept {
+            m_OnUpdateFunctor = functor;
+        }
 
-        unsigned int id() const;
-        unsigned int numViewports() const;
+        inline constexpr unsigned int id() const noexcept { return m_ID; }
+        inline unsigned int numViewports() const noexcept { return (unsigned int)m_Viewports.size(); }
 
 
         Entity createEntity();
@@ -87,7 +89,7 @@ class Scene: public Resource, public Observer {
 
         
         Viewport& getMainViewport();
-        Viewport& addViewport(float x, float y, float width, float height, const Camera& camera);
+        Viewport& addViewport(float x, float y, float width, float height, Camera& camera);
 
         ParticleEmitter* addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity* parent = nullptr);
 
@@ -103,15 +105,15 @@ class Scene: public Resource, public Observer {
         void setBackgroundColor(float r, float g, float b, float a);
         void setBackgroundColor(const glm::vec4& backgroundColor);
 
-        const glm::vec3& getGlobalIllumination() const;
+        inline constexpr const glm::vec3& getGlobalIllumination() const noexcept { return m_GI; }
         void setGlobalIllumination(float global, float diffuse, float specular);
         void setGlobalIllumination(const glm::vec3& globalIllumination);
 
-        void setGodRaysSun(Entity* sun);
-        Entity* getGodRaysSun() const;
+        inline void setGodRaysSun(Entity* sun) noexcept { m_Sun = sun; }
+        inline Entity* getGodRaysSun() const noexcept { return m_Sun; }
 
-        Skybox* skybox() const;
-        void setSkybox(Skybox* skybox);
+        inline Skybox* skybox() const noexcept { return m_Skybox; }
+        void setSkybox(Skybox* s) noexcept { m_Skybox = s; }
 
         void centerSceneToObject(Entity centerEntity);
 };

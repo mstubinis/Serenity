@@ -1018,9 +1018,6 @@
     <ClCompile Include="Engine\src\core\engine\sounds\SoundMusic.cpp">
       <Filter>Source Files\Engine\Core\Sounds</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\sounds\SoundBaseClass.cpp">
-      <Filter>Source Files\Engine\Core\Sounds</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\sounds\SoundQueue.cpp">
       <Filter>Source Files\Engine\Core\Sounds</Filter>
     </ClCompile>
@@ -1176,9 +1173,6 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\lights\LightProbe.cpp">
       <Filter>Source Files\Engine\Core\Lights</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\utils\Logger.cpp">
-      <Filter>Source Files\Engine\Core\Utils</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\model\ModelInstanceAnimation.cpp">
       <Filter>Source Files\Engine\Core\Model</Filter>

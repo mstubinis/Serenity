@@ -40,12 +40,12 @@ namespace Engine::priv{
     class ResourcePool final: public freelist<HandleEntry<T>>{
         using super = freelist<HandleEntry<T>>;
         public:
-            ResourcePool(const unsigned int numEntries) : freelist<HandleEntry<T>>(numEntries){
+            ResourcePool(unsigned int numEntries) : freelist<HandleEntry<T>>(numEntries){
 
             }
             ~ResourcePool(){
             }
-            Handle add(T* ptr, const unsigned int type){
+            Handle add(T* ptr, unsigned int type){
                 const int used_index = super::emplace_back(ptr);
                 if (used_index == -1) {
                     return Handle();
@@ -57,11 +57,11 @@ namespace Engine::priv{
                 }
                 return Handle(used_index + 1, item.m_Version, type);
             }
-            T* get(const Handle handle){
+            T* get(Handle handle){
                 T* outPtr = nullptr;
                 return get(handle, outPtr);
             }
-            const bool get(const Handle handle, T*& outPtr){
+            const bool get(Handle handle, T*& outPtr){
                 const auto& item = super::get(handle.index() - 1U);
                 if (item.m_Version != handle.version()){
                     outPtr = nullptr;
@@ -71,24 +71,24 @@ namespace Engine::priv{
                 return true;
             }
             template<typename RESOURCE> 
-            inline const bool getAs(const Handle handle, RESOURCE*& outPtr){
+            inline bool getAs(Handle handle, RESOURCE*& outPtr){
                 T* void_ = nullptr;
-                const bool rv = get(handle, void_);
+                bool rv = get(handle, void_);
                 outPtr = reinterpret_cast<RESOURCE*>(void_);
                 return rv;
             }
             template<typename RESOURCE>
-            inline void getAsFast(const Handle handle, RESOURCE*& outPtr){
+            inline void getAsFast(Handle handle, RESOURCE*& outPtr){
                 const auto& item = super::get(handle.index() - 1U);
                 outPtr = reinterpret_cast<RESOURCE*>(item.m_Resource);
             }
             template<typename RESOURCE>
-            inline RESOURCE* getAsFast(const Handle handle){
+            inline RESOURCE* getAsFast(Handle handle){
                 const auto& item = super::get(handle.index() - 1U);
                 return reinterpret_cast<RESOURCE*>(item.m_Resource);
             }
             template<typename RESOURCE>
-            inline RESOURCE* getAsFast(const unsigned int index){
+            inline RESOURCE* getAsFast(unsigned int index){
                 const auto& item = super::get(index - 1U);
                 return reinterpret_cast<RESOURCE*>(item.m_Resource);
             }

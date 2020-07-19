@@ -29,9 +29,6 @@ class Scene::impl final {
             m_ECS.assignSystem<ComponentCamera>(ComponentCamera_System_CI()/*, 70000*/);
             m_ECS.assignSystem<ComponentName>  (ComponentName_System_CI()/*, 80000*/);
         }
-        void _destruct() {
-
-        }
         void _centerToObject(Scene& super, Entity centerEntity) {
             ComponentBody* centerBody = centerEntity.getComponent<ComponentBody>();
             auto centerPos            = centerBody->getPosition();
@@ -52,15 +49,13 @@ class Scene::impl final {
                 }
             }
             centerBody->setPosition((decimal)0.0, (decimal)0.0, (decimal)0.0);
-
             ComponentBody::recalculateAllParentChildMatrices(super);
         }
-        void _addModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, const vector<priv::RenderGraph>& render_graph_list, RenderStage::Stage stage) {
+        void _addModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, vector<priv::RenderGraph>& render_graph_list, RenderStage::Stage stage) {
             priv::RenderGraph* renderGraph = nullptr;
-        
             for (auto& render_graph_ptr : render_graph_list) {
                 if (render_graph_ptr.m_ShaderProgram == modelInstance.shaderProgram()) {
-                    renderGraph = &const_cast<priv::RenderGraph&>(render_graph_ptr);
+                    renderGraph = &render_graph_ptr;
                     break;
                 }
             }
@@ -69,11 +64,11 @@ class Scene::impl final {
             }
             renderGraph->addModelInstanceToPipeline(modelInstance);
         }
-        void _removeModelInstanceFromPipeline(ModelInstance& modelInstance, const vector<priv::RenderGraph>& render_graph_list) {
+        void _removeModelInstanceFromPipeline(ModelInstance& modelInstance, vector<priv::RenderGraph>& render_graph_list) {
             priv::RenderGraph* renderGraph = nullptr;
             for (auto& render_graph_ptr : render_graph_list) {
                 if (render_graph_ptr.m_ShaderProgram == modelInstance.shaderProgram()) {
-                    renderGraph = &const_cast<priv::RenderGraph&>(render_graph_ptr);
+                    renderGraph = &render_graph_ptr;
                     break;
                 }
             }
@@ -125,8 +120,6 @@ void priv::InternalScenePublicInterface::CleanECS(Scene& scene, Entity inEntity)
         }
     }
 }
-
-
 void priv::InternalScenePublicInterface::UpdateMaterials(Scene& scene, const float dt) {
     for (unsigned int i = 0; i < RenderStage::_TOTAL; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
@@ -138,61 +131,55 @@ void priv::InternalScenePublicInterface::UpdateMaterials(Scene& scene, const flo
     for (unsigned int i = 0; i < RenderStage::_TOTAL; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             for (auto& materialNode : render_graph_ptr.m_MaterialNodes) {
-                auto& material = *materialNode.material;
-                if (!material.m_UpdatedThisFrame) {
-                    material.update(dt);
-                    material.m_UpdatedThisFrame = true;
+                auto* material = materialNode.material;
+                if (!material->m_UpdatedThisFrame) {
+                    material->update(dt);
+                    material->m_UpdatedThisFrame = true;
                 }
             }
         }
     }
 }
-
 void priv::InternalScenePublicInterface::RenderGeometryOpaque(Renderer& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
     for (unsigned int i = RenderStage::GeometryOpaque; i < RenderStage::GeometryOpaque_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            auto& render_graph = const_cast<RenderGraph&>(render_graph_ptr);
-            render_graph.validate_model_instances_for_rendering(viewport, camera);
-            render_graph.render(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
+            render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
+            render_graph_ptr.render(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
         }
     }
 }
 void priv::InternalScenePublicInterface::RenderGeometryTransparent(Renderer& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
     for (unsigned int i = RenderStage::GeometryTransparent; i < RenderStage::GeometryTransparent_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            auto& render_graph = const_cast<RenderGraph&>(render_graph_ptr);
-            render_graph.sort(camera, SortingMode::BackToFront);
-            render_graph.validate_model_instances_for_rendering(viewport, camera);
-            render_graph.render(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
+            render_graph_ptr.sort(camera, SortingMode::BackToFront);
+            render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
+            render_graph_ptr.render(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
         }
     }
 }
 void priv::InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(Renderer& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
     for (unsigned int i = RenderStage::GeometryTransparentTrianglesSorted; i < RenderStage::GeometryTransparentTrianglesSorted_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            auto& render_graph = const_cast<RenderGraph&>(render_graph_ptr);
-            render_graph.sort(camera, SortingMode::FrontToBack);
-            render_graph.validate_model_instances_for_rendering(viewport, camera);
-            render_graph.render(renderer, viewport, camera, useDefaultShaders, SortingMode::FrontToBack);
+            render_graph_ptr.sort(camera, SortingMode::FrontToBack);
+            render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
+            render_graph_ptr.render(renderer, viewport, camera, useDefaultShaders, SortingMode::FrontToBack);
         }
     }
 }
 void priv::InternalScenePublicInterface::RenderForwardOpaque(Renderer& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
     for (unsigned int i = RenderStage::ForwardOpaque; i < RenderStage::ForwardOpaque_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            auto& render_graph = const_cast<RenderGraph&>(render_graph_ptr);
-            render_graph.validate_model_instances_for_rendering(viewport, camera);
-            render_graph.render(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
+            render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
+            render_graph_ptr.render(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
         }
     }
 }
 void priv::InternalScenePublicInterface::RenderForwardTransparent(Renderer& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
     for (unsigned int i = RenderStage::ForwardTransparent; i < RenderStage::ForwardTransparent_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            auto& render_graph = const_cast<RenderGraph&>(render_graph_ptr);
-            render_graph.sort_bruteforce(camera, SortingMode::BackToFront);
-            render_graph.validate_model_instances_for_rendering(viewport, camera);
-            render_graph.render_bruteforce(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
+            render_graph_ptr.sort_bruteforce(camera, SortingMode::BackToFront);
+            render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
+            render_graph_ptr.render_bruteforce(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
         }
     }
 }
@@ -200,10 +187,9 @@ void priv::InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted
     for (unsigned int i = RenderStage::ForwardTransparentTrianglesSorted; i < RenderStage::ForwardTransparentTrianglesSorted_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             //TODO: sort_bruteforce and render_bruteforce doesn't work here... probably has to do with custom binds and unbinds and custom shader(s)
-            auto& render_graph = const_cast<RenderGraph&>(render_graph_ptr);
-            render_graph.sort(camera, SortingMode::FrontToBack);
-            render_graph.validate_model_instances_for_rendering(viewport, camera);
-            render_graph.render(renderer, viewport, camera, useDefaultShaders, SortingMode::FrontToBack);
+            render_graph_ptr.sort(camera, SortingMode::FrontToBack);
+            render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
+            render_graph_ptr.render(renderer, viewport, camera, useDefaultShaders, SortingMode::FrontToBack);
         }
     }
 }
@@ -220,10 +206,9 @@ void priv::InternalScenePublicInterface::RenderForwardParticles(Renderer& render
 void priv::InternalScenePublicInterface::RenderDecals(Renderer& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
     for (unsigned int i = RenderStage::Decals; i < RenderStage::Decals_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            auto& render_graph = const_cast<RenderGraph&>(render_graph_ptr);
-            render_graph.sort(camera, SortingMode::None);
-            render_graph.validate_model_instances_for_rendering(viewport, camera);
-            render_graph.render(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
+            render_graph_ptr.sort(camera, SortingMode::None);
+            render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
+            render_graph_ptr.render(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
         }
     }
 }
@@ -250,7 +235,6 @@ Scene::Scene(const string& name) : Scene(name, SceneOptions::DEFAULT_OPTIONS) {
 
 }
 Scene::~Scene() {
-    m_i->_destruct();
     SAFE_DELETE(m_i);
     SAFE_DELETE(m_Skybox);
     SAFE_DELETE_VECTOR(m_Lights);
@@ -273,26 +257,10 @@ Camera* Scene::addCamera(float angle, float aspectRatio, float Near, float Far) 
     Scene::addCamera(*camera);
     return camera;
 }
-void Scene::setGodRaysSun(Entity* sun) {
-    m_Sun = sun;
-}
-Entity* Scene::getGodRaysSun() const {
-    return m_Sun;
-}
-unsigned int Scene::numViewports() const {
-    return (unsigned int)m_Viewports.size();
-}
-unsigned int Scene::id() const {
-    return m_ID;
-}
-
-
 ParticleEmitter* Scene::addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity* parent) {
     return m_i->m_ParticleSystem.add_emitter(properties, scene, lifetime, (parent) ? *parent : Entity());
 }
-
-
-Viewport& Scene::addViewport(float x, float y, float width, float height, const Camera& camera) {
+Viewport& Scene::addViewport(float x, float y, float width, float height, Camera& camera) {
     unsigned int id       = numViewports();
     Viewport& viewport    = m_Viewports.emplace_back(*this, camera);
     viewport.m_ID         = id;
@@ -326,9 +294,6 @@ void Scene::setActiveCamera(Camera& camera){
 void Scene::centerSceneToObject(Entity centerEntity){
     return m_i->_centerToObject(*this, centerEntity);
 }
-void Scene::setOnUpdateFunctor(std::function<void(Scene*, const float)> functor) {
-    m_OnUpdateFunctor = functor;
-}
 void Scene::update(const float dt){
     m_OnUpdateFunctor(this, dt);
     m_i->m_ECS.update(dt, *this);
@@ -343,13 +308,6 @@ void Scene::preUpdate(const float dt) {
 void Scene::postUpdate(const float dt) {
     m_i->m_ECS.postUpdate(*this, dt);
 }
-void Scene::onResize(unsigned int width, unsigned int height) {
-
-}
-void Scene::render() {
-
-}
-
 const glm::vec4& Scene::getBackgroundColor() const {
     return m_Viewports[0].m_BackgroundColor;
 }
@@ -358,15 +316,6 @@ void Scene::setBackgroundColor(float r, float g, float b, float a) {
 }
 void Scene::setBackgroundColor(const glm::vec4& backgroundColor) {
     setBackgroundColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
-}
-Skybox* Scene::skybox() const { 
-    return m_Skybox;
-}
-void Scene::setSkybox(Skybox* s){ 
-    m_Skybox = s;
-}
-const glm::vec3& Scene::getGlobalIllumination() const {
-    return m_GI;
 }
 void Scene::setGlobalIllumination(const glm::vec3& globalIllumination) {
     setGlobalIllumination(globalIllumination.x, globalIllumination.y, globalIllumination.z);

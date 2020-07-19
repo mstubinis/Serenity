@@ -11,11 +11,7 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace std;
 
-
 SoundMusic::SoundMusic() : SoundBaseClass(1) {
-}
-SoundMusic::~SoundMusic() {
-
 }
 void SoundMusic::update(const float dt) {
     auto sfStatus = m_Sound.getStatus();

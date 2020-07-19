@@ -1,6 +1,5 @@
 #include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/sounds/SoundData.h>
-#include <core/engine/utils/Utils.h>
 
 using namespace std;
 
@@ -19,15 +18,6 @@ void SoundData::buildBuffer() {
 }
 float SoundData::getDuration() const {
     return m_Buffer->getDuration().asSeconds();
-}
-sf::SoundBuffer* SoundData::getBuffer() {
-    return m_Buffer;
-}
-const std::string& SoundData::getFilename() {
-    return m_File;
-}
-float SoundData::getVolume() const {
-    return m_Volume;
 }
 void SoundData::setVolume(float volume) {
     m_Volume = glm::clamp(volume, 0.0f, 100.0f);

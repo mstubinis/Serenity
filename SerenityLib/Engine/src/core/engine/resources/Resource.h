@@ -19,10 +19,10 @@ class Resource {
         }
         virtual ~Resource() {}
 
-        constexpr inline ResourceType::Type type() const noexcept { return m_ResourceType; }
-        constexpr inline const std::string& name() const noexcept { return m_Name;}
-        constexpr inline bool isLoaded() const noexcept { return m_IsLoaded; }
-        constexpr inline std::uint32_t useCount() const noexcept { return m_UsageCount; }
+        inline constexpr ResourceType::Type type() const noexcept { return m_ResourceType; }
+        inline constexpr const std::string& name() const noexcept { return m_Name;}
+        inline constexpr bool isLoaded() const noexcept { return m_IsLoaded; }
+        inline constexpr std::uint32_t useCount() const noexcept { return m_UsageCount; }
 
         inline void setName(const std::string& name) noexcept { m_Name = name; }
 

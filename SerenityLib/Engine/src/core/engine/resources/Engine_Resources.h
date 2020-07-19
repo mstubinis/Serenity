@@ -58,7 +58,7 @@ namespace Engine{
 
                 template<typename T> T* HasResource(std::string_view resource_name) {
                     for (size_t i = 0; i < m_Resources.size(); ++i) {
-                        Resource* r = m_Resources.getAsFast<Resource>(static_cast<unsigned int>(i) + 1U);
+                        Resource* r = m_Resources.getAsFast<Resource>((unsigned int)i + 1U);
                         if (r) {
                             T* resource = dynamic_cast<T*>(r);
                             if (resource && resource->name() == resource_name) {
@@ -72,7 +72,7 @@ namespace Engine{
                 template<typename T> std::list<T*> GetAllResourcesOfType() {
                     std::list<T*> ret;
                     for (size_t i = 0; i < m_Resources.size(); ++i) {
-                        Resource* r = m_Resources.getAsFast<Resource>(static_cast<unsigned int>(i) + 1U);
+                        Resource* r = m_Resources.getAsFast<Resource>((unsigned int)i + 1U);
                         if (r) {
                             T* resource = dynamic_cast<T*>(r);
                             if (resource) {

@@ -75,7 +75,7 @@ template <typename E> void vector_clear(E& t){
 //formats a number to have commas to represent thousandth places
 template<typename T> const std::string convertNumToNumWithCommas(const T& n){
     std::string r = std::to_string(n);
-    int p = static_cast<int>(r.length()) - 3;
+    int p = (int)r.length() - 3;
     while(p > 0){
         r.insert(p, ",");
         p -= 3;

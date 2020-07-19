@@ -666,7 +666,6 @@
     <ClCompile Include="Engine\src\core\engine\shaders\ShaderHelper.cpp" />
     <ClCompile Include="Engine\src\core\engine\shaders\ShaderProgram.cpp" />
     <ClCompile Include="Engine\src\core\engine\sounds\SoundModule.cpp" />
-    <ClCompile Include="Engine\src\core\engine\sounds\SoundBaseClass.cpp" />
     <ClCompile Include="Engine\src\core\engine\sounds\SoundData.cpp" />
     <ClCompile Include="Engine\src\core\engine\sounds\SoundEffect.cpp" />
     <ClCompile Include="Engine\src\core\engine\sounds\SoundMusic.cpp" />
@@ -684,7 +683,6 @@
     <ClCompile Include="Engine\src\core\engine\threading\ThreadingHelpers.cpp" />
     <ClCompile Include="Engine\src\core\engine\threading\ThreadPool.cpp" />
     <ClCompile Include="Engine\src\core\engine\utils\Engine_Debugging.cpp" />
-    <ClCompile Include="Engine\src\core\engine\utils\Logger.cpp" />
     <ClCompile Include="Engine\src\core\engine\utils\PrecompiledHeader.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeaderFile>

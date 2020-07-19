@@ -12,61 +12,61 @@ namespace Engine {
     namespace priv {
         class DebugManager {
             private:
-                sf::Clock clock;
-                sf::Int64 m_logicTime;
-                sf::Int64 m_physicsTime;
-                sf::Int64 m_renderTime;
-                sf::Int64 m_soundTime;
-                sf::Int64 m_deltaTime;
-                float m_TimeScale;
-                double m_totalTime;
-                double divisor;
-                uint output_frame_delay;
-                uint output_frame;
-                uint decimals;
-                std::string output;
+                sf::Clock clock          = sf::Clock();
+                sf::Int64 m_logicTime    = 0;
+                sf::Int64 m_physicsTime  = 0;
+                sf::Int64 m_renderTime   = 0;
+                sf::Int64 m_soundTime    = 0;
+                sf::Int64 m_deltaTime    = 0;
+                float m_TimeScale        = 1.0;
+                double m_totalTime       = 0.0;
+                double divisor           = 1000000.0;
+                uint output_frame_delay  = 4;
+                uint output_frame        = 0;
+                uint decimals            = 4;
+                std::string output       = "";
 
                 //opengl timers
-                uint queryID;
-                GLuint queryObject;
+                uint queryID             = 0;
+                GLuint queryObject       = 0;
 
                 //general text debugging
                 std::vector<std::string> text_queue;
             public:
-                DebugManager();
-                ~DebugManager();
-
-                void cleanup();
+                DebugManager() = default;
+                ~DebugManager() = default;
 
                 void _init();
 
-                void addDebugLine(const char* message);
-                void addDebugLine(std::string& message);
-                void addDebugLine(std::string message);
+                void addDebugLine(const char* inMessage) noexcept { text_queue.emplace_back(inMessage); }
+                void addDebugLine(const std::string& inMessage) noexcept { text_queue.emplace_back(inMessage); }
+                void addDebugLine(std::string&& inMessage) noexcept { text_queue.emplace_back(std::move(inMessage)); }
 
                 void calculate();
                 void beginGLQuery();
                 void endGLQuery(const char* tag);
-                void stop_clock();
 
-                void calculate_logic();
-                void calculate_physics();
-                void calculate_sounds();
-                void calculate_render();
+                void stop_clock() noexcept { clock.restart(); }
+                void calculate_logic() noexcept { m_logicTime = clock.restart().asMicroseconds(); }
+                void calculate_physics() noexcept { m_physicsTime = clock.restart().asMicroseconds(); }
+                void calculate_sounds() noexcept { m_soundTime = clock.restart().asMicroseconds(); }
+                void calculate_render() noexcept { m_renderTime = clock.restart().asMicroseconds(); }
 
-                float dt() const;
-                double logicTime() const;
-                double physicsTime() const;
-                double soundsTime() const;
-                double renderTime() const;
-                double totalTime() const;
+                constexpr float dt() const noexcept { return (float)((float)m_deltaTime / divisor); }
+                constexpr double logicTime() const noexcept { return (double)((double)m_logicTime / divisor); }
+                constexpr double physicsTime() const noexcept { return (double)((double)m_physicsTime / divisor); }
+                constexpr double renderTime() const noexcept { return (double)((double)m_renderTime / divisor); }
+                constexpr double soundsTime() const noexcept { return (double)((double)m_soundTime / divisor); }
 
-                void setTimeScale(const float timeScale);
+                inline constexpr double totalTime() const noexcept { return m_totalTime; }
+                inline constexpr float timeScale() const noexcept { return m_TimeScale; }
 
-                float timeScale() const;
+                void setTimeScale(float timeScale);
+
+
 
                 std::string& reportTime();
-                std::string& reportTime(const unsigned int decimals);
+                std::string& reportTime(unsigned int decimals);
                 std::string reportDebug();
         };
     };

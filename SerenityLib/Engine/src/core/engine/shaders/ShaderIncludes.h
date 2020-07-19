@@ -2,7 +2,8 @@
 #ifndef ENGINE_SHADER_INCLDUES_H
 #define ENGINE_SHADER_INCLDUES_H
 
-struct ShaderType final{ enum Type {
+struct ShaderType final{ enum Type : unsigned char {
+    Unknown,
     Vertex,                // GL_VERTEX_SHADER
     Fragment,              // GL_FRAGMENT_SHADER
     Geometry,              // GL_GEOMETRY_SHADER

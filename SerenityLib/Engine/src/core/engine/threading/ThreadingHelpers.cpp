@@ -3,12 +3,7 @@
 
 using namespace std;
 
-unsigned int Engine::hardware_concurrency() {
-    return std::max(1U, std::thread::hardware_concurrency());
-    //return 1U;
-}
-
-vector<pair<size_t, size_t>> Engine::splitVectorPairs(size_t vectorSize, size_t num_cores) {
+vector<pair<size_t, size_t>> Engine::splitVectorPairs(size_t vectorSize, size_t num_cores) noexcept {
     if (num_cores == 0) {
         num_cores = Engine::hardware_concurrency();
     }
@@ -22,7 +17,7 @@ vector<pair<size_t, size_t>> Engine::splitVectorPairs(size_t vectorSize, size_t 
     size_t c = vectorSize / num_cores;
     size_t remainder = vectorSize % num_cores; /* Likely uses the result of the division. */
     size_t accumulator = 0;
-    std::pair<size_t, size_t> res;
+    pair<size_t, size_t> res;
     size_t b;
     size_t e = (num_cores - remainder);
     for (size_t i = 0; i < std::min(num_cores, vectorSize); ++i) {

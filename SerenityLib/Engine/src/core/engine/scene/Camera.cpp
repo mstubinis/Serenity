@@ -8,7 +8,7 @@ using namespace Engine;
 using namespace boost;
 using namespace std;
 
-Camera::Camera(const float angle, const float aspectRatio, const float Near, const float Far, Scene* scene) : Entity(*scene){//create a perspective camera
+Camera::Camera(float angle, float aspectRatio, float Near, float Far, Scene* scene) : Entity(*scene){//create a perspective camera
     if (!scene) {
         scene = Resources::getCurrentScene();
     }
@@ -23,7 +23,7 @@ Camera::Camera(const float angle, const float aspectRatio, const float Near, con
     cam.lookAt(glm_vec3(0.0), glm_vec3(0.0) + body.forward(), body.up());
     logic.setUserPointer(this);
 }
-Camera::Camera(const float left, const float right, const float bottom, const float top, const float Near, const float Far, Scene* scene) : Entity(*scene){//create an orthographic camera
+Camera::Camera(float left, float right, float bottom, float top, float Near, float Far, Scene* scene) : Entity(*scene){//create an orthographic camera
     if (!scene) {
         scene = Resources::getCurrentScene();
     }
@@ -109,23 +109,23 @@ glm_vec3 Camera::right() const {
 glm_vec3 Camera::up() const {
     return getComponent<ComponentCamera>()->up(); 
 }
-decimal Camera::getDistance(const Entity& otherEntity) const {
-    auto& otherEntityBody = *otherEntity.getComponent<ComponentBody>();
-    return glm::distance(otherEntityBody.getPosition(), getPosition());
+decimal Camera::getDistance(Entity otherEntity) const {
+    ComponentBody* otherEntityBody = otherEntity.getComponent<ComponentBody>();
+    return glm::distance(otherEntityBody->getPosition(), getPosition());
 }
 decimal Camera::getDistance(const glm_vec3& otherPosition) const {
     return glm::distance(otherPosition, getPosition());
 }
-decimal Camera::getDistanceSquared(const Entity& otherEntity) const {
-    auto& otherEntityBody = *otherEntity.getComponent<ComponentBody>();
-    return glm::distance2(otherEntityBody.getPosition(), getPosition());
+decimal Camera::getDistanceSquared(Entity otherEntity) const {
+    ComponentBody* otherEntityBody = otherEntity.getComponent<ComponentBody>();
+    return glm::distance2(otherEntityBody->getPosition(), getPosition());
 }
 decimal Camera::getDistanceSquared(const glm_vec3& otherPosition) const {
     return glm::distance2(otherPosition, getPosition());
 }
 decimal Camera::getDistanceSquared(const Entity& otherEntity, const glm_vec3& thisPosition) const {
-    auto& otherEntityBody = *otherEntity.getComponent<ComponentBody>();
-    return glm::distance2(otherEntityBody.getPosition(), thisPosition);
+    ComponentBody* otherEntityBody = otherEntity.getComponent<ComponentBody>();
+    return glm::distance2(otherEntityBody->getPosition(), thisPosition);
 }
 decimal Camera::getDistanceSquared(const glm_vec3& otherPosition, const glm_vec3& thisPosition) const {
     return glm::distance2(otherPosition, thisPosition);
@@ -136,12 +136,12 @@ unsigned int Camera::sphereIntersectTest(const glm_vec3& otherPosition, const fl
 unsigned int Camera::pointIntersectTest(const glm_vec3& otherPosition) const {
     return getComponent<ComponentCamera>()->pointIntersectTest(otherPosition);
 }
-bool Camera::rayIntersectSphere(const Entity& entity) const {
-    auto* entityBody     = entity.getComponent<ComponentBody>();
-    auto* entityModel    = entity.getComponent<ComponentModel>();
-    float entityRadius   = 0.0f;
+bool Camera::rayIntersectSphere(Entity entity) const {
+    ComponentBody* entityBody   = entity.getComponent<ComponentBody>();
+    ComponentModel* entityModel = entity.getComponent<ComponentModel>();
+    float entityRadius          = 0.0f;
     if (entityModel) {
-        entityRadius     = entityModel->radius();
+        entityRadius            = entityModel->radius();
     }
     if (!entityBody) {
         return false;

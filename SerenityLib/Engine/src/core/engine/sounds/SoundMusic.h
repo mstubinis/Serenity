@@ -8,7 +8,7 @@ class  SoundQueue;
 #include <core/engine/sounds/SoundBaseClass.h>
 #include <SFML/Audio.hpp>
 
-class  SoundMusic : public SoundBaseClass {
+class SoundMusic : public SoundBaseClass {
     friend class Engine::priv::SoundModule;
     friend class SoundQueue;
     private:
@@ -23,14 +23,14 @@ class  SoundMusic : public SoundBaseClass {
         SoundMusic(SoundMusic&& other) noexcept            = default;
         SoundMusic& operator=(SoundMusic&& other) noexcept = default;
 
-        ~SoundMusic();
+        virtual ~SoundMusic() = default;
 
-        constexpr const bool isActive() const noexcept { return m_Active; }
+        inline constexpr bool isActive() const noexcept { return m_Active; }
         bool play(unsigned int numLoops = 1) override;
         bool pause() override;
         bool stop(bool stopAllLoops = false);
         bool restart() override;
-        constexpr const float getDuration() const noexcept { return m_Duration; }
+        inline constexpr float getDuration() const noexcept { return m_Duration; }
         unsigned int getChannelCount() const override;
         float getMinDistance() const override;
         void setMinDistance(float minDistance) override;

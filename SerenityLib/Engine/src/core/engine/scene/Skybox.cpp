@@ -65,13 +65,13 @@ when saving a skybox in gimp, the layer ordering should be:
 
 namespace Engine::priv {
     class SkyboxImplInterface final {
-        friend class ::Skybox;
-        static void bindDataToGPU() {
+        friend class Skybox;
+        static void bindDataToGPU() noexcept {
             glBindBuffer(GL_ARRAY_BUFFER, m_Buffer);
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
         }
-        static void buildVAO() {
+        static void buildVAO() noexcept {
             Engine::Renderer::deleteVAO(m_VAO);
             if (Engine::priv::Renderer::OPENGL_VERSION >= 30) {
                 Engine::Renderer::genAndBindVAO(m_VAO);
@@ -79,7 +79,7 @@ namespace Engine::priv {
                 Engine::Renderer::bindVAO(0);
             }
         }
-        static void initMesh() {
+        static void initMesh() noexcept {
             if (m_Buffer != 0U) {
                 return;
             }
@@ -94,7 +94,7 @@ namespace Engine::priv {
 Skybox::Skybox(const string* files){
     Engine::priv::SkyboxImplInterface::initMesh();
 
-    string names[6] = { files[0],files[1],files[2],files[3],files[4],files[5] };
+    string names[6] = { files[0], files[1], files[2], files[3], files[4], files[5] };
     //instead of using files[0] generate a proper name using the directory?
     m_Texture = NEW Texture(names, files[0] + "Cubemap", false, ImageInternalFormat::SRGB8_ALPHA8);
     priv::TextureLoader::GeneratePBRData(*m_Texture, 32, m_Texture->width() / 4);

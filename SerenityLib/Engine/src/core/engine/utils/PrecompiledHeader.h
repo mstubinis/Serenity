@@ -278,13 +278,13 @@ namespace Engine {
             T m_Flags;
         public:
             Flag() : m_Flags(0) {}
-            ~Flag() {}
+            ~Flag() = default;
 
             Flag& operator=(const T& other) {
                 m_Flags = other;
                 return *this;
             }
-            const T& get() const {
+            inline const T& get() const noexcept {
                 return m_Flags;
             }
             T operator&(const T& other) {
@@ -310,7 +310,7 @@ namespace Engine {
                     m_Flags = m_Flags & ~flag;
                 }
             }
-            bool has(const T& flag) const {
+            inline constexpr bool has(const T& flag) const noexcept {
                 return (m_Flags & flag);
             }
     };
@@ -375,7 +375,6 @@ namespace Engine {
             float ww = (float)(i & 255);
             return glm::vec4(xx * one_over_255, yy * one_over_255, zz * one_over_255, ww * one_over_255);
         }
-
         inline constexpr float r() const noexcept { return (float)color.r * 0.003921568627451f; }
         inline constexpr float g() const noexcept { return (float)color.g * 0.003921568627451f; }
         inline constexpr float b() const noexcept { return (float)color.b * 0.003921568627451f; }
