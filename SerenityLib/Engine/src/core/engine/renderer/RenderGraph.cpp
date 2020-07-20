@@ -201,7 +201,7 @@ bool RenderGraph::remove_instance_node(MeshNode& meshNode, InstanceNode& instanc
 
 
 //TODO: correct this
-void RenderGraph::sort_bruteforce(Camera& camera, SortingMode::Mode sortingMode) {
+void RenderGraph::sort_bruteforce(Camera& camera, SortingMode sortingMode) {
 #ifndef _DEBUG
     auto lambda_sorter = [&](InstanceNode* lhs, InstanceNode* rhs, const glm_vec3& camPos) {
         auto lhsParent = lhs->instance->parent();
@@ -234,7 +234,7 @@ void RenderGraph::sort_bruteforce(Camera& camera, SortingMode::Mode sortingMode)
     );
 #endif
 }
-void RenderGraph::sort_cheap_bruteforce(Camera& camera, SortingMode::Mode sortingMode) {
+void RenderGraph::sort_cheap_bruteforce(Camera& camera, SortingMode sortingMode) {
 #ifndef _DEBUG
     auto lambda_sorter = [&](InstanceNode* lhs, InstanceNode* rhs, const glm::vec3& camPos) {
         auto& lhsInstance    = *lhs->instance;
@@ -260,7 +260,7 @@ void RenderGraph::sort_cheap_bruteforce(Camera& camera, SortingMode::Mode sortin
 #endif
 }
 
-void RenderGraph::sort_cheap(Camera& camera, SortingMode::Mode sortingMode) {
+void RenderGraph::sort_cheap(Camera& camera, SortingMode sortingMode) {
 #ifndef _DEBUG
     for (auto& materialNode : m_MaterialNodes) {
         for (auto& meshNode : materialNode.meshNodes) {
@@ -293,7 +293,7 @@ void RenderGraph::sort_cheap(Camera& camera, SortingMode::Mode sortingMode) {
 #endif
 }
 //TODO: correct this
-void RenderGraph::sort(Camera& camera, SortingMode::Mode sortingMode) {
+void RenderGraph::sort(Camera& camera, SortingMode sortingMode) {
 #ifndef _DEBUG
     for (auto& materialNode : m_MaterialNodes) {
         for (auto& meshNode : materialNode.meshNodes) {
@@ -336,21 +336,20 @@ void RenderGraph::clean(Entity inEntity) {
     vector<InstanceNode*> kept_nodes_total;
     for (auto& materialNode : m_MaterialNodes) {
         for (auto& meshNode : materialNode.meshNodes) {
-            vector<InstanceNode*>& instances = meshNode.instanceNodes;
             vector<InstanceNode*> kept_nodes;
             vector<InstanceNode*> removed_nodes;
-            for (auto& instanceNode : instances) {
+            for (auto& instanceNode : meshNode.instanceNodes) {
                 auto entity = instanceNode->instance->parent();
                 if (entity != inEntity) {
-                    kept_nodes.push_back(instanceNode);
-                    kept_nodes_total.push_back(instanceNode);
+                    kept_nodes.emplace_back(instanceNode);
+                    kept_nodes_total.emplace_back(instanceNode);
                 }else{
-                    removed_nodes.push_back(instanceNode);
+                    removed_nodes.emplace_back(instanceNode);
                 }
             }
             SAFE_DELETE_VECTOR(removed_nodes);
-            instances.clear();
-            std::move(kept_nodes.begin(), kept_nodes.end(), std::back_inserter(instances));
+            meshNode.instanceNodes.clear();
+            std::move(kept_nodes.begin(), kept_nodes.end(), std::back_inserter(meshNode.instanceNodes));
         }
     }
     m_InstancesTotal.clear();
@@ -398,7 +397,7 @@ void RenderGraph::validate_model_instances_for_rendering(Viewport& viewport, Cam
     };
     lambda(m_InstancesTotal, camera.getPosition());
 }
-void RenderGraph::render(Engine::priv::Renderer& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders, SortingMode::Mode sortingMode) {
+void RenderGraph::render(Engine::priv::Renderer& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders, SortingMode sortingMode) {
     if (useDefaultShaders) {
         renderer.bind(m_ShaderProgram);
     }
@@ -439,7 +438,7 @@ void RenderGraph::render(Engine::priv::Renderer& renderer, Viewport& viewport, C
         }
     }
 }
-void RenderGraph::render_bruteforce(Engine::priv::Renderer& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders, SortingMode::Mode sortingMode) {
+void RenderGraph::render_bruteforce(Engine::priv::Renderer& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders, SortingMode sortingMode) {
     if (useDefaultShaders) {
         renderer.bind(m_ShaderProgram);
     }

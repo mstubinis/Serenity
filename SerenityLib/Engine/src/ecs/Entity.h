@@ -4,6 +4,7 @@
 
 namespace Engine::priv {
     template<typename T> class ECS;
+    struct InternalEntityPublicInterface;
 };
 
 #include <ecs/ECSIncludes.h>
@@ -38,8 +39,8 @@ struct Entity {
         Entity(Entity&& other) noexcept            = default;
         Entity& operator=(Entity&& other) noexcept = default;
 
-        void destroy();
-        bool isDestroyed() const;
+        void destroy() noexcept;
+        bool isDestroyed() const noexcept;
 
         inline constexpr std::uint32_t id() const noexcept {
             return Entity::id(m_Data);
@@ -83,15 +84,15 @@ struct Entity {
             return (m_Data != other.m_Data);
         }
 
-        Scene& scene() const;
+        Scene& scene() const noexcept;
         inline constexpr bool null() const noexcept {
             return (m_Data == 0U);
         }
 
-        bool hasParent() const;
+        bool hasParent() const noexcept;
 
-        void addChild(Entity child) const;
-        void removeChild(Entity child) const;
+        void addChild(Entity child) const noexcept;
+        void removeChild(Entity child) const noexcept;
 
         template<typename T, typename... ARGS> inline void addComponent(ARGS&&... args) noexcept {
             Engine::priv::InternalEntityPublicInterface::GetECS(*this).addComponent<T>(*this, std::forward<ARGS>(args)...);

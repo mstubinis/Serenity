@@ -94,8 +94,8 @@ class Mesh final: public Resource, public Observer, public Engine::NonCopyable, 
             m_CustomUnbindFunctor = std::bind(std::move(functor), std::placeholders::_1, std::placeholders::_2);
         }
 
-        bool operator==(const bool rhs) const;
-        explicit operator bool() const;
+        bool operator==(bool rhs) const { return (rhs) ? (bool)m_VertexData : (bool)!m_VertexData; }
+        explicit operator bool() const { return (bool)m_VertexData; }
 
         std::unordered_map<std::string, Engine::priv::AnimationData>& animationData();
         const glm::vec3& getRadiusBox() const;
@@ -122,6 +122,6 @@ class Mesh final: public Resource, public Observer, public Engine::NonCopyable, 
             );
         }
 
-        void sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, SortingMode::Mode sortMode);
+        void sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, SortingMode sortMode);
 };
 #endif

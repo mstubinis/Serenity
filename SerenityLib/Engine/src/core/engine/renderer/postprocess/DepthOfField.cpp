@@ -10,14 +10,9 @@
 
 using namespace std;
 
-Engine::priv::DepthOfField Engine::priv::DepthOfField::DOF;
+Engine::priv::DepthOfField Engine::priv::DepthOfField::STATIC_DOF;
 
-Engine::priv::DepthOfField::~DepthOfField() {
-    SAFE_DELETE(m_Vertex_Shader);
-    SAFE_DELETE(m_Fragment_Shader);
-    SAFE_DELETE(m_Shader_Program);
-}
-const bool Engine::priv::DepthOfField::init_shaders() {
+bool Engine::priv::DepthOfField::init_shaders() {
     if (!m_GLSL_frag_code.empty())
         return false;
 
@@ -76,19 +71,17 @@ const bool Engine::priv::DepthOfField::init_shaders() {
         "\n";
 #pragma endregion
 
-    auto lambda_part_a = [&]() {
-        m_Vertex_Shader = NEW Shader(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
-        m_Fragment_Shader = NEW Shader(m_GLSL_frag_code, ShaderType::Fragment, false);
-    };
-    auto lambda_part_b = [&]() {
-        m_Shader_Program = NEW ShaderProgram("DepthOfField", *m_Vertex_Shader, *m_Fragment_Shader);
-    };
-    Engine::priv::threading::addJobWithPostCallback(lambda_part_a, lambda_part_b);
+    Engine::priv::threading::addJobWithPostCallback([this]() {
+        m_Vertex_Shader   = std::make_unique<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
+        m_Fragment_Shader = std::make_unique<Shader>(m_GLSL_frag_code, ShaderType::Fragment, false);
+    }, [this]() {
+        m_Shader_Program  = std::make_unique<ShaderProgram>("DepthOfField", *m_Vertex_Shader, *m_Fragment_Shader);
+    });
 
     return true;
 }
-void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport, const unsigned int sceneTexture, const Engine::priv::Renderer& renderer) {
-    renderer.bind(m_Shader_Program);
+void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::Renderer& renderer) {
+    renderer.bind(m_Shader_Program.get());
 
     Engine::Renderer::sendUniform4Safe("Data", blur_radius, bias, focus, 0.0f);
 
@@ -98,30 +91,30 @@ void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport
     Engine::Renderer::renderFullscreenQuad();
 }
 
-void Engine::Renderer::depthOfField::enable(const bool b) {
-    Engine::priv::DepthOfField::DOF.dof = b;
+void Engine::Renderer::depthOfField::enable(bool b) {
+    Engine::priv::DepthOfField::STATIC_DOF.dof = b;
 }
 void Engine::Renderer::depthOfField::disable() {
-    Engine::priv::DepthOfField::DOF.dof = false;
+    Engine::priv::DepthOfField::STATIC_DOF.dof = false;
 }
-const bool Engine::Renderer::depthOfField::enabled() {
-    return Engine::priv::DepthOfField::DOF.dof;
+bool Engine::Renderer::depthOfField::enabled() {
+    return Engine::priv::DepthOfField::STATIC_DOF.dof;
 }
-const float Engine::Renderer::depthOfField::getFocus() {
-    return Engine::priv::DepthOfField::DOF.focus;
+float Engine::Renderer::depthOfField::getFocus() {
+    return Engine::priv::DepthOfField::STATIC_DOF.focus;
 }
-void Engine::Renderer::depthOfField::setFocus(const float f) {
-    Engine::priv::DepthOfField::DOF.focus = glm::max(0.0f, f);
+void Engine::Renderer::depthOfField::setFocus(float f) {
+    Engine::priv::DepthOfField::STATIC_DOF.focus = glm::max(0.0f, f);
 }
-const float Engine::Renderer::depthOfField::getBias() {
-    return Engine::priv::DepthOfField::DOF.bias;
+float Engine::Renderer::depthOfField::getBias() {
+    return Engine::priv::DepthOfField::STATIC_DOF.bias;
 }
-void Engine::Renderer::depthOfField::setBias(const float b) {
-    Engine::priv::DepthOfField::DOF.bias = b;
+void Engine::Renderer::depthOfField::setBias(float b) {
+    Engine::priv::DepthOfField::STATIC_DOF.bias = b;
 }
-const float Engine::Renderer::depthOfField::getBlurRadius() {
-    return Engine::priv::DepthOfField::DOF.blur_radius;
+float Engine::Renderer::depthOfField::getBlurRadius() {
+    return Engine::priv::DepthOfField::STATIC_DOF.blur_radius;
 }
-void Engine::Renderer::depthOfField::setBlurRadius(const float r) {
-    Engine::priv::DepthOfField::DOF.blur_radius = glm::max(0.0f, r);
+void Engine::Renderer::depthOfField::setBlurRadius(float r) {
+    Engine::priv::DepthOfField::STATIC_DOF.blur_radius = glm::max(0.0f, r);
 }

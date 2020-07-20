@@ -842,6 +842,12 @@
     <ClInclude Include="Engine\src\core\engine\utils\PrecompiledHeader.h">
       <Filter>Header Files\Engine\Core\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\threading\WorkerThreadContainer.h">
+      <Filter>Header Files\Engine\Core\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\threading\Task.h">
+      <Filter>Header Files\Engine\Core\Threading</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -1278,6 +1284,12 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\utils\PrecompiledHeader.cpp">
       <Filter>Source Files\Engine\Core\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\threading\WorkerThreadContainer.cpp">
+      <Filter>Source Files\Engine\Core\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\threading\Task.cpp">
+      <Filter>Source Files\Engine\Core\Threading</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

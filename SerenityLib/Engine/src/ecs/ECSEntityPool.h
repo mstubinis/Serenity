@@ -53,10 +53,10 @@ namespace Engine::priv {
                 if (entityData == 0) {
                     return nullptr;
                 }
-                auto index = Entity::id(entityData) - 1U;
+                auto index = ENTITY::id(entityData) - 1U;
                 if (index < m_Pool.size()) {
                     ENTITY e = m_Pool[index];
-                    if (e.versionID() == Entity::versionID(entityData)) {
+                    if (e.versionID() == ENTITY::versionID(entityData)) {
                         return e;
                     }
                     //else {

@@ -36,8 +36,16 @@ bool ServerThread::add_client(const string& hash, ServerClient* serverClient, Se
     bool has_client_hash        = m_ServerClients.count(hash);
     bool has_server_client_hash = server.m_HashedClients.count(hash);
     if (!has_client_hash && !has_server_client_hash) {
-        m_ServerClients.emplace(hash, serverClient);
-        server.m_HashedClients.emplace(hash, serverClient);
+        m_ServerClients.emplace(
+            std::piecewise_construct, 
+            std::forward_as_tuple(hash), 
+            std::forward_as_tuple(serverClient)
+        );
+        server.m_HashedClients.emplace(
+            std::piecewise_construct,
+            std::forward_as_tuple(hash),
+            std::forward_as_tuple(serverClient)
+        );
         return true;
     }
     if (has_client_hash) {
@@ -48,7 +56,6 @@ bool ServerThread::add_client(const string& hash, ServerClient* serverClient, Se
     }
     return false;
 }
-
 
 ServerThread::ServerThread(ServerThread&& other) noexcept {
     m_ServerClients = std::move(other.m_ServerClients);
@@ -95,6 +102,11 @@ bool ServerThreadCollection::addClient(const string& hash, ServerClient* client,
         }
         return result;
     }
+#ifndef ENGINE_PRODUCTION
+    else {
+        std::cout << "ServerThreadCollection::addClient() could not get a next thread\n";
+    }
+#endif
     return false;
 }
 bool ServerThreadCollection::removeClient(const string& hash, Server& server) {

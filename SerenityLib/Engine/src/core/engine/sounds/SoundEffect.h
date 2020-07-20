@@ -38,7 +38,17 @@ class SoundEffect : public SoundBaseClass {
         bool isRelativeToListener() const override;
         void setRelativeToListener(bool relative = true) override;
         float getAttenuation() const override;
+
+
+        /*
+        Set the attenuation factor of the sound. The attenuation is a multiplicative factor which makes
+        the sound more or less loud according to its distance from the listener.An attenuation of 0 will
+        produce a non - attenuated sound, i.e. its volume will always be the same whether it is heard from
+        near or from far. On the other hand, an attenuation value such as 100 will make the sound fade out
+        very quickly as it gets further from the listener. The default value of the attenuation is 1.
+        */
         void setAttenuation(float attenuation) override;
+
         glm::vec3 getPosition() const override;
         void setPosition(float x, float y, float z) override;
         void setPosition(const glm::vec3& position) override;

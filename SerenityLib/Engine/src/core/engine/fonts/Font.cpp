@@ -86,11 +86,10 @@ void Font::init_simple(const string& filename, int height, int width) {
     m_FontTexture = NEW Texture(rawname, false, ImageInternalFormat::SRGB8_ALPHA8);
     Handle handle = priv::Core::m_Engine->m_ResourceManager._addTexture(m_FontTexture);
 
-    float min_y_offset = 9999999999999.0f;
-    float max_y_offset = 0.0f;
-
-    const float textureHeight = static_cast<float>(m_FontTexture->height());
-    const float textureWidth  = static_cast<float>(m_FontTexture->width());
+    float min_y_offset  = 9999999999999.0f;
+    float max_y_offset  = 0.0f;
+    float textureHeight = (float)m_FontTexture->height();
+    float textureWidth  = (float)m_FontTexture->width();
 
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
     for (string line; getline(str, line, '\n');) {
@@ -132,10 +131,10 @@ void Font::init_simple(const string& filename, int height, int width) {
             charGlyph.pts.emplace_back(0.0f, charGlyph.height, 0.0f);
             charGlyph.pts.emplace_back(charGlyph.width, 0.0f, 0.0f);
 
-            const float uvW1 = static_cast<float>(charGlyph.x) / textureWidth;
-            const float uvW2 = uvW1 + (static_cast<float>(charGlyph.width) / textureWidth);
-            const float uvH1 = static_cast<float>(charGlyph.y) / textureHeight;
-            const float uvH2 = uvH1 + (static_cast<float>(charGlyph.height) / textureHeight);
+            float uvW1 = (float)charGlyph.x / textureWidth;
+            float uvW2 = uvW1 + ((float)charGlyph.width / textureWidth);
+            float uvH1 = (float)charGlyph.y / textureHeight;
+            float uvH2 = uvH1 + ((float)charGlyph.height / textureHeight);
 
             charGlyph.uvs.emplace_back(uvW1, uvH2);
             charGlyph.uvs.emplace_back(uvW2, uvH1);
@@ -149,7 +148,7 @@ void Font::init_simple(const string& filename, int height, int width) {
 }
 
 void Font::init_freetype(const string& filename, int height, int width) {
-    const unsigned requested_char_count  = 128;
+    unsigned requested_char_count = 128;
 
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
@@ -163,11 +162,11 @@ void Font::init_freetype(const string& filename, int height, int width) {
     }
     FT_Set_Pixel_Sizes(face, (width < 0) ? 0 : width, height); //Setting the width to 0 lets the face dynamically calculate the width based on the given height.
 
-    unsigned int max_width      = 0;
-    unsigned int max_height     = 0;
-    float min_y_offset          = 9999999999999.0f;
-    float max_y_offset          = 0.0f;
-    const auto face_height      = (face->height >> 6);
+    unsigned int max_width   = 0;
+    unsigned int max_height  = 0;
+    float min_y_offset       = 9999999999999.0f;
+    float max_y_offset       = 0.0f;
+    const auto face_height   = (face->height >> 6);
 
     for (GLubyte char_id = 0; char_id < requested_char_count; ++char_id) {
         if (FT_Load_Char(face, char_id, FT_LOAD_RENDER)) {
@@ -194,17 +193,17 @@ void Font::init_freetype(const string& filename, int height, int width) {
         }
         m_CharGlyphs.emplace(char_id, std::move(charGlyph));
     }
-    const unsigned int final_count  = static_cast<unsigned int>(glm::ceil(glm::sqrt(static_cast<float>(requested_char_count))));
-    const unsigned int final_width  = final_count * max_width;
-    const unsigned int final_height = final_count * max_height;
+    unsigned int final_count  = (unsigned int)glm::ceil(glm::sqrt((float)requested_char_count));
+    unsigned int final_width  = final_count * max_width;
+    unsigned int final_height = final_count * max_height;
 
     sf::Image atlas_image;
     atlas_image.create(final_width, final_height, sf::Color::Transparent);
 
-    int char_id  = 0;
-    bool done    = false;
-    const float textureHeight = static_cast<float>(final_height);
-    const float textureWidth  = static_cast<float>(final_width);
+    int char_id         = 0;
+    bool done           = false;
+    float textureHeight = (float)final_height;
+    float textureWidth  = (float)final_width;
     for (unsigned int i = 0; i < final_count; ++i) {
         for (unsigned int j = 0; j < final_count; ++j) {
             if (FT_Load_Char(face, char_id, FT_LOAD_RENDER)) {
@@ -231,7 +230,7 @@ void Font::init_freetype(const string& filename, int height, int width) {
                 unsigned int glyph_xEnd   = (startX + glyph_x_size);
                 unsigned int glyph_yEnd   = (startY + glyph_y_size);
                 for (unsigned int x = startX; x < glyph_xEnd; ++x) {
-                    const auto gray = pixels[cx][cy];
+                    auto gray = pixels[cx][cy];
                     atlas_image.setPixel(x, y, sf::Color(gray, gray, gray, gray));
                     ++cy;
                 }
@@ -242,10 +241,10 @@ void Font::init_freetype(const string& filename, int height, int width) {
             charGlyph.pts.emplace_back(0.0f,            charGlyph.height, 0.0f);
             charGlyph.pts.emplace_back(charGlyph.width, 0.0f,             0.0f);
 
-            const float uvW1 =         static_cast<float>(charGlyph.x)      / textureWidth;
-            const float uvW2 = uvW1 + (static_cast<float>(charGlyph.width)  / textureWidth);
-            const float uvH1 =         static_cast<float>(charGlyph.y)      / textureHeight;
-            const float uvH2 = uvH1 + (static_cast<float>(charGlyph.height) / textureHeight);
+            float uvW1 =         (float)charGlyph.x      / textureWidth;
+            float uvW2 = uvW1 + ((float)charGlyph.width  / textureWidth);
+            float uvH1 =         (float)charGlyph.y      / textureHeight;
+            float uvH2 = uvH1 + ((float)charGlyph.height / textureHeight);
 
             charGlyph.uvs.emplace_back(uvW1, uvH2);
             charGlyph.uvs.emplace_back(uvW2, uvH1);
@@ -308,14 +307,14 @@ float Font::getTextWidth(string_view text) const {
                 row_width += float(glyph.xadvance);
             }else{
                 //backtrack spaces
-                int j = static_cast<int>(i) - 1;
+                int j = (int)i - 1;
                 while (j >= 0) {
                     const char character_backtrack = text[j];
                     if (character_backtrack != ' ') {
                         break;
                     }
                     const CharGlyph& glyph_space = getGlyphData(character_backtrack);
-                    row_width -= float(glyph_space.xadvance);
+                    row_width -= (float)glyph_space.xadvance;
                     --j;
                 }
                 maxWidth = max(maxWidth, row_width);
@@ -326,22 +325,13 @@ float Font::getTextWidth(string_view text) const {
     maxWidth = max(maxWidth, row_width);
     return maxWidth;
 }
-float Font::getMaxHeight() const {
-    return m_MaxHeight;
-}
-Texture* Font::getGlyphTexture() const {
-    return m_FontTexture; 
-}
-float Font::getLineHeight() const {
-    return m_LineHeight;
-}
-const CharGlyph& Font::getGlyphData(const unsigned char character) const {
+const CharGlyph& Font::getGlyphData(unsigned char character) const {
     return (m_CharGlyphs.count(character)) ? m_CharGlyphs.at(character) : m_CharGlyphs.at('?');
 }
-void Font::renderText(const string& t, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const TextAlignment::Type al, const glm::vec4& scissor){
+void Font::renderText(const string& t, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment al, const glm::vec4& scissor){
     Renderer::renderText(t, *this, p, c, a, s, d, al, scissor);
 }
-void Font::renderTextStatic(const string& t, const glm::vec2& p, const glm::vec4& c, const float a, const glm::vec2& s, const float d, const TextAlignment::Type al, const glm::vec4& scissor) {
+void Font::renderTextStatic(const string& t, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment al, const glm::vec4& scissor) {
     if (first_font) {
         Renderer::renderText(t, *first_font, p, c, a, s, d, al, scissor);
     }

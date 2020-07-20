@@ -11,10 +11,10 @@ namespace Engine::priv {
     class  Renderer;
     class  Bloom final {
         private:
-            Shader*         m_Vertex_Shader   = nullptr;
-            Shader*         m_Fragment_Shader = nullptr;
-            ShaderProgram*  m_Shader_Program  = nullptr;
-            std::string     m_GLSL_frag_code  = "";
+            std::unique_ptr<Shader>         m_Vertex_Shader;
+            std::unique_ptr<Shader>         m_Fragment_Shader;
+            std::unique_ptr<ShaderProgram>  m_Shader_Program;
+            std::string                     m_GLSL_frag_code  = "";
         public:
             unsigned int num_passes           = 3;
             bool         bloom_active         = true;
@@ -25,30 +25,30 @@ namespace Engine::priv {
             float        exposure             = 1.6f;
 
             Bloom() = default;
-            ~Bloom();
+            ~Bloom() = default;
 
-            const bool init_shaders();
+            bool init_shaders();
 
-            void pass(GBuffer&, const Viewport& viewport, const unsigned int sceneTexture, const Engine::priv::Renderer& renderer);
+            void pass(GBuffer&, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::Renderer& renderer);
 
             static Bloom bloom;
     };
 };
 namespace Engine::Renderer::bloom {
-    const unsigned int getNumPasses();
-    void setNumPasses(const unsigned int);
-    void enable(const bool b = true);
+    unsigned int getNumPasses();
+    void setNumPasses(unsigned int numPasses);
+    void enable(bool enabled = true);
     void disable();
-    const bool enabled();
-    const float getThreshold();
-    void setThreshold(const float t);
-    const float getExposure();
-    void setExposure(const float e);
-    const float getBlurRadius();
-    void setBlurRadius(const float r);
-    const float getBlurStrength();
-    void setBlurStrength(const float r);
-    const float getScale();
-    void setScale(const float s);
+    bool enabled();
+    float getThreshold();
+    void setThreshold(float threshold);
+    float getExposure();
+    void setExposure(float exposure);
+    float getBlurRadius();
+    void setBlurRadius(float blurRadius);
+    float getBlurStrength();
+    void setBlurStrength(float blurStrength);
+    float getScale();
+    void setScale(float scale);
 };
 #endif

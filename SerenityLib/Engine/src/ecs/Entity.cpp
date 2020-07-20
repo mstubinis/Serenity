@@ -11,41 +11,46 @@ Entity::Entity(Scene& scene) {
     m_Data = scene.createEntity().m_Data;
 }
 
-void Entity::addChild(Entity child) const {
+void Entity::addChild(Entity child) const noexcept {
     auto* body = getComponent<ComponentBody>();
     if (body) {
         body->addChild(child);
     }
 }
-void Entity::removeChild(Entity child) const {
+void Entity::removeChild(Entity child) const noexcept {
     auto* body = getComponent<ComponentBody>();
     if (body) {
         body->removeChild(child);
     }
 }
-bool Entity::hasParent() const {
+bool Entity::hasParent() const noexcept {
     auto* body = getComponent<ComponentBody>();
     if (body) {
         return body->hasParent();
     }
     return false;
 }
-bool Entity::isDestroyed() const {
+bool Entity::isDestroyed() const noexcept {
     if (!null()) {
         Scene& s = scene();
         return InternalScenePublicInterface::GetECS(s).getEntityPool().isEntityVersionDifferent(*this);
     }
     return false;
 }
-Scene& Entity::scene() const {
+Scene& Entity::scene() const noexcept {
     return Core::m_Engine->m_ResourceManager._getSceneByID(sceneID());
 }
-void Entity::destroy() {
+void Entity::destroy() noexcept {
     if (!null()) {
-        Scene& s = scene();
-        InternalScenePublicInterface::CleanECS(s, *this);
-        InternalScenePublicInterface::GetECS(s).removeEntity(*this);
+        Scene& scene_ = scene();
+        InternalScenePublicInterface::CleanECS(scene_, *this);
+        InternalScenePublicInterface::GetECS(scene_).removeEntity(*this);
     }
+#ifndef ENGINE_PRODUCTION
+    //else {
+    //    std::cout << "Entity::destroy() called on a null entity\n";
+    //}
+#endif
 }
 
 void Entity::addComponent(const string& componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8) {
@@ -57,7 +62,7 @@ void Entity::addComponent(const string& componentClassName, luabridge::LuaRef a1
         }
     }else if (componentClassName == "ComponentModel") {
         if (!a3.isNil() && !a4.isNil()) {
-            addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>(), a4.cast<RenderStage::Stage>());
+            addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>(), a4.cast<RenderStage>());
         }else if(a4.isNil()){
             addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>());
         }else{
@@ -65,9 +70,9 @@ void Entity::addComponent(const string& componentClassName, luabridge::LuaRef a1
         }
     }else if (componentClassName == "ComponentCamera") {
         if (!a5.isNil() || !a6.isNil()) {
-            addComponent<ComponentCamera>(a1.cast<const float>(), a2.cast<const float>(), a3.cast<const float>(), a4.cast<const float>(), a5.cast<const float>(), a6.cast<const float>());
+            addComponent<ComponentCamera>(a1.cast<float>(), a2.cast<float>(), a3.cast<float>(), a4.cast<float>(), a5.cast<float>(), a6.cast<float>());
         }else{
-            addComponent<ComponentCamera>(a1.cast<const float>(), a2.cast<const float>(), a3.cast<const float>(), a4.cast<const float>());
+            addComponent<ComponentCamera>(a1.cast<float>(), a2.cast<float>(), a3.cast<float>(), a4.cast<float>());
         }
     }else if (componentClassName == "ComponentName") {
         addComponent<ComponentName>(a1.cast<const char*>());

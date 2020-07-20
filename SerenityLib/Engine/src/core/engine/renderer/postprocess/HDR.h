@@ -19,31 +19,31 @@ namespace Engine::priv {
     class  Renderer;
     class  HDR final {
         private:
-            Shader*                   m_Vertex_Shader     = nullptr;
-            Shader*                   m_Fragment_Shader   = nullptr;
-            ShaderProgram*            m_Shader_Program    = nullptr;
+            std::unique_ptr<Shader>          m_Vertex_Shader;
+            std::unique_ptr<Shader>          m_Fragment_Shader;
+            std::unique_ptr<ShaderProgram>   m_Shader_Program;
 
-            std::string               m_GLSL_frag_code    = "";
+            std::string                      m_GLSL_frag_code    = "";
+
+            HDR() = default;
+            ~HDR() = default;
         public:
             bool                      hdr_active = true;
             float                     exposure   = 3.0f;
             HDRAlgorithm::Algorithm   algorithm  = HDRAlgorithm::Uncharted;
 
-            HDR() = default;
-            ~HDR();
+            bool init_shaders();
 
-            const bool init_shaders();
+            void pass(GBuffer&, const Viewport& viewport, bool godRays, bool lighting, float godRaysFactor, const Engine::priv::Renderer& renderer);
 
-            void pass(GBuffer&, const Viewport& viewport, const bool godRays, const bool lighting, const float godRaysFactor, const Engine::priv::Renderer& renderer);
-
-            static HDR hdr;
+            static HDR STATIC_HDR;
     };
 };
 namespace Engine::Renderer::hdr {
-    const float getExposure();
-    void setExposure(const float e);
-    void setAlgorithm(const HDRAlgorithm::Algorithm a);
-    const HDRAlgorithm::Algorithm getAlgorithm();
+    float getExposure();
+    void setExposure(float e);
+    void setAlgorithm(HDRAlgorithm::Algorithm a);
+    HDRAlgorithm::Algorithm getAlgorithm();
 };
 
 

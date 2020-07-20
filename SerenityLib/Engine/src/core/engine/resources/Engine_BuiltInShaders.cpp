@@ -736,10 +736,8 @@ priv::EShaders::forward_frag =
     "\n"
     "uniform int Shadeless;\n"
     "\n"
-    //"uniform vec4 Object_Color;\n"
     "uniform uint Object_Color;\n"
     "uniform vec4 Material_F0AndID;\n"
-    //"uniform vec3 Gods_Rays_Color;\n"
     "uniform uint Gods_Rays_Color;\n"
     "\n"
     "varying vec3 WorldPosition;\n"
@@ -784,6 +782,22 @@ priv::EShaders::forward_frag =
     "    vec2 encodedNormals = EncodeOctahedron(inData.normals);\n" //yes these two lines are evil and not needed, but they sync up the results with the deferred pass...
     "    inData.normals = DecodeOctahedron(encodedNormals);\n"
     "\n"
+
+/*
+        "uniform SAMPLER_TYPE_2D gRandomMap;\n"
+        "uniform SAMPLER_TYPE_2D gDepthMap;\n"
+        "uniform vec4  SSAOInfo;\n"
+        "uniform ivec4 SSAOInfoA;\n"
+        "varying vec2 texcoords;\n"
+
+        "    vec3 Pos = CameraView * vec4(inData.worldPosition, 1.0).xyz;\n"
+        "    vec3 Normal = inData.normals;\n"
+        "    Normal = CameraView * vec4(Normal, 1.0).xyz;\n"
+        "    vec2 RandVector = normalize(texture2D(USE_SAMPLER_2D(gRandomMap), ScreenData.zw * texcoords / SSAOInfoA.w).xy);\n"
+        "    float Radius = SSAOInfo.x / max(Pos.z, 100.0);\n"
+        "    float ssao = SSAOExecute(USE_SAMPLER_2D(gDepthMap), texcoords, SSAOInfoA.z, SSAOInfoA.w, RandVector, Radius, Pos, Normal, SSAOInfo.y, SSAOInfo.z, SSAOInfo.w);\n"
+*/
+
     "    vec3 lightTotal = ConstantZeroVec3;\n"
     "    if(Shadeless != 1){\n"
     "        vec3 lightCalculation = ConstantZeroVec3;\n"
@@ -793,7 +807,7 @@ priv::EShaders::forward_frag =
     "            vec3 LightPosition = vec3(currentLight.DataC.yzw) - CamRealPosition;\n"
     "            vec3 LightDirection = normalize(vec3(currentLight.DataA.w,currentLight.DataB.x,currentLight.DataB.y));\n"
     "            if(currentLight.DataD.w == 0.0){\n"       //sun
-    "                lightCalculation = CalcLightInternalForward(currentLight, normalize(LightPosition - WorldPosition),WorldPosition,inData.normals,inData);\n"
+    "                lightCalculation = CalcLightInternalForward(currentLight, normalize(LightPosition - WorldPosition), WorldPosition, inData.normals, inData);\n"
     "            }else if(currentLight.DataD.w == 1.0){\n" //point
     "                lightCalculation = CalcPointLightForward(currentLight, LightPosition,WorldPosition,inData.normals,inData);\n"
     "            }else if(currentLight.DataD.w == 2.0){\n" //directional
@@ -801,9 +815,9 @@ priv::EShaders::forward_frag =
     "            }else if(currentLight.DataD.w == 3.0){\n" //spot
     "                lightCalculation = CalcSpotLightForward(currentLight, LightDirection,LightPosition,WorldPosition,inData.normals,inData);\n"
     "            }else if(currentLight.DataD.w == 4.0){\n" //rod
-    "                lightCalculation = CalcRodLightForward(currentLight, vec3(currentLight.DataA.w,currentLight.DataB.xy),currentLight.DataC.yzw,WorldPosition,inData.normals,inData);\n"
+    "                lightCalculation = CalcRodLightForward(currentLight, vec3(currentLight.DataA.w, currentLight.DataB.xy), currentLight.DataC.yzw, WorldPosition, inData.normals, inData);\n"
         "        }else if(currentLight.DataD.w == 5.0){\n" //projection
-        "            lightCalculation = CalcProjectionLightForward(currentLight, vec3(currentLight.DataA.w,currentLight.DataB.xy),currentLight.DataC.yzw,WorldPosition,inData.normals,inData);\n"
+        "            lightCalculation = CalcProjectionLightForward(currentLight, vec3(currentLight.DataA.w, currentLight.DataB.xy), currentLight.DataC.yzw, WorldPosition, inData.normals, inData);\n"
     "            }\n"
     "            lightTotal += lightCalculation;\n"
     "        }\n"
@@ -812,7 +826,7 @@ priv::EShaders::forward_frag =
         
     "        vec3 ViewDir = normalize(CameraPosition - WorldPosition);\n"
     "        vec3 R = reflect(-ViewDir, inData.normals);\n"
-    "        float VdotN = max(0.0, dot(ViewDir,inData.normals));\n"
+    "        float VdotN = max(0.0, dot(ViewDir, inData.normals));\n"
     //"      float ssaoValue = 1.0 - texture2D(gSSAOMap,uv).a;\n"
     //"      float ao = (fract(matIDandAO)+0.0001) * ssaoValue;\n"
     "        float ao = inData.ao;\n"

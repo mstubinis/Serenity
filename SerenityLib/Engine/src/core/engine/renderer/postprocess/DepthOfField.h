@@ -11,11 +11,11 @@ namespace Engine::priv {
     class  Renderer;
     class  DepthOfField final {
         private:
-            Shader*        m_Vertex_Shader   = nullptr;
-            Shader*        m_Fragment_Shader = nullptr;
-            ShaderProgram* m_Shader_Program  = nullptr;
+            std::unique_ptr<Shader>         m_Vertex_Shader;
+            std::unique_ptr<Shader>         m_Fragment_Shader;
+            std::unique_ptr<ShaderProgram>  m_Shader_Program;
 
-            std::string    m_GLSL_frag_code  = "";
+            std::string                     m_GLSL_frag_code  = "";
         public:
             float bias                       = 0.6f;
             float focus                      = 2.0f;
@@ -23,25 +23,25 @@ namespace Engine::priv {
             bool  dof                        = false;
 
             DepthOfField() = default;
-            ~DepthOfField();
+            ~DepthOfField() = default;
 
-            const bool init_shaders();
+            bool init_shaders();
 
-            void pass(GBuffer&, const Viewport& viewport, const unsigned int sceneTexture, const Engine::priv::Renderer& renderer);
+            void pass(GBuffer&, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::Renderer& renderer);
 
-            static DepthOfField DOF;
+            static DepthOfField STATIC_DOF;
     };
 };
 namespace Engine::Renderer::depthOfField {
-    void enable(const bool b = true);
+    void enable(bool enabled = true);
     void disable();
-    const bool enabled();
-    const float getFocus();
-    void setFocus(const float);
-    const float getBias();
-    void setBias(const float);
-    const float getBlurRadius();
-    void setBlurRadius(const float);
+    bool enabled();
+    float getFocus();
+    void setFocus(float focus);
+    float getBias();
+    void setBias(float bias);
+    float getBlurRadius();
+    void setBlurRadius(float blurRadius);
 };
 
 #endif

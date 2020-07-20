@@ -7,12 +7,12 @@ class  ShaderProgram;
 class  Shader;
 class  Viewport;
 
-struct SMAAQualityLevel {enum Level {
+enum class SMAAQualityLevel : unsigned char {
     Low, 
     Medium, 
     High, 
     Ultra,
-};};
+};
 
 namespace Engine::priv {
     class  GBuffer;
@@ -34,6 +34,8 @@ namespace Engine::priv {
             std::vector<std::string>    m_Vertex_Shaders_Code;
             std::vector<std::string>    m_Fragment_Shaders_Code;
 
+            SMAA();
+            ~SMAA();
         public:
             unsigned int  AreaTexture                             = 0;
             unsigned int  SearchTexture                           = 0;
@@ -54,36 +56,33 @@ namespace Engine::priv {
             bool          PREDICATION                             = false;
             bool          REPROJECTION                            = false;
 
-            SMAA();
-            ~SMAA();
-
             void init();
 
-            const bool init_shaders();
+            bool init_shaders();
 
-            void passEdge(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int sceneTexture, const unsigned int outTexture, const Engine::priv::Renderer& renderer);
-            void passBlend(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int outTexture, const Engine::priv::Renderer& renderer);
-            void passNeighbor(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int sceneTexture, const Engine::priv::Renderer& renderer);
+            void passEdge(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, unsigned int sceneTexture, unsigned int outTexture, const Engine::priv::Renderer& renderer);
+            void passBlend(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, unsigned int outTexture, const Engine::priv::Renderer& renderer);
+            void passNeighbor(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::Renderer& renderer);
             void passFinal(GBuffer&, const Viewport& viewport, const Engine::priv::Renderer& renderer); //currently unused
 
-            static SMAA smaa;
+            static SMAA STATIC_SMAA;
     };
 };
 namespace Engine::Renderer::smaa {
-    void setThreshold(const float threshold);
-    void setSearchSteps(const unsigned int steps);
+    void setThreshold(float threshold);
+    void setSearchSteps(unsigned int searchSteps);
     void disableCornerDetection();
-    void enableCornerDetection(const unsigned int detection = 25);
+    void enableCornerDetection(unsigned int detection = 25);
     void disableDiagonalDetection();
-    void enableDiagonalDetection(const unsigned int detection = 8);
-    void setQuality(const SMAAQualityLevel::Level level);
-    void setPredicationThreshold(const float threshold);
-    void setPredicationScale(const float scale);
-    void setPredicationStrength(const float strength);
-    void setReprojectionScale(const float scale);
-    void enablePredication(const bool b = true);
+    void enableDiagonalDetection(unsigned int detection = 8);
+    void setQuality(SMAAQualityLevel qualityLevel);
+    void setPredicationThreshold(float predicationThreshold);
+    void setPredicationScale(float predicationScale);
+    void setPredicationStrength(float predicationStrength);
+    void setReprojectionScale(float reprojectionScale);
+    void enablePredication(bool enabledPredication = true);
     void disablePredication();
-    void enableReprojection(const bool b = true);
+    void enableReprojection(bool enabledReprojection = true);
     void disableReprojection();
 };
 #endif

@@ -7,34 +7,32 @@
 
 using namespace std;
 
-Engine::priv::Fog Engine::priv::Fog::fog;
+Engine::priv::Fog Engine::priv::Fog::STATIC_FOG;
 
-Engine::priv::Fog::~Fog() {
+bool Engine::Renderer::fog::enabled() {
+    return Engine::priv::Fog::STATIC_FOG.fog_active;
 }
-const bool Engine::Renderer::fog::enabled() {
-    return Engine::priv::Fog::fog.fog_active;
-}
-void Engine::Renderer::fog::enable(const bool b) {
-    Engine::priv::Fog::fog.fog_active = b;
+void Engine::Renderer::fog::enable(bool enabled) {
+    Engine::priv::Fog::STATIC_FOG.fog_active = enabled;
 }
 void Engine::Renderer::fog::disable() {
-    Engine::priv::Fog::fog.fog_active = false;
+    Engine::priv::Fog::STATIC_FOG.fog_active = false;
 }
 void Engine::Renderer::fog::setColor(const glm::vec4& color) {
     Engine::Renderer::fog::setColor(color.r, color.g, color.b, color.a);
 }
-void Engine::Renderer::fog::setColor(const float r, const float g, const float b, const float a) {
-    Engine::Math::setColor(Engine::priv::Fog::fog.color, r, g, b, a);
+void Engine::Renderer::fog::setColor(float r, float g, float b, float a) {
+    Engine::Math::setColor(Engine::priv::Fog::STATIC_FOG.color, r, g, b, a);
 }
-void Engine::Renderer::fog::setNullDistance(const float d) {
-    Engine::priv::Fog::fog.distNull = d;
+void Engine::Renderer::fog::setNullDistance(float nullDistance) {
+    Engine::priv::Fog::STATIC_FOG.distNull = nullDistance;
 }
-void Engine::Renderer::fog::setBlendDistance(const float d) {
-    Engine::priv::Fog::fog.distBlend = d;
+void Engine::Renderer::fog::setBlendDistance(float blendDistance) {
+    Engine::priv::Fog::STATIC_FOG.distBlend = blendDistance;
 }
-const float Engine::Renderer::fog::getNullDistance() {
-    return Engine::priv::Fog::fog.distNull;
+float Engine::Renderer::fog::getNullDistance() {
+    return Engine::priv::Fog::STATIC_FOG.distNull;
 }
-const float Engine::Renderer::fog::getBlendDistance() {
-    return Engine::priv::Fog::fog.distBlend;
+float Engine::Renderer::fog::getBlendDistance() {
+    return Engine::priv::Fog::STATIC_FOG.distBlend;
 }

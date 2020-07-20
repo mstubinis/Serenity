@@ -171,13 +171,13 @@ void DeferredPipeline::init() {
     m_FullscreenTriangle.init();
 
 
-    FXAA::fxaa.init_shaders();
-    SSAO::ssao.init_shaders();
-    HDR::hdr.init_shaders();
-    DepthOfField::DOF.init_shaders();
+    FXAA::STATIC_FXAA.init_shaders();
+    SSAO::STATIC_SSAO.init_shaders();
+    HDR::STATIC_HDR.init_shaders();
+    DepthOfField::STATIC_DOF.init_shaders();
     Bloom::bloom.init_shaders();
-    GodRays::godRays.init_shaders();
-    SMAA::smaa.init_shaders();
+    GodRays::STATIC_GOD_RAYS.init_shaders();
+    SMAA::STATIC_SMAA.init_shaders();
 
     auto emplaceShader = [](unsigned int index, const string& str, vector<Shader*>& collection, ShaderType::Type type) {
         Shader* s = NEW Shader(str, type, false);
@@ -273,8 +273,8 @@ void DeferredPipeline::init() {
     Texture::BRDF = NEW Texture(512, 512, ImagePixelType::FLOAT, ImagePixelFormat::RG, ImageInternalFormat::RG16F);
     Texture::BRDF->setWrapping(TextureWrap::ClampToEdge);
 
-    SSAO::ssao.init();
-    SMAA::smaa.init();
+    SSAO::STATIC_SSAO.init();
+    SMAA::STATIC_SMAA.init();
 
     internal_generate_brdf_lut(*m_InternalShaderPrograms[ShaderProgramEnum::BRDFPrecomputeCookTorrance], 512, 256);
 
@@ -1036,7 +1036,7 @@ void DeferredPipeline::internal_render_2d_text_right(const string& text, const F
     }
 }
 
-void DeferredPipeline::render2DText(const string& text, const Font& font, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, TextAlignment::Type textAlignment, const glm::vec4& scissor) {
+void DeferredPipeline::render2DText(const string& text, const Font& font, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, TextAlignment textAlignment, const glm::vec4& scissor) {
     GLScissor(scissor);
 
     m_Text_Points.clear();
@@ -1076,7 +1076,7 @@ void DeferredPipeline::render2DText(const string& text, const Font& font, const 
     m_Renderer.unbind(&fontPlane);
 
 }
-void DeferredPipeline::render2DTexture(Texture* texture, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, Alignment::Type align, const glm::vec4& scissor) {
+void DeferredPipeline::render2DTexture(Texture* texture, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, Alignment align, const glm::vec4& scissor) {
     GLScissor(scissor);
 
     float translationX = position.x;
@@ -1107,7 +1107,7 @@ void DeferredPipeline::render2DTexture(Texture* texture, const glm::vec2& positi
     renderMesh(plane);
     m_Renderer.unbind(&plane);
 }
-void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment::Type alignment, const glm::vec4& scissor) {
+void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment alignment, const glm::vec4& scissor) {
     GLScissor(scissor);
 
     float translationX = position.x;
@@ -1160,7 +1160,7 @@ void DeferredPipeline::internal_pass_geometry(Viewport& viewport, Camera& camera
     Engine::Renderer::setDepthFunc(GL_LEQUAL);
 
     glClearBufferfv(GL_COLOR, 0, colors);
-    auto& godRays = GodRays::godRays;
+    auto& godRays = GodRays::STATIC_GOD_RAYS;
     if (godRays.godRays_active) {
         const float godraysclearcolor[4] = { godRays.clearColor.r, godRays.clearColor.g, godRays.clearColor.b, godRays.clearColor.a };
         glClearBufferfv(GL_COLOR, 2, godraysclearcolor);
@@ -1205,17 +1205,17 @@ void DeferredPipeline::internal_pass_ssao(Viewport& viewport, Camera& camera) {
     //TODO: possible optimization: use stencil buffer to reject completely black (or are they white?) pixels during blur passes
     m_GBuffer.bindFramebuffers(GBufferType::Bloom, GBufferType::GodRays, "A", false);
     Engine::Renderer::Settings::clear(true, false, false); //bloom and god rays alpha channels cleared to black 
-    if (SSAO::ssao.m_SSAOLevel > SSAOLevel::Off && viewport.getRenderFlags().has(ViewportRenderingFlag::SSAO)) {
+    if (SSAO::STATIC_SSAO.m_SSAOLevel > SSAOLevel::Off && viewport.getRenderFlags().has(ViewportRenderingFlag::SSAO)) {
         Engine::Renderer::GLEnablei(GL_BLEND, 0);//i dont think this is needed anymore
         m_GBuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
-        SSAO::ssao.passSSAO(m_GBuffer, viewport, camera, m_Renderer);
-        if (SSAO::ssao.m_ssao_do_blur) {
+        SSAO::STATIC_SSAO.passSSAO(m_GBuffer, viewport, camera, m_Renderer);
+        if (SSAO::STATIC_SSAO.m_ssao_do_blur) {
             Engine::Renderer::GLDisablei(GL_BLEND, 0); //yes this is absolutely needed
-            for (unsigned int i = 0; i < SSAO::ssao.m_ssao_blur_num_passes; ++i) {
+            for (unsigned int i = 0; i < SSAO::STATIC_SSAO.m_ssao_blur_num_passes; ++i) {
                 m_GBuffer.bindFramebuffers(GBufferType::GodRays, "A", false);
-                SSAO::ssao.passBlur(m_GBuffer, viewport, "H", GBufferType::Bloom, m_Renderer);
+                SSAO::STATIC_SSAO.passBlur(m_GBuffer, viewport, "H", GBufferType::Bloom, m_Renderer);
                 m_GBuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
-                SSAO::ssao.passBlur(m_GBuffer, viewport, "V", GBufferType::GodRays, m_Renderer);
+                SSAO::STATIC_SSAO.passBlur(m_GBuffer, viewport, "V", GBufferType::GodRays, m_Renderer);
             }
         }  
     }
@@ -1328,7 +1328,7 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
 void DeferredPipeline::internal_pass_god_rays(Viewport& viewport, Camera& camera) {
     m_GBuffer.bindFramebuffers(GBufferType::GodRays, "RGB", false);
     Engine::Renderer::Settings::clear(true, false, false); //godrays rgb channels cleared to black
-    auto& godRaysPlatform = GodRays::godRays;
+    auto& godRaysPlatform = GodRays::STATIC_GOD_RAYS;
     auto* sun = Engine::Renderer::godRays::getSun();
     if (sun && viewport.getRenderFlags().has(ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active) {
         auto* body       = sun->getComponent<ComponentBody>();
@@ -1353,7 +1353,7 @@ void DeferredPipeline::internal_pass_god_rays(Viewport& viewport, Camera& camera
 void DeferredPipeline::internal_pass_hdr(Viewport& viewport, Camera& camera) {
     const glm::uvec4& dimensions = viewport.getViewportDimensions();
     m_GBuffer.bindFramebuffers(GBufferType::Misc);
-    HDR::hdr.pass(m_GBuffer, viewport, GodRays::godRays.godRays_active, m_Renderer.m_Lighting, GodRays::godRays.factor, m_Renderer);
+    HDR::STATIC_HDR.pass(m_GBuffer, viewport, GodRays::STATIC_GOD_RAYS.godRays_active, m_Renderer.m_Lighting, GodRays::STATIC_GOD_RAYS.factor, m_Renderer);
 }
 void DeferredPipeline::internal_pass_bloom(Viewport& viewport) {
     if (Bloom::bloom.bloom_active && viewport.getRenderFlags().has(ViewportRenderingFlag::Bloom)) {
@@ -1368,9 +1368,9 @@ void DeferredPipeline::internal_pass_bloom(Viewport& viewport) {
     }
 }
 void DeferredPipeline::internal_pass_depth_of_field(Viewport& viewport, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture) {
-    if (DepthOfField::DOF.dof && viewport.getRenderFlags().has(ViewportRenderingFlag::DepthOfField)) {
+    if (DepthOfField::STATIC_DOF.dof && viewport.getRenderFlags().has(ViewportRenderingFlag::DepthOfField)) {
         m_GBuffer.bindFramebuffers(outTexture);
-        DepthOfField::DOF.pass(m_GBuffer, viewport, sceneTexture, m_Renderer);
+        DepthOfField::STATIC_DOF.pass(m_GBuffer, viewport, sceneTexture, m_Renderer);
         sceneTexture = GBufferType::Lighting;
         outTexture   = GBufferType::Misc;
     }
@@ -1399,7 +1399,7 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
                     render2DAPINonTextured(mainRenderFunction, viewport);
 
                     m_GBuffer.bindFramebuffers(sceneTexture);
-                    FXAA::fxaa.pass(m_GBuffer, viewport, outTexture, m_Renderer);
+                    FXAA::STATIC_FXAA.pass(m_GBuffer, viewport, outTexture, m_Renderer);
 
                     m_GBuffer.bindBackbuffer(viewport);
                     internal_pass_depth_and_transparency(viewport, sceneTexture);
@@ -1423,10 +1423,10 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
                     //const auto& dimensions = viewport.getViewportDimensions();
                     const glm::vec4& SMAA_PIXEL_SIZE = glm::vec4(1.0f / winSize.x, 1.0f / winSize.y, winSize.x, winSize.y);
 
-                    SMAA::smaa.passEdge(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, outTexture, m_Renderer);
-                    SMAA::smaa.passBlend(m_GBuffer, SMAA_PIXEL_SIZE, viewport, outTexture, m_Renderer);
+                    SMAA::STATIC_SMAA.passEdge(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, outTexture, m_Renderer);
+                    SMAA::STATIC_SMAA.passBlend(m_GBuffer, SMAA_PIXEL_SIZE, viewport, outTexture, m_Renderer);
                     m_GBuffer.bindFramebuffers(outTexture);
-                    SMAA::smaa.passNeighbor(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, m_Renderer);
+                    SMAA::STATIC_SMAA.passNeighbor(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, m_Renderer);
                     //m_GBuffer.bindFramebuffers(sceneTexture);
 
                     //SMAA::smaa.passFinal(m_GBuffer, viewport);//unused
@@ -1445,12 +1445,12 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
 void DeferredPipeline::internal_pass_final(GBufferType::Type sceneTexture) {
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredFinal]);
     Engine::Renderer::sendUniform1Safe("HasBloom", (int)Bloom::bloom.bloom_active);
-    Engine::Renderer::sendUniform1Safe("HasFog", (int)Fog::fog.fog_active);
+    Engine::Renderer::sendUniform1Safe("HasFog", (int)Fog::STATIC_FOG.fog_active);
 
-    if (Fog::fog.fog_active) {
-        Engine::Renderer::sendUniform1Safe("FogDistNull", Fog::fog.distNull);
-        Engine::Renderer::sendUniform1Safe("FogDistBlend", Fog::fog.distBlend);
-        Engine::Renderer::sendUniform4Safe("FogColor", Fog::fog.color);
+    if (Engine::Renderer::fog::enabled()) {
+        Engine::Renderer::sendUniform1Safe("FogDistNull", Fog::STATIC_FOG.distNull);
+        Engine::Renderer::sendUniform1Safe("FogDistBlend", Fog::STATIC_FOG.distBlend);
+        Engine::Renderer::sendUniform4Safe("FogColor", Fog::STATIC_FOG.color);
         Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), 2);
     }
     Engine::Renderer::sendTextureSafe("SceneTexture", m_GBuffer.getTexture(sceneTexture), 0);
@@ -1496,7 +1496,7 @@ void DeferredPipeline::internal_pass_blur(Viewport& viewport, GLuint texture, st
         bloom.blur_strength,
         bloom.blur_strength,
         bloom.blur_strength,
-        SSAO::ssao.m_ssao_blur_strength
+        SSAO::STATIC_SSAO.m_ssao_blur_strength
     );
     Engine::Renderer::sendUniform4("DataA", bloom.blur_radius, 0.0f, hv.x, hv.y);
     Engine::Renderer::sendTexture("image", m_GBuffer.getTexture(texture), 0);
@@ -1682,19 +1682,19 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, Viewport& viewpo
     render2DAPI(mainRenderFunction, viewport);
 }
 
-void DeferredPipeline::renderTexture(Texture& tex, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment::Type align, const glm::vec4& scissor) {
+void DeferredPipeline::renderTexture(Texture& tex, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) {
     API2DCommand command;
     command.func = [=, &tex]() { DeferredPipeline::render2DTexture(&tex, p, c, a, s, d, align, scissor); };
     command.depth = d;
     m_2DAPICommands.push_back(std::move(command));
 }
-void DeferredPipeline::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment::Type align, const glm::vec4& scissor) {
+void DeferredPipeline::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) {
     API2DCommand command;
     command.func = [=, &fnt]() { DeferredPipeline::render2DText(t, fnt, p, c, a, s, d, align, scissor); };
     command.depth = d;
     m_2DAPICommands.push_back(std::move(command));
 }
-void DeferredPipeline::renderBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment::Type align, const glm::vec4& scissor) {
+void DeferredPipeline::renderBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) {
     float doubleBorder = borderSize * 2.0f;
     float halfWidth    = w / 2.0f;
     float halfHeight   = h / 2.0f;
@@ -1709,13 +1709,13 @@ void DeferredPipeline::renderBorder(float borderSize, const glm::vec2& pos, cons
     Engine::Renderer::renderRectangle(newPos - glm::vec2(0.0f, halfHeight), col, w, borderSize, angle, depth, Alignment::TopCenter, scissor);
     Engine::Renderer::renderRectangle(newPos + glm::vec2(0.0f, halfHeight + borderSize), col, w, borderSize, angle, depth, Alignment::BottomCenter, scissor);
 }
-void DeferredPipeline::renderRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment::Type align, const glm::vec4& scissor) {
+void DeferredPipeline::renderRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment align, const glm::vec4& scissor) {
     API2DCommand command;
     command.func = [=]() { DeferredPipeline::render2DTexture(nullptr, pos, col, angle, glm::vec2(width, height), depth, align, scissor); };
     command.depth = depth;
     m_2DAPICommands.push_back(std::move(command));
 }
-void DeferredPipeline::renderTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment::Type align, const glm::vec4& scissor) {
+void DeferredPipeline::renderTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) {
     API2DCommand command;
     command.func = [=]() { DeferredPipeline::render2DTriangle(position, color, angle, width, height, depth, align, scissor); };
     command.depth = depth;

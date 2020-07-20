@@ -8,8 +8,8 @@ struct Event;
 
 /*
 Inherit from this class to expose your class to events and event dispatching, specifically the following functions:
-    void registerEvent(EventType::Type type)    -  register this object as an observer to the parameterized event type
-    void unregisterEvent(EventType::Type type)  -  unregister this object as an observer to the parameterized event type
+    void registerEvent(EventType type)    -  register this object as an observer to the parameterized event type
+    void unregisterEvent(EventType type)  -  unregister this object as an observer to the parameterized event type
     virtual void onEvent(const Event& e)        -  execute this function when the event occurs
 */
 class Observer {
@@ -19,9 +19,9 @@ class Observer {
         Observer();
         virtual ~Observer();
 
-        void registerEvent(EventType::Type type);
-        void unregisterEvent(EventType::Type type);
-        bool isRegistered(EventType::Type type) const;
+        void registerEvent(EventType type);
+        void unregisterEvent(EventType type);
+        bool isRegistered(EventType type) const;
 
         virtual void onEvent(const Event& e);
 };

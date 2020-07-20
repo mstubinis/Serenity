@@ -7,13 +7,12 @@
 
 constexpr const glm::vec4 NO_SCISSOR = glm::vec4(-1.0f);
 
-struct SortingMode final { enum Mode : unsigned int {
+enum class SortingMode : unsigned int {
     None,
     FrontToBack,
     BackToFront,
-};};
-
-struct DepthFunc final { enum Func : unsigned int {
+};
+enum class DepthFunc : unsigned int {
     Never    = GL_NEVER,
     Less     = GL_LESS,
     Equal    = GL_EQUAL,
@@ -22,17 +21,16 @@ struct DepthFunc final { enum Func : unsigned int {
     NotEqual = GL_NOTEQUAL,
     GEqual   = GL_GEQUAL,
     Always   = GL_ALWAYS,
-};};
-struct AntiAliasingAlgorithm final { enum Algorithm : unsigned int {
+};
+enum class AntiAliasingAlgorithm : unsigned int {
     None, 
     FXAA, 
     SMAA_LOW,
     SMAA_MED,
     SMAA_HIGH,
     SMAA_ULTRA,
-};};
-
-struct Alignment final { enum Type : unsigned int {
+};
+enum class Alignment : unsigned int {
     TopLeft,
     TopCenter,
     TopRight,
@@ -42,9 +40,8 @@ struct Alignment final { enum Type : unsigned int {
     BottomLeft,
     BottomCenter,
     BottomRight,
-_TOTAL};};
-
-struct RenderStage final { enum Stage : unsigned int {
+_TOTAL};
+enum class RenderStage : unsigned int {
     GeometryOpaque,
     GeometryOpaque_2,
     GeometryOpaque_3,
@@ -85,6 +82,6 @@ struct RenderStage final { enum Stage : unsigned int {
     Decals_3,
     Decals_4,
 
-_TOTAL};};
+_TOTAL};
 
 #endif

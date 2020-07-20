@@ -2,10 +2,10 @@
 #ifndef ENGINE_FONT_INCLUDES_H
 #define ENGINE_FONT_INCLUDES_H
 
-struct TextAlignment final {enum Type {
+enum class TextAlignment : unsigned int {
     Left,
     Center,
     Right,
-};};
+};
 
 #endif

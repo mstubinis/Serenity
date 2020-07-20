@@ -7,7 +7,7 @@
 #include <core/engine/renderer/postprocess/SSAO.h>
 
 struct EngineOptions final {
-    AntiAliasingAlgorithm::Algorithm   aa_algorithm;
+    AntiAliasingAlgorithm   aa_algorithm;
     char**                             argv;
     int                                argc;
     unsigned char                      ssao_level;

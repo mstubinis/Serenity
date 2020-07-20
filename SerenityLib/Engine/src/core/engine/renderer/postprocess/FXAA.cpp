@@ -13,9 +13,9 @@
 
 using namespace std;
 
-Engine::priv::FXAA Engine::priv::FXAA::fxaa;
+Engine::priv::FXAA Engine::priv::FXAA::STATIC_FXAA;
 
-const bool Engine::priv::FXAA::init_shaders() {
+bool Engine::priv::FXAA::init_shaders() {
     if (!m_GLSL_frag_code.empty())
         return false;
 
@@ -72,26 +72,21 @@ const bool Engine::priv::FXAA::init_shaders() {
 #pragma endregion
 
 
-    auto lambda_part_a = [&]() {
-        m_Vertex_shader   = NEW Shader(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
-        m_Fragment_shader = NEW Shader(m_GLSL_frag_code, ShaderType::Fragment, false);
+    auto lambda_part_a = [this]() {
+        m_Vertex_shader   = std::make_unique<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
+        m_Fragment_shader = std::make_unique<Shader>(m_GLSL_frag_code, ShaderType::Fragment, false);
     };
-    auto lambda_part_b = [&]() {
-        m_Shader_program = NEW ShaderProgram("FXAA", *m_Vertex_shader, *m_Fragment_shader);
+    auto lambda_part_b = [this]() {
+        m_Shader_program  = std::make_unique<ShaderProgram>("FXAA", *m_Vertex_shader, *m_Fragment_shader);
     };
 
     Engine::priv::threading::addJobWithPostCallback(lambda_part_a, lambda_part_b);
 
     return true;
 }
-Engine::priv::FXAA::~FXAA() {
-    SAFE_DELETE(m_Shader_program);
-    SAFE_DELETE(m_Fragment_shader);
-    SAFE_DELETE(m_Vertex_shader);
-}
-void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, const unsigned int sceneTexture, const Engine::priv::Renderer& renderer) {
+void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::Renderer& renderer) {
     const auto& dimensions = viewport.getViewportDimensions();
-    renderer.bind(m_Shader_program);
+    renderer.bind(m_Shader_program.get());
 
     Engine::Renderer::sendUniform1("FXAA_REDUCE_MIN", reduce_min);
     Engine::Renderer::sendUniform1("FXAA_REDUCE_MUL", reduce_mul);
@@ -103,21 +98,21 @@ void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, const 
 
     Engine::Renderer::renderFullscreenQuad();
 }
-void Engine::Renderer::fxaa::setReduceMin(const float r) {
-    Engine::priv::FXAA::fxaa.reduce_min = glm::max(0.0f, r);
+void Engine::Renderer::fxaa::setReduceMin(float r) {
+    Engine::priv::FXAA::STATIC_FXAA.reduce_min = glm::max(0.0f, r);
 }
-void Engine::Renderer::fxaa::setReduceMul(const float r) {
-    Engine::priv::FXAA::fxaa.reduce_mul = glm::max(0.0f, r);
+void Engine::Renderer::fxaa::setReduceMul(float r) {
+    Engine::priv::FXAA::STATIC_FXAA.reduce_mul = glm::max(0.0f, r);
 }
-void Engine::Renderer::fxaa::setSpanMax(const float r) {
-    Engine::priv::FXAA::fxaa.span_max = glm::max(0.0f, r);
+void Engine::Renderer::fxaa::setSpanMax(float r) {
+    Engine::priv::FXAA::STATIC_FXAA.span_max = glm::max(0.0f, r);
 }
-const float Engine::Renderer::fxaa::getReduceMin() {
-    return Engine::priv::FXAA::fxaa.reduce_min;
+float Engine::Renderer::fxaa::getReduceMin() {
+    return Engine::priv::FXAA::STATIC_FXAA.reduce_min;
 }
-const float Engine::Renderer::fxaa::getReduceMul() {
-    return Engine::priv::FXAA::fxaa.reduce_mul;
+float Engine::Renderer::fxaa::getReduceMul() {
+    return Engine::priv::FXAA::STATIC_FXAA.reduce_mul;
 }
-const float Engine::Renderer::fxaa::getSpanMax() {
-    return Engine::priv::FXAA::fxaa.span_max;
+float Engine::Renderer::fxaa::getSpanMax() {
+    return Engine::priv::FXAA::STATIC_FXAA.span_max;
 }

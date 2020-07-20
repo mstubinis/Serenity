@@ -60,7 +60,7 @@ class Scene: public Resource, public Observer {
         Entity*                                                       m_Sun                = nullptr;
         Skybox*                                                       m_Skybox             = nullptr;
 
-        class impl; impl*                                             m_i                  = nullptr;
+        class impl; std::unique_ptr<impl>                             m_i                  = nullptr;
         std::function<void(Scene*, const float)>                      m_OnUpdateFunctor    = [](Scene*, const float) {};
 
         void preUpdate(const float dt);
@@ -111,9 +111,8 @@ class Scene: public Resource, public Observer {
 
         inline void setGodRaysSun(Entity* sun) noexcept { m_Sun = sun; }
         inline Entity* getGodRaysSun() const noexcept { return m_Sun; }
-
         inline Skybox* skybox() const noexcept { return m_Skybox; }
-        void setSkybox(Skybox* s) noexcept { m_Skybox = s; }
+        inline void setSkybox(Skybox* s) noexcept { m_Skybox = s; }
 
         void centerSceneToObject(Entity centerEntity);
 };
@@ -146,9 +145,9 @@ namespace Engine::priv {
         static void           RenderDecals( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
         static void           RenderParticles( Renderer&, Scene& scene, Viewport&, Camera&, ShaderProgram& program);
 
-        static void           AddModelInstanceToPipeline(Scene& scene, ModelInstance&, RenderStage::Stage stage);
-        static void           RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance&, RenderStage::Stage stage);
-        static ECS<Entity>&   GetECS(const Scene& scene);
+        static void           AddModelInstanceToPipeline(Scene& scene, ModelInstance&, RenderStage stage);
+        static void           RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance&, RenderStage stage);
+        static ECS<Entity>&   GetECS(Scene& scene);
         static void           CleanECS(Scene& scene, Entity entity);
     };
 };

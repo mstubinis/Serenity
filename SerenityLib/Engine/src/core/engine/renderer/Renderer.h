@@ -32,13 +32,13 @@ namespace priv{
         public:
             bool                               m_Lighting         = true;
             bool                               m_DrawPhysicsDebug = false;
-            AntiAliasingAlgorithm::Algorithm   m_AA_algorithm     = AntiAliasingAlgorithm::FXAA;
+            AntiAliasingAlgorithm   m_AA_algorithm     = AntiAliasingAlgorithm::FXAA;
             float                              m_Gamma            = 2.2f;
             float                              m_GI_Diffuse       = 1.0f;
             float                              m_GI_Specular      = 1.0f;
             float                              m_GI_Global        = 1.0f;
             float                              m_GI_Pack;
-            DepthFunc::Func                    m_Depth_Function   = DepthFunc::Less;
+            DepthFunc                    m_Depth_Function   = DepthFunc::Less;
 
         public:
             IRenderingPipeline*      m_Pipeline                   = nullptr;
@@ -86,7 +86,7 @@ namespace Renderer{
         
         void applyGlobalAnisotropicFiltering(float filtering);
 
-        bool setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm AA_algorithm);
+        bool setAntiAliasingAlgorithm(AntiAliasingAlgorithm AA_algorithm);
 
         void enableDrawPhysicsInfo(bool b = true);
         void disableDrawPhysicsInfo();
@@ -151,7 +151,7 @@ namespace Renderer{
     void sendTextureSafe(const char* location, Texture& texture, int slot);
     void sendTextureSafe(const char* location, GLuint textureAddress, int slot, GLuint glTextureType);
     
-    void alignmentOffset(Alignment::Type align, float& x, float& y, float width, float height);
+    void alignmentOffset(Alignment align, float& x, float& y, float width, float height);
 
     void renderTexture(
         Texture&,
@@ -160,7 +160,7 @@ namespace Renderer{
         float angle,
         const glm::vec2& scale,
         float depth,
-        Alignment::Type = Alignment::Type::Center,
+        Alignment = Alignment::Center,
         const glm::vec4& scissor = NO_SCISSOR
     );
     void renderText(
@@ -171,7 +171,7 @@ namespace Renderer{
         float angle,
         const glm::vec2& scale,
         float depth,
-        TextAlignment::Type = TextAlignment::Left,
+        TextAlignment = TextAlignment::Left,
         const glm::vec4& scissor = NO_SCISSOR
     );
     void renderRectangle(
@@ -181,7 +181,7 @@ namespace Renderer{
         float height,
         float angle,
         float depth,
-        Alignment::Type = Alignment::Type::Center,
+        Alignment = Alignment::Center,
         const glm::vec4& scissor = NO_SCISSOR
     );
     void renderBorder(
@@ -192,7 +192,7 @@ namespace Renderer{
         float height,
         float angle,
         float depth,
-        Alignment::Type = Alignment::Type::Center,
+        Alignment = Alignment::Center,
         const glm::vec4& scissor = NO_SCISSOR
     );
     void renderTriangle(
@@ -202,7 +202,7 @@ namespace Renderer{
         float width,
         float height,
         float depth,
-        Alignment::Type = Alignment::Type::Center,
+        Alignment = Alignment::Center,
         const glm::vec4& scissor = NO_SCISSOR
     );
 

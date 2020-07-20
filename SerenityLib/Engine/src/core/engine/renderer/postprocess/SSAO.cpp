@@ -15,53 +15,51 @@
 using namespace std;
 using namespace Engine::priv;
 
-Engine::priv::SSAO Engine::priv::SSAO::ssao;
+Engine::priv::SSAO Engine::priv::SSAO::STATIC_SSAO;
 
 Engine::priv::SSAO::~SSAO() {
     glDeleteTextures(1, &m_ssao_noise_texture);
-    SAFE_DELETE(m_Shader_Program);
-    SAFE_DELETE(m_Fragment_Shader);
-    SAFE_DELETE(m_Vertex_Shader);
-
-    SAFE_DELETE(m_Vertex_Shader_Blur);
-    SAFE_DELETE(m_Fragment_Shader_Blur);
-    SAFE_DELETE(m_Shader_Program_Blur);
 }
-void Engine::priv::SSAO::init() {
-    uniform_real_distribution<float> rand(0.0f, 1.0f);
-    default_random_engine gen;
-    /*
-    for (unsigned int i = 0; i < SSAO_MAX_KERNEL_SIZE; ++i) {
-        glm::vec3 sample(rand(gen) * 2.0f - 1.0f, rand(gen) * 2.0f - 1.0f, rand(gen));
-        sample = glm::normalize(sample);
-        sample *= rand(gen);
-        float scale = static_cast<float>(i) / static_cast<float>(SSAO_MAX_KERNEL_SIZE);
-        const float a = 0.1f;
-        const float b = 1.0f;
-        const float f = scale * scale;
-        scale = a + f * (b - a);
-        sample *= scale;
-        m_ssao_Kernels[i] = sample;
+void Engine::priv::SSAO::internal_generate_kernel(std::uniform_real_distribution<float>& rand_dist, std::default_random_engine& gen) noexcept {
+    for (std::uint32_t i = 0; i < SSAO_MAX_KERNEL_SIZE; ++i) {
+        glm::vec3 sample(rand_dist(gen) * 2.0f - 1.0f, rand_dist(gen) * 2.0f - 1.0f, rand_dist(gen));
+        sample      = glm::normalize(sample);
+        sample     *= rand_dist(gen);
+        float scale = (float)i / (float)SSAO_MAX_KERNEL_SIZE;
+        float a     = 0.1f;
+        float b     = 1.0f;
+        float f     = scale * scale;
+        scale       = a + f * (b - a);
+        sample     *= scale;
+        //m_ssao_Kernels[i] = sample;
     }
-    */
-    vector<glm::vec3> ssaoNoise;
+}
+void Engine::priv::SSAO::internal_generate_noise(std::uniform_real_distribution<float>& rand_dist, std::default_random_engine& gen) noexcept {
+    std::vector<glm::vec3> ssaoNoise;
     ssaoNoise.reserve(SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE);
-    for (unsigned int i = 0; i < SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE; ++i) {
-        ssaoNoise.emplace_back(rand(gen) * 2.0 - 1.0, rand(gen) * 2.0 - 1.0, 0.0f);
+    for (std::uint32_t i = 0; i < SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE; ++i) {
+        ssaoNoise.emplace_back(rand_dist(gen) * 2.0 - 1.0, rand_dist(gen) * 2.0 - 1.0, 0.0f);
     }
     Engine::Renderer::genAndBindTexture(GL_TEXTURE_2D, m_ssao_noise_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SSAO_NORMALMAP_SIZE, SSAO_NORMALMAP_SIZE, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SSAO_NORMALMAP_SIZE, SSAO_NORMALMAP_SIZE, 0, GL_RGB, GL_FLOAT, ssaoNoise.data());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+}
+void Engine::priv::SSAO::init() {
+    uniform_real_distribution<float> rand_dist(0.0f, 1.0f);
+    default_random_engine gen;
+
+    //internal_generate_kernel(rand_dist, gen);
+    internal_generate_noise(rand_dist, gen);
 
     Engine::Renderer::ssao::setLevel(m_SSAOLevel);
 }
-const bool Engine::priv::SSAO::init_shaders() {
-    if (!m_GLSL_frag_code.empty())
+bool Engine::priv::SSAO::init_shaders() {
+    if (!m_GLSL_frag_code.empty()) {
         return false;
-
+    }
     m_GLSL_frag_code =
         "USE_LOG_DEPTH_FRAG_WORLD_POSITION\n"
         "\n"
@@ -111,43 +109,42 @@ const bool Engine::priv::SSAO::init_shaders() {
         "        Sum += texture2D(" + varName + ", texcoords - vec2(offset.x * Data.z, offset.y * Data.w)).a * weight[i] * Data.y;\n";
 
 
-
     m_GLSL_frag_code_blur +=
         "    }\n"
         "    gl_FragColor.a = Sum;\n"
         "}";
 
     auto lambda_part_a = [&]() {
-        m_Vertex_Shader   = NEW Shader(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
-        m_Fragment_Shader = NEW Shader(m_GLSL_frag_code, ShaderType::Fragment, false);
+        m_Vertex_Shader   = std::make_unique<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
+        m_Fragment_Shader = std::make_unique<Shader>(m_GLSL_frag_code, ShaderType::Fragment, false);
     };
     auto lambda_part_b = [&]() {
-        m_Shader_Program  = NEW ShaderProgram("SSAO", *m_Vertex_Shader, *m_Fragment_Shader);
+        m_Shader_Program  = std::make_unique<ShaderProgram>("SSAO", *m_Vertex_Shader, *m_Fragment_Shader);
     };
     Engine::priv::threading::addJobWithPostCallback(lambda_part_a, lambda_part_b);
 
 
     auto lambda_part_a_blur = [&]() {
-        m_Vertex_Shader_Blur   = NEW Shader(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
-        m_Fragment_Shader_Blur = NEW Shader(m_GLSL_frag_code_blur, ShaderType::Fragment, false);
+        m_Vertex_Shader_Blur   = std::make_unique<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
+        m_Fragment_Shader_Blur = std::make_unique<Shader>(m_GLSL_frag_code_blur, ShaderType::Fragment, false);
     };
     auto lambda_part_b_blur = [&]() {
-        m_Shader_Program_Blur  = NEW ShaderProgram("SSAO_Blur", *m_Vertex_Shader_Blur, *m_Fragment_Shader_Blur);
+        m_Shader_Program_Blur  = std::make_unique<ShaderProgram>("SSAO_Blur", *m_Vertex_Shader_Blur, *m_Fragment_Shader_Blur);
     };
     Engine::priv::threading::addJobWithPostCallback(lambda_part_a_blur, lambda_part_b_blur);
 
     return true;
 }
 void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, const Camera& camera, const Engine::priv::Renderer& renderer) {
-    renderer.bind(m_Shader_Program);
-    const auto& dimensions    = viewport.getViewportDimensions();
-    const float divisor       = gbuffer.getSmallFBO().divisor();
-    const float screen_width  = dimensions.z * divisor;
-    const float screen_height = dimensions.w * divisor;
+    renderer.bind(m_Shader_Program.get());
+    auto& dimensions    = viewport.getViewportDimensions();
+    float divisor       = gbuffer.getSmallFBO().divisor();
+    float screen_width  = dimensions.z * divisor;
+    float screen_height = dimensions.w * divisor;
 
     Engine::Renderer::sendUniform2("ScreenSize", screen_width, screen_height);
     Engine::Renderer::sendUniform4("SSAOInfo", m_ssao_radius, m_ssao_intensity, m_ssao_bias, m_ssao_scale);
-    Engine::Renderer::sendUniform4("SSAOInfoA", 0, 0, static_cast<int>(m_ssao_samples), static_cast<int>(SSAO_NORMALMAP_SIZE)); //change to 4f eventually?
+    Engine::Renderer::sendUniform4("SSAOInfoA", 0, 0, (int)m_ssao_samples, (int)SSAO_NORMALMAP_SIZE); //change to 4f eventually?
 
     Engine::Renderer::sendTexture("gNormalMap", gbuffer.getTexture(GBufferType::Normal), 0);
     Engine::Renderer::sendTexture("gRandomMap", m_ssao_noise_texture, 1, GL_TEXTURE_2D);
@@ -155,8 +152,8 @@ void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, co
 
     Engine::Renderer::renderFullscreenQuad();
 }
-void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, string_view type, const unsigned int texture, const Engine::priv::Renderer& renderer) {
-    renderer.bind(m_Shader_Program_Blur);
+void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, string_view type, unsigned int texture, const Engine::priv::Renderer& renderer) {
+    renderer.bind(m_Shader_Program_Blur.get());
     glm::vec2 hv(0.0f);
     if (type == "H") { 
         hv = glm::vec2(1.0f, 0.0f); 
@@ -170,7 +167,7 @@ void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, st
 }
 
 void Engine::Renderer::ssao::setLevel(const SSAOLevel::Level level) {
-    Engine::priv::SSAO::ssao.m_SSAOLevel = level;
+    Engine::priv::SSAO::STATIC_SSAO.m_SSAOLevel = level;
     switch (level) {
         case SSAOLevel::Off: {
             break;
@@ -219,52 +216,52 @@ void Engine::Renderer::ssao::setLevel(const SSAOLevel::Level level) {
         }
     }
 }
-void Engine::Renderer::ssao::enableBlur(const bool b) {
-    Engine::priv::SSAO::ssao.m_ssao_do_blur = b;
+void Engine::Renderer::ssao::enableBlur(bool b) {
+    Engine::priv::SSAO::STATIC_SSAO.m_ssao_do_blur = b;
 }
 void Engine::Renderer::ssao::disableBlur() {
-    Engine::priv::SSAO::ssao.m_ssao_do_blur = false;
+    Engine::priv::SSAO::STATIC_SSAO.m_ssao_do_blur = false;
 }
-const float Engine::Renderer::ssao::getBlurRadius() {
-    return Engine::priv::SSAO::ssao.m_ssao_blur_radius;
+float Engine::Renderer::ssao::getBlurRadius() {
+    return Engine::priv::SSAO::STATIC_SSAO.m_ssao_blur_radius;
 }
-void Engine::Renderer::ssao::setBlurRadius(const float r) {
-    Engine::priv::SSAO::ssao.m_ssao_blur_radius = glm::max(0.0f, r);
+void Engine::Renderer::ssao::setBlurRadius(float r) {
+    Engine::priv::SSAO::STATIC_SSAO.m_ssao_blur_radius = glm::max(0.0f, r);
 }
-const float Engine::Renderer::ssao::getBlurStrength() {
-    return Engine::priv::SSAO::ssao.m_ssao_blur_strength;
+float Engine::Renderer::ssao::getBlurStrength() {
+    return Engine::priv::SSAO::STATIC_SSAO.m_ssao_blur_strength;
 }
-void Engine::Renderer::ssao::setBlurStrength(const float s) {
-    Engine::priv::SSAO::ssao.m_ssao_blur_strength = glm::max(0.0f, s);
+void Engine::Renderer::ssao::setBlurStrength(float s) {
+    Engine::priv::SSAO::STATIC_SSAO.m_ssao_blur_strength = glm::max(0.0f, s);
 }
-const float Engine::Renderer::ssao::getIntensity() {
-    return Engine::priv::SSAO::ssao.m_ssao_intensity;
+float Engine::Renderer::ssao::getIntensity() {
+    return Engine::priv::SSAO::STATIC_SSAO.m_ssao_intensity;
 }
-void Engine::Renderer::ssao::setIntensity(const float i) {
-    Engine::priv::SSAO::ssao.m_ssao_intensity = glm::max(0.0f, i);
+void Engine::Renderer::ssao::setIntensity(float i) {
+    Engine::priv::SSAO::STATIC_SSAO.m_ssao_intensity = glm::max(0.0f, i);
 }
-const float Engine::Renderer::ssao::getRadius() {
-    return Engine::priv::SSAO::ssao.m_ssao_radius;
+float Engine::Renderer::ssao::getRadius() {
+    return Engine::priv::SSAO::STATIC_SSAO.m_ssao_radius;
 }
-void Engine::Renderer::ssao::setRadius(const float r) {
-    Engine::priv::SSAO::ssao.m_ssao_radius = glm::max(0.0f, r);
+void Engine::Renderer::ssao::setRadius(float r) {
+    Engine::priv::SSAO::STATIC_SSAO.m_ssao_radius = glm::max(0.0f, r);
 }
-const float Engine::Renderer::ssao::getScale() {
-    return Engine::priv::SSAO::ssao.m_ssao_scale;
+float Engine::Renderer::ssao::getScale() {
+    return Engine::priv::SSAO::STATIC_SSAO.m_ssao_scale;
 }
-void Engine::Renderer::ssao::setScale(const float s) {
-    Engine::priv::SSAO::ssao.m_ssao_scale = glm::max(0.0f, s);
+void Engine::Renderer::ssao::setScale(float s) {
+    Engine::priv::SSAO::STATIC_SSAO.m_ssao_scale = glm::max(0.0f, s);
 }
-const float Engine::Renderer::ssao::getBias() {
-    return Engine::priv::SSAO::ssao.m_ssao_bias;
+float Engine::Renderer::ssao::getBias() {
+    return Engine::priv::SSAO::STATIC_SSAO.m_ssao_bias;
 }
-void Engine::Renderer::ssao::setBias(const float b) {
-    Engine::priv::SSAO::ssao.m_ssao_bias = b;
+void Engine::Renderer::ssao::setBias(float b) {
+    Engine::priv::SSAO::STATIC_SSAO.m_ssao_bias = b;
 }
-const unsigned int Engine::Renderer::ssao::getSamples() {
-    return Engine::priv::SSAO::ssao.m_ssao_samples;
+unsigned int Engine::Renderer::ssao::getSamples() {
+    return Engine::priv::SSAO::STATIC_SSAO.m_ssao_samples;
 }
-void Engine::Renderer::ssao::setSamples(const unsigned int s) {
-    const unsigned int samples = glm::max(0U, s);
-    Engine::priv::SSAO::ssao.m_ssao_samples = glm::clamp(samples, 0U, SSAO_MAX_KERNEL_SIZE);
+void Engine::Renderer::ssao::setSamples(unsigned int s) {
+    s = glm::max(0U, s);
+    Engine::priv::SSAO::STATIC_SSAO.m_ssao_samples = glm::clamp(s, 0U, SSAO_MAX_KERNEL_SIZE);
 }

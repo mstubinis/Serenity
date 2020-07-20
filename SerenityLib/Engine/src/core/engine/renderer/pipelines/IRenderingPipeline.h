@@ -133,7 +133,7 @@ namespace Engine::priv {
                 float angle, 
                 const glm::vec2& scale, 
                 float depth, 
-                TextAlignment::Type textAlignment, 
+                TextAlignment textAlignment, 
                 const glm::vec4& scissor = NO_SCISSOR
             ) = 0;
             virtual void render2DTexture(
@@ -143,7 +143,7 @@ namespace Engine::priv {
                 float angle, 
                 const glm::vec2& scale, 
                 float depth, 
-                Alignment::Type align, 
+                Alignment align, 
                 const glm::vec4& scissor = NO_SCISSOR
             ) = 0;
             virtual void render2DTriangle(
@@ -153,7 +153,7 @@ namespace Engine::priv {
                 float width, 
                 float height, 
                 float depth, 
-                Alignment::Type align, 
+                Alignment align, 
                 const glm::vec4& scissor = NO_SCISSOR
             ) = 0;
 
@@ -165,7 +165,7 @@ namespace Engine::priv {
                 float a, 
                 const glm::vec2& s, 
                 float d, 
-                Alignment::Type align, 
+                Alignment align, 
                 const glm::vec4& scissor
             ) = 0;
             virtual void renderText(
@@ -176,7 +176,7 @@ namespace Engine::priv {
                 float a, 
                 const glm::vec2& s, 
                 float d, 
-                TextAlignment::Type align, 
+                TextAlignment align, 
                 const glm::vec4& scissor
             ) = 0;
             virtual void renderBorder(
@@ -187,7 +187,7 @@ namespace Engine::priv {
                 float h, 
                 float angle, 
                 float depth, 
-                Alignment::Type align, 
+                Alignment align, 
                 const glm::vec4& scissor
             ) = 0;
             virtual void renderRectangle(
@@ -197,7 +197,7 @@ namespace Engine::priv {
                 float height, 
                 float angle, 
                 float depth, 
-                Alignment::Type align, 
+                Alignment align, 
                 const glm::vec4& scissor
             ) = 0;
             virtual void renderTriangle(
@@ -207,7 +207,7 @@ namespace Engine::priv {
                 float width, 
                 float height, 
                 float depth, 
-                Alignment::Type align, 
+                Alignment align, 
                 const glm::vec4& scissor
             ) = 0;
 

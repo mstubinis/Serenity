@@ -47,12 +47,13 @@ void opengl::glsl::SSAOCode::convert(string& code, const unsigned int versionNum
             if (!ShaderHelper::sfind(code, "float SSAOOcclude(")) {
                 const string occlude_code =
                     "float SSAOOcclude(sampler2D inDepthSampler, vec2 in_offsetUV, vec3 in_origin, vec3 in_normal, in float in_intensity, in float in_bias, in float in_scale){//generated\n"
-                    "    vec3 PositionOffset = GetViewPosition(inDepthSampler, in_offsetUV, CameraNear, CameraFar) - in_origin;\n"
-                    "    float Length = length(PositionOffset);\n"
+                    "    vec3 ViewPos          = GetViewPosition(inDepthSampler, in_offsetUV, CameraNear, CameraFar);\n"
+                    "    vec3 PositionOffset   = ViewPos - in_origin;\n"
+                    "    float Length          = length(PositionOffset);\n"
                     "    vec3 VectorNormalized = PositionOffset / Length;\n"
-                    "    float Dist = Length * in_scale;\n"
-                    "    float attenuation = 1.0 / (1.0 + Dist);\n"
-                    "    float angleMath = max(0.0, dot(in_normal, VectorNormalized) - in_bias);\n"
+                    "    float Dist            = Length * in_scale;\n"
+                    "    float attenuation     = 1.0 / (1.0 + Dist);\n"
+                    "    float angleMath       = max(0.0, dot(in_normal, VectorNormalized) - in_bias);\n"
                     "    return angleMath * attenuation * in_intensity;\n"
                     "}\n";
                 ShaderHelper::insertStringRightBeforeLineContent(code, occlude_code, "float SSAOExecute(");

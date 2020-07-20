@@ -11,15 +11,9 @@
 
 using namespace std;
 
-Engine::priv::HDR Engine::priv::HDR::hdr;
+Engine::priv::HDR Engine::priv::HDR::STATIC_HDR;
 
-Engine::priv::HDR::~HDR() {
-    SAFE_DELETE(m_Vertex_Shader);
-    SAFE_DELETE(m_Fragment_Shader);
-    SAFE_DELETE(m_Shader_Program);
-}
-const bool Engine::priv::HDR::init_shaders() {
-
+bool Engine::priv::HDR::init_shaders() {
     if (!m_GLSL_frag_code.empty())
         return false;
 
@@ -68,21 +62,21 @@ const bool Engine::priv::HDR::init_shaders() {
 #pragma endregion
 
     auto lambda_part_a = [&]() {
-        m_Vertex_Shader = NEW Shader(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
-        m_Fragment_Shader = NEW Shader(m_GLSL_frag_code, ShaderType::Fragment, false);
+        m_Vertex_Shader   = std::make_unique<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
+        m_Fragment_Shader = std::make_unique<Shader>(m_GLSL_frag_code, ShaderType::Fragment, false);
     };
     auto lambda_part_b = [&]() {
-        m_Shader_Program = NEW ShaderProgram("HDR", *m_Vertex_Shader, *m_Fragment_Shader);
+        m_Shader_Program  = std::make_unique<ShaderProgram>("HDR", *m_Vertex_Shader, *m_Fragment_Shader);
     };
     Engine::priv::threading::addJobWithPostCallback(lambda_part_a, lambda_part_b);
 
     return true;
 }
-void Engine::priv::HDR::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, const bool godRays, const bool lighting, const float godRaysFactor, const Engine::priv::Renderer& renderer) {
-    renderer.bind(m_Shader_Program);
+void Engine::priv::HDR::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, bool godRays, bool lighting, float godRaysFactor, const Engine::priv::Renderer& renderer) {
+    renderer.bind(m_Shader_Program.get());
 
-    Engine::Renderer::sendUniform4Safe("HDRInfo", exposure, 0.0f, godRaysFactor, static_cast<float>(algorithm));
-    Engine::Renderer::sendUniform2Safe("Has", static_cast<int>(godRays), static_cast<int>(lighting));
+    Engine::Renderer::sendUniform4Safe("HDRInfo", exposure, 0.0f, godRaysFactor, (float)algorithm);
+    Engine::Renderer::sendUniform2Safe("Has", (int)godRays, (int)lighting);
 
     Engine::Renderer::sendTextureSafe("lightingBuffer", gbuffer.getTexture(GBufferType::Lighting), 0);
     Engine::Renderer::sendTextureSafe("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 1);
@@ -91,15 +85,15 @@ void Engine::priv::HDR::pass(Engine::priv::GBuffer& gbuffer, const Viewport& vie
 
     Engine::Renderer::renderFullscreenQuad();
 }
-const float Engine::Renderer::hdr::getExposure() {
-    return Engine::priv::HDR::hdr.exposure;
+float Engine::Renderer::hdr::getExposure() {
+    return Engine::priv::HDR::STATIC_HDR.exposure;
 }
-void Engine::Renderer::hdr::setExposure(const float e) {
-    Engine::priv::HDR::hdr.exposure = e;
+void Engine::Renderer::hdr::setExposure(float e) {
+    Engine::priv::HDR::STATIC_HDR.exposure = e;
 }
-void Engine::Renderer::hdr::setAlgorithm(const HDRAlgorithm::Algorithm a) {
-    Engine::priv::HDR::hdr.algorithm = a;
+void Engine::Renderer::hdr::setAlgorithm(HDRAlgorithm::Algorithm a) {
+    Engine::priv::HDR::STATIC_HDR.algorithm = a;
 }
-const HDRAlgorithm::Algorithm Engine::Renderer::hdr::getAlgorithm() {
-    return Engine::priv::HDR::hdr.algorithm;
+HDRAlgorithm::Algorithm Engine::Renderer::hdr::getAlgorithm() {
+    return Engine::priv::HDR::STATIC_HDR.algorithm;
 }

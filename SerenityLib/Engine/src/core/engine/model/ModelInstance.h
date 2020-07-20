@@ -49,7 +49,7 @@ class ModelInstance final : public Engine::UserPointer {
         ShaderProgram*                                       m_ShaderProgram     = nullptr;
         Mesh*                                                m_Mesh              = nullptr;
         Material*                                            m_Material          = nullptr;
-        RenderStage::Stage                                   m_Stage             = RenderStage::GeometryOpaque;
+        RenderStage                                   m_Stage             = RenderStage::GeometryOpaque;
         glm::vec3                                            m_Position          = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3                                            m_Scale             = glm::vec3(1.0f, 1.0f, 1.0f);
         Engine::color_vector_4                               m_GodRaysColor      = Engine::color_vector_4(0_uc);
@@ -127,8 +127,8 @@ class ModelInstance final : public Engine::UserPointer {
         void show();
         void hide();
 
-        RenderStage::Stage stage() const;
-        void setStage(RenderStage::Stage stage, ComponentModel& componentModel);
+        RenderStage stage() const;
+        void setStage(RenderStage stage, ComponentModel& componentModel);
 
         void playAnimation(const std::string& animName, float startTime, float endTime = -1.0f, unsigned int requestedLoops = 1);
 

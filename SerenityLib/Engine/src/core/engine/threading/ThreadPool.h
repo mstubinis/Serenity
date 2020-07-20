@@ -7,6 +7,9 @@ namespace Engine::priv {
     class ThreadPool;
 };
 
+#include <core/engine/threading/WorkerThreadContainer.h>
+#include <core/engine/threading/Task.h>
+
 namespace Engine::priv {
     class ThreadPoolFuture final {
         friend class Engine::priv::ThreadPool;
@@ -46,12 +49,16 @@ namespace Engine::priv {
     };
     
     class ThreadPool final{
+
+        using PoolTask    = Engine::priv::Task;
+        using PoolTaskPtr = std::shared_ptr<PoolTask>;
+
         friend class Engine::priv::WorkerThread;
         private:
-            std::condition_variable                                                  m_ConditionVariable;
+            std::condition_variable_any                                              m_ConditionVariableAny;
             std::mutex                                                               m_Mutex;
-            std::vector<std::queue<std::shared_ptr<std::packaged_task<void()>>>>     m_TaskQueue;
-            std::vector<std::thread>                                                 m_WorkerThreads;
+            std::vector<std::queue<PoolTaskPtr>>                                     m_TaskQueue;
+            WorkerThreadContainer                                                    m_WorkerThreads;
             std::vector<std::vector<Engine::priv::ThreadPoolFuture>>                 m_Futures;
             std::vector<std::vector<Engine::priv::ThreadPoolFutureCallback>>         m_FutureCallbacks;
             bool                                                                     m_Stopped = true;
@@ -60,7 +67,7 @@ namespace Engine::priv {
             void internal_create_packaged_task(std::function<void()>&& job, std::function<void()>&& callback, unsigned int section);
             void internal_update_section(unsigned int section);
             bool task_queue_is_empty() const;
-            std::shared_ptr<std::packaged_task<void()>> internal_get_next_available_job();
+            PoolTaskPtr internal_get_next_available_job();
         public:
             ThreadPool(unsigned int sections = 2U);
             ~ThreadPool();

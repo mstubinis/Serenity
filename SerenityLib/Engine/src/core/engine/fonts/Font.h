@@ -9,11 +9,11 @@ struct FT_GlyphSlotRec_;
 #include <core/engine/fonts/FontIncludes.h>
 
 struct CharGlyph final {
-    unsigned int char_id;
+    unsigned int char_id   = 0;
     unsigned int x         = 0;
     unsigned int y         = 0;
-    unsigned int width;
-    unsigned int height;
+    unsigned int width     = 0;
+    unsigned int height    = 0;
     unsigned int xadvance  = 0;
     int xoffset            = 0;
     int yoffset            = 0;
@@ -45,31 +45,31 @@ class Font final: public Resource {
             const std::string& text,
             const glm::vec2& pos,
             const glm::vec4& color = glm::vec4(1),
-            const float angle = 0.0f,
+            float angle = 0.0f,
             const glm::vec2& scl = glm::vec2(1.0f),
-            const float depth = 0.1f,
-            const TextAlignment::Type = TextAlignment::Left,
+            float depth = 0.1f,
+            TextAlignment = TextAlignment::Left,
             const glm::vec4& scissor = glm::vec4(-1.0f)
         );
         static void renderTextStatic(
             const std::string& text,
             const glm::vec2& pos,
             const glm::vec4& color = glm::vec4(1),
-            const float angle = 0.0f,
+            float angle = 0.0f,
             const glm::vec2& scl = glm::vec2(1.0f),
-            const float depth = 0.1f,
-            const TextAlignment::Type = TextAlignment::Left,
+            float depth = 0.1f,
+            TextAlignment = TextAlignment::Left,
             const glm::vec4& scissor = glm::vec4(-1.0f)
         );
 
         float getTextWidth(std::string_view text) const;
         float getTextHeight(std::string_view text) const;
         float getTextHeightDynamic(std::string_view text) const;
-        float getLineHeight() const;
-        float getMaxHeight() const;
 
-        Texture* getGlyphTexture() const;
+        inline constexpr float getMaxHeight() const noexcept { return m_MaxHeight; }
+        inline constexpr Texture* getGlyphTexture() const noexcept { return m_FontTexture; }
+        inline constexpr float getLineHeight() const noexcept { return m_LineHeight; }
 
-        const CharGlyph& getGlyphData(const unsigned char character) const;
+        const CharGlyph& getGlyphData(unsigned char character) const;
 };
 #endif

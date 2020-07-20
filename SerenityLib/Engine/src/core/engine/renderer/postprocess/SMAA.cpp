@@ -11,9 +11,7 @@
 
 using namespace std;
 
-Engine::priv::SMAA Engine::priv::SMAA::smaa;
-
-constexpr int x = sizeof(Engine::priv::SMAA);
+Engine::priv::SMAA Engine::priv::SMAA::STATIC_SMAA;
 
 Engine::priv::SMAA::SMAA() {
     m_Vertex_Shaders.resize(PassStage::_TOTAL, nullptr);
@@ -26,17 +24,13 @@ Engine::priv::SMAA::SMAA() {
 Engine::priv::SMAA::~SMAA() {
     glDeleteTextures(1, &SearchTexture);
     glDeleteTextures(1, &AreaTexture);
-
-    SAFE_DELETE_VECTOR(m_Vertex_Shaders);
-    SAFE_DELETE_VECTOR(m_Fragment_Shaders);
-    SAFE_DELETE_VECTOR(m_Shader_Programs);
 }
-const bool Engine::priv::SMAA::init_shaders() {
+bool Engine::priv::SMAA::init_shaders() {
 
     if (!m_Vertex_Shaders_Code[0].empty())
         return false;
 
-#pragma region common
+#pragma region smaa_common
 
     string smaa_common =
         "vec4 mad(vec4 a, vec4 b, vec4 c){ return (a * b) + c; }\n"
@@ -607,7 +601,7 @@ void Engine::priv::SMAA::init() {
     Texture::setWrapping(GL_TEXTURE_2D, TextureWrap::ClampToBorder);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, 64, 16, 0, GL_RED, GL_UNSIGNED_BYTE, SMAA_searchTexBytes);
 }
-void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int sceneTexture, const unsigned int outTexture, const Engine::priv::Renderer& renderer) {
+void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, unsigned int sceneTexture, unsigned int outTexture, const Engine::priv::Renderer& renderer) {
     gbuffer.bindFramebuffers(outTexture); //probably the lighting buffer
     renderer.bind(m_Shader_Programs[PassStage::Edge]);
 
@@ -623,7 +617,7 @@ void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec
     Engine::Renderer::sendUniform4Safe("SMAAInfo1Floats", THRESHOLD, DEPTH_THRESHOLD, LOCAL_CONTRAST_ADAPTATION_FACTOR, PREDICATION_THRESHOLD);
     Engine::Renderer::sendUniform2Safe("SMAAInfo1FloatsA", PREDICATION_SCALE, PREDICATION_STRENGTH);
 
-    Engine::Renderer::sendUniform1Safe("SMAA_PREDICATION", static_cast<int>(PREDICATION));
+    Engine::Renderer::sendUniform1Safe("SMAA_PREDICATION", (int)PREDICATION);
 
     Engine::Renderer::sendTexture("textureMap", gbuffer.getTexture(sceneTexture), 0);
     Engine::Renderer::sendTextureSafe("texturePredication", gbuffer.getTexture(GBufferType::Diffuse), 1);
@@ -634,7 +628,7 @@ void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec
     Engine::Renderer::stencilFunc(GL_EQUAL, 0x00000001, 0x00000001);
     Engine::Renderer::stencilOp(GL_KEEP, GL_KEEP, GL_KEEP); //Do not change stencil
 }
-void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int outTexture, const Engine::priv::Renderer& renderer) {
+void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, unsigned int outTexture, const Engine::priv::Renderer& renderer) {
     gbuffer.bindFramebuffers(GBufferType::Normal);
     Engine::Renderer::Settings::clear(true, false, false); //clear color only
 
@@ -650,13 +644,13 @@ void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::ve
     Engine::Renderer::sendUniform1Safe("SMAA_MAX_SEARCH_STEPS", MAX_SEARCH_STEPS);
 
     Engine::Renderer::sendUniform4Safe("SMAAInfo2Ints", MAX_SEARCH_STEPS_DIAG, AREATEX_MAX_DISTANCE, AREATEX_MAX_DISTANCE_DIAG, CORNER_ROUNDING);
-    Engine::Renderer::sendUniform4Safe("SMAAInfo2Floats", AREATEX_PIXEL_SIZE.x, AREATEX_PIXEL_SIZE.y, AREATEX_SUBTEX_SIZE, (static_cast<float>(CORNER_ROUNDING) / 100.0f));
+    Engine::Renderer::sendUniform4Safe("SMAAInfo2Floats", AREATEX_PIXEL_SIZE.x, AREATEX_PIXEL_SIZE.y, AREATEX_SUBTEX_SIZE, (float)CORNER_ROUNDING / 100.0f);
 
     Engine::Renderer::renderFullscreenQuad();
 
     Engine::Renderer::GLDisable(GL_STENCIL_TEST);
 }
-void Engine::priv::SMAA::passNeighbor(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, const unsigned int sceneTexture, const Engine::priv::Renderer& renderer) {
+void Engine::priv::SMAA::passNeighbor(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::Renderer& renderer) {
     renderer.bind(m_Shader_Programs[PassStage::Neighbor]);
 
     Engine::Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
@@ -676,73 +670,73 @@ void Engine::priv::SMAA::passFinal(Engine::priv::GBuffer& gbuffer, const Viewpor
     Engine::Renderer::renderFullscreenTriangle(0,0,fboWidth,fboHeight);
     */
 }
-void Engine::Renderer::smaa::setThreshold(const float f) {
-    Engine::priv::SMAA::smaa.THRESHOLD = f;
+void Engine::Renderer::smaa::setThreshold(float f) {
+    Engine::priv::SMAA::STATIC_SMAA.THRESHOLD = f;
 }
-void Engine::Renderer::smaa::setSearchSteps(const unsigned int s) {
-    Engine::priv::SMAA::smaa.MAX_SEARCH_STEPS = s;
+void Engine::Renderer::smaa::setSearchSteps(unsigned int s) {
+    Engine::priv::SMAA::STATIC_SMAA.MAX_SEARCH_STEPS = s;
 }
 void Engine::Renderer::smaa::disableCornerDetection() {
-    Engine::priv::SMAA::smaa.CORNER_ROUNDING = 0;
+    Engine::priv::SMAA::STATIC_SMAA.CORNER_ROUNDING = 0;
 }
-void Engine::Renderer::smaa::enableCornerDetection(const unsigned int c) {
-    Engine::priv::SMAA::smaa.CORNER_ROUNDING = c;
+void Engine::Renderer::smaa::enableCornerDetection(unsigned int c) {
+    Engine::priv::SMAA::STATIC_SMAA.CORNER_ROUNDING = c;
 }
 void Engine::Renderer::smaa::disableDiagonalDetection() {
-    Engine::priv::SMAA::smaa.MAX_SEARCH_STEPS_DIAG = 0;
+    Engine::priv::SMAA::STATIC_SMAA.MAX_SEARCH_STEPS_DIAG = 0;
 }
-void Engine::Renderer::smaa::enableDiagonalDetection(const unsigned int d) {
-    Engine::priv::SMAA::smaa.MAX_SEARCH_STEPS_DIAG = d;
+void Engine::Renderer::smaa::enableDiagonalDetection(unsigned int d) {
+    Engine::priv::SMAA::STATIC_SMAA.MAX_SEARCH_STEPS_DIAG = d;
 }
-void Engine::Renderer::smaa::setPredicationThreshold(const float f) {
-    Engine::priv::SMAA::smaa.PREDICATION_THRESHOLD = f;
+void Engine::Renderer::smaa::setPredicationThreshold(float f) {
+    Engine::priv::SMAA::STATIC_SMAA.PREDICATION_THRESHOLD = f;
 }
-void Engine::Renderer::smaa::setPredicationScale(const float f) {
-    Engine::priv::SMAA::smaa.PREDICATION_SCALE = f;
+void Engine::Renderer::smaa::setPredicationScale(float f) {
+    Engine::priv::SMAA::STATIC_SMAA.PREDICATION_SCALE = f;
 }
-void Engine::Renderer::smaa::setPredicationStrength(const float s) {
-    Engine::priv::SMAA::smaa.PREDICATION_STRENGTH = s;
+void Engine::Renderer::smaa::setPredicationStrength(float s) {
+    Engine::priv::SMAA::STATIC_SMAA.PREDICATION_STRENGTH = s;
 }
-void Engine::Renderer::smaa::setReprojectionScale(const float s) {
-    Engine::priv::SMAA::smaa.REPROJECTION_WEIGHT_SCALE = s;
+void Engine::Renderer::smaa::setReprojectionScale(float s) {
+    Engine::priv::SMAA::STATIC_SMAA.REPROJECTION_WEIGHT_SCALE = s;
 }
-void Engine::Renderer::smaa::enablePredication(const bool b) {
-    Engine::priv::SMAA::smaa.PREDICATION = b;
+void Engine::Renderer::smaa::enablePredication(bool b) {
+    Engine::priv::SMAA::STATIC_SMAA.PREDICATION = b;
 }
 void Engine::Renderer::smaa::disablePredication() {
-    Engine::priv::SMAA::smaa.PREDICATION = false;
+    Engine::priv::SMAA::STATIC_SMAA.PREDICATION = false;
 }
-void Engine::Renderer::smaa::enableReprojection(const bool b) {
-    Engine::priv::SMAA::smaa.REPROJECTION = b;
+void Engine::Renderer::smaa::enableReprojection(bool b) {
+    Engine::priv::SMAA::STATIC_SMAA.REPROJECTION = b;
 }
 void Engine::Renderer::smaa::disableReprojection() {
-    Engine::priv::SMAA::smaa.REPROJECTION = false;
+    Engine::priv::SMAA::STATIC_SMAA.REPROJECTION = false;
 }
-void Engine::Renderer::smaa::setQuality(const SMAAQualityLevel::Level level) {
-    switch (level) {
+void Engine::Renderer::smaa::setQuality(SMAAQualityLevel qualityLevel) {
+    switch (qualityLevel) {
         case SMAAQualityLevel::Low: {
-            Engine::priv::SMAA::smaa.THRESHOLD = 0.15f;
-            Engine::priv::SMAA::smaa.MAX_SEARCH_STEPS = 4;
-            Engine::priv::SMAA::smaa.MAX_SEARCH_STEPS_DIAG = 0;
-            Engine::priv::SMAA::smaa.CORNER_ROUNDING = 0;
+            Engine::priv::SMAA::STATIC_SMAA.THRESHOLD = 0.15f;
+            Engine::priv::SMAA::STATIC_SMAA.MAX_SEARCH_STEPS = 4;
+            Engine::priv::SMAA::STATIC_SMAA.MAX_SEARCH_STEPS_DIAG = 0;
+            Engine::priv::SMAA::STATIC_SMAA.CORNER_ROUNDING = 0;
             break;
         }case SMAAQualityLevel::Medium: {
-            Engine::priv::SMAA::smaa.THRESHOLD = 0.1f;
-            Engine::priv::SMAA::smaa.MAX_SEARCH_STEPS = 8;
-            Engine::priv::SMAA::smaa.MAX_SEARCH_STEPS_DIAG = 0;
-            Engine::priv::SMAA::smaa.CORNER_ROUNDING = 0;
+            Engine::priv::SMAA::STATIC_SMAA.THRESHOLD = 0.1f;
+            Engine::priv::SMAA::STATIC_SMAA.MAX_SEARCH_STEPS = 8;
+            Engine::priv::SMAA::STATIC_SMAA.MAX_SEARCH_STEPS_DIAG = 0;
+            Engine::priv::SMAA::STATIC_SMAA.CORNER_ROUNDING = 0;
             break;
         }case SMAAQualityLevel::High: {
-            Engine::priv::SMAA::smaa.THRESHOLD = 0.1f;
-            Engine::priv::SMAA::smaa.MAX_SEARCH_STEPS = 16;
-            Engine::priv::SMAA::smaa.MAX_SEARCH_STEPS_DIAG = 8;
-            Engine::priv::SMAA::smaa.CORNER_ROUNDING = 25;
+            Engine::priv::SMAA::STATIC_SMAA.THRESHOLD = 0.1f;
+            Engine::priv::SMAA::STATIC_SMAA.MAX_SEARCH_STEPS = 16;
+            Engine::priv::SMAA::STATIC_SMAA.MAX_SEARCH_STEPS_DIAG = 8;
+            Engine::priv::SMAA::STATIC_SMAA.CORNER_ROUNDING = 25;
             break;
         }case SMAAQualityLevel::Ultra: {
-            Engine::priv::SMAA::smaa.THRESHOLD = 0.05f;
-            Engine::priv::SMAA::smaa.MAX_SEARCH_STEPS = 32;
-            Engine::priv::SMAA::smaa.MAX_SEARCH_STEPS_DIAG = 16;
-            Engine::priv::SMAA::smaa.CORNER_ROUNDING = 25;
+            Engine::priv::SMAA::STATIC_SMAA.THRESHOLD = 0.05f;
+            Engine::priv::SMAA::STATIC_SMAA.MAX_SEARCH_STEPS = 32;
+            Engine::priv::SMAA::STATIC_SMAA.MAX_SEARCH_STEPS_DIAG = 16;
+            Engine::priv::SMAA::STATIC_SMAA.CORNER_ROUNDING = 25;
             break;
         }default: {
             break;

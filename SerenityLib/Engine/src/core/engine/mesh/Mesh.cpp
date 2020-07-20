@@ -323,8 +323,8 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
             for (unsigned int i = 0; i < width; ++i) {
                 for (unsigned int j = 0; j < length; ++j) {
 
-                    unsigned int vertexAtX = i + (width * sectorY);
-                    unsigned int vertexAtY = j + (length * sectorX);
+                    unsigned int vertexAtX = i + (width * (unsigned int)sectorY);
+                    unsigned int vertexAtY = j + (length * (unsigned int)sectorX);
 
                     btVector3 btVerts[4];
                     priv::Vertex verts[4];
@@ -551,16 +551,6 @@ Mesh::~Mesh(){
     unregisterEvent(EventType::WindowFullscreenChanged);
     unload();
 }
-bool Mesh::operator==(const bool rhs) const {
-    if (rhs == true) {
-        return (m_VertexData);
-    }
-    return !(m_VertexData);
-}
-Mesh::operator bool() const {
-    return (m_VertexData);
-}
-
 unordered_map<string, AnimationData>& Mesh::animationData(){ 
     return m_Skeleton->m_AnimationData; 
 }
@@ -592,7 +582,7 @@ void Mesh::onEvent(const Event& e) {
     }
 }
 //TODO: optimize this a bit more (bubble sort?)
-void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, SortingMode::Mode sortMode) {
+void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, SortingMode sortMode) {
     #ifndef _DEBUG
         auto& triangles     = m_VertexData->m_Triangles;
         if (triangles.size() == 0) {

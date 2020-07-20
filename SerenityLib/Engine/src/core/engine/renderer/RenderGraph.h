@@ -88,14 +88,14 @@ namespace Engine::priv {
             bool remove_instance_node(MeshNode& meshNode, InstanceNode& instanceNode);
 
             void clean(Entity entity);
-            void sort(Camera& camera, SortingMode::Mode sortingMode);
-            void sort_cheap(Camera& camera, SortingMode::Mode sortingMode);
+            void sort(Camera& camera, SortingMode sortingMode);
+            void sort_cheap(Camera& camera, SortingMode sortingMode);
 
-            void sort_bruteforce(Camera& camera, SortingMode::Mode sortingMode);
-            void sort_cheap_bruteforce(Camera& camera, SortingMode::Mode sortingMode);
+            void sort_bruteforce(Camera& camera, SortingMode sortingMode);
+            void sort_cheap_bruteforce(Camera& camera, SortingMode sortingMode);
 
-            void render(Engine::priv::Renderer& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders = true, SortingMode::Mode sortingMode = SortingMode::None);
-            void render_bruteforce(Engine::priv::Renderer& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders = true, SortingMode::Mode sortingMode = SortingMode::None);
+            void render(Engine::priv::Renderer& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders = true, SortingMode sortingMode = SortingMode::None);
+            void render_bruteforce(Engine::priv::Renderer& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders = true, SortingMode sortingMode = SortingMode::None);
             void validate_model_instances_for_rendering(Viewport& viewport, Camera& camera);
 
     };

@@ -11,32 +11,32 @@ namespace Engine::priv {
     class  Renderer;
     class  FXAA final {
         private:
-            Shader*         m_Vertex_shader   = nullptr;
-            Shader*         m_Fragment_shader = nullptr;
-            ShaderProgram*  m_Shader_program  = nullptr;
-            std::string     m_GLSL_frag_code  = "";
+            std::unique_ptr<Shader>         m_Vertex_shader;
+            std::unique_ptr<Shader>         m_Fragment_shader;
+            std::unique_ptr<ShaderProgram>  m_Shader_program;
+            std::string                     m_GLSL_frag_code  = "";
+
+            FXAA() = default;
+            ~FXAA() = default;
         public:
             float reduce_min                  = 0.0078125f; // (1 / 128);
             float reduce_mul                  = 0.125f;     // (1 / 8);
             float span_max                    = 8.0f;
 
-            FXAA() = default;
-            ~FXAA();
+            bool init_shaders();
 
-            const bool init_shaders();
+            void pass(GBuffer&, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::Renderer& renderer);
 
-            void pass(GBuffer&, const Viewport& viewport, const unsigned int sceneTexture, const Engine::priv::Renderer& renderer);
-
-            static FXAA fxaa;
+            static FXAA STATIC_FXAA;
     };
 };
 namespace Engine::Renderer::fxaa {
-    void setReduceMin(const float r);
-    const float getReduceMin();
-    void setReduceMul(const float r);
-    const float getReduceMul();
-    void setSpanMax(const float r);
-    const float getSpanMax();
+    void setReduceMin(float reduceMin);
+    float getReduceMin();
+    void setReduceMul(float reduceMul);
+    float getReduceMul();
+    void setSpanMax(float spanMax);
+    float getSpanMax();
 };
 
 #endif

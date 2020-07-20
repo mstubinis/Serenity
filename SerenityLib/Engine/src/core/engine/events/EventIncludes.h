@@ -8,7 +8,7 @@
 #include <core/engine/input/Mouse/MouseButtons.h>
 #include <core/engine/input/Joystick/JoystickAxises.h>
 
-struct EventType final { enum Type : unsigned int {
+enum class EventType : unsigned int {
     Unknown = 0,
     WindowResized,
     WindowGainedFocus,
@@ -61,6 +61,6 @@ struct EventType final { enum Type : unsigned int {
     JoystickMoved,
     TextEntered,
     SceneChanged,
-_TOTAL,};};
+_TOTAL};
 
 #endif

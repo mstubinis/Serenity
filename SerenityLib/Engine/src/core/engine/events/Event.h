@@ -208,7 +208,7 @@ namespace Engine::priv {
     };
 };
 struct Event final{
-    EventType::Type type = EventType::Type::Unknown;
+    EventType type = EventType::Unknown;
     union{
         Engine::priv::EventEnum                       eventEnum;
         Engine::priv::EventWindowResized              eventWindowResized;
@@ -233,7 +233,7 @@ struct Event final{
         Engine::priv::EventClient                     eventClient;
     };
     Event() = delete;
-    Event(EventType::Type type_) {
+    Event(EventType type_) {
         type = type_;
     }
 

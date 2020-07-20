@@ -5,27 +5,27 @@
 namespace Engine::priv {
     class  GBuffer;
     class  Fog final {
+        private:
+            Fog() = default;
+            ~Fog() = default;
         public:
             bool        fog_active = false;
             float       distNull   = 5.0f;
             float       distBlend  = 50.0f;
             glm::vec4   color      = glm::vec4(1.0f, 1.0f, 1.0f, 0.97f);
 
-            Fog() = default;
-            ~Fog();
-
-            static Fog fog;
+            static Fog  STATIC_FOG;
     };
 };
 namespace Engine::Renderer::fog {
-    void enable(const bool b = true);
+    void enable(bool enabled = true);
     void disable();
-    const bool enabled();
+    bool enabled();
     void setColor(const glm::vec4& color);
-    void setColor(const float r, const float g, const float b, const float a);
-    void setNullDistance(const float d);
-    void setBlendDistance(const float d);
-    const float getNullDistance();
-    const float getBlendDistance();
+    void setColor(float r, float g, float b, float a);
+    void setNullDistance(float nullDistance);
+    void setBlendDistance(float blendDistance);
+    float getNullDistance();
+    float getBlendDistance();
 };
 #endif

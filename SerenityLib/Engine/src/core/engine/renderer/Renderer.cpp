@@ -161,7 +161,7 @@ void Renderer::Settings::Lighting::setGIContribution(float g, float d, float s){
     renderManager->m_GI_Pack = Math::pack3FloatsInto1FloatUnsigned(renderManager->m_GI_Diffuse, renderManager->m_GI_Specular, renderManager->m_GI_Global);
 }
 
-bool Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm::Algorithm algorithm){
+bool Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm algorithm){
     switch (algorithm) {
         case AntiAliasingAlgorithm::None: {
             break;
@@ -312,7 +312,7 @@ unsigned int Renderer::getUniformLocUnsafe(const char* location) {
     return renderManager->m_Pipeline->getUniformLocationUnsafe(location);
 }
 
-void Renderer::alignmentOffset(const Alignment::Type align, float& x, float& y, const float width, const float height) {
+void Renderer::alignmentOffset(const Alignment align, float& x, float& y, const float width, const float height) {
     switch (align) {
         case Alignment::TopLeft: {
             x += width / 2;
@@ -349,19 +349,19 @@ void Renderer::alignmentOffset(const Alignment::Type align, float& x, float& y, 
         }
     }
 }
-void Renderer::renderTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment::Type align, const glm::vec4& scissor) {
+void Renderer::renderTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) {
     renderManager->m_Pipeline->renderTriangle(position, color, angle, width, height, depth, align, scissor);
 }
-void Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, const Alignment::Type align, const glm::vec4& scissor) {
+void Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, const Alignment align, const glm::vec4& scissor) {
     renderManager->m_Pipeline->renderRectangle(pos, col, width, height, angle, depth, align, scissor);
 }
-void Renderer::renderTexture(Texture& tex, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment::Type align, const glm::vec4& scissor){
+void Renderer::renderTexture(Texture& tex, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor){
     renderManager->m_Pipeline->renderTexture(tex, p, c, a, s, d, align, scissor);
 }
-void Renderer::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment::Type align, const glm::vec4& scissor) {
+void Renderer::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) {
     renderManager->m_Pipeline->renderText(t, fnt, p, c, a, s, d, align, scissor);
 }
-void Renderer::renderBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment::Type align, const glm::vec4& scissor) {
+void Renderer::renderBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) {
     renderManager->m_Pipeline->renderBorder(borderSize, pos, col, w, h, angle, depth, align, scissor);
 }
 

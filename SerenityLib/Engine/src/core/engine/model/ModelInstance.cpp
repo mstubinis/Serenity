@@ -255,7 +255,7 @@ void ModelInstance::internal_update_model_matrix() {
 Entity ModelInstance::parent() const {
     return m_Parent; 
 }
-void ModelInstance::setStage(RenderStage::Stage stage, ComponentModel& componentModel) {
+void ModelInstance::setStage(RenderStage stage, ComponentModel& componentModel) {
     m_Stage = stage;
     componentModel.setStage(stage, m_Index);
 }
@@ -366,7 +366,7 @@ Mesh* ModelInstance::mesh() const {
 Material* ModelInstance::material() const {
     return m_Material; 
 }
-RenderStage::Stage ModelInstance::stage() const {
+RenderStage ModelInstance::stage() const {
     return m_Stage; 
 }
 void ModelInstance::setShaderProgram(Handle shaderProgramHandle, ComponentModel& componentModel) {

@@ -26,12 +26,12 @@ namespace Engine::priv{
             template <class T> void unregisterObject(Observer&, const T&) = delete;
             template <class T> bool isObjectRegistered(Observer&, const T&) const = delete;
 
-            void registerObject(Observer&, EventType::Type eventType);
-            void unregisterObject(Observer&, EventType::Type eventType);
-            bool isObjectRegistered(const Observer&, EventType::Type eventType) const;
+            void registerObject(Observer&, EventType eventType);
+            void unregisterObject(Observer&, EventType eventType);
+            bool isObjectRegistered(const Observer&, EventType eventType) const;
 
             void dispatchEvent(const Event& event);
-            void dispatchEvent(EventType::Type eventType);
+            void dispatchEvent(EventType eventType);
     };
 };
 #endif
