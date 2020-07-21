@@ -13,13 +13,7 @@ std::array<bool, OpenGLExtensions::_TOTAL> OPENGL_EXTENSIONS {
 
 };
 
-OpenGLExtensions::OpenGLExtensions() {
-
-}
-OpenGLExtensions::~OpenGLExtensions() {
-
-}
-void OpenGLExtensions::INIT() {
+void OpenGLExtensions::INIT() noexcept {
     OPENGL_EXTENSIONS[OpenGLExtensions::EXT_texture_filter_anisotropic]  = checkOpenGLExtension("GL_EXT_texture_filter_anisotropic");
     OPENGL_EXTENSIONS[OpenGLExtensions::ARB_texture_filter_anisotropic]  = checkOpenGLExtension("GL_ARB_texture_filter_anisotropic");
     OPENGL_EXTENSIONS[OpenGLExtensions::EXT_draw_instanced]              = checkOpenGLExtension("GL_EXT_draw_instanced");
@@ -39,30 +33,34 @@ void OpenGLExtensions::INIT() {
     OPENGL_EXTENSIONS[OpenGLExtensions::ARB_gpu_shader_int64]            = checkOpenGLExtension("GL_ARB_bindless_texture");
     OPENGL_EXTENSIONS[OpenGLExtensions::NV_gpu_shader5]                  = checkOpenGLExtension("GL_NV_bindless_texture");
 
-    //printAllAvailableExtensions();
-    //for (size_t i = 0; i < OPENGL_EXTENSIONS.size(); ++i) {
-    //    std::cout << OPENGL_EXTENSIONS[i] << "\n";
-    //}
+    #if !defined(ENGINE_PRODUCTION) && defined(ENGINE_PRINT_OPENGL_EXTENSIONS)
+        printAllAvailableExtensions();
+        for (size_t i = 0; i < OPENGL_EXTENSIONS.size(); ++i) {
+            std::cout << OPENGL_EXTENSIONS[i] << "\n";
+        }
+    #endif
 }
 
-const bool OpenGLExtensions::checkOpenGLExtension(const char* e) {
+bool OpenGLExtensions::checkOpenGLExtension(const char* e) noexcept {
     if (glewIsExtensionSupported(e) != 0) {
         return true;
     }
     return (0 != glewIsSupported(e)); 
 }
-void OpenGLExtensions::printAllAvailableExtensions() {
+void OpenGLExtensions::printAllAvailableExtensions() noexcept {
     GLint n = 0;
     glGetIntegerv(GL_NUM_EXTENSIONS, &n);
+    std::string output = "";
     for (GLint i = 0; i < n; ++i) {
         const char* extension = (const char*)glGetStringi(GL_EXTENSIONS, i);
-        std::cout << i << ": " << extension << "\n";
+        output += std::to_string(i) + ": " + extension + "\n";
     }
+    std::cout << output << "\n";
 }
 
-const bool OpenGLExtensions::supported(const OpenGLExtensions::Extension extension) {
+bool OpenGLExtensions::supported(OpenGLExtensions::Extension extension) noexcept {
     return OPENGL_EXTENSIONS[extension];
 }
-const bool OpenGLExtensions::isBindlessTexturesSupported() {
+bool OpenGLExtensions::isBindlessTexturesSupported() noexcept {
     return OPENGL_EXTENSIONS[OpenGLExtensions::ARB_bindless_texture] || OPENGL_EXTENSIONS[OpenGLExtensions::NV_bindless_texture];
 }

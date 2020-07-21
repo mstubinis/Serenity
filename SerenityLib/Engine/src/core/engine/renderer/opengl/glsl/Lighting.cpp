@@ -45,7 +45,7 @@ void opengl::glsl::Lighting::convert(string& code, const unsigned int versionNum
     if (ShaderHelper::sfind(code, "CalcRodLight(")) {
         if (!ShaderHelper::sfind(code, "vec3 CalcRodLight(")) {
             const string rod_light =
-                "vec3 CalcRodLight(in Light currentLight, vec3 A, vec3 B,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){//generated\n"
+                "vec3 CalcRodLight(in Light currentLight, vec3 A, vec3 B, vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){//generated\n"
                 "    vec3 BMinusA = B - A;\n"
                 "    vec3 CMinusA = PxlWorldPos - A;\n"
                 "    float Dist = length(BMinusA);\n"

@@ -263,17 +263,21 @@ unsigned long long ComponentBody::getDistanceLL(Entity other) const {
     glm_vec3 other_position = other.getComponent<ComponentBody>()->getPosition();
     return (unsigned long long)glm::distance(getPosition(), other_position);
 }
-void ComponentBody::alignTo(const glm_vec3& direction) {
+void ComponentBody::alignTo(decimal dirX, decimal dirY, decimal dirZ) {
     if (m_Physics) {
         //recheck this
         glm_quat q(1.0, 0.0, 0.0, 0.0);
-        Math::alignTo(q, glm::normalize(direction));
+        Math::alignTo(q, dirX, dirY, dirZ);
         ComponentBody::setRotation(q);
     }else{
         auto& normalData = *data.n;
-        Math::alignTo(normalData.rotation, glm::normalize(direction));
+        Math::alignTo(normalData.rotation, dirX, dirY, dirZ);
         Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
     }
+}
+void ComponentBody::alignTo(const glm_vec3& direction) {
+    auto norm_dir = glm::normalize(direction);
+    ComponentBody::alignTo(norm_dir.x, norm_dir.y, norm_dir.z);
 }
 Collision* ComponentBody::getCollision() const {
     if (m_Physics) {
@@ -608,10 +612,10 @@ glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way to do t
         }
         return modelMatrix_;
     }
-    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
-    auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
-    auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
-    return matrix;
+    auto& ecs         = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& system      = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
+    auto& worldMatrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
+    return worldMatrix;
 }
 glm::mat4 ComponentBody::modelMatrixRendering() const {
     return (glm::mat4)modelMatrix();
@@ -940,7 +944,7 @@ void ComponentBody::internal_recalculateAllParentChildMatrices(ComponentBody_Sys
         unsigned int entityID = pcs.Order[i];
         if (entityID > 0) {
             unsigned int entityIndex = entityID - 1U;
-            unsigned int parentID = pcs.Parents[entityIndex];
+            unsigned int parentID    = pcs.Parents[entityIndex];
             if (parentID == 0) {
                 pcs.WorldTransforms[entityIndex] = pcs.LocalTransforms[entityIndex];
             }else{
@@ -954,7 +958,7 @@ void ComponentBody::internal_recalculateAllParentChildMatrices(ComponentBody_Sys
 }
 void ComponentBody::recalculateAllParentChildMatrices(Scene& scene) {
     auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(scene);
-    auto& system = static_cast<Engine::priv::ComponentBody_System&>(ecs.getSystem<ComponentBody>());
+    auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     internal_recalculateAllParentChildMatrices(system);
 }
 
@@ -982,9 +986,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
             worldMatrix         = localMatrix;
         }else{
             auto& n             = *b.data.n;
-            n.position         += (n.linearVelocity * static_cast<decimal>(dt));
-            //n.modelMatrix     = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
-
+            n.position         += (n.linearVelocity * (decimal)dt);
             localMatrix         = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
             worldMatrix         = localMatrix;
         }

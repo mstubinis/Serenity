@@ -4,30 +4,33 @@
 #include <core/engine/utils/Utils.h>
 #include <ecs/ComponentBody.h>
 
-using namespace Engine;
 using namespace std;
 
-SpotLight::SpotLight(const glm_vec3& pos, const glm::vec3& direction, float cutoff, float outerCutoff, Scene* scene) : PointLight(LightType::Spot, pos, scene) {
-    setCutoff(cutoff);
-    setCutoffOuter(outerCutoff);
+SpotLight::SpotLight(const glm_vec3& pos, const glm_vec3& direction, float innerCutoffInDegrees, float outerCutoffInDegrees, Scene* scene) : PointLight(LightType::Spot, pos, scene) {
+    setCutoff(innerCutoffInDegrees);
+    setCutoffOuter(outerCutoffInDegrees);
 
-    auto body = getComponent<ComponentBody>();
-    if (body) {//evil, but needed for now... find out why...
-        body->alignTo(direction);
-    }
+    setDirection(direction);
+
     if (m_Type == LightType::Spot) {
-        auto& spotLights = priv::InternalScenePublicInterface::GetSpotLights(*scene);
+        auto& spotLights = Engine::priv::InternalScenePublicInterface::GetSpotLights(*scene);
         spotLights.push_back(this);
     }
 }
-void SpotLight::setCutoff(float cutoff) {
-    m_Cutoff = glm::cos(glm::radians(cutoff));
+SpotLight::~SpotLight() {
+    free();
 }
-void SpotLight::setCutoffOuter(float outerCutoff) {
-    m_OuterCutoff = glm::cos(glm::radians(outerCutoff));
+void SpotLight::setDirection(decimal xDir, decimal yDir, decimal zDir) noexcept {
+    auto body = getComponent<ComponentBody>();
+    if (body) {
+        body->alignTo(xDir, yDir, zDir);
+    }
+}
+void SpotLight::setDirection(const glm_vec3& direction) noexcept {
+    setDirection(direction.x, direction.y, direction.z);
 }
 void SpotLight::free() noexcept {
     Entity::destroy();
-    removeFromVector(priv::InternalScenePublicInterface::GetSpotLights(scene()), this);
-    removeFromVector(priv::InternalScenePublicInterface::GetLights(scene()), this);
+    removeFromVector(Engine::priv::InternalScenePublicInterface::GetSpotLights(scene()), this);
+    removeFromVector(Engine::priv::InternalScenePublicInterface::GetLights(scene()), this);
 }

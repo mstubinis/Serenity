@@ -84,37 +84,43 @@ bool Engine::priv::GBuffer::resize(unsigned int width, unsigned int height) {
 void Engine::priv::GBuffer::internalBuildTextureBuffer(FramebufferObject& fbo, GBufferType::Type gbufferType, unsigned int w, unsigned int h) {
     const auto i      = GBUFFER_TYPE_DATA[gbufferType];
     Texture* texture  = NEW Texture(w, h, get<2>(i), get<1>(i), get<0>(i), fbo.divisor());
-    m_FramebufferTextures[static_cast<unsigned int>(gbufferType)] = fbo.attatchTexture(texture, get<3>(i));
+    m_FramebufferTextures[(unsigned int)gbufferType] = fbo.attatchTexture(texture, get<3>(i));
 }
-void Engine::priv::GBuffer::internalStart(const unsigned int* types, unsigned int size, string_view channels, bool first_fbo) {
+void Engine::priv::GBuffer::internalStart(std::vector<unsigned int>& types, unsigned int size, string_view channels, bool first_fbo) {
     (first_fbo) ? m_FBO.bind() : m_SmallFBO.bind();
     bool r = (channels.find("R") != string::npos);
     bool g = (channels.find("G") != string::npos);
     bool b = (channels.find("B") != string::npos);
     bool a = (channels.find("A") != string::npos);
-    glDrawBuffers(size, types);
+
+    glDrawBuffers(size, types.data());
     Engine::Renderer::colorMask(r, g, b, a);
 }
-void Engine::priv::GBuffer::bindFramebuffers(unsigned int t1, string_view c, bool mainFBO){
-    unsigned int t[1] = { m_FramebufferTextures[t1]->attatchment() };
-    internalStart(t, 1, c, mainFBO);
+void Engine::priv::GBuffer::bindFramebuffers(string_view c, bool mainFBO) {
+    std::vector<unsigned int> t = { 0 };
+    internalStart(t, 0, c, mainFBO);
+}
+void Engine::priv::GBuffer::bindFramebuffers(unsigned int buffer, string_view c, bool mainFBO) {
+    std::vector<unsigned int> buffers_as_slots = { m_FramebufferTextures[buffer]->attatchment() };
+    internalStart(buffers_as_slots, 1, c, mainFBO);
 }
 void Engine::priv::GBuffer::bindFramebuffers(unsigned int t1, unsigned int t2, string_view c, bool mainFBO){
-    unsigned int t[2] = { m_FramebufferTextures[t1]->attatchment(), m_FramebufferTextures[t2]->attatchment() };
-    internalStart(t, 2, c, mainFBO);
+    std::vector<unsigned int> buffers_as_slots = { m_FramebufferTextures[t1]->attatchment(), m_FramebufferTextures[t2]->attatchment() };
+    internalStart(buffers_as_slots, 2, c, mainFBO);
 }
 void Engine::priv::GBuffer::bindFramebuffers(unsigned int t1, unsigned int t2, unsigned int t3, string_view c, bool mainFBO){
-    unsigned int t[3] = { m_FramebufferTextures[t1]->attatchment(), m_FramebufferTextures[t2]->attatchment(), m_FramebufferTextures[t3]->attatchment() };
-    internalStart(t, 3, c, mainFBO);
+    std::vector<unsigned int> buffers_as_slots = { m_FramebufferTextures[t1]->attatchment(), m_FramebufferTextures[t2]->attatchment(), m_FramebufferTextures[t3]->attatchment() };
+    internalStart(buffers_as_slots, 3, c, mainFBO);
 }
 void Engine::priv::GBuffer::bindFramebuffers(unsigned int t1, unsigned int t2, unsigned int t3, unsigned int t4, string_view c, bool mainFBO){
-    unsigned int t[4] = { m_FramebufferTextures[t1]->attatchment(), m_FramebufferTextures[t2]->attatchment(), m_FramebufferTextures[t3]->attatchment(), m_FramebufferTextures[t4]->attatchment() };
-    internalStart(t, 4, c, mainFBO);
+    std::vector<unsigned int> buffers_as_slots = { m_FramebufferTextures[t1]->attatchment(), m_FramebufferTextures[t2]->attatchment(), m_FramebufferTextures[t3]->attatchment(), m_FramebufferTextures[t4]->attatchment() };
+    internalStart(buffers_as_slots, 4, c, mainFBO);
 }
 void Engine::priv::GBuffer::bindFramebuffers(unsigned int t1, unsigned int t2, unsigned int t3, unsigned int t4, unsigned int t5, string_view c, bool mainFBO){
-    unsigned int t[5] = { m_FramebufferTextures[t1]->attatchment(), m_FramebufferTextures[t2]->attatchment(), m_FramebufferTextures[t3]->attatchment(), m_FramebufferTextures[t4]->attatchment(), m_FramebufferTextures[t5]->attatchment() };
-    internalStart(t, 5, c, mainFBO);
+    std::vector<unsigned int> buffers_as_slots = { m_FramebufferTextures[t1]->attatchment(), m_FramebufferTextures[t2]->attatchment(), m_FramebufferTextures[t3]->attatchment(), m_FramebufferTextures[t4]->attatchment(), m_FramebufferTextures[t5]->attatchment() };
+    internalStart(buffers_as_slots, 5, c, mainFBO);
 }
+
 
 void Engine::priv::GBuffer::bindBackbuffer(const Viewport& viewport, GLuint final_fbo, GLuint final_rbo){
     Engine::Renderer::bindFBO(final_fbo);
@@ -123,24 +129,9 @@ void Engine::priv::GBuffer::bindBackbuffer(const Viewport& viewport, GLuint fina
     const auto& dimensions = viewport.getViewportDimensions();
     Engine::Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
 }
-const std::array<Engine::priv::FramebufferTexture*, Engine::priv::GBufferType::_TOTAL>& Engine::priv::GBuffer::getBuffers() const{
-    return m_FramebufferTextures;
-}
 Texture& Engine::priv::GBuffer::getTexture(unsigned int t) const {
     return m_FramebufferTextures[t]->texture();
 }
 Engine::priv::FramebufferTexture& Engine::priv::GBuffer::getBuffer(unsigned int t) const {
     return *m_FramebufferTextures[t];
-}
-const Engine::priv::FramebufferObject& Engine::priv::GBuffer::getMainFBO() const {
-    return m_FBO; 
-}
-const Engine::priv::FramebufferObject& Engine::priv::GBuffer::getSmallFBO() const {
-    return m_SmallFBO; 
-}
-unsigned int Engine::priv::GBuffer::width() const {
-    return m_Width;
-}
-unsigned int Engine::priv::GBuffer::height() const {
-    return m_Height;
 }

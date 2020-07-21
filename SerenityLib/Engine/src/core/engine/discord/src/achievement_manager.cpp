@@ -1,6 +1,6 @@
-#if !defined(_CRT_SECURE_NO_WARNINGS)
-#define _CRT_SECURE_NO_WARNINGS
-#endif
+//#if !defined(_CRT_SECURE_NO_WARNINGS)
+//#define _CRT_SECURE_NO_WARNINGS
+//#endif
 
 #include "core/engine/utils/PrecompiledHeader.h"
 #include "achievement_manager.h"

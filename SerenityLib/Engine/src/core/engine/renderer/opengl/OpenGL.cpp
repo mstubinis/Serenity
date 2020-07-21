@@ -2,12 +2,11 @@
 #include <core/engine/renderer/opengl/OpenGL.h>
 #include <core/engine/system/window/Window.h>
 
-using namespace std;
 using namespace Engine::priv;
 
-unordered_map<string, string> VERSION_MAP;
-unordered_map<string, string> POPULATE_VERSION_MAP() {
-    unordered_map<string, string> ret;
+std::unordered_map<std::string, std::string> VERSION_MAP;
+std::unordered_map<std::string, std::string> POPULATE_VERSION_MAP() {
+    std::unordered_map<std::string, std::string> ret;
 
     ret["1.1"] = "110";
     ret["2.0"] = "110";
@@ -27,12 +26,12 @@ unordered_map<string, string> POPULATE_VERSION_MAP() {
     return ret;
 }
 
-const string OpenGL::getHighestGLSLVersion(const Window& window) {
+std::string OpenGL::getHighestGLSLVersion(Window& window) noexcept {
     if (VERSION_MAP.size() == 0) {
         VERSION_MAP = POPULATE_VERSION_MAP();
     }
     //unordered_map<string, string> VERSION_MAP = POPULATE_VERSION_MAP();
-    const auto& openglContext = const_cast<Window&>(window).getSFMLHandle().getSettings();
-    const string version = to_string(openglContext.majorVersion) + "." + to_string(openglContext.minorVersion);
+    auto& openglContext = window.getSFMLHandle().getSettings();
+    std::string version = std::to_string(openglContext.majorVersion) + "." + std::to_string(openglContext.minorVersion);
     return VERSION_MAP.at(version);
 }

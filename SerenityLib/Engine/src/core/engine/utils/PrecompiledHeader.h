@@ -64,6 +64,15 @@
 #include <glm/gtc/type_ptr.hpp>
 
 
+#ifdef ENGINE_USE_LIKELY
+    #define LIKELY [[likely]]
+    #define UNLIKELY [[unlikely]]
+#else
+    #define LIKELY
+    #define UNLIKELY
+#endif
+
+
 //#define ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS //this will force the engine and window to use the same thread, which will prevent the engine logic from executing if the user modifies the window. this can cause some flickering on resize however
 //#define ENGINE_FORCE_PHYSICS_DEBUG_DRAW //this will force the renderer to output physics debugging info regardless if the build is debug or release
 

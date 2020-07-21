@@ -69,14 +69,14 @@ namespace Engine::priv {
             std::vector<API2DCommand>      m_2DAPICommands;
             std::vector<API2DCommand>      m_2DAPICommandsNonTextured;
             //particle instancing
-            unsigned int                   m_Particle_Instance_VBO;
+            unsigned int                   m_Particle_Instance_VBO = 0U;
 
             void internal_render_per_frame_preparation(Viewport& viewport, Camera& camera);
             void internal_pass_geometry(Viewport& viewport, Camera& camera);
             void internal_pass_ssao(Viewport& viewport, Camera& camera);
             void internal_pass_stencil();
             void internal_pass_lighting(Viewport& viewport, Camera& camera, bool mainRenderFunction);
-            void internal_pass_forward(Viewport& viewport, Camera& camera);
+            void internal_pass_forward(Viewport& viewport, Camera& camera, bool depthPrepass);
             void internal_pass_god_rays(Viewport& viewport, Camera& camera);
             void internal_pass_hdr(Viewport& viewport, Camera& camera);
             void internal_pass_bloom(Viewport& viewport);
@@ -84,7 +84,7 @@ namespace Engine::priv {
             void internal_pass_aa(bool mainRenderFunction, Viewport& viewport, Camera& camera, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture);
             void internal_pass_final(GBufferType::Type sceneTexture);
             void internal_pass_depth_and_transparency(Viewport& viewport, GBufferType::Type sceneTexture); //TODO: recheck this
-            void internal_pass_copy_depth();
+            bool internal_pass_depth_prepass(Viewport& viewport, Camera& camera);
             void internal_pass_blur(Viewport& viewport, GLuint texture, std::string_view type);
 
             void internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, unsigned int convoludeTextureSize, unsigned int preEnvFilterSize);
@@ -203,7 +203,6 @@ namespace Engine::priv {
             void renderFullscreenTriangle() override;
             void renderFullscreenQuad() override;
 
-            void update(const float dt) override;
             void render(Engine::priv::Renderer& renderer, Viewport& viewport, bool mainRenderFunction) override;
     };
 };

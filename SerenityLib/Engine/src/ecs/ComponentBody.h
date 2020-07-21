@@ -153,6 +153,7 @@ class ComponentBody : public Observer, public Engine::UserPointer {
         unsigned short getCollisionMask() const;  //get the groups this body will register collisions with
         unsigned short getCollisionFlags() const;
 
+        void alignTo(decimal dirX, decimal dirY, decimal dirZ);
         void alignTo(const glm_vec3& direction);
 
         void translate(const glm_vec3& translation, bool local = true);

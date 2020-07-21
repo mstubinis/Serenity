@@ -132,28 +132,28 @@ priv::EShaders::lighting_vert =
     "varying vec2 texcoords;\n"
     "flat varying vec3 CamRealPosition;\n"
     "\n"
-    "vec3 doSpotLightStuff(vec3 v){\n"
+    "vec3 doSpotLightStuff(vec3 inPositions){\n"
     "    float opposite = tan(VertexShaderData.x * 0.5) * VertexShaderData.y;\n" //outerCutoff might need to be in degrees?
-    "    v.xy *= vec2(opposite / VertexShaderData.y);\n" //might need to switch around x,y,z to fit GL's coordinate system
-    "    return v;\n"
+    "    inPositions.xy *= vec2(opposite / VertexShaderData.y);\n" //might need to switch around x,y,z to fit GL's coordinate system
+    "    return inPositions;\n"
     "}\n"
     "void main(){\n"
     "    mat4 ModelClone = Model;\n"
-    "    vec3 vert = position;\n"
+    "    vec3 ModelSpacePositions = position;\n"
     "    if(Type == 2.0){\n" //spot light
-    "        vert = doSpotLightStuff(vert);\n"
-    //"        ModelClone[3][0] -= CameraRealPosition.x;\n"
-    //"        ModelClone[3][1] -= CameraRealPosition.y;\n"
-    //"        ModelClone[3][2] -= CameraRealPosition.z;\n"
+    "        ModelSpacePositions = doSpotLightStuff(ModelSpacePositions);\n"
+    "        ModelClone[3][0] -= CameraRealPosition.x;\n"
+    "        ModelClone[3][1] -= CameraRealPosition.y;\n"
+    "        ModelClone[3][2] -= CameraRealPosition.z;\n"
     "    }else if(Type == 1.0){\n" //point / rod / etc
-    //"        ModelClone[3][0] -= CameraRealPosition.x;\n"
-    //"        ModelClone[3][1] -= CameraRealPosition.y;\n"
-    //"        ModelClone[3][2] -= CameraRealPosition.z;\n"
+    "        ModelClone[3][0] -= CameraRealPosition.x;\n"
+    "        ModelClone[3][1] -= CameraRealPosition.y;\n"
+    "        ModelClone[3][2] -= CameraRealPosition.z;\n"
     "    }else if(Type == 0.0){\n" //fullscreen quad / triangle
     "    }\n"
     "    texcoords = uv;\n"
     "    CamRealPosition = CameraRealPosition;\n"
-    "    gl_Position = VP * ModelClone * vec4(vert,1.0);\n"
+    "    gl_Position = (VP * ModelClone) * vec4(ModelSpacePositions, 1.0);\n"
     "}";
 #pragma endregion
 
@@ -649,16 +649,16 @@ priv::EShaders::brdf_precompute =
     "}";
 #pragma endregion
 
-#pragma region LightingStencilPass
+#pragma region StencilPass
 
 priv::EShaders::stencil_passover =
     "\n"
-    "const vec3 comparison = vec3(1.0,1.0,1.0);\n"
+    "const vec3 comparison = vec3(1.0, 1.0, 1.0);\n"
     "uniform SAMPLER_TYPE_2D gNormalMap;\n"
     "varying vec2 texcoords;\n"
     "void main(){\n"
-    "    vec3 normal = DecodeOctahedron(texture2D(gNormalMap,texcoords).rg);\n"
-    "    if(distance(normal,comparison) < 0.01){\n"
+    "    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);\n"
+    "    if(distance(normal, comparison) < 0.01){\n"
     "        discard;\n"//this is where the magic happens with the stencil buffer.
     "    }\n"
     "}";
@@ -679,7 +679,7 @@ priv::EShaders::fullscreen_quad_vertex =
     "void main(){\n"
     "    vec3 vert = position;\n"
     "    texcoords = uv;\n"
-    "    gl_Position = VP * Model * vec4(vert,1.0);\n"
+    "    gl_Position = VP * Model * vec4(vert, 1.0);\n"
     "}";
 #pragma endregion
    
@@ -1005,8 +1005,8 @@ priv::EShaders::deferred_frag =
 #pragma region ZPrepassFrag
 priv::EShaders::zprepass_frag =
     "USE_LOG_DEPTH_FRAGMENT\n"
-    "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
-    "USE_MAX_MATERIAL_COMPONENTS\n"
+    //"USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
+    //"USE_MAX_MATERIAL_COMPONENTS\n"
     "void main(){\n"
     "}";
 

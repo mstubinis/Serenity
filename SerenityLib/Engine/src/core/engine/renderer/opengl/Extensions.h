@@ -2,6 +2,8 @@
 #ifndef ENGINE_RENDERER_OPENGL_EXTENSIONS_H
 #define ENGINE_RENDERER_OPENGL_EXTENSIONS_H
 
+//#define ENGINE_PRINT_OPENGL_EXTENSIONS
+
 namespace Engine::priv {
     class OpenGLExtensions final {
         public: enum Extension {
@@ -30,16 +32,16 @@ namespace Engine::priv {
         private:
 
         public:
-            void       INIT();
-            const bool checkOpenGLExtension(const char* e);
-            void       printAllAvailableExtensions();
+            void       INIT() noexcept;
+            bool       checkOpenGLExtension(const char* e) noexcept;
+            void       printAllAvailableExtensions() noexcept;
 
-            OpenGLExtensions();
-            ~OpenGLExtensions();
+            OpenGLExtensions() = default;
+            ~OpenGLExtensions() = default;
 
-            static const bool supported(const OpenGLExtensions::Extension extension);
+            static bool supported(OpenGLExtensions::Extension extension) noexcept;
 
-            static const bool isBindlessTexturesSupported();
+            static bool isBindlessTexturesSupported() noexcept;
     };
 };
 

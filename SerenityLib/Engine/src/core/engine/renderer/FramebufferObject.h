@@ -26,17 +26,17 @@ namespace Engine::priv {
         public:
             FramebufferObjectAttatchment(const FramebufferObject&, FramebufferAttatchment::Attatchment, ImageInternalFormat::Format);
             FramebufferObjectAttatchment(const FramebufferObject&, FramebufferAttatchment::Attatchment, const Texture&);
-            virtual ~FramebufferObjectAttatchment();
+            virtual ~FramebufferObjectAttatchment() {}
 
             unsigned int width() const;
             unsigned int height() const;
-            GLuint internalFormat() const;
-            unsigned int attatchment() const;
+            inline constexpr GLuint internalFormat() const noexcept { return m_InternalFormat; }
+            inline constexpr unsigned int attatchment() const noexcept { return m_GL_Attatchment; }
 
-            virtual void resize(FramebufferObject&, unsigned int width, unsigned int height);
-            virtual GLuint address() const;
-            virtual void bind();
-            virtual void unbind();
+            virtual void resize(FramebufferObject&, unsigned int width, unsigned int height) {}
+            virtual GLuint address() const { return 0; }
+            virtual void bind() {}
+            virtual void unbind() {}
     };
     class FramebufferTexture final: public FramebufferObjectAttatchment{
         friend class  Engine::priv::FramebufferObject;
@@ -51,21 +51,21 @@ namespace Engine::priv {
             void resize(FramebufferObject&, unsigned int width, unsigned int height) override;
             GLuint address() const override;
             Texture& texture() const;
-            void bind() override;
-            void unbind() override;
+            void bind() override {}
+            void unbind() override {}
     };
     class RenderbufferObject final: public FramebufferObjectAttatchment{
         friend class  Engine::priv::FramebufferObject;
         private:
-            GLuint         m_RBO;
-            unsigned int   m_Width;
-            unsigned int   m_Height;
+            GLuint         m_RBO    = 0U;
+            unsigned int   m_Width  = 0U;
+            unsigned int   m_Height = 0U;
         public:
             RenderbufferObject(FramebufferObject&, FramebufferAttatchment::Attatchment, ImageInternalFormat::Format);
             ~RenderbufferObject();
 
             void resize(FramebufferObject&, unsigned int width, unsigned int height) override;
-            GLuint address() const override;
+            GLuint address() const override { return m_RBO; }
             void bind() override;
             void unbind() override;
     };
@@ -78,14 +78,14 @@ namespace Engine::priv {
             std::function<void(const FramebufferObject*)>                           m_CustomBindFunctor   = [](const FramebufferObject*) {};
             std::function<void(const FramebufferObject*)>                           m_CustomUnbindFunctor = [](const FramebufferObject*) {};
 
-            mutable size_t                                                          m_CurrentFBOIndex;
-            unsigned int                                                            m_FramebufferWidth  = 0U;
-            unsigned int                                                            m_FramebufferHeight = 0U;
-            float                                                                   m_Divisor           = 1.0f;
+            mutable size_t                                                          m_CurrentFBOIndex     = 0U;
+            unsigned int                                                            m_FramebufferWidth    = 0U;
+            unsigned int                                                            m_FramebufferHeight   = 0U;
+            float                                                                   m_Divisor             = 1.0f;
             std::vector<GLuint>                                                     m_FBO;
             mutable std::unordered_map<unsigned int, FramebufferObjectAttatchment*> m_Attatchments;
         public:
-            FramebufferObject();
+            FramebufferObject() = default;
             FramebufferObject(unsigned int width, unsigned int height, float divisor = 1.0f, unsigned int swapBufferCount = 1);
             FramebufferObject(unsigned int width, unsigned int height, ImageInternalFormat::Format, float divisor = 1.0f, unsigned int swapBufferCount = 1);
             ~FramebufferObject();
@@ -104,17 +104,17 @@ namespace Engine::priv {
 
             void cleanup();
 
-            FramebufferObjectAttatchment* getAttatchement(unsigned int) const;
+            inline FramebufferObjectAttatchment* getAttatchement(unsigned int index) const noexcept { return m_Attatchments.at(index); }
 
             void resize(unsigned int width, unsigned int height);
             FramebufferTexture* attatchTexture(Texture*, FramebufferAttatchment::Attatchment);
             RenderbufferObject* attatchRenderBuffer(RenderbufferObject&);
-            unsigned int width() const;
-            unsigned int height() const;
-            std::unordered_map<unsigned int, FramebufferObjectAttatchment*>& attatchments() const;
+            inline constexpr unsigned int width() const noexcept { return m_FramebufferWidth; }
+            inline constexpr unsigned int height() const noexcept { return m_FramebufferHeight; }
+            inline std::unordered_map<unsigned int, FramebufferObjectAttatchment*>& attatchments() const noexcept { return m_Attatchments; }
             GLuint address() const;
             bool check();
-            float divisor() const;
+            inline constexpr float divisor() const noexcept { return m_Divisor; }
     };
 };
 

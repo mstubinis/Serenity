@@ -282,7 +282,7 @@ Viewport& Scene::getMainViewport() {
     return m_Viewports[0];
 }
 Camera* Scene::getActiveCamera() const {
-    if (m_Viewports.size() == 0) {
+    if (m_Viewports.size() == 0){
         return nullptr;
     }
     return &m_Viewports[0].getCamera();

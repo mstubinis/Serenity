@@ -11,6 +11,7 @@ namespace Engine::priv {
             static void insertStringAtLine(std::string& InSrc, const std::string& newcontent, const unsigned int line);
             static void insertStringAtAndReplaceLine(std::string& InSrc, const std::string& newcontent, const unsigned int line);
             static void insertStringAtEndOfMainFunc(std::string& InSrc, const std::string& content);
+            static void insertStringRightBeforeMainFunc(std::string& InSrc, const std::string& content);
             static void insertStringRightAfterLineContent(std::string& InSrc, const std::string& newContent, const std::string& lineContent);
     };
 };

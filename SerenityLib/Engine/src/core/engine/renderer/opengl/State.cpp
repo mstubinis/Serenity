@@ -1,13 +1,10 @@
 #include "core/engine/utils/PrecompiledHeader.h"
 #include <core/engine/renderer/opengl/State.h>
 
-//#include <glm/glm.hpp>
-
 using namespace Engine;
 using namespace Engine::priv;
 
 unsigned int OpenGLState::MAX_TEXTURE_UNITS = 0;
-
 
 void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(unsigned int windowWidth, unsigned int windowHeight) {
     GLint     int_value;
@@ -17,27 +14,27 @@ void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(unsigned int windowWidth, unsign
     viewportState = ViewportState((GLsizei)windowWidth, (GLsizei)windowHeight);
 
     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &int_value); //what about GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS?
-    textureUnits.reserve(int_value);
+    textureUnits.reserve((size_t)int_value);
     MAX_TEXTURE_UNITS = glm::max(MAX_TEXTURE_UNITS, (unsigned int)int_value);
-    for (unsigned int i = 0; i < textureUnits.capacity(); ++i) {
+    for (size_t i = 0; i < textureUnits.capacity(); ++i) {
         textureUnits.push_back(TextureUnitState());
     }
 
 
     glGetIntegerv(GL_MAX_DRAW_BUFFERS, &int_value);
-    enabledState.blendState.reserve(int_value);
-    blendEquationState.reserve(int_value);
-    for (unsigned int i = 0; i < enabledState.blendState.capacity(); ++i) {
+    enabledState.blendState.reserve((size_t)int_value);
+    blendEquationState.reserve((size_t)int_value);
+    for (size_t i = 0; i < enabledState.blendState.capacity(); ++i) {
         enabledState.blendState.push_back(EnabledState::GLBlendState());
     }
-    for (unsigned int i = 0; i < blendEquationState.capacity(); ++i) {
+    for (size_t i = 0; i < blendEquationState.capacity(); ++i) {
         blendEquationState.push_back(BlendEquationState());
     }
 
 
     glGetIntegerv(GL_MAX_VIEWPORTS, &int_value);
-    enabledState.scissorState.reserve(int_value);
-    for (unsigned int i = 0; i < enabledState.scissorState.capacity(); ++i) {
+    enabledState.scissorState.reserve((size_t)int_value);
+    for (size_t i = 0; i < enabledState.scissorState.capacity(); ++i) {
         enabledState.scissorState.push_back(EnabledState::GLScissorTestState());
     }
 
@@ -71,10 +68,10 @@ void OpenGLState::GL_RESTORE_DEFAULT_STATE_MACHINE(unsigned int windowWidth, uns
     GL_glStencilFunc(GL_ALWAYS, 0, 0xFFFFFFFF);
 
     //glenable stuff
-    for (unsigned int i = 0; i < enabledState.blendState.capacity(); ++i) {
+    for (size_t i = 0; i < enabledState.blendState.capacity(); ++i) {
         GL_glDisablei(GL_BLEND, i);
     }
-    for (unsigned int i = 0; i < enabledState.scissorState.capacity(); ++i) {
+    for (size_t i = 0; i < enabledState.scissorState.capacity(); ++i) {
         GL_glDisablei(GL_SCISSOR_TEST, i);
     }
     GL_glEnable(GL_MULTISAMPLE);
@@ -113,8 +110,9 @@ void OpenGLState::GL_RESTORE_DEFAULT_STATE_MACHINE(unsigned int windowWidth, uns
     GL_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     GL_glBindRenderbuffer(0);
 
-    for (unsigned int i = 0; i < blendEquationState.capacity(); ++i)
+    for (size_t i = 0; i < blendEquationState.capacity(); ++i) {
         GL_glBlendEquationi(i, GL_FUNC_ADD);
+    }
 }
 void OpenGLState::GL_RESTORE_CURRENT_STATE_MACHINE() {
     glActiveTexture(currentTextureUnit);
@@ -139,11 +137,11 @@ void OpenGLState::GL_RESTORE_CURRENT_STATE_MACHINE() {
     glStencilFuncSeparate(GL_BACK, stencilFuncState.func_back, stencilFuncState.ref_back, stencilFuncState.mask_back);
 
     //glenable stuff
-    for (unsigned int i = 0; i < enabledState.blendState.capacity(); ++i) {
+    for (size_t i = 0; i < enabledState.blendState.capacity(); ++i) {
         auto& blend = enabledState.blendState[i];
         blend.gl_blend == GL_TRUE ? glEnablei(GL_BLEND, i) : glDisablei(GL_BLEND, i);
     }
-    for (unsigned int i = 0; i < enabledState.scissorState.capacity(); ++i) {
+    for (size_t i = 0; i < enabledState.scissorState.capacity(); ++i) {
         auto& scissor = enabledState.scissorState[i];
         scissor.gl_scissor_test == GL_TRUE ? glEnablei(GL_SCISSOR_TEST, i) : glDisablei(GL_SCISSOR_TEST, i);
     }
@@ -182,8 +180,9 @@ void OpenGLState::GL_RESTORE_CURRENT_STATE_MACHINE() {
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebufferState.framebuffer_draw);
     glBindRenderbuffer(GL_RENDERBUFFER, framebufferState.renderbuffer);
 
-    for (unsigned int i = 0; i < blendEquationState.capacity(); ++i)
+    for (size_t i = 0; i < blendEquationState.capacity(); ++i) {
         glBlendEquationi(i, blendEquationState[i].mode);
+    }
 }
 bool OpenGLState::GL_glActiveTexture(GLenum textureUnit) {
     currentTextureUnit = textureUnit;
@@ -192,7 +191,7 @@ bool OpenGLState::GL_glActiveTexture(GLenum textureUnit) {
 }
 
 bool OpenGLState::GL_glBindTextureForModification(GLenum textureTarget, GLuint textureObject) {
-    const auto unit = (GLenum)(textureUnits.capacity() - 1);
+    auto unit = (GLenum)(textureUnits.capacity() - 1);
     currentTextureUnit = unit;
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(textureTarget, textureObject);
@@ -229,18 +228,18 @@ bool OpenGLState::GL_glBindTextureForRendering(GLenum textureTarget, GLuint text
 }
 bool OpenGLState::GL_glClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a) {
     //Values are clamped to the range [0,1]
-    GLfloat _r = glm::clamp(r, 0.0f, 1.0f);
-    GLfloat _g = glm::clamp(g, 0.0f, 1.0f);
-    GLfloat _b = glm::clamp(b, 0.0f, 1.0f);
-    GLfloat _a = glm::clamp(a, 0.0f, 1.0f);
-    if (_r == clearColor.r && _g == clearColor.g && _b == clearColor.b && _a == clearColor.a) {
+    r = glm::clamp(r, 0.0f, 1.0f);
+    g = glm::clamp(g, 0.0f, 1.0f);
+    b = glm::clamp(b, 0.0f, 1.0f);
+    a = glm::clamp(a, 0.0f, 1.0f);
+    if (r == clearColor.r && g == clearColor.g && b == clearColor.b && a == clearColor.a) {
         return false;
     }
-    glClearColor(_r, _g, _b, _a);
-    clearColor.r = _r;
-    clearColor.g = _g;
-    clearColor.b = _b;
-    clearColor.a = _a;
+    glClearColor(r, g, b, a);
+    clearColor.r = r;
+    clearColor.g = g;
+    clearColor.b = b;
+    clearColor.a = a;
     return true;
 }
 bool OpenGLState::GL_glColorMask(GLboolean r, GLboolean g, GLboolean b, GLboolean a) {
@@ -255,22 +254,22 @@ bool OpenGLState::GL_glColorMask(GLboolean r, GLboolean g, GLboolean b, GLboolea
 }
 bool OpenGLState::GL_glClearDepth(GLdouble depth) {
     //Values are clamped to the range [0,1]
-    GLdouble d = glm::clamp(depth, 0.0, 1.0);
-    if (clearDepth.depth == d) {
+    depth = glm::clamp(depth, 0.0, 1.0);
+    if (clearDepth.depth == depth) {
         return false;
     }
-    clearDepth.depth = d;
-    glClearDepth(d);
+    clearDepth.depth = depth;
+    glClearDepth(depth);
     return true;
 }
 bool OpenGLState::GL_glClearDepthf(GLfloat depth_float) {
     //Values are clamped to the range [0,1]
-    GLfloat f = glm::clamp(depth_float, 0.0f, 1.0f);
-    if (clearDepth.depthf == f) {
+    depth_float = glm::clamp(depth_float, 0.0f, 1.0f);
+    if (clearDepth.depthf == depth_float) {
         return false;
     }
-    clearDepth.depthf = f;
-    glClearDepthf(f);
+    clearDepth.depthf = depth_float;
+    glClearDepthf(depth_float);
     return true;
 }
 bool OpenGLState::GL_glClearStencil(GLint stencil) {
@@ -430,8 +429,9 @@ bool OpenGLState::GL_glDepthFunc(GLenum func) {
     return false;
 }
 bool OpenGLState::GL_glPixelStorei(GLenum pname, GLint param) {
-    if (param != 1 && param != 2 && param != 4 && param != 8)
+    if (param != 1 && param != 2 && param != 4 && param != 8) {
         return false;
+    }
     switch (pname) {
         case GL_PACK_ALIGNMENT: {
             if (pixelStoreiState.pack_alignment != param) {
@@ -505,7 +505,7 @@ bool OpenGLState::GL_glStencilFunc(GLenum func, GLint ref, GLuint mask) {
     return false;
 }
 bool OpenGLState::GL_glEnable(GLenum capability) {
-    const auto& boolean = GL_TRUE;
+    auto boolean = GL_TRUE;
     switch (capability) {
         case GL_MULTISAMPLE: {
             if (enabledState.gl_multisample != boolean) {
@@ -718,7 +718,7 @@ bool OpenGLState::GL_glEnable(GLenum capability) {
             }
             break;
         }case GL_BLEND: {
-            for (unsigned int i = 0; i < enabledState.blendState.capacity(); ++i) {
+            for (size_t i = 0; i < enabledState.blendState.capacity(); ++i) {
                 auto& blend = enabledState.blendState[i];
                 if (blend.gl_blend != boolean) {
                     glEnablei(capability, i);
@@ -728,7 +728,7 @@ bool OpenGLState::GL_glEnable(GLenum capability) {
             return true;
             break;
         }case GL_SCISSOR_TEST: {
-            for (unsigned int i = 0; i < enabledState.scissorState.capacity(); ++i) {
+            for (size_t i = 0; i < enabledState.scissorState.capacity(); ++i) {
                 auto& scissor = enabledState.scissorState[i];
                 if (scissor.gl_scissor_test != boolean) {
                     glEnablei(capability, i);
@@ -744,7 +744,7 @@ bool OpenGLState::GL_glEnable(GLenum capability) {
     return false;
 }
 bool OpenGLState::GL_glDisable(GLenum capability) {
-    const auto& boolean = GL_FALSE;
+    auto boolean = GL_FALSE;
     switch (capability) {
         case GL_MULTISAMPLE: {
             if (enabledState.gl_multisample != boolean) {
@@ -957,7 +957,7 @@ bool OpenGLState::GL_glDisable(GLenum capability) {
             }
             break;
         }case GL_BLEND: {
-            for (unsigned int i = 0; i < enabledState.blendState.capacity(); ++i) {
+            for (size_t i = 0; i < enabledState.blendState.capacity(); ++i) {
                 auto& blend = enabledState.blendState[i];
                 if (blend.gl_blend != boolean) {
                     glDisablei(capability, i);
@@ -967,7 +967,7 @@ bool OpenGLState::GL_glDisable(GLenum capability) {
             return true;
             break;
         }case GL_SCISSOR_TEST: {
-            for (unsigned int i = 0; i < enabledState.scissorState.capacity(); ++i) {
+            for (size_t i = 0; i < enabledState.scissorState.capacity(); ++i) {
                 auto& scissor = enabledState.scissorState[i];
                 if (scissor.gl_scissor_test != boolean) {
                     glDisablei(capability, i);
@@ -983,7 +983,7 @@ bool OpenGLState::GL_glDisable(GLenum capability) {
     return false;
 }
 bool OpenGLState::GL_glEnablei(GLenum capability, GLuint index) {
-    const auto& boolean = GL_TRUE;
+    auto boolean = GL_TRUE;
     switch (capability) {
         case GL_BLEND: {
             auto& blendState = enabledState.blendState[index];
@@ -1008,7 +1008,7 @@ bool OpenGLState::GL_glEnablei(GLenum capability, GLuint index) {
     return false;
 }
 bool OpenGLState::GL_glDisablei(GLenum capability, GLuint index) {
-    const auto& boolean = GL_FALSE;
+    auto boolean = GL_FALSE;
     switch (capability) {
         case GL_BLEND: {
             auto& blendState = enabledState.blendState[index];

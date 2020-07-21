@@ -46,6 +46,23 @@ void ShaderHelper::insertStringAtAndReplaceLine(string& InSrc, const string& new
         ++count;
     }
 }
+void ShaderHelper::insertStringRightBeforeMainFunc(string& InSrc, const string& content) {
+    stringstream str(InSrc);
+    string line = "";
+    vector<string> lines;
+    bool done = false;
+    while (std::getline(str, line)) {
+        lines.emplace_back(line + "\n");
+        if (!done && ShaderHelper::sfind(line, " main(")) {
+            lines.insert(lines.cend() - 1, content + "\n");
+            done = true;
+        }
+    }
+    InSrc = "";
+    for (auto& lineItr : lines) {
+        InSrc += lineItr;
+    }
+}
 void ShaderHelper::insertStringAtEndOfMainFunc(string& InSrc, const string& content) {
     auto position = InSrc.size() - 1;
     while (position > 0) {

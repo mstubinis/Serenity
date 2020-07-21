@@ -565,6 +565,10 @@ float Math::getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bo
 		angle *= 57.2958f;
     return angle;
 }
+void Math::alignTo(glm_quat& o, decimal x, decimal y, decimal z) {
+    o = glm::conjugate(glm::toQuat(glm::lookAt(glm_vec3(0.0f), -glm_vec3(x, y, z), glm_vec3(0, 1, 0))));
+    o = glm::normalize(o);
+}
 void Math::alignTo(glm_quat& o, const glm_vec3& direction){ 
     o = glm::conjugate(glm::toQuat(glm::lookAt(glm_vec3(0.0f), -direction, glm_vec3(0, 1, 0))));
     o = glm::normalize(o);

@@ -12,19 +12,28 @@ class SpotLight : public PointLight {
     public:
         SpotLight(
             const glm_vec3& position   = glm_vec3(0.0f, 0.0f, 0.0f),
-            const glm::vec3& direction = glm::vec3(0.0f, 0.0f, -1.0f),
-            float innerCutoff    = 11.0f,
-            float outerCutoff    = 13.0f,
+            const glm_vec3& direction  = glm_vec3(0.0f, 0.0f, -1.0f),
+            float innerCutoffInDegrees = 11.0f,
+            float outerCutoffInDegrees = 13.0f,
             Scene* scene               = nullptr
         );
-        virtual ~SpotLight() {}
+        virtual ~SpotLight();
 
         void free() noexcept override;
 
         constexpr float getCutoff() const noexcept { return m_Cutoff; }
         constexpr float getCutoffOuter() const noexcept { return m_OuterCutoff; }
 
-        void setCutoff(float innerCutoff);
-        void setCutoffOuter(float outerCutoff);
+        void setDirection(decimal xDir, decimal yDir, decimal zDir) noexcept;
+        void setDirection(const glm_vec3& direction) noexcept;
+
+        void setCutoffRadians(float cutoffInRadians) noexcept { m_Cutoff = glm::cos(cutoffInRadians); }
+        void setCutoffOuterRadians(float outerCutoffInRadians) noexcept { m_OuterCutoff = glm::cos(outerCutoffInRadians); }
+        void setCutoffDegrees(float cutoffInDegrees) noexcept { m_Cutoff = glm::cos(glm::radians(cutoffInDegrees)); }
+        void setCutoffOuterDegrees(float outerCutoffInDegrees) noexcept { m_OuterCutoff = glm::cos(glm::radians(outerCutoffInDegrees)); }
+        //sets the inner cut off, expecting the input to be in degrees
+        inline void setCutoff(float cutoffInDegrees) noexcept { setCutoffDegrees(cutoffInDegrees); }
+        //sets the outer cut off, expecting the input to be in degrees
+        inline void setCutoffOuter(float outerCutoffInDegrees) noexcept { setCutoffOuterDegrees(outerCutoffInDegrees); }
 };
 #endif

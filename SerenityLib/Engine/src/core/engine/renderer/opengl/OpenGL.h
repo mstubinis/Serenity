@@ -9,7 +9,7 @@ namespace Engine::priv {
         private:
 
         public:
-            static const std::string getHighestGLSLVersion(const Window& window);
+            static std::string getHighestGLSLVersion(Window& window) noexcept;
     };
 };
 

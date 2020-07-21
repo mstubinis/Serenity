@@ -265,7 +265,8 @@ LUABinder::LUABinder() {
             .addFunction("mass", &ComponentBody::mass)
             .addFunction("getDistance", &ComponentBody::getDistance)
             .addFunction("getScreenCoordinates", &ComponentBody::getScreenCoordinates)
-            .addFunction("alignTo", &ComponentBody::alignTo)
+            .addFunction("alignTo", static_cast<void(ComponentBody::*)(const glm_vec3&)>(&ComponentBody::alignTo))
+            .addFunction("alignTo", static_cast<void(ComponentBody::*)(decimal, decimal, decimal)>(&ComponentBody::alignTo))
 
             .addFunction("getRotation", &ComponentBody::getRotation)
             .addFunction("getPosition", &ComponentBody::getPosition)

@@ -214,7 +214,6 @@ namespace Engine::priv {
             virtual void renderFullscreenTriangle() = 0;
             virtual void renderFullscreenQuad() = 0;
 
-            virtual void update(const float dt) = 0;
             virtual void render(Engine::priv::Renderer& renderer, Viewport& viewport, bool mainRenderFunction) = 0;
     };
 };

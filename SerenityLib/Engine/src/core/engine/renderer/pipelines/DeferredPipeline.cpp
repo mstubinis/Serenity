@@ -234,8 +234,7 @@ void DeferredPipeline::init() {
     m_InternalShaderPrograms[ShaderProgramEnum::CubemapConvolude] = NEW ShaderProgram("Cubemap_Convolude", *m_InternalShaders[ShaderEnum::VertexSkybox], *m_InternalShaders[ShaderEnum::CubemapConvoludeFrag]);
     m_InternalShaderPrograms[ShaderProgramEnum::CubemapPrefilterEnv] = NEW ShaderProgram("Cubemap_Prefilter_Env", *m_InternalShaders[ShaderEnum::VertexSkybox], *m_InternalShaders[ShaderEnum::CubemapPrefilterEnvFrag]);
     m_InternalShaderPrograms[ShaderProgramEnum::BRDFPrecomputeCookTorrance] = NEW ShaderProgram("BRDF_Precompute_CookTorrance", *m_InternalShaders[ShaderEnum::FullscreenVertex], *m_InternalShaders[ShaderEnum::BRDFPrecomputeFrag]);
-    //m_InternalShaderPrograms[ShaderProgramEnum::Grayscale] = NEW ShaderProgram("Greyscale_Frag", *m_InternalShaders[ShaderEnum::FullscreenVertex], *m_InternalShaders[ShaderEnum::GrayscaleFrag]);
-    m_InternalShaderPrograms[ShaderProgramEnum::StencilPass] = NEW ShaderProgram("Stencil_Pass", *m_InternalShaders[ShaderEnum::LightingVertex], *m_InternalShaders[ShaderEnum::StencilPassFrag]);
+    m_InternalShaderPrograms[ShaderProgramEnum::StencilPass] = NEW ShaderProgram("Stencil_Pass", *m_InternalShaders[ShaderEnum::FullscreenVertex], *m_InternalShaders[ShaderEnum::StencilPassFrag]);
     m_InternalShaderPrograms[ShaderProgramEnum::Particle] = NEW ShaderProgram("Particle", *m_InternalShaders[ShaderEnum::ParticleVertex], *m_InternalShaders[ShaderEnum::ParticleFrag]);
 
 
@@ -660,16 +659,19 @@ void DeferredPipeline::sendGPUDataDirectionalLight(Camera& camera, DirectionalLi
     sendUniform1Safe("Type", 0.0f);
 }
 int DeferredPipeline::sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight, const string& start) {
-    const auto* body   = spotLight.getComponent<ComponentBody>();
-    const auto pos     = glm::vec3(body->getPosition());
-    const auto forward = glm::vec3(body->forward());
-    const auto cull    = spotLight.getCullingRadius();
-    const auto factor  = 1100.0f * cull;
-    const auto distSq  = (float)camera.getDistanceSquared(pos);
-    if (!camera.sphereIntersectTest(pos, cull) || (distSq > factor * factor)) {
+    auto* body   = spotLight.getComponent<ComponentBody>();
+    auto pos     = glm::vec3(body->getPosition());
+    auto forward = glm::vec3(body->forward());
+    auto cull    = spotLight.getCullingRadius();
+    auto factor  = 1100.0f * cull;
+    auto distSq  = (float)camera.getDistanceSquared(pos);
+    if (!camera.sphereIntersectTest(pos, cull)) {
         return 0;
     }
-    const auto& col = spotLight.color();
+    if (distSq > factor * factor) {
+        return 0;
+    }
+    auto& col = spotLight.color();
     sendUniform4((start + "DataA").c_str(), spotLight.getAmbientIntensity(), spotLight.getDiffuseIntensity(), spotLight.getSpecularIntensity(), forward.x);
     sendUniform4((start + "DataB").c_str(), forward.y, forward.z, spotLight.getConstant(), spotLight.getLinear());
     sendUniform4((start + "DataC").c_str(), spotLight.getExponent(), pos.x, pos.y, pos.z);
@@ -678,8 +680,11 @@ int DeferredPipeline::sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight,
     sendUniform2Safe("VertexShaderData", spotLight.getCutoffOuter(), cull);
     sendUniform1Safe("Type", 2.0f);
 
-    if (distSq <= (cull * cull)) { //inside the light volume                                                 
+    if (distSq <= (cull * cull)) { //inside the light volume
+        //std::cout << "a\n";
         return 1;
+    }else{
+        //std::cout << "b\n";
     }
     return 2;
 }
@@ -712,36 +717,36 @@ int DeferredPipeline::sendGPUDataProjectionLight(Camera& camera, ProjectionLight
     return 2;
 }
 
-void DeferredPipeline::renderDirectionalLight(Camera& c, DirectionalLight& d, Viewport& viewport) {
-    if (!d.isActive()) {
+void DeferredPipeline::renderDirectionalLight(Camera& camera, DirectionalLight& directionalLight, Viewport& viewport) {
+    if (!directionalLight.isActive()) {
         return;
     }
     string start = "light.";
-    sendGPUDataDirectionalLight(c, d, start);
+    sendGPUDataDirectionalLight(camera, directionalLight, start);
     renderFullscreenQuad();
 }
-void DeferredPipeline::renderSunLight(Camera& c, SunLight& s, Viewport& viewport) {
-    if (!s.isActive()) {
+void DeferredPipeline::renderSunLight(Camera& camera, SunLight& sunLight, Viewport& viewport) {
+    if (!sunLight.isActive()) {
         return;
     }
     string start = "light.";
-    sendGPUDataSunLight(c, s, start);
+    sendGPUDataSunLight(camera, sunLight, start);
     renderFullscreenQuad();
 }
-void DeferredPipeline::renderPointLight(Camera& c, PointLight& p) {
-    if (!p.isActive()) {
+void DeferredPipeline::renderPointLight(Camera& camera, PointLight& pointLight) {
+    if (!pointLight.isActive()) {
         return;
     }
     string start = "light.";
-    int result   = sendGPUDataPointLight(c, p, start);
+    int result   = sendGPUDataPointLight(camera, pointLight, start);
 
     if (result == 0) {
         return;
     }
 
-    const auto* body = p.getComponent<ComponentBody>();
-    const auto model = body->modelMatrix();
-    sendUniformMatrix4("Model", model);
+    auto* body       = pointLight.getComponent<ComponentBody>();
+    auto modelMatrix = body->modelMatrixRendering();
+    sendUniformMatrix4("Model", modelMatrix);
     sendUniformMatrix4("VP", m_UBOCameraDataStruct.ViewProj);
 
     if(result == 1){
@@ -757,20 +762,20 @@ void DeferredPipeline::renderPointLight(Camera& c, PointLight& p) {
 
     cullFace(GL_BACK);
 }
-void DeferredPipeline::renderSpotLight(Camera& c, SpotLight& s) {
-    if (!s.isActive()) {
+void DeferredPipeline::renderSpotLight(Camera& camera, SpotLight& spotLight) {
+    if (!spotLight.isActive()) {
         return;
     }
     string start = "light.";
-    int result   = sendGPUDataSpotLight(c, s, start);
+    int result   = sendGPUDataSpotLight(camera, spotLight, start);
 
     if (result == 0) {
         return;
     }
 
-    const auto* body = s.getComponent<ComponentBody>();
-    const auto model = body->modelMatrix();
-    sendUniformMatrix4("Model", model);
+    auto* body       = spotLight.getComponent<ComponentBody>();
+    auto modelMatrix = body->modelMatrixRendering();
+    sendUniformMatrix4("Model", modelMatrix);
     sendUniformMatrix4("VP", m_UBOCameraDataStruct.ViewProj);
 
     if (result == 1) {
@@ -785,21 +790,20 @@ void DeferredPipeline::renderSpotLight(Camera& c, SpotLight& s) {
     m_Renderer.unbind(&spotLightMesh);
 
     cullFace(GL_BACK);
-    //sendUniform1Safe("Type", 0.0f); //is this really needed?
 }
-void DeferredPipeline::renderRodLight(Camera& c, RodLight& rodLight) {
+void DeferredPipeline::renderRodLight(Camera& camera, RodLight& rodLight) {
     if (!rodLight.isActive()) {
         return;
     }
     string start = "light.";
-    int result   = sendGPUDataRodLight(c, rodLight, start);
+    int result   = sendGPUDataRodLight(camera, rodLight, start);
 
     if (result == 0) {
         return;
     }
-    const auto* body = rodLight.getComponent<ComponentBody>();
-    const auto model = body->modelMatrix();
-    sendUniformMatrix4("Model", model);
+    auto* body       = rodLight.getComponent<ComponentBody>();
+    auto modelMatrix = body->modelMatrixRendering();
+    sendUniformMatrix4("Model", modelMatrix);
     sendUniformMatrix4("VP", m_UBOCameraDataStruct.ViewProj);
 
     if (result == 1) {
@@ -814,14 +818,13 @@ void DeferredPipeline::renderRodLight(Camera& c, RodLight& rodLight) {
     m_Renderer.unbind(&rodLightMesh);
 
     cullFace(GL_BACK);
-    //sendUniform1Safe("Type", 0.0f); //is this really needed?
 }
-void DeferredPipeline::renderProjectionLight(Camera& c, ProjectionLight& projectionLight) {
+void DeferredPipeline::renderProjectionLight(Camera& camera, ProjectionLight& projectionLight) {
     if (!projectionLight.isActive()) {
         return;
     }
     string start = "light.";
-    int result = sendGPUDataProjectionLight(c, projectionLight, start);
+    int result = sendGPUDataProjectionLight(camera, projectionLight, start);
 
     Engine::Renderer::sendTextureSafe("gTextureMap", *projectionLight.getTexture(), 5);
 
@@ -839,7 +842,7 @@ void DeferredPipeline::renderProjectionLight(Camera& c, ProjectionLight& project
 void DeferredPipeline::renderDecal(ModelInstance& decalModelInstance) {
     Entity parent          = decalModelInstance.parent();
     auto* body             = parent.getComponent<ComponentBody>();
-    glm::mat4 parentModel  = body->modelMatrix();
+    glm::mat4 parentModel  = body->modelMatrixRendering();
     auto maxTextures       = getMaxNumTextureUnits() - 1U;
 
     Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), maxTextures);
@@ -867,9 +870,9 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, S
         }
 
         for (auto& pair : system.MaterialIDToIndex) {
-            Material* mat = system.MaterialToIndexReverse.at(pair.first);
+            Material* mat    = system.MaterialToIndexReverse.at(pair.first);
             Texture& texture = *mat->getComponent(MaterialComponentType::Diffuse).texture(0);
-            const string location = "DiffuseTexture" + to_string(pair.second) + "";
+            string location  = "DiffuseTexture" + to_string(pair.second) + "";
             Engine::Renderer::sendTextureSafe(location.c_str(), texture, pair.second);
         }
 
@@ -1135,9 +1138,9 @@ void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport,
     const auto& winSize    = Resources::getWindowSize();
     const auto& dimensions = glm::vec4(viewport.getViewportDimensions());
     if (viewport.isAspectRatioSynced()) {
-        const_cast<Camera&>(camera).setAspect(dimensions.z / dimensions.w);
+        camera.setAspect(dimensions.z / dimensions.w);
     }
-    //Engine::Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w); //gbuffer.bind already does this
+    //Engine::Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w); //m_GBuffer.bindFramebuffers() already does this
     glScissor(0, 0, winSize.x, winSize.y);
 
     m_2DProjectionMatrix = glm::ortho(0.0f, dimensions.z, 0.0f, dimensions.w, 0.005f, 3000.0f); //might have to recheck this
@@ -1147,28 +1150,48 @@ void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport,
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
+    glDepthMask(GL_TRUE);
+    Engine::Renderer::setDepthFunc(GL_LEQUAL);
+    Engine::Renderer::GLEnable(GL_DEPTH_TEST);
+    Engine::Renderer::GLEnablei(GL_BLEND, 0); //this is needed for sure
+
+    m_GBuffer.bindFramebuffers("", true);
+    Engine::Renderer::Settings::clear(false, true, true); // clear depth & stencil only
+}
+bool DeferredPipeline::internal_pass_depth_prepass(Viewport& viewport, Camera& camera) {
+    m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::ZPrepass]);
+
+    Scene& scene = viewport.getScene();
+
+    InternalScenePublicInterface::RenderGeometryOpaque(m_Renderer, scene, viewport, camera);
+    if (viewport.getRenderFlags().has(ViewportRenderingFlag::Skybox)) {
+        renderSkybox(scene.skybox(), *m_InternalShaderPrograms[ShaderProgramEnum::DeferredSkybox], scene, viewport, camera);
+    }
+    //InternalScenePublicInterface::RenderGeometryTransparent(m_Renderer, scene, viewport, camera);
+    //InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(m_Renderer, scene, viewport, camera, true);
+
+    InternalScenePublicInterface::RenderForwardOpaque(m_Renderer, scene, viewport, camera);
+    //InternalScenePublicInterface::RenderForwardTransparent(m_Renderer, scene, viewport, camera);
+    //InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(m_Renderer, scene, viewport, camera);
+
+    glDepthMask(GL_FALSE);
+    return true;
 }
 void DeferredPipeline::internal_pass_geometry(Viewport& viewport, Camera& camera) {
     Scene& scene           = viewport.getScene();
     const glm::vec4& clear = viewport.getBackgroundColor();
-    float colors[4]        = { clear.r, clear.g, clear.b, clear.a };
 
     m_GBuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, "RGBA");
 
-    Engine::Renderer::Settings::clear(true, true, true); // (0,0,0,0)
-
-    Engine::Renderer::setDepthFunc(GL_LEQUAL);
-
-    glClearBufferfv(GL_COLOR, 0, colors);
-    auto& godRays = GodRays::STATIC_GOD_RAYS;
-    if (godRays.godRays_active) {
-        const float godraysclearcolor[4] = { godRays.clearColor.r, godRays.clearColor.g, godRays.clearColor.b, godRays.clearColor.a };
-        glClearBufferfv(GL_COLOR, 2, godraysclearcolor);
-    }
-    Engine::Renderer::GLEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_TRUE);
-
-    Engine::Renderer::GLEnablei(GL_BLEND, 0); //this is needed for sure
+    Engine::Renderer::Settings::clear(true, false, false); // clear color only
+    
+    //glClearBufferfv(GL_COLOR, 0, std::vector<float>{ clear.r, clear.g, clear.b/*, clear.a*/ }.data());
+    //auto& godRays = GodRays::STATIC_GOD_RAYS;
+    //if (godRays.godRays_active) {
+        //r = outglow, g = outspecular, b = godRaysRG, a = godRaysB. disabing for now with clear color of zero
+    //    glClearBufferfv(GL_COLOR, 2, std::vector<float>{ 0.0f, 0.0f, 0.0f, 0.0f }.data());
+    //}
+    
     InternalScenePublicInterface::RenderGeometryOpaque(m_Renderer, scene, viewport, camera);
     if (viewport.getRenderFlags().has(ViewportRenderingFlag::Skybox)) {
         renderSkybox(scene.skybox(), *m_InternalShaderPrograms[ShaderProgramEnum::DeferredSkybox], scene, viewport, camera);
@@ -1176,25 +1199,26 @@ void DeferredPipeline::internal_pass_geometry(Viewport& viewport, Camera& camera
     InternalScenePublicInterface::RenderGeometryTransparent(m_Renderer, scene, viewport, camera);
     InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(m_Renderer, scene, viewport, camera, true);
 }
-void DeferredPipeline::internal_pass_forward(Viewport& viewport, Camera& camera) {
+void DeferredPipeline::internal_pass_forward(Viewport& viewport, Camera& camera, bool depthPrepass) {
     Scene& scene = viewport.getScene();
-
     m_GBuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, GBufferType::Lighting, "RGBA");
+
     InternalScenePublicInterface::RenderForwardOpaque(m_Renderer, scene, viewport, camera);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     for (unsigned int i = 0; i < 4; ++i) {
         Engine::Renderer::GLEnablei(GL_BLEND, i);
     }
-
-    glDepthMask(GL_TRUE);
+    if (!depthPrepass) {
+        glDepthMask(GL_TRUE);
+    }
     InternalScenePublicInterface::RenderForwardTransparent(m_Renderer, scene, viewport, camera);
     InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(m_Renderer, scene, viewport, camera);
-    glDepthMask(GL_FALSE);
+    if (!depthPrepass) {
+        glDepthMask(GL_FALSE);
+    }
     InternalScenePublicInterface::RenderDecals(m_Renderer, scene, viewport, camera);
     InternalScenePublicInterface::RenderForwardParticles(m_Renderer, scene, viewport, camera);
-
     InternalScenePublicInterface::RenderParticles(m_Renderer, scene, viewport, camera, *m_InternalShaderPrograms[ShaderProgramEnum::Particle]);
 
     for (unsigned int i = 0; i < 4; ++i) {
@@ -1203,7 +1227,7 @@ void DeferredPipeline::internal_pass_forward(Viewport& viewport, Camera& camera)
 }
 void DeferredPipeline::internal_pass_ssao(Viewport& viewport, Camera& camera) {
     //TODO: possible optimization: use stencil buffer to reject completely black (or are they white?) pixels during blur passes
-    m_GBuffer.bindFramebuffers(GBufferType::Bloom, GBufferType::GodRays, "A", false);
+    m_GBuffer.bindFramebuffers( GBufferType::Bloom, GBufferType::GodRays , "A", false);
     Engine::Renderer::Settings::clear(true, false, false); //bloom and god rays alpha channels cleared to black 
     if (SSAO::STATIC_SSAO.m_SSAOLevel > SSAOLevel::Off && viewport.getRenderFlags().has(ViewportRenderingFlag::SSAO)) {
         Engine::Renderer::GLEnablei(GL_BLEND, 0);//i dont think this is needed anymore
@@ -1236,7 +1260,6 @@ void DeferredPipeline::internal_pass_stencil() {
     Engine::Renderer::stencilOp(GL_KEEP, GL_INCR_WRAP, GL_INCR_WRAP);
 
     Engine::Renderer::sendTexture("gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 0);
-    Engine::Renderer::sendUniform1("Type", 0.0f);
     Engine::Renderer::renderFullscreenQuad();
 
     Engine::Renderer::stencilMask(0xFFFFFFFF);
@@ -1478,9 +1501,6 @@ void DeferredPipeline::internal_pass_depth_and_transparency(Viewport& viewport, 
     //Engine::Renderer::GLDisable(GL_BLEND);
     Engine::Renderer::GLDisablei(GL_BLEND, 0);
 }
-void DeferredPipeline::internal_pass_copy_depth() {
-
-}
 void DeferredPipeline::internal_pass_blur(Viewport& viewport, GLuint texture, string_view type) {
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredBlur]);
 
@@ -1579,10 +1599,6 @@ void DeferredPipeline::render2DAPI(bool mainRenderFunc, Viewport& viewport) {
     }
 }
 
-
-void DeferredPipeline::update(const float dt) {
-
-}
 void DeferredPipeline::render(Engine::priv::Renderer& renderer, Viewport& viewport, bool mainRenderFunction) {
     auto& camera             = viewport.getCamera();
     auto& scene              = viewport.getScene();
@@ -1627,7 +1643,9 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, Viewport& viewpo
         }
         #pragma endregion
     }
-
+    bool depthPrepass = false;
+    //depthPrepass      = internal_pass_depth_prepass(viewport, camera);
+    
     internal_pass_geometry(viewport, camera);
 
     Engine::Renderer::GLDisable(GL_DEPTH_TEST);
@@ -1656,7 +1674,7 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, Viewport& viewpo
     glDepthMask(GL_TRUE);
 
 
-    internal_pass_forward(viewport, camera);
+    internal_pass_forward(viewport, camera, depthPrepass);
 
     Engine::Renderer::GLDisable(GL_DEPTH_TEST);
 
@@ -1674,9 +1692,7 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, Viewport& viewpo
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     internal_pass_aa(mainRenderFunction, viewport, camera, sceneTexture, outTexture);
-
-    //internal_pass_copy_depth();
-
+    
     renderPhysicsAPI(mainRenderFunction, viewport, camera, scene);
 
     render2DAPI(mainRenderFunction, viewport);
@@ -1726,16 +1742,16 @@ void DeferredPipeline::renderTriangle(const glm::vec2& position, const glm::vec4
 void DeferredPipeline::renderFullscreenTriangle() {
     glm::vec2 winSize = glm::vec2(Resources::getWindowSize());
 
-    glm::mat4 p = glm::ortho(0.0f, winSize.x, 0.0f, winSize.y);
-    Engine::Renderer::sendUniformMatrix4("Model", glm::mat4(1.0f));
-    Engine::Renderer::sendUniformMatrix4Safe("VP", p);
+    glm::mat4 projection = glm::ortho(0.0f, winSize.x, 0.0f, winSize.y);
+    Engine::Renderer::sendUniformMatrix4Safe("Model", glm::mat4(1.0f));
+    Engine::Renderer::sendUniformMatrix4Safe("VP", projection);
     m_FullscreenTriangle.render();
 }
 void DeferredPipeline::renderFullscreenQuad() {
     glm::vec2 winSize = glm::vec2(Resources::getWindowSize());
 
-    glm::mat4 p = glm::ortho(0.0f, winSize.x, 0.0f, winSize.y);
-    Engine::Renderer::sendUniformMatrix4("Model", glm::mat4(1.0f));
-    Engine::Renderer::sendUniformMatrix4Safe("VP", p);
+    glm::mat4 projection = glm::ortho(0.0f, winSize.x, 0.0f, winSize.y);
+    Engine::Renderer::sendUniformMatrix4Safe("Model", glm::mat4(1.0f));
+    Engine::Renderer::sendUniformMatrix4Safe("VP", projection);
     m_FullscreenQuad.render();
 }

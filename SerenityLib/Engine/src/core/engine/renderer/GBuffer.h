@@ -17,8 +17,7 @@ namespace Engine::priv {
         Bloom,
         GodRays,
         Depth,
-        _TOTAL,
-    };};
+    _TOTAL};};
 };
 
 #include <GL/glew.h>
@@ -37,7 +36,7 @@ namespace Engine::priv{
 
             void internalBuildTextureBuffer(FramebufferObject& fbo, GBufferType::Type gbuffer_type, unsigned int w, unsigned int h);
             void internalDestruct();
-            void internalStart(const unsigned int* types, unsigned int size, std::string_view channels, bool first_fbo);
+            void internalStart(std::vector<unsigned int>& types, unsigned int size, std::string_view channels, bool first_fbo);
         public:
             GBuffer() = default;
             ~GBuffer();
@@ -45,7 +44,8 @@ namespace Engine::priv{
             void init(unsigned int width, unsigned int height);
             bool resize(unsigned int width, unsigned int height);
 
-            void bindFramebuffers(unsigned int, std::string_view channels = "RGBA", bool isMainFBO = true);
+            void bindFramebuffers(std::string_view channels = "RGBA", bool isMainFBO = true);
+            void bindFramebuffers(unsigned int buffer, std::string_view channels = "RGBA", bool isMainFBO = true);
             void bindFramebuffers(unsigned int, unsigned int, std::string_view channels = "RGBA", bool isMainFBO = true);
             void bindFramebuffers(unsigned int, unsigned int, unsigned int, std::string_view channels = "RGBA", bool isMainFBO = true);
             void bindFramebuffers(unsigned int, unsigned int, unsigned int, unsigned int, std::string_view channels = "RGBA", bool isMainFBO = true);
@@ -53,15 +53,15 @@ namespace Engine::priv{
 
             void bindBackbuffer(const Viewport& viewport, GLuint final_fbo = 0, GLuint final_rbo = 0);
 
-            unsigned int width() const;
-            unsigned int height() const;
+            inline constexpr unsigned int width() const noexcept { return m_Width; }
+            inline constexpr unsigned int height() const noexcept { return m_Height; }
 
-            const std::array<FramebufferTexture*, GBufferType::_TOTAL>& getBuffers() const;
+            inline constexpr const std::array<FramebufferTexture*, GBufferType::_TOTAL>& getBuffers() const noexcept { return m_FramebufferTextures; }
             FramebufferTexture& getBuffer(unsigned int) const;
             Texture& getTexture(unsigned int) const;
 
-            const FramebufferObject& getMainFBO() const;
-            const FramebufferObject& getSmallFBO() const;
+            inline constexpr const FramebufferObject& getMainFBO() const noexcept { return m_FBO; }
+            inline constexpr const FramebufferObject& getSmallFBO() const noexcept { return m_SmallFBO; }
     };
 };
 #endif

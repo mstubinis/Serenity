@@ -161,12 +161,10 @@ void priv::InternalShaderPublicInterface::ConvertCode(Shader& shader) {
             #ifndef ENGINE_FORCE_NO_LOG_DEPTH
                 string log_frag_code = "\n"
                     "flat varying float FC;\n"
-                    "varying float logz_f;\n"
-                    "\n";
-                ShaderHelper::insertStringAtLine(shader.m_Code, log_frag_code, 1);
+                    "varying float logz_f;\n";
+                ShaderHelper::insertStringRightBeforeMainFunc(shader.m_Code, log_frag_code);
                 log_frag_code = "\n"
-                    "gl_FragDepth = log2(logz_f) * FC;\n"
-                    "\n";
+                    "gl_FragDepth = log2(logz_f) * FC;\n";
                 ShaderHelper::insertStringAtEndOfMainFunc(shader.m_Code, log_frag_code);
             #endif
         if (ShaderHelper::sfind(shader.m_Code, "GetWorldPosition(") || ShaderHelper::sfind(shader.m_Code, "GetViewPosition(")) {

@@ -58,7 +58,7 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
 #pragma region use sampler
     const bool is_bindless_supported = Engine::priv::OpenGLExtensions::isBindlessTexturesSupported();
 
-    const vector<string> types{
+    const std::array<string, 4> types{
         "1D",
         "2D",
         "3D",
@@ -81,8 +81,7 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
     auto lambda_sampler_add_code_type = [&](const string& view) {
         if (is_bindless_supported) {
             boost::replace_all(code, "SAMPLER_TYPE_" + view, "sampler" + view);
-        }
-        else {
+        }else{
             boost::replace_all(code, "SAMPLER_TYPE_" + view, "sampler" + view);
         }
     };
@@ -150,8 +149,6 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
         }
     }
 #pragma endregion
-
-
 
 #pragma region normal map
     if (ShaderHelper::sfind(code, "CalcBumpedNormal(") || ShaderHelper::sfind(code, "CalcBumpedNormalCompressed(") || ShaderHelper::sfind(code, "CalcBumpedNormalLOD(") || ShaderHelper::sfind(code, "CalcBumpedNormalCompressedLOD(")) {
