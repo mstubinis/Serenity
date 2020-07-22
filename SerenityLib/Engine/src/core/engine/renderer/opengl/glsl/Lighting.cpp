@@ -1,4 +1,4 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/renderer/opengl/glsl/Lighting.h>
 
 #include <core/engine/renderer/opengl/Extensions.h>
@@ -34,7 +34,7 @@ void opengl::glsl::Lighting::convert(string& code, const unsigned int versionNum
                 "    vec3 c = CalcPointLight(currentLight, LightPos, PxlWorldPos, PxlNormal, uv);\n"
                 "    return c;\n"
                 */
-                "    return vec3(0.0);\n"
+                "    return vec3(0.0, 1.0, 0.0);\n"
                 "}\n";
             ShaderHelper::insertStringRightBeforeLineContent(code, rod_light, "void main(");
         }

@@ -46,7 +46,7 @@ struct MaterialComponentType final { enum Type {
     Refraction,
     ParallaxOcclusion,
 _TOTAL};};
-struct MaterialPhysics final { enum Physics {
+enum class MaterialPhysics {
     Water,
     Plastic_Or_Glass_Low,
     Plastic_High,
@@ -73,15 +73,15 @@ struct MaterialPhysics final { enum Physics {
     Titanium,
     Platinum,
     Nickel,
-_TOTAL};};
-struct DiffuseModel final { enum Model : unsigned char {
+_TOTAL};
+enum class DiffuseModel : unsigned char {
     None,
     Lambert,
     Oren_Nayar,
     Ashikhmin_Shirley,
     Minnaert,
-_TOTAL};};
-struct SpecularModel final {enum Model : unsigned char {
+_TOTAL};
+enum class SpecularModel : unsigned char {
     None,
     Blinn_Phong,
     Phong,
@@ -90,6 +90,6 @@ struct SpecularModel final {enum Model : unsigned char {
     Guassian,
     Beckmann,
     Ashikhmin_Shirley,
-_TOTAL};};
+_TOTAL};
 
 #endif

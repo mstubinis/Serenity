@@ -38,8 +38,8 @@ class Material final : public Resource {
         std::function<void(Material*)>    m_CustomBindFunctor   = [](Material*) {};
       //std::function<void(Material*)>    m_CustomUnbindFunctor = [](Material*) {};
 
-        unsigned char                     m_DiffuseModel        = DiffuseModel::Lambert;
-        unsigned char                     m_SpecularModel       = SpecularModel::GGX;
+        unsigned char                     m_DiffuseModel        = (unsigned char)DiffuseModel::Lambert;
+        unsigned char                     m_SpecularModel       = (unsigned char)SpecularModel::GGX;
         bool                              m_Shadeless           = false;
         bool                              m_UpdatedThisFrame    = false;
         Engine::color_vector_4            m_F0Color             = Engine::color_vector_4(10_uc, 10_uc, 10_uc, 255_uc);
@@ -111,7 +111,7 @@ class Material final : public Resource {
         void setF0Color(const Engine::color_vector_4& f0Color);
         void setF0Color(unsigned char r, unsigned char g, unsigned char b);
 
-        void setMaterialPhysics(MaterialPhysics::Physics materialPhysics);
+        void setMaterialPhysics(MaterialPhysics materialPhysics);
         void setShadeless(bool shadeless);
         void setGlow(unsigned char glow);
         void setSmoothness(unsigned char smoothness);
@@ -119,8 +119,8 @@ class Material final : public Resource {
         void setMetalness(unsigned char metalness);
         void setAlpha(unsigned char alpha);
     
-        void setSpecularModel(SpecularModel::Model specularModel);
-        void setDiffuseModel(DiffuseModel::Model diffuseModel);
+        void setSpecularModel(SpecularModel specularModel);
+        void setDiffuseModel(DiffuseModel diffuseModel);
 
         void update(const float dt);
 };

@@ -1,4 +1,4 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/physics/Collision.h>
 #include <core/engine/math/Engine_Math.h>
 
@@ -19,25 +19,25 @@ using namespace Engine::priv;
 using namespace std;
 
 void Collision::DeferredLoading::load_1(Collision* collision, const CollisionType::Type collisionType, Mesh* mesh, float mass) {
-    auto& body = *collision->m_Owner.getComponent<ComponentBody>();
+    auto* body = collision->m_Owner.getComponent<ComponentBody>();
 
     collision->m_DeferredMeshes.clear();
-    const auto scale = body.getScale();
-    Physics::removeRigidBodyThreadSafe(body);
+    const auto scale = body->getScale();
+    Physics::removeRigidBodyThreadSafe(*body);
     collision->free_memory();
 
     collision->m_BtShape = InternalMeshPublicInterface::BuildCollision(mesh, collisionType);
-    body.rebuildRigidBody(true, true);
-    body.setScale(scale);
+    body->rebuildRigidBody(true, true);
+    body->setScale(scale);
     auto* model = collision->m_Owner.getComponent<ComponentModel>();
     if (model) {
         ComponentModel_Functions::CalculateRadius(*model);
     }
 }
 void Collision::DeferredLoading::load_2(Collision* collision, btCompoundShape* btCompound, vector<ModelInstance*> instances, float mass, const CollisionType::Type collisionType) {
-    auto& body = *collision->m_Owner.getComponent<ComponentBody>();
+    auto* body = collision->m_Owner.getComponent<ComponentBody>();
     btTransform localTransform;
-    const auto scale = body.getScale();
+    const auto scale = body->getScale();
     for (auto& instance : instances) {
         btCollisionShape* built_collision_shape = InternalMeshPublicInterface::BuildCollision(instance, collisionType, true);
         localTransform = btTransform(Math::glmToBTQuat(instance->orientation()), Math::btVectorFromGLM(instance->position()));
@@ -45,8 +45,8 @@ void Collision::DeferredLoading::load_2(Collision* collision, btCompoundShape* b
         built_collision_shape->calculateLocalInertia(mass, collision->m_BtInertia); //this is important
         btCompound->addChildShape(localTransform, built_collision_shape);
     }
-    body.rebuildRigidBody(true, true);
-    body.setScale(scale);
+    body->rebuildRigidBody(true, true);
+    body->setScale(scale);
 
     auto* model = collision->m_Owner.getComponent<ComponentModel>();
     if (model) {
@@ -71,7 +71,7 @@ Collision::Collision(ComponentBody& body, CollisionType::Type type, ModelInstanc
             m_BtShape = InternalMeshPublicInterface::BuildCollision(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), type);
             m_DeferredMeshes.push_back(mesh_ptr);
             m_DeferredLoading = [type, this, mass, mesh_ptr]() { Collision::DeferredLoading::load_1(this, type, mesh_ptr, mass); };
-            registerEvent(EventType::MeshLoaded);
+            registerEvent(EventType::ResourceLoaded);
         }else{
             m_BtShape = InternalMeshPublicInterface::BuildCollision(modelInstance, type);
         }
@@ -81,14 +81,14 @@ Collision::Collision(ComponentBody& body, CollisionType::Type type, ModelInstanc
     _baseInit(type, mass);
 }
 Collision::Collision(ComponentBody& body, CollisionType::Type type, Mesh& mesh, float mass){
-    m_Owner = body.getOwner();
+    m_Owner   = body.getOwner();
     m_BtShape = nullptr;
     if (mesh == false || !mesh.m_CollisionFactory) {
         m_BtShape = InternalMeshPublicInterface::BuildCollision(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), type);
         auto* mesh_ptr = &mesh;
         m_DeferredMeshes.push_back(mesh_ptr);
         m_DeferredLoading = [type, this, mass, mesh_ptr]() { Collision::DeferredLoading::load_1(this, type, mesh_ptr, mass); };
-        registerEvent(EventType::MeshLoaded);
+        registerEvent(EventType::ResourceLoaded);
     }else{
         m_BtShape = InternalMeshPublicInterface::BuildCollision(&mesh, type);
     }
@@ -96,7 +96,7 @@ Collision::Collision(ComponentBody& body, CollisionType::Type type, Mesh& mesh, 
 }
 
 Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, float mass, CollisionType::Type type){
-    m_Owner = body.getOwner();
+    m_Owner   = body.getOwner();
     m_BtShape = nullptr;
     vector<ModelInstance*> modelInstances;
     modelInstances.reserve(modelComponent.getNumModels());
@@ -124,7 +124,7 @@ Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, float 
     }
     if (unfinishedModels.size() > 0) {
         m_DeferredLoading = [=]() { Collision::DeferredLoading::load_2(this, btCompound, unfinishedModels, mass, type); };
-        registerEvent(EventType::MeshLoaded);
+        registerEvent(EventType::ResourceLoaded);
     }
     btCompound->setMargin(0.001f);
     btCompound->recalculateLocalAabb();
@@ -197,21 +197,23 @@ CollisionType::Type Collision::getType() const {
     return m_Type; 
 }
 
-void Collision::onEvent(const Event& event) {
-    if (event.type == EventType::MeshLoaded && m_DeferredMeshes.size() > 0) {
-        auto& ev   = event.eventMeshLoaded;
-        auto it    = m_DeferredMeshes.begin();
-        while (it != m_DeferredMeshes.end()) {
-            Mesh& deferred_mesh = *(*it);
-            if (ev.mesh == (*it) || (deferred_mesh == true && deferred_mesh.m_CollisionFactory)) {
-                it = m_DeferredMeshes.erase(it);
-            }else{
-                ++it;
+void Collision::onEvent(const Event& event_) {
+    if (event_.type == EventType::ResourceLoaded) {
+        if (event_.eventResource.resource->type() == ResourceType::Mesh && m_DeferredMeshes.size() > 0) {
+            auto* mesh = (Mesh*)event_.eventResource.resource;
+            auto it = m_DeferredMeshes.begin();
+            while (it != m_DeferredMeshes.end()) {
+                Mesh& deferred_mesh = *(*it);
+                if (mesh == (*it) || (deferred_mesh == true && deferred_mesh.m_CollisionFactory)) {
+                    it = m_DeferredMeshes.erase(it);
+                }else{
+                    ++it;
+                }
             }
-        }
-        if (m_DeferredMeshes.size() == 0) {
-            m_DeferredLoading();
-            unregisterEvent(EventType::MeshLoaded);
+            if (m_DeferredMeshes.size() == 0) {
+                m_DeferredLoading();
+                unregisterEvent(EventType::ResourceLoaded);
+            }
         }
     }
 }

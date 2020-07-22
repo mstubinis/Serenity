@@ -1,4 +1,4 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/textures/TextureRequest.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/textures/TextureLoader.h>
@@ -42,7 +42,7 @@ TextureRequestPart& TextureRequestPart::operator=(const TextureRequestPart& othe
 
 #pragma region TextureRequest
 
-TextureRequest::TextureRequest(const string& filename, bool genMipMaps, ImageInternalFormat::Format internal_, GLuint openglTextureType) {
+TextureRequest::TextureRequest(const string& filename, bool genMipMaps, ImageInternalFormat internal_, GLuint openglTextureType) {
     file                 = filename;
     part.internalFormat  = internal_;
     part.isToBeMipmapped = genMipMaps;
@@ -100,7 +100,7 @@ void TextureRequestStaticImpl::Request(TextureRequest& request) {
 
 #pragma region TextureRequestFromMemory
 
-TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const string& _filename, bool genMipMaps, ImageInternalFormat::Format internal_, GLuint openglTextureType){
+TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const string& _filename, bool genMipMaps, ImageInternalFormat internal_, GLuint openglTextureType){
     part.async           = false;
     textureName          = _filename;
     image                = sfImage;

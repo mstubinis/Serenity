@@ -4,12 +4,12 @@
 
 #include <SFML/Network.hpp>
 
-struct SocketType final { enum Type : unsigned char {
+enum class SocketType : unsigned char {
     Unknown,
     TCP,
     UDP,
     TCPListener,
-};};
+};
 
 struct SocketStatus final {
     enum Status : unsigned char {

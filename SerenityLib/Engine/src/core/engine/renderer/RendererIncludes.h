@@ -40,7 +40,7 @@ enum class Alignment : unsigned int {
     BottomLeft,
     BottomCenter,
     BottomRight,
-_TOTAL};
+};
 enum class RenderStage : unsigned int {
     GeometryOpaque,
     GeometryOpaque_2,

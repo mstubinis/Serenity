@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_VERTEX_ATTRIBUTE_H_INCLUDE_GUARD
-#define ENGINE_VERTEX_ATTRIBUTE_H_INCLUDE_GUARD
+#ifndef ENGINE_VERTEX_ATTRIBUTE_H
+#define ENGINE_VERTEX_ATTRIBUTE_H
 
 //information about individual attributes (example: position, uv, normals, etc)
 struct VertexAttributeInfo final{

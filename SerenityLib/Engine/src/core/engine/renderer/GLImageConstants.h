@@ -13,7 +13,8 @@ GL_UNSIGNED_SHORT_5_6_5_REV, GL_UNSIGNED_SHORT_4_4_4_4, GL_UNSIGNED_SHORT_4_4_4_
 GL_UNSIGNED_SHORT_1_5_5_5_REV, GL_UNSIGNED_INT_8_8_8_8, GL_UNSIGNED_INT_8_8_8_8_REV, GL_UNSIGNED_INT_10_10_10_2,
 and GL_UNSIGNED_INT_2_10_10_10_REV.
 */
-struct ImagePixelType{enum Type {
+enum class ImagePixelType : unsigned int {
+    Unknown = 0,
     #pragma region ImagePixelTypes
     UNSIGNED_BYTE                  = GL_UNSIGNED_BYTE,
     BYTE                           = GL_BYTE,
@@ -37,14 +38,15 @@ struct ImagePixelType{enum Type {
     UNSIGNED_INT_24_8              = GL_UNSIGNED_INT_24_8,
     FLOAT_32_UNSIGNED_INT_24_8_REV = GL_FLOAT_32_UNSIGNED_INT_24_8_REV,
     #pragma endregion
-_TOTAL};};
+};
 /*
 Specifies the format of the pixel data.
 For transfers of depth, stencil, or depth/stencil data, you must use GL_DEPTH_COMPONENT, GL_STENCIL_INDEX, or GL_DEPTH_STENCIL, where appropriate.
 For transfers of normalized integer or floating-point color image data, you must use one of the following: GL_RED, GL_GREEN, GL_BLUE, GL_RG, GL_RGB, GL_BGR, GL_RGBA, and GL_BGRA.
 For transfers of non-normalized integer data, you must use one of the following: GL_RED_INTEGER, GL_GREEN_INTEGER, GL_BLUE_INTEGER, GL_RG_INTEGER, GL_RGB_INTEGER, GL_BGR_INTEGER, GL_RGBA_INTEGER, and GL_BGRA_INTEGER.
 */
-struct ImagePixelFormat{enum Format {
+enum class ImagePixelFormat : unsigned int {
+    Unknown = 0,
     #pragma region ImagePixelFormats
     RED             = GL_RED,
     RG              = GL_RG,
@@ -62,7 +64,7 @@ struct ImagePixelFormat{enum Format {
     DEPTH_COMPONENT = GL_DEPTH_COMPONENT,
     DEPTH_STENCIL   = GL_DEPTH_STENCIL,
     #pragma endregion
-_TOTAL};};
+};
 /*
 Specifies the number of color components in the texture.
 Must be one of base internal formats given in Table 1,
@@ -70,7 +72,8 @@ one of the sized internal formats given in Table 2,
 or one of the compressed internal formats given in Table 3, below.
 https://www.khronos.org/opengl/wiki/GLAPI/glTexImage2D
 */
-struct ImageInternalFormat{enum Format{
+enum class ImageInternalFormat : unsigned int {
+    Unknown = 0,
     #pragma region ImageInternalFormats
     //Base Internal Formats - recheck these
     DEPTH_COMPONENT                      = GL_DEPTH_COMPONENT,
@@ -178,8 +181,9 @@ struct ImageInternalFormat{enum Format{
     COMPRESSED_RGBA_S3TC_DXT5_EXT        = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT,
     COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT  = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT,
     #pragma endregion
-_TOTAL};};
-struct FramebufferAttatchment{enum Attatchment{
+};
+enum class FramebufferAttatchment : unsigned int {
+    Unknown = 0,
     #pragma region FramebufferAttatchments
     Color_0         = GL_COLOR_ATTACHMENT0,
     Color_1         = GL_COLOR_ATTACHMENT1,
@@ -201,5 +205,5 @@ struct FramebufferAttatchment{enum Attatchment{
     Stencil         = GL_STENCIL_ATTACHMENT,
     DepthAndStencil = GL_DEPTH_STENCIL_ATTACHMENT,
     #pragma endregion
-_TOTAL};};
+};
 #endif

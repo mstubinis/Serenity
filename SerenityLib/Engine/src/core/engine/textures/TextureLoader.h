@@ -14,23 +14,23 @@ namespace Engine::priv {
         static void LoadTextureFramebufferIntoOpenGL(Texture& texture);
         static void LoadTextureCubemapIntoOpenGL(Texture& texture);
 
-        static void EnumWrapToGL(unsigned int& gl, TextureWrap::Wrap wrap);
-        static void EnumFilterToGL(unsigned int& gl, TextureFilter::Filter filter, bool min);
-        static bool IsCompressedType(ImageInternalFormat::Format);
+        static void EnumWrapToGL(unsigned int& gl, TextureWrap wrap);
+        static void EnumFilterToGL(unsigned int& gl, TextureFilter filter, bool min);
+        static bool IsCompressedType(ImageInternalFormat);
 
         static void GenerateMipmapsOpenGL(Texture& texture, unsigned int addressIndex = 0);
         static void WithdrawPixelsFromOpenGLMemory(Texture& texture, unsigned int imageIndex = 0, unsigned int mipmapLevel = 0);
-        static void ChoosePixelFormat(ImagePixelFormat::Format& outPxlFormat, ImageInternalFormat::Format inInternalFormat);
+        static void ChoosePixelFormat(ImagePixelFormat& outPxlFormat, ImageInternalFormat inInternalFormat);
 
         static void GeneratePBRData(Texture&, unsigned int convoludeTextureSize, unsigned int preEnvFilterSize);
         static void ImportIntoOpengl(Texture&, const Engine::priv::ImageMipmap& mipmap, unsigned int openGLType);
         static void InitCommon(Texture&, unsigned int openglTextureType, bool toBeMipmapped);
 
 
-        static void InitFramebuffer(Texture&, unsigned int w, unsigned int h, ImagePixelType::Type pxlType, ImagePixelFormat::Format pxlFormat, ImageInternalFormat::Format _internal, float divisor);
-        static void InitFromMemory(Texture&, const sf::Image& sfImage, const std::string& name, bool genMipMaps, ImageInternalFormat::Format _internal, unsigned int openglTextureType);
-        static void InitFromFile(Texture&, const std::string& filename, bool genMipMaps, ImageInternalFormat::Format _internal, unsigned int openglTextureType);
-        static void InitFromFilesCubemap(Texture&, const std::string files[], const std::string& name, bool genMipMaps, ImageInternalFormat::Format _internal);
+        static void InitFramebuffer(Texture&, unsigned int w, unsigned int h, ImagePixelType pxlType, ImagePixelFormat pxlFormat, ImageInternalFormat _internal, float divisor);
+        static void InitFromMemory(Texture&, const sf::Image& sfImage, const std::string& name, bool genMipMaps, ImageInternalFormat _internal, unsigned int openglTextureType);
+        static void InitFromFile(Texture&, const std::string& filename, bool genMipMaps, ImageInternalFormat _internal, unsigned int openglTextureType);
+        static void InitFromFilesCubemap(Texture&, const std::string files[], const std::string& name, bool genMipMaps, ImageInternalFormat _internal);
     };
     struct InternalTexturePublicInterface final {
         static void LoadCPU(Texture&);

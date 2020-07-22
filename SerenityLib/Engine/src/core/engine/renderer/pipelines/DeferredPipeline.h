@@ -182,7 +182,7 @@ namespace Engine::priv {
             void renderSpotLight(Camera& c, SpotLight& s) override;
             void renderRodLight(Camera& c, RodLight& r) override;
             void renderProjectionLight(Camera& c, ProjectionLight& r) override;
-            void renderMesh(Mesh& mesh, unsigned int mode = ModelDrawingMode::Triangles) override;
+            void renderMesh(Mesh& mesh, unsigned int mode = (unsigned int)ModelDrawingMode::Triangles) override;
             void renderDecal(ModelInstance& decalModelInstance) override;
 
             void renderParticles(ParticleSystem& particleSystem, Camera& camera, ShaderProgram& program) override;

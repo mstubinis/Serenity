@@ -1,4 +1,4 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/mesh/BuiltInMeshes.h>
 #include <core/engine/mesh/Mesh.h>
 
@@ -15,31 +15,31 @@ bool BuiltInMeshses::cleanup() {
     return true;
 }
 Mesh& BuiltInMeshses::getPointLightBounds() {
-    return *m_BuiltInMeshes[BuiltInMeshEnum::PointLight];
+    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::PointLight];
 }
 Mesh& BuiltInMeshses::getSpotLightBounds() {
-    return *m_BuiltInMeshes[BuiltInMeshEnum::SpotLight];
+    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::SpotLight];
 }
 Mesh& BuiltInMeshses::getRodLightBounds() {
-    return *m_BuiltInMeshes[BuiltInMeshEnum::RodLight];
+    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::RodLight];
 }
 Mesh& BuiltInMeshses::getProjectionLightBounds() {
-    return *m_BuiltInMeshes[BuiltInMeshEnum::ProjectionLight];
+    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::ProjectionLight];
 }
 Mesh& BuiltInMeshses::getTriangleMesh() {
-    return *m_BuiltInMeshes[BuiltInMeshEnum::Triangle];
+    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Triangle];
 }
 Mesh& BuiltInMeshses::getCubeMesh() {
-    return *m_BuiltInMeshes[BuiltInMeshEnum::Cube];
+    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Cube];
 }
 Mesh& BuiltInMeshses::getPlaneMesh() {
-    return *m_BuiltInMeshes[BuiltInMeshEnum::Plane];
+    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Plane];
 }
 Mesh& BuiltInMeshses::getFontMesh() {
-    return *m_BuiltInMeshes[BuiltInMeshEnum::Font];
+    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Font];
 }
 Mesh& BuiltInMeshses::getParticleMesh() {
-    return *m_BuiltInMeshes[BuiltInMeshEnum::Particle];
+    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Particle];
 }
 
 bool BuiltInMeshses::init() {
@@ -69,7 +69,7 @@ bool BuiltInMeshses::init() {
     return true;
 }
 bool BuiltInMeshses::build_point_light_mesh() {
-    if (m_BuiltInMeshes[BuiltInMeshEnum::PointLight])
+    if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::PointLight])
         return false;
     string pointLightMesh;
     {
@@ -558,11 +558,11 @@ bool BuiltInMeshses::build_point_light_mesh() {
             "f 18 2 19";
     }
 
-    m_BuiltInMeshes[BuiltInMeshEnum::PointLight] = NEW Mesh(pointLightMesh, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::PointLight] = NEW Mesh(pointLightMesh, 0.0005f);
     return true;
 }
 bool BuiltInMeshses::build_spot_light_mesh() {
-    if (m_BuiltInMeshes[BuiltInMeshEnum::SpotLight])
+    if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::SpotLight])
         return false;
     string spotLightData;
     {
@@ -652,11 +652,11 @@ bool BuiltInMeshses::build_spot_light_mesh() {
             "f 8 10 11";
     }
 
-    m_BuiltInMeshes[BuiltInMeshEnum::SpotLight] = NEW Mesh(spotLightData, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::SpotLight] = NEW Mesh(spotLightData, 0.0005f);
     return true;
 }
 bool BuiltInMeshses::build_rod_light_mesh() {
-    if (m_BuiltInMeshes[BuiltInMeshEnum::RodLight])
+    if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::RodLight])
         return false;
     string rodLightData;
     {
@@ -791,17 +791,17 @@ bool BuiltInMeshses::build_rod_light_mesh() {
             "f 12 10 16";
     }
 
-    m_BuiltInMeshes[BuiltInMeshEnum::RodLight] = NEW Mesh(rodLightData, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::RodLight] = NEW Mesh(rodLightData, 0.0005f);
     return true;
 }
 bool BuiltInMeshses::build_projection_light_mesh() {
-    if (m_BuiltInMeshes[BuiltInMeshEnum::ProjectionLight])
+    if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::ProjectionLight])
         return false;
-    m_BuiltInMeshes[BuiltInMeshEnum::ProjectionLight] = NEW Mesh("ProjectionLightMesh", 1.0f, 1.0f, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::ProjectionLight] = NEW Mesh("ProjectionLightMesh", 1.0f, 1.0f, 0.0005f);
     return true;
 }
 bool BuiltInMeshses::build_triangle_mesh() {
-    if (m_BuiltInMeshes[BuiltInMeshEnum::Triangle])
+    if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Triangle])
         return false;
     string triangleMesh;
     {
@@ -816,11 +816,11 @@ bool BuiltInMeshses::build_triangle_mesh() {
             "f 1/1/1 3/2/1 2/3/1";
     }
 
-    m_BuiltInMeshes[BuiltInMeshEnum::Triangle] = NEW Mesh(triangleMesh, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Triangle] = NEW Mesh(triangleMesh, 0.0005f);
     return true;
 }
 bool BuiltInMeshses::build_cube_mesh() {
-    if (m_BuiltInMeshes[BuiltInMeshEnum::Cube])
+    if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Cube])
         return false;
     string cubeMesh;
     {
@@ -873,24 +873,24 @@ bool BuiltInMeshses::build_cube_mesh() {
             "f 1/14/6 4/20/6 8/15/6";
     }
 
-    m_BuiltInMeshes[BuiltInMeshEnum::Cube] = NEW Mesh(cubeMesh, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Cube] = NEW Mesh(cubeMesh, 0.0005f);
     return true;
 }
 bool BuiltInMeshses::build_plane_mesh() {
-    if (m_BuiltInMeshes[BuiltInMeshEnum::Plane])
+    if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Plane])
         return false;
-    m_BuiltInMeshes[BuiltInMeshEnum::Plane] = NEW Mesh("Plane", 1.0f, 1.0f, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Plane] = NEW Mesh("Plane", 1.0f, 1.0f, 0.0005f);
     return true;
 }
 bool BuiltInMeshses::build_font_mesh() {
-    if (m_BuiltInMeshes[BuiltInMeshEnum::Font])
+    if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Font])
         return false;
-    m_BuiltInMeshes[BuiltInMeshEnum::Font] = NEW Mesh("FontPlane", 1.0f, 1.0f, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Font] = NEW Mesh("FontPlane", 1.0f, 1.0f, 0.0005f);
     return true;
 }
 bool BuiltInMeshses::build_particle_mesh() {
-    if (m_BuiltInMeshes[BuiltInMeshEnum::Particle])
+    if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Particle])
         return false;
-    m_BuiltInMeshes[BuiltInMeshEnum::Particle] = NEW Mesh("ParticlePlane", 1.0f, 1.0f, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Particle] = NEW Mesh("ParticlePlane", 1.0f, 1.0f, 0.0005f);
     return true;
 }

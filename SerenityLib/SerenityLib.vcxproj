@@ -417,6 +417,8 @@
     <ClInclude Include="Engine\src\core\engine\materials\MaterialRequest.h" />
     <ClInclude Include="Engine\src\core\engine\math\BigNumbers.h" />
     <ClInclude Include="Engine\src\core\engine\math\Engine_Math.h" />
+    <ClInclude Include="Engine\src\core\engine\math\shapes\Plane.h" />
+    <ClInclude Include="Engine\src\core\engine\math\shapes\Pyramid.h" />
     <ClInclude Include="Engine\src\core\engine\math\SimplexNoise.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\AnimationData.h" />
     <ClInclude Include="Engine\src\core\engine\mesh\AnimationIncludes.h" />
@@ -597,6 +599,8 @@
     <ClCompile Include="Engine\src\core\engine\materials\MaterialLoader.cpp" />
     <ClCompile Include="Engine\src\core\engine\materials\MaterialRequest.cpp" />
     <ClCompile Include="Engine\src\core\engine\math\Engine_Math.cpp" />
+    <ClCompile Include="Engine\src\core\engine\math\shapes\Plane.cpp" />
+    <ClCompile Include="Engine\src\core\engine\math\shapes\Pyramid.cpp" />
     <ClCompile Include="Engine\src\core\engine\math\SimplexNoise.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\AnimationData.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\BuiltInMeshes.cpp" />

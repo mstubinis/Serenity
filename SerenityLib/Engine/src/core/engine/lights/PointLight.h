@@ -7,20 +7,20 @@
 class PointLight : public SunLight {
     friend class ::Engine::priv::Renderer;
     protected:
-        LightAttenuation::Model  m_AttenuationModel = LightAttenuation::Constant_Linear_Exponent;
-        float                    m_C                = 0.1f;
-        float                    m_L                = 0.1f;
-        float                    m_E                = 0.1f;
-        float                    m_CullingRadius;
+        LightAttenuation   m_AttenuationModel = LightAttenuation::Constant_Linear_Exponent;
+        float              m_C                = 0.1f;
+        float              m_L                = 0.1f;
+        float              m_E                = 0.1f;
+        float              m_CullingRadius;
 
-        virtual float            calculateCullingRadius();
+        virtual float calculateCullingRadius();
     public:
         PointLight(
             const glm_vec3& position  = glm_vec3(0.0f, 0.0f, 0.0f),
             Scene* scene              = nullptr
         );
         PointLight(
-            LightType::Type type,
+            LightType type,
             const glm_vec3& position  = glm_vec3(0.0f, 0.0f, 0.0f),
             Scene* scene              = nullptr
         );
@@ -32,13 +32,13 @@ class PointLight : public SunLight {
         void setLinear(float linear);
         void setExponent(float exponent);
         void setAttenuation(float constant, float linear, float exponent);
-        void setAttenuation(LightRange::Range range);
-        void setAttenuationModel(LightAttenuation::Model model);
+        void setAttenuation(LightRange range);
+        void setAttenuationModel(LightAttenuation model);
 
         constexpr float getCullingRadius() const noexcept { return m_CullingRadius; }
         constexpr float getConstant() const noexcept { return m_C; }
         constexpr float getLinear() const noexcept { return m_L; }
         constexpr float getExponent() const noexcept { return m_E; }
-        constexpr LightAttenuation::Model getAttenuationModel() const noexcept { return m_AttenuationModel; }
+        constexpr LightAttenuation getAttenuationModel() const noexcept { return m_AttenuationModel; }
 };
 #endif

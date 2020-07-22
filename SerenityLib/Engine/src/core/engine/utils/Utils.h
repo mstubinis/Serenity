@@ -4,7 +4,7 @@
 
 template <class OutType, class Data> void readBigEndian(OutType& out, Data& dataBuffer, unsigned int inBufferSizeInBytes, unsigned int& offset) {
     out = (std::uint32_t)dataBuffer[offset + 0U] << (8U * (inBufferSizeInBytes - 1U));
-    for (unsigned int i = 1U; i < inBufferSizeInBytes; ++i) {
+    for (auto i = 1U; i < inBufferSizeInBytes; ++i) {
         out |= (std::uint32_t)dataBuffer[offset + i] << (8U * ((inBufferSizeInBytes - i) - 1U));
     }
     offset += inBufferSizeInBytes;
@@ -14,7 +14,7 @@ template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutT
     inStream.read((char*)buffer.data(), inBufferSizeInBytes);
 
     out = (std::uint32_t)buffer[0] << (8U * (inBufferSizeInBytes - 1U));
-    for (unsigned int i = 1U; i < inBufferSizeInBytes; ++i) {
+    for (auto i = 1U; i < inBufferSizeInBytes; ++i) {
         out |= (std::uint32_t)buffer[i] << (8U * ((inBufferSizeInBytes - i) - 1U));
     }
 }
@@ -26,7 +26,7 @@ template <class InType, class Stream> void writeBigEndian(Stream& inStream, InTy
     unsigned long long offset = 255U;
     for (int i = int(inBufferSizeInBytes) - 1; i >= 0; --i) {
         unsigned int shift = (8U * ((inBufferSizeInBytes - 1U) - i));
-        buffer[i] = (in & offset) >> shift;
+        buffer[i] = (in & (InType)offset) >> shift;
         offset = (offset * 255U) + offset;
     }
     inStream.write((char*)buffer.data(), buffer.size());
@@ -36,7 +36,7 @@ template <class InType, class Stream> void writeBigEndian(Stream& inStream, InTy
     unsigned long long offset = 255U;
     for (int i = int(inBufferSizeInBytes) - 1; i >= 0; --i) {
         unsigned int shift = (8U * ((inBufferSizeInBytes - 1U) - i));
-        buffer[i]  = (in & offset) >> shift;
+        buffer[i]  = (in & (InType)offset) >> shift;
         offset     = (offset * 255U) + offset;
     }
     inStream.write((char*)buffer.data(), buffer.size());

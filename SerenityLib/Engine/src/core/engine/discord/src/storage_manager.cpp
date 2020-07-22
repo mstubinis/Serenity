@@ -1,7 +1,8 @@
-#if !defined(_CRT_SECURE_NO_WARNINGS)
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-#include "core/engine/utils/PrecompiledHeader.h"
+//#if !defined(_CRT_SECURE_NO_WARNINGS)
+//#define _CRT_SECURE_NO_WARNINGS
+//#endif
+
+#include <core/engine/utils/PrecompiledHeader.h>
 #include "storage_manager.h"
 
 #include "core.h"

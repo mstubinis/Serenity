@@ -1,10 +1,9 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/lights/ProjectionLight.h>
 #include <ecs/ComponentBody.h>
 #include <core/engine/utils/Utils.h>
 #include <core/engine/textures/Texture.h>
 
-using namespace std;
 using namespace Engine;
 
 ProjectionLight::ProjectionLight(Texture* texture, const glm::vec3& direction, Scene* scene) : SunLight(glm::vec3(0.0f), LightType::Projection, scene) {

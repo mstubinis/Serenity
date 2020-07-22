@@ -264,6 +264,12 @@
     <Filter Include="Source Files\Engine\Core\Input\Joystick">
       <UniqueIdentifier>{4854aa1e-8514-42ba-848d-0f3a491d36f2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Math\shapes">
+      <UniqueIdentifier>{7b7f892a-ea19-437f-bad7-045a78515a7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Math\shapes">
+      <UniqueIdentifier>{6a446f63-f312-486f-85f4-c3fbac2cc3b5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBody.h">
@@ -848,6 +854,12 @@
     <ClInclude Include="Engine\src\core\engine\threading\Task.h">
       <Filter>Header Files\Engine\Core\Threading</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\math\shapes\Plane.h">
+      <Filter>Header Files\Engine\Core\Math\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\math\shapes\Pyramid.h">
+      <Filter>Header Files\Engine\Core\Math\shapes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -1290,6 +1302,12 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\threading\Task.cpp">
       <Filter>Source Files\Engine\Core\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\math\shapes\Plane.cpp">
+      <Filter>Source Files\Engine\Core\Math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\math\shapes\Pyramid.cpp">
+      <Filter>Source Files\Engine\Core\Math\shapes</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,8 +1,6 @@
 #include <core/engine/utils/PrecompiledHeader.h>
-#include "LightProbe.h"
+#include <core/engine/lights/LightProbe.h>
 #include <ecs/ComponentBody.h>
-
-using namespace std;
 
 LightProbe::LightProbe(ProbeType::Type type, const glm::vec3& position, Scene* scene) : Entity(*scene), m_Camera(glm::radians(90.0f), 1.0f, 0.1f, 3000000.0f, scene), m_Viewport() {
     m_ProbeType  = type;

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_DEBUGGING_CLASS_INCLUDE_GUARD
-#define ENGINE_DEBUGGING_CLASS_INCLUDE_GUARD
+#ifndef ENGINE_DEBUGGING_CLASS_H
+#define ENGINE_DEBUGGING_CLASS_H
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>

@@ -1,11 +1,11 @@
 #pragma once
-#ifndef ENGINE_MESH_SKELETON_INCLUDE_GUARD
-#define ENGINE_MESH_SKELETON_INCLUDE_GUARD
+#ifndef ENGINE_MESH_SKELETON_H
+#define ENGINE_MESH_SKELETON_H
 
 class  Mesh;
 class  SMSH_File;
 namespace Engine::priv {
-    struct InternalMeshPublicInterface;
+    class  InternalMeshPublicInterface;
     struct DefaultMeshBindFunctor;
     struct DefaultMeshUnbindFunctor;
     struct MeshImportedData;
@@ -23,7 +23,7 @@ namespace Engine::priv {
         friend class  Engine::priv::AnimationData;
         friend struct Engine::priv::DefaultMeshBindFunctor;
         friend struct Engine::priv::DefaultMeshUnbindFunctor;
-        friend struct Engine::priv::InternalMeshPublicInterface;
+        friend class  Engine::priv::InternalMeshPublicInterface;
         friend class  Engine::priv::ModelInstanceAnimation;
         private:
             unsigned int                                    m_NumBones                 = 0U;

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_ECS_COMPONENT_NAME_H_INCLUDE_GUARD
-#define ENGINE_ECS_COMPONENT_NAME_H_INCLUDE_GUARD
+#ifndef ENGINE_ECS_COMPONENT_NAME_H
+#define ENGINE_ECS_COMPONENT_NAME_H
 
 #include <ecs/Entity.h>
 #include <ecs/ECSSystemConstructorInfo.h>

@@ -1,4 +1,4 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/materials/MaterialLoader.h>
 #include <core/engine/materials/MaterialComponent.h>
 #include <core/engine/textures/Texture.h>
@@ -138,10 +138,6 @@ void priv::InternalMaterialPublicInterface::LoadGPU(Material& material) {
         }
     }
     material.Resource::load();
-
-    Event e(EventType::MaterialLoaded);
-    e.eventMaterialLoaded = EventMaterialLoaded(&material);
-    priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(e);
 }
 void priv::InternalMaterialPublicInterface::UnloadCPU(Material& material) {
     material.Resource::unload();

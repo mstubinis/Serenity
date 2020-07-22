@@ -40,9 +40,8 @@ enum class EventType : unsigned int {
     WindowHasClosed,
     GameEnded,
 
-    MeshLoaded,
-    MaterialLoaded,
-    TextureLoaded,
+    ResourceLoaded,
+    ResourceUnloaded,
 
     WindowFullscreenChanged,
     SoundStatusChanged,

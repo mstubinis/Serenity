@@ -2,15 +2,15 @@
 #ifndef ENGINE_LIGHT_INCLUDES_H
 #define ENGINE_LIGHT_INCLUDES_H
 
-struct LightType {enum Type {
+enum class LightType : unsigned int {
     Sun, 
     Point, 
     Directional, 
     Spot, 
     Rod,
     Projection,
-_TOTAL};};
-struct LightRange {enum Range {
+};
+enum class LightRange : unsigned int {
     _7, 
     _13, 
     _20, 
@@ -23,13 +23,13 @@ struct LightRange {enum Range {
     _325, 
     _600, 
     _3250,
-_TOTAL};};
-struct LightAttenuation {enum Model {
+_TOTAL};
+enum class LightAttenuation : unsigned int {
     Constant,
     Distance,
     Distance_Squared,
     Constant_Linear_Exponent,
     Distance_Radius_Squared,
-_TOTAL};};
+};
 
 #endif

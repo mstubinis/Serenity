@@ -5,19 +5,17 @@
 #include <core/engine/events/Observer.h>
 #include <core/engine/renderer/Renderer.h>
 
-typedef unsigned short ushort;
-
 namespace Engine::priv{
     struct MeshVertexDataFullscreen final {
-        glm::vec3 position;
-        glm::vec2 uv;
+        glm::vec3 position = glm::vec3(0.0f);
+        glm::vec2 uv       = glm::vec2(0.0f);
 
-        MeshVertexDataFullscreen() {}
-        ~MeshVertexDataFullscreen() {}
+        MeshVertexDataFullscreen() = default;
+        ~MeshVertexDataFullscreen() = default;
     };
     class FullscreenTriangle final: public Observer{
         private:
-            std::vector<ushort>                     m_Indices;
+            std::vector<unsigned short>             m_Indices;
             std::vector<MeshVertexDataFullscreen>   m_Vertices;
             std::vector<GLuint>                     m_Buffers;
             GLuint                                  m_VAO = 0;
@@ -30,14 +28,14 @@ namespace Engine::priv{
 
             void init();
 
-            void changeDimensions(const float width, const float height);
+            void changeDimensions(float width, float height);
 
             void render();
             void onEvent(const Event& e);
     };
     class FullscreenQuad final: public Observer{
         private:
-            std::vector<ushort>                     m_Indices;
+            std::vector<unsigned short>             m_Indices;
             std::vector<MeshVertexDataFullscreen>   m_Vertices;
             std::vector<GLuint>                     m_Buffers;
             GLuint                                  m_VAO = 0;
@@ -50,7 +48,7 @@ namespace Engine::priv{
 
             void init();
 
-            void changeDimensions(const float width, const float height);
+            void changeDimensions(float width, float height);
 
             void render();
             void onEvent(const Event& e);

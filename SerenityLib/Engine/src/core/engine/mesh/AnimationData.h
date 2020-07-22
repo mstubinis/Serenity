@@ -49,9 +49,12 @@ namespace Engine::priv {
             AnimationData(Mesh& skeleton, const aiAnimation& animation);
             ~AnimationData();
 
-            float duration() const;
-            float durationInTicks() const;
-            float ticksPerSecond() const;
+            constexpr float duration() const noexcept {
+                float TicksPerSecond((m_TicksPerSecond != 0.0f) ? m_TicksPerSecond : 25.0f);
+                return m_DurationInTicks / TicksPerSecond;
+            }
+            inline constexpr float durationInTicks() const noexcept { return m_DurationInTicks; }
+            inline constexpr float ticksPerSecond() const noexcept { return m_TicksPerSecond; }
         };
 };
 

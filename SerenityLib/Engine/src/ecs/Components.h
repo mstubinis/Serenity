@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_ECS_COMPONENTS_H_INCLUDE_GUARD
-#define ENGINE_ECS_COMPONENTS_H_INCLUDE_GUARD
+#ifndef ENGINE_ECS_COMPONENTS_H
+#define ENGINE_ECS_COMPONENTS_H
 
 #include <ecs/ComponentBody.h>
 #include <ecs/ComponentCamera.h>

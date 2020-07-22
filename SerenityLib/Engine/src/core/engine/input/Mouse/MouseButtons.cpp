@@ -1,4 +1,4 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/input/Mouse/MouseButtons.h>
 
 constexpr std::array<const char*, MouseButton::_TOTAL> MOUSE_BUTTON_NAMES { {

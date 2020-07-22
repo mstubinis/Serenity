@@ -1,4 +1,4 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/discord/DiscordModule.h>
 #include <core/engine/discord/DiscordActivityEvent.h>
 #include <core/engine/discord/src/discord.h>

@@ -1,4 +1,4 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/mesh/MeshLoading.h>
 #include <core/engine/mesh/MeshImportedData.h>
@@ -8,27 +8,23 @@
 #include <core/engine/system/Engine.h>
 #include <core/Terrain.h>
 
-#include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/renderer/Renderer.h>
-#include <core/engine/physics/Engine_Physics.h>
 #include <core/engine/physics/Collision.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/scene/Camera.h>
 
-#include <boost/filesystem.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 
-#include <btBulletDynamicsCommon.h>
+#include <BulletCollision/CollisionShapes/btEmptyShape.h>
+#include <BulletCollision/CollisionShapes/btMultiSphereShape.h>
+#include <BulletCollision/CollisionShapes/btUniformScalingShape.h>
+#include <BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h>
 #include <BulletCollision/Gimpact/btGImpactShape.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
-#include <boost/iostreams/device/mapped_file.hpp>
 
-using namespace std;
 using namespace Engine;
 using namespace Engine::priv;
 namespace boostm = boost::math;
@@ -44,12 +40,7 @@ namespace Engine::priv {
 
 void InternalMeshPublicInterface::LoadGPU(Mesh& mesh){
     mesh.m_VertexData->finalize(); //transfer vertex data to gpu
-
     mesh.Resource::load();
-
-    Event e(EventType::MeshLoaded);
-    e.eventMeshLoaded = EventMeshLoaded(&mesh);
-    Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(e);
 }
 void InternalMeshPublicInterface::UnloadCPU(Mesh& mesh){
     SAFE_DELETE(mesh.m_Skeleton);
@@ -92,7 +83,7 @@ bool InternalMeshPublicInterface::SupportsInstancing(){
         OpenGLExtensions::supported(OpenGLExtensions::ARB_draw_instanced)
     );
 }
-btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, CollisionType::Type type, bool isCompoundChild) {
+btCollisionShape* InternalMeshPublicInterface::internal_build_collision(Mesh* mesh, ModelInstance* modelInstance, CollisionType::Type collisionType, bool isCompoundChild) noexcept {
     Engine::priv::MeshCollisionFactory* factory = nullptr;
     if (!mesh) {
         factory = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().m_CollisionFactory;
@@ -100,41 +91,7 @@ btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, Collis
         factory = mesh->m_CollisionFactory;
     }
     if (factory) {
-        switch (type) {
-            case CollisionType::None: {
-                return new btEmptyShape();
-            }case CollisionType::Box: {
-                return factory->buildBoxShape(nullptr, isCompoundChild);
-            }case CollisionType::ConvexHull: {
-                return factory->buildConvexHull(nullptr, isCompoundChild);
-            }case CollisionType::Sphere: {
-                return factory->buildSphereShape(nullptr, isCompoundChild);
-            }case CollisionType::TriangleShapeStatic: {
-                return factory->buildTriangleShape(nullptr, isCompoundChild);
-            }case CollisionType::TriangleShape: {
-                return factory->buildTriangleShapeGImpact(nullptr, isCompoundChild);
-            }default: {
-                return new btEmptyShape();
-            }
-        }
-    }
-    return new btEmptyShape();
-}
-btCollisionShape* InternalMeshPublicInterface::BuildCollision(ModelInstance* modelInstance, CollisionType::Type type, bool isCompoundChild) {
-    Mesh* mesh = nullptr;
-    if (modelInstance) {
-        if (modelInstance->mesh()) {
-            mesh = modelInstance->mesh();
-        }
-    }
-    Engine::priv::MeshCollisionFactory* factory = nullptr;
-    if (!mesh) {
-        factory = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().m_CollisionFactory;
-    }else{
-        factory = mesh->m_CollisionFactory;
-    }
-    if (factory) {
-        switch (type) {
+        switch (collisionType) {
             case CollisionType::None: {
                 return new btEmptyShape();
             }case CollisionType::Box: {
@@ -154,6 +111,18 @@ btCollisionShape* InternalMeshPublicInterface::BuildCollision(ModelInstance* mod
     }
     return new btEmptyShape();
 }
+btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, CollisionType::Type collisionType, bool isCompoundChild) {
+    return internal_build_collision(mesh, nullptr, collisionType, isCompoundChild);
+}
+btCollisionShape* InternalMeshPublicInterface::BuildCollision(ModelInstance* modelInstance, CollisionType::Type collisionType, bool isCompoundChild) {
+    Mesh* mesh = nullptr;
+    if (modelInstance) {
+        if (modelInstance->mesh()) {
+            mesh = modelInstance->mesh();
+        }
+    }
+    return internal_build_collision(mesh, modelInstance, collisionType, isCompoundChild);
+}
 void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedData& data) {
     if (data.uvs.size() == 0)         data.uvs.resize(data.points.size());
     if (data.normals.size() == 0)     data.normals.resize(data.points.size());
@@ -168,7 +137,7 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
     }
     auto& vertexData = *mesh.m_VertexData;
     vertexData.clearData();
-    vector<vector<GLuint>> normals;
+    std::vector<std::vector<GLuint>> normals;
     normals.resize(3);
     if (mesh.m_Threshold == 0.0f) {
 #pragma region No Threshold
@@ -193,14 +162,14 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
 #pragma endregion
     }else{
 #pragma region Some Threshold
-        vector<uint32_t>  indices;
-        vector<glm::vec3> temp_pos;             temp_pos.reserve(data.points.size());
-        vector<glm::vec2> temp_uvs;             temp_uvs.reserve(data.uvs.size());
-        vector<glm::vec3> temp_normals;         temp_normals.reserve(data.normals.size());
-        vector<glm::vec3> temp_binormals;       temp_binormals.reserve(data.binormals.size());
-        vector<glm::vec3> temp_tangents;        temp_tangents.reserve(data.tangents.size());
-        vector<glm::vec4> boneIDs;              boneIDs.reserve(data.m_Bones.size());
-        vector<glm::vec4> boneWeights;          boneWeights.reserve(data.m_Bones.size());
+        std::vector<uint32_t>  indices;
+        std::vector<glm::vec3> temp_pos;             temp_pos.reserve(data.points.size());
+        std::vector<glm::vec2> temp_uvs;             temp_uvs.reserve(data.uvs.size());
+        std::vector<glm::vec3> temp_normals;         temp_normals.reserve(data.normals.size());
+        std::vector<glm::vec3> temp_binormals;       temp_binormals.reserve(data.binormals.size());
+        std::vector<glm::vec3> temp_tangents;        temp_tangents.reserve(data.tangents.size());
+        std::vector<glm::vec4> boneIDs;              boneIDs.reserve(data.m_Bones.size());
+        std::vector<glm::vec4> boneWeights;          boneWeights.reserve(data.m_Bones.size());
 
         for (unsigned int i = 0; i < data.points.size(); ++i) {
             unsigned int index;
@@ -271,7 +240,7 @@ void InternalMeshPublicInterface::TriangulateComponentIndices(Mesh& mesh, MeshIm
 }
 void InternalMeshPublicInterface::CalculateRadius(Mesh& mesh) {
     mesh.m_radiusBox = glm::vec3(0.0f);
-    vector<glm::vec3> points = mesh.m_VertexData->getPositions();
+    std::vector<glm::vec3> points = mesh.m_VertexData->getPositions();
     for (const auto& vertex : points) {
         const float x = abs(vertex.x);
         const float y = abs(vertex.y);
@@ -282,6 +251,13 @@ void InternalMeshPublicInterface::CalculateRadius(Mesh& mesh) {
     }
     mesh.m_radius = Math::Max(mesh.m_radiusBox);
 }
+
+
+
+
+
+
+
 
 Mesh::Mesh() : Resource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
@@ -296,14 +272,14 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
     float offsetSectorY = 0.0f;
 
     auto hash_position  = [](glm::vec3& position, unsigned int decimal_places) {
-        stringstream one, two, thr;
+        std::stringstream one, two, thr;
         one << std::fixed << std::setprecision(decimal_places) << position.x;
         two << std::fixed << std::setprecision(decimal_places) << position.y;
         thr << std::fixed << std::setprecision(decimal_places) << position.z;
         return one.str() + "_" + two.str() + "_" + thr.str();
     };
 
-    unordered_map<string, VertexSmoothingGroup> m_VertexMap;
+    std::unordered_map<std::string, VertexSmoothingGroup> m_VertexMap;
     auto& heightfields  = terrain.m_TerrainData.m_BtHeightfieldShapes;
 
     unsigned int width  = static_cast<unsigned int>(heightfields[0][0]->getUserIndex());
@@ -436,24 +412,24 @@ void Mesh::internal_recalc_indices_from_terrain(const Terrain& terrain) {
     modifyIndices(data.indices.data(), data.indices.size(), MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU);
     m_VertexData->unbind();
 }
-Mesh::Mesh(const string& name, const Terrain& terrain, float threshold) : Resource(ResourceType::Mesh) {
+Mesh::Mesh(const std::string& name, const Terrain& terrain, float threshold) : Resource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_Threshold = threshold;
     internal_build_from_terrain(terrain);
     load();
 }
-Mesh::Mesh(VertexData* data, const string& name, float threshold) : Resource(ResourceType::Mesh, name) {
+Mesh::Mesh(VertexData* data, const std::string& name, float threshold) : Resource(ResourceType::Mesh, name) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_VertexData = data;
     m_Threshold = threshold;
 }
-Mesh::Mesh(const string& name, float width, float height, float threshold) : Resource(ResourceType::Mesh, name){
+Mesh::Mesh(const std::string& name, float width, float height, float threshold) : Resource(ResourceType::Mesh, name){
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_Threshold = threshold;
 
     MeshImportedData data;
 
-    vector<priv::Vertex> quad; quad.resize(4);
+    std::vector<priv::Vertex> quad; quad.resize(4);
 
     quad[0].uv = glm::vec2(0.0f, height);
     quad[1].uv = glm::vec2(width, height);
@@ -478,7 +454,7 @@ Mesh::Mesh(const string& name, float width, float height, float threshold) : Res
 
     load();
 }
-Mesh::Mesh(const string& fileOrData, float threshold) : Resource(ResourceType::Mesh) {
+Mesh::Mesh(const std::string& fileOrData, float threshold) : Resource(ResourceType::Mesh) {
     InternalMeshPublicInterface::InitBlankMesh(*this);
     m_Threshold = threshold;
 
@@ -486,13 +462,13 @@ Mesh::Mesh(const string& fileOrData, float threshold) : Resource(ResourceType::M
     unsigned char flags = MeshLoadingFlags::Points | MeshLoadingFlags::Faces | MeshLoadingFlags::UVs | MeshLoadingFlags::Normals | MeshLoadingFlags::TBN;
 
     MeshImportedData data;
-    vector<vector<uint>> indices;
+    std::vector<std::vector<uint>> indices;
     indices.resize(3);
-    istringstream stream;
+    std::istringstream stream;
     stream.str(fileOrData);
 
     //first read in all data
-    for (string line; getline(stream, line, '\n');) {
+    for (std::string line; std::getline(stream, line, '\n');) {
         if (line[0] == 'o') {
         }else if (line[0] == 'v' && line[1] == ' ') {
             if (flags && MeshLoadingFlags::Points) {
@@ -551,29 +527,20 @@ Mesh::~Mesh(){
     unregisterEvent(EventType::WindowFullscreenChanged);
     unload();
 }
-unordered_map<string, AnimationData>& Mesh::animationData(){ 
+std::unordered_map<std::string, AnimationData>& Mesh::animationData(){
     return m_Skeleton->m_AnimationData; 
-}
-const VertexData& Mesh::getVertexData() const { 
-    return *m_VertexData; 
-}
-const glm::vec3& Mesh::getRadiusBox() const { 
-    return m_radiusBox; 
-}
-float Mesh::getRadius() const { 
-    return m_radius; 
 }
 void Mesh::load(){
     if(!isLoaded()){
         InternalMeshPublicInterface::LoadGPU(*this);
-        Resource::load();
+        //Resource::load();
     }
 }
 void Mesh::unload(){
     if(isLoaded()){
         InternalMeshPublicInterface::UnloadGPU(*this);
         InternalMeshPublicInterface::UnloadCPU(*this);
-        Resource::unload();
+        //Resource::unload();
     }
 }
 void Mesh::onEvent(const Event& e) {
@@ -590,7 +557,7 @@ void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const gl
         }
         glm::vec3 camPos    = camera.getPosition();
 
-        auto lambda_sorter = [&](priv::Triangle& lhs, priv::Triangle& rhs) {
+        auto lambda_sorter = [&camPos, sortMode, &instance, &bodyModelMatrix](priv::Triangle& lhs, priv::Triangle& rhs) {
             glm::mat4 model1 = instance.modelMatrix() * bodyModelMatrix;
             glm::mat4 model2 = model1;
 
@@ -611,13 +578,13 @@ void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const gl
         //std::execution::par_unseq seems to really help here for performance
         std::sort( std::execution::par_unseq, triangles.begin(), triangles.end(), lambda_sorter);
 
-        vector<unsigned int> newIndices;
+        std::vector<unsigned int> newIndices;
         newIndices.reserve(m_VertexData->m_Indices.size());
         for (size_t i = 0; i < triangles.size(); ++i) {
             auto& triangle = triangles[i];
-            newIndices.push_back(triangle.index1);
-            newIndices.push_back(triangle.index2);
-            newIndices.push_back(triangle.index3);
+            newIndices.emplace_back(triangle.index1);
+            newIndices.emplace_back(triangle.index2);
+            newIndices.emplace_back(triangle.index3);
         }
         Mesh::modifyIndices(newIndices.data(), newIndices.size());
     #endif

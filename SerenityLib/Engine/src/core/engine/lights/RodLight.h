@@ -7,8 +7,8 @@
 class RodLight : public PointLight {
     friend class ::Engine::priv::Renderer;
     private:
-        float m_RodLength;
-        float calculateCullingRadius();
+        float m_RodLength = 0.0f;
+        float calculateCullingRadius() override;
     public:
         RodLight(
             const glm_vec3& position = glm_vec3(0.0f, 0.0f, 0.0f),

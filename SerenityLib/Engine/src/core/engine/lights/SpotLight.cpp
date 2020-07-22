@@ -1,10 +1,7 @@
 #include <core/engine/utils/PrecompiledHeader.h>
-
 #include <core/engine/lights/SpotLight.h>
 #include <core/engine/utils/Utils.h>
 #include <ecs/ComponentBody.h>
-
-using namespace std;
 
 SpotLight::SpotLight(const glm_vec3& pos, const glm_vec3& direction, float innerCutoffInDegrees, float outerCutoffInDegrees, Scene* scene) : PointLight(LightType::Spot, pos, scene) {
     setCutoff(innerCutoffInDegrees);

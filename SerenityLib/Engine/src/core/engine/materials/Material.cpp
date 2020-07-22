@@ -1,4 +1,4 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/materials/MaterialLoader.h>
 #include <core/engine/materials/MaterialComponent.h>
@@ -11,47 +11,46 @@
 
 using namespace Engine;
 using namespace Engine::priv;
-using namespace std;
 
-vector<glm::vec4> Material::m_MaterialProperities;
+std::vector<glm::vec4> Material::m_MaterialProperities;
 
 Material* Material::Checkers       = nullptr;
 Material* Material::WhiteShadeless = nullptr;
 
-constexpr std::array<tuple<unsigned char, unsigned char, unsigned char, unsigned char, unsigned char>, MaterialPhysics::_TOTAL> MATERIAL_PROPERTIES {
-    make_tuple(5_uc, 5_uc, 5_uc, 128_uc, 1_uc),                // 0 - water
-    make_tuple(8_uc, 8_uc, 8_uc, 246_uc, 1_uc),                // 1 - plastic or glass low
-    make_tuple(13_uc, 13_uc, 13_uc, 234_uc, 1_uc),             // 2 - plastic high
-    make_tuple(20_uc, 20_uc, 20_uc, 250_uc, 1_uc),             // 3 - glass or ruby high
-    make_tuple(44_uc, 44_uc, 44_uc, 250_uc, 1_uc),             // 4 - diamond
-    make_tuple(143_uc, 145_uc, 148_uc, 128_uc, 255_uc),        // 5 - iron
-    make_tuple(243_uc, 162_uc, 137_uc, 229_uc, 255_uc),        // 6 - copper
-    make_tuple(237_uc, 177_uc, 1_uc, 229_uc, 255_uc),          // 7 - gold
-    make_tuple(233_uc, 235_uc, 235_uc, 191_uc, 255_uc),        // 8 - aluminium
-    make_tuple(242_uc, 237_uc, 224_uc, 240_uc, 255_uc),        // 9 - silver
-    make_tuple(1_uc, 1_uc, 2_uc, 115_uc, 1_uc),                // 10 - black leather
-    make_tuple(81_uc, 56_uc, 13_uc, 81_uc, 1_uc),              // 11 - yellow paint MERL
-    make_tuple(140_uc, 141_uc, 141_uc, 204_uc, 255_uc),        // 12 - chromium
-    make_tuple(66_uc, 13_uc, 2_uc, 234_uc, 1_uc),              // 13 - red plastic MERL
-    make_tuple(13_uc, 20_uc, 43_uc, 89_uc, 1_uc),              // 14 - blue rubber MERL
-    make_tuple(169_uc, 210_uc, 217_uc, 229_uc, 255_uc),        // 15 - zinc
-    make_tuple(255_uc, 51_uc, 1_uc, 229_uc, 128_uc),           // 16 - car paint orange
-    make_tuple(7_uc, 7_uc, 7_uc, 25_uc, 1_uc),                 // 17 - skin
-    make_tuple(11_uc, 11_uc, 11_uc, 204_uc, 1_uc),             // 18 - quartz
-    make_tuple(28_uc, 28_uc, 28_uc, 229_uc, 1_uc),             // 19 - crystal
-    make_tuple(5_uc, 5_uc, 5_uc, 204_uc, 1_uc),                // 20 - alcohol
-    make_tuple(6_uc, 6_uc, 6_uc, 153_uc, 1_uc),                // 21 - milk
-    make_tuple(10_uc, 10_uc, 10_uc, 247_uc, 1_uc),             // 22 - glass
-    make_tuple(138_uc, 126_uc, 114_uc, 232_uc, 255_uc),        // 23 - titanium
-    make_tuple(171_uc, 162_uc, 150_uc, 232_uc, 255_uc),        // 24 - platinum
-    make_tuple(168_uc, 155_uc, 134_uc, 242_uc, 255_uc),        // 25 - nickel
+constexpr std::array<std::tuple<unsigned char, unsigned char, unsigned char, unsigned char, unsigned char>, (size_t)MaterialPhysics::_TOTAL> MATERIAL_PROPERTIES {
+    std::make_tuple(5_uc, 5_uc, 5_uc, 128_uc, 1_uc),                // 0 - water
+    std::make_tuple(8_uc, 8_uc, 8_uc, 246_uc, 1_uc),                // 1 - plastic or glass low
+    std::make_tuple(13_uc, 13_uc, 13_uc, 234_uc, 1_uc),             // 2 - plastic high
+    std::make_tuple(20_uc, 20_uc, 20_uc, 250_uc, 1_uc),             // 3 - glass or ruby high
+    std::make_tuple(44_uc, 44_uc, 44_uc, 250_uc, 1_uc),             // 4 - diamond
+    std::make_tuple(143_uc, 145_uc, 148_uc, 128_uc, 255_uc),        // 5 - iron
+    std::make_tuple(243_uc, 162_uc, 137_uc, 229_uc, 255_uc),        // 6 - copper
+    std::make_tuple(237_uc, 177_uc, 1_uc, 229_uc, 255_uc),          // 7 - gold
+    std::make_tuple(233_uc, 235_uc, 235_uc, 191_uc, 255_uc),        // 8 - aluminium
+    std::make_tuple(242_uc, 237_uc, 224_uc, 240_uc, 255_uc),        // 9 - silver
+    std::make_tuple(1_uc, 1_uc, 2_uc, 115_uc, 1_uc),                // 10 - black leather
+    std::make_tuple(81_uc, 56_uc, 13_uc, 81_uc, 1_uc),              // 11 - yellow paint MERL
+    std::make_tuple(140_uc, 141_uc, 141_uc, 204_uc, 255_uc),        // 12 - chromium
+    std::make_tuple(66_uc, 13_uc, 2_uc, 234_uc, 1_uc),              // 13 - red plastic MERL
+    std::make_tuple(13_uc, 20_uc, 43_uc, 89_uc, 1_uc),              // 14 - blue rubber MERL
+    std::make_tuple(169_uc, 210_uc, 217_uc, 229_uc, 255_uc),        // 15 - zinc
+    std::make_tuple(255_uc, 51_uc, 1_uc, 229_uc, 128_uc),           // 16 - car paint orange
+    std::make_tuple(7_uc, 7_uc, 7_uc, 25_uc, 1_uc),                 // 17 - skin
+    std::make_tuple(11_uc, 11_uc, 11_uc, 204_uc, 1_uc),             // 18 - quartz
+    std::make_tuple(28_uc, 28_uc, 28_uc, 229_uc, 1_uc),             // 19 - crystal
+    std::make_tuple(5_uc, 5_uc, 5_uc, 204_uc, 1_uc),                // 20 - alcohol
+    std::make_tuple(6_uc, 6_uc, 6_uc, 153_uc, 1_uc),                // 21 - milk
+    std::make_tuple(10_uc, 10_uc, 10_uc, 247_uc, 1_uc),             // 22 - glass
+    std::make_tuple(138_uc, 126_uc, 114_uc, 232_uc, 255_uc),        // 23 - titanium
+    std::make_tuple(171_uc, 162_uc, 150_uc, 232_uc, 255_uc),        // 24 - platinum
+    std::make_tuple(168_uc, 155_uc, 134_uc, 242_uc, 255_uc),        // 25 - nickel
 };
 
 namespace Engine::priv {
     struct DefaultMaterialBindFunctor { void operator()(Material* material_ptr) const {
-        auto& material = *material_ptr;
-        const size_t numComponents = material.m_Components.size();
-        size_t textureUnit = 0;
+        auto& material       = *material_ptr;
+        size_t numComponents = material.m_Components.size();
+        size_t textureUnit   = 0;
 
         for (size_t i = 0; i < numComponents; ++i) {
             if (material.m_Components[i]) {
@@ -84,7 +83,7 @@ namespace Engine::priv {
 
 #pragma region Material
 
-Material::Material(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) : Resource(ResourceType::Material, name){
+Material::Material(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness) : Resource(ResourceType::Material, name){
     Texture* d  = MaterialLoader::LoadTextureDiffuse(diffuse);
     Texture* n  = MaterialLoader::LoadTextureNormal(normal);
     Texture* g  = MaterialLoader::LoadTextureGlow(glow);
@@ -101,7 +100,7 @@ Material::Material() : Resource(ResourceType::Material) {
     MaterialLoader::InternalInitBase(*this);
     setCustomBindFunctor(Engine::priv::DefaultMaterialBindFunctor());
 }
-Material::Material(const string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) : Resource(ResourceType::Material, name){
+Material::Material(const std::string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) : Resource(ResourceType::Material, name){
     MaterialLoader::InternalInit(*this, diffuse, normal, glow, specular, ao, metalness, smoothness);
     InternalMaterialPublicInterface::Load(*this);
     setCustomBindFunctor(Engine::priv::DefaultMaterialBindFunctor());
@@ -135,7 +134,7 @@ void Material::internalUpdateGlobalMaterialPool(bool addToDatabase) {
 }
 
 
-MaterialComponent& Material::addComponent(MaterialComponentType::Type type, const string& textureFile, const string& maskFile, const string& cubemapFile) {
+MaterialComponent& Material::addComponent(MaterialComponentType::Type type, const std::string& textureFile, const std::string& maskFile, const std::string& cubemapFile) {
     Texture* texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(textureFile);
     if (!texture) {
         if (!textureFile.empty() && textureFile != "DEFAULT") {
@@ -155,23 +154,23 @@ MaterialComponent& Material::addComponent(MaterialComponentType::Type type, cons
 
     return *internalAddComponentGeneric(type, texture, mask, cubemap);
 }
-MaterialComponent& Material::addComponentDiffuse(const string& textureFile){
+MaterialComponent& Material::addComponentDiffuse(const std::string& textureFile){
     Texture* texture = MaterialLoader::LoadTextureDiffuse(textureFile);
     return *internalAddComponentGeneric(MaterialComponentType::Diffuse, texture);
 }
-MaterialComponent& Material::addComponentNormal(const string& textureFile){
+MaterialComponent& Material::addComponentNormal(const std::string& textureFile){
     Texture* texture = MaterialLoader::LoadTextureNormal(textureFile);
     return *internalAddComponentGeneric(MaterialComponentType::Normal, texture);
 }
-MaterialComponent& Material::addComponentGlow(const string& textureFile){
+MaterialComponent& Material::addComponentGlow(const std::string& textureFile){
     Texture* texture = MaterialLoader::LoadTextureGlow(textureFile);
     return *internalAddComponentGeneric(MaterialComponentType::Glow, texture);
 }
-MaterialComponent& Material::addComponentSpecular(const string& textureFile){
+MaterialComponent& Material::addComponentSpecular(const std::string& textureFile){
     Texture* texture = MaterialLoader::LoadTextureSpecular(textureFile);
     return *internalAddComponentGeneric(MaterialComponentType::Specular, texture);
 }
-MaterialComponent& Material::addComponentAO(const string& textureFile, unsigned char baseValue){
+MaterialComponent& Material::addComponentAO(const std::string& textureFile, unsigned char baseValue){
     Texture* texture = MaterialLoader::LoadTextureAO(textureFile);
     auto& component  = *internalAddComponentGeneric(MaterialComponentType::AO, texture);
     auto& layer      = component.layer(0);
@@ -180,7 +179,7 @@ MaterialComponent& Material::addComponentAO(const string& textureFile, unsigned 
     setAO(baseValue);
     return component;
 }
-MaterialComponent& Material::addComponentMetalness(const string& textureFile, unsigned char baseValue){
+MaterialComponent& Material::addComponentMetalness(const std::string& textureFile, unsigned char baseValue){
     Texture* texture = MaterialLoader::LoadTextureMetalness(textureFile);
     auto& component  = *internalAddComponentGeneric(MaterialComponentType::Metalness, texture);
     auto& layer      = component.layer(0);
@@ -189,7 +188,7 @@ MaterialComponent& Material::addComponentMetalness(const string& textureFile, un
     setMetalness(baseValue);
     return component;
 }
-MaterialComponent& Material::addComponentSmoothness(const string& textureFile, unsigned char baseValue){
+MaterialComponent& Material::addComponentSmoothness(const std::string& textureFile, unsigned char baseValue){
     Texture* texture = MaterialLoader::LoadTextureSmoothness(textureFile);
     auto& component  = *internalAddComponentGeneric(MaterialComponentType::Smoothness, texture);
     auto& layer      = component.layer(0);
@@ -198,7 +197,7 @@ MaterialComponent& Material::addComponentSmoothness(const string& textureFile, u
     setSmoothness(baseValue);
     return component;
 }
-MaterialComponent& Material::addComponentReflection(const string& cubemapName, const string& maskFile, float mixFactor){
+MaterialComponent& Material::addComponentReflection(const std::string& cubemapName, const std::string& maskFile, float mixFactor){
     //add checks to see if texture was loaded already
     Texture* cubemap = MaterialLoader::LoadTextureCubemap(cubemapName);
     Texture* mask    = MaterialLoader::LoadTextureMask(maskFile);
@@ -213,7 +212,7 @@ MaterialComponent& Material::addComponentReflection(const string& cubemapName, c
     layer.setData2(mixFactor, _data2.y, _data2.z, _data2.w);
     return component;
 }
-MaterialComponent& Material::addComponentRefraction(const string& cubemapName, const string& maskFile, float refractiveIndex, float mixFactor){
+MaterialComponent& Material::addComponentRefraction(const std::string& cubemapName, const std::string& maskFile, float refractiveIndex, float mixFactor){
     //add checks to see if texture was loaded already
     Texture* cubemap = MaterialLoader::LoadTextureCubemap(cubemapName);
     Texture* mask    = MaterialLoader::LoadTextureMask(maskFile);
@@ -228,7 +227,7 @@ MaterialComponent& Material::addComponentRefraction(const string& cubemapName, c
     layer.setData2(mixFactor, refractiveIndex, _data2.z, _data2.w);
     return component;
 }
-MaterialComponent& Material::addComponentParallaxOcclusion(const string& textureFile, float heightScale){
+MaterialComponent& Material::addComponentParallaxOcclusion(const std::string& textureFile, float heightScale){
     Texture* texture = MaterialLoader::LoadTextureNormal(textureFile);
     auto& component  = *internalAddComponentGeneric(MaterialComponentType::ParallaxOcclusion, texture);
     auto& layer      = component.layer(0);
@@ -261,23 +260,23 @@ void Material::setF0Color(unsigned char r, unsigned char g, unsigned char b) {
     internalUpdateGlobalMaterialPool(false);
 }
 
-void Material::setMaterialPhysics(MaterialPhysics::Physics materialPhysics){
-    const auto& t = MATERIAL_PROPERTIES[materialPhysics];
-    setF0Color(get<0>(t), get<1>(t), get<2>(t));
-    setSmoothness(get<3>(t));
-    setMetalness(get<4>(t));
+void Material::setMaterialPhysics(MaterialPhysics materialPhysics){
+    const auto& t = MATERIAL_PROPERTIES[(unsigned int)materialPhysics];
+    setF0Color(std::get<0>(t), std::get<1>(t), std::get<2>(t));
+    setSmoothness(std::get<3>(t));
+    setMetalness(std::get<4>(t));
     internalUpdateGlobalMaterialPool(false);
 }
 void Material::setSmoothness(unsigned char smoothness){
     m_BaseSmoothness = glm::clamp(smoothness, 1_uc, 255_uc);
     internalUpdateGlobalMaterialPool(false);
 }
-void Material::setSpecularModel(SpecularModel::Model specularModel){
-    m_SpecularModel = specularModel;
+void Material::setSpecularModel(SpecularModel specularModel){
+    m_SpecularModel = (unsigned char)specularModel;
     internalUpdateGlobalMaterialPool(false);
 }
-void Material::setDiffuseModel(DiffuseModel::Model diffuseModel){
-    m_DiffuseModel = diffuseModel;
+void Material::setDiffuseModel(DiffuseModel diffuseModel){
+    m_DiffuseModel = (unsigned char)diffuseModel;
     internalUpdateGlobalMaterialPool(false);
 }
 void Material::setAO(unsigned char ao){

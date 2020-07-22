@@ -13,7 +13,7 @@ namespace Engine::priv {
 class SunLight : public Entity {
     friend class ::Engine::priv::Renderer;
     protected:
-        LightType::Type    m_Type              = LightType::Sun;
+        LightType          m_Type              = LightType::Sun;
         bool               m_IsShadowCaster    = false;
         bool               m_Active            = true;
         glm::vec4          m_Color             = glm::vec4(1.0f);
@@ -23,7 +23,7 @@ class SunLight : public Entity {
     public:
         SunLight(
             const glm_vec3& position = glm_vec3(0.0),
-            LightType::Type type     = LightType::Sun,
+            LightType type           = LightType::Sun,
             Scene* scene             = nullptr
         );
         virtual ~SunLight() {}
@@ -37,7 +37,7 @@ class SunLight : public Entity {
 
         constexpr const glm::vec4& color() const noexcept { return m_Color; }
         constexpr bool isActive() const noexcept { return m_Active; }
-        constexpr LightType::Type type() const noexcept { return m_Type; }
+        constexpr LightType type() const noexcept { return m_Type; }
         constexpr float getAmbientIntensity() const noexcept { return m_AmbientIntensity; }
         constexpr float getDiffuseIntensity() const noexcept { return m_DiffuseIntensity; }
         constexpr float getSpecularIntensity() const noexcept { return m_SpecularIntensity; }

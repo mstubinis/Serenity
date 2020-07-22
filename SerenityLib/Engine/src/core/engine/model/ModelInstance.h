@@ -17,7 +17,7 @@ namespace Engine::priv {
     class  ModelInstanceAnimation;
     class  Renderer;
     struct InternalModelInstancePublicInterface final {
-        static const bool IsViewportValid(const ModelInstance&, const Viewport&);
+        static bool IsViewportValid(const ModelInstance&, const Viewport&);
     };
 };
 
@@ -35,21 +35,25 @@ class ModelInstance final : public Engine::UserPointer {
     friend class  Engine::priv::Renderer;
     friend class  ComponentModel;
     friend class  Collision;
+
+    using bind_function   = std::function<void(ModelInstance*, const Engine::priv::Renderer*)>;
+    using unbind_function = std::function<void(ModelInstance*, const Engine::priv::Renderer*)>;
+
     private:
         static decimal                                       m_GlobalDistanceFactor;
         static unsigned int                                  m_ViewportFlagDefault;
     private:
-        std::function<void(ModelInstance*, const Engine::priv::Renderer*)>  m_CustomBindFunctor   = [](ModelInstance*, const Engine::priv::Renderer*) {};
-        std::function<void(ModelInstance*, const Engine::priv::Renderer*)>  m_CustomUnbindFunctor = [](ModelInstance*, const Engine::priv::Renderer*) {};
+        bind_function                                        m_CustomBindFunctor   = [](ModelInstance*, const Engine::priv::Renderer*) {};
+        unbind_function                                      m_CustomUnbindFunctor = [](ModelInstance*, const Engine::priv::Renderer*) {};
 
-        ModelDrawingMode::Mode                               m_DrawingMode       = ModelDrawingMode::Triangles;
+        ModelDrawingMode                                     m_DrawingMode       = ModelDrawingMode::Triangles;
         Engine::Flag<unsigned int>                           m_ViewportFlag;     //determine what viewports this can be seen in
         Engine::priv::ModelInstanceAnimationVector           m_AnimationVector;
         Entity                                               m_Parent            = Entity();
         ShaderProgram*                                       m_ShaderProgram     = nullptr;
         Mesh*                                                m_Mesh              = nullptr;
         Material*                                            m_Material          = nullptr;
-        RenderStage                                   m_Stage             = RenderStage::GeometryOpaque;
+        RenderStage                                          m_Stage             = RenderStage::GeometryOpaque;
         glm::vec3                                            m_Position          = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3                                            m_Scale             = glm::vec3(1.0f, 1.0f, 1.0f);
         Engine::color_vector_4                               m_GodRaysColor      = Engine::color_vector_4(0_uc);
@@ -81,21 +85,17 @@ class ModelInstance final : public Engine::UserPointer {
 
         ~ModelInstance();
 
-        static void setGlobalDistanceFactor(decimal factor);
-        static decimal getGlobalDistanceFactor();
+        static inline void setGlobalDistanceFactor(decimal factor) noexcept { m_GlobalDistanceFactor = factor; }
+        static inline decimal getGlobalDistanceFactor() noexcept { return m_GlobalDistanceFactor; }
 
-        void setCustomBindFunctor(std::function<void(ModelInstance*, const Engine::priv::Renderer*)> functor) {
+        inline void setCustomBindFunctor(bind_function functor) noexcept {
             m_CustomBindFunctor   = functor;
         }
-        void setCustomUnbindFunctor(std::function<void(ModelInstance*, const Engine::priv::Renderer*)> functor) {
+        inline void setCustomUnbindFunctor(unbind_function functor) noexcept {
             m_CustomUnbindFunctor = functor;
         }
         static void setDefaultViewportFlag(unsigned int flag);
         static void setDefaultViewportFlag(ViewportFlag::Flag flag);
-
-        size_t index() const;
-        ModelDrawingMode::Mode getDrawingMode() const;
-        void setDrawingMode(ModelDrawingMode::Mode);
 
         void setViewportFlag(unsigned int flag);
         void addViewportFlag(unsigned int flag);
@@ -106,28 +106,29 @@ class ModelInstance final : public Engine::UserPointer {
 
         unsigned int getViewportFlags() const;
 
-        void forceRender(bool forced = true);
-        bool isForceRendered() const;
+        inline constexpr size_t index() const noexcept { return m_Index; }
+        inline constexpr ModelDrawingMode getDrawingMode() const noexcept { return m_DrawingMode; }
+        inline void setDrawingMode(ModelDrawingMode drawMode) noexcept { m_DrawingMode = drawMode; }
+        inline void forceRender(bool forced = true) noexcept { m_ForceRender = forced; }
+        inline constexpr bool isForceRendered() const noexcept { return m_ForceRender; }
+        inline constexpr Entity parent() const noexcept { return m_Parent; }
+        inline constexpr const Engine::color_vector_4& color() const noexcept { return m_Color; }
+        inline constexpr const Engine::color_vector_4& godRaysColor() const noexcept { return m_GodRaysColor; }
+        inline constexpr const glm::mat4& modelMatrix() const noexcept { return m_ModelMatrix; }
+        inline constexpr const glm::vec3& getScale() const noexcept { return m_Scale; }
+        inline constexpr const glm::vec3& position() const noexcept { return m_Position; }
+        inline constexpr const glm::quat& orientation() const noexcept { return m_Orientation; }
+        inline constexpr ShaderProgram* shaderProgram() const noexcept { return m_ShaderProgram; }
+        inline constexpr Mesh* mesh() const noexcept { return m_Mesh; }
+        inline constexpr Material* material() const noexcept { return m_Material; }
+        inline constexpr RenderStage stage() const noexcept { return m_Stage; }
+        inline void show() noexcept { m_Visible = true; }
+        inline void hide() noexcept { m_Visible = false; }
+        inline constexpr bool visible() const noexcept { return m_Visible; }
+        inline constexpr bool passedRenderCheck() const noexcept { return m_PassedRenderCheck; }
+        inline void setPassedRenderCheck(bool passed) noexcept { m_PassedRenderCheck = passed; }
 
-        ShaderProgram* shaderProgram() const;
-        Mesh* mesh() const;
-        Material* material() const;
-        Entity parent() const;
 
-        const Engine::color_vector_4& color() const;
-        const Engine::color_vector_4& godRaysColor() const;
-        const glm::mat4& modelMatrix() const;
-        const glm::vec3& position() const;
-        const glm::quat& orientation() const;
-        const glm::vec3& getScale() const;
-
-        bool visible() const;
-        bool passedRenderCheck() const;
-        void setPassedRenderCheck(bool passed);
-        void show();
-        void hide();
-
-        RenderStage stage() const;
         void setStage(RenderStage stage, ComponentModel& componentModel);
 
         void playAnimation(const std::string& animName, float startTime, float endTime = -1.0f, unsigned int requestedLoops = 1);

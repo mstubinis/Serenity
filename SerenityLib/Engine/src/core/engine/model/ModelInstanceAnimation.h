@@ -21,8 +21,8 @@ namespace Engine::priv {
             std::string    m_AnimationName    = "";
             Mesh*          m_Mesh             = nullptr;
         public:
-            ModelInstanceAnimation(Mesh& mesh, const std::string& animName, const float startTime, const float endTime, const unsigned int requestedLoops = 1);
-            ~ModelInstanceAnimation();
+            ModelInstanceAnimation(Mesh& mesh, const std::string& animName, float startTime, float endTime, unsigned int requestedLoops = 1);
+            ~ModelInstanceAnimation() = default;
 
             ModelInstanceAnimation(ModelInstanceAnimation&& other) noexcept;
             ModelInstanceAnimation& operator=(ModelInstanceAnimation&& other) noexcept;
@@ -35,13 +35,13 @@ namespace Engine::priv {
             std::vector<ModelInstanceAnimation> m_Animation_Instances;
             std::vector<glm::mat4>              m_Transforms;
         public:
-            ModelInstanceAnimationVector();
-            ~ModelInstanceAnimationVector();
+            ModelInstanceAnimationVector() = default;
+            ~ModelInstanceAnimationVector() = default;
 
             ModelInstanceAnimationVector(ModelInstanceAnimationVector&& other) noexcept;
             ModelInstanceAnimationVector& operator=(ModelInstanceAnimationVector&& other) noexcept;
 
-            void emplace_animation(Mesh&, const std::string& animationName, const float start, const float end, const unsigned int requestedLoops);
+            void emplace_animation(Mesh&, const std::string& animationName, float start, float end, unsigned int requestedLoops);
 
             size_t size() const;
             void clear();

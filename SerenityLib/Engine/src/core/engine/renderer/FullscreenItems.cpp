@@ -1,8 +1,7 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/renderer/FullscreenItems.h>
 #include <core/engine/events/Event.h>
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/system/window/Window.h>
 
 using namespace Engine;
 using namespace std;
@@ -11,7 +10,7 @@ using namespace std;
 
 void priv::FullscreenTriangle::init() {
     MeshVertexDataFullscreen v1, v2, v3;
-    const auto winSize = glm::vec2(Resources::getWindowSize());
+    auto winSize = glm::vec2(Resources::getWindowSize());
 
     m_Buffers.push_back(0);
     glGenBuffers(1, &m_Buffers[0]);
@@ -29,18 +28,18 @@ void priv::FullscreenTriangle::init() {
     glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(MeshVertexDataFullscreen), &m_Vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned short), &m_Indices[0], GL_STATIC_DRAW);
 
     //vao's
     buildVAO();
     registerEvent(EventType::WindowFullscreenChanged);
 }
 priv::FullscreenTriangle::~FullscreenTriangle(){ 
-    for (uint i = 0; i < m_Buffers.size(); ++i)
+    for (size_t i = 0; i < m_Buffers.size(); ++i)
         glDeleteBuffers(1, &m_Buffers[i]);
     Engine::Renderer::deleteVAO(m_VAO);
 }
-void priv::FullscreenTriangle::changeDimensions(const float width, const float height) {
+void priv::FullscreenTriangle::changeDimensions(float width, float height) {
     if (m_Indices.size() == 0)
         return;
     m_Vertices.clear();
@@ -83,10 +82,10 @@ void priv::FullscreenTriangle::bindToGPU() {
 void priv::FullscreenTriangle::render(){ 
     if (m_VAO) {
         Engine::Renderer::bindVAO(m_VAO);
-        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_Indices.size()), GL_UNSIGNED_SHORT, 0);
+        glDrawElements(GL_TRIANGLES, (GLsizei)m_Indices.size(), GL_UNSIGNED_SHORT, 0);
     }else{
         bindToGPU();
-        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_Indices.size()), GL_UNSIGNED_SHORT, 0);
+        glDrawElements(GL_TRIANGLES, (GLsizei)m_Indices.size(), GL_UNSIGNED_SHORT, 0);
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
     }
@@ -104,7 +103,7 @@ void priv::FullscreenTriangle::onEvent(const Event& e) {
 #pragma region Quad
 
 void priv::FullscreenQuad::init() {
-    const auto winSize = glm::vec2(Resources::getWindowSize());
+    auto winSize = glm::vec2(Resources::getWindowSize());
 
     m_Buffers.push_back(0);
     glGenBuffers(1, &m_Buffers[0]);
@@ -123,18 +122,18 @@ void priv::FullscreenQuad::init() {
 
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(ushort), &m_Indices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned short), &m_Indices[0], GL_STATIC_DRAW);
 
     //vao's
     buildVAO();
     registerEvent(EventType::WindowFullscreenChanged);
 }
 priv::FullscreenQuad::~FullscreenQuad(){ 
-    for (uint i = 0; i < m_Buffers.size(); ++i)
+    for (size_t i = 0; i < m_Buffers.size(); ++i)
         glDeleteBuffers(1, &m_Buffers[i]);
     Engine::Renderer::deleteVAO(m_VAO);
 }
-void priv::FullscreenQuad::changeDimensions(const float width, const float height) {
+void priv::FullscreenQuad::changeDimensions(float width, float height) {
     if (m_Indices.size() == 0)
         return;
     m_Vertices.clear();
@@ -177,10 +176,10 @@ void priv::FullscreenQuad::bindToGPU() {
 void priv::FullscreenQuad::render(){ 
     if (m_VAO) {
         Engine::Renderer::bindVAO(m_VAO);
-        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_Indices.size()), GL_UNSIGNED_SHORT, 0);
+        glDrawElements(GL_TRIANGLES, (GLsizei)m_Indices.size(), GL_UNSIGNED_SHORT, 0);
     }else{
         bindToGPU();
-        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_Indices.size()), GL_UNSIGNED_SHORT, 0);
+        glDrawElements(GL_TRIANGLES, (GLsizei)m_Indices.size(), GL_UNSIGNED_SHORT, 0);
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
     }

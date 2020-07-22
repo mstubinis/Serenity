@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_MESH_IMPORTED_DATA_INCLUDE_GUARD
-#define ENGINE_MESH_IMPORTED_DATA_INCLUDE_GUARD
+#ifndef ENGINE_MESH_IMPORTED_DATA_H
+#define ENGINE_MESH_IMPORTED_DATA_H
 
 #include <core/engine/mesh/MeshIncludes.h>
 

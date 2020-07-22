@@ -1,4 +1,4 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/mesh/AnimationData.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/mesh/Mesh.h>
@@ -10,17 +10,17 @@ using namespace std;
 AnimationData::AnimationData(Mesh& mesh, const aiAnimation& assimpAnimation) : m_Mesh(&mesh) {
     m_TicksPerSecond  = (float)assimpAnimation.mTicksPerSecond;
     m_DurationInTicks = (float)assimpAnimation.mDuration;
-    for (unsigned int c = 0; c < assimpAnimation.mNumChannels; ++c) {
+    for (auto c = 0U; c < assimpAnimation.mNumChannels; ++c) {
         const aiNodeAnim& aiAnimNode = *assimpAnimation.mChannels[c];
         if (!m_KeyframeData.count(aiAnimNode.mNodeName.data)) {
             AnimationChannel animation_channel;
-            for (unsigned int b = 0; b < aiAnimNode.mNumPositionKeys; ++b) {
+            for (auto b = 0U; b < aiAnimNode.mNumPositionKeys; ++b) {
                 animation_channel.PositionKeys.emplace_back(  float(aiAnimNode.mPositionKeys[b].mTime), Math::assimpToGLMVec3(aiAnimNode.mPositionKeys[b].mValue)  );
             }
-            for (unsigned int b = 0; b < aiAnimNode.mNumRotationKeys; ++b) {
+            for (auto b = 0U; b < aiAnimNode.mNumRotationKeys; ++b) {
                 animation_channel.RotationKeys.emplace_back(  float(aiAnimNode.mRotationKeys[b].mTime), aiAnimNode.mRotationKeys[b].mValue  );
             }
-            for (unsigned int b = 0; b < aiAnimNode.mNumScalingKeys; ++b) {
+            for (auto b = 0U; b < aiAnimNode.mNumScalingKeys; ++b) {
                 animation_channel.ScalingKeys.emplace_back(  float(aiAnimNode.mScalingKeys[b].mTime), Math::assimpToGLMVec3(aiAnimNode.mScalingKeys[b].mValue)  );
             }
             m_KeyframeData.emplace(aiAnimNode.mNodeName.data, std::move(animation_channel));
@@ -66,7 +66,7 @@ void AnimationData::BoneTransform(const string& animationName, float TimeInSecon
     float AnimationTime(fmod(TimeInTicks, m_DurationInTicks));
     glm::mat4 ParentIdentity(1.0f);
     ReadNodeHeirarchy(animationName, AnimationTime, m_Mesh->m_RootNode, ParentIdentity, Transforms);
-    for (unsigned int i = 0; i < m_Mesh->m_Skeleton->m_NumBones; ++i) {
+    for (auto i = 0U; i < m_Mesh->m_Skeleton->m_NumBones; ++i) {
         Transforms[i] = m_Mesh->m_Skeleton->m_BoneInfo[i].FinalTransform;
     }
 }
@@ -117,14 +117,4 @@ size_t AnimationData::FindRotation(float AnimationTime, const AnimationChannel& 
 }
 size_t AnimationData::FindScaling(float AnimationTime, const AnimationChannel& node) const {
     return internal_find(AnimationTime, node, node.ScalingKeys);
-}
-float AnimationData::duration() const {
-    float TicksPerSecond( (m_TicksPerSecond != 0.0f) ? m_TicksPerSecond : 25.0f);
-    return m_DurationInTicks / TicksPerSecond;
-}
-float AnimationData::durationInTicks() const {
-    return m_DurationInTicks;
-}
-float AnimationData::ticksPerSecond() const {
-    return m_TicksPerSecond;
 }

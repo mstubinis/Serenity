@@ -1,4 +1,4 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/renderer/RenderGraph.h>
 #include <core/engine/renderer/pipelines/IRenderingPipeline.h>
 #include <core/engine/shaders/ShaderProgram.h>
@@ -420,7 +420,7 @@ void RenderGraph::render(Engine::priv::Renderer& renderer, Viewport& viewport, C
                                 mesh.sortTriangles(camera, modelInstance, modelMatrix, sortingMode);
                             }
                             renderer.bind(&modelInstance);
-                            renderer.m_Pipeline->renderMesh(mesh, modelInstance.getDrawingMode());
+                            renderer.m_Pipeline->renderMesh(mesh, (unsigned int)modelInstance.getDrawingMode());
                             renderer.unbind(&modelInstance);
                         }
                     }
@@ -456,7 +456,7 @@ void RenderGraph::render_bruteforce(Engine::priv::Renderer& renderer, Viewport& 
             renderer.bind(&mesh);
             renderer.bind(&modelInstance);
 
-            renderer.m_Pipeline->renderMesh(mesh, modelInstance.getDrawingMode());
+            renderer.m_Pipeline->renderMesh(mesh, (unsigned int)modelInstance.getDrawingMode());
 
             renderer.unbind(&modelInstance);
             renderer.unbind(&mesh);

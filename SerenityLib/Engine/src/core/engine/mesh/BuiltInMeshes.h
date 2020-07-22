@@ -6,7 +6,7 @@ class  Mesh;
 
 namespace Engine::priv {
     class BuiltInMeshses final {
-        public: struct BuiltInMeshEnum final { enum Mesh : unsigned int {
+        enum class BuiltInMeshEnum : unsigned int {
             PointLight,
             SpotLight,
             RodLight,
@@ -16,10 +16,10 @@ namespace Engine::priv {
             Plane,
             Font,
             Particle,
-        _TOTAL,};};
+        _TOTAL};
 
         private:
-            std::array<Mesh*, BuiltInMeshEnum::_TOTAL> m_BuiltInMeshes = { { nullptr} };
+            std::array<Mesh*, (size_t)BuiltInMeshEnum::_TOTAL> m_BuiltInMeshes = { { nullptr} };
 
             bool build_point_light_mesh();
             bool build_spot_light_mesh();

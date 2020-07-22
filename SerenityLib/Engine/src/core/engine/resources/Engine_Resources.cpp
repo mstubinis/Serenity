@@ -1,29 +1,26 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
+
 #include <core/engine/system/Engine.h>
-#include <core/engine/scene/Skybox.h>
+
 #include <core/engine/mesh/Mesh.h>
-#include <core/engine/model/ModelInstance.h>
 #include <core/engine/materials/Material.h>
-#include <core/engine/scene/Camera.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/fonts/Font.h>
-#include <core/engine/scene/Scene.h>
-#include <core/engine/system/window/Window.h>
-
+#include <core/engine/sounds/SoundData.h>
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/shaders/Shader.h>
+
+#include <core/engine/scene/Scene.h>
+#include <core/engine/system/window/Window.h>
 
 #include <core/engine/mesh/MeshRequest.h>
 #include <core/engine/textures/TextureRequest.h>
 #include <core/engine/materials/MaterialRequest.h>
 #include <core/engine/resources/Handle.h>
 
-#include <core/engine/sounds/SoundData.h>
-
 #include <ecs/ECS.h>
 
 using namespace Engine;
-using namespace std;
 
 priv::ResourceManager* resourceManager = nullptr;
 
@@ -42,7 +39,7 @@ void priv::ResourceManager::_init(const EngineOptions& options){
     window->setJoystickProcessingActive(false);
     m_Windows.push_back(window);
 }
-vector<Scene*>& priv::ResourceManager::scenes() {
+std::vector<Scene*>& priv::ResourceManager::scenes() {
     return m_Scenes;
 }
 void priv::ResourceManager::onPostUpdate() {
@@ -71,14 +68,14 @@ unsigned int priv::ResourceManager::AddScene(Scene& s){
     for (size_t i = 0; i < m_Scenes.size(); ++i) {
         if (m_Scenes[i] == nullptr) {
             m_Scenes[i] = &s;
-            unsigned int res = static_cast<unsigned int>(i) + 1U;
+            unsigned int res = (unsigned int)i + 1U;
             return res;
         }
     }
     m_Scenes.push_back(&s);
-    return static_cast<unsigned int>(m_Scenes.size());
+    return (unsigned int)m_Scenes.size();
 }
-string Engine::Data::reportTime() {
+std::string Engine::Data::reportTime() {
     return priv::Core::m_Engine->m_DebugManager.reportTime();
 }
 float Resources::dt() {
@@ -114,7 +111,7 @@ glm::uvec2 Resources::getWindowSize(unsigned int index) {
 }
 
 
-bool Resources::deleteScene(string_view sceneName) {
+bool Resources::deleteScene(std::string_view sceneName) {
     for (auto& scene_ptr : resourceManager->m_Scenes) {
         if (scene_ptr && scene_ptr->name() == sceneName) {
             return Resources::deleteScene(*scene_ptr);
@@ -133,7 +130,7 @@ bool Resources::deleteScene(Scene& scene) {
 }
 
 
-Scene* Resources::getScene(string_view sceneName){
+Scene* Resources::getScene(std::string_view sceneName){
     for (auto& scene_ptr : resourceManager->m_Scenes) {
         if (scene_ptr && scene_ptr->name() == sceneName) {
             return scene_ptr;
@@ -199,7 +196,7 @@ Texture* Resources::getTexture(Handle h) {
     resourceManager->m_Resources.getAs(h, p); 
     return p; 
 }
-Texture* Resources::getTexture(string_view name) {
+Texture* Resources::getTexture(std::string_view name) {
     return resourceManager->HasResource<Texture>(name); 
 }
 void Resources::getMaterial(Handle h, Material*& p) {
@@ -210,32 +207,32 @@ Material* Resources::getMaterial(Handle h) {
     resourceManager->m_Resources.getAs(h, p); 
     return p; 
 }
-Handle Resources::addFont(const string& filename, int height, int width, float line_height){
+Handle Resources::addFont(const std::string& filename, int height, int width, float line_height){
     return resourceManager->m_Resources.add(NEW Font(filename, height, width, line_height), ResourceType::Font);
 }
 
 
-vector<Handle> Resources::loadMesh(const string& fileOrData, float threshhold) {
+std::vector<Handle> Resources::loadMesh(const std::string& fileOrData, float threshhold) {
     MeshRequest request(fileOrData, threshhold);
     request.request();
-    vector<Handle> handles;
+    std::vector<Handle> handles;
     handles.reserve(request.m_Parts.size());
     for (auto& part : request.m_Parts) {
         handles.push_back(part.handle);
     }
     return handles;
 }
-vector<Handle> Resources::loadMeshAsync(const string& fileOrData, float threshhold) {
+std::vector<Handle> Resources::loadMeshAsync(const std::string& fileOrData, float threshhold) {
     MeshRequest request(fileOrData, threshhold);
     request.request(true);
-    vector<Handle> handles;
+    std::vector<Handle> handles;
     handles.reserve(request.m_Parts.size());
     for (auto& part : request.m_Parts) {
         handles.push_back(part.handle);
     }
     return handles;
 }
-Handle Resources::loadTexture(const string& file, ImageInternalFormat::Format internalFormat, bool mipmaps) {
+Handle Resources::loadTexture(const std::string& file, ImageInternalFormat internalFormat, bool mipmaps) {
     auto* texture = resourceManager->HasResource<Texture>(file);
     if (!texture) {
         TextureRequest request(file, mipmaps, internalFormat);
@@ -244,7 +241,7 @@ Handle Resources::loadTexture(const string& file, ImageInternalFormat::Format in
     }
     return Handle();
 }
-Handle Resources::loadTexture(sf::Image& sfImage, const string& texture_name, ImageInternalFormat::Format internalFormat, bool mipmaps) {
+Handle Resources::loadTexture(sf::Image& sfImage, const std::string& texture_name, ImageInternalFormat internalFormat, bool mipmaps) {
     auto* texture = resourceManager->HasResource<Texture>(texture_name);
     if (!texture) {
         TextureRequestFromMemory request(sfImage, texture_name, mipmaps, internalFormat);
@@ -253,7 +250,7 @@ Handle Resources::loadTexture(sf::Image& sfImage, const string& texture_name, Im
     }
     return Handle();
 }
-Handle Resources::loadTextureAsync(const string& file, ImageInternalFormat::Format internalFormat, bool mipmaps) {
+Handle Resources::loadTextureAsync(const std::string& file, ImageInternalFormat internalFormat, bool mipmaps) {
     auto* texture = resourceManager->HasResource<Texture>(file);
     if (!texture) {
         TextureRequest request(file, mipmaps, internalFormat);
@@ -262,7 +259,7 @@ Handle Resources::loadTextureAsync(const string& file, ImageInternalFormat::Form
     }
     return Handle();
 }
-Handle Resources::loadTextureAsync(sf::Image& sfImage, const string& texture_name, ImageInternalFormat::Format internalFormat, bool mipmaps) {
+Handle Resources::loadTextureAsync(sf::Image& sfImage, const std::string& texture_name, ImageInternalFormat internalFormat, bool mipmaps) {
     auto* texture = resourceManager->HasResource<Texture>(texture_name);
     if (!texture) {
         TextureRequestFromMemory request(sfImage, texture_name, mipmaps, internalFormat);
@@ -272,7 +269,7 @@ Handle Resources::loadTextureAsync(sf::Image& sfImage, const string& texture_nam
     return Handle();
 }
 
-Handle Resources::loadMaterial(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) {
+Handle Resources::loadMaterial(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness) {
     auto* material = resourceManager->HasResource<Material>(name);
     if (!material) {
         MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
@@ -281,7 +278,7 @@ Handle Resources::loadMaterial(const string& name, const string& diffuse, const 
     }
     return Handle();
 }
-Handle Resources::loadMaterialAsync(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness) {   
+Handle Resources::loadMaterialAsync(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness) {
     auto* material = resourceManager->HasResource<Material>(name);
     if (!material) {
         MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
@@ -290,7 +287,7 @@ Handle Resources::loadMaterialAsync(const string& name, const string& diffuse, c
     }
     return Handle();
 }
-Handle Resources::loadMaterial(const string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) {
+Handle Resources::loadMaterial(const std::string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) {
     auto* material = resourceManager->HasResource<Material>(name);
     if (!material) {
         MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
@@ -300,25 +297,25 @@ Handle Resources::loadMaterial(const string& name, Texture* diffuse, Texture* no
     return Handle();
 }
 
-Handle Resources::addShader(const string& fileOrData, ShaderType::Type type, bool fromFile){
+Handle Resources::addShader(const std::string& fileOrData, ShaderType::Type type, bool fromFile){
     Shader* shader = NEW Shader(fileOrData, type, fromFile);
     return resourceManager->m_Resources.add(shader, ResourceType::Shader);
 }
 
-Handle Resources::addShaderProgram(const string& n, Shader& v, Shader& f){
+Handle Resources::addShaderProgram(const std::string& n, Shader& v, Shader& f){
     ShaderProgram* program = NEW ShaderProgram(n, v, f);
     return resourceManager->m_Resources.add(program, ResourceType::ShaderProgram);
 }
-Handle Resources::addShaderProgram(const string& n, Handle v, Handle f){
+Handle Resources::addShaderProgram(const std::string& n, Handle v, Handle f){
     Shader* vertexShader   = resourceManager->m_Resources.getAsFast<Shader>(v);
     Shader* fragmentShader = resourceManager->m_Resources.getAsFast<Shader>(f);
     ShaderProgram* program = NEW ShaderProgram(n, *vertexShader, *fragmentShader);
     return resourceManager->m_Resources.add(program, ResourceType::ShaderProgram);
 }
 
-Handle Resources::addSoundData(const string& file){
+Handle Resources::addSoundData(const std::string& file){
     SoundData* soundData = NEW SoundData(file);
-    return resourceManager->m_Resources.add(soundData,ResourceType::SoundData);
+    return resourceManager->m_Resources.add(soundData, ResourceType::SoundData);
 }
 
 bool Resources::setCurrentScene(Scene* newScene){
@@ -330,13 +327,13 @@ bool Resources::setCurrentScene(Scene* newScene){
     priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     
     if(!oldScene){
-        cout << "---- Initial scene set to: " << newScene->name() << endl;
+        std::cout << "---- Initial scene set to: " << newScene->name() << "\n";
         resourceManager->m_CurrentScene = newScene; 
         priv::InternalScenePublicInterface::GetECS(*newScene).onSceneEntered(*newScene);
         return false;
     }
     if(oldScene != newScene){
-        cout << "---- Scene Change started (" << oldScene->name() << ") to (" << newScene->name() << ") ----" << endl;
+        std::cout << "---- Scene Change started (" << oldScene->name() << ") to (" << newScene->name() << ") ----" << "\n";
         if(resourceManager->m_DynamicMemory){
             //mark game object resources to minus use count
         }
@@ -346,11 +343,11 @@ bool Resources::setCurrentScene(Scene* newScene){
         if(resourceManager->m_DynamicMemory){
             //mark game object resources to add use count
         }
-        cout << "-------- Scene Change ended --------" << endl;
+        std::cout << "-------- Scene Change ended --------" << "\n";
         return true;
     }
     return false;
 }
-bool Resources::setCurrentScene(string_view s){ 
-    return Resources::setCurrentScene(Resources::getScene(s)); 
+bool Resources::setCurrentScene(std::string_view sceneName){
+    return Resources::setCurrentScene(Resources::getScene(sceneName));
 }

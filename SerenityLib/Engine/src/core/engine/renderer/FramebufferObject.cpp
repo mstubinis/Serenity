@@ -1,21 +1,20 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/renderer/FramebufferObject.h>
 #include <core/engine/renderer/Renderer.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/textures/Texture.h>
 
 using namespace Engine;
-using namespace std;
 
 #pragma region FramebufferObjectAttatchmentBaseClass
 
-priv::FramebufferObjectAttatchment::FramebufferObjectAttatchment(const FramebufferObject& fbo, FramebufferAttatchment::Attatchment a, ImageInternalFormat::Format i) : m_FBO(fbo){
-    m_GL_Attatchment = a;
-    m_InternalFormat = i;
+priv::FramebufferObjectAttatchment::FramebufferObjectAttatchment(const FramebufferObject& fbo, FramebufferAttatchment a, ImageInternalFormat i) : m_FBO(fbo){
+    m_GL_Attatchment = (GLuint)a;
+    m_InternalFormat = (GLuint)i;
 }
-priv::FramebufferObjectAttatchment::FramebufferObjectAttatchment(const FramebufferObject& fbo, FramebufferAttatchment::Attatchment a, const Texture& t) : m_FBO(fbo) {
-    m_GL_Attatchment = a;
-    m_InternalFormat = t.internalFormat();
+priv::FramebufferObjectAttatchment::FramebufferObjectAttatchment(const FramebufferObject& fbo, FramebufferAttatchment a, const Texture& t) : m_FBO(fbo) {
+    m_GL_Attatchment = (GLuint)a;
+    m_InternalFormat = (GLuint)t.internalFormat();
 }
 unsigned int priv::FramebufferObjectAttatchment::width() const {
     return m_FBO.width(); 
@@ -26,10 +25,10 @@ unsigned int priv::FramebufferObjectAttatchment::height() const {
 
 #pragma endregion
 
-priv::FramebufferTexture::FramebufferTexture(const FramebufferObject& fbo, FramebufferAttatchment::Attatchment a, const Texture& t) : FramebufferObjectAttatchment(fbo, a, t){
+priv::FramebufferTexture::FramebufferTexture(const FramebufferObject& fbo, FramebufferAttatchment a, const Texture& t) : FramebufferObjectAttatchment(fbo, a, t){
     m_Texture     = &const_cast<Texture&>(t);
-    m_PixelFormat = t.pixelFormat();
-    m_PixelType   = t.pixelType();
+    m_PixelFormat = (GLuint)t.pixelFormat();
+    m_PixelType   = (GLuint)t.pixelType();
 }
 priv::FramebufferTexture::~FramebufferTexture(){ 
     SAFE_DELETE(m_Texture);
@@ -44,7 +43,7 @@ Texture& priv::FramebufferTexture::texture() const {
     return *m_Texture;
 }
 
-priv::RenderbufferObject::RenderbufferObject(FramebufferObject& f, FramebufferAttatchment::Attatchment a, ImageInternalFormat::Format i) : FramebufferObjectAttatchment(f,a,i) {
+priv::RenderbufferObject::RenderbufferObject(FramebufferObject& f, FramebufferAttatchment a, ImageInternalFormat i) : FramebufferObjectAttatchment(f,a,i) {
     glGenRenderbuffers(1, &m_RBO);
 }
 priv::RenderbufferObject::~RenderbufferObject(){ 
@@ -90,14 +89,10 @@ namespace Engine::priv {
     }};
 };
 
-priv::FramebufferObjectDefaultBindFunctor   DEFAULT_BIND_FUNCTOR;
-priv::FramebufferObjectDefaultUnbindFunctor DEFAULT_UNBIND_FUNCTOR;
-
-
 priv::FramebufferObject::FramebufferObject(unsigned int w, unsigned int h, float divisor, unsigned int swapBufferCount) {
     init(w, h, divisor, swapBufferCount);
 }
-priv::FramebufferObject::FramebufferObject(unsigned int w, unsigned int h, ImageInternalFormat::Format depthInternalFormat, float divisor, unsigned int swapBufferCount) : FramebufferObject(w, h, divisor, swapBufferCount) {
+priv::FramebufferObject::FramebufferObject(unsigned int w, unsigned int h, ImageInternalFormat depthInternalFormat, float divisor, unsigned int swapBufferCount) : FramebufferObject(w, h, divisor, swapBufferCount) {
     init(w, h, depthInternalFormat, divisor, swapBufferCount);
 }
 void priv::FramebufferObject::init(unsigned int width, unsigned int height, float divisor, unsigned int swapBufferCount) {
@@ -109,10 +104,10 @@ void priv::FramebufferObject::init(unsigned int width, unsigned int height, floa
     for (size_t i = 0; i < m_FBO.size(); ++i) {
         glGenFramebuffers(1, &m_FBO[i]);
     }
-    setCustomBindFunctor(DEFAULT_BIND_FUNCTOR);
-    setCustomUnbindFunctor(DEFAULT_UNBIND_FUNCTOR);
+    setCustomBindFunctor(FramebufferObjectDefaultBindFunctor());
+    setCustomUnbindFunctor(FramebufferObjectDefaultUnbindFunctor());
 }
-void priv::FramebufferObject::init(unsigned int width, unsigned int height, ImageInternalFormat::Format depthInternalFormat, float divisor, unsigned int swapBufferCount) {
+void priv::FramebufferObject::init(unsigned int width, unsigned int height, ImageInternalFormat depthInternalFormat, float divisor, unsigned int swapBufferCount) {
     RenderbufferObject* rbo;
     if (depthInternalFormat == ImageInternalFormat::Depth24Stencil8 || depthInternalFormat == ImageInternalFormat::Depth32FStencil8) {
         rbo = NEW RenderbufferObject(*this, FramebufferAttatchment::DepthAndStencil, depthInternalFormat);
@@ -143,8 +138,8 @@ void priv::FramebufferObject::resize(unsigned int w, unsigned int h){
         }
     }
 }
-priv::FramebufferTexture* priv::FramebufferObject::attatchTexture(Texture* texture, const FramebufferAttatchment::Attatchment attatchment){
-    if (m_Attatchments.count(attatchment)) {
+priv::FramebufferTexture* priv::FramebufferObject::attatchTexture(Texture* texture, FramebufferAttatchment attatchment){
+    if (m_Attatchments.count((unsigned int)attatchment)) {
         return nullptr;
     }
     FramebufferTexture* framebufferTexture = NEW FramebufferTexture(*this, attatchment, *texture);
@@ -152,11 +147,7 @@ priv::FramebufferTexture* priv::FramebufferObject::attatchTexture(Texture* textu
         Engine::Renderer::bindFBO(m_FBO[i]);
         glFramebufferTexture2D(GL_FRAMEBUFFER, framebufferTexture->attatchment(), framebufferTexture->m_Texture->type(), framebufferTexture->m_Texture->address(), 0);
     }
-    m_Attatchments.emplace(
-        std::piecewise_construct,
-        std::forward_as_tuple(attatchment),
-        std::forward_as_tuple(framebufferTexture)
-    );
+    m_Attatchments.emplace((unsigned int)attatchment, framebufferTexture);
     Engine::Renderer::unbindFBO();
     return framebufferTexture;
 }
@@ -191,7 +182,7 @@ bool priv::FramebufferObject::check(){
         GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (err != GL_FRAMEBUFFER_COMPLETE) {
             #ifndef ENGINE_PRODUCTION
-                std::cout << "Framebuffer completeness in FramebufferObject::impl _check() (index " + to_string(fboHandle) + ") is incomplete!\n";
+                std::cout << "Framebuffer completeness in FramebufferObject::impl _check() (index " + std::to_string(fboHandle) + ") is incomplete!\n";
                 std::cout << "Error is: " << err << "\n";
             #endif
             return false;

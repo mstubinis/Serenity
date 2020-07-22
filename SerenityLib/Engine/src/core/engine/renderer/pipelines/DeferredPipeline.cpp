@@ -1,4 +1,4 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/renderer/pipelines/DeferredPipeline.h>
 #include <core/engine/renderer/opengl/UniformBufferObject.h>
 #include <core/engine/system/Engine.h>
@@ -619,8 +619,8 @@ void DeferredPipeline::renderSkybox(Skybox* skybox, ShaderProgram& shaderProgram
 
 
 void DeferredPipeline::sendGPUDataSunLight(Camera& camera, SunLight& sunLight, const string& start) {
-    const auto* body = sunLight.getComponent<ComponentBody>();
-    const auto pos   = glm::vec3(body->getPosition());
+    auto* body       = sunLight.getComponent<ComponentBody>();
+    auto pos         = glm::vec3(body->getPosition());
     const auto& col  = sunLight.color();
     sendUniform4((start + "DataA").c_str(), sunLight.getAmbientIntensity(), sunLight.getDiffuseIntensity(), sunLight.getSpecularIntensity(), 0.0f);
     sendUniform4((start + "DataC").c_str(), 0.0f, pos.x, pos.y, pos.z);
@@ -628,11 +628,11 @@ void DeferredPipeline::sendGPUDataSunLight(Camera& camera, SunLight& sunLight, c
     sendUniform1Safe("Type", 0.0f);
 }
 int DeferredPipeline::sendGPUDataPointLight(Camera& camera, PointLight& pointLight, const string& start) {
-    const auto* body  = pointLight.getComponent<ComponentBody>();
-    const auto pos    = glm::vec3(body->getPosition());
-    const auto cull   = pointLight.getCullingRadius();
-    const auto factor = 1100.0f * cull;
-    const auto distSq = (float)camera.getDistanceSquared(pos);
+    auto* body      = pointLight.getComponent<ComponentBody>();
+    auto pos        = glm::vec3(body->getPosition());
+    auto cull       = pointLight.getCullingRadius();
+    auto factor     = 1100.0f * cull;
+    auto distSq     = (float)camera.getDistanceSquared(pos);
     if ((!camera.sphereIntersectTest(pos, cull)) || (distSq > factor * factor)) {
         return 0;
     }
@@ -650,9 +650,9 @@ int DeferredPipeline::sendGPUDataPointLight(Camera& camera, PointLight& pointLig
     return 2;
 }
 void DeferredPipeline::sendGPUDataDirectionalLight(Camera& camera, DirectionalLight& directionalLight, const string& start) {
-    const auto* body   = directionalLight.getComponent<ComponentBody>();
-    const auto forward = glm::vec3(body->forward());
-    const auto& col    = directionalLight.color();
+    auto* body      = directionalLight.getComponent<ComponentBody>();
+    auto forward    = glm::vec3(body->forward());
+    const auto& col = directionalLight.color();
     sendUniform4((start + "DataA").c_str(), directionalLight.getAmbientIntensity(), directionalLight.getDiffuseIntensity(), directionalLight.getSpecularIntensity(), forward.x);
     sendUniform4((start + "DataB").c_str(), forward.y, forward.z, 0.0f, 0.0f);
     sendUniform4((start + "DataD").c_str(), col.x, col.y, col.z, (float)directionalLight.type());
@@ -671,7 +671,7 @@ int DeferredPipeline::sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight,
     if (distSq > factor * factor) {
         return 0;
     }
-    auto& col = spotLight.color();
+    const auto& col = spotLight.color();
     sendUniform4((start + "DataA").c_str(), spotLight.getAmbientIntensity(), spotLight.getDiffuseIntensity(), spotLight.getSpecularIntensity(), forward.x);
     sendUniform4((start + "DataB").c_str(), forward.y, forward.z, spotLight.getConstant(), spotLight.getLinear());
     sendUniform4((start + "DataC").c_str(), spotLight.getExponent(), pos.x, pos.y, pos.z);
@@ -681,26 +681,23 @@ int DeferredPipeline::sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight,
     sendUniform1Safe("Type", 2.0f);
 
     if (distSq <= (cull * cull)) { //inside the light volume
-        //std::cout << "a\n";
         return 1;
-    }else{
-        //std::cout << "b\n";
     }
     return 2;
 }
 int DeferredPipeline::sendGPUDataRodLight(Camera& camera, RodLight& rodLight, const string& start) {
-    const auto* body           = rodLight.getComponent<ComponentBody>();
-    const auto pos             = glm::vec3(body->getPosition());
-    const auto cullingDistance = rodLight.rodLength() + (rodLight.getCullingRadius() * 2.0f);
-    const auto factor          = 1100.0f * cullingDistance;
-    const auto distSq          = (float)camera.getDistanceSquared(pos);
+    auto* body           = rodLight.getComponent<ComponentBody>();
+    auto pos             = glm::vec3(body->getPosition());
+    auto cullingDistance = rodLight.rodLength() + (rodLight.getCullingRadius() * 2.0f);
+    auto factor          = 1100.0f * cullingDistance;
+    auto distSq          = (float)camera.getDistanceSquared(pos);
     if (!camera.sphereIntersectTest(pos, cullingDistance) || (distSq > factor * factor)) {
         return 0;
     }
-    const auto& col            = rodLight.color();
-    const float half           = rodLight.rodLength() / 2.0f;
-    const auto firstEndPt      = pos + (glm::vec3(body->forward()) * half);
-    const auto secndEndPt      = pos - (glm::vec3(body->forward()) * half);
+    const auto& col      = rodLight.color();
+    float half           = rodLight.rodLength() / 2.0f;
+    auto firstEndPt      = pos + (glm::vec3(body->forward()) * half);
+    auto secndEndPt      = pos - (glm::vec3(body->forward()) * half);
     sendUniform4((start + "DataA").c_str(), rodLight.getAmbientIntensity(), rodLight.getDiffuseIntensity(), rodLight.getSpecularIntensity(), firstEndPt.x);
     sendUniform4((start + "DataB").c_str(), firstEndPt.y, firstEndPt.z, rodLight.getConstant(), rodLight.getLinear());
     sendUniform4((start + "DataC").c_str(), rodLight.getExponent(), secndEndPt.x, secndEndPt.y, secndEndPt.z);
@@ -739,11 +736,9 @@ void DeferredPipeline::renderPointLight(Camera& camera, PointLight& pointLight) 
     }
     string start = "light.";
     int result   = sendGPUDataPointLight(camera, pointLight, start);
-
     if (result == 0) {
         return;
     }
-
     auto* body       = pointLight.getComponent<ComponentBody>();
     auto modelMatrix = body->modelMatrixRendering();
     sendUniformMatrix4("Model", modelMatrix);
@@ -754,10 +749,9 @@ void DeferredPipeline::renderPointLight(Camera& camera, PointLight& pointLight) 
     }else if (result == 2) {
         cullFace(GL_BACK);
     }
-
     auto& pointLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPointLightBounds();
     m_Renderer.bind(&pointLightMesh);
-    renderMesh(pointLightMesh); //this can bug out if we pass in custom uv's like in the renderQuad method
+    renderMesh(pointLightMesh);
     m_Renderer.unbind(&pointLightMesh);
 
     cullFace(GL_BACK);
@@ -772,7 +766,6 @@ void DeferredPipeline::renderSpotLight(Camera& camera, SpotLight& spotLight) {
     if (result == 0) {
         return;
     }
-
     auto* body       = spotLight.getComponent<ComponentBody>();
     auto modelMatrix = body->modelMatrixRendering();
     sendUniformMatrix4("Model", modelMatrix);
@@ -786,7 +779,7 @@ void DeferredPipeline::renderSpotLight(Camera& camera, SpotLight& spotLight) {
     auto& spotLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getSpotLightBounds();
 
     m_Renderer.bind(&spotLightMesh);
-    renderMesh(spotLightMesh); //this can bug out if we pass in custom uv's like in the renderQuad method
+    renderMesh(spotLightMesh);
     m_Renderer.unbind(&spotLightMesh);
 
     cullFace(GL_BACK);
@@ -814,7 +807,7 @@ void DeferredPipeline::renderRodLight(Camera& camera, RodLight& rodLight) {
 
     auto& rodLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getRodLightBounds();
     m_Renderer.bind(&rodLightMesh);
-    renderMesh(rodLightMesh); //this can bug out if we pass in custom uv's like in the renderQuad method
+    renderMesh(rodLightMesh);
     m_Renderer.unbind(&rodLightMesh);
 
     cullFace(GL_BACK);
@@ -826,7 +819,18 @@ void DeferredPipeline::renderProjectionLight(Camera& camera, ProjectionLight& pr
     string start = "light.";
     int result = sendGPUDataProjectionLight(camera, projectionLight, start);
 
+    if (result == 0) {
+        return;
+    }
+
     Engine::Renderer::sendTextureSafe("gTextureMap", *projectionLight.getTexture(), 5);
+
+
+    if (result == 1) {
+        cullFace(GL_FRONT);
+    }else if (result == 2) {
+        cullFace(GL_BACK);
+    }
 
     auto& projLightMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getProjectionLightBounds();
 
@@ -834,7 +838,7 @@ void DeferredPipeline::renderProjectionLight(Camera& camera, ProjectionLight& pr
     projLightMesh.modifyIndices(projectionLight.getIndices().data(), projectionLight.getIndices().size());
 
     m_Renderer.bind(&projLightMesh);
-    renderMesh(projLightMesh); //this can bug out if we pass in custom uv's like in the renderQuad method
+    renderMesh(projLightMesh);
     m_Renderer.unbind(&projLightMesh);
 
     cullFace(GL_BACK);

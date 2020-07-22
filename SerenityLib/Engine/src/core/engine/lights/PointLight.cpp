@@ -1,4 +1,4 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/lights/PointLight.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/resources/Engine_Resources.h>
@@ -6,24 +6,23 @@
 #include <ecs/ComponentBody.h>
 
 using namespace Engine;
-using namespace std;
 
-constexpr std::array<tuple<float, float, float>, LightRange::_TOTAL> LIGHT_RANGES{ {
-    make_tuple(1.0f, 0.7f, 1.8f),
-    make_tuple(1.0f, 0.35f, 0.44f),
-    make_tuple(1.0f, 0.22f, 0.20f),
-    make_tuple(1.0f, 0.14f, 0.07f),
-    make_tuple(1.0f, 0.09f, 0.032f),
-    make_tuple(1.0f, 0.07f, 0.017f),
-    make_tuple(1.0f, 0.045f, 0.0075f),
-    make_tuple(1.0f, 0.027f, 0.0028f),
-    make_tuple(1.0f, 0.022f, 0.0019f),
-    make_tuple(1.0f, 0.014f, 0.0007f),
-    make_tuple(1.0f, 0.007f, 0.0002f),
-    make_tuple(1.0f, 0.0014f, 0.000007f),
+constexpr std::array<std::tuple<float, float, float>, (size_t)LightRange::_TOTAL> LIGHT_RANGES{ {
+    std::make_tuple(1.0f, 0.7f, 1.8f),
+    std::make_tuple(1.0f, 0.35f, 0.44f),
+    std::make_tuple(1.0f, 0.22f, 0.20f),
+    std::make_tuple(1.0f, 0.14f, 0.07f),
+    std::make_tuple(1.0f, 0.09f, 0.032f),
+    std::make_tuple(1.0f, 0.07f, 0.017f),
+    std::make_tuple(1.0f, 0.045f, 0.0075f),
+    std::make_tuple(1.0f, 0.027f, 0.0028f),
+    std::make_tuple(1.0f, 0.022f, 0.0019f),
+    std::make_tuple(1.0f, 0.014f, 0.0007f),
+    std::make_tuple(1.0f, 0.007f, 0.0002f),
+    std::make_tuple(1.0f, 0.0014f, 0.000007f),
 } };
 
-PointLight::PointLight(LightType::Type type, const glm_vec3& pos, Scene* scene) : SunLight(pos, type, scene) {
+PointLight::PointLight(LightType type, const glm_vec3& pos, Scene* scene) : SunLight(pos, type, scene) {
     m_CullingRadius = calculateCullingRadius();
 
     if (m_Type == LightType::Point) {
@@ -73,11 +72,11 @@ void PointLight::setAttenuation(float c, float l, float e) {
     m_E = e;
     m_CullingRadius = calculateCullingRadius(); 
 }
-void PointLight::setAttenuation(LightRange::Range r) { 
+void PointLight::setAttenuation(LightRange r) { 
     const auto& d = LIGHT_RANGES[(unsigned int)r];
-    PointLight::setAttenuation( get<0>(d), get<1>(d), get<2>(d) ); 
+    PointLight::setAttenuation(std::get<0>(d), std::get<1>(d), std::get<2>(d) );
 }
-void PointLight::setAttenuationModel(LightAttenuation::Model model) {
+void PointLight::setAttenuationModel(LightAttenuation model) {
     m_AttenuationModel = model; 
     m_CullingRadius = calculateCullingRadius();
 }

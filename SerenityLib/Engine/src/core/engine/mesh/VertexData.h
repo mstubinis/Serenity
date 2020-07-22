@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_VERTEX_DATA_H_INCLUDE_GUARD
-#define ENGINE_VERTEX_DATA_H_INCLUDE_GUARD
+#ifndef ENGINE_VERTEX_DATA_H
+#define ENGINE_VERTEX_DATA_H
 
 #include <core/engine/mesh/VertexBufferObject.h>
 #include <core/engine/mesh/VertexDataFormat.h>

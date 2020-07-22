@@ -3,9 +3,7 @@
 #define ENGINE_EVENT_H
 
 class  Scene;
-class  Mesh;
-class  Material;
-class  Texture;
+class  Resource;
 namespace sf {
     class Packet;
 }
@@ -31,10 +29,10 @@ namespace Engine::priv {
         unsigned short   localPort  = 0;
         unsigned short   remotePort = 0;
         sf::IpAddress    remoteIP   = sf::IpAddress::None;
-        SocketType::Type type       = SocketType::Type::Unknown;
+        SocketType       type       = SocketType::Unknown;
 
         EventSocket() = default;
-        EventSocket(unsigned short localPort_, unsigned short remotePort_, sf::IpAddress remoteIP_, SocketType::Type type_) {
+        EventSocket(unsigned short localPort_, unsigned short remotePort_, sf::IpAddress remoteIP_, SocketType type_) {
             localPort  = localPort_;
             remotePort = remotePort_;
             remoteIP   = remoteIP_;
@@ -65,28 +63,13 @@ namespace Engine::priv {
             packet = packet_;
         }
     };
-    struct EventMeshLoaded final {
-        Mesh* mesh = nullptr;
-        EventMeshLoaded() = default;
-        EventMeshLoaded(Mesh* mesh_) {
-            mesh = mesh_;
+    struct EventResource final {
+        Resource* resource = nullptr;
+        EventResource() = default;
+        EventResource(Resource* resource_) {
+            resource = resource_;
         }
     };
-    struct EventMaterialLoaded final {
-        Material* material = nullptr;
-        EventMaterialLoaded() = default;
-        EventMaterialLoaded(Material* material_) {
-            material = material_;
-        }
-    };
-    struct EventTextureLoaded final {
-        Texture* texture = nullptr;
-        EventTextureLoaded() = default;
-        EventTextureLoaded(Texture* texture_) {
-            texture = texture_;
-        }
-    };
-
     struct EventWindowResized final{ 
         unsigned int  width  = 0;
         unsigned int  height = 0;
@@ -223,9 +206,7 @@ struct Event final{
         Engine::priv::EventJoystickConnection         eventJoystickConnection;
         Engine::priv::EventSoundStatusChanged         eventSoundStatusChanged;
         Engine::priv::EventSceneChanged               eventSceneChanged;
-        Engine::priv::EventMeshLoaded                 eventMeshLoaded;
-        Engine::priv::EventMaterialLoaded             eventMaterialLoaded;
-        Engine::priv::EventTextureLoaded              eventTextureLoaded;
+        Engine::priv::EventResource                   eventResource;
 
         Engine::priv::EventPacket                     eventPacket;
         Engine::priv::EventSocket                     eventSocket;

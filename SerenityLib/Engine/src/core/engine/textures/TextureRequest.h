@@ -14,9 +14,9 @@ struct TextureRequestPart final {
     std::string                  name            = "";
     bool                         async           = false;
     GLuint                       type            = 0U;
-    TextureType::Type            textureType;
+    TextureType                  textureType     = TextureType::Unknown;
     bool                         isToBeMipmapped = false;
-    ImageInternalFormat::Format  internalFormat;
+    ImageInternalFormat          internalFormat  = ImageInternalFormat::Unknown;
 
     TextureRequestPart() = default;
     ~TextureRequestPart();
@@ -53,7 +53,7 @@ struct TextureRequest final {
     TextureRequest(
         const std::string& filenameOrData,
         bool genMipMaps = true,
-        ImageInternalFormat::Format internal_ = ImageInternalFormat::Format::SRGB8_ALPHA8,
+        ImageInternalFormat internal_ = ImageInternalFormat::SRGB8_ALPHA8,
         GLuint openglTextureType = GL_TEXTURE_2D
     );
     ~TextureRequest();
@@ -71,7 +71,7 @@ struct TextureRequestFromMemory final {
         sf::Image& sfImage,
         const std::string& textureName,
         bool genMipMaps = true,
-        ImageInternalFormat::Format internal_ = ImageInternalFormat::Format::SRGB8_ALPHA8,
+        ImageInternalFormat internal_ = ImageInternalFormat::SRGB8_ALPHA8,
         GLuint openglTextureType = GL_TEXTURE_2D
     );
     ~TextureRequestFromMemory();

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_ENGINE_RESOURCES_H
-#define ENGINE_ENGINE_RESOURCES_H
+#ifndef ENGINE_RESOURCES_H
+#define ENGINE_RESOURCES_H
 
 namespace sf {
     class Image;
@@ -24,173 +24,170 @@ class  ShaderProgram;
 #include <core/engine/renderer/GLImageConstants.h>
 #include <core/engine/shaders/ShaderIncludes.h>
 #include <core/engine/resources/ResourcePool.h>
-#include <core/engine/utils/Utils.h>
 
-namespace Engine{
-    namespace priv{
-        class ResourceManager final{
-            friend class  Scene;
-            private:
-                unsigned int AddScene(Scene& scene);
-            public:
-                //http://gamesfromwithin.com/managing-data-relationships
-                ResourcePool<Resource>             m_Resources;
-                std::vector<Window*>               m_Windows;
-                Scene*                             m_CurrentScene       = nullptr;
-                bool                               m_DynamicMemory      = false;
-                std::vector<Scene*>                m_Scenes;
-                std::vector<Scene*>                m_ScenesToBeDeleted;
-            public:
+namespace Engine::priv {
+    class ResourceManager final{
+        friend class  Scene;
+        private:
+            unsigned int AddScene(Scene& scene);
+        public:
+            //http://gamesfromwithin.com/managing-data-relationships
+            ResourcePool<Resource>             m_Resources;
+            std::vector<Window*>               m_Windows;
+            std::vector<Scene*>                m_Scenes;
+            std::vector<Scene*>                m_ScenesToBeDeleted;
+            Scene*                             m_CurrentScene = nullptr;
+            bool                               m_DynamicMemory = false;
+        public:
 
-                ResourceManager(const EngineOptions& options);
-                ~ResourceManager();
+            ResourceManager(const EngineOptions& options);
+            ~ResourceManager();
 
-                void cleanup();
+            void cleanup();
 
-                void onPostUpdate();
+            void onPostUpdate();
 
-                void _init(const EngineOptions& options);
+            void _init(const EngineOptions& options);
  
-                Handle _addTexture(Texture*);
-                Scene& _getSceneByID(std::uint32_t id);
+            Handle _addTexture(Texture*);
+            Scene& _getSceneByID(std::uint32_t id);
 
-                std::vector<Scene*>& scenes();
+            std::vector<Scene*>& scenes();
 
-                template<typename T> T* HasResource(std::string_view resource_name) {
-                    for (size_t i = 0; i < m_Resources.size(); ++i) {
-                        Resource* r = m_Resources.getAsFast<Resource>((unsigned int)i + 1U);
-                        if (r) {
-                            T* resource = dynamic_cast<T*>(r);
-                            if (resource && resource->name() == resource_name) {
-                                return resource;
-                            }
+            template<typename T> T* HasResource(std::string_view resource_name) {
+                for (size_t i = 0; i < m_Resources.size(); ++i) {
+                    Resource* r = m_Resources.getAsFast<Resource>((unsigned int)i + 1U);
+                    if (r) {
+                        T* resource = dynamic_cast<T*>(r);
+                        if (resource && resource->name() == resource_name) {
+                            return resource;
                         }
                     }
-                    return nullptr;
                 }
+                return nullptr;
+            }
 
-                template<typename T> std::list<T*> GetAllResourcesOfType() {
-                    std::list<T*> ret;
-                    for (size_t i = 0; i < m_Resources.size(); ++i) {
-                        Resource* r = m_Resources.getAsFast<Resource>((unsigned int)i + 1U);
-                        if (r) {
-                            T* resource = dynamic_cast<T*>(r);
-                            if (resource) {
-                                ret.push_back(resource);
-                            }
+            template<typename T> std::list<T*> GetAllResourcesOfType() {
+                std::list<T*> ret;
+                for (size_t i = 0; i < m_Resources.size(); ++i) {
+                    Resource* r = m_Resources.getAsFast<Resource>((unsigned int)i + 1U);
+                    if (r) {
+                        T* resource = dynamic_cast<T*>(r);
+                        if (resource) {
+                            ret.push_back(resource);
                         }
                     }
-                    return ret;
                 }
+                return ret;
+            }
 
 
-        };
-    };
-    namespace Resources{
-        namespace Settings{
-            void enableDynamicMemory(bool enable = true);
-            void disableDynamicMemory();
-        }
-
-        Scene* getCurrentScene();
-        bool setCurrentScene(Scene* scene);
-        bool setCurrentScene(std::string_view sceneName);
-
-        float dt();
-        double timeScale();
-        double applicationTime();
-
-        Window& getWindow();
-        glm::uvec2 getWindowSize();
-
-        Window& getWindow(unsigned int index);
-        glm::uvec2 getWindowSize(unsigned int index);
-
-        Scene* getScene(std::string_view sceneName);
-        bool deleteScene(std::string_view sceneName);
-        bool deleteScene(Scene& scene);
-
-        void getShader(Handle inHandle, Shader*& outPtr);                  Shader*    getShader(Handle inHandle);
-        void getSoundData(Handle inHandle, SoundData*& outPtr);            SoundData* getSoundData(Handle inHandle);
-        void getCamera(Handle inHandle, Camera*& outPtr);                  Camera*    getCamera(Handle inHandle);
-        void getFont(Handle inHandle, Font*& outPtr);                      Font*      getFont(Handle inHandle);
-
-        void     getTexture(Handle inHandle, Texture*& outPtr);
-        Texture* getTexture(Handle inHandle);
-        Texture* getTexture(std::string_view name);
-
-        void getMesh(Handle inHandle, Mesh*& outPtr);                      Mesh*      getMesh(Handle inHandle);
-
-        void      getMaterial(Handle inHandle, Material*& outPtr);
-        Material* getMaterial(Handle inHandle);
-
-        void getShaderProgram(Handle inHandle, ShaderProgram*& outPtr);    ShaderProgram*   getShaderProgram(Handle inHandle);
-
-        Handle addFont(const std::string& filename, int height, int width = 0, float line_height = 8.0f);
-
-        std::vector<Handle> loadMesh(const std::string& fileOrData, float threshhold = 0.0005f);
-        std::vector<Handle> loadMeshAsync(const std::string& fileOrData, float threshhold = 0.0005f);
-
-        Handle loadTexture(
-            const std::string& file,
-            ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8,
-            bool mipmaps = false
-        );
-        Handle loadTexture(
-            sf::Image& sfImage,
-            const std::string& texture_name,
-            ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8,
-            bool mipmaps = false
-        );
-        Handle loadTextureAsync(
-            const std::string& file,
-            ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8,
-            bool mipmaps = false
-        );
-        Handle loadTextureAsync(
-            sf::Image& sfImage,
-            const std::string& texture_name,
-            ImageInternalFormat::Format = ImageInternalFormat::SRGB8_ALPHA8,
-            bool mipmaps = false
-        );
-        Handle loadMaterial(
-            const std::string& name, 
-            const std::string& diffuse, 
-            const std::string& normal = "", 
-            const std::string& glow = "", 
-            const std::string& specular = "",
-            const std::string& ao = "",
-            const std::string& metalness = "",
-            const std::string& smoothness = ""
-        );
-        Handle loadMaterialAsync(
-            const std::string& name,
-            const std::string& diffuse,
-            const std::string& normal = "",
-            const std::string& glow = "",
-            const std::string& specular = "",
-            const std::string& ao = "",
-            const std::string& metalness = "",
-            const std::string& smoothness = ""
-        );
-        Handle loadMaterial(
-            const std::string& name,
-            Texture* diffuse,
-            Texture* normal = nullptr,
-            Texture* glow = nullptr,
-            Texture* specular = nullptr,
-            Texture* ao = nullptr,
-            Texture* metalness = nullptr,
-            Texture* smoothness = nullptr
-        );
-
-        Handle addShader(const std::string& shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
-        Handle addSoundData(const std::string& file);
-        Handle addShaderProgram(const std::string& name, Shader& vertexShader, Shader& fragmentShader);
-        Handle addShaderProgram(const std::string& name, Handle vertexShader, Handle fragmentShader);
-    };
-    namespace Data{
-        std::string reportTime();
     };
 };
+namespace Engine::Resources::Settings {
+    void enableDynamicMemory(bool enable = true);
+    void disableDynamicMemory();
+};
+namespace Engine::Resources {
+    Scene* getCurrentScene();
+    bool setCurrentScene(Scene* scene);
+    bool setCurrentScene(std::string_view sceneName);
+
+    float dt();
+    double timeScale();
+    double applicationTime();
+
+    Window& getWindow();
+    glm::uvec2 getWindowSize();
+
+    Window& getWindow(unsigned int index);
+    glm::uvec2 getWindowSize(unsigned int index);
+
+    Scene* getScene(std::string_view sceneName);
+    bool deleteScene(std::string_view sceneName);
+    bool deleteScene(Scene& scene);
+
+    void getShader(Handle inHandle, Shader*& outPtr);                  Shader*    getShader(Handle inHandle);
+    void getSoundData(Handle inHandle, SoundData*& outPtr);            SoundData* getSoundData(Handle inHandle);
+    void getCamera(Handle inHandle, Camera*& outPtr);                  Camera*    getCamera(Handle inHandle);
+    void getFont(Handle inHandle, Font*& outPtr);                      Font*      getFont(Handle inHandle);
+
+    void     getTexture(Handle inHandle, Texture*& outPtr);
+    Texture* getTexture(Handle inHandle);
+    Texture* getTexture(std::string_view name);
+
+    void getMesh(Handle inHandle, Mesh*& outPtr);                      Mesh*      getMesh(Handle inHandle);
+
+    void      getMaterial(Handle inHandle, Material*& outPtr);
+    Material* getMaterial(Handle inHandle);
+
+    void getShaderProgram(Handle inHandle, ShaderProgram*& outPtr);    ShaderProgram*   getShaderProgram(Handle inHandle);
+
+    Handle addFont(const std::string& filename, int height, int width = 0, float line_height = 8.0f);
+
+    std::vector<Handle> loadMesh(const std::string& fileOrData, float threshhold = 0.0005f);
+    std::vector<Handle> loadMeshAsync(const std::string& fileOrData, float threshhold = 0.0005f);
+
+    Handle loadTexture(
+        const std::string& file,
+        ImageInternalFormat = ImageInternalFormat::SRGB8_ALPHA8,
+        bool mipmaps        = false
+    );
+    Handle loadTexture(
+        sf::Image& sfImage,
+        const std::string& texture_name,
+        ImageInternalFormat = ImageInternalFormat::SRGB8_ALPHA8,
+        bool mipmaps        = false
+    );
+    Handle loadTextureAsync(
+        const std::string& file,
+        ImageInternalFormat = ImageInternalFormat::SRGB8_ALPHA8,
+        bool mipmaps        = false
+    );
+    Handle loadTextureAsync(
+        sf::Image& sfImage,
+        const std::string& texture_name,
+        ImageInternalFormat = ImageInternalFormat::SRGB8_ALPHA8,
+        bool mipmaps        = false
+    );
+    Handle loadMaterial(
+        const std::string& name, 
+        const std::string& diffuse, 
+        const std::string& normal     = "", 
+        const std::string& glow       = "", 
+        const std::string& specular   = "",
+        const std::string& ao         = "",
+        const std::string& metalness  = "",
+        const std::string& smoothness = ""
+    );
+    Handle loadMaterialAsync(
+        const std::string& name,
+        const std::string& diffuse,
+        const std::string& normal     = "",
+        const std::string& glow       = "",
+        const std::string& specular   = "",
+        const std::string& ao         = "",
+        const std::string& metalness  = "",
+        const std::string& smoothness = ""
+    );
+    Handle loadMaterial(
+        const std::string& name,
+        Texture* diffuse,
+        Texture* normal     = nullptr,
+        Texture* glow       = nullptr,
+        Texture* specular   = nullptr,
+        Texture* ao         = nullptr,
+        Texture* metalness  = nullptr,
+        Texture* smoothness = nullptr
+    );
+
+    Handle addShader(const std::string& shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
+    Handle addSoundData(const std::string& file);
+    Handle addShaderProgram(const std::string& name, Shader& vertexShader, Shader& fragmentShader);
+    Handle addShaderProgram(const std::string& name, Handle vertexShader, Handle fragmentShader);
+};
+namespace Engine::Data{
+    std::string reportTime();
+};
+
 #endif

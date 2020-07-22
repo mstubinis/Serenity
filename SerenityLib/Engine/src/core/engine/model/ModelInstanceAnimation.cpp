@@ -1,4 +1,4 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/model/ModelInstanceAnimation.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/mesh/Skeleton.h>
@@ -6,7 +6,7 @@
 using namespace Engine::priv;
 using namespace std;
 
-ModelInstanceAnimation::ModelInstanceAnimation(Mesh& mesh, const string& animName, const float startTime, const float endTime, const unsigned int requestedLoops){
+ModelInstanceAnimation::ModelInstanceAnimation(Mesh& mesh, const string& animName, float startTime, float endTime, unsigned int requestedLoops){
     m_Mesh             = &mesh;
     m_RequestedLoops   = requestedLoops;
     m_StartTime        = startTime;
@@ -16,9 +16,6 @@ ModelInstanceAnimation::ModelInstanceAnimation(Mesh& mesh, const string& animNam
     }else{
         m_EndTime      = endTime;
     }
-}
-ModelInstanceAnimation::~ModelInstanceAnimation() {
-
 }
 ModelInstanceAnimation::ModelInstanceAnimation(ModelInstanceAnimation&& other) noexcept {
     m_CurrentLoops   = std::move(other.m_CurrentLoops);
@@ -58,12 +55,6 @@ void ModelInstanceAnimation::process(const float dt, vector<glm::mat4>& transfor
 }
 
 
-ModelInstanceAnimationVector::ModelInstanceAnimationVector() {
-
-}
-ModelInstanceAnimationVector::~ModelInstanceAnimationVector() {
-
-}
 ModelInstanceAnimationVector::ModelInstanceAnimationVector(ModelInstanceAnimationVector&& other) noexcept {
     m_Animation_Instances = std::move(other.m_Animation_Instances);
 }
@@ -73,7 +64,7 @@ ModelInstanceAnimationVector& ModelInstanceAnimationVector::operator=(ModelInsta
     }
     return *this;
 }
-void ModelInstanceAnimationVector::emplace_animation(Mesh& mesh, const string& animationName, const float start, const float end, const unsigned int requestedLoops) {
+void ModelInstanceAnimationVector::emplace_animation(Mesh& mesh, const string& animationName, float start, float end, unsigned int requestedLoops) {
     m_Animation_Instances.emplace_back(mesh, animationName, start, end, requestedLoops);
 }
 

@@ -1,19 +1,16 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/textures/TextureIncludes.h>
 #include <SFML/Graphics/Image.hpp>
 
 using namespace Engine::priv;
 using namespace std;
 
-ImageLoadedStructure::ImageLoadedStructure(const unsigned int width, const unsigned int height, const ImagePixelType::Type pixelType, const ImagePixelFormat::Format pixelFormat, const ImageInternalFormat::Format internalFormat){
+ImageLoadedStructure::ImageLoadedStructure(unsigned int width, unsigned int height, ImagePixelType pixelType, ImagePixelFormat pixelFormat, ImageInternalFormat internalFormat){
     load(width, height, pixelType, pixelFormat, internalFormat);
 }
 ImageLoadedStructure::ImageLoadedStructure(const sf::Image& i, const string& filename){
     load(i, filename);
 }
-ImageLoadedStructure::~ImageLoadedStructure() {
-}
-
 ImageLoadedStructure::ImageLoadedStructure(ImageLoadedStructure&& other) noexcept {
     m_InternalFormat = std::move(other.m_InternalFormat);
     m_PixelFormat    = std::move(other.m_PixelFormat);
@@ -31,7 +28,7 @@ ImageLoadedStructure& ImageLoadedStructure::operator=(ImageLoadedStructure&& oth
     }
     return *this;
 }
-void ImageLoadedStructure::load(const unsigned int width, const unsigned int height, const ImagePixelType::Type pixelType, const ImagePixelFormat::Format pixelFormat, const ImageInternalFormat::Format internalFormat) {
+void ImageLoadedStructure::load(unsigned int width, unsigned int height, ImagePixelType pixelType, ImagePixelFormat pixelFormat, ImageInternalFormat internalFormat) {
     m_PixelFormat                 = pixelFormat;
     m_PixelType                   = pixelType;
     m_InternalFormat              = internalFormat;

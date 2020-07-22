@@ -35,23 +35,26 @@ namespace Engine::priv {
 #include <assimp/scene.h>
 
 namespace Engine::priv{
-    struct InternalMeshPublicInterface final {
-        static void InitBlankMesh(Mesh&);
-        static void LoadGPU(Mesh&);
-        static void UnloadCPU(Mesh&);
-        static void UnloadGPU(Mesh&);
-        static bool SupportsInstancing();
-        static btCollisionShape* BuildCollision(ModelInstance*, CollisionType::Type, bool isCompoundChild = false);
-        static btCollisionShape* BuildCollision(Mesh*, CollisionType::Type, bool isCompoundChild = false);
+    class InternalMeshPublicInterface final {
+        private:
+            static btCollisionShape* internal_build_collision(Mesh*, ModelInstance*, CollisionType::Type, bool isCompoundChild) noexcept;
+        public:
+            static void InitBlankMesh(Mesh&);
+            static void LoadGPU(Mesh&);
+            static void UnloadCPU(Mesh&);
+            static void UnloadGPU(Mesh&);
+            static bool SupportsInstancing();
+            static btCollisionShape* BuildCollision(ModelInstance*, CollisionType::Type, bool isCompoundChild = false);
+            static btCollisionShape* BuildCollision(Mesh*, CollisionType::Type, bool isCompoundChild = false);
 
-        static void FinalizeVertexData(Mesh&, MeshImportedData& data);
-        static void TriangulateComponentIndices(Mesh&, MeshImportedData& data, std::vector<std::vector<uint>>& indices, unsigned char flags);
-        static void CalculateRadius(Mesh&);
+            static void FinalizeVertexData(Mesh&, MeshImportedData& data);
+            static void TriangulateComponentIndices(Mesh&, MeshImportedData& data, std::vector<std::vector<uint>>& indices, unsigned char flags);
+            static void CalculateRadius(Mesh&);
     };
 };
 
 class Mesh final: public Resource, public Observer, public Engine::NonCopyable, public Engine::NonMoveable {
-    friend struct Engine::priv::InternalMeshPublicInterface;
+    friend class  Engine::priv::InternalMeshPublicInterface;
     friend struct Engine::priv::InternalMeshRequestPublicInterface;
     friend struct Engine::priv::DefaultMeshBindFunctor;
     friend struct Engine::priv::DefaultMeshUnbindFunctor;
@@ -98,9 +101,9 @@ class Mesh final: public Resource, public Observer, public Engine::NonCopyable, 
         explicit operator bool() const { return (bool)m_VertexData; }
 
         std::unordered_map<std::string, Engine::priv::AnimationData>& animationData();
-        const glm::vec3& getRadiusBox() const;
-        float getRadius() const;
-        const VertexData& getVertexData() const;
+        inline constexpr const glm::vec3& getRadiusBox() const noexcept { return m_radiusBox; }
+        inline constexpr float getRadius() const noexcept { return m_radius; }
+        inline constexpr const VertexData& getVertexData() const noexcept { return *m_VertexData; }
 
         void onEvent(const Event& e);
 

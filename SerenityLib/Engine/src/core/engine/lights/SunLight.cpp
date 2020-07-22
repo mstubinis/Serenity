@@ -1,13 +1,12 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/lights/SunLight.h>
 #include <core/engine/resources/Engine_Resources.h>
 
 #include <ecs/ComponentBody.h>
 
 using namespace Engine;
-using namespace std;
 
-SunLight::SunLight(const glm_vec3& pos, LightType::Type type, Scene* scene) : Entity(*scene){
+SunLight::SunLight(const glm_vec3& pos, LightType type, Scene* scene) : Entity(*scene){
     if (!scene) {
         scene = Resources::getCurrentScene();
     }

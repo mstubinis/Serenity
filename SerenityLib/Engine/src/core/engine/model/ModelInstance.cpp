@@ -1,4 +1,4 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/model/ModelInstance.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/math/Engine_Math.h>
@@ -110,7 +110,7 @@ namespace Engine::priv {
         //auto& i = *static_cast<ModelInstance*>(r);
     }};
 };
-const bool priv::InternalModelInstancePublicInterface::IsViewportValid(const ModelInstance& modelInstance, const Viewport& viewport) {
+bool priv::InternalModelInstancePublicInterface::IsViewportValid(const ModelInstance& modelInstance, const Viewport& viewport) {
     const auto flags = modelInstance.getViewportFlags();
     return (flags & (1 << viewport.id()) || flags == 0);
 }
@@ -181,12 +181,6 @@ ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
 }
 ModelInstance::~ModelInstance() {
 }
-void ModelInstance::setGlobalDistanceFactor(decimal factor) {
-    ModelInstance::m_GlobalDistanceFactor = factor;
-}
-decimal ModelInstance::getGlobalDistanceFactor() {
-    return ModelInstance::m_GlobalDistanceFactor;
-}
 void ModelInstance::bind(const Engine::priv::Renderer& renderer) {
     m_CustomBindFunctor(this, &renderer);
 }
@@ -208,21 +202,6 @@ void ModelInstance::internal_init(Mesh* mesh, Material* mat, ShaderProgram* prog
     m_Material          = mat;
     m_Mesh              = mesh;
     internal_update_model_matrix();
-}
-size_t ModelInstance::index() const {
-    return m_Index;
-}
-ModelDrawingMode::Mode ModelInstance::getDrawingMode() const {
-    return m_DrawingMode;
-}
-void ModelInstance::setDrawingMode(ModelDrawingMode::Mode drawMode) {
-    m_DrawingMode = drawMode;
-}
-void ModelInstance::forceRender(bool forced) {
-    m_ForceRender = forced;
-}
-bool ModelInstance::isForceRendered() const {
-    return m_ForceRender;
 }
 void ModelInstance::setViewportFlag(unsigned int flag) {
     m_ViewportFlag = flag;
@@ -252,27 +231,9 @@ void ModelInstance::internal_update_model_matrix() {
     }
     Math::setFinalModelMatrix(m_ModelMatrix, m_Position, m_Orientation, m_Scale);
 }
-Entity ModelInstance::parent() const {
-    return m_Parent; 
-}
 void ModelInstance::setStage(RenderStage stage, ComponentModel& componentModel) {
     m_Stage = stage;
     componentModel.setStage(stage, m_Index);
-}
-void ModelInstance::show() {
-    m_Visible = true; 
-}
-void ModelInstance::hide() {
-    m_Visible = false; 
-}
-bool ModelInstance::visible() const {
-    return m_Visible; 
-}
-bool ModelInstance::passedRenderCheck() const {
-    return m_PassedRenderCheck; 
-}
-void ModelInstance::setPassedRenderCheck(bool passed) {
-    m_PassedRenderCheck = passed;
 }
 void ModelInstance::setColor(float r, float g, float b, float a) {
     m_Color = Engine::color_vector_4(r, g, b, a);
@@ -338,36 +299,6 @@ void ModelInstance::rotate(const glm::vec3& v){
 }
 void ModelInstance::scale(const glm::vec3& v) {
     ModelInstance::scale(v.x, v.y, v.z);
-}
-const Engine::color_vector_4& ModelInstance::color() const {
-    return m_Color; 
-}
-const Engine::color_vector_4& ModelInstance::godRaysColor() const {
-    return m_GodRaysColor; 
-}
-const glm::mat4& ModelInstance::modelMatrix() const {
-    return m_ModelMatrix; 
-}
-const glm::vec3& ModelInstance::getScale() const {
-    return m_Scale; 
-}
-const glm::vec3& ModelInstance::position() const {
-    return m_Position; 
-}
-const glm::quat& ModelInstance::orientation() const {
-    return m_Orientation; 
-}
-ShaderProgram* ModelInstance::shaderProgram() const {
-    return m_ShaderProgram; 
-}
-Mesh* ModelInstance::mesh() const {
-    return m_Mesh; 
-}
-Material* ModelInstance::material() const {
-    return m_Material; 
-}
-RenderStage ModelInstance::stage() const {
-    return m_Stage; 
 }
 void ModelInstance::setShaderProgram(Handle shaderProgramHandle, ComponentModel& componentModel) {
     ModelInstance::setShaderProgram(shaderProgramHandle.get<ShaderProgram>(), componentModel);

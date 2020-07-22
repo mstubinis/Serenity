@@ -1,11 +1,11 @@
 #pragma once
-#ifndef ENGINE_MODEL_INSTANCE_INCLUDES_H_INCLUDE_GUARD
-#define ENGINE_MODEL_INSTANCE_INCLUDES_H_INCLUDE_GUARD
+#ifndef ENGINE_MODEL_INSTANCE_INCLUDES_H
+#define ENGINE_MODEL_INSTANCE_INCLUDES_H
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 
-struct ModelDrawingMode final { enum Mode {
+enum class ModelDrawingMode {
     Triangles              = GL_TRIANGLES,
     TriangleStrip          = GL_TRIANGLE_STRIP,
     TriangleFan            = GL_TRIANGLE_FAN,
@@ -20,6 +20,6 @@ struct ModelDrawingMode final { enum Mode {
     TrianglesAdjacency     = GL_TRIANGLES_ADJACENCY,
     LineStripAdjacency     = GL_LINE_STRIP_ADJACENCY,
     LinesAdjacency         = GL_LINES_ADJACENCY,
-};};
+};
 
 #endif

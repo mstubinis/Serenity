@@ -4,7 +4,6 @@
 #include <ecs/ComponentBody.h>
 
 using namespace Engine;
-using namespace std;
 
 RodLight::RodLight(const glm_vec3& pos, float rodLength, Scene* scene) : PointLight(LightType::Rod, pos, scene) {
     setRodLength(rodLength);

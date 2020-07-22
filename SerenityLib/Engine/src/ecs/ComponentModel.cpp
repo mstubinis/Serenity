@@ -1,4 +1,4 @@
-#include "core/engine/utils/PrecompiledHeader.h"
+#include <core/engine/utils/PrecompiledHeader.h>
 #include <ecs/ComponentModel.h>
 #include <ecs/ComponentBody.h>
 #include <ecs/ComponentCamera.h>
@@ -51,7 +51,7 @@ float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) 
 };
 void ComponentModel_Functions::RegisterDeferredMeshLoaded(ComponentModel& super, Mesh* mesh) {
     if (mesh && *mesh == false) {
-        super.registerEvent(EventType::MeshLoaded);
+        super.registerEvent(EventType::ResourceLoaded);
     }
 }
 
@@ -95,9 +95,9 @@ ComponentModel::ComponentModel(ComponentModel&& other) noexcept {
     m_Radius         = std::move(other.m_Radius);
     m_RadiusBox      = std::move(other.m_RadiusBox);
 
-    if (other.isRegistered(EventType::MeshLoaded)) {
-        registerEvent(EventType::MeshLoaded);
-        other.unregisterEvent(EventType::MeshLoaded);
+    if (other.isRegistered(EventType::ResourceLoaded)) {
+        registerEvent(EventType::ResourceLoaded);
+        other.unregisterEvent(EventType::ResourceLoaded);
     }
 }
 ComponentModel& ComponentModel::operator=(ComponentModel&& other) noexcept {
@@ -107,9 +107,9 @@ ComponentModel& ComponentModel::operator=(ComponentModel&& other) noexcept {
         m_Radius         = std::move(other.m_Radius);
         m_RadiusBox      = std::move(other.m_RadiusBox);
 
-        if (other.isRegistered(EventType::MeshLoaded)) {
-            registerEvent(EventType::MeshLoaded);
-            other.unregisterEvent(EventType::MeshLoaded);
+        if (other.isRegistered(EventType::ResourceLoaded)) {
+            registerEvent(EventType::ResourceLoaded);
+            other.unregisterEvent(EventType::ResourceLoaded);
         }
     }
     return *this;
@@ -121,8 +121,8 @@ Entity ComponentModel::getOwner() const {
     return m_Owner;
 }
 void ComponentModel::onEvent(const Event& event_) {
-    if (event_.type == EventType::MeshLoaded) {
-        auto* mesh = event_.eventMeshLoaded.mesh;
+    if (event_.type == EventType::ResourceLoaded && event_.eventResource.resource->type() == ResourceType::Mesh) {
+        auto* mesh = (Mesh*)event_.eventResource.resource;
         vector<Mesh*> unfinishedMeshes;
         unfinishedMeshes.reserve(m_ModelInstances.size());
         for (auto& instance : m_ModelInstances) {
@@ -133,7 +133,7 @@ void ComponentModel::onEvent(const Event& event_) {
         }
         if (unfinishedMeshes.size() == 0) {
             ComponentModel_Functions::CalculateRadius(*this);
-            unregisterEvent(EventType::MeshLoaded);
+            unregisterEvent(EventType::ResourceLoaded);
         }
     }
 }

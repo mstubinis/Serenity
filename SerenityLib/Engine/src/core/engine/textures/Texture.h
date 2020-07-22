@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_TEXTURE_INCLUDE_GUARD
-#define ENGINE_TEXTURE_INCLUDE_GUARD
+#ifndef ENGINE_TEXTURE_H
+#define ENGINE_TEXTURE_H
 
 namespace Engine::priv {
     struct TextureRequestStaticImpl;
@@ -24,7 +24,7 @@ class Texture: public Resource {
         std::vector<Engine::priv::ImageLoadedStructure>   m_ImagesDatas;
         std::vector<GLuint>                               m_TextureAddresses; 
         unsigned int                                      m_Type                 = 0U;
-        TextureType::Type                                 m_TextureType          = TextureType::Texture2D;
+        TextureType                                       m_TextureType          = TextureType::Unknown;
         bool                                              m_Mipmapped            = false;
         bool                                              m_IsToBeMipmapped      = false;
         unsigned int                                      m_MinFilter            = 0U; //used to determine filter type for mipmaps
@@ -35,16 +35,16 @@ class Texture: public Resource {
         Texture(
             unsigned int renderTgtWidth, 
             unsigned int renderTgtHeight,
-            ImagePixelType::Type pixelType, 
-            ImagePixelFormat::Format pixelFormat, 
-            ImageInternalFormat::Format internalFormat,
+            ImagePixelType pixelType, 
+            ImagePixelFormat pixelFormat, 
+            ImageInternalFormat internalFormat,
             float divisor = 1.0f
         );
         //Single File
         Texture(
             const std::string& filename,
             bool generateMipmaps = true,
-            ImageInternalFormat::Format internalFormat = ImageInternalFormat::Format::SRGB8_ALPHA8,
+            ImageInternalFormat internalFormat = ImageInternalFormat::SRGB8_ALPHA8,
             unsigned int openglTexureType = GL_TEXTURE_2D
         );
         //Pixels From Memory
@@ -52,7 +52,7 @@ class Texture: public Resource {
             const sf::Image& sfImage,
             const std::string& textureName = "CustomTexture",
             bool generateMipmaps = false, 
-            ImageInternalFormat::Format internalFormat = ImageInternalFormat::Format::SRGB8_ALPHA8,
+            ImageInternalFormat internalFormat = ImageInternalFormat::SRGB8_ALPHA8,
             unsigned int openglTexureType = GL_TEXTURE_2D
         );
         //Cubemap from 6 files
@@ -60,7 +60,7 @@ class Texture: public Resource {
             const std::string files[],
             const std::string& textureName = "Cubemap", 
             bool generateMipmaps = false,
-            ImageInternalFormat::Format internalFormat = ImageInternalFormat::Format::SRGB8_ALPHA8
+            ImageInternalFormat internalFormat = ImageInternalFormat::SRGB8_ALPHA8
         );
         virtual ~Texture();
 
@@ -74,36 +74,36 @@ class Texture: public Resource {
 
         unsigned char* pixels();
         GLuint address(unsigned int index = 0) const;
-        unsigned int type() const;
+        inline constexpr unsigned int type() const noexcept { return m_Type; }
         unsigned int width() const;
         unsigned int height() const;
         glm::uvec2 size() const;
         glm::vec2 sizeAsRatio() const;
         size_t numAddresses() const;
-        bool mipmapped() const;
+        inline constexpr bool mipmapped() const noexcept { return m_Mipmapped; }
         bool compressed() const;
         void setAnisotropicFiltering(float anisotropicFiltering);
         
-        ImageInternalFormat::Format internalFormat() const;
-        ImagePixelFormat::Format pixelFormat() const;
-        ImagePixelType::Type pixelType() const;
+        ImageInternalFormat internalFormat() const;
+        ImagePixelFormat pixelFormat() const;
+        ImagePixelType pixelType() const;
 
-        void setXWrapping(TextureWrap::Wrap);
-        void setYWrapping(TextureWrap::Wrap);
-        void setZWrapping(TextureWrap::Wrap);
-        void setWrapping(TextureWrap::Wrap);
+        void setXWrapping(TextureWrap);
+        void setYWrapping(TextureWrap);
+        void setZWrapping(TextureWrap);
+        void setWrapping(TextureWrap);
 
-        void setMinFilter(TextureFilter::Filter);
-        void setMaxFilter(TextureFilter::Filter);
-        void setFilter(TextureFilter::Filter);
+        void setMinFilter(TextureFilter);
+        void setMaxFilter(TextureFilter);
+        void setFilter(TextureFilter);
 
-        static void setXWrapping(unsigned int type, TextureWrap::Wrap);
-        static void setYWrapping(unsigned int type, TextureWrap::Wrap);
-        static void setZWrapping(unsigned int type, TextureWrap::Wrap);
-        static void setWrapping(unsigned int type, TextureWrap::Wrap);
+        static void setXWrapping(unsigned int type, TextureWrap);
+        static void setYWrapping(unsigned int type, TextureWrap);
+        static void setZWrapping(unsigned int type, TextureWrap);
+        static void setWrapping(unsigned int type, TextureWrap);
 
-        static void setMinFilter(unsigned int type, TextureFilter::Filter);
-        static void setMaxFilter(unsigned int type, TextureFilter::Filter);
-        static void setFilter(unsigned int type, TextureFilter::Filter);
+        static void setMinFilter(unsigned int type, TextureFilter);
+        static void setMaxFilter(unsigned int type, TextureFilter);
+        static void setFilter(unsigned int type, TextureFilter);
 };
 #endif
