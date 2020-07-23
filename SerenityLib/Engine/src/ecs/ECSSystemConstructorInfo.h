@@ -27,23 +27,23 @@ namespace Engine::priv {
         ECSSystemCI(ECSSystemCI&& other) noexcept            = delete;
         ECSSystemCI& operator=(ECSSystemCI&& other) noexcept = delete;
 
-        void setUpdateFunction(std_func_update func) noexcept {
-            onUpdateFunction = func;
+        void setUpdateFunction(std_func_update&& func) noexcept {
+            onUpdateFunction = std::move(func);
         }
-        void setOnComponentAddedToEntityFunction(std_func_component func) noexcept {
-            onComponentAddedToEntityFunction = func;
+        void setOnComponentAddedToEntityFunction(std_func_component&& func) noexcept {
+            onComponentAddedToEntityFunction = std::move(func);
         }
-        void setOnComponentRemovedFromEntityFunction(std_func_component_removed func) noexcept {
-            onComponentRemovedFromEntityFunction = func;
+        void setOnComponentRemovedFromEntityFunction(std_func_component_removed&& func) noexcept {
+            onComponentRemovedFromEntityFunction = std::move(func);
         }
-        void setOnEntityAddedToSceneFunction(std_func_entity func) noexcept {
-            onEntityAddedToSceneFunction = func;
+        void setOnEntityAddedToSceneFunction(std_func_entity&& func) noexcept {
+            onEntityAddedToSceneFunction = std::move(func);
         }
-        void setOnSceneEnteredFunction(std_func_scene func) noexcept {
-            onSceneEnteredFunction = func;
+        void setOnSceneEnteredFunction(std_func_scene&& func) noexcept {
+            onSceneEnteredFunction = std::move(func);
         }
-        void setOnSceneLeftFunction(std_func_scene func) noexcept {
-            onSceneLeftFunction = func;
+        void setOnSceneLeftFunction(std_func_scene&& func) noexcept {
+            onSceneLeftFunction = std::move(func);
         }
     };
 };

@@ -97,16 +97,16 @@ class Material final : public Resource {
         MaterialComponent& addComponentRefraction(const std::string& cubeMapName, const std::string& mapFile, float refractiveIndex = 1.0f, float mixFactor = 1.0f);
         MaterialComponent& addComponentParallaxOcclusion(const std::string& textureFile, float heightScale = 0.1f);
 
-        constexpr bool shadeless() const noexcept { return m_Shadeless; }
-        constexpr const Engine::color_vector_4& f0() const noexcept { return m_F0Color; }
-        constexpr unsigned char glow() const noexcept { return m_BaseGlow; }
-        constexpr std::uint32_t id() const noexcept { return m_ID; }
-        constexpr unsigned char diffuseModel() const noexcept { return m_DiffuseModel; }
-        constexpr unsigned char specularModel() const noexcept { return m_SpecularModel; }
-        constexpr unsigned char ao() const noexcept { return m_BaseAO; }
-        constexpr unsigned char metalness() const noexcept { return m_BaseMetalness; }
-        constexpr unsigned char smoothness() const noexcept { return m_BaseSmoothness; }
-        constexpr unsigned char alpha() const noexcept { return m_BaseAlpha; }
+        inline CONSTEXPR bool shadeless() const noexcept { return m_Shadeless; }
+        inline CONSTEXPR const Engine::color_vector_4& f0() const noexcept { return m_F0Color; }
+        inline CONSTEXPR unsigned char glow() const noexcept { return m_BaseGlow; }
+        inline CONSTEXPR std::uint32_t id() const noexcept { return m_ID; }
+        inline CONSTEXPR unsigned char diffuseModel() const noexcept { return m_DiffuseModel; }
+        inline CONSTEXPR unsigned char specularModel() const noexcept { return m_SpecularModel; }
+        inline CONSTEXPR unsigned char ao() const noexcept { return m_BaseAO; }
+        inline CONSTEXPR unsigned char metalness() const noexcept { return m_BaseMetalness; }
+        inline CONSTEXPR unsigned char smoothness() const noexcept { return m_BaseSmoothness; }
+        inline CONSTEXPR unsigned char alpha() const noexcept { return m_BaseAlpha; }
         
         void setF0Color(const Engine::color_vector_4& f0Color);
         void setF0Color(unsigned char r, unsigned char g, unsigned char b);

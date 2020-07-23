@@ -922,9 +922,6 @@
     <ClCompile Include="Engine\src\core\engine\mesh\MeshRequest.cpp">
       <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\mesh\Skeleton.cpp">
-      <Filter>Source Files\Engine\Core\Mesh</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\src\core\engine\mesh\VertexBufferObject.cpp">
       <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>

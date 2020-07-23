@@ -13,17 +13,14 @@
 
 using namespace Engine;
 using namespace Engine::priv;
-using namespace std;
 
-
-void opengl::glsl::SSAOCode::convert(string& code, const unsigned int versionNumber, const ShaderType::Type shaderType) {
-
+void opengl::glsl::SSAOCode::convert(std::string& code, unsigned int versionNumber, ShaderType shaderType) {
     if (shaderType == ShaderType::Fragment) {
 
 #pragma region SSAO function
         if (ShaderHelper::sfind(code, "SSAOExecute(")) {
             if (!ShaderHelper::sfind(code, "float SSAOExecute(")) {
-                const string execute_code =
+                ShaderHelper::insertStringRightBeforeLineContent(code, 
                     "float SSAOExecute(sampler2D inDepthSampler, vec2 in_uvs, int in_numSamples, int in_noiseTextureSize, vec2 in_randomVector, float in_radius, vec3 in_position, vec3 in_normals, float in_intensity, float in_bias, float in_scale){//generated\n"
                     "    float res = 0.0;\n"
                     "    for (int i = 0; i < in_numSamples; ++i) {\n"
@@ -36,8 +33,8 @@ void opengl::glsl::SSAOCode::convert(string& code, const unsigned int versionNum
                     "    }\n"
                     "    res /= (in_numSamples * 4.0);\n"
                     "    return res;\n"
-                    "}\n";
-                ShaderHelper::insertStringRightBeforeLineContent(code, execute_code, "void main(");
+                    "}\n"
+                , "void main(");
             }
         }
 #pragma endregion
@@ -45,7 +42,7 @@ void opengl::glsl::SSAOCode::convert(string& code, const unsigned int versionNum
 #pragma region Occlude function
         if (ShaderHelper::sfind(code, "SSAOOcclude(")) {
             if (!ShaderHelper::sfind(code, "float SSAOOcclude(")) {
-                const string occlude_code =
+                ShaderHelper::insertStringRightBeforeLineContent(code, 
                     "float SSAOOcclude(sampler2D inDepthSampler, vec2 in_offsetUV, vec3 in_origin, vec3 in_normal, in float in_intensity, in float in_bias, in float in_scale){//generated\n"
                     "    vec3 ViewPos          = GetViewPosition(inDepthSampler, in_offsetUV, CameraNear, CameraFar);\n"
                     "    vec3 PositionOffset   = ViewPos - in_origin;\n"
@@ -55,8 +52,8 @@ void opengl::glsl::SSAOCode::convert(string& code, const unsigned int versionNum
                     "    float attenuation     = 1.0 / (1.0 + Dist);\n"
                     "    float angleMath       = max(0.0, dot(in_normal, VectorNormalized) - in_bias);\n"
                     "    return angleMath * attenuation * in_intensity;\n"
-                    "}\n";
-                ShaderHelper::insertStringRightBeforeLineContent(code, occlude_code, "float SSAOExecute(");
+                    "}\n"
+                , "float SSAOExecute(");
             }
         }
 #pragma endregion
@@ -65,13 +62,13 @@ void opengl::glsl::SSAOCode::convert(string& code, const unsigned int versionNum
 #pragma region Poisson Data
         if (ShaderHelper::sfind(code, "SSAOPoisson[")) {
             if (!ShaderHelper::sfind(code, "vec2 SSAOPoisson[")) {
-                const string poisson_code =
+                ShaderHelper::insertStringRightBeforeLineContent(code, 
                     "const vec2 SSAOPoisson[16] = vec2[](vec2(1.0, 0.0), vec2(-1.0, 0.0),vec2(0.0, 1.0),vec2(0.0, -1.0),\n"
                     "                               vec2(-0.707, 0.707), vec2(0.707, -0.707),vec2(-0.707, -0.707),vec2(0.707, 0.707),\n"
                     "                               vec2(-0.375, 0.927), vec2(0.375, -0.927), vec2(-0.375, -0.927), vec2(0.375, 0.927),\n"
                     "                               vec2(-0.927, 0.375), vec2(0.927, -0.375), vec2(-0.927, -0.375), vec2(0.927, 0.375));\n"
-                    "\n";
-                ShaderHelper::insertStringRightBeforeLineContent(code, poisson_code, "float SSAOOcclude(");
+                    "\n"
+                , "float SSAOOcclude(");
             }
         }
 #pragma endregion

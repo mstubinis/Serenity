@@ -17,7 +17,7 @@ namespace Engine {
                 m_C = c;
                 m_Normal = glm::normalize(glm::cross(m_B - m_A, m_C - m_A));
             }
-            float CalculateDot(const glm::vec3& locationModelSpace) const {
+            float CalculateDot(const glm::vec3& locationModelSpace) const noexcept {
                 return glm::dot(locationModelSpace, m_Normal);
             }
     };

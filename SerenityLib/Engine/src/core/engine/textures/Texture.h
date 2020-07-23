@@ -74,13 +74,13 @@ class Texture: public Resource {
 
         unsigned char* pixels();
         GLuint address(unsigned int index = 0) const;
-        inline constexpr unsigned int type() const noexcept { return m_Type; }
+        inline CONSTEXPR unsigned int type() const noexcept { return m_Type; }
         unsigned int width() const;
         unsigned int height() const;
         glm::uvec2 size() const;
         glm::vec2 sizeAsRatio() const;
         size_t numAddresses() const;
-        inline constexpr bool mipmapped() const noexcept { return m_Mipmapped; }
+        inline CONSTEXPR bool mipmapped() const noexcept { return m_Mipmapped; }
         bool compressed() const;
         void setAnisotropicFiltering(float anisotropicFiltering);
         

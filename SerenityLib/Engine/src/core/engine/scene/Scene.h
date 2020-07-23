@@ -76,11 +76,11 @@ class Scene: public Resource, public Observer {
         virtual void onEvent(const Event& event);
         virtual void onResize(unsigned int width, unsigned int height) {}
 
-        void setOnUpdateFunctor(std::function<void(Scene*, const float)> functor) noexcept {
-            m_OnUpdateFunctor = functor;
+        void setOnUpdateFunctor(std::function<void(Scene*, const float)>&& functor) noexcept {
+            m_OnUpdateFunctor = std::move(functor);
         }
 
-        inline constexpr unsigned int id() const noexcept { return m_ID; }
+        inline CONSTEXPR unsigned int id() const noexcept { return m_ID; }
         inline unsigned int numViewports() const noexcept { return (unsigned int)m_Viewports.size(); }
 
 
@@ -105,13 +105,13 @@ class Scene: public Resource, public Observer {
         void setBackgroundColor(float r, float g, float b, float a);
         void setBackgroundColor(const glm::vec4& backgroundColor);
 
-        inline constexpr const glm::vec3& getGlobalIllumination() const noexcept { return m_GI; }
+        inline CONSTEXPR const glm::vec3& getGlobalIllumination() const noexcept { return m_GI; }
         void setGlobalIllumination(float global, float diffuse, float specular);
         void setGlobalIllumination(const glm::vec3& globalIllumination);
 
         inline void setGodRaysSun(Entity* sun) noexcept { m_Sun = sun; }
-        inline Entity* getGodRaysSun() const noexcept { return m_Sun; }
-        inline Skybox* skybox() const noexcept { return m_Skybox; }
+        inline CONSTEXPR Entity* getGodRaysSun() const noexcept { return m_Sun; }
+        inline CONSTEXPR Skybox* skybox() const noexcept { return m_Skybox; }
         inline void setSkybox(Skybox* s) noexcept { m_Skybox = s; }
 
         void centerSceneToObject(Entity centerEntity);

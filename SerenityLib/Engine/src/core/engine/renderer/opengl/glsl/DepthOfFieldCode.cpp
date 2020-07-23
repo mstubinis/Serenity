@@ -13,15 +13,13 @@
 
 using namespace Engine;
 using namespace Engine::priv;
-using namespace std;
 
-
-void opengl::glsl::DepthOfFieldCode::convert(string& code, const unsigned int versionNumber, const ShaderType::Type shaderType) {
+void opengl::glsl::DepthOfFieldCode::convert(std::string& code, unsigned int versionNumber, ShaderType shaderType) {
     if (shaderType == ShaderType::Fragment) {
         #pragma region DOF function
         if (ShaderHelper::sfind(code, "DOFExecute(")) {
             if (!ShaderHelper::sfind(code, "vec4 DOFExecute(")) {
-                const string execute_code =
+                ShaderHelper::insertStringRightBeforeLineContent(code, 
                     "vec4 DOFExecute(sampler2D in_texture, vec2 in_uvs, vec2 in_aspect, vec2 in_blur_factor){//generated\n"
                     "    vec4 col = vec4(0.0);\n"
                     "    col += texture2D(in_texture, in_uvs);\n"
@@ -54,8 +52,8 @@ void opengl::glsl::DepthOfFieldCode::convert(string& code, const unsigned int ve
                     "        col += texture2D(in_texture, in_uvs + (vec2(0.0, 0.4)*in_aspect)     * in_blur_factor * DOFWeight[k]);\n"
                     "    }\n"
                     "    return col;\n"
-                    "}\n";
-                ShaderHelper::insertStringRightBeforeLineContent(code, execute_code, "void main(");
+                    "}\n"
+                , "void main(");
             }
         }
         #pragma endregion
@@ -63,8 +61,7 @@ void opengl::glsl::DepthOfFieldCode::convert(string& code, const unsigned int ve
         #pragma region DOF Weight Data
         if (ShaderHelper::sfind(code, "DOFWeight[")) {
             if (!ShaderHelper::sfind(code, "float DOFWeight[")) {
-                const string weight_code = "const float DOFWeight[4] = float[](1.0,0.9,0.7,0.4);\n";
-                ShaderHelper::insertStringRightBeforeLineContent(code, weight_code, "vec4 DOFExecute(");
+                ShaderHelper::insertStringRightBeforeLineContent(code, "const float DOFWeight[4] = float[](1.0,0.9,0.7,0.4);\n", "vec4 DOFExecute(");
             }
         }
         #pragma endregion

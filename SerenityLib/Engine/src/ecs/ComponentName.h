@@ -19,11 +19,11 @@ class ComponentName {
         ComponentName(ComponentName&& other) noexcept            = default;
         ComponentName& operator=(ComponentName&& other) noexcept = default;
 
-        const std::string& name() const;
-        void setName(const std::string& name);
-        void setName(const char* name);
-        size_t size() const;
-        bool empty() const;
+        inline CONSTEXPR const std::string& name() const noexcept { return m_Data; }
+        inline void setName(const std::string& name) noexcept { m_Data = name; }
+        inline void setName(const char* name) noexcept { m_Data = name; }
+        inline size_t size() const noexcept { return m_Data.size(); }
+        inline bool empty() const noexcept { return m_Data.empty(); }
 
         ~ComponentName();
 };

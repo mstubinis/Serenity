@@ -66,14 +66,14 @@ namespace Engine::Networking {
 
             virtual void onEvent(const Event& e) override {}
 
-            constexpr ConnectionState::State connectionState() const noexcept { return m_ConnectionState; }
-            constexpr const std::string& hash() const noexcept { return m_Hash; }
-            constexpr Engine::Networking::SocketTCP* socket() const noexcept { return m_TcpSocket; }
-            constexpr unsigned short port() const noexcept { return m_Port; }
-            constexpr const sf::IpAddress& ip() const noexcept { return m_IP; }
-            constexpr std::uint32_t id() const noexcept { return m_ID; }
-            constexpr void setTimeoutTimerLimit(float limit) noexcept { m_Timeout_Timer_Limit = limit; }
-            constexpr void setRecoveryTimeoutTimerLimit(float limit) noexcept { m_Recovery_Timeout_Timer_Limit = limit; }
+            inline CONSTEXPR ConnectionState::State connectionState() const noexcept { return m_ConnectionState; }
+            inline CONSTEXPR const std::string& hash() const noexcept { return m_Hash; }
+            inline CONSTEXPR Engine::Networking::SocketTCP* socket() const noexcept { return m_TcpSocket; }
+            inline CONSTEXPR unsigned short port() const noexcept { return m_Port; }
+            inline CONSTEXPR const sf::IpAddress& ip() const noexcept { return m_IP; }
+            inline CONSTEXPR std::uint32_t id() const noexcept { return m_ID; }
+            inline CONSTEXPR void setTimeoutTimerLimit(float limit) noexcept { m_Timeout_Timer_Limit = limit; }
+            inline CONSTEXPR void setRecoveryTimeoutTimerLimit(float limit) noexcept { m_Recovery_Timeout_Timer_Limit = limit; }
 
 
             sf::Uint32 generate_nonce() const noexcept;

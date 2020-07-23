@@ -5,7 +5,8 @@
 #include <core/engine/lua/LuaModule.h>
 #include <core/engine/lua/LuaScript.h>
 
-template <typename OWNER, typename... ARGS> class LuaCallableFunction {
+template <typename OWNER, typename... ARGS> 
+class LuaCallableFunction {
     using cpp_type = std::function<void(const OWNER*, ARGS... args)>;
     private:
         cpp_type*             m_CPPFunctor  = nullptr;
@@ -52,27 +53,37 @@ template <typename OWNER, typename... ARGS> class LuaCallableFunction {
             }
             return *this;
         }
-        void setFunctor(cpp_type functor) {
+        void setFunctor(cpp_type&& functor) noexcept {
             internal_delete();
-            m_CPPFunctor = NEW cpp_type(functor);
+            m_CPPFunctor = NEW cpp_type(std::move(functor));
         }
-        void setFunctor(luabridge::LuaRef& luaFunction) {
+        void setFunctor(luabridge::LuaRef& luaFunction) noexcept {
             if (!luaFunction.isNil() && luaFunction.isFunction()) {
                 internal_delete();
                 m_LUAFunctor = NEW luabridge::LuaRef(luaFunction);
             }
         }
-        void operator()(const OWNER* owner, ARGS... args) const {
-            if (m_CPPFunctor) {
-                (*m_CPPFunctor)(owner, (args)...);
-            }else{
-                //try {
+
+        #ifdef ENGINE_PRODUCTION
+            void operator()(const OWNER* owner, ARGS... args) const noexcept {
+                if (m_CPPFunctor)
+                    (*m_CPPFunctor)(owner, (args)...);
+                else
                     (*m_LUAFunctor)(owner, (args)...);
-                //}catch (luabridge::LuaException const& e) {
-                //    std::cout << "LuaException: " << e.what() << std::endl;
-                //}
             }
-        }
+        #else
+            void operator()(const OWNER* owner, ARGS... args) const {
+                if (m_CPPFunctor) {
+                    (*m_CPPFunctor)(owner, (args)...);
+                }else{
+                    try {
+                        (*m_LUAFunctor)(owner, (args)...);
+                    }catch (const luabridge::LuaException& luaException) {
+                        std::cout << "LuaException: " << luaException.what() << '\n';
+                    }
+                }
+            }
+        #endif
 
 };
 #endif

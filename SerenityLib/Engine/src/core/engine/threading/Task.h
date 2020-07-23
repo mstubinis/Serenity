@@ -10,7 +10,7 @@ namespace Engine::priv {
             Task(std::function<void()>&& inTask);
             ~Task();
 
-            void operator()() noexcept {
+            inline void operator()() noexcept {
                 //if (m_Task.valid()) {
                 m_Task();
                 //}

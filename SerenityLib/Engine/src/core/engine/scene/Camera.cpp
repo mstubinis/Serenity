@@ -4,39 +4,35 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/resources/Engine_Resources.h>
 
-using namespace Engine;
-using namespace boost;
-using namespace std;
-
 Camera::Camera(float angle, float aspectRatio, float Near, float Far, Scene* scene) : Entity(*scene){//create a perspective camera
     if (!scene) {
-        scene = Resources::getCurrentScene();
+        scene = Engine::Resources::getCurrentScene();
     }
     addComponent<ComponentCamera>(angle, aspectRatio, Near, Far);
     addComponent<ComponentLogic1>();
     addComponent<ComponentBody>();
 
-    auto& cam   = *getComponent<ComponentCamera>();
-    auto& logic = *getComponent<ComponentLogic1>();
-    auto& body  = *getComponent<ComponentBody>();
+    auto* cam   = getComponent<ComponentCamera>();
+    auto* logic = getComponent<ComponentLogic1>();
+    auto* body  = getComponent<ComponentBody>();
 
-    cam.lookAt(glm_vec3(0.0), glm_vec3(0.0) + body.forward(), body.up());
-    logic.setUserPointer(this);
+    cam->lookAt(glm_vec3(0.0), glm_vec3(0.0) + body->forward(), body->up());
+    logic->setUserPointer(this);
 }
 Camera::Camera(float left, float right, float bottom, float top, float Near, float Far, Scene* scene) : Entity(*scene){//create an orthographic camera
     if (!scene) {
-        scene = Resources::getCurrentScene();
+        scene = Engine::Resources::getCurrentScene();
     }
     addComponent<ComponentCamera>(left, right, bottom, top, Near, Far);
     addComponent<ComponentLogic1>();
     addComponent<ComponentBody>();
 
-    auto& cam   = *getComponent<ComponentCamera>();
-    auto& logic = *getComponent<ComponentLogic1>();
-    auto& body  = *getComponent<ComponentBody>();
+    auto* cam   = getComponent<ComponentCamera>();
+    auto* logic = getComponent<ComponentLogic1>();
+    auto* body  = getComponent<ComponentBody>();
 
-    cam.lookAt(glm_vec3(0.0), glm_vec3(0.0) + body.forward(), body.up());
-    logic.setUserPointer(this);
+    cam->lookAt(glm_vec3(0.0), glm_vec3(0.0) + body->forward(), body->up());
+    logic->setUserPointer(this);
 }
 Camera::~Camera(){ 
 }
@@ -67,17 +63,17 @@ float Camera::getNear() const {
 float Camera::getFar() const {
     return getComponent<ComponentCamera>()->m_FarPlane; 
 }
-void Camera::setAngle(const float Angle) {
+void Camera::setAngle(float Angle) {
     getComponent<ComponentCamera>()->setAngle(Angle); 
 }
-void Camera::setAspect(const float Aspect) {
+void Camera::setAspect(float Aspect) {
     getComponent<ComponentCamera>()->setAspect(Aspect); 
 }
-void Camera::setNear(const float Near_) {
-    getComponent<ComponentCamera>()->setNear(Near_);
+void Camera::setNear(float inNear) {
+    getComponent<ComponentCamera>()->setNear(inNear);
 }
-void Camera::setFar(const float Far_) {
-    getComponent<ComponentCamera>()->setFar(Far_);
+void Camera::setFar(float inFar) {
+    getComponent<ComponentCamera>()->setFar(inFar);
 }
 glm::mat4 Camera::getViewProjectionInverse() const {
     return getComponent<ComponentCamera>()->getViewProjectionInverse(); 
@@ -123,14 +119,14 @@ decimal Camera::getDistanceSquared(Entity otherEntity) const {
 decimal Camera::getDistanceSquared(const glm_vec3& otherPosition) const {
     return glm::distance2(otherPosition, getPosition());
 }
-decimal Camera::getDistanceSquared(const Entity& otherEntity, const glm_vec3& thisPosition) const {
+decimal Camera::getDistanceSquared(Entity otherEntity, const glm_vec3& thisPosition) const {
     ComponentBody* otherEntityBody = otherEntity.getComponent<ComponentBody>();
     return glm::distance2(otherEntityBody->getPosition(), thisPosition);
 }
 decimal Camera::getDistanceSquared(const glm_vec3& otherPosition, const glm_vec3& thisPosition) const {
     return glm::distance2(otherPosition, thisPosition);
 }
-unsigned int Camera::sphereIntersectTest(const glm_vec3& otherPosition, const float otherRadius) const {
+unsigned int Camera::sphereIntersectTest(const glm_vec3& otherPosition, float otherRadius) const {
     return getComponent<ComponentCamera>()->sphereIntersectTest(otherPosition, otherRadius);
 }
 unsigned int Camera::pointIntersectTest(const glm_vec3& otherPosition) const {
@@ -146,5 +142,5 @@ bool Camera::rayIntersectSphere(Entity entity) const {
     if (!entityBody) {
         return false;
     }
-    return Math::rayIntersectSphere(entityBody->getPosition(), entityRadius, getPosition(), getViewVector());
+    return Engine::Math::rayIntersectSphere(entityBody->getPosition(), entityRadius, getPosition(), getViewVector());
 }

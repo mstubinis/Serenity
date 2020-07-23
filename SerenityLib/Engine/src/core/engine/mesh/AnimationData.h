@@ -49,12 +49,12 @@ namespace Engine::priv {
             AnimationData(Mesh& skeleton, const aiAnimation& animation);
             ~AnimationData();
 
-            constexpr float duration() const noexcept {
+            CONSTEXPR float duration() const noexcept {
                 float TicksPerSecond((m_TicksPerSecond != 0.0f) ? m_TicksPerSecond : 25.0f);
                 return m_DurationInTicks / TicksPerSecond;
             }
-            inline constexpr float durationInTicks() const noexcept { return m_DurationInTicks; }
-            inline constexpr float ticksPerSecond() const noexcept { return m_TicksPerSecond; }
+            inline CONSTEXPR float durationInTicks() const noexcept { return m_DurationInTicks; }
+            inline CONSTEXPR float ticksPerSecond() const noexcept { return m_TicksPerSecond; }
         };
 };
 

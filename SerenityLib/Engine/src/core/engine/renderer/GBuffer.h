@@ -53,15 +53,15 @@ namespace Engine::priv{
 
             void bindBackbuffer(const Viewport& viewport, GLuint final_fbo = 0, GLuint final_rbo = 0);
 
-            inline constexpr unsigned int width() const noexcept { return m_Width; }
-            inline constexpr unsigned int height() const noexcept { return m_Height; }
+            inline CONSTEXPR unsigned int width() const noexcept { return m_Width; }
+            inline CONSTEXPR unsigned int height() const noexcept { return m_Height; }
 
-            inline constexpr const std::array<FramebufferTexture*, GBufferType::_TOTAL>& getBuffers() const noexcept { return m_FramebufferTextures; }
+            inline CONSTEXPR const std::array<FramebufferTexture*, GBufferType::_TOTAL>& getBuffers() const noexcept { return m_FramebufferTextures; }
             FramebufferTexture& getBuffer(unsigned int) const;
             Texture& getTexture(unsigned int) const;
 
-            inline constexpr const FramebufferObject& getMainFBO() const noexcept { return m_FBO; }
-            inline constexpr const FramebufferObject& getSmallFBO() const noexcept { return m_SmallFBO; }
+            inline CONSTEXPR const FramebufferObject& getMainFBO() const noexcept { return m_FBO; }
+            inline CONSTEXPR const FramebufferObject& getSmallFBO() const noexcept { return m_SmallFBO; }
     };
 };
 #endif

@@ -30,7 +30,7 @@ class MaterialComponent {
         Texture* cubemap(size_t index = 0) const;
         MaterialLayer& layer(size_t index = 0);
 
-        constexpr MaterialComponentType::Type type() const noexcept { return m_ComponentType; }
+        inline CONSTEXPR MaterialComponentType::Type type() const noexcept { return m_ComponentType; }
 
         void update(const float dt);
 };

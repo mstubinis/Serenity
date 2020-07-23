@@ -8,33 +8,18 @@ using namespace std;
 #pragma region Component
 ComponentName::ComponentName(Entity entity) {
     m_Owner = entity;
-    m_Data = "";
+    m_Data  = "";
 }
 ComponentName::ComponentName(Entity entity, const string& Name) {
     m_Owner = entity;
-    m_Data = Name;
+    m_Data  = Name;
 }
 ComponentName::ComponentName(Entity entity, const char* Name) {
     m_Owner = entity;
-    m_Data = Name;
+    m_Data  = Name;
 }
 ComponentName::~ComponentName() {
-    m_Data = "";
-}
-const string& ComponentName::name() const { 
-    return m_Data;
-}
-void ComponentName::setName(const string& name) {
-    m_Data = name;
-}
-void ComponentName::setName(const char* name) {
-    m_Data = name;
-}
-size_t ComponentName::size() const {
-    return m_Data.size();
-}
-bool ComponentName::empty() const {
-    return m_Data.empty();
+    m_Data  = "";
 }
 #pragma endregion
 
@@ -54,6 +39,5 @@ ComponentName_System_CI::ComponentName_System_CI() {
     setOnSceneLeftFunction([](void* system, void* componentPool, Scene& scene) {
     });
 }
-
 
 #pragma endregion

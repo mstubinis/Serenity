@@ -63,6 +63,11 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#ifdef ENGINE_USE_CONSTEXPR
+    #define CONSTEXPR constexpr
+#else
+    #define CONSTEXPR
+#endif
 
 #ifdef ENGINE_USE_LIKELY
     #define LIKELY [[likely]]
@@ -258,10 +263,10 @@ namespace Engine {
             UserPointer() = default;
             ~UserPointer() = default;
 
-            void setUserPointer(void* userPointer) {
+            inline void setUserPointer(void* userPointer) noexcept {
                 m_UserPointer = userPointer;
             }
-            void* getUserPointer() const {
+            inline constexpr void* getUserPointer() const noexcept {
                 return m_UserPointer;
             }
     };
@@ -293,7 +298,7 @@ namespace Engine {
                 m_Flags = other;
                 return *this;
             }
-            inline const T& get() const noexcept {
+            inline constexpr const T& get() const noexcept {
                 return m_Flags;
             }
             T operator&(const T& other) {
@@ -396,14 +401,12 @@ namespace Engine {
         data = 1; //Assign data
         cptr = (std::uint8_t*) & data; //Type cast
         if (*cptr == 1) {
-            std::cout << ("little-endiann") << "\n";
+            std::cout << "little-endiann\n";
         }else if (*cptr == 0) {
-            std::cout << ("big-endiann") << "\n";
+            std::cout << "big-endiann\n";
         }
     }
 
 };
-
-
 
 #endif

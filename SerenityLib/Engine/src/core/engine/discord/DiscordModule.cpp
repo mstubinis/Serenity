@@ -134,7 +134,7 @@ bool DiscordModule::update() {
     }
     const auto result = m_DiscordCore->RunCallbacks();
     if (m_LoggingErrors) {
-        cout << internal_get_result_string_message(result) << endl;
+        cout << internal_get_result_string_message(result) << '\n';
     }
     return true;
 }

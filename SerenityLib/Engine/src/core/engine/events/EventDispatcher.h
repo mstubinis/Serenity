@@ -12,7 +12,7 @@ namespace Engine::priv{
         private:
             std::vector<std::vector<Observer*>> m_Observers;
 
-            template <typename T> bool internal_check_for_duplicates(const T* observer, const std::vector<T*> vectorContainer) const {
+            template <typename T> bool internal_check_for_duplicates(const T* observer, const std::vector<T*> vectorContainer) const noexcept {
                 for (const auto& o : vectorContainer) {
                     if (o == observer) { return true; }
                 }
@@ -20,18 +20,18 @@ namespace Engine::priv{
             }
         public:
             EventDispatcher();
-            ~EventDispatcher();
+            ~EventDispatcher() = default;
 
-            template <class T> void registerObject(Observer&, const T&) = delete;
-            template <class T> void unregisterObject(Observer&, const T&) = delete;
-            template <class T> bool isObjectRegistered(Observer&, const T&) const = delete;
+            template <class T> void registerObject(Observer&, const T&) noexcept = delete;
+            template <class T> void unregisterObject(Observer&, const T&) noexcept = delete;
+            template <class T> bool isObjectRegistered(Observer&, const T&) const noexcept = delete;
 
-            void registerObject(Observer&, EventType eventType);
-            void unregisterObject(Observer&, EventType eventType);
-            bool isObjectRegistered(const Observer&, EventType eventType) const;
+            void registerObject(Observer&, EventType eventType) noexcept;
+            void unregisterObject(Observer&, EventType eventType) noexcept;
+            bool isObjectRegistered(const Observer&, EventType eventType) const noexcept;
 
-            void dispatchEvent(const Event& event);
-            void dispatchEvent(EventType eventType);
+            void dispatchEvent(const Event& event) noexcept;
+            void dispatchEvent(EventType eventType) noexcept;
     };
 };
 #endif

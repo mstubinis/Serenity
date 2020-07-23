@@ -445,7 +445,6 @@ void EngineCore::run(){
             auto& window = *window_itr;
             handle_events(window);
             update(window, dt);
-            window.setActive(true);
             render(window, dt);
             cleanup(window, dt);
         }

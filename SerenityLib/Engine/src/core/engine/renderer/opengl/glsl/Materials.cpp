@@ -13,15 +13,12 @@
 
 using namespace Engine;
 using namespace Engine::priv;
-using namespace std;
 
-
-void opengl::glsl::Materials::convert(string& code, const unsigned int versionNumber, const ShaderType::Type shaderType) {
-
+void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNumber, ShaderType shaderType) {
 #pragma region process component
     if (ShaderHelper::sfind(code, "ProcessComponent(") || ShaderHelper::sfind(code, "ProcessComponentLOD(")) {
         if (!ShaderHelper::sfind(code, "void ProcessComponent(")) {
-            const string process_component =
+            ShaderHelper::insertStringRightBeforeLineContent(code, 
                 "void ProcessComponent(in Component inComponent, inout InData data) {//generated\n"
                 "    if (inComponent.componentData.y == 0) {\n"
                 "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
@@ -109,8 +106,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
                 "            data.uv = CalculateParallaxMapLOD(inComponent.layers[i], ViewDir, data.uv, lod);\n"
                 "        }\n"
                 "    }\n"
-                "}\n";
-            ShaderHelper::insertStringRightBeforeLineContent(code, process_component, " main(");
+                "}\n"
+            , " main(");
         }
     }
 #pragma endregion
@@ -119,7 +116,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
 
     if (ShaderHelper::sfind(code, "CalculateDiffuse(") || ShaderHelper::sfind(code, "CalculateDiffuseLOD(")) {
         if (!ShaderHelper::sfind(code, "vec4 CalculateDiffuse(")) {
-            const string calculate_diffuse =
+            ShaderHelper::insertStringRightBeforeLineContent(code, 
                 "vec4 CalculateDiffuse(in Layer inLayer, in vec4 canvas, in vec4 objectColor, in vec2 inUVs) {//generated\n"
                 "    vec4 paint = objectColor;\n"
                 "    if (inLayer.data1.y >= 0.5) {\n"
@@ -145,8 +142,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
                 "    }\n"
                 "    paint *= inLayer.data2;\n"
                 "    return DoBlend(paint, canvas, inLayer);\n"
-                "}\n";
-            ShaderHelper::insertStringRightBeforeLineContent(code, calculate_diffuse, "void ProcessComponent(");
+                "}\n"
+            , "void ProcessComponent(");
         }
     }
 #pragma endregion
@@ -154,7 +151,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
 #pragma region calculate normals
     if (ShaderHelper::sfind(code, "CalculateNormals(") || ShaderHelper::sfind(code, "CalculateNormalsLOD(")) {
         if (!ShaderHelper::sfind(code, "vec3 CalculateNormals(")) {
-            const string calculate_normals =
+            ShaderHelper::insertStringRightBeforeLineContent(code, 
                 "vec3 CalculateNormals(in Layer inLayer, in vec3 objectNormals, in vec2 inUVs) {//generated\n"
                 "    vec3 outNormals = objectNormals;\n"
                 "    if (inLayer.data1.y > 0.9) {\n"
@@ -182,8 +179,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
                 "    outNormals *= inLayer.data2.xyz;\n"
                 "    outNormals *= inLayer.data2.w;\n"
                 "    return outNormals;\n"
-                "}\n";
-            ShaderHelper::insertStringRightBeforeLineContent(code, calculate_normals, "vec4 CalculateDiffuse(");
+                "}\n"
+            , "vec4 CalculateDiffuse(");
         }
     }
 #pragma endregion
@@ -192,7 +189,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
 #pragma region calculate glow
     if (ShaderHelper::sfind(code, "CalculateGlow(") || ShaderHelper::sfind(code, "CalculateGlowLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateGlow(")) {
-            const string calculate_glow =
+            ShaderHelper::insertStringRightBeforeLineContent(code, 
                 "float CalculateGlow(in Layer inLayer, in float objectGlow, in vec2 inUVs) {//generated\n"
                 "    float outGlow = objectGlow;\n"
                 "    if (inLayer.data1.y >= 0.5) {\n"
@@ -216,8 +213,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
                 "    outGlow = clamp(outGlow, inLayer.data2.x, inLayer.data2.y);\n"
                 "    outGlow *= inLayer.data2.z;\n"
                 "    return outGlow;\n"
-                "}\n";
-            ShaderHelper::insertStringRightBeforeLineContent(code, calculate_glow, "vec3 CalculateNormals(");
+                "}\n"
+            , "vec3 CalculateNormals(");
         }
     }
 #pragma endregion
@@ -225,7 +222,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
 #pragma region calculate specular
     if (ShaderHelper::sfind(code, "CalculateSpecular(") || ShaderHelper::sfind(code, "CalculateSpecularLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateSpecular(")) {
-            const string calculate_spec =
+            ShaderHelper::insertStringRightBeforeLineContent(code, 
                 "float CalculateSpecular(in Layer inLayer, in float objectSpecular, in vec2 inUVs) {//generated\n"
                 "    float outSpecular = objectSpecular;\n"
                 "    if (inLayer.data1.y >= 0.5) {\n"
@@ -249,8 +246,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
                 "    outSpecular = clamp(outSpecular, inLayer.data2.x, inLayer.data2.y);\n"
                 "    outSpecular *= inLayer.data2.z;\n"
                 "    return outSpecular;\n"
-                "}\n";
-            ShaderHelper::insertStringRightBeforeLineContent(code, calculate_spec, "float CalculateGlow(");
+                "}\n"
+            , "float CalculateGlow(");
         }
     }
 #pragma endregion
@@ -259,7 +256,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
 #pragma region calculate ao
     if (ShaderHelper::sfind(code, "CalculateAO(") || ShaderHelper::sfind(code, "CalculateAOLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateAO(")) {
-            const string calculate_ao =
+            ShaderHelper::insertStringRightBeforeLineContent(code, 
                 "float CalculateAO(in Layer inLayer, in float objectAO, in vec2 inUVs) {//generated\n"
                 "    float outAO = objectAO;\n"
                 "    if (inLayer.data1.y >= 0.5) {\n"
@@ -283,8 +280,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
                 "    outAO = clamp(outAO, inLayer.data2.x, inLayer.data2.y);\n"
                 "    outAO *= inLayer.data2.z;\n"
                 "    return outAO;\n"
-                "}\n";
-            ShaderHelper::insertStringRightBeforeLineContent(code, calculate_ao, "float CalculateSpecular(");
+                "}\n"
+            , "float CalculateSpecular(");
         }
     }
 #pragma endregion
@@ -293,7 +290,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
 #pragma region calculate metalness
     if (ShaderHelper::sfind(code, "CalculateMetalness(") || ShaderHelper::sfind(code, "CalculateMetalnessLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateMetalness(")) {
-            const string calculate_metalness =
+            ShaderHelper::insertStringRightBeforeLineContent(code, 
                 "float CalculateMetalness(in Layer inLayer, in float objectMetalness, in vec2 inUVs) {//generated\n"
                 "    float outMetalness = objectMetalness;\n"
                 "    if (inLayer.data1.y >= 0.5) {\n"
@@ -317,8 +314,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
                 "    outMetalness = clamp(outMetalness, inLayer.data2.x, inLayer.data2.y);\n"
                 "    outMetalness *= inLayer.data2.z;\n"
                 "    return clamp(outMetalness,0.01,0.99);\n"
-                "}\n";
-            ShaderHelper::insertStringRightBeforeLineContent(code, calculate_metalness, "float CalculateAO(");
+                "}\n"
+            , "float CalculateAO(");
         }
     }
 #pragma endregion
@@ -327,7 +324,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
 #pragma region calculate smoothness
     if (ShaderHelper::sfind(code, "CalculateSmoothness(") || ShaderHelper::sfind(code, "CalculateSmoothnessLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateSmoothness(")) {
-            const string calculate_smoothness =
+            ShaderHelper::insertStringRightBeforeLineContent(code, 
                 "float CalculateSmoothness(in Layer inLayer, in float objectSmoothness, in vec2 inUVs) {//generated\n"
                 "    float outSmoothness = objectSmoothness;\n"
                 "    if (inLayer.data1.y >= 0.5) {\n"
@@ -351,8 +348,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
                 "    outSmoothness = clamp(outSmoothness, inLayer.data2.x, inLayer.data2.y);\n"
                 "    outSmoothness *= inLayer.data2.z;\n"
                 "    return clamp(outSmoothness,0.01,0.99);\n"
-                "}\n";
-            ShaderHelper::insertStringRightBeforeLineContent(code, calculate_smoothness, "float CalculateMetalness(");
+                "}\n"
+            , "float CalculateMetalness(");
         }
     }
 #pragma endregion
@@ -360,7 +357,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
 #pragma region calculate reflection
     if (ShaderHelper::sfind(code, "CalculateReflection(") || ShaderHelper::sfind(code, "CalculateReflectionLOD(")) {
         if (!ShaderHelper::sfind(code, "vec4 CalculateReflection(")) {
-            const string calculate_reflection =
+            ShaderHelper::insertStringRightBeforeLineContent(code, 
                 "vec4 CalculateReflection(in Layer inLayer, in vec2 inUVs, in vec4 inDiffuse, in vec3 inCameraPosition, in vec3 inNormals, in vec3 inWorldPosition){//generated\n"
                 //"    inUVs *= inLayer.uvModifications.zw;\n"
                 //"    inUVs += inLayer.uvModifications.xy;\n"
@@ -378,8 +375,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
                 "    r.a *= inLayer.data2.x;\n"
                 "    r = PaintersAlgorithm(r, inDiffuse);\n"
                 "    return r;\n"
-                "}\n";
-            ShaderHelper::insertStringRightBeforeLineContent(code, calculate_reflection, "float CalculateSmoothness(");
+                "}\n"
+            , "float CalculateSmoothness(");
         }
     }
 #pragma endregion
@@ -387,7 +384,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
 #pragma region calculate refraction
     if (ShaderHelper::sfind(code, "CalculateRefraction(") || ShaderHelper::sfind(code, "CalculateRefractionLOD(")) {
         if (!ShaderHelper::sfind(code, "vec4 CalculateRefraction(")) {
-            const string calculate_refraction =
+            ShaderHelper::insertStringRightBeforeLineContent(code, 
                 "vec4 CalculateRefraction(in Layer inLayer, in vec2 inUVs, in vec4 inDiffuse, in vec3 inCameraPosition, in vec3 inNormals, in vec3 inWorldPosition){//generated\n"
                 //"    inUVs *= inLayer.uvModifications.zw;\n"
                 //"    inUVs += inLayer.uvModifications.xy;\n"
@@ -405,8 +402,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
                 "    r.a *= inLayer.data2.x;\n"
                 "    r = PaintersAlgorithm(r, inDiffuse);\n"
                 "    return r;\n"
-                "}\n";
-            ShaderHelper::insertStringRightBeforeLineContent(code, calculate_refraction, "vec4 CalculateReflection(");
+                "}\n"
+            , "vec4 CalculateReflection(");
         }
     }
 #pragma endregion
@@ -414,7 +411,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
 #pragma region calculate parallax 
     if (ShaderHelper::sfind(code, "CalculateParallaxMap(") || ShaderHelper::sfind(code, "CalculateParallaxMapLOD(")) {
         if (!ShaderHelper::sfind(code, "vec2 CalculateParallaxMap(")) {
-            const string calculate_parallax =
+            ShaderHelper::insertStringRightBeforeLineContent(code, 
                 "vec2 CalculateParallaxMap(in Layer inLayer, vec3 _ViewDir, in vec2 inUVs){//generated\n"
                 //"    inUVs *= inLayer.uvModifications.zw;\n"
                 //"    inUVs += inLayer.uvModifications.xy;\n"
@@ -460,8 +457,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
                 "    float beforeDepth = texture2DLod(inLayer.texture, prevUV, lod).r - currentLayerDepth + layerDepth;\n"
                 "    float weight = afterDepth / (afterDepth - beforeDepth);\n" // interpolation of texture coordinates
                 "    return prevUV * weight + currentUV * (1.0 - weight);\n"
-                "}\n";
-            ShaderHelper::insertStringRightBeforeLineContent(code, calculate_parallax, "vec4 CalculateRefraction(");
+                "}\n"
+            , "vec4 CalculateRefraction(");
         }
     }
 #pragma endregion
@@ -471,7 +468,7 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
     //https://docs.gimp.org/2.4/en/gimp-concepts-layer-modes.html
     if (ShaderHelper::sfind(code, "DoBlend(")) {
         if (!ShaderHelper::sfind(code, "vec4 DoBlend(")) {
-            const string do_blend =
+            ShaderHelper::insertStringRightBeforeLineContent(code, 
                 "vec4 DoBlend(in vec4 paint, in vec4 canvas, in Layer inLayer) {//generated\n"//TODO: complete this
                 "    if (inLayer.data1.x       == 0.0) {\n"//default
                 "        return PaintersAlgorithm(paint, canvas);\n"
@@ -559,8 +556,8 @@ void opengl::glsl::Materials::convert(string& code, const unsigned int versionNu
                 "    }else if (inLayer.data1.x == 18.0) {\n" //TODO: Value mode uses the value of the upper layer and the saturation and hue of the lower layer to form the resulting image
                 "        return canvas + paint;\n"
                 "    }\n"
-                "}\n";
-            ShaderHelper::insertStringRightBeforeLineContent(code, do_blend, "vec2 CalculateParallaxMap(");
+                "}\n"
+            , "vec2 CalculateParallaxMap(");
         }
     }
 #pragma endregion

@@ -9,22 +9,22 @@ using namespace std;
 void Resource::load(){
     if(!m_IsLoaded){
         m_IsLoaded = true;
-
-        Event e(EventType::ResourceLoaded);
-        e.eventResource = Engine::priv::EventResource(this);
-        Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(e);
-
+        if (Engine::priv::Core::m_Engine) {
+            Event e(EventType::ResourceLoaded);
+            e.eventResource = Engine::priv::EventResource(this);
+            Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(e);
+        }
         ENGINE_LOG(typeid(*this).name() << ": " << m_Name << " - loaded.");
     }
 }
 void Resource::unload(){
     if(m_IsLoaded /*&& m_UsageCount == 0*/){
         m_IsLoaded = false;
-
-        Event e(EventType::ResourceUnloaded);
-        e.eventResource = Engine::priv::EventResource(this);
-        Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(e);
-
+        if (Engine::priv::Core::m_Engine) {
+            Event e(EventType::ResourceUnloaded);
+            e.eventResource = Engine::priv::EventResource(this);
+            Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(e);
+        }
         ENGINE_LOG(typeid(*this).name() << ": " << m_Name << " - unloaded.");
     }
 }

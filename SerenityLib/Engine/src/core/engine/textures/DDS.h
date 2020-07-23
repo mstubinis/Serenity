@@ -3,7 +3,7 @@
 #define ENGINE_TEXTURES_DDS_H
 
 namespace Engine::priv::textures {
-    class DXGI_FORMAT { public: enum Format {
+    enum class DXGI_FORMAT {
         DXGI_FORMAT_UNKNOWN,
         DXGI_FORMAT_R32G32B32A32_TYPELESS,
         DXGI_FORMAT_R32G32B32A32_FLOAT,
@@ -125,15 +125,15 @@ namespace Engine::priv::textures {
         DXGI_FORMAT_V408,
         DXGI_FORMAT_FORCE_UINT,
         _TOTAL,
-    };};
-    class D3D_RESOURCE_DIMENSION { public: enum Dimension {
+    };
+    enum class D3D_RESOURCE_DIMENSION {
         D3D_RESOURCE_DIMENSION_UNKNOWN,
         D3D_RESOURCE_DIMENSION_BUFFER,
         D3D_RESOURCE_DIMENSION_TEXTURE1D,
         D3D_RESOURCE_DIMENSION_TEXTURE2D,
         D3D_RESOURCE_DIMENSION_TEXTURE3D,
         _TOTAL,
-    };};
+    };
     static constexpr std::uint32_t FourCC_DXT1 = 0x31545844;
     static constexpr std::uint32_t FourCC_DXT2 = 0x32545844;
     static constexpr std::uint32_t FourCC_DXT3 = 0x33545844;
@@ -195,16 +195,16 @@ namespace Engine::priv::textures {
             }
         };
         struct DDS_Header_DX10 final {
-            textures::DXGI_FORMAT::Format               dxgiFormat        = textures::DXGI_FORMAT::Format::DXGI_FORMAT_UNKNOWN;
-            textures::D3D_RESOURCE_DIMENSION::Dimension resourceDimension = textures::D3D_RESOURCE_DIMENSION::Dimension::D3D_RESOURCE_DIMENSION_UNKNOWN;
-            std::uint32_t miscFlag                                        = 0U;
-            std::uint32_t arraySize                                       = 0U;
-            std::uint32_t miscFlags2                                      = 0U;
+            textures::DXGI_FORMAT             dxgiFormat        = textures::DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
+            textures::D3D_RESOURCE_DIMENSION  resourceDimension = textures::D3D_RESOURCE_DIMENSION::D3D_RESOURCE_DIMENSION_UNKNOWN;
+            std::uint32_t                     miscFlag          = 0U;
+            std::uint32_t                     arraySize         = 0U;
+            std::uint32_t                     miscFlags2        = 0U;
             constexpr DDS_Header_DX10() {
             }
             constexpr void fill(const unsigned char headerDX10[20]) {
-                dxgiFormat        = static_cast<textures::DXGI_FORMAT::Format>(*(std::uint32_t*)&headerDX10[0]);
-                resourceDimension = static_cast<textures::D3D_RESOURCE_DIMENSION::Dimension>(*(std::uint32_t*)&headerDX10[4]);
+                dxgiFormat        = static_cast<textures::DXGI_FORMAT>(*(std::uint32_t*)&headerDX10[0]);
+                resourceDimension = static_cast<textures::D3D_RESOURCE_DIMENSION>(*(std::uint32_t*)&headerDX10[4]);
                 miscFlag          = *(std::uint32_t*)&headerDX10[8];
                 arraySize         = *(std::uint32_t*)&headerDX10[12];
                 miscFlags2        = *(std::uint32_t*)&headerDX10[16];

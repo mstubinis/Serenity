@@ -72,12 +72,12 @@ class ParticleEmitter final : public Entity {
 
         glm_vec3 linearVelocity() const;
 
-        bool isActive() const noexcept { return m_Active; }
+        inline CONSTEXPR bool isActive() const noexcept { return m_Active; }
 
-        void activate() noexcept { m_Active = true; }
-        void deactivate() noexcept { m_Active = false; }
+        inline void activate() noexcept { m_Active = true; }
+        inline void deactivate() noexcept { m_Active = false; }
 
-        ParticleEmissionProperties* getProperties() const noexcept { return m_Properties; }
+        inline CONSTEXPR ParticleEmissionProperties* getProperties() const noexcept { return m_Properties; }
         void setProperties(ParticleEmissionProperties& properties);
 
         void update(size_t index, const float dt, Engine::priv::ParticleSystem& particleSystem, bool multi_threaded);

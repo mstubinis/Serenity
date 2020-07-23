@@ -3,7 +3,7 @@
 #define ENGINE_THREADING_HELPERS_H
 
 namespace Engine {
-    inline unsigned int hardware_concurrency() noexcept {
+    inline constexpr unsigned int hardware_concurrency() noexcept {
         return std::max(1U, std::thread::hardware_concurrency());
         //return 1U;
     }

@@ -64,7 +64,7 @@ void SoundQueue::update(const float dt) {
                         }
                     }
                 }
-                SoundStatus::Status status = m_Current->status();
+                SoundStatus status = m_Current->status();
                 switch (status) {
                     case SoundStatus::Fresh: {
                         m_Current->play();

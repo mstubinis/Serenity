@@ -179,11 +179,11 @@ void DeferredPipeline::init() {
     GodRays::STATIC_GOD_RAYS.init_shaders();
     SMAA::STATIC_SMAA.init_shaders();
 
-    auto emplaceShader = [](unsigned int index, const string& str, vector<Shader*>& collection, ShaderType::Type type) {
+    auto emplaceShader = [](unsigned int index, const string& str, vector<Shader*>& collection, ShaderType type) {
         Shader* s = NEW Shader(str, type, false);
         collection[index] = s;
     };
-    
+
     priv::threading::addJob([&]() {emplaceShader(0, EShaders::decal_vertex, m_InternalShaders, ShaderType::Vertex); });
     priv::threading::addJob([&]() {emplaceShader(1, EShaders::decal_frag, m_InternalShaders, ShaderType::Fragment); });
     priv::threading::addJob([&]() {emplaceShader(2, EShaders::fullscreen_quad_vertex, m_InternalShaders, ShaderType::Vertex); });
@@ -216,7 +216,7 @@ void DeferredPipeline::init() {
     priv::threading::addJob([&]() {emplaceShader(25, EShaders::particle_frag, m_InternalShaders, ShaderType::Fragment); });
 
     priv::threading::waitForAll();
-  
+
     ShaderProgram::Deferred = NEW ShaderProgram("Deferred", *m_InternalShaders[ShaderEnum::VertexBasic], *m_InternalShaders[ShaderEnum::DeferredFrag]);
     ShaderProgram::Forward = NEW ShaderProgram("Forward", *m_InternalShaders[ShaderEnum::VertexBasic], *m_InternalShaders[ShaderEnum::ForwardFrag]);
     ShaderProgram::Decal = NEW ShaderProgram("Decal", *m_InternalShaders[ShaderEnum::DecalVertex], *m_InternalShaders[ShaderEnum::DecalFrag]);
@@ -302,7 +302,7 @@ void DeferredPipeline::init() {
 void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, unsigned int convoludeTextureSize, unsigned int preEnvFilterSize) {
     auto texType = texture.type();
     if (texType != GL_TEXTURE_CUBE_MAP) {
-        //cout << "(Texture) : Only cubemaps can be precomputed for IBL. Ignoring genPBREnvMapData() call..." << endl;
+        //cout << "(Texture) : Only cubemaps can be precomputed for IBL. Ignoring genPBREnvMapData() call...\n";
         return;
     }
     unsigned int size = convoludeTextureSize;
@@ -622,9 +622,9 @@ void DeferredPipeline::sendGPUDataSunLight(Camera& camera, SunLight& sunLight, c
     auto* body       = sunLight.getComponent<ComponentBody>();
     auto pos         = glm::vec3(body->getPosition());
     const auto& col  = sunLight.color();
-    sendUniform4((start + "DataA").c_str(), sunLight.getAmbientIntensity(), sunLight.getDiffuseIntensity(), sunLight.getSpecularIntensity(), 0.0f);
-    sendUniform4((start + "DataC").c_str(), 0.0f, pos.x, pos.y, pos.z);
-    sendUniform4((start + "DataD").c_str(), col.x, col.y, col.z, (float)sunLight.type());
+    sendUniform4Safe((start + "DataA").c_str(), sunLight.getAmbientIntensity(), sunLight.getDiffuseIntensity(), sunLight.getSpecularIntensity(), 0.0f);
+    sendUniform4Safe((start + "DataC").c_str(), 0.0f, pos.x, pos.y, pos.z);
+    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)sunLight.type());
     sendUniform1Safe("Type", 0.0f);
 }
 int DeferredPipeline::sendGPUDataPointLight(Camera& camera, PointLight& pointLight, const string& start) {
@@ -637,10 +637,10 @@ int DeferredPipeline::sendGPUDataPointLight(Camera& camera, PointLight& pointLig
         return 0;
     }
     const auto& col = pointLight.color();
-    sendUniform4((start + "DataA").c_str(), pointLight.getAmbientIntensity(), pointLight.getDiffuseIntensity(), pointLight.getSpecularIntensity(), 0.0f);
-    sendUniform4((start + "DataB").c_str(), 0.0f, 0.0f, pointLight.getConstant(), pointLight.getLinear());
-    sendUniform4((start + "DataC").c_str(), pointLight.getExponent(), pos.x, pos.y, pos.z);
-    sendUniform4((start + "DataD").c_str(), col.x, col.y, col.z, (float)pointLight.type());
+    sendUniform4Safe((start + "DataA").c_str(), pointLight.getAmbientIntensity(), pointLight.getDiffuseIntensity(), pointLight.getSpecularIntensity(), 0.0f);
+    sendUniform4Safe((start + "DataB").c_str(), 0.0f, 0.0f, pointLight.getConstant(), pointLight.getLinear());
+    sendUniform4Safe((start + "DataC").c_str(), pointLight.getExponent(), pos.x, pos.y, pos.z);
+    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)pointLight.type());
     sendUniform4Safe((start + "DataE").c_str(), 0.0f, 0.0f, (float)pointLight.getAttenuationModel(), 0.0f);
     sendUniform1Safe("Type", 1.0f);
 
@@ -653,9 +653,9 @@ void DeferredPipeline::sendGPUDataDirectionalLight(Camera& camera, DirectionalLi
     auto* body      = directionalLight.getComponent<ComponentBody>();
     auto forward    = glm::vec3(body->forward());
     const auto& col = directionalLight.color();
-    sendUniform4((start + "DataA").c_str(), directionalLight.getAmbientIntensity(), directionalLight.getDiffuseIntensity(), directionalLight.getSpecularIntensity(), forward.x);
-    sendUniform4((start + "DataB").c_str(), forward.y, forward.z, 0.0f, 0.0f);
-    sendUniform4((start + "DataD").c_str(), col.x, col.y, col.z, (float)directionalLight.type());
+    sendUniform4Safe((start + "DataA").c_str(), directionalLight.getAmbientIntensity(), directionalLight.getDiffuseIntensity(), directionalLight.getSpecularIntensity(), forward.x);
+    sendUniform4Safe((start + "DataB").c_str(), forward.y, forward.z, 0.0f, 0.0f);
+    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)directionalLight.type());
     sendUniform1Safe("Type", 0.0f);
 }
 int DeferredPipeline::sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight, const string& start) {
@@ -672,10 +672,10 @@ int DeferredPipeline::sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight,
         return 0;
     }
     const auto& col = spotLight.color();
-    sendUniform4((start + "DataA").c_str(), spotLight.getAmbientIntensity(), spotLight.getDiffuseIntensity(), spotLight.getSpecularIntensity(), forward.x);
-    sendUniform4((start + "DataB").c_str(), forward.y, forward.z, spotLight.getConstant(), spotLight.getLinear());
-    sendUniform4((start + "DataC").c_str(), spotLight.getExponent(), pos.x, pos.y, pos.z);
-    sendUniform4((start + "DataD").c_str(), col.x, col.y, col.z, (float)spotLight.type());
+    sendUniform4Safe((start + "DataA").c_str(), spotLight.getAmbientIntensity(), spotLight.getDiffuseIntensity(), spotLight.getSpecularIntensity(), forward.x);
+    sendUniform4Safe((start + "DataB").c_str(), forward.y, forward.z, spotLight.getConstant(), spotLight.getLinear());
+    sendUniform4Safe((start + "DataC").c_str(), spotLight.getExponent(), pos.x, pos.y, pos.z);
+    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)spotLight.type());
     sendUniform4Safe((start + "DataE").c_str(), spotLight.getCutoff(), spotLight.getCutoffOuter(), (float)spotLight.getAttenuationModel(), 0.0f);
     sendUniform2Safe("VertexShaderData", spotLight.getCutoffOuter(), cull);
     sendUniform1Safe("Type", 2.0f);
@@ -698,10 +698,10 @@ int DeferredPipeline::sendGPUDataRodLight(Camera& camera, RodLight& rodLight, co
     float half           = rodLight.rodLength() / 2.0f;
     auto firstEndPt      = pos + (glm::vec3(body->forward()) * half);
     auto secndEndPt      = pos - (glm::vec3(body->forward()) * half);
-    sendUniform4((start + "DataA").c_str(), rodLight.getAmbientIntensity(), rodLight.getDiffuseIntensity(), rodLight.getSpecularIntensity(), firstEndPt.x);
-    sendUniform4((start + "DataB").c_str(), firstEndPt.y, firstEndPt.z, rodLight.getConstant(), rodLight.getLinear());
-    sendUniform4((start + "DataC").c_str(), rodLight.getExponent(), secndEndPt.x, secndEndPt.y, secndEndPt.z);
-    sendUniform4((start + "DataD").c_str(), col.x, col.y, col.z, (float)rodLight.type());
+    sendUniform4Safe((start + "DataA").c_str(), rodLight.getAmbientIntensity(), rodLight.getDiffuseIntensity(), rodLight.getSpecularIntensity(), firstEndPt.x);
+    sendUniform4Safe((start + "DataB").c_str(), firstEndPt.y, firstEndPt.z, rodLight.getConstant(), rodLight.getLinear());
+    sendUniform4Safe((start + "DataC").c_str(), rodLight.getExponent(), secndEndPt.x, secndEndPt.y, secndEndPt.z);
+    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)rodLight.type());
     sendUniform4Safe((start + "DataE").c_str(), rodLight.rodLength(), 0.0f, (float)rodLight.getAttenuationModel(), 0.0f);
     sendUniform1Safe("Type", 1.0f);
 

@@ -105,7 +105,7 @@ ComponentBody::ComponentBody(Entity entity) {
     auto& normalData          = *data.n;
     Math::recalculateForwardRightUp(normalData.rotation, m_Forward, m_Right, m_Up);
 }
-ComponentBody::ComponentBody(Entity entity, CollisionType::Type collisionType) {
+ComponentBody::ComponentBody(Entity entity, CollisionType collisionType) {
     m_Owner = entity;
     m_Physics               = true;
     data.n                  = nullptr;
@@ -285,7 +285,7 @@ Collision* ComponentBody::getCollision() const {
     }
     return nullptr;
 }
-void ComponentBody::setCollision(CollisionType::Type collisionType, float mass) {
+void ComponentBody::setCollision(CollisionType collisionType, float mass) {
     if (!data.p->collision) { //TODO: clean this up, its hacky and evil. its being used on the ComponentBody_EntityAddedToSceneFunction
         auto* modelComponent = m_Owner.getComponent<ComponentModel>();
         if (modelComponent) {
@@ -1035,7 +1035,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
 
 }};
 struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* systemPtr, void* component, Entity entity) const {
-    auto& system  = *static_cast<Engine::priv::ComponentBody_System*>(systemPtr);
+    auto& system  = *(Engine::priv::ComponentBody_System*)systemPtr;
     auto& pcs     = system.ParentChildSystem;
     const auto id = entity.id();
 
@@ -1047,7 +1047,7 @@ struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()
     }
 }};
 struct priv::ComponentBody_ComponentRemovedFromEntityFunction final { void operator()(void* systemPtr, Entity entity) const {
-    auto& system         = *static_cast<Engine::priv::ComponentBody_System*>(systemPtr);
+    auto& system         = *(Engine::priv::ComponentBody_System*)systemPtr;
     const auto id        = entity.id();
     auto& pcs            = system.ParentChildSystem;
     const auto thisIndex = id - 1U;
@@ -1057,13 +1057,13 @@ struct priv::ComponentBody_ComponentRemovedFromEntityFunction final { void opera
     }
 }};
 struct priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* systemPtr, void* componentPool, Entity entity, Scene& scene) const {
-    auto& pool = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool);
+    auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)componentPool;
     auto* component_ptr = pool.getComponent(entity);
     if (component_ptr) {
         auto& component = *component_ptr;
         if (component.m_Physics) {
             auto& physicsData = *component.data.p;
-            component.setCollision(static_cast<CollisionType::Type>(physicsData.collision->getType()), physicsData.mass);
+            component.setCollision(physicsData.collision->getType(), physicsData.mass);
             auto currentScene = Resources::getCurrentScene();
             if (currentScene && currentScene == &scene) {
                 component.addPhysicsToWorld(true);
@@ -1132,7 +1132,7 @@ void Engine::priv::ComponentBody_System::ParentChildVector::insert(std::uint32_t
     //std::cout << parentID << ", " << childID << " - adding\n";
     bool added = false;
     for (size_t i = 0; i < Order.size(); ++i) {
-        const auto& entityID = Order[i];
+        auto entityID = Order[i];
         if (entityID == parentID) {
             //insert after the parent node where the next available spot is
             //the next available spot is either the next zero or the next spot where that spot's parent is zero
@@ -1179,7 +1179,7 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(std::uint32_t
     bool foundParent   = false;
 
     for (size_t i = 0; i < Order.size(); ++i) {
-        const auto& entityID = Order[i];
+        auto entityID = Order[i];
         if (entityID == 0) {
             break;
         }else if (entityID == parentID) {
@@ -1196,14 +1196,14 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(std::uint32_t
     erasedIndex = parentIndex;
     //std::cout << parentID << ", " << childID << " - removing\n";
     for (size_t i = parentIndex; i < Order.size(); ++i) {
-        const auto& entityID = Order[i];
+        auto entityID = Order[i];
         if (entityID == childID) {
             erasedIndex = i;
             Order[i] = 0;
 
             //now move all children of parent to be next to parent
             for (size_t j = i + 1U; j < Order.size(); ++j) {
-                const auto& entityIDCaseOne = Order[j];
+                auto entityIDCaseOne = Order[j];
                 if (Order[j] == 0) {
                     break;
                 }

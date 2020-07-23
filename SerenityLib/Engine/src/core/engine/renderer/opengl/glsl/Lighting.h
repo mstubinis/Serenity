@@ -7,7 +7,7 @@
 namespace Engine::priv::opengl::glsl {
     class Lighting final {
         public:
-            static void convert(std::string& code, const unsigned int versionNumber, const ShaderType::Type shaderType);
+            static void convert(std::string& code, unsigned int versionNumber, ShaderType shaderType);
     };
 };
 

@@ -38,24 +38,19 @@ class Window final{
         glm::uvec2 getSize();
         glm::uvec2 getPosition();
 
-
         void setJoystickProcessingActive(bool active);
         bool isJoystickProcessingActive() const;
 
-        std::thread::id getOpenglThreadID() const;
-
-        unsigned int getFramerateLimit() const;
-
-        sf::RenderWindow& getSFMLHandle();
-        sf::WindowHandle getSystemHandle() const;
-
-        const glm::vec2& getMousePositionDifference() const;
-        const glm::vec2& getMousePositionPrevious() const;
-        const glm::vec2& getMousePosition() const;
-        double getMouseWheelDelta() const;
+        inline CONSTEXPR const glm::vec2& getMousePositionDifference() const noexcept { return m_Data.m_MouseDifference; }
+        inline CONSTEXPR const glm::vec2& getMousePositionPrevious() const noexcept { return m_Data.m_MousePosition_Previous; }
+        inline CONSTEXPR const glm::vec2& getMousePosition() const noexcept { return m_Data.m_MousePosition; }
+        inline CONSTEXPR double getMouseWheelDelta() const noexcept { return m_Data.m_MouseDelta; }
+        inline std::thread::id getOpenglThreadID() const noexcept { return m_Data.m_OpenGLThreadID; }
+        inline sf::WindowHandle getSystemHandle() const noexcept { return m_Data.m_SFMLWindow.getSystemHandle(); }
+        inline CONSTEXPR sf::RenderWindow& getSFMLHandle() noexcept { return m_Data.m_SFMLWindow; }
+        inline CONSTEXPR unsigned int getFramerateLimit() const noexcept { return m_Data.m_FramerateLimit; }
 
         bool pollEvents(sf::Event& InSFEvent);
-
         bool hasFocus() const;
         bool isOpen() const;
 

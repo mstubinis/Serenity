@@ -19,7 +19,7 @@ class RodLight : public PointLight {
 
         void free() noexcept override;
 
-        constexpr float rodLength() const noexcept { return m_RodLength; }
+        inline CONSTEXPR float rodLength() const noexcept { return m_RodLength; }
 
         void setRodLength(float rodLength);
 };

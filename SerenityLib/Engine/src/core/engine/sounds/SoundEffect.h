@@ -26,12 +26,12 @@ class SoundEffect : public SoundBaseClass {
 
         virtual ~SoundEffect() = default;
 
-        inline constexpr bool isActive() const noexcept { return m_Active; }
+        inline CONSTEXPR bool isActive() const noexcept { return m_Active; }
         bool play(unsigned int numLoops = 1) override;
         bool pause() override;
         bool stop(bool stopAllLoops = false);
         bool restart() override;
-        inline constexpr float getDuration() const noexcept { return m_Duration; }
+        inline CONSTEXPR float getDuration() const noexcept { return m_Duration; }
         unsigned int getChannelCount() const override;
         float getMinDistance() const override;
         void setMinDistance(float minDistance) override;

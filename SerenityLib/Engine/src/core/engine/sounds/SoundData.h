@@ -16,9 +16,9 @@ class SoundData final : public Resource {
 
         float getDuration() const;
         void buildBuffer();
-        inline constexpr sf::SoundBuffer* getBuffer() noexcept { return m_Buffer; }
-        inline constexpr const std::string& getFilename() const noexcept { return m_File; }
-        inline constexpr float getVolume() const noexcept { return m_Volume; }
+        inline CONSTEXPR sf::SoundBuffer* getBuffer() noexcept { return m_Buffer; }
+        inline CONSTEXPR const std::string& getFilename() const noexcept { return m_File; }
+        inline CONSTEXPR float getVolume() const noexcept { return m_Volume; }
         void setVolume(float volume);
 };
 

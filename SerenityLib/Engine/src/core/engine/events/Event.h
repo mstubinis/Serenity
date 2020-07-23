@@ -108,11 +108,11 @@ namespace Engine::priv {
             if (unicode == 27 || unicode == 13 || unicode == 9 || unicode == 8) { //27 = esc, 13 = enter, 9 = tab, 8 = backspace
                 return "";
             }
-            wchar_t c = static_cast<wchar_t>(unicode);
+            wchar_t c = (wchar_t)unicode;
             std::wstring ws(&c);
             std::string res;
             for (auto& c : ws) {
-                res += static_cast<char>(c);
+                res += (char)c;
             }
             res = res[0];
             return res;

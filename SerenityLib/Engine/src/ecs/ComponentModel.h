@@ -19,7 +19,6 @@ namespace Engine::priv {
 #include <ecs/Entity.h>
 #include <ecs/ECSSystemConstructorInfo.h>
 #include <core/engine/model/ModelInstance.h>
-//#include <boost/type_index.hpp>
 
 using ModelInstanceVector = std::vector<ModelInstance*>;
 
@@ -54,7 +53,7 @@ class ComponentModel: public Observer {
 
         ~ComponentModel();
 
-        Entity getOwner() const;
+        inline CONSTEXPR Entity getOwner() const noexcept { return m_Owner; }
 
         void onEvent(const Event& event_) override;
 
@@ -64,18 +63,17 @@ class ComponentModel: public Observer {
         void addViewportFlag(ViewportFlag::Flag flag);
 
         size_t getNumModels() const;
-        float radius() const;
-        const glm::vec3& boundingBox() const;
+        inline CONSTEXPR float radius() const noexcept { return m_Radius; }
+        inline CONSTEXPR const glm::vec3& boundingBox() const noexcept { return m_RadiusBox; }
         void show();
         void hide();
 
         ModelInstance& getModel(size_t index = 0) const;
-        void removeModel(size_t index);
         ModelInstance& addModel(Handle meshHandle, Handle materialHandle, ShaderProgram* = 0,   RenderStage = RenderStage::GeometryOpaque);
         ModelInstance& addModel(Mesh*,             Material*,             ShaderProgram* = 0,   RenderStage = RenderStage::GeometryOpaque);
         ModelInstance& addModel(Handle meshHandle, Handle materialHandle, Handle shaderProgram, RenderStage = RenderStage::GeometryOpaque);
         ModelInstance& addModel(Mesh*,             Material*,             Handle shaderProgram, RenderStage = RenderStage::GeometryOpaque);
-
+        void removeModel(size_t index);
 
         void setStage(RenderStage stage, size_t index = 0);
 
@@ -95,32 +93,20 @@ class ComponentModel: public Observer {
 
         void setUserPointer(void* UserPointer);
 
-        template<typename T> void setCustomBindFunctor(const T& functor, size_t index = 0) {
-            m_ModelInstances[index]->setCustomBindFunctor(functor);
+        void setCustomBindFunctor(ModelInstance::bind_function&& functor, size_t index = 0) {
+            m_ModelInstances[index]->setCustomBindFunctor(std::move(functor));
         }
-        template<typename T> void setCustomUnbindFunctor(const T& functor, size_t index = 0) {
-            m_ModelInstances[index]->setCustomUnbindFunctor(functor);
-        }
-
-        ModelInstance& operator[](const size_t index) {
-            return *m_ModelInstances[index];
-        }
-        const ModelInstance& operator[](const size_t index) const {
-            return *m_ModelInstances[index];
+        void setCustomUnbindFunctor(ModelInstance::unbind_function&& functor, size_t index = 0) {
+            m_ModelInstances[index]->setCustomUnbindFunctor(std::move(functor));
         }
 
-        ModelInstanceVector::iterator begin() {
-            return m_ModelInstances.begin();
-        }
-        ModelInstanceVector::iterator end() {
-            return m_ModelInstances.end();
-        }
-        ModelInstanceVector::const_iterator begin() const {
-            return m_ModelInstances.begin();
-        }
-        ModelInstanceVector::const_iterator end() const {
-            return m_ModelInstances.end();
-        }
+        ModelInstance& operator[](size_t index) { return *m_ModelInstances[index]; }
+        const ModelInstance& operator[](size_t index) const { return *m_ModelInstances[index]; }
+
+        ModelInstanceVector::iterator begin() { return m_ModelInstances.begin(); }
+        ModelInstanceVector::iterator end() { return m_ModelInstances.end(); }
+        ModelInstanceVector::const_iterator begin() const { return m_ModelInstances.begin(); }
+        ModelInstanceVector::const_iterator end() const { return m_ModelInstances.end(); }
 };
 
 class ComponentModel_System_CI : public Engine::priv::ECSSystemCI {

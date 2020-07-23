@@ -25,11 +25,11 @@ class Handle final {
             m_Version = version;
             m_Type    = type;
         }
-        inline constexpr std::uint32_t index() const noexcept { return m_Index; }
-        inline constexpr std::uint32_t version() const noexcept { return m_Version; }
-        inline constexpr std::uint32_t type() const noexcept { return m_Type; }
-        inline constexpr operator std::uint32_t() const noexcept { return m_Type << 27 | m_Version << 12 | m_Index; }
-        inline constexpr bool null() const noexcept { return (m_Type == ResourceType::Empty || m_Index == 0U); }
+        inline CONSTEXPR std::uint32_t index() const noexcept { return m_Index; }
+        inline CONSTEXPR std::uint32_t version() const noexcept { return m_Version; }
+        inline CONSTEXPR std::uint32_t type() const noexcept { return m_Type; }
+        inline CONSTEXPR operator std::uint32_t() const noexcept { return m_Type << 27 | m_Version << 12 | m_Index; }
+        inline CONSTEXPR bool null() const noexcept { return (m_Type == (std::uint32_t)ResourceType::Unknown || m_Index == 0U); }
         template<typename RESOURCE> inline RESOURCE* get() const noexcept {
             Resource* resource = Handle::get_base();
             return reinterpret_cast<RESOURCE*>(resource);

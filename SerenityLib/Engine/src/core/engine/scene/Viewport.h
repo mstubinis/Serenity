@@ -54,31 +54,31 @@ class Viewport final : public Engine::NonCopyable {
 
         ~Viewport() {}
 
-        inline constexpr unsigned int id() const noexcept { return m_ID; }
-        void setID(unsigned int id) noexcept { m_ID = id; }
+        inline CONSTEXPR unsigned int id() const noexcept { return m_ID; }
+        inline void setID(unsigned int id) noexcept { m_ID = id; }
 
-        Engine::Flag<unsigned short> getRenderFlags() const noexcept { return m_RenderFlags; }
+        inline Engine::Flag<unsigned short> getRenderFlags() const noexcept { return m_RenderFlags; }
         inline void setRenderFlag(ViewportRenderingFlag::Flag flag) noexcept { m_RenderFlags = flag; }
         inline void addRenderFlag(ViewportRenderingFlag::Flag flag) noexcept { m_RenderFlags.add(flag); }
         inline void removeRenderFlag(ViewportRenderingFlag::Flag flag) noexcept { m_RenderFlags.remove(flag); }
 
-        inline constexpr float getDepthMaskValue() const noexcept { return m_DepthMaskValue; }
+        inline CONSTEXPR float getDepthMaskValue() const noexcept { return m_DepthMaskValue; }
         inline void setDepthMaskValue(float depth) noexcept { m_DepthMaskValue = depth; }
         void activateDepthMask(bool active = true);
-        inline constexpr bool isDepthMaskActive() const noexcept { return m_StateFlags.has(StateFlags::DepthMaskActive); }
+        inline CONSTEXPR bool isDepthMaskActive() const noexcept { return m_StateFlags.has(StateFlags::DepthMaskActive); }
 
-        inline constexpr const glm::vec4& getBackgroundColor() const noexcept { return m_BackgroundColor; }
+        inline CONSTEXPR const glm::vec4& getBackgroundColor() const noexcept { return m_BackgroundColor; }
         void setBackgroundColor(float r, float g, float b, float a);
 
         void setAspectRatioSynced(bool synced);
         bool isAspectRatioSynced() const;
 
         void activate(bool activate = true);
-        inline constexpr bool isActive() const noexcept { return m_StateFlags.has(StateFlags::Active); }
+        inline CONSTEXPR bool isActive() const noexcept { return m_StateFlags.has(StateFlags::Active); }
 
-        inline Scene& getScene() noexcept { return *m_Scene; }
-        inline Camera& getCamera() noexcept { return *m_Camera; }
-        inline constexpr const glm::vec4& getViewportDimensions() const noexcept { return m_Viewport_Dimensions; }
+        inline CONSTEXPR Scene& getScene() noexcept { return *m_Scene; }
+        inline CONSTEXPR Camera& getCamera() noexcept { return *m_Camera; }
+        inline CONSTEXPR const glm::vec4& getViewportDimensions() const noexcept { return m_Viewport_Dimensions; }
 
         inline void setCamera(Camera& camera) noexcept { m_Camera = &camera; }
         void setViewportDimensions(float x, float y, float width, float height);

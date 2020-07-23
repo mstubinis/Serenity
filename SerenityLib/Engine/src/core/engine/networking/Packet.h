@@ -52,8 +52,8 @@ namespace Engine::Networking {
                 }
             }
 
-            void setOnSendFunction(std::function<void(Engine::Networking::Packet* packet)> function) {
-                m_OnSendFunction = function;
+            void setOnSendFunction(std::function<void(Engine::Networking::Packet* packet)>&& function) {
+                m_OnSendFunction = std::move(function);
             }
 
             virtual Engine::Networking::Packet* clone() {

@@ -22,6 +22,9 @@ namespace Engine::priv {
 #include <core/engine/mesh/BuiltInMeshes.h>
 
 namespace Engine{
+    //void reset_malloc_count() noexcept;
+    //void print_malloc_count() noexcept;
+
     void pause(bool pause = true);
     bool paused();
     void unpause();

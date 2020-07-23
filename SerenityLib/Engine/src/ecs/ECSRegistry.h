@@ -19,7 +19,7 @@ namespace Engine::priv {
             ECSRegistry() = default;
             ~ECSRegistry() = default;
 
-            template <typename T> static constexpr std::uint32_t type_slot() noexcept {
+            template <typename T> static CONSTEXPR std::uint32_t type_slot() noexcept {
                 auto type = type_ID<T>();
                 if (!m_SlotMap.count(type)) {
                     m_SlotMap.emplace(type, m_LastIndex);
@@ -27,7 +27,7 @@ namespace Engine::priv {
                 }
                 return m_SlotMap.at(type);
             }
-            template <typename T> static constexpr std::uint32_t type_slot(T* t) noexcept {
+            template <typename T> static CONSTEXPR std::uint32_t type_slot(T* t) noexcept {
                 auto type = type_ID(t); 
                 if (!m_SlotMap.count(type)) {
                     m_SlotMap.emplace(type, m_LastIndex);
@@ -35,10 +35,10 @@ namespace Engine::priv {
                 }
                 return m_SlotMap.at(type);
             }
-			template <typename T> static constexpr std::uint32_t type_slot_fast() noexcept {
+			template <typename T> static CONSTEXPR std::uint32_t type_slot_fast() noexcept {
 				return m_SlotMap.at(type_ID<T>());
 			}
-			template <typename T> static constexpr std::uint32_t type_slot_fast(T* t) noexcept {
+			template <typename T> static CONSTEXPR std::uint32_t type_slot_fast(T* t) noexcept {
 				return m_SlotMap.at(type_ID(t));
 			}
         };

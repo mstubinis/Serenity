@@ -5,10 +5,10 @@
 #include <ecs/Components.h>
 
 class  Scene;
-struct CameraType final{enum Type {
+enum class CameraType : unsigned char {
     Perspective, 
     Orthographic,
-};};
+};
 class Camera: public Entity{
     friend struct Engine::priv::ComponentCamera_Functions;
     public:
@@ -28,7 +28,7 @@ class Camera: public Entity{
         decimal getDistance(const glm_vec3&) const;
         decimal getDistanceSquared(Entity) const;
         decimal getDistanceSquared(const glm_vec3&) const;
-        decimal getDistanceSquared(const Entity& e, const glm_vec3& this_pos) const;
+        decimal getDistanceSquared(Entity e, const glm_vec3& this_pos) const;
         decimal getDistanceSquared(const glm_vec3& objPos, const glm_vec3& this_pos) const;
 
         float getAngle() const;    void setAngle(float angle);

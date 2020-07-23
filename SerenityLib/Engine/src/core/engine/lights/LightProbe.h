@@ -51,11 +51,11 @@ class LightProbe : public Entity, public Engine::NonCopyable, public Engine::Non
 
         void addIgnoredEntity(Entity entity);
 
-        constexpr const Camera& getCamera() const noexcept { return m_Camera; }
-        constexpr const Viewport& getViewport() const noexcept { return m_Viewport; }
+        inline CONSTEXPR const Camera& getCamera() const noexcept { return m_Camera; }
+        inline CONSTEXPR const Viewport& getViewport() const noexcept { return m_Viewport; }
 
-        void setProbeType(ProbeType::Type type) noexcept { m_ProbeType = type; }
-        constexpr LightProbe::ProbeType::Type getProbeType() const noexcept { return m_ProbeType; }
+        inline void setProbeType(ProbeType::Type type) noexcept { m_ProbeType = type; }
+        inline CONSTEXPR LightProbe::ProbeType::Type getProbeType() const noexcept { return m_ProbeType; }
 
         void update(const float dt);
 

@@ -312,7 +312,7 @@ Terrain::Terrain(const string& name, sf::Image& heightmapImage, Handle& material
     m_TerrainData.calculate_data(heightmapImage, sectorSizeInPixels, pointsPerPixel);
     Terrain::setUseDiamondSubdivision(useDiamondSubdivisions);
     m_Mesh = NEW Mesh(name, *this, 0.000f);
-    Handle handle = priv::Core::m_Engine->m_ResourceManager.m_Resources.add(m_Mesh, ResourceType::Mesh);
+    Handle handle = priv::Core::m_Engine->m_ResourceManager.m_Resources.add(m_Mesh, (unsigned int)ResourceType::Mesh);
 
     addComponent<ComponentModel>(m_Mesh, materialHandle);
     addComponent<ComponentBody>(CollisionType::Compound); //TODO: check CollisionType::TriangleShapeStatic

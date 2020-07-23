@@ -32,15 +32,15 @@ class SunLight : public Entity {
 
         glm_vec3 position() const;
 
-        constexpr bool isShadowCaster() const noexcept { return m_IsShadowCaster; }
+        inline CONSTEXPR bool isShadowCaster() const noexcept { return m_IsShadowCaster; }
         void setShadowCaster(bool castsShadow) noexcept { m_IsShadowCaster = castsShadow; }
 
-        constexpr const glm::vec4& color() const noexcept { return m_Color; }
-        constexpr bool isActive() const noexcept { return m_Active; }
-        constexpr LightType type() const noexcept { return m_Type; }
-        constexpr float getAmbientIntensity() const noexcept { return m_AmbientIntensity; }
-        constexpr float getDiffuseIntensity() const noexcept { return m_DiffuseIntensity; }
-        constexpr float getSpecularIntensity() const noexcept { return m_SpecularIntensity; }
+        inline  const glm::vec4& color() const noexcept { return m_Color; }
+        inline CONSTEXPR bool isActive() const noexcept { return m_Active; }
+        inline CONSTEXPR LightType type() const noexcept { return m_Type; }
+        inline CONSTEXPR float getAmbientIntensity() const noexcept { return m_AmbientIntensity; }
+        inline CONSTEXPR float getDiffuseIntensity() const noexcept { return m_DiffuseIntensity; }
+        inline CONSTEXPR float getSpecularIntensity() const noexcept { return m_SpecularIntensity; }
 
         void setAmbientIntensity(float a) noexcept { m_AmbientIntensity = a; }
         void setDiffuseIntensity(float d) noexcept { m_DiffuseIntensity = d; }

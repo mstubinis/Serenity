@@ -112,7 +112,7 @@ class ComponentBody : public Observer, public Engine::UserPointer {
 
         //BOOST_TYPE_INDEX_REGISTER_CLASS
         ComponentBody(Entity entity);
-        ComponentBody(Entity entity, CollisionType::Type collisionType);
+        ComponentBody(Entity entity, CollisionType collisionType);
 
         ComponentBody& operator=(const ComponentBody& other) = delete;
         ComponentBody(const ComponentBody& other)            = delete;
@@ -121,7 +121,7 @@ class ComponentBody : public Observer, public Engine::UserPointer {
 
         ~ComponentBody();
 
-        constexpr Entity getOwner() const noexcept { return m_Owner; }
+        inline CONSTEXPR Entity getOwner() const noexcept { return m_Owner; }
 
         void onEvent(const Event& event_) override;
 
@@ -143,10 +143,10 @@ class ComponentBody : public Observer, public Engine::UserPointer {
         void setInternalPhysicsUserPointer(void* userPtr);
         void setUserPointer1(void* userPtr) noexcept { m_UserPointer1 = userPtr; }
         void setUserPointer2(void* userPtr) noexcept { m_UserPointer2 = userPtr; }
-        constexpr void* getUserPointer1() const noexcept { return m_UserPointer1; }
-        constexpr void* getUserPointer2() const noexcept { return m_UserPointer2; }
+        inline CONSTEXPR void* getUserPointer1() const noexcept { return m_UserPointer1; }
+        inline CONSTEXPR void* getUserPointer2() const noexcept { return m_UserPointer2; }
 
-        bool hasPhysics() const { return m_Physics; }
+        inline CONSTEXPR bool hasPhysics() const noexcept { return m_Physics; }
         decimal getLinearDamping() const;
         decimal getAngularDamping() const;
         unsigned short getCollisionGroup() const; //get the groups this body belongs to
@@ -190,16 +190,16 @@ class ComponentBody : public Observer, public Engine::UserPointer {
 		glm_vec3 getPosition() const;
         glm_vec3 getLocalPosition() const;
         glm::vec3 getPositionRender() const;
-        const glm_vec3& forward() const { return m_Forward; }
-        const glm_vec3& right() const { return m_Right; }
-        const glm_vec3& up() const { return m_Up; }
+        inline CONSTEXPR const glm_vec3& forward() const noexcept { return m_Forward; }
+        inline CONSTEXPR const glm_vec3& right() const noexcept { return m_Right; }
+        inline CONSTEXPR const glm_vec3& up() const noexcept { return m_Up; }
 		glm_vec3 getLinearVelocity() const;
 		glm_vec3 getAngularVelocity() const;
 		glm_mat4 modelMatrix() const;
         glm::mat4 modelMatrixRendering() const;
 	    btRigidBody& getBtBody() const;
 
-        void setCollision(CollisionType::Type collisionType, float mass);
+        void setCollision(CollisionType collisionType, float mass);
         void setCollision(Collision* collision);
         Collision* getCollision() const;
 
@@ -261,13 +261,13 @@ namespace Engine::priv {
     class ComponentBody_System final : public Engine::priv::ECSSystem<Entity, ComponentBody> {
         class ParentChildVector final {
             private:
-                inline std::uint32_t& getParent(std::uint32_t childID) {
+                inline std::uint32_t& getParent(std::uint32_t childID) noexcept {
                     return Parents[childID - 1U];
                 }
-                inline glm_mat4& getWorld(std::uint32_t ID) {
+                inline glm_mat4& getWorld(std::uint32_t ID) noexcept {
                     return WorldTransforms[ID - 1U];
                 }
-                inline glm_mat4& getLocal(std::uint32_t ID) {
+                inline glm_mat4& getLocal(std::uint32_t ID) noexcept {
                     return LocalTransforms[ID - 1U];
                 }
                 void reserve_from_insert(std::uint32_t parentID, std::uint32_t childID);

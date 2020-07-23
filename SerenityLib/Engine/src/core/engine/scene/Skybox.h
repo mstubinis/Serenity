@@ -24,7 +24,7 @@ class Skybox: public Observer{
 
         virtual void update() {}
 
-        Texture* texture() const noexcept { return m_Texture; }
+        inline CONSTEXPR Texture* texture() const noexcept { return m_Texture; }
 
         void onEvent(const Event& e);
 };

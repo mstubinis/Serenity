@@ -25,14 +25,13 @@ void Engine::priv::MeshLoader::LoadPopulateGlobalNodes(const aiScene& scene, Eng
         request.m_MeshNodeMap.emplace( node->Name, node );
     }
     for (unsigned int i = 0; i < ai_node->mNumMeshes; ++i) {
-        const aiMesh& aimesh = *scene.mMeshes[ai_node->mMeshes[i]];
-
+        const aiMesh& aimesh  = *scene.mMeshes[ai_node->mMeshes[i]];
         auto& part            = request.m_Parts.emplace_back();
         part.mesh             = NEW Mesh();
         part.name             = request.m_FileOrData + " - " + string(aimesh.mName.C_Str());
         part.mesh->m_File     = request.m_FileOrData;
         part.mesh->setName(part.name);
-        part.handle           = priv::Core::m_Engine->m_ResourceManager.m_Resources.add(part.mesh, ResourceType::Mesh);
+        part.handle           = priv::Core::m_Engine->m_ResourceManager.m_Resources.add(part.mesh, (unsigned int)ResourceType::Mesh);
         part.mesh->m_RootNode = root;
     }
 
@@ -41,7 +40,7 @@ void Engine::priv::MeshLoader::LoadPopulateGlobalNodes(const aiScene& scene, Eng
     }
     for (unsigned int a = 0; a < ai_node->mNumChildren; ++a) {
         auto* ai_child = ai_node->mChildren[a];
-        auto* child = NEW Engine::priv::MeshInfoNode(ai_child->mName.C_Str(), Engine::Math::assimpToGLMMat4(ai_child->mTransformation));
+        auto* child    = NEW Engine::priv::MeshInfoNode(ai_child->mName.C_Str(), Engine::Math::assimpToGLMMat4(ai_child->mTransformation));
         MeshLoader::LoadPopulateGlobalNodes(scene, root, node, child, ai_child, request);
     }
 }
@@ -435,13 +434,13 @@ void Engine::priv::MeshLoader::SaveTo_OBJCC(VertexData& vertexData, string filen
         //positions
         std::vector<uint16_t> outp(3);
         for (size_t i = 0; i < outp.size(); ++i) {
-            Engine::Math::Float16From32(&outp[i], position[i]);
+            Engine::Math::Float16From32(&outp[i], position[(glm::vec3::length_type)i]);
             writeBigEndian(stream, outp[i], 2);
         }
         //uvs
         std::vector<uint16_t> outu(2);
         for (size_t i = 0; i < outu.size(); ++i) {
-            Engine::Math::Float16From32(&outu[i], uv[i]);
+            Engine::Math::Float16From32(&outu[i], uv[(glm::vec2::length_type)i]);
             writeBigEndian(stream, outu[i], 2);
         }
         //normals (remember they are GLuints right now)
@@ -461,13 +460,13 @@ void Engine::priv::MeshLoader::SaveTo_OBJCC(VertexData& vertexData, string filen
             //boneID's
             std::vector<uint16_t> outbI(4);
             for (size_t i = 0; i < outbI.size(); ++i) {
-                Engine::Math::Float16From32(&outbI[i], bID[i]);
+                Engine::Math::Float16From32(&outbI[i], bID[(glm::vec4::length_type)i]);
                 writeBigEndian(stream, outbI[i], 2);
             }
             //boneWeight's
             std::vector<uint16_t> outbW(4);
             for (size_t i = 0; i < outbW.size(); ++i) {
-                Engine::Math::Float16From32(&outbW[i], bW[i]);
+                Engine::Math::Float16From32(&outbW[i], bW[(glm::vec4::length_type)i]);
                 writeBigEndian(stream, outbW[i], 2);
             }
         }

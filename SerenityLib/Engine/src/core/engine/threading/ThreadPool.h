@@ -49,19 +49,17 @@ namespace Engine::priv {
     };
     
     class ThreadPool final{
-
         using PoolTask    = Engine::priv::Task;
         using PoolTaskPtr = std::shared_ptr<PoolTask>;
-
         friend class Engine::priv::WorkerThread;
         private:
-            std::condition_variable_any                                              m_ConditionVariableAny;
-            std::mutex                                                               m_Mutex;
-            std::vector<std::queue<PoolTaskPtr>>                                     m_TaskQueue;
-            WorkerThreadContainer                                                    m_WorkerThreads;
-            std::vector<std::vector<Engine::priv::ThreadPoolFuture>>                 m_Futures;
-            std::vector<std::vector<Engine::priv::ThreadPoolFutureCallback>>         m_FutureCallbacks;
-            bool                                                                     m_Stopped = true;
+            std::condition_variable_any                                       m_ConditionVariableAny;
+            std::mutex                                                        m_Mutex;
+            std::vector<std::queue<PoolTaskPtr>>                              m_TaskQueue;
+            WorkerThreadContainer                                             m_WorkerThreads;
+            std::vector<std::vector<Engine::priv::ThreadPoolFuture>>          m_Futures;
+            std::vector<std::vector<Engine::priv::ThreadPoolFutureCallback>>  m_FutureCallbacks;
+            bool                                                              m_Stopped = true;
       
             void internal_create_packaged_task(std::function<void()>&& job, unsigned int section);
             void internal_create_packaged_task(std::function<void()>&& job, std::function<void()>&& callback, unsigned int section);

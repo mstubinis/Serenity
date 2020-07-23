@@ -18,7 +18,7 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace std;
 
-void Collision::DeferredLoading::load_1(Collision* collision, const CollisionType::Type collisionType, Mesh* mesh, float mass) {
+void Collision::DeferredLoading::load_1(Collision* collision, CollisionType collisionType, Mesh* mesh, float mass) {
     auto* body = collision->m_Owner.getComponent<ComponentBody>();
 
     collision->m_DeferredMeshes.clear();
@@ -34,7 +34,7 @@ void Collision::DeferredLoading::load_1(Collision* collision, const CollisionTyp
         ComponentModel_Functions::CalculateRadius(*model);
     }
 }
-void Collision::DeferredLoading::load_2(Collision* collision, btCompoundShape* btCompound, vector<ModelInstance*> instances, float mass, const CollisionType::Type collisionType) {
+void Collision::DeferredLoading::load_2(Collision* collision, btCompoundShape* btCompound, vector<ModelInstance*> instances, float mass, CollisionType collisionType) {
     auto* body = collision->m_Owner.getComponent<ComponentBody>();
     btTransform localTransform;
     const auto scale = body->getScale();
@@ -54,15 +54,15 @@ void Collision::DeferredLoading::load_2(Collision* collision, btCompoundShape* b
     }
 }
 
-void Collision::_baseInit(CollisionType::Type type, float mass) {
+void Collision::internal_base_init(CollisionType type, float mass) {
     m_Type = type;
     setMass(mass);
 }
 Collision::Collision(ComponentBody& body){
     m_Owner = body.getOwner();
-    _baseInit(body.getCollision()->getType(), body.mass());
+    internal_base_init(body.getCollision()->getType(), body.mass());
 }
-Collision::Collision(ComponentBody& body, CollisionType::Type type, ModelInstance* modelInstance, float mass){
+Collision::Collision(ComponentBody& body, CollisionType type, ModelInstance* modelInstance, float mass){
     m_Owner = body.getOwner();
     m_BtShape = nullptr;
     if (modelInstance) {
@@ -78,9 +78,9 @@ Collision::Collision(ComponentBody& body, CollisionType::Type type, ModelInstanc
     }else{
         m_BtShape = InternalMeshPublicInterface::BuildCollision(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), type);
     }
-    _baseInit(type, mass);
+    internal_base_init(type, mass);
 }
-Collision::Collision(ComponentBody& body, CollisionType::Type type, Mesh& mesh, float mass){
+Collision::Collision(ComponentBody& body, CollisionType type, Mesh& mesh, float mass){
     m_Owner   = body.getOwner();
     m_BtShape = nullptr;
     if (mesh == false || !mesh.m_CollisionFactory) {
@@ -92,10 +92,10 @@ Collision::Collision(ComponentBody& body, CollisionType::Type type, Mesh& mesh, 
     }else{
         m_BtShape = InternalMeshPublicInterface::BuildCollision(&mesh, type);
     }
-    _baseInit(type, mass);
+    internal_base_init(type, mass);
 }
 
-Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, float mass, CollisionType::Type type){
+Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, float mass, CollisionType type){
     m_Owner   = body.getOwner();
     m_BtShape = nullptr;
     vector<ModelInstance*> modelInstances;
@@ -164,9 +164,6 @@ Collision& Collision::operator=(Collision&& other) noexcept {
     }
     return *this;
 }
-void Collision::setBtShape(btCollisionShape* shape) {
-    m_BtShape = shape;
-}
 void Collision::setMass(float mass) {
     if (!m_BtShape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None) {
         return;
@@ -187,16 +184,6 @@ void Collision::setMass(float mass) {
         m_BtShape->calculateLocalInertia(mass, m_BtInertia);
     }
 }
-const btVector3& Collision::getBtInertia() const {
-    return m_BtInertia;
-}
-btCollisionShape* Collision::getBtShape() const { 
-    return m_BtShape; 
-}
-CollisionType::Type Collision::getType() const {
-    return m_Type; 
-}
-
 void Collision::onEvent(const Event& event_) {
     if (event_.type == EventType::ResourceLoaded) {
         if (event_.eventResource.resource->type() == ResourceType::Mesh && m_DeferredMeshes.size() > 0) {

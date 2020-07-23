@@ -51,9 +51,8 @@ bool SoundMusic::play(unsigned int numLoops) {
     m_Sound.play();
     m_Active = true;
 
-    EventSoundStatusChanged e(m_Status);
     Event ev(EventType::SoundStatusChanged);
-    ev.eventSoundStatusChanged = e;
+    ev.eventSoundStatusChanged = EventSoundStatusChanged((unsigned int)m_Status);
     Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     return true;
 }
@@ -75,9 +74,8 @@ bool SoundMusic::pause() {
     }
     m_Sound.pause();
 
-    EventSoundStatusChanged e(m_Status);
     Event ev(EventType::SoundStatusChanged);
-    ev.eventSoundStatusChanged = e;
+    ev.eventSoundStatusChanged = EventSoundStatusChanged((unsigned int)m_Status);
     Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     return true;
 }
@@ -111,9 +109,8 @@ bool SoundMusic::stop(bool stopAllLoops) {
         m_Loops = 0;
     }
 
-    EventSoundStatusChanged e(m_Status);
     Event ev(EventType::SoundStatusChanged);
-    ev.eventSoundStatusChanged = e;
+    ev.eventSoundStatusChanged = EventSoundStatusChanged((unsigned int)m_Status);
     Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     return true;
 }
@@ -137,9 +134,8 @@ bool SoundMusic::restart() {
     }
     m_Sound.setPlayingOffset(sf::Time::Zero); //only if paused or playing. if stopped, has no effect
 
-    EventSoundStatusChanged e(m_Status);
     Event ev(EventType::SoundStatusChanged);
-    ev.eventSoundStatusChanged = e;
+    ev.eventSoundStatusChanged = EventSoundStatusChanged((unsigned int)m_Status);;
     Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     return true;
 }

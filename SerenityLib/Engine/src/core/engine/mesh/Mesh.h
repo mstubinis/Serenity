@@ -37,15 +37,15 @@ namespace Engine::priv {
 namespace Engine::priv{
     class InternalMeshPublicInterface final {
         private:
-            static btCollisionShape* internal_build_collision(Mesh*, ModelInstance*, CollisionType::Type, bool isCompoundChild) noexcept;
+            static btCollisionShape* internal_build_collision(Mesh*, ModelInstance*, CollisionType, bool isCompoundChild) noexcept;
         public:
             static void InitBlankMesh(Mesh&);
             static void LoadGPU(Mesh&);
             static void UnloadCPU(Mesh&);
             static void UnloadGPU(Mesh&);
             static bool SupportsInstancing();
-            static btCollisionShape* BuildCollision(ModelInstance*, CollisionType::Type, bool isCompoundChild = false);
-            static btCollisionShape* BuildCollision(Mesh*, CollisionType::Type, bool isCompoundChild = false);
+            static btCollisionShape* BuildCollision(ModelInstance*, CollisionType, bool isCompoundChild = false);
+            static btCollisionShape* BuildCollision(Mesh*, CollisionType, bool isCompoundChild = false);
 
             static void FinalizeVertexData(Mesh&, MeshImportedData& data);
             static void TriangulateComponentIndices(Mesh&, MeshImportedData& data, std::vector<std::vector<uint>>& indices, unsigned char flags);
@@ -67,9 +67,13 @@ class Mesh final: public Resource, public Observer, public Engine::NonCopyable, 
     friend class  Collision;
     friend class  Terrain;
     friend class  SMSH_File;
+
+    using bind_func   = std::function<void(Mesh*, const Engine::priv::Renderer*)>;
+    using unbind_func = std::function<void(Mesh*, const Engine::priv::Renderer*)>;
+
     private:
-        std::function<void(Mesh*, const Engine::priv::Renderer*)> m_CustomBindFunctor   = [](Mesh*, const Engine::priv::Renderer*) {};
-        std::function<void(Mesh*, const Engine::priv::Renderer*)> m_CustomUnbindFunctor = [](Mesh*, const Engine::priv::Renderer*) {};
+        bind_func                              m_CustomBindFunctor   = [](Mesh*, const Engine::priv::Renderer*) {};
+        unbind_func                            m_CustomUnbindFunctor = [](Mesh*, const Engine::priv::Renderer*) {};
         Engine::priv::MeshInfoNode*            m_RootNode            = nullptr;
         VertexData*                            m_VertexData          = nullptr;
         Engine::priv::MeshCollisionFactory*    m_CollisionFactory    = nullptr;
@@ -90,20 +94,16 @@ class Mesh final: public Resource, public Observer, public Engine::NonCopyable, 
         Mesh(const std::string& fileOrData, float threshold = 0.0005f); //file or data
         ~Mesh();
 
-        template<typename T> void setCustomBindFunctor(const T& functor) {
-            m_CustomBindFunctor = std::bind(std::move(functor), std::placeholders::_1, std::placeholders::_2);
-        }
-        template<typename T> void setCustomUnbindFunctor(const T& functor) {
-            m_CustomUnbindFunctor = std::bind(std::move(functor), std::placeholders::_1, std::placeholders::_2);
-        }
+        void setCustomBindFunctor(bind_func&& functor) { m_CustomBindFunctor = std::move(functor); }
+        void setCustomUnbindFunctor(unbind_func&& functor) { m_CustomUnbindFunctor = std::move(functor); }
 
         bool operator==(bool rhs) const { return (rhs) ? (bool)m_VertexData : (bool)!m_VertexData; }
         explicit operator bool() const { return (bool)m_VertexData; }
 
         std::unordered_map<std::string, Engine::priv::AnimationData>& animationData();
-        inline constexpr const glm::vec3& getRadiusBox() const noexcept { return m_radiusBox; }
-        inline constexpr float getRadius() const noexcept { return m_radius; }
-        inline constexpr const VertexData& getVertexData() const noexcept { return *m_VertexData; }
+        inline CONSTEXPR const glm::vec3& getRadiusBox() const noexcept { return m_radiusBox; }
+        inline CONSTEXPR float getRadius() const noexcept { return m_radius; }
+        inline CONSTEXPR const VertexData& getVertexData() const noexcept { return *m_VertexData; }
 
         void onEvent(const Event& e);
 

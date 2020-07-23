@@ -2,13 +2,13 @@
 #ifndef ENGINE_SOUND_BASE_CLASS_H
 #define ENGINE_SOUND_BASE_CLASS_H
 
-struct SoundStatus final {enum Status {
+enum class SoundStatus : unsigned char {
     Fresh,
     Playing,
     PlayingLooped,
     Paused,
     Stopped,
-};};
+};
 
 namespace Engine::priv {
     class SoundModule;
@@ -17,9 +17,9 @@ namespace Engine::priv {
 class SoundBaseClass {
     friend class Engine::priv::SoundModule;
     protected:
-        SoundStatus::Status      m_Status      = SoundStatus::Fresh;
-        unsigned int             m_Loops       = 0U;
-        unsigned int             m_CurrentLoop = 0U;
+        SoundStatus   m_Status      = SoundStatus::Fresh;
+        unsigned int  m_Loops       = 0U;
+        unsigned int  m_CurrentLoop = 0U;
 
         SoundBaseClass(unsigned int numLoops) {
             m_Loops = numLoops;
@@ -32,13 +32,13 @@ class SoundBaseClass {
             m_Status = SoundStatus::Stopped;
         }
 
-        inline constexpr SoundStatus::Status status() const noexcept { return m_Status; }
+        inline CONSTEXPR SoundStatus status() const noexcept { return m_Status; }
         virtual void update(const float dt) {}
         virtual bool play(unsigned int numLoops = 1) { return false; }
         virtual bool pause() { return false; }
         virtual bool stop() { return false; }
         virtual bool restart() { return false; }
-        inline constexpr unsigned int getLoopsLeft() const noexcept { return m_Loops - m_CurrentLoop; }
+        inline CONSTEXPR unsigned int getLoopsLeft() const noexcept { return m_Loops - m_CurrentLoop; }
         virtual float getAttenuation() const { return 0.0f; }
         virtual unsigned int getChannelCount() const { return 0U; }
         virtual float getMinDistance() const { return 0.0f; }

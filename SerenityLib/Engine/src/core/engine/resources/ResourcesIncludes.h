@@ -2,8 +2,8 @@
 #ifndef ENGINE_RESOURCES_INCLUDES_H
 #define ENGINE_RESOURCES_INCLUDES_H
 
-struct ResourceType final { enum Type {
-    Empty, //do NOT move this specific enum
+enum class ResourceType : unsigned char {
+    Unknown = 0,
     Texture,
     Mesh,
     Material,
@@ -15,7 +15,6 @@ struct ResourceType final { enum Type {
     ShaderProgram,
     SoundData,
     Scene,
-    _TOTAL,
-};};
+};
 
 #endif

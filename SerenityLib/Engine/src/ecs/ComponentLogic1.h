@@ -20,12 +20,12 @@ class ComponentLogic1 : public Engine::UserPointer {
     public:
         ComponentLogic1(Entity entity);
         template<typename T> 
-        ComponentLogic1(Entity entity, const T& Functor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr) {
+        ComponentLogic1(Entity entity, T&& Functor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr) {
             m_Owner        = entity;
             m_UserPointer  = Ptr1;
             m_UserPointer1 = Ptr2;
             m_UserPointer2 = Ptr3;
-            setFunctor(Functor);
+            setFunctor(std::move(Functor));
         }
         ComponentLogic1(const ComponentLogic1& other) = delete;
         ComponentLogic1& operator=(const ComponentLogic1& other) = delete;
@@ -34,17 +34,17 @@ class ComponentLogic1 : public Engine::UserPointer {
 
         ~ComponentLogic1();
 
-        const Entity getOwner() const;
+        inline CONSTEXPR Entity getOwner() const noexcept { return m_Owner; }
         void call(const float dt) const;
 
-        void setFunctor(std::function<void(const ComponentLogic1*, const float)> functor);
+        void setFunctor(std::function<void(const ComponentLogic1*, const float)>&& functor);
         void setFunctor(luabridge::LuaRef luaFunction);
 
-        void setUserPointer1(void* UserPointer1);
-        void setUserPointer2(void* UserPointer2);
-        
-        void* getUserPointer1() const;
-        void* getUserPointer2() const;
+        inline void setUserPointer1(void* UserPointer1) noexcept { m_UserPointer1 = UserPointer1; }
+        inline void setUserPointer2(void* UserPointer2) noexcept { m_UserPointer2 = UserPointer2; }
+
+        inline CONSTEXPR void* getUserPointer1() const noexcept { return m_UserPointer1; }
+        inline CONSTEXPR void* getUserPointer2() const noexcept { return m_UserPointer2; }
 };
 
 class ComponentLogic1_System_CI : public Engine::priv::ECSSystemCI {

@@ -30,8 +30,8 @@ namespace Engine::priv {
 
             unsigned int width() const;
             unsigned int height() const;
-            inline constexpr GLuint internalFormat() const noexcept { return m_InternalFormat; }
-            inline constexpr unsigned int attatchment() const noexcept { return m_GL_Attatchment; }
+            inline CONSTEXPR GLuint internalFormat() const noexcept { return m_InternalFormat; }
+            inline CONSTEXPR unsigned int attatchment() const noexcept { return m_GL_Attatchment; }
 
             virtual void resize(FramebufferObject&, unsigned int width, unsigned int height) {}
             virtual GLuint address() const { return 0; }
@@ -90,11 +90,11 @@ namespace Engine::priv {
             FramebufferObject(unsigned int width, unsigned int height, ImageInternalFormat, float divisor = 1.0f, unsigned int swapBufferCount = 1);
             ~FramebufferObject();
 
-            template<typename T> void setCustomBindFunctor(const T& functor) {
-                m_CustomBindFunctor = std::bind<void>(std::move(functor), std::placeholders::_1);
+            void setCustomBindFunctor(std::function<void(const FramebufferObject*)>&& functor) noexcept {
+                m_CustomBindFunctor = std::move(functor);
             }
-            template<typename T> void setCustomUnbindFunctor(const T& functor) {
-                m_CustomUnbindFunctor = std::bind<void>(std::move(functor), std::placeholders::_1);
+            void setCustomUnbindFunctor(std::function<void(const FramebufferObject*)>&& functor) noexcept {
+                m_CustomUnbindFunctor = std::move(functor);
             }
             void bind() const;
             void unbind() const;
@@ -104,17 +104,17 @@ namespace Engine::priv {
 
             void cleanup();
 
-            inline FramebufferObjectAttatchment* getAttatchement(unsigned int index) const noexcept { return m_Attatchments.at(index); }
+            inline CONSTEXPR FramebufferObjectAttatchment* getAttatchement(unsigned int index) const noexcept { return m_Attatchments.at(index); }
 
             void resize(unsigned int width, unsigned int height);
             FramebufferTexture* attatchTexture(Texture*, FramebufferAttatchment);
             RenderbufferObject* attatchRenderBuffer(RenderbufferObject&);
-            inline constexpr unsigned int width() const noexcept { return m_FramebufferWidth; }
-            inline constexpr unsigned int height() const noexcept { return m_FramebufferHeight; }
-            inline std::unordered_map<unsigned int, FramebufferObjectAttatchment*>& attatchments() const noexcept { return m_Attatchments; }
+            inline CONSTEXPR unsigned int width() const noexcept { return m_FramebufferWidth; }
+            inline CONSTEXPR unsigned int height() const noexcept { return m_FramebufferHeight; }
+            inline CONSTEXPR std::unordered_map<unsigned int, FramebufferObjectAttatchment*>& attatchments() const noexcept { return m_Attatchments; }
             GLuint address() const;
             bool check();
-            inline constexpr float divisor() const noexcept { return m_Divisor; }
+            inline CONSTEXPR float divisor() const noexcept { return m_Divisor; }
     };
 };
 

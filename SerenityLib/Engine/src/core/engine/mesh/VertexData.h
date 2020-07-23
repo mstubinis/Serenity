@@ -25,7 +25,7 @@ struct VertexData final{
 
     ~VertexData();
 
-    template<typename T> std::vector<T> getData(size_t attributeIndex) const {
+    template<typename T> std::vector<T> getData(size_t attributeIndex) const noexcept {
         if (attributeIndex >= m_Data.size()) {
             return std::vector<T>{};
         }
@@ -34,7 +34,7 @@ struct VertexData final{
         const std::vector<T> data_as_t(data_as_t_ptr, data_as_t_ptr + m_DataSizes[attributeIndex]);
         return data_as_t;
     }
-    template<typename T> void setData(size_t attributeIndex, const T* source_new_data, size_t bufferCount, bool addToGPU = false, bool orphan = false) {
+    template<typename T> void setData(size_t attributeIndex, const T* source_new_data, size_t bufferCount, bool addToGPU = false, bool orphan = false) noexcept {
         if (m_Buffers.size() == 0)
             m_Buffers.push_back(std::make_unique<VertexBufferObject>());
         if (attributeIndex >= m_Data.size())
@@ -57,7 +57,7 @@ struct VertexData final{
 
     std::vector<glm::vec3> getPositions() const;
 
-    void setData(size_t attributeIndex, uint8_t* buffer, size_t source_new_data_amount, size_t vertexCount, bool addToGPU = false, bool orphan = false) {
+    void setData(size_t attributeIndex, uint8_t* buffer, size_t source_new_data_amount, size_t vertexCount, bool addToGPU = false, bool orphan = false) noexcept {
         if (m_Buffers.size() == 0)
             m_Buffers.push_back(std::make_unique<VertexBufferObject>());
         if (attributeIndex >= m_Data.size())

@@ -5,7 +5,7 @@
 namespace Engine::priv::opengl::glsl {
     class Compression final {
         public:
-            static void convert(std::string& code, const unsigned int versionNumber);
+            static void convert(std::string& code, unsigned int versionNumber);
     };
 };
 

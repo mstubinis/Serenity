@@ -59,7 +59,7 @@ void priv::ResourceManager::onPostUpdate() {
     }   
 }
 Handle priv::ResourceManager::_addTexture(Texture* t) {
-    return m_Resources.add(t, ResourceType::Texture);
+    return m_Resources.add(t, (unsigned int)ResourceType::Texture);
 }
 Scene& priv::ResourceManager::_getSceneByID(std::uint32_t id) {
     return *m_Scenes[id - 1];
@@ -208,7 +208,7 @@ Material* Resources::getMaterial(Handle h) {
     return p; 
 }
 Handle Resources::addFont(const std::string& filename, int height, int width, float line_height){
-    return resourceManager->m_Resources.add(NEW Font(filename, height, width, line_height), ResourceType::Font);
+    return resourceManager->m_Resources.add(NEW Font(filename, height, width, line_height), (unsigned int)ResourceType::Font);
 }
 
 
@@ -297,25 +297,25 @@ Handle Resources::loadMaterial(const std::string& name, Texture* diffuse, Textur
     return Handle();
 }
 
-Handle Resources::addShader(const std::string& fileOrData, ShaderType::Type type, bool fromFile){
+Handle Resources::addShader(const std::string& fileOrData, ShaderType type, bool fromFile){
     Shader* shader = NEW Shader(fileOrData, type, fromFile);
-    return resourceManager->m_Resources.add(shader, ResourceType::Shader);
+    return resourceManager->m_Resources.add(shader, (unsigned int)ResourceType::Shader);
 }
 
 Handle Resources::addShaderProgram(const std::string& n, Shader& v, Shader& f){
     ShaderProgram* program = NEW ShaderProgram(n, v, f);
-    return resourceManager->m_Resources.add(program, ResourceType::ShaderProgram);
+    return resourceManager->m_Resources.add(program, (unsigned int)ResourceType::ShaderProgram);
 }
 Handle Resources::addShaderProgram(const std::string& n, Handle v, Handle f){
     Shader* vertexShader   = resourceManager->m_Resources.getAsFast<Shader>(v);
     Shader* fragmentShader = resourceManager->m_Resources.getAsFast<Shader>(f);
     ShaderProgram* program = NEW ShaderProgram(n, *vertexShader, *fragmentShader);
-    return resourceManager->m_Resources.add(program, ResourceType::ShaderProgram);
+    return resourceManager->m_Resources.add(program, (unsigned int)ResourceType::ShaderProgram);
 }
 
 Handle Resources::addSoundData(const std::string& file){
     SoundData* soundData = NEW SoundData(file);
-    return resourceManager->m_Resources.add(soundData, ResourceType::SoundData);
+    return resourceManager->m_Resources.add(soundData, (unsigned int)ResourceType::SoundData);
 }
 
 bool Resources::setCurrentScene(Scene* newScene){

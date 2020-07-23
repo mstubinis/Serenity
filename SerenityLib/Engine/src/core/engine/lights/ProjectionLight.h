@@ -49,13 +49,13 @@ class ProjectionLight : public SunLight {
 
         Texture* getTexture() const noexcept { return m_Texture; }
 
-        const std::array<glm::vec3, 8> & getPoints() const noexcept { return m_FrustumPoints; }
-        const std::array<unsigned int, 36>& getIndices() const noexcept { return m_FrustumIndices; }
+        inline CONSTEXPR const std::array<glm::vec3, 8>& getPoints() const noexcept { return m_FrustumPoints; }
+        inline CONSTEXPR const std::array<unsigned int, 36>& getIndices() const noexcept { return m_FrustumIndices; }
 
-        constexpr float getNear() const noexcept { return m_Near; }
-        constexpr float getFar() const noexcept { return m_Far; }
-        constexpr glm::vec2 getNearScale() const noexcept { return m_NearScale; }
-        constexpr glm::vec2 getFarScale() const noexcept { return m_FarScale; }
+        inline CONSTEXPR float getNear() const noexcept { return m_Near; }
+        inline CONSTEXPR float getFar() const noexcept { return m_Far; }
+        inline CONSTEXPR glm::vec2 getNearScale() const noexcept { return m_NearScale; }
+        inline CONSTEXPR glm::vec2 getFarScale() const noexcept { return m_FarScale; }
 
         void free() noexcept override;
 };

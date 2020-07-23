@@ -40,14 +40,14 @@ class Particle {
 
         void init(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmitter& parent);
 
-        bool isActive() const noexcept { return (m_Timer > 0.0f); }
+        inline CONSTEXPR bool isActive() const noexcept { return (m_Timer > 0.0f); }
         void setPosition(const glm::vec3& newPosition);
-        Material* getMaterial() const noexcept { return m_Material; }
-        float angle() const noexcept { return m_Angle; }
-        const glm::vec2& getScale() const noexcept { return m_Scale; }
-        const glm::vec3& position() const noexcept { return m_Position; }
-        const Engine::color_vector_4& color() const noexcept { return m_Color; }
-        const glm::vec3& velocity() const noexcept { return m_Velocity; }
+        inline CONSTEXPR Material* getMaterial() const noexcept { return m_Material; }
+        inline CONSTEXPR float angle() const noexcept { return m_Angle; }
+        inline CONSTEXPR const glm::vec2& getScale() const noexcept { return m_Scale; }
+        inline CONSTEXPR const glm::vec3& position() const noexcept { return m_Position; }
+        inline CONSTEXPR const Engine::color_vector_4& color() const noexcept { return m_Color; }
+        inline CONSTEXPR const glm::vec3& velocity() const noexcept { return m_Velocity; }
         float lifetime() const;
 };
 #endif

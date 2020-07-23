@@ -15,7 +15,7 @@ namespace Engine::priv {
             std::vector<Engine::Networking::ListenerTCP*>  m_TCPListeners;
 
             template<typename TVECTOR, typename TSOCKET>
-            void internal_add_socket(TVECTOR& vec, TSOCKET* socket) {
+            void internal_add_socket(TVECTOR& vec, TSOCKET* socket) noexcept {
                 for (size_t i = 0; i < vec.size(); ++i) {
                     if (vec[i] == socket) {
                         return;
@@ -25,7 +25,7 @@ namespace Engine::priv {
             }
 
             template<typename TVECTOR, typename TSOCKET>
-            void internal_remove_socket(TVECTOR& vec, TSOCKET* socket) {
+            void internal_remove_socket(TVECTOR& vec, TSOCKET* socket) noexcept {
                 for (size_t i = 0; i < vec.size(); ++i) {
                     if (vec[i] == socket) {
                         vec.erase(vec.begin() + i);

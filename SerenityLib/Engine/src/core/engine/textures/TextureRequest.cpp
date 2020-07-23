@@ -74,7 +74,7 @@ void TextureRequestStaticImpl::Request(TextureRequest& request) {
             request.part.texture = NEW Texture();
             request.part.texture->m_TextureType = request.part.textureType;
             request.part.texture->setName(request.part.name);
-            request.part.handle = Core::m_Engine->m_ResourceManager.m_Resources.add(request.part.texture, ResourceType::Texture);
+            request.part.handle = Core::m_Engine->m_ResourceManager.m_Resources.add(request.part.texture, (unsigned int)ResourceType::Texture);
 
             auto lambda_cpu = [request]() {
                 if (request.part.textureType == TextureType::Texture2D) {
@@ -142,7 +142,7 @@ void TextureRequestStaticImpl::Request(TextureRequestFromMemory& request) {
         request.part.texture = NEW Texture();
         request.part.texture->m_TextureType = request.part.textureType;
         request.part.texture->setName(request.part.name);
-        request.part.handle = Core::m_Engine->m_ResourceManager.m_Resources.add(request.part.texture, ResourceType::Texture);
+        request.part.handle = Core::m_Engine->m_ResourceManager.m_Resources.add(request.part.texture, (unsigned int)ResourceType::Texture);
 
         auto lambda_cpu = [request]() {
             if (request.part.textureType == TextureType::Texture2D) {

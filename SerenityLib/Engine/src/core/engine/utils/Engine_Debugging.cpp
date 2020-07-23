@@ -4,7 +4,6 @@
 using namespace Engine;
 using namespace std;
 
-
 void priv::DebugManager::_init() {
     //TODO: check if this is still needed
 	GLuint cast = (GLuint)queryID;

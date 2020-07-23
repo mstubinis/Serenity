@@ -83,7 +83,7 @@ bool InternalMeshPublicInterface::SupportsInstancing(){
         OpenGLExtensions::supported(OpenGLExtensions::ARB_draw_instanced)
     );
 }
-btCollisionShape* InternalMeshPublicInterface::internal_build_collision(Mesh* mesh, ModelInstance* modelInstance, CollisionType::Type collisionType, bool isCompoundChild) noexcept {
+btCollisionShape* InternalMeshPublicInterface::internal_build_collision(Mesh* mesh, ModelInstance* modelInstance, CollisionType collisionType, bool isCompoundChild) noexcept {
     Engine::priv::MeshCollisionFactory* factory = nullptr;
     if (!mesh) {
         factory = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().m_CollisionFactory;
@@ -111,10 +111,10 @@ btCollisionShape* InternalMeshPublicInterface::internal_build_collision(Mesh* me
     }
     return new btEmptyShape();
 }
-btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, CollisionType::Type collisionType, bool isCompoundChild) {
+btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, CollisionType collisionType, bool isCompoundChild) {
     return internal_build_collision(mesh, nullptr, collisionType, isCompoundChild);
 }
-btCollisionShape* InternalMeshPublicInterface::BuildCollision(ModelInstance* modelInstance, CollisionType::Type collisionType, bool isCompoundChild) {
+btCollisionShape* InternalMeshPublicInterface::BuildCollision(ModelInstance* modelInstance, CollisionType collisionType, bool isCompoundChild) {
     Mesh* mesh = nullptr;
     if (modelInstance) {
         if (modelInstance->mesh()) {

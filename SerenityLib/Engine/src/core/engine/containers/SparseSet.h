@@ -51,7 +51,7 @@ namespace Engine {
                 }
             }
             template<typename... ARGS> 
-            constexpr T* add(std::uint32_t id, ARGS&&... args) {
+            CONSTEXPR T* add(std::uint32_t id, ARGS&&... args) {
                 std::uint32_t sparseIndex = id - 1;
                 if (static_cast<size_t>(sparseIndex) >= super::m_Sparse.size()) {
                     super::m_Sparse.resize(static_cast<size_t>(sparseIndex) + 1, 0);
@@ -65,7 +65,7 @@ namespace Engine {
                 return &m_Dense[super::m_Sparse[sparseIndex] - 1];
             }
             //TODO: this entire function needs a serious look at
-            constexpr bool remove(std::uint32_t id) override {
+            CONSTEXPR bool remove(std::uint32_t id) override {
                 auto removedEntityIndex = id - 1;
                 if (removedEntityIndex >= super::m_Sparse.size()) {
                     return false;
@@ -98,7 +98,7 @@ namespace Engine {
                 m_Dense.pop_back();
                 return true;
             }
-            constexpr T* get(std::uint32_t id) const {
+            CONSTEXPR T* get(std::uint32_t id) const {
                 auto entityIndexInSparse = id - 1;
                 auto sparseSize          = super::m_Sparse.size();
                 if (sparseSize == 0 || entityIndexInSparse >= sparseSize || super::m_Sparse[entityIndexInSparse] == 0) {
@@ -115,13 +115,13 @@ namespace Engine {
             T& operator[](size_t index) {
                 return m_Dense[index];
             }
-            const T& operator[](size_t index) const {
+            const T& operator[](size_t index) const noexcept {
                 return m_Dense[index];
             }
-            constexpr size_t size() const {
+            inline CONSTEXPR size_t size() const noexcept {
                 return m_Dense.size();
             }
-            std::vector<T>& data() {
+            inline CONSTEXPR std::vector<T>& data() noexcept {
                 return m_Dense;
             }
             typename std::vector<T>::iterator begin() { return m_Dense.begin(); }

@@ -8,16 +8,16 @@ namespace Engine::priv {
     class MouseModule {
         private:
             std::array<bool, MouseButton::_TOTAL>  m_MouseStatus;
-            unsigned int                           m_CurrentMouseButton = static_cast<unsigned int>(MouseButton::Unknown);
-            unsigned int                           m_PreviousMouseButton = static_cast<unsigned int>(MouseButton::Unknown);
+            unsigned int                           m_CurrentMouseButton     = (unsigned int)MouseButton::Unknown;
+            unsigned int                           m_PreviousMouseButton    = (unsigned int)MouseButton::Unknown;
             unsigned int                           m_NumPressedMouseButtons = 0U;
         public:
             MouseModule() {
                 m_MouseStatus.fill(false);
             }
-            virtual ~MouseModule() {}
+            virtual ~MouseModule() = default;
 
-            constexpr void onButtonPressed(unsigned int button) {
+            CONSTEXPR void onButtonPressed(unsigned int button) noexcept {
                 if (button == MouseButton::Unknown) {
                     return;
                 }
@@ -27,7 +27,7 @@ namespace Engine::priv {
                     m_MouseStatus[button] = true;
                 }
             }
-            constexpr void onButtonReleased(unsigned int button) {
+            CONSTEXPR void onButtonReleased(unsigned int button) noexcept {
                 if (button == MouseButton::Unknown) {
                     return;
                 }
@@ -37,27 +37,27 @@ namespace Engine::priv {
                     m_MouseStatus[button] = false;
                 }
             }
-            constexpr void onPostUpdate() {
+            CONSTEXPR void onPostUpdate() noexcept {
                 m_PreviousMouseButton    = (unsigned int)MouseButton::Unknown;
                 m_CurrentMouseButton     = (unsigned int)MouseButton::Unknown;
                 m_NumPressedMouseButtons = 0U;
             }
-            void onClearEvents() {
+            void onClearEvents() noexcept {
                 m_MouseStatus.fill(false);
                 m_PreviousMouseButton    = (unsigned int)MouseButton::Unknown;
                 m_CurrentMouseButton     = (unsigned int)MouseButton::Unknown;
                 m_NumPressedMouseButtons = 0U;
             }
-            constexpr MouseButton::Button getCurrentPressedButton() const {
+            CONSTEXPR MouseButton::Button getCurrentPressedButton() const noexcept {
                 return (MouseButton::Button)m_CurrentMouseButton;
             }
-            constexpr unsigned int getNumPressedButtons() const {
+            CONSTEXPR unsigned int getNumPressedButtons() const noexcept {
                 return m_NumPressedMouseButtons;
             }
-            constexpr bool isButtonDown(unsigned int button) {
+            CONSTEXPR bool isButtonDown(unsigned int button) noexcept {
                 return (m_MouseStatus[button] == true);
             }
-            constexpr bool isButtonDownOnce(unsigned int button) {
+            CONSTEXPR bool isButtonDownOnce(unsigned int button) noexcept {
                 const bool res = isButtonDown(button);
                 return res && m_CurrentMouseButton == button && m_CurrentMouseButton != m_PreviousMouseButton;
             }

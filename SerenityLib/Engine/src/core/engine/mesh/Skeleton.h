@@ -12,7 +12,6 @@ namespace Engine::priv {
     class  MeshLoader;
     class  ModelInstanceAnimation;
 };
-
 #include <core/engine/mesh/AnimationData.h>
 
 namespace Engine::priv {
@@ -32,12 +31,17 @@ namespace Engine::priv {
             std::unordered_map<std::string, AnimationData>  m_AnimationData;
             glm::mat4                                       m_GlobalInverseTransform   = glm::mat4(1.0f);
 
-            void clear();
+            void clear() noexcept {
+                m_NumBones = 0;
+                m_BoneMapping.clear();
+            }
         public:
-            MeshSkeleton();
-            ~MeshSkeleton();
+            MeshSkeleton() {
+                clear();
+            }
+            ~MeshSkeleton() = default;
 
-            unsigned int numBones() const;
+            inline CONSTEXPR unsigned int numBones() const noexcept { return m_NumBones; }
     };
 };
 #endif

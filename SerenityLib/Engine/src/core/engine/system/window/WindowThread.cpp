@@ -1,8 +1,6 @@
 #include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/system/window/Window.h>
 
-using namespace std;
-
 Engine::priv::WindowThread::WindowThread(WindowData& data) : m_Data(data) {
 }
 Engine::priv::WindowThread::~WindowThread() {
@@ -16,10 +14,9 @@ Engine::priv::WindowThread::operator bool() const {
     return (bool)m_EventThread.get();
 }
 std::optional<sf::Event> Engine::priv::WindowThread::try_pop() {
-    auto x = m_Queue.try_pop();
-    return std::move(x);
+    return m_Queue.try_pop();
 }
-void Engine::priv::WindowThread::push(WindowEventThreadOnlyCommands::Command command) {
+void Engine::priv::WindowThread::push(WindowEventThreadOnlyCommands command) {
     m_MainThreadToEventThreadQueue.push(command);
 }
 void Engine::priv::WindowThread::updateLoop() {
@@ -58,8 +55,8 @@ void Engine::priv::WindowThread::updateLoop() {
         }
     }
 }
-void Engine::priv::WindowThread::startup(Window& super, const string& name) {
-    auto lamda = [&]() {
+void Engine::priv::WindowThread::startup(Window& super, const std::string& name) {
+    m_EventThread.reset(NEW std::thread([&]() {
         m_Data.m_SFMLWindow.create(m_Data.m_VideoMode, name, m_Data.m_Style, m_Data.m_SFContextSettings);
         if (!m_Data.m_IconFile.empty()) {
             super.setIcon(m_Data.m_IconFile);
@@ -69,8 +66,7 @@ void Engine::priv::WindowThread::startup(Window& super, const string& name) {
         while (!m_Data.m_UndergoingClosing) {
             updateLoop();
         }
-    };
-    m_EventThread.reset(NEW std::thread(lamda));
+    }));
 }
 void Engine::priv::WindowThread::cleanup() {
     if (m_EventThread && m_EventThread->joinable()) {

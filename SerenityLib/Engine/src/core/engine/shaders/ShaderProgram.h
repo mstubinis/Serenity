@@ -46,16 +46,16 @@ class ShaderProgram final : public Resource, public Engine::NonCopyable {
         ShaderProgram(ShaderProgram&& other) noexcept            = default;
         ShaderProgram& operator=(ShaderProgram&& other) noexcept = default;
 
-        void setCustomBindFunctor(std::function<void(ShaderProgram*)> function) {
-            m_CustomBindFunctor = function;
+        void setCustomBindFunctor(std::function<void(ShaderProgram*)>&& function) {
+            m_CustomBindFunctor = std::move(function);
         }
 
-        inline constexpr operator GLuint() const noexcept { return m_ShaderProgram; }
+        inline CONSTEXPR operator GLuint() const noexcept { return m_ShaderProgram; }
 
         void load() override;
         void unload() override;
 
-        inline constexpr GLuint program() const noexcept { return m_ShaderProgram; }
-        inline constexpr const std::unordered_map<std::string, GLint>& uniforms() const noexcept { return m_UniformLocations; }
+        inline CONSTEXPR GLuint program() const noexcept { return m_ShaderProgram; }
+        inline CONSTEXPR const std::unordered_map<std::string, GLint>& uniforms() const noexcept { return m_UniformLocations; }
 };
 #endif

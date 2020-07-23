@@ -86,14 +86,10 @@ class ModelInstance final : public Engine::UserPointer {
         ~ModelInstance();
 
         static inline void setGlobalDistanceFactor(decimal factor) noexcept { m_GlobalDistanceFactor = factor; }
-        static inline decimal getGlobalDistanceFactor() noexcept { return m_GlobalDistanceFactor; }
+        static inline CONSTEXPR decimal getGlobalDistanceFactor() noexcept { return m_GlobalDistanceFactor; }
 
-        inline void setCustomBindFunctor(bind_function functor) noexcept {
-            m_CustomBindFunctor   = functor;
-        }
-        inline void setCustomUnbindFunctor(unbind_function functor) noexcept {
-            m_CustomUnbindFunctor = functor;
-        }
+        inline void setCustomBindFunctor(bind_function&& functor) noexcept { m_CustomBindFunctor   = std::move(functor); }
+        inline void setCustomUnbindFunctor(unbind_function&& functor) noexcept { m_CustomUnbindFunctor = std::move(functor); }
         static void setDefaultViewportFlag(unsigned int flag);
         static void setDefaultViewportFlag(ViewportFlag::Flag flag);
 
@@ -106,26 +102,26 @@ class ModelInstance final : public Engine::UserPointer {
 
         unsigned int getViewportFlags() const;
 
-        inline constexpr size_t index() const noexcept { return m_Index; }
-        inline constexpr ModelDrawingMode getDrawingMode() const noexcept { return m_DrawingMode; }
+        inline CONSTEXPR size_t index() const noexcept { return m_Index; }
+        inline CONSTEXPR ModelDrawingMode getDrawingMode() const noexcept { return m_DrawingMode; }
         inline void setDrawingMode(ModelDrawingMode drawMode) noexcept { m_DrawingMode = drawMode; }
         inline void forceRender(bool forced = true) noexcept { m_ForceRender = forced; }
-        inline constexpr bool isForceRendered() const noexcept { return m_ForceRender; }
-        inline constexpr Entity parent() const noexcept { return m_Parent; }
-        inline constexpr const Engine::color_vector_4& color() const noexcept { return m_Color; }
-        inline constexpr const Engine::color_vector_4& godRaysColor() const noexcept { return m_GodRaysColor; }
-        inline constexpr const glm::mat4& modelMatrix() const noexcept { return m_ModelMatrix; }
-        inline constexpr const glm::vec3& getScale() const noexcept { return m_Scale; }
-        inline constexpr const glm::vec3& position() const noexcept { return m_Position; }
-        inline constexpr const glm::quat& orientation() const noexcept { return m_Orientation; }
-        inline constexpr ShaderProgram* shaderProgram() const noexcept { return m_ShaderProgram; }
-        inline constexpr Mesh* mesh() const noexcept { return m_Mesh; }
-        inline constexpr Material* material() const noexcept { return m_Material; }
-        inline constexpr RenderStage stage() const noexcept { return m_Stage; }
+        inline CONSTEXPR bool isForceRendered() const noexcept { return m_ForceRender; }
+        inline CONSTEXPR Entity parent() const noexcept { return m_Parent; }
+        inline CONSTEXPR const Engine::color_vector_4& color() const noexcept { return m_Color; }
+        inline CONSTEXPR const Engine::color_vector_4& godRaysColor() const noexcept { return m_GodRaysColor; }
+        inline CONSTEXPR const glm::mat4& modelMatrix() const noexcept { return m_ModelMatrix; }
+        inline CONSTEXPR const glm::vec3& getScale() const noexcept { return m_Scale; }
+        inline CONSTEXPR const glm::vec3& position() const noexcept { return m_Position; }
+        inline CONSTEXPR const glm::quat& orientation() const noexcept { return m_Orientation; }
+        inline CONSTEXPR ShaderProgram* shaderProgram() const noexcept { return m_ShaderProgram; }
+        inline CONSTEXPR Mesh* mesh() const noexcept { return m_Mesh; }
+        inline CONSTEXPR Material* material() const noexcept { return m_Material; }
+        inline CONSTEXPR RenderStage stage() const noexcept { return m_Stage; }
         inline void show() noexcept { m_Visible = true; }
         inline void hide() noexcept { m_Visible = false; }
-        inline constexpr bool visible() const noexcept { return m_Visible; }
-        inline constexpr bool passedRenderCheck() const noexcept { return m_PassedRenderCheck; }
+        inline CONSTEXPR bool visible() const noexcept { return m_Visible; }
+        inline CONSTEXPR bool passedRenderCheck() const noexcept { return m_PassedRenderCheck; }
         inline void setPassedRenderCheck(bool passed) noexcept { m_PassedRenderCheck = passed; }
 
 

@@ -54,7 +54,7 @@ namespace Engine::priv {
 
             std::vector<Scene*>& scenes();
 
-            template<typename T> T* HasResource(std::string_view resource_name) {
+            template<typename T> T* HasResource(std::string_view resource_name) noexcept {
                 for (size_t i = 0; i < m_Resources.size(); ++i) {
                     Resource* r = m_Resources.getAsFast<Resource>((unsigned int)i + 1U);
                     if (r) {
@@ -67,7 +67,7 @@ namespace Engine::priv {
                 return nullptr;
             }
 
-            template<typename T> std::list<T*> GetAllResourcesOfType() {
+            template<typename T> std::list<T*> GetAllResourcesOfType() noexcept {
                 std::list<T*> ret;
                 for (size_t i = 0; i < m_Resources.size(); ++i) {
                     Resource* r = m_Resources.getAsFast<Resource>((unsigned int)i + 1U);
@@ -181,7 +181,7 @@ namespace Engine::Resources {
         Texture* smoothness = nullptr
     );
 
-    Handle addShader(const std::string& shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
+    Handle addShader(const std::string& shaderFileOrData, ShaderType shaderType, bool fromFile = true);
     Handle addSoundData(const std::string& file);
     Handle addShaderProgram(const std::string& name, Shader& vertexShader, Shader& fragmentShader);
     Handle addShaderProgram(const std::string& name, Handle vertexShader, Handle fragmentShader);

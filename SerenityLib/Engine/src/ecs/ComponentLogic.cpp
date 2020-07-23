@@ -33,26 +33,11 @@ ComponentLogic& ComponentLogic::operator=(ComponentLogic&& other) noexcept{
     }
     return *this;
 }
-const Entity ComponentLogic::getOwner() const {
-    return m_Owner;
-}
-void ComponentLogic::setFunctor(std::function<void(const ComponentLogic*, const float)> functor) {
-    m_Functor.setFunctor(functor);
+void ComponentLogic::setFunctor(std::function<void(const ComponentLogic*, const float)>&& functor) {
+    m_Functor.setFunctor(std::move(functor));
 }
 void ComponentLogic::setFunctor(luabridge::LuaRef luaFunction) {
     m_Functor.setFunctor(luaFunction);
-}
-void ComponentLogic::setUserPointer1(void* UserPointer1) {
-    m_UserPointer1 = UserPointer1;
-}
-void ComponentLogic::setUserPointer2(void* UserPointer2) {
-    m_UserPointer2 = UserPointer2;
-}
-void* ComponentLogic::getUserPointer1() const {
-    return m_UserPointer1;
-}
-void* ComponentLogic::getUserPointer2() const {
-    return m_UserPointer2;
 }
 
 void ComponentLogic::call(const float dt) const { 

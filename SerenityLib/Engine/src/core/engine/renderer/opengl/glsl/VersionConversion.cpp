@@ -48,7 +48,7 @@ constexpr std::array<std::string_view, 30> TYPES {
     "umat4",
 };
 
-void opengl::glsl::VersionConversion::convert(string& code, const unsigned int versionNumber, const ShaderType::Type shaderType) {
+void opengl::glsl::VersionConversion::convert(string& code, unsigned int versionNumber, ShaderType shaderType) {
     //deal with MRT binding points
     if (versionNumber >= 130) {
         for (unsigned int i = 0; i < 100; ++i) {
@@ -114,7 +114,7 @@ void opengl::glsl::VersionConversion::convert(string& code, const unsigned int v
                             const string _part1 = line.substr(0, firstFound);
                             line.erase(0, found);
                             line = _part1 + "layout (location = " + to_string(aCount) + ") in " + line;
-                            ShaderHelper::insertStringAtAndReplaceLine(code, line, count);
+                            ShaderHelper::insertStringAtAndReplaceLine(code, std::move(line), count);
                             if (!ShaderHelper::sfind(_part1, "//") && !ShaderHelper::sfind(_part1, "/*") && !ShaderHelper::sfind(_part1, "///")) { //do we need to test for triple slashes?
                                 ++aCount;
                             }
@@ -155,7 +155,7 @@ void opengl::glsl::VersionConversion::convert(string& code, const unsigned int v
                                     const string _part1 = line.substr(0, firstFound);
                                     line.erase(0, found);
                                     line = _part1 + "attribute " + line;
-                                    ShaderHelper::insertStringAtAndReplaceLine(code, line, count);
+                                    ShaderHelper::insertStringAtAndReplaceLine(code, std::move(line), count);
                                     break;
                                 }
                             }

@@ -83,11 +83,11 @@ void InternalShaderProgramPublicInterface::LoadGPU(ShaderProgram& shaderP){
         }
         if (res == GL_FALSE) {
             if (shaderP.m_VertexShader.fromFile()) {
-                cout << "VertexShader Log (" + shaderP.m_VertexShader.m_FileName + "): " << endl;
+                cout << "VertexShader Log (" + shaderP.m_VertexShader.m_FileName + "): \n";
             }else{
-                cout << "VertexShader Log (" + shaderP.m_VertexShader.name() + "): " << endl;
+                cout << "VertexShader Log (" + shaderP.m_VertexShader.name() + "): \n";
             }
-            cout << &ve[0] << endl;
+            cout << &ve[0] << '\n';
         }
         // Compile Fragment Shader
         char const* fss = FragmentCode.c_str();
@@ -102,11 +102,11 @@ void InternalShaderProgramPublicInterface::LoadGPU(ShaderProgram& shaderP){
         }
         if (res == GL_FALSE) {
             if (shaderP.m_FragmentShader.fromFile()) {
-                cout << "FragmentShader Log (" + shaderP.m_FragmentShader.m_FileName + "): " << endl;
+                cout << "FragmentShader Log (" + shaderP.m_FragmentShader.m_FileName + "): \n";
             }else{
-                cout << "FragmentShader Log (" + shaderP.m_FragmentShader.name() + "): " << endl;
+                cout << "FragmentShader Log (" + shaderP.m_FragmentShader.name() + "): \n";
             }
-            cout << &fe[0] << endl;
+            cout << &fe[0] << '\n';
         }
         // Link the program id
         shaderP.m_ShaderProgram = glCreateProgram();
@@ -131,7 +131,8 @@ void InternalShaderProgramPublicInterface::LoadGPU(ShaderProgram& shaderP){
         vector<char>pe(std::max(ll, (int)1));
         glGetProgramInfoLog(shaderP.m_ShaderProgram, ll, NULL, &pe[0]);
         if (res == GL_FALSE) {
-            cout << "ShaderProgram Log : " << endl; cout << &pe[0] << endl;
+            cout << "ShaderProgram Log : " << '\n';
+            cout << &pe[0] << '\n';
         }
         //populate uniform table
         if (res == GL_TRUE) {

@@ -48,12 +48,12 @@ namespace Engine::priv {
             CPoolType& componentPool;
         public:
             ECSSystem(const ECSSystemCI& systemConstructor, ECS<ENTITY>& ecs) : componentPool(ecs.template getPool<COMPONENT>()){
-                super::SUF = systemConstructor.onUpdateFunction;
-                super::CAE = systemConstructor.onComponentAddedToEntityFunction;
-                super::CRE = systemConstructor.onComponentRemovedFromEntityFunction;
-                super::EAS = systemConstructor.onEntityAddedToSceneFunction;
-                super::SEF = systemConstructor.onSceneEnteredFunction;
-                super::SLF = systemConstructor.onSceneLeftFunction;
+                super::SUF = std::move(systemConstructor.onUpdateFunction);
+                super::CAE = std::move(systemConstructor.onComponentAddedToEntityFunction);
+                super::CRE = std::move(systemConstructor.onComponentRemovedFromEntityFunction);
+                super::EAS = std::move(systemConstructor.onEntityAddedToSceneFunction);
+                super::SEF = std::move(systemConstructor.onSceneEnteredFunction);
+                super::SLF = std::move(systemConstructor.onSceneLeftFunction);
             }
             ECSSystem()                                      = default;
             virtual ~ECSSystem()                             = default;
@@ -63,22 +63,22 @@ namespace Engine::priv {
             ECSSystem(ECSSystem&& other) noexcept            = delete;
             ECSSystem& operator=(ECSSystem&& other) noexcept = delete;
 
-            void onUpdate(const float dt, Scene& scene) { 
+            void onUpdate(const float dt, Scene& scene) noexcept { 
                 super::SUF(this, &componentPool, dt, scene); 
 			}
-            void onComponentAddedToEntity(void* component, ENTITY entity) {
+            void onComponentAddedToEntity(void* component, ENTITY entity) noexcept {
                 super::CAE(this, component, entity);
 			}
-            void onComponentRemovedFromEntity(ENTITY entity) {
+            void onComponentRemovedFromEntity(ENTITY entity) noexcept {
                 super::CRE(this, entity);
             }
-            void onEntityAddedToScene(ENTITY entity, Scene& scene) {
+            void onEntityAddedToScene(ENTITY entity, Scene& scene) noexcept {
                 super::EAS(this, &componentPool, entity, scene);
 			}
-            void onSceneEntered(Scene& scene) { 
+            void onSceneEntered(Scene& scene) noexcept { 
                 super::SEF(this, &componentPool, scene);
 			}
-            void onSceneLeft(Scene& scene) { 
+            void onSceneLeft(Scene& scene) noexcept { 
                 super::SLF(this, &componentPool, scene); 
 			}
     };

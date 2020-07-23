@@ -33,7 +33,7 @@ struct BufferObject {
 
     void generate();
     void destroy();
-    inline operator GLuint() const { return buffer; }
+    inline operator GLuint() const noexcept { return buffer; }
 
     void bind();
 
@@ -41,19 +41,19 @@ struct BufferObject {
     void setData(size_t _size, size_t _startingIndex, const void* _data);
     void setDataOrphan(const void* _data);
 
-    template<typename T> void setData(const std::vector<T>& _data, BufferDataDrawType::Type _drawType) {
+    template<typename T> void setData(const std::vector<T>& _data, BufferDataDrawType::Type _drawType) noexcept {
         drawType     = _drawType;
         size_t _size = _data.size() * sizeof(T);
         capacity     = _size;
         glBufferData(type, _size, _data.data(), drawType);
     }
-    template<typename T> void setData(size_t _startingIndex, const std::vector<T>& _data) {
+    template<typename T> void setData(size_t _startingIndex, const std::vector<T>& _data) noexcept {
         if (drawType == BufferDataDrawType::Unassigned) {
             return;
         }
         glBufferSubData(type, _startingIndex, _data.size() * sizeof(T), _data.data());
     }
-    template<typename T> void setDataOrphan(const std::vector<T>& _data) {
+    template<typename T> void setDataOrphan(const std::vector<T>& _data) noexcept {
         if (capacity == 0) {
             return;
         }

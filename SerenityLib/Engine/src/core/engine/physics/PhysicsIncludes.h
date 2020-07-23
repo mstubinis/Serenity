@@ -2,7 +2,7 @@
 #ifndef ENGINE_PHYSICS_INCLUDES_H
 #define ENGINE_PHYSICS_INCLUDES_H
 
-struct CollisionType {enum Type {
+enum class CollisionType : unsigned char {
     None,
     Sphere,
     Box,
@@ -10,7 +10,7 @@ struct CollisionType {enum Type {
     TriangleShape,
     TriangleShapeStatic,
     Compound,
-_TOTAL,};};
+};
 
 //pretty much a copy of bullet physics enums
 struct CollisionFlag final { enum Flag {

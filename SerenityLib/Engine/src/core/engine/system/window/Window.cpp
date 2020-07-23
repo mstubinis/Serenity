@@ -6,7 +6,6 @@
 #include <core/engine/textures/Texture.h>
 
 using namespace Engine;
-using namespace std;
 
 #pragma region Window
 
@@ -34,9 +33,9 @@ Window::Window(const EngineOptions& options){
     
 
 
-    unsigned int requested_glsl_version = stoi(Engine::priv::OpenGL::getHighestGLSLVersion(*this));
+    unsigned int requested_glsl_version = std::stoi(Engine::priv::OpenGL::getHighestGLSLVersion(*this));
  
-    unsigned int opengl_version = stoi(to_string(m_Data.m_SFContextSettings.majorVersion) + to_string(m_Data.m_SFContextSettings.minorVersion));
+    unsigned int opengl_version = std::stoi(std::to_string(m_Data.m_SFContextSettings.majorVersion) + std::to_string(m_Data.m_SFContextSettings.minorVersion));
     priv::Core::m_Engine->m_RenderManager._onOpenGLContextCreation(m_Data.m_VideoMode.width, m_Data.m_VideoMode.height, requested_glsl_version, opengl_version);
 
     m_Data.init_position(*this);
@@ -64,11 +63,10 @@ Window::Window(const EngineOptions& options){
         std::cout << "Using OpenGL: " << m_Data.m_SFContextSettings.majorVersion << "." << m_Data.m_SFContextSettings.minorVersion << 
             ", with depth bits: " << m_Data.m_SFContextSettings.depthBits << 
             " and stencil bits: " << m_Data.m_SFContextSettings.stencilBits << 
-            " and glsl version: " << requested_glsl_version << std::endl;
+            " and glsl version: " << requested_glsl_version << '\n';
     }
 }
 Window::~Window(){
-
 }
 void Window::setJoystickProcessingActive(bool active) {
     m_Data.m_SFMLWindow.setJoystickManagerActive(active);
@@ -81,21 +79,6 @@ void Window::updateMousePosition(float x, float y, bool resetDifference, bool re
 }
 void Window::updateMousePosition(const glm::vec2& position, bool resetDifference, bool resetPrevious) {
     m_Data.update_mouse_position_internal(*this, position.x, position.y, resetDifference, resetPrevious);
-}
-const glm::vec2& Window::getMousePositionDifference() const {
-    return m_Data.m_MouseDifference;
-}
-const glm::vec2& Window::getMousePositionPrevious() const {
-    return m_Data.m_MousePosition_Previous;
-}
-const glm::vec2& Window::getMousePosition() const {
-    return m_Data.m_MousePosition;
-}
-double Window::getMouseWheelDelta() const {
-    return m_Data.m_MouseDelta;
-}
-std::thread::id Window::getOpenglThreadID() const {
-    return m_Data.m_OpenGLThreadID;
 }
 
 bool Window::maximize() {
@@ -135,7 +118,7 @@ void Window::setIcon(const char* file){
     m_Data.m_SFMLWindow.setIcon(texture->width(), texture->height(), texture->pixels());
     m_Data.m_IconFile = file;
 }
-void Window::setIcon(const string& file) {
+void Window::setIcon(const std::string& file) {
     Texture* texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
     if (!texture) {
         texture = NEW Texture(file, false, ImageInternalFormat::RGBA8);
@@ -148,8 +131,9 @@ const std::string& Window::name() const {
     return m_Data.m_WindowName;
 }
 void Window::setName(const char* name){
-    if (m_Data.m_WindowName == name)
+    if (m_Data.m_WindowName == name) {
         return;
+    }
     m_Data.m_WindowName = name;
     m_Data.m_SFMLWindow.setTitle(name);
 }
@@ -365,15 +349,6 @@ void Window::keepMouseInWindow(bool isToBeKept){
 void Window::setFramerateLimit(unsigned int limit){
     m_Data.m_SFMLWindow.setFramerateLimit(limit);
     m_Data.m_FramerateLimit = limit;
-}
-sf::WindowHandle Window::getSystemHandle() const {
-    return m_Data.m_SFMLWindow.getSystemHandle();
-}
-sf::RenderWindow& Window::getSFMLHandle() {
-    return m_Data.m_SFMLWindow;
-}
-unsigned int Window::getFramerateLimit() const {
-    return m_Data.m_FramerateLimit;
 }
 void Window::on_dynamic_resize() {
     #ifdef _WIN32

@@ -19,20 +19,20 @@ class Shader final : public Resource {
     friend struct Engine::priv::InternalShaderPublicInterface;
     friend struct Engine::priv::InternalShaderProgramPublicInterface;
     private:
-        ShaderType::Type   m_Type     = ShaderType::Unknown;
-        bool               m_FromFile = false;
-        std::string        m_FileName = "";
-        std::string        m_Code     = "";
+        ShaderType   m_Type     = ShaderType::Unknown;
+        bool         m_FromFile = false;
+        std::string  m_FileName = "";
+        std::string  m_Code     = "";
     public:
-        Shader(const std::string& shaderFileOrData, ShaderType::Type shaderType, bool fromFile = true);
+        Shader(const std::string& shaderFileOrData, ShaderType shaderType, bool fromFile = true);
         virtual ~Shader();
 
         Shader& operator=(const Shader&) = delete;
         Shader(const Shader&)            = default;
         Shader(Shader&&) noexcept        = default;
 
-        inline constexpr ShaderType::Type type() const noexcept { return m_Type; }
-        inline constexpr const std::string& data() const noexcept { return m_Code; }
-        inline constexpr bool fromFile() const noexcept { return m_FromFile; }
+        inline CONSTEXPR ShaderType type() const noexcept { return m_Type; }
+        inline CONSTEXPR const std::string& data() const noexcept { return m_Code; }
+        inline CONSTEXPR bool fromFile() const noexcept { return m_FromFile; }
 };
 #endif

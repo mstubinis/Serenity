@@ -21,8 +21,8 @@ class SpotLight : public PointLight {
 
         void free() noexcept override;
 
-        constexpr float getCutoff() const noexcept { return m_Cutoff; }
-        constexpr float getCutoffOuter() const noexcept { return m_OuterCutoff; }
+        inline CONSTEXPR float getCutoff() const noexcept { return m_Cutoff; }
+        inline CONSTEXPR float getCutoffOuter() const noexcept { return m_OuterCutoff; }
 
         void setDirection(decimal xDir, decimal yDir, decimal zDir) noexcept;
         void setDirection(const glm_vec3& direction) noexcept;

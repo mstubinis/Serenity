@@ -34,14 +34,14 @@ class MaterialLayer final{
         MaterialLayer(MaterialLayer&& other) noexcept            = delete;
         MaterialLayer& operator=(MaterialLayer&& other) noexcept = delete;
 
-        Texture* getTexture() const noexcept { return m_Texture; }
-        Texture* getMask() const noexcept { return m_Mask; }
-        Texture* getCubemap() const noexcept { return m_Cubemap; }
+        inline CONSTEXPR Texture* getTexture() const noexcept { return m_Texture; }
+        inline CONSTEXPR Texture* getMask() const noexcept { return m_Mask; }
+        inline CONSTEXPR Texture* getCubemap() const noexcept { return m_Cubemap; }
 
-        constexpr const glm::vec4& data1() const noexcept { return m_Data1; }
-        constexpr const glm::vec4& data2() const noexcept { return m_Data2; }
-        constexpr MaterialLayerBlendMode::Mode blendMode() const noexcept { return static_cast<MaterialLayerBlendMode::Mode>(static_cast<unsigned int>(m_Data1.x)); }
-        constexpr const glm::vec4& getUVModifications() const noexcept { return m_UVModifications; }
+        inline CONSTEXPR const glm::vec4& data1() const noexcept { return m_Data1; }
+        inline CONSTEXPR const glm::vec4& data2() const noexcept { return m_Data2; }
+        inline CONSTEXPR MaterialLayerBlendMode::Mode blendMode() const noexcept { return (MaterialLayerBlendMode::Mode)((unsigned int)m_Data1.x); }
+        inline CONSTEXPR const glm::vec4& getUVModifications() const noexcept { return m_UVModifications; }
 
         void addUVModificationFunctor(uv_mod_func functor);
         void addUVModificationSimpleTranslation(float translationX, float translationY);

@@ -23,7 +23,7 @@ struct TextureRequestPart final {
 
     TextureRequestPart(const TextureRequestPart&);
     TextureRequestPart& operator=(const TextureRequestPart&);
-    TextureRequestPart(TextureRequestPart&& other) noexcept = delete;
+    TextureRequestPart(TextureRequestPart&& other) noexcept            = delete;
     TextureRequestPart& operator=(TextureRequestPart&& other) noexcept = delete;
 
     void assignType() {
@@ -70,9 +70,9 @@ struct TextureRequestFromMemory final {
     TextureRequestFromMemory(
         sf::Image& sfImage,
         const std::string& textureName,
-        bool genMipMaps = true,
-        ImageInternalFormat internal_ = ImageInternalFormat::SRGB8_ALPHA8,
-        GLuint openglTextureType = GL_TEXTURE_2D
+        bool genMipMaps                  = true,
+        ImageInternalFormat internal_    = ImageInternalFormat::SRGB8_ALPHA8,
+        GLuint openglTextureType         = GL_TEXTURE_2D
     );
     ~TextureRequestFromMemory();
 

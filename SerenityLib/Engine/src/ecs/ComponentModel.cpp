@@ -12,13 +12,12 @@
 
 using namespace Engine;
 using namespace Engine::priv;
-using namespace std;
 
 float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) {
-    vector<glm::vec3> points_total; //TODO: vector.reserve for performance here?
+    std::vector<glm::vec3> points_total; //TODO: vector.reserve for performance here?
     for (size_t i = 0; i < modelComponent.m_ModelInstances.size(); ++i) {
-        auto& modelInstance            = *modelComponent.m_ModelInstances[i];
-        auto& mesh                     = *modelInstance.mesh();
+        auto& modelInstance     = *modelComponent.m_ModelInstances[i];
+        auto& mesh              = *modelInstance.mesh();
         if (mesh == false) {
             continue;
         }
@@ -34,10 +33,10 @@ float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) 
     for (auto& point : points_total) {
         auto abs_point   = glm::abs(point);
         float radius     = glm::length(abs_point);
-        maxRadius        = max(maxRadius, radius);
-        maxBoundingBox.x = max(maxBoundingBox.x, abs_point.x);
-        maxBoundingBox.y = max(maxBoundingBox.y, abs_point.y);
-        maxBoundingBox.z = max(maxBoundingBox.z, abs_point.z);
+        maxRadius        = std::max(maxRadius, radius);
+        maxBoundingBox.x = std::max(maxBoundingBox.x, abs_point.x);
+        maxBoundingBox.y = std::max(maxBoundingBox.y, abs_point.y);
+        maxBoundingBox.z = std::max(maxBoundingBox.z, abs_point.z);
     }
     modelComponent.m_Radius          = maxRadius;
     modelComponent.m_RadiusBox       = maxBoundingBox;
@@ -117,13 +116,10 @@ ComponentModel& ComponentModel::operator=(ComponentModel&& other) noexcept {
 ComponentModel::~ComponentModel() {
     SAFE_DELETE_VECTOR(m_ModelInstances);
 }
-Entity ComponentModel::getOwner() const {
-    return m_Owner;
-}
 void ComponentModel::onEvent(const Event& event_) {
     if (event_.type == EventType::ResourceLoaded && event_.eventResource.resource->type() == ResourceType::Mesh) {
         auto* mesh = (Mesh*)event_.eventResource.resource;
-        vector<Mesh*> unfinishedMeshes;
+        std::vector<Mesh*> unfinishedMeshes;
         unfinishedMeshes.reserve(m_ModelInstances.size());
         for (auto& instance : m_ModelInstances) {
             auto& mesh = *instance->m_Mesh;
@@ -177,12 +173,6 @@ void ComponentModel::hide() {
     for (auto& modelInstance : m_ModelInstances) {
         modelInstance->hide();
     }
-}
-float ComponentModel::radius() const {
-    return m_Radius; 
-}
-const glm::vec3& ComponentModel::boundingBox() const {
-    return m_RadiusBox;
 }
 ModelInstance& ComponentModel::addModel(Handle mesh, Handle material, ShaderProgram* shaderProgram, RenderStage stage) {
     return ComponentModel::addModel(mesh.get<Mesh>(), material.get<Material>(), shaderProgram, stage);

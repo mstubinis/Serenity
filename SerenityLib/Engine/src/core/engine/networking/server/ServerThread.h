@@ -40,7 +40,7 @@ namespace Engine::Networking {
             bool addClient(const std::string& hash, ServerClient* client, Server& server);
             bool removeClient(const std::string& hash, Server& server);
 
-            constexpr size_t getNumClients() const noexcept { return m_NumClients; }
+            inline CONSTEXPR size_t getNumClients() const noexcept { return m_NumClients; }
             ServerThread* getNextAvailableClientThread();
 
             std::vector<ServerThread>::iterator begin() noexcept { return m_Threads.begin(); }

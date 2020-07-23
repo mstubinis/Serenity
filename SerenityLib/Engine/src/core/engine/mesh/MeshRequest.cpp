@@ -180,7 +180,7 @@ bool InternalMeshRequestPublicInterface::Populate(MeshRequest& meshRequest) {
         part.name   = meshRequest.m_FileOrData;
         part.mesh   = NEW Mesh();
         part.mesh->setName(part.name);
-        part.handle = Core::m_Engine->m_ResourceManager.m_Resources.add(part.mesh, ResourceType::Mesh);
+        part.handle = Core::m_Engine->m_ResourceManager.m_Resources.add(part.mesh, (unsigned int)ResourceType::Mesh);
         meshRequest.m_Parts.push_back(std::move(part));
     }
     return true;

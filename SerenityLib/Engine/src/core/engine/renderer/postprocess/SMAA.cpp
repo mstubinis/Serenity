@@ -24,6 +24,9 @@ Engine::priv::SMAA::SMAA() {
 Engine::priv::SMAA::~SMAA() {
     glDeleteTextures(1, &SearchTexture);
     glDeleteTextures(1, &AreaTexture);
+    SAFE_DELETE_VECTOR(m_Shader_Programs);
+    SAFE_DELETE_VECTOR(m_Fragment_Shaders);
+    SAFE_DELETE_VECTOR(m_Vertex_Shaders);
 }
 bool Engine::priv::SMAA::init_shaders() {
 

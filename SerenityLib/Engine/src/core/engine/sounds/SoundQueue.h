@@ -27,9 +27,9 @@ class SoundQueue {
 
         inline bool empty() const noexcept { return m_Queue.empty(); }
         inline size_t size() const noexcept { return m_Queue.size(); }
-        inline constexpr bool active() const noexcept { return m_Active; }
-        inline constexpr void activate(bool active = true) noexcept { m_Active = active; }
-        inline constexpr void deactivate() noexcept { m_Active = false; }
+        inline CONSTEXPR bool active() const noexcept { return m_Active; }
+        inline CONSTEXPR void activate(bool active = true) noexcept { m_Active = active; }
+        inline CONSTEXPR void deactivate() noexcept { m_Active = false; }
         void enqueueEffect(Handle soundEffectHandle, unsigned int loops = 1);
         void enqueueMusic(Handle soundMusicHandle, unsigned int loops = 1);
         void dequeue();

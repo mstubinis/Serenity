@@ -15,7 +15,7 @@ using namespace Engine::priv;
 using namespace std;
 
 
-void opengl::glsl::Common::convert(string& code, const unsigned int versionNumber) {
+void opengl::glsl::Common::convert(string& code, unsigned int versionNumber) {
 
 #pragma region constants
     if (ShaderHelper::sfind(code, "ConstantOneVec3")) {
@@ -65,18 +65,19 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
         "Cube",
     };
     auto lambda_sampler_add_code = [&](const string& view) {
-        string sampler_wrapper =
-            "sampler" + view + " USE_SAMPLER_" + view + "(sampler" + view + " inSampler){//generated\n"
-            "    return inSampler;\n"
-            "}\n";
-
-        if (is_bindless_supported) {
-            sampler_wrapper +=
-                "sampler" + view + " USE_SAMPLER_" + view + "(uint64_t inHandle){//generated\n"
-                "    return sampler" + view + "(inHandle);\n"
-                "}\n";
-        }
-        ShaderHelper::insertStringAtLine(code, sampler_wrapper, 1);
+        //if (is_bindless_supported) {
+        //    ShaderHelper::insertStringAtLine(code, 
+        //        "sampler" + view + " USE_SAMPLER_" + view + "(uint64_t inHandle){//generated\n"
+        //        "    return sampler" + view + "(inHandle);\n"
+        //        "}\n"
+        //    , 1);
+        //}else{
+            ShaderHelper::insertStringAtLine(code, 
+                "sampler" + view + " USE_SAMPLER_" + view + "(sampler" + view + " inSampler){//generated\n"
+                "    return inSampler;\n"
+                "}\n"
+            , 1);
+        //}
     };
     auto lambda_sampler_add_code_type = [&](const string& view) {
         if (is_bindless_supported) {
@@ -105,11 +106,11 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
 #pragma region Hammersley
     if (ShaderHelper::sfind(code, "HammersleySequence(")) {
         if (!ShaderHelper::sfind(code, "vec2 HammersleySequence(")) {
-            const string hammersley_sequence =
+            ShaderHelper::insertStringAtLine(code, 
                 "vec2 HammersleySequence(int i, int N){\n"
                 "    return vec2(float(i) / float(N), VanDerCorpus(i));\n"
-                "}\n";
-            ShaderHelper::insertStringAtLine(code, hammersley_sequence, 1);
+                "}\n"
+            , 1);
         }
     }
 #pragma endregion
@@ -117,7 +118,7 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
 #pragma region VanDerCorpus
     if (ShaderHelper::sfind(code, "VanDerCorpus(")){
         if (!ShaderHelper::sfind(code, "float VanDerCorpus(")) {
-            const string van_der_corpus =
+            ShaderHelper::insertStringAtLine(code, 
                 "float VanDerCorpus(uint bits){\n"
                 "    bits = (bits << 16u) | (bits >> 16u);\n"
                 "    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);\n"
@@ -125,8 +126,7 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
                 "    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);\n"
                 "    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);\n"
                 "    return float(bits) * 2.3283064365386963e-10;\n" // / 0x100000000
-                "}\n";
-
+                "}\n"
                 //use this if bit shitfing is not supported
                 /*
                 "float VanDerCorpus(int n){\n"
@@ -144,8 +144,7 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
                 "    return result;\n"
                 "}\n"
                 */
-
-            ShaderHelper::insertStringAtLine(code, van_der_corpus, 1);
+            , 1);
         }
     }
 #pragma endregion
@@ -156,7 +155,7 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
             if (ShaderHelper::sfind(code, "varying mat3 TBN;")) {
                 boost::replace_all(code, "varying mat3 TBN;", "");
             }
-            const string normal_map =
+            ShaderHelper::insertStringAtLine(code, 
                 "varying mat3 TBN;\n"
                 "vec3 CalcBumpedNormal(vec2 _uv,sampler2D _inTexture){//generated\n"
                 "    vec3 _t = (texture2D(_inTexture, _uv).xyz) * 2.0 - 1.0;\n"
@@ -177,8 +176,8 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
                 "    float _z = sqrt(1.0 - _t.x * _t.x - _t.y * _t.y);\n"
                 "    vec3 normal = vec3(_t.xy, _z);\n"//recalc z in the shader
                 "    return normalize(TBN * normal);\n"
-                "}\n";
-            ShaderHelper::insertStringAtLine(code, normal_map, 1);
+                "}\n"
+            , 1);
         }
     }
 #pragma endregion
@@ -186,13 +185,13 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
 #pragma region pack nibble
     if (ShaderHelper::sfind(code, "Pack2NibblesInto8BitChannel(")) {
         if (!ShaderHelper::sfind(code, "float Pack2NibblesInto8BitChannel(")) {
-            const string pack_nibble =
+            ShaderHelper::insertStringAtLine(code, 
                 "float Pack2NibblesInto8BitChannel(float x,float y){\n"
                 "    float xF = round(x / 0.0666666666666666);\n"
                 "    float yF = round(y / 0.0666666666666666) * 16.0;\n"
                 "    return (xF + yF) / 255.0;\n"
-                "}\n";
-            ShaderHelper::insertStringAtLine(code, pack_nibble, 1);
+                "}\n"
+            , 1);
         }
     }
 #pragma endregion
@@ -200,14 +199,14 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
 #pragma region unpack nibble
     if (ShaderHelper::sfind(code, "Unpack2NibblesFrom8BitChannel(")) {
         if (!ShaderHelper::sfind(code, "vec2 Unpack2NibblesFrom8BitChannel(")) {
-            const string unpack_nibble =
+            ShaderHelper::insertStringAtLine(code, 
                 "vec2 Unpack2NibblesFrom8BitChannel(float data){\n"
                 "    float d = data * 255.0;\n"
                 "    float y = fract(d / 16.0);\n"
                 "    float x = (d - (y * 16.0));\n"
                 "    return vec2(y, x / 255.0);\n"
-                "}\n";
-            ShaderHelper::insertStringAtLine(code, unpack_nibble, 1);
+                "}\n"
+            , 1);
         }
     }
 #pragma endregion
@@ -215,15 +214,15 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
 #pragma region painters algorithm
     if (ShaderHelper::sfind(code, "PaintersAlgorithm(")) {
         if (!ShaderHelper::sfind(code, "vec4 PaintersAlgorithm(")) {
-            const string painters = "\n"
+            ShaderHelper::insertStringAtLine(code, 
                 "vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){//generated\n"
                 "    float alpha = paint.a + canvas.a * (1.0 - paint.a);\n"
                 "    vec4 ret = vec4(0.0);\n"
                 "    ret = ((paint * paint.a + canvas * canvas.a * (1.0 - paint.a)) / alpha);\n"
                 "    ret.a = alpha;\n"
                 "    return ret;\n"
-                "}\n";
-            ShaderHelper::insertStringAtLine(code, painters, 1);
+                "}\n"
+            , 1);
         }
     }
 #pragma endregion
@@ -231,11 +230,11 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
 #pragma region invert color
     if (ShaderHelper::sfind(code, "InvertColor(")) {
         if (!ShaderHelper::sfind(code, "vec4 InvertColor(")) {
-            const string invCol = "\n"
+            ShaderHelper::insertStringAtLine(code, 
                 "vec4 InvertColor(vec4 color){//generated\n"
                 "    return vec4(vec4(1.0) - color);\n"
-                "}\n";
-            ShaderHelper::insertStringAtLine(code, invCol, 1);
+                "}\n"
+            , 1);
         }
     }
 #pragma endregion
@@ -243,11 +242,11 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
 #pragma region invert color 255
     if (ShaderHelper::sfind(code, "InvertColor255(")) {
         if (!ShaderHelper::sfind(code, "vec4 InvertColor255(")) {
-            const string invCol255 = "\n"
+            ShaderHelper::insertStringAtLine(code, 
                 "vec4 InvertColor255(vec4 color){//generated\n"
                 "    return vec4(vec4(255.0) - color);\n"
-                "}\n";
-            ShaderHelper::insertStringAtLine(code, invCol255, 1);
+                "}\n"
+            , 1);
         }
     }
 #pragma endregion
@@ -255,11 +254,11 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
 #pragma region range to 255
     if (ShaderHelper::sfind(code, "RangeTo255(")) {
         if (!ShaderHelper::sfind(code, "vec4 RangeTo255(")) {
-            const string range255 = "\n"
+            ShaderHelper::insertStringAtLine(code, 
                 "vec4 RangeTo255(vec4 color){//generated\n"
                 "    return color * 255.0;\n"
-                "}\n";
-            ShaderHelper::insertStringAtLine(code, range255, 1);
+                "}\n"
+            , 1);
         }
     }
 #pragma endregion
@@ -267,11 +266,11 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
 #pragma region range to 1
     if (ShaderHelper::sfind(code, "RangeTo1(")) {
         if (!ShaderHelper::sfind(code, "vec4 RangeTo1(")) {
-            const string range1 = "\n"
+            ShaderHelper::insertStringAtLine(code, 
                 "vec4 RangeTo1(vec4 color){//generated\n"
                 "    return color / 255.0;\n"
-                "}\n";
-            ShaderHelper::insertStringAtLine(code, range1, 1);
+                "}\n"
+            , 1);
         }
     }
 #pragma endregion
@@ -282,10 +281,9 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
     ShaderHelper::sfind(code, "CameraInvViewProj") || ShaderHelper::sfind(code, "CameraNear") || ShaderHelper::sfind(code, "CameraFar") ||
     ShaderHelper::sfind(code, "CameraInfo1") || ShaderHelper::sfind(code, "CameraInfo2") || ShaderHelper::sfind(code, "CameraViewVector") ||
     ShaderHelper::sfind(code, "CameraRealPosition") || ShaderHelper::sfind(code, "CameraInfo3") || ShaderHelper::sfind(code, "ScreenInfo")) {
-        string uboCameraString;
         if (versionNumber >= 140) { //UBO only supported at 140 or above
             if (!ShaderHelper::sfind(code, "layout (std140) uniform Camera //generated")) {
-                uboCameraString = "\n"
+                ShaderHelper::insertStringAtLine(code, 
                     "layout (std140) uniform Camera //generated\n"
                     "{\n"
                     "    mat4 CameraView;\n"
@@ -304,12 +302,12 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
                     "vec3 CameraRealPosition = CameraInfo3.xyz;\n"
                     "float CameraNear = CameraInfo1.w;\n"
                     "float CameraFar = CameraInfo2.w;\n"
-                    "\n";
-                ShaderHelper::insertStringAtLine(code, uboCameraString, 1);
+                    "\n"
+                , 1);
             }
         }else{ //no UBO's, just add a bunch of uniforms
             if (!ShaderHelper::sfind(code, "uniform mat4 CameraView;//generated")) {
-                uboCameraString = "\n"
+                ShaderHelper::insertStringAtLine(code, 
                     "uniform mat4 CameraView;//generated;\n"
                     "uniform mat4 CameraProj;\n"
                     "uniform mat4 CameraViewProj;\n"
@@ -325,8 +323,8 @@ void opengl::glsl::Common::convert(string& code, const unsigned int versionNumbe
                     "vec3 CameraRealPosition = CameraInfo3.xyz;\n"
                     "float CameraNear = CameraInfo1.w;\n"
                     "float CameraFar = CameraInfo2.w;\n"
-                    "\n";
-                ShaderHelper::insertStringAtLine(code, uboCameraString, 1);
+                    "\n"
+                , 1);
             }
         }
     }

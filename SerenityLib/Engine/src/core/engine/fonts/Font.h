@@ -66,9 +66,9 @@ class Font final: public Resource {
         float getTextHeight(std::string_view text) const;
         float getTextHeightDynamic(std::string_view text) const;
 
-        inline constexpr float getMaxHeight() const noexcept { return m_MaxHeight; }
-        inline constexpr Texture* getGlyphTexture() const noexcept { return m_FontTexture; }
-        inline constexpr float getLineHeight() const noexcept { return m_LineHeight; }
+        inline CONSTEXPR float getMaxHeight() const noexcept { return m_MaxHeight; }
+        inline CONSTEXPR Texture* getGlyphTexture() const noexcept { return m_FontTexture; }
+        inline CONSTEXPR float getLineHeight() const noexcept { return m_LineHeight; }
 
         const CharGlyph& getGlyphData(unsigned char character) const;
 };

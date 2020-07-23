@@ -5,7 +5,6 @@
 #include <ecs/Components.h>
 
 using namespace Engine::priv;
-using namespace std;
 
 Entity::Entity(Scene& scene) {
     m_Data = scene.createEntity().m_Data;
@@ -53,10 +52,10 @@ void Entity::destroy() noexcept {
 #endif
 }
 
-void Entity::addComponent(const string& componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8) {
+void Entity::addComponent(const std::string& componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8) {
     if (componentClassName == "ComponentBody") {
         if (!a1.isNil()) {
-            addComponent<ComponentBody>(a1.cast<CollisionType::Type>());
+            addComponent<ComponentBody>(a1.cast<CollisionType>());
         }else{
             addComponent<ComponentBody>();
         }
@@ -78,31 +77,35 @@ void Entity::addComponent(const string& componentClassName, luabridge::LuaRef a1
         addComponent<ComponentName>(a1.cast<const char*>());
     }else if (componentClassName == "ComponentLogic") {
         if (!a1.isNil() && a1.isFunction()) {
-            addComponent<ComponentLogic>(a1.cast<const function<void(const ComponentLogic*, const float)>>());
+            using func_type = std::function<void(const ComponentLogic*, const float)>;
+            addComponent<ComponentLogic>(std::move(a1.cast<func_type>()));
         }else{
             addComponent<ComponentLogic>();
         }
     }else if (componentClassName == "ComponentLogic1") {
         if (!a1.isNil() && a1.isFunction()) {
-            addComponent<ComponentLogic1>(a1.cast<const function<void(const ComponentLogic1*, const float)>>());
+            using func_type = std::function<void(const ComponentLogic1*, const float)>;
+            addComponent<ComponentLogic1>(std::move(a1.cast<func_type>()));
         }else{
             addComponent<ComponentLogic1>();
         }
     }else if (componentClassName == "ComponentLogic2") {
         if (!a1.isNil() && a1.isFunction()) {
-            addComponent<ComponentLogic2>(a1.cast<const function<void(const ComponentLogic2*, const float)>>());
+            using func_type = std::function<void(const ComponentLogic2*, const float)>;
+            addComponent<ComponentLogic2>(std::move(a1.cast<func_type>()));
         }else{
             addComponent<ComponentLogic2>();
         }
     }else if (componentClassName == "ComponentLogic3") {
         if (!a1.isNil() && a1.isFunction()) {
-            addComponent<ComponentLogic3>(a1.cast<const function<void(const ComponentLogic3*, const float)>>());
+            using func_type = std::function<void(const ComponentLogic3*, const float)>;
+            addComponent<ComponentLogic3>(std::move(a1.cast<func_type>()));
         }else{
             addComponent<ComponentLogic3>();
         }
     }
 }
-bool Entity::removeComponent(const string& componentClassName) {
+bool Entity::removeComponent(const std::string& componentClassName) {
     if (componentClassName == "ComponentBody") {
         return removeComponent<ComponentBody>();
     }else if (componentClassName == "ComponentModel") {
@@ -122,10 +125,10 @@ bool Entity::removeComponent(const string& componentClassName) {
     }
     return false;
 }
-luabridge::LuaRef Entity::getComponent(const string& componentClassName) {
-    lua_State* L = Engine::priv::getLUABinder().getState()->getState();
-    string global_name = to_string(m_Data) + componentClassName;
-    auto* global_name_cstr = global_name.c_str();
+luabridge::LuaRef Entity::getComponent(const std::string& componentClassName) {
+    lua_State* L            = Engine::priv::getLUABinder().getState()->getState();
+    std::string global_name = std::to_string(m_Data) + componentClassName;
+    auto* global_name_cstr  = global_name.c_str();
     if (componentClassName == "ComponentBody") {
         return InternalEntityPublicInterface::GetComponent<ComponentBody>(L, *this, global_name_cstr);
     }else if (componentClassName == "ComponentModel") {

@@ -15,13 +15,13 @@ namespace Engine::priv {
         friend class Window;
         private:
             WindowData& m_Data;
-            Engine::queue_ts<sf::Event>                                m_Queue;
-            Engine::queue_ts<WindowEventThreadOnlyCommands::Command>   m_MainThreadToEventThreadQueue;
-            std::unique_ptr<std::thread>                               m_EventThread = nullptr;
+            Engine::queue_ts<sf::Event>                       m_Queue;
+            Engine::queue_ts<WindowEventThreadOnlyCommands>   m_MainThreadToEventThreadQueue;
+            std::unique_ptr<std::thread>                      m_EventThread = nullptr;
 
             void cleanup();
             void startup(Window& super, const std::string& name);
-            void push(WindowEventThreadOnlyCommands::Command command);
+            void push(WindowEventThreadOnlyCommands command);
             std::optional<sf::Event> try_pop();
             void updateLoop();
         public:
