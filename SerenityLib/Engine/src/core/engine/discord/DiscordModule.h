@@ -22,21 +22,21 @@ namespace Engine::priv {
             DiscordModule();
             virtual ~DiscordModule();
 
-            const discord::ClientId get_client_id() const;
-            bool activate(const discord::ClientId& clientID);
+            inline CONSTEXPR discord::ClientId get_client_id() const noexcept { return m_ClientID; }
+            bool activate(discord::ClientId clientID);
             bool update_activity(const discord::Activity& activity);
             bool clear_activity();
-            void log_errors(const bool logErrors = true);
+            void log_errors(bool logErrors = true);
             bool update();
 
     };
 };
 namespace Engine::Discord {
     //will only update at most 5 times per 20 seconds
-    const discord::ClientId getClientID();
+    discord::ClientId getClientID();
     bool update_activity(const DiscordActivityEvent& activity);
     bool clear_activity();
-    bool activate(const discord::ClientId& clientID);
+    bool activate(discord::ClientId clientID);
 };
 
 #endif

@@ -14,7 +14,3 @@ void Observer::unregisterEvent(EventType type) noexcept {
 bool Observer::isRegistered(EventType type) const noexcept {
     return priv::Core::m_Engine->m_EventModule.m_EventDispatcher.isObjectRegistered(*this, type);
 }
-
-void Observer::onEvent(const Event& event) {
-
-}

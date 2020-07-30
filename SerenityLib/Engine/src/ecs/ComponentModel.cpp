@@ -309,10 +309,19 @@ struct priv::ComponentModel_UpdateFunction final { void operator()(void* system,
 ComponentModel_System_CI::ComponentModel_System_CI() {
     setUpdateFunction(ComponentModel_UpdateFunction());
     setOnComponentAddedToEntityFunction([](void* system, void* component, Entity entity) {
+        auto* component_ptr = (ComponentModel*)component;
+        if (component_ptr) {
+            ComponentModel_Functions::CalculateRadius(*component_ptr);
+        }
     });
     setOnComponentRemovedFromEntityFunction([](void* system, Entity entity) {
     });
     setOnEntityAddedToSceneFunction([](void* system, void* componentPool, Entity entity, Scene& scene) {
+        auto& pool          = *(ECSComponentPool<Entity, ComponentModel>*)componentPool;
+        auto* component_ptr = pool.getComponent(entity);
+        if (component_ptr) {
+            ComponentModel_Functions::CalculateRadius(*component_ptr);
+        }
     });
     setOnSceneEnteredFunction([](void* system, void* componentPool, Scene& scene) {
     });

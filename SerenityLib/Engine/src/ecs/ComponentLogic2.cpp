@@ -8,12 +8,6 @@ using namespace std;
 
 #pragma region Component
 
-ComponentLogic2::ComponentLogic2(Entity entity) {
-    m_Owner = entity;
-}
-ComponentLogic2::~ComponentLogic2() {
-
-}
 ComponentLogic2::ComponentLogic2(ComponentLogic2&& other) noexcept {
     m_UserPointer  = std::exchange(other.m_UserPointer, nullptr);
     m_UserPointer1 = std::exchange(other.m_UserPointer1, nullptr);
@@ -31,13 +25,10 @@ ComponentLogic2& ComponentLogic2::operator=(ComponentLogic2&& other) noexcept {
     }
     return *this;
 }
-void ComponentLogic2::setFunctor(std::function<void(const ComponentLogic2*, const float)>&& functor) {
-    m_Functor.setFunctor(std::move(functor));
-}
-void ComponentLogic2::setFunctor(luabridge::LuaRef luaFunction) {
+void ComponentLogic2::setFunctor(luabridge::LuaRef luaFunction) noexcept {
     m_Functor.setFunctor(luaFunction);
 }
-void ComponentLogic2::call(const float dt) const { 
+void ComponentLogic2::call(const float dt) const noexcept {
     m_Functor(this, dt);
 }
 

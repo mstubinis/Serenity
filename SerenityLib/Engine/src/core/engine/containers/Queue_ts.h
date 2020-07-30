@@ -62,6 +62,14 @@ namespace Engine {
                 m_Queue.pop();
                 return std::move(res);
             }
+            void clear() {
+                std::lock_guard lock(m_Mutex);
+                while (!m_Queue.empty()) {
+                    m_Queue.pop();
+                }
+                //TODO: test this
+                //m_ConditionVariable.notify_one();
+            }
             void push(T&& u) {
                 {
                     std::lock_guard lock(m_Mutex);

@@ -12,14 +12,13 @@
 #include <core/engine/lights/Lights.h>
 
 using namespace Engine;
-using namespace std;
 
 class Scene::impl final {
     public:
-        Engine::priv::ParticleSystem          m_ParticleSystem;
-        priv::ECS<Entity>                     m_ECS;
-
-        void _init(Scene& super, const string& name, const SceneOptions& options) {
+        Engine::priv::ParticleSystem   m_ParticleSystem;
+        priv::ECS<Entity>              m_ECS;
+        void _init(Scene& super, const std::string& name, const SceneOptions& options) {
+            m_ECS.init(options);
             m_ECS.assignSystem<ComponentLogic> (ComponentLogic_System_CI()/*, 20000*/);
             m_ECS.assignSystem<ComponentLogic1>(ComponentLogic1_System_CI()/*, 30000*/);
             m_ECS.assignSystem<ComponentLogic2>(ComponentLogic2_System_CI()/*, 40000*/);
@@ -43,7 +42,7 @@ class Scene::impl final {
                     }
                 }
             }
-            for (auto& particle : super.m_i->m_ParticleSystem.getParticles()) {
+            for (auto& particle : m_ParticleSystem.getParticles()) {
                 if (particle.isActive()) {
                     particle.setPosition(particle.position() - centerPosFloat);
                 }
@@ -57,7 +56,7 @@ class Scene::impl final {
             Engine::priv::Core::m_Engine->m_SoundModule.updateCameraPosition(super);
             ComponentBody::recalculateAllParentChildMatrices(super);
         }
-        void _addModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, vector<priv::RenderGraph>& render_graph_list, RenderStage stage) {
+        void _addModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, std::vector<priv::RenderGraph>& render_graph_list, RenderStage stage) {
             priv::RenderGraph* renderGraph = nullptr;
             for (auto& render_graph_ptr : render_graph_list) {
                 if (render_graph_ptr.m_ShaderProgram == modelInstance.shaderProgram()) {
@@ -70,7 +69,7 @@ class Scene::impl final {
             }
             renderGraph->addModelInstanceToPipeline(modelInstance);
         }
-        void _removeModelInstanceFromPipeline(ModelInstance& modelInstance, vector<priv::RenderGraph>& render_graph_list) {
+        void _removeModelInstanceFromPipeline(ModelInstance& modelInstance, std::vector<priv::RenderGraph>& render_graph_list) {
             priv::RenderGraph* renderGraph = nullptr;
             for (auto& render_graph_ptr : render_graph_list) {
                 if (render_graph_ptr.m_ShaderProgram == modelInstance.shaderProgram()) {
@@ -83,37 +82,37 @@ class Scene::impl final {
             }
         }
 };
-vector<Particle>& priv::InternalScenePublicInterface::GetParticles(const Scene& scene) {
+std::vector<Particle>& priv::InternalScenePublicInterface::GetParticles(const Scene& scene) {
     return scene.m_i->m_ParticleSystem.getParticles();
 }
-vector<Viewport>& priv::InternalScenePublicInterface::GetViewports(const Scene& scene) {
+std::vector<Viewport>& priv::InternalScenePublicInterface::GetViewports(const Scene& scene) {
     return scene.m_Viewports;
 }
-vector<Camera*>& priv::InternalScenePublicInterface::GetCameras(const Scene& scene) {
+std::vector<Camera*>& priv::InternalScenePublicInterface::GetCameras(const Scene& scene) {
     return scene.m_Cameras;
 }
-vector<Entity>& priv::InternalScenePublicInterface::GetEntities(const Scene& scene) {
+std::vector<Entity>& priv::InternalScenePublicInterface::GetEntities(const Scene& scene) {
     return scene.m_i->m_ECS.m_EntityPool.m_Pool;
 }
-vector<SunLight*>& priv::InternalScenePublicInterface::GetLights(const Scene& scene) {
+std::vector<SunLight*>& priv::InternalScenePublicInterface::GetLights(const Scene& scene) {
     return scene.m_Lights;
 }
-vector<SunLight*>& priv::InternalScenePublicInterface::GetSunLights(const Scene& scene) {
+std::vector<SunLight*>& priv::InternalScenePublicInterface::GetSunLights(const Scene& scene) {
     return scene.m_SunLights;
 }
-vector<DirectionalLight*>& priv::InternalScenePublicInterface::GetDirectionalLights(const Scene& scene) {
+std::vector<DirectionalLight*>& priv::InternalScenePublicInterface::GetDirectionalLights(const Scene& scene) {
     return scene.m_DirectionalLights;
 }
-vector<PointLight*>& priv::InternalScenePublicInterface::GetPointLights(const Scene& scene) {
+std::vector<PointLight*>& priv::InternalScenePublicInterface::GetPointLights(const Scene& scene) {
     return scene.m_PointLights;
 }
-vector<SpotLight*>& priv::InternalScenePublicInterface::GetSpotLights(const Scene& scene) {
+std::vector<SpotLight*>& priv::InternalScenePublicInterface::GetSpotLights(const Scene& scene) {
     return scene.m_SpotLights;
 }
-vector<RodLight*>& priv::InternalScenePublicInterface::GetRodLights(const Scene& scene) {
+std::vector<RodLight*>& priv::InternalScenePublicInterface::GetRodLights(const Scene& scene) {
     return scene.m_RodLights;
 }
-vector<ProjectionLight*>& priv::InternalScenePublicInterface::GetProjectionLights(const Scene& scene) {
+std::vector<ProjectionLight*>& priv::InternalScenePublicInterface::GetProjectionLights(const Scene& scene) {
     return scene.m_ProjectionLights;
 }
 priv::ECS<Entity>& priv::InternalScenePublicInterface::GetECS(Scene& scene) {
@@ -228,7 +227,7 @@ void priv::InternalScenePublicInterface::RemoveModelInstanceFromPipeline(Scene& 
     scene.m_i->_removeModelInstanceFromPipeline(modelInstance, scene.m_RenderGraphs[(unsigned int)stage]);
 }
 
-Scene::Scene(const string& name, const SceneOptions& options) : Resource(ResourceType::Scene, name) {
+Scene::Scene(const std::string& name, const SceneOptions& options) : Resource(ResourceType::Scene, name) {
     m_RenderGraphs.resize((unsigned int)RenderStage::_TOTAL);
     m_ID      = priv::Core::m_Engine->m_ResourceManager.AddScene(*this);
     m_i       = std::make_unique<impl>();
@@ -237,7 +236,7 @@ Scene::Scene(const string& name, const SceneOptions& options) : Resource(Resourc
 
     registerEvent(EventType::SceneChanged);
 }
-Scene::Scene(const string& name) : Scene(name, SceneOptions::DEFAULT_OPTIONS) {
+Scene::Scene(const std::string& name) : Scene(name, SceneOptions::DEFAULT_OPTIONS) {
 
 }
 Scene::~Scene() {

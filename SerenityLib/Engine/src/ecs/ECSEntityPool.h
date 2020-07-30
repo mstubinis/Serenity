@@ -3,6 +3,7 @@
 #define ENGINE_ECS_ENTITY_POOL_H
 
 #include <core/engine/scene/Scene.h>
+#include <core/engine/scene/SceneOptions.h>
 
 namespace Engine::priv {
     template<typename ENTITY> 
@@ -13,14 +14,17 @@ namespace Engine::priv {
             std::vector<std::uint32_t>   m_Freelist;
         public:
             ECSEntityPool() {
-                m_Pool.reserve(5000);
-                m_Freelist.reserve(5000);
             }
             ~ECSEntityPool() {}
             ECSEntityPool(const ECSEntityPool&)                      = delete;
             ECSEntityPool& operator=(const ECSEntityPool&)           = delete;
             ECSEntityPool(ECSEntityPool&& other) noexcept            = delete;
             ECSEntityPool& operator=(ECSEntityPool&& other) noexcept = delete;
+
+            void init(const SceneOptions& options) {
+                m_Pool.reserve(options.maxAmountOfEntities);
+                m_Freelist.reserve(options.maxAmountOfEntities);
+            }
 
             CONSTEXPR bool isEntityVersionDifferent(ENTITY entity) const noexcept {
                 auto index = entity.id() - 1U;

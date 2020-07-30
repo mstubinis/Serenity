@@ -4,8 +4,6 @@
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/system/window/Window.h>
 
-using namespace std;
-
 ::DiscordActivityEvent::DiscordActivityEvent() {
     m_Activity = discord::Activity();
 
@@ -30,91 +28,88 @@ using namespace std;
     m_Activity.GetSecrets().SetMatch("");
     m_Activity.GetSecrets().SetSpectate("");
 }
-::DiscordActivityEvent::~DiscordActivityEvent() {
-
-}
-bool ::DiscordActivityEvent::post() {
+bool ::DiscordActivityEvent::post() noexcept {
     return Engine::Discord::update_activity(*this);
 }
-const discord::Activity& ::DiscordActivityEvent::getActivity() const {
+const discord::Activity& ::DiscordActivityEvent::getActivity() const noexcept {
     return m_Activity;
 }
 
-void ::DiscordActivityEvent::setState(const string& state) {
-    m_Activity.SetState(state.c_str());
+void ::DiscordActivityEvent::setState(const char* state) noexcept {
+    m_Activity.SetState(state);
 }
 
-void ::DiscordActivityEvent::setDetail(const string& detail) {
-    m_Activity.SetDetails(detail.c_str());
+void ::DiscordActivityEvent::setDetail(const char* detail) noexcept {
+    m_Activity.SetDetails(detail);
 }
 
-void ::DiscordActivityEvent::setPartySizeCurrent(unsigned int currentSize) {
+void ::DiscordActivityEvent::setPartySizeCurrent(unsigned int currentSize) noexcept {
     m_Activity.GetParty().GetSize().SetCurrentSize(currentSize);
 }
 
-void ::DiscordActivityEvent::setPartySizeMax(unsigned int maxSize) {
+void ::DiscordActivityEvent::setPartySizeMax(unsigned int maxSize) noexcept {
     m_Activity.GetParty().GetSize().SetMaxSize(maxSize);
 }
 
-void ::DiscordActivityEvent::setImageLarge(const string& largeImage) {
-    m_Activity.GetAssets().SetLargeImage(largeImage.c_str());
+void ::DiscordActivityEvent::setImageLarge(const char* largeImage) noexcept {
+    m_Activity.GetAssets().SetLargeImage(largeImage);
 }
 
-void ::DiscordActivityEvent::setImageLargeText(const string& largeImageText) {
-    m_Activity.GetAssets().SetLargeText(largeImageText.c_str());
+void ::DiscordActivityEvent::setImageLargeText(const char* largeImageText) noexcept {
+    m_Activity.GetAssets().SetLargeText(largeImageText);
 }
 
-void ::DiscordActivityEvent::setImageSmall(const string& smallImage) {
-    m_Activity.GetAssets().SetSmallImage(smallImage.c_str());
+void ::DiscordActivityEvent::setImageSmall(const char* smallImage) noexcept {
+    m_Activity.GetAssets().SetSmallImage(smallImage);
 }
 
-void ::DiscordActivityEvent::setImageSmallText(const string& smallImageText) {
-    m_Activity.GetAssets().SetSmallText(smallImageText.c_str());
+void ::DiscordActivityEvent::setImageSmallText(const char* smallImageText) noexcept {
+    m_Activity.GetAssets().SetSmallText(smallImageText);
 }
 
-void ::DiscordActivityEvent::setPartyID(const string& partyID) {
-    m_Activity.GetParty().SetId(partyID.c_str());
+void ::DiscordActivityEvent::setPartyID(const char* partyID) noexcept {
+    m_Activity.GetParty().SetId(partyID);
 }
 
-void ::DiscordActivityEvent::setInstance(bool instance) {
+void ::DiscordActivityEvent::setInstance(bool instance) noexcept {
     m_Activity.SetInstance(instance);
 }
 
-void ::DiscordActivityEvent::setTimestampStartAsNow() {
-    int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+void ::DiscordActivityEvent::setTimestampStartAsNow() noexcept {
+    std::int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     m_Activity.GetTimestamps().SetStart(now);
 }
 
-void ::DiscordActivityEvent::setTimestampStart(int64_t start) {
+void ::DiscordActivityEvent::setTimestampStart(std::int64_t start) noexcept {
     m_Activity.GetTimestamps().SetStart(start);
 }
 
-void ::DiscordActivityEvent::setTimestampEndSinceNow(int64_t end) {
-    int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+void ::DiscordActivityEvent::setTimestampEndSinceNow(std::int64_t end) noexcept {
+    std::int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     m_Activity.GetTimestamps().SetStart(now + end);
 }
 
-void ::DiscordActivityEvent::setTimestampEndSinceNowSeconds(unsigned int end) {
-    int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    m_Activity.GetTimestamps().SetStart(now + static_cast<std::int64_t>(end * 1000));
+void ::DiscordActivityEvent::setTimestampEndSinceNowSeconds(unsigned int end) noexcept {
+    std::int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    m_Activity.GetTimestamps().SetStart(now + (std::int64_t)(end * 1000U));
 }
 
-void ::DiscordActivityEvent::setTimestampEnd(std::int64_t end) {
+void ::DiscordActivityEvent::setTimestampEnd(std::int64_t end) noexcept {
     m_Activity.GetTimestamps().SetEnd(end);
 }
 
-void ::DiscordActivityEvent::setSecretJoin(const string& join) {
-    m_Activity.GetSecrets().SetJoin(join.c_str());
+void ::DiscordActivityEvent::setSecretJoin(const char* join) noexcept {
+    m_Activity.GetSecrets().SetJoin(join);
 }
 
-void ::DiscordActivityEvent::setSecretSpectate(const string& spectate) {
-    m_Activity.GetSecrets().SetSpectate(spectate.c_str());
+void ::DiscordActivityEvent::setSecretSpectate(const char* spectate) noexcept {
+    m_Activity.GetSecrets().SetSpectate(spectate);
 }
 
-void ::DiscordActivityEvent::setSecretMatch(const string& match) {
-    m_Activity.GetSecrets().SetMatch(match.c_str());
+void ::DiscordActivityEvent::setSecretMatch(const char* match) noexcept {
+    m_Activity.GetSecrets().SetMatch(match);
 }
 
-void ::DiscordActivityEvent::setType(const discord::ActivityType& type) {
+void ::DiscordActivityEvent::setType(const discord::ActivityType& type) noexcept {
     m_Activity.SetType(type);
 }

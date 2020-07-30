@@ -10,6 +10,7 @@ namespace Engine::priv {
 #include <ecs/ECSRegistry.h>
 #include <ecs/ECSEntityPool.h>
 #include <ecs/ECSSystem.h>
+#include <core/engine/scene/SceneOptions.h>
 
 namespace Engine::priv {
     template<typename ENTITY> 
@@ -22,14 +23,21 @@ namespace Engine::priv {
             std::vector<Engine::priv::sparse_set_base*> m_ComponentPools;
             std::vector<ECSSystem<ENTITY>*>             m_Systems;
             std::mutex                                  m_Mutex;
+            SceneOptions                                m_SceneOptions;
 
         public:
-            ECS(/*const SceneOptions& options*/) {
+            ECS() {
             }
             ~ECS() {
                 SAFE_DELETE_VECTOR(m_ComponentPools);
                 SAFE_DELETE_VECTOR(m_Systems);
             }
+
+            void init(const SceneOptions& options) {
+                m_SceneOptions = options;
+                m_EntityPool.init(m_SceneOptions);
+            }
+
             ECS(const ECS&)                      = delete;
             ECS& operator=(const ECS&)           = delete;
             ECS(ECS&& other) noexcept            = delete;
@@ -124,7 +132,7 @@ namespace Engine::priv {
                     m_ComponentPools.resize(type_slot + 1, nullptr);
                 }
                 if (!m_ComponentPools[type_slot]) {
-                    m_ComponentPools[type_slot] = NEW CPOOL();
+                    m_ComponentPools[type_slot] = NEW CPOOL(m_SceneOptions);
                 }
                 if (type_slot >= m_Systems.size()) {
                     m_Systems.resize(type_slot + 1, nullptr);
@@ -132,7 +140,7 @@ namespace Engine::priv {
                 if (m_Systems[type_slot]) {
                     SAFE_DELETE(m_Systems[type_slot]);
                 }
-                m_Systems[type_slot] = NEW SYSTEM(systemCI, *this);
+                m_Systems[type_slot] = NEW SYSTEM(m_SceneOptions, systemCI, *this);
             }
             template<class COMPONENT, typename SYSTEM>
             void assignSystem(const ECSSystemCI& systemCI/*, unsigned int sortValue*/) {
@@ -142,7 +150,7 @@ namespace Engine::priv {
                     m_ComponentPools.resize(type_slot + 1, nullptr);
                 }
                 if (!m_ComponentPools[type_slot]) {
-                    m_ComponentPools[type_slot] = NEW CPOOL();
+                    m_ComponentPools[type_slot] = NEW CPOOL(m_SceneOptions);
                 }
                 if (type_slot >= m_Systems.size()) {
                     m_Systems.resize(type_slot + 1, nullptr);
@@ -150,7 +158,7 @@ namespace Engine::priv {
                 if (m_Systems[type_slot]) {
                     SAFE_DELETE(m_Systems[type_slot]);
                 }
-                m_Systems[type_slot] = NEW SYSTEM(systemCI, *this);
+                m_Systems[type_slot] = NEW SYSTEM(m_SceneOptions, systemCI, *this);
             }
 
             ENTITY createEntity(Scene& scene) {

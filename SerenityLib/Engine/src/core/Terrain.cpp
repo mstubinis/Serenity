@@ -15,13 +15,12 @@
 #include <btBulletCollisionCommon.h>
 #include <SFML/Graphics.hpp>
 
-using namespace std;
 using namespace Engine;
 
 #pragma region TerrainHeightfieldShape
 
 TerrainHeightfieldShape::TerrainHeightfieldShape(int heightWidth, int heightLength, void* data, float heightScale, float minHeight, float maxHeight, int upAxis, PHY_ScalarType type, bool flipQuads) : btHeightfieldTerrainShape(heightWidth, heightLength, data, heightScale, (btScalar)minHeight, (btScalar)maxHeight, upAxis, type, flipQuads) {
-    m_ProcessedVertices.resize(heightWidth, vector<bool>(heightLength, true));
+    m_ProcessedVertices.resize(heightWidth, std::vector<bool>(heightLength, true));
 }
 TerrainHeightfieldShape::~TerrainHeightfieldShape() {
 
@@ -30,7 +29,7 @@ void TerrainHeightfieldShape::setData(void* data) {
     m_ProcessedVertices.clear();
     m_heightfieldDataUnknown = data;
     initialize(m_heightStickWidth, m_heightStickLength, data, m_heightScale, m_minHeight, m_maxHeight, m_upAxis, m_heightDataType, m_flipQuadEdges);
-    m_ProcessedVertices.resize(m_heightStickWidth, vector<bool>(m_heightStickLength, true));
+    m_ProcessedVertices.resize(m_heightStickWidth, std::vector<bool>(m_heightStickLength, true));
 }
 bool TerrainHeightfieldShape::getAndValidateVertex(int x, int y, btVector3& vertex, bool doBTScale) const {
     btScalar height = getRawHeightFieldValue(x, y);
@@ -199,8 +198,8 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
     btScalar color_scale = 1.0 / static_cast<btScalar>(pointsPerPixel);
     btScalar scale_by = 0.15;
     //init the map with points at 0.0
-    vector<vector<btScalar>> temp(pixelSize.y * pointsPerPixel, vector<btScalar>(pixelSize.x * pointsPerPixel, btScalar(0.0)));
-    m_MinAndMaxHeight = make_pair(std::numeric_limits<float>::max(), std::numeric_limits<float>::min());
+    std::vector<std::vector<btScalar>> temp(pixelSize.y * pointsPerPixel, std::vector<btScalar>(pixelSize.x * pointsPerPixel, btScalar(0.0)));
+    m_MinAndMaxHeight = std::make_pair(std::numeric_limits<float>::max(), std::numeric_limits<float>::min());
 
     m_VerticesPerSector = sectorSizeInPixels * pointsPerPixel;
     unsigned int numSectorsWidth = (unsigned int)temp[0].size() / m_VerticesPerSector;
@@ -210,7 +209,7 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
         for (int pxlY = 0; pxlY < (int)pixelSize.y; ++pxlY) {
             int dataX = (pointsPerPixel * pxlX) + 1;
             int dataY = (pointsPerPixel * pxlY) + 1;
-            if ((dataX < 0 || dataX >= temp.size()) || (dataY < 0 || dataX >= temp[0].size())) {
+            if ((dataX < 0 || (size_t)dataX >= temp.size()) || (dataY < 0 || (size_t)dataX >= temp[0].size())) {
                 continue;
             }
             auto pixel = static_cast<btScalar>(heightmapImage.getPixel(pxlX, pxlY).r);
@@ -223,7 +222,7 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
                 for (int oX = -1; oX <= 1; ++oX) {
                     for (int oY = -1; oY <= 1; ++oY) {
                         if (dataX + oX >= 0 && dataY + oY >= 0) {
-                            valid = static_cast<btScalar>(adjacentPixels.valid(oX, oY, pxlX, pxlY));
+                            valid = (btScalar)adjacentPixels.valid(oX, oY, pxlX, pxlY);
                             heightValue = pixel + (((adjacentPixels.pixels[oY + 1][oX + 1] - pixel) * color_scale) * valid);
                             temp[dataX + oX][dataY + oY] = heightValue;
                         }
@@ -252,7 +251,7 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
     for (unsigned int sectorX = 0; sectorX < numSectorsWidth; ++sectorX) {
         m_BtHeightfieldShapes[sectorX].reserve(numSectorsHeight);
         for (unsigned int sectorY = 0; sectorY < numSectorsHeight; ++sectorY) {
-            vector<float> dummy_values = { 1.0f };//Bullet will do an assert check for null data, but i am manually assigning the data later on
+            std::vector<float> dummy_values = { 1.0f };//Bullet will do an assert check for null data, but i am manually assigning the data later on
             TerrainHeightfieldShape* shape = new TerrainHeightfieldShape(m_VerticesPerSector + 1, m_VerticesPerSector + 1, dummy_values.data(), (float)m_HeightScale, m_MinAndMaxHeight.first, m_MinAndMaxHeight.second, 1, PHY_ScalarType::PHY_FLOAT, false);
             shape->setUserIndex(m_VerticesPerSector);
             shape->setUserIndex2(m_VerticesPerSector);
@@ -267,8 +266,8 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
                 for (unsigned int y = 0; y < m_VerticesPerSector + 1; ++y) {
                     unsigned int offset_x = (sectorX * m_VerticesPerSector) + x;
                     unsigned int offset_y = (sectorY * m_VerticesPerSector) + y;
-                    unsigned int x_ = glm::min(offset_x, (unsigned int)(temp.size() - 1));
-                    unsigned int y_ = glm::min(offset_y, (unsigned int)(temp[x].size() - 1));
+                    unsigned int x_ = glm::min(offset_x, (unsigned int)temp.size() - 1U);
+                    unsigned int y_ = glm::min(offset_y, (unsigned int)temp[x].size() - 1U);
 
                     btScalar height = temp[x_][y_];
                     shape.m_Data.push_back(height);
@@ -281,8 +280,8 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
 }
 TerrainData::AdjacentPixels TerrainData::get_adjacent_pixels(unsigned int pixelX, unsigned int pixelY, sf::Image& heightmapImage) {
     AdjacentPixels ret;
-    int pxlX = static_cast<int>(pixelX);
-    int pxlY = static_cast<int>(pixelY);
+    int pxlX = (int)pixelX;
+    int pxlY = (int)pixelY;
     const auto size = glm::ivec2(heightmapImage.getSize().x, heightmapImage.getSize().y);
     ret.imgSizeX = size.x;
     ret.imgSizeY = size.y;
@@ -294,7 +293,7 @@ TerrainData::AdjacentPixels TerrainData::get_adjacent_pixels(unsigned int pixelX
             yy = 0;
             for (int j = pxlY - 1; j <= pxlY + 1; ++j) {
                 if (j >= 0 && j <= size.y - 1) {
-                    ret.pixels[yy][xx] = static_cast<btScalar>(heightmapImage.getPixel(i, j).r);
+                    ret.pixels[yy][xx] = (btScalar)heightmapImage.getPixel(i, j).r;
                 }
                 yy++;
             }
@@ -308,7 +307,7 @@ TerrainData::AdjacentPixels TerrainData::get_adjacent_pixels(unsigned int pixelX
 
 #pragma region Terrain
 
-Terrain::Terrain(const string& name, sf::Image& heightmapImage, Handle& materialHandle, unsigned int sectorSizeInPixels, unsigned int pointsPerPixel, bool useDiamondSubdivisions, Scene* scene) : Entity(*scene) {
+Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& materialHandle, unsigned int sectorSizeInPixels, unsigned int pointsPerPixel, bool useDiamondSubdivisions, Scene* scene) : Entity(*scene) {
     m_TerrainData.calculate_data(heightmapImage, sectorSizeInPixels, pointsPerPixel);
     Terrain::setUseDiamondSubdivision(useDiamondSubdivisions);
     m_Mesh = NEW Mesh(name, *this, 0.000f);
@@ -389,7 +388,7 @@ bool Terrain::removeQuad(unsigned int sectorX, unsigned int sectorY, unsigned in
     }
     return removal_result;
 }
-bool Terrain::removeQuads(vector<tuple<unsigned int, unsigned int, unsigned int, unsigned int>>& quads) {
+bool Terrain::removeQuads(std::vector<std::tuple<unsigned int, unsigned int, unsigned int, unsigned int>>& quads) {
     if (quads.size() == 0) {
         return false;
     }
@@ -416,7 +415,7 @@ bool Terrain::removeQuad(unsigned int indexX, unsigned int indexY) {
     }
     return removal_result;
 }
-bool Terrain::removeQuads(vector<tuple<unsigned int, unsigned int>>& quads) {
+bool Terrain::removeQuads(std::vector<std::tuple<unsigned int, unsigned int>>& quads) {
     if (quads.size() == 0) {
         return false;
     }
@@ -449,8 +448,8 @@ void Terrain::setPosition(const glm::vec3& position) {
 }
 void Terrain::setScale(float x, float y, float z) {
     auto components = getComponents<ComponentModel, ComponentBody>();
-    auto* model = get<0>(components);
-    auto* body = get<1>(components);
+    auto* model = std::get<0>(components);
+    auto* body = std::get<1>(components);
     body->setScale(x, y, z);
 }
 void Terrain::setScale(const glm::vec3& scl) {

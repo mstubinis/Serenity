@@ -9,49 +9,49 @@ class DiscordActivityEvent {
         discord::Activity      m_Activity;
     public:
         DiscordActivityEvent();
-        virtual ~DiscordActivityEvent();
+        virtual ~DiscordActivityEvent() = default;
 
-        bool post();
+        bool post() noexcept;
 
-        const discord::Activity& getActivity() const;
+        const discord::Activity& getActivity() const noexcept;
 
-        void setState(const std::string& state); //the player's current party status
+        void setState(const char* state) noexcept; //the player's current party status
 
-        void setDetail(const std::string& detail); //what the player is currently doing
+        void setDetail(const char* detail) noexcept; //what the player is currently doing
 
-        void setPartySizeCurrent(unsigned int currentSize); //the current size of the party
+        void setPartySizeCurrent(unsigned int currentSize) noexcept; //the current size of the party
 
-        void setPartySizeMax(unsigned int maxSize); //the max possible size of the party
+        void setPartySizeMax(unsigned int maxSize) noexcept; //the max possible size of the party
 
-        void setImageLarge(const std::string& largeImage); //keyname of an asset to display
+        void setImageLarge(const char* largeImage) noexcept; //keyname of an asset to display
 
-        void setImageLargeText(const std::string& largeImageText); //hover text for the large image
+        void setImageLargeText(const char* largeImageText) noexcept; //hover text for the large image
 
-        void setImageSmall(const std::string& smallImage); //keyname of an asset to display
+        void setImageSmall(const char* smallImage) noexcept; //keyname of an asset to display
 
-        void setImageSmallText(const std::string& smallImageText); //hover text for the small image
+        void setImageSmallText(const char* smallImageText) noexcept; //hover text for the small image
 
-        void setPartyID(const std::string& partyID); //a unique identifier for this party
+        void setPartyID(const char* partyID) noexcept; //a unique identifier for this party
 
-        void setInstance(bool instance); //whether this activity is an instanced context, like a match
+        void setInstance(bool instance) noexcept; //whether this activity is an instanced context, like a match
 
-        void setTimestampStartAsNow(); //unix timestamp - set the current starting activity time to this very moment
+        void setTimestampStartAsNow() noexcept; //unix timestamp - set the current starting activity time to this very moment
 
-        void setTimestampStart(std::int64_t start); //unix timestamp - send this to have an "elapsed" timer
+        void setTimestampStart(std::int64_t start) noexcept; //unix timestamp - send this to have an "elapsed" timer
 
-        void setTimestampEndSinceNow(std::int64_t end); //specify how many miliseconds from this very moment that the activity will end
+        void setTimestampEndSinceNow(std::int64_t end) noexcept; //specify how many miliseconds from this very moment that the activity will end
 
-        void setTimestampEndSinceNowSeconds(unsigned int end); //specify how many seconds from this very moment that the activity will end
+        void setTimestampEndSinceNowSeconds(unsigned int end) noexcept; //specify how many seconds from this very moment that the activity will end
 
-        void setTimestampEnd(std::int64_t end); //unix timestamp - send this to have a "remaining" timer
+        void setTimestampEnd(std::int64_t end) noexcept; //unix timestamp - send this to have a "remaining" timer
 
-        void setSecretJoin(const std::string& join); //unique hash for chat invites and Ask to Join
+        void setSecretJoin(const char* join) noexcept; //unique hash for chat invites and Ask to Join
 
-        void setSecretSpectate(const std::string& spectate); //unique hash for Spectate button
+        void setSecretSpectate(const char* spectate) noexcept; //unique hash for Spectate button
 
-        void setSecretMatch(const std::string& match); //unique hash for the given match context
+        void setSecretMatch(const char* match) noexcept; //unique hash for the given match context
 
-        void setType(const discord::ActivityType& type); //ActivityType is strictly for the purpose of handling events that you receive from Discord; though the SDK/our API will not reject a payload with an ActivityType sent, it will be discarded and will not change anything in the client
+        void setType(const discord::ActivityType& type) noexcept; //ActivityType is strictly for the purpose of handling events that you receive from Discord; though the SDK/our API will not reject a payload with an ActivityType sent, it will be discarded and will not change anything in the client
 };
 
 

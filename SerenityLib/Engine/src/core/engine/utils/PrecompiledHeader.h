@@ -63,6 +63,18 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#ifdef ENGINE_USE_INLINE
+    #define INLINE inline
+#else
+    #define INLINE
+#endif
+
+#ifdef ENGINE_USE_NOEXCEPT
+    #define NOEXCEPT noexcept
+#else
+    #define NOEXCEPT
+#endif
+
 #ifdef ENGINE_USE_CONSTEXPR
     #define CONSTEXPR constexpr
 #else

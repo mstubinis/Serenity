@@ -31,7 +31,7 @@
     <ProjectGuid>{CB117FEE-0B28-4982-BB5F-1E1F95C614B8}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>SerenityLib</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -173,6 +173,7 @@
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
       <PrecompiledHeaderFile>core/engine/utils/PrecompiledHeader.h</PrecompiledHeaderFile>
+      <AdditionalOptions>/Zm1000 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -184,7 +185,7 @@
       <Message>Copying binary (Debug) ...</Message>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>%(AdditionalDependencies);lua.lib;assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug_d.lib;BulletDynamics_Debug_d.lib;BulletSoftBody_Debug_d.lib;LinearMath_Debug_d.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;discord_game_sdk.lib;freetyped.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug_d.lib;BulletDynamics_Debug_d.lib;BulletSoftBody_Debug_d.lib;LinearMath_Debug_d.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;discord_game_sdk.lib;freetyped.lib;lua.lib;lua53.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Debug;D:\dev\discord_game_sdk\lib\x86;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Debug;D:\dev\assimp\lib\32\Debug;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Debug;D:\dev\lua\lib\32\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
@@ -250,7 +251,7 @@
       <Message>Copying Binary (Release) ...</Message>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>%(AdditionalDependencies);lua.lib;assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision_d.lib;BulletDynamics_d.lib;BulletSoftBody_d.lib;LinearMath_d.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;discord_game_sdk.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision_d.lib;BulletDynamics_d.lib;BulletSoftBody_d.lib;LinearMath_d.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Release;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\lib\32\Release;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;D:\dev\discord_game_sdk\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
@@ -289,7 +290,7 @@
       <Message>Copying Binary (Release) ...</Message>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>%(AdditionalDependencies);lua.lib;assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision_d.lib;BulletDynamics_d.lib;BulletSoftBody_d.lib;LinearMath_d.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;discord_game_sdk.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision_d.lib;BulletDynamics_d.lib;BulletSoftBody_d.lib;LinearMath_d.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Release;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\lib\32\Release;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;D:\dev\discord_game_sdk\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>

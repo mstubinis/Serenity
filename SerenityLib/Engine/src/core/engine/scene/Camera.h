@@ -16,41 +16,41 @@ class Camera: public Entity{
         Camera(float left, float right, float bottom, float top, float nearPlane, float farPlane, Scene* = nullptr);
         virtual ~Camera();
 
-        void lookAt(const glm_vec3& eye, const glm_vec3& center, const glm_vec3& up);
+        void lookAt(const glm_vec3& eye, const glm_vec3& center, const glm_vec3& up) noexcept;
 
-        glm_vec3 getPosition() const;
-        glm_vec3 forward() const;
-        glm_vec3 right() const;
-        glm_vec3 up() const;
-        glm::quat getOrientation() const;
+        glm_vec3 getPosition() const noexcept;
+        glm_vec3 forward() const noexcept;
+        glm_vec3 right() const noexcept;
+        glm_vec3 up() const noexcept;
+        glm::quat getOrientation() const noexcept;
 
-        decimal getDistance(Entity) const;
-        decimal getDistance(const glm_vec3&) const;
-        decimal getDistanceSquared(Entity) const;
-        decimal getDistanceSquared(const glm_vec3&) const;
-        decimal getDistanceSquared(Entity e, const glm_vec3& this_pos) const;
-        decimal getDistanceSquared(const glm_vec3& objPos, const glm_vec3& this_pos) const;
+        decimal getDistance(Entity) const noexcept;
+        decimal getDistance(const glm_vec3&) const noexcept;
+        decimal getDistanceSquared(Entity) const noexcept;
+        decimal getDistanceSquared(const glm_vec3&) const noexcept;
+        decimal getDistanceSquared(Entity e, const glm_vec3& this_pos) const noexcept;
+        decimal getDistanceSquared(const glm_vec3& objPos, const glm_vec3& this_pos) const noexcept;
 
-        float getAngle() const;    void setAngle(float angle);
-        float getAspect() const;   void setAspect(float aspectRatio);
-        float getNear() const;     void setNear(float nearPlane);
-        float getFar() const;      void setFar(float farPlane);
+        float getAngle() const noexcept;    void setAngle(float angle) noexcept;
+        float getAspect() const noexcept;   void setAspect(float aspectRatio) noexcept;
+        float getNear() const noexcept;     void setNear(float nearPlane) noexcept;
+        float getFar() const noexcept;      void setFar(float farPlane) noexcept;
 
-        void setProjectionMatrix(const glm::mat4& perspectiveMatrix);
-        void setViewMatrix(const glm::mat4& viewMatrix);
+        void setProjectionMatrix(const glm::mat4& perspectiveMatrix) noexcept;
+        void setViewMatrix(const glm::mat4& viewMatrix) noexcept;
 
-        glm::mat4 getProjection() const;
-        glm::mat4 getProjectionInverse() const;
-        glm::vec3 getViewVector() const;
+        glm::mat4 getProjection() const noexcept;
+        glm::mat4 getProjectionInverse() const noexcept;
+        glm::vec3 getViewVector() const noexcept;
 
-        glm::mat4 getView() const;
-        glm::mat4 getViewInverse() const;
-        glm::mat4 getViewProjection() const;
-        glm::mat4 getViewProjectionInverse() const;
+        glm::mat4 getView() const noexcept;
+        glm::mat4 getViewInverse() const noexcept;
+        glm::mat4 getViewProjection() const noexcept;
+        glm::mat4 getViewProjectionInverse() const noexcept;
 
-        unsigned int sphereIntersectTest(const glm_vec3& pos, float radius) const;
-        unsigned int pointIntersectTest(const glm_vec3& pos) const;
+        unsigned int sphereIntersectTest(const glm_vec3& pos, float radius) const noexcept;
+        unsigned int pointIntersectTest(const glm_vec3& pos) const noexcept;
 
-        bool rayIntersectSphere(Entity) const;
+        bool rayIntersectSphere(Entity) const noexcept;
 };
 #endif

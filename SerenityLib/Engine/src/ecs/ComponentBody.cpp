@@ -1045,6 +1045,12 @@ struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()
     if (pcs.Parents.size() < id) {
         pcs.resize(id);
     }
+
+    auto* model = entity.getComponent<ComponentModel>();
+    if (model) {
+        ComponentModel_Functions::CalculateRadius(*model);
+    }
+
 }};
 struct priv::ComponentBody_ComponentRemovedFromEntityFunction final { void operator()(void* systemPtr, Entity entity) const {
     auto& system         = *(Engine::priv::ComponentBody_System*)systemPtr;
@@ -1060,13 +1066,12 @@ struct priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(voi
     auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)componentPool;
     auto* component_ptr = pool.getComponent(entity);
     if (component_ptr) {
-        auto& component = *component_ptr;
-        if (component.m_Physics) {
-            auto& physicsData = *component.data.p;
-            component.setCollision(physicsData.collision->getType(), physicsData.mass);
+        if (component_ptr->m_Physics) {
+            auto& physicsData = *component_ptr->data.p;
+            component_ptr->setCollision(physicsData.collision->getType(), physicsData.mass);
             auto currentScene = Resources::getCurrentScene();
             if (currentScene && currentScene == &scene) {
-                component.addPhysicsToWorld(true);
+                component_ptr->addPhysicsToWorld(true);
             }
         }
     }
@@ -1233,14 +1238,8 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(std::uint32_t
         }
     }
 }
-std::uint32_t Engine::priv::ComponentBody_System::ParentChildVector::size() const {
-    return OrderHead;
-}
-size_t Engine::priv::ComponentBody_System::ParentChildVector::capacity() const {
-    return Order.capacity();
-}
 
-Engine::priv::ComponentBody_System::ComponentBody_System(const Engine::priv::ECSSystemCI& systemCI, Engine::priv::ECS<Entity>& ecs) : Engine::priv::ECSSystem<Entity, ComponentBody>(systemCI, ecs) {
+Engine::priv::ComponentBody_System::ComponentBody_System(const SceneOptions& options, const Engine::priv::ECSSystemCI& systemCI, Engine::priv::ECS<Entity>& ecs) : Engine::priv::ECSSystem<Entity, ComponentBody>(options, systemCI, ecs) {
 
 }
 Engine::priv::ComponentBody_System::~ComponentBody_System() {

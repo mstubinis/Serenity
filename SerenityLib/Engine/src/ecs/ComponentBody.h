@@ -2,11 +2,12 @@
 #ifndef ENGINE_ECS_COMPONENT_BODY_H
 #define ENGINE_ECS_COMPONENT_BODY_H
 
-class Collision;
-class ComponentModel;
-class ComponentBody;
-class btCollisionObject;
-class btRigidBody;
+struct SceneOptions;
+class  Collision;
+class  ComponentModel;
+class  ComponentBody;
+class  btCollisionObject;
+class  btRigidBody;
 
 #include <ecs/ECS.h>
 #include <core/engine/physics/PhysicsIncludes.h>
@@ -283,13 +284,13 @@ namespace Engine::priv {
                 void insert(std::uint32_t parent, std::uint32_t child);
                 void remove(std::uint32_t parent, std::uint32_t child);
 
-                std::uint32_t size() const;
-                size_t capacity() const;
+                inline CONSTEXPR std::uint32_t size() const noexcept { return OrderHead; }
+                inline size_t capacity() const noexcept { return Order.capacity(); }
         };
         public:
             ParentChildVector ParentChildSystem;
 
-            ComponentBody_System(const Engine::priv::ECSSystemCI& systemCI, Engine::priv::ECS<Entity>& ecs);
+            ComponentBody_System(const SceneOptions& options, const Engine::priv::ECSSystemCI& systemCI, Engine::priv::ECS<Entity>& ecs);
             ~ComponentBody_System();
     };
 };

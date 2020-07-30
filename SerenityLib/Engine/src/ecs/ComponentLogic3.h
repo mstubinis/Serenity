@@ -12,15 +12,17 @@ namespace luabridge {
 #include <core/engine/lua/Lua.h>
 
 class ComponentLogic3 : public Engine::UserPointer {
+    using c_function = std::function<void(const ComponentLogic3*, const float)>;
     private:
         Entity                                             m_Owner;
         void*                                              m_UserPointer1 = nullptr;
         void*                                              m_UserPointer2 = nullptr;
         LuaCallableFunction<ComponentLogic3, const float>  m_Functor;
     public:
-        ComponentLogic3(Entity entity);
-        template<typename T> 
-        ComponentLogic3(Entity entity, T&& Functor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr) {
+        ComponentLogic3(Entity entity) {
+            m_Owner = entity;
+        }
+        ComponentLogic3(Entity entity, c_function&& Functor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr) {
             m_Owner        = entity;
             m_UserPointer  = Ptr1;
             m_UserPointer1 = Ptr2;
@@ -32,13 +34,15 @@ class ComponentLogic3 : public Engine::UserPointer {
         ComponentLogic3(ComponentLogic3&& other) noexcept;
         ComponentLogic3& operator=(ComponentLogic3&& other) noexcept;
 
-        ~ComponentLogic3();
+        ~ComponentLogic3() = default;
 
         inline CONSTEXPR Entity getOwner() const noexcept { return m_Owner; }
-        void call(const float dt) const;
+        void call(const float dt) const noexcept;
 
-        void setFunctor(std::function<void(const ComponentLogic3*, const float)>&& functor);
-        void setFunctor(luabridge::LuaRef luaFunction);
+        void setFunctor(c_function&& functor) noexcept {
+            m_Functor.setFunctor(std::move(functor));
+        }
+        void setFunctor(luabridge::LuaRef luaFunction) noexcept;
 
         inline void setUserPointer1(void* UserPointer1) noexcept { m_UserPointer1 = UserPointer1; }
         inline void setUserPointer2(void* UserPointer2) noexcept { m_UserPointer2 = UserPointer2; }

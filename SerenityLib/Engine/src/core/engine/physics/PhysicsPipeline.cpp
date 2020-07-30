@@ -15,7 +15,6 @@
 
 #include <LinearMath/btIDebugDraw.h>
 
-using namespace std;
 using namespace Engine;
 
 #pragma region PhysicsTaskScheduler
@@ -63,7 +62,13 @@ btScalar priv::PhysicsTaskScheduler::parallelSum(int iBegin, int iEnd, int grain
         m_sumRes.store(btScalar(0.0), std::memory_order_relaxed);
         for (size_t i = 0; i < pairs.size(); ++i) {
             auto lambda = [&body, this, i, &pairs]() {
-                m_sumRes += body.sumLoop((int)pairs[i].first, (int)pairs[i].second + 1);
+                #ifdef ENVIRONMENT64
+                    m_sumRes += body.sumLoop((int)pairs[i].first, (int)pairs[i].second + 1);
+                #else
+                    auto data = m_sumRes.load();
+                    data += body.sumLoop((int)pairs[i].first, (int)pairs[i].second + 1);
+                    m_sumRes.store(data, std::memory_order_relaxed);
+                #endif
             };
             Engine::priv::threading::addJob(lambda, 0);
         }
@@ -151,12 +156,12 @@ priv::PhysicsPipeline::PhysicsPipeline() {
     setPreTickCallback(m_PreTickCallback);
     setPostTickCallback(m_PostTickCallback);
 }
-void priv::PhysicsPipeline::setPreTickCallback(function<void(btDynamicsWorld* world, btScalar timeStep)> preTicCallback) {
+void priv::PhysicsPipeline::setPreTickCallback(std::function<void(btDynamicsWorld* world, btScalar timeStep)> preTicCallback) {
     m_PreTickCallback = preTicCallback;
     btInternalTickCallback btFunc = get_fn_ptr<0>(preTicCallback);
     m_World->setInternalTickCallback(btFunc, (void*)m_World, true);
 }
-void priv::PhysicsPipeline::setPostTickCallback(function<void(btDynamicsWorld* world, btScalar timeStep)> postTickCallback) {
+void priv::PhysicsPipeline::setPostTickCallback(std::function<void(btDynamicsWorld* world, btScalar timeStep)> postTickCallback) {
     m_PostTickCallback = postTickCallback;
     btInternalTickCallback btFunc = get_fn_ptr<0>(postTickCallback);
     m_World->setInternalTickCallback(btFunc, (void*)m_World, false);

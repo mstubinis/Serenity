@@ -19,7 +19,7 @@ namespace Engine::priv {
         private:
             //unsigned int m_SortValue = 0;
         public:
-            ECSComponentPool() : super(400) {
+            ECSComponentPool(const SceneOptions& options) : super(400) {
 
             }
             ~ECSComponentPool() = default;

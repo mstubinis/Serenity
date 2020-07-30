@@ -3,19 +3,19 @@
 #define ENGINE_SCENE_OPTIONS_H
 
 struct SceneOptions final {
-    size_t maxAmountOfEntities;
-    size_t maxAmountOfParticleEmitters;
-    size_t maxAmountOfParticles;
+    size_t maxAmountOfEntities          = 20'000;
+    size_t maxAmountOfParticleEmitters  = 500;
+    size_t maxAmountOfParticles         = 25'000;
     
     SceneOptions() {
         #ifdef ENVIRONMENT32
-            maxAmountOfEntities         = 200000;
+            maxAmountOfEntities         = 20'000;
             maxAmountOfParticleEmitters = 500;
-            maxAmountOfParticles        = 250000;
+            maxAmountOfParticles        = 25'000;
         #else
-            maxAmountOfEntities         = 400000;
-            maxAmountOfParticleEmitters = 1000;
-            maxAmountOfParticles        = 500000;
+            maxAmountOfEntities         = 40'000;
+            maxAmountOfParticleEmitters = 1'000;
+            maxAmountOfParticles        = 50'000;
         #endif
     }
    

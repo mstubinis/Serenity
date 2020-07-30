@@ -11,12 +11,12 @@ class ComponentCamera;
 
 namespace Engine::priv {
     struct ComponentCamera_Functions final {
-        static void      RebuildProjectionMatrix(ComponentCamera& componentCamera);
-        static glm::mat4 GetViewNoTranslation(const Camera& camera);
-        static glm::mat4 GetViewInverseNoTranslation(const Camera& camera);
-        static glm::mat4 GetViewProjectionNoTranslation(const Camera& camera);
-        static glm::mat4 GetViewProjectionInverseNoTranslation(const Camera& camera);
-        static glm::vec3 GetViewVectorNoTranslation(const Camera& camera);
+        static void      RebuildProjectionMatrix(ComponentCamera& componentCamera) noexcept;
+        static glm::mat4 GetViewNoTranslation(const Camera& camera) noexcept;
+        static glm::mat4 GetViewInverseNoTranslation(const Camera& camera) noexcept;
+        static glm::mat4 GetViewProjectionNoTranslation(const Camera& camera) noexcept;
+        static glm::mat4 GetViewProjectionInverseNoTranslation(const Camera& camera) noexcept;
+        static glm::vec3 GetViewVectorNoTranslation(const Camera& camera) noexcept;
     };
 };
 
@@ -67,37 +67,37 @@ class ComponentCamera final {
 
         ~ComponentCamera() = default;
 
-        void resize(unsigned int width, unsigned int height);
-        void lookAt(const glm_vec3& eye, const glm_vec3& forward, const glm_vec3& up);
+        void resize(unsigned int width, unsigned int height) noexcept;
+        void lookAt(const glm_vec3& eye, const glm_vec3& forward, const glm_vec3& up) noexcept;
 
-        void setViewMatrix(const glm::mat4& viewMatrix);
-        void setProjectionMatrix(const glm::mat4& projectionMatrix);
+        void setViewMatrix(const glm::mat4& viewMatrix) noexcept;
+        inline void setProjectionMatrix(const glm::mat4& projectionMatrix) noexcept { m_ProjectionMatrix = projectionMatrix; }
 
         inline CONSTEXPR float getAngle() const noexcept { return m_Angle; }
         inline CONSTEXPR float getAspect() const noexcept { return m_AspectRatio; }
         inline CONSTEXPR float getNear() const noexcept { return m_NearPlane; }
         inline CONSTEXPR float getFar() const noexcept { return m_FarPlane; }
 
-        void setAngle(float angle);
-        void setAspect(float aspectRatio);
-        void setNear(float Near);
-        void setFar(float Far);
+        void setAngle(float angle) noexcept;
+        void setAspect(float aspectRatio) noexcept;
+        void setNear(float Near) noexcept;
+        void setFar(float Far) noexcept;
 
         inline CONSTEXPR glm::mat4 getProjection() const noexcept { return m_ProjectionMatrix; }
         inline CONSTEXPR glm::mat4 getView() const noexcept { return m_ViewMatrix; }
-        glm::mat4 getProjectionInverse() const;
-        glm::mat4 getViewInverse() const;
-        glm::mat4 getViewProjection() const;
-        glm::mat4 getViewProjectionInverse() const;
-        glm::vec3 getViewVector() const;
+        inline glm::mat4 getProjectionInverse() const noexcept { return glm::inverse(m_ProjectionMatrix); }
+        inline glm::mat4 getViewInverse() const noexcept { return glm::inverse(m_ViewMatrix); }
+        inline glm::mat4 getViewProjection() const noexcept { return m_ProjectionMatrix * m_ViewMatrix; }
+        inline glm::mat4 getViewProjectionInverse() const noexcept { return glm::inverse(m_ProjectionMatrix * m_ViewMatrix); }
+        inline glm::vec3 getViewVector() const noexcept { return glm::normalize(glm::vec3(m_ViewMatrix[0][2], m_ViewMatrix[1][2], m_ViewMatrix[2][2])); }
 
         inline CONSTEXPR std::array<glm::vec4, 6> getFrustrumPlanes() const noexcept { return m_FrustumPlanes; }
         inline CONSTEXPR glm_vec3 forward() const noexcept { return m_Forward; }
         inline glm_vec3 right() const noexcept { return glm::normalize(glm_vec3(m_ViewMatrixNoTranslation[0][0], m_ViewMatrixNoTranslation[1][0], m_ViewMatrixNoTranslation[2][0])); }
         inline CONSTEXPR glm_vec3 up() const noexcept { return m_Up; /*normalize later?*/ }
 
-		unsigned int pointIntersectTest(const glm_vec3& objectPosition) const;
-		unsigned int sphereIntersectTest(const glm_vec3& objectPosition, float objectRadius) const;
+		unsigned int pointIntersectTest(const glm_vec3& objectPosition) const noexcept;
+		unsigned int sphereIntersectTest(const glm_vec3& objectPosition, float objectRadius) const noexcept;
 };
 
 class ComponentCamera_System_CI : public Engine::priv::ECSSystemCI {

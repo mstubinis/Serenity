@@ -9,6 +9,7 @@ namespace Engine::priv {
 
 #include <ecs/ECSComponentPool.h>
 #include <ecs/ECSSystemConstructorInfo.h>
+#include <core/engine/scene/SceneOptions.h>
 
 namespace Engine::priv {
     template<typename ...> class ECSSystem;
@@ -47,7 +48,7 @@ namespace Engine::priv {
         private:
             CPoolType& componentPool;
         public:
-            ECSSystem(const ECSSystemCI& systemConstructor, ECS<ENTITY>& ecs) : componentPool(ecs.template getPool<COMPONENT>()){
+            ECSSystem(const SceneOptions& options, const ECSSystemCI& systemConstructor, ECS<ENTITY>& ecs) : componentPool(ecs.template getPool<COMPONENT>()){
                 super::SUF = std::move(systemConstructor.onUpdateFunction);
                 super::CAE = std::move(systemConstructor.onComponentAddedToEntityFunction);
                 super::CRE = std::move(systemConstructor.onComponentRemovedFromEntityFunction);
