@@ -6,7 +6,7 @@
 #define MAX_MATERIAL_COMPONENTS 10
 #define MAX_LIGHTS_PER_PASS 16
 
-struct MaterialLayerBlendMode final { enum Mode {
+enum class MaterialLayerBlendMode {
     Default,
     Mix,
     Add,
@@ -29,12 +29,12 @@ struct MaterialLayerBlendMode final { enum Mode {
     Saturation,
     Color,
     Value,
-_TOTAL};};
-struct MaterialUVModificationType final { enum Type {
+_TOTAL};
+enum class MaterialUVModificationType {
     Translation,
     Rotation,
-_TOTAL};};
-struct MaterialComponentType final { enum Type {
+_TOTAL};
+enum class MaterialComponentType : unsigned int {
     Diffuse,
     Normal,
     Glow,
@@ -45,8 +45,8 @@ struct MaterialComponentType final { enum Type {
     Reflection,
     Refraction,
     ParallaxOcclusion,
-_TOTAL};};
-enum class MaterialPhysics {
+_TOTAL};
+enum class MaterialPhysics : unsigned short {
     Water,
     Plastic_Or_Glass_Low,
     Plastic_High,

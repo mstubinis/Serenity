@@ -7,11 +7,11 @@
 
 class MaterialComponent {
     protected:
-        MaterialLayer                m_Layers[MAX_MATERIAL_LAYERS_PER_COMPONENT];
-        unsigned int                 m_NumLayers      = 0U;
-        MaterialComponentType::Type  m_ComponentType;
+        std::array<MaterialLayer, MAX_MATERIAL_LAYERS_PER_COMPONENT>   m_Layers;
+        unsigned int                                                   m_NumLayers      = 0U;
+        MaterialComponentType                                          m_ComponentType  = MaterialComponentType::Diffuse;
     public:
-        MaterialComponent(MaterialComponentType::Type type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
+        MaterialComponent(MaterialComponentType type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
         virtual ~MaterialComponent() {}
 
         MaterialComponent(const MaterialComponent&)                      = delete;
@@ -30,7 +30,8 @@ class MaterialComponent {
         Texture* cubemap(size_t index = 0) const;
         MaterialLayer& layer(size_t index = 0);
 
-        inline CONSTEXPR MaterialComponentType::Type type() const noexcept { return m_ComponentType; }
+        inline CONSTEXPR unsigned int numLayers() const { return m_NumLayers; }
+        inline CONSTEXPR MaterialComponentType type() const noexcept { return m_ComponentType; }
 
         void update(const float dt);
 };

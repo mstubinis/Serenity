@@ -7,16 +7,9 @@
 #include <core/engine/system/Engine.h>
 #include <boost/filesystem.hpp>
 
-using namespace std;
 using namespace Engine;
 using namespace Engine::priv;
 
-
-MaterialRequestPart::MaterialRequestPart() {
-}
-MaterialRequestPart::~MaterialRequestPart() {
-
-}
 MaterialRequestPart::MaterialRequestPart(const MaterialRequestPart& other) {
     m_Material = other.m_Material;
     m_Name     = other.m_Name;
@@ -35,7 +28,7 @@ MaterialRequestPart& MaterialRequestPart::operator=(const MaterialRequestPart& o
 
 
 
-MaterialRequest::MaterialRequest(const string& name, const string& diffuse, const string& normal, const string& glow, const string& specular, const string& ao, const string& metalness, const string& smoothness){ 
+MaterialRequest::MaterialRequest(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness){
     m_Part.m_Name = name;
     m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( diffuse, false, ImageInternalFormat::SRGB8_ALPHA8 )  );
     m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( normal, false, ImageInternalFormat::RGBA8 )  );
@@ -45,7 +38,7 @@ MaterialRequest::MaterialRequest(const string& name, const string& diffuse, cons
     m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( metalness, false, ImageInternalFormat::R8 )  );
     m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( smoothness, false, ImageInternalFormat::R8 )  );
 }
-MaterialRequest::MaterialRequest(const string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) {
+MaterialRequest::MaterialRequest(const std::string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) {
     m_Part.m_Name     = name;
     m_Part.m_Material = NEW Material(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
     m_Part.m_Handle   = Core::m_Engine->m_ResourceManager.m_Resources.add(m_Part.m_Material, (unsigned int)ResourceType::Material);
@@ -86,7 +79,7 @@ void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {
     auto size = request.m_Part.m_TextureRequests.size();
     for (size_t i = 0; i < size; ++i) {
         if (request.m_Part.m_TextureRequests[i]->fileExists) {
-            auto& component = request.m_Part.m_Material->addComponent(static_cast<MaterialComponentType::Type>(i), "DEFAULT");
+            auto& component = request.m_Part.m_Material->addComponent((MaterialComponentType)i, "DEFAULT");
         }
     }
 
@@ -94,11 +87,11 @@ void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {
         for (auto& textureRequest : request.m_Part.m_TextureRequests) {
             textureRequest->request(true);
         }
-        auto lambda_cpu = [=]() {
-            InternalMaterialRequestPublicInterface::LoadCPU(const_cast<MaterialRequest&>(request));
+        auto lambda_cpu = [=]() mutable {
+            InternalMaterialRequestPublicInterface::LoadCPU(request);
         };
-        auto lambda_gpu = [=]() {
-            InternalMaterialRequestPublicInterface::LoadGPU(const_cast<MaterialRequest&>(request));
+        auto lambda_gpu = [=]() mutable {
+            InternalMaterialRequestPublicInterface::LoadGPU(request);
         };
         threading::addJobWithPostCallback(lambda_cpu, lambda_gpu);
     }else{

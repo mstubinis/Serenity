@@ -11,7 +11,7 @@ namespace Engine::priv {
     struct InternalMaterialPublicInterface;
     struct InternalMaterialRequestPublicInterface;
     struct InternalScenePublicInterface;
-    struct MaterialLoader;
+    class  MaterialLoader;
     class  Renderer;
     class  IRenderingPipeline;
 };
@@ -27,7 +27,7 @@ class Material final : public Resource {
     friend struct Engine::priv::InternalScenePublicInterface;
     friend struct Engine::priv::InternalMaterialRequestPublicInterface;
     friend struct Engine::priv::InternalMaterialPublicInterface;
-    friend struct Engine::priv::MaterialLoader;
+    friend class  Engine::priv::MaterialLoader;
     friend class  Engine::priv::Renderer;
     friend class  Engine::priv::IRenderingPipeline;
     public:
@@ -38,8 +38,8 @@ class Material final : public Resource {
         std::function<void(Material*)>    m_CustomBindFunctor   = [](Material*) {};
       //std::function<void(Material*)>    m_CustomUnbindFunctor = [](Material*) {};
 
-        unsigned char                     m_DiffuseModel        = (unsigned char)DiffuseModel::Lambert;
-        unsigned char                     m_SpecularModel       = (unsigned char)SpecularModel::GGX;
+        DiffuseModel                      m_DiffuseModel        = DiffuseModel::Lambert;
+        SpecularModel                     m_SpecularModel       = SpecularModel::GGX;
         bool                              m_Shadeless           = false;
         bool                              m_UpdatedThisFrame    = false;
         Engine::color_vector_4            m_F0Color             = Engine::color_vector_4(10_uc, 10_uc, 10_uc, 255_uc);
@@ -50,8 +50,8 @@ class Material final : public Resource {
         unsigned char                     m_BaseAlpha           = 254_uc;
         std::uint32_t                     m_ID                  = 0U;
 
-        MaterialComponent* internalAddComponentGeneric(MaterialComponentType::Type type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
-        void internalUpdateGlobalMaterialPool(bool addToDatabase);
+        MaterialComponent* internal_add_component_generic(MaterialComponentType type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
+        void internal_update_global_material_pool(bool addToDatabase);
         Material();
     public:
         Material(
@@ -83,9 +83,9 @@ class Material final : public Resource {
         Material(Material&& other) noexcept            = delete;
         Material& operator=(Material&& other) noexcept = delete;
 
-        MaterialComponent& getComponent(unsigned int index);
+        inline CONSTEXPR MaterialComponent& getComponent(unsigned int index) { return *m_Components[index]; }
 
-        MaterialComponent& addComponent(MaterialComponentType::Type type, const std::string& textureFile = "", const std::string& maskFile = "", const std::string& cubemapFile = "");
+        MaterialComponent& addComponent(MaterialComponentType type, const std::string& textureFile = "", const std::string& maskFile = "", const std::string& cubemapFile = "");
         MaterialComponent& addComponentDiffuse(const std::string& textureFile);
         MaterialComponent& addComponentNormal(const std::string& textureFile);
         MaterialComponent& addComponentGlow(const std::string& textureFile);
@@ -101,8 +101,8 @@ class Material final : public Resource {
         inline CONSTEXPR const Engine::color_vector_4& f0() const noexcept { return m_F0Color; }
         inline CONSTEXPR unsigned char glow() const noexcept { return m_BaseGlow; }
         inline CONSTEXPR std::uint32_t id() const noexcept { return m_ID; }
-        inline CONSTEXPR unsigned char diffuseModel() const noexcept { return m_DiffuseModel; }
-        inline CONSTEXPR unsigned char specularModel() const noexcept { return m_SpecularModel; }
+        inline CONSTEXPR DiffuseModel diffuseModel() const noexcept { return m_DiffuseModel; }
+        inline CONSTEXPR SpecularModel specularModel() const noexcept { return m_SpecularModel; }
         inline CONSTEXPR unsigned char ao() const noexcept { return m_BaseAO; }
         inline CONSTEXPR unsigned char metalness() const noexcept { return m_BaseMetalness; }
         inline CONSTEXPR unsigned char smoothness() const noexcept { return m_BaseSmoothness; }

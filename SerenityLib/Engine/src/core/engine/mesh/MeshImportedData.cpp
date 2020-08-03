@@ -3,7 +3,6 @@
 #include <core/engine/utils/Utils.h>
 
 using namespace Engine;
-using namespace std;
 
 priv::MeshImportedData::MeshImportedData() {
 }

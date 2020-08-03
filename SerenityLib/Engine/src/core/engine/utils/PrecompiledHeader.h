@@ -94,8 +94,23 @@
 //#define ENGINE_FORCE_PHYSICS_DEBUG_DRAW //this will force the renderer to output physics debugging info regardless if the build is debug or release
 
 #if defined(__AVX2__) || defined( __AVX__ ) || (defined(_M_AMD64) || defined(_M_X64)) || _M_IX86_FP || defined(__SSE__) || defined(__SSE2__) || defined(__SSE3__) || defined(__SSE4_1__)
-#define ENGINE_SIMD_SUPPORTED
+    #define ENGINE_SIMD_SUPPORTED
 #endif
+
+
+
+//#ifndef NDEBUG
+    #define ASSERT(condition, message) \
+        do { \
+            if (! (condition)) { \
+                std::cerr << "Assertion `" #condition "` failed in " << __FILE__ << " line " << __LINE__ << ": " << message << '\n'; \
+                std::cin.get(); \
+                std::terminate(); \
+            } \
+        } while (false)
+//#else
+//    #define ASSERT(condition, message) do { } while (false)
+//#endif
 
 
 using uint   = std::uint32_t;

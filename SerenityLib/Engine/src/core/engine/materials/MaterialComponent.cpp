@@ -14,7 +14,7 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace std;
 
-MaterialComponent::MaterialComponent(MaterialComponentType::Type type, Texture* texture, Texture* mask, Texture* cubemap) {
+MaterialComponent::MaterialComponent(MaterialComponentType type, Texture* texture, Texture* mask, Texture* cubemap) {
     m_ComponentType = type;
     addLayer(texture, mask, cubemap);
 }
@@ -98,10 +98,9 @@ Texture* MaterialComponent::cubemap(size_t index) const {
 MaterialLayer& MaterialComponent::layer(size_t index) {
     return m_Layers[index];
 }
-
 void MaterialComponent::bind(size_t component_index, size_t& inTextureUnit) const {
     const string wholeString = "components[" + to_string(component_index) + "].";
-    Engine::Renderer::sendUniform2Safe((wholeString + "componentData").c_str(), static_cast<int>(m_NumLayers), static_cast<int>(m_ComponentType));
+    Engine::Renderer::sendUniform2Safe((wholeString + "componentData").c_str(), (int)m_NumLayers, (int)m_ComponentType);
     for (unsigned int layer = 0; layer < m_NumLayers; ++layer) {
         m_Layers[layer].sendDataToGPU(wholeString, component_index, layer, inTextureUnit);
     }

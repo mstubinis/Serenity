@@ -875,7 +875,7 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, S
 
         for (auto& pair : system.MaterialIDToIndex) {
             Material* mat    = system.MaterialToIndexReverse.at(pair.first);
-            Texture& texture = *mat->getComponent(MaterialComponentType::Diffuse).texture(0);
+            Texture& texture = *mat->getComponent((unsigned int)MaterialComponentType::Diffuse).texture(0);
             string location  = "DiffuseTexture" + to_string(pair.second) + "";
             Engine::Renderer::sendTextureSafe(location.c_str(), texture, pair.second);
         }

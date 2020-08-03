@@ -14,8 +14,8 @@ struct MaterialRequestPart final {
     std::string                                   m_Name     = "";
     std::vector<std::shared_ptr<TextureRequest>>  m_TextureRequests;
 
-    MaterialRequestPart();
-    ~MaterialRequestPart();
+    MaterialRequestPart() = default;
+    ~MaterialRequestPart() = default;
 
     MaterialRequestPart(const MaterialRequestPart&);
     MaterialRequestPart& operator=(const MaterialRequestPart&);

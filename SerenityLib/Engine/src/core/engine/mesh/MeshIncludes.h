@@ -33,10 +33,10 @@ namespace Engine::priv {
         glm::vec3 binormal = glm::vec3(0.0f);
         glm::vec3 tangent  = glm::vec3(0.0f);
 
-        Vertex() {}
-        ~Vertex() {}
-        Vertex(const Vertex&)                      = delete;
-        Vertex& operator=(const Vertex&)           = delete;
+        Vertex() = default;
+        ~Vertex() = default;
+        Vertex(const Vertex& other)                = delete;
+        Vertex& operator=(const Vertex& other)     = delete;
         Vertex(Vertex&& other) noexcept            = default;
         Vertex& operator=(Vertex&& other) noexcept = default;
     };
@@ -49,12 +49,22 @@ namespace Engine::priv {
         unsigned int index2   = 0;
         unsigned int index3   = 0;
 
-        Triangle() {}
-        ~Triangle() {}
-        Triangle(const Triangle&)                      = delete;
-        Triangle& operator=(const Triangle&)           = delete;
+        Triangle() = default;
+        ~Triangle() = default;
+        Triangle(const Triangle& other)                = delete;
+        Triangle& operator=(const Triangle& other)     = delete;
         Triangle(Triangle&& other) noexcept            = default;
         Triangle& operator=(Triangle&& other) noexcept = default;
+
+        glm::vec3 getRandomPoint() const noexcept {
+            float A = (float)rand() / (float)RAND_MAX;
+            float B = (float)rand() / (float)RAND_MAX;
+            if (A + B >= 1.0f) {
+                A = 1.0f - A;
+                B = 1.0f - B;
+            }
+            return position1 + A * (position2 - position1) + B * (position3 - position1);
+        }
 
     };
     struct VertexBoneData final : public Engine::NonCopyable {
@@ -68,7 +78,7 @@ namespace Engine::priv {
         VertexBoneData(unsigned int BoneID, float Weight) : VertexBoneData(){
             AddBoneData(BoneID, Weight);
         }
-        ~VertexBoneData(){}
+        ~VertexBoneData() = default;
         VertexBoneData(VertexBoneData&& other) noexcept            = default;
         VertexBoneData& operator=(VertexBoneData&& other) noexcept = default;
 

@@ -6,128 +6,63 @@
 #include <core/engine/system/Engine.h>
 #include <core/engine/events/Event.h>
 
-using namespace Engine;
-using namespace std;
-
-void priv::MaterialLoader::InternalInit(Material& material, Texture* diffuse_ptr, Texture* normal_ptr, Texture* glow_ptr, Texture* specular_ptr, Texture* ao_ptr, Texture* metalness_ptr, Texture* smoothness_ptr) {
-    priv::MaterialLoader::InternalInitBase(material);
-    if (diffuse_ptr)     material.internalAddComponentGeneric(MaterialComponentType::Diffuse,  diffuse_ptr);
-    if (normal_ptr)      material.internalAddComponentGeneric(MaterialComponentType::Normal,   normal_ptr);
-    if (glow_ptr)        material.internalAddComponentGeneric(MaterialComponentType::Glow,     glow_ptr);
-    if (specular_ptr)    material.internalAddComponentGeneric(MaterialComponentType::Specular, specular_ptr);
-    if (ao_ptr)          material.internalAddComponentGeneric(MaterialComponentType::AO, ao_ptr);
-    if (metalness_ptr)   material.internalAddComponentGeneric(MaterialComponentType::Metalness, metalness_ptr);
-    if (smoothness_ptr)  material.internalAddComponentGeneric(MaterialComponentType::Smoothness, smoothness_ptr);
+void Engine::priv::MaterialLoader::Init(Material& material, Texture* diffuse_ptr, Texture* normal_ptr, Texture* glow_ptr, Texture* specular_ptr, Texture* ao_ptr, Texture* metalness_ptr, Texture* smoothness_ptr) {
+    InitBase(material);
+    if (diffuse_ptr)     material.internal_add_component_generic(MaterialComponentType::Diffuse,  diffuse_ptr);
+    if (normal_ptr)      material.internal_add_component_generic(MaterialComponentType::Normal,   normal_ptr);
+    if (glow_ptr)        material.internal_add_component_generic(MaterialComponentType::Glow,     glow_ptr);
+    if (specular_ptr)    material.internal_add_component_generic(MaterialComponentType::Specular, specular_ptr);
+    if (ao_ptr)          material.internal_add_component_generic(MaterialComponentType::AO, ao_ptr);
+    if (metalness_ptr)   material.internal_add_component_generic(MaterialComponentType::Metalness, metalness_ptr);
+    if (smoothness_ptr)  material.internal_add_component_generic(MaterialComponentType::Smoothness, smoothness_ptr);
 }
-void priv::MaterialLoader::InternalInitBase(Material& material) {
+void Engine::priv::MaterialLoader::InitBase(Material& material) {
     material.m_Components.reserve(MAX_MATERIAL_COMPONENTS);
-
-    material.internalUpdateGlobalMaterialPool(true);
+    material.internal_update_global_material_pool(true);
 }
 
-Texture* priv::MaterialLoader::LoadTextureDiffuse(const string& file) {
+Texture* Engine::priv::MaterialLoader::internal_load_texture(const std::string& file, bool mipmapped, ImageInternalFormat format, unsigned int gl_type) {
     Texture* texture = nullptr;
     if (!file.empty()) {
-        texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
+        texture = Engine::priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
         if (!texture) {
-            texture = NEW Texture(file, true, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_2D);
-            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
+            texture = NEW Texture(file, mipmapped, format, gl_type);
+            Engine::priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
         }
     }
     return texture;
 }
-Texture* priv::MaterialLoader::LoadTextureNormal(const string& file) {
-    Texture* texture = nullptr;
-    if (!file.empty()) {
-        texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
-        if (!texture) {
-            texture = NEW Texture(file, true, ImageInternalFormat::RGB8, GL_TEXTURE_2D);
-            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
-        }
-    }
-    return texture;
+Texture* Engine::priv::MaterialLoader::LoadTextureDiffuse(const std::string& file) {
+    return internal_load_texture(file, false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_2D);
 }
-Texture* priv::MaterialLoader::LoadTextureGlow(const string& file) {
-    Texture* texture = nullptr;
-    if (!file.empty()) {
-        texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
-        if (!texture) {
-            texture = NEW Texture(file, true, ImageInternalFormat::R8, GL_TEXTURE_2D);
-            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
-        }
-    }
-    return texture;
+Texture* Engine::priv::MaterialLoader::LoadTextureNormal(const std::string& file) {
+    return internal_load_texture(file, false, ImageInternalFormat::RGB8, GL_TEXTURE_2D);
 }
-Texture* priv::MaterialLoader::LoadTextureSpecular(const string& file) {
-    Texture* texture = nullptr;
-    if (!file.empty()) {
-        texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
-        if (!texture) {
-            texture = NEW Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
-            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
-        }
-    }
-    return texture;
+Texture* Engine::priv::MaterialLoader::LoadTextureGlow(const std::string& file) {
+    return internal_load_texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
 }
-Texture* priv::MaterialLoader::LoadTextureAO(const string& file) {
-    Texture* texture = nullptr;
-    if (!file.empty()) {
-        texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
-        if (!texture) {
-            texture = NEW Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
-            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
-        }
-    }
-    return texture;
+Texture* Engine::priv::MaterialLoader::LoadTextureSpecular(const std::string& file) {
+    return internal_load_texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
 }
-Texture* priv::MaterialLoader::LoadTextureMetalness(const string& file) {
-    Texture* texture = nullptr;
-    if (!file.empty()) {
-        texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
-        if (!texture) {
-            texture = NEW Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
-            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
-        }
-    }
-    return texture;
+Texture* Engine::priv::MaterialLoader::LoadTextureAO(const std::string& file) {
+    return internal_load_texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
 }
-Texture* priv::MaterialLoader::LoadTextureSmoothness(const string& file) {
-    Texture* texture = nullptr;
-    if (!file.empty()) {
-        texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
-        if (!texture) {
-            texture = NEW Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
-            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
-        }
-    }
-    return texture;
+Texture* Engine::priv::MaterialLoader::LoadTextureMetalness(const std::string& file) {
+    return internal_load_texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
 }
-Texture* priv::MaterialLoader::LoadTextureMask(const string& file) {
-    Texture* texture = nullptr;
-    if (!file.empty()) {
-        texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
-        if (!texture) {
-            texture = NEW Texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
-            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
-        }
-    }
-    return texture;
+Texture* Engine::priv::MaterialLoader::LoadTextureSmoothness(const std::string& file) {
+    return internal_load_texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
 }
-Texture* priv::MaterialLoader::LoadTextureCubemap(const string& file) {
-    Texture* texture = nullptr;
-    if (!file.empty()) {
-        texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
-        if (!texture) {
-            texture = NEW Texture(file, false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_CUBE_MAP);
-            priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
-        }
-    }
-    return texture;
+Texture* Engine::priv::MaterialLoader::LoadTextureMask(const std::string& file) {
+    return internal_load_texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
 }
-void priv::InternalMaterialPublicInterface::LoadCPU(Material& material) {
+Texture* Engine::priv::MaterialLoader::LoadTextureCubemap(const std::string& file) {
+    return internal_load_texture(file, false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_CUBE_MAP);
+}
+void Engine::priv::InternalMaterialPublicInterface::LoadCPU(Material& material) {
 
 }
-void priv::InternalMaterialPublicInterface::LoadGPU(Material& material) {
+void Engine::priv::InternalMaterialPublicInterface::LoadGPU(Material& material) {
     //TODO: move this to somewhere with more user control
     for (auto& component : material.m_Components) {
         if (component) {
@@ -139,21 +74,21 @@ void priv::InternalMaterialPublicInterface::LoadGPU(Material& material) {
     }
     material.Resource::load();
 }
-void priv::InternalMaterialPublicInterface::UnloadCPU(Material& material) {
+void Engine::priv::InternalMaterialPublicInterface::UnloadCPU(Material& material) {
     material.Resource::unload();
 }
-void priv::InternalMaterialPublicInterface::UnloadGPU(Material& material) {
+void Engine::priv::InternalMaterialPublicInterface::UnloadGPU(Material& material) {
 
 }
-void priv::InternalMaterialPublicInterface::Load(Material& material) {
+void Engine::priv::InternalMaterialPublicInterface::Load(Material& material) {
     if (!material.isLoaded()) {
-        priv::InternalMaterialPublicInterface::LoadCPU(material);
-        priv::InternalMaterialPublicInterface::LoadGPU(material);
+        Engine::priv::InternalMaterialPublicInterface::LoadCPU(material);
+        Engine::priv::InternalMaterialPublicInterface::LoadGPU(material);
     }
 }
-void priv::InternalMaterialPublicInterface::Unload(Material& material) {
+void Engine::priv::InternalMaterialPublicInterface::Unload(Material& material) {
     if (material.isLoaded()) {
-        priv::InternalMaterialPublicInterface::UnloadGPU(material);
-        priv::InternalMaterialPublicInterface::UnloadCPU(material);
+        Engine::priv::InternalMaterialPublicInterface::UnloadGPU(material);
+        Engine::priv::InternalMaterialPublicInterface::UnloadCPU(material);
     }
 }
