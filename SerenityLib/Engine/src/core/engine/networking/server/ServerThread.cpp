@@ -12,16 +12,13 @@ using namespace Engine::Networking;
 ServerThread::ServerThread() {
 }
 ServerThread::~ServerThread() {
-    SAFE_DELETE_MAP(m_ServerClients);
 }
 bool ServerThread::remove_client(const string& hash, Server& server) {
     bool has_client_hash        = m_ServerClients.count(hash);
     bool has_server_client_hash = server.m_HashedClients.count(hash);
     if (has_client_hash && has_server_client_hash) {
-        auto* serverClient = m_ServerClients.at(hash);
-        SAFE_DELETE(serverClient);
-        m_ServerClients.erase(hash);
         server.m_HashedClients.erase(hash);
+        m_ServerClients.erase(hash);
         return true;
     }
     if (!has_client_hash) {
@@ -39,7 +36,7 @@ bool ServerThread::add_client(const string& hash, ServerClient* serverClient, Se
         m_ServerClients.emplace(
             std::piecewise_construct, 
             std::forward_as_tuple(hash), 
-            std::forward_as_tuple(serverClient)
+            std::forward_as_tuple(std::unique_ptr<ServerClient>(serverClient))
         );
         server.m_HashedClients.emplace(
             std::piecewise_construct,

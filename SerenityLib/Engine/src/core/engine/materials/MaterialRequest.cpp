@@ -28,33 +28,37 @@ MaterialRequestPart& MaterialRequestPart::operator=(const MaterialRequestPart& o
 
 
 
-MaterialRequest::MaterialRequest(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness){
+MaterialRequest::MaterialRequest(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness, std::function<void()>&& callback){
     m_Part.m_Name = name;
-    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( diffuse, false, ImageInternalFormat::SRGB8_ALPHA8 )  );
-    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( normal, false, ImageInternalFormat::RGBA8 )  );
-    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( glow, false, ImageInternalFormat::R8 )  );
-    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( specular, false, ImageInternalFormat::R8 )  );
-    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( ao, false, ImageInternalFormat::R8 )  );
-    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( metalness, false, ImageInternalFormat::R8 )  );
-    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( smoothness, false, ImageInternalFormat::R8 )  );
+    m_Callback    = std::move(callback);
+    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest(diffuse, false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_2D, []() {}));
+    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( normal, false, ImageInternalFormat::RGBA8, GL_TEXTURE_2D, []() {})  );
+    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( glow, false, ImageInternalFormat::R8, GL_TEXTURE_2D, []() {})  );
+    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( specular, false, ImageInternalFormat::R8, GL_TEXTURE_2D, []() {})  );
+    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( ao, false, ImageInternalFormat::R8, GL_TEXTURE_2D, []() {})  );
+    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( metalness, false, ImageInternalFormat::R8, GL_TEXTURE_2D, []() {})  );
+    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( smoothness, false, ImageInternalFormat::R8, GL_TEXTURE_2D, []() {})  );
 }
-MaterialRequest::MaterialRequest(const std::string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) {
+MaterialRequest::MaterialRequest(const std::string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness, std::function<void()>&& callback) {
     m_Part.m_Name     = name;
     m_Part.m_Material = NEW Material(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
     m_Part.m_Handle   = Core::m_Engine->m_ResourceManager.m_Resources.add(m_Part.m_Material, (unsigned int)ResourceType::Material);
+    m_Callback        = std::move(callback);
 }
 
 MaterialRequest::~MaterialRequest() {
 
 }
 MaterialRequest::MaterialRequest(const MaterialRequest& other) {
-    m_Async = other.m_Async;
-    m_Part  = other.m_Part;
+    m_Async    = other.m_Async;
+    m_Part     = other.m_Part;
+    m_Callback = other.m_Callback;
 }
 MaterialRequest& MaterialRequest::operator=(const MaterialRequest& other) {
     if (&other != this) {
-        m_Async = other.m_Async;
-        m_Part  = other.m_Part;
+        m_Async    = other.m_Async;
+        m_Part     = other.m_Part;
+        m_Callback = other.m_Callback;
     }
     return *this;
 }
@@ -92,6 +96,7 @@ void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {
         };
         auto lambda_gpu = [=]() mutable {
             InternalMaterialRequestPublicInterface::LoadGPU(request);
+            request.m_Callback();
         };
         threading::addJobWithPostCallback(lambda_cpu, lambda_gpu);
     }else{
@@ -100,6 +105,7 @@ void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {
         }
         InternalMaterialRequestPublicInterface::LoadCPU(request);
         InternalMaterialRequestPublicInterface::LoadGPU(request);
+        request.m_Callback();
     }
 }
 void InternalMaterialRequestPublicInterface::LoadCPU(MaterialRequest& request) {

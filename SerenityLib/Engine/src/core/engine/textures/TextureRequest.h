@@ -44,17 +44,19 @@ struct TextureRequestPart final {
 };
 
 struct TextureRequest final {
-    std::string         file              = "";
-    std::string         fileExtension     = "";
-    bool                fileExists        = false;
+    std::string           file              = "";
+    std::string           fileExtension     = "";
+    bool                  fileExists        = false;
+    std::function<void()> m_Callback;
 
-    TextureRequestPart  part;
+    TextureRequestPart    part;
 
     TextureRequest(
         const std::string& filenameOrData,
-        bool genMipMaps = true,
-        ImageInternalFormat internal_ = ImageInternalFormat::SRGB8_ALPHA8,
-        GLuint openglTextureType = GL_TEXTURE_2D
+        bool genMipMaps,
+        ImageInternalFormat internal_ ,
+        GLuint openglTextureType,
+        std::function<void()>&& callback
     );
     ~TextureRequest();
 
@@ -64,15 +66,17 @@ struct TextureRequest final {
 struct TextureRequestFromMemory final {
     sf::Image              image;
     std::string            textureName       = "";
+    std::function<void()>  m_Callback;
 
     TextureRequestPart     part;
 
     TextureRequestFromMemory(
         sf::Image& sfImage,
         const std::string& textureName,
-        bool genMipMaps                  = true,
-        ImageInternalFormat internal_    = ImageInternalFormat::SRGB8_ALPHA8,
-        GLuint openglTextureType         = GL_TEXTURE_2D
+        bool genMipMaps,
+        ImageInternalFormat internal_,
+        GLuint openglTextureType,
+        std::function<void()>&& callback_
     );
     ~TextureRequestFromMemory();
 

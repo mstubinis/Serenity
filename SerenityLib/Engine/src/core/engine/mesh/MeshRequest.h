@@ -29,9 +29,9 @@ namespace Engine::priv {
 };
 
 struct MeshRequestPart final {
-    Mesh* mesh = nullptr;
+    Mesh*        mesh   = nullptr;
     Handle       handle = Handle();
-    std::string  name = "";
+    std::string  name   = "";
 
     MeshRequestPart();
     ~MeshRequestPart();
@@ -52,9 +52,10 @@ struct MeshRequest final {
     bool                                                        m_Async          = false;
     Engine::priv::AssimpSceneImport                             m_Importer;
     MeshNodeMap                                                 m_MeshNodeMap;
+    std::function<void()>                                       m_Callback;
 
     MeshRequest() = delete;
-    MeshRequest(const std::string& filenameOrData, const float threshold);
+    MeshRequest(const std::string& filenameOrData, const float threshold, std::function<void()>&& callback);
     ~MeshRequest();
 
     MeshRequest(const MeshRequest& other);

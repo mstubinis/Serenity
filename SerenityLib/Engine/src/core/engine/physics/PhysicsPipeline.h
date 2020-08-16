@@ -31,37 +31,42 @@ namespace Engine::priv {
         protected:
             bool                   m_DoConcurrency = false;
             const char*            m_name;
-            bool                   m_isActive = true;
+            bool                   m_isActive      = true;
             std::atomic<btScalar>  m_sumRes;
         public:
             PhysicsTaskScheduler(const char* name);
             ~PhysicsTaskScheduler();
-            const char* getName() const;
+
+            inline const char* getName() const noexcept { return m_name; }
 
             int getMaxNumThreads() const override;
             int getNumThreads() const override;
             void setNumThreads(int numThreads) override;
             void parallelFor(int iBegin, int iEnd, int grainSize, const btIParallelForBody& body) override;
             btScalar parallelSum(int iBegin, int iEnd, int grainSize, const btIParallelSumBody& body) override;
-            void sleepWorkerThreadsHint() override;
+            void sleepWorkerThreadsHint() override {}
 
             // internal use only
-            void activate() override;
-            void deactivate() override;
+            void activate() override {
+                m_isActive = true;
+            }
+            void deactivate() override {
+                m_isActive = false;
+            }
     };
     class PhysicsPipeline final : public Engine::NonCopyable, public Engine::NonMoveable {
         public:
             std::function<void(btDynamicsWorld* world, btScalar timeStep)> m_PreTickCallback  = [](btDynamicsWorld*, btScalar) {};
             std::function<void(btDynamicsWorld* world, btScalar timeStep)> m_PostTickCallback = [](btDynamicsWorld*, btScalar) {};
 
-            PhysicsTaskScheduler*                                          m_TaskScheduler          = nullptr;
-            btBroadphaseInterface*                                         m_Broadphase             = nullptr;
-            btDefaultCollisionConfiguration*                               m_CollisionConfiguration = nullptr;
-            btCollisionDispatcher*                                         m_Dispatcher             = nullptr;
-            btConstraintSolverPoolMt*                                      m_SolverPool             = nullptr;
-            btSequentialImpulseConstraintSolver*                           m_Solver                 = nullptr;
-            btSequentialImpulseConstraintSolverMt*                         m_SolverMT               = nullptr;
-            btDiscreteDynamicsWorld*                                       m_World                  = nullptr;
+            std::unique_ptr<PhysicsTaskScheduler>                          m_TaskScheduler;
+            std::unique_ptr<btBroadphaseInterface>                         m_Broadphase;
+            std::unique_ptr<btDefaultCollisionConfiguration>               m_CollisionConfiguration;
+            std::unique_ptr<btCollisionDispatcher>                         m_Dispatcher;
+            std::unique_ptr<btConstraintSolverPoolMt>                      m_SolverPool;
+            std::unique_ptr<btSequentialImpulseConstraintSolver>           m_Solver;
+            std::unique_ptr<btSequentialImpulseConstraintSolverMt>         m_SolverMT;
+            std::unique_ptr<btDiscreteDynamicsWorld>                       m_World;
             GLDebugDrawer                                                  m_DebugDrawer;
         public:
             PhysicsPipeline();

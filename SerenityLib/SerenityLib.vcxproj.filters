@@ -860,6 +860,12 @@
     <ClInclude Include="Engine\src\core\engine\math\shapes\Pyramid.h">
       <Filter>Header Files\Engine\Core\Math\shapes</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\containers\Heap.h">
+      <Filter>Header Files\Engine\Core\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\containers\BST.h">
+      <Filter>Header Files\Engine\Core\Containers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">

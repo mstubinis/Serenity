@@ -24,8 +24,9 @@ struct MaterialRequestPart final {
 };
 
 struct MaterialRequest final {
-    MaterialRequestPart  m_Part;
-    bool                 m_Async = false;
+    MaterialRequestPart    m_Part;
+    bool                   m_Async = false;
+    std::function<void()>  m_Callback;
 
     MaterialRequest() = delete;
     MaterialRequest(
@@ -36,7 +37,8 @@ struct MaterialRequest final {
         const std::string& specular,
         const std::string& ao,
         const std::string& metalness,
-        const std::string& smoothness
+        const std::string& smoothness,
+        std::function<void()>&& callback
     );
     MaterialRequest(
         const std::string& name,
@@ -46,7 +48,8 @@ struct MaterialRequest final {
         Texture* specular,
         Texture* ao,
         Texture* metalness,
-        Texture* smoothness
+        Texture* smoothness,
+        std::function<void()>&& callback
     );
     ~MaterialRequest();
 

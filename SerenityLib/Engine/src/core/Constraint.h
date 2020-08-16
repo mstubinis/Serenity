@@ -7,19 +7,26 @@ class btTypedConstraint;
 
 #include <glm/fwd.hpp>
 
-struct ConstraintType final {enum Type {
+enum class ConstraintType : unsigned char {
     Fixed,
     Hinge,
-_TOTAL};};
+_TOTAL};
 class Constraint{
     private:
-        btRigidBody* m_RigidBodyA;
-        btRigidBody* m_RigidBodyB;
-        ConstraintType::Type m_ConstraintType;
-        btTypedConstraint* m_Constraint;
+        btRigidBody&                         m_RigidBodyA;
+        btRigidBody&                         m_RigidBodyB;
+        ConstraintType                       m_ConstraintType = ConstraintType::Fixed;
+        std::unique_ptr<btTypedConstraint>   m_Constraint;
+
+        Constraint()                                       = delete;
+        Constraint(const Constraint& other)                = delete;
+        Constraint& operator=(const Constraint& other)     = delete;
+        Constraint(Constraint&& other) noexcept            = delete;
+        Constraint& operator=(Constraint&& other) noexcept = delete;
     public:
-        Constraint(btRigidBody* a, btRigidBody* b);
+        Constraint(btRigidBody& a, btRigidBody& b);
         ~Constraint();
+
 
         void makeHingeConstraint(glm::vec3& axisA,glm::vec3& axisB,glm::vec3 locationA = glm::vec3(0.0f),glm::vec3 locationB = glm::vec3(0.0f));
 };

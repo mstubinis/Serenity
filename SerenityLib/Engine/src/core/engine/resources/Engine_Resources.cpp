@@ -125,7 +125,7 @@ bool Resources::deleteScene(Scene& scene) {
             return false; //already flagged for deletion
         }
     }
-    resourceManager->m_ScenesToBeDeleted.push_back(&scene);
+    resourceManager->m_ScenesToBeDeleted.emplace_back(&scene);
     return true;
 }
 
@@ -213,7 +213,7 @@ Handle Resources::addFont(const std::string& filename, int height, int width, fl
 
 
 std::vector<Handle> Resources::loadMesh(const std::string& fileOrData, float threshhold) {
-    MeshRequest request(fileOrData, threshhold);
+    MeshRequest request(fileOrData, threshhold, []() {});
     request.request();
     std::vector<Handle> handles;
     handles.reserve(request.m_Parts.size());
@@ -222,8 +222,8 @@ std::vector<Handle> Resources::loadMesh(const std::string& fileOrData, float thr
     }
     return handles;
 }
-std::vector<Handle> Resources::loadMeshAsync(const std::string& fileOrData, float threshhold) {
-    MeshRequest request(fileOrData, threshhold);
+std::vector<Handle> Resources::loadMeshAsync(const std::string& fileOrData, float threshhold, std::function<void()> callback) {
+    MeshRequest request(fileOrData, threshhold, std::move(callback));
     request.request(true);
     std::vector<Handle> handles;
     handles.reserve(request.m_Parts.size());
@@ -235,7 +235,7 @@ std::vector<Handle> Resources::loadMeshAsync(const std::string& fileOrData, floa
 Handle Resources::loadTexture(const std::string& file, ImageInternalFormat internalFormat, bool mipmaps) {
     auto* texture = resourceManager->HasResource<Texture>(file);
     if (!texture) {
-        TextureRequest request(file, mipmaps, internalFormat);
+        TextureRequest request(file, mipmaps, internalFormat, GL_TEXTURE_2D,[]() {});
         request.request(false);
         return request.part.handle;
     }
@@ -244,25 +244,25 @@ Handle Resources::loadTexture(const std::string& file, ImageInternalFormat inter
 Handle Resources::loadTexture(sf::Image& sfImage, const std::string& texture_name, ImageInternalFormat internalFormat, bool mipmaps) {
     auto* texture = resourceManager->HasResource<Texture>(texture_name);
     if (!texture) {
-        TextureRequestFromMemory request(sfImage, texture_name, mipmaps, internalFormat);
+        TextureRequestFromMemory request(sfImage, texture_name, mipmaps, internalFormat, GL_TEXTURE_2D, []() {});
         request.request(false);
         return request.part.handle;
     }
     return Handle();
 }
-Handle Resources::loadTextureAsync(const std::string& file, ImageInternalFormat internalFormat, bool mipmaps) {
+Handle Resources::loadTextureAsync(const std::string& file, ImageInternalFormat internalFormat, bool mipmaps, std::function<void()> callback) {
     auto* texture = resourceManager->HasResource<Texture>(file);
     if (!texture) {
-        TextureRequest request(file, mipmaps, internalFormat);
+        TextureRequest request(file, mipmaps, internalFormat, GL_TEXTURE_2D, std::move(callback));
         request.request(true);
         return request.part.handle;
     }
     return Handle();
 }
-Handle Resources::loadTextureAsync(sf::Image& sfImage, const std::string& texture_name, ImageInternalFormat internalFormat, bool mipmaps) {
+Handle Resources::loadTextureAsync(sf::Image& sfImage, const std::string& texture_name, ImageInternalFormat internalFormat, bool mipmaps, std::function<void()> callback) {
     auto* texture = resourceManager->HasResource<Texture>(texture_name);
     if (!texture) {
-        TextureRequestFromMemory request(sfImage, texture_name, mipmaps, internalFormat);
+        TextureRequestFromMemory request(sfImage, texture_name, mipmaps, internalFormat, GL_TEXTURE_2D, std::move(callback));
         request.request(true);
         return request.part.handle;
     }
@@ -272,16 +272,16 @@ Handle Resources::loadTextureAsync(sf::Image& sfImage, const std::string& textur
 Handle Resources::loadMaterial(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness) {
     auto* material = resourceManager->HasResource<Material>(name);
     if (!material) {
-        MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
+        MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness, []() {});
         request.request(false);
         return request.m_Part.m_Handle;
     }
     return Handle();
 }
-Handle Resources::loadMaterialAsync(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness) {
+Handle Resources::loadMaterialAsync(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness, std::function<void()> callback) {
     auto* material = resourceManager->HasResource<Material>(name);
     if (!material) {
-        MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
+        MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness, std::move(callback));
         request.request(true);
         return request.m_Part.m_Handle;
     }
@@ -290,7 +290,7 @@ Handle Resources::loadMaterialAsync(const std::string& name, const std::string& 
 Handle Resources::loadMaterial(const std::string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) {
     auto* material = resourceManager->HasResource<Material>(name);
     if (!material) {
-        MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
+        MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness, []() {});
         //request.request(false); //the above creates the material and is immediately available for use, no need to request
         return request.m_Part.m_Handle;
     }

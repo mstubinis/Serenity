@@ -13,11 +13,11 @@ namespace Engine::Networking {
         friend class Engine::priv::SocketManager;
         public:
             struct UDPPacketInfo final {
-                sf::Packet*     sfmlPacket = nullptr;
-                unsigned short  port       = 0;
-                sf::IpAddress   ip         = sf::IpAddress::LocalHost;
+                std::unique_ptr<sf::Packet> sfmlPacket;
+                unsigned short              port         = 0;
+                sf::IpAddress               ip           = sf::IpAddress::LocalHost;
 
-                UDPPacketInfo(sf::Packet* inSFMLPacket);
+                UDPPacketInfo(sf::Packet* inSFMLPacket, unsigned short inPort, sf::IpAddress&& inAddress);
                 UDPPacketInfo(UDPPacketInfo&& other) noexcept;
                 UDPPacketInfo& operator=(UDPPacketInfo&& other) noexcept;
                 ~UDPPacketInfo();

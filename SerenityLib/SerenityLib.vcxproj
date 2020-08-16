@@ -359,7 +359,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\core\Constraint.h" />
+    <ClInclude Include="Engine\src\core\engine\containers\BST.h" />
     <ClInclude Include="Engine\src\core\engine\containers\Freelist.h" />
+    <ClInclude Include="Engine\src\core\engine\containers\Heap.h" />
     <ClInclude Include="Engine\src\core\engine\containers\PartialArray.h" />
     <ClInclude Include="Engine\src\core\engine\containers\Queue_ts.h" />
     <ClInclude Include="Engine\src\core\engine\containers\SparseSet.h" />

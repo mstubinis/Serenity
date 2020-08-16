@@ -8,13 +8,13 @@
 
 void Engine::priv::MaterialLoader::Init(Material& material, Texture* diffuse_ptr, Texture* normal_ptr, Texture* glow_ptr, Texture* specular_ptr, Texture* ao_ptr, Texture* metalness_ptr, Texture* smoothness_ptr) {
     InitBase(material);
-    if (diffuse_ptr)     material.internal_add_component_generic(MaterialComponentType::Diffuse,  diffuse_ptr);
-    if (normal_ptr)      material.internal_add_component_generic(MaterialComponentType::Normal,   normal_ptr);
-    if (glow_ptr)        material.internal_add_component_generic(MaterialComponentType::Glow,     glow_ptr);
-    if (specular_ptr)    material.internal_add_component_generic(MaterialComponentType::Specular, specular_ptr);
-    if (ao_ptr)          material.internal_add_component_generic(MaterialComponentType::AO, ao_ptr);
-    if (metalness_ptr)   material.internal_add_component_generic(MaterialComponentType::Metalness, metalness_ptr);
-    if (smoothness_ptr)  material.internal_add_component_generic(MaterialComponentType::Smoothness, smoothness_ptr);
+    if (diffuse_ptr)     material.internal_add_component_generic(MaterialComponentType::Diffuse,     diffuse_ptr);
+    if (normal_ptr)      material.internal_add_component_generic(MaterialComponentType::Normal,      normal_ptr);
+    if (glow_ptr)        material.internal_add_component_generic(MaterialComponentType::Glow,        glow_ptr);
+    if (specular_ptr)    material.internal_add_component_generic(MaterialComponentType::Specular,    specular_ptr);
+    if (ao_ptr)          material.internal_add_component_generic(MaterialComponentType::AO,          ao_ptr);
+    if (metalness_ptr)   material.internal_add_component_generic(MaterialComponentType::Metalness,   metalness_ptr);
+    if (smoothness_ptr)  material.internal_add_component_generic(MaterialComponentType::Smoothness,  smoothness_ptr);
 }
 void Engine::priv::MaterialLoader::InitBase(Material& material) {
     material.m_Components.reserve(MAX_MATERIAL_COMPONENTS);
@@ -33,31 +33,31 @@ Texture* Engine::priv::MaterialLoader::internal_load_texture(const std::string& 
     return texture;
 }
 Texture* Engine::priv::MaterialLoader::LoadTextureDiffuse(const std::string& file) {
-    return internal_load_texture(file, false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_2D);
+    return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_2D);
 }
 Texture* Engine::priv::MaterialLoader::LoadTextureNormal(const std::string& file) {
-    return internal_load_texture(file, false, ImageInternalFormat::RGB8, GL_TEXTURE_2D);
+    return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::RGB8, GL_TEXTURE_2D);
 }
 Texture* Engine::priv::MaterialLoader::LoadTextureGlow(const std::string& file) {
-    return internal_load_texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
+    return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::R8, GL_TEXTURE_2D);
 }
 Texture* Engine::priv::MaterialLoader::LoadTextureSpecular(const std::string& file) {
-    return internal_load_texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
+    return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::R8, GL_TEXTURE_2D);
 }
 Texture* Engine::priv::MaterialLoader::LoadTextureAO(const std::string& file) {
-    return internal_load_texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
+    return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::R8, GL_TEXTURE_2D);
 }
 Texture* Engine::priv::MaterialLoader::LoadTextureMetalness(const std::string& file) {
-    return internal_load_texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
+    return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::R8, GL_TEXTURE_2D);
 }
 Texture* Engine::priv::MaterialLoader::LoadTextureSmoothness(const std::string& file) {
-    return internal_load_texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
+    return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::R8, GL_TEXTURE_2D);
 }
 Texture* Engine::priv::MaterialLoader::LoadTextureMask(const std::string& file) {
-    return internal_load_texture(file, false, ImageInternalFormat::R8, GL_TEXTURE_2D);
+    return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::R8, GL_TEXTURE_2D);
 }
 Texture* Engine::priv::MaterialLoader::LoadTextureCubemap(const std::string& file) {
-    return internal_load_texture(file, false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_CUBE_MAP);
+    return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_CUBE_MAP);
 }
 void Engine::priv::InternalMaterialPublicInterface::LoadCPU(Material& material) {
 

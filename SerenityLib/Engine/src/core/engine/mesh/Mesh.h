@@ -53,6 +53,8 @@ namespace Engine::priv{
     };
 };
 
+constexpr float MESH_DEFAULT_THRESHOLD = 0.0005f;
+
 class Mesh final: public Resource, public Observer, public Engine::NonCopyable, public Engine::NonMoveable {
     friend class  Engine::priv::InternalMeshPublicInterface;
     friend struct Engine::priv::InternalMeshRequestPublicInterface;
@@ -81,7 +83,7 @@ class Mesh final: public Resource, public Observer, public Engine::NonCopyable, 
         std::string                            m_File                = "";
         glm::vec3                              m_radiusBox           = glm::vec3(0.0f);
         float                                  m_radius              = 0.0f;
-        float                                  m_Threshold           = 0.0005f;
+        float                                  m_Threshold           = MESH_DEFAULT_THRESHOLD;
 
         void internal_recalc_indices_from_terrain(const Terrain& terrain);
         void internal_build_from_terrain(const Terrain& terrain);
@@ -89,9 +91,9 @@ class Mesh final: public Resource, public Observer, public Engine::NonCopyable, 
         Mesh();
         Mesh(const std::string& name, const Terrain& terrain, float threshold);
     public:
-        Mesh(VertexData*, const std::string& name, float threshold = 0.0005f);
+        Mesh(VertexData*, const std::string& name, float threshold = MESH_DEFAULT_THRESHOLD);
         Mesh(const std::string& name, float width, float height, float threshold); //plane
-        Mesh(const std::string& fileOrData, float threshold = 0.0005f); //file or data
+        Mesh(const std::string& fileOrData, float threshold = MESH_DEFAULT_THRESHOLD); //file or data
         ~Mesh();
 
         void setCustomBindFunctor(bind_func&& functor) { m_CustomBindFunctor = std::move(functor); }

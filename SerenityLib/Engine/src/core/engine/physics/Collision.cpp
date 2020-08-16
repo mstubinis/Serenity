@@ -16,7 +16,6 @@
 
 using namespace Engine;
 using namespace Engine::priv;
-using namespace std;
 
 void Collision::DeferredLoading::load_1(Collision* collision, CollisionType collisionType, Mesh* mesh, float mass) {
     auto* body = collision->m_Owner.getComponent<ComponentBody>();
@@ -24,9 +23,9 @@ void Collision::DeferredLoading::load_1(Collision* collision, CollisionType coll
     collision->m_DeferredMeshes.clear();
     const auto scale = body->getScale();
     Physics::removeRigidBodyThreadSafe(*body);
-    collision->free_memory();
+    collision->internal_free_memory();
 
-    collision->m_BtShape = InternalMeshPublicInterface::BuildCollision(mesh, collisionType);
+    collision->m_BtShape = std::unique_ptr<btCollisionShape>(InternalMeshPublicInterface::BuildCollision(mesh, collisionType));
     body->rebuildRigidBody(true, true);
     body->setScale(scale);
     auto* model = collision->m_Owner.getComponent<ComponentModel>();
@@ -34,7 +33,7 @@ void Collision::DeferredLoading::load_1(Collision* collision, CollisionType coll
         ComponentModel_Functions::CalculateRadius(*model);
     }
 }
-void Collision::DeferredLoading::load_2(Collision* collision, btCompoundShape* btCompound, vector<ModelInstance*> instances, float mass, CollisionType collisionType) {
+void Collision::DeferredLoading::load_2(Collision* collision, btCompoundShape* btCompound, std::vector<ModelInstance*> instances, float mass, CollisionType collisionType) {
     auto* body = collision->m_Owner.getComponent<ComponentBody>();
     btTransform localTransform;
     const auto scale = body->getScale();
@@ -64,47 +63,44 @@ Collision::Collision(ComponentBody& body){
 }
 Collision::Collision(ComponentBody& body, CollisionType type, ModelInstance* modelInstance, float mass){
     m_Owner = body.getOwner();
-    m_BtShape = nullptr;
     if (modelInstance) {
         auto* mesh_ptr = modelInstance->mesh();
         if (*mesh_ptr == false || !mesh_ptr->m_CollisionFactory) {
-            m_BtShape = InternalMeshPublicInterface::BuildCollision(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), type);
+            m_BtShape = std::unique_ptr<btCollisionShape>(InternalMeshPublicInterface::BuildCollision(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), type));
             m_DeferredMeshes.push_back(mesh_ptr);
             m_DeferredLoading = [type, this, mass, mesh_ptr]() { Collision::DeferredLoading::load_1(this, type, mesh_ptr, mass); };
             registerEvent(EventType::ResourceLoaded);
         }else{
-            m_BtShape = InternalMeshPublicInterface::BuildCollision(modelInstance, type);
+            m_BtShape = std::unique_ptr<btCollisionShape>(InternalMeshPublicInterface::BuildCollision(modelInstance, type));
         }
     }else{
-        m_BtShape = InternalMeshPublicInterface::BuildCollision(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), type);
+        m_BtShape = std::unique_ptr<btCollisionShape>(InternalMeshPublicInterface::BuildCollision(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), type));
     }
     internal_base_init(type, mass);
 }
 Collision::Collision(ComponentBody& body, CollisionType type, Mesh& mesh, float mass){
     m_Owner   = body.getOwner();
-    m_BtShape = nullptr;
     if (mesh == false || !mesh.m_CollisionFactory) {
-        m_BtShape = InternalMeshPublicInterface::BuildCollision(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), type);
+        m_BtShape = std::unique_ptr<btCollisionShape>(InternalMeshPublicInterface::BuildCollision(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), type));
         auto* mesh_ptr = &mesh;
         m_DeferredMeshes.push_back(mesh_ptr);
         m_DeferredLoading = [type, this, mass, mesh_ptr]() { Collision::DeferredLoading::load_1(this, type, mesh_ptr, mass); };
         registerEvent(EventType::ResourceLoaded);
     }else{
-        m_BtShape = InternalMeshPublicInterface::BuildCollision(&mesh, type);
+        m_BtShape = std::unique_ptr<btCollisionShape>(InternalMeshPublicInterface::BuildCollision(&mesh, type));
     }
     internal_base_init(type, mass);
 }
 
 Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, float mass, CollisionType type){
     m_Owner   = body.getOwner();
-    m_BtShape = nullptr;
-    vector<ModelInstance*> modelInstances;
+    std::vector<ModelInstance*> modelInstances;
     modelInstances.reserve(modelComponent.getNumModels());
     for (size_t i = 0; i < modelComponent.getNumModels(); ++i) {
         modelInstances.push_back(&modelComponent.getModel(i));
     }
     btCompoundShape* btCompound = new btCompoundShape();
-    vector<ModelInstance*> unfinishedModels;
+    std::vector<ModelInstance*> unfinishedModels;
     btTransform localTransform;
     for (size_t i = 0; i < modelInstances.size(); ++i) {
         auto& instance = *modelInstances[i];
@@ -129,13 +125,13 @@ Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, float 
     btCompound->setMargin(0.001f);
     btCompound->recalculateLocalAabb();
     btCompound->setUserPointer(&body);
-    free_memory();
-    m_BtShape = btCompound;
+    internal_free_memory();
+    m_BtShape = std::unique_ptr<btCollisionShape>(btCompound);
     setMass(mass);
 }
-void Collision::free_memory() {
+void Collision::internal_free_memory() {
     if (m_BtShape && m_BtShape->isCompound()) {
-        btCompoundShape* compound = static_cast<btCompoundShape*>(m_BtShape);
+        btCompoundShape* compound = (btCompoundShape*)m_BtShape.get();
         const int numChildren = compound->getNumChildShapes();
         if (numChildren > 0) {
             for (int i = 0; i < numChildren; ++i) {
@@ -144,23 +140,25 @@ void Collision::free_memory() {
             }
         }
     }  
-    SAFE_DELETE(m_BtShape);
+    m_BtShape.reset(nullptr);
 }
 Collision::~Collision() {
-    free_memory();
+    internal_free_memory();
 } 
 Collision::Collision(Collision&& other) noexcept {
-    m_Owner     = std::move(other.m_Owner);
-    m_BtInertia = std::move(other.m_BtInertia);
-    m_Type      = std::move(other.m_Type);
-    m_BtShape   = std::exchange(other.m_BtShape, nullptr);
+    if (&other != this) {
+        m_Owner     = std::move(other.m_Owner);
+        m_BtInertia = std::move(other.m_BtInertia);
+        m_Type      = std::move(other.m_Type);
+        m_BtShape.swap(other.m_BtShape);
+    }
 }
 Collision& Collision::operator=(Collision&& other) noexcept {
     if (&other != this) {
         m_Owner     = std::move(other.m_Owner);
         m_BtInertia = std::move(other.m_BtInertia);
         m_Type      = std::move(other.m_Type);
-        m_BtShape   = std::exchange(other.m_BtShape, nullptr);
+        m_BtShape.swap(other.m_BtShape);
     }
     return *this;
 }
@@ -170,7 +168,7 @@ void Collision::setMass(float mass) {
     }
     if (m_BtShape->getShapeType() != EMPTY_SHAPE_PROXYTYPE) {    
         if (m_BtShape->isCompound()) {
-            btCompoundShape* compound = static_cast<btCompoundShape*>(m_BtShape);
+            btCompoundShape* compound = (btCompoundShape*)m_BtShape.get();
             const int numChildren = compound->getNumChildShapes();
             if (numChildren > 0) {
                 for (int i = 0; i < numChildren; ++i) {

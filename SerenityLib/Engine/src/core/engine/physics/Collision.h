@@ -15,6 +15,7 @@ class  btCompoundShape;
 #include <core/engine/events/Observer.h>
 #include <LinearMath/btVector3.h>
 #include <ecs/Entity.h>
+#include <BulletCollision/CollisionShapes/btCollisionShape.h>
 
 class Collision final: public Observer {
     public:
@@ -25,17 +26,16 @@ class Collision final: public Observer {
                 static void load_2(Collision*, btCompoundShape*, std::vector<ModelInstance*>, float mass, CollisionType);
         };
     private:
-        Entity                  m_Owner;
-        std::vector<Mesh*>      m_DeferredMeshes;
-        std::function<void()>   m_DeferredLoading;
+        Entity                             m_Owner;
+        std::vector<Mesh*>                 m_DeferredMeshes;
+        std::function<void()>              m_DeferredLoading;
 
-        CollisionType           m_Type              = CollisionType::None;
-        btVector3               m_BtInertia         = btVector3(0.0f, 0.0f, 0.0f);
-        btCollisionShape*       m_BtShape           = nullptr;
+        CollisionType                      m_Type              = CollisionType::None;
+        btVector3                          m_BtInertia         = btVector3(0.0f, 0.0f, 0.0f);
+        std::unique_ptr<btCollisionShape>  m_BtShape;
 
         void internal_base_init(CollisionType type, float mass);
-
-        void free_memory();
+        void internal_free_memory();
     public:
         Collision(ComponentBody&);
         Collision(ComponentBody&, CollisionType, ModelInstance* modelInstance, float mass = 0);
@@ -49,9 +49,9 @@ class Collision final: public Observer {
 
         ~Collision();
 
-        inline void setBtShape(btCollisionShape* shape) noexcept { m_BtShape = shape; }
+        inline void setBtShape(btCollisionShape* shape) noexcept { m_BtShape.reset(shape); }
         inline CONSTEXPR const btVector3& getBtInertia() const noexcept { return m_BtInertia; }
-        inline CONSTEXPR btCollisionShape* getBtShape() const noexcept { return m_BtShape; }
+        inline CONSTEXPR btCollisionShape* getBtShape() const noexcept { return m_BtShape.get(); }
         inline CONSTEXPR CollisionType getType() const noexcept { return m_Type; }
 
         void setMass(float mass);

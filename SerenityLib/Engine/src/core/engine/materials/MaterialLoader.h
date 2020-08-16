@@ -8,6 +8,13 @@ class Texture;
 #include <core/engine/materials/MaterialEnums.h>
 #include <core/engine/renderer/GLImageConstants.h>
 
+
+#ifdef ENGINE_FORCE_TEXTURE_MIPMAPPING
+    #define ENGINE_MIPMAP_DEFAULT true
+#else
+    #define ENGINE_MIPMAP_DEFAULT false
+#endif
+
 namespace Engine::priv {
     class MaterialLoader final {
         private: 

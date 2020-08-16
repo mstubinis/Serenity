@@ -26,9 +26,6 @@ priv::PhysicsTaskScheduler::PhysicsTaskScheduler(const char* name) : btITaskSche
 priv::PhysicsTaskScheduler::~PhysicsTaskScheduler() {
 
 }
-const char* priv::PhysicsTaskScheduler::getName() const {
-    return m_name; 
-}
 int priv::PhysicsTaskScheduler::getMaxNumThreads() const {
     return Engine::hardware_concurrency();
 }
@@ -49,7 +46,6 @@ void priv::PhysicsTaskScheduler::parallelFor(int iBegin, int iEnd, int grainSize
         }
         Engine::priv::threading::waitForAll(0);
     };
-    
     if (m_DoConcurrency) {
         parallel();
     }else{
@@ -74,8 +70,7 @@ btScalar priv::PhysicsTaskScheduler::parallelSum(int iBegin, int iEnd, int grain
         }
         Engine::priv::threading::waitForAll(0);
         return m_sumRes.load(std::memory_order_relaxed);
-    };
-    
+    }; 
     btScalar res = 0.0;
     if (m_DoConcurrency) {
         res = parallel();
@@ -84,16 +79,6 @@ btScalar priv::PhysicsTaskScheduler::parallelSum(int iBegin, int iEnd, int grain
     }
     return res;
 
-}
-void priv::PhysicsTaskScheduler::sleepWorkerThreadsHint() {
-    // hint the task scheduler that we may not be using these threads for a little while
-} 
-// internal use only
-void priv::PhysicsTaskScheduler::activate() {
-    m_isActive = true;
-}
-void priv::PhysicsTaskScheduler::deactivate() {
-    m_isActive = false;
 }
 
 #pragma endregion
@@ -134,37 +119,37 @@ get_fn_ptr(const std::function<RES(ARGS...)>& f){
 }
 
 priv::PhysicsPipeline::PhysicsPipeline() {
-    const auto hardware_concurrency = Engine::hardware_concurrency();
+    auto hardware_concurrency = Engine::hardware_concurrency();
 
-    m_Broadphase             = new btDbvtBroadphase();
-    m_CollisionConfiguration = new btDefaultCollisionConfiguration();
-    m_Dispatcher             = new btCollisionDispatcher(m_CollisionConfiguration);
+    m_Broadphase              = std::make_unique<btDbvtBroadphase>();
+    m_CollisionConfiguration  = std::make_unique<btDefaultCollisionConfiguration>();
+    m_Dispatcher              = std::make_unique<btCollisionDispatcher>(m_CollisionConfiguration.get());
     if (hardware_concurrency <= 1) {
-        m_Solver             = new btSequentialImpulseConstraintSolver();
-        m_World              = new btDiscreteDynamicsWorld(m_Dispatcher, m_Broadphase, m_Solver, m_CollisionConfiguration);
+        m_Solver              = std::make_unique<btSequentialImpulseConstraintSolver>();
+        m_World               = std::make_unique<btDiscreteDynamicsWorld>(m_Dispatcher.get(), m_Broadphase.get(), m_Solver.get(), m_CollisionConfiguration.get());
     }else{
-        m_TaskScheduler      = NEW PhysicsTaskScheduler("PhysicsTaskScheduler");
-        btSetTaskScheduler(m_TaskScheduler);
-        m_SolverPool         = new btConstraintSolverPoolMt(hardware_concurrency);
-        m_SolverMT           = new btSequentialImpulseConstraintSolverMt();
-        m_World              = new btDiscreteDynamicsWorldMt(m_Dispatcher, m_Broadphase, m_SolverPool, m_SolverMT, m_CollisionConfiguration);
+        m_TaskScheduler       = std::make_unique<PhysicsTaskScheduler>("PhysicsTaskScheduler");
+        btSetTaskScheduler(m_TaskScheduler.get());
+        m_SolverPool          = std::make_unique<btConstraintSolverPoolMt>(hardware_concurrency);
+        m_SolverMT            = std::make_unique<btSequentialImpulseConstraintSolverMt>();
+        m_World               = std::make_unique<btDiscreteDynamicsWorldMt>(m_Dispatcher.get(), m_Broadphase.get(), m_SolverPool.get(), m_SolverMT.get(), m_CollisionConfiguration.get());
     }
     m_DebugDrawer.setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
     m_World->setDebugDrawer(&m_DebugDrawer);
-    m_World->setGravity(btVector3(static_cast<btScalar>(0.0), static_cast<btScalar>(0.0), static_cast<btScalar>(0.0)));
-    btGImpactCollisionAlgorithm::registerAlgorithm(m_Dispatcher);
+    m_World->setGravity(btVector3((btScalar)0.0, (btScalar)0.0, (btScalar)0.0));
+    btGImpactCollisionAlgorithm::registerAlgorithm(m_Dispatcher.get());
     setPreTickCallback(m_PreTickCallback);
     setPostTickCallback(m_PostTickCallback);
 }
 void priv::PhysicsPipeline::setPreTickCallback(std::function<void(btDynamicsWorld* world, btScalar timeStep)> preTicCallback) {
     m_PreTickCallback = preTicCallback;
     btInternalTickCallback btFunc = get_fn_ptr<0>(preTicCallback);
-    m_World->setInternalTickCallback(btFunc, (void*)m_World, true);
+    m_World->setInternalTickCallback(btFunc, (void*)m_World.get(), true);
 }
 void priv::PhysicsPipeline::setPostTickCallback(std::function<void(btDynamicsWorld* world, btScalar timeStep)> postTickCallback) {
     m_PostTickCallback = postTickCallback;
     btInternalTickCallback btFunc = get_fn_ptr<0>(postTickCallback);
-    m_World->setInternalTickCallback(btFunc, (void*)m_World, false);
+    m_World->setInternalTickCallback(btFunc, (void*)m_World.get(), false);
 }
 void priv::PhysicsPipeline::update(const float dt) {
     /*
@@ -179,14 +164,6 @@ void priv::PhysicsPipeline::update(const float dt) {
 }
 priv::PhysicsPipeline::~PhysicsPipeline() {
     //btSetTaskScheduler(nullptr);
-    SAFE_DELETE(m_World);
-    SAFE_DELETE(m_Solver);
-    SAFE_DELETE(m_SolverPool);
-    SAFE_DELETE(m_SolverMT);
-    SAFE_DELETE(m_Dispatcher);
-    SAFE_DELETE(m_CollisionConfiguration);
-    SAFE_DELETE(m_Broadphase);
-    SAFE_DELETE(m_TaskScheduler);
 }
 
 #pragma endregion

@@ -72,9 +72,10 @@ MeshRequestPart& MeshRequestPart::operator=(MeshRequestPart&& other) noexcept {
 
 
 
-MeshRequest::MeshRequest(const string& filenameOrData, const float threshold){
+MeshRequest::MeshRequest(const string& filenameOrData, const float threshold, std::function<void()>&& callback){
     m_FileOrData    = filenameOrData;
     m_Threshold     = threshold;
+    m_Callback      = std::move(callback);
     if (!m_FileOrData.empty()) {
         m_FileExtension = boost::filesystem::extension(m_FileOrData);
         if (boost::filesystem::exists(m_FileOrData)) {
@@ -94,6 +95,7 @@ MeshRequest::MeshRequest(const MeshRequest& other) {
     m_Importer       = other.m_Importer;
     m_MeshNodeMap    = other.m_MeshNodeMap;
     m_Parts          = other.m_Parts;
+    m_Callback       = other.m_Callback;
 }
 MeshRequest& MeshRequest::operator=(const MeshRequest& other) {
     if (&other != this) {
@@ -105,6 +107,7 @@ MeshRequest& MeshRequest::operator=(const MeshRequest& other) {
         m_Importer      = other.m_Importer;
         m_MeshNodeMap   = other.m_MeshNodeMap;
         m_Parts         = other.m_Parts;
+        m_Callback      = other.m_Callback;
     }
     return *this;
 }
@@ -116,6 +119,7 @@ MeshRequest::MeshRequest(MeshRequest&& other) noexcept {
     m_Threshold     = std::move(other.m_Threshold);
     m_MeshNodeMap   = std::move(other.m_MeshNodeMap);
     m_Parts         = std::move(other.m_Parts);
+    m_Callback      = std::move(other.m_Callback);
     m_Importer      = (other.m_Importer);
 }
 MeshRequest& MeshRequest::operator=(MeshRequest&& other) noexcept {
@@ -127,6 +131,7 @@ MeshRequest& MeshRequest::operator=(MeshRequest&& other) noexcept {
         m_Threshold     = std::move(other.m_Threshold);
         m_MeshNodeMap   = std::move(other.m_MeshNodeMap);
         m_Parts         = std::move(other.m_Parts);
+        m_Callback      = std::move(other.m_Callback);
         m_Importer      = (other.m_Importer);
     }
     return *this;
@@ -152,11 +157,13 @@ void InternalMeshRequestPublicInterface::Request(MeshRequest& meshRequest) {
                         },
                         [meshRequest]() mutable {
                             InternalMeshRequestPublicInterface::LoadGPU(meshRequest);
+                            meshRequest.m_Callback();
                         }
                     );
                 }else{
                     InternalMeshRequestPublicInterface::LoadCPU(meshRequest);
                     InternalMeshRequestPublicInterface::LoadGPU(meshRequest);
+                    meshRequest.m_Callback();
                 }
             }
         }

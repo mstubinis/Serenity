@@ -12,7 +12,7 @@ ServerClient::ServerClient(string& hash, Server& server, SocketTCP* tcp_socket, 
     if (tcp_socket) {
         m_IP        = (!tcp_socket->ip().empty() ? tcp_socket->ip() : in_client_IP);
         m_Port      = tcp_socket->remotePort();
-        m_TcpSocket = std::move(tcp_socket);
+        m_TcpSocket = std::unique_ptr<Engine::Networking::SocketTCP>(std::move(tcp_socket));
         m_TcpSocket->setBlocking(false);
     }else{
         m_IP   = in_client_IP;
@@ -34,8 +34,6 @@ ServerClient::~ServerClient() {
     unregisterEvent(EventType::ServerShutdowned);
     unregisterEvent(EventType::PacketSent);
     unregisterEvent(EventType::PacketReceived);
-
-    SAFE_DELETE(m_TcpSocket);
 }
 sf::Uint32 ServerClient::generate_nonce() const noexcept {
     std::random_device device;

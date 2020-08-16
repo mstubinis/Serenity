@@ -12,12 +12,9 @@
 
 #include <SFML/Graphics/Image.hpp>
 
-using namespace Engine;
-using namespace std;
-
 Font* first_font = nullptr;
 
-Font::Font(const string& filename, int height, int width, float line_height) : Resource(ResourceType::Font, filename) {
+Font::Font(const std::string& filename, int height, int width, float line_height) : Resource(ResourceType::Font, filename) {
     init(filename, height, width);
     m_LineHeight = line_height;
 }
@@ -25,7 +22,7 @@ Font::~Font(){
 }
 
 void Font::init(const std::string& filename, int height, int width) {
-    string extension = boost::filesystem::extension(filename);
+    std::string extension = boost::filesystem::extension(filename);
     /*
     TODO:
         CID-keyed Type 1 fonts
@@ -57,8 +54,8 @@ void Font::init(const std::string& filename, int height, int width) {
     }
 }
 
-vector<vector<unsigned char>> Font::generate_bitmap(const FT_GlyphSlotRec_& glyph) {
-    vector<vector<unsigned char>> pixels;
+std::vector<std::vector<unsigned char>> Font::generate_bitmap(const FT_GlyphSlotRec_& glyph) {
+    std::vector<std::vector<unsigned char>> pixels;
     pixels.resize(glyph.bitmap.rows);
     for (unsigned int i = 0; i < pixels.size(); ++i) {
         pixels[i].resize(glyph.bitmap.width, 0_uc);
@@ -76,48 +73,48 @@ vector<vector<unsigned char>> Font::generate_bitmap(const FT_GlyphSlotRec_& glyp
     }
     return pixels;
 }
-void Font::init_simple(const string& filename, int height, int width) {
-    string rawname         = filename;
+void Font::init_simple(const std::string& filename, int height, int width) {
+    std::string rawname         = filename;
     const size_t lastindex = filename.find_last_of(".");
-    if (lastindex != string::npos) {
+    if (lastindex != std::string::npos) {
         rawname = filename.substr(0, lastindex);
         rawname += ".png";
     }
     m_FontTexture = NEW Texture(rawname, false, ImageInternalFormat::SRGB8_ALPHA8);
-    Handle handle = priv::Core::m_Engine->m_ResourceManager._addTexture(m_FontTexture);
+    Handle handle = Engine::priv::Core::m_Engine->m_ResourceManager._addTexture(m_FontTexture);
 
-    float min_y_offset  = 9999999999999.0f;
-    float max_y_offset  = 0.0f;
+    float min_y_offset  = std::numeric_limits<float>().max();
+    float max_y_offset  = std::numeric_limits<float>().min();
     float textureHeight = (float)m_FontTexture->height();
     float textureWidth  = (float)m_FontTexture->width();
 
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
-    for (string line; getline(str, line, '\n');) {
+    for (std::string line; std::getline(str, line, '\n');) {
         if (line[0] == 'c' && line[1] == 'h' && line[2] == 'a' && line[3] == 'r' && line[4] == ' ') {
             auto charGlyph = CharGlyph();
-            string token   = "";
-            istringstream stream(line);
-            while (getline(stream, token, ' ')) {
-                const size_t pos   = token.find("=");
-                const string key   = token.substr(0, pos);
-                const string value = token.substr(pos + 1, string::npos);
+            std::string token   = "";
+            std::istringstream stream(line);
+            while (std::getline(stream, token, ' ')) {
+                const size_t pos        = token.find("=");
+                const std::string key   = token.substr(0, pos);
+                const std::string value = token.substr(pos + 1, std::string::npos);
 
                 if (key == "id") {
-                    charGlyph.char_id = stoi(value);
+                    charGlyph.char_id = std::stoi(value);
                 }else if (key == "x") {
-                    charGlyph.x = stoi(value);
+                    charGlyph.x = std::stoi(value);
                 }else if (key == "y") {
-                    charGlyph.y = stoi(value);
+                    charGlyph.y = std::stoi(value);
                 }else if (key == "width") {
-                    charGlyph.width = stoi(value);
+                    charGlyph.width = std::stoi(value);
                 }else if (key == "height") {
-                    charGlyph.height = stoi(value);
+                    charGlyph.height = std::stoi(value);
                 }else if (key == "xoffset") {
-                    charGlyph.xoffset = stoi(value);
+                    charGlyph.xoffset = std::stoi(value);
                 }else if (key == "yoffset") {
-                    charGlyph.yoffset = stoi(value);
+                    charGlyph.yoffset = std::stoi(value);
                 }else if (key == "xadvance") {
-                    charGlyph.xadvance = stoi(value);
+                    charGlyph.xadvance = std::stoi(value);
                 }
             }
             if (charGlyph.yoffset + charGlyph.height > max_y_offset) {
@@ -147,7 +144,7 @@ void Font::init_simple(const string& filename, int height, int width) {
     m_MaxHeight = max_y_offset - min_y_offset;
 }
 
-void Font::init_freetype(const string& filename, int height, int width) {
+void Font::init_freetype(const std::string& filename, int height, int width) {
     unsigned requested_char_count = 128;
 
     FT_Library ft;
@@ -164,8 +161,8 @@ void Font::init_freetype(const string& filename, int height, int width) {
 
     unsigned int max_width   = 0;
     unsigned int max_height  = 0;
-    float min_y_offset       = 9999999999999.0f;
-    float max_y_offset       = 0.0f;
+    float min_y_offset       = std::numeric_limits<float>().max();
+    float max_y_offset       = std::numeric_limits<float>().min();
     const auto face_height   = (face->height >> 6);
 
     for (GLubyte char_id = 0; char_id < requested_char_count; ++char_id) {
@@ -213,7 +210,7 @@ void Font::init_freetype(const string& filename, int height, int width) {
                 done = true;
                 break;
             }
-            vector<vector<unsigned char>> pixels = generate_bitmap(*face->glyph);
+            std::vector<std::vector<unsigned char>> pixels = generate_bitmap(*face->glyph);
             auto& charGlyph   = m_CharGlyphs.at(char_id);
 
             const auto startX = i * max_width;
@@ -261,11 +258,11 @@ void Font::init_freetype(const string& filename, int height, int width) {
     FT_Done_FreeType(ft);
 
     m_FontTexture = NEW Texture(atlas_image, filename + "_Texture", false, ImageInternalFormat::SRGB8_ALPHA8);
-    Handle handle = priv::Core::m_Engine->m_ResourceManager._addTexture(m_FontTexture);
+    Handle handle = Engine::priv::Core::m_Engine->m_ResourceManager._addTexture(m_FontTexture);
 
     m_MaxHeight = max_y_offset - min_y_offset;
 }
-float Font::getTextHeight(string_view text) const {
+float Font::getTextHeight(std::string_view text) const {
     if (text.empty()) {
         return 0.0f;
     }
@@ -277,26 +274,26 @@ float Font::getTextHeight(string_view text) const {
     }
     return (line_count == 0) ? (m_MaxHeight) : ((line_count + 1) * (m_MaxHeight + m_LineHeight));
 }
-float Font::getTextHeightDynamic(string_view text) const {
+float Font::getTextHeightDynamic(std::string_view text) const {
     if (text.empty()) {
         return 0.0f;
     }
     float res = 0.0f;
-    int min_y = INT_MAX;
-    int max_y = INT_MIN;
+    int min_y = std::numeric_limits<int>().max();
+    int max_y = std::numeric_limits<int>().min();
     for (const char character : text) {
         if (character == '\n') {
             res += ((max_y - min_y) ) + m_LineHeight;
         }else {
             const auto& glyph = getGlyphData(character);
-            min_y = glm::min(min_y, glyph.yoffset);
-            max_y = glm::max(max_y, (glyph.yoffset) + int(glyph.height));
+            min_y = std::min(min_y, glyph.yoffset);
+            max_y = std::max(max_y, (glyph.yoffset) + int(glyph.height));
         }
     }
     res += ((max_y - min_y) );
-    return (min_y == INT_MAX || max_y == INT_MIN) ? m_MaxHeight : res;
+    return (min_y == std::numeric_limits<int>().max() || max_y == std::numeric_limits<int>().min()) ? m_MaxHeight : res;
 }
-float Font::getTextWidth(string_view text) const {
+float Font::getTextWidth(std::string_view text) const {
     float row_width = 0.0f;
     float maxWidth  = 0.0f;
     for (size_t i = 0; i < text.size(); ++i) {
@@ -309,7 +306,7 @@ float Font::getTextWidth(string_view text) const {
                 //backtrack spaces
                 int j = (int)i - 1;
                 while (j >= 0) {
-                    const char character_backtrack = text[j];
+                    char character_backtrack = text[j];
                     if (character_backtrack != ' ') {
                         break;
                     }
@@ -317,22 +314,22 @@ float Font::getTextWidth(string_view text) const {
                     row_width -= (float)glyph_space.xadvance;
                     --j;
                 }
-                maxWidth = max(maxWidth, row_width);
+                maxWidth  = std::max(maxWidth, row_width);
                 row_width = 0.0f;
             }
         }
     }
-    maxWidth = max(maxWidth, row_width);
+    maxWidth = std::max(maxWidth, row_width);
     return maxWidth;
 }
 const CharGlyph& Font::getGlyphData(unsigned char character) const {
     return (m_CharGlyphs.count(character)) ? m_CharGlyphs.at(character) : m_CharGlyphs.at('?');
 }
-void Font::renderText(const string& t, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment al, const glm::vec4& scissor){
-    Renderer::renderText(t, *this, p, c, a, s, d, al, scissor);
+void Font::renderText(const std::string& t, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment al, const glm::vec4& scissor){
+    Engine::Renderer::renderText(t, *this, p, c, a, s, d, al, scissor);
 }
-void Font::renderTextStatic(const string& t, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment al, const glm::vec4& scissor) {
+void Font::renderTextStatic(const std::string& t, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment al, const glm::vec4& scissor) {
     if (first_font) {
-        Renderer::renderText(t, *first_font, p, c, a, s, d, al, scissor);
+        Engine::Renderer::renderText(t, *first_font, p, c, a, s, d, al, scissor);
     }
 }

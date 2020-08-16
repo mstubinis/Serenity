@@ -14,10 +14,10 @@ void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(unsigned int windowWidth, unsign
     viewportState = ViewportState((GLsizei)windowWidth, (GLsizei)windowHeight);
 
     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &int_value); //what about GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS?
-    textureUnits.reserve((size_t)int_value);
     MAX_TEXTURE_UNITS = glm::max(MAX_TEXTURE_UNITS, (unsigned int)int_value);
+    textureUnits.reserve(MAX_TEXTURE_UNITS);
     for (size_t i = 0; i < textureUnits.capacity(); ++i) {
-        textureUnits.push_back(TextureUnitState());
+        textureUnits.emplace_back();
     }
 
 
@@ -25,17 +25,17 @@ void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(unsigned int windowWidth, unsign
     enabledState.blendState.reserve((size_t)int_value);
     blendEquationState.reserve((size_t)int_value);
     for (size_t i = 0; i < enabledState.blendState.capacity(); ++i) {
-        enabledState.blendState.push_back(EnabledState::GLBlendState());
+        enabledState.blendState.emplace_back();
     }
     for (size_t i = 0; i < blendEquationState.capacity(); ++i) {
-        blendEquationState.push_back(BlendEquationState());
+        blendEquationState.emplace_back();
     }
 
 
     glGetIntegerv(GL_MAX_VIEWPORTS, &int_value);
     enabledState.scissorState.reserve((size_t)int_value);
     for (size_t i = 0; i < enabledState.scissorState.capacity(); ++i) {
-        enabledState.scissorState.push_back(EnabledState::GLScissorTestState());
+        enabledState.scissorState.emplace_back();
     }
 
 

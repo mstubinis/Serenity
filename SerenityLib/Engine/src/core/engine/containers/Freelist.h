@@ -130,7 +130,7 @@ namespace Engine {
                 if (m_Freelist.size() == 0) {
                     m_Items.emplace_back(std::forward<ARGS>(args)...);
                     ++m_Size;
-                    return static_cast<int>(m_Items.size()) - 1;
+                    return (int)m_Items.size() - 1;
                 }
                 //get a freelist index
                 auto available_index = m_Freelist[m_Freelist.size() - 1];

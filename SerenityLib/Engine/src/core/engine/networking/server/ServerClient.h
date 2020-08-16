@@ -42,17 +42,17 @@ namespace Engine::Networking {
             on_received_tcp_func       m_On_Received_TCP_Function       = [](sf::Packet& sfPacket, const float dt) {};
             on_received_udp_func       m_On_Received_UDP_Function       = [](sf::Packet& sfPacket, const float dt) {};
         protected:
-            Engine::Networking::Server&             m_Server;
-            ConnectionState::State                  m_ConnectionState              = ConnectionState::Unknown;
-            mutable Engine::Networking::SocketTCP*  m_TcpSocket                    = nullptr;
-            sf::IpAddress                           m_IP                           = sf::IpAddress::LocalHost;
-            std::string                             m_Hash                         = "";
-            unsigned short                          m_Port                         = 0U;
-            std::uint32_t                           m_ID                           = 0U;
-            float                                   m_Timeout_Timer                = 0.0f;
-            float                                   m_Timeout_Timer_Limit          = 30.0f;
-            float                                   m_Recovery_Timeout_Timer       = 0.0f;
-            float                                   m_Recovery_Timeout_Timer_Limit = 60.0f;
+            Engine::Networking::Server&                             m_Server;
+            ConnectionState::State                                  m_ConnectionState              = ConnectionState::Unknown;
+            mutable std::unique_ptr<Engine::Networking::SocketTCP>  m_TcpSocket                    = nullptr;
+            sf::IpAddress                                           m_IP                           = sf::IpAddress::LocalHost;
+            std::string                                             m_Hash                         = "";
+            unsigned short                                          m_Port                         = 0U;
+            std::uint32_t                                           m_ID                           = 0U;
+            float                                                   m_Timeout_Timer                = 0.0f;
+            float                                                   m_Timeout_Timer_Limit          = 30.0f;
+            float                                                   m_Recovery_Timeout_Timer       = 0.0f;
+            float                                                   m_Recovery_Timeout_Timer_Limit = 60.0f;
         public:
             ServerClient(std::string& hash, Engine::Networking::Server& server, Engine::Networking::SocketTCP* tcp, std::string& clientIP, unsigned short clientPort);
             virtual ~ServerClient();
@@ -68,13 +68,12 @@ namespace Engine::Networking {
 
             inline CONSTEXPR ConnectionState::State connectionState() const noexcept { return m_ConnectionState; }
             inline CONSTEXPR const std::string& hash() const noexcept { return m_Hash; }
-            inline CONSTEXPR Engine::Networking::SocketTCP* socket() const noexcept { return m_TcpSocket; }
+            inline CONSTEXPR Engine::Networking::SocketTCP* socket() const noexcept { return m_TcpSocket.get(); }
             inline CONSTEXPR unsigned short port() const noexcept { return m_Port; }
             inline CONSTEXPR const sf::IpAddress& ip() const noexcept { return m_IP; }
             inline CONSTEXPR std::uint32_t id() const noexcept { return m_ID; }
             inline CONSTEXPR void setTimeoutTimerLimit(float limit) noexcept { m_Timeout_Timer_Limit = limit; }
             inline CONSTEXPR void setRecoveryTimeoutTimerLimit(float limit) noexcept { m_Recovery_Timeout_Timer_Limit = limit; }
-
 
             sf::Uint32 generate_nonce() const noexcept;
 

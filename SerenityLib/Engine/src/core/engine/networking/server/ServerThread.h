@@ -11,7 +11,7 @@ namespace Engine::Networking {
     class ServerThread final : public Engine::NonCopyable, public Engine::NonMoveable {
         friend class ServerThreadCollection;
         protected:
-            mutable std::unordered_map<std::string, ServerClient*>  m_ServerClients;
+            mutable std::unordered_map<std::string, std::unique_ptr<ServerClient>>  m_ServerClients;
         public:
             ServerThread();
             ~ServerThread();
@@ -23,7 +23,7 @@ namespace Engine::Networking {
             bool add_client(const std::string& hash, ServerClient* client, Server& server);
 
             size_t num_clients() const noexcept { return m_ServerClients.size(); }
-            std::unordered_map<std::string, ServerClient*>& clients() const noexcept { return m_ServerClients; }
+            std::unordered_map<std::string, std::unique_ptr<ServerClient>>& clients() const noexcept { return m_ServerClients; }
     };
 
     class ServerThreadCollection {
