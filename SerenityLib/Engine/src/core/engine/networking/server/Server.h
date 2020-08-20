@@ -82,6 +82,7 @@ namespace Engine::Networking {
             void update(const float dt);
 
             void remove_client(ServerClient& client);
+            void remove_client_immediately(ServerClient& client);
 
             //tcp
             virtual SocketStatus::Status send_tcp_to_client(ServerClient* client, sf::Packet& packet);

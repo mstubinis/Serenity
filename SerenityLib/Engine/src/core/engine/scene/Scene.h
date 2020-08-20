@@ -54,14 +54,15 @@ class Scene: public Resource, public Observer {
         mutable std::vector<RodLight*>                                m_RodLights;
         mutable std::vector<ProjectionLight*>                         m_ProjectionLights;
 
-        unsigned int                                                  m_ID                 = 0;
-        glm::vec3                                                     m_GI                 = glm::vec3(1.0f);
+        unsigned int                                                  m_ID                  = 0;
+        glm::vec3                                                     m_GI                  = glm::vec3(1.0f);
+        bool                                                          m_SkipRenderThisFrame = false;
 
-        Entity*                                                       m_Sun                = nullptr;
-        Skybox*                                                       m_Skybox             = nullptr;
+        Entity*                                                       m_Sun                 = nullptr;
+        Skybox*                                                       m_Skybox              = nullptr;
 
-        class impl; std::unique_ptr<impl>                             m_i                  = nullptr;
-        std::function<void(Scene*, const float)>                      m_OnUpdateFunctor    = [](Scene*, const float) {};
+        class impl; std::unique_ptr<impl>                             m_i                   = nullptr;
+        std::function<void(Scene*, const float)>                      m_OnUpdateFunctor     = [](Scene*, const float) {};
 
         void preUpdate(const float dt);
         void postUpdate(const float dt);
@@ -149,6 +150,8 @@ namespace Engine::priv {
         static void           RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance&, RenderStage stage);
         static ECS<Entity>&   GetECS(Scene& scene);
         static void           CleanECS(Scene& scene, Entity entity);
+        static void           SkipRenderThisFrame(Scene& scene, bool isSkip);
+        static bool           IsSkipRenderThisFrame(Scene& scene);
     };
 };
 

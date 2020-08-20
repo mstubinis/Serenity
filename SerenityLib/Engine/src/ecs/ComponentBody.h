@@ -191,9 +191,12 @@ class ComponentBody : public Observer, public Engine::UserPointer {
 		glm_vec3 getPosition() const;
         glm_vec3 getLocalPosition() const;
         glm::vec3 getPositionRender() const;
+
+        
         inline CONSTEXPR const glm_vec3& forward() const noexcept { return m_Forward; }
         inline CONSTEXPR const glm_vec3& right() const noexcept { return m_Right; }
         inline CONSTEXPR const glm_vec3& up() const noexcept { return m_Up; }
+        
 		glm_vec3 getLinearVelocity() const;
 		glm_vec3 getAngularVelocity() const;
 		glm_mat4 modelMatrix() const;

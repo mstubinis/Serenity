@@ -155,6 +155,10 @@ void EngineCore::render(Window& window, const float dt){
     m_DebugManager.stop_clock();
     Game::render();
     auto& scene = *Resources::getCurrentScene();
+    if (Engine::priv::InternalScenePublicInterface::IsSkipRenderThisFrame(scene)) {
+        Engine::priv::InternalScenePublicInterface::SkipRenderThisFrame(scene, false);
+        return;
+    }
     scene.render();
     m_RenderManager._sort2DAPICommands();
     auto& scene_viewports = InternalScenePublicInterface::GetViewports(scene);

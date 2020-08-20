@@ -1632,6 +1632,7 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, Viewport& viewpo
             //this render space places the camera at the origin and offsets submitted model matrices to the vertex shaders
             //by the camera's real simulation position
             //this helps to deal with shading inaccuracies for when the camera is very far away from the origin
+
             m_UBOCameraDataStruct.View          = ComponentCamera_Functions::GetViewNoTranslation(camera);
             m_UBOCameraDataStruct.Proj          = camera.getProjection();
             m_UBOCameraDataStruct.ViewProj      = ComponentCamera_Functions::GetViewProjectionNoTranslation(camera);

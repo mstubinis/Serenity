@@ -343,6 +343,7 @@ bool Resources::setCurrentScene(Scene* newScene){
         if(resourceManager->m_DynamicMemory){
             //mark game object resources to add use count
         }
+        priv::InternalScenePublicInterface::SkipRenderThisFrame(*newScene, true);
         std::cout << "-------- Scene Change ended --------" << "\n";
         return true;
     }

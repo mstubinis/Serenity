@@ -42,7 +42,7 @@ bool Server::startup(unsigned short port, std::string ip_restriction) {
     if (m_TCPListener) {
         m_TCPListener->setBlocking(false);
         auto status  = m_TCPListener->listen();
-        #ifndef PRODUCTION
+        #ifndef ENGINE_PRODUCTION
             if (status != SocketStatus::Done) {
                 std::cout << "Server::startup() : could not start up TCP Listener\n";
             }
@@ -51,7 +51,7 @@ bool Server::startup(unsigned short port, std::string ip_restriction) {
     if (m_UdpSocket) {
         m_UdpSocket->setBlocking(false);
         auto status  = m_UdpSocket->bind();
-        #ifndef PRODUCTION
+        #ifndef ENGINE_PRODUCTION
             if (status != SocketStatus::Done) {
                 std::cout << "Server::startup() : could not start up UDP Socket\n";
             }
@@ -146,13 +146,13 @@ bool Server::internal_add_client(std::string& hash, ServerClient* client) {
         return false;
     }
     if (!client) {
-#ifndef PRODUCTION
+#ifndef ENGINE_PRODUCTION
         std::cout << "Server::internal_add_client() called with a nullptr client\n";
 #endif
         return false;
     }
     bool result = m_Threads.addClient(hash, client, *this);
-    #ifndef PRODUCTION
+    #ifndef ENGINE_PRODUCTION
         if(result){
             std::cout << "Server::internal_add_client() accepted new client: " << client->ip() << " on port: " << client->port() << "\n";
         }else{
@@ -162,14 +162,39 @@ bool Server::internal_add_client(std::string& hash, ServerClient* client) {
     #endif
     return result;
 }
+void Server::remove_client_immediately(ServerClient& client) {
+    std::string foundHash = "";
+    bool removed          = false;
+    for (auto& itr : m_HashedClients) {
+        if (itr.second == &client) {
+            client.disconnect();
+            foundHash = itr.first;
+            break;
+        }
+    }
+    if (!foundHash.empty()) {
+        {
+            std::lock_guard lock(m_Mutex);
+            removed = m_Threads.removeClient(foundHash, *this);
+        }
+    }
+    #ifndef ENGINE_PRODUCTION
+        if (!removed) {
+            std::cout << "(Server::remove_client_immediately) error: could not remove client hash: " << foundHash << "\n";
+        }
+    #endif
+}
 void Server::remove_client(ServerClient& client) {
     for (auto& itr : m_HashedClients) {
         if (itr.second == &client) {
+            client.disconnect();
             {
                 std::lock_guard lock(m_Mutex);
-                m_RemovedClients.push_back(make_pair(itr.first, itr.second));
+                m_RemovedClients.emplace_back(std::piecewise_construct, std::forward_as_tuple(itr.first), std::forward_as_tuple(itr.second));
             }
-            std::cout << "(Server::remove_client) ip: " << itr.second->ip() << ", port: " << itr.second->port() << " - has been completely removed from the server\n";
+            #ifndef ENGINE_PRODUCTION
+                std::cout << "(Server::remove_client) ip: " << itr.second->ip() << ", port: " << itr.second->port() << " - has been completely removed from the server\n";
+            #endif
             return;
         }
     }

@@ -9,28 +9,28 @@
 using namespace Engine;
 using namespace Engine::priv;
 
-void priv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentCamera& componentCamera) noexcept {
+void Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentCamera& componentCamera) noexcept {
     if (componentCamera.m_Type == ComponentCamera::CameraType::Perspective) {
         componentCamera.m_ProjectionMatrix = glm::perspective(componentCamera.m_Angle, componentCamera.m_AspectRatio, componentCamera.m_NearPlane, componentCamera.m_FarPlane);
     }else{
         componentCamera.m_ProjectionMatrix = glm::ortho(componentCamera.m_Left, componentCamera.m_Right, componentCamera.m_Bottom, componentCamera.m_Top, componentCamera.m_NearPlane, componentCamera.m_FarPlane);
     }
 }
-glm::mat4 priv::ComponentCamera_Functions::GetViewNoTranslation(const Camera& camera) noexcept {
+glm::mat4 Engine::priv::ComponentCamera_Functions::GetViewNoTranslation(const Camera& camera) noexcept {
     return camera.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation;
 }
-glm::mat4 priv::ComponentCamera_Functions::GetViewInverseNoTranslation(const Camera& camera) noexcept {
+glm::mat4 Engine::priv::ComponentCamera_Functions::GetViewInverseNoTranslation(const Camera& camera) noexcept {
     return glm::inverse(camera.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation);
 }
-glm::mat4 priv::ComponentCamera_Functions::GetViewProjectionNoTranslation(const Camera& camera) noexcept {
+glm::mat4 Engine::priv::ComponentCamera_Functions::GetViewProjectionNoTranslation(const Camera& camera) noexcept {
     const auto& componentCamera = *camera.getComponent<ComponentCamera>();
     return componentCamera.m_ProjectionMatrix * componentCamera.m_ViewMatrixNoTranslation;
 }
-glm::mat4 priv::ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(const Camera& camera) noexcept {
+glm::mat4 Engine::priv::ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(const Camera& camera) noexcept {
     const auto& componentCamera = *camera.getComponent<ComponentCamera>();
     return glm::inverse(componentCamera.m_ProjectionMatrix * componentCamera.m_ViewMatrixNoTranslation);
 }
-glm::vec3 priv::ComponentCamera_Functions::GetViewVectorNoTranslation(const Camera& camera) noexcept {
+glm::vec3 Engine::priv::ComponentCamera_Functions::GetViewVectorNoTranslation(const Camera& camera) noexcept {
     const auto& viewMatrixNoTranslation = camera.getComponent<ComponentCamera>()->m_ViewMatrixNoTranslation;
     return glm::vec3(viewMatrixNoTranslation[0][2], viewMatrixNoTranslation[1][2], viewMatrixNoTranslation[2][2]);
 }
@@ -136,8 +136,8 @@ unsigned int ComponentCamera::sphereIntersectTest(const glm_vec3& position, floa
     return res;
 }
 void ComponentCamera::setViewMatrix(const glm::mat4& viewMatrix) noexcept {
-    m_ViewMatrix = viewMatrix;
-    m_ViewMatrixNoTranslation = viewMatrix;
+    m_ViewMatrix                    = viewMatrix;
+    m_ViewMatrixNoTranslation       = viewMatrix;
     m_ViewMatrixNoTranslation[3][0] = 0.0001f;
     m_ViewMatrixNoTranslation[3][1] = 0.0001f;
     m_ViewMatrixNoTranslation[3][2] = 0.0001f;
@@ -173,8 +173,8 @@ void ComponentCamera::setFar(float farPlane) noexcept {
 
 ComponentCamera_System_CI::ComponentCamera_System_CI() {
     setUpdateFunction([](void* system, void* componentPool, const float dt, Scene& scene) {
-        auto& pool = *static_cast<ECSComponentPool<Entity, ComponentCamera>*>(componentPool);
-        auto& components = pool.data();
+        auto* pool       = (ECSComponentPool<Entity, ComponentCamera>*)componentPool;
+        auto& components = pool->data();
         auto lamda_update_component = [&](ComponentCamera& b, size_t i, size_t k) {
             Math::extractViewFrustumPlanesHartmannGribbs(b.getViewProjection(), b.getFrustrumPlanes().data());//update frustrum planes 
         };

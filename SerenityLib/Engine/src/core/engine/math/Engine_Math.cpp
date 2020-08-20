@@ -39,7 +39,7 @@ glm::vec3 Math::polynomial_interpolate_linear(vector<glm::vec3>& points, float t
         P2 = points[2];
     }else{
         float indexFloat = glm::max(0.01f, (n * time) - 1.0f);
-        size_t index1 = static_cast<size_t>(glm::floor(static_cast<size_t>(indexFloat)));
+        size_t index1 = (size_t)glm::floor((size_t)indexFloat);
         size_t index2;
         size_t index3;
         if (index1 >= n - 2) {
@@ -74,7 +74,7 @@ glm::vec3 Math::polynomial_interpolate_cubic(vector<glm::vec3>& points, float ti
         ys.push_back(pt.y);
         zs.push_back(pt.z);
     }
-    auto step = 1.0f / static_cast<float>(n-1);
+    auto step = 1.0f / (float)(n - 1);
     boost::math::cubic_b_spline<float> x_spline(xs.data(), n, 0.0f, step);
     boost::math::cubic_b_spline<float> y_spline(ys.data(), n, 0.0f, step);
     boost::math::cubic_b_spline<float> z_spline(zs.data(), n, 0.0f, step);
@@ -223,10 +223,10 @@ float Math::toDegrees(float radians){
 	return radians * 57.2958f; 
 }
 float Math::toRadians(double degrees){
-	return Math::toRadians(static_cast<float>(degrees)); 
+	return Math::toRadians((float)degrees); 
 }
 float Math::toDegrees(double radians){
-	return Math::toDegrees(static_cast<float>(radians));
+	return Math::toDegrees((float)radians);
 }
 float Math::remainder(float x, float y){
 	return x - (glm::round(x / y) * y);

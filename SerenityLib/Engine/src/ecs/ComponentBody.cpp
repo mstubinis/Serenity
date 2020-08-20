@@ -970,9 +970,9 @@ void ComponentBody::recalculateAllParentChildMatrices(Scene& scene) {
 constexpr glm_mat4 IDENTITY_MATRIX = glm_mat4(1.0);
 
 struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPtr, void* componentPool, const float dt, Scene& scene) const {
-    auto& system                = *static_cast<Engine::priv::ComponentBody_System*>(systemPtr);
-    auto& pool                  = *static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool);
-    auto& components            = pool.data();
+    auto& system                = *(Engine::priv::ComponentBody_System*)systemPtr;
+    auto* pool                  = (ECSComponentPool<Entity, ComponentBody>*)componentPool;
+    auto& components            = pool->data();
 
     auto lamda_update_component = [dt, &system](ComponentBody& b, size_t i, size_t k) {
         const auto entityIndex  = b.m_Owner.id() - 1U;

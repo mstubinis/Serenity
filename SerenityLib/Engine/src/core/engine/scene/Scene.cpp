@@ -20,12 +20,12 @@ class Scene::impl final {
         void _init(Scene& super, const std::string& name, const SceneOptions& options) {
             m_ECS.init(options);
             m_ECS.assignSystem<ComponentLogic> (ComponentLogic_System_CI()/*, 20000*/);
-            m_ECS.assignSystem<ComponentLogic1>(ComponentLogic1_System_CI()/*, 30000*/);
-            m_ECS.assignSystem<ComponentLogic2>(ComponentLogic2_System_CI()/*, 40000*/);
-            m_ECS.assignSystem<ComponentLogic3>(ComponentLogic3_System_CI()/*, 50000*/);
             m_ECS.assignSystem<ComponentBody, Engine::priv::ComponentBody_System>(ComponentBody_System_CI()/*, 10000*/);
+            m_ECS.assignSystem<ComponentLogic1>(ComponentLogic1_System_CI()/*, 30000*/);
             m_ECS.assignSystem<ComponentModel>(ComponentModel_System_CI()/*, 60000*/);
+            m_ECS.assignSystem<ComponentLogic2>(ComponentLogic2_System_CI()/*, 40000*/);
             m_ECS.assignSystem<ComponentCamera>(ComponentCamera_System_CI()/*, 70000*/);
+            m_ECS.assignSystem<ComponentLogic3>(ComponentLogic3_System_CI()/*, 50000*/);
             m_ECS.assignSystem<ComponentName>  (ComponentName_System_CI()/*, 80000*/);
         }
         void _centerToObject(Scene& super, Entity centerEntity) {
@@ -226,6 +226,13 @@ void priv::InternalScenePublicInterface::AddModelInstanceToPipeline(Scene& scene
 void priv::InternalScenePublicInterface::RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage stage){
     scene.m_i->_removeModelInstanceFromPipeline(modelInstance, scene.m_RenderGraphs[(unsigned int)stage]);
 }
+void priv::InternalScenePublicInterface::SkipRenderThisFrame(Scene& scene, bool isSkip) {
+    scene.m_SkipRenderThisFrame = isSkip;
+}
+bool priv::InternalScenePublicInterface::IsSkipRenderThisFrame(Scene& scene) {
+    return scene.m_SkipRenderThisFrame;
+}
+
 
 Scene::Scene(const std::string& name, const SceneOptions& options) : Resource(ResourceType::Scene, name) {
     m_RenderGraphs.resize((unsigned int)RenderStage::_TOTAL);
@@ -246,7 +253,7 @@ Scene::~Scene() {
     unregisterEvent(EventType::SceneChanged);
 }
 void Scene::addCamera(Camera& camera) {
-    m_Cameras.push_back(&camera);
+    m_Cameras.emplace_back(&camera);
     if (!getActiveCamera()) {
         setActiveCamera(camera);
     }

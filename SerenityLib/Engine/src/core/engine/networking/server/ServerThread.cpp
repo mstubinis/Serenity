@@ -5,7 +5,6 @@
 #include <core/engine/networking/SocketTCP.h>
 #include <core/engine/threading/ThreadingModule.h>
 
-using namespace std;
 using namespace Engine;
 using namespace Engine::Networking;
 
@@ -13,7 +12,7 @@ ServerThread::ServerThread() {
 }
 ServerThread::~ServerThread() {
 }
-bool ServerThread::remove_client(const string& hash, Server& server) {
+bool ServerThread::remove_client(const std::string& hash, Server& server) {
     bool has_client_hash        = m_ServerClients.count(hash);
     bool has_server_client_hash = server.m_HashedClients.count(hash);
     if (has_client_hash && has_server_client_hash) {
@@ -29,7 +28,7 @@ bool ServerThread::remove_client(const string& hash, Server& server) {
     }
     return false;
 }
-bool ServerThread::add_client(const string& hash, ServerClient* serverClient, Server& server) {
+bool ServerThread::add_client(const std::string& hash, ServerClient* serverClient, Server& server) {
     bool has_client_hash        = m_ServerClients.count(hash);
     bool has_server_client_hash = server.m_HashedClients.count(hash);
     if (!has_client_hash && !has_server_client_hash) {
@@ -53,7 +52,6 @@ bool ServerThread::add_client(const string& hash, ServerClient* serverClient, Se
     }
     return false;
 }
-
 ServerThread::ServerThread(ServerThread&& other) noexcept {
     m_ServerClients = std::move(other.m_ServerClients);
 }
@@ -82,7 +80,7 @@ void ServerThreadCollection::setBlocking(bool blocking) {
         }
     }
 }
-void ServerThreadCollection::setBlocking(const string& hash, bool blocking) {
+void ServerThreadCollection::setBlocking(const std::string& hash, bool blocking) {
     for (auto& thread : m_Threads) {
         if (thread.m_ServerClients.count(hash)) {
             thread.m_ServerClients.at(hash)->socket()->setBlocking(blocking);
@@ -90,7 +88,7 @@ void ServerThreadCollection::setBlocking(const string& hash, bool blocking) {
         }
     }
 }
-bool ServerThreadCollection::addClient(const string& hash, ServerClient* client, Server& server) {
+bool ServerThreadCollection::addClient(const std::string& hash, ServerClient* client, Server& server) {
     auto next_thread = getNextAvailableClientThread();
     if (next_thread) {
         bool result = next_thread->add_client(hash, client, server);
@@ -106,7 +104,7 @@ bool ServerThreadCollection::addClient(const string& hash, ServerClient* client,
 #endif
     return false;
 }
-bool ServerThreadCollection::removeClient(const string& hash, Server& server) {
+bool ServerThreadCollection::removeClient(const std::string& hash, Server& server) {
     bool complete = false;
     bool result   = false;
     for (auto& thread : m_Threads) {
