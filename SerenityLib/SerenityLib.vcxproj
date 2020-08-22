@@ -515,6 +515,7 @@
     <ClInclude Include="Engine\src\core\engine\sounds\SoundMusic.h" />
     <ClInclude Include="Engine\src\core\engine\sounds\SoundQueue.h" />
     <ClInclude Include="Engine\src\core\engine\sounds\Sounds.h" />
+    <ClInclude Include="Engine\src\core\engine\system\cursor\Cursor.h" />
     <ClInclude Include="Engine\src\core\engine\system\Engine.h" />
     <ClInclude Include="Engine\src\core\engine\system\EngineGameFunctions.h" />
     <ClInclude Include="Engine\src\core\engine\system\EngineMisc.h" />
@@ -678,6 +679,7 @@
     <ClCompile Include="Engine\src\core\engine\sounds\SoundEffect.cpp" />
     <ClCompile Include="Engine\src\core\engine\sounds\SoundMusic.cpp" />
     <ClCompile Include="Engine\src\core\engine\sounds\SoundQueue.cpp" />
+    <ClCompile Include="Engine\src\core\engine\system\cursor\Cursor.cpp" />
     <ClCompile Include="Engine\src\core\engine\system\Engine.cpp" />
     <ClCompile Include="Engine\src\core\engine\system\EngineMisc.cpp" />
     <ClCompile Include="Engine\src\core\engine\system\window\Window.cpp" />

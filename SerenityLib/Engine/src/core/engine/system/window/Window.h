@@ -14,6 +14,7 @@ namespace Engine::priv {
 class  Texture;
 struct EngineOptions;
 class  Window;
+class  Cursor;
 
 #include <core/engine/system/window/WindowData.h>
 
@@ -30,13 +31,20 @@ class Window final{
         void internal_on_dynamic_resize();
 
         void internal_restore_state();
+
+        void internal_init() noexcept;
     public:
+        Window();
         Window(const EngineOptions& options);
         ~Window();
+
+        void init(const EngineOptions& options) noexcept;
 
         const std::string& name() const;
         glm::uvec2 getSize();
         glm::uvec2 getPosition();
+
+        void setMouseCursor(const Cursor& cursor) noexcept;
 
         void setJoystickProcessingActive(bool active);
         bool isJoystickProcessingActive() const;

@@ -1,0 +1,69 @@
+#include <core/engine/utils/PrecompiledHeader.h>
+#include <core/engine/system/cursor/Cursor.h>
+#include <core/engine/textures/Texture.h>
+#include <core/engine/resources/Engine_Resources.h>
+
+Cursor::Cursor() {
+    bool success = m_SFMLCursor.loadFromSystem(sf::Cursor::Type::Arrow);
+}
+Cursor::Cursor(const std::string& textureFile) {
+    Texture* texture = Engine::Resources::getTexture(textureFile);
+    if (!texture) {
+        Handle handle = Engine::Resources::loadTexture(textureFile);
+        texture = handle.get<Texture>();
+    }
+    bool success = loadFromPixels(texture, glm::uvec2(0, 0));
+}
+Cursor::~Cursor() {
+
+}
+bool Cursor::internal_load_from_pixels(const std::uint8_t* pixels, unsigned int width, unsigned int height, unsigned int hotspotX, unsigned int hotspotY, const glm::vec4& colorMultiplier) noexcept {
+    m_ColorMultiplier = colorMultiplier;
+    m_Width           = width;
+    m_Height          = height;
+    m_Pixels.clear();
+    m_Pixels.reserve(width * height * 4);
+    for (unsigned int i = 0; i < width * height * 4; i += 4) {
+        unsigned char r = pixels[i + 0] * colorMultiplier.r;
+        unsigned char g = pixels[i + 1] * colorMultiplier.g;
+        unsigned char b = pixels[i + 2] * colorMultiplier.b;
+        unsigned char a = pixels[i + 3] * colorMultiplier.a;
+        m_Pixels.emplace_back(r);
+        m_Pixels.emplace_back(g);
+        m_Pixels.emplace_back(b);
+        m_Pixels.emplace_back(a);
+    }
+    return m_SFMLCursor.loadFromPixels(m_Pixels.data(), sf::Vector2u(width, height), sf::Vector2u(hotspotX, hotspotY));
+}
+
+bool Cursor::loadFromCurrentData() noexcept {
+    return loadFromCurrentData(m_ColorMultiplier);
+}
+bool Cursor::loadFromCurrentData(const glm::vec4& colorMultiplier) noexcept {
+    if (m_Pixels.size() == 0 || m_Width == 0 || m_Height == 0) {
+        return false;
+    }
+    return internal_load_from_pixels(m_Pixels.data(), m_Width, m_Height, m_Hotspot.x, m_Hotspot.y, colorMultiplier);
+}
+
+bool Cursor::loadFromPixels(const std::uint8_t* pixels, unsigned int width, unsigned int height, const glm::uvec2& hotspot, const glm::vec4& colorMultiplier) noexcept {
+    return internal_load_from_pixels(pixels, width, height, hotspot.x, hotspot.y, colorMultiplier);
+}
+bool Cursor::loadFromPixels(const std::uint8_t* pixels, unsigned int width, unsigned int height, unsigned int hotspotX, unsigned int hotspotY, const glm::vec4& colorMultiplier) noexcept {
+    return internal_load_from_pixels(pixels, width, height, hotspotX, hotspotY, colorMultiplier);
+}
+
+bool Cursor::loadFromPixels(Texture* texture, const glm::uvec2& hotspot, const glm::vec4& colorMultiplier) noexcept {
+    assert(texture != nullptr);
+    auto pixels = texture->pixels();
+    return internal_load_from_pixels(pixels, texture->width(), texture->height(), hotspot.x, hotspot.y, colorMultiplier);
+}
+bool Cursor::loadFromPixels(Texture* texture, unsigned int hotspotX, unsigned int hotspotY, const glm::vec4& colorMultiplier) noexcept {
+    assert(texture != nullptr);
+    auto pixels = texture->pixels();
+    return internal_load_from_pixels(pixels, texture->width(), texture->height(), hotspotX, hotspotY, colorMultiplier);
+}
+
+bool Cursor::loadFromSystem(CursorType cursorType) noexcept {
+    return m_SFMLCursor.loadFromSystem((sf::Cursor::Type)cursorType);
+}

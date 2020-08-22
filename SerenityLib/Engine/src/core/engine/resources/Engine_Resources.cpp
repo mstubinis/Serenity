@@ -35,9 +35,10 @@ void priv::ResourceManager::cleanup() {
     SAFE_DELETE_VECTOR(m_Scenes);
 }
 void priv::ResourceManager::_init(const EngineOptions& options){
-    auto* window = NEW Window(options);
+    auto* window = NEW Window();
+    m_Windows.emplace_back(window);
+    window->init(options);
     window->setJoystickProcessingActive(false);
-    m_Windows.push_back(window);
 }
 std::vector<Scene*>& priv::ResourceManager::scenes() {
     return m_Scenes;

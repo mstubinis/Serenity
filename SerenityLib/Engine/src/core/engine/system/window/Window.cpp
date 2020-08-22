@@ -4,37 +4,28 @@
 #include <core/engine/renderer/opengl/OpenGL.h>
 #include <core/engine/system/window/Window.h>
 #include <core/engine/textures/Texture.h>
+#include <core/engine/system/cursor/Cursor.h>
 
 using namespace Engine;
 
 #pragma region Window
+Window::Window() {
+    internal_init();
+}
+Window::Window(const EngineOptions& options) : Window() {
+    init(options);
+}
+Window::~Window(){
+}
+void Window::init(const EngineOptions& options) noexcept {
+    m_Data.m_WindowName       = options.window_title;
+    m_Data.m_VideoMode.width  = options.width;
+    m_Data.m_VideoMode.height = options.height;
 
-Window::Window(const EngineOptions& options){
-    m_Data.m_WindowName         = options.window_title;
-
-    m_Data.m_SFContextSettings.depthBits          = 24;
-    m_Data.m_SFContextSettings.stencilBits        = 0;
-    m_Data.m_SFContextSettings.antialiasingLevel  = 0;
-    m_Data.m_SFContextSettings.majorVersion       = 4;
-    m_Data.m_SFContextSettings.minorVersion       = 6;
-
-    #ifdef _DEBUG
-        m_Data.m_SFContextSettings.attributeFlags = m_Data.m_SFContextSettings.Debug;
-    #else
-        m_Data.m_SFContextSettings.attributeFlags = m_Data.m_SFContextSettings.Core;
-    #endif
-
-    m_Data.m_VideoMode.width         = options.width;
-    m_Data.m_VideoMode.height        = options.height;
-    m_Data.m_VideoMode.bitsPerPixel  = 32;
-    m_Data.m_Style                   = sf::Style::Default;
-
-    m_Data.m_SFContextSettings       = m_Data.internal_create(*this, options.window_title);
-    
-
+    m_Data.m_SFContextSettings = m_Data.internal_create(*this, options.window_title);
 
     unsigned int requested_glsl_version = std::stoi(Engine::priv::OpenGL::getHighestGLSLVersion(*this));
- 
+
     unsigned int opengl_version = std::stoi(std::to_string(m_Data.m_SFContextSettings.majorVersion) + std::to_string(m_Data.m_SFContextSettings.minorVersion));
     priv::Core::m_Engine->m_RenderManager._onOpenGLContextCreation(m_Data.m_VideoMode.width, m_Data.m_VideoMode.height, requested_glsl_version, opengl_version);
 
@@ -60,13 +51,30 @@ Window::Window(const EngineOptions& options){
     //setVerticalSyncEnabled(options.vsync); //unfortunately this will not work until a few frames after the window creation
 
     if (options.show_console) {
-        std::cout << "Using OpenGL: " << m_Data.m_SFContextSettings.majorVersion << "." << m_Data.m_SFContextSettings.minorVersion << 
-            ", with depth bits: " << m_Data.m_SFContextSettings.depthBits << 
-            " and stencil bits: " << m_Data.m_SFContextSettings.stencilBits << 
+        std::cout << "Using OpenGL: " << m_Data.m_SFContextSettings.majorVersion << "." << m_Data.m_SFContextSettings.minorVersion <<
+            ", with depth bits: " << m_Data.m_SFContextSettings.depthBits <<
+            " and stencil bits: " << m_Data.m_SFContextSettings.stencilBits <<
             " and glsl version: " << requested_glsl_version << '\n';
     }
 }
-Window::~Window(){
+void Window::internal_init() noexcept {
+    m_Data.m_SFContextSettings.depthBits = 24;
+    m_Data.m_SFContextSettings.stencilBits = 0;
+    m_Data.m_SFContextSettings.antialiasingLevel = 0;
+    m_Data.m_SFContextSettings.majorVersion = 4;
+    m_Data.m_SFContextSettings.minorVersion = 6;
+
+    #ifdef _DEBUG
+        m_Data.m_SFContextSettings.attributeFlags = m_Data.m_SFContextSettings.Debug;
+    #else
+        m_Data.m_SFContextSettings.attributeFlags = m_Data.m_SFContextSettings.Core;
+    #endif
+
+    m_Data.m_VideoMode.bitsPerPixel = 32;
+    m_Data.m_Style = sf::Style::Default;
+}
+void Window::setMouseCursor(const Cursor& cursor) noexcept {
+    m_Data.m_SFMLWindow.setMouseCursor(cursor.getSFMLCursor());
 }
 void Window::setJoystickProcessingActive(bool active) {
     m_Data.m_SFMLWindow.setJoystickManagerActive(active);

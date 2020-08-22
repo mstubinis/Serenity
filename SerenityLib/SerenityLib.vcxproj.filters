@@ -270,6 +270,12 @@
     <Filter Include="Source Files\Engine\Core\Math\shapes">
       <UniqueIdentifier>{6a446f63-f312-486f-85f4-c3fbac2cc3b5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Core\System\Cursor">
+      <UniqueIdentifier>{c93aba5c-c5c7-4955-a814-d1f4f3dd084a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\System\Cursor">
+      <UniqueIdentifier>{52c9aede-017c-4676-9be3-dde2044eaae3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBody.h">
@@ -866,6 +872,9 @@
     <ClInclude Include="Engine\src\core\engine\containers\BST.h">
       <Filter>Header Files\Engine\Core\Containers</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\system\cursor\Cursor.h">
+      <Filter>Header Files\Engine\Core\System\Cursor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -1311,6 +1320,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\math\shapes\Pyramid.cpp">
       <Filter>Source Files\Engine\Core\Math\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\system\cursor\Cursor.cpp">
+      <Filter>Source Files\Engine\Core\System\Cursor</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
