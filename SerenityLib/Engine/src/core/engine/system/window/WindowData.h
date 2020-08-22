@@ -15,6 +15,7 @@ namespace Engine::priv {
 #include <core/engine/system/window/WindowThread.h>
 
 //#define ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS
+
 #if !defined(_APPLE_) && !defined(ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS)
 #ifndef ENGINE_THREAD_WINDOW_EVENTS
 #define ENGINE_THREAD_WINDOW_EVENTS
@@ -50,18 +51,18 @@ namespace Engine::priv {
 
             sf::ContextSettings             m_SFContextSettings;
 
-            void restore_state(Window& super);
-            const sf::ContextSettings create(Window& super, const std::string& name);
-            void update_mouse_position_internal(Window& super, float x, float y, bool resetDifference, bool resetPrevious);
-            void on_fullscreen_internal(Window& super, bool isToBeFullscreen, bool isMaximized, bool isMinimized);
-            sf::VideoMode get_default_desktop_video_mode();
-            void init_position(Window& super);
+            void internal_restore_state(Window& super);
+            const sf::ContextSettings internal_create(Window& super, const std::string& name);
+            void internal_update_mouse_position_internal(Window& super, float x, float y, bool resetDifference, bool resetPrevious);
+            void internal_on_fullscreen_internal(Window& super, bool isToBeFullscreen, bool isMaximized, bool isMinimized);
+            sf::VideoMode internal_get_default_desktop_video_mode();
+            void internal_init_position(Window& super);
 
-            void on_mouse_wheel_scrolled(float delta, int x, int y);
+            void internal_on_mouse_wheel_scrolled(float delta, int x, int y);
 
-            void on_reset_events(const float dt);
+            void internal_on_reset_events(const float dt);
 
-            void on_close();
+            void internal_on_close();
         public:
             WindowData();
             ~WindowData();

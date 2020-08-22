@@ -34,12 +34,11 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <SFML/Graphics/Image.hpp>
 
-using namespace std;
 using namespace Engine;
 using namespace Engine::priv;
 using namespace Engine::Renderer;
 
-priv::DeferredPipeline* pipeline = nullptr;
+Engine::priv::DeferredPipeline* pipeline = nullptr;
 
 constexpr std::array<glm::mat4, 6> CAPTURE_VIEWS = {
     glm::mat4(0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
@@ -49,8 +48,6 @@ constexpr std::array<glm::mat4, 6> CAPTURE_VIEWS = {
     glm::mat4(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
     glm::mat4(-1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
 };
-
-constexpr int SIZE_OF_PARTICLE_DOD = sizeof(ParticleSystem::ParticleDOD);
 
 struct ShaderEnum final { enum Shader {
     DecalVertex,
@@ -103,21 +100,9 @@ struct ShaderProgramEnum final { enum Program : unsigned int {
     _TOTAL,
 };};
 
-void GLScissorDisable() noexcept {
-    auto winSize = Resources::getWindowSize();
-    glScissor(0, 0, winSize.x, winSize.y);
-}
-void GLScissor(const glm::vec4& s) noexcept {
-    if (s == glm::vec4(-1.0f)) {
-        GLScissorDisable();
-    }else{
-        glScissor((GLint)s.x, (GLint)s.y, (GLsizei)s.z, (GLsizei)s.w);
-    }
-}
-
 
 DeferredPipeline::DeferredPipeline(Engine::priv::Renderer& renderer) : m_Renderer(renderer) {
-    pipeline               = this;
+    pipeline = this;
 }
 DeferredPipeline::~DeferredPipeline() {
     SAFE_DELETE(UniformBufferObject::UBO_CAMERA);
@@ -136,6 +121,22 @@ DeferredPipeline::~DeferredPipeline() {
     SAFE_DELETE_VECTOR(m_InternalShaderPrograms);
     SAFE_DELETE_VECTOR(m_InternalShaders);
     //TODO: add cleanup() from ssao / smaa here?
+}
+
+void DeferredPipeline::internal_gl_scissor_reset() noexcept {
+    auto winSize = Resources::getWindowSize();
+    m_CurrentScissorState = glm::vec4(-1.0f);
+    m_CurrentScissorDepth = std::numeric_limits<float>().min();
+    glScissor(0, 0, winSize.x, winSize.y);
+}
+void DeferredPipeline::internal_gl_scissor(const glm::vec4& scissor, float depth) noexcept {
+    if (scissor == glm::vec4(-1.0f)) {
+        internal_gl_scissor_reset();
+    }else{
+        m_CurrentScissorState = scissor;
+        m_CurrentScissorDepth = depth;
+        glScissor((GLint)scissor.x, (GLint)scissor.y, (GLsizei)scissor.z, (GLsizei)scissor.w);
+    }
 }
 
 void DeferredPipeline::init() {
@@ -179,7 +180,7 @@ void DeferredPipeline::init() {
     GodRays::STATIC_GOD_RAYS.init_shaders();
     SMAA::STATIC_SMAA.init_shaders();
 
-    auto emplaceShader = [](unsigned int index, const string& str, vector<Shader*>& collection, ShaderType type) {
+    auto emplaceShader = [](unsigned int index, const std::string& str, std::vector<Shader*>& collection, ShaderType type) {
         Shader* s = NEW Shader(str, type, false);
         collection[index] = s;
     };
@@ -287,11 +288,11 @@ void DeferredPipeline::init() {
     glBufferData(GL_ARRAY_BUFFER, 0, NULL, GL_STREAM_DRAW);
 
     glEnableVertexAttribArray(2);                          
-    glVertexAttribPointer(2, 4, GL_FLOAT,        GL_FALSE, SIZE_OF_PARTICLE_DOD,  (void*)0  );
+    glVertexAttribPointer(2, 4, GL_FLOAT,        GL_FALSE, sizeof(ParticleSystem::ParticleDOD),  (void*)0  );
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 2, GL_FLOAT,        GL_FALSE, SIZE_OF_PARTICLE_DOD,  (void*)(sizeof(glm::vec4))  );
+    glVertexAttribPointer(3, 2, GL_FLOAT,        GL_FALSE, sizeof(ParticleSystem::ParticleDOD),  (void*)(sizeof(glm::vec4))  );
     glEnableVertexAttribArray(4);
-    glVertexAttribIPointer(4, 2, GL_UNSIGNED_INT, SIZE_OF_PARTICLE_DOD, (void*)(sizeof(glm::vec4) + sizeof(glm::vec2))  );
+    glVertexAttribIPointer(4, 2, GL_UNSIGNED_INT, sizeof(ParticleSystem::ParticleDOD), (void*)(sizeof(glm::vec4) + sizeof(glm::vec2))  );
 
     glVertexAttribDivisor(2, 1);
     glVertexAttribDivisor(3, 1);
@@ -618,7 +619,7 @@ void DeferredPipeline::renderSkybox(Skybox* skybox, ShaderProgram& shaderProgram
 }
 
 
-void DeferredPipeline::sendGPUDataSunLight(Camera& camera, SunLight& sunLight, const string& start) {
+void DeferredPipeline::sendGPUDataSunLight(Camera& camera, SunLight& sunLight, const std::string& start) {
     auto* body       = sunLight.getComponent<ComponentBody>();
     auto pos         = glm::vec3(body->getPosition());
     const auto& col  = sunLight.color();
@@ -627,7 +628,7 @@ void DeferredPipeline::sendGPUDataSunLight(Camera& camera, SunLight& sunLight, c
     sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)sunLight.type());
     sendUniform1Safe("Type", 0.0f);
 }
-int DeferredPipeline::sendGPUDataPointLight(Camera& camera, PointLight& pointLight, const string& start) {
+int DeferredPipeline::sendGPUDataPointLight(Camera& camera, PointLight& pointLight, const std::string& start) {
     auto* body      = pointLight.getComponent<ComponentBody>();
     auto pos        = glm::vec3(body->getPosition());
     auto cull       = pointLight.getCullingRadius();
@@ -649,7 +650,7 @@ int DeferredPipeline::sendGPUDataPointLight(Camera& camera, PointLight& pointLig
     }
     return 2;
 }
-void DeferredPipeline::sendGPUDataDirectionalLight(Camera& camera, DirectionalLight& directionalLight, const string& start) {
+void DeferredPipeline::sendGPUDataDirectionalLight(Camera& camera, DirectionalLight& directionalLight, const std::string& start) {
     auto* body      = directionalLight.getComponent<ComponentBody>();
     auto forward    = glm::vec3(body->forward());
     const auto& col = directionalLight.color();
@@ -658,7 +659,7 @@ void DeferredPipeline::sendGPUDataDirectionalLight(Camera& camera, DirectionalLi
     sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)directionalLight.type());
     sendUniform1Safe("Type", 0.0f);
 }
-int DeferredPipeline::sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight, const string& start) {
+int DeferredPipeline::sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight, const std::string& start) {
     auto* body   = spotLight.getComponent<ComponentBody>();
     auto pos     = glm::vec3(body->getPosition());
     auto forward = glm::vec3(body->forward());
@@ -685,7 +686,7 @@ int DeferredPipeline::sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight,
     }
     return 2;
 }
-int DeferredPipeline::sendGPUDataRodLight(Camera& camera, RodLight& rodLight, const string& start) {
+int DeferredPipeline::sendGPUDataRodLight(Camera& camera, RodLight& rodLight, const std::string& start) {
     auto* body           = rodLight.getComponent<ComponentBody>();
     auto pos             = glm::vec3(body->getPosition());
     auto cullingDistance = rodLight.rodLength() + (rodLight.getCullingRadius() * 2.0f);
@@ -710,7 +711,7 @@ int DeferredPipeline::sendGPUDataRodLight(Camera& camera, RodLight& rodLight, co
     }
     return 2;
 }
-int DeferredPipeline::sendGPUDataProjectionLight(Camera& camera, ProjectionLight& rodLight, const string& start) {
+int DeferredPipeline::sendGPUDataProjectionLight(Camera& camera, ProjectionLight& rodLight, const std::string& start) {
     return 2;
 }
 
@@ -718,7 +719,7 @@ void DeferredPipeline::renderDirectionalLight(Camera& camera, DirectionalLight& 
     if (!directionalLight.isActive()) {
         return;
     }
-    string start = "light.";
+    std::string start = "light.";
     sendGPUDataDirectionalLight(camera, directionalLight, start);
     renderFullscreenQuad();
 }
@@ -726,7 +727,7 @@ void DeferredPipeline::renderSunLight(Camera& camera, SunLight& sunLight, Viewpo
     if (!sunLight.isActive()) {
         return;
     }
-    string start = "light.";
+    std::string start = "light.";
     sendGPUDataSunLight(camera, sunLight, start);
     renderFullscreenQuad();
 }
@@ -734,7 +735,7 @@ void DeferredPipeline::renderPointLight(Camera& camera, PointLight& pointLight) 
     if (!pointLight.isActive()) {
         return;
     }
-    string start = "light.";
+    std::string start = "light.";
     int result   = sendGPUDataPointLight(camera, pointLight, start);
     if (result == 0) {
         return;
@@ -760,7 +761,7 @@ void DeferredPipeline::renderSpotLight(Camera& camera, SpotLight& spotLight) {
     if (!spotLight.isActive()) {
         return;
     }
-    string start = "light.";
+    std::string start = "light.";
     int result   = sendGPUDataSpotLight(camera, spotLight, start);
 
     if (result == 0) {
@@ -788,7 +789,7 @@ void DeferredPipeline::renderRodLight(Camera& camera, RodLight& rodLight) {
     if (!rodLight.isActive()) {
         return;
     }
-    string start = "light.";
+    std::string start = "light.";
     int result   = sendGPUDataRodLight(camera, rodLight, start);
 
     if (result == 0) {
@@ -816,7 +817,7 @@ void DeferredPipeline::renderProjectionLight(Camera& camera, ProjectionLight& pr
     if (!projectionLight.isActive()) {
         return;
     }
-    string start = "light.";
+    std::string start = "light.";
     int result = sendGPUDataProjectionLight(camera, projectionLight, start);
 
     if (result == 0) {
@@ -874,9 +875,9 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, S
         }
 
         for (auto& pair : system.MaterialIDToIndex) {
-            Material* mat    = system.MaterialToIndexReverse.at(pair.first);
-            Texture& texture = *mat->getComponent((unsigned int)MaterialComponentType::Diffuse).texture(0);
-            string location  = "DiffuseTexture" + to_string(pair.second) + "";
+            Material* mat         = system.MaterialToIndexReverse.at(pair.first);
+            Texture& texture      = *mat->getComponent((unsigned int)MaterialComponentType::Diffuse).texture(0);
+            std::string location  = "DiffuseTexture" + std::to_string(pair.second) + "";
             Engine::Renderer::sendTextureSafe(location.c_str(), texture, pair.second);
         }
 
@@ -885,8 +886,8 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, S
 
         m_Renderer.bind(&particleMesh);
         glBindBuffer(GL_ARRAY_BUFFER, m_Particle_Instance_VBO);
-        glBufferData(GL_ARRAY_BUFFER, particle_count * SIZE_OF_PARTICLE_DOD, NULL, GL_STREAM_DRAW);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, particle_count * SIZE_OF_PARTICLE_DOD, &system.ParticlesDOD[0]);
+        glBufferData(GL_ARRAY_BUFFER, particle_count * sizeof(ParticleSystem::ParticleDOD), NULL, GL_STREAM_DRAW);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, particle_count * sizeof(ParticleSystem::ParticleDOD), &system.ParticlesDOD[0]);
 
         glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)particleMesh.getVertexData().m_Indices.size(), GL_UNSIGNED_INT, 0, (GLsizei)particle_count);
 
@@ -904,17 +905,17 @@ void DeferredPipeline::renderLightProbe(LightProbe& lightProbe) {
     //goal: render all 6 sides into a fbo and into a cubemap, and have that cubemap stored in the light probe to be used for Global Illumination
 }
 
-void DeferredPipeline::internal_render_2d_text_left(const string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
+void DeferredPipeline::internal_render_2d_text_left(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
     unsigned int i = 0;
     for (const auto character : text) {
         if (character == '\n') {
             y += newLineGlyphHeight;
-            x = 0.0f;
+            x  = 0.0f;
         }else if (character != '\0') {
-            unsigned int accum = i * 4;
-            ++i;
+            unsigned int accum     = i * 4;
             const CharGlyph& glyph = font.getGlyphData(character);
-            float startingY  = y - (glyph.height + glyph.yoffset);
+            float startingY        = y - (glyph.height + glyph.yoffset);
+            ++i;
 
             m_Text_Indices.put(accum + 0);
             m_Text_Indices.put(accum + 1);
@@ -926,22 +927,23 @@ void DeferredPipeline::internal_render_2d_text_left(const string& text, const Fo
             float startingX = x + glyph.xoffset;
             x += glyph.xadvance;
 
-            for(unsigned int i = 0; i < 4; ++i)
+            for (unsigned int i = 0; i < 4; ++i) {
                 m_Text_Points.emplace_put(startingX + glyph.pts[i].x, startingY + glyph.pts[i].y, z);
-
-            for (unsigned int i = 0; i < 4; ++i)
+            }
+            for (unsigned int i = 0; i < 4; ++i) {
                 m_Text_UVs.emplace_put(glyph.uvs[i].x, glyph.uvs[i].y);
+            }
         }
     }
 }
-void DeferredPipeline::internal_render_2d_text_center(const string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
-    vector<string> lines;
-    vector<unsigned short> lines_sizes;
-    string line_accumulator = "";
+void DeferredPipeline::internal_render_2d_text_center(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
+    std::vector<std::string> lines;
+    std::vector<unsigned short> lines_sizes;
+    std::string line_accumulator = "";
     for (const auto character : text) {
         if (character == '\n') {
-            lines.push_back(line_accumulator);
-            lines_sizes.push_back((unsigned short)x);
+            lines.emplace_back(line_accumulator);
+            lines_sizes.emplace_back((unsigned short)x);
             line_accumulator = "";
             x = 0.0f;
             continue;
@@ -952,21 +954,21 @@ void DeferredPipeline::internal_render_2d_text_center(const string& text, const 
         }
     }
     if (!line_accumulator.empty()) {
-        lines.push_back(line_accumulator);
-        lines_sizes.push_back((unsigned short)x);
+        lines.emplace_back(line_accumulator);
+        lines_sizes.emplace_back((unsigned short)x);
     }
 
     x = 0.0f;
     unsigned int i = 0;
-    for (uint l = 0; l < lines.size(); ++l) {
+    for (size_t l = 0; l < lines.size(); ++l) {
         const auto& line = lines[l];
         const auto& line_size = lines_sizes[l] / 2;
         for (auto& character : line) {
             if (character != '\0') {
-                unsigned int accum = i * 4;
-                ++i;
+                unsigned int accum     = i * 4;
                 const CharGlyph& glyph = font.getGlyphData(character);
-                float startingY  = y - (glyph.height + glyph.yoffset);
+                float startingY        = y - (glyph.height + glyph.yoffset);
+                ++i;
 
                 m_Text_Indices.put(accum + 0);
                 m_Text_Indices.put(accum + 1);
@@ -978,31 +980,33 @@ void DeferredPipeline::internal_render_2d_text_center(const string& text, const 
                 float startingX = x + glyph.xoffset;
                 x += glyph.xadvance;
 
-                for (unsigned int i = 0; i < 4; ++i)
+                for (unsigned int i = 0; i < 4; ++i) {
                     m_Text_Points.emplace_put(startingX + glyph.pts[i].x - line_size, startingY + glyph.pts[i].y, z);
-
-                for (unsigned int i = 0; i < 4; ++i)
+                }
+                for (unsigned int i = 0; i < 4; ++i) {
                     m_Text_UVs.emplace_put(glyph.uvs[i].x, glyph.uvs[i].y);
+                }
             }
         }
         y += newLineGlyphHeight;
         x = 0.0f;
     }
 }
-void DeferredPipeline::internal_render_2d_text_right(const string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
-    vector<string> lines;
-    string line_accumulator = "";
+void DeferredPipeline::internal_render_2d_text_right(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
+    std::vector<std::string> lines;
+    std::string line_accumulator = "";
     for (const auto character : text) {
         if (character == '\n') {
-            lines.push_back(line_accumulator);
+            lines.emplace_back(line_accumulator);
             line_accumulator = "";
             continue;
         }else if (character != '\0') {
             line_accumulator += character;
         }
     }
-    if (lines.size() == 0)
-        lines.push_back(line_accumulator);
+    if (lines.size() == 0) {
+        lines.emplace_back(line_accumulator);
+    }
 
     unsigned int i = 0;
     for (auto& line : lines) {
@@ -1029,12 +1033,12 @@ void DeferredPipeline::internal_render_2d_text_right(const string& text, const F
                 float startingX = x + glyph.xoffset;
                 x -= glyph.xadvance;
 
-                for (unsigned int i = 0; i < 4; ++i)
+                for (unsigned int i = 0; i < 4; ++i) {
                     m_Text_Points.emplace_put(startingX + glyph.pts[i].x, startingY + glyph.pts[i].y, z);
-
-                for (unsigned int i = 0; i < 4; ++i)
+                }
+                for (unsigned int i = 0; i < 4; ++i) {
                     m_Text_UVs.emplace_put(glyph.uvs[i].x, glyph.uvs[i].y);
-
+                }
                 ++k;
             }
         }
@@ -1043,8 +1047,8 @@ void DeferredPipeline::internal_render_2d_text_right(const string& text, const F
     }
 }
 
-void DeferredPipeline::render2DText(const string& text, const Font& font, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, TextAlignment textAlignment, const glm::vec4& scissor) {
-    GLScissor(scissor);
+void DeferredPipeline::render2DText(const std::string& text, const Font& font, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, TextAlignment textAlignment, const glm::vec4& scissor) {
+    internal_gl_scissor(scissor, depth);
 
     m_Text_Points.clear();
     m_Text_UVs.clear();
@@ -1084,7 +1088,7 @@ void DeferredPipeline::render2DText(const string& text, const Font& font, const 
 
 }
 void DeferredPipeline::render2DTexture(Texture* texture, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, Alignment align, const glm::vec4& scissor) {
-    GLScissor(scissor);
+    internal_gl_scissor(scissor, depth);
 
     float translationX = position.x;
     float translationY = position.y;
@@ -1115,7 +1119,7 @@ void DeferredPipeline::render2DTexture(Texture* texture, const glm::vec2& positi
     m_Renderer.unbind(&plane);
 }
 void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment alignment, const glm::vec4& scissor) {
-    GLScissor(scissor);
+    internal_gl_scissor(scissor, depth);
 
     float translationX = position.x;
     float translationY = position.y;
@@ -1505,7 +1509,7 @@ void DeferredPipeline::internal_pass_depth_and_transparency(Viewport& viewport, 
     //Engine::Renderer::GLDisable(GL_BLEND);
     Engine::Renderer::GLDisablei(GL_BLEND, 0);
 }
-void DeferredPipeline::internal_pass_blur(Viewport& viewport, GLuint texture, string_view type) {
+void DeferredPipeline::internal_pass_blur(Viewport& viewport, GLuint texture, std::string_view type) {
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredBlur]);
 
     glm::vec2 hv(0.0f);
@@ -1705,15 +1709,15 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, Viewport& viewpo
 
 void DeferredPipeline::renderTexture(Texture& tex, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) {
     API2DCommand command;
-    command.func = [=, &tex]() { DeferredPipeline::render2DTexture(&tex, p, c, a, s, d, align, scissor); };
+    command.func  = [&tex, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DTexture(&tex, p, c, a, s, d, align, scissor); };
     command.depth = d;
-    m_2DAPICommands.push_back(std::move(command));
+    m_2DAPICommands.emplace_back(std::move(command));
 }
-void DeferredPipeline::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) {
+void DeferredPipeline::renderText(const std::string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) {
     API2DCommand command;
-    command.func = [=, &fnt]() { DeferredPipeline::render2DText(t, fnt, p, c, a, s, d, align, scissor); };
+    command.func  = [t, &fnt, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DText(t, fnt, p, c, a, s, d, align, scissor); };
     command.depth = d;
-    m_2DAPICommands.push_back(std::move(command));
+    m_2DAPICommands.emplace_back(std::move(command));
 }
 void DeferredPipeline::renderBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) {
     float doubleBorder = borderSize * 2.0f;
@@ -1732,16 +1736,15 @@ void DeferredPipeline::renderBorder(float borderSize, const glm::vec2& pos, cons
 }
 void DeferredPipeline::renderRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment align, const glm::vec4& scissor) {
     API2DCommand command;
-    command.func = [=]() { DeferredPipeline::render2DTexture(nullptr, pos, col, angle, glm::vec2(width, height), depth, align, scissor); };
+    command.func  = [=]() { DeferredPipeline::render2DTexture(nullptr, pos, col, angle, glm::vec2(width, height), depth, align, scissor); };
     command.depth = depth;
-    m_2DAPICommands.push_back(std::move(command));
+    m_2DAPICommands.emplace_back(std::move(command));
 }
 void DeferredPipeline::renderTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) {
     API2DCommand command;
-    command.func = [=]() { DeferredPipeline::render2DTriangle(position, color, angle, width, height, depth, align, scissor); };
+    command.func  = [=]() { DeferredPipeline::render2DTriangle(position, color, angle, width, height, depth, align, scissor); };
     command.depth = depth;
-    m_2DAPICommands.push_back(std::move(command));
-    //m_2DAPICommandsNonTextured.push_back(std::move(command));
+    m_2DAPICommands.emplace_back(std::move(command));
 }
 
 void DeferredPipeline::renderFullscreenTriangle() {

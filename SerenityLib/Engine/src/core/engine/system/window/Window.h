@@ -27,9 +27,9 @@ class Window final{
 
         //Whenever the window's size changes, this function executes. Different from SFML's onResize Event, this fires constantly if you are changing the size of the window via mouse dragging.
         //This currently only performs actions on the windows platform.
-        void on_dynamic_resize();
+        void internal_on_dynamic_resize();
 
-        void restore_state();
+        void internal_restore_state();
     public:
         Window(const EngineOptions& options);
         ~Window();

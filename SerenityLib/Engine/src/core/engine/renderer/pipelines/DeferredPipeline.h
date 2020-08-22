@@ -49,6 +49,9 @@ namespace Engine::priv {
             };
             Engine::priv::Renderer&        m_Renderer;
 
+            glm::vec4                      m_CurrentScissorState = glm::vec4(-1.0f);
+            float                          m_CurrentScissorDepth = 0.0f;
+
             RendererState                  m_RendererState;
             OpenGLState                    m_OpenGLStateMachine;
             OpenGLExtensions               m_OpenGLExtensionsManager;
@@ -70,6 +73,10 @@ namespace Engine::priv {
             std::vector<API2DCommand>      m_2DAPICommandsNonTextured;
             //particle instancing
             unsigned int                   m_Particle_Instance_VBO = 0U;
+
+            void internal_gl_scissor_reset() noexcept;
+            void internal_gl_scissor(const glm::vec4& scissor, float depth) noexcept;
+
 
             void internal_render_per_frame_preparation(Viewport& viewport, Camera& camera);
             void internal_pass_geometry(Viewport& viewport, Camera& camera);

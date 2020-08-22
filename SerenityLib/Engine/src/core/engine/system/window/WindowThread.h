@@ -19,17 +19,22 @@ namespace Engine::priv {
             Engine::queue_ts<WindowEventThreadOnlyCommands>   m_MainThreadToEventThreadQueue;
             std::unique_ptr<std::thread>                      m_EventThread = nullptr;
 
-            void cleanup();
-            void startup(Window& super, const std::string& name);
-            void push(WindowEventThreadOnlyCommands command);
-            std::optional<sf::Event> try_pop();
-            void updateLoop();
+            void internal_cleanup();
+            void internal_startup(Window& super, const std::string& name);
+            void internal_push(WindowEventThreadOnlyCommands command);
+            std::optional<sf::Event> internal_try_pop();
+            void internal_update_loop();
         public:
             WindowThread(WindowData&);
             ~WindowThread();
 
-            bool operator==(const bool rhs) const;
-            explicit operator bool() const;
+            bool operator==(bool rhs) const {
+                bool res = (bool)m_EventThread.get();
+                return (rhs) ? res : !res;
+            }
+            explicit operator bool() const {
+                return (bool)m_EventThread.get();
+            }
     };
 }
 #endif

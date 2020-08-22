@@ -4,22 +4,15 @@
 Engine::priv::WindowThread::WindowThread(WindowData& data) : m_Data(data) {
 }
 Engine::priv::WindowThread::~WindowThread() {
-    cleanup();
+    internal_cleanup();
 }
-bool Engine::priv::WindowThread::operator==(const bool rhs) const {
-    bool res = m_EventThread.get();
-    return (rhs) ? res : !res;
-}
-Engine::priv::WindowThread::operator bool() const {
-    return (bool)m_EventThread.get();
-}
-std::optional<sf::Event> Engine::priv::WindowThread::try_pop() {
+std::optional<sf::Event> Engine::priv::WindowThread::internal_try_pop() {
     return m_Queue.try_pop();
 }
-void Engine::priv::WindowThread::push(WindowEventThreadOnlyCommands command) {
+void Engine::priv::WindowThread::internal_push(WindowEventThreadOnlyCommands command) {
     m_MainThreadToEventThreadQueue.push(command);
 }
-void Engine::priv::WindowThread::updateLoop() {
+void Engine::priv::WindowThread::internal_update_loop() {
     sf::Event e;
     if (!m_Data.m_UndergoingClosing) {
         //if (m_Data.m_SFMLWindow.waitEvent(e)) {
@@ -32,7 +25,7 @@ void Engine::priv::WindowThread::updateLoop() {
         switch (*command_ptr) {
             case WindowEventThreadOnlyCommands::HideMouse: {
                 m_Data.m_SFMLWindow.setMouseCursorVisible(false);
-                m_Data.m_Flags.add(Window_Flags::MouseVisible);
+                m_Data.m_Flags.remove(Window_Flags::MouseVisible);
                 break;
             }case WindowEventThreadOnlyCommands::ShowMouse: {
                 m_Data.m_SFMLWindow.setMouseCursorVisible(true);
@@ -55,8 +48,8 @@ void Engine::priv::WindowThread::updateLoop() {
         }
     }
 }
-void Engine::priv::WindowThread::startup(Window& super, const std::string& name) {
-    m_EventThread.reset(NEW std::thread([&]() {
+void Engine::priv::WindowThread::internal_startup(Window& super, const std::string& name) {
+    m_EventThread.reset(NEW std::thread([this, &super, &name]() {
         m_Data.m_SFMLWindow.create(m_Data.m_VideoMode, name, m_Data.m_Style, m_Data.m_SFContextSettings);
         if (!m_Data.m_IconFile.empty()) {
             super.setIcon(m_Data.m_IconFile);
@@ -64,11 +57,11 @@ void Engine::priv::WindowThread::startup(Window& super, const std::string& name)
         m_Data.m_SFMLWindow.setActive(false);
         m_Data.m_UndergoingClosing = false;
         while (!m_Data.m_UndergoingClosing) {
-            updateLoop();
+            internal_update_loop();
         }
     }));
 }
-void Engine::priv::WindowThread::cleanup() {
+void Engine::priv::WindowThread::internal_cleanup() {
     if (m_EventThread && m_EventThread->joinable()) {
         m_EventThread->join();
     }

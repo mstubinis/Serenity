@@ -13,22 +13,22 @@ Engine::priv::WindowData::WindowData()
     m_Flags = (Window_Flags::Windowed | Window_Flags::MouseVisible);
 }
 Engine::priv::WindowData::~WindowData() {
-    on_close();
+    internal_on_close();
 }
-void Engine::priv::WindowData::on_close() {
+void Engine::priv::WindowData::internal_on_close() {
     m_UndergoingClosing = true;
 
     m_SFMLWindow.setVisible(false);
     m_SFMLWindow.close();
 
     #ifdef ENGINE_THREAD_WINDOW_EVENTS
-        m_WindowThread.cleanup();
+        m_WindowThread.internal_cleanup();
     #endif
 }
-void Engine::priv::WindowData::on_mouse_wheel_scrolled(float delta, int x, int y) {
+void Engine::priv::WindowData::internal_on_mouse_wheel_scrolled(float delta, int x, int y) {
     m_MouseDelta += ((double)delta * 10.0);
 }
-void Engine::priv::WindowData::restore_state(Window& super) {
+void Engine::priv::WindowData::internal_restore_state(Window& super) {
     if (m_FramerateLimit > 0) {
         m_SFMLWindow.setFramerateLimit(m_FramerateLimit);
     }
@@ -42,7 +42,7 @@ void Engine::priv::WindowData::restore_state(Window& super) {
     m_SFMLWindow.setVerticalSyncEnabled(m_Flags & Window_Flags::Vsync);
     m_SFMLWindow.setMouseCursorGrabbed(m_Flags & Window_Flags::MouseGrabbed);
 }
-void Engine::priv::WindowData::init_position(Window& super) {
+void Engine::priv::WindowData::internal_init_position(Window& super) {
     auto winSize               = glm::vec2(super.getSize());
     auto desktopSize           = sf::VideoMode::getDesktopMode();
     float final_desktop_width  = (float)desktopSize.width;
@@ -61,11 +61,11 @@ void Engine::priv::WindowData::init_position(Window& super) {
 
     super.setPosition((unsigned int)((final_desktop_width - winSize.x) / 2.0f), (unsigned int)((final_desktop_height - winSize.y) / 2.0f));
 }
-const sf::ContextSettings Engine::priv::WindowData::create(Window& super, const std::string& name) {
-    on_close();
+const sf::ContextSettings Engine::priv::WindowData::internal_create(Window& super, const std::string& name) {
+    internal_on_close();
 
 #ifdef ENGINE_THREAD_WINDOW_EVENTS
-    m_WindowThread.startup(super, name);
+    m_WindowThread.internal_startup(super, name);
     std::this_thread::sleep_for(std::chrono::milliseconds(450));
     m_SFMLWindow.setActive(true);
     super.m_Data.m_OpenGLThreadID = std::this_thread::get_id();
@@ -77,7 +77,7 @@ const sf::ContextSettings Engine::priv::WindowData::create(Window& super, const 
 #endif
     return m_SFMLWindow.getSettings();
 }
-void Engine::priv::WindowData::update_mouse_position_internal(Window& super, float x, float y, bool resetDifference, bool resetPrevious) {
+void Engine::priv::WindowData::internal_update_mouse_position_internal(Window& super, float x, float y, bool resetDifference, bool resetPrevious) {
     auto sfml_size           = m_SFMLWindow.getSize();
     auto winSize             = glm::vec2(sfml_size.x, sfml_size.y);
     glm::vec2 newPos         = glm::vec2(x, winSize.y - y); //opengl flipping y axis
@@ -88,15 +88,15 @@ void Engine::priv::WindowData::update_mouse_position_internal(Window& super, flo
         m_MouseDifference    = glm::vec2(0.0f);
     }
 }
-void Engine::priv::WindowData::on_fullscreen_internal(Window& super, bool isToBeFullscreen, bool isMaximized, bool isMinimized) {
+void Engine::priv::WindowData::internal_on_fullscreen_internal(Window& super, bool isToBeFullscreen, bool isMaximized, bool isMinimized) {
     if (isToBeFullscreen) {
         m_OldWindowSize    = glm::uvec2(m_VideoMode.width, m_VideoMode.height);
-        m_VideoMode        = get_default_desktop_video_mode();
+        m_VideoMode        = internal_get_default_desktop_video_mode();
     }else{
         m_VideoMode.width  = m_OldWindowSize.x;
         m_VideoMode.height = m_OldWindowSize.y;
     }
-    create(super, m_WindowName);
+    internal_create(super, m_WindowName);
     m_SFMLWindow.requestFocus();
     Engine::priv::Core::m_Engine->m_RenderManager._onFullscreen(m_VideoMode.width, m_VideoMode.height);
 
@@ -106,7 +106,7 @@ void Engine::priv::WindowData::on_fullscreen_internal(Window& super, bool isToBe
     //this does not trigger the sfml event resize method automatically so we must call it here
     Engine::priv::Core::m_Engine->on_event_resize(super, winSize.x, winSize.y, false);
 
-    restore_state(super);
+    internal_restore_state(super);
     //TODO: very wierd, but there is an after-effect "reflection" of the last frame on the window if maximize() is called. Commenting out until it is fixed
     /*
     if (isMaximized) {
@@ -121,11 +121,11 @@ void Engine::priv::WindowData::on_fullscreen_internal(Window& super, bool isToBe
     ev.eventWindowFullscreenChanged = Engine::priv::EventWindowFullscreenChanged(isToBeFullscreen);
     Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
-sf::VideoMode Engine::priv::WindowData::get_default_desktop_video_mode() {
+sf::VideoMode Engine::priv::WindowData::internal_get_default_desktop_video_mode() {
     auto validModes = sf::VideoMode::getFullscreenModes();
     return (validModes.size() > 0) ? validModes[0] : sf::VideoMode::getDesktopMode();
 }
-void Engine::priv::WindowData::on_reset_events(const float dt) {
+void Engine::priv::WindowData::internal_on_reset_events(const float dt) {
     m_MouseDifference.x = 0.0f;
     m_MouseDifference.y = 0.0f;
     double step         = (1.0 - dt);

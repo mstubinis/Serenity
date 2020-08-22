@@ -124,7 +124,7 @@ void EngineCore::update_physics(Scene& scene, Window& window, const float timeSt
 }
 void EngineCore::update_logic(Scene& scene, Window& window, const float dt){
     m_DebugManager.stop_clock();
-    window.on_dynamic_resize();
+    window.internal_on_dynamic_resize();
     m_NetworkingModule.update(dt);
     Game::update(dt);
     scene.update(dt);
@@ -133,7 +133,7 @@ void EngineCore::update_logic(Scene& scene, Window& window, const float dt){
     m_ThreadingModule.update(dt);
     m_EventModule.onPostUpdate();
 
-    window.m_Data.on_reset_events(dt);
+    window.m_Data.internal_on_reset_events(dt);
 
     m_DiscordModule.update();
     m_DebugManager.calculate_logic();
@@ -211,7 +211,7 @@ void EngineCore::on_event_game_ended() {
 }
 void EngineCore::on_event_window_closed(Window& window) {
     Game::onWindowClosed(window);
-    window.m_Data.on_close();
+    window.m_Data.internal_on_close();
 
     m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowHasClosed);
 }
@@ -225,7 +225,7 @@ void EngineCore::on_event_gained_focus(Window& window){
     m_EventModule.onClearEvents();
     Game::onGainedFocus(window);
 
-    window.m_Data.on_reset_events(0.0f);
+    window.m_Data.internal_on_reset_events(0.0f);
 
     m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowGainedFocus);
 }
@@ -268,7 +268,7 @@ void EngineCore::on_event_key_released(Window& window, unsigned int key){
     m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
 void EngineCore::on_event_mouse_wheel_scrolled(Window& window, float delta, int mouseWheelX, int mouseWheelY){
-    window.m_Data.on_mouse_wheel_scrolled(delta, mouseWheelX, mouseWheelY);
+    window.m_Data.internal_on_mouse_wheel_scrolled(delta, mouseWheelX, mouseWheelY);
 
     Game::onMouseWheelScrolled(window, delta, mouseWheelX, mouseWheelY);
 

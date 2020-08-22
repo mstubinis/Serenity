@@ -24,12 +24,12 @@ namespace Engine::Networking {
         using on_received_udp_func       = std::function<void(sf::Packet& sfPacket, const float dt)>;
 
         public:
-            struct ConnectionState final { enum State : unsigned char {
+            enum class ConnectionState : unsigned char {
                 Unknown,
                 Active,
                 Inactive,
                 Disconnected,
-            };};
+            };
         private:
             void internal_update_receive_tcp_packet(const float dt) noexcept;
             void internal_update_connection_state(const float dt) noexcept;
@@ -43,7 +43,7 @@ namespace Engine::Networking {
             on_received_udp_func       m_On_Received_UDP_Function       = [](sf::Packet& sfPacket, const float dt) {};
         protected:
             Engine::Networking::Server&                             m_Server;
-            ConnectionState::State                                  m_ConnectionState              = ConnectionState::Unknown;
+            ConnectionState                                         m_ConnectionState              = ConnectionState::Unknown;
             mutable std::unique_ptr<Engine::Networking::SocketTCP>  m_TcpSocket                    = nullptr;
             sf::IpAddress                                           m_IP                           = sf::IpAddress::LocalHost;
             std::string                                             m_Hash                         = "";
@@ -54,7 +54,7 @@ namespace Engine::Networking {
             float                                                   m_Recovery_Timeout_Timer       = 0.0f;
             float                                                   m_Recovery_Timeout_Timer_Limit = 60.0f;
         public:
-            ServerClient(std::string& hash, Engine::Networking::Server& server, Engine::Networking::SocketTCP* tcp, std::string& clientIP, unsigned short clientPort);
+            ServerClient(const std::string& hash, Engine::Networking::Server& server, Engine::Networking::SocketTCP* tcp, const std::string& clientIP, unsigned short clientPort);
             virtual ~ServerClient();
       
             void setOnUpdateFunction(update_func function) noexcept { m_Update_Function = function; }
@@ -66,7 +66,7 @@ namespace Engine::Networking {
 
             virtual void onEvent(const Event& e) override {}
 
-            inline CONSTEXPR ConnectionState::State connectionState() const noexcept { return m_ConnectionState; }
+            inline CONSTEXPR ConnectionState connectionState() const noexcept { return m_ConnectionState; }
             inline CONSTEXPR const std::string& hash() const noexcept { return m_Hash; }
             inline CONSTEXPR Engine::Networking::SocketTCP* socket() const noexcept { return m_TcpSocket.get(); }
             inline CONSTEXPR unsigned short port() const noexcept { return m_Port; }

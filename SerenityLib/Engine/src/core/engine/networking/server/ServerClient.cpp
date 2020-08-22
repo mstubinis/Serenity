@@ -3,11 +3,10 @@
 #include <core/engine/networking/server/Server.h>
 #include <core/engine/networking/SocketTCP.h>
 
-using namespace std;
 using namespace Engine;
 using namespace Engine::Networking;
 
-ServerClient::ServerClient(string& hash, Server& server, SocketTCP* tcp_socket, string& in_client_IP, unsigned short in_client_Port) : m_Server(server){
+ServerClient::ServerClient(const std::string& hash, Server& server, SocketTCP* tcp_socket, const std::string& in_client_IP, unsigned short in_client_Port) : m_Server(server){
     m_Hash          = hash;
     if (tcp_socket) {
         m_IP        = (!tcp_socket->ip().empty() ? tcp_socket->ip() : in_client_IP);

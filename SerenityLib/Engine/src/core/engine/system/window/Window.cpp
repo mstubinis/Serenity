@@ -29,7 +29,7 @@ Window::Window(const EngineOptions& options){
     m_Data.m_VideoMode.bitsPerPixel  = 32;
     m_Data.m_Style                   = sf::Style::Default;
 
-    m_Data.m_SFContextSettings       = m_Data.create(*this, options.window_title);
+    m_Data.m_SFContextSettings       = m_Data.internal_create(*this, options.window_title);
     
 
 
@@ -38,7 +38,7 @@ Window::Window(const EngineOptions& options){
     unsigned int opengl_version = std::stoi(std::to_string(m_Data.m_SFContextSettings.majorVersion) + std::to_string(m_Data.m_SFContextSettings.minorVersion));
     priv::Core::m_Engine->m_RenderManager._onOpenGLContextCreation(m_Data.m_VideoMode.width, m_Data.m_VideoMode.height, requested_glsl_version, opengl_version);
 
-    m_Data.init_position(*this);
+    m_Data.internal_init_position(*this);
 
     if (!options.icon.empty()) {
         setIcon(options.icon);
@@ -75,10 +75,10 @@ bool Window::isJoystickProcessingActive() const {
     return m_Data.m_SFMLWindow.isJoystickManagerActive();
 }
 void Window::updateMousePosition(float x, float y, bool resetDifference, bool resetPrevious) {
-    m_Data.update_mouse_position_internal(*this, x, y, resetDifference, resetPrevious);
+    m_Data.internal_update_mouse_position_internal(*this, x, y, resetDifference, resetPrevious);
 }
 void Window::updateMousePosition(const glm::vec2& position, bool resetDifference, bool resetPrevious) {
-    m_Data.update_mouse_position_internal(*this, position.x, position.y, resetDifference, resetPrevious);
+    m_Data.internal_update_mouse_position_internal(*this, position.x, position.y, resetDifference, resetPrevious);
 }
 
 bool Window::maximize() {
@@ -167,7 +167,7 @@ void Window::setMouseCursorVisible(bool isToBeVisible){
     if (isToBeVisible) {
         if (!m_Data.m_Flags.has(Window_Flags::MouseVisible)) {
             #ifdef ENGINE_THREAD_WINDOW_EVENTS
-                m_Data.m_WindowThread.push(WindowEventThreadOnlyCommands::ShowMouse);
+                m_Data.m_WindowThread.internal_push(WindowEventThreadOnlyCommands::ShowMouse);
             #else
                 m_Data.m_SFMLWindow.setMouseCursorVisible(true);
                 m_Data.m_Flags.add(Window_Flags::MouseVisible);
@@ -176,7 +176,7 @@ void Window::setMouseCursorVisible(bool isToBeVisible){
     }else{
         if (m_Data.m_Flags.has(Window_Flags::MouseVisible)) {
             #ifdef ENGINE_THREAD_WINDOW_EVENTS
-                m_Data.m_WindowThread.push(WindowEventThreadOnlyCommands::HideMouse);
+                m_Data.m_WindowThread.internal_push(WindowEventThreadOnlyCommands::HideMouse);
             #else
                 m_Data.m_SFMLWindow.setMouseCursorVisible(false);
                 m_Data.m_Flags.remove(Window_Flags::MouseVisible);
@@ -187,7 +187,7 @@ void Window::setMouseCursorVisible(bool isToBeVisible){
 void Window::requestFocus(){
 
     #ifdef ENGINE_THREAD_WINDOW_EVENTS
-        m_Data.m_WindowThread.push(WindowEventThreadOnlyCommands::RequestFocus);
+        m_Data.m_WindowThread.internal_push(WindowEventThreadOnlyCommands::RequestFocus);
     #else
         m_Data.m_SFMLWindow.requestFocus();
     #endif
@@ -233,8 +233,9 @@ bool Window::isMaximized() const {
         WINDOWPLACEMENT info;
         info.length = sizeof(WINDOWPLACEMENT);
         GetWindowPlacement(getSystemHandle(), &info);
-        if (info.showCmd == SW_MAXIMIZE)
+        if (info.showCmd == SW_MAXIMIZE) {
             return true;
+        }
     #endif
     return false;
 }
@@ -243,8 +244,9 @@ bool Window::isMinimized() const {
         WINDOWPLACEMENT info;
         info.length = sizeof(WINDOWPLACEMENT);
         GetWindowPlacement(getSystemHandle(), &info);
-        if (info.showCmd == SW_MINIMIZE)
+        if (info.showCmd == SW_MINIMIZE) {
             return true;
+        }
     #endif
     return false;
 }
@@ -276,8 +278,8 @@ void Window::setSize(unsigned int width, unsigned int height){
     dimensions.y = height;
     m_Data.m_SFMLWindow.setSize(dimensions);
 }
-void Window::restore_state() {
-    m_Data.restore_state(*this);
+void Window::internal_restore_state() {
+    m_Data.internal_restore_state(*this);
 }
 bool Window::setFullscreenWindowed(bool isToBeFullscreen) {
     if (isToBeFullscreen) {
@@ -299,7 +301,7 @@ bool Window::setFullscreenWindowed(bool isToBeFullscreen) {
     }
     bool old_max = isMaximized();
     bool old_min = isMinimized();
-    m_Data.on_fullscreen_internal(*this, isToBeFullscreen, old_max, old_min);
+    m_Data.internal_on_fullscreen_internal(*this, isToBeFullscreen, old_max, old_min);
     return true;
 }
 bool Window::setFullscreen(bool isToBeFullscreen){
@@ -322,13 +324,13 @@ bool Window::setFullscreen(bool isToBeFullscreen){
     }
     bool old_max = isMaximized();
     bool old_min = isMinimized();
-    m_Data.on_fullscreen_internal(*this, isToBeFullscreen, old_max, old_min);
+    m_Data.internal_on_fullscreen_internal(*this, isToBeFullscreen, old_max, old_min);
     return true;
 }
 void Window::keepMouseInWindow(bool isToBeKept){
     if (isToBeKept) {
         #ifdef ENGINE_THREAD_WINDOW_EVENTS
-            m_Data.m_WindowThread.push(WindowEventThreadOnlyCommands::KeepMouseInWindow);
+            m_Data.m_WindowThread.internal_push(WindowEventThreadOnlyCommands::KeepMouseInWindow);
         #else
             if (!m_Data.m_Flags.has(Window_Flags::MouseGrabbed)) {
                 m_Data.m_SFMLWindow.setMouseCursorGrabbed(true);
@@ -337,7 +339,7 @@ void Window::keepMouseInWindow(bool isToBeKept){
         #endif
     }else{
         #ifdef ENGINE_THREAD_WINDOW_EVENTS
-            m_Data.m_WindowThread.push(WindowEventThreadOnlyCommands::FreeMouseFromWindow);
+            m_Data.m_WindowThread.internal_push(WindowEventThreadOnlyCommands::FreeMouseFromWindow);
         #else
             if (m_Data.m_Flags.has(Window_Flags::MouseGrabbed)) {
                 m_Data.m_SFMLWindow.setMouseCursorGrabbed(false);
@@ -350,7 +352,7 @@ void Window::setFramerateLimit(unsigned int limit){
     m_Data.m_SFMLWindow.setFramerateLimit(limit);
     m_Data.m_FramerateLimit = limit;
 }
-void Window::on_dynamic_resize() {
+void Window::internal_on_dynamic_resize() {
     #ifdef _WIN32
         WINDOWINFO wiInfo;
         GetWindowInfo(m_Data.m_SFMLWindow.getSystemHandle(), &wiInfo);
@@ -365,7 +367,7 @@ void Window::on_dynamic_resize() {
 }
 bool Window::pollEvents(sf::Event& e) {
     #ifdef ENGINE_THREAD_WINDOW_EVENTS
-        auto x = m_Data.m_WindowThread.try_pop(); //expensive as it uses lock & mutex
+        auto x = m_Data.m_WindowThread.internal_try_pop(); //expensive as it uses lock & mutex
         if (x) {
             e = std::move(*x);
             return true;
