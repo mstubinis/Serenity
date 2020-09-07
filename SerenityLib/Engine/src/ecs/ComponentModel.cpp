@@ -21,11 +21,11 @@ float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) 
         if (mesh == false) {
             continue;
         }
-        auto modelInstanceScale = Math::Max(modelInstance.getScale());
-        glm::vec3 localPosition = Math::getMatrixPosition(modelInstance.modelMatrix());
+        auto modelInstanceScale = Engine::Math::Max(modelInstance.getScale());
+        glm::vec3 localPosition = Engine::Math::getMatrixPosition(modelInstance.modelMatrix());
         auto positions          = mesh.getVertexData().getPositions();
         for (auto& vertexPosition : positions) {
-            points_total.push_back(localPosition + (vertexPosition * modelInstanceScale));
+            points_total.emplace_back(localPosition + (vertexPosition * modelInstanceScale));
         }
     }
     float     maxRadius      = 0.0f;
@@ -42,7 +42,7 @@ float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) 
     modelComponent.m_RadiusBox       = maxBoundingBox;
     auto* body                       = modelComponent.m_Owner.getComponent<ComponentBody>();
     if (body) {
-        auto bodyScale               =  Math::Max(glm::vec3(body->getScale()));
+        auto bodyScale               = Engine::Math::Max(glm::vec3(body->getScale()));
         modelComponent.m_Radius     *= bodyScale;
         modelComponent.m_RadiusBox  *= bodyScale;
     }

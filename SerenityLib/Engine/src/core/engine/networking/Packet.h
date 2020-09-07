@@ -9,6 +9,11 @@ using PacketBitfield  = std::uint32_t;
 using PacketTimestamp = std::uint32_t;
 
 namespace Engine::Networking {
+    class Server;
+    class ServerClient;
+};
+
+namespace Engine::Networking {
     class Packet : public sf::Packet {
         public:
             template<typename T> static inline constexpr bool sequence_greater_than(T s1, T s2) noexcept {

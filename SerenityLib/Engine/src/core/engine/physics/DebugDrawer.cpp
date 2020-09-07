@@ -117,15 +117,15 @@ void priv::GLDebugDrawer::drawLine(const btVector3& from, const btVector3& to, c
     v2.color         = color_;
     v1.position      = glm::vec3(from.x(), from.y(), from.z());
     v2.position      = glm::vec3(to.x(), to.y(), to.z());
-    m_LineVertices[m_PerFrameCount    ] = (std::move(v1));
-    m_LineVertices[m_PerFrameCount + 1] = (std::move(v2));
+    m_LineVertices[m_PerFrameCount + 0] = std::move(v1);
+    m_LineVertices[m_PerFrameCount + 1] = std::move(v2);
     m_PerFrameCount += 2;
 }
 void priv::GLDebugDrawer::drawSphere(btScalar radius, const btTransform& transform, const btVector3& color) {
-    const btVector3 center     = transform.getOrigin();
-    const btVector3 up         = transform.getBasis().getColumn(1);
-    const btVector3 axis       = transform.getBasis().getColumn(0);
-    const btScalar stepDegrees = 30.f;
+    btVector3 center     = transform.getOrigin();
+    btVector3 up         = transform.getBasis().getColumn(1);
+    btVector3 axis       = transform.getBasis().getColumn(0);
+    btScalar stepDegrees = 30.f;
     GLDebugDrawer::drawSpherePatch(center, up, axis, radius, -SIMD_HALF_PI, SIMD_HALF_PI, -SIMD_HALF_PI, SIMD_HALF_PI, color, stepDegrees, false);
     GLDebugDrawer::drawSpherePatch(center, up, -axis, radius, -SIMD_HALF_PI, SIMD_HALF_PI, -SIMD_HALF_PI, SIMD_HALF_PI, color, stepDegrees, false);
 }

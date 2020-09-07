@@ -19,10 +19,10 @@ struct TextureRequestPart final {
     ImageInternalFormat          internalFormat  = ImageInternalFormat::Unknown;
 
     TextureRequestPart() = default;
-    ~TextureRequestPart();
+    ~TextureRequestPart() = default;
 
-    TextureRequestPart(const TextureRequestPart&);
-    TextureRequestPart& operator=(const TextureRequestPart&);
+    TextureRequestPart(const TextureRequestPart& other)                = default;
+    TextureRequestPart& operator=(const TextureRequestPart& other)     = default;
     TextureRequestPart(TextureRequestPart&& other) noexcept            = delete;
     TextureRequestPart& operator=(TextureRequestPart&& other) noexcept = delete;
 
@@ -47,7 +47,7 @@ struct TextureRequest final {
     std::string           file              = "";
     std::string           fileExtension     = "";
     bool                  fileExists        = false;
-    std::function<void()> m_Callback;
+    std::function<void()> m_Callback        = []() {};
 
     TextureRequestPart    part;
 
@@ -58,15 +58,21 @@ struct TextureRequest final {
         GLuint openglTextureType,
         std::function<void()>&& callback
     );
-    ~TextureRequest();
+    TextureRequest(
+        const std::string& filenameOrData,
+        bool genMipMaps,
+        ImageInternalFormat internal_,
+        GLuint openglTextureType
+    );
+    ~TextureRequest() = default;
 
     void request(bool async = false);
 };
 
 struct TextureRequestFromMemory final {
     sf::Image              image;
-    std::string            textureName       = "";
-    std::function<void()>  m_Callback;
+    std::string            textureName  = "";
+    std::function<void()>  m_Callback   = []() {};
 
     TextureRequestPart     part;
 
@@ -78,11 +84,11 @@ struct TextureRequestFromMemory final {
         GLuint openglTextureType,
         std::function<void()>&& callback_
     );
-    ~TextureRequestFromMemory();
+    ~TextureRequestFromMemory() = default;
 
-    TextureRequestFromMemory(const TextureRequestFromMemory&);
-    TextureRequestFromMemory& operator=(const TextureRequestFromMemory&);
-    TextureRequestFromMemory(TextureRequestFromMemory&& other) noexcept = delete;
+    TextureRequestFromMemory(const TextureRequestFromMemory& other)                = default;
+    TextureRequestFromMemory& operator=(const TextureRequestFromMemory& other)     = default;
+    TextureRequestFromMemory(TextureRequestFromMemory&& other) noexcept            = delete;
     TextureRequestFromMemory& operator=(TextureRequestFromMemory&& other) noexcept = delete;
 
     void request(bool async = false);

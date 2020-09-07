@@ -32,7 +32,9 @@ class Cursor {
         glm::uvec2                               m_Hotspot         = glm::uvec2(0, 0);
 
         //pixels must be an array of width by height pixels in 32 - bit RGBA format.If not, this will cause undefined behavior.
-        bool internal_load_from_pixels(const std::uint8_t* pixels, unsigned int width, unsigned int height, unsigned int hotspotX, unsigned int hotspotY, const glm::vec4& colorMultiplier) noexcept;
+        bool internal_load_from_pixels(const std::uint8_t* pixels, unsigned int width, unsigned int height, unsigned int hotspotX, unsigned int hotspotY, const glm::vec4& colorMultiplier, bool force = false) noexcept;
+
+        bool internal_rotate(long long startIndex, long long increment, long long increment2, bool left) noexcept;
     protected:
 
     public:
@@ -40,8 +42,11 @@ class Cursor {
         Cursor(const std::string& textureFile);
         virtual ~Cursor();
 
-        bool loadFromCurrentData() noexcept;
-        bool loadFromCurrentData(const glm::vec4& colorMultiplier) noexcept;
+        virtual bool rotateLeft() noexcept;
+        virtual bool rotateRight() noexcept;
+
+        virtual bool loadFromCurrentData() noexcept;
+        virtual bool loadFromCurrentData(const glm::vec4& colorMultiplier) noexcept;
 
         virtual bool loadFromPixels(const std::uint8_t* pixels, unsigned int width, unsigned int height, const glm::uvec2& hotspot, const glm::vec4& colorMultiplier = glm::vec4(1.0f)) noexcept;
         virtual bool loadFromPixels(const std::uint8_t* pixels, unsigned int width, unsigned int height, unsigned int hotspotX, unsigned int hotspotY, const glm::vec4& colorMultiplier = glm::vec4(1.0f)) noexcept;
@@ -50,6 +55,8 @@ class Cursor {
         virtual bool loadFromPixels(Texture* texture, unsigned int hotspotX, unsigned int hotspotY, const glm::vec4& colorMultiplier = glm::vec4(1.0f)) noexcept;
 
         virtual bool loadFromSystem(CursorType cursorType) noexcept;
+
+        virtual void setHotspot(unsigned int x, unsigned int y) noexcept;
 
         inline CONSTEXPR const sf::Cursor& getSFMLCursor() const noexcept { return m_SFMLCursor; }
         inline CONSTEXPR unsigned int getWidth() const noexcept { return m_Width; }

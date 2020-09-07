@@ -7,48 +7,15 @@
 
 #include <boost/filesystem.hpp>
 
-using namespace std;
 using namespace Engine;
 using namespace Engine::priv;
 
-#pragma region TextureRequestPart
-
-TextureRequestPart::~TextureRequestPart() {
-}
-TextureRequestPart::TextureRequestPart(const TextureRequestPart& other) {
-    texture         = other.texture;
-    name            = other.name;
-    handle          = other.handle;
-    async           = other.async;
-    type            = other.type;
-    textureType     = other.textureType;
-    isToBeMipmapped = other.isToBeMipmapped;
-    internalFormat  = other.internalFormat;
-}
-TextureRequestPart& TextureRequestPart::operator=(const TextureRequestPart& other) {
-    if (&other != this) {
-        texture         = other.texture;
-        name            = other.name;
-        handle          = other.handle;
-        async           = other.async;
-        type            = other.type;
-        textureType     = other.textureType;
-        isToBeMipmapped = other.isToBeMipmapped;
-        internalFormat  = other.internalFormat;
-    }
-    return *this;
-}
-#pragma endregion
-
 #pragma region TextureRequest
-
-TextureRequest::TextureRequest(const string& filename, bool genMipMaps, ImageInternalFormat internal_, GLuint openglTextureType, std::function<void()>&& callback_) {
-    file                 = filename;
-    part.internalFormat  = internal_;
+TextureRequest::TextureRequest(const std::string& filename, bool genMipMaps, ImageInternalFormat internal_, GLuint openglTextureType) {
+    file = filename;
+    part.internalFormat = internal_;
     part.isToBeMipmapped = genMipMaps;
-    part.type            = openglTextureType;
-    m_Callback           = std::move(callback_);
-
+    part.type = openglTextureType;
     if (!file.empty()) {
         fileExtension = boost::filesystem::extension(file);
         if (boost::filesystem::exists(file)) {
@@ -57,8 +24,9 @@ TextureRequest::TextureRequest(const string& filename, bool genMipMaps, ImageInt
     }
     part.assignType();
 }
-TextureRequest::~TextureRequest() {
-
+TextureRequest::TextureRequest(const std::string& filename, bool genMipMaps, ImageInternalFormat internal_, GLuint openglTextureType, std::function<void()>&& callback_)
+:TextureRequest(filename, genMipMaps, internal_, openglTextureType) {
+    m_Callback           = std::move(callback_);
 }
 void TextureRequest::request(bool inAsync) {
     if (inAsync && Engine::hardware_concurrency() > 1) {
@@ -103,9 +71,9 @@ void TextureRequestStaticImpl::Request(TextureRequest& request) {
 
 #pragma region TextureRequestFromMemory
 
-TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const string& _filename, bool genMipMaps, ImageInternalFormat internal_, GLuint openglTextureType, std::function<void()>&& callback_){
+TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const std::string& filename_, bool genMipMaps, ImageInternalFormat internal_, GLuint openglTextureType, std::function<void()>&& callback_){
     part.async           = false;
-    textureName          = _filename;
+    textureName          = filename_;
     image                = sfImage;
     part.internalFormat  = internal_;
     part.isToBeMipmapped = genMipMaps;
@@ -114,25 +82,6 @@ TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const str
 
     part.assignType();
 }
-TextureRequestFromMemory::~TextureRequestFromMemory() {
-
-}
-TextureRequestFromMemory::TextureRequestFromMemory(const TextureRequestFromMemory& other) {
-    image            = other.image;
-    textureName      = other.textureName;
-    part             = other.part;
-    m_Callback       = other.m_Callback;
-}
-TextureRequestFromMemory& TextureRequestFromMemory::operator=(const TextureRequestFromMemory& other) {
-    if (&other != this) {
-        image           = other.image;
-        textureName     = other.textureName;
-        part            = other.part;
-        m_Callback      = other.m_Callback;
-    }
-    return *this;
-}
-
 void TextureRequestFromMemory::request(bool inAsync) {
     if (inAsync && Engine::hardware_concurrency() > 1) {
         part.async = true;

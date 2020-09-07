@@ -16,10 +16,7 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/renderer/pipelines/IRenderingPipeline.h>
 
-
 using namespace Engine;
-using namespace std;
-
 
 unsigned int ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
 decimal ModelInstance::m_GlobalDistanceFactor     = (decimal)1100.0;
@@ -44,7 +41,7 @@ namespace Engine::priv {
             for (int i = 0; i < maxLights; ++i) {
                 auto& light     = *lights[i];
                 auto lightType  = light.type();
-                auto start      = "light[" + to_string(i) + "].";
+                auto start      = "light[" + std::to_string(i) + "].";
                 switch (lightType) {
                     case LightType::Sun: {
                         auto& sunLight         = (SunLight&)light;
@@ -115,8 +112,6 @@ bool priv::InternalModelInstancePublicInterface::IsViewportValid(const ModelInst
     return (flags & (1 << viewport.id()) || flags == 0);
 }
 
-
-
 ModelInstance::ModelInstance(Entity parent, Mesh* mesh, Material* mat, ShaderProgram* program) : m_Parent(parent){
     internal_init(mesh, mat, program);
     setCustomBindFunctor(priv::DefaultModelInstanceBindFunctor());
@@ -151,6 +146,8 @@ ModelInstance::ModelInstance(ModelInstance&& other) noexcept {
     m_Material               = std::exchange(other.m_Material, nullptr);
     m_CustomBindFunctor.swap(other.m_CustomBindFunctor);
     m_CustomUnbindFunctor.swap(other.m_CustomUnbindFunctor);
+
+    internal_calculate_radius();
 }
 ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
     if (&other != this) {
@@ -176,10 +173,21 @@ ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
         m_Material               = std::exchange(other.m_Material, nullptr);
         m_CustomBindFunctor.swap(other.m_CustomBindFunctor);
         m_CustomUnbindFunctor.swap(other.m_CustomUnbindFunctor);
+
+        internal_calculate_radius();
     }
     return *this;
 }
 ModelInstance::~ModelInstance() {
+    unregisterEvent(EventType::ResourceLoaded);
+}
+float ModelInstance::internal_calculate_radius() {
+    if (!m_Mesh->isLoaded()) {
+        registerEvent(EventType::ResourceLoaded);
+        return 0.0f;
+    }
+    m_Radius = m_Mesh->getRadius();
+    return m_Radius;
 }
 void ModelInstance::bind(const Engine::priv::Renderer& renderer) {
     m_CustomBindFunctor(this, &renderer);
@@ -230,6 +238,7 @@ void ModelInstance::internal_update_model_matrix() {
         Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
     }
     Math::setFinalModelMatrix(m_ModelMatrix, m_Position, m_Orientation, m_Scale);
+    internal_calculate_radius();
 }
 void ModelInstance::setStage(RenderStage stage, ComponentModel& componentModel) {
     m_Stage = stage;
@@ -315,6 +324,7 @@ void ModelInstance::setMesh(Handle meshHandle, ComponentModel& componentModel){
 void ModelInstance::setMesh(Mesh* mesh, ComponentModel& componentModel){
     m_AnimationVector.clear();
     componentModel.setModel(mesh, m_Material, m_Index, m_ShaderProgram, m_Stage);
+    internal_calculate_radius();
 }
 void ModelInstance::setMaterial(Handle materialHandle, ComponentModel& componentModel){
     ModelInstance::setMaterial(materialHandle.get<Material>(), componentModel);
@@ -322,6 +332,18 @@ void ModelInstance::setMaterial(Handle materialHandle, ComponentModel& component
 void ModelInstance::setMaterial(Material* material, ComponentModel& componentModel){
     componentModel.setModel(m_Mesh, material, m_Index, m_ShaderProgram, m_Stage);
 }
-void ModelInstance::playAnimation(const string& animationName, float start, float end, unsigned int requestedLoops){
+void ModelInstance::playAnimation(const std::string& animationName, float start, float end, unsigned int requestedLoops){
     m_AnimationVector.emplace_animation(*m_Mesh, animationName, start, end, requestedLoops);
+}
+
+void ModelInstance::onEvent(const Event& e) {
+    if (e.type == EventType::ResourceLoaded) {
+        if (e.eventResource.resource && e.eventResource.resource->type() == ResourceType::Mesh) {
+            Mesh* mesh = (Mesh*)e.eventResource.resource;
+            if (m_Mesh->isLoaded() || (mesh == m_Mesh)) {
+                internal_calculate_radius();
+                unregisterEvent(EventType::ResourceLoaded);
+            }
+        }
+    }
 }

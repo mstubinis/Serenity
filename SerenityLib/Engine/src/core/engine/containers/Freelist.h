@@ -14,21 +14,21 @@ namespace Engine {
                 m_Items.reserve(inCapacity);
                 m_Freelist.reserve(inCapacity);
                 for (int i = (int)inCapacity - 1; i >= 0; --i) {
-                    m_Freelist.push_back((std::uint32_t)i);
+                    m_Freelist.emplace_back((std::uint32_t)i);
                 }
             }
 
         public:
             freelist() {
             }
-            freelist(const size_t capacity_) : freelist(){
+            freelist(const size_t capacity_) : freelist() {
                 initialize(capacity_);
             }
-            ~freelist() {
+            virtual ~freelist() {
                 clear(false);
             }
-            void set_auto_reserve_count(std::uint32_t auto_reserve_count_) {
-                m_Auto_Reserve_Count = auto_reserve_count_;
+            inline void set_auto_reserve_count(std::uint32_t auto_reserve_count) noexcept {
+                m_Auto_Reserve_Count = auto_reserve_count;
             }
 
             inline CONSTEXPR size_t size() const noexcept { return m_Size; }
@@ -43,7 +43,7 @@ namespace Engine {
                 }else{
                     m_Items[index] = T();
                 }
-                m_Freelist.push_back((std::uint32_t)index);
+                m_Freelist.emplace_back((std::uint32_t)index);
                 return true;
             }
             //resets the element at the specified index to parameter: data. if the index is invalid, returns false
@@ -52,7 +52,7 @@ namespace Engine {
                     return false;
                 }
                 m_Items[index] = data;
-                m_Freelist.push_back((std::uint32_t)index);
+                m_Freelist.emplace_back((std::uint32_t)index);
                 return true;
             }
             //resets the element at the specified index to parameter: data. Frees the heap allocated memory before hand. if the index is invalid, returns false
@@ -62,7 +62,7 @@ namespace Engine {
                 }
                 delete(m_Items[index]);
                 m_Items[index] = data;
-                m_Freelist.push_back((std::uint32_t)index);
+                m_Freelist.emplace_back((std::uint32_t)index);
                 return true;
             }
             bool reset_and_delete_element(size_t index) {
@@ -139,14 +139,14 @@ namespace Engine {
                 ++m_Size;
                 return (int)available_index;
             }
-            bool set_element(T& data, size_t index) {
+            bool set_element(T& data, size_t index) noexcept {
                 if (index >= m_Items.size()) {
                     return false;
                 }
                 m_Items[index] = std::move(data);
                 return true;
             }
-            int get_next_free_index() {
+            int get_next_free_index() noexcept {
                 return (m_Freelist.size() > 0) ? (int)m_Freelist[m_Freelist.size() - 1] : -1;
             }
             /*
@@ -160,10 +160,10 @@ namespace Engine {
                 return nullptr;
             }
             */
-            const T& get(size_t index) const { return m_Items[index]; }
-            T& get(size_t index) { return m_Items[index]; }
-            T& operator[](size_t index) { return m_Items[index]; }
-            const T& operator[](const size_t& index) const { return m_Items[index]; }
+            inline const T& get(size_t index) const noexcept { return m_Items[index]; }
+            inline T& get(size_t index) noexcept { return m_Items[index]; }
+            inline T& operator[](size_t index) noexcept { return m_Items[index]; }
+            inline const T& operator[](const size_t& index) const noexcept { return m_Items[index]; }
 
             std::vector<T>& data() { return m_Items; }
           

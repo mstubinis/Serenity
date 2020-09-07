@@ -99,8 +99,9 @@ class Mesh final: public Resource, public Observer, public Engine::NonCopyable, 
         void setCustomBindFunctor(bind_func&& functor) { m_CustomBindFunctor = std::move(functor); }
         void setCustomUnbindFunctor(unbind_func&& functor) { m_CustomUnbindFunctor = std::move(functor); }
 
-        bool operator==(bool rhs) const { return (rhs) ? (bool)m_VertexData : (bool)!m_VertexData; }
-        explicit operator bool() const { return (bool)m_VertexData; }
+        inline bool operator==(bool rhs) const { return (rhs) ? (bool)m_VertexData : (bool)!m_VertexData; }
+        inline bool operator!=(bool rhs) const { return !operator==(rhs); }
+        inline operator bool() const { return (bool)m_VertexData; }
 
         std::unordered_map<std::string, Engine::priv::AnimationData>& animationData();
         inline CONSTEXPR const glm::vec3& getRadiusBox() const noexcept { return m_radiusBox; }

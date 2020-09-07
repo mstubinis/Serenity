@@ -8,20 +8,20 @@
 
 namespace Engine::priv{
     template<typename RESOURCE> 
-    struct HandleEntry final{
+    struct HandleEntry final {
         std::uint32_t   m_Version  = 1;
         RESOURCE*       m_Resource = nullptr;
 
         HandleEntry() = default;
-        HandleEntry(RESOURCE* r){
-            m_Resource = r;
+        HandleEntry(RESOURCE* r) 
+            : m_Resource(r) {
         }
         ~HandleEntry() {
             SAFE_DELETE(m_Resource);
         }
 
-        HandleEntry(const HandleEntry&)                      = delete;
-        HandleEntry& operator=(const HandleEntry&)           = delete;
+        HandleEntry(const HandleEntry& other)              = delete;
+        HandleEntry& operator=(const HandleEntry& other)   = delete;
         HandleEntry(HandleEntry&& other) noexcept {
             m_Version  = std::move(other.m_Version);
             m_Resource = std::exchange(other.m_Resource, nullptr);
@@ -39,14 +39,19 @@ namespace Engine::priv{
     template<typename T> 
     class ResourcePool final: public freelist<HandleEntry<T>>{
         using super = freelist<HandleEntry<T>>;
+        private:
+            std::mutex m_Mutex;
         public:
-            ResourcePool(unsigned int numEntries) : freelist<HandleEntry<T>>(numEntries){
-
+            ResourcePool(unsigned int numEntries) 
+                : freelist<HandleEntry<T>>(numEntries){
             }
-            ~ResourcePool(){
-            }
-            Handle add(T* ptr, unsigned int type){
-                const int used_index = super::emplace_back(ptr);
+            ~ResourcePool() = default;
+            Handle add(T* ptr, unsigned int type) {
+                int used_index = -1;
+                {
+                    std::lock_guard lock(m_Mutex);
+                    used_index = super::emplace_back(ptr);
+                }
                 if (used_index == -1) {
                     return Handle();
                 }
@@ -57,11 +62,11 @@ namespace Engine::priv{
                 }
                 return Handle(used_index + 1, item.m_Version, type);
             }
-            T* get(Handle handle){
+            T* get(Handle handle) noexcept {
                 T* outPtr = nullptr;
                 return get(handle, outPtr);
             }
-            const bool get(Handle handle, T*& outPtr){
+            bool get(Handle handle, T*& outPtr) noexcept {
                 const auto& item = super::get(handle.index() - 1U);
                 if (item.m_Version != handle.version()){
                     outPtr = nullptr;
@@ -71,24 +76,24 @@ namespace Engine::priv{
                 return true;
             }
             template<typename RESOURCE> 
-            inline bool getAs(Handle handle, RESOURCE*& outPtr){
+            inline bool getAs(Handle handle, RESOURCE*& outPtr) noexcept {
                 T* void_ = nullptr;
                 bool rv = get(handle, void_);
                 outPtr = reinterpret_cast<RESOURCE*>(void_);
                 return rv;
             }
             template<typename RESOURCE>
-            inline void getAsFast(Handle handle, RESOURCE*& outPtr){
+            inline void getAsFast(Handle handle, RESOURCE*& outPtr) noexcept {
                 const auto& item = super::get(handle.index() - 1U);
                 outPtr = reinterpret_cast<RESOURCE*>(item.m_Resource);
             }
             template<typename RESOURCE>
-            inline RESOURCE* getAsFast(Handle handle){
+            inline RESOURCE* getAsFast(Handle handle) noexcept {
                 const auto& item = super::get(handle.index() - 1U);
                 return reinterpret_cast<RESOURCE*>(item.m_Resource);
             }
             template<typename RESOURCE>
-            inline RESOURCE* getAsFast(unsigned int index){
+            inline RESOURCE* getAsFast(unsigned int index) noexcept {
                 const auto& item = super::get(index - 1U);
                 return reinterpret_cast<RESOURCE*>(item.m_Resource);
             }

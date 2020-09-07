@@ -15,7 +15,7 @@ class Decal final: public EntityBody {
     friend struct Engine::priv::DefaultDecalUnbindFunctor;
     private:
         float      m_LifetimeCurrent  = 0.0f;
-        float      m_LifetimeMax;
+        float      m_LifetimeMax      = 0.0f;
         bool       m_Active           = true;
         glm_vec3   m_InitialPosition  = glm_vec3(0.0, 0.0, 0.0);
         glm_quat   m_InitialRotation  = glm_quat(1.0, 0.0, 0.0, 0.0);
@@ -32,9 +32,9 @@ class Decal final: public EntityBody {
         ~Decal();
 
         void update(const float dt);
-        bool active() const;
 
-        const glm_vec3& initialPosition() const;
-        const glm_quat& initialRotation() const;
+        inline CONSTEXPR bool active() const noexcept { return m_Active; }
+        inline CONSTEXPR const glm_vec3& initialPosition() const noexcept { return m_InitialPosition; }
+        inline CONSTEXPR const glm_quat& initialRotation() const noexcept { return m_InitialRotation; }
 };
 #endif

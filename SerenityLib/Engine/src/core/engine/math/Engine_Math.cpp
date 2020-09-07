@@ -120,6 +120,27 @@ void Math::Float16From32(uint16_t* out, const float in) {
     //#endif
 }
 
+bool Math::rect_fully_contained(const glm::vec4& bigger, const glm::vec4& smaller) noexcept {
+    if (smaller.x >= bigger.x && smaller.x + smaller.z <= bigger.x + bigger.z) {
+        if (smaller.y >= bigger.y && smaller.y + smaller.w <= bigger.y + bigger.w) {
+            return true;
+        }
+    }
+    return false;
+}
+glm::vec4 Math::rect_union(const glm::vec4& bigger, const glm::vec4& smaller) noexcept {
+    if (bigger == glm::vec4(-1.0f)) {
+        return smaller;
+    }
+    float x = std::max(bigger.x, smaller.x);
+    float y = std::max(bigger.y, smaller.y);
+    float z = std::min(bigger.x + bigger.z, smaller.x + smaller.z);
+    float w = std::min(bigger.y + bigger.w, smaller.y + smaller.w);
+    if (x > z || y > w) { //no intersection
+        return bigger;
+    }
+    return glm::vec4(x, y, std::abs(z - x), std::abs(w - y));
+}
 
 void Math::Float32From16(float*    out, const uint16_t* in, const uint arraySize) {
     for (unsigned i = 0; i < arraySize; ++i) {

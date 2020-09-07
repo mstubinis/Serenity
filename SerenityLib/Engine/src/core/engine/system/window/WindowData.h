@@ -53,8 +53,8 @@ namespace Engine::priv {
 
             void internal_restore_state(Window& super);
             const sf::ContextSettings internal_create(Window& super, const std::string& name);
-            void internal_update_mouse_position_internal(Window& super, float x, float y, bool resetDifference, bool resetPrevious);
-            void internal_on_fullscreen_internal(Window& super, bool isToBeFullscreen, bool isMaximized, bool isMinimized);
+            void internal_update_mouse_position(Window& super, float x, float y, bool resetDifference, bool resetPrevious);
+            void internal_on_fullscreen(Window& super, bool isToBeFullscreen, bool isMaximized, bool isMinimized);
             sf::VideoMode internal_get_default_desktop_video_mode();
             void internal_init_position(Window& super);
 

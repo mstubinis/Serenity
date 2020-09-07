@@ -124,7 +124,7 @@ DeferredPipeline::~DeferredPipeline() {
 }
 
 void DeferredPipeline::internal_gl_scissor_reset() noexcept {
-    auto winSize = Resources::getWindowSize();
+    auto winSize          = Resources::getWindowSize();
     m_CurrentScissorState = glm::vec4(-1.0f);
     m_CurrentScissorDepth = std::numeric_limits<float>().min();
     glScissor(0, 0, winSize.x, winSize.y);
@@ -581,7 +581,7 @@ void DeferredPipeline::onFullscreen() {
 void DeferredPipeline::onResize(unsigned int newWidth, unsigned int newHeight) {
     float floatWidth     = (float)newWidth;
     float floatHeight    = (float)newHeight;
-    m_2DProjectionMatrix = glm::ortho(0.0f, floatWidth, 0.0f, floatHeight, 0.005f, 3000.0f);
+    m_2DProjectionMatrix = glm::ortho(0.0f, floatWidth, 0.0f, floatHeight, 0.003f, 6000.0f);
 
     m_FullscreenQuad.changeDimensions(floatWidth, floatHeight);
     m_FullscreenTriangle.changeDimensions(floatWidth, floatHeight);

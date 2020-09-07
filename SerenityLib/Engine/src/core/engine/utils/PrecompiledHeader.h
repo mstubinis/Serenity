@@ -290,12 +290,8 @@ namespace Engine {
             UserPointer() = default;
             ~UserPointer() = default;
 
-            inline void setUserPointer(void* userPointer) noexcept {
-                m_UserPointer = userPointer;
-            }
-            inline constexpr void* getUserPointer() const noexcept {
-                return m_UserPointer;
-            }
+            inline void setUserPointer(void* userPointer) noexcept { m_UserPointer = userPointer; }
+            inline CONSTEXPR void* getUserPointer() const noexcept { return m_UserPointer; }
     };
     class NonCopyable {
         public:

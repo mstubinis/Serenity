@@ -57,12 +57,12 @@ namespace Engine::Networking {
             ServerClient(const std::string& hash, Engine::Networking::Server& server, Engine::Networking::SocketTCP* tcp, const std::string& clientIP, unsigned short clientPort);
             virtual ~ServerClient();
       
-            void setOnUpdateFunction(update_func function) noexcept { m_Update_Function = function; }
-            void setOnTimedOutFunction(on_timed_out_func function) noexcept { m_On_Timed_Out_Function = function; }
-            void setOnRecoveryTimedOutFunction(on_recovery_timed_out_func function) noexcept { m_On_Recovery_Timed_Out_Function = function; }
-            void setOnReceivedTCPFunction(on_received_tcp_func function) noexcept { m_On_Received_TCP_Function = function; }
-            void setOnReceivedUDPFunction(on_received_udp_func function) noexcept { m_On_Received_UDP_Function = function; }
-            void setUpdateFunction(update_func function) noexcept { m_Update_Function = function; }
+            inline void setOnUpdateFunction(update_func function) noexcept { m_Update_Function = function; }
+            inline void setOnTimedOutFunction(on_timed_out_func function) noexcept { m_On_Timed_Out_Function = function; }
+            inline void setOnRecoveryTimedOutFunction(on_recovery_timed_out_func function) noexcept { m_On_Recovery_Timed_Out_Function = function; }
+            inline void setOnReceivedTCPFunction(on_received_tcp_func function) noexcept { m_On_Received_TCP_Function = function; }
+            inline void setOnReceivedUDPFunction(on_received_udp_func function) noexcept { m_On_Received_UDP_Function = function; }
+            inline void setUpdateFunction(update_func function) noexcept { m_Update_Function = function; }
 
             virtual void onEvent(const Event& e) override {}
 

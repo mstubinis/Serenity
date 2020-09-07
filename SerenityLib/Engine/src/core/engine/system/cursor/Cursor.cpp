@@ -7,35 +7,81 @@ Cursor::Cursor() {
     bool success = m_SFMLCursor.loadFromSystem(sf::Cursor::Type::Arrow);
 }
 Cursor::Cursor(const std::string& textureFile) {
-    Texture* texture = Engine::Resources::getTexture(textureFile);
+    Texture* texture  = Engine::Resources::getTexture(textureFile);
     if (!texture) {
         Handle handle = Engine::Resources::loadTexture(textureFile);
-        texture = handle.get<Texture>();
+        texture       = handle.get<Texture>();
     }
-    bool success = loadFromPixels(texture, glm::uvec2(0, 0));
+    bool success      = loadFromPixels(texture, glm::uvec2(0, 0));
 }
 Cursor::~Cursor() {
 
 }
-bool Cursor::internal_load_from_pixels(const std::uint8_t* pixels, unsigned int width, unsigned int height, unsigned int hotspotX, unsigned int hotspotY, const glm::vec4& colorMultiplier) noexcept {
-    m_ColorMultiplier = colorMultiplier;
+bool Cursor::internal_load_from_pixels(const std::uint8_t* pixels, unsigned int width, unsigned int height, unsigned int hotspotX, unsigned int hotspotY, const glm::vec4& colorMultiplier, bool force) noexcept {
     m_Width           = width;
     m_Height          = height;
+    size_t numBytes   = width * height * 4;
+
+    if (force || (m_ColorMultiplier != colorMultiplier) || (m_Pixels.data() != pixels) || (m_Pixels.data() == pixels && m_Pixels.size() != numBytes)) {
+        m_ColorMultiplier = colorMultiplier;
+        m_Pixels.clear();
+        m_Pixels.reserve(numBytes);
+        for (size_t i = 0; i < numBytes; i += 4) {
+            unsigned char r = pixels[i + 0] * colorMultiplier.r;
+            unsigned char g = pixels[i + 1] * colorMultiplier.g;
+            unsigned char b = pixels[i + 2] * colorMultiplier.b;
+            unsigned char a = pixels[i + 3] * colorMultiplier.a;
+            m_Pixels.emplace_back(r);
+            m_Pixels.emplace_back(g);
+            m_Pixels.emplace_back(b);
+            m_Pixels.emplace_back(a);
+        }
+    }
+    return m_SFMLCursor.loadFromPixels(m_Pixels.data(), sf::Vector2u(width, height), sf::Vector2u(hotspotX, hotspotY));
+}
+bool Cursor::internal_rotate(long long startIndex, long long increment1, long long increment2, bool left) noexcept {
+    size_t oldWidth  = (size_t)m_Width;
+    size_t oldHeight = (size_t)m_Height;
+    size_t numBytes  = (size_t)m_Width * (size_t)m_Height * 4;
+
+    std::swap(m_Width, m_Height);
+    std::vector<std::uint8_t> oldPixels = m_Pixels;
+
     m_Pixels.clear();
-    m_Pixels.reserve(width * height * 4);
-    for (unsigned int i = 0; i < width * height * 4; i += 4) {
-        unsigned char r = pixels[i + 0] * colorMultiplier.r;
-        unsigned char g = pixels[i + 1] * colorMultiplier.g;
-        unsigned char b = pixels[i + 2] * colorMultiplier.b;
-        unsigned char a = pixels[i + 3] * colorMultiplier.a;
+    m_Pixels.reserve(numBytes);
+
+    long long pixel = startIndex;
+    for (size_t i = 0; i < numBytes; i += 4) {
+        unsigned char r = oldPixels[(pixel * 4) + 0] * m_ColorMultiplier.r;
+        unsigned char g = oldPixels[(pixel * 4) + 1] * m_ColorMultiplier.g;
+        unsigned char b = oldPixels[(pixel * 4) + 2] * m_ColorMultiplier.b;
+        unsigned char a = oldPixels[(pixel * 4) + 3] * m_ColorMultiplier.a;
         m_Pixels.emplace_back(r);
         m_Pixels.emplace_back(g);
         m_Pixels.emplace_back(b);
         m_Pixels.emplace_back(a);
+        pixel += increment1;
+        if ((left && pixel < 0) || (!left && pixel >= (oldWidth * oldHeight))) {
+            pixel += increment2;
+        }
     }
-    return m_SFMLCursor.loadFromPixels(m_Pixels.data(), sf::Vector2u(width, height), sf::Vector2u(hotspotX, hotspotY));
+    return m_SFMLCursor.loadFromPixels(m_Pixels.data(), sf::Vector2u(m_Width, m_Height), sf::Vector2u(m_Hotspot.x, m_Hotspot.y));
 }
-
+bool Cursor::rotateLeft() noexcept {
+    auto oldWidth  = (long long)m_Width;
+    auto oldHeight = (long long)m_Height;
+    return internal_rotate((oldWidth * oldHeight) - oldWidth, -oldWidth, (oldWidth * oldHeight) + 1, true);
+}
+bool Cursor::rotateRight() noexcept {
+    auto oldWidth  = (long long)m_Width;
+    auto oldHeight = (long long)m_Height;
+    return internal_rotate(oldWidth - 1, oldWidth, -((oldWidth * oldHeight) + 1), false);
+}
+void Cursor::setHotspot(unsigned int x, unsigned int y) noexcept {
+    m_Hotspot.x = x;
+    m_Hotspot.y = y;
+    internal_load_from_pixels(m_Pixels.data(), m_Width, m_Height, m_Hotspot.x, m_Hotspot.y, m_ColorMultiplier);
+}
 bool Cursor::loadFromCurrentData() noexcept {
     return loadFromCurrentData(m_ColorMultiplier);
 }

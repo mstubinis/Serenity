@@ -17,9 +17,9 @@ struct MaterialRequestPart final {
     MaterialRequestPart() = default;
     ~MaterialRequestPart() = default;
 
-    MaterialRequestPart(const MaterialRequestPart&);
-    MaterialRequestPart& operator=(const MaterialRequestPart&);
-    MaterialRequestPart(MaterialRequestPart&& other) noexcept = delete;
+    MaterialRequestPart(const MaterialRequestPart& other)                = default;
+    MaterialRequestPart& operator=(const MaterialRequestPart& other)     = default;
+    MaterialRequestPart(MaterialRequestPart&& other) noexcept            = delete;
     MaterialRequestPart& operator=(MaterialRequestPart&& other) noexcept = delete;
 };
 
@@ -53,8 +53,10 @@ struct MaterialRequest final {
     );
     ~MaterialRequest();
 
-    MaterialRequest(const MaterialRequest&);
-    MaterialRequest& operator=(const MaterialRequest&);
+    MaterialRequest(const MaterialRequest& other)                = default;
+    MaterialRequest& operator=(const MaterialRequest& other)     = default;
+    MaterialRequest(MaterialRequest&& other) noexcept            = delete;
+    MaterialRequest& operator=(MaterialRequest&& other) noexcept = delete;
 
     void request(bool async = false);
 };
@@ -62,9 +64,9 @@ struct MaterialRequest final {
 namespace Engine::priv {
     struct InternalMaterialRequestPublicInterface final {
         friend class  Material;
-        static void Request(MaterialRequest&);
-        static void LoadGPU(MaterialRequest&);
-        static void LoadCPU(MaterialRequest&);
+        static void Request(MaterialRequest& materialRequest);
+        static void LoadGPU(MaterialRequest& materialRequest);
+        static void LoadCPU(MaterialRequest& materialRequest);
     };
 };
 

@@ -20,9 +20,14 @@ namespace Engine::priv {
 
     struct EventEnum final {
         unsigned int enumValue = 0;
+        void* enumPtr          = nullptr;
         EventEnum() = default;
         EventEnum(unsigned int enum_) {
             enumValue = enum_;
+        }
+        EventEnum(unsigned int enum_, void* enumPtr_) {
+            enumValue = enum_;
+            enumPtr   = enumPtr_;
         }
     };
     struct EventSocket final {

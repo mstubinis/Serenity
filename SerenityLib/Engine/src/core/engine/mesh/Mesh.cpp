@@ -53,14 +53,13 @@ void InternalMeshPublicInterface::UnloadCPU(Mesh& mesh){
         q.push(mesh.m_RootNode);
         while (!q.empty()) {
             size_t size = q.size();
-            while (size > 0) {
+            while (size--) {
                 auto* front = q.front();
-                cleanup_vector.push_back(front);
+                cleanup_vector.emplace_back(front);
                 for (const auto& child : front->Children) {
                     q.push(child);
                 }
                 q.pop();
-                --size;
             }
         }
         SAFE_DELETE_VECTOR(cleanup_vector);
@@ -145,13 +144,13 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
         normals[1].reserve(data.binormals.size());
         normals[2].reserve(data.tangents.size());
         for (size_t i = 0; i < data.normals.size(); ++i) {
-            normals[0].push_back(Math::pack3NormalsInto32Int(data.normals[i]));
+            normals[0].emplace_back(Math::pack3NormalsInto32Int(data.normals[i]));
         }
         for (size_t i = 0; i < data.binormals.size(); ++i) {
-            normals[1].push_back(Math::pack3NormalsInto32Int(data.binormals[i]));
+            normals[1].emplace_back(Math::pack3NormalsInto32Int(data.binormals[i]));
         }
         for (size_t i = 0; i < data.tangents.size(); ++i) {
-            normals[2].push_back(Math::pack3NormalsInto32Int(data.tangents[i]));
+            normals[2].emplace_back(Math::pack3NormalsInto32Int(data.tangents[i]));
         }
         vertexData.setData(0, data.points.data(), data.points.size());
         vertexData.setData(1, data.uvs.data(), data.uvs.size());
@@ -190,20 +189,20 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
                     boneIDs.emplace_back(data.m_Bones[i].IDs[0], data.m_Bones[i].IDs[1], data.m_Bones[i].IDs[2], data.m_Bones[i].IDs[3]);
                     boneWeights.emplace_back(data.m_Bones[i].Weights[0], data.m_Bones[i].Weights[1], data.m_Bones[i].Weights[2], data.m_Bones[i].Weights[3]);
                 }
-                indices.emplace_back(static_cast<uint32_t>(temp_pos.size() - 1));
+                indices.emplace_back((std::uint32_t)temp_pos.size() - 1);
             }
         }
         normals[0].reserve(temp_normals.size());
         normals[1].reserve(temp_binormals.size());
         normals[2].reserve(temp_tangents.size());
         for (size_t i = 0; i < temp_normals.size(); ++i) {
-            normals[0].push_back(Math::pack3NormalsInto32Int(temp_normals[i]));
+            normals[0].emplace_back(Math::pack3NormalsInto32Int(temp_normals[i]));
         }
         for (size_t i = 0; i < temp_binormals.size(); ++i) {
-            normals[1].push_back(Math::pack3NormalsInto32Int(temp_binormals[i]));
+            normals[1].emplace_back(Math::pack3NormalsInto32Int(temp_binormals[i]));
         }
         for (size_t i = 0; i < temp_tangents.size(); ++i) {
-            normals[2].push_back(Math::pack3NormalsInto32Int(temp_tangents[i]));
+            normals[2].emplace_back(Math::pack3NormalsInto32Int(temp_tangents[i]));
         }
 
         vertexData.setData(0, temp_pos.data(), temp_pos.size());
@@ -226,28 +225,28 @@ void InternalMeshPublicInterface::TriangulateComponentIndices(Mesh& mesh, MeshIm
         glm::vec3 norm(1.0f);
         if (flags && MeshLoadingFlags::Points && data.file_points.size() > 0) {
             pos = data.file_points[indices[0][i] - 1];
-            data.points.push_back(pos);
+            data.points.emplace_back(pos);
         }
         if (flags && MeshLoadingFlags::UVs && data.file_uvs.size() > 0) {
             uv = data.file_uvs[indices[1][i] - 1];
-            data.uvs.push_back(uv);
+            data.uvs.emplace_back(uv);
         }
         if (flags && MeshLoadingFlags::Normals && data.file_normals.size() > 0) {
             norm = data.file_normals[indices[2][i] - 1];
-            data.normals.push_back(norm);
+            data.normals.emplace_back(norm);
         }
     }
 }
 void InternalMeshPublicInterface::CalculateRadius(Mesh& mesh) {
     mesh.m_radiusBox = glm::vec3(0.0f);
-    std::vector<glm::vec3> points = mesh.m_VertexData->getPositions();
+    auto points      = mesh.m_VertexData->getPositions();
     for (const auto& vertex : points) {
-        const float x = abs(vertex.x);
-        const float y = abs(vertex.y);
-        const float z = abs(vertex.z);
-        if (x > mesh.m_radiusBox.x)  mesh.m_radiusBox.x = x;
-        if (y > mesh.m_radiusBox.y)  mesh.m_radiusBox.y = y;
-        if (z > mesh.m_radiusBox.z)  mesh.m_radiusBox.z = z;
+        const float x      = std::abs(vertex.x);
+        const float y      = std::abs(vertex.y);
+        const float z      = std::abs(vertex.z);
+        mesh.m_radiusBox.x = std::max(mesh.m_radiusBox.x, x);
+        mesh.m_radiusBox.y = std::max(mesh.m_radiusBox.y, y);
+        mesh.m_radiusBox.z = std::max(mesh.m_radiusBox.z, z);
     }
     mesh.m_radius = Math::Max(mesh.m_radiusBox);
 }
@@ -282,10 +281,10 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
     std::unordered_map<std::string, VertexSmoothingGroup> m_VertexMap;
     auto& heightfields  = terrain.m_TerrainData.m_BtHeightfieldShapes;
 
-    unsigned int width  = static_cast<unsigned int>(heightfields[0][0]->getUserIndex());
-    unsigned int length = static_cast<unsigned int>(heightfields[0][0]->getUserIndex2());
-    const float fWidth  = static_cast<float>(width);
-    const float fLength = static_cast<float>(length);
+    unsigned int width  = (unsigned int)heightfields[0][0]->getUserIndex();
+    unsigned int length = (unsigned int)heightfields[0][0]->getUserIndex2();
+    const float fWidth  = (float)width;
+    const float fLength = (float)length;
 
     float totalVertexSizeX = fWidth * heightfields.size();
     float totalVertexSizeY = fLength * heightfields[0].size();
@@ -336,24 +335,24 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
                     verts[3].uv.y = (vertexAtY + 1.0f) / totalVertexSizeY;
 
                     for (int i = 0; i < 4; ++i) {
-                        data.points.push_back(verts[i].position);
-                        data.uvs.push_back(verts[i].uv);
-                        data.normals.push_back(verts[i].normal);
+                        data.points.emplace_back(verts[i].position);
+                        data.uvs.emplace_back(verts[i].uv);
+                        data.normals.emplace_back(verts[i].normal);
                     }
                     for (int i = 0; i < 4; ++i) {
                         smooths[i].normal = verts[i].normal;
                         smooths[i].index = (data.points.size() - 1) - (3 - i);
-                        m_VertexMap[hash_position(verts[i].position, 4)].data.push_back(std::move(smooths[i]));
+                        m_VertexMap[hash_position(verts[i].position, 4)].data.emplace_back(std::move(smooths[i]));
                     }
 
                     if (valid[0] || valid[1] || valid[2] || valid[3]) {
-                        data.indices.push_back(count + 0);
-                        data.indices.push_back(count + 2);
-                        data.indices.push_back(count + 1);
+                        data.indices.emplace_back(count + 0);
+                        data.indices.emplace_back(count + 2);
+                        data.indices.emplace_back(count + 1);
 
-                        data.indices.push_back(count + 2);
-                        data.indices.push_back(count + 3);
-                        data.indices.push_back(count + 1);
+                        data.indices.emplace_back(count + 2);
+                        data.indices.emplace_back(count + 3);
+                        data.indices.emplace_back(count + 1);
                     }
                     count += 4;
                 }
@@ -384,8 +383,8 @@ void Mesh::internal_recalc_indices_from_terrain(const Terrain& terrain) {
     for (size_t sectorX = 0; sectorX < heightfields.size(); ++sectorX) {
         for (size_t sectorY = 0; sectorY < heightfields[sectorX].size(); ++sectorY) {
             auto& heightfield = *heightfields[sectorX][sectorY];
-            unsigned int width  = static_cast<unsigned int>(heightfield.getUserIndex());
-            unsigned int length = static_cast<unsigned int>(heightfield.getUserIndex2());
+            unsigned int width  = (unsigned int)heightfield.getUserIndex();
+            unsigned int length = (unsigned int)heightfield.getUserIndex2();
             for (unsigned int i = 0; i < width; ++i) {
                 for (unsigned int j = 0; j < length; ++j) {
                     btVector3 vert1, vert2, vert3, vert4;
@@ -395,13 +394,13 @@ void Mesh::internal_recalc_indices_from_terrain(const Terrain& terrain) {
                     valid[2] = heightfield.getAndValidateVertex(i, j + 1,     vert3, false);
                     valid[3] = heightfield.getAndValidateVertex(i + 1, j + 1, vert4, false);
                     if (valid[0] || valid[1] || valid[2] || valid[3]) {
-                        data.indices.push_back(count + 0);
-                        data.indices.push_back(count + 2);
-                        data.indices.push_back(count + 1);
+                        data.indices.emplace_back(count + 0);
+                        data.indices.emplace_back(count + 2);
+                        data.indices.emplace_back(count + 1);
 
-                        data.indices.push_back(count + 2);
-                        data.indices.push_back(count + 3);
-                        data.indices.push_back(count + 1);
+                        data.indices.emplace_back(count + 2);
+                        data.indices.emplace_back(count + 3);
+                        data.indices.emplace_back(count + 1);
                     }
                     count += 4;
                 }
@@ -473,42 +472,45 @@ Mesh::Mesh(const std::string& fileOrData, float threshold) : Resource(ResourceTy
         }else if (line[0] == 'v' && line[1] == ' ') {
             if (flags && MeshLoadingFlags::Points) {
                 glm::vec3 p;
-                auto res = sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &p.x, &p.y, &p.z);
-                data.file_points.push_back(p);
+                auto res = std::sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &p.x, &p.y, &p.z);
+                data.file_points.emplace_back(p);
             }
         }else if (line[0] == 'v' && line[1] == 't') {
             if (flags && MeshLoadingFlags::UVs) {
                 glm::vec2 uv;
-                auto res = sscanf(line.substr(2, line.size()).c_str(), "%f %f", &uv.x, &uv.y);
+                auto res = std::sscanf(line.substr(2, line.size()).c_str(), "%f %f", &uv.x, &uv.y);
                 uv.y = 1.0f - uv.y;
-                data.file_uvs.push_back(uv);
+                data.file_uvs.emplace_back(uv);
             }
         }else if (line[0] == 'v' && line[1] == 'n') {
             if (flags && MeshLoadingFlags::Normals) {
                 glm::vec3 n;
-                auto res = sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &n.x, &n.y, &n.z);
-                data.file_normals.push_back(n);
+                auto res = std::sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &n.x, &n.y, &n.z);
+                data.file_normals.emplace_back(n);
             }
         }else if (line[0] == 'f' && line[1] == ' ') {
             if (flags && MeshLoadingFlags::Faces) {
                 glm::uvec3 f1, f2, f3, f4 = glm::uvec3(1);
-                int matches = sscanf(line.substr(2, line.size()).c_str(), "%d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d", &f1.x, &f1.y, &f1.z, &f2.x, &f2.y, &f2.z, &f3.x, &f3.y, &f3.z, &f4.x, &f4.y, &f4.z);
+                int matches = std::sscanf(line.substr(2, line.size()).c_str(), "%d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d", &f1.x, &f1.y, &f1.z, &f2.x, &f2.y, &f2.z, &f3.x, &f3.y, &f3.z, &f4.x, &f4.y, &f4.z);
                 if (matches < 3) {
-                    matches = sscanf(line.substr(2, line.size()).c_str(), "%d %d %d %d", &f1.x, &f2.x, &f3.x, &f4.x);
+                    matches = std::sscanf(line.substr(2, line.size()).c_str(), "%d %d %d %d", &f1.x, &f2.x, &f3.x, &f4.x);
                 }
-                f1 = glm::max(f1, glm::uvec3(1)); f2 = glm::max(f2, glm::uvec3(1)); f3 = glm::max(f3, glm::uvec3(1)); f4 = glm::max(f4, glm::uvec3(1));
+                f1 = glm::max(f1, glm::uvec3(1)); 
+                f2 = glm::max(f2, glm::uvec3(1)); 
+                f3 = glm::max(f3, glm::uvec3(1)); 
+                f4 = glm::max(f4, glm::uvec3(1));
                 if (matches == 3 || matches == 6 || matches == 9) { //triangle
-                    indices[0].push_back(f1.x); indices[0].push_back(f2.x); indices[0].push_back(f3.x);
-                    indices[1].push_back(f1.y); indices[1].push_back(f2.y); indices[1].push_back(f3.y);
-                    indices[2].push_back(f1.z); indices[2].push_back(f2.z); indices[2].push_back(f3.z);
+                    indices[0].emplace_back(f1.x); indices[0].emplace_back(f2.x); indices[0].emplace_back(f3.x);
+                    indices[1].emplace_back(f1.y); indices[1].emplace_back(f2.y); indices[1].emplace_back(f3.y);
+                    indices[2].emplace_back(f1.z); indices[2].emplace_back(f2.z); indices[2].emplace_back(f3.z);
                 }else if (matches == 4 || matches == 8 || matches == 12) {//quad
-                    indices[0].push_back(f1.x); indices[0].push_back(f2.x); indices[0].push_back(f3.x);
-                    indices[1].push_back(f1.y); indices[1].push_back(f2.y); indices[1].push_back(f3.y);
-                    indices[2].push_back(f1.z); indices[2].push_back(f2.z); indices[2].push_back(f3.z);
+                    indices[0].emplace_back(f1.x); indices[0].emplace_back(f2.x); indices[0].emplace_back(f3.x);
+                    indices[1].emplace_back(f1.y); indices[1].emplace_back(f2.y); indices[1].emplace_back(f3.y);
+                    indices[2].emplace_back(f1.z); indices[2].emplace_back(f2.z); indices[2].emplace_back(f3.z);
 
-                    indices[0].push_back(f1.x); indices[0].push_back(f3.x); indices[0].push_back(f4.x);
-                    indices[1].push_back(f1.y); indices[1].push_back(f3.y); indices[1].push_back(f4.y);
-                    indices[2].push_back(f1.z); indices[2].push_back(f3.z); indices[2].push_back(f4.z);
+                    indices[0].emplace_back(f1.x); indices[0].emplace_back(f3.x); indices[0].emplace_back(f4.x);
+                    indices[1].emplace_back(f1.y); indices[1].emplace_back(f3.y); indices[1].emplace_back(f4.y);
+                    indices[2].emplace_back(f1.z); indices[2].emplace_back(f3.z); indices[2].emplace_back(f4.z);
                 }
             }
         }

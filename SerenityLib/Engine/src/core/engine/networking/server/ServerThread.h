@@ -22,8 +22,8 @@ namespace Engine::Networking {
             bool remove_client(const std::string& hash, Server& server);
             bool add_client(const std::string& hash, ServerClient* client, Server& server);
 
-            size_t num_clients() const noexcept { return m_ServerClients.size(); }
-            std::unordered_map<std::string, std::unique_ptr<ServerClient>>& clients() const noexcept { return m_ServerClients; }
+            inline CONSTEXPR size_t num_clients() const noexcept { return m_ServerClients.size(); }
+            inline CONSTEXPR std::unordered_map<std::string, std::unique_ptr<ServerClient>>& clients() const noexcept { return m_ServerClients; }
     };
 
     class ServerThreadCollection {

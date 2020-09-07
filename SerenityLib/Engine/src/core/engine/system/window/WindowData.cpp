@@ -63,21 +63,20 @@ void Engine::priv::WindowData::internal_init_position(Window& super) {
 }
 const sf::ContextSettings Engine::priv::WindowData::internal_create(Window& super, const std::string& name) {
     internal_on_close();
-
-#ifdef ENGINE_THREAD_WINDOW_EVENTS
-    m_WindowThread.internal_startup(super, name);
-    std::this_thread::sleep_for(std::chrono::milliseconds(450));
-    m_SFMLWindow.setActive(true);
-    super.m_Data.m_OpenGLThreadID = std::this_thread::get_id();
-#else
-    m_SFMLWindow.create(m_VideoMode, name, m_Style, m_SFContextSettings);
-    if (!m_IconFile.empty())
-        super.setIcon(m_IconFile);
-    m_UndergoingClosing = false;
-#endif
+    #ifdef ENGINE_THREAD_WINDOW_EVENTS
+        m_WindowThread.internal_startup(super, name);
+        std::this_thread::sleep_for(std::chrono::milliseconds(450));
+        m_SFMLWindow.setActive(true);
+        super.m_Data.m_OpenGLThreadID = std::this_thread::get_id();
+    #else
+        m_SFMLWindow.create(m_VideoMode, name, m_Style, m_SFContextSettings);
+        if (!m_IconFile.empty())
+            super.setIcon(m_IconFile);
+        m_UndergoingClosing = false;
+    #endif
     return m_SFMLWindow.getSettings();
 }
-void Engine::priv::WindowData::internal_update_mouse_position_internal(Window& super, float x, float y, bool resetDifference, bool resetPrevious) {
+void Engine::priv::WindowData::internal_update_mouse_position(Window& super, float x, float y, bool resetDifference, bool resetPrevious) {
     auto sfml_size           = m_SFMLWindow.getSize();
     auto winSize             = glm::vec2(sfml_size.x, sfml_size.y);
     glm::vec2 newPos         = glm::vec2(x, winSize.y - y); //opengl flipping y axis
@@ -88,7 +87,7 @@ void Engine::priv::WindowData::internal_update_mouse_position_internal(Window& s
         m_MouseDifference    = glm::vec2(0.0f);
     }
 }
-void Engine::priv::WindowData::internal_on_fullscreen_internal(Window& super, bool isToBeFullscreen, bool isMaximized, bool isMinimized) {
+void Engine::priv::WindowData::internal_on_fullscreen(Window& super, bool isToBeFullscreen, bool isMaximized, bool isMinimized) {
     if (isToBeFullscreen) {
         m_OldWindowSize    = glm::uvec2(m_VideoMode.width, m_VideoMode.height);
         m_VideoMode        = internal_get_default_desktop_video_mode();
@@ -104,7 +103,7 @@ void Engine::priv::WindowData::internal_on_fullscreen_internal(Window& super, bo
     auto winSize   = glm::uvec2(sfml_size.x, sfml_size.y);
 
     //this does not trigger the sfml event resize method automatically so we must call it here
-    Engine::priv::Core::m_Engine->on_event_resize(super, winSize.x, winSize.y, false);
+    Engine::priv::Core::m_Engine->internal_on_event_resize(super, winSize.x, winSize.y, false);
 
     internal_restore_state(super);
     //TODO: very wierd, but there is an after-effect "reflection" of the last frame on the window if maximize() is called. Commenting out until it is fixed

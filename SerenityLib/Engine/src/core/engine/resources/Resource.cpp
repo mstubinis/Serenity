@@ -4,8 +4,6 @@
 #include <core/engine/system/Engine.h>
 #include <core/engine/events/Event.h>
 
-using namespace std;
-
 void Resource::load(){
     if(!m_IsLoaded){
         m_IsLoaded = true;

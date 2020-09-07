@@ -13,7 +13,6 @@
 #include <ecs/ComponentBody.h>
 #include <ecs/ComponentModel.h>
 
-using namespace std;
 using namespace Engine;
 
 namespace Engine::priv {
@@ -21,7 +20,6 @@ namespace Engine::priv {
         renderer->m_Pipeline->renderDecal(*i);
     }};
     struct DefaultDecalUnbindFunctor { void operator()(ModelInstance* i, const Engine::priv::Renderer* renderer) const {
-        //auto& i = *static_cast<ModelInstance*>(r);
     }};
 };
 
@@ -41,8 +39,8 @@ Decal::Decal(Material& material, const glm_vec3& localPosition, const glm::vec3&
     Math::alignTo(q, hitNormal);
     m_InitialRotation = q;
     body.setRotation(q);
-    const decimal factor = static_cast<decimal>(0.2f * size);
-    body.setScale(factor, factor, static_cast<decimal>(0.04));
+    const decimal factor = (decimal)(0.2f * size);
+    body.setScale(factor, factor, (decimal)0.04);
 
     model.setCustomBindFunctor(Engine::priv::DefaultDecalBindFunctor());
     model.setCustomUnbindFunctor(Engine::priv::DefaultDecalUnbindFunctor());
@@ -65,13 +63,4 @@ void Decal::update(const float dt) {
             Entity::destroy();
         }
     }
-}
-bool Decal::active() const {
-    return m_Active;
-}
-const glm_vec3& Decal::initialPosition() const {
-    return m_InitialPosition;
-}
-const glm_quat& Decal::initialRotation() const {
-    return m_InitialRotation;
 }

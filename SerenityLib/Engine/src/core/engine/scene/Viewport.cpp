@@ -5,9 +5,6 @@
 #include <core/engine/renderer/Renderer.h>
 #include <core/engine/resources/Engine_Resources.h>
 
-using namespace Engine;
-using namespace std;
-
 Viewport::Viewport() {
     m_RenderFlags = ViewportRenderingFlag::_ALL;
     activate();
@@ -15,32 +12,32 @@ Viewport::Viewport() {
     activateDepthMask(false);
 }
 Viewport::Viewport(Scene& scene, Camera& camera) : Viewport() {
-    auto winSize  = Resources::getWindowSize();
+    auto winSize  = Engine::Resources::getWindowSize();
     m_Scene       = &scene;
 
     setCamera(camera);
     setViewportDimensions(0.0f, 0.0f, (float)winSize.x, (float)winSize.y);
 }
 Viewport::Viewport(Viewport&& other) noexcept {
-    m_Scene                  = std::exchange(other.m_Scene, nullptr);
-    m_Camera                 = std::exchange(other.m_Camera, nullptr);
-    m_Viewport_Dimensions    = std::move(other.m_Viewport_Dimensions);
-    m_BackgroundColor        = std::move(other.m_BackgroundColor);
-    m_StateFlags             = std::move(other.m_StateFlags);
-    m_DepthMaskValue         = std::move(other.m_DepthMaskValue);
-    m_ID                     = std::move(other.m_ID);
-    m_RenderFlags            = std::move(other.m_RenderFlags);
+    m_Scene                = std::exchange(other.m_Scene, nullptr);
+    m_Camera               = std::exchange(other.m_Camera, nullptr);
+    m_Viewport_Dimensions  = std::move(other.m_Viewport_Dimensions);
+    m_BackgroundColor      = std::move(other.m_BackgroundColor);
+    m_StateFlags           = std::move(other.m_StateFlags);
+    m_DepthMaskValue       = std::move(other.m_DepthMaskValue);
+    m_ID                   = std::move(other.m_ID);
+    m_RenderFlags          = std::move(other.m_RenderFlags);
 }
 Viewport& Viewport::operator=(Viewport&& other) noexcept {
     if (&other != this) {
-        m_Scene                  = std::exchange(other.m_Scene, nullptr);
-        m_Camera                 = std::exchange(other.m_Camera, nullptr);
-        m_Viewport_Dimensions    = std::move(other.m_Viewport_Dimensions);
-        m_BackgroundColor        = std::move(other.m_BackgroundColor);
-        m_StateFlags             = std::move(other.m_StateFlags);
-        m_DepthMaskValue         = std::move(other.m_DepthMaskValue);
-        m_ID                     = std::move(other.m_ID);
-        m_RenderFlags            = std::move(other.m_RenderFlags);
+        m_Scene               = std::exchange(other.m_Scene, nullptr);
+        m_Camera              = std::exchange(other.m_Camera, nullptr);
+        m_Viewport_Dimensions = std::move(other.m_Viewport_Dimensions);
+        m_BackgroundColor     = std::move(other.m_BackgroundColor);
+        m_StateFlags          = std::move(other.m_StateFlags);
+        m_DepthMaskValue      = std::move(other.m_DepthMaskValue);
+        m_ID                  = std::move(other.m_ID);
+        m_RenderFlags         = std::move(other.m_RenderFlags);
     }
     return *this;
 }

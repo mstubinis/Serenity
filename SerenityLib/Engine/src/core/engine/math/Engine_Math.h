@@ -36,6 +36,9 @@ namespace Engine::Math{
     glm_vec3 btVectorToGLM(const btVector3&);
     btVector3 btVectorFromGLM(const glm_vec3&);
 
+    bool rect_fully_contained(const glm::vec4& bigger, const glm::vec4& smaller) noexcept;
+    glm::vec4 rect_union(const glm::vec4& bigger, const glm::vec4& smaller) noexcept;
+
     glm::vec3 assimpToGLMVec3(const aiVector3D&);
     glm::mat4 assimpToGLMMat4(const aiMatrix4x4&);
     glm::mat3 assimpToGLMMat3(const aiMatrix3x3&);

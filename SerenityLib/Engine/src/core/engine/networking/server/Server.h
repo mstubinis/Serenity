@@ -74,9 +74,9 @@ namespace Engine::Networking {
             inline CONSTEXPR SocketUDP& getUDPSocket() const noexcept { return *m_UdpSocket.get(); }
             inline CONSTEXPR ServerType::Type getType() const noexcept { return m_ServerType; }
             inline CONSTEXPR size_t num_clients() const noexcept { return m_Threads.getNumClients(); }
-            void setClientHashFunction(hash_func function) { m_Client_Hash_Function = function; }
-            void setServerUpdateFunction(update_func function) { m_Update_Function = function; }
-            void setOnReceiveUDPFunction(on_udp_func function) { m_On_Receive_UDP_Function = function; }
+            inline void setClientHashFunction(hash_func function) { m_Client_Hash_Function = function; }
+            inline void setServerUpdateFunction(update_func function) { m_Update_Function = function; }
+            inline void setOnReceiveUDPFunction(on_udp_func function) { m_On_Receive_UDP_Function = function; }
             void onReceiveUDP(Engine::Networking::Packet& packet, sf::IpAddress& ip, unsigned short port, const float dt);
 
             void update(const float dt);

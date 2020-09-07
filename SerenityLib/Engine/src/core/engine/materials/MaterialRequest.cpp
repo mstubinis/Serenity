@@ -10,34 +10,16 @@
 using namespace Engine;
 using namespace Engine::priv;
 
-MaterialRequestPart::MaterialRequestPart(const MaterialRequestPart& other) {
-    m_Material = other.m_Material;
-    m_Name     = other.m_Name;
-    m_Handle   = other.m_Handle;
-    m_TextureRequests = other.m_TextureRequests;
-}
-MaterialRequestPart& MaterialRequestPart::operator=(const MaterialRequestPart& other) {
-    if (&other != this) {
-        m_Material = other.m_Material;
-        m_Name     = other.m_Name;
-        m_Handle   = other.m_Handle;
-        m_TextureRequests = other.m_TextureRequests;
-    }
-    return *this;
-}
-
-
-
 MaterialRequest::MaterialRequest(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness, std::function<void()>&& callback){
     m_Part.m_Name = name;
     m_Callback    = std::move(callback);
-    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest(diffuse, false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_2D, []() {}));
-    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( normal, false, ImageInternalFormat::RGBA8, GL_TEXTURE_2D, []() {})  );
-    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( glow, false, ImageInternalFormat::R8, GL_TEXTURE_2D, []() {})  );
-    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( specular, false, ImageInternalFormat::R8, GL_TEXTURE_2D, []() {})  );
-    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( ao, false, ImageInternalFormat::R8, GL_TEXTURE_2D, []() {})  );
-    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( metalness, false, ImageInternalFormat::R8, GL_TEXTURE_2D, []() {})  );
-    m_Part.m_TextureRequests.emplace_back(  NEW TextureRequest( smoothness, false, ImageInternalFormat::R8, GL_TEXTURE_2D, []() {})  );
+    m_Part.m_TextureRequests.emplace_back( NEW TextureRequest( diffuse, false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_2D));
+    m_Part.m_TextureRequests.emplace_back( NEW TextureRequest( normal, false, ImageInternalFormat::RGBA8, GL_TEXTURE_2D));
+    m_Part.m_TextureRequests.emplace_back( NEW TextureRequest( glow, false, ImageInternalFormat::R8, GL_TEXTURE_2D));
+    m_Part.m_TextureRequests.emplace_back( NEW TextureRequest( specular, false, ImageInternalFormat::R8, GL_TEXTURE_2D));
+    m_Part.m_TextureRequests.emplace_back( NEW TextureRequest( ao, false, ImageInternalFormat::R8, GL_TEXTURE_2D));
+    m_Part.m_TextureRequests.emplace_back( NEW TextureRequest( metalness, false, ImageInternalFormat::R8, GL_TEXTURE_2D));
+    m_Part.m_TextureRequests.emplace_back( NEW TextureRequest( smoothness, false, ImageInternalFormat::R8, GL_TEXTURE_2D));
 }
 MaterialRequest::MaterialRequest(const std::string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness, std::function<void()>&& callback) {
     m_Part.m_Name     = name;
@@ -48,19 +30,6 @@ MaterialRequest::MaterialRequest(const std::string& name, Texture* diffuse, Text
 
 MaterialRequest::~MaterialRequest() {
 
-}
-MaterialRequest::MaterialRequest(const MaterialRequest& other) {
-    m_Async    = other.m_Async;
-    m_Part     = other.m_Part;
-    m_Callback = other.m_Callback;
-}
-MaterialRequest& MaterialRequest::operator=(const MaterialRequest& other) {
-    if (&other != this) {
-        m_Async    = other.m_Async;
-        m_Part     = other.m_Part;
-        m_Callback = other.m_Callback;
-    }
-    return *this;
 }
 
 void MaterialRequest::request(bool inAsync) {
@@ -91,10 +60,10 @@ void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {
         for (auto& textureRequest : request.m_Part.m_TextureRequests) {
             textureRequest->request(true);
         }
-        auto lambda_cpu = [=]() mutable {
+        auto lambda_cpu = [request]() mutable {
             InternalMaterialRequestPublicInterface::LoadCPU(request);
         };
-        auto lambda_gpu = [=]() mutable {
+        auto lambda_gpu = [request]() mutable {
             InternalMaterialRequestPublicInterface::LoadGPU(request);
             request.m_Callback();
         };
@@ -114,9 +83,9 @@ void InternalMaterialRequestPublicInterface::LoadCPU(MaterialRequest& request) {
 void InternalMaterialRequestPublicInterface::LoadGPU(MaterialRequest& request) {
     const auto& texture_requests = request.m_Part.m_TextureRequests;
     unsigned int count = 0;
-    for (size_t i = 0; i < texture_requests.size(); ++i) {
-        if (texture_requests[i]->fileExists) {
-            request.m_Part.m_Material->getComponent(count).layer(0).setTexture(texture_requests[i]->file);
+    for (const auto& req : texture_requests) {
+        if (req->fileExists) {
+            request.m_Part.m_Material->getComponent(count).layer(0).setTexture(req->file);
             ++count;
         }
     }

@@ -12,9 +12,6 @@ using namespace Engine;
 Window::Window() {
     internal_init();
 }
-Window::Window(const EngineOptions& options) : Window() {
-    init(options);
-}
 Window::~Window(){
 }
 void Window::init(const EngineOptions& options) noexcept {
@@ -58,11 +55,11 @@ void Window::init(const EngineOptions& options) noexcept {
     }
 }
 void Window::internal_init() noexcept {
-    m_Data.m_SFContextSettings.depthBits = 24;
-    m_Data.m_SFContextSettings.stencilBits = 0;
-    m_Data.m_SFContextSettings.antialiasingLevel = 0;
-    m_Data.m_SFContextSettings.majorVersion = 4;
-    m_Data.m_SFContextSettings.minorVersion = 6;
+    m_Data.m_SFContextSettings.depthBits          = 24;
+    m_Data.m_SFContextSettings.stencilBits        = 0;
+    m_Data.m_SFContextSettings.antialiasingLevel  = 0;
+    m_Data.m_SFContextSettings.majorVersion       = 4;
+    m_Data.m_SFContextSettings.minorVersion       = 6;
 
     #ifdef _DEBUG
         m_Data.m_SFContextSettings.attributeFlags = m_Data.m_SFContextSettings.Debug;
@@ -71,7 +68,7 @@ void Window::internal_init() noexcept {
     #endif
 
     m_Data.m_VideoMode.bitsPerPixel = 32;
-    m_Data.m_Style = sf::Style::Default;
+    m_Data.m_Style                  = sf::Style::Default;
 }
 void Window::setMouseCursor(const Cursor& cursor) noexcept {
     m_Data.m_SFMLWindow.setMouseCursor(cursor.getSFMLCursor());
@@ -83,25 +80,23 @@ bool Window::isJoystickProcessingActive() const {
     return m_Data.m_SFMLWindow.isJoystickManagerActive();
 }
 void Window::updateMousePosition(float x, float y, bool resetDifference, bool resetPrevious) {
-    m_Data.internal_update_mouse_position_internal(*this, x, y, resetDifference, resetPrevious);
+    m_Data.internal_update_mouse_position(*this, x, y, resetDifference, resetPrevious);
 }
 void Window::updateMousePosition(const glm::vec2& position, bool resetDifference, bool resetPrevious) {
-    m_Data.internal_update_mouse_position_internal(*this, position.x, position.y, resetDifference, resetPrevious);
+    m_Data.internal_update_mouse_position(*this, position.x, position.y, resetDifference, resetPrevious);
 }
-
-bool Window::maximize() {
+bool Window::internal_execute_show_window(unsigned int cmd) noexcept {
     #ifdef _WIN32
-        ::ShowWindow(m_Data.m_SFMLWindow.getSystemHandle(), SW_MAXIMIZE);
+        ::ShowWindow(m_Data.m_SFMLWindow.getSystemHandle(), cmd);
         return true;
     #endif
     return false;
 }
-bool Window::minimize() {
-    #ifdef _WIN32
-        ::ShowWindow(m_Data.m_SFMLWindow.getSystemHandle(), SW_MINIMIZE);
-        return true;
-    #endif
-    return false;
+bool Window::maximize() noexcept {
+    return internal_execute_show_window(SW_MAXIMIZE);
+}
+bool Window::minimize() noexcept {
+    return internal_execute_show_window(SW_MINIMIZE);
 }
 void Window::setPosition(unsigned int x, unsigned int y) {
     m_Data.m_SFMLWindow.setPosition(sf::Vector2i(x, y));
@@ -114,38 +109,30 @@ glm::uvec2 Window::getSize(){
     sf::Vector2u window_size = m_Data.m_SFMLWindow.getSize();
     return glm::uvec2(window_size.x, window_size.y);
 }
-void Window::setIcon(const Texture& texture){
+void Window::setIcon(const Texture& texture) {
     m_Data.m_SFMLWindow.setIcon(texture.width(), texture.height(), const_cast<Texture&>(texture).pixels());
+    m_Data.m_IconFile = texture.name();
 }
-void Window::setIcon(const char* file){
+void Window::setIcon(const char* file) {
     Texture* texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
     if (!texture) {
-        texture = NEW Texture(file, false, ImageInternalFormat::RGBA8);
-        Handle handle = priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
+        Handle handle = Engine::Resources::loadTexture(file);
+        texture       = handle.get<Texture>();
     }
     m_Data.m_SFMLWindow.setIcon(texture->width(), texture->height(), texture->pixels());
     m_Data.m_IconFile = file;
 }
 void Window::setIcon(const std::string& file) {
-    Texture* texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
-    if (!texture) {
-        texture = NEW Texture(file, false, ImageInternalFormat::RGBA8);
-        Handle handle = priv::Core::m_Engine->m_ResourceManager._addTexture(texture);
-    }
-    m_Data.m_SFMLWindow.setIcon(texture->width(), texture->height(), texture->pixels());
-    m_Data.m_IconFile = file;
+    Window::setIcon(file.c_str());
 }
-const std::string& Window::name() const {
-    return m_Data.m_WindowName;
-}
-void Window::setName(const char* name){
+void Window::setName(const char* name) {
     if (m_Data.m_WindowName == name) {
         return;
     }
     m_Data.m_WindowName = name;
     m_Data.m_SFMLWindow.setTitle(name);
 }
-void Window::setVerticalSyncEnabled(bool isToBeEnabled){
+void Window::setVerticalSyncEnabled(bool isToBeEnabled) {
     if (isToBeEnabled) {
         if (!m_Data.m_Flags.has(Window_Flags::Vsync)) {
             m_Data.m_SFMLWindow.setVerticalSyncEnabled(true);
@@ -158,7 +145,7 @@ void Window::setVerticalSyncEnabled(bool isToBeEnabled){
         }
     }
 }
-void Window::setKeyRepeatEnabled(bool isToBeEnabled){
+void Window::setKeyRepeatEnabled(bool isToBeEnabled) {
     if (isToBeEnabled) {
         if (!m_Data.m_Flags.has(Window_Flags::KeyRepeat)) {
             m_Data.m_SFMLWindow.setKeyRepeatEnabled(true);
@@ -171,7 +158,7 @@ void Window::setKeyRepeatEnabled(bool isToBeEnabled){
         }
     }
 }
-void Window::setMouseCursorVisible(bool isToBeVisible){
+void Window::setMouseCursorVisible(bool isToBeVisible) {
     if (isToBeVisible) {
         if (!m_Data.m_Flags.has(Window_Flags::MouseVisible)) {
             #ifdef ENGINE_THREAD_WINDOW_EVENTS
@@ -192,16 +179,15 @@ void Window::setMouseCursorVisible(bool isToBeVisible){
         }
     }
 }
-void Window::requestFocus(){
-
+void Window::requestFocus() {
     #ifdef ENGINE_THREAD_WINDOW_EVENTS
         m_Data.m_WindowThread.internal_push(WindowEventThreadOnlyCommands::RequestFocus);
     #else
         m_Data.m_SFMLWindow.requestFocus();
     #endif
 }
-void Window::close(){
-    priv::Core::m_Engine->on_event_window_closed(*this);
+void Window::close() {
+    priv::Core::m_Engine->internal_on_event_window_closed(*this);
     m_Data.m_SFMLWindow.close();
 }
 bool Window::isWindowOnSeparateThread() const {
@@ -233,32 +219,27 @@ bool Window::isFullscreenNonWindowed() const {
 bool Window::isMouseKeptInWindow() const {
     return m_Data.m_Flags.has(Window_Flags::MouseGrabbed);
 }
-void Window::display(){
+void Window::display() {
     m_Data.m_SFMLWindow.display();
 }
-bool Window::isMaximized() const {
+bool Window::internal_return_window_placement_cmd(unsigned int cmd) const noexcept {
     #ifdef _WIN32
         WINDOWPLACEMENT info;
         info.length = sizeof(WINDOWPLACEMENT);
         GetWindowPlacement(getSystemHandle(), &info);
-        if (info.showCmd == SW_MAXIMIZE) {
+        if (info.showCmd == cmd) {
             return true;
         }
     #endif
     return false;
 }
-bool Window::isMinimized() const {
-    #ifdef _WIN32
-        WINDOWPLACEMENT info;
-        info.length = sizeof(WINDOWPLACEMENT);
-        GetWindowPlacement(getSystemHandle(), &info);
-        if (info.showCmd == SW_MINIMIZE) {
-            return true;
-        }
-    #endif
-    return false;
+bool Window::isMaximized() const noexcept {
+    return internal_return_window_placement_cmd(SW_MAXIMIZE);
 }
-void Window::setActive(bool isToBeActive){
+bool Window::isMinimized() const noexcept {
+    return internal_return_window_placement_cmd(SW_MINIMIZE);
+}
+void Window::setActive(bool isToBeActive) {
     if (isToBeActive) {
         if (!m_Data.m_Flags.has(Window_Flags::Active)) {
             m_Data.m_SFMLWindow.setActive(true);
@@ -272,7 +253,7 @@ void Window::setActive(bool isToBeActive){
         }
     }
 }
-void Window::setSize(unsigned int width, unsigned int height){
+void Window::setSize(unsigned int width, unsigned int height) {
     if (m_Data.m_VideoMode.width == width && m_Data.m_VideoMode.height == height) {
         return;
     }
@@ -309,10 +290,10 @@ bool Window::setFullscreenWindowed(bool isToBeFullscreen) {
     }
     bool old_max = isMaximized();
     bool old_min = isMinimized();
-    m_Data.internal_on_fullscreen_internal(*this, isToBeFullscreen, old_max, old_min);
+    m_Data.internal_on_fullscreen(*this, isToBeFullscreen, old_max, old_min);
     return true;
 }
-bool Window::setFullscreen(bool isToBeFullscreen){
+bool Window::setFullscreen(bool isToBeFullscreen) {
     if (isToBeFullscreen) {
         if (isFullscreenNonWindowed()) {
             return false;
@@ -332,10 +313,10 @@ bool Window::setFullscreen(bool isToBeFullscreen){
     }
     bool old_max = isMaximized();
     bool old_min = isMinimized();
-    m_Data.internal_on_fullscreen_internal(*this, isToBeFullscreen, old_max, old_min);
+    m_Data.internal_on_fullscreen(*this, isToBeFullscreen, old_max, old_min);
     return true;
 }
-void Window::keepMouseInWindow(bool isToBeKept){
+void Window::keepMouseInWindow(bool isToBeKept) {
     if (isToBeKept) {
         #ifdef ENGINE_THREAD_WINDOW_EVENTS
             m_Data.m_WindowThread.internal_push(WindowEventThreadOnlyCommands::KeepMouseInWindow);
@@ -369,7 +350,7 @@ void Window::internal_on_dynamic_resize() {
 
         if (current_size.x != old_size.x || current_size.y != old_size.y) {
             Window::setSize(current_size.x, current_size.y);
-            priv::Core::m_Engine->on_event_resize(*this, current_size.x, current_size.y, true);
+            priv::Core::m_Engine->internal_on_event_resize(*this, current_size.x, current_size.y, true);
         }
     #endif
 }

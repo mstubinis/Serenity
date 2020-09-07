@@ -19,10 +19,10 @@ namespace Engine::priv {
         std::uint32_t versionID : VERSION_BIT_POSITIONS;
     };
 }
+
 /*
 The Entity class used in the ECS framework.
 */
-
 struct Entity {
     public:
         std::uint32_t m_Data = 0;
@@ -30,7 +30,10 @@ struct Entity {
         constexpr Entity() = default;
         Entity(Scene& scene);
         constexpr Entity(std::uint32_t entityID, std::uint32_t sceneID, std::uint32_t versionID) {
-            m_Data = versionID << (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS) | sceneID << (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS) | entityID;
+            m_Data = 
+                versionID << (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS) |    
+                sceneID << (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS) |    
+                entityID;
         }
         ~Entity() = default;
 
@@ -39,56 +42,35 @@ struct Entity {
         Entity(Entity&& other) noexcept            = default;
         Entity& operator=(Entity&& other) noexcept = default;
 
+        inline CONSTEXPR operator std::uint32_t() const noexcept { return m_Data; }
+        inline CONSTEXPR bool operator==(const Entity other) const noexcept { return (m_Data == other.m_Data); }
+        inline CONSTEXPR bool operator!=(const Entity other) const noexcept { return (m_Data != other.m_Data); }
+        inline CONSTEXPR bool null() const noexcept { return (m_Data == 0U); }
+
         void destroy() noexcept;
         bool isDestroyed() const noexcept;
 
-        inline constexpr std::uint32_t id() const noexcept {
-            return Entity::id(m_Data);
-        }
-        inline constexpr std::uint32_t sceneID() const noexcept {
-            return Entity::sceneID(m_Data);
-        }
-        inline constexpr std::uint32_t versionID() const noexcept {
-            return Entity::versionID(m_Data);
-        }
-        static inline constexpr std::uint32_t id(Entity entity) noexcept {
-            return Entity::id(entity.m_Data);
-        }
-        static inline constexpr std::uint32_t sceneID(Entity entity) noexcept {
-            return Entity::sceneID(entity.m_Data);
-        }
-        static inline constexpr std::uint32_t versionID(Entity entity) noexcept {
-            return Entity::versionID(entity.m_Data);
-        }
-        static inline constexpr std::uint32_t id(std::uint32_t data) noexcept {
+        inline CONSTEXPR std::uint32_t id() const noexcept { return id(m_Data); }
+        inline CONSTEXPR std::uint32_t sceneID() const noexcept { return sceneID(m_Data); }
+        inline CONSTEXPR std::uint32_t versionID() const noexcept { return versionID(m_Data); }
+
+        static inline CONSTEXPR std::uint32_t id(std::uint32_t data) noexcept {
             Engine::priv::entity_packed_data p{};
             p.ID = (data & 4'194'303U) >> (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS - ID_BIT_POSITIONS);
             return p.ID;
         }
-        static inline constexpr std::uint32_t sceneID(std::uint32_t data) noexcept {
+        static inline CONSTEXPR std::uint32_t sceneID(std::uint32_t data) noexcept {
             Engine::priv::entity_packed_data p{};
             p.sceneID = (data & 534'773'760U) >> (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS);
             return p.sceneID;
         }
-        static inline constexpr std::uint32_t versionID(std::uint32_t data) noexcept {
+        static inline CONSTEXPR std::uint32_t versionID(std::uint32_t data) noexcept {
             Engine::priv::entity_packed_data p{};
             p.versionID = (data & 4'026'531'840U) >> (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS);
             return p.versionID;
         }
 
-
-        inline constexpr bool operator==(const Entity other) const noexcept {
-            return (m_Data == other.m_Data);
-        }
-        inline constexpr bool operator!=(const Entity other) const noexcept {
-            return (m_Data != other.m_Data);
-        }
-
         Scene& scene() const noexcept;
-        inline constexpr bool null() const noexcept {
-            return (m_Data == 0U);
-        }
-
         bool hasParent() const noexcept;
 
         void addChild(Entity child) const noexcept;
@@ -100,10 +82,10 @@ struct Entity {
         template<typename T> inline bool removeComponent() noexcept {
             return Engine::priv::InternalEntityPublicInterface::GetECS(*this).removeComponent<T>(*this);
         }
-        template<typename T> inline constexpr T* getComponent() const noexcept {
+        template<typename T> inline CONSTEXPR T* getComponent() const noexcept {
             return Engine::priv::InternalEntityPublicInterface::GetECS(*this).getComponent<T>(*this);
         }
-        template<class... Types> inline constexpr std::tuple<Types*...> getComponents() const noexcept {
+        template<class... Types> inline CONSTEXPR std::tuple<Types*...> getComponents() const noexcept {
             return Engine::priv::InternalEntityPublicInterface::GetECS(*this).getComponents<Types...>(*this);
         }
 

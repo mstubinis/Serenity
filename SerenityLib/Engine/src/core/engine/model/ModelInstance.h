@@ -28,7 +28,7 @@ namespace Engine::priv {
 #include <core/engine/model/ModelInstanceAnimation.h>
 #include <core/engine/scene/ViewportIncludes.h>
 
-class ModelInstance final : public Engine::UserPointer {
+class ModelInstance final : public Engine::UserPointer, public Observer {
     friend struct Engine::priv::DefaultModelInstanceBindFunctor;
     friend struct Engine::priv::DefaultModelInstanceUnbindFunctor;
     friend struct Engine::priv::ComponentModel_UpdateFunction;
@@ -63,8 +63,10 @@ class ModelInstance final : public Engine::UserPointer {
         bool                                                 m_PassedRenderCheck = false;
         bool                                                 m_Visible           = true;
         bool                                                 m_ForceRender       = false;
+        float                                                m_Radius            = 0.0f;
         size_t                                               m_Index             = 0U;
 
+        float internal_calculate_radius();
         void internal_init(Mesh* mesh, Material* mat, ShaderProgram* program);
         void internal_update_model_matrix();
 
@@ -85,6 +87,8 @@ class ModelInstance final : public Engine::UserPointer {
 
         ~ModelInstance();
 
+        void onEvent(const Event& e) override;
+
         static inline void setGlobalDistanceFactor(decimal factor) noexcept { m_GlobalDistanceFactor = factor; }
         static inline CONSTEXPR decimal getGlobalDistanceFactor() noexcept { return m_GlobalDistanceFactor; }
 
@@ -102,6 +106,7 @@ class ModelInstance final : public Engine::UserPointer {
 
         unsigned int getViewportFlags() const;
 
+        inline CONSTEXPR float radius() const noexcept { return m_Radius; }
         inline CONSTEXPR size_t index() const noexcept { return m_Index; }
         inline CONSTEXPR ModelDrawingMode getDrawingMode() const noexcept { return m_DrawingMode; }
         inline void setDrawingMode(ModelDrawingMode drawMode) noexcept { m_DrawingMode = drawMode; }

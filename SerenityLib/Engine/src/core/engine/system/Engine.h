@@ -44,19 +44,19 @@ namespace Engine{
             friend class Window;
             friend class Engine::priv::WindowData;
             private:
-                void init_os_specific(const EngineOptions& options);
-                void cleanup_os_specific();
+                void internal_init_os_specific(const EngineOptions& options);
+                void internal_cleanup_os_specific();
 
                 /* The sf::Event::Resized event is triggered when the window is resized,
                 either through user action or programmatically by calling window.setSize. */
-                void on_event_resize(Window& window, unsigned int w, unsigned int h, bool saveSize);
+                void internal_on_event_resize(Window& window, unsigned int w, unsigned int h, bool saveSize);
 
                 /* Triggered when the game application fully closes, by calling Engine::stop(). This triggers Game::onGameEnded(), and this will be called before Game::cleanup() */
-                void on_event_game_ended();
+                void internal_on_event_game_ended();
 
 
                 /* Triggered when a window has closed via Window::close() */
-                void on_event_window_closed(Window& window);
+                void internal_on_event_window_closed(Window& window);
 
                 /* The sf::Event::Closed event is triggered when the user wants to close the window,
                 through any of the possible methods the window manager provides ("close" button, keyboard shortcut, etc.).
@@ -65,22 +65,22 @@ namespace Engine{
                 Typical code will just call window.close() in reaction to this event, to actually close the window.
                 However, you may also want to do something else first, like saving the current application state or asking the user what to do.
                 If you don't do anything, the window remains open. */
-                void on_event_window_requested_closed(Window& window);
+                void internal_on_event_window_requested_closed(Window& window);
 
                 /* The sf::Event::LostFocus and sf::Event::GainedFocus events are triggered when the window loses/gains focus,
                 which happens when the user switches the currently active window. When the window is out of focus, it doesn't receive keyboard events. */
-                void on_event_lost_focus(Window& window);
+                void internal_on_event_lost_focus(Window& window);
 
                 /* The sf::Event::LostFocus and sf::Event::GainedFocus events are triggered when the window loses/gains focus,
                 which happens when the user switches the currently active window. When the window is out of focus, it doesn't receive keyboard events. */
-                void on_event_gained_focus(Window& window);
+                void internal_on_event_gained_focus(Window& window);
 
                 /* The sf::Event::TextEntered event is triggered when a character is typed.
                 This must not be confused with the KeyPressed event: TextEntered interprets the user input and produces the appropriate printable character.
                 For example, pressing '^' then 'e' on a French keyboard will produce two KeyPressed events, but a single TextEntered event containing the 'ê' character.
                 It works with all the input methods provided by the operating system, even the most specific or complex ones.
                 This event is typically used to catch user input in a text field. */
-                void on_event_text_entered(Window& window, unsigned int unicode);
+                void internal_on_event_text_entered(Window& window, unsigned int unicode);
 
 
                 /* The sf::Event::KeyPressed and sf::Event::KeyReleased events are triggered when a keyboard key is pressed/released.
@@ -89,7 +89,7 @@ namespace Engine{
                 On the flip side, it is obvious that KeyReleased events can never be repeated.
                 This event is the one to use if you want to trigger an action exactly once when a key is pressed or released,
                 like making a character jump with space, or exiting something with escape. */
-                void on_event_key_pressed(Window& window, unsigned int key);
+                void internal_on_event_key_pressed(Window& window, unsigned int key);
 
                 /* The sf::Event::KeyPressed and sf::Event::KeyReleased events are triggered when a keyboard key is pressed/released.
                 If a key is held, multiple KeyPressed events will be generated, at the default operating system delay
@@ -97,47 +97,47 @@ namespace Engine{
                 On the flip side, it is obvious that KeyReleased events can never be repeated.
                 This event is the one to use if you want to trigger an action exactly once when a key is pressed or released,
                 like making a character jump with space, or exiting something with escape. */
-                void on_event_key_released(Window& window, unsigned int key);
+                void internal_on_event_key_released(Window& window, unsigned int key);
 
                 /* The sf::Event::MouseWheelScrolled event is triggered when a mouse wheel moves up or down, but also laterally if the mouse supports it.
                 The member associated with this event is event.mouseWheelScroll, it contains the number of ticks the wheel has moved,
                 what the orientation of the wheel is and the current position of the mouse cursor. */
-                void on_event_mouse_wheel_scrolled(Window& window, float delta, int mouseWheelX, int mouseWheelY);
+                void internal_on_event_mouse_wheel_scrolled(Window& window, float delta, int mouseWheelX, int mouseWheelY);
 
                 /* The sf::Event::MouseButtonPressed and sf::Event::MouseButtonReleased events are
                 triggered when a mouse button is pressed/released.
                 SFML supports 5 mouse buttons: left, right, middle (wheel), extra #1 and extra #2 (side buttons). */
-                void on_event_mouse_button_pressed(Window& window, unsigned int mouseButton);
+                void internal_on_event_mouse_button_pressed(Window& window, unsigned int mouseButton);
 
                 /* The sf::Event::MouseButtonPressed and sf::Event::MouseButtonReleased events are
                 triggered when a mouse button is pressed/released.
                 SFML supports 5 mouse buttons: left, right, middle (wheel), extra #1 and extra #2 (side buttons). */
-                void on_event_mouse_button_released(Window& window, unsigned int mouseButton);
+                void internal_on_event_mouse_button_released(Window& window, unsigned int mouseButton);
 
                 /* The sf::Event::MouseMoved event is triggered when the mouse moves within the window.
                 This event is triggered even if the window isn't focused. However, it is triggered
                 only when the mouse moves within the inner area of the window, not when it moves over the title bar or borders. */
-                void on_event_mouse_moved(Window& window, int mouseX, int mouseY);
+                void internal_on_event_mouse_moved(Window& window, int mouseX, int mouseY);
 
                 /* The sf::Event::MouseEntered and sf::Event::MouseLeft events are triggered when the mouse cursor enters/leaves the window. */
-                void on_event_mouse_entered(Window& window);
+                void internal_on_event_mouse_entered(Window& window);
 
                 /* The sf::Event::MouseEntered and sf::Event::MouseLeft events are triggered when the mouse cursor enters/leaves the window. */
-                void on_event_mouse_left(Window& window);
+                void internal_on_event_mouse_left(Window& window);
 
 
-                void on_event_joystick_button_pressed(Window& window, unsigned int button, unsigned int id);
-                void on_event_joystick_button_released(Window& window, unsigned int button, unsigned int id);
-                void on_event_joystick_moved(Window& window, unsigned int id, float position, unsigned int axis);
-                void on_event_joystick_connected(Window& window, unsigned int id);
-                void on_event_joystick_disconnected(Window& window, unsigned int id);
+                void internal_on_event_joystick_button_pressed(Window& window, unsigned int button, unsigned int id);
+                void internal_on_event_joystick_button_released(Window& window, unsigned int button, unsigned int id);
+                void internal_on_event_joystick_moved(Window& window, unsigned int id, float position, unsigned int axis);
+                void internal_on_event_joystick_connected(Window& window, unsigned int id);
+                void internal_on_event_joystick_disconnected(Window& window, unsigned int id);
 
-                void update_logic(Scene& scene, Window& window, const float dt);
-                void update_sounds(Scene& scene, Window& window, const float dt);
-                void update_physics(Scene& scene, Window& window, const float dt);
-                void update(Window& window, const float dt);
-                void render(Window& window, const float dt);
-                void cleanup(Window& window, const float dt);
+                void internal_update_logic(Scene& scene, Window& window, const float dt);
+                void internal_update_sounds(Scene& scene, Window& window, const float dt);
+                void internal_update_physics(Scene& scene, Window& window, const float dt);
+                void internal_update(Window& window, const float dt);
+                void internal_render(Window& window, const float dt);
+                void internal_cleanup(Window& window, const float dt);
             public:
                 class Misc final {
                     public:

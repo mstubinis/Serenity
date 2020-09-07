@@ -32,27 +32,26 @@ namespace Engine::priv {
             unsigned int AddScene(Scene& scene);
         public:
             //http://gamesfromwithin.com/managing-data-relationships
-            ResourcePool<Resource>             m_Resources;
-            std::vector<Window*>               m_Windows;
-            std::vector<Scene*>                m_Scenes;
-            std::vector<Scene*>                m_ScenesToBeDeleted;
-            Scene*                             m_CurrentScene = nullptr;
-            bool                               m_DynamicMemory = false;
+            ResourcePool<Resource>                m_Resources;
+            std::vector<std::unique_ptr<Window>>  m_Windows;
+            std::vector<std::unique_ptr<Scene>>   m_Scenes;
+            std::vector<Scene*>                   m_ScenesToBeDeleted;
+            Scene*                                m_CurrentScene = nullptr;
         public:
 
-            ResourceManager(const EngineOptions& options);
+            ResourceManager(const EngineOptions& engineOptions);
             ~ResourceManager();
 
             void cleanup();
 
             void onPostUpdate();
 
-            void _init(const EngineOptions& options);
+            void init(const EngineOptions& engineOptions);
  
-            Handle _addTexture(Texture*);
-            Scene& _getSceneByID(std::uint32_t id);
+            Handle _addTexture(Texture* texture);
+            Scene& _getSceneByID(std::uint32_t sceneID);
 
-            std::vector<Scene*>& scenes();
+            inline CONSTEXPR std::vector<std::unique_ptr<Scene>>& scenes() noexcept { return m_Scenes; }
 
             template<typename T> T* HasResource(std::string_view resource_name) noexcept {
                 for (size_t i = 0; i < m_Resources.size(); ++i) {
@@ -74,7 +73,7 @@ namespace Engine::priv {
                     if (r) {
                         T* resource = dynamic_cast<T*>(r);
                         if (resource) {
-                            ret.push_back(resource);
+                            ret.emplace_back(resource);
                         }
                     }
                 }
@@ -83,10 +82,6 @@ namespace Engine::priv {
 
 
     };
-};
-namespace Engine::Resources::Settings {
-    void enableDynamicMemory(bool enable = true);
-    void disableDynamicMemory();
 };
 namespace Engine::Resources {
     Scene* getCurrentScene();
@@ -107,21 +102,34 @@ namespace Engine::Resources {
     bool deleteScene(std::string_view sceneName);
     bool deleteScene(Scene& scene);
 
-    void getShader(Handle inHandle, Shader*& outPtr);                  Shader*    getShader(Handle inHandle);
-    void getSoundData(Handle inHandle, SoundData*& outPtr);            SoundData* getSoundData(Handle inHandle);
-    void getCamera(Handle inHandle, Camera*& outPtr);                  Camera*    getCamera(Handle inHandle);
-    void getFont(Handle inHandle, Font*& outPtr);                      Font*      getFont(Handle inHandle);
+    void     getShader(Handle inHandle, Shader*& outPtr);                  
+    Shader*  getShader(Handle inHandle);
+
+    void       getSoundData(Handle inHandle, SoundData*& outPtr);            
+    SoundData* getSoundData(Handle inHandle);
+
+    void     getCamera(Handle inHandle, Camera*& outPtr);                  
+    Camera*  getCamera(Handle inHandle);
+
+    void  getFont(Handle inHandle, Font*& outPtr);                      
+    Font* getFont(Handle inHandle);
+    Font* getFont(std::string_view name);
 
     void     getTexture(Handle inHandle, Texture*& outPtr);
     Texture* getTexture(Handle inHandle);
     Texture* getTexture(std::string_view name);
 
-    void getMesh(Handle inHandle, Mesh*& outPtr);                      Mesh*      getMesh(Handle inHandle);
+    void  getMesh(Handle inHandle, Mesh*& outPtr);
+    Mesh* getMesh(Handle inHandle);
+    Mesh* getMesh(std::string_view name);
 
     void      getMaterial(Handle inHandle, Material*& outPtr);
     Material* getMaterial(Handle inHandle);
+    Material* getMaterial(std::string_view name);
 
-    void getShaderProgram(Handle inHandle, ShaderProgram*& outPtr);    ShaderProgram*   getShaderProgram(Handle inHandle);
+    void           getShaderProgram(Handle inHandle, ShaderProgram*& outPtr);
+    ShaderProgram* getShaderProgram(Handle inHandle);
+    ShaderProgram* getShaderProgram(std::string_view name);
 
     Handle addFont(const std::string& filename, int height, int width = 0, float line_height = 8.0f);
 

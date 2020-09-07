@@ -10,6 +10,7 @@ namespace Engine::priv {
     class  EventManager;
     class  WindowData;
     class  WindowThread;
+    class  ResourceManager;
 };
 class  Texture;
 struct EngineOptions;
@@ -23,6 +24,7 @@ class Window final{
     friend class Engine::priv::EventManager;
     friend class Engine::priv::WindowData;
     friend class Engine::priv::WindowThread;
+    friend class Engine::priv::ResourceManager;
     private:
         Engine::priv::WindowData m_Data;
 
@@ -31,16 +33,18 @@ class Window final{
         void internal_on_dynamic_resize();
 
         void internal_restore_state();
-
         void internal_init() noexcept;
-    public:
+        bool internal_return_window_placement_cmd(unsigned int cmd) const noexcept;
+        bool internal_execute_show_window(unsigned int cmd) noexcept;
+
         Window();
-        Window(const EngineOptions& options);
+    public:
         ~Window();
 
         void init(const EngineOptions& options) noexcept;
 
-        const std::string& name() const;
+        inline CONSTEXPR const std::string& name() const noexcept { return m_Data.m_WindowName; }
+
         glm::uvec2 getSize();
         glm::uvec2 getPosition();
 
@@ -74,9 +78,9 @@ class Window final{
         bool isFullscreenNonWindowed() const;
 
         //currently specific to windows os only
-        bool isMaximized() const;
+        bool isMaximized() const noexcept;
         //currently specific to windows os only
-        bool isMinimized() const;
+        bool isMinimized() const noexcept;
 
         bool isActive() const;
         bool isMouseKeptInWindow() const;
@@ -93,9 +97,9 @@ class Window final{
         void setPosition(unsigned int x, unsigned int y);
 
         //currently specific to windows os only
-        bool maximize();
+        bool maximize() noexcept;
         //currently specific to windows os only
-        bool minimize();
+        bool minimize() noexcept;
 
         //If key repeat is enabled, you will receive repeated KeyPressed events while keeping a key pressed.
         //If it is disabled, you will only get a single event when the key is pressed.

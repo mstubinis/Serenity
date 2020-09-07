@@ -110,8 +110,7 @@ Material::~Material(){
 }
 MaterialComponent* Material::internal_add_component_generic(MaterialComponentType type, Texture* texture, Texture* mask, Texture* cubemap) {
     MaterialComponent* newMaterialComponent = NEW MaterialComponent(type, texture, mask, cubemap);
-    m_Components.emplace_back(newMaterialComponent);
-    return newMaterialComponent;
+    return m_Components.emplace_back(newMaterialComponent);
 }
 void Material::internal_update_global_material_pool(bool addToDatabase) {
     //this data is kept around to be deferred to the lighting pass
