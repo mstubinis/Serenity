@@ -10,11 +10,10 @@
 
 using namespace Engine;
 using namespace Engine::priv;
-using namespace std;
 
-SoundEffect::SoundEffect() : SoundBaseClass(1) {
-
-}
+SoundEffect::SoundEffect() 
+    : SoundBaseClass{ 1 }
+{}
 void SoundEffect::update(const float dt) {
     auto sfStatus = m_Sound.getStatus();
     if (sfStatus == sf::SoundSource::Status::Stopped) {

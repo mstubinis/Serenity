@@ -8,7 +8,7 @@ namespace Engine::priv {
             std::packaged_task<void()> m_Task;
         public:
             Task(std::function<void()>&& inTask);
-            ~Task();
+            ~Task() = default;
 
             inline void operator()() noexcept {
                 //if (m_Task.valid()) {

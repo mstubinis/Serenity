@@ -42,6 +42,8 @@ namespace Engine{
 
                 void _update(const float dt, int maxSubSteps = 1, float fixedTimeStep = 0.0166666f);
                 void _render(const Camera& camera);
+
+                bool add_rigid_body(btRigidBody* rigidBody, short group, short mask, bool doGroupAndMask) noexcept;
         };
     };
     namespace Physics{
@@ -67,24 +69,24 @@ namespace Engine{
         void unpause();
 
         bool addRigidBody(Entity entity);
-        void addRigidBody(ComponentBody&);
-        void addRigidBody(btRigidBody*, short group, short mask);
-        void addRigidBody(btRigidBody*);
+        bool addRigidBody(ComponentBody&);
+        bool addRigidBody(btRigidBody*, short group, short mask);
+        bool addRigidBody(btRigidBody*);
         bool removeRigidBody(Entity entity);
-        void removeRigidBody(btRigidBody*);
-        void removeRigidBody(ComponentBody&);
-        void removeCollisionObject(btCollisionObject* object);
+        bool removeRigidBody(btRigidBody*);
+        bool removeRigidBody(ComponentBody&);
+        bool removeCollisionObject(btCollisionObject* object);
 
         void updateRigidBody(btRigidBody*);
 
         bool addRigidBodyThreadSafe(Entity entity);
-        void addRigidBodyThreadSafe(ComponentBody&);
-        void addRigidBodyThreadSafe(btRigidBody*, short group, short mask);
-        void addRigidBodyThreadSafe(btRigidBody*);
+        bool addRigidBodyThreadSafe(ComponentBody&);
+        bool addRigidBodyThreadSafe(btRigidBody*, short group, short mask);
+        bool addRigidBodyThreadSafe(btRigidBody*);
         bool removeRigidBodyThreadSafe(Entity entity);
-        void removeRigidBodyThreadSafe(btRigidBody*);
-        void removeRigidBodyThreadSafe(ComponentBody&);
-        void removeCollisionObjectThreadSafe(btCollisionObject* object);
+        bool removeRigidBodyThreadSafe(btRigidBody*);
+        bool removeRigidBodyThreadSafe(ComponentBody&);
+        bool removeCollisionObjectThreadSafe(btCollisionObject* object);
 
         void updateRigidBodyThreadSafe(btRigidBody*);
     };

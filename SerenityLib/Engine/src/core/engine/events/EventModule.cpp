@@ -8,7 +8,6 @@
 
 using namespace Engine;
 using namespace Engine::priv;
-using namespace std;
 
 EventModule* eventModule = nullptr;
 
@@ -104,20 +103,20 @@ double Engine::getMouseWheelDelta(Window& window){
     return window.getMouseWheelDelta();
 }
 void Engine::setMousePosition(Window& window, float x, float y, bool resetDifference, bool resetPreviousPosition){
-    sf::Mouse::setPosition(sf::Vector2i(static_cast<int>(x), static_cast<int>(y)), window.getSFMLHandle());
+    sf::Mouse::setPosition(sf::Vector2i((int)x, (int)y), window.getSFMLHandle());
     window.updateMousePosition(x, y, resetDifference, resetPreviousPosition);
 }
 void Engine::setMousePosition(Window& window, unsigned int x, unsigned int y, bool resetDifference, bool resetPreviousPosition){
     sf::Mouse::setPosition(sf::Vector2i(x, y), window.getSFMLHandle());
-    window.updateMousePosition(static_cast<float>(x), static_cast<float>(y), resetDifference, resetPreviousPosition);
+    window.updateMousePosition((float)x, (float)y, resetDifference, resetPreviousPosition);
 }
 void Engine::setMousePosition(Window& window, const glm::vec2& pos, bool resetDifference, bool resetPreviousPosition){
-    sf::Mouse::setPosition(sf::Vector2i(static_cast<int>(pos.x), static_cast<int>(pos.y)), window.getSFMLHandle());
+    sf::Mouse::setPosition(sf::Vector2i((int)pos.x, (int)pos.y), window.getSFMLHandle());
     window.updateMousePosition(pos.x, pos.y, resetDifference, resetPreviousPosition);
 }
 void Engine::setMousePosition(Window& window, const glm::uvec2& pos, bool resetDifference, bool resetPreviousPosition){
     sf::Mouse::setPosition(sf::Vector2i(pos.x, pos.y), window.getSFMLHandle());
-    window.updateMousePosition(static_cast<float>(pos.x), static_cast<float>(pos.y), resetDifference, resetPreviousPosition);
+    window.updateMousePosition((float)pos.x, (float)pos.y, resetDifference, resetPreviousPosition);
 }
 void Engine::setMousePosition(float x, float y, bool resetDifference, bool resetPreviousPosition) {
     Engine::setMousePosition(Resources::getWindow(), x, y, resetDifference, resetPreviousPosition);

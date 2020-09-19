@@ -2,7 +2,6 @@
 #include <core/engine/lua/LuaModule.h>
 
 using namespace Engine::priv;
-using namespace std;
 
 LUAModule* manager = nullptr;
 

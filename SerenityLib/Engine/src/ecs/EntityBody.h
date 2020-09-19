@@ -16,6 +16,12 @@ class EntityBody : public Entity {
         EntityBody(Scene& scene);
         EntityBody(const Entity& other);
         EntityBody(std::uint32_t entityID, std::uint32_t sceneID, std::uint32_t versionID);
+
+        EntityBody(const EntityBody& other)                = default;
+        EntityBody& operator=(const EntityBody& other)     = default;
+        EntityBody(EntityBody&& other) noexcept            = default;
+        EntityBody& operator=(EntityBody&& other) noexcept = default;
+
         virtual ~EntityBody() = default;
 
         virtual float mass() const;

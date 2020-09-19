@@ -9,10 +9,11 @@
 using namespace Engine;
 using namespace Engine::Networking;
 
-Server::Server(ServerType::Type type, bool multithreaded) : m_Threads(Engine::hardware_concurrency()){
-    m_ServerType    = type;
-    m_Multithreaded = multithreaded;
-}
+Server::Server(ServerType::Type type, bool multithreaded) 
+    : m_Threads{ Engine::hardware_concurrency() }
+    , m_ServerType{ type }
+    , m_Multithreaded{ multithreaded }
+{}
 Server::~Server() {
     shutdown();
 }
@@ -42,20 +43,16 @@ bool Server::startup(unsigned short port, std::string ip_restriction) {
     if (m_TCPListener) {
         m_TCPListener->setBlocking(false);
         auto status  = m_TCPListener->listen();
-        #ifndef ENGINE_PRODUCTION
-            if (status != SocketStatus::Done) {
-                std::cout << "Server::startup() : could not start up TCP Listener\n";
-            }
-        #endif
+        if (status != SocketStatus::Done) {
+            ENGINE_PRODUCTION_LOG("Server::startup() : could not start up TCP Listener")
+        }
     }
     if (m_UdpSocket) {
         m_UdpSocket->setBlocking(false);
         auto status  = m_UdpSocket->bind();
-        #ifndef ENGINE_PRODUCTION
-            if (status != SocketStatus::Done) {
-                std::cout << "Server::startup() : could not start up UDP Socket\n";
-            }
-        #endif
+        if (status != SocketStatus::Done) {
+            ENGINE_PRODUCTION_LOG("Server::startup() : could not start up UDP Socket")
+        }
     }
 
     m_Port           = port;
@@ -146,29 +143,25 @@ bool Server::internal_add_client(std::string& hash, ServerClient* client) {
         return false;
     }
     if (!client) {
-#ifndef ENGINE_PRODUCTION
-        std::cout << "Server::internal_add_client() called with a nullptr client\n";
-#endif
+        ENGINE_PRODUCTION_LOG("Server::internal_add_client() called with a nullptr client")
         return false;
     }
     bool result = m_Threads.addClient(hash, client, *this);
-    #ifndef ENGINE_PRODUCTION
-        if(result){
-            std::cout << "Server::internal_add_client() accepted new client: " << client->ip() << " on port: " << client->port() << "\n";
-        }else{
-            std::cout << "Server::internal_add_client() REJECTED new client: " << client->ip() << " on port: " << client->port() << " due to not finding a next_thread\n";
-            SAFE_DELETE(client);
-        }
-    #endif
+    if(result){
+        ENGINE_PRODUCTION_LOG("Server::internal_add_client() accepted new client: " << client->ip() << " on port: " << client->port())
+    }else{
+        ENGINE_PRODUCTION_LOG("Server::internal_add_client() REJECTED new client: " << client->ip() << " on port: " << client->port() << " due to not finding a next_thread")
+        SAFE_DELETE(client);
+    }
     return result;
 }
-void Server::remove_client_immediately(ServerClient& client) {
+void Server::remove_client_immediately(ServerClient& inClient) {
     std::string foundHash = "";
     bool removed          = false;
-    for (auto& itr : m_HashedClients) {
-        if (itr.second == &client) {
-            client.disconnect();
-            foundHash = itr.first;
+    for (auto&[name, client] : m_HashedClients) {
+        if (client == &inClient) {
+            inClient.disconnect();
+            foundHash = name;
             break;
         }
     }
@@ -178,23 +171,23 @@ void Server::remove_client_immediately(ServerClient& client) {
             removed = m_Threads.removeClient(foundHash, *this);
         }
     }
-    #ifndef ENGINE_PRODUCTION
-        if (!removed) {
-            std::cout << "(Server::remove_client_immediately) error: could not remove client hash: " << foundHash << "\n";
-        }
-    #endif
+    if (!removed) {
+        ENGINE_PRODUCTION_LOG("(Server::remove_client_immediately) error: could not remove client hash: " << foundHash)
+    }
 }
-void Server::remove_client(ServerClient& client) {
-    for (auto& itr : m_HashedClients) {
-        if (itr.second == &client) {
-            client.disconnect();
+void Server::remove_client(ServerClient& inClient) {
+    for (auto& [name, client] : m_HashedClients) {
+        if (client == &inClient) {
+            inClient.disconnect();
             {
                 std::lock_guard lock(m_Mutex);
-                m_RemovedClients.emplace_back(std::piecewise_construct, std::forward_as_tuple(itr.first), std::forward_as_tuple(itr.second));
+                m_RemovedClients.emplace_back(
+                    std::piecewise_construct, 
+                    std::forward_as_tuple(name),
+                    std::forward_as_tuple(client)
+                );
             }
-            #ifndef ENGINE_PRODUCTION
-                std::cout << "(Server::remove_client) ip: " << itr.second->ip() << ", port: " << itr.second->port() << " - has been completely removed from the server\n";
-            #endif
+            ENGINE_PRODUCTION_LOG("(Server::remove_client) ip: " << client->ip() << ", port: " << client->port() << " - has been completely removed from the server")
             return;
         }
     }

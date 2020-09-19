@@ -21,12 +21,12 @@ namespace Engine::priv {
             ThreadPoolFuture(std::future<void>&& future);
             ~ThreadPoolFuture() = default;
 
-            bool isReady() const;
+            inline bool isReady() const noexcept { return (m_Future._Is_ready() && m_Future.valid()); }
 
-            ThreadPoolFuture(const ThreadPoolFuture& other) noexcept = delete;
+            ThreadPoolFuture(const ThreadPoolFuture& other) noexcept            = delete;
             ThreadPoolFuture& operator=(const ThreadPoolFuture& other) noexcept = delete;
-            ThreadPoolFuture(ThreadPoolFuture&& other) noexcept;
-            ThreadPoolFuture& operator=(ThreadPoolFuture&& other) noexcept;
+            ThreadPoolFuture(ThreadPoolFuture&& other) noexcept                 = default;
+            ThreadPoolFuture& operator=(ThreadPoolFuture&& other) noexcept      = default;
     };
     class ThreadPoolFutureCallback final {
         friend class Engine::priv::ThreadPool;
@@ -39,13 +39,13 @@ namespace Engine::priv {
             ThreadPoolFutureCallback(std::future<void>&& future, std::function<void()>&& callback);
             ~ThreadPoolFutureCallback() = default;
 
-            bool isReady() const;
-            void operator()() const;
+            inline bool isReady() const noexcept { return (m_Future._Is_ready() && m_Future.valid()); }
+            inline void operator()() const noexcept { m_Callback(); }
 
-            ThreadPoolFutureCallback(const ThreadPoolFutureCallback& other) noexcept = delete;
+            ThreadPoolFutureCallback(const ThreadPoolFutureCallback& other) noexcept            = delete;
             ThreadPoolFutureCallback& operator=(const ThreadPoolFutureCallback& other) noexcept = delete;
-            ThreadPoolFutureCallback(ThreadPoolFutureCallback&& other) noexcept;
-            ThreadPoolFutureCallback& operator=(ThreadPoolFutureCallback&& other) noexcept;
+            ThreadPoolFutureCallback(ThreadPoolFutureCallback&& other) noexcept                 = default;
+            ThreadPoolFutureCallback& operator=(ThreadPoolFutureCallback&& other) noexcept      = default;
     };
     
     class ThreadPool final{

@@ -2,35 +2,32 @@
 #include <core/engine/renderer/Renderer.h>
 #include <core/engine/textures/Texture.h>
 
-using namespace Engine;
-using namespace Engine::priv;
-
 Texture* Texture::White    = nullptr;
 Texture* Texture::Black    = nullptr;
 Texture* Texture::Checkers = nullptr;
 Texture* Texture::BRDF     = nullptr;
 
 Texture::Texture() : Resource(ResourceType::Texture) {
-    TextureLoader::InitCommon(*this, GL_TEXTURE_2D, false);
+    Engine::priv::TextureLoader::InitCommon(*this, GL_TEXTURE_2D, false);
 }
 Texture::Texture(unsigned int w, unsigned int h, ImagePixelType pxlType, ImagePixelFormat pxlFormat, ImageInternalFormat internal_, float divisor) : Resource(ResourceType::Texture) {
-    TextureLoader::InitFramebuffer(*this, w, h, pxlType, pxlFormat, internal_, divisor);
-    InternalTexturePublicInterface::Load(*this);
+    Engine::priv::TextureLoader::InitFramebuffer(*this, w, h, pxlType, pxlFormat, internal_, divisor);
+    Engine::priv::InternalTexturePublicInterface::Load(*this);
 }
 Texture::Texture(const sf::Image& sfImage, const std::string& name, bool genMipMaps, ImageInternalFormat internal_, unsigned int openglTextureType) : Resource(ResourceType::Texture, name) {
-    TextureLoader::InitFromMemory(*this, sfImage, name, genMipMaps, internal_, openglTextureType);
-    InternalTexturePublicInterface::Load(*this);
+    Engine::priv::TextureLoader::InitFromMemory(*this, sfImage, name, genMipMaps, internal_, openglTextureType);
+    Engine::priv::InternalTexturePublicInterface::Load(*this);
 }
 Texture::Texture(const std::string& filename, bool genMipMaps, ImageInternalFormat internal_, unsigned int openglTextureType) : Resource(ResourceType::Texture, filename) {
-    TextureLoader::InitFromFile(*this, filename, genMipMaps, internal_, openglTextureType);
-    InternalTexturePublicInterface::Load(*this);
+    Engine::priv::TextureLoader::InitFromFile(*this, filename, genMipMaps, internal_, openglTextureType);
+    Engine::priv::InternalTexturePublicInterface::Load(*this);
 }
 Texture::Texture(const std::string files[], const std::string& name, bool genMipMaps, ImageInternalFormat internal_) : Resource(ResourceType::Texture, name) {
-    TextureLoader::InitFromFilesCubemap(*this, files, name, genMipMaps, internal_);
-    InternalTexturePublicInterface::Load(*this);
+    Engine::priv::TextureLoader::InitFromFilesCubemap(*this, files, name, genMipMaps, internal_);
+    Engine::priv::InternalTexturePublicInterface::Load(*this);
 }
 Texture::~Texture(){
-    InternalTexturePublicInterface::Unload(*this);
+    Engine::priv::InternalTexturePublicInterface::Unload(*this);
 }
 bool Texture::operator==(const bool rhs) const {
     if (rhs == true) {
@@ -101,21 +98,21 @@ void Texture::setFilter(TextureFilter filter){
 }
 void Texture::setXWrapping(unsigned int type, TextureWrap wrap){
     unsigned int gl;
-    TextureLoader::EnumWrapToGL(gl, wrap);
-    glTexParameteri(type, GL_TEXTURE_WRAP_S, gl);
+    Engine::priv::TextureLoader::EnumWrapToGL(gl, wrap);
+    GLCall(glTexParameteri(type, GL_TEXTURE_WRAP_S, gl));
 }
 void Texture::setYWrapping(unsigned int type, TextureWrap wrap){
     unsigned int gl;
-    TextureLoader::EnumWrapToGL(gl, wrap);
-    glTexParameteri(type, GL_TEXTURE_WRAP_T, gl);
+    Engine::priv::TextureLoader::EnumWrapToGL(gl, wrap);
+    GLCall(glTexParameteri(type, GL_TEXTURE_WRAP_T, gl));
 }
 void Texture::setZWrapping(unsigned int type, TextureWrap wrap){
     if (type != GL_TEXTURE_CUBE_MAP) {
         return;
     }
     unsigned int gl;
-    TextureLoader::EnumWrapToGL(gl, wrap);
-    glTexParameteri(type, GL_TEXTURE_WRAP_R, gl);
+    Engine::priv::TextureLoader::EnumWrapToGL(gl, wrap);
+    GLCall(glTexParameteri(type, GL_TEXTURE_WRAP_R, gl));
 }
 void Texture::setWrapping(unsigned int type, TextureWrap wrap){
     Texture::setXWrapping(type, wrap);
@@ -124,13 +121,13 @@ void Texture::setWrapping(unsigned int type, TextureWrap wrap){
 }
 void Texture::setMinFilter(unsigned int type, TextureFilter filter){
     unsigned int gl;
-    TextureLoader::EnumFilterToGL(gl, filter, true);
-    glTexParameteri(type, GL_TEXTURE_MIN_FILTER, gl);
+    Engine::priv::TextureLoader::EnumFilterToGL(gl, filter, true);
+    GLCall(glTexParameteri(type, GL_TEXTURE_MIN_FILTER, gl));
 }
 void Texture::setMaxFilter(unsigned int type, TextureFilter filter){
     unsigned int gl;
-    TextureLoader::EnumFilterToGL(gl, filter, false);
-    glTexParameteri(type, GL_TEXTURE_MAG_FILTER, gl);
+    Engine::priv::TextureLoader::EnumFilterToGL(gl, filter, false);
+    GLCall(glTexParameteri(type, GL_TEXTURE_MAG_FILTER, gl));
 }
 void Texture::setFilter(unsigned int type, TextureFilter filter){
     Texture::setMinFilter(type, filter);
@@ -146,15 +143,15 @@ void Texture::setAnisotropicFiltering(float anisotropicFiltering){
     }
     Engine::Renderer::bindTextureForModification(m_Type, m_TextureAddresses[0]);
     if(Engine::priv::Renderer::OPENGL_VERSION >= 46){
-    	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, const_cast<GLfloat*>(&anisotropicFiltering));
-    	glTexParameterf(m_Type, GL_TEXTURE_MAX_ANISOTROPY, anisotropicFiltering);
+        GLCall(glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, const_cast<GLfloat*>(&anisotropicFiltering)));
+        GLCall(glTexParameterf(m_Type, GL_TEXTURE_MAX_ANISOTROPY, anisotropicFiltering));
     }else{
-        if(OpenGLExtensions::supported(OpenGLExtensions::ARB_texture_filter_anisotropic)){
-            //glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, const_cast<GLfloat*>(&anisotropicFiltering));
-            //glTexParameterf(m_Type, GL_TEXTURE_MAX_ANISOTROPY, anisotropicFiltering);
-        }else if(OpenGLExtensions::supported(OpenGLExtensions::EXT_texture_filter_anisotropic)){
-            glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, const_cast<GLfloat*>(&anisotropicFiltering));
-            glTexParameterf(m_Type, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropicFiltering);
+        if(Engine::priv::OpenGLExtensions::supported(Engine::priv::OpenGLExtensions::ARB_texture_filter_anisotropic)){
+            //GLCall(glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, const_cast<GLfloat*>(&anisotropicFiltering)));
+            //GLCall(glTexParameterf(m_Type, GL_TEXTURE_MAX_ANISOTROPY, anisotropicFiltering));
+        }else if(Engine::priv::OpenGLExtensions::supported(Engine::priv::OpenGLExtensions::EXT_texture_filter_anisotropic)){
+            GLCall(glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, const_cast<GLfloat*>(&anisotropicFiltering)));
+            GLCall(glTexParameterf(m_Type, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropicFiltering));
         }
     }
 }
@@ -169,7 +166,7 @@ bool Texture::compressed() const {
     return (m_ImagesDatas[0].m_Mipmaps[0].compressedSize > 0);
 }
 unsigned char* Texture::pixels() {
-    TextureLoader::WithdrawPixelsFromOpenGLMemory(*this); 
+    Engine::priv::TextureLoader::WithdrawPixelsFromOpenGLMemory(*this);
     return &(m_ImagesDatas[0].m_Mipmaps[0].pixels)[0];
 }
 GLuint Texture::address(unsigned int index) const {

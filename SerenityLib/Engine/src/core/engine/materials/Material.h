@@ -22,6 +22,14 @@ namespace Engine::priv {
 #include <core/engine/resources/Resource.h>
 #include <core/engine/materials/MaterialEnums.h>
 
+struct MaterialDefaultPhysicsProperty final {
+    std::uint8_t r;
+    std::uint8_t g;
+    std::uint8_t b;
+    std::uint8_t smoothness;
+    std::uint8_t metalness;
+};
+
 class Material final : public Resource {
     friend struct Engine::priv::DefaultMaterialBindFunctor;
     friend struct Engine::priv::InternalScenePublicInterface;

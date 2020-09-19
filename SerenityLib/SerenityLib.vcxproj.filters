@@ -875,6 +875,9 @@
     <ClInclude Include="Engine\src\core\engine\system\cursor\Cursor.h">
       <Filter>Header Files\Engine\Core\System\Cursor</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\math\MathCompression.h">
+      <Filter>Header Files\Engine\Core\Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -935,9 +938,6 @@
       <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\mesh\MeshRequest.cpp">
-      <Filter>Source Files\Engine\Core\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\mesh\VertexBufferObject.cpp">
       <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\mesh\VertexData.cpp">
@@ -1323,6 +1323,12 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\system\cursor\Cursor.cpp">
       <Filter>Source Files\Engine\Core\System\Cursor</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\math\MathCompression.cpp">
+      <Filter>Source Files\Engine\Core\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\networking\Packet.cpp">
+      <Filter>Source Files\Engine\Core\Networking</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -9,8 +9,6 @@
 #include <core/engine/threading/ThreadingModule.h>
 #include <core/engine/scene/Viewport.h>
 
-using namespace std;
-
 Engine::priv::HDR Engine::priv::HDR::STATIC_HDR;
 
 bool Engine::priv::HDR::init_shaders() {

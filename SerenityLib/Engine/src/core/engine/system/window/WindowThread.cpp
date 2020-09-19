@@ -1,13 +1,14 @@
 #include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/system/window/Window.h>
 
-Engine::priv::WindowThread::WindowThread(WindowData& data) : m_Data(data) {
-}
+Engine::priv::WindowThread::WindowThread(WindowData& data) 
+    : m_Data{ data }
+{}
 Engine::priv::WindowThread::~WindowThread() {
     internal_cleanup();
 }
 std::optional<sf::Event> Engine::priv::WindowThread::internal_try_pop() {
-    return m_Queue.try_pop();
+    return m_SFEventQueue.try_pop();
 }
 void Engine::priv::WindowThread::internal_push(WindowEventThreadOnlyCommands command) {
     m_MainThreadToEventThreadQueue.push(command);
@@ -17,7 +18,7 @@ void Engine::priv::WindowThread::internal_update_loop() {
     if (!m_Data.m_UndergoingClosing) {
         //if (m_Data.m_SFMLWindow.waitEvent(e)) {
         while (m_Data.m_SFMLWindow.pollEvent(e)) {
-            m_Queue.push(e);
+            m_SFEventQueue.push(e);
         }
     }
     while (!m_MainThreadToEventThreadQueue.empty()) {
@@ -51,10 +52,8 @@ void Engine::priv::WindowThread::internal_update_loop() {
 void Engine::priv::WindowThread::internal_startup(Window& super, const std::string& name) {
     m_EventThread.reset(NEW std::thread([this, &super, &name]() {
         m_Data.m_SFMLWindow.create(m_Data.m_VideoMode, name, m_Data.m_Style, m_Data.m_SFContextSettings);
-        if (!m_Data.m_IconFile.empty()) {
-            super.setIcon(m_Data.m_IconFile);
-        }
-        m_Data.m_SFMLWindow.setActive(false);
+        super.setIcon(m_Data.m_IconFile);
+        bool successfulDeactivation = m_Data.m_SFMLWindow.setActive(false);
         m_Data.m_UndergoingClosing = false;
         while (!m_Data.m_UndergoingClosing) {
             internal_update_loop();

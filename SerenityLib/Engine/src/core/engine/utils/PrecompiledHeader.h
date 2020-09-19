@@ -89,6 +89,12 @@
     #define UNLIKELY
 #endif
 
+#if defined(ENGINE_PRODUCTION)
+    #define ENGINE_PRODUCTION_LOG(x)
+#else
+    #define ENGINE_PRODUCTION_LOG(x) std::cout << x << '\n';
+#endif
+
 
 //#define ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS //this will force the engine and window to use the same thread, which will prevent the engine logic from executing if the user modifies the window. this can cause some flickering on resize however
 //#define ENGINE_FORCE_PHYSICS_DEBUG_DRAW //this will force the renderer to output physics debugging info regardless if the build is debug or release
@@ -367,17 +373,25 @@ namespace Engine {
             }
     };
 
-    struct color_vector_4 {
-        glm::vec<4, unsigned char, glm::packed_highp> color = glm::vec<4, unsigned char, glm::packed_highp>(0);
+    struct color_vector_4 final {
+        using color_type = glm::vec<4, unsigned char, glm::packed_highp>;
+
+        color_type color = color_type(0);
 
         color_vector_4() = default;
-        explicit color_vector_4(const float inColor) {
+        color_vector_4(const color_vector_4& other)                = default;
+        color_vector_4& operator=(const color_vector_4& other)     = default;
+        color_vector_4(color_vector_4&& other) noexcept            = default;
+        color_vector_4& operator=(color_vector_4&& other) noexcept = default;
+        ~color_vector_4() = default;
+
+        explicit color_vector_4(float inColor) {
             color.r = (unsigned char)(inColor * 255.0f);
             color.g = (unsigned char)(inColor * 255.0f);
             color.b = (unsigned char)(inColor * 255.0f);
             color.a = (unsigned char)(inColor * 255.0f);
         }
-        explicit color_vector_4(const float inR, const float inG, const float inB, const float inA) {
+        explicit color_vector_4(float inR, float inG, float inB, float inA) {
             color.r = (unsigned char)(inR * 255.0f);
             color.g = (unsigned char)(inG * 255.0f);
             color.b = (unsigned char)(inB * 255.0f);
@@ -389,19 +403,19 @@ namespace Engine {
             color.b = (unsigned char)(inColor.b * 255.0f);
             color.a = (unsigned char)(inColor.a * 255.0f);
         }
-        explicit color_vector_4(const unsigned char inR, const unsigned char inG, const unsigned char inB, const unsigned char inA) {
+        explicit color_vector_4(unsigned char inR, unsigned char inG, unsigned char inB, unsigned char inA) {
             color.r = inR;
             color.g = inG;
             color.b = inB;
             color.a = inA;
         }
-        explicit color_vector_4(const unsigned char inColor) {
+        explicit color_vector_4(unsigned char inColor) {
             color.r = inColor;
             color.g = inColor;
             color.b = inColor;
             color.a = inColor;
         }
-        inline constexpr std::uint32_t toPackedInt() const noexcept {
+        inline CONSTEXPR std::uint32_t toPackedInt() const noexcept {
             return (color.r << 24) | (color.g << 16) | (color.b << 8) | color.a;
         }
         glm::vec4 unpackInt(std::uint32_t i) const noexcept {
@@ -412,10 +426,10 @@ namespace Engine {
             float ww = (float)(i & 255);
             return glm::vec4(xx * one_over_255, yy * one_over_255, zz * one_over_255, ww * one_over_255);
         }
-        inline constexpr float r() const noexcept { return (float)color.r * 0.003921568627451f; }
-        inline constexpr float g() const noexcept { return (float)color.g * 0.003921568627451f; }
-        inline constexpr float b() const noexcept { return (float)color.b * 0.003921568627451f; }
-        inline constexpr float a() const noexcept { return (float)color.a * 0.003921568627451f; }
+        inline CONSTEXPR float r() const noexcept { return (float)color.r * 0.003921568627451f; }
+        inline CONSTEXPR float g() const noexcept { return (float)color.g * 0.003921568627451f; }
+        inline CONSTEXPR float b() const noexcept { return (float)color.b * 0.003921568627451f; }
+        inline CONSTEXPR float a() const noexcept { return (float)color.a * 0.003921568627451f; }
     };
 
     inline void printEndianness() noexcept {
@@ -424,9 +438,9 @@ namespace Engine {
         data = 1; //Assign data
         cptr = (std::uint8_t*) & data; //Type cast
         if (*cptr == 1) {
-            std::cout << "little-endiann\n";
+            ENGINE_PRODUCTION_LOG("little-endiann")
         }else if (*cptr == 0) {
-            std::cout << "big-endiann\n";
+            ENGINE_PRODUCTION_LOG("big-endiann")
         }
     }
 

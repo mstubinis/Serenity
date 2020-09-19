@@ -79,7 +79,7 @@ class LuaCallableFunction {
                     try {
                         (*m_LUAFunctor)(owner, (args)...);
                     }catch (const luabridge::LuaException& luaException) {
-                        std::cout << "LuaException: " << luaException.what() << '\n';
+                        ENGINE_PRODUCTION_LOG("LuaException: " << luaException.what())
                     }
                 }
             }

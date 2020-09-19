@@ -56,44 +56,44 @@ void ComponentModel_Functions::RegisterDeferredMeshLoaded(ComponentModel& super,
 
 #pragma region Component
 
-ComponentModel::ComponentModel(Entity entity, Handle mesh, Handle material, ShaderProgram* shaderProgram, RenderStage stage) {
-    m_Owner = entity;
+ComponentModel::ComponentModel(Entity entity, Handle mesh, Handle material, ShaderProgram* shaderProgram, RenderStage stage) 
+: m_Owner(entity) {
     addModel(mesh, material, shaderProgram, stage);
 }
-ComponentModel::ComponentModel(Entity entity, Mesh* mesh, Handle material,  ShaderProgram* shaderProgram, RenderStage stage) {
-    m_Owner = entity;
+ComponentModel::ComponentModel(Entity entity, Mesh* mesh, Handle material,  ShaderProgram* shaderProgram, RenderStage stage) 
+: m_Owner(entity) {
     addModel(mesh, material.get<Material>(), shaderProgram, stage);
 }
-ComponentModel::ComponentModel(Entity entity, Handle mesh, Material* material,  ShaderProgram* shaderProgram, RenderStage stage) {
-    m_Owner = entity;
+ComponentModel::ComponentModel(Entity entity, Handle mesh, Material* material,  ShaderProgram* shaderProgram, RenderStage stage) 
+: m_Owner(entity) {
     addModel(mesh.get<Mesh>(), material, shaderProgram, stage);
 }
-ComponentModel::ComponentModel(Entity entity, Mesh* mesh, Material* material, ShaderProgram* shaderProgram, RenderStage stage) {
-    m_Owner = entity;
+ComponentModel::ComponentModel(Entity entity, Mesh* mesh, Material* material, ShaderProgram* shaderProgram, RenderStage stage) 
+: m_Owner(entity) {
     addModel(mesh, material, shaderProgram, stage);
 }
-ComponentModel::ComponentModel(Entity entity, Handle mesh, Handle material, Handle shaderProgram, RenderStage stage) {
-    m_Owner = entity;
+ComponentModel::ComponentModel(Entity entity, Handle mesh, Handle material, Handle shaderProgram, RenderStage stage) 
+: m_Owner(entity) {
     addModel(mesh, material, shaderProgram.get<ShaderProgram>(), stage);
 }
-ComponentModel::ComponentModel(Entity entity, Mesh* mesh, Handle material, Handle shaderProgram, RenderStage stage) {
-    m_Owner = entity;
+ComponentModel::ComponentModel(Entity entity, Mesh* mesh, Handle material, Handle shaderProgram, RenderStage stage) 
+: m_Owner(entity) {
     addModel(mesh, material.get<Material>(), shaderProgram.get<ShaderProgram>(), stage);
 }
-ComponentModel::ComponentModel(Entity entity, Handle mesh, Material* material, Handle shaderProgram, RenderStage stage) {
-    m_Owner = entity;
+ComponentModel::ComponentModel(Entity entity, Handle mesh, Material* material, Handle shaderProgram, RenderStage stage) 
+: m_Owner(entity) {
     addModel(mesh.get<Mesh>(), material, shaderProgram.get<ShaderProgram>(), stage);
 }
-ComponentModel::ComponentModel(Entity entity, Mesh* mesh, Material* material, Handle shaderProgram, RenderStage stage) {
-    m_Owner = entity;
+ComponentModel::ComponentModel(Entity entity, Mesh* mesh, Material* material, Handle shaderProgram, RenderStage stage) 
+: m_Owner(entity) {
     addModel(mesh, material, shaderProgram.get<ShaderProgram>(), stage);
 }
-ComponentModel::ComponentModel(ComponentModel&& other) noexcept {
-    m_Owner          = std::move(other.m_Owner);
-    m_ModelInstances = std::move(other.m_ModelInstances);
-    m_Radius         = std::move(other.m_Radius);
-    m_RadiusBox      = std::move(other.m_RadiusBox);
-
+ComponentModel::ComponentModel(ComponentModel&& other) noexcept 
+    : m_Owner(std::move(other.m_Owner))
+    , m_ModelInstances(std::move(other.m_ModelInstances))
+    , m_Radius(std::move(other.m_Radius))
+    , m_RadiusBox(std::move(other.m_RadiusBox))
+{
     if (other.isRegistered(EventType::ResourceLoaded)) {
         registerEvent(EventType::ResourceLoaded);
         other.unregisterEvent(EventType::ResourceLoaded);
@@ -164,15 +164,13 @@ size_t ComponentModel::getNumModels() const {
 ModelInstance& ComponentModel::getModel(size_t index) const {
     return *m_ModelInstances[index];
 }
-void ComponentModel::show() { 
+void ComponentModel::show(bool shown) { 
     for (auto& modelInstance : m_ModelInstances) {
-        modelInstance->show();
+        modelInstance->show(shown);
     }
 }
 void ComponentModel::hide() { 
-    for (auto& modelInstance : m_ModelInstances) {
-        modelInstance->hide();
-    }
+    ComponentModel::show(false);
 }
 ModelInstance& ComponentModel::addModel(Handle mesh, Handle material, ShaderProgram* shaderProgram, RenderStage stage) {
     return ComponentModel::addModel(mesh.get<Mesh>(), material.get<Material>(), shaderProgram, stage);

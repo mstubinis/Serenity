@@ -5,69 +5,85 @@
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 
-struct BufferDataType final {enum Type {
+enum class BufferDataType : unsigned int {
     VertexArray  = GL_ARRAY_BUFFER,
     ElementArray = GL_ELEMENT_ARRAY_BUFFER,
-};};
+};
 
-struct BufferDataDrawType final{enum Type {
+enum class BufferDataDrawType : unsigned int {
     Unassigned   = 0,
     Static       = GL_STATIC_DRAW,
     Dynamic      = GL_DYNAMIC_DRAW,
     Stream       = GL_STREAM_DRAW,
-_TOTAL};};
+};
 
-struct BufferObject {
-    GLuint                    buffer   = 0;
-    BufferDataDrawType::Type  drawType = BufferDataDrawType::Unassigned;
-    BufferDataType::Type      type;
-    size_t                    capacity = 0;
-
-    BufferObject() = default;
-    BufferObject(const BufferObject& other)                = delete;
-    BufferObject& operator=(const BufferObject& other)     = delete;
-    BufferObject(BufferObject&& other) noexcept            = delete;
-    BufferObject& operator=(BufferObject&& other) noexcept = delete;
+struct BufferObject : public Engine::NonCopyable, public Engine::NonMoveable {
+    GLuint                buffer   = 0;
+    BufferDataDrawType    drawType = BufferDataDrawType::Unassigned;
+    BufferDataType        type     = BufferDataType::VertexArray;
+    size_t                capacity = 0;
 
     virtual ~BufferObject() { destroy(); }
 
-    void generate();
-    void destroy();
-    inline operator GLuint() const noexcept { return buffer; }
-
-    void bind();
-
-    void setData(size_t _size, const void* _data, BufferDataDrawType::Type _drawType);
-    void setData(size_t _size, size_t _startingIndex, const void* _data);
-    void setDataOrphan(const void* _data);
-
-    template<typename T> void setData(const std::vector<T>& _data, BufferDataDrawType::Type _drawType) noexcept {
-        drawType     = _drawType;
-        size_t _size = _data.size() * sizeof(T);
-        capacity     = _size;
-        glBufferData(type, _size, _data.data(), drawType);
+    void generate() noexcept {
+        if (!buffer) {
+            glGenBuffers(1, &buffer);
+        }
     }
-    template<typename T> void setData(size_t _startingIndex, const std::vector<T>& _data) noexcept {
+    void destroy() noexcept {
+        if (buffer) {
+            glDeleteBuffers(1, &buffer);
+            buffer = 0;
+        }
+    }
+    inline operator GLuint() const noexcept { return buffer; }
+    inline void bind() const noexcept { glBindBuffer((GLuint)type, buffer); }
+
+    void setData(size_t size_, const void* data_, BufferDataDrawType drawType_) noexcept {
+        drawType = drawType_;
         if (drawType == BufferDataDrawType::Unassigned) {
             return;
         }
-        glBufferSubData(type, _startingIndex, _data.size() * sizeof(T), _data.data());
+        if (size_ > capacity) {
+            capacity = size_;
+            glBufferData((GLuint)type, size_, data_, (GLuint)drawType);
+        }else{
+            glBufferSubData((GLuint)type, 0, size_, data_);
+        }
     }
-    template<typename T> void setDataOrphan(const std::vector<T>& _data) noexcept {
-        if (capacity == 0) {
+    void setData(size_t size_, size_t startingIndex_, const void* data_) const noexcept {
+        if (drawType == BufferDataDrawType::Unassigned) {
             return;
         }
-        glBufferData(type, capacity, nullptr, drawType);
-        glBufferSubData(type, 0, capacity, _data.data());
+        glBufferSubData((GLuint)type, startingIndex_, size_, data_);
+    }
+    void setDataOrphan(const void* data_) const noexcept {
+        if (drawType == BufferDataDrawType::Unassigned || capacity == 0) {
+            return;
+        }
+        glBufferData((GLuint)type, capacity, nullptr, (GLuint)drawType);
+        glBufferSubData((GLuint)type, 0, capacity, data_);
+    }
+
+    template<class T> inline void setData(const std::vector<T>& data_, BufferDataDrawType drawType_) noexcept {
+        setData(data_.size() * sizeof(T), (void*)data_.data(), drawType_);
+    }
+    template<class T> inline void setData(size_t startingIndex_, const std::vector<T>& data_) const noexcept {
+        setData(data_.size() * sizeof(T), startingIndex_, (void*)data_.data());
+    }
+    template<class T> inline void setDataOrphan(const std::vector<T>& data_) const noexcept {
+        setDataOrphan((void*)data_.data());
     }
 };
-struct VertexBufferObject final : public BufferObject{
-    VertexBufferObject();
-    ~VertexBufferObject()  = default;
+struct VertexBufferObject final : public BufferObject {
+    VertexBufferObject() {
+        type = BufferDataType::VertexArray;
+    }
 };
 struct ElementBufferObject final : public BufferObject {
-    ElementBufferObject();
-    ~ElementBufferObject() = default;
+    ElementBufferObject() {
+        type = BufferDataType::ElementArray;
+    }
 };
 
 #endif

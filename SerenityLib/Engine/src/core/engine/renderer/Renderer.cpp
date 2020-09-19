@@ -2,6 +2,7 @@
 #include <core/engine/system/EngineOptions.h>
 #include <core/engine/renderer/Renderer.h>
 #include <core/engine/math/Engine_Math.h>
+#include <core/engine/math/MathCompression.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/mesh/Mesh.h>
@@ -20,16 +21,16 @@
 #include <core/engine/renderer/pipelines/DeferredPipeline.h>
 
 using namespace Engine;
-using namespace std;
 
 priv::Renderer* renderManager = nullptr;
 
 unsigned int priv::Renderer::GLSL_VERSION;
 unsigned int priv::Renderer::OPENGL_VERSION;
 
-priv::Renderer::Renderer(const EngineOptions& options){
-    m_GI_Pack          = Engine::Math::pack3FloatsInto1FloatUnsigned(m_GI_Diffuse, m_GI_Specular, m_GI_Global);
-    m_Pipeline         = NEW Engine::priv::DeferredPipeline(*this);
+priv::Renderer::Renderer(const EngineOptions& options)
+    : m_GI_Pack{ Engine::Compression::pack3FloatsInto1FloatUnsigned(m_GI_Diffuse, m_GI_Specular, m_GI_Global) }
+    , m_Pipeline{ NEW Engine::priv::DeferredPipeline(*this) }
+{
     renderManager      = this;
 }
 priv::Renderer::~Renderer(){
@@ -138,27 +139,27 @@ float Renderer::Settings::Lighting::getGIContributionGlobal(){
 }
 void Renderer::Settings::Lighting::setGIContributionGlobal(float gi){
     renderManager->m_GI_Global = glm::clamp(gi,0.001f,0.999f);
-    renderManager->m_GI_Pack = Math::pack3FloatsInto1FloatUnsigned(renderManager->m_GI_Diffuse, renderManager->m_GI_Specular, renderManager->m_GI_Global);
+    renderManager->m_GI_Pack = Engine::Compression::pack3FloatsInto1FloatUnsigned(renderManager->m_GI_Diffuse, renderManager->m_GI_Specular, renderManager->m_GI_Global);
 }
 float Renderer::Settings::Lighting::getGIContributionDiffuse(){
     return renderManager->m_GI_Diffuse;
 }
 void Renderer::Settings::Lighting::setGIContributionDiffuse(float gi){
     renderManager->m_GI_Diffuse = glm::clamp(gi, 0.001f, 0.999f);
-    renderManager->m_GI_Pack = Math::pack3FloatsInto1FloatUnsigned(renderManager->m_GI_Diffuse, renderManager->m_GI_Specular, renderManager->m_GI_Global);
+    renderManager->m_GI_Pack = Engine::Compression::pack3FloatsInto1FloatUnsigned(renderManager->m_GI_Diffuse, renderManager->m_GI_Specular, renderManager->m_GI_Global);
 }
 float Renderer::Settings::Lighting::getGIContributionSpecular(){
     return renderManager->m_GI_Specular;
 }
 void Renderer::Settings::Lighting::setGIContributionSpecular(float gi){
     renderManager->m_GI_Specular = glm::clamp(gi, 0.001f, 0.999f);
-    renderManager->m_GI_Pack = Math::pack3FloatsInto1FloatUnsigned(renderManager->m_GI_Diffuse, renderManager->m_GI_Specular, renderManager->m_GI_Global);
+    renderManager->m_GI_Pack = Engine::Compression::pack3FloatsInto1FloatUnsigned(renderManager->m_GI_Diffuse, renderManager->m_GI_Specular, renderManager->m_GI_Global);
 }
 void Renderer::Settings::Lighting::setGIContribution(float g, float d, float s){
     renderManager->m_GI_Global = glm::clamp(g, 0.001f, 0.999f);
     renderManager->m_GI_Diffuse = glm::clamp(d, 0.001f, 0.999f);
     renderManager->m_GI_Specular = glm::clamp(s, 0.001f, 0.999f);
-    renderManager->m_GI_Pack = Math::pack3FloatsInto1FloatUnsigned(renderManager->m_GI_Diffuse, renderManager->m_GI_Specular, renderManager->m_GI_Global);
+    renderManager->m_GI_Pack = Engine::Compression::pack3FloatsInto1FloatUnsigned(renderManager->m_GI_Diffuse, renderManager->m_GI_Specular, renderManager->m_GI_Global);
 }
 
 bool Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm algorithm){
@@ -358,7 +359,7 @@ void Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, float
 void Renderer::renderTexture(Texture& tex, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor){
     renderManager->m_Pipeline->renderTexture(tex, p, c, a, s, d, align, scissor);
 }
-void Renderer::renderText(const string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) {
+void Renderer::renderText(const std::string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) {
     renderManager->m_Pipeline->renderText(t, fnt, p, c, a, s, d, align, scissor);
 }
 void Renderer::renderBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) {

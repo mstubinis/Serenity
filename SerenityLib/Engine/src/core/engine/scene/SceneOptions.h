@@ -2,23 +2,29 @@
 #ifndef ENGINE_SCENE_OPTIONS_H
 #define ENGINE_SCENE_OPTIONS_H
 
+#ifdef ENVIRONMENT64
+    constexpr unsigned int NUMBER_OF_ENTITIES_LIMIT          = 40'000;
+    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 2'000U;
+    constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT          = 200'000U;
+#else
+    constexpr unsigned int NUMBER_OF_ENTITIES_LIMIT          = 20'000;
+    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 1'000U;
+    constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT          = 100'000U;
+#endif
+
 struct SceneOptions final {
-    size_t maxAmountOfEntities          = 20'000;
-    size_t maxAmountOfParticleEmitters  = 500;
-    size_t maxAmountOfParticles         = 25'000;
+    unsigned int maxAmountOfEntities         = NUMBER_OF_ENTITIES_LIMIT;
+    unsigned int maxAmountOfParticleEmitters = NUMBER_OF_PARTICLE_EMITTERS_LIMIT;
+    unsigned int maxAmountOfParticles        = NUMBER_OF_PARTICLE_LIMIT;
     
-    SceneOptions() {
-        #ifdef ENVIRONMENT32
-            maxAmountOfEntities         = 20'000;
-            maxAmountOfParticleEmitters = 500;
-            maxAmountOfParticles        = 25'000;
-        #else
-            maxAmountOfEntities         = 40'000;
-            maxAmountOfParticleEmitters = 1'000;
-            maxAmountOfParticles        = 50'000;
-        #endif
-    }
-   
+    SceneOptions() = default;
+    SceneOptions(unsigned int maxAmountOfEntities_, unsigned int maxAmountOfParticleEmitters_, unsigned int maxAmountOfParticles_)
+        : maxAmountOfEntities(maxAmountOfEntities_)
+        , maxAmountOfParticleEmitters(maxAmountOfParticleEmitters_)
+        , maxAmountOfParticles(maxAmountOfParticles_)
+    {}
+    ~SceneOptions() = default;
+
     static SceneOptions DEFAULT_OPTIONS;
 };
 

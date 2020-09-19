@@ -6,17 +6,19 @@
 
 using namespace Engine;
 
-SunLight::SunLight(const glm_vec3& pos, LightType type, Scene* scene) : Entity(*scene){
+SunLight::SunLight(const glm_vec3& pos, LightType type, Scene* scene) 
+    : Entity(*scene)
+    , m_Type(type)
+{
     if (!scene) {
         scene = Resources::getCurrentScene();
     }
-    m_Type = type;
     if (type == LightType::Sun) {
         auto& sunLights = priv::InternalScenePublicInterface::GetSunLights(*scene);
-        sunLights.push_back(this);
+        sunLights.emplace_back(this);
     }
     auto& allLights = priv::InternalScenePublicInterface::GetLights(*scene);
-    allLights.push_back(this);
+    allLights.emplace_back(this);
 
     addComponent<ComponentBody>();
     SunLight::setPosition(pos);

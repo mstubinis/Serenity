@@ -9,11 +9,11 @@
 
 using namespace Engine;
 using namespace Engine::priv;
-using namespace std;
 
-Networking::ListenerTCP::ListenerTCP(const unsigned short port, const string& ip){
-    m_Port = port;
-    m_IP   = ip;
+Networking::ListenerTCP::ListenerTCP(const unsigned short port, const std::string& ip) 
+    : m_Port{ port }
+    , m_IP{ ip }
+{
     m_Listener.setBlocking(false);
 
     Core::m_Engine->m_NetworkingModule.m_SocketManager.add_tcp_listener(this);

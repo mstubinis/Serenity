@@ -2,18 +2,15 @@
 #include <ecs/ComponentLogic.h>
 #include <ecs/ECSComponentPool.h>
 
-using namespace Engine;
-using namespace Engine::priv;
-using namespace std;
-
 #pragma region Component
 
-ComponentLogic::ComponentLogic(ComponentLogic&& other) noexcept {
+ComponentLogic::ComponentLogic(ComponentLogic&& other) noexcept 
+    : m_UserPointer1(std::exchange(other.m_UserPointer1, nullptr))
+    , m_UserPointer2(std::exchange(other.m_UserPointer2, nullptr))
+    , m_Owner(std::move(other.m_Owner))
+    , m_Functor(std::move(other.m_Functor))
+{
     m_UserPointer      = std::exchange(other.m_UserPointer, nullptr);
-    m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
-    m_UserPointer2     = std::exchange(other.m_UserPointer2, nullptr);
-    m_Owner            = std::move(other.m_Owner);
-    m_Functor          = std::move(other.m_Functor);
 }
 ComponentLogic& ComponentLogic::operator=(ComponentLogic&& other) noexcept{
     if(&other != this){
@@ -39,7 +36,7 @@ void ComponentLogic::call(const float dt) const noexcept {
 
 ComponentLogic_System_CI::ComponentLogic_System_CI() {
     setUpdateFunction([](void* system, void* componentPool, const float dt, Scene& scene) {
-        auto& pool = *static_cast<ECSComponentPool<Entity, ComponentLogic>*>(componentPool);
+        auto& pool = *static_cast<Engine::priv::ECSComponentPool<Entity, ComponentLogic>*>(componentPool);
         const auto& components = pool.data();
         for (auto& component : components) {
             component.call(dt);

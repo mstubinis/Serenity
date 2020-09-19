@@ -123,7 +123,34 @@ ModelInstance::ModelInstance(Entity parent, Mesh* mesh, Handle mat, ShaderProgra
 }
 ModelInstance::ModelInstance(Entity parent, Handle mesh, Material* mat, ShaderProgram* program) : ModelInstance(parent, mesh.get<Mesh>(), mat, program) {
 }
-ModelInstance::ModelInstance(ModelInstance&& other) noexcept {
+ModelInstance::ModelInstance(ModelInstance&& other) noexcept
+    : m_DrawingMode{ std::move(other.m_DrawingMode) }
+    , m_AnimationVector{ std::move(other.m_AnimationVector) }
+    , m_Parent{ std::move(other.m_Parent) }
+    , m_Stage{ std::move(other.m_Stage) }
+    , m_Position{ std::move(other.m_Position) }
+    , m_Scale{ std::move(other.m_Scale) }
+    , m_GodRaysColor{ std::move(other.m_GodRaysColor) }
+    , m_Orientation{ std::move(other.m_Orientation) }
+    , m_ModelMatrix{ std::move(other.m_ModelMatrix) }
+    , m_Color{ std::move(other.m_Color) }
+    , m_PassedRenderCheck{ std::move(other.m_PassedRenderCheck) }
+    , m_Visible{ std::move(other.m_Visible) }
+    , m_ForceRender{ std::move(other.m_ForceRender) }
+    , m_Index{ std::move(other.m_Index) }
+    , m_ShaderProgram{ std::exchange(other.m_ShaderProgram, nullptr) }
+    , m_Mesh{ std::exchange(other.m_Mesh, nullptr) }
+    , m_Material{ std::exchange(other.m_Material, nullptr) }
+    , m_CustomBindFunctor{ std::move(other.m_CustomBindFunctor) }
+    , m_CustomUnbindFunctor{ std::move(other.m_CustomUnbindFunctor) }
+{
+    m_ViewportFlagDefault    = std::move(other.m_ViewportFlagDefault);
+    m_ViewportFlag           = std::move(other.m_ViewportFlagDefault);
+    m_UserPointer            = std::exchange(other.m_UserPointer, nullptr);
+
+    internal_calculate_radius();
+}
+ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
     m_DrawingMode            = std::move(other.m_DrawingMode);
     m_ViewportFlagDefault    = std::move(other.m_ViewportFlagDefault);
     m_ViewportFlag           = std::move(other.m_ViewportFlagDefault);
@@ -144,38 +171,10 @@ ModelInstance::ModelInstance(ModelInstance&& other) noexcept {
     m_ShaderProgram          = std::exchange(other.m_ShaderProgram, nullptr);
     m_Mesh                   = std::exchange(other.m_Mesh, nullptr);
     m_Material               = std::exchange(other.m_Material, nullptr);
-    m_CustomBindFunctor.swap(other.m_CustomBindFunctor);
-    m_CustomUnbindFunctor.swap(other.m_CustomUnbindFunctor);
+    m_CustomBindFunctor      = std::move(other.m_CustomBindFunctor);
+    m_CustomUnbindFunctor    = std::move(other.m_CustomUnbindFunctor);
 
     internal_calculate_radius();
-}
-ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
-    if (&other != this) {
-        m_DrawingMode            = std::move(other.m_DrawingMode);
-        m_ViewportFlagDefault    = std::move(other.m_ViewportFlagDefault);
-        m_ViewportFlag           = std::move(other.m_ViewportFlagDefault);
-        m_AnimationVector        = std::move(other.m_AnimationVector);
-        m_Parent                 = std::move(other.m_Parent);
-        m_Stage                  = std::move(other.m_Stage);
-        m_Position               = std::move(other.m_Position);
-        m_Scale                  = std::move(other.m_Scale);
-        m_GodRaysColor           = std::move(other.m_GodRaysColor);
-        m_Orientation            = std::move(other.m_Orientation);
-        m_ModelMatrix            = std::move(other.m_ModelMatrix);
-        m_Color                  = std::move(other.m_Color);
-        m_PassedRenderCheck      = std::move(other.m_PassedRenderCheck);
-        m_Visible                = std::move(other.m_Visible);
-        m_ForceRender            = std::move(other.m_ForceRender);
-        m_Index                  = std::move(other.m_Index);
-        m_UserPointer            = std::exchange(other.m_UserPointer, nullptr);
-        m_ShaderProgram          = std::exchange(other.m_ShaderProgram, nullptr);
-        m_Mesh                   = std::exchange(other.m_Mesh, nullptr);
-        m_Material               = std::exchange(other.m_Material, nullptr);
-        m_CustomBindFunctor.swap(other.m_CustomBindFunctor);
-        m_CustomUnbindFunctor.swap(other.m_CustomUnbindFunctor);
-
-        internal_calculate_radius();
-    }
     return *this;
 }
 ModelInstance::~ModelInstance() {

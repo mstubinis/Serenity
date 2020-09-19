@@ -1,6 +1,6 @@
-#pragma once
 #ifndef ENGINE_NETWORKING_PACKET_H
 #define ENGINE_NETWORKING_PACKET_H
+#pragma once
 
 #include <SFML/Network/Packet.hpp>
 
@@ -12,6 +12,51 @@ namespace Engine::Networking {
     class Server;
     class ServerClient;
 };
+
+
+//glm vector floats
+sf::Packet& operator <<(sf::Packet& packet, const glm::vec2& data);
+sf::Packet& operator <<(sf::Packet& packet, const glm::vec3& data);
+sf::Packet& operator <<(sf::Packet& packet, const glm::vec4& data);
+sf::Packet& operator >>(sf::Packet& packet, glm::vec2& data);
+sf::Packet& operator >>(sf::Packet& packet, glm::vec3& data);
+sf::Packet& operator >>(sf::Packet& packet, glm::vec4& data);
+//glm vector ints
+sf::Packet& operator <<(sf::Packet& packet, const glm::ivec2& data);
+sf::Packet& operator <<(sf::Packet& packet, const glm::ivec3& data);
+sf::Packet& operator <<(sf::Packet& packet, const glm::ivec4& data);
+sf::Packet& operator >>(sf::Packet& packet, glm::ivec2& data);
+sf::Packet& operator >>(sf::Packet& packet, glm::ivec3& data);
+sf::Packet& operator >>(sf::Packet& packet, glm::ivec4& data);
+//glm vector uints
+sf::Packet& operator <<(sf::Packet& packet, const glm::uvec2& data);
+sf::Packet& operator <<(sf::Packet& packet, const glm::uvec3& data);
+sf::Packet& operator <<(sf::Packet& packet, const glm::uvec4& data);
+sf::Packet& operator >>(sf::Packet& packet, glm::uvec2& data);
+sf::Packet& operator >>(sf::Packet& packet, glm::uvec3& data);
+sf::Packet& operator >>(sf::Packet& packet, glm::uvec4& data);
+//glm vector doubles
+sf::Packet& operator <<(sf::Packet& packet, const glm::dvec2& data);
+sf::Packet& operator <<(sf::Packet& packet, const glm::dvec3& data);
+sf::Packet& operator <<(sf::Packet& packet, const glm::dvec4& data);
+sf::Packet& operator >>(sf::Packet& packet, glm::dvec2& data);
+sf::Packet& operator >>(sf::Packet& packet, glm::dvec3& data);
+sf::Packet& operator >>(sf::Packet& packet, glm::dvec4& data);
+
+template<typename T, size_t size>
+inline sf::Packet& operator <<(sf::Packet& packet, const std::array<T, size>& data) {
+    for (size_t i = 0; i < size-1; ++i) {
+        packet << data[i];
+    }
+    return packet << data[size-1];
+}
+template<typename T, size_t size>
+inline sf::Packet& operator >>(sf::Packet& packet, std::array<T, size>& data) {
+    for (size_t i = 0; i < size-1; ++i) {
+        packet >> data[i];
+    }
+    return packet >> data[size - 1];
+}
 
 namespace Engine::Networking {
     class Packet : public sf::Packet {

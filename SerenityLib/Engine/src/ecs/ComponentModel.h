@@ -65,7 +65,7 @@ class ComponentModel: public Observer {
         size_t getNumModels() const;
         inline CONSTEXPR float radius() const noexcept { return m_Radius; }
         inline CONSTEXPR const glm::vec3& boundingBox() const noexcept { return m_RadiusBox; }
-        void show();
+        void show(bool shown = true);
         void hide();
 
         ModelInstance& getModel(size_t index = 0) const;

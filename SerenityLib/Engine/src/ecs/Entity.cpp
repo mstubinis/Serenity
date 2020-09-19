@@ -22,6 +22,12 @@ void Entity::removeChild(Entity child) const noexcept {
         body->removeChild(child);
     }
 }
+void Entity::removeAllChildren() const noexcept {
+    auto* body = getComponent<ComponentBody>();
+    if (body) {
+        body->removeAllChildren();
+    }
+}
 bool Entity::hasParent() const noexcept {
     auto* body = getComponent<ComponentBody>();
     if (body) {
@@ -47,7 +53,7 @@ void Entity::destroy() noexcept {
     }
 #ifndef ENGINE_PRODUCTION
     //else {
-    //    std::cout << "Entity::destroy() called on a null entity\n";
+    //    ENGINE_PRODUCTION_LOG("Entity::destroy() called on a null entity")
     //}
 #endif
 }

@@ -2,10 +2,9 @@
 #include <core/engine/lua/LuaState.h>
 #include <core/engine/lua/LuaIncludes.h>
 
-using namespace std;
-
-LUAState::LUAState() {
-    L = luaL_newstate();
+LUAState::LUAState() 
+    : L(luaL_newstate())
+{
     luaL_openlibs(L);
 }
 LUAState::~LUAState() {
@@ -13,14 +12,11 @@ LUAState::~LUAState() {
         lua_close(L);
     }
 }
-lua_State* LUAState::getState() const {
-    return L;
-}
-int LUAState::runFile(const string& filename) const {
+int LUAState::runFile(const std::string& filename) const {
     int ret = -1;
     auto* filenameC = filename.c_str();
     if (luaL_loadfile(L, filenameC) || lua_pcall(L, 0, 0, 0)) {
-        cout << "LUA Error: script did not compile correctly (" << filename << ")\n";
+        ENGINE_PRODUCTION_LOG("LUA Error: script did not compile correctly (" << filename)
         return 0;
     }
     ret = lua_getfield(L, LUA_REGISTRYINDEX, filenameC);

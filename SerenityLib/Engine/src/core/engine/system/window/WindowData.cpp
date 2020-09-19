@@ -7,7 +7,7 @@
 
 Engine::priv::WindowData::WindowData()
 #ifdef ENGINE_THREAD_WINDOW_EVENTS
-: m_WindowThread(*this)
+    : m_WindowThread{ *this }
 #endif
 {
     m_Flags = (Window_Flags::Windowed | Window_Flags::MouseVisible);
@@ -33,12 +33,8 @@ void Engine::priv::WindowData::internal_restore_state(Window& super) {
         m_SFMLWindow.setFramerateLimit(m_FramerateLimit);
     }
     m_SFContextSettings = m_SFMLWindow.getSettings();
-
     m_SFMLWindow.setMouseCursorVisible(m_Flags & Window_Flags::MouseVisible);
-    m_SFMLWindow.setActive(m_Flags & Window_Flags::Active);
-    if (m_Flags & Window_Flags::Active) {
-        super.m_Data.m_OpenGLThreadID = std::this_thread::get_id();
-    }
+    super.setActive(m_Flags & Window_Flags::Active);
     m_SFMLWindow.setVerticalSyncEnabled(m_Flags & Window_Flags::Vsync);
     m_SFMLWindow.setMouseCursorGrabbed(m_Flags & Window_Flags::MouseGrabbed);
 }
@@ -49,29 +45,28 @@ void Engine::priv::WindowData::internal_init_position(Window& super) {
     float final_desktop_height = (float)desktopSize.height;
     float x_other              = 0.0f;
     float y_other              = 0.0f;
-#ifdef _WIN32
-    //get the dimensions of the desktop's bottom task bar. Only tested on Windows 10
-    auto os_handle             = super.getSFMLHandle().getSystemHandle();
-    //            left   right   top   bottom
-    RECT rect; //[0,     1920,   0,    1040]  //bottom task bar
-    SystemParametersInfoA(SPI_GETWORKAREA, 0, &rect, 0);
-    y_other               = final_desktop_height - (float)rect.bottom;
-    final_desktop_height -= y_other;
-#endif
+    #ifdef _WIN32
+        //get the dimensions of the desktop's bottom task bar. Only tested on Windows 10
+        auto os_handle             = super.getSFMLHandle().getSystemHandle();
+        //            left   right   top   bottom
+        RECT rect; //[0,     1920,   0,    1040]  //bottom task bar
+        SystemParametersInfoA(SPI_GETWORKAREA, 0, &rect, 0);
+        y_other               = final_desktop_height - (float)rect.bottom;
+        final_desktop_height -= y_other;
+    #endif
 
     super.setPosition((unsigned int)((final_desktop_width - winSize.x) / 2.0f), (unsigned int)((final_desktop_height - winSize.y) / 2.0f));
 }
 const sf::ContextSettings Engine::priv::WindowData::internal_create(Window& super, const std::string& name) {
     internal_on_close();
     #ifdef ENGINE_THREAD_WINDOW_EVENTS
-        m_WindowThread.internal_startup(super, name);
+        m_WindowThread.internal_startup(super, name); //calls window.setActive(false) on the created event thread, so we call setActive(true) below
         std::this_thread::sleep_for(std::chrono::milliseconds(450));
-        m_SFMLWindow.setActive(true);
-        super.m_Data.m_OpenGLThreadID = std::this_thread::get_id();
+        super.setActive(true);
     #else
         m_SFMLWindow.create(m_VideoMode, name, m_Style, m_SFContextSettings);
-        if (!m_IconFile.empty())
-            super.setIcon(m_IconFile);
+        super.m_Data.m_OpenGLThreadID = std::this_thread::get_id();
+        super.setIcon(m_IconFile);
         m_UndergoingClosing = false;
     #endif
     return m_SFMLWindow.getSettings();

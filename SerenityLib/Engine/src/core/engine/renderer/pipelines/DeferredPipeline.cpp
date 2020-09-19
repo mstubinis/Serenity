@@ -127,7 +127,7 @@ void DeferredPipeline::internal_gl_scissor_reset() noexcept {
     auto winSize          = Resources::getWindowSize();
     m_CurrentScissorState = glm::vec4(-1.0f);
     m_CurrentScissorDepth = std::numeric_limits<float>().min();
-    glScissor(0, 0, winSize.x, winSize.y);
+    GLCall(glScissor(0, 0, winSize.x, winSize.y));
 }
 void DeferredPipeline::internal_gl_scissor(const glm::vec4& scissor, float depth) noexcept {
     if (scissor == glm::vec4(-1.0f)) {
@@ -135,7 +135,7 @@ void DeferredPipeline::internal_gl_scissor(const glm::vec4& scissor, float depth
     }else{
         m_CurrentScissorState = scissor;
         m_CurrentScissorDepth = depth;
-        glScissor((GLint)scissor.x, (GLint)scissor.y, (GLsizei)scissor.z, (GLsizei)scissor.w);
+        GLCall(glScissor((GLint)scissor.x, (GLint)scissor.y, (GLsizei)scissor.z, (GLsizei)scissor.w));
     }
 }
 
@@ -147,8 +147,8 @@ void DeferredPipeline::init() {
     m_InternalShaders.resize(ShaderEnum::_TOTAL, nullptr);
     m_InternalShaderPrograms.resize(ShaderProgramEnum::_TOTAL, nullptr);
 
-    glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &UniformBufferObject::MAX_UBO_BINDINGS);
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, init_border_color);
+    GLCall(glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &UniformBufferObject::MAX_UBO_BINDINGS));
+    GLCall(glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, init_border_color));
 
     m_OpenGLExtensionsManager.INIT();
 
@@ -282,21 +282,21 @@ void DeferredPipeline::init() {
 
     //particle instancing
     Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh().getVertexData().bind();
-    glGenBuffers(1, &m_Particle_Instance_VBO);
+    GLCall(glGenBuffers(1, &m_Particle_Instance_VBO));
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_Particle_Instance_VBO);
-    glBufferData(GL_ARRAY_BUFFER, 0, NULL, GL_STREAM_DRAW);
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_Particle_Instance_VBO));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, 0, NULL, GL_STREAM_DRAW));
 
-    glEnableVertexAttribArray(2);                          
-    glVertexAttribPointer(2, 4, GL_FLOAT,        GL_FALSE, sizeof(ParticleSystem::ParticleDOD),  (void*)0  );
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 2, GL_FLOAT,        GL_FALSE, sizeof(ParticleSystem::ParticleDOD),  (void*)(sizeof(glm::vec4))  );
-    glEnableVertexAttribArray(4);
-    glVertexAttribIPointer(4, 2, GL_UNSIGNED_INT, sizeof(ParticleSystem::ParticleDOD), (void*)(sizeof(glm::vec4) + sizeof(glm::vec2))  );
+    GLCall(glEnableVertexAttribArray(2));
+    GLCall(glVertexAttribPointer(2, 4, GL_FLOAT,        GL_FALSE, sizeof(ParticleSystem::ParticleDOD),  (void*)0  ));
+    GLCall(glEnableVertexAttribArray(3));
+    GLCall(glVertexAttribPointer(3, 2, GL_FLOAT,        GL_FALSE, sizeof(ParticleSystem::ParticleDOD),  (void*)(sizeof(glm::vec4))  ));
+    GLCall(glEnableVertexAttribArray(4));
+    GLCall(glVertexAttribIPointer(4, 2, GL_UNSIGNED_INT, sizeof(ParticleSystem::ParticleDOD), (void*)(sizeof(glm::vec4) + sizeof(glm::vec2))  ));
 
-    glVertexAttribDivisor(2, 1);
-    glVertexAttribDivisor(3, 1);
-    glVertexAttribDivisor(4, 1);
+    GLCall(glVertexAttribDivisor(2, 1));
+    GLCall(glVertexAttribDivisor(3, 1));
+    GLCall(glVertexAttribDivisor(4, 1));
 
     Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh().getVertexData().unbind();
 }
@@ -322,7 +322,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
     for (unsigned int i = 0; i < 6; ++i) {
         glm::mat4 vp = captureProjection * CAPTURE_VIEWS[i];
         Engine::Renderer::sendUniformMatrix4("VP", vp);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture.address(1), 0);
+        GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture.address(1), 0));
         Engine::Renderer::Settings::clear(true, true, false);
         Skybox::bindMesh();
     }
@@ -349,7 +349,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
         for (unsigned int i = 0; i < 6; ++i) {
             glm::mat4 vp = captureProjection * CAPTURE_VIEWS[i];
             Engine::Renderer::sendUniformMatrix4("VP", vp);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture.address(2), m);
+            GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture.address(2), m));
             Engine::Renderer::Settings::clear(true, true, false);
             Skybox::bindMesh();
         }
@@ -361,10 +361,10 @@ void DeferredPipeline::internal_generate_brdf_lut(ShaderProgram& program, unsign
     fbo.bind();
 
     Engine::Renderer::bindTextureForModification(GL_TEXTURE_2D, Texture::BRDF->address());
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, brdfSize, brdfSize, 0, GL_RG, GL_FLOAT, 0);
+    GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, brdfSize, brdfSize, 0, GL_RG, GL_FLOAT, 0));
     Texture::setFilter(GL_TEXTURE_2D, TextureFilter::Linear);
     Texture::setWrapping(GL_TEXTURE_2D, TextureWrap::ClampToEdge);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Texture::BRDF->address(), 0);
+    GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Texture::BRDF->address(), 0));
 
     m_Renderer.bind(&program);
 
@@ -442,7 +442,7 @@ void DeferredPipeline::clear(bool color, bool depth, bool stencil) {
     if (color)   clearBit |= GL_COLOR_BUFFER_BIT;
     if (depth)   clearBit |= GL_DEPTH_BUFFER_BIT;
     if (stencil) clearBit |= GL_STENCIL_BUFFER_BIT;
-    glClear(clearBit);
+    GLCall(glClear(clearBit));
 }
 bool DeferredPipeline::colorMask(bool r, bool g, bool b, bool alpha) {
     return m_OpenGLStateMachine.GL_glColorMask(r, g, b, alpha);
@@ -458,18 +458,18 @@ bool DeferredPipeline::bindVAO(unsigned int vaoObject) {
 }
 bool DeferredPipeline::deleteVAO(unsigned int& vaoObject) {
     if (vaoObject) {
-        glDeleteVertexArrays(1, &vaoObject);
+        GLCall(glDeleteVertexArrays(1, &vaoObject));
         vaoObject = 0;
         return true;
     }
     return false;
 }
 void DeferredPipeline::generateAndBindTexture(unsigned int textureType, unsigned int& textureObject) {
-    glGenTextures(1, &textureObject);
+    GLCall(glGenTextures(1, &textureObject));
     m_OpenGLStateMachine.GL_glBindTextureForModification(textureType, textureObject);
 }
 void DeferredPipeline::generateAndBindVAO(unsigned int& vaoObject) {
-    glGenVertexArrays(1, &vaoObject);
+    GLCall(glGenVertexArrays(1, &vaoObject));
     DeferredPipeline::bindVAO(vaoObject);
 }
 bool DeferredPipeline::enableAPI(unsigned int apiEnum) {
@@ -866,31 +866,25 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, S
     if (particle_count > 0) {
         auto& particleMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh();
         m_Renderer.bind(&program);
-        for (auto& pair : system.MaterialToIndexReverse) {
-            system.MaterialIDToIndex.try_emplace(pair.first, (unsigned int)system.MaterialIDToIndex.size());
+        for (auto& [id, mat] : system.MaterialToIndexReverse) {
+            system.MaterialIDToIndex.try_emplace(id, (unsigned int)system.MaterialIDToIndex.size());
         }
-
         for (auto& pod : system.ParticlesDOD) {
             pod.MatIDAndPackedColor.x = system.MaterialIDToIndex.at(pod.MatIDAndPackedColor.x);
         }
-
-        for (auto& pair : system.MaterialIDToIndex) {
-            Material* mat         = system.MaterialToIndexReverse.at(pair.first);
+        for (auto& [id, index] : system.MaterialIDToIndex) {
+            Material* mat         = system.MaterialToIndexReverse.at(id);
             Texture& texture      = *mat->getComponent((unsigned int)MaterialComponentType::Diffuse).texture(0);
-            std::string location  = "DiffuseTexture" + std::to_string(pair.second) + "";
-            Engine::Renderer::sendTextureSafe(location.c_str(), texture, pair.second);
+            std::string location  = "DiffuseTexture" + std::to_string(index) + "";
+            Engine::Renderer::sendTextureSafe(location.c_str(), texture, index);
         }
-
         const auto maxTextures = getMaxNumTextureUnits() - 1U;
         Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), maxTextures);
-
         m_Renderer.bind(&particleMesh);
-        glBindBuffer(GL_ARRAY_BUFFER, m_Particle_Instance_VBO);
-        glBufferData(GL_ARRAY_BUFFER, particle_count * sizeof(ParticleSystem::ParticleDOD), NULL, GL_STREAM_DRAW);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, particle_count * sizeof(ParticleSystem::ParticleDOD), &system.ParticlesDOD[0]);
-
-        glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)particleMesh.getVertexData().m_Indices.size(), GL_UNSIGNED_INT, 0, (GLsizei)particle_count);
-
+        GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_Particle_Instance_VBO));
+        GLCall(glBufferData(GL_ARRAY_BUFFER, particle_count * sizeof(ParticleSystem::ParticleDOD), NULL, GL_STREAM_DRAW));
+        GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, particle_count * sizeof(ParticleSystem::ParticleDOD), &system.ParticlesDOD[0]));
+        GLCall(glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)particleMesh.getVertexData().m_Indices.size(), GL_UNSIGNED_INT, 0, (GLsizei)particle_count));
         m_Renderer.unbind(&particleMesh);
     }
 }
@@ -899,7 +893,7 @@ void DeferredPipeline::renderMesh(Mesh& mesh, unsigned int mode) {
     if (indicesSize == 0) {
         return;
     }
-    glDrawElements(mode, (GLsizei)indicesSize, GL_UNSIGNED_INT, nullptr);
+    GLCall(glDrawElements(mode, (GLsizei)indicesSize, GL_UNSIGNED_INT, nullptr));
 }
 void DeferredPipeline::renderLightProbe(LightProbe& lightProbe) {
     //goal: render all 6 sides into a fbo and into a cubemap, and have that cubemap stored in the light probe to be used for Global Illumination
@@ -1149,16 +1143,16 @@ void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport,
         camera.setAspect(dimensions.z / dimensions.w);
     }
     //Engine::Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w); //m_GBuffer.bindFramebuffers() already does this
-    glScissor(0, 0, winSize.x, winSize.y);
+    GLCall(glScissor(0, 0, winSize.x, winSize.y));
 
     m_2DProjectionMatrix = glm::ortho(0.0f, dimensions.z, 0.0f, dimensions.w, 0.005f, 3000.0f); //might have to recheck this
     //this is god awful and ugly, but it's needed. find a way to refactor this properly
     for (unsigned int i = 0; i < 9; ++i) {
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        GLCall(glActiveTexture(GL_TEXTURE0 + i));
+        GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+        GLCall(glBindTexture(GL_TEXTURE_CUBE_MAP, 0));
     }
-    glDepthMask(GL_TRUE);
+    GLCall(glDepthMask(GL_TRUE));
     Engine::Renderer::setDepthFunc(GL_LEQUAL);
     Engine::Renderer::GLEnable(GL_DEPTH_TEST);
     Engine::Renderer::GLEnablei(GL_BLEND, 0); //this is needed for sure
@@ -1182,7 +1176,7 @@ bool DeferredPipeline::internal_pass_depth_prepass(Viewport& viewport, Camera& c
     //InternalScenePublicInterface::RenderForwardTransparent(m_Renderer, scene, viewport, camera);
     //InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(m_Renderer, scene, viewport, camera);
 
-    glDepthMask(GL_FALSE);
+    GLCall(glDepthMask(GL_FALSE));
     return true;
 }
 void DeferredPipeline::internal_pass_geometry(Viewport& viewport, Camera& camera) {
@@ -1213,17 +1207,17 @@ void DeferredPipeline::internal_pass_forward(Viewport& viewport, Camera& camera,
 
     InternalScenePublicInterface::RenderForwardOpaque(m_Renderer, scene, viewport, camera);
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
     for (unsigned int i = 0; i < 4; ++i) {
         Engine::Renderer::GLEnablei(GL_BLEND, i);
     }
     if (!depthPrepass) {
-        glDepthMask(GL_TRUE);
+        GLCall(glDepthMask(GL_TRUE));
     }
     InternalScenePublicInterface::RenderForwardTransparent(m_Renderer, scene, viewport, camera);
     InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(m_Renderer, scene, viewport, camera);
     if (!depthPrepass) {
-        glDepthMask(GL_FALSE);
+        GLCall(glDepthMask(GL_FALSE));
     }
     InternalScenePublicInterface::RenderDecals(m_Renderer, scene, viewport, camera);
     InternalScenePublicInterface::RenderForwardParticles(m_Renderer, scene, viewport, camera);
@@ -1497,7 +1491,7 @@ void DeferredPipeline::internal_pass_depth_and_transparency(Viewport& viewport, 
     //Engine::Renderer::GLEnable(GL_BLEND);
     Engine::Renderer::GLEnablei(GL_BLEND, 0);
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
     //sendUniform4Safe("TransparencyMaskColor", viewport.getTransparencyMaskColor());
     //sendUniform1Safe("TransparencyMaskActive", (int)viewport.isTransparencyMaskActive());
@@ -1538,7 +1532,7 @@ void DeferredPipeline::renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport,
             if (m_Renderer.m_DrawPhysicsDebug && &camera == scene.getActiveCamera()) {
         #endif
                 Engine::Renderer::GLDisable(GL_DEPTH_TEST);
-                glDepthMask(GL_FALSE);
+                GLCall(glDepthMask(GL_FALSE));
                 m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::BulletPhysics]);
                 Core::m_Engine->m_PhysicsManager._render(camera);
         #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
@@ -1554,9 +1548,9 @@ void DeferredPipeline::render2DAPINonTextured(bool mainRenderFunc, Viewport& vie
         Engine::Renderer::GLEnablei(GL_BLEND, 0);
         //Engine::Renderer::GLEnable(GL_DEPTH_TEST);
         //Engine::Renderer::GLDisable(GL_DEPTH_TEST);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //glDepthMask(GL_TRUE);
-        //glDepthMask(GL_FALSE);
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        //GLCall(glDepthMask(GL_TRUE));
+        //GLCall(glDepthMask(GL_FALSE));
         if (mainRenderFunc) {
             if (viewport.getRenderFlags().has(ViewportRenderingFlag::API2D)) {
                 //Engine::Renderer::Settings::clear(false, true, false); //clear depth only
@@ -1572,7 +1566,7 @@ void DeferredPipeline::render2DAPINonTextured(bool mainRenderFunc, Viewport& vie
         }
         Engine::Renderer::GLDisablei(GL_BLEND, 0);
         //Engine::Renderer::GLEnable(GL_DEPTH_TEST);
-        //glDepthMask(GL_FALSE);   
+        //GLCall(glDepthMask(GL_FALSE));   
     }
 }
 
@@ -1583,8 +1577,8 @@ void DeferredPipeline::render2DAPI(bool mainRenderFunc, Viewport& viewport) {
         //Engine::Renderer::GLEnable(GL_DEPTH_TEST);
         //Engine::Renderer::GLDisable(GL_DEPTH_TEST);
 
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDepthMask(GL_TRUE);
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        GLCall(glDepthMask(GL_TRUE));
         if (mainRenderFunc) {
             if (viewport.getRenderFlags().has(ViewportRenderingFlag::API2D)) {
                 Engine::Renderer::Settings::clear(false, true, false); //clear depth only
@@ -1602,8 +1596,8 @@ void DeferredPipeline::render2DAPI(bool mainRenderFunc, Viewport& viewport) {
         Engine::Renderer::GLDisablei(GL_BLEND, 0);
 
         //Engine::Renderer::GLEnable(GL_DEPTH_TEST);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //glDepthMask(GL_FALSE);
+        //GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        //GLCall(glDepthMask(GL_FALSE));
     }
 }
 
@@ -1658,7 +1652,7 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, Viewport& viewpo
     internal_pass_geometry(viewport, camera);
 
     Engine::Renderer::GLDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
+    GLCall(glDepthMask(GL_FALSE));
     Engine::Renderer::GLDisablei(GL_BLEND, 0);
 
     internal_pass_ssao(viewport, camera);
@@ -1668,7 +1662,7 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, Viewport& viewpo
     internal_pass_stencil();
 
     Engine::Renderer::GLEnablei(GL_BLEND, 0);
-    glBlendFuncSeparatei(0, GL_ONE, GL_ONE, GL_ONE, GL_ONE);
+    GLCall(glBlendFuncSeparatei(0, GL_ONE, GL_ONE, GL_ONE, GL_ONE));
 
     //this needs to be cleaned up
     m_GBuffer.bindFramebuffers(GBufferType::Lighting, "RGB");
@@ -1680,8 +1674,7 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, Viewport& viewpo
     Engine::Renderer::GLDisablei(GL_BLEND, 0);
     Engine::Renderer::GLDisable(GL_STENCIL_TEST);
     Engine::Renderer::GLEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_TRUE);
-
+    GLCall(glDepthMask(GL_TRUE));
 
     internal_pass_forward(viewport, camera, depthPrepass);
 
@@ -1698,7 +1691,7 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, Viewport& viewpo
 
     internal_pass_depth_of_field(viewport, sceneTexture, outTexture);
 
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    GLCall(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
 
     internal_pass_aa(mainRenderFunction, viewport, camera, sceneTexture, outTexture);
     

@@ -5,11 +5,15 @@
 #include <core/engine/mesh/Skeleton.h>
 
 using namespace Engine::priv;
-using namespace std;
 
-AnimationData::AnimationData(Mesh& mesh, const aiAnimation& assimpAnimation) : m_Mesh(&mesh) {
-    m_TicksPerSecond  = (float)assimpAnimation.mTicksPerSecond;
-    m_DurationInTicks = (float)assimpAnimation.mDuration;
+AnimationData::AnimationData(Mesh& mesh, float ticksPerSecond, float durationInTicks)
+    : m_Mesh{ &mesh }
+    , m_TicksPerSecond{ ticksPerSecond }
+    , m_DurationInTicks{ durationInTicks }
+{}
+AnimationData::AnimationData(Mesh& mesh, const aiAnimation& assimpAnimation) 
+    : AnimationData{ mesh, (float)assimpAnimation.mTicksPerSecond, (float)assimpAnimation.mDuration }
+{
     for (auto c = 0U; c < assimpAnimation.mNumChannels; ++c) {
         const aiNodeAnim& aiAnimNode = *assimpAnimation.mChannels[c];
         if (!m_KeyframeData.count(aiAnimNode.mNodeName.data)) {
@@ -27,14 +31,10 @@ AnimationData::AnimationData(Mesh& mesh, const aiAnimation& assimpAnimation) : m
         }
     }
 }
-AnimationData::AnimationData(Mesh& mesh, float ticksPerSecond, float durationInTicks) : m_Mesh(&mesh) {
-    m_TicksPerSecond  = ticksPerSecond;
-    m_DurationInTicks = durationInTicks;
-}
 AnimationData::~AnimationData() {
     m_KeyframeData.clear();
 }
-void AnimationData::ReadNodeHeirarchy(const string& animationName, float time, const MeshInfoNode* node, const glm::mat4& ParentTransform, vector<glm::mat4>& Transforms) {
+void AnimationData::ReadNodeHeirarchy(const std::string& animationName, float time, const MeshInfoNode* node, const glm::mat4& ParentTransform, std::vector<glm::mat4>& Transforms) {
     glm::mat4 NodeTransform(node->Transform);
     if (m_KeyframeData.count(node->Name)) {
         AnimationChannel keyframes(m_KeyframeData.at(node->Name));
@@ -60,7 +60,7 @@ void AnimationData::ReadNodeHeirarchy(const string& animationName, float time, c
         ReadNodeHeirarchy(animationName, time, node->Children[i], Transform, Transforms);
     }
 }
-void AnimationData::BoneTransform(const string& animationName, float TimeInSeconds, vector<glm::mat4>& Transforms) {
+void AnimationData::BoneTransform(const std::string& animationName, float TimeInSeconds, std::vector<glm::mat4>& Transforms) {
     float TicksPerSecond = (m_TicksPerSecond != 0.0f) ? m_TicksPerSecond : 25.0f;
     float TimeInTicks(TimeInSeconds * TicksPerSecond);
     float AnimationTime(fmod(TimeInTicks, m_DurationInTicks));
@@ -70,7 +70,7 @@ void AnimationData::BoneTransform(const string& animationName, float TimeInSecon
         Transforms[i] = m_Mesh->m_Skeleton->m_BoneInfo[i].FinalTransform;
     }
 }
-void AnimationData::internal_interpolate_vec3(glm::vec3& Out, float AnimationTime, const vector<Engine::priv::Vector3Key>& keys, function<size_t()> call) {
+void AnimationData::internal_interpolate_vec3(glm::vec3& Out, float AnimationTime, const std::vector<Engine::priv::Vector3Key>& keys, std::function<size_t()> call) {
     if (keys.size() == 1) {
         Out = keys[0].value;
         return;

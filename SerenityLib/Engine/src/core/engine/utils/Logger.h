@@ -16,9 +16,9 @@ class Logger final {
 
         void operator()(std::string_view message, const char* function, const char* file, int line) noexcept {
             if (m_LevelType == Logger::Level::Debug) {
-                std::cout << "Function: " << function << ", File: " << file << ", Line: " << line << ", msg: " << message << "\n";
+                ENGINE_PRODUCTION_LOG("Function: " << function << ", File: " << file << ", Line: " << line << ", msg: " << message)
             }else if (m_LevelType == Logger::Level::Release) {
-                //std::cout << message << "\n";
+                //ENGINE_PRODUCTION_LOG(message)
             }
         }
         inline CONSTEXPR Logger::Level getLevel() const noexcept { return m_LevelType; }

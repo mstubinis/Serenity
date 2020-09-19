@@ -219,10 +219,9 @@ struct Event final{
         Engine::priv::EventClient                     eventClient;
     };
     Event() = delete;
-    Event(EventType type_) {
-        type = type_;
-    }
-
+    Event(EventType type_) 
+        : type(type_)
+    {}
 };
 
 #endif

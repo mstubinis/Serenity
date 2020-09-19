@@ -42,8 +42,8 @@ class Collision final: public Observer {
 
         Collision(const Collision& other)                  = delete;
         Collision& operator=(const Collision& other)       = delete;
-        Collision(Collision&& other) noexcept;
-        Collision& operator=(Collision&& other) noexcept;
+        Collision(Collision&& other) noexcept              = default;
+        Collision& operator=(Collision&& other) noexcept   = default;
 
         ~Collision();
 

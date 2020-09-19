@@ -8,12 +8,13 @@
 
 using namespace Engine;
 using namespace Engine::priv;
-using namespace std;
 
-Networking::SocketTCP::SocketTCP(){
+Networking::SocketTCP::SocketTCP() {
     Core::m_Engine->m_NetworkingModule.m_SocketManager.add_tcp_socket(this);
 }
-Networking::SocketTCP::SocketTCP(const unsigned short port, const string& ip) : Networking::SocketTCP::SocketTCP() {  //client side socket
+Networking::SocketTCP::SocketTCP(const unsigned short port, const std::string& ip) 
+    : Networking::SocketTCP::SocketTCP{}
+{
     m_IP    = ip;
     m_Port  = port;
 }
@@ -76,7 +77,7 @@ void Networking::SocketTCP::update(const float dt) {
 bool Networking::SocketTCP::isConnected() const {
     return (m_SocketTCP.getLocalPort() != 0);
 }
-string Networking::SocketTCP::ip() const {
+std::string Networking::SocketTCP::ip() const {
     return m_SocketTCP.getRemoteAddress().toString();
 }
 unsigned short Networking::SocketTCP::remotePort() const {

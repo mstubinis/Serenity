@@ -48,7 +48,9 @@ namespace Engine::priv {
         private:
             CPoolType& componentPool;
         public:
-            ECSSystem(const SceneOptions& options, const ECSSystemCI& systemConstructor, ECS<ENTITY>& ecs) : componentPool(ecs.template getPool<COMPONENT>()){
+            ECSSystem(const SceneOptions& options, const ECSSystemCI& systemConstructor, ECS<ENTITY>& ecs) 
+                : componentPool(ecs.template getPool<COMPONENT>())
+            {
                 super::SUF = std::move(systemConstructor.onUpdateFunction);
                 super::CAE = std::move(systemConstructor.onComponentAddedToEntityFunction);
                 super::CRE = std::move(systemConstructor.onComponentRemovedFromEntityFunction);
@@ -64,22 +66,22 @@ namespace Engine::priv {
             ECSSystem(ECSSystem&& other) noexcept            = delete;
             ECSSystem& operator=(ECSSystem&& other) noexcept = delete;
 
-            void onUpdate(const float dt, Scene& scene) noexcept { 
+            void onUpdate(const float dt, Scene& scene) noexcept override { 
                 super::SUF(this, &componentPool, dt, scene); 
 			}
-            void onComponentAddedToEntity(void* component, ENTITY entity) noexcept {
+            void onComponentAddedToEntity(void* component, ENTITY entity) noexcept override {
                 super::CAE(this, component, entity);
 			}
-            void onComponentRemovedFromEntity(ENTITY entity) noexcept {
+            void onComponentRemovedFromEntity(ENTITY entity) noexcept override {
                 super::CRE(this, entity);
             }
-            void onEntityAddedToScene(ENTITY entity, Scene& scene) noexcept {
+            void onEntityAddedToScene(ENTITY entity, Scene& scene) noexcept override {
                 super::EAS(this, &componentPool, entity, scene);
 			}
-            void onSceneEntered(Scene& scene) noexcept { 
+            void onSceneEntered(Scene& scene) noexcept override {
                 super::SEF(this, &componentPool, scene);
 			}
-            void onSceneLeft(Scene& scene) noexcept { 
+            void onSceneLeft(Scene& scene) noexcept override {
                 super::SLF(this, &componentPool, scene); 
 			}
     };

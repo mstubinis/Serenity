@@ -9,8 +9,6 @@
 #include <core/engine/shaders/Shader.h>
 #include <core/engine/threading/ThreadingModule.h>
 
-using namespace std;
-
 Engine::priv::SMAA Engine::priv::SMAA::STATIC_SMAA;
 
 Engine::priv::SMAA::SMAA() {
@@ -22,8 +20,8 @@ Engine::priv::SMAA::SMAA() {
     m_Fragment_Shaders_Code.resize(PassStage::_TOTAL, "");
 }
 Engine::priv::SMAA::~SMAA() {
-    glDeleteTextures(1, &SearchTexture);
-    glDeleteTextures(1, &AreaTexture);
+    GLCall(glDeleteTextures(1, &SearchTexture));
+    GLCall(glDeleteTextures(1, &AreaTexture));
     SAFE_DELETE_VECTOR(m_Shader_Programs);
     SAFE_DELETE_VECTOR(m_Fragment_Shaders);
     SAFE_DELETE_VECTOR(m_Vertex_Shaders);
@@ -35,7 +33,7 @@ bool Engine::priv::SMAA::init_shaders() {
 
 #pragma region smaa_common
 
-    string smaa_common =
+    std::string smaa_common =
         "vec4 mad(vec4 a, vec4 b, vec4 c){ return (a * b) + c; }\n"
         "vec3 mad(vec3 a, vec3 b, vec3 c){ return (a * b) + c; }\n"
         "vec2 mad(vec2 a, vec2 b, vec2 c){ return (a * b) + c; }\n"
@@ -597,12 +595,12 @@ void Engine::priv::SMAA::init() {
     Engine::Renderer::genAndBindTexture(GL_TEXTURE_2D, AreaTexture);
     Texture::setFilter(GL_TEXTURE_2D, TextureFilter::Linear);
     Texture::setWrapping(GL_TEXTURE_2D, TextureWrap::ClampToBorder);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG8, 160, 560, 0, GL_RG, GL_UNSIGNED_BYTE, SMAA_areaTexBytes);
+    GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RG8, 160, 560, 0, GL_RG, GL_UNSIGNED_BYTE, SMAA_areaTexBytes));
 
     Engine::Renderer::genAndBindTexture(GL_TEXTURE_2D, SearchTexture);
     Texture::setFilter(GL_TEXTURE_2D, TextureFilter::Linear);
     Texture::setWrapping(GL_TEXTURE_2D, TextureWrap::ClampToBorder);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, 64, 16, 0, GL_RED, GL_UNSIGNED_BYTE, SMAA_searchTexBytes);
+    GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, 64, 16, 0, GL_RED, GL_UNSIGNED_BYTE, SMAA_searchTexBytes));
 }
 void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, unsigned int sceneTexture, unsigned int outTexture, const Engine::priv::Renderer& renderer) {
     gbuffer.bindFramebuffers(outTexture); //probably the lighting buffer

@@ -11,7 +11,7 @@ SpotLight::SpotLight(const glm_vec3& pos, const glm_vec3& direction, float inner
 
     if (m_Type == LightType::Spot) {
         auto& spotLights = Engine::priv::InternalScenePublicInterface::GetSpotLights(*scene);
-        spotLights.push_back(this);
+        spotLights.emplace_back(this);
     }
 }
 SpotLight::~SpotLight() {

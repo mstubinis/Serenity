@@ -10,7 +10,6 @@
 
 using namespace Engine;
 using namespace Engine::priv;
-using namespace std;
 
 ShaderProgram* ShaderProgram::Deferred = nullptr;
 ShaderProgram* ShaderProgram::Forward  = nullptr;
@@ -26,22 +25,23 @@ namespace Engine::priv {
         if (!camera) {
             return;
         }
-        Camera& c = *camera;
-
-        float fcoeff = (2.0f / glm::log2(c.getFar() + 1.0f)) * 0.5f;
+        float fcoeff = (2.0f / glm::log2(camera->getFar() + 1.0f)) * 0.5f;
         Engine::Renderer::sendUniform1Safe("fcoeff", fcoeff);
 
         //yes this is needed
         if(priv::Renderer::GLSL_VERSION < 140){
-            Engine::Renderer::sendUniformMatrix4Safe("CameraViewProj",c.getViewProjection());
+            Engine::Renderer::sendUniformMatrix4Safe("CameraViewProj", camera->getViewProjection());
         }
     }};
 };
 
-ShaderProgram::ShaderProgram(const string& in_name, Shader& vs, Shader& fs):m_VertexShader(vs), m_FragmentShader(fs), Resource(ResourceType::ShaderProgram, in_name){
+ShaderProgram::ShaderProgram(const std::string& in_name, Shader& vs, Shader& fs)
+    : Resource{ ResourceType::ShaderProgram, in_name }
+    , m_VertexShader{ vs }
+    , m_FragmentShader{ fs }
+{
     setName(in_name);
-
-    const string& name_ = name();
+    const std::string& name_ = name();
     if (vs.name() == "NULL") {
         vs.setName(name_ + ".vert");
     }
@@ -64,90 +64,96 @@ void InternalShaderProgramPublicInterface::LoadCPU(ShaderProgram& shaderP){
 void InternalShaderProgramPublicInterface::LoadGPU(ShaderProgram& shaderP){
     InternalShaderProgramPublicInterface::UnloadGPU(shaderP);
     if (!shaderP.m_LoadedGPU) {
-        string& VertexCode = shaderP.m_VertexShader.m_Code;
-        string& FragmentCode = shaderP.m_FragmentShader.m_Code;
-        GLuint vid = glCreateShader(GL_VERTEX_SHADER);
-        GLuint fid = glCreateShader(GL_FRAGMENT_SHADER);
-        GLint res = GL_FALSE;
+        const std::string& VertexCode   = shaderP.m_VertexShader.m_Code;
+        const std::string& FragmentCode = shaderP.m_FragmentShader.m_Code;
+        GLCall(GLuint vid = glCreateShader(GL_VERTEX_SHADER));
+        GLCall(GLuint fid = glCreateShader(GL_FRAGMENT_SHADER));
+        GLint res  = GL_FALSE;
         int ll;
         // Compile Vertex Shader
-        char const* vss = VertexCode.c_str();
-        glShaderSource(vid, 1, &vss, NULL);
-        glCompileShader(vid);
+        const char* vss = VertexCode.c_str();
+        GLCall(glShaderSource(vid, 1, &vss, NULL));
+        GLCall(glCompileShader(vid));
         // Check Vertex Shader
-        glGetShaderiv(vid, GL_COMPILE_STATUS, &res);
-        glGetShaderiv(vid, GL_INFO_LOG_LENGTH, &ll);
-        vector<char>ve(ll);
+        GLCall(glGetShaderiv(vid, GL_COMPILE_STATUS, &res));
+        GLCall(glGetShaderiv(vid, GL_INFO_LOG_LENGTH, &ll));
+        std::vector<char> ve(ll);
         if (ve.size() > 0) {
-            glGetShaderInfoLog(vid, ll, NULL, &ve[0]);
+            GLCall(glGetShaderInfoLog(vid, ll, NULL, &ve[0]));
         }
         if (res == GL_FALSE) {
             if (shaderP.m_VertexShader.fromFile()) {
-                cout << "VertexShader Log (" + shaderP.m_VertexShader.m_FileName + "): \n";
+                ENGINE_PRODUCTION_LOG("VertexShader Log (" + shaderP.m_VertexShader.m_FileName + "): ")
             }else{
-                cout << "VertexShader Log (" + shaderP.m_VertexShader.name() + "): \n";
+                ENGINE_PRODUCTION_LOG("VertexShader Log (" + shaderP.m_VertexShader.name() + "): ")
             }
-            cout << &ve[0] << '\n';
+            ENGINE_PRODUCTION_LOG(&ve[0])
         }
         // Compile Fragment Shader
-        char const* fss = FragmentCode.c_str();
-        glShaderSource(fid, 1, &fss, NULL);
-        glCompileShader(fid);
+        const char* fss = FragmentCode.c_str();
+        GLCall(glShaderSource(fid, 1, &fss, NULL));
+        GLCall(glCompileShader(fid));
         // Check Fragment Shader
-        glGetShaderiv(fid, GL_COMPILE_STATUS, &res);
-        glGetShaderiv(fid, GL_INFO_LOG_LENGTH, &ll);
-        vector<char>fe(ll);
+        GLCall(glGetShaderiv(fid, GL_COMPILE_STATUS, &res));
+        GLCall(glGetShaderiv(fid, GL_INFO_LOG_LENGTH, &ll));
+        std::vector<char> fe(ll);
         if (fe.size() > 0) {
-            glGetShaderInfoLog(fid, ll, NULL, &fe[0]);
+            GLCall(glGetShaderInfoLog(fid, ll, NULL, &fe[0]));
         }
         if (res == GL_FALSE) {
             if (shaderP.m_FragmentShader.fromFile()) {
-                cout << "FragmentShader Log (" + shaderP.m_FragmentShader.m_FileName + "): \n";
+                ENGINE_PRODUCTION_LOG("FragmentShader Log (" + shaderP.m_FragmentShader.m_FileName + "): ")
             }else{
-                cout << "FragmentShader Log (" + shaderP.m_FragmentShader.name() + "): \n";
+                ENGINE_PRODUCTION_LOG("FragmentShader Log (" + shaderP.m_FragmentShader.name() + "): ")
             }
-            cout << &fe[0] << '\n';
+            ENGINE_PRODUCTION_LOG(&fe[0])
         }
         // Link the program id
-        shaderP.m_ShaderProgram = glCreateProgram();
-        glAttachShader(shaderP.m_ShaderProgram, vid);
-        glAttachShader(shaderP.m_ShaderProgram, fid);
+        GLCall(shaderP.m_ShaderProgram = glCreateProgram());
+        GLCall(glAttachShader(shaderP.m_ShaderProgram, vid));
+        GLCall(glAttachShader(shaderP.m_ShaderProgram, fid));
 
         for (unsigned int i = 0; i < 100; ++i) {
-            string outFragCol = "out vec4 FRAG_COL_" + to_string(i) + ";";
+            std::string outFragCol = "out vec4 FRAG_COL_" + std::to_string(i) + ";";
             if (ShaderHelper::sfind(FragmentCode, outFragCol)) {
-                glBindFragDataLocation(shaderP.m_ShaderProgram, i, string("FRAG_COL_" + to_string(i)).c_str());
+                GLCall(glBindFragDataLocation(shaderP.m_ShaderProgram, i, std::string("FRAG_COL_" + std::to_string(i)).c_str()));
             }
         }
 
-        glLinkProgram(shaderP.m_ShaderProgram);
-        glDetachShader(shaderP.m_ShaderProgram, vid);
-        glDetachShader(shaderP.m_ShaderProgram, fid);
-        glDeleteShader(vid);
-        glDeleteShader(fid);
+        GLCall(glLinkProgram(shaderP.m_ShaderProgram));
+        GLCall(glDetachShader(shaderP.m_ShaderProgram, vid));
+        GLCall(glDetachShader(shaderP.m_ShaderProgram, fid));
+        GLCall(glDeleteShader(vid));
+        GLCall(glDeleteShader(fid));
         // Check the program
-        glGetProgramiv(shaderP.m_ShaderProgram, GL_LINK_STATUS, &res);
-        glGetProgramiv(shaderP.m_ShaderProgram, GL_INFO_LOG_LENGTH, &ll);
-        vector<char>pe(std::max(ll, (int)1));
-        glGetProgramInfoLog(shaderP.m_ShaderProgram, ll, NULL, &pe[0]);
+        GLCall(glGetProgramiv(shaderP.m_ShaderProgram, GL_LINK_STATUS, &res));
+        GLCall(glGetProgramiv(shaderP.m_ShaderProgram, GL_INFO_LOG_LENGTH, &ll));
+        std::vector<char> pe(std::max(ll, (int)1));
+        GLCall(glGetProgramInfoLog(shaderP.m_ShaderProgram, ll, NULL, &pe[0]));
         if (res == GL_FALSE) {
-            cout << "ShaderProgram Log : " << '\n';
-            cout << &pe[0] << '\n';
+            ENGINE_PRODUCTION_LOG("ShaderProgram Log : ")
+            ENGINE_PRODUCTION_LOG(&pe[0])
         }
         //populate uniform table
         if (res == GL_TRUE) {
-            GLint i_, count_, size_;
-            GLenum type_;
-            const GLsizei bufSize_ = 256; // maximum name length
-            GLchar name_[bufSize_]; // variable name in GLSL
-            GLsizei length_; // name length
-            glGetProgramiv(shaderP.m_ShaderProgram, GL_ACTIVE_UNIFORMS, &count_);
+            GLint           i_;
+            GLint           count_;
+            GLint           size_;
+            GLenum          type_;
+            const GLsizei   bufSize_ = 256;    // maximum name length
+            GLchar          name_[bufSize_];   // variable name in GLSL
+            GLsizei         length_;           // name length
+            GLCall(glGetProgramiv(shaderP.m_ShaderProgram, GL_ACTIVE_UNIFORMS, &count_));
             for (i_ = 0; i_ < count_; ++i_) {
-                glGetActiveUniform(shaderP.m_ShaderProgram, (GLuint)i_, bufSize_, &length_, &size_, &type_, name_);
+                GLCall(glGetActiveUniform(shaderP.m_ShaderProgram, (GLuint)i_, bufSize_, &length_, &size_, &type_, name_));
                 if (length_ > 0) {
-                    string name1_((char*)name_, length_);
-                    GLint loc_ = glGetUniformLocation(shaderP.m_ShaderProgram, name_);
-                    shaderP.m_UniformLocations.emplace(name1_, loc_);
+                    std::string name1_((char*)name_, length_);
+                    GLCall(GLint loc_ = glGetUniformLocation(shaderP.m_ShaderProgram, name_));
+                    shaderP.m_UniformLocations.emplace(
+                        std::piecewise_construct,
+                        std::forward_as_tuple(name1_), 
+                        std::forward_as_tuple(loc_)
+                    );
                 }
             }
         }
@@ -169,7 +175,7 @@ void InternalShaderProgramPublicInterface::UnloadGPU(ShaderProgram& shaderP){
     if (shaderP.m_LoadedGPU) {
         shaderP.m_UniformLocations.clear();
         shaderP.m_AttachedUBOs.clear();
-        glDeleteProgram(shaderP.m_ShaderProgram);
+        GLCall(glDeleteProgram(shaderP.m_ShaderProgram));
         shaderP.m_LoadedGPU = false;
     }
 }

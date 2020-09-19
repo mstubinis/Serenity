@@ -5,8 +5,6 @@
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/math/Engine_Math.h>
 
-using namespace std;
-
 Engine::priv::Fog Engine::priv::Fog::STATIC_FOG;
 
 bool Engine::Renderer::fog::enabled() {

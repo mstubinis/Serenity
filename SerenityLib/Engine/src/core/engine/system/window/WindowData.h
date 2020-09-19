@@ -16,10 +16,8 @@ namespace Engine::priv {
 
 //#define ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS
 
-#if !defined(_APPLE_) && !defined(ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS)
-#ifndef ENGINE_THREAD_WINDOW_EVENTS
-#define ENGINE_THREAD_WINDOW_EVENTS
-#endif
+#if !defined(_APPLE_) && !defined(ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS) && !defined(ENGINE_THREAD_WINDOW_EVENTS)
+    #define ENGINE_THREAD_WINDOW_EVENTS
 #endif
 
 namespace Engine::priv {

@@ -2,17 +2,17 @@
 #ifndef ENGINE_LUA_BINDER_H
 #define ENGINE_LUA_BINDER_H
 
-class LUAState;
+#include <core/engine/lua/LuaState.h>
 
 namespace Engine::priv {
     class LUABinder {
         private:
-            LUAState*   m_LUA_STATE = nullptr;
+            std::unique_ptr<LUAState>   m_LUA_STATE;
         public:
             LUABinder();
-            virtual ~LUABinder();
+            virtual ~LUABinder() = default;
 
-            inline CONSTEXPR LUAState* getState() const noexcept { return m_LUA_STATE; }
+            inline CONSTEXPR LUAState* getState() const noexcept { return m_LUA_STATE.get(); }
 
     };
 }

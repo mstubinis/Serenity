@@ -107,6 +107,7 @@ class Mesh final: public Resource, public Observer, public Engine::NonCopyable, 
         inline CONSTEXPR const glm::vec3& getRadiusBox() const noexcept { return m_radiusBox; }
         inline CONSTEXPR float getRadius() const noexcept { return m_radius; }
         inline CONSTEXPR const VertexData& getVertexData() const noexcept { return *m_VertexData; }
+        inline CONSTEXPR const Engine::priv::MeshSkeleton* getSkeleton() const noexcept { return m_Skeleton; }
 
         void onEvent(const Event& e);
 

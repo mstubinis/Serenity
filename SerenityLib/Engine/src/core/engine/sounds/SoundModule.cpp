@@ -8,7 +8,6 @@
 #include <core/engine/sounds/SoundQueue.h>
 
 using namespace Engine;
-using namespace std;
 
 priv::SoundModule* soundModule = nullptr;
 
@@ -73,36 +72,33 @@ void priv::SoundModule::updateCameraPosition(Scene& scene) {
     }
 }
 void priv::SoundModule::updateSoundQueues(Scene& scene, const float dt) {
-    for (auto it1 = m_SoundQueues.begin(); it1 != m_SoundQueues.end();) {
-        SoundQueue& queue = *(*it1);
-        queue.update(dt);
-        if (queue.empty()) {
-            it1 = m_SoundQueues.erase(it1);
-        }else{
-            ++it1;
-        }
+    for (auto& queue : m_SoundQueues) {
+        queue->update(dt);
     }
+    std::erase_if(m_SoundQueues, [](auto& queue) {
+        return (queue->empty());
+    });
 }
 void priv::SoundModule::updateSoundEffects(Scene& scene, const float dt) {
     for (unsigned int i = 0; i < MAX_SOUND_EFFECTS; ++i) {
-        auto& effect = m_SoundEffects[i];
-        if (effect.m_Active) {
-            effect.update(dt);
-            if (effect.status() == SoundStatus::Stopped || effect.status() == SoundStatus::Fresh) {
+        auto& soundEffect = m_SoundEffects[i];
+        if (soundEffect.m_Active) {
+            soundEffect.update(dt);
+            if (soundEffect.status() == SoundStatus::Stopped || soundEffect.status() == SoundStatus::Fresh) {
                 m_FreelistEffects.push(i);
-                effect.m_Active = false;
+                soundEffect.m_Active = false;
             }
         }
     }
 }
 void priv::SoundModule::updateSoundMusic(Scene& scene, const float dt) {
     for (unsigned int i = 0; i < MAX_SOUND_MUSIC; ++i) {
-        auto& music = m_SoundMusics[i];
-        if (music.m_Active) {
-            music.update(dt);
-            if (music.status() == SoundStatus::Stopped || music.status() == SoundStatus::Fresh) {
+        auto& soundMusic = m_SoundMusics[i];
+        if (soundMusic.m_Active) {
+            soundMusic.update(dt);
+            if (soundMusic.status() == SoundStatus::Stopped || soundMusic.status() == SoundStatus::Fresh) {
                 m_FreelistMusics.push(i);
-                music.m_Active = false;
+                soundMusic.m_Active = false;
             }
         }
     }
@@ -124,12 +120,9 @@ SoundEffect* Sound::playEffect(Handle handle, unsigned int loops){
     if (effect) {
         soundModule->setSoundInformation(handle, *effect);
         effect->play(loops);
+    }else{
+        ENGINE_PRODUCTION_LOG("Sound::playEffect returned a null sound effect for handle: " << handle.index() << ", " << handle.type() << ", " << handle.version())
     }
-    #ifndef ENGINE_PRODUCTION
-        else {
-            std::cout << "Sound::playEffect returned a null sound effect for handle: " << handle.index() << ", " << handle.type() << ", " << handle.version() << "\n";
-        }
-    #endif
     return effect;
 }
 SoundMusic* Sound::playMusic(Handle handle, unsigned int loops){
@@ -137,22 +130,19 @@ SoundMusic* Sound::playMusic(Handle handle, unsigned int loops){
     if (music) {
         soundModule->setSoundInformation(handle, *music);
         music->play(loops);
+    }else{
+        ENGINE_PRODUCTION_LOG("Sound::playMusic returned a null sound music for handle: " << handle.index() << ", " << handle.type() << ", " << handle.version())
     }
-    #ifndef ENGINE_PRODUCTION
-        else {
-            std::cout << "Sound::playMusic returned a null sound music for handle: " << handle.index() << ", " << handle.type() << ", " << handle.version() << "\n";
-        }
-    #endif
     return music;
 }
 void Sound::stop_all_effects() {
-    for (auto& effect : soundModule->m_SoundEffects) {
-        effect.stop();
+    for (auto& soundEffect : soundModule->m_SoundEffects) {
+        soundEffect.stop();
     }
 }
 void Sound::stop_all_music() {
-    for (auto& music : soundModule->m_SoundMusics) {
-        music.stop();
+    for (auto& soundMusic : soundModule->m_SoundMusics) {
+        soundMusic.stop();
     }
 }
 std::array<SoundEffect, MAX_SOUND_EFFECTS>& Sound::getAllSoundEffects() {

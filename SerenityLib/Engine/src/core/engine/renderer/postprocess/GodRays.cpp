@@ -10,8 +10,6 @@
 #include <core/engine/resources/Engine_BuiltInShaders.h>
 #include <core/engine/threading/ThreadingModule.h>
 
-using namespace std;
-
 Engine::priv::GodRays Engine::priv::GodRays::STATIC_GOD_RAYS;
 
 bool Engine::priv::GodRays::init_shaders() {

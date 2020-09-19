@@ -55,12 +55,14 @@ void Collision::internal_base_init(CollisionType type, float mass) {
     m_Type = type;
     setMass(mass);
 }
-Collision::Collision(ComponentBody& body){
-    m_Owner = body.getOwner();
+Collision::Collision(ComponentBody& body)
+    : m_Owner{ body.getOwner() }
+{
     internal_base_init(body.getCollision()->getType(), body.mass());
 }
-Collision::Collision(ComponentBody& body, CollisionType type, ModelInstance* modelInstance, float mass){
-    m_Owner = body.getOwner();
+Collision::Collision(ComponentBody& body, CollisionType type, ModelInstance* modelInstance, float mass)
+    : m_Owner{ body.getOwner() }
+{
     if (modelInstance) {
         auto* mesh_ptr = modelInstance->mesh();
         if (!mesh_ptr->isLoaded() || !mesh_ptr->m_CollisionFactory) {
@@ -78,8 +80,9 @@ Collision::Collision(ComponentBody& body, CollisionType type, ModelInstance* mod
     }
     internal_base_init(type, mass);
 }
-Collision::Collision(ComponentBody& body, CollisionType type, Mesh& mesh, float mass){
-    m_Owner   = body.getOwner();
+Collision::Collision(ComponentBody& body, CollisionType type, Mesh& mesh, float mass)
+    : m_Owner{ body.getOwner() }
+{
     if (!mesh.isLoaded() || !mesh.m_CollisionFactory) {
         m_BtShape      = std::unique_ptr<btCollisionShape>(Engine::priv::InternalMeshPublicInterface::BuildCollision(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), type));
         auto* mesh_ptr = &mesh;
@@ -94,8 +97,9 @@ Collision::Collision(ComponentBody& body, CollisionType type, Mesh& mesh, float 
     internal_base_init(type, mass);
 }
 
-Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, float mass, CollisionType type){
-    m_Owner   = body.getOwner();
+Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, float mass, CollisionType type)
+    : m_Owner{ body.getOwner() }
+{
     std::vector<ModelInstance*> modelInstances;
     modelInstances.reserve(modelComponent.getNumModels());
     for (size_t i = 0; i < modelComponent.getNumModels(); ++i) {
@@ -149,23 +153,7 @@ void Collision::internal_free_memory() {
 Collision::~Collision() {
     internal_free_memory();
 } 
-Collision::Collision(Collision&& other) noexcept {
-    if (&other != this) {
-        m_Owner     = std::move(other.m_Owner);
-        m_BtInertia = std::move(other.m_BtInertia);
-        m_Type      = std::move(other.m_Type);
-        m_BtShape.swap(other.m_BtShape);
-    }
-}
-Collision& Collision::operator=(Collision&& other) noexcept {
-    if (&other != this) {
-        m_Owner     = std::move(other.m_Owner);
-        m_BtInertia = std::move(other.m_BtInertia);
-        m_Type      = std::move(other.m_Type);
-        m_BtShape.swap(other.m_BtShape);
-    }
-    return *this;
-}
+
 void Collision::setMass(float mass) noexcept {
     if (!m_BtShape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None) {
         return;
@@ -190,15 +178,9 @@ void Collision::onEvent(const Event& e) {
     if (e.type == EventType::ResourceLoaded) {
         if (e.eventResource.resource->type() == ResourceType::Mesh && m_DeferredMeshes.size() > 0) {
             auto* mesh = (Mesh*)e.eventResource.resource;
-            auto it    = m_DeferredMeshes.begin();
-            while (it != m_DeferredMeshes.end()) {
-                Mesh& deferred_mesh = *(*it);
-                if (mesh == (*it) || (deferred_mesh.isLoaded() && deferred_mesh.m_CollisionFactory)) {
-                    it = m_DeferredMeshes.erase(it);
-                }else{
-                    ++it;
-                }
-            }
+            std::erase_if(m_DeferredMeshes, [mesh](Mesh* deferred_mesh) {
+                return (mesh == deferred_mesh || (deferred_mesh->isLoaded() && deferred_mesh->m_CollisionFactory));
+            });
             if (m_DeferredMeshes.size() == 0) {
                 m_DeferredLoadingFunction();
                 unregisterEvent(EventType::ResourceLoaded);

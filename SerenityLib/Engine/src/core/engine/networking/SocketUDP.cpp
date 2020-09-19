@@ -9,14 +9,15 @@
 using namespace Engine;
 using namespace Engine::priv;
 
-Networking::SocketUDP::UDPPacketInfo::UDPPacketInfo(sf::Packet* inSFMLPacket, unsigned short inPort, sf::IpAddress&& inAddress) {
-    sfmlPacket = std::unique_ptr<sf::Packet>(inSFMLPacket);
-    port       = inPort;
-    ip         = std::move(inAddress);
-}
-Networking::SocketUDP::UDPPacketInfo::UDPPacketInfo(Networking::SocketUDP::UDPPacketInfo&& other) noexcept {
-    port       = std::move(other.port);
-    ip         = std::move(other.ip);
+Networking::SocketUDP::UDPPacketInfo::UDPPacketInfo(sf::Packet* inSFMLPacket, unsigned short inPort, sf::IpAddress&& inAddress) 
+    : port{ inPort }
+    , ip{ std::move(inAddress) }
+    , sfmlPacket{ std::unique_ptr<sf::Packet>(inSFMLPacket) }
+{}
+Networking::SocketUDP::UDPPacketInfo::UDPPacketInfo(Networking::SocketUDP::UDPPacketInfo&& other) noexcept 
+    : port{ std::move(other.port) }
+    , ip{ std::move(other.ip) }
+{
     sfmlPacket.swap(other.sfmlPacket);
 }
 Networking::SocketUDP::UDPPacketInfo& Networking::SocketUDP::UDPPacketInfo::operator=(Networking::SocketUDP::UDPPacketInfo&& other) noexcept {
@@ -33,10 +34,10 @@ Networking::SocketUDP::UDPPacketInfo::~UDPPacketInfo() {
 
 
 
-Networking::SocketUDP::SocketUDP(unsigned short port, const std::string& ip){
-    m_Port  = port;
-    m_IP    = ip;
-
+Networking::SocketUDP::SocketUDP(unsigned short port, const std::string& ip) 
+    : m_Port(port)
+    , m_IP(ip)
+{
     Core::m_Engine->m_NetworkingModule.m_SocketManager.add_udp_socket(this);
 }
 Networking::SocketUDP::~SocketUDP() { 

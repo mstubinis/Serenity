@@ -16,6 +16,7 @@ namespace Engine::priv {
     class  IRenderingPipeline;
 };
 
+#include <core/engine/renderer/opengl/OpenGL.h>
 #include <core/engine/renderer/RendererState.h>
 #include <core/engine/utils/Utils.h>
 #include <core/engine/renderer/RendererIncludes.h>
@@ -32,16 +33,16 @@ namespace priv{
         public:
             bool                               m_Lighting         = true;
             bool                               m_DrawPhysicsDebug = false;
-            AntiAliasingAlgorithm   m_AA_algorithm     = AntiAliasingAlgorithm::FXAA;
+            AntiAliasingAlgorithm              m_AA_algorithm     = AntiAliasingAlgorithm::FXAA;
             float                              m_Gamma            = 2.2f;
             float                              m_GI_Diffuse       = 1.0f;
             float                              m_GI_Specular      = 1.0f;
             float                              m_GI_Global        = 1.0f;
             float                              m_GI_Pack;
-            DepthFunc                    m_Depth_Function   = DepthFunc::Less;
+            DepthFunc                          m_Depth_Function   = DepthFunc::Less;
 
         public:
-            IRenderingPipeline*      m_Pipeline                   = nullptr;
+            IRenderingPipeline*                m_Pipeline         = nullptr;
 
             Renderer(const EngineOptions& options);
             ~Renderer();

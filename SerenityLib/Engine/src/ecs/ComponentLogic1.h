@@ -11,7 +11,7 @@ namespace luabridge {
 #include <ecs/ECSSystemConstructorInfo.h>
 #include <core/engine/lua/Lua.h>
 
-class ComponentLogic1 : public Engine::UserPointer {
+class ComponentLogic1 : public Engine::UserPointer, public Engine::NonCopyable {
     using c_function = std::function<void(const ComponentLogic1*, const float)>;
     private:
         Entity                                             m_Owner;
@@ -19,18 +19,17 @@ class ComponentLogic1 : public Engine::UserPointer {
         void*                                              m_UserPointer2 = nullptr;
         LuaCallableFunction<ComponentLogic1, const float>  m_Functor;
     public:
-        ComponentLogic1(Entity entity) {
-            m_Owner = entity;
-        }
-        ComponentLogic1(Entity entity, c_function&& Functor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr) {
-            m_Owner        = entity;
+        ComponentLogic1(Entity entity) 
+            : m_Owner(entity)
+        {}
+        ComponentLogic1(Entity entity, c_function&& Functor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr) 
+            : m_Owner(entity)
+            , m_UserPointer1(Ptr2)
+            , m_UserPointer2(Ptr3)
+        {
             m_UserPointer  = Ptr1;
-            m_UserPointer1 = Ptr2;
-            m_UserPointer2 = Ptr3;
             setFunctor(std::move(Functor));
         }
-        ComponentLogic1(const ComponentLogic1& other) = delete;
-        ComponentLogic1& operator=(const ComponentLogic1& other) = delete;
         ComponentLogic1(ComponentLogic1&& other) noexcept;
         ComponentLogic1& operator=(ComponentLogic1&& other) noexcept;
 
@@ -39,9 +38,7 @@ class ComponentLogic1 : public Engine::UserPointer {
         inline CONSTEXPR Entity getOwner() const noexcept { return m_Owner; }
         void call(const float dt) const noexcept;
 
-        void setFunctor(c_function&& functor) noexcept {
-            m_Functor.setFunctor(std::move(functor));
-        }
+        inline void setFunctor(c_function&& functor) noexcept { m_Functor.setFunctor(std::move(functor)); }
         void setFunctor(luabridge::LuaRef luaFunction) noexcept;
 
         inline void setUserPointer1(void* UserPointer1) noexcept { m_UserPointer1 = UserPointer1; }

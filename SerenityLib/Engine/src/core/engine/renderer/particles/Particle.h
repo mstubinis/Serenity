@@ -31,23 +31,25 @@ class Particle {
 
         Particle() = delete;
         Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmitter& emitter);
-        ~Particle() {}
+        ~Particle() = default;
 
-        Particle(const Particle& other) = delete;
-        Particle& operator=(const Particle& other) = delete;
+        Particle(const Particle& other)                = delete;
+        Particle& operator=(const Particle& other)     = delete;
         Particle(Particle&& other) noexcept;
         Particle& operator=(Particle&& other) noexcept;
 
-        void init(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmitter& parent);
+        void init(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmitter& parent) noexcept;
 
         inline CONSTEXPR bool isActive() const noexcept { return (m_Timer > 0.0f); }
-        void setPosition(const glm::vec3& newPosition);
         inline CONSTEXPR Material* getMaterial() const noexcept { return m_Material; }
         inline CONSTEXPR float angle() const noexcept { return m_Angle; }
         inline CONSTEXPR const glm::vec2& getScale() const noexcept { return m_Scale; }
         inline CONSTEXPR const glm::vec3& position() const noexcept { return m_Position; }
         inline CONSTEXPR const Engine::color_vector_4& color() const noexcept { return m_Color; }
         inline CONSTEXPR const glm::vec3& velocity() const noexcept { return m_Velocity; }
-        float lifetime() const;
+        float lifetime() const noexcept;
+
+        void setPosition(const glm::vec3& newPosition) noexcept;
+        void setPosition(float x, float y, float z) noexcept;
 };
 #endif

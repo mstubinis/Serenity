@@ -4,7 +4,9 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/resources/Engine_Resources.h>
 
-Camera::Camera(float angle, float aspectRatio, float Near, float Far, Scene* scene) : Entity(*scene){//create a perspective camera
+Camera::Camera(float angle, float aspectRatio, float Near, float Far, Scene* scene) 
+    : Entity(*scene)
+{
     if (!scene) {
         scene = Engine::Resources::getCurrentScene();
     }
@@ -19,7 +21,9 @@ Camera::Camera(float angle, float aspectRatio, float Near, float Far, Scene* sce
     cam->lookAt(glm_vec3(0.0), glm_vec3(0.0) + body->forward(), body->up());
     logic->setUserPointer(this);
 }
-Camera::Camera(float left, float right, float bottom, float top, float Near, float Far, Scene* scene) : Entity(*scene){//create an orthographic camera
+Camera::Camera(float left, float right, float bottom, float top, float Near, float Far, Scene* scene) 
+    : Entity(*scene)
+{
     if (!scene) {
         scene = Engine::Resources::getCurrentScene();
     }

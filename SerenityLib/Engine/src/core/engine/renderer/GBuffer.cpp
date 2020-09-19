@@ -5,13 +5,13 @@
 #include <core/engine/scene/Viewport.h>
 
 constexpr std::array<std::tuple<ImageInternalFormat, ImagePixelFormat, ImagePixelType, FramebufferAttatchment>, Engine::priv::GBufferType::_TOTAL> GBUFFER_TYPE_DATA{{
-    std::make_tuple(ImageInternalFormat::RGB8, ImagePixelFormat::RGB, ImagePixelType::UNSIGNED_BYTE, FramebufferAttatchment::Color_0),
-    std::make_tuple(ImageInternalFormat::RGBA16F, ImagePixelFormat::RGBA, ImagePixelType::FLOAT, FramebufferAttatchment::Color_1),//r,g = NormalsOctahedronCompressed, b = MaterialID & AO, a = Packed Metalness / Smoothness 
-    std::make_tuple(ImageInternalFormat::RGBA8, ImagePixelFormat::RGBA, ImagePixelType::UNSIGNED_BYTE, FramebufferAttatchment::Color_2),//r = OutGlow, g = OutSpecular, b = GodRaysRG (nibbles), a = GodRaysB 
-    std::make_tuple(ImageInternalFormat::RGB16F, ImagePixelFormat::RGB, ImagePixelType::FLOAT, FramebufferAttatchment::Color_3),
-    std::make_tuple(ImageInternalFormat::RGBA4, ImagePixelFormat::RGBA, ImagePixelType::UNSIGNED_BYTE, FramebufferAttatchment::Color_0),
-    std::make_tuple(ImageInternalFormat::RGBA4, ImagePixelFormat::RGBA, ImagePixelType::UNSIGNED_BYTE, FramebufferAttatchment::Color_1),
-    std::make_tuple(ImageInternalFormat::Depth24Stencil8, ImagePixelFormat::DEPTH_STENCIL, ImagePixelType::UNSIGNED_INT_24_8, FramebufferAttatchment::DepthAndStencil),
+    {ImageInternalFormat::RGB8, ImagePixelFormat::RGB, ImagePixelType::UNSIGNED_BYTE, FramebufferAttatchment::Color_0},
+    {ImageInternalFormat::RGBA16F, ImagePixelFormat::RGBA, ImagePixelType::FLOAT, FramebufferAttatchment::Color_1},//r,g = NormalsOctahedronCompressed, b = MaterialID & AO, a = Packed Metalness / Smoothness 
+    {ImageInternalFormat::RGBA8, ImagePixelFormat::RGBA, ImagePixelType::UNSIGNED_BYTE, FramebufferAttatchment::Color_2},//r = OutGlow, g = OutSpecular, b = GodRaysRG (nibbles), a = GodRaysB 
+    {ImageInternalFormat::RGB16F, ImagePixelFormat::RGB, ImagePixelType::FLOAT, FramebufferAttatchment::Color_3},
+    {ImageInternalFormat::RGBA4, ImagePixelFormat::RGBA, ImagePixelType::UNSIGNED_BYTE, FramebufferAttatchment::Color_0},
+    {ImageInternalFormat::RGBA4, ImagePixelFormat::RGBA, ImagePixelType::UNSIGNED_BYTE, FramebufferAttatchment::Color_1},
+    {ImageInternalFormat::Depth24Stencil8, ImagePixelFormat::DEPTH_STENCIL, ImagePixelType::UNSIGNED_INT_24_8, FramebufferAttatchment::DepthAndStencil},
 }};
 
 void Engine::priv::GBuffer::init(unsigned int width, unsigned int height){
@@ -79,9 +79,9 @@ bool Engine::priv::GBuffer::resize(unsigned int width, unsigned int height) {
     return true;
 }
 void Engine::priv::GBuffer::internalBuildTextureBuffer(FramebufferObject& fbo, GBufferType::Type gbufferType, unsigned int w, unsigned int h) {
-    const auto i      = GBUFFER_TYPE_DATA[gbufferType];
-    Texture* texture  = NEW Texture(w, h, std::get<2>(i), std::get<1>(i), std::get<0>(i), fbo.divisor());
-    m_FramebufferTextures[(unsigned int)gbufferType] = fbo.attatchTexture(texture, std::get<3>(i));
+    const auto [internalFmt, pxlFmt, pxlType, fbAttatch] = GBUFFER_TYPE_DATA[gbufferType];
+    Texture* texture  = NEW Texture(w, h, pxlType, pxlFmt, internalFmt, fbo.divisor());
+    m_FramebufferTextures[(unsigned int)gbufferType] = fbo.attatchTexture(texture, fbAttatch);
 }
 void Engine::priv::GBuffer::internalStart(std::vector<unsigned int>& types, unsigned int size, std::string_view channels, bool first_fbo) {
     (first_fbo) ? m_FBO.bind() : m_SmallFBO.bind();
@@ -90,7 +90,7 @@ void Engine::priv::GBuffer::internalStart(std::vector<unsigned int>& types, unsi
     bool b = (channels.find("B") != std::string::npos);
     bool a = (channels.find("A") != std::string::npos);
 
-    glDrawBuffers(size, types.data());
+    GLCall(glDrawBuffers(size, types.data()));
     Engine::Renderer::colorMask(r, g, b, a);
 }
 void Engine::priv::GBuffer::bindFramebuffers(std::string_view c, bool mainFBO) {

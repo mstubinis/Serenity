@@ -13,9 +13,9 @@ using namespace Engine;
 using namespace Engine::priv;
 
 #pragma region MaterialNode
-MaterialNode::MaterialNode(Material& material_) {
-    material = &(material_);
-}
+MaterialNode::MaterialNode(Material& material_) 
+    : material{ &(material_) }
+{}
 MaterialNode::~MaterialNode() {
 }
 MaterialNode::MaterialNode(MaterialNode&& other) noexcept {
@@ -33,9 +33,9 @@ MaterialNode& MaterialNode::operator=(MaterialNode&& other) noexcept {
 #pragma endregion
 
 #pragma region MeshNode
-MeshNode::MeshNode(Mesh& mesh_) {
-    mesh = &(mesh_);
-}
+MeshNode::MeshNode(Mesh& mesh_) 
+    : mesh{ &(mesh_) }
+{}
 MeshNode::~MeshNode() {
     SAFE_DELETE_VECTOR(instanceNodes);
 }
@@ -54,9 +54,9 @@ MeshNode& MeshNode::operator=(MeshNode&& other) noexcept {
 #pragma endregion
 
 #pragma region InstanceNode
-InstanceNode::InstanceNode(ModelInstance& modelInstance_){
-    instance = &(modelInstance_);
-}
+InstanceNode::InstanceNode(ModelInstance& modelInstance_)
+    : instance{ &(modelInstance_) }
+{}
 InstanceNode::~InstanceNode() {
 }
 InstanceNode::InstanceNode(InstanceNode&& other) noexcept {
@@ -71,10 +71,9 @@ InstanceNode& InstanceNode::operator=(InstanceNode&& other) noexcept {
 
 #pragma endregion
 
-RenderGraph::RenderGraph(ShaderProgram& shaderProgram){
-    m_ShaderProgram = &shaderProgram;
-}
-
+RenderGraph::RenderGraph(ShaderProgram& shaderProgram)
+    : m_ShaderProgram{ &shaderProgram }
+{}
 RenderGraph::RenderGraph(RenderGraph&& other) noexcept {
     m_ShaderProgram  = std::exchange(other.m_ShaderProgram, nullptr);
     m_MaterialNodes  = std::move(other.m_MaterialNodes);
@@ -88,8 +87,6 @@ RenderGraph& RenderGraph::operator=(RenderGraph&& other) noexcept {
     }
     return *this;
 }
-
-
 RenderGraph::~RenderGraph() {
 }
 
@@ -124,8 +121,8 @@ void RenderGraph::addModelInstanceToPipeline(ModelInstance& modelInstance) {
     }
     if (!instanceNode) {
         instanceNode = NEW InstanceNode(modelInstance);
-        meshNode->instanceNodes.push_back(instanceNode);
-        m_InstancesTotal.push_back(instanceNode);
+        meshNode->instanceNodes.emplace_back(instanceNode);
+        m_InstancesTotal.emplace_back(instanceNode);
     }
 }
 void RenderGraph::removeModelInstanceFromPipeline(ModelInstance& modelInstance) {
@@ -206,13 +203,13 @@ void RenderGraph::sort_bruteforce(Camera& camera, SortingMode sortingMode) {
         auto lhsParent = lhs->instance->parent();
         auto rhsParent = rhs->instance->parent();
 
-        std::tuple<ComponentBody*, ComponentModel*> lhsComps  = lhsParent.getComponents<ComponentBody, ComponentModel>();
-        std::tuple<ComponentBody*, ComponentModel*> rhsComps  = rhsParent.getComponents<ComponentBody, ComponentModel>();
+        auto [lhsBody, lhsModel] = lhsParent.getComponents<ComponentBody, ComponentModel>();
+        auto [rhsBody, rhsModel] = rhsParent.getComponents<ComponentBody, ComponentModel>();
 
-        auto lhsPos    = std::get<0>(lhsComps)->getPosition();
-        auto rhsPos    = std::get<0>(rhsComps)->getPosition();
-        auto lhsRad    = std::get<1>(lhsComps)->radius();
-        auto rhsRad    = std::get<1>(rhsComps)->radius();
+        auto lhsPos    = lhsBody->getPosition();
+        auto rhsPos    = rhsBody->getPosition();
+        auto lhsRad    = lhsModel->radius();
+        auto rhsRad    = rhsModel->radius();
 
         auto leftDir   = glm::normalize(lhsPos - camPos);
         auto rightDir  = glm::normalize(rhsPos - camPos);
@@ -299,13 +296,13 @@ void RenderGraph::sort(Camera& camera, SortingMode sortingMode) {
                 auto  lhsParent = lhs->instance->parent();
                 auto  rhsParent = rhs->instance->parent();
 
-                std::tuple<ComponentBody*, ComponentModel*> lhsComps = lhsParent.getComponents<ComponentBody, ComponentModel>();
-                std::tuple<ComponentBody*, ComponentModel*> rhsComps = rhsParent.getComponents<ComponentBody, ComponentModel>();
+                auto [lhsBody, lhsModel] = lhsParent.getComponents<ComponentBody, ComponentModel>();
+                auto [rhsBody, rhsModel] = rhsParent.getComponents<ComponentBody, ComponentModel>();
 
-                auto lhsPos     = std::get<0>(lhsComps)->getPosition();
-                auto rhsPos     = std::get<0>(rhsComps)->getPosition();
-                auto lhsRad     = std::get<1>(lhsComps)->radius();
-                auto rhsRad     = std::get<1>(rhsComps)->radius();
+                auto lhsPos     = lhsBody->getPosition();
+                auto rhsPos     = rhsBody->getPosition();
+                auto lhsRad     = lhsModel->radius();
+                auto rhsRad     = rhsModel->radius();
 
                 auto leftDir    = glm::normalize(lhsPos - camPos);
                 auto rightDir   = glm::normalize(rhsPos - camPos);

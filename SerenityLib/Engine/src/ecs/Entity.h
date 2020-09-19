@@ -75,6 +75,7 @@ struct Entity {
 
         void addChild(Entity child) const noexcept;
         void removeChild(Entity child) const noexcept;
+        void removeAllChildren() const noexcept;
 
         template<typename T, typename... ARGS> inline void addComponent(ARGS&&... args) noexcept {
             Engine::priv::InternalEntityPublicInterface::GetECS(*this).addComponent<T>(*this, std::forward<ARGS>(args)...);

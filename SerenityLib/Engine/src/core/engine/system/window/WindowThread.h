@@ -15,7 +15,7 @@ namespace Engine::priv {
         friend class Window;
         private:
             WindowData&                                       m_Data;
-            Engine::queue_ts<sf::Event>                       m_Queue;
+            Engine::queue_ts<sf::Event>                       m_SFEventQueue;
             Engine::queue_ts<WindowEventThreadOnlyCommands>   m_MainThreadToEventThreadQueue;
             std::unique_ptr<std::thread>                      m_EventThread = nullptr;
 

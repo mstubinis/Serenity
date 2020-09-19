@@ -19,8 +19,10 @@ using namespace Engine;
 
 #pragma region PhysicsTaskScheduler
 
-priv::PhysicsTaskScheduler::PhysicsTaskScheduler(const char* name) : btITaskScheduler(name){
-    m_name = name;
+priv::PhysicsTaskScheduler::PhysicsTaskScheduler(const char* name) 
+    : btITaskScheduler{ name }
+    , m_name{ name }
+{
     m_sumRes.store(btScalar(0.0), std::memory_order_relaxed);
 }
 priv::PhysicsTaskScheduler::~PhysicsTaskScheduler() {

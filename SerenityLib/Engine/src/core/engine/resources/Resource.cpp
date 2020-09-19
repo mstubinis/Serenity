@@ -4,7 +4,7 @@
 #include <core/engine/system/Engine.h>
 #include <core/engine/events/Event.h>
 
-void Resource::load(){
+void Resource::load() {
     if(!m_IsLoaded){
         m_IsLoaded = true;
         if (Engine::priv::Core::m_Engine) {
@@ -15,7 +15,7 @@ void Resource::load(){
         ENGINE_LOG(typeid(*this).name() << ": " << m_Name << " - loaded.");
     }
 }
-void Resource::unload(){
+void Resource::unload() {
     if(m_IsLoaded /*&& m_UsageCount == 0*/){
         m_IsLoaded = false;
         if (Engine::priv::Core::m_Engine) {

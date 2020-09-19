@@ -9,7 +9,7 @@ namespace Engine::priv {
 };
 
 namespace Engine::priv {
-    class ModelInstanceAnimation final : public Engine::NonCopyable {
+    class ModelInstanceAnimation final {
         friend struct DefaultModelInstanceBindFunctor;
         friend class  ModelInstanceAnimationVector;
         private:
@@ -24,12 +24,14 @@ namespace Engine::priv {
             ModelInstanceAnimation(Mesh& mesh, const std::string& animName, float startTime, float endTime, unsigned int requestedLoops = 1);
             ~ModelInstanceAnimation() = default;
 
-            ModelInstanceAnimation(ModelInstanceAnimation&& other) noexcept;
-            ModelInstanceAnimation& operator=(ModelInstanceAnimation&& other) noexcept;
+            ModelInstanceAnimation(const ModelInstanceAnimation& other)                = delete;
+            ModelInstanceAnimation& operator=(const ModelInstanceAnimation& other)     = delete;
+            ModelInstanceAnimation(ModelInstanceAnimation&& other) noexcept            = default;
+            ModelInstanceAnimation& operator=(ModelInstanceAnimation&& other) noexcept = default;
 
             void process(const float dt, std::vector<glm::mat4>& transforms);
     };
-    class ModelInstanceAnimationVector final : public Engine::NonCopyable {
+    class ModelInstanceAnimationVector final {
         friend struct DefaultModelInstanceBindFunctor;
         private:
             std::vector<ModelInstanceAnimation> m_Animation_Instances;
@@ -38,12 +40,14 @@ namespace Engine::priv {
             ModelInstanceAnimationVector() = default;
             ~ModelInstanceAnimationVector() = default;
 
-            ModelInstanceAnimationVector(ModelInstanceAnimationVector&& other) noexcept;
-            ModelInstanceAnimationVector& operator=(ModelInstanceAnimationVector&& other) noexcept;
+            ModelInstanceAnimationVector(const ModelInstanceAnimationVector& other)                = default;
+            ModelInstanceAnimationVector& operator=(const ModelInstanceAnimationVector& other)     = default;
+            ModelInstanceAnimationVector(ModelInstanceAnimationVector&& other) noexcept            = default;
+            ModelInstanceAnimationVector& operator=(ModelInstanceAnimationVector&& other) noexcept = default;
 
             void emplace_animation(Mesh&, const std::string& animationName, float start, float end, unsigned int requestedLoops);
 
-            size_t size() const;
+            inline size_t size() const noexcept { return m_Animation_Instances.size(); }
             void clear();
             void process(Mesh& mesh, const float dt);
     };

@@ -9,8 +9,6 @@
 #include <core/engine/threading/ThreadingModule.h>
 #include <core/engine/scene/Viewport.h>
 
-using namespace std;
-
 Engine::priv::Bloom Engine::priv::Bloom::bloom;
 
 bool Engine::priv::Bloom::init_shaders() {

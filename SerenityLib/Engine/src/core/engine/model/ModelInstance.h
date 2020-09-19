@@ -123,7 +123,7 @@ class ModelInstance final : public Engine::UserPointer, public Observer {
         inline CONSTEXPR Mesh* mesh() const noexcept { return m_Mesh; }
         inline CONSTEXPR Material* material() const noexcept { return m_Material; }
         inline CONSTEXPR RenderStage stage() const noexcept { return m_Stage; }
-        inline void show() noexcept { m_Visible = true; }
+        inline void show(bool shown = true) noexcept { m_Visible = shown; }
         inline void hide() noexcept { m_Visible = false; }
         inline CONSTEXPR bool visible() const noexcept { return m_Visible; }
         inline CONSTEXPR bool passedRenderCheck() const noexcept { return m_PassedRenderCheck; }

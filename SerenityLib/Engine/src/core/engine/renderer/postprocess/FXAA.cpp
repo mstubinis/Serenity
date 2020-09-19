@@ -11,8 +11,6 @@
 
 #include <core/engine/resources/Engine_BuiltInShaders.h>
 
-using namespace std;
-
 Engine::priv::FXAA Engine::priv::FXAA::STATIC_FXAA;
 
 bool Engine::priv::FXAA::init_shaders() {

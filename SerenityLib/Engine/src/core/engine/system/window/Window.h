@@ -126,7 +126,7 @@ class Window final{
         //if you want to make it active on another thread you have to deactivate it on the previous thread first if it was active.
         //Only one window can be active on a thread at a time, thus the window previously active (if any) automatically gets deactivated.
         //This is not to be confused with requestFocus().
-        void setActive(bool active = true);
+        bool setActive(bool active = true);
 
         //sets the window to be full screen
         bool setFullscreen(bool isFullscreen = true);

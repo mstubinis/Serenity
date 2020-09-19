@@ -19,10 +19,10 @@ namespace Engine::priv {
         aiNode*                            m_AIRoot         = nullptr;
 
         AssimpSceneImport();
-        ~AssimpSceneImport();
+        ~AssimpSceneImport() = default;
 
-        AssimpSceneImport(const AssimpSceneImport& other);
-        AssimpSceneImport& operator=(const AssimpSceneImport& other);
+        AssimpSceneImport(const AssimpSceneImport& other)                = default;
+        AssimpSceneImport& operator=(const AssimpSceneImport& other)     = default;
         AssimpSceneImport(AssimpSceneImport&& other) noexcept            = delete;
         AssimpSceneImport& operator=(AssimpSceneImport&& other) noexcept = delete;
     };
@@ -33,13 +33,13 @@ struct MeshRequestPart final {
     Handle       handle = Handle();
     std::string  name   = "";
 
-    MeshRequestPart();
-    ~MeshRequestPart();
+    MeshRequestPart() = default;
+    ~MeshRequestPart() = default;
 
-    MeshRequestPart(const MeshRequestPart& other);
-    MeshRequestPart& operator=(const MeshRequestPart& other);
-    MeshRequestPart(MeshRequestPart&& other) noexcept;
-    MeshRequestPart& operator=(MeshRequestPart&& other) noexcept;
+    MeshRequestPart(const MeshRequestPart& other)                = default;
+    MeshRequestPart& operator=(const MeshRequestPart& other)     = default;
+    MeshRequestPart(MeshRequestPart&& other) noexcept            = default;
+    MeshRequestPart& operator=(MeshRequestPart&& other) noexcept = default;
 
 };
 
@@ -56,10 +56,10 @@ struct MeshRequest final {
 
     MeshRequest() = delete;
     MeshRequest(const std::string& filenameOrData, const float threshold, std::function<void()>&& callback);
-    ~MeshRequest();
+    ~MeshRequest() = default;
 
-    MeshRequest(const MeshRequest& other);
-    MeshRequest& operator=(const MeshRequest& other);
+    MeshRequest(const MeshRequest& other) = default;
+    MeshRequest& operator=(const MeshRequest& other) = default;
     MeshRequest(MeshRequest&& other) noexcept;
     MeshRequest& operator=(MeshRequest&& other) noexcept;
 

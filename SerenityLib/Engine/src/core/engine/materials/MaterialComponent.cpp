@@ -12,13 +12,13 @@
 
 using namespace Engine;
 using namespace Engine::priv;
-using namespace std;
 
-MaterialComponent::MaterialComponent(MaterialComponentType type, Texture* texture, Texture* mask, Texture* cubemap) {
-    m_ComponentType = type;
+MaterialComponent::MaterialComponent(MaterialComponentType type, Texture* texture, Texture* mask, Texture* cubemap) 
+    : m_ComponentType{ type }
+{
     addLayer(texture, mask, cubemap);
 }
-MaterialLayer* MaterialComponent::addLayer(const string& textureFile, const string& maskFile, const string& cubemapFile) {
+MaterialLayer* MaterialComponent::addLayer(const std::string& textureFile, const std::string& maskFile, const std::string& cubemapFile) {
     if (m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT) {
         return nullptr;
     }
@@ -99,7 +99,7 @@ MaterialLayer& MaterialComponent::layer(size_t index) {
     return m_Layers[index];
 }
 void MaterialComponent::bind(size_t component_index, size_t& inTextureUnit) const {
-    const string wholeString = "components[" + to_string(component_index) + "].";
+    const std::string wholeString = "components[" + std::to_string(component_index) + "].";
     Engine::Renderer::sendUniform2Safe((wholeString + "componentData").c_str(), (int)m_NumLayers, (int)m_ComponentType);
     for (unsigned int layer = 0; layer < m_NumLayers; ++layer) {
         m_Layers[layer].sendDataToGPU(wholeString, component_index, layer, inTextureUnit);

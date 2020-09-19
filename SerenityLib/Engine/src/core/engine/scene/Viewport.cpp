@@ -11,34 +11,34 @@ Viewport::Viewport() {
     setAspectRatioSynced(true);
     activateDepthMask(false);
 }
-Viewport::Viewport(Scene& scene, Camera& camera) : Viewport() {
-    auto winSize  = Engine::Resources::getWindowSize();
+Viewport::Viewport(Scene& scene, Camera& camera) 
+    : Viewport{}
+{
+    auto winSize{ Engine::Resources::getWindowSize() };
     m_Scene       = &scene;
 
     setCamera(camera);
     setViewportDimensions(0.0f, 0.0f, (float)winSize.x, (float)winSize.y);
 }
-Viewport::Viewport(Viewport&& other) noexcept {
-    m_Scene                = std::exchange(other.m_Scene, nullptr);
-    m_Camera               = std::exchange(other.m_Camera, nullptr);
-    m_Viewport_Dimensions  = std::move(other.m_Viewport_Dimensions);
-    m_BackgroundColor      = std::move(other.m_BackgroundColor);
-    m_StateFlags           = std::move(other.m_StateFlags);
-    m_DepthMaskValue       = std::move(other.m_DepthMaskValue);
-    m_ID                   = std::move(other.m_ID);
-    m_RenderFlags          = std::move(other.m_RenderFlags);
-}
+Viewport::Viewport(Viewport&& other) noexcept 
+    : m_Scene{ std::move(other.m_Scene) }
+    , m_Camera{ std::move(other.m_Camera) }
+    , m_Viewport_Dimensions{ std::move(other.m_Viewport_Dimensions) }
+    , m_BackgroundColor{ std::move(other.m_BackgroundColor) }
+    , m_StateFlags{ std::move(other.m_StateFlags) }
+    , m_DepthMaskValue{ std::move(other.m_DepthMaskValue) }
+    , m_ID{ std::move(other.m_ID) }
+    , m_RenderFlags{ std::move(other.m_RenderFlags) }
+{}
 Viewport& Viewport::operator=(Viewport&& other) noexcept {
-    if (&other != this) {
-        m_Scene               = std::exchange(other.m_Scene, nullptr);
-        m_Camera              = std::exchange(other.m_Camera, nullptr);
-        m_Viewport_Dimensions = std::move(other.m_Viewport_Dimensions);
-        m_BackgroundColor     = std::move(other.m_BackgroundColor);
-        m_StateFlags          = std::move(other.m_StateFlags);
-        m_DepthMaskValue      = std::move(other.m_DepthMaskValue);
-        m_ID                  = std::move(other.m_ID);
-        m_RenderFlags         = std::move(other.m_RenderFlags);
-    }
+    m_Scene               = std::move(other.m_Scene);
+    m_Camera              = std::move(other.m_Camera);
+    m_Viewport_Dimensions = std::move(other.m_Viewport_Dimensions);
+    m_BackgroundColor     = std::move(other.m_BackgroundColor);
+    m_StateFlags          = std::move(other.m_StateFlags);
+    m_DepthMaskValue      = std::move(other.m_DepthMaskValue);
+    m_ID                  = std::move(other.m_ID);
+    m_RenderFlags         = std::move(other.m_RenderFlags);
     return *this;
 }
 

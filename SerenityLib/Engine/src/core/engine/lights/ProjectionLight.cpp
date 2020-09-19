@@ -11,19 +11,13 @@ ProjectionLight::ProjectionLight(Texture* texture, const glm::vec3& direction, S
     setTexture(texture);
     if (m_Type == LightType::Projection) {
         auto& projLights = priv::InternalScenePublicInterface::GetProjectionLights(*scene);
-        projLights.push_back(this);
+        projLights.emplace_back(this);
     }
     recalc_frustum_indices();
 }
-ProjectionLight::ProjectionLight(Handle textureHandle, const glm::vec3& direction, Scene* scene) : SunLight(glm::vec3(0.0f), LightType::Projection, scene) {
-    getComponent<ComponentBody>()->alignTo(direction);
-    setTexture(textureHandle);
-    if (m_Type == LightType::Projection) {
-        auto& projLights = priv::InternalScenePublicInterface::GetProjectionLights(*scene);
-        projLights.push_back(this);
-    }
-    recalc_frustum_indices();
-}
+ProjectionLight::ProjectionLight(Handle textureHandle, const glm::vec3& direction, Scene* scene) 
+    : ProjectionLight(textureHandle.get<Texture>(), direction, scene)
+{}
 void ProjectionLight::recalc_frustum_points() noexcept {
     //0-3 : near plane
     //4-7 : far plane

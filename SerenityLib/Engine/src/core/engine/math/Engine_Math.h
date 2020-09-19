@@ -2,19 +2,17 @@
 #ifndef ENGINE_ENGINE_MATH_H
 #define ENGINE_ENGINE_MATH_H
 
-#include <core/engine/utils/Utils.h>
+class btVector3;
+class btRigidBody;
+class btQuaternion;
+class Camera;
 
 #include <assimp/Importer.hpp>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <SFML/Graphics/Color.hpp>
 
-class btVector3;
-class btRigidBody;
-class btQuaternion;
-class Camera;
-
-namespace Engine::Math{
+namespace Engine::Math {
     glm_vec3 rotate_vec3(const glm_quat& rotation, const glm_vec3& vec);
 
     glm::vec3 polynomial_interpolate_linear(std::vector<glm::vec3>& points, float time);
@@ -22,11 +20,11 @@ namespace Engine::Math{
 
     void extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProjection,glm::vec4* outPlanes);
 
-    void Float32From16(float*     out, const uint16_t in);
-    void Float16From32(uint16_t*  out, const float    in);
+    void Float32From16(float*     out, const std::uint16_t in);
+    void Float16From32(std::uint16_t*  out, const float    in);
 
-    void Float32From16(float*    out, const uint16_t* in, const uint arraySize);
-    void Float16From32(uint16_t* out, const float*    in, const uint arraySize);
+    void Float32From16(float*    out, const std::uint16_t* in, unsigned int arraySize);
+    void Float16From32(std::uint16_t* out, const float*    in, unsigned int arraySize);
 
     glm::vec2 rotate2DPoint(const glm::vec2& point, float angle, const glm::vec2& origin = glm::vec2(0.0f, 0.0f));
 
@@ -58,27 +56,6 @@ namespace Engine::Math{
     void setRotation(glm::quat& orientation, float pitch, float yaw, float roll);
     void setFinalModelMatrix(glm_mat4& modelMatrix, const glm_vec3& position,const glm_quat& rotation, const glm_vec3& scale);
     void setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
-
-    uchar pack2NibblesIntoChar(float x, float y);
-    glm::vec2 unpack2NibblesFromChar(unsigned char);
-    float pack2NibblesIntoCharBasic(float x, float y);
-    glm::vec2 unpack2NibblesFromCharBasic(float);
-
-    std::uint32_t pack3NormalsInto32Int(float x, float y, float z);
-    glm::vec3     unpack3NormalsFrom32Int(std::uint32_t);
-    std::uint32_t pack3NormalsInto32Int(const glm::vec3&);
-
-    float pack3FloatsInto1Float(float, float, float);
-    float pack3FloatsInto1Float(const glm::vec3&);
-    glm::vec3 unpack3FloatsInto1Float(float i);
-
-    float pack3FloatsInto1FloatUnsigned(float,float,float);
-    float pack3FloatsInto1FloatUnsigned(const glm::vec3&);
-    glm::vec3 unpack3FloatsInto1FloatUnsigned(float i);
-        
-    float pack2FloatsInto1Float(float, float);
-    float pack2FloatsInto1Float(const glm::vec2&);
-    glm::vec2 unpack2FloatsInto1Float(float i);
 
     float remainder(float, float);
 

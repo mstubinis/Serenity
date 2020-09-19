@@ -4,6 +4,12 @@
 
 #include <core/engine/lights/SunLight.h>
 
+struct PointLightDefaultAttenuationData final {
+    float constant;
+    float linear;
+    float exponent;
+};
+
 class PointLight : public SunLight {
     friend class ::Engine::priv::Renderer;
     protected:
@@ -11,7 +17,7 @@ class PointLight : public SunLight {
         float              m_C                = 0.1f;
         float              m_L                = 0.1f;
         float              m_E                = 0.1f;
-        float              m_CullingRadius;
+        float              m_CullingRadius    = 0.0f;
 
         virtual float calculateCullingRadius();
     public:

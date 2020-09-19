@@ -8,6 +8,15 @@ class  ComponentModel;
 class  ComponentBody;
 class  btCollisionObject;
 class  btRigidBody;
+namespace Engine::priv {
+    class  ComponentBody_System;
+    struct ComponentBody_UpdateFunction;
+    struct ComponentBody_EntityAddedToSceneFunction;
+    struct ComponentBody_ComponentAddedToEntityFunction;
+    struct ComponentBody_ComponentRemovedFromEntityFunction;
+    struct ComponentBody_SceneEnteredFunction;
+    struct ComponentBody_SceneLeftFunction;
+};
 
 #include <ecs/ECS.h>
 #include <core/engine/physics/PhysicsIncludes.h>
@@ -29,28 +38,28 @@ struct CollisionCallbackEventData final {
     size_t             ownerModelInstanceIndex = 0;
     size_t             otherModelInstanceIndex = 0;
 
-    CollisionCallbackEventData(ComponentBody& ownerBody_, ComponentBody& otherBody_, glm::vec3& ownerHit_, glm::vec3& otherHit_, glm::vec3& normal_, glm::vec3& ownerLocalHit_, glm::vec3& otherLocalHit_, glm::vec3& normalFromA_, glm::vec3& normalFromB_);
+    CollisionCallbackEventData(
+        ComponentBody& ownerBody_, 
+        ComponentBody& otherBody_, 
+        glm::vec3& ownerHit_, 
+        glm::vec3& otherHit_, 
+        glm::vec3& normal_, 
+        glm::vec3& ownerLocalHit_, 
+        glm::vec3& otherLocalHit_, 
+        glm::vec3& normalFromA_, 
+        glm::vec3& normalFromB_
+    );
 };
 
-struct ScreenBoxCoordinates {
-    bool      inBounds;
-    glm::vec2 topLeft;
-    glm::vec2 topRight;
-    glm::vec2 bottomLeft;
-    glm::vec2 bottomRight;
+struct ScreenBoxCoordinates final {
+    bool      inBounds      = false;
+    glm::vec2 topLeft       = glm::vec2(0.0f, 0.0f);
+    glm::vec2 topRight      = glm::vec2(0.0f, 0.0f);
+    glm::vec2 bottomLeft    = glm::vec2(0.0f, 0.0f);
+    glm::vec2 bottomRight   = glm::vec2(0.0f, 0.0f);
 };
 
-namespace Engine::priv {
-    class  ComponentBody_System;
-    struct ComponentBody_UpdateFunction;
-    struct ComponentBody_EntityAddedToSceneFunction;
-    struct ComponentBody_ComponentAddedToEntityFunction;
-    struct ComponentBody_ComponentRemovedFromEntityFunction;
-    struct ComponentBody_SceneEnteredFunction;
-    struct ComponentBody_SceneLeftFunction;
-};
-
-class ComponentBody : public Observer, public Engine::UserPointer {
+class ComponentBody : public Observer, public Engine::UserPointer, public Engine::NonCopyable {
     friend class  Engine::priv::ComponentBody_System;
     friend struct Engine::priv::ComponentBody_UpdateFunction;
     friend struct Engine::priv::ComponentBody_ComponentAddedToEntityFunction;
@@ -60,7 +69,7 @@ class ComponentBody : public Observer, public Engine::UserPointer {
     friend struct Engine::priv::ComponentBody_SceneLeftFunction;
     friend class  ComponentModel;
     private:
-        struct PhysicsData final {
+        struct PhysicsData final : public Engine::NonCopyable {
             Collision*           collision              = nullptr;
             btRigidBody*         bullet_rigidBody       = nullptr;
             btDefaultMotionState bullet_motionState;
@@ -72,12 +81,10 @@ class ComponentBody : public Observer, public Engine::UserPointer {
             PhysicsData() = default;
             ~PhysicsData();
 
-            PhysicsData(const PhysicsData& other)            = delete;
-            PhysicsData& operator=(const PhysicsData& other) = delete;
             PhysicsData& operator=(PhysicsData&& other) noexcept;
             PhysicsData(PhysicsData&& other) noexcept;        
         };
-        struct NormalData final {
+        struct NormalData final : public Engine::NonCopyable {
             glm_vec3 scale          = glm_vec3(1.0);
             glm_vec3 position       = glm_vec3(0.0);
             glm_quat rotation       = glm_quat(1.0, 0.0, 0.0, 0.0);
@@ -86,8 +93,6 @@ class ComponentBody : public Observer, public Engine::UserPointer {
             NormalData() = default;
             ~NormalData() = default;
 
-            NormalData(const NormalData& other)            = delete;
-            NormalData& operator=(const NormalData& other) = delete;
             NormalData& operator=(NormalData&& other) noexcept;
             NormalData(NormalData&& other) noexcept;
         };
@@ -115,8 +120,6 @@ class ComponentBody : public Observer, public Engine::UserPointer {
         ComponentBody(Entity entity);
         ComponentBody(Entity entity, CollisionType collisionType);
 
-        ComponentBody& operator=(const ComponentBody& other) = delete;
-        ComponentBody(const ComponentBody& other)            = delete;
         ComponentBody(ComponentBody&& other) noexcept;
         ComponentBody& operator=(ComponentBody&& other) noexcept;
 
@@ -124,17 +127,19 @@ class ComponentBody : public Observer, public Engine::UserPointer {
 
         inline CONSTEXPR Entity getOwner() const noexcept { return m_Owner; }
 
-        void onEvent(const Event& event_) override;
+        void onEvent(const Event& e) override;
 
         bool hasParent() const;
 
         void addChild(Entity child) const;
         void addChild(const ComponentBody& child) const;
+
         void removeChild(Entity child) const;
         void removeChild(const ComponentBody& child) const;
+        void removeAllChildren() const;
 
+        inline void setCollisionFunctor(std::function<void(CollisionCallbackEventData& data)>&& functor) noexcept { m_CollisionFunctor = std::move(functor); }
 
-        void setCollisionFunctor(std::function<void(CollisionCallbackEventData& data)> functor);
         void collisionResponse(CollisionCallbackEventData& data) const;
 
         void rebuildRigidBody(bool addBodyToPhysicsWorld = true, bool threadSafe = false);

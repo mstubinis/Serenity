@@ -2,7 +2,6 @@
 #include <core/engine/mesh/BuiltInMeshes.h>
 #include <core/engine/mesh/Mesh.h>
 
-using namespace std;
 using namespace Engine::priv;
 
 BuiltInMeshses::BuiltInMeshses() {
@@ -71,7 +70,7 @@ bool BuiltInMeshses::init() {
 bool BuiltInMeshses::build_point_light_mesh() {
     if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::PointLight])
         return false;
-    string pointLightMesh;
+    std::string pointLightMesh;
     {
         pointLightMesh =
             "v 0.000000 -1.000000 0.000000\n"
@@ -564,7 +563,7 @@ bool BuiltInMeshses::build_point_light_mesh() {
 bool BuiltInMeshses::build_spot_light_mesh() {
     if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::SpotLight])
         return false;
-    string spotLightData;
+    std::string spotLightData;
     {
         spotLightData =
             "v 0.000000 1.000000 -1.000000\n"
@@ -658,7 +657,7 @@ bool BuiltInMeshses::build_spot_light_mesh() {
 bool BuiltInMeshses::build_rod_light_mesh() {
     if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::RodLight])
         return false;
-    string rodLightData;
+    std::string rodLightData;
     {
         rodLightData =
             "v -0.000000 1.000000 -1.000000\n"
@@ -803,7 +802,7 @@ bool BuiltInMeshses::build_projection_light_mesh() {
 bool BuiltInMeshses::build_triangle_mesh() {
     if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Triangle])
         return false;
-    string triangleMesh;
+    std::string triangleMesh;
     {
         triangleMesh =
             "v 0.0 -0.948008 0.0\n"
@@ -822,7 +821,7 @@ bool BuiltInMeshses::build_triangle_mesh() {
 bool BuiltInMeshses::build_cube_mesh() {
     if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Cube])
         return false;
-    string cubeMesh;
+    std::string cubeMesh;
     {
         cubeMesh =
             "v 1.0 -1.0 -1.0\n"

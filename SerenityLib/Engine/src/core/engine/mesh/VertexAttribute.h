@@ -4,28 +4,21 @@
 
 //information about individual attributes (example: position, uv, normals, etc)
 struct VertexAttributeInfo final{
-    int      size;
-    int      type;
-    size_t   typeSize;
-    int      stride;
-    size_t   offset;
-    bool     normalized;
+    int      size       = 0;
+    int      type       = 0;
+    size_t   typeSize   = 0;
+    size_t   offset     = 0;
+    int      stride     = 0;
+    bool     normalized = false;
 
-    VertexAttributeInfo(const int size_, const int type_, const bool normalized_, const int stride_, const size_t offset_, const size_t typeSize_) {
-        size       = size_;
-        type       = type_;
-        normalized = normalized_;
-        stride     = stride_;
-        offset     = offset_;
-        typeSize   = typeSize_;
-    }
-    VertexAttributeInfo()                                                = delete;
-
-    VertexAttributeInfo(const VertexAttributeInfo& other)                = default;
-    VertexAttributeInfo& operator=(const VertexAttributeInfo& other)     = default;
-    VertexAttributeInfo(VertexAttributeInfo&& other) noexcept            = default;
-    VertexAttributeInfo& operator=(VertexAttributeInfo&& other) noexcept = default;
-
-    ~VertexAttributeInfo() = default;
+    VertexAttributeInfo() = delete;
+    VertexAttributeInfo(int size_, int type_, bool normalized_, int stride_, size_t offset_, size_t typeSize_)
+        :size(size_),
+        type(type_),
+        typeSize(typeSize_),
+        offset(offset_),
+        stride(stride_),
+        normalized(normalized_)
+    {}
 };
 #endif

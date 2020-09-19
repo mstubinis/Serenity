@@ -8,7 +8,7 @@ namespace Engine::priv {
             std::vector<std::thread>                            m_WorkerThreads;
             std::unordered_map<std::thread::id, std::thread*>   m_WorkerThreadsHashed;
         public:
-            WorkerThreadContainer();
+            WorkerThreadContainer() = default;
             ~WorkerThreadContainer();
 
             void clear() noexcept;

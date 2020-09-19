@@ -8,10 +8,11 @@ using namespace std;
 
 #pragma region PhysicsDebugDrawcallback
 
-priv::PhysicsDebugDrawcallback::PhysicsDebugDrawcallback(btIDebugDraw* debugDrawer, const btTransform& worldTrans, const btVector3& color) : m_DebugDrawer(*debugDrawer) {
-    m_Color          = color;
-    m_WorldTransform = worldTrans;
-}
+priv::PhysicsDebugDrawcallback::PhysicsDebugDrawcallback(btIDebugDraw* debugDrawer, const btTransform& worldTrans, const btVector3& color) 
+    : m_DebugDrawer{ *debugDrawer }
+    , m_Color{ color }
+    , m_WorldTransform{ worldTrans }
+{}
 void priv::PhysicsDebugDrawcallback::internalProcessTriangleIndex(btVector3* triangle, int partId, int  triangleIndex) {
     processTriangle(triangle, partId, triangleIndex);
 }

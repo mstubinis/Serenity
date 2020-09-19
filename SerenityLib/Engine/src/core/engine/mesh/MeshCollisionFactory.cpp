@@ -5,61 +5,53 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/mesh/Mesh.h>
 
-#include <btBulletDynamicsCommon.h>
-#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-#include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/Gimpact/btGImpactShape.h>
 #include <BulletCollision/CollisionDispatch/btInternalEdgeUtility.h>
-#include <BulletCollision/CollisionShapes/btTriangleInfoMap.h>
+#include <BulletCollision/CollisionShapes/btMultiSphereShape.h>
+#include <BulletCollision/CollisionShapes/btUniformScalingShape.h>
+#include <BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h>
 
 #include <glm/glm.hpp>
 
-using namespace Engine;
-using namespace std;
+constexpr btScalar DEFAULT_MARGIN = (btScalar)0.001;
 
-priv::MeshCollisionFactory::MeshCollisionFactory(Mesh& mesh) : m_Mesh(mesh) {
-    auto& data                  = *mesh.m_VertexData;
-    vector<glm::vec3> positions = data.getPositions();
-    initConvexData(data, positions);
-    initTriangleData(data, positions);
+Engine::priv::MeshCollisionFactory::MeshCollisionFactory(Mesh& mesh) 
+    : m_Mesh{ mesh }
+{
+    auto& data                       = *mesh.m_VertexData;
+    std::vector<glm::vec3> positions = data.getPositions();
+    internal_init_convex_data(data, positions);
+    internal_init_triangle_data(data, positions);
 }
-priv::MeshCollisionFactory::~MeshCollisionFactory() {
-    SAFE_DELETE(m_ConvexHullData);
-    SAFE_DELETE(m_ConvesHullShape);
-    SAFE_DELETE(m_TriangleStaticData);
-    SAFE_DELETE(m_TriangleInfoMap);
-    SAFE_DELETE(m_TriangleStaticShape);
-}
-void priv::MeshCollisionFactory::initConvexData(VertexData& data, std::vector<glm::vec3>& positions) {
+void Engine::priv::MeshCollisionFactory::internal_init_convex_data(VertexData& data, std::vector<glm::vec3>& positions) {
     if (!m_ConvexHullData) {
-        m_ConvesHullShape = new btConvexHullShape();
+        m_ConvesHullShape.reset(new btConvexHullShape());
         for (auto& pos : positions) {
             m_ConvesHullShape->addPoint(btVector3(pos.x, pos.y, pos.z));
         }
-        m_ConvexHullData = new btShapeHull(m_ConvesHullShape);
+        m_ConvexHullData.reset(new btShapeHull(m_ConvesHullShape.get()));
         m_ConvexHullData->buildHull(m_ConvesHullShape->getMargin());
-        SAFE_DELETE(m_ConvesHullShape);
         const btVector3* ptsArray = m_ConvexHullData->getVertexPointer();
-        m_ConvesHullShape = new btConvexHullShape();
+        m_ConvesHullShape.reset(new btConvexHullShape());
         for (int i = 0; i < m_ConvexHullData->numVertices(); ++i) {
             m_ConvesHullShape->addPoint(ptsArray[i]);
         }
-        m_ConvesHullShape->setMargin(static_cast<btScalar>(0.001));
+        m_ConvesHullShape->setMargin(DEFAULT_MARGIN);
         m_ConvesHullShape->recalcLocalAabb();
     }
 }
-void priv::MeshCollisionFactory::initTriangleData(VertexData& data, std::vector<glm::vec3>& positions) {
+void Engine::priv::MeshCollisionFactory::internal_init_triangle_data(VertexData& data, std::vector<glm::vec3>& positions) {
     if (!m_TriangleStaticData) {
-        vector<glm::vec3> triangles;
+        std::vector<glm::vec3> triangles;
         triangles.reserve(data.m_Indices.size());
         for (auto& indice : data.m_Indices) {
-            triangles.push_back(positions[indice]);
+            triangles.emplace_back(positions[indice]);
         }
-        m_TriangleStaticData = new btTriangleMesh();
+        m_TriangleStaticData.reset(new btTriangleMesh());
         uint count = 0;
-        vector<glm::vec3> tri;
+        std::vector<glm::vec3> tri;
         for (auto& position : triangles) {
-            tri.push_back(position);
+            tri.emplace_back(position);
             ++count;
             if (count == 3) {
                 btVector3 v1 = Engine::Math::btVectorFromGLM(tri[0]);
@@ -70,53 +62,53 @@ void priv::MeshCollisionFactory::initTriangleData(VertexData& data, std::vector<
                 count = 0;
             }
         }
-        m_TriangleStaticShape = new btBvhTriangleMeshShape(m_TriangleStaticData, true);
-        m_TriangleStaticShape->setMargin(static_cast<btScalar>(0.001));
+        m_TriangleStaticShape.reset(new btBvhTriangleMeshShape(m_TriangleStaticData.get(), true));
+        m_TriangleStaticShape->setMargin(DEFAULT_MARGIN);
         m_TriangleStaticShape->recalcLocalAabb();
 
-        m_TriangleInfoMap = new btTriangleInfoMap();
-        btGenerateInternalEdgeInfo(m_TriangleStaticShape, m_TriangleInfoMap);
+        m_TriangleInfoMap.reset(new btTriangleInfoMap());
+        btGenerateInternalEdgeInfo(m_TriangleStaticShape.get(), m_TriangleInfoMap.get());
     }
 }
-btMultiSphereShape* priv::MeshCollisionFactory::buildSphereShape(ModelInstance* modelInstance, const bool isCompoundChild) {
-    const auto& rad = static_cast<btScalar>(m_Mesh.getRadius());
+btMultiSphereShape* Engine::priv::MeshCollisionFactory::buildSphereShape(ModelInstance* modelInstance, bool isCompoundChild) {
+    auto rad = (btScalar)m_Mesh.getRadius();
     auto v = btVector3(0, 0, 0);
     btMultiSphereShape* sphere = new btMultiSphereShape(&v, &rad, 1);
-    sphere->setMargin(static_cast<btScalar>(0.001));
+    sphere->setMargin(DEFAULT_MARGIN);
     sphere->recalcLocalAabb();
     if (isCompoundChild) {
         sphere->setUserPointer(modelInstance);
     }
     return sphere;
 }
-btBoxShape* priv::MeshCollisionFactory::buildBoxShape(ModelInstance* modelInstance, const bool isCompoundChild) {
+btBoxShape* Engine::priv::MeshCollisionFactory::buildBoxShape(ModelInstance* modelInstance, bool isCompoundChild) {
     btBoxShape* box = new btBoxShape(Math::btVectorFromGLM(m_Mesh.getRadiusBox()));
-    box->setMargin(static_cast<btScalar>(0.001));
+    box->setMargin(DEFAULT_MARGIN);
     if (isCompoundChild) {
         box->setUserPointer(modelInstance);
     }
     return box;
 }
-btUniformScalingShape* priv::MeshCollisionFactory::buildConvexHull(ModelInstance* modelInstance, const bool isCompoundChild) {
-    btUniformScalingShape* uniformScalingShape = new btUniformScalingShape(m_ConvesHullShape, static_cast<btScalar>(1.0));
-    uniformScalingShape->setMargin(static_cast<btScalar>(0.001));
+btUniformScalingShape* Engine::priv::MeshCollisionFactory::buildConvexHull(ModelInstance* modelInstance, bool isCompoundChild) {
+    btUniformScalingShape* uniformScalingShape = new btUniformScalingShape(m_ConvesHullShape.get(), (btScalar)1.0);
+    uniformScalingShape->setMargin(DEFAULT_MARGIN);
     if (isCompoundChild) {
         uniformScalingShape->getChildShape()->setUserPointer(modelInstance);
         uniformScalingShape->setUserPointer(&modelInstance);
     }
     return uniformScalingShape;
 }
-btScaledBvhTriangleMeshShape* priv::MeshCollisionFactory::buildTriangleShape(ModelInstance* modelInstance, const bool isCompoundChild) {
-    btScaledBvhTriangleMeshShape* scaledBVH = new btScaledBvhTriangleMeshShape(m_TriangleStaticShape, btVector3(static_cast<btScalar>(1.0), static_cast<btScalar>(1.0), static_cast<btScalar>(1.0)));
+btScaledBvhTriangleMeshShape* Engine::priv::MeshCollisionFactory::buildTriangleShape(ModelInstance* modelInstance, bool isCompoundChild) {
+    btScaledBvhTriangleMeshShape* scaledBVH = new btScaledBvhTriangleMeshShape(m_TriangleStaticShape.get(), btVector3((btScalar)1.0, (btScalar)1.0, (btScalar)1.0));
     if (isCompoundChild) {
         scaledBVH->getChildShape()->setUserPointer(modelInstance);
         scaledBVH->setUserPointer(modelInstance);
     }
     return scaledBVH;
 }
-btGImpactMeshShape* priv::MeshCollisionFactory::buildTriangleShapeGImpact(ModelInstance* modelInstance, const bool isCompoundChild) {
-    btGImpactMeshShape* gImpact = new btGImpactMeshShape(m_TriangleStaticData);
-    gImpact->setMargin(static_cast<btScalar>(0.001));
+btGImpactMeshShape* Engine::priv::MeshCollisionFactory::buildTriangleShapeGImpact(ModelInstance* modelInstance, bool isCompoundChild) {
+    btGImpactMeshShape* gImpact = new btGImpactMeshShape(m_TriangleStaticData.get());
+    gImpact->setMargin(DEFAULT_MARGIN);
     gImpact->updateBound();
     gImpact->postUpdate();
     if (isCompoundChild) {

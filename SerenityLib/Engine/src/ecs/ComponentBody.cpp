@@ -20,7 +20,6 @@
 
 using namespace Engine;
 using namespace Engine::priv;
-using namespace std;
 
 #pragma region CollisionCallbackParticipant
 CollisionCallbackEventData::CollisionCallbackEventData(ComponentBody& a, ComponentBody& b, glm::vec3& c, glm::vec3& d, glm::vec3& e, glm::vec3& f, glm::vec3& g, glm::vec3& h, glm::vec3& i) :
@@ -36,16 +35,15 @@ ComponentBody::PhysicsData::~PhysicsData() {
     SAFE_DELETE(collision);
     SAFE_DELETE(bullet_rigidBody);
 }
-ComponentBody::PhysicsData::PhysicsData(ComponentBody::PhysicsData&& other) noexcept {
-    //move constructor
-    mass               = std::move(other.mass);
-    bullet_motionState = std::move(other.bullet_motionState);
-    group              = std::move(other.group);
-    mask               = std::move(other.mask);
-    forcedOut          = std::move(other.forcedOut);
-    collision          = std::exchange(other.collision, nullptr);
-    bullet_rigidBody   = std::exchange(other.bullet_rigidBody, nullptr);  
-}
+ComponentBody::PhysicsData::PhysicsData(ComponentBody::PhysicsData&& other) noexcept 
+    : mass(std::move(other.mass))
+    , bullet_motionState(std::move(other.bullet_motionState))
+    , group(std::move(other.group))
+    , mask(std::move(other.mask))
+    , forcedOut(std::move(other.forcedOut))
+    , collision(std::exchange(other.collision, nullptr))
+    , bullet_rigidBody(std::exchange(other.bullet_rigidBody, nullptr))
+{}
 ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(ComponentBody::PhysicsData&& other) noexcept {
     //move assignment
     if(&other != this){
@@ -74,13 +72,12 @@ ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(ComponentBody:
 
 #pragma region NormalData
 
-ComponentBody::NormalData::NormalData(ComponentBody::NormalData&& other) noexcept {
-    //move constructor
-    position       = std::move(other.position);
-    rotation       = std::move(other.rotation);
-    scale          = std::move(other.scale);
-    linearVelocity = std::move(other.linearVelocity);
-}
+ComponentBody::NormalData::NormalData(ComponentBody::NormalData&& other) noexcept 
+    : position(std::move(other.position))
+    , rotation(std::move(other.rotation))
+    , scale(std::move(other.scale))
+    , linearVelocity(std::move(other.linearVelocity))
+{}
 ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::NormalData&& other) noexcept {
     //move assignment
     if (&other != this) {
@@ -130,8 +127,6 @@ ComponentBody::~ComponentBody() {
     }
 }
 ComponentBody::ComponentBody(ComponentBody&& other) noexcept {
-    //move constructor
-    using std::swap;
     if (other.m_Physics) {
         data.p = std::exchange(other.data.p, nullptr);
     }else{
@@ -146,6 +141,7 @@ ComponentBody::ComponentBody(ComponentBody&& other) noexcept {
     m_UserPointer      = std::exchange(other.m_UserPointer, nullptr);
     m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
     m_UserPointer2     = std::exchange(other.m_UserPointer2, nullptr);
+
     setInternalPhysicsUserPointer(this);
 }
 ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
@@ -172,9 +168,7 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
     }
     return *this;
 }
-void ComponentBody::setCollisionFunctor(function<void(CollisionCallbackEventData& data)> functor) {
-    m_CollisionFunctor = functor;
-}
+
 void ComponentBody::onEvent(const Event& e) {
 
 }
@@ -280,10 +274,7 @@ void ComponentBody::alignTo(const glm_vec3& direction) {
     ComponentBody::alignTo(norm_dir.x, norm_dir.y, norm_dir.z);
 }
 Collision* ComponentBody::getCollision() const {
-    if (m_Physics) {
-        return data.p->collision;
-    }
-    return nullptr;
+    return (m_Physics) ? data.p->collision : nullptr;
 }
 void ComponentBody::setCollision(CollisionType collisionType, float mass) {
     if (!data.p->collision) { //TODO: clean this up, its hacky and evil. its being used on the ComponentBody_EntityAddedToSceneFunction
@@ -871,6 +862,7 @@ void ComponentBody::applyTorqueImpulse(decimal x, decimal y, decimal z, bool loc
 void ComponentBody::applyTorqueImpulse(const glm_vec3& torqueImpulse, bool local) {
 	ComponentBody::applyTorqueImpulse(torqueImpulse.x, torqueImpulse.y, torqueImpulse.z, local);
 }
+
 void ComponentBody::clearLinearForces() {
     if (m_Physics) {
         auto& rigidBody = *data.p->bullet_rigidBody;
@@ -888,14 +880,8 @@ void ComponentBody::clearAngularForces() {
     }
 }
 void ComponentBody::clearAllForces() {
-    if (m_Physics) {
-        auto& rigidBody = *data.p->bullet_rigidBody;
-        btVector3 v(0, 0, 0);
-        rigidBody.setActivationState(0);
-        rigidBody.activate();
-        rigidBody.setLinearVelocity(v);
-        rigidBody.setAngularVelocity(v);
-    }
+    clearLinearForces();
+    clearAngularForces();
 }
 void ComponentBody::setMass(float mass) {
     if (m_Physics) {
@@ -931,6 +917,24 @@ void ComponentBody::removeChild(Entity child) const {
 }
 void ComponentBody::removeChild(const ComponentBody& child) const {
     ComponentBody::removeChild(child.m_Owner);
+}
+void ComponentBody::removeAllChildren() const {
+    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
+    auto& pcs    = system.ParentChildSystem;
+
+    for (size_t i = 0; i < pcs.Order.size(); ++i) {
+        auto entityID = pcs.Order[i];
+        if (entityID == m_Owner.id()) {
+            size_t j = i + 1;
+            while (j < pcs.Order.size() && pcs.Order[j] > 0) {
+                if (pcs.Parents[pcs.Order[j] - 1U] == m_Owner.id()) {
+                    pcs.remove(m_Owner.id(), pcs.Order[j]);
+                }
+                ++j;
+            }
+        }
+    }
 }
 bool ComponentBody::hasParent() const {
     auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
@@ -1034,7 +1038,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
 #endif
 
 }};
-struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* systemPtr, void* component, Entity entity) const {
+struct Engine::priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* systemPtr, void* component, Entity entity) const {
     auto& system  = *(Engine::priv::ComponentBody_System*)systemPtr;
     auto& pcs     = system.ParentChildSystem;
     const auto id = entity.id();
@@ -1052,7 +1056,7 @@ struct priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()
     }
 
 }};
-struct priv::ComponentBody_ComponentRemovedFromEntityFunction final { void operator()(void* systemPtr, Entity entity) const {
+struct Engine::priv::ComponentBody_ComponentRemovedFromEntityFunction final { void operator()(void* systemPtr, Entity entity) const {
     auto& system         = *(Engine::priv::ComponentBody_System*)systemPtr;
     const auto id        = entity.id();
     auto& pcs            = system.ParentChildSystem;
@@ -1062,7 +1066,7 @@ struct priv::ComponentBody_ComponentRemovedFromEntityFunction final { void opera
         pcs.remove(pcs.Parents[thisIndex], id);
     }
 }};
-struct priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* systemPtr, void* componentPool, Entity entity, Scene& scene) const {
+struct Engine::priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* systemPtr, void* componentPool, Entity entity, Scene& scene) const {
     auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)componentPool;
     auto* component_ptr = pool.getComponent(entity);
     if (component_ptr) {
@@ -1076,7 +1080,7 @@ struct priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(voi
         }
     }
 }};
-struct priv::ComponentBody_SceneEnteredFunction final {void operator()(void* systemPtr, void* componentPool,Scene& scene) const {
+struct Engine::priv::ComponentBody_SceneEnteredFunction final {void operator()(void* systemPtr, void* componentPool,Scene& scene) const {
 	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool)).data();
     for (auto& component : pool) { 
         if (component.m_Physics) {
@@ -1084,7 +1088,7 @@ struct priv::ComponentBody_SceneEnteredFunction final {void operator()(void* sys
         } 
     }
 }};
-struct priv::ComponentBody_SceneLeftFunction final {void operator()(void* systemPtr, void* componentPool, Scene& scene) const {
+struct Engine::priv::ComponentBody_SceneLeftFunction final {void operator()(void* systemPtr, void* componentPool, Scene& scene) const {
 	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool)).data();
     for (auto& component : pool) { 
         if (component.m_Physics) {
@@ -1130,11 +1134,11 @@ void Engine::priv::ComponentBody_System::ParentChildVector::reserve_from_insert(
 void Engine::priv::ComponentBody_System::ParentChildVector::insert(std::uint32_t parentID, std::uint32_t childID) {
     reserve_from_insert(parentID, childID);
     if (getParent(childID) == parentID) {
-        //std::cout << parentID << ", " << childID << " - added: already added\n";
+        //ENGINE_PRODUCTION_LOG(parentID << ", " << childID << " - added: already added")
         return;
     }
 
-    //std::cout << parentID << ", " << childID << " - adding\n";
+    //ENGINE_PRODUCTION_LOG(parentID << ", " << childID << " - adding")
     bool added = false;
     for (size_t i = 0; i < Order.size(); ++i) {
         auto entityID = Order[i];
@@ -1142,7 +1146,7 @@ void Engine::priv::ComponentBody_System::ParentChildVector::insert(std::uint32_t
             //insert after the parent node where the next available spot is
             //the next available spot is either the next zero or the next spot where that spot's parent is zero
             for (size_t j = i + 1; j < Order.size(); ++j) {
-                const auto& entityIDCaseOne = Order[j];
+                auto entityIDCaseOne = Order[j];
                 if (entityIDCaseOne == 0 || Parents[entityIDCaseOne - 1U] == 0) {
                     Order.insert(Order.begin() + j, childID);
                     Order.pop_back();
@@ -1194,12 +1198,12 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(std::uint32_t
         }
     }
     if (!foundParent) {
-        //std::cout << parentID << ", " << childID << " - remove: not found\n";
+        //ENGINE_PRODUCTION_LOG(parentID << ", " << childID << " - remove: not found")
         return;
     }
     getParent(childID) = 0;
     erasedIndex = parentIndex;
-    //std::cout << parentID << ", " << childID << " - removing\n";
+    //ENGINE_PRODUCTION_LOG(parentID << ", " << childID << " - removing")
     for (size_t i = parentIndex; i < Order.size(); ++i) {
         auto entityID = Order[i];
         if (entityID == childID) {

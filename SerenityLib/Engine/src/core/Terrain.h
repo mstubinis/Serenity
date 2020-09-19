@@ -60,7 +60,7 @@ class TerrainData {
         bool                                                 m_UseDiamondSubDivision = false;
         btScalar                                             m_HeightScale           = 1.0;
         std::vector<std::vector<TerrainHeightfieldShape*>>   m_BtHeightfieldShapes;
-        std::pair<float, float>                              m_MinAndMaxHeight       = std::make_pair(std::numeric_limits<float>::max(), std::numeric_limits<float>::min());
+        std::pair<float, float>                              m_MinAndMaxHeight       = { std::numeric_limits<float>::max(), std::numeric_limits<float>::min() };
         btCompoundShape*                                     m_FinalCompoundShape    = nullptr;
         unsigned int                                         m_VerticesPerSector     = 0;
 

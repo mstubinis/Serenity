@@ -14,9 +14,11 @@
 
 Font* first_font = nullptr;
 
-Font::Font(const std::string& filename, int height, int width, float line_height) : Resource(ResourceType::Font, filename) {
+Font::Font(const std::string& filename, int height, int width, float line_height) 
+    : Resource(ResourceType::Font, filename) 
+    , m_LineHeight(line_height)
+{
     init(filename, height, width);
-    m_LineHeight = line_height;
 }
 Font::~Font(){ 
 }
@@ -54,8 +56,8 @@ void Font::init(const std::string& filename, int height, int width) {
     }
 }
 
-std::vector<std::vector<unsigned char>> Font::generate_bitmap(const FT_GlyphSlotRec_& glyph) {
-    std::vector<std::vector<unsigned char>> pixels;
+std::vector<std::vector<std::uint8_t>> Font::generate_bitmap(const FT_GlyphSlotRec_& glyph) {
+    std::vector<std::vector<std::uint8_t>> pixels;
     pixels.resize(glyph.bitmap.rows);
     for (unsigned int i = 0; i < pixels.size(); ++i) {
         pixels[i].resize(glyph.bitmap.width, 0_uc);
@@ -149,12 +151,12 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
 
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
-        std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << "\n";
+        ENGINE_PRODUCTION_LOG("ERROR::FREETYPE: Could not init FreeType Library")
         return;
     }
     FT_Face face;
     if (FT_New_Face(ft, filename.c_str(), 0, &face)) {
-        std::cout << "ERROR::FREETYPE: Failed to load font file: " << filename << "\n";
+        ENGINE_PRODUCTION_LOG("ERROR::FREETYPE: Failed to load font file: " << filename)
         return;
     }
     FT_Set_Pixel_Sizes(face, (width < 0) ? 0 : width, height); //Setting the width to 0 lets the face dynamically calculate the width based on the given height.
@@ -167,7 +169,7 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
 
     for (GLubyte char_id = 0; char_id < requested_char_count; ++char_id) {
         if (FT_Load_Char(face, char_id, FT_LOAD_RENDER)) {
-            std::cout << "ERROR::FREETYTPE: Failed to load Glyph: " << char_id << "\n";
+            ENGINE_PRODUCTION_LOG("ERROR::FREETYTPE: Failed to load Glyph: " << char_id)
             continue;
         }
         CharGlyph charGlyph = CharGlyph();
@@ -322,7 +324,7 @@ float Font::getTextWidth(std::string_view text) const {
     maxWidth = std::max(maxWidth, row_width);
     return maxWidth;
 }
-const CharGlyph& Font::getGlyphData(unsigned char character) const {
+const CharGlyph& Font::getGlyphData(std::uint8_t character) const {
     return (m_CharGlyphs.count(character)) ? m_CharGlyphs.at(character) : m_CharGlyphs.at('?');
 }
 void Font::renderText(const std::string& t, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment al, const glm::vec4& scissor){

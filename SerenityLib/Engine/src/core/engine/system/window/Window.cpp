@@ -6,8 +6,6 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/system/cursor/Cursor.h>
 
-using namespace Engine;
-
 #pragma region Window
 Window::Window() {
     internal_init();
@@ -15,16 +13,18 @@ Window::Window() {
 Window::~Window(){
 }
 void Window::init(const EngineOptions& options) noexcept {
-    m_Data.m_WindowName       = options.window_title;
-    m_Data.m_VideoMode.width  = options.width;
-    m_Data.m_VideoMode.height = options.height;
-
+    m_Data.m_WindowName        = options.window_title;
+    m_Data.m_VideoMode.width   = options.width;
+    m_Data.m_VideoMode.height  = options.height;
     m_Data.m_SFContextSettings = m_Data.internal_create(*this, options.window_title);
-
-    unsigned int requested_glsl_version = std::stoi(Engine::priv::OpenGL::getHighestGLSLVersion(*this));
-
-    unsigned int opengl_version = std::stoi(std::to_string(m_Data.m_SFContextSettings.majorVersion) + std::to_string(m_Data.m_SFContextSettings.minorVersion));
-    priv::Core::m_Engine->m_RenderManager._onOpenGLContextCreation(m_Data.m_VideoMode.width, m_Data.m_VideoMode.height, requested_glsl_version, opengl_version);
+    int requested_glsl_version = std::stoi(Engine::priv::OpenGL::getHighestGLSLVersion(*this));
+    int opengl_version         = std::stoi(std::to_string(m_Data.m_SFContextSettings.majorVersion) + std::to_string(m_Data.m_SFContextSettings.minorVersion));
+    Engine::priv::Core::m_Engine->m_RenderManager._onOpenGLContextCreation(
+        m_Data.m_VideoMode.width, 
+        m_Data.m_VideoMode.height, 
+        (unsigned int)requested_glsl_version, 
+        (unsigned int)opengl_version
+    );
 
     m_Data.internal_init_position(*this);
 
@@ -48,10 +48,10 @@ void Window::init(const EngineOptions& options) noexcept {
     //setVerticalSyncEnabled(options.vsync); //unfortunately this will not work until a few frames after the window creation
 
     if (options.show_console) {
-        std::cout << "Using OpenGL: " << m_Data.m_SFContextSettings.majorVersion << "." << m_Data.m_SFContextSettings.minorVersion <<
+        ENGINE_PRODUCTION_LOG("Using OpenGL: " << m_Data.m_SFContextSettings.majorVersion << "." << m_Data.m_SFContextSettings.minorVersion <<
             ", with depth bits: " << m_Data.m_SFContextSettings.depthBits <<
             " and stencil bits: " << m_Data.m_SFContextSettings.stencilBits <<
-            " and glsl version: " << requested_glsl_version << '\n';
+            " and glsl version: " << requested_glsl_version)
     }
 }
 void Window::internal_init() noexcept {
@@ -114,7 +114,7 @@ void Window::setIcon(const Texture& texture) {
     m_Data.m_IconFile = texture.name();
 }
 void Window::setIcon(const char* file) {
-    Texture* texture = priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
+    Texture* texture = Engine::priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
     if (!texture) {
         Handle handle = Engine::Resources::loadTexture(file);
         texture       = handle.get<Texture>();
@@ -123,6 +123,9 @@ void Window::setIcon(const char* file) {
     m_Data.m_IconFile = file;
 }
 void Window::setIcon(const std::string& file) {
+    if (file.empty()) {
+        return;
+    }
     Window::setIcon(file.c_str());
 }
 void Window::setName(const char* name) {
@@ -133,51 +136,20 @@ void Window::setName(const char* name) {
     m_Data.m_SFMLWindow.setTitle(name);
 }
 void Window::setVerticalSyncEnabled(bool isToBeEnabled) {
-    if (isToBeEnabled) {
-        if (!m_Data.m_Flags.has(Window_Flags::Vsync)) {
-            m_Data.m_SFMLWindow.setVerticalSyncEnabled(true);
-            m_Data.m_Flags.add(Window_Flags::Vsync);
-        }
-    }else{
-        if (m_Data.m_Flags.has(Window_Flags::Vsync)) {
-            m_Data.m_SFMLWindow.setVerticalSyncEnabled(false);
-            m_Data.m_Flags.remove(Window_Flags::Vsync);
-        }
-    }
+    m_Data.m_SFMLWindow.setVerticalSyncEnabled(isToBeEnabled);
+    (isToBeEnabled) ? m_Data.m_Flags.add(Window_Flags::Vsync) : m_Data.m_Flags.remove(Window_Flags::Vsync);
 }
 void Window::setKeyRepeatEnabled(bool isToBeEnabled) {
-    if (isToBeEnabled) {
-        if (!m_Data.m_Flags.has(Window_Flags::KeyRepeat)) {
-            m_Data.m_SFMLWindow.setKeyRepeatEnabled(true);
-            m_Data.m_Flags.add(Window_Flags::KeyRepeat);
-        }
-    }else{
-        if (m_Data.m_Flags.has(Window_Flags::KeyRepeat)) {
-            m_Data.m_SFMLWindow.setKeyRepeatEnabled(false);
-            m_Data.m_Flags.remove(Window_Flags::KeyRepeat);
-        }
-    }
+    m_Data.m_SFMLWindow.setKeyRepeatEnabled(isToBeEnabled);
+    (isToBeEnabled) ? m_Data.m_Flags.add(Window_Flags::KeyRepeat) : m_Data.m_Flags.remove(Window_Flags::KeyRepeat);
 }
 void Window::setMouseCursorVisible(bool isToBeVisible) {
-    if (isToBeVisible) {
-        if (!m_Data.m_Flags.has(Window_Flags::MouseVisible)) {
-            #ifdef ENGINE_THREAD_WINDOW_EVENTS
-                m_Data.m_WindowThread.internal_push(WindowEventThreadOnlyCommands::ShowMouse);
-            #else
-                m_Data.m_SFMLWindow.setMouseCursorVisible(true);
-                m_Data.m_Flags.add(Window_Flags::MouseVisible);
-            #endif
-        }
-    }else{
-        if (m_Data.m_Flags.has(Window_Flags::MouseVisible)) {
-            #ifdef ENGINE_THREAD_WINDOW_EVENTS
-                m_Data.m_WindowThread.internal_push(WindowEventThreadOnlyCommands::HideMouse);
-            #else
-                m_Data.m_SFMLWindow.setMouseCursorVisible(false);
-                m_Data.m_Flags.remove(Window_Flags::MouseVisible);
-            #endif
-        }
-    }
+    #ifdef ENGINE_THREAD_WINDOW_EVENTS
+        (isToBeVisible) ? m_Data.m_WindowThread.internal_push(WindowEventThreadOnlyCommands::ShowMouse) : m_Data.m_WindowThread.internal_push(WindowEventThreadOnlyCommands::HideMouse);
+    #else
+        m_Data.m_SFMLWindow.setMouseCursorVisible(isToBeVisible);
+        (isToBeVisible) ? m_Data.m_Flags.add(Window_Flags::MouseVisible) : m_Data.m_Flags.remove(Window_Flags::MouseVisible);
+    #endif
 }
 void Window::requestFocus() {
     #ifdef ENGINE_THREAD_WINDOW_EVENTS
@@ -187,7 +159,7 @@ void Window::requestFocus() {
     #endif
 }
 void Window::close() {
-    priv::Core::m_Engine->internal_on_event_window_closed(*this);
+    Engine::priv::Core::m_Engine->internal_on_event_window_closed(*this);
     m_Data.m_SFMLWindow.close();
 }
 bool Window::isWindowOnSeparateThread() const {
@@ -239,19 +211,19 @@ bool Window::isMaximized() const noexcept {
 bool Window::isMinimized() const noexcept {
     return internal_return_window_placement_cmd(SW_MINIMIZE);
 }
-void Window::setActive(bool isToBeActive) {
-    if (isToBeActive) {
-        if (!m_Data.m_Flags.has(Window_Flags::Active)) {
-            m_Data.m_SFMLWindow.setActive(true);
+bool Window::setActive(bool isToBeActive) {
+    bool result = m_Data.m_SFMLWindow.setActive(isToBeActive);
+    if (result) {
+        if (isToBeActive) {
             m_Data.m_OpenGLThreadID = std::this_thread::get_id();
             m_Data.m_Flags.add(Window_Flags::Active);
-        }
-    }else{
-        if (m_Data.m_Flags.has(Window_Flags::Active)) {
-            m_Data.m_SFMLWindow.setActive(false);
+        }else{
             m_Data.m_Flags.remove(Window_Flags::Active);
         }
+    }else{
+        ENGINE_PRODUCTION_LOG("error: Window::setActive() failed when called from thread: " << std::this_thread::get_id())     
     }
+    return result;
 }
 void Window::setSize(unsigned int width, unsigned int height) {
     if (m_Data.m_VideoMode.width == width && m_Data.m_VideoMode.height == height) {
@@ -317,25 +289,12 @@ bool Window::setFullscreen(bool isToBeFullscreen) {
     return true;
 }
 void Window::keepMouseInWindow(bool isToBeKept) {
-    if (isToBeKept) {
-        #ifdef ENGINE_THREAD_WINDOW_EVENTS
-            m_Data.m_WindowThread.internal_push(WindowEventThreadOnlyCommands::KeepMouseInWindow);
-        #else
-            if (!m_Data.m_Flags.has(Window_Flags::MouseGrabbed)) {
-                m_Data.m_SFMLWindow.setMouseCursorGrabbed(true);
-                m_Data.m_Flags.add(Window_Flags::MouseGrabbed);
-            }
-        #endif
-    }else{
-        #ifdef ENGINE_THREAD_WINDOW_EVENTS
-            m_Data.m_WindowThread.internal_push(WindowEventThreadOnlyCommands::FreeMouseFromWindow);
-        #else
-            if (m_Data.m_Flags.has(Window_Flags::MouseGrabbed)) {
-                m_Data.m_SFMLWindow.setMouseCursorGrabbed(false);
-                m_Data.m_Flags.remove(Window_Flags::MouseGrabbed);
-            }
-        #endif
-    }
+    #ifdef ENGINE_THREAD_WINDOW_EVENTS
+        (isToBeKept) ? m_Data.m_WindowThread.internal_push(WindowEventThreadOnlyCommands::KeepMouseInWindow) : m_Data.m_WindowThread.internal_push(WindowEventThreadOnlyCommands::FreeMouseFromWindow);
+    #else
+        m_Data.m_SFMLWindow.setMouseCursorGrabbed(isToBeKept);
+        (isToBeKept) ? m_Data.m_Flags.add(Window_Flags::MouseGrabbed) : m_Data.m_Flags.remove(Window_Flags::MouseGrabbed);
+    #endif
 }
 void Window::setFramerateLimit(unsigned int limit){
     m_Data.m_SFMLWindow.setFramerateLimit(limit);
@@ -350,18 +309,17 @@ void Window::internal_on_dynamic_resize() {
 
         if (current_size.x != old_size.x || current_size.y != old_size.y) {
             Window::setSize(current_size.x, current_size.y);
-            priv::Core::m_Engine->internal_on_event_resize(*this, current_size.x, current_size.y, true);
+            Engine::priv::Core::m_Engine->internal_on_event_resize(*this, current_size.x, current_size.y, true);
         }
     #endif
 }
 bool Window::pollEvents(sf::Event& e) {
     #ifdef ENGINE_THREAD_WINDOW_EVENTS
-        auto x = m_Data.m_WindowThread.internal_try_pop(); //expensive as it uses lock & mutex
+        std::optional<sf::Event> x = m_Data.m_WindowThread.internal_try_pop(); //expensive as it uses lock & mutex
         if (x) {
             e = std::move(*x);
-            return true;
         }
-        return false;
+        return (bool)x;
     #else
         return m_Data.m_SFMLWindow.pollEvent(e);
     #endif

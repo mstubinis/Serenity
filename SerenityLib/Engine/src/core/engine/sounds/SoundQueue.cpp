@@ -4,11 +4,11 @@
 #include <core/engine/sounds/SoundMusic.h>
 #include <core/engine/sounds/SoundModule.h>
 
-using namespace std;
-
-SoundQueue::SoundQueue(Engine::priv::SoundModule& module, float delay) : m_SoundModule(module){
-    m_DelayInSeconds = delay;
-    m_SoundModule.m_SoundQueues.push_back(this);
+SoundQueue::SoundQueue(Engine::priv::SoundModule& module, float delay) 
+    : m_SoundModule{ module }
+    , m_DelayInSeconds{ delay }
+{
+    m_SoundModule.m_SoundQueues.emplace_back(this);
 }
 SoundQueue::~SoundQueue() {
     clear();

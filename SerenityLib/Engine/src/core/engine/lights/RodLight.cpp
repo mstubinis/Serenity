@@ -15,7 +15,7 @@ RodLight::RodLight(const glm_vec3& pos, float rodLength, Scene* scene) : PointLi
 
     if (m_Type == LightType::Rod) {
         auto& rodLights = priv::InternalScenePublicInterface::GetRodLights(*scene);
-        rodLights.push_back(this);
+        rodLights.emplace_back(this);
     }
 }
 float RodLight::calculateCullingRadius() {

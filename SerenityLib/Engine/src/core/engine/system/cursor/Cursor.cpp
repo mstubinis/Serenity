@@ -27,10 +27,10 @@ bool Cursor::internal_load_from_pixels(const std::uint8_t* pixels, unsigned int 
         m_Pixels.clear();
         m_Pixels.reserve(numBytes);
         for (size_t i = 0; i < numBytes; i += 4) {
-            unsigned char r = pixels[i + 0] * colorMultiplier.r;
-            unsigned char g = pixels[i + 1] * colorMultiplier.g;
-            unsigned char b = pixels[i + 2] * colorMultiplier.b;
-            unsigned char a = pixels[i + 3] * colorMultiplier.a;
+            unsigned char r = static_cast<unsigned char>((float)pixels[i + 0] * colorMultiplier.r);
+            unsigned char g = static_cast<unsigned char>((float)pixels[i + 1] * colorMultiplier.g);
+            unsigned char b = static_cast<unsigned char>((float)pixels[i + 2] * colorMultiplier.b);
+            unsigned char a = static_cast<unsigned char>((float)pixels[i + 3] * colorMultiplier.a);
             m_Pixels.emplace_back(r);
             m_Pixels.emplace_back(g);
             m_Pixels.emplace_back(b);
@@ -52,10 +52,10 @@ bool Cursor::internal_rotate(long long startIndex, long long increment1, long lo
 
     long long pixel = startIndex;
     for (size_t i = 0; i < numBytes; i += 4) {
-        unsigned char r = oldPixels[(pixel * 4) + 0] * m_ColorMultiplier.r;
-        unsigned char g = oldPixels[(pixel * 4) + 1] * m_ColorMultiplier.g;
-        unsigned char b = oldPixels[(pixel * 4) + 2] * m_ColorMultiplier.b;
-        unsigned char a = oldPixels[(pixel * 4) + 3] * m_ColorMultiplier.a;
+        unsigned char r = static_cast<unsigned char>((float)oldPixels[(pixel * 4) + 0] * m_ColorMultiplier.r);
+        unsigned char g = static_cast<unsigned char>((float)oldPixels[(pixel * 4) + 1] * m_ColorMultiplier.g);
+        unsigned char b = static_cast<unsigned char>((float)oldPixels[(pixel * 4) + 2] * m_ColorMultiplier.b);
+        unsigned char a = static_cast<unsigned char>((float)oldPixels[(pixel * 4) + 3] * m_ColorMultiplier.a);
         m_Pixels.emplace_back(r);
         m_Pixels.emplace_back(g);
         m_Pixels.emplace_back(b);

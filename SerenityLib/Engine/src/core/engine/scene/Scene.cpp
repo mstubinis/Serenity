@@ -17,7 +17,14 @@ class Scene::impl final {
     public:
         Engine::priv::ParticleSystem   m_ParticleSystem;
         priv::ECS<Entity>              m_ECS;
-        void _init(Scene& super, const std::string& name, const SceneOptions& options) {
+
+        impl() = delete;
+
+        impl(unsigned int maxEmitters, unsigned int maxParticles)
+            : m_ParticleSystem(maxEmitters, maxParticles)
+        {}
+
+        void _init(Scene& super, const SceneOptions& options) {
             m_ECS.init(options);
             m_ECS.assignSystem<ComponentLogic> (ComponentLogic_System_CI()/*, 20000*/);
             m_ECS.assignSystem<ComponentBody, Engine::priv::ComponentBody_System>(ComponentBody_System_CI()/*, 10000*/);
@@ -237,8 +244,8 @@ bool priv::InternalScenePublicInterface::IsSkipRenderThisFrame(Scene& scene) {
 Scene::Scene(const std::string& name, const SceneOptions& options) : Resource(ResourceType::Scene, name) {
     m_RenderGraphs.resize((unsigned int)RenderStage::_TOTAL);
     m_ID      = priv::Core::m_Engine->m_ResourceManager.AddScene(*this);
-    m_i       = std::make_unique<impl>();
-    m_i->_init(*this, name, options);
+    m_i       = std::make_unique<impl>(options.maxAmountOfParticleEmitters, options.maxAmountOfParticles);
+    m_i->_init(*this, options);
     setName(name);
 
     registerEvent(EventType::SceneChanged);

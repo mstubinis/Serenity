@@ -12,13 +12,12 @@
 #include <core/engine/resources/Engine_BuiltInShaders.h>
 #include <core/engine/resources/Engine_Resources.h>
 
-using namespace std;
 using namespace Engine::priv;
 
 Engine::priv::SSAO Engine::priv::SSAO::STATIC_SSAO;
 
 Engine::priv::SSAO::~SSAO() {
-    glDeleteTextures(1, &m_ssao_noise_texture);
+    GLCall(glDeleteTextures(1, &m_ssao_noise_texture));
 }
 void Engine::priv::SSAO::internal_generate_kernel(std::uniform_real_distribution<float>& rand_dist, std::default_random_engine& gen) noexcept {
     for (std::uint32_t i = 0; i < SSAO_MAX_KERNEL_SIZE; ++i) {
@@ -41,15 +40,15 @@ void Engine::priv::SSAO::internal_generate_noise(std::uniform_real_distribution<
         ssaoNoise.emplace_back(rand_dist(gen) * 2.0 - 1.0, rand_dist(gen) * 2.0 - 1.0, 0.0f);
     }
     Engine::Renderer::genAndBindTexture(GL_TEXTURE_2D, m_ssao_noise_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SSAO_NORMALMAP_SIZE, SSAO_NORMALMAP_SIZE, 0, GL_RGB, GL_FLOAT, ssaoNoise.data());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    GLCall((GL_TEXTURE_2D, 0, GL_RGB16F, SSAO_NORMALMAP_SIZE, SSAO_NORMALMAP_SIZE, 0, GL_RGB, GL_FLOAT, ssaoNoise.data()));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
 }
 void Engine::priv::SSAO::init() {
-    uniform_real_distribution<float> rand_dist(0.0f, 1.0f);
-    default_random_engine gen;
+    std::uniform_real_distribution<float> rand_dist(0.0f, 1.0f);
+    std::default_random_engine gen;
 
     //internal_generate_kernel(rand_dist, gen);
     internal_generate_noise(rand_dist, gen);
@@ -98,7 +97,7 @@ bool Engine::priv::SSAO::init_shaders() {
         "    for(int i = 0; i < NUM_SAMPLES; ++i){\n"
         "        vec2 offset = (inverseResolution * float(i)) * Data.x;\n";
 
-    string varName = "image";
+    std::string varName = "image";
     if (OpenGLExtensions::isBindlessTexturesSupported()) {
         varName = "imageSampler";
         m_GLSL_frag_code_blur += "sampler2D " + varName + " = USE_SAMPLER_2D(image);\n";
@@ -152,7 +151,7 @@ void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, co
 
     Engine::Renderer::renderFullscreenQuad();
 }
-void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, string_view type, unsigned int texture, const Engine::priv::Renderer& renderer) {
+void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, std::string_view type, unsigned int texture, const Engine::priv::Renderer& renderer) {
     renderer.bind(m_Shader_Program_Blur.get());
     glm::vec2 hv(0.0f);
     if (type == "H") { 

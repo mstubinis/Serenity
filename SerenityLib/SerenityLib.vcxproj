@@ -419,6 +419,7 @@
     <ClInclude Include="Engine\src\core\engine\materials\MaterialLoader.h" />
     <ClInclude Include="Engine\src\core\engine\materials\MaterialRequest.h" />
     <ClInclude Include="Engine\src\core\engine\math\BigNumbers.h" />
+    <ClInclude Include="Engine\src\core\engine\math\MathCompression.h" />
     <ClInclude Include="Engine\src\core\engine\math\Engine_Math.h" />
     <ClInclude Include="Engine\src\core\engine\math\shapes\Plane.h" />
     <ClInclude Include="Engine\src\core\engine\math\shapes\Pyramid.h" />
@@ -602,6 +603,7 @@
     <ClCompile Include="Engine\src\core\engine\materials\MaterialLayer.cpp" />
     <ClCompile Include="Engine\src\core\engine\materials\MaterialLoader.cpp" />
     <ClCompile Include="Engine\src\core\engine\materials\MaterialRequest.cpp" />
+    <ClCompile Include="Engine\src\core\engine\math\MathCompression.cpp" />
     <ClCompile Include="Engine\src\core\engine\math\Engine_Math.cpp" />
     <ClCompile Include="Engine\src\core\engine\math\shapes\Plane.cpp" />
     <ClCompile Include="Engine\src\core\engine\math\shapes\Pyramid.cpp" />
@@ -614,13 +616,13 @@
     <ClCompile Include="Engine\src\core\engine\mesh\MeshLoading.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshRequest.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\smsh.cpp" />
-    <ClCompile Include="Engine\src\core\engine\mesh\VertexBufferObject.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\VertexData.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\VertexDataFormat.cpp" />
     <ClCompile Include="Engine\src\core\engine\model\ModelInstance.cpp" />
     <ClCompile Include="Engine\src\core\engine\model\ModelInstanceAnimation.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\ListenerTCP.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\NetworkingModule.cpp" />
+    <ClCompile Include="Engine\src\core\engine\networking\Packet.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\server\Server.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\server\ServerClient.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\server\ServerThread.cpp" />

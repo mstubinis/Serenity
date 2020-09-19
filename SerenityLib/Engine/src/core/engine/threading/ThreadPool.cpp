@@ -7,45 +7,16 @@ using namespace Engine;
 using namespace Engine::priv;
 
 #pragma region ThreadPoolFuture
-ThreadPoolFuture::ThreadPoolFuture(std::future<void>&& future) {
-    m_Future = std::move(future);
-}
-ThreadPoolFuture::ThreadPoolFuture(ThreadPoolFuture&& other) noexcept {
-    m_Future = std::move(other.m_Future);
-}
-ThreadPoolFuture& ThreadPoolFuture::operator=(ThreadPoolFuture&& other) noexcept {
-    if (&other != this) {
-        m_Future = std::move(other.m_Future);
-    }
-    return *this;
-}
-bool ThreadPoolFuture::isReady() const {
-    return (m_Future._Is_ready() && m_Future.valid());
-}
+ThreadPoolFuture::ThreadPoolFuture(std::future<void>&& future) 
+    : m_Future{ std::move(future) }
+{}
 #pragma endregion
 
 #pragma region ThreadPoolFutureCallback
-ThreadPoolFutureCallback::ThreadPoolFutureCallback(std::future<void>&& future, std::function<void()>&& callback) {
-    m_Future   = std::move(future);
-    m_Callback = std::move(callback);
-}
-ThreadPoolFutureCallback::ThreadPoolFutureCallback(ThreadPoolFutureCallback&& other) noexcept {
-    m_Future   = std::move(other.m_Future);
-    m_Callback.swap(other.m_Callback);
-}
-ThreadPoolFutureCallback& ThreadPoolFutureCallback::operator=(ThreadPoolFutureCallback&& other) noexcept {
-    if (&other != this) {
-        m_Future   = std::move(other.m_Future);
-        m_Callback.swap(other.m_Callback);
-    }
-    return *this;
-}
-bool ThreadPoolFutureCallback::isReady() const {
-    return (m_Future._Is_ready() && m_Future.valid());
-}
-void ThreadPoolFutureCallback::operator()() const {
-    m_Callback();
-}
+ThreadPoolFutureCallback::ThreadPoolFutureCallback(std::future<void>&& future, std::function<void()>&& callback) 
+    : m_Future{ std::move(future) }
+    , m_Callback{ std::move(callback) }
+{}
 #pragma endregion
 
 #pragma region ThreadPool
@@ -129,14 +100,14 @@ void ThreadPool::internal_create_packaged_task(std::function<void()>&& job, std:
     if (size() > 0) {
         {
             std::lock_guard lock(m_Mutex);
-            m_FutureCallbacks[section].push_back(std::move(thread_pool_future));
-            m_TaskQueue[section].push(std::move(task));
+            m_FutureCallbacks[section].emplace_back(std::move(thread_pool_future));
+            m_TaskQueue[section].emplace(std::move(task));
         }
         m_ConditionVariableAny.notify_one();
     }else{
         //on single threaded, we just execute the tasks on the main thread below in update()
-        m_FutureCallbacks[section].push_back(std::move(thread_pool_future));
-        m_TaskQueue[section].push(std::move(task));
+        m_FutureCallbacks[section].emplace_back(std::move(thread_pool_future));
+        m_TaskQueue[section].emplace(std::move(task));
     }
 }
 void ThreadPool::internal_create_packaged_task(std::function<void()>&& job, unsigned int section) {
@@ -145,14 +116,14 @@ void ThreadPool::internal_create_packaged_task(std::function<void()>&& job, unsi
     if (size() > 0) {
         {
             std::lock_guard lock(m_Mutex);
-            m_Futures[section].push_back(std::move(thread_pool_future));
-            m_TaskQueue[section].push(std::move(task));
+            m_Futures[section].emplace_back(std::move(thread_pool_future));
+            m_TaskQueue[section].emplace(std::move(task));
         }
         m_ConditionVariableAny.notify_one();
     }else{
         //on single threaded, we just execute the tasks on the main thread below in update()
-        m_Futures[section].push_back(std::move(thread_pool_future));
-        m_TaskQueue[section].push(std::move(task));
+        m_Futures[section].emplace_back(std::move(thread_pool_future));
+        m_TaskQueue[section].emplace(std::move(task));
     }
 }
 

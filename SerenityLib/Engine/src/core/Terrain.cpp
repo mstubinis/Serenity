@@ -19,7 +19,9 @@ using namespace Engine;
 
 #pragma region TerrainHeightfieldShape
 
-TerrainHeightfieldShape::TerrainHeightfieldShape(int heightWidth, int heightLength, void* data, float heightScale, float minHeight, float maxHeight, int upAxis, PHY_ScalarType type, bool flipQuads) : btHeightfieldTerrainShape(heightWidth, heightLength, data, heightScale, (btScalar)minHeight, (btScalar)maxHeight, upAxis, type, flipQuads) {
+TerrainHeightfieldShape::TerrainHeightfieldShape(int heightWidth, int heightLength, void* data, float heightScale, float minHeight, float maxHeight, int upAxis, PHY_ScalarType type, bool flipQuads) 
+    : btHeightfieldTerrainShape{ heightWidth, heightLength, data, heightScale, (btScalar)minHeight, (btScalar)maxHeight, upAxis, type, flipQuads }
+{
     m_ProcessedVertices.resize(heightWidth, std::vector<bool>(heightLength, true));
 }
 TerrainHeightfieldShape::~TerrainHeightfieldShape() {
@@ -195,11 +197,11 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
     if (pixelSize.x == 0 || pixelSize.y == 0) {
         return false;
     }
-    btScalar color_scale = 1.0 / static_cast<btScalar>(pointsPerPixel);
+    btScalar color_scale = 1.0 / (btScalar)pointsPerPixel;
     btScalar scale_by = 0.15;
     //init the map with points at 0.0
     std::vector<std::vector<btScalar>> temp(pixelSize.y * pointsPerPixel, std::vector<btScalar>(pixelSize.x * pointsPerPixel, btScalar(0.0)));
-    m_MinAndMaxHeight = std::make_pair(std::numeric_limits<float>::max(), std::numeric_limits<float>::min());
+    m_MinAndMaxHeight = { std::numeric_limits<float>::max(), std::numeric_limits<float>::min() };
 
     m_VerticesPerSector = sectorSizeInPixels * pointsPerPixel;
     unsigned int numSectorsWidth = (unsigned int)temp[0].size() / m_VerticesPerSector;
@@ -212,7 +214,7 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
             if ((dataX < 0 || (size_t)dataX >= temp.size()) || (dataY < 0 || (size_t)dataX >= temp[0].size())) {
                 continue;
             }
-            auto pixel = static_cast<btScalar>(heightmapImage.getPixel(pxlX, pxlY).r);
+            auto pixel = (btScalar)heightmapImage.getPixel(pxlX, pxlY).r;
             temp[dataX][dataY] = pixel;
             auto adjacentPixels = get_adjacent_pixels(pxlX, pxlY, heightmapImage);
 
@@ -307,7 +309,9 @@ TerrainData::AdjacentPixels TerrainData::get_adjacent_pixels(unsigned int pixelX
 
 #pragma region Terrain
 
-Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& materialHandle, unsigned int sectorSizeInPixels, unsigned int pointsPerPixel, bool useDiamondSubdivisions, Scene* scene) : Entity(*scene) {
+Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& materialHandle, unsigned int sectorSizeInPixels, unsigned int pointsPerPixel, bool useDiamondSubdivisions, Scene* scene) 
+    : Entity{ *scene }
+{
     m_TerrainData.calculate_data(heightmapImage, sectorSizeInPixels, pointsPerPixel);
     Terrain::setUseDiamondSubdivision(useDiamondSubdivisions);
     m_Mesh = NEW Mesh(name, *this, 0.000f);
@@ -393,11 +397,7 @@ bool Terrain::removeQuads(std::vector<std::tuple<unsigned int, unsigned int, uns
         return false;
     }
     bool atLeastOne = false;
-    for (const auto& tuple : quads) {
-        auto sectorX = std::get<0>(tuple);
-        auto sectorY = std::get<1>(tuple);
-        auto indexX  = std::get<2>(tuple);
-        auto indexY  = std::get<3>(tuple);
+    for (const auto& [sectorX, sectorY, indexX, indexY] : quads) {
         auto removal_result = internal_remove_quad(sectorX, sectorY, indexX, indexY);
         if (removal_result) {
             atLeastOne = true;
@@ -420,9 +420,7 @@ bool Terrain::removeQuads(std::vector<std::tuple<unsigned int, unsigned int>>& q
         return false;
     }
     bool atLeastOne = false;
-    for (const auto& tuple : quads) {
-        auto indexX = std::get<0>(tuple);
-        auto indexY = std::get<1>(tuple);
+    for (const auto& [indexX, indexY] : quads) {
         bool removal_result = internal_remove_quad(indexX, indexY);
         if (removal_result) {
             atLeastOne = true;
@@ -447,9 +445,7 @@ void Terrain::setPosition(const glm::vec3& position) {
     Terrain::setPosition(position.x, position.y, position.z);
 }
 void Terrain::setScale(float x, float y, float z) {
-    auto components = getComponents<ComponentModel, ComponentBody>();
-    auto* model = std::get<0>(components);
-    auto* body = std::get<1>(components);
+    auto body = getComponent<ComponentBody>();
     body->setScale(x, y, z);
 }
 void Terrain::setScale(const glm::vec3& scl) {

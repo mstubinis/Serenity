@@ -3,11 +3,10 @@
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/renderer/Renderer.h>
 
-using namespace std;
-
-VertexData::VertexData(VertexDataFormat& format){
-    m_Format = format;
-    const auto attributesSize = format.m_Attributes.size();
+VertexData::VertexData(VertexDataFormat& format)
+    : m_Format{ format }
+{
+    const auto attributesSize{ format.m_Attributes.size() };
     m_Data.resize(attributesSize);
     m_DataSizes.resize(attributesSize, 0);
     m_Buffers.push_back(std::make_unique<VertexBufferObject>());
@@ -58,7 +57,7 @@ std::vector<glm::vec3> VertexData::getPositions() const {
     std::vector<glm::vec3> points;
     if (m_Format.m_Attributes[0].type != GL_FLOAT) {
         struct half_point {
-            uint16_t x, y, z;
+            std::uint16_t x, y, z;
         };
         auto pts_half = getData<half_point>(0);
         points.reserve(pts_half.size());
@@ -107,7 +106,7 @@ void VertexData::setIndices(const unsigned int* data, size_t bufferCount, bool a
                     tri.index3    = index;
                     tri.midpoint  = tri.position1 + tri.position2 + tri.position3;
                     tri.midpoint /= 3.0f;
-                    m_Triangles.push_back(std::move(tri));
+                    m_Triangles.emplace_back(std::move(tri));
                     j = 0;
                 }
             }
@@ -132,7 +131,7 @@ void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
 
     size_t accumulator = 0;
     size_t size = 0;
-    std::vector<uint8_t> gpu_data_buffer;
+    std::vector<std::uint8_t> gpu_data_buffer;
     if (m_Format.m_InterleavingType == VertexAttributeLayout::Interleaved) {
         size = (m_Format.m_Attributes[0].stride * m_DataSizes[0]);
         gpu_data_buffer.reserve(size);

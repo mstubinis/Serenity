@@ -10,7 +10,7 @@ namespace Engine::priv {
 #include <core/engine/utils/Utils.h>
 #include <core/engine/mesh/VertexData.h>
 
-class SMSH_AttributeDataType final { public: enum Type : unsigned int {
+enum class SMSH_AttributeDataType : unsigned int {
     Float                        = GL_FLOAT,
     Byte                         = GL_BYTE,
     Unsigned_Byte                = GL_UNSIGNED_BYTE,
@@ -24,25 +24,24 @@ class SMSH_AttributeDataType final { public: enum Type : unsigned int {
     UNSIGNED_INT_2_10_10_10_REV  = GL_UNSIGNED_INT_2_10_10_10_REV,
     UNSIGNED_INT_10F_11F_11F_REV = GL_UNSIGNED_INT_10F_11F_11F_REV,
     INT_2_10_10_10_REV           = GL_INT_2_10_10_10_REV,
-};};
-class SMSH_IndiceDataType final { public: enum Type : unsigned int {
+};
+enum class SMSH_IndiceDataType : unsigned int {
     Unsigned_Byte   = GL_UNSIGNED_BYTE,
     Unsigned_Short  = GL_UNSIGNED_SHORT,
     Unsigned_Int    = GL_UNSIGNED_INT,
-};};
-class SMSH_AttributeComponentSize final{ public: enum Type : unsigned int {
+};
+enum class SMSH_AttributeComponentSize : unsigned int {
     Unknown = 0,
     _1      = 1,
     _2      = 2,
     _3      = 3,
     _4      = 4,
     BGRA    = GL_BGRA,
-};};
-
-class SMSH_InterleavingType final { public: enum Type : unsigned char {
-    Interleaved    = VertexAttributeLayout::Interleaved,
-    NonInterleaved = VertexAttributeLayout::NonInterleaved,
-};};
+};
+enum class SMSH_InterleavingType : unsigned char {
+    Interleaved    = (unsigned char)VertexAttributeLayout::Interleaved,
+    NonInterleaved = (unsigned char)VertexAttributeLayout::NonInterleaved,
+};
 
 /*
 smsh is a file extension for this engine that holds mesh / geometry data.
@@ -121,44 +120,54 @@ metadata structure:
 */
 
 struct SMSH_Fileheader final {
-    unsigned char m_InterleavingType   = static_cast<unsigned char>(SMSH_InterleavingType::Interleaved);
+    unsigned char m_InterleavingType   = (unsigned char)SMSH_InterleavingType::Interleaved;
     unsigned int  m_AttributeCount     = 0;
     unsigned int  m_UserDataCount      = 2;
     unsigned int  m_IndiceCount        = 0;
-    unsigned int  m_IndiceDataTypeSize = static_cast<unsigned int>(SMSH_IndiceDataType::Unsigned_Short);
+    unsigned int  m_IndiceDataTypeSize = (unsigned int)SMSH_IndiceDataType::Unsigned_Short;
     unsigned int  m_NumberOfBones      = 0U;
+
+    SMSH_Fileheader() = default;
+    SMSH_Fileheader(Mesh& mesh);
 };
 
 struct SMSH_AttributeNoBuffer {
     unsigned char            m_Normalized              = 0;
     unsigned int             m_Stride                  = 0;
-    unsigned int             m_AttributeType           = SMSH_AttributeDataType::Float;
+    unsigned int             m_AttributeType           = (unsigned int)SMSH_AttributeDataType::Float;
     unsigned int             m_SizeOfAttribute         = 0;
     unsigned int             m_AttributeBufferSize     = 0;
-    unsigned int             m_AttributeComponentCount = SMSH_AttributeComponentSize::_4;
+    unsigned int             m_AttributeComponentCount = (unsigned int)SMSH_AttributeComponentSize::_4;
     unsigned int             m_Offset                  = 0;
 
-    SMSH_AttributeNoBuffer() {}
-    SMSH_AttributeNoBuffer(SMSH_AttributeDataType::Type type, unsigned int componentCount) {
-        m_AttributeType           = static_cast<unsigned short>(type);
-        m_AttributeComponentCount = componentCount;
-    }
+    SMSH_AttributeNoBuffer() = default;
+
+    SMSH_AttributeNoBuffer(SMSH_AttributeDataType type, unsigned int componentCount, unsigned int offset, unsigned int normalized, unsigned int stride, unsigned int sizeOfAttr, unsigned int attributeBufferSize) :
+        m_AttributeType((unsigned int)type),
+        m_AttributeComponentCount(componentCount),
+        m_Offset(offset),
+        m_Normalized(normalized),
+        m_Stride(stride),
+        m_SizeOfAttribute(sizeOfAttr),
+        m_AttributeBufferSize(attributeBufferSize)
+    {}
 };
 
 struct SMSH_Attribute final : public SMSH_AttributeNoBuffer {
     const uint8_t*  m_AttributeBuffer = nullptr;
 
-    SMSH_Attribute(unsigned int sizeOfAttr, unsigned int componentCount) : SMSH_AttributeNoBuffer(static_cast<SMSH_AttributeDataType::Type>(m_AttributeType), componentCount){
-        m_SizeOfAttribute = sizeOfAttr;
-    }
-    SMSH_Attribute(SMSH_AttributeDataType::Type type, unsigned int componentCount) : SMSH_Attribute(0, componentCount){
-        m_AttributeType   = type;
-    }
+    SMSH_Attribute(SMSH_AttributeDataType type, SMSH_AttributeComponentSize componentCount, unsigned int offset, unsigned int normalized, unsigned int stride, unsigned int sizeOfAttr, unsigned int attributeBufferSize)
+        : SMSH_AttributeNoBuffer(type, (unsigned int)componentCount, offset, normalized, stride, sizeOfAttr, attributeBufferSize)
+    {}
+
+
+
+
     void setBuffer(const uint8_t* attrDataBuffer, unsigned int attrDataBufferSize) {
         m_AttributeBuffer     = attrDataBuffer;
         m_AttributeBufferSize = attrDataBufferSize;
     }
-    template<class Stream> bool write(Stream& stream) {
+    template<class STREAM> bool write(STREAM& stream) {
         if (m_AttributeBufferSize == 0 || !m_AttributeBuffer) {
             return false;
         }

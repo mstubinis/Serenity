@@ -2,6 +2,7 @@
 #ifndef ENGINE_RENDERER_PARTICLE_SYSTEM_H
 #define ENGINE_RENDERER_PARTICLE_SYSTEM_H
 
+struct Entity;
 class  ParticleEmissionProperties;
 class  Scene;
 class  Camera;
@@ -15,20 +16,10 @@ namespace Engine::priv {
 #include <core/engine/renderer/particles/Particle.h>
 #include <core/engine/renderer/particles/ParticleEmitter.h>
 
-struct Entity;
-
 constexpr unsigned int MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME = 12U;
 
-#ifdef ENVIRONMENT64
-    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT  = 4'000U;
-    constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT           = 1'000'000U;
-#else
-    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT  = 2'000U;
-    constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT           = 500'000U;
-#endif
-
 namespace Engine::priv {
-    class ParticleSystem final{
+    class ParticleSystem final : public Engine::NonCopyable, public Engine::NonMoveable {
         friend class ::ParticleEmitter;
         friend class ::Particle;
         private:
@@ -42,46 +33,43 @@ namespace Engine::priv {
             void internal_update_emitters(const float dt);
             void internal_update_particles(const float dt, Camera& camera);
         public:
-            //DOD
             struct ParticleDOD final {
-                glm::vec4 PositionAndScaleX;
-                glm::vec2 ScaleYAndAngle;
+                glm::vec4  PositionAndScaleX;
+                glm::vec2  ScaleYAndAngle;
                 glm::uvec2 MatIDAndPackedColor;
 
-                ParticleDOD(glm::vec4&& posAndScaleX, glm::vec2&& scaleYAndAngle, glm::uvec2&& matIDAndPackedColor) {
-                    PositionAndScaleX   = std::move(posAndScaleX);
-                    ScaleYAndAngle      = std::move(scaleYAndAngle);
-                    MatIDAndPackedColor = std::move(matIDAndPackedColor);
-                }
+                ParticleDOD() = delete;
+                ParticleDOD(glm::vec4&& posAndScaleX, glm::vec2&& scaleYAndAngle, glm::uvec2&& matIDAndPackedColor) 
+                    : PositionAndScaleX(std::move(posAndScaleX))
+                    , ScaleYAndAngle(std::move(scaleYAndAngle)) 
+                    , MatIDAndPackedColor(std::move(matIDAndPackedColor)) 
+                {}
+                ParticleDOD(const ParticleDOD& other)                = delete;
+                ParticleDOD& operator=(const ParticleDOD& other)     = delete;
+                ParticleDOD(ParticleDOD&& other) noexcept            = default;
+                ParticleDOD& operator=(ParticleDOD&& other) noexcept = default;
+                ~ParticleDOD() = default;
             };
 
-            std::vector<ParticleDOD>  ParticlesDOD;
-            std::unordered_map<Material*, unsigned int>    MaterialToIndex;
-            std::unordered_map<unsigned int, Material*>    MaterialToIndexReverse;
-            std::unordered_map<unsigned int, unsigned int> MaterialIDToIndex;
+            std::vector<ParticleDOD>                                 ParticlesDOD;
+            std::unordered_map<Material*, unsigned int>              MaterialToIndex;
+            std::unordered_map<unsigned int, Material*>              MaterialToIndexReverse;
+            std::unordered_map<unsigned int, unsigned int>           MaterialIDToIndex;
 
             //for the threads...
             std::vector<std::vector<ParticleDOD>>                    THREAD_PART_1;
             std::vector<std::unordered_map<Material*, unsigned int>> THREAD_PART_4;
             std::vector<std::unordered_map<unsigned int, Material*>> THREAD_PART_5;
         public:
-            ParticleSystem();
-            ~ParticleSystem();
-
-            ParticleSystem(const ParticleSystem&)                      = delete;
-            ParticleSystem& operator=(const ParticleSystem&)           = delete;
-            ParticleSystem(ParticleSystem&& other) noexcept            = delete;
-            ParticleSystem& operator=(ParticleSystem&& other) noexcept = delete;
+            ParticleSystem(unsigned int maxEmitters, unsigned int maxParticles);
 
             ParticleEmitter* add_emitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent);
 
             bool add_particle(ParticleEmitter& emitter, const glm::vec3& emitterPosition, const glm::quat& emitterRotation);
             bool add_particle(ParticleEmitter& emitter);
 
-            std::vector<ParticleEmitter>& getParticleEmitters();
-            std::vector<Particle>&        getParticles();
-            std::stack<size_t>&           getParticleEmittersFreelist();
-            std::stack<size_t>&           getParticlesFreelist();
+            inline CONSTEXPR std::vector<ParticleEmitter>& getParticleEmitters() noexcept { return m_ParticleEmitters; }
+            inline CONSTEXPR std::vector<Particle>& getParticles() noexcept { return m_Particles; }
 
             void update(const float dt, Camera& camera);
             void render(Viewport& viewport, Camera& camera, ShaderProgram& program, Renderer& renderer);

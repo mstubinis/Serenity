@@ -1,15 +1,13 @@
 #include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/threading/ThreadingHelpers.h>
 
-using namespace std;
-
-vector<pair<size_t, size_t>> Engine::splitVectorPairs(size_t vectorSize, size_t num_cores) noexcept {
+std::vector<std::pair<size_t, size_t>> Engine::splitVectorPairs(size_t vectorSize, size_t num_cores) noexcept {
     if (num_cores == 0) {
         num_cores = Engine::hardware_concurrency();
     }
-    vector<pair<size_t, size_t>> outVec;
+    std::vector<std::pair<size_t, size_t>> outVec;
     if (vectorSize <= num_cores) {
-        outVec.emplace_back(make_pair(0, vectorSize - 1));
+        outVec.emplace_back(0, vectorSize - 1);
         return outVec;
     }
     outVec.reserve(num_cores);
@@ -17,7 +15,7 @@ vector<pair<size_t, size_t>> Engine::splitVectorPairs(size_t vectorSize, size_t 
     size_t c = vectorSize / num_cores;
     size_t remainder = vectorSize % num_cores; /* Likely uses the result of the division. */
     size_t accumulator = 0;
-    pair<size_t, size_t> res;
+    std::pair<size_t, size_t> res;
     size_t b;
     size_t e = (num_cores - remainder);
     for (size_t i = 0; i < std::min(num_cores, vectorSize); ++i) {
@@ -33,8 +31,7 @@ vector<pair<size_t, size_t>> Engine::splitVectorPairs(size_t vectorSize, size_t 
             ++b;
             ++e;
         }
-        res = make_pair(accumulator, b);
-        outVec.push_back(res);
+        res = outVec.emplace_back(accumulator, b);
         accumulator += c;
     }
     return outVec;

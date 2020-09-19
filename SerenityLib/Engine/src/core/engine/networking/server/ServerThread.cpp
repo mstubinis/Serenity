@@ -21,10 +21,10 @@ bool ServerThread::remove_client(const std::string& hash, Server& server) {
         return true;
     }
     if (!has_client_hash) {
-        std::cout << "error: client removal - hash: " << hash << " is not in m_Clients\n";
+        ENGINE_PRODUCTION_LOG("error: ServerThread::remove_client() client removal - hash: " << hash << " is not in m_Clients")
     }
     if (!has_server_client_hash) {
-        std::cout << "error: client removal - hash: " << hash << " is not in server.m_HashedClients\n";
+        ENGINE_PRODUCTION_LOG("error: ServerThread::remove_client() client removal - hash: " << hash << " is not in server.m_HashedClients")
     }
     return false;
 }
@@ -45,10 +45,10 @@ bool ServerThread::add_client(const std::string& hash, ServerClient* serverClien
         return true;
     }
     if (has_client_hash) {
-        std::cout << "error: client addition - hash: " << hash << " is already in m_Clients\n";
+        ENGINE_PRODUCTION_LOG("error: ServerThread::add_client() client addition - hash: " << hash << " is already in m_Clients")
     }
     if (has_server_client_hash) {
-        std::cout << "error: client addition - hash: " << hash << " is already in server.m_HashedClients\n";
+        ENGINE_PRODUCTION_LOG("error: ServerThread::add_client() client addition - hash: " << hash << " is already in server.m_HashedClients")
     }
     return false;
 }
@@ -96,20 +96,17 @@ bool ServerThreadCollection::addClient(const std::string& hash, ServerClient* cl
             ++m_NumClients;
         }
         return result;
+    }else{
+        ENGINE_PRODUCTION_LOG("ServerThreadCollection::addClient() could not get a next thread")
     }
-#ifndef ENGINE_PRODUCTION
-    else {
-        std::cout << "ServerThreadCollection::addClient() could not get a next thread\n";
-    }
-#endif
     return false;
 }
 bool ServerThreadCollection::removeClient(const std::string& hash, Server& server) {
     bool complete = false;
     bool result   = false;
     for (auto& thread : m_Threads) {
-        for (auto& client_itr : thread.m_ServerClients) {
-            if (client_itr.first == hash) {
+        for (auto&[name, client] : thread.m_ServerClients) {
+            if (name == hash) {
                 result   = thread.remove_client(hash, server);
                 if (result) {
                     --m_NumClients;

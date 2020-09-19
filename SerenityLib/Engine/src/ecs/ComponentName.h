@@ -7,17 +7,17 @@
 
 class ComponentName {
     private:
-        Entity m_Owner;
-        std::string m_Data;
+        Entity       m_Owner = Entity();
+        std::string  m_Data  = "";
     public:
         ComponentName(Entity entity);
         ComponentName(Entity entity, const std::string& name);
         ComponentName(Entity entity, const char* name);
 
-        ComponentName(const ComponentName& other)                = delete;
-        ComponentName& operator=(const ComponentName& other)     = delete;
-        ComponentName(ComponentName&& other) noexcept            = default;
-        ComponentName& operator=(ComponentName&& other) noexcept = default;
+        ComponentName(const ComponentName& other)                 = delete;
+        ComponentName& operator=(const ComponentName & other)     = delete;
+        ComponentName(ComponentName&& other) noexcept             = default;
+        ComponentName& operator=(ComponentName&& other) noexcept  = default;
 
         inline CONSTEXPR const std::string& name() const noexcept { return m_Data; }
         inline void setName(const std::string& name) noexcept { m_Data = name; }

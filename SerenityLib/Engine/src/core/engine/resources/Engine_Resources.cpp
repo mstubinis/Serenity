@@ -23,7 +23,9 @@
 
 Engine::priv::ResourceManager* resourceManager = nullptr;
 
-Engine::priv::ResourceManager::ResourceManager(const EngineOptions& options) : m_Resources(32768){
+Engine::priv::ResourceManager::ResourceManager(const EngineOptions& options) 
+    : m_Resources(32768)
+{
     resourceManager    = this;
 }
 Engine::priv::ResourceManager::~ResourceManager(){
@@ -328,25 +330,21 @@ bool Engine::Resources::setCurrentScene(Scene* newScene){
     Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     
     if(!oldScene){
-        #ifndef ENGINE_PRODUCTION
-            std::cout << "---- Initial scene set to: " << newScene->name() << "\n";
-        #endif
+        ENGINE_PRODUCTION_LOG("---- Initial scene set to: " << newScene->name())
         resourceManager->m_CurrentScene = newScene; 
         Engine::priv::InternalScenePublicInterface::GetECS(*newScene).onSceneEntered(*newScene);
         return false;
     }
     if(oldScene != newScene){
-        #ifndef ENGINE_PRODUCTION
-            std::cout << "---- Scene Change started (" << oldScene->name() << ") to (" << newScene->name() << ") ----" << "\n";
-        #endif
+        ENGINE_PRODUCTION_LOG("---- Scene Change started (" << oldScene->name() << ") to (" << newScene->name() << ") ----")
         Engine::priv::InternalScenePublicInterface::GetECS(*oldScene).onSceneLeft(*oldScene);
         resourceManager->m_CurrentScene = newScene;
         Engine::priv::InternalScenePublicInterface::GetECS(*newScene).onSceneEntered(*newScene);
 
         Engine::priv::InternalScenePublicInterface::SkipRenderThisFrame(*newScene, true);
-        #ifndef ENGINE_PRODUCTION
-            std::cout << "-------- Scene Change ended --------" << "\n";
-        #endif
+
+        ENGINE_PRODUCTION_LOG("-------- Scene Change to (" << newScene->name() << ") ended --------")
+
         return true;
     }
     return false;

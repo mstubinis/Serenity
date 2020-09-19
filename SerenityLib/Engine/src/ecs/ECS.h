@@ -26,8 +26,7 @@ namespace Engine::priv {
             SceneOptions                                m_SceneOptions;
 
         public:
-            ECS() {
-            }
+            ECS() = default;
             ~ECS() {
                 SAFE_DELETE_VECTOR(m_ComponentPools);
                 SAFE_DELETE_VECTOR(m_Systems);

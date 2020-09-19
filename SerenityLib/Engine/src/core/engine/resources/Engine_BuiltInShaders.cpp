@@ -868,7 +868,7 @@ priv::EShaders::forward_frag =
 
     "uniform SAMPLER_TYPE_2D DiffuseTexture0;\n";
 
-for (unsigned int i = 1; i < glm::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
+for (unsigned int i = 1; i < std::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
     priv::EShaders::particle_frag +=
      "uniform SAMPLER_TYPE_2D DiffuseTexture" + to_string(i) + ";\n";
 }
@@ -897,7 +897,7 @@ for (unsigned int i = 1; i < glm::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U,
 
     priv::EShaders::particle_frag += "";
 
-    for (unsigned int i = 1; i < glm::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
+    for (unsigned int i = 1; i < std::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
         priv::EShaders::particle_frag +=
             "    else if (MaterialIndex == " + to_string(i) + "U)\n"
             "        finalColor *= texture2D(DiffuseTexture" + to_string(i) + ", UV); \n";

@@ -3,7 +3,6 @@
 #include <LuaBridge/LuaBridge.h>
 
 #include <core/engine/lua/LuaBinder.h>
-#include <core/engine/lua/LuaState.h>
 
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/sounds/SoundModule.h>
@@ -17,15 +16,15 @@
 #include <ecs/Entity.h>
 #include <ecs/Components.h>
 
-using namespace std;
 using namespace Engine::priv;
 
-void print(const string& s) { cout << s << "\n"; }
-void tostring(luabridge::LuaRef r) { cout << r.tostring() << "\n"; }
+void print(const std::string& s) { std::cout << s << "\n"; }
+void tostring(luabridge::LuaRef r) { std::cout << r.tostring() << "\n"; }
 
-LUABinder::LUABinder() {
-    m_LUA_STATE = NEW LUAState();
-    lua_State* L = m_LUA_STATE->getState();
+LUABinder::LUABinder()
+    : m_LUA_STATE(std::make_unique<LUAState>())
+{
+    lua_State* L{ m_LUA_STATE->getState() };
     luabridge::getGlobalNamespace(L)
         .addFunction("print", &print)
         .addFunction("tostring", &tostring)
@@ -230,7 +229,7 @@ LUABinder::LUABinder() {
         .endClass()
         .addFunction("getCurrentScene", &Engine::Resources::getCurrentScene)
         .addFunction("setCurrentScene", static_cast<bool(*)(Scene*)>(&Engine::Resources::setCurrentScene))
-        .addFunction("setCurrentSceneByName", static_cast<bool(*)(string_view)>(&Engine::Resources::setCurrentScene))
+        .addFunction("setCurrentSceneByName", static_cast<bool(*)(std::string_view)>(&Engine::Resources::setCurrentScene))
         //entity stuff
         .beginClass<Entity>("Entity")
             .addFunction("scene", &Entity::scene)
@@ -242,8 +241,8 @@ LUABinder::LUABinder() {
             .addFunction("versionID", &Entity::versionID)
             .addFunction("addChild", &Entity::addChild)
             .addFunction("removeChild", &Entity::removeChild)
-            .addFunction("removeComponent", static_cast<bool(Entity::*)(const string&)>(&Entity::removeComponent))
-            .addFunction("getComponent", static_cast<luabridge::LuaRef(Entity::*)(const string&)>(&Entity::getComponent))
+            .addFunction("removeComponent", static_cast<bool(Entity::*)(const std::string&)>(&Entity::removeComponent))
+            .addFunction("getComponent", static_cast<luabridge::LuaRef(Entity::*)(const std::string&)>(&Entity::getComponent))
             .addFunction("addComponent", &Entity::addComponent)
         .endClass()
         //component name
@@ -381,7 +380,4 @@ LUABinder::LUABinder() {
             .addFunction("setOrientation", static_cast<void(ModelInstance::*)(const float, const float, const float)>(&ModelInstance::setOrientation))
         .endClass()
     ;
-}
-LUABinder::~LUABinder() {
-    SAFE_DELETE(m_LUA_STATE);
 }

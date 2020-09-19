@@ -8,14 +8,14 @@ using namespace Engine;
 
 #pragma region FramebufferObjectAttatchmentBaseClass
 
-priv::FramebufferObjectAttatchment::FramebufferObjectAttatchment(const FramebufferObject& fbo, FramebufferAttatchment a, ImageInternalFormat i) : m_FBO(fbo){
-    m_GL_Attatchment = (GLuint)a;
-    m_InternalFormat = (GLuint)i;
-}
-priv::FramebufferObjectAttatchment::FramebufferObjectAttatchment(const FramebufferObject& fbo, FramebufferAttatchment a, const Texture& t) : m_FBO(fbo) {
-    m_GL_Attatchment = (GLuint)a;
-    m_InternalFormat = (GLuint)t.internalFormat();
-}
+priv::FramebufferObjectAttatchment::FramebufferObjectAttatchment(const FramebufferObject& fbo, FramebufferAttatchment a, ImageInternalFormat i) 
+    : m_FBO{ fbo }
+    , m_GL_Attatchment{ (GLuint)a }
+    , m_InternalFormat{ (GLuint)i }
+{}
+priv::FramebufferObjectAttatchment::FramebufferObjectAttatchment(const FramebufferObject& fbo, FramebufferAttatchment a, const Texture& t) 
+    : FramebufferObjectAttatchment(fbo, a, t.internalFormat())
+{}
 unsigned int priv::FramebufferObjectAttatchment::width() const {
     return m_FBO.width(); 
 }
@@ -25,11 +25,12 @@ unsigned int priv::FramebufferObjectAttatchment::height() const {
 
 #pragma endregion
 
-priv::FramebufferTexture::FramebufferTexture(const FramebufferObject& fbo, FramebufferAttatchment a, const Texture& t) : FramebufferObjectAttatchment(fbo, a, t){
-    m_Texture     = &const_cast<Texture&>(t);
-    m_PixelFormat = (GLuint)t.pixelFormat();
-    m_PixelType   = (GLuint)t.pixelType();
-}
+priv::FramebufferTexture::FramebufferTexture(const FramebufferObject& fbo, FramebufferAttatchment a, const Texture& t) 
+    : FramebufferObjectAttatchment(fbo, a, t)
+    , m_Texture{ &const_cast<Texture&>(t) }
+    , m_PixelFormat{ (GLuint)t.pixelFormat() }
+    , m_PixelType{ (GLuint)t.pixelType() }
+{}
 priv::FramebufferTexture::~FramebufferTexture(){ 
     SAFE_DELETE(m_Texture);
 }
@@ -44,16 +45,16 @@ Texture& priv::FramebufferTexture::texture() const {
 }
 
 priv::RenderbufferObject::RenderbufferObject(FramebufferObject& f, FramebufferAttatchment a, ImageInternalFormat i) : FramebufferObjectAttatchment(f,a,i) {
-    glGenRenderbuffers(1, &m_RBO);
+    GLCall(glGenRenderbuffers(1, &m_RBO));
 }
 priv::RenderbufferObject::~RenderbufferObject(){ 
-    glDeleteRenderbuffers(1, &m_RBO);
+    GLCall(glDeleteRenderbuffers(1, &m_RBO));
 }
 void priv::RenderbufferObject::resize(FramebufferObject& fbo, unsigned int w, unsigned int h){
     Engine::Renderer::bindRBO(m_RBO);
     m_Width  = w; 
     m_Height = h;
-    glRenderbufferStorage(GL_RENDERBUFFER, attatchment(), m_Width, m_Height);
+    GLCall(glRenderbufferStorage(GL_RENDERBUFFER, attatchment(), m_Width, m_Height));
     Engine::Renderer::unbindRBO();
 }
 
@@ -102,7 +103,7 @@ void priv::FramebufferObject::init(unsigned int width, unsigned int height, floa
     m_FramebufferHeight = (unsigned int)((float)height * m_Divisor);
     m_FBO.resize(swapBufferCount, GLuint(0));
     for (size_t i = 0; i < m_FBO.size(); ++i) {
-        glGenFramebuffers(1, &m_FBO[i]);
+        GLCall(glGenFramebuffers(1, &m_FBO[i]));
     }
     setCustomBindFunctor(FramebufferObjectDefaultBindFunctor());
     setCustomUnbindFunctor(FramebufferObjectDefaultUnbindFunctor());
@@ -121,7 +122,7 @@ void priv::FramebufferObject::init(unsigned int width, unsigned int height, Imag
 void priv::FramebufferObject::cleanup() {
     SAFE_DELETE_MAP(m_Attatchments);
     for (size_t i = 0; i < m_FBO.size(); ++i) {
-        glDeleteFramebuffers(1, &m_FBO[i]);
+        GLCall(glDeleteFramebuffers(1, &m_FBO[i]));
     }
 }
 priv::FramebufferObject::~FramebufferObject(){ 
@@ -145,7 +146,7 @@ priv::FramebufferTexture* priv::FramebufferObject::attatchTexture(Texture* textu
     FramebufferTexture* framebufferTexture = NEW FramebufferTexture(*this, attatchment, *texture);
     for (size_t i = 0; i < m_FBO.size(); ++i) {
         Engine::Renderer::bindFBO(m_FBO[i]);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, framebufferTexture->attatchment(), framebufferTexture->m_Texture->type(), framebufferTexture->m_Texture->address(), 0);
+        GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, framebufferTexture->attatchment(), framebufferTexture->m_Texture->type(), framebufferTexture->m_Texture->address(), 0));
     }
     m_Attatchments.emplace((unsigned int)attatchment, framebufferTexture);
     Engine::Renderer::unbindFBO();
@@ -164,8 +165,8 @@ priv::RenderbufferObject* priv::FramebufferObject::attatchRenderBuffer(priv::Ren
     for (size_t i = 0; i < m_FBO.size(); ++i) {
         Engine::Renderer::bindFBO(m_FBO[i]);
         Engine::Renderer::bindRBO(rbo);
-        glRenderbufferStorage(GL_RENDERBUFFER, rbo.internalFormat(), width(), height());
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, rbo.internalFormat(), GL_RENDERBUFFER, rbo.address());
+        GLCall(glRenderbufferStorage(GL_RENDERBUFFER, rbo.internalFormat(), width(), height()));
+        GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, rbo.internalFormat(), GL_RENDERBUFFER, rbo.address()));
         Engine::Renderer::unbindRBO();
     }
     m_Attatchments.emplace(rbo.attatchment(), &rbo);
@@ -179,12 +180,10 @@ GLuint priv::FramebufferObject::address() const {
 bool priv::FramebufferObject::check(){
     for (const auto fboHandle : m_FBO) {
         Engine::Renderer::bindFBO(fboHandle);
-        GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        GLCall(GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER));
         if (err != GL_FRAMEBUFFER_COMPLETE) {
-            #ifndef ENGINE_PRODUCTION
-                std::cout << "Framebuffer completeness in FramebufferObject::impl _check() (index " + std::to_string(fboHandle) + ") is incomplete!\n";
-                std::cout << "Error is: " << err << "\n";
-            #endif
+            ENGINE_PRODUCTION_LOG("Framebuffer completeness in FramebufferObject::impl _check() (index " + std::to_string(fboHandle) + ") is incomplete!")
+            ENGINE_PRODUCTION_LOG("Error is: " << err)
             return false;
         }
     }

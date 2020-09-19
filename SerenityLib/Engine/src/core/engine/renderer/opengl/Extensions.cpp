@@ -1,13 +1,12 @@
 #include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/renderer/opengl/Extensions.h>
+#include <core/engine/renderer/opengl/OpenGL.h>
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 
 using namespace Engine;
 using namespace Engine::priv;
-using namespace std;
-
 
 std::array<bool, OpenGLExtensions::_TOTAL> OPENGL_EXTENSIONS {
 
@@ -36,7 +35,7 @@ void OpenGLExtensions::INIT() noexcept {
     #if !defined(ENGINE_PRODUCTION) && defined(ENGINE_PRINT_OPENGL_EXTENSIONS)
         printAllAvailableExtensions();
         for (size_t i = 0; i < OPENGL_EXTENSIONS.size(); ++i) {
-            std::cout << OPENGL_EXTENSIONS[i] << "\n";
+            ENGINE_PRODUCTION_LOG(OPENGL_EXTENSIONS[i])
         }
     #endif
 }
@@ -49,13 +48,13 @@ bool OpenGLExtensions::checkOpenGLExtension(const char* e) noexcept {
 }
 void OpenGLExtensions::printAllAvailableExtensions() noexcept {
     GLint n = 0;
-    glGetIntegerv(GL_NUM_EXTENSIONS, &n);
+    GLCall(glGetIntegerv(GL_NUM_EXTENSIONS, &n));
     std::string output = "";
     for (GLint i = 0; i < n; ++i) {
         const char* extension = (const char*)glGetStringi(GL_EXTENSIONS, i);
         output += std::to_string(i) + ": " + extension + "\n";
     }
-    std::cout << output << "\n";
+    ENGINE_PRODUCTION_LOG(output)
 }
 
 bool OpenGLExtensions::supported(OpenGLExtensions::Extension extension) noexcept {

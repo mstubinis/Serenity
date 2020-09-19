@@ -3,8 +3,6 @@
 
 using namespace Engine::priv;
 
-Task::Task(std::function<void()>&& inTask) {
-    m_Task = std::packaged_task<void()>(std::move(inTask));
-}
-Task::~Task() {
-}
+Task::Task(std::function<void()>&& inTask)
+    : m_Task{ std::packaged_task<void()>(std::move(inTask)) }
+{}

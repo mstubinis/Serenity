@@ -4,7 +4,10 @@
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
 
-Constraint::Constraint(btRigidBody& a, btRigidBody& b) : m_RigidBodyA(a), m_RigidBodyB(b) {
+Constraint::Constraint(btRigidBody& a, btRigidBody& b) 
+    : m_RigidBodyA{ a }
+    , m_RigidBodyB{ b }
+{
     btTransform& a_transform = m_RigidBodyA.getWorldTransform();
     btTransform& b_transform = m_RigidBodyA.getWorldTransform();
     m_Constraint             = std::make_unique<btFixedConstraint>(m_RigidBodyA, m_RigidBodyB, a_transform, b_transform);

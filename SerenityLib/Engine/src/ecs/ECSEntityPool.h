@@ -13,13 +13,12 @@ namespace Engine::priv {
             std::vector<ENTITY>          m_Pool;
             std::vector<std::uint32_t>   m_Freelist;
         public:
-            ECSEntityPool() {
-            }
-            ~ECSEntityPool() {}
+            ECSEntityPool() = default;
             ECSEntityPool(const ECSEntityPool&)                      = delete;
             ECSEntityPool& operator=(const ECSEntityPool&)           = delete;
             ECSEntityPool(ECSEntityPool&& other) noexcept            = delete;
             ECSEntityPool& operator=(ECSEntityPool&& other) noexcept = delete;
+            ~ECSEntityPool() = default;
 
             void init(const SceneOptions& options) {
                 m_Pool.reserve(options.maxAmountOfEntities);

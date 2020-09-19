@@ -11,7 +11,7 @@ priv::ThreadingModule::ThreadingModule(){
     auto hardware_concurrency = Engine::hardware_concurrency();
     if (hardware_concurrency > 1) {
         m_ThreadPool.startup(hardware_concurrency);
-        std::cout << "Starting thread pool with " << hardware_concurrency << " threads\n";
+        ENGINE_PRODUCTION_LOG("Starting thread pool with " << hardware_concurrency)
     }
     threadingModule = this;
 }

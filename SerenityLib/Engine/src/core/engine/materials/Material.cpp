@@ -5,6 +5,7 @@
 #include <core/engine/system/Engine.h>
 #include <core/engine/textures/Texture.h>
 #include <core/engine/math/Engine_Math.h>
+#include <core/engine/math/MathCompression.h>
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/scene/Scene.h>
 #include <core/engine/scene/Skybox.h>
@@ -14,34 +15,34 @@ std::vector<glm::vec4> Material::m_MaterialProperities;
 Material* Material::Checkers       = nullptr;
 Material* Material::WhiteShadeless = nullptr;
 
-constexpr std::array<std::tuple<unsigned char, unsigned char, unsigned char, unsigned char, unsigned char>, (size_t)MaterialPhysics::_TOTAL> MATERIAL_PROPERTIES {
-    std::make_tuple(5_uc, 5_uc, 5_uc, 128_uc, 1_uc),                // 0 - water
-    std::make_tuple(8_uc, 8_uc, 8_uc, 246_uc, 1_uc),                // 1 - plastic or glass low
-    std::make_tuple(13_uc, 13_uc, 13_uc, 234_uc, 1_uc),             // 2 - plastic high
-    std::make_tuple(20_uc, 20_uc, 20_uc, 250_uc, 1_uc),             // 3 - glass or ruby high
-    std::make_tuple(44_uc, 44_uc, 44_uc, 250_uc, 1_uc),             // 4 - diamond
-    std::make_tuple(143_uc, 145_uc, 148_uc, 128_uc, 255_uc),        // 5 - iron
-    std::make_tuple(243_uc, 162_uc, 137_uc, 229_uc, 255_uc),        // 6 - copper
-    std::make_tuple(237_uc, 177_uc, 1_uc, 229_uc, 255_uc),          // 7 - gold
-    std::make_tuple(233_uc, 235_uc, 235_uc, 191_uc, 255_uc),        // 8 - aluminium
-    std::make_tuple(242_uc, 237_uc, 224_uc, 240_uc, 255_uc),        // 9 - silver
-    std::make_tuple(1_uc, 1_uc, 2_uc, 115_uc, 1_uc),                // 10 - black leather
-    std::make_tuple(81_uc, 56_uc, 13_uc, 81_uc, 1_uc),              // 11 - yellow paint MERL
-    std::make_tuple(140_uc, 141_uc, 141_uc, 204_uc, 255_uc),        // 12 - chromium
-    std::make_tuple(66_uc, 13_uc, 2_uc, 234_uc, 1_uc),              // 13 - red plastic MERL
-    std::make_tuple(13_uc, 20_uc, 43_uc, 89_uc, 1_uc),              // 14 - blue rubber MERL
-    std::make_tuple(169_uc, 210_uc, 217_uc, 229_uc, 255_uc),        // 15 - zinc
-    std::make_tuple(255_uc, 51_uc, 1_uc, 229_uc, 128_uc),           // 16 - car paint orange
-    std::make_tuple(7_uc, 7_uc, 7_uc, 25_uc, 1_uc),                 // 17 - skin
-    std::make_tuple(11_uc, 11_uc, 11_uc, 204_uc, 1_uc),             // 18 - quartz
-    std::make_tuple(28_uc, 28_uc, 28_uc, 229_uc, 1_uc),             // 19 - crystal
-    std::make_tuple(5_uc, 5_uc, 5_uc, 204_uc, 1_uc),                // 20 - alcohol
-    std::make_tuple(6_uc, 6_uc, 6_uc, 153_uc, 1_uc),                // 21 - milk
-    std::make_tuple(10_uc, 10_uc, 10_uc, 247_uc, 1_uc),             // 22 - glass
-    std::make_tuple(138_uc, 126_uc, 114_uc, 232_uc, 255_uc),        // 23 - titanium
-    std::make_tuple(171_uc, 162_uc, 150_uc, 232_uc, 255_uc),        // 24 - platinum
-    std::make_tuple(168_uc, 155_uc, 134_uc, 242_uc, 255_uc),        // 25 - nickel
-};
+constexpr std::array<MaterialDefaultPhysicsProperty, (size_t)MaterialPhysics::_TOTAL> MATERIAL_PROPERTIES{ {
+    { 5_uc, 5_uc, 5_uc, 128_uc, 1_uc },                // 0 - water
+    { 8_uc, 8_uc, 8_uc, 246_uc, 1_uc },                // 1 - plastic or glass low
+    { 13_uc, 13_uc, 13_uc, 234_uc, 1_uc },             // 2 - plastic high
+    { 20_uc, 20_uc, 20_uc, 250_uc, 1_uc },             // 3 - glass or ruby high
+    { 44_uc, 44_uc, 44_uc, 250_uc, 1_uc },             // 4 - diamond
+    { 143_uc, 145_uc, 148_uc, 128_uc, 255_uc },        // 5 - iron
+    { 243_uc, 162_uc, 137_uc, 229_uc, 255_uc },        // 6 - copper
+    { 237_uc, 177_uc, 1_uc, 229_uc, 255_uc },          // 7 - gold
+    { 233_uc, 235_uc, 235_uc, 191_uc, 255_uc },        // 8 - aluminium
+    { 242_uc, 237_uc, 224_uc, 240_uc, 255_uc },        // 9 - silver
+    { 1_uc, 1_uc, 2_uc, 115_uc, 1_uc },                // 10 - black leather
+    { 81_uc, 56_uc, 13_uc, 81_uc, 1_uc },              // 11 - yellow paint MERL
+    { 140_uc, 141_uc, 141_uc, 204_uc, 255_uc },        // 12 - chromium
+    { 66_uc, 13_uc, 2_uc, 234_uc, 1_uc },              // 13 - red plastic MERL
+    { 13_uc, 20_uc, 43_uc, 89_uc, 1_uc },              // 14 - blue rubber MERL
+    { 169_uc, 210_uc, 217_uc, 229_uc, 255_uc },        // 15 - zinc
+    { 255_uc, 51_uc, 1_uc, 229_uc, 128_uc },           // 16 - car paint orange
+    { 7_uc, 7_uc, 7_uc, 25_uc, 1_uc },                 // 17 - skin
+    { 11_uc, 11_uc, 11_uc, 204_uc, 1_uc },             // 18 - quartz
+    { 28_uc, 28_uc, 28_uc, 229_uc, 1_uc },             // 19 - crystal
+    { 5_uc, 5_uc, 5_uc, 204_uc, 1_uc },                // 20 - alcohol
+    { 6_uc, 6_uc, 6_uc, 153_uc, 1_uc },                // 21 - milk
+    { 10_uc, 10_uc, 10_uc, 247_uc, 1_uc },             // 22 - glass
+    { 138_uc, 126_uc, 114_uc, 232_uc, 255_uc },        // 23 - titanium
+    { 171_uc, 162_uc, 150_uc, 232_uc, 255_uc },        // 24 - platinum
+    { 168_uc, 155_uc, 134_uc, 242_uc, 255_uc },        // 25 - nickel
+} };
 
 constexpr float ONE_OVER_255 = 0.003921568627451f;
 
@@ -82,7 +83,9 @@ namespace Engine::priv {
 
 #pragma region Material
 
-Material::Material(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness) : Resource(ResourceType::Material, name){
+Material::Material(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness)
+    : Resource(ResourceType::Material, name)
+{
     Texture* d  = Engine::priv::MaterialLoader::LoadTextureDiffuse(diffuse);
     Texture* n  = Engine::priv::MaterialLoader::LoadTextureNormal(normal);
     Texture* g  = Engine::priv::MaterialLoader::LoadTextureGlow(glow);
@@ -95,7 +98,9 @@ Material::Material(const std::string& name, const std::string& diffuse, const st
     Engine::priv::InternalMaterialPublicInterface::Load(*this);
     setCustomBindFunctor(Engine::priv::DefaultMaterialBindFunctor());
 }
-Material::Material() : Resource(ResourceType::Material) {
+Material::Material() 
+    : Resource(ResourceType::Material) 
+{
     Engine::priv::MaterialLoader::InitBase(*this);
     setCustomBindFunctor(Engine::priv::DefaultMaterialBindFunctor());
 }
@@ -115,7 +120,7 @@ MaterialComponent* Material::internal_add_component_generic(MaterialComponentTyp
 void Material::internal_update_global_material_pool(bool addToDatabase) {
     //this data is kept around to be deferred to the lighting pass
     auto update_data = [this](glm::vec4& data) {
-        data.r = Engine::Math::pack3FloatsInto1FloatUnsigned(m_F0Color.r(), m_F0Color.g(), m_F0Color.b());
+        data.r = Engine::Compression::pack3FloatsInto1FloatUnsigned(m_F0Color.r(), m_F0Color.g(), m_F0Color.b());
         data.g = (float)(m_BaseAlpha) * ONE_OVER_255;
         data.b = (float)m_SpecularModel;
         data.a = (float)m_DiffuseModel;
@@ -254,10 +259,10 @@ void Material::setF0Color(unsigned char r, unsigned char g, unsigned char b) {
 }
 
 void Material::setMaterialPhysics(MaterialPhysics materialPhysics){
-    const auto& t = MATERIAL_PROPERTIES[(unsigned int)materialPhysics];
-    setF0Color(std::get<0>(t), std::get<1>(t), std::get<2>(t));
-    setSmoothness(std::get<3>(t));
-    setMetalness(std::get<4>(t));
+    const auto& prop = MATERIAL_PROPERTIES[(size_t)materialPhysics];
+    setF0Color(prop.r, prop.g, prop.b);
+    setSmoothness(prop.smoothness);
+    setMetalness(prop.metalness);
     internal_update_global_material_pool(false);
 }
 void Material::setSmoothness(unsigned char smoothness){

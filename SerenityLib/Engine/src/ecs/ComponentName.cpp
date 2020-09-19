@@ -1,26 +1,22 @@
 #include <core/engine/utils/PrecompiledHeader.h>
 #include <ecs/ComponentName.h>
 
-using namespace Engine;
-using namespace Engine::priv;
-using namespace std;
-
 #pragma region Component
-ComponentName::ComponentName(Entity entity) {
-    m_Owner = entity;
-    m_Data  = "";
-}
-ComponentName::ComponentName(Entity entity, const string& Name) {
-    m_Owner = entity;
-    m_Data  = Name;
-}
-ComponentName::ComponentName(Entity entity, const char* Name) {
-    m_Owner = entity;
-    m_Data  = Name;
-}
+ComponentName::ComponentName(Entity entity) 
+    : m_Owner(entity)
+{}
+ComponentName::ComponentName(Entity entity, const std::string& Name) 
+    : m_Owner(entity)
+    , m_Data(Name)
+{}
+ComponentName::ComponentName(Entity entity, const char* Name) 
+    : m_Owner(entity)
+    , m_Data(Name) 
+{}
 ComponentName::~ComponentName() {
-    m_Data  = "";
+
 }
+
 #pragma endregion
 
 #pragma region System

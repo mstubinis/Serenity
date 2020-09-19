@@ -10,6 +10,7 @@
 
 #include <core/engine/physics/Collision.h>
 #include <core/engine/math/Engine_Math.h>
+#include <core/engine/math/MathCompression.h>
 #include <core/engine/scene/Camera.h>
 
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -144,13 +145,13 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
         normals[1].reserve(data.binormals.size());
         normals[2].reserve(data.tangents.size());
         for (size_t i = 0; i < data.normals.size(); ++i) {
-            normals[0].emplace_back(Math::pack3NormalsInto32Int(data.normals[i]));
+            normals[0].emplace_back(Engine::Compression::pack3NormalsInto32Int(data.normals[i]));
         }
         for (size_t i = 0; i < data.binormals.size(); ++i) {
-            normals[1].emplace_back(Math::pack3NormalsInto32Int(data.binormals[i]));
+            normals[1].emplace_back(Engine::Compression::pack3NormalsInto32Int(data.binormals[i]));
         }
         for (size_t i = 0; i < data.tangents.size(); ++i) {
-            normals[2].emplace_back(Math::pack3NormalsInto32Int(data.tangents[i]));
+            normals[2].emplace_back(Engine::Compression::pack3NormalsInto32Int(data.tangents[i]));
         }
         vertexData.setData(0, data.points.data(), data.points.size());
         vertexData.setData(1, data.uvs.data(), data.uvs.size());
@@ -196,13 +197,13 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
         normals[1].reserve(temp_binormals.size());
         normals[2].reserve(temp_tangents.size());
         for (size_t i = 0; i < temp_normals.size(); ++i) {
-            normals[0].emplace_back(Math::pack3NormalsInto32Int(temp_normals[i]));
+            normals[0].emplace_back(Engine::Compression::pack3NormalsInto32Int(temp_normals[i]));
         }
         for (size_t i = 0; i < temp_binormals.size(); ++i) {
-            normals[1].emplace_back(Math::pack3NormalsInto32Int(temp_binormals[i]));
+            normals[1].emplace_back(Engine::Compression::pack3NormalsInto32Int(temp_binormals[i]));
         }
         for (size_t i = 0; i < temp_tangents.size(); ++i) {
-            normals[2].emplace_back(Math::pack3NormalsInto32Int(temp_tangents[i]));
+            normals[2].emplace_back(Engine::Compression::pack3NormalsInto32Int(temp_tangents[i]));
         }
 
         vertexData.setData(0, temp_pos.data(), temp_pos.size());
@@ -258,7 +259,9 @@ void InternalMeshPublicInterface::CalculateRadius(Mesh& mesh) {
 
 
 
-Mesh::Mesh() : Resource(ResourceType::Mesh) {
+Mesh::Mesh() 
+    : Resource(ResourceType::Mesh) 
+{
     InternalMeshPublicInterface::InitBlankMesh(*this);
 }
 
@@ -411,20 +414,26 @@ void Mesh::internal_recalc_indices_from_terrain(const Terrain& terrain) {
     modifyIndices(data.indices.data(), data.indices.size(), MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU);
     m_VertexData->unbind();
 }
-Mesh::Mesh(const std::string& name, const Terrain& terrain, float threshold) : Resource(ResourceType::Mesh) {
+Mesh::Mesh(const std::string& name, const Terrain& terrain, float threshold) 
+    : Resource{ ResourceType::Mesh }
+    , m_Threshold{ threshold }
+{
     InternalMeshPublicInterface::InitBlankMesh(*this);
-    m_Threshold = threshold;
     internal_build_from_terrain(terrain);
     load();
 }
-Mesh::Mesh(VertexData* data, const std::string& name, float threshold) : Resource(ResourceType::Mesh, name) {
+Mesh::Mesh(VertexData* data, const std::string& name, float threshold) 
+    : Resource{ ResourceType::Mesh, name }
+    , m_VertexData{ data }
+    , m_Threshold{ threshold }
+{
     InternalMeshPublicInterface::InitBlankMesh(*this);
-    m_VertexData = data;
-    m_Threshold = threshold;
 }
-Mesh::Mesh(const std::string& name, float width, float height, float threshold) : Resource(ResourceType::Mesh, name){
+Mesh::Mesh(const std::string& name, float width, float height, float threshold) 
+    : Resource(ResourceType::Mesh, name)
+    , m_Threshold{ threshold }
+{
     InternalMeshPublicInterface::InitBlankMesh(*this);
-    m_Threshold = threshold;
 
     MeshImportedData data;
 
@@ -453,9 +462,11 @@ Mesh::Mesh(const std::string& name, float width, float height, float threshold) 
 
     load();
 }
-Mesh::Mesh(const std::string& fileOrData, float threshold) : Resource(ResourceType::Mesh) {
+Mesh::Mesh(const std::string& fileOrData, float threshold) 
+    : Resource{ ResourceType::Mesh }
+    , m_Threshold{ threshold }
+{
     InternalMeshPublicInterface::InitBlankMesh(*this);
-    m_Threshold = threshold;
 
     setName("Custom Mesh");
     unsigned char flags = MeshLoadingFlags::Points | MeshLoadingFlags::Faces | MeshLoadingFlags::UVs | MeshLoadingFlags::Normals | MeshLoadingFlags::TBN;
@@ -553,13 +564,13 @@ void Mesh::onEvent(const Event& e) {
 //TODO: optimize this a bit more (bubble sort?)
 void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, SortingMode sortMode) {
     #ifndef _DEBUG
-        auto& triangles     = m_VertexData->m_Triangles;
+        auto& triangles      = m_VertexData->m_Triangles;
         if (triangles.size() == 0) {
             return;
         }
-        glm::vec3 camPos    = camera.getPosition();
+        glm::vec3 camPos     = camera.getPosition();
 
-        auto lambda_sorter = [&camPos, sortMode, &instance, &bodyModelMatrix](priv::Triangle& lhs, priv::Triangle& rhs) {
+        auto lambda_sorter   = [&camPos, sortMode, &instance, &bodyModelMatrix](priv::Triangle& lhs, priv::Triangle& rhs) {
             glm::mat4 model1 = instance.modelMatrix() * bodyModelMatrix;
             glm::mat4 model2 = model1;
 

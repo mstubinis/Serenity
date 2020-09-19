@@ -8,8 +8,6 @@
 #include <core/engine/threading/ThreadingModule.h>
 #include <core/engine/scene/Viewport.h>
 
-using namespace std;
-
 Engine::priv::DepthOfField Engine::priv::DepthOfField::STATIC_DOF;
 
 bool Engine::priv::DepthOfField::init_shaders() {

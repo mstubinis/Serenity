@@ -39,7 +39,7 @@ namespace Engine::priv {
             static void        LoadPopulateGlobalNodes(const aiScene& scene, Engine::priv::MeshInfoNode* root, Engine::priv::MeshInfoNode* parent, Engine::priv::MeshInfoNode* node, aiNode* ai_node, MeshRequest& meshRequest);
             static void        FinalizeData(Mesh& mesh, MeshImportedData& data, float threshold);
 
-            static VertexData* LoadFrom_OBJCC(std::string& filename);
+            static VertexData* LoadFrom_OBJCC(const std::string& filename);
             static void        SaveTo_OBJCC(VertexData& data, std::string filename);
 
             static bool        IsNear(float v1, float v2, float threshold);

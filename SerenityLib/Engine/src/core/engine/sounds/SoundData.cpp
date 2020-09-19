@@ -1,10 +1,10 @@
 #include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/sounds/SoundData.h>
 
-using namespace std;
-
-SoundData::SoundData(const string& file) : Resource(ResourceType::SoundData, file){
-    m_File   = file;
+SoundData::SoundData(const std::string& file) 
+    : Resource{ ResourceType::SoundData, file }
+    , m_File{ file }
+{
     buildBuffer();
 }
 SoundData::~SoundData() {

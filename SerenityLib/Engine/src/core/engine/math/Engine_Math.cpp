@@ -142,13 +142,13 @@ glm::vec4 Math::rect_union(const glm::vec4& bigger, const glm::vec4& smaller) no
     return glm::vec4(x, y, std::abs(z - x), std::abs(w - y));
 }
 
-void Math::Float32From16(float*    out, const uint16_t* in, const uint arraySize) {
-    for (unsigned i = 0; i < arraySize; ++i) {
+void Math::Float32From16(float*    out, const std::uint16_t* in, unsigned int arraySize) {
+    for (unsigned int i = 0; i < arraySize; ++i) {
         Math::Float32From16(&(out[i]), in[i]);
     }
 }
-void Math::Float16From32(uint16_t* out, const float*    in, const uint arraySize) {
-    for (uint i = 0; i < arraySize; ++i) {
+void Math::Float16From32(std::uint16_t* out, const float*    in, unsigned int arraySize) {
+    for (unsigned int i = 0; i < arraySize; ++i) {
         Math::Float16From32(&(out[i]), in[i]);
     }
 }
@@ -398,140 +398,7 @@ uint Math::Max(uint x, uint y, uint z, uint w){
 	return glm::max(x,glm::max(y,glm::max(z,w))); 
 }
 
-glm::vec3 Math::unpack3NormalsFrom32Int(uint32_t data) {
-    glm::vec3 conversions;
-    glm::vec3 negatives = glm::vec3(1.0f);
-    //X
-    conversions.x = static_cast<float>(data & 1023 << 0);
-    if (conversions.x >= 512.0f) { //2^9
-        conversions.x = 1023 - conversions.x; //2^10
-        negatives.x *= -1.0f;
-    }
-    conversions.x /= 511.0f * negatives.x; //(2^9) - 1
-    //Y 
-    conversions.y = static_cast<float>(data & 1023 << 10);
-    if (conversions.y >= 524289.0f) { //2^19
-        conversions.y = 1048575.0f - conversions.y; //2^20
-        negatives.y *= -1.0f;
-    }
-    conversions.y /= 524288.0f * negatives.y; //(2^19) - 1
-    //Z
-    conversions.z = static_cast<float>(data & 1023 << 20);
-    if (conversions.z >= 536870912.0f) { //2^29
-        conversions.z = 1073741824.0f - conversions.z; //2^30
-        negatives.z *= -1.0f;
-    }
-    conversions.z /= 536870911.0f * negatives.z; //(2^29) - 1
-    return conversions;
-}
-uint32_t Math::pack3NormalsInto32Int(float x, float y, float z){
-    uint32_t xsign = x < 0; //if x < 0, this = 1, else this = 0
-    uint32_t ysign = y < 0; //if y < 0, this = 1, else this = 0
-    uint32_t zsign = z < 0; //if z < 0, this = 1, else this = 0
-    float w = 0.0f;         //2 bits left for w, should i ever want to use it
-    uint32_t wsign = w < 0; //if w < 0, this = 1, else this = 0
-    uint32_t intW = ((uint32_t)(w       + (wsign << 1)) & 1);
-    uint32_t intZ = ((uint32_t)(z * 511 + (zsign << 9)) & 511);
-    uint32_t intY = ((uint32_t)(y * 511 + (ysign << 9)) & 511);
-    uint32_t intX = ((uint32_t)(x * 511 + (xsign << 9)) & 511);
-    uint32_t data = 
-        (wsign << 31 | intW << 30) |
-        (zsign << 29 | intZ << 20) |
-        (ysign << 19 | intY << 10) |
-        (xsign << 9  | intX      );
-    return data;
-}
-uint32_t Math::pack3NormalsInto32Int(const glm::vec3& v){
-	return Math::pack3NormalsInto32Int(v.x,v.y,v.z); 
-}
 
-
-float Math::pack3FloatsInto1Float(float r, float g, float b){
-    r = (r + 1.0f) * 0.5f;
-    uchar _r = static_cast<uchar>(r * 255.0f);
-    g = (g + 1.0f) * 0.5f;
-    uchar _g = static_cast<uchar>(g * 255.0f);
-    b = (b + 1.0f) * 0.5f;
-    uchar _b = static_cast<uchar>(b * 255.0f);
-    uint packedColor = (_r << 16) | (_g << 8) | _b;
-    float packedFloat = static_cast<float>(static_cast<double>(packedColor) / static_cast<double>(1 << 24));
-    return packedFloat;
-}
-float Math::pack3FloatsInto1Float(const glm::vec3& c){ 
-	return Math::pack3FloatsInto1Float(c.r,c.g,c.b); 
-}
-glm::vec3 Math::unpack3FloatsInto1Float(float v){
-    glm::vec3 ret = glm::vec3(
-		static_cast<float>(fmod(v, 1.0f)),
-		static_cast<float>(fmod(v * 256.0f, 1.0f)),
-		static_cast<float>(fmod(v * 65536.0f, 1.0f))
-	);
-    //Unpack to the -1..1 range
-    ret.r = (ret.r * 2.0f) - 1.0f;
-    ret.g = (ret.g * 2.0f) - 1.0f;
-    ret.b = (ret.b * 2.0f) - 1.0f;
-    return ret;
-}
-float Math::pack3FloatsInto1FloatUnsigned(float r,float g,float b){
-    uchar _r = static_cast<uchar>(r * 255.0f);
-    uchar _g = static_cast<uchar>(g * 255.0f);
-    uchar _b = static_cast<uchar>(b * 255.0f);
-    uint packedColor = (_r << 16) | (_g << 8) | _b;
-    float packedFloat = static_cast<float>(static_cast<double>(packedColor) / static_cast<double>(1 << 24) );
-    return packedFloat;
-}
-float Math::pack3FloatsInto1FloatUnsigned(const glm::vec3& c){ 
-	return Math::pack3FloatsInto1Float(c.r,c.g,c.b); 
-}
-glm::vec3 Math::unpack3FloatsInto1FloatUnsigned(float v){
-    const glm::vec3 ret = glm::vec3(
-		static_cast<float>(fmod(v, 1.0f)),
-		static_cast<float>(fmod(v * 256.0f, 1.0f)),
-		static_cast<float>(fmod(v * 65536.0f, 1.0f))
-	);
-    return ret;
-}
-uchar Math::pack2NibblesIntoChar(float x, float y) {
-    uchar packedData = 0;
-    int bits  = static_cast<int>(round(x / 0.066666666666f));
-    int bits1 = static_cast<int>(round(y / 0.066666666666f));
-	packedData |= bits & 15;
-	packedData |= (bits1 << 4) & 240;
-    return packedData;
-}
-glm::vec2 Math::unpack2NibblesFromChar(unsigned char _packedData) {
-    int low  = _packedData & 15;
-    int high = _packedData >> 4;
-    return glm::vec2(static_cast<float>(low * 0.066666666666f), static_cast<float>(high * 0.066666666666f));
-}
-//attempt to do the above using non bitwise operations for glsl versions that do not support bitwise operations
-float Math::pack2NibblesIntoCharBasic(float x, float y) {
-    float lowEnd = (round(x / 0.066666666666f));
-    float highEnd = (round(y / 0.066666666666f) * 16.0f);
-    return (lowEnd + highEnd);
-}
-glm::vec2 Math::unpack2NibblesFromCharBasic(float _packedData) {
-    float highEnd = (_packedData / 16.0f);
-    highEnd = highEnd - glm::floor(highEnd);
-    float lowEnd = static_cast<float>(_packedData - (highEnd * 16.0f));
-    return glm::vec2(highEnd, static_cast<float>(lowEnd / 255.0));
-}
-float Math::pack2FloatsInto1Float(float x, float y){
-    int _x = static_cast<int>((x + 1.0f) * 0.5f);
-	int _y = static_cast<int>((y + 1.0f) * 0.5f);
-    return glm::floor(_x * 1000.0f) + _y; 
-}
-float Math::pack2FloatsInto1Float(const glm::vec2& v){
-	return Math::pack2FloatsInto1Float(v.x,v.y); 
-}
-glm::vec2 Math::unpack2FloatsInto1Float(float i){
-    glm::vec2 res;
-    res.y = i - glm::floor(i);
-    res.x = (i - res.y) / 1000.0f;
-    res.x = (res.x - 0.5f) * 2.0f;
-    res.y = (res.y - 0.5f) * 2.0f;
-    return res;
-}
 void Math::translate(const btRigidBody& body, btVector3& vec, bool local){
     if(local){
         btQuaternion q = body.getWorldTransform().getRotation().normalize();

@@ -11,7 +11,7 @@ DirectionalLight::DirectionalLight(const glm::vec3& direction, Scene* scene) : S
 
     if (m_Type == LightType::Directional) {
         auto& dirLights = priv::InternalScenePublicInterface::GetDirectionalLights(*scene);
-        dirLights.push_back(this);
+        dirLights.emplace_back(this);
     }
 }
 void DirectionalLight::free() noexcept {
