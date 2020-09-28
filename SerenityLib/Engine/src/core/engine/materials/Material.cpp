@@ -15,7 +15,7 @@ std::vector<glm::vec4> Material::m_MaterialProperities;
 Material* Material::Checkers       = nullptr;
 Material* Material::WhiteShadeless = nullptr;
 
-constexpr std::array<MaterialDefaultPhysicsProperty, (size_t)MaterialPhysics::_TOTAL> MATERIAL_PROPERTIES{ {
+constexpr std::array<MaterialDefaultPhysicsProperty, (size_t)MaterialPhysics::_TOTAL> MATERIAL_PROPERTIES { {
     { 5_uc, 5_uc, 5_uc, 128_uc, 1_uc },                // 0 - water
     { 8_uc, 8_uc, 8_uc, 246_uc, 1_uc },                // 1 - plastic or glass low
     { 13_uc, 13_uc, 13_uc, 234_uc, 1_uc },             // 2 - plastic high
@@ -84,7 +84,7 @@ namespace Engine::priv {
 #pragma region Material
 
 Material::Material(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness)
-    : Resource(ResourceType::Material, name)
+    : Resource{ ResourceType::Material, name }
 {
     Texture* d  = Engine::priv::MaterialLoader::LoadTextureDiffuse(diffuse);
     Texture* n  = Engine::priv::MaterialLoader::LoadTextureNormal(normal);
@@ -99,12 +99,14 @@ Material::Material(const std::string& name, const std::string& diffuse, const st
     setCustomBindFunctor(Engine::priv::DefaultMaterialBindFunctor());
 }
 Material::Material() 
-    : Resource(ResourceType::Material) 
+    : Resource{ ResourceType::Material }
 {
     Engine::priv::MaterialLoader::InitBase(*this);
     setCustomBindFunctor(Engine::priv::DefaultMaterialBindFunctor());
 }
-Material::Material(const std::string& name,Texture* diffuse,Texture* normal,Texture* glow,Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) : Resource(ResourceType::Material, name){
+Material::Material(const std::string& name,Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) 
+    : Resource{ ResourceType::Material, name }
+{
     Engine::priv::MaterialLoader::Init(*this, diffuse, normal, glow, specular, ao, metalness, smoothness);
     Engine::priv::InternalMaterialPublicInterface::Load(*this);
     setCustomBindFunctor(Engine::priv::DefaultMaterialBindFunctor());
@@ -246,7 +248,7 @@ void Material::setGlow(unsigned char glow){
 }
 
 void Material::setF0Color(const Engine::color_vector_4& f0Color) {
-    Material::setF0Color(f0Color.color.r, f0Color.color.g, f0Color.color.b);
+    Material::setF0Color(f0Color.rc(), f0Color.gc(), f0Color.bc());
 }
 void Material::setF0Color(unsigned char r, unsigned char g, unsigned char b) {
     m_F0Color = Engine::color_vector_4(

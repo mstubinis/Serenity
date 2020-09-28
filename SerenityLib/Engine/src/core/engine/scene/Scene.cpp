@@ -21,7 +21,7 @@ class Scene::impl final {
         impl() = delete;
 
         impl(unsigned int maxEmitters, unsigned int maxParticles)
-            : m_ParticleSystem(maxEmitters, maxParticles)
+            : m_ParticleSystem{ maxEmitters, maxParticles }
         {}
 
         void _init(Scene& super, const SceneOptions& options) {
@@ -241,7 +241,9 @@ bool priv::InternalScenePublicInterface::IsSkipRenderThisFrame(Scene& scene) {
 }
 
 
-Scene::Scene(const std::string& name, const SceneOptions& options) : Resource(ResourceType::Scene, name) {
+Scene::Scene(const std::string& name, const SceneOptions& options) 
+    : Resource{ ResourceType::Scene, name }
+{
     m_RenderGraphs.resize((unsigned int)RenderStage::_TOTAL);
     m_ID      = priv::Core::m_Engine->m_ResourceManager.AddScene(*this);
     m_i       = std::make_unique<impl>(options.maxAmountOfParticleEmitters, options.maxAmountOfParticles);
@@ -250,9 +252,9 @@ Scene::Scene(const std::string& name, const SceneOptions& options) : Resource(Re
 
     registerEvent(EventType::SceneChanged);
 }
-Scene::Scene(const std::string& name) : Scene(name, SceneOptions::DEFAULT_OPTIONS) {
-
-}
+Scene::Scene(const std::string& name) 
+    : Scene{ name, SceneOptions::DEFAULT_OPTIONS }
+{}
 Scene::~Scene() {
     SAFE_DELETE(m_Skybox);
     SAFE_DELETE_VECTOR(m_Lights);

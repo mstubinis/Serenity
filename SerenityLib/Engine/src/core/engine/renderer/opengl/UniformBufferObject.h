@@ -31,7 +31,7 @@ class UniformBufferObject final : public Observer {
         ~UniformBufferObject();
 
         void onEvent(const Event& e);
-        const GLuint address() const;
+        inline GLuint address() const noexcept { return m_UBOObject; }
 
         void attachToShader(const ShaderProgram& shaderProgram);
         void updateData(void* data);

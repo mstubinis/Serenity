@@ -29,15 +29,11 @@ unsigned int priv::Renderer::OPENGL_VERSION;
 
 priv::Renderer::Renderer(const EngineOptions& options)
     : m_GI_Pack{ Engine::Compression::pack3FloatsInto1FloatUnsigned(m_GI_Diffuse, m_GI_Specular, m_GI_Global) }
-    , m_Pipeline{ NEW Engine::priv::DeferredPipeline(*this) }
 {
-    renderManager      = this;
+    m_Pipeline     = std::make_unique<Engine::priv::DeferredPipeline>(*this);
+    renderManager  = this;
 }
 priv::Renderer::~Renderer(){
-    cleanup();
-}
-void priv::Renderer::cleanup() {
-    SAFE_DELETE(m_Pipeline);
 }
 void priv::Renderer::_init(){
     m_Pipeline->init();
@@ -119,8 +115,8 @@ bool priv::Renderer::bind(Material* material) const {
 bool priv::Renderer::unbind(Material* material) const {
     return m_Pipeline->unbind(material);
 }
-void priv::Renderer::_genPBREnvMapData(Texture& texture, uint size1, uint size2){
-    return m_Pipeline->generatePBRData(texture, size1, size2);
+void priv::Renderer::_genPBREnvMapData(Texture& texture, Texture& convolutionTexture, Texture& preEnvTexture, uint size1, uint size2){
+    return m_Pipeline->generatePBRData(texture, convolutionTexture, preEnvTexture, size1, size2);
 }
 void Renderer::restoreDefaultOpenGLState() {
     renderManager->m_Pipeline->restoreDefaultState();
@@ -234,6 +230,9 @@ bool Renderer::colorMask(bool r, bool g, bool b, bool a) {
 }
 bool Renderer::clearColor(float r, float g, float b, float a) {
     return renderManager->m_Pipeline->clearColor(r, g, b, a);
+}
+unsigned int Renderer::getCurrentlyBoundTextureOfType(unsigned int textureType) noexcept {
+    return renderManager->m_Pipeline->getCurrentBoundTextureOfType(textureType);
 }
 bool Renderer::bindTextureForModification(GLuint textureType, GLuint textureObject) {
     return renderManager->m_Pipeline->bindTextureForModification(textureType, textureObject);

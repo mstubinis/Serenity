@@ -1031,7 +1031,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
         }
         const auto screenPos = Math::getScreenCoordinates(bodyRenderPos, *scene.getActiveCamera(), false);
         if (screenPos.z > 0) {
-            const string text = "ID: " + to_string(entity.id());
+            const std::string text = "ID: " + std::to_string(entity.id());
             Font::renderTextStatic(text, glm::vec2(screenPos.x, screenPos.y), glm::vec4(1.0f), 0.0f, glm::vec2(0.5f), 0.1f, TextAlignment::Left);
         }
     }

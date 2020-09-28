@@ -9,75 +9,62 @@
 namespace Engine::priv{
     template<typename RESOURCE> 
     struct HandleEntry final {
-        std::uint32_t   m_Version  = 1;
-        RESOURCE*       m_Resource = nullptr;
+        std::uint32_t             m_Version{ 1 };
+        std::unique_ptr<RESOURCE> m_Resource;
 
         HandleEntry() = default;
         HandleEntry(RESOURCE* r) 
-            : m_Resource(r) {
-        }
-        ~HandleEntry() {
-            SAFE_DELETE(m_Resource);
-        }
-
-        HandleEntry(const HandleEntry& other)              = delete;
-        HandleEntry& operator=(const HandleEntry& other)   = delete;
-        HandleEntry(HandleEntry&& other) noexcept {
-            m_Version  = std::move(other.m_Version);
-            m_Resource = std::exchange(other.m_Resource, nullptr);
-        }
-        HandleEntry& operator=(HandleEntry&& other) noexcept {
-            if (&other != this) {
-                m_Version  = std::move(other.m_Version);
-                m_Resource = std::exchange(other.m_Resource, nullptr);
-            }
-            return *this;
-        }
-
+            : m_Resource{ r } 
+        {}
+        HandleEntry(const HandleEntry& other)                = delete;
+        HandleEntry& operator=(const HandleEntry& other)     = delete;
+        HandleEntry(HandleEntry&& other) noexcept            = default;
+        HandleEntry& operator=(HandleEntry&& other) noexcept = default;
+        ~HandleEntry() = default;
     };
 
-    template<typename T> 
-    class ResourcePool final: public freelist<HandleEntry<T>>{
-        using super = freelist<HandleEntry<T>>;
+    template<typename RESOURCE_INTERFACE> 
+    class ResourcePool final: public freelist<HandleEntry<RESOURCE_INTERFACE>>{
+        using super = freelist<HandleEntry<RESOURCE_INTERFACE>>;
         private:
             std::mutex m_Mutex;
         public:
             ResourcePool(unsigned int numEntries) 
-                : freelist<HandleEntry<T>>(numEntries){
-            }
+                : freelist<HandleEntry<RESOURCE_INTERFACE>>{ numEntries } 
+            {}
             ~ResourcePool() = default;
-            Handle add(T* ptr, unsigned int type) {
-                int used_index = -1;
+            Handle add(RESOURCE_INTERFACE* ptr, unsigned int type) {
+                int used_index{ -1 };
                 {
-                    std::lock_guard lock(m_Mutex);
+                    std::lock_guard lock{ m_Mutex };
                     used_index = super::emplace_back(ptr);
                 }
                 if (used_index == -1) {
-                    return Handle();
+                    return Handle{};
                 }
                 auto& item = super::get(used_index);
                 ++item.m_Version;
                 if (item.m_Version == 0) {
                     item.m_Version = 1;
                 }
-                return Handle(used_index + 1, item.m_Version, type);
+                return Handle{ (std::uint32_t)used_index + 1U, item.m_Version, type };
             }
-            T* get(Handle handle) noexcept {
-                T* outPtr = nullptr;
+            RESOURCE_INTERFACE* get(Handle handle) noexcept {
+                RESOURCE_INTERFACE* outPtr{ nullptr };
                 return get(handle, outPtr);
             }
-            bool get(Handle handle, T*& outPtr) noexcept {
+            bool get(Handle handle, RESOURCE_INTERFACE*& outPtr) noexcept {
                 const auto& item = super::get(handle.index() - 1U);
                 if (item.m_Version != handle.version()){
                     outPtr = nullptr;
                     return false;
                 }
-                outPtr = item.m_Resource;
+                outPtr = item.m_Resource.get();
                 return true;
             }
             template<typename RESOURCE> 
             inline bool getAs(Handle handle, RESOURCE*& outPtr) noexcept {
-                T* void_ = nullptr;
+                RESOURCE_INTERFACE* void_ = nullptr;
                 bool rv = get(handle, void_);
                 outPtr = reinterpret_cast<RESOURCE*>(void_);
                 return rv;
@@ -85,17 +72,17 @@ namespace Engine::priv{
             template<typename RESOURCE>
             inline void getAsFast(Handle handle, RESOURCE*& outPtr) noexcept {
                 const auto& item = super::get(handle.index() - 1U);
-                outPtr = reinterpret_cast<RESOURCE*>(item.m_Resource);
+                outPtr = reinterpret_cast<RESOURCE*>(item.m_Resource.get());
             }
             template<typename RESOURCE>
             inline RESOURCE* getAsFast(Handle handle) noexcept {
                 const auto& item = super::get(handle.index() - 1U);
-                return reinterpret_cast<RESOURCE*>(item.m_Resource);
+                return reinterpret_cast<RESOURCE*>(item.m_Resource.get());
             }
             template<typename RESOURCE>
             inline RESOURCE* getAsFast(unsigned int index) noexcept {
                 const auto& item = super::get(index - 1U);
-                return reinterpret_cast<RESOURCE*>(item.m_Resource);
+                return reinterpret_cast<RESOURCE*>(item.m_Resource.get());
             }
     };
 };

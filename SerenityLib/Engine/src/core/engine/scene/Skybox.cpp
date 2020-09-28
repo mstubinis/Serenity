@@ -90,7 +90,7 @@ namespace Engine::priv {
     };
 };
 
-Skybox::Skybox(const std::string* files){
+Skybox::Skybox(const std::string* files) {
     Engine::priv::SkyboxImplInterface::initMesh();
 
     std::string names[6] = { files[0], files[1], files[2], files[3], files[4], files[5] };
@@ -100,7 +100,7 @@ Skybox::Skybox(const std::string* files){
     Engine::priv::Core::m_Engine->m_ResourceManager._addTexture(m_Texture);
     registerEvent(EventType::WindowFullscreenChanged);
 }
-Skybox::Skybox(const std::string& filename){
+Skybox::Skybox(const std::string& filename) {
     Engine::priv::SkyboxImplInterface::initMesh();
 
     m_Texture = Engine::priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(filename);
@@ -111,11 +111,11 @@ Skybox::Skybox(const std::string& filename){
     }
     registerEvent(EventType::WindowFullscreenChanged);
 }
-Skybox::~Skybox(){
+Skybox::~Skybox() {
     unregisterEvent(EventType::WindowFullscreenChanged);
 }
 
-void Skybox::bindMesh(){
+void Skybox::bindMesh() {
     Engine::priv::SkyboxImplInterface::initMesh();
     if(m_VAO){
         Engine::Renderer::bindVAO(m_VAO);

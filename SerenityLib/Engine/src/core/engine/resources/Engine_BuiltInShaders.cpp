@@ -262,7 +262,7 @@ priv::EShaders::particle_vertex =
 
     "    vec3 CameraRight = vec3(CameraView[0][0], CameraView[1][0], CameraView[2][0]);\n"
     "    vec3 CameraUp = vec3(CameraView[0][1], CameraView[1][1], CameraView[2][1]);\n"
-    "    vec3 VertexWorldSpace = (ParticlePositionAndScaleX.xyz - CameraRealPosition) + CameraRight * (xPrime) * ParticlePositionAndScaleX.w + CameraUp * (yPrime) * ParticleScaleYAndRotation.x;\n"
+    "    vec3 VertexWorldSpace = (ParticlePositionAndScaleX.xyz) + CameraRight * (xPrime) * ParticlePositionAndScaleX.w + CameraUp * (yPrime) * ParticleScaleYAndRotation.x;\n"
 
     "    vec4 worldPos = vec4(VertexWorldSpace, 1.0);\n"
     "    gl_Position = CameraViewProj * worldPos;\n"
@@ -270,8 +270,11 @@ priv::EShaders::particle_vertex =
     "    UV = uv;\n"
 
     "    MaterialIndex = ParticleMaterialIndexAndColorPacked.x;\n"
+#if defined(ENGINE_PARTICLES_HALF_SIZE)
+    "    ParticleColor = Unpack16BitUIntTo4ColorFloats(ParticleMaterialIndexAndColorPacked.y);\n"
+#else
     "    ParticleColor = Unpack32BitUIntTo4ColorFloats(ParticleMaterialIndexAndColorPacked.y);\n"
-
+#endif
     "}";
 #pragma endregion
 

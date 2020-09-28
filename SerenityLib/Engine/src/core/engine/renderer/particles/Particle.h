@@ -12,7 +12,7 @@ namespace Engine::priv {
 /*
 2D Sprite that is optimized to render fast and in very large numbers
 */
-class Particle {
+class Particle final {
     friend struct Engine::priv::InternalScenePublicInterface;
     friend class  Engine::priv::ParticleSystem;
     public:

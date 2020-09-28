@@ -5,7 +5,7 @@
 #include <core/engine/resources/Engine_Resources.h>
 
 Camera::Camera(float angle, float aspectRatio, float Near, float Far, Scene* scene) 
-    : Entity(*scene)
+    : Entity{ *scene }
 {
     if (!scene) {
         scene = Engine::Resources::getCurrentScene();
@@ -22,7 +22,7 @@ Camera::Camera(float angle, float aspectRatio, float Near, float Far, Scene* sce
     logic->setUserPointer(this);
 }
 Camera::Camera(float left, float right, float bottom, float top, float Near, float Far, Scene* scene) 
-    : Entity(*scene)
+    : Entity{ *scene }
 {
     if (!scene) {
         scene = Engine::Resources::getCurrentScene();
@@ -38,7 +38,7 @@ Camera::Camera(float left, float right, float bottom, float top, float Near, flo
     cam->lookAt(glm_vec3(0.0), glm_vec3(0.0) + body->forward(), body->up());
     logic->setUserPointer(this);
 }
-Camera::~Camera(){ 
+Camera::~Camera() { 
 }
 void Camera::setProjectionMatrix(const glm::mat4& projectonMatrix) noexcept {
     getComponent<ComponentCamera>()->setProjectionMatrix(projectonMatrix);

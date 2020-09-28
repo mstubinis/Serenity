@@ -14,20 +14,20 @@ MaterialRequest::MaterialRequest(const std::string& name, const std::string& dif
     : m_Callback{ std::move(callback) }
 {
     m_Part.m_Name = name;
-    m_Part.m_TextureRequests.emplace_back( NEW TextureRequest( diffuse, false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_2D));
-    m_Part.m_TextureRequests.emplace_back( NEW TextureRequest( normal, false, ImageInternalFormat::RGBA8, GL_TEXTURE_2D));
-    m_Part.m_TextureRequests.emplace_back( NEW TextureRequest( glow, false, ImageInternalFormat::R8, GL_TEXTURE_2D));
-    m_Part.m_TextureRequests.emplace_back( NEW TextureRequest( specular, false, ImageInternalFormat::R8, GL_TEXTURE_2D));
-    m_Part.m_TextureRequests.emplace_back( NEW TextureRequest( ao, false, ImageInternalFormat::R8, GL_TEXTURE_2D));
-    m_Part.m_TextureRequests.emplace_back( NEW TextureRequest( metalness, false, ImageInternalFormat::R8, GL_TEXTURE_2D));
-    m_Part.m_TextureRequests.emplace_back( NEW TextureRequest( smoothness, false, ImageInternalFormat::R8, GL_TEXTURE_2D));
+    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( diffuse,    false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_2D ));
+    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( normal,     false, ImageInternalFormat::RGBA8,        GL_TEXTURE_2D ));
+    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( glow,       false, ImageInternalFormat::R8,           GL_TEXTURE_2D ));
+    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( specular,   false, ImageInternalFormat::R8,           GL_TEXTURE_2D ));
+    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( ao,         false, ImageInternalFormat::R8,           GL_TEXTURE_2D ));
+    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( metalness,  false, ImageInternalFormat::R8,           GL_TEXTURE_2D ));
+    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( smoothness, false, ImageInternalFormat::R8,           GL_TEXTURE_2D ));
 }
 MaterialRequest::MaterialRequest(const std::string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness, std::function<void()>&& callback) 
     : m_Callback{ std::move(callback) }
 {
     m_Part.m_Name     = name;
     m_Part.m_Material = NEW Material(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
-    m_Part.m_Handle   = Core::m_Engine->m_ResourceManager.m_Resources.add(m_Part.m_Material, (unsigned int)ResourceType::Material);
+    m_Part.m_Handle   = Core::m_Engine->m_ResourceManager.m_ResourcePool.add(m_Part.m_Material, (unsigned int)ResourceType::Material);
 }
 
 MaterialRequest::~MaterialRequest() {
@@ -49,7 +49,7 @@ void MaterialRequest::request(bool inAsync) {
 void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {
     request.m_Part.m_Material = NEW Material();
     request.m_Part.m_Material->setName(request.m_Part.m_Name);
-    request.m_Part.m_Handle = Core::m_Engine->m_ResourceManager.m_Resources.add(request.m_Part.m_Material, (unsigned int)ResourceType::Material);
+    request.m_Part.m_Handle = Core::m_Engine->m_ResourceManager.m_ResourcePool.add(request.m_Part.m_Material, (unsigned int)ResourceType::Material);
 
     auto size = request.m_Part.m_TextureRequests.size();
     for (size_t i = 0; i < size; ++i) {

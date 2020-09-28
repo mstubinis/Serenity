@@ -12,7 +12,8 @@ namespace Engine::priv{
         private:
             std::vector<std::vector<Observer*>> m_Observers;
 
-            template <typename T> bool internal_check_for_duplicates(const T* observer, const std::vector<T*> vectorContainer) const noexcept {
+            template <typename T> 
+            bool internal_check_for_duplicates(const T* observer, const std::vector<T*> vectorContainer) const noexcept {
                 for (const auto& o : vectorContainer) {
                     if (o == observer) { return true; }
                 }

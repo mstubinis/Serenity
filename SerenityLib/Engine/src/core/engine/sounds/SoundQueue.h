@@ -14,11 +14,11 @@ class SoundQueue {
     private:
         Engine::priv::SoundModule&     m_SoundModule;
         std::queue<Handle>             m_Queue;
-        SoundBaseClass*                m_Current = nullptr;
-        float                          m_DelayInSeconds  = 0.0f;
-        float                          m_DelayTimer      = 0.0f;
-        bool                           m_IsDelayProcess  = false;
-        bool                           m_Active          = false;
+        SoundBaseClass*                m_Current          = nullptr;
+        float                          m_DelayInSeconds   = 0.0f;
+        float                          m_DelayTimer       = 0.0f;
+        bool                           m_IsDelayProcess   = false;
+        bool                           m_Active           = false;
 
         SoundQueue() = delete;
     public:

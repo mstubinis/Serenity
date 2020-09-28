@@ -59,7 +59,7 @@ namespace Engine::priv {
 
             virtual unsigned int getUniformLocation(const char* location) = 0;
             virtual unsigned int getUniformLocationUnsafe(const char* location) = 0;
-
+            virtual unsigned int getCurrentBoundTextureOfType(unsigned int textureType) = 0;
             virtual unsigned int getMaxNumTextureUnits() = 0;
 
             virtual bool stencilOperation(unsigned int stencilFail, unsigned int depthFail, unsigned int depthPass) = 0;
@@ -102,7 +102,7 @@ namespace Engine::priv {
             virtual bool unbind(Material* material) = 0;
             virtual bool unbind(Mesh* mesh) = 0;
 
-            virtual void generatePBRData(Texture& texture, unsigned int convoludeSize, unsigned int prefilterSize) = 0;
+            virtual void generatePBRData(Texture& texture, Texture& convolutionTexture, Texture& preEnvTexture, unsigned int convoludeSize, unsigned int prefilterSize) = 0;
 
             virtual void sendGPUDataSunLight(Camera& camera, SunLight& sunLight, const std::string& start) = 0;
             virtual int sendGPUDataPointLight(Camera& camera, PointLight& pointLight, const std::string& start) = 0;

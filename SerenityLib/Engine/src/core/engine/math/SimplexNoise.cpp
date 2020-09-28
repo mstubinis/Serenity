@@ -3,10 +3,9 @@
 
 using namespace Engine;
 using namespace Engine::priv;
-using namespace std;
 
 SimplexNoise noise;
-SimplexNoise::SimplexNoise(){
+SimplexNoise::SimplexNoise() {
     m_Constants[0] = -0.211324865405187; //STRETCH_CONSTANT_2D
     m_Constants[1] = 0.366025403784439;  //SQUISH_CONSTANT_2D
     m_Constants[2] = 0.166666666666666;  //STRETCH_CONSTANT_3D
@@ -119,17 +118,18 @@ SimplexNoise::SimplexNoise(){
     unsigned long long zero(time(0));
     internalInitFromSeed(zero);
 }
-SimplexNoise::~SimplexNoise(){
+SimplexNoise::~SimplexNoise() {
     m_Perm.clear();
     m_PermGradIndex3D.clear();
 }
-void SimplexNoise::internalInitFromSeed(const unsigned long long& seed) {
+void SimplexNoise::internalInitFromSeed(unsigned long long seed) {
     unsigned long long _seed = seed;
     vector_clear(m_Perm);
     vector_clear(m_PermGradIndex3D);
     m_Perm.resize(256);
     m_PermGradIndex3D.resize(256);
-    vector<short> source; source.resize(256);
+    std::vector<short> source; 
+    source.resize(256);
     for (short i = 0; i < 256; ++i)
         source[i] = i;
     _seed = _seed * (6364136223846793005LL) + (1442695040888963407LL);
@@ -145,19 +145,19 @@ void SimplexNoise::internalInitFromSeed(const unsigned long long& seed) {
         source[r] = source[i];
     }
 }
-double SimplexNoise::internalExtrapolate(const int xsb, const int ysb, const double& dx, const double& dy) {
+double SimplexNoise::internalExtrapolate(int xsb, int ysb, double dx, double dy) {
     const int index = m_Perm[(m_Perm[xsb & 0xFF] + ysb) & 0xFF] & 0x0E;
     return m_Grad2[index].x * dx + m_Grad2[index].y * dy;
 }
-double SimplexNoise::internalExtrapolate(const int xsb, const int ysb, const int zsb, const double& dx, const double& dy, const double& dz) {
+double SimplexNoise::internalExtrapolate(int xsb, int ysb, int zsb, double dx, double dy, double dz) {
     const int index = m_PermGradIndex3D[(m_Perm[(m_Perm[xsb & 0xFF] + ysb) & 0xFF] + zsb) & 0xFF];
     return m_Grad3[index].x * dx + m_Grad3[index].y * dy + m_Grad3[index].z * dz;
 }
-double SimplexNoise::internalExtrapolate(const int xsb, const int ysb, const int zsb, const int wsb, const double& dx, const double& dy, const double& dz, const double& dw) {
+double SimplexNoise::internalExtrapolate(int xsb, int ysb, int zsb, int wsb, double dx, double dy, double dz, double dw) {
     const int index = m_Perm[(m_Perm[(m_Perm[(m_Perm[xsb & 0xFF] + ysb) & 0xFF] + zsb) & 0xFF] + wsb) & 0xFF] & 0xFC;
     return m_Grad4[index].x * dx + m_Grad4[index].y * dy + m_Grad4[index].z * dz + m_Grad4[index].w * dw;
 }
-double SimplexNoise::noiseOpenSimplex2D(const double& x, const double& y) {
+double SimplexNoise::noiseOpenSimplex2D(double x, double y) {
     double stretchOffset = (x + y) * m_Constants[0];
     double xs = x + stretchOffset;
     double ys = y + stretchOffset;
@@ -245,7 +245,7 @@ double SimplexNoise::noiseOpenSimplex2D(const double& x, const double& y) {
     }
     return value / m_Constants[6];
 }
-double SimplexNoise::noiseOpenSimplex3D(const double& x, const double& y, const double& z) {
+double SimplexNoise::noiseOpenSimplex3D(double x, double y, double z) {
     double stretchOffset = (x + y + z) * m_Constants[2];
     double xs = x + stretchOffset;
     double ys = y + stretchOffset;
@@ -712,7 +712,7 @@ double SimplexNoise::noiseOpenSimplex3D(const double& x, const double& y, const 
     }
     return value / m_Constants[7];
 }
-double SimplexNoise::noiseOpenSimplex4D(const double& x, const double& y, const double& z, const double& w) {
+double SimplexNoise::noiseOpenSimplex4D(double x, double y, double z, double w) {
     double stretchOffset = (x + y + z + w) * m_Constants[4];
     double xs = x + stretchOffset;
     double ys = y + stretchOffset;
@@ -1873,37 +1873,36 @@ double SimplexNoise::noiseOpenSimplex4D(const double& x, const double& y, const 
     }
     return value / m_Constants[8];
 }
-double SimplexNoise::noiseOpenSimplex2D(const double& x, const double& y, const unsigned long long& seed) {
+double SimplexNoise::noiseOpenSimplex2D(double x, double y, unsigned long long seed) {
     internalInitFromSeed(seed);
     return noiseOpenSimplex2D(x, y);
 }
-double SimplexNoise::noiseOpenSimplex3D(const double& x, const double& y, const double& z, const unsigned long long& seed) {
+double SimplexNoise::noiseOpenSimplex3D(double x, double y, double z, unsigned long long seed) {
     internalInitFromSeed(seed);
     return noiseOpenSimplex3D(x, y, z);
 }
-double SimplexNoise::noiseOpenSimplex4D(const double& x, const double& y, const double& z, const double& w, const unsigned long long& seed) {
+double SimplexNoise::noiseOpenSimplex4D(double x, double y, double z, double w, unsigned long long seed) {
     internalInitFromSeed(seed);
     return noiseOpenSimplex4D(x, y, z, w);
 }
 
 
 
-
-const double Noise::noiseOpenSimplex2D(const double& x, const double& y){
-    return noise.noiseOpenSimplex2D(x,y); 
+double Noise::noiseOpenSimplex2D(double x, double y){
+    return noise.noiseOpenSimplex2D(x, y);
 }
-const double Noise::noiseOpenSimplex3D(const double& x, const double& y, const double& z){
-    return noise.noiseOpenSimplex3D(x,y,z); 
+double Noise::noiseOpenSimplex3D(double x, double y, double z){
+    return noise.noiseOpenSimplex3D(x, y, z);
 }
-const double Noise::noiseOpenSimplex4D(const double& x, const double& y, const double& z, const double& w){
-    return noise.noiseOpenSimplex4D(x,y,z,w); 
+double Noise::noiseOpenSimplex4D(double x, double y, double z, double w){
+    return noise.noiseOpenSimplex4D(x, y, z, w);
 }
-const double Noise::noiseOpenSimplex2D(const double& x, const double& y, const unsigned long long& seed){
-    return noise.noiseOpenSimplex2D(x,y,seed); 
+double Noise::noiseOpenSimplex2D(double x, double y, unsigned long long seed){
+    return noise.noiseOpenSimplex2D(x, y, seed);
 }
-const double Noise::noiseOpenSimplex3D(const double& x, const double& y, const double& z, const unsigned long long& seed){ 
-    return noise.noiseOpenSimplex3D(x,y,z,seed); 
+double Noise::noiseOpenSimplex3D(double x, double y, double z, unsigned long long seed){ 
+    return noise.noiseOpenSimplex3D(x, y, z, seed);
 }
-const double Noise::noiseOpenSimplex4D(const double& x, const double& y, const double& z, const double& w, const unsigned long long& seed){ 
-    return noise.noiseOpenSimplex4D(x,y,z,w,seed); 
+double Noise::noiseOpenSimplex4D(double x, double y, double z, double w, unsigned long long seed) {
+    return noise.noiseOpenSimplex4D(x, y, z, w, seed);
 }

@@ -10,10 +10,12 @@ using namespace Engine::priv;
 
 GLint UniformBufferObject::MAX_UBO_BINDINGS;
 unsigned int UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT = 0;
-UniformBufferObject* UniformBufferObject::UBO_CAMERA = nullptr;
+UniformBufferObject* UniformBufferObject::UBO_CAMERA         = nullptr;
 
-UniformBufferObject::UniformBufferObject(const char* nameInShader, const unsigned int sizeofStruct, const int globalBindingPointNumber) {
-    m_NameInShader = nameInShader;
+UniformBufferObject::UniformBufferObject(const char* nameInShader, const unsigned int sizeofStruct, const int globalBindingPointNumber) 
+    : m_NameInShader{ nameInShader }
+    , m_SizeOfStruct{ sizeofStruct }
+{
     if (Engine::priv::Renderer::GLSL_VERSION < 140) {
         return;
     }
@@ -28,7 +30,6 @@ UniformBufferObject::UniformBufferObject(const char* nameInShader, const unsigne
     }else{
         m_GlobalBindingPointNumber = globalBindingPointNumber;
     }
-    m_SizeOfStruct = sizeofStruct;
     _load_CPU();
     _load_GPU();
     registerEvent(EventType::WindowFullscreenChanged);
@@ -81,9 +82,6 @@ void UniformBufferObject::attachToShader(const ShaderProgram& shaderProgram) {
     const unsigned int programBlockIndex = glGetUniformBlockIndex(shaderProgram.m_ShaderProgram, m_NameInShader);
     GLCall(glUniformBlockBinding(shaderProgram.m_ShaderProgram, programBlockIndex, m_GlobalBindingPointNumber));
     const_cast<ShaderProgram&>(shaderProgram).m_AttachedUBOs.emplace(m_UBOObject);
-}
-const GLuint UniformBufferObject::address() const {
-    return m_UBOObject;
 }
 void UniformBufferObject::onEvent(const Event& e) {
     if (e.type == EventType::WindowFullscreenChanged) {

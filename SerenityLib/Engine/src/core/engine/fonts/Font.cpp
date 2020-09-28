@@ -15,8 +15,8 @@
 Font* first_font = nullptr;
 
 Font::Font(const std::string& filename, int height, int width, float line_height) 
-    : Resource(ResourceType::Font, filename) 
-    , m_LineHeight(line_height)
+    : Resource{ ResourceType::Font, filename }
+    , m_LineHeight{ line_height }
 {
     init(filename, height, width);
 }

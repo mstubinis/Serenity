@@ -5,7 +5,9 @@
 
 using namespace Engine;
 
-RodLight::RodLight(const glm_vec3& pos, float rodLength, Scene* scene) : PointLight(LightType::Rod, pos, scene) {
+RodLight::RodLight(const glm_vec3& pos, float rodLength, Scene* scene) 
+    : PointLight{ LightType::Rod, pos, scene }
+{
     setRodLength(rodLength);
 
     auto* body = getComponent<ComponentBody>();

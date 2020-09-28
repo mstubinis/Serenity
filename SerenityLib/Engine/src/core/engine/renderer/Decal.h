@@ -31,6 +31,11 @@ class Decal final: public EntityBody {
         );
         ~Decal();
 
+        Decal(const Decal& other) = delete;
+        Decal& operator=(const Decal& other) = delete;
+        Decal(Decal&& other) noexcept;
+        Decal& operator=(Decal&& other) noexcept;
+
         void update(const float dt);
 
         inline CONSTEXPR bool active() const noexcept { return m_Active; }

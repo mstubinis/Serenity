@@ -164,9 +164,18 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Sh
             ///////////////////////////////////////////
 
             THREAD_PART_1[k].emplace_back(
-                glm::vec4(pos.x, pos.y, pos.z, particle.m_Scale.x),
-                glm::vec2(particle.m_Scale.y, particle.m_Angle),
-                glm::uvec2(THREAD_PART_4[k].at(particle.m_Material), particle.m_Color.toPackedInt())
+                pos.x - camPos.x,
+                pos.y - camPos.y,
+                pos.z - camPos.z,
+                particle.m_Scale.x, 
+                particle.m_Scale.y, 
+                particle.m_Angle,
+                (ParticleSystem::ParticleIDType)THREAD_PART_4[k].at(particle.m_Material), 
+#if defined(ENGINE_PARTICLES_HALF_SIZE)
+                particle.m_Color.toPackedShort()
+#else
+                particle.m_Color.toPackedInt()
+#endif
             );
         }
     };
@@ -189,9 +198,30 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Sh
 
     //sorting
     auto lambda = [&camPos](const ParticleDOD& l, const ParticleDOD& r) {
-        glm::vec3 position1(l.PositionAndScaleX.x, l.PositionAndScaleX.y, l.PositionAndScaleX.z);
-        glm::vec3 position2(r.PositionAndScaleX.x, r.PositionAndScaleX.y, r.PositionAndScaleX.z);
-        return glm::distance2(position1, camPos) > glm::distance2(position2, camPos);
+#if defined(ENGINE_PARTICLES_HALF_SIZE)
+        glm::vec3 lPos = glm::vec3(
+            Engine::Math::Float32From16(l.PositionX), 
+            Engine::Math::Float32From16(l.PositionY),
+            Engine::Math::Float32From16(l.PositionZ)
+        );
+        glm::vec3 rPos = glm::vec3(
+            Engine::Math::Float32From16(r.PositionX),
+            Engine::Math::Float32From16(r.PositionY),
+            Engine::Math::Float32From16(r.PositionZ)
+        );
+#else
+        glm::vec3 lPos = glm::vec3(
+            l.PositionX,
+            l.PositionY,
+            l.PositionZ
+        );
+        glm::vec3 rPos = glm::vec3(
+            r.PositionX,
+            r.PositionY,
+            r.PositionZ
+        );
+#endif
+        return glm::length2(lPos) > glm::length2(rPos);
     };
     std::sort(std::execution::par_unseq, ParticlesDOD.begin(), ParticlesDOD.end(), lambda);
 

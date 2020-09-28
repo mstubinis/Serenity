@@ -22,7 +22,7 @@ namespace Engine::priv {
         private:
             std::stack<unsigned int>                    m_FreelistEffects;
             std::stack<unsigned int>                    m_FreelistMusics;
-            std::vector<SoundQueue*>                    m_SoundQueues;
+            std::vector<std::unique_ptr<SoundQueue>>    m_SoundQueues;
 
             void updateSoundQueues(Scene& scene, const float dt);
             void updateSoundEffects(Scene& scene, const float dt);
@@ -33,8 +33,6 @@ namespace Engine::priv {
 
             SoundModule();
             ~SoundModule();
-
-            void cleanup();
 
             void updateCameraPosition(Scene& scene);
             void update(Scene& scene, const float dt);

@@ -30,8 +30,7 @@ std::string OpenGL::getHighestGLSLVersion(Window& window) noexcept {
     if (VERSION_MAP.size() == 0) {
         VERSION_MAP = POPULATE_VERSION_MAP();
     }
-    //unordered_map<string, string> VERSION_MAP = POPULATE_VERSION_MAP();
     auto& openglContext = window.getSFMLHandle().getSettings();
     std::string version = std::to_string(openglContext.majorVersion) + "." + std::to_string(openglContext.minorVersion);
-    return VERSION_MAP.at(version);
+    return VERSION_MAP.count(version) ? VERSION_MAP.at(version) : "N/A";
 }

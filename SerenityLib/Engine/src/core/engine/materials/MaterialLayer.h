@@ -8,7 +8,7 @@ struct SimpleUVTranslationFunctor;
 
 #include <core/engine/materials/MaterialEnums.h>
 
-typedef std::function<void(const float dt, MaterialLayer& layer)> uv_mod_func;
+using uv_mod_func = std::function<void(const float dt, MaterialLayer& layer)>;
 
 class MaterialLayer final{
     friend struct SimpleUVTranslationFunctor;

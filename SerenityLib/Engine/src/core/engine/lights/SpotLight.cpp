@@ -3,7 +3,9 @@
 #include <core/engine/utils/Utils.h>
 #include <ecs/ComponentBody.h>
 
-SpotLight::SpotLight(const glm_vec3& pos, const glm_vec3& direction, float innerCutoffInDegrees, float outerCutoffInDegrees, Scene* scene) : PointLight(LightType::Spot, pos, scene) {
+SpotLight::SpotLight(const glm_vec3& pos, const glm_vec3& direction, float innerCutoffInDegrees, float outerCutoffInDegrees, Scene* scene) 
+    : PointLight{ LightType::Spot, pos, scene }
+{
     setCutoff(innerCutoffInDegrees);
     setCutoffOuter(outerCutoffInDegrees);
 

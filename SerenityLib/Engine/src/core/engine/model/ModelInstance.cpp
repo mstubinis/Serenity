@@ -75,13 +75,13 @@ namespace Engine::priv {
             Skybox* skybox          = scene.skybox();
             const auto maxTextures  = renderer->m_Pipeline->getMaxNumTextureUnits() - 1U;
             Engine::Renderer::sendUniform4Safe("ScreenData", renderer->m_GI_Pack, Engine::Renderer::Settings::getGamma(), 0.0f, 0.0f);
-            if (skybox && skybox->texture()->numAddresses() >= 3) {
-                Engine::Renderer::sendTextureSafe("irradianceMap", skybox->texture()->address(1), maxTextures - 2, GL_TEXTURE_CUBE_MAP);
-                Engine::Renderer::sendTextureSafe("prefilterMap", skybox->texture()->address(2), maxTextures - 1, GL_TEXTURE_CUBE_MAP);
+            if (skybox && skybox->texture()->hasGlobalIlluminationData()) {
+                Engine::Renderer::sendTextureSafe("irradianceMap", skybox->texture()->getConvolutionTexture().address(), maxTextures - 2, GL_TEXTURE_CUBE_MAP);
+                Engine::Renderer::sendTextureSafe("prefilterMap", skybox->texture()->getPreEnvTexture().address(), maxTextures - 1, GL_TEXTURE_CUBE_MAP);
                 Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF, maxTextures);
             }else{
-                Engine::Renderer::sendTextureSafe("irradianceMap", Texture::Black->address(0), maxTextures - 2, GL_TEXTURE_2D);
-                Engine::Renderer::sendTextureSafe("prefilterMap", Texture::Black->address(0), maxTextures - 1, GL_TEXTURE_2D);
+                Engine::Renderer::sendTextureSafe("irradianceMap", Texture::Black->address(), maxTextures - 2, GL_TEXTURE_2D);
+                Engine::Renderer::sendTextureSafe("prefilterMap", Texture::Black->address(), maxTextures - 1, GL_TEXTURE_2D);
                 Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF, maxTextures);
             }
         }

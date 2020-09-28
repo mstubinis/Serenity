@@ -42,10 +42,17 @@ namespace Engine::priv {
         };
 
         private:
-            struct API2DCommand {
+            struct API2DCommand final {
                 std::function<void()>  func;
                 float                  depth;
-                glm::vec4              scissor;
+                //glm::vec4              scissor;
+
+                API2DCommand() = default;
+                API2DCommand(std::function<void()>&& func_, float depth_/*, const glm::vec4& scissor_*/) 
+                    : func{ std::move(func_ ) }
+                    , depth { depth_ }
+                    //, scissor { scissor_ }
+                {}
             };
             Engine::priv::Renderer&        m_Renderer;
 
@@ -94,7 +101,7 @@ namespace Engine::priv {
             bool internal_pass_depth_prepass(Viewport& viewport, Camera& camera);
             void internal_pass_blur(Viewport& viewport, GLuint texture, std::string_view type);
 
-            void internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, unsigned int convoludeTextureSize, unsigned int preEnvFilterSize);
+            void internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, Texture& convolutionTexture, Texture& preEnvTexture, unsigned int convoludeTextureSize, unsigned int preEnvFilterSize);
             void internal_generate_brdf_lut(ShaderProgram& program, unsigned int brdfSize, int numSamples);
 
             void internal_render_2d_text_left(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
@@ -130,7 +137,7 @@ namespace Engine::priv {
 
             unsigned int getUniformLocation(const char* location) override;
             unsigned int getUniformLocationUnsafe(const char* location) override;
-
+            unsigned int getCurrentBoundTextureOfType(unsigned int textureType) override;
             unsigned int getMaxNumTextureUnits() override;
 
             bool stencilOperation(unsigned int stencilFail, unsigned int depthFail, unsigned int depthPass) override;
@@ -173,7 +180,7 @@ namespace Engine::priv {
             bool unbind(Material* material) override;
             bool unbind(Mesh* mesh) override;
 
-            void generatePBRData(Texture& texture, unsigned int convoludeSize, unsigned int prefilterSize) override;
+            void generatePBRData(Texture& texture, Texture& convolutionTexture, Texture& preEnvTexture, unsigned int convoludeSize, unsigned int prefilterSize) override;
 
             void sendGPUDataSunLight(Camera& camera, SunLight& sunLight, const std::string& start) override;
             int sendGPUDataPointLight(Camera& camera, PointLight& pointLight, const std::string& start) override;

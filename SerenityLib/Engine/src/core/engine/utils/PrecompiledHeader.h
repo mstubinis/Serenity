@@ -62,6 +62,9 @@
 #include <glm/common.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/packing.hpp>
+#include <glm/gtc/bitfield.hpp>
+#include <glm/detail/type_half.hpp>
 
 #ifdef ENGINE_USE_INLINE
     #define INLINE inline
@@ -103,9 +106,9 @@
     #define ENGINE_SIMD_SUPPORTED
 #endif
 
-
-
-//#ifndef NDEBUG
+#if defined(ENGINE_PRODUCTION)
+    #define ASSERT(condition, message) ((void)0)
+#else
     #define ASSERT(condition, message) \
         do { \
             if (! (condition)) { \
@@ -114,10 +117,7 @@
                 std::terminate(); \
             } \
         } while (false)
-//#else
-//    #define ASSERT(condition, message) do { } while (false)
-//#endif
-
+#endif
 
 using uint   = std::uint32_t;
 using uchar  = std::uint8_t;
@@ -144,7 +144,6 @@ typedef glm::dquat  glm_quat;
 typedef glm::dmat3  glm_mat3;
 typedef glm::dmat4  glm_mat4;
 #endif
-
 
 #pragma region EnvironmentDefines
 
@@ -284,9 +283,14 @@ typedef glm::dmat4  glm_mat4;
 
 #pragma endregion
 
-inline constexpr unsigned char operator "" _uc(unsigned long long arg) noexcept {
-    return (unsigned char)arg;
-}
+inline constexpr unsigned char operator "" _uc(unsigned long long arg) noexcept { return (unsigned char)arg; }
+inline std::string operator "" _str(const char* cStr, std::size_t length) { return std::string(cStr, length); }
+
+#include <core/engine/types/SmallMap.h>
+#include <core/engine/types/StaticString.h>
+#include <core/engine/types/ColorVector.h>
+#include <core/engine/types/Flag.h>
+#include <core/engine/utils/BlockProfiler.h>
 
 namespace Engine {
     class UserPointer {
@@ -300,7 +304,7 @@ namespace Engine {
             inline CONSTEXPR void* getUserPointer() const noexcept { return m_UserPointer; }
     };
     class NonCopyable {
-        public:
+        public: 
             NonCopyable() = default;
             ~NonCopyable() = default;
         private:
@@ -316,134 +320,17 @@ namespace Engine {
             NonMoveable& operator=(NonMoveable&&) noexcept = delete;
     };
 
-    template<typename T> class Flag final {
-        private:
-            T m_Flags;
-        public:
-            Flag() : m_Flags(0) {}
-            ~Flag() = default;
-
-            Flag& operator=(const T& other) {
-                m_Flags = other;
-                return *this;
-            }
-            inline constexpr const T& get() const noexcept {
-                return m_Flags;
-            }
-            T operator&(const T& other) {
-                return m_Flags & other;
-            }
-            T operator|(const T& other) {
-                return m_Flags | other;
-            }
-            T operator&=(const T& other) {
-                return m_Flags &= other;
-            }
-            T operator|=(const T& other) {
-                return m_Flags |= other;
-            }
-
-            void add(const T& flag) {
-                if (m_Flags != (m_Flags | flag)) {
-                    m_Flags = m_Flags | flag;
-                }
-            }
-            void remove(const T& flag) {
-                if (m_Flags != (m_Flags & ~flag)) {
-                    m_Flags = m_Flags & ~flag;
-                }
-            }
-            inline constexpr bool has(const T& flag) const noexcept {
-                return (m_Flags & flag);
-            }
-    };
-
-    template<typename LOGGER> class ProfileBlock {
-        private:
-            LOGGER& m_Logger;
-            std::chrono::time_point<std::chrono::steady_clock> m_Start;
-        public:
-            ProfileBlock(LOGGER& logger) : m_Logger(logger) {
-                m_Start = std::chrono::high_resolution_clock::now();
-            }
-            ~ProfileBlock() {
-                auto z  = (std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - m_Start));
-                float f = (float)z.count() * 0.000001f;
-                m_Logger << f << "\n";
-            }
-    };
-
-    struct color_vector_4 final {
-        using color_type = glm::vec<4, unsigned char, glm::packed_highp>;
-
-        color_type color = color_type(0);
-
-        color_vector_4() = default;
-        color_vector_4(const color_vector_4& other)                = default;
-        color_vector_4& operator=(const color_vector_4& other)     = default;
-        color_vector_4(color_vector_4&& other) noexcept            = default;
-        color_vector_4& operator=(color_vector_4&& other) noexcept = default;
-        ~color_vector_4() = default;
-
-        explicit color_vector_4(float inColor) {
-            color.r = (unsigned char)(inColor * 255.0f);
-            color.g = (unsigned char)(inColor * 255.0f);
-            color.b = (unsigned char)(inColor * 255.0f);
-            color.a = (unsigned char)(inColor * 255.0f);
-        }
-        explicit color_vector_4(float inR, float inG, float inB, float inA) {
-            color.r = (unsigned char)(inR * 255.0f);
-            color.g = (unsigned char)(inG * 255.0f);
-            color.b = (unsigned char)(inB * 255.0f);
-            color.a = (unsigned char)(inA * 255.0f);
-        }
-        explicit color_vector_4(const glm::vec4& inColor) {
-            color.r = (unsigned char)(inColor.r * 255.0f);
-            color.g = (unsigned char)(inColor.g * 255.0f);
-            color.b = (unsigned char)(inColor.b * 255.0f);
-            color.a = (unsigned char)(inColor.a * 255.0f);
-        }
-        explicit color_vector_4(unsigned char inR, unsigned char inG, unsigned char inB, unsigned char inA) {
-            color.r = inR;
-            color.g = inG;
-            color.b = inB;
-            color.a = inA;
-        }
-        explicit color_vector_4(unsigned char inColor) {
-            color.r = inColor;
-            color.g = inColor;
-            color.b = inColor;
-            color.a = inColor;
-        }
-        inline CONSTEXPR std::uint32_t toPackedInt() const noexcept {
-            return (color.r << 24) | (color.g << 16) | (color.b << 8) | color.a;
-        }
-        glm::vec4 unpackInt(std::uint32_t i) const noexcept {
-            constexpr float one_over_255 = 0.003921568627451f;
-            float xx = (float)((i >> 24) & 255);
-            float yy = (float)((i >> 16) & 255);
-            float zz = (float)((i >> 8) & 255);
-            float ww = (float)(i & 255);
-            return glm::vec4(xx * one_over_255, yy * one_over_255, zz * one_over_255, ww * one_over_255);
-        }
-        inline CONSTEXPR float r() const noexcept { return (float)color.r * 0.003921568627451f; }
-        inline CONSTEXPR float g() const noexcept { return (float)color.g * 0.003921568627451f; }
-        inline CONSTEXPR float b() const noexcept { return (float)color.b * 0.003921568627451f; }
-        inline CONSTEXPR float a() const noexcept { return (float)color.a * 0.003921568627451f; }
-    };
-
-    inline void printEndianness() noexcept {
+    void printEndianness() noexcept {
         std::uint32_t data;
         std::uint8_t* cptr;
         data = 1; //Assign data
-        cptr = (std::uint8_t*) & data; //Type cast
+        cptr = (std::uint8_t*)&data; //Type cast
         if (*cptr == 1) {
             ENGINE_PRODUCTION_LOG("little-endiann")
         }else if (*cptr == 0) {
             ENGINE_PRODUCTION_LOG("big-endiann")
         }
     }
-
 };
 
 #endif

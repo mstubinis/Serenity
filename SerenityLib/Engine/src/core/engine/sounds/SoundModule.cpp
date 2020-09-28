@@ -21,10 +21,7 @@ priv::SoundModule::SoundModule(){
     }
 }
 priv::SoundModule::~SoundModule(){
-    cleanup();
-}
-void priv::SoundModule::cleanup() {
-    SAFE_DELETE_VECTOR(m_SoundQueues);
+
 }
 SoundEffect* priv::SoundModule::getNextFreeEffect() {
     if (m_FreelistEffects.size() > 0){
@@ -111,8 +108,7 @@ void priv::SoundModule::update(Scene& scene, const float dt){
 }
 
 SoundQueue* Sound::createQueue(float delay) {
-    SoundQueue* queue = NEW SoundQueue(*soundModule, delay);
-    return queue;
+    return NEW SoundQueue(*soundModule, delay);
 }
 
 SoundEffect* Sound::playEffect(Handle handle, unsigned int loops){

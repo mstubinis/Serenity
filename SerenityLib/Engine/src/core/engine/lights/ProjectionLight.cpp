@@ -6,7 +6,9 @@
 
 using namespace Engine;
 
-ProjectionLight::ProjectionLight(Texture* texture, const glm::vec3& direction, Scene* scene) : SunLight(glm::vec3(0.0f), LightType::Projection, scene) {
+ProjectionLight::ProjectionLight(Texture* texture, const glm::vec3& direction, Scene* scene) 
+    : SunLight{ glm::vec3(0.0f), LightType::Projection, scene }
+{
     getComponent<ComponentBody>()->alignTo(direction);
     setTexture(texture);
     if (m_Type == LightType::Projection) {
@@ -16,7 +18,7 @@ ProjectionLight::ProjectionLight(Texture* texture, const glm::vec3& direction, S
     recalc_frustum_indices();
 }
 ProjectionLight::ProjectionLight(Handle textureHandle, const glm::vec3& direction, Scene* scene) 
-    : ProjectionLight(textureHandle.get<Texture>(), direction, scene)
+    : ProjectionLight{ textureHandle.get<Texture>(), direction, scene }
 {}
 void ProjectionLight::recalc_frustum_points() noexcept {
     //0-3 : near plane

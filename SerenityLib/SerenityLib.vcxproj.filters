@@ -276,6 +276,9 @@
     <Filter Include="Header Files\Engine\Core\System\Cursor">
       <UniqueIdentifier>{52c9aede-017c-4676-9be3-dde2044eaae3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Types">
+      <UniqueIdentifier>{414cd6a5-0362-4283-91ff-a221c1670432}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBody.h">
@@ -877,6 +880,21 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\math\MathCompression.h">
       <Filter>Header Files\Engine\Core\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\types\StaticString.h">
+      <Filter>Header Files\Engine\Core\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\types\SmallMap.h">
+      <Filter>Header Files\Engine\Core\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\types\ColorVector.h">
+      <Filter>Header Files\Engine\Core\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\types\Flag.h">
+      <Filter>Header Files\Engine\Core\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\utils\BlockProfiler.h">
+      <Filter>Header Files\Engine\Core\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

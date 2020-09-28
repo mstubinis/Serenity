@@ -1,10 +1,8 @@
 #include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/system/EngineMisc.h>
 
-using namespace std;
-
-string Engine::misc::extractClipboardText() {
-    string res = "";
+std::string Engine::misc::extractClipboardText() {
+    std::string res = "";
     #ifdef _WIN32
         // Try opening the clipboard
         if (!OpenClipboard(nullptr)) {

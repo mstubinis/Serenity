@@ -21,16 +21,15 @@ class SoundBaseClass {
         unsigned int  m_Loops       = 0U;
         unsigned int  m_CurrentLoop = 0U;
 
-        SoundBaseClass(unsigned int numLoops) {
-            m_Loops = numLoops;
-        }
+        SoundBaseClass(unsigned int numLoops) 
+            : m_Loops{ numLoops }
+        {}
     public:
-        SoundBaseClass& operator=(const SoundBaseClass&) = delete;
-        SoundBaseClass(const SoundBaseClass&) = default;
-        SoundBaseClass(SoundBaseClass&&) noexcept = default;
-        virtual ~SoundBaseClass() {
-            m_Status = SoundStatus::Stopped;
-        }
+        SoundBaseClass(const SoundBaseClass& other)                = delete;
+        SoundBaseClass& operator=(const SoundBaseClass& other)     = delete;
+        SoundBaseClass(SoundBaseClass&& other) noexcept            = default;
+        SoundBaseClass& operator=(SoundBaseClass&& other) noexcept = default;
+        virtual ~SoundBaseClass()                                  = default;
 
         inline CONSTEXPR SoundStatus status() const noexcept { return m_Status; }
         virtual void update(const float dt) {}

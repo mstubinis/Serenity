@@ -23,17 +23,17 @@ constexpr std::array<PointLightDefaultAttenuationData, (size_t)LightRange::_TOTA
 } };
 
 PointLight::PointLight(LightType type, const glm_vec3& pos, Scene* scene) 
-    : SunLight(pos, type, scene) 
-    , m_CullingRadius(calculateCullingRadius())
+    : SunLight{ pos, type, scene }
+    , m_CullingRadius{ calculateCullingRadius() }
 {
     if (m_Type == LightType::Point) {
         auto& ptLights = priv::InternalScenePublicInterface::GetPointLights(*scene);
         ptLights.emplace_back(this);
     }
 }
-PointLight::PointLight(const glm_vec3& pos, Scene* scene) : PointLight(LightType::Point, pos, scene) {
-
-}
+PointLight::PointLight(const glm_vec3& pos, Scene* scene) 
+    : PointLight{ LightType::Point, pos, scene }
+{}
 void PointLight::free() noexcept {
     Entity::destroy();
     removeFromVector(priv::InternalScenePublicInterface::GetPointLights(scene()), this);

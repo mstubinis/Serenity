@@ -11,7 +11,7 @@ using namespace Engine::priv;
 
 EventModule* eventModule = nullptr;
 
-EventModule::EventModule(){
+EventModule::EventModule() {
     eventModule = this;
 }
 EventModule::~EventModule(){

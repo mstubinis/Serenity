@@ -8,43 +8,43 @@ namespace Engine{
     namespace priv{
         class SimplexNoise final{
             private:
-                double              m_Constants[9];
+                double               m_Constants[9];
 
-                glm::ivec2          m_Grad2[8];
-                glm::ivec3          m_Grad3[24];
-                glm::ivec4          m_Grad4[64];
+                glm::ivec2           m_Grad2[8];
+                glm::ivec3           m_Grad3[24];
+                glm::ivec4           m_Grad4[64];
 
                 std::vector<short>   m_Perm;
                 std::vector<short>   m_PermGradIndex3D;
 
-                double internalExtrapolate(const int xsb, const int ysb, const double& dx, const double& dy);
-                double internalExtrapolate(const int xsb, const int ysb, const int zsb, const double& dx, const double& dy, const double& dz);
-                double internalExtrapolate(const int xsb, const int ysb, const int zsb, const int wsb, const double& dx, const double& dy, const double& dz, const double& dw);
+                double internalExtrapolate(int xsb, int ysb, double dx, double dy);
+                double internalExtrapolate(int xsb, int ysb, int zsb, double dx, double dy, double dz);
+                double internalExtrapolate(int xsb, int ysb, int zsb, int wsb, double dx, double dy, double dz, double dw);
 
-                void internalInitFromSeed(const unsigned long long& seed);
+                void internalInitFromSeed(unsigned long long seed);
             public:
                 SimplexNoise();
                 ~SimplexNoise();
 
-                double noiseOpenSimplex2D(const double& x, const double& y);
-                double noiseOpenSimplex3D(const double& x, const double& y, const double& z);
-                double noiseOpenSimplex4D(const double& x, const double& y, const double& z, const double& w);
+                double noiseOpenSimplex2D(double x, double y);
+                double noiseOpenSimplex3D(double x, double y, double z);
+                double noiseOpenSimplex4D(double x, double y, double z, double w);
 
-                double noiseOpenSimplex2D(const double& x, const double& y, const unsigned long long& seed);
-                double noiseOpenSimplex3D(const double& x, const double& y, const double& z, const unsigned long long& seed);
-                double noiseOpenSimplex4D(const double& x, const double& y, const double& z, const double& w, const unsigned long long& seed);
+                double noiseOpenSimplex2D(double x, double y, unsigned long long seed);
+                double noiseOpenSimplex3D(double x, double y, double z, unsigned long long seed);
+                double noiseOpenSimplex4D(double x, double y, double z, double w, unsigned long long seed);
 
         };
     };
     namespace Noise{
-        const double noiseOpenSimplex2D(const double& x, const double& y);
-        const double noiseOpenSimplex2D(const double& x, const double& y, const unsigned long long& seed);
+        double noiseOpenSimplex2D(double x, double y);
+        double noiseOpenSimplex2D(double x, double y, unsigned long long seed);
 
-        const double noiseOpenSimplex3D(const double& x, const double& y, const double& z);
-        const double noiseOpenSimplex3D(const double& x, const double& y, const double& z, const unsigned long long& seed);
+        double noiseOpenSimplex3D(double x, double y, double z);
+        double noiseOpenSimplex3D(double x, double y, double z, unsigned long long seed);
 
-        const double noiseOpenSimplex4D(const double& x, const double& y, const double& z, const double& w);
-        const double noiseOpenSimplex4D(const double& x, const double& y, const double& z, const double& w, const unsigned long long& seed);
+        double noiseOpenSimplex4D(double x, double y, double z, double w);
+        double noiseOpenSimplex4D(double x, double y, double z, double w, unsigned long long seed);
     };
 };
 

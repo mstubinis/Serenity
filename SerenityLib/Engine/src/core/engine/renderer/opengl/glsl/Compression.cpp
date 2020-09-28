@@ -162,6 +162,26 @@ void opengl::glsl::Compression::convert(string& code, unsigned int versionNumber
     }
 #pragma endregion
 
+
+#pragma region Unpack16BitUIntTo4ColorFloats
+    if (ShaderHelper::sfind(code, "Unpack16BitUIntTo4ColorFloats")) {
+        if (!ShaderHelper::sfind(code, "vec4 Unpack16BitUIntTo4ColorFloats")) {
+            ShaderHelper::insertStringAtLine(code,
+                "vec4 Unpack16BitUIntTo4ColorFloats(uint n) {\n"
+                "    int nasInt = int(n);\n"
+                "    vec4 ret;\n"
+                "    ret.r = (nasInt >> 12) & 15;\n"
+                "    ret.g = (nasInt >> 8) & 15; \n"
+                "    ret.b = (nasInt >> 4) & 15; \n"
+                "    ret.a = (nasInt & 15); \n"
+                "    return ret * 0.0666666666; \n"
+                "}\n"
+                , 1);
+        }
+    }
+#pragma endregion
+
+
 #pragma region SignNotZero
     if (ShaderHelper::sfind(code, "SignNotZero")) {
         if (!ShaderHelper::sfind(code, "vec2 SignNotZero")) {

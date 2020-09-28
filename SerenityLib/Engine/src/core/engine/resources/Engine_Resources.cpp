@@ -24,7 +24,7 @@
 Engine::priv::ResourceManager* resourceManager = nullptr;
 
 Engine::priv::ResourceManager::ResourceManager(const EngineOptions& options) 
-    : m_Resources(32768)
+    : m_ResourcePool(32768)
 {
     resourceManager    = this;
 }
@@ -42,22 +42,20 @@ void Engine::priv::ResourceManager::onPostUpdate() {
     if (m_ScenesToBeDeleted.size() > 0) {
         for (size_t i = 0; i < m_ScenesToBeDeleted.size(); ++i) {
             if (m_ScenesToBeDeleted[i]) {
-                size_t index = 0;
                 for (size_t j = 0; j < m_Scenes.size(); ++j) {
                     if (m_Scenes[j] && m_Scenes[j]->name() == m_ScenesToBeDeleted[i]->name()) {
-                        index = j;
+                        m_Scenes[j].reset(nullptr);
+                        m_ScenesToBeDeleted[i] = nullptr;
                         break;
                     }
                 }
-                m_Scenes[index].reset(nullptr);
-                m_ScenesToBeDeleted[i] = nullptr;
             }
         }
         m_ScenesToBeDeleted.clear();
     }   
 }
 Handle Engine::priv::ResourceManager::_addTexture(Texture* t) {
-    return m_Resources.add(t, (unsigned int)ResourceType::Texture);
+    return m_ResourcePool.add(t, (unsigned int)ResourceType::Texture);
 }
 Scene& Engine::priv::ResourceManager::_getSceneByID(std::uint32_t id) {
     return *m_Scenes[id - 1];
@@ -66,8 +64,7 @@ unsigned int Engine::priv::ResourceManager::AddScene(Scene& s){
     for (size_t i = 0; i < m_Scenes.size(); ++i) {
         if (m_Scenes[i] == nullptr) {
             m_Scenes[i].reset(&s);
-            unsigned int res = (unsigned int)i + 1U;
-            return res;
+            return (unsigned int)i + 1U;
         }
     }
     m_Scenes.emplace_back(std::unique_ptr<Scene>(&s));
@@ -132,57 +129,57 @@ Scene* Engine::Resources::getScene(std::string_view sceneName){
 }
 
 void Engine::Resources::getShader(Handle h, Shader*& p) {
-    resourceManager->m_Resources.getAs(h, p); 
+    resourceManager->m_ResourcePool.getAs(h, p);
 }
 Shader* Engine::Resources::getShader(Handle h) {
     Shader* p; 
-    resourceManager->m_Resources.getAs(h, p); 
+    resourceManager->m_ResourcePool.getAs(h, p);
     return p; 
 }
 void Engine::Resources::getSoundData(Handle h, SoundData*& p) {
-    resourceManager->m_Resources.getAs(h, p); 
+    resourceManager->m_ResourcePool.getAs(h, p);
 }
 SoundData* Engine::Resources::getSoundData(Handle h) {
     SoundData* p; 
-    resourceManager->m_Resources.getAs(h, p); 
+    resourceManager->m_ResourcePool.getAs(h, p);
     return p; 
 }
 void Engine::Resources::getCamera(Handle h, Camera*& p) {
-    resourceManager->m_Resources.getAs(h, p); 
+    resourceManager->m_ResourcePool.getAs(h, p);
 }
 Camera* Engine::Resources::getCamera(Handle h) {
     Camera* p; 
-    resourceManager->m_Resources.getAs(h, p); 
+    resourceManager->m_ResourcePool.getAs(h, p);
     return p; 
 }
 void Engine::Resources::getFont(Handle h, Font*& p) {
-    resourceManager->m_Resources.getAs(h, p); 
+    resourceManager->m_ResourcePool.getAs(h, p);
 }
 Font* Engine::Resources::getFont(Handle h) {
     Font* p; 
-    resourceManager->m_Resources.getAs(h, p); 
+    resourceManager->m_ResourcePool.getAs(h, p);
     return p; 
 }
 Font* Engine::Resources::getFont(std::string_view name) {
     return resourceManager->HasResource<Font>(name);
 }
 void Engine::Resources::getMesh(Handle h, Mesh*& p) {
-    resourceManager->m_Resources.getAs(h, p); 
+    resourceManager->m_ResourcePool.getAs(h, p);
 }
 Mesh* Engine::Resources::getMesh(Handle h) {
     Mesh* p; 
-    resourceManager->m_Resources.getAs(h, p); 
+    resourceManager->m_ResourcePool.getAs(h, p);
     return p; 
 }
 Mesh* Engine::Resources::getMesh(std::string_view name) {
     return resourceManager->HasResource<Mesh>(name);
 }
 void Engine::Resources::getShaderProgram(Handle h, ShaderProgram*& p) {
-    resourceManager->m_Resources.getAs(h, p); 
+    resourceManager->m_ResourcePool.getAs(h, p);
 }
 ShaderProgram* Engine::Resources::getShaderProgram(Handle h) {
     ShaderProgram* p; 
-    resourceManager->m_Resources.getAs(h, p); 
+    resourceManager->m_ResourcePool.getAs(h, p);
     return p; 
 }
 ShaderProgram* Engine::Resources::getShaderProgram(std::string_view name) {
@@ -190,29 +187,29 @@ ShaderProgram* Engine::Resources::getShaderProgram(std::string_view name) {
 }
 
 void Engine::Resources::getTexture(Handle h, Texture*& p) {
-    resourceManager->m_Resources.getAs(h, p); 
+    resourceManager->m_ResourcePool.getAs(h, p);
 }
 Texture* Engine::Resources::getTexture(Handle h) {
     Texture* p; 
-    resourceManager->m_Resources.getAs(h, p); 
+    resourceManager->m_ResourcePool.getAs(h, p);
     return p; 
 }
 Texture* Engine::Resources::getTexture(std::string_view name) {
     return resourceManager->HasResource<Texture>(name); 
 }
 void Engine::Resources::getMaterial(Handle h, Material*& p) {
-    resourceManager->m_Resources.getAs(h, p); 
+    resourceManager->m_ResourcePool.getAs(h, p);
 }
 Material* Engine::Resources::getMaterial(Handle h) {
     Material* p; 
-    resourceManager->m_Resources.getAs(h, p); 
+    resourceManager->m_ResourcePool.getAs(h, p);
     return p; 
 }
 Material* Engine::Resources::getMaterial(std::string_view name) {
     return resourceManager->HasResource<Material>(name);
 }
 Handle Engine::Resources::addFont(const std::string& filename, int height, int width, float line_height){
-    return resourceManager->m_Resources.add(NEW Font(filename, height, width, line_height), (unsigned int)ResourceType::Font);
+    return resourceManager->m_ResourcePool.add(NEW Font(filename, height, width, line_height), (unsigned int)ResourceType::Font);
 }
 
 
@@ -303,23 +300,23 @@ Handle Engine::Resources::loadMaterial(const std::string& name, Texture* diffuse
 
 Handle Engine::Resources::addShader(const std::string& fileOrData, ShaderType type, bool fromFile){
     Shader* shader = NEW Shader(fileOrData, type, fromFile);
-    return resourceManager->m_Resources.add(shader, (unsigned int)ResourceType::Shader);
+    return resourceManager->m_ResourcePool.add(shader, (unsigned int)ResourceType::Shader);
 }
 
 Handle Engine::Resources::addShaderProgram(const std::string& n, Shader& v, Shader& f){
     ShaderProgram* program = NEW ShaderProgram(n, v, f);
-    return resourceManager->m_Resources.add(program, (unsigned int)ResourceType::ShaderProgram);
+    return resourceManager->m_ResourcePool.add(program, (unsigned int)ResourceType::ShaderProgram);
 }
 Handle Engine::Resources::addShaderProgram(const std::string& n, Handle v, Handle f){
-    Shader* vertexShader   = resourceManager->m_Resources.getAsFast<Shader>(v);
-    Shader* fragmentShader = resourceManager->m_Resources.getAsFast<Shader>(f);
+    Shader* vertexShader   = resourceManager->m_ResourcePool.getAsFast<Shader>(v);
+    Shader* fragmentShader = resourceManager->m_ResourcePool.getAsFast<Shader>(f);
     ShaderProgram* program = NEW ShaderProgram(n, *vertexShader, *fragmentShader);
-    return resourceManager->m_Resources.add(program, (unsigned int)ResourceType::ShaderProgram);
+    return resourceManager->m_ResourcePool.add(program, (unsigned int)ResourceType::ShaderProgram);
 }
 
 Handle Engine::Resources::addSoundData(const std::string& file){
     SoundData* soundData = NEW SoundData(file);
-    return resourceManager->m_Resources.add(soundData, (unsigned int)ResourceType::SoundData);
+    return resourceManager->m_ResourcePool.add(soundData, (unsigned int)ResourceType::SoundData);
 }
 
 bool Engine::Resources::setCurrentScene(Scene* newScene){

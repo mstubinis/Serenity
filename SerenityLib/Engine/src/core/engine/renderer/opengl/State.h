@@ -2,28 +2,33 @@
 #ifndef ENGINE_OPENGL_STATE_MACHINE_H
 #define ENGINE_OPENGL_STATE_MACHINE_H
 
-/*
-this class provides a cpu side implementation of opengl's state machine, including default values
-*/
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
+#include <core/engine/textures/TextureIncludes.h>
 
 namespace Engine::priv {
     class  Renderer;
+
+    /*
+    This class provides a cpu side implementation of opengl's state machine, including default values
+    */
     class  OpenGLState final {
         friend class  Renderer;
         private:
             #pragma region TextureUnits
             struct TextureUnitState final {
-                GLuint targetTexture1D   = std::numeric_limits<GLuint>().max();
-                GLuint targetTexture2D   = std::numeric_limits<GLuint>().max();
-                GLuint targetTexture3D   = std::numeric_limits<GLuint>().max();
-                GLuint targetTextureCube = std::numeric_limits<GLuint>().max();
-                TextureUnitState() = default;
+                std::array<GLuint, (size_t)TextureType::_TOTAL - 1> openglIDs; //-1 for the "Unknown" enum 
+
+                TextureUnitState() {
+                    openglIDs.fill(std::numeric_limits<GLuint>().max());
+                }
             };
             std::vector<TextureUnitState> textureUnits;
-            GLuint                        currentTextureUnit = 0;
+            GLuint                        currentActiveTextureUnit = 0;
+
+            unsigned int internal_get_enum_index_from_gl_texture_type(GLenum textureType) noexcept;
+
             #pragma endregion
 
             #pragma region ClearColor
@@ -114,12 +119,10 @@ namespace Engine::priv {
                 GLsizei height = 0;
                 ViewportState() = default;
                 //note - this is the real default glViewport state
-                ViewportState(GLsizei width_, GLsizei height_) {
-                    x      = 0;
-                    y      = 0;
-                    width  = width_;
-                    height = height_;
-                }
+                ViewportState(GLsizei width_, GLsizei height_) 
+                    : width{ width_ }
+                    , height{ height_ }
+                {}
             };
             ViewportState viewportState;
             #pragma endregion
@@ -239,9 +242,11 @@ namespace Engine::priv {
             std::vector<BlendEquationState> blendEquationState;
             #pragma endregion
 
-
         public:
+            static float MAX_TEXTURE_MAX_ANISOTROPY;
             static unsigned int MAX_TEXTURE_UNITS;
+
+            GLuint getCurrentlyBoundTextureOfType(GLenum textureType) noexcept;
 
             bool GL_glActiveTexture(GLenum textureUnit);
             bool GL_glBindTextureForModification(GLenum textureTarget, GLuint textureObject);

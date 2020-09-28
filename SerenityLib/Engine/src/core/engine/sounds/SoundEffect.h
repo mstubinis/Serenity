@@ -18,13 +18,11 @@ class SoundEffect : public SoundBaseClass {
         bool        m_Active   = false;
     public:
         SoundEffect();
-
         SoundEffect(const SoundEffect& other)                = delete;
         SoundEffect& operator=(const SoundEffect& other)     = delete;
         SoundEffect(SoundEffect&& other) noexcept            = default;
         SoundEffect& operator=(SoundEffect&& other) noexcept = default;
-
-        virtual ~SoundEffect() = default;
+        virtual ~SoundEffect()                               = default;
 
         inline CONSTEXPR bool isActive() const noexcept { return m_Active; }
         bool play(unsigned int numLoops = 1) override;

@@ -29,7 +29,7 @@ void Engine::priv::MeshLoader::LoadPopulateGlobalNodes(const aiScene& scene, Eng
         part.name             = request.m_FileOrData + " - " + std::string(aimesh.mName.C_Str());
         part.mesh->m_File     = request.m_FileOrData;
         part.mesh->setName(part.name);
-        part.handle           = priv::Core::m_Engine->m_ResourceManager.m_Resources.add(part.mesh, (unsigned int)ResourceType::Mesh);
+        part.handle           = priv::Core::m_Engine->m_ResourceManager.m_ResourcePool.add(part.mesh, (unsigned int)ResourceType::Mesh);
         part.mesh->m_RootNode = root;
     }
 

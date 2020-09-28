@@ -165,13 +165,13 @@ void InternalShaderProgramPublicInterface::LoadGPU(ShaderProgram& shaderP){
     }
     shaderP.Resource::load();
 }
-void InternalShaderProgramPublicInterface::UnloadCPU(ShaderProgram& shaderP){
+void InternalShaderProgramPublicInterface::UnloadCPU(ShaderProgram& shaderP) {
     if (shaderP.m_LoadedCPU) {
         shaderP.m_LoadedCPU = false;
     }
     shaderP.Resource::unload();
 }
-void InternalShaderProgramPublicInterface::UnloadGPU(ShaderProgram& shaderP){
+void InternalShaderProgramPublicInterface::UnloadGPU(ShaderProgram& shaderP) {
     if (shaderP.m_LoadedGPU) {
         shaderP.m_UniformLocations.clear();
         shaderP.m_AttachedUBOs.clear();
@@ -179,7 +179,7 @@ void InternalShaderProgramPublicInterface::UnloadGPU(ShaderProgram& shaderP){
         shaderP.m_LoadedGPU = false;
     }
 }
-void ShaderProgram::load(){
+void ShaderProgram::load() {
     if(!isLoaded()){
         InternalShaderProgramPublicInterface::LoadCPU(*this);
         InternalShaderProgramPublicInterface::LoadGPU(*this);
@@ -187,7 +187,7 @@ void ShaderProgram::load(){
         Resource::load();
     }
 }
-void ShaderProgram::unload(){
+void ShaderProgram::unload() {
     if(isLoaded() /*&& useCount() == 0*/){
         InternalShaderProgramPublicInterface::UnloadGPU(*this);
         InternalShaderProgramPublicInterface::UnloadCPU(*this);

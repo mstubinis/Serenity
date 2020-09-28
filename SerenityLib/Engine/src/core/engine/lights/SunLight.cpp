@@ -7,8 +7,8 @@
 using namespace Engine;
 
 SunLight::SunLight(const glm_vec3& pos, LightType type, Scene* scene) 
-    : Entity(*scene)
-    , m_Type(type)
+    : Entity{ *scene }
+    , m_Type{ type }
 {
     if (!scene) {
         scene = Resources::getCurrentScene();

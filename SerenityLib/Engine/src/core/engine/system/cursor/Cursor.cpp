@@ -61,7 +61,7 @@ bool Cursor::internal_rotate(long long startIndex, long long increment1, long lo
         m_Pixels.emplace_back(b);
         m_Pixels.emplace_back(a);
         pixel += increment1;
-        if ((left && pixel < 0) || (!left && pixel >= (oldWidth * oldHeight))) {
+        if ((left && pixel < 0) || (!left && pixel >= (long long)(oldWidth * oldHeight))) {
             pixel += increment2;
         }
     }

@@ -3,10 +3,10 @@
 #include <ecs/ComponentBody.h>
 
 LightProbe::LightProbe(ProbeType::Type type, const glm::vec3& position, Scene* scene) 
-    : Entity(*scene)
-    , m_Camera(glm::radians(90.0f), 1.0f, 0.1f, 3000000.0f, scene)
-    , m_Viewport() 
-    , m_ProbeType(type)
+    : Entity{ *scene }
+    , m_Camera{ glm::radians(90.0f), 1.0f, 0.1f, 3000000.0f, scene }
+    , m_Viewport{}
+    , m_ProbeType{ type }
 {
     addComponent<ComponentBody>();
     getComponent<ComponentBody>()->setPosition(position);

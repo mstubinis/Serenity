@@ -8,11 +8,10 @@ SoundData::SoundData(const std::string& file)
     buildBuffer();
 }
 SoundData::~SoundData() {
-    SAFE_DELETE(m_Buffer);
 }
 void SoundData::buildBuffer() {
     if (!m_Buffer) {
-        m_Buffer = NEW sf::SoundBuffer();
+        m_Buffer = std::make_unique<sf::SoundBuffer>();
     }
     m_Buffer->loadFromFile(m_File);
 }

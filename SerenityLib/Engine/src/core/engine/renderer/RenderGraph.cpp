@@ -18,15 +18,13 @@ MaterialNode::MaterialNode(Material& material_)
 {}
 MaterialNode::~MaterialNode() {
 }
-MaterialNode::MaterialNode(MaterialNode&& other) noexcept {
-    material  = std::exchange(other.material, nullptr);
-    meshNodes = std::move(other.meshNodes);
-}
+MaterialNode::MaterialNode(MaterialNode&& other) noexcept 
+    : material{ std::move(other.material) }
+    , meshNodes{ std::move(other.meshNodes) }
+{}
 MaterialNode& MaterialNode::operator=(MaterialNode&& other) noexcept {
-    if (&other != this) {
-        material  = std::exchange(other.material, nullptr);
-        meshNodes = std::move(other.meshNodes);
-    }
+    material  = std::move(other.material);
+    meshNodes = std::move(other.meshNodes);
     return *this;
 }
 
@@ -39,15 +37,14 @@ MeshNode::MeshNode(Mesh& mesh_)
 MeshNode::~MeshNode() {
     SAFE_DELETE_VECTOR(instanceNodes);
 }
-MeshNode::MeshNode(MeshNode&& other) noexcept {
-    mesh          = std::exchange(other.mesh, nullptr);
-    instanceNodes = std::move(other.instanceNodes);
-}
+MeshNode::MeshNode(MeshNode&& other) noexcept 
+    : mesh{ std::move(other.mesh) }
+    , instanceNodes{ std::move(other.instanceNodes) }
+
+{}
 MeshNode& MeshNode::operator=(MeshNode&& other) noexcept {
-    if (&other != this) {
-        mesh          = std::exchange(other.mesh, nullptr);
-        instanceNodes = std::move(other.instanceNodes);
-    }
+    mesh          = std::move(other.mesh);
+    instanceNodes = std::move(other.instanceNodes);
     return *this;
 }
 
@@ -59,13 +56,11 @@ InstanceNode::InstanceNode(ModelInstance& modelInstance_)
 {}
 InstanceNode::~InstanceNode() {
 }
-InstanceNode::InstanceNode(InstanceNode&& other) noexcept {
-    instance = std::exchange(other.instance, nullptr);
-}
+InstanceNode::InstanceNode(InstanceNode&& other) noexcept 
+    : instance{ std::move(other.instance) }
+{}
 InstanceNode& InstanceNode::operator=(InstanceNode&& other) noexcept {
-    if (&other != this) {
-        instance = std::exchange(other.instance, nullptr);
-    }
+    instance = std::move(other.instance);
     return *this;
 }
 
@@ -74,17 +69,15 @@ InstanceNode& InstanceNode::operator=(InstanceNode&& other) noexcept {
 RenderGraph::RenderGraph(ShaderProgram& shaderProgram)
     : m_ShaderProgram{ &shaderProgram }
 {}
-RenderGraph::RenderGraph(RenderGraph&& other) noexcept {
-    m_ShaderProgram  = std::exchange(other.m_ShaderProgram, nullptr);
+RenderGraph::RenderGraph(RenderGraph&& other) noexcept 
+    : m_ShaderProgram{ std::move(other.m_ShaderProgram) }
+    , m_MaterialNodes{ std::move(other.m_MaterialNodes) }
+    , m_InstancesTotal{ std::move(other.m_InstancesTotal) }
+{}
+RenderGraph& RenderGraph::operator=(RenderGraph&& other) noexcept {
+    m_ShaderProgram  = std::move(other.m_ShaderProgram);
     m_MaterialNodes  = std::move(other.m_MaterialNodes);
     m_InstancesTotal = std::move(other.m_InstancesTotal);
-}
-RenderGraph& RenderGraph::operator=(RenderGraph&& other) noexcept {
-    if (&other != this) {
-        m_ShaderProgram  = std::exchange(other.m_ShaderProgram, nullptr);
-        m_MaterialNodes  = std::move(other.m_MaterialNodes);
-        m_InstancesTotal = std::move(other.m_InstancesTotal);
-    }
     return *this;
 }
 RenderGraph::~RenderGraph() {

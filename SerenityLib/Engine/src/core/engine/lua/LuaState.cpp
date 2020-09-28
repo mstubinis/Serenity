@@ -3,7 +3,7 @@
 #include <core/engine/lua/LuaIncludes.h>
 
 LUAState::LUAState() 
-    : L(luaL_newstate())
+    : L{ luaL_newstate() }
 {
     luaL_openlibs(L);
 }

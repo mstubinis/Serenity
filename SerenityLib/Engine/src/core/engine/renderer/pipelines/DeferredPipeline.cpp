@@ -156,7 +156,9 @@ void DeferredPipeline::init() {
     m_OpenGLStateMachine.GL_glEnable(GL_DEPTH_TEST);
     m_OpenGLStateMachine.GL_glDisable(GL_STENCIL_TEST);
     m_OpenGLStateMachine.GL_glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //for non Power of Two textures
-    //m_OpenGLStateMachine.GL_glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); //very odd, supported on my gpu and opengl version but it runs REAL slowly, dropping fps to 1
+    if (Engine::priv::Renderer::OPENGL_VERSION >= 40) {
+        m_OpenGLStateMachine.GL_glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); //can run real slowly on some gpu's / drivers. its core 32 but just to be safe, set it to 40
+    }
     m_OpenGLStateMachine.GL_glEnable(GL_DEPTH_CLAMP);
     Engine::Renderer::setDepthFunc(GL_LEQUAL);
 
@@ -181,8 +183,7 @@ void DeferredPipeline::init() {
     SMAA::STATIC_SMAA.init_shaders();
 
     auto emplaceShader = [](unsigned int index, const std::string& str, std::vector<Shader*>& collection, ShaderType type) {
-        Shader* s = NEW Shader(str, type, false);
-        collection[index] = s;
+        collection[index] = NEW Shader(str, type, false);
     };
 
     priv::threading::addJob([&]() {emplaceShader(0, EShaders::decal_vertex, m_InternalShaders, ShaderType::Vertex); });
@@ -287,12 +288,24 @@ void DeferredPipeline::init() {
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_Particle_Instance_VBO));
     GLCall(glBufferData(GL_ARRAY_BUFFER, 0, NULL, GL_STREAM_DRAW));
 
+    auto sizeofOne = sizeof(ParticleSystem::ParticleFloatType) * 4;
+    auto sizeofTwo = sizeof(ParticleSystem::ParticleFloatType) * 2;
+
+#if defined(ENGINE_PARTICLES_HALF_SIZE)
     GLCall(glEnableVertexAttribArray(2));
-    GLCall(glVertexAttribPointer(2, 4, GL_FLOAT,        GL_FALSE, sizeof(ParticleSystem::ParticleDOD),  (void*)0  ));
+    GLCall(glVertexAttribPointer(2, 4, GL_HALF_FLOAT,        GL_FALSE, sizeof(ParticleSystem::ParticleDOD),  (void*)0  ));
     GLCall(glEnableVertexAttribArray(3));
-    GLCall(glVertexAttribPointer(3, 2, GL_FLOAT,        GL_FALSE, sizeof(ParticleSystem::ParticleDOD),  (void*)(sizeof(glm::vec4))  ));
+    GLCall(glVertexAttribPointer(3, 2, GL_HALF_FLOAT,        GL_FALSE, sizeof(ParticleSystem::ParticleDOD),  (void*)sizeofOne));
     GLCall(glEnableVertexAttribArray(4));
-    GLCall(glVertexAttribIPointer(4, 2, GL_UNSIGNED_INT, sizeof(ParticleSystem::ParticleDOD), (void*)(sizeof(glm::vec4) + sizeof(glm::vec2))  ));
+    GLCall(glVertexAttribIPointer(4, 2, GL_UNSIGNED_SHORT, sizeof(ParticleSystem::ParticleDOD), (void*)(sizeofOne + sizeofTwo)));
+#else
+    GLCall(glEnableVertexAttribArray(2));
+    GLCall(glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(ParticleSystem::ParticleDOD), (void*)0));
+    GLCall(glEnableVertexAttribArray(3));
+    GLCall(glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(ParticleSystem::ParticleDOD), (void*)sizeofOne));
+    GLCall(glEnableVertexAttribArray(4));
+    GLCall(glVertexAttribIPointer(4, 2, GL_UNSIGNED_INT, sizeof(ParticleSystem::ParticleDOD), (void*)(sizeofOne + sizeofTwo)));
+#endif
 
     GLCall(glVertexAttribDivisor(2, 1));
     GLCall(glVertexAttribDivisor(3, 1));
@@ -300,14 +313,14 @@ void DeferredPipeline::init() {
 
     Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh().getVertexData().unbind();
 }
-void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, unsigned int convoludeTextureSize, unsigned int preEnvFilterSize) {
+void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, Texture& convolutionTexture, Texture& preEnvTexture, unsigned int convoludeTextureSize, unsigned int preEnvFilterSize) {
     auto texType = texture.type();
     if (texType != GL_TEXTURE_CUBE_MAP) {
         //cout << "(Texture) : Only cubemaps can be precomputed for IBL. Ignoring genPBREnvMapData() call...\n";
         return;
     }
     unsigned int size = convoludeTextureSize;
-    Engine::Renderer::bindTextureForModification(texType, texture.address(1));
+    Engine::Renderer::bindTextureForModification(texType, convolutionTexture.address());
     //Engine::Renderer::unbindFBO();
     priv::FramebufferObject fbo(size, size); //try without a depth format
     fbo.bind();
@@ -322,7 +335,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
     for (unsigned int i = 0; i < 6; ++i) {
         glm::mat4 vp = captureProjection * CAPTURE_VIEWS[i];
         Engine::Renderer::sendUniformMatrix4("VP", vp);
-        GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture.address(1), 0));
+        GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, convolutionTexture.address(), 0));
         Engine::Renderer::Settings::clear(true, true, false);
         Skybox::bindMesh();
     }
@@ -330,7 +343,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
 
     //now gen EnvPrefilterMap for specular IBL
     size = preEnvFilterSize;
-    Engine::Renderer::bindTextureForModification(texType, texture.address(2));
+    Engine::Renderer::bindTextureForModification(texType, preEnvTexture.address());
 
 
     m_Renderer.bind(&prefilterShaderProgram);
@@ -349,7 +362,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(ShaderProgram& cov
         for (unsigned int i = 0; i < 6; ++i) {
             glm::mat4 vp = captureProjection * CAPTURE_VIEWS[i];
             Engine::Renderer::sendUniformMatrix4("VP", vp);
-            GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture.address(2), m));
+            GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, preEnvTexture.address(), m));
             Engine::Renderer::Settings::clear(true, true, false);
             Skybox::bindMesh();
         }
@@ -419,6 +432,9 @@ Material* DeferredPipeline::getCurrentBoundMaterial() {
 Mesh* DeferredPipeline::getCurrentBoundMesh() {
     return m_RendererState.current_bound_mesh;
 }
+unsigned int DeferredPipeline::getCurrentBoundTextureOfType(unsigned int textureType) {
+    return m_OpenGLStateMachine.getCurrentlyBoundTextureOfType(textureType);
+}
 bool DeferredPipeline::stencilOperation(unsigned int stencilFail, unsigned int depthFail, unsigned int depthPass) {
     return m_OpenGLStateMachine.GL_glStencilOp(stencilFail, depthFail, depthPass);
 }
@@ -438,7 +454,7 @@ void DeferredPipeline::clear(bool color, bool depth, bool stencil) {
     if (!color && !depth && !stencil) {
         return;
     }
-    GLuint clearBit = 0x00000000;
+    GLuint clearBit = 0;
     if (color)   clearBit |= GL_COLOR_BUFFER_BIT;
     if (depth)   clearBit |= GL_DEPTH_BUFFER_BIT;
     if (stencil) clearBit |= GL_STENCIL_BUFFER_BIT;
@@ -516,8 +532,6 @@ bool DeferredPipeline::bindDrawFBO(unsigned int fbo) {
 bool DeferredPipeline::bindRBO(unsigned int rbo) {
     return m_OpenGLStateMachine.GL_glBindRenderbuffer(rbo);
 }
-
-
 bool DeferredPipeline::bind(ModelInstance* modelInstance) {
     return true;
 }
@@ -559,11 +573,13 @@ bool DeferredPipeline::unbind(Mesh* mesh) {
     m_RendererState.current_bound_mesh = nullptr;
     return true;
 }
-void DeferredPipeline::generatePBRData(Texture& texture, unsigned int convoludeSize, unsigned int prefilterSize) {
+void DeferredPipeline::generatePBRData(Texture& texture, Texture& convolutionTexture, Texture& preEnvTexture, unsigned int convoludeSize, unsigned int prefilterSize) {
     internal_generate_pbr_data_for_texture(
         *m_InternalShaderPrograms[ShaderProgramEnum::CubemapConvolude], 
         *m_InternalShaderPrograms[ShaderProgramEnum::CubemapPrefilterEnv], 
         texture, 
+        convolutionTexture,
+        preEnvTexture,
         convoludeSize, 
         prefilterSize
     );
@@ -604,7 +620,7 @@ void DeferredPipeline::renderSkybox(Skybox* skybox, ShaderProgram& shaderProgram
 
     if (skybox) {
         Engine::Renderer::sendUniform1("IsFake", 0);
-        Engine::Renderer::sendTextureSafe("Texture", skybox->texture()->address(0), 0, GL_TEXTURE_CUBE_MAP);
+        Engine::Renderer::sendTextureSafe("Texture", skybox->texture()->address(), 0, GL_TEXTURE_CUBE_MAP);
     }else{
         Engine::Renderer::sendUniform1("IsFake", 1);
         const auto& bgColor = scene.getBackgroundColor();
@@ -862,15 +878,14 @@ void DeferredPipeline::renderDecal(ModelInstance& decalModelInstance) {
 }
 
 void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, ShaderProgram& program) {
-    const auto particle_count = system.ParticlesDOD.size();
+    const size_t particle_count = system.ParticlesDOD.size();
     if (particle_count > 0) {
-        auto& particleMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh();
         m_Renderer.bind(&program);
         for (auto& [id, mat] : system.MaterialToIndexReverse) {
             system.MaterialIDToIndex.try_emplace(id, (unsigned int)system.MaterialIDToIndex.size());
         }
         for (auto& pod : system.ParticlesDOD) {
-            pod.MatIDAndPackedColor.x = system.MaterialIDToIndex.at(pod.MatIDAndPackedColor.x);
+            pod.MatID = system.MaterialIDToIndex.at(pod.MatID);
         }
         for (auto& [id, index] : system.MaterialIDToIndex) {
             Material* mat         = system.MaterialToIndexReverse.at(id);
@@ -880,10 +895,13 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, S
         }
         const auto maxTextures = getMaxNumTextureUnits() - 1U;
         Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), maxTextures);
+
+        GLCall(glBindBuffer(   GL_ARRAY_BUFFER,    m_Particle_Instance_VBO));
+        GLCall(glBufferData(   GL_ARRAY_BUFFER,    particle_count * sizeof(ParticleSystem::ParticleDOD), NULL, GL_STREAM_DRAW));
+        GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, particle_count * sizeof(ParticleSystem::ParticleDOD), system.ParticlesDOD.data()));
+
+        auto& particleMesh = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh();
         m_Renderer.bind(&particleMesh);
-        GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_Particle_Instance_VBO));
-        GLCall(glBufferData(GL_ARRAY_BUFFER, particle_count * sizeof(ParticleSystem::ParticleDOD), NULL, GL_STREAM_DRAW));
-        GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, particle_count * sizeof(ParticleSystem::ParticleDOD), &system.ParticlesDOD[0]));
         GLCall(glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)particleMesh.getVertexData().m_Indices.size(), GL_UNSIGNED_INT, 0, (GLsizei)particle_count));
         m_Renderer.unbind(&particleMesh);
     }
@@ -938,7 +956,7 @@ void DeferredPipeline::internal_render_2d_text_center(const std::string& text, c
         if (character == '\n') {
             lines.emplace_back(line_accumulator);
             lines_sizes.emplace_back((unsigned short)x);
-            line_accumulator = "";
+            line_accumulator.clear();
             x = 0.0f;
             continue;
         }else if (character != '\0') {
@@ -992,7 +1010,7 @@ void DeferredPipeline::internal_render_2d_text_right(const std::string& text, co
     for (const auto character : text) {
         if (character == '\n') {
             lines.emplace_back(line_accumulator);
-            line_accumulator = "";
+            line_accumulator.clear();
             continue;
         }else if (character != '\0') {
             line_accumulator += character;
@@ -1338,13 +1356,13 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
         Engine::Renderer::sendTexture("gSSAOMap", m_GBuffer.getTexture(GBufferType::Bloom), 3);
         Engine::Renderer::sendTexture("gMiscMap", m_GBuffer.getTexture(GBufferType::Misc), 4);
         Skybox* skybox = scene.skybox();
-        if (skybox && skybox->texture()->numAddresses() >= 3) {
-            Engine::Renderer::sendTextureSafe("irradianceMap", skybox->texture()->address(1), 5, GL_TEXTURE_CUBE_MAP);
-            Engine::Renderer::sendTextureSafe("prefilterMap", skybox->texture()->address(2), 6, GL_TEXTURE_CUBE_MAP);
+        if (skybox && skybox->texture()->hasGlobalIlluminationData()) {
+            Engine::Renderer::sendTextureSafe("irradianceMap", skybox->texture()->getConvolutionTexture().address(), 5, GL_TEXTURE_CUBE_MAP);
+            Engine::Renderer::sendTextureSafe("prefilterMap", skybox->texture()->getPreEnvTexture().address(), 6, GL_TEXTURE_CUBE_MAP);
             Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF, 7);
         }else{
-            Engine::Renderer::sendTextureSafe("irradianceMap", Texture::Black->address(0), 5, GL_TEXTURE_2D);
-            Engine::Renderer::sendTextureSafe("prefilterMap", Texture::Black->address(0), 6, GL_TEXTURE_2D);
+            Engine::Renderer::sendTextureSafe("irradianceMap", Texture::Black->address(), 5, GL_TEXTURE_2D);
+            Engine::Renderer::sendTextureSafe("prefilterMap", Texture::Black->address(), 6, GL_TEXTURE_2D);
             Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF, 7);
         }
         Engine::Renderer::renderFullscreenQuad();
@@ -1701,16 +1719,10 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, Viewport& viewpo
 }
 
 void DeferredPipeline::renderTexture(Texture& tex, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) {
-    API2DCommand command;
-    command.func  = [&tex, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DTexture(&tex, p, c, a, s, d, align, scissor); };
-    command.depth = d;
-    m_2DAPICommands.emplace_back(std::move(command));
+    m_2DAPICommands.emplace_back([&tex, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DTexture(&tex, p, c, a, s, d, align, scissor); }, d);
 }
 void DeferredPipeline::renderText(const std::string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) {
-    API2DCommand command;
-    command.func  = [t, &fnt, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DText(t, fnt, p, c, a, s, d, align, scissor); };
-    command.depth = d;
-    m_2DAPICommands.emplace_back(std::move(command));
+    m_2DAPICommands.emplace_back([t, &fnt, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DText(t, fnt, p, c, a, s, d, align, scissor); }, d);
 }
 void DeferredPipeline::renderBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) {
     float doubleBorder = borderSize * 2.0f;
@@ -1728,16 +1740,10 @@ void DeferredPipeline::renderBorder(float borderSize, const glm::vec2& pos, cons
     Engine::Renderer::renderRectangle(newPos + glm::vec2(0.0f, halfHeight + borderSize), col, w, borderSize, angle, depth, Alignment::BottomCenter, scissor);
 }
 void DeferredPipeline::renderRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment align, const glm::vec4& scissor) {
-    API2DCommand command;
-    command.func  = [=]() { DeferredPipeline::render2DTexture(nullptr, pos, col, angle, glm::vec2(width, height), depth, align, scissor); };
-    command.depth = depth;
-    m_2DAPICommands.emplace_back(std::move(command));
+    m_2DAPICommands.emplace_back([=]() { DeferredPipeline::render2DTexture(nullptr, pos, col, angle, glm::vec2(width, height), depth, align, scissor); }, depth);
 }
 void DeferredPipeline::renderTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) {
-    API2DCommand command;
-    command.func  = [=]() { DeferredPipeline::render2DTriangle(position, color, angle, width, height, depth, align, scissor); };
-    command.depth = depth;
-    m_2DAPICommands.emplace_back(std::move(command));
+    m_2DAPICommands.emplace_back([=]() { DeferredPipeline::render2DTriangle(position, color, angle, width, height, depth, align, scissor); }, depth);
 }
 
 void DeferredPipeline::renderFullscreenTriangle() {

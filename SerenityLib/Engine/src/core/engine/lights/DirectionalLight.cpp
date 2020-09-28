@@ -6,7 +6,9 @@
 using namespace Engine;
 using namespace std;
 
-DirectionalLight::DirectionalLight(const glm::vec3& direction, Scene* scene) : SunLight(glm::vec3(0.0f), LightType::Directional, scene) {
+DirectionalLight::DirectionalLight(const glm::vec3& direction, Scene* scene) 
+    : SunLight{ glm::vec3(0.0f), LightType::Directional, scene }
+{
     getComponent<ComponentBody>()->alignTo(direction);
 
     if (m_Type == LightType::Directional) {

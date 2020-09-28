@@ -3,4 +3,3 @@
 #include <SFML/Window/Keyboard.hpp>
 
 using namespace Engine::priv;
-using namespace std;

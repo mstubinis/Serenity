@@ -32,13 +32,12 @@ namespace Engine::priv {
             unsigned int AddScene(Scene& scene);
         public:
             //http://gamesfromwithin.com/managing-data-relationships
-            ResourcePool<Resource>                m_Resources;
+            ResourcePool<Resource>                m_ResourcePool;
             std::vector<std::unique_ptr<Window>>  m_Windows;
             std::vector<std::unique_ptr<Scene>>   m_Scenes;
             std::vector<Scene*>                   m_ScenesToBeDeleted;
             Scene*                                m_CurrentScene = nullptr;
         public:
-
             ResourceManager(const EngineOptions& engineOptions);
             ~ResourceManager();
 
@@ -54,8 +53,8 @@ namespace Engine::priv {
             inline CONSTEXPR std::vector<std::unique_ptr<Scene>>& scenes() noexcept { return m_Scenes; }
 
             template<typename T> T* HasResource(std::string_view resource_name) noexcept {
-                for (size_t i = 0; i < m_Resources.size(); ++i) {
-                    Resource* r = m_Resources.getAsFast<Resource>((unsigned int)i + 1U);
+                for (size_t i = 0; i < m_ResourcePool.size(); ++i) {
+                    Resource* r = m_ResourcePool.getAsFast<Resource>((unsigned int)i + 1U);
                     if (r) {
                         T* resource = dynamic_cast<T*>(r);
                         if (resource && resource->name() == resource_name) {
@@ -68,8 +67,8 @@ namespace Engine::priv {
 
             template<typename T> std::list<T*> GetAllResourcesOfType() noexcept {
                 std::list<T*> ret;
-                for (size_t i = 0; i < m_Resources.size(); ++i) {
-                    Resource* r = m_Resources.getAsFast<Resource>((unsigned int)i + 1U);
+                for (size_t i = 0; i < m_ResourcePool.size(); ++i) {
+                    Resource* r = m_ResourcePool.getAsFast<Resource>((unsigned int)i + 1U);
                     if (r) {
                         T* resource = dynamic_cast<T*>(r);
                         if (resource) {

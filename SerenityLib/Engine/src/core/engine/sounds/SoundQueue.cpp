@@ -8,7 +8,7 @@ SoundQueue::SoundQueue(Engine::priv::SoundModule& module, float delay)
     : m_SoundModule{ module }
     , m_DelayInSeconds{ delay }
 {
-    m_SoundModule.m_SoundQueues.emplace_back(this);
+    m_SoundModule.m_SoundQueues.push_back(std::unique_ptr<SoundQueue>(this));
 }
 SoundQueue::~SoundQueue() {
     clear();

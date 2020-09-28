@@ -22,7 +22,7 @@ void print(const std::string& s) { std::cout << s << "\n"; }
 void tostring(luabridge::LuaRef r) { std::cout << r.tostring() << "\n"; }
 
 LUABinder::LUABinder()
-    : m_LUA_STATE(std::make_unique<LUAState>())
+    : m_LUA_STATE{ std::make_unique<LUAState>() }
 {
     lua_State* L{ m_LUA_STATE->getState() };
     luabridge::getGlobalNamespace(L)

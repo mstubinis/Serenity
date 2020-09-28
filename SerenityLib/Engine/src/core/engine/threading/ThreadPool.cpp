@@ -2,7 +2,6 @@
 #include <core/engine/threading/ThreadPool.h>
 #include <core/engine/utils/Utils.h>
 
-using namespace std;
 using namespace Engine;
 using namespace Engine::priv;
 

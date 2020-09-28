@@ -6,16 +6,22 @@ using namespace Engine;
 using namespace Engine::priv;
 
 unsigned int OpenGLState::MAX_TEXTURE_UNITS = 0;
+float OpenGLState::MAX_TEXTURE_MAX_ANISOTROPY = 1.0f;
 
 void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(unsigned int windowWidth, unsigned int windowHeight) {
-    GLint     int_value;
-    //GLfloat   float_value;
+    GLint    int_value;
+    GLfloat  float_value;
     //GLboolean boolean_value;
 
     viewportState = ViewportState((GLsizei)windowWidth, (GLsizei)windowHeight);
 
     GLCall(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &int_value)); //what about GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS?
     MAX_TEXTURE_UNITS = glm::max(MAX_TEXTURE_UNITS, (unsigned int)int_value);
+
+    GLCall(glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &float_value));
+    MAX_TEXTURE_MAX_ANISOTROPY = float_value;
+
+
     textureUnits.reserve(MAX_TEXTURE_UNITS);
     for (size_t i = 0; i < textureUnits.capacity(); ++i) {
         textureUnits.emplace_back();
@@ -43,7 +49,7 @@ void OpenGLState::GL_RESTORE_DEFAULT_STATE_MACHINE(unsigned int windowWidth, uns
     glewInit(); 
     glGetError();//stupid glew always inits an error. nothing we can do about it.
 
-    currentTextureUnit = 0;
+    currentActiveTextureUnit = 0;
 
     //TODO: might need to gen and bind a dummy vao
     GLCall(glActiveTexture(GL_TEXTURE0)); //this was said to be needed for some drivers
@@ -113,7 +119,7 @@ void OpenGLState::GL_RESTORE_DEFAULT_STATE_MACHINE(unsigned int windowWidth, uns
     }
 }
 void OpenGLState::GL_RESTORE_CURRENT_STATE_MACHINE() {
-    GLCall(glActiveTexture(currentTextureUnit));
+    GLCall(glActiveTexture(currentActiveTextureUnit));
     GLCall(glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a));
     GLCall(glColorMask(colorMaskState.r, colorMaskState.g, colorMaskState.b, colorMaskState.a));
     GLCall(glClearDepth(clearDepth.depth));
@@ -183,42 +189,46 @@ void OpenGLState::GL_RESTORE_CURRENT_STATE_MACHINE() {
     }
 }
 bool OpenGLState::GL_glActiveTexture(GLenum textureUnit) {
-    currentTextureUnit = textureUnit;
-    GLCall(glActiveTexture(GL_TEXTURE0 + textureUnit));
+    currentActiveTextureUnit = textureUnit;
+    currentActiveTextureUnit = std::min(currentActiveTextureUnit, (GLuint)(textureUnits.capacity() - 1U));
+    GLCall(glActiveTexture(GL_TEXTURE0 + currentActiveTextureUnit));
     return true;
 }
 
 bool OpenGLState::GL_glBindTextureForModification(GLenum textureTarget, GLuint textureObject) {
-    auto unit = (GLenum)(textureUnits.capacity() - 1);
-    currentTextureUnit = unit;
-    GLCall(glActiveTexture(GL_TEXTURE0 + unit));
-    GLCall(glBindTexture(textureTarget, textureObject));
+    GL_glActiveTexture((GLenum)(textureUnits.capacity() - 1U));
+    GL_glBindTextureForRendering(textureTarget, textureObject);
     return true;
 }
-bool OpenGLState::GL_glBindTextureForRendering(GLenum textureTarget, GLuint textureObject) {
-    auto& unit = textureUnits[currentTextureUnit];
-    switch (textureTarget) {
+
+unsigned int OpenGLState::internal_get_enum_index_from_gl_texture_type(GLenum textureType) noexcept {
+    switch (textureType) {
         case GL_TEXTURE_1D: {
-            unit.targetTexture1D = textureObject;
-            GLCall(glBindTexture(textureTarget, textureObject));
-            return true;
+            return (unsigned int)TextureType::Texture1D;
         }case GL_TEXTURE_2D: {
-            unit.targetTexture2D = textureObject;
-            GLCall(glBindTexture(textureTarget, textureObject));
-            return true;
+            return (unsigned int)TextureType::Texture2D;
         }case GL_TEXTURE_3D: {
-            unit.targetTexture3D = textureObject;
-            GLCall(glBindTexture(textureTarget, textureObject));
-            return true;
+            return (unsigned int)TextureType::Texture3D;
         }case GL_TEXTURE_CUBE_MAP: {
-            unit.targetTextureCube = textureObject;
-            GLCall(glBindTexture(textureTarget, textureObject));
-            return true;
+            return (unsigned int)TextureType::CubeMap;
         }default: {
-            break;
+            return 0;
         }
     }
-    return false;
+    return 0;
+}
+GLuint OpenGLState::getCurrentlyBoundTextureOfType(GLenum textureType) noexcept {
+    unsigned int index = internal_get_enum_index_from_gl_texture_type(textureType);
+    return textureUnits[currentActiveTextureUnit].openglIDs[index];
+}
+bool OpenGLState::GL_glBindTextureForRendering(GLenum textureTarget, GLuint textureObject) {
+    auto& currentBoundUnit            = textureUnits[currentActiveTextureUnit];
+    unsigned int index                = internal_get_enum_index_from_gl_texture_type(textureTarget);
+    currentBoundUnit.openglIDs[index] = textureObject;    
+    if (index > 0) {
+        GLCall(glBindTexture(textureTarget, textureObject));
+    }
+    return (bool)index;
 }
 bool OpenGLState::GL_glClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a) {
     //Values are clamped to the range [0,1]

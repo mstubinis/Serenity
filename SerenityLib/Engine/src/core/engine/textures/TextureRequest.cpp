@@ -8,8 +8,9 @@
 #include <boost/filesystem.hpp>
 
 #pragma region TextureRequest
-TextureRequest::TextureRequest(const std::string& filename, bool genMipMaps, ImageInternalFormat internal_, GLuint openglTextureType) {
-    file                 = filename;
+TextureRequest::TextureRequest(const std::string& filename, bool genMipMaps, ImageInternalFormat internal_, GLuint openglTextureType) 
+    : file{ filename }
+{
     part.internalFormat  = internal_;
     part.isToBeMipmapped = genMipMaps;
     part.type            = openglTextureType;
@@ -22,7 +23,8 @@ TextureRequest::TextureRequest(const std::string& filename, bool genMipMaps, Ima
     part.assignType();
 }
 TextureRequest::TextureRequest(const std::string& filename, bool genMipMaps, ImageInternalFormat internal_, GLuint openglTextureType, std::function<void()>&& callback_)
-:TextureRequest(filename, genMipMaps, internal_, openglTextureType) {
+    : TextureRequest{ filename, genMipMaps, internal_, openglTextureType }
+{
     m_Callback           = std::move(callback_);
 }
 void TextureRequest::request(bool inAsync) {
@@ -40,7 +42,7 @@ void Engine::priv::TextureRequestStaticImpl::Request(TextureRequest& request) {
             request.part.texture = NEW Texture();
             request.part.texture->m_TextureType = request.part.textureType;
             request.part.texture->setName(request.part.name);
-            request.part.handle = Engine::priv::Core::m_Engine->m_ResourceManager.m_Resources.add(request.part.texture, (unsigned int)ResourceType::Texture);
+            request.part.handle = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourcePool.add(request.part.texture, (unsigned int)ResourceType::Texture);
 
             auto lambda_cpu = [request]() {
                 if (request.part.textureType == TextureType::Texture2D) {
@@ -74,15 +76,15 @@ void Engine::priv::TextureRequestStaticImpl::Request(TextureRequest& request) {
 
 #pragma region TextureRequestFromMemory
 
-TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const std::string& filename_, bool genMipMaps, ImageInternalFormat internal_, GLuint openglTextureType, std::function<void()>&& callback_){
+TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const std::string& filename_, bool genMipMaps, ImageInternalFormat internal_, GLuint openglTextureType, std::function<void()>&& callback_)
+    : image{ sfImage }
+    , textureName{ filename_ }
+    , m_Callback{ std::move(callback_) }
+{
     part.async           = false;
-    textureName          = filename_;
-    image                = sfImage;
     part.internalFormat  = internal_;
     part.isToBeMipmapped = genMipMaps;
     part.type            = openglTextureType;
-    m_Callback           = std::move(callback_);
-
     part.assignType();
 }
 void TextureRequestFromMemory::request(bool inAsync) {
@@ -100,7 +102,7 @@ void Engine::priv::TextureRequestStaticImpl::Request(TextureRequestFromMemory& r
         request.part.texture = NEW Texture();
         request.part.texture->m_TextureType = request.part.textureType;
         request.part.texture->setName(request.part.name);
-        request.part.handle = Core::m_Engine->m_ResourceManager.m_Resources.add(request.part.texture, (unsigned int)ResourceType::Texture);
+        request.part.handle = Core::m_Engine->m_ResourceManager.m_ResourcePool.add(request.part.texture, (unsigned int)ResourceType::Texture);
 
         auto lambda_cpu = [request]() {
             if (request.part.textureType == TextureType::Texture2D) {

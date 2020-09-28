@@ -4,12 +4,12 @@
 
 #ifdef ENVIRONMENT64
     constexpr unsigned int NUMBER_OF_ENTITIES_LIMIT          = 40'000;
-    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 2'000U;
-    constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT          = 200'000U;
+    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 1'500U;
+    constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT          = 100'000U;
 #else
     constexpr unsigned int NUMBER_OF_ENTITIES_LIMIT          = 20'000;
-    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 1'000U;
-    constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT          = 100'000U;
+    constexpr unsigned int NUMBER_OF_PARTICLE_EMITTERS_LIMIT = 750U;
+    constexpr unsigned int NUMBER_OF_PARTICLE_LIMIT          = 50'000U;
 #endif
 
 struct SceneOptions final {

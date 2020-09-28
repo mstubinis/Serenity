@@ -23,6 +23,9 @@ namespace Engine::Math {
     void Float32From16(float*     out, const std::uint16_t in);
     void Float16From32(std::uint16_t*  out, const float    in);
 
+    float Float32From16(const std::uint16_t in);
+    std::uint16_t Float16From32(const float in);
+
     void Float32From16(float*    out, const std::uint16_t* in, unsigned int arraySize);
     void Float16From32(std::uint16_t* out, const float*    in, unsigned int arraySize);
 

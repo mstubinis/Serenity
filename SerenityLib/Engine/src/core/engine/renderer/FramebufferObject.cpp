@@ -14,7 +14,7 @@ priv::FramebufferObjectAttatchment::FramebufferObjectAttatchment(const Framebuff
     , m_InternalFormat{ (GLuint)i }
 {}
 priv::FramebufferObjectAttatchment::FramebufferObjectAttatchment(const FramebufferObject& fbo, FramebufferAttatchment a, const Texture& t) 
-    : FramebufferObjectAttatchment(fbo, a, t.internalFormat())
+    : FramebufferObjectAttatchment{ fbo, a, t.internalFormat() }
 {}
 unsigned int priv::FramebufferObjectAttatchment::width() const {
     return m_FBO.width(); 
@@ -26,7 +26,7 @@ unsigned int priv::FramebufferObjectAttatchment::height() const {
 #pragma endregion
 
 priv::FramebufferTexture::FramebufferTexture(const FramebufferObject& fbo, FramebufferAttatchment a, const Texture& t) 
-    : FramebufferObjectAttatchment(fbo, a, t)
+    : FramebufferObjectAttatchment{ fbo, a, t }
     , m_Texture{ &const_cast<Texture&>(t) }
     , m_PixelFormat{ (GLuint)t.pixelFormat() }
     , m_PixelType{ (GLuint)t.pixelType() }
@@ -44,7 +44,9 @@ Texture& priv::FramebufferTexture::texture() const {
     return *m_Texture;
 }
 
-priv::RenderbufferObject::RenderbufferObject(FramebufferObject& f, FramebufferAttatchment a, ImageInternalFormat i) : FramebufferObjectAttatchment(f,a,i) {
+priv::RenderbufferObject::RenderbufferObject(FramebufferObject& f, FramebufferAttatchment a, ImageInternalFormat i) 
+    : FramebufferObjectAttatchment{ f,a,i }
+{
     GLCall(glGenRenderbuffers(1, &m_RBO));
 }
 priv::RenderbufferObject::~RenderbufferObject(){ 
@@ -93,8 +95,13 @@ namespace Engine::priv {
 priv::FramebufferObject::FramebufferObject(unsigned int w, unsigned int h, float divisor, unsigned int swapBufferCount) {
     init(w, h, divisor, swapBufferCount);
 }
-priv::FramebufferObject::FramebufferObject(unsigned int w, unsigned int h, ImageInternalFormat depthInternalFormat, float divisor, unsigned int swapBufferCount) : FramebufferObject(w, h, divisor, swapBufferCount) {
+priv::FramebufferObject::FramebufferObject(unsigned int w, unsigned int h, ImageInternalFormat depthInternalFormat, float divisor, unsigned int swapBufferCount) 
+    : FramebufferObject{ w, h, divisor, swapBufferCount }
+{
     init(w, h, depthInternalFormat, divisor, swapBufferCount);
+}
+priv::FramebufferObject::~FramebufferObject() {
+    cleanup();
 }
 void priv::FramebufferObject::init(unsigned int width, unsigned int height, float divisor, unsigned int swapBufferCount) {
     m_CurrentFBOIndex   = 0;
@@ -124,9 +131,6 @@ void priv::FramebufferObject::cleanup() {
     for (size_t i = 0; i < m_FBO.size(); ++i) {
         GLCall(glDeleteFramebuffers(1, &m_FBO[i]));
     }
-}
-priv::FramebufferObject::~FramebufferObject(){ 
-    cleanup();
 }
 void priv::FramebufferObject::resize(unsigned int w, unsigned int h){
     m_FramebufferWidth  = (unsigned int)((float)w * m_Divisor);

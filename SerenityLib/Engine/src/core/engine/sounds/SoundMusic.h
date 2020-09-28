@@ -17,13 +17,11 @@ class SoundMusic : public SoundBaseClass {
         bool        m_Active   = false;
     public:
         SoundMusic();
-
         SoundMusic(const SoundMusic& other)                = delete;
         SoundMusic& operator=(const SoundMusic& other)     = delete;
         SoundMusic(SoundMusic&& other) noexcept            = default;
         SoundMusic& operator=(SoundMusic&& other) noexcept = default;
-
-        virtual ~SoundMusic() = default;
+        virtual ~SoundMusic()                              = default;
 
         inline CONSTEXPR bool isActive() const noexcept { return m_Active; }
         bool play(unsigned int numLoops = 1) override;

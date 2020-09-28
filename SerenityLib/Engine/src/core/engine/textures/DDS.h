@@ -180,7 +180,7 @@ namespace Engine::priv::textures {
                 BitMaskB    = mskB;
                 BitMaskA    = mskA;
             }
-            constexpr void fill(const unsigned char header[128]) {
+            constexpr void fill(const std::array<unsigned char, 128>& header) {
                 pxl_size    = *(std::uint32_t*)&header[76];
                 pxl_flags   = *(std::uint32_t*)&header[80];
                 fourCC      = *(std::uint32_t*)&header[84];
@@ -190,7 +190,7 @@ namespace Engine::priv::textures {
                 BitMaskB    = *(std::uint32_t*)&header[100];
                 BitMaskA    = *(std::uint32_t*)&header[104];
             }
-            constexpr DDS_PixelFormat(const unsigned char header[128]) {
+            constexpr DDS_PixelFormat(const std::array<unsigned char, 128>& header) {
                 fill(header); 
             }
         };
@@ -202,7 +202,7 @@ namespace Engine::priv::textures {
             std::uint32_t                     miscFlags2        = 0U;
             constexpr DDS_Header_DX10() {
             }
-            constexpr void fill(const unsigned char headerDX10[20]) {
+            constexpr void fill(const std::array<unsigned char, 20>& headerDX10) {
                 dxgiFormat        = static_cast<textures::DXGI_FORMAT>(*(std::uint32_t*)&headerDX10[0]);
                 resourceDimension = static_cast<textures::D3D_RESOURCE_DIMENSION>(*(std::uint32_t*)&headerDX10[4]);
                 miscFlag          = *(std::uint32_t*)&headerDX10[8];
@@ -228,7 +228,7 @@ namespace Engine::priv::textures {
             std::uint32_t reserved2         = 0U;
             constexpr DDS_Header() {
             }
-            constexpr DDS_Header(const unsigned char header[128]) {
+            constexpr DDS_Header(const std::array<unsigned char, 128>& header) {
                 magic             = *(std::uint32_t*)&header[0];
                 header_size       = *(std::uint32_t*)&header[4];
                 header_flags      = *(std::uint32_t*)&header[8];

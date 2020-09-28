@@ -11,10 +11,12 @@ class Resource {
         std::uint32_t  m_UsageCount    = 0U;
         ResourceType   m_ResourceType  = ResourceType::Unknown;
     public:
-        Resource(ResourceType type) {
-            m_ResourceType = type;
-        }
-        Resource(ResourceType type, const std::string& name) : Resource(type){
+        Resource(ResourceType type) 
+            : m_ResourceType{ type }
+        {}
+        Resource(ResourceType type, const std::string& name) 
+            : Resource{ type }
+        {
             m_Name = name;
         }
         virtual ~Resource() {}

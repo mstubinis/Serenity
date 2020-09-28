@@ -56,7 +56,7 @@ class Material final : public Resource {
         unsigned char                     m_BaseMetalness       = 1_uc;
         unsigned char                     m_BaseSmoothness      = 64_uc;
         unsigned char                     m_BaseAlpha           = 254_uc;
-        std::uint32_t                     m_ID                  = 0U;
+        std::uint16_t                     m_ID                  = 0U;
 
         MaterialComponent* internal_add_component_generic(MaterialComponentType type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
         void internal_update_global_material_pool(bool addToDatabase);
@@ -108,7 +108,7 @@ class Material final : public Resource {
         inline CONSTEXPR bool shadeless() const noexcept { return m_Shadeless; }
         inline CONSTEXPR const Engine::color_vector_4& f0() const noexcept { return m_F0Color; }
         inline CONSTEXPR unsigned char glow() const noexcept { return m_BaseGlow; }
-        inline CONSTEXPR std::uint32_t id() const noexcept { return m_ID; }
+        inline CONSTEXPR std::uint16_t id() const noexcept { return m_ID; }
         inline CONSTEXPR DiffuseModel diffuseModel() const noexcept { return m_DiffuseModel; }
         inline CONSTEXPR SpecularModel specularModel() const noexcept { return m_SpecularModel; }
         inline CONSTEXPR unsigned char ao() const noexcept { return m_BaseAO; }
@@ -132,4 +132,5 @@ class Material final : public Resource {
 
         void update(const float dt);
 };
+
 #endif

@@ -42,17 +42,15 @@ MeshRequest::MeshRequest(MeshRequest&& other) noexcept
     , m_Importer{ other.m_Importer }
 {}
 MeshRequest& MeshRequest::operator=(MeshRequest&& other) noexcept {
-    if (&other != this) {
-        m_FileOrData    = std::move(other.m_FileOrData);
-        m_FileExtension = std::move(other.m_FileExtension);
-        m_FileExists    = std::move(other.m_FileExists);
-        m_Async         = std::move(other.m_Async);
-        m_Threshold     = std::move(other.m_Threshold);
-        m_MeshNodeMap   = std::move(other.m_MeshNodeMap);
-        m_Parts         = std::move(other.m_Parts);
-        m_Callback      = std::move(other.m_Callback);
-        m_Importer      = (other.m_Importer);
-    }
+    m_FileOrData    = std::move(other.m_FileOrData);
+    m_FileExtension = std::move(other.m_FileExtension);
+    m_FileExists    = std::move(other.m_FileExists);
+    m_Async         = std::move(other.m_Async);
+    m_Threshold     = std::move(other.m_Threshold);
+    m_MeshNodeMap   = std::move(other.m_MeshNodeMap);
+    m_Parts         = std::move(other.m_Parts);
+    m_Callback      = std::move(other.m_Callback);
+    m_Importer      = (other.m_Importer);
     return *this;
 }
 void MeshRequest::request(bool inAsync) {
@@ -106,7 +104,7 @@ bool InternalMeshRequestPublicInterface::Populate(MeshRequest& meshRequest) {
         part.name   = meshRequest.m_FileOrData;
         part.mesh   = NEW Mesh();
         part.mesh->setName(part.name);
-        part.handle = Core::m_Engine->m_ResourceManager.m_Resources.add(part.mesh, (unsigned int)ResourceType::Mesh);
+        part.handle = Core::m_Engine->m_ResourceManager.m_ResourcePool.add(part.mesh, (unsigned int)ResourceType::Mesh);
         meshRequest.m_Parts.push_back(std::move(part));
     }
     return true;

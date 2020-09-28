@@ -32,7 +32,9 @@ namespace Engine {
                 m_Planes[4] = frontTopLeft;
                 m_Planes[5] = frontBottomRight;
             }
-            bool isPointInside(const glm::vec3 & locationModelSpace) const noexcept {
+            ~Pyramid() = default;
+
+            bool isPointInside(const glm::vec3& locationModelSpace) const noexcept {
                 for (const auto& plane : m_Planes) {
                     float plane_dot = plane.CalculateDot(locationModelSpace);
                     if (plane_dot > 0.0f) {

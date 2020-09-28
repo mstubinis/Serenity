@@ -1,7 +1,7 @@
 #include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/input/Keyboard/KeyboardKeys.h>
 
-constexpr std::array<const char*, KeyboardKey::_TOTAL> KEYBOARD_KEY_NAMES{ {
+constexpr std::array<const char*, KeyboardKey::_TOTAL> KEYBOARD_KEY_NAMES { {
     "A",
     "B",
     "C",

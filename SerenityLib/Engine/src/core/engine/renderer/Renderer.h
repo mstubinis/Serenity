@@ -31,26 +31,22 @@ namespace priv{
     class  Renderer final{
         private:
         public:
-            bool                               m_Lighting         = true;
-            bool                               m_DrawPhysicsDebug = false;
-            AntiAliasingAlgorithm              m_AA_algorithm     = AntiAliasingAlgorithm::FXAA;
-            float                              m_Gamma            = 2.2f;
-            float                              m_GI_Diffuse       = 1.0f;
-            float                              m_GI_Specular      = 1.0f;
-            float                              m_GI_Global        = 1.0f;
-            float                              m_GI_Pack;
-            DepthFunc                          m_Depth_Function   = DepthFunc::Less;
-
+            bool                                 m_Lighting         = true;
+            bool                                 m_DrawPhysicsDebug = false;
+            AntiAliasingAlgorithm                m_AA_algorithm     = AntiAliasingAlgorithm::FXAA;
+            float                                m_Gamma            = 2.2f;
+            float                                m_GI_Diffuse       = 1.0f;
+            float                                m_GI_Specular      = 1.0f;
+            float                                m_GI_Global        = 1.0f;
+            float                                m_GI_Pack;
+            DepthFunc                            m_Depth_Function   = DepthFunc::Less;
+            std::unique_ptr<IRenderingPipeline>  m_Pipeline;
         public:
-            IRenderingPipeline*                m_Pipeline         = nullptr;
-
             Renderer(const EngineOptions& options);
             ~Renderer();
 
             static unsigned int GLSL_VERSION;
             static unsigned int OPENGL_VERSION;
-
-            void cleanup();
 
             void _init();
             void _resize(unsigned int width, unsigned int height);
@@ -75,7 +71,7 @@ namespace priv{
             bool unbind(Material* material) const;
 
             float _getGIPackedData();
-            void _genPBREnvMapData(Texture&,uint,uint);
+            void _genPBREnvMapData(Texture&, Texture&, Texture&, uint, uint);
     };
 };
 namespace Renderer{
@@ -112,6 +108,7 @@ namespace Renderer{
 
     unsigned int getUniformLoc(const char* location);
     unsigned int getUniformLocUnsafe(const char* location);
+    unsigned int getCurrentlyBoundTextureOfType(unsigned int textureType) noexcept;
 
     bool cullFace(GLenum state);
     bool setDepthFunc(GLenum func);

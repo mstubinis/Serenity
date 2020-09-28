@@ -6,7 +6,7 @@
 
 using namespace Engine;
 
-priv::EventDispatcher::EventDispatcher(){ 
+priv::EventDispatcher::EventDispatcher() { 
     m_Observers.resize((size_t)EventType::_TOTAL);
 }
 void priv::EventDispatcher::registerObject(Observer& observer, EventType eventType) noexcept {

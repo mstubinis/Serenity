@@ -6,7 +6,7 @@
 #define MAX_MATERIAL_COMPONENTS 10
 #define MAX_LIGHTS_PER_PASS 16
 
-enum class MaterialLayerBlendMode {
+enum class MaterialLayerBlendMode : unsigned char {
     Default,
     Mix,
     Add,
@@ -30,11 +30,11 @@ enum class MaterialLayerBlendMode {
     Color,
     Value,
 _TOTAL};
-enum class MaterialUVModificationType {
+enum class MaterialUVModificationType : unsigned char {
     Translation,
     Rotation,
 _TOTAL};
-enum class MaterialComponentType : unsigned int {
+enum class MaterialComponentType : unsigned char {
     Diffuse,
     Normal,
     Glow,
@@ -46,7 +46,7 @@ enum class MaterialComponentType : unsigned int {
     Refraction,
     ParallaxOcclusion,
 _TOTAL};
-enum class MaterialPhysics : unsigned short {
+enum class MaterialPhysics : unsigned char {
     Water,
     Plastic_Or_Glass_Low,
     Plastic_High,

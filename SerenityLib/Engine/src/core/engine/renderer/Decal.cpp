@@ -45,6 +45,23 @@ Decal::Decal(Material& material, const glm_vec3& localPosition, const glm::vec3&
     model.setCustomBindFunctor(Engine::priv::DefaultDecalBindFunctor());
     model.setCustomUnbindFunctor(Engine::priv::DefaultDecalUnbindFunctor());
 }
+Decal::Decal(Decal&& other) noexcept 
+    : EntityBody{ std::move(other) }
+    , m_LifetimeCurrent{ std::move(other.m_LifetimeCurrent) }
+    , m_LifetimeMax{ std::move(other.m_LifetimeMax) }
+    , m_Active{ std::move(other.m_Active) }
+    , m_InitialPosition{ std::move(other.m_InitialPosition) }
+    , m_InitialRotation{ std::move(other.m_InitialRotation) }
+{}
+Decal& Decal::operator=(Decal&& other) noexcept {
+    EntityBody::operator=(std::move(other));
+    m_LifetimeCurrent   = std::move(other.m_LifetimeCurrent);
+    m_LifetimeMax       = std::move(other.m_LifetimeMax);
+    m_Active            = std::move(other.m_Active);
+    m_InitialPosition   = std::move(other.m_InitialPosition);
+    m_InitialRotation   = std::move(other.m_InitialRotation);
+    return *this;
+}
 Decal::~Decal() {
     Entity::destroy();
 }

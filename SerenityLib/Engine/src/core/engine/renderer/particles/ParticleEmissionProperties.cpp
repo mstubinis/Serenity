@@ -12,7 +12,7 @@ ParticleEmissionProperties::ParticleEmissionProperties(Handle materialHandle, fl
 }
 
 bool ParticleEmissionProperties::addMaterial(Material& material) {
-    for (auto& mat : m_ParticleMaterials) {
+    for (const auto& mat : m_ParticleMaterials) {
         if (&material == mat) {
             return false;
         }
