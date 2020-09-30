@@ -16,6 +16,7 @@ namespace Engine::priv {
 #include <core/engine/renderer/particles/Particle.h>
 #include <core/engine/renderer/particles/ParticleEmitter.h>
 #include <core/engine/math/Engine_Math.h>
+#include <core/engine/containers/PartialVectorPOD.h>
 
 constexpr unsigned int MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME = 12U;
 
@@ -27,8 +28,8 @@ namespace Engine::priv {
             std::vector<ParticleEmitter>           m_ParticleEmitters;
             std::vector<Particle>                  m_Particles;
 
-            std::stack<size_t>                     m_ParticleEmitterFreelist;
-            std::stack<size_t>                     m_ParticleFreelist;
+            std::queue<size_t>                     m_ParticleEmitterFreelist;
+            std::queue<size_t>                     m_ParticleFreelist;
             std::mutex                             m_Mutex;
 
             void internal_update_emitters(const float dt);
@@ -57,7 +58,7 @@ namespace Engine::priv {
                 ParticleIDType    MatID;
                 ParticleIDType    PackedColor;
 
-                ParticleDOD() = delete;
+                ParticleDOD() = default;
                 ParticleDOD(float X, float Y, float Z, float ScaleX_, float ScaleY_, float Angle_, ParticleIDType MatID_, ParticleIDType PackedColor_)
 #if defined(ENGINE_PARTICLES_HALF_SIZE)
                     : PositionX{ Engine::Math::Float16From32(X) }
@@ -84,7 +85,8 @@ namespace Engine::priv {
                 ~ParticleDOD() = default;
             };
 
-            std::vector<ParticleDOD>                                 ParticlesDOD;
+            Engine::partial_vector_pod<ParticleDOD>                  ParticlesDOD;
+
             std::unordered_map<Material*, unsigned int>              MaterialToIndex;
             std::unordered_map<unsigned int, Material*>              MaterialToIndexReverse;
             std::unordered_map<unsigned int, unsigned int>           MaterialIDToIndex;

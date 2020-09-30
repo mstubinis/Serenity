@@ -97,11 +97,11 @@ namespace Engine::priv {
                 if (m_DestroyedEntities.size() > 0) {
                     for (const auto entity : m_DestroyedEntities) {
                         auto id = entity.id();
-                        m_EntityPool.destroyFlaggedEntity(id);
                         for (size_t i = 0; i < m_ComponentPools.size(); ++i) {
                             m_ComponentPools[i]->remove(id);
                             m_Systems[i]->onComponentRemovedFromEntity(entity);
                         }
+                        m_EntityPool.destroyFlaggedEntity(id);
                     }
                     m_DestroyedEntities.clear();
                     for (auto& component_pool : m_ComponentPools) {

@@ -88,7 +88,7 @@ bool Server::shutdown() {
     m_Active.store(false, std::memory_order_relaxed);
     return true;
 }
-void Server::internal_send_to_all_tcp(ServerClient* exclusion, sf::Packet& sf_packet) {
+void Server::internal_send_to_all_tcp(const ServerClient* exclusion, sf::Packet& sf_packet) {
     for (auto& itr : m_HashedClients) {
         if (itr.second != exclusion) {
             auto status = itr.second->send_tcp(sf_packet);
@@ -96,7 +96,7 @@ void Server::internal_send_to_all_tcp(ServerClient* exclusion, sf::Packet& sf_pa
     }
 }
 
-void Server::internal_send_to_all_udp(ServerClient* exclusion, sf::Packet& sf_packet) {
+void Server::internal_send_to_all_udp(const ServerClient* exclusion, sf::Packet& sf_packet) {
     for (auto& itr : m_HashedClients) {
         if (itr.second != exclusion) {
             auto status = itr.second->send_udp(sf_packet);
@@ -107,7 +107,7 @@ void Server::internal_send_to_all_udp(ServerClient* exclusion, sf::Packet& sf_pa
 SocketStatus::Status Server::send_tcp_to_client(ServerClient* client, sf::Packet& sf_packet) {
     return client->send_tcp(sf_packet);
 }
-void Server::send_tcp_to_all_but_client(ServerClient* exclusion, sf::Packet& sf_packet) {
+void Server::send_tcp_to_all_but_client(const ServerClient* exclusion, sf::Packet& sf_packet) {
     internal_send_to_all_tcp(exclusion, sf_packet);
 }
 void Server::send_tcp_to_all(sf::Packet& packet) {
@@ -117,7 +117,7 @@ void Server::send_tcp_to_all(sf::Packet& packet) {
 SocketStatus::Status Server::send_udp_to_client(ServerClient* client, sf::Packet& sf_packet) {
     return m_UdpSocket->send(client->port(), sf_packet, client->ip().toString());
 }
-void Server::send_udp_to_all_but_client(ServerClient* exclusion, sf::Packet& sf_packet) {
+void Server::send_udp_to_all_but_client(const ServerClient* exclusion, sf::Packet& sf_packet) {
     internal_send_to_all_udp(exclusion, sf_packet);
 }
 void Server::send_udp_to_all(sf::Packet& sf_packet) {
@@ -127,7 +127,7 @@ void Server::send_udp_to_all(sf::Packet& sf_packet) {
 SocketStatus::Status Server::send_udp_to_client_important(ServerClient* client, Engine::Networking::Packet& packet) {
     return Server::send_udp_to_client(client, packet);
 }
-void Server::send_udp_to_all_but_client_important(ServerClient* exclusion, Engine::Networking::Packet& packet) {
+void Server::send_udp_to_all_but_client_important(const ServerClient* exclusion, Engine::Networking::Packet& packet) {
     Server::send_udp_to_all_but_client(exclusion, packet);
 }
 void Server::send_udp_to_all_important(Engine::Networking::Packet& packet) {

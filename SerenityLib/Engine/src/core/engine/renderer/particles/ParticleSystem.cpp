@@ -17,6 +17,7 @@
 Engine::priv::ParticleSystem::ParticleSystem(unsigned int maxEmitters, unsigned int maxParticles) {
     m_ParticleEmitters.reserve(maxEmitters);
     m_Particles.reserve(maxParticles);
+    ParticlesDOD.resize(std::min(maxParticles, 300U));
 
     const auto maxMaterialSlots = std::min(Engine::priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME);
 
@@ -77,7 +78,7 @@ void Engine::priv::ParticleSystem::internal_update_particles(const float dt, Cam
 
 ParticleEmitter* Engine::priv::ParticleSystem::add_emitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
     while (m_ParticleEmitterFreelist.size() > 0) { //first, try to reuse an empty
-        size_t freeindex = m_ParticleEmitterFreelist.top(); 
+        size_t freeindex = m_ParticleEmitterFreelist.front();
         m_ParticleEmitterFreelist.pop();
         if (freeindex >= m_ParticleEmitters.size() && m_ParticleEmitterFreelist.size() > 0) {
             continue;
@@ -97,7 +98,7 @@ ParticleEmitter* Engine::priv::ParticleSystem::add_emitter(ParticleEmissionPrope
 }
 bool Engine::priv::ParticleSystem::add_particle(ParticleEmitter& emitter, const glm::vec3& emitterPosition, const glm::quat& emitterRotation) {
     while (m_ParticleFreelist.size() > 0) { //first, try to reuse an empty
-        size_t freeindex = m_ParticleFreelist.top();
+        size_t freeindex = m_ParticleFreelist.front();
         m_ParticleFreelist.pop();
         if (freeindex >= m_Particles.size() && m_ParticleFreelist.size() > 0) {
             continue;
@@ -136,8 +137,9 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Sh
     MaterialToIndex.clear();
     MaterialToIndexReverse.clear();
     MaterialIDToIndex.clear();
+
     if (ParticlesDOD.capacity() < particles_size) {
-        ParticlesDOD.reserve(particles_size);
+        ParticlesDOD.resize(particles_size);
     }
     //auto start = chrono::high_resolution_clock::now();
 
@@ -183,7 +185,10 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Sh
 
     //merge the thread collections into the main collections
     for (auto& _1 : THREAD_PART_1) { 
-        ParticlesDOD.insert(ParticlesDOD.end(), std::make_move_iterator(_1.begin()), std::make_move_iterator(_1.end())); 
+        for (auto& item : _1) {
+            ParticlesDOD.push(std::move(item));
+        }
+        //ParticlesDOD.insert(ParticlesDOD.end(), std::make_move_iterator(_1.begin()), std::make_move_iterator(_1.end())); 
     }
     for (auto& _4 : THREAD_PART_4) { 
         MaterialToIndex.merge(_4); 
@@ -199,23 +204,23 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Sh
     //sorting
     auto lambda = [&camPos](const ParticleDOD& l, const ParticleDOD& r) {
 #if defined(ENGINE_PARTICLES_HALF_SIZE)
-        glm::vec3 lPos = glm::vec3(
+        glm::vec3 lPos(
             Engine::Math::Float32From16(l.PositionX), 
             Engine::Math::Float32From16(l.PositionY),
             Engine::Math::Float32From16(l.PositionZ)
         );
-        glm::vec3 rPos = glm::vec3(
+        glm::vec3 rPos(
             Engine::Math::Float32From16(r.PositionX),
             Engine::Math::Float32From16(r.PositionY),
             Engine::Math::Float32From16(r.PositionZ)
         );
 #else
-        glm::vec3 lPos = glm::vec3(
+        glm::vec3 lPos(
             l.PositionX,
             l.PositionY,
             l.PositionZ
         );
-        glm::vec3 rPos = glm::vec3(
+        glm::vec3 rPos(
             r.PositionX,
             r.PositionY,
             r.PositionZ

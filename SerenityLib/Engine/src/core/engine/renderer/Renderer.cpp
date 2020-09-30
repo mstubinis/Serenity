@@ -33,8 +33,6 @@ priv::Renderer::Renderer(const EngineOptions& options)
     m_Pipeline     = std::make_unique<Engine::priv::DeferredPipeline>(*this);
     renderManager  = this;
 }
-priv::Renderer::~Renderer(){
-}
 void priv::Renderer::_init(){
     m_Pipeline->init();
 }

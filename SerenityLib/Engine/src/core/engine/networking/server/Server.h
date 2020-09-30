@@ -32,11 +32,11 @@ namespace Engine::Networking {
             update_func            m_Update_Function            = [](const float dt, bool serverActive) {};
             on_udp_func            m_On_Receive_UDP_Function    = [](sf::Packet& sf_packet, std::string& ip, unsigned short port, const float dt) {};
 
-            void internal_send_to_all_tcp(ServerClient* exclusion, sf::Packet& packet);
-            //void internal_send_to_all_tcp(ServerClient* exclusion, void* data, size_t size);
+            void internal_send_to_all_tcp(const ServerClient* exclusion, sf::Packet& packet);
+            //void internal_send_to_all_tcp(const ServerClient* exclusion, void* data, size_t size);
 
-            void internal_send_to_all_udp(ServerClient* exclusion, sf::Packet& packet);
-            //void internal_send_to_all_udp(ServerClient* exclusion, void* data, size_t size);
+            void internal_send_to_all_udp(const ServerClient* exclusion, sf::Packet& packet);
+            //void internal_send_to_all_udp(const ServerClient* exclusion, void* data, size_t size);
 
             void internal_update_tcp_listener_loop(bool serverActive);
             void internal_update_udp_loop(const float dt, bool serverActive);
@@ -63,6 +63,9 @@ namespace Engine::Networking {
             Server(ServerType::Type type, bool multithreaded = true);
             virtual ~Server();
 
+            inline CONSTEXPR bool isActive() const noexcept { return m_Active.load(std::memory_order::relaxed); }
+            inline explicit CONSTEXPR operator bool() const noexcept { return isActive(); }
+
             //override this function with your own custom client class that inherits from Engine::Networking::ServerClient
             virtual ServerClient* add_new_client(std::string& hash, std::string& clientIP, unsigned short clientPort, SocketTCP* tcp);
             virtual void onEvent(const Event& e) override {}
@@ -71,6 +74,7 @@ namespace Engine::Networking {
 
             ServerClient* getClientFromUDPData(const std::string& ip, unsigned short port, sf::Packet& sf_packet) const;
 
+            inline CONSTEXPR unsigned short getPort() const noexcept { return m_Port; }
             inline CONSTEXPR SocketUDP& getUDPSocket() const noexcept { return *m_UdpSocket.get(); }
             inline CONSTEXPR ServerType::Type getType() const noexcept { return m_ServerType; }
             inline CONSTEXPR size_t num_clients() const noexcept { return m_Threads.getNumClients(); }
@@ -86,17 +90,17 @@ namespace Engine::Networking {
 
             //tcp
             virtual SocketStatus::Status send_tcp_to_client(ServerClient* client, sf::Packet& packet);
-            virtual void send_tcp_to_all_but_client(ServerClient* exclusion, sf::Packet& packet);
+            virtual void send_tcp_to_all_but_client(const ServerClient* exclusion, sf::Packet& packet);
             virtual void send_tcp_to_all(sf::Packet& packet);
 
             //udp
             
             virtual SocketStatus::Status send_udp_to_client(ServerClient* client, sf::Packet& packet);
-            virtual void send_udp_to_all_but_client(ServerClient* exclusion, sf::Packet& packet);
+            virtual void send_udp_to_all_but_client(const ServerClient* exclusion, sf::Packet& packet);
             virtual void send_udp_to_all(sf::Packet& packet);
             
             virtual SocketStatus::Status send_udp_to_client_important(ServerClient* client, Engine::Networking::Packet& packet);
-            virtual void send_udp_to_all_but_client_important(ServerClient* exclusion, Engine::Networking::Packet& packet);
+            virtual void send_udp_to_all_but_client_important(const ServerClient* exclusion, Engine::Networking::Packet& packet);
             virtual void send_udp_to_all_important(Engine::Networking::Packet& packet);
 
             virtual SocketStatus::Status receive_udp(sf::Packet& packet, sf::IpAddress& sender, unsigned short& port);

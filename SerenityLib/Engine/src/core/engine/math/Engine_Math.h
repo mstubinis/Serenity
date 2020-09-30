@@ -13,21 +13,20 @@ class Camera;
 #include <SFML/Graphics/Color.hpp>
 
 namespace Engine::Math {
-    glm_vec3 rotate_vec3(const glm_quat& rotation, const glm_vec3& vec);
+    inline glm_vec3 rotate_vec3(const glm_quat& rotation, const glm_vec3& vec) noexcept { return rotation * vec; }
 
     glm::vec3 polynomial_interpolate_linear(std::vector<glm::vec3>& points, float time);
     glm::vec3 polynomial_interpolate_cubic(std::vector<glm::vec3>& points, float time);
 
     void extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProjection,glm::vec4* outPlanes);
 
-    void Float32From16(float*     out, const std::uint16_t in);
-    void Float16From32(std::uint16_t*  out, const float    in);
+    inline void Float32From16(float* out, const std::uint16_t in) noexcept { *out = glm::unpackHalf1x16(in); }
+    inline void Float16From32(std::uint16_t* out, const float in) noexcept { *out = glm::packHalf1x16(in); }
+    inline float Float32From16(const std::uint16_t in) noexcept { return glm::unpackHalf1x16(in); }
+    inline std::uint16_t Float16From32(const float in) noexcept { return glm::packHalf1x16(in); }
 
-    float Float32From16(const std::uint16_t in);
-    std::uint16_t Float16From32(const float in);
-
-    void Float32From16(float*    out, const std::uint16_t* in, unsigned int arraySize);
-    void Float16From32(std::uint16_t* out, const float*    in, unsigned int arraySize);
+    void Float32From16(float*    out, const std::uint16_t* in, unsigned int arraySize) noexcept;
+    void Float16From32(std::uint16_t* out, const float*    in, unsigned int arraySize) noexcept;
 
     glm::vec2 rotate2DPoint(const glm::vec2& point, float angle, const glm::vec2& origin = glm::vec2(0.0f, 0.0f));
 
@@ -52,15 +51,13 @@ namespace Engine::Math {
 
     glm::vec3 direction(const glm::vec3& eye, const glm::vec3& target);
 
-    void translate(const btRigidBody&, btVector3&, bool local);
-    void rotate(glm_quat& orientation, decimal pitch, decimal yaw, decimal roll);
-    void rotate(glm::quat& orientation, float pitch, float yaw, float roll);
-    void setRotation(glm_quat& orientation, decimal pitch, decimal yaw, decimal roll);
-    void setRotation(glm::quat& orientation, float pitch, float yaw, float roll);
-    void setFinalModelMatrix(glm_mat4& modelMatrix, const glm_vec3& position,const glm_quat& rotation, const glm_vec3& scale);
-    void setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
-
-    float remainder(float, float);
+    void translate(const btRigidBody&, btVector3&, bool local) noexcept;
+    void rotate(glm_quat& orientation, decimal pitch, decimal yaw, decimal roll) noexcept;
+    void rotate(glm::quat& orientation, float pitch, float yaw, float roll) noexcept;
+    void setRotation(glm_quat& orientation, decimal pitch, decimal yaw, decimal roll) noexcept;
+    void setRotation(glm::quat& orientation, float pitch, float yaw, float roll) noexcept;
+    void setFinalModelMatrix(glm_mat4& modelMatrix, const glm_vec3& position,const glm_quat& rotation, const glm_vec3& scale) noexcept;
+    void setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) noexcept;
 
     glm::vec3 getMatrixPosition(const glm::mat4& matrix);
     glm_vec3 getMatrixPosition(const glm_mat4& matrix);
@@ -87,22 +84,22 @@ namespace Engine::Math {
     bool isPointWithinCone(const glm::vec3& conePos, const glm::vec3& coneVector, const glm::vec3& point, float fovRadians);
     bool isPointWithinCone(const glm::vec3& conePos, const glm::vec3& coneVector, const glm::vec3& point, float fovRadians, float fovDistance);
 
-    float toRadians(float degrees);
-    float toDegrees(float radians);
-    float toRadians(double degrees);
-    float toDegrees(double radians);
+    inline float toRadians(float degrees) noexcept { return degrees * 0.0174533f; }
+    inline float toDegrees(float radians) noexcept { return radians * 57.2958f; }
+    inline float toRadians(double degrees) noexcept { return Math::toRadians((float)degrees); }
+    inline float toDegrees(double radians) noexcept { return Math::toDegrees((float)radians); }
+    inline float remainder(float x, float y) noexcept { return x - (glm::round(x / y) * y); }
 
-    float Max(const glm::vec2&);
-    float Max(const glm::vec3&);
-    float Max(const glm::vec4&);
+    inline float Max(const glm::vec2& v) noexcept { return std::max(v.x, v.y); }
+    inline float Max(const glm::vec3& v) noexcept { return std::max(v.x, std::max(v.y, v.z)); }
+    inline float Max(const glm::vec4& v) noexcept { return std::max(v.x, std::max(v.y, std::max(v.z, v.w))); }
+    inline float Max(float x, float y) noexcept { return std::max(x, y); }
+    inline float Max(float x, float y, float z) noexcept { return std::max(x, std::max(y, z)); }
+    inline float Max(float x, float y, float z, float w) noexcept { return std::max(x, std::max(y, std::max(z, w))); }
 
-    float Max(float, float);
-    float Max(float, float, float);
-    float Max(float, float, float, float);
-
-    uint Max(uint, uint);
-    uint Max(uint, uint, uint);
-    uint Max(uint, uint, uint, uint);
+    inline unsigned int Max(unsigned int x, unsigned int y) noexcept { return std::max(x, y); }
+    inline unsigned int Max(unsigned int x, unsigned int y, unsigned int z) noexcept { return std::max(x, std::max(y, z)); }
+    inline unsigned int Max(unsigned int x, unsigned int y, unsigned int z, unsigned int w) noexcept { return std::max(x, std::max(y, std::max(z, w))); }
 
     float fade(float t);
     double fade(double t);

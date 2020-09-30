@@ -146,31 +146,20 @@ namespace Engine {
                 m_Items[index] = std::move(data);
                 return true;
             }
-            int get_next_free_index() noexcept {
+            inline int get_next_free_index() noexcept {
                 return (m_Freelist.size() > 0) ? (int)m_Freelist[m_Freelist.size() - 1] : -1;
             }
-            /*
-            T* get_next_free() {
-                if (m_Freelist.size() > 0) {
-                    auto available_index = m_Freelist[m_Freelist.size() - 1];
-                    m_Freelist.pop_back();
-                    T& item = const_cast<T&>(m_Items[available_index]);
-                    return &item;
-                }
-                return nullptr;
-            }
-            */
             inline const T& get(size_t index) const noexcept { return m_Items[index]; }
             inline T& get(size_t index) noexcept { return m_Items[index]; }
             inline T& operator[](size_t index) noexcept { return m_Items[index]; }
             inline const T& operator[](const size_t& index) const noexcept { return m_Items[index]; }
 
-            std::vector<T>& data() { return m_Items; }
+            inline std::vector<T>& data() noexcept { return m_Items; }
           
-            typename std::vector<T>::iterator begin() { return m_Items.begin(); }
-            typename std::vector<T>::iterator end() { return m_Items.end(); }
-            typename std::vector<T>::const_iterator begin() const { return m_Items.begin(); }
-            typename std::vector<T>::const_iterator end() const { return m_Items.end(); }
+            typename inline std::vector<T>::iterator begin() { return m_Items.begin(); }
+            typename inline std::vector<T>::iterator end() { return m_Items.end(); }
+            typename inline std::vector<T>::const_iterator begin() const { return m_Items.begin(); }
+            typename inline std::vector<T>::const_iterator end() const { return m_Items.end(); }
     };
 };
 #endif

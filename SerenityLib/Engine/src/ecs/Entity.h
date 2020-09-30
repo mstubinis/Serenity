@@ -43,6 +43,7 @@ struct Entity {
         Entity& operator=(Entity&& other) noexcept = default;
 
         inline CONSTEXPR operator std::uint32_t() const noexcept { return m_Data; }
+        inline CONSTEXPR operator bool() const noexcept { return !null(); }
         inline CONSTEXPR bool operator==(const Entity other) const noexcept { return (m_Data == other.m_Data); }
         inline CONSTEXPR bool operator!=(const Entity other) const noexcept { return (m_Data != other.m_Data); }
         inline CONSTEXPR bool null() const noexcept { return (m_Data == 0U); }

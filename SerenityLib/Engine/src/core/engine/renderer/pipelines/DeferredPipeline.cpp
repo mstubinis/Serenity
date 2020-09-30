@@ -896,9 +896,8 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, S
         const auto maxTextures = getMaxNumTextureUnits() - 1U;
         Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), maxTextures);
 
-        GLCall(glBindBuffer(   GL_ARRAY_BUFFER,    m_Particle_Instance_VBO));
-        GLCall(glBufferData(   GL_ARRAY_BUFFER,    particle_count * sizeof(ParticleSystem::ParticleDOD), NULL, GL_STREAM_DRAW));
-        GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, particle_count * sizeof(ParticleSystem::ParticleDOD), system.ParticlesDOD.data()));
+        GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_Particle_Instance_VBO));
+        GLCall(glBufferData(GL_ARRAY_BUFFER, particle_count * sizeof(ParticleSystem::ParticleDOD), system.ParticlesDOD.data(), GL_STREAM_DRAW));
 
         auto& particleMesh = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh();
         m_Renderer.bind(&particleMesh);
@@ -929,21 +928,21 @@ void DeferredPipeline::internal_render_2d_text_left(const std::string& text, con
             float startingY        = y - (glyph.height + glyph.yoffset);
             ++i;
 
-            m_Text_Indices.put(accum + 0);
-            m_Text_Indices.put(accum + 1);
-            m_Text_Indices.put(accum + 2);
-            m_Text_Indices.put(accum + 3);
-            m_Text_Indices.put(accum + 1);
-            m_Text_Indices.put(accum + 0);
+            m_Text_Indices.push(accum + 0);
+            m_Text_Indices.push(accum + 1);
+            m_Text_Indices.push(accum + 2);
+            m_Text_Indices.push(accum + 3);
+            m_Text_Indices.push(accum + 1);
+            m_Text_Indices.push(accum + 0);
 
             float startingX = x + glyph.xoffset;
             x += glyph.xadvance;
 
             for (unsigned int i = 0; i < 4; ++i) {
-                m_Text_Points.emplace_put(startingX + glyph.pts[i].x, startingY + glyph.pts[i].y, z);
+                m_Text_Points.emplace_push(startingX + glyph.pts[i].x, startingY + glyph.pts[i].y, z);
             }
             for (unsigned int i = 0; i < 4; ++i) {
-                m_Text_UVs.emplace_put(glyph.uvs[i].x, glyph.uvs[i].y);
+                m_Text_UVs.emplace_push(glyph.uvs[i].x, glyph.uvs[i].y);
             }
         }
     }
@@ -982,21 +981,21 @@ void DeferredPipeline::internal_render_2d_text_center(const std::string& text, c
                 float startingY        = y - (glyph.height + glyph.yoffset);
                 ++i;
 
-                m_Text_Indices.put(accum + 0);
-                m_Text_Indices.put(accum + 1);
-                m_Text_Indices.put(accum + 2);
-                m_Text_Indices.put(accum + 3);
-                m_Text_Indices.put(accum + 1);
-                m_Text_Indices.put(accum + 0);
+                m_Text_Indices.push(accum + 0);
+                m_Text_Indices.push(accum + 1);
+                m_Text_Indices.push(accum + 2);
+                m_Text_Indices.push(accum + 3);
+                m_Text_Indices.push(accum + 1);
+                m_Text_Indices.push(accum + 0);
 
                 float startingX = x + glyph.xoffset;
                 x += glyph.xadvance;
 
                 for (unsigned int i = 0; i < 4; ++i) {
-                    m_Text_Points.emplace_put(startingX + glyph.pts[i].x - line_size, startingY + glyph.pts[i].y, z);
+                    m_Text_Points.emplace_push(startingX + glyph.pts[i].x - line_size, startingY + glyph.pts[i].y, z);
                 }
                 for (unsigned int i = 0; i < 4; ++i) {
-                    m_Text_UVs.emplace_put(glyph.uvs[i].x, glyph.uvs[i].y);
+                    m_Text_UVs.emplace_push(glyph.uvs[i].x, glyph.uvs[i].y);
                 }
             }
         }
@@ -1032,12 +1031,12 @@ void DeferredPipeline::internal_render_2d_text_right(const std::string& text, co
                 const CharGlyph& glyph = font.getGlyphData(character);
                 float startingY  = y - (glyph.height + glyph.yoffset);
 
-                m_Text_Indices.put(accum + 0);
-                m_Text_Indices.put(accum + 1);
-                m_Text_Indices.put(accum + 2);
-                m_Text_Indices.put(accum + 3);
-                m_Text_Indices.put(accum + 1);
-                m_Text_Indices.put(accum + 0);
+                m_Text_Indices.push(accum + 0);
+                m_Text_Indices.push(accum + 1);
+                m_Text_Indices.push(accum + 2);
+                m_Text_Indices.push(accum + 3);
+                m_Text_Indices.push(accum + 1);
+                m_Text_Indices.push(accum + 0);
 
                 if (k == 0) {
                     x -= glyph.width;
@@ -1046,10 +1045,10 @@ void DeferredPipeline::internal_render_2d_text_right(const std::string& text, co
                 x -= glyph.xadvance;
 
                 for (unsigned int i = 0; i < 4; ++i) {
-                    m_Text_Points.emplace_put(startingX + glyph.pts[i].x, startingY + glyph.pts[i].y, z);
+                    m_Text_Points.emplace_push(startingX + glyph.pts[i].x, startingY + glyph.pts[i].y, z);
                 }
                 for (unsigned int i = 0; i < 4; ++i) {
-                    m_Text_UVs.emplace_put(glyph.uvs[i].x, glyph.uvs[i].y);
+                    m_Text_UVs.emplace_push(glyph.uvs[i].x, glyph.uvs[i].y);
                 }
                 ++k;
             }

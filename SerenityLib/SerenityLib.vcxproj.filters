@@ -896,6 +896,12 @@
     <ClInclude Include="Engine\src\core\engine\utils\BlockProfiler.h">
       <Filter>Header Files\Engine\Core\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\containers\PartialVectorPOD.h">
+      <Filter>Header Files\Engine\Core\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\model\ModelInstanceHandle.h">
+      <Filter>Header Files\Engine\Core\Model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -1347,6 +1353,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\networking\Packet.cpp">
       <Filter>Source Files\Engine\Core\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\model\ModelInstanceHandle.cpp">
+      <Filter>Source Files\Engine\Core\Model</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

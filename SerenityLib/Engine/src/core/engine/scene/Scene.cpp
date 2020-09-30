@@ -63,29 +63,29 @@ class Scene::impl final {
             Engine::priv::Core::m_Engine->m_SoundModule.updateCameraPosition(super);
             ComponentBody::recalculateAllParentChildMatrices(super);
         }
-        void _addModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, std::vector<priv::RenderGraph>& render_graph_list, RenderStage stage) {
+        void _addModelInstanceToPipeline(Scene& scene, ModelInstance& inModelInstance, std::vector<priv::RenderGraph>& renderGraphs, RenderStage stage, ComponentModel& componentModel) {
             priv::RenderGraph* renderGraph = nullptr;
-            for (auto& render_graph_ptr : render_graph_list) {
-                if (render_graph_ptr.m_ShaderProgram == modelInstance.shaderProgram()) {
-                    renderGraph = &render_graph_ptr;
+            for (auto& graph : renderGraphs) {
+                if (graph.m_ShaderProgram == inModelInstance.shaderProgram()) {
+                    renderGraph = &graph;
                     break;
                 }
             }
             if (!renderGraph) {
-                renderGraph = &scene.m_RenderGraphs[(unsigned int)stage].emplace_back(*modelInstance.shaderProgram());
+                renderGraph = &scene.m_RenderGraphs[(size_t)stage].emplace_back(*inModelInstance.shaderProgram());
             }
-            renderGraph->addModelInstanceToPipeline(modelInstance);
+            renderGraph->addModelInstanceToPipeline(inModelInstance, componentModel);
         }
-        void _removeModelInstanceFromPipeline(ModelInstance& modelInstance, std::vector<priv::RenderGraph>& render_graph_list) {
+        void _removeModelInstanceFromPipeline(ModelInstance& inModelInstance, std::vector<priv::RenderGraph>& renderGraphs) {
             priv::RenderGraph* renderGraph = nullptr;
-            for (auto& render_graph_ptr : render_graph_list) {
-                if (render_graph_ptr.m_ShaderProgram == modelInstance.shaderProgram()) {
-                    renderGraph = &render_graph_ptr;
+            for (auto& graph : renderGraphs) {
+                if (graph.m_ShaderProgram == inModelInstance.shaderProgram()) {
+                    renderGraph = &graph;
                     break;
                 }
             }
             if (renderGraph) {
-                renderGraph->removeModelInstanceFromPipeline(modelInstance);
+                renderGraph->removeModelInstanceFromPipeline(inModelInstance);
             }
         }
 };
@@ -133,14 +133,14 @@ void priv::InternalScenePublicInterface::CleanECS(Scene& scene, Entity inEntity)
     }
 }
 void priv::InternalScenePublicInterface::UpdateMaterials(Scene& scene, const float dt) {
-    for (unsigned int i = 0; i < (unsigned int)RenderStage::_TOTAL; ++i) {
+    for (size_t i = 0; i < (size_t)RenderStage::_TOTAL; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             for (auto& materialNode : render_graph_ptr.m_MaterialNodes) {
                 materialNode.material->m_UpdatedThisFrame = false;
             }
         }
     }
-    for (unsigned int i = 0; i < (unsigned int)RenderStage::_TOTAL; ++i) {
+    for (size_t i = 0; i < (size_t)RenderStage::_TOTAL; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             for (auto& materialNode : render_graph_ptr.m_MaterialNodes) {
                 auto* material = materialNode.material;
@@ -153,7 +153,7 @@ void priv::InternalScenePublicInterface::UpdateMaterials(Scene& scene, const flo
     }
 }
 void priv::InternalScenePublicInterface::RenderGeometryOpaque(Renderer& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
-    for (unsigned int i = (unsigned int)RenderStage::GeometryOpaque; i < (unsigned int)RenderStage::GeometryOpaque_4; ++i) {
+    for (size_t i = (size_t)RenderStage::GeometryOpaque; i < (size_t)RenderStage::GeometryOpaque_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
             render_graph_ptr.render(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
@@ -161,7 +161,7 @@ void priv::InternalScenePublicInterface::RenderGeometryOpaque(Renderer& renderer
     }
 }
 void priv::InternalScenePublicInterface::RenderGeometryTransparent(Renderer& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
-    for (unsigned int i = (unsigned int)RenderStage::GeometryTransparent; i < (unsigned int)RenderStage::GeometryTransparent_4; ++i) {
+    for (size_t i = (size_t)RenderStage::GeometryTransparent; i < (size_t)RenderStage::GeometryTransparent_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             render_graph_ptr.sort(camera, SortingMode::BackToFront);
             render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
@@ -170,7 +170,7 @@ void priv::InternalScenePublicInterface::RenderGeometryTransparent(Renderer& ren
     }
 }
 void priv::InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorted(Renderer& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
-    for (unsigned int i = (unsigned int)RenderStage::GeometryTransparentTrianglesSorted; i < (unsigned int)RenderStage::GeometryTransparentTrianglesSorted_4; ++i) {
+    for (size_t i = (size_t)RenderStage::GeometryTransparentTrianglesSorted; i < (size_t)RenderStage::GeometryTransparentTrianglesSorted_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             render_graph_ptr.sort(camera, SortingMode::FrontToBack);
             render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
@@ -179,7 +179,7 @@ void priv::InternalScenePublicInterface::RenderGeometryTransparentTrianglesSorte
     }
 }
 void priv::InternalScenePublicInterface::RenderForwardOpaque(Renderer& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
-    for (unsigned int i = (unsigned int)RenderStage::ForwardOpaque; i < (unsigned int)RenderStage::ForwardOpaque_4; ++i) {
+    for (size_t i = (size_t)RenderStage::ForwardOpaque; i < (size_t)RenderStage::ForwardOpaque_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
             render_graph_ptr.render(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
@@ -187,7 +187,7 @@ void priv::InternalScenePublicInterface::RenderForwardOpaque(Renderer& renderer,
     }
 }
 void priv::InternalScenePublicInterface::RenderForwardTransparent(Renderer& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
-    for (unsigned int i = (unsigned int)RenderStage::ForwardTransparent; i < (unsigned int)RenderStage::ForwardTransparent_4; ++i) {
+    for (size_t i = (size_t)RenderStage::ForwardTransparent; i < (size_t)RenderStage::ForwardTransparent_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             render_graph_ptr.sort_bruteforce(camera, SortingMode::BackToFront);
             render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
@@ -196,7 +196,7 @@ void priv::InternalScenePublicInterface::RenderForwardTransparent(Renderer& rend
     }
 }
 void priv::InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted(Renderer& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
-    for (unsigned int i = (unsigned int)RenderStage::ForwardTransparentTrianglesSorted; i < (unsigned int)RenderStage::ForwardTransparentTrianglesSorted_4; ++i) {
+    for (size_t i = (size_t)RenderStage::ForwardTransparentTrianglesSorted; i < (size_t)RenderStage::ForwardTransparentTrianglesSorted_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             //TODO: sort_bruteforce and render_bruteforce doesn't work here... probably has to do with custom binds and unbinds and custom shader(s)
             render_graph_ptr.sort(camera, SortingMode::FrontToBack);
@@ -206,7 +206,7 @@ void priv::InternalScenePublicInterface::RenderForwardTransparentTrianglesSorted
     }
 }
 void priv::InternalScenePublicInterface::RenderForwardParticles(Renderer& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
-    for (unsigned int i = (unsigned int)RenderStage::ForwardParticles; i < (unsigned int)RenderStage::ForwardParticles_4; ++i) {
+    for (size_t i = (size_t)RenderStage::ForwardParticles; i < (size_t)RenderStage::ForwardParticles_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             auto& render_graph = const_cast<RenderGraph&>(render_graph_ptr);
             render_graph.sort_cheap_bruteforce(camera, SortingMode::BackToFront);
@@ -216,7 +216,7 @@ void priv::InternalScenePublicInterface::RenderForwardParticles(Renderer& render
     }
 }
 void priv::InternalScenePublicInterface::RenderDecals(Renderer& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
-    for (unsigned int i = (unsigned int)RenderStage::Decals; i < (unsigned int)RenderStage::Decals_4; ++i) {
+    for (size_t i = (size_t)RenderStage::Decals; i < (size_t)RenderStage::Decals_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             render_graph_ptr.sort(camera, SortingMode::None);
             render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
@@ -227,8 +227,8 @@ void priv::InternalScenePublicInterface::RenderDecals(Renderer& renderer, Scene&
 void priv::InternalScenePublicInterface::RenderParticles(Renderer& renderer, Scene& scene, Viewport& viewport, Camera& camera, ShaderProgram& program) {
     scene.m_i->m_ParticleSystem.render(viewport, camera, program, renderer);
 }
-void priv::InternalScenePublicInterface::AddModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage stage) {
-    scene.m_i->_addModelInstanceToPipeline(scene, modelInstance, scene.m_RenderGraphs[(unsigned int)stage], stage);
+void priv::InternalScenePublicInterface::AddModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage stage, ComponentModel& componentModel) {
+    scene.m_i->_addModelInstanceToPipeline(scene, modelInstance, scene.m_RenderGraphs[(unsigned int)stage], stage, componentModel);
 }
 void priv::InternalScenePublicInterface::RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage stage){
     scene.m_i->_removeModelInstanceFromPipeline(modelInstance, scene.m_RenderGraphs[(unsigned int)stage]);

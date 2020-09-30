@@ -23,6 +23,7 @@ namespace Engine::priv {
 #include <core/engine/renderer/opengl/State.h>
 #include <core/engine/renderer/opengl/Extensions.h>
 #include <core/engine/fonts/FontIncludes.h>
+#include <core/engine/renderer/pipelines/IRenderingPipeline.h>
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -43,7 +44,7 @@ namespace priv{
             std::unique_ptr<IRenderingPipeline>  m_Pipeline;
         public:
             Renderer(const EngineOptions& options);
-            ~Renderer();
+            ~Renderer() = default;
 
             static unsigned int GLSL_VERSION;
             static unsigned int OPENGL_VERSION;

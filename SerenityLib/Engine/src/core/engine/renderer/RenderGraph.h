@@ -8,6 +8,7 @@ class  Scene;
 class  Material;
 class  Mesh;
 class  ModelInstance;
+class  ModelInstanceHandle;
 struct Entity;
 class  Viewport;
 namespace Engine::priv {
@@ -18,38 +19,23 @@ namespace Engine::priv {
 
 #include <core/engine/utils/Utils.h>
 #include <core/engine/renderer/RendererIncludes.h>
+#include <core/engine/model/ModelInstanceHandle.h>
 
 namespace Engine::priv {
-    class InstanceNode final : public Engine::NonCopyable {
+    class MeshNode final {
         friend class  RenderGraph;
         friend struct InternalScenePublicInterface;
         private:
-            ModelInstance*   instance = nullptr;
-
-            InstanceNode() = delete;
-        public:
-            InstanceNode(ModelInstance& modelInstance);
-            ~InstanceNode();
-
-            InstanceNode(InstanceNode&& other) noexcept;
-            InstanceNode& operator=(InstanceNode&& other) noexcept;
-    };
-    class MeshNode final : public Engine::NonCopyable {
-        friend class  RenderGraph;
-        friend struct InternalScenePublicInterface;
-        private:
-            Mesh*                        mesh = nullptr;
-            std::vector<InstanceNode*>   instanceNodes;
+            Mesh*                             mesh = nullptr;
+            std::vector<ModelInstance*>       instanceNodes;
 
             MeshNode() = delete;
         public:
-            MeshNode(Mesh& mesh);
-            ~MeshNode();
-
-            MeshNode(MeshNode&& other) noexcept;
-            MeshNode& operator=(MeshNode&& other) noexcept;
+            MeshNode(Mesh& mesh_)
+                : mesh{ &mesh_ }
+            {}
     };
-    class MaterialNode final : public Engine::NonCopyable{
+    class MaterialNode final {
         friend class  RenderGraph;
         friend struct InternalScenePublicInterface;
         private:
@@ -58,34 +44,35 @@ namespace Engine::priv {
 
             MaterialNode() = delete;
         public:
-            MaterialNode(Material& material);
-            ~MaterialNode();
-
-            MaterialNode(MaterialNode&& other) noexcept;
-            MaterialNode& operator=(MaterialNode&& other) noexcept;
+            MaterialNode(Material& material_) 
+                : material{ &material_ }
+            {}
     };
-    class RenderGraph final : public Engine::NonCopyable {
+    class RenderGraph final {
         friend class  Scene;
         friend struct Engine::priv::InternalScenePublicInterface;
         private:
-            ShaderProgram*               m_ShaderProgram = nullptr;
-            std::vector<MaterialNode>    m_MaterialNodes;
-            std::vector<InstanceNode*>   m_InstancesTotal;
+            ShaderProgram*                    m_ShaderProgram = nullptr;
+            std::vector<MaterialNode>         m_MaterialNodes;
+            std::vector<ModelInstance*>       m_InstancesTotal;
 
             RenderGraph() = delete;
 
-            void addModelInstanceToPipeline(ModelInstance& modelInstance);
+            void addModelInstanceToPipeline(ModelInstance& modelInstance, ComponentModel&);
             void removeModelInstanceFromPipeline(ModelInstance& modelInstance);
         public:
-            RenderGraph(ShaderProgram&);
-            ~RenderGraph();
+            RenderGraph(ShaderProgram& shaderProgram)
+                : m_ShaderProgram{ &shaderProgram }
+            {}
 
-            RenderGraph(RenderGraph&& other) noexcept;
-            RenderGraph& operator=(RenderGraph&& other) noexcept;
+            RenderGraph(const RenderGraph& other) = delete;
+            RenderGraph& operator=(const RenderGraph& other) = delete;
+            RenderGraph(RenderGraph&& other) noexcept = default;
+            RenderGraph& operator=(RenderGraph&& other) noexcept = default;
 
             bool remove_material_node(MaterialNode& materialNode);
             bool remove_mesh_node(MaterialNode& materialNode, MeshNode& meshNode);
-            bool remove_instance_node(MeshNode& meshNode, InstanceNode& instanceNode);
+            bool remove_instance_node(MeshNode& meshNode, ModelInstance& instanceNode);
 
             void clean(Entity entity);
             void sort(Camera& camera, SortingMode sortingMode);

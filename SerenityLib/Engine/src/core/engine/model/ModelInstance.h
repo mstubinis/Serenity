@@ -87,6 +87,11 @@ class ModelInstance final : public Engine::UserPointer, public Observer {
 
         ~ModelInstance();
 
+        inline bool operator==(const ModelInstance& other) { return (m_Index == other.m_Index && m_Parent == other.m_Parent); }
+        inline bool operator!=(const ModelInstance& other) { return !operator==(other); }
+        inline bool operator==(ModelInstance& other) { return (m_Index == other.m_Index && m_Parent == other.m_Parent); }
+        inline bool operator!=(ModelInstance& other) { return !operator==(other); }
+
         void onEvent(const Event& e) override;
 
         static inline void setGlobalDistanceFactor(decimal factor) noexcept { m_GlobalDistanceFactor = factor; }
@@ -97,14 +102,13 @@ class ModelInstance final : public Engine::UserPointer, public Observer {
         static void setDefaultViewportFlag(unsigned int flag);
         static void setDefaultViewportFlag(ViewportFlag::Flag flag);
 
-        void setViewportFlag(unsigned int flag);
-        void addViewportFlag(unsigned int flag);
-        void removeViewportFlag(unsigned int flag);
-        void setViewportFlag(ViewportFlag::Flag flag);
-        void addViewportFlag(ViewportFlag::Flag flag);
-        void removeViewportFlag(ViewportFlag::Flag flag);
-
-        unsigned int getViewportFlags() const;
+        inline void setViewportFlag(unsigned int flag) noexcept { m_ViewportFlag = flag; }
+        inline void addViewportFlag(unsigned int flag) noexcept { m_ViewportFlag.add(flag); }
+        inline void removeViewportFlag(unsigned int flag) noexcept { m_ViewportFlag.remove(flag); }
+        inline void setViewportFlag(ViewportFlag::Flag flag) noexcept { m_ViewportFlag = flag; }
+        inline void addViewportFlag(ViewportFlag::Flag flag) noexcept { m_ViewportFlag.add(flag); }
+        inline void removeViewportFlag(ViewportFlag::Flag flag) noexcept { m_ViewportFlag.remove(flag); }
+        inline unsigned int getViewportFlags() const noexcept { return m_ViewportFlag.get(); }
 
         inline CONSTEXPR float radius() const noexcept { return m_Radius; }
         inline CONSTEXPR size_t index() const noexcept { return m_Index; }

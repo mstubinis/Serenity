@@ -112,17 +112,22 @@ bool priv::InternalModelInstancePublicInterface::IsViewportValid(const ModelInst
     return (flags & (1 << viewport.id()) || flags == 0);
 }
 
-ModelInstance::ModelInstance(Entity parent, Mesh* mesh, Material* mat, ShaderProgram* program) : m_Parent(parent){
+ModelInstance::ModelInstance(Entity parent, Mesh* mesh, Material* mat, ShaderProgram* program) 
+    : m_Parent{ parent }
+{
     internal_init(mesh, mat, program);
     setCustomBindFunctor(priv::DefaultModelInstanceBindFunctor());
     setCustomUnbindFunctor(priv::DefaultModelInstanceUnbindFunctor());
 }
-ModelInstance::ModelInstance(Entity parent, Handle mesh, Handle mat, ShaderProgram* program) : ModelInstance(parent, mesh.get<Mesh>(), mat.get<Material>(), program) {
-}
-ModelInstance::ModelInstance(Entity parent, Mesh* mesh, Handle mat, ShaderProgram* program) : ModelInstance(parent, mesh, mat.get<Material>(), program) {
-}
-ModelInstance::ModelInstance(Entity parent, Handle mesh, Material* mat, ShaderProgram* program) : ModelInstance(parent, mesh.get<Mesh>(), mat, program) {
-}
+ModelInstance::ModelInstance(Entity parent, Handle mesh, Handle mat, ShaderProgram* program) 
+    : ModelInstance{ parent, mesh.get<Mesh>(), mat.get<Material>(), program }
+{}
+ModelInstance::ModelInstance(Entity parent, Mesh* mesh, Handle mat, ShaderProgram* program) 
+    : ModelInstance{ parent, mesh, mat.get<Material>(), program }
+{}
+ModelInstance::ModelInstance(Entity parent, Handle mesh, Material* mat, ShaderProgram* program) 
+    : ModelInstance{ parent, mesh.get<Mesh>(), mat, program }
+{}
 ModelInstance::ModelInstance(ModelInstance&& other) noexcept
     : m_DrawingMode{ std::move(other.m_DrawingMode) }
     , m_AnimationVector{ std::move(other.m_AnimationVector) }
@@ -138,15 +143,15 @@ ModelInstance::ModelInstance(ModelInstance&& other) noexcept
     , m_Visible{ std::move(other.m_Visible) }
     , m_ForceRender{ std::move(other.m_ForceRender) }
     , m_Index{ std::move(other.m_Index) }
-    , m_ShaderProgram{ std::exchange(other.m_ShaderProgram, nullptr) }
-    , m_Mesh{ std::exchange(other.m_Mesh, nullptr) }
-    , m_Material{ std::exchange(other.m_Material, nullptr) }
+    , m_ShaderProgram{ std::move(other.m_ShaderProgram) }
+    , m_Mesh{ std::move(other.m_Mesh) }
+    , m_Material{ std::move(other.m_Material) }
     , m_CustomBindFunctor{ std::move(other.m_CustomBindFunctor) }
     , m_CustomUnbindFunctor{ std::move(other.m_CustomUnbindFunctor) }
+    , m_ViewportFlag{ std::move(other.m_ViewportFlagDefault) }
 {
     m_ViewportFlagDefault    = std::move(other.m_ViewportFlagDefault);
-    m_ViewportFlag           = std::move(other.m_ViewportFlagDefault);
-    m_UserPointer            = std::exchange(other.m_UserPointer, nullptr);
+    m_UserPointer            = std::move(other.m_UserPointer);
 
     internal_calculate_radius();
 }
@@ -167,10 +172,10 @@ ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
     m_Visible                = std::move(other.m_Visible);
     m_ForceRender            = std::move(other.m_ForceRender);
     m_Index                  = std::move(other.m_Index);
-    m_UserPointer            = std::exchange(other.m_UserPointer, nullptr);
-    m_ShaderProgram          = std::exchange(other.m_ShaderProgram, nullptr);
-    m_Mesh                   = std::exchange(other.m_Mesh, nullptr);
-    m_Material               = std::exchange(other.m_Material, nullptr);
+    m_UserPointer            = std::move(other.m_UserPointer);
+    m_ShaderProgram          = std::move(other.m_ShaderProgram);
+    m_Mesh                   = std::move(other.m_Mesh);
+    m_Material               = std::move(other.m_Material);
     m_CustomBindFunctor      = std::move(other.m_CustomBindFunctor);
     m_CustomUnbindFunctor    = std::move(other.m_CustomUnbindFunctor);
 
@@ -209,27 +214,6 @@ void ModelInstance::internal_init(Mesh* mesh, Material* mat, ShaderProgram* prog
     m_Material          = mat;
     m_Mesh              = mesh;
     internal_update_model_matrix();
-}
-void ModelInstance::setViewportFlag(unsigned int flag) {
-    m_ViewportFlag = flag;
-}
-void ModelInstance::addViewportFlag(unsigned int flag) {
-    m_ViewportFlag.add(flag);
-}
-void ModelInstance::removeViewportFlag(unsigned int flag) {
-    m_ViewportFlag.remove(flag);
-}
-void ModelInstance::setViewportFlag(ViewportFlag::Flag flag) {
-    m_ViewportFlag = flag;
-}
-void ModelInstance::addViewportFlag(ViewportFlag::Flag flag) {
-    m_ViewportFlag.add(flag);
-}
-void ModelInstance::removeViewportFlag(ViewportFlag::Flag flag) {
-    m_ViewportFlag.remove(flag);
-}
-unsigned int ModelInstance::getViewportFlags() const {
-    return m_ViewportFlag.get();
 }
 void ModelInstance::internal_update_model_matrix() {
     auto* model = m_Parent.getComponent<ComponentModel>();

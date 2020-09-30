@@ -57,42 +57,50 @@ void ComponentModel_Functions::RegisterDeferredMeshLoaded(ComponentModel& super,
 #pragma region Component
 
 ComponentModel::ComponentModel(Entity entity, Handle mesh, Handle material, ShaderProgram* shaderProgram, RenderStage stage) 
-: m_Owner(entity) {
+    : m_Owner{ entity }
+{
     addModel(mesh, material, shaderProgram, stage);
 }
 ComponentModel::ComponentModel(Entity entity, Mesh* mesh, Handle material,  ShaderProgram* shaderProgram, RenderStage stage) 
-: m_Owner(entity) {
+    : m_Owner{ entity }
+{
     addModel(mesh, material.get<Material>(), shaderProgram, stage);
 }
 ComponentModel::ComponentModel(Entity entity, Handle mesh, Material* material,  ShaderProgram* shaderProgram, RenderStage stage) 
-: m_Owner(entity) {
+    : m_Owner{ entity }
+{
     addModel(mesh.get<Mesh>(), material, shaderProgram, stage);
 }
 ComponentModel::ComponentModel(Entity entity, Mesh* mesh, Material* material, ShaderProgram* shaderProgram, RenderStage stage) 
-: m_Owner(entity) {
+    : m_Owner{ entity }
+{
     addModel(mesh, material, shaderProgram, stage);
 }
 ComponentModel::ComponentModel(Entity entity, Handle mesh, Handle material, Handle shaderProgram, RenderStage stage) 
-: m_Owner(entity) {
+    : m_Owner{ entity }
+{
     addModel(mesh, material, shaderProgram.get<ShaderProgram>(), stage);
 }
 ComponentModel::ComponentModel(Entity entity, Mesh* mesh, Handle material, Handle shaderProgram, RenderStage stage) 
-: m_Owner(entity) {
+    : m_Owner{ entity }
+{
     addModel(mesh, material.get<Material>(), shaderProgram.get<ShaderProgram>(), stage);
 }
 ComponentModel::ComponentModel(Entity entity, Handle mesh, Material* material, Handle shaderProgram, RenderStage stage) 
-: m_Owner(entity) {
+    : m_Owner{ entity }
+{
     addModel(mesh.get<Mesh>(), material, shaderProgram.get<ShaderProgram>(), stage);
 }
 ComponentModel::ComponentModel(Entity entity, Mesh* mesh, Material* material, Handle shaderProgram, RenderStage stage) 
-: m_Owner(entity) {
+    : m_Owner{ entity }
+{
     addModel(mesh, material, shaderProgram.get<ShaderProgram>(), stage);
 }
 ComponentModel::ComponentModel(ComponentModel&& other) noexcept 
-    : m_Owner(std::move(other.m_Owner))
-    , m_ModelInstances(std::move(other.m_ModelInstances))
-    , m_Radius(std::move(other.m_Radius))
-    , m_RadiusBox(std::move(other.m_RadiusBox))
+    : m_Owner{ std::move(other.m_Owner) }
+    , m_ModelInstances{ std::move(other.m_ModelInstances) }
+    , m_Radius{ std::move(other.m_Radius) }
+    , m_RadiusBox{ std::move(other.m_RadiusBox) }
 {
     if (other.isRegistered(EventType::ResourceLoaded)) {
         registerEvent(EventType::ResourceLoaded);
@@ -100,30 +108,24 @@ ComponentModel::ComponentModel(ComponentModel&& other) noexcept
     }
 }
 ComponentModel& ComponentModel::operator=(ComponentModel&& other) noexcept {
-    if (&other != this) {
-        m_Owner          = std::move(other.m_Owner);
-        m_ModelInstances = std::move(other.m_ModelInstances);
-        m_Radius         = std::move(other.m_Radius);
-        m_RadiusBox      = std::move(other.m_RadiusBox);
+    m_Owner          = std::move(other.m_Owner);
+    m_ModelInstances = std::move(other.m_ModelInstances);
+    m_Radius         = std::move(other.m_Radius);
+    m_RadiusBox      = std::move(other.m_RadiusBox);
 
-        if (other.isRegistered(EventType::ResourceLoaded)) {
-            registerEvent(EventType::ResourceLoaded);
-            other.unregisterEvent(EventType::ResourceLoaded);
-        }
+    if (other.isRegistered(EventType::ResourceLoaded)) {
+        registerEvent(EventType::ResourceLoaded);
+        other.unregisterEvent(EventType::ResourceLoaded);
     }
     return *this;
 }
-ComponentModel::~ComponentModel() {
-    SAFE_DELETE_VECTOR(m_ModelInstances);
-}
-void ComponentModel::onEvent(const Event& event_) {
-    if (event_.type == EventType::ResourceLoaded && event_.eventResource.resource->type() == ResourceType::Mesh) {
-        auto* mesh = (Mesh*)event_.eventResource.resource;
+void ComponentModel::onEvent(const Event& e) {
+    if (e.type == EventType::ResourceLoaded && e.eventResource.resource->type() == ResourceType::Mesh) {
+        auto* mesh = (Mesh*)e.eventResource.resource;
         std::vector<Mesh*> unfinishedMeshes;
         unfinishedMeshes.reserve(m_ModelInstances.size());
         for (auto& instance : m_ModelInstances) {
-            auto& mesh = *instance->m_Mesh;
-            if (instance->m_Mesh && mesh == false) {
+            if (instance->m_Mesh && *mesh == false) {
                 unfinishedMeshes.emplace_back(instance->m_Mesh);
             }
         }
@@ -132,11 +134,6 @@ void ComponentModel::onEvent(const Event& event_) {
             unregisterEvent(EventType::ResourceLoaded);
         }
     }
-}
-void ComponentModel::removeModel(size_t index) {
-    auto* ptr = m_ModelInstances[index];
-    m_ModelInstances.erase(m_ModelInstances.begin() + index);
-    SAFE_DELETE(ptr);
 }
 void ComponentModel::setViewportFlag(unsigned int flag) {
     for (auto& model_instance : m_ModelInstances) {
@@ -158,43 +155,29 @@ void ComponentModel::addViewportFlag(ViewportFlag::Flag flag) {
         model_instance->addViewportFlag(flag);
     }
 }
-size_t ComponentModel::getNumModels() const {
-    return m_ModelInstances.size();
-}
-ModelInstance& ComponentModel::getModel(size_t index) const {
-    return *m_ModelInstances[index];
-}
-void ComponentModel::show(bool shown) { 
+void ComponentModel::show(bool shown) noexcept { 
     for (auto& modelInstance : m_ModelInstances) {
         modelInstance->show(shown);
     }
 }
-void ComponentModel::hide() { 
-    ComponentModel::show(false);
-}
-ModelInstance& ComponentModel::addModel(Handle mesh, Handle material, ShaderProgram* shaderProgram, RenderStage stage) {
-    return ComponentModel::addModel(mesh.get<Mesh>(), material.get<Material>(), shaderProgram, stage);
-}
-ModelInstance& ComponentModel::addModel(Mesh* mesh, Material* material, ShaderProgram* shaderProgram, RenderStage stage) {
+ModelInstanceHandle ComponentModel::addModel(Mesh* mesh, Material* material, ShaderProgram* shaderProgram, RenderStage stage) {
     ComponentModel_Functions::RegisterDeferredMeshLoaded(*this, mesh);
 
-    auto modelInstance      = NEW ModelInstance(m_Owner, mesh, material, shaderProgram);
-    auto& scene             = m_Owner.scene();
-    modelInstance->m_Stage  = stage;
+    auto& modelInstance    = *m_ModelInstances.emplace_back(std::make_unique<ModelInstance>(m_Owner, mesh, material, shaderProgram));
+    modelInstance.m_Stage  = stage;
+    modelInstance.m_Index  = m_ModelInstances.size() - 1U;
 
-    const auto index        = m_ModelInstances.size();
-    modelInstance->m_Index  = index;
-    m_ModelInstances.push_back(std::move(modelInstance));
-
-    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, *modelInstance, stage);
+    InternalScenePublicInterface::AddModelInstanceToPipeline(m_Owner.scene(), modelInstance, stage, *this);
     ComponentModel_Functions::CalculateRadius(*this);
-    return *modelInstance;
+    return { modelInstance.m_Index, *this };
 }
-
-ModelInstance& ComponentModel::addModel(Handle mesh, Handle material, Handle shaderProgram, RenderStage stage) {
+ModelInstanceHandle ComponentModel::addModel(Handle mesh, Handle material, ShaderProgram* shaderProgram, RenderStage stage) {
+    return ComponentModel::addModel(mesh.get<Mesh>(), material.get<Material>(), shaderProgram, stage);
+}
+ModelInstanceHandle ComponentModel::addModel(Handle mesh, Handle material, Handle shaderProgram, RenderStage stage) {
     return ComponentModel::addModel(mesh.get<Mesh>(), material.get<Material>(), shaderProgram.get<ShaderProgram>(), stage);
 }
-ModelInstance& ComponentModel::addModel(Mesh* mesh, Material* material, Handle shaderProgram, RenderStage stage) {
+ModelInstanceHandle ComponentModel::addModel(Mesh* mesh, Material* material, Handle shaderProgram, RenderStage stage) {
     return ComponentModel::addModel(mesh, material, shaderProgram.get<ShaderProgram>(), stage);
 }
 
@@ -214,7 +197,7 @@ void ComponentModel::setModel(Mesh* mesh, Material* material, size_t index, Shad
     model_instance.m_Material      = material;
     model_instance.m_Stage         = stage;
 
-    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, stage);
+    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, stage, *this);
     ComponentModel_Functions::CalculateRadius(*this);
 }
 void ComponentModel::setModelShaderProgram(ShaderProgram* shaderProgram, size_t index, RenderStage stage) {
@@ -225,7 +208,7 @@ void ComponentModel::setModelShaderProgram(ShaderProgram* shaderProgram, size_t 
     model_instance.m_ShaderProgram = shaderProgram;
     model_instance.m_Stage         = stage;
 
-    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, stage);
+    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, stage, *this);
     ComponentModel_Functions::CalculateRadius(*this);
 }
 void ComponentModel::setModelShaderProgram(Handle shaderPHandle, size_t index, RenderStage stage) {
@@ -238,7 +221,7 @@ void ComponentModel::setStage(RenderStage stage, size_t index) {
 
     model_instance.m_Stage = stage;
 
-    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, stage);
+    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, stage, *this);
 }
 void ComponentModel::setModelMesh(Mesh* mesh, size_t index, RenderStage stage) {
     ComponentModel_Functions::RegisterDeferredMeshLoaded(*this, mesh);
@@ -251,7 +234,7 @@ void ComponentModel::setModelMesh(Mesh* mesh, size_t index, RenderStage stage) {
     model_instance.m_Mesh  = mesh;
     model_instance.m_Stage = stage;
 
-    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, stage);
+    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, stage, *this);
     ComponentModel_Functions::CalculateRadius(*this);
 }
 void ComponentModel::setModelMesh(Handle mesh, size_t index, RenderStage stage) {
@@ -265,7 +248,7 @@ void ComponentModel::setModelMaterial(Material* material, size_t index, RenderSt
     model_instance.m_Material = material;
     model_instance.m_Stage    = stage;
 
-    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, stage);
+    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, stage, *this);
 }
 void ComponentModel::setModelMaterial(Handle material, size_t index, RenderStage stage) {
     ComponentModel::setModelMaterial(material.get<Material>(), index, stage);
@@ -286,7 +269,7 @@ void ComponentModel::setUserPointer(void* UserPointer) {
 #pragma region System
 
 struct priv::ComponentModel_UpdateFunction final { void operator()(void* system, void* componentPool, const float dt, Scene& scene) const {
-    auto& pool       = *static_cast<ECSComponentPool<Entity, ComponentModel>*>(componentPool);
+    auto& pool       = *(ECSComponentPool<Entity, ComponentModel>*)componentPool;
     auto& components = pool.data();
     auto lamda_update_component = [&](ComponentModel& componentModel, size_t i, size_t k) {
         for (size_t j = 0; j < componentModel.getNumModels(); ++j) {
@@ -312,8 +295,7 @@ ComponentModel_System_CI::ComponentModel_System_CI() {
             ComponentModel_Functions::CalculateRadius(*component_ptr);
         }
     });
-    setOnComponentRemovedFromEntityFunction([](void* system, Entity entity) {
-    });
+    //setOnComponentRemovedFromEntityFunction([](void* system, Entity entity) { });
     setOnEntityAddedToSceneFunction([](void* system, void* componentPool, Entity entity, Scene& scene) {
         auto& pool          = *(ECSComponentPool<Entity, ComponentModel>*)componentPool;
         auto* component_ptr = pool.getComponent(entity);
@@ -321,10 +303,8 @@ ComponentModel_System_CI::ComponentModel_System_CI() {
             ComponentModel_Functions::CalculateRadius(*component_ptr);
         }
     });
-    setOnSceneEnteredFunction([](void* system, void* componentPool, Scene& scene) {
-    });
-    setOnSceneLeftFunction([](void* system, void* componentPool, Scene& scene) {
-    });
+    //setOnSceneEnteredFunction([](void* system, void* componentPool, Scene& scene) { });
+    //setOnSceneLeftFunction([](void* system, void* componentPool, Scene& scene) { });
 }
 
 #pragma endregion

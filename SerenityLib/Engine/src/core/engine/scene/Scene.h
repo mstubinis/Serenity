@@ -14,6 +14,7 @@ class  ShaderProgram;
 class  Viewport;
 class  Skybox;
 class  ModelInstance;
+class  ComponentModel;
 struct Entity;
 struct SceneOptions;
 
@@ -146,7 +147,7 @@ namespace Engine::priv {
         static void           RenderDecals( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
         static void           RenderParticles( Renderer&, Scene& scene, Viewport&, Camera&, ShaderProgram& program);
 
-        static void           AddModelInstanceToPipeline(Scene& scene, ModelInstance&, RenderStage stage);
+        static void           AddModelInstanceToPipeline(Scene& scene, ModelInstance&, RenderStage stage, ComponentModel&);
         static void           RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance&, RenderStage stage);
         static ECS<Entity>&   GetECS(Scene& scene);
         static void           CleanECS(Scene& scene, Entity entity);
