@@ -9,8 +9,8 @@
 using namespace Engine;
 using namespace Engine::Networking;
 
-Server::Server(ServerType::Type type, bool multithreaded) 
-    : m_Threads{ Engine::hardware_concurrency() }
+Server::Server(ServerType type, bool multithreaded) 
+    : m_Clients{ Engine::hardware_concurrency() }
     , m_ServerType{ type }
     , m_Multithreaded{ multithreaded }
 {}
@@ -19,7 +19,7 @@ Server::~Server() {
 }
 ServerClient* Server::getClientFromUDPData(const std::string& ip, unsigned short port, sf::Packet& sf_packet) const {
     auto hash = m_Client_Hash_Function(ip, port, sf_packet);
-    return (m_HashedClients.count(hash)) ? m_HashedClients.at(hash) : nullptr;
+    return m_Clients.getClient(hash);
 }
 bool Server::startup(unsigned short port, std::string ip_restriction) {
     if (m_Active.load(std::memory_order_relaxed) == true) {
@@ -88,8 +88,11 @@ bool Server::shutdown() {
     m_Active.store(false, std::memory_order_relaxed);
     return true;
 }
+void Server::clearAllClients() {
+    m_Clients.clearAllClients();
+}
 void Server::internal_send_to_all_tcp(const ServerClient* exclusion, sf::Packet& sf_packet) {
-    for (auto& itr : m_HashedClients) {
+    for (auto& itr : m_Clients) {
         if (itr.second != exclusion) {
             auto status = itr.second->send_tcp(sf_packet);
         }
@@ -97,7 +100,7 @@ void Server::internal_send_to_all_tcp(const ServerClient* exclusion, sf::Packet&
 }
 
 void Server::internal_send_to_all_udp(const ServerClient* exclusion, sf::Packet& sf_packet) {
-    for (auto& itr : m_HashedClients) {
+    for (auto& itr : m_Clients) {
         if (itr.second != exclusion) {
             auto status = itr.second->send_udp(sf_packet);
         }
@@ -137,8 +140,8 @@ void Server::send_udp_to_all_important(Engine::Networking::Packet& packet) {
 SocketStatus::Status Server::receive_udp(sf::Packet& sf_packet, sf::IpAddress& sender, unsigned short& port) {
     return m_UdpSocket->receive(sf_packet, sender, port);
 }
-bool Server::internal_add_client(std::string& hash, ServerClient* client) {
-    if (m_HashedClients.count(hash)) {
+bool Server::internal_add_client(const std::string& hash, ServerClient* client) {
+    if (m_Clients.count(hash)) {
         SAFE_DELETE(client);
         return false;
     }
@@ -146,7 +149,7 @@ bool Server::internal_add_client(std::string& hash, ServerClient* client) {
         ENGINE_PRODUCTION_LOG("Server::internal_add_client() called with a nullptr client")
         return false;
     }
-    bool result = m_Threads.addClient(hash, client, *this);
+    bool result = m_Clients.addClient(hash, client);
     if(result){
         ENGINE_PRODUCTION_LOG("Server::internal_add_client() accepted new client: " << client->ip() << " on port: " << client->port())
     }else{
@@ -156,41 +159,10 @@ bool Server::internal_add_client(std::string& hash, ServerClient* client) {
     return result;
 }
 void Server::remove_client_immediately(ServerClient& inClient) {
-    std::string foundHash = "";
-    bool removed          = false;
-    for (auto&[name, client] : m_HashedClients) {
-        if (client == &inClient) {
-            inClient.disconnect();
-            foundHash = name;
-            break;
-        }
-    }
-    if (!foundHash.empty()) {
-        {
-            std::lock_guard lock(m_Mutex);
-            removed = m_Threads.removeClient(foundHash, *this);
-        }
-    }
-    if (!removed) {
-        ENGINE_PRODUCTION_LOG("(Server::remove_client_immediately) error: could not remove client hash: " << foundHash)
-    }
+    m_Clients.removeClientImmediately(inClient, m_Mutex);
 }
 void Server::remove_client(ServerClient& inClient) {
-    for (auto& [name, client] : m_HashedClients) {
-        if (client == &inClient) {
-            inClient.disconnect();
-            {
-                std::lock_guard lock(m_Mutex);
-                m_RemovedClients.emplace_back(
-                    std::piecewise_construct, 
-                    std::forward_as_tuple(name),
-                    std::forward_as_tuple(client)
-                );
-            }
-            ENGINE_PRODUCTION_LOG("(Server::remove_client) ip: " << client->ip() << ", port: " << client->port() << " - has been completely removed from the server")
-            return;
-        }
-    }
+    m_Clients.removeClient(inClient, m_Mutex);
 }
 ServerClient* Server::add_new_client(std::string& hash, std::string& clientIP, unsigned short clientPort, SocketTCP* tcp) {
     ServerClient* client = NEW ServerClient(hash, *this, tcp, clientIP, clientPort);
@@ -222,7 +194,7 @@ void Server::onReceiveUDP(Engine::Networking::Packet& packet, sf::IpAddress& ip,
     if (m_ServerType == ServerType::UDP) {
         internal_add_client(client_hash, add_new_client(client_hash, ipAsString, port, nullptr));
     }
-    m_HashedClients.at(client_hash)->internal_on_receive_udp(packet, dt);
+    m_Clients.getClient(client_hash)->internal_on_receive_udp(packet, dt);
     Server::m_On_Receive_UDP_Function(packet, ipAsString, port, dt);
 }
 void Server::internal_update_udp_loop(const float dt, bool serverActive) {
@@ -269,25 +241,16 @@ void Server::internal_update_client_threads(const float dt, bool serverActive) {
     };
     if (m_Multithreaded) {
         //TODO: it works but it's kind of hacky
-        for (auto& clientThread : m_Threads) {
+        for (auto& clientThread : m_Clients.getThreads()) {
             auto lambda_update_client_thread_driver = [&lambda_update_client_thread, &clientThread, dt]() {
                 return lambda_update_client_thread(clientThread, dt);
             };
             Engine::priv::threading::addJob(std::move(lambda_update_client_thread_driver));
         }
     }else{
-        for (auto& clientThread : m_Threads) {
+        for (auto& clientThread : m_Clients.getThreads()) {
             lambda_update_client_thread(clientThread, dt);
         }
-    }
-}
-void Server::internal_update_remove_clients() {
-    if (m_RemovedClients.size() > 0) {
-        Engine::priv::threading::waitForAll();
-        for (const auto& itr : m_RemovedClients) {
-            bool result = m_Threads.removeClient(itr.first, *this);
-        }
-        m_RemovedClients.clear();
     }
 }
 void Server::update(const float dt) {
@@ -299,5 +262,5 @@ void Server::update(const float dt) {
 
     m_Update_Function(dt, serverActive);
 
-    internal_update_remove_clients();
+    m_Clients.internal_update_remove_clients();
 }

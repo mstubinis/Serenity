@@ -8,16 +8,16 @@ namespace Engine::Networking {
 }
 
 #include <core/engine/networking/Packet.h>
-#include <core/engine/networking/server/ServerThread.h>
+#include <core/engine/networking/server/ServerClientsContainer.h>
 #include <core/engine/networking/ListenerTCP.h>
 #include <core/engine/networking/SocketUDP.h>
 #include <core/engine/events/Observer.h>
 #include <SFML/Network/Socket.hpp>
 
-struct ServerType final { enum Type : unsigned char {
+enum class ServerType : unsigned char {
     UDP,
     TCP,
-};};
+};
 
 namespace Engine::Networking {
     class Server : public Observer, public Engine::NonCopyable, public Engine::NonMoveable {
@@ -41,17 +41,14 @@ namespace Engine::Networking {
             void internal_update_tcp_listener_loop(bool serverActive);
             void internal_update_udp_loop(const float dt, bool serverActive);
             void internal_update_client_threads(const float dt, bool serverActive);
-            void internal_update_remove_clients();
-            bool internal_add_client(std::string& hash, ServerClient* client);
+            bool internal_add_client(const std::string& hash, ServerClient* client);
 
             Server() = delete;
         protected:
-            ServerType::Type                                      m_ServerType     = ServerType::UDP;
+            ServerType                                            m_ServerType     = ServerType::UDP;
             std::mutex                                            m_Mutex;
 
-            ServerThreadCollection                                m_Threads;
-            std::unordered_map<std::string, ServerClient*>        m_HashedClients;
-            std::vector<std::pair<std::string, ServerClient*>>    m_RemovedClients;
+            ServerClientsContainer                                m_Clients;
 
             std::unique_ptr<SocketUDP>                            m_UdpSocket      = nullptr;
             std::unique_ptr<ListenerTCP>                          m_TCPListener    = nullptr;
@@ -60,7 +57,7 @@ namespace Engine::Networking {
             std::atomic<bool>                                     m_Active         = false;
             bool                                                  m_Multithreaded  = true;
         public:
-            Server(ServerType::Type type, bool multithreaded = true);
+            Server(ServerType type, bool multithreaded = true);
             virtual ~Server();
 
             inline CONSTEXPR bool isActive() const noexcept { return m_Active.load(std::memory_order::relaxed); }
@@ -71,13 +68,14 @@ namespace Engine::Networking {
             virtual void onEvent(const Event& e) override {}
             virtual bool startup(unsigned short port, std::string ip_restriction = "");
             virtual bool shutdown();
+            virtual void clearAllClients();
 
             ServerClient* getClientFromUDPData(const std::string& ip, unsigned short port, sf::Packet& sf_packet) const;
 
             inline CONSTEXPR unsigned short getPort() const noexcept { return m_Port; }
             inline CONSTEXPR SocketUDP& getUDPSocket() const noexcept { return *m_UdpSocket.get(); }
-            inline CONSTEXPR ServerType::Type getType() const noexcept { return m_ServerType; }
-            inline CONSTEXPR size_t num_clients() const noexcept { return m_Threads.getNumClients(); }
+            inline CONSTEXPR ServerType getType() const noexcept { return m_ServerType; }
+            inline CONSTEXPR size_t num_clients() const noexcept { return m_Clients.size(); }
             inline void setClientHashFunction(hash_func function) { m_Client_Hash_Function = function; }
             inline void setServerUpdateFunction(update_func function) { m_Update_Function = function; }
             inline void setOnReceiveUDPFunction(on_udp_func function) { m_On_Receive_UDP_Function = function; }

@@ -2,7 +2,7 @@
 #ifndef ENGINE_NETWORKING_SOCKET_TCP_H
 #define ENGINE_NETWORKING_SOCKET_TCP_H
 
-#include <core/engine/networking/SocketInterface.h>
+#include <core/engine/networking/ISocket.h>
 #include <core/engine/networking/Packet.h>
 
 namespace Engine::priv {

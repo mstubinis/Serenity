@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_NETWORKING_SOCKET_INTERFACE_H
-#define ENGINE_NETWORKING_SOCKET_INTERFACE_H
+#ifndef ENGINE_NETWORKING_I_SOCKET_H
+#define ENGINE_NETWORKING_I_SOCKET_H
 
 #include <SFML/Network.hpp>
 
@@ -20,7 +20,7 @@ struct SocketStatus final {
         Error        = sf::Socket::Status::Error,        //4
 
     };
-    static SocketStatus::Status map_status(sf::Socket::Status sfmlStatus);
+    static inline SocketStatus::Status map_status(sf::Socket::Status sfmlStatus) noexcept { return (SocketStatus::Status)sfmlStatus; }
 };
 
 namespace Engine::Networking {

@@ -2,6 +2,7 @@
 #include <core/engine/networking/server/ServerClient.h>
 #include <core/engine/networking/server/Server.h>
 #include <core/engine/networking/SocketTCP.h>
+#include <core/engine/networking/NetworkingIncludes.h>
 
 using namespace Engine;
 using namespace Engine::Networking;
@@ -36,10 +37,7 @@ ServerClient::~ServerClient() {
     unregisterEvent(EventType::PacketReceived);
 }
 sf::Uint32 ServerClient::generate_nonce() const noexcept {
-    std::random_device device;
-    std::mt19937 mt(device());
-    std::uniform_int_distribution<sf::Uint32> distribution;
-    return distribution(mt);
+    return Engine::Networking::NetworkingHelpers::generate_nonce();
 }
 bool ServerClient::connect(unsigned short timeout) noexcept {
     if (!m_TcpSocket || !disconnected()) {

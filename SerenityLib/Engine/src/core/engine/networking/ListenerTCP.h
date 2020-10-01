@@ -9,7 +9,7 @@ namespace Engine::priv {
     class SocketManager;
 }
 
-#include <core/engine/networking/SocketInterface.h>
+#include <core/engine/networking/ISocket.h>
 
 namespace Engine::Networking {
     class ListenerTCP : public ISocket, public Engine::NonCopyable {

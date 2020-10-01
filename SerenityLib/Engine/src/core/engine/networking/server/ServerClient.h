@@ -10,7 +10,7 @@ namespace Engine::Networking {
 #include <SFML/Network/Socket.hpp>
 #include <SFML/Network/Packet.hpp>
 #include <core/engine/networking/Packet.h>
-#include <core/engine/networking/SocketInterface.h>
+#include <core/engine/networking/ISocket.h>
 #include <core/engine/events/Observer.h>
 
 namespace Engine::Networking {
