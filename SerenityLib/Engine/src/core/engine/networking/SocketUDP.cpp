@@ -14,25 +14,6 @@ Networking::SocketUDP::UDPPacketInfo::UDPPacketInfo(sf::Packet* inSFMLPacket, un
     , ip{ std::move(inAddress) }
     , sfmlPacket{ std::unique_ptr<sf::Packet>(inSFMLPacket) }
 {}
-Networking::SocketUDP::UDPPacketInfo::UDPPacketInfo(Networking::SocketUDP::UDPPacketInfo&& other) noexcept 
-    : port{ std::move(other.port) }
-    , ip{ std::move(other.ip) }
-{
-    sfmlPacket.swap(other.sfmlPacket);
-}
-Networking::SocketUDP::UDPPacketInfo& Networking::SocketUDP::UDPPacketInfo::operator=(Networking::SocketUDP::UDPPacketInfo&& other) noexcept {
-    if (&other != this) {
-        port       = std::move(other.port);
-        ip         = std::move(other.ip);
-        sfmlPacket.swap(other.sfmlPacket);
-    }
-    return *this;
-}
-Networking::SocketUDP::UDPPacketInfo::~UDPPacketInfo() {
-}
-
-
-
 
 Networking::SocketUDP::SocketUDP(unsigned short port, const std::string& ip) 
     : m_Port(port)
@@ -41,6 +22,7 @@ Networking::SocketUDP::SocketUDP(unsigned short port, const std::string& ip)
     Core::m_Engine->m_NetworkingModule.m_SocketManager.add_udp_socket(this);
 }
 Networking::SocketUDP::~SocketUDP() { 
+    unbind();
     Core::m_Engine->m_NetworkingModule.m_SocketManager.remove_udp_socket(this);
 }
 void Networking::SocketUDP::clearPartialPackets() {

@@ -12,7 +12,7 @@ namespace luabridge {
 #include <core/engine/lua/Lua.h>
 
 class ComponentLogic2 : public Engine::UserPointer, public Engine::NonCopyable {
-    using c_function = std::function<void(const ComponentLogic2*, const float)>;
+    using c_function = void(*)(const ComponentLogic2*, const float);
     private:
         Entity                                             m_Owner;
         void*                                              m_UserPointer1 = nullptr;
@@ -37,7 +37,7 @@ class ComponentLogic2 : public Engine::UserPointer, public Engine::NonCopyable {
 
         inline CONSTEXPR Entity getOwner() const noexcept { return m_Owner; }
         void call(const float dt) const noexcept;
-
+        
         inline void setFunctor(c_function&& functor) noexcept { m_Functor.setFunctor(std::move(functor)); }
         void setFunctor(luabridge::LuaRef luaFunction) noexcept;
 

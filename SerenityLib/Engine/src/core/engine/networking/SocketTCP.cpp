@@ -74,24 +74,6 @@ void Networking::SocketTCP::update(const float dt) {
         auto status = internal_send_partial_packets_loop();
     }
 }
-bool Networking::SocketTCP::isConnected() const {
-    return (m_SocketTCP.getLocalPort() != 0);
-}
-std::string Networking::SocketTCP::ip() const {
-    return m_SocketTCP.getRemoteAddress().toString();
-}
-unsigned short Networking::SocketTCP::remotePort() const {
-    return m_SocketTCP.getRemotePort();
-}
-unsigned short Networking::SocketTCP::localPort() const {
-    return m_SocketTCP.getLocalPort();
-}
-void Networking::SocketTCP::setBlocking(const bool blocking) {
-    m_SocketTCP.setBlocking(blocking);
-}
-bool Networking::SocketTCP::isBlocking() const {
-    return m_SocketTCP.isBlocking();
-}
 void Networking::SocketTCP::disconnect() {
     if (isConnected()) {
         EventSocket e = EventSocket(m_SocketTCP.getLocalPort(), m_SocketTCP.getRemotePort(), m_SocketTCP.getRemoteAddress(), SocketType::TCP);

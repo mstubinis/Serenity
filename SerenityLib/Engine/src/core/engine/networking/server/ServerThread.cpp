@@ -1,132 +1,27 @@
 #include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/networking/server/ServerThread.h>
-#include <core/engine/networking/server/ServerClient.h>
-#include <core/engine/networking/server/Server.h>
-#include <core/engine/networking/SocketTCP.h>
-#include <core/engine/threading/ThreadingModule.h>
 
 using namespace Engine;
 using namespace Engine::Networking;
 
-ServerThread::ServerThread() {
-}
 ServerThread::~ServerThread() {
+    SAFE_DELETE_MAP(m_HashedServerClients);
 }
-bool ServerThread::remove_client(const std::string& hash, Server& server) {
-    bool has_client_hash        = m_ServerClients.count(hash);
-    bool has_server_client_hash = server.m_HashedClients.count(hash);
-    if (has_client_hash && has_server_client_hash) {
-        server.m_HashedClients.erase(hash);
-        m_ServerClients.erase(hash);
+bool ServerThread::remove_client(const std::string& hash) {
+    if (m_HashedServerClients.count(hash)) {
+        m_HashedServerClients.erase(hash);
         return true;
-    }
-    if (!has_client_hash) {
-        ENGINE_PRODUCTION_LOG("error: ServerThread::remove_client() client removal - hash: " << hash << " is not in m_Clients")
-    }
-    if (!has_server_client_hash) {
-        ENGINE_PRODUCTION_LOG("error: ServerThread::remove_client() client removal - hash: " << hash << " is not in server.m_HashedClients")
     }
     return false;
 }
-bool ServerThread::add_client(const std::string& hash, ServerClient* serverClient, Server& server) {
-    bool has_client_hash        = m_ServerClients.count(hash);
-    bool has_server_client_hash = server.m_HashedClients.count(hash);
-    if (!has_client_hash && !has_server_client_hash) {
-        m_ServerClients.emplace(
+bool ServerThread::add_client(const std::string& hash, ServerClient* serverClient) {
+    if (!m_HashedServerClients.count(hash)) {
+        m_HashedServerClients.emplace(
             std::piecewise_construct, 
             std::forward_as_tuple(hash), 
-            std::forward_as_tuple(std::unique_ptr<ServerClient>(serverClient))
-        );
-        server.m_HashedClients.emplace(
-            std::piecewise_construct,
-            std::forward_as_tuple(hash),
             std::forward_as_tuple(serverClient)
         );
         return true;
     }
-    if (has_client_hash) {
-        ENGINE_PRODUCTION_LOG("error: ServerThread::add_client() client addition - hash: " << hash << " is already in m_Clients")
-    }
-    if (has_server_client_hash) {
-        ENGINE_PRODUCTION_LOG("error: ServerThread::add_client() client addition - hash: " << hash << " is already in server.m_HashedClients")
-    }
     return false;
-}
-ServerThread::ServerThread(ServerThread&& other) noexcept {
-    m_ServerClients = std::move(other.m_ServerClients);
-}
-ServerThread& ServerThread::operator=(ServerThread&& other) noexcept {
-    if (&other != this) {
-        m_ServerClients = std::move(other.m_ServerClients);
-    }
-    return *this;
-}
-
-
-
-
-
-
-ServerThreadCollection::ServerThreadCollection(size_t threadCount) {
-    m_Threads.resize(threadCount);
-}
-ServerThreadCollection::~ServerThreadCollection() {
-
-}
-void ServerThreadCollection::setBlocking(bool blocking) {
-    for (size_t i = 0; i < m_Threads.size(); ++i) {
-        for (const auto& client : m_Threads[i].m_ServerClients) {
-            client.second->socket()->setBlocking(blocking);
-        }
-    }
-}
-void ServerThreadCollection::setBlocking(const std::string& hash, bool blocking) {
-    for (auto& thread : m_Threads) {
-        if (thread.m_ServerClients.count(hash)) {
-            thread.m_ServerClients.at(hash)->socket()->setBlocking(blocking);
-            return;
-        }
-    }
-}
-bool ServerThreadCollection::addClient(const std::string& hash, ServerClient* client, Server& server) {
-    auto next_thread = getNextAvailableClientThread();
-    if (next_thread) {
-        bool result = next_thread->add_client(hash, client, server);
-        if (result) {
-            ++m_NumClients;
-        }
-        return result;
-    }else{
-        ENGINE_PRODUCTION_LOG("ServerThreadCollection::addClient() could not get a next thread")
-    }
-    return false;
-}
-bool ServerThreadCollection::removeClient(const std::string& hash, Server& server) {
-    bool complete = false;
-    bool result   = false;
-    for (auto& thread : m_Threads) {
-        for (auto&[name, client] : thread.m_ServerClients) {
-            if (name == hash) {
-                result   = thread.remove_client(hash, server);
-                if (result) {
-                    --m_NumClients;
-                }
-                complete = true;
-                break;
-            }
-        }
-        if (complete) {
-            break;
-        }
-    }
-    return result;
-}
-ServerThread* ServerThreadCollection::getNextAvailableClientThread() {
-    Engine::Networking::ServerThread* leastThread = nullptr;
-    for (auto& clientThread : m_Threads) {
-        if (!leastThread || (leastThread && leastThread->num_clients() < clientThread.num_clients())) {
-            leastThread = &clientThread;
-        }
-    }
-    return leastThread;
 }

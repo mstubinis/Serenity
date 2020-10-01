@@ -10,7 +10,7 @@ namespace Engine::Networking {
 #include <SFML/Network/Socket.hpp>
 #include <SFML/Network/Packet.hpp>
 #include <core/engine/networking/Packet.h>
-#include <core/engine/networking/SocketInterface.h>
+#include <core/engine/networking/ISocket.h>
 #include <core/engine/events/Observer.h>
 
 namespace Engine::Networking {
@@ -42,27 +42,32 @@ namespace Engine::Networking {
             on_received_tcp_func       m_On_Received_TCP_Function       = [](sf::Packet& sfPacket, const float dt) {};
             on_received_udp_func       m_On_Received_UDP_Function       = [](sf::Packet& sfPacket, const float dt) {};
         protected:
+            mutable std::unique_ptr<Engine::Networking::SocketTCP>  m_TcpSocket;
             Engine::Networking::Server&                             m_Server;
-            ConnectionState                                         m_ConnectionState              = ConnectionState::Unknown;
-            mutable std::unique_ptr<Engine::Networking::SocketTCP>  m_TcpSocket                    = nullptr;
             sf::IpAddress                                           m_IP                           = sf::IpAddress::LocalHost;
             std::string                                             m_Hash                         = "";
-            unsigned short                                          m_Port                         = 0U;
             std::uint32_t                                           m_ID                           = 0U;
+            ConnectionState                                         m_ConnectionState              = ConnectionState::Unknown;
             float                                                   m_Timeout_Timer                = 0.0f;
             float                                                   m_Timeout_Timer_Limit          = 30.0f;
             float                                                   m_Recovery_Timeout_Timer       = 0.0f;
             float                                                   m_Recovery_Timeout_Timer_Limit = 60.0f;
+            unsigned short                                          m_Port                         = 0U;
         public:
             ServerClient(const std::string& hash, Engine::Networking::Server& server, Engine::Networking::SocketTCP* tcp, const std::string& clientIP, unsigned short clientPort);
             virtual ~ServerClient();
       
-            inline void setOnUpdateFunction(update_func function) noexcept { m_Update_Function = function; }
-            inline void setOnTimedOutFunction(on_timed_out_func function) noexcept { m_On_Timed_Out_Function = function; }
-            inline void setOnRecoveryTimedOutFunction(on_recovery_timed_out_func function) noexcept { m_On_Recovery_Timed_Out_Function = function; }
-            inline void setOnReceivedTCPFunction(on_received_tcp_func function) noexcept { m_On_Received_TCP_Function = function; }
-            inline void setOnReceivedUDPFunction(on_received_udp_func function) noexcept { m_On_Received_UDP_Function = function; }
-            inline void setUpdateFunction(update_func function) noexcept { m_Update_Function = function; }
+            ServerClient(const ServerClient& other)                 = delete;
+            ServerClient& operator=(const ServerClient& other)      = delete;
+            ServerClient(ServerClient&& other) noexcept             = default;
+            ServerClient& operator=(ServerClient&& other) noexcept  = default;
+
+            inline void setOnUpdateFunction(update_func&& function) noexcept { m_Update_Function = std::move(function); }
+            inline void setOnTimedOutFunction(on_timed_out_func&& function) noexcept { m_On_Timed_Out_Function = std::move(function); }
+            inline void setOnRecoveryTimedOutFunction(on_recovery_timed_out_func&& function) noexcept { m_On_Recovery_Timed_Out_Function = std::move(function); }
+            inline void setOnReceivedTCPFunction(on_received_tcp_func&& function) noexcept { m_On_Received_TCP_Function = std::move(function); }
+            inline void setOnReceivedUDPFunction(on_received_udp_func&& function) noexcept { m_On_Received_UDP_Function = std::move(function); }
+            inline void setUpdateFunction(update_func&& function) noexcept { m_Update_Function = std::move(function); }
 
             virtual void onEvent(const Event& e) override {}
 
@@ -75,7 +80,7 @@ namespace Engine::Networking {
             inline CONSTEXPR void setTimeoutTimerLimit(float limit) noexcept { m_Timeout_Timer_Limit = limit; }
             inline CONSTEXPR void setRecoveryTimeoutTimerLimit(float limit) noexcept { m_Recovery_Timeout_Timer_Limit = limit; }
 
-            sf::Uint32 generate_nonce() const noexcept;
+            std::uint32_t generate_nonce() const noexcept;
 
             void disconnect() noexcept;
             bool connect(unsigned short timeout = 0) noexcept;

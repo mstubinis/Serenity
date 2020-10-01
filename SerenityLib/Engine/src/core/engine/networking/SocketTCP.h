@@ -2,16 +2,15 @@
 #ifndef ENGINE_NETWORKING_SOCKET_TCP_H
 #define ENGINE_NETWORKING_SOCKET_TCP_H
 
-#include <core/engine/networking/SocketInterface.h>
+#include <core/engine/networking/ISocket.h>
 #include <core/engine/networking/Packet.h>
 
 namespace Engine::priv {
     class SocketManager;
-}
+};
 namespace Engine::Networking {
     class ListenerTCP;
-}
-
+};
 namespace Engine::Networking {
     class SocketTCP: public ISocket, public Engine::NonCopyable {
         friend class Engine::priv::SocketManager;
@@ -33,14 +32,17 @@ namespace Engine::Networking {
             ~SocketTCP();
 
             void                 disconnect();
-            bool                 isConnected() const;
 
-            void                 setBlocking(bool blocking) override;
-            bool                 isBlocking() const override;
-            unsigned short       localPort() const override;
 
-            std::string          ip() const;
-            unsigned short       remotePort() const;
+            bool                 isConnected() const { return (m_SocketTCP.getLocalPort() != 0); }
+            std::string          ip() const { return m_SocketTCP.getRemoteAddress().toString(); }
+            unsigned short       remotePort() const { return m_SocketTCP.getRemotePort(); }
+            unsigned short       localPort() const override { return m_SocketTCP.getLocalPort(); }
+
+
+            void                 setBlocking(bool blocking) override { m_SocketTCP.setBlocking(blocking); }
+            bool                 isBlocking() const override { return m_SocketTCP.isBlocking(); }
+
     
             SocketStatus::Status   connect(const unsigned short timeout = 0);
 

@@ -20,13 +20,13 @@ class ParticleEmissionProperties final {
     friend class  ParticleEmitter;
     friend class  Engine::priv::ParticleSystem;
 
-    using color_func                      = std::function<Engine::color_vector_4(const float dt, Particle&)>;
-    using change_in_angular_velocity_func = std::function<float(const float dt, Particle&)>;
-    using change_in_velocity_func         = std::function<glm::vec3(const float dt, Particle&)>;
-    using change_in_scale_func            = std::function<glm::vec2(const float dt, Particle&)>;
-    using initial_velocity_func           = std::function<glm::vec3(Particle&)>;
-    using initial_scale_func              = std::function<glm::vec2(Particle&)>;
-    using initial_angular_velocity_func   = std::function<float(Particle&)>;
+    using color_func                      = Engine::color_vector_4(*)(const float dt, Particle&);
+    using change_in_angular_velocity_func = float(*)(const float dt, Particle&);
+    using change_in_velocity_func         = glm::vec3(*)(const float dt, Particle&);
+    using change_in_scale_func            = glm::vec2(*)(const float dt, Particle&);
+    using initial_velocity_func           = glm::vec3(*)(Particle&);
+    using initial_scale_func              = glm::vec2(*)(Particle&);
+    using initial_angular_velocity_func   = float(*)(Particle&);
     private:
         color_func                      m_ColorFunctor                   = [](const float, Particle&) { return Engine::color_vector_4(255_uc); };
         change_in_angular_velocity_func m_ChangeInAngularVelocityFunctor = [](const float, Particle&) { return 0.0f; };

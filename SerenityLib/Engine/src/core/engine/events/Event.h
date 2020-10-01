@@ -14,7 +14,7 @@ namespace Engine::Networking {
 }
 #include <SFML/Network/IpAddress.hpp>
 #include <core/engine/events/EventIncludes.h>
-#include <core/engine/networking/SocketInterface.h>
+#include <core/engine/networking/ISocket.h>
 
 namespace Engine::priv {
     struct EventEnum final {

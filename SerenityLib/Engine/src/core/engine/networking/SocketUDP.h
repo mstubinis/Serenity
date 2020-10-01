@@ -2,12 +2,12 @@
 #ifndef ENGINE_NETWORKING_SOCKET_UDP_H
 #define ENGINE_NETWORKING_SOCKET_UDP_H
 
-#include <core/engine/networking/SocketInterface.h>
+#include <core/engine/networking/ISocket.h>
 #include <core/engine/networking/Packet.h>
 
 namespace Engine::priv {
     class SocketManager;
-}
+};
 namespace Engine::Networking {
     class SocketUDP : public ISocket, public Engine::NonCopyable {
         friend class Engine::priv::SocketManager;
@@ -18,9 +18,8 @@ namespace Engine::Networking {
                 sf::IpAddress               ip           = sf::IpAddress::LocalHost;
 
                 UDPPacketInfo(sf::Packet* inSFMLPacket, unsigned short inPort, sf::IpAddress&& inAddress);
-                UDPPacketInfo(UDPPacketInfo&& other) noexcept;
-                UDPPacketInfo& operator=(UDPPacketInfo&& other) noexcept;
-                ~UDPPacketInfo();
+                UDPPacketInfo(const UDPPacketInfo& other)            = delete;
+                UDPPacketInfo& operator=(const UDPPacketInfo& other) = delete;
             };
         private:
             sf::UdpSocket               m_SocketUDP;

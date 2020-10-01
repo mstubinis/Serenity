@@ -1,8 +1,6 @@
 #pragma once
-#ifndef ENGINE_NETWORKING_SOCKET_INTERFACE_H
-#define ENGINE_NETWORKING_SOCKET_INTERFACE_H
-
-#include <SFML/Network.hpp>
+#ifndef ENGINE_NETWORKING_I_SOCKET_H
+#define ENGINE_NETWORKING_I_SOCKET_H
 
 enum class SocketType : unsigned char {
     Unknown,
@@ -10,6 +8,8 @@ enum class SocketType : unsigned char {
     UDP,
     TCPListener,
 };
+
+#include <SFML/Network.hpp>
 
 struct SocketStatus final {
     enum Status : unsigned char {
@@ -20,9 +20,10 @@ struct SocketStatus final {
         Error        = sf::Socket::Status::Error,        //4
 
     };
-    static SocketStatus::Status map_status(sf::Socket::Status sfmlStatus);
+    inline static SocketStatus::Status map_status(sf::Socket::Status inSfmlStatus) noexcept {
+        return (SocketStatus::Status)inSfmlStatus;
+    }
 };
-
 namespace Engine::Networking {
     class ISocket {
         private:
@@ -30,9 +31,7 @@ namespace Engine::Networking {
         public:
             virtual void             setBlocking(bool blocking) = 0;
             virtual bool             isBlocking() const = 0;
-            //virtual sf::Socket&      getSFMLSocket() = 0;
             virtual unsigned short   localPort() const = 0;
     };
 };
-
 #endif
