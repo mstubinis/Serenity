@@ -20,9 +20,8 @@ struct SocketStatus final {
         Error        = sf::Socket::Status::Error,        //4
 
     };
-    inline static SocketStatus::Status map_status(sf::Socket::Status inSfmlStatus) noexcept {
-        return (SocketStatus::Status)inSfmlStatus;
-    }
+
+    static inline SocketStatus::Status map_status(sf::Socket::Status sfmlStatus) noexcept { return (SocketStatus::Status)sfmlStatus; }
 };
 namespace Engine::Networking {
     class ISocket {

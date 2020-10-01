@@ -454,7 +454,6 @@
     <ClInclude Include="Engine\src\core\engine\networking\server\ServerClientsContainer.h" />
     <ClInclude Include="Engine\src\core\engine\networking\server\ServerThread.h" />
     <ClInclude Include="Engine\src\core\engine\networking\ISocket.h" />
-    <ClInclude Include="Engine\src\core\engine\networking\server\ServerThreadCollection.h" />
     <ClInclude Include="Engine\src\core\engine\networking\SocketManager.h" />
     <ClInclude Include="Engine\src\core\engine\networking\SocketTCP.h" />
     <ClInclude Include="Engine\src\core\engine\networking\SocketUDP.h" />
@@ -638,7 +637,6 @@
     <ClCompile Include="Engine\src\core\engine\networking\server\ServerClient.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\server\ServerClientsContainer.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\server\ServerThread.cpp" />
-    <ClCompile Include="Engine\src\core\engine\networking\server\ServerThreadCollection.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\SocketManager.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\SocketTCP.cpp" />
     <ClCompile Include="Engine\src\core\engine\networking\SocketUDP.cpp" />

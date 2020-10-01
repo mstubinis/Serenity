@@ -38,7 +38,8 @@ namespace Engine::Networking {
             void internal_update_tcp_listener_loop(bool serverActive);
             void internal_update_udp_loop(const float dt, bool serverActive);
             void internal_update_client_threads(const float dt, bool serverActive);
-            bool internal_add_client(std::string& hash, ServerClient* client);
+
+            bool internal_add_client(const std::string& hash, ServerClient* client);
 
             Server() = delete;
         protected:
@@ -65,14 +66,17 @@ namespace Engine::Networking {
             virtual void onEvent(const Event& e) override {}
             virtual bool startup(unsigned short port, std::string ip_restriction = "");
             virtual bool shutdown();
-            virtual void clearAllClients() { m_Clients.clear(); }
+
+            virtual void clearAllClients();
 
             ServerClient* getClientFromUDPData(const std::string& ip, unsigned short port, sf::Packet& sf_packet) const;
 
             inline CONSTEXPR unsigned short getPort() const noexcept { return m_Port; }
             inline CONSTEXPR SocketUDP& getUDPSocket() const noexcept { return *m_UdpSocket.get(); }
             inline CONSTEXPR ServerType getType() const noexcept { return m_ServerType; }
-            inline CONSTEXPR size_t getNumClients() const noexcept { return m_Clients.getNumClients(); }
+
+            inline CONSTEXPR size_t num_clients() const noexcept { return m_Clients.size(); }
+
             inline void setClientHashFunction(hash_func function) { m_Client_Hash_Function = function; }
             inline void setServerUpdateFunction(update_func function) { m_Update_Function = function; }
             inline void setOnReceiveUDPFunction(on_udp_func function) { m_On_Receive_UDP_Function = function; }

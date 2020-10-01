@@ -902,13 +902,10 @@
     <ClInclude Include="Engine\src\core\engine\networking\ISocket.h">
       <Filter>Header Files\Engine\Core\Networking</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\networking\server\ServerClientsContainer.h">
-      <Filter>Header Files\Engine\Core\Networking\Server</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\networking\NetworkingIncludes.h">
       <Filter>Header Files\Engine\Core\Networking</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\networking\server\ServerThreadCollection.h">
+    <ClInclude Include="Engine\src\core\engine\networking\server\ServerClientsContainer.h">
       <Filter>Header Files\Engine\Core\Networking\Server</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1364,9 +1361,6 @@
       <Filter>Source Files\Engine\Core\Model</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\networking\server\ServerClientsContainer.cpp">
-      <Filter>Source Files\Engine\Core\Networking\Server</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\networking\server\ServerThreadCollection.cpp">
       <Filter>Source Files\Engine\Core\Networking\Server</Filter>
     </ClCompile>
   </ItemGroup>

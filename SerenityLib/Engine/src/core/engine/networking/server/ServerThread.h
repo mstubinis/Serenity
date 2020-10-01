@@ -4,34 +4,47 @@
 
 namespace Engine::Networking {
     class ServerClient;
-    class ServerThreadCollection;
+    class ServerThreadContainer;
 };
 namespace Engine::Networking {
-    class ServerThread final {
-        friend class ServerThreadCollection;
-        using ClientsMap = std::unordered_map<std::string, ServerClient*>;
+    class ServerThread final : public Engine::NonCopyable, public Engine::NonMoveable {
+        friend class ServerThreadContainer;
         protected:
-            ClientsMap  m_HashedServerClients;
+            mutable std::unordered_map<std::string, std::unique_ptr<ServerClient>>  m_HashedServerClients;
         public:
-            ServerThread()                                         = default;
-            ~ServerThread();
-            ServerThread(const ServerThread& other)                = default;
-            ServerThread& operator=(const ServerThread& other)     = default;
-            ServerThread(ServerThread&& other) noexcept            = default;
-            ServerThread& operator=(ServerThread&& other) noexcept = default;
+            ServerThread() = default;
+            ServerThread(ServerThread&& other) noexcept;
+            ServerThread& operator=(ServerThread&& other) noexcept;
 
-            void remove_all_clients() noexcept { m_HashedServerClients.clear(); }
-            inline bool has(const std::string& hash) noexcept { return m_HashedServerClients.count(hash); }
+            void clearAllClients();
             bool remove_client(const std::string& hash);
             bool add_client(const std::string& hash, ServerClient* client);
 
-            inline size_t num_clients() const noexcept { return m_HashedServerClients.size(); }
-            inline ClientsMap& clients() noexcept { return m_HashedServerClients; }
+            inline CONSTEXPR size_t num_clients() const noexcept { return m_HashedServerClients.size(); }
+            inline CONSTEXPR std::unordered_map<std::string, std::unique_ptr<ServerClient>>& clients() const noexcept { return m_HashedServerClients; }
+    };
 
-            inline ClientsMap::iterator begin() noexcept { return m_HashedServerClients.begin(); }
-            inline ClientsMap::const_iterator begin() const noexcept { return m_HashedServerClients.begin(); }
-            inline ClientsMap::iterator end() noexcept { return m_HashedServerClients.end(); }
-            inline ClientsMap::const_iterator end() const noexcept { return m_HashedServerClients.end(); }
+    class ServerThreadContainer {
+        private:
+            std::vector<ServerThread> m_Threads;
+            size_t                    m_NumClients = 0;
+        public:
+            ServerThreadContainer(size_t threadCount);
+
+            void setBlocking(bool blocking);
+            void setBlocking(const std::string& hash, bool blocking);
+
+            void removeAllClients();
+            bool addClient(const std::string& hash, ServerClient* client);
+            bool removeClient(const std::string& hash);
+
+            inline CONSTEXPR size_t getNumClients() const noexcept { return m_NumClients; }
+            ServerThread* getNextAvailableClientThread();
+
+            std::vector<ServerThread>::iterator begin() noexcept { return m_Threads.begin(); }
+            std::vector<ServerThread>::iterator end() noexcept { return m_Threads.end(); }
+            std::vector<ServerThread>::const_iterator begin() const noexcept { return m_Threads.begin(); }
+            std::vector<ServerThread>::const_iterator end() const noexcept { return m_Threads.end(); }
     };
 };
 
