@@ -11,6 +11,7 @@
 #include <core/engine/scene/Camera.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/physics/Collision.h>
+#include <core/engine/scene/Scene.h>
 
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
@@ -975,7 +976,7 @@ constexpr glm_mat4 IDENTITY_MATRIX = glm_mat4(1.0);
 
 struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPtr, void* componentPool, const float dt, Scene& scene) const {
     auto& system                = *(Engine::priv::ComponentBody_System*)systemPtr;
-    auto* pool                  = (ECSComponentPool<Entity, ComponentBody>*)componentPool;
+    auto* pool                  = (ECSComponentPool<ComponentBody>*)componentPool;
     auto& components            = pool->data();
 
     auto lamda_update_component = [dt, &system](ComponentBody& b, size_t i, size_t k) {
@@ -1067,7 +1068,7 @@ struct Engine::priv::ComponentBody_ComponentRemovedFromEntityFunction final { vo
     }
 }};
 struct Engine::priv::ComponentBody_EntityAddedToSceneFunction final {void operator()(void* systemPtr, void* componentPool, Entity entity, Scene& scene) const {
-    auto& pool = *(ECSComponentPool<Entity, ComponentBody>*)componentPool;
+    auto& pool = *(ECSComponentPool<ComponentBody>*)componentPool;
     auto* component_ptr = pool.getComponent(entity);
     if (component_ptr) {
         if (component_ptr->m_Physics) {
@@ -1081,7 +1082,7 @@ struct Engine::priv::ComponentBody_EntityAddedToSceneFunction final {void operat
     }
 }};
 struct Engine::priv::ComponentBody_SceneEnteredFunction final {void operator()(void* systemPtr, void* componentPool,Scene& scene) const {
-	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool)).data();
+	auto& pool = (*static_cast<ECSComponentPool<ComponentBody>*>(componentPool)).data();
     for (auto& component : pool) { 
         if (component.m_Physics) {
             component.addPhysicsToWorld(true);
@@ -1089,7 +1090,7 @@ struct Engine::priv::ComponentBody_SceneEnteredFunction final {void operator()(v
     }
 }};
 struct Engine::priv::ComponentBody_SceneLeftFunction final {void operator()(void* systemPtr, void* componentPool, Scene& scene) const {
-	auto& pool = (*static_cast<ECSComponentPool<Entity, ComponentBody>*>(componentPool)).data();
+	auto& pool = (*static_cast<ECSComponentPool<ComponentBody>*>(componentPool)).data();
     for (auto& component : pool) { 
         if (component.m_Physics) {
             component.removePhysicsFromWorld(true);
@@ -1243,9 +1244,9 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(std::uint32_t
     }
 }
 
-Engine::priv::ComponentBody_System::ComponentBody_System(const SceneOptions& options, const Engine::priv::ECSSystemCI& systemCI, Engine::priv::ECS<Entity>& ecs) : Engine::priv::ECSSystem<Entity, ComponentBody>(options, systemCI, ecs) {
-
-}
+Engine::priv::ComponentBody_System::ComponentBody_System(const SceneOptions& options, const Engine::priv::ECSSystemCI& systemCI, Engine::priv::sparse_set_base& inComponentPool)
+    : Engine::priv::ECSSystem<ComponentBody>(options, systemCI, inComponentPool)
+{}
 Engine::priv::ComponentBody_System::~ComponentBody_System() {
 
 }

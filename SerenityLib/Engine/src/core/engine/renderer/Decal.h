@@ -9,6 +9,7 @@ namespace Engine::priv {
 };
 
 #include <ecs/EntityBody.h>
+#include <core/engine/renderer/RendererIncludes.h>
 
 class Decal final: public EntityBody {
     friend struct Engine::priv::DefaultDecalBindFunctor;

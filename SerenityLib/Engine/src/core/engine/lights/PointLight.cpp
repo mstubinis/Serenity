@@ -4,6 +4,7 @@
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/utils/Utils.h>
 #include <ecs/ComponentBody.h>
+#include <core/engine/scene/Scene.h>
 
 using namespace Engine;
 

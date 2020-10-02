@@ -2,9 +2,9 @@
 #include <core/engine/lights/DirectionalLight.h>
 #include <ecs/ComponentBody.h>
 #include <core/engine/utils/Utils.h>
+#include <core/engine/scene/Scene.h>
 
 using namespace Engine;
-using namespace std;
 
 DirectionalLight::DirectionalLight(const glm::vec3& direction, Scene* scene) 
     : SunLight{ glm::vec3(0.0f), LightType::Directional, scene }

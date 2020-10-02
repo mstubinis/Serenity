@@ -2,6 +2,7 @@
 #include <core/engine/lights/SpotLight.h>
 #include <core/engine/utils/Utils.h>
 #include <ecs/ComponentBody.h>
+#include <core/engine/scene/Scene.h>
 
 SpotLight::SpotLight(const glm_vec3& pos, const glm_vec3& direction, float innerCutoffInDegrees, float outerCutoffInDegrees, Scene* scene) 
     : PointLight{ LightType::Spot, pos, scene }

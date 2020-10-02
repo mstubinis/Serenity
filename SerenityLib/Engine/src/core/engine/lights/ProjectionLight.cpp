@@ -3,6 +3,7 @@
 #include <ecs/ComponentBody.h>
 #include <core/engine/utils/Utils.h>
 #include <core/engine/textures/Texture.h>
+#include <core/engine/scene/Scene.h>
 
 using namespace Engine;
 

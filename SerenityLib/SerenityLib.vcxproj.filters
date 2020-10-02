@@ -1363,5 +1363,11 @@
     <ClCompile Include="Engine\src\core\engine\networking\server\ServerClientsContainer.cpp">
       <Filter>Source Files\Engine\Core\Networking\Server</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\src\ecs\ECSEntityPool.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\ecs\ECS.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

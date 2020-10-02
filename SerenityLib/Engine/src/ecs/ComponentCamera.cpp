@@ -171,7 +171,7 @@ void ComponentCamera::setFar(float farPlane) noexcept {
 
 ComponentCamera_System_CI::ComponentCamera_System_CI() {
     setUpdateFunction([](void* system, void* componentPool, const float dt, Scene& scene) {
-        auto* pool       = (ECSComponentPool<Entity, ComponentCamera>*)componentPool;
+        auto* pool       = (ECSComponentPool<ComponentCamera>*)componentPool;
         auto& components = pool->data();
         auto lamda_update_component = [&](ComponentCamera& b, size_t i, size_t k) {
             Math::extractViewFrustumPlanesHartmannGribbs(b.getViewProjection(), b.getFrustrumPlanes().data());//update frustrum planes 

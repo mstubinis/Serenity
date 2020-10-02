@@ -2,7 +2,9 @@
 #ifndef ENGINE_ECS_SYSTEM_CONSTRUCTOR_INFO_H
 #define ENGINE_ECS_SYSTEM_CONSTRUCTOR_INFO_H
 
-#include <ecs/Entity.h>
+class Scene;
+
+struct Entity;
 
 using std_func_update            = std::function<void(void*, void*, const float, Scene&)>;
 using std_func_entity            = std::function<void(void*, void*, Entity, Scene&)>;
@@ -21,24 +23,12 @@ namespace Engine::priv {
 
         virtual ~ECSSystemCI() = default;
 
-        inline void setUpdateFunction(std_func_update&& func) noexcept {
-            onUpdateFunction = std::move(func);
-        }
-        inline void setOnComponentAddedToEntityFunction(std_func_component&& func) noexcept {
-            onComponentAddedToEntityFunction = std::move(func);
-        }
-        inline void setOnComponentRemovedFromEntityFunction(std_func_component_removed&& func) noexcept {
-            onComponentRemovedFromEntityFunction = std::move(func);
-        }
-        inline void setOnEntityAddedToSceneFunction(std_func_entity&& func) noexcept {
-            onEntityAddedToSceneFunction = std::move(func);
-        }
-        inline void setOnSceneEnteredFunction(std_func_scene&& func) noexcept {
-            onSceneEnteredFunction = std::move(func);
-        }
-        inline void setOnSceneLeftFunction(std_func_scene&& func) noexcept {
-            onSceneLeftFunction = std::move(func);
-        }
+        inline void setUpdateFunction(std_func_update&& func) noexcept { onUpdateFunction = std::move(func); }
+        inline void setOnComponentAddedToEntityFunction(std_func_component&& func) noexcept { onComponentAddedToEntityFunction = std::move(func); }
+        inline void setOnComponentRemovedFromEntityFunction(std_func_component_removed&& func) noexcept { onComponentRemovedFromEntityFunction = std::move(func); }
+        inline void setOnEntityAddedToSceneFunction(std_func_entity&& func) noexcept { onEntityAddedToSceneFunction = std::move(func); }
+        inline void setOnSceneEnteredFunction(std_func_scene&& func) noexcept { onSceneEnteredFunction = std::move(func); }
+        inline void setOnSceneLeftFunction(std_func_scene&& func) noexcept { onSceneLeftFunction = std::move(func); }
     };
 };
 #endif

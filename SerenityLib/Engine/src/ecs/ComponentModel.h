@@ -37,15 +37,15 @@ class ComponentModel: public Observer {
         ComponentModel() = delete;
     public:
         //BOOST_TYPE_INDEX_REGISTER_CLASS
-        explicit ComponentModel(Entity, Handle meshHandle, Handle materialHandle, ShaderProgram* = 0, RenderStage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(Entity, Mesh*,             Handle materialHandle, ShaderProgram* = 0, RenderStage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(Entity, Handle meshHandle, Material*,             ShaderProgram* = 0, RenderStage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(Entity, Mesh*,             Material*,             ShaderProgram* = 0, RenderStage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity, Handle meshHandle, Handle materialHandle, ShaderProgram* = 0, RenderStage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity, Mesh*,             Handle materialHandle, ShaderProgram* = 0, RenderStage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity, Handle meshHandle, Material*,             ShaderProgram* = 0, RenderStage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity, Mesh*,             Material*,             ShaderProgram* = 0, RenderStage = RenderStage::GeometryOpaque);
 
-        explicit ComponentModel(Entity, Handle meshHandle, Handle materialHandle, Handle shaderPHandle, RenderStage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(Entity, Mesh*,             Handle materialHandle, Handle shaderPHandle, RenderStage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(Entity, Handle meshHandle, Material*,             Handle shaderPHandle, RenderStage = RenderStage::GeometryOpaque);
-        explicit ComponentModel(Entity, Mesh*,             Material*,             Handle shaderPHandle, RenderStage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity, Handle meshHandle, Handle materialHandle, Handle shaderPHandle, RenderStage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity, Mesh*,             Handle materialHandle, Handle shaderPHandle, RenderStage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity, Handle meshHandle, Material*,             Handle shaderPHandle, RenderStage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity, Mesh*,             Material*,             Handle shaderPHandle, RenderStage = RenderStage::GeometryOpaque);
 
         ComponentModel(const ComponentModel& other)                = delete;
         ComponentModel& operator=(const ComponentModel& other)     = delete;
@@ -98,6 +98,12 @@ class ComponentModel: public Observer {
         }
         inline void setCustomUnbindFunctor(ModelInstance::unbind_function&& functor, size_t index = 0) noexcept {
             m_ModelInstances[index]->setCustomUnbindFunctor(std::move(functor));
+        }
+        inline void setCustomBindFunctor(const ModelInstance::bind_function& functor, size_t index = 0) noexcept {
+            m_ModelInstances[index]->setCustomBindFunctor(functor);
+        }
+        inline void setCustomUnbindFunctor(const ModelInstance::unbind_function& functor, size_t index = 0) noexcept {
+            m_ModelInstances[index]->setCustomUnbindFunctor(functor);
         }
 
         inline ModelInstance& operator[](size_t index) { return *m_ModelInstances[index].get(); }

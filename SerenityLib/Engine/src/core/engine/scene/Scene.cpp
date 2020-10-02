@@ -16,7 +16,7 @@ using namespace Engine;
 class Scene::impl final {
     public:
         Engine::priv::ParticleSystem   m_ParticleSystem;
-        priv::ECS<Entity>              m_ECS;
+        priv::ECS              m_ECS;
 
         impl() = delete;
 
@@ -122,7 +122,7 @@ std::vector<RodLight*>& priv::InternalScenePublicInterface::GetRodLights(const S
 std::vector<ProjectionLight*>& priv::InternalScenePublicInterface::GetProjectionLights(const Scene& scene) {
     return scene.m_ProjectionLights;
 }
-priv::ECS<Entity>& priv::InternalScenePublicInterface::GetECS(Scene& scene) {
+Engine::priv::ECS& priv::InternalScenePublicInterface::GetECS(Scene& scene) {
     return scene.m_i->m_ECS;
 }
 void priv::InternalScenePublicInterface::CleanECS(Scene& scene, Entity inEntity) {

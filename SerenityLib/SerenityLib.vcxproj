@@ -736,6 +736,8 @@
     <ClCompile Include="Engine\src\ecs\ComponentLogic3.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentModel.cpp" />
     <ClCompile Include="Engine\src\ecs\ComponentName.cpp" />
+    <ClCompile Include="Engine\src\ecs\ECS.cpp" />
+    <ClCompile Include="Engine\src\ecs\ECSEntityPool.cpp" />
     <ClCompile Include="Engine\src\ecs\ECSRegistry.cpp" />
     <ClCompile Include="Engine\src\ecs\Entity.cpp" />
     <ClCompile Include="Engine\src\ecs\EntityBody.cpp" />

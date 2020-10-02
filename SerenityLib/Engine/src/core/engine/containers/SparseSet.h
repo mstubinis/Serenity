@@ -2,7 +2,7 @@
 #ifndef ENGINE_CONTAINERS_SPARSE_SET_H
 #define ENGINE_CONTAINERS_SPARSE_SET_H
 
-#include <ecs/ECSRegistry.h>
+//#include <ecs/ECSRegistry.h>
 
 namespace Engine {
     namespace priv {

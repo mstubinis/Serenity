@@ -9,6 +9,7 @@
 #include <core/engine/scene/Camera.h>
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/system/Engine.h>
+#include <core/engine/scene/Scene.h>
 
 using namespace Engine;
 using namespace Engine::priv;
@@ -269,7 +270,7 @@ void ComponentModel::setUserPointer(void* UserPointer) {
 #pragma region System
 
 struct priv::ComponentModel_UpdateFunction final { void operator()(void* system, void* componentPool, const float dt, Scene& scene) const {
-    auto& pool       = *(ECSComponentPool<Entity, ComponentModel>*)componentPool;
+    auto& pool       = *(ECSComponentPool<ComponentModel>*)componentPool;
     auto& components = pool.data();
     auto lamda_update_component = [&](ComponentModel& componentModel, size_t i, size_t k) {
         for (size_t j = 0; j < componentModel.getNumModels(); ++j) {
@@ -297,7 +298,7 @@ ComponentModel_System_CI::ComponentModel_System_CI() {
     });
     //setOnComponentRemovedFromEntityFunction([](void* system, Entity entity) { });
     setOnEntityAddedToSceneFunction([](void* system, void* componentPool, Entity entity, Scene& scene) {
-        auto& pool          = *(ECSComponentPool<Entity, ComponentModel>*)componentPool;
+        auto& pool          = *(ECSComponentPool<ComponentModel>*)componentPool;
         auto* component_ptr = pool.getComponent(entity);
         if (component_ptr) {
             ComponentModel_Functions::CalculateRadius(*component_ptr);

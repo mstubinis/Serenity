@@ -15,7 +15,7 @@
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/shaders/Shader.h>
 #include <core/engine/renderer/FramebufferObject.h>
-
+#include <core/engine/scene/Scene.h>
 #include <core/engine/scene/Camera.h>
 
 #include <ecs/ComponentBody.h>

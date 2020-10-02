@@ -134,7 +134,7 @@ namespace Engine{
 
                 void internal_update_logic(Scene& scene, Window& window, const float dt);
                 void internal_update_sounds(Scene& scene, Window& window, const float dt);
-                void internal_update_physics(Scene& scene, Window& window, const float dt);
+                void internal_update_physics(Window& window, const float dt);
                 void internal_update(Window& window, const float dt);
                 void internal_render(Window& window, const float dt);
                 void internal_cleanup(Window& window, const float dt);

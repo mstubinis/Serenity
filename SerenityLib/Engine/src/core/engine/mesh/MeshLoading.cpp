@@ -183,10 +183,12 @@ bool Engine::priv::MeshLoader::IsSpecialFloat(const glm::vec3& v) {
     if (boost::math::isinf(v.x) || boost::math::isinf(v.y) || boost::math::isinf(v.z)) return true;
     return false;
 }
-bool Engine::priv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& pts, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& norms, unsigned int& result, float threshold) {
+bool Engine::priv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& pts, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& norms, size_t& result, float threshold) {
     for (size_t t = 0; t < pts.size(); ++t) {
-        if (IsNear(in_pos, pts[t], threshold) && IsNear(in_uv, uvs[t], threshold) && IsNear(in_norm, norms[t], threshold)) {
-            result = (unsigned int)t;
+        if (IsNear(in_pos, pts[t], threshold) 
+         && IsNear(in_uv, uvs[t], threshold) 
+         && IsNear(in_norm, norms[t], threshold)) {
+            result = t;
             return true;
         }
     }

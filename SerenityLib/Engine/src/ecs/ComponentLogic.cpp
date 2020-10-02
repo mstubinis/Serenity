@@ -36,7 +36,7 @@ void ComponentLogic::call(const float dt) const noexcept {
 
 ComponentLogic_System_CI::ComponentLogic_System_CI() {
     setUpdateFunction([](void* system, void* componentPool, const float dt, Scene& scene) {
-        auto& pool = *static_cast<Engine::priv::ECSComponentPool<Entity, ComponentLogic>*>(componentPool);
+        auto& pool = *static_cast<Engine::priv::ECSComponentPool<ComponentLogic>*>(componentPool);
         const auto& components = pool.data();
         for (auto& component : components) {
             component.call(dt);

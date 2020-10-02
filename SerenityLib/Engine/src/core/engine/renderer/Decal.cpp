@@ -16,11 +16,11 @@
 using namespace Engine;
 
 namespace Engine::priv {
-    struct DefaultDecalBindFunctor { void operator()(ModelInstance* i, const Engine::priv::Renderer* renderer) const {
+    constexpr auto DefaultDecalBindFunctor = [](ModelInstance* i, const Engine::priv::Renderer* renderer) {
         renderer->m_Pipeline->renderDecal(*i);
-    }};
-    struct DefaultDecalUnbindFunctor { void operator()(ModelInstance* i, const Engine::priv::Renderer* renderer) const {
-    }};
+    };
+    constexpr auto DefaultDecalUnbindFunctor = [](ModelInstance* i, const Engine::priv::Renderer* renderer) {
+    };
 };
 
 Decal::Decal(Material& material, const glm_vec3& localPosition, const glm::vec3& hitNormal, float size, Scene& scene, float lifetimeMax, RenderStage stage) 
@@ -42,8 +42,8 @@ Decal::Decal(Material& material, const glm_vec3& localPosition, const glm::vec3&
     const decimal factor = (decimal)(0.2f * size);
     body.setScale(factor, factor, (decimal)0.04);
 
-    model.setCustomBindFunctor(Engine::priv::DefaultDecalBindFunctor());
-    model.setCustomUnbindFunctor(Engine::priv::DefaultDecalUnbindFunctor());
+    model.setCustomBindFunctor(Engine::priv::DefaultDecalBindFunctor);
+    model.setCustomUnbindFunctor(Engine::priv::DefaultDecalUnbindFunctor);
 }
 Decal::Decal(Decal&& other) noexcept 
     : EntityBody{ std::move(other) }

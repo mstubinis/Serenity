@@ -38,6 +38,7 @@ bool Engine::Networking::ServerClientsContainer::removeClientImmediately(ServerC
     if (!removed) {
         ENGINE_PRODUCTION_LOG("(Server::remove_client_immediately) error: could not remove client hash: " << foundHash)
     }
+    return removed;
 }
 bool Engine::Networking::ServerClientsContainer::removeClient(ServerClient& inClient, std::mutex& inMutex) {
     for (auto& [name, client] : m_HashedClients) {

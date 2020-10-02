@@ -22,17 +22,17 @@ unsigned int ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
 decimal ModelInstance::m_GlobalDistanceFactor     = (decimal)1100.0;
 
 namespace Engine::priv {
-    struct DefaultModelInstanceBindFunctor {void operator()(ModelInstance* i, const Engine::priv::Renderer* renderer) const {
+    constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engine::priv::Renderer* renderer) {
         auto stage            = i->stage();
         auto& scene           = *Resources::getCurrentScene();
         auto* camera          = scene.getActiveCamera();
         glm::vec3 camPos      = camera->getPosition();
-        auto* body            = (i->m_Parent.getComponent<ComponentBody>());
+        auto* body            = (i->parent().getComponent<ComponentBody>());
         glm::mat4 parentModel = body->modelMatrixRendering();
-        auto& animationVector = i->m_AnimationVector;
+        auto& animationVector = i->getRunningAnimations();
 
-        Engine::Renderer::sendUniform1Safe("Object_Color", i->m_Color.toPackedInt());
-        Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", i->m_GodRaysColor.toPackedInt());
+        Engine::Renderer::sendUniform1Safe("Object_Color", i->color().toPackedInt());
+        Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", i->godRaysColor().toPackedInt());
 
         if (stage == RenderStage::ForwardTransparentTrianglesSorted || stage == RenderStage::ForwardTransparent || stage == RenderStage::ForwardOpaque) {
             auto& lights     = priv::InternalScenePublicInterface::GetLights(scene);
@@ -87,11 +87,11 @@ namespace Engine::priv {
         }
         if (animationVector.size() > 0) {
             Engine::Renderer::sendUniform1Safe("AnimationPlaying", 1);
-            Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationVector.m_Transforms, (unsigned int)animationVector.m_Transforms.size());
+            Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationVector.getTransforms(), (unsigned int)animationVector.getTransforms().size());
         }else{
             Engine::Renderer::sendUniform1Safe("AnimationPlaying", 0);
         }
-        glm::mat4 modelMatrix = parentModel * i->m_ModelMatrix;
+        glm::mat4 modelMatrix = parentModel * i->modelMatrix();
 
         //world space normals
         glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
@@ -102,10 +102,10 @@ namespace Engine::priv {
 
         Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
         Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
-    }};
-    struct DefaultModelInstanceUnbindFunctor {void operator()(ModelInstance* i, const Engine::priv::Renderer* renderer) const {
+    };
+    constexpr auto DefaultModelInstanceUnbindFunctor = [](ModelInstance* i, const Engine::priv::Renderer* renderer) {
         //auto& i = *static_cast<ModelInstance*>(r);
-    }};
+    };
 };
 bool priv::InternalModelInstancePublicInterface::IsViewportValid(const ModelInstance& modelInstance, const Viewport& viewport) {
     const auto flags = modelInstance.getViewportFlags();
@@ -116,8 +116,8 @@ ModelInstance::ModelInstance(Entity parent, Mesh* mesh, Material* mat, ShaderPro
     : m_Parent{ parent }
 {
     internal_init(mesh, mat, program);
-    setCustomBindFunctor(priv::DefaultModelInstanceBindFunctor());
-    setCustomUnbindFunctor(priv::DefaultModelInstanceUnbindFunctor());
+    setCustomBindFunctor(priv::DefaultModelInstanceBindFunctor);
+    setCustomUnbindFunctor(priv::DefaultModelInstanceUnbindFunctor);
 }
 ModelInstance::ModelInstance(Entity parent, Handle mesh, Handle mat, ShaderProgram* program) 
     : ModelInstance{ parent, mesh.get<Mesh>(), mat.get<Material>(), program }

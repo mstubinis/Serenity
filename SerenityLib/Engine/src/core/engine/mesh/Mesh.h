@@ -70,8 +70,8 @@ class Mesh final: public Resource, public Observer, public Engine::NonCopyable, 
     friend class  Terrain;
     friend class  SMSH_File;
 
-    using bind_func   = std::function<void(Mesh*, const Engine::priv::Renderer*)>;
-    using unbind_func = std::function<void(Mesh*, const Engine::priv::Renderer*)>;
+    using bind_func   = void(*)(Mesh*, const Engine::priv::Renderer*);
+    using unbind_func = void(*)(Mesh*, const Engine::priv::Renderer*);
 
     private:
         bind_func                              m_CustomBindFunctor   = [](Mesh*, const Engine::priv::Renderer*) {};

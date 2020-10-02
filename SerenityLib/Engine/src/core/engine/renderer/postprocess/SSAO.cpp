@@ -8,6 +8,7 @@
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/shaders/Shader.h>
 #include <core/engine/scene/Camera.h>
+#include <core/engine/scene/Viewport.h>
 #include <core/engine/threading/ThreadingModule.h>
 #include <core/engine/resources/Engine_BuiltInShaders.h>
 #include <core/engine/resources/Engine_Resources.h>

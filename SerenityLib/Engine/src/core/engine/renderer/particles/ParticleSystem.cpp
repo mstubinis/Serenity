@@ -9,6 +9,7 @@
 #include <core/engine/materials/Material.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/scene/Camera.h>
+#include <core/engine/scene/Viewport.h>
 #include <core/engine/system/Engine.h>
 #include <core/engine/threading/ThreadingModule.h>
 #include <core/engine/shaders/ShaderProgram.h>

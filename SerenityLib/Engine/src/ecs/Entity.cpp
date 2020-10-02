@@ -157,3 +157,7 @@ luabridge::LuaRef Entity::getComponent(const std::string& componentClassName) {
     }
     return luabridge::getGlobal(L, global_name_cstr);
 }
+
+Engine::priv::ECS& Engine::priv::InternalEntityPublicInterface::GetECS(Entity entity) {
+    return Engine::priv::InternalScenePublicInterface::GetECS(entity.scene());
+}

@@ -23,15 +23,15 @@ class ParticleEmissionProperties;
 class Particle;
 
 namespace Engine::priv {
+    class  ECS;
     class  RenderGraph;
     class  ResourceManager;
     struct InternalScenePublicInterface;
-    template<typename T> class ECS;
     class  GBuffer;
     class  Renderer;
     class  EngineCore;
 };
-
+#include <ecs/ECS.h>
 #include <core/engine/renderer/RendererIncludes.h>
 #include <core/engine/resources/Resource.h>
 #include <core/engine/scene/Viewport.h>
@@ -135,24 +135,24 @@ namespace Engine::priv {
         static std::vector<RodLight*>&           GetRodLights(const Scene& scene);
         static std::vector<ProjectionLight*>&    GetProjectionLights(const Scene& scene);
 
-        static void           UpdateMaterials(Scene& scene, const float dt);
+        static void                       UpdateMaterials(Scene& scene, const float dt);
 
-        static void           RenderGeometryOpaque( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void           RenderGeometryTransparent( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void           RenderGeometryTransparentTrianglesSorted( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void           RenderForwardOpaque( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void           RenderForwardTransparent( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void           RenderForwardTransparentTrianglesSorted( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void           RenderForwardParticles( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void           RenderDecals( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void           RenderParticles( Renderer&, Scene& scene, Viewport&, Camera&, ShaderProgram& program);
+        static void                       RenderGeometryOpaque( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void                       RenderGeometryTransparent( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void                       RenderGeometryTransparentTrianglesSorted( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void                       RenderForwardOpaque( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void                       RenderForwardTransparent( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void                       RenderForwardTransparentTrianglesSorted( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void                       RenderForwardParticles( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void                       RenderDecals( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void                       RenderParticles( Renderer&, Scene& scene, Viewport&, Camera&, ShaderProgram& program);
 
-        static void           AddModelInstanceToPipeline(Scene& scene, ModelInstance&, RenderStage stage, ComponentModel&);
-        static void           RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance&, RenderStage stage);
-        static ECS<Entity>&   GetECS(Scene& scene);
-        static void           CleanECS(Scene& scene, Entity entity);
-        static void           SkipRenderThisFrame(Scene& scene, bool isSkip);
-        static bool           IsSkipRenderThisFrame(Scene& scene);
+        static void                       AddModelInstanceToPipeline(Scene& scene, ModelInstance&, RenderStage stage, ComponentModel&);
+        static void                       RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance&, RenderStage stage);
+        static Engine::priv::ECS& GetECS(Scene& scene);
+        static void                       CleanECS(Scene& scene, Entity entity);
+        static void                       SkipRenderThisFrame(Scene& scene, bool isSkip);
+        static bool                       IsSkipRenderThisFrame(Scene& scene);
     };
 };
 

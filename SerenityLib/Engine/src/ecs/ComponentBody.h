@@ -9,6 +9,7 @@ class  ComponentBody;
 class  btCollisionObject;
 class  btRigidBody;
 namespace Engine::priv {
+    class  sparse_set_base;
     class  ComponentBody_System;
     struct ComponentBody_UpdateFunction;
     struct ComponentBody_EntityAddedToSceneFunction;
@@ -22,6 +23,7 @@ namespace Engine::priv {
 #include <core/engine/physics/PhysicsIncludes.h>
 #include <LinearMath/btDefaultMotionState.h>
 #include <ecs/Entity.h>
+#include <core/engine/events/Observer.h>
 
 struct CollisionCallbackEventData final {
     ComponentBody&     ownerBody;
@@ -267,7 +269,7 @@ class ComponentBody_System_CI : public Engine::priv::ECSSystemCI {
 };
 
 namespace Engine::priv {
-    class ComponentBody_System final : public Engine::priv::ECSSystem<Entity, ComponentBody> {
+    class ComponentBody_System final : public Engine::priv::ECSSystem<ComponentBody> {
         class ParentChildVector final {
             private:
                 inline std::uint32_t& getParent(std::uint32_t childID) noexcept {
@@ -298,7 +300,7 @@ namespace Engine::priv {
         public:
             ParentChildVector ParentChildSystem;
 
-            ComponentBody_System(const SceneOptions& options, const Engine::priv::ECSSystemCI& systemCI, Engine::priv::ECS<Entity>& ecs);
+            ComponentBody_System(const SceneOptions& options, const Engine::priv::ECSSystemCI& systemCI, Engine::priv::sparse_set_base& inComponentPool);
             ~ComponentBody_System();
     };
 };

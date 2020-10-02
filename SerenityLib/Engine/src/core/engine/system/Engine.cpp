@@ -112,7 +112,9 @@ void EngineCore::init(const EngineOptions& options) {
     Engine::Renderer::fog::enable(options.fog_enabled);
     Engine::Renderer::Settings::setAntiAliasingAlgorithm(options.aa_algorithm);
 }
-void EngineCore::internal_update_physics(Scene& scene, Window& window, const float timeStep) {
+void EngineCore::internal_update_physics(Window& window, const float timeStep) {
+    auto& scene = *Resources::getCurrentScene();
+
     m_DebugManager.stop_clock();
 
     unsigned int requestedStepsPerFrame  = Physics::getNumberOfStepsPerFrame();
@@ -147,7 +149,6 @@ void EngineCore::internal_update(Window& window, const float dt){
     Scene& scene = *Resources::getCurrentScene();
     Game::onPreUpdate(dt);
     scene.preUpdate(dt);
-    internal_update_physics(scene, window, dt);
     internal_update_logic(scene, window, dt);
     internal_update_sounds(scene, window, dt);
 }
@@ -450,6 +451,7 @@ void EngineCore::run(){
             handle_events(window);
             internal_update(window, dt);
             internal_render(window, dt);
+            internal_update_physics(window, dt);
             internal_cleanup(window, dt);
         }
         m_DebugManager.calculate();

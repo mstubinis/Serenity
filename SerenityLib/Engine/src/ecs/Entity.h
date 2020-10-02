@@ -2,15 +2,12 @@
 #ifndef ENGINE_ECS_ENTITY_H
 #define ENGINE_ECS_ENTITY_H
 
+class Scene;
 namespace Engine::priv {
-    template<typename T> class ECS;
     struct InternalEntityPublicInterface;
 };
 
 #include <ecs/ECSIncludes.h>
-#include <core/engine/scene/Scene.h>
-#include <core/engine/lua/LuaIncludes.h>
-#include <core/engine/lua/LuaState.h>
 
 namespace Engine::priv {
     struct entity_packed_data final {
@@ -19,6 +16,8 @@ namespace Engine::priv {
         std::uint32_t versionID : VERSION_BIT_POSITIONS;
     };
 }
+#include <core/engine/lua/LuaIncludes.h>
+#include <core/engine/lua/LuaState.h>
 
 /*
 The Entity class used in the ECS framework.
@@ -97,10 +96,9 @@ struct Entity {
 };
 
 namespace Engine::priv {
+    class ECS;
     struct InternalEntityPublicInterface final {
-        static ECS<Entity>& GetECS(Entity entity) {
-            return Engine::priv::InternalScenePublicInterface::GetECS(entity.scene());
-        }
+        static Engine::priv::ECS& GetECS(Entity entity);
 
         template<typename T> static luabridge::LuaRef GetComponent(lua_State* L, Entity entity, const char* globalName){
             luabridge::setGlobal(L, entity.getComponent<T>(), globalName);

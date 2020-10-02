@@ -31,12 +31,12 @@ using namespace Engine::priv;
 namespace boostm = boost::math;
 
 namespace Engine::priv {
-    struct DefaultMeshBindFunctor final { void operator()(Mesh* mesh_ptr, const Engine::priv::Renderer* renderer) const {
-        mesh_ptr->m_VertexData->bind();
-    }};
-    struct DefaultMeshUnbindFunctor final { void operator()(Mesh* mesh_ptr, const Engine::priv::Renderer* renderer) const {
-        mesh_ptr->m_VertexData->unbind();
-    }};
+    constexpr auto DefaultMeshBindFunctor = [](Mesh* mesh_ptr, const Engine::priv::Renderer* renderer) {
+        mesh_ptr->getVertexData().bind();
+    };
+    constexpr auto DefaultMeshUnbindFunctor = [](Mesh* mesh_ptr, const Engine::priv::Renderer* renderer) {
+        mesh_ptr->getVertexData().unbind();
+    };
 };
 
 void InternalMeshPublicInterface::LoadGPU(Mesh& mesh){
@@ -73,8 +73,8 @@ void InternalMeshPublicInterface::UnloadGPU(Mesh& mesh){
 }
 void InternalMeshPublicInterface::InitBlankMesh(Mesh& mesh) {
     mesh.registerEvent(EventType::WindowFullscreenChanged);
-    mesh.setCustomBindFunctor(DefaultMeshBindFunctor());
-    mesh.setCustomUnbindFunctor(DefaultMeshUnbindFunctor());
+    mesh.setCustomBindFunctor(DefaultMeshBindFunctor);
+    mesh.setCustomUnbindFunctor(DefaultMeshUnbindFunctor);
 }
 bool InternalMeshPublicInterface::SupportsInstancing(){
     return (
@@ -162,7 +162,7 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
 #pragma endregion
     }else{
 #pragma region Some Threshold
-        std::vector<uint32_t>  indices;
+        std::vector<std::uint32_t>  indices;
         std::vector<glm::vec3> temp_pos;             temp_pos.reserve(data.points.size());
         std::vector<glm::vec2> temp_uvs;             temp_uvs.reserve(data.uvs.size());
         std::vector<glm::vec3> temp_normals;         temp_normals.reserve(data.normals.size());
@@ -171,8 +171,8 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
         std::vector<glm::vec4> boneIDs;              boneIDs.reserve(data.m_Bones.size());
         std::vector<glm::vec4> boneWeights;          boneWeights.reserve(data.m_Bones.size());
 
-        for (unsigned int i = 0; i < data.points.size(); ++i) {
-            unsigned int index;
+        for (size_t i = 0; i < data.points.size(); ++i) {
+            size_t index;
             bool found = priv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, mesh.m_Threshold);
             if (found) {
                 indices.emplace_back(index);

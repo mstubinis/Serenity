@@ -27,6 +27,8 @@ namespace Engine::priv {
 #include <core/engine/model/ModelInstanceIncludes.h>
 #include <core/engine/model/ModelInstanceAnimation.h>
 #include <core/engine/scene/ViewportIncludes.h>
+#include <core/engine/events/Observer.h>
+#include <core/engine/renderer/RendererIncludes.h>
 
 class ModelInstance final : public Engine::UserPointer, public Observer {
     friend struct Engine::priv::DefaultModelInstanceBindFunctor;
@@ -36,8 +38,8 @@ class ModelInstance final : public Engine::UserPointer, public Observer {
     friend class  ComponentModel;
     friend class  Collision;
 
-    using bind_function   = std::function<void(ModelInstance*, const Engine::priv::Renderer*)>;
-    using unbind_function = std::function<void(ModelInstance*, const Engine::priv::Renderer*)>;
+    using bind_function   = void(*)(ModelInstance*, const Engine::priv::Renderer*);
+    using unbind_function = void(*)(ModelInstance*, const Engine::priv::Renderer*);
 
     private:
         static decimal                                       m_GlobalDistanceFactor;
@@ -99,6 +101,9 @@ class ModelInstance final : public Engine::UserPointer, public Observer {
 
         inline void setCustomBindFunctor(bind_function&& functor) noexcept { m_CustomBindFunctor   = std::move(functor); }
         inline void setCustomUnbindFunctor(unbind_function&& functor) noexcept { m_CustomUnbindFunctor = std::move(functor); }
+        inline void setCustomBindFunctor(const bind_function& functor) noexcept { m_CustomBindFunctor = functor; }
+        inline void setCustomUnbindFunctor(const unbind_function& functor) noexcept { m_CustomUnbindFunctor = functor; }
+
         static void setDefaultViewportFlag(unsigned int flag);
         static void setDefaultViewportFlag(ViewportFlag::Flag flag);
 
@@ -109,6 +114,8 @@ class ModelInstance final : public Engine::UserPointer, public Observer {
         inline void addViewportFlag(ViewportFlag::Flag flag) noexcept { m_ViewportFlag.add(flag); }
         inline void removeViewportFlag(ViewportFlag::Flag flag) noexcept { m_ViewportFlag.remove(flag); }
         inline unsigned int getViewportFlags() const noexcept { return m_ViewportFlag.get(); }
+
+        inline CONSTEXPR const Engine::priv::ModelInstanceAnimationVector& getRunningAnimations() const noexcept { return m_AnimationVector; }
 
         inline CONSTEXPR float radius() const noexcept { return m_Radius; }
         inline CONSTEXPR size_t index() const noexcept { return m_Index; }

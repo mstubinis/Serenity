@@ -47,6 +47,8 @@ namespace Engine::priv {
 
             void emplace_animation(Mesh&, const std::string& animationName, float start, float end, unsigned int requestedLoops);
 
+            inline const std::vector<glm::mat4>& getTransforms() const noexcept { return m_Transforms; }
+
             inline size_t size() const noexcept { return m_Animation_Instances.size(); }
             void clear();
             void process(Mesh& mesh, const float dt);
