@@ -16,11 +16,12 @@ class  btCompoundShape;
 #include <LinearMath/btVector3.h>
 #include <ecs/Entity.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
+#include <core/engine/resources/Handle.h>
 
 class Collision final: public Observer {
     private:
         Entity                             m_Owner;
-        std::vector<Mesh*>                 m_DeferredMeshes;
+        std::vector<Handle>                m_DeferredMeshes;
         std::function<void()>              m_DeferredLoadingFunction = []() {};
 
         CollisionType                      m_Type                    = CollisionType::None;
@@ -30,14 +31,14 @@ class Collision final: public Observer {
         void internal_base_init(CollisionType collisionType, float mass);
         void internal_free_memory();
 
-        static void internal_load_1(Collision* collision, CollisionType collisionType, Mesh* mesh, float mass);
+        static void internal_load_1(Collision* collision, CollisionType collisionType, Handle mesh, float mass);
         static void internal_load_2(Collision* collision, btCompoundShape* BTCompoundShape, std::vector<ModelInstance*> modelInstances, float mass, CollisionType collisionType);
 
         Collision() = delete;
     public:
         Collision(ComponentBody& componentBody);
         Collision(ComponentBody& componentBody, CollisionType collisionType, ModelInstance* modelInstance, float mass = 0);
-        Collision(ComponentBody& componentBody, CollisionType collisionType, Mesh& mesh, float mass = 0);
+        Collision(ComponentBody& componentBody, CollisionType collisionType, Handle mesh, float mass = 0);
         Collision(ComponentBody& componentBody, ComponentModel& componentModel, float mass = 0, CollisionType collisionType = CollisionType::ConvexHull);
 
         Collision(const Collision& other)                  = delete;

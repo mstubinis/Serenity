@@ -9,87 +9,41 @@ class Texture;
 #include <core/engine/textures/TextureIncludes.h>
 
 struct TextureRequestPart final {
-    Texture*                     texture         = nullptr;
-    Handle                       handle          = Handle();
-    std::string                  name            = "";
-    bool                         async           = false;
-    GLuint                       type            = 0U;
-    TextureType                  textureType     = TextureType::Unknown;
-    bool                         isToBeMipmapped = false;
-    ImageInternalFormat          internalFormat  = ImageInternalFormat::Unknown;
-
-    TextureRequestPart() = default;
-    ~TextureRequestPart() = default;
-
-    TextureRequestPart(const TextureRequestPart& other)                = default;
-    TextureRequestPart& operator=(const TextureRequestPart& other)     = default;
-    TextureRequestPart(TextureRequestPart&& other) noexcept            = delete;
-    TextureRequestPart& operator=(TextureRequestPart&& other) noexcept = delete;
-
-    void assignType() {
-        switch (type) {
-            case GL_TEXTURE_2D: {
-                textureType = TextureType::Texture2D; break;
-            }case GL_TEXTURE_1D: {
-                textureType = TextureType::Texture1D; break;
-            }case GL_TEXTURE_3D: {
-                textureType = TextureType::Texture3D; break;
-            }case GL_TEXTURE_CUBE_MAP: {
-                textureType = TextureType::CubeMap; break;
-            }default: {
-                textureType = TextureType::Texture2D; break;
-            }
-        }
-    }
+    std::string                  fileOrTextureName = "";
+    Handle                       handle            = Handle();
+    TextureType                  textureType       = TextureType::Unknown;
+    ImageInternalFormat          internalFormat    = ImageInternalFormat::Unknown;
+    bool                         async             = false;
+    bool                         isToBeMipmapped   = false;
+    std::function<void()>        m_Callback        = []() {};
 };
 
 struct TextureRequest final {
-    std::string           file              = "";
-    std::string           fileExtension     = "";
-    bool                  fileExists        = false;
-    std::function<void()> m_Callback        = []() {};
+    struct FileData final {
+        std::string           m_FileExtension = "";
+        bool                  m_FileExists = false;
+    };
 
-    TextureRequestPart    part;
+    TextureRequestPart        m_Part;
+    bool                      m_FromMemory = false;
+    //union {
+        FileData              m_FileData;
+        sf::Image             m_SFMLImage;
+    //};
 
-    TextureRequest(
-        const std::string& filenameOrData,
-        bool genMipMaps,
-        ImageInternalFormat internal_ ,
-        GLuint openglTextureType,
-        std::function<void()>&& callback
-    );
-    TextureRequest(
-        const std::string& filenameOrData,
-        bool genMipMaps,
-        ImageInternalFormat internal_,
-        GLuint openglTextureType
-    );
-    ~TextureRequest() = default;
+    TextureRequest() = delete;
+    TextureRequest(const std::string& filenameOrData, bool genMipMaps, ImageInternalFormat, TextureType, std::function<void()>&& callback);
+    TextureRequest(const std::string& filenameOrData, bool genMipMaps, ImageInternalFormat, TextureType);
+    TextureRequest(const sf::Image&, const std::string& textureName, bool genMipMaps, ImageInternalFormat, TextureType, std::function<void()>&& callback);
 
-    void request(bool async = false);
-};
+    TextureRequest(const TextureRequest& other);
+    TextureRequest& operator=(const TextureRequest& other);
+    TextureRequest(TextureRequest&& other) noexcept;
+    TextureRequest& operator=(TextureRequest&& other) noexcept;
+    ~TextureRequest() {}
 
-struct TextureRequestFromMemory final {
-    sf::Image              image;
-    std::string            textureName  = "";
-    std::function<void()>  m_Callback   = []() {};
-
-    TextureRequestPart     part;
-
-    TextureRequestFromMemory(
-        sf::Image& sfImage,
-        const std::string& textureName,
-        bool genMipMaps,
-        ImageInternalFormat internal_,
-        GLuint openglTextureType,
-        std::function<void()>&& callback_
-    );
-    ~TextureRequestFromMemory() = default;
-
-    TextureRequestFromMemory(const TextureRequestFromMemory& other)                = default;
-    TextureRequestFromMemory& operator=(const TextureRequestFromMemory& other)     = default;
-    TextureRequestFromMemory(TextureRequestFromMemory&& other) noexcept            = delete;
-    TextureRequestFromMemory& operator=(TextureRequestFromMemory&& other) noexcept = delete;
+    inline constexpr bool isFromFile() const noexcept { return (!m_FromMemory && m_FileData.m_FileExists); }
+    inline constexpr bool isFromMemory() const noexcept { return (m_FromMemory && m_SFMLImage.getSize().x > 0 && m_SFMLImage.getSize().y > 0); }
 
     void request(bool async = false);
 };
@@ -98,7 +52,6 @@ namespace Engine::priv {
     struct TextureRequestStaticImpl final {
         friend class  Texture;
         static void Request(TextureRequest& request);
-        static void Request(TextureRequestFromMemory& requestFromMemory);
     };
 };
 

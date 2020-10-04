@@ -43,6 +43,8 @@
 #include <deque>
 #include <set>
 #include <map>
+#include <typeinfo>
+#include <typeindex>
 
 //windows api
 #ifdef _WIN32
@@ -65,6 +67,7 @@
 #include <glm/gtc/packing.hpp>
 #include <glm/gtc/bitfield.hpp>
 #include <glm/detail/type_half.hpp>
+
 
 #ifdef ENGINE_USE_INLINE
     #define INLINE inline
@@ -106,6 +109,24 @@
     #define ENGINE_SIMD_SUPPORTED
 #endif
 
+
+
+#if defined(__clang__)
+    #define DEBUG_BREAK() __builtin_debugtrap()
+#elif defined(__GNUC__) || defined(__GNUG__)
+    #define DEBUG_BREAK() __builtin_trap()
+#elif defined(_MSC_VER) || defined(_MSC_FULL_VER)
+    #define DEBUG_BREAK() __debugbreak()
+#else
+    #include <signal.h>
+    #if defined(SIGTRAP)
+        #define DEBUG_BREAK() raise(SIGTRAP)
+    #else
+        #define DEBUG_BREAK() raise(SIGABRT)
+    #endif
+#endif
+
+
 #if defined(ENGINE_PRODUCTION)
     #define ASSERT(condition, message) ((void)0)
 #else
@@ -113,7 +134,7 @@
         do { \
             if (! (condition)) { \
                 std::cerr << "Assertion `" #condition "` failed in " << __FILE__ << " line " << __LINE__ << ": " << message << '\n'; \
-                std::cin.get(); \
+                DEBUG_BREAK(); \
                 std::terminate(); \
             } \
         } while (false)
@@ -319,7 +340,7 @@ namespace Engine {
             NonMoveable(NonMoveable&&) noexcept = delete;
             NonMoveable& operator=(NonMoveable&&) noexcept = delete;
     };
-
+    /*
     void printEndianness() noexcept {
         std::uint32_t data;
         std::uint8_t* cptr;
@@ -331,6 +352,7 @@ namespace Engine {
             ENGINE_PRODUCTION_LOG("big-endiann")
         }
     }
+    */
 };
 
 #endif

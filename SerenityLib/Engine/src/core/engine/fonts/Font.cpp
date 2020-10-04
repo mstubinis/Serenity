@@ -20,6 +20,21 @@ Font::Font(const std::string& filename, int height, int width, float line_height
 {
     init(filename, height, width);
 }
+Font::Font(Font&& other) noexcept 
+    : Resource(std::move(other))
+    , m_FontTexture { std::exchange(other.m_FontTexture, nullptr) }
+    , m_MaxHeight   { std::move(other.m_MaxHeight) }
+    , m_LineHeight  { std::move(other.m_LineHeight) }
+    , m_CharGlyphs  { std::move(other.m_CharGlyphs) }
+{}
+Font& Font::operator=(Font&& other) noexcept {
+    Resource::operator=(std::move(other));
+    m_FontTexture = std::exchange(other.m_FontTexture, nullptr);
+    m_MaxHeight   = std::move(other.m_MaxHeight);
+    m_LineHeight  = std::move(other.m_LineHeight);
+    m_CharGlyphs  = std::move(other.m_CharGlyphs);
+    return *this;
+}
 Font::~Font(){ 
 }
 
@@ -82,8 +97,11 @@ void Font::init_simple(const std::string& filename, int height, int width) {
         rawname = filename.substr(0, lastindex);
         rawname += ".png";
     }
-    m_FontTexture = NEW Texture(rawname, false, ImageInternalFormat::SRGB8_ALPHA8);
-    Handle handle = Engine::priv::Core::m_Engine->m_ResourceManager._addTexture(m_FontTexture);
+
+    Handle handle = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.emplace<Texture>(rawname, false, ImageInternalFormat::SRGB8_ALPHA8);
+    m_FontTexture = handle.get<Texture>();
+    //m_FontTexture = NEW Texture(rawname, false, ImageInternalFormat::SRGB8_ALPHA8);
+    //Handle handle = Engine::priv::Core::m_Engine->m_ResourceManager._addTexture(m_FontTexture);
 
     float min_y_offset  = std::numeric_limits<float>().max();
     float max_y_offset  = std::numeric_limits<float>().min();
@@ -259,8 +277,10 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
 
-    m_FontTexture = NEW Texture(atlas_image, filename + "_Texture", false, ImageInternalFormat::SRGB8_ALPHA8);
-    Handle handle = Engine::priv::Core::m_Engine->m_ResourceManager._addTexture(m_FontTexture);
+    //m_FontTexture = NEW Texture(atlas_image, filename + "_Texture", false, ImageInternalFormat::SRGB8_ALPHA8);
+    //Handle handle = Engine::priv::Core::m_Engine->m_ResourceManager._addTexture(m_FontTexture);
+    Handle handle = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.emplace<Texture>(atlas_image, filename + "_Texture", false, ImageInternalFormat::SRGB8_ALPHA8);
+    m_FontTexture = handle.get<Texture>();
 
     m_MaxHeight = max_y_offset - min_y_offset;
 }

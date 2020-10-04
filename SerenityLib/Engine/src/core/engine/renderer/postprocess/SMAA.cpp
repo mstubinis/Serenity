@@ -8,13 +8,14 @@
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/shaders/Shader.h>
 #include <core/engine/threading/ThreadingModule.h>
+#include <core/engine/resources/Engine_Resources.h>
 
 Engine::priv::SMAA Engine::priv::SMAA::STATIC_SMAA;
 
 Engine::priv::SMAA::SMAA() {
-    m_Vertex_Shaders.resize(PassStage::_TOTAL, nullptr);
-    m_Fragment_Shaders.resize(PassStage::_TOTAL, nullptr);
-    m_Shader_Programs.resize(PassStage::_TOTAL, nullptr);
+    m_Vertex_Shaders.resize(PassStage::_TOTAL, Handle{});
+    m_Fragment_Shaders.resize(PassStage::_TOTAL, Handle{});
+    m_Shader_Programs.resize(PassStage::_TOTAL, Handle{});
 
     m_Vertex_Shaders_Code.resize(PassStage::_TOTAL, "");
     m_Fragment_Shaders_Code.resize(PassStage::_TOTAL, "");
@@ -22,9 +23,6 @@ Engine::priv::SMAA::SMAA() {
 Engine::priv::SMAA::~SMAA() {
     GLCall(glDeleteTextures(1, &SearchTexture));
     GLCall(glDeleteTextures(1, &AreaTexture));
-    SAFE_DELETE_VECTOR(m_Shader_Programs);
-    SAFE_DELETE_VECTOR(m_Fragment_Shaders);
-    SAFE_DELETE_VECTOR(m_Vertex_Shaders);
 }
 bool Engine::priv::SMAA::init_shaders() {
 
@@ -578,12 +576,12 @@ bool Engine::priv::SMAA::init_shaders() {
 #pragma endregion
 
     for (unsigned int i = 0; i < PassStage::_TOTAL; ++i) {
-        auto lambda_part_a = [&, i]() {
-            m_Vertex_Shaders[i] = NEW Shader(m_Vertex_Shaders_Code[i], ShaderType::Vertex, false);
-            m_Fragment_Shaders[i] = NEW Shader(m_Fragment_Shaders_Code[i], ShaderType::Fragment, false);
+        auto lambda_part_a = [this, i]() {
+            m_Vertex_Shaders[i]   = Engine::Resources::addResource<Shader>(m_Vertex_Shaders_Code[i], ShaderType::Vertex, false);
+            m_Fragment_Shaders[i] = Engine::Resources::addResource<Shader>(m_Fragment_Shaders_Code[i], ShaderType::Fragment, false);
         };
-        auto lambda_part_b = [&, i]() {
-            m_Shader_Programs[i] = NEW ShaderProgram("SMAA_" + std::to_string(i), *m_Vertex_Shaders[i], *m_Fragment_Shaders[i]);
+        auto lambda_part_b = [this, i]() {
+            m_Shader_Programs[i]  = Engine::Resources::addResource<ShaderProgram>("SMAA_" + std::to_string(i), m_Vertex_Shaders[i], m_Fragment_Shaders[i]);
         };
         Engine::priv::threading::addJobWithPostCallback(lambda_part_a, lambda_part_b);
     }
@@ -592,19 +590,19 @@ bool Engine::priv::SMAA::init_shaders() {
 
 
 void Engine::priv::SMAA::init() {
-    Engine::Renderer::genAndBindTexture(GL_TEXTURE_2D, AreaTexture);
-    Texture::setFilter(GL_TEXTURE_2D, TextureFilter::Linear);
-    Texture::setWrapping(GL_TEXTURE_2D, TextureWrap::ClampToBorder);
+    Engine::Renderer::genAndBindTexture(TextureType::Texture2D, AreaTexture);
+    Texture::setFilter(TextureType::Texture2D, TextureFilter::Linear);
+    Texture::setWrapping(TextureType::Texture2D, TextureWrap::ClampToBorder);
     GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RG8, 160, 560, 0, GL_RG, GL_UNSIGNED_BYTE, SMAA_areaTexBytes));
 
-    Engine::Renderer::genAndBindTexture(GL_TEXTURE_2D, SearchTexture);
-    Texture::setFilter(GL_TEXTURE_2D, TextureFilter::Linear);
-    Texture::setWrapping(GL_TEXTURE_2D, TextureWrap::ClampToBorder);
+    Engine::Renderer::genAndBindTexture(TextureType::Texture2D, SearchTexture);
+    Texture::setFilter(TextureType::Texture2D, TextureFilter::Linear);
+    Texture::setWrapping(TextureType::Texture2D, TextureWrap::ClampToBorder);
     GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, 64, 16, 0, GL_RED, GL_UNSIGNED_BYTE, SMAA_searchTexBytes));
 }
 void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, unsigned int sceneTexture, unsigned int outTexture, const Engine::priv::Renderer& renderer) {
     gbuffer.bindFramebuffers(outTexture); //probably the lighting buffer
-    renderer.bind(m_Shader_Programs[PassStage::Edge]);
+    renderer.bind(m_Shader_Programs[PassStage::Edge].get<ShaderProgram>());
 
     Engine::Renderer::Settings::clear(true, false, true);//lighting rgba, stencil is completely filled with 0's
 
@@ -633,7 +631,7 @@ void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::ve
     gbuffer.bindFramebuffers(GBufferType::Normal);
     Engine::Renderer::Settings::clear(true, false, false); //clear color only
 
-    renderer.bind(m_Shader_Programs[PassStage::Blend]);
+    renderer.bind(m_Shader_Programs[PassStage::Blend].get<ShaderProgram>());
 
     Engine::Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
 
@@ -652,7 +650,7 @@ void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::ve
     Engine::Renderer::GLDisable(GL_STENCIL_TEST);
 }
 void Engine::priv::SMAA::passNeighbor(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::Renderer& renderer) {
-    renderer.bind(m_Shader_Programs[PassStage::Neighbor]);
+    renderer.bind(m_Shader_Programs[PassStage::Neighbor].get<ShaderProgram>());
 
     Engine::Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
     Engine::Renderer::sendTextureSafe("textureMap", gbuffer.getTexture(sceneTexture), 0); //need original final image from first smaa pass

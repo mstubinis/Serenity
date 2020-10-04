@@ -36,10 +36,10 @@ void RenderGraph::addModelInstanceToPipeline(ModelInstance& inModelInstance, Com
         }
     }
     if (!materialNode) {
-        materialNode = &m_MaterialNodes.emplace_back(*inModelInstance.material());
+        materialNode = &m_MaterialNodes.emplace_back(inModelInstance.material());
     }
     if (!meshNode) {
-        meshNode = &materialNode->meshNodes.emplace_back(*inModelInstance.mesh());
+        meshNode = &materialNode->meshNodes.emplace_back(inModelInstance.mesh());
     }
     if (!modelInstance) {
         meshNode->instanceNodes.emplace_back(&inModelInstance);
@@ -303,16 +303,17 @@ void RenderGraph::validate_model_instances_for_rendering(Viewport& viewport, Cam
     lambda(m_InstancesTotal, camera.getPosition());
 }
 void RenderGraph::render(Engine::priv::Renderer& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders, SortingMode sortingMode) {
+    auto* shaderProgram = m_ShaderProgram.get<ShaderProgram>();
     if (useDefaultShaders) {
-        renderer.bind(m_ShaderProgram);
+        renderer.bind(shaderProgram);
     }
     for (auto& materialNode : m_MaterialNodes) {
         if (materialNode.meshNodes.size() > 0) {
-            auto& material = *materialNode.material;
+            auto& material = *materialNode.material.get<Material>();
             renderer.bind(&material);
             for (auto& meshNode : materialNode.meshNodes) {
                 if (meshNode.instanceNodes.size() > 0) {
-                    auto& mesh = *meshNode.mesh;
+                    auto& mesh = *meshNode.mesh.get<Mesh>();
                     renderer.bind(&mesh);
                     for (auto& modelInstancePtr : meshNode.instanceNodes) {
                         auto& modelInstance   = *modelInstancePtr;
@@ -329,8 +330,8 @@ void RenderGraph::render(Engine::priv::Renderer& renderer, Viewport& viewport, C
                     }
                     //protect against any custom changes by restoring to the regular shader and material
                     if (useDefaultShaders) {
-                        if (renderer.m_Pipeline->getCurrentBoundShaderProgram() != m_ShaderProgram) {
-                            renderer.bind(m_ShaderProgram);
+                        if (renderer.m_Pipeline->getCurrentBoundShaderProgram() != shaderProgram) {
+                            renderer.bind(shaderProgram);
                             renderer.bind(&material);
                         }
                     }
@@ -342,13 +343,14 @@ void RenderGraph::render(Engine::priv::Renderer& renderer, Viewport& viewport, C
     }
 }
 void RenderGraph::render_bruteforce(Engine::priv::Renderer& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders, SortingMode sortingMode) {
+    auto* shaderProgram = m_ShaderProgram.get<ShaderProgram>();
     if (useDefaultShaders) {
-        renderer.bind(m_ShaderProgram);
+        renderer.bind(shaderProgram);
     }
     for (auto& modelInstancePtr : m_InstancesTotal) {
         auto& modelInstance   = *modelInstancePtr;
-        auto* mesh            = modelInstance.mesh();
-        auto* material        = modelInstance.material();
+        auto* mesh            = modelInstance.mesh().get<Mesh>();
+        auto* material        = modelInstance.material().get<Material>();
         auto* body            = modelInstance.parent().getComponent<ComponentBody>();
         glm::mat4 modelMatrix = body->modelMatrixRendering();
         if (modelInstance.passedRenderCheck()) {
@@ -367,8 +369,8 @@ void RenderGraph::render_bruteforce(Engine::priv::Renderer& renderer, Viewport& 
         }
         //protect against any custom changes by restoring to the regular shader and material
         if (useDefaultShaders) {
-            if (renderer.m_Pipeline->getCurrentBoundShaderProgram() != m_ShaderProgram) {
-                renderer.bind(m_ShaderProgram);
+            if (renderer.m_Pipeline->getCurrentBoundShaderProgram() != shaderProgram) {
+                renderer.bind(shaderProgram);
                 renderer.bind(material);
             }
         }

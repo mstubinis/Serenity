@@ -18,37 +18,38 @@ namespace Engine::priv {
 };
 
 #include <core/engine/resources/Resource.h>
+#include <core/engine/resources/Handle.h>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <core/engine/shaders/ShaderIncludes.h>
 
-class ShaderProgram final : public Resource, public Engine::NonCopyable {
+class ShaderProgram final : public Resource {
     friend class  UniformBufferObject;
     friend class  Shader;
     friend struct Engine::priv::InternalShaderProgramPublicInterface;
     friend class  Engine::priv::Renderer;
     friend class  Engine::priv::IRenderingPipeline;
     public:
-        static ShaderProgram                      *Deferred, *Forward, *Decal; //loaded in renderer
+        static Handle Deferred, Forward, Decal; //loaded in renderer
     private:
-        Shader&                                                m_VertexShader;
-        Shader&                                                m_FragmentShader;
         std::function<void(ShaderProgram*)>                    m_CustomBindFunctor  = [](ShaderProgram*) {};
-        GLuint                                                 m_ShaderProgram      = 0;
         std::unordered_map<std::string, GLint>                 m_UniformLocations;
         std::unordered_set<GLuint>                             m_AttachedUBOs;
+        Handle                                                 m_VertexShader       = Handle{};
+        Handle                                                 m_FragmentShader     = Handle{};
+        GLuint                                                 m_ShaderProgram      = 0;
 		bool                                                   m_LoadedCPU          = false;
 		bool                                                   m_LoadedGPU          = false;
     public:
-        ShaderProgram(const std::string& name, Shader& vertexShader, Shader& fragmentShader);
-        virtual ~ShaderProgram();
+        ShaderProgram() = default;
+        ShaderProgram(const std::string& name, Handle vertexShader, Handle fragmentShader);
+        ShaderProgram(const ShaderProgram& other)            = delete;
+        ShaderProgram& operator=(const ShaderProgram& other) = delete;
+        ShaderProgram(ShaderProgram&& other) noexcept;
+        ShaderProgram& operator=(ShaderProgram&& other) noexcept;
+        ~ShaderProgram();
 
-        ShaderProgram(ShaderProgram&& other) noexcept            = default;
-        ShaderProgram& operator=(ShaderProgram&& other) noexcept = default;
-
-        void setCustomBindFunctor(std::function<void(ShaderProgram*)>&& function) {
-            m_CustomBindFunctor = std::move(function);
-        }
+        inline void setCustomBindFunctor(std::function<void(ShaderProgram*)>&& function) noexcept { m_CustomBindFunctor = std::move(function); }
 
         inline CONSTEXPR operator GLuint() const noexcept { return m_ShaderProgram; }
 

@@ -9,7 +9,7 @@ namespace Engine::priv {
 
 struct Entity;
 //#include <ecs/Entity.h>
-#include <ecs/ECSRegistry.h>
+#include <core/engine/containers/TypeRegistry.h>
 #include <ecs/ECSEntityPool.h>
 #include <ecs/ECSSystem.h>
 #include <ecs/ECSComponentPool.h>
@@ -19,6 +19,7 @@ namespace Engine::priv {
     class ECS final {
         friend struct Engine::priv::InternalScenePublicInterface;
         private:
+            Engine::type_registry                       m_Registry;
             ECSEntityPool                               m_EntityPool;
             std::vector<Entity>                         m_JustAddedEntities;
             std::vector<Entity>                         m_DestroyedEntities;
@@ -45,7 +46,7 @@ namespace Engine::priv {
             template<typename COMPONENT>
             void onResize(std::uint32_t width, std::uint32_t height) {
                 using CPoolType  = ECSComponentPool<COMPONENT>;
-                auto type_slot   = ECSRegistry::type_slot_fast<COMPONENT>();
+                auto type_slot   = m_Registry.type_slot_fast<COMPONENT>();
                 auto& components = (*(CPoolType*)m_ComponentPools[type_slot]).data();
                 for (auto& camera : components) {
                     camera.resize(width, height);
@@ -66,19 +67,19 @@ namespace Engine::priv {
 
             template<class COMPONENT> inline CONSTEXPR ECSComponentPool<COMPONENT>& getPool() const {
                 using CPOOL = ECSComponentPool<COMPONENT>;
-                auto type_slot  = ECSRegistry::type_slot_fast<COMPONENT>();
+                auto type_slot  = m_Registry.type_slot_fast<COMPONENT>();
                 return *(CPOOL*)m_ComponentPools[type_slot];
             }
 
             template<class COMPONENT> inline CONSTEXPR ECSSystem<COMPONENT>& getSystem() const {
-                auto type_slot = ECSRegistry::type_slot_fast<COMPONENT>();
+                auto type_slot = m_Registry.type_slot_fast<COMPONENT>();
                 return *(ECSSystem<COMPONENT>*)m_Systems[type_slot];
             }
 
 
             template<class COMPONENT>
             void assignSystem(const ECSSystemCI& systemCI/*, unsigned int sortValue*/) {
-                auto type_slot = ECSRegistry::type_slot<COMPONENT>();
+                auto type_slot = m_Registry.type_slot<COMPONENT>();
                 using CPOOL    = ECSComponentPool<COMPONENT>;
                 using SYSTEM   = ECSSystem<COMPONENT>;
                 if (type_slot >= m_ComponentPools.size()) {
@@ -97,7 +98,7 @@ namespace Engine::priv {
             }
             template<class COMPONENT, typename SYSTEM>
             void assignSystem(const ECSSystemCI& systemCI/*, unsigned int sortValue*/) {
-                auto type_slot = ECSRegistry::type_slot<COMPONENT>();
+                auto type_slot = m_Registry.type_slot<COMPONENT>();
                 using CPOOL    = ECSComponentPool<COMPONENT>;
                 if (type_slot >= m_ComponentPools.size()) {
                     m_ComponentPools.resize(type_slot + 1, nullptr);
@@ -115,7 +116,7 @@ namespace Engine::priv {
             }
 
             template<class T, typename... ARGS> void addComponent(Entity entity, ARGS&&... args) noexcept {
-                auto type_slot = ECSRegistry::type_slot_fast<T>();
+                auto type_slot = m_Registry.type_slot_fast<T>();
                 auto& cPool    = *(ECSComponentPool<T>*)m_ComponentPools[type_slot];
                 T* res         = nullptr;
                 {
@@ -127,7 +128,7 @@ namespace Engine::priv {
                 }
             }
             template<class T> bool removeComponent(Entity entity) noexcept {
-                auto type_slot = ECSRegistry::type_slot_fast<T>();
+                auto type_slot = m_Registry.type_slot_fast<T>();
                 auto& cPool    = *(ECSComponentPool<T>*)m_ComponentPools[type_slot];
                 bool ret_val   = false;
                 {
@@ -142,7 +143,7 @@ namespace Engine::priv {
 
             template<class T> inline CONSTEXPR T* getComponent(Entity entity) const noexcept {
                 using CPOOL = ECSComponentPool<T>;
-                return ((CPOOL*)m_ComponentPools[ECSRegistry::type_slot_fast<T>()])->getComponent(entity);
+                return ((CPOOL*)m_ComponentPools[m_Registry.type_slot_fast<T>()])->getComponent(entity);
             }
 
             template<class... TYPES> inline CONSTEXPR std::tuple<TYPES*...> getComponents(Entity entity) const noexcept {

@@ -29,7 +29,7 @@ namespace Engine::priv {
 };
 
 struct MeshRequestPart final {
-    Mesh*        mesh   = nullptr;
+    //Mesh*        mesh   = nullptr;
     Handle       handle = Handle();
     std::string  name   = "";
 

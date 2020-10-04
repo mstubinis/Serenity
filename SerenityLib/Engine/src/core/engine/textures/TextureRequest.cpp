@@ -5,127 +5,100 @@
 #include <core/engine/system/window/Window.h>
 #include <core/engine/system/Engine.h>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #pragma region TextureRequest
-TextureRequest::TextureRequest(const std::string& filename, bool genMipMaps, ImageInternalFormat internal_, GLuint openglTextureType) 
-    : file{ filename }
-{
-    part.internalFormat  = internal_;
-    part.isToBeMipmapped = genMipMaps;
-    part.type            = openglTextureType;
-    if (!file.empty()) {
-        fileExtension = boost::filesystem::extension(file);
-        if (boost::filesystem::exists(file)) {
-            fileExists = true;
+
+TextureRequest::TextureRequest(const std::string& filename, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType) {
+    m_Part.fileOrTextureName = filename;
+    m_Part.internalFormat    = intFmt;
+    m_Part.isToBeMipmapped   = genMipMaps;
+    m_Part.textureType       = textureType;
+    if (!m_Part.fileOrTextureName.empty()) {
+        m_FileData.m_FileExtension = std::filesystem::path(m_Part.fileOrTextureName).extension().string();
+        if (std::filesystem::exists(m_Part.fileOrTextureName)) {
+            m_FileData.m_FileExists = true;
         }
     }
-    part.assignType();
 }
-TextureRequest::TextureRequest(const std::string& filename, bool genMipMaps, ImageInternalFormat internal_, GLuint openglTextureType, std::function<void()>&& callback_)
-    : TextureRequest{ filename, genMipMaps, internal_, openglTextureType }
+TextureRequest::TextureRequest(const std::string& filename, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType, std::function<void()>&& callback)
+    : TextureRequest{ filename, genMipMaps, intFmt, textureType }
 {
-    m_Callback           = std::move(callback_);
+    m_Part.m_Callback = std::move(callback);
 }
+
+TextureRequest::TextureRequest(const sf::Image& sfImage, const std::string& filename, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType, std::function<void()>&& callback)
+    : m_SFMLImage{ sfImage }
+{
+    m_FromMemory = true;
+    m_Part.m_Callback = std::move(callback);
+    m_Part.fileOrTextureName = filename;
+    m_Part.async = false;
+    m_Part.internalFormat = intFmt;
+    m_Part.isToBeMipmapped = genMipMaps;
+    m_Part.textureType = textureType;
+}
+TextureRequest::TextureRequest(const TextureRequest& other) 
+    : m_Part       { other.m_Part }
+    , m_FromMemory { other.m_FromMemory }
+    , m_SFMLImage  { other.m_SFMLImage }
+    , m_FileData   { other.m_FileData }
+{}
+TextureRequest& TextureRequest::operator=(const TextureRequest& other) {
+    m_Part         = other.m_Part;
+    m_FromMemory   = other.m_FromMemory;   
+    m_SFMLImage    = other.m_SFMLImage;
+    m_FileData     = other.m_FileData;
+    return *this;
+}
+TextureRequest::TextureRequest(TextureRequest&& other) noexcept
+    : m_Part       { std::move(other.m_Part) }
+    , m_FromMemory { std::move(other.m_FromMemory) }
+    , m_SFMLImage  { std::move(other.m_SFMLImage) } //copys instead of moves
+    , m_FileData   { std::move(other.m_FileData) }
+{}
+TextureRequest& TextureRequest::operator=(TextureRequest&& other) noexcept {
+    m_Part         = std::move(other.m_Part);
+    m_FromMemory   = std::move(other.m_FromMemory);
+    m_SFMLImage    = std::move(other.m_SFMLImage);//copys instead of moves
+    m_FileData     = std::move(other.m_FileData);
+    return *this;
+}
+
+
+
 void TextureRequest::request(bool inAsync) {
-    if (inAsync && Engine::hardware_concurrency() > 1) {
-        part.async = true;
-    }else{
-        part.async = false;
-    }
+    m_Part.async = (inAsync && Engine::hardware_concurrency() > 1);
     Engine::priv::TextureRequestStaticImpl::Request(*this);
 }
 void Engine::priv::TextureRequestStaticImpl::Request(TextureRequest& request) {
-    if (!request.file.empty()) {
-        if (request.fileExists) {
-            request.part.name = request.file;
-            request.part.texture = NEW Texture();
-            request.part.texture->m_TextureType = request.part.textureType;
-            request.part.texture->setName(request.part.name);
-            request.part.handle = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourcePool.add(request.part.texture, (unsigned int)ResourceType::Texture);
+    if (!request.m_Part.fileOrTextureName.empty()) {
+        if (request.isFromFile() || request.isFromMemory()) {
+            request.m_Part.handle              = Core::m_Engine->m_ResourceManager.m_ResourceModule.emplace<Texture>();
+            Texture& textureRef                = *request.m_Part.handle.get<Texture>();
+            textureRef.m_CPUData.m_TextureType = request.m_Part.textureType;
+            textureRef.setName(request.m_Part.fileOrTextureName);
 
             auto lambda_cpu = [request]() {
-                if (request.part.textureType == TextureType::Texture2D) {
-                    Engine::priv::TextureLoader::InitFromFile(
-                        *request.part.texture, 
-                        request.file,
-                        request.part.isToBeMipmapped, 
-                        request.part.internalFormat, 
-                        request.part.type
-                    );
+                if (request.m_Part.textureType == TextureType::Texture2D) {
+                    if(request.m_FromMemory)
+                        Engine::priv::TextureLoader::CPUInitFromMemory(request.m_Part.handle, request.m_SFMLImage, request.m_Part.fileOrTextureName, request.m_Part.isToBeMipmapped, request.m_Part.internalFormat, request.m_Part.textureType);
+                    else
+                        Engine::priv::TextureLoader::CPUInitFromFile(request.m_Part.handle, request.m_Part.fileOrTextureName, request.m_Part.isToBeMipmapped, request.m_Part.internalFormat, request.m_Part.textureType);
                 }
-                Engine::priv::InternalTexturePublicInterface::LoadCPU(*request.part.texture);
+                Engine::priv::InternalTexturePublicInterface::LoadCPU(request.m_Part.handle);
             };
-            if (request.part.async || std::this_thread::get_id() != Engine::Resources::getWindow().getOpenglThreadID()) {
-                Engine::priv::threading::addJobWithPostCallback(lambda_cpu, [request]() {
-                    Engine::priv::InternalTexturePublicInterface::LoadGPU(*request.part.texture);
-                    request.m_Callback();
-                });
+            auto lambda_gpu = [request]() {
+                Engine::priv::InternalTexturePublicInterface::LoadGPU(request.m_Part.handle);
+                request.m_Part.m_Callback();
+            };
+
+            if (request.m_Part.async || std::this_thread::get_id() != Engine::Resources::getWindow().getOpenglThreadID()) {
+                Engine::priv::threading::addJobWithPostCallback(lambda_cpu, lambda_gpu);
             }else{
                 lambda_cpu();
-                Engine::priv::InternalTexturePublicInterface::LoadGPU(*request.part.texture);
-                request.m_Callback();
+                lambda_gpu();
             }
-        }else{
-            //we got either an invalid file or memory data
-        }
-    }
-}
-
-#pragma endregion
-
-#pragma region TextureRequestFromMemory
-
-TextureRequestFromMemory::TextureRequestFromMemory(sf::Image& sfImage, const std::string& filename_, bool genMipMaps, ImageInternalFormat internal_, GLuint openglTextureType, std::function<void()>&& callback_)
-    : image{ sfImage }
-    , textureName{ filename_ }
-    , m_Callback{ std::move(callback_) }
-{
-    part.async           = false;
-    part.internalFormat  = internal_;
-    part.isToBeMipmapped = genMipMaps;
-    part.type            = openglTextureType;
-    part.assignType();
-}
-void TextureRequestFromMemory::request(bool inAsync) {
-    if (inAsync && Engine::hardware_concurrency() > 1) {
-        part.async = true;
-    }else{
-        part.async = false;
-    }
-    Engine::priv::TextureRequestStaticImpl::Request(*this);
-}
-void Engine::priv::TextureRequestStaticImpl::Request(TextureRequestFromMemory& request) {
-    auto imgSize = request.image.getSize();
-    if (imgSize.x > 0 && imgSize.y > 0) {
-        request.part.name = request.textureName;
-        request.part.texture = NEW Texture();
-        request.part.texture->m_TextureType = request.part.textureType;
-        request.part.texture->setName(request.part.name);
-        request.part.handle = Core::m_Engine->m_ResourceManager.m_ResourcePool.add(request.part.texture, (unsigned int)ResourceType::Texture);
-
-        auto lambda_cpu = [request]() {
-            if (request.part.textureType == TextureType::Texture2D) {
-                Engine::priv::TextureLoader::InitFromMemory(
-                    *request.part.texture,
-                    request.image, 
-                    request.textureName,
-                    request.part.isToBeMipmapped, 
-                    request.part.internalFormat,
-                    request.part.type
-                );
-            }
-            Engine::priv::InternalTexturePublicInterface::LoadCPU(*request.part.texture);
-        };
-        if (request.part.async || std::this_thread::get_id() != Engine::Resources::getWindow().getOpenglThreadID()) {
-            Engine::priv::threading::addJobWithPostCallback(lambda_cpu, [request]() {
-                Engine::priv::InternalTexturePublicInterface::LoadGPU(*request.part.texture);
-                request.m_Callback();
-            });
-        }else{
-            lambda_cpu();
-            Engine::priv::InternalTexturePublicInterface::LoadGPU(*request.part.texture);
-            request.m_Callback();
         }
     }
 }

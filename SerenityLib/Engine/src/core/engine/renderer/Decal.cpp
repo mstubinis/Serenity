@@ -23,13 +23,13 @@ namespace Engine::priv {
     };
 };
 
-Decal::Decal(Material& material, const glm_vec3& localPosition, const glm::vec3& hitNormal, float size, Scene& scene, float lifetimeMax, RenderStage stage) 
+Decal::Decal(Handle materialHandle, const glm_vec3& localPosition, const glm::vec3& hitNormal, float size, Scene& scene, float lifetimeMax, RenderStage stage) 
     : EntityBody{ scene }
     , m_InitialPosition{ localPosition }
     , m_LifetimeMax{ lifetimeMax}
 {
     addComponent<ComponentBody>();
-    addComponent<ComponentModel>(&priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), &material, ShaderProgram::Decal, stage);
+    addComponent<ComponentModel>(priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), materialHandle, ShaderProgram::Decal, stage);
 
     auto& body  = *getComponent<ComponentBody>();
     auto& model = *getComponent<ComponentModel>();

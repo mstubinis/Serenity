@@ -83,12 +83,12 @@ bool InternalMeshPublicInterface::SupportsInstancing(){
         OpenGLExtensions::supported(OpenGLExtensions::ARB_draw_instanced)
     );
 }
-btCollisionShape* InternalMeshPublicInterface::internal_build_collision(Mesh* mesh, ModelInstance* modelInstance, CollisionType collisionType, bool isCompoundChild) noexcept {
+btCollisionShape* InternalMeshPublicInterface::internal_build_collision(Handle meshHandle, ModelInstance* modelInstance, CollisionType collisionType, bool isCompoundChild) noexcept {
     Engine::priv::MeshCollisionFactory* factory = nullptr;
-    if (!mesh) {
-        factory = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().m_CollisionFactory;
+    if (!meshHandle) {
+        factory = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().get<Mesh>()->m_CollisionFactory;
     }else{
-        factory = mesh->m_CollisionFactory;
+        factory = meshHandle.get<Mesh>()->m_CollisionFactory;
     }
     if (factory) {
         switch (collisionType) {
@@ -111,17 +111,21 @@ btCollisionShape* InternalMeshPublicInterface::internal_build_collision(Mesh* me
     }
     return new btEmptyShape();
 }
-btCollisionShape* InternalMeshPublicInterface::BuildCollision(Mesh* mesh, CollisionType collisionType, bool isCompoundChild) {
-    return internal_build_collision(mesh, nullptr, collisionType, isCompoundChild);
+btCollisionShape* InternalMeshPublicInterface::BuildCollision(Handle meshHandle, CollisionType collisionType, bool isCompoundChild) {
+    return internal_build_collision(meshHandle, nullptr, collisionType, isCompoundChild);
 }
 btCollisionShape* InternalMeshPublicInterface::BuildCollision(ModelInstance* modelInstance, CollisionType collisionType, bool isCompoundChild) {
-    Mesh* mesh = nullptr;
+    Handle meshHandle = Handle{};
     if (modelInstance) {
         if (modelInstance->mesh()) {
-            mesh = modelInstance->mesh();
+            meshHandle = modelInstance->mesh();
         }
     }
-    return internal_build_collision(mesh, modelInstance, collisionType, isCompoundChild);
+    return internal_build_collision(meshHandle, modelInstance, collisionType, isCompoundChild);
+}
+void InternalMeshPublicInterface::FinalizeVertexData(Handle meshHandle, MeshImportedData& data) {
+    Mesh& mesh = *meshHandle.get<Mesh>();
+    InternalMeshPublicInterface::FinalizeVertexData(mesh, data);
 }
 void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedData& data) {
     if (data.uvs.size() == 0)         data.uvs.resize(data.points.size());
@@ -219,7 +223,7 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
 #pragma endregion
     }
 }
-void InternalMeshPublicInterface::TriangulateComponentIndices(Mesh& mesh, MeshImportedData& data, std::vector<std::vector<uint>>& indices, unsigned char flags) {
+void InternalMeshPublicInterface::TriangulateComponentIndices(MeshImportedData& data, std::vector<std::vector<uint>>& indices, unsigned char flags) {
     for (size_t i = 0; i < indices[0].size(); ++i) {
         glm::vec3 pos(0.0f);
         glm::vec2 uv(0.0f);
@@ -238,20 +242,24 @@ void InternalMeshPublicInterface::TriangulateComponentIndices(Mesh& mesh, MeshIm
         }
     }
 }
-void InternalMeshPublicInterface::CalculateRadius(Mesh& mesh) {
-    mesh.m_radiusBox = glm::vec3(0.0f);
-    auto points      = mesh.m_VertexData->getPositions();
-    for (const auto& vertex : points) {
-        const float x      = std::abs(vertex.x);
-        const float y      = std::abs(vertex.y);
-        const float z      = std::abs(vertex.z);
-        mesh.m_radiusBox.x = std::max(mesh.m_radiusBox.x, x);
-        mesh.m_radiusBox.y = std::max(mesh.m_radiusBox.y, y);
-        mesh.m_radiusBox.z = std::max(mesh.m_radiusBox.z, z);
-    }
-    mesh.m_radius = Math::Max(mesh.m_radiusBox);
-}
 
+void InternalMeshPublicInterface::CalculateRadius(Handle meshHandle) {
+    Mesh& mesh       = *meshHandle.get<Mesh>();
+    InternalMeshPublicInterface::CalculateRadius(mesh);
+}
+void InternalMeshPublicInterface::CalculateRadius(Mesh& mesh) {
+    mesh.m_RadiusBox = glm::vec3(0.0f);
+    auto points = mesh.m_VertexData->getPositions();
+    for (const auto& vertex : points) {
+        const float x = std::abs(vertex.x);
+        const float y = std::abs(vertex.y);
+        const float z = std::abs(vertex.z);
+        mesh.m_RadiusBox.x = std::max(mesh.m_RadiusBox.x, x);
+        mesh.m_RadiusBox.y = std::max(mesh.m_RadiusBox.y, y);
+        mesh.m_RadiusBox.z = std::max(mesh.m_RadiusBox.z, z);
+    }
+    mesh.m_Radius = Math::Max(mesh.m_RadiusBox);
+}
 
 
 
@@ -375,8 +383,8 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
         }
     }
     MeshLoader::CalculateTBNAssimp(data);
-    InternalMeshPublicInterface::FinalizeVertexData(*this, data);
-    InternalMeshPublicInterface::CalculateRadius(*this);
+    InternalMeshPublicInterface::FinalizeVertexData(terrain.m_MeshHandle, data);
+    InternalMeshPublicInterface::CalculateRadius(terrain.m_MeshHandle);
     SAFE_DELETE(m_CollisionFactory);
 }
 void Mesh::internal_recalc_indices_from_terrain(const Terrain& terrain) {
@@ -527,7 +535,7 @@ Mesh::Mesh(const std::string& fileOrData, float threshold)
         }
     }
     if (flags && MeshLoadingFlags::Faces) {
-        InternalMeshPublicInterface::TriangulateComponentIndices(*this, data, indices, flags);
+        InternalMeshPublicInterface::TriangulateComponentIndices(data, indices, flags);
     }
     if (flags && MeshLoadingFlags::TBN) {
         MeshLoader::CalculateTBNAssimp(data);
@@ -535,6 +543,33 @@ Mesh::Mesh(const std::string& fileOrData, float threshold)
     MeshLoader::FinalizeData(*this, data, threshold);
 
     load();
+}
+Mesh::Mesh(Mesh&& other) noexcept 
+    : Resource(std::move(other))
+    , m_CustomBindFunctor   {std::move(other.m_CustomBindFunctor)}
+    , m_CustomUnbindFunctor { std::move(other.m_CustomUnbindFunctor) }
+    , m_RootNode            { std::exchange(other.m_RootNode, nullptr) }
+    , m_VertexData          { std::exchange(other.m_VertexData, nullptr) }
+    , m_CollisionFactory    { std::exchange(other.m_CollisionFactory, nullptr) }
+    , m_Skeleton            { std::exchange(other.m_Skeleton, nullptr) }
+    , m_File                { std::move(other.m_File) }
+    , m_RadiusBox           { std::move(other.m_RadiusBox) }
+    , m_Radius              { std::move(other.m_Radius) }
+    , m_Threshold           { std::move(other.m_Threshold) }
+{}
+Mesh& Mesh::operator=(Mesh&& other) noexcept {
+    Resource::operator=(std::move(other));
+    m_CustomBindFunctor   = std::move(other.m_CustomBindFunctor);
+    m_CustomUnbindFunctor = std::move(other.m_CustomUnbindFunctor);
+    m_RootNode            = std::exchange(other.m_RootNode, nullptr);
+    m_VertexData          = std::exchange(other.m_VertexData, nullptr);
+    m_CollisionFactory    = std::exchange(other.m_CollisionFactory, nullptr);
+    m_Skeleton            = std::exchange(other.m_Skeleton, nullptr);
+    m_File                = std::move(other.m_File);
+    m_RadiusBox           = std::move(other.m_RadiusBox);
+    m_Radius              = std::move(other.m_Radius);
+    m_Threshold           = std::move(other.m_Threshold);
+    return *this;
 }
 Mesh::~Mesh(){
     unregisterEvent(EventType::WindowFullscreenChanged);

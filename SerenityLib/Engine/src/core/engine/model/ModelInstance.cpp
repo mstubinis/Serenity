@@ -75,14 +75,14 @@ namespace Engine::priv {
             Skybox* skybox          = scene.skybox();
             const auto maxTextures  = renderer->m_Pipeline->getMaxNumTextureUnits() - 1U;
             Engine::Renderer::sendUniform4Safe("ScreenData", renderer->m_GI_Pack, Engine::Renderer::Settings::getGamma(), 0.0f, 0.0f);
-            if (skybox && skybox->texture()->hasGlobalIlluminationData()) {
-                Engine::Renderer::sendTextureSafe("irradianceMap", skybox->texture()->getConvolutionTexture().address(), maxTextures - 2, GL_TEXTURE_CUBE_MAP);
-                Engine::Renderer::sendTextureSafe("prefilterMap", skybox->texture()->getPreEnvTexture().address(), maxTextures - 1, GL_TEXTURE_CUBE_MAP);
-                Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF, maxTextures);
+            if (skybox && skybox->texture().get<Texture>()->hasGlobalIlluminationData()) {
+                Engine::Renderer::sendTextureSafe("irradianceMap", skybox->texture().get<Texture>()->getConvolutionTexture().get<Texture>()->address(), maxTextures - 2, GL_TEXTURE_CUBE_MAP);
+                Engine::Renderer::sendTextureSafe("prefilterMap", skybox->texture().get<Texture>()->getPreEnvTexture().get<Texture>()->address(), maxTextures - 1, GL_TEXTURE_CUBE_MAP);
+                Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF.get<Texture>(), maxTextures);
             }else{
-                Engine::Renderer::sendTextureSafe("irradianceMap", Texture::Black->address(), maxTextures - 2, GL_TEXTURE_2D);
-                Engine::Renderer::sendTextureSafe("prefilterMap", Texture::Black->address(), maxTextures - 1, GL_TEXTURE_2D);
-                Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF, maxTextures);
+                Engine::Renderer::sendTextureSafe("irradianceMap", Texture::Black.get<Texture>()->address(), maxTextures - 2, GL_TEXTURE_2D);
+                Engine::Renderer::sendTextureSafe("prefilterMap", Texture::Black.get<Texture>()->address(), maxTextures - 1, GL_TEXTURE_2D);
+                Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF.get<Texture>(), maxTextures);
             }
         }
         if (animationVector.size() > 0) {
@@ -112,6 +112,14 @@ bool priv::InternalModelInstancePublicInterface::IsViewportValid(const ModelInst
     return (flags & (1 << viewport.id()) || flags == 0);
 }
 
+ModelInstance::ModelInstance(Entity parent, Handle mesh, Handle material, Handle shaderProgram)
+    : m_Parent{ parent }
+{
+    internal_init(mesh, material, shaderProgram);
+    setCustomBindFunctor(priv::DefaultModelInstanceBindFunctor);
+    setCustomUnbindFunctor(priv::DefaultModelInstanceUnbindFunctor);
+}
+/*
 ModelInstance::ModelInstance(Entity parent, Mesh* mesh, Material* mat, ShaderProgram* program) 
     : m_Parent{ parent }
 {
@@ -128,6 +136,7 @@ ModelInstance::ModelInstance(Entity parent, Mesh* mesh, Handle mat, ShaderProgra
 ModelInstance::ModelInstance(Entity parent, Handle mesh, Material* mat, ShaderProgram* program) 
     : ModelInstance{ parent, mesh.get<Mesh>(), mat, program }
 {}
+*/
 ModelInstance::ModelInstance(ModelInstance&& other) noexcept
     : m_DrawingMode{ std::move(other.m_DrawingMode) }
     , m_AnimationVector{ std::move(other.m_AnimationVector) }
@@ -143,9 +152,9 @@ ModelInstance::ModelInstance(ModelInstance&& other) noexcept
     , m_Visible{ std::move(other.m_Visible) }
     , m_ForceRender{ std::move(other.m_ForceRender) }
     , m_Index{ std::move(other.m_Index) }
-    , m_ShaderProgram{ std::move(other.m_ShaderProgram) }
-    , m_Mesh{ std::move(other.m_Mesh) }
-    , m_Material{ std::move(other.m_Material) }
+    , m_ShaderProgramHandle{ std::move(other.m_ShaderProgramHandle) }
+    , m_MeshHandle{ std::move(other.m_MeshHandle) }
+    , m_MaterialHandle{ std::move(other.m_MaterialHandle) }
     , m_CustomBindFunctor{ std::move(other.m_CustomBindFunctor) }
     , m_CustomUnbindFunctor{ std::move(other.m_CustomUnbindFunctor) }
     , m_ViewportFlag{ std::move(other.m_ViewportFlagDefault) }
@@ -173,9 +182,9 @@ ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
     m_ForceRender            = std::move(other.m_ForceRender);
     m_Index                  = std::move(other.m_Index);
     m_UserPointer            = std::move(other.m_UserPointer);
-    m_ShaderProgram          = std::move(other.m_ShaderProgram);
-    m_Mesh                   = std::move(other.m_Mesh);
-    m_Material               = std::move(other.m_Material);
+    m_ShaderProgramHandle    = std::move(other.m_ShaderProgramHandle);
+    m_MeshHandle             = std::move(other.m_MeshHandle);
+    m_MaterialHandle         = std::move(other.m_MaterialHandle);
     m_CustomBindFunctor      = std::move(other.m_CustomBindFunctor);
     m_CustomUnbindFunctor    = std::move(other.m_CustomUnbindFunctor);
 
@@ -186,11 +195,11 @@ ModelInstance::~ModelInstance() {
     unregisterEvent(EventType::ResourceLoaded);
 }
 float ModelInstance::internal_calculate_radius() {
-    if (!m_Mesh->isLoaded()) {
+    if (!m_MeshHandle.get<Mesh>()->isLoaded()) {
         registerEvent(EventType::ResourceLoaded);
         return 0.0f;
     }
-    m_Radius = m_Mesh->getRadius();
+    m_Radius = m_MeshHandle.get<Mesh>()->getRadius();
     return m_Radius;
 }
 void ModelInstance::bind(const Engine::priv::Renderer& renderer) {
@@ -205,23 +214,25 @@ void ModelInstance::setDefaultViewportFlag(unsigned int flag) {
 void ModelInstance::setDefaultViewportFlag(ViewportFlag::Flag flag) {
     m_ViewportFlagDefault = flag;
 }
-void ModelInstance::internal_init(Mesh* mesh, Material* mat, ShaderProgram* program) {
-    if (!program) {
-        program = ShaderProgram::Deferred;
+void ModelInstance::internal_init(Handle mesh, Handle material, Handle shaderProgram) {
+    if (!shaderProgram) {
+        shaderProgram     = ShaderProgram::Deferred;
     }
-    m_ViewportFlag      = ModelInstance::m_ViewportFlagDefault;
-    m_ShaderProgram     = program;
-    m_Material          = mat;
-    m_Mesh              = mesh;
+    m_ViewportFlag        = ModelInstance::m_ViewportFlagDefault;
+    m_ShaderProgramHandle = shaderProgram;
+    m_MaterialHandle      = material;
+    m_MeshHandle          = mesh;
     internal_update_model_matrix();
 }
-void ModelInstance::internal_update_model_matrix() {
+void ModelInstance::internal_update_model_matrix(bool recalcRadius) {
     auto* model = m_Parent.getComponent<ComponentModel>();
-    if (model) {
+    if (model && recalcRadius) {
         Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
     }
     Math::setFinalModelMatrix(m_ModelMatrix, m_Position, m_Orientation, m_Scale);
-    internal_calculate_radius();
+    if (recalcRadius) {
+        internal_calculate_radius();
+    }
 }
 void ModelInstance::setStage(RenderStage stage, ComponentModel& componentModel) {
     m_Stage = stage;
@@ -247,35 +258,37 @@ void ModelInstance::setGodRaysColor(const glm::vec3& color){
 }
 void ModelInstance::setPosition(float x, float y, float z){
     m_Position = glm::vec3(x, y, z);
-    internal_update_model_matrix();
+    internal_update_model_matrix(false);
 }
 void ModelInstance::setOrientation(const glm::quat& orientation) {
     m_Orientation = orientation;
-    internal_update_model_matrix();
+    internal_update_model_matrix(false);
 }
 void ModelInstance::setOrientation(float x, float y, float z) {
     Math::setRotation(m_Orientation, x, y, z);
-    internal_update_model_matrix();
+    internal_update_model_matrix(false);
 }
 void ModelInstance::setScale(float scale) {
-    m_Scale = glm::vec3(scale, scale, scale);
-    internal_update_model_matrix();
+    ModelInstance::setScale(scale, scale, scale);
 }
 void ModelInstance::setScale(float x, float y, float z){
+    bool recalcRadius = false;
+    if (m_Scale.x != x || m_Scale.y != y || m_Scale.z != z) {
+        recalcRadius = true;
+    }
     m_Scale = glm::vec3(x, y, z);
-    internal_update_model_matrix();
+    internal_update_model_matrix(recalcRadius);
 }
 void ModelInstance::translate(float x, float y, float z){
     m_Position += glm::vec3(x, y, z);
-    internal_update_model_matrix();
+    internal_update_model_matrix(false);
 }
 void ModelInstance::rotate(float x, float y, float z){
     Math::rotate(m_Orientation, x, y, z);
-    internal_update_model_matrix();
+    internal_update_model_matrix(false);
 }
 void ModelInstance::scale(float x, float y, float z){
-    m_Scale += glm::vec3(x, y, z); 
-    internal_update_model_matrix();
+    ModelInstance::setScale(x + m_Scale.x, y + m_Scale.y, z + m_Scale.z);
 }
 void ModelInstance::setPosition(const glm::vec3& v){
     ModelInstance::setPosition(v.x, v.y, v.z);
@@ -292,39 +305,32 @@ void ModelInstance::rotate(const glm::vec3& v){
 void ModelInstance::scale(const glm::vec3& v) {
     ModelInstance::scale(v.x, v.y, v.z);
 }
-void ModelInstance::setShaderProgram(Handle shaderProgramHandle, ComponentModel& componentModel) {
-    ModelInstance::setShaderProgram(shaderProgramHandle.get<ShaderProgram>(), componentModel);
-}
-void ModelInstance::setShaderProgram(ShaderProgram* shaderProgram, ComponentModel& componentModel) {
+
+void ModelInstance::setShaderProgram(Handle shaderProgram, ComponentModel& componentModel) {
     if (!shaderProgram) { 
         shaderProgram = ShaderProgram::Deferred;
     }
-    componentModel.setModel(m_Mesh, m_Material, m_Index, shaderProgram, m_Stage);
+    componentModel.setModel(m_MeshHandle, m_MaterialHandle, m_Index, shaderProgram, m_Stage);
 }
-void ModelInstance::setMesh(Handle meshHandle, ComponentModel& componentModel){
-    ModelInstance::setMesh(meshHandle.get<Mesh>(), componentModel);
-}
-void ModelInstance::setMesh(Mesh* mesh, ComponentModel& componentModel){
+void ModelInstance::setMesh(Handle mesh, ComponentModel& componentModel){
     m_AnimationVector.clear();
-    componentModel.setModel(mesh, m_Material, m_Index, m_ShaderProgram, m_Stage);
-    internal_calculate_radius();
+    componentModel.setModel(mesh, m_MaterialHandle, m_Index, m_ShaderProgramHandle, m_Stage);
+    internal_update_model_matrix();
 }
-void ModelInstance::setMaterial(Handle materialHandle, ComponentModel& componentModel){
-    ModelInstance::setMaterial(materialHandle.get<Material>(), componentModel);
-}
-void ModelInstance::setMaterial(Material* material, ComponentModel& componentModel){
-    componentModel.setModel(m_Mesh, material, m_Index, m_ShaderProgram, m_Stage);
+void ModelInstance::setMaterial(Handle material, ComponentModel& componentModel){
+    componentModel.setModel(m_MeshHandle, material, m_Index, m_ShaderProgramHandle, m_Stage);
 }
 void ModelInstance::playAnimation(const std::string& animationName, float start, float end, unsigned int requestedLoops){
-    m_AnimationVector.emplace_animation(*m_Mesh, animationName, start, end, requestedLoops);
+    m_AnimationVector.emplace_animation(m_MeshHandle, animationName, start, end, requestedLoops);
 }
 
 void ModelInstance::onEvent(const Event& e) {
     if (e.type == EventType::ResourceLoaded) {
         if (e.eventResource.resource && e.eventResource.resource->type() == ResourceType::Mesh) {
-            Mesh* mesh = (Mesh*)e.eventResource.resource;
-            if (m_Mesh->isLoaded() || (mesh == m_Mesh)) {
-                internal_calculate_radius();
+            Mesh* mesh           = (Mesh*)e.eventResource.resource;
+            Mesh* meshFromHandle = m_MeshHandle.get<Mesh>();
+            if (meshFromHandle->isLoaded() || mesh == meshFromHandle) {
+                internal_update_model_matrix();
                 unregisterEvent(EventType::ResourceLoaded);
             }
         }

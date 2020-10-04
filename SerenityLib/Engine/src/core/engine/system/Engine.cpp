@@ -20,6 +20,39 @@
 using namespace Engine;
 using namespace Engine::priv;
 
+
+//faux game functions if test suite enabled
+#if defined(ENGINE_TESTS)
+    void Game::initResources() {}
+    void Game::initLogic() {}
+    void Game::update(const float dt) {}
+    void Game::render() {}
+    void Game::cleanup() {}
+
+    void Game::onResize(Window& window, unsigned int width, unsigned int height) {}
+    void Game::onWindowRequestedToBeClosed(Window& window) {}
+    void Game::onWindowClosed(Window& window) {}
+    void Game::onGameEnded() {}
+    void Game::onLostFocus(Window& window) {}
+    void Game::onGainedFocus(Window& window) {}
+    void Game::onTextEntered(Window& window, unsigned int unicode) {}
+    void Game::onKeyPressed(Window& window, unsigned int key) {}
+    void Game::onKeyReleased(Window& window, unsigned int key) {}
+    void Game::onMouseWheelScrolled(Window& window, float delta, int x, int y) {}
+    void Game::onMouseButtonPressed(Window& window, unsigned int button) {}
+    void Game::onMouseButtonReleased(Window& window, unsigned int button) {}
+    void Game::onMouseMoved(Window& window, float mouseX, float mouseY) {}
+    void Game::onMouseEntered(Window& window) {}
+    void Game::onMouseLeft(Window& window) {}
+    void Game::onPreUpdate(const float dt) {}
+    void Game::onPostUpdate(const float dt) {}
+    void Game::onJoystickButtonPressed() {}
+    void Game::onJoystickButtonReleased() {}
+    void Game::onJoystickMoved() {}
+    void Game::onJoystickConnected() {}
+    void Game::onJoystickDisconnected() {}
+#endif
+
 EngineCore* Core::m_Engine = nullptr;
 
 EngineCore::EngineCore(const EngineOptions& options) : m_ResourceManager(options), m_RenderManager(options){
@@ -28,8 +61,6 @@ EngineCore::~EngineCore(){
     internal_on_event_game_ended();
     Game::cleanup();
     internal_cleanup_os_specific();
-
-    m_Misc.m_BuiltInMeshes.cleanup();
 }
 bool Engine::paused(){ 
     return Core::m_Engine->m_Misc.m_Paused;

@@ -6,17 +6,22 @@
 #include <core/engine/mesh/VertexDataFormat.h>
 #include <core/engine/mesh/MeshIncludes.h>
 
-struct VertexData final : public Engine::NonCopyable {
+struct VertexData final {
     VertexDataFormat                               m_Format;
-    GLuint                                         m_VAO = 0;
     std::vector<std::vector<uint8_t>>              m_Data;
     std::vector<size_t>                            m_DataSizes;
     std::vector<unsigned int>                      m_Indices;
     std::vector<Engine::priv::Triangle>            m_Triangles;
     std::vector<std::unique_ptr<BufferObject>>     m_Buffers;
+    GLuint                                         m_VAO        = 0;
 
     VertexData() = delete;
     VertexData(VertexDataFormat& format);
+
+    VertexData(const VertexData& other) = delete;
+    VertexData& operator=(const VertexData& other) = delete;
+    VertexData(VertexData&& other) noexcept;
+    VertexData& operator=(VertexData&& other) noexcept;
     ~VertexData();
 
     template<typename T> std::vector<T> getData(size_t attributeIndex) const noexcept {

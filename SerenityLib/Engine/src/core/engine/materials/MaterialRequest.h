@@ -9,8 +9,7 @@ class Texture;
 #include <core/engine/textures/TextureRequest.h>
 
 struct MaterialRequestPart final {
-    Material*                                     m_Material = nullptr;
-    Handle                                        m_Handle   = Handle();
+    Handle                                        m_Handle   = Handle{};
     std::string                                   m_Name     = "";
     std::vector<std::shared_ptr<TextureRequest>>  m_TextureRequests;
 
@@ -42,16 +41,16 @@ struct MaterialRequest final {
     );
     MaterialRequest(
         const std::string& name,
-        Texture* diffuse,
-        Texture* normal,
-        Texture* glow,
-        Texture* specular,
-        Texture* ao,
-        Texture* metalness,
-        Texture* smoothness,
+        Handle diffuse,
+        Handle normal,
+        Handle glow,
+        Handle specular,
+        Handle ao,
+        Handle metalness,
+        Handle smoothness,
         std::function<void()>&& callback
     );
-    ~MaterialRequest();
+    ~MaterialRequest() = default;
 
     MaterialRequest(const MaterialRequest& other)                = default;
     MaterialRequest& operator=(const MaterialRequest& other)     = default;

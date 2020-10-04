@@ -73,10 +73,21 @@ Shader::Shader(const std::string& filenameOrCode, ShaderType shaderType, bool fr
     }
     priv::InternalShaderPublicInterface::ConvertCode(*this);
 }
-Shader::~Shader() {
+Shader::Shader(Shader&& other) noexcept 
+    : Resource(std::move(other))
+    , m_Type     { std::move(other.m_Type) }
+    , m_FromFile { std::move(other.m_FromFile) }
+    , m_FileName { std::move(other.m_FileName) }
+    , m_Code     { std::move(other.m_Code) }
+{}
+Shader& Shader::operator=(Shader&& other) noexcept {
+    Resource::operator=(std::move(other));
+    m_Type     = std::move(other.m_Type);
+    m_FromFile = std::move(other.m_FromFile);
+    m_FileName = std::move(other.m_FileName);
+    m_Code     = std::move(other.m_Code);
+    return *this;
 }
-
-
 
 void priv::InternalShaderPublicInterface::ConvertCode(Shader& shader) {
     //load initial code

@@ -314,10 +314,12 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
 {
     m_TerrainData.calculate_data(heightmapImage, sectorSizeInPixels, pointsPerPixel);
     Terrain::setUseDiamondSubdivision(useDiamondSubdivisions);
-    m_Mesh = NEW Mesh(name, *this, 0.000f);
-    Handle handle = priv::Core::m_Engine->m_ResourceManager.m_ResourcePool.add(m_Mesh, (unsigned int)ResourceType::Mesh);
 
-    addComponent<ComponentModel>(m_Mesh, materialHandle);
+    //m_Mesh = NEW Mesh(name, *this, 0.0f);
+    //Handle handle = priv::Core::m_Engine->m_ResourceManager.m_ResourcePool.add(m_Mesh, (unsigned int)ResourceType::Mesh);
+    m_MeshHandle = Engine::Resources::addResource<Mesh>(name, *this, 0.0f);
+
+    addComponent<ComponentModel>(m_MeshHandle, materialHandle);
     addComponent<ComponentBody>(CollisionType::Compound); //TODO: check CollisionType::TriangleShapeStatic
     auto* body = getComponent<ComponentBody>();
     auto* model = getComponent<ComponentModel>();
@@ -388,7 +390,7 @@ bool Terrain::internal_remove_quad(unsigned int sectorX, unsigned int sectorY, u
 bool Terrain::removeQuad(unsigned int sectorX, unsigned int sectorY, unsigned int indexX, unsigned int indexY) {
     bool removal_result = internal_remove_quad(sectorX, sectorY, indexX, indexY);
     if (removal_result) {
-        m_Mesh->internal_recalc_indices_from_terrain(*this);
+        m_MeshHandle.get<Mesh>()->internal_recalc_indices_from_terrain(*this);
     }
     return removal_result;
 }
@@ -404,14 +406,14 @@ bool Terrain::removeQuads(std::vector<std::tuple<unsigned int, unsigned int, uns
         }
     }
     if (atLeastOne) {
-        m_Mesh->internal_recalc_indices_from_terrain(*this);
+        m_MeshHandle.get<Mesh>()->internal_recalc_indices_from_terrain(*this);
     }
     return atLeastOne;
 }
 bool Terrain::removeQuad(unsigned int indexX, unsigned int indexY) {
     bool removal_result = internal_remove_quad(indexX, indexY);
     if (removal_result) {
-        m_Mesh->internal_recalc_indices_from_terrain(*this);
+        m_MeshHandle.get<Mesh>()->internal_recalc_indices_from_terrain(*this);
     }
     return removal_result;
 }
@@ -427,7 +429,7 @@ bool Terrain::removeQuads(std::vector<std::tuple<unsigned int, unsigned int>>& q
         }
     }
     if (atLeastOne) {
-        m_Mesh->internal_recalc_indices_from_terrain(*this);
+        m_MeshHandle.get<Mesh>()->internal_recalc_indices_from_terrain(*this);
     }
     return atLeastOne;
 }

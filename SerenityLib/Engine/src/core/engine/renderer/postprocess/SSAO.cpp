@@ -40,7 +40,7 @@ void Engine::priv::SSAO::internal_generate_noise(std::uniform_real_distribution<
     for (std::uint32_t i = 0; i < SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE; ++i) {
         ssaoNoise.emplace_back(rand_dist(gen) * 2.0 - 1.0, rand_dist(gen) * 2.0 - 1.0, 0.0f);
     }
-    Engine::Renderer::genAndBindTexture(GL_TEXTURE_2D, m_ssao_noise_texture);
+    Engine::Renderer::genAndBindTexture(TextureType::Texture2D, m_ssao_noise_texture);
     GLCall((GL_TEXTURE_2D, 0, GL_RGB16F, SSAO_NORMALMAP_SIZE, SSAO_NORMALMAP_SIZE, 0, GL_RGB, GL_FLOAT, ssaoNoise.data()));
     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
@@ -115,28 +115,28 @@ bool Engine::priv::SSAO::init_shaders() {
         "}";
 
     auto lambda_part_a = [&]() {
-        m_Vertex_Shader   = std::make_unique<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
-        m_Fragment_Shader = std::make_unique<Shader>(m_GLSL_frag_code, ShaderType::Fragment, false);
+        m_Vertex_Shader   = Engine::Resources::addResource<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
+        m_Fragment_Shader = Engine::Resources::addResource<Shader>(m_GLSL_frag_code, ShaderType::Fragment, false);
     };
     auto lambda_part_b = [&]() {
-        m_Shader_Program  = std::make_unique<ShaderProgram>("SSAO", *m_Vertex_Shader, *m_Fragment_Shader);
+        m_Shader_Program  = Engine::Resources::addResource<ShaderProgram>("SSAO", m_Vertex_Shader, m_Fragment_Shader);
     };
     Engine::priv::threading::addJobWithPostCallback(lambda_part_a, lambda_part_b);
 
 
     auto lambda_part_a_blur = [&]() {
-        m_Vertex_Shader_Blur   = std::make_unique<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
-        m_Fragment_Shader_Blur = std::make_unique<Shader>(m_GLSL_frag_code_blur, ShaderType::Fragment, false);
+        m_Vertex_Shader_Blur   = Engine::Resources::addResource<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
+        m_Fragment_Shader_Blur = Engine::Resources::addResource<Shader>(m_GLSL_frag_code_blur, ShaderType::Fragment, false);
     };
     auto lambda_part_b_blur = [&]() {
-        m_Shader_Program_Blur  = std::make_unique<ShaderProgram>("SSAO_Blur", *m_Vertex_Shader_Blur, *m_Fragment_Shader_Blur);
+        m_Shader_Program_Blur  = Engine::Resources::addResource<ShaderProgram>("SSAO_Blur", m_Vertex_Shader_Blur, m_Fragment_Shader_Blur);
     };
     Engine::priv::threading::addJobWithPostCallback(lambda_part_a_blur, lambda_part_b_blur);
 
     return true;
 }
 void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, const Camera& camera, const Engine::priv::Renderer& renderer) {
-    renderer.bind(m_Shader_Program.get());
+    renderer.bind(m_Shader_Program.get<ShaderProgram>());
     auto& dimensions    = viewport.getViewportDimensions();
     float divisor       = gbuffer.getSmallFBO().divisor();
     float screen_width  = dimensions.z * divisor;
@@ -153,7 +153,7 @@ void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, co
     Engine::Renderer::renderFullscreenQuad();
 }
 void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, std::string_view type, unsigned int texture, const Engine::priv::Renderer& renderer) {
-    renderer.bind(m_Shader_Program_Blur.get());
+    renderer.bind(m_Shader_Program_Blur.get<ShaderProgram>());
     glm::vec2 hv(0.0f);
     if (type == "H") { 
         hv = glm::vec2(1.0f, 0.0f); 

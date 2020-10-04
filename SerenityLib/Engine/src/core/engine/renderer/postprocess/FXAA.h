@@ -6,15 +6,17 @@ class  Shader;
 class  ShaderProgram;
 class  Viewport;
 
+#include <core/engine/resources/Handle.h>
+
 namespace Engine::priv {
     class  GBuffer;
     class  Renderer;
     class  FXAA final {
         private:
-            std::unique_ptr<Shader>         m_Vertex_shader;
-            std::unique_ptr<Shader>         m_Fragment_shader;
-            std::unique_ptr<ShaderProgram>  m_Shader_program;
-            std::string                     m_GLSL_frag_code  = "";
+            Handle         m_Vertex_shader;
+            Handle         m_Fragment_shader;
+            Handle         m_Shader_program;
+            std::string    m_GLSL_frag_code  = "";
 
             FXAA() = default;
             ~FXAA() = default;

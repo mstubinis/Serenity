@@ -1,44 +1,36 @@
 #include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/mesh/BuiltInMeshes.h>
 #include <core/engine/mesh/Mesh.h>
+#include <core/engine/resources/Engine_Resources.h>
 
 using namespace Engine::priv;
 
-BuiltInMeshses::BuiltInMeshses() {
+Handle BuiltInMeshses::getPointLightBounds() {
+    return m_BuiltInMeshes[(size_t)BuiltInMeshEnum::PointLight];
 }
-BuiltInMeshses::~BuiltInMeshses() {
-    cleanup();
+Handle BuiltInMeshses::getSpotLightBounds() {
+    return m_BuiltInMeshes[(size_t)BuiltInMeshEnum::SpotLight];
 }
-bool BuiltInMeshses::cleanup() {
-    SAFE_DELETE_ARRAY(m_BuiltInMeshes);
-    return true;
+Handle BuiltInMeshses::getRodLightBounds() {
+    return m_BuiltInMeshes[(size_t)BuiltInMeshEnum::RodLight];
 }
-Mesh& BuiltInMeshses::getPointLightBounds() {
-    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::PointLight];
+Handle BuiltInMeshses::getProjectionLightBounds() {
+    return m_BuiltInMeshes[(size_t)BuiltInMeshEnum::ProjectionLight];
 }
-Mesh& BuiltInMeshses::getSpotLightBounds() {
-    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::SpotLight];
+Handle BuiltInMeshses::getTriangleMesh() {
+    return m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Triangle];
 }
-Mesh& BuiltInMeshses::getRodLightBounds() {
-    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::RodLight];
+Handle BuiltInMeshses::getCubeMesh() {
+    return m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Cube];
 }
-Mesh& BuiltInMeshses::getProjectionLightBounds() {
-    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::ProjectionLight];
+Handle BuiltInMeshses::getPlaneMesh() {
+    return m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Plane];
 }
-Mesh& BuiltInMeshses::getTriangleMesh() {
-    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Triangle];
+Handle BuiltInMeshses::getFontMesh() {
+    return m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Font];
 }
-Mesh& BuiltInMeshses::getCubeMesh() {
-    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Cube];
-}
-Mesh& BuiltInMeshses::getPlaneMesh() {
-    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Plane];
-}
-Mesh& BuiltInMeshses::getFontMesh() {
-    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Font];
-}
-Mesh& BuiltInMeshses::getParticleMesh() {
-    return *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Particle];
+Handle BuiltInMeshses::getParticleMesh() {
+    return m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Particle];
 }
 
 bool BuiltInMeshses::init() {
@@ -557,7 +549,7 @@ bool BuiltInMeshses::build_point_light_mesh() {
             "f 18 2 19";
     }
 
-    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::PointLight] = NEW Mesh(pointLightMesh, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::PointLight] = Engine::Resources::addResource<Mesh>(pointLightMesh, 0.0005f);
     return true;
 }
 bool BuiltInMeshses::build_spot_light_mesh() {
@@ -651,7 +643,7 @@ bool BuiltInMeshses::build_spot_light_mesh() {
             "f 8 10 11";
     }
 
-    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::SpotLight] = NEW Mesh(spotLightData, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::SpotLight] = Engine::Resources::addResource<Mesh>(spotLightData, 0.0005f);
     return true;
 }
 bool BuiltInMeshses::build_rod_light_mesh() {
@@ -790,13 +782,13 @@ bool BuiltInMeshses::build_rod_light_mesh() {
             "f 12 10 16";
     }
 
-    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::RodLight] = NEW Mesh(rodLightData, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::RodLight] = Engine::Resources::addResource<Mesh>(rodLightData, 0.0005f);
     return true;
 }
 bool BuiltInMeshses::build_projection_light_mesh() {
     if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::ProjectionLight])
         return false;
-    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::ProjectionLight] = NEW Mesh("ProjectionLightMesh", 1.0f, 1.0f, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::ProjectionLight] = Engine::Resources::addResource<Mesh>("ProjectionLightMesh", 1.0f, 1.0f, 0.0005f);
     return true;
 }
 bool BuiltInMeshses::build_triangle_mesh() {
@@ -815,7 +807,7 @@ bool BuiltInMeshses::build_triangle_mesh() {
             "f 1/1/1 3/2/1 2/3/1";
     }
 
-    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Triangle] = NEW Mesh(triangleMesh, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Triangle] = Engine::Resources::addResource<Mesh>(triangleMesh, 0.0005f);
     return true;
 }
 bool BuiltInMeshses::build_cube_mesh() {
@@ -872,24 +864,24 @@ bool BuiltInMeshses::build_cube_mesh() {
             "f 1/14/6 4/20/6 8/15/6";
     }
 
-    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Cube] = NEW Mesh(cubeMesh, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Cube] = Engine::Resources::addResource<Mesh>(cubeMesh, 0.0005f);
     return true;
 }
 bool BuiltInMeshses::build_plane_mesh() {
     if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Plane])
         return false;
-    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Plane] = NEW Mesh("Plane", 1.0f, 1.0f, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Plane] = Engine::Resources::addResource<Mesh>("Plane", 1.0f, 1.0f, 0.0005f);
     return true;
 }
 bool BuiltInMeshses::build_font_mesh() {
     if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Font])
         return false;
-    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Font] = NEW Mesh("FontPlane", 1.0f, 1.0f, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Font] = Engine::Resources::addResource<Mesh>("FontPlane", 1.0f, 1.0f, 0.0005f);
     return true;
 }
 bool BuiltInMeshses::build_particle_mesh() {
     if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Particle])
         return false;
-    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Particle] = NEW Mesh("ParticlePlane", 1.0f, 1.0f, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Particle] = Engine::Resources::addResource<Mesh>("ParticlePlane", 1.0f, 1.0f, 0.0005f);
     return true;
 }

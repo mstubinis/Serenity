@@ -7,7 +7,7 @@
 #define MAX_LIGHTS_PER_PASS 16
 
 enum class MaterialLayerBlendMode : unsigned char {
-    Default,
+    Default = 0,
     Mix,
     Add,
     Subtract,
@@ -31,11 +31,11 @@ enum class MaterialLayerBlendMode : unsigned char {
     Value,
 _TOTAL};
 enum class MaterialUVModificationType : unsigned char {
-    Translation,
+    Translation = 0,
     Rotation,
 _TOTAL};
 enum class MaterialComponentType : unsigned char {
-    Diffuse,
+    Diffuse = 0,
     Normal,
     Glow,
     Specular,
@@ -47,7 +47,7 @@ enum class MaterialComponentType : unsigned char {
     ParallaxOcclusion,
 _TOTAL};
 enum class MaterialPhysics : unsigned char {
-    Water,
+    Water = 0,
     Plastic_Or_Glass_Low,
     Plastic_High,
     Glass_Or_Ruby_High,
@@ -75,14 +75,14 @@ enum class MaterialPhysics : unsigned char {
     Nickel,
 _TOTAL};
 enum class DiffuseModel : unsigned char {
-    None,
+    None = 0,
     Lambert,
     Oren_Nayar,
     Ashikhmin_Shirley,
     Minnaert,
 _TOTAL};
 enum class SpecularModel : unsigned char {
-    None,
+    None = 0,
     Blinn_Phong,
     Phong,
     GGX,

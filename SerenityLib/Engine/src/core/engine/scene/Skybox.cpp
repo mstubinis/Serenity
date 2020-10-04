@@ -93,21 +93,21 @@ namespace Engine::priv {
 Skybox::Skybox(const std::string* files) {
     Engine::priv::SkyboxImplInterface::initMesh();
 
-    std::string names[6] = { files[0], files[1], files[2], files[3], files[4], files[5] };
+    std::array<std::string, 6> names = { files[0], files[1], files[2], files[3], files[4], files[5] };
     //instead of using files[0] generate a proper name using the directory?
-    m_Texture = NEW Texture(names, files[0] + "Cubemap", false, ImageInternalFormat::SRGB8_ALPHA8);
-    Engine::priv::TextureLoader::GeneratePBRData(*m_Texture, 32, m_Texture->width() / 4);
-    Engine::priv::Core::m_Engine->m_ResourceManager._addTexture(m_Texture);
+
+    m_Texture = Engine::Resources::addResource<Texture>(names, files[0] + "Cubemap", false, ImageInternalFormat::SRGB8_ALPHA8);
+    Engine::priv::TextureLoader::GeneratePBRData(*m_Texture.get<Texture>(), 32, m_Texture.get<Texture>()->width() / 4);
+
     registerEvent(EventType::WindowFullscreenChanged);
 }
 Skybox::Skybox(const std::string& filename) {
     Engine::priv::SkyboxImplInterface::initMesh();
 
-    m_Texture = Engine::priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(filename);
-    if (!m_Texture) {
-        m_Texture = NEW Texture(filename, false, ImageInternalFormat::SRGB8_ALPHA8);
-        Engine::priv::TextureLoader::GeneratePBRData(*m_Texture, 32, m_Texture->width() / 4);
-        Engine::priv::Core::m_Engine->m_ResourceManager._addTexture(m_Texture);
+    m_Texture = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.get<Texture>(filename).second;
+    if (m_Texture) {
+        m_Texture = Engine::Resources::addResource<Texture>(filename, false, ImageInternalFormat::SRGB8_ALPHA8);
+        Engine::priv::TextureLoader::GeneratePBRData(*m_Texture.get<Texture>(), 32, m_Texture.get<Texture>()->width() / 4);
     }
     registerEvent(EventType::WindowFullscreenChanged);
 }

@@ -2,56 +2,76 @@
 #include <core/engine/renderer/Renderer.h>
 #include <core/engine/textures/Texture.h>
 
-Texture* Texture::White    = nullptr;
-Texture* Texture::Black    = nullptr;
-Texture* Texture::Checkers = nullptr;
-Texture* Texture::BRDF     = nullptr;
+Handle Texture::White    = Handle{};
+Handle Texture::Black    = Handle{};
+Handle Texture::Checkers = Handle{};
+Handle Texture::BRDF     = Handle{};
 
-Texture::Texture() 
-    : Resource{ ResourceType::Texture }
+Texture::Texture(const std::string& name) 
+    : Resource{ ResourceType::Texture, name }
 {
-    Engine::priv::TextureLoader::InitCommon(*this, GL_TEXTURE_2D, false);
+    m_CPUData.m_ImagesDatas.emplace_back();
+    Engine::priv::TextureLoader::CPUInitCommon(m_CPUData, TextureType::Texture2D, false);
 }
 
 Texture::Texture(const std::string& textureName, TextureType textureType, unsigned int width, unsigned int height, bool mipMap) 
-    : Resource{ ResourceType::Texture }
+    : Texture{}
 {
     setName(textureName);
-    m_TextureType = textureType;
-    m_Type = Engine::priv::TextureLoader::OpenglTypeFromTextureType(textureType);
-    Engine::priv::TextureLoader::InitCommon(*this, m_Type, mipMap);
+    m_CPUData.m_TextureType = textureType;
+    Engine::priv::TextureLoader::CPUInitCommon(m_CPUData, m_CPUData.m_TextureType, mipMap);
 }
 Texture::Texture(unsigned int w, unsigned int h, ImagePixelType pxlType, ImagePixelFormat pxlFormat, ImageInternalFormat internal_, float divisor) 
-    : Resource{ ResourceType::Texture }
+    : Texture{}
 {
-    Engine::priv::TextureLoader::InitFramebuffer(*this, w, h, pxlType, pxlFormat, internal_, divisor);
+    Engine::priv::TextureLoader::CPUInitFramebuffer(m_CPUData, w, h, pxlType, pxlFormat, internal_, divisor);
     Engine::priv::InternalTexturePublicInterface::Load(*this);
 }
-Texture::Texture(const sf::Image& sfImage, const std::string& name, bool genMipMaps, ImageInternalFormat internal_, unsigned int openglTextureType) 
-    : Resource{ ResourceType::Texture, name }
+Texture::Texture(const sf::Image& sfImage, const std::string& name, bool genMipMaps, ImageInternalFormat internal_, TextureType textureType)
+    : Texture{ name }
 {
-    Engine::priv::TextureLoader::InitFromMemory(*this, sfImage, name, genMipMaps, internal_, openglTextureType);
+    Engine::priv::TextureLoader::CPUInitFromMemory(m_CPUData, sfImage, name, genMipMaps, internal_, textureType);
     Engine::priv::InternalTexturePublicInterface::Load(*this);
 }
-Texture::Texture(const std::string& filename, bool genMipMaps, ImageInternalFormat internal_, unsigned int openglTextureType) 
-    : Resource{ ResourceType::Texture, filename }
+Texture::Texture(const std::string& filename, bool genMipMaps, ImageInternalFormat internal_, TextureType textureType) 
+    : Texture{ filename }
 {
-    Engine::priv::TextureLoader::InitFromFile(*this, filename, genMipMaps, internal_, openglTextureType);
+    Engine::priv::TextureLoader::CPUInitFromFile(m_CPUData, filename, genMipMaps, internal_, textureType);
     Engine::priv::InternalTexturePublicInterface::Load(*this);
 }
-Texture::Texture(const std::string files[], const std::string& name, bool genMipMaps, ImageInternalFormat internal_) 
-    : Resource{ ResourceType::Texture, name }
+Texture::Texture(const std::array<std::string, 6>& files, const std::string& name, bool genMipMaps, ImageInternalFormat internal_) 
+    : Texture{ name }
 {
-    Engine::priv::TextureLoader::InitFromFilesCubemap(*this, files, name, genMipMaps, internal_);
+    Engine::priv::TextureLoader::CPUInitFromFilesCubemap(m_CPUData, files, name, genMipMaps, internal_);
     Engine::priv::InternalTexturePublicInterface::Load(*this);
 }
+
+
+Texture::Texture(Texture&& other) noexcept 
+    : Resource(std::move(other))
+    , m_CPUData                  { std::move(other.m_CPUData) }
+    , m_CommandQueue             { std::move(other.m_CommandQueue) }
+    , m_TextureAddress           { std::exchange(other.m_TextureAddress, 0) }
+    , m_ConvolutionTextureHandle { std::exchange(other.m_ConvolutionTextureHandle, Handle{}) }
+    , m_PreEnvTextureHandle      { std::exchange(other.m_PreEnvTextureHandle, Handle{}) }
+{}
+Texture& Texture::operator=(Texture&& other) noexcept {
+    Resource::operator=(std::move(other));
+    m_CPUData                  = std::move(other.m_CPUData);
+    m_CommandQueue             = std::move(other.m_CommandQueue);
+    m_TextureAddress           = std::exchange(other.m_TextureAddress, 0);
+    m_ConvolutionTextureHandle = std::exchange(other.m_ConvolutionTextureHandle, Handle{});
+    m_PreEnvTextureHandle      = std::exchange(other.m_PreEnvTextureHandle, Handle{});
+    return *this;
+}
+
 Texture::~Texture(){
     Engine::priv::InternalTexturePublicInterface::Unload(*this);
 }
 bool Texture::internal_bind_if_not_bound(unsigned int requestedAddress) noexcept {
     auto whichID = Engine::Renderer::getCurrentlyBoundTextureOfType(requestedAddress);
     if (whichID != requestedAddress) {
-        Engine::Renderer::bindTextureForModification(m_Type, requestedAddress);
+        Engine::Renderer::bindTextureForModification(m_CPUData.m_TextureType, requestedAddress);
         return true;
     }
     return false;
@@ -62,7 +82,7 @@ void Texture::setXWrapping(TextureWrap wrap) {
         return;
     }
     internal_bind_if_not_bound(m_TextureAddress);
-    Texture::setXWrapping(m_Type, wrap);
+    Texture::setXWrapping(m_CPUData.m_TextureType, wrap);
 }
 void Texture::setYWrapping(TextureWrap wrap) {
     if (*this == false) {
@@ -70,7 +90,7 @@ void Texture::setYWrapping(TextureWrap wrap) {
         return;
     }
     internal_bind_if_not_bound(m_TextureAddress);
-    Texture::setYWrapping(m_Type, wrap);
+    Texture::setYWrapping(m_CPUData.m_TextureType, wrap);
 }
 void Texture::setZWrapping(TextureWrap wrap) {
     if (*this == false) {
@@ -78,7 +98,7 @@ void Texture::setZWrapping(TextureWrap wrap) {
         return;
     }
     internal_bind_if_not_bound(m_TextureAddress);
-    Texture::setZWrapping(m_Type, wrap);
+    Texture::setZWrapping(m_CPUData.m_TextureType, wrap);
 }
 void Texture::setWrapping(TextureWrap wrap) {
     if (*this == false) {
@@ -86,7 +106,7 @@ void Texture::setWrapping(TextureWrap wrap) {
         return;
     }
     internal_bind_if_not_bound(m_TextureAddress);
-    Texture::setWrapping(m_Type, wrap);
+    Texture::setWrapping(m_CPUData.m_TextureType, wrap);
 }
 void Texture::setMinFilter(TextureFilter filter) {
     if (*this == false) {
@@ -94,8 +114,8 @@ void Texture::setMinFilter(TextureFilter filter) {
         return;
     }
     internal_bind_if_not_bound(m_TextureAddress);
-    Texture::setMinFilter(m_Type, filter);
-    m_MinFilter = (unsigned int)filter;
+    Texture::setMinFilter(m_CPUData.m_TextureType, filter);
+    m_CPUData.m_MinFilter = filter.toGLType(true);
 }
 void Texture::setMaxFilter(TextureFilter filter) {
     if (*this == false) {
@@ -103,7 +123,7 @@ void Texture::setMaxFilter(TextureFilter filter) {
         return;
     }
     internal_bind_if_not_bound(m_TextureAddress);
-    Texture::setMaxFilter(m_Type, filter);
+    Texture::setMaxFilter(m_CPUData.m_TextureType, filter);
 }
 void Texture::setFilter(TextureFilter filter) {
     if (*this == false) {
@@ -111,45 +131,35 @@ void Texture::setFilter(TextureFilter filter) {
         return;
     }
     internal_bind_if_not_bound(m_TextureAddress);
-    Texture::setFilter(m_Type, filter);
+    Texture::setFilter(m_CPUData.m_TextureType, filter);
 }
-void Texture::setXWrapping(unsigned int type, TextureWrap wrap) {
-    unsigned int glXWrapEnum;
-    Engine::priv::TextureLoader::EnumWrapToGL(glXWrapEnum, wrap);
-    GLCall(glTexParameteri(type, GL_TEXTURE_WRAP_S, glXWrapEnum));
+void Texture::setXWrapping(TextureType type, TextureWrap wrap) {
+    GLCall(glTexParameteri(type.toGLType(), GL_TEXTURE_WRAP_S, wrap.toGLType()));
 }
-void Texture::setYWrapping(unsigned int type, TextureWrap wrap) {
-    unsigned int glYWrapEnum;
-    Engine::priv::TextureLoader::EnumWrapToGL(glYWrapEnum, wrap);
-    GLCall(glTexParameteri(type, GL_TEXTURE_WRAP_T, glYWrapEnum));
+void Texture::setYWrapping(TextureType type, TextureWrap wrap) {
+    GLCall(glTexParameteri(type.toGLType(), GL_TEXTURE_WRAP_T, wrap.toGLType()));
 }
-void Texture::setZWrapping(unsigned int type, TextureWrap wrap) {
-    if (type != GL_TEXTURE_CUBE_MAP) {
+void Texture::setZWrapping(TextureType type, TextureWrap wrap) {
+    if (type.toGLType() != GL_TEXTURE_CUBE_MAP) {
         ENGINE_PRODUCTION_LOG("Texture::setZWrapping() error: type was not GL_TEXTURE_CUBE_MAP!")
         return;
     }
-    unsigned int glZWrapEnum;
-    Engine::priv::TextureLoader::EnumWrapToGL(glZWrapEnum, wrap);
-    GLCall(glTexParameteri(type, GL_TEXTURE_WRAP_R, glZWrapEnum));
+    GLCall(glTexParameteri(type.toGLType(), GL_TEXTURE_WRAP_R, wrap.toGLType()));
 }
-void Texture::setWrapping(unsigned int type, TextureWrap wrap) {
+void Texture::setWrapping(TextureType type, TextureWrap wrap) {
     Texture::setXWrapping(type, wrap);
     Texture::setYWrapping(type, wrap);
-    if (type == GL_TEXTURE_CUBE_MAP) {
+    if (type.toGLType() == GL_TEXTURE_CUBE_MAP) {
         Texture::setZWrapping(type, wrap);
     }
 }
-void Texture::setMinFilter(unsigned int type, TextureFilter filter) {
-    unsigned int glMinFilterEnum;
-    Engine::priv::TextureLoader::EnumFilterToGL(glMinFilterEnum, filter, true);
-    GLCall(glTexParameteri(type, GL_TEXTURE_MIN_FILTER, glMinFilterEnum));
+void Texture::setMinFilter(TextureType type, TextureFilter filter) {
+    GLCall(glTexParameteri(type.toGLType(), GL_TEXTURE_MIN_FILTER, filter.toGLType(true)));
 }
-void Texture::setMaxFilter(unsigned int type, TextureFilter filter) {
-    unsigned int glMaxFilterEnum;
-    Engine::priv::TextureLoader::EnumFilterToGL(glMaxFilterEnum, filter, false);
-    GLCall(glTexParameteri(type, GL_TEXTURE_MAG_FILTER, glMaxFilterEnum));
+void Texture::setMaxFilter(TextureType type, TextureFilter filter) {
+    GLCall(glTexParameteri(type.toGLType(), GL_TEXTURE_MAG_FILTER, filter.toGLType(false)));
 }
-void Texture::setFilter(unsigned int type, TextureFilter filter) {
+void Texture::setFilter(TextureType type, TextureFilter filter) {
     Texture::setMinFilter(type, filter);
     Texture::setMaxFilter(type, filter);
 }
@@ -164,12 +174,12 @@ void Texture::setAnisotropicFiltering(float anisotropicFiltering){
     }
     internal_bind_if_not_bound(m_TextureAddress);
     if (Engine::priv::Renderer::OPENGL_VERSION >= 46) {
-        GLCall(glTexParameterf(m_Type, GL_TEXTURE_MAX_ANISOTROPY, anisotropicFiltering));
+        GLCall(glTexParameterf(m_CPUData.m_TextureType.toGLType(), GL_TEXTURE_MAX_ANISOTROPY, anisotropicFiltering));
     }else{
         if (Engine::priv::OpenGLExtensions::supported(Engine::priv::OpenGLExtensions::ARB_texture_filter_anisotropic)) {
-            GLCall(glTexParameterf(m_Type, GL_TEXTURE_MAX_ANISOTROPY, anisotropicFiltering));
+            GLCall(glTexParameterf(m_CPUData.m_TextureType.toGLType(), GL_TEXTURE_MAX_ANISOTROPY, anisotropicFiltering));
         }else if (Engine::priv::OpenGLExtensions::supported(Engine::priv::OpenGLExtensions::EXT_texture_filter_anisotropic)) {
-            GLCall(glTexParameterf(m_Type, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropicFiltering));
+            GLCall(glTexParameterf(m_CPUData.m_TextureType.toGLType(), GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropicFiltering));
         }
     }
 }
@@ -178,9 +188,9 @@ glm::vec2 Texture::sizeAsRatio() const {
     return glm::vec2(glm::vec2(size()) / max_val);
 }
 bool Texture::compressed() const {
-    return (m_ImagesDatas.size() == 0) ? false : (m_ImagesDatas[0].m_Mipmaps[0].compressedSize > 0);
+    return (m_CPUData.m_ImagesDatas.size() == 0) ? false : (m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].compressedSize > 0);
 }
 unsigned char* Texture::pixels() {
     Engine::priv::TextureLoader::WithdrawPixelsFromOpenGLMemory(*this);
-    return &(m_ImagesDatas[0].m_Mipmaps[0].pixels)[0];
+    return &(m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].pixels)[0];
 }

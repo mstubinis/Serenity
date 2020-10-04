@@ -15,12 +15,12 @@ ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& 
 {
     addComponent<ComponentBody>();
 
-    
-    addComponent<ComponentModel>(&Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), Material::Checkers);
+    /*
+    addComponent<ComponentModel>(Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), Material::Checkers);
     auto& modelComponent = *getComponent<ComponentModel>();
     modelComponent.getModel().setScale(0.01f, 0.01f, 0.1f);
     modelComponent.getModel().translate(0.0f, 0.0f, 0.1f);
-    
+    */
     init(properties, scene, lifetime, parent);
 }
 void ParticleEmitter::init(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {

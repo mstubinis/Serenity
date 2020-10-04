@@ -6,15 +6,17 @@ class  ShaderProgram;
 class  Shader;
 class  Viewport;
 
+#include <core/engine/resources/Handle.h>
+
 namespace Engine::priv {
     class  GBuffer;
     class  Renderer;
     class  Bloom final {
         private:
-            std::unique_ptr<Shader>         m_Vertex_Shader;
-            std::unique_ptr<Shader>         m_Fragment_Shader;
-            std::unique_ptr<ShaderProgram>  m_Shader_Program;
-            std::string                     m_GLSL_frag_code  = "";
+            Handle         m_Vertex_Shader;
+            Handle         m_Fragment_Shader;
+            Handle         m_Shader_Program;
+            std::string    m_GLSL_frag_code  = "";
         public:
             unsigned int num_passes           = 3;
             bool         bloom_active         = true;

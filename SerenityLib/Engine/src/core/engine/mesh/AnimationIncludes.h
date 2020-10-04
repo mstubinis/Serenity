@@ -10,43 +10,43 @@ namespace Engine::priv {
         glm::mat4   FinalTransform = glm::mat4(1.0f);
     };
     struct MeshInfoNode final {
+        std::vector<MeshInfoNode*>  Children;
+        glm::mat4                   Transform = glm::mat4(1.0f);
         std::string                 Name      = "";
         MeshInfoNode*               Parent    = nullptr;
-        glm::mat4                   Transform = glm::mat4(1.0f);
-        std::vector<MeshInfoNode*>  Children;
 
         MeshInfoNode() = delete;
         MeshInfoNode(std::string&& name_, glm::mat4&& transform_) {
             Name      = name_;
             Transform = transform_;
         }
-        ~MeshInfoNode() {
-        }
     };
     struct AnimationKeyBaseClass {
-        float     time;
+        float     time = 0.0f;
         AnimationKeyBaseClass() = default;
-        AnimationKeyBaseClass(float time_) {
-            time = time_;
-        }
+        AnimationKeyBaseClass(float time_) 
+            : time{ time_ }
+        {}
     };
     struct Vector3Key final : public AnimationKeyBaseClass {
-        glm::vec3  value;
+        glm::vec3  value = glm::vec3(0.0f);
         Vector3Key() = default;
-        Vector3Key(float time_, const glm::vec3& value_) : AnimationKeyBaseClass(time_){
-            value = value_;
-        }
+        Vector3Key(float time_, const glm::vec3& value_) 
+            : AnimationKeyBaseClass{ time_ }
+            , value{ value_ }
+        {}
     };
     struct QuatKey final : public AnimationKeyBaseClass {
-        aiQuaternion  value;
+        aiQuaternion  value = aiQuaternion(1.0f, 0.0f, 0.0f, 0.0f);
         QuatKey() = default;
-        QuatKey(float time_, const aiQuaternion& value_) : AnimationKeyBaseClass(time_){
-            value = value_;
-        }
+        QuatKey(float time_, const aiQuaternion& value_) 
+            : AnimationKeyBaseClass{ time_ }
+            , value{ value_ }
+        {}
     };
     struct AnimationChannel final {
-        std::vector<Vector3Key>  PositionKeys;
         std::vector<QuatKey>     RotationKeys;
+        std::vector<Vector3Key>  PositionKeys;
         std::vector<Vector3Key>  ScalingKeys;
     };
 };

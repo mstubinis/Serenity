@@ -11,6 +11,25 @@ VertexData::VertexData(VertexDataFormat& format)
     m_DataSizes.resize(attributesSize, 0);
     m_Buffers.push_back(std::make_unique<VertexBufferObject>());
 }
+VertexData::VertexData(VertexData&& other) noexcept
+    : m_Format    { std::move(other.m_Format) }
+    , m_Data      { std::move(other.m_Data) }
+    , m_DataSizes { std::move(other.m_DataSizes) }
+    , m_Indices   { std::move(other.m_Indices) }
+    , m_Triangles { std::move(other.m_Triangles) }
+    , m_Buffers   { std::move(other.m_Buffers) }
+    , m_VAO       { std::exchange(other.m_VAO, 0)  }
+{}
+VertexData& VertexData::operator=(VertexData&& other) noexcept {
+    m_Format      = std::move(other.m_Format);
+    m_Data        = std::move(other.m_Data);
+    m_DataSizes   = std::move(other.m_DataSizes);
+    m_Indices     = std::move(other.m_Indices);
+    m_Triangles   = std::move(other.m_Triangles);
+    m_Buffers     = std::move(other.m_Buffers);
+    m_VAO         = std::exchange(other.m_VAO, 0);
+    return *this;
+}
 VertexData::~VertexData() {
     Engine::Renderer::deleteVAO(m_VAO);
 }

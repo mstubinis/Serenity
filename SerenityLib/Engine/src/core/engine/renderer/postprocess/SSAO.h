@@ -18,20 +18,22 @@ struct SSAOLevel { enum Level : unsigned char {
     Ultra,
 };};
 
+#include <core/engine/resources/Handle.h>
+
 namespace Engine::priv {
     class  GBuffer;
     class  Renderer;
     class  SSAO final {
         private:
-            std::unique_ptr<Shader>          m_Vertex_Shader;
-            std::unique_ptr<Shader>          m_Fragment_Shader;
-            std::unique_ptr<ShaderProgram>   m_Shader_Program;
-            std::unique_ptr<Shader>          m_Vertex_Shader_Blur;
-            std::unique_ptr<Shader>          m_Fragment_Shader_Blur;
-            std::unique_ptr<ShaderProgram>   m_Shader_Program_Blur;
+            Handle       m_Vertex_Shader;
+            Handle       m_Fragment_Shader;
+            Handle       m_Shader_Program;
+            Handle       m_Vertex_Shader_Blur;
+            Handle       m_Fragment_Shader_Blur;
+            Handle       m_Shader_Program_Blur;
 
-            std::string                      m_GLSL_frag_code       = "";
-            std::string                      m_GLSL_frag_code_blur  = "";
+            std::string  m_GLSL_frag_code       = "";
+            std::string  m_GLSL_frag_code_blur  = "";
 
             void internal_generate_kernel(std::uniform_real_distribution<float>& rand_dist, std::default_random_engine& gen) noexcept;
             void internal_generate_noise(std::uniform_real_distribution<float>& rand_dist, std::default_random_engine& gen) noexcept;

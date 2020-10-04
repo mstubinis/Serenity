@@ -7,17 +7,22 @@ SoundData::SoundData(const std::string& file)
 {
     buildBuffer();
 }
-SoundData::~SoundData() {
+SoundData::SoundData(SoundData&& other) noexcept 
+    : Resource(std::move(other))
+    , m_Buffer {std::move(other.m_Buffer)}
+    , m_File   { std::move(other.m_File) }
+    , m_Volume { std::move(other.m_Volume) }
+{}
+SoundData& SoundData::operator=(SoundData&& other) noexcept {
+    Resource::operator=(std::move(other));
+    m_Buffer = std::move(other.m_Buffer);
+    m_File   = std::move(other.m_File);
+    m_Volume = std::move(other.m_Volume);
+    return *this;
 }
 void SoundData::buildBuffer() {
     if (!m_Buffer) {
         m_Buffer = std::make_unique<sf::SoundBuffer>();
     }
     m_Buffer->loadFromFile(m_File);
-}
-float SoundData::getDuration() const {
-    return m_Buffer->getDuration().asSeconds();
-}
-void SoundData::setVolume(float volume) {
-    m_Volume = glm::clamp(volume, 0.0f, 100.0f);
 }

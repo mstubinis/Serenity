@@ -25,12 +25,20 @@ void Engine::priv::MeshLoader::LoadPopulateGlobalNodes(const aiScene& scene, Eng
     for (unsigned int i = 0; i < ai_node->mNumMeshes; ++i) {
         const aiMesh& aimesh  = *scene.mMeshes[ai_node->mMeshes[i]];
         auto& part            = request.m_Parts.emplace_back();
-        part.mesh             = NEW Mesh();
         part.name             = request.m_FileOrData + " - " + std::string(aimesh.mName.C_Str());
+
+        /*
+        part.mesh = NEW Mesh();
         part.mesh->m_File     = request.m_FileOrData;
         part.mesh->setName(part.name);
         part.handle           = priv::Core::m_Engine->m_ResourceManager.m_ResourcePool.add(part.mesh, (unsigned int)ResourceType::Mesh);
         part.mesh->m_RootNode = root;
+        */
+        part.handle     = priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.emplace<Mesh>();
+        Mesh& mesh      = *part.handle.get<Mesh>();
+        mesh.m_File     = request.m_FileOrData;
+        mesh.m_RootNode = root;
+        mesh.setName(part.name);
     }
 
     if (parent) {
@@ -98,8 +106,8 @@ void Engine::priv::MeshLoader::LoadProcessNodeData(MeshRequest& request, const a
 
         #pragma region Skeleton
         if (aimesh.mNumBones > 0) {
-            part.mesh->m_Skeleton = NEW MeshSkeleton();
-            auto& skeleton = *part.mesh->m_Skeleton;
+            part.handle.get<Mesh>()->m_Skeleton = NEW MeshSkeleton();
+            auto& skeleton = *part.handle.get<Mesh>()->m_Skeleton;
 
             #pragma region IndividualBones
             //build bone information
@@ -135,7 +143,7 @@ void Engine::priv::MeshLoader::LoadProcessNodeData(MeshRequest& request, const a
                         key = "Animation " + std::to_string(skeleton.m_AnimationData.size());
                     }
                     if (!skeleton.m_AnimationData.count(key)) {
-                        skeleton.m_AnimationData.emplace(std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(*part.mesh, anim));
+                        skeleton.m_AnimationData.emplace(std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(*part.handle.get<Mesh>(), anim));
                     }
                 }
             }
@@ -143,7 +151,7 @@ void Engine::priv::MeshLoader::LoadProcessNodeData(MeshRequest& request, const a
         }
         #pragma endregion
         MeshLoader::CalculateTBNAssimp(data);
-        MeshLoader::FinalizeData(*part.mesh, data, 0.0005f);
+        MeshLoader::FinalizeData(part.handle, data, 0.0005f);
         ++count;
     }
     for (unsigned int i = 0; i < node.mNumChildren; ++i) {
@@ -151,6 +159,10 @@ void Engine::priv::MeshLoader::LoadProcessNodeData(MeshRequest& request, const a
     }
 }
 
+void Engine::priv::MeshLoader::FinalizeData(Handle meshHandle, Engine::priv::MeshImportedData& data, float threshold) {
+    auto& mesh = *meshHandle.get<Mesh>();
+    FinalizeData(mesh, data, threshold);
+}
 void Engine::priv::MeshLoader::FinalizeData(Mesh& mesh, Engine::priv::MeshImportedData& data, float threshold) {
     mesh.m_Threshold = threshold;
     InternalMeshPublicInterface::FinalizeVertexData(mesh, data);
@@ -158,6 +170,8 @@ void Engine::priv::MeshLoader::FinalizeData(Mesh& mesh, Engine::priv::MeshImport
     SAFE_DELETE(mesh.m_CollisionFactory);
     mesh.m_CollisionFactory = NEW MeshCollisionFactory(mesh);
 }
+
+
 
 bool Engine::priv::MeshLoader::IsNear(float v1, float v2, float threshold) {
     return (std::abs(v1 - v2) < threshold);

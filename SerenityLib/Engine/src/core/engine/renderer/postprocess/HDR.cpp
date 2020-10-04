@@ -8,6 +8,7 @@
 #include <core/engine/resources/Engine_BuiltInShaders.h>
 #include <core/engine/threading/ThreadingModule.h>
 #include <core/engine/scene/Viewport.h>
+#include <core/engine/resources/Engine_Resources.h>
 
 Engine::priv::HDR Engine::priv::HDR::STATIC_HDR;
 
@@ -60,18 +61,18 @@ bool Engine::priv::HDR::init_shaders() {
 #pragma endregion
 
     auto lambda_part_a = [&]() {
-        m_Vertex_Shader   = std::make_unique<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
-        m_Fragment_Shader = std::make_unique<Shader>(m_GLSL_frag_code, ShaderType::Fragment, false);
+        m_Vertex_Shader   = Engine::Resources::addResource<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
+        m_Fragment_Shader = Engine::Resources::addResource<Shader>(m_GLSL_frag_code, ShaderType::Fragment, false);
     };
     auto lambda_part_b = [&]() {
-        m_Shader_Program  = std::make_unique<ShaderProgram>("HDR", *m_Vertex_Shader, *m_Fragment_Shader);
+        m_Shader_Program  = Engine::Resources::addResource<ShaderProgram>("HDR", m_Vertex_Shader, m_Fragment_Shader);
     };
     Engine::priv::threading::addJobWithPostCallback(lambda_part_a, lambda_part_b);
 
     return true;
 }
 void Engine::priv::HDR::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, bool godRays, bool lighting, float godRaysFactor, const Engine::priv::Renderer& renderer) {
-    renderer.bind(m_Shader_Program.get());
+    renderer.bind(m_Shader_Program.get<ShaderProgram>());
 
     Engine::Renderer::sendUniform4Safe("HDRInfo", exposure, 0.0f, godRaysFactor, (float)algorithm);
     Engine::Renderer::sendUniform2Safe("Has", (int)godRays, (int)lighting);

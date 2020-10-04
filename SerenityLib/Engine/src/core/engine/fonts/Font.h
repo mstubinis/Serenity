@@ -26,10 +26,10 @@ class Font final: public Resource {
     public:
         static constexpr unsigned int MAX_CHARACTERS_RENDERED_PER_FRAME    = 4096;
     private:
-        Texture* m_FontTexture                                             = nullptr;
-        float    m_MaxHeight                                               = 0.0f;
-        float    m_LineHeight                                              = 8.0f;
-        std::unordered_map<std::uint8_t, CharGlyph> m_CharGlyphs;
+        Texture*                                      m_FontTexture    = nullptr;
+        float                                         m_MaxHeight      = 0.0f;
+        float                                         m_LineHeight     = 8.0f;
+        std::unordered_map<std::uint8_t, CharGlyph>   m_CharGlyphs;
 
         void init_simple(const std::string& filename, int height, int width);
         void init_freetype(const std::string& filename, int height, int width);
@@ -38,7 +38,12 @@ class Font final: public Resource {
         std::vector<std::vector<std::uint8_t>> generate_bitmap(const FT_GlyphSlotRec_&);
 
     public:
+        Font() = default;
         Font(const std::string& filename, int height, int width, float line_height);
+        Font(const Font& other) = delete;
+        Font& operator=(const Font& other) = delete;
+        Font(Font&& other) noexcept;
+        Font& operator=(Font&& other) noexcept;
         ~Font();
 
         void renderText(

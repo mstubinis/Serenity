@@ -72,7 +72,7 @@ class Scene::impl final {
                 }
             }
             if (!renderGraph) {
-                renderGraph = &scene.m_RenderGraphs[(size_t)stage].emplace_back(*inModelInstance.shaderProgram());
+                renderGraph = &scene.m_RenderGraphs[(size_t)stage].emplace_back(inModelInstance.shaderProgram());
             }
             renderGraph->addModelInstanceToPipeline(inModelInstance, componentModel);
         }
@@ -136,14 +136,14 @@ void priv::InternalScenePublicInterface::UpdateMaterials(Scene& scene, const flo
     for (size_t i = 0; i < (size_t)RenderStage::_TOTAL; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             for (auto& materialNode : render_graph_ptr.m_MaterialNodes) {
-                materialNode.material->m_UpdatedThisFrame = false;
+                materialNode.material.get<Material>()->m_UpdatedThisFrame = false;
             }
         }
     }
     for (size_t i = 0; i < (size_t)RenderStage::_TOTAL; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             for (auto& materialNode : render_graph_ptr.m_MaterialNodes) {
-                auto* material = materialNode.material;
+                auto* material = materialNode.material.get<Material>();
                 if (!material->m_UpdatedThisFrame) {
                     material->update(dt);
                     material->m_UpdatedThisFrame = true;
@@ -224,7 +224,7 @@ void priv::InternalScenePublicInterface::RenderDecals(Renderer& renderer, Scene&
         }
     }
 }
-void priv::InternalScenePublicInterface::RenderParticles(Renderer& renderer, Scene& scene, Viewport& viewport, Camera& camera, ShaderProgram& program) {
+void priv::InternalScenePublicInterface::RenderParticles(Renderer& renderer, Scene& scene, Viewport& viewport, Camera& camera, Handle program) {
     scene.m_i->m_ParticleSystem.render(viewport, camera, program, renderer);
 }
 void priv::InternalScenePublicInterface::AddModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage stage, ComponentModel& componentModel) {

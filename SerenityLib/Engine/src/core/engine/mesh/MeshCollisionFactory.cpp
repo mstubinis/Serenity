@@ -15,14 +15,30 @@
 
 constexpr btScalar DEFAULT_MARGIN = (btScalar)0.001;
 
-Engine::priv::MeshCollisionFactory::MeshCollisionFactory(Mesh& mesh) 
-    : m_Mesh{ mesh }
+Engine::priv::MeshCollisionFactory::MeshCollisionFactory(Mesh& mesh)
+    : m_Mesh{ &mesh }
 {
     auto& data                       = *mesh.m_VertexData;
     std::vector<glm::vec3> positions = data.getPositions();
     internal_init_convex_data(data, positions);
     internal_init_triangle_data(data, positions);
 }
+Engine::priv::MeshCollisionFactory::MeshCollisionFactory(MeshCollisionFactory&& other) noexcept 
+    : m_ConvexHullData      {std::move(other.m_ConvexHullData) }
+    , m_TriangleStaticData  { std::move(other.m_TriangleStaticData) }
+    , m_TriangleStaticShape { std::move(other.m_TriangleStaticShape) }
+    , m_TriangleInfoMap     { std::move(other.m_TriangleInfoMap) }
+    , m_Mesh                { std::exchange(other.m_Mesh, nullptr) }
+{}
+Engine::priv::MeshCollisionFactory& Engine::priv::MeshCollisionFactory::operator=(MeshCollisionFactory&& other) noexcept {
+    m_ConvexHullData      = std::move(other.m_ConvexHullData);
+    m_TriangleStaticData  = std::move(other.m_TriangleStaticData);
+    m_TriangleStaticShape = std::move(other.m_TriangleStaticShape);
+    m_TriangleInfoMap     = std::move(other.m_TriangleInfoMap);
+    m_Mesh                = std::exchange(other.m_Mesh, nullptr);
+    return *this;
+}
+
 void Engine::priv::MeshCollisionFactory::internal_init_convex_data(VertexData& data, std::vector<glm::vec3>& positions) {
     if (!m_ConvexHullData) {
         m_ConvesHullShape.reset(new btConvexHullShape());
@@ -71,7 +87,7 @@ void Engine::priv::MeshCollisionFactory::internal_init_triangle_data(VertexData&
     }
 }
 btMultiSphereShape* Engine::priv::MeshCollisionFactory::buildSphereShape(ModelInstance* modelInstance, bool isCompoundChild) {
-    auto rad = (btScalar)m_Mesh.getRadius();
+    auto rad = (btScalar)m_Mesh->getRadius();
     auto v = btVector3(0, 0, 0);
     btMultiSphereShape* sphere = new btMultiSphereShape(&v, &rad, 1);
     sphere->setMargin(DEFAULT_MARGIN);
@@ -82,7 +98,7 @@ btMultiSphereShape* Engine::priv::MeshCollisionFactory::buildSphereShape(ModelIn
     return sphere;
 }
 btBoxShape* Engine::priv::MeshCollisionFactory::buildBoxShape(ModelInstance* modelInstance, bool isCompoundChild) {
-    btBoxShape* box = new btBoxShape(Math::btVectorFromGLM(m_Mesh.getRadiusBox()));
+    btBoxShape* box = new btBoxShape(Math::btVectorFromGLM(m_Mesh->getRadiusBox()));
     box->setMargin(DEFAULT_MARGIN);
     if (isCompoundChild) {
         box->setUserPointer(modelInstance);

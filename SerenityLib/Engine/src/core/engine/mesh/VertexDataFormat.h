@@ -9,8 +9,7 @@ enum class VertexAttributeLayout : unsigned int {
     NonInterleaved, // | pos pos pos | uv  uv  uv  | norm norm norm | ... etc ... 
 };
 
-#include <core/engine/mesh/VertexAttribute.h>
-
+#include <core/engine/mesh/VertexAttributeInfo.h>
 
 //information about a vertex structure ( a list of all its attributes and the way the attributes are weaved into memory)
 struct VertexDataFormat {

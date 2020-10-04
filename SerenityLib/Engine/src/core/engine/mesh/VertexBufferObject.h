@@ -17,12 +17,31 @@ enum class BufferDataDrawType : unsigned int {
     Stream       = GL_STREAM_DRAW,
 };
 
-struct BufferObject : public Engine::NonCopyable, public Engine::NonMoveable {
+struct BufferObject {
     GLuint                buffer   = 0;
     BufferDataDrawType    drawType = BufferDataDrawType::Unassigned;
     BufferDataType        type     = BufferDataType::VertexArray;
     size_t                capacity = 0;
 
+    BufferObject() = default;
+    BufferObject(BufferDataType bufferDataType) 
+        : type { bufferDataType }
+    {}
+    BufferObject(const BufferObject& other) = delete;
+    BufferObject& operator=(const BufferObject& other) = delete;
+    BufferObject(BufferObject&& other) noexcept 
+        : buffer   { std::exchange(other.buffer, 0) }
+        , drawType { std::move(other.drawType) }
+        , type     { std::move(other.type) }
+        , capacity { std::move(other.capacity) }
+    {}
+    BufferObject& operator=(BufferObject&& other) noexcept {
+        buffer   = std::exchange(other.buffer, 0);
+        drawType = std::move(other.drawType);
+        type     = std::move(other.type);
+        capacity = std::move(other.capacity);
+        return *this;
+    }
     virtual ~BufferObject() { destroy(); }
 
     void generate() noexcept {
@@ -76,13 +95,31 @@ struct BufferObject : public Engine::NonCopyable, public Engine::NonMoveable {
     }
 };
 struct VertexBufferObject final : public BufferObject {
-    VertexBufferObject() {
-        type = BufferDataType::VertexArray;
+    VertexBufferObject() 
+        : BufferObject(BufferDataType::VertexArray)
+    {}
+    VertexBufferObject(const VertexBufferObject& other)            = delete;
+    VertexBufferObject& operator=(const VertexBufferObject& other) = delete;
+    VertexBufferObject(VertexBufferObject&& other) noexcept 
+        : BufferObject{ std::move(other) }
+    {}
+    VertexBufferObject& operator=(VertexBufferObject&& other) noexcept {
+        BufferObject::operator=(std::move(other));
+        return *this;
     }
 };
 struct ElementBufferObject final : public BufferObject {
-    ElementBufferObject() {
-        type = BufferDataType::ElementArray;
+    ElementBufferObject() 
+        : BufferObject(BufferDataType::ElementArray)
+    {}
+    ElementBufferObject(const ElementBufferObject& other)            = delete;
+    ElementBufferObject& operator=(const ElementBufferObject& other) = delete;
+    ElementBufferObject(ElementBufferObject&& other) noexcept
+        : BufferObject{ std::move(other) }
+    {}
+    ElementBufferObject& operator=(ElementBufferObject&& other) noexcept {
+        BufferObject::operator=(std::move(other));
+        return *this;
     }
 };
 

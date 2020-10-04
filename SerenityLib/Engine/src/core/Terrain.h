@@ -21,6 +21,7 @@ class  Mesh;
 
 #include <LinearMath/btScalar.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+#include <core/engine/resources/Handle.h>
 
 constexpr btScalar NULL_VERTEX = static_cast<btScalar>(-255.0);
 
@@ -77,8 +78,8 @@ class TerrainData {
 class Terrain : public Observer, public Entity {
     friend class Mesh;
     private:
-        Mesh*       m_Mesh         = nullptr;
-        TerrainData m_TerrainData;
+        Handle       m_MeshHandle   = Handle{};
+        TerrainData  m_TerrainData;
 
         bool internal_remove_quad(unsigned int indexX, unsigned int indexY);
         bool internal_remove_quad(unsigned int sectorX, unsigned int sectorY, unsigned int indexX, unsigned int indexY);

@@ -39,7 +39,7 @@ namespace Engine{
     void stop();
     bool setFullscreen(bool isFullscreen);
     bool setFullscreenWindowed(bool isFullscreen);
-    namespace priv{
+    namespace priv {
         class EngineCore final {
             friend class Window;
             friend class Engine::priv::WindowData;

@@ -21,11 +21,11 @@ bool ParticleEmissionProperties::addMaterial(Material& material) {
     return true;
 }
 bool ParticleEmissionProperties::addMaterial(Handle materialHandle) {
-    return ParticleEmissionProperties::addMaterial(*Engine::Resources::getMaterial(materialHandle));
+    return ParticleEmissionProperties::addMaterial(*Engine::Resources::getResource<Material>(materialHandle));
 }
 const Material& ParticleEmissionProperties::getParticleMaterialRandom() const noexcept {
-    return (m_ParticleMaterials.size() == 0) ? *Material::Checkers : *m_ParticleMaterials[rand() % m_ParticleMaterials.size()];
+    return (m_ParticleMaterials.size() == 0) ? *Material::Checkers.get<Material>() : *m_ParticleMaterials[rand() % m_ParticleMaterials.size()];
 }
 const Material& ParticleEmissionProperties::getParticleMaterial(size_t index) const noexcept {
-    return (m_ParticleMaterials.size() == 0) ? *Material::Checkers : *m_ParticleMaterials[index];
+    return (m_ParticleMaterials.size() == 0) ? *Material::Checkers.get<Material>() : *m_ParticleMaterials[index];
 }

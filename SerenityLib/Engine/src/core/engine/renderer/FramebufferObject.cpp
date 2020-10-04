@@ -150,7 +150,7 @@ priv::FramebufferTexture* priv::FramebufferObject::attatchTexture(Texture* textu
     FramebufferTexture* framebufferTexture = NEW FramebufferTexture(*this, attatchment, *texture);
     for (size_t i = 0; i < m_FBO.size(); ++i) {
         Engine::Renderer::bindFBO(m_FBO[i]);
-        GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, framebufferTexture->attatchment(), framebufferTexture->m_Texture->type(), framebufferTexture->m_Texture->address(), 0));
+        GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, framebufferTexture->attatchment(), framebufferTexture->m_Texture->getTextureType().toGLType(), framebufferTexture->m_Texture->address(), 0));
     }
     m_Attatchments.emplace((unsigned int)attatchment, framebufferTexture);
     Engine::Renderer::unbindFBO();

@@ -5,6 +5,9 @@
 namespace sf {
     class Image;
 };
+namespace Engine::priv {
+    class ResourceManager;
+};
 
 class  Handle;
 struct EngineOptions;
@@ -23,36 +26,44 @@ class  ShaderProgram;
 
 #include <core/engine/renderer/GLImageConstants.h>
 #include <core/engine/shaders/ShaderIncludes.h>
-#include <core/engine/resources/ResourcePool.h>
+#include <core/engine/resources/ResourceModule.h>
 
 namespace Engine::priv {
     class ResourceManager final{
         friend class  Scene;
+        public:
+            static ResourceManager* RESOURCE_MANAGER;
         private:
             unsigned int AddScene(Scene& scene);
         public:
+            ResourceModule m_ResourceModule;
+
             //http://gamesfromwithin.com/managing-data-relationships
-            ResourcePool<Resource>                m_ResourcePool;
+            //ResourcePool<Resource>                m_ResourcePool;
+
             std::vector<std::unique_ptr<Window>>  m_Windows;
             std::vector<std::unique_ptr<Scene>>   m_Scenes;
             std::vector<Scene*>                   m_ScenesToBeDeleted;
             Scene*                                m_CurrentScene = nullptr;
         public:
             ResourceManager(const EngineOptions& engineOptions);
-            ~ResourceManager();
-
-            void cleanup();
 
             void onPostUpdate();
 
             void init(const EngineOptions& engineOptions);
- 
-            Handle _addTexture(Texture* texture);
+
+            template<typename TResource, typename ... ARGS>
+            Handle addResource(ARGS&&... args) {
+                return m_ResourceModule.emplace<TResource>(std::forward<ARGS>(args)...);
+            }
+
+
             Scene& _getSceneByID(std::uint32_t sceneID);
 
             inline CONSTEXPR std::vector<std::unique_ptr<Scene>>& scenes() noexcept { return m_Scenes; }
-
-            template<typename T> T* HasResource(std::string_view resource_name) noexcept {
+            /*
+            template<typename T> 
+            T* HasResource(std::string_view resource_name) noexcept {
                 for (size_t i = 0; i < m_ResourcePool.size(); ++i) {
                     Resource* r = m_ResourcePool.getAsFast<Resource>((unsigned int)i + 1U);
                     if (r) {
@@ -64,8 +75,11 @@ namespace Engine::priv {
                 }
                 return nullptr;
             }
-
-            template<typename T> std::list<T*> GetAllResourcesOfType() noexcept {
+            */
+            template<typename T> 
+            std::list<T*> GetAllResourcesOfType() noexcept {
+                return m_ResourceModule.getAllResourcesOfType<T>();
+                /*
                 std::list<T*> ret;
                 for (size_t i = 0; i < m_ResourcePool.size(); ++i) {
                     Resource* r = m_ResourcePool.getAsFast<Resource>((unsigned int)i + 1U);
@@ -77,6 +91,7 @@ namespace Engine::priv {
                     }
                 }
                 return ret;
+                */
             }
 
 
@@ -101,37 +116,6 @@ namespace Engine::Resources {
     bool deleteScene(std::string_view sceneName);
     bool deleteScene(Scene& scene);
 
-    void     getShader(Handle inHandle, Shader*& outPtr);                  
-    Shader*  getShader(Handle inHandle);
-
-    void       getSoundData(Handle inHandle, SoundData*& outPtr);            
-    SoundData* getSoundData(Handle inHandle);
-
-    void     getCamera(Handle inHandle, Camera*& outPtr);                  
-    Camera*  getCamera(Handle inHandle);
-
-    void  getFont(Handle inHandle, Font*& outPtr);                      
-    Font* getFont(Handle inHandle);
-    Font* getFont(std::string_view name);
-
-    void     getTexture(Handle inHandle, Texture*& outPtr);
-    Texture* getTexture(Handle inHandle);
-    Texture* getTexture(std::string_view name);
-
-    void  getMesh(Handle inHandle, Mesh*& outPtr);
-    Mesh* getMesh(Handle inHandle);
-    Mesh* getMesh(std::string_view name);
-
-    void      getMaterial(Handle inHandle, Material*& outPtr);
-    Material* getMaterial(Handle inHandle);
-    Material* getMaterial(std::string_view name);
-
-    void           getShaderProgram(Handle inHandle, ShaderProgram*& outPtr);
-    ShaderProgram* getShaderProgram(Handle inHandle);
-    ShaderProgram* getShaderProgram(std::string_view name);
-
-    Handle addFont(const std::string& filename, int height, int width = 0, float line_height = 8.0f);
-
     std::vector<Handle> loadMesh(
         const std::string& fileOrData, 
         float threshhold = 0.005f
@@ -141,6 +125,24 @@ namespace Engine::Resources {
         float threshhold = 0.005f,
         std::function<void()> callback = []() {}
     );
+
+    template<typename TResource>
+    std::pair<TResource*, Handle> getResource(std::string_view name) noexcept {
+        return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<TResource>(name);
+    }
+    template<typename TResource>
+    void getResource(Handle inHandle, TResource*& outPtr) noexcept {
+        outPtr = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<TResource>(inHandle);
+    }
+    template<typename TResource>
+    TResource* getResource(Handle inHandle) noexcept {
+        return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<TResource>(inHandle);
+    }
+
+    template<typename TResource, typename ... ARGS>
+    Handle addResource(ARGS&&... args) {
+        return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.emplace<TResource>(std::forward<ARGS>(args)...);
+    }
 
     Handle loadTexture(
         const std::string& file,
@@ -189,18 +191,16 @@ namespace Engine::Resources {
     );
     Handle loadMaterial(
         const std::string& name,
-        Texture* diffuse,
-        Texture* normal     = nullptr,
-        Texture* glow       = nullptr,
-        Texture* specular   = nullptr,
-        Texture* ao         = nullptr,
-        Texture* metalness  = nullptr,
-        Texture* smoothness = nullptr
+        Handle diffuse,
+        Handle normal     = Handle{},
+        Handle glow       = Handle{},
+        Handle specular   = Handle{},
+        Handle ao         = Handle{},
+        Handle metalness  = Handle{},
+        Handle smoothness = Handle{}
     );
 
     Handle addShader(const std::string& shaderFileOrData, ShaderType shaderType, bool fromFile = true);
-    Handle addSoundData(const std::string& file);
-    Handle addShaderProgram(const std::string& name, Shader& vertexShader, Shader& fragmentShader);
     Handle addShaderProgram(const std::string& name, Handle vertexShader, Handle fragmentShader);
 };
 namespace Engine::Data{

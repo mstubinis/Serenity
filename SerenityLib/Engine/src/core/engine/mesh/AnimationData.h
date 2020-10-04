@@ -18,10 +18,10 @@ namespace Engine::priv {
         friend class  Mesh;
         friend class  SMSH_File;
         private:
+            std::unordered_map<std::string, AnimationChannel>  m_KeyframeData;
             Mesh*                                              m_Mesh = nullptr;
             float                                              m_TicksPerSecond  = 0.0f;
             float                                              m_DurationInTicks = 0.0f;
-            std::unordered_map<std::string, AnimationChannel>  m_KeyframeData;
 
             void internal_interpolate_vec3(glm::vec3& Out, float AnimationTime, const std::vector<Engine::priv::Vector3Key>& keys, std::function<size_t()> call);
 

@@ -23,6 +23,7 @@ namespace Engine::priv {
     class  ModelInstanceAnimation;
     class  Renderer;
 };
+constexpr float MESH_DEFAULT_THRESHOLD = 0.0005f;
 
 #include <core/engine/mesh/VertexData.h>
 #include <core/engine/mesh/MeshIncludes.h>
@@ -37,7 +38,7 @@ namespace Engine::priv {
 namespace Engine::priv{
     class InternalMeshPublicInterface final {
         private:
-            static btCollisionShape* internal_build_collision(Mesh*, ModelInstance*, CollisionType, bool isCompoundChild) noexcept;
+            static btCollisionShape* internal_build_collision(Handle meshHandle, ModelInstance*, CollisionType, bool isCompoundChild) noexcept;
         public:
             static void InitBlankMesh(Mesh&);
             static void LoadGPU(Mesh&);
@@ -45,17 +46,18 @@ namespace Engine::priv{
             static void UnloadGPU(Mesh&);
             static bool SupportsInstancing();
             static btCollisionShape* BuildCollision(ModelInstance*, CollisionType, bool isCompoundChild = false);
-            static btCollisionShape* BuildCollision(Mesh*, CollisionType, bool isCompoundChild = false);
+            static btCollisionShape* BuildCollision(Handle meshHandle, CollisionType, bool isCompoundChild = false);
 
-            static void FinalizeVertexData(Mesh&, MeshImportedData& data);
-            static void TriangulateComponentIndices(Mesh&, MeshImportedData& data, std::vector<std::vector<uint>>& indices, unsigned char flags);
-            static void CalculateRadius(Mesh&);
+            static void FinalizeVertexData(Handle meshHandle, MeshImportedData& data);
+            static void FinalizeVertexData(Mesh& mesh, MeshImportedData& data);
+
+            static void TriangulateComponentIndices(MeshImportedData& data, std::vector<std::vector<uint>>& indices, unsigned char flags);
+
+            static void CalculateRadius(Handle meshHandle);
+            static void CalculateRadius(Mesh& mesh);
     };
 };
-
-constexpr float MESH_DEFAULT_THRESHOLD = 0.0005f;
-
-class Mesh final: public Resource, public Observer, public Engine::NonCopyable, public Engine::NonMoveable {
+class Mesh final: public Resource, public Observer {
     friend class  Engine::priv::InternalMeshPublicInterface;
     friend struct Engine::priv::InternalMeshRequestPublicInterface;
     friend struct Engine::priv::DefaultMeshBindFunctor;
@@ -81,31 +83,36 @@ class Mesh final: public Resource, public Observer, public Engine::NonCopyable, 
         Engine::priv::MeshCollisionFactory*    m_CollisionFactory    = nullptr;
         Engine::priv::MeshSkeleton*            m_Skeleton            = nullptr;
         std::string                            m_File                = "";
-        glm::vec3                              m_radiusBox           = glm::vec3(0.0f);
-        float                                  m_radius              = 0.0f;
+        glm::vec3                              m_RadiusBox           = glm::vec3(0.0f);
+        float                                  m_Radius              = 0.0f;
         float                                  m_Threshold           = MESH_DEFAULT_THRESHOLD;
 
         void internal_recalc_indices_from_terrain(const Terrain& terrain);
         void internal_build_from_terrain(const Terrain& terrain);
 
-        Mesh();
-        Mesh(const std::string& name, const Terrain& terrain, float threshold);
     public:
+        Mesh();
         Mesh(VertexData*, const std::string& name, float threshold = MESH_DEFAULT_THRESHOLD);
         Mesh(const std::string& name, float width, float height, float threshold); //plane
         Mesh(const std::string& fileOrData, float threshold = MESH_DEFAULT_THRESHOLD); //file or data
+        Mesh(const std::string& name, const Terrain& terrain, float threshold);
+
+        Mesh(const Mesh& other)                 = delete;
+        Mesh& operator=(const Mesh& other)      = delete;
+        Mesh(Mesh&& other) noexcept;
+        Mesh& operator=(Mesh&& other) noexcept;
         ~Mesh();
 
-        void setCustomBindFunctor(bind_func&& functor) { m_CustomBindFunctor = std::move(functor); }
-        void setCustomUnbindFunctor(unbind_func&& functor) { m_CustomUnbindFunctor = std::move(functor); }
+        inline void setCustomBindFunctor(bind_func&& functor) noexcept { m_CustomBindFunctor = std::move(functor); }
+        inline void setCustomUnbindFunctor(unbind_func&& functor) noexcept { m_CustomUnbindFunctor = std::move(functor); }
 
         inline bool operator==(bool rhs) const { return (rhs) ? (bool)m_VertexData : (bool)!m_VertexData; }
         inline bool operator!=(bool rhs) const { return !operator==(rhs); }
         inline operator bool() const { return (bool)m_VertexData; }
 
         std::unordered_map<std::string, Engine::priv::AnimationData>& animationData();
-        inline CONSTEXPR const glm::vec3& getRadiusBox() const noexcept { return m_radiusBox; }
-        inline CONSTEXPR float getRadius() const noexcept { return m_radius; }
+        inline CONSTEXPR const glm::vec3& getRadiusBox() const noexcept { return m_RadiusBox; }
+        inline CONSTEXPR float getRadius() const noexcept { return m_Radius; }
         inline CONSTEXPR const VertexData& getVertexData() const noexcept { return *m_VertexData; }
         inline CONSTEXPR const Engine::priv::MeshSkeleton* getSkeleton() const noexcept { return m_Skeleton; }
 

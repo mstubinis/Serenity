@@ -44,19 +44,19 @@ void Engine::priv::GBuffer::init(unsigned int width, unsigned int height){
     }
     //this should be better performance wise, but clean up this code a bit
     auto& depthTexture = m_FramebufferTextures[GBufferType::Depth]->texture();
-    Engine::Renderer::bindTextureForModification(depthTexture.type(), depthTexture.address());
+    Engine::Renderer::bindTextureForModification(depthTexture.getTextureType(), depthTexture.address());
     depthTexture.setFilter(TextureFilter::Nearest);
 
     auto& diffuseTexture = m_FramebufferTextures[GBufferType::Diffuse]->texture();
-    Engine::Renderer::bindTextureForModification(diffuseTexture.type(), diffuseTexture.address());
+    Engine::Renderer::bindTextureForModification(diffuseTexture.getTextureType(), diffuseTexture.address());
     diffuseTexture.setFilter(TextureFilter::Nearest);
 
     auto& normalTexture = m_FramebufferTextures[GBufferType::Normal]->texture();
-    Engine::Renderer::bindTextureForModification(normalTexture.type(), normalTexture.address());
+    Engine::Renderer::bindTextureForModification(normalTexture.getTextureType(), normalTexture.address());
     normalTexture.setFilter(TextureFilter::Nearest);
 
     auto& godRaysTexture = m_FramebufferTextures[GBufferType::GodRays]->texture();
-    Engine::Renderer::bindTextureForModification(godRaysTexture.type(), godRaysTexture.address());
+    Engine::Renderer::bindTextureForModification(godRaysTexture.getTextureType(), godRaysTexture.address());
     godRaysTexture.setFilter(TextureFilter::Nearest);
 }
 void Engine::priv::GBuffer::internalDestruct() {

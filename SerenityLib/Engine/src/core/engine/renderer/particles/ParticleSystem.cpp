@@ -125,14 +125,14 @@ void Engine::priv::ParticleSystem::update(const float dt, Camera& camera) {
     internal_update_particles(dt, camera);
 }
 
-void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, ShaderProgram& program, Renderer& renderer) {
+void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Handle program, Renderer& renderer) {
     const auto particles_size = m_Particles.size();
     if (particles_size == 0 || !viewport.getRenderFlags().has(ViewportRenderingFlag::Particles)) {
         return;
     }
 
     //now cull, sort, and populate their render lists
-    auto& planeMesh = priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh();
+    auto& planeMesh = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh().get<Mesh>();
     ParticlesDOD.clear();
 
     MaterialToIndex.clear();

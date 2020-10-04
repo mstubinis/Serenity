@@ -7,12 +7,12 @@ Cursor::Cursor() {
     bool success = m_SFMLCursor.loadFromSystem(sf::Cursor::Type::Arrow);
 }
 Cursor::Cursor(const std::string& textureFile) {
-    Texture* texture  = Engine::Resources::getTexture(textureFile);
-    if (!texture) {
-        Handle handle = Engine::Resources::loadTexture(textureFile);
-        texture       = handle.get<Texture>();
+    auto texture  = Engine::Resources::getResource<Texture>(textureFile);
+    if (!texture.first) {
+        texture.second = Engine::Resources::loadTexture(textureFile);
+        texture.first  = texture.second.get<Texture>();
     }
-    bool success      = loadFromPixels(texture, glm::uvec2(0, 0));
+    bool success       = loadFromPixels(texture.first, glm::uvec2(0, 0));
 }
 Cursor::~Cursor() {
 

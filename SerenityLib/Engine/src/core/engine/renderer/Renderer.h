@@ -24,7 +24,7 @@ namespace Engine::priv {
 #include <core/engine/renderer/opengl/Extensions.h>
 #include <core/engine/fonts/FontIncludes.h>
 #include <core/engine/renderer/pipelines/IRenderingPipeline.h>
-
+#include <core/engine/textures/TextureIncludes.h>
 #include <glm/gtc/type_ptr.hpp>
 
 namespace Engine{
@@ -72,7 +72,7 @@ namespace priv{
             bool unbind(Material* material) const;
 
             float _getGIPackedData();
-            void _genPBREnvMapData(Texture&, Texture&, Texture&, uint, uint);
+            void _genPBREnvMapData(Texture&, Handle convolutionTexture, Handle preEnvTexture, uint, uint);
     };
 };
 namespace Renderer{
@@ -136,10 +136,10 @@ namespace Renderer{
     bool GLEnablei(GLenum capability, GLuint index);
     bool GLDisablei(GLenum capability, GLuint index);
 
-    bool bindTextureForModification(GLuint textureType, GLuint textureObject);
+    bool bindTextureForModification(TextureType textureType, GLuint textureObject);
 
     bool bindVAO(GLuint vaoObject);
-    void genAndBindTexture(GLuint textureType, GLuint& textureObject);
+    void genAndBindTexture(TextureType textureType, GLuint& textureObject);
     void genAndBindVAO(GLuint& vaoObject);
     bool deleteVAO(GLuint& vaoObject);
     bool colorMask(bool r, bool g, bool b, bool a);

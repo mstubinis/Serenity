@@ -20,49 +20,50 @@ namespace Engine::priv {
 #include <core/engine/utils/Utils.h>
 #include <core/engine/renderer/RendererIncludes.h>
 #include <core/engine/model/ModelInstanceHandle.h>
+#include <core/engine/resources/Handle.h>
 
 namespace Engine::priv {
     class MeshNode final {
         friend class  RenderGraph;
         friend struct InternalScenePublicInterface;
         private:
-            Mesh*                             mesh = nullptr;
-            std::vector<ModelInstance*>       instanceNodes;
+            Handle                       mesh = Handle{};
+            std::vector<ModelInstance*>  instanceNodes;
 
             MeshNode() = delete;
         public:
-            MeshNode(Mesh& mesh_)
-                : mesh{ &mesh_ }
+            MeshNode(Handle mesh_)
+                : mesh{ mesh_ }
             {}
     };
     class MaterialNode final {
         friend class  RenderGraph;
         friend struct InternalScenePublicInterface;
         private:
-            Material*                material = nullptr;
-            std::vector<MeshNode>    meshNodes;
+            Handle                 material = Handle{};
+            std::vector<MeshNode>  meshNodes;
 
             MaterialNode() = delete;
         public:
-            MaterialNode(Material& material_) 
-                : material{ &material_ }
+            MaterialNode(Handle material_)
+                : material{ material_ }
             {}
     };
     class RenderGraph final {
         friend class  Scene;
         friend struct Engine::priv::InternalScenePublicInterface;
         private:
-            ShaderProgram*                    m_ShaderProgram = nullptr;
-            std::vector<MaterialNode>         m_MaterialNodes;
-            std::vector<ModelInstance*>       m_InstancesTotal;
+            Handle                        m_ShaderProgram = Handle{};
+            std::vector<MaterialNode>     m_MaterialNodes;
+            std::vector<ModelInstance*>   m_InstancesTotal;
 
             RenderGraph() = delete;
 
             void addModelInstanceToPipeline(ModelInstance& modelInstance, ComponentModel&);
             void removeModelInstanceFromPipeline(ModelInstance& modelInstance);
         public:
-            RenderGraph(ShaderProgram& shaderProgram)
-                : m_ShaderProgram{ &shaderProgram }
+            RenderGraph(Handle shaderProgram)
+                : m_ShaderProgram{ shaderProgram }
             {}
 
             RenderGraph(const RenderGraph& other) = delete;

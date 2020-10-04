@@ -14,31 +14,25 @@ MaterialRequest::MaterialRequest(const std::string& name, const std::string& dif
     : m_Callback{ std::move(callback) }
 {
     m_Part.m_Name = name;
-    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( diffuse,    false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_2D ));
-    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( normal,     false, ImageInternalFormat::RGBA8,        GL_TEXTURE_2D ));
-    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( glow,       false, ImageInternalFormat::R8,           GL_TEXTURE_2D ));
-    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( specular,   false, ImageInternalFormat::R8,           GL_TEXTURE_2D ));
-    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( ao,         false, ImageInternalFormat::R8,           GL_TEXTURE_2D ));
-    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( metalness,  false, ImageInternalFormat::R8,           GL_TEXTURE_2D ));
-    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( smoothness, false, ImageInternalFormat::R8,           GL_TEXTURE_2D ));
+    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( diffuse,    false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D ));
+    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( normal,     false, ImageInternalFormat::RGBA8,        TextureType::Texture2D));
+    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( glow,       false, ImageInternalFormat::R8,           TextureType::Texture2D));
+    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( specular,   false, ImageInternalFormat::R8,           TextureType::Texture2D));
+    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( ao,         false, ImageInternalFormat::R8,           TextureType::Texture2D));
+    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( metalness,  false, ImageInternalFormat::R8,           TextureType::Texture2D));
+    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( smoothness, false, ImageInternalFormat::R8,           TextureType::Texture2D));
 }
-MaterialRequest::MaterialRequest(const std::string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness, std::function<void()>&& callback) 
+MaterialRequest::MaterialRequest(const std::string& name, Handle diffuse, Handle normal, Handle glow, Handle specular, Handle ao, Handle metalness, Handle smoothness, std::function<void()>&& callback)
     : m_Callback{ std::move(callback) }
 {
-    m_Part.m_Name     = name;
-    m_Part.m_Material = NEW Material(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
-    m_Part.m_Handle   = Core::m_Engine->m_ResourceManager.m_ResourcePool.add(m_Part.m_Material, (unsigned int)ResourceType::Material);
+    m_Part.m_Name   = name;
+    m_Part.m_Handle = Engine::Resources::addResource<Material>(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
 }
-
-MaterialRequest::~MaterialRequest() {
-
-}
-
 void MaterialRequest::request(bool inAsync) {
     if (inAsync && Engine::hardware_concurrency() > 1) {
         m_Async = true;
         for (auto& textureRequest : m_Part.m_TextureRequests) {
-            textureRequest->part.async = true;
+            textureRequest->m_Part.async = true;
         }
     }else{
         m_Async = false;
@@ -47,14 +41,13 @@ void MaterialRequest::request(bool inAsync) {
 }
 
 void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {
-    request.m_Part.m_Material = NEW Material();
-    request.m_Part.m_Material->setName(request.m_Part.m_Name);
-    request.m_Part.m_Handle = Core::m_Engine->m_ResourceManager.m_ResourcePool.add(request.m_Part.m_Material, (unsigned int)ResourceType::Material);
-
+    request.m_Part.m_Handle = Engine::Resources::addResource<Material>();
+    request.m_Part.m_Handle.get<Material>()->setName(request.m_Part.m_Name);
+        
     auto size = request.m_Part.m_TextureRequests.size();
     for (size_t i = 0; i < size; ++i) {
-        if (request.m_Part.m_TextureRequests[i]->fileExists) {
-            auto& component = request.m_Part.m_Material->addComponent((MaterialComponentType)i, "DEFAULT");
+        if (request.m_Part.m_TextureRequests[i]->m_FileData.m_FileExists) {
+            auto& component = request.m_Part.m_Handle.get<Material>()->addComponent((MaterialComponentType)i, "DEFAULT");
         }
     }
 
@@ -80,16 +73,16 @@ void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {
     }
 }
 void InternalMaterialRequestPublicInterface::LoadCPU(MaterialRequest& request) {
-    InternalMaterialPublicInterface::LoadCPU(*request.m_Part.m_Material);
+    InternalMaterialPublicInterface::LoadCPU(*request.m_Part.m_Handle.get<Material>());
 }
 void InternalMaterialRequestPublicInterface::LoadGPU(MaterialRequest& request) {
     const auto& texture_requests = request.m_Part.m_TextureRequests;
     unsigned int count = 0;
     for (const auto& req : texture_requests) {
-        if (req->fileExists) {
-            request.m_Part.m_Material->getComponent(count).layer(0).setTexture(req->file);
+        if (req->m_FileData.m_FileExists) {
+            request.m_Part.m_Handle.get<Material>()->getComponent(count).layer(0).setTexture(req->m_Part.fileOrTextureName);
             ++count;
         }
     }
-    InternalMaterialPublicInterface::LoadGPU(*request.m_Part.m_Material);
+    InternalMaterialPublicInterface::LoadGPU(*request.m_Part.m_Handle.get<Material>());
 }

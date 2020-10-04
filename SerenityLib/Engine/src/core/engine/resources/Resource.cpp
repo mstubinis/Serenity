@@ -4,6 +4,29 @@
 #include <core/engine/system/Engine.h>
 #include <core/engine/events/Event.h>
 
+Resource::Resource(ResourceType type)
+    : m_ResourceType{ type }
+{}
+Resource::Resource(ResourceType type, const std::string& name)
+    : Resource{ type }
+{
+    m_Name = name;
+}
+
+Resource::Resource(Resource&& other) noexcept 
+    : m_IsLoaded     { std::exchange(other.m_IsLoaded, false) }
+    , m_Name         { std::move(other.m_Name) }
+    , m_UsageCount   { std::exchange(other.m_UsageCount, 0) }
+    , m_ResourceType { std::move(other.m_ResourceType) }
+{}
+Resource& Resource::operator=(Resource&& other) noexcept {
+    m_IsLoaded     = std::exchange(other.m_IsLoaded, false);
+    m_Name         = std::move(other.m_Name);
+    m_UsageCount   = std::exchange(other.m_UsageCount, 0);
+    m_ResourceType = std::move(other.m_ResourceType);
+    return *this;
+}
+
 void Resource::load() {
     if(!m_IsLoaded){
         m_IsLoaded = true;

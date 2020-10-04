@@ -222,9 +222,6 @@
     <Filter Include="Header Files\Engine\Core\Containers">
       <UniqueIdentifier>{7e0e9cd0-d69e-4a0b-a72c-145c62587007}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Engine\Core\Containers">
-      <UniqueIdentifier>{2d0ac183-7fb4-4254-9fab-37aa4c59245d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Engine\Core\Renderer\interfaces">
       <UniqueIdentifier>{6786444b-e1dd-490b-b433-2c392bcdc8e6}</UniqueIdentifier>
     </Filter>
@@ -279,6 +276,9 @@
     <Filter Include="Header Files\Engine\Core\Types">
       <UniqueIdentifier>{414cd6a5-0362-4283-91ff-a221c1670432}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Core\Tests">
+      <UniqueIdentifier>{e53ff94b-16bc-413d-a85c-4ab915872dfa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBody.h">
@@ -315,9 +315,6 @@
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\ecs\ECSEntityPool.h">
-      <Filter>Header Files\Engine\Core\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\ecs\ECSRegistry.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\ecs\ECSSystem.h">
@@ -363,9 +360,6 @@
       <Filter>Header Files\Engine\Core\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\mesh\Skeleton.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\mesh\VertexAttribute.h">
       <Filter>Header Files\Engine\Core\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\mesh\VertexBufferObject.h">
@@ -908,6 +902,21 @@
     <ClInclude Include="Engine\src\core\engine\networking\server\ServerClientsContainer.h">
       <Filter>Header Files\Engine\Core\Networking\Server</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\resources\ResourceModule.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\containers\TypeRegistry.h">
+      <Filter>Header Files\Engine\Core\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\resources\ResourceVector.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\resources\IResourceVector.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\mesh\VertexAttributeInfo.h">
+      <Filter>Header Files\Engine\Core\Mesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -933,9 +942,6 @@
     </ClCompile>
     <ClCompile Include="Engine\src\ecs\ComponentName.cpp">
       <Filter>Source Files\Engine\Core\ECS\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\ecs\ECSRegistry.cpp">
-      <Filter>Source Files\Engine\Core\ECS</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\ecs\Entity.cpp">
       <Filter>Source Files\Engine\Core\ECS</Filter>
@@ -1368,6 +1374,18 @@
     </ClCompile>
     <ClCompile Include="Engine\src\ecs\ECS.cpp">
       <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\GLImageConstants.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\tests\TestGLTypes.cpp">
+      <Filter>Source Files\Engine\Core\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\tests\main.cpp">
+      <Filter>Source Files\Engine\Core\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\tests\TestTextureTypes.cpp">
+      <Filter>Source Files\Engine\Core\Tests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

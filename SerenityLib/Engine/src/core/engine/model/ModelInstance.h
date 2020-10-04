@@ -29,6 +29,7 @@ namespace Engine::priv {
 #include <core/engine/scene/ViewportIncludes.h>
 #include <core/engine/events/Observer.h>
 #include <core/engine/renderer/RendererIncludes.h>
+#include <core/engine/resources/Handle.h>
 
 class ModelInstance final : public Engine::UserPointer, public Observer {
     friend struct Engine::priv::DefaultModelInstanceBindFunctor;
@@ -48,39 +49,40 @@ class ModelInstance final : public Engine::UserPointer, public Observer {
         bind_function                                        m_CustomBindFunctor   = [](ModelInstance*, const Engine::priv::Renderer*) {};
         unbind_function                                      m_CustomUnbindFunctor = [](ModelInstance*, const Engine::priv::Renderer*) {};
 
-        ModelDrawingMode                                     m_DrawingMode       = ModelDrawingMode::Triangles;
+        ModelDrawingMode                                     m_DrawingMode         = ModelDrawingMode::Triangles;
         Engine::Flag<unsigned int>                           m_ViewportFlag;     //determine what viewports this can be seen in
         Engine::priv::ModelInstanceAnimationVector           m_AnimationVector;
-        Entity                                               m_Parent            = Entity();
-        ShaderProgram*                                       m_ShaderProgram     = nullptr;
-        Mesh*                                                m_Mesh              = nullptr;
-        Material*                                            m_Material          = nullptr;
-        RenderStage                                          m_Stage             = RenderStage::GeometryOpaque;
-        glm::vec3                                            m_Position          = glm::vec3(0.0f, 0.0f, 0.0f);
-        glm::vec3                                            m_Scale             = glm::vec3(1.0f, 1.0f, 1.0f);
-        Engine::color_vector_4                               m_GodRaysColor      = Engine::color_vector_4(0_uc);
-        glm::quat                                            m_Orientation       = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-        glm::mat4                                            m_ModelMatrix       = glm::mat4(1.0f);
-        Engine::color_vector_4                               m_Color             = Engine::color_vector_4(255_uc);
-        bool                                                 m_PassedRenderCheck = false;
-        bool                                                 m_Visible           = true;
-        bool                                                 m_ForceRender       = false;
-        float                                                m_Radius            = 0.0f;
-        size_t                                               m_Index             = 0U;
+        Entity                                               m_Parent              = Entity();
+        Handle                                               m_ShaderProgramHandle = Handle{};
+        Handle                                               m_MeshHandle          = Handle{};
+        Handle                                               m_MaterialHandle      = Handle{};
+        RenderStage                                          m_Stage               = RenderStage::GeometryOpaque;
+        glm::vec3                                            m_Position            = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3                                            m_Scale               = glm::vec3(1.0f, 1.0f, 1.0f);
+        Engine::color_vector_4                               m_GodRaysColor        = Engine::color_vector_4(0_uc);
+        glm::quat                                            m_Orientation         = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+        glm::mat4                                            m_ModelMatrix         = glm::mat4(1.0f);
+        Engine::color_vector_4                               m_Color               = Engine::color_vector_4(255_uc);
+        bool                                                 m_PassedRenderCheck   = false;
+        bool                                                 m_Visible             = true;
+        bool                                                 m_ForceRender         = false;
+        float                                                m_Radius              = 0.0f;
+        size_t                                               m_Index               = 0U;
 
         float internal_calculate_radius();
-        void internal_init(Mesh* mesh, Material* mat, ShaderProgram* program);
-        void internal_update_model_matrix();
+        void internal_init(Handle mesh, Handle mat, Handle program);
+        void internal_update_model_matrix(bool recalcRadius = true);
 
         void bind(const Engine::priv::Renderer& renderer);
         void unbind(const Engine::priv::Renderer& renderer);
 
         ModelInstance() = delete;
     public:
-        ModelInstance(Entity, Mesh*,       Material*,  ShaderProgram* = 0);
-        ModelInstance(Entity, Handle mesh, Handle mat, ShaderProgram* = 0);
-        ModelInstance(Entity, Mesh*,       Handle mat, ShaderProgram* = 0);
-        ModelInstance(Entity, Handle mesh, Material*,  ShaderProgram* = 0);
+        ModelInstance(Entity, Handle mesh, Handle material, Handle shaderProgram = Handle{});
+        //ModelInstance(Entity, Mesh*,       Material*,  ShaderProgram* = 0);
+        //ModelInstance(Entity, Handle mesh, Handle mat, ShaderProgram* = 0);
+        //ModelInstance(Entity, Mesh*,       Handle mat, ShaderProgram* = 0);
+        //ModelInstance(Entity, Handle mesh, Material*,  ShaderProgram* = 0);
 
         ModelInstance(const ModelInstance& other)                = delete;
         ModelInstance& operator=(const ModelInstance& other)     = delete;
@@ -130,9 +132,9 @@ class ModelInstance final : public Engine::UserPointer, public Observer {
         inline CONSTEXPR const glm::vec3& getScale() const noexcept { return m_Scale; }
         inline CONSTEXPR const glm::vec3& position() const noexcept { return m_Position; }
         inline CONSTEXPR const glm::quat& orientation() const noexcept { return m_Orientation; }
-        inline CONSTEXPR ShaderProgram* shaderProgram() const noexcept { return m_ShaderProgram; }
-        inline CONSTEXPR Mesh* mesh() const noexcept { return m_Mesh; }
-        inline CONSTEXPR Material* material() const noexcept { return m_Material; }
+        inline CONSTEXPR Handle shaderProgram() const noexcept { return m_ShaderProgramHandle; }
+        inline CONSTEXPR Handle mesh() const noexcept { return m_MeshHandle; }
+        inline CONSTEXPR Handle material() const noexcept { return m_MaterialHandle; }
         inline CONSTEXPR RenderStage stage() const noexcept { return m_Stage; }
         inline void show(bool shown = true) noexcept { m_Visible = shown; }
         inline void hide() noexcept { m_Visible = false; }
@@ -154,13 +156,13 @@ class ModelInstance final : public Engine::UserPointer, public Observer {
         void setGodRaysColor(const glm::vec3& color);
 
         void setShaderProgram(Handle shaderPHandle, ComponentModel&);
-        void setShaderProgram(ShaderProgram*, ComponentModel&);
+        //void setShaderProgram(ShaderProgram*, ComponentModel&);
 
         void setMesh(Handle meshHandle, ComponentModel&);
-        void setMesh(Mesh*, ComponentModel&);
+        //void setMesh(Mesh*, ComponentModel&);
 
         void setMaterial(Handle materialHandle, ComponentModel&);
-        void setMaterial(Material*, ComponentModel&);
+        //void setMaterial(Material*, ComponentModel&);
 
         void setPosition(float x, float y, float z);
         void setPosition(const glm::vec3& position);

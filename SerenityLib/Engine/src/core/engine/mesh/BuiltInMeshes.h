@@ -2,7 +2,7 @@
 #ifndef ENGINE_MESH_BUILT_IN_MESHES_H
 #define ENGINE_MESH_BUILT_IN_MESHES_H
 
-class  Mesh;
+#include <core/engine/resources/Handle.h>
 
 namespace Engine::priv {
     class BuiltInMeshses final {
@@ -19,7 +19,7 @@ namespace Engine::priv {
         _TOTAL};
 
         private:
-            std::array<Mesh*, (size_t)BuiltInMeshEnum::_TOTAL> m_BuiltInMeshes = { { nullptr} };
+            std::array<Handle, (size_t)BuiltInMeshEnum::_TOTAL> m_BuiltInMeshes;
 
             bool build_point_light_mesh();
             bool build_spot_light_mesh();
@@ -32,21 +32,17 @@ namespace Engine::priv {
             bool build_particle_mesh();
 
         public:
-            BuiltInMeshses();
-            ~BuiltInMeshses();
-
-            Mesh& getPointLightBounds();
-            Mesh& getSpotLightBounds();
-            Mesh& getRodLightBounds();
-            Mesh& getProjectionLightBounds();
-            Mesh& getTriangleMesh();
-            Mesh& getCubeMesh();
-            Mesh& getPlaneMesh();
-            Mesh& getFontMesh();
-            Mesh& getParticleMesh();
+            Handle getPointLightBounds();
+            Handle getSpotLightBounds();
+            Handle getRodLightBounds();
+            Handle getProjectionLightBounds();
+            Handle getTriangleMesh();
+            Handle getCubeMesh();
+            Handle getPlaneMesh();
+            Handle getFontMesh();
+            Handle getParticleMesh();
 
             bool init();
-            bool cleanup();
     };
 };
 #endif

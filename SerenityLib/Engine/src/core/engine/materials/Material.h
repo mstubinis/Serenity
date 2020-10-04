@@ -7,7 +7,6 @@ class  Mesh;
 class  MaterialComponent;
 class  Texture;
 namespace Engine::priv {
-    struct DefaultMaterialBindFunctor;
     struct InternalMaterialPublicInterface;
     struct InternalMaterialRequestPublicInterface;
     struct InternalScenePublicInterface;
@@ -20,7 +19,9 @@ namespace Engine::priv {
 #include <SFML/OpenGL.hpp>
 
 #include <core/engine/resources/Resource.h>
+#include <core/engine/resources/Handle.h>
 #include <core/engine/materials/MaterialEnums.h>
+#include <core/engine/materials/MaterialComponent.h>
 
 struct MaterialDefaultPhysicsProperty final {
     std::uint8_t r;
@@ -31,20 +32,23 @@ struct MaterialDefaultPhysicsProperty final {
 };
 
 class Material final : public Resource {
-    friend struct Engine::priv::DefaultMaterialBindFunctor;
     friend struct Engine::priv::InternalScenePublicInterface;
     friend struct Engine::priv::InternalMaterialRequestPublicInterface;
     friend struct Engine::priv::InternalMaterialPublicInterface;
     friend class  Engine::priv::MaterialLoader;
     friend class  Engine::priv::Renderer;
     friend class  Engine::priv::IRenderingPipeline;
+
+    using bind_fp   = void(*)(Material*);
+  //using unbind_fp = void(*)(Material*);
+
     public:
-        static Material                  *Checkers, *WhiteShadeless; //loaded in renderer
+        static Handle Checkers, WhiteShadeless; //loaded in renderer
         static std::vector<glm::vec4>     m_MaterialProperities;
     private:
-        std::vector<MaterialComponent*>   m_Components;
-        std::function<void(Material*)>    m_CustomBindFunctor   = [](Material*) {};
-      //std::function<void(Material*)>    m_CustomUnbindFunctor = [](Material*) {};
+        std::vector<MaterialComponent>    m_Components;
+        bind_fp                           m_CustomBindFunctor   = [](Material*) {};
+      //unbind_fp                         m_CustomUnbindFunctor = [](Material*) {};
 
         DiffuseModel                      m_DiffuseModel        = DiffuseModel::Lambert;
         SpecularModel                     m_SpecularModel       = SpecularModel::GGX;
@@ -58,40 +62,42 @@ class Material final : public Resource {
         unsigned char                     m_BaseAlpha           = 254_uc;
         std::uint16_t                     m_ID                  = 0U;
 
-        MaterialComponent* internal_add_component_generic(MaterialComponentType type, Texture* texture, Texture* mask = nullptr, Texture* cubemap = nullptr);
+        MaterialComponent* internal_add_component_generic(MaterialComponentType type, Handle texture, Handle mask = Handle{}, Handle cubemap = {});
         void internal_update_global_material_pool(bool addToDatabase);
-        Material();
     public:
+        Material();
         Material(
             const std::string& name,
             const std::string& diffuse,
-            const std::string& normal = "",
-            const std::string& glow = "",
-            const std::string& specular = "",
-            const std::string& ao = "",
-            const std::string& metalness = "",
+            const std::string& normal     = "",
+            const std::string& glow       = "",
+            const std::string& specular   = "",
+            const std::string& ao         = "",
+            const std::string& metalness  = "",
             const std::string& smoothness = ""
         );
         Material(
             const std::string& name,
-            Texture* diffuse,
-            Texture* normal = nullptr,
-            Texture* glow = nullptr,
-            Texture* specular = nullptr,
-            Texture* ao = nullptr,
-            Texture* metalness = nullptr,
-            Texture* smoothness = nullptr
+            Handle diffuse,
+            Handle normal     = Handle{},
+            Handle glow       = Handle{},
+            Handle specular   = Handle{},
+            Handle ao         = Handle{},
+            Handle metalness  = Handle{},
+            Handle smoothness = Handle{}
         );
+
+        Material(const Material& other)                 = delete;
+        Material& operator=(const Material& other)      = delete;
+        Material(Material&& other) noexcept;
+        Material& operator=(Material&& other) noexcept;
         ~Material();
 
-        void setCustomBindFunctor(std::function<void(Material*)> functor) noexcept { m_CustomBindFunctor = functor; }
+        inline void setCustomBindFunctor(const bind_fp& functor) noexcept { m_CustomBindFunctor = functor; }
+        inline void setCustomBindFunctor(bind_fp&& functor) noexcept { m_CustomBindFunctor = std::move(functor); }
 
-        Material(const Material&)                      = delete;
-        Material& operator=(const Material&)           = delete;
-        Material(Material&& other) noexcept            = delete;
-        Material& operator=(Material&& other) noexcept = delete;
-
-        inline CONSTEXPR MaterialComponent& getComponent(unsigned int index) { return *m_Components[index]; }
+        inline CONSTEXPR const std::vector<MaterialComponent>& getComponents() const noexcept { return m_Components; }
+        inline CONSTEXPR MaterialComponent& getComponent(unsigned int index) { return m_Components[index]; }
 
         MaterialComponent& addComponent(MaterialComponentType type, const std::string& textureFile = "", const std::string& maskFile = "", const std::string& cubemapFile = "");
         MaterialComponent& addComponentDiffuse(const std::string& textureFile);

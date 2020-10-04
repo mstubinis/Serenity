@@ -27,6 +27,8 @@ namespace Engine::priv {
 
 #include <core/engine/fonts/FontIncludes.h>
 #include <core/engine/renderer/RendererIncludes.h>
+#include <core/engine/resources/Handle.h>
+#include <core/engine/textures/TextureIncludes.h>
 
 namespace Engine::priv {
     class IRenderingPipeline {
@@ -72,10 +74,10 @@ namespace Engine::priv {
             virtual bool colorMask(bool r, bool g, bool b, bool alpha) = 0;
             virtual bool clearColor(bool r, bool g, bool b, bool alpha) = 0;
 
-            virtual bool bindTextureForModification(unsigned int textureType, unsigned int textureObject) = 0;
+            virtual bool bindTextureForModification(TextureType textureType, unsigned int textureObject) = 0;
             virtual bool bindVAO(unsigned int vaoObject) = 0;
             virtual bool deleteVAO(unsigned int& vaoObject) = 0;
-            virtual void generateAndBindTexture(unsigned int textureType, unsigned int& textureObject) = 0;
+            virtual void generateAndBindTexture(TextureType textureType, unsigned int& textureObject) = 0;
             virtual void generateAndBindVAO(unsigned int& vaoObject) = 0;
 
             virtual bool enableAPI(unsigned int apiEnum) = 0;
@@ -101,8 +103,8 @@ namespace Engine::priv {
             virtual bool unbind(ShaderProgram* program) = 0;
             virtual bool unbind(Material* material) = 0;
             virtual bool unbind(Mesh* mesh) = 0;
-
-            virtual void generatePBRData(Texture& texture, Texture& convolutionTexture, Texture& preEnvTexture, unsigned int convoludeSize, unsigned int prefilterSize) = 0;
+            
+            virtual void generatePBRData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, unsigned int convoludeSize, unsigned int prefilterSize) = 0;
 
             virtual void sendGPUDataSunLight(Camera& camera, SunLight& sunLight, const std::string& start) = 0;
             virtual int sendGPUDataPointLight(Camera& camera, PointLight& pointLight, const std::string& start) = 0;
@@ -118,12 +120,12 @@ namespace Engine::priv {
             virtual void renderRodLight(Camera& camera, RodLight& rodLight) = 0;
             virtual void renderProjectionLight(Camera& camera, ProjectionLight& rodLight) = 0;
 
-            virtual void renderSkybox(Skybox*, ShaderProgram& shaderProgram, Scene& scene, Viewport& viewport, Camera& camera) = 0;
+            virtual void renderSkybox(Skybox*, Handle shaderProgram, Scene& scene, Viewport& viewport, Camera& camera) = 0;
             virtual void renderMesh(Mesh& mesh, unsigned int mode) = 0;
             virtual void renderDecal(ModelInstance& decalModelInstance) = 0;
             virtual void renderLightProbe(LightProbe& lightProbe) = 0;
 
-            virtual void renderParticles(ParticleSystem& particleSystem, Camera& camera, ShaderProgram& program) = 0;
+            virtual void renderParticles(ParticleSystem& particleSystem, Camera& camera, Handle program) = 0;
 
             virtual void render2DText(
                 const std::string& text, 

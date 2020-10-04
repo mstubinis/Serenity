@@ -13,43 +13,56 @@
 using namespace Engine;
 using namespace Engine::priv;
 
-MaterialComponent::MaterialComponent(MaterialComponentType type, Texture* texture, Texture* mask, Texture* cubemap) 
+MaterialComponent::MaterialComponent(MaterialComponentType type, Handle textureHandle, Handle maskHandle, Handle cubemapHandle)
     : m_ComponentType{ type }
 {
-    addLayer(texture, mask, cubemap);
+    addLayer(textureHandle, maskHandle, cubemapHandle);
 }
+MaterialComponent::MaterialComponent(MaterialComponent&& other) noexcept 
+    : m_Layers        { std::move(other.m_Layers) }
+    , m_NumLayers     { std::move(other.m_NumLayers) }
+    , m_ComponentType { std::move(other.m_ComponentType) }
+{}
+MaterialComponent& MaterialComponent::operator=(MaterialComponent&& other) noexcept {
+    m_Layers        = std::move(other.m_Layers);
+    m_NumLayers     = std::move(other.m_NumLayers);
+    m_ComponentType = std::move(other.m_ComponentType);
+    return *this;
+}
+
 MaterialLayer* MaterialComponent::addLayer(const std::string& textureFile, const std::string& maskFile, const std::string& cubemapFile) {
     if (m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT) {
+        ENGINE_PRODUCTION_LOG("MaterialComponent::addLayer(string...): m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT!")
         return nullptr;
     }
-    Texture* texture, * mask, * cubemap;
-    texture = mask = cubemap = nullptr;
-    texture = Core::m_Engine->m_ResourceManager.HasResource<Texture>(textureFile);
-    mask    = Core::m_Engine->m_ResourceManager.HasResource<Texture>(maskFile);
-    cubemap = Core::m_Engine->m_ResourceManager.HasResource<Texture>(cubemapFile);
-    if (!texture) {
-        texture = NEW Texture(textureFile);
-        Core::m_Engine->m_ResourceManager._addTexture(texture);
+    auto  texture = Engine::Resources::getResource<Texture>(textureFile);
+    auto  mask    = Engine::Resources::getResource<Texture>(maskFile);
+    auto  cubemap = Engine::Resources::getResource<Texture>(cubemapFile);
+
+    if (!texture.first && !textureFile.empty()) {
+        //texture.second = Engine::Resources::loadTextureAsync(textureFile, ImageInternalFormat::SRGB8_ALPHA8, false);
+        texture.second = Engine::Resources::addResource<Texture>(textureFile, false, ImageInternalFormat::SRGB8_ALPHA8);
+        texture.first  = texture.second.get<Texture>();
     }
-    if (!mask) {
-        mask = NEW Texture(maskFile, false, ImageInternalFormat::R8);
-        Core::m_Engine->m_ResourceManager._addTexture(mask);
+    if (!mask.first && !maskFile.empty()) {
+        mask.second = Engine::Resources::addResource<Texture>(maskFile, false, ImageInternalFormat::R8);
+        mask.first  = mask.second.get<Texture>();
     }
-    if (!cubemap) {
-        cubemap = NEW Texture(cubemapFile, false, ImageInternalFormat::SRGB8_ALPHA8, GL_TEXTURE_CUBE_MAP);
-        Core::m_Engine->m_ResourceManager._addTexture(cubemap);
+    if (!cubemap.first && !cubemapFile.empty()) {
+        cubemap.second = Engine::Resources::addResource<Texture>(cubemapFile, false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::CubeMap);
+        cubemap.first  = cubemap.second.get<Texture>();
     }
-    return addLayer(texture, mask, cubemap);
+    return addLayer(texture.second, mask.second, cubemap.second);
 }
-MaterialLayer* MaterialComponent::addLayer(Texture* texture, Texture* mask, Texture* cubemap) {
+MaterialLayer* MaterialComponent::addLayer(Handle textureHandle, Handle maskHandle, Handle cubemapHandle) {
     if (m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT) {
+        ENGINE_PRODUCTION_LOG("MaterialComponent::addLayer(Handle...): m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT!")
         return nullptr;
     }
     auto& layer = m_Layers[m_NumLayers];
-    layer.setTexture(texture);
-    layer.setMask(mask);
-    layer.setCubemap(cubemap);
-
+    layer.setTexture(textureHandle);
+    layer.setMask(maskHandle);
+    layer.setCubemap(cubemapHandle);
     switch (m_ComponentType) {
         case MaterialComponentType::Diffuse: {
             layer.setData2(1.0f, 1.0f, 1.0f, 1.0f);
@@ -86,23 +99,11 @@ MaterialLayer* MaterialComponent::addLayer(Texture* texture, Texture* mask, Text
     return &layer;
 }
 
-Texture* MaterialComponent::texture(size_t index) const {
-    return m_Layers[index].getTexture();
-}
-Texture* MaterialComponent::mask(size_t index) const {
-    return m_Layers[index].getMask();
-}
-Texture* MaterialComponent::cubemap(size_t index) const {
-    return m_Layers[index].getCubemap();
-}
-MaterialLayer& MaterialComponent::layer(size_t index) {
-    return m_Layers[index];
-}
 void MaterialComponent::bind(size_t component_index, size_t& inTextureUnit) const {
     const std::string wholeString = "components[" + std::to_string(component_index) + "].";
     Engine::Renderer::sendUniform2Safe((wholeString + "componentData").c_str(), (int)m_NumLayers, (int)m_ComponentType);
-    for (unsigned int layer = 0; layer < m_NumLayers; ++layer) {
-        m_Layers[layer].sendDataToGPU(wholeString, component_index, layer, inTextureUnit);
+    for (unsigned int layerNumber = 0; layerNumber < m_NumLayers; ++layerNumber) {
+        m_Layers[layerNumber].sendDataToGPU(wholeString, component_index, layerNumber, inTextureUnit);
     }
 }
 void MaterialComponent::update(const float dt) {

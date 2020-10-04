@@ -36,6 +36,7 @@ namespace Engine::priv {
 #include <core/engine/resources/Resource.h>
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/events/Observer.h>
+#include <core/engine/resources/Handle.h>
 
 class Scene: public Resource, public Observer {
     friend class  Engine::priv::RenderGraph;
@@ -145,7 +146,7 @@ namespace Engine::priv {
         static void                       RenderForwardTransparentTrianglesSorted( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
         static void                       RenderForwardParticles( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
         static void                       RenderDecals( Renderer&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void                       RenderParticles( Renderer&, Scene& scene, Viewport&, Camera&, ShaderProgram& program);
+        static void                       RenderParticles( Renderer&, Scene& scene, Viewport&, Camera&, Handle program);
 
         static void                       AddModelInstanceToPipeline(Scene& scene, ModelInstance&, RenderStage stage, ComponentModel&);
         static void                       RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance&, RenderStage stage);

@@ -9,7 +9,7 @@ enum class CameraType : unsigned char {
     Perspective, 
     Orthographic,
 };
-class Camera: public Entity{
+class Camera: public Entity {
     friend struct Engine::priv::ComponentCamera_Functions;
     public:
         Camera(float angle, float aspectRatio, float nearPlane, float farPlane, Scene* = nullptr);

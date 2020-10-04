@@ -35,4 +35,5 @@ namespace Game {
     void onJoystickDisconnected();
 
 };
+
 #endif

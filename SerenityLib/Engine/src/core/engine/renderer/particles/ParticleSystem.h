@@ -17,6 +17,7 @@ namespace Engine::priv {
 #include <core/engine/renderer/particles/ParticleEmitter.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/containers/PartialVectorPOD.h>
+#include <core/engine/resources/Handle.h>
 
 constexpr unsigned int MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME = 12U;
 
@@ -107,7 +108,7 @@ namespace Engine::priv {
             inline CONSTEXPR std::vector<Particle>& getParticles() noexcept { return m_Particles; }
 
             void update(const float dt, Camera& camera);
-            void render(Viewport& viewport, Camera& camera, ShaderProgram& program, Renderer& renderer);
+            void render(Viewport& viewport, Camera& camera, Handle program, Renderer& renderer);
         };
 };
 

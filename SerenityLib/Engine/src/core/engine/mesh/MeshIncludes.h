@@ -19,12 +19,12 @@ struct MeshModifyFlags {enum Flag {
 
 namespace Engine::priv {
     struct VertexSmoothingData final {
-        size_t index     = 0U;
-        glm::vec3 normal = glm::vec3(0.0f);
+        glm::vec3  normal = glm::vec3(0.0f);
+        size_t     index  = 0U;
     };
     struct VertexSmoothingGroup final {
-        std::vector<VertexSmoothingData> data;
-        glm::vec3 smoothedNormal = glm::vec3(0.0f);
+        std::vector<VertexSmoothingData>   data;
+        glm::vec3                          smoothedNormal = glm::vec3(0.0f);
     };
     struct Vertex final {
         glm::vec3 position = glm::vec3(0.0f);
@@ -34,11 +34,11 @@ namespace Engine::priv {
         glm::vec3 tangent  = glm::vec3(0.0f);
 
         Vertex() = default;
-        ~Vertex() = default;
         Vertex(const Vertex& other)                = delete;
         Vertex& operator=(const Vertex& other)     = delete;
         Vertex(Vertex&& other) noexcept            = default;
         Vertex& operator=(Vertex&& other) noexcept = default;
+        ~Vertex() = default;
     };
     struct Triangle final {
         glm::vec3 position1   = glm::vec3(0.0f);
@@ -50,11 +50,11 @@ namespace Engine::priv {
         unsigned int index3   = 0;
 
         Triangle() = default;
-        ~Triangle() = default;
         Triangle(const Triangle& other)                = delete;
         Triangle& operator=(const Triangle& other)     = delete;
         Triangle(Triangle&& other) noexcept            = default;
         Triangle& operator=(Triangle&& other) noexcept = default;
+        ~Triangle() = default;
 
         glm::vec3 getRandomPoint() const noexcept {
             float A = (float)rand() / (float)RAND_MAX;
@@ -67,9 +67,9 @@ namespace Engine::priv {
         }
 
     };
-    struct VertexBoneData final : public Engine::NonCopyable {
-        std::array<float, NUM_BONES_PER_VERTEX> IDs;
-        std::array<float, NUM_BONES_PER_VERTEX> Weights;
+    struct VertexBoneData final {
+        std::array<float, NUM_BONES_PER_VERTEX>   IDs;
+        std::array<float, NUM_BONES_PER_VERTEX>   Weights;
 
         VertexBoneData() {
             IDs.fill(0.0f);
@@ -78,14 +78,16 @@ namespace Engine::priv {
         VertexBoneData(unsigned int BoneID, float Weight) : VertexBoneData(){
             AddBoneData(BoneID, Weight);
         }
-        ~VertexBoneData() = default;
+        VertexBoneData(const VertexBoneData& other)                = delete;
+        VertexBoneData& operator=(const VertexBoneData& other)     = delete;
         VertexBoneData(VertexBoneData&& other) noexcept            = default;
         VertexBoneData& operator=(VertexBoneData&& other) noexcept = default;
+        ~VertexBoneData() = default;
 
         void AddBoneData(unsigned int BoneID, float Weight) {
-            for (unsigned int i = 0; i < NUM_BONES_PER_VERTEX; ++i) {
+            for (unsigned int i = 0; i < IDs.size(); ++i) {
                 if (Weights[i] == 0.0f) {
-                    IDs[i]     = float(BoneID);
+                    IDs[i]     = (float)BoneID;
                     Weights[i] = Weight;
                     return;
                 }

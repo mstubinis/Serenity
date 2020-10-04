@@ -37,6 +37,7 @@ namespace Engine::priv {
             static void        LoadProcessNodeData(MeshRequest& meshRequest, const aiScene& scene, const aiNode& node, uint& count);
 
             static void        LoadPopulateGlobalNodes(const aiScene& scene, Engine::priv::MeshInfoNode* root, Engine::priv::MeshInfoNode* parent, Engine::priv::MeshInfoNode* node, aiNode* ai_node, MeshRequest& meshRequest);
+            static void        FinalizeData(Handle meshHandle, MeshImportedData& data, float threshold);
             static void        FinalizeData(Mesh& mesh, MeshImportedData& data, float threshold);
 
             static VertexData* LoadFrom_OBJCC(const std::string& filename);

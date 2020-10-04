@@ -85,7 +85,7 @@ bool priv::Renderer::bind(Mesh* mesh) const {
         if (mesh->isLoaded()) {
             mesh->m_CustomBindFunctor(mesh, this);
         }else{
-            Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().m_VertexData->bind();
+            Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().get<Mesh>()->m_VertexData->bind();
         }
     }
     return res;
@@ -95,7 +95,7 @@ bool priv::Renderer::unbind(Mesh* mesh) const {
     if (mesh->isLoaded()) {
         mesh->m_CustomUnbindFunctor(mesh, this);
     }else{
-        Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().m_VertexData->unbind();
+        Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().get<Mesh>()->m_VertexData->unbind();
     }
     return true;
 }
@@ -105,7 +105,8 @@ bool priv::Renderer::bind(Material* material) const {
         if (material->isLoaded()) {
             material->m_CustomBindFunctor(material);
         }else{
-            Material::Checkers->m_CustomBindFunctor(Material::Checkers);
+            auto* material = Material::Checkers.get<Material>();
+            material->m_CustomBindFunctor(material);
         }
     }
     return res;
@@ -113,7 +114,7 @@ bool priv::Renderer::bind(Material* material) const {
 bool priv::Renderer::unbind(Material* material) const {
     return m_Pipeline->unbind(material);
 }
-void priv::Renderer::_genPBREnvMapData(Texture& texture, Texture& convolutionTexture, Texture& preEnvTexture, uint size1, uint size2){
+void priv::Renderer::_genPBREnvMapData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, uint size1, uint size2){
     return m_Pipeline->generatePBRData(texture, convolutionTexture, preEnvTexture, size1, size2);
 }
 void Renderer::restoreDefaultOpenGLState() {
@@ -232,7 +233,7 @@ bool Renderer::clearColor(float r, float g, float b, float a) {
 unsigned int Renderer::getCurrentlyBoundTextureOfType(unsigned int textureType) noexcept {
     return renderManager->m_Pipeline->getCurrentBoundTextureOfType(textureType);
 }
-bool Renderer::bindTextureForModification(GLuint textureType, GLuint textureObject) {
+bool Renderer::bindTextureForModification(TextureType textureType, GLuint textureObject) {
     return renderManager->m_Pipeline->bindTextureForModification(textureType, textureObject);
 }
 
@@ -242,7 +243,7 @@ bool Renderer::bindVAO(GLuint vaoObject){
 bool Renderer::deleteVAO(GLuint& vaoObject) {
     return renderManager->m_Pipeline->deleteVAO(vaoObject);
 }
-void Renderer::genAndBindTexture(GLuint textureType, GLuint& textureObject){
+void Renderer::genAndBindTexture(TextureType textureType, GLuint& textureObject){
     renderManager->m_Pipeline->generateAndBindTexture(textureType, textureObject);
 }
 void Renderer::genAndBindVAO(GLuint& vaoObject){

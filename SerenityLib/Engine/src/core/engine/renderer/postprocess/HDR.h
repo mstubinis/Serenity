@@ -7,23 +7,25 @@ class  Shader;
 class  Viewport;
 
 struct HDRAlgorithm { enum Algorithm : unsigned char {
-    None,
+    None = 0,
     Reinhard, 
     Filmic, 
     Exposure, 
     Uncharted,
 };};
 
+#include <core/engine/resources/Handle.h>
+
 namespace Engine::priv {
     class  GBuffer;
     class  Renderer;
     class  HDR final {
         private:
-            std::unique_ptr<Shader>          m_Vertex_Shader;
-            std::unique_ptr<Shader>          m_Fragment_Shader;
-            std::unique_ptr<ShaderProgram>   m_Shader_Program;
+            Handle        m_Vertex_Shader;
+            Handle        m_Fragment_Shader;
+            Handle        m_Shader_Program;
 
-            std::string                      m_GLSL_frag_code    = "";
+            std::string   m_GLSL_frag_code    = "";
 
             HDR() = default;
             ~HDR() = default;

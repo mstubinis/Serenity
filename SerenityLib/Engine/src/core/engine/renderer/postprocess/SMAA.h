@@ -14,6 +14,8 @@ enum class SMAAQualityLevel : unsigned char {
     Ultra,
 };
 
+#include <core/engine/resources/Handle.h>
+
 namespace Engine::priv {
     class  GBuffer;
     class  Renderer;
@@ -27,12 +29,12 @@ namespace Engine::priv {
                 _TOTAL,
             };};
 
-            std::vector<Shader*>        m_Vertex_Shaders;
-            std::vector<Shader*>        m_Fragment_Shaders;
-            std::vector<ShaderProgram*> m_Shader_Programs;
+            std::vector<Handle>        m_Vertex_Shaders;
+            std::vector<Handle>        m_Fragment_Shaders;
+            std::vector<Handle>        m_Shader_Programs;
 
-            std::vector<std::string>    m_Vertex_Shaders_Code;
-            std::vector<std::string>    m_Fragment_Shaders_Code;
+            std::vector<std::string>   m_Vertex_Shaders_Code;
+            std::vector<std::string>   m_Fragment_Shaders_Code;
 
             SMAA();
             ~SMAA();

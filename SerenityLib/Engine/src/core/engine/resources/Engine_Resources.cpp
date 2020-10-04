@@ -21,17 +21,18 @@
 #include <ecs/ECS.h>
 
 
-Engine::priv::ResourceManager* resourceManager = nullptr;
+Engine::priv::ResourceManager* Engine::priv::ResourceManager::RESOURCE_MANAGER = nullptr;
 
-Engine::priv::ResourceManager::ResourceManager(const EngineOptions& options) 
-    : m_ResourcePool(32768)
-{
-    resourceManager    = this;
-}
-Engine::priv::ResourceManager::~ResourceManager(){
-    cleanup();
-}
-void Engine::priv::ResourceManager::cleanup() {
+Engine::priv::ResourceManager::ResourceManager(const EngineOptions& options) {
+    RESOURCE_MANAGER = this;
+
+    m_ResourceModule.registerResourceType<Texture>();
+    m_ResourceModule.registerResourceType<Material>();
+    m_ResourceModule.registerResourceType<Mesh>();
+    m_ResourceModule.registerResourceType<Shader>();
+    m_ResourceModule.registerResourceType<ShaderProgram>();
+    m_ResourceModule.registerResourceType<SoundData>();
+    m_ResourceModule.registerResourceType<Font>();
 }
 void Engine::priv::ResourceManager::init(const EngineOptions& options){
     auto& window = m_Windows.emplace_back(std::unique_ptr<Window>(NEW Window()));
@@ -53,9 +54,6 @@ void Engine::priv::ResourceManager::onPostUpdate() {
         }
         m_ScenesToBeDeleted.clear();
     }   
-}
-Handle Engine::priv::ResourceManager::_addTexture(Texture* t) {
-    return m_ResourcePool.add(t, (unsigned int)ResourceType::Texture);
 }
 Scene& Engine::priv::ResourceManager::_getSceneByID(std::uint32_t id) {
     return *m_Scenes[id - 1];
@@ -83,25 +81,25 @@ double Engine::Resources::applicationTime() {
     return priv::Core::m_Engine->m_DebugManager.totalTime();
 }
 Scene* Engine::Resources::getCurrentScene() {
-    return resourceManager->m_CurrentScene;
+    return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_CurrentScene;
 }
 Window& Engine::Resources::getWindow(){
-    return *resourceManager->m_Windows[0]; 
+    return *Engine::priv::ResourceManager::RESOURCE_MANAGER->m_Windows[0];
 }
 glm::uvec2 Engine::Resources::getWindowSize(){
-    return resourceManager->m_Windows[0]->getSize(); 
+    return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_Windows[0]->getSize();
 }
 
 Window& Engine::Resources::getWindow(unsigned int index) {
-    return *resourceManager->m_Windows[index];
+    return *Engine::priv::ResourceManager::RESOURCE_MANAGER->m_Windows[index];
 }
 glm::uvec2 Engine::Resources::getWindowSize(unsigned int index) {
-    return resourceManager->m_Windows[index]->getSize();
+    return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_Windows[index]->getSize();
 }
 
 
 bool Engine::Resources::deleteScene(std::string_view sceneName) {
-    for (auto& scene_ptr : resourceManager->m_Scenes) {
+    for (auto& scene_ptr : Engine::priv::ResourceManager::RESOURCE_MANAGER->m_Scenes) {
         if (scene_ptr && scene_ptr->name() == sceneName) {
             return Resources::deleteScene(*scene_ptr);
         }
@@ -109,109 +107,24 @@ bool Engine::Resources::deleteScene(std::string_view sceneName) {
     return false;
 }
 bool Engine::Resources::deleteScene(Scene& scene) {
-    for (auto& deleted_scene_ptr : resourceManager->m_ScenesToBeDeleted) {
+    for (auto& deleted_scene_ptr : Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ScenesToBeDeleted) {
         if (scene.name() == deleted_scene_ptr->name()) {
             return false; //already flagged for deletion
         }
     }
-    resourceManager->m_ScenesToBeDeleted.emplace_back(&scene);
+    Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ScenesToBeDeleted.emplace_back(&scene);
     return true;
 }
 
 
 Scene* Engine::Resources::getScene(std::string_view sceneName){
-    for (auto& scene_ptr : resourceManager->m_Scenes) {
+    for (auto& scene_ptr : Engine::priv::ResourceManager::RESOURCE_MANAGER->m_Scenes) {
         if (scene_ptr && scene_ptr->name() == sceneName) {
             return scene_ptr.get();
         }
     }
     return nullptr;
 }
-
-void Engine::Resources::getShader(Handle h, Shader*& p) {
-    resourceManager->m_ResourcePool.getAs(h, p);
-}
-Shader* Engine::Resources::getShader(Handle h) {
-    Shader* p; 
-    resourceManager->m_ResourcePool.getAs(h, p);
-    return p; 
-}
-void Engine::Resources::getSoundData(Handle h, SoundData*& p) {
-    resourceManager->m_ResourcePool.getAs(h, p);
-}
-SoundData* Engine::Resources::getSoundData(Handle h) {
-    SoundData* p; 
-    resourceManager->m_ResourcePool.getAs(h, p);
-    return p; 
-}
-void Engine::Resources::getCamera(Handle h, Camera*& p) {
-    resourceManager->m_ResourcePool.getAs(h, p);
-}
-Camera* Engine::Resources::getCamera(Handle h) {
-    Camera* p; 
-    resourceManager->m_ResourcePool.getAs(h, p);
-    return p; 
-}
-void Engine::Resources::getFont(Handle h, Font*& p) {
-    resourceManager->m_ResourcePool.getAs(h, p);
-}
-Font* Engine::Resources::getFont(Handle h) {
-    Font* p; 
-    resourceManager->m_ResourcePool.getAs(h, p);
-    return p; 
-}
-Font* Engine::Resources::getFont(std::string_view name) {
-    return resourceManager->HasResource<Font>(name);
-}
-void Engine::Resources::getMesh(Handle h, Mesh*& p) {
-    resourceManager->m_ResourcePool.getAs(h, p);
-}
-Mesh* Engine::Resources::getMesh(Handle h) {
-    Mesh* p; 
-    resourceManager->m_ResourcePool.getAs(h, p);
-    return p; 
-}
-Mesh* Engine::Resources::getMesh(std::string_view name) {
-    return resourceManager->HasResource<Mesh>(name);
-}
-void Engine::Resources::getShaderProgram(Handle h, ShaderProgram*& p) {
-    resourceManager->m_ResourcePool.getAs(h, p);
-}
-ShaderProgram* Engine::Resources::getShaderProgram(Handle h) {
-    ShaderProgram* p; 
-    resourceManager->m_ResourcePool.getAs(h, p);
-    return p; 
-}
-ShaderProgram* Engine::Resources::getShaderProgram(std::string_view name) {
-    return resourceManager->HasResource<ShaderProgram>(name);
-}
-
-void Engine::Resources::getTexture(Handle h, Texture*& p) {
-    resourceManager->m_ResourcePool.getAs(h, p);
-}
-Texture* Engine::Resources::getTexture(Handle h) {
-    Texture* p; 
-    resourceManager->m_ResourcePool.getAs(h, p);
-    return p; 
-}
-Texture* Engine::Resources::getTexture(std::string_view name) {
-    return resourceManager->HasResource<Texture>(name); 
-}
-void Engine::Resources::getMaterial(Handle h, Material*& p) {
-    resourceManager->m_ResourcePool.getAs(h, p);
-}
-Material* Engine::Resources::getMaterial(Handle h) {
-    Material* p; 
-    resourceManager->m_ResourcePool.getAs(h, p);
-    return p; 
-}
-Material* Engine::Resources::getMaterial(std::string_view name) {
-    return resourceManager->HasResource<Material>(name);
-}
-Handle Engine::Resources::addFont(const std::string& filename, int height, int width, float line_height){
-    return resourceManager->m_ResourcePool.add(NEW Font(filename, height, width, line_height), (unsigned int)ResourceType::Font);
-}
-
 
 std::vector<Handle> Engine::Resources::loadMesh(const std::string& fileOrData, float threshhold) {
     MeshRequest request(fileOrData, threshhold, []() {});
@@ -234,93 +147,80 @@ std::vector<Handle> Engine::Resources::loadMeshAsync(const std::string& fileOrDa
     return handles;
 }
 Handle Engine::Resources::loadTexture(const std::string& file, ImageInternalFormat internalFormat, bool mipmaps) {
-    auto* texture = resourceManager->HasResource<Texture>(file);
-    if (!texture) {
-        TextureRequest request(file, mipmaps, internalFormat, GL_TEXTURE_2D,[]() {});
-        request.request(false);
-        return request.part.handle;
+    auto texture = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Texture>(file);
+    if (!texture.first) {
+        TextureRequest request{ file, mipmaps, internalFormat, TextureType::Texture2D,[]() {} };
+        request.request();
+        return request.m_Part.handle;
     }
-    return Handle();
+    return Handle{};
 }
 Handle Engine::Resources::loadTexture(sf::Image& sfImage, const std::string& texture_name, ImageInternalFormat internalFormat, bool mipmaps) {
-    auto* texture = resourceManager->HasResource<Texture>(texture_name);
-    if (!texture) {
-        TextureRequestFromMemory request(sfImage, texture_name, mipmaps, internalFormat, GL_TEXTURE_2D, []() {});
-        request.request(false);
-        return request.part.handle;
+    auto texture = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Texture>(texture_name);
+    if (!texture.first) {
+        TextureRequest request{ sfImage, texture_name, mipmaps, internalFormat, TextureType::Texture2D, []() {} };
+        request.request();
+        return request.m_Part.handle;
     }
-    return Handle();
+    return Handle{};
 }
 Handle Engine::Resources::loadTextureAsync(const std::string& file, ImageInternalFormat internalFormat, bool mipmaps, std::function<void()> callback) {
-    auto* texture = resourceManager->HasResource<Texture>(file);
-    if (!texture) {
-        TextureRequest request(file, mipmaps, internalFormat, GL_TEXTURE_2D, std::move(callback));
+    auto texture = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Texture>(file);
+    if (!texture.first) {
+        TextureRequest request{ file, mipmaps, internalFormat, TextureType::Texture2D, std::move(callback) };
         request.request(true);
-        return request.part.handle;
+        return request.m_Part.handle;
     }
-    return Handle();
+    return Handle{};
 }
 Handle Engine::Resources::loadTextureAsync(sf::Image& sfImage, const std::string& texture_name, ImageInternalFormat internalFormat, bool mipmaps, std::function<void()> callback) {
-    auto* texture = resourceManager->HasResource<Texture>(texture_name);
-    if (!texture) {
-        TextureRequestFromMemory request(sfImage, texture_name, mipmaps, internalFormat, GL_TEXTURE_2D, std::move(callback));
+    auto texture = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Texture>(texture_name);
+    if (!texture.first) {
+        TextureRequest request{ sfImage, texture_name, mipmaps, internalFormat, TextureType::Texture2D, std::move(callback) };
         request.request(true);
-        return request.part.handle;
+        return request.m_Part.handle;
     }
-    return Handle();
+    return Handle{};
 }
 
 Handle Engine::Resources::loadMaterial(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness) {
-    auto* material = resourceManager->HasResource<Material>(name);
-    if (!material) {
-        MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness, []() {});
-        request.request(false);
+    auto material = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Material>(name);
+    if (!material.first) {
+        MaterialRequest request{ name, diffuse, normal, glow, specular, ao, metalness, smoothness, []() {} };
+        request.request();
         return request.m_Part.m_Handle;
     }
-    return Handle();
+    return Handle{};
 }
 Handle Engine::Resources::loadMaterialAsync(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness, std::function<void()> callback) {
-    auto* material = resourceManager->HasResource<Material>(name);
-    if (!material) {
-        MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness, std::move(callback));
+    auto material = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Material>(name);
+    if (!material.first) {
+        MaterialRequest request{ name, diffuse, normal, glow, specular, ao, metalness, smoothness, std::move(callback) };
         request.request(true);
         return request.m_Part.m_Handle;
     }
-    return Handle();
+    return Handle{};
 }
-Handle Engine::Resources::loadMaterial(const std::string& name, Texture* diffuse, Texture* normal, Texture* glow, Texture* specular, Texture* ao, Texture* metalness, Texture* smoothness) {
-    auto* material = resourceManager->HasResource<Material>(name);
-    if (!material) {
-        MaterialRequest request(name, diffuse, normal, glow, specular, ao, metalness, smoothness, []() {});
-        //request.request(false); //the above creates the material and is immediately available for use, no need to request
+Handle Engine::Resources::loadMaterial(const std::string& name, Handle diffuse, Handle normal, Handle glow, Handle specular, Handle ao, Handle metalness, Handle smoothness) {
+    auto material = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Material>(name);
+    if (!material.first) {
+        MaterialRequest request{ name, diffuse, normal, glow, specular, ao, metalness, smoothness, []() {} };
+        //request.request(); //the above creates the material and is immediately available for use, no need to request
         return request.m_Part.m_Handle;
     }
-    return Handle();
+    return Handle{};
 }
 
 Handle Engine::Resources::addShader(const std::string& fileOrData, ShaderType type, bool fromFile){
-    Shader* shader = NEW Shader(fileOrData, type, fromFile);
-    return resourceManager->m_ResourcePool.add(shader, (unsigned int)ResourceType::Shader);
-}
-
-Handle Engine::Resources::addShaderProgram(const std::string& n, Shader& v, Shader& f){
-    ShaderProgram* program = NEW ShaderProgram(n, v, f);
-    return resourceManager->m_ResourcePool.add(program, (unsigned int)ResourceType::ShaderProgram);
+    return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.emplace<Shader>(fileOrData, type, fromFile);
 }
 Handle Engine::Resources::addShaderProgram(const std::string& n, Handle v, Handle f){
-    Shader* vertexShader   = resourceManager->m_ResourcePool.getAsFast<Shader>(v);
-    Shader* fragmentShader = resourceManager->m_ResourcePool.getAsFast<Shader>(f);
-    ShaderProgram* program = NEW ShaderProgram(n, *vertexShader, *fragmentShader);
-    return resourceManager->m_ResourcePool.add(program, (unsigned int)ResourceType::ShaderProgram);
+    Shader* vertexShader   = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Shader>(v);
+    Shader* fragmentShader = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Shader>(f);
+    return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.emplace<ShaderProgram>(n, v, f);
 }
-
-Handle Engine::Resources::addSoundData(const std::string& file){
-    SoundData* soundData = NEW SoundData(file);
-    return resourceManager->m_ResourcePool.add(soundData, (unsigned int)ResourceType::SoundData);
-}
-
 bool Engine::Resources::setCurrentScene(Scene* newScene){
-    Scene* oldScene = resourceManager->m_CurrentScene;
+    Scene* oldScene = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_CurrentScene;
 
     Event ev(EventType::SceneChanged);
     ev.eventSceneChanged = Engine::priv::EventSceneChanged(oldScene, newScene);
@@ -328,14 +228,14 @@ bool Engine::Resources::setCurrentScene(Scene* newScene){
     
     if(!oldScene){
         ENGINE_PRODUCTION_LOG("---- Initial scene set to: " << newScene->name())
-        resourceManager->m_CurrentScene = newScene; 
+        Engine::priv::ResourceManager::RESOURCE_MANAGER->m_CurrentScene = newScene;
         Engine::priv::InternalScenePublicInterface::GetECS(*newScene).onSceneEntered(*newScene);
         return false;
     }
     if(oldScene != newScene){
         ENGINE_PRODUCTION_LOG("---- Scene Change started (" << oldScene->name() << ") to (" << newScene->name() << ") ----")
         Engine::priv::InternalScenePublicInterface::GetECS(*oldScene).onSceneLeft(*oldScene);
-        resourceManager->m_CurrentScene = newScene;
+        Engine::priv::ResourceManager::RESOURCE_MANAGER->m_CurrentScene = newScene;
         Engine::priv::InternalScenePublicInterface::GetECS(*newScene).onSceneEntered(*newScene);
 
         Engine::priv::InternalScenePublicInterface::SkipRenderThisFrame(*newScene, true);

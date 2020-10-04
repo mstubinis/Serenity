@@ -10,6 +10,7 @@ namespace Engine::priv {
 
 #include <ecs/EntityBody.h>
 #include <core/engine/renderer/RendererIncludes.h>
+#include <core/engine/resources/Handle.h>
 
 class Decal final: public EntityBody {
     friend struct Engine::priv::DefaultDecalBindFunctor;
@@ -22,7 +23,7 @@ class Decal final: public EntityBody {
         glm_quat   m_InitialRotation  = glm_quat(1.0, 0.0, 0.0, 0.0);
     public:
         Decal(
-            Material& material,
+            Handle materialHandle,
             const glm_vec3& position,
             const glm::vec3& hitNormal,
             float size,

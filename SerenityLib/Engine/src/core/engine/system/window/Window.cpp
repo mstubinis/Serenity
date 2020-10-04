@@ -114,12 +114,12 @@ void Window::setIcon(const Texture& texture) {
     m_Data.m_IconFile = texture.name();
 }
 void Window::setIcon(const char* file) {
-    Texture* texture = Engine::priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(file);
-    if (!texture) {
-        Handle handle = Engine::Resources::loadTexture(file);
-        texture       = handle.get<Texture>();
+    auto texture = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.get<Texture>(file);
+    if (!texture.first) {
+        texture.second = Engine::Resources::loadTexture(file);
+        texture.first  = texture.second.get<Texture>();
     }
-    m_Data.m_SFMLWindow.setIcon(texture->width(), texture->height(), texture->pixels());
+    m_Data.m_SFMLWindow.setIcon(texture.first->width(), texture.first->height(), texture.first->pixels());
     m_Data.m_IconFile = file;
 }
 void Window::setIcon(const std::string& file) {

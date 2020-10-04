@@ -2,11 +2,12 @@
 #ifndef ENGINE_MODEL_INSTANCE_ANIMATION_H
 #define ENGINE_MODEL_INSTANCE_ANIMATION_H
 
-class  Mesh;
 namespace Engine::priv {
     struct DefaultModelInstanceBindFunctor;
     class  ModelInstanceAnimationVector;
 };
+
+#include <core/engine/resources/Handle.h>
 
 namespace Engine::priv {
     class ModelInstanceAnimation final {
@@ -19,9 +20,9 @@ namespace Engine::priv {
             float          m_StartTime        = 0.0f;
             float          m_EndTime          = 0.0f;
             std::string    m_AnimationName    = "";
-            Mesh*          m_Mesh             = nullptr;
+            Handle         m_Mesh             = Handle{};
         public:
-            ModelInstanceAnimation(Mesh& mesh, const std::string& animName, float startTime, float endTime, unsigned int requestedLoops = 1);
+            ModelInstanceAnimation(Handle mesh, const std::string& animName, float startTime, float endTime, unsigned int requestedLoops = 1);
             ~ModelInstanceAnimation() = default;
 
             ModelInstanceAnimation(const ModelInstanceAnimation& other)                = delete;
@@ -45,13 +46,13 @@ namespace Engine::priv {
             ModelInstanceAnimationVector(ModelInstanceAnimationVector&& other) noexcept            = default;
             ModelInstanceAnimationVector& operator=(ModelInstanceAnimationVector&& other) noexcept = default;
 
-            void emplace_animation(Mesh&, const std::string& animationName, float start, float end, unsigned int requestedLoops);
+            void emplace_animation(Handle mesh, const std::string& animationName, float start, float end, unsigned int requestedLoops);
 
             inline const std::vector<glm::mat4>& getTransforms() const noexcept { return m_Transforms; }
 
             inline size_t size() const noexcept { return m_Animation_Instances.size(); }
             void clear();
-            void process(Mesh& mesh, const float dt);
+            void process(Handle mesh, const float dt);
     };
 };
 

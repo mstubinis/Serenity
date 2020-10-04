@@ -11,9 +11,9 @@
 using namespace Engine;
 using namespace Engine::priv;
 
-ShaderProgram* ShaderProgram::Deferred = nullptr;
-ShaderProgram* ShaderProgram::Forward  = nullptr;
-ShaderProgram* ShaderProgram::Decal    = nullptr;
+Handle ShaderProgram::Deferred = Handle{};
+Handle ShaderProgram::Forward  = Handle{};
+Handle ShaderProgram::Decal    = Handle{};
 
 namespace Engine::priv {
     struct DefaultShaderBindFunctor{void operator()(ShaderProgram* shaderProgram) const {
@@ -35,13 +35,15 @@ namespace Engine::priv {
     }};
 };
 
-ShaderProgram::ShaderProgram(const std::string& in_name, Shader& vs, Shader& fs)
+ShaderProgram::ShaderProgram(const std::string& in_name, Handle vsHandle, Handle fsHandle)
     : Resource{ ResourceType::ShaderProgram, in_name }
-    , m_VertexShader{ vs }
-    , m_FragmentShader{ fs }
+    , m_VertexShader{ vsHandle }
+    , m_FragmentShader{ fsHandle }
 {
     setName(in_name);
     const std::string& name_ = name();
+    auto& vs = *vsHandle.get<Shader>();
+    auto& fs = *fsHandle.get<Shader>();
     if (vs.name() == "NULL") {
         vs.setName(name_ + ".vert");
     }
@@ -50,6 +52,29 @@ ShaderProgram::ShaderProgram(const std::string& in_name, Shader& vs, Shader& fs)
     }
     setCustomBindFunctor(DefaultShaderBindFunctor());
     load();
+}
+ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept 
+    : Resource(std::move(other))
+    , m_VertexShader      { std::exchange(other.m_VertexShader, Handle{})}
+    , m_FragmentShader    { std::exchange(other.m_FragmentShader, Handle{}) }
+    , m_CustomBindFunctor {std::move(other.m_CustomBindFunctor)}
+    , m_ShaderProgram     { std::move(other.m_ShaderProgram) }
+    , m_UniformLocations  { std::move(other.m_UniformLocations) }
+    , m_AttachedUBOs      { std::move(other.m_AttachedUBOs) }
+    , m_LoadedCPU         { std::move(other.m_LoadedCPU) }
+    , m_LoadedGPU         { std::move(other.m_LoadedGPU) }
+{}
+ShaderProgram& ShaderProgram::operator=(ShaderProgram&& other) noexcept {
+    Resource::operator=(std::move(other));
+    m_VertexShader       = std::exchange(other.m_VertexShader, Handle{});
+    m_FragmentShader     = std::exchange(other.m_FragmentShader, Handle{});
+    m_CustomBindFunctor  = std::move(other.m_CustomBindFunctor);
+    m_ShaderProgram      = std::move(other.m_ShaderProgram);
+    m_UniformLocations   = std::move(other.m_UniformLocations);
+    m_AttachedUBOs       = std::move(other.m_AttachedUBOs);
+    m_LoadedCPU          = std::move(other.m_LoadedCPU);
+    m_LoadedGPU          = std::move(other.m_LoadedGPU);
+    return *this;
 }
 ShaderProgram::~ShaderProgram(){ 
     unload(); 
@@ -64,8 +89,10 @@ void InternalShaderProgramPublicInterface::LoadCPU(ShaderProgram& shaderP){
 void InternalShaderProgramPublicInterface::LoadGPU(ShaderProgram& shaderP){
     InternalShaderProgramPublicInterface::UnloadGPU(shaderP);
     if (!shaderP.m_LoadedGPU) {
-        const std::string& VertexCode   = shaderP.m_VertexShader.m_Code;
-        const std::string& FragmentCode = shaderP.m_FragmentShader.m_Code;
+        auto& vs = *shaderP.m_VertexShader.get<Shader>();
+        auto& fs = *shaderP.m_FragmentShader.get<Shader>();
+        const std::string& VertexCode   = vs.m_Code;
+        const std::string& FragmentCode = fs.m_Code;
         GLCall(GLuint vid = glCreateShader(GL_VERTEX_SHADER));
         GLCall(GLuint fid = glCreateShader(GL_FRAGMENT_SHADER));
         GLint res  = GL_FALSE;
@@ -82,10 +109,10 @@ void InternalShaderProgramPublicInterface::LoadGPU(ShaderProgram& shaderP){
             GLCall(glGetShaderInfoLog(vid, ll, NULL, &ve[0]));
         }
         if (res == GL_FALSE) {
-            if (shaderP.m_VertexShader.fromFile()) {
-                ENGINE_PRODUCTION_LOG("VertexShader Log (" + shaderP.m_VertexShader.m_FileName + "): ")
+            if (vs.fromFile()) {
+                ENGINE_PRODUCTION_LOG("VertexShader Log (" + vs.m_FileName + "): ")
             }else{
-                ENGINE_PRODUCTION_LOG("VertexShader Log (" + shaderP.m_VertexShader.name() + "): ")
+                ENGINE_PRODUCTION_LOG("VertexShader Log (" + vs.name() + "): ")
             }
             ENGINE_PRODUCTION_LOG(&ve[0])
         }
@@ -101,10 +128,10 @@ void InternalShaderProgramPublicInterface::LoadGPU(ShaderProgram& shaderP){
             GLCall(glGetShaderInfoLog(fid, ll, NULL, &fe[0]));
         }
         if (res == GL_FALSE) {
-            if (shaderP.m_FragmentShader.fromFile()) {
-                ENGINE_PRODUCTION_LOG("FragmentShader Log (" + shaderP.m_FragmentShader.m_FileName + "): ")
+            if (fs.fromFile()) {
+                ENGINE_PRODUCTION_LOG("FragmentShader Log (" + fs.m_FileName + "): ")
             }else{
-                ENGINE_PRODUCTION_LOG("FragmentShader Log (" + shaderP.m_FragmentShader.name() + "): ")
+                ENGINE_PRODUCTION_LOG("FragmentShader Log (" + fs.name() + "): ")
             }
             ENGINE_PRODUCTION_LOG(&fe[0])
         }

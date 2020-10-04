@@ -45,13 +45,11 @@ namespace Engine::priv {
             struct API2DCommand final {
                 std::function<void()>  func;
                 float                  depth;
-                //glm::vec4              scissor;
 
                 API2DCommand() = default;
-                API2DCommand(std::function<void()>&& func_, float depth_/*, const glm::vec4& scissor_*/) 
+                API2DCommand(std::function<void()>&& func_, float depth_) 
                     : func{ std::move(func_ ) }
                     , depth { depth_ }
-                    //, scissor { scissor_ }
                 {}
             };
             Engine::priv::Renderer&        m_Renderer;
@@ -74,8 +72,8 @@ namespace Engine::priv {
             glm::mat4                      m_2DProjectionMatrix;
             GBuffer                        m_GBuffer;
 
-            std::vector<Shader*>           m_InternalShaders;
-            std::vector<ShaderProgram*>    m_InternalShaderPrograms;
+            std::vector<Handle>            m_InternalShaders;
+            std::vector<Handle>            m_InternalShaderPrograms;
             std::vector<API2DCommand>      m_2DAPICommands;
             std::vector<API2DCommand>      m_2DAPICommandsNonTextured;
             //particle instancing
@@ -101,8 +99,8 @@ namespace Engine::priv {
             bool internal_pass_depth_prepass(Viewport& viewport, Camera& camera);
             void internal_pass_blur(Viewport& viewport, GLuint texture, std::string_view type);
 
-            void internal_generate_pbr_data_for_texture(ShaderProgram& covoludeShaderProgram, ShaderProgram& prefilterShaderProgram, Texture& texture, Texture& convolutionTexture, Texture& preEnvTexture, unsigned int convoludeTextureSize, unsigned int preEnvFilterSize);
-            void internal_generate_brdf_lut(ShaderProgram& program, unsigned int brdfSize, int numSamples);
+            void internal_generate_pbr_data_for_texture(Handle covoludeShaderProgram, Handle prefilterShaderProgram, Texture& texture, Handle convolutionTexture, Handle preEnvTexture, unsigned int convoludeTextureSize, unsigned int preEnvFilterSize);
+            void internal_generate_brdf_lut(Handle shaderProgram, unsigned int brdfSize, int numSamples);
 
             void internal_render_2d_text_left(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
             void internal_render_2d_text_center(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
@@ -150,10 +148,10 @@ namespace Engine::priv {
             bool colorMask(bool r, bool g, bool b, bool alpha) override;
             bool clearColor(bool r, bool g, bool b, bool alpha) override;
 
-            bool bindTextureForModification(unsigned int textureType, unsigned int textureObject) override;
+            bool bindTextureForModification(TextureType textureType, unsigned int textureObject) override;
             bool bindVAO(unsigned int vaoObject) override;
             bool deleteVAO(unsigned int& vaoObject) override;
-            void generateAndBindTexture(unsigned int textureType, unsigned int& textureObject) override;
+            void generateAndBindTexture(TextureType textureType, unsigned int& textureObject) override;
             void generateAndBindVAO(unsigned int& vaoObject) override;
 
             bool enableAPI(unsigned int apiEnum) override;
@@ -180,7 +178,7 @@ namespace Engine::priv {
             bool unbind(Material* material) override;
             bool unbind(Mesh* mesh) override;
 
-            void generatePBRData(Texture& texture, Texture& convolutionTexture, Texture& preEnvTexture, unsigned int convoludeSize, unsigned int prefilterSize) override;
+            void generatePBRData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, unsigned int convoludeSize, unsigned int prefilterSize) override;
 
             void sendGPUDataSunLight(Camera& camera, SunLight& sunLight, const std::string& start) override;
             int sendGPUDataPointLight(Camera& camera, PointLight& pointLight, const std::string& start) override;
@@ -189,7 +187,7 @@ namespace Engine::priv {
             int sendGPUDataRodLight(Camera& camera, RodLight& rodLight, const std::string& start) override;
             int sendGPUDataProjectionLight(Camera& camera, ProjectionLight& projectionLight, const std::string& start) override;
 
-            void renderSkybox(Skybox*, ShaderProgram& shaderProgram, Scene& scene, Viewport& viewport, Camera& camera) override;
+            void renderSkybox(Skybox*, Handle shaderProgram, Scene& scene, Viewport& viewport, Camera& camera) override;
             void renderSunLight(Camera& c, SunLight& s, Viewport& viewport) override;
             void renderPointLight(Camera& c, PointLight& p) override;
             void renderDirectionalLight(Camera& c, DirectionalLight& d, Viewport& viewport) override;
@@ -199,7 +197,7 @@ namespace Engine::priv {
             void renderMesh(Mesh& mesh, unsigned int mode = (unsigned int)ModelDrawingMode::Triangles) override;
             void renderDecal(ModelInstance& decalModelInstance) override;
 
-            void renderParticles(ParticleSystem& particleSystem, Camera& camera, ShaderProgram& program) override;
+            void renderParticles(ParticleSystem& particleSystem, Camera& camera, Handle program) override;
 
             void renderLightProbe(LightProbe& lightProbe) override;
 

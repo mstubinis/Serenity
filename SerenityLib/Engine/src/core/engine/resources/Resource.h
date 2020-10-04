@@ -11,14 +11,14 @@ class Resource {
         std::uint32_t  m_UsageCount    = 0U;
         ResourceType   m_ResourceType  = ResourceType::Unknown;
     public:
-        Resource(ResourceType type) 
-            : m_ResourceType{ type }
-        {}
-        Resource(ResourceType type, const std::string& name) 
-            : Resource{ type }
-        {
-            m_Name = name;
-        }
+        Resource() = default;
+        Resource(ResourceType type);
+        Resource(ResourceType type, const std::string& name);
+
+        Resource(const Resource& other)                 = delete;
+        Resource& operator=(const Resource& other)      = delete;
+        Resource(Resource&& other) noexcept;
+        Resource& operator=(Resource&& other) noexcept;
         virtual ~Resource() {}
 
         inline CONSTEXPR ResourceType type() const noexcept { return m_ResourceType; }

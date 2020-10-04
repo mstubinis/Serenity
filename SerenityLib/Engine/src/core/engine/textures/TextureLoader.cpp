@@ -14,116 +14,92 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace Engine::priv::textures;
 
-void TextureLoader::InitCommon(Texture& texture, unsigned int openglTextureType, bool toBeMipmapped) {
-    texture.m_Mipmapped       = false;
-    texture.m_IsToBeMipmapped = toBeMipmapped;
-    texture.m_MinFilter       = GL_LINEAR;
-    texture.m_Type            = openglTextureType;
+void TextureLoader::CPUInitCommon(TextureCPUData& cpuData, TextureType textureType, bool toBeMipmapped) {
+    cpuData.m_IsToBeMipmapped = toBeMipmapped;
+    cpuData.m_TextureType     = textureType;
 }
 
-void TextureLoader::InitFramebuffer(Texture& texture, int w, int h, ImagePixelType pxlType, ImagePixelFormat pxlFormat, ImageInternalFormat internal_, float divisor) {
-    texture.m_TextureType = TextureType::RenderTarget;
+void TextureLoader::CPUInitFramebuffer(TextureCPUData& cpuData, int w, int h, ImagePixelType pxlType, ImagePixelFormat pxlFormat, ImageInternalFormat intFormat, float divisor) {
+    cpuData.m_TextureType = TextureType::RenderTarget;
     int width             = (int)((float)w * divisor);
     int height            = (int)((float)h * divisor);
 
-    TextureLoader::InitCommon(texture, GL_TEXTURE_2D, false);
+    TextureLoader::CPUInitCommon(cpuData, TextureType::Texture2D, false);
 
-    texture.m_ImagesDatas.emplace_back(width, height, pxlType, pxlFormat, internal_);
-    texture.setName("RenderTarget");
+    auto& image                     = cpuData.m_ImagesDatas[0];
+    image.m_Mipmaps[0].width        = width;
+    image.m_Mipmaps[0].height       = height;
+    image.m_PixelType               = pxlType;
+    image.m_PixelFormat             = pxlFormat;
+    image.m_InternalFormat          = intFormat;
+
+    cpuData.m_Name = "RenderTgt";
 }
-void TextureLoader::InitFromMemory(Texture& texture, const sf::Image& sfImage, const std::string& name, bool genMipMaps, ImageInternalFormat internal_, unsigned int openglTextureType) {
-    texture.m_TextureType    = TextureType::Texture2D;
-    auto image               = ImageLoadedStructure(sfImage, name);
-    image.m_PixelType        = ImagePixelType::UNSIGNED_BYTE;
-    image.m_InternalFormat   = internal_;
+void TextureLoader::CPUInitFromMemory(TextureCPUData& cpuData, const sf::Image& sfImage, const std::string& name, bool genMipMaps, ImageInternalFormat intFormat, TextureType textureType) {
+    cpuData.m_TextureType       = TextureType::Texture2D;
+    auto& image                 = cpuData.m_ImagesDatas[0];
+    image.load(sfImage, name);
+    image.m_PixelType           = ImagePixelType::UNSIGNED_BYTE;
+    image.m_InternalFormat      = intFormat;
 
-    TextureLoader::InitCommon(texture, openglTextureType, genMipMaps);
+    TextureLoader::CPUInitCommon(cpuData, textureType, genMipMaps);
 
-    TextureLoader::ChoosePixelFormat(image.m_PixelFormat, image.m_InternalFormat);
-    texture.m_ImagesDatas.emplace_back(std::move(image));
-    texture.setName(name);
+    image.m_PixelFormat = image.m_InternalFormat;
+    cpuData.m_Name = name;
 }
-void TextureLoader::InitFromFile(Texture& texture, const std::string& filename, bool genMipMaps, ImageInternalFormat internal_, unsigned int openglTextureType) {
-    texture.m_TextureType        = TextureType::Texture2D;
-    auto image                   = ImageLoadedStructure();
-    image.m_Filename             = filename;
-    image.m_PixelType            = ImagePixelType::UNSIGNED_BYTE;
-    image.m_InternalFormat       = internal_;
-    const std::string& extension = boost::filesystem::extension(filename);
-    TextureLoader::InitCommon(texture, openglTextureType, genMipMaps);
+void TextureLoader::CPUInitFromMemory(Handle textureHandle, const sf::Image& sfImage, const std::string& name, bool genMipMaps, ImageInternalFormat intFormat, TextureType textureType) {
+    auto& cpuData = textureHandle.get<Texture>()->m_CPUData;
+    CPUInitFromMemory(cpuData, sfImage, name, genMipMaps, intFormat, textureType);
+}
+void TextureLoader::CPUInitFromFile(TextureCPUData& cpuData, const std::string& filename, bool genMipMaps, ImageInternalFormat intFormat, TextureType textureType) {
+    cpuData.m_TextureType            = TextureType::Texture2D;
+    auto& image                      = cpuData.m_ImagesDatas[0];
+    image.m_Filename                 = filename;
+    image.m_PixelType                = ImagePixelType::UNSIGNED_BYTE;
+    image.m_InternalFormat           = intFormat;
+    const std::string& extension     = boost::filesystem::extension(filename);
+    TextureLoader::CPUInitCommon(cpuData, textureType, genMipMaps);
     if (extension == ".dds") {
-        TextureLoader::LoadDDSFile(texture, filename, image);
+        TextureLoader::LoadDDSFile(cpuData, filename, image);
     }
-    TextureLoader::ChoosePixelFormat(image.m_PixelFormat, image.m_InternalFormat);
-    texture.m_ImagesDatas.insert(texture.m_ImagesDatas.begin(), std::move(image)); //yes, this NEEDS to be pushed into the front, not the back
 
-    texture.setName(filename);
+    image.m_PixelFormat = image.m_InternalFormat;
+    cpuData.m_Name      = filename;
 }
-void TextureLoader::InitFromFilesCubemap(Texture& texture, const std::string files[], const std::string& name, bool genMipMaps, ImageInternalFormat _internal) {
-    texture.m_TextureType = TextureType::CubeMap;
-    for (int j = 0; j < 6; ++j) {
-        auto image = ImageLoadedStructure();
-        image.m_Filename = files[j];
-        texture.m_ImagesDatas.emplace_back(std::move(image));
+void TextureLoader::CPUInitFromFile(Handle textureHandle, const std::string& filename, bool genMipMaps, ImageInternalFormat intFormat, TextureType textureType) {
+    auto& cpuData = textureHandle.get<Texture>()->m_CPUData;
+    CPUInitFromFile(cpuData, filename, genMipMaps, intFormat, textureType);
+}
+void TextureLoader::CPUInitFromFilesCubemap(TextureCPUData& cpuData, const std::array<std::string, 6>& files, const std::string& name, bool genMipMaps, ImageInternalFormat intFormat) {
+    cpuData.m_TextureType = TextureType::CubeMap;
+    auto& image           = cpuData.m_ImagesDatas[0];
+    image.m_Filename      = files[0];
+    for (int j = 1; j < files.size(); ++j) {
+        auto& imageInnerLoop      = cpuData.m_ImagesDatas.emplace_back();
+        imageInnerLoop.m_Filename = files[j];
     }
-    TextureLoader::InitCommon(texture, GL_TEXTURE_CUBE_MAP, genMipMaps);
-    for (auto& sideImage : texture.m_ImagesDatas) {
-        texture.m_Type              = GL_TEXTURE_CUBE_MAP;
+    TextureLoader::CPUInitCommon(cpuData, TextureType::CubeMap, genMipMaps);
+    for (auto& sideImage : cpuData.m_ImagesDatas) {
         sideImage.m_PixelType       = ImagePixelType::UNSIGNED_BYTE;
-        sideImage.m_InternalFormat  = _internal;
-        TextureLoader::ChoosePixelFormat(sideImage.m_PixelFormat, sideImage.m_InternalFormat);
+        sideImage.m_InternalFormat  = intFormat;
+        sideImage.m_PixelFormat     = sideImage.m_InternalFormat;
     }
-    texture.setName(name);
+    cpuData.m_Name = name;
 }
-unsigned int TextureLoader::OpenglTypeFromTextureType(TextureType type) noexcept {
-    switch (type) {
-        case TextureType::Unknown: {
-            return 0;
-        }case TextureType::Texture1D: {
-            return GL_TEXTURE_1D;
-        }case TextureType::Texture2D: {
-            return GL_TEXTURE_2D;
-        }case TextureType::Texture3D: {
-            return GL_TEXTURE_3D;
-        }case TextureType::CubeMap: {
-            return GL_TEXTURE_CUBE_MAP;
-        }case TextureType::RenderTarget: {
-            return GL_TEXTURE_2D;
-        }default: {
-            return 0;
-        }
-    }
-    return 0;
-}
-void TextureLoader::ImportIntoOpengl(Texture& texture, const Engine::priv::ImageMipmap& mipmap, unsigned int openGLType) {
-    auto& imageData = texture.m_ImagesDatas[0];
-    if (TextureLoader::IsCompressedType(imageData.m_InternalFormat) && mipmap.compressedSize != 0) {
-        GLCall(glCompressedTexImage2D(
-            openGLType, 
-            mipmap.level, 
-            (GLenum)imageData.m_InternalFormat, 
-            mipmap.width, 
-            mipmap.height, 
-            0, 
-            mipmap.compressedSize, 
+void TextureLoader::ImportIntoOpengl(Texture& texture, const Engine::priv::ImageMipmap& mipmap, TextureType textureType) {
+    auto& imageData = texture.m_CPUData.m_ImagesDatas[0];
+    if (imageData.m_InternalFormat.isCompressedType() && mipmap.compressedSize != 0) {
+        GLCall(glCompressedTexImage2D(textureType.toGLType(), mipmap.level, (GLenum)imageData.m_InternalFormat, mipmap.width, mipmap.height, 0, mipmap.compressedSize,
             &mipmap.pixels[0]
         ));
     }else{
-        GLCall(glTexImage2D(
-            openGLType, 
-            mipmap.level, 
-            (GLint)imageData.m_InternalFormat, 
-            mipmap.width, 
-            mipmap.height, 
-            0, 
-            (GLenum)imageData.m_PixelFormat, 
-            (GLenum)imageData.m_PixelType, 
-            &mipmap.pixels[0]
+        GLCall(glTexImage2D(textureType.toGLType(), mipmap.level, (GLint)imageData.m_InternalFormat, mipmap.width, mipmap.height, 0,
+            (GLenum)imageData.m_PixelFormat, (GLenum)imageData.m_PixelType, &mipmap.pixels[0]
         ));
     }
 }
 
-bool TextureLoader::LoadDDSFile(Texture& texture, const std::string& filename, ImageLoadedStructure& image_loaded_struct) {
+bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, const std::string& filename, ImageLoadedStructure& image_loaded_struct) {
     std::ifstream stream(filename.c_str(), std::ios::binary);
     if (!stream) {
         return false;
@@ -249,9 +225,8 @@ bool TextureLoader::LoadDDSFile(Texture& texture, const std::string& filename, I
             if (head.caps2 & DDS::DDS_CAPS2_CUBEMAP_NEGATIVEY) { ++numberOfMainImages; }//bottom
             if (head.caps2 & DDS::DDS_CAPS2_CUBEMAP_POSITIVEZ) { ++numberOfMainImages; }//front
             if (head.caps2 & DDS::DDS_CAPS2_CUBEMAP_NEGATIVEZ) { ++numberOfMainImages; }//back
-            texture.m_Type            = GL_TEXTURE_CUBE_MAP;
-            texture.m_TextureType     = TextureType::CubeMap;
-            texture.m_IsToBeMipmapped = false;
+            cpuData.m_TextureType     = TextureType::CubeMap;
+            cpuData.m_IsToBeMipmapped = false;
             --numberOfMainImages;
         }
     }
@@ -261,18 +236,15 @@ bool TextureLoader::LoadDDSFile(Texture& texture, const std::string& filename, I
     std::uint32_t height_             = head.h;
     for (std::uint32_t i = 0; i < numberOfMainImages; ++i) {
         ImageLoadedStructure* imgPtr = nullptr;
-        ImageLoadedStructure  imgCon;
         if (i == 0) {
             imgPtr = &image_loaded_struct;
-        }else if (texture.m_ImagesDatas.size() < i) {
-            imgPtr                   = &imgCon;
+        }else if (i >= cpuData.m_ImagesDatas.size()) {
+            imgPtr                   = &cpuData.m_ImagesDatas.emplace_back();
             imgPtr->m_PixelFormat    = image_loaded_struct.m_PixelFormat;
             imgPtr->m_PixelType      = image_loaded_struct.m_PixelType;
             imgPtr->m_InternalFormat = image_loaded_struct.m_InternalFormat;
-            texture.m_ImagesDatas.emplace_back(std::move(imgCon));
-            imgPtr = &texture.m_ImagesDatas.back();
         }else{
-            imgPtr = &texture.m_ImagesDatas[i];
+            imgPtr = &cpuData.m_ImagesDatas[i];
         }
         width_  = head.w;
         height_ = head.h;
@@ -280,48 +252,45 @@ bool TextureLoader::LoadDDSFile(Texture& texture, const std::string& filename, I
             if (level > 0 && (width_ < 64 || height_ < 64)) {
                 break;
             }
-            ImageMipmap* mipmap            = nullptr;
-            ImageMipmap  mipMapCon;
-            if (level > 0) { 
-                mipmap                     = &mipMapCon; 
-            }else{ 
-                mipmap                     = &imgPtr->m_Mipmaps[0]; 
-            }
-            mipmap->level                  = level;
-            mipmap->width                  = width_;
-            mipmap->height                 = height_;
-            const std::uint32_t compressed_size = ((width_ + 3U) / 4U) * ((height_ + 3U) / 4U) * blockSize;
-            mipmap->compressedSize         = compressed_size;
 
-            auto& pixels                   = mipmap->pixels;
+            ImageMipmap* mipmap = nullptr;
+            if (level > 0) {
+                mipmap = &imgPtr->m_Mipmaps.emplace_back();
+            }else{
+                mipmap = &imgPtr->m_Mipmaps[0];
+            }
+            mipmap->level                       = level;
+            mipmap->width                       = width_;
+            mipmap->height                      = height_;
+            const std::uint32_t compressed_size = ((width_ + 3U) / 4U) * ((height_ + 3U) / 4U) * blockSize;
+            mipmap->compressedSize              = compressed_size;
+
+            auto& pixels                        = mipmap->pixels;
             pixels.reserve(compressed_size);
             for (std::uint32_t t = 0; t < compressed_size; ++t) {
                 pixels.emplace_back( file_data[offset + t] );
             }
-            width_                         = std::max(width_ / 2U, 1U);
-            height_                        = std::max(height_ / 2U, 1U);
-            offset                        += compressed_size;
-            if (level > 0) { 
-                imgPtr->m_Mipmaps.emplace_back(*mipmap);
-            }
+            width_                              = std::max(width_ / 2U, 1U);
+            height_                             = std::max(height_ / 2U, 1U);
+            offset                             += compressed_size;
         }
     }
     return true;
 }
 void TextureLoader::LoadTexture2DIntoOpenGL(Texture& texture) {
-    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress);
-    for (auto& mipmap : texture.m_ImagesDatas[0].m_Mipmaps) {
-        TextureLoader::ImportIntoOpengl(texture, mipmap, texture.m_Type);
-        //TextureLoader::WithdrawPixelsFromOpenGLMemory(texture,0,mipmap.level);
+    Engine::Renderer::bindTextureForModification(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
+    for (auto& mipmap : texture.m_CPUData.m_ImagesDatas[0].m_Mipmaps) {
+        TextureLoader::ImportIntoOpengl(texture, mipmap, texture.m_CPUData.m_TextureType);
+        //TextureLoader::WithdrawPixelsFromOpenGLMemory(texture, 0, mipmap.level);
     }
     texture.setFilter(TextureFilter::Linear);
     texture.setWrapping(TextureWrap::Repeat);
 }
 void TextureLoader::LoadTextureFramebufferIntoOpenGL(Texture& texture) {
-    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress);
-    const auto& image = texture.m_ImagesDatas[0];
+    Engine::Renderer::bindTextureForModification(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
+    const auto& image = texture.m_CPUData.m_ImagesDatas[0];
     GLCall(glTexImage2D(
-        texture.m_Type, 
+        texture.m_CPUData.m_TextureType.toGLType(),
         0, 
         (GLint)image.m_InternalFormat, 
         image.m_Mipmaps[0].width, 
@@ -335,12 +304,11 @@ void TextureLoader::LoadTextureFramebufferIntoOpenGL(Texture& texture) {
     texture.setWrapping(TextureWrap::ClampToEdge);
 }
 void TextureLoader::LoadTextureCubemapIntoOpenGL(Texture& texture) {
-    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress);
+    Engine::Renderer::bindTextureForModification(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
     std::uint32_t imageIndex = 0;
-    for (auto& image : texture.m_ImagesDatas) {
+    for (auto& image : texture.m_CPUData.m_ImagesDatas) {
         for (auto& mipmap : image.m_Mipmaps) {
-            TextureLoader::ImportIntoOpengl(texture, mipmap, GL_TEXTURE_CUBE_MAP_POSITIVE_X + imageIndex);
-            //TextureLoader::WithdrawPixelsFromOpenGLMemory(texture, imageIndex, mipmap.level);
+            TextureLoader::ImportIntoOpengl(texture, mipmap, static_cast<TextureType>((std::uint32_t)TextureType::CubeMap_X_Pos + imageIndex));
         }
         ++imageIndex;
     }
@@ -348,206 +316,88 @@ void TextureLoader::LoadTextureCubemapIntoOpenGL(Texture& texture) {
     texture.setWrapping(TextureWrap::ClampToEdge);
 }
 void TextureLoader::WithdrawPixelsFromOpenGLMemory(Texture& texture, unsigned int imageIndex, unsigned int mipmapLevel) {
-    auto& image = texture.m_ImagesDatas[imageIndex];
+    auto& image = texture.m_CPUData.m_ImagesDatas[imageIndex];
     auto& pxls  = image.m_Mipmaps[mipmapLevel].pixels;
-    if (pxls.size() != 0) {
-        return;
-    }
+    pxls.clear();
     pxls.resize(image.m_Mipmaps[mipmapLevel].width * image.m_Mipmaps[mipmapLevel].height * 4);
-    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress);
-    GLCall(glGetTexImage(texture.m_Type, 0, (GLenum)image.m_PixelFormat, (GLenum)image.m_PixelType, &pxls[0]));
-}
-void TextureLoader::ChoosePixelFormat(ImagePixelFormat& out, ImageInternalFormat in) {
-    switch (in) {
-        case ImageInternalFormat::COMPRESSED_RED: { out = ImagePixelFormat::RED; break; }
-        case ImageInternalFormat::COMPRESSED_RED_RGTC1: { out = ImagePixelFormat::RED; break; }//recheck this
-        case ImageInternalFormat::COMPRESSED_RG: { out = ImagePixelFormat::RG; break; }
-        case ImageInternalFormat::COMPRESSED_RGB: { out = ImagePixelFormat::RGB; break; }
-        case ImageInternalFormat::COMPRESSED_RGBA: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT1_EXT: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT3_EXT: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT5_EXT: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::COMPRESSED_RGB_S3TC_DXT1_EXT: { out = ImagePixelFormat::RGB; break; }
-        case ImageInternalFormat::COMPRESSED_RG_RGTC2: { out = ImagePixelFormat::RG; break; }//recheck this
-        case ImageInternalFormat::COMPRESSED_SIGNED_RED_RGTC1: { out = ImagePixelFormat::RED; break; }//recheck this
-        case ImageInternalFormat::COMPRESSED_SIGNED_RG_RGTC2: { out = ImagePixelFormat::RG; break; }//recheck this
-        case ImageInternalFormat::COMPRESSED_SRGB: { out = ImagePixelFormat::RGB; break; }
-        case ImageInternalFormat::COMPRESSED_SRGB_ALPHA: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::COMPRESSED_SRGB_S3TC_DXT1_EXT: { out = ImagePixelFormat::RGB; break; }
-        case ImageInternalFormat::Depth16: { out = ImagePixelFormat::DEPTH_COMPONENT; break; }
-        case ImageInternalFormat::Depth24: { out = ImagePixelFormat::DEPTH_COMPONENT; break; }
-        case ImageInternalFormat::Depth32: { out = ImagePixelFormat::DEPTH_COMPONENT; break; }
-        case ImageInternalFormat::Depth32F: { out = ImagePixelFormat::DEPTH_COMPONENT; break; }
-        case ImageInternalFormat::Depth24Stencil8: { out = ImagePixelFormat::DEPTH_STENCIL; break; }
-        case ImageInternalFormat::Depth32FStencil8: { out = ImagePixelFormat::DEPTH_STENCIL; break; }
-        case ImageInternalFormat::DEPTH_COMPONENT: { out = ImagePixelFormat::DEPTH_COMPONENT; break; }
-        case ImageInternalFormat::DEPTH_STENCIL: { out = ImagePixelFormat::DEPTH_STENCIL; break; }
-        case ImageInternalFormat::R11F_G11F_B10F: { out = ImagePixelFormat::RGB; break; }
-        case ImageInternalFormat::R16: { out = ImagePixelFormat::RED; break; }
-        case ImageInternalFormat::R16F: { out = ImagePixelFormat::RED; break; }
-        case ImageInternalFormat::R16I: { out = ImagePixelFormat::RED_INTEGER; break; }
-        case ImageInternalFormat::R16UI: { out = ImagePixelFormat::RED_INTEGER; break; }
-        case ImageInternalFormat::R16_SNORM: { out = ImagePixelFormat::RED; break; }
-        case ImageInternalFormat::R32F: { out = ImagePixelFormat::RED; break; }
-        case ImageInternalFormat::R32I: { out = ImagePixelFormat::RED_INTEGER; break; }
-        case ImageInternalFormat::R32UI: { out = ImagePixelFormat::RED_INTEGER; break; }
-        case ImageInternalFormat::R3_G3_B2: { out = ImagePixelFormat::RGB; break; }
-        case ImageInternalFormat::R8: { out = ImagePixelFormat::RED; break; }
-        case ImageInternalFormat::R8I: { out = ImagePixelFormat::RED_INTEGER; break; }
-        case ImageInternalFormat::R8UI: { out = ImagePixelFormat::RED_INTEGER; break; }
-        case ImageInternalFormat::R8_SNORM: { out = ImagePixelFormat::RED; break; }
-        case ImageInternalFormat::RED: { out = ImagePixelFormat::RED; break; }
-        case ImageInternalFormat::RG: { out = ImagePixelFormat::RG; break; }
-        case ImageInternalFormat::RG16: { out = ImagePixelFormat::RG; break; }
-        case ImageInternalFormat::RG16F: { out = ImagePixelFormat::RG; break; }
-        case ImageInternalFormat::RG16I: { out = ImagePixelFormat::RG_INTEGER; break; }
-        case ImageInternalFormat::RG16UI: { out = ImagePixelFormat::RG_INTEGER; break; }
-        case ImageInternalFormat::RG16_SNORM: { out = ImagePixelFormat::RG; break; }
-        case ImageInternalFormat::RG32F: { out = ImagePixelFormat::RG; break; }
-        case ImageInternalFormat::RG32I: { out = ImagePixelFormat::RG_INTEGER; break; }
-        case ImageInternalFormat::RG32UI: { out = ImagePixelFormat::RG_INTEGER; break; }
-        case ImageInternalFormat::RG8: { out = ImagePixelFormat::RG; break; }
-        case ImageInternalFormat::RG8I: { out = ImagePixelFormat::RG_INTEGER; break; }
-        case ImageInternalFormat::RG8UI: { out = ImagePixelFormat::RG_INTEGER; break; }
-        case ImageInternalFormat::RG8_SNORM: { out = ImagePixelFormat::RG; break; }
-        case ImageInternalFormat::RGB: { out = ImagePixelFormat::RGB; break; }
-        case ImageInternalFormat::RGB10: { out = ImagePixelFormat::RGB; break; }
-        case ImageInternalFormat::RGB10_A2: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::RGB12: { out = ImagePixelFormat::RGB; break; }
-        case ImageInternalFormat::RGB16F: { out = ImagePixelFormat::RGB; break; }
-        case ImageInternalFormat::RGB16I: { out = ImagePixelFormat::RGB_INTEGER; break; }
-        case ImageInternalFormat::RGB16UI: { out = ImagePixelFormat::RGB_INTEGER; break; }
-        case ImageInternalFormat::RGB16_SNORM: { out = ImagePixelFormat::RGB; break; }
-        case ImageInternalFormat::RGB32F: { out = ImagePixelFormat::RGB; break; }
-        case ImageInternalFormat::RGB32I: { out = ImagePixelFormat::RGB_INTEGER; break; }
-        case ImageInternalFormat::RGB32UI: { out = ImagePixelFormat::RGB_INTEGER; break; }
-        case ImageInternalFormat::RGB4: { out = ImagePixelFormat::RGB; break; }
-        case ImageInternalFormat::RGB5: { out = ImagePixelFormat::RGB; break; }
-        case ImageInternalFormat::RGB5_A1: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::RGB8: { out = ImagePixelFormat::RGB; break; }
-        case ImageInternalFormat::RGB8I: { out = ImagePixelFormat::RGB_INTEGER; break; }
-        case ImageInternalFormat::RGB8UI: { out = ImagePixelFormat::RGB_INTEGER; break; }
-        case ImageInternalFormat::RGB8_SNORM: { out = ImagePixelFormat::RGB; break; }
-        case ImageInternalFormat::RGB9_E5: { out = ImagePixelFormat::RGB; break; }//recheck this
-        case ImageInternalFormat::RGBA: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::RGBA12: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::RGBA16: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::RGBA16F: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::RGBA16I: { out = ImagePixelFormat::RGBA_INTEGER; break; }
-        case ImageInternalFormat::RGBA16UI: { out = ImagePixelFormat::RGBA_INTEGER; break; }
-        case ImageInternalFormat::RGBA2: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::RGBA32F: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::RGBA32I: { out = ImagePixelFormat::RGBA_INTEGER; break; }
-        case ImageInternalFormat::RGBA32UI: { out = ImagePixelFormat::RGBA_INTEGER; break; }
-        case ImageInternalFormat::RGBA4: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::RGBA8: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::RGBA8I: { out = ImagePixelFormat::RGBA_INTEGER; break; }
-        case ImageInternalFormat::RGBA8UI: { out = ImagePixelFormat::RGBA_INTEGER; break; }
-        case ImageInternalFormat::RGBA8_SNORM: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::SRGB8: { out = ImagePixelFormat::RGB; break; }
-        case ImageInternalFormat::SRGB8_ALPHA8: { out = ImagePixelFormat::RGBA; break; }
-        case ImageInternalFormat::StencilIndex8: { out = ImagePixelFormat::STENCIL_INDEX; break; }
-        case ImageInternalFormat::STENCIL_INDEX: { out = ImagePixelFormat::STENCIL_INDEX; break; }
-        default: { out = ImagePixelFormat::RGBA; break; }
-    }
-}
-bool TextureLoader::IsCompressedType(ImageInternalFormat format) {
-    switch (format) {
-        case ImageInternalFormat::COMPRESSED_RED: { return true; break; }
-        case ImageInternalFormat::COMPRESSED_RED_RGTC1: { return true; break; }
-        case ImageInternalFormat::COMPRESSED_RG: { return true; break; }
-        case ImageInternalFormat::COMPRESSED_RGB: { return true; break; }
-        case ImageInternalFormat::COMPRESSED_RGBA: { return true; break; }
-        case ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT1_EXT: { return true; break; }
-        case ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT3_EXT: { return true; break; }
-        case ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT5_EXT: { return true; break; }
-        case ImageInternalFormat::COMPRESSED_RGB_S3TC_DXT1_EXT: { return true; break; }
-        case ImageInternalFormat::COMPRESSED_RG_RGTC2: { return true; break; }
-        case ImageInternalFormat::COMPRESSED_SIGNED_RED_RGTC1: { return true; break; }
-        case ImageInternalFormat::COMPRESSED_SIGNED_RG_RGTC2: { return true; break; }
-        case ImageInternalFormat::COMPRESSED_SRGB: { return true; break; }
-        case ImageInternalFormat::COMPRESSED_SRGB_ALPHA: { return true; break; }
-        case ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT: { return true; break; }
-        case ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT: { return true; break; }
-        case ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT: { return true; break; }
-        case ImageInternalFormat::COMPRESSED_SRGB_S3TC_DXT1_EXT: { return true; break; }
-        default: { return false; break; }
-    }
-    return false;
+    Engine::Renderer::bindTextureForModification(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
+    GLCall(glGetTexImage(texture.m_CPUData.m_TextureType.toGLType(), 0, (GLenum)image.m_PixelFormat, (GLenum)image.m_PixelType, &pxls[0]));
 }
 void TextureLoader::GenerateMipmapsOpenGL(Texture& texture) {
-    if (texture.m_Mipmapped) {
+    if (texture.m_CPUData.m_Mipmapped) {
         return;
     }
-    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress);
-    GLCall(glTexParameteri(texture.m_Type, GL_TEXTURE_BASE_LEVEL, 0));
-    if (texture.m_MinFilter == GL_LINEAR) {
-        texture.m_MinFilter = GL_LINEAR_MIPMAP_LINEAR;
-    }else if (texture.m_MinFilter == GL_NEAREST) {
-        texture.m_MinFilter = GL_NEAREST_MIPMAP_NEAREST;
+    Engine::Renderer::bindTextureForModification(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
+    GLCall(glTexParameteri(texture.m_CPUData.m_TextureType.toGLType(), GL_TEXTURE_BASE_LEVEL, 0));
+    if (texture.m_CPUData.m_MinFilter == GL_LINEAR) {
+        texture.m_CPUData.m_MinFilter = GL_LINEAR_MIPMAP_LINEAR;
+    }else if (texture.m_CPUData.m_MinFilter == GL_NEAREST) {
+        texture.m_CPUData.m_MinFilter = GL_NEAREST_MIPMAP_NEAREST;
     }
-    GLCall(glTexParameteri(texture.m_Type, GL_TEXTURE_MIN_FILTER, texture.m_MinFilter));
-    GLCall(glGenerateMipmap(texture.m_Type));
-    texture.m_Mipmapped = true;
-}
-void TextureLoader::EnumWrapToGL(unsigned int& gl, TextureWrap wrap) {
-    if      (wrap == TextureWrap::Repeat)         gl = GL_REPEAT;
-    else if (wrap == TextureWrap::RepeatMirrored) gl = GL_MIRRORED_REPEAT;
-    else if (wrap == TextureWrap::ClampToBorder)  gl = GL_CLAMP_TO_BORDER;
-    else if (wrap == TextureWrap::ClampToEdge)    gl = GL_CLAMP_TO_EDGE;
-}
-void TextureLoader::EnumFilterToGL(unsigned int& gl, TextureFilter filter, bool min) {
-    if (min) {
-        if      (filter == TextureFilter::Linear)                  gl = GL_LINEAR;
-        else if (filter == TextureFilter::Nearest)                 gl = GL_NEAREST;
-        else if (filter == TextureFilter::Linear_Mipmap_Linear)    gl = GL_LINEAR_MIPMAP_LINEAR;
-        else if (filter == TextureFilter::Linear_Mipmap_Nearest)   gl = GL_LINEAR_MIPMAP_NEAREST;
-        else if (filter == TextureFilter::Nearest_Mipmap_Linear)   gl = GL_NEAREST_MIPMAP_LINEAR;
-        else if (filter == TextureFilter::Nearest_Mipmap_Nearest)  gl = GL_NEAREST_MIPMAP_NEAREST;
-    }else{
-        if      (filter == TextureFilter::Linear)                  gl = GL_LINEAR;
-        else if (filter == TextureFilter::Nearest)                 gl = GL_NEAREST;
-        else if (filter == TextureFilter::Linear_Mipmap_Linear)    gl = GL_LINEAR;
-        else if (filter == TextureFilter::Linear_Mipmap_Nearest)   gl = GL_LINEAR;
-        else if (filter == TextureFilter::Nearest_Mipmap_Linear)   gl = GL_NEAREST;
-        else if (filter == TextureFilter::Nearest_Mipmap_Nearest)  gl = GL_NEAREST;
-    }
+    GLCall(glTexParameteri(texture.m_CPUData.m_TextureType.toGLType(), GL_TEXTURE_MIN_FILTER, texture.m_CPUData.m_MinFilter));
+    GLCall(glGenerateMipmap(texture.m_CPUData.m_TextureType.toGLType()));
+    texture.m_CPUData.m_Mipmapped = true;
 }
 void TextureLoader::GeneratePBRData(Texture& texture, int convoludeTextureSize, int preEnvFilterSize) {
-    Texture* cubemapConvolution  = Engine::priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(texture.name() + "Convolution");
-    Texture* cubemapPreEnvFilter = Engine::priv::Core::m_Engine->m_ResourceManager.HasResource<Texture>(texture.name() + "PreEnvFilter");
-
-    if (!cubemapConvolution) {
-        cubemapConvolution = NEW Texture(texture.name() + "Convolution", TextureType::CubeMap, convoludeTextureSize, convoludeTextureSize, false);
-        Engine::Renderer::genAndBindTexture(cubemapConvolution->type(), cubemapConvolution->internal_get_address_for_generation());
+    auto cubemapConvolution            = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.get<Texture>(texture.name() + "Convolution");
+    auto cubemapPreEnvFilter           = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.get<Texture>(texture.name() + "PreEnvFilter");
+    texture.m_ConvolutionTextureHandle = cubemapConvolution.second;
+    texture.m_PreEnvTextureHandle      = cubemapPreEnvFilter.second;
+    if (!cubemapConvolution.first) {
+        texture.m_ConvolutionTextureHandle = Engine::Resources::addResource<Texture>(
+            texture.name() + "Convolution", TextureType::CubeMap, convoludeTextureSize, convoludeTextureSize, false
+        );
+        cubemapConvolution.first = texture.m_ConvolutionTextureHandle.get<Texture>();
+        Engine::Renderer::genAndBindTexture(cubemapConvolution.first->getTextureType(), cubemapConvolution.first->internal_get_address_for_generation());
         for (unsigned int i = 0; i < 6; ++i) {
             GLCall(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, convoludeTextureSize, convoludeTextureSize, 0, GL_RGB, GL_FLOAT, NULL));
         }
-        cubemapConvolution->setWrapping(TextureWrap::ClampToEdge);
-        cubemapConvolution->setFilter(TextureFilter::Linear);
-        Engine::priv::Core::m_Engine->m_ResourceManager._addTexture(cubemapConvolution);
+        cubemapConvolution.first->setWrapping(TextureWrap::ClampToEdge);
+        cubemapConvolution.first->setFilter(TextureFilter::Linear);
     }
-    texture.m_ConvolutionTexture = cubemapConvolution;
-    if (!cubemapPreEnvFilter) {
-        cubemapPreEnvFilter = NEW Texture(texture.name() + "PreEnvFilter", TextureType::CubeMap, preEnvFilterSize, preEnvFilterSize, true);
-        Engine::Renderer::genAndBindTexture(cubemapPreEnvFilter->type(), cubemapPreEnvFilter->internal_get_address_for_generation());
+    if (!cubemapPreEnvFilter.first) {
+        texture.m_PreEnvTextureHandle = Engine::Resources::addResource<Texture>(
+            texture.name() + "PreEnvFilter", TextureType::CubeMap, preEnvFilterSize, preEnvFilterSize, true
+        );
+        cubemapPreEnvFilter.first = texture.m_PreEnvTextureHandle.get<Texture>();
+        Engine::Renderer::genAndBindTexture(cubemapPreEnvFilter.first->getTextureType(), cubemapPreEnvFilter.first->internal_get_address_for_generation());
         for (unsigned int i = 0; i < 6; ++i) {
             GLCall(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, preEnvFilterSize, preEnvFilterSize, 0, GL_RGB, GL_FLOAT, NULL));
         }
-        cubemapPreEnvFilter->setWrapping(TextureWrap::ClampToEdge);
-        cubemapPreEnvFilter->setMinFilter(TextureFilter::Linear_Mipmap_Linear);
-        cubemapPreEnvFilter->setMaxFilter(TextureFilter::Linear);
-        Engine::priv::Core::m_Engine->m_ResourceManager._addTexture(cubemapPreEnvFilter);
+        cubemapPreEnvFilter.first->setWrapping(TextureWrap::ClampToEdge);
+        cubemapPreEnvFilter.first->setMinFilter(TextureFilter::Linear_Mipmap_Linear);
+        cubemapPreEnvFilter.first->setMaxFilter(TextureFilter::Linear);
     }
-    texture.m_PreEnvTexture = cubemapPreEnvFilter;
 
-    Core::m_Engine->m_RenderManager._genPBREnvMapData(texture, *cubemapConvolution, *cubemapPreEnvFilter, convoludeTextureSize, preEnvFilterSize);
+    Core::m_Engine->m_RenderManager._genPBREnvMapData(texture, texture.m_ConvolutionTextureHandle, texture.m_PreEnvTextureHandle, convoludeTextureSize, preEnvFilterSize);
+}
+void InternalTexturePublicInterface::LoadCPU(Handle textureHandle) {
+    auto& texture = *textureHandle.get<Texture>();
+    LoadCPU(texture);
+}
+void InternalTexturePublicInterface::LoadGPU(Handle textureHandle) {
+    auto& texture = *textureHandle.get<Texture>();
+    LoadGPU(texture);
+}
+void InternalTexturePublicInterface::UnloadCPU(Handle textureHandle) {
+    auto& texture = *textureHandle.get<Texture>();
+    UnloadCPU(texture);
+}
+void InternalTexturePublicInterface::UnloadGPU(Handle textureHandle) {
+    auto& texture = *textureHandle.get<Texture>();
+    UnloadGPU(texture);
+}
+void InternalTexturePublicInterface::Load(Handle textureHandle) {
+    auto& texture = *textureHandle.get<Texture>();
+    Load(texture);
+}
+void InternalTexturePublicInterface::Unload(Handle textureHandle) {
+    auto& texture = *textureHandle.get<Texture>();
+    Unload(texture);
 }
 void InternalTexturePublicInterface::LoadCPU(Texture& texture) {
-    for (auto& image : texture.m_ImagesDatas) {
+    texture.setName(texture.m_CPUData.m_Name);
+    for (auto& image : texture.m_CPUData.m_ImagesDatas) {
         if (!image.m_Filename.empty()) {
             bool do_ = false;
             if (image.m_Mipmaps.size() == 0) {
@@ -564,7 +414,7 @@ void InternalTexturePublicInterface::LoadCPU(Texture& texture) {
             if (do_) {
                 const std::string& extension = boost::filesystem::extension(image.m_Filename);
                 if (extension == ".dds") {
-                    TextureLoader::LoadDDSFile(texture, image.m_Filename, image);
+                    TextureLoader::LoadDDSFile(texture.m_CPUData, image.m_Filename, image);
                 }else{
                     sf::Image sfImage;
                     sfImage.loadFromFile(image.m_Filename);
@@ -575,8 +425,8 @@ void InternalTexturePublicInterface::LoadCPU(Texture& texture) {
     }
 }
 void InternalTexturePublicInterface::LoadGPU(Texture& texture) {
-    Engine::Renderer::genAndBindTexture(texture.m_Type, texture.m_TextureAddress);
-    switch (texture.m_TextureType) {
+    Engine::Renderer::genAndBindTexture(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
+    switch ((TextureType::Type)texture.m_CPUData.m_TextureType) {
         case TextureType::RenderTarget: {
             TextureLoader::LoadTextureFramebufferIntoOpenGL(texture);
             break;
@@ -590,11 +440,11 @@ void InternalTexturePublicInterface::LoadGPU(Texture& texture) {
         }case TextureType::CubeMap: {
             TextureLoader::LoadTextureCubemapIntoOpenGL(texture);
             break;
-        }default: { 
-            break; 
+        }default: {
+            break;
         }
     }
-    if (texture.m_IsToBeMipmapped) {
+    if (texture.m_CPUData.m_IsToBeMipmapped) {
         TextureLoader::GenerateMipmapsOpenGL(texture);
     }
     while (texture.m_CommandQueue.size() > 0) {
@@ -604,7 +454,7 @@ void InternalTexturePublicInterface::LoadGPU(Texture& texture) {
     texture.Resource::load();
 }
 void InternalTexturePublicInterface::UnloadCPU(Texture& texture) {
-    for (auto& image : texture.m_ImagesDatas) {
+    for (auto& image : texture.m_CPUData.m_ImagesDatas) {
         if (!image.m_Filename.empty()) {
             for (auto& mipmap : image.m_Mipmaps) {
                 if (mipmap.pixels.size() == 0) {
@@ -613,7 +463,7 @@ void InternalTexturePublicInterface::UnloadCPU(Texture& texture) {
             }
         }
     }
-    texture.m_Mipmapped = false;
+    texture.m_CPUData.m_Mipmapped = false;
     texture.Resource::unload();
 }
 void InternalTexturePublicInterface::UnloadGPU(Texture& texture) {
@@ -631,18 +481,20 @@ void InternalTexturePublicInterface::Unload(Texture& texture) {
         InternalTexturePublicInterface::UnloadCPU(texture);
     }
 }
+
+
 void InternalTexturePublicInterface::Resize(Texture& texture, Engine::priv::FramebufferObject& fbo, int width, int height) {
-    if (texture.m_TextureType != TextureType::RenderTarget) {
+    if (texture.m_CPUData.m_TextureType != TextureType::RenderTarget) {
         ENGINE_PRODUCTION_LOG("Error: Non-framebuffer texture cannot be resized. Returning...")
         return;
     }
     const float divisor           = fbo.divisor();
-    Engine::Renderer::bindTextureForModification(texture.m_Type, texture.m_TextureAddress);
+    Engine::Renderer::bindTextureForModification(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
     const int w                   = (int)((float)width * divisor);
     const int h                   = (int)((float)height * divisor);
-    auto& imageData               = texture.m_ImagesDatas[0];
+    auto& imageData               = texture.m_CPUData.m_ImagesDatas[0];
     imageData.m_Mipmaps[0].width  = w;
     imageData.m_Mipmaps[0].height = h;
 
-    GLCall(glTexImage2D(texture.m_Type, 0, (GLint)imageData.m_InternalFormat, w, h, 0, (GLenum)imageData.m_PixelFormat, (GLenum)imageData.m_PixelType, NULL));
+    GLCall(glTexImage2D(texture.m_CPUData.m_TextureType.toGLType(), 0, (GLint)imageData.m_InternalFormat, w, h, 0, (GLenum)imageData.m_PixelFormat, (GLenum)imageData.m_PixelType, NULL));
 }

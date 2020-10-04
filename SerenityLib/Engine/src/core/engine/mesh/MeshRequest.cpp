@@ -101,10 +101,10 @@ bool InternalMeshRequestPublicInterface::Populate(MeshRequest& meshRequest) {
         MeshLoader::LoadPopulateGlobalNodes(scene, rootNode, nullptr, rootNode, &root, meshRequest);
     }else{
         MeshRequestPart part{};
-        part.name   = meshRequest.m_FileOrData;
-        part.mesh   = NEW Mesh();
-        part.mesh->setName(part.name);
-        part.handle = Core::m_Engine->m_ResourceManager.m_ResourcePool.add(part.mesh, (unsigned int)ResourceType::Mesh);
+        part.name    = meshRequest.m_FileOrData;
+        part.handle  = Core::m_Engine->m_ResourceManager.m_ResourceModule.emplace<Mesh>();
+        Mesh* mesh   = part.handle.get<Mesh>();
+        mesh->setName(part.name);
         meshRequest.m_Parts.push_back(std::move(part));
     }
     return true;
@@ -115,9 +115,9 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
         auto& root{ *meshRequest.m_Importer.m_AIRoot };
         unsigned int count{ 0 };
         MeshLoader::LoadProcessNodeData(meshRequest, scene, root, count);
-        SMSH_File::SaveFile((meshRequest.m_FileOrData.substr(0, meshRequest.m_FileOrData.find_last_of(".")) + ".smsh").c_str(), *meshRequest.m_Parts[0].mesh);
+        SMSH_File::SaveFile((meshRequest.m_FileOrData.substr(0, meshRequest.m_FileOrData.find_last_of(".")) + ".smsh").c_str(), *meshRequest.m_Parts[0].handle.get<Mesh>());
     }else if (meshRequest.m_FileExtension == ".smsh") {
-        Mesh& mesh{ *meshRequest.m_Parts[0].mesh };
+        Mesh& mesh{ *meshRequest.m_Parts[0].handle.get<Mesh>() };
         SMSH_File::LoadFile(&mesh, meshRequest.m_FileOrData.c_str());
         mesh.m_Threshold = meshRequest.m_Threshold;
         InternalMeshPublicInterface::CalculateRadius(mesh);
@@ -125,7 +125,7 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
         mesh.m_CollisionFactory = NEW MeshCollisionFactory(mesh);
     }else{ //objcc
         VertexData* vertexData{ MeshLoader::LoadFrom_OBJCC(meshRequest.m_FileOrData) };
-        Mesh& mesh{ *meshRequest.m_Parts[0].mesh };
+        Mesh& mesh{ *meshRequest.m_Parts[0].handle.get<Mesh>() };
         mesh.m_VertexData        = vertexData;
         mesh.m_Threshold         = meshRequest.m_Threshold;
         InternalMeshPublicInterface::CalculateRadius(mesh);
@@ -135,7 +135,7 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
 }
 void InternalMeshRequestPublicInterface::LoadGPU(MeshRequest& meshRequest) {
     for (auto& part : meshRequest.m_Parts) {
-        InternalMeshPublicInterface::LoadGPU(*part.mesh);
-        part.mesh->Resource::load();
+        InternalMeshPublicInterface::LoadGPU(*part.handle.get<Mesh>());
+        part.handle.get<Mesh>()->Resource::load();
     }
 }

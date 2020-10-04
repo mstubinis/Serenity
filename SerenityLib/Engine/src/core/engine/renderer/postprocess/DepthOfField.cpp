@@ -7,6 +7,7 @@
 #include <core/engine/resources/Engine_BuiltInShaders.h>
 #include <core/engine/threading/ThreadingModule.h>
 #include <core/engine/scene/Viewport.h>
+#include <core/engine/resources/Engine_Resources.h>
 
 Engine::priv::DepthOfField Engine::priv::DepthOfField::STATIC_DOF;
 
@@ -70,16 +71,16 @@ bool Engine::priv::DepthOfField::init_shaders() {
 #pragma endregion
 
     Engine::priv::threading::addJobWithPostCallback([this]() {
-        m_Vertex_Shader   = std::make_unique<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
-        m_Fragment_Shader = std::make_unique<Shader>(m_GLSL_frag_code, ShaderType::Fragment, false);
+        m_Vertex_Shader   = Engine::Resources::addResource<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
+        m_Fragment_Shader = Engine::Resources::addResource<Shader>(m_GLSL_frag_code, ShaderType::Fragment, false);
     }, [this]() {
-        m_Shader_Program  = std::make_unique<ShaderProgram>("DepthOfField", *m_Vertex_Shader, *m_Fragment_Shader);
+        m_Shader_Program  = Engine::Resources::addResource<ShaderProgram>("DepthOfField", m_Vertex_Shader, m_Fragment_Shader);
     });
 
     return true;
 }
 void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::Renderer& renderer) {
-    renderer.bind(m_Shader_Program.get());
+    renderer.bind(m_Shader_Program.get<ShaderProgram>());
 
     Engine::Renderer::sendUniform4Safe("Data", blur_radius, bias, focus, 0.0f);
 

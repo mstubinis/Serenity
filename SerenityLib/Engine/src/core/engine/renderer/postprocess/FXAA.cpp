@@ -10,6 +10,7 @@
 #include <core/engine/scene/Viewport.h>
 
 #include <core/engine/resources/Engine_BuiltInShaders.h>
+#include <core/engine/resources/Engine_Resources.h>
 
 Engine::priv::FXAA Engine::priv::FXAA::STATIC_FXAA;
 
@@ -71,11 +72,11 @@ bool Engine::priv::FXAA::init_shaders() {
 
 
     auto lambda_part_a = [this]() {
-        m_Vertex_shader   = std::make_unique<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
-        m_Fragment_shader = std::make_unique<Shader>(m_GLSL_frag_code, ShaderType::Fragment, false);
+        m_Vertex_shader   = Engine::Resources::addResource<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
+        m_Fragment_shader = Engine::Resources::addResource<Shader>(m_GLSL_frag_code, ShaderType::Fragment, false);
     };
     auto lambda_part_b = [this]() {
-        m_Shader_program  = std::make_unique<ShaderProgram>("FXAA", *m_Vertex_shader, *m_Fragment_shader);
+        m_Shader_program  = Engine::Resources::addResource<ShaderProgram>("FXAA", m_Vertex_shader, m_Fragment_shader);
     };
 
     Engine::priv::threading::addJobWithPostCallback(lambda_part_a, lambda_part_b);
@@ -84,7 +85,7 @@ bool Engine::priv::FXAA::init_shaders() {
 }
 void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::Renderer& renderer) {
     const auto& dimensions = viewport.getViewportDimensions();
-    renderer.bind(m_Shader_program.get());
+    renderer.bind(m_Shader_program.get<ShaderProgram>());
 
     Engine::Renderer::sendUniform1("FXAA_REDUCE_MIN", reduce_min);
     Engine::Renderer::sendUniform1("FXAA_REDUCE_MUL", reduce_mul);
