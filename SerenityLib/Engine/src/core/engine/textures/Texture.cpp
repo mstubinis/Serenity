@@ -21,6 +21,17 @@ void Engine::priv::TextureCPUData::initFromFile() {
     }
     image.setInternalFormat(image.m_InternalFormat);
 }
+void Engine::priv::TextureCPUData::initFromCubemap(const std::array<std::string, 6>& files, ImageInternalFormat intFmt) {
+    auto& image = m_ImagesDatas[0];
+    image.m_Filename = files[0];
+    for (int j = 1; j < files.size(); ++j) {
+        auto& imageInnerLoop = m_ImagesDatas.emplace_back();
+        imageInnerLoop.m_Filename = files[j];
+    }
+    for (auto& sideImage : m_ImagesDatas) {
+        sideImage.setInternalFormat(intFmt);
+    }
+}
 
 Texture::Texture(const std::string& textureName, TextureType textureType, bool mipMap) 
     : Resource{ ResourceType::Texture, textureName }
@@ -39,7 +50,7 @@ Texture::Texture(unsigned int w, unsigned int h, ImagePixelType pxlType, ImagePi
     auto& image  = m_CPUData.m_ImagesDatas[0];
     image.load(width, height, pxlType, pxlFmt, intFmt);
 
-    Engine::priv::InternalTexturePublicInterface::LoadGPU(*this); //nothing to load cpu side for frame buffers
+    Engine::priv::TextureLoader::LoadGPU(*this); //nothing to load cpu side for frame buffers
 }
 Texture::Texture(const sf::Image& sfImage, const std::string& name, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType)
     : Texture{ name, textureType, genMipMaps }
@@ -47,7 +58,7 @@ Texture::Texture(const sf::Image& sfImage, const std::string& name, bool genMipM
     m_CPUData.m_ImagesDatas[0].setInternalFormat(intFmt);
     m_CPUData.initFromMemory(sfImage);
 
-    Engine::priv::InternalTexturePublicInterface::Load(*this);
+    Engine::priv::TextureLoader::Load(*this);
 }
 Texture::Texture(const std::string& filename, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType)
     : Texture{ filename, textureType, genMipMaps }
@@ -55,13 +66,14 @@ Texture::Texture(const std::string& filename, bool genMipMaps, ImageInternalForm
     m_CPUData.m_ImagesDatas[0].setInternalFormat(intFmt);
     m_CPUData.initFromFile();
 
-    Engine::priv::InternalTexturePublicInterface::Load(*this);
+    Engine::priv::TextureLoader::Load(*this);
 }
 Texture::Texture(const std::array<std::string, 6>& files, const std::string& name, bool genMipMaps, ImageInternalFormat intFmt)
     : Texture{ name, TextureType::CubeMap, genMipMaps }
 {
-    Engine::priv::TextureLoader::CPUInitFromFilesCubemap(m_CPUData, files, name, genMipMaps, intFmt);
-    Engine::priv::InternalTexturePublicInterface::Load(*this);
+    m_CPUData.initFromCubemap(files, intFmt);
+
+    Engine::priv::TextureLoader::Load(*this);
 }
 
 
@@ -84,7 +96,7 @@ Texture& Texture::operator=(Texture&& other) noexcept {
 }
 
 Texture::~Texture(){
-    Engine::priv::InternalTexturePublicInterface::Unload(*this);
+    Engine::priv::TextureLoader::Unload(*this);
 }
 bool Texture::internal_bind_if_not_bound(unsigned int requestedAddress) noexcept {
     auto whichID = Engine::Renderer::getCurrentlyBoundTextureOfType(requestedAddress);
@@ -167,7 +179,7 @@ void Texture::setZWrapping(TextureType type, TextureWrap wrap) {
 void Texture::setWrapping(TextureType type, TextureWrap wrap) {
     Texture::setXWrapping(type, wrap);
     Texture::setYWrapping(type, wrap);
-    if (type.toGLType() == GL_TEXTURE_CUBE_MAP) {
+    if (type == TextureType::CubeMap) {
         Texture::setZWrapping(type, wrap);
     }
 }

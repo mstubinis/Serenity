@@ -92,6 +92,7 @@ namespace Engine::priv {
                 const std::uint32_t index      = (const std::uint32_t)static_cast<collectionType>(m_Resources[typeIndex].get())->emplace_back(std::forward<ARGS>(args)...);
                 return Handle( index, 0, typeIndex + 1 );
             }
+
             template<typename TResource>
             Handle push(TResource&& inResource) {
                 using collectionType           = Engine::priv::ResourceVector<TResource>*;

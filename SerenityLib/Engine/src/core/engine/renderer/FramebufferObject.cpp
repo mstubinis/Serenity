@@ -35,7 +35,7 @@ priv::FramebufferTexture::~FramebufferTexture(){
     SAFE_DELETE(m_Texture);
 }
 void priv::FramebufferTexture::resize(FramebufferObject& fbo, unsigned int w, unsigned int h){
-    InternalTexturePublicInterface::Resize(*m_Texture, fbo, w, h);
+    TextureLoader::Resize(*m_Texture, fbo, w, h);
 }
 GLuint priv::FramebufferTexture::address() const {
     return m_Texture->address(); 

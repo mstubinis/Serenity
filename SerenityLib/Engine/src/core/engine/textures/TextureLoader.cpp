@@ -14,17 +14,7 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace Engine::priv::textures;
 
-void TextureLoader::CPUInitFromFilesCubemap(TextureCPUData& cpuData, const std::array<std::string, 6>& files, const std::string& name, bool genMipMaps, ImageInternalFormat intFmt) {
-    auto& image           = cpuData.m_ImagesDatas[0];
-    image.m_Filename      = files[0];
-    for (int j = 1; j < files.size(); ++j) {
-        auto& imageInnerLoop      = cpuData.m_ImagesDatas.emplace_back();
-        imageInnerLoop.m_Filename = files[j];
-    }
-    for (auto& sideImage : cpuData.m_ImagesDatas) {
-        sideImage.setInternalFormat(intFmt);
-    }
-}
+
 void TextureLoader::ImportIntoOpengl(Texture& texture, const Engine::priv::ImageMipmap& mipmap, TextureType textureType) {
     auto& imageData = texture.m_CPUData.m_ImagesDatas[0];
     if (imageData.m_InternalFormat.isCompressedType() && mipmap.compressedSize != 0) {
@@ -310,49 +300,17 @@ void TextureLoader::GeneratePBRData(Texture& texture, int convoludeTextureSize, 
 
     Core::m_Engine->m_RenderManager._genPBREnvMapData(texture, texture.m_ConvolutionTextureHandle, texture.m_PreEnvTextureHandle, convoludeTextureSize, preEnvFilterSize);
 }
-void InternalTexturePublicInterface::LoadCPU(Handle textureHandle) {
-    auto& texture = *textureHandle.get<Texture>();
-    LoadCPU(texture);
-}
-void InternalTexturePublicInterface::LoadGPU(Handle textureHandle) {
+void TextureLoader::LoadGPU(Handle textureHandle) {
     auto& texture = *textureHandle.get<Texture>();
     LoadGPU(texture);
 }
-void InternalTexturePublicInterface::UnloadGPU(Handle textureHandle) {
-    auto& texture = *textureHandle.get<Texture>();
-    UnloadGPU(texture);
-}
-void InternalTexturePublicInterface::Load(Handle textureHandle) {
-    auto& texture = *textureHandle.get<Texture>();
-    Load(texture);
-}
-void InternalTexturePublicInterface::Unload(Handle textureHandle) {
-    auto& texture = *textureHandle.get<Texture>();
-    Unload(texture);
-}
-void InternalTexturePublicInterface::LoadCPU(Texture& texture) {
-    for (auto& imageData : texture.m_CPUData.m_ImagesDatas) {
+void TextureLoader::LoadCPU(TextureCPUData& cpuData, Handle inHandle) {
+    for (auto& imageData : cpuData.m_ImagesDatas) {
         if (!imageData.m_Filename.empty()) {
             if (imageData.hasBlankMipmap()) {
                 std::string extension = std::filesystem::path(imageData.m_Filename).extension().string();
                 if (extension == ".dds") {
-                    TextureLoader::LoadDDSFile(texture.m_CPUData, imageData);
-                }else{
-                    sf::Image sfImage;
-                    sfImage.loadFromFile(imageData.m_Filename);
-                    imageData.load(sfImage, imageData.m_Filename);
-                }
-            }
-        }
-    }
-}
-void InternalTexturePublicInterface::LoadCPU(TextureRequest& request) {
-    for (auto& imageData : request.m_Part.m_CPUData.m_ImagesDatas) {
-        if (!imageData.m_Filename.empty()) {
-            if (imageData.hasBlankMipmap()) {
-                std::string extension = std::filesystem::path(imageData.m_Filename).extension().string();
-                if (extension == ".dds") {
-                    TextureLoader::LoadDDSFile(request.m_Part.m_CPUData, imageData);
+                    TextureLoader::LoadDDSFile(cpuData, imageData);
                 }else {
                     sf::Image sfImage;
                     sfImage.loadFromFile(imageData.m_Filename);
@@ -361,15 +319,17 @@ void InternalTexturePublicInterface::LoadCPU(TextureRequest& request) {
             }
         }
     }
-    auto* mutex = request.m_Part.handle.getMutex();
-    if (mutex) {
-        std::lock_guard lock(*mutex);
-        auto& texture = *request.m_Part.handle.get<Texture>();
-        texture.m_CPUData = request.m_Part.m_CPUData;
+    if (!inHandle.null()) {
+        auto* mutex = inHandle.getMutex();
+        if (mutex) {
+            std::lock_guard lock(*mutex);
+            auto& texture = *inHandle.get<Texture>();
+            texture.m_CPUData = cpuData;
+        }
     }
 }
 
-void InternalTexturePublicInterface::LoadGPU(Texture& texture) {
+void TextureLoader::LoadGPU(Texture& texture) {
     Engine::Renderer::genAndBindTexture(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
     switch ((TextureType::Type)texture.m_CPUData.m_TextureType) {
         case TextureType::RenderTarget: {
@@ -399,24 +359,24 @@ void InternalTexturePublicInterface::LoadGPU(Texture& texture) {
     texture.Resource::load();
 }
 
-void InternalTexturePublicInterface::UnloadGPU(Texture& texture) {
+void TextureLoader::UnloadGPU(Texture& texture) {
     glDeleteTextures(1, &texture.m_TextureAddress);
     texture.Resource::unload();
 }
-void InternalTexturePublicInterface::Load(Texture& texture) {
+void TextureLoader::Load(Texture& texture) {
     if (!texture.isLoaded()) {
-        InternalTexturePublicInterface::LoadCPU(texture);
-        InternalTexturePublicInterface::LoadGPU(texture);
+        TextureLoader::LoadCPU(texture.m_CPUData, Handle{});
+        TextureLoader::LoadGPU(texture);
     }
 }
-void InternalTexturePublicInterface::Unload(Texture& texture) {
+void TextureLoader::Unload(Texture& texture) {
     if (texture.isLoaded()) {
-        InternalTexturePublicInterface::UnloadGPU(texture);
+        TextureLoader::UnloadGPU(texture);
     }
 }
 
 
-void InternalTexturePublicInterface::Resize(Texture& texture, Engine::priv::FramebufferObject& fbo, int width, int height) {
+void TextureLoader::Resize(Texture& texture, Engine::priv::FramebufferObject& fbo, int width, int height) {
     if (texture.m_CPUData.m_TextureType != TextureType::RenderTarget) {
         ENGINE_PRODUCTION_LOG("Error: Non-framebuffer texture cannot be resized. Returning...")
         return;

@@ -47,10 +47,10 @@ void TextureRequest::request(bool inAsync) {
             else
                 r.m_Part.m_CPUData.initFromFile();
         }
-        Engine::priv::InternalTexturePublicInterface::LoadCPU(r);
+        Engine::priv::TextureLoader::LoadCPU(r.m_Part.m_CPUData, r.m_Part.handle);
     };
     auto lambda_gpu = [r]() mutable {
-        Engine::priv::InternalTexturePublicInterface::LoadGPU(r.m_Part.handle);
+        Engine::priv::TextureLoader::LoadGPU(r.m_Part.handle);
         r.m_Part.m_Callback();
     };
 

@@ -27,6 +27,7 @@ namespace Engine::priv {
 
         void initFromMemory(const sf::Image& sfImage);
         void initFromFile();
+        void initFromCubemap(const std::array<std::string, 6>& files, ImageInternalFormat intFmt);
     };
 };
 
@@ -35,7 +36,6 @@ class Texture: public Resource {
     friend class  Engine::priv::GBuffer;
     friend struct Engine::priv::TextureLoader;
     friend struct TextureRequest;
-    friend struct Engine::priv::InternalTexturePublicInterface;
     public:
         static Handle White, Black, Checkers, BRDF; //loaded in renderer. TODO: move these to built in class (separate from client side interface)
     private:

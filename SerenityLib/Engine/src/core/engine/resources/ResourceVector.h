@@ -3,6 +3,7 @@
 #define ENGINE_RESOURCES_RESOURCE_VECTOR_H
 
 #include <core/engine/resources/IResourceVector.h>
+#include <core/engine/threading/ThreadingModule.h>
 
 namespace Engine::priv {
     template<typename TResource>
@@ -75,7 +76,6 @@ namespace Engine::priv {
                 m_AvailableIndices.pop_back();
                 return index;
             }
-
             TResource* get(const Handle inHandle) noexcept {
                 if (inHandle.version() != m_Resources[inHandle.index()].m_Version) {
                     return nullptr;
@@ -123,7 +123,7 @@ namespace Engine::priv {
                 }
                 return m_Resources.size() - 1;
             }
-
+            
             size_t push_back(TResource&& inResource) {
                 ASSERT(!m_Locked, "Engine::priv::ResourceVector::push_back(): is locked!");
                 if (m_Locked) {
