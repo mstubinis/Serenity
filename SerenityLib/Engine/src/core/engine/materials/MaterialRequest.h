@@ -5,6 +5,10 @@
 class Material;
 class Texture;
 
+namespace Engine::priv {
+    struct InternalMaterialRequestPublicInterface;
+}
+
 #include <core/engine/resources/Handle.h>
 #include <core/engine/textures/TextureRequest.h>
 
@@ -23,6 +27,12 @@ struct MaterialRequestPart final {
 };
 
 struct MaterialRequest final {
+    friend struct Engine::priv::InternalMaterialRequestPublicInterface;
+private:
+    void internal_set_async(bool async) noexcept;
+    void internal_init_material_components() noexcept;
+    void internal_void_launch_texture_requests(bool async) noexcept;
+public:
     MaterialRequestPart    m_Part;
     bool                   m_Async = false;
     std::function<void()>  m_Callback;
@@ -59,15 +69,5 @@ struct MaterialRequest final {
 
     void request(bool async = false);
 };
-
-namespace Engine::priv {
-    struct InternalMaterialRequestPublicInterface final {
-        friend class  Material;
-        static void Request(MaterialRequest& materialRequest);
-        static void LoadGPU(MaterialRequest& materialRequest);
-        static void LoadCPU(MaterialRequest& materialRequest);
-    };
-};
-
 
 #endif

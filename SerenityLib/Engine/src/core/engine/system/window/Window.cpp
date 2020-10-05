@@ -116,7 +116,7 @@ void Window::setIcon(const Texture& texture) {
 void Window::setIcon(const char* file) {
     auto texture = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.get<Texture>(file);
     if (!texture.first) {
-        texture.second = Engine::Resources::loadTexture(file);
+        texture.second = Engine::Resources::loadTexture(file, ImageInternalFormat::SRGB8_ALPHA8, false);
         texture.first  = texture.second.get<Texture>();
     }
     m_Data.m_SFMLWindow.setIcon(texture.first->width(), texture.first->height(), texture.first->pixels());

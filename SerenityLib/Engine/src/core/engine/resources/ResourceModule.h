@@ -33,6 +33,10 @@ namespace Engine::priv {
                 }
             }
 
+            std::mutex* getMutex(const Handle inHandle) noexcept {
+                return m_Resources[inHandle.type() - 1]->getMutex();
+            }
+
             template<typename TResource>
             std::uint32_t registerResourceType() {
                 std::uint32_t index = (const std::uint32_t)m_ResourceRegistry.type_slot<TResource>();

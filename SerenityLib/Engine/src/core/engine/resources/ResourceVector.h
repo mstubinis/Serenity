@@ -50,6 +50,8 @@ namespace Engine::priv {
             ResourceVector& operator=(ResourceVector&& other) noexcept = delete;
             ~ResourceVector() = default;
 
+            std::mutex* getMutex() noexcept override { return &m_Mutex; }
+
             void lock() override {
                 m_Locked = true;
                 shrink_to_fit();

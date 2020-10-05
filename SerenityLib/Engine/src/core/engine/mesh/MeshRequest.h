@@ -55,7 +55,7 @@ struct MeshRequest final {
     std::function<void()>                                       m_Callback;
 
     MeshRequest() = delete;
-    MeshRequest(const std::string& filenameOrData, const float threshold, std::function<void()>&& callback);
+    MeshRequest(const std::string& filenameOrData, float threshold, std::function<void()>&& callback);
     ~MeshRequest() = default;
 
     MeshRequest(const MeshRequest& other) = default;

@@ -2,9 +2,11 @@
 #ifndef ENGINE_TEXTURE_H
 #define ENGINE_TEXTURE_H
 
+struct TextureRequest;
 namespace Engine::priv {
-    struct TextureRequestStaticImpl;
-};
+    class GBuffer;
+    template<typename T> class ResourceVector;
+}
 
 #include <core/engine/resources/Handle.h>
 #include <core/engine/textures/TextureLoader.h>
@@ -16,19 +18,24 @@ namespace Engine::priv {
 
 namespace Engine::priv {
     struct TextureCPUData final {
-        std::vector<Engine::priv::ImageLoadedStructure>   m_ImagesDatas;
-        std::string                                       m_Name            = "";
-        unsigned int                                      m_MinFilter       = GL_LINEAR; //used to determine filter type for mipmaps
-        TextureType                                       m_TextureType     = TextureType::Unknown;
-        bool                                              m_Mipmapped       = false;
-        bool                                              m_IsToBeMipmapped = false;
+        std::vector<Engine::priv::ImageData>   m_ImagesDatas     = { Engine::priv::ImageData {} };
+        std::string                            m_Name            = "";
+        unsigned int                           m_MinFilter       = GL_LINEAR; //used to determine filter type for mipmaps
+        TextureType                            m_TextureType     = TextureType::Unknown;
+        bool                                   m_Mipmapped       = false;
+        bool                                   m_IsToBeMipmapped = false;
+
+        void initFromMemory(const sf::Image& sfImage);
+        void initFromFile();
     };
 };
 
 class Texture: public Resource {
+    friend class  Engine::priv::ResourceVector<Texture>;
+    friend class  Engine::priv::GBuffer;
     friend struct Engine::priv::TextureLoader;
+    friend struct TextureRequest;
     friend struct Engine::priv::InternalTexturePublicInterface;
-    friend struct Engine::priv::TextureRequestStaticImpl;
     public:
         static Handle White, Black, Checkers, BRDF; //loaded in renderer. TODO: move these to built in class (separate from client side interface)
     private:
@@ -40,48 +47,44 @@ class Texture: public Resource {
 
         bool internal_bind_if_not_bound(unsigned int requestedAddress) noexcept;
         GLuint& internal_get_address_for_generation() noexcept { return m_TextureAddress; }
-    public:
-        Texture(const std::string& name = "");
 
-
-        //Empty Texture
-        Texture(
-            const std::string& textureName,
-            TextureType textureType,
-            unsigned int width,
-            unsigned int height,
-            bool mipMap
-        );
         //Framebuffer
         Texture(
-            unsigned int renderTgtWidth, 
+            unsigned int renderTgtWidth,
             unsigned int renderTgtHeight,
-            ImagePixelType pixelType, 
-            ImagePixelFormat pixelFormat, 
+            ImagePixelType pixelType,
+            ImagePixelFormat pixelFormat,
             ImageInternalFormat internalFormat,
             float divisor = 1.0f
+        );
+    public:
+        //Empty Texture
+        Texture(
+            const std::string& textureName = "",
+            TextureType textureType = TextureType::Texture2D,
+            bool mipMap = false
         );
         //Single File
         Texture(
             const std::string& filename,
             bool generateMipmaps,
-            ImageInternalFormat internalFormat = ImageInternalFormat::SRGB8_ALPHA8,
-            TextureType openglTexureType = TextureType::Texture2D
+            ImageInternalFormat internalFormat,
+            TextureType openglTexureType
         );
         //Pixels From Memory
         Texture(
             const sf::Image& sfImage,
-            const std::string& textureName = "CustomTexture",
-            bool generateMipmaps = false, 
-            ImageInternalFormat internalFormat = ImageInternalFormat::SRGB8_ALPHA8,
-            TextureType openglTexureType = TextureType::Texture2D
+            const std::string& textureName,
+            bool generateMipmaps, 
+            ImageInternalFormat internalFormat,
+            TextureType openglTexureType
         );
         //Cubemap from 6 files
         Texture(
             const std::array<std::string, 6>& files,
-            const std::string& textureName = "Cubemap", 
-            bool generateMipmaps = false,
-            ImageInternalFormat internalFormat = ImageInternalFormat::SRGB8_ALPHA8
+            const std::string& textureName, 
+            bool generateMipmaps,
+            ImageInternalFormat internalFormat
         );
 
         Texture(const Texture& other)                = delete;

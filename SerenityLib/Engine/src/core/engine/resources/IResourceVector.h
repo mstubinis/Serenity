@@ -16,6 +16,8 @@ namespace Engine::priv {
 
             virtual void shrink_to_fit() = 0;
 
+            virtual std::mutex* getMutex() noexcept = 0;
+
             virtual size_t size() const noexcept = 0;
 
             virtual void get(void*& out, const Handle inHandle) const noexcept = 0;

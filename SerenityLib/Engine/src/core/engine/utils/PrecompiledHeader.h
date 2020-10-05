@@ -45,6 +45,7 @@
 #include <map>
 #include <typeinfo>
 #include <typeindex>
+#include <filesystem>
 
 //windows api
 #ifdef _WIN32

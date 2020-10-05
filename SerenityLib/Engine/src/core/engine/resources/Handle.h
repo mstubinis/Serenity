@@ -14,6 +14,7 @@ class Handle final {
     friend class Engine::priv::ResourceModule;
     private:
         void* internal_get_base() const noexcept;
+        std::mutex* internal_get_mutex() const noexcept;
 
         std::uint32_t m_Index   : 12;
         std::uint32_t m_Version : 15;
@@ -50,5 +51,7 @@ class Handle final {
             ASSERT((ret != nullptr && !null()) || (ret == nullptr && null()), "Handle::get(): a non-null handle returned a null resource!");
             return ret;
         }
+
+        std::mutex* getMutex() noexcept;
 };
 #endif

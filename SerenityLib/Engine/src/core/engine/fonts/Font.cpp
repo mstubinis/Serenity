@@ -91,17 +91,15 @@ std::vector<std::vector<std::uint8_t>> Font::generate_bitmap(const FT_GlyphSlotR
     return pixels;
 }
 void Font::init_simple(const std::string& filename, int height, int width) {
-    std::string rawname         = filename;
+    std::string rawname    = filename;
     const size_t lastindex = filename.find_last_of(".");
     if (lastindex != std::string::npos) {
         rawname = filename.substr(0, lastindex);
         rawname += ".png";
     }
 
-    Handle handle = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.emplace<Texture>(rawname, false, ImageInternalFormat::SRGB8_ALPHA8);
+    Handle handle = Engine::Resources::addResource<Texture>(rawname, false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D);
     m_FontTexture = handle.get<Texture>();
-    //m_FontTexture = NEW Texture(rawname, false, ImageInternalFormat::SRGB8_ALPHA8);
-    //Handle handle = Engine::priv::Core::m_Engine->m_ResourceManager._addTexture(m_FontTexture);
 
     float min_y_offset  = std::numeric_limits<float>().max();
     float max_y_offset  = std::numeric_limits<float>().min();
@@ -277,9 +275,7 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
 
-    //m_FontTexture = NEW Texture(atlas_image, filename + "_Texture", false, ImageInternalFormat::SRGB8_ALPHA8);
-    //Handle handle = Engine::priv::Core::m_Engine->m_ResourceManager._addTexture(m_FontTexture);
-    Handle handle = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.emplace<Texture>(atlas_image, filename + "_Texture", false, ImageInternalFormat::SRGB8_ALPHA8);
+    Handle handle = Engine::Resources::addResource<Texture>(atlas_image, filename + "_Texture", false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D);
     m_FontTexture = handle.get<Texture>();
 
     m_MaxHeight = max_y_offset - min_y_offset;

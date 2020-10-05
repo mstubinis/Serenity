@@ -122,6 +122,10 @@ class TextureType final {
         inline constexpr bool operator==(const TextureType::Type other) const noexcept { return m_Type == other; }
         inline constexpr bool operator!=(const TextureType::Type other) const noexcept { return !operator==(other); }
         inline constexpr void operator=(const TextureType::Type other) noexcept { m_Type = other; }
+        inline constexpr bool operator>(const TextureType::Type other) noexcept { return m_Type > other; }
+        inline constexpr bool operator<(const TextureType::Type other) noexcept { return m_Type < other; }
+        inline constexpr bool operator>=(const TextureType::Type other) noexcept { return m_Type >= other; }
+        inline constexpr bool operator<=(const TextureType::Type other) noexcept { return m_Type <= other; }
         inline explicit constexpr operator TextureType::Type() const noexcept { return m_Type; }
         constexpr GLuint toGLType() const noexcept {
             ASSERT(m_Type > TextureType::Unknown && m_Type < TextureType::_TOTAL, "TextureType::m_Type is an invalid value!");
@@ -147,33 +151,30 @@ namespace Engine::priv {
         int                         height         = 0U;
         int                         level          = 0U;
 
-        ImageMipmap() = default;
-        ImageMipmap(const ImageMipmap& other)                = delete;
-        ImageMipmap& operator=(const ImageMipmap& other)     = delete;
-        ImageMipmap(ImageMipmap&& other) noexcept ;
-        ImageMipmap& operator=(ImageMipmap&& other) noexcept;
-        ~ImageMipmap() = default;
+        inline bool null() const noexcept { return pixels.size() == 0; }
     };
-    struct ImageLoadedStructure final {
-        std::vector<priv::ImageMipmap>  m_Mipmaps;
+    struct ImageData final {
+        std::vector<priv::ImageMipmap>  m_Mipmaps         = { priv::ImageMipmap {} };
         std::string                     m_Filename        = "";
         ImageInternalFormat             m_InternalFormat  = ImageInternalFormat::Unknown;
         ImagePixelFormat                m_PixelFormat     = ImagePixelFormat::Unknown;
-        ImagePixelType                  m_PixelType       = ImagePixelType::Unknown;
+        ImagePixelType                  m_PixelType       = ImagePixelType::UNSIGNED_BYTE;
 
-        ImageLoadedStructure() {
-            m_Mipmaps.emplace_back();
-        }
-        ImageLoadedStructure(int width, int height, ImagePixelType pixelType, ImagePixelFormat pixelFormat, ImageInternalFormat internalFormat);
-        ImageLoadedStructure(const sf::Image& sfImage, const std::string& filename = "");
-        ImageLoadedStructure(const ImageLoadedStructure&)                      = delete;
-        ImageLoadedStructure& operator=(const ImageLoadedStructure&)           = delete;
-        ImageLoadedStructure(ImageLoadedStructure&& other) noexcept;
-        ImageLoadedStructure& operator=(ImageLoadedStructure&& other) noexcept;
-        ~ImageLoadedStructure() = default;
-
+        void setInternalFormat(ImageInternalFormat);
         void load(int width, int height, ImagePixelType pixelType, ImagePixelFormat pixelFormat, ImageInternalFormat internalFormat);
         void load(const sf::Image& sfImage, const std::string& filename = "");
+
+        bool hasBlankMipmap() const noexcept {
+            bool res = m_Mipmaps.size() == 0;
+            if (!res) {
+                for (const auto& mip : m_Mipmaps) {
+                    if (mip.null()) {
+                        return true;
+                    }
+                }
+            }
+            return res;
+        }
     };
 };
 

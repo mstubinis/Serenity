@@ -1,48 +1,66 @@
 #include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/renderer/Renderer.h>
 #include <core/engine/textures/Texture.h>
+#include <SFML/Graphics/Image.hpp>
 
 Handle Texture::White    = Handle{};
 Handle Texture::Black    = Handle{};
 Handle Texture::Checkers = Handle{};
 Handle Texture::BRDF     = Handle{};
 
-Texture::Texture(const std::string& name) 
-    : Resource{ ResourceType::Texture, name }
-{
-    m_CPUData.m_ImagesDatas.emplace_back();
-    Engine::priv::TextureLoader::CPUInitCommon(m_CPUData, TextureType::Texture2D, false);
+void Engine::priv::TextureCPUData::initFromMemory(const sf::Image& sfImage) {
+    auto& image = m_ImagesDatas[0];
+    image.setInternalFormat(image.m_InternalFormat);
+    image.load(sfImage, image.m_Filename);
+}
+void Engine::priv::TextureCPUData::initFromFile() {
+    auto& image           = m_ImagesDatas[0];
+    std::string extension = std::filesystem::path(image.m_Filename).extension().string();
+    if (extension == ".dds") {
+        TextureLoader::LoadDDSFile(*this, image);
+    }
+    image.setInternalFormat(image.m_InternalFormat);
 }
 
-Texture::Texture(const std::string& textureName, TextureType textureType, unsigned int width, unsigned int height, bool mipMap) 
-    : Texture{}
+Texture::Texture(const std::string& textureName, TextureType textureType, bool mipMap) 
+    : Resource{ ResourceType::Texture, textureName }
 {
     setName(textureName);
-    m_CPUData.m_TextureType = textureType;
-    Engine::priv::TextureLoader::CPUInitCommon(m_CPUData, m_CPUData.m_TextureType, mipMap);
+    m_CPUData.m_ImagesDatas[0].m_Filename = textureName;
+    m_CPUData.m_Name                      = textureName;
+    m_CPUData.m_TextureType               = textureType;
+    m_CPUData.m_IsToBeMipmapped           = mipMap;
 }
-Texture::Texture(unsigned int w, unsigned int h, ImagePixelType pxlType, ImagePixelFormat pxlFormat, ImageInternalFormat internal_, float divisor) 
-    : Texture{}
+Texture::Texture(unsigned int w, unsigned int h, ImagePixelType pxlType, ImagePixelFormat pxlFmt, ImageInternalFormat intFmt, float divisor) 
+    : Texture{ "MRT", TextureType::RenderTarget, false }
 {
-    Engine::priv::TextureLoader::CPUInitFramebuffer(m_CPUData, w, h, pxlType, pxlFormat, internal_, divisor);
+    int width    = (int)((float)w * divisor);
+    int height   = (int)((float)h * divisor);
+    auto& image  = m_CPUData.m_ImagesDatas[0];
+    image.load(width, height, pxlType, pxlFmt, intFmt);
+
+    Engine::priv::InternalTexturePublicInterface::LoadGPU(*this); //nothing to load cpu side for frame buffers
+}
+Texture::Texture(const sf::Image& sfImage, const std::string& name, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType)
+    : Texture{ name, textureType, genMipMaps }
+{
+    m_CPUData.m_ImagesDatas[0].setInternalFormat(intFmt);
+    m_CPUData.initFromMemory(sfImage);
+
     Engine::priv::InternalTexturePublicInterface::Load(*this);
 }
-Texture::Texture(const sf::Image& sfImage, const std::string& name, bool genMipMaps, ImageInternalFormat internal_, TextureType textureType)
-    : Texture{ name }
+Texture::Texture(const std::string& filename, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType)
+    : Texture{ filename, textureType, genMipMaps }
 {
-    Engine::priv::TextureLoader::CPUInitFromMemory(m_CPUData, sfImage, name, genMipMaps, internal_, textureType);
+    m_CPUData.m_ImagesDatas[0].setInternalFormat(intFmt);
+    m_CPUData.initFromFile();
+
     Engine::priv::InternalTexturePublicInterface::Load(*this);
 }
-Texture::Texture(const std::string& filename, bool genMipMaps, ImageInternalFormat internal_, TextureType textureType) 
-    : Texture{ filename }
+Texture::Texture(const std::array<std::string, 6>& files, const std::string& name, bool genMipMaps, ImageInternalFormat intFmt)
+    : Texture{ name, TextureType::CubeMap, genMipMaps }
 {
-    Engine::priv::TextureLoader::CPUInitFromFile(m_CPUData, filename, genMipMaps, internal_, textureType);
-    Engine::priv::InternalTexturePublicInterface::Load(*this);
-}
-Texture::Texture(const std::array<std::string, 6>& files, const std::string& name, bool genMipMaps, ImageInternalFormat internal_) 
-    : Texture{ name }
-{
-    Engine::priv::TextureLoader::CPUInitFromFilesCubemap(m_CPUData, files, name, genMipMaps, internal_);
+    Engine::priv::TextureLoader::CPUInitFromFilesCubemap(m_CPUData, files, name, genMipMaps, intFmt);
     Engine::priv::InternalTexturePublicInterface::Load(*this);
 }
 

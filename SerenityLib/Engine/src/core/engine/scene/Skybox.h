@@ -18,7 +18,7 @@ class Skybox: public Observer{
     public:
         static void bindMesh();
     public:
-        Skybox(const std::string* files);
+        Skybox(const std::array<std::string, 6>& files);
         Skybox(const std::string& file);
         virtual ~Skybox();
 

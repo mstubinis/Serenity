@@ -18,7 +18,7 @@ Engine::priv::AssimpSceneImport::AssimpSceneImport() {
     m_Importer_ptr.reset(NEW Assimp::Importer{});
 }
 
-MeshRequest::MeshRequest(const std::string& filenameOrData, const float threshold, std::function<void()>&& callback) 
+MeshRequest::MeshRequest(const std::string& filenameOrData, float threshold, std::function<void()>&& callback) 
     : m_FileOrData{ filenameOrData }
     , m_Threshold{ threshold }
     , m_Callback{ std::move(callback) }
@@ -31,15 +31,15 @@ MeshRequest::MeshRequest(const std::string& filenameOrData, const float threshol
     }
 }
 MeshRequest::MeshRequest(MeshRequest&& other) noexcept
-    : m_FileOrData{ std::move(other.m_FileOrData) }
-    , m_FileExtension{ std::move(other.m_FileExtension) }
-    , m_FileExists{ std::move(other.m_FileExists) }
-    , m_Async{ std::move(other.m_Async) }
-    , m_Threshold{ std::move(other.m_Threshold) }
-    , m_MeshNodeMap{ std::move(other.m_MeshNodeMap) }
-    , m_Parts{ std::move(other.m_Parts) }
-    , m_Callback{ std::move(other.m_Callback) }
-    , m_Importer{ other.m_Importer }
+    : m_FileOrData    { std::move(other.m_FileOrData) }
+    , m_FileExtension { std::move(other.m_FileExtension) }
+    , m_FileExists    { std::move(other.m_FileExists) }
+    , m_Async         { std::move(other.m_Async) }
+    , m_Threshold     { std::move(other.m_Threshold) }
+    , m_MeshNodeMap   { std::move(other.m_MeshNodeMap) }
+    , m_Parts         { std::move(other.m_Parts) }
+    , m_Callback      { std::move(other.m_Callback) }
+    , m_Importer      { other.m_Importer }
 {}
 MeshRequest& MeshRequest::operator=(MeshRequest&& other) noexcept {
     m_FileOrData    = std::move(other.m_FileOrData);
@@ -54,11 +54,7 @@ MeshRequest& MeshRequest::operator=(MeshRequest&& other) noexcept {
     return *this;
 }
 void MeshRequest::request(bool inAsync) {
-    if (inAsync && Engine::hardware_concurrency() > 1) {
-        m_Async = true;
-    }else{
-        m_Async = false;
-    }
+    m_Async = (inAsync && Engine::hardware_concurrency() > 1);
     InternalMeshRequestPublicInterface::Request(*this);
 }
 
@@ -67,20 +63,19 @@ void InternalMeshRequestPublicInterface::Request(MeshRequest& meshRequest) {
         if (meshRequest.m_FileExists) {
             bool valid = InternalMeshRequestPublicInterface::Populate(meshRequest);
             if (valid){
-                if (meshRequest.m_Async || std::this_thread::get_id() != Resources::getWindow().getOpenglThreadID()){
-                    threading::addJobWithPostCallback(
-                        [meshRequest]() mutable {
-                            InternalMeshRequestPublicInterface::LoadCPU(meshRequest);
-                        },
-                        [meshRequest]() mutable {
-                            InternalMeshRequestPublicInterface::LoadGPU(meshRequest);
-                            meshRequest.m_Callback();
-                        }
-                    );
-                }else{
+                auto lambda_cpu = [meshRequest]() mutable {
                     InternalMeshRequestPublicInterface::LoadCPU(meshRequest);
+                };
+                auto lambda_gpu = [meshRequest]() mutable {
                     InternalMeshRequestPublicInterface::LoadGPU(meshRequest);
                     meshRequest.m_Callback();
+                };
+
+                if (meshRequest.m_Async || std::this_thread::get_id() != Resources::getWindow().getOpenglThreadID()){
+                    threading::addJobWithPostCallback(lambda_cpu, lambda_gpu);
+                }else{
+                    lambda_cpu();
+                    lambda_gpu();
                 }
             }
         }

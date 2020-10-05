@@ -176,7 +176,7 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
         std::vector<glm::vec4> boneWeights;          boneWeights.reserve(data.m_Bones.size());
 
         for (size_t i = 0; i < data.points.size(); ++i) {
-            size_t index;
+            std::uint32_t index;
             bool found = priv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, mesh.m_Threshold);
             if (found) {
                 indices.emplace_back(index);
@@ -268,7 +268,7 @@ void InternalMeshPublicInterface::CalculateRadius(Mesh& mesh) {
 
 
 Mesh::Mesh() 
-    : Resource(ResourceType::Mesh) 
+    : Resource{ ResourceType::Mesh }
 {
     InternalMeshPublicInterface::InitBlankMesh(*this);
 }
@@ -438,7 +438,7 @@ Mesh::Mesh(VertexData* data, const std::string& name, float threshold)
     InternalMeshPublicInterface::InitBlankMesh(*this);
 }
 Mesh::Mesh(const std::string& name, float width, float height, float threshold) 
-    : Resource(ResourceType::Mesh, name)
+    : Resource{ ResourceType::Mesh, name }
     , m_Threshold{ threshold }
 {
     InternalMeshPublicInterface::InitBlankMesh(*this);
@@ -619,8 +619,6 @@ void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const gl
                 return glm::distance2(camPos, model1Pos) < glm::distance2(camPos, model2Pos);
             else if (sortMode == SortingMode::BackToFront)
                 return glm::distance2(camPos, model1Pos) > glm::distance2(camPos, model2Pos);
-            else
-                return false;
             return false;
         };
         //std::execution::par_unseq seems to really help here for performance

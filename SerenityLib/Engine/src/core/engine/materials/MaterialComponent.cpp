@@ -40,12 +40,12 @@ MaterialLayer* MaterialComponent::addLayer(const std::string& textureFile, const
     auto  cubemap = Engine::Resources::getResource<Texture>(cubemapFile);
 
     if (!texture.first && !textureFile.empty()) {
-        //texture.second = Engine::Resources::loadTextureAsync(textureFile, ImageInternalFormat::SRGB8_ALPHA8, false);
-        texture.second = Engine::Resources::addResource<Texture>(textureFile, false, ImageInternalFormat::SRGB8_ALPHA8);
+        //texture.second = Engine::Resources::loadTextureAsync(textureFile, ImageInternalFormat::SRGB8_ALPHA8, false, TextureType::Texture2D);
+        texture.second = Engine::Resources::addResource<Texture>(textureFile, false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D);
         texture.first  = texture.second.get<Texture>();
     }
     if (!mask.first && !maskFile.empty()) {
-        mask.second = Engine::Resources::addResource<Texture>(maskFile, false, ImageInternalFormat::R8);
+        mask.second = Engine::Resources::addResource<Texture>(maskFile, false, ImageInternalFormat::R8, TextureType::Texture2D);
         mask.first  = mask.second.get<Texture>();
     }
     if (!cubemap.first && !cubemapFile.empty()) {

@@ -90,7 +90,7 @@ namespace Engine::priv {
     };
 };
 
-Skybox::Skybox(const std::string* files) {
+Skybox::Skybox(const std::array<std::string, 6>& files) {
     Engine::priv::SkyboxImplInterface::initMesh();
 
     std::array<std::string, 6> names = { files[0], files[1], files[2], files[3], files[4], files[5] };
@@ -106,7 +106,7 @@ Skybox::Skybox(const std::string& filename) {
 
     m_Texture = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.get<Texture>(filename).second;
     if (m_Texture) {
-        m_Texture = Engine::Resources::addResource<Texture>(filename, false, ImageInternalFormat::SRGB8_ALPHA8);
+        m_Texture = Engine::Resources::addResource<Texture>(filename, false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::CubeMap);
         Engine::priv::TextureLoader::GeneratePBRData(*m_Texture.get<Texture>(), 32, m_Texture.get<Texture>()->width() / 4);
     }
     registerEvent(EventType::WindowFullscreenChanged);

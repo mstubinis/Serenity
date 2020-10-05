@@ -75,7 +75,9 @@ namespace Engine::priv {
             IDs.fill(0.0f);
             Weights.fill(0.0f);
         }
-        VertexBoneData(unsigned int BoneID, float Weight) : VertexBoneData(){
+        VertexBoneData(unsigned int BoneID, float Weight) 
+            : VertexBoneData{}
+        {
             AddBoneData(BoneID, Weight);
         }
         VertexBoneData(const VertexBoneData& other)                = delete;
@@ -84,7 +86,7 @@ namespace Engine::priv {
         VertexBoneData& operator=(VertexBoneData&& other) noexcept = default;
         ~VertexBoneData() = default;
 
-        void AddBoneData(unsigned int BoneID, float Weight) {
+        void AddBoneData(unsigned int BoneID, float Weight) noexcept {
             for (unsigned int i = 0; i < IDs.size(); ++i) {
                 if (Weights[i] == 0.0f) {
                     IDs[i]     = (float)BoneID;

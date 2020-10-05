@@ -14,7 +14,7 @@ MaterialRequest::MaterialRequest(const std::string& name, const std::string& dif
     : m_Callback{ std::move(callback) }
 {
     m_Part.m_Name = name;
-    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( diffuse,    false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D ));
+    m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( diffuse,    false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D));
     m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( normal,     false, ImageInternalFormat::RGBA8,        TextureType::Texture2D));
     m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( glow,       false, ImageInternalFormat::R8,           TextureType::Texture2D));
     m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>( specular,   false, ImageInternalFormat::R8,           TextureType::Texture2D));
@@ -28,7 +28,7 @@ MaterialRequest::MaterialRequest(const std::string& name, Handle diffuse, Handle
     m_Part.m_Name   = name;
     m_Part.m_Handle = Engine::Resources::addResource<Material>(name, diffuse, normal, glow, specular, ao, metalness, smoothness);
 }
-void MaterialRequest::request(bool inAsync) {
+void MaterialRequest::internal_set_async(bool inAsync) noexcept {
     if (inAsync && Engine::hardware_concurrency() > 1) {
         m_Async = true;
         for (auto& textureRequest : m_Part.m_TextureRequests) {
@@ -37,52 +37,55 @@ void MaterialRequest::request(bool inAsync) {
     }else{
         m_Async = false;
     }
-    InternalMaterialRequestPublicInterface::Request(*this);
 }
-
-void InternalMaterialRequestPublicInterface::Request(MaterialRequest& request) {
-    request.m_Part.m_Handle = Engine::Resources::addResource<Material>();
-    request.m_Part.m_Handle.get<Material>()->setName(request.m_Part.m_Name);
-        
-    auto size = request.m_Part.m_TextureRequests.size();
+void MaterialRequest::internal_init_material_components() noexcept {
+    auto size = m_Part.m_TextureRequests.size();
     for (size_t i = 0; i < size; ++i) {
-        if (request.m_Part.m_TextureRequests[i]->m_FileData.m_FileExists) {
-            auto& component = request.m_Part.m_Handle.get<Material>()->addComponent((MaterialComponentType)i, "DEFAULT");
+        if (m_Part.m_TextureRequests[i]->m_FileData.m_FileExists) {
+            auto& component = m_Part.m_Handle.get<Material>()->addComponent((MaterialComponentType)i, "DEFAULT");
         }
     }
+}
+void MaterialRequest::internal_void_launch_texture_requests(bool async) noexcept {
+    for (auto& textureRequest : m_Part.m_TextureRequests) {
+        if (!textureRequest->m_Part.m_CPUData.m_Name.empty()) {
+            textureRequest->request(async);
+        }
+    }
+}
+void MaterialRequest::request(bool inAsync) {
+    internal_set_async(inAsync);
+
+    //launch the request
+    m_Part.m_Handle = Engine::Resources::addResource<Material>();
+    m_Part.m_Handle.get<Material>()->setName(m_Part.m_Name);
+
+    internal_init_material_components();
+    internal_void_launch_texture_requests(m_Async);
+
+    MaterialRequest request(*this);
+    auto lambda_cpu = [request]() mutable {
+        InternalMaterialPublicInterface::LoadCPU(*request.m_Part.m_Handle.get<Material>());
+    };
+    auto lambda_gpu = [request]() mutable {
+        const auto& texture_requests = request.m_Part.m_TextureRequests;
+        unsigned int count = 0;
+        for (const auto& req : texture_requests) {
+            if (req->m_FileData.m_FileExists) {
+                request.m_Part.m_Handle.get<Material>()->getComponent(count).layer(0).setTexture(req->m_Part.m_CPUData.m_Name);
+                ++count;
+            }
+        }
+        InternalMaterialPublicInterface::LoadGPU(*request.m_Part.m_Handle.get<Material>());
+
+        request.m_Callback();
+    };
 
     if (request.m_Async) {
-        for (auto& textureRequest : request.m_Part.m_TextureRequests) {
-            textureRequest->request(true);
-        }
-        auto lambda_cpu = [request]() mutable {
-            InternalMaterialRequestPublicInterface::LoadCPU(request);
-        };
-        auto lambda_gpu = [request]() mutable {
-            InternalMaterialRequestPublicInterface::LoadGPU(request);
-            request.m_Callback();
-        };
         threading::addJobWithPostCallback(lambda_cpu, lambda_gpu);
     }else{
-        for (auto& textureRequest : request.m_Part.m_TextureRequests) {
-            textureRequest->request();
-        }
-        InternalMaterialRequestPublicInterface::LoadCPU(request);
-        InternalMaterialRequestPublicInterface::LoadGPU(request);
-        request.m_Callback();
+        lambda_cpu();
+        lambda_gpu();
     }
 }
-void InternalMaterialRequestPublicInterface::LoadCPU(MaterialRequest& request) {
-    InternalMaterialPublicInterface::LoadCPU(*request.m_Part.m_Handle.get<Material>());
-}
-void InternalMaterialRequestPublicInterface::LoadGPU(MaterialRequest& request) {
-    const auto& texture_requests = request.m_Part.m_TextureRequests;
-    unsigned int count = 0;
-    for (const auto& req : texture_requests) {
-        if (req->m_FileData.m_FileExists) {
-            request.m_Part.m_Handle.get<Material>()->getComponent(count).layer(0).setTexture(req->m_Part.fileOrTextureName);
-            ++count;
-        }
-    }
-    InternalMaterialPublicInterface::LoadGPU(*request.m_Part.m_Handle.get<Material>());
-}
+
