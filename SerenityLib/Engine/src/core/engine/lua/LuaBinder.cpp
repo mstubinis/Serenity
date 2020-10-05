@@ -216,7 +216,7 @@ LUABinder::LUABinder()
         //scene stuff
         .beginClass<Scene>("Scene")
             //.addProperty("name", &Scene::name, &Scene::setName)
-            .addFunction("setName", &Scene::setName)
+            .addFunction("setName", static_cast<void(Scene::*)(const std::string&)>(&Scene::setName))
             .addFunction("createEntity", &Scene::createEntity)
             .addFunction("id", &Scene::id)
             .addFunction("setActiveCamera", &Scene::setActiveCamera)

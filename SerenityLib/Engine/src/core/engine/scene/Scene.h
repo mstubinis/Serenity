@@ -33,16 +33,16 @@ namespace Engine::priv {
 };
 #include <ecs/ECS.h>
 #include <core/engine/renderer/RendererIncludes.h>
-#include <core/engine/resources/Resource.h>
 #include <core/engine/scene/Viewport.h>
 #include <core/engine/events/Observer.h>
 #include <core/engine/resources/Handle.h>
 
-class Scene: public Resource, public Observer {
+class Scene: public Observer {
     friend class  Engine::priv::RenderGraph;
     friend class  Engine::priv::ResourceManager;
     friend struct Engine::priv::InternalScenePublicInterface;
     friend class  Engine::priv::EngineCore;
+    using updateFP = void(*)(Scene*, const float);
     private:
         mutable std::vector<Viewport>                                 m_Viewports;
         mutable std::vector<Camera*>                                  m_Cameras;
@@ -55,7 +55,8 @@ class Scene: public Resource, public Observer {
         mutable std::vector<SpotLight*>                               m_SpotLights;
         mutable std::vector<RodLight*>                                m_RodLights;
         mutable std::vector<ProjectionLight*>                         m_ProjectionLights;
-
+        updateFP                                                      m_OnUpdateFunctor     = [](Scene*, const float) {};
+        std::string                                                   m_Name                = "";
         unsigned int                                                  m_ID                  = 0;
         glm::vec3                                                     m_GI                  = glm::vec3(1.0f);
         bool                                                          m_SkipRenderThisFrame = false;
@@ -64,7 +65,6 @@ class Scene: public Resource, public Observer {
         Skybox*                                                       m_Skybox              = nullptr;
 
         class impl; std::unique_ptr<impl>                             m_i                   = nullptr;
-        std::function<void(Scene*, const float)>                      m_OnUpdateFunctor     = [](Scene*, const float) {};
 
         void preUpdate(const float dt);
         void postUpdate(const float dt);
@@ -73,15 +73,18 @@ class Scene: public Resource, public Observer {
         Scene(const std::string& name, const SceneOptions& options);
         virtual ~Scene();
 
+        inline void setName(const std::string& name) noexcept { m_Name = name; }
+        inline void setName(std::string&& name) noexcept { m_Name = std::move(name); }
+        inline void setName(const char* name) noexcept { m_Name = name; }
+        inline CONSTEXPR const std::string& name() const noexcept { return m_Name; }
 
         void update(const float dt);
         virtual void render() {}
         virtual void onEvent(const Event& event);
         virtual void onResize(unsigned int width, unsigned int height) {}
 
-        void setOnUpdateFunctor(std::function<void(Scene*, const float)>&& functor) noexcept {
-            m_OnUpdateFunctor = std::move(functor);
-        }
+        inline void setOnUpdateFunctor(const updateFP& functor) noexcept { m_OnUpdateFunctor = functor; }
+        inline void setOnUpdateFunctor(updateFP&& functor) noexcept { m_OnUpdateFunctor = std::move(functor); }
 
         inline CONSTEXPR unsigned int id() const noexcept { return m_ID; }
         inline unsigned int numViewports() const noexcept { return (unsigned int)m_Viewports.size(); }

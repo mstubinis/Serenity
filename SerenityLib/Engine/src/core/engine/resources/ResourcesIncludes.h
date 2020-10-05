@@ -11,7 +11,6 @@ enum class ResourceType : unsigned char {
     Shader,
     ShaderProgram,
     SoundData,
-    Scene,
 };
 
 #endif

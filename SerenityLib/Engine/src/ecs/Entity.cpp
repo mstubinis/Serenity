@@ -83,29 +83,25 @@ void Entity::addComponent(const std::string& componentClassName, luabridge::LuaR
         addComponent<ComponentName>(a1.cast<const char*>());
     }else if (componentClassName == "ComponentLogic") {
         if (!a1.isNil() && a1.isFunction()) {
-            using func_type = void(*)(const ComponentLogic*, const float);
-            addComponent<ComponentLogic>(std::move(a1.cast<func_type>()));
+            addComponent<ComponentLogic>(a1);
         }else{
             addComponent<ComponentLogic>();
         }
     }else if (componentClassName == "ComponentLogic1") {
         if (!a1.isNil() && a1.isFunction()) {
-            using func_type = void(*)(const ComponentLogic1*, const float);
-            addComponent<ComponentLogic1>(std::move(a1.cast<func_type>()));
+            addComponent<ComponentLogic1>(a1);
         }else{
             addComponent<ComponentLogic1>();
         }
     }else if (componentClassName == "ComponentLogic2") {
         if (!a1.isNil() && a1.isFunction()) {
-            using func_type = void(*)(const ComponentLogic2*, const float);
-            addComponent<ComponentLogic2>(std::move(a1.cast<func_type>()));
+            addComponent<ComponentLogic2>(a1);
         }else{
             addComponent<ComponentLogic2>();
         }
     }else if (componentClassName == "ComponentLogic3") {
         if (!a1.isNil() && a1.isFunction()) {
-            using func_type = void(*)(const ComponentLogic3*, const float);
-            addComponent<ComponentLogic3>(std::move(a1.cast<func_type>()));
+            addComponent<ComponentLogic3>(a1);
         }else{
             addComponent<ComponentLogic3>();
         }

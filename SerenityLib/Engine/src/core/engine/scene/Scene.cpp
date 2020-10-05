@@ -241,9 +241,7 @@ bool priv::InternalScenePublicInterface::IsSkipRenderThisFrame(Scene& scene) {
 }
 
 
-Scene::Scene(const std::string& name, const SceneOptions& options) 
-    : Resource{ ResourceType::Scene, name }
-{
+Scene::Scene(const std::string& name, const SceneOptions& options) {
     m_RenderGraphs.resize((unsigned int)RenderStage::_TOTAL);
     m_ID      = priv::Core::m_Engine->m_ResourceManager.AddScene(*this);
     m_i       = std::make_unique<impl>(options.maxAmountOfParticleEmitters, options.maxAmountOfParticles);

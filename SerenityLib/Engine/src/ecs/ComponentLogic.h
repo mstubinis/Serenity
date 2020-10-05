@@ -30,6 +30,15 @@ class ComponentLogic : public Engine::UserPointer, public Engine::NonCopyable {
             m_UserPointer  = Ptr1;
             setFunctor(std::move(Functor));
         }
+        ComponentLogic(Entity entity, luabridge::LuaRef luaFunction, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr)
+            : m_Owner(entity)
+            , m_UserPointer1(Ptr2)
+            , m_UserPointer2(Ptr3)
+        {
+            m_UserPointer = Ptr1;
+            setFunctor(luaFunction);
+        }
+
         ComponentLogic(ComponentLogic&& other) noexcept;
         ComponentLogic& operator=(ComponentLogic&& other) noexcept;
 
@@ -39,7 +48,10 @@ class ComponentLogic : public Engine::UserPointer, public Engine::NonCopyable {
         void call(const float dt) const noexcept;
 
         inline void setFunctor(c_function&& functor) noexcept { m_Functor.setFunctor(std::move(functor)); }
-        void setFunctor(luabridge::LuaRef luaFunction) noexcept;
+        inline void setFunctor(luabridge::LuaRef luaFunction) noexcept {
+            ASSERT(!luaFunction.isNil() && luaFunction.isFunction(), "ComponentLogic::setFunctor(luabridge::LuaRef): lua ref is invalid!");
+            m_Functor.setFunctor(luaFunction);
+        }
 
         inline void setUserPointer1(void* UserPointer1) noexcept { m_UserPointer1 = UserPointer1; }
         inline void setUserPointer2(void* UserPointer2) noexcept { m_UserPointer2 = UserPointer2; }

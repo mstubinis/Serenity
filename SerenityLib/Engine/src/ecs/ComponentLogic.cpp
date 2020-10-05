@@ -22,9 +22,6 @@ ComponentLogic& ComponentLogic::operator=(ComponentLogic&& other) noexcept{
     }
     return *this;
 }
-void ComponentLogic::setFunctor(luabridge::LuaRef luaFunction) noexcept {
-    m_Functor.setFunctor(luaFunction);
-}
 
 void ComponentLogic::call(const float dt) const noexcept {
     m_Functor(this, dt);
