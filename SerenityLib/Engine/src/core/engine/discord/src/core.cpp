@@ -56,12 +56,12 @@ discord::Result discord::Core::RunCallbacks()
     return static_cast<Result>(result);
 }
 
-void discord::Core::SetLogHook(LogLevel minLevel, std::function<void(LogLevel, char const*)> hook)
+void discord::Core::SetLogHook(LogLevel minLevel, std::function<void(LogLevel, const char*)> hook)
 {
     setLogHook_.DisconnectAll();
     setLogHook_.Connect(std::move(hook));
     static auto wrapper =
-      [](void* callbackData, EDiscordLogLevel level, char const* message) -> void {
+      [](void* callbackData, EDiscordLogLevel level, const char* message) -> void {
         auto cb(reinterpret_cast<decltype(setLogHook_)*>(callbackData));
         if (!cb) {
             return;

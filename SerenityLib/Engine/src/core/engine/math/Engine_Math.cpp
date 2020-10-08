@@ -13,9 +13,9 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <boost/math/interpolators/cubic_b_spline.hpp>
+//#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Engine;
-using namespace std;
 
 constexpr float ROTATION_THRESHOLD = 0.00001f;
 
@@ -78,6 +78,31 @@ glm::vec3 Math::polynomial_interpolate_cubic(std::vector<glm::vec3>& points, flo
     return glm::vec3(x_spline(time), y_spline(time), z_spline(time));
 }
 
+bool Math::IsNear(float v1, float v2, float threshold) noexcept {
+    return (std::abs(v1 - v2) < threshold);
+}
+bool Math::IsNear(glm::vec2& v1, glm::vec2& v2, float threshold) noexcept {
+    return (std::abs(v1.x - v2.x) < threshold && std::abs(v1.y - v2.y) < threshold);
+}
+bool Math::IsNear(glm::vec3& v1, glm::vec3& v2, float threshold) noexcept {
+    return (std::abs(v1.x - v2.x) < threshold && std::abs(v1.y - v2.y) < threshold && std::abs(v1.z - v2.z) < threshold);
+}
+bool Math::IsSpecialFloat(float f) noexcept {
+    if (boost::math::isnan(f)) return true;
+    if (boost::math::isinf(f)) return true;
+    return false;
+}
+bool Math::IsSpecialFloat(const glm::vec2& v) noexcept {
+    if (boost::math::isnan(v.x) || boost::math::isnan(v.y)) return true;
+    if (boost::math::isinf(v.x) || boost::math::isinf(v.y)) return true;
+    return false;
+}
+bool Math::IsSpecialFloat(const glm::vec3& v) noexcept {
+    if (boost::math::isnan(v.x) || boost::math::isnan(v.y) || boost::math::isnan(v.z)) return true;
+    if (boost::math::isinf(v.x) || boost::math::isinf(v.y) || boost::math::isinf(v.z)) return true;
+    return false;
+}
+
 
 bool Math::rect_fully_contained(const glm::vec4& bigger, const glm::vec4& smaller) noexcept {
     if (smaller.x >= bigger.x && smaller.x + smaller.z <= bigger.x + bigger.z) {
@@ -101,12 +126,12 @@ glm::vec4 Math::rect_union(const glm::vec4& bigger, const glm::vec4& smaller) no
     return glm::vec4(x, y, std::abs(z - x), std::abs(w - y));
 }
 
-void Math::Float32From16(float*    out, const std::uint16_t* in, unsigned int arraySize) noexcept {
+void Math::Float32From16(float*    out, const uint16_t* in, unsigned int arraySize) noexcept {
     for (unsigned int i = 0; i < arraySize; ++i) {
         Math::Float32From16(&(out[i]), in[i]);
     }
 }
-void Math::Float16From32(std::uint16_t* out, const float*    in, unsigned int arraySize) noexcept {
+void Math::Float16From32(uint16_t* out, const float*    in, unsigned int arraySize) noexcept {
     for (unsigned int i = 0; i < arraySize; ++i) {
         Math::Float16From32(&(out[i]), in[i]);
     }
@@ -168,15 +193,16 @@ glm::vec2 Math::rotate2DPoint(const glm::vec2& point, float angle, const glm::ve
 
 
 
-void Math::extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProjection,glm::vec4* outPlanes){
+void Math::extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProjection, std::array<glm::vec4, 6>& outPlanes){
     glm::vec4 rows[4];
-    for(unsigned char i = 0; i < 4; ++i)
-        rows[i] = glm::row(inViewProjection,i);
+    for (size_t i = 0; i < 4; ++i) {
+        rows[i] = glm::row(inViewProjection, i);
+    }
     //0 = left, 1 = right, 2 = top, 3 = bottom, 4 = near, 5 = far
-    for(unsigned char i = 0; i < 3; ++i){
-        unsigned char index = i * 2;
-        outPlanes[index  ] = -(rows[3] + rows[i]);  //0,2,4
-        outPlanes[index+1] = -(rows[3] - rows[i]);  //1,3,5
+    for (size_t i = 0; i < outPlanes.size() / 2; ++i) {
+        size_t index         = i * 2;
+        outPlanes[index]     = -(rows[3] + rows[i]);  //0,2,4
+        outPlanes[index + 1] = -(rows[3] - rows[i]);  //1,3,5
     }
     //https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
 }

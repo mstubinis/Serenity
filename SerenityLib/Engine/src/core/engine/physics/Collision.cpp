@@ -17,8 +17,7 @@
 using namespace Engine;
 
 void Collision::internal_load_1(Collision* collision, CollisionType collisionType, Handle mesh, float mass) {
-    auto* body = collision->m_Owner.getComponent<ComponentBody>();
-
+    auto* body       = collision->m_Owner.getComponent<ComponentBody>();
     collision->m_DeferredMeshes.clear();
     const auto scale = body->getScale();
     Physics::removeRigidBodyThreadSafe(*body);
@@ -33,7 +32,7 @@ void Collision::internal_load_1(Collision* collision, CollisionType collisionTyp
     }
 }
 void Collision::internal_load_2(Collision* collision, btCompoundShape* btCompound, std::vector<ModelInstance*> instances, float mass, CollisionType collisionType) {
-    auto* body = collision->m_Owner.getComponent<ComponentBody>();
+    auto* body       = collision->m_Owner.getComponent<ComponentBody>();
     const auto scale = body->getScale();
     for (auto& instance : instances) {
         btCollisionShape* built_collision_shape = Engine::priv::InternalMeshPublicInterface::BuildCollision(instance, collisionType, true);
@@ -65,8 +64,8 @@ Collision::Collision(ComponentBody& body, CollisionType type, ModelInstance* mod
 {
     if (modelInstance) {
         Handle meshHandle = modelInstance->mesh();
-        auto& mesh = *meshHandle.get<Mesh>();
-        if (!mesh.isLoaded() || !mesh.m_CollisionFactory) {
+        auto& mesh        = *meshHandle.get<Mesh>();
+        if (!mesh.isLoaded() || !mesh.m_CPUData.m_CollisionFactory) {
             m_BtShape = std::unique_ptr<btCollisionShape>(Engine::priv::InternalMeshPublicInterface::BuildCollision(Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), type));
             m_DeferredMeshes.emplace_back(meshHandle);
             m_DeferredLoadingFunction = [type, this, mass, meshHandle]() {
@@ -85,7 +84,7 @@ Collision::Collision(ComponentBody& body, CollisionType type, Handle meshHandle,
     : m_Owner{ body.getOwner() }
 {
     auto& mesh = *meshHandle.get<Mesh>();
-    if (!mesh.isLoaded() || !mesh.m_CollisionFactory) {
+    if (!mesh.isLoaded() || !mesh.m_CPUData.m_CollisionFactory) {
         m_BtShape      = std::unique_ptr<btCollisionShape>(Engine::priv::InternalMeshPublicInterface::BuildCollision(Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), type));
         m_DeferredMeshes.emplace_back(meshHandle);
         m_DeferredLoadingFunction = [this, type, mass, meshHandle]() {
@@ -181,7 +180,7 @@ void Collision::onEvent(const Event& e) {
         if (e.eventResource.resource->type() == ResourceType::Mesh && m_DeferredMeshes.size() > 0) {
             auto* mesh = (Mesh*)e.eventResource.resource;
             std::erase_if(m_DeferredMeshes, [mesh](Mesh* deferred_mesh) {
-                return (mesh == deferred_mesh || (deferred_mesh->isLoaded() && deferred_mesh->m_CollisionFactory));
+                return (mesh == deferred_mesh || (deferred_mesh->isLoaded() && deferred_mesh->m_CPUData.m_CollisionFactory));
             });
             if (m_DeferredMeshes.size() == 0) {
                 m_DeferredLoadingFunction();

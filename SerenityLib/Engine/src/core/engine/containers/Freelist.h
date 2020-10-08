@@ -6,15 +6,15 @@ namespace Engine {
     template<typename T> class freelist {
         private:
             std::vector<T>             m_Items;
-            std::vector<std::uint32_t> m_Freelist;
+            std::vector<uint32_t> m_Freelist;
             size_t                     m_Size = 0U;
-            std::uint32_t              m_Auto_Reserve_Count = 25U;
+            uint32_t              m_Auto_Reserve_Count = 25U;
 
             void initialize(size_t inCapacity) {
                 m_Items.reserve(inCapacity);
                 m_Freelist.reserve(inCapacity);
                 for (int i = (int)inCapacity - 1; i >= 0; --i) {
-                    m_Freelist.emplace_back((std::uint32_t)i);
+                    m_Freelist.emplace_back((uint32_t)i);
                 }
             }
 
@@ -27,7 +27,7 @@ namespace Engine {
             virtual ~freelist() {
                 clear(false);
             }
-            inline void set_auto_reserve_count(std::uint32_t auto_reserve_count) noexcept {
+            inline void set_auto_reserve_count(uint32_t auto_reserve_count) noexcept {
                 m_Auto_Reserve_Count = auto_reserve_count;
             }
 
@@ -43,7 +43,7 @@ namespace Engine {
                 }else{
                     m_Items[index] = T();
                 }
-                m_Freelist.emplace_back((std::uint32_t)index);
+                m_Freelist.emplace_back((uint32_t)index);
                 return true;
             }
             //resets the element at the specified index to parameter: data. if the index is invalid, returns false
@@ -52,7 +52,7 @@ namespace Engine {
                     return false;
                 }
                 m_Items[index] = data;
-                m_Freelist.emplace_back((std::uint32_t)index);
+                m_Freelist.emplace_back((uint32_t)index);
                 return true;
             }
             //resets the element at the specified index to parameter: data. Frees the heap allocated memory before hand. if the index is invalid, returns false
@@ -62,7 +62,7 @@ namespace Engine {
                 }
                 delete(m_Items[index]);
                 m_Items[index] = data;
-                m_Freelist.emplace_back((std::uint32_t)index);
+                m_Freelist.emplace_back((uint32_t)index);
                 return true;
             }
             bool reset_and_delete_element(size_t index) {

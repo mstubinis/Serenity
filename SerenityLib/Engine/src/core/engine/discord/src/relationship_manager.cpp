@@ -77,7 +77,7 @@ Result RelationshipManager::Get(UserId userId, Relationship* relationship)
     return static_cast<Result>(result);
 }
 
-Result RelationshipManager::GetAt(std::uint32_t index, Relationship* relationship)
+Result RelationshipManager::GetAt(uint32_t index, Relationship* relationship)
 {
     if (!relationship) {
         return Result::InternalError;

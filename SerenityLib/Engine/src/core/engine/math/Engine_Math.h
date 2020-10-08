@@ -18,15 +18,23 @@ namespace Engine::Math {
     glm::vec3 polynomial_interpolate_linear(std::vector<glm::vec3>& points, float time);
     glm::vec3 polynomial_interpolate_cubic(std::vector<glm::vec3>& points, float time);
 
-    void extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProjection,glm::vec4* outPlanes);
+    bool IsSpecialFloat(float number) noexcept;
+    bool IsSpecialFloat(const glm::vec2& vec) noexcept;
+    bool IsSpecialFloat(const glm::vec3& vec) noexcept;
 
-    inline void Float32From16(float* out, const std::uint16_t in) noexcept { *out = glm::unpackHalf1x16(in); }
-    inline void Float16From32(std::uint16_t* out, const float in) noexcept { *out = glm::packHalf1x16(in); }
-    inline float Float32From16(const std::uint16_t in) noexcept { return glm::unpackHalf1x16(in); }
-    inline std::uint16_t Float16From32(const float in) noexcept { return glm::packHalf1x16(in); }
+    bool IsNear(float v1, float v2, float threshold) noexcept;
+    bool IsNear(glm::vec2& v1, glm::vec2& v2, float threshold) noexcept;
+    bool IsNear(glm::vec3& v1, glm::vec3& v2, float threshold) noexcept;
 
-    void Float32From16(float*    out, const std::uint16_t* in, unsigned int arraySize) noexcept;
-    void Float16From32(std::uint16_t* out, const float*    in, unsigned int arraySize) noexcept;
+    void extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProjection, std::array<glm::vec4, 6>& outPlanes);
+
+    inline void Float32From16(float* out, const uint16_t in) noexcept { *out = glm::unpackHalf1x16(in); }
+    inline void Float16From32(uint16_t* out, const float in) noexcept { *out = glm::packHalf1x16(in); }
+    inline float Float32From16(const uint16_t in) noexcept { return glm::unpackHalf1x16(in); }
+    inline uint16_t Float16From32(const float in) noexcept { return glm::packHalf1x16(in); }
+
+    void Float32From16(float*    out, const uint16_t* in, unsigned int arraySize) noexcept;
+    void Float16From32(uint16_t* out, const float*    in, unsigned int arraySize) noexcept;
 
     glm::vec2 rotate2DPoint(const glm::vec2& point, float angle, const glm::vec2& origin = glm::vec2(0.0f, 0.0f));
 

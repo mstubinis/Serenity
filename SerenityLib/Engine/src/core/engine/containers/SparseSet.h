@@ -8,22 +8,22 @@ namespace Engine {
     namespace priv {
         class sparse_set_base {
             protected:
-                std::uint32_t               m_MaxLastIndex = 0;
-                std::vector<std::uint32_t>  m_Sparse;
+                uint32_t               m_MaxLastIndex = 0;
+                std::vector<uint32_t>  m_Sparse;
 
                 sparse_set_base() = delete;
             public:
-                sparse_set_base(std::uint32_t initial_capacity) {
+                sparse_set_base(uint32_t initial_capacity) {
                     m_Sparse.reserve(initial_capacity);
                 }
                 virtual ~sparse_set_base() {
                     m_MaxLastIndex = 0;
                     m_Sparse.clear();
                 }
-                virtual bool remove(std::uint32_t id) {
+                virtual bool remove(uint32_t id) {
                     return false;
                 }
-                virtual void reserve(std::uint32_t amount) {
+                virtual void reserve(uint32_t amount) {
                 }
             };
     };
@@ -35,14 +35,14 @@ namespace Engine {
         public:
             sparse_set() : super(0) {
             }
-            sparse_set(std::uint32_t initial_capacity) : super(initial_capacity) {
+            sparse_set(uint32_t initial_capacity) : super(initial_capacity) {
                 m_Dense.reserve(initial_capacity);
             }
             virtual ~sparse_set() {
                 m_Dense.clear();
             }
 
-            void reserve(std::uint32_t amount) override {
+            void reserve(uint32_t amount) override {
                 if (super::m_Sparse.size() == super::m_Sparse.capacity()) {
                     super::m_Sparse.reserve(super::m_Sparse.capacity() + amount);
                 }
@@ -51,8 +51,8 @@ namespace Engine {
                 }
             }
             template<typename... ARGS> 
-            CONSTEXPR T* add(std::uint32_t id, ARGS&&... args) {
-                std::uint32_t sparseIndex = id - 1;
+            CONSTEXPR T* add(uint32_t id, ARGS&&... args) {
+                uint32_t sparseIndex = id - 1;
                 if (static_cast<size_t>(sparseIndex) >= super::m_Sparse.size()) {
                     super::m_Sparse.resize(static_cast<size_t>(sparseIndex) + 1, 0);
                 }
@@ -60,12 +60,12 @@ namespace Engine {
                     return nullptr;
                 }
                 m_Dense.emplace_back(std::forward<ARGS>(args)...);
-                super::m_Sparse[sparseIndex] = static_cast<std::uint32_t>(m_Dense.size());
+                super::m_Sparse[sparseIndex] = static_cast<uint32_t>(m_Dense.size());
                 super::m_MaxLastIndex        = sparseIndex;
                 return &m_Dense[super::m_Sparse[sparseIndex] - 1];
             }
             //TODO: this entire function needs a serious look at
-            CONSTEXPR bool remove(std::uint32_t id) override {
+            CONSTEXPR bool remove(uint32_t id) override {
                 auto removedEntityIndex = id - 1;
                 if (removedEntityIndex >= super::m_Sparse.size()) {
                     return false;
@@ -76,11 +76,11 @@ namespace Engine {
                 }
                 super::m_Sparse[removedEntityIndex] = 0;
                 super::m_MaxLastIndex  = 0;
-                std::uint32_t max_val_ = 0;
+                uint32_t max_val_ = 0;
                 for (size_t i = super::m_Sparse.size(); i-- > 0;) {
                     if (super::m_Sparse[i] > 0) {
                         if (super::m_Sparse[i] > max_val_) {
-                            super::m_MaxLastIndex = static_cast<std::uint32_t>(i);
+                            super::m_MaxLastIndex = static_cast<uint32_t>(i);
                             max_val_ = super::m_Sparse[i];
                         }
                     }
@@ -98,7 +98,7 @@ namespace Engine {
                 m_Dense.pop_back();
                 return true;
             }
-            CONSTEXPR T* get(std::uint32_t id) const {
+            CONSTEXPR T* get(uint32_t id) const {
                 auto entityIndexInSparse = id - 1;
                 auto sparseSize          = super::m_Sparse.size();
                 if (sparseSize == 0 || entityIndexInSparse >= sparseSize || super::m_Sparse[entityIndexInSparse] == 0) {

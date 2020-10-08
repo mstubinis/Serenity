@@ -28,24 +28,24 @@ glm::vec2 Engine::Compression::unpack2NibblesFromCharBasic(float compressedValue
     return glm::vec2(highEnd, (float)(lowEnd / 255.0));
 }
 
-std::uint32_t Engine::Compression::pack3NormalsInto32Int(float x, float y, float z) {
-    std::uint32_t xsign = x < 0; //if x < 0, this = 1, else this = 0
-    std::uint32_t ysign = y < 0; //if y < 0, this = 1, else this = 0
-    std::uint32_t zsign = z < 0; //if z < 0, this = 1, else this = 0
+uint32_t Engine::Compression::pack3NormalsInto32Int(float x, float y, float z) {
+    uint32_t xsign = x < 0; //if x < 0, this = 1, else this = 0
+    uint32_t ysign = y < 0; //if y < 0, this = 1, else this = 0
+    uint32_t zsign = z < 0; //if z < 0, this = 1, else this = 0
     float w = 0.0f;         //2 bits left for w, should i ever want to use it
-    std::uint32_t wsign = w < 0; //if w < 0, this = 1, else this = 0
-    std::uint32_t intW = ((std::uint32_t)(w + (wsign << 1)) & 1);
-    std::uint32_t intZ = ((std::uint32_t)(z * 511 + (zsign << 9)) & 511);
-    std::uint32_t intY = ((std::uint32_t)(y * 511 + (ysign << 9)) & 511);
-    std::uint32_t intX = ((std::uint32_t)(x * 511 + (xsign << 9)) & 511);
-    std::uint32_t data =
+    uint32_t wsign = w < 0; //if w < 0, this = 1, else this = 0
+    uint32_t intW = ((uint32_t)(w + (wsign << 1)) & 1);
+    uint32_t intZ = ((uint32_t)(z * 511 + (zsign << 9)) & 511);
+    uint32_t intY = ((uint32_t)(y * 511 + (ysign << 9)) & 511);
+    uint32_t intX = ((uint32_t)(x * 511 + (xsign << 9)) & 511);
+    uint32_t data =
         (wsign << 31 | intW << 30) |
         (zsign << 29 | intZ << 20) |
         (ysign << 19 | intY << 10) |
         (xsign << 9 | intX);
     return data;
 }
-glm::vec3 Engine::Compression::unpack3NormalsFrom32Int(std::uint32_t compressedValue) {
+glm::vec3 Engine::Compression::unpack3NormalsFrom32Int(uint32_t compressedValue) {
     glm::vec3 conversions;
     glm::vec3 negatives = glm::vec3(1.0f);
     //X
@@ -71,7 +71,7 @@ glm::vec3 Engine::Compression::unpack3NormalsFrom32Int(std::uint32_t compressedV
     conversions.z /= 536870911.0f * negatives.z; //(2^29) - 1
     return conversions;
 }
-std::uint32_t Engine::Compression::pack3NormalsInto32Int(const glm::vec3& values) {
+uint32_t Engine::Compression::pack3NormalsInto32Int(const glm::vec3& values) {
     return Engine::Compression::pack3NormalsInto32Int(values.x, values.y, values.z);
 }
 
@@ -82,7 +82,7 @@ float Engine::Compression::pack3FloatsInto1Float(float val1, float val2, float v
     std::uint8_t _g = static_cast<std::uint8_t>(val2 * 255.0f);
     val3 = (val3 + 1.0f) * 0.5f;
     std::uint8_t _b = static_cast<std::uint8_t>(val3 * 255.0f);
-    std::uint32_t packedColor = (_r << 16) | (_g << 8) | _b;
+    uint32_t packedColor = (_r << 16) | (_g << 8) | _b;
     float packedFloat = static_cast<float>((double)packedColor / (double)(1 << 24));
     return packedFloat;
 }
@@ -103,7 +103,7 @@ float Engine::Compression::pack3FloatsInto1FloatUnsigned(float val1, float val2,
     std::uint8_t v1 = static_cast<std::uint8_t>(val1 * 255.0f);
     std::uint8_t v2 = static_cast<std::uint8_t>(val2 * 255.0f);
     std::uint8_t v3 = static_cast<std::uint8_t>(val3 * 255.0f);
-    std::uint32_t packedColor = (v1 << 16) | (v2 << 8) | v3;
+    uint32_t packedColor = (v1 << 16) | (v2 << 8) | v3;
     float packedFloat = static_cast<float>((double)packedColor / (double)(1 << 24));
     return packedFloat;
 }

@@ -17,9 +17,9 @@ void ModelInstanceAnimation::process(const float dt, std::vector<glm::mat4>& tra
     m_CurrentTime += dt;
     auto& mesh     = *m_Mesh.get<Mesh>();
     if(transforms.size() == 0){
-        transforms.resize(mesh.m_Skeleton->numBones(), glm::mat4(1.0f) );
+        transforms.resize(mesh.m_CPUData.m_Skeleton->numBones(), glm::mat4(1.0f) );
     }
-    auto& animation = mesh.m_Skeleton->m_AnimationData.at(m_AnimationName);
+    auto& animation = mesh.m_CPUData.m_Skeleton->m_AnimationData.at(m_AnimationName);
     animation.BoneTransform(m_AnimationName, m_CurrentTime, transforms);
 
     if (m_CurrentTime >= m_EndTime) {

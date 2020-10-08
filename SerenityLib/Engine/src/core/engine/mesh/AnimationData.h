@@ -3,6 +3,7 @@
 #define ENGINE_MESH_ANIMATION_DATA_H
 
 class  Mesh;
+struct MeshCPUData;
 class  SMSH_File;
 namespace Engine::priv {
     class  MeshSkeleton;
@@ -19,11 +20,11 @@ namespace Engine::priv {
         friend class  SMSH_File;
         private:
             std::unordered_map<std::string, AnimationChannel>  m_KeyframeData;
-            Mesh*                                              m_Mesh = nullptr;
+            MeshCPUData*                                       m_MeshCPUData     = nullptr;
             float                                              m_TicksPerSecond  = 0.0f;
             float                                              m_DurationInTicks = 0.0f;
 
-            void internal_interpolate_vec3(glm::vec3& Out, float AnimationTime, const std::vector<Engine::priv::Vector3Key>& keys, std::function<size_t()> call);
+            glm::vec3 internal_interpolate_vec3(float AnimationTime, const std::vector<Engine::priv::Vector3Key>& keys, std::function<size_t()>&& call);
 
             template<typename T> size_t internal_find(float AnimationTime, const AnimationChannel& node, const std::vector<T>& keys) const {
                 for (size_t i = 0; i < keys.size() - 1; ++i) {
@@ -36,18 +37,17 @@ namespace Engine::priv {
 
             void ReadNodeHeirarchy(const std::string& animationName, float time, const MeshInfoNode* node, const glm::mat4& ParentTransform, std::vector<glm::mat4>& Transforms);
             void BoneTransform(const std::string& animationName, float TimeInSeconds, std::vector<glm::mat4>& Transforms);
-            void CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime, const AnimationChannel& node);
-            void CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const AnimationChannel& node);
-            void CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime, const AnimationChannel& node);
+            glm::vec3 CalcInterpolatedPosition(float AnimationTime, const AnimationChannel& node);
+            aiQuaternion CalcInterpolatedRotation(float AnimationTime, const AnimationChannel& node);
+            glm::vec3 CalcInterpolatedScaling(float AnimationTime, const AnimationChannel& node);
             size_t FindPosition(float AnimationTime, const AnimationChannel& node) const;
             size_t FindRotation(float AnimationTime, const AnimationChannel& node) const;
             size_t FindScaling(float AnimationTime, const AnimationChannel& node) const;
 
             AnimationData() = delete;
-            AnimationData(Mesh& skeleton, float ticksPerSecond, float durationInTicks);
+            AnimationData(MeshCPUData& cpuData, float ticksPerSecond, float durationInTicks);
         public:
-            AnimationData(Mesh& skeleton, const aiAnimation& animation);
-            ~AnimationData();
+            AnimationData(MeshCPUData& cpuData, const aiAnimation& animation);
 
             CONSTEXPR float duration() const noexcept {
                 float TicksPerSecond((m_TicksPerSecond != 0.0f) ? m_TicksPerSecond : 25.0f);

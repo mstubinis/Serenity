@@ -290,7 +290,8 @@ void RenderGraph::validate_model_instances_for_rendering(Viewport& viewport, Cam
                         bool failedSphereTest   = (sphereTest == 0);
                         bool failedDistanceTest = (glm::distance2(pos, camPos) > comparison * comparison);
 
-                        modelInstance.setPassedRenderCheck(!((failedVisibleTest || failedSphereTest || failedDistanceTest)));
+                        bool result = !((failedVisibleTest || failedSphereTest || failedDistanceTest));
+                        modelInstance.setPassedRenderCheck(result);
                     }
                 }else{
                     modelInstance.setPassedRenderCheck(false);

@@ -4,6 +4,7 @@
 
 struct VertexData;
 class  Mesh;
+struct MeshCPUData;
 class  ModelInstance;
 class  btMultiSphereShape;
 class  btSphereShape;
@@ -17,6 +18,7 @@ class  btGImpactMeshShape;
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleInfoMap.h>
+#include <core/engine/mesh/MeshIncludes.h>
 #include <core/engine/resources/Handle.h>
 
 namespace Engine::priv {
@@ -27,13 +29,13 @@ namespace Engine::priv {
             std::unique_ptr<btTriangleMesh>          m_TriangleStaticData;
             std::unique_ptr<btBvhTriangleMeshShape>  m_TriangleStaticShape;
             std::unique_ptr<btTriangleInfoMap>       m_TriangleInfoMap;
-            Mesh*                                    m_Mesh = nullptr;
+            MeshCPUData*                             m_CPUData = nullptr;
 
             void internal_init_convex_data(VertexData& data, std::vector<glm::vec3>& positions);
             void internal_init_triangle_data(VertexData& data, std::vector<glm::vec3>& positions);
         public:
             MeshCollisionFactory() = default;
-            MeshCollisionFactory(Mesh& mesh);
+            MeshCollisionFactory(MeshCPUData& cpuData, MeshCollisionLoadingFlag::Flag = MESH_COLLISION_FACTORY_DEFAULT_LOAD_FLAG);
             MeshCollisionFactory(const MeshCollisionFactory& other)                = delete;
             MeshCollisionFactory& operator=(const MeshCollisionFactory& other)     = delete;
             MeshCollisionFactory(MeshCollisionFactory&& other) noexcept;

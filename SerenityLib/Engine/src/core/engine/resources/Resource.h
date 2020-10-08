@@ -8,7 +8,7 @@ class Resource {
     private:
         bool           m_IsLoaded      = false;
         std::string    m_Name          = "";
-        std::uint32_t  m_UsageCount    = 0U;
+        uint32_t  m_UsageCount    = 0U;
         ResourceType   m_ResourceType  = ResourceType::Unknown;
     public:
         Resource() = default;
@@ -24,7 +24,7 @@ class Resource {
         inline CONSTEXPR ResourceType type() const noexcept { return m_ResourceType; }
         inline CONSTEXPR const std::string& name() const noexcept { return m_Name;}
         inline CONSTEXPR bool isLoaded() const noexcept { return m_IsLoaded; }
-        inline CONSTEXPR std::uint32_t useCount() const noexcept { return m_UsageCount; }
+        inline CONSTEXPR uint32_t useCount() const noexcept { return m_UsageCount; }
 
         inline void setName(const std::string& name) noexcept { m_Name = name; }
 

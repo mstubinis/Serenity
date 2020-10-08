@@ -15,7 +15,7 @@ namespace Engine::priv {
         friend struct Engine::priv::InternalScenePublicInterface;
         private:
             std::vector<Entity>          m_Pool;
-            std::vector<std::uint32_t>   m_Freelist;
+            std::vector<uint32_t>   m_Freelist;
         public:
             ECSEntityPool() = default;
             ECSEntityPool(const ECSEntityPool&)                      = delete;
@@ -28,9 +28,9 @@ namespace Engine::priv {
 
             bool isEntityVersionDifferent(Entity entity) const noexcept;
 
-            void destroyFlaggedEntity(std::uint32_t entityID);
+            void destroyFlaggedEntity(uint32_t entityID);
             Entity addEntity(const Scene& scene) noexcept;
-            Entity getEntity(std::uint32_t entityData) const noexcept;
+            Entity getEntity(uint32_t entityData) const noexcept;
         };
 };
 

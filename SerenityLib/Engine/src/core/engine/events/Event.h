@@ -100,9 +100,9 @@ namespace Engine::priv {
         {}
     };
     struct EventTextEntered final{ 
-        std::uint32_t  unicode;
+        uint32_t  unicode;
         EventTextEntered() = default;
-        EventTextEntered(std::uint32_t unicode_) 
+        EventTextEntered(uint32_t unicode_) 
             : unicode{ unicode_ }
         {}
         const std::string convert() const {

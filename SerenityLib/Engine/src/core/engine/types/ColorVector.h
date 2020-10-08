@@ -32,10 +32,10 @@ namespace Engine {
                 for (int i = 0; i < 4; ++i)
                     color[i] = inColor;
             }
-            inline CONSTEXPR std::uint32_t toPackedInt() const noexcept {
+            inline CONSTEXPR uint32_t toPackedInt() const noexcept {
                 return (color.r << 24) | (color.g << 16) | (color.b << 8) | color.a;
             }
-            glm::vec4 unpackInt(std::uint32_t i) const noexcept {
+            glm::vec4 unpackInt(uint32_t i) const noexcept {
                 constexpr float one_over_255 = 0.003921568627451f;
                 float xx = (float)((i >> 24) & 255);
                 float yy = (float)((i >> 16) & 255);
@@ -50,14 +50,14 @@ namespace Engine {
             }
 
 
-            inline CONSTEXPR std::uint16_t toPackedShort() const noexcept {
+            inline CONSTEXPR uint16_t toPackedShort() const noexcept {
                 int r = (int)(((float)color.r * 16.0f) / 256.0f);
                 int g = (int)(((float)color.g * 16.0f) / 256.0f);
                 int b = (int)(((float)color.b * 16.0f) / 256.0f);
                 int a = (int)(((float)color.a * 16.0f) / 256.0f);
                 return (r << 12) | (g << 8) | (b << 4) | a;
             }
-            glm::vec4 unpackShort(std::uint16_t i) const noexcept {
+            glm::vec4 unpackShort(uint16_t i) const noexcept {
                 constexpr float one_over_15 = 0.0666666666666f;
                 float xx = (float)((i >> 12) & 15);
                 float yy = (float)((i >> 8) & 15);

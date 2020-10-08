@@ -144,7 +144,7 @@ void priv::FramebufferObject::resize(unsigned int w, unsigned int h){
     }
 }
 priv::FramebufferTexture* priv::FramebufferObject::attatchTexture(Texture* texture, FramebufferAttatchment attatchment){
-    if (m_Attatchments.count((unsigned int)attatchment)) {
+    if (m_Attatchments.contains((unsigned int)attatchment)) {
         return nullptr;
     }
     FramebufferTexture* framebufferTexture = NEW FramebufferTexture(*this, attatchment, *texture);
@@ -152,7 +152,11 @@ priv::FramebufferTexture* priv::FramebufferObject::attatchTexture(Texture* textu
         Engine::Renderer::bindFBO(m_FBO[i]);
         GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, framebufferTexture->attatchment(), framebufferTexture->m_Texture->getTextureType().toGLType(), framebufferTexture->m_Texture->address(), 0));
     }
-    m_Attatchments.emplace((unsigned int)attatchment, framebufferTexture);
+    m_Attatchments.emplace(
+        std::piecewise_construct,
+        std::forward_as_tuple((unsigned int)attatchment),
+        std::forward_as_tuple(framebufferTexture)
+    );
     Engine::Renderer::unbindFBO();
     return framebufferTexture;
 }
@@ -163,7 +167,7 @@ void priv::FramebufferObject::unbind() const {
     m_CustomUnbindFunctor(this);
 }
 priv::RenderbufferObject* priv::FramebufferObject::attatchRenderBuffer(priv::RenderbufferObject& rbo){ 
-    if (m_Attatchments.count(rbo.attatchment())) {
+    if (m_Attatchments.contains(rbo.attatchment())) {
         return nullptr;
     }
     for (size_t i = 0; i < m_FBO.size(); ++i) {
@@ -173,7 +177,11 @@ priv::RenderbufferObject* priv::FramebufferObject::attatchRenderBuffer(priv::Ren
         GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, rbo.internalFormat(), GL_RENDERBUFFER, rbo.address()));
         Engine::Renderer::unbindRBO();
     }
-    m_Attatchments.emplace(rbo.attatchment(), &rbo);
+    m_Attatchments.emplace(
+        std::piecewise_construct,
+        std::forward_as_tuple(rbo.attatchment()),
+        std::forward_as_tuple(&rbo)
+    );
     Engine::Renderer::unbindRBO();
     Engine::Renderer::unbindFBO();
     return &rbo;

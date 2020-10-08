@@ -21,7 +21,7 @@ Engine::priv::SSAO::~SSAO() {
     GLCall(glDeleteTextures(1, &m_ssao_noise_texture));
 }
 void Engine::priv::SSAO::internal_generate_kernel(std::uniform_real_distribution<float>& rand_dist, std::default_random_engine& gen) noexcept {
-    for (std::uint32_t i = 0; i < SSAO_MAX_KERNEL_SIZE; ++i) {
+    for (uint32_t i = 0; i < SSAO_MAX_KERNEL_SIZE; ++i) {
         glm::vec3 sample(rand_dist(gen) * 2.0f - 1.0f, rand_dist(gen) * 2.0f - 1.0f, rand_dist(gen));
         sample      = glm::normalize(sample);
         sample     *= rand_dist(gen);
@@ -37,7 +37,7 @@ void Engine::priv::SSAO::internal_generate_kernel(std::uniform_real_distribution
 void Engine::priv::SSAO::internal_generate_noise(std::uniform_real_distribution<float>& rand_dist, std::default_random_engine& gen) noexcept {
     std::vector<glm::vec3> ssaoNoise;
     ssaoNoise.reserve(SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE);
-    for (std::uint32_t i = 0; i < SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE; ++i) {
+    for (uint32_t i = 0; i < SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE; ++i) {
         ssaoNoise.emplace_back(rand_dist(gen) * 2.0 - 1.0, rand_dist(gen) * 2.0 - 1.0, 0.0f);
     }
     Engine::Renderer::genAndBindTexture(TextureType::Texture2D, m_ssao_noise_texture);

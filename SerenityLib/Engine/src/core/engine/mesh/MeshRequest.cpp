@@ -9,23 +9,22 @@
 
 #include <core/engine/system/Engine.h>
 
-#include <boost/filesystem.hpp>
-
 using namespace Engine;
 using namespace Engine::priv;
 
 Engine::priv::AssimpSceneImport::AssimpSceneImport() {
-    m_Importer_ptr.reset(NEW Assimp::Importer{});
+    m_Importer_ptr = std::make_shared<Assimp::Importer>();
 }
 
-MeshRequest::MeshRequest(const std::string& filenameOrData, float threshold, std::function<void()>&& callback) 
-    : m_FileOrData{ filenameOrData }
-    , m_Threshold{ threshold }
-    , m_Callback{ std::move(callback) }
+MeshRequest::MeshRequest(const std::string& filenameOrData, float threshold, MeshCollisionLoadingFlag::Flag flags, std::function<void()>&& callback)
+    : m_FileOrData            { filenameOrData }
+    , m_Threshold             { threshold }
+    , m_Callback              { std::move(callback) }
+    , m_CollisionLoadingFlags { flags }
 {
     if (!m_FileOrData.empty()) {
-        m_FileExtension = boost::filesystem::extension(m_FileOrData);
-        if (boost::filesystem::exists(m_FileOrData)) {
+        m_FileExtension = std::filesystem::path(m_FileOrData).extension().string();
+        if (std::filesystem::exists(m_FileOrData)) {
             m_FileExists = true;
         }
     }
@@ -55,23 +54,21 @@ MeshRequest& MeshRequest::operator=(MeshRequest&& other) noexcept {
 }
 void MeshRequest::request(bool inAsync) {
     m_Async = (inAsync && Engine::hardware_concurrency() > 1);
-    InternalMeshRequestPublicInterface::Request(*this);
-}
 
-void InternalMeshRequestPublicInterface::Request(MeshRequest& meshRequest) {
-    if (!meshRequest.m_FileOrData.empty()) {
-        if (meshRequest.m_FileExists) {
-            bool valid = InternalMeshRequestPublicInterface::Populate(meshRequest);
-            if (valid){
-                auto lambda_cpu = [meshRequest]() mutable {
-                    InternalMeshRequestPublicInterface::LoadCPU(meshRequest);
+    if (!m_FileOrData.empty()) {
+        if (m_FileExists) {
+            bool valid = InternalMeshRequestPublicInterface::Populate(*this);
+            if (valid) {
+                MeshRequest copyRequest{ *this };
+                auto lambda_cpu = [copyRequest]() mutable {
+                    InternalMeshRequestPublicInterface::LoadCPU(copyRequest);
                 };
-                auto lambda_gpu = [meshRequest]() mutable {
-                    InternalMeshRequestPublicInterface::LoadGPU(meshRequest);
-                    meshRequest.m_Callback();
+                auto lambda_gpu = [copyRequest]() mutable {
+                    InternalMeshRequestPublicInterface::LoadGPU(copyRequest);
+                    copyRequest.m_Callback();
                 };
 
-                if (meshRequest.m_Async || std::this_thread::get_id() != Resources::getWindow().getOpenglThreadID()){
+                if (m_Async || std::this_thread::get_id() != Resources::getWindow().getOpenglThreadID()) {
                     threading::addJobWithPostCallback(lambda_cpu, lambda_gpu);
                 }else{
                     lambda_cpu();
@@ -81,13 +78,14 @@ void InternalMeshRequestPublicInterface::Request(MeshRequest& meshRequest) {
         }
     }
 }
+
 bool InternalMeshRequestPublicInterface::Populate(MeshRequest& meshRequest) {
     if (meshRequest.m_FileExtension != ".objcc" && meshRequest.m_FileExtension != ".smsh") {
         meshRequest.m_Importer.m_AIScene = const_cast<aiScene*>(meshRequest.m_Importer.m_Importer_ptr->ReadFile(meshRequest.m_FileOrData, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace));
         meshRequest.m_Importer.m_AIRoot  = meshRequest.m_Importer.m_AIScene->mRootNode;
 
-        auto& scene{ *meshRequest.m_Importer.m_AIScene };
-        auto& root{ *meshRequest.m_Importer.m_AIRoot };
+        auto& scene { *meshRequest.m_Importer.m_AIScene };
+        auto& root  { *meshRequest.m_Importer.m_AIRoot };
 
         if (!&scene || (scene.mFlags & AI_SCENE_FLAGS_INCOMPLETE) || !&root) {
             return false;
@@ -95,12 +93,10 @@ bool InternalMeshRequestPublicInterface::Populate(MeshRequest& meshRequest) {
         auto* rootNode{ NEW Engine::priv::MeshInfoNode{ root.mName.C_Str(), Engine::Math::assimpToGLMMat4(root.mTransformation) } };
         MeshLoader::LoadPopulateGlobalNodes(scene, rootNode, nullptr, rootNode, &root, meshRequest);
     }else{
-        MeshRequestPart part{};
+        auto& part   = meshRequest.m_Parts.emplace_back();
         part.name    = meshRequest.m_FileOrData;
-        part.handle  = Core::m_Engine->m_ResourceManager.m_ResourceModule.emplace<Mesh>();
-        Mesh* mesh   = part.handle.get<Mesh>();
-        mesh->setName(part.name);
-        meshRequest.m_Parts.push_back(std::move(part));
+        part.handle  = Engine::Resources::addResource<Mesh>();
+        part.handle.get<Mesh>()->setName(part.name);
     }
     return true;
 }
@@ -110,22 +106,44 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
         auto& root{ *meshRequest.m_Importer.m_AIRoot };
         unsigned int count{ 0 };
         MeshLoader::LoadProcessNodeData(meshRequest, scene, root, count);
-        SMSH_File::SaveFile((meshRequest.m_FileOrData.substr(0, meshRequest.m_FileOrData.find_last_of(".")) + ".smsh").c_str(), *meshRequest.m_Parts[0].handle.get<Mesh>());
+        const char* saveFileName = (meshRequest.m_FileOrData.substr(0, meshRequest.m_FileOrData.find_last_of(".")) + ".smsh").c_str();
+        auto& part = meshRequest.m_Parts[0];
+        SMSH_File::SaveFile(saveFileName, part.cpuData);
+        std::mutex* mutex = part.handle.getMutex();
+        if (mutex) {
+            std::lock_guard lock(*mutex);
+            auto& mesh = *part.handle.get<Mesh>();
+            mesh.setName(part.name);
+            mesh.m_CPUData = std::move(part.cpuData);
+        }
     }else if (meshRequest.m_FileExtension == ".smsh") {
-        Mesh& mesh{ *meshRequest.m_Parts[0].handle.get<Mesh>() };
-        SMSH_File::LoadFile(&mesh, meshRequest.m_FileOrData.c_str());
-        mesh.m_Threshold = meshRequest.m_Threshold;
-        InternalMeshPublicInterface::CalculateRadius(mesh);
-        SAFE_DELETE(mesh.m_CollisionFactory);
-        mesh.m_CollisionFactory = NEW MeshCollisionFactory(mesh);
+        for (auto& part : meshRequest.m_Parts) {
+            SMSH_File::LoadFile(meshRequest.m_FileOrData.c_str(), part.cpuData);
+            part.cpuData.m_Threshold = meshRequest.m_Threshold;
+            part.cpuData.internal_calculate_radius();
+            part.cpuData.m_CollisionFactory = (NEW MeshCollisionFactory(part.cpuData, meshRequest.m_CollisionLoadingFlags));
+            std::mutex* mutex = part.handle.getMutex();
+            if (mutex) {
+                std::lock_guard lock(*mutex);
+                auto& mesh = *part.handle.get<Mesh>();
+                mesh.setName(part.name);
+                mesh.m_CPUData = std::move(part.cpuData);
+            }
+        }
     }else{ //objcc
-        VertexData* vertexData{ MeshLoader::LoadFrom_OBJCC(meshRequest.m_FileOrData) };
-        Mesh& mesh{ *meshRequest.m_Parts[0].handle.get<Mesh>() };
-        mesh.m_VertexData        = vertexData;
-        mesh.m_Threshold         = meshRequest.m_Threshold;
-        InternalMeshPublicInterface::CalculateRadius(mesh);
-        SAFE_DELETE(mesh.m_CollisionFactory);
-        mesh.m_CollisionFactory  = NEW MeshCollisionFactory(mesh);
+        for (auto& part : meshRequest.m_Parts) {
+            part.cpuData.m_VertexData = (MeshLoader::LoadFrom_OBJCC(meshRequest.m_FileOrData));
+            part.cpuData.m_Threshold  = meshRequest.m_Threshold;
+            part.cpuData.internal_calculate_radius();
+            part.cpuData.m_CollisionFactory = (NEW MeshCollisionFactory(part.cpuData, meshRequest.m_CollisionLoadingFlags));
+            std::mutex* mutex = part.handle.getMutex();
+            if (mutex) {
+                std::lock_guard lock(*mutex);
+                auto& mesh = *part.handle.get<Mesh>();
+                mesh.setName(part.name);
+                mesh.m_CPUData = std::move(part.cpuData);
+            }
+        }
     }
 }
 void InternalMeshRequestPublicInterface::LoadGPU(MeshRequest& meshRequest) {

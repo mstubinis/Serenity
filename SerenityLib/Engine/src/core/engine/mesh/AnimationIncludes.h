@@ -10,10 +10,10 @@ namespace Engine::priv {
         glm::mat4   FinalTransform = glm::mat4(1.0f);
     };
     struct MeshInfoNode final {
-        std::vector<MeshInfoNode*>  Children;
-        glm::mat4                   Transform = glm::mat4(1.0f);
-        std::string                 Name      = "";
-        MeshInfoNode*               Parent    = nullptr;
+        std::vector<std::unique_ptr<MeshInfoNode>>  Children;
+        glm::mat4                                   Transform = glm::mat4(1.0f);
+        std::string                                 Name      = "";
+        MeshInfoNode*                               Parent    = nullptr;
 
         MeshInfoNode() = delete;
         MeshInfoNode(std::string&& name_, glm::mat4&& transform_) {

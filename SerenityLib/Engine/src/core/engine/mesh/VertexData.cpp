@@ -76,7 +76,7 @@ std::vector<glm::vec3> VertexData::getPositions() const {
     std::vector<glm::vec3> points;
     if (m_Format.m_Attributes[0].type != GL_FLOAT) {
         struct half_point {
-            std::uint16_t x, y, z;
+            uint16_t x, y, z;
         };
         auto pts_half = getData<half_point>(0);
         points.reserve(pts_half.size());

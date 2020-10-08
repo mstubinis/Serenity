@@ -10,8 +10,8 @@ namespace Engine::priv {
     class ResourceVector final : public IResourceVector {
 
         struct Entry final {
-            TResource      m_Resource;
-            std::uint32_t  m_Version{ 0 };
+            TResource   m_Resource;
+            uint32_t    m_Version{ 0 };
 
             template<typename ... ARGS>
             Entry(ARGS&&... args)
@@ -32,18 +32,17 @@ namespace Engine::priv {
                 m_Resource   = std::move(other.m_Resource);
                 return *this;
             }
-            ~Entry() = default;
         };
 
         private:
-            std::vector<Entry>           m_Resources;
-            std::vector<std::uint32_t>   m_AvailableIndices;
-            std::mutex                   m_Mutex;
-            bool                         m_Locked              = false;
+            std::vector<Entry>      m_Resources;
+            std::vector<uint32_t>   m_AvailableIndices;
+            std::mutex              m_Mutex;
+            bool                    m_Locked             = false;
         public:
             ResourceVector() {
-                m_Resources.reserve(200);
-                m_AvailableIndices.reserve(200);
+                m_Resources.reserve(5);
+                m_AvailableIndices.reserve(5);
             }
             ResourceVector(const ResourceVector& other)                = delete;
             ResourceVector& operator=(const ResourceVector& other)     = delete;
@@ -66,7 +65,7 @@ namespace Engine::priv {
                 m_AvailableIndices.shrink_to_fit();
             }
 
-            std::uint32_t pop_index() noexcept {
+            uint32_t pop_index() noexcept {
                 ASSERT(!m_Locked, "Engine::priv::ResourceVector::pop_index(): is locked!");
                 if (m_Locked) {
                     return 0;
@@ -93,7 +92,7 @@ namespace Engine::priv {
             }
 
             std::pair<TResource*, Handle> get(const std::string_view sv) noexcept {
-                for (std::uint32_t i = 0; i < (std::uint32_t)m_Resources.size(); ++i) {
+                for (uint32_t i = 0; i < (uint32_t)m_Resources.size(); ++i) {
                     if (m_Resources[i].m_Resource.name() == sv) {
                         return std::make_pair(&m_Resources[i].m_Resource, Handle( i, m_Resources[i].m_Version, 0U ) );
                     }

@@ -669,6 +669,7 @@
     <ClInclude Include="Engine\src\core\engine\types\Flag.h" />
     <ClInclude Include="Engine\src\core\engine\types\SmallMap.h" />
     <ClInclude Include="Engine\src\core\engine\types\StaticString.h" />
+    <ClInclude Include="Engine\src\core\engine\types\ViewPointer.h" />
     <ClInclude Include="Engine\src\core\engine\utils\BlockProfiler.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Engine_Debugging.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Logger.h" />
@@ -746,7 +747,6 @@
     <ClCompile Include="Engine\src\core\engine\mesh\BuiltInMeshes.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\Mesh.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshCollisionFactory.cpp" />
-    <ClCompile Include="Engine\src\core\engine\mesh\MeshImportedData.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshLoading.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshRequest.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\smsh.cpp" />

@@ -29,7 +29,7 @@ public:
         module.OnMessage(peerId, channelId, data, dataLength);
     }
 
-    static void OnRouteUpdate(void* callbackData, char const* routeData)
+    static void OnRouteUpdate(void* callbackData, const char* routeData)
     {
         auto* core = reinterpret_cast<Core*>(callbackData);
         if (!core) {
@@ -61,13 +61,13 @@ Result NetworkManager::Flush()
     return static_cast<Result>(result);
 }
 
-Result NetworkManager::OpenPeer(NetworkPeerId peerId, char const* routeData)
+Result NetworkManager::OpenPeer(NetworkPeerId peerId, const char* routeData)
 {
     auto result = internal_->open_peer(internal_, peerId, const_cast<char*>(routeData));
     return static_cast<Result>(result);
 }
 
-Result NetworkManager::UpdatePeer(NetworkPeerId peerId, char const* routeData)
+Result NetworkManager::UpdatePeer(NetworkPeerId peerId, const char* routeData)
 {
     auto result = internal_->update_peer(internal_, peerId, const_cast<char*>(routeData));
     return static_cast<Result>(result);
@@ -94,7 +94,7 @@ Result NetworkManager::CloseChannel(NetworkPeerId peerId, NetworkChannelId chann
 Result NetworkManager::SendMessage(NetworkPeerId peerId,
                                    NetworkChannelId channelId,
                                    std::uint8_t* data,
-                                   std::uint32_t dataLength)
+                                   uint32_t dataLength)
 {
     auto result = internal_->send_message(
       internal_, peerId, channelId, reinterpret_cast<uint8_t*>(data), dataLength);

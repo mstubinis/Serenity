@@ -156,7 +156,11 @@ void Font::init_simple(const std::string& filename, int height, int width) {
             charGlyph.uvs.emplace_back(uvW1, uvH1);
             charGlyph.uvs.emplace_back(uvW2, uvH2);
 
-            m_CharGlyphs.emplace(charGlyph.char_id, std::move(charGlyph));
+            m_CharGlyphs.emplace(
+                std::piecewise_construct,
+                std::forward_as_tuple(charGlyph.char_id), 
+                std::forward_as_tuple(std::move(charGlyph))
+            );
         }
     }
     m_MaxHeight = max_y_offset - min_y_offset;
@@ -224,7 +228,7 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
             if (FT_Load_Char(face, char_id, FT_LOAD_RENDER)) {
                 continue;
             }
-            if (!m_CharGlyphs.count(char_id)) {
+            if (!m_CharGlyphs.contains(char_id)) {
                 done = true;
                 break;
             }
@@ -341,7 +345,7 @@ float Font::getTextWidth(std::string_view text) const {
     return maxWidth;
 }
 const CharGlyph& Font::getGlyphData(std::uint8_t character) const {
-    return (m_CharGlyphs.count(character)) ? m_CharGlyphs.at(character) : m_CharGlyphs.at('?');
+    return (m_CharGlyphs.contains(character)) ? m_CharGlyphs.at(character) : m_CharGlyphs.at('?');
 }
 void Font::renderText(const std::string& t, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment al, const glm::vec4& scissor){
     Engine::Renderer::renderText(t, *this, p, c, a, s, d, al, scissor);

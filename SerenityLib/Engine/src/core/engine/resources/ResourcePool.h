@@ -9,7 +9,7 @@
 namespace Engine::priv{
     template<typename RESOURCE> 
     struct HandleEntry final {
-        std::uint32_t             m_Version{ 1 };
+        uint32_t             m_Version{ 1 };
         std::unique_ptr<RESOURCE> m_Resource;
 
         HandleEntry() = default;
@@ -47,7 +47,7 @@ namespace Engine::priv{
                 if (item.m_Version == 0) {
                     item.m_Version = 1;
                 }
-                return Handle{ (std::uint32_t)used_index + 1U, item.m_Version, type };
+                return Handle{ (uint32_t)used_index + 1U, item.m_Version, type };
             }
             RESOURCE_INTERFACE* get(Handle handle) noexcept {
                 RESOURCE_INTERFACE* outPtr{ nullptr };

@@ -917,6 +917,9 @@
     <ClInclude Include="Engine\src\core\engine\mesh\VertexAttributeInfo.h">
       <Filter>Header Files\Engine\Core\Mesh</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\types\ViewPointer.h">
+      <Filter>Header Files\Engine\Core\Types</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -965,9 +968,6 @@
       <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\mesh\MeshCollisionFactory.cpp">
-      <Filter>Source Files\Engine\Core\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\mesh\MeshImportedData.cpp">
       <Filter>Source Files\Engine\Core\Mesh</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\mesh\MeshLoading.cpp">

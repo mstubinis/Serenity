@@ -173,36 +173,36 @@ void DeferredPipeline::init() {
         collection[index] = Engine::Resources::addResource<Shader>(str, type, false);
     };
 
-    priv::threading::addJob([&]() {emplaceShader(0, EShaders::decal_vertex, m_InternalShaders, ShaderType::Vertex); });
-    priv::threading::addJob([&]() {emplaceShader(1, EShaders::decal_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(2, EShaders::fullscreen_quad_vertex, m_InternalShaders, ShaderType::Vertex); });
-    priv::threading::addJob([&]() {emplaceShader(3, EShaders::bullet_physics_vert, m_InternalShaders, ShaderType::Vertex); });
-    priv::threading::addJob([&]() {emplaceShader(4, EShaders::bullet_physcis_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(5, EShaders::vertex_basic, m_InternalShaders, ShaderType::Vertex); });
-    priv::threading::addJob([&]() {emplaceShader(6, EShaders::vertex_2DAPI, m_InternalShaders, ShaderType::Vertex); });
-    priv::threading::addJob([&]() {emplaceShader(7, EShaders::vertex_skybox, m_InternalShaders, ShaderType::Vertex); });
-    priv::threading::addJob([&]() {emplaceShader(8, EShaders::lighting_vert, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(0, EShaders::decal_vertex, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(1, EShaders::decal_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(2, EShaders::fullscreen_quad_vertex, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(3, EShaders::bullet_physics_vert, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(4, EShaders::bullet_physcis_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(5, EShaders::vertex_basic, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(6, EShaders::vertex_2DAPI, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(7, EShaders::vertex_skybox, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(8, EShaders::lighting_vert, m_InternalShaders, ShaderType::Vertex); });
 
-    priv::threading::addJob([&]() {emplaceShader(9, EShaders::forward_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(10, EShaders::deferred_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(11, EShaders::zprepass_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(12, EShaders::deferred_frag_hud, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(13, EShaders::deferred_frag_skybox, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(9, EShaders::forward_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(10, EShaders::deferred_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(11, EShaders::zprepass_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(12, EShaders::deferred_frag_hud, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(13, EShaders::deferred_frag_skybox, m_InternalShaders, ShaderType::Fragment); });
 
-    priv::threading::addJob([&]() {emplaceShader(14, EShaders::copy_depth_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(15, EShaders::blur_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(14, EShaders::copy_depth_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(15, EShaders::blur_frag, m_InternalShaders, ShaderType::Fragment); });
 
-    priv::threading::addJob([&]() {emplaceShader(16, EShaders::final_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(17, EShaders::depth_and_transparency_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(16, EShaders::final_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(17, EShaders::depth_and_transparency_frag, m_InternalShaders, ShaderType::Fragment); });
 
-    priv::threading::addJob([&]() {emplaceShader(18, EShaders::lighting_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(19, EShaders::lighting_frag_gi, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(20, EShaders::cubemap_convolude_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(21, EShaders::cubemap_prefilter_envmap_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(22, EShaders::brdf_precompute, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(23, EShaders::stencil_passover, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(24, EShaders::particle_vertex, m_InternalShaders, ShaderType::Vertex); });
-    priv::threading::addJob([&]() {emplaceShader(25, EShaders::particle_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(18, EShaders::lighting_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(19, EShaders::lighting_frag_gi, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(20, EShaders::cubemap_convolude_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(21, EShaders::cubemap_prefilter_envmap_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(22, EShaders::brdf_precompute, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(23, EShaders::stencil_passover, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(24, EShaders::particle_vertex, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(25, EShaders::particle_frag, m_InternalShaders, ShaderType::Fragment); });
 
     priv::threading::waitForAll();
 
@@ -384,10 +384,7 @@ void DeferredPipeline::onPipelineChanged() {
 }
 unsigned int DeferredPipeline::getUniformLocation(const char* location) {
     const auto& uniforms = m_RendererState.current_bound_shader_program->uniforms();
-    if (!uniforms.count(location)) {
-        return -1;
-    }
-    return uniforms.at(location);
+    return (!uniforms.contains(location)) ? -1 : uniforms.at(location);
 }
 unsigned int DeferredPipeline::getUniformLocationUnsafe(const char* location) {
     return m_RendererState.current_bound_shader_program->uniforms().at(location);

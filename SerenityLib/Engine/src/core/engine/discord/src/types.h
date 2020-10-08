@@ -169,27 +169,27 @@ using Version = std::int32_t;
 using Snowflake = std::int64_t;
 using Timestamp = std::int64_t;
 using UserId = Snowflake;
-using Locale = char const*;
-using Branch = char const*;
+using Locale = const char*;
+using Branch = const char*;
 using LobbyId = Snowflake;
-using LobbySecret = char const*;
-using MetadataKey = char const*;
-using MetadataValue = char const*;
+using LobbySecret = const char*;
+using MetadataKey = const char*;
+using MetadataValue = const char*;
 using NetworkPeerId = std::uint64_t;
 using NetworkChannelId = std::uint8_t;
-using Path = char const*;
-using DateTime = char const*;
+using Path = const char*;
+using DateTime = const char*;
 
 class User final {
 public:
     void SetId(UserId id);
     UserId GetId() const;
-    void SetUsername(char const* username);
-    char const* GetUsername() const;
-    void SetDiscriminator(char const* discriminator);
-    char const* GetDiscriminator() const;
-    void SetAvatar(char const* avatar);
-    char const* GetAvatar() const;
+    void SetUsername(const char* username);
+    const char* GetUsername() const;
+    void SetDiscriminator(const char* discriminator);
+    const char* GetDiscriminator() const;
+    void SetAvatar(const char* avatar);
+    const char* GetAvatar() const;
     void SetBot(bool bot);
     bool GetBot() const;
 
@@ -199,10 +199,10 @@ private:
 
 class OAuth2Token final {
 public:
-    void SetAccessToken(char const* accessToken);
-    char const* GetAccessToken() const;
-    void SetScopes(char const* scopes);
-    char const* GetScopes() const;
+    void SetAccessToken(const char* accessToken);
+    const char* GetAccessToken() const;
+    void SetScopes(const char* scopes);
+    const char* GetScopes() const;
     void SetExpires(Timestamp expires);
     Timestamp GetExpires() const;
 
@@ -216,8 +216,8 @@ public:
     ImageType GetType() const;
     void SetId(std::int64_t id);
     std::int64_t GetId() const;
-    void SetSize(std::uint32_t size);
-    std::uint32_t GetSize() const;
+    void SetSize(uint32_t size);
+    uint32_t GetSize() const;
 
 private:
     DiscordImageHandle internal_;
@@ -225,10 +225,10 @@ private:
 
 class ImageDimensions final {
 public:
-    void SetWidth(std::uint32_t width);
-    std::uint32_t GetWidth() const;
-    void SetHeight(std::uint32_t height);
-    std::uint32_t GetHeight() const;
+    void SetWidth(uint32_t width);
+    uint32_t GetWidth() const;
+    void SetHeight(uint32_t height);
+    uint32_t GetHeight() const;
 
 private:
     DiscordImageDimensions internal_;
@@ -247,14 +247,14 @@ private:
 
 class ActivityAssets final {
 public:
-    void SetLargeImage(char const* largeImage);
-    char const* GetLargeImage() const;
-    void SetLargeText(char const* largeText);
-    char const* GetLargeText() const;
-    void SetSmallImage(char const* smallImage);
-    char const* GetSmallImage() const;
-    void SetSmallText(char const* smallText);
-    char const* GetSmallText() const;
+    void SetLargeImage(const char* largeImage);
+    const char* GetLargeImage() const;
+    void SetLargeText(const char* largeText);
+    const char* GetLargeText() const;
+    void SetSmallImage(const char* smallImage);
+    const char* GetSmallImage() const;
+    void SetSmallText(const char* smallText);
+    const char* GetSmallText() const;
 
 private:
     DiscordActivityAssets internal_;
@@ -273,8 +273,8 @@ private:
 
 class ActivityParty final {
 public:
-    void SetId(char const* id);
-    char const* GetId() const;
+    void SetId(const char* id);
+    const char* GetId() const;
     PartySize& GetSize();
     PartySize const& GetSize() const;
 
@@ -284,12 +284,12 @@ private:
 
 class ActivitySecrets final {
 public:
-    void SetMatch(char const* match);
-    char const* GetMatch() const;
-    void SetJoin(char const* join);
-    char const* GetJoin() const;
-    void SetSpectate(char const* spectate);
-    char const* GetSpectate() const;
+    void SetMatch(const char* match);
+    const char* GetMatch() const;
+    void SetJoin(const char* join);
+    const char* GetJoin() const;
+    void SetSpectate(const char* spectate);
+    const char* GetSpectate() const;
 
 private:
     DiscordActivitySecrets internal_;
@@ -301,12 +301,12 @@ public:
     ActivityType GetType() const;
     void SetApplicationId(std::int64_t applicationId);
     std::int64_t GetApplicationId() const;
-    void SetName(char const* name);
-    char const* GetName() const;
-    void SetState(char const* state);
-    char const* GetState() const;
-    void SetDetails(char const* details);
-    char const* GetDetails() const;
+    void SetName(const char* name);
+    const char* GetName() const;
+    void SetState(const char* state);
+    const char* GetState() const;
+    void SetDetails(const char* details);
+    const char* GetDetails() const;
     ActivityTimestamps& GetTimestamps();
     ActivityTimestamps const& GetTimestamps() const;
     ActivityAssets& GetAssets();
@@ -356,8 +356,8 @@ public:
     UserId GetOwnerId() const;
     void SetSecret(LobbySecret secret);
     LobbySecret GetSecret() const;
-    void SetCapacity(std::uint32_t capacity);
-    std::uint32_t GetCapacity() const;
+    void SetCapacity(uint32_t capacity);
+    uint32_t GetCapacity() const;
     void SetLocked(bool locked);
     bool GetLocked() const;
 
@@ -367,8 +367,8 @@ private:
 
 class FileStat final {
 public:
-    void SetFilename(char const* filename);
-    char const* GetFilename() const;
+    void SetFilename(const char* filename);
+    const char* GetFilename() const;
     void SetSize(std::uint64_t size);
     std::uint64_t GetSize() const;
     void SetLastModified(std::uint64_t lastModified);
@@ -393,10 +393,10 @@ private:
 
 class SkuPrice final {
 public:
-    void SetAmount(std::uint32_t amount);
-    std::uint32_t GetAmount() const;
-    void SetCurrency(char const* currency);
-    char const* GetCurrency() const;
+    void SetAmount(uint32_t amount);
+    uint32_t GetAmount() const;
+    void SetCurrency(const char* currency);
+    const char* GetCurrency() const;
 
 private:
     DiscordSkuPrice internal_;
@@ -408,8 +408,8 @@ public:
     Snowflake GetId() const;
     void SetType(SkuType type);
     SkuType GetType() const;
-    void SetName(char const* name);
-    char const* GetName() const;
+    void SetName(const char* name);
+    const char* GetName() const;
     SkuPrice& GetPrice();
     SkuPrice const& GetPrice() const;
 
@@ -421,8 +421,8 @@ class InputMode final {
 public:
     void SetType(InputModeType type);
     InputModeType GetType() const;
-    void SetShortcut(char const* shortcut);
-    char const* GetShortcut() const;
+    void SetShortcut(const char* shortcut);
+    const char* GetShortcut() const;
 
 private:
     DiscordInputMode internal_;
@@ -447,7 +447,7 @@ class LobbyTransaction final {
 public:
     Result SetType(LobbyType type);
     Result SetOwner(UserId ownerId);
-    Result SetCapacity(std::uint32_t capacity);
+    Result SetCapacity(uint32_t capacity);
     Result SetMetadata(MetadataKey key, MetadataValue value);
     Result DeleteMetadata(MetadataKey key);
     Result SetLocked(bool locked);
@@ -478,7 +478,7 @@ public:
                   LobbySearchCast cast,
                   MetadataValue value);
     Result Sort(MetadataKey key, LobbySearchCast cast, MetadataValue value);
-    Result Limit(std::uint32_t limit);
+    Result Limit(uint32_t limit);
     Result Distance(LobbySearchDistance distance);
 
     IDiscordLobbySearchQuery** Receive() { return &internal_; }

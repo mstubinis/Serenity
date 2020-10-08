@@ -91,7 +91,7 @@ class ComponentCamera final {
         inline glm::mat4 getViewProjectionInverse() const noexcept { return glm::inverse(m_ProjectionMatrix * m_ViewMatrix); }
         inline glm::vec3 getViewVector() const noexcept { return glm::normalize(glm::vec3(m_ViewMatrix[0][2], m_ViewMatrix[1][2], m_ViewMatrix[2][2])); }
 
-        inline CONSTEXPR std::array<glm::vec4, 6> getFrustrumPlanes() const noexcept { return m_FrustumPlanes; }
+        inline std::array<glm::vec4, 6>& getFrustrumPlanes() noexcept { return m_FrustumPlanes; }
         inline CONSTEXPR glm_vec3 forward() const noexcept { return m_Forward; }
         inline glm_vec3 right() const noexcept { return glm::normalize(glm_vec3(m_ViewMatrixNoTranslation[0][0], m_ViewMatrixNoTranslation[1][0], m_ViewMatrixNoTranslation[2][0])); }
         inline CONSTEXPR glm_vec3 up() const noexcept { return m_Up; /*normalize later?*/ }

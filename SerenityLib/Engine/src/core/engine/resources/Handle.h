@@ -16,25 +16,25 @@ class Handle final {
         void* internal_get_base() const noexcept;
         std::mutex* internal_get_mutex() const noexcept;
 
-        std::uint32_t m_Index   : 12;
-        std::uint32_t m_Version : 15;
-        std::uint32_t m_Type    : 5;
+        uint32_t m_Index   : 12;
+        uint32_t m_Version : 15;
+        uint32_t m_Type    : 5;
     public:
         constexpr Handle()
             : m_Index{ 0 }
             , m_Version{ 0 }
             , m_Type{ 0 }
         {}
-        constexpr Handle(const std::uint32_t index, const std::uint32_t version, const std::uint32_t type)
+        constexpr Handle(const uint32_t index, const uint32_t version, const uint32_t type)
             : m_Index{ index }
             , m_Version{ version }
             , m_Type { type }
         {}
 
-        inline constexpr std::uint32_t index() const noexcept { return m_Index; }
-        inline constexpr std::uint32_t version() const noexcept { return m_Version; }
-        inline constexpr std::uint32_t type() const noexcept { return m_Type; }
-        inline explicit constexpr operator std::uint32_t() const noexcept { return m_Type << 27 | m_Version << 12 | m_Index; }
+        inline constexpr uint32_t index() const noexcept { return m_Index; }
+        inline constexpr uint32_t version() const noexcept { return m_Version; }
+        inline constexpr uint32_t type() const noexcept { return m_Type; }
+        inline explicit constexpr operator uint32_t() const noexcept { return m_Type << 27 | m_Version << 12 | m_Index; }
         inline explicit constexpr operator bool() const noexcept { return !null(); }
 
         inline constexpr bool operator==(const Handle& other) const noexcept { 

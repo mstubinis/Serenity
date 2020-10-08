@@ -7,7 +7,7 @@ using namespace Engine;
 using namespace Engine::Networking;
 
 bool ServerThread::remove_client(const std::string& hash) {
-    bool has_client_hash        = m_HashedServerClients.count(hash);
+    bool has_client_hash        = m_HashedServerClients.contains(hash);
     if (has_client_hash) {
         m_HashedServerClients.erase(hash);
         return true;
@@ -18,7 +18,7 @@ bool ServerThread::remove_client(const std::string& hash) {
     return false;
 }
 bool ServerThread::add_client(const std::string& hash, ServerClient* serverClient) {
-    bool has_client_hash = m_HashedServerClients.count(hash);
+    bool has_client_hash = m_HashedServerClients.contains(hash);
     if (!has_client_hash) {
         m_HashedServerClients.emplace(
             std::piecewise_construct, 
@@ -62,7 +62,7 @@ void ServerThreadContainer::setBlocking(bool blocking) {
 }
 void ServerThreadContainer::setBlocking(const std::string& hash, bool blocking) {
     for (auto& thread : m_Threads) {
-        if (thread.m_HashedServerClients.count(hash)) {
+        if (thread.m_HashedServerClients.contains(hash)) {
             thread.m_HashedServerClients.at(hash)->socket()->setBlocking(blocking);
             return;
         }

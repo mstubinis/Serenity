@@ -8,6 +8,7 @@
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/system/Engine.h>
+#include <core/engine/model/ModelInstance.h>
 
 #include <core/engine/renderer/postprocess/SSAO.h>
 #include <core/engine/renderer/postprocess/HDR.h>
@@ -85,7 +86,7 @@ bool priv::Renderer::bind(Mesh* mesh) const {
         if (mesh->isLoaded()) {
             mesh->m_CustomBindFunctor(mesh, this);
         }else{
-            Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().get<Mesh>()->m_VertexData->bind();
+            Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().get<Mesh>()->m_CPUData.m_VertexData->bind();
         }
     }
     return res;
@@ -95,7 +96,7 @@ bool priv::Renderer::unbind(Mesh* mesh) const {
     if (mesh->isLoaded()) {
         mesh->m_CustomUnbindFunctor(mesh, this);
     }else{
-        Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().get<Mesh>()->m_VertexData->unbind();
+        Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().get<Mesh>()->m_CPUData.m_VertexData->unbind();
     }
     return true;
 }

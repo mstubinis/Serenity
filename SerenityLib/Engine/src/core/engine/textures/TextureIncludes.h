@@ -114,7 +114,7 @@ class TextureType final {
 
     public:
         constexpr TextureType() = default;
-        constexpr TextureType(const std::uint32_t other) { 
+        constexpr TextureType(const uint32_t other) { 
             m_Type = static_cast<TextureType::Type>(other); 
             ASSERT(m_Type > TextureType::Unknown && m_Type < TextureType::_TOTAL, "TextureType::m_Type is an invalid value!");
         }
@@ -146,7 +146,7 @@ namespace Engine::priv {
 namespace Engine::priv {
     struct ImageMipmap final {
         std::vector<std::uint8_t>   pixels;
-        std::uint32_t               compressedSize = 0U;
+        uint32_t               compressedSize = 0U;
         int                         width          = 0U;
         int                         height         = 0U;
         int                         level          = 0U;

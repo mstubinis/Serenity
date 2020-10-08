@@ -2,8 +2,8 @@
 #ifndef ENGINE_RENDERER_POSTPROCESS_SSAO_H
 #define ENGINE_RENDERER_POSTPROCESS_SSAO_H
 
-constexpr std::uint32_t SSAO_MAX_KERNEL_SIZE = 16U;
-constexpr std::uint32_t SSAO_NORMALMAP_SIZE  = 16U;
+constexpr uint32_t SSAO_MAX_KERNEL_SIZE = 16U;
+constexpr uint32_t SSAO_NORMALMAP_SIZE  = 16U;
 
 class  Camera;
 class  ShaderProgram;

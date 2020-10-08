@@ -99,7 +99,7 @@ void EngineCore::internal_init_os_specific(const EngineOptions& options) {
             freopen("CONIN$",  "r", stdin);
             freopen("CONOUT$", "w", stdout);
             freopen("CONOUT$", "w", stderr);
-        }else if (!args.count("console")) {
+        }else if (!args.contains("console")) {
             ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window
         }
     #endif

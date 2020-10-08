@@ -1060,7 +1060,7 @@ void Engine::priv::ComponentBody_System::ParentChildVector::reserve(size_t size)
     WorldTransforms.reserve(size);
     LocalTransforms.reserve(size);
 }
-void Engine::priv::ComponentBody_System::ParentChildVector::reserve_from_insert(std::uint32_t parentID, std::uint32_t childID) {
+void Engine::priv::ComponentBody_System::ParentChildVector::reserve_from_insert(uint32_t parentID, uint32_t childID) {
     if (Parents.capacity() < parentID || Parents.capacity() < childID) {
         reserve(std::max(parentID, childID) + 50U);
     }
@@ -1068,7 +1068,7 @@ void Engine::priv::ComponentBody_System::ParentChildVector::reserve_from_insert(
         resize(std::max(parentID, childID));
     }
 }
-void Engine::priv::ComponentBody_System::ParentChildVector::insert(std::uint32_t parentID, std::uint32_t childID) {
+void Engine::priv::ComponentBody_System::ParentChildVector::insert(uint32_t parentID, uint32_t childID) {
     reserve_from_insert(parentID, childID);
     if (getParent(childID) == parentID) {
         //ENGINE_PRODUCTION_LOG(parentID << ", " << childID << " - added: already added")
@@ -1115,7 +1115,7 @@ void Engine::priv::ComponentBody_System::ParentChildVector::insert(std::uint32_t
 
     getWorld(childID) = getWorld(parentID) * getLocal(childID);
 }
-void Engine::priv::ComponentBody_System::ParentChildVector::remove(std::uint32_t parentID, std::uint32_t childID) {
+void Engine::priv::ComponentBody_System::ParentChildVector::remove(uint32_t parentID, uint32_t childID) {
     if (getParent(childID) == 0) {
         //std::cout << parentID << ", " << childID << " - remove: already removed\n";
         return;

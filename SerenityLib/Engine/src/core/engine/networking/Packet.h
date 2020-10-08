@@ -4,9 +4,9 @@
 
 #include <SFML/Network/Packet.hpp>
 
-using PacketSequence  = std::uint16_t;
-using PacketBitfield  = std::uint32_t;
-using PacketTimestamp = std::uint32_t;
+using PacketSequence  = uint16_t;
+using PacketBitfield  = uint32_t;
+using PacketTimestamp = uint32_t;
 
 namespace Engine::Networking {
     class Server;
@@ -66,7 +66,7 @@ namespace Engine::Networking {
             }
         public:
             bool                  m_Valid          = false;
-            std::uint32_t         m_PacketType     = 0U;
+            uint32_t         m_PacketType     = 0U;
             PacketTimestamp       m_Timestamp      = 0U;
             PacketSequence        m_SequenceNumber = 0U;
             PacketSequence        m_Ack            = 0U;
@@ -75,7 +75,7 @@ namespace Engine::Networking {
             std::function<void(Engine::Networking::Packet* packet)> m_OnSendFunction = [](Engine::Networking::Packet* packet) {};
         public:
             Packet() {}
-            Packet(std::uint32_t PacketType) {
+            Packet(uint32_t PacketType) {
                 m_PacketType = PacketType;
             }
             Packet(sf::Packet& inSFMLPacket)           = delete;
