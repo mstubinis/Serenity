@@ -46,7 +46,7 @@ namespace Engine::Networking {
             Engine::Networking::Server&                             m_Server;
             sf::IpAddress                                           m_IP                           = sf::IpAddress::LocalHost;
             std::string                                             m_Hash                         = "";
-            std::uint32_t                                           m_ID                           = 0U;
+            uint32_t                                           m_ID                           = 0U;
             ConnectionState                                         m_ConnectionState              = ConnectionState::Unknown;
             float                                                   m_Timeout_Timer                = 0.0f;
             float                                                   m_Timeout_Timer_Limit          = 30.0f;
@@ -76,11 +76,11 @@ namespace Engine::Networking {
             inline CONSTEXPR Engine::Networking::SocketTCP* socket() const noexcept { return m_TcpSocket.get(); }
             inline CONSTEXPR unsigned short port() const noexcept { return m_Port; }
             inline CONSTEXPR const sf::IpAddress& ip() const noexcept { return m_IP; }
-            inline CONSTEXPR std::uint32_t id() const noexcept { return m_ID; }
+            inline CONSTEXPR uint32_t id() const noexcept { return m_ID; }
             inline CONSTEXPR void setTimeoutTimerLimit(float limit) noexcept { m_Timeout_Timer_Limit = limit; }
             inline CONSTEXPR void setRecoveryTimeoutTimerLimit(float limit) noexcept { m_Recovery_Timeout_Timer_Limit = limit; }
 
-            std::uint32_t generate_nonce() const noexcept;
+            uint32_t generate_nonce() const noexcept;
 
             void disconnect() noexcept;
             bool connect(unsigned short timeout = 0) noexcept;

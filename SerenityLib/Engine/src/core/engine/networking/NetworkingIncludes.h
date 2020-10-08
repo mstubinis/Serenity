@@ -5,7 +5,7 @@
 namespace Engine::Networking {
     class NetworkingHelpers final {
         public:
-            static std::uint32_t generate_nonce() {
+            static uint32_t generate_nonce() {
                 std::random_device device;
                 std::mt19937 mt(device());
                 std::uniform_int_distribution<sf::Uint32> distribution;

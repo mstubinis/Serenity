@@ -12,7 +12,7 @@ public:
     void IsLocked(bool* locked);
     void SetLocked(bool locked, std::function<void(Result)> callback);
     void OpenActivityInvite(ActivityActionType type, std::function<void(Result)> callback);
-    void OpenGuildInvite(char const* code, std::function<void(Result)> callback);
+    void OpenGuildInvite(const char* code, std::function<void(Result)> callback);
     void OpenVoiceSettings(std::function<void(Result)> callback);
 
     Event<bool> OnToggle;

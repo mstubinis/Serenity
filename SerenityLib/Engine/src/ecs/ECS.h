@@ -44,7 +44,7 @@ namespace Engine::priv {
 
             //"event handlers"
             template<typename COMPONENT>
-            void onResize(std::uint32_t width, std::uint32_t height) {
+            void onResize(uint32_t width, uint32_t height) {
                 using CPoolType  = ECSComponentPool<COMPONENT>;
                 auto type_slot   = m_Registry.type_slot_fast<COMPONENT>();
                 auto& components = (*(CPoolType*)m_ComponentPools[type_slot]).data();
@@ -55,8 +55,8 @@ namespace Engine::priv {
 
             void removeEntity(Entity entity);
             void update(const float dt, Scene& scene);
-            void onComponentAddedToEntity(void* component, Entity entity, std::uint32_t type_slot);
-            void onComponentRemovedFromEntity(Entity entity, std::uint32_t type_slot);
+            void onComponentAddedToEntity(void* component, Entity entity, uint32_t type_slot);
+            void onComponentRemovedFromEntity(Entity entity, uint32_t type_slot);
             void onSceneEntered(Scene& scene);
             void onSceneLeft(Scene& scene);
 

@@ -173,36 +173,36 @@ void DeferredPipeline::init() {
         collection[index] = Engine::Resources::addResource<Shader>(str, type, false);
     };
 
-    priv::threading::addJob([&]() {emplaceShader(0, EShaders::decal_vertex, m_InternalShaders, ShaderType::Vertex); });
-    priv::threading::addJob([&]() {emplaceShader(1, EShaders::decal_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(2, EShaders::fullscreen_quad_vertex, m_InternalShaders, ShaderType::Vertex); });
-    priv::threading::addJob([&]() {emplaceShader(3, EShaders::bullet_physics_vert, m_InternalShaders, ShaderType::Vertex); });
-    priv::threading::addJob([&]() {emplaceShader(4, EShaders::bullet_physcis_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(5, EShaders::vertex_basic, m_InternalShaders, ShaderType::Vertex); });
-    priv::threading::addJob([&]() {emplaceShader(6, EShaders::vertex_2DAPI, m_InternalShaders, ShaderType::Vertex); });
-    priv::threading::addJob([&]() {emplaceShader(7, EShaders::vertex_skybox, m_InternalShaders, ShaderType::Vertex); });
-    priv::threading::addJob([&]() {emplaceShader(8, EShaders::lighting_vert, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(0, EShaders::decal_vertex, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(1, EShaders::decal_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(2, EShaders::fullscreen_quad_vertex, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(3, EShaders::bullet_physics_vert, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(4, EShaders::bullet_physcis_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(5, EShaders::vertex_basic, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(6, EShaders::vertex_2DAPI, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(7, EShaders::vertex_skybox, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(8, EShaders::lighting_vert, m_InternalShaders, ShaderType::Vertex); });
 
-    priv::threading::addJob([&]() {emplaceShader(9, EShaders::forward_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(10, EShaders::deferred_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(11, EShaders::zprepass_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(12, EShaders::deferred_frag_hud, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(13, EShaders::deferred_frag_skybox, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(9, EShaders::forward_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(10, EShaders::deferred_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(11, EShaders::zprepass_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(12, EShaders::deferred_frag_hud, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(13, EShaders::deferred_frag_skybox, m_InternalShaders, ShaderType::Fragment); });
 
-    priv::threading::addJob([&]() {emplaceShader(14, EShaders::copy_depth_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(15, EShaders::blur_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(14, EShaders::copy_depth_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(15, EShaders::blur_frag, m_InternalShaders, ShaderType::Fragment); });
 
-    priv::threading::addJob([&]() {emplaceShader(16, EShaders::final_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(17, EShaders::depth_and_transparency_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(16, EShaders::final_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(17, EShaders::depth_and_transparency_frag, m_InternalShaders, ShaderType::Fragment); });
 
-    priv::threading::addJob([&]() {emplaceShader(18, EShaders::lighting_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(19, EShaders::lighting_frag_gi, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(20, EShaders::cubemap_convolude_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(21, EShaders::cubemap_prefilter_envmap_frag, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(22, EShaders::brdf_precompute, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(23, EShaders::stencil_passover, m_InternalShaders, ShaderType::Fragment); });
-    priv::threading::addJob([&]() {emplaceShader(24, EShaders::particle_vertex, m_InternalShaders, ShaderType::Vertex); });
-    priv::threading::addJob([&]() {emplaceShader(25, EShaders::particle_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(18, EShaders::lighting_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(19, EShaders::lighting_frag_gi, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(20, EShaders::cubemap_convolude_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(21, EShaders::cubemap_prefilter_envmap_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(22, EShaders::brdf_precompute, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(23, EShaders::stencil_passover, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(24, EShaders::particle_vertex, m_InternalShaders, ShaderType::Vertex); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(25, EShaders::particle_frag, m_InternalShaders, ShaderType::Fragment); });
 
     priv::threading::waitForAll();
 
@@ -384,10 +384,7 @@ void DeferredPipeline::onPipelineChanged() {
 }
 unsigned int DeferredPipeline::getUniformLocation(const char* location) {
     const auto& uniforms = m_RendererState.current_bound_shader_program->uniforms();
-    if (!uniforms.count(location)) {
-        return -1;
-    }
-    return uniforms.at(location);
+    return (!uniforms.contains(location)) ? -1 : uniforms.at(location);
 }
 unsigned int DeferredPipeline::getUniformLocationUnsafe(const char* location) {
     return m_RendererState.current_bound_shader_program->uniforms().at(location);
@@ -1048,7 +1045,7 @@ void DeferredPipeline::internal_render_2d_text_right(const std::string& text, co
     }
 }
 
-void DeferredPipeline::render2DText(const std::string& text, const Font& font, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, TextAlignment textAlignment, const glm::vec4& scissor) {
+void DeferredPipeline::render2DText(const std::string& text, Handle fontHandle, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, TextAlignment textAlignment, const glm::vec4& scissor) {
     internal_gl_scissor(scissor, depth);
 
     m_Text_Points.clear();
@@ -1058,8 +1055,9 @@ void DeferredPipeline::render2DText(const std::string& text, const Font& font, c
     auto& fontPlane = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getFontMesh().get<Mesh>();
     m_Renderer.bind(&fontPlane);
 
+    Font& font = *fontHandle.get<Font>();
     auto  newLineGlyphHeight = font.getMaxHeight() + font.getLineHeight();
-    auto* texture = font.getGlyphTexture();
+    Handle textureHandle = font.getGlyphTexture();
     float y = 0.0f;
     float x = 0.0f;
     float z = -0.001f - depth;
@@ -1070,7 +1068,7 @@ void DeferredPipeline::render2DText(const std::string& text, const Font& font, c
     modelMatrix           = glm::scale(modelMatrix, glm::vec3(scale.x, scale.y, 1));
 
     Engine::Renderer::sendUniform1("DiffuseTextureEnabled", 1);
-    Engine::Renderer::sendTexture("DiffuseTexture", *texture, 0);
+    Engine::Renderer::sendTexture("DiffuseTexture", *textureHandle.get<Texture>(), 0);
     Engine::Renderer::sendUniform4("Object_Color", color);
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
 
@@ -1088,13 +1086,16 @@ void DeferredPipeline::render2DText(const std::string& text, const Font& font, c
     m_Renderer.unbind(&fontPlane);
 
 }
-void DeferredPipeline::render2DTexture(Texture* texture, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, Alignment align, const glm::vec4& scissor) {
+void DeferredPipeline::render2DTexture(Handle textureHandle, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, Alignment align, const glm::vec4& scissor) {
     internal_gl_scissor(scissor, depth);
 
     float translationX = position.x;
     float translationY = position.y;
     float totalSizeX   = scale.x;
     float totalSizeY   = scale.y;
+
+    Texture* texture   = textureHandle.get<Texture>();
+
     if (texture) {
         totalSizeX *= texture->width();
         totalSizeY *= texture->height();
@@ -1707,11 +1708,11 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, Viewport& viewpo
     render2DAPI(mainRenderFunction, viewport);
 }
 
-void DeferredPipeline::renderTexture(Texture& tex, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) {
-    m_2DAPICommands.emplace_back([&tex, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DTexture(&tex, p, c, a, s, d, align, scissor); }, d);
+void DeferredPipeline::renderTexture(Handle textureHandle, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) {
+    m_2DAPICommands.emplace_back([textureHandle, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DTexture(textureHandle, p, c, a, s, d, align, scissor); }, d);
 }
-void DeferredPipeline::renderText(const std::string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) {
-    m_2DAPICommands.emplace_back([t, &fnt, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DText(t, fnt, p, c, a, s, d, align, scissor); }, d);
+void DeferredPipeline::renderText(const std::string& t, Handle fontHandle, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) {
+    m_2DAPICommands.emplace_back([t, fontHandle, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DText(t, fontHandle, p, c, a, s, d, align, scissor); }, d);
 }
 void DeferredPipeline::renderBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) {
     float doubleBorder = borderSize * 2.0f;
@@ -1729,7 +1730,7 @@ void DeferredPipeline::renderBorder(float borderSize, const glm::vec2& pos, cons
     Engine::Renderer::renderRectangle(newPos + glm::vec2(0.0f, halfHeight + borderSize), col, w, borderSize, angle, depth, Alignment::BottomCenter, scissor);
 }
 void DeferredPipeline::renderRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment align, const glm::vec4& scissor) {
-    m_2DAPICommands.emplace_back([=]() { DeferredPipeline::render2DTexture(nullptr, pos, col, angle, glm::vec2(width, height), depth, align, scissor); }, depth);
+    m_2DAPICommands.emplace_back([=]() { DeferredPipeline::render2DTexture(Handle{}, pos, col, angle, glm::vec2(width, height), depth, align, scissor); }, depth);
 }
 void DeferredPipeline::renderTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) {
     m_2DAPICommands.emplace_back([=]() { DeferredPipeline::render2DTriangle(position, color, angle, width, height, depth, align, scissor); }, depth);

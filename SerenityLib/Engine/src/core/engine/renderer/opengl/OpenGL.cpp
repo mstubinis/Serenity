@@ -32,5 +32,5 @@ std::string OpenGL::getHighestGLSLVersion(Window& window) noexcept {
     }
     auto& openglContext = window.getSFMLHandle().getSettings();
     std::string version = std::to_string(openglContext.majorVersion) + "." + std::to_string(openglContext.minorVersion);
-    return VERSION_MAP.count(version) ? VERSION_MAP.at(version) : "N/A";
+    return VERSION_MAP.contains(version) ? VERSION_MAP.at(version) : "N/A";
 }

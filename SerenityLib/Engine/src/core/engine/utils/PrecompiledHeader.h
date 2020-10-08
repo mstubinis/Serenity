@@ -141,10 +141,10 @@
         } while (false)
 #endif
 
-using uint   = std::uint32_t;
+using uint   = uint32_t;
 using uchar  = std::uint8_t;
-using ushort = std::uint16_t;
-using uint32 = std::uint32_t;
+using ushort = uint16_t;
+using uint32 = uint32_t;
 using uint64 = std::uint64_t;
 
 #ifndef ENGINE_HIGH_PRECISION
@@ -313,6 +313,7 @@ inline std::string operator "" _str(const char* cStr, std::size_t length) { retu
 #include <core/engine/types/ColorVector.h>
 #include <core/engine/types/Flag.h>
 #include <core/engine/utils/BlockProfiler.h>
+#include <core/engine/types/ViewPointer.h>
 
 namespace Engine {
     class UserPointer {
@@ -343,7 +344,7 @@ namespace Engine {
     };
     /*
     void printEndianness() noexcept {
-        std::uint32_t data;
+        uint32_t data;
         std::uint8_t* cptr;
         data = 1; //Assign data
         cptr = (std::uint8_t*)&data; //Type cast

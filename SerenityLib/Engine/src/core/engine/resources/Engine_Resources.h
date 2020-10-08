@@ -27,12 +27,13 @@ class  ShaderProgram;
 #include <core/engine/renderer/GLImageConstants.h>
 #include <core/engine/shaders/ShaderIncludes.h>
 #include <core/engine/resources/ResourceModule.h>
+#include <core/engine/mesh/MeshIncludes.h>
 
 namespace Engine::priv {
     class ResourceManager final{
         friend class  Scene;
         public:
-            static ResourceManager* RESOURCE_MANAGER;
+            static Engine::view_ptr<ResourceManager> RESOURCE_MANAGER;
         private:
             unsigned int AddScene(Scene& scene);
         public:
@@ -58,7 +59,7 @@ namespace Engine::priv {
             }
 
 
-            Scene& _getSceneByID(std::uint32_t sceneID);
+            Scene& _getSceneByID(uint32_t sceneID);
 
             inline CONSTEXPR std::vector<std::unique_ptr<Scene>>& scenes() noexcept { return m_Scenes; }
             /*
@@ -118,11 +119,15 @@ namespace Engine::Resources {
 
     std::vector<Handle> loadMesh(
         const std::string& fileOrData, 
-        float threshhold = 0.005f
+        float threshhold = MESH_DEFAULT_THRESHOLD,
+        MeshCollisionLoadingFlag::Flag = MESH_COLLISION_FACTORY_DEFAULT_LOAD_FLAG
     );
+
+
     std::vector<Handle> loadMeshAsync(
-        const std::string& fileOrData, 
-        float threshhold = 0.005f,
+        const std::string& fileOrData,
+        float threshhold = MESH_DEFAULT_THRESHOLD,
+        MeshCollisionLoadingFlag::Flag = MESH_COLLISION_FACTORY_DEFAULT_LOAD_FLAG,
         std::function<void()> callback = []() {}
     );
 
@@ -201,6 +206,7 @@ namespace Engine::Resources {
     );
 
     Handle addShader(const std::string& shaderFileOrData, ShaderType shaderType, bool fromFile = true);
+
     Handle addShaderProgram(const std::string& name, Handle vertexShader, Handle fragmentShader);
 };
 namespace Engine::Data{

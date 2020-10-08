@@ -8,25 +8,25 @@ class StorageManager final {
 public:
     ~StorageManager() = default;
 
-    Result Read(char const* name,
+    Result Read(const char* name,
                 std::uint8_t* data,
-                std::uint32_t dataLength,
-                std::uint32_t* read);
-    void ReadAsync(char const* name,
-                   std::function<void(Result, std::uint8_t*, std::uint32_t)> callback);
-    void ReadAsyncPartial(char const* name,
+                uint32_t dataLength,
+                uint32_t* read);
+    void ReadAsync(const char* name,
+                   std::function<void(Result, std::uint8_t*, uint32_t)> callback);
+    void ReadAsyncPartial(const char* name,
                           std::uint64_t offset,
                           std::uint64_t length,
-                          std::function<void(Result, std::uint8_t*, std::uint32_t)> callback);
-    Result Write(char const* name, std::uint8_t* data, std::uint32_t dataLength);
-    void WriteAsync(char const* name,
+                          std::function<void(Result, std::uint8_t*, uint32_t)> callback);
+    Result Write(const char* name, std::uint8_t* data, uint32_t dataLength);
+    void WriteAsync(const char* name,
                     std::uint8_t* data,
-                    std::uint32_t dataLength,
+                    uint32_t dataLength,
                     std::function<void(Result)> callback);
-    Result Delete(char const* name);
-    Result Exists(char const* name, bool* exists);
+    Result Delete(const char* name);
+    Result Exists(const char* name, bool* exists);
     void Count(std::int32_t* count);
-    Result Stat(char const* name, FileStat* stat);
+    Result Stat(const char* name, FileStat* stat);
     Result StatAt(std::int32_t index, FileStat* stat);
     Result GetPath(char path[4096]);
 

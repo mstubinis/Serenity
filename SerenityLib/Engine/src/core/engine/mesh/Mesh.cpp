@@ -25,58 +25,83 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
-
 using namespace Engine;
 using namespace Engine::priv;
 namespace boostm = boost::math;
 
-namespace Engine::priv {
-    constexpr auto DefaultMeshBindFunctor = [](Mesh* mesh_ptr, const Engine::priv::Renderer* renderer) {
-        mesh_ptr->getVertexData().bind();
-    };
-    constexpr auto DefaultMeshUnbindFunctor = [](Mesh* mesh_ptr, const Engine::priv::Renderer* renderer) {
-        mesh_ptr->getVertexData().unbind();
-    };
+MeshCPUData::MeshCPUData(const MeshCPUData& other) 
+    : m_RadiusBox        { other.m_RadiusBox }
+    , m_Skeleton         { std::exchange(other.m_Skeleton, nullptr) }
+    , m_RootNode         { std::exchange(other.m_RootNode, nullptr) }
+    , m_CollisionFactory { std::exchange(other.m_CollisionFactory, nullptr) }
+    , m_VertexData       { std::exchange(other.m_VertexData, nullptr) }
+    , m_File             { other.m_File }
+    , m_Radius           { other.m_Radius }
+    , m_Threshold        { other.m_Threshold }
+{}
+MeshCPUData& MeshCPUData::operator=(const MeshCPUData& other) {
+    m_RadiusBox        = other.m_RadiusBox;
+    m_Skeleton         = std::exchange(other.m_Skeleton, nullptr);
+    m_RootNode         = std::exchange(other.m_RootNode, nullptr);
+    m_CollisionFactory = std::exchange(other.m_CollisionFactory, nullptr);
+    m_VertexData       = std::exchange(other.m_VertexData, nullptr);
+    m_File             = other.m_File;
+    m_Radius           = other.m_Radius;
+    m_Threshold        = other.m_Threshold;
+    return *this;
+}
+MeshCPUData::MeshCPUData(MeshCPUData&& other) noexcept 
+    : m_RadiusBox        { std::move(other.m_RadiusBox) }
+    , m_Skeleton         { std::exchange(other.m_Skeleton, nullptr) }
+    , m_RootNode         { std::exchange(other.m_RootNode, nullptr) }
+    , m_CollisionFactory { std::exchange(other.m_CollisionFactory, nullptr) }
+    , m_VertexData       { std::exchange(other.m_VertexData, nullptr) }
+    , m_File             { std::move(other.m_File) }
+    , m_Radius           { std::move(other.m_Radius) }
+    , m_Threshold        { std::move(other.m_Threshold) }
+{}
+MeshCPUData& MeshCPUData::operator=(MeshCPUData&& other) noexcept {
+    m_RadiusBox        = std::move(other.m_RadiusBox);
+    m_Skeleton         = std::exchange(other.m_Skeleton, nullptr);
+    m_RootNode         = std::exchange(other.m_RootNode, nullptr);
+    m_CollisionFactory = std::exchange(other.m_CollisionFactory, nullptr);
+    m_VertexData       = std::exchange(other.m_VertexData, nullptr);
+    m_File             = std::move(other.m_File);
+    m_Radius           = std::move(other.m_Radius);
+    m_Threshold        = std::move(other.m_Threshold);
+    return *this;
+}
+
+
+constexpr auto DefaultMeshBindFunctor = [](Mesh* mesh_ptr, const Engine::priv::Renderer* renderer) {
+    mesh_ptr->getVertexData().bind();
+};
+constexpr auto DefaultMeshUnbindFunctor = [](Mesh* mesh_ptr, const Engine::priv::Renderer* renderer) {
+    mesh_ptr->getVertexData().unbind();
 };
 
-void InternalMeshPublicInterface::LoadGPU(Mesh& mesh){
-    mesh.m_VertexData->finalize(); //transfer vertex data to gpu
+
+void InternalMeshPublicInterface::LoadGPU(Mesh& mesh) {
+    mesh.m_CPUData.m_VertexData->finalize(); //transfer vertex data to gpu
     mesh.Resource::load();
 }
-void InternalMeshPublicInterface::UnloadCPU(Mesh& mesh){
-    SAFE_DELETE(mesh.m_Skeleton);
-    SAFE_DELETE(mesh.m_CollisionFactory);
-
-    //cleanup the node tree
-    if (mesh.m_RootNode) {
-        std::vector<Engine::priv::MeshInfoNode*> cleanup_vector;
-        std::queue<Engine::priv::MeshInfoNode*> q;
-        q.push(mesh.m_RootNode);
-        while (!q.empty()) {
-            size_t size = q.size();
-            while (size--) {
-                auto* front = q.front();
-                cleanup_vector.emplace_back(front);
-                for (const auto& child : front->Children) {
-                    q.push(child);
-                }
-                q.pop();
-            }
-        }
-        SAFE_DELETE_VECTOR(cleanup_vector);
-    }
-
+void InternalMeshPublicInterface::UnloadCPU(Mesh& mesh) {
+    //mesh.m_CPUData.m_Skeleton.reset();
+    //mesh.m_CPUData.m_CollisionFactory.reset();
+    //mesh.m_CPUData.m_RootNode.reset();
+    
     mesh.Resource::unload();
 }
-void InternalMeshPublicInterface::UnloadGPU(Mesh& mesh){
-    SAFE_DELETE(mesh.m_VertexData);
+void InternalMeshPublicInterface::UnloadGPU(Mesh& mesh) {
+    SAFE_DELETE(mesh.m_CPUData.m_VertexData);
+
 }
 void InternalMeshPublicInterface::InitBlankMesh(Mesh& mesh) {
     mesh.registerEvent(EventType::WindowFullscreenChanged);
     mesh.setCustomBindFunctor(DefaultMeshBindFunctor);
     mesh.setCustomUnbindFunctor(DefaultMeshUnbindFunctor);
 }
-bool InternalMeshPublicInterface::SupportsInstancing(){
+bool InternalMeshPublicInterface::SupportsInstancing() {
     return (
         Renderer::OPENGL_VERSION >= 31 || 
         OpenGLExtensions::supported(OpenGLExtensions::EXT_draw_instanced) || 
@@ -86,9 +111,9 @@ bool InternalMeshPublicInterface::SupportsInstancing(){
 btCollisionShape* InternalMeshPublicInterface::internal_build_collision(Handle meshHandle, ModelInstance* modelInstance, CollisionType collisionType, bool isCompoundChild) noexcept {
     Engine::priv::MeshCollisionFactory* factory = nullptr;
     if (!meshHandle) {
-        factory = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().get<Mesh>()->m_CollisionFactory;
+        factory = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().get<Mesh>()->m_CPUData.m_CollisionFactory;
     }else{
-        factory = meshHandle.get<Mesh>()->m_CollisionFactory;
+        factory = meshHandle.get<Mesh>()->m_CPUData.m_CollisionFactory;
     }
     if (factory) {
         switch (collisionType) {
@@ -104,8 +129,6 @@ btCollisionShape* InternalMeshPublicInterface::internal_build_collision(Handle m
                 return factory->buildTriangleShape(modelInstance, isCompoundChild);
             }case CollisionType::TriangleShape: {
                 return factory->buildTriangleShapeGImpact(modelInstance, isCompoundChild);
-            }default: {
-                return new btEmptyShape();
             }
         }
     }
@@ -115,36 +138,31 @@ btCollisionShape* InternalMeshPublicInterface::BuildCollision(Handle meshHandle,
     return internal_build_collision(meshHandle, nullptr, collisionType, isCompoundChild);
 }
 btCollisionShape* InternalMeshPublicInterface::BuildCollision(ModelInstance* modelInstance, CollisionType collisionType, bool isCompoundChild) {
-    Handle meshHandle = Handle{};
-    if (modelInstance) {
-        if (modelInstance->mesh()) {
-            meshHandle = modelInstance->mesh();
-        }
-    }
+    Handle meshHandle = (modelInstance && modelInstance->mesh()) ? modelInstance->mesh() : Handle{};
     return internal_build_collision(meshHandle, modelInstance, collisionType, isCompoundChild);
 }
 void InternalMeshPublicInterface::FinalizeVertexData(Handle meshHandle, MeshImportedData& data) {
-    Mesh& mesh = *meshHandle.get<Mesh>();
-    InternalMeshPublicInterface::FinalizeVertexData(mesh, data);
+    auto& cpuData = meshHandle.get<Mesh>()->m_CPUData;
+    InternalMeshPublicInterface::FinalizeVertexData(cpuData, data);
 }
-void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedData& data) {
+void InternalMeshPublicInterface::FinalizeVertexData(MeshCPUData& cpuData, MeshImportedData& data) {
     if (data.uvs.size() == 0)         data.uvs.resize(data.points.size());
     if (data.normals.size() == 0)     data.normals.resize(data.points.size());
     if (data.binormals.size() == 0)   data.binormals.resize(data.points.size());
     if (data.tangents.size() == 0)    data.tangents.resize(data.points.size());
-    if (!mesh.m_VertexData) {
-        if (mesh.m_Skeleton) {
-            mesh.m_VertexData = NEW VertexData(VertexDataFormat::VertexDataAnimated);
+    if (!cpuData.m_VertexData) {
+        if (cpuData.m_Skeleton) {
+            cpuData.m_VertexData = NEW VertexData(VertexDataFormat::VertexDataAnimated);
         }else{
-            mesh.m_VertexData = NEW VertexData(VertexDataFormat::VertexDataBasic);
+            cpuData.m_VertexData = NEW VertexData(VertexDataFormat::VertexDataBasic);
         }
     }
-    auto& vertexData = *mesh.m_VertexData;
+    auto& vertexData = *cpuData.m_VertexData;
     vertexData.clearData();
     std::vector<std::vector<GLuint>> normals;
     normals.resize(3);
-    if (mesh.m_Threshold == 0.0f) {
-#pragma region No Threshold
+    if (cpuData.m_Threshold == 0.0f) {
+        #pragma region No Threshold
         normals[0].reserve(data.normals.size());
         normals[1].reserve(data.binormals.size());
         normals[2].reserve(data.tangents.size());
@@ -163,10 +181,10 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
         vertexData.setData(3, normals[1].data(), normals[1].size());
         vertexData.setData(4, normals[2].data(), normals[2].size());
         vertexData.setIndices(data.indices.data(), data.indices.size(), false, false, true);
-#pragma endregion
+        #pragma endregion
     }else{
-#pragma region Some Threshold
-        std::vector<std::uint32_t>  indices;
+        #pragma region Some Threshold
+        std::vector<uint32_t>  indices;
         std::vector<glm::vec3> temp_pos;             temp_pos.reserve(data.points.size());
         std::vector<glm::vec2> temp_uvs;             temp_uvs.reserve(data.uvs.size());
         std::vector<glm::vec3> temp_normals;         temp_normals.reserve(data.normals.size());
@@ -176,8 +194,8 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
         std::vector<glm::vec4> boneWeights;          boneWeights.reserve(data.m_Bones.size());
 
         for (size_t i = 0; i < data.points.size(); ++i) {
-            std::uint32_t index;
-            bool found = priv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, mesh.m_Threshold);
+            uint32_t index;
+            bool found = priv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, cpuData.m_Threshold);
             if (found) {
                 indices.emplace_back(index);
                 //average out TBN. But it cancels out normal mapping on some flat surfaces
@@ -194,7 +212,7 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
                     boneIDs.emplace_back(data.m_Bones[i].IDs[0], data.m_Bones[i].IDs[1], data.m_Bones[i].IDs[2], data.m_Bones[i].IDs[3]);
                     boneWeights.emplace_back(data.m_Bones[i].Weights[0], data.m_Bones[i].Weights[1], data.m_Bones[i].Weights[2], data.m_Bones[i].Weights[3]);
                 }
-                indices.emplace_back((std::uint32_t)temp_pos.size() - 1);
+                indices.emplace_back((uint32_t)temp_pos.size() - 1);
             }
         }
         normals[0].reserve(temp_normals.size());
@@ -220,49 +238,31 @@ void InternalMeshPublicInterface::FinalizeVertexData(Mesh& mesh, MeshImportedDat
             vertexData.setData(6, boneWeights.data(), boneWeights.size());
         }
         vertexData.setIndices(indices.data(), indices.size(), false, false, true);
-#pragma endregion
-    }
-}
-void InternalMeshPublicInterface::TriangulateComponentIndices(MeshImportedData& data, std::vector<std::vector<uint>>& indices, unsigned char flags) {
-    for (size_t i = 0; i < indices[0].size(); ++i) {
-        glm::vec3 pos(0.0f);
-        glm::vec2 uv(0.0f);
-        glm::vec3 norm(1.0f);
-        if (flags && MeshLoadingFlags::Points && data.file_points.size() > 0) {
-            pos = data.file_points[indices[0][i] - 1];
-            data.points.emplace_back(pos);
-        }
-        if (flags && MeshLoadingFlags::UVs && data.file_uvs.size() > 0) {
-            uv = data.file_uvs[indices[1][i] - 1];
-            data.uvs.emplace_back(uv);
-        }
-        if (flags && MeshLoadingFlags::Normals && data.file_normals.size() > 0) {
-            norm = data.file_normals[indices[2][i] - 1];
-            data.normals.emplace_back(norm);
-        }
+        #pragma endregion
     }
 }
 
+
 void InternalMeshPublicInterface::CalculateRadius(Handle meshHandle) {
     Mesh& mesh       = *meshHandle.get<Mesh>();
-    InternalMeshPublicInterface::CalculateRadius(mesh);
+    mesh.m_CPUData.internal_calculate_radius();
 }
-void InternalMeshPublicInterface::CalculateRadius(Mesh& mesh) {
-    mesh.m_RadiusBox = glm::vec3(0.0f);
-    auto points = mesh.m_VertexData->getPositions();
+
+
+
+void MeshCPUData::internal_calculate_radius() {
+    m_RadiusBox = glm::vec3(0.0f);
+    auto points = m_VertexData->getPositions();
     for (const auto& vertex : points) {
         const float x = std::abs(vertex.x);
         const float y = std::abs(vertex.y);
         const float z = std::abs(vertex.z);
-        mesh.m_RadiusBox.x = std::max(mesh.m_RadiusBox.x, x);
-        mesh.m_RadiusBox.y = std::max(mesh.m_RadiusBox.y, y);
-        mesh.m_RadiusBox.z = std::max(mesh.m_RadiusBox.z, z);
+        m_RadiusBox.x = std::max(m_RadiusBox.x, x);
+        m_RadiusBox.y = std::max(m_RadiusBox.y, y);
+        m_RadiusBox.z = std::max(m_RadiusBox.z, z);
     }
-    mesh.m_Radius = Math::Max(mesh.m_RadiusBox);
+    m_Radius = Math::Max(m_RadiusBox);
 }
-
-
-
 
 
 
@@ -372,20 +372,20 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
     }
     //TODO: optimize if possible
     //now smooth the normals
-    for (auto& itr : m_VertexMap) {
-        auto& smoothed = itr.second.smoothedNormal;
-        for (auto& vertex : itr.second.data) {
-            smoothed += vertex.normal;
+    for (auto& [name, vertex] : m_VertexMap) {
+        auto& smoothed = vertex.smoothedNormal;
+        for (auto& v : vertex.data) {
+            smoothed += v.normal;
         }
         smoothed = glm::normalize(smoothed);
-        for (auto& vertex : itr.second.data) {
-            data.normals[vertex.index] = smoothed;
+        for (auto& v : vertex.data) {
+            data.normals[v.index] = smoothed;
         }
     }
     MeshLoader::CalculateTBNAssimp(data);
     InternalMeshPublicInterface::FinalizeVertexData(terrain.m_MeshHandle, data);
     InternalMeshPublicInterface::CalculateRadius(terrain.m_MeshHandle);
-    SAFE_DELETE(m_CollisionFactory);
+    SAFE_DELETE(m_CPUData.m_CollisionFactory);
 }
 void Mesh::internal_recalc_indices_from_terrain(const Terrain& terrain) {
     MeshImportedData data;
@@ -418,29 +418,29 @@ void Mesh::internal_recalc_indices_from_terrain(const Terrain& terrain) {
             }
         }
     }
-    m_VertexData->bind();
+    m_CPUData.m_VertexData->bind();
     modifyIndices(data.indices.data(), data.indices.size(), MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU);
-    m_VertexData->unbind();
+    m_CPUData.m_VertexData->unbind();
 }
 Mesh::Mesh(const std::string& name, const Terrain& terrain, float threshold) 
     : Resource{ ResourceType::Mesh }
-    , m_Threshold{ threshold }
 {
+    m_CPUData.m_Threshold = threshold;
     InternalMeshPublicInterface::InitBlankMesh(*this);
     internal_build_from_terrain(terrain);
     load();
 }
-Mesh::Mesh(VertexData* data, const std::string& name, float threshold) 
+Mesh::Mesh(VertexData& data, const std::string& name, float threshold) 
     : Resource{ ResourceType::Mesh, name }
-    , m_VertexData{ data }
-    , m_Threshold{ threshold }
 {
+    m_CPUData.m_VertexData = &data;
+    m_CPUData.m_Threshold  = threshold;
     InternalMeshPublicInterface::InitBlankMesh(*this);
 }
 Mesh::Mesh(const std::string& name, float width, float height, float threshold) 
     : Resource{ ResourceType::Mesh, name }
-    , m_Threshold{ threshold }
 {
+    m_CPUData.m_Threshold = threshold;
     InternalMeshPublicInterface::InitBlankMesh(*this);
 
     MeshImportedData data;
@@ -465,15 +465,15 @@ Mesh::Mesh(const std::string& name, float width, float height, float threshold)
         data.points.emplace_back(quad[(i + 2) % 4].position);
         data.uvs.emplace_back(quad[(i + 2) % 4].uv);
     }
-    m_VertexData = NEW VertexData(VertexDataFormat::VertexDataNoLighting);
-    MeshLoader::FinalizeData(*this, data, threshold);
+    m_CPUData.m_VertexData = NEW VertexData(VertexDataFormat::VertexDataNoLighting);
+    MeshLoader::FinalizeData(this->m_CPUData, data, threshold);
 
     load();
 }
 Mesh::Mesh(const std::string& fileOrData, float threshold) 
     : Resource{ ResourceType::Mesh }
-    , m_Threshold{ threshold }
 {
+    m_CPUData.m_Threshold = threshold;
     InternalMeshPublicInterface::InitBlankMesh(*this);
 
     setName("Custom Mesh");
@@ -490,22 +490,19 @@ Mesh::Mesh(const std::string& fileOrData, float threshold)
         if (line[0] == 'o') {
         }else if (line[0] == 'v' && line[1] == ' ') {
             if (flags && MeshLoadingFlags::Points) {
-                glm::vec3 p;
+                auto& p = data.file_points.emplace_back();
                 auto res = std::sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &p.x, &p.y, &p.z);
-                data.file_points.emplace_back(p);
             }
         }else if (line[0] == 'v' && line[1] == 't') {
             if (flags && MeshLoadingFlags::UVs) {
-                glm::vec2 uv;
+                auto& uv = data.file_uvs.emplace_back();
                 auto res = std::sscanf(line.substr(2, line.size()).c_str(), "%f %f", &uv.x, &uv.y);
                 uv.y = 1.0f - uv.y;
-                data.file_uvs.emplace_back(uv);
             }
         }else if (line[0] == 'v' && line[1] == 'n') {
             if (flags && MeshLoadingFlags::Normals) {
-                glm::vec3 n;
+                auto& n = data.file_normals.emplace_back();
                 auto res = std::sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &n.x, &n.y, &n.z);
-                data.file_normals.emplace_back(n);
             }
         }else if (line[0] == 'f' && line[1] == ' ') {
             if (flags && MeshLoadingFlags::Faces) {
@@ -534,57 +531,43 @@ Mesh::Mesh(const std::string& fileOrData, float threshold)
             }
         }
     }
-    if (flags && MeshLoadingFlags::Faces) {
-        InternalMeshPublicInterface::TriangulateComponentIndices(data, indices, flags);
+    if (flags & MeshLoadingFlags::Faces) {
+        data.triangulateIndices(indices, flags);
     }
-    if (flags && MeshLoadingFlags::TBN) {
+    if (flags & MeshLoadingFlags::TBN) {
         MeshLoader::CalculateTBNAssimp(data);
     }
-    MeshLoader::FinalizeData(*this, data, threshold);
+    MeshLoader::FinalizeData(this->m_CPUData, data, threshold);
 
     load();
 }
 Mesh::Mesh(Mesh&& other) noexcept 
-    : Resource(std::move(other))
-    , m_CustomBindFunctor   {std::move(other.m_CustomBindFunctor)}
+    : Resource{ std::move(other) }
+    , m_CustomBindFunctor   { std::move(other.m_CustomBindFunctor) }
     , m_CustomUnbindFunctor { std::move(other.m_CustomUnbindFunctor) }
-    , m_RootNode            { std::exchange(other.m_RootNode, nullptr) }
-    , m_VertexData          { std::exchange(other.m_VertexData, nullptr) }
-    , m_CollisionFactory    { std::exchange(other.m_CollisionFactory, nullptr) }
-    , m_Skeleton            { std::exchange(other.m_Skeleton, nullptr) }
-    , m_File                { std::move(other.m_File) }
-    , m_RadiusBox           { std::move(other.m_RadiusBox) }
-    , m_Radius              { std::move(other.m_Radius) }
-    , m_Threshold           { std::move(other.m_Threshold) }
+    , m_CPUData             { std::move(other.m_CPUData) }
 {}
 Mesh& Mesh::operator=(Mesh&& other) noexcept {
     Resource::operator=(std::move(other));
     m_CustomBindFunctor   = std::move(other.m_CustomBindFunctor);
     m_CustomUnbindFunctor = std::move(other.m_CustomUnbindFunctor);
-    m_RootNode            = std::exchange(other.m_RootNode, nullptr);
-    m_VertexData          = std::exchange(other.m_VertexData, nullptr);
-    m_CollisionFactory    = std::exchange(other.m_CollisionFactory, nullptr);
-    m_Skeleton            = std::exchange(other.m_Skeleton, nullptr);
-    m_File                = std::move(other.m_File);
-    m_RadiusBox           = std::move(other.m_RadiusBox);
-    m_Radius              = std::move(other.m_Radius);
-    m_Threshold           = std::move(other.m_Threshold);
+    m_CPUData             = std::move(other.m_CPUData);
     return *this;
 }
-Mesh::~Mesh(){
+Mesh::~Mesh() {
     unregisterEvent(EventType::WindowFullscreenChanged);
     unload();
 }
-std::unordered_map<std::string, AnimationData>& Mesh::animationData(){
-    return m_Skeleton->m_AnimationData; 
+std::unordered_map<std::string, AnimationData>& Mesh::animationData() {
+    return m_CPUData.m_Skeleton->m_AnimationData;
 }
-void Mesh::load(){
+void Mesh::load() {
     if(!isLoaded()){
         InternalMeshPublicInterface::LoadGPU(*this);
         //Resource::load();
     }
 }
-void Mesh::unload(){
+void Mesh::unload() {
     if(isLoaded()){
         InternalMeshPublicInterface::UnloadGPU(*this);
         InternalMeshPublicInterface::UnloadCPU(*this);
@@ -593,13 +576,13 @@ void Mesh::unload(){
 }
 void Mesh::onEvent(const Event& e) {
     if (e.type == EventType::WindowFullscreenChanged) {
-        m_VertexData->finalize();
+        m_CPUData.m_VertexData->finalize();
     }
 }
 //TODO: optimize this a bit more (bubble sort?)
 void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, SortingMode sortMode) {
     #ifndef _DEBUG
-        auto& triangles      = m_VertexData->m_Triangles;
+        auto& triangles      = m_CPUData.m_VertexData->m_Triangles;
         if (triangles.size() == 0) {
             return;
         }
@@ -625,7 +608,7 @@ void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const gl
         std::sort( std::execution::par_unseq, triangles.begin(), triangles.end(), lambda_sorter);
 
         std::vector<unsigned int> newIndices;
-        newIndices.reserve(m_VertexData->m_Indices.size());
+        newIndices.reserve(m_CPUData.m_VertexData->m_Indices.size());
         for (size_t i = 0; i < triangles.size(); ++i) {
             auto& triangle = triangles[i];
             newIndices.emplace_back(triangle.index1);

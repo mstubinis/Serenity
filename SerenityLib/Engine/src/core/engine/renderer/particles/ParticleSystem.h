@@ -40,11 +40,11 @@ namespace Engine::priv {
 #define ENGINE_PARTICLES_HALF_SIZE //use this to reduce particle data size at the cost of precision. this small size uses 16 bytes per particle
 
 #if defined(ENGINE_PARTICLES_HALF_SIZE)
-            using ParticleFloatType = std::uint16_t;
-            using ParticleIDType    = std::uint16_t;
+            using ParticleFloatType = uint16_t;
+            using ParticleIDType    = uint16_t;
 #else
             using ParticleFloatType = float;
-            using ParticleIDType    = std::uint32_t;
+            using ParticleIDType    = uint32_t;
 #endif
 
             struct ParticleDOD final {

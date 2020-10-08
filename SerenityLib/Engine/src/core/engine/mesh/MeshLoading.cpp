@@ -9,63 +9,56 @@
 #include <core/engine/system/Engine.h>
 #include <core/engine/resources/Engine_Resources.h>
 
-#include <boost/math/special_functions/fpclassify.hpp>
-
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
-#include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 
-void Engine::priv::MeshLoader::LoadPopulateGlobalNodes(const aiScene& scene, Engine::priv::MeshInfoNode* root, Engine::priv::MeshInfoNode* parent, Engine::priv::MeshInfoNode* node, aiNode* ai_node, MeshRequest& request) {
-    if (!request.m_MeshNodeMap.count(node->Name)) {
-        request.m_MeshNodeMap.emplace( node->Name, node );
+void Engine::priv::MeshLoader::LoadPopulateGlobalNodes(const aiScene& scene, MeshInfoNode* root, MeshInfoNode* parent, MeshInfoNode* node, aiNode* ai_node, MeshRequest& request) {
+    if (!request.m_MeshNodeMap.contains(node->Name)) {
+        request.m_MeshNodeMap.emplace( 
+            std::piecewise_construct, 
+            std::forward_as_tuple(node->Name), 
+            std::forward_as_tuple(node) 
+        );
     }
-    for (unsigned int i = 0; i < ai_node->mNumMeshes; ++i) {
+    for (uint32_t i = 0; i < ai_node->mNumMeshes; ++i) {
         const aiMesh& aimesh  = *scene.mMeshes[ai_node->mMeshes[i]];
-        auto& part            = request.m_Parts.emplace_back();
+        MeshRequestPart& part = request.m_Parts.emplace_back();
         part.name             = request.m_FileOrData + " - " + std::string(aimesh.mName.C_Str());
 
-        /*
-        part.mesh = NEW Mesh();
-        part.mesh->m_File     = request.m_FileOrData;
-        part.mesh->setName(part.name);
-        part.handle           = priv::Core::m_Engine->m_ResourceManager.m_ResourcePool.add(part.mesh, (unsigned int)ResourceType::Mesh);
-        part.mesh->m_RootNode = root;
-        */
-        part.handle     = priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.emplace<Mesh>();
-        Mesh& mesh      = *part.handle.get<Mesh>();
-        mesh.m_File     = request.m_FileOrData;
-        mesh.m_RootNode = root;
-        mesh.setName(part.name);
+        part.handle     = Engine::Resources::addResource<Mesh>();
+        //Mesh& mesh      = *part.handle.get<Mesh>();
+        part.cpuData.m_File     = request.m_FileOrData;
+        part.cpuData.m_RootNode = (root);
+        //mesh.setName(part.name);
     }
-
     if (parent) {
-        parent->Children.push_back(node);
+        parent->Children.emplace_back(std::unique_ptr<Engine::priv::MeshInfoNode>(node));
     }
-    for (unsigned int a = 0; a < ai_node->mNumChildren; ++a) {
-        auto* ai_child = ai_node->mChildren[a];
-        auto* child    = NEW Engine::priv::MeshInfoNode(ai_child->mName.C_Str(), Engine::Math::assimpToGLMMat4(ai_child->mTransformation));
+    for (uint32_t i = 0; i < ai_node->mNumChildren; ++i) {
+        auto* ai_child = ai_node->mChildren[i];
+        auto* child    = NEW Engine::priv::MeshInfoNode{ ai_child->mName.C_Str(), Engine::Math::assimpToGLMMat4(ai_child->mTransformation) };
         MeshLoader::LoadPopulateGlobalNodes(scene, root, node, child, ai_child, request);
     }
 }
-void Engine::priv::MeshLoader::LoadProcessNodeData(MeshRequest& request, const aiScene& scene, const aiNode& node, uint& count) {
-    auto& root = *(scene.mRootNode);
+void Engine::priv::MeshLoader::LoadProcessNodeData(MeshRequest& request, const aiScene& aiScene, const aiNode& node, uint& count) {
+    auto& root = *(aiScene.mRootNode);
 
-    for (unsigned int i = 0; i < node.mNumMeshes; ++i) {
-        const aiMesh& aimesh = *scene.mMeshes[node.mMeshes[i]];
+    for (auto i = 0U; i < node.mNumMeshes; ++i) {
+        const aiMesh& aimesh = *aiScene.mMeshes[node.mMeshes[i]];
 
         auto& part = request.m_Parts[count];
         MeshImportedData data;
 
         #pragma region vertices
-        if (aimesh.mVertices) { data.points.reserve(aimesh.mNumVertices); }
-        if (aimesh.mTextureCoords[0]) { data.uvs.reserve(aimesh.mNumVertices); }
-        if (aimesh.mNormals) { data.normals.reserve(aimesh.mNumVertices); }
-        if (aimesh.mBitangents) { data.binormals.reserve(aimesh.mNumVertices); }
-        if (aimesh.mTangents) { data.tangents.reserve(aimesh.mNumVertices); }
-        for (unsigned int j = 0; j < aimesh.mNumVertices; ++j) {
+        data.points.reserve(aimesh.mNumVertices);
+        data.uvs.reserve(aimesh.mNumVertices);
+        data.normals.reserve(aimesh.mNumVertices);
+        data.binormals.reserve(aimesh.mNumVertices);
+        data.tangents.reserve(aimesh.mNumVertices);
+        for (uint32_t j = 0; j < aimesh.mNumVertices; ++j) {
             //pos
             auto& pos = aimesh.mVertices[j];
             data.points.emplace_back(pos.x, pos.y, pos.z);
@@ -96,7 +89,7 @@ void Engine::priv::MeshLoader::LoadProcessNodeData(MeshRequest& request, const a
 
         #pragma region indices
         data.indices.reserve(aimesh.mNumFaces * 3);
-        for (unsigned int j = 0; j < aimesh.mNumFaces; ++j) {
+        for (uint32_t j = 0; j < aimesh.mNumFaces; ++j) {
             const auto& face = aimesh.mFaces[j];
             data.indices.emplace_back(face.mIndices[0]);
             data.indices.emplace_back(face.mIndices[1]);
@@ -106,25 +99,29 @@ void Engine::priv::MeshLoader::LoadProcessNodeData(MeshRequest& request, const a
 
         #pragma region Skeleton
         if (aimesh.mNumBones > 0) {
-            part.handle.get<Mesh>()->m_Skeleton = NEW MeshSkeleton();
-            auto& skeleton = *part.handle.get<Mesh>()->m_Skeleton;
+            part.cpuData.m_Skeleton = NEW MeshSkeleton{};
+            auto& skeleton = *part.cpuData.m_Skeleton;
 
             #pragma region IndividualBones
             //build bone information
-            for (unsigned int k = 0; k < aimesh.mNumBones; ++k) {
+            for (uint32_t k = 0; k < aimesh.mNumBones; ++k) {
                 auto& boneNode   = request.m_MeshNodeMap.at(aimesh.mBones[k]->mName.data);
                 auto& assimpBone = *aimesh.mBones[k];
-                unsigned int BoneIndex{ 0 };
-                if (!skeleton.m_BoneMapping.count(boneNode->Name)) {
+                uint32_t BoneIndex{ 0 };
+                if (!skeleton.m_BoneMapping.contains(boneNode->Name)) {
                     BoneIndex = skeleton.m_NumBones;
                     ++skeleton.m_NumBones;
                     skeleton.m_BoneInfo.emplace_back();
                 }else{
                     BoneIndex = skeleton.m_BoneMapping.at(boneNode->Name);
                 }
-                skeleton.m_BoneMapping.emplace(boneNode->Name, BoneIndex);
+                skeleton.m_BoneMapping.emplace(
+                    std::piecewise_construct,
+                    std::forward_as_tuple(boneNode->Name), 
+                    std::forward_as_tuple(BoneIndex)
+                );
                 skeleton.m_BoneInfo[BoneIndex].BoneOffset = Math::assimpToGLMMat4(assimpBone.mOffsetMatrix);
-                for (unsigned int j = 0; j < assimpBone.mNumWeights; ++j) {
+                for (uint32_t j = 0; j < assimpBone.mNumWeights; ++j) {
                     data.m_Bones.emplace(
                         std::piecewise_construct,
                         std::forward_as_tuple(assimpBone.mWeights[j].mVertexId),
@@ -135,15 +132,19 @@ void Engine::priv::MeshLoader::LoadProcessNodeData(MeshRequest& request, const a
             #pragma endregion
 
             #pragma region Animations
-            if (scene.mAnimations && scene.mNumAnimations > 0) {
-                for (unsigned int k = 0; k < scene.mNumAnimations; ++k) {
-                    const aiAnimation& anim = *scene.mAnimations[k];
-                    std::string key(anim.mName.C_Str());
+            if (aiScene.mAnimations && aiScene.mNumAnimations > 0) {
+                for (uint32_t k = 0; k < aiScene.mNumAnimations; ++k) {
+                    const aiAnimation& anim = *aiScene.mAnimations[k];
+                    std::string key{ anim.mName.C_Str() };
                     if (key.empty()) {
                         key = "Animation " + std::to_string(skeleton.m_AnimationData.size());
                     }
-                    if (!skeleton.m_AnimationData.count(key)) {
-                        skeleton.m_AnimationData.emplace(std::piecewise_construct, std::forward_as_tuple(key), std::forward_as_tuple(*part.handle.get<Mesh>(), anim));
+                    if (!skeleton.m_AnimationData.contains(key)) {
+                        skeleton.m_AnimationData.emplace(
+                            std::piecewise_construct, 
+                            std::forward_as_tuple(std::move(key)), 
+                            std::forward_as_tuple(part.handle.get<Mesh>()->m_CPUData, anim)
+                        );
                     }
                 }
             }
@@ -151,57 +152,31 @@ void Engine::priv::MeshLoader::LoadProcessNodeData(MeshRequest& request, const a
         }
         #pragma endregion
         MeshLoader::CalculateTBNAssimp(data);
-        MeshLoader::FinalizeData(part.handle, data, 0.0005f);
+        MeshLoader::FinalizeData(part.cpuData, data, 0.0005f);
         ++count;
     }
-    for (unsigned int i = 0; i < node.mNumChildren; ++i) {
-        MeshLoader::LoadProcessNodeData(request, scene, *node.mChildren[i], count);
+    for (uint32_t i = 0; i < node.mNumChildren; ++i) {
+        MeshLoader::LoadProcessNodeData(request, aiScene, *node.mChildren[i], count);
     }
 }
-
-void Engine::priv::MeshLoader::FinalizeData(Handle meshHandle, Engine::priv::MeshImportedData& data, float threshold) {
+/*
+void Engine::priv::MeshLoader::FinalizeData(Handle meshHandle, MeshImportedData& data, float threshold) {
     auto& mesh = *meshHandle.get<Mesh>();
-    FinalizeData(mesh, data, threshold);
+    FinalizeData(mesh.m_CPUData, data, threshold);
 }
-void Engine::priv::MeshLoader::FinalizeData(Mesh& mesh, Engine::priv::MeshImportedData& data, float threshold) {
-    mesh.m_Threshold = threshold;
-    InternalMeshPublicInterface::FinalizeVertexData(mesh, data);
-    InternalMeshPublicInterface::CalculateRadius(mesh);
-    SAFE_DELETE(mesh.m_CollisionFactory);
-    mesh.m_CollisionFactory = NEW MeshCollisionFactory(mesh);
+*/
+void Engine::priv::MeshLoader::FinalizeData(MeshCPUData& cpuData, MeshImportedData& data, float threshold) {
+    cpuData.m_Threshold = threshold;
+    InternalMeshPublicInterface::FinalizeVertexData(cpuData, data);
+    cpuData.internal_calculate_radius();
+    cpuData.m_CollisionFactory = (NEW MeshCollisionFactory{ cpuData });
 }
 
-
-
-bool Engine::priv::MeshLoader::IsNear(float v1, float v2, float threshold) {
-    return (std::abs(v1 - v2) < threshold);
-}
-bool Engine::priv::MeshLoader::IsNear(glm::vec2& v1, glm::vec2& v2, float threshold) {
-    return (std::abs(v1.x - v2.x) < threshold && std::abs(v1.y - v2.y) < threshold);
-}
-bool Engine::priv::MeshLoader::IsNear(glm::vec3& v1, glm::vec3& v2, float threshold) {
-    return (std::abs(v1.x - v2.x) < threshold && std::abs(v1.y - v2.y) < threshold && std::abs(v1.z - v2.z) < threshold);
-}
-bool Engine::priv::MeshLoader::IsSpecialFloat(float f) {
-    if (boost::math::isnan(f)) return true;
-    if (boost::math::isinf(f)) return true;
-    return false;
-}
-bool Engine::priv::MeshLoader::IsSpecialFloat(const glm::vec2& v) {
-    if (boost::math::isnan(v.x) || boost::math::isnan(v.y)) return true;
-    if (boost::math::isinf(v.x) || boost::math::isinf(v.y)) return true;
-    return false;
-}
-bool Engine::priv::MeshLoader::IsSpecialFloat(const glm::vec3& v) {
-    if (boost::math::isnan(v.x) || boost::math::isnan(v.y) || boost::math::isnan(v.z)) return true;
-    if (boost::math::isinf(v.x) || boost::math::isinf(v.y) || boost::math::isinf(v.z)) return true;
-    return false;
-}
-bool Engine::priv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& pts, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& norms, std::uint32_t& result, float threshold) {
-    for (std::uint32_t t = 0; t < pts.size(); ++t) {
-        if (IsNear(in_pos, pts[t], threshold) 
-         && IsNear(in_uv, uvs[t], threshold) 
-         && IsNear(in_norm, norms[t], threshold)) {
+bool Engine::priv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& pts, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& norms, uint32_t& result, float thrshld) {
+    for (uint32_t t = 0; t < pts.size(); ++t) {
+        if (Math::IsNear(in_pos, pts[t], thrshld) 
+        &&  Math::IsNear(in_uv, uvs[t], thrshld) 
+        &&  Math::IsNear(in_norm, norms[t], thrshld)) {
             result = t;
             return true;
         }
@@ -219,22 +194,18 @@ void Engine::priv::MeshLoader::CalculateTBNAssimp(MeshImportedData& importedData
         const size_t p0{ i + 0 };
         const size_t p1{ i + 1 };
         const size_t p2{ i + 2 };
-
-        glm::vec3 point1, point2, point3;
-        glm::vec2 uv1, uv2, uv3;
-
         const size_t uvSize{ importedData.uvs.size() };
 
-        point1 = (pointsSize > p0) ? importedData.points[p0] : glm::vec3(0.0f);
-        point2 = (pointsSize > p1) ? importedData.points[p1] : glm::vec3(0.0f);
-        point3 = (pointsSize > p2) ? importedData.points[p2] : glm::vec3(0.0f);
+        const glm::vec3 point1 = (pointsSize > p0) ? importedData.points[p0] : glm::vec3(0.0f);
+        const glm::vec3 point2 = (pointsSize > p1) ? importedData.points[p1] : glm::vec3(0.0f);
+        const glm::vec3 point3 = (pointsSize > p2) ? importedData.points[p2] : glm::vec3(0.0f);
 
-        uv1 = (uvSize > p0) ? importedData.uvs[p0] : glm::vec2(0.0f);
-        uv2 = (uvSize > p1) ? importedData.uvs[p1] : glm::vec2(0.0f);
-        uv3 = (uvSize > p2) ? importedData.uvs[p2] : glm::vec2(0.0f);
+        const glm::vec2 uv1 = (uvSize > p0) ? importedData.uvs[p0] : glm::vec2(0.0f);
+        const glm::vec2 uv2 = (uvSize > p1) ? importedData.uvs[p1] : glm::vec2(0.0f);
+        const glm::vec2 uv3 = (uvSize > p2) ? importedData.uvs[p2] : glm::vec2(0.0f);
 
-        glm::vec3 v{ point2 - point1 };
-        glm::vec3 w{ point3 - point1 };
+        const glm::vec3 v{ point2 - point1 };
+        const glm::vec3 w{ point3 - point1 };
 
         // texture offset p1->p2 and p1->p3
         float sx{ uv2.x - uv1.x };
@@ -256,17 +227,19 @@ void Engine::priv::MeshLoader::CalculateTBNAssimp(MeshImportedData& importedData
         }
         // tangent points in the direction where to positive X axis of the texture coord's would point in model space
         // bitangent's points along the positive Y axis of the texture coord's, respectively
-        glm::vec3 tangent;
-        glm::vec3 bitangent;
-        tangent.x   = (w.x * sy - v.x * ty) * dirCorrection;
-        tangent.y   = (w.y * sy - v.y * ty) * dirCorrection;
-        tangent.z   = (w.z * sy - v.z * ty) * dirCorrection;
-        bitangent.x = (w.x * sx - v.x * tx) * dirCorrection;
-        bitangent.y = (w.y * sx - v.y * tx) * dirCorrection;
-        bitangent.z = (w.z * sx - v.z * tx) * dirCorrection;
+        glm::vec3 tangent{
+            (w.x * sy - v.x * ty) * dirCorrection,
+            (w.y * sy - v.y * ty) * dirCorrection,
+            (w.z * sy - v.z * ty) * dirCorrection
+        };
+        glm::vec3 bitangent{
+            (w.x * sx - v.x * tx) * dirCorrection,
+            (w.y * sx - v.y * tx) * dirCorrection,
+            (w.z * sx - v.z * tx) * dirCorrection
+        };
 
         // store for every vertex of that face
-        for (size_t b = 0; b < 3; ++b) {
+        for (auto b = 0; b < 3; ++b) {
             size_t p;
             glm::vec3 normal;
             if (b == 0)      p = p0;
@@ -276,7 +249,7 @@ void Engine::priv::MeshLoader::CalculateTBNAssimp(MeshImportedData& importedData
             if (importedData.normals.size() > p)
                 normal = importedData.normals[p];
             else                         
-                normal = glm::vec3(0.0f);
+                normal = glm::vec3{ 0.0f };
 
             // project tangent and bitangent into the plane formed by the vertex' normal
             glm::vec3 localTangent{ tangent - normal * (tangent * normal) };
@@ -285,8 +258,8 @@ void Engine::priv::MeshLoader::CalculateTBNAssimp(MeshImportedData& importedData
             localBitangent = glm::normalize(localBitangent);
 
             // reconstruct tangent/bitangent according to normal and bitangent/tangent when it's infinite or NaN.
-            const bool invalid_tangent   = IsSpecialFloat(localTangent);
-            const bool invalid_bitangent = IsSpecialFloat(localBitangent);
+            const bool invalid_tangent   = Engine::Math::IsSpecialFloat(localTangent);
+            const bool invalid_bitangent = Engine::Math::IsSpecialFloat(localBitangent);
             if (invalid_tangent != invalid_bitangent) {
                 if (invalid_tangent) 
                     localTangent   = glm::normalize(glm::cross(normal, localBitangent));
@@ -309,17 +282,17 @@ VertexData* Engine::priv::MeshLoader::LoadFrom_OBJCC(const std::string& filename
     boost::iostreams::mapped_file_source stream(filename.c_str());
     //TODO: try possible optimizations
 
-    std::uint32_t blockStart = 0;
-    const std::uint8_t* streamDataBuffer = (std::uint8_t*)stream.data();
+    uint32_t blockStart = 0;
+    const uint8_t* streamDataBuffer = (uint8_t*)stream.data();
 
-    std::uint32_t sizes[3];
-    for (auto i = 0; i < 3; ++i) {
+    uint32_t sizes[3];
+    for (uint32_t i = 0; i < 3; ++i) {
         readBigEndian(sizes[i], streamDataBuffer, 4U, blockStart);
     }
     
-    const auto& sizes_attr     = sizes[0];
-    const auto& sizes_indices  = sizes[1];
-    const auto& sizes_skeleton = sizes[2];
+    const uint32_t sizes_attr     = sizes[0];
+    const uint32_t sizes_indices  = sizes[1];
+    const uint32_t sizes_skeleton = sizes[2];
     VertexData* vertexData = nullptr;
     if (sizes_skeleton == 1) {
         vertexData = NEW VertexData(VertexDataFormat::VertexDataAnimated);
@@ -349,25 +322,25 @@ VertexData* Engine::priv::MeshLoader::LoadFrom_OBJCC(const std::string& filename
     for (auto i = 0U; i < sizes_attr; ++i) {
         //positions stored as half floats
 
-        auto lambda = [&blockStart, &streamDataBuffer]<typename INTYPE, typename T>(std::vector<T>& outContainer, unsigned int blockSize, INTYPE* in_, unsigned int size) {
+        auto lambda = [&blockStart, &streamDataBuffer]<typename INTYPE, typename T>(std::vector<T>& outContainer, uint32_t blockSize, INTYPE* in_, uint32_t size) {
             std::vector<float> outPos(3, 0.0f);
-            for (unsigned int j = 0; j < size; ++j) {
+            for (uint32_t j = 0; j < size; ++j) {
                 readBigEndian(in_[j], streamDataBuffer, blockSize, blockStart);
             }
             Engine::Math::Float32From16(outPos.data(), in_, size);
             auto& outVar = outContainer.emplace_back();
-            for (unsigned int j = 0; j < size; ++j) {
+            for (uint32_t j = 0; j < size; ++j) {
                 outVar[j] = outPos[j];
             }
         };
-        std::uint16_t inPos[3];
+        uint16_t inPos[3];
         lambda(temp_pos, 2U, inPos, 3); //positions
 
-        std::uint16_t inUV[2];
+        uint16_t inUV[2];
         lambda(temp_uvs, 2U, inUV, 2); //uvs
 
         //normals stored as unsigned int's
-        std::uint32_t inn[3];
+        uint32_t inn[3];
         for (auto j = 0; j < 3; ++j) {
             readBigEndian(inn[j], streamDataBuffer, 4U, blockStart);
         }
@@ -376,16 +349,16 @@ VertexData* Engine::priv::MeshLoader::LoadFrom_OBJCC(const std::string& filename
         temp_tang.emplace_back(inn[2]);
 
         if (sizes_skeleton == 1) { //skeleton is present
-            std::uint16_t  inIDs[4];
+            uint16_t  inIDs[4];
             lambda(temp_bID, 2U, inIDs, 4); //bone ids
 
-            std::uint16_t  inWs[4];
+            uint16_t  inWs[4];
             lambda(temp_bW, 2U, inWs, 4); //bone weights
         }
     }
     //indices
     for (auto i = 0U; i < sizes_indices; ++i) {
-        std::uint16_t      inindice;
+        uint16_t      inindice;
         readBigEndian(inindice, streamDataBuffer, 2, blockStart);
         vertexData->m_Indices.emplace_back(inindice);
     }
@@ -405,9 +378,9 @@ void Engine::priv::MeshLoader::SaveTo_OBJCC(VertexData& vertexData, std::string 
     std::ofstream stream(filename, std::ios::binary | std::ios::out);
 
     //header - should only be 3 entries, one for m_Vertices , one for m_Indices, and one to tell if animation data is present or not
-    std::vector<std::uint32_t>   sizes(3);
-    sizes[0] = (std::uint32_t)vertexData.m_DataSizes[0];
-    sizes[1] = (std::uint32_t)vertexData.m_Indices.size();
+    std::vector<uint32_t>   sizes(3);
+    sizes[0] = (uint32_t)vertexData.m_DataSizes[0];
+    sizes[1] = (uint32_t)vertexData.m_Indices.size();
     if (vertexData.m_Data.size() > 5) { //vertices contain animation data
         sizes[2] = 1;
     }else{
@@ -438,19 +411,19 @@ void Engine::priv::MeshLoader::SaveTo_OBJCC(VertexData& vertexData, std::string 
         glm::vec4* boneWeight  = nullptr;
 
         //positions
-        std::vector<std::uint16_t> outp(3);
+        std::vector<uint16_t> outp(3);
         for (size_t i = 0; i < outp.size(); ++i) {
             Engine::Math::Float16From32(&outp[i], position[(glm::vec3::length_type)i]);
             writeBigEndian(stream, outp[i], 2);
         }
         //uvs
-        std::vector<std::uint16_t> outu(2);
+        std::vector<uint16_t> outu(2);
         for (size_t i = 0; i < outu.size(); ++i) {
             Engine::Math::Float16From32(&outu[i], uv[(glm::vec2::length_type)i]);
             writeBigEndian(stream, outu[i], 2);
         }
         //normals (remember they are GLuints right now)
-        std::uint32_t outn[3];
+        uint32_t outn[3];
         outn[0] = normal;
         outn[1] = binormal;
         outn[2] = tangent;
@@ -464,13 +437,13 @@ void Engine::priv::MeshLoader::SaveTo_OBJCC(VertexData& vertexData, std::string 
             const auto& bW  = *boneWeight;
 
             //boneID's
-            std::vector<std::uint16_t> outbI(4);
+            std::vector<uint16_t> outbI(4);
             for (size_t i = 0; i < outbI.size(); ++i) {
                 Engine::Math::Float16From32(&outbI[i], bID[(glm::vec4::length_type)i]);
                 writeBigEndian(stream, outbI[i], 2);
             }
             //boneWeight's
-            std::vector<std::uint16_t> outbW(4);
+            std::vector<uint16_t> outbW(4);
             for (size_t i = 0; i < outbW.size(); ++i) {
                 Engine::Math::Float16From32(&outbW[i], bW[(glm::vec4::length_type)i]);
                 writeBigEndian(stream, outbW[i], 2);
@@ -478,8 +451,8 @@ void Engine::priv::MeshLoader::SaveTo_OBJCC(VertexData& vertexData, std::string 
         }
     }
     //indices
-    for (unsigned int i = 0; i < sizes[1]; ++i) {
-        std::uint16_t indice = vertexData.m_Indices[i];
+    for (uint32_t i = 0; i < sizes[1]; ++i) {
+        uint16_t indice = vertexData.m_Indices[i];
         writeBigEndian(stream, indice, 2);
     }
     stream.close();

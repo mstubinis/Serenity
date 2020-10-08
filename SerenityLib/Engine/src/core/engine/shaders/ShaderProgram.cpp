@@ -178,7 +178,7 @@ void InternalShaderProgramPublicInterface::LoadGPU(ShaderProgram& shaderP){
                     GLCall(GLint loc_ = glGetUniformLocation(shaderP.m_ShaderProgram, name_));
                     shaderP.m_UniformLocations.emplace(
                         std::piecewise_construct,
-                        std::forward_as_tuple(name1_), 
+                        std::forward_as_tuple(std::move(name1_)), 
                         std::forward_as_tuple(loc_)
                     );
                 }

@@ -23,7 +23,7 @@ public:
     ~Core();
 
     Result RunCallbacks();
-    void SetLogHook(LogLevel minLevel, std::function<void(LogLevel, char const*)> hook);
+    void SetLogHook(LogLevel minLevel, std::function<void(LogLevel, const char*)> hook);
 
     discord::ApplicationManager& ApplicationManager();
     discord::UserManager& UserManager();
@@ -46,7 +46,7 @@ private:
     Core& operator=(Core&& rhs) = delete;
 
     IDiscordCore* internal_;
-    Event<LogLevel, char const*> setLogHook_;
+    Event<LogLevel, const char*> setLogHook_;
     discord::ApplicationManager applicationManager_;
     discord::UserManager userManager_;
     discord::ImageManager imageManager_;

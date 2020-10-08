@@ -36,7 +36,7 @@ ServerClient::~ServerClient() {
     unregisterEvent(EventType::PacketSent);
     unregisterEvent(EventType::PacketReceived);
 }
-std::uint32_t ServerClient::generate_nonce() const noexcept {
+uint32_t ServerClient::generate_nonce() const noexcept {
     return Engine::Networking::NetworkingHelpers::generate_nonce();
 }
 bool ServerClient::connect(unsigned short timeout) noexcept {

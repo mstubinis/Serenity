@@ -4,7 +4,7 @@
 
 EntityBody::EntityBody(Scene& scene) : Entity(scene) {
 }
-EntityBody::EntityBody(std::uint32_t entityID, std::uint32_t sceneID, std::uint32_t versionID) : Entity(entityID, sceneID, versionID){
+EntityBody::EntityBody(uint32_t entityID, uint32_t sceneID, uint32_t versionID) : Entity(entityID, sceneID, versionID){
 }
 EntityBody::EntityBody(const Entity& other) {
     m_Data = other.m_Data;

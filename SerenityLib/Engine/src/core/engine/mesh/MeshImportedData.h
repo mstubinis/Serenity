@@ -22,7 +22,20 @@ namespace Engine::priv {
         MeshImportedData& operator=(const MeshImportedData& other)     = delete;
         MeshImportedData(MeshImportedData&& other) noexcept            = default;
         MeshImportedData& operator=(MeshImportedData&& other) noexcept = default;
-        ~MeshImportedData() = default;
+
+        void triangulateIndices(const std::vector<std::vector<uint32_t>>& indices, unsigned char flags) {
+            for (size_t i = 0; i < indices[0].size(); ++i) {
+                if ((flags & MeshLoadingFlags::Points) && file_points.size() > 0) {
+                    points.emplace_back(file_points[indices[0][i] - 1]);
+                }
+                if ((flags & MeshLoadingFlags::UVs) && file_uvs.size() > 0) {
+                    uvs.emplace_back(file_uvs[indices[1][i] - 1]);
+                }
+                if ((flags & MeshLoadingFlags::Normals) && file_normals.size() > 0) {
+                    normals.emplace_back(file_normals[indices[2][i] - 1]);
+                }
+            }
+        }
     };
 };
 #endif

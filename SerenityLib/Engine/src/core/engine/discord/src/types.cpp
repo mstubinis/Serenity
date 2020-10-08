@@ -20,35 +20,35 @@ UserId User::GetId() const
     return internal_.id;
 }
 
-void User::SetUsername(char const* username)
+void User::SetUsername(const char* username)
 {
     strncpy(internal_.username, username, 256);
     internal_.username[256 - 1] = '\0';
 }
 
-char const* User::GetUsername() const
+const char* User::GetUsername() const
 {
     return internal_.username;
 }
 
-void User::SetDiscriminator(char const* discriminator)
+void User::SetDiscriminator(const char* discriminator)
 {
     strncpy(internal_.discriminator, discriminator, 8);
     internal_.discriminator[8 - 1] = '\0';
 }
 
-char const* User::GetDiscriminator() const
+const char* User::GetDiscriminator() const
 {
     return internal_.discriminator;
 }
 
-void User::SetAvatar(char const* avatar)
+void User::SetAvatar(const char* avatar)
 {
     strncpy(internal_.avatar, avatar, 128);
     internal_.avatar[128 - 1] = '\0';
 }
 
-char const* User::GetAvatar() const
+const char* User::GetAvatar() const
 {
     return internal_.avatar;
 }
@@ -63,24 +63,24 @@ bool User::GetBot() const
     return internal_.bot != 0;
 }
 
-void OAuth2Token::SetAccessToken(char const* accessToken)
+void OAuth2Token::SetAccessToken(const char* accessToken)
 {
     strncpy(internal_.access_token, accessToken, 128);
     internal_.access_token[128 - 1] = '\0';
 }
 
-char const* OAuth2Token::GetAccessToken() const
+const char* OAuth2Token::GetAccessToken() const
 {
     return internal_.access_token;
 }
 
-void OAuth2Token::SetScopes(char const* scopes)
+void OAuth2Token::SetScopes(const char* scopes)
 {
     strncpy(internal_.scopes, scopes, 1024);
     internal_.scopes[1024 - 1] = '\0';
 }
 
-char const* OAuth2Token::GetScopes() const
+const char* OAuth2Token::GetScopes() const
 {
     return internal_.scopes;
 }
@@ -115,32 +115,32 @@ std::int64_t ImageHandle::GetId() const
     return internal_.id;
 }
 
-void ImageHandle::SetSize(std::uint32_t size)
+void ImageHandle::SetSize(uint32_t size)
 {
     internal_.size = size;
 }
 
-std::uint32_t ImageHandle::GetSize() const
+uint32_t ImageHandle::GetSize() const
 {
     return internal_.size;
 }
 
-void ImageDimensions::SetWidth(std::uint32_t width)
+void ImageDimensions::SetWidth(uint32_t width)
 {
     internal_.width = width;
 }
 
-std::uint32_t ImageDimensions::GetWidth() const
+uint32_t ImageDimensions::GetWidth() const
 {
     return internal_.width;
 }
 
-void ImageDimensions::SetHeight(std::uint32_t height)
+void ImageDimensions::SetHeight(uint32_t height)
 {
     internal_.height = height;
 }
 
-std::uint32_t ImageDimensions::GetHeight() const
+uint32_t ImageDimensions::GetHeight() const
 {
     return internal_.height;
 }
@@ -165,46 +165,46 @@ Timestamp ActivityTimestamps::GetEnd() const
     return internal_.end;
 }
 
-void ActivityAssets::SetLargeImage(char const* largeImage)
+void ActivityAssets::SetLargeImage(const char* largeImage)
 {
     strncpy(internal_.large_image, largeImage, 128);
     internal_.large_image[128 - 1] = '\0';
 }
 
-char const* ActivityAssets::GetLargeImage() const
+const char* ActivityAssets::GetLargeImage() const
 {
     return internal_.large_image;
 }
 
-void ActivityAssets::SetLargeText(char const* largeText)
+void ActivityAssets::SetLargeText(const char* largeText)
 {
     strncpy(internal_.large_text, largeText, 128);
     internal_.large_text[128 - 1] = '\0';
 }
 
-char const* ActivityAssets::GetLargeText() const
+const char* ActivityAssets::GetLargeText() const
 {
     return internal_.large_text;
 }
 
-void ActivityAssets::SetSmallImage(char const* smallImage)
+void ActivityAssets::SetSmallImage(const char* smallImage)
 {
     strncpy(internal_.small_image, smallImage, 128);
     internal_.small_image[128 - 1] = '\0';
 }
 
-char const* ActivityAssets::GetSmallImage() const
+const char* ActivityAssets::GetSmallImage() const
 {
     return internal_.small_image;
 }
 
-void ActivityAssets::SetSmallText(char const* smallText)
+void ActivityAssets::SetSmallText(const char* smallText)
 {
     strncpy(internal_.small_text, smallText, 128);
     internal_.small_text[128 - 1] = '\0';
 }
 
-char const* ActivityAssets::GetSmallText() const
+const char* ActivityAssets::GetSmallText() const
 {
     return internal_.small_text;
 }
@@ -229,13 +229,13 @@ std::int32_t PartySize::GetMaxSize() const
     return internal_.max_size;
 }
 
-void ActivityParty::SetId(char const* id)
+void ActivityParty::SetId(const char* id)
 {
     strncpy(internal_.id, id, 128);
     internal_.id[128 - 1] = '\0';
 }
 
-char const* ActivityParty::GetId() const
+const char* ActivityParty::GetId() const
 {
     return internal_.id;
 }
@@ -250,35 +250,35 @@ PartySize const& ActivityParty::GetSize() const
     return reinterpret_cast<PartySize const&>(internal_.size);
 }
 
-void ActivitySecrets::SetMatch(char const* match)
+void ActivitySecrets::SetMatch(const char* match)
 {
     strncpy(internal_.match, match, 128);
     internal_.match[128 - 1] = '\0';
 }
 
-char const* ActivitySecrets::GetMatch() const
+const char* ActivitySecrets::GetMatch() const
 {
     return internal_.match;
 }
 
-void ActivitySecrets::SetJoin(char const* join)
+void ActivitySecrets::SetJoin(const char* join)
 {
     strncpy(internal_.join, join, 128);
     internal_.join[128 - 1] = '\0';
 }
 
-char const* ActivitySecrets::GetJoin() const
+const char* ActivitySecrets::GetJoin() const
 {
     return internal_.join;
 }
 
-void ActivitySecrets::SetSpectate(char const* spectate)
+void ActivitySecrets::SetSpectate(const char* spectate)
 {
     strncpy(internal_.spectate, spectate, 128);
     internal_.spectate[128 - 1] = '\0';
 }
 
-char const* ActivitySecrets::GetSpectate() const
+const char* ActivitySecrets::GetSpectate() const
 {
     return internal_.spectate;
 }
@@ -303,35 +303,35 @@ std::int64_t Activity::GetApplicationId() const
     return internal_.application_id;
 }
 
-void Activity::SetName(char const* name)
+void Activity::SetName(const char* name)
 {
     strncpy(internal_.name, name, 128);
     internal_.name[128 - 1] = '\0';
 }
 
-char const* Activity::GetName() const
+const char* Activity::GetName() const
 {
     return internal_.name;
 }
 
-void Activity::SetState(char const* state)
+void Activity::SetState(const char* state)
 {
     strncpy(internal_.state, state, 128);
     internal_.state[128 - 1] = '\0';
 }
 
-char const* Activity::GetState() const
+const char* Activity::GetState() const
 {
     return internal_.state;
 }
 
-void Activity::SetDetails(char const* details)
+void Activity::SetDetails(const char* details)
 {
     strncpy(internal_.details, details, 128);
     internal_.details[128 - 1] = '\0';
 }
 
-char const* Activity::GetDetails() const
+const char* Activity::GetDetails() const
 {
     return internal_.details;
 }
@@ -477,12 +477,12 @@ LobbySecret Lobby::GetSecret() const
     return internal_.secret;
 }
 
-void Lobby::SetCapacity(std::uint32_t capacity)
+void Lobby::SetCapacity(uint32_t capacity)
 {
     internal_.capacity = capacity;
 }
 
-std::uint32_t Lobby::GetCapacity() const
+uint32_t Lobby::GetCapacity() const
 {
     return internal_.capacity;
 }
@@ -497,13 +497,13 @@ bool Lobby::GetLocked() const
     return internal_.locked != 0;
 }
 
-void FileStat::SetFilename(char const* filename)
+void FileStat::SetFilename(const char* filename)
 {
     strncpy(internal_.filename, filename, 260);
     internal_.filename[260 - 1] = '\0';
 }
 
-char const* FileStat::GetFilename() const
+const char* FileStat::GetFilename() const
 {
     return internal_.filename;
 }
@@ -558,23 +558,23 @@ Snowflake Entitlement::GetSkuId() const
     return internal_.sku_id;
 }
 
-void SkuPrice::SetAmount(std::uint32_t amount)
+void SkuPrice::SetAmount(uint32_t amount)
 {
     internal_.amount = amount;
 }
 
-std::uint32_t SkuPrice::GetAmount() const
+uint32_t SkuPrice::GetAmount() const
 {
     return internal_.amount;
 }
 
-void SkuPrice::SetCurrency(char const* currency)
+void SkuPrice::SetCurrency(const char* currency)
 {
     strncpy(internal_.currency, currency, 16);
     internal_.currency[16 - 1] = '\0';
 }
 
-char const* SkuPrice::GetCurrency() const
+const char* SkuPrice::GetCurrency() const
 {
     return internal_.currency;
 }
@@ -599,13 +599,13 @@ SkuType Sku::GetType() const
     return static_cast<SkuType>(internal_.type);
 }
 
-void Sku::SetName(char const* name)
+void Sku::SetName(const char* name)
 {
     strncpy(internal_.name, name, 256);
     internal_.name[256 - 1] = '\0';
 }
 
-char const* Sku::GetName() const
+const char* Sku::GetName() const
 {
     return internal_.name;
 }
@@ -630,13 +630,13 @@ InputModeType InputMode::GetType() const
     return static_cast<InputModeType>(internal_.type);
 }
 
-void InputMode::SetShortcut(char const* shortcut)
+void InputMode::SetShortcut(const char* shortcut)
 {
     strncpy(internal_.shortcut, shortcut, 256);
     internal_.shortcut[256 - 1] = '\0';
 }
 
-char const* InputMode::GetShortcut() const
+const char* InputMode::GetShortcut() const
 {
     return internal_.shortcut;
 }
@@ -694,7 +694,7 @@ Result LobbyTransaction::SetOwner(UserId ownerId)
     return static_cast<Result>(result);
 }
 
-Result LobbyTransaction::SetCapacity(std::uint32_t capacity)
+Result LobbyTransaction::SetCapacity(uint32_t capacity)
 {
     auto result = internal_->set_capacity(internal_, capacity);
     return static_cast<Result>(result);
@@ -754,7 +754,7 @@ Result LobbySearchQuery::Sort(MetadataKey key, LobbySearchCast cast, MetadataVal
     return static_cast<Result>(result);
 }
 
-Result LobbySearchQuery::Limit(std::uint32_t limit)
+Result LobbySearchQuery::Limit(uint32_t limit)
 {
     auto result = internal_->limit(internal_, limit);
     return static_cast<Result>(result);

@@ -14,7 +14,7 @@ namespace discord {
 
 class ActivityEvents final {
 public:
-    static void OnActivityJoin(void* callbackData, char const* secret){
+    static void OnActivityJoin(void* callbackData, const char* secret){
         auto* core = reinterpret_cast<Core*>(callbackData);
         if (!core) {
             return;
@@ -24,7 +24,7 @@ public:
         module.OnActivityJoin(static_cast<const char*>(secret));
     }
 
-    static void OnActivitySpectate(void* callbackData, char const* secret){
+    static void OnActivitySpectate(void* callbackData, const char* secret){
         auto* core = reinterpret_cast<Core*>(callbackData);
         if (!core) {
             return;
@@ -62,12 +62,12 @@ IDiscordActivityEvents ActivityManager::events_{
   &ActivityEvents::OnActivityInvite,
 };
 
-Result ActivityManager::RegisterCommand(char const* command){
+Result ActivityManager::RegisterCommand(const char* command){
     auto result = internal_->register_command(internal_, const_cast<char*>(command));
     return static_cast<Result>(result);
 }
 
-Result ActivityManager::RegisterSteam(std::uint32_t steamId){
+Result ActivityManager::RegisterSteam(uint32_t steamId){
     auto result = internal_->register_steam(internal_, steamId);
     return static_cast<Result>(result);
 }
@@ -111,7 +111,7 @@ void ActivityManager::SendRequestReply(UserId userId, ActivityJoinRequestReply r
     internal_->send_request_reply(internal_, userId, static_cast<EDiscordActivityJoinRequestReply>(reply), cb.release(), wrapper);
 }
 
-void ActivityManager::SendInvite(UserId userId, ActivityActionType type, char const* content, std::function<void(Result)> callback){
+void ActivityManager::SendInvite(UserId userId, ActivityActionType type, const char* content, std::function<void(Result)> callback){
     static auto wrapper = [](void* callbackData, EDiscordResult result) -> void {
         std::unique_ptr<std::function<void(Result)>> cb(reinterpret_cast<std::function<void(Result)>*>(callbackData));
         if (!cb || !(*cb)) {

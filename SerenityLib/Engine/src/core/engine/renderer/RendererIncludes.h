@@ -7,12 +7,12 @@
 
 constexpr const glm::vec4 NO_SCISSOR = glm::vec4(-1.0f);
 
-enum class SortingMode : unsigned int {
-    None,
+enum class SortingMode : uint32_t {
+    None = 0,
     FrontToBack,
     BackToFront,
 };
-enum class DepthFunc : unsigned int {
+enum class DepthFunc : uint32_t {
     Never    = GL_NEVER,
     Less     = GL_LESS,
     Equal    = GL_EQUAL,
@@ -22,16 +22,16 @@ enum class DepthFunc : unsigned int {
     GEqual   = GL_GEQUAL,
     Always   = GL_ALWAYS,
 };
-enum class AntiAliasingAlgorithm : unsigned int {
-    None, 
+enum class AntiAliasingAlgorithm : uint32_t {
+    None = 0, 
     FXAA, 
     SMAA_LOW,
     SMAA_MED,
     SMAA_HIGH,
     SMAA_ULTRA,
 };
-enum class Alignment : unsigned int {
-    TopLeft,
+enum class Alignment : uint32_t {
+    TopLeft = 0,
     TopCenter,
     TopRight,
     Left,
@@ -41,8 +41,8 @@ enum class Alignment : unsigned int {
     BottomCenter,
     BottomRight,
 };
-enum class RenderStage : unsigned int {
-    GeometryOpaque,
+enum class RenderStage : uint32_t {
+    GeometryOpaque = 0,
     GeometryOpaque_2,
     GeometryOpaque_3,
     GeometryOpaque_4,

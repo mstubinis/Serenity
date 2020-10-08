@@ -11,31 +11,34 @@
 #include <BulletCollision/CollisionShapes/btUniformScalingShape.h>
 #include <BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h>
 
-#include <glm/glm.hpp>
-
 constexpr btScalar DEFAULT_MARGIN = (btScalar)0.001;
 
-Engine::priv::MeshCollisionFactory::MeshCollisionFactory(Mesh& mesh)
-    : m_Mesh{ &mesh }
+Engine::priv::MeshCollisionFactory::MeshCollisionFactory(MeshCPUData& cpuData, MeshCollisionLoadingFlag::Flag flags)
+    : m_CPUData{ &cpuData }
 {
-    auto& data                       = *mesh.m_VertexData;
+    auto& data                       = *m_CPUData->m_VertexData;
     std::vector<glm::vec3> positions = data.getPositions();
-    internal_init_convex_data(data, positions);
-    internal_init_triangle_data(data, positions);
+
+    if (flags & MeshCollisionLoadingFlag::LoadConvexHull) {
+        internal_init_convex_data(data, positions);
+    }
+    if (flags & MeshCollisionLoadingFlag::LoadTriangleMesh) {
+        internal_init_triangle_data(data, positions);
+    }
 }
 Engine::priv::MeshCollisionFactory::MeshCollisionFactory(MeshCollisionFactory&& other) noexcept 
-    : m_ConvexHullData      {std::move(other.m_ConvexHullData) }
+    : m_ConvexHullData      { std::move(other.m_ConvexHullData) }
     , m_TriangleStaticData  { std::move(other.m_TriangleStaticData) }
     , m_TriangleStaticShape { std::move(other.m_TriangleStaticShape) }
     , m_TriangleInfoMap     { std::move(other.m_TriangleInfoMap) }
-    , m_Mesh                { std::exchange(other.m_Mesh, nullptr) }
+    , m_CPUData             { std::exchange(other.m_CPUData, nullptr) }
 {}
 Engine::priv::MeshCollisionFactory& Engine::priv::MeshCollisionFactory::operator=(MeshCollisionFactory&& other) noexcept {
     m_ConvexHullData      = std::move(other.m_ConvexHullData);
     m_TriangleStaticData  = std::move(other.m_TriangleStaticData);
     m_TriangleStaticShape = std::move(other.m_TriangleStaticShape);
     m_TriangleInfoMap     = std::move(other.m_TriangleInfoMap);
-    m_Mesh                = std::exchange(other.m_Mesh, nullptr);
+    m_CPUData             = std::exchange(other.m_CPUData, nullptr);
     return *this;
 }
 
@@ -53,7 +56,7 @@ void Engine::priv::MeshCollisionFactory::internal_init_convex_data(VertexData& d
             m_ConvesHullShape->addPoint(ptsArray[i]);
         }
         m_ConvesHullShape->setMargin(DEFAULT_MARGIN);
-        m_ConvesHullShape->recalcLocalAabb();
+        //m_ConvesHullShape->recalcLocalAabb(); //this is cpu expensive. is it really needed?
     }
 }
 void Engine::priv::MeshCollisionFactory::internal_init_triangle_data(VertexData& data, std::vector<glm::vec3>& positions) {
@@ -80,14 +83,14 @@ void Engine::priv::MeshCollisionFactory::internal_init_triangle_data(VertexData&
         }
         m_TriangleStaticShape.reset(new btBvhTriangleMeshShape(m_TriangleStaticData.get(), true));
         m_TriangleStaticShape->setMargin(DEFAULT_MARGIN);
-        m_TriangleStaticShape->recalcLocalAabb();
+        m_TriangleStaticShape->recalcLocalAabb();  //this is cpu expensive. is it really needed?
 
         m_TriangleInfoMap.reset(new btTriangleInfoMap());
         btGenerateInternalEdgeInfo(m_TriangleStaticShape.get(), m_TriangleInfoMap.get());
     }
 }
 btMultiSphereShape* Engine::priv::MeshCollisionFactory::buildSphereShape(ModelInstance* modelInstance, bool isCompoundChild) {
-    auto rad = (btScalar)m_Mesh->getRadius();
+    auto rad = (btScalar)m_CPUData->m_Radius;
     auto v = btVector3(0, 0, 0);
     btMultiSphereShape* sphere = new btMultiSphereShape(&v, &rad, 1);
     sphere->setMargin(DEFAULT_MARGIN);
@@ -98,7 +101,7 @@ btMultiSphereShape* Engine::priv::MeshCollisionFactory::buildSphereShape(ModelIn
     return sphere;
 }
 btBoxShape* Engine::priv::MeshCollisionFactory::buildBoxShape(ModelInstance* modelInstance, bool isCompoundChild) {
-    btBoxShape* box = new btBoxShape(Math::btVectorFromGLM(m_Mesh->getRadiusBox()));
+    btBoxShape* box = new btBoxShape(Math::btVectorFromGLM(m_CPUData->m_RadiusBox));
     box->setMargin(DEFAULT_MARGIN);
     if (isCompoundChild) {
         box->setUserPointer(modelInstance);
@@ -106,6 +109,10 @@ btBoxShape* Engine::priv::MeshCollisionFactory::buildBoxShape(ModelInstance* mod
     return box;
 }
 btUniformScalingShape* Engine::priv::MeshCollisionFactory::buildConvexHull(ModelInstance* modelInstance, bool isCompoundChild) {
+    if (!m_ConvesHullShape) {
+        ENGINE_PRODUCTION_LOG("Engine::priv::MeshCollisionFactory::buildConvexHull(): m_ConvesHullShape was null!")
+        return nullptr;
+    }
     btUniformScalingShape* uniformScalingShape = new btUniformScalingShape(m_ConvesHullShape.get(), (btScalar)1.0);
     uniformScalingShape->setMargin(DEFAULT_MARGIN);
     if (isCompoundChild) {
@@ -115,6 +122,10 @@ btUniformScalingShape* Engine::priv::MeshCollisionFactory::buildConvexHull(Model
     return uniformScalingShape;
 }
 btScaledBvhTriangleMeshShape* Engine::priv::MeshCollisionFactory::buildTriangleShape(ModelInstance* modelInstance, bool isCompoundChild) {
+    if (!m_TriangleStaticData) {
+        ENGINE_PRODUCTION_LOG("Engine::priv::MeshCollisionFactory::buildTriangleShape(): m_TriangleStaticData was null!")
+        return nullptr;
+    }
     btScaledBvhTriangleMeshShape* scaledBVH = new btScaledBvhTriangleMeshShape(m_TriangleStaticShape.get(), btVector3((btScalar)1.0, (btScalar)1.0, (btScalar)1.0));
     if (isCompoundChild) {
         scaledBVH->getChildShape()->setUserPointer(modelInstance);
@@ -123,6 +134,10 @@ btScaledBvhTriangleMeshShape* Engine::priv::MeshCollisionFactory::buildTriangleS
     return scaledBVH;
 }
 btGImpactMeshShape* Engine::priv::MeshCollisionFactory::buildTriangleShapeGImpact(ModelInstance* modelInstance, bool isCompoundChild) {
+    if (!m_TriangleStaticData) {
+        ENGINE_PRODUCTION_LOG("Engine::priv::MeshCollisionFactory::buildTriangleShapeGImpact(): m_TriangleStaticData was null!")
+        return nullptr;
+    }
     btGImpactMeshShape* gImpact = new btGImpactMeshShape(m_TriangleStaticData.get());
     gImpact->setMargin(DEFAULT_MARGIN);
     gImpact->updateBound();

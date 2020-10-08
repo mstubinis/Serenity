@@ -8,8 +8,8 @@ class ActivityManager final {
 public:
     ~ActivityManager() = default;
 
-    Result RegisterCommand(char const* command);
-    Result RegisterSteam(std::uint32_t steamId);
+    Result RegisterCommand(const char* command);
+    Result RegisterSteam(uint32_t steamId);
     void UpdateActivity(Activity const& activity, std::function<void(Result)> callback);
     void ClearActivity(std::function<void(Result)> callback);
     void SendRequestReply(UserId userId,
@@ -17,12 +17,12 @@ public:
                           std::function<void(Result)> callback);
     void SendInvite(UserId userId,
                     ActivityActionType type,
-                    char const* content,
+                    const char* content,
                     std::function<void(Result)> callback);
     void AcceptInvite(UserId userId, std::function<void(Result)> callback);
 
-    Event<char const*> OnActivityJoin;
-    Event<char const*> OnActivitySpectate;
+    Event<const char*> OnActivityJoin;
+    Event<const char*> OnActivitySpectate;
     Event<User const&> OnActivityJoinRequest;
     Event<ActivityActionType, User const&, Activity const&> OnActivityInvite;
 

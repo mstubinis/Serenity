@@ -417,7 +417,7 @@ void LobbyManager::UpdateMember(LobbyId lobbyId,
 
 void LobbyManager::SendLobbyMessage(LobbyId lobbyId,
                                     std::uint8_t* data,
-                                    std::uint32_t dataLength,
+                                    uint32_t dataLength,
                                     std::function<void(Result)> callback)
 {
     static auto wrapper = [](void* callbackData, EDiscordResult result) -> void {
@@ -538,7 +538,7 @@ Result LobbyManager::SendNetworkMessage(LobbyId lobbyId,
                                         UserId userId,
                                         std::uint8_t channelId,
                                         std::uint8_t* data,
-                                        std::uint32_t dataLength)
+                                        uint32_t dataLength)
 {
     auto result = internal_->send_network_message(
       internal_, lobbyId, userId, channelId, reinterpret_cast<uint8_t*>(data), dataLength);

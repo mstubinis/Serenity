@@ -12,8 +12,6 @@
 
 #include <SFML/Graphics/Image.hpp>
 
-Font* first_font = nullptr;
-
 Font::Font(const std::string& filename, int height, int width, float line_height) 
     : Resource{ ResourceType::Font, filename }
     , m_LineHeight{ line_height }
@@ -22,14 +20,14 @@ Font::Font(const std::string& filename, int height, int width, float line_height
 }
 Font::Font(Font&& other) noexcept 
     : Resource(std::move(other))
-    , m_FontTexture { std::exchange(other.m_FontTexture, nullptr) }
+    , m_FontTexture{ std::exchange(other.m_FontTexture, Handle{}) }
     , m_MaxHeight   { std::move(other.m_MaxHeight) }
     , m_LineHeight  { std::move(other.m_LineHeight) }
     , m_CharGlyphs  { std::move(other.m_CharGlyphs) }
 {}
 Font& Font::operator=(Font&& other) noexcept {
     Resource::operator=(std::move(other));
-    m_FontTexture = std::exchange(other.m_FontTexture, nullptr);
+    m_FontTexture = std::exchange(other.m_FontTexture, Handle{});
     m_MaxHeight   = std::move(other.m_MaxHeight);
     m_LineHeight  = std::move(other.m_LineHeight);
     m_CharGlyphs  = std::move(other.m_CharGlyphs);
@@ -65,10 +63,6 @@ void Font::init(const std::string& filename, int height, int width) {
     }else if (extension == ".pfr") { //PFR fonts
         init_freetype(filename, height, width);
     }
-
-    if (!first_font) {
-        first_font = this;
-    }
 }
 
 std::vector<std::vector<std::uint8_t>> Font::generate_bitmap(const FT_GlyphSlotRec_& glyph) {
@@ -98,13 +92,13 @@ void Font::init_simple(const std::string& filename, int height, int width) {
         rawname += ".png";
     }
 
-    Handle handle = Engine::Resources::addResource<Texture>(rawname, false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D);
-    m_FontTexture = handle.get<Texture>();
+    m_FontTexture = Engine::Resources::addResource<Texture>(rawname, false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D);
+    auto& texture = *m_FontTexture.get<Texture>();
 
     float min_y_offset  = std::numeric_limits<float>().max();
     float max_y_offset  = std::numeric_limits<float>().min();
-    float textureHeight = (float)m_FontTexture->height();
-    float textureWidth  = (float)m_FontTexture->width();
+    float textureHeight = (float)texture.height();
+    float textureWidth  = (float)texture.width();
 
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
     for (std::string line; std::getline(str, line, '\n');) {
@@ -156,7 +150,11 @@ void Font::init_simple(const std::string& filename, int height, int width) {
             charGlyph.uvs.emplace_back(uvW1, uvH1);
             charGlyph.uvs.emplace_back(uvW2, uvH2);
 
-            m_CharGlyphs.emplace(charGlyph.char_id, std::move(charGlyph));
+            m_CharGlyphs.emplace(
+                std::piecewise_construct,
+                std::forward_as_tuple(charGlyph.char_id), 
+                std::forward_as_tuple(std::move(charGlyph))
+            );
         }
     }
     m_MaxHeight = max_y_offset - min_y_offset;
@@ -224,7 +222,7 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
             if (FT_Load_Char(face, char_id, FT_LOAD_RENDER)) {
                 continue;
             }
-            if (!m_CharGlyphs.count(char_id)) {
+            if (!m_CharGlyphs.contains(char_id)) {
                 done = true;
                 break;
             }
@@ -275,8 +273,7 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
 
-    Handle handle = Engine::Resources::addResource<Texture>(atlas_image, filename + "_Texture", false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D);
-    m_FontTexture = handle.get<Texture>();
+    m_FontTexture = Engine::Resources::addResource<Texture>(atlas_image, filename + "_Texture", false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D);
 
     m_MaxHeight = max_y_offset - min_y_offset;
 }
@@ -341,13 +338,5 @@ float Font::getTextWidth(std::string_view text) const {
     return maxWidth;
 }
 const CharGlyph& Font::getGlyphData(std::uint8_t character) const {
-    return (m_CharGlyphs.count(character)) ? m_CharGlyphs.at(character) : m_CharGlyphs.at('?');
-}
-void Font::renderText(const std::string& t, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment al, const glm::vec4& scissor){
-    Engine::Renderer::renderText(t, *this, p, c, a, s, d, al, scissor);
-}
-void Font::renderTextStatic(const std::string& t, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment al, const glm::vec4& scissor) {
-    if (first_font) {
-        Engine::Renderer::renderText(t, *first_font, p, c, a, s, d, al, scissor);
-    }
+    return (m_CharGlyphs.contains(character)) ? m_CharGlyphs.at(character) : m_CharGlyphs.at('?');
 }

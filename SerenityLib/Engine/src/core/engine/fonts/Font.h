@@ -6,6 +6,7 @@ class Texture;
 struct FT_GlyphSlotRec_;
 
 #include <core/engine/resources/Resource.h>
+#include <core/engine/resources/Handle.h>
 #include <core/engine/fonts/FontIncludes.h>
 
 struct CharGlyph final {
@@ -26,7 +27,7 @@ class Font final: public Resource {
     public:
         static constexpr unsigned int MAX_CHARACTERS_RENDERED_PER_FRAME    = 4096;
     private:
-        Texture*                                      m_FontTexture    = nullptr;
+        Handle                                        m_FontTexture    = Handle{};
         float                                         m_MaxHeight      = 0.0f;
         float                                         m_LineHeight     = 8.0f;
         std::unordered_map<std::uint8_t, CharGlyph>   m_CharGlyphs;
@@ -46,33 +47,12 @@ class Font final: public Resource {
         Font& operator=(Font&& other) noexcept;
         ~Font();
 
-        void renderText(
-            const std::string& text,
-            const glm::vec2& pos,
-            const glm::vec4& color = glm::vec4(1),
-            float angle = 0.0f,
-            const glm::vec2& scl = glm::vec2(1.0f),
-            float depth = 0.1f,
-            TextAlignment = TextAlignment::Left,
-            const glm::vec4& scissor = glm::vec4(-1.0f)
-        );
-        static void renderTextStatic(
-            const std::string& text,
-            const glm::vec2& pos,
-            const glm::vec4& color = glm::vec4(1),
-            float angle = 0.0f,
-            const glm::vec2& scl = glm::vec2(1.0f),
-            float depth = 0.1f,
-            TextAlignment = TextAlignment::Left,
-            const glm::vec4& scissor = glm::vec4(-1.0f)
-        );
-
         float getTextWidth(std::string_view text) const;
         float getTextHeight(std::string_view text) const;
         float getTextHeightDynamic(std::string_view text) const;
 
         inline CONSTEXPR float getMaxHeight() const noexcept { return m_MaxHeight; }
-        inline CONSTEXPR Texture* getGlyphTexture() const noexcept { return m_FontTexture; }
+        inline CONSTEXPR Handle getGlyphTexture() const noexcept { return m_FontTexture; }
         inline CONSTEXPR float getLineHeight() const noexcept { return m_LineHeight; }
 
         const CharGlyph& getGlyphData(std::uint8_t character) const;

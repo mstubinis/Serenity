@@ -39,7 +39,7 @@
     <ProjectGuid>{CB117FEE-0B28-4982-BB5F-1E1F95C614B8}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>SerenityLib</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -48,7 +48,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <PreferredToolArchitecture>x86</PreferredToolArchitecture>
-    <VCToolsVersion>14.26.28801</VCToolsVersion>
+    <VCToolsVersion>14.27.29110</VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -57,7 +57,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x86</PreferredToolArchitecture>
-    <VCToolsVersion>14.26.28801</VCToolsVersion>
+    <VCToolsVersion>14.27.29110</VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -66,7 +66,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x86</PreferredToolArchitecture>
-    <VCToolsVersion>14.26.28801</VCToolsVersion>
+    <VCToolsVersion>14.27.29110</VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -75,7 +75,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x86</PreferredToolArchitecture>
-    <VCToolsVersion>14.26.28801</VCToolsVersion>
+    <VCToolsVersion>14.27.29110</VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -83,7 +83,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
-    <VCToolsVersion>14.26.28801</VCToolsVersion>
+    <VCToolsVersion>14.27.29110</VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -92,7 +92,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
-    <VCToolsVersion>14.26.28801</VCToolsVersion>
+    <VCToolsVersion>14.27.29110</VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -101,7 +101,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
-    <VCToolsVersion>14.26.28801</VCToolsVersion>
+    <VCToolsVersion>14.27.29110</VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -110,7 +110,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
-    <VCToolsVersion>14.26.28801</VCToolsVersion>
+    <VCToolsVersion>14.27.29110</VCToolsVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -186,8 +186,6 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)Builds\Serenity64\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Builds\Serenity64\$(Configuration)\objs\</IntDir>
-    <IncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\cppwinrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x64;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x64;C:\Program Files (x86)\Windows Kits\10\lib\10.0.17134.0\um\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17134.0\ucrt\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17763.0\um\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17763.0\ucrt\x64;$(LibraryPath)</LibraryPath>
     <TargetName>Serenity</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">
@@ -669,6 +667,7 @@
     <ClInclude Include="Engine\src\core\engine\types\Flag.h" />
     <ClInclude Include="Engine\src\core\engine\types\SmallMap.h" />
     <ClInclude Include="Engine\src\core\engine\types\StaticString.h" />
+    <ClInclude Include="Engine\src\core\engine\types\ViewPointer.h" />
     <ClInclude Include="Engine\src\core\engine\utils\BlockProfiler.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Engine_Debugging.h" />
     <ClInclude Include="Engine\src\core\engine\utils\Logger.h" />
@@ -746,7 +745,6 @@
     <ClCompile Include="Engine\src\core\engine\mesh\BuiltInMeshes.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\Mesh.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshCollisionFactory.cpp" />
-    <ClCompile Include="Engine\src\core\engine\mesh\MeshImportedData.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshLoading.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\MeshRequest.cpp" />
     <ClCompile Include="Engine\src\core\engine\mesh\smsh.cpp" />

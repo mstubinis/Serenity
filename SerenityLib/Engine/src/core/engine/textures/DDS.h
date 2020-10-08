@@ -134,43 +134,43 @@ namespace Engine::priv::textures {
         D3D_RESOURCE_DIMENSION_TEXTURE3D,
         _TOTAL,
     };
-    static constexpr std::uint32_t FourCC_DXT1 = 0x31545844;
-    static constexpr std::uint32_t FourCC_DXT2 = 0x32545844;
-    static constexpr std::uint32_t FourCC_DXT3 = 0x33545844;
-    static constexpr std::uint32_t FourCC_DXT4 = 0x34545844;
-    static constexpr std::uint32_t FourCC_DXT5 = 0x35545844;
-    static constexpr std::uint32_t FourCC_DX10 = 0x30315844;
-    static constexpr std::uint32_t FourCC_ATI1 = 0x31495441;
-    static constexpr std::uint32_t FourCC_ATI2 = 0x32495441;
-    static constexpr std::uint32_t FourCC_RXGB = 0x42475852;
-    static constexpr std::uint32_t FourCC_$    = 0x00000024;
-    static constexpr std::uint32_t FourCC_o    = 0x0000006f;
-    static constexpr std::uint32_t FourCC_p    = 0x00000070;
-    static constexpr std::uint32_t FourCC_q    = 0x00000071;
-    static constexpr std::uint32_t FourCC_r    = 0x00000072;
-    static constexpr std::uint32_t FourCC_s    = 0x00000073;
-    static constexpr std::uint32_t FourCC_t    = 0x00000074;
-    static constexpr std::uint32_t FourCC_BC4U = 0x55344342;
-    static constexpr std::uint32_t FourCC_BC4S = 0x53344342;
-    static constexpr std::uint32_t FourCC_BC5U = 0x55354342;
-    static constexpr std::uint32_t FourCC_BC5S = 0x53354342;
-    static constexpr std::uint32_t FourCC_RGBG = 0x47424752;
-    static constexpr std::uint32_t FourCC_GRGB = 0x42475247;
-    static constexpr std::uint32_t FourCC_YUY2 = 0x32595559;
+    static constexpr uint32_t FourCC_DXT1 = 0x31545844;
+    static constexpr uint32_t FourCC_DXT2 = 0x32545844;
+    static constexpr uint32_t FourCC_DXT3 = 0x33545844;
+    static constexpr uint32_t FourCC_DXT4 = 0x34545844;
+    static constexpr uint32_t FourCC_DXT5 = 0x35545844;
+    static constexpr uint32_t FourCC_DX10 = 0x30315844;
+    static constexpr uint32_t FourCC_ATI1 = 0x31495441;
+    static constexpr uint32_t FourCC_ATI2 = 0x32495441;
+    static constexpr uint32_t FourCC_RXGB = 0x42475852;
+    static constexpr uint32_t FourCC_$    = 0x00000024;
+    static constexpr uint32_t FourCC_o    = 0x0000006f;
+    static constexpr uint32_t FourCC_p    = 0x00000070;
+    static constexpr uint32_t FourCC_q    = 0x00000071;
+    static constexpr uint32_t FourCC_r    = 0x00000072;
+    static constexpr uint32_t FourCC_s    = 0x00000073;
+    static constexpr uint32_t FourCC_t    = 0x00000074;
+    static constexpr uint32_t FourCC_BC4U = 0x55344342;
+    static constexpr uint32_t FourCC_BC4S = 0x53344342;
+    static constexpr uint32_t FourCC_BC5U = 0x55354342;
+    static constexpr uint32_t FourCC_BC5S = 0x53354342;
+    static constexpr uint32_t FourCC_RGBG = 0x47424752;
+    static constexpr uint32_t FourCC_GRGB = 0x42475247;
+    static constexpr uint32_t FourCC_YUY2 = 0x32595559;
 
     namespace DDS {
         struct DDS_PixelFormat final {
-            std::uint32_t pxl_size    = 0U;
-            std::uint32_t pxl_flags   = 0U;
-            std::uint32_t fourCC      = 0U;
-            std::uint32_t BitCountRGB = 0U; //Number of bits in an RGB (possibly including alpha) format. Valid when flags includes DDPF_RGB, DDPF_LUMINANCE, or DDPF_YUV.
-            std::uint32_t BitMaskR    = 0U;
-            std::uint32_t BitMaskG    = 0U;
-            std::uint32_t BitMaskB    = 0U;
-            std::uint32_t BitMaskA    = 0U;
+            uint32_t pxl_size    = 0U;
+            uint32_t pxl_flags   = 0U;
+            uint32_t fourCC      = 0U;
+            uint32_t BitCountRGB = 0U; //Number of bits in an RGB (possibly including alpha) format. Valid when flags includes DDPF_RGB, DDPF_LUMINANCE, or DDPF_YUV.
+            uint32_t BitMaskR    = 0U;
+            uint32_t BitMaskG    = 0U;
+            uint32_t BitMaskB    = 0U;
+            uint32_t BitMaskA    = 0U;
             constexpr DDS_PixelFormat() {
             }
-            constexpr DDS_PixelFormat(const std::uint32_t size, const std::uint32_t flags, const std::uint32_t fourCC_, const std::uint32_t bitCRGB, const std::uint32_t mskR, const std::uint32_t mskG, const std::uint32_t mskB, const std::uint32_t mskA) {
+            constexpr DDS_PixelFormat(const uint32_t size, const uint32_t flags, const uint32_t fourCC_, const uint32_t bitCRGB, const uint32_t mskR, const uint32_t mskG, const uint32_t mskB, const uint32_t mskA) {
                 pxl_size    = size;
                 pxl_flags   = flags;
                 fourCC      = fourCC_;
@@ -181,14 +181,14 @@ namespace Engine::priv::textures {
                 BitMaskA    = mskA;
             }
             constexpr void fill(const std::array<unsigned char, 128>& header) {
-                pxl_size    = *(std::uint32_t*)&header[76];
-                pxl_flags   = *(std::uint32_t*)&header[80];
-                fourCC      = *(std::uint32_t*)&header[84];
-                BitCountRGB = *(std::uint32_t*)&header[88];
-                BitMaskR    = *(std::uint32_t*)&header[92];
-                BitMaskG    = *(std::uint32_t*)&header[96];
-                BitMaskB    = *(std::uint32_t*)&header[100];
-                BitMaskA    = *(std::uint32_t*)&header[104];
+                pxl_size    = *(uint32_t*)&header[76];
+                pxl_flags   = *(uint32_t*)&header[80];
+                fourCC      = *(uint32_t*)&header[84];
+                BitCountRGB = *(uint32_t*)&header[88];
+                BitMaskR    = *(uint32_t*)&header[92];
+                BitMaskG    = *(uint32_t*)&header[96];
+                BitMaskB    = *(uint32_t*)&header[100];
+                BitMaskA    = *(uint32_t*)&header[104];
             }
             constexpr DDS_PixelFormat(const std::array<unsigned char, 128>& header) {
                 fill(header); 
@@ -197,103 +197,103 @@ namespace Engine::priv::textures {
         struct DDS_Header_DX10 final {
             textures::DXGI_FORMAT             dxgiFormat        = textures::DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
             textures::D3D_RESOURCE_DIMENSION  resourceDimension = textures::D3D_RESOURCE_DIMENSION::D3D_RESOURCE_DIMENSION_UNKNOWN;
-            std::uint32_t                     miscFlag          = 0U;
-            std::uint32_t                     arraySize         = 0U;
-            std::uint32_t                     miscFlags2        = 0U;
+            uint32_t                     miscFlag          = 0U;
+            uint32_t                     arraySize         = 0U;
+            uint32_t                     miscFlags2        = 0U;
             constexpr DDS_Header_DX10() {
             }
             constexpr void fill(const std::array<unsigned char, 20>& headerDX10) {
-                dxgiFormat        = static_cast<textures::DXGI_FORMAT>(*(std::uint32_t*)&headerDX10[0]);
-                resourceDimension = static_cast<textures::D3D_RESOURCE_DIMENSION>(*(std::uint32_t*)&headerDX10[4]);
-                miscFlag          = *(std::uint32_t*)&headerDX10[8];
-                arraySize         = *(std::uint32_t*)&headerDX10[12];
-                miscFlags2        = *(std::uint32_t*)&headerDX10[16];
+                dxgiFormat        = static_cast<textures::DXGI_FORMAT>(*(uint32_t*)&headerDX10[0]);
+                resourceDimension = static_cast<textures::D3D_RESOURCE_DIMENSION>(*(uint32_t*)&headerDX10[4]);
+                miscFlag          = *(uint32_t*)&headerDX10[8];
+                arraySize         = *(uint32_t*)&headerDX10[12];
+                miscFlags2        = *(uint32_t*)&headerDX10[16];
             }
         };
         struct DDS_Header final {
-            std::uint32_t magic             = 0U;
-            std::uint32_t header_size       = 0U;
-            std::uint32_t header_flags      = 0U; //if this is DDPF_FOURCC then we include the DDS_HEADER_DXT10
-            std::uint32_t h                 = 0U;
-            std::uint32_t w                 = 0U;
-            std::uint32_t pitchOrlinearSize = 0U; //The pitch or number of bytes per scan line in an uncompressed texture; the total number of bytes in the top level texture for a compressed texture.
-            std::uint32_t depth             = 0U;
-            std::uint32_t mipMapCount       = 0U;
-            //std::uint32_t reserved1[11];
+            uint32_t magic             = 0U;
+            uint32_t header_size       = 0U;
+            uint32_t header_flags      = 0U; //if this is DDPF_FOURCC then we include the DDS_HEADER_DXT10
+            uint32_t h                 = 0U;
+            uint32_t w                 = 0U;
+            uint32_t pitchOrlinearSize = 0U; //The pitch or number of bytes per scan line in an uncompressed texture; the total number of bytes in the top level texture for a compressed texture.
+            uint32_t depth             = 0U;
+            uint32_t mipMapCount       = 0U;
+            //uint32_t reserved1[11];
             DDS_PixelFormat format          = DDS_PixelFormat{};
-            std::uint32_t caps              = 0U;
-            std::uint32_t caps2             = 0U;
-            std::uint32_t caps3             = 0U;
-            std::uint32_t caps4             = 0U;
-            std::uint32_t reserved2         = 0U;
+            uint32_t caps              = 0U;
+            uint32_t caps2             = 0U;
+            uint32_t caps3             = 0U;
+            uint32_t caps4             = 0U;
+            uint32_t reserved2         = 0U;
             constexpr DDS_Header() {
             }
             constexpr DDS_Header(const std::array<unsigned char, 128>& header) {
-                magic             = *(std::uint32_t*)&header[0];
-                header_size       = *(std::uint32_t*)&header[4];
-                header_flags      = *(std::uint32_t*)&header[8];
-                h                 = *(std::uint32_t*)&header[12];
-                w                 = *(std::uint32_t*)&header[16];
-                pitchOrlinearSize = *(std::uint32_t*)&header[20];
-                depth             = *(std::uint32_t*)&header[24];
-                mipMapCount       = *(std::uint32_t*)&header[28];
+                magic             = *(uint32_t*)&header[0];
+                header_size       = *(uint32_t*)&header[4];
+                header_flags      = *(uint32_t*)&header[8];
+                h                 = *(uint32_t*)&header[12];
+                w                 = *(uint32_t*)&header[16];
+                pitchOrlinearSize = *(uint32_t*)&header[20];
+                depth             = *(uint32_t*)&header[24];
+                mipMapCount       = *(uint32_t*)&header[28];
 
-                //reserved1[11]   = *(std::uint32_t*)&header[32-72];
+                //reserved1[11]   = *(uint32_t*)&header[32-72];
                 format.fill(header);
 
-                caps              = *(std::uint32_t*)&header[108];
-                caps2             = *(std::uint32_t*)&header[112];
-                caps3             = *(std::uint32_t*)&header[116];
-                caps4             = *(std::uint32_t*)&header[120];
-                reserved2         = *(std::uint32_t*)&header[124];
+                caps              = *(uint32_t*)&header[108];
+                caps2             = *(uint32_t*)&header[112];
+                caps3             = *(uint32_t*)&header[116];
+                caps4             = *(uint32_t*)&header[120];
+                reserved2         = *(uint32_t*)&header[124];
             }
         };
 
-        static constexpr std::uint32_t DDS_CAPS                      = 0x00000001;
-        static constexpr std::uint32_t DDS_HEIGHT                    = 0x00000002;
-        static constexpr std::uint32_t DDS_WIDTH                     = 0x00000004;
-        static constexpr std::uint32_t DDS_PITCH                     = 0x00000008;
-        static constexpr std::uint32_t DDS_PIXELFORMAT               = 0x00001000;
-        static constexpr std::uint32_t DDS_MIPMAPCOUNT               = 0x00020000;
-        static constexpr std::uint32_t DDS_LINEARSIZE                = 0x00080000;
-        static constexpr std::uint32_t DDS_DEPTH                     = 0x00800000;
-        static constexpr std::uint32_t DDS_HEADER_FLAGS_TEXTURE      = 0x00001007;
-        static constexpr std::uint32_t DDS_CAPS_COMPLEX              = 0x00000008;
-        static constexpr std::uint32_t DDS_CAPS_MIPMAP               = 0x00400000;
-        static constexpr std::uint32_t DDS_CAPS_TEXTURE              = 0x00001000;
-        static constexpr std::uint32_t DDS_SURFACE_FLAGS_MIPMAP      = 0x00400008;
-        static constexpr std::uint32_t DDS_CAPS2_CUBEMAP             = 0x00000200;
-        static constexpr std::uint32_t DDS_CAPS2_CUBEMAP_POSITIVEX   = 0x00000400;
-        static constexpr std::uint32_t DDS_CAPS2_CUBEMAP_NEGATIVEX   = 0x00000800;
-        static constexpr std::uint32_t DDS_CAPS2_CUBEMAP_POSITIVEY   = 0x00001000;
-        static constexpr std::uint32_t DDS_CAPS2_CUBEMAP_NEGATIVEY   = 0x00002000;
-        static constexpr std::uint32_t DDS_CAPS2_CUBEMAP_POSITIVEZ   = 0x00004000;
-        static constexpr std::uint32_t DDS_CAPS2_CUBEMAP_NEGATIVEZ   = 0x00008000;
-        static constexpr std::uint32_t DDS_CAPS2_VOLUME              = 0x00200000;
+        static constexpr uint32_t DDS_CAPS                      = 0x00000001;
+        static constexpr uint32_t DDS_HEIGHT                    = 0x00000002;
+        static constexpr uint32_t DDS_WIDTH                     = 0x00000004;
+        static constexpr uint32_t DDS_PITCH                     = 0x00000008;
+        static constexpr uint32_t DDS_PIXELFORMAT               = 0x00001000;
+        static constexpr uint32_t DDS_MIPMAPCOUNT               = 0x00020000;
+        static constexpr uint32_t DDS_LINEARSIZE                = 0x00080000;
+        static constexpr uint32_t DDS_DEPTH                     = 0x00800000;
+        static constexpr uint32_t DDS_HEADER_FLAGS_TEXTURE      = 0x00001007;
+        static constexpr uint32_t DDS_CAPS_COMPLEX              = 0x00000008;
+        static constexpr uint32_t DDS_CAPS_MIPMAP               = 0x00400000;
+        static constexpr uint32_t DDS_CAPS_TEXTURE              = 0x00001000;
+        static constexpr uint32_t DDS_SURFACE_FLAGS_MIPMAP      = 0x00400008;
+        static constexpr uint32_t DDS_CAPS2_CUBEMAP             = 0x00000200;
+        static constexpr uint32_t DDS_CAPS2_CUBEMAP_POSITIVEX   = 0x00000400;
+        static constexpr uint32_t DDS_CAPS2_CUBEMAP_NEGATIVEX   = 0x00000800;
+        static constexpr uint32_t DDS_CAPS2_CUBEMAP_POSITIVEY   = 0x00001000;
+        static constexpr uint32_t DDS_CAPS2_CUBEMAP_NEGATIVEY   = 0x00002000;
+        static constexpr uint32_t DDS_CAPS2_CUBEMAP_POSITIVEZ   = 0x00004000;
+        static constexpr uint32_t DDS_CAPS2_CUBEMAP_NEGATIVEZ   = 0x00008000;
+        static constexpr uint32_t DDS_CAPS2_VOLUME              = 0x00200000;
 
-        static constexpr std::uint32_t DDS_CUBEMAP_POSITIVEX         = 0x00000600;
-        static constexpr std::uint32_t DDS_CUBEMAP_NEGATIVEX         = 0x00000a00;
-        static constexpr std::uint32_t DDS_CUBEMAP_POSITIVEY         = 0x00001200;
-        static constexpr std::uint32_t DDS_CUBEMAP_NEGATIVEY         = 0x00002200;
-        static constexpr std::uint32_t DDS_CUBEMAP_POSITIVEZ         = 0x00004200;
-        static constexpr std::uint32_t DDS_CUBEMAP_NEGATIVEZ         = 0x00008200;
-        static constexpr std::uint32_t DDS_CUBEMAP_ALLFACES          = 0x0000fe00;
+        static constexpr uint32_t DDS_CUBEMAP_POSITIVEX         = 0x00000600;
+        static constexpr uint32_t DDS_CUBEMAP_NEGATIVEX         = 0x00000a00;
+        static constexpr uint32_t DDS_CUBEMAP_POSITIVEY         = 0x00001200;
+        static constexpr uint32_t DDS_CUBEMAP_NEGATIVEY         = 0x00002200;
+        static constexpr uint32_t DDS_CUBEMAP_POSITIVEZ         = 0x00004200;
+        static constexpr uint32_t DDS_CUBEMAP_NEGATIVEZ         = 0x00008200;
+        static constexpr uint32_t DDS_CUBEMAP_ALLFACES          = 0x0000fe00;
 
-        static constexpr std::uint32_t DDS_RESOURCE_MISC_TEXTURECUBE = 0x00000004;
-        static constexpr std::uint32_t DDS_ALPHA_MODE_UNKNOWN        = 0x00000000;
-        static constexpr std::uint32_t DDS_ALPHA_MODE_STRAIGHT       = 0x00000001;
-        static constexpr std::uint32_t DDS_ALPHA_MODE_PREMULTIPLIED  = 0x00000002;
-        static constexpr std::uint32_t DDS_ALPHA_MODE_OPAQUE         = 0x00000003;
-        static constexpr std::uint32_t DDS_ALPHA_MODE_CUSTOM         = 0x00000004;
-        static constexpr std::uint32_t DDPF_ALPHAPIXELS              = 0x00000001;
-        static constexpr std::uint32_t DDPF_ALPHA                    = 0x00000002;
-        static constexpr std::uint32_t DDPF_FOURCC                   = 0x00000004;
-        static constexpr std::uint32_t DDPF_RGB                      = 0x00000040;
-        static constexpr std::uint32_t DDPF_YUV                      = 0x00000200;
-        static constexpr std::uint32_t DDPF_LUMINANCE                = 0x00020000;
-        static constexpr std::uint32_t DDS_RGBA                      = 0x00000041;
-        static constexpr std::uint32_t DDS_LUMINANCEA                = 0x00020001;
-        static constexpr std::uint32_t DDPF_BUMPDUDV                 = 0x00080000;
+        static constexpr uint32_t DDS_RESOURCE_MISC_TEXTURECUBE = 0x00000004;
+        static constexpr uint32_t DDS_ALPHA_MODE_UNKNOWN        = 0x00000000;
+        static constexpr uint32_t DDS_ALPHA_MODE_STRAIGHT       = 0x00000001;
+        static constexpr uint32_t DDS_ALPHA_MODE_PREMULTIPLIED  = 0x00000002;
+        static constexpr uint32_t DDS_ALPHA_MODE_OPAQUE         = 0x00000003;
+        static constexpr uint32_t DDS_ALPHA_MODE_CUSTOM         = 0x00000004;
+        static constexpr uint32_t DDPF_ALPHAPIXELS              = 0x00000001;
+        static constexpr uint32_t DDPF_ALPHA                    = 0x00000002;
+        static constexpr uint32_t DDPF_FOURCC                   = 0x00000004;
+        static constexpr uint32_t DDPF_RGB                      = 0x00000040;
+        static constexpr uint32_t DDPF_YUV                      = 0x00000200;
+        static constexpr uint32_t DDPF_LUMINANCE                = 0x00020000;
+        static constexpr uint32_t DDS_RGBA                      = 0x00000041;
+        static constexpr uint32_t DDS_LUMINANCEA                = 0x00020001;
+        static constexpr uint32_t DDPF_BUMPDUDV                 = 0x00080000;
 
         static constexpr DDS_PixelFormat DDSPF_DXT1      = { sizeof(DDS_PixelFormat), DDPF_FOURCC, FourCC_DXT1, 0, 0, 0, 0, 0 };
         static constexpr DDS_PixelFormat DDSPF_DXT2      = { sizeof(DDS_PixelFormat), DDPF_FOURCC, FourCC_DXT2, 0, 0, 0, 0, 0 };

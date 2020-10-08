@@ -1,7 +1,5 @@
 #include <core/engine/utils/PrecompiledHeader.h>
-
 #include <core/engine/system/Engine.h>
-
 #include <core/engine/mesh/Mesh.h>
 #include <core/engine/materials/Material.h>
 #include <core/engine/textures/Texture.h>
@@ -9,23 +7,20 @@
 #include <core/engine/sounds/SoundData.h>
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/shaders/Shader.h>
-
 #include <core/engine/scene/Scene.h>
 #include <core/engine/system/window/Window.h>
-
 #include <core/engine/mesh/MeshRequest.h>
 #include <core/engine/textures/TextureRequest.h>
 #include <core/engine/materials/MaterialRequest.h>
-#include <core/engine/resources/Handle.h>
+#include <core/engine/events/Event.h>
 
 #include <ecs/ECS.h>
 
 
-Engine::priv::ResourceManager* Engine::priv::ResourceManager::RESOURCE_MANAGER = nullptr;
+Engine::view_ptr<Engine::priv::ResourceManager> Engine::priv::ResourceManager::RESOURCE_MANAGER = nullptr;
 
 Engine::priv::ResourceManager::ResourceManager(const EngineOptions& options) {
     RESOURCE_MANAGER = this;
-
     m_ResourceModule.registerResourceType<Texture>();
     m_ResourceModule.registerResourceType<Material>();
     m_ResourceModule.registerResourceType<Mesh>();
@@ -35,7 +30,7 @@ Engine::priv::ResourceManager::ResourceManager(const EngineOptions& options) {
     m_ResourceModule.registerResourceType<Font>();
 }
 void Engine::priv::ResourceManager::init(const EngineOptions& options){
-    auto& window = m_Windows.emplace_back(std::unique_ptr<Window>(NEW Window()));
+    auto& window = m_Windows.emplace_back(std::unique_ptr<Window>(NEW Window{}));
     window->init(options);
     window->setJoystickProcessingActive(false);
 }
@@ -55,7 +50,7 @@ void Engine::priv::ResourceManager::onPostUpdate() {
         m_ScenesToBeDeleted.clear();
     }   
 }
-Scene& Engine::priv::ResourceManager::_getSceneByID(std::uint32_t id) {
+Scene& Engine::priv::ResourceManager::_getSceneByID(uint32_t id) {
     return *m_Scenes[id - 1];
 }
 unsigned int Engine::priv::ResourceManager::AddScene(Scene& s){
@@ -126,8 +121,8 @@ Scene* Engine::Resources::getScene(std::string_view sceneName){
     return nullptr;
 }
 
-std::vector<Handle> Engine::Resources::loadMesh(const std::string& fileOrData, float threshhold) {
-    MeshRequest request(fileOrData, threshhold, []() {});
+std::vector<Handle> Engine::Resources::loadMesh(const std::string& fileOrData, float threshhold, MeshCollisionLoadingFlag::Flag flags) {
+    MeshRequest request{ fileOrData, threshhold, flags, []() {} };
     request.request();
     std::vector<Handle> handles;
     handles.reserve(request.m_Parts.size());
@@ -136,8 +131,8 @@ std::vector<Handle> Engine::Resources::loadMesh(const std::string& fileOrData, f
     }
     return handles;
 }
-std::vector<Handle> Engine::Resources::loadMeshAsync(const std::string& fileOrData, float threshhold, std::function<void()> callback) {
-    MeshRequest request(fileOrData, threshhold, std::move(callback));
+std::vector<Handle> Engine::Resources::loadMeshAsync(const std::string& fileOrData, float threshhold, MeshCollisionLoadingFlag::Flag flags, std::function<void()> callback) {
+    MeshRequest request{ fileOrData, threshhold, flags, std::move(callback) };
     request.request(true);
     std::vector<Handle> handles;
     handles.reserve(request.m_Parts.size());
@@ -147,7 +142,7 @@ std::vector<Handle> Engine::Resources::loadMeshAsync(const std::string& fileOrDa
     return handles;
 }
 Handle Engine::Resources::loadTexture(const std::string& file, ImageInternalFormat internalFormat, bool mipmaps) {
-    auto texture = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Texture>(file);
+    auto texture = Engine::Resources::getResource<Texture>(file);
     if (!texture.first) {
         TextureRequest request{ file, mipmaps, internalFormat, TextureType::Texture2D,[]() {} };
         request.request();
@@ -156,7 +151,7 @@ Handle Engine::Resources::loadTexture(const std::string& file, ImageInternalForm
     return Handle{};
 }
 Handle Engine::Resources::loadTexture(sf::Image& sfImage, const std::string& texture_name, ImageInternalFormat internalFormat, bool mipmaps) {
-    auto texture = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Texture>(texture_name);
+    auto texture = Engine::Resources::getResource<Texture>(texture_name);
     if (!texture.first) {
         TextureRequest request{ sfImage, texture_name, mipmaps, internalFormat, TextureType::Texture2D, []() {} };
         request.request();
@@ -165,7 +160,7 @@ Handle Engine::Resources::loadTexture(sf::Image& sfImage, const std::string& tex
     return Handle{};
 }
 Handle Engine::Resources::loadTextureAsync(const std::string& file, ImageInternalFormat internalFormat, bool mipmaps, std::function<void()> callback) {
-    auto texture = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Texture>(file);
+    auto texture = Engine::Resources::getResource<Texture>(file);
     if (!texture.first) {
         TextureRequest request{ file, mipmaps, internalFormat, TextureType::Texture2D, std::move(callback) };
         request.request(true);
@@ -174,7 +169,7 @@ Handle Engine::Resources::loadTextureAsync(const std::string& file, ImageInterna
     return Handle{};
 }
 Handle Engine::Resources::loadTextureAsync(sf::Image& sfImage, const std::string& texture_name, ImageInternalFormat internalFormat, bool mipmaps, std::function<void()> callback) {
-    auto texture = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Texture>(texture_name);
+    auto texture = Engine::Resources::getResource<Texture>(texture_name);
     if (!texture.first) {
         TextureRequest request{ sfImage, texture_name, mipmaps, internalFormat, TextureType::Texture2D, std::move(callback) };
         request.request(true);
@@ -184,7 +179,7 @@ Handle Engine::Resources::loadTextureAsync(sf::Image& sfImage, const std::string
 }
 
 Handle Engine::Resources::loadMaterial(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness) {
-    auto material = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Material>(name);
+    auto material = Engine::Resources::getResource<Material>(name);
     if (!material.first) {
         MaterialRequest request{ name, diffuse, normal, glow, specular, ao, metalness, smoothness, []() {} };
         request.request();
@@ -193,7 +188,7 @@ Handle Engine::Resources::loadMaterial(const std::string& name, const std::strin
     return Handle{};
 }
 Handle Engine::Resources::loadMaterialAsync(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness, std::function<void()> callback) {
-    auto material = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Material>(name);
+    auto material = Engine::Resources::getResource<Material>(name);
     if (!material.first) {
         MaterialRequest request{ name, diffuse, normal, glow, specular, ao, metalness, smoothness, std::move(callback) };
         request.request(true);
@@ -202,7 +197,7 @@ Handle Engine::Resources::loadMaterialAsync(const std::string& name, const std::
     return Handle{};
 }
 Handle Engine::Resources::loadMaterial(const std::string& name, Handle diffuse, Handle normal, Handle glow, Handle specular, Handle ao, Handle metalness, Handle smoothness) {
-    auto material = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Material>(name);
+    auto material = Engine::Resources::getResource<Material>(name);
     if (!material.first) {
         MaterialRequest request{ name, diffuse, normal, glow, specular, ao, metalness, smoothness, []() {} };
         //request.request(); //the above creates the material and is immediately available for use, no need to request
@@ -212,18 +207,19 @@ Handle Engine::Resources::loadMaterial(const std::string& name, Handle diffuse, 
 }
 
 Handle Engine::Resources::addShader(const std::string& fileOrData, ShaderType type, bool fromFile){
-    return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.emplace<Shader>(fileOrData, type, fromFile);
+    return Engine::Resources::addResource<Shader>(fileOrData, type, fromFile);
 }
+
 Handle Engine::Resources::addShaderProgram(const std::string& n, Handle v, Handle f){
-    Shader* vertexShader   = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Shader>(v);
-    Shader* fragmentShader = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<Shader>(f);
-    return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.emplace<ShaderProgram>(n, v, f);
+    Shader* vertexShader   = Engine::Resources::getResource<Shader>(v);
+    Shader* fragmentShader = Engine::Resources::getResource<Shader>(f);
+    return Engine::Resources::addResource<ShaderProgram>(n, v, f);
 }
 bool Engine::Resources::setCurrentScene(Scene* newScene){
     Scene* oldScene = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_CurrentScene;
 
-    Event ev(EventType::SceneChanged);
-    ev.eventSceneChanged = Engine::priv::EventSceneChanged(oldScene, newScene);
+    Event ev{ EventType::SceneChanged };
+    ev.eventSceneChanged = Engine::priv::EventSceneChanged{ oldScene, newScene };
     Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     
     if(!oldScene){

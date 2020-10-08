@@ -283,29 +283,29 @@ namespace Engine::priv {
     class ComponentBody_System final : public Engine::priv::ECSSystem<ComponentBody> {
         class ParentChildVector final {
             private:
-                inline std::uint32_t& getParent(std::uint32_t childID) noexcept {
+                inline uint32_t& getParent(uint32_t childID) noexcept {
                     return Parents[childID - 1U];
                 }
-                inline glm_mat4& getWorld(std::uint32_t ID) noexcept {
+                inline glm_mat4& getWorld(uint32_t ID) noexcept {
                     return WorldTransforms[ID - 1U];
                 }
-                inline glm_mat4& getLocal(std::uint32_t ID) noexcept {
+                inline glm_mat4& getLocal(uint32_t ID) noexcept {
                     return LocalTransforms[ID - 1U];
                 }
-                void reserve_from_insert(std::uint32_t parentID, std::uint32_t childID);
+                void reserve_from_insert(uint32_t parentID, uint32_t childID);
             public:
                 std::vector<glm_mat4>         WorldTransforms;
                 std::vector<glm_mat4>         LocalTransforms;
-                std::vector<std::uint32_t>    Parents;
-                std::vector<std::uint32_t>    Order;
-                std::uint32_t                 OrderHead        = 0;
+                std::vector<uint32_t>    Parents;
+                std::vector<uint32_t>    Order;
+                uint32_t                 OrderHead        = 0;
 
                 void resize(size_t size);
                 void reserve(size_t size);
-                void insert(std::uint32_t parent, std::uint32_t child);
-                void remove(std::uint32_t parent, std::uint32_t child);
+                void insert(uint32_t parent, uint32_t child);
+                void remove(uint32_t parent, uint32_t child);
 
-                inline CONSTEXPR std::uint32_t size() const noexcept { return OrderHead; }
+                inline CONSTEXPR uint32_t size() const noexcept { return OrderHead; }
                 inline size_t capacity() const noexcept { return Order.capacity(); }
         };
         public:

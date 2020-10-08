@@ -76,7 +76,7 @@ void UniformBufferObject::updateData(void* data) {
     GLCall(glBufferSubData(GL_UNIFORM_BUFFER, 0, m_SizeOfStruct, data));
 }
 void UniformBufferObject::attachToShader(const ShaderProgram& shaderProgram) {
-    if (Engine::priv::Renderer::GLSL_VERSION < 140 || shaderProgram.m_AttachedUBOs.count(m_UBOObject)) {
+    if (Engine::priv::Renderer::GLSL_VERSION < 140 || shaderProgram.m_AttachedUBOs.contains(m_UBOObject)) {
         return;
     }
     const unsigned int programBlockIndex = glGetUniformBlockIndex(shaderProgram.m_ShaderProgram, m_NameInShader);

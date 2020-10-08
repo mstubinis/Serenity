@@ -19,11 +19,11 @@ public:
     /**
      * Open a connection to a remote peer.
      */
-    Result OpenPeer(NetworkPeerId peerId, char const* routeData);
+    Result OpenPeer(NetworkPeerId peerId, const char* routeData);
     /**
      * Update the route data for a connected peer.
      */
-    Result UpdatePeer(NetworkPeerId peerId, char const* routeData);
+    Result UpdatePeer(NetworkPeerId peerId, const char* routeData);
     /**
      * Close the connection to a remote peer.
      */
@@ -42,10 +42,10 @@ public:
     Result SendMessage(NetworkPeerId peerId,
                        NetworkChannelId channelId,
                        std::uint8_t* data,
-                       std::uint32_t dataLength);
+                       uint32_t dataLength);
 
-    Event<NetworkPeerId, NetworkChannelId, std::uint8_t*, std::uint32_t> OnMessage;
-    Event<char const*> OnRouteUpdate;
+    Event<NetworkPeerId, NetworkChannelId, std::uint8_t*, uint32_t> OnMessage;
+    Event<const char*> OnRouteUpdate;
 
 private:
     friend class Core;

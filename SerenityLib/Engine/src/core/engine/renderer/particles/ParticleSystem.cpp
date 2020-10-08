@@ -160,7 +160,7 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
         float comparison       = radius * 3100.0f; //TODO: this is obviously different from the other culling functions
         if (particle.isActive() && (glm::distance2(pos, camPos) <= (comparison * comparison)) && sphereTest > 0) {
             //its just pretty expensive in general...
-            if (!THREAD_PART_4[k].count(particle.m_Material)) {
+            if (!THREAD_PART_4[k].contains(particle.m_Material)) {
                 THREAD_PART_4[k].try_emplace(particle.m_Material,       particle.m_Material->id());
                 THREAD_PART_5[k].try_emplace(particle.m_Material->id(), particle.m_Material);
             }

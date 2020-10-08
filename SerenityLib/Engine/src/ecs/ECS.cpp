@@ -25,10 +25,10 @@ void Engine::priv::ECS::update(const float dt, Scene& scene) {
         m_Systems[i]->onUpdate(dt, scene);
     }
 }
-void Engine::priv::ECS::onComponentAddedToEntity(void* component, Entity entity, std::uint32_t type_slot) {
+void Engine::priv::ECS::onComponentAddedToEntity(void* component, Entity entity, uint32_t type_slot) {
     m_Systems[type_slot]->onComponentAddedToEntity(component, entity);
 }
-void Engine::priv::ECS::onComponentRemovedFromEntity(Entity entity, std::uint32_t type_slot) {
+void Engine::priv::ECS::onComponentRemovedFromEntity(Entity entity, uint32_t type_slot) {
     m_Systems[type_slot]->onComponentRemovedFromEntity(entity);
 }
 void Engine::priv::ECS::onSceneEntered(Scene& scene) {

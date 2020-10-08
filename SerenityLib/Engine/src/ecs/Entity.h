@@ -11,9 +11,9 @@ namespace Engine::priv {
 
 namespace Engine::priv {
     struct entity_packed_data final {
-        std::uint32_t        ID : ID_BIT_POSITIONS;
-        std::uint32_t   sceneID : SCENE_BIT_POSITIONS;
-        std::uint32_t versionID : VERSION_BIT_POSITIONS;
+        uint32_t        ID : ID_BIT_POSITIONS;
+        uint32_t   sceneID : SCENE_BIT_POSITIONS;
+        uint32_t versionID : VERSION_BIT_POSITIONS;
     };
 }
 #include <core/engine/lua/LuaIncludes.h>
@@ -24,11 +24,11 @@ The Entity class used in the ECS framework.
 */
 struct Entity {
     public:
-        std::uint32_t m_Data = 0;
+        uint32_t m_Data = 0;
 
         constexpr Entity() = default;
         Entity(Scene& scene);
-        constexpr Entity(std::uint32_t entityID, std::uint32_t sceneID, std::uint32_t versionID) {
+        constexpr Entity(uint32_t entityID, uint32_t sceneID, uint32_t versionID) {
             m_Data = 
                 versionID << (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS) |    
                 sceneID << (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS) |    
@@ -41,7 +41,7 @@ struct Entity {
         Entity(Entity&& other) noexcept            = default;
         Entity& operator=(Entity&& other) noexcept = default;
 
-        inline CONSTEXPR operator std::uint32_t() const noexcept { return m_Data; }
+        inline CONSTEXPR operator uint32_t() const noexcept { return m_Data; }
         inline CONSTEXPR operator bool() const noexcept { return !null(); }
         inline CONSTEXPR bool operator==(const Entity other) const noexcept { return (m_Data == other.m_Data); }
         inline CONSTEXPR bool operator!=(const Entity other) const noexcept { return (m_Data != other.m_Data); }
@@ -50,21 +50,21 @@ struct Entity {
         void destroy() noexcept;
         bool isDestroyed() const noexcept;
 
-        inline CONSTEXPR std::uint32_t id() const noexcept { return id(m_Data); }
-        inline CONSTEXPR std::uint32_t sceneID() const noexcept { return sceneID(m_Data); }
-        inline CONSTEXPR std::uint32_t versionID() const noexcept { return versionID(m_Data); }
+        inline CONSTEXPR uint32_t id() const noexcept { return id(m_Data); }
+        inline CONSTEXPR uint32_t sceneID() const noexcept { return sceneID(m_Data); }
+        inline CONSTEXPR uint32_t versionID() const noexcept { return versionID(m_Data); }
 
-        static inline CONSTEXPR std::uint32_t id(std::uint32_t data) noexcept {
+        static inline CONSTEXPR uint32_t id(uint32_t data) noexcept {
             Engine::priv::entity_packed_data p{};
             p.ID = (data & 4'194'303U) >> (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS - ID_BIT_POSITIONS);
             return p.ID;
         }
-        static inline CONSTEXPR std::uint32_t sceneID(std::uint32_t data) noexcept {
+        static inline CONSTEXPR uint32_t sceneID(uint32_t data) noexcept {
             Engine::priv::entity_packed_data p{};
             p.sceneID = (data & 534'773'760U) >> (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS);
             return p.sceneID;
         }
-        static inline CONSTEXPR std::uint32_t versionID(std::uint32_t data) noexcept {
+        static inline CONSTEXPR uint32_t versionID(uint32_t data) noexcept {
             Engine::priv::entity_packed_data p{};
             p.versionID = (data & 4'026'531'840U) >> (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS);
             return p.versionID;

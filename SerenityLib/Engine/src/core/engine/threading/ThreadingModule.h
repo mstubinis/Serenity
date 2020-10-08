@@ -31,17 +31,17 @@ namespace Engine::priv{
     };
     namespace threading{
         void waitForAll(unsigned int section = 0);
-        void finalizeJob(std::function<void()>& job, unsigned int section);
-        void finalizeJob(std::function<void()>& job, std::function<void()>& then, unsigned int section);
+        void finalizeJob(std::function<void()>&& job, unsigned int section);
+        void finalizeJob(std::function<void()>&& job, std::function<void()>&& then, unsigned int section);
          
         template<typename JOB> void addJob(JOB&& job, unsigned int section = 0U){
             std::function<void()> job_func = job;
-            finalizeJob(job_func, section);
+            finalizeJob(std::move(job_func), section);
         }
         template<typename JOB, typename THEN> void addJobWithPostCallback(JOB&& job, THEN&& then, unsigned int section = 0U){
             std::function<void()> job_func = job;
             std::function<void()> then_func = then;
-            finalizeJob(job_func, then_func, section);
+            finalizeJob(std::move(job_func), std::move(then_func), section);
         }
         template<typename JOB, typename T> void addJobSplitVectored(JOB&& job, std::vector<T>& collection, bool waitForAll, unsigned int section = 0U) {
             if (Engine::hardware_concurrency() > 1) {

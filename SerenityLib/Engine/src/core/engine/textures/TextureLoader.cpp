@@ -45,7 +45,7 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
     stream.close();
 
     std::array<std::uint8_t, 128> header_buffer;
-    std::uint32_t progress = 0;
+    uint32_t progress = 0;
     for (size_t i = 0; i < header_buffer.size(); ++i) {
         header_buffer[i] = file_data[i];
         ++progress;
@@ -65,7 +65,7 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
         }
         headDX10.fill(header_buffer_DX10);
     }
-    std::uint32_t factor, blockSize, offset = progress;
+    uint32_t factor, blockSize, offset = progress;
     //TODO: fill the rest of these out
     switch (head.format.fourCC) {
         case FourCC_DXT1: {
@@ -144,7 +144,7 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
         }
     }
 
-    std::uint32_t numberOfMainImages = 1;
+    uint32_t numberOfMainImages = 1;
     if (head.caps & DDS::DDS_CAPS_COMPLEX) {
         if (head.caps2 & DDS::DDS_CAPS2_CUBEMAP) {//cubemap
             //note: in skybox dds files, especially in gimp, layer order is as follows: right,left,top,bottom,front,back
@@ -161,9 +161,9 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
     }
     image_loaded_struct.m_PixelFormat = ImagePixelFormat::RGBA;
     image_loaded_struct.m_PixelType   = ImagePixelType::UNSIGNED_BYTE;
-    std::uint32_t width_              = head.w;
-    std::uint32_t height_             = head.h;
-    for (std::uint32_t i = 0; i < numberOfMainImages; ++i) {
+    uint32_t width_              = head.w;
+    uint32_t height_             = head.h;
+    for (uint32_t i = 0; i < numberOfMainImages; ++i) {
         ImageData* imgPtr = nullptr;
         if (i == 0) {
             imgPtr = &image_loaded_struct;
@@ -177,7 +177,7 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
         }
         width_  = head.w;
         height_ = head.h;
-        for (std::uint32_t level = 0; level < head.mipMapCount && (width_ || height_); ++level) {
+        for (uint32_t level = 0; level < head.mipMapCount && (width_ || height_); ++level) {
             if (level > 0 && (width_ < 64 || height_ < 64)) {
                 break;
             }
@@ -191,12 +191,12 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
             mipmap->level                       = level;
             mipmap->width                       = width_;
             mipmap->height                      = height_;
-            const std::uint32_t compressed_size = ((width_ + 3U) / 4U) * ((height_ + 3U) / 4U) * blockSize;
+            const uint32_t compressed_size = ((width_ + 3U) / 4U) * ((height_ + 3U) / 4U) * blockSize;
             mipmap->compressedSize              = compressed_size;
 
             auto& pixels                        = mipmap->pixels;
             pixels.reserve(compressed_size);
-            for (std::uint32_t t = 0; t < compressed_size; ++t) {
+            for (uint32_t t = 0; t < compressed_size; ++t) {
                 pixels.emplace_back( file_data[offset + t] );
             }
             width_                              = std::max(width_ / 2U, 1U);
@@ -234,10 +234,10 @@ void TextureLoader::LoadTextureFramebufferIntoOpenGL(Texture& texture) {
 }
 void TextureLoader::LoadTextureCubemapIntoOpenGL(Texture& texture) {
     Engine::Renderer::bindTextureForModification(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
-    std::uint32_t imageIndex = 0;
+    uint32_t imageIndex = 0;
     for (auto& image : texture.m_CPUData.m_ImagesDatas) {
         for (auto& mipmap : image.m_Mipmaps) {
-            TextureLoader::ImportIntoOpengl(texture, mipmap, static_cast<TextureType>((std::uint32_t)TextureType::CubeMap_X_Pos + imageIndex));
+            TextureLoader::ImportIntoOpengl(texture, mipmap, static_cast<TextureType>((uint32_t)TextureType::CubeMap_X_Pos + imageIndex));
         }
         ++imageIndex;
     }
@@ -300,10 +300,6 @@ void TextureLoader::GeneratePBRData(Texture& texture, int convoludeTextureSize, 
 
     Core::m_Engine->m_RenderManager._genPBREnvMapData(texture, texture.m_ConvolutionTextureHandle, texture.m_PreEnvTextureHandle, convoludeTextureSize, preEnvFilterSize);
 }
-void TextureLoader::LoadGPU(Handle textureHandle) {
-    auto& texture = *textureHandle.get<Texture>();
-    LoadGPU(texture);
-}
 void TextureLoader::LoadCPU(TextureCPUData& cpuData, Handle inHandle) {
     for (auto& imageData : cpuData.m_ImagesDatas) {
         if (!imageData.m_Filename.empty()) {
@@ -323,12 +319,18 @@ void TextureLoader::LoadCPU(TextureCPUData& cpuData, Handle inHandle) {
         auto* mutex = inHandle.getMutex();
         if (mutex) {
             std::lock_guard lock(*mutex);
-            auto& texture = *inHandle.get<Texture>();
-            texture.m_CPUData = cpuData;
+            inHandle.get<Texture>()->m_CPUData = std::move(cpuData);
         }
     }
 }
-
+void TextureLoader::LoadGPU(Handle textureHandle) {
+    auto* mutex = textureHandle.getMutex();
+    if (mutex) {
+        std::lock_guard lock(*mutex);
+        auto& texture = *textureHandle.get<Texture>();
+        LoadGPU(texture);
+    }
+}
 void TextureLoader::LoadGPU(Texture& texture) {
     Engine::Renderer::genAndBindTexture(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
     switch ((TextureType::Type)texture.m_CPUData.m_TextureType) {

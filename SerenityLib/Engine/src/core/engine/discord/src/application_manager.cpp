@@ -61,18 +61,18 @@ void ApplicationManager::GetOAuth2Token(std::function<void(Result, OAuth2Token c
     internal_->get_oauth2_token(internal_, cb.release(), wrapper);
 }
 
-void ApplicationManager::GetTicket(std::function<void(Result, char const*)> callback)
+void ApplicationManager::GetTicket(std::function<void(Result, const char*)> callback)
 {
-    static auto wrapper = [](void* callbackData, EDiscordResult result, char const* data) -> void {
-        std::unique_ptr<std::function<void(Result, char const*)>> cb(
-          reinterpret_cast<std::function<void(Result, char const*)>*>(callbackData));
+    static auto wrapper = [](void* callbackData, EDiscordResult result, const char* data) -> void {
+        std::unique_ptr<std::function<void(Result, const char*)>> cb(
+          reinterpret_cast<std::function<void(Result, const char*)>*>(callbackData));
         if (!cb || !(*cb)) {
             return;
         }
         (*cb)(static_cast<Result>(result), static_cast<const char*>(data));
     };
-    std::unique_ptr<std::function<void(Result, char const*)>> cb{};
-    cb.reset(NEW std::function<void(Result, char const*)>(std::move(callback)));
+    std::unique_ptr<std::function<void(Result, const char*)>> cb{};
+    cb.reset(NEW std::function<void(Result, const char*)>(std::move(callback)));
     internal_->get_ticket(internal_, cb.release(), wrapper);
 }
 

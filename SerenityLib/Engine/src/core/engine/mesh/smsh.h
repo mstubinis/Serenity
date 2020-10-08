@@ -3,6 +3,7 @@
 #define ENGINE_MESH_SMSH_H
 
 class Mesh;
+struct MeshCPUData;
 namespace Engine::priv {
     class MeshSkeleton;
 }
@@ -120,50 +121,48 @@ metadata structure:
 */
 
 struct SMSH_Fileheader final {
-    unsigned char m_InterleavingType   = (unsigned char)SMSH_InterleavingType::Interleaved;
-    unsigned int  m_AttributeCount     = 0;
-    unsigned int  m_UserDataCount      = 2;
-    unsigned int  m_IndiceCount        = 0;
-    unsigned int  m_IndiceDataTypeSize = (unsigned int)SMSH_IndiceDataType::Unsigned_Short;
-    unsigned int  m_NumberOfBones      = 0U;
+    uint8_t   m_InterleavingType   = (uint8_t)SMSH_InterleavingType::Interleaved;
+    uint32_t  m_AttributeCount     = 0;
+    uint32_t  m_UserDataCount      = 2;
+    uint32_t  m_IndiceCount        = 0;
+    uint32_t  m_IndiceDataTypeSize = (uint32_t)SMSH_IndiceDataType::Unsigned_Short;
+    uint32_t  m_NumberOfBones      = 0U;
 
     SMSH_Fileheader() = default;
-    SMSH_Fileheader(Mesh& mesh);
+    SMSH_Fileheader(MeshCPUData& cpuData);
 };
 
 struct SMSH_AttributeNoBuffer {
-    unsigned char            m_Normalized              = 0;
-    unsigned int             m_Stride                  = 0;
-    unsigned int             m_AttributeType           = (unsigned int)SMSH_AttributeDataType::Float;
-    unsigned int             m_SizeOfAttribute         = 0;
-    unsigned int             m_AttributeBufferSize     = 0;
-    unsigned int             m_AttributeComponentCount = (unsigned int)SMSH_AttributeComponentSize::_4;
-    unsigned int             m_Offset                  = 0;
+    uint8_t     m_Normalized              = 0;
+    uint32_t    m_Stride                  = 0;
+    uint32_t    m_AttributeType           = (uint32_t)SMSH_AttributeDataType::Float;
+    uint32_t    m_SizeOfAttribute         = 0;
+    uint32_t    m_AttributeBufferSize     = 0;
+    uint32_t    m_AttributeComponentCount = (uint32_t)SMSH_AttributeComponentSize::_4;
+    uint32_t    m_Offset                  = 0;
 
     SMSH_AttributeNoBuffer() = default;
 
-    SMSH_AttributeNoBuffer(SMSH_AttributeDataType type, unsigned int componentCount, unsigned int offset, unsigned int normalized, unsigned int stride, unsigned int sizeOfAttr, unsigned int attributeBufferSize) :
-        m_AttributeType((unsigned int)type),
-        m_AttributeComponentCount(componentCount),
-        m_Offset(offset),
-        m_Normalized(normalized),
-        m_Stride(stride),
-        m_SizeOfAttribute(sizeOfAttr),
-        m_AttributeBufferSize(attributeBufferSize)
+    SMSH_AttributeNoBuffer(SMSH_AttributeDataType type, uint32_t componentCount, uint32_t offset, uint32_t normalized, uint32_t stride, uint32_t sizeOfAttr, uint32_t attributeBufferSize) 
+        : m_AttributeType((uint32_t)type)
+        , m_AttributeComponentCount(componentCount)
+        , m_Offset(offset)
+        , m_Normalized(normalized)
+        , m_Stride(stride)
+        , m_SizeOfAttribute(sizeOfAttr)
+        , m_AttributeBufferSize(attributeBufferSize)
     {}
 };
 
 struct SMSH_Attribute final : public SMSH_AttributeNoBuffer {
     const uint8_t*  m_AttributeBuffer = nullptr;
 
-    SMSH_Attribute(SMSH_AttributeDataType type, SMSH_AttributeComponentSize componentCount, unsigned int offset, unsigned int normalized, unsigned int stride, unsigned int sizeOfAttr, unsigned int attributeBufferSize)
-        : SMSH_AttributeNoBuffer(type, (unsigned int)componentCount, offset, normalized, stride, sizeOfAttr, attributeBufferSize)
+    SMSH_Attribute(SMSH_AttributeDataType type, SMSH_AttributeComponentSize componentCount, uint32_t offset, uint32_t normalized, uint32_t stride, uint32_t sizeOfAttr, uint32_t attributeBufferSize)
+        : SMSH_AttributeNoBuffer{ type, (uint32_t)componentCount, offset, normalized, stride, sizeOfAttr, attributeBufferSize }
     {}
 
 
-
-
-    void setBuffer(const uint8_t* attrDataBuffer, unsigned int attrDataBufferSize) {
+    void setBuffer(const uint8_t* attrDataBuffer, uint32_t attrDataBufferSize) {
         m_AttributeBuffer     = attrDataBuffer;
         m_AttributeBufferSize = attrDataBufferSize;
     }
@@ -179,7 +178,7 @@ struct SMSH_Attribute final : public SMSH_AttributeNoBuffer {
         writeBigEndian(stream, m_AttributeBufferSize,      4U);
         writeBigEndian(stream, m_Offset,                   4U);
 
-        for (size_t i = 0; i < m_AttributeBufferSize; ++i) {
+        for (uint32_t i = 0; i < m_AttributeBufferSize; ++i) {
             writeBigEndian(stream, m_AttributeBuffer[i], 1U); //writing as uint8_t's
         }
         return true;
@@ -188,8 +187,8 @@ struct SMSH_Attribute final : public SMSH_AttributeNoBuffer {
 
 class SMSH_File final {
     public:
-        static void LoadFile(Mesh* mesh, const char* filename);
-        static void SaveFile(const char* filename, Mesh& mesh);
+        static void LoadFile(const char* filename, MeshCPUData& cpuData);
+        static void SaveFile(const char* filename, MeshCPUData& cpuData);
 };
 
 #endif

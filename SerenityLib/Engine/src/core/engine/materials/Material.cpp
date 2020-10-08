@@ -147,7 +147,7 @@ void Material::internal_update_global_material_pool(bool addToDatabase) {
         data.a = (float)m_DiffuseModel;
     };
     if (addToDatabase) {
-        m_ID = (std::uint32_t)Material::m_MaterialProperities.size();
+        m_ID = (uint32_t)Material::m_MaterialProperities.size();
         auto& data = Material::m_MaterialProperities.emplace_back(0.0f, 0.0f, 0.0f, 0.0f);
         update_data(data);
     }else{

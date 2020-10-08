@@ -129,7 +129,7 @@ namespace Engine::priv {
 
             virtual void render2DText(
                 const std::string& text, 
-                const Font& font, 
+                Handle font,
                 const glm::vec2& position, 
                 const glm::vec4& color, 
                 float angle, 
@@ -139,7 +139,7 @@ namespace Engine::priv {
                 const glm::vec4& scissor = NO_SCISSOR
             ) = 0;
             virtual void render2DTexture(
-                Texture* texture, 
+                Handle texture,
                 const glm::vec2& position, 
                 const glm::vec4& color, 
                 float angle, 
@@ -161,7 +161,7 @@ namespace Engine::priv {
 
 
             virtual void renderTexture(
-                Texture& tex, 
+                Handle texture,
                 const glm::vec2& p, 
                 const glm::vec4& c, 
                 float a, 
@@ -172,7 +172,7 @@ namespace Engine::priv {
             ) = 0;
             virtual void renderText(
                 const std::string& t, 
-                const Font& fnt, 
+                Handle font,
                 const glm::vec2& p, 
                 const glm::vec4& c, 
                 float a, 

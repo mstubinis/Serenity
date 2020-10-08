@@ -141,7 +141,7 @@ SocketStatus::Status Server::receive_udp(sf::Packet& sf_packet, sf::IpAddress& s
     return m_UdpSocket->receive(sf_packet, sender, port);
 }
 bool Server::internal_add_client(const std::string& hash, ServerClient* client) {
-    if (m_Clients.count(hash)) {
+    if (m_Clients.contains(hash)) {
         SAFE_DELETE(client);
         return false;
     }

@@ -3,9 +3,9 @@
 #define ENGINE_UTILS_H
 
 template <class OutType, class Data> void readBigEndian(OutType& out, Data& dataBuffer, unsigned int inBufferSizeInBytes, unsigned int& offset) noexcept {
-    out = (std::uint32_t)dataBuffer[offset + 0U] << (8U * (inBufferSizeInBytes - 1U));
+    out = (uint32_t)dataBuffer[offset + 0U] << (8U * (inBufferSizeInBytes - 1U));
     for (auto i = 1U; i < inBufferSizeInBytes; ++i) {
-        out |= (std::uint32_t)dataBuffer[offset + i] << (8U * ((inBufferSizeInBytes - i) - 1U));
+        out |= (uint32_t)dataBuffer[offset + i] << (8U * ((inBufferSizeInBytes - i) - 1U));
     }
     offset += inBufferSizeInBytes;
 }
@@ -13,9 +13,9 @@ template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutT
     std::vector<std::uint8_t> buffer(inBufferSizeInBytes, 0);
     inStream.read((char*)buffer.data(), inBufferSizeInBytes);
 
-    out = (std::uint32_t)buffer[0] << (8U * (inBufferSizeInBytes - 1U));
+    out = (uint32_t)buffer[0] << (8U * (inBufferSizeInBytes - 1U));
     for (auto i = 1U; i < inBufferSizeInBytes; ++i) {
-        out |= (std::uint32_t)buffer[i] << (8U * ((inBufferSizeInBytes - i) - 1U));
+        out |= (uint32_t)buffer[i] << (8U * ((inBufferSizeInBytes - i) - 1U));
     }
 }
 template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutType& out) noexcept {

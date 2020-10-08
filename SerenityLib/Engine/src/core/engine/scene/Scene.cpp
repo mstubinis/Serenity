@@ -136,7 +136,8 @@ void priv::InternalScenePublicInterface::UpdateMaterials(Scene& scene, const flo
     for (size_t i = 0; i < (size_t)RenderStage::_TOTAL; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             for (auto& materialNode : render_graph_ptr.m_MaterialNodes) {
-                materialNode.material.get<Material>()->m_UpdatedThisFrame = false;
+                auto* material = materialNode.material.get<Material>();
+                material->m_UpdatedThisFrame = false;
             }
         }
     }

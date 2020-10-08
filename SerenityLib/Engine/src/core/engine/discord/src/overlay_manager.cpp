@@ -80,7 +80,7 @@ void OverlayManager::OpenActivityInvite(ActivityActionType type,
       internal_, static_cast<EDiscordActivityActionType>(type), cb.release(), wrapper);
 }
 
-void OverlayManager::OpenGuildInvite(char const* code, std::function<void(Result)> callback)
+void OverlayManager::OpenGuildInvite(const char* code, std::function<void(Result)> callback)
 {
     static auto wrapper = [](void* callbackData, EDiscordResult result) -> void {
         std::unique_ptr<std::function<void(Result)>> cb(

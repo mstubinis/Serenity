@@ -20,8 +20,8 @@ namespace Engine::Networking {
         public:
             ServerClientsContainer(size_t numThreads);
 
-            inline ServerClient* getClient(const std::string& hash) const noexcept { return (m_HashedClients.count(hash)) ? m_HashedClients.at(hash) : nullptr; }
-            bool count(const std::string& hash) const noexcept { return m_HashedClients.count(hash); }
+            inline ServerClient* getClient(const std::string& hash) const noexcept { return (m_HashedClients.contains(hash)) ? m_HashedClients.at(hash) : nullptr; }
+            bool contains(const std::string& hash) const noexcept { return m_HashedClients.contains(hash); }
 
             inline size_t size() const noexcept { return m_HashedClients.size(); }
 

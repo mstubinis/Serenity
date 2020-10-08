@@ -174,7 +174,7 @@ ComponentCamera_System_CI::ComponentCamera_System_CI() {
         auto* pool       = (ECSComponentPool<ComponentCamera>*)componentPool;
         auto& components = pool->data();
         auto lamda_update_component = [&](ComponentCamera& b, size_t i, size_t k) {
-            Math::extractViewFrustumPlanesHartmannGribbs(b.getViewProjection(), b.getFrustrumPlanes().data());//update frustrum planes 
+            Math::extractViewFrustumPlanesHartmannGribbs(b.getViewProjection(), b.getFrustrumPlanes());//update frustrum planes 
         };
         if (components.size() < 50) {
             for (size_t i = 0; i < components.size(); ++i) {
