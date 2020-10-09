@@ -60,7 +60,7 @@ class Material final : public Resource {
         unsigned char                     m_BaseMetalness       = 1_uc;
         unsigned char                     m_BaseSmoothness      = 64_uc;
         unsigned char                     m_BaseAlpha           = 254_uc;
-        uint16_t                     m_ID                  = 0U;
+        uint16_t                          m_ID                  = 0U;
 
         MaterialComponent* internal_add_component_generic(MaterialComponentType type, Handle texture, Handle mask = Handle{}, Handle cubemap = {});
         void internal_update_global_material_pool(bool addToDatabase);

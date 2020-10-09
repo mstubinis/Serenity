@@ -21,10 +21,10 @@ void Engine::priv::ThreadingModule::cleanup() {
 void Engine::priv::ThreadingModule::update(const float dt){
     m_ThreadPool.update();
 }
-void Engine::priv::threading::finalizeJob(std::function<void()>& task, unsigned int section){
+void Engine::priv::threading::finalizeJob(std::function<void()>&& task, unsigned int section){
     threadingModule->m_ThreadPool.add_job(std::move(task), section);
 }
-void Engine::priv::threading::finalizeJob(std::function<void()>& task, std::function<void()>& then_task, unsigned int section){
+void Engine::priv::threading::finalizeJob(std::function<void()>&& task, std::function<void()>&& then_task, unsigned int section){
     threadingModule->m_ThreadPool.add_job(std::move(task), std::move(then_task), section);
 }
 void Engine::priv::threading::waitForAll(unsigned int section){

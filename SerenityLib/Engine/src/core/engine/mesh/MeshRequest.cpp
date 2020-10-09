@@ -147,8 +147,12 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
     }
 }
 void InternalMeshRequestPublicInterface::LoadGPU(MeshRequest& meshRequest) {
-    for (auto& part : meshRequest.m_Parts) {
-        InternalMeshPublicInterface::LoadGPU(*part.handle.get<Mesh>());
-        part.handle.get<Mesh>()->Resource::load();
+    std::mutex* mutex = meshRequest.m_Parts[0].handle.getMutex();
+    if (mutex) {
+        std::lock_guard lock(*mutex);
+        for (auto& part : meshRequest.m_Parts) {
+            InternalMeshPublicInterface::LoadGPU(*part.handle.get<Mesh>());
+            part.handle.get<Mesh>()->Resource::load();
+        }
     }
 }

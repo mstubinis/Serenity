@@ -1045,7 +1045,7 @@ void DeferredPipeline::internal_render_2d_text_right(const std::string& text, co
     }
 }
 
-void DeferredPipeline::render2DText(const std::string& text, const Font& font, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, TextAlignment textAlignment, const glm::vec4& scissor) {
+void DeferredPipeline::render2DText(const std::string& text, Handle fontHandle, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, TextAlignment textAlignment, const glm::vec4& scissor) {
     internal_gl_scissor(scissor, depth);
 
     m_Text_Points.clear();
@@ -1055,8 +1055,9 @@ void DeferredPipeline::render2DText(const std::string& text, const Font& font, c
     auto& fontPlane = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getFontMesh().get<Mesh>();
     m_Renderer.bind(&fontPlane);
 
+    Font& font = *fontHandle.get<Font>();
     auto  newLineGlyphHeight = font.getMaxHeight() + font.getLineHeight();
-    auto* texture = font.getGlyphTexture();
+    Handle textureHandle = font.getGlyphTexture();
     float y = 0.0f;
     float x = 0.0f;
     float z = -0.001f - depth;
@@ -1067,7 +1068,7 @@ void DeferredPipeline::render2DText(const std::string& text, const Font& font, c
     modelMatrix           = glm::scale(modelMatrix, glm::vec3(scale.x, scale.y, 1));
 
     Engine::Renderer::sendUniform1("DiffuseTextureEnabled", 1);
-    Engine::Renderer::sendTexture("DiffuseTexture", *texture, 0);
+    Engine::Renderer::sendTexture("DiffuseTexture", *textureHandle.get<Texture>(), 0);
     Engine::Renderer::sendUniform4("Object_Color", color);
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
 
@@ -1085,13 +1086,16 @@ void DeferredPipeline::render2DText(const std::string& text, const Font& font, c
     m_Renderer.unbind(&fontPlane);
 
 }
-void DeferredPipeline::render2DTexture(Texture* texture, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, Alignment align, const glm::vec4& scissor) {
+void DeferredPipeline::render2DTexture(Handle textureHandle, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, Alignment align, const glm::vec4& scissor) {
     internal_gl_scissor(scissor, depth);
 
     float translationX = position.x;
     float translationY = position.y;
     float totalSizeX   = scale.x;
     float totalSizeY   = scale.y;
+
+    Texture* texture   = textureHandle.get<Texture>();
+
     if (texture) {
         totalSizeX *= texture->width();
         totalSizeY *= texture->height();
@@ -1704,11 +1708,11 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, Viewport& viewpo
     render2DAPI(mainRenderFunction, viewport);
 }
 
-void DeferredPipeline::renderTexture(Texture& tex, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) {
-    m_2DAPICommands.emplace_back([&tex, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DTexture(&tex, p, c, a, s, d, align, scissor); }, d);
+void DeferredPipeline::renderTexture(Handle textureHandle, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) {
+    m_2DAPICommands.emplace_back([textureHandle, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DTexture(textureHandle, p, c, a, s, d, align, scissor); }, d);
 }
-void DeferredPipeline::renderText(const std::string& t, const Font& fnt, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) {
-    m_2DAPICommands.emplace_back([t, &fnt, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DText(t, fnt, p, c, a, s, d, align, scissor); }, d);
+void DeferredPipeline::renderText(const std::string& t, Handle fontHandle, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) {
+    m_2DAPICommands.emplace_back([t, fontHandle, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DText(t, fontHandle, p, c, a, s, d, align, scissor); }, d);
 }
 void DeferredPipeline::renderBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) {
     float doubleBorder = borderSize * 2.0f;
@@ -1726,7 +1730,7 @@ void DeferredPipeline::renderBorder(float borderSize, const glm::vec2& pos, cons
     Engine::Renderer::renderRectangle(newPos + glm::vec2(0.0f, halfHeight + borderSize), col, w, borderSize, angle, depth, Alignment::BottomCenter, scissor);
 }
 void DeferredPipeline::renderRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment align, const glm::vec4& scissor) {
-    m_2DAPICommands.emplace_back([=]() { DeferredPipeline::render2DTexture(nullptr, pos, col, angle, glm::vec2(width, height), depth, align, scissor); }, depth);
+    m_2DAPICommands.emplace_back([=]() { DeferredPipeline::render2DTexture(Handle{}, pos, col, angle, glm::vec2(width, height), depth, align, scissor); }, depth);
 }
 void DeferredPipeline::renderTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) {
     m_2DAPICommands.emplace_back([=]() { DeferredPipeline::render2DTriangle(position, color, angle, width, height, depth, align, scissor); }, depth);

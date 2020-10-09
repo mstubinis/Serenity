@@ -18,17 +18,44 @@ ThreadPoolFutureCallback::ThreadPoolFutureCallback(std::future<void>&& future, s
 {}
 #pragma endregion
 
+#pragma region ThreadPoolFutureContainer
+void ThreadPoolFutureContainer::update_section(unsigned int section) noexcept {
+    for (auto future = m_Sections[section].begin(); future != m_Sections[section].end();) {
+        if (future->isReady()) {
+            future = m_Sections[section].erase(future);
+        }else{
+            ++future;
+        }
+    }
+    for (auto future = m_Callbacks[section].begin(); future != m_Callbacks[section].end();) {
+        if (future->isReady()) {
+            (*future)();
+            future = m_Callbacks[section].erase(future);
+        }else{
+            ++future;
+        }
+    }
+}
+void ThreadPoolFutureContainer::wait_for_all(unsigned int section) noexcept {
+    //TODO: use std::experimental::when_all when it becomes available, as it should be faster than individual wait's
+    for (auto& future : m_Sections[section]) {
+        if (!future.isReady()) {
+            future.m_Future.wait();
+        }
+    }
+    for (auto& futureCallback : m_Callbacks[section]) {
+        if (!futureCallback.isReady()) {
+            futureCallback.m_Future.wait();
+        }
+    }
+}
+#pragma endregion
+
 #pragma region ThreadPool
 
 ThreadPool::ThreadPool(unsigned int sections) {
     m_Futures.resize(sections);
-    m_FutureCallbacks.resize(sections);
-    for (auto& future_section : m_Futures) {
-        future_section.reserve(800);
-    }
-    for (auto& future_section : m_FutureCallbacks) {
-        future_section.reserve(800);
-    }
+    m_Futures.reserve(800);
     m_TaskQueue.resize(sections);
 }
 ThreadPool::~ThreadPool() {
@@ -51,7 +78,7 @@ bool ThreadPool::startup(unsigned int num_threads) {
         for (unsigned int i = 0; i < num_threads; ++i) {
             auto* worker = m_WorkerThreads.add_thread([this]() {
                 while (!m_Stopped) {
-                    ThreadPool::PoolTaskPtr job;
+                    Engine::priv::PoolTaskPtr job;
                     {
                         std::unique_lock unique_lock(m_Mutex);
                         m_ConditionVariableAny.wait(unique_lock, [this] { return !(task_queue_is_empty() && !m_Stopped); });
@@ -82,8 +109,8 @@ bool ThreadPool::task_queue_is_empty() const {
     }
     return true;
 }
-ThreadPool::PoolTaskPtr ThreadPool::internal_get_next_available_job() {
-    ThreadPool::PoolTaskPtr ret = nullptr;
+Engine::priv::PoolTaskPtr ThreadPool::internal_get_next_available_job() {
+    PoolTaskPtr ret = nullptr;
     for (auto& queue : m_TaskQueue) {
         if (!queue.empty()) {
             ret = queue.front();
@@ -93,77 +120,55 @@ ThreadPool::PoolTaskPtr ThreadPool::internal_get_next_available_job() {
     }
     return ret;
 }
+void ThreadPool::internal_emplace(ThreadPoolFuture&& future, Engine::priv::PoolTaskPtr&& task, unsigned int section) noexcept {
+    m_Futures.emplace(std::move(future), section);
+    m_TaskQueue[section].emplace(std::move(task));
+}
+void ThreadPool::internal_emplace(ThreadPoolFutureCallback&& futureCallback, Engine::priv::PoolTaskPtr&& task, unsigned int section) noexcept {
+    m_Futures.emplace(std::move(futureCallback), section);
+    m_TaskQueue[section].emplace(std::move(task));
+}
 void ThreadPool::internal_create_packaged_task(std::function<void()>&& job, std::function<void()>&& callback, unsigned int section) {
-    auto task = std::make_shared<ThreadPool::PoolTask>(std::move(job));
+    auto task = std::make_shared<PoolTask>(std::move(job));
     ThreadPoolFutureCallback thread_pool_future(std::move(task->get_future()), std::move(callback));
     if (size() > 0) {
         {
             std::lock_guard lock(m_Mutex);
-            m_FutureCallbacks[section].emplace_back(std::move(thread_pool_future));
-            m_TaskQueue[section].emplace(std::move(task));
+            internal_emplace(std::move(thread_pool_future), std::move(task), section);
         }
         m_ConditionVariableAny.notify_one();
     }else{
         //on single threaded, we just execute the tasks on the main thread below in update()
-        m_FutureCallbacks[section].emplace_back(std::move(thread_pool_future));
-        m_TaskQueue[section].emplace(std::move(task));
+        internal_emplace(std::move(thread_pool_future), std::move(task), section);
     }
 }
 void ThreadPool::internal_create_packaged_task(std::function<void()>&& job, unsigned int section) {
-    auto task = std::make_shared<ThreadPool::PoolTask>(std::move(job));
+    auto task = std::make_shared<PoolTask>(std::move(job));
     ThreadPoolFuture thread_pool_future(std::move(task->get_future()));
     if (size() > 0) {
         {
             std::lock_guard lock(m_Mutex);
-            m_Futures[section].emplace_back(std::move(thread_pool_future));
-            m_TaskQueue[section].emplace(std::move(task));
+            internal_emplace(std::move(thread_pool_future), std::move(task), section);
         }
         m_ConditionVariableAny.notify_one();
     }else{
         //on single threaded, we just execute the tasks on the main thread below in update()
-        m_Futures[section].emplace_back(std::move(thread_pool_future));
-        m_TaskQueue[section].emplace(std::move(task));
+        internal_emplace(std::move(thread_pool_future), std::move(task), section);
     }
 }
 
-void ThreadPool::internal_update_section(unsigned int section) {
-    for (auto it = m_Futures[section].begin(); it != m_Futures[section].end();) {
-        auto& future = (*it);
-        if (future.isReady()) {
-            {
-                //std::lock_guard lock(m_Mutex); //hrmm....
-                it = m_Futures[section].erase(it);
-            }
-        }else{
-            ++it;
-        }
-    }
-    for (auto it = m_FutureCallbacks[section].begin(); it != m_FutureCallbacks[section].end();) {
-        auto& future = (*it);
-        if (future.isReady()) {
-            future();
-            {
-                //std::lock_guard lock(m_Mutex); //hrmm....
-                it = m_FutureCallbacks[section].erase(it);
-            }
-        }else{
-            ++it;
-        }
-    }
-}
 void ThreadPool::update() {
     if (ThreadPool::size() == 0) { //for single threaded stuff
         for (size_t i = 0; i < m_TaskQueue.size(); ++i) {
             while (m_TaskQueue[i].size() > 0) {
-                auto& job = m_TaskQueue[i].front();
-                (*job)();
+                (*m_TaskQueue[i].front())();
                 m_TaskQueue[i].pop();
             }
         }
     }
     //this executes the "then" functions
     for (size_t i = 0; i < m_Futures.size(); ++i) {
-        internal_update_section((unsigned int)i);
+        m_Futures.update_section(i);
     }
 }
 size_t ThreadPool::size() const {
@@ -178,13 +183,7 @@ void ThreadPool::join_all() {
 }
 void ThreadPool::wait_for_all(unsigned int section) {
     if (ThreadPool::size() > 0) {
-        //TODO: use std::experimental::when_all when it becomes available, as it should be faster than individual wait's
-        for (auto& future : m_FutureCallbacks[section]) {
-            future.m_Future.wait();
-        }
-        for (auto& future : m_Futures[section]) {
-            future.m_Future.wait();
-        }
+        m_Futures.wait_for_all(section);
     }
     update();
 }

@@ -300,10 +300,6 @@ void TextureLoader::GeneratePBRData(Texture& texture, int convoludeTextureSize, 
 
     Core::m_Engine->m_RenderManager._genPBREnvMapData(texture, texture.m_ConvolutionTextureHandle, texture.m_PreEnvTextureHandle, convoludeTextureSize, preEnvFilterSize);
 }
-void TextureLoader::LoadGPU(Handle textureHandle) {
-    auto& texture = *textureHandle.get<Texture>();
-    LoadGPU(texture);
-}
 void TextureLoader::LoadCPU(TextureCPUData& cpuData, Handle inHandle) {
     for (auto& imageData : cpuData.m_ImagesDatas) {
         if (!imageData.m_Filename.empty()) {
@@ -327,7 +323,14 @@ void TextureLoader::LoadCPU(TextureCPUData& cpuData, Handle inHandle) {
         }
     }
 }
-
+void TextureLoader::LoadGPU(Handle textureHandle) {
+    auto* mutex = textureHandle.getMutex();
+    if (mutex) {
+        std::lock_guard lock(*mutex);
+        auto& texture = *textureHandle.get<Texture>();
+        LoadGPU(texture);
+    }
+}
 void TextureLoader::LoadGPU(Texture& texture) {
     Engine::Renderer::genAndBindTexture(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
     switch ((TextureType::Type)texture.m_CPUData.m_TextureType) {

@@ -105,17 +105,23 @@ class Texture: public Resource {
         unsigned char* pixels();
         GLuint address() const noexcept { return m_TextureAddress; }
         inline CONSTEXPR TextureType getTextureType() const noexcept { return m_CPUData.m_TextureType; }
-        inline unsigned int width() const noexcept { return m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].width; }
-        inline unsigned int height() const noexcept { return m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].height; }
+        inline int width() const noexcept { return (m_CPUData.m_ImagesDatas.size() == 0) ? 0 : m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].width; }
+        inline int height() const noexcept { return (m_CPUData.m_ImagesDatas.size() == 0) ? 0 : m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].height; }
         inline glm::uvec2 size() const noexcept { return glm::uvec2(width(), height()); }
         glm::vec2 sizeAsRatio() const;
         inline CONSTEXPR bool mipmapped() const noexcept { return m_CPUData.m_Mipmapped; }
         bool compressed() const;
         void setAnisotropicFiltering(float anisotropicFiltering);
         
-        inline CONSTEXPR ImageInternalFormat internalFormat() const noexcept { return m_CPUData.m_ImagesDatas[0].m_InternalFormat; }
-        inline CONSTEXPR ImagePixelFormat pixelFormat() const noexcept { return m_CPUData.m_ImagesDatas[0].m_PixelFormat; }
-        inline CONSTEXPR ImagePixelType pixelType() const noexcept { return m_CPUData.m_ImagesDatas[0].m_PixelType; }
+        inline CONSTEXPR ImageInternalFormat internalFormat() const noexcept { 
+            return (m_CPUData.m_ImagesDatas.size() == 0) ? ImageInternalFormat::Unknown : m_CPUData.m_ImagesDatas[0].m_InternalFormat; 
+        }
+        inline CONSTEXPR ImagePixelFormat pixelFormat() const noexcept { 
+            return (m_CPUData.m_ImagesDatas.size() == 0) ? ImagePixelFormat::Unknown : m_CPUData.m_ImagesDatas[0].m_PixelFormat; 
+        }
+        inline CONSTEXPR ImagePixelType pixelType() const noexcept { 
+            return (m_CPUData.m_ImagesDatas.size() == 0) ? ImagePixelType::Unknown : m_CPUData.m_ImagesDatas[0].m_PixelType; 
+        }
 
         void setXWrapping(TextureWrap);
         void setYWrapping(TextureWrap);

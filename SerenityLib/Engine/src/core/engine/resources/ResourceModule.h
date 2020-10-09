@@ -82,6 +82,10 @@ namespace Engine::priv {
                 return static_cast<collectionType>(m_Resources[typeIndex].get())->get(inHandle);
             }
             inline void get(void*& out, const Handle inHandle) const noexcept {
+                if (inHandle.null()) {
+                    out = nullptr;
+                    return;
+                }
                 m_Resources[inHandle.type() - 1]->get(out, inHandle);
             }
 

@@ -153,7 +153,7 @@ namespace Renderer{
     void alignmentOffset(Alignment align, float& x, float& y, float width, float height);
 
     void renderTexture(
-        Texture&,
+        Handle texture,
         const glm::vec2& position,
         const glm::vec4& color,
         float angle,
@@ -164,7 +164,7 @@ namespace Renderer{
     );
     void renderText(
         const std::string& text,
-        const Font&,
+        Handle font,
         const glm::vec2& position,
         const glm::vec4& color,
         float angle,
