@@ -22,7 +22,7 @@ struct SSAOLevel { enum Level : unsigned char {
 
 namespace Engine::priv {
     class  GBuffer;
-    class  Renderer;
+    class  RenderModule;
     class  SSAO final {
         private:
             Handle       m_Vertex_Shader;
@@ -57,8 +57,8 @@ namespace Engine::priv {
             bool init_shaders();
             void init();
 
-            void passSSAO(GBuffer&, const Viewport& viewport, const Camera&, const Engine::priv::Renderer& renderer);
-            void passBlur(GBuffer&, const Viewport& viewport, std::string_view type, unsigned int texture, const Engine::priv::Renderer& renderer);
+            void passSSAO(GBuffer&, const Viewport& viewport, const Camera&, const Engine::priv::RenderModule& renderer);
+            void passBlur(GBuffer&, const Viewport& viewport, std::string_view type, unsigned int texture, const Engine::priv::RenderModule& renderer);
 
             static SSAO STATIC_SSAO;
     };

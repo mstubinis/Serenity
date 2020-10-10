@@ -147,7 +147,7 @@ void Material::internal_update_global_material_pool(bool addToDatabase) {
         data.a = (float)m_DiffuseModel;
     };
     if (addToDatabase) {
-        m_ID = (uint32_t)Material::m_MaterialProperities.size();
+        m_ID = (MaterialID)Material::m_MaterialProperities.size();
         auto& data = Material::m_MaterialProperities.emplace_back(0.0f, 0.0f, 0.0f, 0.0f);
         update_data(data);
     }else{
@@ -248,7 +248,7 @@ MaterialComponent& Material::addComponentRefraction(const std::string& cubemapNa
     return component;
 }
 MaterialComponent& Material::addComponentParallaxOcclusion(const std::string& textureFile, float heightScale){
-    auto texture = Engine::priv::MaterialLoader::LoadTextureNormal(textureFile);
+    auto texture     = Engine::priv::MaterialLoader::LoadTextureNormal(textureFile);
     auto& component  = *internal_add_component_generic(MaterialComponentType::ParallaxOcclusion, texture.second);
     auto& layer      = component.layer(0);
     auto& _data2     = layer.data2();

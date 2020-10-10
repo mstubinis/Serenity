@@ -36,8 +36,6 @@ bool Server::startup(unsigned short port, std::string ip_restriction) {
                 m_UdpSocket   = make_unique<SocketUDP>(port, ip_restriction);
             }
             break;
-        }default: {
-            break;
         }
     }
     if (m_TCPListener) {
@@ -218,8 +216,6 @@ void Server::internal_update_udp_loop(const float dt, bool serverActive) {
         }case sf::Socket::Status::Disconnected: {
             break;
         }case sf::Socket::Status::Error: {
-            break;
-        }default: {
             break;
         }
     }

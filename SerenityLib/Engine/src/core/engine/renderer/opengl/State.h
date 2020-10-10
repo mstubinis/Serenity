@@ -8,13 +8,13 @@
 #include <core/engine/textures/TextureIncludes.h>
 
 namespace Engine::priv {
-    class  Renderer;
+    class  RenderModule;
 
     /*
     This class provides a cpu side implementation of opengl's state machine, including default values
     */
     class  OpenGLState final {
-        friend class  Renderer;
+        friend class  RenderModule;
         private:
             #pragma region TextureUnits
             struct TextureUnitState final {

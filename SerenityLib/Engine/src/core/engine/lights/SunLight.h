@@ -4,14 +4,14 @@
 
 class Scene;
 namespace Engine::priv {
-    class Renderer;
+    class RenderModule;
 };
 
 #include <core/engine/lights/LightIncludes.h>
 #include <ecs/Entity.h>
 
 class SunLight : public Entity {
-    friend class ::Engine::priv::Renderer;
+    friend class ::Engine::priv::RenderModule;
     protected:
         LightType          m_Type              = LightType::Sun;
         bool               m_IsShadowCaster    = false;

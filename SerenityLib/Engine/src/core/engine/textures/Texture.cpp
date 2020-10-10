@@ -203,7 +203,7 @@ void Texture::setAnisotropicFiltering(float anisotropicFiltering){
         return;
     }
     internal_bind_if_not_bound(m_TextureAddress);
-    if (Engine::priv::Renderer::OPENGL_VERSION >= 46) {
+    if (Engine::priv::RenderModule::OPENGL_VERSION >= 46) {
         GLCall(glTexParameterf(m_CPUData.m_TextureType.toGLType(), GL_TEXTURE_MAX_ANISOTROPY, anisotropicFiltering));
     }else{
         if (Engine::priv::OpenGLExtensions::supported(Engine::priv::OpenGLExtensions::ARB_texture_filter_anisotropic)) {
@@ -218,9 +218,13 @@ glm::vec2 Texture::sizeAsRatio() const {
     return glm::vec2(glm::vec2(size()) / max_val);
 }
 bool Texture::compressed() const {
-    return (m_CPUData.m_ImagesDatas.size() == 0) ? false : (m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].compressedSize > 0);
+    ASSERT(m_CPUData.m_ImagesDatas.size() > 0, __FUNCTION__ << "(): m_CPUData.m_ImagesDatas.size() is 0!");
+    ASSERT(m_CPUData.m_ImagesDatas[0].m_Mipmaps.size() > 0, __FUNCTION__ << "(): m_CPUData.m_ImagesDatas[0].m_Mipmaps.size() is 0!");
+    return m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].compressedSize > 0;
 }
 unsigned char* Texture::pixels() {
     Engine::priv::TextureLoader::WithdrawPixelsFromOpenGLMemory(*this);
+    ASSERT(m_CPUData.m_ImagesDatas.size() > 0, __FUNCTION__ << "(): m_CPUData.m_ImagesDatas.size() is 0!");
+    ASSERT(m_CPUData.m_ImagesDatas[0].m_Mipmaps.size() > 0, __FUNCTION__ << "(): m_CPUData.m_ImagesDatas[0].m_Mipmaps.size() is 0!");
     return &(m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].pixels)[0];
 }

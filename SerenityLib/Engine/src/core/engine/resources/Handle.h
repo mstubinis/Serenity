@@ -4,6 +4,7 @@
 
 #include <core/engine/resources/ResourcesIncludes.h>
 
+
 class SoundQueue;
 namespace Engine::priv {
     class ResourceModule;
@@ -14,7 +15,8 @@ class Handle final {
     friend class Engine::priv::ResourceModule;
     private:
         void* internal_get_base() const noexcept;
-        std::mutex* internal_get_mutex() const noexcept;
+        void* internal_get_base_thread_safe() noexcept;
+        std::mutex* internal_get_mutex() noexcept;
 
         uint32_t m_Index   : 12;
         uint32_t m_Version : 15;
@@ -51,7 +53,13 @@ class Handle final {
             ASSERT((ret != nullptr && !null()) || (ret == nullptr && null()), "Handle::get(): a non-null handle returned a null resource!");
             return ret;
         }
+        template<typename TResource>
+        inline TResource* getThreadSafe() noexcept {
+            TResource* ret = static_cast<TResource*>(internal_get_base_thread_safe());
+            ASSERT((ret != nullptr && !null()) || (ret == nullptr && null()), "Handle::get(): a non-null handle returned a null resource!");
+            return ret;
+        }
 
-        std::mutex* getMutex() noexcept;
+        Engine::view_ptr<std::mutex> getMutex() noexcept;
 };
 #endif

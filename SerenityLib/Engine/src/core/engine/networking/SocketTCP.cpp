@@ -40,8 +40,6 @@ SocketStatus::Status Networking::SocketTCP::internal_send_packet(sf::Packet& pac
             break;
         }case sf::Socket::Status::Partial: {
             break;
-        }default: {
-            break;
         }
     }
     return SocketStatus::map_status(status);
@@ -61,8 +59,6 @@ SocketStatus::Status Networking::SocketTCP::internal_send_partial_packets_loop()
             }case SocketStatus::NotReady: {
                 break;
             }case SocketStatus::Partial: {
-                break;
-            }default: {
                 break;
             }
         }

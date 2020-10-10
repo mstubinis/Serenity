@@ -60,8 +60,9 @@ void Engine::priv::WindowData::internal_init_position(Window& super) {
 const sf::ContextSettings Engine::priv::WindowData::internal_create(Window& super, const std::string& name) {
     internal_on_close();
     #ifdef ENGINE_THREAD_WINDOW_EVENTS
-        m_WindowThread.internal_startup(super, name); //calls window.setActive(false) on the created event thread, so we call setActive(true) below
-        std::this_thread::sleep_for(std::chrono::milliseconds(450));
+        boost::latch bLatch{ 1 }; //TODO: replace with std::latch once it is avaiable for c++20 msvc compiler
+        m_WindowThread.internal_startup(super, name, &bLatch); //calls window.setActive(false) on the created event thread, so we call setActive(true) below
+        bLatch.wait();
         super.setActive(true);
     #else
         m_SFMLWindow.create(m_VideoMode, name, m_Style, m_SFContextSettings);
@@ -92,7 +93,7 @@ void Engine::priv::WindowData::internal_on_fullscreen(Window& super, bool isToBe
     }
     internal_create(super, m_WindowName);
     m_SFMLWindow.requestFocus();
-    Engine::priv::Core::m_Engine->m_RenderManager._onFullscreen(m_VideoMode.width, m_VideoMode.height);
+    Engine::priv::Core::m_Engine->m_RenderModule._onFullscreen(m_VideoMode.width, m_VideoMode.height);
 
     auto sfml_size = m_SFMLWindow.getSize();
     auto winSize   = glm::uvec2(sfml_size.x, sfml_size.y);

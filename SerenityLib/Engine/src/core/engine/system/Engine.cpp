@@ -55,8 +55,10 @@ using namespace Engine::priv;
 
 EngineCore* Core::m_Engine = nullptr;
 
-EngineCore::EngineCore(const EngineOptions& options) : m_ResourceManager(options), m_RenderManager(options){
-}
+EngineCore::EngineCore(const EngineOptions& options) 
+    : m_ResourceManager{ options }
+    , m_RenderModule{ options }
+{}
 EngineCore::~EngineCore(){
     internal_on_event_game_ended();
     Game::cleanup();
@@ -117,7 +119,7 @@ void EngineCore::init(const EngineOptions& options) {
     m_ResourceManager.init(options);
     m_DebugManager._init();
     m_Misc.m_BuiltInMeshes.init();
-    m_RenderManager._init();
+    m_RenderModule._init();
     m_PhysicsManager._init();
 
     //init the game here
@@ -192,15 +194,15 @@ void EngineCore::internal_render(Window& window, const float dt){
         return;
     }
     scene.render();
-    m_RenderManager._sort2DAPICommands();
+    m_RenderModule._sort2DAPICommands();
     auto& scene_viewports = InternalScenePublicInterface::GetViewports(scene);
     for (auto& viewport : scene_viewports) {
         if (viewport.isActive()) {
-            m_RenderManager._render( viewport, true );
+            m_RenderModule._render( viewport, true );
         }
     }
     window.display();
-    m_RenderManager._clear2DAPICommands();
+    m_RenderModule._clear2DAPICommands();
     m_DebugManager.calculate_render();
 }
 void EngineCore::internal_cleanup(Window& window, const float dt) {
@@ -208,7 +210,7 @@ void EngineCore::internal_cleanup(Window& window, const float dt) {
 }
 void EngineCore::internal_on_event_resize(Window& window, unsigned int newWindowWidth, unsigned int newWindowHeight, bool saveSize){
     m_EventModule.onClearEvents();
-    m_RenderManager._resize(newWindowWidth, newWindowHeight);
+    m_RenderModule._resize(newWindowWidth, newWindowHeight);
 
     if (saveSize) {
         window.m_Data.m_VideoMode.width  = newWindowWidth;

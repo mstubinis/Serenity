@@ -83,7 +83,7 @@ bool Engine::priv::FXAA::init_shaders() {
 
     return true;
 }
-void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::Renderer& renderer) {
+void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::RenderModule& renderer) {
     const auto& dimensions = viewport.getViewportDimensions();
     renderer.bind(m_Shader_program.get<ShaderProgram>());
 

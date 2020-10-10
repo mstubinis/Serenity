@@ -37,11 +37,7 @@ namespace Engine::priv {
         private:
             unsigned int AddScene(Scene& scene);
         public:
-            ResourceModule m_ResourceModule;
-
-            //http://gamesfromwithin.com/managing-data-relationships
-            //ResourcePool<Resource>                m_ResourcePool;
-
+            ResourceModule                        m_ResourceModule;
             std::vector<std::unique_ptr<Window>>  m_Windows;
             std::vector<std::unique_ptr<Scene>>   m_Scenes;
             std::vector<Scene*>                   m_ScenesToBeDeleted;
@@ -62,37 +58,10 @@ namespace Engine::priv {
             Scene& _getSceneByID(uint32_t sceneID);
 
             inline CONSTEXPR std::vector<std::unique_ptr<Scene>>& scenes() noexcept { return m_Scenes; }
-            /*
+
             template<typename T> 
-            T* HasResource(std::string_view resource_name) noexcept {
-                for (size_t i = 0; i < m_ResourcePool.size(); ++i) {
-                    Resource* r = m_ResourcePool.getAsFast<Resource>((unsigned int)i + 1U);
-                    if (r) {
-                        T* resource = dynamic_cast<T*>(r);
-                        if (resource && resource->name() == resource_name) {
-                            return resource;
-                        }
-                    }
-                }
-                return nullptr;
-            }
-            */
-            template<typename T> 
-            std::list<T*> GetAllResourcesOfType() noexcept {
+            std::list<Engine::view_ptr<T>> GetAllResourcesOfType() noexcept {
                 return m_ResourceModule.getAllResourcesOfType<T>();
-                /*
-                std::list<T*> ret;
-                for (size_t i = 0; i < m_ResourcePool.size(); ++i) {
-                    Resource* r = m_ResourcePool.getAsFast<Resource>((unsigned int)i + 1U);
-                    if (r) {
-                        T* resource = dynamic_cast<T*>(r);
-                        if (resource) {
-                            ret.emplace_back(resource);
-                        }
-                    }
-                }
-                return ret;
-                */
             }
 
 
@@ -132,15 +101,15 @@ namespace Engine::Resources {
     );
 
     template<typename TResource>
-    std::pair<TResource*, Handle> getResource(std::string_view name) noexcept {
+    std::pair<Engine::view_ptr<TResource>, Handle> getResource(std::string_view name) noexcept {
         return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<TResource>(name);
     }
+    //template<typename TResource>
+    //void getResource(Handle inHandle, Engine::view_ptr<TResource>& outPtr) noexcept {
+    //    outPtr = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<TResource>(inHandle);
+    //}
     template<typename TResource>
-    void getResource(Handle inHandle, TResource*& outPtr) noexcept {
-        outPtr = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<TResource>(inHandle);
-    }
-    template<typename TResource>
-    TResource* getResource(Handle inHandle) noexcept {
+    Engine::view_ptr<TResource> getResource(Handle inHandle) noexcept {
         return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<TResource>(inHandle);
     }
 

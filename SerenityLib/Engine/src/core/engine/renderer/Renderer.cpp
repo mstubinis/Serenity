@@ -21,66 +21,66 @@
 
 #include <core/engine/renderer/pipelines/DeferredPipeline.h>
 
-using namespace Engine;
+using namespace Engine::priv;
 
-priv::Renderer* renderManager = nullptr;
+Engine::view_ptr<RenderModule> RenderModule::RENDERER = nullptr;
 
-unsigned int priv::Renderer::GLSL_VERSION;
-unsigned int priv::Renderer::OPENGL_VERSION;
+unsigned int RenderModule::GLSL_VERSION;
+unsigned int RenderModule::OPENGL_VERSION;
 
-priv::Renderer::Renderer(const EngineOptions& options)
+RenderModule::RenderModule(const EngineOptions& options)
     : m_GI_Pack{ Engine::Compression::pack3FloatsInto1FloatUnsigned(m_GI_Diffuse, m_GI_Specular, m_GI_Global) }
 {
-    m_Pipeline     = std::make_unique<Engine::priv::DeferredPipeline>(*this);
-    renderManager  = this;
+    m_Pipeline  = std::make_unique<Engine::priv::DeferredPipeline>(*this);
+    RENDERER    = this;
 }
-void priv::Renderer::_init(){
+void RenderModule::_init(){
     m_Pipeline->init();
 }
-void priv::Renderer::_render(Viewport& viewport, bool mainFunc){
+void RenderModule::_render(Viewport& viewport, bool mainFunc){
     m_Pipeline->render(*this, viewport, mainFunc);
 }
-void priv::Renderer::_resize(uint w,uint h){
+void RenderModule::_resize(uint w,uint h){
     m_Pipeline->onResize(w, h);
 }
-void priv::Renderer::_onFullscreen(unsigned int width, unsigned int height) {
+void RenderModule::_onFullscreen(unsigned int width, unsigned int height) {
     m_Pipeline->onFullscreen();
 }
-void priv::Renderer::_onOpenGLContextCreation(uint windowWidth,uint windowHeight,uint _glslVersion,uint _openglVersion){
+void RenderModule::_onOpenGLContextCreation(uint windowWidth,uint windowHeight,uint _glslVersion,uint _openglVersion){
     m_Pipeline->onOpenGLContextCreation(windowWidth, windowHeight, _glslVersion, _openglVersion);
 }
-void priv::Renderer::_clear2DAPICommands() {
+void RenderModule::_clear2DAPICommands() {
     m_Pipeline->clear2DAPI();
 }
-void priv::Renderer::_sort2DAPICommands() {
+void RenderModule::_sort2DAPICommands() {
     m_Pipeline->sort2DAPI();
 }
-float priv::Renderer::_getGIPackedData() {
+float RenderModule::_getGIPackedData() {
     return m_GI_Pack;
 }
-bool priv::Renderer::bind(ModelInstance* modelInstance) const {
+bool RenderModule::bind(ModelInstance* modelInstance) const {
     bool res = m_Pipeline->bind(modelInstance);
     if (res) {
         modelInstance->m_CustomBindFunctor(modelInstance, this);
     }
     return res;
 }
-bool priv::Renderer::unbind(ModelInstance* modelInstance) const {
+bool RenderModule::unbind(ModelInstance* modelInstance) const {
     modelInstance->m_CustomUnbindFunctor(modelInstance, this);
     return m_Pipeline->unbind(modelInstance);
 }
-bool priv::Renderer::bind(ShaderProgram* program) const {
+bool RenderModule::bind(ShaderProgram* program) const {
     bool res = m_Pipeline->bind(program);
     if (res) {
         program->m_CustomBindFunctor(program);
     }
     return res;
 }
-bool priv::Renderer::unbind(ShaderProgram* program) const {
+bool RenderModule::unbind(ShaderProgram* program) const {
     return m_Pipeline->unbind(program);
 }
 
-bool priv::Renderer::bind(Mesh* mesh) const {
+bool RenderModule::bind(Mesh* mesh) const {
     bool res = m_Pipeline->bind(mesh);
     if (res) {
         if (mesh->isLoaded()) {
@@ -91,7 +91,7 @@ bool priv::Renderer::bind(Mesh* mesh) const {
     }
     return res;
 }
-bool priv::Renderer::unbind(Mesh* mesh) const {
+bool RenderModule::unbind(Mesh* mesh) const {
     bool res = m_Pipeline->unbind(mesh);
     if (mesh->isLoaded()) {
         mesh->m_CustomUnbindFunctor(mesh, this);
@@ -100,7 +100,7 @@ bool priv::Renderer::unbind(Mesh* mesh) const {
     }
     return true;
 }
-bool priv::Renderer::bind(Material* material) const {
+bool RenderModule::bind(Material* material) const {
     bool res = m_Pipeline->bind(material);
     if (res) {
         if (material->isLoaded()) {
@@ -112,205 +112,221 @@ bool priv::Renderer::bind(Material* material) const {
     }
     return res;
 }
-bool priv::Renderer::unbind(Material* material) const {
+bool RenderModule::unbind(Material* material) const {
     return m_Pipeline->unbind(material);
 }
-void priv::Renderer::_genPBREnvMapData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, uint size1, uint size2){
+void RenderModule::_genPBREnvMapData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, uint size1, uint size2){
     return m_Pipeline->generatePBRData(texture, convolutionTexture, preEnvTexture, size1, size2);
 }
-void Renderer::restoreDefaultOpenGLState() {
-    renderManager->m_Pipeline->restoreDefaultState();
+void Engine::Renderer::restoreDefaultOpenGLState() {
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->restoreDefaultState();
 }
-void Renderer::restoreCurrentOpenGLState() {
-    renderManager->m_Pipeline->restoreCurrentState();
+void Engine::Renderer::restoreCurrentOpenGLState() {
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->restoreCurrentState();
 }
-void Renderer::Settings::Lighting::enable(bool lighting){
-    renderManager->m_Lighting = lighting;
+void Engine::Renderer::Settings::Lighting::enable(bool lighting){
+    Engine::priv::RenderModule::RENDERER->m_Lighting = lighting;
 }
-void Renderer::Settings::Lighting::disable(){ 
-    renderManager->m_Lighting = false;
+void Engine::Renderer::Settings::Lighting::disable(){
+    Engine::priv::RenderModule::RENDERER->m_Lighting = false;
 }
-float Renderer::Settings::Lighting::getGIContributionGlobal(){
-    return renderManager->m_GI_Global;
+float Engine::Renderer::Settings::Lighting::getGIContributionGlobal(){
+    return Engine::priv::RenderModule::RENDERER->m_GI_Global;
 }
-void Renderer::Settings::Lighting::setGIContributionGlobal(float gi){
-    renderManager->m_GI_Global = glm::clamp(gi,0.001f,0.999f);
-    renderManager->m_GI_Pack = Engine::Compression::pack3FloatsInto1FloatUnsigned(renderManager->m_GI_Diffuse, renderManager->m_GI_Specular, renderManager->m_GI_Global);
+void Engine::Renderer::Settings::Lighting::setGIContributionGlobal(float gi){
+    Engine::priv::RenderModule::RENDERER->m_GI_Global = glm::clamp(gi,0.001f,0.999f);
+    Engine::priv::RenderModule::RENDERER->m_GI_Pack = Engine::Compression::pack3FloatsInto1FloatUnsigned(
+        Engine::priv::RenderModule::RENDERER->m_GI_Diffuse,
+        Engine::priv::RenderModule::RENDERER->m_GI_Specular,
+        Engine::priv::RenderModule::RENDERER->m_GI_Global
+    );
 }
-float Renderer::Settings::Lighting::getGIContributionDiffuse(){
-    return renderManager->m_GI_Diffuse;
+float Engine::Renderer::Settings::Lighting::getGIContributionDiffuse(){
+    return Engine::priv::RenderModule::RENDERER->m_GI_Diffuse;
 }
-void Renderer::Settings::Lighting::setGIContributionDiffuse(float gi){
-    renderManager->m_GI_Diffuse = glm::clamp(gi, 0.001f, 0.999f);
-    renderManager->m_GI_Pack = Engine::Compression::pack3FloatsInto1FloatUnsigned(renderManager->m_GI_Diffuse, renderManager->m_GI_Specular, renderManager->m_GI_Global);
+void Engine::Renderer::Settings::Lighting::setGIContributionDiffuse(float gi){
+    Engine::priv::RenderModule::RENDERER->m_GI_Diffuse = glm::clamp(gi, 0.001f, 0.999f);
+    Engine::priv::RenderModule::RENDERER->m_GI_Pack = Engine::Compression::pack3FloatsInto1FloatUnsigned(
+        Engine::priv::RenderModule::RENDERER->m_GI_Diffuse,
+        Engine::priv::RenderModule::RENDERER->m_GI_Specular,
+        Engine::priv::RenderModule::RENDERER->m_GI_Global
+    );
 }
-float Renderer::Settings::Lighting::getGIContributionSpecular(){
-    return renderManager->m_GI_Specular;
+float Engine::Renderer::Settings::Lighting::getGIContributionSpecular(){
+    return Engine::priv::RenderModule::RENDERER->m_GI_Specular;
 }
-void Renderer::Settings::Lighting::setGIContributionSpecular(float gi){
-    renderManager->m_GI_Specular = glm::clamp(gi, 0.001f, 0.999f);
-    renderManager->m_GI_Pack = Engine::Compression::pack3FloatsInto1FloatUnsigned(renderManager->m_GI_Diffuse, renderManager->m_GI_Specular, renderManager->m_GI_Global);
+void Engine::Renderer::Settings::Lighting::setGIContributionSpecular(float gi){
+    Engine::priv::RenderModule::RENDERER->m_GI_Specular = glm::clamp(gi, 0.001f, 0.999f);
+    Engine::priv::RenderModule::RENDERER->m_GI_Pack = Engine::Compression::pack3FloatsInto1FloatUnsigned(
+        Engine::priv::RenderModule::RENDERER->m_GI_Diffuse,
+        Engine::priv::RenderModule::RENDERER->m_GI_Specular,
+        Engine::priv::RenderModule::RENDERER->m_GI_Global
+    );
 }
-void Renderer::Settings::Lighting::setGIContribution(float g, float d, float s){
-    renderManager->m_GI_Global = glm::clamp(g, 0.001f, 0.999f);
-    renderManager->m_GI_Diffuse = glm::clamp(d, 0.001f, 0.999f);
-    renderManager->m_GI_Specular = glm::clamp(s, 0.001f, 0.999f);
-    renderManager->m_GI_Pack = Engine::Compression::pack3FloatsInto1FloatUnsigned(renderManager->m_GI_Diffuse, renderManager->m_GI_Specular, renderManager->m_GI_Global);
+void Engine::Renderer::Settings::Lighting::setGIContribution(float g, float d, float s){
+    Engine::priv::RenderModule::RENDERER->m_GI_Global = glm::clamp(g, 0.001f, 0.999f);
+    Engine::priv::RenderModule::RENDERER->m_GI_Diffuse = glm::clamp(d, 0.001f, 0.999f);
+    Engine::priv::RenderModule::RENDERER->m_GI_Specular = glm::clamp(s, 0.001f, 0.999f);
+    Engine::priv::RenderModule::RENDERER->m_GI_Pack = Engine::Compression::pack3FloatsInto1FloatUnsigned(
+        Engine::priv::RenderModule::RENDERER->m_GI_Diffuse,
+        Engine::priv::RenderModule::RENDERER->m_GI_Specular,
+        Engine::priv::RenderModule::RENDERER->m_GI_Global
+    );
 }
 
-bool Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm algorithm){
+bool Engine::Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm algorithm){
     switch (algorithm) {
         case AntiAliasingAlgorithm::None: {
             break;
         }case AntiAliasingAlgorithm::FXAA: {
             break;
         }case AntiAliasingAlgorithm::SMAA_LOW: {
-            Renderer::smaa::setQuality(SMAAQualityLevel::Low);
+            Engine::Renderer::smaa::setQuality(SMAAQualityLevel::Low);
             break;
         }case AntiAliasingAlgorithm::SMAA_MED: {
-            Renderer::smaa::setQuality(SMAAQualityLevel::Medium);
+            Engine::Renderer::smaa::setQuality(SMAAQualityLevel::Medium);
             break;
         }case AntiAliasingAlgorithm::SMAA_HIGH: {
-            Renderer::smaa::setQuality(SMAAQualityLevel::High);
+            Engine::Renderer::smaa::setQuality(SMAAQualityLevel::High);
             break;
         }case AntiAliasingAlgorithm::SMAA_ULTRA: {
-            Renderer::smaa::setQuality(SMAAQualityLevel::Ultra);
+            Engine::Renderer::smaa::setQuality(SMAAQualityLevel::Ultra);
             break;
         }
     }
-    if(renderManager->m_AA_algorithm != algorithm){
-        renderManager->m_AA_algorithm = algorithm;
+    if(Engine::priv::RenderModule::RENDERER->m_AA_algorithm != algorithm){
+        Engine::priv::RenderModule::RENDERER->m_AA_algorithm = algorithm;
         return true;
     }
     return false;
 }
-bool Renderer::stencilOp(GLenum sfail, GLenum dpfail, GLenum dppass) {
-    return renderManager->m_Pipeline->stencilOperation(sfail, dpfail, dppass);
+bool Engine::Renderer::stencilOp(GLenum sfail, GLenum dpfail, GLenum dppass) {
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->stencilOperation(sfail, dpfail, dppass);
 }
-bool Renderer::stencilMask(GLuint mask) {
-    return renderManager->m_Pipeline->stencilMask(mask);
+bool Engine::Renderer::stencilMask(GLuint mask) {
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->stencilMask(mask);
 }
-bool Renderer::cullFace(GLenum state){
-    return renderManager->m_Pipeline->cullFace(state);
+bool Engine::Renderer::cullFace(GLenum state){
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->cullFace(state);
 }
-void Renderer::Settings::clear(bool color, bool depth, bool stencil){
-    return renderManager->m_Pipeline->clear(color, depth, stencil);
+void Engine::Renderer::Settings::clear(bool color, bool depth, bool stencil){
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->clear(color, depth, stencil);
 }
-void Renderer::Settings::applyGlobalAnisotropicFiltering(float filtering) {
+void Engine::Renderer::Settings::applyGlobalAnisotropicFiltering(float filtering) {
     const auto textures = Engine::priv::Core::m_Engine->m_ResourceManager.GetAllResourcesOfType<Texture>();
     for (auto& texture : textures) {
         texture->setAnisotropicFiltering(filtering);
     }
 }
-void Renderer::Settings::enableDrawPhysicsInfo(bool enableDrawPhysics){
-    renderManager->m_DrawPhysicsDebug = enableDrawPhysics;
+void Engine::Renderer::Settings::enableDrawPhysicsInfo(bool enableDrawPhysics){
+    Engine::priv::RenderModule::RENDERER->m_DrawPhysicsDebug = enableDrawPhysics;
 }
-void Renderer::Settings::disableDrawPhysicsInfo(){ 
-    renderManager->m_DrawPhysicsDebug = false;
+void Engine::Renderer::Settings::disableDrawPhysicsInfo(){
+    Engine::priv::RenderModule::RENDERER->m_DrawPhysicsDebug = false;
 }
-void Renderer::Settings::setGamma(float gamma){
-    renderManager->m_Gamma = gamma;
+void Engine::Renderer::Settings::setGamma(float gamma){
+    Engine::priv::RenderModule::RENDERER->m_Gamma = gamma;
 }
-const float Renderer::Settings::getGamma(){
-    return renderManager->m_Gamma;
+const float Engine::Renderer::Settings::getGamma(){
+    return Engine::priv::RenderModule::RENDERER->m_Gamma;
 }
-bool Renderer::setDepthFunc(GLenum func){
-    return renderManager->m_Pipeline->setDepthFunction(func);
+bool Engine::Renderer::setDepthFunc(GLenum func){
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->setDepthFunction(func);
 }
-bool Renderer::setViewport(float x, float y, float w, float h){
-    return renderManager->m_Pipeline->setViewport(x, y, w, h);
+bool Engine::Renderer::setViewport(float x, float y, float w, float h){
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->setViewport(x, y, w, h);
 }
-bool Renderer::stencilFunc(GLenum func, GLint ref, GLuint mask) {
-    return renderManager->m_Pipeline->stencilFunction(func, ref, mask);
+bool Engine::Renderer::stencilFunc(GLenum func, GLint ref, GLuint mask) {
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->stencilFunction(func, ref, mask);
 }
-bool Renderer::colorMask(bool r, bool g, bool b, bool a) {
-    return renderManager->m_Pipeline->colorMask(r, g, b, a);
+bool Engine::Renderer::colorMask(bool r, bool g, bool b, bool a) {
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->colorMask(r, g, b, a);
 }
-bool Renderer::clearColor(float r, float g, float b, float a) {
-    return renderManager->m_Pipeline->clearColor(r, g, b, a);
+bool Engine::Renderer::clearColor(float r, float g, float b, float a) {
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->clearColor(r, g, b, a);
 }
-unsigned int Renderer::getCurrentlyBoundTextureOfType(unsigned int textureType) noexcept {
-    return renderManager->m_Pipeline->getCurrentBoundTextureOfType(textureType);
+unsigned int Engine::Renderer::getCurrentlyBoundTextureOfType(unsigned int textureType) noexcept {
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->getCurrentBoundTextureOfType(textureType);
 }
-bool Renderer::bindTextureForModification(TextureType textureType, GLuint textureObject) {
-    return renderManager->m_Pipeline->bindTextureForModification(textureType, textureObject);
-}
-
-bool Renderer::bindVAO(GLuint vaoObject){
-    return renderManager->m_Pipeline->bindVAO(vaoObject);
-}
-bool Renderer::deleteVAO(GLuint& vaoObject) {
-    return renderManager->m_Pipeline->deleteVAO(vaoObject);
-}
-void Renderer::genAndBindTexture(TextureType textureType, GLuint& textureObject){
-    renderManager->m_Pipeline->generateAndBindTexture(textureType, textureObject);
-}
-void Renderer::genAndBindVAO(GLuint& vaoObject){
-    renderManager->m_Pipeline->generateAndBindVAO(vaoObject);
-}
-bool Renderer::GLEnable(GLenum apiEnum) {
-    return renderManager->m_Pipeline->enableAPI(apiEnum);
-}
-bool Renderer::GLDisable(GLenum apiEnum) {
-    return renderManager->m_Pipeline->disableAPI(apiEnum);
-}
-bool Renderer::GLEnablei(GLenum apiEnum, GLuint index) {
-    return renderManager->m_Pipeline->enableAPI_i(apiEnum, index);
-}
-bool Renderer::GLDisablei(GLenum apiEnum, GLuint index) {
-    return renderManager->m_Pipeline->disableAPI_i(apiEnum, index);
-}
-void Renderer::sendTexture(const char* location, Texture& texture, int slot){
-    renderManager->m_Pipeline->sendTexture(location, texture, slot);
-}
-void Renderer::sendTexture(const char* location, GLuint textureObject, int slot, GLuint textureTarget){
-    renderManager->m_Pipeline->sendTexture(location, textureObject, slot, textureTarget);
-}
-void Renderer::sendTextureSafe(const char* location, Texture& texture, int slot){
-    renderManager->m_Pipeline->sendTextureSafe(location, texture, slot);
-}
-void Renderer::sendTextureSafe(const char* location, GLuint textureObject, int slot, GLuint textureTarget){
-    renderManager->m_Pipeline->sendTextureSafe(location, textureObject, slot, textureTarget);
-}
-bool Renderer::bindReadFBO(const GLuint fbo){
-    return renderManager->m_Pipeline->bindReadFBO(fbo);
-}
-bool Renderer::bindDrawFBO(const GLuint fbo) {
-    return renderManager->m_Pipeline->bindDrawFBO(fbo);
-}
-void Renderer::bindFBO(const priv::FramebufferObject& fbo){ 
-    Renderer::bindFBO(fbo.address()); 
-}
-bool Renderer::bindRBO(priv::RenderbufferObject& rbo){
-    return Renderer::bindRBO(rbo.address()); 
-}
-void Renderer::bindFBO(const GLuint fbo){
-    Renderer::bindReadFBO(fbo);
-    Renderer::bindDrawFBO(fbo);
-}
-bool Renderer::bindRBO(const GLuint rbo){
-    return renderManager->m_Pipeline->bindRBO(rbo);
-}
-void Renderer::unbindFBO(){ 
-    Renderer::bindFBO(GLuint(0)); 
-}
-void Renderer::unbindRBO(){ 
-    Renderer::bindRBO(GLuint(0)); 
-}
-void Renderer::unbindReadFBO(){ 
-    Renderer::bindReadFBO(0); 
-}
-void Renderer::unbindDrawFBO(){ 
-    Renderer::bindDrawFBO(0); 
-}
-unsigned int Renderer::getUniformLoc(const char* location) {
-    return renderManager->m_Pipeline->getUniformLocation(location);
-}
-unsigned int Renderer::getUniformLocUnsafe(const char* location) {
-    return renderManager->m_Pipeline->getUniformLocationUnsafe(location);
+bool Engine::Renderer::bindTextureForModification(TextureType textureType, GLuint textureObject) {
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->bindTextureForModification(textureType, textureObject);
 }
 
-void Renderer::alignmentOffset(const Alignment align, float& x, float& y, const float width, const float height) {
+bool Engine::Renderer::bindVAO(GLuint vaoObject){
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->bindVAO(vaoObject);
+}
+bool Engine::Renderer::deleteVAO(GLuint& vaoObject) {
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->deleteVAO(vaoObject);
+}
+void Engine::Renderer::genAndBindTexture(TextureType textureType, GLuint& textureObject){
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->generateAndBindTexture(textureType, textureObject);
+}
+void Engine::Renderer::genAndBindVAO(GLuint& vaoObject){
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->generateAndBindVAO(vaoObject);
+}
+bool Engine::Renderer::GLEnable(GLenum apiEnum) {
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->enableAPI(apiEnum);
+}
+bool Engine::Renderer::GLDisable(GLenum apiEnum) {
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->disableAPI(apiEnum);
+}
+bool Engine::Renderer::GLEnablei(GLenum apiEnum, GLuint index) {
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->enableAPI_i(apiEnum, index);
+}
+bool Engine::Renderer::GLDisablei(GLenum apiEnum, GLuint index) {
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->disableAPI_i(apiEnum, index);
+}
+void Engine::Renderer::sendTexture(const char* location, Texture& texture, int slot){
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->sendTexture(location, texture, slot);
+}
+void Engine::Renderer::sendTexture(const char* location, GLuint textureObject, int slot, GLuint textureTarget){
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->sendTexture(location, textureObject, slot, textureTarget);
+}
+void Engine::Renderer::sendTextureSafe(const char* location, Texture& texture, int slot){
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->sendTextureSafe(location, texture, slot);
+}
+void Engine::Renderer::sendTextureSafe(const char* location, GLuint textureObject, int slot, GLuint textureTarget){
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->sendTextureSafe(location, textureObject, slot, textureTarget);
+}
+bool Engine::Renderer::bindReadFBO(const GLuint fbo){
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->bindReadFBO(fbo);
+}
+bool Engine::Renderer::bindDrawFBO(const GLuint fbo) {
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->bindDrawFBO(fbo);
+}
+void Engine::Renderer::bindFBO(const priv::FramebufferObject& fbo){
+    Engine::Renderer::bindFBO(fbo.address());
+}
+bool Engine::Renderer::bindRBO(priv::RenderbufferObject& rbo){
+    return Engine::Renderer::bindRBO(rbo.address());
+}
+void Engine::Renderer::bindFBO(const GLuint fbo){
+    Engine::Renderer::bindReadFBO(fbo);
+    Engine::Renderer::bindDrawFBO(fbo);
+}
+bool Engine::Renderer::bindRBO(const GLuint rbo){
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->bindRBO(rbo);
+}
+void Engine::Renderer::unbindFBO(){
+    Engine::Renderer::bindFBO(GLuint(0));
+}
+void Engine::Renderer::unbindRBO(){
+    Engine::Renderer::bindRBO(GLuint(0));
+}
+void Engine::Renderer::unbindReadFBO(){
+    Engine::Renderer::bindReadFBO(0);
+}
+void Engine::Renderer::unbindDrawFBO(){
+    Engine::Renderer::bindDrawFBO(0);
+}
+unsigned int Engine::Renderer::getUniformLoc(const char* location) {
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->getUniformLocation(location);
+}
+unsigned int Engine::Renderer::getUniformLocUnsafe(const char* location) {
+    return Engine::priv::RenderModule::RENDERER->m_Pipeline->getUniformLocationUnsafe(location);
+}
+
+void Engine::Renderer::alignmentOffset(const Alignment align, float& x, float& y, const float width, const float height) {
     switch (align) {
         case Alignment::TopLeft: {
             x += width / 2;
@@ -345,26 +361,24 @@ void Renderer::alignmentOffset(const Alignment align, float& x, float& y, const 
         }
     }
 }
-void Renderer::renderTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) {
-    renderManager->m_Pipeline->renderTriangle(position, color, angle, width, height, depth, align, scissor);
+void Engine::Renderer::renderTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) {
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->renderTriangle(position, color, angle, width, height, depth, align, scissor);
 }
-void Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, const Alignment align, const glm::vec4& scissor) {
-    renderManager->m_Pipeline->renderRectangle(pos, col, width, height, angle, depth, align, scissor);
+void Engine::Renderer::renderRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, const Alignment align, const glm::vec4& scissor) {
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->renderRectangle(pos, col, width, height, angle, depth, align, scissor);
 }
-void Renderer::renderTexture(Handle texture, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor){
-    renderManager->m_Pipeline->renderTexture(texture, p, c, a, s, d, align, scissor);
+void Engine::Renderer::renderTexture(Handle texture, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor){
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->renderTexture(texture, p, c, a, s, d, align, scissor);
 }
-void Renderer::renderText(const std::string& t, Handle font, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) {
-    renderManager->m_Pipeline->renderText(t, font, p, c, a, s, d, align, scissor);
+void Engine::Renderer::renderText(const std::string& t, Handle font, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) {
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->renderText(t, font, p, c, a, s, d, align, scissor);
 }
-void Renderer::renderBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) {
-    renderManager->m_Pipeline->renderBorder(borderSize, pos, col, w, h, angle, depth, align, scissor);
+void Engine::Renderer::renderBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) {
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->renderBorder(borderSize, pos, col, w, h, angle, depth, align, scissor);
 }
-
-void Renderer::renderFullscreenQuad() {
-    renderManager->m_Pipeline->renderFullscreenQuad();
+void Engine::Renderer::renderFullscreenQuad() {
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->renderFullscreenQuad();
 }
-
-void Renderer::renderFullscreenTriangle() {
-    renderManager->m_Pipeline->renderFullscreenTriangle();
+void Engine::Renderer::renderFullscreenTriangle() {
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->renderFullscreenTriangle();
 }

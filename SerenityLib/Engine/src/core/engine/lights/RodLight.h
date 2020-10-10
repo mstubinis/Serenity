@@ -5,7 +5,7 @@
 #include <core/engine/lights/PointLight.h>
 
 class RodLight : public PointLight {
-    friend class ::Engine::priv::Renderer;
+    friend class ::Engine::priv::RenderModule;
     private:
         float m_RodLength = 0.0f;
         float calculateCullingRadius() override;

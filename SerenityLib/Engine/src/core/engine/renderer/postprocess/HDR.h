@@ -18,7 +18,7 @@ struct HDRAlgorithm { enum Algorithm : unsigned char {
 
 namespace Engine::priv {
     class  GBuffer;
-    class  Renderer;
+    class  RenderModule;
     class  HDR final {
         private:
             Handle        m_Vertex_Shader;
@@ -36,7 +36,7 @@ namespace Engine::priv {
 
             bool init_shaders();
 
-            void pass(GBuffer&, const Viewport& viewport, bool godRays, bool lighting, float godRaysFactor, const Engine::priv::Renderer& renderer);
+            void pass(GBuffer&, const Viewport& viewport, bool godRays, bool lighting, float godRaysFactor, const Engine::priv::RenderModule& renderer);
 
             static HDR STATIC_HDR;
     };

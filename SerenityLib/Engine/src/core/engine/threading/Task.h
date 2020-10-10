@@ -11,13 +11,11 @@ namespace Engine::priv {
             ~Task() = default;
 
             inline void operator()() noexcept {
-                //if (m_Task.valid()) {
-                m_Task();
-                //}
+                ASSERT(m_Task.valid(), "Engine::priv::Task::operator()(): m_Task was not valid!");
+                //if (m_Task.valid())
+                    m_Task();
             }
-            inline std::future<void> get_future() noexcept {
-                return m_Task.get_future();
-            }
+            inline std::future<void> get_future() noexcept { return m_Task.get_future(); }
     };
 };
 

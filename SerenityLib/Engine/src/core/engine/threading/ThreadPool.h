@@ -13,115 +13,120 @@ namespace Engine::priv {
 #include <core/engine/threading/WorkerThreadContainer.h>
 #include <core/engine/threading/Task.h>
 
+using ThreadJob = std::function<void()>;
+
 namespace Engine::priv {
     using PoolTask    = Engine::priv::Task;
     using PoolTaskPtr = std::shared_ptr<PoolTask>;
-
+    using FutureType = std::future<void>;
     class ThreadPoolFuture final {
         friend class Engine::priv::ThreadPool;
         friend class Engine::priv::ThreadPoolFutureContainer;
         private:
-            std::future<void>           m_Future;
+            FutureType m_Future;
 
             ThreadPoolFuture() = delete;
         public:
-            ThreadPoolFuture(std::future<void>&& future);
-            ~ThreadPoolFuture() = default;
+            ThreadPoolFuture(FutureType&& future);
 
-            inline bool isReady() const noexcept { return (m_Future._Is_ready() && m_Future.valid()); }
+            ThreadPoolFuture(const ThreadPoolFuture&) noexcept            = delete;
+            ThreadPoolFuture& operator=(const ThreadPoolFuture&) noexcept = delete;
+            ThreadPoolFuture(ThreadPoolFuture&&) noexcept                 = default;
+            ThreadPoolFuture& operator=(ThreadPoolFuture&&) noexcept      = default;
 
-            ThreadPoolFuture(const ThreadPoolFuture& other) noexcept            = delete;
-            ThreadPoolFuture& operator=(const ThreadPoolFuture& other) noexcept = delete;
-            ThreadPoolFuture(ThreadPoolFuture&& other) noexcept                 = default;
-            ThreadPoolFuture& operator=(ThreadPoolFuture&& other) noexcept      = default;
+            inline bool isReady() const noexcept { return (m_Future.wait_for(0s) == std::future_status::ready /*&& m_Future.valid()*/); }
     };
     class ThreadPoolFutureCallback final {
         friend class Engine::priv::ThreadPool;
         friend class Engine::priv::ThreadPoolFutureContainer;
         private:
-            std::future<void>           m_Future;
-            std::function<void()>       m_Callback = []() {};
+            FutureType  m_Future;
+            ThreadJob   m_Callback;
 
             ThreadPoolFutureCallback() = delete;
         public:
-            ThreadPoolFutureCallback(std::future<void>&& future, std::function<void()>&& callback);
-            ~ThreadPoolFutureCallback() = default;
+            ThreadPoolFutureCallback(FutureType&& future, ThreadJob&& callback);
 
-            inline bool isReady() const noexcept { return (m_Future._Is_ready() && m_Future.valid()); }
-            inline void operator()() const noexcept { if(m_Callback) m_Callback(); }
+            ThreadPoolFutureCallback(const ThreadPoolFutureCallback&) noexcept            = delete;
+            ThreadPoolFutureCallback& operator=(const ThreadPoolFutureCallback&) noexcept = delete;
+            ThreadPoolFutureCallback(ThreadPoolFutureCallback&&) noexcept                 = default;
+            ThreadPoolFutureCallback& operator=(ThreadPoolFutureCallback&&) noexcept      = default;
 
-            ThreadPoolFutureCallback(const ThreadPoolFutureCallback& other) noexcept            = delete;
-            ThreadPoolFutureCallback& operator=(const ThreadPoolFutureCallback& other) noexcept = delete;
-            ThreadPoolFutureCallback(ThreadPoolFutureCallback&& other) noexcept                 = default;
-            ThreadPoolFutureCallback& operator=(ThreadPoolFutureCallback&& other) noexcept      = default;
+            inline bool isReady() const noexcept { return (m_Future.wait_for(0s) == std::future_status::ready /*&& m_Future.valid()*/); }
+
+            inline operator bool() const noexcept { return (bool)m_Callback; }
+            inline bool operator==(bool other) const noexcept { return (other && m_Callback); }
+
+            inline void operator()() const noexcept {
+                ASSERT(m_Callback, __FUNCTION__ << "(): m_Callback was invalid!");
+                //if(m_Callback) 
+                m_Callback();
+            }
     };
     
     class ThreadPoolFutureContainer final {
-        friend class ThreadPool;
+        friend class Engine::priv::ThreadPool;
         private:
-            std::vector<std::vector<Engine::priv::ThreadPoolFuture>>          m_Sections;
-            std::vector<std::vector<Engine::priv::ThreadPoolFutureCallback>>  m_Callbacks;
+            std::vector<std::vector<Engine::priv::ThreadPoolFuture>>          m_FuturesBasic;
+            std::vector<std::vector<Engine::priv::ThreadPoolFutureCallback>>  m_FuturesCallback;
+
         public:
             void resize(size_t newSize) {
-                m_Sections.resize(newSize);
-                m_Callbacks.resize(newSize);
+                m_FuturesBasic.resize(newSize);
+                m_FuturesCallback.resize(newSize);
             }
-            inline size_t size() const noexcept { return m_Sections.size(); }
-            inline void emplace(ThreadPoolFuture&& future, unsigned int section) {
-                m_Sections[section].emplace_back(std::move(future));
-            }
-            inline void emplace(ThreadPoolFutureCallback&& future, unsigned int section) {
-                m_Callbacks[section].emplace_back(std::move(future));
-            }
-            void update_section(unsigned int section) noexcept;
-            void wait_for_all(unsigned int section) noexcept;
-
             void reserve(size_t newSize) {
-                for (auto& futureSection : m_Sections) {
-                    futureSection.reserve(newSize);
-                }
-                for (auto& callbackSection : m_Callbacks) {
-                    callbackSection.reserve(newSize);
-                }
+                for (auto& section : m_FuturesBasic) { section.reserve(newSize); }
+                for (auto& section : m_FuturesCallback) { section.reserve(newSize); }
             }
+            inline size_t size() const noexcept { return std::min(m_FuturesBasic.size(), m_FuturesCallback.size()); }
+            inline void emplace(ThreadPoolFuture&& future, size_t section) { 
+                m_FuturesBasic[section].emplace_back(std::move(future)); 
+            }
+            inline void emplace(ThreadPoolFutureCallback&& future, size_t section) { 
+                m_FuturesCallback[section].emplace_back(std::move(future)); 
+            }
+            void update_section(size_t section) noexcept;
+            void wait_for_all(size_t section) noexcept;
     };
 
     class ThreadPool final{
         friend class Engine::priv::WorkerThread;
         private:
-            WorkerThreadContainer                                             m_WorkerThreads;
-            ThreadPoolFutureContainer                                         m_Futures;
-            std::mutex                                                        m_Mutex;
-            std::vector<std::queue<PoolTaskPtr>>                              m_TaskQueue;
-            std::condition_variable_any                                       m_ConditionVariableAny;
-            bool                                                              m_Stopped = true;
+            WorkerThreadContainer                     m_WorkerThreads;
+            ThreadPoolFutureContainer                 m_Futures;
+            std::mutex                                m_Mutex;
+            std::vector<std::queue<PoolTaskPtr>>      m_TaskQueues;
+            std::condition_variable_any               m_ConditionVariableAny;
+            bool                                      m_Stopped = true;
       
-            void internal_create_packaged_task(std::function<void()>&& job, unsigned int section);
-            void internal_create_packaged_task(std::function<void()>&& job, std::function<void()>&& callback, unsigned int section);
+            void internal_create_packaged_task(ThreadJob&& job, size_t section);
+            void internal_create_packaged_task(ThreadJob&& job, ThreadJob&& callback, size_t section);
+
             bool task_queue_is_empty() const;
             PoolTaskPtr internal_get_next_available_job();
-            void internal_emplace(ThreadPoolFuture&&, Engine::priv::PoolTaskPtr&&, unsigned int section) noexcept;
-            void internal_emplace(ThreadPoolFutureCallback&&, Engine::priv::PoolTaskPtr&&, unsigned int section) noexcept;
+            void internal_emplace(ThreadPoolFuture&&, PoolTaskPtr&&, size_t section) noexcept;
+            void internal_emplace(ThreadPoolFutureCallback&&, PoolTaskPtr&&, size_t section) noexcept;
         public:
-            ThreadPool(unsigned int sections = 2U);
+            ThreadPool(size_t sections = 2U);
             ~ThreadPool();
 
-            bool startup(unsigned int num_threads);
+            bool startup(size_t num_threads);
 
-            ThreadPool(const ThreadPool& other) noexcept = delete;
-            ThreadPool& operator=(const ThreadPool& other) noexcept = delete;
-            ThreadPool(ThreadPool&& other) noexcept = delete;
-            ThreadPool& operator=(ThreadPool&& other) noexcept = delete;
+            ThreadPool(const ThreadPool&) noexcept            = delete;
+            ThreadPool& operator=(const ThreadPool&) noexcept = delete;
+            ThreadPool(ThreadPool&&) noexcept                 = delete;
+            ThreadPool& operator=(ThreadPool&&) noexcept      = delete;
 
-            size_t size() const;
+            inline size_t size() const noexcept { return m_WorkerThreads.size(); }
 
-            void add_job(std::function<void()>&& job, unsigned int section);
-            void add_job(std::function<void()>&& job, std::function<void()>&& callback, unsigned int section);
+            void add_job(ThreadJob&& job, size_t section);
+            void add_job(ThreadJob&& job, ThreadJob&& callback, size_t section);
 
             void update();
 
             void join_all();
-            void wait_for_all(unsigned int section);
+            void wait_for_all(size_t section);
 
             void shutdown();
     };

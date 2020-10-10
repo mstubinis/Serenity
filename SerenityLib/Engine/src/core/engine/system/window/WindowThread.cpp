@@ -49,12 +49,15 @@ void Engine::priv::WindowThread::internal_update_loop() {
         }
     }
 }
-void Engine::priv::WindowThread::internal_startup(Window& super, const std::string& name) {
-    m_EventThread.reset(NEW std::thread([this, &super, &name]() {
+void Engine::priv::WindowThread::internal_startup(Window& super, const std::string& name, boost::latch* bLatch) {
+    m_EventThread.reset(NEW std::thread([this, &super, &name, &bLatch]() {
         m_Data.m_SFMLWindow.create(m_Data.m_VideoMode, name, m_Data.m_Style, m_Data.m_SFContextSettings);
         super.setIcon(m_Data.m_IconFile);
         bool successfulDeactivation = m_Data.m_SFMLWindow.setActive(false);
         m_Data.m_UndergoingClosing = false;
+        if (bLatch) {
+            bLatch->count_down();
+        }
         while (!m_Data.m_UndergoingClosing) {
             internal_update_loop();
         }

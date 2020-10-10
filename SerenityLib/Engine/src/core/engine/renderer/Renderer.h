@@ -14,6 +14,7 @@ namespace Engine::priv {
     class  FramebufferObject;
     class  RenderbufferObject;
     class  IRenderingPipeline;
+    class  RenderModule;
 };
 
 #include <core/engine/renderer/opengl/OpenGL.h>
@@ -29,8 +30,10 @@ namespace Engine::priv {
 
 namespace Engine{
 namespace priv{
-    class  Renderer final{
+    class  RenderModule final{
         private:
+        public:
+            static Engine::view_ptr<Engine::priv::RenderModule> RENDERER;
         public:
             bool                                 m_Lighting         = true;
             bool                                 m_DrawPhysicsDebug = false;
@@ -43,8 +46,8 @@ namespace priv{
             DepthFunc                            m_Depth_Function   = DepthFunc::Less;
             std::unique_ptr<IRenderingPipeline>  m_Pipeline;
         public:
-            Renderer(const EngineOptions& options);
-            ~Renderer() = default;
+            RenderModule(const EngineOptions& options);
+            ~RenderModule() = default;
 
             static unsigned int GLSL_VERSION;
             static unsigned int OPENGL_VERSION;

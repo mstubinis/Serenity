@@ -19,7 +19,7 @@ void Window::init(const EngineOptions& options) noexcept {
     m_Data.m_SFContextSettings = m_Data.internal_create(*this, options.window_title);
     int requested_glsl_version = std::stoi(Engine::priv::OpenGL::getHighestGLSLVersion(*this));
     int opengl_version         = std::stoi(std::to_string(m_Data.m_SFContextSettings.majorVersion) + std::to_string(m_Data.m_SFContextSettings.minorVersion));
-    Engine::priv::Core::m_Engine->m_RenderManager._onOpenGLContextCreation(
+    Engine::priv::Core::m_Engine->m_RenderModule._onOpenGLContextCreation(
         m_Data.m_VideoMode.width, 
         m_Data.m_VideoMode.height, 
         (unsigned int)requested_glsl_version, 

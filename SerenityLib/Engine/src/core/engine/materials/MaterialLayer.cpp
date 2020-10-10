@@ -72,7 +72,13 @@ void MaterialLayer::internal_set_texture_and_property(Handle textureHandleValue,
 }
 float MaterialLayer::internal_get_texture_compression_value(Handle textureHandle) noexcept {
     if (!textureHandle.null()) {
-        return textureHandle.get<Texture>()->compressed() ? 0.5f : 1.0f;
+        auto mutex = textureHandle.getMutex();
+        bool isCompressed = false;
+        if (mutex) {
+            std::lock_guard lock(*mutex);
+            isCompressed = textureHandle.get<Texture>()->compressed();
+        }
+        return isCompressed ? 0.5f : 1.0f;
     }
     return 0.0f;
 }
@@ -94,24 +100,23 @@ void MaterialLayer::update(const float dt) {
 void MaterialLayer::sendDataToGPU(const std::string& uniform_component_string, size_t component_index, size_t layer_index, size_t& textureUnit) const {
     std::string wholeString = uniform_component_string + "layers[" + std::to_string(layer_index) + "].";
     //auto start              = (component_index * (MAX_MATERIAL_LAYERS_PER_COMPONENT * 3)) + (layer_index * 3);
-
     if (!m_TextureHandle.null()){
         auto& texture = *m_TextureHandle.get<Texture>();
-        if (texture.address() != 0U) {
+        if (!texture.isLoaded() || texture.address() != 0U) {
             Engine::Renderer::sendTextureSafe((wholeString + "texture").c_str(), texture, (int)textureUnit);
             ++textureUnit;
         }
     }
     if (!m_MaskHandle.null()){
         auto& mask = *m_MaskHandle.get<Texture>();
-        if (mask.address() != 0U) {
+        if (!mask.isLoaded() || mask.address() != 0U) {
             Engine::Renderer::sendTextureSafe((wholeString + "mask").c_str(), mask, (int)textureUnit);
             ++textureUnit;
         }
     }
     if (!m_CubemapHandle.null() ){
         auto& cubemap = *m_CubemapHandle.get<Texture>();
-        if (cubemap.address() != 0U) {
+        if (!cubemap.isLoaded() || cubemap.address() != 0U) {
             Engine::Renderer::sendTextureSafe((wholeString + "cubemap").c_str(), cubemap, (int)textureUnit);
             ++textureUnit;
         }

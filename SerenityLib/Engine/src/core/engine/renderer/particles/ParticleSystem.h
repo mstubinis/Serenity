@@ -10,7 +10,7 @@ class  ShaderProgram;
 class  Material;
 class  Viewport;
 namespace Engine::priv {
-    class Renderer;
+    class RenderModule;
 };
 
 #include <core/engine/renderer/particles/Particle.h>
@@ -108,7 +108,7 @@ namespace Engine::priv {
             inline CONSTEXPR std::vector<Particle>& getParticles() noexcept { return m_Particles; }
 
             void update(const float dt, Camera& camera);
-            void render(Viewport& viewport, Camera& camera, Handle program, Renderer& renderer);
+            void render(Viewport& viewport, Camera& camera, Handle program, RenderModule& renderer);
         };
 };
 

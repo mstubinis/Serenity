@@ -15,7 +15,7 @@ namespace Engine::priv {
     struct DefaultModelInstanceUnbindFunctor;
     struct ComponentModel_UpdateFunction;
     class  ModelInstanceAnimation;
-    class  Renderer;
+    class  RenderModule;
     struct InternalModelInstancePublicInterface final {
         static bool IsViewportValid(const ModelInstance&, const Viewport&);
     };
@@ -35,19 +35,19 @@ class ModelInstance final : public Engine::UserPointer, public Observer {
     friend struct Engine::priv::DefaultModelInstanceBindFunctor;
     friend struct Engine::priv::DefaultModelInstanceUnbindFunctor;
     friend struct Engine::priv::ComponentModel_UpdateFunction;
-    friend class  Engine::priv::Renderer;
+    friend class  Engine::priv::RenderModule;
     friend class  ComponentModel;
     friend class  Collision;
 
-    using bind_function   = void(*)(ModelInstance*, const Engine::priv::Renderer*);
-    using unbind_function = void(*)(ModelInstance*, const Engine::priv::Renderer*);
+    using bind_function   = void(*)(ModelInstance*, const Engine::priv::RenderModule*);
+    using unbind_function = void(*)(ModelInstance*, const Engine::priv::RenderModule*);
 
     private:
         static decimal                                       m_GlobalDistanceFactor;
         static unsigned int                                  m_ViewportFlagDefault;
     private:
-        bind_function                                        m_CustomBindFunctor   = [](ModelInstance*, const Engine::priv::Renderer*) {};
-        unbind_function                                      m_CustomUnbindFunctor = [](ModelInstance*, const Engine::priv::Renderer*) {};
+        bind_function                                        m_CustomBindFunctor   = [](ModelInstance*, const Engine::priv::RenderModule*) {};
+        unbind_function                                      m_CustomUnbindFunctor = [](ModelInstance*, const Engine::priv::RenderModule*) {};
 
         ModelDrawingMode                                     m_DrawingMode         = ModelDrawingMode::Triangles;
         Engine::Flag<unsigned int>                           m_ViewportFlag;     //determine what viewports this can be seen in
@@ -73,8 +73,8 @@ class ModelInstance final : public Engine::UserPointer, public Observer {
         void internal_init(Handle mesh, Handle mat, Handle program);
         void internal_update_model_matrix(bool recalcRadius = true);
 
-        void bind(const Engine::priv::Renderer& renderer);
-        void unbind(const Engine::priv::Renderer& renderer);
+        void bind(const Engine::priv::RenderModule& renderer);
+        void unbind(const Engine::priv::RenderModule& renderer);
 
         ModelInstance() = delete;
     public:

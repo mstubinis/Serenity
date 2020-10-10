@@ -13,7 +13,7 @@ namespace Engine::Networking {
                 do {
                     nonce = distribution(mt);
                 } while (nonce == 0);
-                ASSERT(nonce != 0, "NetworkingHelpers::generate_nonce(): nonce was 0!");
+                ASSERT(nonce != 0, __FUNCTION__ << "(): nonce was 0!");
                 return nonce;
             }
     };

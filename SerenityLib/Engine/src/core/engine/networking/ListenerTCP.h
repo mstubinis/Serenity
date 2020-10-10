@@ -26,12 +26,12 @@ namespace Engine::Networking {
             ListenerTCP(const unsigned short port, const std::string& ip = "");
             ~ListenerTCP();
 
-            void               close();
-            void               setBlocking(bool blocking) override;
+            void close();
+            void setBlocking(bool blocking) override { m_Listener.setBlocking(blocking); }
 
-            bool               isListening() const;
-            bool               isBlocking() const override;
-            unsigned short     localPort() const override;
+            bool isListening() const { return (localPort() != 0); }
+            bool isBlocking() const override { return m_Listener.isBlocking(); }
+            unsigned short localPort() const override { return m_Listener.getLocalPort(); }
 
             SocketStatus::Status accept(SocketTCP& tcpSocket);
             SocketStatus::Status accept(sf::TcpSocket& sfmlTcpSocket);

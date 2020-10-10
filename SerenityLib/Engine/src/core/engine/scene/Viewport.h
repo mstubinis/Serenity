@@ -6,7 +6,7 @@ class  Scene;
 class  Camera;
 class  LightProbe;
 namespace Engine::priv {
-    class Renderer;
+    class RenderModule;
 };
 
 struct ViewportRenderingFlag final { enum Flag: unsigned short {
@@ -26,7 +26,7 @@ struct ViewportRenderingFlag final { enum Flag: unsigned short {
 
 class Viewport final : public Engine::NonCopyable {
     friend class Scene;
-    friend class Engine::priv::Renderer;
+    friend class Engine::priv::RenderModule;
     friend class LightProbe;
     private:
         struct StateFlags final { enum Flag : unsigned char {

@@ -10,17 +10,13 @@ namespace Engine::priv {
     class ResourceVector final : public IResourceVector {
 
         struct Entry final {
-            TResource   m_Resource;
-            uint32_t    m_Version{ 0 };
+            std::unique_ptr<TResource>  m_Resource;
+            uint32_t                    m_Version{ 0 };
 
             template<typename ... ARGS>
-            Entry(ARGS&&... args)
-                : m_Resource { std::forward<ARGS>(args)... }
-            {}
-            Entry(TResource&& inResource) 
-                : m_Resource { std::move(inResource) }
-            {}
-
+            Entry(ARGS&&... args){
+                m_Resource = std::make_unique<TResource>(std::forward<ARGS>(args)...);
+            }
             Entry(const Entry& other)                = delete;
             Entry& operator=(const Entry& other)     = delete;
             Entry(Entry&& other) noexcept
@@ -39,16 +35,18 @@ namespace Engine::priv {
             std::vector<uint32_t>   m_AvailableIndices;
             std::mutex              m_Mutex;
             bool                    m_Locked             = false;
+
+            inline TResource* internal_get(const Handle inHandle) const noexcept { return m_Resources[inHandle.index()].m_Resource.get(); }
+            inline TResource* internal_get(const size_t index) const noexcept { return m_Resources[index].m_Resource.get(); }
         public:
-            ResourceVector() {
-                m_Resources.reserve(5);
-                m_AvailableIndices.reserve(5);
+            ResourceVector(size_t reserveSize = 1) {
+                m_Resources.reserve(reserveSize);
+                m_AvailableIndices.reserve(reserveSize);
             }
             ResourceVector(const ResourceVector& other)                = delete;
             ResourceVector& operator=(const ResourceVector& other)     = delete;
             ResourceVector(ResourceVector&& other) noexcept            = delete;
             ResourceVector& operator=(ResourceVector&& other) noexcept = delete;
-            ~ResourceVector() = default;
 
             std::mutex* getMutex() noexcept override { return &m_Mutex; }
 
@@ -66,35 +64,35 @@ namespace Engine::priv {
             }
 
             uint32_t pop_index() noexcept {
-                ASSERT(!m_Locked, "Engine::priv::ResourceVector::pop_index(): is locked!");
+                ASSERT(!m_Locked, __FUNCTION__ << "(): is locked!");
                 if (m_Locked) {
                     return 0;
                 }
-                ASSERT(m_AvailableIndices.size() > 0, "Engine::priv::ResourceVector::pop_index(): m_AvailableIndices was empty!");
+                ASSERT(m_AvailableIndices.size() > 0, __FUNCTION__ << "(): m_AvailableIndices was empty!");
                 auto index = m_AvailableIndices.back();
                 m_AvailableIndices.pop_back();
                 return index;
             }
-            TResource* get(const Handle inHandle) noexcept {
+            Engine::view_ptr<TResource> get(const Handle inHandle) noexcept {
                 if (inHandle.version() != m_Resources[inHandle.index()].m_Version) {
                     return nullptr;
                 }
-                ASSERT(inHandle.index() >= 0 && inHandle.index() < m_Resources.size(), "Engine::priv::ResourceVector::get(): handle index was out of bounds!");
-                return &m_Resources[inHandle.index()].m_Resource;
+                ASSERT(inHandle.index() >= 0 && inHandle.index() < m_Resources.size(), __FUNCTION__ << "(): handle index was out of bounds!");
+                return internal_get(inHandle);
             }
 
             void get(void*& out, const Handle inHandle) const noexcept override {
                 if (inHandle.version() != m_Resources[inHandle.index()].m_Version) {
                     out = nullptr;
                 }
-                ASSERT(inHandle.index() >= 0 && inHandle.index() < m_Resources.size(), "Engine::priv::ResourceVector::get(): handle index was out of bounds!");
-                out = (void*)&m_Resources[inHandle.index()].m_Resource;
+                ASSERT(inHandle.index() >= 0 && inHandle.index() < m_Resources.size(), __FUNCTION__ << "(): handle index was out of bounds!");
+                out = (void*)internal_get(inHandle);
             }
 
-            std::pair<TResource*, Handle> get(const std::string_view sv) noexcept {
+            std::pair<Engine::view_ptr<TResource>, Handle> get(const std::string_view sv) noexcept {
                 for (uint32_t i = 0; i < (uint32_t)m_Resources.size(); ++i) {
-                    if (m_Resources[i].m_Resource.name() == sv) {
-                        return std::make_pair(&m_Resources[i].m_Resource, Handle( i, m_Resources[i].m_Version, 0U ) );
+                    if (m_Resources[i].m_Resource->name() == sv) {
+                        return std::make_pair(internal_get(i), Handle( i, m_Resources[i].m_Version, 0U ) );
                     }
                 }
                 return std::make_pair( nullptr, Handle{} );
@@ -102,7 +100,7 @@ namespace Engine::priv {
 
             template<typename ...ARGS>
             size_t emplace_back(ARGS&&... args) { 
-                ASSERT(!m_Locked, "Engine::priv::ResourceVector::emplace_back(): is locked!");
+                ASSERT(!m_Locked, __FUNCTION__ << "(): is locked!");
                 if (m_Locked) {
                     return 0;
                 }
@@ -163,10 +161,10 @@ namespace Engine::priv {
             }
             inline constexpr size_t size() const noexcept override {  return m_Resources.size();  }
 
-            std::list<TResource*> getAsList() {
-                std::list<TResource*> returnedList;
+            std::list<Engine::view_ptr<TResource>> getAsList() {
+                std::list<Engine::view_ptr<TResource>> returnedList;
                 for (const auto& entry : m_Resources) {
-                    returnedList.push_back((TResource*)&entry.m_Resource);
+                    returnedList.push_back((TResource*)entry.m_Resource.get());
                 }
                 return returnedList;
             }

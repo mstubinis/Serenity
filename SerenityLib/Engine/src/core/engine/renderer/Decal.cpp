@@ -16,10 +16,10 @@
 using namespace Engine;
 
 namespace Engine::priv {
-    constexpr auto DefaultDecalBindFunctor = [](ModelInstance* i, const Engine::priv::Renderer* renderer) {
+    constexpr auto DefaultDecalBindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
         renderer->m_Pipeline->renderDecal(*i);
     };
-    constexpr auto DefaultDecalUnbindFunctor = [](ModelInstance* i, const Engine::priv::Renderer* renderer) {
+    constexpr auto DefaultDecalUnbindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
     };
 };
 

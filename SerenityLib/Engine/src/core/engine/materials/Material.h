@@ -11,7 +11,7 @@ namespace Engine::priv {
     struct InternalMaterialRequestPublicInterface;
     struct InternalScenePublicInterface;
     class  MaterialLoader;
-    class  Renderer;
+    class  RenderModule;
     class  IRenderingPipeline;
 };
 
@@ -36,11 +36,13 @@ class Material final : public Resource {
     friend struct Engine::priv::InternalMaterialRequestPublicInterface;
     friend struct Engine::priv::InternalMaterialPublicInterface;
     friend class  Engine::priv::MaterialLoader;
-    friend class  Engine::priv::Renderer;
+    friend class  Engine::priv::RenderModule;
     friend class  Engine::priv::IRenderingPipeline;
 
     using bind_fp   = void(*)(Material*);
   //using unbind_fp = void(*)(Material*);
+
+    using MaterialID = uint16_t;
 
     public:
         static Handle Checkers, WhiteShadeless; //loaded in renderer
@@ -60,7 +62,7 @@ class Material final : public Resource {
         unsigned char                     m_BaseMetalness       = 1_uc;
         unsigned char                     m_BaseSmoothness      = 64_uc;
         unsigned char                     m_BaseAlpha           = 254_uc;
-        uint16_t                          m_ID                  = 0U;
+        MaterialID                        m_ID                  = 0U;
 
         MaterialComponent* internal_add_component_generic(MaterialComponentType type, Handle texture, Handle mask = Handle{}, Handle cubemap = {});
         void internal_update_global_material_pool(bool addToDatabase);
@@ -114,7 +116,7 @@ class Material final : public Resource {
         inline CONSTEXPR bool shadeless() const noexcept { return m_Shadeless; }
         inline CONSTEXPR const Engine::color_vector_4& f0() const noexcept { return m_F0Color; }
         inline CONSTEXPR unsigned char glow() const noexcept { return m_BaseGlow; }
-        inline CONSTEXPR uint16_t id() const noexcept { return m_ID; }
+        inline CONSTEXPR MaterialID id() const noexcept { return m_ID; }
         inline CONSTEXPR DiffuseModel diffuseModel() const noexcept { return m_DiffuseModel; }
         inline CONSTEXPR SpecularModel specularModel() const noexcept { return m_SpecularModel; }
         inline CONSTEXPR unsigned char ao() const noexcept { return m_BaseAO; }

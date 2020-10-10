@@ -4,12 +4,6 @@
 
 using namespace Engine::priv;
 
-SocketManager::SocketManager() {
-
-}
-SocketManager::~SocketManager() {
-
-}
 void SocketManager::update(const float dt) {
     for (size_t i = 0; i < m_TCPListeners.size(); ++i) {
         m_TCPListeners[i]->update(dt);

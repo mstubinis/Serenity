@@ -12,6 +12,7 @@
 #include <core/engine/threading/ThreadingModule.h>
 #include <core/engine/resources/Engine_BuiltInShaders.h>
 #include <core/engine/resources/Engine_Resources.h>
+#include <core/engine/textures/Texture.h>
 
 using namespace Engine::priv;
 
@@ -41,11 +42,9 @@ void Engine::priv::SSAO::internal_generate_noise(std::uniform_real_distribution<
         ssaoNoise.emplace_back(rand_dist(gen) * 2.0 - 1.0, rand_dist(gen) * 2.0 - 1.0, 0.0f);
     }
     Engine::Renderer::genAndBindTexture(TextureType::Texture2D, m_ssao_noise_texture);
-    GLCall((GL_TEXTURE_2D, 0, GL_RGB16F, SSAO_NORMALMAP_SIZE, SSAO_NORMALMAP_SIZE, 0, GL_RGB, GL_FLOAT, ssaoNoise.data()));
-    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+    GLCall(glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB16F, SSAO_NORMALMAP_SIZE, SSAO_NORMALMAP_SIZE, 0, GL_RGB, GL_FLOAT, ssaoNoise.data() ));
+    Texture::setFilter(TextureType::Texture2D, TextureFilter::Nearest);
+    Texture::setWrapping(TextureType::Texture2D, TextureWrap::Repeat);
 }
 void Engine::priv::SSAO::init() {
     std::uniform_real_distribution<float> rand_dist(0.0f, 1.0f);
@@ -114,28 +113,28 @@ bool Engine::priv::SSAO::init_shaders() {
         "    gl_FragColor.a = Sum;\n"
         "}";
 
-    auto lambda_part_a = [&]() {
+    auto lambda_part_a = [this]() {
         m_Vertex_Shader   = Engine::Resources::addResource<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
         m_Fragment_Shader = Engine::Resources::addResource<Shader>(m_GLSL_frag_code, ShaderType::Fragment, false);
     };
-    auto lambda_part_b = [&]() {
+    auto lambda_part_b = [this]() {
         m_Shader_Program  = Engine::Resources::addResource<ShaderProgram>("SSAO", m_Vertex_Shader, m_Fragment_Shader);
     };
     Engine::priv::threading::addJobWithPostCallback(lambda_part_a, lambda_part_b);
 
 
-    auto lambda_part_a_blur = [&]() {
+    auto lambda_part_a_blur = [this]() {
         m_Vertex_Shader_Blur   = Engine::Resources::addResource<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
         m_Fragment_Shader_Blur = Engine::Resources::addResource<Shader>(m_GLSL_frag_code_blur, ShaderType::Fragment, false);
     };
-    auto lambda_part_b_blur = [&]() {
+    auto lambda_part_b_blur = [this]() {
         m_Shader_Program_Blur  = Engine::Resources::addResource<ShaderProgram>("SSAO_Blur", m_Vertex_Shader_Blur, m_Fragment_Shader_Blur);
     };
     Engine::priv::threading::addJobWithPostCallback(lambda_part_a_blur, lambda_part_b_blur);
 
     return true;
 }
-void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, const Camera& camera, const Engine::priv::Renderer& renderer) {
+void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, const Camera& camera, const Engine::priv::RenderModule& renderer) {
     renderer.bind(m_Shader_Program.get<ShaderProgram>());
     auto& dimensions    = viewport.getViewportDimensions();
     float divisor       = gbuffer.getSmallFBO().divisor();
@@ -152,7 +151,7 @@ void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, co
 
     Engine::Renderer::renderFullscreenQuad();
 }
-void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, std::string_view type, unsigned int texture, const Engine::priv::Renderer& renderer) {
+void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, std::string_view type, unsigned int texture, const Engine::priv::RenderModule& renderer) {
     renderer.bind(m_Shader_Program_Blur.get<ShaderProgram>());
     glm::vec2 hv(0.0f);
     if (type == "H") { 
@@ -210,8 +209,6 @@ void Engine::Renderer::ssao::setLevel(const SSAOLevel::Level level) {
 
             setBlurRadius(0.66f);
             setBlurStrength(0.48f);
-            break;
-        }default: {
             break;
         }
     }

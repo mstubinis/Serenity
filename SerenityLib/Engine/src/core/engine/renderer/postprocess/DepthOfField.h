@@ -10,7 +10,7 @@ class  Viewport;
 
 namespace Engine::priv {
     class  GBuffer;
-    class  Renderer;
+    class  RenderModule;
     class  DepthOfField final {
         private:
             Handle       m_Vertex_Shader;
@@ -29,7 +29,7 @@ namespace Engine::priv {
 
             bool init_shaders();
 
-            void pass(GBuffer&, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::Renderer& renderer);
+            void pass(GBuffer&, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::RenderModule& renderer);
 
             static DepthOfField STATIC_DOF;
     };

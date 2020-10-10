@@ -7,7 +7,7 @@ class  Shader;
 class  ShaderProgram;
 class  UniformBufferObject;
 namespace Engine::priv {
-    class Renderer;
+    class RenderModule;
     class IRenderingPipeline;
     struct InternalShaderProgramPublicInterface final {
         static void LoadCPU(ShaderProgram&);
@@ -27,7 +27,7 @@ class ShaderProgram final : public Resource {
     friend class  UniformBufferObject;
     friend class  Shader;
     friend struct Engine::priv::InternalShaderProgramPublicInterface;
-    friend class  Engine::priv::Renderer;
+    friend class  Engine::priv::RenderModule;
     friend class  Engine::priv::IRenderingPipeline;
     public:
         static Handle Deferred, Forward, Decal; //loaded in renderer

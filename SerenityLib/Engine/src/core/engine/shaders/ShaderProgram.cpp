@@ -29,7 +29,7 @@ namespace Engine::priv {
         Engine::Renderer::sendUniform1Safe("fcoeff", fcoeff);
 
         //yes this is needed
-        if(priv::Renderer::GLSL_VERSION < 140){
+        if(priv::RenderModule::GLSL_VERSION < 140){
             Engine::Renderer::sendUniformMatrix4Safe("CameraViewProj", camera->getViewProjection());
         }
     }};

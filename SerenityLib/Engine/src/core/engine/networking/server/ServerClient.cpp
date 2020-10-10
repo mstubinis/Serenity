@@ -93,8 +93,6 @@ void ServerClient::internal_update_receive_tcp_packet(const float dt) noexcept {
             break;
         }case SocketStatus::Error: {
             break;
-        }default: {
-            break;
         }
     }
 }
@@ -115,8 +113,6 @@ void ServerClient::internal_update_connection_state(const float dt) noexcept {
             }
             break;
         }case ConnectionState::Inactive: {
-            break;
-        }default: {
             break;
         }
     }

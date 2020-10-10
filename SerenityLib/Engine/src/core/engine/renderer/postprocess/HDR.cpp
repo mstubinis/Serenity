@@ -71,7 +71,7 @@ bool Engine::priv::HDR::init_shaders() {
 
     return true;
 }
-void Engine::priv::HDR::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, bool godRays, bool lighting, float godRaysFactor, const Engine::priv::Renderer& renderer) {
+void Engine::priv::HDR::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, bool godRays, bool lighting, float godRaysFactor, const Engine::priv::RenderModule& renderer) {
     renderer.bind(m_Shader_Program.get<ShaderProgram>());
 
     Engine::Renderer::sendUniform4Safe("HDRInfo", exposure, 0.0f, godRaysFactor, (float)algorithm);

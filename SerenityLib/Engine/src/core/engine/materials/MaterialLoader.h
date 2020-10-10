@@ -20,27 +20,25 @@ class Texture;
 namespace Engine::priv {
     class MaterialLoader final {
         private: 
-            static std::pair<Texture*, Handle> internal_load_texture(const std::string& file, bool mipmapped, ImageInternalFormat, TextureType);
+            static std::pair<Engine::view_ptr<Texture>, Handle> internal_load_texture(const std::string& file, bool mipmapped, ImageInternalFormat, TextureType);
         public:
-            static std::pair<Texture*, Handle> LoadTextureDiffuse(const std::string& file);
-            static std::pair<Texture*, Handle> LoadTextureNormal(const std::string& file);
-            static std::pair<Texture*, Handle> LoadTextureGlow(const std::string& file);
-            static std::pair<Texture*, Handle> LoadTextureSpecular(const std::string& file);
-            static std::pair<Texture*, Handle> LoadTextureAO(const std::string& file);
-            static std::pair<Texture*, Handle> LoadTextureMetalness(const std::string& file);
-            static std::pair<Texture*, Handle> LoadTextureSmoothness(const std::string& file);
-            static std::pair<Texture*, Handle> LoadTextureMask(const std::string& file);
-            static std::pair<Texture*, Handle> LoadTextureCubemap(const std::string& file);
+            static std::pair<Engine::view_ptr<Texture>, Handle> LoadTextureDiffuse(const std::string& file);
+            static std::pair<Engine::view_ptr<Texture>, Handle> LoadTextureNormal(const std::string& file);
+            static std::pair<Engine::view_ptr<Texture>, Handle> LoadTextureGlow(const std::string& file);
+            static std::pair<Engine::view_ptr<Texture>, Handle> LoadTextureSpecular(const std::string& file);
+            static std::pair<Engine::view_ptr<Texture>, Handle> LoadTextureAO(const std::string& file);
+            static std::pair<Engine::view_ptr<Texture>, Handle> LoadTextureMetalness(const std::string& file);
+            static std::pair<Engine::view_ptr<Texture>, Handle> LoadTextureSmoothness(const std::string& file);
+            static std::pair<Engine::view_ptr<Texture>, Handle> LoadTextureMask(const std::string& file);
+            static std::pair<Engine::view_ptr<Texture>, Handle> LoadTextureCubemap(const std::string& file);
 
             static void InitBase(Material&);
             static void Init(Material&, Handle diffuse, Handle normal, Handle glow, Handle specular, Handle ao, Handle metalness, Handle smoothness);
             
     };
     struct InternalMaterialPublicInterface final {
-        static void LoadCPU(Material&);
         static void LoadGPU(Material&);
         static void UnloadCPU(Material&);
-        static void UnloadGPU(Material&);
         static void Load(Material&);
         static void Unload(Material&);
     };

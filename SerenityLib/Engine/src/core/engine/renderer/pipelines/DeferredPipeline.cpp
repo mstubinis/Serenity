@@ -101,7 +101,7 @@ struct ShaderProgramEnum final { enum Program : unsigned int {
 };};
 
 
-DeferredPipeline::DeferredPipeline(Engine::priv::Renderer& renderer) : m_Renderer(renderer) {
+DeferredPipeline::DeferredPipeline(Engine::priv::RenderModule& renderer) : m_Renderer(renderer) {
     pipeline = this;
 }
 DeferredPipeline::~DeferredPipeline() {
@@ -143,14 +143,14 @@ void DeferredPipeline::init() {
     m_OpenGLStateMachine.GL_glEnable(GL_DEPTH_TEST);
     m_OpenGLStateMachine.GL_glDisable(GL_STENCIL_TEST);
     m_OpenGLStateMachine.GL_glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //for non Power of Two textures
-    if (Engine::priv::Renderer::OPENGL_VERSION >= 40) {
+    if (Engine::priv::RenderModule::OPENGL_VERSION >= 40) {
         m_OpenGLStateMachine.GL_glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); //can run real slowly on some gpu's / drivers. its core 32 but just to be safe, set it to 40
     }
     m_OpenGLStateMachine.GL_glEnable(GL_DEPTH_CLAMP);
     Engine::Renderer::setDepthFunc(GL_LEQUAL);
 
 
-    priv::EShaders::init(Engine::priv::Renderer::OPENGL_VERSION, Engine::priv::Renderer::GLSL_VERSION);
+    priv::EShaders::init(Engine::priv::RenderModule::OPENGL_VERSION, Engine::priv::RenderModule::GLSL_VERSION);
 
 
     UniformBufferObject::UBO_CAMERA = NEW UniformBufferObject("Camera", sizeof(UBOCameraDataStruct));
@@ -593,8 +593,8 @@ void DeferredPipeline::onResize(unsigned int newWidth, unsigned int newHeight) {
 }
 void DeferredPipeline::onOpenGLContextCreation(unsigned int windowWidth, unsigned int windowHeight, unsigned int glslVersion, unsigned int openglVersion) {
     //TODO: move to a more generic area
-    Engine::priv::Renderer::GLSL_VERSION   = glslVersion;
-    Engine::priv::Renderer::OPENGL_VERSION = openglVersion;
+    Engine::priv::RenderModule::GLSL_VERSION   = glslVersion;
+    Engine::priv::RenderModule::OPENGL_VERSION = openglVersion;
     m_OpenGLStateMachine.GL_INIT_DEFAULT_STATE_MACHINE(windowWidth, windowHeight);
     Engine::Renderer::GLEnable(GL_CULL_FACE);
     m_GBuffer.init(windowWidth, windowHeight);
@@ -1052,7 +1052,7 @@ void DeferredPipeline::render2DText(const std::string& text, Handle fontHandle, 
     m_Text_UVs.clear();
     m_Text_Indices.clear();
 
-    auto& fontPlane = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getFontMesh().get<Mesh>();
+    Mesh& fontPlane = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getFontMesh().get<Mesh>();
     m_Renderer.bind(&fontPlane);
 
     Font& font = *fontHandle.get<Font>();
@@ -1115,7 +1115,7 @@ void DeferredPipeline::render2DTexture(Handle textureHandle, const glm::vec2& po
     Engine::Renderer::sendUniform4("Object_Color", color);
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
 
-    auto& plane = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh().get<Mesh>();
+    Mesh& plane = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh().get<Mesh>();
     m_Renderer.bind(&plane);
     renderMesh(plane);
     m_Renderer.unbind(&plane);
@@ -1138,7 +1138,7 @@ void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::ve
     Engine::Renderer::sendUniform4("Object_Color", color);
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
 
-    auto& triangle = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getTriangleMesh().get<Mesh>();
+    Mesh& triangle = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getTriangleMesh().get<Mesh>();
     m_Renderer.bind(&triangle);
     renderMesh(triangle);
     m_Renderer.unbind(&triangle);
@@ -1216,7 +1216,7 @@ void DeferredPipeline::internal_pass_forward(Viewport& viewport, Camera& camera,
     InternalScenePublicInterface::RenderForwardOpaque(m_Renderer, scene, viewport, camera);
 
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-    for (unsigned int i = 0; i < 4; ++i) {
+    for (auto i = 0U; i < 4; ++i) {
         Engine::Renderer::GLEnablei(GL_BLEND, i);
     }
     if (!depthPrepass) {
@@ -1284,7 +1284,7 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
 
     auto winSize = glm::vec2(Engine::Resources::getWindowSize());
 
-    if (Renderer::GLSL_VERSION < 140) {
+    if (RenderModule::GLSL_VERSION < 140) {
         Engine::Renderer::sendUniformMatrix4Safe("CameraView", camera.getView());
         Engine::Renderer::sendUniformMatrix4Safe("CameraProj", camera.getProjection());
         //sendUniformMatrix4Safe("CameraViewProj",camera.getViewProjection()); //moved to shader binding function
@@ -1330,7 +1330,7 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
     if (mainRenderFunction) {
         //do GI here. (only doing GI during the main render pass, not during light probes
         m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingGI].get<ShaderProgram>());
-        if (Renderer::GLSL_VERSION < 140) {
+        if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
             Engine::Renderer::sendUniformMatrix4Safe("CameraInvView", camera.getViewInverse());
             Engine::Renderer::sendUniformMatrix4Safe("CameraInvProj", camera.getProjectionInverse());
             Engine::Renderer::sendUniformMatrix4Safe("CameraInvViewProj", camera.getViewProjectionInverse());
@@ -1609,7 +1609,7 @@ void DeferredPipeline::render2DAPI(bool mainRenderFunc, Viewport& viewport) {
     }
 }
 
-void DeferredPipeline::render(Engine::priv::Renderer& renderer, Viewport& viewport, bool mainRenderFunction) {
+void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& viewport, bool mainRenderFunction) {
     auto& camera             = viewport.getCamera();
     auto& scene              = viewport.getScene();
     auto& viewportDimensions = viewport.getViewportDimensions();
@@ -1619,7 +1619,7 @@ void DeferredPipeline::render(Engine::priv::Renderer& renderer, Viewport& viewpo
 
     if (mainRenderFunction) {
         #pragma region Camera UBO
-        if (Renderer::GLSL_VERSION >= 140 && UniformBufferObject::UBO_CAMERA) {
+        if (Engine::priv::RenderModule::GLSL_VERSION >= 140 && UniformBufferObject::UBO_CAMERA) {
             //TODO: change the manual camera uniform sending (for when glsl version < 140) to give a choice between the two render spaces
 
             //same simulation and render space
