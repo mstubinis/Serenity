@@ -3,12 +3,6 @@
 
 using namespace Engine::priv;
 
-NetworkingModule::NetworkingModule() {
-
-}
-NetworkingModule::~NetworkingModule() {
-
-}
 void NetworkingModule::update(const float dt) {
     m_SocketManager.update(dt);
 }

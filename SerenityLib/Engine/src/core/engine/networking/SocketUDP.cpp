@@ -47,8 +47,6 @@ SocketStatus::Status Networking::SocketUDP::internal_send_packet(UDPPacketInfo& 
             break;
         }case sf::Socket::Status::Partial: {
             break;
-        }default: {
-            break;
         }
     }
     return SocketStatus::map_status(status);
@@ -72,8 +70,6 @@ SocketStatus::Status Networking::SocketUDP::internal_send_partial_packets_loop()
             }case SocketStatus::NotReady: {
                 break;
             }case SocketStatus::Partial: {
-                break;
-            }default: {
                 break;
             }
         }

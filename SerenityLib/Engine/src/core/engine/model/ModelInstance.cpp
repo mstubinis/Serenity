@@ -22,7 +22,7 @@ unsigned int ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
 decimal ModelInstance::m_GlobalDistanceFactor     = (decimal)1100.0;
 
 namespace Engine::priv {
-    constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engine::priv::Renderer* renderer) {
+    constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
         auto stage            = i->stage();
         auto& scene           = *Resources::getCurrentScene();
         auto* camera          = scene.getActiveCamera();
@@ -103,7 +103,7 @@ namespace Engine::priv {
         Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
         Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
     };
-    constexpr auto DefaultModelInstanceUnbindFunctor = [](ModelInstance* i, const Engine::priv::Renderer* renderer) {
+    constexpr auto DefaultModelInstanceUnbindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
         //auto& i = *static_cast<ModelInstance*>(r);
     };
 };
@@ -202,10 +202,10 @@ float ModelInstance::internal_calculate_radius() {
     m_Radius = m_MeshHandle.get<Mesh>()->getRadius();
     return m_Radius;
 }
-void ModelInstance::bind(const Engine::priv::Renderer& renderer) {
+void ModelInstance::bind(const Engine::priv::RenderModule& renderer) {
     m_CustomBindFunctor(this, &renderer);
 }
-void ModelInstance::unbind(const Engine::priv::Renderer& renderer) {
+void ModelInstance::unbind(const Engine::priv::RenderModule& renderer) {
     m_CustomUnbindFunctor(this, &renderer);
 }
 void ModelInstance::setDefaultViewportFlag(unsigned int flag) {

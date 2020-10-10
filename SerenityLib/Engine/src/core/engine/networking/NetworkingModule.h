@@ -5,17 +5,14 @@
 #include <core/engine/networking/SocketManager.h>
 
 namespace Engine::priv {
-    class NetworkingModule {
+    class NetworkingModule final {
         friend class ::Engine::Networking::SocketTCP;
         friend class ::Engine::Networking::SocketUDP;
         friend class ::Engine::Networking::ListenerTCP;
         private:
             SocketManager m_SocketManager;
         public:
-            NetworkingModule();
-            virtual ~NetworkingModule();
-
-            virtual void update(const float dt);
+            void update(const float dt);
     };
 };
 

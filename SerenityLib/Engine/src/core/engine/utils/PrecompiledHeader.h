@@ -47,6 +47,14 @@
 #include <typeindex>
 #include <filesystem>
 
+//TODO: replace with std::latch and std::barrier once available from c++20 on msvc
+#include <boost/thread/latch.hpp>
+#include <boost/thread/barrier.hpp>
+
+using namespace std::literals;
+using namespace std::chrono_literals;
+using namespace std::literals::chrono_literals;
+
 //windows api
 #ifdef _WIN32
     #include <windows.h>

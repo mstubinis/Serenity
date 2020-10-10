@@ -21,7 +21,7 @@ class Particle;
 class ModelInstance;
 class LightProbe;
 namespace Engine::priv {
-    class Renderer;
+    class RenderModule;
     class ParticleSystem;
 };
 
@@ -32,7 +32,7 @@ namespace Engine::priv {
 
 namespace Engine::priv {
     class IRenderingPipeline {
-        friend class Renderer;
+        friend class RenderModule;
         public:
             virtual ~IRenderingPipeline(){}
 
@@ -216,7 +216,7 @@ namespace Engine::priv {
             virtual void renderFullscreenTriangle() = 0;
             virtual void renderFullscreenQuad() = 0;
 
-            virtual void render(Engine::priv::Renderer& renderer, Viewport& viewport, bool mainRenderFunction) = 0;
+            virtual void render(Engine::priv::RenderModule& renderer, Viewport& viewport, bool mainRenderFunction) = 0;
     };
 };
 

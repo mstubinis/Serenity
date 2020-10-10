@@ -21,18 +21,16 @@ namespace Engine::priv {
     class  AnimationData;
     struct InternalMeshRequestPublicInterface;
     class  ModelInstanceAnimation;
-    class  Renderer;
+    class  RenderModule;
 };
 
 #include <core/engine/mesh/VertexData.h>
-//#include <core/engine/mesh/MeshIncludes.h>
 #include <core/engine/mesh/Skeleton.h>
 #include <core/engine/mesh/MeshCollisionFactory.h>
 #include <core/engine/resources/Resource.h>
 #include <core/engine/events/Observer.h>
 #include <core/engine/physics/PhysicsIncludes.h>
 #include <core/engine/renderer/RendererIncludes.h>
-//#include <core/engine/resources/Handle.h>
 
 namespace Engine::priv{
     class InternalMeshPublicInterface final {
@@ -106,17 +104,17 @@ class Mesh final: public Resource, public Observer {
     friend class  Engine::priv::MeshLoader;
     friend class  Engine::priv::MeshCollisionFactory;
     friend class  Engine::priv::ModelInstanceAnimation;
-    friend class  Engine::priv::Renderer;
+    friend class  Engine::priv::RenderModule;
     friend class  Collision;
     friend class  Terrain;
     friend class  SMSH_File;
 
-    using bind_func   = void(*)(Mesh*, const Engine::priv::Renderer*);
-    using unbind_func = void(*)(Mesh*, const Engine::priv::Renderer*);
+    using bind_func   = void(*)(Mesh*, const Engine::priv::RenderModule*);
+    using unbind_func = void(*)(Mesh*, const Engine::priv::RenderModule*);
 
     private:
-        bind_func       m_CustomBindFunctor   = [](Mesh*, const Engine::priv::Renderer*) {};
-        unbind_func     m_CustomUnbindFunctor = [](Mesh*, const Engine::priv::Renderer*) {};
+        bind_func       m_CustomBindFunctor   = [](Mesh*, const Engine::priv::RenderModule*) {};
+        unbind_func     m_CustomUnbindFunctor = [](Mesh*, const Engine::priv::RenderModule*) {};
 
         MeshCPUData     m_CPUData;
 

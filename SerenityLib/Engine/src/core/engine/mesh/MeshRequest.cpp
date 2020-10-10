@@ -68,7 +68,7 @@ void MeshRequest::request(bool inAsync) {
                     copyRequest.m_Callback();
                 };
 
-                if (m_Async || std::this_thread::get_id() != Resources::getWindow().getOpenglThreadID()) {
+                if (m_Async || !Engine::priv::threading::isMainThread()) {
                     threading::addJobWithPostCallback(lambda_cpu, lambda_gpu);
                 }else{
                     lambda_cpu();
@@ -109,7 +109,7 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
         const char* saveFileName = (meshRequest.m_FileOrData.substr(0, meshRequest.m_FileOrData.find_last_of(".")) + ".smsh").c_str();
         auto& part = meshRequest.m_Parts[0];
         SMSH_File::SaveFile(saveFileName, part.cpuData);
-        std::mutex* mutex = part.handle.getMutex();
+        auto mutex = part.handle.getMutex();
         if (mutex) {
             std::lock_guard lock(*mutex);
             auto& mesh = *part.handle.get<Mesh>();
@@ -122,7 +122,7 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
             part.cpuData.m_Threshold = meshRequest.m_Threshold;
             part.cpuData.internal_calculate_radius();
             part.cpuData.m_CollisionFactory = (NEW MeshCollisionFactory(part.cpuData, meshRequest.m_CollisionLoadingFlags));
-            std::mutex* mutex = part.handle.getMutex();
+            auto mutex = part.handle.getMutex();
             if (mutex) {
                 std::lock_guard lock(*mutex);
                 auto& mesh = *part.handle.get<Mesh>();
@@ -136,7 +136,7 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
             part.cpuData.m_Threshold  = meshRequest.m_Threshold;
             part.cpuData.internal_calculate_radius();
             part.cpuData.m_CollisionFactory = (NEW MeshCollisionFactory(part.cpuData, meshRequest.m_CollisionLoadingFlags));
-            std::mutex* mutex = part.handle.getMutex();
+            auto mutex = part.handle.getMutex();
             if (mutex) {
                 std::lock_guard lock(*mutex);
                 auto& mesh = *part.handle.get<Mesh>();
@@ -147,7 +147,7 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
     }
 }
 void InternalMeshRequestPublicInterface::LoadGPU(MeshRequest& meshRequest) {
-    std::mutex* mutex = meshRequest.m_Parts[0].handle.getMutex();
+    auto mutex = meshRequest.m_Parts[0].handle.getMutex();
     if (mutex) {
         std::lock_guard lock(*mutex);
         for (auto& part : meshRequest.m_Parts) {

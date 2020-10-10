@@ -152,7 +152,7 @@ namespace Engine{
                 NetworkingModule    m_NetworkingModule;
                 DiscordModule       m_DiscordModule;
                 EventModule         m_EventModule;
-                Renderer            m_RenderManager;
+                RenderModule      m_RenderModule;
                 PhysicsManager      m_PhysicsManager;
                 ResourceManager     m_ResourceManager;
                 SoundModule         m_SoundModule;

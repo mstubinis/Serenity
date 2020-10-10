@@ -25,18 +25,6 @@ Networking::ListenerTCP::~ListenerTCP() {
 void Networking::ListenerTCP::update(const float dt) {
 
 }
-unsigned short Networking::ListenerTCP::localPort() const {
-    return m_Listener.getLocalPort(); 
-}
-void Networking::ListenerTCP::setBlocking(bool b) { 
-    m_Listener.setBlocking(b); 
-}
-bool Networking::ListenerTCP::isListening() const {
-    return (localPort() != 0);
-}
-bool Networking::ListenerTCP::isBlocking() const {
-    return m_Listener.isBlocking(); 
-}
 void Networking::ListenerTCP::close() { 
     if (isListening()) {
         EventSocket e = EventSocket(m_Listener.getLocalPort(), 0, m_IP, SocketType::TCPListener);

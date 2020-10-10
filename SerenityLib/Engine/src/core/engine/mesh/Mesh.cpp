@@ -73,10 +73,10 @@ MeshCPUData& MeshCPUData::operator=(MeshCPUData&& other) noexcept {
 }
 
 
-constexpr auto DefaultMeshBindFunctor = [](Mesh* mesh_ptr, const Engine::priv::Renderer* renderer) {
+constexpr auto DefaultMeshBindFunctor = [](Mesh* mesh_ptr, const Engine::priv::RenderModule* renderer) {
     mesh_ptr->getVertexData().bind();
 };
-constexpr auto DefaultMeshUnbindFunctor = [](Mesh* mesh_ptr, const Engine::priv::Renderer* renderer) {
+constexpr auto DefaultMeshUnbindFunctor = [](Mesh* mesh_ptr, const Engine::priv::RenderModule* renderer) {
     mesh_ptr->getVertexData().unbind();
 };
 
@@ -86,10 +86,6 @@ void InternalMeshPublicInterface::LoadGPU(Mesh& mesh) {
     mesh.Resource::load();
 }
 void InternalMeshPublicInterface::UnloadCPU(Mesh& mesh) {
-    //mesh.m_CPUData.m_Skeleton.reset();
-    //mesh.m_CPUData.m_CollisionFactory.reset();
-    //mesh.m_CPUData.m_RootNode.reset();
-    
     mesh.Resource::unload();
 }
 void InternalMeshPublicInterface::UnloadGPU(Mesh& mesh) {
@@ -103,7 +99,7 @@ void InternalMeshPublicInterface::InitBlankMesh(Mesh& mesh) {
 }
 bool InternalMeshPublicInterface::SupportsInstancing() {
     return (
-        Renderer::OPENGL_VERSION >= 31 || 
+        RenderModule::OPENGL_VERSION >= 31 ||
         OpenGLExtensions::supported(OpenGLExtensions::EXT_draw_instanced) || 
         OpenGLExtensions::supported(OpenGLExtensions::ARB_draw_instanced)
     );

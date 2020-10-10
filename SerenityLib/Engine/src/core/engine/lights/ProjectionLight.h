@@ -11,7 +11,7 @@ namespace Engine::priv {
 #include <core/engine/resources/Handle.h>
 
 class ProjectionLight : public SunLight {
-    friend class Engine::priv::Renderer;
+    friend class Engine::priv::RenderModule;
     friend class Engine::priv::IRenderingPipeline;
     protected:
         Texture*                       m_Texture    = nullptr;

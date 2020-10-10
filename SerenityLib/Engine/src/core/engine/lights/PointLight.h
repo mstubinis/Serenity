@@ -11,7 +11,7 @@ struct PointLightDefaultAttenuationData final {
 };
 
 class PointLight : public SunLight {
-    friend class ::Engine::priv::Renderer;
+    friend class ::Engine::priv::RenderModule;
     protected:
         LightAttenuation   m_AttenuationModel = LightAttenuation::Constant_Linear_Exponent;
         float              m_C                = 0.1f;

@@ -211,8 +211,8 @@ Handle Engine::Resources::addShader(const std::string& fileOrData, ShaderType ty
 }
 
 Handle Engine::Resources::addShaderProgram(const std::string& n, Handle v, Handle f){
-    Shader* vertexShader   = Engine::Resources::getResource<Shader>(v);
-    Shader* fragmentShader = Engine::Resources::getResource<Shader>(f);
+    auto vertexShader   = Engine::Resources::getResource<Shader>(v);
+    auto fragmentShader = Engine::Resources::getResource<Shader>(f);
     return Engine::Resources::addResource<ShaderProgram>(n, v, f);
 }
 bool Engine::Resources::setCurrentScene(Scene* newScene){

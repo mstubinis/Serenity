@@ -11,7 +11,7 @@ namespace Engine::priv {
     class GBuffer;
     class FullscreenQuad;
     class FullscreenTriangle;
-    class Renderer;
+    class RenderModule;
 };
 
 #include <core/engine/renderer/pipelines/IRenderingPipeline.h>
@@ -25,7 +25,7 @@ namespace Engine::priv {
 
 namespace Engine::priv {
     class DeferredPipeline final : public IRenderingPipeline {
-        friend class Renderer;
+        friend class RenderModule;
         public: struct UBOCameraDataStruct final {
             glm::mat4 View;
             glm::mat4 Proj;
@@ -52,7 +52,7 @@ namespace Engine::priv {
                     , depth { depth_ }
                 {}
             };
-            Engine::priv::Renderer&        m_Renderer;
+            Engine::priv::RenderModule&  m_Renderer;
 
             glm::vec4                      m_CurrentScissorState = glm::vec4(-1.0f);
             float                          m_CurrentScissorDepth = 0.0f;
@@ -108,7 +108,7 @@ namespace Engine::priv {
 
             DeferredPipeline() = delete;
         public:
-            DeferredPipeline(Engine::priv::Renderer& renderer);
+            DeferredPipeline(Engine::priv::RenderModule& renderer);
             ~DeferredPipeline();
 
             void init() override;
@@ -215,7 +215,7 @@ namespace Engine::priv {
             void renderFullscreenTriangle() override;
             void renderFullscreenQuad() override;
 
-            void render(Engine::priv::Renderer& renderer, Viewport& viewport, bool mainRenderFunction) override;
+            void render(Engine::priv::RenderModule& renderer, Viewport& viewport, bool mainRenderFunction) override;
     };
 };
 

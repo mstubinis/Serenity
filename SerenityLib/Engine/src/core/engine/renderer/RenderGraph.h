@@ -13,7 +13,7 @@ struct Entity;
 class  Viewport;
 namespace Engine::priv {
     class  RenderGraph;
-    class  Renderer;
+    class  RenderModule;
     struct InternalScenePublicInterface;
 };
 
@@ -82,8 +82,8 @@ namespace Engine::priv {
             void sort_bruteforce(Camera& camera, SortingMode sortingMode);
             void sort_cheap_bruteforce(Camera& camera, SortingMode sortingMode);
 
-            void render(Engine::priv::Renderer& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders = true, SortingMode sortingMode = SortingMode::None);
-            void render_bruteforce(Engine::priv::Renderer& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders = true, SortingMode sortingMode = SortingMode::None);
+            void render(Engine::priv::RenderModule& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders = true, SortingMode sortingMode = SortingMode::None);
+            void render_bruteforce(Engine::priv::RenderModule& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders = true, SortingMode sortingMode = SortingMode::None);
             void validate_model_instances_for_rendering(Viewport& viewport, Camera& camera);
 
     };

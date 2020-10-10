@@ -30,14 +30,12 @@ namespace Engine::priv {
                 return &worker;
             }
 
-            std::thread* operator[](std::thread::id threadID) noexcept {
-                return m_WorkerThreadsHashed.at(threadID);
-            }
+            inline std::thread* operator[](std::thread::id threadID) noexcept { return m_WorkerThreadsHashed.at(threadID); }
 
-            std::vector<std::thread>::iterator begin() { return m_WorkerThreads.begin(); }
-            std::vector<std::thread>::iterator end() { return m_WorkerThreads.end(); }
-            std::vector<std::thread>::const_iterator begin() const { return m_WorkerThreads.begin(); }
-            std::vector<std::thread>::const_iterator end() const { return m_WorkerThreads.end(); }
+            inline std::vector<std::thread>::iterator begin() { return m_WorkerThreads.begin(); }
+            inline std::vector<std::thread>::iterator end() { return m_WorkerThreads.end(); }
+            inline std::vector<std::thread>::const_iterator begin() const { return m_WorkerThreads.begin(); }
+            inline std::vector<std::thread>::const_iterator end() const { return m_WorkerThreads.end(); }
     };
 };
 

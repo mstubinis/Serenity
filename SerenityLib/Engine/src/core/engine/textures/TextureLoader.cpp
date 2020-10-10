@@ -140,6 +140,7 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
         }case FourCC_YUY2: {
             break;
         }default: {
+            ENGINE_PRODUCTION_LOG("TextureLoader::LoadDDSFile(): could not evalutate switch statement for head.format.fourCC!")
             return false;
         }
     }
@@ -298,7 +299,7 @@ void TextureLoader::GeneratePBRData(Texture& texture, int convoludeTextureSize, 
         cubemapPreEnvFilter.first->setMaxFilter(TextureFilter::Linear);
     }
 
-    Core::m_Engine->m_RenderManager._genPBREnvMapData(texture, texture.m_ConvolutionTextureHandle, texture.m_PreEnvTextureHandle, convoludeTextureSize, preEnvFilterSize);
+    Core::m_Engine->m_RenderModule._genPBREnvMapData(texture, texture.m_ConvolutionTextureHandle, texture.m_PreEnvTextureHandle, convoludeTextureSize, preEnvFilterSize);
 }
 void TextureLoader::LoadCPU(TextureCPUData& cpuData, Handle inHandle) {
     for (auto& imageData : cpuData.m_ImagesDatas) {
@@ -316,7 +317,7 @@ void TextureLoader::LoadCPU(TextureCPUData& cpuData, Handle inHandle) {
         }
     }
     if (!inHandle.null()) {
-        auto* mutex = inHandle.getMutex();
+        auto mutex = inHandle.getMutex();
         if (mutex) {
             std::lock_guard lock(*mutex);
             inHandle.get<Texture>()->m_CPUData = std::move(cpuData);
@@ -324,7 +325,7 @@ void TextureLoader::LoadCPU(TextureCPUData& cpuData, Handle inHandle) {
     }
 }
 void TextureLoader::LoadGPU(Handle textureHandle) {
-    auto* mutex = textureHandle.getMutex();
+    auto mutex = textureHandle.getMutex();
     if (mutex) {
         std::lock_guard lock(*mutex);
         auto& texture = *textureHandle.get<Texture>();
@@ -346,8 +347,6 @@ void TextureLoader::LoadGPU(Texture& texture) {
             break;
         }case TextureType::CubeMap: {
             TextureLoader::LoadTextureCubemapIntoOpenGL(texture);
-            break;
-        }default: {
             break;
         }
     }

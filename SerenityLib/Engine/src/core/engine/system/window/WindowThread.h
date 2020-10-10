@@ -20,7 +20,7 @@ namespace Engine::priv {
             std::unique_ptr<std::thread>                      m_EventThread = nullptr;
 
             void internal_cleanup();
-            void internal_startup(Window& super, const std::string& name);
+            void internal_startup(Window& super, const std::string& name, boost::latch* bLatch);
             void internal_push(WindowEventThreadOnlyCommands command);
             std::optional<sf::Event> internal_try_pop();
             void internal_update_loop();

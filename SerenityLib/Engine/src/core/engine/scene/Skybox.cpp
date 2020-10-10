@@ -72,7 +72,7 @@ namespace Engine::priv {
         }
         static void buildVAO() noexcept {
             Engine::Renderer::deleteVAO(m_VAO);
-            if (Engine::priv::Renderer::OPENGL_VERSION >= 30) {
+            if (Engine::priv::RenderModule::OPENGL_VERSION >= 30) {
                 Engine::Renderer::genAndBindVAO(m_VAO);
                 Engine::priv::SkyboxImplInterface::bindDataToGPU();
                 Engine::Renderer::bindVAO(0);

@@ -44,7 +44,7 @@ bool Engine::priv::Bloom::init_shaders() {
 
     return true;
 }
-void Engine::priv::Bloom::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::Renderer& renderer) {
+void Engine::priv::Bloom::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::RenderModule& renderer) {
     renderer.bind(m_Shader_Program.get<ShaderProgram>());
 
     Engine::Renderer::sendUniform4("Data", scale, threshold, exposure, 0.0f);

@@ -11,7 +11,7 @@ class  Viewport;
 
 namespace Engine::priv {
     class  GBuffer;
-    class  Renderer;
+    class  RenderModule;
     class  GodRays final {
         private:
             Handle          m_Vertex_Shader;
@@ -36,7 +36,7 @@ namespace Engine::priv {
 
             bool init_shaders();
 
-            void pass(GBuffer&, const Viewport& viewport, const glm::vec2& lightScrnPos, float alpha, const Engine::priv::Renderer& renderer);
+            void pass(GBuffer&, const Viewport& viewport, const glm::vec2& lightScrnPos, float alpha, const Engine::priv::RenderModule& renderer);
 
             static GodRays STATIC_GOD_RAYS;
     };

@@ -303,7 +303,7 @@ void RenderGraph::validate_model_instances_for_rendering(Viewport& viewport, Cam
     };
     lambda(m_InstancesTotal, camera.getPosition());
 }
-void RenderGraph::render(Engine::priv::Renderer& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders, SortingMode sortingMode) {
+void RenderGraph::render(Engine::priv::RenderModule& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders, SortingMode sortingMode) {
     auto* shaderProgram = m_ShaderProgram.get<ShaderProgram>();
     if (useDefaultShaders) {
         renderer.bind(shaderProgram);
@@ -343,7 +343,7 @@ void RenderGraph::render(Engine::priv::Renderer& renderer, Viewport& viewport, C
         }
     }
 }
-void RenderGraph::render_bruteforce(Engine::priv::Renderer& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders, SortingMode sortingMode) {
+void RenderGraph::render_bruteforce(Engine::priv::RenderModule& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders, SortingMode sortingMode) {
     auto* shaderProgram = m_ShaderProgram.get<ShaderProgram>();
     if (useDefaultShaders) {
         renderer.bind(shaderProgram);

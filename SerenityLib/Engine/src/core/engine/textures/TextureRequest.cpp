@@ -38,23 +38,23 @@ void TextureRequest::request(bool inAsync) {
     }
     m_Part.async   = (inAsync && Engine::hardware_concurrency() > 1);
     m_Part.handle  = Engine::Resources::addResource<Texture>(m_Part.m_CPUData.m_Name, m_Part.m_CPUData.m_TextureType, m_Part.m_CPUData.m_IsToBeMipmapped);
-    TextureRequest r(*this);
-    auto lambda_cpu = [r]() mutable {
+    TextureRequest textureRequest(*this);
+    auto lambda_cpu = [textureRequest]() mutable {
         //6 file cubemaps and framebuffers are not loaded this way
-        if (r.m_Part.m_CPUData.m_TextureType == TextureType::Texture2D) {
-            if (r.m_FromMemory)
-                r.m_Part.m_CPUData.initFromMemory(r.m_SFMLImage);
+        if (textureRequest.m_Part.m_CPUData.m_TextureType == TextureType::Texture2D) {
+            if (textureRequest.m_FromMemory)
+                textureRequest.m_Part.m_CPUData.initFromMemory(textureRequest.m_SFMLImage);
             else
-                r.m_Part.m_CPUData.initFromFile();
+                textureRequest.m_Part.m_CPUData.initFromFile();
         }
-        Engine::priv::TextureLoader::LoadCPU(r.m_Part.m_CPUData, r.m_Part.handle);
+        Engine::priv::TextureLoader::LoadCPU(textureRequest.m_Part.m_CPUData, textureRequest.m_Part.handle);
     };
-    auto lambda_gpu = [r]() mutable {
-        Engine::priv::TextureLoader::LoadGPU(r.m_Part.handle);
-        r.m_Part.m_Callback();
+    auto lambda_gpu = [textureRequest]() mutable {
+        Engine::priv::TextureLoader::LoadGPU(textureRequest.m_Part.handle);
+        textureRequest.m_Part.m_Callback();
     };
 
-    if (m_Part.async || std::this_thread::get_id() != Engine::Resources::getWindow().getOpenglThreadID()) {
+    if (m_Part.async || !Engine::priv::threading::isMainThread()) {
         Engine::priv::threading::addJobWithPostCallback(lambda_cpu, lambda_gpu);
     }else{
         lambda_cpu();

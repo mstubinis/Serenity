@@ -19,6 +19,9 @@ namespace Engine::priv{
         friend struct ComponentBody_UpdateFunction;
         friend struct ComponentModel_UpdateFunction;
         friend class  Engine::priv::ParticleSystem;
+
+        public:
+            static Engine::view_ptr<Engine::priv::ThreadingModule> THREADING_MODULE;
         public:
             ThreadPool m_ThreadPool;
 
@@ -30,36 +33,34 @@ namespace Engine::priv{
             void update(const float dt);
     };
     namespace threading{
-        void waitForAll(unsigned int section = 0);
-        void finalizeJob(std::function<void()>&& job, unsigned int section);
-        void finalizeJob(std::function<void()>&& job, std::function<void()>&& then, unsigned int section);
-         
-        template<typename JOB> void addJob(JOB&& job, unsigned int section = 0U){
-            std::function<void()> job_func = job;
-            finalizeJob(std::move(job_func), section);
+        bool isMainThread() noexcept;
+
+        void waitForAll(size_t section = 0);
+        void finalizeJob(std::function<void()>&& job, size_t section);
+        void finalizeJob(std::function<void()>&& job, std::function<void()>&& then, size_t section);
+
+        template<typename JOB> void addJob(JOB&& job, size_t section = 0U){
+            finalizeJob(std::function<void()>{std::move(job)}, section);
         }
-        template<typename JOB, typename THEN> void addJobWithPostCallback(JOB&& job, THEN&& then, unsigned int section = 0U){
-            std::function<void()> job_func = job;
-            std::function<void()> then_func = then;
-            finalizeJob(std::move(job_func), std::move(then_func), section);
+        template<typename JOB, typename THEN> void addJobWithPostCallback(JOB&& job, THEN&& then, size_t section = 0U){
+            finalizeJob(std::function<void()>{std::move(job)}, std::function<void()>{std::move(then)}, section);
         }
-        template<typename JOB, typename T> void addJobSplitVectored(JOB&& job, std::vector<T>& collection, bool waitForAll, unsigned int section = 0U) {
+        template<typename JOB, typename T> void addJobSplitVectored(JOB&& job, std::vector<T>& collection, bool waitForAll, size_t section = 0U) {
             if (Engine::hardware_concurrency() > 1) {
                 auto pairs = Engine::splitVectorPairs(collection);
-                for (size_t k = 0; k < pairs.size(); ++k) {
-                    auto lambda = [&pairs, k, &job, &collection]() {
+                for (size_t k = 0U; k < pairs.size(); ++k) {
+                    Engine::priv::threading::addJob([&pairs, k, &job, &collection]() {
                         for (size_t j = pairs[k].first; j <= pairs[k].second; ++j) {
                             job(collection[j], j, k);
-                        }
-                    };
-                    Engine::priv::threading::addJob(lambda, section);
+                        }  
+                    }, section);
                 }
                 if (waitForAll) {
                     Engine::priv::threading::waitForAll(section);
                 }
             }else{
                 for (size_t j = 0; j < collection.size(); ++j) {
-                    job(collection[j], j, 0);
+                    job(collection[j], j, 0U);
                 }
             }
         }

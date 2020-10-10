@@ -56,7 +56,7 @@ void Engine::priv::MeshCollisionFactory::internal_init_convex_data(VertexData& d
             m_ConvesHullShape->addPoint(ptsArray[i]);
         }
         m_ConvesHullShape->setMargin(DEFAULT_MARGIN);
-        //m_ConvesHullShape->recalcLocalAabb(); //this is cpu expensive. is it really needed?
+        m_ConvesHullShape->recalcLocalAabb();
     }
 }
 void Engine::priv::MeshCollisionFactory::internal_init_triangle_data(VertexData& data, std::vector<glm::vec3>& positions) {
@@ -83,7 +83,7 @@ void Engine::priv::MeshCollisionFactory::internal_init_triangle_data(VertexData&
         }
         m_TriangleStaticShape.reset(new btBvhTriangleMeshShape(m_TriangleStaticData.get(), true));
         m_TriangleStaticShape->setMargin(DEFAULT_MARGIN);
-        m_TriangleStaticShape->recalcLocalAabb();  //this is cpu expensive. is it really needed?
+        m_TriangleStaticShape->recalcLocalAabb();
 
         m_TriangleInfoMap.reset(new btTriangleInfoMap());
         btGenerateInternalEdgeInfo(m_TriangleStaticShape.get(), m_TriangleInfoMap.get());

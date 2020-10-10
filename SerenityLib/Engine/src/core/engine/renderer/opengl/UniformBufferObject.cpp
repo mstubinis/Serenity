@@ -16,7 +16,7 @@ UniformBufferObject::UniformBufferObject(const char* nameInShader, const unsigne
     : m_NameInShader{ nameInShader }
     , m_SizeOfStruct{ sizeofStruct }
 {
-    if (Engine::priv::Renderer::GLSL_VERSION < 140) {
+    if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
         return;
     }
     if (globalBindingPointNumber == -1) {
@@ -40,18 +40,18 @@ UniformBufferObject::~UniformBufferObject() {
     _unload_CPU();
 }
 void UniformBufferObject::_load_CPU() {
-    if (Engine::priv::Renderer::GLSL_VERSION < 140) {
+    if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
         return;
     }
     _unload_CPU();
 }
 void UniformBufferObject::_unload_CPU() {
-    if (Engine::priv::Renderer::GLSL_VERSION < 140) {
+    if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
         return;
     }
 }
 void UniformBufferObject::_load_GPU() {
-    if (Engine::priv::Renderer::GLSL_VERSION < 140) {
+    if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
         return;
     }
     _unload_GPU();
@@ -61,13 +61,13 @@ void UniformBufferObject::_load_GPU() {
     GLCall(glBindBufferBase(GL_UNIFORM_BUFFER, m_GlobalBindingPointNumber, m_UBOObject));//link UBO to it's global numerical index
 }
 void UniformBufferObject::_unload_GPU() {
-    if (Engine::priv::Renderer::GLSL_VERSION < 140) {
+    if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
         return;
     }
     GLCall(glDeleteBuffers(1, &m_UBOObject));
 }
 void UniformBufferObject::updateData(void* data) {
-    if (Engine::priv::Renderer::GLSL_VERSION < 140) {
+    if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
         return;
     } 
     GLCall(glBindBuffer(GL_UNIFORM_BUFFER, m_UBOObject));
@@ -76,7 +76,7 @@ void UniformBufferObject::updateData(void* data) {
     GLCall(glBufferSubData(GL_UNIFORM_BUFFER, 0, m_SizeOfStruct, data));
 }
 void UniformBufferObject::attachToShader(const ShaderProgram& shaderProgram) {
-    if (Engine::priv::Renderer::GLSL_VERSION < 140 || shaderProgram.m_AttachedUBOs.contains(m_UBOObject)) {
+    if (Engine::priv::RenderModule::GLSL_VERSION < 140 || shaderProgram.m_AttachedUBOs.contains(m_UBOObject)) {
         return;
     }
     const unsigned int programBlockIndex = glGetUniformBlockIndex(shaderProgram.m_ShaderProgram, m_NameInShader);

@@ -23,7 +23,6 @@ namespace Engine::priv {
                 }
                 vec.push_back(socket);
             }
-
             template<typename TVECTOR, typename TSOCKET>
             void internal_remove_socket(TVECTOR& vec, TSOCKET* socket) noexcept {
                 for (size_t i = 0; i < vec.size(); ++i) {
@@ -34,9 +33,6 @@ namespace Engine::priv {
                 }
             }
         public:
-            SocketManager();
-            ~SocketManager();
-
             void update(const float dt);
 
             void add_tcp_socket(Engine::Networking::SocketTCP* tcpSocketPtr);
@@ -48,5 +44,4 @@ namespace Engine::priv {
             void remove_tcp_listener(Engine::Networking::ListenerTCP* tcpListenerPtr);
     };
 }
-
 #endif

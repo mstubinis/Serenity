@@ -19,9 +19,11 @@ bool Engine::Networking::ServerClientsContainer::addClient(const std::string& ha
     ENGINE_PRODUCTION_LOG("ServerClientsContainer::addClient() failed to add client!") 
     return false;
 }
+
 bool Engine::Networking::ServerClientsContainer::removeClientImmediately(ServerClient& inClient, std::mutex& inMutex) {
     std::string foundHash = "";
     bool removed = false;
+
     for (auto& [name, client] : m_HashedClients) {
         if (client == &inClient) {
             inClient.disconnect();
