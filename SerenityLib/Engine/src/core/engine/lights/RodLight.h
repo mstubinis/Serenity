@@ -4,20 +4,24 @@
 
 #include <core/engine/lights/PointLight.h>
 
+constexpr float ROD_LIGHT_DEFAULT_ROD_LENGTH = 2.0f;
+
 class RodLight : public PointLight {
     friend class ::Engine::priv::RenderModule;
     private:
-        float m_RodLength = 0.0f;
+        float m_RodLength = ROD_LIGHT_DEFAULT_ROD_LENGTH;
         float calculateCullingRadius() override;
-    public:
-        RodLight(
-            const glm_vec3& position = glm_vec3(0.0f, 0.0f, 0.0f),
-            float rodLength          = 2.0f,
-            Scene* scene             = nullptr
-        );
-        virtual ~RodLight() {}
 
-        void free() noexcept override;
+    public:
+        RodLight() = delete;
+        RodLight(
+            Scene* scene,
+            const glm_vec3& position = glm_vec3(0.0f, 0.0f, 0.0f),
+            float rodLength = ROD_LIGHT_DEFAULT_ROD_LENGTH
+        );
+        virtual ~RodLight();
+
+        void destroy() noexcept;
 
         inline CONSTEXPR float rodLength() const noexcept { return m_RodLength; }
 

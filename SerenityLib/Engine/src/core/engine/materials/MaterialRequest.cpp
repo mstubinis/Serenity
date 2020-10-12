@@ -63,25 +63,29 @@ void MaterialRequest::request(bool inAsync) {
     internal_init_material_components();
     internal_void_launch_texture_requests(m_Async);
 
-    MaterialRequest request(*this);
-    auto lambda_gpu = [request]() mutable {
-        const auto& texture_requests = request.m_Part.m_TextureRequests;
+    auto l_gpu = [materialRequest{ *this }]() mutable {
+        const auto& texture_requests = materialRequest.m_Part.m_TextureRequests;
         unsigned int count = 0;
         for (const auto& textureRequest : texture_requests) {
             if (textureRequest->m_FileData.m_FileExists) {
-                request.m_Part.m_Handle.get<Material>()->getComponent(count).layer(0).setTexture(textureRequest->m_Part.handle);
+                materialRequest.m_Part.m_Handle.get<Material>()->getComponent(count).layer(0).setTexture(textureRequest->m_Part.handle);
                 ++count;
             }
         }
-        InternalMaterialPublicInterface::LoadGPU(*request.m_Part.m_Handle.get<Material>());
-
-        request.m_Callback();
+        InternalMaterialPublicInterface::LoadGPU(*materialRequest.m_Part.m_Handle.get<Material>());
+        materialRequest.m_Callback();
     };
 
-    if (request.m_Async) {
-        threading::addJobWithPostCallback([]() {}, lambda_gpu);
+    if (m_Async || !Engine::priv::threading::isMainThread()) {
+        if (Engine::priv::threading::isMainThread()) {
+            Engine::priv::threading::addJobWithPostCallback([]() {}, std::move(l_gpu), 1U);
+        }else{
+            Engine::priv::threading::submitTaskForMainThread([g{ std::move(l_gpu) }]() mutable { 
+                threading::addJobWithPostCallback([]() {}, std::move(g), 1U); 
+            });
+        }
     }else{
-        lambda_gpu();
+        l_gpu();
     }
 }
 

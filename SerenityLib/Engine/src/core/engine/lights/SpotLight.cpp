@@ -4,22 +4,25 @@
 #include <ecs/ComponentBody.h>
 #include <core/engine/scene/Scene.h>
 
-SpotLight::SpotLight(const glm_vec3& pos, const glm_vec3& direction, float innerCutoffInDegrees, float outerCutoffInDegrees, Scene* scene) 
-    : PointLight{ LightType::Spot, pos, scene }
+SpotLight::SpotLight(Scene* scene, const glm_vec3& pos, const glm_vec3& direction, float innerCutoffInDegrees, float outerCutoffInDegrees)
+    : PointLight{ scene, LightType::Spot, pos }
 {
     setCutoff(innerCutoffInDegrees);
     setCutoffOuter(outerCutoffInDegrees);
 
     setDirection(direction);
-
-    if (m_Type == LightType::Spot) {
-        auto& spotLights = Engine::priv::InternalScenePublicInterface::GetSpotLights(*scene);
-        spotLights.emplace_back(this);
-    }
 }
 SpotLight::~SpotLight() {
-    free();
 }
+void SpotLight::destroy() noexcept {
+    Entity::destroy();
+    Scene* scene_ptr = scene();
+    if (scene_ptr) {
+        removeFromVector(Engine::priv::InternalScenePublicInterface::GetSpotLights(*scene_ptr), this);
+        removeFromVector(Engine::priv::InternalScenePublicInterface::GetLights(*scene_ptr), this);
+    }
+}
+
 void SpotLight::setDirection(decimal xDir, decimal yDir, decimal zDir) noexcept {
     auto body = getComponent<ComponentBody>();
     if (body) {
@@ -28,9 +31,4 @@ void SpotLight::setDirection(decimal xDir, decimal yDir, decimal zDir) noexcept 
 }
 void SpotLight::setDirection(const glm_vec3& direction) noexcept {
     setDirection(direction.x, direction.y, direction.z);
-}
-void SpotLight::free() noexcept {
-    Entity::destroy();
-    removeFromVector(Engine::priv::InternalScenePublicInterface::GetSpotLights(scene()), this);
-    removeFromVector(Engine::priv::InternalScenePublicInterface::GetLights(scene()), this);
 }

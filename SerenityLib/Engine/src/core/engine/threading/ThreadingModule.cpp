@@ -1,8 +1,7 @@
 #include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/threading/ThreadingModule.h>
-#include <core/engine/utils/Utils.h>
-#include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/system/window/Window.h>
+#include <core/engine/system/Engine.h>
 
 using namespace Engine::priv;
 
@@ -16,24 +15,12 @@ ThreadingModule::ThreadingModule() {
     }
     THREADING_MODULE = this;
 }
-ThreadingModule::~ThreadingModule(){
-    cleanup();
-}
-void ThreadingModule::cleanup() {
-    m_ThreadPool.shutdown();
-}
-void ThreadingModule::update(const float dt){
-    m_ThreadPool.update();
+void Engine::priv::threading::submitTaskForMainThread(std::function<void()>&& task) noexcept {
+    Engine::priv::Core::m_Engine->m_Misc.m_QueuedCommands.push(std::move(task));
 }
 bool Engine::priv::threading::isMainThread() noexcept {
+    return std::this_thread::get_id() == Engine::priv::Core::m_Engine->m_Misc.m_MainThreadID;
+}
+bool Engine::priv::threading::isOpenGLThread() noexcept {
     return std::this_thread::get_id() == Engine::Resources::getWindow().getOpenglThreadID();
-}
-void Engine::priv::threading::finalizeJob(std::function<void()>&& task, size_t section){
-    ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job(std::move(task), section);
-}
-void Engine::priv::threading::finalizeJob(std::function<void()>&& task, std::function<void()>&& then_task, size_t section){
-    ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job(std::move(task), std::move(then_task), section);
-}
-void Engine::priv::threading::waitForAll(size_t section){
-    ThreadingModule::THREADING_MODULE->m_ThreadPool.wait_for_all(section);
 }

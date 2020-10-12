@@ -15,10 +15,12 @@ namespace Engine::priv {
             void reserve(size_t newReserveSize) noexcept;
 
             inline size_t size() const noexcept { return m_WorkerThreads.size(); }
+            void join_all() noexcept;
 
             template<typename FUNCTION>
-            std::thread* add_thread(FUNCTION&& function) noexcept {
+            Engine::view_ptr<std::thread> add_thread(FUNCTION&& function) noexcept {
                 if (m_WorkerThreads.size() >= m_WorkerThreads.capacity()) {
+                    ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): m_WorkerThreads reached its capacity!")
                     return nullptr;
                 }
                 auto& worker = m_WorkerThreads.emplace_back(std::move(function));

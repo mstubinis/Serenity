@@ -16,13 +16,14 @@ namespace Engine::priv {
         MeshInfoNode*                               Parent    = nullptr;
 
         MeshInfoNode() = delete;
-        MeshInfoNode(std::string&& name_, glm::mat4&& transform_) {
-            Name      = name_;
-            Transform = transform_;
-        }
+        MeshInfoNode(std::string&& name_, glm::mat4&& transform_) 
+            : Name { std::move(name_) }
+            , Transform { std::move(transform_) }
+        {}
     };
     struct AnimationKeyBaseClass {
         float     time = 0.0f;
+
         AnimationKeyBaseClass() = default;
         AnimationKeyBaseClass(float time_) 
             : time{ time_ }
@@ -30,6 +31,7 @@ namespace Engine::priv {
     };
     struct Vector3Key final : public AnimationKeyBaseClass {
         glm::vec3  value = glm::vec3(0.0f);
+
         Vector3Key() = default;
         Vector3Key(float time_, const glm::vec3& value_) 
             : AnimationKeyBaseClass{ time_ }
@@ -38,6 +40,7 @@ namespace Engine::priv {
     };
     struct QuatKey final : public AnimationKeyBaseClass {
         aiQuaternion  value = aiQuaternion(1.0f, 0.0f, 0.0f, 0.0f);
+
         QuatKey() = default;
         QuatKey(float time_, const aiQuaternion& value_) 
             : AnimationKeyBaseClass{ time_ }

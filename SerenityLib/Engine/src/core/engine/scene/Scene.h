@@ -42,7 +42,7 @@ class Scene: public Observer {
     friend class  Engine::priv::ResourceManager;
     friend struct Engine::priv::InternalScenePublicInterface;
     friend class  Engine::priv::EngineCore;
-    using updateFP = void(*)(Scene*, const float);
+    using UpdateFP = void(*)(Scene*, const float);
     private:
         mutable std::vector<Viewport>                                 m_Viewports;
         mutable std::vector<Camera*>                                  m_Cameras;
@@ -55,13 +55,13 @@ class Scene: public Observer {
         mutable std::vector<SpotLight*>                               m_SpotLights;
         mutable std::vector<RodLight*>                                m_RodLights;
         mutable std::vector<ProjectionLight*>                         m_ProjectionLights;
-        updateFP                                                      m_OnUpdateFunctor     = [](Scene*, const float) {};
+        UpdateFP                                                      m_OnUpdateFunctor     = [](Scene*, const float) {};
         std::string                                                   m_Name                = "";
         unsigned int                                                  m_ID                  = 0;
         glm::vec3                                                     m_GI                  = glm::vec3(1.0f);
         bool                                                          m_SkipRenderThisFrame = false;
 
-        Entity*                                                       m_Sun                 = nullptr;
+        Entity                                                        m_Sun                 = Entity{};
         Skybox*                                                       m_Skybox              = nullptr;
 
         class impl; std::unique_ptr<impl>                             m_i                   = nullptr;
@@ -78,13 +78,35 @@ class Scene: public Observer {
         inline void setName(const char* name) noexcept { m_Name = name; }
         inline CONSTEXPR const std::string& name() const noexcept { return m_Name; }
 
+
+        template<typename ... ARGS> Engine::view_ptr<SunLight> createSunLight(ARGS&& ... args) {
+            return (SunLight*)m_Lights.emplace_back( m_SunLights.emplace_back(NEW SunLight(this, std::forward<ARGS>(args)...)) );
+        }
+        template<typename ... ARGS> Engine::view_ptr<DirectionalLight> createDirectionalLight(ARGS&& ... args) {
+            return (DirectionalLight*)m_Lights.emplace_back( m_DirectionalLights.emplace_back(NEW DirectionalLight(this, std::forward<ARGS>(args)...)) );
+        }
+        template<typename ... ARGS> Engine::view_ptr<PointLight> createPointLight(ARGS&& ... args) {
+            return (PointLight*)m_Lights.emplace_back( m_PointLights.emplace_back(NEW PointLight(this, std::forward<ARGS>(args)...)) );
+        }
+        template<typename ... ARGS> Engine::view_ptr<SpotLight> createSpotLight(ARGS&& ... args) {
+            return (SpotLight*)m_Lights.emplace_back( m_SpotLights.emplace_back(NEW SpotLight(this, std::forward<ARGS>(args)...)) );
+        }
+        template<typename ... ARGS> Engine::view_ptr<RodLight> createRodLight(ARGS&& ... args) {
+            return (RodLight*)m_Lights.emplace_back( m_RodLights.emplace_back(NEW RodLight(this, std::forward<ARGS>(args)...)) );
+        }
+        template<typename ... ARGS> Engine::view_ptr<ProjectionLight> createProjectionLight(ARGS&& ... args) {
+            return (ProjectionLight*)m_Lights.emplace_back( m_ProjectionLights.emplace_back(NEW ProjectionLight(this, std::forward<ARGS>(args)...)) );
+        }
+
+
+        void clearAllEntities() noexcept;
         void update(const float dt);
         virtual void render() {}
         virtual void onEvent(const Event& event);
         virtual void onResize(unsigned int width, unsigned int height) {}
 
-        inline void setOnUpdateFunctor(const updateFP& functor) noexcept { m_OnUpdateFunctor = functor; }
-        inline void setOnUpdateFunctor(updateFP&& functor) noexcept { m_OnUpdateFunctor = std::move(functor); }
+        inline void setOnUpdateFunctor(const UpdateFP& functor) noexcept { m_OnUpdateFunctor = functor; }
+        inline void setOnUpdateFunctor(UpdateFP&& functor) noexcept { m_OnUpdateFunctor = std::move(functor); }
 
         inline CONSTEXPR unsigned int id() const noexcept { return m_ID; }
         inline unsigned int numViewports() const noexcept { return (unsigned int)m_Viewports.size(); }
@@ -115,8 +137,8 @@ class Scene: public Observer {
         void setGlobalIllumination(float global, float diffuse, float specular);
         void setGlobalIllumination(const glm::vec3& globalIllumination);
 
-        inline void setGodRaysSun(Entity* sun) noexcept { m_Sun = sun; }
-        inline CONSTEXPR Entity* getGodRaysSun() const noexcept { return m_Sun; }
+        inline void setGodRaysSun(Entity sun) noexcept { m_Sun = sun; }
+        inline CONSTEXPR Entity getGodRaysSun() const noexcept { return m_Sun; }
         inline CONSTEXPR Skybox* skybox() const noexcept { return m_Skybox; }
         inline void setSkybox(Skybox* s) noexcept { m_Skybox = s; }
 

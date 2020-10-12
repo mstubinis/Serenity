@@ -125,9 +125,9 @@ void Engine::Renderer::godRays::setFOVDegrees(float fovInDegrees) {
 void Engine::Renderer::godRays::setAlphaFalloff(float alphaFalloff) {
     Engine::priv::GodRays::STATIC_GOD_RAYS.alphaFalloff = alphaFalloff;
 }
-void Engine::Renderer::godRays::setSun(Entity* sunEntity) {
+void Engine::Renderer::godRays::setSun(Entity sunEntity) noexcept {
     Resources::getCurrentScene()->setGodRaysSun(sunEntity);
 }
-Entity* Engine::Renderer::godRays::getSun() {
+Entity Engine::Renderer::godRays::getSun() noexcept {
     return Engine::Resources::getCurrentScene()->getGodRaysSun();
 }

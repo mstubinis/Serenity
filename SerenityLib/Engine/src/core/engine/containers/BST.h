@@ -8,7 +8,9 @@ namespace Engine {
             T data;
             Node* left   = nullptr;
             Node* right  = nullptr;
-            Node(T inData) : data(inData) {}
+            Node(T inData) 
+                : data{ inData }
+            {}
         };
         private:
             Node* m_Root = nullptr;
@@ -63,8 +65,7 @@ namespace Engine {
                 return root;
             }
         public:
-            BST() {
-            }
+            BST() = default;
             virtual ~BST() {
                 internal_cleanup();
             }

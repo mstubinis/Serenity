@@ -58,7 +58,9 @@ EngineCore* Core::m_Engine = nullptr;
 EngineCore::EngineCore(const EngineOptions& options) 
     : m_ResourceManager{ options }
     , m_RenderModule{ options }
-{}
+{
+    m_Misc.m_MainThreadID = std::this_thread::get_id();
+}
 EngineCore::~EngineCore(){
     internal_on_event_game_ended();
     Game::cleanup();
@@ -125,9 +127,7 @@ void EngineCore::init(const EngineOptions& options) {
     //init the game here
     Engine::setMousePosition(options.width / 2, options.height / 2);
     Game::initResources();
-    priv::threading::waitForAll();
     Game::initLogic();
-    priv::threading::waitForAll();
 
     //the scene is the root of all games. create the default scene if 1 does not exist already
     if (m_ResourceManager.m_Scenes.size() == 0){
@@ -161,6 +161,9 @@ void EngineCore::internal_update_logic(Scene& scene, Window& window, const float
     m_DebugManager.stop_clock();
     window.internal_on_dynamic_resize();
     m_NetworkingModule.update(dt);
+
+    m_Misc.m_QueuedCommands.for_each_and_clear([](std::function<void()>& item) mutable { item(); });
+
     Game::update(dt);
     scene.update(dt);
     Game::onPostUpdate(dt);

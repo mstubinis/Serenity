@@ -15,13 +15,15 @@ namespace Engine {
                     m_Sparse.reserve(initial_capacity);
                 }
                 virtual ~sparse_set_base() {
-                    m_MaxLastIndex = 0;
-                    m_Sparse.clear();
+                    sparse_set_base::clear();
                 }
                 virtual bool remove(uint32_t id) {
                     return false;
                 }
-                virtual void reserve(uint32_t amount) {
+                virtual void reserve(uint32_t amount) {}
+                virtual void clear() {
+                    m_MaxLastIndex = 0;
+                    m_Sparse.clear();
                 }
             };
     };
@@ -38,6 +40,10 @@ namespace Engine {
             }
             virtual ~sparse_set() {
                 m_Dense.clear();
+            }
+            void clear() override {
+                m_Dense.clear();
+                super::clear();
             }
 
             void reserve(uint32_t amount) override {

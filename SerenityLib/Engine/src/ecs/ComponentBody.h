@@ -114,10 +114,10 @@ class ComponentBody : public Observer, public Engine::UserPointer {
         glm_vec3              m_Right            = glm_vec3(1.0, 0.0, 0.0);
         glm_vec3              m_Up               = glm_vec3(0.0, 1.0, 0.0);
         CollisionCallbackFP   m_CollisionFunctor = [](CollisionCallbackEventData&) {};
-        union {
-            NormalData*       n                  = nullptr;
-            PhysicsData*      p;
-        };
+        //union {
+        std::unique_ptr<NormalData>       n;
+        std::unique_ptr<PhysicsData>      p;
+        //};
         void*                 m_UserPointer1     = nullptr;
         void*                 m_UserPointer2     = nullptr;
         Entity                m_Owner;

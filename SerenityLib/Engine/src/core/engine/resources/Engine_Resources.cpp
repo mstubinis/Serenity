@@ -16,18 +16,18 @@
 
 #include <ecs/ECS.h>
 
-
 Engine::view_ptr<Engine::priv::ResourceManager> Engine::priv::ResourceManager::RESOURCE_MANAGER = nullptr;
 
 Engine::priv::ResourceManager::ResourceManager(const EngineOptions& options) {
     RESOURCE_MANAGER = this;
+
     m_ResourceModule.registerResourceType<Texture>();
-    m_ResourceModule.registerResourceType<Material>();
     m_ResourceModule.registerResourceType<Mesh>();
+    m_ResourceModule.registerResourceType<Material>();
+    m_ResourceModule.registerResourceType<Font>();
     m_ResourceModule.registerResourceType<Shader>();
     m_ResourceModule.registerResourceType<ShaderProgram>();
     m_ResourceModule.registerResourceType<SoundData>();
-    m_ResourceModule.registerResourceType<Font>();
 }
 void Engine::priv::ResourceManager::init(const EngineOptions& options){
     auto& window = m_Windows.emplace_back(std::unique_ptr<Window>(NEW Window{}));
@@ -50,8 +50,9 @@ void Engine::priv::ResourceManager::onPostUpdate() {
         m_ScenesToBeDeleted.clear();
     }   
 }
-Scene& Engine::priv::ResourceManager::_getSceneByID(uint32_t id) {
-    return *m_Scenes[id - 1];
+Engine::view_ptr<Scene> Engine::priv::ResourceManager::getSceneByID(uint32_t id) {
+    uint32_t index = id - 1;
+    return (index < m_Scenes.size()) ? m_Scenes[index].get() : nullptr;
 }
 unsigned int Engine::priv::ResourceManager::AddScene(Scene& s){
     for (size_t i = 0; i < m_Scenes.size(); ++i) {
@@ -75,7 +76,7 @@ double Engine::Resources::timeScale(){
 double Engine::Resources::applicationTime() {
     return priv::Core::m_Engine->m_DebugManager.totalTime();
 }
-Scene* Engine::Resources::getCurrentScene() {
+Engine::view_ptr<Scene> Engine::Resources::getCurrentScene() {
     return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_CurrentScene;
 }
 Window& Engine::Resources::getWindow(){
@@ -112,7 +113,7 @@ bool Engine::Resources::deleteScene(Scene& scene) {
 }
 
 
-Scene* Engine::Resources::getScene(std::string_view sceneName){
+Engine::view_ptr<Scene> Engine::Resources::getScene(std::string_view sceneName){
     for (auto& scene_ptr : Engine::priv::ResourceManager::RESOURCE_MANAGER->m_Scenes) {
         if (scene_ptr && scene_ptr->name() == sceneName) {
             return scene_ptr.get();
@@ -177,7 +178,6 @@ Handle Engine::Resources::loadTextureAsync(sf::Image& sfImage, const std::string
     }
     return Handle{};
 }
-
 Handle Engine::Resources::loadMaterial(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness) {
     auto material = Engine::Resources::getResource<Material>(name);
     if (!material.first) {
@@ -205,13 +205,11 @@ Handle Engine::Resources::loadMaterial(const std::string& name, Handle diffuse, 
     }
     return Handle{};
 }
-
 Handle Engine::Resources::addShader(const std::string& fileOrData, ShaderType type, bool fromFile){
     return Engine::Resources::addResource<Shader>(fileOrData, type, fromFile);
 }
-
 Handle Engine::Resources::addShaderProgram(const std::string& n, Handle v, Handle f){
-    auto vertexShader   = Engine::Resources::getResource<Shader>(v);
+    auto vertexShader = Engine::Resources::getResource<Shader>(v);
     auto fragmentShader = Engine::Resources::getResource<Shader>(f);
     return Engine::Resources::addResource<ShaderProgram>(n, v, f);
 }

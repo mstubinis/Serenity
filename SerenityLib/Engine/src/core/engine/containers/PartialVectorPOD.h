@@ -17,7 +17,6 @@ namespace Engine {
             partial_vector_pod& operator=(const partial_vector_pod& other)     = default;
             partial_vector_pod(partial_vector_pod&& other) noexcept            = default;
             partial_vector_pod& operator=(partial_vector_pod&& other) noexcept = default;
-            ~partial_vector_pod() = default;
 
             inline void resize(size_t capacity, T&& item) {
                 m_Items.resize(capacity, item);

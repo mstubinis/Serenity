@@ -5,28 +5,30 @@
 #include <core/engine/textures/Texture.h>
 #include <core/engine/scene/Scene.h>
 
-using namespace Engine;
-
-ProjectionLight::ProjectionLight(Texture* texture, const glm::vec3& direction, Scene* scene) 
-    : SunLight{ glm::vec3(0.0f), LightType::Projection, scene }
+ProjectionLight::ProjectionLight(Scene* scene, Handle textureHandle, const glm::vec3& direction)
+    : SunLight{ scene, glm::vec3(0.0f), LightType::Projection }
 {
     getComponent<ComponentBody>()->alignTo(direction);
-    setTexture(texture);
-    if (m_Type == LightType::Projection) {
-        auto& projLights = priv::InternalScenePublicInterface::GetProjectionLights(*scene);
-        projLights.emplace_back(this);
-    }
+    setTexture(textureHandle);
     recalc_frustum_indices();
 }
-ProjectionLight::ProjectionLight(Handle textureHandle, const glm::vec3& direction, Scene* scene) 
-    : ProjectionLight{ textureHandle.get<Texture>(), direction, scene }
-{}
+ProjectionLight::~ProjectionLight() {
+}
+void ProjectionLight::destroy() noexcept {
+    Entity::destroy();
+    Scene* scene_ptr = scene();
+    if (scene_ptr) {
+        removeFromVector(Engine::priv::InternalScenePublicInterface::GetProjectionLights(*scene_ptr), this);
+        removeFromVector(Engine::priv::InternalScenePublicInterface::GetLights(*scene_ptr), this);
+    }
+}
 void ProjectionLight::recalc_frustum_points() noexcept {
     //0-3 : near plane
     //4-7 : far plane
     //both in order: top left, top right, btm left, btm right
 
-    glm::vec2 texture_dimension_ratio = (m_Texture) ? m_Texture->sizeAsRatio() : glm::vec2(1.0f);
+    Texture* texture = m_Texture.get<Texture>();
+    glm::vec2 texture_dimension_ratio = (texture) ? texture->sizeAsRatio() : glm::vec2(1.0f);
     std::array<glm::vec2, 4> offsets = {
         glm::vec2(-1.0f,  1.0f),
         glm::vec2( 1.0f,  1.0f),
@@ -94,12 +96,4 @@ void ProjectionLight::recalc_frustum_indices() noexcept {
     m_FrustumIndices[33] = 6;
     m_FrustumIndices[34] = 2;
     m_FrustumIndices[35] = 3;
-}
-void ProjectionLight::setTexture(Handle textureHandle) noexcept {
-    m_Texture = textureHandle.get<Texture>();
-}
-void ProjectionLight::free() noexcept {
-    Entity::destroy();
-    removeFromVector(priv::InternalScenePublicInterface::GetProjectionLights(scene()), this);
-    removeFromVector(priv::InternalScenePublicInterface::GetLights(scene()), this);
 }

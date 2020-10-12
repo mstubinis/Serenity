@@ -17,6 +17,7 @@ namespace Engine::priv {
         friend class  Engine::priv::MeshSkeleton;
         friend class  Engine::priv::ModelInstanceAnimation;
         friend class  Mesh;
+        friend struct MeshCPUData;
         friend class  SMSH_File;
         private:
             std::unordered_map<std::string, AnimationChannel>  m_KeyframeData;

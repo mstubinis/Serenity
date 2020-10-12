@@ -21,7 +21,6 @@ namespace Engine {
                 return m_SlotMap.at(inType);
             }
         public:
-
             template<typename T> inline size_t count() const noexcept { return m_SlotMap.contains(internal_type_ID<T>()); }
 
             template<typename T> inline uint32_t at() const noexcept {  return m_SlotMap.at(internal_type_ID<T>()); }

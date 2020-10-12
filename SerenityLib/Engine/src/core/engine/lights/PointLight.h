@@ -4,35 +4,41 @@
 
 #include <core/engine/lights/SunLight.h>
 
+constexpr float POINT_LIGHT_DEFAULT_CONSTANT = 0.1f;
+constexpr float POINT_LIGHT_DEFAULT_LINEAR   = 0.1f;
+constexpr float POINT_LIGHT_DEFAULT_EXPONENT = 0.1f;
+
 struct PointLightDefaultAttenuationData final {
-    float constant;
-    float linear;
-    float exponent;
+    float constant = POINT_LIGHT_DEFAULT_CONSTANT;
+    float linear   = POINT_LIGHT_DEFAULT_LINEAR;
+    float exponent = POINT_LIGHT_DEFAULT_EXPONENT;
 };
 
 class PointLight : public SunLight {
     friend class ::Engine::priv::RenderModule;
     protected:
         LightAttenuation   m_AttenuationModel = LightAttenuation::Constant_Linear_Exponent;
-        float              m_C                = 0.1f;
-        float              m_L                = 0.1f;
-        float              m_E                = 0.1f;
+        float              m_C                = POINT_LIGHT_DEFAULT_CONSTANT;
+        float              m_L                = POINT_LIGHT_DEFAULT_LINEAR;
+        float              m_E                = POINT_LIGHT_DEFAULT_EXPONENT;
         float              m_CullingRadius    = 0.0f;
 
         virtual float calculateCullingRadius();
-    public:
-        PointLight(
-            const glm_vec3& position  = glm_vec3(0.0f, 0.0f, 0.0f),
-            Scene* scene              = nullptr
-        );
-        PointLight(
-            LightType type,
-            const glm_vec3& position  = glm_vec3(0.0f, 0.0f, 0.0f),
-            Scene* scene              = nullptr
-        );
-        virtual ~PointLight() {}
 
-        void free() noexcept override;
+    public:
+        PointLight() = delete;
+        PointLight(
+            Scene* scene,
+            const glm_vec3& position = glm_vec3(0.0f, 0.0f, 0.0f)
+        );
+        PointLight(
+            Scene* scene,
+            LightType type,
+            const glm_vec3& position = glm_vec3(0.0f, 0.0f, 0.0f)
+        );
+        virtual ~PointLight();
+
+        void destroy() noexcept;
 
         void setConstant(float constant);
         void setLinear(float linear);

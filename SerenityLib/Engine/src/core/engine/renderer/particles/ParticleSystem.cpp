@@ -116,7 +116,7 @@ bool Engine::priv::ParticleSystem::add_particle(ParticleEmitter& emitter, const 
     return false;
 }
 bool Engine::priv::ParticleSystem::add_particle(ParticleEmitter& emitter) {
-    auto* body = emitter.getComponent<ComponentBody>();
+    auto body = emitter.getComponent<ComponentBody>();
     return (body) ? add_particle(emitter, body->getPosition(), body->getRotation()) : false;
 }
 

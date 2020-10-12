@@ -9,14 +9,13 @@ void Engine::priv::ECSEntityPool::init(const SceneOptions& options) {
 }
 
 bool Engine::priv::ECSEntityPool::isEntityVersionDifferent(Entity entity) const noexcept {
-    auto index = entity.id() - 1U;
-    Entity storedEntity = m_Pool[index];
-    return (storedEntity.versionID() != entity.versionID());
+    uint32_t index = entity.id() - 1U;
+    return (index >= m_Pool.size()) ? true : (m_Pool[index].versionID() != entity.versionID());
 }
 
 void Engine::priv::ECSEntityPool::destroyFlaggedEntity(uint32_t entityID) {
-    auto index = entityID - 1U;
-    Entity storedEntity = m_Pool[index];
+    auto index             = entityID - 1U;
+    Entity storedEntity    = m_Pool[index];
     uint32_t storedVersion = storedEntity.versionID();
     ++storedVersion;
     Entity updatedEntity(storedEntity.id(), storedEntity.sceneID(), storedVersion);
@@ -33,7 +32,7 @@ Entity Engine::priv::ECSEntityPool::addEntity(const Scene& scene) noexcept {
     Entity entity = Entity{ id + 1U, scene.id(), old.versionID() };
     m_Freelist.pop_back();
     m_Pool[id] = entity;
-    return std::move(entity);
+    return entity;
 }
 Entity Engine::priv::ECSEntityPool::getEntity(uint32_t entityData) const noexcept {
     if (entityData == 0) {

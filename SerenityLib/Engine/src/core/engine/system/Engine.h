@@ -20,6 +20,7 @@ namespace Engine::priv {
 #include <core/engine/discord/DiscordModule.h>
 #include <core/engine/lua/LuaModule.h>
 #include <core/engine/mesh/BuiltInMeshes.h>
+#include <core/engine/containers/Queue_ts.h>
 
 namespace Engine{
     //void reset_malloc_count() noexcept;
@@ -141,10 +142,12 @@ namespace Engine{
             public:
                 class Misc final {
                     public:
-                        Engine::priv::BuiltInMeshses   m_BuiltInMeshes;
-                        SimplexNoise                   m_SimplexNoise;
-                        bool                           m_Paused         = false;
-                        bool                           m_Destroyed      = false;
+                        Engine::priv::BuiltInMeshses             m_BuiltInMeshes;
+                        SimplexNoise                             m_SimplexNoise;
+                        Engine::queue_ts<std::function<void()>>  m_QueuedCommands;
+                        std::thread::id                          m_MainThreadID;
+                        bool                                     m_Paused         = false;
+                        bool                                     m_Destroyed      = false;
                 };
                 Misc                m_Misc;
 
@@ -152,7 +155,7 @@ namespace Engine{
                 NetworkingModule    m_NetworkingModule;
                 DiscordModule       m_DiscordModule;
                 EventModule         m_EventModule;
-                RenderModule      m_RenderModule;
+                RenderModule        m_RenderModule;
                 PhysicsManager      m_PhysicsManager;
                 ResourceManager     m_ResourceManager;
                 SoundModule         m_SoundModule;
