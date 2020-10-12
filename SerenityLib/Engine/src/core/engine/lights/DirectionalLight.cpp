@@ -16,6 +16,5 @@ void DirectionalLight::destroy() noexcept {
     Scene* scene_ptr = scene();
     if (scene_ptr) {
         removeFromVector(Engine::priv::InternalScenePublicInterface::GetDirectionalLights(*scene_ptr), this);
-        removeFromVector(Engine::priv::InternalScenePublicInterface::GetLights(*scene_ptr), this);
     }
 }

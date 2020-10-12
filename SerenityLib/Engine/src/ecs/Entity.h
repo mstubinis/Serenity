@@ -77,8 +77,8 @@ struct Entity {
         void removeChild(Entity child) const noexcept;
         void removeAllChildren() const noexcept;
 
-        template<typename T, typename... ARGS> inline void addComponent(ARGS&&... args) noexcept {
-            Engine::priv::InternalEntityPublicInterface::GetECS(*this)->addComponent<T>(*this, std::forward<ARGS>(args)...);
+        template<typename T, typename... ARGS> inline bool addComponent(ARGS&&... args) noexcept {
+            return Engine::priv::InternalEntityPublicInterface::GetECS(*this)->addComponent<T>(*this, std::forward<ARGS>(args)...);
         }
         template<typename T> inline bool removeComponent() noexcept {
             return Engine::priv::InternalEntityPublicInterface::GetECS(*this)->removeComponent<T>(*this);
@@ -90,7 +90,7 @@ struct Entity {
             return Engine::priv::InternalEntityPublicInterface::GetECS(*this)->getComponents<Types...>(*this);
         }
 
-        void addComponent(const std::string& componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8);
+        bool addComponent(const std::string& componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8);
         bool removeComponent(const std::string& componentClassName);
         luabridge::LuaRef getComponent(const std::string& componentClassName);
 };

@@ -35,7 +35,6 @@ void PointLight::destroy() noexcept {
     Scene* scene_ptr = scene();
     if (scene_ptr) {
         removeFromVector(Engine::priv::InternalScenePublicInterface::GetPointLights(*scene_ptr), this);
-        removeFromVector(Engine::priv::InternalScenePublicInterface::GetLights(*scene_ptr), this);
     }
 }
 float PointLight::calculateCullingRadius() {

@@ -106,12 +106,12 @@ namespace Engine::priv {
             
             virtual void generatePBRData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, unsigned int convoludeSize, unsigned int prefilterSize) = 0;
 
-            virtual void sendGPUDataSunLight(Camera& camera, SunLight& sunLight, const std::string& start) = 0;
-            virtual int sendGPUDataPointLight(Camera& camera, PointLight& pointLight, const std::string& start) = 0;
-            virtual void sendGPUDataDirectionalLight(Camera& camera, DirectionalLight& directionalLight, const std::string& start) = 0;
-            virtual int sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight, const std::string& start) = 0;
-            virtual int sendGPUDataRodLight(Camera& camera, RodLight& rodLight, const std::string& start) = 0;
-            virtual int sendGPUDataProjectionLight(Camera& camera, ProjectionLight& projectionLight, const std::string& start) = 0;
+            virtual void sendGPUDataLight(Camera& camera, SunLight& sunLight, const std::string& start) = 0;
+            virtual int sendGPUDataLight(Camera& camera, PointLight& pointLight, const std::string& start) = 0;
+            virtual void sendGPUDataLight(Camera& camera, DirectionalLight& directionalLight, const std::string& start) = 0;
+            virtual int sendGPUDataLight(Camera& camera, SpotLight& spotLight, const std::string& start) = 0;
+            virtual int sendGPUDataLight(Camera& camera, RodLight& rodLight, const std::string& start) = 0;
+            virtual int sendGPUDataLight(Camera& camera, ProjectionLight& projectionLight, const std::string& start) = 0;
 
             virtual void renderSunLight(Camera& camera, SunLight& sunLight, Viewport& viewport) = 0;
             virtual void renderPointLight(Camera& camera, PointLight& pointLight) = 0;

@@ -101,9 +101,6 @@ std::vector<Camera*>& priv::InternalScenePublicInterface::GetCameras(const Scene
 std::vector<Entity>& priv::InternalScenePublicInterface::GetEntities(const Scene& scene) {
     return scene.m_i->m_ECS.m_EntityPool.m_Pool;
 }
-std::vector<SunLight*>& priv::InternalScenePublicInterface::GetLights(const Scene& scene) {
-    return scene.m_Lights;
-}
 std::vector<SunLight*>& priv::InternalScenePublicInterface::GetSunLights(const Scene& scene) {
     return scene.m_SunLights;
 }
@@ -256,9 +253,26 @@ Scene::Scene(const std::string& name)
 {}
 Scene::~Scene() {
     SAFE_DELETE(m_Skybox);
-    SAFE_DELETE_VECTOR(m_Lights);
+
+    SAFE_DELETE_VECTOR(m_SunLights);
+    SAFE_DELETE_VECTOR(m_DirectionalLights);
+    SAFE_DELETE_VECTOR(m_PointLights);
+    SAFE_DELETE_VECTOR(m_SpotLights);
+    SAFE_DELETE_VECTOR(m_RodLights);
+    SAFE_DELETE_VECTOR(m_ProjectionLights);
+
     SAFE_DELETE_VECTOR(m_Cameras);
     unregisterEvent(EventType::SceneChanged);
+}
+size_t Scene::getNumLights() const noexcept {
+    size_t count = 0;
+    count += m_SunLights.size();
+    count += m_DirectionalLights.size();
+    count += m_PointLights.size();
+    count += m_SpotLights.size();
+    count += m_RodLights.size();
+    count += m_ProjectionLights.size();
+    return count;
 }
 void Scene::clearAllEntities() noexcept {
     m_i->m_ECS.clearAllEntities();

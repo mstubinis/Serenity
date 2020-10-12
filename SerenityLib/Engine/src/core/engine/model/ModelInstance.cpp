@@ -35,43 +35,31 @@ namespace Engine::priv {
         Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", i->godRaysColor().toPackedInt());
 
         if (stage == RenderStage::ForwardTransparentTrianglesSorted || stage == RenderStage::ForwardTransparent || stage == RenderStage::ForwardOpaque) {
-            auto& lights     = priv::InternalScenePublicInterface::GetLights(scene);
-            int maxLights    = glm::min((int)lights.size(), MAX_LIGHTS_PER_PASS);
+            int maxLights = glm::min((int)scene.getNumLights(), MAX_LIGHTS_PER_PASS);
             Engine::Renderer::sendUniform1Safe("numLights", maxLights);
-            for (int i = 0; i < maxLights; ++i) {
-                auto& light     = *lights[i];
-                auto lightType  = light.type();
-                auto start      = "light[" + std::to_string(i) + "].";
-                switch (lightType) {
-                    case LightType::Sun: {
-                        auto& sunLight         = (SunLight&)light;
-                        renderer->m_Pipeline->sendGPUDataSunLight(*camera, sunLight, start);
-                        break;
-                    }case LightType::Directional: {
-                        auto& directionalLight = (DirectionalLight&)light;
-                        renderer->m_Pipeline->sendGPUDataDirectionalLight(*camera, directionalLight, start);
-                        break;
-                    }case LightType::Point: {
-                        auto& pointLight       = (PointLight&)light;
-                        renderer->m_Pipeline->sendGPUDataPointLight(*camera, pointLight, start);
-                        break;
-                    }case LightType::Spot: {
-                        auto& spotLight        = (SpotLight&)light;
-                        renderer->m_Pipeline->sendGPUDataSpotLight(*camera, spotLight, start);
-                        break;
-                    }case LightType::Rod: {
-                        auto& rodLight         = (RodLight&)light;
-                        renderer->m_Pipeline->sendGPUDataRodLight(*camera, rodLight, start);
-                        break;
-                    }case LightType::Projection:{
-                        auto& projectionLight  = (ProjectionLight&)light;
-                        renderer->m_Pipeline->sendGPUDataProjectionLight(*camera, projectionLight, start);
-                        break;
-                    }default: {
+
+            int i = 0;
+            auto lambda = [&i, &renderer, &camera, maxLights](const auto& container) {
+                if (i >= maxLights) {
+                    return;
+                }
+                for (auto& light : container) {
+                    if (i >= maxLights) {
                         break;
                     }
+                    auto start = "light[" + std::to_string(i) + "].";
+                    renderer->m_Pipeline->sendGPUDataLight(*camera, *light, start);
+                    ++i;
                 }
-            }
+            };
+            lambda(Engine::priv::InternalScenePublicInterface::GetSunLights(scene));
+            lambda(Engine::priv::InternalScenePublicInterface::GetDirectionalLights(scene));
+            lambda(Engine::priv::InternalScenePublicInterface::GetPointLights(scene));
+
+            lambda(Engine::priv::InternalScenePublicInterface::GetSpotLights(scene));
+            lambda(Engine::priv::InternalScenePublicInterface::GetRodLights(scene));
+            lambda(Engine::priv::InternalScenePublicInterface::GetProjectionLights(scene));
+
             Skybox* skybox          = scene.skybox();
             const auto maxTextures  = renderer->m_Pipeline->getMaxNumTextureUnits() - 1U;
             Engine::Renderer::sendUniform4Safe("ScreenData", renderer->m_GI_Pack, Engine::Renderer::Settings::getGamma(), 0.0f, 0.0f);

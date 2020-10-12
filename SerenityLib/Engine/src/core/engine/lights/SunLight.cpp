@@ -19,7 +19,6 @@ void SunLight::destroy() noexcept {
     Scene* scene_ptr = scene();
     if (scene_ptr) {
         removeFromVector(Engine::priv::InternalScenePublicInterface::GetSunLights(*scene_ptr), this);
-        removeFromVector(Engine::priv::InternalScenePublicInterface::GetLights(*scene_ptr), this);
     }
 }
 glm_vec3 SunLight::position() const { return getComponent<ComponentBody>()->getPosition(); }

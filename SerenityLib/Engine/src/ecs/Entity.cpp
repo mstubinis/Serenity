@@ -58,54 +58,55 @@ void Entity::destroy() noexcept {
     }
 }
 
-void Entity::addComponent(const std::string& componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8) {
+bool Entity::addComponent(const std::string& componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8) {
     if (componentClassName == "ComponentBody") {
         if (!a1.isNil()) {
-            addComponent<ComponentBody>(a1.cast<CollisionType>());
+            return addComponent<ComponentBody>(a1.cast<CollisionType>());
         }else{
-            addComponent<ComponentBody>();
+            return addComponent<ComponentBody>();
         }
     }else if (componentClassName == "ComponentModel") {
         if (!a3.isNil() && !a4.isNil()) {
-            addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>(), a4.cast<RenderStage>());
+            return addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>(), a4.cast<RenderStage>());
         }else if(a4.isNil()){
-            addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>());
+            return addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>());
         }else{
-            addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>());
+            return addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>());
         }
     }else if (componentClassName == "ComponentCamera") {
         if (!a5.isNil() || !a6.isNil()) {
-            addComponent<ComponentCamera>(a1.cast<float>(), a2.cast<float>(), a3.cast<float>(), a4.cast<float>(), a5.cast<float>(), a6.cast<float>());
+            return addComponent<ComponentCamera>(a1.cast<float>(), a2.cast<float>(), a3.cast<float>(), a4.cast<float>(), a5.cast<float>(), a6.cast<float>());
         }else{
-            addComponent<ComponentCamera>(a1.cast<float>(), a2.cast<float>(), a3.cast<float>(), a4.cast<float>());
+            return addComponent<ComponentCamera>(a1.cast<float>(), a2.cast<float>(), a3.cast<float>(), a4.cast<float>());
         }
     }else if (componentClassName == "ComponentName") {
-        addComponent<ComponentName>(a1.cast<const char*>());
+        return addComponent<ComponentName>(a1.cast<const char*>());
     }else if (componentClassName == "ComponentLogic") {
         if (!a1.isNil() && a1.isFunction()) {
-            addComponent<ComponentLogic>(a1);
+            return addComponent<ComponentLogic>(a1);
         }else{
-            addComponent<ComponentLogic>();
+            return addComponent<ComponentLogic>();
         }
     }else if (componentClassName == "ComponentLogic1") {
         if (!a1.isNil() && a1.isFunction()) {
-            addComponent<ComponentLogic1>(a1);
+            return addComponent<ComponentLogic1>(a1);
         }else{
-            addComponent<ComponentLogic1>();
+            return addComponent<ComponentLogic1>();
         }
     }else if (componentClassName == "ComponentLogic2") {
         if (!a1.isNil() && a1.isFunction()) {
-            addComponent<ComponentLogic2>(a1);
+            return addComponent<ComponentLogic2>(a1);
         }else{
-            addComponent<ComponentLogic2>();
+            return addComponent<ComponentLogic2>();
         }
     }else if (componentClassName == "ComponentLogic3") {
         if (!a1.isNil() && a1.isFunction()) {
-            addComponent<ComponentLogic3>(a1);
+            return addComponent<ComponentLogic3>(a1);
         }else{
-            addComponent<ComponentLogic3>();
+            return addComponent<ComponentLogic3>();
         }
     }
+    return false;
 }
 bool Entity::removeComponent(const std::string& componentClassName) {
     if (componentClassName == "ComponentBody") {
