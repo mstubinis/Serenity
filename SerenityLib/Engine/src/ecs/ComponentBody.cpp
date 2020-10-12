@@ -108,9 +108,9 @@ ComponentBody::ComponentBody(ComponentBody&& other) noexcept
     , m_UserPointer1     { std::exchange(other.m_UserPointer1, nullptr) }
     , m_UserPointer2     { std::exchange(other.m_UserPointer2, nullptr) }
 {
-
-    p = std::move(other.p);
     n = std::move(other.n);
+    p = std::move(other.p);
+
     m_UserPointer = std::exchange(other.m_UserPointer, nullptr);
 
     setInternalPhysicsUserPointer(this);
@@ -128,9 +128,10 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
         m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
         m_UserPointer2     = std::exchange(other.m_UserPointer2, nullptr);
 
-        p                  = std::move(other.p);
-        n                  = std::move(other.n);
-
+        n.reset();
+        p.reset();
+        n = std::move(other.n);
+        p = std::move(other.p);
         setInternalPhysicsUserPointer(this);
     }
     return *this;

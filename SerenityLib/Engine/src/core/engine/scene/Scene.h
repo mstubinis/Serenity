@@ -48,13 +48,13 @@ class Scene: public Observer {
         mutable std::vector<Camera*>                                  m_Cameras;
         mutable std::vector<std::vector<Engine::priv::RenderGraph>>   m_RenderGraphs;
 
-        mutable std::vector<SunLight*>                                m_Lights;
         mutable std::vector<SunLight*>                                m_SunLights;
         mutable std::vector<DirectionalLight*>                        m_DirectionalLights;
         mutable std::vector<PointLight*>                              m_PointLights;
         mutable std::vector<SpotLight*>                               m_SpotLights;
         mutable std::vector<RodLight*>                                m_RodLights;
         mutable std::vector<ProjectionLight*>                         m_ProjectionLights;
+
         UpdateFP                                                      m_OnUpdateFunctor     = [](Scene*, const float) {};
         std::string                                                   m_Name                = "";
         unsigned int                                                  m_ID                  = 0;
@@ -80,22 +80,22 @@ class Scene: public Observer {
 
 
         template<typename ... ARGS> Engine::view_ptr<SunLight> createSunLight(ARGS&& ... args) {
-            return (SunLight*)m_Lights.emplace_back( m_SunLights.emplace_back(NEW SunLight(this, std::forward<ARGS>(args)...)) );
+            return m_SunLights.emplace_back(NEW SunLight(this, std::forward<ARGS>(args)...));
         }
         template<typename ... ARGS> Engine::view_ptr<DirectionalLight> createDirectionalLight(ARGS&& ... args) {
-            return (DirectionalLight*)m_Lights.emplace_back( m_DirectionalLights.emplace_back(NEW DirectionalLight(this, std::forward<ARGS>(args)...)) );
+            return m_DirectionalLights.emplace_back(NEW DirectionalLight(this, std::forward<ARGS>(args)...));
         }
         template<typename ... ARGS> Engine::view_ptr<PointLight> createPointLight(ARGS&& ... args) {
-            return (PointLight*)m_Lights.emplace_back( m_PointLights.emplace_back(NEW PointLight(this, std::forward<ARGS>(args)...)) );
+            return m_PointLights.emplace_back(NEW PointLight(this, std::forward<ARGS>(args)...));
         }
         template<typename ... ARGS> Engine::view_ptr<SpotLight> createSpotLight(ARGS&& ... args) {
-            return (SpotLight*)m_Lights.emplace_back( m_SpotLights.emplace_back(NEW SpotLight(this, std::forward<ARGS>(args)...)) );
+            return m_SpotLights.emplace_back(NEW SpotLight(this, std::forward<ARGS>(args)...));
         }
         template<typename ... ARGS> Engine::view_ptr<RodLight> createRodLight(ARGS&& ... args) {
-            return (RodLight*)m_Lights.emplace_back( m_RodLights.emplace_back(NEW RodLight(this, std::forward<ARGS>(args)...)) );
+            return m_RodLights.emplace_back(NEW RodLight(this, std::forward<ARGS>(args)...));
         }
         template<typename ... ARGS> Engine::view_ptr<ProjectionLight> createProjectionLight(ARGS&& ... args) {
-            return (ProjectionLight*)m_Lights.emplace_back( m_ProjectionLights.emplace_back(NEW ProjectionLight(this, std::forward<ARGS>(args)...)) );
+            return m_ProjectionLights.emplace_back(NEW ProjectionLight(this, std::forward<ARGS>(args)...));
         }
 
 
@@ -115,7 +115,8 @@ class Scene: public Observer {
         Entity createEntity();
         void removeEntity(Entity entity);
 
-        
+        size_t getNumLights() const noexcept;
+
         Viewport& getMainViewport();
         Viewport& addViewport(float x, float y, float width, float height, Camera& camera);
 
@@ -153,7 +154,6 @@ namespace Engine::priv {
         static std::vector<Entity>&              GetEntities(const Scene& scene);
         static std::vector<Viewport>&            GetViewports(const Scene& scene);
         static std::vector<Camera*>&             GetCameras(const Scene& scene);
-        static std::vector<SunLight*>&           GetLights(const Scene& scene);
         static std::vector<SunLight*>&           GetSunLights(const Scene& scene);
         static std::vector<DirectionalLight*>&   GetDirectionalLights(const Scene& scene);
         static std::vector<PointLight*>&         GetPointLights(const Scene& scene);

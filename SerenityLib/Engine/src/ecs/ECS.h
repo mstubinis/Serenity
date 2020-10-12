@@ -117,7 +117,7 @@ namespace Engine::priv {
                 m_Systems[type_slot] = NEW SYSTEM( m_SceneOptions, systemCI, getPool<COMPONENT>() );
             }
 
-            template<class T, typename... ARGS> void addComponent(Entity entity, ARGS&&... args) noexcept {
+            template<class T, typename... ARGS> bool addComponent(Entity entity, ARGS&&... args) noexcept {
                 auto type_slot = m_Registry.type_slot_fast<T>();
                 auto& cPool    = *(ECSComponentPool<T>*)m_ComponentPools[type_slot];
                 T* res         = nullptr;
@@ -127,7 +127,9 @@ namespace Engine::priv {
                 }
                 if (res) {
                     onComponentAddedToEntity(res, entity, type_slot);
+                    return true;
                 }
+                return false;
             }
             template<class T> bool removeComponent(Entity entity) noexcept {
                 auto type_slot = m_Registry.type_slot_fast<T>();

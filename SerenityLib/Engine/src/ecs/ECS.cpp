@@ -7,9 +7,18 @@ Engine::priv::ECS::~ECS() {
 }
 
 Entity Engine::priv::ECS::createEntity(Scene& scene) {
-    Entity res = m_EntityPool.addEntity(scene);
-    m_JustAddedEntities.emplace_back(res);
-    return res;
+    Entity entity = m_EntityPool.addEntity(scene);
+
+#ifndef ENGINE_PRODUCTION
+    for (auto e : m_JustAddedEntities) {
+        if (e == entity) {
+            ASSERT(false, __FUNCTION__ << "(): " << entity.m_Data << " already in m_JustAddedEntities!");
+        }
+    }
+#endif
+
+    m_JustAddedEntities.emplace_back(entity);
+    return entity;
 }
 
 void Engine::priv::ECS::init(const SceneOptions& options) {
@@ -27,6 +36,15 @@ void Engine::priv::ECS::clearAllEntities() noexcept {
 }
 
 void Engine::priv::ECS::removeEntity(Entity entity) {
+#ifndef ENGINE_PRODUCTION
+    for (auto e : m_DestroyedEntities) {
+        if (e == entity) {
+            ASSERT(false, __FUNCTION__ << "(): " << entity.m_Data << " already in m_DestroyedEntities!");
+        }
+    }
+#endif
+
+
     m_DestroyedEntities.emplace_back(entity);
 }
 void Engine::priv::ECS::update(const float dt, Scene& scene) {

@@ -622,7 +622,7 @@ void DeferredPipeline::renderSkybox(Skybox* skybox, Handle shaderProgram, Scene&
 }
 
 
-void DeferredPipeline::sendGPUDataSunLight(Camera& camera, SunLight& sunLight, const std::string& start) {
+void DeferredPipeline::sendGPUDataLight(Camera& camera, SunLight& sunLight, const std::string& start) {
     auto body        = sunLight.getComponent<ComponentBody>();
     auto pos         = glm::vec3(body->getPosition());
     const auto& col  = sunLight.color();
@@ -631,7 +631,7 @@ void DeferredPipeline::sendGPUDataSunLight(Camera& camera, SunLight& sunLight, c
     sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)sunLight.type());
     sendUniform1Safe("Type", 0.0f);
 }
-int DeferredPipeline::sendGPUDataPointLight(Camera& camera, PointLight& pointLight, const std::string& start) {
+int DeferredPipeline::sendGPUDataLight(Camera& camera, PointLight& pointLight, const std::string& start) {
     auto body       = pointLight.getComponent<ComponentBody>();
     auto pos        = glm::vec3(body->getPosition());
     auto cull       = pointLight.getCullingRadius();
@@ -653,7 +653,7 @@ int DeferredPipeline::sendGPUDataPointLight(Camera& camera, PointLight& pointLig
     }
     return 2;
 }
-void DeferredPipeline::sendGPUDataDirectionalLight(Camera& camera, DirectionalLight& directionalLight, const std::string& start) {
+void DeferredPipeline::sendGPUDataLight(Camera& camera, DirectionalLight& directionalLight, const std::string& start) {
     auto body       = directionalLight.getComponent<ComponentBody>();
     auto forward    = glm::vec3(body->forward());
     const auto& col = directionalLight.color();
@@ -662,7 +662,7 @@ void DeferredPipeline::sendGPUDataDirectionalLight(Camera& camera, DirectionalLi
     sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)directionalLight.type());
     sendUniform1Safe("Type", 0.0f);
 }
-int DeferredPipeline::sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight, const std::string& start) {
+int DeferredPipeline::sendGPUDataLight(Camera& camera, SpotLight& spotLight, const std::string& start) {
     auto body    = spotLight.getComponent<ComponentBody>();
     auto pos     = glm::vec3(body->getPosition());
     auto forward = glm::vec3(body->forward());
@@ -689,7 +689,7 @@ int DeferredPipeline::sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight,
     }
     return 2;
 }
-int DeferredPipeline::sendGPUDataRodLight(Camera& camera, RodLight& rodLight, const std::string& start) {
+int DeferredPipeline::sendGPUDataLight(Camera& camera, RodLight& rodLight, const std::string& start) {
     auto body            = rodLight.getComponent<ComponentBody>();
     auto pos             = glm::vec3(body->getPosition());
     auto cullingDistance = rodLight.rodLength() + (rodLight.getCullingRadius() * 2.0f);
@@ -714,7 +714,7 @@ int DeferredPipeline::sendGPUDataRodLight(Camera& camera, RodLight& rodLight, co
     }
     return 2;
 }
-int DeferredPipeline::sendGPUDataProjectionLight(Camera& camera, ProjectionLight& rodLight, const std::string& start) {
+int DeferredPipeline::sendGPUDataLight(Camera& camera, ProjectionLight& rodLight, const std::string& start) {
     return 2;
 }
 
@@ -723,7 +723,7 @@ void DeferredPipeline::renderDirectionalLight(Camera& camera, DirectionalLight& 
         return;
     }
     std::string start = "light.";
-    sendGPUDataDirectionalLight(camera, directionalLight, start);
+    sendGPUDataLight(camera, directionalLight, start);
     renderFullscreenQuad();
 }
 void DeferredPipeline::renderSunLight(Camera& camera, SunLight& sunLight, Viewport& viewport) {
@@ -731,7 +731,7 @@ void DeferredPipeline::renderSunLight(Camera& camera, SunLight& sunLight, Viewpo
         return;
     }
     std::string start = "light.";
-    sendGPUDataSunLight(camera, sunLight, start);
+    sendGPUDataLight(camera, sunLight, start);
     renderFullscreenQuad();
 }
 void DeferredPipeline::renderPointLight(Camera& camera, PointLight& pointLight) {
@@ -739,7 +739,7 @@ void DeferredPipeline::renderPointLight(Camera& camera, PointLight& pointLight) 
         return;
     }
     std::string start = "light.";
-    int result   = sendGPUDataPointLight(camera, pointLight, start);
+    int result   = sendGPUDataLight(camera, pointLight, start);
     if (result == 0) {
         return;
     }
@@ -765,7 +765,7 @@ void DeferredPipeline::renderSpotLight(Camera& camera, SpotLight& spotLight) {
         return;
     }
     std::string start = "light.";
-    int result   = sendGPUDataSpotLight(camera, spotLight, start);
+    int result   = sendGPUDataLight(camera, spotLight, start);
 
     if (result == 0) {
         return;
@@ -793,7 +793,7 @@ void DeferredPipeline::renderRodLight(Camera& camera, RodLight& rodLight) {
         return;
     }
     std::string start = "light.";
-    int result   = sendGPUDataRodLight(camera, rodLight, start);
+    int result   = sendGPUDataLight(camera, rodLight, start);
 
     if (result == 0) {
         return;
@@ -821,7 +821,7 @@ void DeferredPipeline::renderProjectionLight(Camera& camera, ProjectionLight& pr
         return;
     }
     std::string start = "light.";
-    int result = sendGPUDataProjectionLight(camera, projectionLight, start);
+    int result = sendGPUDataLight(camera, projectionLight, start);
 
     if (result == 0) {
         return;
