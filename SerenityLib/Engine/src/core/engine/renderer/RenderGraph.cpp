@@ -272,9 +272,9 @@ void RenderGraph::validate_model_instances_for_rendering(Viewport& viewport, Cam
     decimal global_distance_factor = ModelInstance::getGlobalDistanceFactor();
     auto lambda = [&](std::vector<ModelInstance*>& inInstanceNodes, const glm_vec3& camPos) {
         for (auto& modelInstancePtr : inInstanceNodes) {
-            auto& modelInstance    = *modelInstancePtr;
-            auto* body             = modelInstance.parent().getComponent<ComponentBody>();
-            auto* model            = modelInstance.parent().getComponent<ComponentModel>();
+            auto& modelInstance = *modelInstancePtr;
+            auto body           = modelInstance.parent().getComponent<ComponentBody>();
+            auto model          = modelInstance.parent().getComponent<ComponentModel>();
             bool is_valid_viewport = InternalModelInstancePublicInterface::IsViewportValid(modelInstance, viewport);
             if (is_valid_viewport) {
                 if (body) {
@@ -318,7 +318,7 @@ void RenderGraph::render(Engine::priv::RenderModule& renderer, Viewport& viewpor
                     renderer.bind(&mesh);
                     for (auto& modelInstancePtr : meshNode.instanceNodes) {
                         auto& modelInstance   = *modelInstancePtr;
-                        auto* body            = modelInstance.parent().getComponent<ComponentBody>();
+                        auto body             = modelInstance.parent().getComponent<ComponentBody>();
                         glm::mat4 modelMatrix = body->modelMatrixRendering();
                         if (modelInstance.passedRenderCheck()) {
                             if (sortingMode != SortingMode::None) {
@@ -352,7 +352,7 @@ void RenderGraph::render_bruteforce(Engine::priv::RenderModule& renderer, Viewpo
         auto& modelInstance   = *modelInstancePtr;
         auto* mesh            = modelInstance.mesh().get<Mesh>();
         auto* material        = modelInstance.material().get<Material>();
-        auto* body            = modelInstance.parent().getComponent<ComponentBody>();
+        auto  body            = modelInstance.parent().getComponent<ComponentBody>();
         glm::mat4 modelMatrix = body->modelMatrixRendering();
         if (modelInstance.passedRenderCheck()) {
             if (sortingMode != SortingMode::None) {

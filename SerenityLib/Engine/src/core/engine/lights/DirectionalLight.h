@@ -6,14 +6,17 @@
 
 class DirectionalLight : public SunLight {
     friend class Engine::priv::RenderModule;
-    public:
-        DirectionalLight(
-            const glm::vec3& direction = glm::vec3(0.0f, 0.0f, -1.0f),
-            Scene*                     = nullptr
-        );
-        virtual ~DirectionalLight() {}
+    private:
 
-        void free() noexcept override;
+    public:
+        DirectionalLight() = delete;
+        DirectionalLight(
+            Scene* scene,
+            const glm::vec3& direction = glm::vec3(0.0f, 0.0f, -1.0f)
+        );
+        virtual ~DirectionalLight();
+
+        void destroy() noexcept;
 };
 
 #endif

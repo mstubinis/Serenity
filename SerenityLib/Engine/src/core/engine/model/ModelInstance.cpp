@@ -27,7 +27,7 @@ namespace Engine::priv {
         auto& scene           = *Resources::getCurrentScene();
         auto* camera          = scene.getActiveCamera();
         glm::vec3 camPos      = camera->getPosition();
-        auto* body            = (i->parent().getComponent<ComponentBody>());
+        ComponentBody* body   = (i->parent().getComponent<ComponentBody>());
         glm::mat4 parentModel = body->modelMatrixRendering();
         auto& animationVector = i->getRunningAnimations();
 
@@ -225,7 +225,7 @@ void ModelInstance::internal_init(Handle mesh, Handle material, Handle shaderPro
     internal_update_model_matrix();
 }
 void ModelInstance::internal_update_model_matrix(bool recalcRadius) {
-    auto* model = m_Parent.getComponent<ComponentModel>();
+    ComponentModel* model = m_Parent.getComponent<ComponentModel>();
     if (model && recalcRadius) {
         Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
     }

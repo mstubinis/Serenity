@@ -17,23 +17,23 @@
 using namespace Engine;
 
 void Collision::internal_load_1(Collision* collision, CollisionType collisionType, Handle mesh, float mass) {
-    auto* body       = collision->m_Owner.getComponent<ComponentBody>();
+    auto body       = collision->m_Owner.getComponent<ComponentBody>();
     collision->m_DeferredMeshes.clear();
-    const auto scale = body->getScale();
+    auto scale = body->getScale();
     Physics::removeRigidBodyThreadSafe(*body);
     collision->internal_free_memory();
 
     collision->m_BtShape = std::unique_ptr<btCollisionShape>(Engine::priv::InternalMeshPublicInterface::BuildCollision(mesh, collisionType));
     body->rebuildRigidBody(true, true);
     body->setScale(scale);
-    auto* model = collision->m_Owner.getComponent<ComponentModel>();
+    auto model = collision->m_Owner.getComponent<ComponentModel>();
     if (model) {
         Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
     }
 }
 void Collision::internal_load_2(Collision* collision, btCompoundShape* btCompound, std::vector<ModelInstance*> instances, float mass, CollisionType collisionType) {
-    auto* body       = collision->m_Owner.getComponent<ComponentBody>();
-    const auto scale = body->getScale();
+    auto body  = collision->m_Owner.getComponent<ComponentBody>();
+    auto scale = body->getScale();
     for (auto& instance : instances) {
         btCollisionShape* built_collision_shape = Engine::priv::InternalMeshPublicInterface::BuildCollision(instance, collisionType, true);
         btTransform localTransform(Math::glmToBTQuat(instance->orientation()), Math::btVectorFromGLM(instance->position()));
@@ -44,7 +44,7 @@ void Collision::internal_load_2(Collision* collision, btCompoundShape* btCompoun
     body->rebuildRigidBody(true, true);
     body->setScale(scale);
 
-    auto* model = collision->m_Owner.getComponent<ComponentModel>();
+    auto model = collision->m_Owner.getComponent<ComponentModel>();
     if (model) {
         Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
     }

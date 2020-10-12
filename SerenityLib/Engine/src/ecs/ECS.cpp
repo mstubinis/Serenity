@@ -17,6 +17,15 @@ void Engine::priv::ECS::init(const SceneOptions& options) {
     m_EntityPool.init(m_SceneOptions);
 }
 
+void Engine::priv::ECS::clearAllEntities() noexcept {
+    m_JustAddedEntities.clear();
+    m_DestroyedEntities.clear();
+    m_EntityPool.clear();
+    for (auto& pool : m_ComponentPools) {
+        pool->clear();
+    }
+}
+
 void Engine::priv::ECS::removeEntity(Entity entity) {
     m_DestroyedEntities.emplace_back(entity);
 }

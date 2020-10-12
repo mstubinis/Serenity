@@ -8,27 +8,29 @@ namespace Engine::priv {
 };
 
 #include <core/engine/lights/LightIncludes.h>
-#include <ecs/Entity.h>
+#include <ecs/EntityBody.h>
 
-class SunLight : public Entity {
+constexpr float LIGHT_DEFAULT_AMBIENT_INTENSITY = 0.005f;
+constexpr float LIGHT_DEFAULT_DIFFUSE_INTENSITY = 2.0f;
+constexpr float LIGHT_DEFAULT_SPECULAR_INTENSITY = 1.0f;
+
+class SunLight : public EntityBody {
     friend class ::Engine::priv::RenderModule;
     protected:
         LightType          m_Type              = LightType::Sun;
         bool               m_IsShadowCaster    = false;
         bool               m_Active            = true;
         glm::vec4          m_Color             = glm::vec4(1.0f);
-        float              m_AmbientIntensity  = 0.005f;
-        float              m_DiffuseIntensity  = 2.0f;
-        float              m_SpecularIntensity = 1.0f;
-    public:
-        SunLight(
-            const glm_vec3& position = glm_vec3(0.0),
-            LightType type           = LightType::Sun,
-            Scene* scene             = nullptr
-        );
-        virtual ~SunLight() {}
+        float              m_AmbientIntensity  = LIGHT_DEFAULT_AMBIENT_INTENSITY;
+        float              m_DiffuseIntensity  = LIGHT_DEFAULT_DIFFUSE_INTENSITY;
+        float              m_SpecularIntensity = LIGHT_DEFAULT_SPECULAR_INTENSITY;
 
-        virtual void free() noexcept;
+    public:
+        SunLight() = delete;
+        SunLight(Scene* scene, const glm_vec3& position = glm_vec3(0.0), LightType type = LightType::Sun);
+        virtual ~SunLight();
+
+        void destroy() noexcept;
 
         glm_vec3 position() const;
 

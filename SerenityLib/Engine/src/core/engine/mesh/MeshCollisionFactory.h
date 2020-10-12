@@ -23,6 +23,7 @@ class  btGImpactMeshShape;
 
 namespace Engine::priv {
     class MeshCollisionFactory final {
+        friend struct MeshCPUData;
         private:
             std::unique_ptr<btShapeHull>             m_ConvexHullData;
             std::unique_ptr<btConvexHullShape>       m_ConvesHullShape;

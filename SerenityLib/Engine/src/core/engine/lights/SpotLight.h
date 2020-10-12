@@ -4,22 +4,27 @@
 
 #include <core/engine/lights/PointLight.h>
 
+constexpr float SPOT_LIGHT_DEFAULT_CUTOFF = 11.0f;
+constexpr float SPOT_LIGHT_DEFAULT_OUTER_CUTOFF = 13.0f;
+
 class SpotLight : public PointLight {
     friend class ::Engine::priv::RenderModule;
     private:
-        float   m_Cutoff;
-        float   m_OuterCutoff;
+        float   m_Cutoff      = SPOT_LIGHT_DEFAULT_CUTOFF;
+        float   m_OuterCutoff = SPOT_LIGHT_DEFAULT_OUTER_CUTOFF;
+
     public:
+        SpotLight() = delete;
         SpotLight(
-            const glm_vec3& position   = glm_vec3(0.0f, 0.0f, 0.0f),
-            const glm_vec3& direction  = glm_vec3(0.0f, 0.0f, -1.0f),
-            float innerCutoffInDegrees = 11.0f,
-            float outerCutoffInDegrees = 13.0f,
-            Scene* scene               = nullptr
+            Scene* scene,
+            const glm_vec3& position = glm_vec3(0.0f, 0.0f, 0.0f),
+            const glm_vec3& direction = glm_vec3(0.0f, 0.0f, -1.0f),
+            float innerCutoffInDegrees = SPOT_LIGHT_DEFAULT_CUTOFF,
+            float outerCutoffInDegrees = SPOT_LIGHT_DEFAULT_OUTER_CUTOFF
         );
         virtual ~SpotLight();
 
-        void free() noexcept override;
+        void destroy() noexcept;
 
         inline CONSTEXPR float getCutoff() const noexcept { return m_Cutoff; }
         inline CONSTEXPR float getCutoffOuter() const noexcept { return m_OuterCutoff; }

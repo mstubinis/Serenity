@@ -4,36 +4,34 @@
 #include <ecs/ComponentBody.h>
 #include <core/engine/scene/Scene.h>
 
-using namespace Engine;
-
-RodLight::RodLight(const glm_vec3& pos, float rodLength, Scene* scene) 
-    : PointLight{ LightType::Rod, pos, scene }
+RodLight::RodLight(Scene* scene, const glm_vec3& pos, float rodLength)
+    : PointLight{ scene, LightType::Rod, pos }
 {
     setRodLength(rodLength);
 
-    auto* body = getComponent<ComponentBody>();
+    auto body = getComponent<ComponentBody>();
     if (body) { //evil, but needed. find out why...
         body->setScale(m_CullingRadius, m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius);
     }
-
-    if (m_Type == LightType::Rod) {
-        auto& rodLights = priv::InternalScenePublicInterface::GetRodLights(*scene);
-        rodLights.emplace_back(this);
+}
+RodLight::~RodLight() {
+}
+void RodLight::destroy() noexcept {
+    Entity::destroy();
+    Scene* scene_ptr = scene();
+    if (scene_ptr) {
+        removeFromVector(Engine::priv::InternalScenePublicInterface::GetRodLights(*scene_ptr), this);
+        removeFromVector(Engine::priv::InternalScenePublicInterface::GetLights(*scene_ptr), this);
     }
 }
 float RodLight::calculateCullingRadius() {
     float res = PointLight::calculateCullingRadius();
-    auto& body = *getComponent<ComponentBody>();
-    body.setScale(m_CullingRadius, m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius);
+    auto body = getComponent<ComponentBody>();
+    body->setScale(m_CullingRadius, m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius);
     return res;
 }
 void RodLight::setRodLength(float length) {
     m_RodLength = length;
-    auto& body = *getComponent<ComponentBody>();
-    body.setScale(m_CullingRadius, m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius);
-}
-void RodLight::free() noexcept {
-    Entity::destroy();
-    removeFromVector(priv::InternalScenePublicInterface::GetRodLights(scene()), this);
-    removeFromVector(priv::InternalScenePublicInterface::GetLights(scene()), this);
+    auto body = getComponent<ComponentBody>();
+    body->setScale(m_CullingRadius, m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius);
 }

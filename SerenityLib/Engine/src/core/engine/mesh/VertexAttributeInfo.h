@@ -24,6 +24,5 @@ struct VertexAttributeInfo final {
     VertexAttributeInfo& operator=(const VertexAttributeInfo& other)     = default;
     VertexAttributeInfo(VertexAttributeInfo&& other) noexcept            = default;
     VertexAttributeInfo& operator=(VertexAttributeInfo&& other) noexcept = default;
-    ~VertexAttributeInfo() = default;
 };
 #endif

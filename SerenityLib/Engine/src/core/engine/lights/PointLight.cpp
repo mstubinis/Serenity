@@ -6,8 +6,6 @@
 #include <ecs/ComponentBody.h>
 #include <core/engine/scene/Scene.h>
 
-using namespace Engine;
-
 constexpr std::array<PointLightDefaultAttenuationData, (size_t)LightRange::_TOTAL> LIGHT_RANGES { {
     { 1.0f, 0.7f, 1.8f },
     { 1.0f, 0.35f, 0.44f },
@@ -23,25 +21,25 @@ constexpr std::array<PointLightDefaultAttenuationData, (size_t)LightRange::_TOTA
     { 1.0f, 0.0014f, 0.000007f },
 } };
 
-PointLight::PointLight(LightType type, const glm_vec3& pos, Scene* scene) 
-    : SunLight{ pos, type, scene }
+PointLight::PointLight(Scene* scene, LightType type, const glm_vec3& pos)
+    : SunLight{ scene, pos, type }
     , m_CullingRadius{ calculateCullingRadius() }
-{
-    if (m_Type == LightType::Point) {
-        auto& ptLights = priv::InternalScenePublicInterface::GetPointLights(*scene);
-        ptLights.emplace_back(this);
+{}
+PointLight::PointLight(Scene* scene, const glm_vec3& pos)
+    : PointLight{ scene, LightType::Point, pos }
+{}
+PointLight::~PointLight() {
+}
+void PointLight::destroy() noexcept {
+    Entity::destroy();
+    Scene* scene_ptr = scene();
+    if (scene_ptr) {
+        removeFromVector(Engine::priv::InternalScenePublicInterface::GetPointLights(*scene_ptr), this);
+        removeFromVector(Engine::priv::InternalScenePublicInterface::GetLights(*scene_ptr), this);
     }
 }
-PointLight::PointLight(const glm_vec3& pos, Scene* scene) 
-    : PointLight{ LightType::Point, pos, scene }
-{}
-void PointLight::free() noexcept {
-    Entity::destroy();
-    removeFromVector(priv::InternalScenePublicInterface::GetPointLights(scene()), this);
-    removeFromVector(priv::InternalScenePublicInterface::GetLights(scene()), this);
-}
 float PointLight::calculateCullingRadius() {
-    float lightMax = Math::Max(m_Color.x, m_Color.y, m_Color.z);
+    float lightMax = Engine::Math::Max(m_Color.x, m_Color.y, m_Color.z);
     float radius = 0;
     //if(m_AttenuationModel == LightAttenuation::Constant_Linear_Exponent){
           radius = (-m_L + glm::sqrt(m_L * m_L - 4.0f * m_E * (m_C - (256.0f / 5.0f) * lightMax))) / (2.0f * m_E);
@@ -75,7 +73,7 @@ void PointLight::setAttenuation(float constant, float linear, float exponent) {
     m_CullingRadius = calculateCullingRadius(); 
 }
 void PointLight::setAttenuation(LightRange r) { 
-    const auto& data = LIGHT_RANGES[(unsigned int)r];
+    const auto& data = LIGHT_RANGES[(uint32_t)r];
     PointLight::setAttenuation(data.constant, data.linear, data.exponent);
 }
 void PointLight::setAttenuationModel(LightAttenuation model) {

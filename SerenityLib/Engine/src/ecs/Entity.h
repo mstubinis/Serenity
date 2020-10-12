@@ -70,7 +70,7 @@ struct Entity {
             return p.versionID;
         }
 
-        Scene& scene() const noexcept;
+        Engine::view_ptr<Scene> scene() const noexcept;
         bool hasParent() const noexcept;
 
         void addChild(Entity child) const noexcept;
@@ -78,16 +78,16 @@ struct Entity {
         void removeAllChildren() const noexcept;
 
         template<typename T, typename... ARGS> inline void addComponent(ARGS&&... args) noexcept {
-            Engine::priv::InternalEntityPublicInterface::GetECS(*this).addComponent<T>(*this, std::forward<ARGS>(args)...);
+            Engine::priv::InternalEntityPublicInterface::GetECS(*this)->addComponent<T>(*this, std::forward<ARGS>(args)...);
         }
         template<typename T> inline bool removeComponent() noexcept {
-            return Engine::priv::InternalEntityPublicInterface::GetECS(*this).removeComponent<T>(*this);
+            return Engine::priv::InternalEntityPublicInterface::GetECS(*this)->removeComponent<T>(*this);
         }
-        template<typename T> inline CONSTEXPR T* getComponent() const noexcept {
-            return Engine::priv::InternalEntityPublicInterface::GetECS(*this).getComponent<T>(*this);
+        template<typename T> inline CONSTEXPR Engine::view_ptr<T> getComponent() const noexcept {
+            return Engine::priv::InternalEntityPublicInterface::GetECS(*this)->getComponent<T>(*this);
         }
         template<class... Types> inline CONSTEXPR std::tuple<Types*...> getComponents() const noexcept {
-            return Engine::priv::InternalEntityPublicInterface::GetECS(*this).getComponents<Types...>(*this);
+            return Engine::priv::InternalEntityPublicInterface::GetECS(*this)->getComponents<Types...>(*this);
         }
 
         void addComponent(const std::string& componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8);
@@ -98,7 +98,7 @@ struct Entity {
 namespace Engine::priv {
     class ECS;
     struct InternalEntityPublicInterface final {
-        static Engine::priv::ECS& GetECS(Entity entity);
+        static Engine::view_ptr<Engine::priv::ECS> GetECS(Entity entity);
 
         template<typename T> static luabridge::LuaRef GetComponent(lua_State* L, Entity entity, const char* globalName){
             luabridge::setGlobal(L, entity.getComponent<T>(), globalName);

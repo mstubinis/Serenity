@@ -37,6 +37,8 @@ namespace Engine::priv {
 
             void init(const SceneOptions& options);
 
+            void clearAllEntities() noexcept;
+
             inline const ECSEntityPool& getEntityPool() const noexcept {
                 return m_EntityPool;
             }
@@ -141,12 +143,12 @@ namespace Engine::priv {
                 return ret_val;
             }
 
-            template<class T> inline CONSTEXPR T* getComponent(Entity entity) const noexcept {
+            template<class T> inline CONSTEXPR Engine::view_ptr<T> getComponent(Entity entity) const noexcept {
                 using CPOOL = ECSComponentPool<T>;
                 return ((CPOOL*)m_ComponentPools[m_Registry.type_slot_fast<T>()])->getComponent(entity);
             }
 
-            template<class... TYPES> inline CONSTEXPR std::tuple<TYPES*...> getComponents(Entity entity) const noexcept {
+            template<class... TYPES> inline CONSTEXPR std::tuple<Engine::view_ptr<TYPES>...> getComponents(Entity entity) const noexcept {
                 return std::make_tuple(getComponent<TYPES>(entity)...);
             }
     };

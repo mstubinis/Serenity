@@ -321,8 +321,8 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
 
     addComponent<ComponentModel>(m_MeshHandle, materialHandle);
     addComponent<ComponentBody>(CollisionType::Compound); //TODO: check CollisionType::TriangleShapeStatic
-    auto* body = getComponent<ComponentBody>();
-    auto* model = getComponent<ComponentModel>();
+    ComponentBody*  body  = getComponent<ComponentBody>();
+    ComponentModel* model = getComponent<ComponentModel>();
     Collision* c = NEW Collision(*body);
 
     m_TerrainData.m_FinalCompoundShape = new btCompoundShape();

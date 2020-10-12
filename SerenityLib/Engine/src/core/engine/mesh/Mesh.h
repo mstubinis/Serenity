@@ -55,15 +55,15 @@ namespace Engine::priv{
 
 struct MeshCPUData final {
     glm::vec3                                      m_RadiusBox        = glm::vec3(0.0f);
+    std::string                                    m_File             = "";
     mutable Engine::priv::MeshSkeleton*            m_Skeleton         = nullptr;
     mutable Engine::priv::MeshInfoNode*            m_RootNode         = nullptr;
     mutable Engine::priv::MeshCollisionFactory*    m_CollisionFactory = nullptr;
     mutable VertexData*                            m_VertexData       = nullptr;
-    std::string                                    m_File             = "";
     float                                          m_Radius           = 0.0f;
     float                                          m_Threshold        = MESH_DEFAULT_THRESHOLD;
 
-    MeshCPUData()                                        = default;
+    MeshCPUData() = default;
     MeshCPUData(const MeshCPUData& other);
     MeshCPUData& operator=(const MeshCPUData& other);
     MeshCPUData(MeshCPUData&& other) noexcept;
@@ -92,7 +92,7 @@ struct MeshCPUData final {
         SAFE_DELETE(m_CollisionFactory);
         SAFE_DELETE(m_VertexData);
     }
-
+    void internal_transfer_cpu_datas();
     void internal_calculate_radius();
 };
 

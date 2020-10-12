@@ -4,6 +4,7 @@
 
 class  Mesh;
 class  SMSH_File;
+struct MeshCPUData;
 namespace Engine::priv {
     class  InternalMeshPublicInterface;
     struct MeshImportedData;
@@ -15,6 +16,7 @@ namespace Engine::priv {
 namespace Engine::priv {
     class MeshSkeleton final {
         friend class  Mesh;
+        friend struct MeshCPUData;
         friend class  SMSH_File;
         friend class  Engine::priv::MeshLoader;
         friend class  Engine::priv::AnimationData;
@@ -39,7 +41,8 @@ namespace Engine::priv {
             MeshSkeleton(MeshSkeleton&& other) noexcept        = default;
             MeshSkeleton& operator=(MeshSkeleton&& other)      = default;
 
-            inline CONSTEXPR unsigned int numBones() const noexcept { return m_NumBones; }
+            inline std::unordered_map<std::string, AnimationData>& getAnimationData() noexcept { return m_AnimationData; }
+            inline unsigned int numBones() const noexcept { return m_NumBones; }
     };
 };
 #endif

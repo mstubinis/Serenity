@@ -55,7 +55,7 @@ namespace Engine::priv {
             }
 
 
-            Scene& _getSceneByID(uint32_t sceneID);
+            Engine::view_ptr<Scene> getSceneByID(uint32_t sceneID);
 
             inline CONSTEXPR std::vector<std::unique_ptr<Scene>>& scenes() noexcept { return m_Scenes; }
 
@@ -68,7 +68,7 @@ namespace Engine::priv {
     };
 };
 namespace Engine::Resources {
-    Scene* getCurrentScene();
+    Engine::view_ptr<Scene> getCurrentScene();
     bool setCurrentScene(Scene* scene);
     bool setCurrentScene(std::string_view sceneName);
 
@@ -82,7 +82,7 @@ namespace Engine::Resources {
     Window& getWindow(unsigned int index);
     glm::uvec2 getWindowSize(unsigned int index);
 
-    Scene* getScene(std::string_view sceneName);
+    Engine::view_ptr<Scene> getScene(std::string_view sceneName);
     bool deleteScene(std::string_view sceneName);
     bool deleteScene(Scene& scene);
 
@@ -104,10 +104,6 @@ namespace Engine::Resources {
     std::pair<Engine::view_ptr<TResource>, Handle> getResource(std::string_view name) noexcept {
         return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<TResource>(name);
     }
-    //template<typename TResource>
-    //void getResource(Handle inHandle, Engine::view_ptr<TResource>& outPtr) noexcept {
-    //    outPtr = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<TResource>(inHandle);
-    //}
     template<typename TResource>
     Engine::view_ptr<TResource> getResource(Handle inHandle) noexcept {
         return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<TResource>(inHandle);

@@ -4,6 +4,9 @@
 using namespace Engine::priv;
 
 WorkerThreadContainer::~WorkerThreadContainer() {
+    join_all();
+}
+void WorkerThreadContainer::join_all() noexcept {
     for (auto& worker_thread : m_WorkerThreads) {
         if (worker_thread.joinable()) {
             worker_thread.join();
@@ -11,10 +14,11 @@ WorkerThreadContainer::~WorkerThreadContainer() {
     }
 }
 void WorkerThreadContainer::clear() noexcept {
+    join_all();
     m_WorkerThreadsHashed.clear();
     m_WorkerThreads.clear();
 }
 void WorkerThreadContainer::reserve(size_t newReserveSize) noexcept {
-    m_WorkerThreads.reserve(newReserveSize);
     m_WorkerThreadsHashed.reserve(newReserveSize);
+    m_WorkerThreads.reserve(newReserveSize);
 }

@@ -14,8 +14,8 @@ namespace Engine::priv {
     class ECSEntityPool final{
         friend struct Engine::priv::InternalScenePublicInterface;
         private:
-            std::vector<Entity>          m_Pool;
-            std::vector<uint32_t>   m_Freelist;
+            std::vector<Entity>    m_Pool;
+            std::vector<uint32_t>  m_Freelist;
         public:
             ECSEntityPool() = default;
             ECSEntityPool(const ECSEntityPool&)                      = delete;
@@ -31,6 +31,16 @@ namespace Engine::priv {
             void destroyFlaggedEntity(uint32_t entityID);
             Entity addEntity(const Scene& scene) noexcept;
             Entity getEntity(uint32_t entityData) const noexcept;
+
+            void clear() noexcept {
+                m_Pool.clear();
+                m_Freelist.clear();
+            }
+
+            inline std::vector<Entity>::iterator begin() noexcept { return m_Pool.begin(); }
+            inline std::vector<Entity>::const_iterator begin() const noexcept { return m_Pool.begin(); }
+            inline std::vector<Entity>::iterator end() noexcept { return m_Pool.end(); }
+            inline std::vector<Entity>::const_iterator end() const noexcept { return m_Pool.end(); }
         };
 };
 

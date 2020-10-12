@@ -5,6 +5,9 @@
 #include <core/engine/system/window/Window.h>
 #include <core/engine/system/Engine.h>
 
+using namespace Engine;
+using namespace Engine::priv;
+
 #pragma region TextureRequest
 
 TextureRequest::TextureRequest(const std::string& filename, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType) 
@@ -38,8 +41,8 @@ void TextureRequest::request(bool inAsync) {
     }
     m_Part.async   = (inAsync && Engine::hardware_concurrency() > 1);
     m_Part.handle  = Engine::Resources::addResource<Texture>(m_Part.m_CPUData.m_Name, m_Part.m_CPUData.m_TextureType, m_Part.m_CPUData.m_IsToBeMipmapped);
-    TextureRequest textureRequest(*this);
-    auto lambda_cpu = [textureRequest]() mutable {
+
+    auto l_cpu = [textureRequest{ *this }]() mutable {
         //6 file cubemaps and framebuffers are not loaded this way
         if (textureRequest.m_Part.m_CPUData.m_TextureType == TextureType::Texture2D) {
             if (textureRequest.m_FromMemory)
@@ -49,16 +52,21 @@ void TextureRequest::request(bool inAsync) {
         }
         Engine::priv::TextureLoader::LoadCPU(textureRequest.m_Part.m_CPUData, textureRequest.m_Part.handle);
     };
-    auto lambda_gpu = [textureRequest]() mutable {
-        Engine::priv::TextureLoader::LoadGPU(textureRequest.m_Part.handle);
-        textureRequest.m_Part.m_Callback();
+    auto l_gpu = [textureRequestPart{ m_Part }]() mutable {
+        Engine::priv::TextureLoader::LoadGPU(textureRequestPart.handle);
+        textureRequestPart.m_Callback();
     };
-
-    if (m_Part.async || !Engine::priv::threading::isMainThread()) {
-        Engine::priv::threading::addJobWithPostCallback(lambda_cpu, lambda_gpu);
+    if (m_Part.async || !threading::isMainThread()) {
+        if (threading::isMainThread()) {
+            threading::addJobWithPostCallback(std::move(l_cpu), std::move(l_gpu), 1U);
+        }else{
+            threading::submitTaskForMainThread([c{ std::move(l_cpu) }, g{ std::move(l_gpu) }]() mutable { 
+                threading::addJobWithPostCallback(std::move(c), std::move(g), 1U); 
+            });
+        }
     }else{
-        lambda_cpu();
-        lambda_gpu();
+        l_cpu();
+        l_gpu();
     }
 }
 

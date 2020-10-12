@@ -57,46 +57,59 @@ void MeshRequest::request(bool inAsync) {
 
     if (!m_FileOrData.empty()) {
         if (m_FileExists) {
-            bool valid = InternalMeshRequestPublicInterface::Populate(*this);
+            bool valid = populate();
             if (valid) {
-                MeshRequest copyRequest{ *this };
-                auto lambda_cpu = [copyRequest]() mutable {
-                    InternalMeshRequestPublicInterface::LoadCPU(copyRequest);
+                auto l_cpu = [meshRequest{ *this }]() mutable {
+                    InternalMeshRequestPublicInterface::LoadCPU(meshRequest);
                 };
-                auto lambda_gpu = [copyRequest]() mutable {
-                    InternalMeshRequestPublicInterface::LoadGPU(copyRequest);
-                    copyRequest.m_Callback();
+                auto l_gpu = [meshRequest{ *this }]() mutable {
+                    auto mutex = meshRequest.m_Parts[0].handle.getMutex();
+                    if (mutex) {
+                        std::lock_guard lock(*mutex);
+                        for (auto& part : meshRequest.m_Parts) {
+                            auto& mesh = *part.handle.get<Mesh>();
+                            InternalMeshPublicInterface::LoadGPU(mesh);
+                        }
+                    }
+                    meshRequest.m_Callback();
                 };
-
                 if (m_Async || !Engine::priv::threading::isMainThread()) {
-                    threading::addJobWithPostCallback(lambda_cpu, lambda_gpu);
+                    if (Engine::priv::threading::isMainThread()) {
+                        threading::addJobWithPostCallback(std::move(l_cpu), std::move(l_gpu), 1U);
+                    }else{
+                        threading::submitTaskForMainThread([c{ std::move(l_cpu) }, g{ std::move(l_gpu) }]() mutable {
+                            threading::addJobWithPostCallback(std::move(c), std::move(g), 1U);
+                        });
+                    }
                 }else{
-                    lambda_cpu();
-                    lambda_gpu();
+                    l_cpu();
+                    l_gpu();
                 }
+            }else{
+                ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): mesh request - " << m_FileOrData << " was invalid (populate() failed)!")
             }
         }
     }
 }
 
-bool InternalMeshRequestPublicInterface::Populate(MeshRequest& meshRequest) {
-    if (meshRequest.m_FileExtension != ".objcc" && meshRequest.m_FileExtension != ".smsh") {
-        meshRequest.m_Importer.m_AIScene = const_cast<aiScene*>(meshRequest.m_Importer.m_Importer_ptr->ReadFile(meshRequest.m_FileOrData, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace));
-        meshRequest.m_Importer.m_AIRoot  = meshRequest.m_Importer.m_AIScene->mRootNode;
+bool MeshRequest::populate() {
+    if (m_FileExtension != ".objcc" && m_FileExtension != ".smsh") {
+        m_Importer.m_AIScene = const_cast<aiScene*>(m_Importer.m_Importer_ptr->ReadFile(m_FileOrData, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace));
+        m_Importer.m_AIRoot  = m_Importer.m_AIScene->mRootNode;
 
-        auto& scene { *meshRequest.m_Importer.m_AIScene };
-        auto& root  { *meshRequest.m_Importer.m_AIRoot };
+        auto& scene { *m_Importer.m_AIScene };
+        auto& root  { *m_Importer.m_AIRoot };
 
         if (!&scene || (scene.mFlags & AI_SCENE_FLAGS_INCOMPLETE) || !&root) {
             return false;
         }
         auto* rootNode{ NEW Engine::priv::MeshInfoNode{ root.mName.C_Str(), Engine::Math::assimpToGLMMat4(root.mTransformation) } };
-        MeshLoader::LoadPopulateGlobalNodes(scene, rootNode, nullptr, rootNode, &root, meshRequest);
+        MeshLoader::LoadPopulateGlobalNodes(scene, rootNode, nullptr, rootNode, &root, *this);
     }else{
-        auto& part   = meshRequest.m_Parts.emplace_back();
-        part.name    = meshRequest.m_FileOrData;
+        auto& part   = m_Parts.emplace_back();
+        part.name    = m_FileOrData;
         part.handle  = Engine::Resources::addResource<Mesh>();
-        part.handle.get<Mesh>()->setName(part.name);
+        part.handle.get<Mesh>()->setName(m_FileOrData);
     }
     return true;
 }
@@ -143,16 +156,6 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
                 mesh.setName(part.name);
                 mesh.m_CPUData = std::move(part.cpuData);
             }
-        }
-    }
-}
-void InternalMeshRequestPublicInterface::LoadGPU(MeshRequest& meshRequest) {
-    auto mutex = meshRequest.m_Parts[0].handle.getMutex();
-    if (mutex) {
-        std::lock_guard lock(*mutex);
-        for (auto& part : meshRequest.m_Parts) {
-            InternalMeshPublicInterface::LoadGPU(*part.handle.get<Mesh>());
-            part.handle.get<Mesh>()->Resource::load();
         }
     }
 }

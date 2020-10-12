@@ -8,6 +8,7 @@ namespace Engine {
         struct node final {
             int weight = 0;
             T   data;
+
             node() = default;
             node(T&& inData, int inWeight) {
                 data   = std::move(inData);
@@ -17,7 +18,6 @@ namespace Engine {
             node& operator=(const node& other) = default;
             node(node&& other)                 = default;
             node& operator=(node&& other)      = default;
-            ~node() = default;
         };
         private:
             node m_Dummy_Left  = {T(), 0};
@@ -65,9 +65,7 @@ namespace Engine {
                 };
                 m_Items.reserve(capacity);
             }
-            virtual ~heap() {
-
-            }
+            virtual ~heap() {}
 
             inline size_t size() const noexcept { return m_Items.size(); }
             inline size_t capacity() const noexcept { return m_Items.capacity(); }

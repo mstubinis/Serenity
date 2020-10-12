@@ -67,7 +67,7 @@ void Engine::priv::MeshCollisionFactory::internal_init_triangle_data(VertexData&
             triangles.emplace_back(positions[indice]);
         }
         m_TriangleStaticData.reset(new btTriangleMesh());
-        uint count = 0;
+        uint32_t count = 0;
         std::vector<glm::vec3> tri;
         for (auto& position : triangles) {
             tri.emplace_back(position);
@@ -77,7 +77,7 @@ void Engine::priv::MeshCollisionFactory::internal_init_triangle_data(VertexData&
                 btVector3 v2 = Engine::Math::btVectorFromGLM(tri[1]);
                 btVector3 v3 = Engine::Math::btVectorFromGLM(tri[2]);
                 m_TriangleStaticData->addTriangle(v1, v2, v3, true);
-                vector_clear(tri);
+                tri.clear();
                 count = 0;
             }
         }
@@ -90,8 +90,9 @@ void Engine::priv::MeshCollisionFactory::internal_init_triangle_data(VertexData&
     }
 }
 btMultiSphereShape* Engine::priv::MeshCollisionFactory::buildSphereShape(ModelInstance* modelInstance, bool isCompoundChild) {
+    ASSERT(m_CPUData->m_Radius > 0.0f, __FUNCTION__ << "(): m_CPUData->m_Radius is zero!");
     auto rad = (btScalar)m_CPUData->m_Radius;
-    auto v = btVector3(0, 0, 0);
+    auto v   = btVector3(0, 0, 0);
     btMultiSphereShape* sphere = new btMultiSphereShape(&v, &rad, 1);
     sphere->setMargin(DEFAULT_MARGIN);
     sphere->recalcLocalAabb();
@@ -101,7 +102,13 @@ btMultiSphereShape* Engine::priv::MeshCollisionFactory::buildSphereShape(ModelIn
     return sphere;
 }
 btBoxShape* Engine::priv::MeshCollisionFactory::buildBoxShape(ModelInstance* modelInstance, bool isCompoundChild) {
-    btBoxShape* box = new btBoxShape(Math::btVectorFromGLM(m_CPUData->m_RadiusBox));
+    ASSERT(m_CPUData->m_RadiusBox.x > 0.0f || m_CPUData->m_RadiusBox.y > 0.0f || m_CPUData->m_RadiusBox.z > 0.0f, __FUNCTION__ << "(): m_CPUData->m_RadiusBox is zero!");
+    btVector3 btBox{ 
+        m_CPUData->m_RadiusBox.x == 0.0f ? 0.005f : m_CPUData->m_RadiusBox.x,
+        m_CPUData->m_RadiusBox.y == 0.0f ? 0.005f : m_CPUData->m_RadiusBox.y,
+        m_CPUData->m_RadiusBox.z == 0.0f ? 0.005f : m_CPUData->m_RadiusBox.z
+    };
+    btBoxShape* box = new btBoxShape(btBox);
     box->setMargin(DEFAULT_MARGIN);
     if (isCompoundChild) {
         box->setUserPointer(modelInstance);

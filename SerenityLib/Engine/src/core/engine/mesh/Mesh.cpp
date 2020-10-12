@@ -38,7 +38,10 @@ MeshCPUData::MeshCPUData(const MeshCPUData& other)
     , m_File             { other.m_File }
     , m_Radius           { other.m_Radius }
     , m_Threshold        { other.m_Threshold }
-{}
+{
+    internal_transfer_cpu_datas();
+    internal_calculate_radius(); //TODO: do we need this?
+}
 MeshCPUData& MeshCPUData::operator=(const MeshCPUData& other) {
     m_RadiusBox        = other.m_RadiusBox;
     m_Skeleton         = std::exchange(other.m_Skeleton, nullptr);
@@ -48,6 +51,8 @@ MeshCPUData& MeshCPUData::operator=(const MeshCPUData& other) {
     m_File             = other.m_File;
     m_Radius           = other.m_Radius;
     m_Threshold        = other.m_Threshold;
+    internal_transfer_cpu_datas();
+    internal_calculate_radius(); //TODO: do we need this?
     return *this;
 }
 MeshCPUData::MeshCPUData(MeshCPUData&& other) noexcept 
@@ -59,7 +64,10 @@ MeshCPUData::MeshCPUData(MeshCPUData&& other) noexcept
     , m_File             { std::move(other.m_File) }
     , m_Radius           { std::move(other.m_Radius) }
     , m_Threshold        { std::move(other.m_Threshold) }
-{}
+{
+    internal_transfer_cpu_datas();
+    internal_calculate_radius(); //TODO: do we need this?
+}
 MeshCPUData& MeshCPUData::operator=(MeshCPUData&& other) noexcept {
     m_RadiusBox        = std::move(other.m_RadiusBox);
     m_Skeleton         = std::exchange(other.m_Skeleton, nullptr);
@@ -69,7 +77,35 @@ MeshCPUData& MeshCPUData::operator=(MeshCPUData&& other) noexcept {
     m_File             = std::move(other.m_File);
     m_Radius           = std::move(other.m_Radius);
     m_Threshold        = std::move(other.m_Threshold);
+    internal_transfer_cpu_datas();
+    internal_calculate_radius(); //TODO: do we need this?
     return *this;
+}
+void MeshCPUData::internal_transfer_cpu_datas() {
+    if (m_CollisionFactory) {
+        m_CollisionFactory->m_CPUData = this;
+    }
+    if (m_Skeleton) {
+        for (auto& [name, anim] : m_Skeleton->getAnimationData()) {
+            anim.m_MeshCPUData = this;
+        }
+    }
+}
+void MeshCPUData::internal_calculate_radius() {
+    if (!m_VertexData) {
+        return;
+    }
+    m_RadiusBox = glm::vec3(0.0f);
+    auto points = m_VertexData->getPositions();
+    for (const auto& vertex : points) {
+        const float x = std::abs(vertex.x);
+        const float y = std::abs(vertex.y);
+        const float z = std::abs(vertex.z);
+        m_RadiusBox.x = std::max(m_RadiusBox.x, x);
+        m_RadiusBox.y = std::max(m_RadiusBox.y, y);
+        m_RadiusBox.z = std::max(m_RadiusBox.z, z);
+    }
+    m_Radius = Math::Max(m_RadiusBox);
 }
 
 
@@ -142,10 +178,10 @@ void InternalMeshPublicInterface::FinalizeVertexData(Handle meshHandle, MeshImpo
     InternalMeshPublicInterface::FinalizeVertexData(cpuData, data);
 }
 void InternalMeshPublicInterface::FinalizeVertexData(MeshCPUData& cpuData, MeshImportedData& data) {
-    if (data.uvs.size() == 0)         data.uvs.resize(data.points.size());
-    if (data.normals.size() == 0)     data.normals.resize(data.points.size());
-    if (data.binormals.size() == 0)   data.binormals.resize(data.points.size());
-    if (data.tangents.size() == 0)    data.tangents.resize(data.points.size());
+    data.uvs.resize(data.points.size());
+    data.normals.resize(data.points.size());
+    data.binormals.resize(data.points.size());
+    data.tangents.resize(data.points.size());
     if (!cpuData.m_VertexData) {
         if (cpuData.m_Skeleton) {
             cpuData.m_VertexData = NEW VertexData(VertexDataFormat::VertexDataAnimated);
@@ -246,19 +282,6 @@ void InternalMeshPublicInterface::CalculateRadius(Handle meshHandle) {
 
 
 
-void MeshCPUData::internal_calculate_radius() {
-    m_RadiusBox = glm::vec3(0.0f);
-    auto points = m_VertexData->getPositions();
-    for (const auto& vertex : points) {
-        const float x = std::abs(vertex.x);
-        const float y = std::abs(vertex.y);
-        const float z = std::abs(vertex.z);
-        m_RadiusBox.x = std::max(m_RadiusBox.x, x);
-        m_RadiusBox.y = std::max(m_RadiusBox.y, y);
-        m_RadiusBox.z = std::max(m_RadiusBox.z, z);
-    }
-    m_Radius = Math::Max(m_RadiusBox);
-}
 
 
 

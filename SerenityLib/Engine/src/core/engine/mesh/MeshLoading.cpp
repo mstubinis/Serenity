@@ -29,10 +29,8 @@ void Engine::priv::MeshLoader::LoadPopulateGlobalNodes(const aiScene& scene, Mes
         part.name             = request.m_FileOrData + " - " + std::string(aimesh.mName.C_Str());
 
         part.handle     = Engine::Resources::addResource<Mesh>();
-        //Mesh& mesh      = *part.handle.get<Mesh>();
         part.cpuData.m_File     = request.m_FileOrData;
         part.cpuData.m_RootNode = (root);
-        //mesh.setName(part.name);
     }
     if (parent) {
         parent->Children.emplace_back(std::unique_ptr<Engine::priv::MeshInfoNode>(node));

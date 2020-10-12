@@ -18,12 +18,14 @@ namespace Engine::priv {
 #define PHYSICS_MIN_STEP 0.016666666666666666f
 
 namespace Engine{
-    struct RayCastResult {
+    struct RayCastResult final {
         glm::vec3 hitPosition = glm::vec3(0.0f);
         glm::vec3 hitNormal   = glm::vec3(0.0f);
     };
     namespace priv{
-        class PhysicsManager final{
+        class PhysicsManager final {
+            public:
+                static Engine::view_ptr<PhysicsManager> PHYSICS_MANAGER;
             public:
                 Engine::priv::PhysicsPipeline    m_Pipeline;
                 std::mutex                       m_Mutex;

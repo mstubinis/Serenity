@@ -623,7 +623,7 @@ void DeferredPipeline::renderSkybox(Skybox* skybox, Handle shaderProgram, Scene&
 
 
 void DeferredPipeline::sendGPUDataSunLight(Camera& camera, SunLight& sunLight, const std::string& start) {
-    auto* body       = sunLight.getComponent<ComponentBody>();
+    auto body        = sunLight.getComponent<ComponentBody>();
     auto pos         = glm::vec3(body->getPosition());
     const auto& col  = sunLight.color();
     sendUniform4Safe((start + "DataA").c_str(), sunLight.getAmbientIntensity(), sunLight.getDiffuseIntensity(), sunLight.getSpecularIntensity(), 0.0f);
@@ -632,7 +632,7 @@ void DeferredPipeline::sendGPUDataSunLight(Camera& camera, SunLight& sunLight, c
     sendUniform1Safe("Type", 0.0f);
 }
 int DeferredPipeline::sendGPUDataPointLight(Camera& camera, PointLight& pointLight, const std::string& start) {
-    auto* body      = pointLight.getComponent<ComponentBody>();
+    auto body       = pointLight.getComponent<ComponentBody>();
     auto pos        = glm::vec3(body->getPosition());
     auto cull       = pointLight.getCullingRadius();
     auto factor     = 1100.0f * cull;
@@ -654,7 +654,7 @@ int DeferredPipeline::sendGPUDataPointLight(Camera& camera, PointLight& pointLig
     return 2;
 }
 void DeferredPipeline::sendGPUDataDirectionalLight(Camera& camera, DirectionalLight& directionalLight, const std::string& start) {
-    auto* body      = directionalLight.getComponent<ComponentBody>();
+    auto body       = directionalLight.getComponent<ComponentBody>();
     auto forward    = glm::vec3(body->forward());
     const auto& col = directionalLight.color();
     sendUniform4Safe((start + "DataA").c_str(), directionalLight.getAmbientIntensity(), directionalLight.getDiffuseIntensity(), directionalLight.getSpecularIntensity(), forward.x);
@@ -663,7 +663,7 @@ void DeferredPipeline::sendGPUDataDirectionalLight(Camera& camera, DirectionalLi
     sendUniform1Safe("Type", 0.0f);
 }
 int DeferredPipeline::sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight, const std::string& start) {
-    auto* body   = spotLight.getComponent<ComponentBody>();
+    auto body    = spotLight.getComponent<ComponentBody>();
     auto pos     = glm::vec3(body->getPosition());
     auto forward = glm::vec3(body->forward());
     auto cull    = spotLight.getCullingRadius();
@@ -690,7 +690,7 @@ int DeferredPipeline::sendGPUDataSpotLight(Camera& camera, SpotLight& spotLight,
     return 2;
 }
 int DeferredPipeline::sendGPUDataRodLight(Camera& camera, RodLight& rodLight, const std::string& start) {
-    auto* body           = rodLight.getComponent<ComponentBody>();
+    auto body            = rodLight.getComponent<ComponentBody>();
     auto pos             = glm::vec3(body->getPosition());
     auto cullingDistance = rodLight.rodLength() + (rodLight.getCullingRadius() * 2.0f);
     auto factor          = 1100.0f * cullingDistance;
@@ -743,7 +743,7 @@ void DeferredPipeline::renderPointLight(Camera& camera, PointLight& pointLight) 
     if (result == 0) {
         return;
     }
-    auto* body       = pointLight.getComponent<ComponentBody>();
+    auto body        = pointLight.getComponent<ComponentBody>();
     auto modelMatrix = body->modelMatrixRendering();
     sendUniformMatrix4("Model", modelMatrix);
     sendUniformMatrix4("VP", m_UBOCameraDataStruct.ViewProj);
@@ -770,7 +770,7 @@ void DeferredPipeline::renderSpotLight(Camera& camera, SpotLight& spotLight) {
     if (result == 0) {
         return;
     }
-    auto* body       = spotLight.getComponent<ComponentBody>();
+    auto body        = spotLight.getComponent<ComponentBody>();
     auto modelMatrix = body->modelMatrixRendering();
     sendUniformMatrix4("Model", modelMatrix);
     sendUniformMatrix4("VP", m_UBOCameraDataStruct.ViewProj);
@@ -798,7 +798,7 @@ void DeferredPipeline::renderRodLight(Camera& camera, RodLight& rodLight) {
     if (result == 0) {
         return;
     }
-    auto* body       = rodLight.getComponent<ComponentBody>();
+    auto body        = rodLight.getComponent<ComponentBody>();
     auto modelMatrix = body->modelMatrixRendering();
     sendUniformMatrix4("Model", modelMatrix);
     sendUniformMatrix4("VP", m_UBOCameraDataStruct.ViewProj);
@@ -827,8 +827,7 @@ void DeferredPipeline::renderProjectionLight(Camera& camera, ProjectionLight& pr
         return;
     }
 
-    Engine::Renderer::sendTextureSafe("gTextureMap", *projectionLight.getTexture(), 5);
-
+    Engine::Renderer::sendTextureSafe("gTextureMap", *projectionLight.getTexture().get<Texture>(), 5);
 
     if (result == 1) {
         cullFace(GL_FRONT);
@@ -849,7 +848,7 @@ void DeferredPipeline::renderProjectionLight(Camera& camera, ProjectionLight& pr
 }
 void DeferredPipeline::renderDecal(ModelInstance& decalModelInstance) {
     Entity parent          = decalModelInstance.parent();
-    auto* body             = parent.getComponent<ComponentBody>();
+    auto body              = parent.getComponent<ComponentBody>();
     glm::mat4 parentModel  = body->modelMatrixRendering();
     auto maxTextures       = getMaxNumTextureUnits() - 1U;
 
@@ -1362,9 +1361,12 @@ void DeferredPipeline::internal_pass_god_rays(Viewport& viewport, Camera& camera
     m_GBuffer.bindFramebuffers(GBufferType::GodRays, "RGB", false);
     Engine::Renderer::Settings::clear(true, false, false); //godrays rgb channels cleared to black
     auto& godRaysPlatform = GodRays::STATIC_GOD_RAYS;
-    auto* sun = Engine::Renderer::godRays::getSun();
-    if (sun && viewport.getRenderFlags().has(ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active) {
-        auto* body       = sun->getComponent<ComponentBody>();
+    auto sun = Engine::Renderer::godRays::getSun();
+    if (!sun.null() && viewport.getRenderFlags().has(ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active) {
+        auto body        = sun.getComponent<ComponentBody>();
+        if (!body) {
+            return;
+        }
         glm::vec3 oPos   = body->getPosition();
         glm::vec3 camPos = camera.getPosition();
         glm::vec3 camVec = camera.getViewVector();

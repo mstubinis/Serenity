@@ -82,28 +82,21 @@ ComponentBody::NormalData& ComponentBody::NormalData::operator=(ComponentBody::N
 #pragma region Component
 
 ComponentBody::ComponentBody(Entity entity) {
-    m_Owner              = entity;
-    m_Physics            = false;
-    p                    = nullptr;
-    n                    = NEW NormalData();
+    m_Owner    = entity;
+    m_Physics  = false;
+    p          = nullptr;
+    n          = std::make_unique<NormalData>();
     Math::recalculateForwardRightUp(n->rotation, m_Forward, m_Right, m_Up);
 }
 ComponentBody::ComponentBody(Entity entity, CollisionType collisionType) {
-    m_Owner               = entity;
-    m_Physics             = true;
-    n                     = nullptr;
-    p                     = NEW PhysicsData();
-
+    m_Owner    = entity;
+    m_Physics  = true;
+    n          = nullptr;
+    p          = std::make_unique<PhysicsData>();
     setCollision(collisionType, 1.0f);
     rebuildRigidBody(false);
 }
 ComponentBody::~ComponentBody() {
-    //destructor
-    if (m_Physics) {
-        SAFE_DELETE(p);
-    }else{
-        SAFE_DELETE(n);
-    }
 }
 ComponentBody::ComponentBody(ComponentBody&& other) noexcept 
     : m_Physics          { std::move(other.m_Physics) }
@@ -115,11 +108,9 @@ ComponentBody::ComponentBody(ComponentBody&& other) noexcept
     , m_UserPointer1     { std::exchange(other.m_UserPointer1, nullptr) }
     , m_UserPointer2     { std::exchange(other.m_UserPointer2, nullptr) }
 {
-    if (other.m_Physics) {
-        p = std::exchange(other.p, nullptr);
-    }else{
-        n = std::exchange(other.n, nullptr);
-    }
+
+    p = std::move(other.p);
+    n = std::move(other.n);
     m_UserPointer = std::exchange(other.m_UserPointer, nullptr);
 
     setInternalPhysicsUserPointer(this);
@@ -127,14 +118,6 @@ ComponentBody::ComponentBody(ComponentBody&& other) noexcept
 ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
     //move assignment
     if (&other != this) {
-        using std::swap;
-        if (other.m_Physics) {
-            SAFE_DELETE(p);
-            p = std::exchange(other.p, nullptr);
-        }else{
-            SAFE_DELETE(n);
-            n = std::exchange(other.n, nullptr);
-        }
         m_Physics          = std::move(other.m_Physics);
         m_Forward          = std::move(other.m_Forward);
         m_Right            = std::move(other.m_Right);
@@ -144,6 +127,10 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
         m_UserPointer      = std::exchange(other.m_UserPointer, nullptr);
         m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
         m_UserPointer2     = std::exchange(other.m_UserPointer2, nullptr);
+
+        p                  = std::move(other.p);
+        n                  = std::move(other.n);
+
         setInternalPhysicsUserPointer(this);
     }
     return *this;
@@ -253,7 +240,7 @@ void ComponentBody::internal_update_misc() noexcept {
 }
 void ComponentBody::setCollision(CollisionType collisionType, float mass) {
     if (!p->collision) { //TODO: clean this up, its hacky and evil. its being used on the ComponentBody_EntityAddedToSceneFunction
-        auto* modelComponent = m_Owner.getComponent<ComponentModel>();
+        auto modelComponent = m_Owner.getComponent<ComponentModel>();
         if (modelComponent) {
             if (collisionType == CollisionType::Compound) {
                 p->collision = std::make_unique<Collision>(*this, *modelComponent, mass);
@@ -337,7 +324,7 @@ void ComponentBody::scale(decimal x, decimal y, decimal z) {
         scl.y += y;
         scl.z += z;
     }
-    auto* models = m_Owner.getComponent<ComponentModel>();
+    auto models = m_Owner.getComponent<ComponentModel>();
     if (models) {
         ComponentModel_Functions::CalculateRadius(*models);
     }
@@ -349,7 +336,7 @@ void ComponentBody::setPosition(decimal newPosition) {
 	ComponentBody::setPosition(newPosition, newPosition, newPosition);
 }
 void ComponentBody::setPosition(decimal x, decimal y, decimal z) {
-    auto& ecs        = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& ecs        = Engine::priv::InternalScenePublicInterface::GetECS(*m_Owner.scene());
     auto& system     = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     auto& pcs        = system.ParentChildSystem;
     auto entityIndex = m_Owner.id() - 1U;
@@ -432,7 +419,7 @@ void ComponentBody::setScale(decimal x, decimal y, decimal z) {
         scl.y = y;
         scl.z = z;
     }
-    auto* models = m_Owner.getComponent<ComponentModel>();
+    auto models = m_Owner.getComponent<ComponentModel>();
     if (models) {
         priv::ComponentModel_Functions::CalculateRadius(*models);
     }
@@ -451,7 +438,7 @@ glm_vec3 ComponentBody::getPosition() const { //theres prob a better way to do t
         p->bullet_rigidBody->getMotionState()->getWorldTransform(tr);
         return Math::btVectorToGLM(tr.getOrigin());
     }
-    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(*m_Owner.scene());
     auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return Math::getMatrixPosition(matrix);
@@ -461,20 +448,20 @@ glm::vec3 ComponentBody::getPositionRender() const { //theres prob a better way 
         auto tr = p->bullet_rigidBody->getWorldTransform();
         return Math::btVectorToGLM(tr.getOrigin());
     }
-    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(*m_Owner.scene());
     auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return Math::getMatrixPosition(matrix);
 }
 glm::vec3 ComponentBody::getScreenCoordinates(bool clampToEdge) const {
-	return Math::getScreenCoordinates(getPosition(), *m_Owner.scene().getActiveCamera(), clampToEdge);
+	return Math::getScreenCoordinates(getPosition(), *m_Owner.scene()->getActiveCamera(), clampToEdge);
 }
 ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(float minOffset) const {
     ScreenBoxCoordinates ret;
     const auto& worldPos    = getPosition();
     auto radius             = 0.0001f;
-    auto* model             = m_Owner.getComponent<ComponentModel>();
-    auto& camera            = *m_Owner.scene().getActiveCamera();
+    auto model              = m_Owner.getComponent<ComponentModel>();
+    auto& camera            = *m_Owner.scene()->getActiveCamera();
     const auto center2DRes  = Math::getScreenCoordinates(worldPos, camera, false);
     const auto center2D     = glm::vec2(center2DRes.x, center2DRes.y);
     if (model) {
@@ -558,7 +545,7 @@ glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way to do t
         }
         return modelMatrix_;
     }
-    auto& ecs         = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& ecs         = Engine::priv::InternalScenePublicInterface::GetECS(*m_Owner.scene());
     auto& system      = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     auto& worldMatrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return worldMatrix;
@@ -835,7 +822,7 @@ void ComponentBody::setMass(float mass) {
 }
 void ComponentBody::addChild(Entity child) const {
     if (child.sceneID() == m_Owner.sceneID()) {
-        auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+        auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(*m_Owner.scene());
         auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
         auto& pcs    = system.ParentChildSystem;
         pcs.insert(m_Owner.id(), child.id());
@@ -846,7 +833,7 @@ void ComponentBody::addChild(const ComponentBody& child) const {
 }
 void ComponentBody::removeChild(Entity child) const {
     if (child.sceneID() == m_Owner.sceneID()) {
-        auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+        auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(*m_Owner.scene());
         auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
         auto& pcs    = system.ParentChildSystem;
         pcs.remove(m_Owner.id(), child.id());
@@ -856,7 +843,7 @@ void ComponentBody::removeChild(const ComponentBody& child) const {
     ComponentBody::removeChild(child.m_Owner);
 }
 void ComponentBody::removeAllChildren() const {
-    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(*m_Owner.scene());
     auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     auto& pcs    = system.ParentChildSystem;
 
@@ -874,7 +861,7 @@ void ComponentBody::removeAllChildren() const {
     }
 }
 bool ComponentBody::hasParent() const {
-    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(m_Owner.scene());
+    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(*m_Owner.scene());
     auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     auto& pcs    = system.ParentChildSystem;
     return (pcs.Parents[m_Owner.id() - 1U] > 0);
@@ -987,7 +974,7 @@ struct Engine::priv::ComponentBody_ComponentAddedToEntityFunction final {void op
         pcs.resize(id);
     }
 
-    auto* model = entity.getComponent<ComponentModel>();
+    auto model = entity.getComponent<ComponentModel>();
     if (model) {
         ComponentModel_Functions::CalculateRadius(*model);
     }

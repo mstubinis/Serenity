@@ -7,12 +7,13 @@ namespace Engine::priv {
         private:
             std::packaged_task<void()> m_Task;
         public:
-            Task(std::function<void()>&& inTask);
-            ~Task() = default;
+            Task(std::function<void()>&& inTask)
+                : m_Task{ std::move(inTask) }
+            {}
 
             inline void operator()() noexcept {
                 ASSERT(m_Task.valid(), "Engine::priv::Task::operator()(): m_Task was not valid!");
-                //if (m_Task.valid())
+                if (m_Task.valid())
                     m_Task();
             }
             inline std::future<void> get_future() noexcept { return m_Task.get_future(); }

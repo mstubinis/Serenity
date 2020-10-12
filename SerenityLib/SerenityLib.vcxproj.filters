@@ -707,9 +707,6 @@
     <ClInclude Include="Engine\src\core\engine\containers\Freelist.h">
       <Filter>Header Files\Engine\Core\Containers</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\resources\ResourcePool.h">
-      <Filter>Header Files\Engine\Core\Resources</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\model\ModelInstanceAnimation.h">
       <Filter>Header Files\Engine\Core\Model</Filter>
     </ClInclude>
@@ -1343,9 +1340,6 @@
       <Filter>Source Files\Engine\Core\Utils</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\threading\WorkerThreadContainer.cpp">
-      <Filter>Source Files\Engine\Core\Threading</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\threading\Task.cpp">
       <Filter>Source Files\Engine\Core\Threading</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\math\shapes\Plane.cpp">

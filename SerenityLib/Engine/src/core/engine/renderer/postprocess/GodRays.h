@@ -61,7 +61,7 @@ namespace Engine::Renderer::godRays {
     void setFOVDegrees(float fovInDegrees);
     float getAlphaFalloff();
     void setAlphaFalloff(float alphaFalloff);
-    void setSun(Entity* sun);
-    Entity* getSun();
+    void setSun(Entity sun) noexcept;
+    Entity getSun() noexcept;
 };
 #endif

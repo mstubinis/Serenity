@@ -37,7 +37,7 @@
 
 using namespace Engine;
 
-priv::PhysicsManager* physicsManager = nullptr;
+Engine::view_ptr<Engine::priv::PhysicsManager> Engine::priv::PhysicsManager::PHYSICS_MANAGER = nullptr;
 
 void processManifoldContact(btManifoldPoint& cp, btCollisionObject* A, btCollisionObject* B, btCollisionShape* childA, btCollisionShape* childB, const btCollisionShape* shapeA, const btCollisionShape* shapeB) {
     ComponentBody* a_               = (ComponentBody*)A->getUserPointer();
@@ -125,7 +125,7 @@ bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionOb
 
 
 priv::PhysicsManager::PhysicsManager(){ 
-    physicsManager          = this;
+    PHYSICS_MANAGER = this;
 }
 priv::PhysicsManager::~PhysicsManager(){ 
     cleanup();
@@ -204,31 +204,31 @@ void priv::PhysicsManager::_render(const Camera& camera){
     m_Pipeline.m_DebugDrawer.postRender();
 }
 void Physics::setNumberOfStepsPerFrame(unsigned int numSteps) {
-    physicsManager->m_NumberOfStepsPerFrame = glm::max(1U, numSteps);
+    Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_NumberOfStepsPerFrame = glm::max(1U, numSteps);
 }
 unsigned int Physics::getNumberOfStepsPerFrame() {
-    return physicsManager->m_NumberOfStepsPerFrame;
+    return Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_NumberOfStepsPerFrame;
 }
 void Physics::pause(bool b){ 
-    physicsManager->m_Paused = b; 
+    Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Paused = b;
 }
 void Physics::unpause(){ 
-    physicsManager->m_Paused = false; 
+    Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Paused = false;
 }
 void Physics::setGravity(float x, float y, float z){ 
-    physicsManager->m_Pipeline.m_World->setGravity(btVector3(x,y,z));
+    Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Pipeline.m_World->setGravity(btVector3(x,y,z));
 }
 void Physics::setGravity(const glm::vec3& gravity){ 
     Physics::setGravity(gravity.x,gravity.y,gravity.z); 
 }
 bool Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){
-    return physicsManager->add_rigid_body(rigidBody, group, mask, true);
+    return Engine::priv::PhysicsManager::PHYSICS_MANAGER->add_rigid_body(rigidBody, group, mask, true);
 }
 bool Physics::addRigidBody(btRigidBody* rigidBody){
-    return physicsManager->add_rigid_body(rigidBody, 0, 0, false);
+    return Engine::priv::PhysicsManager::PHYSICS_MANAGER->add_rigid_body(rigidBody, 0, 0, false);
 }
 bool Physics::removeRigidBody(btRigidBody* rigidBody){
-    auto& physicsWorld    = *physicsManager->m_Pipeline.m_World;
+    auto& physicsWorld    = *Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Pipeline.m_World;
     int collisionObjCount = physicsWorld.getNumCollisionObjects();
     for (int i = 0; i < collisionObjCount; ++i) {
         btRigidBody* btRigidBodyUpCast = btRigidBody::upcast(physicsWorld.getCollisionObjectArray()[i]);
@@ -244,11 +244,11 @@ bool Physics::removeRigidBody(btRigidBody* rigidBody){
     return false;
 }
 bool Physics::removeCollisionObject(btCollisionObject* object) {
-    physicsManager->m_Pipeline.m_World->removeCollisionObject(object);
+    Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Pipeline.m_World->removeCollisionObject(object);
     return true;
 }
 void Physics::updateRigidBody(btRigidBody* rigidBody){ 
-    physicsManager->m_Pipeline.m_World->updateSingleAabb(rigidBody);
+    Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Pipeline.m_World->updateSingleAabb(rigidBody);
 }
 bool Physics::addRigidBody(Entity entity) {
     ComponentBody* body = entity.getComponent<ComponentBody>();
@@ -271,27 +271,27 @@ bool Physics::removeRigidBody(ComponentBody& body) {
     return Physics::removeRigidBody(&body.getBtBody());
 }
 bool Physics::addRigidBodyThreadSafe(Entity entity) {
-    std::lock_guard lock(physicsManager->m_Mutex);
+    std::lock_guard lock(Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Mutex);
     return Physics::addRigidBody(entity);
 }
 bool Physics::addRigidBodyThreadSafe(btRigidBody* body, short group, short mask) {
-    std::lock_guard lock(physicsManager->m_Mutex);
+    std::lock_guard lock(Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Mutex);
     return Physics::addRigidBody(body, group, mask);
 }
 bool Physics::addRigidBodyThreadSafe(btRigidBody* body) {
-    std::lock_guard lock(physicsManager->m_Mutex);
+    std::lock_guard lock(Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Mutex);
     return Physics::addRigidBody(body);
 }
 bool Physics::removeRigidBodyThreadSafe(Entity entity) {
-    std::lock_guard lock(physicsManager->m_Mutex);
+    std::lock_guard lock(Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Mutex);
     return Physics::removeRigidBody(entity);
 }
 bool Physics::removeRigidBodyThreadSafe(btRigidBody* body) {
-    std::lock_guard lock(physicsManager->m_Mutex);
+    std::lock_guard lock(Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Mutex);
     return Physics::removeRigidBody(body);
 }
 void Physics::updateRigidBodyThreadSafe(btRigidBody* body) {
-    std::lock_guard lock(physicsManager->m_Mutex);
+    std::lock_guard lock(Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Mutex);
     Physics::updateRigidBody(body);
 }
 bool Physics::addRigidBodyThreadSafe(ComponentBody& body){
@@ -301,7 +301,7 @@ bool Physics::removeRigidBodyThreadSafe(ComponentBody& body) {
     return Physics::removeRigidBodyThreadSafe(&body.getBtBody());
 }
 bool Physics::removeCollisionObjectThreadSafe(btCollisionObject* object) {
-    std::lock_guard lock(physicsManager->m_Mutex);
+    std::lock_guard lock(Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Mutex);
     return Physics::removeCollisionObject(object);
 }
 
@@ -311,9 +311,9 @@ RayCastResult internal_ray_cast_nearest(btVector3& start, btVector3& end, unsign
     RayCallback.m_collisionFilterMask  = mask;
     RayCallback.m_collisionFilterGroup = group;
 
-    physicsManager->m_Pipeline.m_World->rayTest(start, end, RayCallback);
+    Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Pipeline.m_World->rayTest(start, end, RayCallback);
 #ifdef _DEBUG
-    physicsManager->m_Pipeline.m_World->getDebugDrawer()->drawLine(start, end, btVector4(1, 1, 0, 1));
+    Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Pipeline.m_World->getDebugDrawer()->drawLine(start, end, btVector4(1.0f, 0.5f, 0.0f, 1.0f));
 #endif
 
     RayCastResult result;
@@ -334,16 +334,16 @@ std::vector<RayCastResult> internal_ray_cast(btVector3& start, btVector3& end, u
     RayCallback.m_collisionFilterMask  = mask;
     RayCallback.m_collisionFilterGroup = group;
 
-    physicsManager->m_Pipeline.m_World->rayTest(start, end, RayCallback);
+    Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Pipeline.m_World->rayTest(start, end, RayCallback);
 #ifdef _DEBUG
-    physicsManager->m_Pipeline.m_World->getDebugDrawer()->drawLine(start, end, btVector4(1, 0.5, 0, 1));
+    Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Pipeline.m_World->getDebugDrawer()->drawLine(start, end, btVector4(1, 0.5, 0, 1));
 #endif
 
     std::vector<RayCastResult> result;
     if (RayCallback.hasHit()) {
         auto& pts     = RayCallback.m_hitPointWorld;
         auto& normals = RayCallback.m_hitNormalWorld;
-
+        result.reserve(pts.size());
         for (int i = 0; i < pts.size(); ++i) { 
             const glm::vec3 hitPoint  = Math::btVectorToGLM(RayCallback.m_hitPointWorld[i]);
             const glm::vec3 hitNormal = Math::btVectorToGLM(RayCallback.m_hitNormalWorld[i]);
@@ -381,10 +381,8 @@ std::vector<RayCastResult> Physics::rayCast(glm::vec3& start, glm::vec3& end, En
     btVector3 end_   = Math::btVectorFromGLM(end);
     if (ignored) {
         ComponentBody* body = ignored->getComponent<ComponentBody>();
-        if (body) {
-            if (body->hasPhysics()) {
-                return Physics::rayCast(start_, end_, body, group, mask);
-            }
+        if (body && body->hasPhysics()) {
+            return Physics::rayCast(start_, end_, body, group, mask); 
         }
     }
     return Physics::rayCast(start_, end_, nullptr, group, mask);
@@ -395,10 +393,8 @@ std::vector<RayCastResult> Physics::rayCast(glm::vec3& start, glm::vec3& end , s
     std::vector<ComponentBody*> objs;
     for(auto& ent : ignored){
         ComponentBody* body = ent.getComponent<ComponentBody>();
-        if(body){
-            if (body->hasPhysics()) {
-                objs.emplace_back(body);
-            }
+        if(body && body->hasPhysics()) {
+            objs.emplace_back(body);
         }
     }
     return Physics::rayCast(start_, end_, objs, group, mask);

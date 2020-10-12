@@ -10,11 +10,10 @@ namespace Engine {
             size_t           m_Count = 0U;
         public:
             partial_array() = default;
-            partial_array(const partial_array& other) = default;
-            partial_array& operator=(const partial_array& other) = default;
-            partial_array(partial_array&& other) noexcept = default;
+            partial_array(const partial_array& other)                = default;
+            partial_array& operator=(const partial_array& other)     = default;
+            partial_array(partial_array&& other) noexcept            = default;
             partial_array& operator=(partial_array&& other) noexcept = default;
-            ~partial_array() = default;
 
             inline void fill(const T& item) noexcept { m_Array.fill(item); }
             inline CONSTEXPR size_t size() const noexcept { return m_Count; }

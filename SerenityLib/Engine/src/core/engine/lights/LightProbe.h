@@ -43,9 +43,9 @@ class LightProbe : public Entity, public Engine::NonCopyable, public Engine::Non
         Viewport            m_Viewport;
     public:
         LightProbe(
+            Scene* scene,
             ProbeType::Type type,
-            const glm::vec3& position   = glm::vec3(0.0f, 0.0f, 0.0f),
-            Scene* scene = nullptr
+            const glm::vec3& position   = glm::vec3(0.0f, 0.0f, 0.0f)
         );
         virtual ~LightProbe();
 

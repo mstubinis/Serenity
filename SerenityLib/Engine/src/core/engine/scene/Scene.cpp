@@ -36,12 +36,12 @@ class Scene::impl final {
             m_ECS.assignSystem<ComponentName>  (ComponentName_System_CI()/*, 80000*/);
         }
         void _centerToObject(Scene& super, Entity centerEntity) {
-            ComponentBody* centerBody = centerEntity.getComponent<ComponentBody>();
-            auto centerPos            = centerBody->getPosition();
-            auto centerPosFloat       = glm::vec3(centerPos);
+            auto centerBody     = centerEntity.getComponent<ComponentBody>();
+            auto centerPos      = centerBody->getPosition();
+            auto centerPosFloat = glm::vec3(centerPos);
             for (const auto e : priv::InternalScenePublicInterface::GetEntities(super)) {
                 if (e != centerEntity) {
-                    ComponentBody* eBody = e.getComponent<ComponentBody>();
+                    auto eBody = e.getComponent<ComponentBody>();
                     if (eBody) {
                         if (!eBody->hasParent()) {
                             eBody->setPosition(eBody->getPosition() - centerPos);
@@ -259,6 +259,9 @@ Scene::~Scene() {
     SAFE_DELETE_VECTOR(m_Lights);
     SAFE_DELETE_VECTOR(m_Cameras);
     unregisterEvent(EventType::SceneChanged);
+}
+void Scene::clearAllEntities() noexcept {
+    m_i->m_ECS.clearAllEntities();
 }
 void Scene::addCamera(Camera& camera) {
     m_Cameras.emplace_back(&camera);

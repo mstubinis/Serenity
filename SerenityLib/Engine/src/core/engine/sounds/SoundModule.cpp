@@ -59,7 +59,7 @@ void priv::SoundModule::setSoundInformation(Handle handle, SoundMusic& sound) {
 }
 void priv::SoundModule::updateCameraPosition(Scene& scene) {
     auto* camera = scene.getActiveCamera();
-    if (camera) {
+    if (camera && !camera->isDestroyed()) {
         auto camPos     = glm::vec3(camera->getPosition());
         auto camForward = glm::vec3(camera->forward());
         auto camUp      = glm::vec3(camera->up());

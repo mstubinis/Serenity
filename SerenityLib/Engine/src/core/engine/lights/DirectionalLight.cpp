@@ -4,20 +4,18 @@
 #include <core/engine/utils/Utils.h>
 #include <core/engine/scene/Scene.h>
 
-using namespace Engine;
-
-DirectionalLight::DirectionalLight(const glm::vec3& direction, Scene* scene) 
-    : SunLight{ glm::vec3(0.0f), LightType::Directional, scene }
+DirectionalLight::DirectionalLight(Scene* scene, const glm::vec3& direction)
+    : SunLight{ scene, glm::vec3(0.0f), LightType::Directional }
 {
     getComponent<ComponentBody>()->alignTo(direction);
-
-    if (m_Type == LightType::Directional) {
-        auto& dirLights = priv::InternalScenePublicInterface::GetDirectionalLights(*scene);
-        dirLights.emplace_back(this);
-    }
 }
-void DirectionalLight::free() noexcept {
+DirectionalLight::~DirectionalLight() {
+}
+void DirectionalLight::destroy() noexcept {
     Entity::destroy();
-    removeFromVector(priv::InternalScenePublicInterface::GetDirectionalLights(scene()), this);
-    removeFromVector(priv::InternalScenePublicInterface::GetLights(scene()), this);
+    Scene* scene_ptr = scene();
+    if (scene_ptr) {
+        removeFromVector(Engine::priv::InternalScenePublicInterface::GetDirectionalLights(*scene_ptr), this);
+        removeFromVector(Engine::priv::InternalScenePublicInterface::GetLights(*scene_ptr), this);
+    }
 }

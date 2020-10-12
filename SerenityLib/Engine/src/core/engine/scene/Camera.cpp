@@ -14,9 +14,9 @@ Camera::Camera(float angle, float aspectRatio, float Near, float Far, Scene* sce
     addComponent<ComponentLogic1>();
     addComponent<ComponentBody>();
 
-    auto* cam   = getComponent<ComponentCamera>();
-    auto* logic = getComponent<ComponentLogic1>();
-    auto* body  = getComponent<ComponentBody>();
+    auto cam   = getComponent<ComponentCamera>();
+    auto logic = getComponent<ComponentLogic1>();
+    auto body  = getComponent<ComponentBody>();
 
     cam->lookAt(glm_vec3(0.0), glm_vec3(0.0) + body->forward(), body->up());
     logic->setUserPointer(this);
@@ -31,9 +31,9 @@ Camera::Camera(float left, float right, float bottom, float top, float Near, flo
     addComponent<ComponentLogic1>();
     addComponent<ComponentBody>();
 
-    auto* cam   = getComponent<ComponentCamera>();
-    auto* logic = getComponent<ComponentLogic1>();
-    auto* body  = getComponent<ComponentBody>();
+    auto cam   = getComponent<ComponentCamera>();
+    auto logic = getComponent<ComponentLogic1>();
+    auto body  = getComponent<ComponentBody>();
 
     cam->lookAt(glm_vec3(0.0), glm_vec3(0.0) + body->forward(), body->up());
     logic->setUserPointer(this);

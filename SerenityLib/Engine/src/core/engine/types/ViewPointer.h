@@ -15,10 +15,13 @@ namespace Engine {
             inline T& operator* () noexcept { return *m_Ptr; }
             inline operator bool() const noexcept { return static_cast<bool>(m_Ptr); }
             inline operator T*() const noexcept { return m_Ptr; }
+            template<class U> inline U* cast_dynamic() noexcept { return dynamic_cast<U*>(m_Ptr); }
+            template<class U> inline U* cast() noexcept { return static_cast<U*>(m_Ptr); }
 
             view_ptr(T* ptr)
                 : m_Ptr{ ptr }
             {}
+
 
     };
 }
