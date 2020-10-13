@@ -4,15 +4,13 @@
 
 struct SceneOptions;
 
-#include <core/engine/containers/SparseSet.h>
-
 namespace Engine::priv {
     template <typename COMPONENT>
     class ECSComponentPool : public Engine::sparse_set<COMPONENT> {
         private:
             ECSComponentPool() = delete;
         public:
-            ECSComponentPool(const SceneOptions& options) 
+            ECSComponentPool(const SceneOptions& options)
                 : Engine::sparse_set<COMPONENT>{ 400U }
             {}
 

@@ -11,14 +11,14 @@ namespace Engine::priv {
 };
 
 #include <core/engine/threading/WorkerThreadContainer.h>
-#include <core/engine/threading/Task.h>
 
 using ThreadJob = std::function<void()>;
 
 namespace Engine::priv {
-    using PoolTask    = Engine::priv::Task;
-    using PoolTaskPtr = std::shared_ptr<PoolTask>;
-    using FutureType = std::future<void>;
+    using PoolTask      = std::packaged_task<void()>;
+    using PoolTaskPtr   = std::shared_ptr<PoolTask>;
+    using FutureType    = std::future<void>;
+    using TaskQueueType = std::queue<PoolTaskPtr>;
     class ThreadPoolFuture final {
         friend class Engine::priv::ThreadPool;
         friend class Engine::priv::ThreadPoolFutureContainer;
@@ -35,7 +35,6 @@ namespace Engine::priv {
             ThreadPoolFuture& operator=(ThreadPoolFuture&&) noexcept      = default;
 
             inline bool isReady() const noexcept { return (m_Future.valid() && m_Future.wait_for(0s) == std::future_status::ready); }
-            //inline bool isReady() const noexcept { return (m_Future._Is_ready() && m_Future.valid()); }
     };
     class ThreadPoolFutureCallback final {
         friend class Engine::priv::ThreadPool;
@@ -54,7 +53,6 @@ namespace Engine::priv {
             ThreadPoolFutureCallback& operator=(ThreadPoolFutureCallback&&) noexcept      = default;
 
             inline bool isReady() const noexcept { return (m_Future.valid() && m_Future.wait_for(0s) == std::future_status::ready); }
-            //inline bool isReady() const noexcept { return (m_Future._Is_ready() && m_Future.valid()); }
 
             inline operator bool() const noexcept { return (bool)m_Callback; }
             inline bool operator==(bool other) const noexcept { return (other && m_Callback); }
@@ -68,17 +66,14 @@ namespace Engine::priv {
     class ThreadPool final{
         friend class Engine::priv::WorkerThread;
         private:
-            WorkerThreadContainer                                             m_WorkerThreads;
-            std::vector<std::vector<Engine::priv::ThreadPoolFuture>>          m_FuturesBasic;
-            std::vector<std::vector<Engine::priv::ThreadPoolFutureCallback>>  m_FuturesCallback;
-            std::mutex                                                        m_Mutex;
-            std::vector<std::queue<PoolTaskPtr>>                              m_TaskQueues;
-            std::condition_variable_any                                       m_ConditionVariableAny;
-            bool                                                              m_Stopped = true;
+            WorkerThreadContainer                               m_WorkerThreads;
+            std::vector<std::vector<ThreadPoolFuture>>          m_FuturesBasic;
+            std::vector<std::vector<ThreadPoolFutureCallback>>  m_FuturesCallback;
+            std::mutex                                          m_Mutex;
+            std::vector<TaskQueueType>                          m_TaskQueues;
+            std::condition_variable_any                         m_ConditionVariableAny;
+            bool                                                m_Stopped               = true;
       
-            void internal_create_packaged_task(ThreadJob&& job, size_t section);
-            void internal_create_packaged_task(ThreadJob&& job, ThreadJob&& callback, size_t section);
-
             bool internal_task_queue_is_empty() const noexcept {
                 for (const auto& queue : m_TaskQueues) {
                     if (!queue.empty()) {
@@ -116,11 +111,33 @@ namespace Engine::priv {
             }
             inline size_t size() const noexcept { return m_WorkerThreads.size(); }
 
-            template<class TASK> inline void add_job(TASK&& job, size_t section) {
-                internal_create_packaged_task(std::move(job), section);
+            template<class JOB> inline void add_job(JOB&& job, size_t section) {
+                if (size() > 0) {
+                    {
+                        std::lock_guard lock{ m_Mutex };
+                        auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
+                        m_FuturesBasic[section].emplace_back(task->get_future());
+                    }
+                    m_ConditionVariableAny.notify_one();
+                }else{
+                    //on single threaded, we just execute the tasks on the main thread below in update()
+                    auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
+                    m_FuturesBasic[section].emplace_back(task->get_future());
+                }
             }
-            template<class TASK, class THEN> inline void add_job(TASK&& job, THEN&& callback, size_t section) {
-                internal_create_packaged_task(std::move(job), std::move(callback), section);
+            template<class JOB, class THEN> inline void add_job(JOB&& job, THEN&& callback, size_t section) {
+                if (size() > 0) {
+                    {
+                        std::lock_guard lock{ m_Mutex };
+                        auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
+                        m_FuturesCallback[section].emplace_back(task->get_future(), std::forward<THEN>(callback));
+                    }
+                    m_ConditionVariableAny.notify_one();
+                }else{
+                    //on single threaded, we just execute the tasks on the main thread below in update()
+                    auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
+                    m_FuturesCallback[section].emplace_back(task->get_future(), std::forward<THEN>(callback));
+                }
             }
 
             void update();

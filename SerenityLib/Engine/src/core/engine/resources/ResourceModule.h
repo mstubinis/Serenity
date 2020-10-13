@@ -2,7 +2,6 @@
 #ifndef ENGINE_RESOURCES_RESOURCE_MODULE_H
 #define ENGINE_RESOURCES_RESOURCE_MODULE_H
 
-#include <core/engine/containers/TypeRegistry.h>
 #include <core/engine/resources/ResourceVector.h>
 
 namespace Engine::priv {
@@ -10,7 +9,7 @@ namespace Engine::priv {
         private:
             Engine::type_registry                                        m_ResourceRegistry;
             std::vector<std::unique_ptr<Engine::priv::IResourceVector>>  m_Resources;
-            std::mutex                                                   m_Mutex;
+            mutable std::mutex                                           m_Mutex;
         public:
             ResourceModule() = default;
             ResourceModule(const ResourceModule& other)            = delete;
@@ -33,11 +32,11 @@ namespace Engine::priv {
                 }
             }
 
-            inline std::mutex* getMutex(const Handle inHandle) noexcept { return m_Resources[inHandle.type() - 1]->getMutex(); }
+            inline Engine::view_ptr<std::mutex> getMutex(const Handle inHandle) noexcept { return m_Resources[inHandle.type() - 1]->getMutex(); }
 
             template<typename TResource>
             uint32_t registerResourceType() {
-                uint32_t index = (const uint32_t)m_ResourceRegistry.type_slot<TResource>();
+                const uint32_t index = m_ResourceRegistry.type_slot<TResource>();
                 if (index == m_Resources.size()) {
                     std::lock_guard lock{ m_Mutex };
                     m_Resources.emplace_back(std::make_unique<Engine::priv::ResourceVector<TResource>>());
@@ -49,7 +48,7 @@ namespace Engine::priv {
                 uint32_t index;
                 {
                     std::lock_guard lock{ m_Mutex };
-                    index = (const uint32_t)m_ResourceRegistry.type_slot<TResource>();
+                    index = m_ResourceRegistry.type_slot<TResource>();
                     if (index == m_Resources.size()) {
                         m_Resources.emplace_back(std::make_unique<Engine::priv::ResourceVector<TResource>>());
                     }
@@ -65,8 +64,7 @@ namespace Engine::priv {
                     return std::make_pair(nullptr, Handle{});
                 }
                 using collectionType     = Engine::priv::ResourceVector<TResource>*;
-              //const uint32_t typeIndex = (const uint32_t)registerResourceType<TResource>();
-                const uint32_t typeIndex = (const uint32_t)m_ResourceRegistry.type_slot_fast<TResource>();
+                const uint32_t typeIndex = m_ResourceRegistry.type_slot_fast<TResource>();
                 std::pair<Engine::view_ptr<TResource>, Handle> returned_pair = static_cast<collectionType>(m_Resources[typeIndex].get())->get(sv);
                 returned_pair.second.m_Type = typeIndex + 1;
                 return returned_pair;
@@ -75,8 +73,7 @@ namespace Engine::priv {
             template<typename TResource>
             Engine::view_ptr<TResource> get(const Handle inHandle) noexcept {
                 using collectionType     = Engine::priv::ResourceVector<TResource>*;
-              //const uint32_t typeIndex = (const uint32_t)registerResourceType<TResource>();
-                const uint32_t typeIndex = (const uint32_t)m_ResourceRegistry.type_slot_fast<TResource>();
+                const uint32_t typeIndex = m_ResourceRegistry.type_slot_fast<TResource>();
                 return static_cast<collectionType>(m_Resources[typeIndex].get())->get(inHandle);
             }
             inline void get(void*& out, const Handle inHandle) const noexcept {
@@ -90,7 +87,7 @@ namespace Engine::priv {
             template<typename TResource, typename ... ARGS>
             Handle emplace(ARGS&&... args) {
                 using collectionType     = Engine::priv::ResourceVector<TResource>*;
-                const uint32_t typeIndex = (const uint32_t)registerResourceType<TResource>();
+                const uint32_t typeIndex = registerResourceType<TResource>();
                 const uint32_t index     = (const uint32_t)static_cast<collectionType>(m_Resources[typeIndex].get())->emplace_back(std::forward<ARGS>(args)...);
                 return Handle( index, 0, typeIndex + 1 );
             }
@@ -98,7 +95,7 @@ namespace Engine::priv {
             template<typename TResource>
             Handle push(TResource&& inResource) {
                 using collectionType     = Engine::priv::ResourceVector<TResource>*;
-                const uint32_t typeIndex = (const uint32_t)registerResourceType<TResource>();
+                const uint32_t typeIndex = registerResourceType<TResource>();
                 const uint32_t index     = (const uint32_t)static_cast<collectionType>(m_Resources[typeIndex].get())->push_back(std::move(inResource));
                 return Handle( index, 0, typeIndex + 1 );
             }
@@ -106,7 +103,7 @@ namespace Engine::priv {
             template<typename TResource>
             std::list<Engine::view_ptr<TResource>> getAllResourcesOfType() {
                 using collectionType     = Engine::priv::ResourceVector<TResource>*;
-                const uint32_t typeIndex = (const uint32_t)m_ResourceRegistry.type_slot_fast<TResource>();
+                const uint32_t typeIndex = m_ResourceRegistry.type_slot_fast<TResource>();
                 return static_cast<collectionType>(m_Resources[typeIndex].get())->getAsList();
             }
     };

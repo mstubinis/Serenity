@@ -33,7 +33,7 @@ namespace Engine::priv {
         private:
             std::vector<Entry>      m_Resources;
             std::vector<uint32_t>   m_AvailableIndices;
-            std::mutex              m_Mutex;
+            mutable std::mutex      m_Mutex;
             bool                    m_Locked             = false;
 
             inline TResource* internal_get(const Handle inHandle) const noexcept { return m_Resources[inHandle.index()].m_Resource.get(); }
@@ -48,7 +48,13 @@ namespace Engine::priv {
             ResourceVector(ResourceVector&& other) noexcept            = delete;
             ResourceVector& operator=(ResourceVector&& other) noexcept = delete;
 
-            std::mutex* getMutex() noexcept override { return &m_Mutex; }
+            inline constexpr size_t size() const noexcept override { return m_Resources.size(); }
+            void shrink_to_fit() override {
+                m_Resources.shrink_to_fit();
+                m_AvailableIndices.shrink_to_fit();
+            }
+
+            Engine::view_ptr<std::mutex> getMutex() noexcept override { return &m_Mutex; }
 
             void lock() override {
                 m_Locked = true;
@@ -58,10 +64,6 @@ namespace Engine::priv {
                 m_Locked = false;
             }
 
-            void shrink_to_fit() override {
-                m_Resources.shrink_to_fit();
-                m_AvailableIndices.shrink_to_fit();
-            }
 
             uint32_t pop_index() noexcept {
                 ASSERT(!m_Locked, __FUNCTION__ << "(): is locked!");
@@ -159,12 +161,12 @@ namespace Engine::priv {
                 }
                 m_Resources.reserve(inSize); 
             }
-            inline constexpr size_t size() const noexcept override {  return m_Resources.size();  }
+
 
             std::list<Engine::view_ptr<TResource>> getAsList() {
                 std::list<Engine::view_ptr<TResource>> returnedList;
                 for (const auto& entry : m_Resources) {
-                    returnedList.push_back((TResource*)entry.m_Resource.get());
+                    returnedList.push_back( static_cast<TResource*>(entry.m_Resource.get()) );
                 }
                 return returnedList;
             }

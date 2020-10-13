@@ -316,13 +316,6 @@ typedef glm::dmat4  glm_mat4;
 inline constexpr unsigned char operator "" _uc(unsigned long long arg) noexcept { return (unsigned char)arg; }
 inline std::string operator "" _str(const char* cStr, std::size_t length) { return std::string(cStr, length); }
 
-#include <core/engine/types/SmallMap.h>
-#include <core/engine/types/StaticString.h>
-#include <core/engine/types/ColorVector.h>
-#include <core/engine/types/Flag.h>
-#include <core/engine/utils/BlockProfiler.h>
-#include <core/engine/types/ViewPointer.h>
-
 namespace Engine {
     class UserPointer {
         protected:
@@ -364,5 +357,17 @@ namespace Engine {
     }
     */
 };
+
+#include <core/engine/types/SmallMap.h>
+#include <core/engine/types/StaticString.h>
+#include <core/engine/types/ColorVector.h>
+#include <core/engine/types/Flag.h>
+#include <core/engine/utils/BlockProfiler.h>
+#include <core/engine/types/ViewPointer.h>
+
+#include <core/engine/containers/Queue_ts.h>
+#include <core/engine/containers/SparseSet.h>
+#include <core/engine/containers/TypeRegistry.h>
+#include <core/engine/containers/Freelist.h>
 
 #endif

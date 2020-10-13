@@ -51,9 +51,7 @@ bool ThreadPool::startup(size_t numThreads) {
                         job = internal_get_next_available_job();
                     }
                     ASSERT((!m_Stopped && job) || (m_Stopped && !job), __FUNCTION__ << "(): job was nullptr!");
-                    //if (job) {
-                        job->operator()();
-                    //}
+                    job->operator()();
                 }
             });
         }
@@ -64,43 +62,12 @@ bool ThreadPool::startup(size_t numThreads) {
 Engine::priv::PoolTaskPtr ThreadPool::internal_get_next_available_job() noexcept {
     for (auto& queue : m_TaskQueues) {
         if (!queue.empty()) {
-            PoolTaskPtr task = std::move(queue.front());
+            PoolTaskPtr task = queue.front();
             queue.pop();
             return task;
         }
     }
     return nullptr;
-}
-void ThreadPool::internal_create_packaged_task(ThreadJob&& job, size_t section) {
-    ASSERT(job, __FUNCTION__ << "(ThreadJob&& job, size_t section): job was not valid!");
-    if (size() > 0) {
-        {
-            std::lock_guard lock{ m_Mutex };
-            auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::move(job)));
-            m_FuturesBasic[section].emplace_back(task->get_future());
-        }
-        m_ConditionVariableAny.notify_one();
-    }else{
-        //on single threaded, we just execute the tasks on the main thread below in update()
-        auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::move(job)));
-        m_FuturesBasic[section].emplace_back(task->get_future());
-    }
-}
-void ThreadPool::internal_create_packaged_task(ThreadJob&& job, ThreadJob&& callback, size_t section) {
-    ASSERT(job,      __FUNCTION__ << "(ThreadJob&& job, ThreadJob&& callback size_t section): job was not valid!");
-    ASSERT(callback, __FUNCTION__ << "(ThreadJob&& job, ThreadJob&& callback size_t section): callback was not valid!");
-    if (size() > 0) {
-        {
-            std::lock_guard lock{ m_Mutex };
-            auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::move(job)));
-            m_FuturesCallback[section].emplace_back(task->get_future(), std::move(callback));
-        }
-        m_ConditionVariableAny.notify_one();
-    }else{
-        //on single threaded, we just execute the tasks on the main thread below in update()
-        auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::move(job)));
-        m_FuturesCallback[section].emplace_back(task->get_future(), std::move(callback));
-    }
 }
 void ThreadPool::update() {
     if (size() == 0) { //for single threaded stuff
@@ -111,18 +78,21 @@ void ThreadPool::update() {
             }
         }
     }
-    for (size_t section = 0; section < m_FuturesCallback.size(); ++section) {
-        std::erase_if(m_FuturesBasic[section], [](const Engine::priv::ThreadPoolFuture& future) {
-            return future.isReady();
-        });
-        std::for_each(m_FuturesCallback[section].cbegin(), m_FuturesCallback[section].cend(), [](const Engine::priv::ThreadPoolFutureCallback& callback) {
-            ASSERT(callback == true, __FUNCTION__ << "(): callback had empty function!");
-            if (callback.isReady()) {
-                callback(); //this executes the "then" functions
+    //this CANNOT be split up in different loops / steps.
+    for (auto& callbackSection : m_FuturesCallback) {
+        for (auto it = callbackSection.begin(); it != callbackSection.end();) {
+            if ((*it).isReady()) {
+                (*it)();
+                it = callbackSection.erase(it);
+            }else{
+                ++it;
             }
-        });
-        std::erase_if(m_FuturesCallback[section], [](const Engine::priv::ThreadPoolFutureCallback& callback) {
-            return callback.isReady();
+
+        }
+    }
+    for (auto& basicSection : m_FuturesBasic) {
+        std::erase_if(basicSection, [](const Engine::priv::ThreadPoolFuture& future) {
+            return future.isReady();
         });
     }
 }

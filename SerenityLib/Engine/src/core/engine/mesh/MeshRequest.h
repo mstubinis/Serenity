@@ -48,7 +48,7 @@ struct MeshRequest final {
     bool                               m_Async                 = false;
 
     MeshRequest() = delete;
-    MeshRequest(const std::string& filenameOrData, float threshold, MeshCollisionLoadingFlag::Flag, std::function<void()>&& callback);
+    MeshRequest(std::string filenameOrData, float threshold, MeshCollisionLoadingFlag::Flag, std::function<void()>&& callback);
 
     MeshRequest(const MeshRequest& other)                 = default;
     MeshRequest& operator=(const MeshRequest& other)      = default;
