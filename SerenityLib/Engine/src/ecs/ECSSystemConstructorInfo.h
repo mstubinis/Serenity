@@ -2,17 +2,16 @@
 #ifndef ENGINE_ECS_SYSTEM_CONSTRUCTOR_INFO_H
 #define ENGINE_ECS_SYSTEM_CONSTRUCTOR_INFO_H
 
-class Scene;
-
+class  Scene;
 struct Entity;
 
-using std_func_update            = std::function<void(void*, void*, const float, Scene&)>;
-using std_func_entity            = std::function<void(void*, void*, Entity, Scene&)>;
-using std_func_component         = std::function<void(void*, void*, Entity)>;
-using std_func_component_removed = std::function<void(void*, Entity)>;
-using std_func_scene             = std::function<void(void*, void*, Scene&)>;
-
 namespace Engine::priv {
+    using std_func_update            = std::function<void(void*, void*, const float, Scene&)>;
+    using std_func_entity            = std::function<void(void*, void*, Entity, Scene&)>;
+    using std_func_component         = std::function<void(void*, void*, Entity)>;
+    using std_func_component_removed = std::function<void(void*, Entity)>;
+    using std_func_scene             = std::function<void(void*, void*, Scene&)>;
+
     struct ECSSystemCI {
         std_func_update               onUpdateFunction                     = [](void*, void*, const float, Scene&) {};
         std_func_component            onComponentAddedToEntityFunction     = [](void*, void*, Entity) {};

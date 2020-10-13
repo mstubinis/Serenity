@@ -8,8 +8,6 @@ namespace Engine::priv {
 }
 
 struct Entity;
-//#include <ecs/Entity.h>
-#include <core/engine/containers/TypeRegistry.h>
 #include <ecs/ECSEntityPool.h>
 #include <ecs/ECSSystem.h>
 #include <ecs/ECSComponentPool.h>

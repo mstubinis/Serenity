@@ -10,6 +10,25 @@ Entity::Entity(Scene& scene) {
     m_Data = scene.createEntity().m_Data;
 }
 
+void Entity::destroy() noexcept {
+    if (!null()) {
+        Scene* scene_ptr = scene();
+        if (!scene_ptr || (scene_ptr && InternalScenePublicInterface::GetECS(*scene_ptr).getEntityPool().isEntityVersionDifferent(*this))) {
+            return;
+        }
+        InternalScenePublicInterface::CleanECS(*scene_ptr, *this);
+        InternalScenePublicInterface::GetECS(*scene_ptr).removeEntity(*this);
+    }
+}
+bool Entity::isDestroyed() const noexcept {
+    if (!null()) {
+        Scene* s = scene();
+        if (s) {
+            return InternalScenePublicInterface::GetECS(*s).getEntityPool().isEntityVersionDifferent(*this);
+        }
+    }
+    return false;
+}
 void Entity::addChild(Entity child) const noexcept {
     auto body = getComponent<ComponentBody>();
     if (body) {
@@ -35,27 +54,8 @@ bool Entity::hasParent() const noexcept {
     }
     return false;
 }
-bool Entity::isDestroyed() const noexcept {
-    if (!null()) {
-        Scene* s = scene();
-        if (s) {
-            return InternalScenePublicInterface::GetECS(*s).getEntityPool().isEntityVersionDifferent(*this);
-        }
-    }
-    return false;
-}
 Engine::view_ptr<Scene> Entity::scene() const noexcept {
     return Core::m_Engine->m_ResourceManager.getSceneByID(sceneID());
-}
-void Entity::destroy() noexcept {
-    if (!null()) {
-        Scene* scene_ptr = scene();
-        if (!scene_ptr) {
-            return;
-        }
-        InternalScenePublicInterface::CleanECS(*scene_ptr, *this);
-        InternalScenePublicInterface::GetECS(*scene_ptr).removeEntity(*this);
-    }
 }
 
 bool Entity::addComponent(const std::string& componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8) {

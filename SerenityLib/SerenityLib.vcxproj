@@ -386,7 +386,7 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -657,7 +657,6 @@
     <ClInclude Include="Engine\src\core\engine\textures\TextureIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\textures\TextureLoader.h" />
     <ClInclude Include="Engine\src\core\engine\textures\TextureRequest.h" />
-    <ClInclude Include="Engine\src\core\engine\threading\Task.h" />
     <ClInclude Include="Engine\src\core\engine\threading\ThreadingHelpers.h" />
     <ClInclude Include="Engine\src\core\engine\threading\ThreadingModule.h" />
     <ClInclude Include="Engine\src\core\engine\threading\ThreadPool.h" />
@@ -690,6 +689,8 @@
     <ClInclude Include="Engine\src\ecs\ECSSystemConstructorInfo.h" />
     <ClInclude Include="Engine\src\ecs\Entity.h" />
     <ClInclude Include="Engine\src\ecs\EntityBody.h" />
+    <ClInclude Include="Engine\src\ecs\EntityRAII.h" />
+    <ClInclude Include="Engine\src\ecs\EntityRAIIBody.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\core\Constraint.cpp" />
@@ -896,6 +897,8 @@
     <ClCompile Include="Engine\src\ecs\ECSEntityPool.cpp" />
     <ClCompile Include="Engine\src\ecs\Entity.cpp" />
     <ClCompile Include="Engine\src\ecs\EntityBody.cpp" />
+    <ClCompile Include="Engine\src\ecs\EntityRAII.cpp" />
+    <ClCompile Include="Engine\src\ecs\EntityRAIIBody.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

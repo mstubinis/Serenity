@@ -848,9 +848,6 @@
     <ClInclude Include="Engine\src\core\engine\threading\WorkerThreadContainer.h">
       <Filter>Header Files\Engine\Core\Threading</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\threading\Task.h">
-      <Filter>Header Files\Engine\Core\Threading</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\math\shapes\Plane.h">
       <Filter>Header Files\Engine\Core\Math\shapes</Filter>
     </ClInclude>
@@ -916,6 +913,12 @@
     </ClInclude>
     <ClInclude Include="Engine\src\core\engine\types\ViewPointer.h">
       <Filter>Header Files\Engine\Core\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\ecs\EntityRAII.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\ecs\EntityRAIIBody.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1380,6 +1383,12 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\tests\TestTextureTypes.cpp">
       <Filter>Source Files\Engine\Core\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\ecs\EntityRAII.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\ecs\EntityRAIIBody.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

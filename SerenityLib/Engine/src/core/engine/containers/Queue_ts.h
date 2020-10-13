@@ -31,26 +31,13 @@ namespace Engine {
                 return m_Queue.front();
             }
 
-            template<typename FUNCTION>
-            void for_each_and_clear(FUNCTION&& func) {
+            template<typename FUNCTION> void for_each_and_clear(const FUNCTION& func) {
                 std::unique_lock lock(m_Mutex);
                 while (m_Queue.size() > 0) {
                     func(m_Queue.front());
                     m_Queue.pop();
                 }
             }
-
-            /*
-            bool try_pop(T& value) {
-                std::lock_guard lock(m_Mutex);
-                if (m_Queue.empty()) {
-                    return false;
-                }
-                value = m_Queue.front();
-                m_Queue.pop();
-                return true;
-            }
-            */
             std::optional<T> try_pop() {
                 std::lock_guard lock(m_Mutex);
                 if (m_Queue.empty()) {
@@ -66,16 +53,6 @@ namespace Engine {
                 m_Queue.pop();
                 return frontItem;
             }
-            /*
-            void wait_and_pop(T& value) {
-                std::unique_lock lock(m_Mutex);
-                m_ConditionVariable.wait(lock, [this]() {
-                    return !m_Queue.empty();
-                });
-                value = m_Queue.front();
-                m_Queue.pop();
-            }
-            */
             T wait_and_pop() {
                 std::unique_lock lock(m_Mutex);
                 m_ConditionVariable.wait(lock, [this]() {
@@ -94,20 +71,32 @@ namespace Engine {
                 }
                 m_ConditionVariable.notify_all(); //TODO: test this
             }
-            void push(T&& item) {
+            T& push(T&& item) {
                 {
                     std::lock_guard lock(m_Mutex);
-                    m_Queue.emplace(std::move(item));
+                    m_Queue.push(std::move(item));
                 }
                 m_ConditionVariable.notify_one();
+                return m_Queue.back();
             }
-            void push(const T& item) {
+            T& push(const T& item) {
                 {
                     std::lock_guard lock(m_Mutex);
                     m_Queue.push(item);
                 }
                 m_ConditionVariable.notify_one();
+                return m_Queue.back();
             }
+
+            template<typename ... ARGS> T& emplace(ARGS&&... args) {
+                {
+                    std::lock_guard lock(m_Mutex);
+                    m_Queue.emplace(std::forward<ARGS>(args)...);
+                }
+                m_ConditionVariable.notify_one();
+                return m_Queue.back();
+            }
+
             inline bool empty() const noexcept {
                 std::lock_guard lock(m_Mutex);
                 return m_Queue.empty();

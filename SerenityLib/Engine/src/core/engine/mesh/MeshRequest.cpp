@@ -16,8 +16,8 @@ Engine::priv::AssimpSceneImport::AssimpSceneImport() {
     m_Importer_ptr = std::make_shared<Assimp::Importer>();
 }
 
-MeshRequest::MeshRequest(const std::string& filenameOrData, float threshold, MeshCollisionLoadingFlag::Flag flags, std::function<void()>&& callback)
-    : m_FileOrData            { filenameOrData }
+MeshRequest::MeshRequest(std::string filenameOrData, float threshold, MeshCollisionLoadingFlag::Flag flags, std::function<void()>&& callback)
+    : m_FileOrData            { std::move(filenameOrData) }
     , m_Threshold             { threshold }
     , m_Callback              { std::move(callback) }
     , m_CollisionLoadingFlags { flags }
@@ -75,10 +75,10 @@ void MeshRequest::request(bool inAsync) {
                 };
                 if (m_Async || !Engine::priv::threading::isMainThread()) {
                     if (Engine::priv::threading::isMainThread()) {
-                        threading::addJobWithPostCallback(std::move(l_cpu), std::move(l_gpu), 1U);
+                        threading::addJobWithPostCallback(l_cpu, l_gpu, 1U);
                     }else{
-                        threading::submitTaskForMainThread([c{ std::move(l_cpu) }, g{ std::move(l_gpu) }]() mutable {
-                            threading::addJobWithPostCallback(std::move(c), std::move(g), 1U);
+                        threading::submitTaskForMainThread([=]() mutable {
+                            threading::addJobWithPostCallback(l_cpu, l_gpu, 1U);
                         });
                     }
                 }else{
@@ -119,9 +119,9 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
         auto& root{ *meshRequest.m_Importer.m_AIRoot };
         unsigned int count{ 0 };
         MeshLoader::LoadProcessNodeData(meshRequest, scene, root, count);
-        const char* saveFileName = (meshRequest.m_FileOrData.substr(0, meshRequest.m_FileOrData.find_last_of(".")) + ".smsh").c_str();
+        std::string saveFileName = (meshRequest.m_FileOrData.substr(0, meshRequest.m_FileOrData.find_last_of(".")) + ".smsh").c_str();
         auto& part = meshRequest.m_Parts[0];
-        SMSH_File::SaveFile(saveFileName, part.cpuData);
+        SMSH_File::SaveFile(saveFileName.c_str(), part.cpuData);
         auto mutex = part.handle.getMutex();
         if (mutex) {
             std::lock_guard lock(*mutex);

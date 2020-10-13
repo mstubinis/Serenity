@@ -43,7 +43,7 @@ namespace Engine::priv {
             ECSComponentPool<COMPONENT>& componentPool;
         public:
             ECSSystem(const SceneOptions& options, const ECSSystemCI& systemConstructor, Engine::priv::sparse_set_base& inComponentPool)
-                : componentPool{ (ECSComponentPool<COMPONENT>&)inComponentPool }
+                : componentPool{ static_cast<ECSComponentPool<COMPONENT>&>(inComponentPool) }
             {
                 SUF = std::move(systemConstructor.onUpdateFunction);
                 CAE = std::move(systemConstructor.onComponentAddedToEntityFunction);
