@@ -3,20 +3,17 @@
 #include <core/engine/events/Event.h>
 #include <core/engine/renderer/Renderer.h>
 
-using namespace Engine;
-using namespace std;
-
 #pragma region PhysicsDebugDrawcallback
 
-priv::PhysicsDebugDrawcallback::PhysicsDebugDrawcallback(btIDebugDraw* debugDrawer, const btTransform& worldTrans, const btVector3& color) 
+Engine::priv::PhysicsDebugDrawcallback::PhysicsDebugDrawcallback(btIDebugDraw* debugDrawer, const btTransform& worldTrans, const btVector3& color) 
     : m_DebugDrawer{ *debugDrawer }
     , m_Color{ color }
     , m_WorldTransform{ worldTrans }
 {}
-void priv::PhysicsDebugDrawcallback::internalProcessTriangleIndex(btVector3* triangle, int partId, int  triangleIndex) {
+void Engine::priv::PhysicsDebugDrawcallback::internalProcessTriangleIndex(btVector3* triangle, int partId, int  triangleIndex) {
     processTriangle(triangle, partId, triangleIndex);
 }
-void priv::PhysicsDebugDrawcallback::processTriangle(btVector3* triangle, int partId, int triangleIndex) {
+void Engine::priv::PhysicsDebugDrawcallback::processTriangle(btVector3* triangle, int partId, int triangleIndex) {
     (void)partId;
     (void)triangleIndex;
     btVector3 wv0, wv1, wv2;
@@ -39,42 +36,42 @@ void priv::PhysicsDebugDrawcallback::processTriangle(btVector3* triangle, int pa
 
 #pragma region GLDebugDrawer
 
-void priv::GLDebugDrawer::init() {
+void Engine::priv::GLDebugDrawer::init() {
     m_LineVertices.resize(C_MAX_POINTS);
 
-    glGenBuffers(1, &m_VertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(LineVertex) * m_LineVertices.size(), &m_LineVertices[0], GL_DYNAMIC_DRAW);
+    GLCall(glGenBuffers(1, &m_VertexBuffer));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(LineVertex) * m_LineVertices.size(), &m_LineVertices[0], GL_DYNAMIC_DRAW));
 
     //support vao's
     buildVAO();
 
     registerEvent(EventType::WindowFullscreenChanged);
 }
-void priv::GLDebugDrawer::destruct() {
-    glDeleteBuffers(1, &m_VertexBuffer);
+void Engine::priv::GLDebugDrawer::destruct() {
+    GLCall(glDeleteBuffers(1, &m_VertexBuffer));
     Engine::Renderer::deleteVAO(m_VAO);
 }
-void priv::GLDebugDrawer::bindDataToGPU() {
-    glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)(offsetof(LineVertex, color)));
+void Engine::priv::GLDebugDrawer::bindDataToGPU() {
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer));
+    GLCall(glEnableVertexAttribArray(0));
+    GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)0));
+    GLCall(glEnableVertexAttribArray(1));
+    GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)(offsetof(LineVertex, color))));
 }
-void priv::GLDebugDrawer::render() {
+void Engine::priv::GLDebugDrawer::render() {
     if (m_VAO) {
         Engine::Renderer::bindVAO(m_VAO);
-        glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_PerFrameCount));
+        GLCall(glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_PerFrameCount)));
         Engine::Renderer::bindVAO(0);
     }else{
         bindDataToGPU();
-        glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_PerFrameCount));
-        glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
+        GLCall(glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_PerFrameCount)));
+        GLCall(glDisableVertexAttribArray(0));
+        GLCall(glDisableVertexAttribArray(1));
     }
 }
-void priv::GLDebugDrawer::buildVAO() {
+void Engine::priv::GLDebugDrawer::buildVAO() {
     Engine::Renderer::deleteVAO(m_VAO);
     if (Engine::priv::RenderModule::OPENGL_VERSION >= 30) {
         Engine::Renderer::genAndBindVAO(m_VAO);
@@ -82,33 +79,33 @@ void priv::GLDebugDrawer::buildVAO() {
         Engine::Renderer::bindVAO(0);
     }
 }
-void priv::GLDebugDrawer::postRender() {
+void Engine::priv::GLDebugDrawer::postRender() {
     m_PerFrameCount = 0U;
 }
-priv::GLDebugDrawer::~GLDebugDrawer() {
+Engine::priv::GLDebugDrawer::~GLDebugDrawer() {
     destruct();
 }
-void priv::GLDebugDrawer::drawAccumulatedLines() {
+void Engine::priv::GLDebugDrawer::drawAccumulatedLines() {
     if (m_PerFrameCount > 0) {
-        glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LineVertex) * m_PerFrameCount, &m_LineVertices[0]);
+        GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer));
+        GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LineVertex) * m_PerFrameCount, &m_LineVertices[0]));
         render();
     }
 }
-void priv::GLDebugDrawer::onEvent(const Event& e) {
+void Engine::priv::GLDebugDrawer::onEvent(const Event& e) {
     if (e.type == EventType::WindowFullscreenChanged) {
         buildVAO();
     }
 }
-void priv::GLDebugDrawer::drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3&, const btVector3&, const btVector3&, const btVector3& color, btScalar alpha) {
+void Engine::priv::GLDebugDrawer::drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3&, const btVector3&, const btVector3&, const btVector3& color, btScalar alpha) {
     GLDebugDrawer::drawTriangle(v0, v1, v2, color, alpha);
 }
-void priv::GLDebugDrawer::drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3& color, btScalar) {
+void Engine::priv::GLDebugDrawer::drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3& color, btScalar) {
     GLDebugDrawer::drawLine(v0, v1, color);
     GLDebugDrawer::drawLine(v1, v2, color);
     GLDebugDrawer::drawLine(v2, v0, color);
 }
-void priv::GLDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) {
+void Engine::priv::GLDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) {
     if (m_PerFrameCount >= C_MAX_POINTS - 1U) {
         return;
     }
@@ -122,7 +119,7 @@ void priv::GLDebugDrawer::drawLine(const btVector3& from, const btVector3& to, c
     m_LineVertices[m_PerFrameCount + 1] = std::move(v2);
     m_PerFrameCount += 2;
 }
-void priv::GLDebugDrawer::drawSphere(btScalar radius, const btTransform& transform, const btVector3& color) {
+void Engine::priv::GLDebugDrawer::drawSphere(btScalar radius, const btTransform& transform, const btVector3& color) {
     btVector3 center     = transform.getOrigin();
     btVector3 up         = transform.getBasis().getColumn(1);
     btVector3 axis       = transform.getBasis().getColumn(0);
@@ -130,13 +127,13 @@ void priv::GLDebugDrawer::drawSphere(btScalar radius, const btTransform& transfo
     GLDebugDrawer::drawSpherePatch(center, up, axis, radius, -SIMD_HALF_PI, SIMD_HALF_PI, -SIMD_HALF_PI, SIMD_HALF_PI, color, stepDegrees, false);
     GLDebugDrawer::drawSpherePatch(center, up, -axis, radius, -SIMD_HALF_PI, SIMD_HALF_PI, -SIMD_HALF_PI, SIMD_HALF_PI, color, stepDegrees, false);
 }
-void priv::GLDebugDrawer::drawSphere(const btVector3& p, btScalar radius, const btVector3& color) {
+void Engine::priv::GLDebugDrawer::drawSphere(const btVector3& p, btScalar radius, const btVector3& color) {
     btTransform tr;
     tr.setIdentity();
     tr.setOrigin(p);
     GLDebugDrawer::drawSphere(radius, tr, color);
 }
-void priv::GLDebugDrawer::drawArc(const btVector3& center, const btVector3& normal, const btVector3& axis, btScalar radiusA, btScalar radiusB, btScalar minAngle, btScalar maxAngle, const btVector3& color, bool drawSect, btScalar stepDegrees) {
+void Engine::priv::GLDebugDrawer::drawArc(const btVector3& center, const btVector3& normal, const btVector3& axis, btScalar radiusA, btScalar radiusB, btScalar minAngle, btScalar maxAngle, const btVector3& color, bool drawSect, btScalar stepDegrees) {
     const btVector3& vx = axis;
     btVector3 vy        = normal.cross(axis);
     btScalar step       = stepDegrees * SIMD_RADS_PER_DEG;
@@ -158,7 +155,7 @@ void priv::GLDebugDrawer::drawArc(const btVector3& center, const btVector3& norm
         GLDebugDrawer::drawLine(center, prev, color);
     }
 }
-void priv::GLDebugDrawer::drawSpherePatch(const btVector3& center, const btVector3& up, const btVector3& axis, btScalar radius, btScalar minTh, btScalar maxTh, btScalar minPs, btScalar maxPs, const btVector3& color, btScalar stepDegrees, bool drawCenter) {
+void Engine::priv::GLDebugDrawer::drawSpherePatch(const btVector3& center, const btVector3& up, const btVector3& axis, btScalar radius, btScalar minTh, btScalar maxTh, btScalar minPs, btScalar maxPs, const btVector3& color, btScalar stepDegrees, bool drawCenter) {
     btVector3 vA[74];
     btVector3 vB[74];
     btVector3* pvA      = vA, * pvB = vB, * pT;
@@ -243,13 +240,13 @@ void priv::GLDebugDrawer::drawSpherePatch(const btVector3& center, const btVecto
         pvB = pT;
     }
 }
-void priv::GLDebugDrawer::drawTransform(const btTransform& transform, btScalar orthoLen) {
+void Engine::priv::GLDebugDrawer::drawTransform(const btTransform& transform, btScalar orthoLen) {
     btVector3 start = transform.getOrigin();
     GLDebugDrawer::drawLine(start, start + transform.getBasis() * btVector3(orthoLen, 0, 0), btVector3(btScalar(1.), btScalar(0.3), btScalar(0.3)));
     GLDebugDrawer::drawLine(start, start + transform.getBasis() * btVector3(0, orthoLen, 0), btVector3(btScalar(0.3), btScalar(1.), btScalar(0.3)));
     GLDebugDrawer::drawLine(start, start + transform.getBasis() * btVector3(0, 0, orthoLen), btVector3(btScalar(0.3), btScalar(0.3), btScalar(1.)));
 }
-void priv::GLDebugDrawer::drawAabb(const btVector3& from, const btVector3& to, const btVector3& color) {
+void Engine::priv::GLDebugDrawer::drawAabb(const btVector3& from, const btVector3& to, const btVector3& color) {
     btVector3 halfExtents = (to - from) * 0.5f;
     btVector3 center      = (to + from) * 0.5f;
     int i, j;
@@ -270,7 +267,7 @@ void priv::GLDebugDrawer::drawAabb(const btVector3& from, const btVector3& to, c
         }
     }
 }
-void priv::GLDebugDrawer::drawCylinder(btScalar radius, btScalar halfHeight, int upAxis, const btTransform& transform, const btVector3& color) {
+void Engine::priv::GLDebugDrawer::drawCylinder(btScalar radius, btScalar halfHeight, int upAxis, const btTransform& transform, const btVector3& color) {
     btVector3 start = transform.getOrigin();
     btVector3	offsetHeight(0, 0, 0);
     offsetHeight[upAxis] = halfHeight;
@@ -292,7 +289,7 @@ void priv::GLDebugDrawer::drawCylinder(btScalar radius, btScalar halfHeight, int
     GLDebugDrawer::drawArc(start - transform.getBasis() * (offsetHeight), transform.getBasis() * yaxis, transform.getBasis() * xaxis, radius, radius, 0, SIMD_2_PI, color, false, btScalar(10.0));
     GLDebugDrawer::drawArc(start + transform.getBasis() * (offsetHeight), transform.getBasis() * yaxis, transform.getBasis() * xaxis, radius, radius, 0, SIMD_2_PI, color, false, btScalar(10.0));
 }
-void priv::GLDebugDrawer::drawCapsule(btScalar radius, btScalar halfHeight, int upAxis, const btTransform& transform, const btVector3& color) {
+void Engine::priv::GLDebugDrawer::drawCapsule(btScalar radius, btScalar halfHeight, int upAxis, const btTransform& transform, const btVector3& color) {
     int stepDegrees = 30;
     btVector3 capStart(0.f, 0.f, 0.f);
     capStart[upAxis] = -halfHeight;
@@ -327,7 +324,7 @@ void priv::GLDebugDrawer::drawCapsule(btScalar radius, btScalar halfHeight, int 
         GLDebugDrawer::drawLine(start + transform.getBasis() * capStart, start + transform.getBasis() * capEnd, color);
     }
 }
-void priv::GLDebugDrawer::drawBox(const btVector3& bbMin, const btVector3& bbMax, const btVector3& color) {
+void Engine::priv::GLDebugDrawer::drawBox(const btVector3& bbMin, const btVector3& bbMax, const btVector3& color) {
     GLDebugDrawer::drawLine(btVector3(bbMin[0], bbMin[1], bbMin[2]), btVector3(bbMax[0], bbMin[1], bbMin[2]), color);
     GLDebugDrawer::drawLine(btVector3(bbMax[0], bbMin[1], bbMin[2]), btVector3(bbMax[0], bbMax[1], bbMin[2]), color);
     GLDebugDrawer::drawLine(btVector3(bbMax[0], bbMax[1], bbMin[2]), btVector3(bbMin[0], bbMax[1], bbMin[2]), color);
@@ -341,7 +338,7 @@ void priv::GLDebugDrawer::drawBox(const btVector3& bbMin, const btVector3& bbMax
     GLDebugDrawer::drawLine(btVector3(bbMax[0], bbMax[1], bbMax[2]), btVector3(bbMin[0], bbMax[1], bbMax[2]), color);
     GLDebugDrawer::drawLine(btVector3(bbMin[0], bbMax[1], bbMax[2]), btVector3(bbMin[0], bbMin[1], bbMax[2]), color);
 }
-void priv::GLDebugDrawer::drawBox(const btVector3& bbMin, const btVector3& bbMax, const btTransform& trans, const btVector3& color) {
+void Engine::priv::GLDebugDrawer::drawBox(const btVector3& bbMin, const btVector3& bbMax, const btTransform& trans, const btVector3& color) {
     GLDebugDrawer::drawLine(trans * btVector3(bbMin[0], bbMin[1], bbMin[2]), trans * btVector3(bbMax[0], bbMin[1], bbMin[2]), color);
     GLDebugDrawer::drawLine(trans * btVector3(bbMax[0], bbMin[1], bbMin[2]), trans * btVector3(bbMax[0], bbMax[1], bbMin[2]), color);
     GLDebugDrawer::drawLine(trans * btVector3(bbMax[0], bbMax[1], bbMin[2]), trans * btVector3(bbMin[0], bbMax[1], bbMin[2]), color);
@@ -355,9 +352,7 @@ void priv::GLDebugDrawer::drawBox(const btVector3& bbMin, const btVector3& bbMax
     GLDebugDrawer::drawLine(trans * btVector3(bbMax[0], bbMax[1], bbMax[2]), trans * btVector3(bbMin[0], bbMax[1], bbMax[2]), color);
     GLDebugDrawer::drawLine(trans * btVector3(bbMin[0], bbMax[1], bbMax[2]), trans * btVector3(bbMin[0], bbMin[1], bbMax[2]), color);
 }
-void priv::GLDebugDrawer::drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) {
-}
-void priv::GLDebugDrawer::drawPlane(const btVector3& planeNormal, btScalar planeConst, const btTransform& transform, const btVector3& color) {
+void Engine::priv::GLDebugDrawer::drawPlane(const btVector3& planeNormal, btScalar planeConst, const btTransform& transform, const btVector3& color) {
     btVector3 planeOrigin = planeNormal * planeConst;
     btVector3 vec0, vec1;
     btPlaneSpace1(planeNormal, vec0, vec1);
@@ -369,7 +364,7 @@ void priv::GLDebugDrawer::drawPlane(const btVector3& planeNormal, btScalar plane
     GLDebugDrawer::drawLine(transform * pt0, transform * pt1, color);
     GLDebugDrawer::drawLine(transform * pt2, transform * pt3, color);
 }
-void priv::GLDebugDrawer::drawCone(btScalar radius, btScalar height, int upAxis, const btTransform& transform, const btVector3& color) {
+void Engine::priv::GLDebugDrawer::drawCone(btScalar radius, btScalar height, int upAxis, const btTransform& transform, const btVector3& color) {
     int stepDegrees = 30;
     btVector3 start = transform.getOrigin();
     btVector3	offsetHeight(0, 0, 0);
@@ -397,16 +392,6 @@ void priv::GLDebugDrawer::drawCone(btScalar radius, btScalar height, int upAxis,
     btVector3 xaxis(0, 0, 0);
     xaxis[(upAxis + 1) % 3] = btScalar(1.0);
     GLDebugDrawer::drawArc(start - transform.getBasis() * (offsetHeight), transform.getBasis() * yaxis, transform.getBasis() * xaxis, radius, radius, 0, SIMD_2_PI, color, false, 10.0);
-}
-void priv::GLDebugDrawer::reportErrorWarning(const char* errWarning) {
-}
-void priv::GLDebugDrawer::draw3dText(const btVector3& location, const char* text) {
-}
-void priv::GLDebugDrawer::setDebugMode(int _mode) {
-    m_Mode = _mode;
-}
-int priv::GLDebugDrawer::getDebugMode() const {
-    return m_Mode;
 }
 
 #pragma endregion

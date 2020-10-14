@@ -45,8 +45,6 @@ bool TerrainHeightfieldShape::getAndValidateVertex(int x, int y, btVector3& vert
         }case 2: {
             vertex.setValue((-m_width / btScalar(2.0)) + x, (-m_length / btScalar(2.0)) + y, height - m_localOrigin.getZ());
             break;
-        }default: {
-            break;
         }
     }
     if (doBTScale) {
@@ -321,10 +319,8 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
 
     addComponent<ComponentModel>(m_MeshHandle, materialHandle);
     addComponent<ComponentBody>(CollisionType::Compound); //TODO: check CollisionType::TriangleShapeStatic
-    ComponentBody*  body  = getComponent<ComponentBody>();
-    ComponentModel* model = getComponent<ComponentModel>();
-    Collision* c = NEW Collision(*body);
-
+    auto body  = getComponent<ComponentBody>();
+    auto model = getComponent<ComponentModel>();
     m_TerrainData.m_FinalCompoundShape = new btCompoundShape();
     for (unsigned int sectorX = 0; sectorX < m_TerrainData.m_BtHeightfieldShapes.size(); ++sectorX) {
         for (unsigned int sectorY = 0; sectorY < m_TerrainData.m_BtHeightfieldShapes[sectorX].size(); ++sectorY) {
@@ -340,8 +336,8 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
             m_TerrainData.m_FinalCompoundShape->recalculateLocalAabb();
         }
     }
-    c->setBtShape(m_TerrainData.m_FinalCompoundShape);
-    body->setCollision(c);
+    Collision& c = body->setCollision(*body);
+    c.setBtShape(m_TerrainData.m_FinalCompoundShape);
     body->setMass(0.0f);
     body->setDynamic(false);
     body->setGravity(0, 0, 0);

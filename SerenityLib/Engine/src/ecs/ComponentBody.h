@@ -144,10 +144,10 @@ class ComponentBody : public Observer, public Engine::UserPointer {
         bool hasParent() const;
 
         void addChild(Entity child) const;
-        void addChild(const ComponentBody& child) const;
+        inline void addChild(const ComponentBody& child) const noexcept { addChild(child.m_Owner); }
 
         void removeChild(Entity child) const;
-        void removeChild(const ComponentBody& child) const;
+        inline void removeChild(const ComponentBody& child) const noexcept { removeChild(child.m_Owner); }
         void removeAllChildren() const;
 
         inline void setCollisionFunctor(const CollisionCallbackFP& functor) noexcept { m_CollisionFunctor = functor; }
@@ -168,36 +168,41 @@ class ComponentBody : public Observer, public Engine::UserPointer {
         inline CONSTEXPR bool hasPhysics() const noexcept { return m_Physics; }
         decimal getLinearDamping() const;
         decimal getAngularDamping() const;
-        unsigned short getCollisionGroup() const; //get the groups this body belongs to
-        unsigned short getCollisionMask() const;  //get the groups this body will register collisions with
+
+        inline unsigned short getCollisionGroup() const noexcept { return (m_Physics) ? p->group : 0; }
+        inline unsigned short getCollisionMask() const noexcept { return (m_Physics) ? p->mask : 0; }
+
         unsigned short getCollisionFlags() const;
 
         void alignTo(decimal dirX, decimal dirY, decimal dirZ);
         void alignTo(const glm_vec3& direction);
 
-        void translate(const glm_vec3& translation, bool local = true);
+        inline void translate(const glm_vec3& translation, bool local = true) noexcept { translate(translation.x, translation.y, translation.z, local); }
+        inline void translate(decimal translation, bool local = true) noexcept { translate(translation, translation, translation, local); }
         void translate(decimal x, decimal y, decimal z, bool local = true);
-        void translate(decimal t, bool local = true);
 
-        void rotate(const glm_vec3& rotation, bool local = true);
+
+        inline void rotate(const glm_vec3& rotation, bool local = true) noexcept { rotate(rotation.x, rotation.y, rotation.z, local); }
         void rotate(decimal pitch_radians, decimal yaw_radians, decimal roll_radians, bool local = true);
 
-        void scale(const glm_vec3& amount);
+        inline void scale(const glm_vec3& scaleAmount) noexcept { scale(scaleAmount.x, scaleAmount.y, scaleAmount.z); }
+        inline void scale(decimal scaleAmount) noexcept { scale(scaleAmount, scaleAmount, scaleAmount); }
         void scale(decimal x, decimal y, decimal z);
-        void scale(decimal s);
 
-        void setPosition(const glm_vec3& newPosition);
+
+        inline void setPosition(const glm_vec3& newPosition) noexcept { setPosition(newPosition.x, newPosition.y, newPosition.z); }
+        inline void setPosition(decimal newPosition) noexcept { setPosition(newPosition, newPosition, newPosition); }
         void setPosition(decimal x, decimal y, decimal z);
-        void setPosition(decimal p);
 
-        void setRotation(const glm_quat& newRotation);
+
+        inline void setRotation(const glm_quat& newRotation) noexcept { setRotation(newRotation.x, newRotation.y, newRotation.z, newRotation.w); }
         void setRotation(decimal quat_x, decimal quat_y, decimal quat_z, decimal quat_w);
 
-        void setScale(const glm_vec3& newScale);
         void setScale(decimal x, decimal y, decimal z);
-        void setScale(decimal s);
+        inline void setScale(const glm_vec3& newScale) noexcept { setScale(newScale.x, newScale.y, newScale.z); }
+        inline void setScale(decimal newScale) noexcept { setScale(newScale, newScale, newScale); }
 
-	    float mass() const;
+        inline float mass() const noexcept { return (m_Physics) ? p->mass : 0.0f; }
         decimal getDistance(Entity other) const;
         unsigned long long getDistanceLL(Entity other) const;
         glm::vec3 getScreenCoordinates(bool clampToEdge = false) const;
@@ -218,31 +223,45 @@ class ComponentBody : public Observer, public Engine::UserPointer {
 		glm_vec3 getLinearVelocity() const;
 		glm_vec3 getAngularVelocity() const;
 		glm_mat4 modelMatrix() const;
-        glm::mat4 modelMatrixRendering() const;
-	    btRigidBody& getBtBody() const;
+        inline glm::mat4 modelMatrixRendering() const noexcept { return (glm::mat4)modelMatrix(); }
+        inline btRigidBody& getBtBody() const noexcept { return *p->bullet_rigidBody; }
 
         void setCollision(CollisionType collisionType, float mass);
-        void setCollision(Collision* collision);
-        Collision* getCollision() const;
 
-        void setCollisionGroup(short group);  //set the groups this body belongs to
-        void setCollisionMask(short mask); //set the groups this body will register collisions with
+        //double check this...
+        template<typename ... ARGS>
+        Collision& setCollision(ARGS&&... args) {
+            if (p->collision) {
+                removePhysicsFromWorld(false, false);
+            }
+            p->collision.reset(NEW Collision(std::forward<ARGS>(args)...));
+            internal_update_misc();
+            if (p->bullet_rigidBody) {
+                addPhysicsToWorld(false, false);
+            }
+            setInternalPhysicsUserPointer(this);
+            return *p->collision.get();
+        }
+        inline Engine::view_ptr<Collision> getCollision() const noexcept { return (m_Physics) ? p->collision.get() : nullptr; }
+
+        void setCollisionGroup(short group);
+        void setCollisionMask(short mask);
         void setCollisionFlag(short flag);
-        void setCollisionGroup(CollisionFilter::Filter group);  //set the groups this body belongs to
-        void setCollisionMask(CollisionFilter::Filter mask); //set the groups this body will register collisions with
-        void setCollisionFlag(CollisionFlag::Flag flag);
-        void addCollisionGroup(short group);  //add to the groups this body belongs to
-        void addCollisionMask(short mask); //add to the groups this body will register collisions with
+        inline void setCollisionGroup(CollisionFilter::Filter group) noexcept { setCollisionGroup((short)group); }
+        inline void setCollisionMask(CollisionFilter::Filter mask) noexcept { setCollisionMask((short)mask); }
+        inline void setCollisionFlag(CollisionFlag::Flag flag) noexcept { setCollisionFlag((short)flag); }
+        void addCollisionGroup(short group);
+        void addCollisionMask(short mask);
         void addCollisionFlag(short flag);
-        void addCollisionGroup(CollisionFilter::Filter group); //add to the groups this body belongs to
-        void addCollisionMask(CollisionFilter::Filter mask); //add to the groups this body will register collisions with
-        void addCollisionFlag(CollisionFlag::Flag flag);
+        inline void addCollisionGroup(CollisionFilter::Filter group) noexcept { addCollisionGroup((short)group); }
+        inline void addCollisionMask(CollisionFilter::Filter mask) noexcept { addCollisionMask((short)mask); }
+        inline void addCollisionFlag(CollisionFlag::Flag flag) noexcept { addCollisionFlag((short)flag); }
         void removeCollisionGroup(short group);
         void removeCollisionMask(short mask);
         void removeCollisionFlag(short flag);
-        void removeCollisionGroup(CollisionFilter::Filter group);
-        void removeCollisionMask(CollisionFilter::Filter mask);
-        void removeCollisionFlag(CollisionFlag::Flag flag);
+        inline void removeCollisionGroup(CollisionFilter::Filter group) noexcept { removeCollisionGroup((short)group); }
+        inline void removeCollisionMask(CollisionFilter::Filter mask) noexcept { removeCollisionMask((short)mask); }
+        inline void removeCollisionFlag(CollisionFlag::Flag flag) noexcept { removeCollisionFlag((short)flag); }
 
         void setDamping(decimal linear, decimal angular);
 
@@ -255,10 +274,10 @@ class ComponentBody : public Observer, public Engine::UserPointer {
         void clearAllForces();
 
         void setLinearVelocity(decimal x, decimal y, decimal z, bool local = true);
-        void setLinearVelocity(const glm_vec3& velocity, bool local = true);
+        inline void setLinearVelocity(const glm_vec3& velocity, bool local = true) noexcept { setLinearVelocity(velocity.x, velocity.y, velocity.z, local); }
 
         void setAngularVelocity(decimal x, decimal y, decimal z, bool local = true);
-        void setAngularVelocity(const glm_vec3& velocity, bool local = true);
+        inline void setAngularVelocity(const glm_vec3& velocity, bool local = true) noexcept { setAngularVelocity(velocity.x, velocity.y, velocity.z, local); }
 
         void applyForce(decimal x, decimal y, decimal z, bool local = true);
         void applyForce(const glm_vec3& force, const glm_vec3& origin = glm_vec3(0.0f), bool local = true);
@@ -267,10 +286,10 @@ class ComponentBody : public Observer, public Engine::UserPointer {
         void applyImpulse(const glm_vec3& impulse, const glm_vec3& origin = glm_vec3(0.0f), bool local = true);
 
         void applyTorque(decimal x, decimal y, decimal z, bool local = true);
-        void applyTorque(const glm_vec3& torque, bool local = true);
+        inline void applyTorque(const glm_vec3& torque, bool local = true) noexcept { applyTorque(torque.x, torque.y, torque.z, local); }
 
         void applyTorqueImpulse(decimal x, decimal y, decimal z, bool local = true);
-        void applyTorqueImpulse(const glm_vec3& torqueImpulse, bool local = true);
+        inline void applyTorqueImpulse(const glm_vec3& torqueImpulse, bool local = true) noexcept { applyTorqueImpulse(torqueImpulse.x, torqueImpulse.y, torqueImpulse.z, local); }
 };
 
 class ComponentBody_System_CI : public Engine::priv::ECSSystemCI {

@@ -14,13 +14,11 @@
 #include <btBulletCollisionCommon.h>
 #include <LinearMath/btIDebugDraw.h>
 
-using namespace Engine;
-
 void Collision::internal_load_1(Collision* collision, CollisionType collisionType, Handle mesh, float mass) {
-    auto body       = collision->m_Owner.getComponent<ComponentBody>();
+    auto body  = collision->m_Owner.getComponent<ComponentBody>();
     collision->m_DeferredMeshes.clear();
     auto scale = body->getScale();
-    Physics::removeRigidBodyThreadSafe(*body);
+    Engine::Physics::removeRigidBodyThreadSafe(*body);
     collision->internal_free_memory();
 
     collision->m_BtShape = std::unique_ptr<btCollisionShape>(Engine::priv::InternalMeshPublicInterface::BuildCollision(mesh, collisionType));
@@ -36,7 +34,7 @@ void Collision::internal_load_2(Collision* collision, btCompoundShape* btCompoun
     auto scale = body->getScale();
     for (auto& instance : instances) {
         btCollisionShape* built_collision_shape = Engine::priv::InternalMeshPublicInterface::BuildCollision(instance, collisionType, true);
-        btTransform localTransform(Math::glmToBTQuat(instance->orientation()), Math::btVectorFromGLM(instance->position()));
+        btTransform localTransform(Engine::Math::glmToBTQuat(instance->orientation()), Engine::Math::btVectorFromGLM(instance->position()));
         built_collision_shape->setMargin(0.001f);
         built_collision_shape->calculateLocalInertia(mass, collision->m_BtInertia); //this is important
         btCompound->addChildShape(localTransform, built_collision_shape);
@@ -85,7 +83,7 @@ Collision::Collision(ComponentBody& body, CollisionType type, Handle meshHandle,
 {
     auto& mesh = *meshHandle.get<Mesh>();
     if (!mesh.isLoaded() || !mesh.m_CPUData.m_CollisionFactory) {
-        m_BtShape      = std::unique_ptr<btCollisionShape>(Engine::priv::InternalMeshPublicInterface::BuildCollision(Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), type));
+        m_BtShape = std::unique_ptr<btCollisionShape>(Engine::priv::InternalMeshPublicInterface::BuildCollision(Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), type));
         m_DeferredMeshes.emplace_back(meshHandle);
         m_DeferredLoadingFunction = [this, type, mass, meshHandle]() {
             internal_load_1(this, type, meshHandle, mass);
@@ -117,7 +115,7 @@ Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, float 
             unfinishedModels.emplace_back(&instance);
         }else{
             btCollisionShape* built_collision_shape = Engine::priv::InternalMeshPublicInterface::BuildCollision(&instance, type, true);
-            btTransform localTransform = btTransform(Math::glmToBTQuat(instance.orientation()), Math::btVectorFromGLM(instance.position()));
+            btTransform localTransform = btTransform(Engine::Math::glmToBTQuat(instance.orientation()), Engine::Math::btVectorFromGLM(instance.position()));
             built_collision_shape->setMargin(0.001f);
             if (built_collision_shape->getShapeType() != BroadphaseNativeTypes::EMPTY_SHAPE_PROXYTYPE) {
                 built_collision_shape->calculateLocalInertia(mass, m_BtInertia); //this is important
@@ -178,7 +176,7 @@ void Collision::setMass(float mass) noexcept {
 void Collision::onEvent(const Event& e) {
     if (e.type == EventType::ResourceLoaded) {
         if (e.eventResource.resource->type() == ResourceType::Mesh && m_DeferredMeshes.size() > 0) {
-            auto* mesh = (Mesh*)e.eventResource.resource;
+            auto mesh = (Mesh*)e.eventResource.resource;
             std::erase_if(m_DeferredMeshes, [mesh](Mesh* deferred_mesh) {
                 return (mesh == deferred_mesh || (deferred_mesh->isLoaded() && deferred_mesh->m_CPUData.m_CollisionFactory));
             });

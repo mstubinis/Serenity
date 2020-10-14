@@ -11,14 +11,42 @@ struct SimpleUVTranslationFunctor;
 
 using uv_mod_func = std::function<void(const float dt, MaterialLayer& layer)>;
 
+struct MaterialLayerTextureData final {
+    float blendMode      = (float)MaterialLayerBlendMode::Default;
+    float textureEnabled = 0.0f;
+    float maskEnabled    = 0.0f;
+    float cubemapEnabled = 0.0f;
+
+    MaterialLayerTextureData() = default;
+    MaterialLayerTextureData(float blendMode_, float textureEnabled_, float maskEnabled_, float cubemapEnabled_)
+        : blendMode{ blendMode_ }
+        , textureEnabled{ textureEnabled_ }
+        , maskEnabled{ maskEnabled_ }
+        , cubemapEnabled{ cubemapEnabled_ }
+    {}
+};
+struct MaterialLayerMiscData final {
+    float rMultiplier   = 0.0f;
+    float gMultiplier   = 0.0f;
+    float bMultiplier   = 0.0f;
+    float aMultiplier   = 0.0f;
+
+    MaterialLayerMiscData() = default;
+    MaterialLayerMiscData(float rMultiplier_, float gMultiplier_, float bMultiplier_, float aMultiplier_)
+        : rMultiplier{ rMultiplier_ }
+        , gMultiplier{ gMultiplier_ }
+        , bMultiplier{ bMultiplier_ }
+        , aMultiplier{ aMultiplier_ }
+    {}
+};
+
 class MaterialLayer final {
     friend struct SimpleUVTranslationFunctor;
     private:
         std::vector<uv_mod_func>   m_UVModificationQueue;
 
-        //x = blend mode? | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
-        glm::vec4                  m_Data1                         = glm::vec4((float)MaterialLayerBlendMode::Default, 0.0f, 0.0f, 0.0f);
-        glm::vec4                  m_Data2                         = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+        MaterialLayerTextureData   m_MaterialLayerTextureData;
+        MaterialLayerMiscData      m_MaterialLayerMiscData;
 
         //x = translationX, y = translationY, z = multX, w = multY
         glm::vec4                  m_UVModifications               = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
@@ -43,16 +71,16 @@ class MaterialLayer final {
         inline CONSTEXPR Handle getMask() const noexcept { return m_MaskHandle; }
         inline CONSTEXPR Handle getCubemap() const noexcept { return m_CubemapHandle; }
 
-        inline CONSTEXPR const glm::vec4& data1() const noexcept { return m_Data1; }
-        inline CONSTEXPR const glm::vec4& data2() const noexcept { return m_Data2; }
-        inline CONSTEXPR MaterialLayerBlendMode blendMode() const noexcept { return (MaterialLayerBlendMode)((unsigned int)m_Data1.x); }
+        inline CONSTEXPR const MaterialLayerTextureData& getMaterialLayerTextureData() const noexcept { return m_MaterialLayerTextureData; }
+        inline CONSTEXPR const MaterialLayerMiscData& getMaterialLayerMiscData() const noexcept { return m_MaterialLayerMiscData; }
+        inline CONSTEXPR MaterialLayerBlendMode blendMode() const noexcept { return (MaterialLayerBlendMode)((unsigned int)m_MaterialLayerTextureData.blendMode); }
         inline CONSTEXPR const glm::vec4& getUVModifications() const noexcept { return m_UVModifications; }
 
         inline void addUVModificationFunctor(uv_mod_func&& functor) { m_UVModificationQueue.emplace_back(std::move(functor)); }
         void addUVModificationSimpleTranslation(float translationX, float translationY);
         void addUVModificationSimpleMultiplication(float mulX, float mulY);
 
-        inline void setBlendMode(MaterialLayerBlendMode mode) noexcept { m_Data1.x = (float)mode; }
+        inline void setBlendMode(MaterialLayerBlendMode mode) noexcept { m_MaterialLayerTextureData.blendMode = (float)mode; }
         void setTexture(Handle textureHandle) noexcept;
         void setMask(Handle maskHandle) noexcept;
         void setCubemap(Handle cubemapHandle) noexcept;
@@ -60,8 +88,8 @@ class MaterialLayer final {
         void setMask(const std::string& maskFile) noexcept;
         void setCubemap(const std::string& cubemapFile) noexcept;
 
-        inline void setData1(float x, float y, float z, float w) noexcept { m_Data1.x = x; m_Data1.y = y; m_Data1.z = z; m_Data1.w = w; }
-        inline void setData2(float x, float y, float z, float w) noexcept { m_Data2.x = x; m_Data2.y = y; m_Data2.z = z; m_Data2.w = w; }
+        inline void setData1(float x, float y, float z, float w) noexcept { m_MaterialLayerTextureData = { x, y, z, w }; }
+        inline void setData2(float r, float g, float b, float a) noexcept { m_MaterialLayerMiscData = { r, g, b, a }; }
 
         void sendDataToGPU(const std::string& uniform_component_string, size_t component_index, size_t layer_index, size_t& textureUnit) const;
 

@@ -78,22 +78,26 @@ void ThreadPool::update() {
             }
         }
     }
-    //this CANNOT be split up in different loops / steps.
-    for (auto& callbackSection : m_FuturesCallback) {
-        for (auto it = callbackSection.begin(); it != callbackSection.end();) {
-            if ((*it).isReady()) {
-                (*it)();
-                it = callbackSection.erase(it);
-            }else{
-                ++it;
-            }
+    {
+        std::lock_guard lock(m_Mutex);
+        //this CANNOT be split up in different loops / steps: future is_ready MIGHT be false for the first run,
+        //and then true for the second run, in which case it gets removed without calling its then function
+        for (auto& callbackSection : m_FuturesCallback) {
+            for (auto it = callbackSection.begin(); it != callbackSection.end();) {
+                if ((*it).isReady()) {
+                    (*it)(); //calls the "then" function
+                    it = callbackSection.erase(it);
+                }else{
+                    ++it;
+                }
 
+            }
         }
-    }
-    for (auto& basicSection : m_FuturesBasic) {
-        std::erase_if(basicSection, [](const Engine::priv::ThreadPoolFuture& future) {
-            return future.isReady();
-        });
+        for (auto& basicSection : m_FuturesBasic) {
+            std::erase_if(basicSection, [](const Engine::priv::ThreadPoolFuture& future) {
+                return future.isReady();
+            });
+        }
     }
 }
 

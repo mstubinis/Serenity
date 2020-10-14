@@ -1471,9 +1471,6 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
                 }
                 break;
             }
-            default: {
-                break;
-            }
         }
     }
 }
