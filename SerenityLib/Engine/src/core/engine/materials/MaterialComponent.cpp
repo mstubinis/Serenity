@@ -40,15 +40,17 @@ MaterialLayer* MaterialComponent::addLayer(const std::string& textureFile, const
     auto  cubemap = Engine::Resources::getResource<Texture>(cubemapFile);
 
     if (!texture.first && !textureFile.empty()) {
-        //texture.second = Engine::Resources::loadTextureAsync(textureFile, ImageInternalFormat::SRGB8_ALPHA8, false, TextureType::Texture2D);
+        //texture.second = Engine::Resources::loadTextureAsync(textureFile, ImageInternalFormat::SRGB8_ALPHA8, false);
         texture.second = Engine::Resources::addResource<Texture>(textureFile, false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D);
         texture.first  = texture.second.get<Texture>();
     }
     if (!mask.first && !maskFile.empty()) {
+        //mask.second = Engine::Resources::loadTextureAsync(maskFile, ImageInternalFormat::R8, false);
         mask.second = Engine::Resources::addResource<Texture>(maskFile, false, ImageInternalFormat::R8, TextureType::Texture2D);
         mask.first  = mask.second.get<Texture>();
     }
     if (!cubemap.first && !cubemapFile.empty()) {
+        //cubemap.second = Engine::Resources::loadTextureAsync(cubemapFile, ImageInternalFormat::SRGB8_ALPHA8, false);
         cubemap.second = Engine::Resources::addResource<Texture>(cubemapFile, false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::CubeMap);
         cubemap.first  = cubemap.second.get<Texture>();
     }
@@ -90,8 +92,6 @@ MaterialLayer* MaterialComponent::addLayer(Handle textureHandle, Handle maskHand
         }case MaterialComponentType::Refraction: {
             break;
         }case MaterialComponentType::ParallaxOcclusion: {
-            break;
-        }default: {
             break;
         }
     }

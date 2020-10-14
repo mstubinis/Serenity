@@ -140,11 +140,11 @@ MaterialComponent* Material::internal_add_component_generic(MaterialComponentTyp
 }
 void Material::internal_update_global_material_pool(bool addToDatabase) {
     //this data is kept around to be deferred to the lighting pass
-    auto update_data = [this](glm::vec4& data) {
-        data.r = Engine::Compression::pack3FloatsInto1FloatUnsigned(m_F0Color.r(), m_F0Color.g(), m_F0Color.b());
-        data.g = (float)(m_BaseAlpha) * ONE_OVER_255;
-        data.b = (float)m_SpecularModel;
-        data.a = (float)m_DiffuseModel;
+    auto update_data = [this](glm::vec4& materialData) {
+        materialData.r = Engine::Compression::pack3FloatsInto1FloatUnsigned(m_F0Color.r(), m_F0Color.g(), m_F0Color.b());
+        materialData.g = (float)(m_BaseAlpha) * ONE_OVER_255;
+        materialData.b = (float)m_SpecularModel;
+        materialData.a = (float)m_DiffuseModel;
     };
     if (addToDatabase) {
         m_ID = (MaterialID)Material::m_MaterialProperities.size();
@@ -194,8 +194,8 @@ MaterialComponent& Material::addComponentAO(const std::string& textureFile, unsi
     auto texture     = Engine::priv::MaterialLoader::LoadTextureAO(textureFile);
     auto& component  = *internal_add_component_generic(MaterialComponentType::AO, texture.second);
     auto& layer      = component.layer(0);
-    auto& _data2     = layer.data2();
-    layer.setData2(0.0f, 1.0f, 1.0f, _data2.w);
+    auto& _data2     = layer.getMaterialLayerMiscData();
+    layer.setData2(0.0f, 1.0f, 1.0f, _data2.aMultiplier);
     setAO(baseValue);
     return component;
 }
@@ -203,8 +203,8 @@ MaterialComponent& Material::addComponentMetalness(const std::string& textureFil
     auto texture     = Engine::priv::MaterialLoader::LoadTextureMetalness(textureFile);
     auto& component  = *internal_add_component_generic(MaterialComponentType::Metalness, texture.second);
     auto& layer      = component.layer(0);
-    auto& _data2     = layer.data2();
-    layer.setData2(0.01f, 0.99f, 1.0f, _data2.w);
+    auto& _data2     = layer.getMaterialLayerMiscData();
+    layer.setData2(0.01f, 0.99f, 1.0f, _data2.aMultiplier);
     setMetalness(baseValue);
     return component;
 }
@@ -212,8 +212,8 @@ MaterialComponent& Material::addComponentSmoothness(const std::string& textureFi
     auto texture     = Engine::priv::MaterialLoader::LoadTextureSmoothness(textureFile);
     auto& component  = *internal_add_component_generic(MaterialComponentType::Smoothness, texture.second);
     auto& layer      = component.layer(0);
-    auto& _data2     = layer.data2();
-    layer.setData2(0.01f, 0.99f, 1.0f, _data2.w);
+    auto& _data2     = layer.getMaterialLayerMiscData();
+    layer.setData2(0.01f, 0.99f, 1.0f, _data2.aMultiplier);
     setSmoothness(baseValue);
     return component;
 }
@@ -226,10 +226,10 @@ MaterialComponent& Material::addComponentReflection(const std::string& cubemapNa
     }
     auto& component = *internal_add_component_generic(MaterialComponentType::Reflection, Handle{});
     auto& layer     = component.layer(0);
-    auto& _data2    = layer.data2();
+    auto& _data2    = layer.getMaterialLayerMiscData();
     layer.setMask(mask.second);
     layer.setCubemap(cubemap.second);
-    layer.setData2(mixFactor, _data2.y, _data2.z, _data2.w);
+    layer.setData2(mixFactor, _data2.gMultiplier, _data2.bMultiplier, _data2.aMultiplier);
     return component;
 }
 MaterialComponent& Material::addComponentRefraction(const std::string& cubemapName, const std::string& maskFile, float refractiveIndex, float mixFactor){
@@ -241,18 +241,18 @@ MaterialComponent& Material::addComponentRefraction(const std::string& cubemapNa
     }
     auto& component = *internal_add_component_generic(MaterialComponentType::Refraction, Handle{});
     auto& layer     = component.layer(0);
-    auto& _data2    = layer.data2();
+    auto& _data2    = layer.getMaterialLayerMiscData();
     layer.setMask(mask.second);
     layer.setCubemap(cubemap.second);
-    layer.setData2(mixFactor, refractiveIndex, _data2.z, _data2.w);
+    layer.setData2(mixFactor, refractiveIndex, _data2.bMultiplier, _data2.aMultiplier);
     return component;
 }
 MaterialComponent& Material::addComponentParallaxOcclusion(const std::string& textureFile, float heightScale){
     auto texture     = Engine::priv::MaterialLoader::LoadTextureNormal(textureFile);
     auto& component  = *internal_add_component_generic(MaterialComponentType::ParallaxOcclusion, texture.second);
     auto& layer      = component.layer(0);
-    auto& _data2     = layer.data2();
-    layer.setData2(heightScale, _data2.y, _data2.z, _data2.w);
+    auto& _data2     = layer.getMaterialLayerMiscData();
+    layer.setData2(heightScale, _data2.gMultiplier, _data2.bMultiplier, _data2.aMultiplier);
     return component;
 }
 void Material::setShadeless(bool shadeless){

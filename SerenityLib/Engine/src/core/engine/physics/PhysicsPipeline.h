@@ -24,6 +24,7 @@ namespace Engine::priv {
 
 #include <core/engine/physics/DebugDrawer.h>
 #include <LinearMath/btThreads.h>
+#include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
 
 namespace Engine::priv {
     class PhysicsTaskScheduler final : public btITaskScheduler, public Engine::NonCopyable, public Engine::NonMoveable {
@@ -47,17 +48,13 @@ namespace Engine::priv {
             void sleepWorkerThreadsHint() override {}
 
             // internal use only
-            void activate() override {
-                m_isActive = true;
-            }
-            void deactivate() override {
-                m_isActive = false;
-            }
+            void activate() override { m_isActive = true; }
+            void deactivate() override { m_isActive = false; }
     };
     class PhysicsPipeline final : public Engine::NonCopyable, public Engine::NonMoveable {
         public:
-            std::function<void(btDynamicsWorld* world, btScalar timeStep)> m_PreTickCallback  = [](btDynamicsWorld*, btScalar) {};
-            std::function<void(btDynamicsWorld* world, btScalar timeStep)> m_PostTickCallback = [](btDynamicsWorld*, btScalar) {};
+            btInternalTickCallback                                         m_PreTickCallback  = [](btDynamicsWorld*, btScalar) {};
+            btInternalTickCallback                                         m_PostTickCallback = [](btDynamicsWorld*, btScalar) {};
 
             std::unique_ptr<PhysicsTaskScheduler>                          m_TaskScheduler;
             std::unique_ptr<btBroadphaseInterface>                         m_Broadphase;
@@ -74,8 +71,8 @@ namespace Engine::priv {
 
             void update(const float dt);
 
-            void setPreTickCallback(std::function<void(btDynamicsWorld* world, btScalar timeStep)> preTicCallback);
-            void setPostTickCallback(std::function<void(btDynamicsWorld* world, btScalar timeStep)> postTickCallback);
+            void setPreTickCallback(btInternalTickCallback preTicCallback);
+            void setPostTickCallback(btInternalTickCallback postTickCallback);
     };
 };
 #endif

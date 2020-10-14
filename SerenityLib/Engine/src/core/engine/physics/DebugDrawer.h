@@ -13,7 +13,7 @@
 
 namespace Engine::priv {
     class PhysicsManager;
-    class PhysicsDebugDrawcallback final : public btTriangleCallback, public btInternalTriangleIndexCallback, public Engine::NonCopyable, public Engine::NonMoveable {
+    class PhysicsDebugDrawcallback final : public btTriangleCallback, public btInternalTriangleIndexCallback {
         private:
             btIDebugDraw& m_DebugDrawer;
             btVector3	  m_Color;
@@ -49,6 +49,9 @@ namespace Engine::priv {
             GLDebugDrawer() = default;
             ~GLDebugDrawer();
 
+            inline void setDebugMode(int mode) noexcept { m_Mode = mode; }
+            inline int getDebugMode() const noexcept { return m_Mode; }
+
             void drawAccumulatedLines();
             void onEvent(const Event& e) override;
             void drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3&, const btVector3&, const btVector3&, const btVector3& color, btScalar alpha);
@@ -64,13 +67,13 @@ namespace Engine::priv {
             void drawCapsule(btScalar radius, btScalar halfHeight, int upAxis, const btTransform& transform, const btVector3& color);
             void drawBox(const btVector3& bbMin, const btVector3& bbMax, const btVector3& color);
             void drawBox(const btVector3& bbMin, const btVector3& bbMax, const btTransform& trans, const btVector3& color);
-            void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color);
+            void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color){}
             void drawPlane(const btVector3& planeNormal, btScalar planeConst, const btTransform& transform, const btVector3& color);
             void drawCone(btScalar radius, btScalar height, int upAxis, const btTransform& transform, const btVector3& color);
-            void reportErrorWarning(const char* errWarning);
-            void draw3dText(const btVector3& location, const char* text);
-            void setDebugMode(int Mode);
-            int getDebugMode() const;
+            void reportErrorWarning(const char* errWarning) {
+                ENGINE_PRODUCTION_LOG("DebugDraw error: " << errWarning)
+            }
+            void draw3dText(const btVector3& location, const char* text) {}
     };
 };
 
