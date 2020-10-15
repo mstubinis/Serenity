@@ -19,7 +19,7 @@ class ParticleEmitter final : public EntityBody {
     friend class  Particle;
     friend struct Engine::priv::InternalScenePublicInterface;
 
-    using update_func = std::function<void(ParticleEmitter*, const float dt, std::mutex&)>;
+    using update_func = std::function<void(ParticleEmitter*, const float dt, std::shared_mutex&)>;
 
     public:
         glm::vec4                      m_UserData       = glm::vec4(0.0f);
@@ -30,7 +30,7 @@ class ParticleEmitter final : public EntityBody {
         float                          m_Timer          = 0.0f;
         float                          m_Lifetime       = 0.0f;
         Entity                         m_Parent         = Entity();
-        update_func                    m_UpdateFunctor  = [](ParticleEmitter*, const float, std::mutex&) {};
+        update_func                    m_UpdateFunctor  = [](ParticleEmitter*, const float, std::shared_mutex&) {};
 
         ParticleEmitter() = delete;
     public:

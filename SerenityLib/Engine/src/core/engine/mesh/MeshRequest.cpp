@@ -16,7 +16,7 @@ Engine::priv::AssimpSceneImport::AssimpSceneImport() {
     m_Importer_ptr = std::make_shared<Assimp::Importer>();
 }
 
-MeshRequest::MeshRequest(std::string filenameOrData, float threshold, MeshCollisionLoadingFlag::Flag flags, std::function<void()>&& callback)
+MeshRequest::MeshRequest(std::string filenameOrData, float threshold, MeshCollisionLoadingFlag::Flag flags, MeshRequestCallback&& callback)
     : m_FileOrData            { std::move(filenameOrData) }
     , m_Threshold             { threshold }
     , m_Callback              { std::move(callback) }
@@ -71,7 +71,12 @@ void MeshRequest::request(bool inAsync) {
                             InternalMeshPublicInterface::LoadGPU(mesh);
                         }
                     }
-                    meshRequest.m_Callback();
+                    std::vector<Handle> handles;
+                    handles.reserve(meshRequest.m_Parts.size());
+                    for (auto& part : meshRequest.m_Parts) {
+                        handles.emplace_back(part.handle);
+                    }
+                    meshRequest.m_Callback(handles);
                 };
                 if (m_Async || !Engine::priv::threading::isMainThread()) {
                     if (Engine::priv::threading::isMainThread()) {

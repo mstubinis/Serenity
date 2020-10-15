@@ -9,7 +9,7 @@ namespace Engine::priv {
         private:
             Engine::type_registry                                        m_ResourceRegistry;
             std::vector<std::unique_ptr<Engine::priv::IResourceVector>>  m_Resources;
-            mutable std::mutex                                           m_Mutex;
+            mutable std::shared_mutex                                    m_SharedMutex;
         public:
             ResourceModule() = default;
             ResourceModule(const ResourceModule& other)            = delete;
@@ -32,13 +32,15 @@ namespace Engine::priv {
                 }
             }
 
-            inline Engine::view_ptr<std::mutex> getMutex(const Handle inHandle) noexcept { return m_Resources[inHandle.type() - 1]->getMutex(); }
+            inline Engine::view_ptr<std::shared_mutex> getMutex(const Handle inHandle) noexcept { 
+                return m_Resources[inHandle.type() - 1]->getMutex(); 
+            }
 
             template<typename TResource>
             uint32_t registerResourceType() {
                 const uint32_t index = m_ResourceRegistry.type_slot<TResource>();
                 if (index == m_Resources.size()) {
-                    std::lock_guard lock{ m_Mutex };
+                    std::unique_lock lock{ m_SharedMutex };
                     m_Resources.emplace_back(std::make_unique<Engine::priv::ResourceVector<TResource>>());
                 }
                 return index;
@@ -47,7 +49,7 @@ namespace Engine::priv {
             uint32_t registerResourceTypeThreadSafe() {
                 uint32_t index;
                 {
-                    std::lock_guard lock{ m_Mutex };
+                    std::unique_lock lock{ m_SharedMutex };
                     index = m_ResourceRegistry.type_slot<TResource>();
                     if (index == m_Resources.size()) {
                         m_Resources.emplace_back(std::make_unique<Engine::priv::ResourceVector<TResource>>());

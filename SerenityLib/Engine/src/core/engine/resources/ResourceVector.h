@@ -31,10 +31,10 @@ namespace Engine::priv {
         };
 
         private:
-            std::vector<Entry>      m_Resources;
-            std::vector<uint32_t>   m_AvailableIndices;
-            mutable std::mutex      m_Mutex;
-            bool                    m_Locked             = false;
+            std::vector<Entry>          m_Resources;
+            std::vector<uint32_t>       m_AvailableIndices;
+            mutable std::shared_mutex   m_SharedMutex;
+            bool                        m_Locked             = false;
 
             inline TResource* internal_get(const Handle inHandle) const noexcept { return m_Resources[inHandle.index()].m_Resource.get(); }
             inline TResource* internal_get(const size_t index) const noexcept { return m_Resources[index].m_Resource.get(); }
@@ -48,13 +48,17 @@ namespace Engine::priv {
             ResourceVector(ResourceVector&& other) noexcept            = delete;
             ResourceVector& operator=(ResourceVector&& other) noexcept = delete;
 
-            inline constexpr size_t size() const noexcept override { return m_Resources.size(); }
+            inline constexpr size_t size() const noexcept override { 
+                return m_Resources.size(); 
+            }
             void shrink_to_fit() override {
                 m_Resources.shrink_to_fit();
                 m_AvailableIndices.shrink_to_fit();
             }
 
-            Engine::view_ptr<std::mutex> getMutex() noexcept override { return &m_Mutex; }
+            Engine::view_ptr<std::shared_mutex> getMutex() noexcept override {
+                return &m_SharedMutex; 
+            }
 
             void lock() override {
                 m_Locked = true;
@@ -109,53 +113,53 @@ namespace Engine::priv {
                 if (m_AvailableIndices.size() > 0) {
                     size_t index;
                     {
-                        std::lock_guard lock{ m_Mutex };
+                        std::unique_lock lock{ m_SharedMutex };
                         index = pop_index();
-                        ASSERT(index >= 0 && index < m_Resources.size(), "Engine::priv::ResourceVector::push_back(): index was out of bounds!");
+                        ASSERT(index >= 0 && index < m_Resources.size(), __FUNCTION__ << "(): index was out of bounds!");
                         m_Resources[index] = Entry{ std::forward<ARGS>(args)... };
                     }
                     return index;
                 }
                 {
-                    std::lock_guard lock{ m_Mutex };
+                    std::unique_lock lock{ m_SharedMutex };
                     m_Resources.emplace_back(std::forward<ARGS>(args)...);
                 }
                 return m_Resources.size() - 1;
             }
             
             size_t push_back(TResource&& inResource) {
-                ASSERT(!m_Locked, "Engine::priv::ResourceVector::push_back(): is locked!");
+                ASSERT(!m_Locked, __FUNCTION__ << "(): is locked!");
                 if (m_Locked) {
                     return 0;
                 }
                 if (m_AvailableIndices.size() > 0) {
                     size_t index;
                     {
-                        std::lock_guard lock{ m_Mutex };
+                        std::unique_lock lock{ m_SharedMutex };
                         index = pop_index();
-                        ASSERT(index >= 0 && index < m_Resources.size(), "Engine::priv::ResourceVector::push_back(): index was out of bounds!");
+                        ASSERT(index >= 0 && index < m_Resources.size(), __FUNCTION__ << "(): index was out of bounds!");
                         m_Resources[index] = Entry{ std::move(inResource) };
                     }
                     return index;
                 }
                 {
-                    std::lock_guard lock{ m_Mutex };
+                    std::unique_lock lock{ m_SharedMutex };
                     m_Resources.push_back(std::move(inResource));
                 }
                 return m_Resources.size() - 1;
             }
 
             inline void erase(const Handle inHandle) noexcept { 
-                ASSERT(!m_Locked, "Engine::priv::ResourceVector::erase(): is locked!");
+                ASSERT(!m_Locked, __FUNCTION__ << "(): is locked!");
                 if (m_Locked) {
                     return;
                 }
-                ASSERT(inHandle.index() >= 0 && inHandle.index() < m_Resources.size(), "Engine::priv::ResourceVector::erase(): handle index was out of bounds!");
+                ASSERT(inHandle.index() >= 0 && inHandle.index() < m_Resources.size(), __FUNCTION__ << "(): handle index was out of bounds!");
                 m_Resources[inHandle.index()].m_Version++;
             }
 
             inline void reserve(const size_t inSize) override { 
-                ASSERT(!m_Locked, "Engine::priv::ResourceVector::reserve(): is locked!");
+                ASSERT(!m_Locked, __FUNCTION__ << "(): is locked!");
                 if (m_Locked) {
                     return;
                 }

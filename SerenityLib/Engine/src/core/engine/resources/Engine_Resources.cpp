@@ -123,7 +123,7 @@ Engine::view_ptr<Scene> Engine::Resources::getScene(std::string_view sceneName){
 }
 
 std::vector<Handle> Engine::Resources::loadMesh(const std::string& fileOrData, float threshhold, MeshCollisionLoadingFlag::Flag flags) {
-    MeshRequest request{ fileOrData, threshhold, flags, []() {} };
+    MeshRequest request{ fileOrData, threshhold, flags, [](const std::vector<Handle>&) {} };
     request.request();
     std::vector<Handle> handles;
     handles.reserve(request.m_Parts.size());
@@ -132,7 +132,7 @@ std::vector<Handle> Engine::Resources::loadMesh(const std::string& fileOrData, f
     }
     return handles;
 }
-std::vector<Handle> Engine::Resources::loadMeshAsync(const std::string& fileOrData, float threshhold, MeshCollisionLoadingFlag::Flag flags, std::function<void()> callback) {
+std::vector<Handle> Engine::Resources::loadMeshAsync(const std::string& fileOrData, float threshhold, MeshCollisionLoadingFlag::Flag flags, MeshRequestCallback callback) {
     MeshRequest request{ fileOrData, threshhold, flags, std::move(callback) };
     request.request(true);
     std::vector<Handle> handles;

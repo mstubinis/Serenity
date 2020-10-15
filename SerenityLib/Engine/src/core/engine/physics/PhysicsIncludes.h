@@ -11,9 +11,7 @@ enum class CollisionType : unsigned char {
     TriangleShapeStatic,
     Compound,
 };
-
-//pretty much a copy of bullet physics enums
-struct CollisionFlag final { enum Flag : unsigned short {
+struct CollisionFlag final { enum Flag : MaskType {
     None                          =      0,
     StaticObject                  = 1 << 0,
     KinematicObject               = 1 << 1,
@@ -31,10 +29,9 @@ struct CollisionFlag final { enum Flag : unsigned short {
     _Custom_3                     = 1 << 13,
     _Custom_4                     = 1 << 14,
     _Custom_5                     = 1 << 15,
-    AllFilter                     = std::numeric_limits<unsigned short>().max(), //all bits set
+    AllFilter                     = std::numeric_limits<MaskType>().max(),
 };};
-
-struct CollisionFilter final { enum Filter : unsigned short {
+struct CollisionFilter final { enum Filter : MaskType {
     NoFilter        =      0,
     DefaultFilter   = 1 << 0,
     StaticFilter    = 1 << 1,
@@ -47,7 +44,7 @@ struct CollisionFilter final { enum Filter : unsigned short {
     _Custom_3       = 1 << 8,
     _Custom_4       = 1 << 9,
     _Custom_5       = 1 << 10,
-    AllFilter       = std::numeric_limits<unsigned short>().max(), //all bits set
+    AllFilter       = std::numeric_limits<MaskType>().max(),
 };};
 
 #endif

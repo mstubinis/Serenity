@@ -15,44 +15,44 @@ namespace Engine::Networking {
 
 
 //glm vector floats
-sf::Packet& operator <<(sf::Packet& packet, const glm::vec2& data);
-sf::Packet& operator <<(sf::Packet& packet, const glm::vec3& data);
-sf::Packet& operator <<(sf::Packet& packet, const glm::vec4& data);
-sf::Packet& operator >>(sf::Packet& packet, glm::vec2& data);
-sf::Packet& operator >>(sf::Packet& packet, glm::vec3& data);
-sf::Packet& operator >>(sf::Packet& packet, glm::vec4& data);
+sf::Packet& operator <<(sf::Packet& packet, const glm::vec2& data) noexcept;
+sf::Packet& operator <<(sf::Packet& packet, const glm::vec3& data) noexcept;
+sf::Packet& operator <<(sf::Packet& packet, const glm::vec4& data) noexcept;
+sf::Packet& operator >>(sf::Packet& packet, glm::vec2& data) noexcept;
+sf::Packet& operator >>(sf::Packet& packet, glm::vec3& data) noexcept;
+sf::Packet& operator >>(sf::Packet& packet, glm::vec4& data) noexcept;
 //glm vector ints
-sf::Packet& operator <<(sf::Packet& packet, const glm::ivec2& data);
-sf::Packet& operator <<(sf::Packet& packet, const glm::ivec3& data);
-sf::Packet& operator <<(sf::Packet& packet, const glm::ivec4& data);
-sf::Packet& operator >>(sf::Packet& packet, glm::ivec2& data);
-sf::Packet& operator >>(sf::Packet& packet, glm::ivec3& data);
-sf::Packet& operator >>(sf::Packet& packet, glm::ivec4& data);
+sf::Packet& operator <<(sf::Packet& packet, const glm::ivec2& data) noexcept;
+sf::Packet& operator <<(sf::Packet& packet, const glm::ivec3& data) noexcept;
+sf::Packet& operator <<(sf::Packet& packet, const glm::ivec4& data) noexcept;
+sf::Packet& operator >>(sf::Packet& packet, glm::ivec2& data) noexcept;
+sf::Packet& operator >>(sf::Packet& packet, glm::ivec3& data) noexcept;
+sf::Packet& operator >>(sf::Packet& packet, glm::ivec4& data) noexcept;
 //glm vector uints
-sf::Packet& operator <<(sf::Packet& packet, const glm::uvec2& data);
-sf::Packet& operator <<(sf::Packet& packet, const glm::uvec3& data);
-sf::Packet& operator <<(sf::Packet& packet, const glm::uvec4& data);
-sf::Packet& operator >>(sf::Packet& packet, glm::uvec2& data);
-sf::Packet& operator >>(sf::Packet& packet, glm::uvec3& data);
-sf::Packet& operator >>(sf::Packet& packet, glm::uvec4& data);
+sf::Packet& operator <<(sf::Packet& packet, const glm::uvec2& data) noexcept;
+sf::Packet& operator <<(sf::Packet& packet, const glm::uvec3& data) noexcept;
+sf::Packet& operator <<(sf::Packet& packet, const glm::uvec4& data) noexcept;
+sf::Packet& operator >>(sf::Packet& packet, glm::uvec2& data) noexcept;
+sf::Packet& operator >>(sf::Packet& packet, glm::uvec3& data) noexcept;
+sf::Packet& operator >>(sf::Packet& packet, glm::uvec4& data) noexcept;
 //glm vector doubles
-sf::Packet& operator <<(sf::Packet& packet, const glm::dvec2& data);
-sf::Packet& operator <<(sf::Packet& packet, const glm::dvec3& data);
-sf::Packet& operator <<(sf::Packet& packet, const glm::dvec4& data);
-sf::Packet& operator >>(sf::Packet& packet, glm::dvec2& data);
-sf::Packet& operator >>(sf::Packet& packet, glm::dvec3& data);
-sf::Packet& operator >>(sf::Packet& packet, glm::dvec4& data);
+sf::Packet& operator <<(sf::Packet& packet, const glm::dvec2& data) noexcept;
+sf::Packet& operator <<(sf::Packet& packet, const glm::dvec3& data) noexcept;
+sf::Packet& operator <<(sf::Packet& packet, const glm::dvec4& data) noexcept;
+sf::Packet& operator >>(sf::Packet& packet, glm::dvec2& data) noexcept;
+sf::Packet& operator >>(sf::Packet& packet, glm::dvec3& data) noexcept;
+sf::Packet& operator >>(sf::Packet& packet, glm::dvec4& data) noexcept;
 
 template<typename T, size_t size>
-inline sf::Packet& operator <<(sf::Packet& packet, const std::array<T, size>& data) {
-    for (size_t i = 0; i < size-1; ++i) {
+inline sf::Packet& operator <<(sf::Packet& packet, const std::array<T, size>& data) noexcept {
+    for (size_t i = 0; i < size - 1; ++i) {
         packet << data[i];
     }
-    return packet << data[size-1];
+    return packet << data[size - 1];
 }
 template<typename T, size_t size>
-inline sf::Packet& operator >>(sf::Packet& packet, std::array<T, size>& data) {
-    for (size_t i = 0; i < size-1; ++i) {
+inline sf::Packet& operator >>(sf::Packet& packet, std::array<T, size>& data) noexcept {
+    for (size_t i = 0; i < size - 1; ++i) {
         packet >> data[i];
     }
     return packet >> data[size - 1];

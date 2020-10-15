@@ -54,6 +54,15 @@ namespace Engine::priv {
         unsigned int index2   = 0;
         unsigned int index3   = 0;
 
+        float getArea() const noexcept {
+            auto crossProduct = glm::cross(position2 - position1, position3 - position1);
+            return 0.5f * glm::sqrt(
+                (crossProduct.x*crossProduct.x) + 
+                (crossProduct.y*crossProduct.y) + 
+                (crossProduct.z*crossProduct.z)
+            );
+        }
+
         glm::vec3 getRandomPoint() const noexcept {
             float A = (float)rand() / (float)RAND_MAX;
             float B = (float)rand() / (float)RAND_MAX;

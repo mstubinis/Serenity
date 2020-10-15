@@ -31,7 +31,7 @@ namespace Engine::priv {
 
             std::queue<size_t>                     m_ParticleEmitterFreelist;
             std::queue<size_t>                     m_ParticleFreelist;
-            std::mutex                             m_Mutex;
+            mutable std::shared_mutex              m_SharedMutex;
 
             void internal_update_emitters(const float dt);
             void internal_update_particles(const float dt, Camera& camera);

@@ -43,7 +43,7 @@ bool ThreadPool::startup(size_t numThreads) {
                 while (!m_Stopped) {
                     Engine::priv::PoolTaskPtr job;
                     {
-                        std::unique_lock l{ m_Mutex };
+                        std::unique_lock l{ m_SharedMutex };
                         m_ConditionVariableAny.wait(l, [this] { return m_Stopped || !internal_task_queue_is_empty(); });
                         if (m_Stopped) {
                             return;
@@ -79,7 +79,7 @@ void ThreadPool::update() {
         }
     }
     {
-        std::lock_guard lock(m_Mutex);
+        std::lock_guard lock(m_SharedMutex);
         //this CANNOT be split up in different loops / steps: future is_ready MIGHT be false for the first run,
         //and then true for the second run, in which case it gets removed without calling its then function
         for (auto& callbackSection : m_FuturesCallback) {
