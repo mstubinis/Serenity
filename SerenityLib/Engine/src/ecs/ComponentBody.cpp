@@ -1,13 +1,10 @@
 #include <core/engine/utils/PrecompiledHeader.h>
 #include <ecs/ComponentBody.h>
 #include <ecs/ComponentModel.h>
-#include <core/engine/fonts/Font.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/threading/ThreadingModule.h>
-#include <core/engine/system/Engine.h>
 #include <core/engine/physics/Engine_Physics.h>
 #include <core/engine/model/ModelInstance.h>
-#include <core/engine/mesh/Mesh.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/resources/Engine_Resources.h>
 #include <core/engine/physics/Collision.h>
@@ -15,9 +12,6 @@
 
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
-
-#include <BulletCollision/Gimpact/btGImpactShape.h>
-#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
 using namespace Engine;
 using namespace Engine::priv;
@@ -138,7 +132,6 @@ ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
 }
 
 void ComponentBody::onEvent(const Event& e) {
-
 }
 
 void ComponentBody::rebuildRigidBody(bool addBodyToPhysicsWorld, bool threadSafe) {
@@ -152,7 +145,7 @@ void ComponentBody::rebuildRigidBody(bool addBodyToPhysicsWorld, bool threadSafe
             p->bullet_rigidBody.reset(new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(p->mass, &p->bullet_motionState, shape, inertia)));
             p->bullet_rigidBody->setSleepingThresholds(0.015f, 0.015f);
             p->bullet_rigidBody->setFriction(0.3f);
-            ComponentBody::setDamping((decimal)(0.1), (decimal)(0.4));
+            setDamping((decimal)(0.1), (decimal)(0.4));
             p->bullet_rigidBody->setMassProps((btScalar)(p->mass), inertia);
             p->bullet_rigidBody->updateInertiaTensor();
             setInternalPhysicsUserPointer(this);
@@ -196,10 +189,9 @@ void ComponentBody::collisionResponse(CollisionCallbackEventData& data) const {
         m_CollisionFunctor(data);
     }
 }
-unsigned short ComponentBody::getCollisionFlags() const {
-    return (m_Physics) ? p->bullet_rigidBody->getCollisionFlags() : 0;
+MaskType ComponentBody::getCollisionFlags() const {
+    return (m_Physics) ? static_cast<MaskType>(p->bullet_rigidBody->getCollisionFlags()) : 0;
 }
-
 decimal ComponentBody::getDistance(Entity other) const {
     glm_vec3 other_position = other.getComponent<ComponentBody>()->getPosition();
     return glm::distance(getPosition(), other_position);
@@ -361,10 +353,9 @@ void ComponentBody::setScale(decimal x, decimal y, decimal z) {
             collisionShape->setLocalScaling(newScale);
         }
     }else{
-        auto& scl = n->scale;
-        scl.x = x;
-        scl.y = y;
-        scl.z = z;
+        n->scale.x = x;
+        n->scale.y = y;
+        n->scale.z = z;
     }
     auto models = m_Owner.getComponent<ComponentModel>();
     if (models) {
@@ -482,8 +473,7 @@ glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way to do t
         p->bullet_rigidBody->getMotionState()->getWorldTransform(tr);
         btScalar* val_ptr = (btScalar*)glm::value_ptr(modelMatrix_);
         tr.getOpenGLMatrix(val_ptr);
-        auto& collision_  = *p->collision;
-        if (collision_.getBtShape()) {
+        if (p->collision->getBtShape()) {
             auto scale   = getScale();
             modelMatrix_ = glm::scale(modelMatrix_, scale);
         }
@@ -495,97 +485,81 @@ glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way to do t
     return worldMatrix;
 }
 void ComponentBody::setDamping(decimal linearFactor, decimal angularFactor) {
-	p->bullet_rigidBody->setDamping(btScalar(linearFactor), btScalar(angularFactor));
+	p->bullet_rigidBody->setDamping((btScalar)linearFactor, (btScalar)angularFactor);
 }
-void ComponentBody::setCollisionGroup(short group) {
+void ComponentBody::setCollisionGroup(MaskType group) {
     if (m_Physics) {
-        if (p->group != group) {
-            removePhysicsFromWorld(true);
-            p->group = group;
-            addPhysicsToWorld(true);
-        }
+        removePhysicsFromWorld(true);
+        p->group = group;
+        addPhysicsToWorld(true);
     }
 }
-void ComponentBody::setCollisionMask(short mask) {
+void ComponentBody::setCollisionMask(MaskType mask) {
     if (m_Physics) {
-        if (p->mask != mask) {
-            removePhysicsFromWorld(true);
-            p->mask = mask;
-            addPhysicsToWorld(true);
-        }
+        removePhysicsFromWorld(true);
+        p->mask = mask;
+        addPhysicsToWorld(true);
     }
 }
-void ComponentBody::addCollisionGroup(short group) {
+void ComponentBody::addCollisionGroup(MaskType group) {
     if (m_Physics) {
-        auto added_flags = (p->group | group);
-        if (p->group != added_flags) {
-            removePhysicsFromWorld(true);
-            p->group = added_flags;
-            addPhysicsToWorld(true);
-        }
+        removePhysicsFromWorld(true);
+        p->group |= group;
+        addPhysicsToWorld(true);
     }
 }
-void ComponentBody::addCollisionMask(short mask) {
+void ComponentBody::addCollisionMask(MaskType mask) {
     if (m_Physics) {
-        auto added_flags = (p->mask | mask);
-        if (p->mask != added_flags) {
-            removePhysicsFromWorld(true);
-            p->mask = added_flags;
-            addPhysicsToWorld(true);
-        }
+        removePhysicsFromWorld(true);
+        p->mask |= mask;
+        addPhysicsToWorld(true);
     }
 }
-void ComponentBody::setCollisionFlag(short flag) {
+void ComponentBody::setCollisionFlag(MaskType flag) {
     if (m_Physics) {
-        auto& rigidBody = *p->bullet_rigidBody;
-        auto currFlags  = rigidBody.getCollisionFlags();
+        auto& BtRigidBody = *p->bullet_rigidBody;
+        auto currFlags    = BtRigidBody.getCollisionFlags();
         if (currFlags != flag) {
             removePhysicsFromWorld(true);
-            rigidBody.setCollisionFlags(flag);
+            BtRigidBody.setCollisionFlags(flag);
             addPhysicsToWorld(true);
         }
     }
 }
-void ComponentBody::addCollisionFlag(short flag) {
+void ComponentBody::addCollisionFlag(MaskType flag) {
     if (m_Physics) {
-        auto& rigidBody  = *p->bullet_rigidBody;
-        auto currFlags   = rigidBody.getCollisionFlags();
-        auto added_flags = (currFlags | flag);
+        auto& BtRigidBody = *p->bullet_rigidBody;
+        auto currFlags    = BtRigidBody.getCollisionFlags();
+        auto added_flags  = (currFlags | flag);
         if (currFlags != added_flags) {
             removePhysicsFromWorld(true);
-            rigidBody.setCollisionFlags(added_flags);
+            BtRigidBody.setCollisionFlags(added_flags);
             addPhysicsToWorld(true);
         }
     }
 }
-void ComponentBody::removeCollisionGroup(short group) {
+void ComponentBody::removeCollisionGroup(MaskType group) {
     if (m_Physics) {
-        auto removed_flags = (p->group & ~group);
-        if (p->group != removed_flags) {
-            removePhysicsFromWorld(true);
-            p->group = removed_flags;
-            addPhysicsToWorld(true);
-        }
+        removePhysicsFromWorld(true);
+        p->group &= ~group;
+        addPhysicsToWorld(true);
     }
 }
-void ComponentBody::removeCollisionMask(short mask) {
+void ComponentBody::removeCollisionMask(MaskType mask) {
     if (m_Physics) {
-        auto removed_flags = (p->mask & ~mask);
-        if (p->mask != removed_flags) {
-            removePhysicsFromWorld(true);
-            p->mask = removed_flags;
-            addPhysicsToWorld(true);
-        }
+        removePhysicsFromWorld(true);
+        p->mask &= ~mask;
+        addPhysicsToWorld(true);
     }
 }
-void ComponentBody::removeCollisionFlag(short flag) {
+void ComponentBody::removeCollisionFlag(MaskType flag) {
     if (m_Physics) {
-        auto& rigidBody    = *p->bullet_rigidBody;
-        auto currFlags     = rigidBody.getCollisionFlags();
+        auto& BtRigidBody  = *p->bullet_rigidBody;
+        auto currFlags     = BtRigidBody.getCollisionFlags();
         auto removed_flags = (currFlags & ~flag);
         if (currFlags != removed_flags) {
             removePhysicsFromWorld(true);
-            rigidBody.setCollisionFlags(removed_flags);
+            BtRigidBody.setCollisionFlags(removed_flags);
             addPhysicsToWorld(true);
         }
     }
@@ -594,18 +568,18 @@ void ComponentBody::removeCollisionFlag(short flag) {
 //TODO: reconsider how this works
 void ComponentBody::setDynamic(bool dynamic) {
     if (m_Physics) {
-        auto& rigidBody = *p->bullet_rigidBody;
+        auto& BtRigidBody = *p->bullet_rigidBody;
         if (dynamic) {
             //ComponentBody::removePhysicsFromWorld(false);
-            rigidBody.setCollisionFlags(btCollisionObject::CF_ANISOTROPIC_FRICTION_DISABLED);
+            BtRigidBody.setCollisionFlags(btCollisionObject::CF_ANISOTROPIC_FRICTION_DISABLED);
             //ComponentBody::addPhysicsToWorld(false);
-            rigidBody.activate();
+            BtRigidBody.activate();
         }else{
             //ComponentBody::removePhysicsFromWorld(false);
-            rigidBody.setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+            BtRigidBody.setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
             ComponentBody::clearAllForces();
             //ComponentBody::addPhysicsToWorld(false);
-            rigidBody.activate();
+            BtRigidBody.activate();
         }
     }
 }
@@ -617,88 +591,86 @@ btVector3 ComponentBody::internal_activate_and_get_vector(decimal x, decimal y, 
 }
 void ComponentBody::setLinearVelocity(decimal x, decimal y, decimal z, bool local) {
     if (m_Physics) {
-        auto& rigidBody = *p->bullet_rigidBody;
+        auto& BtRigidBody = *p->bullet_rigidBody;
         btVector3 v = internal_activate_and_get_vector(x, y, z, local);
-        rigidBody.setLinearVelocity(v);
+        BtRigidBody.setLinearVelocity(v);
     }else{
-        auto& normalData = *n;
         glm_vec3 offset(x, y, z);
         if (local) {
-            offset = normalData.rotation * offset;
+            offset = n->rotation * offset;
         }
-        normalData.linearVelocity = offset;
+        n->linearVelocity = offset;
     }
 }
 void ComponentBody::setAngularVelocity(decimal x, decimal y, decimal z, bool local) {
     if (m_Physics) {
-		auto& rigidBody = *p->bullet_rigidBody;
+		auto& BtRigidBody = *p->bullet_rigidBody;
         btVector3 v = internal_activate_and_get_vector(x, y, z, local);
-		rigidBody.setAngularVelocity(v);
+        BtRigidBody.setAngularVelocity(v);
     }
 }
 void ComponentBody::applyForce(decimal x, decimal y, decimal z, bool local) {
     if (m_Physics) {
-        auto& rigidBody = *p->bullet_rigidBody;
+        auto& BtRigidBody = *p->bullet_rigidBody;
         btVector3 v = internal_activate_and_get_vector(x, y, z, local);
-        rigidBody.applyCentralForce(v);
+        BtRigidBody.applyCentralForce(v);
     }
 }
 void ComponentBody::applyForce(const glm_vec3& force, const glm_vec3& origin, bool local) {
     if (m_Physics) {
-        auto& rigidBody = *p->bullet_rigidBody;
+        auto& BtRigidBody = *p->bullet_rigidBody;
         btVector3 v = internal_activate_and_get_vector(force.x, force.y, force.z, local);
-        rigidBody.applyForce(v, btVector3(static_cast<btScalar>(origin.x), static_cast<btScalar>(origin.y), static_cast<btScalar>(origin.z)));
+        BtRigidBody.applyForce(v, btVector3(static_cast<btScalar>(origin.x), static_cast<btScalar>(origin.y), static_cast<btScalar>(origin.z)));
     }
 }
 void ComponentBody::applyImpulse(decimal x, decimal y, decimal z, bool local) {
     if (m_Physics) {
-        auto& rigidBody = *p->bullet_rigidBody;
+        auto& BtRigidBody = *p->bullet_rigidBody;
         btVector3 v = internal_activate_and_get_vector(x, y, z, local);
-        rigidBody.applyCentralImpulse(v);
+        BtRigidBody.applyCentralImpulse(v);
     }
 }
 void ComponentBody::applyImpulse(const glm_vec3& impulse, const glm_vec3& origin, bool local) {
     if (m_Physics) {
-        auto& rigidBody = *p->bullet_rigidBody;
+        auto& BtRigidBody = *p->bullet_rigidBody;
         btVector3 v = internal_activate_and_get_vector(impulse.x, impulse.y, impulse.z, local);
-        rigidBody.applyImpulse(v, btVector3(static_cast<btScalar>(origin.x), static_cast<btScalar>(origin.y), static_cast<btScalar>(origin.z)));
+        BtRigidBody.applyImpulse(v, btVector3(static_cast<btScalar>(origin.x), static_cast<btScalar>(origin.y), static_cast<btScalar>(origin.z)));
     }
 }
 void ComponentBody::applyTorque(decimal x, decimal y, decimal z, bool local) {
     if (m_Physics) {
-        auto& rigidBody = *p->bullet_rigidBody;
+        auto& BtRigidBody = *p->bullet_rigidBody;
         btVector3 v = internal_activate_and_get_vector(x, y, z, false); //yes, keep this false
         if (local) {
-            v = rigidBody.getInvInertiaTensorWorld().inverse() * (rigidBody.getWorldTransform().getBasis() * v);
+            v = BtRigidBody.getInvInertiaTensorWorld().inverse() * (BtRigidBody.getWorldTransform().getBasis() * v);
         }
-        rigidBody.applyTorque(v);
+        BtRigidBody.applyTorque(v);
     }
 }
 void ComponentBody::applyTorqueImpulse(decimal x, decimal y, decimal z, bool local) {
     if (m_Physics) {
-        auto& rigidBody = *p->bullet_rigidBody;
+        auto& BtRigidBody = *p->bullet_rigidBody;
         btVector3 v = internal_activate_and_get_vector(x, y, z, false); //yes, keep this false
         if (local) {
-            v = rigidBody.getInvInertiaTensorWorld().inverse() * (rigidBody.getWorldTransform().getBasis() * v);
+            v = BtRigidBody.getInvInertiaTensorWorld().inverse() * (BtRigidBody.getWorldTransform().getBasis() * v);
         }
-        rigidBody.applyTorqueImpulse(v);
+        BtRigidBody.applyTorqueImpulse(v);
     }
 }
-
 void ComponentBody::clearLinearForces() {
     if (m_Physics) {
-        auto& rigidBody = *p->bullet_rigidBody;
-        rigidBody.setActivationState(0);
-        rigidBody.activate();
-        rigidBody.setLinearVelocity(btVector3(0, 0, 0));
+        auto& BtRigidBody = *p->bullet_rigidBody;
+        BtRigidBody.setActivationState(0);
+        BtRigidBody.activate();
+        BtRigidBody.setLinearVelocity(btVector3(0, 0, 0));
     }
 }
 void ComponentBody::clearAngularForces() {
     if (m_Physics) {
-        auto& rigidBody = *p->bullet_rigidBody;
-        rigidBody.setActivationState(0);
-        rigidBody.activate();
-        rigidBody.setAngularVelocity(btVector3(0, 0, 0));
+        auto& BtRigidBody = *p->bullet_rigidBody;
+        BtRigidBody.setActivationState(0);
+        BtRigidBody.activate();
+        BtRigidBody.setAngularVelocity(btVector3(0, 0, 0));
     }
 }
 void ComponentBody::clearAllForces() {
@@ -782,7 +754,6 @@ void ComponentBody::recalculateAllParentChildMatrices(Scene& scene) {
     internal_recalculateAllParentChildMatrices(system);
 }
 
-
 #pragma endregion
 
 #pragma region SystemCI
@@ -799,8 +770,8 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
         auto& localMatrix       = system.ParentChildSystem.LocalTransforms[entityIndex];
         auto& worldMatrix       = system.ParentChildSystem.WorldTransforms[entityIndex];
         if (b.m_Physics) {
-            auto& rigidBody     = *b.p->bullet_rigidBody;
-            Engine::Math::recalculateForwardRightUp(rigidBody, b.m_Forward, b.m_Right, b.m_Up);
+            auto& BtRigidBody   = *b.p->bullet_rigidBody;
+            Engine::Math::recalculateForwardRightUp(BtRigidBody, b.m_Forward, b.m_Right, b.m_Up);
 
             localMatrix         = b.modelMatrix();
             worldMatrix         = localMatrix;
@@ -821,7 +792,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
     }
     
     ComponentBody::internal_recalculateAllParentChildMatrices(system);
-
+    /*
 #if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
     for (auto& componentBody : components) {
         Entity entity      = componentBody.getOwner();
@@ -840,9 +811,9 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
                 auto up       = glm::normalize(Math::getUp(rotation)) * 0.3f;
 
                 auto& physics = Engine::priv::Core::m_Engine->m_PhysicsManager;
-                physics.debug_draw_line(world_pos, (world_pos+fwd) /* * glm::length(world_scl) */, 1, 0, 0, 1);
-                physics.debug_draw_line(world_pos, (world_pos+right) /* * glm::length(world_scl) */, 0, 1, 0, 1);
-                physics.debug_draw_line(world_pos, (world_pos+up) /* * glm::length(world_scl) */, 0, 0, 1, 1);
+                physics.debug_draw_line(world_pos, (world_pos+fwd) , 1, 0, 0, 1);
+                physics.debug_draw_line(world_pos, (world_pos+right) , 0, 1, 0, 1);
+                physics.debug_draw_line(world_pos, (world_pos+up) , 0, 0, 1, 1);
             }
         }
         const auto screenPos = Math::getScreenCoordinates(bodyRenderPos, *scene.getActiveCamera(), false);
@@ -852,7 +823,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
         }
     }
 #endif
-
+    */
 }};
 struct Engine::priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* systemPtr, void* component, Entity entity) const {
     auto& system  = *(Engine::priv::ComponentBody_System*)systemPtr;

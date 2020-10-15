@@ -19,8 +19,9 @@ namespace Engine::priv {
 
 namespace Engine{
     struct RayCastResult final {
-        glm::vec3 hitPosition = glm::vec3(0.0f);
-        glm::vec3 hitNormal   = glm::vec3(0.0f);
+        glm::vec3          hitPosition     = glm::vec3(0.0f);
+        glm::vec3          hitNormal       = glm::vec3(0.0f);
+        btCollisionObject* collisionObject = nullptr;
     };
     namespace priv{
         class PhysicsManager final {
@@ -42,25 +43,26 @@ namespace Engine{
 
                 void _init();
 
+                void preUpdate(const float dt) noexcept;
                 void _update(const float dt, int maxSubSteps = 1, float fixedTimeStep = 0.0166666f);
                 void _render(const Camera& camera);
 
-                bool add_rigid_body(btRigidBody* rigidBody, short group, short mask, bool doGroupAndMask) noexcept;
+                bool add_rigid_body(btRigidBody* rigidBody, MaskType group, MaskType mask, bool doGroupAndMask) noexcept;
         };
     };
     namespace Physics{
-        std::vector<RayCastResult> rayCast(btVector3& start, btVector3& end, ComponentBody* ignoredObject = nullptr, unsigned short group = -1, unsigned short mask = -1);
-        std::vector<RayCastResult> rayCast(btVector3& start, btVector3& end, std::vector<ComponentBody*>& ignoredObjects, unsigned short group = -1, unsigned short mask = -1);
+        std::vector<RayCastResult> rayCast(btVector3& start, btVector3& end, ComponentBody* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
+        std::vector<RayCastResult> rayCast(btVector3& start, btVector3& end, std::vector<ComponentBody*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
-        std::vector<RayCastResult> rayCast(glm::vec3& start, glm::vec3& end, Entity* ignoredObject = nullptr, unsigned short group = -1, unsigned short mask = -1);
-        std::vector<RayCastResult> rayCast(glm::vec3& start, glm::vec3& end, std::vector<Entity>& ignoredObjects, unsigned short group = -1, unsigned short mask = -1);
+        std::vector<RayCastResult> rayCast(glm::vec3& start, glm::vec3& end, Entity* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
+        std::vector<RayCastResult> rayCast(glm::vec3& start, glm::vec3& end, std::vector<Entity>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
 
-        RayCastResult rayCastNearest(btVector3& start, btVector3& end, ComponentBody* ignoredObject = nullptr, unsigned short group = -1, unsigned short mask = -1);
-        RayCastResult rayCastNearest(btVector3& start, btVector3& end, std::vector<ComponentBody*>& ignoredObjects, unsigned short group = -1, unsigned short mask = -1);
+        RayCastResult rayCastNearest(btVector3& start, btVector3& end, ComponentBody* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
+        RayCastResult rayCastNearest(btVector3& start, btVector3& end, std::vector<ComponentBody*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
-        RayCastResult rayCastNearest(glm::vec3& start, glm::vec3& end, Entity* ignoredObject = nullptr, unsigned short group = -1, unsigned short mask = -1);
-        RayCastResult rayCastNearest(glm::vec3& start, glm::vec3& end, std::vector<Entity>& ignoredObjects, unsigned short group = -1, unsigned short mask = -1);
+        RayCastResult rayCastNearest(glm::vec3& start, glm::vec3& end, Entity* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
+        RayCastResult rayCastNearest(glm::vec3& start, glm::vec3& end, std::vector<Entity>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
         void setNumberOfStepsPerFrame(unsigned int numSteps);
         unsigned int getNumberOfStepsPerFrame();
@@ -72,7 +74,7 @@ namespace Engine{
 
         bool addRigidBody(Entity entity);
         bool addRigidBody(ComponentBody&);
-        bool addRigidBody(btRigidBody*, short group, short mask);
+        bool addRigidBody(btRigidBody*, MaskType group, MaskType mask);
         bool addRigidBody(btRigidBody*);
         bool removeRigidBody(Entity entity);
         bool removeRigidBody(btRigidBody*);
@@ -83,7 +85,7 @@ namespace Engine{
 
         bool addRigidBodyThreadSafe(Entity entity);
         bool addRigidBodyThreadSafe(ComponentBody&);
-        bool addRigidBodyThreadSafe(btRigidBody*, short group, short mask);
+        bool addRigidBodyThreadSafe(btRigidBody*, MaskType group, MaskType mask);
         bool addRigidBodyThreadSafe(btRigidBody*);
         bool removeRigidBodyThreadSafe(Entity entity);
         bool removeRigidBodyThreadSafe(btRigidBody*);

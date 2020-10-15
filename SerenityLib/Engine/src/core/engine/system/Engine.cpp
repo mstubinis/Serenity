@@ -185,6 +185,7 @@ void EngineCore::internal_update(Window& window, const float dt){
     Scene& scene = *Resources::getCurrentScene();
     Game::onPreUpdate(dt);
     scene.preUpdate(dt);
+    m_PhysicsManager.preUpdate(dt);
     internal_update_logic(scene, window, dt);
     internal_update_sounds(scene, window, dt);
 }
@@ -472,8 +473,6 @@ void EngineCore::handle_events(Window& window){
                 internal_on_event_joystick_disconnected(window, e.joystickConnect.joystickId); break;
             }case sf::Event::JoystickMoved: {
                 internal_on_event_joystick_moved(window, e.joystickMove.joystickId, e.joystickMove.position, e.joystickMove.axis); break;
-            }default: {
-                break;
             }
         }
     }

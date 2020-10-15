@@ -28,6 +28,7 @@ class  ShaderProgram;
 #include <core/engine/shaders/ShaderIncludes.h>
 #include <core/engine/resources/ResourceModule.h>
 #include <core/engine/mesh/MeshIncludes.h>
+#include <core/engine/mesh/MeshRequest.h>
 
 namespace Engine::priv {
     class ResourceManager final{
@@ -97,7 +98,7 @@ namespace Engine::Resources {
         const std::string& fileOrData,
         float threshhold = MESH_DEFAULT_THRESHOLD,
         MeshCollisionLoadingFlag::Flag = MESH_COLLISION_FACTORY_DEFAULT_LOAD_FLAG,
-        std::function<void()> callback = []() {}
+        MeshRequestCallback callback = [](const std::vector<Handle>&) {}
     );
 
     template<typename TResource>

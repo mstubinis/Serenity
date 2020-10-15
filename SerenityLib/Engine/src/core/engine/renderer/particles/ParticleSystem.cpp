@@ -68,7 +68,7 @@ void Engine::priv::ParticleSystem::internal_update_particles(const float dt, Cam
             if (particle.m_Timer >= prop.m_Lifetime) {
                 particle.m_Timer  = 0.0f;
                 {
-                    std::lock_guard lock(m_Mutex);
+                    std::unique_lock lock(m_SharedMutex);
                     m_ParticleFreelist.emplace(j);
                 }
             }

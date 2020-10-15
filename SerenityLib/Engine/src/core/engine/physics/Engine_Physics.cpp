@@ -131,10 +131,9 @@ void Engine::priv::PhysicsManager::debug_draw_line(const glm::vec3& start, const
 }
 void Engine::priv::PhysicsManager::_init(){
     m_Pipeline.m_DebugDrawer.init();
-
     gContactAddedCallback = CustomMaterialContactAddedCallback;
 }
-bool Engine::priv::PhysicsManager::add_rigid_body(btRigidBody* rigidBody, short group, short mask, bool doGroupAndMask) noexcept {
+bool Engine::priv::PhysicsManager::add_rigid_body(btRigidBody* rigidBody, MaskType group, MaskType mask, bool doGroupAndMask) noexcept {
     auto& physicsWorld = *m_Pipeline.m_World;
     for (int i = 0; i < physicsWorld.getNumCollisionObjects(); ++i) {
         btRigidBody* btRigidBodyUpCast = btRigidBody::upcast(physicsWorld.getCollisionObjectArray()[i]);
@@ -142,8 +141,15 @@ bool Engine::priv::PhysicsManager::add_rigid_body(btRigidBody* rigidBody, short 
             return false;
         }
     }
-    (doGroupAndMask) ? physicsWorld.addRigidBody(rigidBody, group, mask) : physicsWorld.addRigidBody(rigidBody);
+    if (doGroupAndMask)
+        physicsWorld.addRigidBody(rigidBody, group, mask);
+    else
+        physicsWorld.addRigidBody(rigidBody);
     return true;
+}
+void Engine::priv::PhysicsManager::preUpdate(const float dt) noexcept {
+    //this is needed for raycasting
+    Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Pipeline.m_World->performDiscreteCollisionDetection();
 }
 void Engine::priv::PhysicsManager::_update(const float dt, int maxSubSteps, float fixedTimeStep){
     if (m_Paused) {
@@ -196,7 +202,7 @@ void Engine::Physics::setGravity(float x, float y, float z){
 void Engine::Physics::setGravity(const glm::vec3& gravity){
     Physics::setGravity(gravity.x,gravity.y,gravity.z); 
 }
-bool Engine::Physics::addRigidBody(btRigidBody* rigidBody, short group, short mask){
+bool Engine::Physics::addRigidBody(btRigidBody* rigidBody, MaskType group, MaskType mask){
     return Engine::priv::PhysicsManager::PHYSICS_MANAGER->add_rigid_body(rigidBody, group, mask, true);
 }
 bool Engine::Physics::addRigidBody(btRigidBody* rigidBody){
@@ -249,7 +255,7 @@ bool Engine::Physics::addRigidBodyThreadSafe(Entity entity) {
     std::lock_guard lock(Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Mutex);
     return Physics::addRigidBody(entity);
 }
-bool Engine::Physics::addRigidBodyThreadSafe(btRigidBody* body, short group, short mask) {
+bool Engine::Physics::addRigidBodyThreadSafe(btRigidBody* body, MaskType group, MaskType mask) {
     std::lock_guard lock(Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Mutex);
     return Physics::addRigidBody(body, group, mask);
 }
@@ -281,16 +287,14 @@ bool Engine::Physics::removeCollisionObjectThreadSafe(btCollisionObject* object)
 }
 
 
-Engine::RayCastResult internal_ray_cast_nearest(btVector3& start, btVector3& end, unsigned short group, unsigned short mask) {
+Engine::RayCastResult internal_ray_cast_nearest(btVector3& start, btVector3& end, MaskType group, MaskType mask) {
     btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
-    RayCallback.m_collisionFilterMask  = mask;
     RayCallback.m_collisionFilterGroup = group;
-
+    RayCallback.m_collisionFilterMask  = mask;
     Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Pipeline.m_World->rayTest(start, end, RayCallback);
 #if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
     Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Pipeline.m_World->getDebugDrawer()->drawLine(start, end, btVector4(1.0f, 0.5f, 0.0f, 1.0f));
 #endif
-
     Engine::RayCastResult result;
     if (RayCallback.hasHit()) {
         auto& pts           = RayCallback.m_hitPointWorld;
@@ -304,10 +308,10 @@ Engine::RayCastResult internal_ray_cast_nearest(btVector3& start, btVector3& end
     }
     return result;
 }
-std::vector<Engine::RayCastResult> internal_ray_cast(btVector3& start, btVector3& end, unsigned short group, unsigned short mask) {
+std::vector<Engine::RayCastResult> internal_ray_cast(btVector3& start, btVector3& end, MaskType group, MaskType mask) {
     btCollisionWorld::AllHitsRayResultCallback RayCallback(start, end);
-    RayCallback.m_collisionFilterMask  = mask;
-    RayCallback.m_collisionFilterGroup = group;
+    RayCallback.m_collisionFilterGroup = (int)group;
+    RayCallback.m_collisionFilterMask  = (int)mask;
 
     Engine::priv::PhysicsManager::PHYSICS_MANAGER->m_Pipeline.m_World->rayTest(start, end, RayCallback);
 #if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
@@ -322,7 +326,6 @@ std::vector<Engine::RayCastResult> internal_ray_cast(btVector3& start, btVector3
         for (int i = 0; i < pts.size(); ++i) { 
             const glm::vec3 hitPoint  = Engine::Math::btVectorToGLM(RayCallback.m_hitPointWorld[i]);
             const glm::vec3 hitNormal = Engine::Math::btVectorToGLM(RayCallback.m_hitNormalWorld[i]);
-
             auto& res       = result.emplace_back();
             res.hitPosition = hitPoint;
             res.hitNormal   = hitNormal;
@@ -330,7 +333,7 @@ std::vector<Engine::RayCastResult> internal_ray_cast(btVector3& start, btVector3
     }
     return result;
 }
-std::vector<Engine::RayCastResult> Engine::Physics::rayCast(btVector3& start, btVector3& end, ComponentBody* ignoredComponentBody, unsigned short group, unsigned short mask){
+std::vector<Engine::RayCastResult> Engine::Physics::rayCast(btVector3& start, btVector3& end, ComponentBody* ignoredComponentBody, MaskType group, MaskType mask){
     if (ignoredComponentBody) {
         Engine::Physics::removeRigidBody(*ignoredComponentBody);
     }
@@ -340,7 +343,7 @@ std::vector<Engine::RayCastResult> Engine::Physics::rayCast(btVector3& start, bt
     }
     return result;
 }
-std::vector<Engine::RayCastResult> Engine::Physics::rayCast(btVector3& start, btVector3& end, std::vector<ComponentBody*>& ignoredComponentBodies, unsigned short group, unsigned short mask){
+std::vector<Engine::RayCastResult> Engine::Physics::rayCast(btVector3& start, btVector3& end, std::vector<ComponentBody*>& ignoredComponentBodies, MaskType group, MaskType mask){
     for (auto& body : ignoredComponentBodies) {
         Engine::Physics::removeRigidBody(*body);
     }
@@ -350,7 +353,7 @@ std::vector<Engine::RayCastResult> Engine::Physics::rayCast(btVector3& start, bt
     }
     return result;
  }
-std::vector<Engine::RayCastResult> Engine::Physics::rayCast(glm::vec3& start, glm::vec3& end, Entity* ignoredEntity, unsigned short group, unsigned short mask){
+std::vector<Engine::RayCastResult> Engine::Physics::rayCast(glm::vec3& start, glm::vec3& end, Entity* ignoredEntity, MaskType group, MaskType mask){
     btVector3 start_ = Engine::Math::btVectorFromGLM(start);
     btVector3 end_   = Engine::Math::btVectorFromGLM(end);
     if (ignoredEntity) {
@@ -361,10 +364,11 @@ std::vector<Engine::RayCastResult> Engine::Physics::rayCast(glm::vec3& start, gl
     }
     return Engine::Physics::rayCast(start_, end_, nullptr, group, mask);
  }
-std::vector<Engine::RayCastResult> Engine::Physics::rayCast(glm::vec3& start, glm::vec3& end , std::vector<Entity>& ignoredEntities, unsigned short group, unsigned short mask){
+std::vector<Engine::RayCastResult> Engine::Physics::rayCast(glm::vec3& start, glm::vec3& end , std::vector<Entity>& ignoredEntities, MaskType group, MaskType mask){
     btVector3 start_ = Engine::Math::btVectorFromGLM(start);
     btVector3 end_   = Engine::Math::btVectorFromGLM(end);
     std::vector<ComponentBody*> objs;
+    objs.reserve(ignoredEntities.size());
     for(auto ignoredEntity : ignoredEntities){
         auto body = ignoredEntity.getComponent<ComponentBody>();
         if(body && body->hasPhysics()) {
@@ -374,7 +378,7 @@ std::vector<Engine::RayCastResult> Engine::Physics::rayCast(glm::vec3& start, gl
     return Engine::Physics::rayCast(start_, end_, objs, group, mask);
 }
 
-Engine::RayCastResult Engine::Physics::rayCastNearest(btVector3& start, btVector3& end, ComponentBody* ignoredBodyComponent, unsigned short group, unsigned short mask) {
+Engine::RayCastResult Engine::Physics::rayCastNearest(btVector3& start, btVector3& end, ComponentBody* ignoredBodyComponent, MaskType group, MaskType mask) {
     if (ignoredBodyComponent) {
         Engine::Physics::removeRigidBody(*ignoredBodyComponent);
     }
@@ -384,7 +388,7 @@ Engine::RayCastResult Engine::Physics::rayCastNearest(btVector3& start, btVector
     }
     return result;
 }
-Engine::RayCastResult Engine::Physics::rayCastNearest(btVector3& start, btVector3& end, std::vector<ComponentBody*>& ignoredComponentBodies, unsigned short group, unsigned short mask) {
+Engine::RayCastResult Engine::Physics::rayCastNearest(btVector3& start, btVector3& end, std::vector<ComponentBody*>& ignoredComponentBodies, MaskType group, MaskType mask) {
     for (auto& object : ignoredComponentBodies) {
         Physics::removeRigidBody(*object);
     }
@@ -394,7 +398,7 @@ Engine::RayCastResult Engine::Physics::rayCastNearest(btVector3& start, btVector
     }
     return result;
 }
-Engine::RayCastResult Engine::Physics::rayCastNearest(glm::vec3& start, glm::vec3& end, Entity* ignoredEntity, unsigned short group, unsigned short mask) {
+Engine::RayCastResult Engine::Physics::rayCastNearest(glm::vec3& start, glm::vec3& end, Entity* ignoredEntity, MaskType group, MaskType mask) {
     btVector3 start_ = Engine::Math::btVectorFromGLM(start);
     btVector3 end_   = Engine::Math::btVectorFromGLM(end);
     if (ignoredEntity) {
@@ -405,10 +409,11 @@ Engine::RayCastResult Engine::Physics::rayCastNearest(glm::vec3& start, glm::vec
     }
     return Engine::Physics::rayCastNearest(start_, end_, nullptr, group, mask);
 }
-Engine::RayCastResult Engine::Physics::rayCastNearest(glm::vec3& start, glm::vec3& end, std::vector<Entity>& ignoredEntities, unsigned short group, unsigned short mask) {
+Engine::RayCastResult Engine::Physics::rayCastNearest(glm::vec3& start, glm::vec3& end, std::vector<Entity>& ignoredEntities, MaskType group, MaskType mask) {
     btVector3 start_ = Engine::Math::btVectorFromGLM(start);
     btVector3 end_   = Engine::Math::btVectorFromGLM(end);
     std::vector<ComponentBody*> objs;
+    objs.reserve(ignoredEntities.size());
     for (auto ignoredEntity : ignoredEntities) {
         auto body = ignoredEntity.getComponent<ComponentBody>();
         if (body && body->hasPhysics()) {

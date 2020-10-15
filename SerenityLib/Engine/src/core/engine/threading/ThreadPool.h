@@ -69,7 +69,7 @@ namespace Engine::priv {
             WorkerThreadContainer                               m_WorkerThreads;
             std::vector<std::vector<ThreadPoolFuture>>          m_FuturesBasic;
             std::vector<std::vector<ThreadPoolFutureCallback>>  m_FuturesCallback;
-            std::mutex                                          m_Mutex;
+            mutable std::shared_mutex                           m_SharedMutex;
             std::vector<TaskQueueType>                          m_TaskQueues;
             std::condition_variable_any                         m_ConditionVariableAny;
             bool                                                m_Stopped               = true;
@@ -114,7 +114,7 @@ namespace Engine::priv {
             template<class JOB> inline void add_job(JOB&& job, size_t section) {
                 if (size() > 0) {
                     {
-                        std::lock_guard lock{ m_Mutex };
+                        std::unique_lock lock{ m_SharedMutex };
                         auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
                         m_FuturesBasic[section].emplace_back(task->get_future());
                     }
@@ -128,7 +128,7 @@ namespace Engine::priv {
             template<class JOB, class THEN> inline void add_job(JOB&& job, THEN&& callback, size_t section) {
                 if (size() > 0) {
                     {
-                        std::lock_guard lock{ m_Mutex };
+                        std::unique_lock lock{ m_SharedMutex };
                         auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
                         m_FuturesCallback[section].emplace_back(task->get_future(), std::forward<THEN>(callback));
                     }

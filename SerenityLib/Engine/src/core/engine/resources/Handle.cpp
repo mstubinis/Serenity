@@ -2,7 +2,7 @@
 #include <core/engine/resources/Handle.h>
 #include <core/engine/system/Engine.h>
 
-Engine::view_ptr<std::mutex> Handle::getMutex() noexcept {
+Engine::view_ptr<std::shared_mutex> Handle::getMutex() noexcept {
     return (null()) ? nullptr : Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.getMutex(*this);
 }
 
@@ -14,11 +14,12 @@ void* Handle::internal_get_base() const noexcept {
 void* Handle::internal_get_base_thread_safe() noexcept {
     void* outPtr = nullptr;
     {
-        auto mutex = getMutex();
-        if (mutex) {
-            std::lock_guard lock(*mutex);
+        auto sharedMutex = getMutex();
+        ASSERT(sharedMutex, __FUNCTION__ << "(): sharedMutex was nullptr!");
+        //if (sharedMutex) {
+            std::shared_lock lock(*sharedMutex);
             Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.get(outPtr, *this);
-        }
+        //}
     }
     return (null()) ? nullptr : outPtr;
 }

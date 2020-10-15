@@ -71,10 +71,10 @@ void ParticleEmitter::update(size_t index, const float dt, Engine::priv::Particl
     if (m_Active) {
         m_Timer           += dt;
         m_SpawningTimer   += dt;
-        m_UpdateFunctor(this, dt, particleSystem.m_Mutex);
+        m_UpdateFunctor(this, dt, particleSystem.m_SharedMutex);
         if (m_Properties && m_SpawningTimer > m_Properties->m_SpawnRate) {
             if (multi_threaded) {
-                std::lock_guard lock(particleSystem.m_Mutex);
+                std::unique_lock lock(particleSystem.m_SharedMutex);
                 for (unsigned int i = 0; i < m_Properties->m_ParticlesPerSpawn; ++i) {
                     particleSystem.add_particle(*this);
                 }
@@ -89,7 +89,7 @@ void ParticleEmitter::update(size_t index, const float dt, Engine::priv::Particl
             m_Active = false;
             m_Timer  = 0.0;
             if (multi_threaded) {
-                std::lock_guard lock(particleSystem.m_Mutex);
+                std::unique_lock lock(particleSystem.m_SharedMutex);
                 particleSystem.m_ParticleEmitterFreelist.emplace(index);
             }else{
                 particleSystem.m_ParticleEmitterFreelist.emplace(index);

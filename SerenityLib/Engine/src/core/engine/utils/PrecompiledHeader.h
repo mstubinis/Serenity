@@ -27,6 +27,7 @@
 #include <future>
 #include <execution>
 #include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <cstring>
 #include <stdint.h>
@@ -54,6 +55,8 @@
 using namespace std::literals;
 using namespace std::chrono_literals;
 using namespace std::literals::chrono_literals;
+
+using MaskType = uint32_t;
 
 //windows api
 #ifdef _WIN32

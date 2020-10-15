@@ -35,11 +35,12 @@ struct MeshRequestPart final {
     MeshRequestPart& operator=(MeshRequestPart&& other) noexcept = default;
 };
 
+using MeshRequestCallback = std::function<void(const std::vector<Handle>&)>;
 struct MeshRequest final {
     MeshCollisionLoadingFlag::Flag     m_CollisionLoadingFlags = MESH_COLLISION_FACTORY_DEFAULT_LOAD_FLAG;
     Engine::priv::AssimpSceneImport    m_Importer;
     MeshNodeMap                        m_MeshNodeMap;
-    std::function<void()>              m_Callback;
+    MeshRequestCallback                m_Callback;
     std::vector<MeshRequestPart>       m_Parts;
     std::string                        m_FileOrData            = "";
     std::string                        m_FileExtension         = "";
@@ -48,7 +49,7 @@ struct MeshRequest final {
     bool                               m_Async                 = false;
 
     MeshRequest() = delete;
-    MeshRequest(std::string filenameOrData, float threshold, MeshCollisionLoadingFlag::Flag, std::function<void()>&& callback);
+    MeshRequest(std::string filenameOrData, float threshold, MeshCollisionLoadingFlag::Flag, MeshRequestCallback&& callback);
 
     MeshRequest(const MeshRequest& other)                 = default;
     MeshRequest& operator=(const MeshRequest& other)      = default;
