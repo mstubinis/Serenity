@@ -30,13 +30,6 @@ PointLight::PointLight(Scene* scene, const glm_vec3& pos)
 {}
 PointLight::~PointLight() {
 }
-void PointLight::destroy() noexcept {
-    Entity::destroy();
-    Scene* scene_ptr = scene();
-    if (scene_ptr) {
-        removeFromVector(Engine::priv::InternalScenePublicInterface::GetPointLights(*scene_ptr), this);
-    }
-}
 float PointLight::calculateCullingRadius() {
     float lightMax = Engine::Math::Max(m_Color.x, m_Color.y, m_Color.z);
     float radius = 0;

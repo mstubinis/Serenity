@@ -14,13 +14,6 @@ SunLight::SunLight(Scene* scene, const glm_vec3& pos, LightType type)
 }
 SunLight::~SunLight() {
 }
-void SunLight::destroy() noexcept {
-    EntityBody::destroy();
-    Scene* scene_ptr = scene();
-    if (scene_ptr) {
-        removeFromVector(Engine::priv::InternalScenePublicInterface::GetSunLights(*scene_ptr), this);
-    }
-}
 glm_vec3 SunLight::position() const { return getComponent<ComponentBody>()->getPosition(); }
 void SunLight::setPosition(decimal x, decimal y, decimal z) { getComponent<ComponentBody>()->setPosition(x, y, z); }
 void SunLight::setPosition(decimal position) { getComponent<ComponentBody>()->setPosition(position, position, position); }

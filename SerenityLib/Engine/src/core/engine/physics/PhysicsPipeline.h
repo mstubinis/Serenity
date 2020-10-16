@@ -69,6 +69,8 @@ namespace Engine::priv {
             PhysicsPipeline();
             ~PhysicsPipeline();
 
+            void cleanup();
+
             void update(const float dt);
 
             void setPreTickCallback(btInternalTickCallback preTicCallback);

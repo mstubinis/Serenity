@@ -264,6 +264,30 @@ Scene::~Scene() {
     SAFE_DELETE_VECTOR(m_Cameras);
     unregisterEvent(EventType::SceneChanged);
 }
+
+template<class LIGHT, class CONTAINER> constexpr void internal_delete_light(LIGHT* light, CONTAINER& container) {
+    light->destroy();
+    removeFromVector(container, light);
+    SAFE_DELETE(light);
+}
+void Scene::deleteSunLight(SunLight* light) {
+    internal_delete_light(light, m_SunLights);
+}
+void Scene::deleteDirectionalLight(DirectionalLight* light) {
+    internal_delete_light(light, m_DirectionalLights);
+}
+void Scene::deletePointLight(PointLight* light) {
+    internal_delete_light(light, m_PointLights);
+}
+void Scene::deleteSpotLight(SpotLight* light) {
+    internal_delete_light(light, m_SpotLights);
+}
+void Scene::deleteRodLight(RodLight* light) {
+    internal_delete_light(light, m_RodLights);
+}
+void Scene::deleteProjectionLight(ProjectionLight* light) {
+    internal_delete_light(light, m_ProjectionLights);
+}
 size_t Scene::getNumLights() const noexcept {
     size_t count = 0;
     count += m_SunLights.size();

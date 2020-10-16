@@ -79,24 +79,31 @@ class Scene: public Observer {
         inline CONSTEXPR const std::string& name() const noexcept { return m_Name; }
 
 
-        template<typename ... ARGS> Engine::view_ptr<SunLight> createSunLight(ARGS&& ... args) {
+        template<typename ... ARGS> inline Engine::view_ptr<SunLight> createSunLight(ARGS&& ... args) {
             return m_SunLights.emplace_back(NEW SunLight(this, std::forward<ARGS>(args)...));
         }
-        template<typename ... ARGS> Engine::view_ptr<DirectionalLight> createDirectionalLight(ARGS&& ... args) {
+        template<typename ... ARGS> inline Engine::view_ptr<DirectionalLight> createDirectionalLight(ARGS&& ... args) {
             return m_DirectionalLights.emplace_back(NEW DirectionalLight(this, std::forward<ARGS>(args)...));
         }
-        template<typename ... ARGS> Engine::view_ptr<PointLight> createPointLight(ARGS&& ... args) {
+        template<typename ... ARGS> inline Engine::view_ptr<PointLight> createPointLight(ARGS&& ... args) {
             return m_PointLights.emplace_back(NEW PointLight(this, std::forward<ARGS>(args)...));
         }
-        template<typename ... ARGS> Engine::view_ptr<SpotLight> createSpotLight(ARGS&& ... args) {
+        template<typename ... ARGS> inline Engine::view_ptr<SpotLight> createSpotLight(ARGS&& ... args) {
             return m_SpotLights.emplace_back(NEW SpotLight(this, std::forward<ARGS>(args)...));
         }
-        template<typename ... ARGS> Engine::view_ptr<RodLight> createRodLight(ARGS&& ... args) {
+        template<typename ... ARGS> inline Engine::view_ptr<RodLight> createRodLight(ARGS&& ... args) {
             return m_RodLights.emplace_back(NEW RodLight(this, std::forward<ARGS>(args)...));
         }
-        template<typename ... ARGS> Engine::view_ptr<ProjectionLight> createProjectionLight(ARGS&& ... args) {
+        template<typename ... ARGS> inline Engine::view_ptr<ProjectionLight> createProjectionLight(ARGS&& ... args) {
             return m_ProjectionLights.emplace_back(NEW ProjectionLight(this, std::forward<ARGS>(args)...));
         }
+
+        void deleteSunLight(SunLight* light);
+        void deleteDirectionalLight(DirectionalLight* light);
+        void deletePointLight(PointLight* light);
+        void deleteSpotLight(SpotLight* light);
+        void deleteRodLight(RodLight* light);
+        void deleteProjectionLight(ProjectionLight* light);
 
 
         void clearAllEntities() noexcept;

@@ -14,13 +14,6 @@ ProjectionLight::ProjectionLight(Scene* scene, Handle textureHandle, const glm::
 }
 ProjectionLight::~ProjectionLight() {
 }
-void ProjectionLight::destroy() noexcept {
-    Entity::destroy();
-    Scene* scene_ptr = scene();
-    if (scene_ptr) {
-        removeFromVector(Engine::priv::InternalScenePublicInterface::GetProjectionLights(*scene_ptr), this);
-    }
-}
 void ProjectionLight::recalc_frustum_points() noexcept {
     //0-3 : near plane
     //4-7 : far plane

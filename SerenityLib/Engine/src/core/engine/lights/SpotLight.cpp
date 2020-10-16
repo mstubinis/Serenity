@@ -14,14 +14,6 @@ SpotLight::SpotLight(Scene* scene, const glm_vec3& pos, const glm_vec3& directio
 }
 SpotLight::~SpotLight() {
 }
-void SpotLight::destroy() noexcept {
-    Entity::destroy();
-    Scene* scene_ptr = scene();
-    if (scene_ptr) {
-        removeFromVector(Engine::priv::InternalScenePublicInterface::GetSpotLights(*scene_ptr), this);
-    }
-}
-
 void SpotLight::setDirection(decimal xDir, decimal yDir, decimal zDir) noexcept {
     auto body = getComponent<ComponentBody>();
     if (body) {

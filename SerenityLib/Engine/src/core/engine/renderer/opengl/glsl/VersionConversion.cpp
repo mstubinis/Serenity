@@ -133,9 +133,9 @@ void opengl::glsl::VersionConversion::convert(string& code, unsigned int version
             if (ShaderHelper::sfind(code, "layout") && ShaderHelper::sfind(code, "location") && ShaderHelper::sfind(code, "=")) {
                 if (versionNumber > 130) {
                     if (OpenGLExtensions::supported(OpenGLExtensions::EXT_separate_shader_objects)) {
-                        code = "#extension GL_EXT_seperate_shader_objects : enable\n" + code;
+                        code = "#extension GL_EXT_separate_shader_objects : enable\n" + code;
                     }else if (OpenGLExtensions::supported(OpenGLExtensions::ARB_separate_shader_objects)) {
-                        code = "#extension GL_ARB_seperate_shader_objects : enable\n" + code;
+                        code = "#extension GL_ARB_separate_shader_objects : enable\n" + code;
                     }if (OpenGLExtensions::supported(OpenGLExtensions::EXT_explicit_attrib_location)) {
                         code = "#extension GL_EXT_explicit_attrib_location : enable\n" + code;
                     }else if (OpenGLExtensions::supported(OpenGLExtensions::ARB_explicit_attrib_location)) {

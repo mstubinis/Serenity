@@ -100,34 +100,11 @@ bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionOb
     return true;
 }
 
-
 Engine::priv::PhysicsManager::PhysicsManager(){
     PHYSICS_MANAGER = this;
 }
 Engine::priv::PhysicsManager::~PhysicsManager(){
-    cleanup();
-}
-void Engine::priv::PhysicsManager::cleanup() {
-    auto& pipeline        = *m_Pipeline.m_World;
-    int collisionObjCount = pipeline.getNumCollisionObjects();
-    for (int i = 0; i < collisionObjCount; ++i) {
-        btCollisionObject* obj = pipeline.getCollisionObjectArray()[i];
-        if (obj) {
-            btRigidBody* body  = btRigidBody::upcast(obj);
-            if (body) {
-                auto* motionState = body->getMotionState();
-                SAFE_DELETE(motionState);
-            }
-            pipeline.removeCollisionObject(obj);
-            SAFE_DELETE(obj);
-        }
-    }
-}
-void Engine::priv::PhysicsManager::debug_draw_line(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color) {
-    priv::PhysicsManager::debug_draw_line(start, end, color.r, color.g, color.b, color.a);
-}
-void Engine::priv::PhysicsManager::debug_draw_line(const glm::vec3& start, const glm::vec3& end, float r, float g, float b, float a) {
-    m_Pipeline.m_World->getDebugDrawer()->drawLine(Math::btVectorFromGLM(start), Math::btVectorFromGLM(end), btVector4(r, g, b, a));
+
 }
 void Engine::priv::PhysicsManager::_init(){
     m_Pipeline.m_DebugDrawer.init();
@@ -177,9 +154,8 @@ void Engine::priv::PhysicsManager::_update(const float dt, int maxSubSteps, floa
 }
 void Engine::priv::PhysicsManager::_render(const Camera& camera){
     const glm::vec3 camPos = camera.getPosition();
-    const glm::mat4 model  = glm::mat4(1.0f);
     m_Pipeline.m_World->debugDrawWorld();
-    Engine::Renderer::sendUniformMatrix4("Model", model);
+    Engine::Renderer::sendUniformMatrix4("Model", glm::mat4(1.0f));
     Engine::Renderer::sendUniformMatrix4("VP", camera.getViewProjection());
     m_Pipeline.m_DebugDrawer.drawAccumulatedLines();
     m_Pipeline.m_DebugDrawer.postRender();
