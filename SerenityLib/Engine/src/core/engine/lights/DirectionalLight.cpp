@@ -11,10 +11,3 @@ DirectionalLight::DirectionalLight(Scene* scene, const glm::vec3& direction)
 }
 DirectionalLight::~DirectionalLight() {
 }
-void DirectionalLight::destroy() noexcept {
-    Entity::destroy();
-    Scene* scene_ptr = scene();
-    if (scene_ptr) {
-        removeFromVector(Engine::priv::InternalScenePublicInterface::GetDirectionalLights(*scene_ptr), this);
-    }
-}

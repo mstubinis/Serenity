@@ -36,11 +36,6 @@ namespace Engine{
                 PhysicsManager();
                 ~PhysicsManager();
 
-                void debug_draw_line(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color);
-                void debug_draw_line(const glm::vec3& start, const glm::vec3& end, float r, float g, float b, float a);
-
-                void cleanup();
-
                 void _init();
 
                 void preUpdate(const float dt) noexcept;

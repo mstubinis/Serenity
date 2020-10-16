@@ -39,8 +39,6 @@ class ProjectionLight : public SunLight {
         );
         virtual ~ProjectionLight();
 
-        void destroy() noexcept;
-
         inline void setTexture(Handle textureHandle) noexcept { m_Texture = textureHandle; }
 
         void setNear(float inNear) noexcept { m_Near = inNear; recalc_frustum_points(); }

@@ -30,8 +30,6 @@ class SunLight : public EntityBody {
         SunLight(Scene* scene, const glm_vec3& position = glm_vec3(0.0), LightType type = LightType::Sun);
         virtual ~SunLight();
 
-        void destroy() noexcept;
-
         glm_vec3 position() const;
 
         inline CONSTEXPR bool isShadowCaster() const noexcept { return m_IsShadowCaster; }

@@ -21,8 +21,6 @@ class RodLight : public PointLight {
         );
         virtual ~RodLight();
 
-        void destroy() noexcept;
-
         inline CONSTEXPR float rodLength() const noexcept { return m_RodLength; }
 
         void setRodLength(float rodLength);

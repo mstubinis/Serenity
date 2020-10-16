@@ -24,8 +24,6 @@ class SpotLight : public PointLight {
         );
         virtual ~SpotLight();
 
-        void destroy() noexcept;
-
         inline CONSTEXPR float getCutoff() const noexcept { return m_Cutoff; }
         inline CONSTEXPR float getCutoffOuter() const noexcept { return m_OuterCutoff; }
 

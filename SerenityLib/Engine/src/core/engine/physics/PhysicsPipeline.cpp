@@ -77,7 +77,6 @@ btScalar Engine::priv::PhysicsTaskScheduler::parallelSum(int iBegin, int iEnd, i
         res = body.sumLoop(iBegin, iEnd);
     }
     return res;
-
 }
 
 #pragma endregion
@@ -103,9 +102,30 @@ Engine::priv::PhysicsPipeline::PhysicsPipeline() {
     m_DebugDrawer.setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
     m_World->setDebugDrawer(&m_DebugDrawer);
     m_World->setGravity(btVector3(0.0, 0.0, 0.0));
+
+    m_World->setForceUpdateAllAabbs(false); //TODO: optional optimization thing. remove if it causes issues
+
     btGImpactCollisionAlgorithm::registerAlgorithm(m_Dispatcher.get());
     setPreTickCallback(m_PreTickCallback);
     setPostTickCallback(m_PostTickCallback);
+}
+Engine::priv::PhysicsPipeline::~PhysicsPipeline() {
+    cleanup();
+}
+void Engine::priv::PhysicsPipeline::cleanup() {
+    int collisionObjCount = m_World->getNumCollisionObjects();
+    for (int i = 0; i < collisionObjCount; ++i) {
+        btCollisionObject* obj = m_World->getCollisionObjectArray()[i];
+        if (obj) {
+            btRigidBody* body = btRigidBody::upcast(obj);
+            if (body) {
+                auto motionState = body->getMotionState();
+                SAFE_DELETE(motionState);
+            }
+            m_World->removeCollisionObject(obj);
+            SAFE_DELETE(obj);
+        }
+    }
 }
 void Engine::priv::PhysicsPipeline::setPreTickCallback(btInternalTickCallback preTicCallback) {
     m_PreTickCallback = preTicCallback;
@@ -125,9 +145,6 @@ void Engine::priv::PhysicsPipeline::update(const float dt) {
         m_TaskScheduler->m_DoConcurrency = false;
     }
     */
-}
-Engine::priv::PhysicsPipeline::~PhysicsPipeline() {
-    //btSetTaskScheduler(nullptr);
 }
 
 #pragma endregion

@@ -16,13 +16,6 @@ RodLight::RodLight(Scene* scene, const glm_vec3& pos, float rodLength)
 }
 RodLight::~RodLight() {
 }
-void RodLight::destroy() noexcept {
-    Entity::destroy();
-    Scene* scene_ptr = scene();
-    if (scene_ptr) {
-        removeFromVector(Engine::priv::InternalScenePublicInterface::GetRodLights(*scene_ptr), this);
-    }
-}
 float RodLight::calculateCullingRadius() {
     float res = PointLight::calculateCullingRadius();
     auto body = getComponent<ComponentBody>();
