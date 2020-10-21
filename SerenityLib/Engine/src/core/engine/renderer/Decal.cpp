@@ -35,8 +35,7 @@ Decal::Decal(Handle materialHandle, const glm_vec3& localPosition, const glm::ve
     auto& model = *getComponent<ComponentModel>();
 
     body.setPosition(localPosition);
-    glm_quat q = glm_quat(1.0, 0.0, 0.0, 0.0);
-    Math::alignTo(q, hitNormal);
+    auto q = Math::alignTo(hitNormal);
     m_InitialRotation = q;
     body.setRotation(q);
     const decimal factor = (decimal)(0.2f * size);

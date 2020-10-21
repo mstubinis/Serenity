@@ -69,7 +69,7 @@ struct ScreenBoxCoordinates final {
     glm::vec2 bottomRight   = glm::vec2(0.0f, 0.0f);
 };
 
-class ComponentBody : public Observer, public Engine::UserPointer {
+class ComponentBody : public Engine::UserPointer {
     friend class  Engine::priv::ComponentBody_System;
     friend struct Engine::priv::ComponentBody_UpdateFunction;
     friend struct Engine::priv::ComponentBody_ComponentAddedToEntityFunction;
@@ -97,9 +97,9 @@ class ComponentBody : public Observer, public Engine::UserPointer {
             ~PhysicsData();
         };
         struct NormalData final {
+            glm_quat rotation       = glm_quat(1.0, 0.0, 0.0, 0.0);
             glm_vec3 scale          = glm_vec3(1.0);
             glm_vec3 position       = glm_vec3(0.0);
-            glm_quat rotation       = glm_quat(1.0, 0.0, 0.0, 0.0);
             glm_vec3 linearVelocity = glm_vec3(0.0);
 
             NormalData() = default;
@@ -128,18 +128,16 @@ class ComponentBody : public Observer, public Engine::UserPointer {
         static void internal_recalculateAllParentChildMatrices(Engine::priv::ComponentBody_System& system);
     public:
         static void recalculateAllParentChildMatrices(Scene& scene);
-
+    public:
         ComponentBody(Entity entity);
         ComponentBody(Entity entity, CollisionType collisionType);
-        ComponentBody(const ComponentBody& other)                  = delete;
-        ComponentBody& operator=(const ComponentBody& other)       = delete;
-        ComponentBody(ComponentBody&& other) noexcept;
-        ComponentBody& operator=(ComponentBody&& other) noexcept;
+        ComponentBody(const ComponentBody&)                  = delete;
+        ComponentBody& operator=(const ComponentBody&)       = delete;
+        ComponentBody(ComponentBody&&) noexcept;
+        ComponentBody& operator=(ComponentBody&&) noexcept;
         ~ComponentBody();
 
         inline CONSTEXPR Entity getOwner() const noexcept { return m_Owner; }
-
-        void onEvent(const Event& e) override;
 
         bool hasParent() const;
 

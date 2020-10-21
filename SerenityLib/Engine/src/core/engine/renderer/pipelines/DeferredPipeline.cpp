@@ -1541,7 +1541,7 @@ void DeferredPipeline::renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport,
                 Engine::Renderer::GLDisable(GL_DEPTH_TEST);
                 GLCall(glDepthMask(GL_FALSE));
                 m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::BulletPhysics].get<ShaderProgram>());
-                Core::m_Engine->m_PhysicsManager._render(camera);
+                Core::m_Engine->m_PhysicsModule._render(camera);
         #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
             }
         #endif

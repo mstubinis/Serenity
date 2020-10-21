@@ -10,7 +10,7 @@ namespace Engine::priv {
 
 #include <core/engine/utils/Engine_Debugging.h>
 #include <core/engine/resources/Engine_Resources.h>
-#include <core/engine/physics/Engine_Physics.h>
+#include <core/engine/physics/PhysicsModule.h>
 #include <core/engine/renderer/Renderer.h>
 #include <core/engine/sounds/SoundModule.h>
 #include <core/engine/events/EventModule.h>
@@ -156,7 +156,7 @@ namespace Engine{
                 DiscordModule       m_DiscordModule;
                 EventModule         m_EventModule;
                 RenderModule        m_RenderModule;
-                PhysicsManager      m_PhysicsManager;
+                PhysicsModule       m_PhysicsModule;
                 ResourceManager     m_ResourceManager;
                 SoundModule         m_SoundModule;
                 DebugManager        m_DebugManager;

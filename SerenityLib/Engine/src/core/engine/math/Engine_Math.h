@@ -83,8 +83,11 @@ namespace Engine::Math {
     glm::vec3 getUp(const btRigidBody& b);
 
     float getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bool degrees = true);
-    void alignTo(glm_quat& o, const glm_vec3& direction);
-    void alignTo(glm_quat& o, decimal x, decimal y, decimal z);
+
+    //void alignTo(glm_quat& o, const glm_vec3& direction) noexcept;
+    //void alignTo(glm_quat& o, decimal x, decimal y, decimal z) noexcept;
+    glm_quat alignTo(decimal x, decimal y, decimal z) noexcept;
+    inline glm_quat alignTo(const glm_vec3& direction) noexcept { return alignTo(direction.x, direction.y, direction.z); }
 
     void setColor(glm::vec3& color, float r, float g, float b);
     void setColor(glm::vec4& color, float r, float g, float b, float a);

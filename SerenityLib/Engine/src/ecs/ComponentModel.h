@@ -29,10 +29,10 @@ class ComponentModel: public Observer {
     friend struct Engine::priv::ComponentModel_Functions;
     friend class  ComponentCamera;
     private:
-        Entity                       m_Owner;
         ModelInstanceVector          m_ModelInstances;
-        float                        m_Radius          = 0.0f;
-        glm::vec3                    m_RadiusBox       = glm::vec3(0.0f);
+        glm::vec3                    m_RadiusBox = glm::vec3(0.0f);
+        float                        m_Radius = 0.0f;
+        Entity                       m_Owner;
 
         ComponentModel() = delete;
     public:

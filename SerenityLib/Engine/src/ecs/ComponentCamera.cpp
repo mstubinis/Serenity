@@ -140,14 +140,25 @@ void ComponentCamera::setViewMatrix(const glm::mat4& viewMatrix) noexcept {
     m_ViewMatrixNoTranslation[3][1] = 0.0001f;
     m_ViewMatrixNoTranslation[3][2] = 0.0001f;
 }
-void ComponentCamera::lookAt(const glm_vec3& eye, const glm_vec3& center, const glm_vec3& up) noexcept {
+void ComponentCamera::setViewMatrix(glm::mat4&& viewMatrix) noexcept {
+    m_ViewMatrixNoTranslation = viewMatrix;
+    m_ViewMatrix              = std::move(viewMatrix);
+    m_ViewMatrixNoTranslation[3][0] = 0.0001f;
+    m_ViewMatrixNoTranslation[3][1] = 0.0001f;
+    m_ViewMatrixNoTranslation[3][2] = 0.0001f;
+}
+void ComponentCamera::lookAt(const glm::vec3& eye, const glm::vec3& center, const glm::vec3& up) noexcept {
     m_Eye                     = eye;
     m_Up                      = up;
     m_Forward                 = glm::normalize(m_Eye - center);
-
     setViewMatrix(glm::lookAt(m_Eye, m_Eye - m_Forward, m_Up));
 }
-
+void ComponentCamera::lookAt(glm::vec3&& eye, glm::vec3&& center, glm::vec3&& up) noexcept {
+    m_Eye     = std::move(eye);
+    m_Up      = std::move(up);
+    m_Forward = glm::normalize(m_Eye - std::move(center));
+    setViewMatrix(glm::lookAt(m_Eye, m_Eye - m_Forward, m_Up));
+}
 void ComponentCamera::setAngle(float angle) noexcept {
 	m_Angle = angle;
 	priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 

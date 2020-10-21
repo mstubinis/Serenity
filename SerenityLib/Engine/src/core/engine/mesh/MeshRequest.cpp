@@ -57,6 +57,12 @@ void MeshRequest::request(bool inAsync) {
 
     if (!m_FileOrData.empty()) {
         if (m_FileExists) {
+            auto info = Resources::getResource<Mesh>(m_FileOrData);
+            if (info.first) {
+                //mesh already loaded
+                return;
+            }
+
             bool valid = populate();
             if (valid) {
                 auto l_cpu = [meshRequest{ *this }]() mutable {
@@ -65,7 +71,7 @@ void MeshRequest::request(bool inAsync) {
                 auto l_gpu = [meshRequest{ *this }]() mutable {
                     auto mutex = meshRequest.m_Parts[0].handle.getMutex();
                     if (mutex) {
-                        std::lock_guard lock(*mutex);
+                        std::unique_lock lock(*mutex);
                         for (auto& part : meshRequest.m_Parts) {
                             auto& mesh = *part.handle.get<Mesh>();
                             InternalMeshPublicInterface::LoadGPU(mesh);
@@ -129,7 +135,7 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
         SMSH_File::SaveFile(saveFileName.c_str(), part.cpuData);
         auto mutex = part.handle.getMutex();
         if (mutex) {
-            std::lock_guard lock(*mutex);
+            std::unique_lock lock(*mutex);
             auto& mesh = *part.handle.get<Mesh>();
             mesh.setName(part.name);
             mesh.m_CPUData = std::move(part.cpuData);
@@ -142,7 +148,7 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
             part.cpuData.m_CollisionFactory = (NEW MeshCollisionFactory(part.cpuData, meshRequest.m_CollisionLoadingFlags));
             auto mutex = part.handle.getMutex();
             if (mutex) {
-                std::lock_guard lock(*mutex);
+                std::unique_lock lock(*mutex);
                 auto& mesh = *part.handle.get<Mesh>();
                 mesh.setName(part.name);
                 mesh.m_CPUData = std::move(part.cpuData);
@@ -156,7 +162,7 @@ void InternalMeshRequestPublicInterface::LoadCPU(MeshRequest& meshRequest) {
             part.cpuData.m_CollisionFactory = (NEW MeshCollisionFactory(part.cpuData, meshRequest.m_CollisionLoadingFlags));
             auto mutex = part.handle.getMutex();
             if (mutex) {
-                std::lock_guard lock(*mutex);
+                std::unique_lock lock(*mutex);
                 auto& mesh = *part.handle.get<Mesh>();
                 mesh.setName(part.name);
                 mesh.m_CPUData = std::move(part.cpuData);

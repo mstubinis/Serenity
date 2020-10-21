@@ -53,7 +53,7 @@ class Material final : public Resource {
       //unbind_fp                         m_CustomUnbindFunctor = [](Material*) {};
 
         DiffuseModel                      m_DiffuseModel        = DiffuseModel::Lambert;
-        SpecularModel                     m_SpecularModel       = SpecularModel::GGX;
+        SpecularModel                     m_SpecularModel       = SpecularModel::Cook_Torrance;
         bool                              m_Shadeless           = false;
         bool                              m_UpdatedThisFrame    = false;
         Engine::color_vector_4            m_F0Color             = Engine::color_vector_4(10_uc, 10_uc, 10_uc, 255_uc);

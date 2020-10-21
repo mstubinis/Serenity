@@ -122,7 +122,7 @@ void EngineCore::init(const EngineOptions& options) {
     m_DebugManager._init();
     m_Misc.m_BuiltInMeshes.init();
     m_RenderModule._init();
-    m_PhysicsManager._init();
+    m_PhysicsModule._init();
 
     //init the game here
     Engine::setMousePosition(options.width / 2, options.height / 2);
@@ -153,7 +153,7 @@ void EngineCore::internal_update_physics(Window& window, const float timeStep) {
     unsigned int requestedStepsPerFrame  = Physics::getNumberOfStepsPerFrame();
     float fixed_time_step                = PHYSICS_MIN_STEP / (float)requestedStepsPerFrame;
 
-    m_PhysicsManager._update(timeStep, 100, fixed_time_step);
+    m_PhysicsModule._update(timeStep, 100, fixed_time_step);
 
     m_DebugManager.calculate_physics();
 }
@@ -185,7 +185,7 @@ void EngineCore::internal_update(Window& window, const float dt){
     Scene& scene = *Resources::getCurrentScene();
     Game::onPreUpdate(dt);
     scene.preUpdate(dt);
-    m_PhysicsManager.preUpdate(dt);
+    m_PhysicsModule.preUpdate(dt);
     internal_update_logic(scene, window, dt);
     internal_update_sounds(scene, window, dt);
 }
@@ -484,9 +484,9 @@ void EngineCore::run(){
         for (auto& window_itr : m_ResourceManager.m_Windows) {
             auto& window = *window_itr;
             handle_events(window);
+            internal_update_physics(window, dt);
             internal_update(window, dt);
             internal_render(window, dt);
-            internal_update_physics(window, dt);
             internal_cleanup(window, dt);
         }
         m_DebugManager.calculate();

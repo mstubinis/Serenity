@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_ENGINE_PHYSICS_H
-#define ENGINE_ENGINE_PHYSICS_H
+#ifndef ENGINE_PHYSICS_MODULE_H
+#define ENGINE_PHYSICS_MODULE_H
 
 struct Entity;
 class  btRigidBody;
@@ -13,28 +13,41 @@ namespace Engine::priv {
 };
 
 #include <core/engine/physics/PhysicsPipeline.h>
-#include <LinearMath/btVector3.h>
+#include <core/engine/math/Engine_Math.h>
 
 #define PHYSICS_MIN_STEP 0.016666666666666666f
 
 namespace Engine{
     struct RayCastResult final {
-        glm::vec3          hitPosition     = glm::vec3(0.0f);
-        glm::vec3          hitNormal       = glm::vec3(0.0f);
-        btCollisionObject* collisionObject = nullptr;
+        glm::vec3          hitPosition           = glm::vec3(0.0f);
+        glm::vec3          hitNormal             = glm::vec3(0.0f);
+        btCollisionObject* collisionObject       = nullptr;
+  
+        RayCastResult(const btCollisionWorld::ClosestRayResultCallback& closestHitResult) {
+            if (closestHitResult.hasHit()) {
+                hitPosition     = Engine::Math::btVectorToGLM(closestHitResult.m_hitPointWorld);
+                hitNormal       = Engine::Math::btVectorToGLM(closestHitResult.m_hitNormalWorld);
+                collisionObject = const_cast<btCollisionObject*>(closestHitResult.m_collisionObject);
+            }
+        }
+        RayCastResult(const btCollisionWorld::AllHitsRayResultCallback& allHitResult, const int index) {
+            hitPosition           = Engine::Math::btVectorToGLM(allHitResult.m_hitPointWorld[index]);
+            hitNormal             = Engine::Math::btVectorToGLM(allHitResult.m_hitNormalWorld[index]);
+            collisionObject       = const_cast<btCollisionObject*>(allHitResult.m_collisionObjects[index]);
+        }
     };
     namespace priv{
-        class PhysicsManager final {
+        class PhysicsModule final {
             public:
-                static Engine::view_ptr<PhysicsManager> PHYSICS_MANAGER;
+                static Engine::view_ptr<PhysicsModule> PHYSICS_MANAGER;
             public:
                 Engine::priv::PhysicsPipeline    m_Pipeline;
                 std::mutex                       m_Mutex;
                 bool                             m_Paused                = false;
                 unsigned int                     m_NumberOfStepsPerFrame = 1;
             public:
-                PhysicsManager();
-                ~PhysicsManager();
+                PhysicsModule();
+                ~PhysicsModule();
 
                 void _init();
 

@@ -313,14 +313,12 @@ void ModelInstance::playAnimation(const std::string& animationName, float start,
 }
 
 void ModelInstance::onEvent(const Event& e) {
-    if (e.type == EventType::ResourceLoaded) {
-        if (e.eventResource.resource && e.eventResource.resource->type() == ResourceType::Mesh) {
-            Mesh* mesh           = (Mesh*)e.eventResource.resource;
-            Mesh* meshFromHandle = m_MeshHandle.get<Mesh>();
-            if (meshFromHandle->isLoaded() || mesh == meshFromHandle) {
-                internal_update_model_matrix();
-                unregisterEvent(EventType::ResourceLoaded);
-            }
+    if (e.type == EventType::ResourceLoaded && e.eventResource.resource->type() == ResourceType::Mesh) {
+        Mesh* mesh           = (Mesh*)e.eventResource.resource;
+        Mesh* meshFromHandle = m_MeshHandle.get<Mesh>();
+        if (meshFromHandle->isLoaded() || mesh == meshFromHandle) {
+            internal_update_model_matrix();
+            unregisterEvent(EventType::ResourceLoaded);
         }
     }
 }
