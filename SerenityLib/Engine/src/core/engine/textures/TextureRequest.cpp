@@ -40,6 +40,13 @@ void TextureRequest::request(bool inAsync) {
         return;
     }
     m_Part.async   = (inAsync && Engine::hardware_concurrency() > 1);
+
+    auto info = Engine::Resources::getResource<Texture>(m_Part.m_CPUData.m_Name);
+    if (info.first) {
+        //Texture was already loaded
+        m_Part.handle = info.second;
+        return;
+    }
     m_Part.handle  = Engine::Resources::addResource<Texture>(m_Part.m_CPUData.m_Name, m_Part.m_CPUData.m_TextureType, m_Part.m_CPUData.m_IsToBeMipmapped);
 
     auto l_cpu = [textureRequest{ *this }]() mutable {

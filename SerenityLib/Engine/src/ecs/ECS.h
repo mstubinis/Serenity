@@ -42,7 +42,6 @@ namespace Engine::priv {
             }
             Entity createEntity(Scene& scene);
 
-            //"event handlers"
             template<typename COMPONENT>
             void onResize(uint32_t width, uint32_t height) {
                 using CPoolType  = ECSComponentPool<COMPONENT>;

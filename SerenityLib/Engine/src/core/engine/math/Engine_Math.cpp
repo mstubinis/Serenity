@@ -308,35 +308,36 @@ glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& ca
     if (inBounds) {
         return glm::vec3(screen_pos.x, screen_pos.y, inBounds);
     }
-    if (clampToEdge) {
-        v2 center(viewport.z / 2.0f, viewport.w / 2.0f);
-        glm::vec3 res(0.0f, 0.0f, inBounds);
-        v2 perm;
-        if (dot >= 0.0f) {
-            //reflect screen_pos along center
-            auto xDiff = screen_pos.x - center.x;
-            auto yDiff = screen_pos.y - center.y;
-            v2 reflected(center.x - xDiff, center.y - yDiff);
+if (clampToEdge) {
+    v2 center(viewport.z / 2.0f, viewport.w / 2.0f);
+    glm::vec3 res(0.0f, 0.0f, inBounds);
+    v2 perm;
+    if (dot >= 0.0f) {
+        //reflect screen_pos along center
+        auto xDiff = screen_pos.x - center.x;
+        auto yDiff = screen_pos.y - center.y;
+        v2 reflected(center.x - xDiff, center.y - yDiff);
 
-            auto norm = reflected - center;
-            norm = glm::normalize(norm);
-            norm *= 9999999.0f;
+        auto norm = reflected - center;
+        norm = glm::normalize(norm);
+        norm *= 9999999.0f;
 
-            perm = getPerimiterIntersection(center, center + norm, v2(0, 0), v2(0, 0 + viewport.w), v2(0 + viewport.z, 0 + viewport.w), v2(0 + viewport.z, 0));
-        }else{
-            perm = getPerimiterIntersection(center, v2(screen_pos.x, screen_pos.y), v2(0, 0), v2(0, 0 + viewport.w), v2(0 + viewport.z, 0 + viewport.w), v2(0 + viewport.z, 0));
-        }
-        res.x = perm.x;
-        res.y = perm.y;
-        return res;
+        perm = getPerimiterIntersection(center, center + norm, v2(0, 0), v2(0, 0 + viewport.w), v2(0 + viewport.z, 0 + viewport.w), v2(0 + viewport.z, 0));
     }
-    return glm::vec3(screen_pos.x, screen_pos.y, inBounds);
+    else {
+        perm = getPerimiterIntersection(center, v2(screen_pos.x, screen_pos.y), v2(0, 0), v2(0, 0 + viewport.w), v2(0 + viewport.z, 0 + viewport.w), v2(0 + viewport.z, 0));
+    }
+    res.x = perm.x;
+    res.y = perm.y;
+    return res;
+}
+return glm::vec3(screen_pos.x, screen_pos.y, inBounds);
 }
 glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& camera, const glm::vec4& viewport, bool clampToEdge) {
     return Math::getScreenCoordinates(position, camera, camera.getView(), camera.getProjection(), viewport, clampToEdge);
 }
 glm::vec3 Math::getScreenCoordinates(const glm::vec3& objPos, const Camera& camera, bool clampToEdge) {
-    glm::vec2 winSize  = glm::vec2(Resources::getWindowSize());
+    glm::vec2 winSize = glm::vec2(Resources::getWindowSize());
     glm::vec4 viewport = glm::vec4(0.0f, 0.0f, winSize.x, winSize.y);
     return Math::getScreenCoordinates(objPos, camera, viewport, clampToEdge);
 }
@@ -344,27 +345,27 @@ glm::vec3 Math::getScreenCoordinates(const glm::vec3& objPos, const Camera& came
 
 
 void Math::translate(const btRigidBody& body, btVector3& vec, bool local) noexcept {
-    if(local){
+    if (local) {
         btQuaternion q = body.getWorldTransform().getRotation().normalize();
         vec = vec.rotate(q.getAxis(), q.getAngle());
     }
 }
-glm::vec3 Math::midpoint(const glm::vec3& a, const glm::vec3& b){ 
+glm::vec3 Math::midpoint(const glm::vec3& a, const glm::vec3& b) {
     return glm::vec3((a.x + b.x) / 2.0f, (a.y + b.y) / 2.0f, (a.z + b.z) / 2.0f);
 }
-glm::vec3 Math::direction(const glm::vec3& eye, const glm::vec3& target){ 
+glm::vec3 Math::direction(const glm::vec3& eye, const glm::vec3& target) {
     return glm::normalize(eye - target);
 }
-glm::vec3 Math::getForward(const glm_quat& q){
+glm::vec3 Math::getForward(const glm_quat& q) {
     return glm::normalize(q * glm_vec3(0, 0, -1));
 }
-glm::vec3 Math::getRight(const glm_quat& q){
+glm::vec3 Math::getRight(const glm_quat& q) {
     return glm::normalize(q * glm_vec3(1, 0, 0));
 }
-glm::vec3 Math::getUp(const glm_quat& q){
+glm::vec3 Math::getUp(const glm_quat& q) {
     return glm::normalize(q * glm_vec3(0, 1, 0));
 }
-glm::vec3 Math::getColumnVector(const btRigidBody& b, unsigned int column){
+glm::vec3 Math::getColumnVector(const btRigidBody& b, unsigned int column) {
     btTransform t;
     b.getMotionState()->getWorldTransform(t);
     btVector3 v = t.getBasis().getColumn(column);
@@ -379,32 +380,42 @@ glm::vec3 Math::getRight(const btRigidBody& b) {
 glm::vec3 Math::getUp(const btRigidBody& b) {
     return Math::getColumnVector(b, 1);
 }
-void Math::recalculateForwardRightUp(const glm_quat& o,glm_vec3& f,glm_vec3& r,glm_vec3& u){
+void Math::recalculateForwardRightUp(const glm_quat& o, glm_vec3& f, glm_vec3& r, glm_vec3& u) {
     f = Math::getForward(o);
-	r = Math::getRight(o);
-	u = Math::getUp(o);
+    r = Math::getRight(o);
+    u = Math::getUp(o);
 }
-void Math::recalculateForwardRightUp(const btRigidBody& b,glm_vec3& f,glm_vec3& r,glm_vec3& u){
+void Math::recalculateForwardRightUp(const btRigidBody& b, glm_vec3& f, glm_vec3& r, glm_vec3& u) {
     f = Math::getForward(b);
-	r = Math::getRight(b);
-	u = Math::getUp(b);
+    r = Math::getRight(b);
+    u = Math::getUp(b);
 }
-float Math::getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bool degrees){
-	if (a == b) 
+float Math::getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bool degrees) {
+    if (a == b)
         return 0.0f;
-	float angle = glm::acos(glm::dot(a, b));
-    if(degrees) 
-		angle *= 57.2958f;
+    float angle = glm::acos(glm::dot(a, b));
+    if (degrees)
+        angle *= 57.2958f;
     return angle;
 }
-void Math::alignTo(glm_quat& o, decimal x, decimal y, decimal z) {
+/*
+void Math::alignTo(glm_quat& o, decimal x, decimal y, decimal z) noexcept {
     o = glm::conjugate(glm::toQuat(glm::lookAt(glm_vec3(0.0f), -glm_vec3(x, y, z), glm_vec3(0, 1, 0))));
     o = glm::normalize(o);
 }
-void Math::alignTo(glm_quat& o, const glm_vec3& direction){ 
+void Math::alignTo(glm_quat& o, const glm_vec3& direction) noexcept {
     o = glm::conjugate(glm::toQuat(glm::lookAt(glm_vec3(0.0f), -direction, glm_vec3(0, 1, 0))));
     o = glm::normalize(o);
 }
+*/
+glm_quat Math::alignTo(decimal x, decimal y, decimal z) noexcept {
+    glm_quat o{ 1.0, 0.0, 0.0, 0.0 };
+    o = glm::conjugate(glm::toQuat(glm::lookAt(glm_vec3(0.0f), -glm_vec3(x, y, z), glm_vec3(0, 1, 0))));
+    o = glm::normalize(o);
+    return o;
+}
+
+
 void Math::setColor(glm::vec3& c, float r, float g, float b){
     if(r > 1.0f) r /= 255.0f;
     if(g > 1.0f) g /= 255.0f;

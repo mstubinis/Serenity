@@ -9,14 +9,18 @@ namespace Engine {
                 uint32_t               m_MaxLastIndex = 0;
                 std::vector<uint32_t>  m_Sparse;
 
-                sparse_set_base() = delete;
+                sparse_set_base() = default;
             public:
                 sparse_set_base(uint32_t initial_capacity) {
                     m_Sparse.reserve(initial_capacity);
                 }
-                virtual ~sparse_set_base() {
-                    sparse_set_base::clear();
-                }
+
+                sparse_set_base(const sparse_set_base&)                = default;
+                sparse_set_base& operator=(const sparse_set_base&)     = default;
+                sparse_set_base(sparse_set_base&&) noexcept            = default;
+                sparse_set_base& operator=(sparse_set_base&&) noexcept = default;
+
+                virtual ~sparse_set_base() = default;
                 virtual bool remove(uint32_t id) {
                     return false;
                 }
@@ -33,14 +37,19 @@ namespace Engine {
         private:
             std::vector<T> m_Dense;
         public:
-            sparse_set() : super(0) {
-            }
-            sparse_set(uint32_t initial_capacity) : super(initial_capacity) {
+            sparse_set() = default;
+            sparse_set(uint32_t initial_capacity) 
+                : super{ initial_capacity }
+            {
                 m_Dense.reserve(initial_capacity);
             }
-            virtual ~sparse_set() {
-                m_Dense.clear();
-            }
+
+            sparse_set(const sparse_set&)                = default;
+            sparse_set& operator=(const sparse_set&)     = default;
+            sparse_set(sparse_set&&) noexcept            = default;
+            sparse_set& operator=(sparse_set&&) noexcept = default;
+
+            virtual ~sparse_set() = default;
             void clear() override {
                 m_Dense.clear();
                 super::clear();
@@ -116,22 +125,14 @@ namespace Engine {
                 return const_cast<T*>(ret);
             }
 
-            T& operator[](size_t index) {
-                return m_Dense[index];
-            }
-            const T& operator[](size_t index) const noexcept {
-                return m_Dense[index];
-            }
-            inline CONSTEXPR size_t size() const noexcept {
-                return m_Dense.size();
-            }
-            inline CONSTEXPR std::vector<T>& data() noexcept {
-                return m_Dense;
-            }
-            typename std::vector<T>::iterator begin() { return m_Dense.begin(); }
-            typename std::vector<T>::iterator end() { return m_Dense.end(); }
-            typename std::vector<T>::const_iterator begin() const { return m_Dense.begin(); }
-            typename std::vector<T>::const_iterator end() const { return m_Dense.end(); }
+            inline T& operator[](size_t index) { return m_Dense[index]; }
+            inline const T& operator[](size_t index) const noexcept { return m_Dense[index]; }
+            inline CONSTEXPR size_t size() const noexcept { return m_Dense.size(); }
+            inline CONSTEXPR std::vector<T>& data() noexcept { return m_Dense; }
+            typename inline std::vector<T>::iterator begin() { return m_Dense.begin(); }
+            typename inline std::vector<T>::iterator end() { return m_Dense.end(); }
+            typename inline std::vector<T>::const_iterator begin() const { return m_Dense.begin(); }
+            typename inline std::vector<T>::const_iterator end() const { return m_Dense.end(); }
     };
 };
 

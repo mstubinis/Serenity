@@ -14,10 +14,10 @@ namespace Engine::priv {
                 : Engine::sparse_set<COMPONENT>{ 400U }
             {}
 
-            ECSComponentPool(const ECSComponentPool& other) = delete;
-            ECSComponentPool& operator=(const ECSComponentPool& other) = delete;
-            ECSComponentPool(ECSComponentPool&& other) noexcept = delete;
-            ECSComponentPool& operator=(ECSComponentPool&& other) noexcept = delete;
+            ECSComponentPool(const ECSComponentPool&)                = default;
+            ECSComponentPool& operator=(const ECSComponentPool&)     = default;
+            ECSComponentPool(ECSComponentPool&&) noexcept            = default;
+            ECSComponentPool& operator=(ECSComponentPool&&) noexcept = default;
 
             ~ECSComponentPool() = default;
 

@@ -3,7 +3,7 @@
 #include <ecs/ComponentModel.h>
 #include <core/engine/math/Engine_Math.h>
 #include <core/engine/threading/ThreadingModule.h>
-#include <core/engine/physics/Engine_Physics.h>
+#include <core/engine/physics/PhysicsModule.h>
 #include <core/engine/model/ModelInstance.h>
 #include <core/engine/scene/Camera.h>
 #include <core/engine/resources/Engine_Resources.h>
@@ -32,22 +32,21 @@ ComponentBody::PhysicsData::PhysicsData(ComponentBody::PhysicsData&& other) noex
 {}
 ComponentBody::PhysicsData& ComponentBody::PhysicsData::operator=(ComponentBody::PhysicsData&& other) noexcept {
     //move assignment
-    if(&other != this){
-        mass               = std::move(other.mass);
-        bullet_motionState = std::move(other.bullet_motionState);
-        group              = std::move(other.group);
-        mask               = std::move(other.mask);
-        forcedOut          = std::move(other.forcedOut);
+    ASSERT(&other != this, __FUNCTION__ << "(): trying to move itself!");
+    mass               = std::move(other.mass);
+    bullet_motionState = std::move(other.bullet_motionState);
+    group              = std::move(other.group);
+    mask               = std::move(other.mask);
+    forcedOut          = std::move(other.forcedOut);
 
-        collision          = std::move(other.collision);
+    collision          = std::move(other.collision);
 
-        if (bullet_rigidBody) {
-            Physics::removeRigidBody(bullet_rigidBody.get());
-        }
-        bullet_rigidBody   = std::move(other.bullet_rigidBody);
-        if (bullet_rigidBody) {
-            bullet_rigidBody->setCollisionShape(collision->getBtShape());
-        }
+    if (bullet_rigidBody) {
+        Physics::removeRigidBody(bullet_rigidBody.get());
+    }
+    bullet_rigidBody   = std::move(other.bullet_rigidBody);
+    if (bullet_rigidBody) {
+        bullet_rigidBody->setCollisionShape(collision->getBtShape());
     }
     return *this;
 }
@@ -111,29 +110,24 @@ ComponentBody::ComponentBody(ComponentBody&& other) noexcept
 }
 ComponentBody& ComponentBody::operator=(ComponentBody&& other) noexcept {
     //move assignment
-    if (&other != this) {
-        m_Physics          = std::move(other.m_Physics);
-        m_Forward          = std::move(other.m_Forward);
-        m_Right            = std::move(other.m_Right);
-        m_Up               = std::move(other.m_Up);
-        m_Owner            = std::move(other.m_Owner);
-        m_CollisionFunctor = std::move(other.m_CollisionFunctor);
-        m_UserPointer      = std::exchange(other.m_UserPointer, nullptr);
-        m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
-        m_UserPointer2     = std::exchange(other.m_UserPointer2, nullptr);
+    ASSERT(&other != this, __FUNCTION__ << "(): trying to move itself!");
+    m_Physics          = std::move(other.m_Physics);
+    m_Forward          = std::move(other.m_Forward);
+    m_Right            = std::move(other.m_Right);
+    m_Up               = std::move(other.m_Up);
+    m_Owner            = std::move(other.m_Owner);
+    m_CollisionFunctor = std::move(other.m_CollisionFunctor);
+    m_UserPointer      = std::exchange(other.m_UserPointer, nullptr);
+    m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
+    m_UserPointer2     = std::exchange(other.m_UserPointer2, nullptr);
 
-        n.reset();
-        p.reset();
-        n = std::move(other.n);
-        p = std::move(other.p);
-        setInternalPhysicsUserPointer(this);
-    }
+    n.reset();
+    p.reset();
+    n = std::move(other.n);
+    p = std::move(other.p);
+    setInternalPhysicsUserPointer(this);
     return *this;
 }
-
-void ComponentBody::onEvent(const Event& e) {
-}
-
 void ComponentBody::rebuildRigidBody(bool addBodyToPhysicsWorld, bool threadSafe) {
     if (m_Physics) {
         auto& inertia = p->collision->getBtInertia();
@@ -203,11 +197,10 @@ unsigned long long ComponentBody::getDistanceLL(Entity other) const {
 void ComponentBody::alignTo(decimal dirX, decimal dirY, decimal dirZ) {
     if (m_Physics) {
         //recheck this
-        glm_quat q(1.0, 0.0, 0.0, 0.0);
-        Math::alignTo(q, dirX, dirY, dirZ);
+        auto q = Math::alignTo(dirX, dirY, dirZ);
         ComponentBody::setRotation(q);
     }else{
-        Math::alignTo(n->rotation, dirX, dirY, dirZ);
+        n->rotation = Math::alignTo(dirX, dirY, dirZ);
         Math::recalculateForwardRightUp(n->rotation, m_Forward, m_Right, m_Up);
     }
 }
@@ -570,15 +563,11 @@ void ComponentBody::setDynamic(bool dynamic) {
     if (m_Physics) {
         auto& BtRigidBody = *p->bullet_rigidBody;
         if (dynamic) {
-            //ComponentBody::removePhysicsFromWorld(false);
             BtRigidBody.setCollisionFlags(btCollisionObject::CF_ANISOTROPIC_FRICTION_DISABLED);
-            //ComponentBody::addPhysicsToWorld(false);
             BtRigidBody.activate();
         }else{
-            //ComponentBody::removePhysicsFromWorld(false);
             BtRigidBody.setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
             ComponentBody::clearAllForces();
-            //ComponentBody::addPhysicsToWorld(false);
             BtRigidBody.activate();
         }
     }
@@ -810,7 +799,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
                 auto right    = glm::normalize(Math::getRight(rotation)) * 0.3f;
                 auto up       = glm::normalize(Math::getUp(rotation)) * 0.3f;
 
-                auto& physics = Engine::priv::Core::m_Engine->m_PhysicsManager;
+                auto& physics = Engine::priv::Core::m_Engine->m_PhysicsModule;
                 physics.debug_draw_line(world_pos, (world_pos+fwd) , 1, 0, 0, 1);
                 physics.debug_draw_line(world_pos, (world_pos+right) , 0, 1, 0, 1);
                 physics.debug_draw_line(world_pos, (world_pos+up) , 0, 0, 1, 1);

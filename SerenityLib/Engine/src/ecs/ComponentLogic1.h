@@ -14,10 +14,10 @@ namespace luabridge {
 class ComponentLogic1 : public Engine::UserPointer, public Engine::NonCopyable {
     using c_function = void(*)(const ComponentLogic1*, const float);
     private:
-        Entity                                             m_Owner;
+        LuaCallableFunction<ComponentLogic1, const float>  m_Functor;
         void*                                              m_UserPointer1 = nullptr;
         void*                                              m_UserPointer2 = nullptr;
-        LuaCallableFunction<ComponentLogic1, const float>  m_Functor;
+        Entity                                             m_Owner;
     public:
         ComponentLogic1(Entity entity) 
             : m_Owner(entity)

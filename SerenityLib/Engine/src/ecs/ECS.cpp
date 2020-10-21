@@ -81,7 +81,7 @@ void Engine::priv::ECS::preUpdate(Scene& scene, const float dt) {
 void Engine::priv::ECS::postUpdate(Scene& scene, const float dt) {
     if (m_DestroyedEntities.size() > 0) {
         for (const auto entity : m_DestroyedEntities) {
-            auto id = entity.id();
+            const auto id = entity.id();
             for (size_t i = 0; i < m_ComponentPools.size(); ++i) {
                 m_ComponentPools[i]->remove(id);
                 m_Systems[i]->onComponentRemovedFromEntity(entity);

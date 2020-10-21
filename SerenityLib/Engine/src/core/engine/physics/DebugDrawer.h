@@ -12,7 +12,7 @@
 #include <SFML/OpenGL.hpp>
 
 namespace Engine::priv {
-    class PhysicsManager;
+    class PhysicsModule;
     class PhysicsDebugDrawcallback final : public btTriangleCallback, public btInternalTriangleIndexCallback {
         private:
             btIDebugDraw& m_DebugDrawer;
@@ -26,7 +26,7 @@ namespace Engine::priv {
             virtual void processTriangle(btVector3* triangle, int partId, int triangleIndex);
     };
     class GLDebugDrawer final : public btIDebugDraw, public Observer, public Engine::NonCopyable, public Engine::NonMoveable {
-        friend class Engine::priv::PhysicsManager;
+        friend class Engine::priv::PhysicsModule;
         private:
             GLuint m_PerFrameCount = 0U;
             GLuint m_Mode          = btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE;

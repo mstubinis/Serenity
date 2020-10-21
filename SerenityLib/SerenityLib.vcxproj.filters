@@ -440,9 +440,6 @@
     <ClInclude Include="Engine\src\core\engine\lights\Lights.h">
       <Filter>Header Files\Engine\Core\Lights</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\src\core\engine\physics\Engine_Physics.h">
-      <Filter>Header Files\Engine\Core\Physics</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\src\core\engine\renderer\FullscreenItems.h">
       <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
@@ -920,6 +917,9 @@
     <ClInclude Include="Engine\src\ecs\EntityRAIIBody.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\physics\PhysicsModule.h">
+      <Filter>Header Files\Engine\Core\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -1038,9 +1038,6 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\postprocess\Fog.cpp">
       <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\src\core\engine\physics\Engine_Physics.cpp">
-      <Filter>Source Files\Engine\Core\Physics</Filter>
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\renderer\FullscreenItems.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
@@ -1389,6 +1386,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\ecs\EntityRAIIBody.cpp">
       <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\physics\PhysicsModule.cpp">
+      <Filter>Source Files\Engine\Core\Physics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -7,8 +7,8 @@
 
 class ComponentName {
     private:
+        std::string  m_Data = "";
         Entity       m_Owner = Entity();
-        std::string  m_Data  = "";
 
         ComponentName() = delete;
     public:

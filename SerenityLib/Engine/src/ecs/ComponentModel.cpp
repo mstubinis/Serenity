@@ -50,7 +50,7 @@ float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) 
     return modelComponent.m_Radius; //now modified by the body scale
 };
 void ComponentModel_Functions::RegisterDeferredMeshLoaded(ComponentModel& super, Mesh* mesh) {
-    if (mesh && *mesh == false) {
+    if (mesh && !mesh->isLoaded()) {
         super.registerEvent(EventType::ResourceLoaded);
     }
 }
@@ -87,11 +87,11 @@ ComponentModel& ComponentModel::operator=(ComponentModel&& other) noexcept {
 }
 void ComponentModel::onEvent(const Event& e) {
     if (e.type == EventType::ResourceLoaded && e.eventResource.resource->type() == ResourceType::Mesh) {
-        auto* mesh = (Mesh*)e.eventResource.resource;
         std::vector<Handle> unfinishedMeshes;
         unfinishedMeshes.reserve(m_ModelInstances.size());
         for (auto& instance : m_ModelInstances) {
-            if (instance->m_MeshHandle && *mesh == false) {
+            auto& mesh = *instance->m_MeshHandle.get<Mesh>();
+            if (!mesh.isLoaded()) {
                 unfinishedMeshes.emplace_back(instance->m_MeshHandle);
             }
         }
