@@ -73,16 +73,15 @@ class ModelInstance final : public Engine::UserPointer, public Observer {
         void internal_init(Handle mesh, Handle mat, Handle program);
         void internal_update_model_matrix(bool recalcRadius = true);
 
-        void bind(const Engine::priv::RenderModule& renderer);
-        void unbind(const Engine::priv::RenderModule& renderer);
+        inline void bind(const Engine::priv::RenderModule& renderer) noexcept { m_CustomBindFunctor(this, &renderer); }
+        inline void unbind(const Engine::priv::RenderModule& renderer) noexcept { m_CustomUnbindFunctor(this, &renderer); }
 
         ModelInstance() = delete;
     public:
+        static void setDefaultViewportFlag(uint32_t flag) noexcept { m_ViewportFlagDefault = flag; }
+        static void setDefaultViewportFlag(ViewportFlag::Flag flag) noexcept { m_ViewportFlagDefault = flag; }
+    public:
         ModelInstance(Entity, Handle mesh, Handle material, Handle shaderProgram = Handle{});
-        //ModelInstance(Entity, Mesh*,       Material*,  ShaderProgram* = 0);
-        //ModelInstance(Entity, Handle mesh, Handle mat, ShaderProgram* = 0);
-        //ModelInstance(Entity, Mesh*,       Handle mat, ShaderProgram* = 0);
-        //ModelInstance(Entity, Handle mesh, Material*,  ShaderProgram* = 0);
 
         ModelInstance(const ModelInstance& other)                = delete;
         ModelInstance& operator=(const ModelInstance& other)     = delete;
@@ -106,83 +105,76 @@ class ModelInstance final : public Engine::UserPointer, public Observer {
         inline void setCustomBindFunctor(const bind_function& functor) noexcept { m_CustomBindFunctor = functor; }
         inline void setCustomUnbindFunctor(const unbind_function& functor) noexcept { m_CustomUnbindFunctor = functor; }
 
-        static void setDefaultViewportFlag(unsigned int flag);
-        static void setDefaultViewportFlag(ViewportFlag::Flag flag);
-
-        inline void setViewportFlag(unsigned int flag) noexcept { m_ViewportFlag = flag; }
-        inline void addViewportFlag(unsigned int flag) noexcept { m_ViewportFlag.add(flag); }
-        inline void removeViewportFlag(unsigned int flag) noexcept { m_ViewportFlag.remove(flag); }
+        inline void setViewportFlag(uint32_t flag) noexcept { m_ViewportFlag = flag; }
+        inline void addViewportFlag(uint32_t flag) noexcept { m_ViewportFlag.add(flag); }
+        inline void removeViewportFlag(uint32_t flag) noexcept { m_ViewportFlag.remove(flag); }
         inline void setViewportFlag(ViewportFlag::Flag flag) noexcept { m_ViewportFlag = flag; }
         inline void addViewportFlag(ViewportFlag::Flag flag) noexcept { m_ViewportFlag.add(flag); }
         inline void removeViewportFlag(ViewportFlag::Flag flag) noexcept { m_ViewportFlag.remove(flag); }
-        inline unsigned int getViewportFlags() const noexcept { return m_ViewportFlag.get(); }
+        inline uint32_t getViewportFlags() const noexcept { return m_ViewportFlag.get(); }
 
-        inline CONSTEXPR const Engine::priv::ModelInstanceAnimationVector& getRunningAnimations() const noexcept { return m_AnimationVector; }
+        inline const Engine::priv::ModelInstanceAnimationVector& getRunningAnimations() const noexcept { return m_AnimationVector; }
 
-        inline CONSTEXPR float radius() const noexcept { return m_Radius; }
-        inline CONSTEXPR size_t index() const noexcept { return m_Index; }
-        inline CONSTEXPR ModelDrawingMode getDrawingMode() const noexcept { return m_DrawingMode; }
+        inline float radius() const noexcept { return m_Radius; }
+        inline size_t index() const noexcept { return m_Index; }
+        inline ModelDrawingMode getDrawingMode() const noexcept { return m_DrawingMode; }
         inline void setDrawingMode(ModelDrawingMode drawMode) noexcept { m_DrawingMode = drawMode; }
         inline void forceRender(bool forced = true) noexcept { m_ForceRender = forced; }
-        inline CONSTEXPR bool isForceRendered() const noexcept { return m_ForceRender; }
-        inline CONSTEXPR Entity parent() const noexcept { return m_Parent; }
-        inline CONSTEXPR const Engine::color_vector_4& color() const noexcept { return m_Color; }
-        inline CONSTEXPR const Engine::color_vector_4& godRaysColor() const noexcept { return m_GodRaysColor; }
-        inline CONSTEXPR const glm::mat4& modelMatrix() const noexcept { return m_ModelMatrix; }
-        inline CONSTEXPR const glm::vec3& getScale() const noexcept { return m_Scale; }
-        inline CONSTEXPR const glm::vec3& position() const noexcept { return m_Position; }
-        inline CONSTEXPR const glm::quat& orientation() const noexcept { return m_Orientation; }
-        inline CONSTEXPR Handle shaderProgram() const noexcept { return m_ShaderProgramHandle; }
-        inline CONSTEXPR Handle mesh() const noexcept { return m_MeshHandle; }
-        inline CONSTEXPR Handle material() const noexcept { return m_MaterialHandle; }
-        inline CONSTEXPR RenderStage stage() const noexcept { return m_Stage; }
+        inline bool isForceRendered() const noexcept { return m_ForceRender; }
+        inline Entity parent() const noexcept { return m_Parent; }
+        inline const Engine::color_vector_4& color() const noexcept { return m_Color; }
+        inline const Engine::color_vector_4& godRaysColor() const noexcept { return m_GodRaysColor; }
+        inline const glm::mat4& modelMatrix() const noexcept { return m_ModelMatrix; }
+        inline const glm::vec3& getScale() const noexcept { return m_Scale; }
+        inline const glm::vec3& position() const noexcept { return m_Position; }
+        inline const glm::quat& orientation() const noexcept { return m_Orientation; }
+        inline Handle shaderProgram() const noexcept { return m_ShaderProgramHandle; }
+        inline Handle mesh() const noexcept { return m_MeshHandle; }
+        inline Handle material() const noexcept { return m_MaterialHandle; }
+        inline RenderStage stage() const noexcept { return m_Stage; }
         inline void show(bool shown = true) noexcept { m_Visible = shown; }
         inline void hide() noexcept { m_Visible = false; }
-        inline CONSTEXPR bool visible() const noexcept { return m_Visible; }
-        inline CONSTEXPR bool passedRenderCheck() const noexcept { return m_PassedRenderCheck; }
+        inline bool visible() const noexcept { return m_Visible; }
+        inline bool passedRenderCheck() const noexcept { return m_PassedRenderCheck; }
         inline void setPassedRenderCheck(bool passed) noexcept { m_PassedRenderCheck = passed; }
 
 
         void setStage(RenderStage stage, ComponentModel& componentModel);
 
-        void playAnimation(const std::string& animName, float startTime, float endTime = -1.0f, unsigned int requestedLoops = 1);
+        void playAnimation(const std::string& animName, float startTime, float endTime = -1.0f, uint32_t requestedLoops = 1);
 
-        void setColor(float r, float g, float b, float a = 1.0f);
-        void setColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255);
-        void setColor(const glm::vec4& color);
-        void setColor(const glm::vec3& color);
+        inline void setColor(float r, float g, float b, float a = 1.0f) noexcept { m_Color = Engine::color_vector_4(r, g, b, a); }
+        inline void setColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255_uc) noexcept { m_Color = Engine::color_vector_4(r, g, b, a); }
+        inline void setColor(const glm::vec4& color) noexcept { setColor(color.r, color.g, color.b, color.a); }
+        inline void setColor(const glm::vec3& color) noexcept { setColor(color.r, color.g, color.b, 1.0f); }
 
-        void setGodRaysColor(float r, float g, float b);
-        void setGodRaysColor(const glm::vec3& color);
+        inline void setGodRaysColor(float r, float g, float b) noexcept { m_GodRaysColor = Engine::color_vector_4(r, g, b, m_GodRaysColor.a()); }
+        inline void setGodRaysColor(const glm::vec3& color) noexcept { setGodRaysColor(color.r, color.g, color.b); }
 
         void setShaderProgram(Handle shaderPHandle, ComponentModel&);
-        //void setShaderProgram(ShaderProgram*, ComponentModel&);
 
         void setMesh(Handle meshHandle, ComponentModel&);
-        //void setMesh(Mesh*, ComponentModel&);
 
         void setMaterial(Handle materialHandle, ComponentModel&);
-        //void setMaterial(Material*, ComponentModel&);
 
         void setPosition(float x, float y, float z);
-        void setPosition(const glm::vec3& position);
 
         void setOrientation(const glm::quat& orientation);
         void setOrientation(float x, float y, float z);
 
-        void setScale(float scale);
-
         void setScale(float x, float y, float z);
-        void setScale(const glm::vec3& scale);
 
         void translate(float x, float y, float z);
-        void translate(const glm::vec3& translation);
 
         void rotate(float pitch, float yaw, float roll);
-        void rotate(const glm::vec3& rotation);
 
-        void scale(float x, float y, float z);
-        void scale(const glm::vec3& scale);
+        inline void setScale(float scale) noexcept { setScale(scale, scale, scale); }
+        inline void scale(float x, float y, float z) noexcept { setScale(x + m_Scale.x, y + m_Scale.y, z + m_Scale.z); }
+        inline void setPosition(const glm::vec3& v) noexcept { setPosition(v.x, v.y, v.z); }
+        inline void setScale(const glm::vec3& v) noexcept { setScale(v.x, v.y, v.z); }
+        inline void translate(const glm::vec3& v) noexcept { translate(v.x, v.y, v.z); }
+        inline void rotate(const glm::vec3& v) noexcept { rotate(v.x, v.y, v.z); }
+        inline void scale(const glm::vec3& v) noexcept { scale(v.x, v.y, v.z); }
 };
 
 #endif

@@ -4,31 +4,31 @@
 
 namespace Engine {
     class color_vector_4 final {
-        using color_type = glm::vec<4, std::uint8_t, glm::packed_highp>;
+        using color_type = glm::vec<4, uint8_t, glm::packed_highp>;
         private:
             color_type color = color_type(0);
         public:
             explicit color_vector_4(float inColor) {
                 for (int i = 0; i < 4; ++i)
-                    color[i] = (std::uint8_t)(inColor * 255.0f);
+                    color[i] = (uint8_t)(inColor * 255.0f);
             }
             explicit color_vector_4(float inR, float inG, float inB, float inA) {
-                color.r = (std::uint8_t)(inR * 255.0f);
-                color.g = (std::uint8_t)(inG * 255.0f);
-                color.b = (std::uint8_t)(inB * 255.0f);
-                color.a = (std::uint8_t)(inA * 255.0f);
+                color.r = (uint8_t)(inR * 255.0f);
+                color.g = (uint8_t)(inG * 255.0f);
+                color.b = (uint8_t)(inB * 255.0f);
+                color.a = (uint8_t)(inA * 255.0f);
             }
             explicit color_vector_4(const glm::vec4& inColor) {
                 for (int i = 0; i < 4; ++i)
-                    color[i] = (std::uint8_t)(inColor[i] * 255.0f);
+                    color[i] = (uint8_t)(inColor[i] * 255.0f);
             }
-            explicit color_vector_4(std::uint8_t inR, std::uint8_t inG, std::uint8_t inB, std::uint8_t inA) {
+            explicit color_vector_4(uint8_t inR, uint8_t inG, uint8_t inB, uint8_t inA) {
                 color.r = inR;
                 color.g = inG;
                 color.b = inB;
                 color.a = inA;
             }
-            explicit color_vector_4(std::uint8_t inColor) {
+            explicit color_vector_4(uint8_t inColor) {
                 for (int i = 0; i < 4; ++i)
                     color[i] = inColor;
             }
@@ -85,16 +85,16 @@ namespace Engine {
             inline CONSTEXPR float a() const noexcept { return (float)color.a * 0.003921568627451f; }
 
             //return r as an unsigned char
-            inline CONSTEXPR std::uint8_t rc() const noexcept { return color.r; }
+            inline CONSTEXPR uint8_t rc() const noexcept { return color.r; }
 
             //return g as an unsigned char
-            inline CONSTEXPR std::uint8_t gc() const noexcept { return color.g; }
+            inline CONSTEXPR uint8_t gc() const noexcept { return color.g; }
 
             //return b as an unsigned char
-            inline CONSTEXPR std::uint8_t bc() const noexcept { return color.b; }
+            inline CONSTEXPR uint8_t bc() const noexcept { return color.b; }
 
             //return a as an unsigned char
-            inline CONSTEXPR std::uint8_t ac() const noexcept { return color.a; }
+            inline CONSTEXPR uint8_t ac() const noexcept { return color.a; }
     };
 };
 #endif

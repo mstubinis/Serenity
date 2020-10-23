@@ -34,6 +34,17 @@ namespace Engine::priv {
     class IRenderingPipeline {
         friend class RenderModule;
         public:
+            struct API2DCommand final {
+                std::function<void()>  func;
+                float                  depth;
+
+                API2DCommand() = default;
+                API2DCommand(std::function<void()>&& func_, float depth_)
+                    : func{ std::move(func_) }
+                    , depth{ depth_ }
+                {}
+            };
+
             virtual ~IRenderingPipeline(){}
 
             virtual void init() = 0;
@@ -47,11 +58,7 @@ namespace Engine::priv {
             virtual void sort2DAPI() = 0;
 
             virtual void renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport, Camera& camera, Scene& scene) = 0;
-
-            //non textured 2d api elements will be exposed to anti-aliasing post processing
-            virtual void render2DAPINonTextured(bool mainRenderFunc, Viewport& viewport) = 0;
-
-            virtual void render2DAPI(bool mainRenderFunc, Viewport& viewport) = 0;
+            virtual void render2DAPI(const std::vector<IRenderingPipeline::API2DCommand>& commands, bool mainRenderFunc, Viewport& viewport, bool clearDepth = true) = 0;
 
 
             virtual ShaderProgram* getCurrentBoundShaderProgram() = 0;
@@ -212,6 +219,67 @@ namespace Engine::priv {
                 Alignment align, 
                 const glm::vec4& scissor
             ) = 0;
+
+
+
+
+
+            virtual void renderBackgroundTexture(
+                Handle texture,
+                const glm::vec2& p,
+                const glm::vec4& c,
+                float a,
+                const glm::vec2& s,
+                float d,
+                Alignment align,
+                const glm::vec4& scissor
+            ) = 0;
+            virtual void renderBackgroundText(
+                const std::string& t,
+                Handle font,
+                const glm::vec2& p,
+                const glm::vec4& c,
+                float a,
+                const glm::vec2& s,
+                float d,
+                TextAlignment align,
+                const glm::vec4& scissor
+            ) = 0;
+            virtual void renderBackgroundBorder(
+                float borderSize,
+                const glm::vec2& pos,
+                const glm::vec4& col,
+                float w,
+                float h,
+                float angle,
+                float depth,
+                Alignment align,
+                const glm::vec4& scissor
+            ) = 0;
+            virtual void renderBackgroundRectangle(
+                const glm::vec2& pos,
+                const glm::vec4& col,
+                float width,
+                float height,
+                float angle,
+                float depth,
+                Alignment align,
+                const glm::vec4& scissor
+            ) = 0;
+            virtual void renderBackgroundTriangle(
+                const glm::vec2& position,
+                const glm::vec4& color,
+                float angle,
+                float width,
+                float height,
+                float depth,
+                Alignment align,
+                const glm::vec4& scissor
+            ) = 0;
+
+
+
+
 
             virtual void renderFullscreenTriangle() = 0;
             virtual void renderFullscreenQuad() = 0;

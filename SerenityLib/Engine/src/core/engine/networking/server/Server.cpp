@@ -17,11 +17,11 @@ Server::Server(ServerType type, bool multithreaded)
 Server::~Server() {
     shutdown();
 }
-ServerClient* Server::getClientFromUDPData(const std::string& ip, unsigned short port, sf::Packet& sf_packet) const {
+ServerClient* Server::getClientFromUDPData(const std::string& ip, uint16_t port, sf::Packet& sf_packet) const {
     auto hash = m_Client_Hash_Function(ip, port, sf_packet);
     return m_Clients.getClient(hash);
 }
-bool Server::startup(unsigned short port, std::string ip_restriction) {
+bool Server::startup(uint16_t port, std::string ip_restriction) {
     if (m_Active.load(std::memory_order_relaxed) == true) {
         return false;
     }
@@ -135,7 +135,7 @@ void Server::send_udp_to_all_important(Engine::Networking::Packet& packet) {
     Server::send_udp_to_all(packet);
 }
 
-SocketStatus::Status Server::receive_udp(sf::Packet& sf_packet, sf::IpAddress& sender, unsigned short& port) {
+SocketStatus::Status Server::receive_udp(sf::Packet& sf_packet, sf::IpAddress& sender, uint16_t& port) {
     return m_UdpSocket->receive(sf_packet, sender, port);
 }
 bool Server::internal_add_client(const std::string& hash, ServerClient* client) {
@@ -162,7 +162,7 @@ void Server::remove_client_immediately(ServerClient& inClient) {
 void Server::remove_client(ServerClient& inClient) {
     m_Clients.removeClient(inClient, m_Mutex);
 }
-ServerClient* Server::add_new_client(std::string& hash, std::string& clientIP, unsigned short clientPort, SocketTCP* tcp) {
+ServerClient* Server::add_new_client(std::string& hash, std::string& clientIP, uint16_t clientPort, SocketTCP* tcp) {
     ServerClient* client = NEW ServerClient(hash, *this, tcp, clientIP, clientPort);
     return client;
 }
@@ -186,7 +186,7 @@ void Server::internal_update_tcp_listener_loop(bool serverActive) {
     }
 }
 
-void Server::onReceiveUDP(Engine::Networking::Packet& packet, sf::IpAddress& ip, unsigned short port, const float dt) {
+void Server::onReceiveUDP(Engine::Networking::Packet& packet, sf::IpAddress& ip, uint16_t port, const float dt) {
     std::string ipAsString  = ip.toString();
     std::string client_hash = m_Client_Hash_Function(ipAsString, port, packet);
     if (m_ServerType == ServerType::UDP) {
@@ -201,7 +201,7 @@ void Server::internal_update_udp_loop(const float dt, bool serverActive) {
     }
     Engine::Networking::Packet packet;
     sf::IpAddress              ip;
-    unsigned short             port;
+    uint16_t                   port;
 
     auto status = receive_udp(packet, ip, port);
 

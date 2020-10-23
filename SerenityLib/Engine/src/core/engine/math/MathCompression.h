@@ -4,8 +4,8 @@
 
 namespace Engine::Compression {
 
-    std::uint8_t pack2NibblesIntoChar(float val1, float val2);
-    glm::vec2    unpack2NibblesFromChar(std::uint8_t compressedValue);
+    uint8_t pack2NibblesIntoChar(float val1, float val2);
+    glm::vec2    unpack2NibblesFromChar(uint8_t compressedValue);
     float        pack2NibblesIntoCharBasic(float val1, float val2);
     glm::vec2    unpack2NibblesFromCharBasic(float compressedValue);
 

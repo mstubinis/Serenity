@@ -145,7 +145,7 @@ namespace Engine::priv {
 
 namespace Engine::priv {
     struct ImageMipmap final {
-        std::vector<std::uint8_t>   pixels;
+        std::vector<uint8_t>   pixels;
         uint32_t               compressedSize = 0U;
         int                         width          = 0U;
         int                         height         = 0U;

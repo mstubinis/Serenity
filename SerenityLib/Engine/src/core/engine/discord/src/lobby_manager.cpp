@@ -416,7 +416,7 @@ void LobbyManager::UpdateMember(LobbyId lobbyId,
 }
 
 void LobbyManager::SendLobbyMessage(LobbyId lobbyId,
-                                    std::uint8_t* data,
+                                    uint8_t* data,
                                     uint32_t dataLength,
                                     std::function<void(Result)> callback)
 {
@@ -527,7 +527,7 @@ Result LobbyManager::FlushNetwork()
     return static_cast<Result>(result);
 }
 
-Result LobbyManager::OpenNetworkChannel(LobbyId lobbyId, std::uint8_t channelId, bool reliable)
+Result LobbyManager::OpenNetworkChannel(LobbyId lobbyId, uint8_t channelId, bool reliable)
 {
     auto result =
       internal_->open_network_channel(internal_, lobbyId, channelId, (reliable ? 1 : 0));
@@ -536,8 +536,8 @@ Result LobbyManager::OpenNetworkChannel(LobbyId lobbyId, std::uint8_t channelId,
 
 Result LobbyManager::SendNetworkMessage(LobbyId lobbyId,
                                         UserId userId,
-                                        std::uint8_t channelId,
-                                        std::uint8_t* data,
+                                        uint8_t channelId,
+                                        uint8_t* data,
                                         uint32_t dataLength)
 {
     auto result = internal_->send_network_message(

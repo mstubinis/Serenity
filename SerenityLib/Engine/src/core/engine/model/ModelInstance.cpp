@@ -75,7 +75,7 @@ namespace Engine::priv {
         }
         if (animationVector.size() > 0) {
             Engine::Renderer::sendUniform1Safe("AnimationPlaying", 1);
-            Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationVector.getTransforms(), (unsigned int)animationVector.getTransforms().size());
+            Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationVector.getTransforms(), (uint32_t)animationVector.getTransforms().size());
         }else{
             Engine::Renderer::sendUniform1Safe("AnimationPlaying", 0);
         }
@@ -107,24 +107,6 @@ ModelInstance::ModelInstance(Entity parent, Handle mesh, Handle material, Handle
     setCustomBindFunctor(priv::DefaultModelInstanceBindFunctor);
     setCustomUnbindFunctor(priv::DefaultModelInstanceUnbindFunctor);
 }
-/*
-ModelInstance::ModelInstance(Entity parent, Mesh* mesh, Material* mat, ShaderProgram* program) 
-    : m_Parent{ parent }
-{
-    internal_init(mesh, mat, program);
-    setCustomBindFunctor(priv::DefaultModelInstanceBindFunctor);
-    setCustomUnbindFunctor(priv::DefaultModelInstanceUnbindFunctor);
-}
-ModelInstance::ModelInstance(Entity parent, Handle mesh, Handle mat, ShaderProgram* program) 
-    : ModelInstance{ parent, mesh.get<Mesh>(), mat.get<Material>(), program }
-{}
-ModelInstance::ModelInstance(Entity parent, Mesh* mesh, Handle mat, ShaderProgram* program) 
-    : ModelInstance{ parent, mesh, mat.get<Material>(), program }
-{}
-ModelInstance::ModelInstance(Entity parent, Handle mesh, Material* mat, ShaderProgram* program) 
-    : ModelInstance{ parent, mesh.get<Mesh>(), mat, program }
-{}
-*/
 ModelInstance::ModelInstance(ModelInstance&& other) noexcept
     : m_DrawingMode{ std::move(other.m_DrawingMode) }
     , m_AnimationVector{ std::move(other.m_AnimationVector) }
@@ -190,18 +172,6 @@ float ModelInstance::internal_calculate_radius() {
     m_Radius = m_MeshHandle.get<Mesh>()->getRadius();
     return m_Radius;
 }
-void ModelInstance::bind(const Engine::priv::RenderModule& renderer) {
-    m_CustomBindFunctor(this, &renderer);
-}
-void ModelInstance::unbind(const Engine::priv::RenderModule& renderer) {
-    m_CustomUnbindFunctor(this, &renderer);
-}
-void ModelInstance::setDefaultViewportFlag(unsigned int flag) {
-    m_ViewportFlagDefault = flag;
-}
-void ModelInstance::setDefaultViewportFlag(ViewportFlag::Flag flag) {
-    m_ViewportFlagDefault = flag;
-}
 void ModelInstance::internal_init(Handle mesh, Handle material, Handle shaderProgram) {
     if (!shaderProgram) {
         shaderProgram     = ShaderProgram::Deferred;
@@ -226,24 +196,6 @@ void ModelInstance::setStage(RenderStage stage, ComponentModel& componentModel) 
     m_Stage = stage;
     componentModel.setStage(stage, m_Index);
 }
-void ModelInstance::setColor(float r, float g, float b, float a) {
-    m_Color = Engine::color_vector_4(r, g, b, a);
-}
-void ModelInstance::setColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
-    m_Color = Engine::color_vector_4(r, g, b, a);
-}
-void ModelInstance::setColor(const glm::vec4& color){
-    ModelInstance::setColor(color.r, color.g, color.b, color.a);
-}
-void ModelInstance::setColor(const glm::vec3& color) {
-    ModelInstance::setColor(color.r, color.g, color.b, 1.0f);
-}
-void ModelInstance::setGodRaysColor(float r, float g, float b) {
-    m_GodRaysColor = Engine::color_vector_4(r, g, b, m_GodRaysColor.a());
-}
-void ModelInstance::setGodRaysColor(const glm::vec3& color){
-    ModelInstance::setGodRaysColor(color.r, color.g, color.b);
-}
 void ModelInstance::setPosition(float x, float y, float z){
     m_Position = glm::vec3(x, y, z);
     internal_update_model_matrix(false);
@@ -255,9 +207,6 @@ void ModelInstance::setOrientation(const glm::quat& orientation) {
 void ModelInstance::setOrientation(float x, float y, float z) {
     Math::setRotation(m_Orientation, x, y, z);
     internal_update_model_matrix(false);
-}
-void ModelInstance::setScale(float scale) {
-    ModelInstance::setScale(scale, scale, scale);
 }
 void ModelInstance::setScale(float x, float y, float z){
     bool recalcRadius = false;
@@ -275,24 +224,7 @@ void ModelInstance::rotate(float x, float y, float z){
     Math::rotate(m_Orientation, x, y, z);
     internal_update_model_matrix(false);
 }
-void ModelInstance::scale(float x, float y, float z){
-    ModelInstance::setScale(x + m_Scale.x, y + m_Scale.y, z + m_Scale.z);
-}
-void ModelInstance::setPosition(const glm::vec3& v){
-    ModelInstance::setPosition(v.x, v.y, v.z);
-}
-void ModelInstance::setScale(const glm::vec3& v){
-    ModelInstance::setScale(v.x, v.y, v.z);
-}
-void ModelInstance::translate(const glm::vec3& v){
-    ModelInstance::translate(v.x, v.y, v.z);
-}
-void ModelInstance::rotate(const glm::vec3& v){
-    ModelInstance::rotate(v.x, v.y, v.z);
-}
-void ModelInstance::scale(const glm::vec3& v) {
-    ModelInstance::scale(v.x, v.y, v.z);
-}
+
 
 void ModelInstance::setShaderProgram(Handle shaderProgram, ComponentModel& componentModel) {
     if (!shaderProgram) { 
@@ -308,7 +240,7 @@ void ModelInstance::setMesh(Handle mesh, ComponentModel& componentModel){
 void ModelInstance::setMaterial(Handle material, ComponentModel& componentModel){
     componentModel.setModel(m_MeshHandle, material, m_Index, m_ShaderProgramHandle, m_Stage);
 }
-void ModelInstance::playAnimation(const std::string& animationName, float start, float end, unsigned int requestedLoops){
+void ModelInstance::playAnimation(const std::string& animationName, float start, float end, uint32_t requestedLoops){
     m_AnimationVector.emplace_animation(m_MeshHandle, animationName, start, end, requestedLoops);
 }
 

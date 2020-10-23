@@ -9,18 +9,18 @@ public:
     ~StorageManager() = default;
 
     Result Read(const char* name,
-                std::uint8_t* data,
+                uint8_t* data,
                 uint32_t dataLength,
                 uint32_t* read);
     void ReadAsync(const char* name,
-                   std::function<void(Result, std::uint8_t*, uint32_t)> callback);
+                   std::function<void(Result, uint8_t*, uint32_t)> callback);
     void ReadAsyncPartial(const char* name,
                           std::uint64_t offset,
                           std::uint64_t length,
-                          std::function<void(Result, std::uint8_t*, uint32_t)> callback);
-    Result Write(const char* name, std::uint8_t* data, uint32_t dataLength);
+                          std::function<void(Result, uint8_t*, uint32_t)> callback);
+    Result Write(const char* name, uint8_t* data, uint32_t dataLength);
     void WriteAsync(const char* name,
-                    std::uint8_t* data,
+                    uint8_t* data,
                     uint32_t dataLength,
                     std::function<void(Result)> callback);
     Result Delete(const char* name);

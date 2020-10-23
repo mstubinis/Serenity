@@ -44,7 +44,7 @@ public:
                       LobbyMemberTransaction const& transaction,
                       std::function<void(Result)> callback);
     void SendLobbyMessage(LobbyId lobbyId,
-                          std::uint8_t* data,
+                          uint8_t* data,
                           uint32_t dataLength,
                           std::function<void(Result)> callback);
     Result GetSearchQuery(LobbySearchQuery* query);
@@ -56,11 +56,11 @@ public:
     Result ConnectNetwork(LobbyId lobbyId);
     Result DisconnectNetwork(LobbyId lobbyId);
     Result FlushNetwork();
-    Result OpenNetworkChannel(LobbyId lobbyId, std::uint8_t channelId, bool reliable);
+    Result OpenNetworkChannel(LobbyId lobbyId, uint8_t channelId, bool reliable);
     Result SendNetworkMessage(LobbyId lobbyId,
                               UserId userId,
-                              std::uint8_t channelId,
-                              std::uint8_t* data,
+                              uint8_t channelId,
+                              uint8_t* data,
                               uint32_t dataLength);
 
     Event<std::int64_t> OnLobbyUpdate;
@@ -68,9 +68,9 @@ public:
     Event<std::int64_t, std::int64_t> OnMemberConnect;
     Event<std::int64_t, std::int64_t> OnMemberUpdate;
     Event<std::int64_t, std::int64_t> OnMemberDisconnect;
-    Event<std::int64_t, std::int64_t, std::uint8_t*, uint32_t> OnLobbyMessage;
+    Event<std::int64_t, std::int64_t, uint8_t*, uint32_t> OnLobbyMessage;
     Event<std::int64_t, std::int64_t, bool> OnSpeaking;
-    Event<std::int64_t, std::int64_t, std::uint8_t, std::uint8_t*, uint32_t> OnNetworkMessage;
+    Event<std::int64_t, std::int64_t, uint8_t, uint8_t*, uint32_t> OnNetworkMessage;
 
 private:
     friend class Core;

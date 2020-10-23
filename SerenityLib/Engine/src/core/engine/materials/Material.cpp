@@ -190,30 +190,30 @@ MaterialComponent& Material::addComponentSpecular(const std::string& textureFile
     auto texture = Engine::priv::MaterialLoader::LoadTextureSpecular(textureFile);
     return *internal_add_component_generic(MaterialComponentType::Specular, texture.second);
 }
-MaterialComponent& Material::addComponentAO(const std::string& textureFile, unsigned char baseValue){
+MaterialComponent& Material::addComponentAO(const std::string& textureFile, uint8_t baseValue){
     auto texture     = Engine::priv::MaterialLoader::LoadTextureAO(textureFile);
     auto& component  = *internal_add_component_generic(MaterialComponentType::AO, texture.second);
     auto& layer      = component.layer(0);
-    auto& _data2     = layer.getMaterialLayerMiscData();
-    layer.setData2(0.0f, 1.0f, 1.0f, _data2.aMultiplier);
+    auto& data2_     = layer.getMaterialLayerMiscData();
+    layer.setData2(0.0f, 1.0f, 1.0f, data2_.aMultiplier);
     setAO(baseValue);
     return component;
 }
-MaterialComponent& Material::addComponentMetalness(const std::string& textureFile, unsigned char baseValue){
+MaterialComponent& Material::addComponentMetalness(const std::string& textureFile, uint8_t baseValue){
     auto texture     = Engine::priv::MaterialLoader::LoadTextureMetalness(textureFile);
     auto& component  = *internal_add_component_generic(MaterialComponentType::Metalness, texture.second);
     auto& layer      = component.layer(0);
-    auto& _data2     = layer.getMaterialLayerMiscData();
-    layer.setData2(0.01f, 0.99f, 1.0f, _data2.aMultiplier);
+    auto& data2_     = layer.getMaterialLayerMiscData();
+    layer.setData2(0.01f, 0.99f, 1.0f, data2_.aMultiplier);
     setMetalness(baseValue);
     return component;
 }
-MaterialComponent& Material::addComponentSmoothness(const std::string& textureFile, unsigned char baseValue){
+MaterialComponent& Material::addComponentSmoothness(const std::string& textureFile, uint8_t baseValue){
     auto texture     = Engine::priv::MaterialLoader::LoadTextureSmoothness(textureFile);
     auto& component  = *internal_add_component_generic(MaterialComponentType::Smoothness, texture.second);
     auto& layer      = component.layer(0);
-    auto& _data2     = layer.getMaterialLayerMiscData();
-    layer.setData2(0.01f, 0.99f, 1.0f, _data2.aMultiplier);
+    auto& data2_     = layer.getMaterialLayerMiscData();
+    layer.setData2(0.01f, 0.99f, 1.0f, data2_.aMultiplier);
     setSmoothness(baseValue);
     return component;
 }
@@ -226,10 +226,10 @@ MaterialComponent& Material::addComponentReflection(const std::string& cubemapNa
     }
     auto& component = *internal_add_component_generic(MaterialComponentType::Reflection, Handle{});
     auto& layer     = component.layer(0);
-    auto& _data2    = layer.getMaterialLayerMiscData();
+    auto& data2_    = layer.getMaterialLayerMiscData();
     layer.setMask(mask.second);
     layer.setCubemap(cubemap.second);
-    layer.setData2(mixFactor, _data2.gMultiplier, _data2.bMultiplier, _data2.aMultiplier);
+    layer.setData2(mixFactor, data2_.gMultiplier, data2_.bMultiplier, data2_.aMultiplier);
     return component;
 }
 MaterialComponent& Material::addComponentRefraction(const std::string& cubemapName, const std::string& maskFile, float refractiveIndex, float mixFactor){
@@ -241,25 +241,25 @@ MaterialComponent& Material::addComponentRefraction(const std::string& cubemapNa
     }
     auto& component = *internal_add_component_generic(MaterialComponentType::Refraction, Handle{});
     auto& layer     = component.layer(0);
-    auto& _data2    = layer.getMaterialLayerMiscData();
+    auto& data2_    = layer.getMaterialLayerMiscData();
     layer.setMask(mask.second);
     layer.setCubemap(cubemap.second);
-    layer.setData2(mixFactor, refractiveIndex, _data2.bMultiplier, _data2.aMultiplier);
+    layer.setData2(mixFactor, refractiveIndex, data2_.bMultiplier, data2_.aMultiplier);
     return component;
 }
 MaterialComponent& Material::addComponentParallaxOcclusion(const std::string& textureFile, float heightScale){
     auto texture     = Engine::priv::MaterialLoader::LoadTextureNormal(textureFile);
     auto& component  = *internal_add_component_generic(MaterialComponentType::ParallaxOcclusion, texture.second);
     auto& layer      = component.layer(0);
-    auto& _data2     = layer.getMaterialLayerMiscData();
-    layer.setData2(heightScale, _data2.gMultiplier, _data2.bMultiplier, _data2.aMultiplier);
+    auto& data2_     = layer.getMaterialLayerMiscData();
+    layer.setData2(heightScale, data2_.gMultiplier, data2_.bMultiplier, data2_.aMultiplier);
     return component;
 }
 void Material::setShadeless(bool shadeless){
     m_Shadeless = shadeless;
     internal_update_global_material_pool(false);
 }
-void Material::setGlow(unsigned char glow){
+void Material::setGlow(uint8_t glow){
     m_BaseGlow = glm::clamp(glow, 1_uc, 255_uc);
     internal_update_global_material_pool(false);
 }
@@ -267,7 +267,7 @@ void Material::setGlow(unsigned char glow){
 void Material::setF0Color(const Engine::color_vector_4& f0Color) {
     Material::setF0Color(f0Color.rc(), f0Color.gc(), f0Color.bc());
 }
-void Material::setF0Color(unsigned char r, unsigned char g, unsigned char b) {
+void Material::setF0Color(uint8_t r, uint8_t g, uint8_t b) {
     m_F0Color = Engine::color_vector_4(
         glm::clamp(r, 1_uc, 255_uc),
         glm::clamp(g, 1_uc, 255_uc),
@@ -284,7 +284,7 @@ void Material::setMaterialPhysics(MaterialPhysics materialPhysics){
     setMetalness(prop.metalness);
     internal_update_global_material_pool(false);
 }
-void Material::setSmoothness(unsigned char smoothness){
+void Material::setSmoothness(uint8_t smoothness){
     m_BaseSmoothness = glm::clamp(smoothness, 1_uc, 255_uc);
     internal_update_global_material_pool(false);
 }
@@ -296,15 +296,15 @@ void Material::setDiffuseModel(DiffuseModel diffuseModel){
     m_DiffuseModel = diffuseModel;
     internal_update_global_material_pool(false);
 }
-void Material::setAO(unsigned char ao){
+void Material::setAO(uint8_t ao){
     m_BaseAO = glm::clamp(ao, 1_uc, 255_uc);
     internal_update_global_material_pool(false);
 }
-void Material::setMetalness(unsigned char metalness){
+void Material::setMetalness(uint8_t metalness){
     m_BaseMetalness = glm::clamp(metalness, 1_uc, 255_uc);
     internal_update_global_material_pool(false);
 }
-void Material::setAlpha(unsigned char alpha) {
+void Material::setAlpha(uint8_t alpha) {
     m_BaseAlpha = glm::clamp(alpha, 1_uc, 255_uc);
     internal_update_global_material_pool(false);
 }

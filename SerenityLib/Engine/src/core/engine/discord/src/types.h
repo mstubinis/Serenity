@@ -176,7 +176,7 @@ using LobbySecret = const char*;
 using MetadataKey = const char*;
 using MetadataValue = const char*;
 using NetworkPeerId = std::uint64_t;
-using NetworkChannelId = std::uint8_t;
+using NetworkChannelId = uint8_t;
 using Path = const char*;
 using DateTime = const char*;
 
@@ -434,8 +434,8 @@ public:
     Snowflake GetUserId() const;
     void SetAchievementId(Snowflake achievementId);
     Snowflake GetAchievementId() const;
-    void SetPercentComplete(std::uint8_t percentComplete);
-    std::uint8_t GetPercentComplete() const;
+    void SetPercentComplete(uint8_t percentComplete);
+    uint8_t GetPercentComplete() const;
     void SetUnlockedAt(DateTime unlockedAt);
     DateTime GetUnlockedAt() const;
 

@@ -39,12 +39,12 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
     fileSize = stream.tellg();
     stream.seekg(0, std::ios::beg);
 
-    std::vector<std::uint8_t> file_data;
+    std::vector<uint8_t> file_data;
     file_data.reserve((unsigned int)fileSize);
-    file_data.insert(file_data.begin(), std::istream_iterator<std::uint8_t>(stream), std::istream_iterator<std::uint8_t>());
+    file_data.insert(file_data.begin(), std::istream_iterator<uint8_t>(stream), std::istream_iterator<uint8_t>());
     stream.close();
 
-    std::array<std::uint8_t, 128> header_buffer;
+    std::array<uint8_t, 128> header_buffer;
     uint32_t progress = 0;
     for (size_t i = 0; i < header_buffer.size(); ++i) {
         header_buffer[i] = file_data[i];
@@ -58,7 +58,7 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
     //DX10 header here
     DDS::DDS_Header_DX10 headDX10;
     if ((head.header_flags & DDS::DDPF_FOURCC) && head.format.fourCC == FourCC_DX10) {
-        std::array<std::uint8_t, 20> header_buffer_DX10;
+        std::array<uint8_t, 20> header_buffer_DX10;
         for (size_t i = 0; i < header_buffer_DX10.size(); ++i) {
             header_buffer_DX10[i] = file_data[i + progress];
             ++progress;

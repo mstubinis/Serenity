@@ -30,13 +30,13 @@ class Font final: public Resource {
         Handle                                        m_FontTexture    = Handle{};
         float                                         m_MaxHeight      = 0.0f;
         float                                         m_LineHeight     = 8.0f;
-        std::unordered_map<std::uint8_t, CharGlyph>   m_CharGlyphs;
+        std::unordered_map<uint8_t, CharGlyph>   m_CharGlyphs;
 
         void init_simple(const std::string& filename, int height, int width);
         void init_freetype(const std::string& filename, int height, int width);
         void init(const std::string& filename, int height, int width);
 
-        std::vector<std::vector<std::uint8_t>> generate_bitmap(const FT_GlyphSlotRec_&);
+        std::vector<std::vector<uint8_t>> generate_bitmap(const FT_GlyphSlotRec_&);
 
     public:
         Font() = default;
@@ -55,6 +55,6 @@ class Font final: public Resource {
         inline CONSTEXPR Handle getGlyphTexture() const noexcept { return m_FontTexture; }
         inline CONSTEXPR float getLineHeight() const noexcept { return m_LineHeight; }
 
-        const CharGlyph& getGlyphData(std::uint8_t character) const;
+        const CharGlyph& getGlyphData(uint8_t character) const;
 };
 #endif

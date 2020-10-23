@@ -30,7 +30,7 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
     SMSH_Fileheader smsh_header;
 
     uint32_t blockStart = 0;
-    const std::uint8_t* streamDataBuffer = (std::uint8_t*)stream.data();
+    const uint8_t* streamDataBuffer = (uint8_t*)stream.data();
 
     readBigEndian(smsh_header.m_InterleavingType,   streamDataBuffer, 1, blockStart);
     readBigEndian(smsh_header.m_AttributeCount,     streamDataBuffer, 4, blockStart);
@@ -46,7 +46,7 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
     VertexDataFormat vertexDataFormat;
     vertexDataFormat.m_InterleavingType = (VertexAttributeLayout)smsh_header.m_InterleavingType;
 
-    std::vector<std::tuple<SMSH_AttributeNoBuffer, std::uint8_t*, uint32_t>> attr_data;
+    std::vector<std::tuple<SMSH_AttributeNoBuffer, uint8_t*, uint32_t>> attr_data;
     attr_data.reserve(smsh_header.m_AttributeCount);
     for (size_t i = 0; i < smsh_header.m_AttributeCount; ++i) {
         auto& [attr, buff, idx] = attr_data.emplace_back(SMSH_AttributeNoBuffer{}, nullptr, 0U);
@@ -59,7 +59,7 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
         readBigEndian(attr.m_AttributeBufferSize,     streamDataBuffer, 4, blockStart);     //size of the whole data buffer
         readBigEndian(attr.m_Offset,                  streamDataBuffer, 4, blockStart);
 
-        buff = NEW std::uint8_t[attr.m_AttributeBufferSize];
+        buff = NEW uint8_t[attr.m_AttributeBufferSize];
         std::memcpy(&buff[0], &streamDataBuffer[blockStart], attr.m_AttributeBufferSize);
         blockStart += attr.m_AttributeBufferSize;
 
@@ -71,7 +71,7 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
 
     for (size_t i = 0; i < smsh_header.m_AttributeCount; ++i) {
         auto& [attr, buff, idx] = attr_data[i];
-        cpuData.m_VertexData->setData(i, buff, attr.m_AttributeBufferSize, attr.m_AttributeBufferSize / attr.m_SizeOfAttribute, false, false);
+        cpuData.m_VertexData->setData(i, buff, attr.m_AttributeBufferSize, attr.m_AttributeBufferSize / attr.m_SizeOfAttribute, MeshModifyFlags::None);
         delete[] buff;
     }
     //indices
@@ -80,7 +80,7 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
     switch (smsh_header.m_IndiceDataTypeSize) {
         case (uint32_t)SMSH_IndiceDataType::Unsigned_Byte: {
             for (size_t i = 0; i < smsh_header.m_IndiceCount; ++i) {
-                std::uint8_t indice;
+                uint8_t indice;
                 readBigEndian(indice, streamDataBuffer, 1U, blockStart);
                 indices.emplace_back((uint32_t)indice);
             }
@@ -108,7 +108,7 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
             break;
         }
     }
-    cpuData.m_VertexData->setIndices(indices.data(), indices.size(), false, false, true);
+    cpuData.m_VertexData->setIndices(indices.data(), indices.size(), MeshModifyFlags::RecalculateTriangles);
 
     //animation data
     if (smsh_header.m_NumberOfBones > 0U) {
@@ -305,7 +305,7 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
             Engine::Math::Float16From32(&positions_packed[(i * 3) + j], positions[i][j]);
         }
     }
-    positions_attr.setBuffer(reinterpret_cast<const std::uint8_t*>(positions_packed.data()), (uint32_t)(positions_packed.size() * 2));
+    positions_attr.setBuffer(reinterpret_cast<const uint8_t*>(positions_packed.data()), (uint32_t)(positions_packed.size() * 2));
 
     //uvs - 2 half floats
     SMSH_Attribute uvs_attr{ 
@@ -318,28 +318,28 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
             Engine::Math::Float16From32(&uvs_packed[(i * 2) + j], uvs[i][j]);
         }
     }
-    uvs_attr.setBuffer(reinterpret_cast<const std::uint8_t*>(uvs_packed.data()), (uint32_t)(uvs_packed.size() * 2));
+    uvs_attr.setBuffer(reinterpret_cast<const uint8_t*>(uvs_packed.data()), (uint32_t)(uvs_packed.size() * 2));
 
     //normals - 1 packed unsigned 32 int
     SMSH_Attribute normals_attr{ 
         SMSH_AttributeDataType::INT_2_10_10_10_REV, SMSH_AttributeComponentSize::BGRA, uvs_attr.m_SizeOfAttribute + uvs_attr.m_Offset, true, 0, sizeof(uint32_t), 0
     };
     auto normals = vertexData.getData<uint32_t>(2);
-    normals_attr.setBuffer(reinterpret_cast<const std::uint8_t*>(normals.data()), (uint32_t)(normals.size() * normals_attr.m_SizeOfAttribute));
+    normals_attr.setBuffer(reinterpret_cast<const uint8_t*>(normals.data()), (uint32_t)(normals.size() * normals_attr.m_SizeOfAttribute));
 
     //binormals - 1 packed unsigned 32 int
     SMSH_Attribute binormals_attr{ 
         SMSH_AttributeDataType::INT_2_10_10_10_REV, SMSH_AttributeComponentSize::BGRA, normals_attr.m_Offset + normals_attr.m_SizeOfAttribute, true, 0, sizeof(uint32_t), 0
     };
     auto binormals = vertexData.getData<uint32_t>(3);
-    binormals_attr.setBuffer(reinterpret_cast<const std::uint8_t*>(binormals.data()), (uint32_t)(binormals.size() * binormals_attr.m_SizeOfAttribute));
+    binormals_attr.setBuffer(reinterpret_cast<const uint8_t*>(binormals.data()), (uint32_t)(binormals.size() * binormals_attr.m_SizeOfAttribute));
 
     //tangents - 1 packed unsigned 32 int
     SMSH_Attribute tangents_attr{ 
         SMSH_AttributeDataType::INT_2_10_10_10_REV, SMSH_AttributeComponentSize::BGRA, binormals_attr.m_Offset + binormals_attr.m_SizeOfAttribute, true, 0, sizeof(uint32_t), 0
     };
     auto tangents = vertexData.getData<uint32_t>(4);
-    tangents_attr.setBuffer(reinterpret_cast<const std::uint8_t*>(tangents.data()), (uint32_t)(tangents.size() * tangents_attr.m_SizeOfAttribute));
+    tangents_attr.setBuffer(reinterpret_cast<const uint8_t*>(tangents.data()), (uint32_t)(tangents.size() * tangents_attr.m_SizeOfAttribute));
 
     //boneids - 4 half floats
     SMSH_Attribute boneids_attr{ 
@@ -352,7 +352,7 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
             Engine::Math::Float16From32(&boneids_packed[(i * 4) + j], boneids[i][j]);
         }
     }
-    boneids_attr.setBuffer(reinterpret_cast<const std::uint8_t*>(boneids_packed.data()), (uint32_t)(boneids_packed.size() * 2));
+    boneids_attr.setBuffer(reinterpret_cast<const uint8_t*>(boneids_packed.data()), (uint32_t)(boneids_packed.size() * 2));
 
     //boneweights - 4 half floats
     SMSH_Attribute boneweights_attr{ 
@@ -365,7 +365,7 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
             Engine::Math::Float16From32(&boneweights_packed[(i * 4) + j], boneweights[i][j]);
         }
     }
-    boneweights_attr.setBuffer(reinterpret_cast<const std::uint8_t*>(boneweights_packed.data()), (uint32_t)(boneweights_packed.size() * 2));
+    boneweights_attr.setBuffer(reinterpret_cast<const uint8_t*>(boneweights_packed.data()), (uint32_t)(boneweights_packed.size() * 2));
 
     //strides
     uint32_t total_stride =
@@ -399,7 +399,7 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
     switch (smsh_header.m_IndiceDataTypeSize) {
         case (uint32_t)SMSH_IndiceDataType::Unsigned_Byte: {
             for (size_t i = 0; i < vertexData.m_Indices.size(); ++i) {
-                std::uint8_t indice = vertexData.m_Indices[i];
+                uint8_t indice = vertexData.m_Indices[i];
                 writeBigEndian(stream, indice, 1U);
             }
             break;

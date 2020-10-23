@@ -65,8 +65,8 @@ void Font::init(const std::string& filename, int height, int width) {
     }
 }
 
-std::vector<std::vector<std::uint8_t>> Font::generate_bitmap(const FT_GlyphSlotRec_& glyph) {
-    std::vector<std::vector<std::uint8_t>> pixels;
+std::vector<std::vector<uint8_t>> Font::generate_bitmap(const FT_GlyphSlotRec_& glyph) {
+    std::vector<std::vector<uint8_t>> pixels;
     pixels.resize(glyph.bitmap.rows);
     for (unsigned int i = 0; i < pixels.size(); ++i) {
         pixels[i].resize(glyph.bitmap.width, 0_uc);
@@ -337,6 +337,6 @@ float Font::getTextWidth(std::string_view text) const {
     maxWidth = std::max(maxWidth, row_width);
     return maxWidth;
 }
-const CharGlyph& Font::getGlyphData(std::uint8_t character) const {
+const CharGlyph& Font::getGlyphData(uint8_t character) const {
     return (m_CharGlyphs.contains(character)) ? m_CharGlyphs.at(character) : m_CharGlyphs.at('?');
 }

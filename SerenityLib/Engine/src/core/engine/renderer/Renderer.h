@@ -208,6 +208,70 @@ namespace Renderer{
         const glm::vec4& scissor = NO_SCISSOR
     );
 
+
+
+    void renderBackgroundTexture(
+        Handle texture,
+        const glm::vec2& position,
+        const glm::vec4& color,
+        float angle,
+        const glm::vec2& scale,
+        float depth,
+        Alignment = Alignment::Center,
+        const glm::vec4& scissor = NO_SCISSOR
+    );
+    void renderBackgroundText(
+        const std::string& text,
+        Handle font,
+        const glm::vec2& position,
+        const glm::vec4& color,
+        float angle,
+        const glm::vec2& scale,
+        float depth,
+        TextAlignment = TextAlignment::Left,
+        const glm::vec4& scissor = NO_SCISSOR
+    );
+    void renderBackgroundRectangle(
+        const glm::vec2& pos,
+        const glm::vec4& col,
+        float width,
+        float height,
+        float angle,
+        float depth,
+        Alignment = Alignment::Center,
+        const glm::vec4& scissor = NO_SCISSOR
+    );
+    void renderBackgroundBorder(
+        float borderSize,
+        const glm::vec2& position,
+        const glm::vec4& color,
+        float width,
+        float height,
+        float angle,
+        float depth,
+        Alignment = Alignment::Center,
+        const glm::vec4& scissor = NO_SCISSOR
+    );
+    void renderBackgroundTriangle(
+        const glm::vec2& position,
+        const glm::vec4& color,
+        float angle,
+        float width,
+        float height,
+        float depth,
+        Alignment = Alignment::Center,
+        const glm::vec4& scissor = NO_SCISSOR
+    );
+
+
+
+
+
+
+
+
+
+
     #pragma region UniformSending
     //Uniform 1
     inline void sendUniform1(const char* l, double x){ glUniform1d(getUniformLocUnsafe(l),x); }

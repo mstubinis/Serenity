@@ -360,16 +360,16 @@ VertexData* Engine::priv::MeshLoader::LoadFrom_OBJCC(const std::string& filename
         readBigEndian(inindice, streamDataBuffer, 2, blockStart);
         vertexData->m_Indices.emplace_back(inindice);
     }
-    vertexData->setData(0, temp_pos.data(), temp_pos.size());
-    vertexData->setData(1, temp_uvs.data(), temp_uvs.size());
-    vertexData->setData(2, temp_norm.data(), temp_norm.size());
-    vertexData->setData(3, temp_binorm.data(), temp_binorm.size());
-    vertexData->setData(4, temp_tang.data(), temp_tang.size());
+    vertexData->setData(0, temp_pos.data(), temp_pos.size(), MeshModifyFlags::None);
+    vertexData->setData(1, temp_uvs.data(), temp_uvs.size(), MeshModifyFlags::None);
+    vertexData->setData(2, temp_norm.data(), temp_norm.size(), MeshModifyFlags::None);
+    vertexData->setData(3, temp_binorm.data(), temp_binorm.size(), MeshModifyFlags::None);
+    vertexData->setData(4, temp_tang.data(), temp_tang.size(), MeshModifyFlags::None);
     if (temp_bID.size() > 0) {
-        vertexData->setData(5, temp_bID.data(), temp_bID.size());
-        vertexData->setData(6, temp_bW.data(), temp_bW.size());
+        vertexData->setData(5, temp_bID.data(), temp_bID.size(), MeshModifyFlags::None);
+        vertexData->setData(6, temp_bW.data(), temp_bW.size(), MeshModifyFlags::None);
     }
-    vertexData->setIndices(vertexData->m_Indices.data(), vertexData->m_Indices.size(), false, false, true);
+    vertexData->setIndices(vertexData->m_Indices.data(), vertexData->m_Indices.size(), MeshModifyFlags::RecalculateTriangles);
     return vertexData;
 }
 void Engine::priv::MeshLoader::SaveTo_OBJCC(VertexData& vertexData, std::string filename) {

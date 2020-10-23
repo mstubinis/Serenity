@@ -153,7 +153,7 @@ using MaskType = uint32_t;
 #endif
 
 using uint   = uint32_t;
-using uchar  = std::uint8_t;
+using uchar  = uint8_t;
 using ushort = uint16_t;
 using uint32 = uint32_t;
 using uint64 = std::uint64_t;
@@ -349,9 +349,9 @@ namespace Engine {
     /*
     void printEndianness() noexcept {
         uint32_t data;
-        std::uint8_t* cptr;
+        uint8_t* cptr;
         data = 1; //Assign data
-        cptr = (std::uint8_t*)&data; //Type cast
+        cptr = (uint8_t*)&data; //Type cast
         if (*cptr == 1) {
             ENGINE_PRODUCTION_LOG("little-endiann")
         }else if (*cptr == 0) {

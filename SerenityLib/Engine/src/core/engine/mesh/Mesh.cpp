@@ -207,12 +207,12 @@ void InternalMeshPublicInterface::FinalizeVertexData(MeshCPUData& cpuData, MeshI
         for (size_t i = 0; i < data.tangents.size(); ++i) {
             normals[2].emplace_back(Engine::Compression::pack3NormalsInto32Int(data.tangents[i]));
         }
-        vertexData.setData(0, data.points.data(), data.points.size());
-        vertexData.setData(1, data.uvs.data(), data.uvs.size());
-        vertexData.setData(2, normals[0].data(), normals[0].size());
-        vertexData.setData(3, normals[1].data(), normals[1].size());
-        vertexData.setData(4, normals[2].data(), normals[2].size());
-        vertexData.setIndices(data.indices.data(), data.indices.size(), false, false, true);
+        vertexData.setData(0, data.points.data(), data.points.size(), MeshModifyFlags::None);
+        vertexData.setData(1, data.uvs.data(), data.uvs.size(), MeshModifyFlags::None);
+        vertexData.setData(2, normals[0].data(), normals[0].size(), MeshModifyFlags::None);
+        vertexData.setData(3, normals[1].data(), normals[1].size(), MeshModifyFlags::None);
+        vertexData.setData(4, normals[2].data(), normals[2].size(), MeshModifyFlags::None);
+        vertexData.setIndices(data.indices.data(), data.indices.size(), MeshModifyFlags::RecalculateTriangles);
         #pragma endregion
     }else{
         #pragma region Some Threshold
@@ -260,16 +260,16 @@ void InternalMeshPublicInterface::FinalizeVertexData(MeshCPUData& cpuData, MeshI
             normals[2].emplace_back(Engine::Compression::pack3NormalsInto32Int(temp_tangents[i]));
         }
 
-        vertexData.setData(0, temp_pos.data(), temp_pos.size());
-        vertexData.setData(1, temp_uvs.data(), temp_uvs.size());
-        vertexData.setData(2, normals[0].data(), normals[0].size());
-        vertexData.setData(3, normals[1].data(), normals[1].size());
-        vertexData.setData(4, normals[2].data(), normals[2].size());
+        vertexData.setData(0, temp_pos.data(), temp_pos.size(), MeshModifyFlags::None);
+        vertexData.setData(1, temp_uvs.data(), temp_uvs.size(), MeshModifyFlags::None);
+        vertexData.setData(2, normals[0].data(), normals[0].size(), MeshModifyFlags::None);
+        vertexData.setData(3, normals[1].data(), normals[1].size(), MeshModifyFlags::None);
+        vertexData.setData(4, normals[2].data(), normals[2].size(), MeshModifyFlags::None);
         if (boneIDs.size() > 0) {
-            vertexData.setData(5, boneIDs.data(), boneIDs.size());
-            vertexData.setData(6, boneWeights.data(), boneWeights.size());
+            vertexData.setData(5, boneIDs.data(), boneIDs.size(), MeshModifyFlags::None);
+            vertexData.setData(6, boneWeights.data(), boneWeights.size(), MeshModifyFlags::None);
         }
-        vertexData.setIndices(indices.data(), indices.size(), false, false, true);
+        vertexData.setIndices(indices.data(), indices.size(), MeshModifyFlags::RecalculateTriangles);
         #pragma endregion
     }
 }
@@ -438,7 +438,7 @@ void Mesh::internal_recalc_indices_from_terrain(const Terrain& terrain) {
         }
     }
     m_CPUData.m_VertexData->bind();
-    modifyIndices(data.indices.data(), data.indices.size(), MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU);
+    modifyIndices(data.indices.data(), data.indices.size());
     m_CPUData.m_VertexData->unbind();
 }
 Mesh::Mesh(const std::string& name, const Terrain& terrain, float threshold) 

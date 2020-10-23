@@ -1,15 +1,15 @@
 #include <core/engine/utils/PrecompiledHeader.h>
 #include <core/engine/math/MathCompression.h>
 
-std::uint8_t Engine::Compression::pack2NibblesIntoChar(float val1, float val2) {
-    std::uint8_t packedData = 0;
+uint8_t Engine::Compression::pack2NibblesIntoChar(float val1, float val2) {
+    uint8_t packedData = 0;
     int bits    = (int)std::round(val1 / 0.066666666666f);
     int bits1   = (int)std::round(val2 / 0.066666666666f);
     packedData |= bits & 15;
     packedData |= (bits1 << 4) & 240;
     return packedData;
 }
-glm::vec2 Engine::Compression::unpack2NibblesFromChar(std::uint8_t compressedValue) {
+glm::vec2 Engine::Compression::unpack2NibblesFromChar(uint8_t compressedValue) {
     return glm::vec2(
         (float)(((int)compressedValue & 15) * 0.066666666666f),
         (float)(((int)compressedValue >> 4) * 0.066666666666f)
@@ -77,11 +77,11 @@ uint32_t Engine::Compression::pack3NormalsInto32Int(const glm::vec3& values) {
 
 float Engine::Compression::pack3FloatsInto1Float(float val1, float val2, float val3) {
     val1 = (val1 + 1.0f) * 0.5f;
-    std::uint8_t _r = static_cast<std::uint8_t>(val1 * 255.0f);
+    uint8_t _r = static_cast<uint8_t>(val1 * 255.0f);
     val2 = (val2 + 1.0f) * 0.5f;
-    std::uint8_t _g = static_cast<std::uint8_t>(val2 * 255.0f);
+    uint8_t _g = static_cast<uint8_t>(val2 * 255.0f);
     val3 = (val3 + 1.0f) * 0.5f;
-    std::uint8_t _b = static_cast<std::uint8_t>(val3 * 255.0f);
+    uint8_t _b = static_cast<uint8_t>(val3 * 255.0f);
     uint32_t packedColor = (_r << 16) | (_g << 8) | _b;
     float packedFloat = static_cast<float>((double)packedColor / (double)(1 << 24));
     return packedFloat;
@@ -100,9 +100,9 @@ glm::vec3 Engine::Compression::unpack3FloatsInto1Float(float compressedValue) {
 }
 
 float Engine::Compression::pack3FloatsInto1FloatUnsigned(float val1, float val2, float val3) {
-    std::uint8_t v1 = static_cast<std::uint8_t>(val1 * 255.0f);
-    std::uint8_t v2 = static_cast<std::uint8_t>(val2 * 255.0f);
-    std::uint8_t v3 = static_cast<std::uint8_t>(val3 * 255.0f);
+    uint8_t v1 = static_cast<uint8_t>(val1 * 255.0f);
+    uint8_t v2 = static_cast<uint8_t>(val2 * 255.0f);
+    uint8_t v3 = static_cast<uint8_t>(val3 * 255.0f);
     uint32_t packedColor = (v1 << 16) | (v2 << 8) | v3;
     float packedFloat = static_cast<float>((double)packedColor / (double)(1 << 24));
     return packedFloat;

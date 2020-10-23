@@ -93,7 +93,7 @@ std::vector<glm::vec3> VertexData::getPositions() const {
     return points;
 }
 
-void VertexData::setIndices(const unsigned int* data, size_t bufferCount, bool addToGPU, bool orphan, bool reCalcTriangles) {
+void VertexData::setIndices(const unsigned int* data, size_t bufferCount, MeshModifyFlags::Flag flags) {
     if (m_Buffers.size() == 1) {
         m_Buffers.push_back(std::make_unique<ElementBufferObject>());
     }
@@ -104,7 +104,7 @@ void VertexData::setIndices(const unsigned int* data, size_t bufferCount, bool a
             m_Indices.emplace_back(data[i]);
         }
     }
-    if (reCalcTriangles) {
+    if (flags & MeshModifyFlags::RecalculateTriangles) {
         auto positions = getPositions();
         if (positions.size() >= 0) {
             m_Triangles.clear();
@@ -131,11 +131,11 @@ void VertexData::setIndices(const unsigned int* data, size_t bufferCount, bool a
             }
         }
     }
-    if (addToGPU) {
+    if (flags & MeshModifyFlags::UploadToGPU) {
         auto& indiceBuffer = *m_Buffers[1];
         indiceBuffer.generate();
         indiceBuffer.bind();
-        !orphan ? indiceBuffer.setData(m_Indices, BufferDataDrawType::Static) : indiceBuffer.setDataOrphan(m_Indices);
+        !(flags & MeshModifyFlags::Orphan) ? indiceBuffer.setData(m_Indices, BufferDataDrawType::Static) : indiceBuffer.setDataOrphan(m_Indices);
     }
 }
 void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
@@ -150,7 +150,7 @@ void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
 
     size_t accumulator = 0;
     size_t size = 0;
-    std::vector<std::uint8_t> gpu_data_buffer;
+    std::vector<uint8_t> gpu_data_buffer;
     if (m_Format.m_InterleavingType == VertexAttributeLayout::Interleaved) {
         size = (m_Format.m_Attributes[0].stride * m_DataSizes[0]);
         gpu_data_buffer.reserve(size);
