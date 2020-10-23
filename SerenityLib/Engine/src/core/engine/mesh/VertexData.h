@@ -6,6 +6,8 @@
 #include <core/engine/mesh/VertexDataFormat.h>
 #include <core/engine/mesh/MeshIncludes.h>
 
+constexpr uint32_t MESH_DEFAULT_MODIFICATION_FLAGS = MeshModifyFlags::None | MeshModifyFlags::UploadToGPU;
+
 struct VertexData final {
     VertexDataFormat                               m_Format;
     std::vector<std::vector<uint8_t>>              m_Data;
@@ -24,7 +26,8 @@ struct VertexData final {
     VertexData& operator=(VertexData&& other) noexcept;
     ~VertexData();
 
-    template<typename T> std::vector<T> getData(size_t attributeIndex) const noexcept {
+    template<typename T> 
+    std::vector<T> getData(size_t attributeIndex) const noexcept {
         if (attributeIndex >= m_Data.size()) {
             return {};
         }
@@ -33,7 +36,8 @@ struct VertexData final {
         const std::vector<T> data_as_t(data_as_t_ptr, data_as_t_ptr + m_DataSizes[attributeIndex]);
         return data_as_t;
     }
-    template<typename T> void setData(size_t attributeIndex, const T* source_new_data, size_t bufferCount, bool addToGPU = false, bool orphan = false) noexcept {
+    template<typename T> 
+    void setData(size_t attributeIndex, const T* source_new_data, size_t bufferCount, MeshModifyFlags::Flag flags = (MeshModifyFlags::Flag)MESH_DEFAULT_MODIFICATION_FLAGS) noexcept {
         if (m_Buffers.size() == 0) {
             m_Buffers.push_back(std::make_unique<VertexBufferObject>());
         }
@@ -47,18 +51,18 @@ struct VertexData final {
         const uint8_t* raw_src_data_uchar = reinterpret_cast<const uint8_t*>(source_new_data);
         std::copy(raw_src_data_uchar, raw_src_data_uchar + totalSize, std::back_inserter(destination_data));
         m_DataSizes[attributeIndex] = bufferCount;
-        if (addToGPU) {
+        if (flags & MeshModifyFlags::UploadToGPU) {
             if (m_Format.m_InterleavingType == VertexAttributeLayout::Interleaved) {
-                sendDataToGPU(orphan, -1);
+                sendDataToGPU(flags & MeshModifyFlags::Orphan, -1);
             }else{
-                sendDataToGPU(orphan, (int)attributeIndex);
+                sendDataToGPU(flags & MeshModifyFlags::Orphan, (int)attributeIndex);
             }
         }
     }
 
     std::vector<glm::vec3> getPositions() const;
 
-    void setData(size_t attributeIndex, uint8_t* buffer, size_t source_new_data_amount, size_t vertexCount, bool addToGPU = false, bool orphan = false) noexcept {
+    void setData(size_t attributeIndex, uint8_t* buffer, size_t source_new_data_amount, size_t vertexCount, MeshModifyFlags::Flag flags = (MeshModifyFlags::Flag)MESH_DEFAULT_MODIFICATION_FLAGS) noexcept {
         if (m_Buffers.size() == 0) {
             m_Buffers.push_back(std::make_unique<VertexBufferObject>());
         }
@@ -70,16 +74,16 @@ struct VertexData final {
         destination_data.reserve(source_new_data_amount);
         std::copy(buffer, buffer + source_new_data_amount, std::back_inserter(destination_data));
         m_DataSizes[attributeIndex] = vertexCount;
-        if (addToGPU) {
+        if (flags & MeshModifyFlags::UploadToGPU) {
             if (m_Format.m_InterleavingType == VertexAttributeLayout::Interleaved) {
-                sendDataToGPU(orphan, -1);
+                sendDataToGPU(flags & MeshModifyFlags::Orphan, -1);
             }else{
-                sendDataToGPU(orphan, (int)attributeIndex);
+                sendDataToGPU(flags & MeshModifyFlags::Orphan, (int)attributeIndex);
             }
         }
     }
 
-    void setIndices(const unsigned int* data, size_t bufferCount, bool addToGPU = false, bool orphan = false, bool recalcTriangles = false);
+    void setIndices(const unsigned int* data, size_t bufferCount, MeshModifyFlags::Flag flags);
 
     void clearData();
 

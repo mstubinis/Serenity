@@ -661,12 +661,12 @@ Snowflake UserAchievement::GetAchievementId() const
     return internal_.achievement_id;
 }
 
-void UserAchievement::SetPercentComplete(std::uint8_t percentComplete)
+void UserAchievement::SetPercentComplete(uint8_t percentComplete)
 {
     internal_.percent_complete = percentComplete;
 }
 
-std::uint8_t UserAchievement::GetPercentComplete() const
+uint8_t UserAchievement::GetPercentComplete() const
 {
     return internal_.percent_complete;
 }

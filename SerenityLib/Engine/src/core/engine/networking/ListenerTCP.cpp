@@ -10,7 +10,7 @@
 using namespace Engine;
 using namespace Engine::priv;
 
-Networking::ListenerTCP::ListenerTCP(const unsigned short port, const std::string& ip) 
+Networking::ListenerTCP::ListenerTCP(const uint16_t port, const std::string& ip)
     : m_Port{ port }
     , m_IP{ ip }
 {

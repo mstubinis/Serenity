@@ -10,7 +10,7 @@ template <class OutType, class Data> void readBigEndian(OutType& out, Data& data
     offset += inBufferSizeInBytes;
 }
 template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutType& out, unsigned int inBufferSizeInBytes) noexcept {
-    std::vector<std::uint8_t> buffer(inBufferSizeInBytes, 0);
+    std::vector<uint8_t> buffer(inBufferSizeInBytes, 0);
     inStream.read((char*)buffer.data(), inBufferSizeInBytes);
 
     out = (uint32_t)buffer[0] << (8U * (inBufferSizeInBytes - 1U));
@@ -22,7 +22,7 @@ template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutT
     readBigEndian(inStream, out, sizeof(out));
 }
 template <class InType, class Stream> void writeBigEndian(Stream& inStream, InType& in, unsigned int inBufferSizeInBytes) noexcept {
-    std::vector<std::uint8_t> buffer(inBufferSizeInBytes, 0);
+    std::vector<uint8_t> buffer(inBufferSizeInBytes, 0);
     unsigned long long offset = 255U;
     for (int i = int(inBufferSizeInBytes) - 1; i >= 0; --i) {
         unsigned int shift = (8U * ((inBufferSizeInBytes - 1U) - i));
@@ -32,7 +32,7 @@ template <class InType, class Stream> void writeBigEndian(Stream& inStream, InTy
     inStream.write((char*)buffer.data(), buffer.size());
 }
 template <class InType, class Stream> void writeBigEndian(Stream& inStream, InType&& in, unsigned int inBufferSizeInBytes) noexcept {
-    std::vector<std::uint8_t> buffer(inBufferSizeInBytes, 0);
+    std::vector<uint8_t> buffer(inBufferSizeInBytes, 0);
     unsigned long long offset = 255U;
     for (int i = int(inBufferSizeInBytes) - 1; i >= 0; --i) {
         unsigned int shift = (8U * ((inBufferSizeInBytes - 1U) - i));

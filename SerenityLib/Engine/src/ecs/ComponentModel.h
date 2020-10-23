@@ -45,12 +45,12 @@ class ComponentModel: public Observer {
 
         inline CONSTEXPR Entity getOwner() const noexcept { return m_Owner; }
 
-        void onEvent(const Event& e) override;
+        void onEvent(const Event&) override;
 
-        void setViewportFlag(unsigned int flag);
-        void addViewportFlag(unsigned int flag);
-        void setViewportFlag(ViewportFlag::Flag flag);
-        void addViewportFlag(ViewportFlag::Flag flag);
+        void setViewportFlag(uint32_t flag) noexcept;
+        void addViewportFlag(uint32_t flag) noexcept;
+        inline void setViewportFlag(ViewportFlag::Flag flag) noexcept { setViewportFlag((uint32_t)flag); }
+        inline void addViewportFlag(ViewportFlag::Flag flag) noexcept { addViewportFlag((uint32_t)flag); }
 
         inline size_t getNumModels() const noexcept { return m_ModelInstances.size(); }
         inline CONSTEXPR float radius() const noexcept { return m_Radius; }
@@ -68,9 +68,9 @@ class ComponentModel: public Observer {
         void setModelMaterial(Handle materialHandle, size_t index, RenderStage = RenderStage::GeometryOpaque);
         void setModelShaderProgram(Handle shaderProgram, size_t index, RenderStage = RenderStage::GeometryOpaque);
 
-        bool rayIntersectSphere(const ComponentCamera& camera) const;
+        bool rayIntersectSphere(const ComponentCamera& camera) const noexcept;
 
-        void setUserPointer(void* UserPointer);
+        void setUserPointer(void* UserPointer) noexcept;
 
         inline void setCustomBindFunctor(ModelInstance::bind_function&& functor, size_t index = 0) noexcept {
             m_ModelInstances[index]->setCustomBindFunctor(std::move(functor));

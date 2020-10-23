@@ -16,14 +16,15 @@ namespace Engine::Networking {
         friend class Engine::priv::SocketManager;
         private:
             sf::TcpListener  m_Listener;
-            unsigned short   m_Port        = 0;
-            std::string      m_IP          = "";
+            std::string      m_IP = "";
+            uint16_t         m_Port        = 0;
+
 
             ListenerTCP() = delete;
 
             void update(const float dt) override;
         public:
-            ListenerTCP(const unsigned short port, const std::string& ip = "");
+            ListenerTCP(const uint16_t port, const std::string& ip = "");
             ~ListenerTCP();
 
             void close();
@@ -31,7 +32,7 @@ namespace Engine::Networking {
 
             bool isListening() const { return (localPort() != 0); }
             bool isBlocking() const override { return m_Listener.isBlocking(); }
-            unsigned short localPort() const override { return m_Listener.getLocalPort(); }
+            uint16_t localPort() const override { return m_Listener.getLocalPort(); }
 
             SocketStatus::Status accept(SocketTCP& tcpSocket);
             SocketStatus::Status accept(sf::TcpSocket& sfmlTcpSocket);

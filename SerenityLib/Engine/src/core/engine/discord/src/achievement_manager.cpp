@@ -27,7 +27,7 @@ public:
 IDiscordAchievementEvents AchievementManager::events_{
   &AchievementEvents::OnUserAchievementUpdate,
 };
-void AchievementManager::SetUserAchievement(Snowflake achievementId, std::uint8_t percentComplete, std::function<void(Result)> callback){
+void AchievementManager::SetUserAchievement(Snowflake achievementId, uint8_t percentComplete, std::function<void(Result)> callback){
     static auto wrapper = [](void* callbackData, EDiscordResult result) -> void {
         std::unique_ptr<std::function<void(Result)>> cb(reinterpret_cast<std::function<void(Result)>*>(callbackData));
         if (!cb || !(*cb)) {

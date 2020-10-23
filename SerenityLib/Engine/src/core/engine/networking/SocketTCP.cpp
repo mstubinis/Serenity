@@ -12,7 +12,7 @@ using namespace Engine::priv;
 Networking::SocketTCP::SocketTCP() {
     Core::m_Engine->m_NetworkingModule.m_SocketManager.add_tcp_socket(this);
 }
-Networking::SocketTCP::SocketTCP(const unsigned short port, const std::string& ip) 
+Networking::SocketTCP::SocketTCP(uint16_t port, const std::string& ip)
     : Networking::SocketTCP::SocketTCP{}
 {
     m_IP    = ip;
@@ -81,7 +81,7 @@ void Networking::SocketTCP::disconnect() {
         Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     }
 }
-SocketStatus::Status Networking::SocketTCP::connect(const unsigned short timeout) {
+SocketStatus::Status Networking::SocketTCP::connect(uint16_t timeout) {
     auto status = m_SocketTCP.connect(m_IP, m_Port, sf::seconds(timeout));
     if (status == sf::Socket::Status::Done) {
         EventSocket e = EventSocket(m_SocketTCP.getLocalPort(), m_SocketTCP.getRemotePort(), m_SocketTCP.getRemoteAddress(), SocketType::TCP);

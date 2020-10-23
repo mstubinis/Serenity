@@ -12,7 +12,7 @@ constexpr unsigned int MESH_BONES_NUM_MAX_INSTANCES      = 65536U;
 constexpr float        MESH_DEFAULT_THRESHOLD = 0.0005f;
 
 struct MeshModifyFlags {enum Flag {
-    Default              = 1 << 0,
+    None                 = 1 << 0,
     Orphan               = 1 << 1,
     UploadToGPU          = 1 << 2,
     RecalculateTriangles = 1 << 3,

@@ -7,7 +7,7 @@
 using namespace Engine;
 using namespace Engine::Networking;
 
-ServerClient::ServerClient(const std::string& hash, Server& server, SocketTCP* tcp_socket, const std::string& in_client_IP, unsigned short in_client_Port) 
+ServerClient::ServerClient(const std::string& hash, Server& server, SocketTCP* tcp_socket, const std::string& in_client_IP, uint16_t in_client_Port)
     : m_Server{ server }
     , m_Hash{ hash }
     , m_ConnectionState{ ConnectionState::Active }
@@ -39,7 +39,7 @@ ServerClient::~ServerClient() {
 uint32_t ServerClient::generate_nonce() const noexcept {
     return Engine::Networking::NetworkingHelpers::generate_nonce();
 }
-bool ServerClient::connect(unsigned short timeout) noexcept {
+bool ServerClient::connect(uint16_t timeout) noexcept {
     if (!m_TcpSocket || !disconnected()) {
         return false;
     }

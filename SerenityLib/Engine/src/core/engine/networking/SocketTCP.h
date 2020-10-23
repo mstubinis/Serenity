@@ -17,9 +17,9 @@ namespace Engine::Networking {
         friend class Engine::Networking::ListenerTCP;
         private:
             sf::TcpSocket             m_SocketTCP;
-            std::string               m_IP       = "";
-            unsigned short            m_Port     = 0;
             std::queue<sf::Packet>    m_PartialPackets;
+            std::string               m_IP       = "";
+            uint16_t                  m_Port     = 0;
 
             SocketStatus::Status internal_send_partial_packets_loop();
             SocketStatus::Status internal_send_packet(sf::Packet& sfPacket);
@@ -28,7 +28,7 @@ namespace Engine::Networking {
             void update(const float dt) override;
         public: 
             SocketTCP();
-            SocketTCP(const unsigned short port, const std::string& ip = ""); //client side socket
+            SocketTCP(uint16_t port, const std::string& ip = ""); //client side socket
             ~SocketTCP();
 
             void                 disconnect();
@@ -36,15 +36,15 @@ namespace Engine::Networking {
 
             bool                 isConnected() const { return (m_SocketTCP.getLocalPort() != 0); }
             std::string          ip() const { return m_SocketTCP.getRemoteAddress().toString(); }
-            unsigned short       remotePort() const { return m_SocketTCP.getRemotePort(); }
-            unsigned short       localPort() const override { return m_SocketTCP.getLocalPort(); }
+            uint16_t             remotePort() const { return m_SocketTCP.getRemotePort(); }
+            uint16_t             localPort() const override { return m_SocketTCP.getLocalPort(); }
 
 
             void                 setBlocking(bool blocking) override { m_SocketTCP.setBlocking(blocking); }
             bool                 isBlocking() const override { return m_SocketTCP.isBlocking(); }
 
     
-            SocketStatus::Status   connect(const unsigned short timeout = 0);
+            SocketStatus::Status   connect(uint16_t timeout = 0);
 
             //SocketStatus::Status   send(Engine::Networking::Packet& packet);
             SocketStatus::Status   send(sf::Packet& packet);

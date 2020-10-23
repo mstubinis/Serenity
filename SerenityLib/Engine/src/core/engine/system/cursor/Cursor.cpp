@@ -17,7 +17,7 @@ Cursor::Cursor(const std::string& textureFile) {
 Cursor::~Cursor() {
 
 }
-bool Cursor::internal_load_from_pixels(const std::uint8_t* pixels, unsigned int width, unsigned int height, unsigned int hotspotX, unsigned int hotspotY, const glm::vec4& colorMultiplier, bool force) noexcept {
+bool Cursor::internal_load_from_pixels(const uint8_t* pixels, unsigned int width, unsigned int height, unsigned int hotspotX, unsigned int hotspotY, const glm::vec4& colorMultiplier, bool force) noexcept {
     m_Width           = width;
     m_Height          = height;
     size_t numBytes   = width * height * 4;
@@ -27,10 +27,10 @@ bool Cursor::internal_load_from_pixels(const std::uint8_t* pixels, unsigned int 
         m_Pixels.clear();
         m_Pixels.reserve(numBytes);
         for (size_t i = 0; i < numBytes; i += 4) {
-            unsigned char r = static_cast<unsigned char>((float)pixels[i + 0] * colorMultiplier.r);
-            unsigned char g = static_cast<unsigned char>((float)pixels[i + 1] * colorMultiplier.g);
-            unsigned char b = static_cast<unsigned char>((float)pixels[i + 2] * colorMultiplier.b);
-            unsigned char a = static_cast<unsigned char>((float)pixels[i + 3] * colorMultiplier.a);
+            uint8_t r = static_cast<uint8_t>((float)pixels[i + 0] * colorMultiplier.r);
+            uint8_t g = static_cast<uint8_t>((float)pixels[i + 1] * colorMultiplier.g);
+            uint8_t b = static_cast<uint8_t>((float)pixels[i + 2] * colorMultiplier.b);
+            uint8_t a = static_cast<uint8_t>((float)pixels[i + 3] * colorMultiplier.a);
             m_Pixels.emplace_back(r);
             m_Pixels.emplace_back(g);
             m_Pixels.emplace_back(b);
@@ -45,17 +45,17 @@ bool Cursor::internal_rotate(long long startIndex, long long increment1, long lo
     size_t numBytes  = (size_t)m_Width * (size_t)m_Height * 4;
 
     std::swap(m_Width, m_Height);
-    std::vector<std::uint8_t> oldPixels = m_Pixels;
+    std::vector<uint8_t> oldPixels = m_Pixels;
 
     m_Pixels.clear();
     m_Pixels.reserve(numBytes);
 
     long long pixel = startIndex;
     for (size_t i = 0; i < numBytes; i += 4) {
-        unsigned char r = static_cast<unsigned char>((float)oldPixels[(pixel * 4) + 0] * m_ColorMultiplier.r);
-        unsigned char g = static_cast<unsigned char>((float)oldPixels[(pixel * 4) + 1] * m_ColorMultiplier.g);
-        unsigned char b = static_cast<unsigned char>((float)oldPixels[(pixel * 4) + 2] * m_ColorMultiplier.b);
-        unsigned char a = static_cast<unsigned char>((float)oldPixels[(pixel * 4) + 3] * m_ColorMultiplier.a);
+        uint8_t r = static_cast<uint8_t>((float)oldPixels[(pixel * 4) + 0] * m_ColorMultiplier.r);
+        uint8_t g = static_cast<uint8_t>((float)oldPixels[(pixel * 4) + 1] * m_ColorMultiplier.g);
+        uint8_t b = static_cast<uint8_t>((float)oldPixels[(pixel * 4) + 2] * m_ColorMultiplier.b);
+        uint8_t a = static_cast<uint8_t>((float)oldPixels[(pixel * 4) + 3] * m_ColorMultiplier.a);
         m_Pixels.emplace_back(r);
         m_Pixels.emplace_back(g);
         m_Pixels.emplace_back(b);
@@ -92,10 +92,10 @@ bool Cursor::loadFromCurrentData(const glm::vec4& colorMultiplier) noexcept {
     return internal_load_from_pixels(m_Pixels.data(), m_Width, m_Height, m_Hotspot.x, m_Hotspot.y, colorMultiplier);
 }
 
-bool Cursor::loadFromPixels(const std::uint8_t* pixels, unsigned int width, unsigned int height, const glm::uvec2& hotspot, const glm::vec4& colorMultiplier) noexcept {
+bool Cursor::loadFromPixels(const uint8_t* pixels, unsigned int width, unsigned int height, const glm::uvec2& hotspot, const glm::vec4& colorMultiplier) noexcept {
     return internal_load_from_pixels(pixels, width, height, hotspot.x, hotspot.y, colorMultiplier);
 }
-bool Cursor::loadFromPixels(const std::uint8_t* pixels, unsigned int width, unsigned int height, unsigned int hotspotX, unsigned int hotspotY, const glm::vec4& colorMultiplier) noexcept {
+bool Cursor::loadFromPixels(const uint8_t* pixels, unsigned int width, unsigned int height, unsigned int hotspotX, unsigned int hotspotY, const glm::vec4& colorMultiplier) noexcept {
     return internal_load_from_pixels(pixels, width, height, hotspotX, hotspotY, colorMultiplier);
 }
 

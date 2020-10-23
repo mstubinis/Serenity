@@ -52,10 +52,9 @@ namespace Engine::priv{
     };
 };
 
-
 struct MeshCPUData final {
-    glm::vec3                                      m_RadiusBox        = glm::vec3(0.0f);
     std::string                                    m_File             = "";
+    glm::vec3                                      m_RadiusBox        = glm::vec3(0.0f);
     mutable Engine::priv::MeshSkeleton*            m_Skeleton         = nullptr;
     mutable Engine::priv::MeshInfoNode*            m_RootNode         = nullptr;
     mutable Engine::priv::MeshCollisionFactory*    m_CollisionFactory = nullptr;
@@ -120,7 +119,6 @@ class Mesh final: public Resource, public Observer {
 
         void internal_recalc_indices_from_terrain(const Terrain& terrain);
         void internal_build_from_terrain(const Terrain& terrain);
-
     public:
         Mesh();
         Mesh(VertexData&, const std::string& name, float threshold = MESH_DEFAULT_THRESHOLD);
@@ -139,34 +137,23 @@ class Mesh final: public Resource, public Observer {
         inline void setCustomBindFunctor(bind_func&& functor) noexcept { m_CustomBindFunctor = std::move(functor); }
         inline void setCustomUnbindFunctor(unbind_func&& functor) noexcept { m_CustomUnbindFunctor = std::move(functor); }
 
-        inline bool operator==(bool rhs) const { return (rhs) ? (bool)m_CPUData.m_VertexData : (bool)!m_CPUData.m_VertexData; }
-        inline bool operator!=(bool rhs) const { return !operator==(rhs); }
-        inline operator bool() const { return (bool)m_CPUData.m_VertexData; }
-
         std::unordered_map<std::string, Engine::priv::AnimationData>& animationData();
         inline CONSTEXPR const glm::vec3& getRadiusBox() const noexcept { return m_CPUData.m_RadiusBox; }
         inline CONSTEXPR float getRadius() const noexcept { return m_CPUData.m_Radius; }
         inline CONSTEXPR const VertexData& getVertexData() const noexcept { return *m_CPUData.m_VertexData; }
         inline CONSTEXPR const Engine::priv::MeshSkeleton* getSkeleton() const noexcept { return m_CPUData.m_Skeleton; }
 
-        void onEvent(const Event& e);
+        void onEvent(const Event&);
 
         void load();
         void unload();
 
         template<typename T> 
-        void modifyVertices(unsigned int attributeIndex, const T* modifications, size_t bufferCount, unsigned int MeshModifyFlags = MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU) {
-            m_CPUData.m_VertexData->setData<T>(attributeIndex, modifications, bufferCount,
-                MeshModifyFlags & MeshModifyFlags::UploadToGPU, 
-                MeshModifyFlags & MeshModifyFlags::Orphan
-            );
+        void modifyVertices(uint32_t attrIdx, const T* modifications, size_t bufferCount, uint32_t MeshModifyFlags = MESH_DEFAULT_MODIFICATION_FLAGS) {
+            m_CPUData.m_VertexData->setData<T>(attrIdx, modifications, bufferCount, (MeshModifyFlags::Flag)MeshModifyFlags);
         }
-        void modifyIndices(const unsigned int* modifiedIndices, size_t bufferCount, unsigned int MeshModifyFlags = MeshModifyFlags::Default | MeshModifyFlags::UploadToGPU) {
-            m_CPUData.m_VertexData->setIndices(modifiedIndices, bufferCount, 
-                MeshModifyFlags & MeshModifyFlags::UploadToGPU, 
-                MeshModifyFlags & MeshModifyFlags::Orphan, 
-                MeshModifyFlags & MeshModifyFlags::RecalculateTriangles
-            );
+        void modifyIndices(const uint32_t* modifiedIndices, size_t bufferCount, uint32_t MeshModifyFlags = MESH_DEFAULT_MODIFICATION_FLAGS) {
+            m_CPUData.m_VertexData->setIndices(modifiedIndices, bufferCount, (MeshModifyFlags::Flag)MeshModifyFlags);
         }
 
         void sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, SortingMode sortMode);

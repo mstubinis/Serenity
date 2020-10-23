@@ -376,6 +376,27 @@ void Engine::Renderer::renderText(const std::string& t, Handle font, const glm::
 void Engine::Renderer::renderBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) {
     Engine::priv::RenderModule::RENDERER->m_Pipeline->renderBorder(borderSize, pos, col, w, h, angle, depth, align, scissor);
 }
+
+
+void Engine::Renderer::renderBackgroundTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) {
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->renderBackgroundTriangle(position, color, angle, width, height, depth, align, scissor);
+}
+void Engine::Renderer::renderBackgroundRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, const Alignment align, const glm::vec4& scissor) {
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->renderBackgroundRectangle(pos, col, width, height, angle, depth, align, scissor);
+}
+void Engine::Renderer::renderBackgroundTexture(Handle texture, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) {
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->renderBackgroundTexture(texture, p, c, a, s, d, align, scissor);
+}
+void Engine::Renderer::renderBackgroundText(const std::string& t, Handle font, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) {
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->renderBackgroundText(t, font, p, c, a, s, d, align, scissor);
+}
+void Engine::Renderer::renderBackgroundBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) {
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->renderBackgroundBorder(borderSize, pos, col, w, h, angle, depth, align, scissor);
+}
+
+
+
+
 void Engine::Renderer::renderFullscreenQuad() {
     Engine::priv::RenderModule::RENDERER->m_Pipeline->renderFullscreenQuad();
 }

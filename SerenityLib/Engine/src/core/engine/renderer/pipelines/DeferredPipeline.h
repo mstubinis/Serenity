@@ -40,18 +40,7 @@ namespace Engine::priv {
 
             glm::vec4 Info4; //mainWindowSizeX, mainWindowSizeY, viewportSizeX, viewportSizeY
         };
-
         private:
-            struct API2DCommand final {
-                std::function<void()>  func;
-                float                  depth;
-
-                API2DCommand() = default;
-                API2DCommand(std::function<void()>&& func_, float depth_) 
-                    : func{ std::move(func_ ) }
-                    , depth { depth_ }
-                {}
-            };
             Engine::priv::RenderModule&  m_Renderer;
 
             glm::vec4                      m_CurrentScissorState = glm::vec4(-1.0f);
@@ -74,8 +63,9 @@ namespace Engine::priv {
 
             std::vector<Handle>            m_InternalShaders;
             std::vector<Handle>            m_InternalShaderPrograms;
-            std::vector<API2DCommand>      m_2DAPICommands;
-            std::vector<API2DCommand>      m_2DAPICommandsNonTextured;
+
+            std::vector<IRenderingPipeline::API2DCommand>      m_Background2DAPICommands;
+            std::vector<IRenderingPipeline::API2DCommand>      m_2DAPICommands;
             //particle instancing
             unsigned int                   m_Particle_Instance_VBO = 0U;
 
@@ -106,6 +96,18 @@ namespace Engine::priv {
             void internal_render_2d_text_center(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
             void internal_render_2d_text_right(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
 
+
+
+
+            void internal_renderTexture(std::vector<IRenderingPipeline::API2DCommand>& commands, Handle texture, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor);
+            void internal_renderText(std::vector<IRenderingPipeline::API2DCommand>& commands, const std::string& t, Handle font, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor);
+            void internal_renderBorder(std::vector<IRenderingPipeline::API2DCommand>& commands, float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor);
+            void internal_renderRectangle(std::vector<IRenderingPipeline::API2DCommand>& commands, const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment align, const glm::vec4& scissor);
+            void internal_renderTriangle(std::vector<IRenderingPipeline::API2DCommand>& commands, const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor);
+
+
+
+
             DeferredPipeline() = delete;
         public:
             DeferredPipeline(Engine::priv::RenderModule& renderer);
@@ -122,11 +124,7 @@ namespace Engine::priv {
             void sort2DAPI() override;
 
             void renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport, Camera& camera, Scene& scene) override;
-
-            //non textured 2d api elements will be exposed to anti-aliasing post processing
-            void render2DAPINonTextured(bool mainRenderFunc, Viewport& viewport) override;
-
-            void render2DAPI(bool mainRenderFunc, Viewport& viewport) override;
+            void render2DAPI(const std::vector<IRenderingPipeline::API2DCommand>& commands, bool mainRenderFunc, Viewport& viewport, bool clearDepth = true) override;
 
 
             ShaderProgram* getCurrentBoundShaderProgram() override;
@@ -211,6 +209,14 @@ namespace Engine::priv {
             void renderBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) override;
             void renderRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment align, const glm::vec4& scissor) override;
             void renderTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) override;
+
+
+            void renderBackgroundTexture(Handle texture, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) override;
+            void renderBackgroundText(const std::string& t, Handle font, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) override;
+            void renderBackgroundBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) override;
+            void renderBackgroundRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment align, const glm::vec4& scissor) override;
+            void renderBackgroundTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) override;
+
 
             void renderFullscreenTriangle() override;
             void renderFullscreenQuad() override;

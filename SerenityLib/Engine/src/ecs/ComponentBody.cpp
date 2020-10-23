@@ -781,7 +781,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
     }
     
     ComponentBody::internal_recalculateAllParentChildMatrices(system);
-    /*
+    
 #if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
     for (auto& componentBody : components) {
         Entity entity      = componentBody.getOwner();
@@ -812,7 +812,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
         }
     }
 #endif
-    */
+    
 }};
 struct Engine::priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* systemPtr, void* component, Entity entity) const {
     auto& system  = *(Engine::priv::ComponentBody_System*)systemPtr;
