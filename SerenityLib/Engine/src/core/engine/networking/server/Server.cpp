@@ -179,7 +179,10 @@ void Server::internal_update_tcp_listener_loop(bool serverActive) {
             auto client_ip   = new_tcp_socket->ip();
             auto client_port = new_tcp_socket->remotePort();
             auto client_hash = m_Client_Hash_Function(client_ip, client_port, dummy);
-            internal_add_client(client_hash, add_new_client(client_hash, client_ip, client_port, new_tcp_socket));
+            if (!m_Clients.contains(client_hash)) {
+                auto newClient = add_new_client(client_hash, client_ip, client_port, new_tcp_socket);
+                internal_add_client(client_hash, newClient);
+            }
         }else{
             SAFE_DELETE(new_tcp_socket);
         }
@@ -190,7 +193,10 @@ void Server::onReceiveUDP(Engine::Networking::Packet& packet, sf::IpAddress& ip,
     std::string ipAsString  = ip.toString();
     std::string client_hash = m_Client_Hash_Function(ipAsString, port, packet);
     if (m_ServerType == ServerType::UDP) {
-        internal_add_client(client_hash, add_new_client(client_hash, ipAsString, port, nullptr));
+        if (!m_Clients.contains(client_hash)) {
+            auto newClient = add_new_client(client_hash, ipAsString, port, nullptr);
+            internal_add_client(client_hash, newClient);
+        }
     }
     m_Clients.getClient(client_hash)->internal_on_receive_udp(packet, dt);
     Server::m_On_Receive_UDP_Function(packet, ipAsString, port, dt);

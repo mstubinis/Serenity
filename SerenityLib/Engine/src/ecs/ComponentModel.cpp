@@ -61,9 +61,11 @@ float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) 
     }
     return modelComponent.m_Radius; //now modified by the body scale
 };
-void ComponentModel_Functions::RegisterDeferredMeshLoaded(ComponentModel& super, Mesh* mesh) {
+void ComponentModel_Functions::RegisterDeferredMeshLoaded(ComponentModel& modelComponent, Mesh* mesh) {
     if (mesh && !mesh->isLoaded()) {
-        super.registerEvent(EventType::ResourceLoaded);
+        if (!modelComponent.isRegistered(EventType::ResourceLoaded)) {
+            modelComponent.registerEvent(EventType::ResourceLoaded);
+        }
     }
 }
 
@@ -75,10 +77,10 @@ ComponentModel::ComponentModel(Entity entity, Handle mesh, Handle material, Hand
     addModel(mesh, material, shaderProgram, stage);
 }
 ComponentModel::ComponentModel(ComponentModel&& other) noexcept 
-    : m_Owner{ std::move(other.m_Owner) }
-    , m_ModelInstances{ std::move(other.m_ModelInstances) }
-    , m_Radius{ std::move(other.m_Radius) }
-    , m_RadiusBox{ std::move(other.m_RadiusBox) }
+    : m_Owner          { std::move(other.m_Owner) }
+    , m_ModelInstances { std::move(other.m_ModelInstances) }
+    , m_Radius         { std::move(other.m_Radius) }
+    , m_RadiusBox      { std::move(other.m_RadiusBox) }
 {
     if (other.isRegistered(EventType::ResourceLoaded)) {
         registerEvent(EventType::ResourceLoaded);

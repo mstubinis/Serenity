@@ -4,40 +4,50 @@
 #include <core/engine/events/Observer.h>
 #include <core/engine/events/Event.h>
 
-using namespace Engine;
-
-priv::EventDispatcher::EventDispatcher() { 
+Engine::priv::EventDispatcher::EventDispatcher() { 
     m_Observers.resize((size_t)EventType::_TOTAL);
 }
-void priv::EventDispatcher::registerObject(Observer& observer, EventType eventType) noexcept {
+void Engine::priv::EventDispatcher::registerObject(Observer& observer, EventType eventType) noexcept {
+    std::lock_guard lock(m_Mutex);
     auto& observers_with_event_type = m_Observers[(size_t)eventType];
-    if (internal_check_for_duplicates(&observer, observers_with_event_type)) {
+    if (internal_check_for_duplicates(observer, observers_with_event_type)) {
         return;
     }
-    observers_with_event_type.push_back(&observer);
+    observers_with_event_type.emplace_back(&observer);
 }
-void priv::EventDispatcher::unregisterObject(Observer& observer, EventType eventType) noexcept {
-    if (m_Observers.size() <= (size_t)eventType) {
-        return;
-    }
-    auto& observers_with_event_type = m_Observers[(size_t)eventType];
-    removeFromVector(observers_with_event_type, &observer);
+void Engine::priv::EventDispatcher::unregisterObject(Observer& observer, EventType eventType) noexcept {
+    ASSERT(m_Observers.size() > (size_t)eventType, __FUNCTION__ << "(): eventType does not fit in m_Observers!");
+    std::lock_guard lock(m_Mutex);
+    m_UnregisteredObservers.emplace_back(&observer, (size_t)eventType);
 }
-bool priv::EventDispatcher::isObjectRegistered(const Observer& observer, EventType eventType) const noexcept {
+bool Engine::priv::EventDispatcher::isObjectRegistered(const Observer& observer, EventType eventType) const noexcept {
+    std::lock_guard lock(m_Mutex);
     const auto& observers_with_event_type = m_Observers[(size_t)eventType];
-    return internal_check_for_duplicates(&observer, observers_with_event_type);
+    bool result = internal_check_for_duplicates(observer, observers_with_event_type);
+    return result;
 }
-
-void priv::EventDispatcher::dispatchEvent(const Event& event) noexcept {
-    const auto& observers_with_event_type = m_Observers[(size_t)event.type];
-    for (size_t i = 0; i < observers_with_event_type.size(); ++i) {
-        observers_with_event_type[i]->onEvent(event);
+void Engine::priv::EventDispatcher::dispatchEvent(const Event& e) noexcept {
+    const auto& observers_with_event_type = m_Observers[(size_t)e.type];
+    for (auto& observer : observers_with_event_type) {
+        observer->onEvent(e);
     }
 }
-void priv::EventDispatcher::dispatchEvent(EventType eventType) noexcept {
-    Event event{ eventType };
-    const auto& observers_with_event_type = m_Observers[(size_t)event.type];
-    for (size_t i = 0; i < observers_with_event_type.size(); ++i) {
-        observers_with_event_type[i]->onEvent(event);
+void Engine::priv::EventDispatcher::dispatchEvent(EventType eventType) noexcept {
+    Event e{ eventType };
+    const auto& observers_with_event_type = m_Observers[(size_t)e.type];
+    for (auto& observer : observers_with_event_type) {
+        observer->onEvent(e);
+    }
+}
+void Engine::priv::EventDispatcher::onPostUpdate() {
+    if (m_UnregisteredObservers.size() > 0) {
+        std::lock_guard lock(m_Mutex);
+        for (auto& [observer, index] : m_UnregisteredObservers) {
+            auto& observers_with_event_type = m_Observers[index];
+            std::erase_if(observers_with_event_type, [&observer](auto observerItr) {
+                return observerItr == observer;
+            });
+        }
+        m_UnregisteredObservers.clear();
     }
 }

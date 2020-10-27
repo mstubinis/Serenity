@@ -371,7 +371,7 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
                     }
                     for (int i = 0; i < 4; ++i) {
                         smooths[i].normal = verts[i].normal;
-                        smooths[i].index = (data.points.size() - 1) - (3 - i);
+                        smooths[i].index = (data.points.size() - 1) - static_cast<size_t>(3 - i);
                         m_VertexMap[hash_position(verts[i].position, 4)].data.emplace_back(std::move(smooths[i]));
                     }
 

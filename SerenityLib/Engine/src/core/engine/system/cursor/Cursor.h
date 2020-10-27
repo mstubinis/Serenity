@@ -6,7 +6,7 @@ class  Texture;
 
 #include <SFML/Window/Cursor.hpp>
 
-enum class CursorType : unsigned short {
+enum class CursorType : uint8_t {
     Arrow = sf::Cursor::Type::Arrow, //Arrow cursor (default)
     ArrowWait,                       //Busy arrow cursor. Not allowed on Linux or Mac OS X
     Wait,                            //Busy cursor. Not allowed on Mac OS X
@@ -24,15 +24,16 @@ enum class CursorType : unsigned short {
 
 class Cursor {
     private:
-        sf::Cursor                               m_SFMLCursor;
-        std::vector<uint8_t>                m_Pixels;
-        unsigned int                             m_Width           = 0;
-        unsigned int                             m_Height          = 0;
-        glm::vec4                                m_ColorMultiplier = glm::vec4(1.0f);
-        glm::uvec2                               m_Hotspot         = glm::uvec2(0, 0);
+        sf::Cursor                m_SFMLCursor;
+        std::vector<uint8_t>      m_Pixels;
+        std::vector<uint8_t>      m_PixelsColored;
+        uint32_t                  m_Width           = 0;
+        uint32_t                  m_Height          = 0;
+        glm::vec4                 m_ColorMultiplier = glm::vec4(1.0f);
+        glm::uvec2                m_Hotspot         = glm::uvec2(0, 0);
 
         //pixels must be an array of width by height pixels in 32 - bit RGBA format.If not, this will cause undefined behavior.
-        bool internal_load_from_pixels(const uint8_t* pixels, unsigned int width, unsigned int height, unsigned int hotspotX, unsigned int hotspotY, const glm::vec4& colorMultiplier, bool force = false) noexcept;
+        bool internal_load_from_pixels(const uint8_t* pixels, uint32_t width, uint32_t height, uint32_t hotspotX, uint32_t hotspotY, const glm::vec4& colorMultiplier) noexcept;
 
         bool internal_rotate(long long startIndex, long long increment, long long increment2, bool left) noexcept;
     protected:
@@ -48,19 +49,20 @@ class Cursor {
         virtual bool loadFromCurrentData() noexcept;
         virtual bool loadFromCurrentData(const glm::vec4& colorMultiplier) noexcept;
 
-        virtual bool loadFromPixels(const uint8_t* pixels, unsigned int width, unsigned int height, const glm::uvec2& hotspot, const glm::vec4& colorMultiplier = glm::vec4(1.0f)) noexcept;
-        virtual bool loadFromPixels(const uint8_t* pixels, unsigned int width, unsigned int height, unsigned int hotspotX, unsigned int hotspotY, const glm::vec4& colorMultiplier = glm::vec4(1.0f)) noexcept;
+        virtual bool loadFromPixels(const uint8_t* pixels, uint32_t width, uint32_t height, const glm::uvec2& hotspot, const glm::vec4& colorMultiplier = glm::vec4(1.0f)) noexcept;
+        virtual bool loadFromPixels(const uint8_t* pixels, uint32_t width, uint32_t height, uint32_t hotspotX, uint32_t hotspotY, const glm::vec4& colorMultiplier = glm::vec4(1.0f)) noexcept;
 
         virtual bool loadFromPixels(Texture* texture, const glm::uvec2& hotspot, const glm::vec4& colorMultiplier = glm::vec4(1.0f)) noexcept;
-        virtual bool loadFromPixels(Texture* texture, unsigned int hotspotX, unsigned int hotspotY, const glm::vec4& colorMultiplier = glm::vec4(1.0f)) noexcept;
+        virtual bool loadFromPixels(Texture* texture, uint32_t hotspotX, uint32_t hotspotY, const glm::vec4& colorMultiplier = glm::vec4(1.0f)) noexcept;
 
         virtual bool loadFromSystem(CursorType cursorType) noexcept;
 
-        virtual void setHotspot(unsigned int x, unsigned int y) noexcept;
+        virtual void setHotspot(uint32_t x, uint32_t y) noexcept;
 
+        inline CONSTEXPR const glm::vec4& getColor() const noexcept { return m_ColorMultiplier; }
         inline CONSTEXPR const sf::Cursor& getSFMLCursor() const noexcept { return m_SFMLCursor; }
-        inline CONSTEXPR unsigned int getWidth() const noexcept { return m_Width; }
-        inline CONSTEXPR unsigned int getHeight() const noexcept { return m_Height; }
+        inline CONSTEXPR uint32_t getWidth() const noexcept { return m_Width; }
+        inline CONSTEXPR uint32_t getHeight() const noexcept { return m_Height; }
         inline CONSTEXPR const std::vector<uint8_t>& getPixels() const noexcept { return m_Pixels; }
 };
 

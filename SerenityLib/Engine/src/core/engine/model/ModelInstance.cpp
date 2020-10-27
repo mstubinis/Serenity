@@ -108,26 +108,26 @@ ModelInstance::ModelInstance(Entity parent, Handle mesh, Handle material, Handle
     setCustomUnbindFunctor(priv::DefaultModelInstanceUnbindFunctor);
 }
 ModelInstance::ModelInstance(ModelInstance&& other) noexcept
-    : m_DrawingMode{ std::move(other.m_DrawingMode) }
-    , m_AnimationVector{ std::move(other.m_AnimationVector) }
-    , m_Parent{ std::move(other.m_Parent) }
-    , m_Stage{ std::move(other.m_Stage) }
-    , m_Position{ std::move(other.m_Position) }
-    , m_Scale{ std::move(other.m_Scale) }
-    , m_GodRaysColor{ std::move(other.m_GodRaysColor) }
-    , m_Orientation{ std::move(other.m_Orientation) }
-    , m_ModelMatrix{ std::move(other.m_ModelMatrix) }
-    , m_Color{ std::move(other.m_Color) }
-    , m_PassedRenderCheck{ std::move(other.m_PassedRenderCheck) }
-    , m_Visible{ std::move(other.m_Visible) }
-    , m_ForceRender{ std::move(other.m_ForceRender) }
-    , m_Index{ std::move(other.m_Index) }
-    , m_ShaderProgramHandle{ std::move(other.m_ShaderProgramHandle) }
-    , m_MeshHandle{ std::move(other.m_MeshHandle) }
-    , m_MaterialHandle{ std::move(other.m_MaterialHandle) }
-    , m_CustomBindFunctor{ std::move(other.m_CustomBindFunctor) }
-    , m_CustomUnbindFunctor{ std::move(other.m_CustomUnbindFunctor) }
-    , m_ViewportFlag{ std::move(other.m_ViewportFlagDefault) }
+    : m_DrawingMode         { std::move(other.m_DrawingMode) }
+    , m_AnimationVector     { std::move(other.m_AnimationVector) }
+    , m_Parent              { std::move(other.m_Parent) }
+    , m_Stage               { std::move(other.m_Stage) }
+    , m_Position            { std::move(other.m_Position) }
+    , m_Scale               { std::move(other.m_Scale) }
+    , m_GodRaysColor        { std::move(other.m_GodRaysColor) }
+    , m_Orientation         { std::move(other.m_Orientation) }
+    , m_ModelMatrix         { std::move(other.m_ModelMatrix) }
+    , m_Color               { std::move(other.m_Color) }
+    , m_PassedRenderCheck   { std::move(other.m_PassedRenderCheck) }
+    , m_Visible             { std::move(other.m_Visible) }
+    , m_ForceRender         { std::move(other.m_ForceRender) }
+    , m_Index               { std::move(other.m_Index) }
+    , m_ShaderProgramHandle { std::move(other.m_ShaderProgramHandle) }
+    , m_MeshHandle          { std::move(other.m_MeshHandle) }
+    , m_MaterialHandle      { std::move(other.m_MaterialHandle) }
+    , m_CustomBindFunctor   { std::move(other.m_CustomBindFunctor) }
+    , m_CustomUnbindFunctor { std::move(other.m_CustomUnbindFunctor) }
+    , m_ViewportFlag        { std::move(other.m_ViewportFlagDefault) }
 {
     m_ViewportFlagDefault    = std::move(other.m_ViewportFlagDefault);
     m_UserPointer            = std::move(other.m_UserPointer);
@@ -162,14 +162,19 @@ ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
     return *this;
 }
 ModelInstance::~ModelInstance() {
-    unregisterEvent(EventType::ResourceLoaded);
+    if (isRegistered(EventType::ResourceLoaded)) {
+        unregisterEvent(EventType::ResourceLoaded);
+    }
 }
 float ModelInstance::internal_calculate_radius() {
-    if (!m_MeshHandle.get<Mesh>()->isLoaded()) {
-        registerEvent(EventType::ResourceLoaded);
+    auto mesh = m_MeshHandle.get<Mesh>();
+    if (!mesh->isLoaded()) {
+        if (!isRegistered(EventType::ResourceLoaded)) {
+            registerEvent(EventType::ResourceLoaded);
+        }
         return 0.0f;
     }
-    m_Radius = m_MeshHandle.get<Mesh>()->getRadius();
+    m_Radius = mesh->getRadius();
     return m_Radius;
 }
 void ModelInstance::internal_init(Handle mesh, Handle material, Handle shaderProgram) {
@@ -183,14 +188,14 @@ void ModelInstance::internal_init(Handle mesh, Handle material, Handle shaderPro
     internal_update_model_matrix();
 }
 void ModelInstance::internal_update_model_matrix(bool recalcRadius) {
-    ComponentModel* model = m_Parent.getComponent<ComponentModel>();
+    if (recalcRadius) {
+        internal_calculate_radius();
+    }
+    auto model = m_Parent.getComponent<ComponentModel>();
     if (model && recalcRadius) {
         Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
     }
     Math::setFinalModelMatrix(m_ModelMatrix, m_Position, m_Orientation, m_Scale);
-    if (recalcRadius) {
-        internal_calculate_radius();
-    }
 }
 void ModelInstance::setStage(RenderStage stage, ComponentModel& componentModel) {
     m_Stage = stage;
@@ -225,7 +230,6 @@ void ModelInstance::rotate(float x, float y, float z){
     internal_update_model_matrix(false);
 }
 
-
 void ModelInstance::setShaderProgram(Handle shaderProgram, ComponentModel& componentModel) {
     if (!shaderProgram) { 
         shaderProgram = ShaderProgram::Deferred;
@@ -243,14 +247,13 @@ void ModelInstance::setMaterial(Handle material, ComponentModel& componentModel)
 void ModelInstance::playAnimation(const std::string& animationName, float start, float end, uint32_t requestedLoops){
     m_AnimationVector.emplace_animation(m_MeshHandle, animationName, start, end, requestedLoops);
 }
-
 void ModelInstance::onEvent(const Event& e) {
     if (e.type == EventType::ResourceLoaded && e.eventResource.resource->type() == ResourceType::Mesh) {
         Mesh* mesh           = (Mesh*)e.eventResource.resource;
         Mesh* meshFromHandle = m_MeshHandle.get<Mesh>();
-        if (meshFromHandle->isLoaded() || mesh == meshFromHandle) {
-            internal_update_model_matrix();
+        if (meshFromHandle->isLoaded()) {
+            internal_update_model_matrix(true);
             unregisterEvent(EventType::ResourceLoaded);
         }
-    }
+    }  
 }
