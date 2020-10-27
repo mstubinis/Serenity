@@ -124,8 +124,8 @@ SimplexNoise::~SimplexNoise() {
 }
 void SimplexNoise::internalInitFromSeed(unsigned long long seed) {
     unsigned long long _seed = seed;
-    vector_clear(m_Perm);
-    vector_clear(m_PermGradIndex3D);
+    m_Perm.clear();
+    m_PermGradIndex3D.clear();
     m_Perm.resize(256);
     m_PermGradIndex3D.resize(256);
     std::vector<short> source; 

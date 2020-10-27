@@ -90,11 +90,6 @@ class ModelInstance final : public Engine::UserPointer, public Observer {
 
         ~ModelInstance();
 
-        inline bool operator==(const ModelInstance& other) { return (m_Index == other.m_Index && m_Parent == other.m_Parent); }
-        inline bool operator!=(const ModelInstance& other) { return !operator==(other); }
-        inline bool operator==(ModelInstance& other) { return (m_Index == other.m_Index && m_Parent == other.m_Parent); }
-        inline bool operator!=(ModelInstance& other) { return !operator==(other); }
-
         void onEvent(const Event& e) override;
 
         static inline void setGlobalDistanceFactor(decimal factor) noexcept { m_GlobalDistanceFactor = factor; }

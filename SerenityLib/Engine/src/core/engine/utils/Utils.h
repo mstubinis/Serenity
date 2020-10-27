@@ -50,26 +50,11 @@ template <class InType, class Stream> void writeBigEndian(Stream& inStream, InTy
 //specifies if a specific pointer element is in a vector
 template<typename E, typename B> bool isInVector(std::vector<B*>& v, E* e) noexcept {
     for (auto& item : v) {
-        if (item == e)
+        if (item == e) {
             return true;
+        }
     }
     return false;
-}
-
-//removes a specific element from a vector
-template<typename E,typename B> void removeFromVector(std::vector<B*>& v, const E* e) noexcept {
-    v.erase(std::remove(v.begin(), v.end(), e), v.end());
-}
-//removes a specific element from a vector
-template<typename E,typename B> void removeFromVector(std::vector<B>& v,const E& e) noexcept {
-    v.erase(std::remove(v.begin(), v.end(), e), v.end());
-}
-
-//clears a vector, reset its size to zero, and removes the elements from memory. does NOT delete pointer elements
-template <typename E> void vector_clear(E& t) noexcept {
-    t.clear();
-    E().swap(t);
-    t.shrink_to_fit(); 
 }
 
 //formats a number to have commas to represent thousandth places
@@ -82,6 +67,5 @@ template<typename T> std::string convertNumToNumWithCommas(const T& n) noexcept 
     }
     return r;
 }
-
 
 #endif

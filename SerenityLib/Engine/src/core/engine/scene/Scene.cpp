@@ -265,7 +265,9 @@ Scene::~Scene() {
 
 template<class LIGHT, class CONTAINER> constexpr void internal_delete_light(LIGHT* light, CONTAINER& container) {
     light->destroy();
-    removeFromVector(container, light);
+    std::erase_if(container, [&light](auto& itr) {
+        return itr == light;
+    });
     SAFE_DELETE(light);
 }
 void Scene::deleteSunLight(SunLight* light) {

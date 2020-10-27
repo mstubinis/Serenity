@@ -33,8 +33,8 @@ namespace Engine::Math {
     inline float Float32From16(const uint16_t in) noexcept { return glm::unpackHalf1x16(in); }
     inline uint16_t Float16From32(const float in) noexcept { return glm::packHalf1x16(in); }
 
-    void Float32From16(float*    out, const uint16_t* in, unsigned int arraySize) noexcept;
-    void Float16From32(uint16_t* out, const float*    in, unsigned int arraySize) noexcept;
+    void Float32From16(float*    out, const uint16_t* in, uint32_t arraySize) noexcept;
+    void Float16From32(uint16_t* out, const float*    in, uint32_t arraySize) noexcept;
 
     glm::vec2 rotate2DPoint(const glm::vec2& point, float angle, const glm::vec2& origin = glm::vec2(0.0f, 0.0f));
 
@@ -108,9 +108,16 @@ namespace Engine::Math {
     inline float Max(float x, float y, float z) noexcept { return std::max(x, std::max(y, z)); }
     inline float Max(float x, float y, float z, float w) noexcept { return std::max(x, std::max(y, std::max(z, w))); }
 
-    inline unsigned int Max(unsigned int x, unsigned int y) noexcept { return std::max(x, y); }
-    inline unsigned int Max(unsigned int x, unsigned int y, unsigned int z) noexcept { return std::max(x, std::max(y, z)); }
-    inline unsigned int Max(unsigned int x, unsigned int y, unsigned int z, unsigned int w) noexcept { return std::max(x, std::max(y, std::max(z, w))); }
+    inline double Max(const glm::dvec2& v) noexcept { return std::max(v.x, v.y); }
+    inline double Max(const glm::dvec3& v) noexcept { return std::max(v.x, std::max(v.y, v.z)); }
+    inline double Max(const glm::dvec4& v) noexcept { return std::max(v.x, std::max(v.y, std::max(v.z, v.w))); }
+    inline double Max(double x, double y) noexcept { return std::max(x, y); }
+    inline double Max(double x, double y, double z) noexcept { return std::max(x, std::max(y, z)); }
+    inline double Max(double x, double y, double z, double w) noexcept { return std::max(x, std::max(y, std::max(z, w))); }
+
+    inline uint32_t Max(uint32_t x, uint32_t y) noexcept { return std::max(x, y); }
+    inline uint32_t Max(uint32_t x, uint32_t y, unsigned int z) noexcept { return std::max(x, std::max(y, z)); }
+    inline uint32_t Max(uint32_t x, uint32_t y, uint32_t z, uint32_t w) noexcept { return std::max(x, std::max(y, std::max(z, w))); }
 
     float fade(float t);
     double fade(double t);

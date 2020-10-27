@@ -25,6 +25,7 @@ void EventModule::onEventMouseButtonReleased(unsigned int mouseButton){
 void EventModule::onPostUpdate(){
     m_KeyboardModule.onPostUpdate();
     m_MouseModule.onPostUpdate();
+    m_EventDispatcher.onPostUpdate();
 }
 void EventModule::onClearEvents() {
     m_KeyboardModule.onClearEvents();
