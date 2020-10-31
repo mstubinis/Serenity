@@ -19,7 +19,6 @@ namespace Engine::Networking {
             std::string      m_IP = "";
             uint16_t         m_Port        = 0;
 
-
             ListenerTCP() = delete;
 
             void update(const float dt) override;

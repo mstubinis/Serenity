@@ -162,7 +162,7 @@ void Server::remove_client_immediately(ServerClient& inClient) {
 void Server::remove_client(ServerClient& inClient) {
     m_Clients.removeClient(inClient, m_Mutex);
 }
-ServerClient* Server::add_new_client(std::string& hash, std::string& clientIP, uint16_t clientPort, SocketTCP* tcp) {
+ServerClient* Server::add_new_client(std::string& hash, sf::IpAddress clientIP, uint16_t clientPort, SocketTCP* tcp) {
     ServerClient* client = NEW ServerClient(hash, *this, tcp, clientIP, clientPort);
     return client;
 }
@@ -189,7 +189,7 @@ void Server::internal_update_tcp_listener_loop(bool serverActive) {
     }
 }
 
-void Server::onReceiveUDP(Engine::Networking::Packet& packet, sf::IpAddress& ip, uint16_t port, const float dt) {
+void Server::onReceiveUDP(Engine::Networking::Packet& packet, sf::IpAddress ip, uint16_t port, const float dt) {
     std::string ipAsString  = ip.toString();
     std::string client_hash = m_Client_Hash_Function(ipAsString, port, packet);
     if (m_ServerType == ServerType::UDP) {

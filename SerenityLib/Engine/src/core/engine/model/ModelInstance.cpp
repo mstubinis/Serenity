@@ -162,16 +162,12 @@ ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
     return *this;
 }
 ModelInstance::~ModelInstance() {
-    if (isRegistered(EventType::ResourceLoaded)) {
-        unregisterEvent(EventType::ResourceLoaded);
-    }
+    unregisterEvent(EventType::ResourceLoaded);
 }
 float ModelInstance::internal_calculate_radius() {
     auto mesh = m_MeshHandle.get<Mesh>();
     if (!mesh->isLoaded()) {
-        if (!isRegistered(EventType::ResourceLoaded)) {
-            registerEvent(EventType::ResourceLoaded);
-        }
+        registerEvent(EventType::ResourceLoaded);
         return 0.0f;
     }
     m_Radius = mesh->getRadius();

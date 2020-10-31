@@ -12,10 +12,10 @@ using namespace Engine::priv;
 Networking::SocketTCP::SocketTCP() {
     Core::m_Engine->m_NetworkingModule.m_SocketManager.add_tcp_socket(this);
 }
-Networking::SocketTCP::SocketTCP(uint16_t port, const std::string& ip)
+Networking::SocketTCP::SocketTCP(uint16_t port, sf::IpAddress ip)
     : Networking::SocketTCP::SocketTCP{}
 {
-    m_IP    = ip;
+    m_IP    = std::move(ip);
     m_Port  = port;
 }
 Networking::SocketTCP::~SocketTCP() { 
@@ -91,15 +91,6 @@ SocketStatus::Status Networking::SocketTCP::connect(uint16_t timeout) {
     }
     return SocketStatus::map_status(status);
 }
-/*
-SocketStatus::Status Networking::SocketTCP::send(Engine::Networking::Packet& packet) {
-    sf::Packet sf_packet;
-    using cast         = std::chrono::duration<std::uint64_t>;
-    packet.m_Timestamp = std::chrono::duration_cast<cast>(std::chrono::system_clock::now().time_since_epoch()).count();
-    packet.build(sf_packet);
-    return send(sf_packet);
-}
-*/
 SocketStatus::Status Networking::SocketTCP::send(sf::Packet& packet) {
     m_PartialPackets.push(packet);
     return internal_send_partial_packets_loop();

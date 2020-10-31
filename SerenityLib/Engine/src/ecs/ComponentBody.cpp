@@ -781,12 +781,12 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
     }
     
     ComponentBody::internal_recalculateAllParentChildMatrices(system);
-    
+  /*
 #if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
     for (auto& componentBody : components) {
         Entity entity      = componentBody.getOwner();
         auto bodyRenderPos = componentBody.getPosition();
-        ComponentModel* model        = entity.getComponent<ComponentModel>();
+        auto model         = entity.getComponent<ComponentModel>();
         if (model) {
             auto world_pos = glm::vec3(componentBody.getPosition());
             auto world_rot = glm::quat(componentBody.getRotation());
@@ -812,7 +812,7 @@ struct priv::ComponentBody_UpdateFunction final { void operator()(void* systemPt
         }
     }
 #endif
-    
+    */
 }};
 struct Engine::priv::ComponentBody_ComponentAddedToEntityFunction final {void operator()(void* systemPtr, void* component, Entity entity) const {
     auto& system  = *(Engine::priv::ComponentBody_System*)systemPtr;

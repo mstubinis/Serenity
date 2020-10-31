@@ -14,7 +14,7 @@
 #include <btBulletCollisionCommon.h>
 #include <LinearMath/btIDebugDraw.h>
 
-void Collision::internal_load_1(Collision* collision, CollisionType collisionType, Handle mesh, float mass) {
+void Collision::internal_load_1(Engine::view_ptr<Collision> collision, CollisionType collisionType, Handle mesh) {
     auto body  = collision->m_Owner.getComponent<ComponentBody>();
     collision->m_DeferredMeshes.clear();
     auto scale = body->getScale();
@@ -29,7 +29,7 @@ void Collision::internal_load_1(Collision* collision, CollisionType collisionTyp
         Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
     }
 }
-void Collision::internal_load_2(Collision* collision, btCompoundShape* btCompound, std::vector<ModelInstance*> instances, float mass, CollisionType collisionType) {
+void Collision::internal_load_2(Engine::view_ptr<Collision> collision, Engine::view_ptr<btCompoundShape> btCompound, std::vector<Engine::view_ptr<ModelInstance>> instances, float mass, CollisionType collisionType) {
     auto body  = collision->m_Owner.getComponent<ComponentBody>();
     auto scale = body->getScale();
     for (auto& instance : instances) {
@@ -57,7 +57,7 @@ Collision::Collision(ComponentBody& body)
 {
     internal_base_init(body.getCollision()->getType(), body.mass());
 }
-Collision::Collision(ComponentBody& body, CollisionType type, ModelInstance* modelInstance, float mass)
+Collision::Collision(ComponentBody& body, CollisionType type, Engine::view_ptr<ModelInstance> modelInstance, float mass)
     : m_Owner{ body.getOwner() }
 {
     if (modelInstance) {
@@ -67,7 +67,7 @@ Collision::Collision(ComponentBody& body, CollisionType type, ModelInstance* mod
             m_BtShape = std::unique_ptr<btCollisionShape>(Engine::priv::InternalMeshPublicInterface::BuildCollision(Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), type));
             m_DeferredMeshes.emplace_back(meshHandle);
             m_DeferredLoadingFunction = [type, this, mass, meshHandle]() {
-                internal_load_1(this, type, meshHandle, mass);
+                internal_load_1(this, type, meshHandle);
             };
             registerEvent(EventType::ResourceLoaded);
         }else{
@@ -86,7 +86,7 @@ Collision::Collision(ComponentBody& body, CollisionType type, Handle meshHandle,
         m_BtShape = std::unique_ptr<btCollisionShape>(Engine::priv::InternalMeshPublicInterface::BuildCollision(Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), type));
         m_DeferredMeshes.emplace_back(meshHandle);
         m_DeferredLoadingFunction = [this, type, mass, meshHandle]() {
-            internal_load_1(this, type, meshHandle, mass);
+            internal_load_1(this, type, meshHandle);
         };
         registerEvent(EventType::ResourceLoaded);
     }else{
@@ -94,17 +94,17 @@ Collision::Collision(ComponentBody& body, CollisionType type, Handle meshHandle,
     }
     internal_base_init(type, mass);
 }
-
 Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, float mass, CollisionType type)
     : m_Owner{ body.getOwner() }
 {
-    std::vector<ModelInstance*> modelInstances;
+
+    std::vector<Engine::view_ptr<ModelInstance>> modelInstances;
     modelInstances.reserve(modelComponent.getNumModels());
     for (size_t i = 0; i < modelComponent.getNumModels(); ++i) {
         modelInstances.emplace_back(&modelComponent.getModel(i));
     }
     btCompoundShape* btCompound = new btCompoundShape();
-    std::vector<ModelInstance*> unfinishedModels;
+    std::vector<Engine::view_ptr<ModelInstance>> unfinishedModels;
     unfinishedModels.reserve(modelInstances.size());
     for (size_t i = 0; i < modelInstances.size(); ++i) {
         auto& instance  = *modelInstances[i];
@@ -136,6 +136,9 @@ Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, float 
     m_BtShape = std::unique_ptr<btCollisionShape>(btCompound);
     setMass(mass);
 }
+Collision::~Collision() {
+    internal_free_memory();
+}
 void Collision::internal_free_memory() {
     if (m_BtShape && m_BtShape->isCompound()) {
         btCompoundShape* compound = (btCompoundShape*)m_BtShape.get();
@@ -149,10 +152,6 @@ void Collision::internal_free_memory() {
     }  
     m_BtShape.reset(nullptr);
 }
-Collision::~Collision() {
-    internal_free_memory();
-} 
-
 void Collision::setMass(float mass) noexcept {
     if (!m_BtShape || m_Type == CollisionType::TriangleShapeStatic || m_Type == CollisionType::None) {
         return;
@@ -161,12 +160,10 @@ void Collision::setMass(float mass) noexcept {
         if (m_BtShape->isCompound()) {
             btCompoundShape* compound = (btCompoundShape*)m_BtShape.get();
             int numChildren = compound->getNumChildShapes();
-            if (numChildren > 0) {
-                for (int i = 0; i < numChildren; ++i) {
-                    btCollisionShape* child_shape = compound->getChildShape(i);
-                    if(child_shape){
-                        child_shape->calculateLocalInertia(mass, m_BtInertia);
-                    }
+            for (int i = 0; i < numChildren; ++i) {
+                btCollisionShape* child_shape = compound->getChildShape(i);
+                if(child_shape){
+                    child_shape->calculateLocalInertia(mass, m_BtInertia);
                 }
             }
         }    
@@ -174,16 +171,14 @@ void Collision::setMass(float mass) noexcept {
     }
 }
 void Collision::onEvent(const Event& e) {
-    if (e.type == EventType::ResourceLoaded) {
-        if (e.eventResource.resource->type() == ResourceType::Mesh && m_DeferredMeshes.size() > 0) {
-            auto mesh = (Mesh*)e.eventResource.resource;
-            std::erase_if(m_DeferredMeshes, [mesh](Mesh* deferred_mesh) {
-                return (mesh == deferred_mesh || (deferred_mesh->isLoaded() && deferred_mesh->m_CPUData.m_CollisionFactory));
-            });
-            if (m_DeferredMeshes.size() == 0) {
-                m_DeferredLoadingFunction();
-                unregisterEvent(EventType::ResourceLoaded);
-            }
+    if (e.type == EventType::ResourceLoaded && e.eventResource.resource->type() == ResourceType::Mesh && m_DeferredMeshes.size() > 0) {
+        auto mesh = (Mesh*)e.eventResource.resource;
+        std::erase_if(m_DeferredMeshes, [mesh](Mesh* deferred_mesh) {
+            return (mesh == deferred_mesh || (deferred_mesh->isLoaded() && deferred_mesh->m_CPUData.m_CollisionFactory));
+        });
+        if (m_DeferredMeshes.size() == 0) {
+            m_DeferredLoadingFunction();
+            unregisterEvent(EventType::ResourceLoaded);
         }
     }
 }

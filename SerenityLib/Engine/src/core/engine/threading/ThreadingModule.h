@@ -32,17 +32,17 @@ namespace Engine::priv {
             ThreadingModule::THREADING_MODULE->m_ThreadPool.wait_for_all(section);
         }
 
-        template<class JOB> inline void finalizeJob(JOB&& task, size_t section) {
-            ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job(std::forward<JOB>(task), section);
+        template<class JOB> inline FutureType& finalizeJob(JOB&& task, size_t section) {
+            return ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job(std::forward<JOB>(task), section);
         }
-        template<class JOB, class THEN> inline void finalizeJob(JOB&& task, THEN&& then, size_t section) {
-            ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job(std::forward<JOB>(task), std::forward<THEN>(then), section);
+        template<class JOB, class THEN> inline FutureType& finalizeJob(JOB&& task, THEN&& then, size_t section) {
+            return ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job(std::forward<JOB>(task), std::forward<THEN>(then), section);
         }
-        template<class JOB> inline void addJob(JOB&& job, size_t section = 0U) {
-            finalizeJob(std::forward<JOB>(job), section);
+        template<class JOB> inline FutureType& addJob(JOB&& job, size_t section = 0U) {
+            return finalizeJob(std::forward<JOB>(job), section);
         }
-        template<class JOB, class THEN> inline void addJobWithPostCallback(JOB&& job, THEN&& then, size_t section = 0U){
-            finalizeJob(std::forward<JOB>(job), std::forward<THEN>(then), section);
+        template<class JOB, class THEN> inline FutureType& addJobWithPostCallback(JOB&& job, THEN&& then, size_t section = 0U){
+            return finalizeJob(std::forward<JOB>(job), std::forward<THEN>(then), section);
         }
         template<class JOB, class T> void addJobSplitVectored(JOB&& job, std::vector<T>& collection, bool waitForAll, size_t section = 0U) {
             if (Engine::hardware_concurrency() > 1) {

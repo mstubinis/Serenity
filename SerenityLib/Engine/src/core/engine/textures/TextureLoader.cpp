@@ -40,7 +40,7 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
     stream.seekg(0, std::ios::beg);
 
     std::vector<uint8_t> file_data;
-    file_data.reserve((unsigned int)fileSize);
+    file_data.reserve((uint32_t)fileSize);
     file_data.insert(file_data.begin(), std::istream_iterator<uint8_t>(stream), std::istream_iterator<uint8_t>());
     stream.close();
 
@@ -52,7 +52,7 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
     }
 
     DDS::DDS_Header head(header_buffer);
-    if (head.magic != 0x20534444) {  //checks if this is "DDS "
+    if (head.magic != DDS::DDS_MAGIC_NUMBER) {  //checks if this is "DDS "
         return false; 
     }
     //DX10 header here
@@ -69,32 +69,32 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
     //TODO: fill the rest of these out
     switch (head.format.fourCC) {
         case FourCC_DXT1: {
-            factor = 2;
+            factor    = 2;
             blockSize = 8;
             image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_S3TC_DXT1_EXT;
             break;
         }case FourCC_DXT2: {
-            factor = 4;
+            factor    = 4;
             blockSize = 16;
             break;
         }case FourCC_DXT3: {
-            factor = 4;
+            factor    = 4;
             blockSize = 16;
             image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
             break;
         }case FourCC_DXT4: {
-            factor = 4;
+            factor    = 4;
             blockSize = 16;
             break;
         }case FourCC_DXT5: {
-            factor = 4;
+            factor    = 4;
             blockSize = 16;
             image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
             break;
         }case FourCC_DX10: {
             break;
         }case FourCC_ATI1: { //useful for 1 channel textures (greyscales, glow / specular / ao / smoothness / metalness etc)
-            factor = 2;
+            factor    = 2;
             blockSize = 8;
             image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_RED_RGTC1;
             break;
@@ -107,7 +107,7 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
             //vec3 normal;
             //normal.xy = texture2D(RXGBnormalmap, texcoord).ag;
             //normal.z = sqrt(1.0 - normal.x * normal.x - normal.y * normal.y);
-            factor = 4;
+            factor    = 4;
             blockSize = 16;
             image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT5_EXT;
             break;
@@ -189,20 +189,20 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
             }else{
                 mipmap = &imgPtr->m_Mipmaps[0];
             }
-            mipmap->level                       = level;
-            mipmap->width                       = width_;
-            mipmap->height                      = height_;
+            mipmap->level                  = level;
+            mipmap->width                  = width_;
+            mipmap->height                 = height_;
             const uint32_t compressed_size = ((width_ + 3U) / 4U) * ((height_ + 3U) / 4U) * blockSize;
-            mipmap->compressedSize              = compressed_size;
+            mipmap->compressedSize         = compressed_size;
 
-            auto& pixels                        = mipmap->pixels;
+            auto& pixels                   = mipmap->pixels;
             pixels.reserve(compressed_size);
             for (uint32_t t = 0; t < compressed_size; ++t) {
                 pixels.emplace_back( file_data[offset + t] );
             }
-            width_                              = std::max(width_ / 2U, 1U);
-            height_                             = std::max(height_ / 2U, 1U);
-            offset                             += compressed_size;
+            width_                         = std::max(width_ / 2U, 1U);
+            height_                        = std::max(height_ / 2U, 1U);
+            offset                        += compressed_size;
         }
     }
     return true;

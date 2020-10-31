@@ -373,4 +373,7 @@ namespace Engine {
 #include <core/engine/containers/TypeRegistry.h>
 #include <core/engine/containers/Freelist.h>
 
+#include <core/engine/algorithms/MergeSort.h>
+#include <core/engine/algorithms/RadixSort.h>
+
 #endif

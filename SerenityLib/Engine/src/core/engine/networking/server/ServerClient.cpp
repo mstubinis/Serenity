@@ -7,18 +7,18 @@
 using namespace Engine;
 using namespace Engine::Networking;
 
-ServerClient::ServerClient(const std::string& hash, Server& server, SocketTCP* tcp_socket, const std::string& in_client_IP, uint16_t in_client_Port)
+ServerClient::ServerClient(const std::string& hash, Server& server, SocketTCP* tcp_socket, sf::IpAddress clientIP, uint16_t in_client_Port)
     : m_Server{ server }
     , m_Hash{ hash }
     , m_ConnectionState{ ConnectionState::Active }
 {
     if (tcp_socket) {
-        m_IP        = (!tcp_socket->ip().empty() ? tcp_socket->ip() : in_client_IP);
+        m_IP        = tcp_socket->ip();
         m_Port      = tcp_socket->remotePort();
         m_TcpSocket = std::unique_ptr<Engine::Networking::SocketTCP>(std::move(tcp_socket));
         m_TcpSocket->setBlocking(false);
     }else{
-        m_IP   = in_client_IP;
+        m_IP   = std::move(clientIP);
         m_Port = in_client_Port;
     }
     registerEvent(EventType::ClientConnected);
