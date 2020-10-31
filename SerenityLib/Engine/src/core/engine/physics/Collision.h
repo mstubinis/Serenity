@@ -27,18 +27,18 @@ class Collision final: public Observer {
         CollisionType                      m_Type                    = CollisionType::None;
         Entity                             m_Owner;
 
-        void internal_base_init(CollisionType collisionType, float mass);
+        void internal_base_init(CollisionType, float mass);
         void internal_free_memory();
 
-        static void internal_load_1(Collision* collision, CollisionType collisionType, Handle mesh, float mass);
-        static void internal_load_2(Collision* collision, btCompoundShape* BTCompoundShape, std::vector<ModelInstance*> modelInstances, float mass, CollisionType collisionType);
+        static void internal_load_1(Engine::view_ptr<Collision>, CollisionType, Handle mesh);
+        static void internal_load_2(Engine::view_ptr<Collision>, Engine::view_ptr<btCompoundShape>, std::vector<Engine::view_ptr<ModelInstance>>, float mass, CollisionType);
 
         Collision() = delete;
     public:
-        Collision(ComponentBody& componentBody);
-        Collision(ComponentBody& componentBody, CollisionType collisionType, ModelInstance* modelInstance, float mass = 0);
-        Collision(ComponentBody& componentBody, CollisionType collisionType, Handle mesh, float mass = 0);
-        Collision(ComponentBody& componentBody, ComponentModel& componentModel, float mass = 0, CollisionType collisionType = CollisionType::ConvexHull);
+        Collision(ComponentBody&);
+        Collision(ComponentBody&, CollisionType, Engine::view_ptr<ModelInstance>, float mass = 0);
+        Collision(ComponentBody&, CollisionType, Handle mesh, float mass = 0);
+        Collision(ComponentBody&, ComponentModel&, float mass = 0, CollisionType = CollisionType::ConvexHull);
 
         Collision(const Collision&)                  = delete;
         Collision& operator=(const Collision&)       = delete;
@@ -54,6 +54,6 @@ class Collision final: public Observer {
 
         void setMass(float mass) noexcept;
 
-        void onEvent(const Event& e) override;
+        void onEvent(const Event&) override;
 };
 #endif

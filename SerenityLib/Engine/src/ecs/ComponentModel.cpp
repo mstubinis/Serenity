@@ -16,18 +16,7 @@ using namespace Engine::priv;
 
 float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) {
     std::vector<glm::vec3> points_total;
-    //This is optional, just calculate a reserve size for the vector.
-    size_t totalCapacity = 0;
-    for (const auto& modelInstance : modelComponent) {
-        const Mesh& mesh = *modelInstance->mesh().get<Mesh>();
-        if (!mesh.isLoaded()) {
-            continue;
-        }
-        totalCapacity += mesh.getVertexData().m_DataSizes[0];
-    }
-    points_total.reserve(totalCapacity);
-    ////////////////////////////////////////////////////////////////
-
+    points_total.reserve(ComponentModel_Functions::GetTotalVertexCount(modelComponent));
 
     for (const auto& modelInstance : modelComponent) {
         const Mesh& mesh = *modelInstance->mesh().get<Mesh>();
@@ -61,11 +50,20 @@ float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) 
     }
     return modelComponent.m_Radius; //now modified by the body scale
 };
+size_t ComponentModel_Functions::GetTotalVertexCount(ComponentModel& modelComponent) {
+    size_t totalCapacity = 0;
+    for (const auto& modelInstance : modelComponent) {
+        const Mesh& mesh = *modelInstance->mesh().get<Mesh>();
+        if (!mesh.isLoaded()) {
+            continue;
+        }
+        totalCapacity += mesh.getVertexData().m_DataSizes[0];
+    }
+    return totalCapacity;
+}
 void ComponentModel_Functions::RegisterDeferredMeshLoaded(ComponentModel& modelComponent, Mesh* mesh) {
     if (mesh && !mesh->isLoaded()) {
-        if (!modelComponent.isRegistered(EventType::ResourceLoaded)) {
-            modelComponent.registerEvent(EventType::ResourceLoaded);
-        }
+        modelComponent.registerEvent(EventType::ResourceLoaded);
     }
 }
 
@@ -209,7 +207,6 @@ void ComponentModel::setUserPointer(void* UserPointer) noexcept {
         instance->setUserPointer(UserPointer);
     }
 }
-
 
 #pragma endregion
 

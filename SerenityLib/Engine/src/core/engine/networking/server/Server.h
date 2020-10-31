@@ -23,14 +23,14 @@ namespace Engine::Networking {
     class Server : public Observer, public Engine::NonCopyable, public Engine::NonMoveable {
         friend class Engine::Networking::ServerThread;
 
-        using hash_func    = std::function<std::string(std::string ip, uint16_t port, sf::Packet packet)>;
+        using hash_func    = std::function<std::string(sf::IpAddress ip, uint16_t port, sf::Packet packet)>;
         using update_func  = std::function<void(const float dt, bool serverActive)>;
         using on_udp_func  = std::function<void(sf::Packet& sf_packet, std::string& ip, uint16_t port, const float dt)>;
 
         private:
-            hash_func              m_Client_Hash_Function       = [](std::string ip, uint16_t port, sf::Packet packet) { return (ip + "|" + std::to_string(port)); };
-            update_func            m_Update_Function            = [](const float dt, bool serverActive) {};
-            on_udp_func            m_On_Receive_UDP_Function    = [](sf::Packet& sf_packet, std::string& ip, uint16_t port, const float dt) {};
+            hash_func      m_Client_Hash_Function     = [](sf::IpAddress ip, uint16_t port, sf::Packet packet) { return (ip.toString() + "|" + std::to_string(port)); };
+            update_func    m_Update_Function          = [](const float dt, bool serverActive) {};
+            on_udp_func    m_On_Receive_UDP_Function  = [](sf::Packet& sf_packet, std::string& ip, uint16_t port, const float dt) {};
 
             void internal_send_to_all_tcp(const ServerClient* exclusion, sf::Packet& packet);
             void internal_send_to_all_udp(const ServerClient* exclusion, sf::Packet& packet);
@@ -48,7 +48,7 @@ namespace Engine::Networking {
             std::unique_ptr<SocketUDP>                      m_UdpSocket;
             std::unique_ptr<ListenerTCP>                    m_TCPListener;
             std::string                                     m_IP_Restriction = "";
-            ServerType                                      m_ServerType = ServerType::UDP;
+            ServerType                                      m_ServerType     = ServerType::UDP;
             uint16_t                                        m_Port           = 0;
             std::atomic<bool>                               m_Active         = false;
             bool                                            m_Multithreaded  = true;
@@ -60,7 +60,7 @@ namespace Engine::Networking {
             inline explicit CONSTEXPR operator bool() const noexcept { return isActive(); }
 
             //override this function with your own custom client class that inherits from Engine::Networking::ServerClient
-            virtual ServerClient* add_new_client(std::string& hash, std::string& clientIP, uint16_t clientPort, SocketTCP* tcp);
+            virtual ServerClient* add_new_client(std::string& hash, sf::IpAddress clientIP, uint16_t clientPort, SocketTCP* tcp);
             virtual void onEvent(const Event& e) override {}
             virtual bool startup(uint16_t port, std::string ip_restriction = "");
             virtual bool shutdown();
@@ -78,7 +78,7 @@ namespace Engine::Networking {
             inline void setClientHashFunction(hash_func function) { m_Client_Hash_Function = function; }
             inline void setServerUpdateFunction(update_func function) { m_Update_Function = function; }
             inline void setOnReceiveUDPFunction(on_udp_func function) { m_On_Receive_UDP_Function = function; }
-            void onReceiveUDP(Engine::Networking::Packet& packet, sf::IpAddress& ip, uint16_t port, const float dt);
+            void onReceiveUDP(Engine::Networking::Packet& packet, sf::IpAddress ip, uint16_t port, const float dt);
 
             void update(const float dt);
 

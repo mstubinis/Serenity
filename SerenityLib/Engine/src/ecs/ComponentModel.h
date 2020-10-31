@@ -12,8 +12,9 @@ class  ModelInstanceHandle;
 namespace Engine::priv {
     struct ComponentModel_UpdateFunction;
     struct ComponentModel_Functions final {
-        static float CalculateRadius(ComponentModel& super);
-        static void RegisterDeferredMeshLoaded(ComponentModel& super, Mesh* mesh);
+        static float CalculateRadius(ComponentModel&);
+        static size_t GetTotalVertexCount(ComponentModel&);
+        static void RegisterDeferredMeshLoaded(ComponentModel&, Mesh*);
     };
 };
 

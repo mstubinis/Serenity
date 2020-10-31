@@ -386,7 +386,7 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -479,6 +479,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\core\Constraint.h" />
+    <ClInclude Include="Engine\src\core\engine\algorithms\MergeSort.h" />
+    <ClInclude Include="Engine\src\core\engine\algorithms\RadixSort.h" />
     <ClInclude Include="Engine\src\core\engine\containers\BST.h" />
     <ClInclude Include="Engine\src\core\engine\containers\Freelist.h" />
     <ClInclude Include="Engine\src\core\engine\containers\Heap.h" />
@@ -694,6 +696,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\core\Constraint.cpp" />
+    <ClCompile Include="Engine\src\core\engine\algorithms\MergeSort.cpp" />
+    <ClCompile Include="Engine\src\core\engine\algorithms\RadixSort.cpp" />
     <ClCompile Include="Engine\src\core\engine\discord\DiscordActivityEvent.cpp" />
     <ClCompile Include="Engine\src\core\engine\discord\DiscordModule.cpp" />
     <ClCompile Include="Engine\src\core\engine\discord\src\achievement_manager.cpp" />

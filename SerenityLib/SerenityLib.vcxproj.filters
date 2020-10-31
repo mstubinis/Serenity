@@ -279,6 +279,12 @@
     <Filter Include="Source Files\Engine\Core\Tests">
       <UniqueIdentifier>{e53ff94b-16bc-413d-a85c-4ab915872dfa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Algorithms">
+      <UniqueIdentifier>{b1b87c79-c852-45bf-9b52-3cd057fa81ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Algorithms">
+      <UniqueIdentifier>{fe7f5334-dd8a-4e90-9720-f9da6fbea250}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\src\ecs\ComponentBody.h">
@@ -920,6 +926,12 @@
     <ClInclude Include="Engine\src\core\engine\physics\PhysicsModule.h">
       <Filter>Header Files\Engine\Core\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\algorithms\MergeSort.h">
+      <Filter>Header Files\Engine\Core\Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\algorithms\RadixSort.h">
+      <Filter>Header Files\Engine\Core\Algorithms</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -1389,6 +1401,12 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\physics\PhysicsModule.cpp">
       <Filter>Source Files\Engine\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\algorithms\MergeSort.cpp">
+      <Filter>Source Files\Engine\Core\Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\algorithms\RadixSort.cpp">
+      <Filter>Source Files\Engine\Core\Algorithms</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

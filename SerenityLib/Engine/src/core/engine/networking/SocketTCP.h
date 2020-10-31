@@ -18,7 +18,7 @@ namespace Engine::Networking {
         private:
             sf::TcpSocket             m_SocketTCP;
             std::queue<sf::Packet>    m_PartialPackets;
-            std::string               m_IP       = "";
+            sf::IpAddress             m_IP;
             uint16_t                  m_Port     = 0;
 
             SocketStatus::Status internal_send_partial_packets_loop();
@@ -28,14 +28,14 @@ namespace Engine::Networking {
             void update(const float dt) override;
         public: 
             SocketTCP();
-            SocketTCP(uint16_t port, const std::string& ip = ""); //client side socket
+            SocketTCP(uint16_t port, sf::IpAddress ip);
             ~SocketTCP();
 
             void                 disconnect();
 
 
             bool                 isConnected() const { return (m_SocketTCP.getLocalPort() != 0); }
-            std::string          ip() const { return m_SocketTCP.getRemoteAddress().toString(); }
+            sf::IpAddress        ip() const { return m_SocketTCP.getRemoteAddress(); }
             uint16_t             remotePort() const { return m_SocketTCP.getRemotePort(); }
             uint16_t             localPort() const override { return m_SocketTCP.getLocalPort(); }
 
@@ -45,8 +45,6 @@ namespace Engine::Networking {
 
     
             SocketStatus::Status   connect(uint16_t timeout = 0);
-
-            //SocketStatus::Status   send(Engine::Networking::Packet& packet);
             SocketStatus::Status   send(sf::Packet& packet);
 
             //TODO: handle this case automatically

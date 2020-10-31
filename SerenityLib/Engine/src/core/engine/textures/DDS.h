@@ -3,7 +3,7 @@
 #define ENGINE_TEXTURES_DDS_H
 
 namespace Engine::priv::textures {
-    enum class DXGI_FORMAT {
+    enum class DXGI_FORMAT : uint32_t {
         DXGI_FORMAT_UNKNOWN,
         DXGI_FORMAT_R32G32B32A32_TYPELESS,
         DXGI_FORMAT_R32G32B32A32_FLOAT,
@@ -126,7 +126,7 @@ namespace Engine::priv::textures {
         DXGI_FORMAT_FORCE_UINT,
         _TOTAL,
     };
-    enum class D3D_RESOURCE_DIMENSION {
+    enum class D3D_RESOURCE_DIMENSION : uint32_t {
         D3D_RESOURCE_DIMENSION_UNKNOWN,
         D3D_RESOURCE_DIMENSION_BUFFER,
         D3D_RESOURCE_DIMENSION_TEXTURE1D,
@@ -159,6 +159,9 @@ namespace Engine::priv::textures {
     static constexpr uint32_t FourCC_YUY2 = 0x32595559;
 
     namespace DDS {
+
+        constexpr uint32_t DDS_MAGIC_NUMBER = 0x20534444;
+
         struct DDS_PixelFormat final {
             uint32_t pxl_size    = 0U;
             uint32_t pxl_flags   = 0U;
@@ -168,19 +171,19 @@ namespace Engine::priv::textures {
             uint32_t BitMaskG    = 0U;
             uint32_t BitMaskB    = 0U;
             uint32_t BitMaskA    = 0U;
-            constexpr DDS_PixelFormat() {
-            }
-            constexpr DDS_PixelFormat(const uint32_t size, const uint32_t flags, const uint32_t fourCC_, const uint32_t bitCRGB, const uint32_t mskR, const uint32_t mskG, const uint32_t mskB, const uint32_t mskA) {
-                pxl_size    = size;
-                pxl_flags   = flags;
-                fourCC      = fourCC_;
-                BitCountRGB = bitCRGB;
-                BitMaskR    = mskR;
-                BitMaskG    = mskG;
-                BitMaskB    = mskB;
-                BitMaskA    = mskA;
-            }
-            constexpr void fill(const std::array<unsigned char, 128>& header) {
+
+            constexpr DDS_PixelFormat() = default;
+            constexpr DDS_PixelFormat(uint32_t size, uint32_t flags, uint32_t fourCC_, uint32_t bitCRGB, uint32_t mskR, uint32_t mskG, uint32_t mskB, uint32_t mskA) 
+                : pxl_size    { size }
+                , pxl_flags   { flags }
+                , fourCC      { fourCC_ }
+                , BitCountRGB { bitCRGB }
+                , BitMaskR    { mskR }
+                , BitMaskG    { mskG }
+                , BitMaskB    { mskB }
+                , BitMaskA    { mskA }
+            {}
+            constexpr void fill(const std::array<uint8_t, 128>& header) {
                 pxl_size    = *(uint32_t*)&header[76];
                 pxl_flags   = *(uint32_t*)&header[80];
                 fourCC      = *(uint32_t*)&header[84];
@@ -190,19 +193,19 @@ namespace Engine::priv::textures {
                 BitMaskB    = *(uint32_t*)&header[100];
                 BitMaskA    = *(uint32_t*)&header[104];
             }
-            constexpr DDS_PixelFormat(const std::array<unsigned char, 128>& header) {
+            constexpr DDS_PixelFormat(const std::array<uint8_t, 128>& header) {
                 fill(header); 
             }
         };
         struct DDS_Header_DX10 final {
             textures::DXGI_FORMAT             dxgiFormat        = textures::DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
             textures::D3D_RESOURCE_DIMENSION  resourceDimension = textures::D3D_RESOURCE_DIMENSION::D3D_RESOURCE_DIMENSION_UNKNOWN;
-            uint32_t                     miscFlag          = 0U;
-            uint32_t                     arraySize         = 0U;
-            uint32_t                     miscFlags2        = 0U;
-            constexpr DDS_Header_DX10() {
-            }
-            constexpr void fill(const std::array<unsigned char, 20>& headerDX10) {
+            uint32_t                          miscFlag          = 0U;
+            uint32_t                          arraySize         = 0U;
+            uint32_t                          miscFlags2        = 0U;
+
+            constexpr DDS_Header_DX10() = default;
+            constexpr void fill(const std::array<uint8_t, 20>& headerDX10) {
                 dxgiFormat        = static_cast<textures::DXGI_FORMAT>(*(uint32_t*)&headerDX10[0]);
                 resourceDimension = static_cast<textures::D3D_RESOURCE_DIMENSION>(*(uint32_t*)&headerDX10[4]);
                 miscFlag          = *(uint32_t*)&headerDX10[8];
@@ -220,15 +223,15 @@ namespace Engine::priv::textures {
             uint32_t depth             = 0U;
             uint32_t mipMapCount       = 0U;
             //uint32_t reserved1[11];
-            DDS_PixelFormat format          = DDS_PixelFormat{};
+            DDS_PixelFormat format     = DDS_PixelFormat{};
             uint32_t caps              = 0U;
             uint32_t caps2             = 0U;
             uint32_t caps3             = 0U;
             uint32_t caps4             = 0U;
             uint32_t reserved2         = 0U;
-            constexpr DDS_Header() {
-            }
-            constexpr DDS_Header(const std::array<unsigned char, 128>& header) {
+
+            constexpr DDS_Header() = default;
+            constexpr DDS_Header(const std::array<uint8_t, 128>& header) {
                 magic             = *(uint32_t*)&header[0];
                 header_size       = *(uint32_t*)&header[4];
                 header_flags      = *(uint32_t*)&header[8];

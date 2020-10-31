@@ -34,6 +34,7 @@ namespace Engine::priv {
             ThreadPoolFuture(ThreadPoolFuture&&) noexcept                 = default;
             ThreadPoolFuture& operator=(ThreadPoolFuture&&) noexcept      = default;
 
+            inline FutureType& getFuture() noexcept { return m_Future; }
             inline bool isReady() const noexcept { return (m_Future.valid() && m_Future.wait_for(0s) == std::future_status::ready); }
     };
     class ThreadPoolFutureCallback final {
@@ -52,6 +53,7 @@ namespace Engine::priv {
             ThreadPoolFutureCallback(ThreadPoolFutureCallback&&) noexcept                 = default;
             ThreadPoolFutureCallback& operator=(ThreadPoolFutureCallback&&) noexcept      = default;
 
+            inline FutureType& getFuture() noexcept { return m_Future; }
             inline bool isReady() const noexcept { return (m_Future.valid() && m_Future.wait_for(0s) == std::future_status::ready); }
 
             inline operator bool() const noexcept { return (bool)m_Callback; }
@@ -59,8 +61,8 @@ namespace Engine::priv {
 
             inline void operator()() const noexcept {
                 ASSERT(m_Callback, __FUNCTION__ << "(): m_Callback was invalid!");
-                if(m_Callback)
-                    m_Callback();
+                //if(m_Callback)
+                m_Callback();
             }
     };
     class ThreadPool final{
@@ -111,32 +113,36 @@ namespace Engine::priv {
             }
             inline size_t size() const noexcept { return m_WorkerThreads.size(); }
 
-            template<class JOB> inline void add_job(JOB&& job, size_t section) {
+            template<class JOB> inline FutureType& add_job(JOB&& job, size_t section) {
                 if (size() > 0) {
+                    FutureType* ret;
                     {
                         std::unique_lock lock{ m_SharedMutex };
                         auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
-                        m_FuturesBasic[section].emplace_back(task->get_future());
+                        ret = &m_FuturesBasic[section].emplace_back(task->get_future()).getFuture();
                     }
                     m_ConditionVariableAny.notify_one();
+                    return *ret;
                 }else{
                     //on single threaded, we just execute the tasks on the main thread below in update()
                     auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
-                    m_FuturesBasic[section].emplace_back(task->get_future());
+                    return m_FuturesBasic[section].emplace_back(task->get_future()).getFuture();
                 }
             }
-            template<class JOB, class THEN> inline void add_job(JOB&& job, THEN&& callback, size_t section) {
+            template<class JOB, class THEN> inline FutureType& add_job(JOB&& job, THEN&& callback, size_t section) {
                 if (size() > 0) {
+                    FutureType* ret;
                     {
                         std::unique_lock lock{ m_SharedMutex };
                         auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
-                        m_FuturesCallback[section].emplace_back(task->get_future(), std::forward<THEN>(callback));
+                        ret = &m_FuturesCallback[section].emplace_back(task->get_future(), std::forward<THEN>(callback)).getFuture();
                     }
                     m_ConditionVariableAny.notify_one();
+                    return *ret;
                 }else{
                     //on single threaded, we just execute the tasks on the main thread below in update()
                     auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
-                    m_FuturesCallback[section].emplace_back(task->get_future(), std::forward<THEN>(callback));
+                    return m_FuturesCallback[section].emplace_back(task->get_future(), std::forward<THEN>(callback)).getFuture();
                 }
             }
 

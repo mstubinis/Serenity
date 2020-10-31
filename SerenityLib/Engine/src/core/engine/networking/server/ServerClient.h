@@ -54,7 +54,7 @@ namespace Engine::Networking {
             float                                                   m_Recovery_Timeout_Timer_Limit = 60.0f;
             uint16_t                                                m_Port                         = 0U;
         public:
-            ServerClient(const std::string& hash, Engine::Networking::Server& server, Engine::Networking::SocketTCP* tcp, const std::string& clientIP, uint16_t clientPort);
+            ServerClient(const std::string& hash, Engine::Networking::Server& server, Engine::Networking::SocketTCP* tcp, sf::IpAddress clientIP, uint16_t clientPort);
             virtual ~ServerClient();
       
             ServerClient(const ServerClient& other)                 = delete;
@@ -75,7 +75,7 @@ namespace Engine::Networking {
             inline CONSTEXPR const std::string& hash() const noexcept { return m_Hash; }
             inline CONSTEXPR Engine::Networking::SocketTCP* socket() const noexcept { return m_TcpSocket.get(); }
             inline CONSTEXPR uint16_t port() const noexcept { return m_Port; }
-            inline CONSTEXPR const sf::IpAddress& ip() const noexcept { return m_IP; }
+            inline CONSTEXPR sf::IpAddress ip() const noexcept { return m_IP; }
             inline CONSTEXPR uint32_t id() const noexcept { return m_ID; }
             inline CONSTEXPR void setTimeoutTimerLimit(float limit) noexcept { m_Timeout_Timer_Limit = limit; }
             inline CONSTEXPR void setRecoveryTimeoutTimerLimit(float limit) noexcept { m_Recovery_Timeout_Timer_Limit = limit; }
@@ -83,7 +83,7 @@ namespace Engine::Networking {
             uint32_t generate_nonce() const noexcept;
 
             void disconnect() noexcept;
-            bool connect(unsigned short timeout = 0) noexcept;
+            bool connect(uint16_t timeout = 0) noexcept;
             bool disconnected() const noexcept;
 
             SocketStatus::Status send_udp(sf::Packet& sfPacket) noexcept;
