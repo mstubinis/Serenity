@@ -2,6 +2,7 @@
 #ifndef ENGINE_EVENT_H
 #define ENGINE_EVENT_H
 
+class  Window;
 class  Scene;
 class  Resource;
 namespace sf {
@@ -13,30 +14,31 @@ namespace Engine::Networking {
     class ServerThread;
 }
 #include <SFML/Network/IpAddress.hpp>
-#include <core/engine/events/EventIncludes.h>
+//#include <core/engine/events/EventIncludes.h>
 #include <core/engine/networking/ISocket.h>
+#include <core/engine/events/EventModule.h>
 
 namespace Engine::priv {
     struct EventEnum final {
-        unsigned int enumValue = 0;
-        void* enumPtr          = nullptr;
+        uint32_t enumValue = 0;
+        void* enumPtr      = nullptr;
         EventEnum() = default;
-        EventEnum(unsigned int enum_) 
+        EventEnum(uint32_t enum_)
             : enumValue{ enum_ }
         {}
-        EventEnum(unsigned int enum_, void* enumPtr_) 
+        EventEnum(uint32_t enum_, void* enumPtr_)
             : enumValue{ enum_ }
             , enumPtr{ enumPtr_ }
         {}
     };
     struct EventSocket final {
-        unsigned short   localPort  = 0;
-        unsigned short   remotePort = 0;
-        sf::IpAddress    remoteIP   = sf::IpAddress::None;
-        SocketType       type       = SocketType::Unknown;
+        uint16_t       localPort  = 0;
+        uint16_t       remotePort = 0;
+        sf::IpAddress  remoteIP   = sf::IpAddress::None;
+        SocketType     type       = SocketType::Unknown;
 
         EventSocket() = default;
-        EventSocket(unsigned short localPort_, unsigned short remotePort_, sf::IpAddress remoteIP_, SocketType type_) 
+        EventSocket(uint16_t localPort_, uint16_t remotePort_, sf::IpAddress remoteIP_, SocketType type_)
             : localPort{ localPort_ }
             , remotePort{ remotePort_ }
             , remoteIP{ remoteIP_ }
@@ -72,10 +74,10 @@ namespace Engine::priv {
         {}
     };
     struct EventWindowResized final{ 
-        unsigned int  width  = 0;
-        unsigned int  height = 0;
+        uint32_t  width  = 0;
+        uint32_t  height = 0;
         EventWindowResized() = default;
-        EventWindowResized(unsigned int width_, unsigned int height_)
+        EventWindowResized(uint32_t width_, uint32_t height_)
             : width{ width_ }
             , height{ height_ }
         {}
@@ -91,12 +93,12 @@ namespace Engine::priv {
         KeyboardKey::Key  key;
         bool              alt, control, shift, system;
         EventKeyboard() = default;
-        EventKeyboard(KeyboardKey::Key key_, bool alt_, bool control_, bool shift_, bool system_) 
-            : key{ key_ }
-            , alt{ alt_ }
+        EventKeyboard(KeyboardKey::Key key_, bool alt_ = false, bool control_ = false, bool shift_ = false, bool system_ = false)
+            : key    { key_ }
+            , alt    { alt_ }
             , control{ control_ }
-            , shift{ shift_ }
-            , system{ system_ }
+            , shift  { shift_ }
+            , system { system_ }
         {}
     };
     struct EventTextEntered final{ 
@@ -121,25 +123,40 @@ namespace Engine::priv {
     };
     struct EventMouseButton final{ 
         MouseButton::Button button; 
-        float x, y; 
+        float x = 0.0f;
+        float y = 0.0f;
         EventMouseButton() = default;
         EventMouseButton(MouseButton::Button button_, float x_, float y_) 
             : button{ button_ }
             , x{ x_ }
             , y{ y_ }
         {}
+        EventMouseButton(MouseButton::Button button_, Window& window)
+            : button{ button_ }
+        {
+            const auto& m = Engine::getMousePosition(window);
+            x = m.x;
+            y = m.y;
+        }
     };
     struct EventMouseMove final{ 
-        float x,y;
+        float x = 0.0f;
+        float y = 0.0f;
         EventMouseMove() = default;
         EventMouseMove(float x_, float y_) 
             : x{ x_ }
             , y{ y_ }
         {}
+        EventMouseMove(Window& window) {
+            const auto& m = Engine::getMousePosition(window);
+            x = m.x;
+            y = m.y;
+        }
     };
     struct EventMouseWheel final{ 
-        float delta;
-        int x, y;
+        float delta = 0.0f;
+        int   x     = 0;
+        int   y     = 0;
         EventMouseWheel() = default;
         EventMouseWheel(float delta_, int x_, int y_) 
             : delta{ delta_ }
@@ -148,11 +165,11 @@ namespace Engine::priv {
         {}
     };
     struct EventJoystickMoved final{ 
-        unsigned int        joystickID = 0;
+        uint32_t            joystickID = 0;
         JoystickAxis::Axis  axis       = JoystickAxis::Axis::Unknown;
         float               position   = 0.0f;
         EventJoystickMoved() = default;
-        EventJoystickMoved(unsigned int joystickID_, JoystickAxis::Axis axis_, float position_) 
+        EventJoystickMoved(uint32_t joystickID_, JoystickAxis::Axis axis_, float position_)
             : joystickID{ joystickID_ }
             , axis{ axis_ }
             , position{ position_ }
@@ -160,25 +177,25 @@ namespace Engine::priv {
         {}
     };
     struct EventJoystickButton final {
-        unsigned int  joystickID = 0;
-        unsigned int  button = 0;
+        uint32_t  joystickID = 0;
+        uint32_t  button     = 0;
         EventJoystickButton() = default;
-        EventJoystickButton(unsigned int joystickID_, unsigned int button_)
+        EventJoystickButton(uint32_t joystickID_, uint32_t button_)
             : joystickID{ joystickID_ }
             , button{ button_ }
         {}
     };
     struct EventJoystickConnection final{ 
-        unsigned int  joystickID = 0;
+        uint32_t  joystickID = 0;
         EventJoystickConnection() = default;
-        EventJoystickConnection(unsigned int joystickID_) 
+        EventJoystickConnection(uint32_t joystickID_)
             : joystickID{ joystickID_ }
         {}
     };
     struct EventSoundStatusChanged final {
-        unsigned int  status = 0;
+        uint32_t  status = 0;
         EventSoundStatusChanged() = default;
-        EventSoundStatusChanged(unsigned int status_) 
+        EventSoundStatusChanged(uint32_t status_)
             : status{ status_ }
         {}
     };
@@ -219,6 +236,98 @@ struct Event final{
     Event(EventType type_) 
         : type(type_)
     {}
+
+    Event(EventType type_, Engine::priv::EventEnum&& eventEnum_)
+        : Event{ type_ }
+    {
+        eventEnum = std::move(eventEnum_);
+    }
+
+    Event(EventType type_, Engine::priv::EventWindowResized&& eventWindowResized_)
+        : Event{ type_ }
+    {
+        eventWindowResized = std::move(eventWindowResized_);
+    }
+    Event(EventType type_, Engine::priv::EventWindowFullscreenChanged&& eventWindowFullscreenChanged_)
+        : Event{ type_ }
+    {
+        eventWindowFullscreenChanged = std::move(eventWindowFullscreenChanged_);
+    }
+    Event(EventType type_, Engine::priv::EventKeyboard&& eventKeyboard_)
+        : Event{ type_ }
+    {
+        eventKeyboard = std::move(eventKeyboard_);
+    }
+    Event(EventType type_, Engine::priv::EventTextEntered&& eventTextEntered_)
+        : Event{ type_ }
+    {
+        eventTextEntered = std::move(eventTextEntered_);
+    }
+    Event(EventType type_, Engine::priv::EventMouseButton&& eventMouseButton_)
+        : Event{ type_ }
+    {
+        eventMouseButton = std::move(eventMouseButton_);
+    }
+    Event(EventType type_, Engine::priv::EventMouseMove&& eventMouseMoved_)
+        : Event{ type_ }
+    {
+        eventMouseMoved = std::move(eventMouseMoved_);
+    }
+    Event(EventType type_, Engine::priv::EventMouseWheel&& eventMouseWheel_)
+        : Event{ type_ }
+    {
+        eventMouseWheel = std::move(eventMouseWheel_);
+    }
+    Event(EventType type_, Engine::priv::EventJoystickMoved&& eventJoystickMoved_)
+        : Event{ type_ }
+    {
+        eventJoystickMoved = std::move(eventJoystickMoved_);
+    }
+    Event(EventType type_, Engine::priv::EventJoystickButton&& eventJoystickButton_)
+        : Event{ type_ }
+    {
+        eventJoystickButton = std::move(eventJoystickButton_);
+    }
+    Event(EventType type_, Engine::priv::EventJoystickConnection&& eventJoystickConnection_)
+        : Event{ type_ }
+    {
+        eventJoystickConnection = std::move(eventJoystickConnection_);
+    }
+    Event(EventType type_, Engine::priv::EventSoundStatusChanged&& eventSoundStatusChanged_)
+        : Event{ type_ }
+    {
+        eventSoundStatusChanged = std::move(eventSoundStatusChanged_);
+    }
+    Event(EventType type_, Engine::priv::EventSceneChanged&& eventSceneChanged_)
+        : Event{ type_ }
+    {
+        eventSceneChanged = std::move(eventSceneChanged_);
+    }
+    Event(EventType type_, Engine::priv::EventResource&& eventResource_)
+        : Event{ type_ }
+    {
+        eventResource = std::move(eventResource_);
+    }
+    Event(EventType type_, Engine::priv::EventPacket&& eventPacket_)
+        : Event{ type_ }
+    {
+        eventPacket = std::move(eventPacket_);
+    }
+    Event(EventType type_, Engine::priv::EventSocket&& eventSocket_)
+        : Event{ type_ }
+    {
+        eventSocket = std::move(eventSocket_);
+    }
+    Event(EventType type_, Engine::priv::EventServer&& eventServer_)
+        : Event{ type_ }
+    {
+        eventServer = std::move(eventServer_);
+    }
+    Event(EventType type_, Engine::priv::EventClient&& eventClient_)
+        : Event{ type_ }
+    {
+        eventClient = std::move(eventClient_);
+    }
 };
 
 #endif

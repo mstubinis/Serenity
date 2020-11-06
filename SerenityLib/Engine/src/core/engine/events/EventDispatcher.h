@@ -8,7 +8,7 @@ struct Event;
 #include <core/engine/events/EventIncludes.h>
 
 namespace Engine::priv{
-    class EventDispatcher final : public Engine::NonCopyable, public Engine::NonMoveable{
+    class EventDispatcher final {
         private:
             mutable std::mutex                          m_Mutex;
             std::vector<std::vector<Observer*>>         m_Observers;
@@ -22,9 +22,12 @@ namespace Engine::priv{
             }
         public:
             EventDispatcher();
-            ~EventDispatcher() = default;
+            EventDispatcher(const EventDispatcher&)                = delete;
+            EventDispatcher& operator=(const EventDispatcher&)     = delete;
+            EventDispatcher(EventDispatcher&&) noexcept            = delete;
+            EventDispatcher& operator=(EventDispatcher&&) noexcept = delete;
 
-            void onPostUpdate();
+            void postUpdate();
 
             template<class T> void registerObject(Observer&, const T&) noexcept = delete;
             template<class T> void unregisterObject(Observer&, const T&) noexcept = delete;

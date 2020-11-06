@@ -12,10 +12,8 @@
 
 using namespace Engine;
 using namespace Engine::priv;
-using namespace std;
 
-
-void opengl::glsl::Common::convert(string& code, unsigned int versionNumber) {
+void opengl::glsl::Common::convert(std::string& code, unsigned int versionNumber) {
 
 #pragma region constants
     if (ShaderHelper::sfind(code, "ConstantOneVec3")) {
@@ -58,13 +56,13 @@ void opengl::glsl::Common::convert(string& code, unsigned int versionNumber) {
 #pragma region use sampler
     const bool is_bindless_supported = Engine::priv::OpenGLExtensions::isBindlessTexturesSupported();
 
-    const std::array<string, 4> types{
+    const std::array<std::string, 4> types{
         "1D",
         "2D",
         "3D",
         "Cube",
     };
-    auto lambda_sampler_add_code = [&](const string& view) {
+    auto lambda_sampler_add_code = [&](const std::string& view) {
         //if (is_bindless_supported) {
         //    ShaderHelper::insertStringAtLine(code, 
         //        "sampler" + view + " USE_SAMPLER_" + view + "(uint64_t inHandle){//generated\n"
@@ -79,7 +77,7 @@ void opengl::glsl::Common::convert(string& code, unsigned int versionNumber) {
             , 1);
         //}
     };
-    auto lambda_sampler_add_code_type = [&](const string& view) {
+    auto lambda_sampler_add_code_type = [&](const std::string& view) {
         if (is_bindless_supported) {
             boost::replace_all(code, "SAMPLER_TYPE_" + view, "sampler" + view);
         }else{
@@ -176,35 +174,6 @@ void opengl::glsl::Common::convert(string& code, unsigned int versionNumber) {
                 "    float _z = sqrt(1.0 - _t.x * _t.x - _t.y * _t.y);\n"
                 "    vec3 normal = vec3(_t.xy, _z);\n"//recalc z in the shader
                 "    return normalize(TBN * normal);\n"
-                "}\n"
-            , 1);
-        }
-    }
-#pragma endregion
-
-#pragma region pack nibble
-    if (ShaderHelper::sfind(code, "Pack2NibblesInto8BitChannel(")) {
-        if (!ShaderHelper::sfind(code, "float Pack2NibblesInto8BitChannel(")) {
-            ShaderHelper::insertStringAtLine(code, 
-                "float Pack2NibblesInto8BitChannel(float x,float y){\n"
-                "    float xF = round(x / 0.0666666666666666);\n"
-                "    float yF = round(y / 0.0666666666666666) * 16.0;\n"
-                "    return (xF + yF) / 255.0;\n"
-                "}\n"
-            , 1);
-        }
-    }
-#pragma endregion
-
-#pragma region unpack nibble
-    if (ShaderHelper::sfind(code, "Unpack2NibblesFrom8BitChannel(")) {
-        if (!ShaderHelper::sfind(code, "vec2 Unpack2NibblesFrom8BitChannel(")) {
-            ShaderHelper::insertStringAtLine(code, 
-                "vec2 Unpack2NibblesFrom8BitChannel(float data){\n"
-                "    float d = data * 255.0;\n"
-                "    float y = fract(d / 16.0);\n"
-                "    float x = (d - (y * 16.0));\n"
-                "    return vec2(y, x / 255.0);\n"
                 "}\n"
             , 1);
         }
@@ -332,13 +301,13 @@ void opengl::glsl::Common::convert(string& code, unsigned int versionNumber) {
 
 #pragma region material constants
     if (ShaderHelper::sfind(code, "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT") && !ShaderHelper::sfind(code, "//USE_MAX_MATERIAL_LAYERS_PER_COMPONENT")) {
-        boost::replace_all(code, "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT", "#define MAX_MATERIAL_LAYERS_PER_COMPONENT " + to_string(MAX_MATERIAL_LAYERS_PER_COMPONENT) + "\n");
+        boost::replace_all(code, "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT", "#define MAX_MATERIAL_LAYERS_PER_COMPONENT " + std::to_string(MAX_MATERIAL_LAYERS_PER_COMPONENT) + "\n");
     }
     if (ShaderHelper::sfind(code, "USE_MAX_MATERIAL_COMPONENTS") && !ShaderHelper::sfind(code, "//USE_MAX_MATERIAL_COMPONENTS")) {
-        boost::replace_all(code, "USE_MAX_MATERIAL_COMPONENTS", "#define MAX_MATERIAL_COMPONENTS " + to_string(MAX_MATERIAL_COMPONENTS) + "\n");
+        boost::replace_all(code, "USE_MAX_MATERIAL_COMPONENTS", "#define MAX_MATERIAL_COMPONENTS " + std::to_string(MAX_MATERIAL_COMPONENTS) + "\n");
     }
     if (ShaderHelper::sfind(code, "USE_MAX_LIGHTS_PER_PASS") && !ShaderHelper::sfind(code, "//USE_MAX_LIGHTS_PER_PASS")) {
-        boost::replace_all(code, "USE_MAX_LIGHTS_PER_PASS", "#define MAX_LIGHTS_PER_PASS " + to_string(MAX_MATERIAL_COMPONENTS) + "\n");
+        boost::replace_all(code, "USE_MAX_LIGHTS_PER_PASS", "#define MAX_LIGHTS_PER_PASS " + std::to_string(MAX_MATERIAL_COMPONENTS) + "\n");
     }
 #pragma endregion
 }

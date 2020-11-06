@@ -11,18 +11,18 @@ namespace Game {
     void render();
     void cleanup();
 
-    void onResize(Window& window, unsigned int width, unsigned int height);
+    void onResize(Window& window, uint32_t width, uint32_t height);
     void onWindowRequestedToBeClosed(Window& window);
     void onWindowClosed(Window& window);
     void onGameEnded();
     void onLostFocus(Window& window);
     void onGainedFocus(Window& window);
-    void onTextEntered(Window& window, unsigned int unicode);
-    void onKeyPressed(Window& window, unsigned int key);
-    void onKeyReleased(Window& window, unsigned int key);
+    void onTextEntered(Window& window, uint32_t unicode);
+    void onKeyPressed(Window& window, uint32_t key);
+    void onKeyReleased(Window& window, uint32_t key);
     void onMouseWheelScrolled(Window& window, float delta, int x, int y);
-    void onMouseButtonPressed(Window& window, unsigned int button);
-    void onMouseButtonReleased(Window& window, unsigned int button);
+    void onMouseButtonPressed(Window& window, uint32_t button);
+    void onMouseButtonReleased(Window& window, uint32_t button);
     void onMouseMoved(Window& window, float mouseX, float mouseY);
     void onMouseEntered(Window& window);
     void onMouseLeft(Window& window);
@@ -33,7 +33,6 @@ namespace Game {
     void onJoystickMoved();
     void onJoystickConnected();
     void onJoystickDisconnected();
-
 };
 
 #endif

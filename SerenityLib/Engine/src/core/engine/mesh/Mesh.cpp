@@ -27,7 +27,6 @@
 
 using namespace Engine;
 using namespace Engine::priv;
-namespace boostm = boost::math;
 
 MeshCPUData::MeshCPUData(const MeshCPUData& other) 
     : m_RadiusBox        { other.m_RadiusBox }
@@ -98,16 +97,12 @@ void MeshCPUData::internal_calculate_radius() {
     m_RadiusBox = glm::vec3(0.0f);
     auto points = m_VertexData->getPositions();
     for (const auto& vertex : points) {
-        const float x = std::abs(vertex.x);
-        const float y = std::abs(vertex.y);
-        const float z = std::abs(vertex.z);
-        m_RadiusBox.x = std::max(m_RadiusBox.x, x);
-        m_RadiusBox.y = std::max(m_RadiusBox.y, y);
-        m_RadiusBox.z = std::max(m_RadiusBox.z, z);
+        m_RadiusBox.x = std::max(m_RadiusBox.x, std::abs(vertex.x));
+        m_RadiusBox.y = std::max(m_RadiusBox.y, std::abs(vertex.y));
+        m_RadiusBox.z = std::max(m_RadiusBox.z, std::abs(vertex.z));
     }
     m_Radius = Math::Max(m_RadiusBox);
 }
-
 
 constexpr auto DefaultMeshBindFunctor = [](Mesh* mesh_ptr, const Engine::priv::RenderModule* renderer) {
     mesh_ptr->getVertexData().bind();
@@ -115,7 +110,6 @@ constexpr auto DefaultMeshBindFunctor = [](Mesh* mesh_ptr, const Engine::priv::R
 constexpr auto DefaultMeshUnbindFunctor = [](Mesh* mesh_ptr, const Engine::priv::RenderModule* renderer) {
     mesh_ptr->getVertexData().unbind();
 };
-
 
 void InternalMeshPublicInterface::LoadGPU(Mesh& mesh) {
     mesh.m_CPUData.m_VertexData->finalize(); //transfer vertex data to gpu
@@ -126,7 +120,6 @@ void InternalMeshPublicInterface::UnloadCPU(Mesh& mesh) {
 }
 void InternalMeshPublicInterface::UnloadGPU(Mesh& mesh) {
     SAFE_DELETE(mesh.m_CPUData.m_VertexData);
-
 }
 void InternalMeshPublicInterface::InitBlankMesh(Mesh& mesh) {
     mesh.registerEvent(EventType::WindowFullscreenChanged);
@@ -241,8 +234,18 @@ void InternalMeshPublicInterface::FinalizeVertexData(MeshCPUData& cpuData, MeshI
                 temp_tangents.emplace_back(data.tangents[i]);
 
                 if (data.m_Bones.size() > 0) {
-                    boneIDs.emplace_back(data.m_Bones[i].IDs[0], data.m_Bones[i].IDs[1], data.m_Bones[i].IDs[2], data.m_Bones[i].IDs[3]);
-                    boneWeights.emplace_back(data.m_Bones[i].Weights[0], data.m_Bones[i].Weights[1], data.m_Bones[i].Weights[2], data.m_Bones[i].Weights[3]);
+                    boneIDs.emplace_back(
+                        data.m_Bones[i].IDs[0], 
+                        data.m_Bones[i].IDs[1], 
+                        data.m_Bones[i].IDs[2], 
+                        data.m_Bones[i].IDs[3]
+                    );
+                    boneWeights.emplace_back(
+                        data.m_Bones[i].Weights[0], 
+                        data.m_Bones[i].Weights[1], 
+                        data.m_Bones[i].Weights[2], 
+                        data.m_Bones[i].Weights[3]
+                    );
                 }
                 indices.emplace_back((uint32_t)temp_pos.size() - 1);
             }
@@ -273,8 +276,6 @@ void InternalMeshPublicInterface::FinalizeVertexData(MeshCPUData& cpuData, MeshI
         #pragma endregion
     }
 }
-
-
 void InternalMeshPublicInterface::CalculateRadius(Handle meshHandle) {
     Mesh& mesh       = *meshHandle.get<Mesh>();
     mesh.m_CPUData.internal_calculate_radius();
@@ -296,11 +297,11 @@ Mesh::Mesh()
 void Mesh::internal_build_from_terrain(const Terrain& terrain) {
     MeshImportedData data;
 
-    unsigned int count  = 0;
+    uint32_t count      = 0;
     float offsetSectorX = 0.0f;
     float offsetSectorY = 0.0f;
 
-    auto hash_position  = [](glm::vec3& position, unsigned int decimal_places) {
+    auto hash_position  = [](glm::vec3& position, uint32_t decimal_places) {
         std::stringstream one, two, thr;
         one << std::fixed << std::setprecision(decimal_places) << position.x;
         two << std::fixed << std::setprecision(decimal_places) << position.y;
@@ -311,8 +312,8 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
     std::unordered_map<std::string, VertexSmoothingGroup> m_VertexMap;
     auto& heightfields  = terrain.m_TerrainData.m_BtHeightfieldShapes;
 
-    unsigned int width  = (unsigned int)heightfields[0][0]->getUserIndex();
-    unsigned int length = (unsigned int)heightfields[0][0]->getUserIndex2();
+    uint32_t width      = (uint32_t)heightfields[0][0]->getUserIndex();
+    uint32_t length     = (uint32_t)heightfields[0][0]->getUserIndex2();
     const float fWidth  = (float)width;
     const float fLength = (float)length;
 
@@ -325,11 +326,11 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
             offsetSectorX     = sectorX * fWidth;
             offsetSectorY     = sectorY * fLength;
 
-            for (unsigned int i = 0; i < width; ++i) {
-                for (unsigned int j = 0; j < length; ++j) {
+            for (uint32_t i = 0; i < width; ++i) {
+                for (uint32_t j = 0; j < length; ++j) {
 
-                    unsigned int vertexAtX = i + (width * (unsigned int)sectorY);
-                    unsigned int vertexAtY = j + (length * (unsigned int)sectorX);
+                    uint32_t vertexAtX = i + (width * (uint32_t)sectorY);
+                    uint32_t vertexAtY = j + (length * (uint32_t)sectorX);
 
                     btVector3 btVerts[4];
                     priv::Vertex verts[4];
@@ -408,15 +409,15 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
 }
 void Mesh::internal_recalc_indices_from_terrain(const Terrain& terrain) {
     MeshImportedData data;
-    unsigned int count = 0;
+    uint32_t count = 0;
     auto& heightfields = terrain.m_TerrainData.m_BtHeightfieldShapes;
     for (size_t sectorX = 0; sectorX < heightfields.size(); ++sectorX) {
         for (size_t sectorY = 0; sectorY < heightfields[sectorX].size(); ++sectorY) {
             auto& heightfield = *heightfields[sectorX][sectorY];
-            unsigned int width  = (unsigned int)heightfield.getUserIndex();
-            unsigned int length = (unsigned int)heightfield.getUserIndex2();
-            for (unsigned int i = 0; i < width; ++i) {
-                for (unsigned int j = 0; j < length; ++j) {
+            uint32_t width  = (uint32_t)heightfield.getUserIndex();
+            uint32_t length = (uint32_t)heightfield.getUserIndex2();
+            for (uint32_t i = 0; i < width; ++i) {
+                for (uint32_t j = 0; j < length; ++j) {
                     btVector3 vert1, vert2, vert3, vert4;
                     bool valid[4];
                     valid[0] = heightfield.getAndValidateVertex(i, j,         vert1, false);
@@ -476,11 +477,11 @@ Mesh::Mesh(const std::string& name, float width, float height, float threshold)
     quad[2].position = glm::vec3(width / 2.0f, height / 2.0f, 0.0f);
     quad[3].position = glm::vec3(-width / 2.0f, height / 2.0f, 0.0f);
 
-    for (unsigned int i = 0; i < 3; ++i) {   //triangle 1 (0, 1, 2)
+    for (uint32_t i = 0; i < 3; ++i) {   //triangle 1 (0, 1, 2)
         data.points.emplace_back(quad[i].position);
         data.uvs.emplace_back(quad[i].uv);
     }
-    for (unsigned int i = 0; i < 3; ++i) {   //triangle 2 (2, 3, 0)
+    for (uint32_t i = 0; i < 3; ++i) {   //triangle 2 (2, 3, 0)
         data.points.emplace_back(quad[(i + 2) % 4].position);
         data.uvs.emplace_back(quad[(i + 2) % 4].uv);
     }
@@ -496,7 +497,7 @@ Mesh::Mesh(const std::string& fileOrData, float threshold)
     InternalMeshPublicInterface::InitBlankMesh(*this);
 
     setName("Custom Mesh");
-    unsigned char flags = MeshLoadingFlags::Points | MeshLoadingFlags::Faces | MeshLoadingFlags::UVs | MeshLoadingFlags::Normals | MeshLoadingFlags::TBN;
+    uint8_t flags = MeshLoadingFlags::Points | MeshLoadingFlags::Faces | MeshLoadingFlags::UVs | MeshLoadingFlags::Normals | MeshLoadingFlags::TBN;
 
     MeshImportedData data;
     std::vector<std::vector<uint>> indices;
@@ -626,7 +627,7 @@ void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const gl
         //std::execution::par_unseq seems to really help here for performance
         std::sort( std::execution::par_unseq, triangles.begin(), triangles.end(), lambda_sorter);
 
-        std::vector<unsigned int> newIndices;
+        std::vector<uint32_t> newIndices;
         newIndices.reserve(m_CPUData.m_VertexData->m_Indices.size());
         for (size_t i = 0; i < triangles.size(); ++i) {
             auto& triangle = triangles[i];

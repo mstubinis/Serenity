@@ -12,11 +12,10 @@ namespace Engine::priv {
             mutable std::shared_mutex                                    m_SharedMutex;
         public:
             ResourceModule() = default;
-            ResourceModule(const ResourceModule& other)            = delete;
-            ResourceModule& operator=(const ResourceModule& other) = delete;
-            ResourceModule(ResourceModule&& other) noexcept        = delete;
-            ResourceModule& operator=(ResourceModule&& other)      = delete;
-            ~ResourceModule() = default;
+            ResourceModule(const ResourceModule&)            = delete;
+            ResourceModule& operator=(const ResourceModule&) = delete;
+            ResourceModule(ResourceModule&&) noexcept        = delete;
+            ResourceModule& operator=(ResourceModule&&)      = delete;
 
             // Locks the resource module from modifying the underlying resource containers. 
             // It will also reduce the memory footprint of them by calling shrink_to_fit().

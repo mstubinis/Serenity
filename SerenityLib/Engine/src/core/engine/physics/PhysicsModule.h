@@ -30,10 +30,10 @@ namespace Engine{
                 collisionObject = const_cast<btCollisionObject*>(closestHitResult.m_collisionObject);
             }
         }
-        RayCastResult(const btCollisionWorld::AllHitsRayResultCallback& allHitResult, const int index) {
-            hitPosition           = Engine::Math::btVectorToGLM(allHitResult.m_hitPointWorld[index]);
-            hitNormal             = Engine::Math::btVectorToGLM(allHitResult.m_hitNormalWorld[index]);
-            collisionObject       = const_cast<btCollisionObject*>(allHitResult.m_collisionObjects[index]);
+        RayCastResult(const btCollisionWorld::AllHitsRayResultCallback& allHitResult, int index) {
+            hitPosition         = Engine::Math::btVectorToGLM(allHitResult.m_hitPointWorld[index]);
+            hitNormal           = Engine::Math::btVectorToGLM(allHitResult.m_hitNormalWorld[index]);
+            collisionObject     = const_cast<btCollisionObject*>(allHitResult.m_collisionObjects[index]);
         }
     };
     namespace priv{
@@ -44,36 +44,37 @@ namespace Engine{
                 Engine::priv::PhysicsPipeline    m_Pipeline;
                 std::mutex                       m_Mutex;
                 bool                             m_Paused                = false;
-                unsigned int                     m_NumberOfStepsPerFrame = 1;
+                uint32_t                         m_NumberOfStepsPerFrame = 1;
             public:
                 PhysicsModule();
-                ~PhysicsModule();
 
-                void _init();
+                void init();
 
                 void preUpdate(const float dt) noexcept;
-                void _update(const float dt, int maxSubSteps = 1, float fixedTimeStep = 0.0166666f);
-                void _render(const Camera& camera);
+                void update(const float dt, int maxSubSteps = 1, float fixedTimeStep = 0.0166666f);
+                void render(const Camera& camera);
 
                 bool add_rigid_body(btRigidBody* rigidBody, MaskType group, MaskType mask, bool doGroupAndMask) noexcept;
         };
     };
     namespace Physics{
-        std::vector<RayCastResult> rayCast(btVector3& start, btVector3& end, ComponentBody* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
-        std::vector<RayCastResult> rayCast(btVector3& start, btVector3& end, std::vector<ComponentBody*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
+        std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, ComponentBody* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
+        std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, std::vector<ComponentBody*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
-        std::vector<RayCastResult> rayCast(glm::vec3& start, glm::vec3& end, Entity* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
-        std::vector<RayCastResult> rayCast(glm::vec3& start, glm::vec3& end, std::vector<Entity>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
+        std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, Entity* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
+        std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
 
-        RayCastResult rayCastNearest(btVector3& start, btVector3& end, ComponentBody* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
-        RayCastResult rayCastNearest(btVector3& start, btVector3& end, std::vector<ComponentBody*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
+        RayCastResult rayCastNearest(const btVector3& start, const btVector3& end, ComponentBody* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
+        RayCastResult rayCastNearest(const btVector3& start, const btVector3& end, std::vector<ComponentBody*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
-        RayCastResult rayCastNearest(glm::vec3& start, glm::vec3& end, Entity* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
-        RayCastResult rayCastNearest(glm::vec3& start, glm::vec3& end, std::vector<Entity>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
+        RayCastResult rayCastNearest(const glm::vec3& start, const glm::vec3& end, Entity* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
+        RayCastResult rayCastNearest(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
-        void setNumberOfStepsPerFrame(unsigned int numSteps);
-        unsigned int getNumberOfStepsPerFrame();
+        void setNumberOfStepsPerFrame(uint32_t numSteps);
+        uint32_t getNumberOfStepsPerFrame();
+
+        void updateDiscreteCollisionDetection() noexcept;
 
         void setGravity(float x, float y, float z);
         void setGravity(const glm::vec3& gravity);

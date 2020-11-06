@@ -932,6 +932,9 @@
     <ClInclude Include="Engine\src\core\engine\algorithms\RadixSort.h">
       <Filter>Header Files\Engine\Core\Algorithms</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\system\EngineEventHandler.h">
+      <Filter>Header Files\Engine\Core\System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -1407,6 +1410,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\algorithms\RadixSort.cpp">
       <Filter>Source Files\Engine\Core\Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\system\EngineEventHandler.cpp">
+      <Filter>Source Files\Engine\Core\System</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

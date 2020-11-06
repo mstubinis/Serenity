@@ -63,16 +63,14 @@ void processManifoldContact(btManifoldPoint& cp, btCollisionObject* A, btCollisi
 
         cp.setDistance((btScalar)9999999999999.0); //hacky way of saying "dont process this again"
     }
-
 }
 bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1) {
-    btCollisionShape* childShapeA       = nullptr;
-    btCollisionShape* childShapeB       = nullptr;
-    btCollisionObjectWrapper* ARoot     = const_cast<btCollisionObjectWrapper*>(colObj0Wrap);
-    btCollisionObjectWrapper* BRoot     = const_cast<btCollisionObjectWrapper*>(colObj1Wrap);
-    btCollisionObjectWrapper* ARootPrev = nullptr;
-    btCollisionObjectWrapper* BRootPrev = nullptr;
-
+    btCollisionShape*         childShapeA  = nullptr;
+    btCollisionShape*         childShapeB  = nullptr;
+    btCollisionObjectWrapper* ARoot        = const_cast<btCollisionObjectWrapper*>(colObj0Wrap);
+    btCollisionObjectWrapper* BRoot        = const_cast<btCollisionObjectWrapper*>(colObj1Wrap);
+    btCollisionObjectWrapper* ARootPrev    = nullptr;
+    btCollisionObjectWrapper* BRootPrev    = nullptr;
     while (ARoot->m_parent) {
         ARootPrev = ARoot;
         ARoot = const_cast<btCollisionObjectWrapper*>(ARoot->m_parent);
@@ -91,7 +89,6 @@ bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionOb
             childShapeB = const_cast<btCollisionShape*>(BRootPrev->getCollisionShape());
         }
     }
-
     if (cp.getDistance() < 0.0f) {
         //btAdjustInternalEdgeContacts(cp, colObj1Wrap, colObj0Wrap, partId1, index1);
         processManifoldContact(cp, const_cast<btCollisionObject*>(colObj0Wrap->getCollisionObject()), const_cast<btCollisionObject*>(colObj1Wrap->getCollisionObject()), childShapeA, childShapeB, colObj0Wrap->m_shape, colObj1Wrap->m_shape);
@@ -102,10 +99,7 @@ bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionOb
 Engine::priv::PhysicsModule::PhysicsModule(){
     PHYSICS_MANAGER = this;
 }
-Engine::priv::PhysicsModule::~PhysicsModule(){
-
-}
-void Engine::priv::PhysicsModule::_init(){
+void Engine::priv::PhysicsModule::init(){
     m_Pipeline.m_DebugDrawer.init();
     gContactAddedCallback = CustomMaterialContactAddedCallback;
 }
@@ -113,21 +107,21 @@ bool Engine::priv::PhysicsModule::add_rigid_body(btRigidBody* rigidBody, MaskTyp
     auto& physicsWorld = *m_Pipeline.m_World;
     for (int i = 0; i < physicsWorld.getNumCollisionObjects(); ++i) {
         btRigidBody* btRigidBodyUpCast = btRigidBody::upcast(physicsWorld.getCollisionObjectArray()[i]);
-        if (btRigidBodyUpCast && btRigidBodyUpCast == rigidBody) {
+        if (/*btRigidBodyUpCast &&*/ btRigidBodyUpCast == rigidBody) {
             return false;
         }
     }
-    if (doGroupAndMask)
+    if (doGroupAndMask) {
         physicsWorld.addRigidBody(rigidBody, group, mask);
-    else
+    }else{
         physicsWorld.addRigidBody(rigidBody);
+    }
     return true;
 }
 void Engine::priv::PhysicsModule::preUpdate(const float dt) noexcept {
-    //this is needed for raycasting
-    Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_World->performDiscreteCollisionDetection();
+    m_Pipeline.m_World->performDiscreteCollisionDetection();
 }
-void Engine::priv::PhysicsModule::_update(const float dt, int maxSubSteps, float fixedTimeStep){
+void Engine::priv::PhysicsModule::update(const float dt, int maxSubSteps, float fixedTimeStep){
     if (m_Paused) {
         return;
     }
@@ -151,7 +145,7 @@ void Engine::priv::PhysicsModule::_update(const float dt, int maxSubSteps, float
         }
     }
 }
-void Engine::priv::PhysicsModule::_render(const Camera& camera){
+void Engine::priv::PhysicsModule::render(const Camera& camera){
     const glm::vec3 camPos = camera.getPosition();
     m_Pipeline.m_World->debugDrawWorld();
     Engine::Renderer::sendUniformMatrix4("Model", glm::mat4(1.0f));
@@ -159,10 +153,13 @@ void Engine::priv::PhysicsModule::_render(const Camera& camera){
     m_Pipeline.m_DebugDrawer.drawAccumulatedLines();
     m_Pipeline.m_DebugDrawer.postRender();
 }
-void Engine::Physics::setNumberOfStepsPerFrame(unsigned int numSteps) {
+void Engine::Physics::updateDiscreteCollisionDetection() noexcept {
+    Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_World->performDiscreteCollisionDetection();
+}
+void Engine::Physics::setNumberOfStepsPerFrame(uint32_t numSteps) {
     Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_NumberOfStepsPerFrame = glm::max(1U, numSteps);
 }
-unsigned int Engine::Physics::getNumberOfStepsPerFrame() {
+uint32_t Engine::Physics::getNumberOfStepsPerFrame() {
     return Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_NumberOfStepsPerFrame;
 }
 void Engine::Physics::pause(bool b){
@@ -262,7 +259,7 @@ bool Engine::Physics::removeCollisionObjectThreadSafe(btCollisionObject* object)
 }
 
 
-Engine::RayCastResult internal_ray_cast_nearest(btVector3& start, btVector3& end, MaskType group, MaskType mask) {
+Engine::RayCastResult internal_ray_cast_nearest(const btVector3& start, const btVector3& end, MaskType group, MaskType mask) {
     btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
     RayCallback.m_collisionFilterGroup = group;
     RayCallback.m_collisionFilterMask  = mask;
@@ -273,7 +270,7 @@ Engine::RayCastResult internal_ray_cast_nearest(btVector3& start, btVector3& end
     Engine::RayCastResult result(RayCallback);
     return result;
 }
-std::vector<Engine::RayCastResult> internal_ray_cast(btVector3& start, btVector3& end, MaskType group, MaskType mask) {
+std::vector<Engine::RayCastResult> internal_ray_cast(const btVector3& start, const btVector3& end, MaskType group, MaskType mask) {
     btCollisionWorld::AllHitsRayResultCallback AllHitsRayCallback(start, end);
     AllHitsRayCallback.m_collisionFilterGroup = (int)group;
     AllHitsRayCallback.m_collisionFilterMask  = (int)mask;
@@ -293,7 +290,7 @@ std::vector<Engine::RayCastResult> internal_ray_cast(btVector3& start, btVector3
     }
     return result;
 }
-std::vector<Engine::RayCastResult> Engine::Physics::rayCast(btVector3& start, btVector3& end, ComponentBody* ignoredComponentBody, MaskType group, MaskType mask){
+std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const btVector3& start, const btVector3& end, ComponentBody* ignoredComponentBody, MaskType group, MaskType mask){
     if (ignoredComponentBody) {
         Engine::Physics::removeRigidBody(*ignoredComponentBody);
     }
@@ -303,7 +300,7 @@ std::vector<Engine::RayCastResult> Engine::Physics::rayCast(btVector3& start, bt
     }
     return result;
 }
-std::vector<Engine::RayCastResult> Engine::Physics::rayCast(btVector3& start, btVector3& end, std::vector<ComponentBody*>& ignoredComponentBodies, MaskType group, MaskType mask){
+std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const btVector3& start, const btVector3& end, std::vector<ComponentBody*>& ignoredComponentBodies, MaskType group, MaskType mask){
     for (auto& body : ignoredComponentBodies) {
         Engine::Physics::removeRigidBody(*body);
     }
@@ -313,7 +310,7 @@ std::vector<Engine::RayCastResult> Engine::Physics::rayCast(btVector3& start, bt
     }
     return result;
  }
-std::vector<Engine::RayCastResult> Engine::Physics::rayCast(glm::vec3& start, glm::vec3& end, Entity* ignoredEntity, MaskType group, MaskType mask){
+std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const glm::vec3& start, const glm::vec3& end, Entity* ignoredEntity, MaskType group, MaskType mask){
     btVector3 start_ = Engine::Math::btVectorFromGLM(start);
     btVector3 end_   = Engine::Math::btVectorFromGLM(end);
     if (ignoredEntity) {
@@ -324,7 +321,7 @@ std::vector<Engine::RayCastResult> Engine::Physics::rayCast(glm::vec3& start, gl
     }
     return Engine::Physics::rayCast(start_, end_, nullptr, group, mask);
  }
-std::vector<Engine::RayCastResult> Engine::Physics::rayCast(glm::vec3& start, glm::vec3& end , std::vector<Entity>& ignoredEntities, MaskType group, MaskType mask){
+std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const glm::vec3& start, const glm::vec3& end , std::vector<Entity>& ignoredEntities, MaskType group, MaskType mask){
     btVector3 start_ = Engine::Math::btVectorFromGLM(start);
     btVector3 end_   = Engine::Math::btVectorFromGLM(end);
     std::vector<ComponentBody*> objs;
@@ -338,7 +335,7 @@ std::vector<Engine::RayCastResult> Engine::Physics::rayCast(glm::vec3& start, gl
     return Engine::Physics::rayCast(start_, end_, objs, group, mask);
 }
 
-Engine::RayCastResult Engine::Physics::rayCastNearest(btVector3& start, btVector3& end, ComponentBody* ignoredBodyComponent, MaskType group, MaskType mask) {
+Engine::RayCastResult Engine::Physics::rayCastNearest(const btVector3& start, const btVector3& end, ComponentBody* ignoredBodyComponent, MaskType group, MaskType mask) {
     if (ignoredBodyComponent) {
         Engine::Physics::removeRigidBody(*ignoredBodyComponent);
     }
@@ -348,7 +345,7 @@ Engine::RayCastResult Engine::Physics::rayCastNearest(btVector3& start, btVector
     }
     return result;
 }
-Engine::RayCastResult Engine::Physics::rayCastNearest(btVector3& start, btVector3& end, std::vector<ComponentBody*>& ignoredComponentBodies, MaskType group, MaskType mask) {
+Engine::RayCastResult Engine::Physics::rayCastNearest(const btVector3& start, const btVector3& end, std::vector<ComponentBody*>& ignoredComponentBodies, MaskType group, MaskType mask) {
     for (auto& object : ignoredComponentBodies) {
         Physics::removeRigidBody(*object);
     }
@@ -358,7 +355,7 @@ Engine::RayCastResult Engine::Physics::rayCastNearest(btVector3& start, btVector
     }
     return result;
 }
-Engine::RayCastResult Engine::Physics::rayCastNearest(glm::vec3& start, glm::vec3& end, Entity* ignoredEntity, MaskType group, MaskType mask) {
+Engine::RayCastResult Engine::Physics::rayCastNearest(const glm::vec3& start, const glm::vec3& end, Entity* ignoredEntity, MaskType group, MaskType mask) {
     btVector3 start_ = Engine::Math::btVectorFromGLM(start);
     btVector3 end_   = Engine::Math::btVectorFromGLM(end);
     if (ignoredEntity) {
@@ -369,7 +366,7 @@ Engine::RayCastResult Engine::Physics::rayCastNearest(glm::vec3& start, glm::vec
     }
     return Engine::Physics::rayCastNearest(start_, end_, nullptr, group, mask);
 }
-Engine::RayCastResult Engine::Physics::rayCastNearest(glm::vec3& start, glm::vec3& end, std::vector<Entity>& ignoredEntities, MaskType group, MaskType mask) {
+Engine::RayCastResult Engine::Physics::rayCastNearest(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredEntities, MaskType group, MaskType mask) {
     btVector3 start_ = Engine::Math::btVectorFromGLM(start);
     btVector3 end_   = Engine::Math::btVectorFromGLM(end);
     std::vector<ComponentBody*> objs;

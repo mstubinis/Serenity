@@ -159,7 +159,7 @@ void Window::requestFocus() {
     #endif
 }
 void Window::close() {
-    Engine::priv::Core::m_Engine->internal_on_event_window_closed(*this);
+    Engine::priv::Core::m_Engine->m_EngineEventHandler.internal_on_event_window_closed(*this);
     m_Data.m_SFMLWindow.close();
 }
 bool Window::isWindowOnSeparateThread() const {
@@ -309,7 +309,7 @@ void Window::internal_on_dynamic_resize() {
 
         if (current_size.x != old_size.x || current_size.y != old_size.y) {
             Window::setSize(current_size.x, current_size.y);
-            Engine::priv::Core::m_Engine->internal_on_event_resize(*this, current_size.x, current_size.y, true);
+            Engine::priv::Core::m_Engine->m_EngineEventHandler.internal_on_event_resize(*this, current_size.x, current_size.y, true);
         }
     #endif
 }

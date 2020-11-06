@@ -99,7 +99,7 @@ void Engine::priv::WindowData::internal_on_fullscreen(Window& super, bool isToBe
     auto winSize   = glm::uvec2(sfml_size.x, sfml_size.y);
 
     //this does not trigger the sfml event resize method automatically so we must call it here
-    Engine::priv::Core::m_Engine->internal_on_event_resize(super, winSize.x, winSize.y, false);
+    Engine::priv::Core::m_Engine->m_EngineEventHandler.internal_on_event_resize(super, winSize.x, winSize.y, false);
 
     internal_restore_state(super);
     //TODO: very wierd, but there is an after-effect "reflection" of the last frame on the window if maximize() is called. Commenting out until it is fixed

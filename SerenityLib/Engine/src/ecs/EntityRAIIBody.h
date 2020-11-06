@@ -85,7 +85,6 @@ class EntityRAIIBody final {
         inline glm_vec3 getScale() const noexcept { return m_Entity.getScale(); }
         inline glm_vec3 getPosition() const noexcept { return m_Entity.getPosition(); }
         inline glm_vec3 getLocalPosition() const noexcept { return m_Entity.getLocalPosition(); }
-        inline glm::vec3 getPositionRender() const noexcept { return m_Entity.getPositionRender(); }
 
         inline const glm_vec3& forward() const noexcept { return m_Entity.forward(); }
         inline const glm_vec3& right() const noexcept { return m_Entity.right(); }

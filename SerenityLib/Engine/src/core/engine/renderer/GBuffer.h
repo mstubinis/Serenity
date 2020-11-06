@@ -9,7 +9,7 @@ namespace Engine::priv {
     class FramebufferTexture;
     class FramebufferObject;
 
-    struct GBufferType { enum Type : unsigned char {
+    struct GBufferType { enum Type : uint8_t {
         Diffuse,
         Normal,
         Misc,
@@ -31,34 +31,34 @@ namespace Engine::priv{
             mutable FramebufferObject                             m_FBO;
             mutable FramebufferObject                             m_SmallFBO;
             std::array<FramebufferTexture*, GBufferType::_TOTAL>  m_FramebufferTextures;
-            unsigned int                                          m_Width                = 0U;
-            unsigned int                                          m_Height               = 0U;
+            uint32_t                                              m_Width                = 0U;
+            uint32_t                                              m_Height               = 0U;
 
-            void internalBuildTextureBuffer(FramebufferObject& fbo, GBufferType::Type gbuffer_type, unsigned int w, unsigned int h);
-            void internalDestruct();
-            void internalStart(std::vector<unsigned int>& types, unsigned int size, std::string_view channels, bool first_fbo);
+            void internal_Build_Texture_Buffer(FramebufferObject& fbo, GBufferType::Type gbuffer_type, uint32_t w, uint32_t h);
+            void internal_Destruct();
+            void internal_Start(std::vector<uint32_t>& types, std::string_view channels, bool first_fbo);
         public:
             GBuffer() = default;
             ~GBuffer();
 
-            void init(unsigned int width, unsigned int height);
-            bool resize(unsigned int width, unsigned int height);
+            void init(uint32_t width, uint32_t height);
+            bool resize(uint32_t width, uint32_t height);
 
             void bindFramebuffers(std::string_view channels = "RGBA", bool isMainFBO = true);
-            void bindFramebuffers(unsigned int buffer, std::string_view channels = "RGBA", bool isMainFBO = true);
-            void bindFramebuffers(unsigned int, unsigned int, std::string_view channels = "RGBA", bool isMainFBO = true);
-            void bindFramebuffers(unsigned int, unsigned int, unsigned int, std::string_view channels = "RGBA", bool isMainFBO = true);
-            void bindFramebuffers(unsigned int, unsigned int, unsigned int, unsigned int, std::string_view channels = "RGBA", bool isMainFBO = true);
-            void bindFramebuffers(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, std::string_view channels = "RGBA", bool isMainFBO = true);
+            void bindFramebuffers(uint32_t buffer, std::string_view channels = "RGBA", bool isMainFBO = true);
+            void bindFramebuffers(uint32_t, uint32_t, std::string_view channels = "RGBA", bool isMainFBO = true);
+            void bindFramebuffers(uint32_t, uint32_t, uint32_t, std::string_view channels = "RGBA", bool isMainFBO = true);
+            void bindFramebuffers(uint32_t, uint32_t, uint32_t, uint32_t, std::string_view channels = "RGBA", bool isMainFBO = true);
+            void bindFramebuffers(uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, std::string_view channels = "RGBA", bool isMainFBO = true);
 
             void bindBackbuffer(const Viewport& viewport, GLuint final_fbo = 0, GLuint final_rbo = 0);
 
-            inline CONSTEXPR unsigned int width() const noexcept { return m_Width; }
-            inline CONSTEXPR unsigned int height() const noexcept { return m_Height; }
+            inline CONSTEXPR uint32_t width() const noexcept { return m_Width; }
+            inline CONSTEXPR uint32_t height() const noexcept { return m_Height; }
 
             inline CONSTEXPR const std::array<FramebufferTexture*, GBufferType::_TOTAL>& getBuffers() const noexcept { return m_FramebufferTextures; }
-            FramebufferTexture& getBuffer(unsigned int) const;
-            Texture& getTexture(unsigned int) const;
+            FramebufferTexture& getBuffer(uint32_t index) const noexcept;
+            Texture& getTexture(uint32_t index) const noexcept;
 
             inline CONSTEXPR const FramebufferObject& getMainFBO() const noexcept { return m_FBO; }
             inline CONSTEXPR const FramebufferObject& getSmallFBO() const noexcept { return m_SmallFBO; }

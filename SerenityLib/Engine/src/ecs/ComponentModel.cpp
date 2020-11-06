@@ -199,8 +199,8 @@ void ComponentModel::setModelMaterial(Handle material, size_t index, RenderStage
     InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, renderStage, *this);
 }
 bool ComponentModel::rayIntersectSphere(const ComponentCamera& camera) const noexcept {
-    const auto& body = *m_Owner.getComponent<ComponentBody>();
-    return Math::rayIntersectSphere(body.getPosition(), m_Radius, camera.m_Eye, camera.getViewVector());
+    auto body = m_Owner.getComponent<ComponentBody>();
+    return Math::rayIntersectSphere(body->getPosition(), m_Radius, camera.m_Eye, camera.getViewVector());
 }
 void ComponentModel::setUserPointer(void* UserPointer) noexcept {
     for (auto& instance : m_ModelInstances) {
@@ -216,10 +216,8 @@ struct priv::ComponentModel_UpdateFunction final { void operator()(void* system,
     auto& pool       = *(ECSComponentPool<ComponentModel>*)componentPool;
     auto& components = pool.data();
     auto lamda_update_component = [&](ComponentModel& componentModel, size_t i, size_t k) {
-        for (size_t j = 0; j < componentModel.getNumModels(); ++j) {
-            auto& modelInstance = componentModel[j];
-            //process the animations here
-            modelInstance.m_AnimationVector.process(modelInstance.mesh(), dt);
+        for (auto& modelInstance : componentModel) {
+            modelInstance->m_AnimationVector.update(dt); //process the animations here
         }
     };
     if (components.size() < 100) {

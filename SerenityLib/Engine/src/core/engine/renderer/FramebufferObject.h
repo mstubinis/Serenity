@@ -17,7 +17,7 @@ namespace Engine::priv {
 #include <SFML/OpenGL.hpp>
 
 namespace Engine::priv {     
-    class FramebufferObjectAttatchment{
+    class FramebufferObjectAttatchment {
         friend class  Engine::priv::FramebufferObject;
         private:
             GLuint                     m_InternalFormat = 0U;
@@ -28,12 +28,12 @@ namespace Engine::priv {
             FramebufferObjectAttatchment(const FramebufferObject&, FramebufferAttatchment, const Texture&);
             virtual ~FramebufferObjectAttatchment() {}
 
-            unsigned int width() const;
-            unsigned int height() const;
+            uint32_t width() const;
+            uint32_t height() const;
             inline CONSTEXPR GLuint internalFormat() const noexcept { return m_InternalFormat; }
             inline CONSTEXPR unsigned int attatchment() const noexcept { return m_GL_Attatchment; }
 
-            virtual void resize(FramebufferObject&, unsigned int width, unsigned int height) {}
+            virtual void resize(FramebufferObject&, uint32_t width, uint32_t height) {}
             virtual GLuint address() const { return 0; }
             virtual void bind() {}
             virtual void unbind() {}
@@ -48,7 +48,7 @@ namespace Engine::priv {
             FramebufferTexture(const FramebufferObject&, FramebufferAttatchment, const Texture&);
             ~FramebufferTexture();
 
-            void resize(FramebufferObject&, unsigned int width, unsigned int height) override;
+            void resize(FramebufferObject&, uint32_t width, uint32_t height) override;
             GLuint address() const override;
             Texture& texture() const;
             void bind() override {}
@@ -57,14 +57,14 @@ namespace Engine::priv {
     class RenderbufferObject final: public FramebufferObjectAttatchment{
         friend class  Engine::priv::FramebufferObject;
         private:
-            GLuint         m_RBO    = 0U;
-            unsigned int   m_Width  = 0U;
-            unsigned int   m_Height = 0U;
+            GLuint     m_RBO    = 0U;
+            uint32_t   m_Width  = 0U;
+            uint32_t   m_Height = 0U;
         public:
             RenderbufferObject(FramebufferObject&, FramebufferAttatchment, ImageInternalFormat);
             ~RenderbufferObject();
 
-            void resize(FramebufferObject&, unsigned int width, unsigned int height) override;
+            void resize(FramebufferObject&, uint32_t width, uint32_t height) override;
             GLuint address() const override { return m_RBO; }
             void bind() override;
             void unbind() override;
@@ -74,46 +74,45 @@ namespace Engine::priv {
         friend class  Engine::priv::RenderbufferObject;
         friend struct Engine::priv::FramebufferObjectDefaultBindFunctor;
         friend struct Engine::priv::FramebufferObjectDefaultUnbindFunctor;
+        using BindFP         = std::function<void(const FramebufferObject*)>;
+        using UnbindFP       = std::function<void(const FramebufferObject*)>;
+        using AttatchmentMap = std::unordered_map<uint32_t, FramebufferObjectAttatchment*>;
         private:
-            std::function<void(const FramebufferObject*)>                           m_CustomBindFunctor   = [](const FramebufferObject*) {};
-            std::function<void(const FramebufferObject*)>                           m_CustomUnbindFunctor = [](const FramebufferObject*) {};
+            BindFP                    m_CustomBindFunctor   = [](const FramebufferObject*) {};
+            UnbindFP                  m_CustomUnbindFunctor = [](const FramebufferObject*) {};
 
-            mutable size_t                                                          m_CurrentFBOIndex     = 0U;
-            unsigned int                                                            m_FramebufferWidth    = 0U;
-            unsigned int                                                            m_FramebufferHeight   = 0U;
-            float                                                                   m_Divisor             = 1.0f;
-            std::vector<GLuint>                                                     m_FBO;
-            mutable std::unordered_map<unsigned int, FramebufferObjectAttatchment*> m_Attatchments;
+            mutable size_t            m_CurrentFBOIndex     = 0U;
+            uint32_t                  m_FramebufferWidth    = 0U;
+            uint32_t                  m_FramebufferHeight   = 0U;
+            float                     m_Divisor             = 1.0f;
+            std::vector<GLuint>       m_FBO;
+            mutable AttatchmentMap    m_Attatchments;
         public:
             FramebufferObject() = default;
-            FramebufferObject(unsigned int width, unsigned int height, float divisor = 1.0f, unsigned int swapBufferCount = 1);
-            FramebufferObject(unsigned int width, unsigned int height, ImageInternalFormat, float divisor = 1.0f, unsigned int swapBufferCount = 1);
+            FramebufferObject(uint32_t width, uint32_t height, float divisor = 1.0f, uint32_t swapBufferCount = 1);
+            FramebufferObject(uint32_t width, uint32_t height, ImageInternalFormat, float divisor = 1.0f, uint32_t swapBufferCount = 1);
             ~FramebufferObject();
 
-            void setCustomBindFunctor(std::function<void(const FramebufferObject*)>&& functor) noexcept {
-                m_CustomBindFunctor = std::move(functor);
-            }
-            void setCustomUnbindFunctor(std::function<void(const FramebufferObject*)>&& functor) noexcept {
-                m_CustomUnbindFunctor = std::move(functor);
-            }
-            void bind() const;
-            void unbind() const;
-
-            void init(unsigned int width, unsigned int height, float divisor = 1.0f, unsigned int swapBufferCount = 1);
-            void init(unsigned int width, unsigned int height, ImageInternalFormat, float divisor = 1.0f, unsigned int swapBufferCount = 1);
-
+            void init(uint32_t width, uint32_t height, float divisor = 1.0f, uint32_t swapBufferCount = 1);
+            void init(uint32_t width, uint32_t height, ImageInternalFormat, float divisor = 1.0f, uint32_t swapBufferCount = 1);
             void cleanup();
 
-            inline CONSTEXPR FramebufferObjectAttatchment* getAttatchement(unsigned int index) const noexcept { return m_Attatchments.at(index); }
+            inline void setCustomBindFunctor(const BindFP& functor) noexcept { m_CustomBindFunctor = functor; }
+            inline void setCustomUnbindFunctor(const UnbindFP& functor) noexcept { m_CustomUnbindFunctor = functor; }
+            inline void setCustomBindFunctor(BindFP&& functor) noexcept { m_CustomBindFunctor = std::move(functor); }
+            inline void setCustomUnbindFunctor(UnbindFP&& functor) noexcept { m_CustomUnbindFunctor = std::move(functor); }
+            inline void bind() const noexcept { m_CustomBindFunctor(this); }
+            inline void unbind() const noexcept { m_CustomUnbindFunctor(this); }
+            inline CONSTEXPR FramebufferObjectAttatchment* getAttatchement(uint32_t index) const noexcept { return m_Attatchments.at(index); }
 
-            void resize(unsigned int width, unsigned int height);
+            void resize(uint32_t width, uint32_t height);
             FramebufferTexture* attatchTexture(Texture*, FramebufferAttatchment);
             RenderbufferObject* attatchRenderBuffer(RenderbufferObject&);
-            inline CONSTEXPR unsigned int width() const noexcept { return m_FramebufferWidth; }
-            inline CONSTEXPR unsigned int height() const noexcept { return m_FramebufferHeight; }
-            inline CONSTEXPR std::unordered_map<unsigned int, FramebufferObjectAttatchment*>& attatchments() const noexcept { return m_Attatchments; }
-            GLuint address() const;
-            bool check();
+            inline CONSTEXPR uint32_t width() const noexcept { return m_FramebufferWidth; }
+            inline CONSTEXPR uint32_t height() const noexcept { return m_FramebufferHeight; }
+            inline CONSTEXPR std::unordered_map<uint32_t, FramebufferObjectAttatchment*>& attatchments() const noexcept { return m_Attatchments; }
+            inline GLuint address() const noexcept { return m_FBO[m_CurrentFBOIndex]; }
+            bool checkStatus();
             inline CONSTEXPR float divisor() const noexcept { return m_Divisor; }
     };
 };
