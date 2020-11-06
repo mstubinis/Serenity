@@ -34,7 +34,7 @@ void Engine::priv::ResourceManager::init(const EngineOptions& options){
     window->init(options);
     window->setJoystickProcessingActive(false);
 }
-void Engine::priv::ResourceManager::onPostUpdate() {
+void Engine::priv::ResourceManager::postUpdate() {
     if (m_ScenesToBeDeleted.size() > 0) {
         for (size_t i = 0; i < m_ScenesToBeDeleted.size(); ++i) {
             if (m_ScenesToBeDeleted[i]) {

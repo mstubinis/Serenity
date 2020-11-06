@@ -18,7 +18,7 @@ bool Engine::priv::Bloom::init_shaders() {
 
 #pragma region Bloom
     m_GLSL_frag_code =
-        "const vec3 ConstantZeroVec3 = vec3(0.0,0.0,0.0);\n"
+        "const vec3 ConstantZeroVec3 = vec3(0.0, 0.0, 0.0);\n"
         "uniform SAMPLER_TYPE_2D SceneTexture;\n"
         "\n"
         "uniform vec4 Data;\n" //x = scale y = threshold z = exposure w = UNUSED
@@ -29,7 +29,7 @@ bool Engine::priv::Bloom::init_shaders() {
         //                                               exposure
         "    sceneColor = vec3(1.0) - exp(-sceneColor * Data.z);\n"
         //                                                         threshold       scale
-        "    gl_FragColor.rgb = max(ConstantZeroVec3,sceneColor - vec3(Data.y)) * Data.x;\n"
+        "    gl_FragColor.rgb = max(ConstantZeroVec3, sceneColor - vec3(Data.y)) * Data.x;\n"
         "}";
 #pragma endregion
 
@@ -44,58 +44,11 @@ bool Engine::priv::Bloom::init_shaders() {
 
     return true;
 }
-void Engine::priv::Bloom::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::RenderModule& renderer) {
+void Engine::priv::Bloom::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, uint32_t sceneTexture, const Engine::priv::RenderModule& renderer) {
     renderer.bind(m_Shader_Program.get<ShaderProgram>());
 
-    Engine::Renderer::sendUniform4("Data", scale, threshold, exposure, 0.0f);
+    Engine::Renderer::sendUniform4("Data", m_Scale, m_Threshold, m_Exposure, 0.0f);
     Engine::Renderer::sendTexture("SceneTexture", gbuffer.getTexture(sceneTexture), 0);
 
     Engine::Renderer::renderFullscreenQuad();
-}
-
-
-float Engine::Renderer::bloom::getThreshold() {
-    return Engine::priv::Bloom::bloom.threshold;
-}
-void Engine::Renderer::bloom::setThreshold(float t) {
-    Engine::priv::Bloom::bloom.threshold = t;
-}
-float Engine::Renderer::bloom::getExposure() {
-    return Engine::priv::Bloom::bloom.exposure;
-}
-void Engine::Renderer::bloom::setExposure(float e) {
-    Engine::priv::Bloom::bloom.exposure = e;
-}
-bool Engine::Renderer::bloom::enabled() {
-    return Engine::priv::Bloom::bloom.bloom_active;
-}
-unsigned int Engine::Renderer::bloom::getNumPasses() {
-    return Engine::priv::Bloom::bloom.num_passes;
-}
-void Engine::Renderer::bloom::setNumPasses(unsigned int p) {
-    Engine::priv::Bloom::bloom.num_passes = p;
-}
-void Engine::Renderer::bloom::enable(bool b) {
-    Engine::priv::Bloom::bloom.bloom_active = b;
-}
-void Engine::Renderer::bloom::disable() {
-    Engine::priv::Bloom::bloom.bloom_active = false;
-}
-float Engine::Renderer::bloom::getBlurRadius() {
-    return Engine::priv::Bloom::bloom.blur_radius;
-}
-float Engine::Renderer::bloom::getBlurStrength() {
-    return Engine::priv::Bloom::bloom.blur_strength;
-}
-void Engine::Renderer::bloom::setBlurRadius(float r) {
-    Engine::priv::Bloom::bloom.blur_radius = glm::max(0.0f, r);
-}
-void Engine::Renderer::bloom::setBlurStrength(float r) {
-    Engine::priv::Bloom::bloom.blur_strength = glm::max(0.0f, r);
-}
-float Engine::Renderer::bloom::getScale() {
-    return Engine::priv::Bloom::bloom.scale;
-}
-void Engine::Renderer::bloom::setScale(float s) {
-    Engine::priv::Bloom::bloom.scale = glm::max(0.0f, s);
 }

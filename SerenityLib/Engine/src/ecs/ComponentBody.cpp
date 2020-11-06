@@ -359,6 +359,7 @@ glm_vec3 ComponentBody::getLocalPosition() const { //theres prob a better way to
     if (m_Physics) {
         btTransform tr;
         p->bullet_rigidBody->getMotionState()->getWorldTransform(tr);
+        //auto& tr = p->bullet_rigidBody->getWorldTransform();
         return Math::btVectorToGLM(tr.getOrigin());
     }
     return n->position;
@@ -367,16 +368,7 @@ glm_vec3 ComponentBody::getPosition() const { //theres prob a better way to do t
     if (m_Physics) {
         btTransform tr;
         p->bullet_rigidBody->getMotionState()->getWorldTransform(tr);
-        return Math::btVectorToGLM(tr.getOrigin());
-    }
-    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(*m_Owner.scene());
-    auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
-    auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
-    return Math::getMatrixPosition(matrix);
-}
-glm::vec3 ComponentBody::getPositionRender() const { //theres prob a better way to do this
-    if (m_Physics) {
-        auto tr = p->bullet_rigidBody->getWorldTransform();
+        //auto& tr = p->bullet_rigidBody->getWorldTransform();
         return Math::btVectorToGLM(tr.getOrigin());
     }
     auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(*m_Owner.scene());
@@ -436,6 +428,7 @@ glm_quat ComponentBody::getRotation() const {
     if (m_Physics) {
         btTransform tr;
         p->bullet_rigidBody->getMotionState()->getWorldTransform(tr);
+        //auto& tr = p->bullet_rigidBody->getWorldTransform();
         auto quat = tr.getRotation();
         return Engine::Math::btToGLMQuat(quat);
     }
@@ -464,6 +457,7 @@ glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way to do t
 #endif
         btTransform tr;
         p->bullet_rigidBody->getMotionState()->getWorldTransform(tr);
+        //auto& tr = p->bullet_rigidBody->getWorldTransform();
         btScalar* val_ptr = (btScalar*)glm::value_ptr(modelMatrix_);
         tr.getOpenGLMatrix(val_ptr);
         if (p->collision->getBtShape()) {
@@ -899,7 +893,7 @@ void Engine::priv::ComponentBody_System::ParentChildVector::reserve(size_t size)
     WorldTransforms.reserve(size);
     LocalTransforms.reserve(size);
 }
-void Engine::priv::ComponentBody_System::ParentChildVector::reserve_from_insert(uint32_t parentID, uint32_t childID) {
+void Engine::priv::ComponentBody_System::ParentChildVector::internal_reserve_from_insert(uint32_t parentID, uint32_t childID) {
     if (Parents.capacity() < parentID || Parents.capacity() < childID) {
         reserve(std::max(parentID, childID) + 50U);
     }
@@ -908,7 +902,7 @@ void Engine::priv::ComponentBody_System::ParentChildVector::reserve_from_insert(
     }
 }
 void Engine::priv::ComponentBody_System::ParentChildVector::insert(uint32_t parentID, uint32_t childID) {
-    reserve_from_insert(parentID, childID);
+    internal_reserve_from_insert(parentID, childID);
     if (getParent(childID) == parentID) {
         //ENGINE_PRODUCTION_LOG(parentID << ", " << childID << " - added: already added")
         return;
@@ -1022,9 +1016,5 @@ void Engine::priv::ComponentBody_System::ParentChildVector::remove(uint32_t pare
 Engine::priv::ComponentBody_System::ComponentBody_System(const SceneOptions& options, const Engine::priv::ECSSystemCI& systemCI, Engine::priv::sparse_set_base& inComponentPool)
     : Engine::priv::ECSSystem<ComponentBody>(options, systemCI, inComponentPool)
 {}
-Engine::priv::ComponentBody_System::~ComponentBody_System() {
-
-}
-
 
 #pragma endregion

@@ -386,7 +386,7 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -647,6 +647,7 @@
     <ClInclude Include="Engine\src\core\engine\sounds\Sounds.h" />
     <ClInclude Include="Engine\src\core\engine\system\cursor\Cursor.h" />
     <ClInclude Include="Engine\src\core\engine\system\Engine.h" />
+    <ClInclude Include="Engine\src\core\engine\system\EngineEventHandler.h" />
     <ClInclude Include="Engine\src\core\engine\system\EngineGameFunctions.h" />
     <ClInclude Include="Engine\src\core\engine\system\EngineMisc.h" />
     <ClInclude Include="Engine\src\core\engine\system\EngineOptions.h" />
@@ -821,6 +822,7 @@
     <ClCompile Include="Engine\src\core\engine\sounds\SoundQueue.cpp" />
     <ClCompile Include="Engine\src\core\engine\system\cursor\Cursor.cpp" />
     <ClCompile Include="Engine\src\core\engine\system\Engine.cpp" />
+    <ClCompile Include="Engine\src\core\engine\system\EngineEventHandler.cpp" />
     <ClCompile Include="Engine\src\core\engine\system\EngineMisc.cpp" />
     <ClCompile Include="Engine\src\core\engine\system\window\Window.cpp" />
     <ClCompile Include="Engine\src\core\engine\system\window\WindowData.cpp" />

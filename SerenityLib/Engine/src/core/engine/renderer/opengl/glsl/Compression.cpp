@@ -14,6 +14,35 @@ using namespace Engine::priv;
 using namespace std;
 
 void opengl::glsl::Compression::convert(string& code, unsigned int versionNumber) {
+#pragma region Pack2NibblesInto8BitChannel
+    if (ShaderHelper::sfind(code, "Pack2NibblesInto8BitChannel(")) {
+        if (!ShaderHelper::sfind(code, "float Pack2NibblesInto8BitChannel(")) {
+            ShaderHelper::insertStringAtLine(code,
+                "float Pack2NibblesInto8BitChannel(float x,float y){\n"
+                "    float xF = round(x / 0.0666666666666666);\n"
+                "    float yF = round(y / 0.0666666666666666) * 16.0;\n"
+                "    return (xF + yF) / 255.0;\n"
+                "}\n"
+            , 1);
+        }
+    }
+#pragma endregion
+
+#pragma region Unpack2NibblesFrom8BitChannel
+    if (ShaderHelper::sfind(code, "Unpack2NibblesFrom8BitChannel(")) {
+        if (!ShaderHelper::sfind(code, "vec2 Unpack2NibblesFrom8BitChannel(")) {
+            ShaderHelper::insertStringAtLine(code,
+                "vec2 Unpack2NibblesFrom8BitChannel(float data){\n"
+                "    float d = data * 255.0;\n"
+                "    float y = fract(d / 16.0);\n"
+                "    float x = (d - (y * 16.0));\n"
+                "    return vec2(y, x / 255.0);\n"
+                "}\n"
+            , 1);
+        }
+    }
+#pragma endregion
+
 #pragma region Unpack3FloatsInto1FloatUnsigned
     if (ShaderHelper::sfind(code, "Unpack3FloatsInto1FloatUnsigned")) {
         if (!ShaderHelper::sfind(code, "vec3 Unpack3FloatsInto1FloatUnsigned")) {
@@ -162,7 +191,6 @@ void opengl::glsl::Compression::convert(string& code, unsigned int versionNumber
     }
 #pragma endregion
 
-
 #pragma region Unpack16BitUIntTo4ColorFloats
     if (ShaderHelper::sfind(code, "Unpack16BitUIntTo4ColorFloats")) {
         if (!ShaderHelper::sfind(code, "vec4 Unpack16BitUIntTo4ColorFloats")) {
@@ -180,7 +208,6 @@ void opengl::glsl::Compression::convert(string& code, unsigned int versionNumber
         }
     }
 #pragma endregion
-
 
 #pragma region SignNotZero
     if (ShaderHelper::sfind(code, "SignNotZero")) {

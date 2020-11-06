@@ -5,9 +5,10 @@
 class Window;
 
 namespace Engine::priv {
-    class EngineCore;
-    class EventManager;
-    class WindowThread;
+    class  EngineCore;
+    class  EventManager;
+    class  WindowThread;
+    class  EngineEventHandler;
 };
 
 #include <SFML/Window/VideoMode.hpp>
@@ -25,6 +26,7 @@ namespace Engine::priv {
         friend class Engine::priv::EngineCore;
         friend class Engine::priv::EventManager;
         friend class Engine::priv::WindowThread;
+        friend class Engine::priv::EngineEventHandler;
         friend class Window;
         private:
             #ifdef ENGINE_THREAD_WINDOW_EVENTS

@@ -35,16 +35,16 @@ struct CollisionCallbackEventData final {
     glm::vec3&         normalOnB;
     glm::vec3&         normalFromA;
     glm::vec3&         normalFromB;
-    btCollisionObject* ownerCollisionObj = nullptr;
-    btCollisionObject* otherCollisionObj = nullptr;
+    btCollisionObject* ownerCollisionObj       = nullptr;
+    btCollisionObject* otherCollisionObj       = nullptr;
     size_t             ownerModelInstanceIndex = 0;
     size_t             otherModelInstanceIndex = 0;
 
     CollisionCallbackEventData() = delete;
-    CollisionCallbackEventData(const CollisionCallbackEventData& other)                = delete;
-    CollisionCallbackEventData& operator=(const CollisionCallbackEventData& other)     = delete;
-    CollisionCallbackEventData(CollisionCallbackEventData&& other) noexcept            = delete;
-    CollisionCallbackEventData& operator=(CollisionCallbackEventData&& other) noexcept = delete;
+    CollisionCallbackEventData(const CollisionCallbackEventData&)                = delete;
+    CollisionCallbackEventData& operator=(const CollisionCallbackEventData&)     = delete;
+    CollisionCallbackEventData(CollisionCallbackEventData&&) noexcept            = delete;
+    CollisionCallbackEventData& operator=(CollisionCallbackEventData&&) noexcept = delete;
 
     CollisionCallbackEventData(ComponentBody& ownerBody_, ComponentBody& otherBody_, glm::vec3& ownerHit_, glm::vec3& otherHit_, glm::vec3& normal_,
         glm::vec3& ownerLocalHit_, glm::vec3& otherLocalHit_, glm::vec3& normalFromA_, glm::vec3& normalFromB_
@@ -90,10 +90,10 @@ class ComponentBody : public Engine::UserPointer {
             bool                          forcedOut              = false;
 
             PhysicsData() = default;
-            PhysicsData(const PhysicsData& other)                  = delete;
-            PhysicsData& operator=(const PhysicsData& other)       = delete;
-            PhysicsData(PhysicsData&& other) noexcept; 
-            PhysicsData& operator=(PhysicsData&& other) noexcept;
+            PhysicsData(const PhysicsData&)                  = delete;
+            PhysicsData& operator=(const PhysicsData&)       = delete;
+            PhysicsData(PhysicsData&&) noexcept; 
+            PhysicsData& operator=(PhysicsData&&) noexcept;
             ~PhysicsData();
         };
         struct NormalData final {
@@ -103,10 +103,10 @@ class ComponentBody : public Engine::UserPointer {
             glm_vec3 linearVelocity = glm_vec3(0.0);
 
             NormalData() = default;
-            NormalData(const NormalData& other)                  = delete;
-            NormalData& operator=(const NormalData& other)       = delete;
-            NormalData(NormalData&& other) noexcept;
-            NormalData& operator=(NormalData&& other) noexcept;
+            NormalData(const NormalData&)                  = delete;
+            NormalData& operator=(const NormalData&)       = delete;
+            NormalData(NormalData&&) noexcept;
+            NormalData& operator=(NormalData&&) noexcept;
             ~NormalData() = default;
         };
 
@@ -120,7 +120,7 @@ class ComponentBody : public Engine::UserPointer {
         //};
         void*                 m_UserPointer1     = nullptr;
         void*                 m_UserPointer2     = nullptr;
-        Entity                m_Owner;
+        Entity                m_Owner            = Entity{};
         bool                  m_Physics          = false;
 
         btVector3 internal_activate_and_get_vector(decimal x, decimal y, decimal z, bool local) noexcept;
@@ -211,8 +211,6 @@ class ComponentBody : public Engine::UserPointer {
 		glm_vec3 getScale() const;
 		glm_vec3 getPosition() const;
         glm_vec3 getLocalPosition() const;
-        glm::vec3 getPositionRender() const;
-
         
         inline CONSTEXPR const glm_vec3& forward() const noexcept { return m_Forward; }
         inline CONSTEXPR const glm_vec3& right() const noexcept { return m_Right; }
@@ -300,19 +298,14 @@ namespace Engine::priv {
     class ComponentBody_System final : public Engine::priv::ECSSystem<ComponentBody> {
         class ParentChildVector final {
             private:
-                inline uint32_t& getParent(uint32_t childID) noexcept {
-                    return Parents[childID - 1U];
-                }
-                inline glm_mat4& getWorld(uint32_t ID) noexcept {
-                    return WorldTransforms[ID - 1U];
-                }
-                inline glm_mat4& getLocal(uint32_t ID) noexcept {
-                    return LocalTransforms[ID - 1U];
-                }
-                void reserve_from_insert(uint32_t parentID, uint32_t childID);
+                inline uint32_t& getParent(uint32_t childID) noexcept { return Parents[childID - 1U]; }
+                inline glm_mat4& getWorld(uint32_t ID) noexcept { return WorldTransforms[ID - 1U]; }
+                inline glm_mat4& getLocal(uint32_t ID) noexcept { return LocalTransforms[ID - 1U]; }
+
+                void internal_reserve_from_insert(uint32_t parentID, uint32_t childID);
             public:
-                std::vector<glm_mat4>         WorldTransforms;
-                std::vector<glm_mat4>         LocalTransforms;
+                std::vector<glm_mat4>    WorldTransforms;
+                std::vector<glm_mat4>    LocalTransforms;
                 std::vector<uint32_t>    Parents;
                 std::vector<uint32_t>    Order;
                 uint32_t                 OrderHead        = 0;
@@ -329,7 +322,6 @@ namespace Engine::priv {
             ParentChildVector ParentChildSystem;
 
             ComponentBody_System(const SceneOptions& options, const Engine::priv::ECSSystemCI& systemCI, Engine::priv::sparse_set_base& inComponentPool);
-            ~ComponentBody_System();
     };
 };
 

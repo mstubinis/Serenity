@@ -162,17 +162,17 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
     }
     image_loaded_struct.m_PixelFormat = ImagePixelFormat::RGBA;
     image_loaded_struct.m_PixelType   = ImagePixelType::UNSIGNED_BYTE;
-    uint32_t width_              = head.w;
-    uint32_t height_             = head.h;
+    uint32_t width_                   = head.w;
+    uint32_t height_                  = head.h;
     for (uint32_t i = 0; i < numberOfMainImages; ++i) {
         ImageData* imgPtr = nullptr;
         if (i == 0) {
             imgPtr = &image_loaded_struct;
         }else if (i >= cpuData.m_ImagesDatas.size()) {
-            imgPtr                   = &cpuData.m_ImagesDatas.emplace_back();
-            imgPtr->m_PixelFormat    = image_loaded_struct.m_PixelFormat;
-            imgPtr->m_PixelType      = image_loaded_struct.m_PixelType;
-            imgPtr->m_InternalFormat = image_loaded_struct.m_InternalFormat;
+            imgPtr                    = &cpuData.m_ImagesDatas.emplace_back();
+            imgPtr->m_PixelFormat     = image_loaded_struct.m_PixelFormat;
+            imgPtr->m_PixelType       = image_loaded_struct.m_PixelType;
+            imgPtr->m_InternalFormat  = image_loaded_struct.m_InternalFormat;
         }else{
             imgPtr = &cpuData.m_ImagesDatas[i];
         }
@@ -182,7 +182,6 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
             if (level > 0 && (width_ < 64 || height_ < 64)) {
                 break;
             }
-
             ImageMipmap* mipmap = nullptr;
             if (level > 0) {
                 mipmap = &imgPtr->m_Mipmaps.emplace_back();

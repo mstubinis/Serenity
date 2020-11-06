@@ -27,9 +27,6 @@ glm_vec3 EntityBody::getPosition() const {
 glm_vec3 EntityBody::getLocalPosition() const {
     return getComponent<ComponentBody>()->getLocalPosition();
 }
-glm::vec3 EntityBody::getPositionRender() const {
-    return getComponent<ComponentBody>()->getPositionRender();
-}
 
 const glm_vec3& EntityBody::forward() const {
     return getComponent<ComponentBody>()->forward();

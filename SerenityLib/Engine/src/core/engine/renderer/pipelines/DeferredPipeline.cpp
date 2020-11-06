@@ -38,7 +38,7 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace Engine::Renderer;
 
-Engine::priv::DeferredPipeline* pipeline = nullptr;
+//Engine::view_ptr<Engine::priv::DeferredPipeline> PIPELINE = nullptr;
 
 constexpr std::array<glm::mat4, 6> CAPTURE_VIEWS = {
     glm::mat4(0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
@@ -101,8 +101,10 @@ struct ShaderProgramEnum final { enum Program : unsigned int {
 };};
 
 
-DeferredPipeline::DeferredPipeline(Engine::priv::RenderModule& renderer) : m_Renderer(renderer) {
-    pipeline = this;
+DeferredPipeline::DeferredPipeline(Engine::priv::RenderModule& renderer) 
+    : m_Renderer{ renderer }
+{
+    //PIPELINE = this;
 }
 DeferredPipeline::~DeferredPipeline() {
     SAFE_DELETE(UniformBufferObject::UBO_CAMERA);
@@ -1234,20 +1236,24 @@ void DeferredPipeline::internal_pass_forward(Viewport& viewport, Camera& camera,
     }
 }
 void DeferredPipeline::internal_pass_ssao(Viewport& viewport, Camera& camera) {
+
+    auto framebuffer1 = GBufferType::Bloom;
+    auto framebuffer2 = GBufferType::GodRays;
+
     //TODO: possible optimization: use stencil buffer to reject completely black (or are they white?) pixels during blur passes
-    m_GBuffer.bindFramebuffers( GBufferType::Bloom, GBufferType::GodRays , "A", false);
+    m_GBuffer.bindFramebuffers(framebuffer1, framebuffer2, "A", false);
     Engine::Renderer::Settings::clear(true, false, false); //bloom and god rays alpha channels cleared to black 
     if (SSAO::STATIC_SSAO.m_SSAOLevel > SSAOLevel::Off && viewport.getRenderFlags().has(ViewportRenderingFlag::SSAO)) {
         Engine::Renderer::GLEnablei(GL_BLEND, 0);//i dont think this is needed anymore
-        m_GBuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
+        m_GBuffer.bindFramebuffers(framebuffer1, "A", false);
         SSAO::STATIC_SSAO.passSSAO(m_GBuffer, viewport, camera, m_Renderer);
         if (SSAO::STATIC_SSAO.m_ssao_do_blur) {
             Engine::Renderer::GLDisablei(GL_BLEND, 0); //yes this is absolutely needed
             for (unsigned int i = 0; i < SSAO::STATIC_SSAO.m_ssao_blur_num_passes; ++i) {
-                m_GBuffer.bindFramebuffers(GBufferType::GodRays, "A", false);
-                SSAO::STATIC_SSAO.passBlur(m_GBuffer, viewport, "H", GBufferType::Bloom, m_Renderer);
-                m_GBuffer.bindFramebuffers(GBufferType::Bloom, "A", false);
-                SSAO::STATIC_SSAO.passBlur(m_GBuffer, viewport, "V", GBufferType::GodRays, m_Renderer);
+                m_GBuffer.bindFramebuffers(framebuffer2, "A", false);
+                SSAO::STATIC_SSAO.passBlur(m_GBuffer, viewport, "H", framebuffer1, m_Renderer);
+                m_GBuffer.bindFramebuffers(framebuffer1, "A", false);
+                SSAO::STATIC_SSAO.passBlur(m_GBuffer, viewport, "V", framebuffer2, m_Renderer);
             }
         }  
     }
@@ -1386,14 +1392,14 @@ void DeferredPipeline::internal_pass_god_rays(Viewport& viewport, Camera& camera
 }
 void DeferredPipeline::internal_pass_hdr(Viewport& viewport, Camera& camera) {
     const glm::uvec4& dimensions = viewport.getViewportDimensions();
-    m_GBuffer.bindFramebuffers(GBufferType::Misc);
+    m_GBuffer.bindFramebuffers(GBufferType::Misc, "RGBA");
     HDR::STATIC_HDR.pass(m_GBuffer, viewport, GodRays::STATIC_GOD_RAYS.godRays_active, m_Renderer.m_Lighting, GodRays::STATIC_GOD_RAYS.factor, m_Renderer);
 }
 void DeferredPipeline::internal_pass_bloom(Viewport& viewport) {
-    if (Bloom::bloom.bloom_active && viewport.getRenderFlags().has(ViewportRenderingFlag::Bloom)) {
+    if (Bloom::bloom.m_Bloom_Active && viewport.getRenderFlags().has(ViewportRenderingFlag::Bloom)) {
         m_GBuffer.bindFramebuffers(GBufferType::Bloom, "RGB", false);
         Bloom::bloom.pass(m_GBuffer, viewport, GBufferType::Lighting, m_Renderer);
-        for (unsigned int i = 0; i < Bloom::bloom.num_passes; ++i) {
+        for (uint32_t i = 0; i < Bloom::bloom.m_Num_Passes; ++i) {
             m_GBuffer.bindFramebuffers(GBufferType::GodRays, "RGB", false);
             internal_pass_blur(viewport, GBufferType::Bloom, "H");
             m_GBuffer.bindFramebuffers(GBufferType::Bloom, "RGB", false);
@@ -1403,7 +1409,7 @@ void DeferredPipeline::internal_pass_bloom(Viewport& viewport) {
 }
 void DeferredPipeline::internal_pass_depth_of_field(Viewport& viewport, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture) {
     if (DepthOfField::STATIC_DOF.dof && viewport.getRenderFlags().has(ViewportRenderingFlag::DepthOfField)) {
-        m_GBuffer.bindFramebuffers(outTexture);
+        m_GBuffer.bindFramebuffers(outTexture, "RGBA");
         DepthOfField::STATIC_DOF.pass(m_GBuffer, viewport, sceneTexture, m_Renderer);
         sceneTexture = GBufferType::Lighting;
         outTexture   = GBufferType::Misc;
@@ -1412,7 +1418,7 @@ void DeferredPipeline::internal_pass_depth_of_field(Viewport& viewport, GBufferT
 void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewport, Camera& camera, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture) {
 
     if (!mainRenderFunction || m_Renderer.m_AA_algorithm == AntiAliasingAlgorithm::None || !viewport.getRenderFlags().has(ViewportRenderingFlag::AntiAliasing)) {
-        m_GBuffer.bindFramebuffers(outTexture);
+        m_GBuffer.bindFramebuffers(outTexture, "RGBA");
 
         internal_pass_final(sceneTexture);
 
@@ -1426,11 +1432,11 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
             }
             case AntiAliasingAlgorithm::FXAA: {
                 if (mainRenderFunction) {
-                    m_GBuffer.bindFramebuffers(outTexture);
+                    m_GBuffer.bindFramebuffers(outTexture, "RGBA");
 
                     internal_pass_final(sceneTexture);
 
-                    m_GBuffer.bindFramebuffers(sceneTexture);
+                    m_GBuffer.bindFramebuffers(sceneTexture, "RGBA");
                     FXAA::STATIC_FXAA.pass(m_GBuffer, viewport, outTexture, m_Renderer);
 
                     m_GBuffer.bindBackbuffer(viewport);
@@ -1443,7 +1449,7 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
             case AntiAliasingAlgorithm::SMAA_HIGH: {}
             case AntiAliasingAlgorithm::SMAA_ULTRA: {
                 if (mainRenderFunction) {
-                    m_GBuffer.bindFramebuffers(outTexture);
+                    m_GBuffer.bindFramebuffers(outTexture, "RGBA");
 
 
                     internal_pass_final(sceneTexture);
@@ -1456,7 +1462,7 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
 
                     SMAA::STATIC_SMAA.passEdge(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, outTexture, m_Renderer);
                     SMAA::STATIC_SMAA.passBlend(m_GBuffer, SMAA_PIXEL_SIZE, viewport, outTexture, m_Renderer);
-                    m_GBuffer.bindFramebuffers(outTexture);
+                    m_GBuffer.bindFramebuffers(outTexture, "RGBA");
                     SMAA::STATIC_SMAA.passNeighbor(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, m_Renderer);
                     //m_GBuffer.bindFramebuffers(sceneTexture);
 
@@ -1472,7 +1478,7 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
 }
 void DeferredPipeline::internal_pass_final(GBufferType::Type sceneTexture) {
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredFinal].get<ShaderProgram>());
-    Engine::Renderer::sendUniform1Safe("HasBloom", (int)Bloom::bloom.bloom_active);
+    Engine::Renderer::sendUniform1Safe("HasBloom", (int)Bloom::bloom.m_Bloom_Active);
     Engine::Renderer::sendUniform1Safe("HasFog", (int)Fog::STATIC_FOG.fog_active);
 
     if (Engine::Renderer::fog::enabled()) {
@@ -1518,12 +1524,12 @@ void DeferredPipeline::internal_pass_blur(Viewport& viewport, GLuint texture, st
 
     auto& bloom = Bloom::bloom;
     Engine::Renderer::sendUniform4("strengthModifier",
-        bloom.blur_strength,
-        bloom.blur_strength,
-        bloom.blur_strength,
+        bloom.m_Blur_Strength,
+        bloom.m_Blur_Strength,
+        bloom.m_Blur_Strength,
         SSAO::STATIC_SSAO.m_ssao_blur_strength
     );
-    Engine::Renderer::sendUniform4("DataA", bloom.blur_radius, 0.0f, hv.x, hv.y);
+    Engine::Renderer::sendUniform4("DataA", bloom.m_Blur_Radius, 0.0f, hv.x, hv.y);
     Engine::Renderer::sendTexture("image", m_GBuffer.getTexture(texture), 0);
 
     Engine::Renderer::renderFullscreenQuad();
@@ -1537,7 +1543,7 @@ void DeferredPipeline::renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport,
                 Engine::Renderer::GLDisable(GL_DEPTH_TEST);
                 GLCall(glDepthMask(GL_FALSE));
                 m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::BulletPhysics].get<ShaderProgram>());
-                Core::m_Engine->m_PhysicsModule._render(camera);
+                Core::m_Engine->m_PhysicsModule.render(camera);
         #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
             }
         #endif
@@ -1662,7 +1668,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
     internal_pass_forward(viewport, camera, depthPrepass);
 
     Engine::Renderer::GLDisable(GL_DEPTH_TEST);
-    m_GBuffer.bindFramebuffers(GBufferType::Lighting, "RGB");
+    //m_GBuffer.bindFramebuffers(GBufferType::Lighting, "RGB");
     internal_pass_god_rays(viewport, camera);
 
     internal_pass_hdr(viewport, camera);

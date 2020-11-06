@@ -46,7 +46,7 @@ namespace Engine::priv {
         public:
             ResourceManager(const EngineOptions& engineOptions);
 
-            void onPostUpdate();
+            void postUpdate();
 
             void init(const EngineOptions& engineOptions);
 

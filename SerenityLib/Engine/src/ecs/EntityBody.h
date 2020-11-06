@@ -29,7 +29,6 @@ class EntityBody : public Entity {
         virtual glm_vec3 getScale() const;
         virtual glm_vec3 getPosition() const;
         virtual glm_vec3 getLocalPosition() const;
-        virtual glm::vec3 getPositionRender() const;
 
         const glm_vec3& forward() const;
         const glm_vec3& right() const;

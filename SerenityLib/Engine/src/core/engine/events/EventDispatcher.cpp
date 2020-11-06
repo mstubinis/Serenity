@@ -39,7 +39,7 @@ void Engine::priv::EventDispatcher::dispatchEvent(EventType eventType) noexcept 
         observer->onEvent(e);
     }
 }
-void Engine::priv::EventDispatcher::onPostUpdate() {
+void Engine::priv::EventDispatcher::postUpdate() {
     if (m_UnregisteredObservers.size() > 0) {
         std::lock_guard lock(m_Mutex);
         for (auto& [observer, index] : m_UnregisteredObservers) {

@@ -11,6 +11,7 @@ namespace Engine::priv {
     class  WindowData;
     class  WindowThread;
     class  ResourceManager;
+    class  EngineEventHandler;
 };
 class  Texture;
 struct EngineOptions;
@@ -25,6 +26,7 @@ class Window final{
     friend class Engine::priv::WindowData;
     friend class Engine::priv::WindowThread;
     friend class Engine::priv::ResourceManager;
+    friend class Engine::priv::EngineEventHandler;
     private:
         Engine::priv::WindowData m_Data;
 
