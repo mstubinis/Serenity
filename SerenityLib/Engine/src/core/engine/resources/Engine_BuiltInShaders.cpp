@@ -5,7 +5,6 @@
 #include <core/engine/renderer/opengl/State.h>
 
 using namespace Engine;
-using namespace std;
 
 /*
 GLSL Version    OpenGL Version
@@ -25,34 +24,33 @@ GLSL Version    OpenGL Version
 */
 
 #pragma region Declarations
-string priv::EShaders::conditional_functions;
-string priv::EShaders::decal_vertex;
-string priv::EShaders::decal_frag;
-string priv::EShaders::bullet_physics_vert;
-string priv::EShaders::bullet_physcis_frag;
-string priv::EShaders::fullscreen_quad_vertex;
-string priv::EShaders::vertex_basic;
-string priv::EShaders::vertex_2DAPI;
-string priv::EShaders::vertex_skybox;
-string priv::EShaders::particle_vertex;
-string priv::EShaders::lighting_vert;
-string priv::EShaders::stencil_passover;
-string priv::EShaders::forward_frag;
-string priv::EShaders::particle_frag;
-string priv::EShaders::deferred_frag;
-string priv::EShaders::zprepass_frag;
-string priv::EShaders::deferred_frag_hud;
-string priv::EShaders::deferred_frag_skybox;
-string priv::EShaders::copy_depth_frag;
-string priv::EShaders::cubemap_convolude_frag;
-string priv::EShaders::cubemap_prefilter_envmap_frag;
-string priv::EShaders::brdf_precompute;
-string priv::EShaders::blur_frag;
-//string priv::EShaders::greyscale_frag;
-string priv::EShaders::final_frag;
-string priv::EShaders::depth_and_transparency_frag;
-string priv::EShaders::lighting_frag;
-string priv::EShaders::lighting_frag_gi;
+std::string priv::EShaders::conditional_functions;
+std::string priv::EShaders::decal_vertex;
+std::string priv::EShaders::decal_frag;
+std::string priv::EShaders::bullet_physics_vert;
+std::string priv::EShaders::bullet_physcis_frag;
+std::string priv::EShaders::fullscreen_quad_vertex;
+std::string priv::EShaders::vertex_basic;
+std::string priv::EShaders::vertex_2DAPI;
+std::string priv::EShaders::vertex_skybox;
+std::string priv::EShaders::particle_vertex;
+std::string priv::EShaders::lighting_vert;
+std::string priv::EShaders::stencil_passover;
+std::string priv::EShaders::forward_frag;
+std::string priv::EShaders::particle_frag;
+std::string priv::EShaders::deferred_frag;
+std::string priv::EShaders::zprepass_frag;
+std::string priv::EShaders::deferred_frag_hud;
+std::string priv::EShaders::deferred_frag_skybox;
+std::string priv::EShaders::copy_depth_frag;
+std::string priv::EShaders::cubemap_convolude_frag;
+std::string priv::EShaders::cubemap_prefilter_envmap_frag;
+std::string priv::EShaders::brdf_precompute;
+std::string priv::EShaders::blur_frag;
+std::string priv::EShaders::final_frag;
+std::string priv::EShaders::depth_and_transparency_frag;
+std::string priv::EShaders::lighting_frag;
+std::string priv::EShaders::lighting_frag_gi;
 #pragma endregion
 
 void priv::EShaders::init(const unsigned int openglVersion, const unsigned int glslVersion){
@@ -386,12 +384,15 @@ normal = tangentToView * normal;
     "        inData.diffuse *= (1.0 + inData.glow);\n" // we want shadeless items to be influenced by the glow somewhat...
     "    }\n"
     "    vec4 GodRays = Unpack32BitUIntTo4ColorFloats(Gods_Rays_Color);\n"
-    "    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);\n"
     "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
     "\n"
-    "    gl_FragData[0] = inData.diffuse;\n"
-    "    gl_FragData[1] = vec4(encodedNormals, 0.0, 0.0);\n"
-    "    gl_FragData[2] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);\n"
+    "    SUBMIT_DIFFUSE(inData.diffuse);\n"
+    "    SUBMIT_NORMALS(encodedNormals);\n"
+    "    SUBMIT_MATERIAL_ID_AND_AO(0.0, 0.0);\n"
+    "    SUBMIT_METALNESS_AND_SMOOTHNESS(0.0);\n"
+    "    SUBMIT_GLOW(inData.glow);\n"
+    "    SUBMIT_SPECULAR(inData.specular);\n"
+    "    SUBMIT_GOD_RAYS_COLOR(GodRays.r, GodRays.g, GodRays.b);\n"
     "    gl_FragData[3] = inData.diffuse;\n"
     "}";
 #pragma endregion
@@ -810,17 +811,17 @@ priv::EShaders::forward_frag =
     "            vec3 LightPosition = vec3(currentLight.DataC.yzw) - CamRealPosition;\n"
     "            vec3 LightDirection = normalize(vec3(currentLight.DataA.w,currentLight.DataB.x,currentLight.DataB.y));\n"
     "            if(currentLight.DataD.w == 0.0){\n"       //sun
-    "                lightCalculation = CalcLightInternalForward(currentLight, normalize(LightPosition - WorldPosition), WorldPosition, inData.normals, inData);\n"
+    "                lightCalculation = CalcLightInternalForward(currentLight, normalize(LightPosition - WorldPosition), WorldPosition, inData);\n"
     "            }else if(currentLight.DataD.w == 1.0){\n" //point
-    "                lightCalculation = CalcPointLightForward(currentLight, LightPosition,WorldPosition,inData.normals,inData);\n"
+    "                lightCalculation = CalcPointLightForward(currentLight, LightPosition,WorldPosition,inData);\n"
     "            }else if(currentLight.DataD.w == 2.0){\n" //directional
-    "                lightCalculation = CalcLightInternalForward(currentLight, LightDirection,WorldPosition,inData.normals,inData);\n"
+    "                lightCalculation = CalcLightInternalForward(currentLight, LightDirection,WorldPosition,inData);\n"
     "            }else if(currentLight.DataD.w == 3.0){\n" //spot
-    "                lightCalculation = CalcSpotLightForward(currentLight, LightDirection,LightPosition,WorldPosition,inData.normals,inData);\n"
+    "                lightCalculation = CalcSpotLightForward(currentLight, LightDirection,LightPosition,WorldPosition,inData);\n"
     "            }else if(currentLight.DataD.w == 4.0){\n" //rod
-    "                lightCalculation = CalcRodLightForward(currentLight, vec3(currentLight.DataA.w, currentLight.DataB.xy), currentLight.DataC.yzw, WorldPosition, inData.normals, inData);\n"
+    "                lightCalculation = CalcRodLightForward(currentLight, vec3(currentLight.DataA.w, currentLight.DataB.xy), currentLight.DataC.yzw, WorldPosition, inData);\n"
         "        }else if(currentLight.DataD.w == 5.0){\n" //projection
-        "            lightCalculation = CalcProjectionLightForward(currentLight, vec3(currentLight.DataA.w, currentLight.DataB.xy), currentLight.DataC.yzw, WorldPosition, inData.normals, inData);\n"
+        "            lightCalculation = CalcProjectionLightForward(currentLight, vec3(currentLight.DataA.w, currentLight.DataB.xy), currentLight.DataC.yzw, WorldPosition,inData);\n"
     "            }\n"
     "            lightTotal += lightCalculation;\n"
     "        }\n"
@@ -855,10 +856,14 @@ priv::EShaders::forward_frag =
     "    }\n"
     "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
     "    vec4 GodRays = Unpack32BitUIntTo4ColorFloats(Gods_Rays_Color);\n"
-    "    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);\n"
-    "    gl_FragData[0] = inData.diffuse;\n"
-    "    gl_FragData[1] = vec4(encodedNormals, 0.0, 0.0);\n" //old: OutMatIDAndAO, OutPackedMetalnessAndSmoothness. keeping normals around for possible decals later
-    "    gl_FragData[2] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);\n"
+
+    "    SUBMIT_DIFFUSE(inData.diffuse);\n"
+    "    SUBMIT_NORMALS(encodedNormals);\n"
+    "    SUBMIT_MATERIAL_ID_AND_AO(0.0, 0.0);\n"
+    "    SUBMIT_METALNESS_AND_SMOOTHNESS(0.0);\n"
+    "    SUBMIT_GLOW(inData.glow);\n"
+    "    SUBMIT_SPECULAR(inData.specular);\n"
+    "    SUBMIT_GOD_RAYS_COLOR(GodRays.r, GodRays.g, GodRays.b);\n"
     "    gl_FragData[3] = inData.diffuse;\n"
     "\n"
     "}";
@@ -873,7 +878,7 @@ priv::EShaders::forward_frag =
 
 for (unsigned int i = 1; i < std::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
     priv::EShaders::particle_frag +=
-     "uniform SAMPLER_TYPE_2D DiffuseTexture" + to_string(i) + ";\n";
+     "uniform SAMPLER_TYPE_2D DiffuseTexture" + std::to_string(i) + ";\n";
 }
 
     priv::EShaders::particle_frag +=
@@ -902,8 +907,8 @@ for (unsigned int i = 1; i < std::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U,
 
     for (unsigned int i = 1; i < std::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
         priv::EShaders::particle_frag +=
-            "    else if (MaterialIndex == " + to_string(i) + "U)\n"
-            "        finalColor *= texture2D(DiffuseTexture" + to_string(i) + ", UV); \n";
+            "    else if (MaterialIndex == " + std::to_string(i) + "U)\n"
+            "        finalColor *= texture2D(DiffuseTexture" + std::to_string(i) + ", UV); \n";
     }
 
     priv::EShaders::particle_frag +=
@@ -912,7 +917,7 @@ for (unsigned int i = 1; i < std::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U,
 
     "    finalColor.a *= alpha;\n"
 
-    "    gl_FragData[0] = finalColor;\n"
+    "    SUBMIT_DIFFUSE(finalColor);\n"
     "    gl_FragData[3] = finalColor;\n"
     "}";
 #pragma endregion
@@ -987,19 +992,21 @@ priv::EShaders::deferred_frag =
     "        ProcessComponent(components[j], inData);\n"
     "    }\n"
     "\n"
-    "	 float OutMatIDAndAO = Material_F0AndID.w + inData.ao;\n"
     "    vec2 OutNormals = EncodeOctahedron(inData.normals);\n"
     "    if(Shadeless == 1){\n"
     "        OutNormals = ConstantOneVec2;\n"
     "        inData.diffuse *= (1.0 + inData.glow);\n" // we want shadeless items to be influenced by the glow somewhat...
     "    }\n"
-    "	 float OutPackedMetalnessAndSmoothness = Pack2FloatIntoFloat16(inData.metalness,inData.smoothness);\n"
     "    vec4 GodRays = Unpack32BitUIntTo4ColorFloats(Gods_Rays_Color);\n"
-    "    float GodRaysRG = Pack2NibblesInto8BitChannel(GodRays.r,GodRays.g);\n"
     "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
-    "    gl_FragData[0] = inData.diffuse;\n"
-    "    gl_FragData[1] = vec4(OutNormals, OutMatIDAndAO, OutPackedMetalnessAndSmoothness);\n"
-    "    gl_FragData[2] = vec4(inData.glow, inData.specular, GodRaysRG, GodRays.b);\n"
+
+    "    SUBMIT_DIFFUSE(inData.diffuse);\n"
+    "    SUBMIT_NORMALS(OutNormals);\n"
+    "    SUBMIT_MATERIAL_ID_AND_AO(Material_F0AndID.w, inData.ao);\n"
+    "    SUBMIT_METALNESS_AND_SMOOTHNESS(inData.metalness,inData.smoothness);\n"
+    "    SUBMIT_GLOW(inData.glow);\n"
+    "    SUBMIT_SPECULAR(inData.specular);\n"
+    "    SUBMIT_GOD_RAYS_COLOR(GodRays.r, GodRays.g, GodRays.b);\n"
     "}";
 #pragma endregion
 
@@ -1023,6 +1030,7 @@ priv::EShaders::deferred_frag_hud =
     "uniform vec4 Object_Color;\n"
     "varying vec2 UV;\n"
     "void main(){\n"
+
     "    gl_FragColor = Object_Color;\n"
     "    if(DiffuseTextureEnabled == 1){\n"
     "        vec4 color = texture2D(DiffuseTexture, UV); \n"
@@ -1043,9 +1051,9 @@ priv::EShaders::deferred_frag_skybox =
     "varying vec3 WorldPosition;\n"
     "void main(){\n"
     "    if(IsFake == 1){\n"
-    "        gl_FragData[0] = Color;\n"
+    "        SUBMIT_DIFFUSE(Color);\n"
     "    }else{\n"
-    "        gl_FragData[0] = textureCube(Texture, UV);\n"
+    "        SUBMIT_DIFFUSE(textureCube(Texture, UV));\n"
     "    }\n"
     "    gl_FragData[0].rgb = pow(gl_FragData[0].rgb, vec3(1.0 / ScreenGamma));\n" //ScreenGamma is gamma
     "    gl_FragData[1].rg = vec2(1.0);\n"
@@ -1247,44 +1255,45 @@ priv::EShaders::lighting_frag_gi =
     "varying vec2 texcoords;\n"
     "flat varying vec3 CamRealPosition;\n" //add this to calculations?
     "\n"
-    "vec3 SchlickFrenselRoughness(float theta, vec3 _F0,float roughness){\n"
-    "    vec3 ret = _F0 + (max(vec3(1.0 - roughness),_F0) - _F0) * pow(1.0 - theta,5.0);\n"
+    "vec3 SchlickFrenselRoughness(float theta, vec3 _F0, float roughness){\n"
+    "    vec3 ret = _F0 + (max(vec3(1.0 - roughness), _F0) - _F0) * pow(1.0 - theta, 5.0);\n"
     "    return ret;\n"
     "}\n"
     "void main(){\n"
-
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);\n"
-    "    vec3 PxlNormal = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
-    "    float Glow = texture2D(gMiscMap, uv).r;\n"
+    "    float ssaoValue            = 1.0 - texture2D(gSSAOMap, uv).a;\n"
+    "    vec3 PxlNormal             = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
     "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap,uv).rgb;\n"
-    "    vec3 PxlWorldPos = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv,CameraNear,CameraFar);\n"
-    "    vec3 ViewDir = normalize(CameraPosition - PxlWorldPos);\n"
-    "    vec3 R = reflect(-ViewDir, PxlNormal);\n"
-    "    float VdotN = max(0.0, dot(ViewDir,PxlNormal));\n"
-    "    float matIDandAO = texture2D(gNormalMap,uv).b;\n"
-    "    highp int index = int(floor(matIDandAO));\n"
-    "    float ssaoValue = 1.0 - texture2D(gSSAOMap,uv).a;\n"
-    "    float ao = (fract(matIDandAO)+0.0001) * ssaoValue;\n"//the 0.0001 makes up for the clamp in material class
-    "    vec2 stuff = UnpackFloat16Into2Floats(texture2D(gNormalMap,uv).a);\n" //x is metalness, y is smoothness
-    "    vec3 MaterialF0 = Unpack3FloatsInto1FloatUnsigned(materials[index].r);\n"
-    "    vec3 F0 = mix(MaterialF0, MaterialAlbedoTexture, vec3(stuff.x));\n"
-    "    vec3 Frensel = F0;\n"
-    "    float roughness = 1.0 - stuff.y;\n"
-    "    vec3 irradianceColor = textureCube(irradianceMap, PxlNormal).rgb;\n"
-    "    vec3 kS = SchlickFrenselRoughness(VdotN,Frensel,roughness);\n"
-    "    vec3 kD = ConstantOneVec3 - kS;\n"
-    "    kD *= 1.0 - stuff.x;\n"
-    "    vec3 GIContribution = Unpack3FloatsInto1FloatUnsigned(ScreenData.x);\n" //x = diffuse, y = specular, z = global
-    "    vec3 GIDiffuse = irradianceColor * MaterialAlbedoTexture * kD * GIContribution.x;\n"
+    "    vec3 PxlWorldPos           = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv,CameraNear,CameraFar);\n"
+    "    vec3 ViewDir               = normalize(CameraPosition - PxlWorldPos);\n"
+    "    vec3 R                     = reflect(-ViewDir, PxlNormal);\n"
+    "    float VdotN                = max(0.0, dot(ViewDir,PxlNormal));\n"
+    "    float matIDandAO           = texture2D(gNormalMap,uv).b;\n"
+    "    highp int index            = int(floor(matIDandAO));\n"
+    "    vec3 MaterialF0            = Unpack3FloatsInto1FloatUnsigned(materials[index].r);\n"
+    "    float ao                   = (fract(matIDandAO)+0.0001) * ssaoValue;\n"//the 0.0001 makes up for the clamp in material class
+
+    "    float Glow                 = texture2D(gMiscMap, uv).r;\n"
+    "    vec2 stuff                 = UnpackFloat16Into2Floats(texture2D(gNormalMap,uv).a);\n" //x is metalness, y is smoothness
+
+    "    vec3 F0                    = mix(MaterialF0, MaterialAlbedoTexture, vec3(stuff.x));\n"
+    "    vec3 Frensel               = F0;\n"
+    "    float roughness            = 1.0 - stuff.y;\n"
+    "    vec3 irradianceColor       = textureCube(irradianceMap, PxlNormal).rgb;\n"
+    "    vec3 kS                    = SchlickFrenselRoughness(VdotN,Frensel,roughness);\n"
+    "    vec3 kD                    = ConstantOneVec3 - kS;\n"
+    "    kD                        *= 1.0 - stuff.x;\n"
+    "    vec3 GIContribution        = Unpack3FloatsInto1FloatUnsigned(ScreenData.x);\n" //x = diffuse, y = specular, z = global
+    "    vec3 GIDiffuse             = irradianceColor * MaterialAlbedoTexture * kD * GIContribution.x;\n"
     "\n"
-    "    vec3 prefilteredColor = textureCubeLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;\n"
-    "    vec2 brdf  = texture2D(brdfLUT, vec2(VdotN, roughness)).rg;\n"
-    "    vec3 GISpecular = prefilteredColor * (kS * brdf.x + brdf.y) * GIContribution.y;\n"
+    "    vec3 prefilteredColor      = textureCubeLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;\n"
+    "    vec2 brdf                  = texture2D(brdfLUT, vec2(VdotN, roughness)).rg;\n"
+    "    vec3 GISpecular            = prefilteredColor * (kS * brdf.x + brdf.y) * GIContribution.y;\n"
     "\n"
-    "    vec3 TotalIrradiance = (GIDiffuse + GISpecular) * ao;\n"
-    "    TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / ScreenData.y));\n" //ScreenData.y is gamma
-    "    gl_FragColor += (vec4(TotalIrradiance, 1.0) * vec4(vec3(GIContribution.z), 1.0)) * (materials[index].g);\n" //materials[index].g is material base alpha
-    "    gl_FragColor.rgb = max(gl_FragColor.rgb, Glow * MaterialAlbedoTexture);\n"
+    "    vec3 TotalIrradiance       = (GIDiffuse + GISpecular) * ao;\n"
+    "    TotalIrradiance            = pow(TotalIrradiance, vec3(1.0 / ScreenData.y));\n" //ScreenData.y is gamma
+    "    gl_FragColor              += (vec4(TotalIrradiance, 1.0) * vec4(vec3(GIContribution.z), 1.0)) * materials[index].g;\n" //materials[index].g is material base alpha
+    "    gl_FragColor.rgb           = max(gl_FragColor.rgb, Glow * MaterialAlbedoTexture);\n"
     "}";
 
 #pragma endregion

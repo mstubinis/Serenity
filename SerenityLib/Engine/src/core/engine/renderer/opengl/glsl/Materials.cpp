@@ -15,6 +15,99 @@ using namespace Engine;
 using namespace Engine::priv;
 
 void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNumber, ShaderType shaderType) {
+
+#pragma region OutputSubmissions
+
+    if (ShaderHelper::sfind(code, "SUBMIT_DIFFUSE(")) {
+        if (!ShaderHelper::sfind(code, "void SUBMIT_DIFFUSE(")) {
+            ShaderHelper::insertStringRightBeforeMainFunc(code,
+                "void SUBMIT_DIFFUSE(float r, float g, float b, float a){\n"
+                "    gl_FragData[0] = vec4(r, g, b, a);\n"
+                "}\n"
+                "void SUBMIT_DIFFUSE(vec4 color){\n"
+                "    gl_FragData[0] = color;\n"
+                "}\n"
+            );
+        }
+    }
+
+    if (ShaderHelper::sfind(code, "SUBMIT_NORMALS(")) {
+        if (!ShaderHelper::sfind(code, "void SUBMIT_NORMALS(")) {
+            ShaderHelper::insertStringRightBeforeMainFunc(code,
+                "void SUBMIT_NORMALS(float x, float y, float z){\n"
+                "    gl_FragData[1].xy = EncodeOctahedron(vec3(x, y, z));\n"
+                "}\n"
+                "void SUBMIT_NORMALS(vec3 normals){\n"
+                "    gl_FragData[1].xy = EncodeOctahedron(normals);\n"
+                "}\n"
+                "void SUBMIT_NORMALS(float xCompressed, float yCompressed){\n"
+                "    gl_FragData[1].xy = vec2(xCompressed, yCompressed);\n"
+                "}\n"
+                "void SUBMIT_NORMALS(vec2 compressedNormals){\n"
+                "    gl_FragData[1].xy = compressedNormals;\n"
+                "}\n"
+            );
+        }
+    }
+    if (ShaderHelper::sfind(code, "SUBMIT_GLOW(")) {
+        if (!ShaderHelper::sfind(code, "void SUBMIT_GLOW(")) {
+            ShaderHelper::insertStringRightBeforeMainFunc(code,
+                "void SUBMIT_GLOW(float glow){\n"
+                "    gl_FragData[2].r = glow;\n"
+                "}\n"
+            );
+        }
+    }
+    if (ShaderHelper::sfind(code, "SUBMIT_SPECULAR(")) {
+        if (!ShaderHelper::sfind(code, "void SUBMIT_SPECULAR(")) {
+            ShaderHelper::insertStringRightBeforeMainFunc(code,
+                "void SUBMIT_SPECULAR(float specular){\n"
+                "    gl_FragData[2].g = specular;\n"
+                "}\n"
+            );
+        }
+    }
+    if (ShaderHelper::sfind(code, "SUBMIT_MATERIAL_ID_AND_AO(")) {
+        if (!ShaderHelper::sfind(code, "void SUBMIT_MATERIAL_ID_AND_AO(")) {
+            ShaderHelper::insertStringRightBeforeMainFunc(code,
+                "void SUBMIT_MATERIAL_ID_AND_AO(float matID, float ao){\n"
+                "    gl_FragData[1].b = matID + ao;\n"
+                "}\n"
+                "void SUBMIT_MATERIAL_ID_AND_AO(float matIDAndAO){\n"
+                "    gl_FragData[1].b = matIDAndAO;\n"
+                "}\n"
+            );
+        }
+    }
+    if (ShaderHelper::sfind(code, "SUBMIT_GOD_RAYS_COLOR(")) {
+        if (!ShaderHelper::sfind(code, "void SUBMIT_GOD_RAYS_COLOR(")) {
+            ShaderHelper::insertStringRightBeforeMainFunc(code,
+                "void SUBMIT_GOD_RAYS_COLOR(float godRaysR, float godRaysG, float godRaysB){\n"
+                "    float GodRaysRG = Pack2NibblesInto8BitChannel(godRaysR, godRaysG);\n"
+                "    gl_FragData[2].ba = vec2(GodRaysRG, godRaysB);\n"
+                "}\n"
+                "void SUBMIT_GOD_RAYS_COLOR(float godRaysPackedRG, float godRaysB){\n"
+                "    gl_FragData[2].ba = vec2(godRaysPackedRG, godRaysB);\n"
+                "}\n"
+            );
+        }
+    }
+    if (ShaderHelper::sfind(code, "SUBMIT_METALNESS_AND_SMOOTHNESS(")) {
+        if (!ShaderHelper::sfind(code, "void SUBMIT_METALNESS_AND_SMOOTHNESS(")) {
+            ShaderHelper::insertStringRightBeforeMainFunc(code,
+                "void SUBMIT_METALNESS_AND_SMOOTHNESS(float inMetal, float inSmooth){\n"
+                "    float PackedMetalSmooth = Pack2FloatIntoFloat16(inMetal, inSmooth);\n"
+                "    gl_FragData[1].a = PackedMetalSmooth;\n"
+                "}\n"
+                "void SUBMIT_METALNESS_AND_SMOOTHNESS(float inPackedMetalSmooth){\n"
+                "    gl_FragData[1].a = inPackedMetalSmooth;\n"
+                "}\n"
+            );
+        }
+    }
+
+#pragma endregion
+
 #pragma region process component
     if (ShaderHelper::sfind(code, "ProcessComponent(") || ShaderHelper::sfind(code, "ProcessComponentLOD(")) {
         if (!ShaderHelper::sfind(code, "void ProcessComponent(")) {

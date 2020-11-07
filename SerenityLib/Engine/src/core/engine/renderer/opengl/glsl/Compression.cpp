@@ -11,14 +11,13 @@
 
 using namespace Engine;
 using namespace Engine::priv;
-using namespace std;
 
-void opengl::glsl::Compression::convert(string& code, unsigned int versionNumber) {
+void opengl::glsl::Compression::convert(std::string& code, unsigned int versionNumber) {
 #pragma region Pack2NibblesInto8BitChannel
     if (ShaderHelper::sfind(code, "Pack2NibblesInto8BitChannel(")) {
         if (!ShaderHelper::sfind(code, "float Pack2NibblesInto8BitChannel(")) {
             ShaderHelper::insertStringAtLine(code,
-                "float Pack2NibblesInto8BitChannel(float x,float y){\n"
+                "float Pack2NibblesInto8BitChannel(float x, float y){\n"
                 "    float xF = round(x / 0.0666666666666666);\n"
                 "    float yF = round(y / 0.0666666666666666) * 16.0;\n"
                 "    return (xF + yF) / 255.0;\n"
@@ -147,9 +146,9 @@ void opengl::glsl::Compression::convert(string& code, unsigned int versionNumber
         if (!ShaderHelper::sfind(code, "vec2 EncodeOctahedron")) {
             ShaderHelper::insertStringAtLine(code, 
                 "vec2 EncodeOctahedron(vec3 n) {\n"
-                "    if(   all(greaterThan(n,ConstantAlmostOneVec3))   )\n"
-                "        return ConstantOneVec2;\n"
-                "	 n.xy /= dot(abs(n), ConstantOneVec3);\n"
+                "    if(   all(greaterThan(n, vec3(0.999, 0.999, 0.999)))   )\n"
+                "        return vec2(1.0, 1.0);\n"
+                "	 n.xy /= dot(abs(n), vec3(1.0, 1.0, 1.0));\n"
                 "	 return mix(n.xy, (1.0 - abs(n.yx)) * SignNotZero(n.xy), step(n.z, 0.0));\n"
                 "}\n"
             , 1);
@@ -162,8 +161,8 @@ void opengl::glsl::Compression::convert(string& code, unsigned int versionNumber
         if (!ShaderHelper::sfind(code, "vec3 DecodeOctahedron")) {
             ShaderHelper::insertStringAtLine(code, 
                 "vec3 DecodeOctahedron(vec2 n) {\n"
-                "    if(    all(greaterThan(n,ConstantAlmostOneVec2))    )\n"
-                "        return ConstantOneVec3;\n"
+                "    if(    all(greaterThan(n, vec2(0.999, 0.999)))    )\n"
+                "        return vec3(1.0, 1.0, 1.0);\n"
                 "	 vec3 v = vec3(n.xy, 1.0 - abs(n.x) - abs(n.y));\n"
                 "	 if (v.z < 0) v.xy = (1.0 - abs(v.yx)) * SignNotZero(v.xy);\n"
                 "	 return normalize(v);\n"

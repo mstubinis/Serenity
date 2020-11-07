@@ -174,7 +174,7 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
     if (ShaderHelper::sfind(code, "CalcProjectionLightForward(")) {
         if (!ShaderHelper::sfind(code, "vec3 CalcProjectionLightForward(")) {
             ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec3 CalcProjectionLightForward(in Light currentLight, vec3 A, vec3 B, vec3 PxlWorldPos, vec3 PxlNormal, in InData inData){//generated\n"
+                "vec3 CalcProjectionLightForward(in Light currentLight, vec3 A, vec3 B, vec3 PxlWorldPos, in InData inData){//generated\n"
                 /*
                 //TODO: implement
                 "    vec3 BMinusA = B - A;\n"
@@ -183,7 +183,7 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
                 "    vec3 _Normal = BMinusA / Dist;\n"
                 "    float t = clamp(dot(CMinusA, _Normal / Dist), 0.0, 1.0);\n"
                 "    vec3 LightPos = A + t * BMinusA;\n"
-                "    vec3 c = CalcPointLightForward(currentLight, LightPos, PxlWorldPos, PxlNormal, inData);\n"
+                "    vec3 c = CalcPointLightForward(currentLight, LightPos, PxlWorldPos, inData);\n"
                 "    return c;\n"
                 */
                 "    return vec3(0.0);\n"
@@ -197,14 +197,14 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
     if (ShaderHelper::sfind(code, "CalcRodLightForward(")) {
         if (!ShaderHelper::sfind(code, "vec3 CalcRodLightForward(")) {
             ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec3 CalcRodLightForward(in Light currentLight, vec3 A, vec3 B,vec3 PxlWorldPos, vec3 PxlNormal, in InData inData){//generated\n"
+                "vec3 CalcRodLightForward(in Light currentLight, vec3 A, vec3 B,vec3 PxlWorldPos, in InData inData){//generated\n"
                 "    vec3 BMinusA = B - A;\n"
                 "    vec3 CMinusA = PxlWorldPos - A;\n"
                 "    float Dist = length(BMinusA);\n"
                 "    vec3 _Normal = BMinusA / Dist;\n"
                 "    float t = clamp(dot(CMinusA, _Normal / Dist), 0.0, 1.0);\n"
                 "    vec3 LightPos = A + t * BMinusA;\n"
-                "    vec3 c = CalcPointLightForward(currentLight, LightPos, PxlWorldPos, PxlNormal, inData);\n"
+                "    vec3 c = CalcPointLightForward(currentLight, LightPos, PxlWorldPos, inData);\n"
                 "    return c;\n"
                 "}\n"
             , "void main(");
@@ -216,9 +216,9 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
     if (ShaderHelper::sfind(code, "CalcSpotLightForward(")) {
         if (!ShaderHelper::sfind(code, "vec3 CalcSpotLightForward(")) {
             ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec3 CalcSpotLightForward(in Light currentLight, vec3 SpotLightDir, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, in InData inData){//generated\n"
+                "vec3 CalcSpotLightForward(in Light currentLight, vec3 SpotLightDir, vec3 LightPos,vec3 PxlWorldPos, in InData inData){//generated\n"
                 "    vec3 LightDir = normalize(LightPos - PxlWorldPos);\n"
-                "    vec3 c = CalcPointLightForward(currentLight, LightPos, PxlWorldPos, PxlNormal, inData);\n"
+                "    vec3 c = CalcPointLightForward(currentLight, LightPos, PxlWorldPos, inData);\n"
                 "    float cosAngle = dot(LightDir, -SpotLightDir);\n"
                 "    float spotEffect = smoothstep(currentLight.DataE.y, currentLight.DataE.x, cosAngle);\n"
                 "    return c * spotEffect;\n"
@@ -232,11 +232,11 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
     if (ShaderHelper::sfind(code, "CalcPointLightForward(")) {
         if (!ShaderHelper::sfind(code, "vec3 CalcPointLightForward(")) {
             ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec3 CalcPointLightForward(in Light currentLight, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, in InData inData){//generated\n"
+                "vec3 CalcPointLightForward(in Light currentLight, vec3 LightPos,vec3 PxlWorldPos, in InData inData){//generated\n"
                 "    vec3 RawDirection = LightPos - PxlWorldPos;\n"
                 "    float Dist = length(RawDirection);\n"
                 "    vec3 LightDir = RawDirection / Dist;\n"
-                "    vec3 c = CalcLightInternalForward(currentLight, LightDir, PxlWorldPos, PxlNormal, inData);\n"
+                "    vec3 c = CalcLightInternalForward(currentLight, LightDir, PxlWorldPos, inData);\n"
                 "    float attenuation = CalculateAttenuationForward(currentLight,Dist,1.0);\n"
                 "    return c * attenuation;\n"
                 "}\n"
@@ -249,7 +249,7 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
     if (ShaderHelper::sfind(code, "CalcLightInternalForward(")) {
         if (!ShaderHelper::sfind(code, "vec3 CalcLightInternalForward(")) {
             ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec3 CalcLightInternalForward(in Light currentLight, vec3 LightDir, vec3 PxlWorldPos, vec3 PxlNormal, in InData inData){//generated\n"
+                "vec3 CalcLightInternalForward(in Light currentLight, vec3 LightDir, vec3 PxlWorldPos, in InData inData){//generated\n"
                 "    float SpecularStrength     = inData.specular;\n"
                 "    vec3 MaterialAlbedoTexture = inData.diffuse.rgb;\n"
                 "    vec3 LightDiffuseColor     = currentLight.DataD.xyz;\n"
@@ -273,9 +273,9 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
                 "\n"
                 "    vec3 ViewDir = normalize(CameraPosition - PxlWorldPos);\n"
                 "    vec3 Half    = normalize(LightDir + ViewDir);\n"
-                "    float NdotL  = clamp(dot(PxlNormal, LightDir), 0.0, 1.0);\n"
-                "    float NdotH  = clamp(dot(PxlNormal, Half), 0.0, 1.0);\n"
-                "    float VdotN  = clamp(dot(ViewDir,PxlNormal), 0.0, 1.0);\n"
+                "    float NdotL  = clamp(dot(inData.normals, LightDir), 0.0, 1.0);\n"
+                "    float NdotH  = clamp(dot(inData.normals, Half), 0.0, 1.0);\n"
+                "    float VdotN  = clamp(dot(ViewDir,inData.normals), 0.0, 1.0);\n"
                 "    float VdotH  = clamp(dot(ViewDir,Half), 0.0, 1.0);\n"
                 "\n"
                 "    float MaterialTypeDiffuse  = MaterialBasePropertiesTwo.y;\n"
@@ -292,7 +292,7 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
                 "    if(MaterialTypeSpecular == 1.0){\n"
                 "        SpecularFactor = SpecularBlinnPhong(smoothness, NdotH);\n"
                 "    }else if(MaterialTypeSpecular == 2.0){\n"
-                "        SpecularFactor = SpecularPhong(smoothness, LightDir, PxlNormal, ViewDir);\n"
+                "        SpecularFactor = SpecularPhong(smoothness, LightDir, inData.normals, ViewDir);\n"
                 "    }else if(MaterialTypeSpecular == 3.0){\n"
                 "        SpecularFactor = SpecularGGX(Frensel, LightDir, Half, roughnessSquared, NdotH, F0, NdotL);\n"
                 "    }else if(MaterialTypeSpecular == 4.0){\n"
@@ -302,7 +302,7 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
                 "    }else if(MaterialTypeSpecular == 6.0){\n"
                 "        SpecularFactor = vec3(BeckmannDist(NdotH, roughnessSquared));\n"
                 "    }else if(MaterialTypeSpecular == 7.0){\n"
-                "        SpecularFactor = SpecularAshikhminShirley(PxlNormal, Half, NdotH, LightDir, NdotL, VdotN);\n"
+                "        SpecularFactor = SpecularAshikhminShirley(inData.normals, Half, NdotH, LightDir, NdotL, VdotN);\n"
                 "    }\n"
                 "    LightDiffuseColor *= currentLight.DataA.y;\n"
                 "    LightSpecularColor *= (SpecularFactor * currentLight.DataA.z);\n"

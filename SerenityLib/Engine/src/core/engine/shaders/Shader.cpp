@@ -123,8 +123,8 @@ void priv::InternalShaderPublicInterface::ConvertCode(Shader& shader) {
     opengl::glsl::Materials::convert(shader.m_Code, versionNumber, shader.m_Type);
     opengl::glsl::Lighting::convert(shader.m_Code, versionNumber, shader.m_Type);
     opengl::glsl::SSAOCode::convert(shader.m_Code, versionNumber, shader.m_Type);
-    opengl::glsl::DepthOfFieldCode::convert(shader.m_Code, versionNumber, shader.m_Type);
     opengl::glsl::Compression::convert(shader.m_Code, versionNumber);
+    opengl::glsl::DepthOfFieldCode::convert(shader.m_Code, versionNumber, shader.m_Type);
     
 
     //check for log depth - vertex
