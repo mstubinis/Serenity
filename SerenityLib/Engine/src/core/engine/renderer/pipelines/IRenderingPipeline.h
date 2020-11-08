@@ -50,8 +50,8 @@ namespace Engine::priv {
             virtual void init() = 0;
             virtual void onPipelineChanged() = 0;
             virtual void onFullscreen() = 0;
-            virtual void onResize(unsigned int newWidth, unsigned int newHeight) = 0;
-            virtual void onOpenGLContextCreation(unsigned int windowWidth, unsigned int windowHeight, unsigned int glslVersion, unsigned int openglVersion) = 0;
+            virtual void onResize(uint32_t newWidth, uint32_t newHeight) = 0;
+            virtual void onOpenGLContextCreation(uint32_t windowWidth, uint32_t windowHeight, uint32_t glslVersion, uint32_t openglVersion) = 0;
             virtual void restoreDefaultState() = 0;
             virtual void restoreCurrentState() = 0;
             virtual void clear2DAPI() = 0;
@@ -66,40 +66,41 @@ namespace Engine::priv {
             virtual Mesh* getCurrentBoundMesh() = 0;
 
 
-            virtual unsigned int getUniformLocation(const char* location) = 0;
-            virtual unsigned int getUniformLocationUnsafe(const char* location) = 0;
-            virtual unsigned int getCurrentBoundTextureOfType(unsigned int textureType) = 0;
-            virtual unsigned int getMaxNumTextureUnits() = 0;
+            virtual uint32_t getUniformLocation(const char* location) = 0;
+            virtual uint32_t getUniformLocationUnsafe(const char* location) = 0;
+            virtual uint32_t getCurrentBoundTextureOfType(uint32_t textureType) = 0;
+            virtual uint32_t getMaxNumTextureUnits() = 0;
 
-            virtual bool stencilOperation(unsigned int stencilFail, unsigned int depthFail, unsigned int depthPass) = 0;
-            virtual bool stencilMask(unsigned int mask) = 0;
-            virtual bool stencilFunction(unsigned int stencilFunction, unsigned int reference, unsigned int mask) = 0;
-            virtual bool cullFace(unsigned int face) = 0;
-            virtual bool setDepthFunction(unsigned int depthFunction) = 0;
+            virtual bool stencilOperation(uint32_t stencilFail, uint32_t depthFail, uint32_t depthPass) = 0;
+            virtual bool stencilMask(uint32_t mask) = 0;
+            virtual bool stencilFunction(uint32_t stencilFunction, uint32_t reference, uint32_t mask) = 0;
+            virtual bool cullFace(uint32_t face) = 0;
+            virtual bool setDepthFunction(uint32_t depthFunction) = 0;
             virtual bool setViewport(float x, float y, float width, float height) = 0;
             virtual void clear(bool color, bool depth, bool stencil) = 0;
             virtual bool colorMask(bool r, bool g, bool b, bool alpha) = 0;
             virtual bool clearColor(bool r, bool g, bool b, bool alpha) = 0;
 
-            virtual bool bindTextureForModification(TextureType textureType, unsigned int textureObject) = 0;
-            virtual bool bindVAO(unsigned int vaoObject) = 0;
-            virtual bool deleteVAO(unsigned int& vaoObject) = 0;
-            virtual void generateAndBindTexture(TextureType textureType, unsigned int& textureObject) = 0;
-            virtual void generateAndBindVAO(unsigned int& vaoObject) = 0;
+            virtual bool bindTextureForModification(TextureType textureType, uint32_t textureObject) = 0;
+            virtual bool bindVAO(uint32_t vaoObject) = 0;
+            virtual bool deleteVAO(uint32_t& vaoObject) = 0;
+            virtual void generateAndBindTexture(TextureType textureType, uint32_t& textureObject) = 0;
+            virtual void generateAndBindVAO(uint32_t& vaoObject) = 0;
 
-            virtual bool enableAPI(unsigned int apiEnum) = 0;
-            virtual bool disableAPI(unsigned int apiEnum) = 0;
-            virtual bool enableAPI_i(unsigned int apiEnum, unsigned int index) = 0;
-            virtual bool disableAPI_i(unsigned int apiEnum, unsigned int index) = 0;
+            virtual bool enableAPI(uint32_t apiEnum) = 0;
+            virtual bool disableAPI(uint32_t apiEnum) = 0;
+            virtual bool enableAPI_i(uint32_t apiEnum, uint32_t index) = 0;
+            virtual bool disableAPI_i(uint32_t apiEnum, uint32_t index) = 0;
 
-            virtual void sendTexture(const char* location, Texture& texture, int slot) = 0;
-            virtual void sendTexture(const char* location, unsigned int textureObject, int slot, unsigned int textureTarget) = 0;
-            virtual void sendTextureSafe(const char* location, Texture& texture, int slot) = 0;
-            virtual void sendTextureSafe(const char* location, unsigned int textureObject, int slot, unsigned int textureTarget) = 0;
+            virtual void clearTexture(int unit, uint32_t textureTarget) = 0;
+            virtual void sendTexture(const char* location, Texture& texture, int unit) = 0;
+            virtual void sendTexture(const char* location, uint32_t textureObject, int unit, uint32_t textureTarget) = 0;
+            virtual void sendTextureSafe(const char* location, Texture& texture, int unit) = 0;
+            virtual void sendTextureSafe(const char* location, uint32_t textureObject, int unit, uint32_t textureTarget) = 0;
 
-            virtual bool bindReadFBO(unsigned int fbo) = 0;
-            virtual bool bindDrawFBO(unsigned int fbo) = 0;
-            virtual bool bindRBO(unsigned int rbo) = 0;
+            virtual bool bindReadFBO(uint32_t fbo) = 0;
+            virtual bool bindDrawFBO(uint32_t fbo) = 0;
+            virtual bool bindRBO(uint32_t rbo) = 0;
 
             virtual bool bind(ModelInstance* modelInstance) = 0;
             virtual bool bind(ShaderProgram* program) = 0;
@@ -111,7 +112,7 @@ namespace Engine::priv {
             virtual bool unbind(Material* material) = 0;
             virtual bool unbind(Mesh* mesh) = 0;
             
-            virtual void generatePBRData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, unsigned int convoludeSize, unsigned int prefilterSize) = 0;
+            virtual void generatePBRData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, uint32_t convoludeSize, uint32_t prefilterSize) = 0;
 
             virtual void sendGPUDataLight(Camera& camera, SunLight& sunLight, const std::string& start) = 0;
             virtual int sendGPUDataLight(Camera& camera, PointLight& pointLight, const std::string& start) = 0;
@@ -128,7 +129,7 @@ namespace Engine::priv {
             virtual void renderProjectionLight(Camera& camera, ProjectionLight& rodLight) = 0;
 
             virtual void renderSkybox(Skybox*, Handle shaderProgram, Scene& scene, Viewport& viewport, Camera& camera) = 0;
-            virtual void renderMesh(Mesh& mesh, unsigned int mode) = 0;
+            virtual void renderMesh(Mesh& mesh, uint32_t mode) = 0;
             virtual void renderDecal(ModelInstance& decalModelInstance) = 0;
             virtual void renderLightProbe(LightProbe& lightProbe) = 0;
 
@@ -276,10 +277,6 @@ namespace Engine::priv {
                 Alignment align,
                 const glm::vec4& scissor
             ) = 0;
-
-
-
-
 
             virtual void renderFullscreenTriangle() = 0;
             virtual void renderFullscreenQuad() = 0;

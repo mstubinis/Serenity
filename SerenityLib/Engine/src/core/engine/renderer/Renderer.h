@@ -148,6 +148,7 @@ namespace Renderer{
     bool colorMask(bool r, bool g, bool b, bool a);
     bool clearColor(float r, float g, float b, float a);
 
+    void clearTexture(int slot, GLuint glTextureType);
     void sendTexture(const char* location, Texture& texture, int slot);
     void sendTexture(const char* location, GLuint textureAddress, int slot, GLuint glTextureType);
     void sendTextureSafe(const char* location, Texture& texture, int slot);

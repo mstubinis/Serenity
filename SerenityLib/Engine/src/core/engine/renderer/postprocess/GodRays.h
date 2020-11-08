@@ -17,12 +17,8 @@ namespace Engine::priv {
             Handle          m_Vertex_Shader;
             Handle          m_Fragment_Shader;
             Handle          m_Shader_Program;
-            std::string     m_GLSL_frag_code  = "";
-
-            GodRays() = default;
-            ~GodRays() = default;
+            std::string     m_GLSL_frag_code   = "";
         public:
-            bool        godRays_active         = true;
             glm::vec4   clearColor             = glm::vec4(0.030f, 0.023f, 0.032f, 1.0f);
             float       exposure               = 0.03f;
             float       factor                 = 1.0f;
@@ -32,35 +28,36 @@ namespace Engine::priv {
             float       fovDegrees             = 75.0f;
             float       alphaFalloff           = 2.0f;
             int         samples                = 80;
-
-
+            bool        godRays_active         = true;
+            
             bool init_shaders();
 
-            void pass(GBuffer&, const Viewport& viewport, const glm::vec2& lightScrnPos, float alpha, const Engine::priv::RenderModule& renderer);
+            void pass(GBuffer&, const Viewport& viewport, const glm::vec2& lightScrnPos, float alpha, const RenderModule& renderer);
 
             static GodRays STATIC_GOD_RAYS;
     };
 };
 namespace Engine::Renderer::godRays {
-    bool enabled();
-    void enable(bool enabled);
-    void disable();
-    float getExposure();
-    void setExposure(float exposure);
-    float getFactor();
-    void setFactor(float factor);
-    float getDecay();
-    void setDecay(float decay);
-    float getDensity();
-    void setDensity(float density);
-    float getWeight();
-    void setWeight(float weight);
-    unsigned int getSamples();
-    void setSamples(unsigned int numSamples);
-    float getFOVDegrees();
-    void setFOVDegrees(float fovInDegrees);
-    float getAlphaFalloff();
-    void setAlphaFalloff(float alphaFalloff);
+    inline bool enabled() noexcept { return Engine::priv::GodRays::STATIC_GOD_RAYS.godRays_active; }
+    inline void enable(bool enabled) noexcept { Engine::priv::GodRays::STATIC_GOD_RAYS.godRays_active = enabled; }
+    inline void disable() noexcept { Engine::priv::GodRays::STATIC_GOD_RAYS.godRays_active = false; }
+    inline float getExposure() noexcept { return Engine::priv::GodRays::STATIC_GOD_RAYS.exposure; }
+    inline void setExposure(float exposure) noexcept { Engine::priv::GodRays::STATIC_GOD_RAYS.exposure = exposure; }
+    inline float getFactor() noexcept { return Engine::priv::GodRays::STATIC_GOD_RAYS.factor; }
+    inline void setFactor(float factor) noexcept { Engine::priv::GodRays::STATIC_GOD_RAYS.factor = factor; }
+    inline float getDecay() noexcept { return Engine::priv::GodRays::STATIC_GOD_RAYS.decay; }
+    inline void setDecay(float decay) noexcept { Engine::priv::GodRays::STATIC_GOD_RAYS.decay = decay; }
+    inline float getDensity() noexcept { return Engine::priv::GodRays::STATIC_GOD_RAYS.density; }
+    inline void setDensity(float density) noexcept { Engine::priv::GodRays::STATIC_GOD_RAYS.density = density; }
+    inline float getWeight() noexcept { return Engine::priv::GodRays::STATIC_GOD_RAYS.weight; }
+    inline void setWeight(float weight) noexcept { Engine::priv::GodRays::STATIC_GOD_RAYS.weight = weight; }
+    inline int getSamples() noexcept { return Engine::priv::GodRays::STATIC_GOD_RAYS.samples; }
+    inline void setSamples(int numSamples) noexcept { Engine::priv::GodRays::STATIC_GOD_RAYS.samples = glm::max(0, numSamples); }
+    inline float getFOVDegrees() noexcept { return Engine::priv::GodRays::STATIC_GOD_RAYS.fovDegrees; }
+    inline void setFOVDegrees(float fovInDegrees) noexcept { Engine::priv::GodRays::STATIC_GOD_RAYS.fovDegrees = fovInDegrees; }
+    inline float getAlphaFalloff() noexcept { return Engine::priv::GodRays::STATIC_GOD_RAYS.alphaFalloff; }
+    inline void setAlphaFalloff(float alphaFalloff) noexcept { Engine::priv::GodRays::STATIC_GOD_RAYS.alphaFalloff = alphaFalloff; }
+
     void setSun(Entity sun) noexcept;
     Entity getSun() noexcept;
 };

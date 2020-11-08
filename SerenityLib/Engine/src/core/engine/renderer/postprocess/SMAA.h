@@ -7,7 +7,7 @@ class  ShaderProgram;
 class  Shader;
 class  Viewport;
 
-enum class SMAAQualityLevel : unsigned char {
+enum class SMAAQualityLevel : uint8_t {
     Low, 
     Medium, 
     High, 
@@ -21,7 +21,7 @@ namespace Engine::priv {
     class  RenderModule;
     class  SMAA final {
         private:
-            struct PassStage final { enum Stage : unsigned int {
+            struct PassStage final { enum Stage : uint32_t {
                 Edge,
                 Blend,
                 Neighbor,
@@ -39,13 +39,9 @@ namespace Engine::priv {
             SMAA();
             ~SMAA();
         public:
-            unsigned int  AreaTexture                             = 0;
-            unsigned int  SearchTexture                           = 0;
-            unsigned char MAX_SEARCH_STEPS                        = 32;
-            unsigned char MAX_SEARCH_STEPS_DIAG                   = 16;
-            unsigned char CORNER_ROUNDING                         = 25;
-            unsigned char AREATEX_MAX_DISTANCE                    = 16;
-            unsigned char AREATEX_MAX_DISTANCE_DIAG               = 20;
+            glm::vec2     AREATEX_PIXEL_SIZE                      = glm::vec2(glm::vec2(1.0f) / glm::vec2(160.0f, 560.0f));
+            uint32_t      AreaTexture                             = 0;
+            uint32_t      SearchTexture                           = 0;
             float         THRESHOLD                               = 0.05f;
             float         LOCAL_CONTRAST_ADAPTATION_FACTOR        = 2.0f;
             float         DEPTH_THRESHOLD                         = (0.1f * THRESHOLD);
@@ -54,7 +50,11 @@ namespace Engine::priv {
             float         PREDICATION_STRENGTH                    = 0.4f;
             float         REPROJECTION_WEIGHT_SCALE               = 30.0f;
             float         AREATEX_SUBTEX_SIZE                     = 0.14285714285f; //(1 / 7)
-            glm::vec2     AREATEX_PIXEL_SIZE                      = glm::vec2(glm::vec2(1.0f) / glm::vec2(160.0f, 560.0f));
+            uint8_t       MAX_SEARCH_STEPS                        = 32;
+            uint8_t       MAX_SEARCH_STEPS_DIAG                   = 16;
+            uint8_t       CORNER_ROUNDING                         = 25;
+            uint8_t       AREATEX_MAX_DISTANCE                    = 16;
+            uint8_t       AREATEX_MAX_DISTANCE_DIAG               = 20;
             bool          PREDICATION                             = false;
             bool          REPROJECTION                            = false;
 
@@ -62,29 +62,30 @@ namespace Engine::priv {
 
             bool init_shaders();
 
-            void passEdge(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, unsigned int sceneTexture, unsigned int outTexture, const Engine::priv::RenderModule& renderer);
-            void passBlend(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, unsigned int outTexture, const Engine::priv::RenderModule& renderer);
-            void passNeighbor(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::RenderModule& renderer);
+            void passEdge(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, uint32_t sceneTexture, uint32_t outTexture, const Engine::priv::RenderModule& renderer);
+            void passBlend(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, uint32_t outTexture, const Engine::priv::RenderModule& renderer);
+            void passNeighbor(GBuffer&, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, uint32_t sceneTexture, const Engine::priv::RenderModule& renderer);
             void passFinal(GBuffer&, const Viewport& viewport, const Engine::priv::RenderModule& renderer); //currently unused
 
             static SMAA STATIC_SMAA;
     };
 };
 namespace Engine::Renderer::smaa {
-    void setThreshold(float threshold);
-    void setSearchSteps(unsigned int searchSteps);
-    void disableCornerDetection();
-    void enableCornerDetection(unsigned int detection = 25);
-    void disableDiagonalDetection();
-    void enableDiagonalDetection(unsigned int detection = 8);
     void setQuality(SMAAQualityLevel qualityLevel);
-    void setPredicationThreshold(float predicationThreshold);
-    void setPredicationScale(float predicationScale);
-    void setPredicationStrength(float predicationStrength);
-    void setReprojectionScale(float reprojectionScale);
-    void enablePredication(bool enabledPredication = true);
-    void disablePredication();
-    void enableReprojection(bool enabledReprojection = true);
-    void disableReprojection();
+
+    inline void setThreshold(float threshold) noexcept { Engine::priv::SMAA::STATIC_SMAA.THRESHOLD = threshold; }
+    inline void setSearchSteps(uint32_t searchSteps) noexcept { Engine::priv::SMAA::STATIC_SMAA.MAX_SEARCH_STEPS = searchSteps; }
+    inline void disableCornerDetection() noexcept { Engine::priv::SMAA::STATIC_SMAA.CORNER_ROUNDING = 0; }
+    inline void enableCornerDetection(uint32_t detection = 25) noexcept { Engine::priv::SMAA::STATIC_SMAA.CORNER_ROUNDING = detection; }
+    inline void disableDiagonalDetection() noexcept { Engine::priv::SMAA::STATIC_SMAA.MAX_SEARCH_STEPS_DIAG = 0; }
+    inline void enableDiagonalDetection(uint32_t detection = 8) noexcept { Engine::priv::SMAA::STATIC_SMAA.MAX_SEARCH_STEPS_DIAG = detection; }
+    inline void setPredicationThreshold(float predicationThreshold) noexcept { Engine::priv::SMAA::STATIC_SMAA.PREDICATION_THRESHOLD = predicationThreshold; }
+    inline void setPredicationScale(float predicationScale) noexcept { Engine::priv::SMAA::STATIC_SMAA.PREDICATION_SCALE = predicationScale; }
+    inline void setPredicationStrength(float predicationStrength) noexcept { Engine::priv::SMAA::STATIC_SMAA.PREDICATION_STRENGTH = predicationStrength; }
+    inline void setReprojectionScale(float reprojectionScale) noexcept { Engine::priv::SMAA::STATIC_SMAA.REPROJECTION_WEIGHT_SCALE = reprojectionScale; }
+    inline void enablePredication(bool enabledPredication = true) noexcept { Engine::priv::SMAA::STATIC_SMAA.PREDICATION = enabledPredication; }
+    inline void disablePredication() noexcept { Engine::priv::SMAA::STATIC_SMAA.PREDICATION = false; }
+    inline void enableReprojection(bool enabledReprojection = true) noexcept { Engine::priv::SMAA::STATIC_SMAA.REPROJECTION = enabledReprojection; }
+    inline void disableReprojection() noexcept { Engine::priv::SMAA::STATIC_SMAA.REPROJECTION = false; }
 };
 #endif

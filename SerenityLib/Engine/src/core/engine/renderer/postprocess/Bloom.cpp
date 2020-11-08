@@ -26,10 +26,8 @@ bool Engine::priv::Bloom::init_shaders() {
         "\n"
         "void main(){\n"
         "    vec3 sceneColor = texture2D(SceneTexture,texcoords).rgb;\n"
-        //                                               exposure
-        "    sceneColor = vec3(1.0) - exp(-sceneColor * Data.z);\n"
-        //                                                         threshold       scale
-        "    gl_FragColor.rgb = max(ConstantZeroVec3, sceneColor - vec3(Data.y)) * Data.x;\n"
+        "    sceneColor = vec3(1.0) - exp(-sceneColor * Data.z);\n"//exposure
+        "    gl_FragColor.rgb = max(ConstantZeroVec3, sceneColor - vec3(Data.y)) * Data.x;\n"//threshold   scale
         "}";
 #pragma endregion
 
@@ -51,4 +49,6 @@ void Engine::priv::Bloom::pass(Engine::priv::GBuffer& gbuffer, const Viewport& v
     Engine::Renderer::sendTexture("SceneTexture", gbuffer.getTexture(sceneTexture), 0);
 
     Engine::Renderer::renderFullscreenQuad();
+
+    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
 }

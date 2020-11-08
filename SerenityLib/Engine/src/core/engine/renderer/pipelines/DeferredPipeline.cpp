@@ -49,7 +49,7 @@ constexpr std::array<glm::mat4, 6> CAPTURE_VIEWS = {
     glm::mat4(-1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
 };
 
-struct ShaderEnum final { enum Shader {
+struct ShaderEnum final { enum Shader : uint32_t {
     DecalVertex,
     DecalFrag,
     FullscreenVertex,
@@ -77,10 +77,11 @@ struct ShaderEnum final { enum Shader {
     StencilPassFrag,
     ParticleVertex,
     ParticleFrag,
+    NormalessDiffuseFrag,
     _TOTAL,
 };};
 
-struct ShaderProgramEnum final { enum Program : unsigned int {
+struct ShaderProgramEnum final { enum Program : uint32_t {
     BulletPhysics,
     ZPrepass,
     Deferred2DAPI,
@@ -97,6 +98,7 @@ struct ShaderProgramEnum final { enum Program : unsigned int {
     //Grayscale,
     StencilPass,
     Particle,
+    NormalessDiffuse,
     _TOTAL,
 };};
 
@@ -172,7 +174,7 @@ void DeferredPipeline::init() {
     GodRays::STATIC_GOD_RAYS.init_shaders();
     SMAA::STATIC_SMAA.init_shaders();
 
-    auto emplaceShader = [](unsigned int index, const std::string& str, std::vector<Handle>& collection, ShaderType type) {
+    auto emplaceShader = [](uint32_t index, const std::string& str, std::vector<Handle>& collection, ShaderType type) {
         collection[index] = Engine::Resources::addResource<Shader>(str, type, false);
     };
 
@@ -206,6 +208,7 @@ void DeferredPipeline::init() {
     priv::threading::addJob([this, &emplaceShader]() {emplaceShader(23, EShaders::stencil_passover, m_InternalShaders, ShaderType::Fragment); });
     priv::threading::addJob([this, &emplaceShader]() {emplaceShader(24, EShaders::particle_vertex, m_InternalShaders, ShaderType::Vertex); });
     priv::threading::addJob([this, &emplaceShader]() {emplaceShader(25, EShaders::particle_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(26, EShaders::normaless_diffuse_frag, m_InternalShaders, ShaderType::Fragment); });
 
     priv::threading::waitForAll();
 
@@ -228,6 +231,7 @@ void DeferredPipeline::init() {
     m_InternalShaderPrograms[ShaderProgramEnum::BRDFPrecomputeCookTorrance] = Engine::Resources::addResource<ShaderProgram>("BRDF_Precompute_CookTorrance", m_InternalShaders[ShaderEnum::FullscreenVertex], m_InternalShaders[ShaderEnum::BRDFPrecomputeFrag]);
     m_InternalShaderPrograms[ShaderProgramEnum::StencilPass] = Engine::Resources::addResource<ShaderProgram>("Stencil_Pass", m_InternalShaders[ShaderEnum::FullscreenVertex], m_InternalShaders[ShaderEnum::StencilPassFrag]);
     m_InternalShaderPrograms[ShaderProgramEnum::Particle] = Engine::Resources::addResource<ShaderProgram>("Particle", m_InternalShaders[ShaderEnum::ParticleVertex], m_InternalShaders[ShaderEnum::ParticleFrag]);
+    m_InternalShaderPrograms[ShaderProgramEnum::NormalessDiffuse] = Engine::Resources::addResource<ShaderProgram>("NormalessDiffuse", m_InternalShaders[ShaderEnum::FullscreenVertex], m_InternalShaders[ShaderEnum::NormalessDiffuseFrag]);
 
 
     sf::Image sfImageWhite;
@@ -304,13 +308,13 @@ void DeferredPipeline::init() {
 
     Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh().get<Mesh>()->getVertexData().unbind();
 }
-void DeferredPipeline::internal_generate_pbr_data_for_texture(Handle covoludeShaderProgram, Handle prefilterShaderProgram, Texture& texture, Handle convolutionTextureHandle, Handle preEnvTextureHandle, unsigned int convoludeTextureSize, unsigned int preEnvFilterSize) {
+void DeferredPipeline::internal_generate_pbr_data_for_texture(Handle covoludeShaderProgram, Handle prefilterShaderProgram, Texture& texture, Handle convolutionTextureHandle, Handle preEnvTextureHandle, uint32_t convoludeTextureSize, uint32_t preEnvFilterSize) {
     auto texType = texture.getTextureType();
     if (texType != TextureType::CubeMap) {
         //cout << "(Texture) : Only cubemaps can be precomputed for IBL. Ignoring genPBREnvMapData() call...\n";
         return;
     }
-    unsigned int size = convoludeTextureSize;
+    uint32_t size = convoludeTextureSize;
     auto& convolutionTexture = *convolutionTextureHandle.get<Texture>();
     Engine::Renderer::bindTextureForModification(texType, convolutionTexture.address());
     //Engine::Renderer::unbindFBO();
@@ -324,7 +328,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(Handle covoludeSha
 
     Engine::Renderer::sendTexture("cubemap", texture.address(), 0, texType.toGLType());
     Engine::Renderer::setViewport(0.0f, 0.0f, (float)size, (float)size);
-    for (unsigned int i = 0; i < 6; ++i) {
+    for (uint32_t i = 0; i < 6; ++i) {
         glm::mat4 vp = captureProjection * CAPTURE_VIEWS[i];
         Engine::Renderer::sendUniformMatrix4("VP", vp);
         GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, convolutionTexture.address(), 0));
@@ -344,15 +348,15 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(Handle covoludeSha
     Engine::Renderer::sendTexture("cubemap", texture.address(), 0, texType.toGLType());
     Engine::Renderer::sendUniform1("PiFourDividedByResSquaredTimesSix", 12.56637f / float((texture.width() * texture.width()) * 6));
     Engine::Renderer::sendUniform1("NUM_SAMPLES", 32);
-    unsigned int maxMipLevels = 5;
-    for (unsigned int m = 0; m < maxMipLevels; ++m) {
-        const unsigned int mipSize(size * (unsigned int)glm::pow(0.5, m)); // reisze framebuffer according to mip-level size.
+    uint32_t maxMipLevels = 5;
+    for (uint32_t m = 0; m < maxMipLevels; ++m) {
+        const uint32_t mipSize(size * (uint32_t)glm::pow(0.5, m)); // reisze framebuffer according to mip-level size.
         fbo.resize(mipSize, mipSize);
         float roughness = (float)m / (float)(maxMipLevels - 1);
         Engine::Renderer::sendUniform1("roughness", roughness);
         float a = roughness * roughness;
         Engine::Renderer::sendUniform1("a2", a * a);
-        for (unsigned int i = 0; i < 6; ++i) {
+        for (uint32_t i = 0; i < 6; ++i) {
             glm::mat4 vp = captureProjection * CAPTURE_VIEWS[i];
             Engine::Renderer::sendUniformMatrix4("VP", vp);
             GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, preEnvTexture.address(), m));
@@ -362,7 +366,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(Handle covoludeSha
     }
     fbo.unbind();
 }
-void DeferredPipeline::internal_generate_brdf_lut(Handle program, unsigned int brdfSize, int numSamples) {
+void DeferredPipeline::internal_generate_brdf_lut(Handle program, uint32_t brdfSize, int numSamples) {
     FramebufferObject fbo(brdfSize, brdfSize); //try without a depth format
     fbo.bind();
 
@@ -385,14 +389,14 @@ void DeferredPipeline::internal_generate_brdf_lut(Handle program, unsigned int b
 void DeferredPipeline::onPipelineChanged() {
 
 }
-unsigned int DeferredPipeline::getUniformLocation(const char* location) {
+uint32_t DeferredPipeline::getUniformLocation(const char* location) {
     const auto& uniforms = m_RendererState.current_bound_shader_program->uniforms();
     return (!uniforms.contains(location)) ? -1 : uniforms.at(location);
 }
-unsigned int DeferredPipeline::getUniformLocationUnsafe(const char* location) {
+uint32_t DeferredPipeline::getUniformLocationUnsafe(const char* location) {
     return m_RendererState.current_bound_shader_program->uniforms().at(location);
 }
-unsigned int DeferredPipeline::getMaxNumTextureUnits() {
+uint32_t DeferredPipeline::getMaxNumTextureUnits() {
     return Engine::priv::OpenGLState::MAX_TEXTURE_UNITS;
 }
 void DeferredPipeline::restoreDefaultState() {
@@ -422,19 +426,19 @@ Material* DeferredPipeline::getCurrentBoundMaterial() {
 Mesh* DeferredPipeline::getCurrentBoundMesh() {
     return m_RendererState.current_bound_mesh;
 }
-unsigned int DeferredPipeline::getCurrentBoundTextureOfType(unsigned int textureType) {
+uint32_t DeferredPipeline::getCurrentBoundTextureOfType(uint32_t textureType) {
     return m_OpenGLStateMachine.getCurrentlyBoundTextureOfType(textureType);
 }
-bool DeferredPipeline::stencilOperation(unsigned int stencilFail, unsigned int depthFail, unsigned int depthPass) {
+bool DeferredPipeline::stencilOperation(uint32_t stencilFail, uint32_t depthFail, uint32_t depthPass) {
     return m_OpenGLStateMachine.GL_glStencilOp(stencilFail, depthFail, depthPass);
 }
-bool DeferredPipeline::stencilMask(unsigned int mask) {
+bool DeferredPipeline::stencilMask(uint32_t mask) {
     return m_OpenGLStateMachine.GL_glStencilMask(mask);
 }
-bool DeferredPipeline::stencilFunction(unsigned int stencilFunction, unsigned int reference, unsigned int mask) {
+bool DeferredPipeline::stencilFunction(uint32_t stencilFunction, uint32_t reference, uint32_t mask) {
     return m_OpenGLStateMachine.GL_glStencilFunc(stencilFunction, reference, mask);
 }
-bool DeferredPipeline::setDepthFunction(unsigned int depthFunction) {
+bool DeferredPipeline::setDepthFunction(uint32_t depthFunction) {
     return m_OpenGLStateMachine.GL_glDepthFunc(depthFunction);
 }
 bool DeferredPipeline::setViewport(float x, float y, float width, float height) {
@@ -456,13 +460,13 @@ bool DeferredPipeline::colorMask(bool r, bool g, bool b, bool alpha) {
 bool DeferredPipeline::clearColor(bool r, bool g, bool b, bool alpha) {
     return m_OpenGLStateMachine.GL_glClearColor(r, g, b, alpha);
 }
-bool DeferredPipeline::bindTextureForModification(TextureType textureType, unsigned int textureObject) {
+bool DeferredPipeline::bindTextureForModification(TextureType textureType, uint32_t textureObject) {
     return m_OpenGLStateMachine.GL_glBindTextureForModification(textureType.toGLType(), textureObject);
 }
-bool DeferredPipeline::bindVAO(unsigned int vaoObject) {
+bool DeferredPipeline::bindVAO(uint32_t vaoObject) {
     return m_OpenGLStateMachine.GL_glBindVertexArray(vaoObject);
 }
-bool DeferredPipeline::deleteVAO(unsigned int& vaoObject) {
+bool DeferredPipeline::deleteVAO(uint32_t& vaoObject) {
     if (vaoObject) {
         GLCall(glDeleteVertexArrays(1, &vaoObject));
         vaoObject = 0;
@@ -470,56 +474,59 @@ bool DeferredPipeline::deleteVAO(unsigned int& vaoObject) {
     }
     return false;
 }
-void DeferredPipeline::generateAndBindTexture(TextureType textureType, unsigned int& textureObject) {
+void DeferredPipeline::generateAndBindTexture(TextureType textureType, uint32_t& textureObject) {
     GLCall(glGenTextures(1, &textureObject));
     m_OpenGLStateMachine.GL_glBindTextureForModification(textureType.toGLType(), textureObject);
 }
-void DeferredPipeline::generateAndBindVAO(unsigned int& vaoObject) {
+void DeferredPipeline::generateAndBindVAO(uint32_t& vaoObject) {
     GLCall(glGenVertexArrays(1, &vaoObject));
     DeferredPipeline::bindVAO(vaoObject);
 }
-bool DeferredPipeline::enableAPI(unsigned int apiEnum) {
+bool DeferredPipeline::enableAPI(uint32_t apiEnum) {
     return m_OpenGLStateMachine.GL_glEnable(apiEnum);
 }
-bool DeferredPipeline::disableAPI(unsigned int apiEnum) {
+bool DeferredPipeline::disableAPI(uint32_t apiEnum) {
     return m_OpenGLStateMachine.GL_glDisable(apiEnum);
 }
-bool DeferredPipeline::enableAPI_i(unsigned int apiEnum, unsigned int index) {
+bool DeferredPipeline::enableAPI_i(uint32_t apiEnum, uint32_t index) {
     return m_OpenGLStateMachine.GL_glEnablei(apiEnum, index);
 }
-bool DeferredPipeline::disableAPI_i(unsigned int apiEnum, unsigned int index) {
+bool DeferredPipeline::disableAPI_i(uint32_t apiEnum, uint32_t index) {
     return m_OpenGLStateMachine.GL_glDisablei(apiEnum, index);
 }
-void DeferredPipeline::sendTexture(const char* location, Texture& texture, int slot) {
-    m_OpenGLStateMachine.GL_glActiveTexture(slot);
+void DeferredPipeline::clearTexture(int unit, uint32_t textureTarget) {
+    m_OpenGLStateMachine.GL_glUnbindTexture(unit, textureTarget);
+}
+void DeferredPipeline::sendTexture(const char* location, Texture& texture, int unit) {
+    m_OpenGLStateMachine.GL_glActiveTexture(unit);
     m_OpenGLStateMachine.GL_glBindTextureForRendering(texture.getTextureType().toGLType(), texture.address());
-    Engine::Renderer::sendUniform1(location, slot);
+    Engine::Renderer::sendUniform1(location, unit);
 }
-void DeferredPipeline::sendTexture(const char* location, unsigned int textureObject, int slot, unsigned int textureTarget) {
-    m_OpenGLStateMachine.GL_glActiveTexture(slot);
+void DeferredPipeline::sendTexture(const char* location, uint32_t textureObject, int unit, uint32_t textureTarget) {
+    m_OpenGLStateMachine.GL_glActiveTexture(unit);
     m_OpenGLStateMachine.GL_glBindTextureForRendering(textureTarget, textureObject);
-    Engine::Renderer::sendUniform1(location, slot);
+    Engine::Renderer::sendUniform1(location, unit);
 }
-void DeferredPipeline::sendTextureSafe(const char* location, Texture& texture, int slot) {
-    m_OpenGLStateMachine.GL_glActiveTexture(slot);
+void DeferredPipeline::sendTextureSafe(const char* location, Texture& texture, int unit) {
+    m_OpenGLStateMachine.GL_glActiveTexture(unit);
     m_OpenGLStateMachine.GL_glBindTextureForRendering(texture.getTextureType().toGLType(), texture.address());
-    Engine::Renderer::sendUniform1Safe(location, slot);
+    Engine::Renderer::sendUniform1Safe(location, unit);
 }
-void DeferredPipeline::sendTextureSafe(const char* location, unsigned int textureObject, int slot, unsigned int textureTarget) {
-    m_OpenGLStateMachine.GL_glActiveTexture(slot);
+void DeferredPipeline::sendTextureSafe(const char* location, uint32_t textureObject, int unit, uint32_t textureTarget) {
+    m_OpenGLStateMachine.GL_glActiveTexture(unit);
     m_OpenGLStateMachine.GL_glBindTextureForRendering(textureTarget, textureObject);
-    Engine::Renderer::sendUniform1Safe(location, slot);
+    Engine::Renderer::sendUniform1Safe(location, unit);
 }
-bool DeferredPipeline::cullFace(unsigned int face) {
+bool DeferredPipeline::cullFace(uint32_t face) {
     return m_OpenGLStateMachine.GL_glCullFace(face);
 }
-bool DeferredPipeline::bindReadFBO(unsigned int fbo) {
+bool DeferredPipeline::bindReadFBO(uint32_t fbo) {
     return m_OpenGLStateMachine.GL_glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 }
-bool DeferredPipeline::bindDrawFBO(unsigned int fbo) {
+bool DeferredPipeline::bindDrawFBO(uint32_t fbo) {
     return m_OpenGLStateMachine.GL_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 }
-bool DeferredPipeline::bindRBO(unsigned int rbo) {
+bool DeferredPipeline::bindRBO(uint32_t rbo) {
     return m_OpenGLStateMachine.GL_glBindRenderbuffer(rbo);
 }
 bool DeferredPipeline::bind(ModelInstance* modelInstance) {
@@ -563,7 +570,7 @@ bool DeferredPipeline::unbind(Mesh* mesh) {
     m_RendererState.current_bound_mesh = nullptr;
     return true;
 }
-void DeferredPipeline::generatePBRData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, unsigned int convoludeSize, unsigned int prefilterSize) {
+void DeferredPipeline::generatePBRData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, uint32_t convoludeSize, uint32_t prefilterSize) {
     internal_generate_pbr_data_for_texture(
         m_InternalShaderPrograms[ShaderProgramEnum::CubemapConvolude], 
         m_InternalShaderPrograms[ShaderProgramEnum::CubemapPrefilterEnv], 
@@ -584,7 +591,7 @@ void DeferredPipeline::onFullscreen() {
     auto winSize = Resources::getWindowSize();
     m_GBuffer.init(winSize.x, winSize.y);
 }
-void DeferredPipeline::onResize(unsigned int newWidth, unsigned int newHeight) {
+void DeferredPipeline::onResize(uint32_t newWidth, uint32_t newHeight) {
     float floatWidth     = (float)newWidth;
     float floatHeight    = (float)newHeight;
     m_2DProjectionMatrix = glm::ortho(0.0f, floatWidth, 0.0f, floatHeight, 0.003f, 6000.0f);
@@ -594,7 +601,7 @@ void DeferredPipeline::onResize(unsigned int newWidth, unsigned int newHeight) {
 
     m_GBuffer.resize(newWidth, newHeight);
 }
-void DeferredPipeline::onOpenGLContextCreation(unsigned int windowWidth, unsigned int windowHeight, unsigned int glslVersion, unsigned int openglVersion) {
+void DeferredPipeline::onOpenGLContextCreation(uint32_t windowWidth, uint32_t windowHeight, uint32_t glslVersion, uint32_t openglVersion) {
     //TODO: move to a more generic area
     Engine::priv::RenderModule::GLSL_VERSION   = glslVersion;
     Engine::priv::RenderModule::OPENGL_VERSION = openglVersion;
@@ -718,7 +725,6 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, RodLight& rodLight, const
 int DeferredPipeline::sendGPUDataLight(Camera& camera, ProjectionLight& rodLight, const std::string& start) {
     return 2;
 }
-
 void DeferredPipeline::renderDirectionalLight(Camera& camera, DirectionalLight& directionalLight, Viewport& viewport) {
     if (!directionalLight.isActive()) {
         return;
@@ -869,14 +875,14 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, H
     if (particle_count > 0) {
         m_Renderer.bind(program.get<ShaderProgram>());
         for (auto& [id, mat] : system.MaterialToIndexReverse) {
-            system.MaterialIDToIndex.try_emplace(id, (unsigned int)system.MaterialIDToIndex.size());
+            system.MaterialIDToIndex.try_emplace(id, (uint32_t)system.MaterialIDToIndex.size());
         }
         for (auto& pod : system.ParticlesDOD) {
             pod.MatID = system.MaterialIDToIndex.at(pod.MatID);
         }
         for (auto& [id, index] : system.MaterialIDToIndex) {
             Material* mat         = system.MaterialToIndexReverse.at(id);
-            Texture& texture      = *mat->getComponent((unsigned int)MaterialComponentType::Diffuse).texture(0).get<Texture>();
+            Texture& texture      = *mat->getComponent((uint32_t)MaterialComponentType::Diffuse).texture(0).get<Texture>();
             std::string location  = "DiffuseTexture" + std::to_string(index) + "";
             Engine::Renderer::sendTextureSafe(location.c_str(), texture, index);
         }
@@ -892,7 +898,7 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, H
         m_Renderer.unbind(&particleMesh);
     }
 }
-void DeferredPipeline::renderMesh(Mesh& mesh, unsigned int mode) {
+void DeferredPipeline::renderMesh(Mesh& mesh, uint32_t mode) {
     const auto indicesSize = mesh.getVertexData().m_Indices.size();
     if (indicesSize == 0) {
         return;
@@ -902,15 +908,14 @@ void DeferredPipeline::renderMesh(Mesh& mesh, unsigned int mode) {
 void DeferredPipeline::renderLightProbe(LightProbe& lightProbe) {
     //goal: render all 6 sides into a fbo and into a cubemap, and have that cubemap stored in the light probe to be used for Global Illumination
 }
-
 void DeferredPipeline::internal_render_2d_text_left(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
-    unsigned int i = 0;
+    uint32_t i = 0;
     for (const auto character : text) {
         if (character == '\n') {
             y += newLineGlyphHeight;
             x  = 0.0f;
         }else if (character != '\0') {
-            unsigned int accum     = i * 4;
+            uint32_t accum     = i * 4;
             const CharGlyph& glyph = font.getGlyphData(character);
             float startingY        = y - (glyph.height + glyph.yoffset);
             ++i;
@@ -925,10 +930,10 @@ void DeferredPipeline::internal_render_2d_text_left(const std::string& text, con
             float startingX = x + glyph.xoffset;
             x += glyph.xadvance;
 
-            for (unsigned int i = 0; i < 4; ++i) {
+            for (uint32_t i = 0; i < 4; ++i) {
                 m_Text_Points.emplace_push(startingX + glyph.pts[i].x, startingY + glyph.pts[i].y, z);
             }
-            for (unsigned int i = 0; i < 4; ++i) {
+            for (uint32_t i = 0; i < 4; ++i) {
                 m_Text_UVs.emplace_push(glyph.uvs[i].x, glyph.uvs[i].y);
             }
         }
@@ -936,12 +941,12 @@ void DeferredPipeline::internal_render_2d_text_left(const std::string& text, con
 }
 void DeferredPipeline::internal_render_2d_text_center(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
     std::vector<std::string> lines;
-    std::vector<unsigned short> lines_sizes;
+    std::vector<uint16_t> lines_sizes;
     std::string line_accumulator = "";
     for (const auto character : text) {
         if (character == '\n') {
             lines.emplace_back(line_accumulator);
-            lines_sizes.emplace_back((unsigned short)x);
+            lines_sizes.emplace_back((uint16_t)x);
             line_accumulator.clear();
             x = 0.0f;
             continue;
@@ -953,17 +958,17 @@ void DeferredPipeline::internal_render_2d_text_center(const std::string& text, c
     }
     if (!line_accumulator.empty()) {
         lines.emplace_back(line_accumulator);
-        lines_sizes.emplace_back((unsigned short)x);
+        lines_sizes.emplace_back((uint16_t)x);
     }
 
     x = 0.0f;
-    unsigned int i = 0;
+    uint32_t i = 0;
     for (size_t l = 0; l < lines.size(); ++l) {
         const auto& line = lines[l];
         const auto& line_size = lines_sizes[l] / 2;
         for (auto& character : line) {
             if (character != '\0') {
-                unsigned int accum     = i * 4;
+                uint32_t accum     = i * 4;
                 const CharGlyph& glyph = font.getGlyphData(character);
                 float startingY        = y - (glyph.height + glyph.yoffset);
                 ++i;
@@ -978,10 +983,10 @@ void DeferredPipeline::internal_render_2d_text_center(const std::string& text, c
                 float startingX = x + glyph.xoffset;
                 x += glyph.xadvance;
 
-                for (unsigned int i = 0; i < 4; ++i) {
+                for (uint32_t i = 0; i < 4; ++i) {
                     m_Text_Points.emplace_push(startingX + glyph.pts[i].x - line_size, startingY + glyph.pts[i].y, z);
                 }
-                for (unsigned int i = 0; i < 4; ++i) {
+                for (uint32_t i = 0; i < 4; ++i) {
                     m_Text_UVs.emplace_push(glyph.uvs[i].x, glyph.uvs[i].y);
                 }
             }
@@ -1006,14 +1011,14 @@ void DeferredPipeline::internal_render_2d_text_right(const std::string& text, co
         lines.emplace_back(line_accumulator);
     }
 
-    unsigned int i = 0;
+    uint32_t i = 0;
     for (auto& line : lines) {
         int line_size = (int)line.size();
         int k = 0;
         for (int j = line_size; j >= 0; --j) {
             auto character = line[j];
             if (character != '\0') {
-                unsigned int accum = i * 4;
+                uint32_t accum = i * 4;
                 ++i;
                 const CharGlyph& glyph = font.getGlyphData(character);
                 float startingY  = y - (glyph.height + glyph.yoffset);
@@ -1031,10 +1036,10 @@ void DeferredPipeline::internal_render_2d_text_right(const std::string& text, co
                 float startingX = x + glyph.xoffset;
                 x -= glyph.xadvance;
 
-                for (unsigned int i = 0; i < 4; ++i) {
+                for (uint32_t i = 0; i < 4; ++i) {
                     m_Text_Points.emplace_push(startingX + glyph.pts[i].x, startingY + glyph.pts[i].y, z);
                 }
-                for (unsigned int i = 0; i < 4; ++i) {
+                for (uint32_t i = 0; i < 4; ++i) {
                     m_Text_UVs.emplace_push(glyph.uvs[i].x, glyph.uvs[i].y);
                 }
                 ++k;
@@ -1044,7 +1049,6 @@ void DeferredPipeline::internal_render_2d_text_right(const std::string& text, co
         x = 0.0f;
     }
 }
-
 void DeferredPipeline::render2DText(const std::string& text, Handle fontHandle, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, TextAlignment textAlignment, const glm::vec4& scissor) {
     internal_gl_scissor(scissor, depth);
 
@@ -1143,7 +1147,6 @@ void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::ve
     renderMesh(triangle);
     m_Renderer.unbind(&triangle);
 }
-
 void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport, Camera& camera) {
     const auto& winSize    = Resources::getWindowSize();
     const auto& dimensions = glm::vec4(viewport.getViewportDimensions());
@@ -1155,7 +1158,7 @@ void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport,
 
     m_2DProjectionMatrix = glm::ortho(0.0f, dimensions.z, 0.0f, dimensions.w, 0.005f, 3000.0f); //might have to recheck this
     //this is god awful and ugly, but it's needed. find a way to refactor this properly
-    for (unsigned int i = 0; i < 9; ++i) {
+    for (uint32_t i = 0; i < 12; ++i) {
         GLCall(glActiveTexture(GL_TEXTURE0 + i));
         GLCall(glBindTexture(GL_TEXTURE_2D, 0));
         GLCall(glBindTexture(GL_TEXTURE_CUBE_MAP, 0));
@@ -1231,7 +1234,7 @@ void DeferredPipeline::internal_pass_forward(Viewport& viewport, Camera& camera,
     InternalScenePublicInterface::RenderForwardParticles(m_Renderer, scene, viewport, camera);
     InternalScenePublicInterface::RenderParticles(m_Renderer, scene, viewport, camera, m_InternalShaderPrograms[ShaderProgramEnum::Particle]);
 
-    for (unsigned int i = 0; i < 4; ++i) {
+    for (uint32_t i = 0; i < 4; ++i) {
         Engine::Renderer::GLDisablei(GL_BLEND, i); //this is needed for smaa at least
     }
 }
@@ -1249,7 +1252,7 @@ void DeferredPipeline::internal_pass_ssao(Viewport& viewport, Camera& camera) {
         SSAO::STATIC_SSAO.passSSAO(m_GBuffer, viewport, camera, m_Renderer);
         if (SSAO::STATIC_SSAO.m_ssao_do_blur) {
             Engine::Renderer::GLDisablei(GL_BLEND, 0); //yes this is absolutely needed
-            for (unsigned int i = 0; i < SSAO::STATIC_SSAO.m_ssao_blur_num_passes; ++i) {
+            for (uint32_t i = 0; i < SSAO::STATIC_SSAO.m_ssao_blur_num_passes; ++i) {
                 m_GBuffer.bindFramebuffers(framebuffer2, "A", false);
                 SSAO::STATIC_SSAO.passBlur(m_GBuffer, viewport, "H", framebuffer1, m_Renderer);
                 m_GBuffer.bindFramebuffers(framebuffer1, "A", false);
@@ -1276,6 +1279,8 @@ void DeferredPipeline::internal_pass_stencil() {
     Engine::Renderer::sendTexture("gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 0);
     Engine::Renderer::renderFullscreenQuad();
 
+    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
+
     Engine::Renderer::stencilMask(0xFFFFFFFF);
     Engine::Renderer::stencilFunc(GL_NOTEQUAL, 0x00000000, 0xFFFFFFFF);
     Engine::Renderer::stencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Do not change stencil
@@ -1283,11 +1288,8 @@ void DeferredPipeline::internal_pass_stencil() {
 }
 void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera, bool mainRenderFunction) {
     const Scene& scene = viewport.getScene();
-
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLighting].get<ShaderProgram>());
-
     auto winSize = glm::vec2(Engine::Resources::getWindowSize());
-
     if (RenderModule::GLSL_VERSION < 140) {
         Engine::Renderer::sendUniformMatrix4Safe("CameraView", camera.getView());
         Engine::Renderer::sendUniformMatrix4Safe("CameraProj", camera.getProjection());
@@ -1298,7 +1300,7 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
         Engine::Renderer::sendUniform4Safe("CameraInfo1", glm::vec4(camera.getPosition(), camera.getNear()));
         Engine::Renderer::sendUniform4Safe("CameraInfo2", glm::vec4(camera.getViewVector(), camera.getFar()));
     }
-    Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (unsigned int)Material::m_MaterialProperities.size());
+    Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (uint32_t)Material::m_MaterialProperities.size());
     Engine::Renderer::sendUniform4Safe("ScreenData", 0.0f, m_Renderer.m_Gamma, winSize.x, winSize.y);
 
     Engine::Renderer::sendTexture("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0);
@@ -1330,7 +1332,13 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
     for (const auto& light : InternalScenePublicInterface::GetDirectionalLights(scene)) {
         renderDirectionalLight(camera, *light, viewport);
     }
-    
+    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
+    Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
+    Engine::Renderer::clearTexture(2, GL_TEXTURE_2D);
+    Engine::Renderer::clearTexture(3, GL_TEXTURE_2D);
+    Engine::Renderer::clearTexture(4, GL_TEXTURE_2D);
+
+
     if (mainRenderFunction) {
         //do GI here. (only doing GI during the main render pass, not during light probes
         m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingGI].get<ShaderProgram>());
@@ -1341,8 +1349,7 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
             Engine::Renderer::sendUniform4Safe("CameraInfo1", glm::vec4(camera.getPosition(), camera.getNear()));
             Engine::Renderer::sendUniform4Safe("CameraInfo2", glm::vec4(camera.getViewVector(), camera.getFar()));
         }
-
-        Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (unsigned int)Material::m_MaterialProperities.size());
+        Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (uint32_t)Material::m_MaterialProperities.size());
         Engine::Renderer::sendUniform4Safe("ScreenData", m_Renderer.m_GI_Pack, m_Renderer.m_Gamma, winSize.x, winSize.y);
         Engine::Renderer::sendTexture("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0);
         Engine::Renderer::sendTexture("gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1);
@@ -1353,13 +1360,28 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
         if (skybox && skybox->texture().get<Texture>()->hasGlobalIlluminationData()) {
             Engine::Renderer::sendTextureSafe("irradianceMap", skybox->texture().get<Texture>()->getConvolutionTexture().get<Texture>()->address(), 5, GL_TEXTURE_CUBE_MAP);
             Engine::Renderer::sendTextureSafe("prefilterMap", skybox->texture().get<Texture>()->getPreEnvTexture().get<Texture>()->address(), 6, GL_TEXTURE_CUBE_MAP);
-            Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF.get<Texture>(), 7);
         }else{
             Engine::Renderer::sendTextureSafe("irradianceMap", Texture::Black.get<Texture>()->address(), 5, GL_TEXTURE_2D);
             Engine::Renderer::sendTextureSafe("prefilterMap", Texture::Black.get<Texture>()->address(), 6, GL_TEXTURE_2D);
-            Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF.get<Texture>(), 7);
         }
+        Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF.get<Texture>(), 7);
+
         Engine::Renderer::renderFullscreenQuad();
+
+        Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
+        Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
+        Engine::Renderer::clearTexture(2, GL_TEXTURE_2D);
+        Engine::Renderer::clearTexture(3, GL_TEXTURE_2D);
+        Engine::Renderer::clearTexture(4, GL_TEXTURE_2D);
+
+        if (skybox && skybox->texture().get<Texture>()->hasGlobalIlluminationData()) {
+            Engine::Renderer::clearTexture(5, GL_TEXTURE_CUBE_MAP);
+            Engine::Renderer::clearTexture(6, GL_TEXTURE_CUBE_MAP);
+        }else{
+            Engine::Renderer::clearTexture(5, GL_TEXTURE_2D);
+            Engine::Renderer::clearTexture(6, GL_TEXTURE_2D);
+        }
+        Engine::Renderer::clearTexture(7, GL_TEXTURE_2D);
     }
 }
 void DeferredPipeline::internal_pass_god_rays(Viewport& viewport, Camera& camera) {
@@ -1390,15 +1412,13 @@ void DeferredPipeline::internal_pass_god_rays(Viewport& viewport, Camera& camera
         }
     }
 }
-void DeferredPipeline::internal_pass_hdr(Viewport& viewport, Camera& camera) {
-    const glm::uvec4& dimensions = viewport.getViewportDimensions();
-    m_GBuffer.bindFramebuffers(GBufferType::Misc, "RGBA");
-    HDR::STATIC_HDR.pass(m_GBuffer, viewport, GodRays::STATIC_GOD_RAYS.godRays_active, m_Renderer.m_Lighting, GodRays::STATIC_GOD_RAYS.factor, m_Renderer);
+void DeferredPipeline::internal_pass_hdr(Viewport& viewport, Camera& camera, GBufferType::Type outTexture, GBufferType::Type outTexture2) {
+    HDR::STATIC_HDR.pass(m_GBuffer, viewport, outTexture, outTexture2, GodRays::STATIC_GOD_RAYS.godRays_active, GodRays::STATIC_GOD_RAYS.factor, m_Renderer);
 }
-void DeferredPipeline::internal_pass_bloom(Viewport& viewport) {
+void DeferredPipeline::internal_pass_bloom(Viewport& viewport, GBufferType::Type sceneTexture) {
     if (Bloom::bloom.m_Bloom_Active && viewport.getRenderFlags().has(ViewportRenderingFlag::Bloom)) {
         m_GBuffer.bindFramebuffers(GBufferType::Bloom, "RGB", false);
-        Bloom::bloom.pass(m_GBuffer, viewport, GBufferType::Lighting, m_Renderer);
+        Bloom::bloom.pass(m_GBuffer, viewport, sceneTexture, m_Renderer);
         for (uint32_t i = 0; i < Bloom::bloom.m_Num_Passes; ++i) {
             m_GBuffer.bindFramebuffers(GBufferType::GodRays, "RGB", false);
             internal_pass_blur(viewport, GBufferType::Bloom, "H");
@@ -1411,19 +1431,14 @@ void DeferredPipeline::internal_pass_depth_of_field(Viewport& viewport, GBufferT
     if (DepthOfField::STATIC_DOF.dof && viewport.getRenderFlags().has(ViewportRenderingFlag::DepthOfField)) {
         m_GBuffer.bindFramebuffers(outTexture, "RGBA");
         DepthOfField::STATIC_DOF.pass(m_GBuffer, viewport, sceneTexture, m_Renderer);
-        sceneTexture = GBufferType::Lighting;
-        outTexture   = GBufferType::Misc;
+        std::swap(sceneTexture, outTexture);
     }
 }
 void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewport, Camera& camera, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture) {
-
     if (!mainRenderFunction || m_Renderer.m_AA_algorithm == AntiAliasingAlgorithm::None || !viewport.getRenderFlags().has(ViewportRenderingFlag::AntiAliasing)) {
         m_GBuffer.bindFramebuffers(outTexture, "RGBA");
-
         internal_pass_final(sceneTexture);
-
-        m_GBuffer.bindBackbuffer(viewport);
-        
+        m_GBuffer.bindBackbuffer(viewport);   
         internal_pass_depth_and_transparency(viewport, outTexture);
     }else{
         switch (m_Renderer.m_AA_algorithm) {
@@ -1433,12 +1448,9 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
             case AntiAliasingAlgorithm::FXAA: {
                 if (mainRenderFunction) {
                     m_GBuffer.bindFramebuffers(outTexture, "RGBA");
-
                     internal_pass_final(sceneTexture);
-
                     m_GBuffer.bindFramebuffers(sceneTexture, "RGBA");
                     FXAA::STATIC_FXAA.pass(m_GBuffer, viewport, outTexture, m_Renderer);
-
                     m_GBuffer.bindBackbuffer(viewport);
                     internal_pass_depth_and_transparency(viewport, sceneTexture);
                 }
@@ -1450,24 +1462,16 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
             case AntiAliasingAlgorithm::SMAA_ULTRA: {
                 if (mainRenderFunction) {
                     m_GBuffer.bindFramebuffers(outTexture, "RGBA");
-
-
                     internal_pass_final(sceneTexture);
-
                     std::swap(sceneTexture, outTexture);
-
                     const auto winSize = glm::vec2(Resources::getWindowSize());
-                    //const auto& dimensions = viewport.getViewportDimensions();
                     const glm::vec4& SMAA_PIXEL_SIZE = glm::vec4(1.0f / winSize.x, 1.0f / winSize.y, winSize.x, winSize.y);
-
                     SMAA::STATIC_SMAA.passEdge(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, outTexture, m_Renderer);
                     SMAA::STATIC_SMAA.passBlend(m_GBuffer, SMAA_PIXEL_SIZE, viewport, outTexture, m_Renderer);
                     m_GBuffer.bindFramebuffers(outTexture, "RGBA");
                     SMAA::STATIC_SMAA.passNeighbor(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, m_Renderer);
                     //m_GBuffer.bindFramebuffers(sceneTexture);
-
                     //SMAA::smaa.passFinal(m_GBuffer, viewport);//unused
-
                     m_GBuffer.bindBackbuffer(viewport);
                     internal_pass_depth_and_transparency(viewport, outTexture);
                 }
@@ -1491,6 +1495,10 @@ void DeferredPipeline::internal_pass_final(GBufferType::Type sceneTexture) {
     Engine::Renderer::sendTextureSafe("gBloomMap", m_GBuffer.getTexture(GBufferType::Bloom), 1);
     Engine::Renderer::sendTextureSafe("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 2);
     Engine::Renderer::renderFullscreenQuad();
+
+    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
+    Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
+    Engine::Renderer::clearTexture(2, GL_TEXTURE_2D);
 }
 void DeferredPipeline::internal_pass_depth_and_transparency(Viewport& viewport, GBufferType::Type sceneTexture) {
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DepthAndTransparency].get<ShaderProgram>());
@@ -1534,6 +1542,20 @@ void DeferredPipeline::internal_pass_blur(Viewport& viewport, GLuint texture, st
 
     Engine::Renderer::renderFullscreenQuad();
 }
+void DeferredPipeline::internal_pass_normaless_diffuse() {
+    m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::NormalessDiffuse].get<ShaderProgram>());
+
+    m_GBuffer.bindFramebuffers(GBufferType::Lighting, "RGBA");
+
+    Engine::Renderer::sendUniform1Safe("HasLighting", (int)m_Renderer.m_Lighting);
+    Engine::Renderer::sendTexture("gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 0);
+    Engine::Renderer::sendTexture("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 1);
+
+    Engine::Renderer::renderFullscreenQuad();
+
+    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
+    Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
+}
 void DeferredPipeline::renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport, Camera& camera, Scene& scene) {
     Engine::Renderer::GLEnablei(GL_BLEND, 0);
     if (mainRenderFunc && viewport.getRenderFlags().has(ViewportRenderingFlag::PhysicsDebug)) {
@@ -1549,8 +1571,6 @@ void DeferredPipeline::renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport,
         #endif
     }
 }
-
-
 void DeferredPipeline::render2DAPI(const std::vector<IRenderingPipeline::API2DCommand>& commands, bool mainRenderFunc, Viewport& viewport, bool clearDepth) {
     if (commands.size() > 0) {
         Engine::Renderer::GLEnablei(GL_BLEND, 0);
@@ -1667,13 +1687,20 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
 
     internal_pass_forward(viewport, camera, depthPrepass);
 
+    //this is god awful and ugly, but it's needed. find a way to refactor this properly
+    for (uint32_t i = 0; i < OpenGLState::MAX_TEXTURE_UNITS; ++i) {
+        Engine::Renderer::clearTexture(i, GL_TEXTURE_2D);
+        Engine::Renderer::clearTexture(i, GL_TEXTURE_CUBE_MAP);
+    }
+
     Engine::Renderer::GLDisable(GL_DEPTH_TEST);
-    //m_GBuffer.bindFramebuffers(GBufferType::Lighting, "RGB");
     internal_pass_god_rays(viewport, camera);
 
-    internal_pass_hdr(viewport, camera);
+    internal_pass_normaless_diffuse();
 
-    internal_pass_bloom(viewport);
+    internal_pass_hdr(viewport, camera, GBufferType::Normal, GBufferType::Misc);//out textures
+
+    internal_pass_bloom(viewport, GBufferType::Normal);//in texture
 
     GBufferType::Type sceneTexture = GBufferType::Misc;
     GBufferType::Type outTexture   = GBufferType::Lighting;

@@ -47,6 +47,7 @@ std::string priv::EShaders::cubemap_convolude_frag;
 std::string priv::EShaders::cubemap_prefilter_envmap_frag;
 std::string priv::EShaders::brdf_precompute;
 std::string priv::EShaders::blur_frag;
+std::string priv::EShaders::normaless_diffuse_frag;
 std::string priv::EShaders::final_frag;
 std::string priv::EShaders::depth_and_transparency_frag;
 std::string priv::EShaders::lighting_frag;
@@ -1010,6 +1011,27 @@ priv::EShaders::deferred_frag =
     "}";
 #pragma endregion
 
+#pragma region NormalessDiffuseFrag
+
+priv::EShaders::normaless_diffuse_frag = 
+    "\n"
+    "const vec3 comparison = vec3(1.0, 1.0, 1.0);\n"
+    "uniform SAMPLER_TYPE_2D gNormalMap;\n"
+    "uniform SAMPLER_TYPE_2D gDiffuseMap;\n"
+    "uniform int HasLighting;\n"
+    "varying vec2 texcoords;\n"
+    "void main(){\n"
+    "    vec3 normal   = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);\n"
+    "    vec3 diffuse  = texture2D(USE_SAMPLER_2D(gDiffuseMap), texcoords).rgb;\n"
+    "    if(HasLighting == 0 || distance(normal, comparison) < 0.01){\n"
+    "        gl_FragColor = vec4(diffuse, 1.0);\n"
+    "    }else{\n"
+    "        discard;\n"
+    "    }\n"
+    "}";
+
+#pragma endregion
+
 #pragma region ZPrepassFrag
 priv::EShaders::zprepass_frag =
     "USE_LOG_DEPTH_FRAGMENT\n"
@@ -1143,7 +1165,6 @@ priv::EShaders::final_frag =
     "        gl_FragColor = PaintersAlgorithm(fc,gl_FragColor);\n"
     "    }\n"
     //"    gl_FragColor = (gl_FragColor * 0.0001) + vec4(1.0 - texture2D(gBloomMap,texcoords).a);\n"
-    "\n"
     "}";
 
 #pragma endregion
@@ -1175,8 +1196,7 @@ priv::EShaders::depth_and_transparency_frag +=
     "           discard;\n"
     "    }\n"
     "    gl_FragColor = scene;\n"
-    "\n"
-"}";
+    "}";
 #pragma endregion
 
 #pragma region LightingFrag
@@ -1263,7 +1283,7 @@ priv::EShaders::lighting_frag_gi =
     "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z,ScreenData.w);\n"
     "    float ssaoValue            = 1.0 - texture2D(gSSAOMap, uv).a;\n"
     "    vec3 PxlNormal             = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
-    "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap,uv).rgb;\n"
+    "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap, uv).rgb;\n"
     "    vec3 PxlWorldPos           = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv,CameraNear,CameraFar);\n"
     "    vec3 ViewDir               = normalize(CameraPosition - PxlWorldPos);\n"
     "    vec3 R                     = reflect(-ViewDir, PxlNormal);\n"

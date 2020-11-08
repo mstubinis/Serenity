@@ -57,7 +57,7 @@ bool Engine::priv::GodRays::init_shaders() {
 
     return true;
 }
-void Engine::priv::GodRays::pass(GBuffer& gbuffer, const Viewport& viewport, const glm::vec2& lightScrnPos, float alpha, const Engine::priv::RenderModule& renderer) {
+void Engine::priv::GodRays::pass(GBuffer& gbuffer, const Viewport& viewport, const glm::vec2& lightScrnPos, float alpha, const RenderModule& renderer) {
     const auto& dimensions = viewport.getViewportDimensions();
     renderer.bind(m_Shader_Program.get<ShaderProgram>());
     Engine::Renderer::sendUniform4("RaysInfo", exposure, decay, density, weight);
@@ -67,64 +67,10 @@ void Engine::priv::GodRays::pass(GBuffer& gbuffer, const Viewport& viewport, con
     Engine::Renderer::sendTexture("firstPass", gbuffer.getTexture(GBufferType::Misc), 0);
 
     Engine::Renderer::renderFullscreenQuad();
+
+    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
 }
-bool Engine::Renderer::godRays::enabled() {
-    return Engine::priv::GodRays::STATIC_GOD_RAYS.godRays_active;
-}
-void Engine::Renderer::godRays::enable(bool enalbed) {
-    Engine::priv::GodRays::STATIC_GOD_RAYS.godRays_active = enalbed;
-}
-void Engine::Renderer::godRays::disable() {
-    Engine::priv::GodRays::STATIC_GOD_RAYS.godRays_active = false;
-}
-float Engine::Renderer::godRays::getExposure() {
-    return Engine::priv::GodRays::STATIC_GOD_RAYS.exposure;
-}
-float Engine::Renderer::godRays::getFactor() {
-    return Engine::priv::GodRays::STATIC_GOD_RAYS.factor;
-}
-float Engine::Renderer::godRays::getDecay() {
-    return Engine::priv::GodRays::STATIC_GOD_RAYS.decay;
-}
-float Engine::Renderer::godRays::getDensity() {
-    return Engine::priv::GodRays::STATIC_GOD_RAYS.density;
-}
-float Engine::Renderer::godRays::getWeight() {
-    return Engine::priv::GodRays::STATIC_GOD_RAYS.weight;
-}
-unsigned int Engine::Renderer::godRays::getSamples() {
-    return Engine::priv::GodRays::STATIC_GOD_RAYS.samples;
-}
-float Engine::Renderer::godRays::getFOVDegrees() {
-    return Engine::priv::GodRays::STATIC_GOD_RAYS.fovDegrees;
-}
-float Engine::Renderer::godRays::getAlphaFalloff() {
-    return Engine::priv::GodRays::STATIC_GOD_RAYS.alphaFalloff;
-}
-void Engine::Renderer::godRays::setExposure(float exposure) {
-    Engine::priv::GodRays::STATIC_GOD_RAYS.exposure = exposure;
-}
-void Engine::Renderer::godRays::setFactor(float factor) {
-    Engine::priv::GodRays::STATIC_GOD_RAYS.factor = factor;
-}
-void Engine::Renderer::godRays::setDecay(float decay) {
-    Engine::priv::GodRays::STATIC_GOD_RAYS.decay = decay;
-}
-void Engine::Renderer::godRays::setDensity(float density) {
-    Engine::priv::GodRays::STATIC_GOD_RAYS.density = density;
-}
-void Engine::Renderer::godRays::setWeight(float weight) {
-    Engine::priv::GodRays::STATIC_GOD_RAYS.weight = weight;
-}
-void Engine::Renderer::godRays::setSamples(unsigned int numSamples) {
-    Engine::priv::GodRays::STATIC_GOD_RAYS.samples = glm::max(0U, numSamples);
-}
-void Engine::Renderer::godRays::setFOVDegrees(float fovInDegrees) {
-    Engine::priv::GodRays::STATIC_GOD_RAYS.fovDegrees = fovInDegrees;
-}
-void Engine::Renderer::godRays::setAlphaFalloff(float alphaFalloff) {
-    Engine::priv::GodRays::STATIC_GOD_RAYS.alphaFalloff = alphaFalloff;
-}
+
 void Engine::Renderer::godRays::setSun(Entity sunEntity) noexcept {
     Resources::getCurrentScene()->setGodRaysSun(sunEntity);
 }

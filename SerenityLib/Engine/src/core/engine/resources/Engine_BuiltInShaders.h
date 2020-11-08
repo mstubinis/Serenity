@@ -38,7 +38,7 @@ namespace Engine::priv{
 
             static std::string blur_frag;
 
-            //static std::string greyscale_frag;
+            static std::string normaless_diffuse_frag;
 
             static std::string final_frag;
 

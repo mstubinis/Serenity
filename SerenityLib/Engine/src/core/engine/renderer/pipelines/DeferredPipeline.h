@@ -55,7 +55,7 @@ namespace Engine::priv {
 
             Engine::partial_array<glm::vec3, Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4>    m_Text_Points; //4 points per char
             Engine::partial_array<glm::vec2, Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4>    m_Text_UVs;//4 uvs per char
-            Engine::partial_array<unsigned int, Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 6> m_Text_Indices;//6 ind per char
+            Engine::partial_array<uint32_t,  Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 6>    m_Text_Indices;//6 ind per char
 
             UBOCameraDataStruct            m_UBOCameraDataStruct;
             glm::mat4                      m_2DProjectionMatrix;
@@ -67,7 +67,7 @@ namespace Engine::priv {
             std::vector<IRenderingPipeline::API2DCommand>      m_Background2DAPICommands;
             std::vector<IRenderingPipeline::API2DCommand>      m_2DAPICommands;
             //particle instancing
-            unsigned int                   m_Particle_Instance_VBO = 0U;
+            uint32_t                       m_Particle_Instance_VBO = 0U;
 
             void internal_gl_scissor_reset() noexcept;
             void internal_gl_scissor(const glm::vec4& scissor, float depth) noexcept;
@@ -80,17 +80,18 @@ namespace Engine::priv {
             void internal_pass_lighting(Viewport& viewport, Camera& camera, bool mainRenderFunction);
             void internal_pass_forward(Viewport& viewport, Camera& camera, bool depthPrepass);
             void internal_pass_god_rays(Viewport& viewport, Camera& camera);
-            void internal_pass_hdr(Viewport& viewport, Camera& camera);
-            void internal_pass_bloom(Viewport& viewport);
+            void internal_pass_hdr(Viewport& viewport, Camera& camera, GBufferType::Type outTexture, GBufferType::Type outTexture2);
+            void internal_pass_bloom(Viewport& viewport, GBufferType::Type sceneTexture);
             void internal_pass_depth_of_field(Viewport& viewport, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture);
             void internal_pass_aa(bool mainRenderFunction, Viewport& viewport, Camera& camera, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture);
             void internal_pass_final(GBufferType::Type sceneTexture);
             void internal_pass_depth_and_transparency(Viewport& viewport, GBufferType::Type sceneTexture); //TODO: recheck this
             bool internal_pass_depth_prepass(Viewport& viewport, Camera& camera);
             void internal_pass_blur(Viewport& viewport, GLuint texture, std::string_view type);
+            void internal_pass_normaless_diffuse();
 
-            void internal_generate_pbr_data_for_texture(Handle covoludeShaderProgram, Handle prefilterShaderProgram, Texture& texture, Handle convolutionTexture, Handle preEnvTexture, unsigned int convoludeTextureSize, unsigned int preEnvFilterSize);
-            void internal_generate_brdf_lut(Handle shaderProgram, unsigned int brdfSize, int numSamples);
+            void internal_generate_pbr_data_for_texture(Handle covoludeShaderProgram, Handle prefilterShaderProgram, Texture& texture, Handle convolutionTexture, Handle preEnvTexture, uint32_t convoludeTextureSize, uint32_t preEnvFilterSize);
+            void internal_generate_brdf_lut(Handle shaderProgram, uint32_t brdfSize, int numSamples);
 
             void internal_render_2d_text_left(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
             void internal_render_2d_text_center(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
@@ -116,8 +117,8 @@ namespace Engine::priv {
             void init() override;
             void onPipelineChanged() override;
             void onFullscreen() override;
-            void onResize(unsigned int newWidth, unsigned int newHeight) override;
-            void onOpenGLContextCreation(unsigned int windowWidth, unsigned int windowHeight, unsigned int glslVersion, unsigned int openglVersion) override;
+            void onResize(uint32_t newWidth, uint32_t newHeight) override;
+            void onOpenGLContextCreation(uint32_t windowWidth, uint32_t windowHeight, uint32_t glslVersion, uint32_t openglVersion) override;
             void restoreDefaultState() override;
             void restoreCurrentState() override;
             void clear2DAPI() override;
@@ -126,45 +127,45 @@ namespace Engine::priv {
             void renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport, Camera& camera, Scene& scene) override;
             void render2DAPI(const std::vector<IRenderingPipeline::API2DCommand>& commands, bool mainRenderFunc, Viewport& viewport, bool clearDepth = true) override;
 
-
             ShaderProgram* getCurrentBoundShaderProgram() override;
             Material* getCurrentBoundMaterial() override;
             Mesh* getCurrentBoundMesh() override;
 
-            unsigned int getUniformLocation(const char* location) override;
-            unsigned int getUniformLocationUnsafe(const char* location) override;
-            unsigned int getCurrentBoundTextureOfType(unsigned int textureType) override;
-            unsigned int getMaxNumTextureUnits() override;
+            uint32_t getUniformLocation(const char* location) override;
+            uint32_t getUniformLocationUnsafe(const char* location) override;
+            uint32_t getCurrentBoundTextureOfType(uint32_t textureType) override;
+            uint32_t getMaxNumTextureUnits() override;
 
-            bool stencilOperation(unsigned int stencilFail, unsigned int depthFail, unsigned int depthPass) override;
-            bool stencilMask(unsigned int mask) override;
-            bool stencilFunction(unsigned int stencilFunction, unsigned int reference, unsigned int mask) override;
-            bool cullFace(unsigned int face) override;
-            bool setDepthFunction(unsigned int depthFunction) override;
+            bool stencilOperation(uint32_t stencilFail, uint32_t depthFail, uint32_t depthPass) override;
+            bool stencilMask(uint32_t mask) override;
+            bool stencilFunction(uint32_t stencilFunction, uint32_t reference, uint32_t mask) override;
+            bool cullFace(uint32_t face) override;
+            bool setDepthFunction(uint32_t depthFunction) override;
             bool setViewport(float x, float y, float width, float height) override;
             void clear(bool color, bool depth, bool stencil) override;
             bool colorMask(bool r, bool g, bool b, bool alpha) override;
             bool clearColor(bool r, bool g, bool b, bool alpha) override;
 
-            bool bindTextureForModification(TextureType textureType, unsigned int textureObject) override;
-            bool bindVAO(unsigned int vaoObject) override;
-            bool deleteVAO(unsigned int& vaoObject) override;
-            void generateAndBindTexture(TextureType textureType, unsigned int& textureObject) override;
-            void generateAndBindVAO(unsigned int& vaoObject) override;
+            bool bindTextureForModification(TextureType textureType, uint32_t textureObject) override;
+            bool bindVAO(uint32_t vaoObject) override;
+            bool deleteVAO(uint32_t& vaoObject) override;
+            void generateAndBindTexture(TextureType textureType, uint32_t& textureObject) override;
+            void generateAndBindVAO(uint32_t& vaoObject) override;
 
-            bool enableAPI(unsigned int apiEnum) override;
-            bool disableAPI(unsigned int apiEnum) override;
-            bool enableAPI_i(unsigned int apiEnum, unsigned int index) override;
-            bool disableAPI_i(unsigned int apiEnum, unsigned int index) override;
+            bool enableAPI(uint32_t apiEnum) override;
+            bool disableAPI(uint32_t apiEnum) override;
+            bool enableAPI_i(uint32_t apiEnum, uint32_t index) override;
+            bool disableAPI_i(uint32_t apiEnum, uint32_t index) override;
 
-            void sendTexture(const char* location, Texture& texture, int slot) override;
-            void sendTexture(const char* location, unsigned int textureObject, int slot, unsigned int textureTarget) override;
-            void sendTextureSafe(const char* location, Texture& texture, int slot) override;
-            void sendTextureSafe(const char* location, unsigned int textureObject, int slot, unsigned int textureTarget) override;
+            void clearTexture(int unit, uint32_t textureTarget) override;
+            void sendTexture(const char* location, Texture& texture, int unit) override;
+            void sendTexture(const char* location, uint32_t textureObject, int unit, uint32_t textureTarget) override;
+            void sendTextureSafe(const char* location, Texture& texture, int unit) override;
+            void sendTextureSafe(const char* location, uint32_t textureObject, int unit, uint32_t textureTarget) override;
 
-            bool bindReadFBO(unsigned int fbo) override;
-            bool bindDrawFBO(unsigned int fbo) override;
-            bool bindRBO(unsigned int rbo) override;
+            bool bindReadFBO(uint32_t fbo) override;
+            bool bindDrawFBO(uint32_t fbo) override;
+            bool bindRBO(uint32_t rbo) override;
 
             bool bind(ModelInstance* modelInstance) override;
             bool bind(ShaderProgram* program) override;
@@ -176,7 +177,7 @@ namespace Engine::priv {
             bool unbind(Material* material) override;
             bool unbind(Mesh* mesh) override;
 
-            void generatePBRData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, unsigned int convoludeSize, unsigned int prefilterSize) override;
+            void generatePBRData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, uint32_t convoludeSize, uint32_t prefilterSize) override;
 
             void sendGPUDataLight(Camera& camera, SunLight& sunLight, const std::string& start) override;
             int sendGPUDataLight(Camera& camera, PointLight& pointLight, const std::string& start) override;
@@ -192,7 +193,7 @@ namespace Engine::priv {
             void renderSpotLight(Camera& c, SpotLight& s) override;
             void renderRodLight(Camera& c, RodLight& r) override;
             void renderProjectionLight(Camera& c, ProjectionLight& r) override;
-            void renderMesh(Mesh& mesh, unsigned int mode = (unsigned int)ModelDrawingMode::Triangles) override;
+            void renderMesh(Mesh& mesh, uint32_t mode = (uint32_t)ModelDrawingMode::Triangles) override;
             void renderDecal(ModelInstance& decalModelInstance) override;
 
             void renderParticles(ParticleSystem& particleSystem, Camera& camera, Handle program) override;

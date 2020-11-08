@@ -276,17 +276,20 @@ bool Engine::Renderer::GLEnablei(GLenum apiEnum, GLuint index) {
 bool Engine::Renderer::GLDisablei(GLenum apiEnum, GLuint index) {
     return Engine::priv::RenderModule::RENDERER->m_Pipeline->disableAPI_i(apiEnum, index);
 }
-void Engine::Renderer::sendTexture(const char* location, Texture& texture, int slot){
-    Engine::priv::RenderModule::RENDERER->m_Pipeline->sendTexture(location, texture, slot);
+void Engine::Renderer::clearTexture(int unit, GLuint glTextureType) {
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->clearTexture(unit, glTextureType);
 }
-void Engine::Renderer::sendTexture(const char* location, GLuint textureObject, int slot, GLuint textureTarget){
-    Engine::priv::RenderModule::RENDERER->m_Pipeline->sendTexture(location, textureObject, slot, textureTarget);
+void Engine::Renderer::sendTexture(const char* location, Texture& texture, int unit){
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->sendTexture(location, texture, unit);
 }
-void Engine::Renderer::sendTextureSafe(const char* location, Texture& texture, int slot){
-    Engine::priv::RenderModule::RENDERER->m_Pipeline->sendTextureSafe(location, texture, slot);
+void Engine::Renderer::sendTexture(const char* location, GLuint textureObject, int unit, GLuint textureTarget){
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->sendTexture(location, textureObject, unit, textureTarget);
 }
-void Engine::Renderer::sendTextureSafe(const char* location, GLuint textureObject, int slot, GLuint textureTarget){
-    Engine::priv::RenderModule::RENDERER->m_Pipeline->sendTextureSafe(location, textureObject, slot, textureTarget);
+void Engine::Renderer::sendTextureSafe(const char* location, Texture& texture, int unit){
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->sendTextureSafe(location, texture, unit);
+}
+void Engine::Renderer::sendTextureSafe(const char* location, GLuint textureObject, int unit, GLuint textureTarget){
+    Engine::priv::RenderModule::RENDERER->m_Pipeline->sendTextureSafe(location, textureObject, unit, textureTarget);
 }
 bool Engine::Renderer::bindReadFBO(const GLuint fbo){
     return Engine::priv::RenderModule::RENDERER->m_Pipeline->bindReadFBO(fbo);

@@ -5,10 +5,10 @@
 using namespace Engine;
 using namespace Engine::priv;
 
-unsigned int OpenGLState::MAX_TEXTURE_UNITS = 0;
-float OpenGLState::MAX_TEXTURE_MAX_ANISOTROPY = 1.0f;
+uint32_t OpenGLState::MAX_TEXTURE_UNITS           = 0;
+float    OpenGLState::MAX_TEXTURE_MAX_ANISOTROPY  = 1.0f;
 
-void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(unsigned int windowWidth, unsigned int windowHeight) {
+void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(uint32_t windowWidth, uint32_t windowHeight) {
     GLint    int_value;
     GLfloat  float_value;
     //GLboolean boolean_value;
@@ -16,7 +16,7 @@ void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(unsigned int windowWidth, unsign
     viewportState = ViewportState((GLsizei)windowWidth, (GLsizei)windowHeight);
 
     GLCall(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &int_value)); //what about GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS?
-    MAX_TEXTURE_UNITS = glm::max(MAX_TEXTURE_UNITS, (unsigned int)int_value);
+    MAX_TEXTURE_UNITS = glm::max(MAX_TEXTURE_UNITS, (uint32_t)int_value);
 
     GLCall(glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &float_value));
     MAX_TEXTURE_MAX_ANISOTROPY = float_value;
@@ -44,7 +44,7 @@ void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(unsigned int windowWidth, unsign
     }
     GL_RESTORE_DEFAULT_STATE_MACHINE(windowWidth, windowHeight);
 }
-void OpenGLState::GL_RESTORE_DEFAULT_STATE_MACHINE(unsigned int windowWidth, unsigned int windowHeight) {
+void OpenGLState::GL_RESTORE_DEFAULT_STATE_MACHINE(uint32_t windowWidth, uint32_t windowHeight) {
     glewExperimental = GL_TRUE;
     glewInit(); 
     glGetError();//stupid glew always inits an error. nothing we can do about it.
@@ -194,36 +194,37 @@ bool OpenGLState::GL_glActiveTexture(GLenum textureUnit) {
     GLCall(glActiveTexture(GL_TEXTURE0 + currentActiveTextureUnit));
     return true;
 }
-
+bool OpenGLState::GL_glUnbindTexture(GLenum textureUnit, GLenum textureTarget) {
+    GL_glActiveTexture(textureUnit);
+    GL_glBindTextureForRendering(textureTarget, 0);
+    return true;
+}
 bool OpenGLState::GL_glBindTextureForModification(GLenum textureTarget, GLuint textureObject) {
     GL_glActiveTexture((GLenum)(textureUnits.capacity() - 1U));
     GL_glBindTextureForRendering(textureTarget, textureObject);
     return true;
 }
-
-unsigned int OpenGLState::internal_get_enum_index_from_gl_texture_type(GLenum textureType) noexcept {
+uint32_t OpenGLState::internal_get_enum_index_from_gl_texture_type(GLenum textureType) noexcept {
     switch (textureType) {
         case GL_TEXTURE_1D: {
-            return (unsigned int)TextureType::Texture1D;
+            return (uint32_t)TextureType::Texture1D;
         }case GL_TEXTURE_2D: {
-            return (unsigned int)TextureType::Texture2D;
+            return (uint32_t)TextureType::Texture2D;
         }case GL_TEXTURE_3D: {
-            return (unsigned int)TextureType::Texture3D;
+            return (uint32_t)TextureType::Texture3D;
         }case GL_TEXTURE_CUBE_MAP: {
-            return (unsigned int)TextureType::CubeMap;
-        }default: {
-            return 0;
+            return (uint32_t)TextureType::CubeMap;
         }
     }
     return 0;
 }
 GLuint OpenGLState::getCurrentlyBoundTextureOfType(GLenum textureType) noexcept {
-    unsigned int index = internal_get_enum_index_from_gl_texture_type(textureType);
+    uint32_t index = internal_get_enum_index_from_gl_texture_type(textureType);
     return textureUnits[currentActiveTextureUnit].openglIDs[index];
 }
 bool OpenGLState::GL_glBindTextureForRendering(GLenum textureTarget, GLuint textureObject) {
     auto& currentBoundUnit            = textureUnits[currentActiveTextureUnit];
-    unsigned int index                = internal_get_enum_index_from_gl_texture_type(textureTarget);
+    uint32_t index                    = internal_get_enum_index_from_gl_texture_type(textureTarget);
     currentBoundUnit.openglIDs[index] = textureObject;    
     if (index > 0) {
         GLCall(glBindTexture(textureTarget, textureObject));
@@ -309,9 +310,6 @@ bool OpenGLState::GL_glStencilMaskSeparate(GLenum face, GLuint mask) {
                 stencilMask.back_mask = mask;
                 return true;
             }
-            break;
-        }
-        default: {
             break;
         }
     }

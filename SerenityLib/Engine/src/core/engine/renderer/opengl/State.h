@@ -27,7 +27,7 @@ namespace Engine::priv {
             std::vector<TextureUnitState> textureUnits;
             GLuint                        currentActiveTextureUnit = 0;
 
-            unsigned int internal_get_enum_index_from_gl_texture_type(GLenum textureType) noexcept;
+            uint32_t internal_get_enum_index_from_gl_texture_type(GLenum textureType) noexcept;
 
             #pragma endregion
 
@@ -243,12 +243,13 @@ namespace Engine::priv {
             #pragma endregion
 
         public:
-            static float MAX_TEXTURE_MAX_ANISOTROPY;
-            static unsigned int MAX_TEXTURE_UNITS;
+            static float     MAX_TEXTURE_MAX_ANISOTROPY;
+            static uint32_t  MAX_TEXTURE_UNITS;
 
             GLuint getCurrentlyBoundTextureOfType(GLenum textureType) noexcept;
 
             bool GL_glActiveTexture(GLenum textureUnit);
+            bool GL_glUnbindTexture(GLenum textureUnit, GLenum textureTarget);
             bool GL_glBindTextureForModification(GLenum textureTarget, GLuint textureObject);
             bool GL_glBindTextureForRendering(GLenum textureTarget, GLuint textureObject);
             bool GL_glClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
@@ -282,12 +283,9 @@ namespace Engine::priv {
             bool GL_glBlendEquation(GLenum mode);
             bool GL_glBlendEquationi(GLuint buf, GLenum mode);
 
-            void GL_INIT_DEFAULT_STATE_MACHINE(unsigned int windowWidth, unsigned int windowHeight);
-            void GL_RESTORE_DEFAULT_STATE_MACHINE(unsigned int windowWidth, unsigned int windowHeight);
+            void GL_INIT_DEFAULT_STATE_MACHINE(uint32_t windowWidth, uint32_t windowHeight);
+            void GL_RESTORE_DEFAULT_STATE_MACHINE(uint32_t windowWidth, uint32_t windowHeight);
             void GL_RESTORE_CURRENT_STATE_MACHINE();
-
-            OpenGLState() = default;
-            ~OpenGLState() = default;
     };
 };
 

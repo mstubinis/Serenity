@@ -79,7 +79,7 @@ bool Engine::priv::DepthOfField::init_shaders() {
 
     return true;
 }
-void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::RenderModule& renderer) {
+void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport, uint32_t sceneTexture, const Engine::priv::RenderModule& renderer) {
     renderer.bind(m_Shader_Program.get<ShaderProgram>());
 
     Engine::Renderer::sendUniform4Safe("Data", blur_radius, bias, focus, 0.0f);
@@ -88,32 +88,7 @@ void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport
     Engine::Renderer::sendTextureSafe("textureDepth", gbuffer.getTexture(GBufferType::Depth), 1);
 
     Engine::Renderer::renderFullscreenQuad();
-}
 
-void Engine::Renderer::depthOfField::enable(bool b) {
-    Engine::priv::DepthOfField::STATIC_DOF.dof = b;
-}
-void Engine::Renderer::depthOfField::disable() {
-    Engine::priv::DepthOfField::STATIC_DOF.dof = false;
-}
-bool Engine::Renderer::depthOfField::enabled() {
-    return Engine::priv::DepthOfField::STATIC_DOF.dof;
-}
-float Engine::Renderer::depthOfField::getFocus() {
-    return Engine::priv::DepthOfField::STATIC_DOF.focus;
-}
-void Engine::Renderer::depthOfField::setFocus(float f) {
-    Engine::priv::DepthOfField::STATIC_DOF.focus = glm::max(0.0f, f);
-}
-float Engine::Renderer::depthOfField::getBias() {
-    return Engine::priv::DepthOfField::STATIC_DOF.bias;
-}
-void Engine::Renderer::depthOfField::setBias(float b) {
-    Engine::priv::DepthOfField::STATIC_DOF.bias = b;
-}
-float Engine::Renderer::depthOfField::getBlurRadius() {
-    return Engine::priv::DepthOfField::STATIC_DOF.blur_radius;
-}
-void Engine::Renderer::depthOfField::setBlurRadius(float r) {
-    Engine::priv::DepthOfField::STATIC_DOF.blur_radius = glm::max(0.0f, r);
+    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
+    Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
 }

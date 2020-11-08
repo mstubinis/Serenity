@@ -24,26 +24,23 @@ namespace Engine::priv {
             float blur_radius                = 3.0f;
             bool  dof                        = false;
 
-            DepthOfField() = default;
-            ~DepthOfField() = default;
-
             bool init_shaders();
 
-            void pass(GBuffer&, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::RenderModule& renderer);
+            void pass(GBuffer&, const Viewport& viewport, uint32_t sceneTexture, const Engine::priv::RenderModule& renderer);
 
             static DepthOfField STATIC_DOF;
     };
 };
 namespace Engine::Renderer::depthOfField {
-    void enable(bool enabled = true);
-    void disable();
-    bool enabled();
-    float getFocus();
-    void setFocus(float focus);
-    float getBias();
-    void setBias(float bias);
-    float getBlurRadius();
-    void setBlurRadius(float blurRadius);
+    inline void enable(bool enabled = true) noexcept { Engine::priv::DepthOfField::STATIC_DOF.dof = enabled; }
+    inline void disable() noexcept { Engine::priv::DepthOfField::STATIC_DOF.dof = false; }
+    inline bool enabled() noexcept { return Engine::priv::DepthOfField::STATIC_DOF.dof; }
+    inline float getFocus() noexcept { return Engine::priv::DepthOfField::STATIC_DOF.focus; }
+    inline void setFocus(float focus) noexcept { Engine::priv::DepthOfField::STATIC_DOF.focus = glm::max(0.0f, focus); }
+    inline float getBias() noexcept { return Engine::priv::DepthOfField::STATIC_DOF.bias; }
+    inline void setBias(float bias) noexcept { Engine::priv::DepthOfField::STATIC_DOF.bias = bias; }
+    inline float getBlurRadius() noexcept { return Engine::priv::DepthOfField::STATIC_DOF.blur_radius; }
+    inline void setBlurRadius(float blurRadius) noexcept { Engine::priv::DepthOfField::STATIC_DOF.blur_radius = glm::max(0.0f, blurRadius); }
 };
 
 #endif

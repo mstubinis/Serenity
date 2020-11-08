@@ -151,7 +151,7 @@ void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, co
 
     Engine::Renderer::renderFullscreenQuad();
 }
-void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, std::string_view type, unsigned int texture, const Engine::priv::RenderModule& renderer) {
+void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, std::string_view type, uint32_t texture, const Engine::priv::RenderModule& renderer) {
     renderer.bind(m_Shader_Program_Blur.get<ShaderProgram>());
     glm::vec2 hv(0.0f);
     if (type == "H") { 
@@ -163,6 +163,8 @@ void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, st
     Engine::Renderer::sendTexture("image", gbuffer.getTexture(texture), 0);
 
     Engine::Renderer::renderFullscreenQuad();
+
+    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
 }
 
 void Engine::Renderer::ssao::setLevel(const SSAOLevel::Level level) {
@@ -212,53 +214,4 @@ void Engine::Renderer::ssao::setLevel(const SSAOLevel::Level level) {
             break;
         }
     }
-}
-void Engine::Renderer::ssao::enableBlur(bool b) {
-    Engine::priv::SSAO::STATIC_SSAO.m_ssao_do_blur = b;
-}
-void Engine::Renderer::ssao::disableBlur() {
-    Engine::priv::SSAO::STATIC_SSAO.m_ssao_do_blur = false;
-}
-float Engine::Renderer::ssao::getBlurRadius() {
-    return Engine::priv::SSAO::STATIC_SSAO.m_ssao_blur_radius;
-}
-void Engine::Renderer::ssao::setBlurRadius(float r) {
-    Engine::priv::SSAO::STATIC_SSAO.m_ssao_blur_radius = glm::max(0.0f, r);
-}
-float Engine::Renderer::ssao::getBlurStrength() {
-    return Engine::priv::SSAO::STATIC_SSAO.m_ssao_blur_strength;
-}
-void Engine::Renderer::ssao::setBlurStrength(float s) {
-    Engine::priv::SSAO::STATIC_SSAO.m_ssao_blur_strength = glm::max(0.0f, s);
-}
-float Engine::Renderer::ssao::getIntensity() {
-    return Engine::priv::SSAO::STATIC_SSAO.m_ssao_intensity;
-}
-void Engine::Renderer::ssao::setIntensity(float i) {
-    Engine::priv::SSAO::STATIC_SSAO.m_ssao_intensity = glm::max(0.0f, i);
-}
-float Engine::Renderer::ssao::getRadius() {
-    return Engine::priv::SSAO::STATIC_SSAO.m_ssao_radius;
-}
-void Engine::Renderer::ssao::setRadius(float r) {
-    Engine::priv::SSAO::STATIC_SSAO.m_ssao_radius = glm::max(0.0f, r);
-}
-float Engine::Renderer::ssao::getScale() {
-    return Engine::priv::SSAO::STATIC_SSAO.m_ssao_scale;
-}
-void Engine::Renderer::ssao::setScale(float s) {
-    Engine::priv::SSAO::STATIC_SSAO.m_ssao_scale = glm::max(0.0f, s);
-}
-float Engine::Renderer::ssao::getBias() {
-    return Engine::priv::SSAO::STATIC_SSAO.m_ssao_bias;
-}
-void Engine::Renderer::ssao::setBias(float b) {
-    Engine::priv::SSAO::STATIC_SSAO.m_ssao_bias = b;
-}
-unsigned int Engine::Renderer::ssao::getSamples() {
-    return Engine::priv::SSAO::STATIC_SSAO.m_ssao_samples;
-}
-void Engine::Renderer::ssao::setSamples(unsigned int s) {
-    s = glm::max(0U, s);
-    Engine::priv::SSAO::STATIC_SSAO.m_ssao_samples = glm::clamp(s, 0U, SSAO_MAX_KERNEL_SIZE);
 }

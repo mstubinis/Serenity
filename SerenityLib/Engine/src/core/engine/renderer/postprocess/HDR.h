@@ -6,7 +6,7 @@ class  ShaderProgram;
 class  Shader;
 class  Viewport;
 
-struct HDRAlgorithm { enum Algorithm : unsigned char {
+struct HDRAlgorithm { enum Algorithm : uint8_t {
     None = 0,
     Reinhard, 
     Filmic, 
@@ -21,31 +21,27 @@ namespace Engine::priv {
     class  RenderModule;
     class  HDR final {
         private:
-            Handle        m_Vertex_Shader;
-            Handle        m_Fragment_Shader;
-            Handle        m_Shader_Program;
+            Handle                    m_Vertex_Shader;
+            Handle                    m_Fragment_Shader;
+            Handle                    m_Shader_Program;
 
-            std::string   m_GLSL_frag_code    = "";
-
-            HDR() = default;
-            ~HDR() = default;
+            std::string               m_GLSL_frag_code    = "";
         public:
-            bool                      hdr_active = true;
-            float                     exposure   = 3.0f;
-            HDRAlgorithm::Algorithm   algorithm  = HDRAlgorithm::Uncharted;
+            HDRAlgorithm::Algorithm   m_Algorithm  = HDRAlgorithm::Uncharted;
+            float                     m_Exposure   = 3.0f;
 
             bool init_shaders();
 
-            void pass(GBuffer&, const Viewport& viewport, bool godRays, bool lighting, float godRaysFactor, const Engine::priv::RenderModule& renderer);
+            void pass(GBuffer&, const Viewport& viewport, uint32_t outTexture, uint32_t outTexture2, bool godRays, float godRaysFactor, const RenderModule& renderer);
 
             static HDR STATIC_HDR;
     };
 };
 namespace Engine::Renderer::hdr {
-    float getExposure();
-    void setExposure(float e);
-    void setAlgorithm(HDRAlgorithm::Algorithm a);
-    HDRAlgorithm::Algorithm getAlgorithm();
+    inline float getExposure() noexcept { return Engine::priv::HDR::STATIC_HDR.m_Exposure; }
+    inline void setExposure(float exposure) noexcept { Engine::priv::HDR::STATIC_HDR.m_Exposure = exposure; }
+    inline void setAlgorithm(HDRAlgorithm::Algorithm algorithm) noexcept { Engine::priv::HDR::STATIC_HDR.m_Algorithm = algorithm; }
+    inline HDRAlgorithm::Algorithm getAlgorithm() noexcept { return Engine::priv::HDR::STATIC_HDR.m_Algorithm; }
 };
 
 

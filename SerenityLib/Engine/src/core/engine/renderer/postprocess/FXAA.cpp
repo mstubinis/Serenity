@@ -83,7 +83,7 @@ bool Engine::priv::FXAA::init_shaders() {
 
     return true;
 }
-void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::RenderModule& renderer) {
+void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, uint32_t sceneTexture, const Engine::priv::RenderModule& renderer) {
     const auto& dimensions = viewport.getViewportDimensions();
     renderer.bind(m_Shader_program.get<ShaderProgram>());
 
@@ -96,22 +96,8 @@ void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, unsign
     Engine::Renderer::sendTexture("depthTexture", gbuffer.getTexture(GBufferType::Depth), 2);
 
     Engine::Renderer::renderFullscreenQuad();
-}
-void Engine::Renderer::fxaa::setReduceMin(float r) {
-    Engine::priv::FXAA::STATIC_FXAA.reduce_min = glm::max(0.0f, r);
-}
-void Engine::Renderer::fxaa::setReduceMul(float r) {
-    Engine::priv::FXAA::STATIC_FXAA.reduce_mul = glm::max(0.0f, r);
-}
-void Engine::Renderer::fxaa::setSpanMax(float r) {
-    Engine::priv::FXAA::STATIC_FXAA.span_max = glm::max(0.0f, r);
-}
-float Engine::Renderer::fxaa::getReduceMin() {
-    return Engine::priv::FXAA::STATIC_FXAA.reduce_min;
-}
-float Engine::Renderer::fxaa::getReduceMul() {
-    return Engine::priv::FXAA::STATIC_FXAA.reduce_mul;
-}
-float Engine::Renderer::fxaa::getSpanMax() {
-    return Engine::priv::FXAA::STATIC_FXAA.span_max;
+
+    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
+    Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
+    Engine::Renderer::clearTexture(2, GL_TEXTURE_2D);
 }

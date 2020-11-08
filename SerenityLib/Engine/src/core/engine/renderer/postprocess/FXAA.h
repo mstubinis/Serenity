@@ -17,9 +17,6 @@ namespace Engine::priv {
             Handle         m_Fragment_shader;
             Handle         m_Shader_program;
             std::string    m_GLSL_frag_code  = "";
-
-            FXAA() = default;
-            ~FXAA() = default;
         public:
             float reduce_min                  = 0.0078125f; // (1 / 128);
             float reduce_mul                  = 0.125f;     // (1 / 8);
@@ -27,18 +24,18 @@ namespace Engine::priv {
 
             bool init_shaders();
 
-            void pass(GBuffer&, const Viewport& viewport, unsigned int sceneTexture, const Engine::priv::RenderModule& renderer);
+            void pass(GBuffer&, const Viewport& viewport, uint32_t sceneTexture, const Engine::priv::RenderModule& renderer);
 
             static FXAA STATIC_FXAA;
     };
 };
 namespace Engine::Renderer::fxaa {
-    void setReduceMin(float reduceMin);
-    float getReduceMin();
-    void setReduceMul(float reduceMul);
-    float getReduceMul();
-    void setSpanMax(float spanMax);
-    float getSpanMax();
+    inline void setReduceMin(float reduceMin) noexcept { Engine::priv::FXAA::STATIC_FXAA.reduce_min = glm::max(0.0f, reduceMin); }
+    inline float getReduceMin() noexcept { return Engine::priv::FXAA::STATIC_FXAA.reduce_min; }
+    inline void setReduceMul(float reduceMul) noexcept { Engine::priv::FXAA::STATIC_FXAA.reduce_mul = glm::max(0.0f, reduceMul); }
+    inline float getReduceMul() noexcept { return Engine::priv::FXAA::STATIC_FXAA.reduce_mul; }
+    inline void setSpanMax(float spanMax) noexcept { Engine::priv::FXAA::STATIC_FXAA.span_max = glm::max(0.0f, spanMax); }
+    inline float getSpanMax() noexcept { return Engine::priv::FXAA::STATIC_FXAA.span_max; }
 };
 
 #endif

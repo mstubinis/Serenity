@@ -21,22 +21,17 @@ bool Engine::priv::HDR::init_shaders() {
         "\n"
         "uniform SAMPLER_TYPE_2D lightingBuffer;\n"
         "uniform SAMPLER_TYPE_2D gDiffuseMap;\n"
-        "uniform SAMPLER_TYPE_2D gNormalMap;\n"
         "uniform SAMPLER_TYPE_2D gGodsRaysMap;\n"
         "\n"
         "varying vec2 texcoords;\n"
         "\n"
         "uniform vec4 HDRInfo;\n"// exposure | UNUSED | godRays_Factor | HDRAlgorithm
-        "uniform ivec2 Has;\n"   //HasGodRays | HasLighting
+        "uniform int HasGodRays;\n"
         "\n"
         "vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f){ return vec3(((x*(a*x+c*b)+d*e)/(x*(a*x+b)+d*f))-e/f); }\n"
         "void main(){\n"
         "    vec3 diffuse = texture2D(USE_SAMPLER_2D(gDiffuseMap), texcoords).rgb;\n"
         "    vec3 lighting = texture2D(USE_SAMPLER_2D(lightingBuffer), texcoords).rgb;\n"
-        "    vec3 normals = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), texcoords).rg);\n"
-        "    if(Has.y == 0 || distance(normals, ConstantOneVec3) < 0.01){\n" //if normals are damn near 1.0,1.0,1.0 or no lighting
-        "        lighting = diffuse;\n"
-        "    }\n"
         "    if(HDRInfo.w > 0.0){\n"//has hdr?
         "        if(HDRInfo.w == 1.0){\n"// Reinhard tone mapping
         "            lighting = lighting / (lighting + ConstantOneVec3);\n"
@@ -52,11 +47,12 @@ bool Engine::priv::HDR::init_shaders() {
         "            lighting *= white;\n"
         "        }\n"
         "    }\n"
-        "    if(Has.x == 1){\n" //has god rays?
+        "    if(HasGodRays == 1){\n" //has god rays?
         "        vec3 rays = texture2D(USE_SAMPLER_2D(gGodsRaysMap), texcoords).rgb;\n"
         "        lighting += (rays * HDRInfo.z);\n"
         "    }\n"
-        "    gl_FragColor = vec4(lighting, 1.0);\n"
+        "    gl_FragData[0] = vec4(lighting, 1.0);\n"
+        "    gl_FragData[1] = vec4(lighting, 1.0);\n"
         "}";
 #pragma endregion
 
@@ -71,28 +67,21 @@ bool Engine::priv::HDR::init_shaders() {
 
     return true;
 }
-void Engine::priv::HDR::pass(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, bool godRays, bool lighting, float godRaysFactor, const Engine::priv::RenderModule& renderer) {
+void Engine::priv::HDR::pass(GBuffer& gbuffer, const Viewport& viewport, uint32_t outTexture, uint32_t outTexture2, bool godRays, float godRaysFactor, const RenderModule& renderer) {
     renderer.bind(m_Shader_Program.get<ShaderProgram>());
 
-    Engine::Renderer::sendUniform4Safe("HDRInfo", exposure, 0.0f, godRaysFactor, (float)algorithm);
-    Engine::Renderer::sendUniform2Safe("Has", (int)godRays, (int)lighting);
+    gbuffer.bindFramebuffers(outTexture, outTexture2, "RGBA");
+
+    Engine::Renderer::sendUniform4Safe("HDRInfo", m_Exposure, 0.0f, godRaysFactor, (float)m_Algorithm);
+    Engine::Renderer::sendUniform1Safe("HasGodRays", (int)godRays);
 
     Engine::Renderer::sendTextureSafe("lightingBuffer", gbuffer.getTexture(GBufferType::Lighting), 0);
     Engine::Renderer::sendTextureSafe("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 1);
-    Engine::Renderer::sendTextureSafe("gNormalMap", gbuffer.getTexture(GBufferType::Normal), 2);
-    Engine::Renderer::sendTextureSafe("gGodsRaysMap", gbuffer.getTexture(GBufferType::GodRays), 3);
+    Engine::Renderer::sendTextureSafe("gGodsRaysMap", gbuffer.getTexture(GBufferType::GodRays), 2);
 
     Engine::Renderer::renderFullscreenQuad();
-}
-float Engine::Renderer::hdr::getExposure() {
-    return Engine::priv::HDR::STATIC_HDR.exposure;
-}
-void Engine::Renderer::hdr::setExposure(float e) {
-    Engine::priv::HDR::STATIC_HDR.exposure = e;
-}
-void Engine::Renderer::hdr::setAlgorithm(HDRAlgorithm::Algorithm a) {
-    Engine::priv::HDR::STATIC_HDR.algorithm = a;
-}
-HDRAlgorithm::Algorithm Engine::Renderer::hdr::getAlgorithm() {
-    return Engine::priv::HDR::STATIC_HDR.algorithm;
+
+    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
+    Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
+    Engine::Renderer::clearTexture(2, GL_TEXTURE_2D);
 }
