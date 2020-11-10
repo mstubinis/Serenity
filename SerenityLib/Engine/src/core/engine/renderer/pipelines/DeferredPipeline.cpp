@@ -1219,7 +1219,7 @@ void DeferredPipeline::internal_pass_forward(Viewport& viewport, Camera& camera,
     InternalScenePublicInterface::RenderForwardOpaque(m_Renderer, scene, viewport, camera);
 
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-    for (auto i = 0U; i < 4; ++i) {
+    for (uint32_t i = 0; i < 4; ++i) {
         Engine::Renderer::GLEnablei(GL_BLEND, i);
     }
     if (!depthPrepass) {
@@ -1679,7 +1679,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
 
     m_GBuffer.bindFramebuffers(GBufferType::Diffuse, "RGBA");
     glEnablei(GL_BLEND, 0);
-    GLCall(glDepthRange(0.0f, 0.99f));
+    GLCall(glDepthRange(0.0f, 0.98f));
     render2DAPI(m_Background2DAPICommands, mainRenderFunction, viewport, false);
     GLCall(glDepthRange(0.0f, 1.0f));
     glDisablei(GL_BLEND, 0);
@@ -1727,8 +1727,8 @@ void DeferredPipeline::internal_renderText(std::vector<IRenderingPipeline::API2D
 }
 void DeferredPipeline::internal_renderBorder(std::vector<IRenderingPipeline::API2DCommand>& commands, float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) {
     float doubleBorder = borderSize * 2.0f;
-    float halfWidth = w / 2.0f;
-    float halfHeight = h / 2.0f;
+    float halfWidth    = w / 2.0f;
+    float halfHeight   = h / 2.0f;
 
     float translationX = pos.x;
     float translationY = pos.y;
@@ -1746,7 +1746,6 @@ void DeferredPipeline::internal_renderRectangle(std::vector<IRenderingPipeline::
 void DeferredPipeline::internal_renderTriangle(std::vector<IRenderingPipeline::API2DCommand>& commands, const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) {
     commands.emplace_back([=]() { DeferredPipeline::render2DTriangle(position, color, angle, width, height, depth, align, scissor); }, depth);
 }
-
 
 void DeferredPipeline::renderTexture(Handle textureHandle, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) {
     internal_renderTexture(m_2DAPICommands, textureHandle, p, c, a, s, d, align, scissor);

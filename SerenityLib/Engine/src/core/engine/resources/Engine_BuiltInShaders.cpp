@@ -785,14 +785,14 @@ priv::EShaders::forward_frag =
     "    vec3 lightTotal = ConstantZeroVec3;\n"
     "    if(Shadeless != 1){\n"
     "        vec3 lightCalculation = ConstantZeroVec3;\n"
+    "        float SSAO            = 1.0;\n"
+    "        vec2 MetalSmooth      = vec2(inData.metalness, inData.smoothness);\n"
+    "        float AO              = inData.ao + 0.0001;\n"//the 0.0001 makes up for the clamp in material class
     "        for (int j = 0; j < numLights; ++j) {\n"
     "            Light currentLight    = light[j];\n"
     "            vec3 lightCalculation = ConstantZeroVec3;\n"
     "            vec3 LightPosition    = vec3(currentLight.DataC.yzw) - CamRealPosition;\n"
     "            vec3 LightDirection   = normalize(vec3(currentLight.DataA.w, currentLight.DataB.x, currentLight.DataB.y));\n"
-    "            float SSAO            = 0.0;\n"
-    "            vec2 MetalSmooth      = vec2(inData.metalness, inData.smoothness);\n"
-    "            float AO              = inData.ao + 0.0001;\n"//the 0.0001 makes up for the clamp in material class
     "            if(currentLight.DataD.w == 0.0){\n"       //sun
     "                lightCalculation = CalcLightInternal(currentLight, normalize(LightPosition - WorldPosition), WorldPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
     "            }else if(currentLight.DataD.w == 1.0){\n" //point
@@ -808,29 +808,10 @@ priv::EShaders::forward_frag =
     "            }\n"
     "            lightTotal += lightCalculation;\n"
     "        }\n"
-    //GI here
-    "        vec3 ViewDir = normalize(CameraPosition - WorldPosition);\n"
-    "        vec3 R = reflect(-ViewDir, inData.normals);\n"
-    "        float VdotN = max(0.0, dot(ViewDir, inData.normals));\n"
-    //"      float ssaoValue = 1.0 - texture2D(gSSAOMap,uv).a;\n"
-    "        float ao = inData.ao /* * ssaoValue */;\n"
-    "        vec3 F0 = mix(inData.materialF0, inData.diffuse.rgb, vec3(inData.metalness));\n"
-    "        vec3 Frensel = F0;\n"
-    "        float roughness = 1.0 - inData.smoothness;\n"
-    "        vec3 irradianceColor = textureCube(irradianceMap, inData.normals).rgb;\n"
-    "        vec3 kS = SchlickFrenselRoughness(VdotN, Frensel, roughness);\n"
-    "        vec3 kD = ConstantOneVec3 - kS;\n"
-    "        kD *= 1.0 - inData.metalness;\n"
-    "        vec3 GIContribution = Unpack3FloatsInto1FloatUnsigned(ScreenData.x);\n" //x = diffuse, y = specular, z = global
-    "        vec3 GIDiffuse = irradianceColor * inData.diffuse.rgb * kD * GIContribution.x;\n"
-    "        vec3 prefilteredColor = textureCubeLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;\n"
-    "        vec2 brdf  = texture2D(brdfLUT, vec2(VdotN, roughness)).rg;\n"
-    "        vec3 GISpecular = prefilteredColor * (kS * brdf.x + brdf.y) * GIContribution.y;\n"
-    "        vec3 TotalIrradiance = (GIDiffuse + GISpecular) * ao;\n"
-    "        TotalIrradiance = pow(TotalIrradiance, vec3(1.0 / ScreenData.y));\n" //ScreenData.y is gamma
-    "        lightTotal += TotalIrradiance * GIContribution.z * MaterialBasePropertiesTwo.x;\n"
-    "        lightTotal = max(lightTotal, inData.glow * inData.diffuse.rgb);\n"
-    "        inData.diffuse.rgb = lightTotal;\n"
+             //GI here
+    "        vec3 inGIContribution = Unpack3FloatsInto1FloatUnsigned(ScreenData.x);\n" //x = diffuse, y = specular, z = global
+    "        lightTotal           += CalcGILight(SSAO, inData.normals, inData.diffuse.xyz, WorldPosition, AO, MetalSmooth.x, MetalSmooth.y, inData.glow, inData.materialF0, MaterialBasePropertiesTwo.x, inGIContribution).rgb;\n"
+    "        inData.diffuse.rgb    = lightTotal;\n"
     "    }\n"
     "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
     "    vec4 GodRays = Unpack32BitUIntTo4ColorFloats(Gods_Rays_Color);\n"
@@ -852,7 +833,7 @@ priv::EShaders::forward_frag =
 
     "uniform SAMPLER_TYPE_2D DiffuseTexture0;\n";
 
-for (unsigned int i = 1; i < std::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
+for (uint32_t i = 1; i < std::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
     priv::EShaders::particle_frag +=
      "uniform SAMPLER_TYPE_2D DiffuseTexture" + std::to_string(i) + ";\n";
 }
@@ -1257,45 +1238,25 @@ priv::EShaders::lighting_frag_gi =
     "varying vec2 texcoords;\n"
     "flat varying vec3 CamRealPosition;\n" //add this to calculations?
     "\n"
-    "vec3 SchlickFrenselRoughness(float theta, vec3 F0_, float roughness){\n"
-    "    vec3 ret = F0_ + (max(vec3(1.0 - roughness), F0_) - F0_) * pow(1.0 - theta, 5.0);\n"
-    "    return ret;\n"
+    "vec3 SchlickFrenselRoughness(float inTheta, vec3 inF0, float inRoughness){\n"
+    "    return inF0 + (max(vec3(1.0 - inRoughness), inF0) - inF0) * pow(1.0 - inTheta, 5.0);\n"
     "}\n"
     "void main(){\n"
-    "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z, ScreenData.w);\n"
-    "    float ssaoValue            = 1.0 - texture2D(gSSAOMap, uv).a;\n"
-    "    vec3 PxlNormal             = DecodeOctahedron(texture2D(gNormalMap, uv).rg);\n"
-    "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap, uv).rgb;\n"
-    "    vec3 PxlWorldPos           = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv, CameraNear, CameraFar);\n"
-    "    vec3 ViewDir               = normalize(CameraPosition - PxlWorldPos);\n"
-    "    vec3 R                     = reflect(-ViewDir, PxlNormal);\n"
-    "    float VdotN                = max(0.0, dot(ViewDir, PxlNormal));\n"
-    "    float matIDandAO           = texture2D(gNormalMap, uv).b;\n"
-    "    highp int index            = int(floor(matIDandAO));\n"
-    "    vec3 MaterialF0            = Unpack3FloatsInto1FloatUnsigned(materials[index].r);\n"
-    "    float ao                   = (fract(matIDandAO) + 0.0001) * ssaoValue;\n"//the 0.0001 makes up for the clamp in material class
+    "    vec2 uv               = gl_FragCoord.xy / vec2(ScreenData.z, ScreenData.w);\n"
 
-    "    float Glow                 = texture2D(gMiscMap, uv).r;\n"
-    "    vec2 stuff                 = UnpackFloat16Into2Floats(texture2D(gNormalMap, uv).a);\n" //x is metalness, y is smoothness
+    "    float inSSAO          = 1.0 - texture2D(USE_SAMPLER_2D(gSSAOMap), uv).a;\n"
+    "    vec3 inNormals        = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), uv).rg);\n"
+    "    vec3 inAlbedo         = texture2D(USE_SAMPLER_2D(gDiffuseMap), uv).rgb;\n"
+    "    vec3 inWorldPosition  = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv, CameraNear, CameraFar);\n"
+    "    float inGlow          = texture2D(USE_SAMPLER_2D(gMiscMap), uv).r;\n"
+    "    vec2 inMetalSmooth    = UnpackFloat16Into2Floats(texture2D(USE_SAMPLER_2D(gNormalMap), uv).a);\n"
+    "    float MatIDAndAO      = texture2D(USE_SAMPLER_2D(gNormalMap), uv).b;\n"
 
-    "    vec3 F0                    = mix(MaterialF0, MaterialAlbedoTexture, vec3(stuff.x));\n"
-    "    vec3 Frensel               = F0;\n"
-    "    float roughness            = 1.0 - stuff.y;\n"
-    "    vec3 irradianceColor       = textureCube(irradianceMap, PxlNormal).rgb;\n"
-    "    vec3 kS                    = SchlickFrenselRoughness(VdotN, Frensel, roughness);\n"
-    "    vec3 kD                    = ConstantOneVec3 - kS;\n"
-    "    kD                        *= 1.0 - stuff.x;\n"
-    "    vec3 GIContribution        = Unpack3FloatsInto1FloatUnsigned(ScreenData.x);\n" //x = diffuse, y = specular, z = global
-    "    vec3 GIDiffuse             = irradianceColor * MaterialAlbedoTexture * kD * GIContribution.x;\n"
-    "\n"
-    "    vec3 prefilteredColor      = textureCubeLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;\n"
-    "    vec2 brdf                  = texture2D(brdfLUT, vec2(VdotN, roughness)).rg;\n"
-    "    vec3 GISpecular            = prefilteredColor * (kS * brdf.x + brdf.y) * GIContribution.y;\n"
-    "\n"
-    "    vec3 TotalIrradiance       = (GIDiffuse + GISpecular) * ao;\n"
-    "    TotalIrradiance            = pow(TotalIrradiance, vec3(1.0 / ScreenData.y));\n" //ScreenData.y is gamma
-    "    gl_FragColor              += (vec4(TotalIrradiance, 1.0) * vec4(vec3(GIContribution.z), 1.0)) * materials[index].g;\n" //materials[index].g is material base alpha
-    "    gl_FragColor.rgb           = max(gl_FragColor.rgb, Glow * MaterialAlbedoTexture);\n"
+    "    highp int index       = int(floor(MatIDAndAO));\n"
+    "    float inAO            = (fract(MatIDAndAO) + 0.0001);\n"
+    "    vec3 inMatF0          = Unpack3FloatsInto1FloatUnsigned(materials[index].r);\n"
+    "    vec3 inGIContribution = Unpack3FloatsInto1FloatUnsigned(ScreenData.x);\n" //x = diffuse, y = specular, z = global
+    "    gl_FragColor         += CalcGILight(inSSAO, inNormals, inAlbedo, inWorldPosition, inAO, inMetalSmooth.x, inMetalSmooth.y, inGlow, inMatF0, materials[index].g, inGIContribution);\n"
     "}";
 
 #pragma endregion

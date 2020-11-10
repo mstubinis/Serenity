@@ -96,34 +96,27 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
         if (!ShaderHelper::sfind(code, "vec3 CalcLightInternal(")) {
             ShaderHelper::insertStringRightBeforeLineContent(code, 
                 "vec3 CalcLightInternal(in Light currentLight, vec3 LightDir, vec3 PxlWorldPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){//generated\n"
-                "    vec3 LightDiffuseColor     = currentLight.DataD.xyz;\n"
-                "    vec3 LightSpecularColor    = currentLight.DataD.xyz * Specular;\n"
-                "    vec3 TotalLight            = ConstantZeroVec3;\n"
-                "    vec3 SpecularFactor        = ConstantZeroVec3;\n"
-                "\n"
-                //"    highp int matID            = int(floor(MatIDAndAO));\n"
-                "    float ao                   = AO * SSAO;\n"//the 0.0001 makes up for the clamp in material class
-                "    float metalness            = MetalSmooth.x;\n"
-                "    float smoothness           = MetalSmooth.y;\n"
-                //"    float materialAlpha        = materials[matID].g;\n"
-                "\n"
-                //"    vec3 MaterialF0            = Unpack3FloatsInto1FloatUnsigned(materials[matID].r);\n"
-                "    vec3 F0                    = mix(MatF0, Albedo, vec3(metalness));\n"
-                "    vec3 Frensel               = F0;\n"
-                "\n"
-                "    float roughness            = 1.0 - smoothness;\n"
-                "    float roughnessSquared     = roughness * roughness;\n"
-                "\n"
-                "    vec3 ViewDir               = normalize(CameraPosition - PxlWorldPos);\n"
-                "    vec3 Half                  = normalize(LightDir + ViewDir);\n"
-                "    float NdotL                = clamp(dot(PxlNormal, LightDir), 0.0, 1.0);\n"
-                "    float NdotH                = clamp(dot(PxlNormal, Half), 0.0, 1.0);\n"
-                "    float VdotN                = clamp(dot(ViewDir, PxlNormal), 0.0, 1.0);\n"
-                "    float VdotH                = clamp(dot(ViewDir, Half), 0.0, 1.0);\n"
-                "\n"
-                //"    float MaterialTypeDiffuse  = materials[matID].a;\n"
-                //"    float MaterialTypeSpecular = materials[matID].b;\n"
-                "\n"
+                "    vec3 LightDiffuseColor  = currentLight.DataD.xyz;\n"
+                "    vec3 LightSpecularColor = currentLight.DataD.xyz * Specular;\n"
+                "    vec3 TotalLight         = ConstantZeroVec3;\n"
+                "    vec3 SpecularFactor     = ConstantZeroVec3;\n"
+
+                "    float ao                = AO * SSAO;\n"
+                "    float metalness         = MetalSmooth.x;\n"
+                "    float smoothness        = MetalSmooth.y;\n"
+                "    vec3 F0                 = mix(MatF0, Albedo, vec3(metalness));\n"
+                "    vec3 Frensel            = F0;\n"
+
+                "    float roughness         = 1.0 - smoothness;\n"
+                "    float roughnessSquared  = roughness * roughness;\n"
+
+                "    vec3 ViewDir            = normalize(CameraPosition - PxlWorldPos);\n"
+                "    vec3 Half               = normalize(LightDir + ViewDir);\n"
+                "    float NdotL             = clamp(dot(PxlNormal, LightDir), 0.0, 1.0);\n"
+                "    float NdotH             = clamp(dot(PxlNormal, Half), 0.0, 1.0);\n"
+                "    float VdotN             = clamp(dot(ViewDir, PxlNormal), 0.0, 1.0);\n"
+                "    float VdotH             = clamp(dot(ViewDir, Half), 0.0, 1.0);\n"
+
                 "    if(MatTypeDiffuse == 2.0){\n"
                 "        LightDiffuseColor *= DiffuseOrenNayar(ViewDir, LightDir, NdotL, VdotN, roughnessSquared);\n"
                 "    }else if(MatTypeDiffuse == 3.0){\n"
@@ -131,7 +124,6 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
                 "    }else if(MatTypeDiffuse == 4.0){\n"//this is minneart
                 "        LightDiffuseColor *= pow(VdotN * NdotL, smoothness);\n"
                 "    }\n"
-                "\n"
                 "    if(MatTypeSpecular == 1.0){\n"
                 "        SpecularFactor = SpecularBlinnPhong(smoothness, NdotH);\n"
                 "    }else if(MatTypeSpecular == 2.0){\n"
@@ -147,17 +139,17 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
                 "    }else if(MatTypeSpecular == 7.0){\n"
                 "        SpecularFactor = SpecularAshikhminShirley(PxlNormal, Half, NdotH, LightDir, NdotL, VdotN);\n"
                 "    }\n"
-                "    LightDiffuseColor       *= currentLight.DataA.y;\n"
-                "    LightSpecularColor      *= (SpecularFactor * currentLight.DataA.z);\n"
-                "\n"
-                "    vec3 componentDiffuse    = ConstantOneVec3 - Frensel;\n"
-                "    componentDiffuse        *= 1.0 - metalness;\n"
-                "\n"
-                "    TotalLight               = (componentDiffuse * ao) * Albedo;\n"
-                "    TotalLight              /= KPI;\n"
-                "    TotalLight              += LightSpecularColor;\n"
-                "    TotalLight              *= (LightDiffuseColor * NdotL);\n"
-                "    TotalLight              *= MatAlpha;\n"
+                "    LightDiffuseColor     *= currentLight.DataA.y;\n"
+                "    LightSpecularColor    *= (SpecularFactor * currentLight.DataA.z);\n"
+
+                "    vec3 componentDiffuse  = ConstantOneVec3 - Frensel;\n"
+                "    componentDiffuse      *= 1.0 - metalness;\n"
+
+                "    TotalLight             = (componentDiffuse * ao) * Albedo;\n"
+                "    TotalLight            /= KPI;\n"
+                "    TotalLight            += LightSpecularColor;\n"
+                "    TotalLight            *= (LightDiffuseColor * NdotL);\n"
+                "    TotalLight            *= MatAlpha;\n"
                 "    return TotalLight;\n"
                 "}\n"
             , "vec3 CalcPointLight(");
@@ -165,6 +157,41 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
     }
 #pragma endregion
 
+#pragma region GI Lighting Internal
+
+    if (ShaderHelper::sfind(code, "CalcGILight(")) {
+        if (!ShaderHelper::sfind(code, "vec4 CalcGILight(")) {
+            ShaderHelper::insertStringRightBeforeMainFunc(code,
+                "vec4 CalcGILight(float SSAO, vec3 Normals, vec3 Albedo, vec3 WorldPosition, float AO, float Metal, float Smooth, float Glow, vec3 MatF0, float MatAlpha, vec3 GIContribution){//generated\n"
+                "    vec3 ViewDir          = normalize(CameraPosition - WorldPosition);\n"
+                "    vec3 R                = reflect(-ViewDir, Normals);\n"
+                "    float VdotN           = max(0.0, dot(ViewDir, Normals));\n"
+                "    float ao              = AO * SSAO;\n"
+                "    vec3 Frensel          = mix(MatF0, Albedo, vec3(Metal));\n"
+                "    float roughness       = 1.0 - Smooth;\n"
+                "    vec3 irradianceColor  = textureCube(irradianceMap, Normals).rgb;\n"
+                "    vec3 kS               = SchlickFrenselRoughness(VdotN, Frensel, roughness);\n"
+                "    vec3 kD               = ConstantOneVec3 - kS;\n"
+                "    kD                   *= 1.0 - Metal;\n"
+                "    vec3 GIDiffuse        = irradianceColor * Albedo * kD * GIContribution.x;\n"
+
+                "    vec3 prefilteredColor = textureCubeLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;\n"
+                "    vec2 brdf             = texture2D(brdfLUT, vec2(VdotN, roughness)).rg;\n"
+                "    vec3 GISpecular       = prefilteredColor * (kS * brdf.x + brdf.y) * GIContribution.y;\n"
+
+                "    vec3 TotalIrradiance  = (GIDiffuse + GISpecular) * ao;\n"
+                "    TotalIrradiance       = pow(TotalIrradiance, vec3(1.0 / ScreenData.y));\n" //ScreenData.y is gamma
+
+                "    vec4 FinalColor       = vec4(0.0, 0.0, 0.0, 0.0);\n"
+                "    FinalColor           += (vec4(TotalIrradiance, 1.0) * vec4(vec3(GIContribution.z), 1.0)) * MatAlpha;\n"
+                "    FinalColor.rgb        = max(FinalColor.rgb, Glow * Albedo);\n"
+                "    return FinalColor;\n"
+                "}\n"
+            );
+        }
+    }
+
+#pragma endregion
 
 #pragma region Diffuse oryen nayar
     if (ShaderHelper::sfind(code, "DiffuseOrenNayar(")) {
@@ -353,9 +380,8 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
     if (ShaderHelper::sfind(code, "SchlickFrensel(")) {
         if (!ShaderHelper::sfind(code, "vec3 SchlickFrensel(")) {
             ShaderHelper::insertStringAtLine(code, 
-                "vec3 SchlickFrensel(float theta, vec3 F0_){//generated\n"
-                "    vec3 ret = F0_ + (ConstantOneVec3 - F0_) * pow(1.0 - theta, 5.0);\n"
-                "    return ret;\n"
+                "vec3 SchlickFrensel(float inTheta, vec3 inF0){//generated\n"
+                "    return inF0 + (ConstantOneVec3 - inF0) * pow(1.0 - inTheta, 5.0);\n"
                 "}\n"
             , 1);
         }
