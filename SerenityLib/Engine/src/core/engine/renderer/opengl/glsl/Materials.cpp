@@ -15,9 +15,9 @@ using namespace Engine;
 using namespace Engine::priv;
 
 void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNumber, ShaderType shaderType) {
-
+    //Pack2NibblesInto8BitChannel
+    //Unpack2NibblesFrom8BitChannel
 #pragma region OutputSubmissions
-
     if (ShaderHelper::sfind(code, "SUBMIT_DIFFUSE(")) {
         if (!ShaderHelper::sfind(code, "void SUBMIT_DIFFUSE(")) {
             ShaderHelper::insertStringRightBeforeMainFunc(code,
@@ -30,7 +30,6 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
             );
         }
     }
-
     if (ShaderHelper::sfind(code, "SUBMIT_NORMALS(")) {
         if (!ShaderHelper::sfind(code, "void SUBMIT_NORMALS(")) {
             ShaderHelper::insertStringRightBeforeMainFunc(code,
@@ -105,7 +104,6 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
             );
         }
     }
-
 #pragma endregion
 
 #pragma region process component
@@ -278,7 +276,6 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
     }
 #pragma endregion
 
-
 #pragma region calculate glow
     if (ShaderHelper::sfind(code, "CalculateGlow(") || ShaderHelper::sfind(code, "CalculateGlowLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateGlow(")) {
@@ -345,7 +342,6 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
     }
 #pragma endregion
 
-
 #pragma region calculate ao
     if (ShaderHelper::sfind(code, "CalculateAO(") || ShaderHelper::sfind(code, "CalculateAOLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateAO(")) {
@@ -379,7 +375,6 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
     }
 #pragma endregion
 
-
 #pragma region calculate metalness
     if (ShaderHelper::sfind(code, "CalculateMetalness(") || ShaderHelper::sfind(code, "CalculateMetalnessLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateMetalness(")) {
@@ -394,7 +389,7 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
                 "    }\n"
                 "    outMetalness = clamp(outMetalness, inLayer.data2.x, inLayer.data2.y);\n"
                 "    outMetalness *= inLayer.data2.z;\n"
-                "    return clamp(outMetalness,0.01,0.99);\n"
+                "    return outMetalness;\n"
                 "}\n"
                 "float CalculateMetalnessLOD(in Layer inLayer, in float objectMetalness, in vec2 inUVs, in float lod) {//generated\n"
                 "    float outMetalness = objectMetalness;\n"
@@ -406,13 +401,12 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
                 "    }\n"
                 "    outMetalness = clamp(outMetalness, inLayer.data2.x, inLayer.data2.y);\n"
                 "    outMetalness *= inLayer.data2.z;\n"
-                "    return clamp(outMetalness,0.01,0.99);\n"
+                "    return outMetalness;\n"
                 "}\n"
             , "float CalculateAO(");
         }
     }
 #pragma endregion
-
 
 #pragma region calculate smoothness
     if (ShaderHelper::sfind(code, "CalculateSmoothness(") || ShaderHelper::sfind(code, "CalculateSmoothnessLOD(")) {
@@ -428,7 +422,7 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
                 "    }\n"
                 "    outSmoothness = clamp(outSmoothness, inLayer.data2.x, inLayer.data2.y);\n"
                 "    outSmoothness *= inLayer.data2.z;\n"
-                "    return clamp(outSmoothness,0.01,0.99);\n"
+                "    return outSmoothness;\n"
                 "}\n"
                 "float CalculateSmoothnessLOD(in Layer inLayer, in float objectSmoothness, in vec2 inUVs, in float lod) {//generated\n"
                 "    float outSmoothness = objectSmoothness;\n"
@@ -440,7 +434,7 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
                 "    }\n"
                 "    outSmoothness = clamp(outSmoothness, inLayer.data2.x, inLayer.data2.y);\n"
                 "    outSmoothness *= inLayer.data2.z;\n"
-                "    return clamp(outSmoothness,0.01,0.99);\n"
+                "    return outSmoothness;\n"
                 "}\n"
             , "float CalculateMetalness(");
         }
@@ -555,7 +549,6 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
         }
     }
 #pragma endregion
-
 
 #pragma region do blend
     //https://docs.gimp.org/2.4/en/gimp-concepts-layer-modes.html

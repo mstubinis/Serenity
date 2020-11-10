@@ -20,7 +20,7 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
     if (ShaderHelper::sfind(code, "CalcProjectionLight(")) {
         if (!ShaderHelper::sfind(code, "vec3 CalcProjectionLight(")) {
             ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec3 CalcProjectionLight(in Light currentLight, vec3 A, vec3 B,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){//generated\n"
+                "vec3 CalcProjectionLight(in Light inLight, vec3 A, vec3 B,vec3 PxlWorldPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){//generated\n"
                 /*
                 //TODO: implement
                 "    vec3 BMinusA = B - A;\n"
@@ -29,7 +29,7 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
                 "    vec3 _Normal = BMinusA / Dist;\n"
                 "    float t = clamp(dot(CMinusA, _Normal / Dist), 0.0, 1.0);\n"
                 "    vec3 LightPos = A + t * BMinusA;\n"
-                "    vec3 c = CalcPointLight(currentLight, LightPos, PxlWorldPos, PxlNormal, uv);\n"
+                "    vec3 c = CalcPointLight(inLight, LightPos, PxlWorldPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);\n"
                 "    return c;\n"
                 */
                 "    return vec3(0.0, 1.0, 0.0);\n"
@@ -43,14 +43,14 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
     if (ShaderHelper::sfind(code, "CalcRodLight(")) {
         if (!ShaderHelper::sfind(code, "vec3 CalcRodLight(")) {
             ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec3 CalcRodLight(in Light currentLight, vec3 A, vec3 B, vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){//generated\n"
+                "vec3 CalcRodLight(in Light inLight, vec3 A, vec3 B, vec3 PxlWorldPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){//generated\n"
                 "    vec3 BMinusA = B - A;\n"
                 "    vec3 CMinusA = PxlWorldPos - A;\n"
                 "    float Dist = length(BMinusA);\n"
                 "    vec3 _Normal = BMinusA / Dist;\n"
                 "    float t = clamp(dot(CMinusA, _Normal / Dist), 0.0, 1.0);\n"
                 "    vec3 LightPos = A + t * BMinusA;\n"
-                "    vec3 c = CalcPointLight(currentLight, LightPos, PxlWorldPos, PxlNormal, uv);\n"
+                "    vec3 c = CalcPointLight(inLight, LightPos, PxlWorldPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);\n"
                 "    return c;\n"
                 "}\n"
             , "void main(");
@@ -62,11 +62,11 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
     if (ShaderHelper::sfind(code, "CalcSpotLight(")) {
         if (!ShaderHelper::sfind(code, "vec3 CalcSpotLight(")) {
             ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec3 CalcSpotLight(in Light currentLight, vec3 SpotLightDir, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){//generated\n"
+                "vec3 CalcSpotLight(in Light inLight, vec3 SpotLightDir, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){//generated\n"
                 "    vec3 LightDir = normalize(LightPos - PxlWorldPos);\n"
-                "    vec3 c = CalcPointLight(currentLight, LightPos, PxlWorldPos, PxlNormal, uv);\n"
+                "    vec3 c = CalcPointLight(inLight, LightPos, PxlWorldPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);\n"
                 "    float cosAngle = dot(LightDir, -SpotLightDir);\n"
-                "    float spotEffect = smoothstep(currentLight.DataE.y, currentLight.DataE.x, cosAngle);\n"
+                "    float spotEffect = smoothstep(inLight.DataE.y, inLight.DataE.x, cosAngle);\n"
                 "    return c * spotEffect;\n"
                 "}\n"
             , "vec3 CalcRodLight(");
@@ -78,12 +78,12 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
     if (ShaderHelper::sfind(code, "CalcPointLight(")) {
         if (!ShaderHelper::sfind(code, "vec3 CalcPointLight(")) {
             ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec3 CalcPointLight(in Light currentLight, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){//generated\n"
+                "vec3 CalcPointLight(in Light inLight, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){//generated\n"
                 "    vec3 RawDirection = LightPos - PxlWorldPos;\n"
                 "    float Dist = length(RawDirection);\n"
                 "    vec3 LightDir = RawDirection / Dist;\n"
-                "    vec3 c = CalcLightInternal(currentLight, LightDir, PxlWorldPos, PxlNormal, uv);\n"
-                "    float attenuation = CalculateAttenuation(Dist, 1.0);\n"
+                "    vec3 c = CalcLightInternal(inLight, LightDir, PxlWorldPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);\n"
+                "    float attenuation = CalculateAttenuation(inLight, Dist, 1.0);\n"
                 "    return c * attenuation;\n"
                 "}\n"
             , "vec3 CalcSpotLight(");
@@ -95,25 +95,20 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
     if (ShaderHelper::sfind(code, "CalcLightInternal(")) {
         if (!ShaderHelper::sfind(code, "vec3 CalcLightInternal(")) {
             ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec3 CalcLightInternal(in Light currentLight, vec3 LightDir, vec3 PxlWorldPos, vec3 PxlNormal, vec2 uv){//generated\n"
-                "    float SpecularStrength     = texture2D(gMiscMap, uv).g;\n"
-                "    vec3 MaterialAlbedoTexture = texture2D(gDiffuseMap, uv).rgb;\n"
+                "vec3 CalcLightInternal(in Light currentLight, vec3 LightDir, vec3 PxlWorldPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){//generated\n"
                 "    vec3 LightDiffuseColor     = currentLight.DataD.xyz;\n"
-                "    vec3 LightSpecularColor    = currentLight.DataD.xyz * SpecularStrength;\n"
+                "    vec3 LightSpecularColor    = currentLight.DataD.xyz * Specular;\n"
                 "    vec3 TotalLight            = ConstantZeroVec3;\n"
                 "    vec3 SpecularFactor        = ConstantZeroVec3;\n"
                 "\n"
-                "    float matIDandAO           = texture2D(gNormalMap, uv).b;\n"
-                "    highp int matID            = int(floor(matIDandAO));\n"
-                "    float ssaoValue            = 1.0 - texture2D(gSSAOMap, uv).a;\n"
-                "    float ao                   = (fract(matIDandAO) + 0.0001) * ssaoValue;\n"//the 0.0001 makes up for the clamp in material class
-                "    vec2 stuff                 = UnpackFloat16Into2Floats(texture2D(gNormalMap, uv).a);\n"
-                "    float metalness            = stuff.x;\n"
-                "    float smoothness           = stuff.y;\n"
-                "    float materialAlpha        = materials[matID].g;\n"
+                //"    highp int matID            = int(floor(MatIDAndAO));\n"
+                "    float ao                   = AO * SSAO;\n"//the 0.0001 makes up for the clamp in material class
+                "    float metalness            = MetalSmooth.x;\n"
+                "    float smoothness           = MetalSmooth.y;\n"
+                //"    float materialAlpha        = materials[matID].g;\n"
                 "\n"
-                "    vec3 MaterialF0            = Unpack3FloatsInto1FloatUnsigned(materials[matID].r);\n"
-                "    vec3 F0                    = mix(MaterialF0, MaterialAlbedoTexture, vec3(metalness));\n"
+                //"    vec3 MaterialF0            = Unpack3FloatsInto1FloatUnsigned(materials[matID].r);\n"
+                "    vec3 F0                    = mix(MatF0, Albedo, vec3(metalness));\n"
                 "    vec3 Frensel               = F0;\n"
                 "\n"
                 "    float roughness            = 1.0 - smoothness;\n"
@@ -126,30 +121,30 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
                 "    float VdotN                = clamp(dot(ViewDir, PxlNormal), 0.0, 1.0);\n"
                 "    float VdotH                = clamp(dot(ViewDir, Half), 0.0, 1.0);\n"
                 "\n"
-                "    float MaterialTypeDiffuse  = materials[matID].a;\n"
-                "    float MaterialTypeSpecular = materials[matID].b;\n"
+                //"    float MaterialTypeDiffuse  = materials[matID].a;\n"
+                //"    float MaterialTypeSpecular = materials[matID].b;\n"
                 "\n"
-                "    if(MaterialTypeDiffuse == 2.0){\n"
+                "    if(MatTypeDiffuse == 2.0){\n"
                 "        LightDiffuseColor *= DiffuseOrenNayar(ViewDir, LightDir, NdotL, VdotN, roughnessSquared);\n"
-                "    }else if(MaterialTypeDiffuse == 3.0){\n"
-                "        LightDiffuseColor *= DiffuseAshikhminShirley(smoothness, MaterialAlbedoTexture, NdotL, VdotN);\n"
-                "    }else if(MaterialTypeDiffuse == 4.0){\n"//this is minneart
+                "    }else if(MatTypeDiffuse == 3.0){\n"
+                "        LightDiffuseColor *= DiffuseAshikhminShirley(smoothness, Albedo, NdotL, VdotN);\n"
+                "    }else if(MatTypeDiffuse == 4.0){\n"//this is minneart
                 "        LightDiffuseColor *= pow(VdotN * NdotL, smoothness);\n"
                 "    }\n"
                 "\n"
-                "    if(MaterialTypeSpecular == 1.0){\n"
+                "    if(MatTypeSpecular == 1.0){\n"
                 "        SpecularFactor = SpecularBlinnPhong(smoothness, NdotH);\n"
-                "    }else if(MaterialTypeSpecular == 2.0){\n"
+                "    }else if(MatTypeSpecular == 2.0){\n"
                 "        SpecularFactor = SpecularPhong(smoothness, LightDir, PxlNormal, ViewDir);\n"
-                "    }else if(MaterialTypeSpecular == 3.0){\n"
+                "    }else if(MatTypeSpecular == 3.0){\n"
                 "        SpecularFactor = SpecularGGX(Frensel, LightDir, Half, roughnessSquared, NdotH, F0, NdotL);\n"
-                "    }else if(MaterialTypeSpecular == 4.0){\n"
+                "    }else if(MatTypeSpecular == 4.0){\n"
                 "        SpecularFactor = SpecularCookTorrance(Frensel, F0, VdotH, NdotH, roughnessSquared, VdotN, roughness, NdotL);\n"
-                "    }else if(MaterialTypeSpecular == 5.0){\n"
+                "    }else if(MatTypeSpecular == 5.0){\n"
                 "        SpecularFactor = SpecularGaussian(NdotH, smoothness);\n"
-                "    }else if(MaterialTypeSpecular == 6.0){\n"
+                "    }else if(MatTypeSpecular == 6.0){\n"
                 "        SpecularFactor = vec3(BeckmannDist(NdotH, roughnessSquared));\n"
-                "    }else if(MaterialTypeSpecular == 7.0){\n"
+                "    }else if(MatTypeSpecular == 7.0){\n"
                 "        SpecularFactor = SpecularAshikhminShirley(PxlNormal, Half, NdotH, LightDir, NdotL, VdotN);\n"
                 "    }\n"
                 "    LightDiffuseColor       *= currentLight.DataA.y;\n"
@@ -158,171 +153,17 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
                 "    vec3 componentDiffuse    = ConstantOneVec3 - Frensel;\n"
                 "    componentDiffuse        *= 1.0 - metalness;\n"
                 "\n"
-                "    TotalLight               = (componentDiffuse * ao) * MaterialAlbedoTexture;\n"
+                "    TotalLight               = (componentDiffuse * ao) * Albedo;\n"
                 "    TotalLight              /= KPI;\n"
                 "    TotalLight              += LightSpecularColor;\n"
                 "    TotalLight              *= (LightDiffuseColor * NdotL);\n"
-                "    TotalLight              *= materialAlpha;\n"
+                "    TotalLight              *= MatAlpha;\n"
                 "    return TotalLight;\n"
                 "}\n"
             , "vec3 CalcPointLight(");
         }
     }
 #pragma endregion
-
-#pragma region Projection Light Forward
-    if (ShaderHelper::sfind(code, "CalcProjectionLightForward(")) {
-        if (!ShaderHelper::sfind(code, "vec3 CalcProjectionLightForward(")) {
-            ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec3 CalcProjectionLightForward(in Light currentLight, vec3 A, vec3 B, vec3 PxlWorldPos, in InData inData){//generated\n"
-                /*
-                //TODO: implement
-                "    vec3 BMinusA = B - A;\n"
-                "    vec3 CMinusA = PxlWorldPos - A;\n"
-                "    float Dist = length(BMinusA);\n"
-                "    vec3 _Normal = BMinusA / Dist;\n"
-                "    float t = clamp(dot(CMinusA, _Normal / Dist), 0.0, 1.0);\n"
-                "    vec3 LightPos = A + t * BMinusA;\n"
-                "    vec3 c = CalcPointLightForward(currentLight, LightPos, PxlWorldPos, inData);\n"
-                "    return c;\n"
-                */
-                "    return vec3(0.0);\n"
-                "}\n"
-            , "void main(");
-        }
-    }
-#pragma endregion
-
-#pragma region Rod Light Forward
-    if (ShaderHelper::sfind(code, "CalcRodLightForward(")) {
-        if (!ShaderHelper::sfind(code, "vec3 CalcRodLightForward(")) {
-            ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec3 CalcRodLightForward(in Light currentLight, vec3 A, vec3 B,vec3 PxlWorldPos, in InData inData){//generated\n"
-                "    vec3 BMinusA = B - A;\n"
-                "    vec3 CMinusA = PxlWorldPos - A;\n"
-                "    float Dist = length(BMinusA);\n"
-                "    vec3 _Normal = BMinusA / Dist;\n"
-                "    float t = clamp(dot(CMinusA, _Normal / Dist), 0.0, 1.0);\n"
-                "    vec3 LightPos = A + t * BMinusA;\n"
-                "    vec3 c = CalcPointLightForward(currentLight, LightPos, PxlWorldPos, inData);\n"
-                "    return c;\n"
-                "}\n"
-            , "void main(");
-        }
-    }
-#pragma endregion
-
-#pragma region Spot Light Forward
-    if (ShaderHelper::sfind(code, "CalcSpotLightForward(")) {
-        if (!ShaderHelper::sfind(code, "vec3 CalcSpotLightForward(")) {
-            ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec3 CalcSpotLightForward(in Light currentLight, vec3 SpotLightDir, vec3 LightPos,vec3 PxlWorldPos, in InData inData){//generated\n"
-                "    vec3 LightDir = normalize(LightPos - PxlWorldPos);\n"
-                "    vec3 c = CalcPointLightForward(currentLight, LightPos, PxlWorldPos, inData);\n"
-                "    float cosAngle = dot(LightDir, -SpotLightDir);\n"
-                "    float spotEffect = smoothstep(currentLight.DataE.y, currentLight.DataE.x, cosAngle);\n"
-                "    return c * spotEffect;\n"
-                "}\n"
-            , "vec3 CalcRodLightForward(");
-        }
-    }
-#pragma endregion
-
-#pragma region Point Light Forward
-    if (ShaderHelper::sfind(code, "CalcPointLightForward(")) {
-        if (!ShaderHelper::sfind(code, "vec3 CalcPointLightForward(")) {
-            ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec3 CalcPointLightForward(in Light currentLight, vec3 LightPos,vec3 PxlWorldPos, in InData inData){//generated\n"
-                "    vec3 RawDirection = LightPos - PxlWorldPos;\n"
-                "    float Dist = length(RawDirection);\n"
-                "    vec3 LightDir = RawDirection / Dist;\n"
-                "    vec3 c = CalcLightInternalForward(currentLight, LightDir, PxlWorldPos, inData);\n"
-                "    float attenuation = CalculateAttenuationForward(currentLight,Dist,1.0);\n"
-                "    return c * attenuation;\n"
-                "}\n"
-            , "vec3 CalcSpotLightForward(");
-        }
-    }
-#pragma endregion
-
-#pragma region Lighting Internal Forward Function
-    if (ShaderHelper::sfind(code, "CalcLightInternalForward(")) {
-        if (!ShaderHelper::sfind(code, "vec3 CalcLightInternalForward(")) {
-            ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec3 CalcLightInternalForward(in Light currentLight, vec3 LightDir, vec3 PxlWorldPos, in InData inData){//generated\n"
-                "    float SpecularStrength     = inData.specular;\n"
-                "    vec3 MaterialAlbedoTexture = inData.diffuse.rgb;\n"
-                "    vec3 LightDiffuseColor     = currentLight.DataD.xyz;\n"
-                "    vec3 LightSpecularColor    = currentLight.DataD.xyz * SpecularStrength;\n"
-                "    vec3 TotalLight            = ConstantZeroVec3;\n"
-                "    vec3 SpecularFactor        = ConstantZeroVec3;\n"
-                "\n"
-                //"  float ssaoValue     = 1.0 - texture2D(gSSAOMap, uv).a;\n"
-                //"  float ao            = inData.ao * ssaoValue;\n"
-                "    float ao            = inData.ao;\n"//the 0.0001 makes up for the clamp in material class
-                "    float metalness     = inData.metalness;\n"
-                "    float smoothness    = inData.smoothness;\n"
-                "    float materialAlpha = MaterialBasePropertiesTwo.x;\n"
-                "\n"
-                "    vec3 MaterialF0 = inData.materialF0;\n"
-                "    vec3 F0         = mix(MaterialF0, MaterialAlbedoTexture, vec3(metalness));\n"
-                "    vec3 Frensel    = F0;\n"
-                "\n"
-                "    float roughness        = 1.0 - smoothness;\n"
-                "    float roughnessSquared = roughness * roughness;\n"
-                "\n"
-                "    vec3 ViewDir = normalize(CameraPosition - PxlWorldPos);\n"
-                "    vec3 Half    = normalize(LightDir + ViewDir);\n"
-                "    float NdotL  = clamp(dot(inData.normals, LightDir), 0.0, 1.0);\n"
-                "    float NdotH  = clamp(dot(inData.normals, Half), 0.0, 1.0);\n"
-                "    float VdotN  = clamp(dot(ViewDir,inData.normals), 0.0, 1.0);\n"
-                "    float VdotH  = clamp(dot(ViewDir,Half), 0.0, 1.0);\n"
-                "\n"
-                "    float MaterialTypeDiffuse  = MaterialBasePropertiesTwo.y;\n"
-                "    float MaterialTypeSpecular = MaterialBasePropertiesTwo.z;\n"
-                "\n"
-                "    if(MaterialTypeDiffuse == 2.0){\n"
-                "        LightDiffuseColor *= DiffuseOrenNayar(ViewDir, LightDir, NdotL, VdotN, roughnessSquared);\n"
-                "    }else if(MaterialTypeDiffuse == 3.0){\n"
-                "        LightDiffuseColor *= DiffuseAshikhminShirley(smoothness, MaterialAlbedoTexture, NdotL, VdotN);\n"
-                "    }else if(MaterialTypeDiffuse == 4.0){\n"//this is minneart
-                "        LightDiffuseColor *= pow(VdotN * NdotL, smoothness);\n"
-                "    }\n"
-                "\n"
-                "    if(MaterialTypeSpecular == 1.0){\n"
-                "        SpecularFactor = SpecularBlinnPhong(smoothness, NdotH);\n"
-                "    }else if(MaterialTypeSpecular == 2.0){\n"
-                "        SpecularFactor = SpecularPhong(smoothness, LightDir, inData.normals, ViewDir);\n"
-                "    }else if(MaterialTypeSpecular == 3.0){\n"
-                "        SpecularFactor = SpecularGGX(Frensel, LightDir, Half, roughnessSquared, NdotH, F0, NdotL);\n"
-                "    }else if(MaterialTypeSpecular == 4.0){\n"
-                "        SpecularFactor = SpecularCookTorrance(Frensel, F0, VdotH, NdotH, roughnessSquared, VdotN, roughness, NdotL);\n"
-                "    }else if(MaterialTypeSpecular == 5.0){\n"
-                "        SpecularFactor = SpecularGaussian(NdotH, smoothness);\n"
-                "    }else if(MaterialTypeSpecular == 6.0){\n"
-                "        SpecularFactor = vec3(BeckmannDist(NdotH, roughnessSquared));\n"
-                "    }else if(MaterialTypeSpecular == 7.0){\n"
-                "        SpecularFactor = SpecularAshikhminShirley(inData.normals, Half, NdotH, LightDir, NdotL, VdotN);\n"
-                "    }\n"
-                "    LightDiffuseColor *= currentLight.DataA.y;\n"
-                "    LightSpecularColor *= (SpecularFactor * currentLight.DataA.z);\n"
-                "\n"
-                "    vec3 componentDiffuse = ConstantOneVec3 - Frensel;\n"
-                "    componentDiffuse *= 1.0 - metalness;\n"
-                "\n"
-                "    TotalLight = (componentDiffuse * ao) * MaterialAlbedoTexture;\n"
-                "    TotalLight /= KPI;\n"
-                "    TotalLight += LightSpecularColor;\n"
-                //"    NdotL = pow(NdotL,  2.2);\n" //gamma test. do not use this
-                "    TotalLight *= (LightDiffuseColor * NdotL);\n"
-                "    TotalLight *= materialAlpha;\n"
-                "    return TotalLight;\n"
-                "}\n"
-            , "vec3 CalcPointLightForward(");
-        }
-    }
-#pragma endregion
-
 
 
 #pragma region Diffuse oryen nayar
@@ -408,12 +249,12 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
     if (ShaderHelper::sfind(code, "SpecularGGX(")) {
         if (!ShaderHelper::sfind(code, "vec3 SpecularGGX(")) {
             ShaderHelper::insertStringAtLine(code, 
-                "vec3 SpecularGGX(inout vec3 _Frensel,vec3 _LightDir,vec3 _Half,float _roughnessSquared,float _NdotH,vec3 _F0,float _NdotL){//generated\n"
+                "vec3 SpecularGGX(inout vec3 _Frensel,vec3 _LightDir,vec3 _Half,float _roughnessSquared,float _NdotH,vec3 F0_,float _NdotL){//generated\n"
                 "    float LdotH = max(0.0, dot(_LightDir, _Half));\n"
                 "    float alphaSqr = _roughnessSquared * _roughnessSquared;\n"
                 "    float denom = _NdotH * _NdotH * (alphaSqr - 1.0) + 1.0;\n"
                 "    float NDF = alphaSqr / (KPI * denom * denom);\n"
-                "    _Frensel = SchlickFrensel(LdotH, _F0);\n"
+                "    _Frensel = SchlickFrensel(LdotH, F0_);\n"
                 "    float k = _roughnessSquared * 0.5;\n"
                 "    float k2 = k * k;\n"
                 "    float invk2 = 1.0 - k2;\n"
@@ -512,8 +353,8 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
     if (ShaderHelper::sfind(code, "SchlickFrensel(")) {
         if (!ShaderHelper::sfind(code, "vec3 SchlickFrensel(")) {
             ShaderHelper::insertStringAtLine(code, 
-                "vec3 SchlickFrensel(float theta, vec3 _F0){//generated\n"
-                "    vec3 ret = _F0 + (ConstantOneVec3 - _F0) * pow(1.0 - theta,5.0);\n"
+                "vec3 SchlickFrensel(float theta, vec3 F0_){//generated\n"
+                "    vec3 ret = F0_ + (ConstantOneVec3 - F0_) * pow(1.0 - theta, 5.0);\n"
                 "    return ret;\n"
                 "}\n"
             , 1);
@@ -525,31 +366,7 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
     if (ShaderHelper::sfind(code, "CalculateAttenuation(")) {
         if (!ShaderHelper::sfind(code, "float CalculateAttenuation(")) {
             ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "float CalculateAttenuation(float Dist, float radius){//generated\n"
-                "   float attenuation = 0.0;\n"
-                "   if(light.DataE.z == 0.0){\n"       //constant
-                "       attenuation = 1.0 / max(1.0 , light.DataB.z);\n"
-                "   }else if(light.DataE.z == 1.0){\n" //distance
-                "       attenuation = 1.0 / max(1.0 , Dist);\n"
-                "   }else if(light.DataE.z == 2.0){\n" //distance squared
-                "       attenuation = 1.0 / max(1.0 , Dist * Dist);\n"
-                "   }else if(light.DataE.z == 3.0){\n" //constant linear exponent
-                "       attenuation = 1.0 / max(1.0 , light.DataB.z + (light.DataB.w * Dist) + (light.DataC.x * Dist * Dist));\n"
-                "   }else if(light.DataE.z == 4.0){\n" //distance radius squared
-                "       attenuation = 1.0 / max(1.0 ,pow((Dist / radius) + 1.0,2.0));\n"
-                "   }\n"
-                "   return attenuation;\n"
-                "}\n"
-            , "vec3 CalcLightInternal(");
-        }
-    }
-#pragma endregion
-
-#pragma region Attenuation Forward Function
-    if (ShaderHelper::sfind(code, "CalculateAttenuationForward(")) {
-        if (!ShaderHelper::sfind(code, "float CalculateAttenuationForward(")) {
-            ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "float CalculateAttenuationForward(in Light currentLight, float Dist, float radius){//generated\n"
+                "float CalculateAttenuation(in Light currentLight, float Dist, float radius){//generated\n"
                 "   float attenuation = 0.0;\n"
                 "   if(currentLight.DataE.z == 0.0){\n"       //constant
                 "       attenuation = 1.0 / max(1.0 , currentLight.DataB.z);\n"
@@ -560,11 +377,11 @@ void opengl::glsl::Lighting::convert(std::string& code, unsigned int versionNumb
                 "   }else if(currentLight.DataE.z == 3.0){\n" //constant linear exponent
                 "       attenuation = 1.0 / max(1.0 , currentLight.DataB.z + (currentLight.DataB.w * Dist) + (currentLight.DataC.x * Dist * Dist));\n"
                 "   }else if(currentLight.DataE.z == 4.0){\n" //distance radius squared
-                "       attenuation = 1.0 / max(1.0 ,pow((Dist / radius) + 1.0,2.0));\n"
+                "       attenuation = 1.0 / max(1.0 ,pow((Dist / radius) + 1.0, 2.0));\n"
                 "   }\n"
                 "   return attenuation;\n"
                 "}\n"
-            , "vec3 CalcLightInternalForward(");
+            , "vec3 CalcLightInternal(");
         }
     }
 #pragma endregion
