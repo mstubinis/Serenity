@@ -1168,6 +1168,8 @@ void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport,
     Engine::Renderer::GLEnable(GL_DEPTH_TEST);
     Engine::Renderer::GLEnablei(GL_BLEND, 0); //this is needed for sure
 
+    //m_GBuffer.bindFramebuffers(GBufferType::Bloom, GBufferType::GodRays, "RGBA", false);
+    //Engine::Renderer::Settings::clear(true, true, true); // clear all
     m_GBuffer.bindFramebuffers("", true);
     Engine::Renderer::Settings::clear(false, true, true); // clear depth & stencil only
 }

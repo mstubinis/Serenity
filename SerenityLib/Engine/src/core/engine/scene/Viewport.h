@@ -9,7 +9,7 @@ namespace Engine::priv {
     class RenderModule;
 };
 
-struct ViewportRenderingFlag final { enum Flag: unsigned short {
+struct ViewportRenderingFlag final { enum Flag: uint16_t {
     GodRays      = 1 << 0,
     SSAO         = 1 << 1,
     API2D        = 1 << 2,
@@ -29,21 +29,20 @@ class Viewport final : public Engine::NonCopyable {
     friend class Engine::priv::RenderModule;
     friend class LightProbe;
     private:
-        struct StateFlags final { enum Flag : unsigned char {
+        struct StateFlags final { enum Flag : uint8_t {
             Active              = 1 << 0,
             AspectRatioSynced   = 1 << 1,
             DepthMaskActive     = 1 << 2,
         };};
 
-        Engine::Flag<unsigned char>   m_StateFlags;
-        Engine::Flag<unsigned short>  m_RenderFlags;
-
-        Scene*                        m_Scene               = nullptr;
-        Camera*                       m_Camera              = nullptr;
         glm::vec4                     m_Viewport_Dimensions = glm::vec4(0.0f, 0.0f, 256.0f, 256.0f);
         glm::vec4                     m_BackgroundColor     = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+        Scene*                        m_Scene               = nullptr;
+        Camera*                       m_Camera              = nullptr;
         float                         m_DepthMaskValue      = 50.0f;
-        unsigned int                  m_ID                  = 0;
+        uint32_t                      m_ID                  = 0;
+        Engine::Flag<uint16_t>        m_RenderFlags;
+        Engine::Flag<uint8_t>         m_StateFlags;
 
         Viewport();
     public:
@@ -54,10 +53,10 @@ class Viewport final : public Engine::NonCopyable {
 
         ~Viewport() {}
 
-        inline CONSTEXPR unsigned int id() const noexcept { return m_ID; }
-        inline void setID(unsigned int id) noexcept { m_ID = id; }
+        inline CONSTEXPR uint32_t id() const noexcept { return m_ID; }
+        inline void setID(uint32_t id) noexcept { m_ID = id; }
 
-        inline Engine::Flag<unsigned short> getRenderFlags() const noexcept { return m_RenderFlags; }
+        inline Engine::Flag<uint16_t> getRenderFlags() const noexcept { return m_RenderFlags; }
         inline void setRenderFlag(ViewportRenderingFlag::Flag flag) noexcept { m_RenderFlags = flag; }
         inline void addRenderFlag(ViewportRenderingFlag::Flag flag) noexcept { m_RenderFlags.add(flag); }
         inline void removeRenderFlag(ViewportRenderingFlag::Flag flag) noexcept { m_RenderFlags.remove(flag); }

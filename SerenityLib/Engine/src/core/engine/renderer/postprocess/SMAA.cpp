@@ -103,7 +103,7 @@ bool Engine::priv::SMAA::init_shaders() {
         "uniform SAMPLER_TYPE_2D texturePredication;\n"
         "\n"
         "uniform vec4 SMAAInfo1Floats;\n" //SMAA_THRESHOLD,SMAA_DEPTH_THRESHOLD,SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR,SMAA_PREDICATION_THRESHOLD
-        "uniform vec4 SMAAInfo1FloatsA;\n" //SMAA_PREDICATION_SCALE,SMAA_PREDICATION_STRENGTH
+        "uniform vec2 SMAAInfo1FloatsA;\n" //SMAA_PREDICATION_SCALE,SMAA_PREDICATION_STRENGTH
         "\n"
         "varying vec2 uv;\n"
         "varying vec4 _offset[3];\n"
@@ -603,7 +603,7 @@ void Engine::priv::SMAA::init() {
     Texture::setWrapping(TextureType::Texture2D, TextureWrap::ClampToBorder);
 }
 void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, uint32_t sceneTexture, uint32_t outTexture, const Engine::priv::RenderModule& renderer) {
-    gbuffer.bindFramebuffers(outTexture); //probably the lighting buffer
+    gbuffer.bindFramebuffers(outTexture, "RGBA"); //probably the lighting buffer
     renderer.bind(m_Shader_Programs[PassStage::Edge].get<ShaderProgram>());
 
     Engine::Renderer::Settings::clear(true, false, true);//lighting rgba, stencil is completely filled with 0's
@@ -633,7 +633,7 @@ void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec
     Engine::Renderer::stencilOp(GL_KEEP, GL_KEEP, GL_KEEP); //Do not change stencil
 }
 void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, uint32_t outTexture, const Engine::priv::RenderModule& renderer) {
-    gbuffer.bindFramebuffers(TEXTURE_INTERMEDIARY);
+    gbuffer.bindFramebuffers(TEXTURE_INTERMEDIARY, "RGBA");
     Engine::Renderer::Settings::clear(true, false, false); //clear color only
 
     renderer.bind(m_Shader_Programs[PassStage::Blend].get<ShaderProgram>());

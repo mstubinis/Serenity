@@ -390,10 +390,10 @@ normal = tangentToView * normal;
     "    SUBMIT_DIFFUSE(inData.diffuse);\n"
     "    SUBMIT_NORMALS(encodedNormals);\n"
     "    SUBMIT_MATERIAL_ID_AND_AO(0.0, 0.0);\n"
-    "    SUBMIT_METALNESS_AND_SMOOTHNESS(0.0);\n"
+    //"    SUBMIT_METALNESS_AND_SMOOTHNESS(0.0);\n"
     "    SUBMIT_GLOW(inData.glow);\n"
-    "    SUBMIT_SPECULAR(inData.specular);\n"
-    "    SUBMIT_GOD_RAYS_COLOR(GodRays.r, GodRays.g, GodRays.b);\n"
+    //"    SUBMIT_SPECULAR(inData.specular);\n"
+    //"    SUBMIT_GOD_RAYS_COLOR(GodRays.r, GodRays.g, GodRays.b);\n"
     "    gl_FragData[3] = inData.diffuse;\n"
     "}";
 #pragma endregion
@@ -811,18 +811,19 @@ priv::EShaders::forward_frag =
              //GI here
     "        vec3 inGIContribution = Unpack3FloatsInto1FloatUnsigned(ScreenData.x);\n" //x = diffuse, y = specular, z = global
     "        lightTotal           += CalcGILight(SSAO, inData.normals, inData.diffuse.xyz, WorldPosition, AO, MetalSmooth.x, MetalSmooth.y, inData.glow, inData.materialF0, MaterialBasePropertiesTwo.x, inGIContribution).rgb;\n"
-    "        inData.diffuse.rgb    = lightTotal;\n"
+    "    }else{\n"
+    "        lightTotal = inData.diffuse.rgb;\n"
     "    }\n"
     "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
     "    vec4 GodRays = Unpack32BitUIntTo4ColorFloats(Gods_Rays_Color);\n"
-    "    SUBMIT_DIFFUSE(inData.diffuse);\n"
+    "    SUBMIT_DIFFUSE(vec4(lightTotal.rgb, inData.diffuse.a));\n"
     "    SUBMIT_NORMALS(inData.normals);\n"
     "    SUBMIT_MATERIAL_ID_AND_AO(0.0, 0.0);\n"
-    "    SUBMIT_METALNESS_AND_SMOOTHNESS(0.0);\n"
+    //"    SUBMIT_METALNESS_AND_SMOOTHNESS(0.0);\n"
     "    SUBMIT_GLOW(inData.glow);\n"
-    "    SUBMIT_SPECULAR(inData.specular);\n"
-    "    SUBMIT_GOD_RAYS_COLOR(GodRays.r, GodRays.g, GodRays.b);\n"
-    "    gl_FragData[3] = inData.diffuse;\n"
+    //"    SUBMIT_SPECULAR(inData.specular);\n"
+    //"    SUBMIT_GOD_RAYS_COLOR(GodRays.r, GodRays.g, GodRays.b);\n"
+    "    gl_FragData[3] = vec4(lightTotal.rgb, inData.diffuse.a);\n"
     "}";
 #pragma endregion
 
@@ -862,7 +863,7 @@ for (uint32_t i = 1; i < std::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX
 
     priv::EShaders::particle_frag += "";
 
-    for (unsigned int i = 1; i < std::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
+    for (uint32_t i = 1; i < std::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
         priv::EShaders::particle_frag +=
             "    else if (MaterialIndex == " + std::to_string(i) + "U)\n"
             "        finalColor *= texture2D(DiffuseTexture" + std::to_string(i) + ", UV); \n";
@@ -913,7 +914,6 @@ priv::EShaders::deferred_frag =
     "\n"
     "uniform Component   components[MAX_MATERIAL_COMPONENTS];\n"
     "uniform int         numComponents;\n"
-    "\n"
     "\n"
     "uniform vec4        MaterialBasePropertiesOne;\n"//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
     "uniform vec4        MaterialBasePropertiesTwo;\n"//x = BaseAlpha, y = diffuseModel, z = specularModel, w = UNUSED

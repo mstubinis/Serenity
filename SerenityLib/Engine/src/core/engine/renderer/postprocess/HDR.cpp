@@ -20,7 +20,6 @@ bool Engine::priv::HDR::init_shaders() {
     m_GLSL_frag_code =
         "\n"
         "uniform SAMPLER_TYPE_2D lightingBuffer;\n"
-        "uniform SAMPLER_TYPE_2D gDiffuseMap;\n"
         "uniform SAMPLER_TYPE_2D gGodsRaysMap;\n"
         "\n"
         "varying vec2 texcoords;\n"
@@ -30,7 +29,6 @@ bool Engine::priv::HDR::init_shaders() {
         "\n"
         "vec3 uncharted(vec3 x,float a,float b,float c,float d,float e,float f){ return vec3(((x*(a*x+c*b)+d*e)/(x*(a*x+b)+d*f))-e/f); }\n"
         "void main(){\n"
-        "    vec3 diffuse = texture2D(USE_SAMPLER_2D(gDiffuseMap), texcoords).rgb;\n"
         "    vec3 lighting = texture2D(USE_SAMPLER_2D(lightingBuffer), texcoords).rgb;\n"
         "    if(HDRInfo.w > 0.0){\n"//has hdr?
         "        if(HDRInfo.w == 1.0){\n"// Reinhard tone mapping
@@ -76,12 +74,10 @@ void Engine::priv::HDR::pass(GBuffer& gbuffer, const Viewport& viewport, uint32_
     Engine::Renderer::sendUniform1Safe("HasGodRays", (int)godRays);
 
     Engine::Renderer::sendTextureSafe("lightingBuffer", gbuffer.getTexture(GBufferType::Lighting), 0);
-    Engine::Renderer::sendTextureSafe("gDiffuseMap", gbuffer.getTexture(GBufferType::Diffuse), 1);
-    Engine::Renderer::sendTextureSafe("gGodsRaysMap", gbuffer.getTexture(GBufferType::GodRays), 2);
+    Engine::Renderer::sendTextureSafe("gGodsRaysMap", gbuffer.getTexture(GBufferType::GodRays), 1);
 
     Engine::Renderer::renderFullscreenQuad();
 
     Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
     Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(2, GL_TEXTURE_2D);
 }
