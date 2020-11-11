@@ -378,20 +378,18 @@ normal = tangentToView * normal;
     "    for (int j = 0; j < numComponents; ++j) {\n"
     "        ProcessComponent(components[j], inData);\n"
     "    }\n"
-    "    vec2 encodedNormals = EncodeOctahedron(inData.normals);\n" //yes these two lines are evil and not needed, but they sync up the results with the deferred pass...
-    "    inData.normals = DecodeOctahedron(encodedNormals);\n"
     "    if(Shadeless == 1){\n"
-    "        encodedNormals = ConstantOneVec2;\n"
+    "        inData.normals = ConstantOneVec3;\n"
     "        inData.diffuse *= (1.0 + inData.glow);\n" // we want shadeless items to be influenced by the glow somewhat...
     "    }\n"
     "    vec4 GodRays = Unpack32BitUIntTo4ColorFloats(Gods_Rays_Color);\n"
     "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
     "\n"
     "    SUBMIT_DIFFUSE(inData.diffuse);\n"
-    "    SUBMIT_NORMALS(encodedNormals);\n"
+    "    SUBMIT_NORMALS(1.0, 1.0);\n"
     "    SUBMIT_MATERIAL_ID_AND_AO(0.0, 0.0);\n"
     //"    SUBMIT_METALNESS_AND_SMOOTHNESS(0.0);\n"
-    "    SUBMIT_GLOW(inData.glow);\n"
+    "    SUBMIT_GLOW(0.0);\n"
     //"    SUBMIT_SPECULAR(inData.specular);\n"
     //"    SUBMIT_GOD_RAYS_COLOR(GodRays.r, GodRays.g, GodRays.b);\n"
     "    gl_FragData[3] = inData.diffuse;\n"
@@ -817,10 +815,10 @@ priv::EShaders::forward_frag =
     "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
     "    vec4 GodRays = Unpack32BitUIntTo4ColorFloats(Gods_Rays_Color);\n"
     "    SUBMIT_DIFFUSE(vec4(lightTotal.rgb, inData.diffuse.a));\n"
-    "    SUBMIT_NORMALS(inData.normals);\n"
+    "    SUBMIT_NORMALS(1.0, 1.0);\n"
     "    SUBMIT_MATERIAL_ID_AND_AO(0.0, 0.0);\n"
     //"    SUBMIT_METALNESS_AND_SMOOTHNESS(0.0);\n"
-    "    SUBMIT_GLOW(inData.glow);\n"
+    "    SUBMIT_GLOW(0.0);\n"
     //"    SUBMIT_SPECULAR(inData.specular);\n"
     //"    SUBMIT_GOD_RAYS_COLOR(GodRays.r, GodRays.g, GodRays.b);\n"
     "    gl_FragData[3] = vec4(lightTotal.rgb, inData.diffuse.a);\n"
@@ -834,10 +832,10 @@ priv::EShaders::forward_frag =
 
     "uniform SAMPLER_TYPE_2D DiffuseTexture0;\n";
 
-for (uint32_t i = 1; i < std::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
-    priv::EShaders::particle_frag +=
-     "uniform SAMPLER_TYPE_2D DiffuseTexture" + std::to_string(i) + ";\n";
-}
+    for (uint32_t i = 1; i < std::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
+        priv::EShaders::particle_frag +=
+         "uniform SAMPLER_TYPE_2D DiffuseTexture" + std::to_string(i) + ";\n";
+    }
 
     priv::EShaders::particle_frag +=
 

@@ -79,12 +79,12 @@ void opengl::glsl::Compression::convert(std::string& code, unsigned int versionN
     if (ShaderHelper::sfind(code, "Pack2FloatIntoFloat16")) {
         if (!ShaderHelper::sfind(code, "float Pack2FloatIntoFloat16")) {
             ShaderHelper::insertStringAtLine(code, 
-                "float Pack2FloatIntoFloat16(float x,float y){\n"
-                "    x = clamp(x,0.0001,0.9999);\n"
-                "    y = clamp(y,0.0001,0.9999);\n"
-                "    float _x = (x + 1.0) * 0.5;\n"
-                "    float _y = (y + 1.0) * 0.5;\n"
-                "    return floor(_x * 100.0) + _y;\n"
+                "float Pack2FloatIntoFloat16(float x, float y){\n"
+                "    x = clamp(x, 0.0001, 0.9999);\n"
+                "    y = clamp(y, 0.0001, 0.9999);\n"
+                "    float x_ = (x + 1.0) * 0.5;\n"
+                "    float y_ = (y + 1.0) * 0.5;\n"
+                "    return floor(x_ * 100.0) + y_;\n"
                 "}\n"
             , 1);
         }
