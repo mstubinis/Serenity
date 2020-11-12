@@ -52,7 +52,7 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
         if (!ShaderHelper::sfind(code, "void SUBMIT_GLOW(")) {
             ShaderHelper::insertStringRightBeforeMainFunc(code,
                 "void SUBMIT_GLOW(float glow){\n"
-                "    gl_FragData[2].r = glow;\n"
+                "    gl_FragData[1].a = glow;\n"
                 "}\n"
             );
         }
@@ -95,11 +95,11 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
         if (!ShaderHelper::sfind(code, "void SUBMIT_METALNESS_AND_SMOOTHNESS(")) {
             ShaderHelper::insertStringRightBeforeMainFunc(code,
                 "void SUBMIT_METALNESS_AND_SMOOTHNESS(float inMetal, float inSmooth){\n"
-                "    float PackedMetalSmooth = Pack2FloatIntoFloat16(inMetal, inSmooth);\n"
-                "    gl_FragData[1].a = PackedMetalSmooth;\n"
+                "    float PackedMetalSmooth = Pack2NibblesInto8BitChannel(inMetal, inSmooth);\n"
+                "    gl_FragData[2].r = PackedMetalSmooth;\n"
                 "}\n"
                 "void SUBMIT_METALNESS_AND_SMOOTHNESS(float inPackedMetalSmooth){\n"
-                "    gl_FragData[1].a = inPackedMetalSmooth;\n"
+                "    gl_FragData[2].r = inPackedMetalSmooth;\n"
                 "}\n"
             );
         }
