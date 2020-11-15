@@ -377,7 +377,7 @@ void Engine::priv::MeshLoader::SaveTo_OBJCC(VertexData& vertexData, std::string 
 
     //header - should only be 3 entries, one for m_Vertices , one for m_Indices, and one to tell if animation data is present or not
     std::vector<uint32_t>   sizes(3);
-    sizes[0] = (uint32_t)vertexData.m_DataSizes[0];
+    sizes[0] = (uint32_t)vertexData.m_Data[0].m_Size;
     sizes[1] = (uint32_t)vertexData.m_Indices.size();
     if (vertexData.m_Data.size() > 5) { //vertices contain animation data
         sizes[2] = 1;

@@ -8,11 +8,17 @@
 
 constexpr uint32_t MESH_DEFAULT_MODIFICATION_FLAGS = MeshModifyFlags::None | MeshModifyFlags::UploadToGPU;
 
+struct VertexAttrDataBuffer final {
+    std::vector<uint8_t>  m_Buffer;
+    size_t                m_Size = 0;
+
+    inline void clear() noexcept { m_Buffer.clear(); m_Size = 0; }
+};
+
 struct VertexData final {
     VertexDataFormat                               m_Format;
-    std::vector<std::vector<uint8_t>>              m_Data;
-    std::vector<size_t>                            m_DataSizes;
-    std::vector<unsigned int>                      m_Indices;
+    std::vector<VertexAttrDataBuffer>              m_Data;
+    std::vector<uint32_t>                          m_Indices;
     std::vector<Engine::priv::Triangle>            m_Triangles;
     std::vector<std::unique_ptr<BufferObject>>     m_Buffers;
     GLuint                                         m_VAO        = 0;
@@ -31,10 +37,8 @@ struct VertexData final {
         if (attributeIndex >= m_Data.size()) {
             return {};
         }
-        auto* buffer           = (m_Data[attributeIndex].data());
-        const T* data_as_t_ptr = reinterpret_cast<const T*>(buffer);
-        const std::vector<T> data_as_t(data_as_t_ptr, data_as_t_ptr + m_DataSizes[attributeIndex]);
-        return data_as_t;
+        const T* data_ptr = reinterpret_cast<const T*>(m_Data[attributeIndex].m_Buffer.data());
+        return { data_ptr, data_ptr + m_Data[attributeIndex].m_Size };
     }
     template<typename T> 
     void setData(size_t attributeIndex, const T* source_new_data, size_t bufferCount, MeshModifyFlags::Flag flags = (MeshModifyFlags::Flag)MESH_DEFAULT_MODIFICATION_FLAGS) noexcept {
@@ -44,13 +48,13 @@ struct VertexData final {
         if (attributeIndex >= m_Data.size()) {
             return;
         }
-        auto& destination_data = m_Data[attributeIndex];
+        auto& destination_data = m_Data[attributeIndex].m_Buffer;
         const auto totalSize   = (bufferCount * sizeof(T));
         destination_data.clear();
         destination_data.reserve(totalSize);
         const uint8_t* raw_src_data_uchar = reinterpret_cast<const uint8_t*>(source_new_data);
         std::copy(raw_src_data_uchar, raw_src_data_uchar + totalSize, std::back_inserter(destination_data));
-        m_DataSizes[attributeIndex] = bufferCount;
+        m_Data[attributeIndex].m_Size = bufferCount;
         if (flags & MeshModifyFlags::UploadToGPU) {
             if (m_Format.m_InterleavingType == VertexAttributeLayout::Interleaved) {
                 sendDataToGPU(flags & MeshModifyFlags::Orphan, -1);
@@ -69,11 +73,11 @@ struct VertexData final {
         if (attributeIndex >= m_Data.size()) {
             return;
         }
-        auto& destination_data = m_Data[attributeIndex];
+        auto& destination_data = m_Data[attributeIndex].m_Buffer;
         destination_data.clear();
         destination_data.reserve(source_new_data_amount);
         std::copy(buffer, buffer + source_new_data_amount, std::back_inserter(destination_data));
-        m_DataSizes[attributeIndex] = vertexCount;
+        m_Data[attributeIndex].m_Size = vertexCount;
         if (flags & MeshModifyFlags::UploadToGPU) {
             if (m_Format.m_InterleavingType == VertexAttributeLayout::Interleaved) {
                 sendDataToGPU(flags & MeshModifyFlags::Orphan, -1);
@@ -83,7 +87,7 @@ struct VertexData final {
         }
     }
 
-    void setIndices(const unsigned int* data, size_t bufferCount, MeshModifyFlags::Flag flags);
+    void setIndices(const uint32_t* data, size_t bufferCount, MeshModifyFlags::Flag flags);
 
     void clearData();
 

@@ -8,13 +8,11 @@ VertexData::VertexData(VertexDataFormat& format)
 {
     const auto attributesSize{ format.m_Attributes.size() };
     m_Data.resize(attributesSize);
-    m_DataSizes.resize(attributesSize, 0);
     m_Buffers.push_back(std::make_unique<VertexBufferObject>());
 }
 VertexData::VertexData(VertexData&& other) noexcept
     : m_Format    { std::move(other.m_Format) }
     , m_Data      { std::move(other.m_Data) }
-    , m_DataSizes { std::move(other.m_DataSizes) }
     , m_Indices   { std::move(other.m_Indices) }
     , m_Triangles { std::move(other.m_Triangles) }
     , m_Buffers   { std::move(other.m_Buffers) }
@@ -23,7 +21,6 @@ VertexData::VertexData(VertexData&& other) noexcept
 VertexData& VertexData::operator=(VertexData&& other) noexcept {
     m_Format      = std::move(other.m_Format);
     m_Data        = std::move(other.m_Data);
-    m_DataSizes   = std::move(other.m_DataSizes);
     m_Indices     = std::move(other.m_Indices);
     m_Triangles   = std::move(other.m_Triangles);
     m_Buffers     = std::move(other.m_Buffers);
@@ -37,7 +34,6 @@ void VertexData::clearData() {
     for (size_t i = 0; i < m_Data.size(); ++i) {
         m_Data[i].clear();
     }
-    m_DataSizes.resize(m_DataSizes.size(), 0);
     m_Indices.clear();
     m_Triangles.clear();
 }
@@ -93,14 +89,14 @@ std::vector<glm::vec3> VertexData::getPositions() const {
     return points;
 }
 
-void VertexData::setIndices(const unsigned int* data, size_t bufferCount, MeshModifyFlags::Flag flags) {
+void VertexData::setIndices(const uint32_t* data, size_t bufferCount, MeshModifyFlags::Flag flags) {
     if (m_Buffers.size() == 1) {
         m_Buffers.push_back(std::make_unique<ElementBufferObject>());
     }
     if (data != m_Indices.data()) {
         m_Indices.clear();
         m_Indices.reserve(bufferCount);
-        for (unsigned int i = 0; i < bufferCount; ++i) {
+        for (uint32_t i = 0; i < bufferCount; ++i) {
             m_Indices.emplace_back(data[i]);
         }
     }
@@ -152,15 +148,15 @@ void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
     size_t size = 0;
     std::vector<uint8_t> gpu_data_buffer;
     if (m_Format.m_InterleavingType == VertexAttributeLayout::Interleaved) {
-        size = (m_Format.m_Attributes[0].stride * m_DataSizes[0]);
+        size = (m_Format.m_Attributes[0].stride * m_Data[0].m_Size);
         gpu_data_buffer.reserve(size);
-        for (size_t i = 0; i < m_DataSizes[0]; ++i) {
+        for (size_t i = 0; i < m_Data[0].m_Size; ++i) {
             for (size_t attribute_index = 0; attribute_index < m_Data.size(); ++attribute_index) {
                 const auto& sizeofT     = m_Format.m_Attributes[attribute_index].typeSize;
                 auto* gpu_destination   = &(gpu_data_buffer.data())[accumulator];
                 const auto at           = i * sizeofT;
                 auto& src_data          = m_Data[attribute_index];
-                auto* cpu_source        = &(src_data.data())[at];
+                auto* cpu_source        = &(src_data.m_Buffer.data())[at];
                 std::memcpy(gpu_destination, cpu_source, sizeofT);
                 accumulator            += sizeofT;
             }
@@ -169,28 +165,28 @@ void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
     }else{
         if (attributeIndex == -1) {
             for (size_t attribute_index = 0; attribute_index < m_Data.size(); ++attribute_index) {
-                size += m_Format.m_Attributes[attribute_index].typeSize * m_DataSizes[attribute_index];
+                size += m_Format.m_Attributes[attribute_index].typeSize * m_Data[attribute_index].m_Size;
             }
             gpu_data_buffer.reserve(size);
             for (size_t attribute_index = 0; attribute_index < m_Data.size(); ++attribute_index) {
-                const auto blockSize  = m_DataSizes[attribute_index] * m_Format.m_Attributes[attribute_index].typeSize;
+                const auto blockSize  = m_Data[attribute_index].m_Size * m_Format.m_Attributes[attribute_index].typeSize;
                 auto* gpu_destination = &(gpu_data_buffer.data())[accumulator];
                 auto& src_data        = m_Data[attribute_index];
-                auto* cpu_source      = &(src_data.data())[0];
+                auto* cpu_source      = &(src_data.m_Buffer.data())[0];
                 std::memcpy(gpu_destination, cpu_source, blockSize);
                 accumulator          += blockSize;
             }
             (!orphan) ? vertexBuffer.setData(size, gpu_data_buffer.data(), BufferDataDrawType::Dynamic) : vertexBuffer.setDataOrphan(gpu_data_buffer.data());
         }else{
-            size += (m_Format.m_Attributes[attributeIndex].typeSize * m_DataSizes[attributeIndex]);
+            size += (m_Format.m_Attributes[attributeIndex].typeSize * m_Data[attributeIndex].m_Size);
             gpu_data_buffer.reserve(size);
             for (size_t attribute_index = 0; attribute_index < m_Data.size(); ++attribute_index) {
                 if (attribute_index != attributeIndex) {
-                    accumulator += m_DataSizes[attribute_index] * m_Format.m_Attributes[attribute_index].typeSize;
+                    accumulator += m_Data[attribute_index].m_Size * m_Format.m_Attributes[attribute_index].typeSize;
                 }else{
                     auto* gpu_destination     = &(gpu_data_buffer.data())[0];
                     auto& src_data            = m_Data[attribute_index];
-                    auto* cpu_source          = &(src_data.data())[0];
+                    auto* cpu_source          = &(src_data.m_Buffer.data())[0];
                     std::memcpy(gpu_destination, cpu_source, size);
                     break;
                 }

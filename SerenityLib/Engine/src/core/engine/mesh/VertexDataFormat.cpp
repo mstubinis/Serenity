@@ -17,7 +17,7 @@ void VertexDataFormat::bind(const VertexData& vertData) const {
             const auto& attribute = m_Attributes[i];
             glEnableVertexAttribArray((GLuint)i);
             glVertexAttribPointer((GLuint)i, attribute.size, attribute.type, attribute.normalized, 0, (void*)accumulator);
-            accumulator += vertData.m_DataSizes[i] * attribute.typeSize;
+            accumulator += vertData.m_Data[i].m_Size * attribute.typeSize;
         }
     }
 }
