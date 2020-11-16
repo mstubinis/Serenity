@@ -647,13 +647,13 @@ void DeferredPipeline::sendGPUDataAllLights(Scene& scene, Camera& camera) {
             ++i;
         }
     };
-    lambda(Engine::priv::InternalScenePublicInterface::GetSunLights(scene));
-    lambda(Engine::priv::InternalScenePublicInterface::GetDirectionalLights(scene));
-    lambda(Engine::priv::InternalScenePublicInterface::GetPointLights(scene));
+    lambda(Engine::priv::InternalScenePublicInterface::GetLights<SunLight>(scene));
+    lambda(Engine::priv::InternalScenePublicInterface::GetLights<DirectionalLight>(scene));
+    lambda(Engine::priv::InternalScenePublicInterface::GetLights<PointLight>(scene));
 
-    lambda(Engine::priv::InternalScenePublicInterface::GetSpotLights(scene));
-    lambda(Engine::priv::InternalScenePublicInterface::GetRodLights(scene));
-    lambda(Engine::priv::InternalScenePublicInterface::GetProjectionLights(scene));
+    lambda(Engine::priv::InternalScenePublicInterface::GetLights<SpotLight>(scene));
+    lambda(Engine::priv::InternalScenePublicInterface::GetLights<RodLight>(scene));
+    lambda(Engine::priv::InternalScenePublicInterface::GetLights<ProjectionLight>(scene));
 }
 void DeferredPipeline::sendGPUDataGI(Skybox* skybox) {
     const auto maxTextures = getMaxNumTextureUnits() - 1U;
@@ -1350,24 +1350,24 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
     Engine::Renderer::setDepthFunc(GL_GEQUAL);
     Engine::Renderer::GLEnable(GL_DEPTH_TEST);
     
-    for (const auto& light : InternalScenePublicInterface::GetPointLights(scene)) {
+    for (const auto& light : InternalScenePublicInterface::GetLights<PointLight>(scene)) {
         renderPointLight(camera, *light);
     }
-    for (const auto& light : InternalScenePublicInterface::GetSpotLights(scene)) {
+    for (const auto& light : InternalScenePublicInterface::GetLights<SpotLight>(scene)) {
         renderSpotLight(camera, *light);
     }
-    for (const auto& light : InternalScenePublicInterface::GetRodLights(scene)) {
+    for (const auto& light : InternalScenePublicInterface::GetLights<RodLight>(scene)) {
         renderRodLight(camera, *light);
     }
-    for (const auto& light : InternalScenePublicInterface::GetProjectionLights(scene)) {
+    for (const auto& light : InternalScenePublicInterface::GetLights<ProjectionLight>(scene)) {
         renderProjectionLight(camera, *light);
     }
     Engine::Renderer::setDepthFunc(GL_LEQUAL);
     Engine::Renderer::GLDisable(GL_DEPTH_TEST);
-    for (const auto& light : InternalScenePublicInterface::GetSunLights(scene)) {
+    for (const auto& light : InternalScenePublicInterface::GetLights<SunLight>(scene)) {
         renderSunLight(camera, *light, viewport);
     }
-    for (const auto& light : InternalScenePublicInterface::GetDirectionalLights(scene)) {
+    for (const auto& light : InternalScenePublicInterface::GetLights<DirectionalLight>(scene)) {
         renderDirectionalLight(camera, *light, viewport);
     }
     Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);

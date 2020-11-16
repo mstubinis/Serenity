@@ -25,8 +25,9 @@ namespace Engine::priv {
                 SAFE_DELETE_VECTOR(m_Lights);
             }
 
-            template<typename ... ARGS> inline Engine::view_ptr<LIGHT> createLight(ARGS&& ... args) {
-                return static_cast<LIGHT*>(m_Lights.emplace_back(NEW LIGHT(std::forward<ARGS>(args)...)));
+            template<typename ... ARGS> 
+            inline Engine::view_ptr<LIGHT> createLight(ARGS&& ... args) { 
+                return m_Lights.emplace_back(NEW LIGHT(std::forward<ARGS>(args)...)); 
             }
 
             void deleteLight(LIGHT* light) noexcept {
@@ -41,7 +42,7 @@ namespace Engine::priv {
                 SAFE_DELETE(light);
             }
 
-            void set_shadow(LIGHT* light, bool isShadowCaster) {
+            void setShadowCaster(LIGHT* light, bool isShadowCaster) {
                 if (isShadowCaster){
                     for (const auto itr : m_LightsShadows) {
                         if (itr == light) {
@@ -59,6 +60,7 @@ namespace Engine::priv {
             size_t size() const noexcept override { return m_Lights.size(); }
 
             inline LIGHT* operator[](size_t idx) noexcept { return m_Lights[idx]; }
+            inline const LIGHT* operator[](size_t idx) const noexcept { return m_Lights[idx]; }
 
             inline const std::vector<LIGHT*>& getShadowCasters() const noexcept { return m_LightsShadows; }
 

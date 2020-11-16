@@ -49,16 +49,8 @@ class Scene: public Observer {
         mutable std::vector<Camera*>                                  m_Cameras;
         mutable std::vector<std::vector<Engine::priv::RenderGraph>>   m_RenderGraphs;
 
-
         mutable Engine::priv::LightsModule                            m_LightsModule;
-        /*
-        mutable std::vector<SunLight*>                                m_SunLights;
-        mutable std::vector<DirectionalLight*>                        m_DirectionalLights;
-        mutable std::vector<PointLight*>                              m_PointLights;
-        mutable std::vector<SpotLight*>                               m_SpotLights;
-        mutable std::vector<RodLight*>                                m_RodLights;
-        mutable std::vector<ProjectionLight*>                         m_ProjectionLights;
-        */
+
         UpdateFP                                                      m_OnUpdateFunctor     = [](Scene*, const float) {};
         std::string                                                   m_Name                = "";
         uint32_t                                                      m_ID                  = 0;
@@ -83,38 +75,14 @@ class Scene: public Observer {
         inline CONSTEXPR const std::string& name() const noexcept { return m_Name; }
 
 
-        template<class LIGHT, typename ... ARGS> inline Engine::view_ptr<LIGHT> createLight(ARGS&& ... args) {
-            return m_LightsModule.createLight<LIGHT>(std::forward<ARGS>(args)...);
+        template<class LIGHT, typename ... ARGS> 
+        inline Engine::view_ptr<LIGHT> createLight(ARGS&& ... args) {
+            return m_LightsModule.createLight<LIGHT>(this, std::forward<ARGS>(args)...);
         }
-        template<class LIGHT> inline void deleteLight(LIGHT* light) noexcept { m_LightsModule.deleteLight(light); }
-        /*
-        template<typename ... ARGS> inline Engine::view_ptr<SunLight> createSunLight(ARGS&& ... args) {
-            return m_SunLights.emplace_back(NEW SunLight(this, std::forward<ARGS>(args)...));
+        template<class LIGHT> 
+        inline void deleteLight(LIGHT* light) noexcept { 
+            m_LightsModule.deleteLight(light); 
         }
-        template<typename ... ARGS> inline Engine::view_ptr<DirectionalLight> createDirectionalLight(ARGS&& ... args) {
-            return m_DirectionalLights.emplace_back(NEW DirectionalLight(this, std::forward<ARGS>(args)...));
-        }
-        template<typename ... ARGS> inline Engine::view_ptr<PointLight> createPointLight(ARGS&& ... args) {
-            return m_PointLights.emplace_back(NEW PointLight(this, std::forward<ARGS>(args)...));
-        }
-        template<typename ... ARGS> inline Engine::view_ptr<SpotLight> createSpotLight(ARGS&& ... args) {
-            return m_SpotLights.emplace_back(NEW SpotLight(this, std::forward<ARGS>(args)...));
-        }
-        template<typename ... ARGS> inline Engine::view_ptr<RodLight> createRodLight(ARGS&& ... args) {
-            return m_RodLights.emplace_back(NEW RodLight(this, std::forward<ARGS>(args)...));
-        }
-        template<typename ... ARGS> inline Engine::view_ptr<ProjectionLight> createProjectionLight(ARGS&& ... args) {
-            return m_ProjectionLights.emplace_back(NEW ProjectionLight(this, std::forward<ARGS>(args)...));
-        }
-        */
-        /*
-        void deleteSunLight(SunLight* light);
-        void deleteDirectionalLight(DirectionalLight* light);
-        void deletePointLight(PointLight* light);
-        void deleteSpotLight(SpotLight* light);
-        void deleteRodLight(RodLight* light);
-        void deleteProjectionLight(ProjectionLight* light);
-        */
 
         void clearAllEntities() noexcept;
         void update(const float dt);
@@ -173,18 +141,10 @@ namespace Engine::priv {
         static std::vector<Camera*>&             GetCameras(const Scene& scene);
 
 
-
         template<class LIGHT>
-        const Engine::priv::LightContainer<LIGHT>& GetLights(const Scene& scene) const noexcept { return scene.m_LightsModule.getLights<LIGHT>(); }
-
-        static std::vector<SunLight*>&           GetSunLights(const Scene& scene);
-        static std::vector<DirectionalLight*>&   GetDirectionalLights(const Scene& scene);
-        static std::vector<PointLight*>&         GetPointLights(const Scene& scene);
-        static std::vector<SpotLight*>&          GetSpotLights(const Scene& scene);
-        static std::vector<RodLight*>&           GetRodLights(const Scene& scene);
-        static std::vector<ProjectionLight*>&    GetProjectionLights(const Scene& scene);
-
-
+        static inline const Engine::priv::LightContainer<LIGHT>& GetLights(const Scene& scene) noexcept { 
+            return scene.m_LightsModule.getLights<LIGHT>(); 
+        }
 
 
         static void                       UpdateMaterials(Scene& scene, const float dt);

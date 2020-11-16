@@ -37,7 +37,7 @@ namespace Engine::priv {
                 const uint32_t index     = m_LightsRegistry.type_slot_fast<LIGHT>();
                 ASSERT(m_LightsRegistry.contains<LIGHT>(), __FUNCTION__ << "(): type: " << typeid(LIGHT).name() << " must be registered first!");
                 ContainerType* container = static_cast<ContainerType*>(m_Lights[index].get());
-                return container->createLight<LIGHT>(std::forward<ARGS>(args)...);
+                return container->createLight(std::forward<ARGS>(args)...);
             }
 
             template<class LIGHT>
@@ -48,6 +48,11 @@ namespace Engine::priv {
                 ContainerType* container = static_cast<ContainerType*>(m_Lights[index].get());
                 return container->deleteLight(light);
             }
+
+            inline std::vector<std::unique_ptr<ILightContainer>>::iterator begin() noexcept { return m_Lights.begin(); }
+            inline std::vector<std::unique_ptr<ILightContainer>>::const_iterator begin() const noexcept { return m_Lights.cbegin(); }
+            inline std::vector<std::unique_ptr<ILightContainer>>::iterator end() noexcept { return m_Lights.end(); }
+            inline std::vector<std::unique_ptr<ILightContainer>>::const_iterator end() const noexcept { return m_Lights.cend(); }
     };
 }
 
