@@ -6,8 +6,7 @@
 VertexData::VertexData(VertexDataFormat& format)
     : m_Format{ format }
 {
-    const auto attributesSize{ format.m_Attributes.size() };
-    m_Data.resize(attributesSize);
+    m_Data.resize(format.m_Attributes.size());
     m_Buffers.push_back(std::make_unique<VertexBufferObject>());
 }
 VertexData::VertexData(VertexData&& other) noexcept
@@ -77,11 +76,7 @@ std::vector<glm::vec3> VertexData::getPositions() const {
         auto pts_half = getData<half_point>(0);
         points.reserve(pts_half.size());
         for (const auto& half : pts_half) {
-            float x, y, z;
-            Engine::Math::Float32From16(&x, half.x);
-            Engine::Math::Float32From16(&y, half.y);
-            Engine::Math::Float32From16(&z, half.z);
-            points.emplace_back(x, y, z);
+            points.emplace_back(Engine::Math::Float32From16(half.x), Engine::Math::Float32From16(half.y), Engine::Math::Float32From16(half.z));
         }
     }else{
         points = getData<glm::vec3>(0);
@@ -121,7 +116,7 @@ void VertexData::setIndices(const uint32_t* data, size_t bufferCount, MeshModify
                     tri.index3    = index;
                     tri.midpoint  = tri.position1 + tri.position2 + tri.position3;
                     tri.midpoint /= 3.0f;
-                    m_Triangles.emplace_back(std::move(tri));
+                    m_Triangles.push_back(tri);
                     j = 0;
                 }
             }

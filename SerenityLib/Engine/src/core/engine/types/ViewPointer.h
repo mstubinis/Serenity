@@ -15,7 +15,15 @@ namespace Engine {
             inline T& operator* () noexcept { return *m_Ptr; }
             inline operator bool() const noexcept { return static_cast<bool>(m_Ptr); }
             inline operator T*() const noexcept { return m_Ptr; }
+
+            //returns the static_cast of the underlying pointer to the templated type if the typeid's match. Otherwise returns nullptr.
+            //this is faster than using dynamic_cast
+            template<class U> inline U* cast_type() noexcept { return (m_Ptr && typeid(U) == typeid(*m_Ptr)) ? static_cast<U*>(m_Ptr) : nullptr; }
+
+            //returns the dynamic_cast of the underlying pointer to the templated type
             template<class U> inline U* cast_dynamic() noexcept { return dynamic_cast<U*>(m_Ptr); }
+
+            //returns the static_cast of the underlying pointer to the templated type
             template<class U> inline U* cast() noexcept { return static_cast<U*>(m_Ptr); }
 
             view_ptr(T* ptr)

@@ -238,7 +238,15 @@ bool Engine::priv::InternalScenePublicInterface::IsSkipRenderThisFrame(Scene& sc
 
 
 Scene::Scene(const std::string& name, const SceneOptions& options) {
-    m_RenderGraphs.resize((unsigned int)RenderStage::_TOTAL);
+    m_RenderGraphs.resize((uint32_t)RenderStage::_TOTAL);
+
+    m_LightsModule.registerLightType<SunLight>();
+    m_LightsModule.registerLightType<PointLight>();
+    m_LightsModule.registerLightType<DirectionalLight>();
+    m_LightsModule.registerLightType<SpotLight>();
+    m_LightsModule.registerLightType<RodLight>();
+    m_LightsModule.registerLightType<ProjectionLight>();
+
     m_ID      = Engine::priv::Core::m_Engine->m_ResourceManager.AddScene(*this);
     m_i       = std::make_unique<impl>(options.maxAmountOfParticleEmitters, options.maxAmountOfParticles);
     m_i->_init(*this, options);
@@ -321,9 +329,9 @@ ParticleEmitter* Scene::addParticleEmitter(ParticleEmissionProperties& propertie
     return m_i->m_ParticleSystem.add_emitter(properties, scene, lifetime, (parent) ? *parent : Entity());
 }
 Viewport& Scene::addViewport(float x, float y, float width, float height, Camera& camera) {
-    unsigned int id       = numViewports();
-    Viewport& viewport    = m_Viewports.emplace_back(*this, camera);
-    viewport.m_ID         = id;
+    uint32_t id         = numViewports();
+    Viewport& viewport  = m_Viewports.emplace_back(*this, camera);
+    viewport.m_ID       = id;
     viewport.setViewportDimensions(x, y, width, height);
     return viewport;
 }
@@ -344,7 +352,7 @@ Camera* Scene::getActiveCamera() const {
 }
 void Scene::setActiveCamera(Camera& camera){
     if (m_Viewports.size() == 0) {
-        unsigned int id    = numViewports();
+        uint32_t id        = numViewports();
         Viewport& viewport = m_Viewports.emplace_back(*this, camera);
         viewport.m_ID      = id;
         return;

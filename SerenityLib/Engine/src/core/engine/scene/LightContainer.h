@@ -3,8 +3,14 @@
 #define ENGINE_SCENE_LIGHT_CONTAINER_H
 
 namespace Engine::priv {
+    class ILightContainer {
+        public:
+            virtual ~ILightContainer() {}
+            virtual size_t size() const noexcept = 0;
+    };
+
     template<class LIGHT>
-    class LightContainer final {
+    class LightContainer final : public ILightContainer {
         private:
             mutable std::vector<LIGHT*>  m_Lights;
             mutable std::vector<LIGHT*>  m_LightsShadows;
@@ -19,11 +25,12 @@ namespace Engine::priv {
                 SAFE_DELETE_VECTOR(m_Lights);
             }
 
-            template<class DERIVED, typename ... ARGS> inline Engine::view_ptr<DERIVED> createLight(ARGS&& ... args) {
-                return static_cast<DERIVED*>(m_Lights.emplace_back(NEW DERIVED(std::forward<ARGS>(args)...)));
+            template<typename ... ARGS> inline Engine::view_ptr<LIGHT> createLight(ARGS&& ... args) {
+                return static_cast<LIGHT*>(m_Lights.emplace_back(NEW LIGHT(std::forward<ARGS>(args)...)));
             }
 
-            void delete_light(LIGHT* light) noexcept {
+            void deleteLight(LIGHT* light) noexcept {
+                ASSERT(light != nullptr, __FUNCTION__ << "(): light parameter must not be a null pointer!");
                 light->destroy();
                 std::erase_if(m_Lights, [&light](auto& itr) {
                     return itr == light;
@@ -49,7 +56,7 @@ namespace Engine::priv {
                 }
             }
 
-            inline size_t size() const noexcept { return m_Lights.size(); }
+            size_t size() const noexcept override { return m_Lights.size(); }
 
             inline LIGHT* operator[](size_t idx) noexcept { return m_Lights[idx]; }
 

@@ -18,8 +18,8 @@
 
 using namespace Engine;
 
-unsigned int ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
-decimal ModelInstance::m_GlobalDistanceFactor     = (decimal)1100.0;
+uint32_t ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
+decimal ModelInstance::m_GlobalDistanceFactor = (decimal)1100.0;
 
 namespace Engine::priv {
     constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
@@ -35,43 +35,10 @@ namespace Engine::priv {
         Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", i->godRaysColor().toPackedInt());
 
         if (stage == RenderStage::ForwardTransparentTrianglesSorted || stage == RenderStage::ForwardTransparent || stage == RenderStage::ForwardOpaque) {
-            int maxLights = glm::min((int)scene.getNumLights(), MAX_LIGHTS_PER_PASS);
-            Engine::Renderer::sendUniform1Safe("numLights", maxLights);
-
-            int i = 0;
-            auto lambda = [&i, &renderer, &camera, maxLights](const auto& container) {
-                if (i >= maxLights) {
-                    return;
-                }
-                for (auto& light : container) {
-                    if (i >= maxLights) {
-                        break;
-                    }
-                    auto start = "light[" + std::to_string(i) + "].";
-                    renderer->m_Pipeline->sendGPUDataLight(*camera, *light, start);
-                    ++i;
-                }
-            };
-            lambda(Engine::priv::InternalScenePublicInterface::GetSunLights(scene));
-            lambda(Engine::priv::InternalScenePublicInterface::GetDirectionalLights(scene));
-            lambda(Engine::priv::InternalScenePublicInterface::GetPointLights(scene));
-
-            lambda(Engine::priv::InternalScenePublicInterface::GetSpotLights(scene));
-            lambda(Engine::priv::InternalScenePublicInterface::GetRodLights(scene));
-            lambda(Engine::priv::InternalScenePublicInterface::GetProjectionLights(scene));
-
             Skybox* skybox          = scene.skybox();
-            const auto maxTextures  = renderer->m_Pipeline->getMaxNumTextureUnits() - 1U;
+            renderer->m_Pipeline->sendGPUDataAllLights(scene, *camera);
+            renderer->m_Pipeline->sendGPUDataGI(skybox);
             Engine::Renderer::sendUniform4Safe("ScreenData", renderer->m_GI_Pack, Engine::Renderer::Settings::getGamma(), 0.0f, 0.0f);
-            if (skybox && skybox->texture().get<Texture>()->hasGlobalIlluminationData()) {
-                Engine::Renderer::sendTextureSafe("irradianceMap", skybox->texture().get<Texture>()->getConvolutionTexture().get<Texture>()->address(), maxTextures - 2, GL_TEXTURE_CUBE_MAP);
-                Engine::Renderer::sendTextureSafe("prefilterMap", skybox->texture().get<Texture>()->getPreEnvTexture().get<Texture>()->address(), maxTextures - 1, GL_TEXTURE_CUBE_MAP);
-                Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF.get<Texture>(), maxTextures);
-            }else{
-                Engine::Renderer::sendTextureSafe("irradianceMap", Texture::Black.get<Texture>()->address(), maxTextures - 2, GL_TEXTURE_2D);
-                Engine::Renderer::sendTextureSafe("prefilterMap", Texture::Black.get<Texture>()->address(), maxTextures - 1, GL_TEXTURE_2D);
-                Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF.get<Texture>(), maxTextures);
-            }
         }
         if (animationVector.size() > 0) {
             Engine::Renderer::sendUniform1Safe("AnimationPlaying", 1);

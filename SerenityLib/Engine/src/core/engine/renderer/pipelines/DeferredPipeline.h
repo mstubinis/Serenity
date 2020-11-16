@@ -179,6 +179,8 @@ namespace Engine::priv {
 
             void generatePBRData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, uint32_t convoludeSize, uint32_t prefilterSize) override;
 
+            void sendGPUDataAllLights(Scene&, Camera&) override;
+            void sendGPUDataGI(Skybox*) override;
             void sendGPUDataLight(Camera& camera, SunLight& sunLight, const std::string& start) override;
             int sendGPUDataLight(Camera& camera, PointLight& pointLight, const std::string& start) override;
             void sendGPUDataLight(Camera& camera, DirectionalLight& directionalLight, const std::string& start) override;

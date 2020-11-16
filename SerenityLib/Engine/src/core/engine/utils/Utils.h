@@ -2,14 +2,22 @@
 #ifndef ENGINE_UTILS_H
 #define ENGINE_UTILS_H
 
-template <class OutType, class Data> void readBigEndian(OutType& out, Data& dataBuffer, unsigned int inBufferSizeInBytes, unsigned int& offset) noexcept {
+namespace Engine {
+    template<class DERIVED, class BASE> inline DERIVED* type_cast(BASE* inPtr) noexcept {
+        return (inPtr && typeid(DERIVED) == typeid(*inPtr)) ? static_cast<DERIVED*>(inPtr) : nullptr;
+    }
+    template<class DERIVED, class BASE> inline bool type_compare(BASE* inPtr) noexcept {
+        return inPtr && typeid(DERIVED) == typeid(*inPtr);
+    }
+}
+template <class OutType, class Data> void readBigEndian(OutType& out, Data& dataBuffer, uint32_t inBufferSizeInBytes, uint32_t& offset) noexcept {
     out = (uint32_t)dataBuffer[offset + 0U] << (8U * (inBufferSizeInBytes - 1U));
     for (auto i = 1U; i < inBufferSizeInBytes; ++i) {
         out |= (uint32_t)dataBuffer[offset + i] << (8U * ((inBufferSizeInBytes - i) - 1U));
     }
     offset += inBufferSizeInBytes;
 }
-template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutType& out, unsigned int inBufferSizeInBytes) noexcept {
+template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutType& out, uint32_t inBufferSizeInBytes) noexcept {
     std::vector<uint8_t> buffer(inBufferSizeInBytes, 0);
     inStream.read((char*)buffer.data(), inBufferSizeInBytes);
 
@@ -21,21 +29,21 @@ template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutT
 template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutType& out) noexcept {
     readBigEndian(inStream, out, sizeof(out));
 }
-template <class InType, class Stream> void writeBigEndian(Stream& inStream, InType& in, unsigned int inBufferSizeInBytes) noexcept {
+template <class InType, class Stream> void writeBigEndian(Stream& inStream, InType& in, uint32_t inBufferSizeInBytes) noexcept {
     std::vector<uint8_t> buffer(inBufferSizeInBytes, 0);
-    unsigned long long offset = 255U;
+    uint64_t offset = 255U;
     for (int i = int(inBufferSizeInBytes) - 1; i >= 0; --i) {
-        unsigned int shift = (8U * ((inBufferSizeInBytes - 1U) - i));
+        uint32_t shift = (8U * ((inBufferSizeInBytes - 1U) - i));
         buffer[i] = (in & (InType)offset) >> shift;
         offset = (offset * 255U) + offset;
     }
     inStream.write((char*)buffer.data(), buffer.size());
 }
-template <class InType, class Stream> void writeBigEndian(Stream& inStream, InType&& in, unsigned int inBufferSizeInBytes) noexcept {
+template <class InType, class Stream> void writeBigEndian(Stream& inStream, InType&& in, uint32_t inBufferSizeInBytes) noexcept {
     std::vector<uint8_t> buffer(inBufferSizeInBytes, 0);
-    unsigned long long offset = 255U;
+    uint64_t offset = 255U;
     for (int i = int(inBufferSizeInBytes) - 1; i >= 0; --i) {
-        unsigned int shift = (8U * ((inBufferSizeInBytes - 1U) - i));
+        uint32_t shift = (8U * ((inBufferSizeInBytes - 1U) - i));
         buffer[i]  = (in & (InType)offset) >> shift;
         offset     = (offset * 255U) + offset;
     }

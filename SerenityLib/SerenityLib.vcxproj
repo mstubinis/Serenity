@@ -629,6 +629,8 @@
     <ClInclude Include="Engine\src\core\engine\resources\ResourcesIncludes.h" />
     <ClInclude Include="Engine\src\core\engine\resources\ResourceVector.h" />
     <ClInclude Include="Engine\src\core\engine\scene\Camera.h" />
+    <ClInclude Include="Engine\src\core\engine\scene\LightContainer.h" />
+    <ClInclude Include="Engine\src\core\engine\scene\LightsModule.h" />
     <ClInclude Include="Engine\src\core\engine\scene\Scene.h" />
     <ClInclude Include="Engine\src\core\engine\scene\SceneOptions.h" />
     <ClInclude Include="Engine\src\core\engine\scene\Skybox.h" />

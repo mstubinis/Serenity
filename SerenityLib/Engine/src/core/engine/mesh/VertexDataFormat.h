@@ -19,8 +19,8 @@ struct VertexDataFormat {
     inline void add(int size, int type, bool normalized, int stride, size_t offset, size_t typeSize) {
         m_Attributes.emplace_back(size, type, normalized, stride, offset, typeSize);
     }
-    void bind(const VertexData& vertData) const;
-    void unbind() const {
+    void bind(const VertexData& vertData) const noexcept;
+    void unbind() const noexcept {
         for (size_t i = 0; i < m_Attributes.size(); ++i) {
             glDisableVertexAttribArray((GLuint)i);
         }

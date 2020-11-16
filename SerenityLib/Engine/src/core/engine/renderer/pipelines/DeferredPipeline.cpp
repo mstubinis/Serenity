@@ -630,6 +630,43 @@ void DeferredPipeline::renderSkybox(Skybox* skybox, Handle shaderProgram, Scene&
     Engine::Renderer::sendTextureSafe("Texture", 0, 0, GL_TEXTURE_CUBE_MAP); //this is needed to render stuff in geometry transparent using the normal deferred shader. i do not know why just yet...
     //could also change sendTexture("Texture", skybox->texture()->address(0),0, GL_TEXTURE_CUBE_MAP); above to use a different slot...
 }
+void DeferredPipeline::sendGPUDataAllLights(Scene& scene, Camera& camera) {
+    int maxLights = glm::min((int)scene.getNumLights(), MAX_LIGHTS_PER_PASS);
+    Engine::Renderer::sendUniform1Safe("numLights", maxLights);
+    int i = 0;
+    auto lambda = [&i, this, &camera, maxLights](const auto& container) {
+        if (i >= maxLights) {
+            return;
+        }
+        for (auto& light : container) {
+            if (i >= maxLights) {
+                break;
+            }
+            auto start = "light[" + std::to_string(i) + "].";
+            sendGPUDataLight(camera, *light, start);
+            ++i;
+        }
+    };
+    lambda(Engine::priv::InternalScenePublicInterface::GetSunLights(scene));
+    lambda(Engine::priv::InternalScenePublicInterface::GetDirectionalLights(scene));
+    lambda(Engine::priv::InternalScenePublicInterface::GetPointLights(scene));
+
+    lambda(Engine::priv::InternalScenePublicInterface::GetSpotLights(scene));
+    lambda(Engine::priv::InternalScenePublicInterface::GetRodLights(scene));
+    lambda(Engine::priv::InternalScenePublicInterface::GetProjectionLights(scene));
+}
+void DeferredPipeline::sendGPUDataGI(Skybox* skybox) {
+    const auto maxTextures = getMaxNumTextureUnits() - 1U;
+    if (skybox && skybox->texture().get<Texture>()->hasGlobalIlluminationData()) {
+        Engine::Renderer::sendTextureSafe("irradianceMap", skybox->texture().get<Texture>()->getConvolutionTexture().get<Texture>()->address(), maxTextures - 2, GL_TEXTURE_CUBE_MAP);
+        Engine::Renderer::sendTextureSafe("prefilterMap", skybox->texture().get<Texture>()->getPreEnvTexture().get<Texture>()->address(), maxTextures - 1, GL_TEXTURE_CUBE_MAP);
+        Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF.get<Texture>(), maxTextures);
+    }else{
+        Engine::Renderer::sendTextureSafe("irradianceMap", Texture::Black.get<Texture>()->address(), maxTextures - 2, GL_TEXTURE_2D);
+        Engine::Renderer::sendTextureSafe("prefilterMap", Texture::Black.get<Texture>()->address(), maxTextures - 1, GL_TEXTURE_2D);
+        Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF.get<Texture>(), maxTextures);
+    }
+}
 void DeferredPipeline::sendGPUDataLight(Camera& camera, SunLight& sunLight, const std::string& start) {
     auto body        = sunLight.getComponent<ComponentBody>();
     auto pos         = glm::vec3(body->getPosition());
@@ -869,7 +906,6 @@ void DeferredPipeline::renderDecal(ModelInstance& decalModelInstance) {
     Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 }
-
 void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, Handle program) {
     const size_t particle_count = system.ParticlesDOD.size();
     if (particle_count > 0) {

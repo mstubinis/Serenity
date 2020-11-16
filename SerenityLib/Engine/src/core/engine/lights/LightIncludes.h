@@ -2,7 +2,7 @@
 #ifndef ENGINE_LIGHT_INCLUDES_H
 #define ENGINE_LIGHT_INCLUDES_H
 
-enum class LightType : unsigned int {
+enum class LightType : uint32_t {
     Sun, 
     Point, 
     Directional, 
@@ -10,7 +10,7 @@ enum class LightType : unsigned int {
     Rod,
     Projection,
 };
-enum class LightRange : unsigned int {
+enum class LightRange : uint32_t {
     _7, 
     _13, 
     _20, 
@@ -24,7 +24,7 @@ enum class LightRange : unsigned int {
     _600, 
     _3250,
 _TOTAL};
-enum class LightAttenuation : unsigned int {
+enum class LightAttenuation : uint32_t {
     Constant,
     Distance,
     Distance_Squared,

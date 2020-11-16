@@ -4,7 +4,7 @@
 #include <GL/glew.h>
 #include <GL/GL.h>
 
-void VertexDataFormat::bind(const VertexData& vertData) const {
+void VertexDataFormat::bind(const VertexData& vertData) const noexcept {
     if (m_InterleavingType == VertexAttributeLayout::Interleaved) {
         for (size_t i = 0; i < m_Attributes.size(); ++i) {
             const auto& attribute = m_Attributes[i];

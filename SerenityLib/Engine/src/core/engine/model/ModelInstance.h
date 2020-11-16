@@ -44,8 +44,12 @@ class ModelInstance final : public Engine::UserPointer, public Observer {
 
     private:
         static decimal                                       m_GlobalDistanceFactor;
-        static unsigned int                                  m_ViewportFlagDefault;
+        static uint32_t                                      m_ViewportFlagDefault;
     private:
+        glm::mat4                                            m_ModelMatrix         = glm::mat4(1.0f);
+        glm::quat                                            m_Orientation         = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+        glm::vec3                                            m_Position            = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3                                            m_Scale               = glm::vec3(1.0f, 1.0f, 1.0f);
         bind_function                                        m_CustomBindFunctor   = [](ModelInstance*, const Engine::priv::RenderModule*) {};
         unbind_function                                      m_CustomUnbindFunctor = [](ModelInstance*, const Engine::priv::RenderModule*) {};
 
@@ -57,17 +61,13 @@ class ModelInstance final : public Engine::UserPointer, public Observer {
         Handle                                               m_MeshHandle          = Handle{};
         Handle                                               m_MaterialHandle      = Handle{};
         RenderStage                                          m_Stage               = RenderStage::GeometryOpaque;
-        glm::vec3                                            m_Position            = glm::vec3(0.0f, 0.0f, 0.0f);
-        glm::vec3                                            m_Scale               = glm::vec3(1.0f, 1.0f, 1.0f);
         Engine::color_vector_4                               m_GodRaysColor        = Engine::color_vector_4(0_uc);
-        glm::quat                                            m_Orientation         = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-        glm::mat4                                            m_ModelMatrix         = glm::mat4(1.0f);
         Engine::color_vector_4                               m_Color               = Engine::color_vector_4(255_uc);
+        float                                                m_Radius              = 0.0f;
+        size_t                                               m_Index               = 0U;
         bool                                                 m_PassedRenderCheck   = false;
         bool                                                 m_Visible             = true;
         bool                                                 m_ForceRender         = false;
-        float                                                m_Radius              = 0.0f;
-        size_t                                               m_Index               = 0U;
 
         float internal_calculate_radius();
         void internal_init(Handle mesh, Handle mat, Handle program);

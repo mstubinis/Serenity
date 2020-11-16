@@ -5,12 +5,12 @@
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 
-enum class BufferDataType : unsigned int {
+enum class BufferDataType : uint32_t {
     VertexArray  = GL_ARRAY_BUFFER,
     ElementArray = GL_ELEMENT_ARRAY_BUFFER,
 };
 
-enum class BufferDataDrawType : unsigned int {
+enum class BufferDataDrawType : uint32_t {
     Unassigned   = 0,
     Static       = GL_STATIC_DRAW,
     Dynamic      = GL_DYNAMIC_DRAW,
@@ -58,41 +58,35 @@ struct BufferObject {
     inline operator GLuint() const noexcept { return buffer; }
     inline void bind() const noexcept { glBindBuffer((GLuint)type, buffer); }
 
-    void setData(size_t size_, const void* data_, BufferDataDrawType drawType_) noexcept {
+    void setData(size_t size, const void* data, BufferDataDrawType drawType_) noexcept {
         drawType = drawType_;
         if (drawType == BufferDataDrawType::Unassigned) {
             return;
         }
-        if (size_ > capacity) {
-            capacity = size_;
-            glBufferData((GLuint)type, size_, data_, (GLuint)drawType);
+        if (size > capacity) {
+            capacity = size;
+            glBufferData((GLuint)type, size, data, (GLuint)drawType);
         }else{
-            glBufferSubData((GLuint)type, 0, size_, data_);
+            glBufferSubData((GLuint)type, 0, size, data);
         }
     }
-    void setData(size_t size_, size_t startingIndex_, const void* data_) const noexcept {
+    void setData(size_t size, size_t startingIndex, const void* data) const noexcept {
         if (drawType == BufferDataDrawType::Unassigned) {
             return;
         }
-        glBufferSubData((GLuint)type, startingIndex_, size_, data_);
+        glBufferSubData((GLuint)type, startingIndex, size, data);
     }
-    void setDataOrphan(const void* data_) const noexcept {
+    void setDataOrphan(const void* data) const noexcept {
         if (drawType == BufferDataDrawType::Unassigned || capacity == 0) {
             return;
         }
         glBufferData((GLuint)type, capacity, nullptr, (GLuint)drawType);
-        glBufferSubData((GLuint)type, 0, capacity, data_);
+        glBufferSubData((GLuint)type, 0, capacity, data);
     }
 
-    template<class T> inline void setData(const std::vector<T>& data_, BufferDataDrawType drawType_) noexcept {
-        setData(data_.size() * sizeof(T), (void*)data_.data(), drawType_);
-    }
-    template<class T> inline void setData(size_t startingIndex_, const std::vector<T>& data_) const noexcept {
-        setData(data_.size() * sizeof(T), startingIndex_, (void*)data_.data());
-    }
-    template<class T> inline void setDataOrphan(const std::vector<T>& data_) const noexcept {
-        setDataOrphan((void*)data_.data());
-    }
+    template<class T> inline void setData(const std::vector<T>& data, BufferDataDrawType drawType) noexcept { setData(data.size() * sizeof(T), (void*)data.data(), drawType); }
+    template<class T> inline void setData(size_t startingIndex, const std::vector<T>& data) const noexcept { setData(data.size() * sizeof(T), startingIndex, (void*)data.data()); }
+    template<class T> inline void setDataOrphan(const std::vector<T>& data) const noexcept { setDataOrphan((void*)data.data()); }
 };
 struct VertexBufferObject final : public BufferObject {
     VertexBufferObject() 
