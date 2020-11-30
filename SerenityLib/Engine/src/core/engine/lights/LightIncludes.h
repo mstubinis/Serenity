@@ -3,7 +3,7 @@
 #define ENGINE_LIGHT_INCLUDES_H
 
 enum class LightType : uint32_t {
-    Sun, 
+    Sun = 0, 
     Point, 
     Directional, 
     Spot, 
@@ -11,7 +11,7 @@ enum class LightType : uint32_t {
     Projection,
 };
 enum class LightRange : uint32_t {
-    _7, 
+    _7 = 0, 
     _13, 
     _20, 
     _32, 
@@ -25,7 +25,7 @@ enum class LightRange : uint32_t {
     _3250,
 _TOTAL};
 enum class LightAttenuation : uint32_t {
-    Constant,
+    Constant = 0,
     Distance,
     Distance_Squared,
     Constant_Linear_Exponent,

@@ -93,8 +93,8 @@ class Scene: public Observer {
         inline void setOnUpdateFunctor(const UpdateFP& functor) noexcept { m_OnUpdateFunctor = functor; }
         inline void setOnUpdateFunctor(UpdateFP&& functor) noexcept { m_OnUpdateFunctor = std::move(functor); }
 
-        inline CONSTEXPR unsigned int id() const noexcept { return m_ID; }
-        inline unsigned int numViewports() const noexcept { return (unsigned int)m_Viewports.size(); }
+        inline CONSTEXPR uint32_t id() const noexcept { return m_ID; }
+        inline uint32_t numViewports() const noexcept { return (uint32_t)m_Viewports.size(); }
 
 
         Entity createEntity();
@@ -145,7 +145,10 @@ namespace Engine::priv {
         static inline const Engine::priv::LightContainer<LIGHT>& GetLights(const Scene& scene) noexcept { 
             return scene.m_LightsModule.getLights<LIGHT>(); 
         }
-
+        template<class LIGHT>
+        static inline bool SetLightShadowCaster(const Scene& scene, LIGHT& light, bool isShadowCaster) noexcept {
+            return scene.m_LightsModule.setShadowCaster(&light, isShadowCaster);
+        }
 
         static void                       UpdateMaterials(Scene& scene, const float dt);
 

@@ -179,14 +179,22 @@ namespace Engine::priv {
 
             void generatePBRData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, uint32_t convoludeSize, uint32_t prefilterSize) override;
 
+
+            bool buildShadowCaster(SunLight&) override;
+            bool buildShadowCaster(PointLight&) override;
+            bool buildShadowCaster(DirectionalLight&) override;
+            bool buildShadowCaster(SpotLight&) override;
+            bool buildShadowCaster(RodLight&) override;
+            bool buildShadowCaster(ProjectionLight&) override;
+
             void sendGPUDataAllLights(Scene&, Camera&) override;
             void sendGPUDataGI(Skybox*) override;
-            void sendGPUDataLight(Camera& camera, SunLight& sunLight, const std::string& start) override;
-            int sendGPUDataLight(Camera& camera, PointLight& pointLight, const std::string& start) override;
-            void sendGPUDataLight(Camera& camera, DirectionalLight& directionalLight, const std::string& start) override;
-            int sendGPUDataLight(Camera& camera, SpotLight& spotLight, const std::string& start) override;
-            int sendGPUDataLight(Camera& camera, RodLight& rodLight, const std::string& start) override;
-            int sendGPUDataLight(Camera& camera, ProjectionLight& projectionLight, const std::string& start) override;
+            void sendGPUDataLight(Camera&, SunLight&,         const std::string& start) override;
+            int  sendGPUDataLight(Camera&, PointLight&,       const std::string& start) override;
+            void sendGPUDataLight(Camera&, DirectionalLight&, const std::string& start) override;
+            int  sendGPUDataLight(Camera&, SpotLight&,        const std::string& start) override;
+            int  sendGPUDataLight(Camera&, RodLight&,         const std::string& start) override;
+            int  sendGPUDataLight(Camera&, ProjectionLight&,  const std::string& start) override;
 
             void renderSkybox(Skybox*, Handle shaderProgram, Scene& scene, Viewport& viewport, Camera& camera) override;
             void renderSunLight(Camera& c, SunLight& s, Viewport& viewport) override;

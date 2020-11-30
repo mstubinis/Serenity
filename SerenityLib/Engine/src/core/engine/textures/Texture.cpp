@@ -193,7 +193,7 @@ void Texture::setFilter(TextureType type, TextureFilter filter) {
     Texture::setMinFilter(type, filter);
     Texture::setMaxFilter(type, filter);
 }
-void Texture::setAnisotropicFiltering(float anisotropicFiltering){
+void Texture::setAnisotropicFiltering(float anisotropicFiltering) {
     anisotropicFiltering = glm::clamp(anisotropicFiltering, 1.0f, Engine::priv::OpenGLState::MAX_TEXTURE_MAX_ANISOTROPY);
 
     if (*this == false) {
@@ -222,7 +222,7 @@ bool Texture::compressed() const {
     ASSERT(m_CPUData.m_ImagesDatas[0].m_Mipmaps.size() > 0, __FUNCTION__ << "(): m_CPUData.m_ImagesDatas[0].m_Mipmaps.size() is 0!");
     return m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].compressedSize > 0;
 }
-unsigned char* Texture::pixels() {
+uint8_t* Texture::pixels() {
     Engine::priv::TextureLoader::WithdrawPixelsFromOpenGLMemory(*this);
     ASSERT(m_CPUData.m_ImagesDatas.size() > 0, __FUNCTION__ << "(): m_CPUData.m_ImagesDatas.size() is 0!");
     ASSERT(m_CPUData.m_ImagesDatas[0].m_Mipmaps.size() > 0, __FUNCTION__ << "(): m_CPUData.m_ImagesDatas[0].m_Mipmaps.size() is 0!");

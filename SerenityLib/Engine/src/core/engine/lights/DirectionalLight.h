@@ -15,6 +15,8 @@ class DirectionalLight : public SunLight {
             const glm::vec3& direction = glm::vec3(0.0f, 0.0f, -1.0f)
         );
         virtual ~DirectionalLight();
+
+        bool setShadowCaster(bool castsShadow) noexcept override;
 };
 
 #endif

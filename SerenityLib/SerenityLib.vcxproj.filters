@@ -941,6 +941,9 @@
     <ClInclude Include="Engine\src\core\engine\scene\LightsModule.h">
       <Filter>Header Files\Engine\Core\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\src\core\engine\renderer\pipelines\DeferredShadowCasters.h">
+      <Filter>Header Files\Engine\Core\Renderer\pipelines</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\src\ecs\ComponentBody.cpp">
@@ -1419,6 +1422,9 @@
     </ClCompile>
     <ClCompile Include="Engine\src\core\engine\system\EngineEventHandler.cpp">
       <Filter>Source Files\Engine\Core\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\src\core\engine\renderer\pipelines\DeferredShadowCasters.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\pipelines</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

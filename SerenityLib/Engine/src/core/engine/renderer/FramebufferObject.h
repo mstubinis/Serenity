@@ -20,9 +20,9 @@ namespace Engine::priv {
     class FramebufferObjectAttatchment {
         friend class  Engine::priv::FramebufferObject;
         private:
-            GLuint                     m_InternalFormat = 0U;
-            GLuint                     m_GL_Attatchment = 0U;
             const FramebufferObject&   m_FBO;
+            GLuint                     m_InternalFormat = 0;
+            GLuint                     m_GL_Attatchment = 0;
         public:
             FramebufferObjectAttatchment(const FramebufferObject&, FramebufferAttatchment, ImageInternalFormat);
             FramebufferObjectAttatchment(const FramebufferObject&, FramebufferAttatchment, const Texture&);
@@ -38,28 +38,26 @@ namespace Engine::priv {
             virtual void bind() {}
             virtual void unbind() {}
     };
-    class FramebufferTexture final: public FramebufferObjectAttatchment{
+    class FramebufferTexture final: public FramebufferObjectAttatchment {
         friend class  Engine::priv::FramebufferObject;
         private:
-            Texture*       m_Texture      = nullptr;
-            GLuint         m_PixelFormat  = 0U;
-            GLuint         m_PixelType    = 0U;
+            Texture&       m_Texture;
+            GLuint         m_PixelFormat  = 0;
+            GLuint         m_PixelType    = 0;
         public:
             FramebufferTexture(const FramebufferObject&, FramebufferAttatchment, const Texture&);
             ~FramebufferTexture();
 
             void resize(FramebufferObject&, uint32_t width, uint32_t height) override;
             GLuint address() const override;
-            Texture& texture() const;
-            void bind() override {}
-            void unbind() override {}
+            inline Texture& texture() const noexcept { return m_Texture; }
     };
-    class RenderbufferObject final: public FramebufferObjectAttatchment{
+    class RenderbufferObject final: public FramebufferObjectAttatchment {
         friend class  Engine::priv::FramebufferObject;
         private:
-            GLuint     m_RBO    = 0U;
-            uint32_t   m_Width  = 0U;
-            uint32_t   m_Height = 0U;
+            GLuint     m_RBO    = 0;
+            uint32_t   m_Width  = 0;
+            uint32_t   m_Height = 0;
         public:
             RenderbufferObject(FramebufferObject&, FramebufferAttatchment, ImageInternalFormat);
             ~RenderbufferObject();
@@ -81,12 +79,12 @@ namespace Engine::priv {
             BindFP                    m_CustomBindFunctor   = [](const FramebufferObject*) {};
             UnbindFP                  m_CustomUnbindFunctor = [](const FramebufferObject*) {};
 
-            mutable size_t            m_CurrentFBOIndex     = 0U;
-            uint32_t                  m_FramebufferWidth    = 0U;
-            uint32_t                  m_FramebufferHeight   = 0U;
-            float                     m_Divisor             = 1.0f;
-            std::vector<GLuint>       m_FBO;
+            std::vector<GLuint>       m_FBOs;
             mutable AttatchmentMap    m_Attatchments;
+            mutable size_t            m_CurrentFBOIndex = 0U;
+            uint32_t                  m_FramebufferWidth = 0U;
+            uint32_t                  m_FramebufferHeight = 0U;
+            float                     m_Divisor = 1.0f;
         public:
             FramebufferObject() = default;
             FramebufferObject(uint32_t width, uint32_t height, float divisor = 1.0f, uint32_t swapBufferCount = 1);
@@ -111,7 +109,7 @@ namespace Engine::priv {
             inline CONSTEXPR uint32_t width() const noexcept { return m_FramebufferWidth; }
             inline CONSTEXPR uint32_t height() const noexcept { return m_FramebufferHeight; }
             inline CONSTEXPR std::unordered_map<uint32_t, FramebufferObjectAttatchment*>& attatchments() const noexcept { return m_Attatchments; }
-            inline GLuint address() const noexcept { return m_FBO[m_CurrentFBOIndex]; }
+            inline GLuint address() const noexcept { return m_FBOs[m_CurrentFBOIndex]; }
             bool checkStatus();
             inline CONSTEXPR float divisor() const noexcept { return m_Divisor; }
     };

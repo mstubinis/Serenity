@@ -5,10 +5,10 @@
 namespace Engine {
     template<typename T> class freelist {
         private:
-            std::vector<T>             m_Items;
-            std::vector<uint32_t> m_Freelist;
-            size_t                     m_Size = 0U;
-            uint32_t              m_Auto_Reserve_Count = 25U;
+            std::vector<T>         m_Items;
+            std::vector<uint32_t>  m_Freelist;
+            size_t                 m_Size = 0U;
+            uint32_t               m_Auto_Reserve_Count = 25U;
 
             void initialize(size_t inCapacity) {
                 m_Items.reserve(inCapacity);
@@ -19,9 +19,10 @@ namespace Engine {
             }
 
         public:
-            freelist() {
-            }
-            freelist(const size_t capacity_) : freelist() {
+            freelist() = default;
+            freelist(const size_t capacity_) 
+                : freelist() 
+            {
                 initialize(capacity_);
             }
             virtual ~freelist() {
@@ -155,7 +156,8 @@ namespace Engine {
             inline const T& operator[](const size_t& index) const noexcept { return m_Items[index]; }
 
             inline std::vector<T>& data() noexcept { return m_Items; }
-          
+            inline const std::vector<T>& data() const noexcept { return m_Items; }
+
             typename inline std::vector<T>::iterator begin() { return m_Items.begin(); }
             typename inline std::vector<T>::iterator end() { return m_Items.end(); }
             typename inline std::vector<T>::const_iterator begin() const { return m_Items.begin(); }

@@ -28,12 +28,11 @@ namespace Engine::priv {
 #include <core/engine/textures/TextureIncludes.h>
 #include <glm/gtc/type_ptr.hpp>
 
-namespace Engine{
-namespace priv{
-    class  RenderModule final{
-        private:
+namespace Engine {
+namespace priv {
+    class  RenderModule final {
         public:
-            static Engine::view_ptr<Engine::priv::RenderModule> RENDERER;
+            static Engine::view_ptr<Engine::priv::RenderModule> RENDER_MODULE;
         public:
             bool                                 m_Lighting         = true;
             bool                                 m_DrawPhysicsDebug = false;
@@ -49,16 +48,23 @@ namespace priv{
             RenderModule(const EngineOptions& options);
             ~RenderModule() = default;
 
-            static unsigned int GLSL_VERSION;
-            static unsigned int OPENGL_VERSION;
+            static uint32_t GLSL_VERSION;
+            static uint32_t OPENGL_VERSION;
 
             void _init();
-            void _resize(unsigned int width, unsigned int height);
+            void _resize(uint32_t width, uint32_t height);
 
             void _render(Viewport&, bool mainRenderFunc = true);
 
-            void _onFullscreen(unsigned int width, unsigned int height);
-            void _onOpenGLContextCreation(unsigned int width, unsigned int height, unsigned int glslVersion, unsigned int openglVersion);
+            bool setShadowCaster(SunLight&, bool isShadowCaster);
+            bool setShadowCaster(PointLight&, bool isShadowCaster);
+            bool setShadowCaster(DirectionalLight&, bool isShadowCaster);
+            bool setShadowCaster(SpotLight&, bool isShadowCaster);
+            bool setShadowCaster(RodLight&, bool isShadowCaster);
+            bool setShadowCaster(ProjectionLight&, bool isShadowCaster);
+
+            void _onFullscreen(uint32_t width, uint32_t height);
+            void _onOpenGLContextCreation(uint32_t width, uint32_t height, uint32_t glslVersion, uint32_t openglVersion);
             void _clear2DAPICommands();
             void _sort2DAPICommands();
 
@@ -74,7 +80,7 @@ namespace priv{
             bool bind(Material* material) const;
             bool unbind(Material* material) const;
 
-            float _getGIPackedData();
+            inline float _getGIPackedData() noexcept { return m_GI_Pack; }
             void _genPBREnvMapData(Texture&, Handle convolutionTexture, Handle preEnvTexture, uint, uint);
     };
 };
@@ -110,9 +116,9 @@ namespace Renderer{
     void renderFullscreenQuad();
     void renderFullscreenTriangle();
 
-    unsigned int getUniformLoc(const char* location);
-    unsigned int getUniformLocUnsafe(const char* location);
-    unsigned int getCurrentlyBoundTextureOfType(unsigned int textureType) noexcept;
+    uint32_t getUniformLoc(const char* location);
+    uint32_t getUniformLocUnsafe(const char* location);
+    uint32_t getCurrentlyBoundTextureOfType(uint32_t textureType) noexcept;
 
     bool cullFace(GLenum state);
     bool setDepthFunc(GLenum func);

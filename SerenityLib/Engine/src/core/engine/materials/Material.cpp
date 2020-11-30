@@ -51,6 +51,7 @@ constexpr auto DEFAULT_MATERIAL_BIND_FUNCTOR = [](Material* m) {
     auto&  components    = m->getComponents();
     size_t numComponents = components.size();
     size_t textureUnit   = 0;
+
     for (size_t i = 0; i < numComponents; ++i) {
         auto& component = components[i];
         if (component == true) {
@@ -309,8 +310,8 @@ void Material::setAlpha(uint8_t alpha) {
     internal_update_global_material_pool(false);
 }
 void Material::update(const float dt) {
-    for (auto& component : m_Components) {
+    std::for_each(std::begin(m_Components), std::end(m_Components), [dt](auto& component) {
         component.update(dt);
-    }
+    });
 }
 #pragma endregion

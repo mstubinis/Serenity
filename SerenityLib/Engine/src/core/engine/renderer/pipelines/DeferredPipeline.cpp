@@ -38,8 +38,6 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace Engine::Renderer;
 
-//Engine::view_ptr<Engine::priv::DeferredPipeline> PIPELINE = nullptr;
-
 constexpr std::array<glm::mat4, 6> CAPTURE_VIEWS = {
     glm::mat4(0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
     glm::mat4(0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
@@ -106,7 +104,6 @@ struct ShaderProgramEnum final { enum Program : uint32_t {
 DeferredPipeline::DeferredPipeline(Engine::priv::RenderModule& renderer) 
     : m_Renderer{ renderer }
 {
-    //PIPELINE = this;
 }
 DeferredPipeline::~DeferredPipeline() {
     SAFE_DELETE(UniformBufferObject::UBO_CAMERA);
@@ -630,6 +627,27 @@ void DeferredPipeline::renderSkybox(Skybox* skybox, Handle shaderProgram, Scene&
     Engine::Renderer::sendTextureSafe("Texture", 0, 0, GL_TEXTURE_CUBE_MAP); //this is needed to render stuff in geometry transparent using the normal deferred shader. i do not know why just yet...
     //could also change sendTexture("Texture", skybox->texture()->address(0),0, GL_TEXTURE_CUBE_MAP); above to use a different slot...
 }
+
+
+bool DeferredPipeline::buildShadowCaster(SunLight& sunLight) {
+    return false;
+}
+bool DeferredPipeline::buildShadowCaster(PointLight& pointLight) {
+    return false;
+}
+bool DeferredPipeline::buildShadowCaster(DirectionalLight& directionalLight) {
+    return false;
+}
+bool DeferredPipeline::buildShadowCaster(SpotLight& spotLight) {
+    return false;
+}
+bool DeferredPipeline::buildShadowCaster(RodLight& rodLight) {
+    return false;
+}
+bool DeferredPipeline::buildShadowCaster(ProjectionLight& projectionLight) {
+    return false;
+}
+
 void DeferredPipeline::sendGPUDataAllLights(Scene& scene, Camera& camera) {
     int maxLights = glm::min((int)scene.getNumLights(), MAX_LIGHTS_PER_PASS);
     Engine::Renderer::sendUniform1Safe("numLights", maxLights);
@@ -650,7 +668,6 @@ void DeferredPipeline::sendGPUDataAllLights(Scene& scene, Camera& camera) {
     lambda(Engine::priv::InternalScenePublicInterface::GetLights<SunLight>(scene));
     lambda(Engine::priv::InternalScenePublicInterface::GetLights<DirectionalLight>(scene));
     lambda(Engine::priv::InternalScenePublicInterface::GetLights<PointLight>(scene));
-
     lambda(Engine::priv::InternalScenePublicInterface::GetLights<SpotLight>(scene));
     lambda(Engine::priv::InternalScenePublicInterface::GetLights<RodLight>(scene));
     lambda(Engine::priv::InternalScenePublicInterface::GetLights<ProjectionLight>(scene));

@@ -44,9 +44,9 @@ void ModelInstanceAnimationVector::update(const float dt) {
         return;
     }
     m_Transforms.clear();
-    for (auto& animation : m_Animation_Instances) {
+    std::for_each(std::begin(m_Animation_Instances), std::end(m_Animation_Instances), [this, dt](auto& animation) {
         animation.process(dt, m_Transforms);
-    }
+    });
     //cleanup any completed animations
     std::erase_if(m_Animation_Instances, [](const auto& anim) {
         return anim.m_RequestedLoops > 0 && anim.m_CurrentLoops >= anim.m_RequestedLoops;

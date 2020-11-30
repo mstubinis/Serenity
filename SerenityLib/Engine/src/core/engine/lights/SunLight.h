@@ -10,21 +10,20 @@ namespace Engine::priv {
 #include <core/engine/lights/LightIncludes.h>
 #include <ecs/EntityBody.h>
 
-constexpr float LIGHT_DEFAULT_AMBIENT_INTENSITY = 0.005f;
-constexpr float LIGHT_DEFAULT_DIFFUSE_INTENSITY = 2.0f;
+constexpr float LIGHT_DEFAULT_AMBIENT_INTENSITY  = 0.005f;
+constexpr float LIGHT_DEFAULT_DIFFUSE_INTENSITY  = 2.0f;
 constexpr float LIGHT_DEFAULT_SPECULAR_INTENSITY = 1.0f;
 
 class SunLight : public EntityBody {
     friend class ::Engine::priv::RenderModule;
     protected:
-        LightType          m_Type              = LightType::Sun;
-        bool               m_IsShadowCaster    = false;
-        bool               m_Active            = true;
         glm::vec4          m_Color             = glm::vec4(1.0f);
         float              m_AmbientIntensity  = LIGHT_DEFAULT_AMBIENT_INTENSITY;
         float              m_DiffuseIntensity  = LIGHT_DEFAULT_DIFFUSE_INTENSITY;
         float              m_SpecularIntensity = LIGHT_DEFAULT_SPECULAR_INTENSITY;
-
+        LightType          m_Type              = LightType::Sun;
+        bool               m_IsShadowCaster    = false;
+        bool               m_Active            = true;
     public:
         SunLight() = delete;
         SunLight(Scene* scene, const glm_vec3& position = glm_vec3(0.0), LightType type = LightType::Sun);
@@ -32,8 +31,8 @@ class SunLight : public EntityBody {
 
         glm_vec3 position() const;
 
-        inline CONSTEXPR bool isShadowCaster() const noexcept { return m_IsShadowCaster; }
-        void setShadowCaster(bool castsShadow) noexcept { m_IsShadowCaster = castsShadow; }
+        bool isShadowCaster() const noexcept;
+        virtual bool setShadowCaster(bool castsShadow) noexcept;
 
         inline  const glm::vec4& color() const noexcept { return m_Color; }
         inline CONSTEXPR bool isActive() const noexcept { return m_Active; }

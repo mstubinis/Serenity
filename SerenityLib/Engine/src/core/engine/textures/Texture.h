@@ -45,7 +45,7 @@ class Texture: public Resource {
         Handle                                      m_ConvolutionTextureHandle = Handle{};
         Handle                                      m_PreEnvTextureHandle      = Handle{};
 
-        bool internal_bind_if_not_bound(unsigned int requestedAddress) noexcept;
+        bool internal_bind_if_not_bound(uint32_t requestedAddress) noexcept;
         GLuint& internal_get_address_for_generation() noexcept { return m_TextureAddress; }
 
     public:
@@ -58,8 +58,8 @@ class Texture: public Resource {
 
         //Framebuffer
         Texture(
-            unsigned int renderTgtWidth,
-            unsigned int renderTgtHeight,
+            uint32_t renderTgtWidth,
+            uint32_t renderTgtHeight,
             ImagePixelType pixelType,
             ImagePixelFormat pixelFormat,
             ImageInternalFormat internalFormat,
@@ -106,7 +106,7 @@ class Texture: public Resource {
         inline Handle getConvolutionTexture() const noexcept { return m_ConvolutionTextureHandle; }
         inline Handle getPreEnvTexture() const noexcept { return m_PreEnvTextureHandle; }
 
-        unsigned char* pixels();
+        uint8_t* pixels();
         GLuint address() const noexcept { return m_TextureAddress; }
         inline CONSTEXPR TextureType getTextureType() const noexcept { return m_CPUData.m_TextureType; }
         inline int width() const noexcept { 

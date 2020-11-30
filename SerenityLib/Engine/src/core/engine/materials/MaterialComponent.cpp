@@ -102,12 +102,12 @@ MaterialLayer* MaterialComponent::addLayer(Handle textureHandle, Handle maskHand
 void MaterialComponent::bind(size_t component_index, size_t& inTextureUnit) const {
     const std::string wholeString = "components[" + std::to_string(component_index) + "].";
     Engine::Renderer::sendUniform2Safe((wholeString + "componentData").c_str(), (int)m_NumLayers, (int)m_ComponentType);
-    for (unsigned int layerNumber = 0; layerNumber < m_NumLayers; ++layerNumber) {
+    for (uint32_t layerNumber = 0; layerNumber < m_NumLayers; ++layerNumber) {
         m_Layers[layerNumber].sendDataToGPU(wholeString, component_index, layerNumber, inTextureUnit);
     }
 }
 void MaterialComponent::update(const float dt) {
-    for (unsigned int i = 0; i < m_NumLayers; ++i) {
-        m_Layers[i].update(dt);
-    }
+    std::for_each_n(std::begin(m_Layers), m_NumLayers, [dt](auto& materialLayer) {
+        materialLayer.update(dt);
+    });
 }

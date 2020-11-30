@@ -14,7 +14,6 @@ namespace Engine::priv {
         private:
             mutable std::vector<LIGHT*>  m_Lights;
             mutable std::vector<LIGHT*>  m_LightsShadows;
-
         public:
             LightContainer() = default;
             LightContainer(const LightContainer&)                = delete;
@@ -30,31 +29,32 @@ namespace Engine::priv {
                 return m_Lights.emplace_back(NEW LIGHT(std::forward<ARGS>(args)...)); 
             }
 
-            void deleteLight(LIGHT* light) noexcept {
+            bool deleteLight(LIGHT* light) noexcept {
                 ASSERT(light != nullptr, __FUNCTION__ << "(): light parameter must not be a null pointer!");
+                //if (!light) {
+                //    return false;
+                //}
                 light->destroy();
-                std::erase_if(m_Lights, [&light](auto& itr) {
-                    return itr == light;
-                });
-                std::erase_if(m_LightsShadows, [&light](auto& itr) {
-                    return itr == light;
-                });
+                auto resultEraseLight           = std::erase_if(m_Lights,        [&light](auto& itr) { return itr == light; });
+                auto resultEraseLightShdwCaster = std::erase_if(m_LightsShadows, [&light](auto& itr) { return itr == light; });
                 SAFE_DELETE(light);
+                return true;
             }
 
-            void setShadowCaster(LIGHT* light, bool isShadowCaster) {
+            bool setShadowCaster(LIGHT* light, bool isShadowCaster) {
                 if (isShadowCaster){
                     for (const auto itr : m_LightsShadows) {
                         if (itr == light) {
-                            return;
+                            return false;
                         }
                     }
                     m_LightsShadows.push_back(light);
+                    return true;
                 }else{
-                    std::erase_if(m_LightsShadows, [&light](auto& itr) {
-                        return itr == light;
-                    });
+                    auto result = std::erase_if(m_LightsShadows, [&light](auto& itr) { return itr == light; });
+                    return (bool)result;
                 }
+                return false;
             }
 
             size_t size() const noexcept override { return m_Lights.size(); }

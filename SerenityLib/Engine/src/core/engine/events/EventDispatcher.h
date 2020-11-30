@@ -14,11 +14,10 @@ namespace Engine::priv{
             std::vector<std::vector<Observer*>>         m_Observers;
             std::vector<std::pair<Observer*, size_t>>   m_UnregisteredObservers;
 
-            bool internal_check_for_duplicates(const Observer& observer, const std::vector<Observer*> vectorContainer) const noexcept {
-                for (const auto& o : vectorContainer) {
-                    if (o == &observer) { return true; }
-                }
-                return false;
+            bool internal_has_duplicate(const Observer& observer, const std::vector<Observer*>& vectorContainer) const noexcept {
+                return std::any_of(vectorContainer.cbegin(), vectorContainer.cend(), [&observer](const auto& o) {
+                    return o == &observer;
+                });
             }
         public:
             EventDispatcher();

@@ -31,9 +31,9 @@ MaterialRequest::MaterialRequest(const std::string& name, Handle diffuse, Handle
 void MaterialRequest::internal_set_async(bool inAsync) noexcept {
     if (inAsync && Engine::hardware_concurrency() > 1) {
         m_Async = true;
-        for (auto& textureRequest : m_Part.m_TextureRequests) {
+        std::for_each(std::cbegin(m_Part.m_TextureRequests), std::cend(m_Part.m_TextureRequests), [](auto& textureRequest) {
             textureRequest->m_Part.async = true;
-        }
+        });
     }else{
         m_Async = false;
     }
@@ -47,11 +47,11 @@ void MaterialRequest::internal_init_material_components() noexcept {
     }
 }
 void MaterialRequest::internal_void_launch_texture_requests(bool async) noexcept {
-    for (auto& textureRequest : m_Part.m_TextureRequests) {
+    std::for_each(std::cbegin(m_Part.m_TextureRequests), std::cend(m_Part.m_TextureRequests), [async](auto& textureRequest) {
         if (!textureRequest->m_Part.m_CPUData.m_Name.empty()) {
             textureRequest->request(async);
         }
-    }
+    });
 }
 void MaterialRequest::request(bool inAsync) {
     internal_set_async(inAsync);
@@ -65,7 +65,7 @@ void MaterialRequest::request(bool inAsync) {
 
     auto l_gpu = [materialRequest{ *this }]() mutable {
         const auto& texture_requests = materialRequest.m_Part.m_TextureRequests;
-        unsigned int count = 0;
+        uint32_t count = 0;
         for (const auto& textureRequest : texture_requests) {
             if (textureRequest->m_FileData.m_FileExists) {
                 materialRequest.m_Part.m_Handle.get<Material>()->getComponent(count).layer(0).setTexture(textureRequest->m_Part.handle);

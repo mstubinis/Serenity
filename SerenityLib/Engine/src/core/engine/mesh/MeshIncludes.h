@@ -7,11 +7,11 @@
 #include <SFML/OpenGL.hpp>
 #include <glm/glm.hpp>
 
-constexpr unsigned int MESH_BONES_NUM_BONES_PER_VERTEX   = 4U;
-constexpr unsigned int MESH_BONES_NUM_MAX_INSTANCES      = 65536U;
-constexpr float        MESH_DEFAULT_THRESHOLD = 0.0005f;
+constexpr uint32_t MESH_BONES_NUM_BONES_PER_VERTEX = 4U;
+constexpr uint32_t MESH_BONES_NUM_MAX_INSTANCES    = 65536U;
+constexpr float    MESH_DEFAULT_THRESHOLD          = 0.0005f;
 
-struct MeshModifyFlags {enum Flag {
+struct MeshModifyFlags { enum Flag {
     None                 = 1 << 0,
     Orphan               = 1 << 1,
     UploadToGPU          = 1 << 2,
@@ -46,13 +46,13 @@ namespace Engine::priv {
         glm::vec3 tangent  = glm::vec3(0.0f);
     };
     struct Triangle final {
-        glm::vec3 position1   = glm::vec3(0.0f);
-        glm::vec3 position2   = glm::vec3(0.0f);
-        glm::vec3 position3   = glm::vec3(0.0f);
-        glm::vec3 midpoint    = glm::vec3(0.0f);
-        unsigned int index1   = 0;
-        unsigned int index2   = 0;
-        unsigned int index3   = 0;
+        glm::vec3 position1 = glm::vec3(0.0f);
+        glm::vec3 position2 = glm::vec3(0.0f);
+        glm::vec3 position3 = glm::vec3(0.0f);
+        glm::vec3 midpoint  = glm::vec3(0.0f);
+        uint32_t index1     = 0;
+        uint32_t index2     = 0;
+        uint32_t index3     = 0;
 
         float getArea() const noexcept {
             auto crossProduct = glm::cross(position2 - position1, position3 - position1);
@@ -82,14 +82,14 @@ namespace Engine::priv {
             IDs.fill(0.0f);
             Weights.fill(0.0f);
         }
-        VertexBoneData(unsigned int BoneID, float Weight) 
+        VertexBoneData(uint32_t BoneID, float Weight)
             : VertexBoneData{}
         {
             AddBoneData(BoneID, Weight);
         }
 
-        void AddBoneData(unsigned int BoneID, float Weight) noexcept {
-            for (unsigned int i = 0; i < IDs.size(); ++i) {
+        void AddBoneData(uint32_t BoneID, float Weight) noexcept {
+            for (size_t i = 0; i < IDs.size(); ++i) {
                 if (Weights[i] == 0.0f) {
                     IDs[i]     = (float)BoneID;
                     Weights[i] = Weight;

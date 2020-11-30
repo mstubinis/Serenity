@@ -41,13 +41,23 @@ namespace Engine::priv {
             }
 
             template<class LIGHT>
-            void deleteLight(LIGHT* light) noexcept {
+            bool deleteLight(LIGHT* light) noexcept {
                 using ContainerType      = LightContainer<LIGHT>;
                 const uint32_t index     = m_LightsRegistry.type_slot_fast<LIGHT>();
                 ASSERT(m_LightsRegistry.contains<LIGHT>(), __FUNCTION__ << "(): type: " << typeid(LIGHT).name() << " must be registered first!");
                 ContainerType* container = static_cast<ContainerType*>(m_Lights[index].get());
                 return container->deleteLight(light);
             }
+
+            template<class LIGHT>
+            bool setShadowCaster(LIGHT* light, bool isShadowCaster) {
+                using ContainerType      = LightContainer<LIGHT>;
+                const uint32_t index     = m_LightsRegistry.type_slot_fast<LIGHT>();
+                ASSERT(m_LightsRegistry.contains<LIGHT>(), __FUNCTION__ << "(): type: " << typeid(LIGHT).name() << " must be registered first!");
+                ContainerType* container = static_cast<ContainerType*>(m_Lights[index].get());
+                return container->setShadowCaster(light, isShadowCaster);
+            }
+
 
             inline std::vector<std::unique_ptr<ILightContainer>>::iterator begin() noexcept { return m_Lights.begin(); }
             inline std::vector<std::unique_ptr<ILightContainer>>::const_iterator begin() const noexcept { return m_Lights.cbegin(); }

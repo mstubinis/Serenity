@@ -15,8 +15,8 @@ class Camera;
 namespace Engine::Math {
     inline glm_vec3 rotate_vec3(const glm_quat& rotation, const glm_vec3& vec) noexcept { return rotation * vec; }
 
-    glm::vec3 polynomial_interpolate_linear(std::vector<glm::vec3>& points, float time);
-    glm::vec3 polynomial_interpolate_cubic(std::vector<glm::vec3>& points, float time);
+    glm::vec3 polynomial_interpolate_linear(const std::vector<glm::vec3>& points, float time);
+    glm::vec3 polynomial_interpolate_cubic(const std::vector<glm::vec3>& points, float time);
 
     bool IsSpecialFloat(float number) noexcept;
     bool IsSpecialFloat(const glm::vec2& vec) noexcept;

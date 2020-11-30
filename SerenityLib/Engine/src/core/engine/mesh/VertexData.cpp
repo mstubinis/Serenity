@@ -53,9 +53,9 @@ void VertexData::bind() const {
     if (m_VAO) {
         Engine::Renderer::bindVAO(m_VAO);
     }else{
-        for (auto& buffer : m_Buffers) {
+        std::for_each(std::cbegin(m_Buffers), std::cend(m_Buffers), [](const auto& buffer) {
             buffer->bind();
-        }
+        });
         m_Format.bind(*this);
     }
 }

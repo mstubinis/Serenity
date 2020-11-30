@@ -19,7 +19,7 @@ using namespace Engine;
 constexpr float ROTATION_THRESHOLD = 0.00001f;
 
 //could use some fixing
-glm::vec3 Math::polynomial_interpolate_linear(std::vector<glm::vec3>& points, float time) {
+glm::vec3 Math::polynomial_interpolate_linear(const std::vector<glm::vec3>& points, float time) {
     glm::vec3 ret = glm::vec3(0.0f);
     auto n = points.size();
     assert(n >= 3);
@@ -58,23 +58,23 @@ glm::vec3 Math::polynomial_interpolate_linear(std::vector<glm::vec3>& points, fl
     return ret;
 }
 //this works perfectly
-glm::vec3 Math::polynomial_interpolate_cubic(std::vector<glm::vec3>& points, float time) {
-    glm::vec3 ret = glm::vec3(0.0f);
+glm::vec3 Math::polynomial_interpolate_cubic(const std::vector<glm::vec3>& points, float time) {
+    glm::vec3 ret{ 0.0f };
     auto n = points.size();
-    std::vector<float> xs; xs.reserve(n);
-    std::vector<float> ys; ys.reserve(n);
-    std::vector<float> zs; zs.reserve(n);
-    for (auto& pt : points) {
-        xs.emplace_back(pt.x);
-        ys.emplace_back(pt.y);
-        zs.emplace_back(pt.z);
-    }
+    std::vector<float> x_vals; x_vals.reserve(n);
+    std::vector<float> y_vals; y_vals.reserve(n);
+    std::vector<float> z_vals; z_vals.reserve(n);
+    std::for_each(std::cbegin(points), std::cend(points), [&x_vals, &y_vals, &z_vals](const auto& pt) {
+        x_vals.emplace_back(pt.x);
+        y_vals.emplace_back(pt.y);
+        z_vals.emplace_back(pt.z);
+    });
     auto step = 1.0f / (float)(n - 1);
-    boost::math::cubic_b_spline<float> x_spline(xs.data(), n, 0.0f, step);
-    boost::math::cubic_b_spline<float> y_spline(ys.data(), n, 0.0f, step);
-    boost::math::cubic_b_spline<float> z_spline(zs.data(), n, 0.0f, step);
+    boost::math::cubic_b_spline<float> x_spline{ x_vals.data(), n, 0.0f, step };
+    boost::math::cubic_b_spline<float> y_spline{ y_vals.data(), n, 0.0f, step };
+    boost::math::cubic_b_spline<float> z_spline{ z_vals.data(), n, 0.0f, step };
 
-    return glm::vec3(x_spline(time), y_spline(time), z_spline(time));
+    return glm::vec3{ x_spline(time), y_spline(time), z_spline(time) };
 }
 
 bool Math::IsNear(float v1, float v2, float threshold) noexcept {
@@ -102,17 +102,11 @@ bool Math::IsSpecialFloat(const glm::vec3& v) noexcept {
     return false;
 }
 
-
 bool Math::rect_fully_contained(const glm::vec4& bigger, const glm::vec4& smaller) noexcept {
-    if (smaller.x >= bigger.x && smaller.x + smaller.z <= bigger.x + bigger.z) {
-        if (smaller.y >= bigger.y && smaller.y + smaller.w <= bigger.y + bigger.w) {
-            return true;
-        }
-    }
-    return false;
+    return ((smaller.x >= bigger.x && smaller.x + smaller.z <= bigger.x + bigger.z) && (smaller.y >= bigger.y && smaller.y + smaller.w <= bigger.y + bigger.w));
 }
 glm::vec4 Math::rect_union(const glm::vec4& bigger, const glm::vec4& smaller) noexcept {
-    if (bigger == glm::vec4(-1.0f)) {
+    if (bigger == glm::vec4{ -1.0f }) {
         return smaller;
     }
     float x = std::max(bigger.x, smaller.x);
@@ -122,16 +116,16 @@ glm::vec4 Math::rect_union(const glm::vec4& bigger, const glm::vec4& smaller) no
     if (x > z || y > w) { //no intersection
         return bigger;
     }
-    return glm::vec4(x, y, std::abs(z - x), std::abs(w - y));
+    return glm::vec4{ x, y, std::abs(z - x), std::abs(w - y) };
 }
 
-void Math::Float32From16(float*    out, const uint16_t* in, unsigned int arraySize) noexcept {
-    for (unsigned int i = 0; i < arraySize; ++i) {
+void Math::Float32From16(float* out, const uint16_t* in, uint32_t arraySize) noexcept {
+    for (uint32_t i = 0; i < arraySize; ++i) {
         Math::Float32From16(&(out[i]), in[i]);
     }
 }
-void Math::Float16From32(uint16_t* out, const float*    in, unsigned int arraySize) noexcept {
-    for (unsigned int i = 0; i < arraySize; ++i) {
+void Math::Float16From32(uint16_t* out, const float* in, uint32_t arraySize) noexcept {
+    for (uint32_t i = 0; i < arraySize; ++i) {
         Math::Float16From32(&(out[i]), in[i]);
     }
 }
@@ -151,50 +145,48 @@ void Math::setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position
 }
 void Math::setRotation(glm_quat& orientation, decimal pitch, decimal yaw, decimal roll) noexcept {
     if (abs(pitch) > ROTATION_THRESHOLD)
-        orientation               = (glm::angleAxis(pitch, glm_vec3(-1, 0, 0)));   //pitch
+        orientation               = (glm::angleAxis(pitch, glm_vec3{ -1, 0, 0 }));   //pitch
     if (abs(yaw) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(yaw,   glm_vec3(0, -1, 0)));   //yaw
+        orientation = orientation * (glm::angleAxis(yaw,   glm_vec3{0, -1, 0}));   //yaw
     if (abs(roll) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(roll,   glm_vec3(0, 0, 1)));   //roll
+        orientation = orientation * (glm::angleAxis(roll,  glm_vec3{ 0, 0, 1 }));   //roll
 }
 void Math::setRotation(glm::quat& orientation, float pitch, float yaw, float roll) noexcept {
     if (abs(pitch) > ROTATION_THRESHOLD)
-        orientation               = (glm::angleAxis(pitch, glm::vec3(-1, 0, 0)));   //pitch
+        orientation =               (glm::angleAxis(pitch, glm::vec3{ -1, 0, 0 }));   //pitch
     if (abs(yaw) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(yaw, glm::vec3(0, -1, 0)));   //yaw
+        orientation = orientation * (glm::angleAxis(yaw,   glm::vec3{ 0, -1, 0 }));   //yaw
     if (abs(roll) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(roll, glm::vec3(0, 0, 1)));   //roll
+        orientation = orientation * (glm::angleAxis(roll,  glm::vec3{ 0, 0, 1 }));   //roll
 }
 void Math::rotate(glm_quat& orientation, decimal pitch, decimal yaw, decimal roll) noexcept {
     if (abs(pitch) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(pitch, glm_vec3(-1, 0, 0)));   //pitch
+        orientation = orientation * (glm::angleAxis(pitch, glm_vec3{ -1, 0, 0 }));   //pitch
     if (abs(yaw) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(yaw,   glm_vec3(0, -1, 0)));   //yaw
+        orientation = orientation * (glm::angleAxis(yaw,   glm_vec3{ 0, -1, 0 }));   //yaw
     if (abs(roll) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(roll,   glm_vec3(0, 0, 1)));   //roll
+        orientation = orientation * (glm::angleAxis(roll,  glm_vec3{ 0, 0, 1 }));   //roll
 }
 void Math::rotate(glm::quat& orientation, float pitch, float yaw, float roll) noexcept {
     if (abs(pitch) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(pitch, glm::vec3(-1, 0, 0)));   //pitch
+        orientation = orientation * (glm::angleAxis(pitch, glm::vec3{ -1, 0, 0 }));   //pitch
     if (abs(yaw) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(yaw, glm::vec3(0, -1, 0)));   //yaw
+        orientation = orientation * (glm::angleAxis(yaw,   glm::vec3{ 0, -1, 0 }));   //yaw
     if (abs(roll) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(roll, glm::vec3(0, 0, 1)));   //roll
+        orientation = orientation * (glm::angleAxis(roll,  glm::vec3{ 0, 0, 1 }));   //roll
 }
 glm::vec2 Math::rotate2DPoint(const glm::vec2& point, float angle, const glm::vec2& origin) {
     float s = glm::sin(angle);
     float c = glm::cos(angle);
-    glm::vec2 ret;
-    ret.x = c * (point.x - origin.x) - s * (point.y - origin.y) + origin.x;
-    ret.y = s * (point.x - origin.x) + c * (point.y - origin.y) + origin.x;
-    return ret;
+    return {
+        c* (point.x - origin.x) - s * (point.y - origin.y) + origin.x,
+        s* (point.x - origin.x) + c * (point.y - origin.y) + origin.x
+    };
 }
-
-
 
 void Math::extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProjection, std::array<glm::vec4, 6>& outPlanes){
     glm::vec4 rows[4];
-    for (size_t i = 0; i < 4; ++i) {
+    for (uint32_t i = 0; i < 4; ++i) {
         rows[i] = glm::row(inViewProjection, i);
     }
     //0 = left, 1 = right, 2 = top, 3 = bottom, 4 = near, 5 = far
@@ -206,33 +198,33 @@ void Math::extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProject
     //https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
 }
 glm_quat Math::btToGLMQuat(const btQuaternion& q){
-	return glm_quat(q.getW(),q.getX(),q.getY(),q.getZ()); 
+    return glm_quat{ q.getW(), q.getX(), q.getY(), q.getZ() };
 }
 btQuaternion Math::glmToBTQuat(const glm_quat& q){
-	return btQuaternion(q.x,q.y,q.z,q.w); 
+    return btQuaternion{ q.x, q.y, q.z, q.w };
 }
 glm::vec3 Math::assimpToGLMVec3(const aiVector3D& n){
-	return glm::vec3(n.x,n.y,n.z); 
+    return glm::vec3{ n.x, n.y, n.z };
 }
 glm::mat4 Math::assimpToGLMMat4(const aiMatrix4x4& n){
-	return glm::mat4(n.a1,n.b1,n.c1,n.d1,n.a2,n.b2,n.c2,n.d2,n.a3,n.b3,n.c3,n.d3,n.a4,n.b4,n.c4,n.d4); 
+    return glm::mat4{ n.a1, n.b1, n.c1, n.d1, n.a2, n.b2, n.c2, n.d2, n.a3, n.b3, n.c3, n.d3, n.a4, n.b4, n.c4, n.d4 };
 }
 glm::mat3 Math::assimpToGLMMat3(const aiMatrix3x3& n){
-	return glm::mat3(n.a1,n.b1,n.c1,n.a2,n.b2,n.c2,n.a3,n.b3,n.c3);  
+    return glm::mat3{ n.a1, n.b1, n.c1, n.a2, n.b2, n.c2, n.a3, n.b3, n.c3 };
 }
 
 
 glm_vec3 Math::btVectorToGLM(const btVector3& btvector){
-	return glm_vec3(btvector.x(), btvector.y(), btvector.z());
+    return glm_vec3{ btvector.x(), btvector.y(), btvector.z() };
 }
 btVector3 Math::btVectorFromGLM(const glm_vec3& vector){ 
-	return btVector3(vector.x, vector.y, vector.z);
+    return btVector3{ vector.x, vector.y, vector.z };
 }
 glm_vec3 Math::getMatrixPosition(const glm_mat4& matrix) {
-    return glm_vec3(matrix[3][0], matrix[3][1], matrix[3][2]);
+    return glm_vec3{ matrix[3][0], matrix[3][1], matrix[3][2] };
 }
 glm::vec3 Math::getMatrixPosition(const glm::mat4& matrix) {
-    return glm::vec3(matrix[3][0], matrix[3][1], matrix[3][2]);
+    return glm::vec3{ matrix[3][0], matrix[3][1], matrix[3][2] };
 }
 void Math::removeMatrixPosition(glm::mat4& matrix){
 	matrix[3][0] = 0.0f;
@@ -348,8 +340,8 @@ glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& ca
     return Math::getScreenCoordinates(position, camera, camera.getView(), camera.getProjection(), viewport, clampToEdge);
 }
 glm::vec3 Math::getScreenCoordinates(const glm::vec3& objPos, const Camera& camera, bool clampToEdge) {
-    glm::vec2 winSize  = glm::vec2(Resources::getWindowSize());
-    glm::vec4 viewport = glm::vec4(0.0f, 0.0f, winSize.x, winSize.y);
+    glm::vec2 winSize{ Engine::Resources::getWindowSize() };
+    glm::vec4 viewport{ 0.0f, 0.0f, winSize.x, winSize.y };
     return Math::getScreenCoordinates(objPos, camera, viewport, clampToEdge);
 }
 
@@ -362,25 +354,25 @@ void Math::translate(const btRigidBody& body, btVector3& vec, bool local) noexce
     }
 }
 glm::vec3 Math::midpoint(const glm::vec3& a, const glm::vec3& b) {
-    return glm::vec3((a.x + b.x) / 2.0f, (a.y + b.y) / 2.0f, (a.z + b.z) / 2.0f);
+    return glm::vec3{ (a.x + b.x) / 2.0f, (a.y + b.y) / 2.0f, (a.z + b.z) / 2.0f };
 }
 glm::vec3 Math::direction(const glm::vec3& eye, const glm::vec3& target) {
     return glm::normalize(eye - target);
 }
 glm::vec3 Math::getForward(const glm_quat& q) {
-    return glm::normalize(q * glm_vec3(0, 0, -1));
+    return glm::normalize(q * glm_vec3{ 0, 0, -1 });
 }
 glm::vec3 Math::getRight(const glm_quat& q) {
-    return glm::normalize(q * glm_vec3(1, 0, 0));
+    return glm::normalize(q * glm_vec3{ 1, 0, 0 });
 }
 glm::vec3 Math::getUp(const glm_quat& q) {
-    return glm::normalize(q * glm_vec3(0, 1, 0));
+    return glm::normalize(q * glm_vec3{ 0, 1, 0 });
 }
 glm::vec3 Math::getColumnVector(const btRigidBody& b, unsigned int column) {
     btTransform t;
     b.getMotionState()->getWorldTransform(t);
     btVector3 v = t.getBasis().getColumn(column);
-    return glm::normalize(glm::vec3(v.x(), v.y(), v.z()));
+    return glm::normalize(glm::vec3{ v.x(), v.y(), v.z() });
 }
 glm::vec3 Math::getForward(const btRigidBody& b) {
     return Math::getColumnVector(b, 2);
@@ -411,7 +403,7 @@ float Math::getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bo
 }
 glm_quat Math::alignTo(decimal x, decimal y, decimal z) noexcept {
     glm_quat o{ 1.0, 0.0, 0.0, 0.0 };
-    o = glm::conjugate(glm::toQuat(glm::lookAt(glm_vec3(0.0f), -glm_vec3(x, y, z), glm_vec3(0, 1, 0))));
+    o = glm::conjugate(glm::toQuat(glm::lookAt(glm_vec3{ 0.0f }, -glm_vec3{ x, y, z }, glm_vec3{ 0, 1, 0 })));
     o = glm::normalize(o);
     return o;
 }
@@ -458,15 +450,15 @@ double Math::grad(int hash, double x, double y, double z){
 	return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
 }
 glm::vec4 Math::PaintersAlgorithm(const glm::vec4& paint_color, const glm::vec4& canvas_color){
-    glm::vec4 output(0.0f);
+    glm::vec4 output{ 0.0f };
     float alpha = paint_color.a + canvas_color.a * (1.0f - paint_color.a);
     output      = ((paint_color * paint_color.a + canvas_color * canvas_color.a * (1.0f - paint_color.a)) / alpha);
     output.a    = alpha;
     return output;
 }
 sf::Color Math::PaintersAlgorithm(const sf::Color& paint_color, const sf::Color& canvas_color) {
-    glm::vec4 cC = glm::vec4((float)canvas_color.r / 255.0f, (float)canvas_color.g / 255.0f, (float)canvas_color.b / 255.0f, (float)canvas_color.a / 255.0f);
-    glm::vec4 pC = glm::vec4((float)paint_color.r / 255.0f, (float)paint_color.g / 255.0f, (float)paint_color.b / 255.0f, (float)paint_color.a / 255.0f);
+    glm::vec4 cC{ (float)canvas_color.r / 255.0f, (float)canvas_color.g / 255.0f, (float)canvas_color.b / 255.0f, (float)canvas_color.a / 255.0f };
+    glm::vec4 pC{ (float)paint_color.r / 255.0f, (float)paint_color.g / 255.0f, (float)paint_color.b / 255.0f, (float)paint_color.a / 255.0f };
     float alpha  = pC.a + cC.a * (1.0f - pC.a);
     glm::vec4 calculations(0.0f);
     calculations = (pC * pC.a + cC * cC.a * (1.0f - pC.a) / alpha);
@@ -475,7 +467,7 @@ sf::Color Math::PaintersAlgorithm(const sf::Color& paint_color, const sf::Color&
     sf::Uint8 finalG = (sf::Uint8)(calculations.g * 255.0f);
     sf::Uint8 finalB = (sf::Uint8)(calculations.b * 255.0f);
     sf::Uint8 finalA = (sf::Uint8)(calculations.a * 255.0f);
-    return sf::Color(finalR, finalG, finalB, finalA);
+    return sf::Color{ finalR, finalG, finalB, finalA };
 }
 bool Math::rayIntersectSphere(const glm::vec3& C, float r, const glm::vec3& A, const glm::vec3& rayVector){
     glm::vec3 B = A + rayVector;

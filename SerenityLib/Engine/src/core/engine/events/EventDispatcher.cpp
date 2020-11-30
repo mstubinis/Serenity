@@ -10,7 +10,7 @@ Engine::priv::EventDispatcher::EventDispatcher() {
 void Engine::priv::EventDispatcher::registerObject(Observer& observer, EventType eventType) noexcept {
     std::lock_guard lock(m_Mutex);
     auto& observers_with_event_type = m_Observers[(size_t)eventType];
-    if (internal_check_for_duplicates(observer, observers_with_event_type)) {
+    if (internal_has_duplicate(observer, observers_with_event_type)) {
         return;
     }
     observers_with_event_type.emplace_back(&observer);
@@ -23,31 +23,30 @@ void Engine::priv::EventDispatcher::unregisterObject(Observer& observer, EventTy
 bool Engine::priv::EventDispatcher::isObjectRegistered(const Observer& observer, EventType eventType) const noexcept {
     std::lock_guard lock(m_Mutex);
     const auto& observers_with_event_type = m_Observers[(size_t)eventType];
-    bool result = internal_check_for_duplicates(observer, observers_with_event_type);
+    bool result = internal_has_duplicate(observer, observers_with_event_type);
     return result;
 }
 void Engine::priv::EventDispatcher::dispatchEvent(const Event& e) noexcept {
     const auto& observers_with_event_type = m_Observers[(size_t)e.type];
-    for (auto& observer : observers_with_event_type) {
+    std::for_each(observers_with_event_type.begin(), observers_with_event_type.end(), [&e](auto& observer) {
         observer->onEvent(e);
-    }
+    });
 }
 void Engine::priv::EventDispatcher::dispatchEvent(EventType eventType) noexcept {
     Event e{ eventType };
     const auto& observers_with_event_type = m_Observers[(size_t)e.type];
-    for (auto& observer : observers_with_event_type) {
+    std::for_each(observers_with_event_type.begin(), observers_with_event_type.end(), [&e](auto& observer) {
         observer->onEvent(e);
-    }
+    });
 }
 void Engine::priv::EventDispatcher::postUpdate() {
     if (m_UnregisteredObservers.size() > 0) {
         std::lock_guard lock(m_Mutex);
-        for (auto& [observer, index] : m_UnregisteredObservers) {
-            auto& observers_with_event_type = m_Observers[index];
-            std::erase_if(observers_with_event_type, [&observer](auto observerItr) {
-                return observerItr == observer;
+        std::for_each(std::cbegin(m_UnregisteredObservers), std::cend(m_UnregisteredObservers), [this](const auto& data) {
+            std::erase_if(m_Observers[data.second], [&data](auto observerItr) {
+                return observerItr == data.first;
             });
-        }
+        });
         m_UnregisteredObservers.clear();
     }
 }

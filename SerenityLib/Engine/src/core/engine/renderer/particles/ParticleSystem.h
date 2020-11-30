@@ -19,7 +19,7 @@ namespace Engine::priv {
 #include <core/engine/containers/PartialVectorPOD.h>
 #include <core/engine/resources/Handle.h>
 
-constexpr unsigned int MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME = 12U;
+constexpr uint32_t MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME = 12U;
 
 namespace Engine::priv {
     class ParticleSystem final : public Engine::NonCopyable, public Engine::NonMoveable {
@@ -88,16 +88,16 @@ namespace Engine::priv {
 
             Engine::partial_vector_pod<ParticleDOD>                  ParticlesDOD;
 
-            std::unordered_map<Material*, unsigned int>              MaterialToIndex;
-            std::unordered_map<unsigned int, Material*>              MaterialToIndexReverse;
-            std::unordered_map<unsigned int, unsigned int>           MaterialIDToIndex;
+            std::unordered_map<Material*, uint32_t>              MaterialToIndex;
+            std::unordered_map<uint32_t, Material*>              MaterialToIndexReverse;
+            std::unordered_map<uint32_t, uint32_t>           MaterialIDToIndex;
 
             //for the threads...
             std::vector<std::vector<ParticleDOD>>                    THREAD_PART_1;
-            std::vector<std::unordered_map<Material*, unsigned int>> THREAD_PART_4;
-            std::vector<std::unordered_map<unsigned int, Material*>> THREAD_PART_5;
+            std::vector<std::unordered_map<Material*, uint32_t>> THREAD_PART_4;
+            std::vector<std::unordered_map<uint32_t, Material*>> THREAD_PART_5;
         public:
-            ParticleSystem(unsigned int maxEmitters, unsigned int maxParticles);
+            ParticleSystem(uint32_t maxEmitters, uint32_t maxParticles);
 
             ParticleEmitter* add_emitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent);
 

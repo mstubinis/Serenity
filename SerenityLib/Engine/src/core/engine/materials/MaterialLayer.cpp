@@ -93,9 +93,9 @@ void MaterialLayer::setCubemap(Handle cubemapHandle) noexcept {
 }
 
 void MaterialLayer::update(const float dt) {
-    for (auto& command : m_UVModificationQueue) {
+    std::for_each(std::cbegin(m_UVModificationQueue), std::cend(m_UVModificationQueue), [this, dt](auto& command) {
         command(dt, *this);
-    }
+    });
 }
 void MaterialLayer::sendDataToGPU(const std::string& uniform_component_string, size_t component_index, size_t layer_index, size_t& textureUnit) const {
     std::string wholeString = uniform_component_string + "layers[" + std::to_string(layer_index) + "].";

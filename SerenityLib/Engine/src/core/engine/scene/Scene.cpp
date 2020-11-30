@@ -18,7 +18,7 @@ class Scene::impl final {
 
         impl() = delete;
 
-        impl(unsigned int maxEmitters, unsigned int maxParticles)
+        impl(uint32_t maxEmitters, uint32_t maxParticles)
             : m_ParticleSystem{ maxEmitters, maxParticles }
         {}
 
@@ -99,26 +99,6 @@ std::vector<Camera*>& Engine::priv::InternalScenePublicInterface::GetCameras(con
 std::vector<Entity>& Engine::priv::InternalScenePublicInterface::GetEntities(const Scene& scene) {
     return scene.m_i->m_ECS.m_EntityPool.m_Pool;
 }
-/*
-std::vector<SunLight*>& Engine::priv::InternalScenePublicInterface::GetSunLights(const Scene& scene) {
-    return scene.m_SunLights;
-}
-std::vector<DirectionalLight*>& Engine::priv::InternalScenePublicInterface::GetDirectionalLights(const Scene& scene) {
-    return scene.m_DirectionalLights;
-}
-std::vector<PointLight*>& Engine::priv::InternalScenePublicInterface::GetPointLights(const Scene& scene) {
-    return scene.m_PointLights;
-}
-std::vector<SpotLight*>& Engine::priv::InternalScenePublicInterface::GetSpotLights(const Scene& scene) {
-    return scene.m_SpotLights;
-}
-std::vector<RodLight*>& Engine::priv::InternalScenePublicInterface::GetRodLights(const Scene& scene) {
-    return scene.m_RodLights;
-}
-std::vector<ProjectionLight*>& Engine::priv::InternalScenePublicInterface::GetProjectionLights(const Scene& scene) {
-    return scene.m_ProjectionLights;
-}
-*/
 Engine::priv::ECS& Engine::priv::InternalScenePublicInterface::GetECS(Scene& scene) {
     return scene.m_i->m_ECS;
 }
@@ -226,10 +206,10 @@ void Engine::priv::InternalScenePublicInterface::RenderParticles(RenderModule& r
     scene.m_i->m_ParticleSystem.render(viewport, camera, program, renderer);
 }
 void Engine::priv::InternalScenePublicInterface::AddModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage stage, ComponentModel& componentModel) {
-    scene.m_i->_addModelInstanceToPipeline(scene, modelInstance, scene.m_RenderGraphs[(unsigned int)stage], stage, componentModel);
+    scene.m_i->_addModelInstanceToPipeline(scene, modelInstance, scene.m_RenderGraphs[(uint32_t)stage], stage, componentModel);
 }
 void Engine::priv::InternalScenePublicInterface::RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage stage){
-    scene.m_i->_removeModelInstanceFromPipeline(modelInstance, scene.m_RenderGraphs[(unsigned int)stage]);
+    scene.m_i->_removeModelInstanceFromPipeline(modelInstance, scene.m_RenderGraphs[(uint32_t)stage]);
 }
 void Engine::priv::InternalScenePublicInterface::SkipRenderThisFrame(Scene& scene, bool isSkip) {
     scene.m_SkipRenderThisFrame = isSkip;
@@ -261,58 +241,15 @@ Scene::Scene(const std::string& name)
 {}
 Scene::~Scene() {
     SAFE_DELETE(m_Skybox);
-    /*
-    SAFE_DELETE_VECTOR(m_SunLights);
-    SAFE_DELETE_VECTOR(m_DirectionalLights);
-    SAFE_DELETE_VECTOR(m_PointLights);
-    SAFE_DELETE_VECTOR(m_SpotLights);
-    SAFE_DELETE_VECTOR(m_RodLights);
-    SAFE_DELETE_VECTOR(m_ProjectionLights);
-    */
     SAFE_DELETE_VECTOR(m_Cameras);
     unregisterEvent(EventType::SceneChanged);
 }
 
-template<class LIGHT, class CONTAINER> constexpr void internal_delete_light(LIGHT* light, CONTAINER& container) {
-    light->destroy();
-    std::erase_if(container, [&light](auto& itr) {
-        return itr == light;
-    });
-    SAFE_DELETE(light);
-}
-/*
-void Scene::deleteSunLight(SunLight* light) {
-    internal_delete_light(light, m_SunLights);
-}
-void Scene::deleteDirectionalLight(DirectionalLight* light) {
-    internal_delete_light(light, m_DirectionalLights);
-}
-void Scene::deletePointLight(PointLight* light) {
-    internal_delete_light(light, m_PointLights);
-}
-void Scene::deleteSpotLight(SpotLight* light) {
-    internal_delete_light(light, m_SpotLights);
-}
-void Scene::deleteRodLight(RodLight* light) {
-    internal_delete_light(light, m_RodLights);
-}
-void Scene::deleteProjectionLight(ProjectionLight* light) {
-    internal_delete_light(light, m_ProjectionLights);
-}
-*/
 size_t Scene::getNumLights() const noexcept {
     size_t count = 0;
     for (const auto& itr : m_LightsModule) {
         count += itr->size();
     }
-    /*
-    count += m_SunLights.size();
-    count += m_DirectionalLights.size();
-    count += m_PointLights.size();
-    count += m_SpotLights.size();
-    count += m_RodLights.size();
-    count += m_ProjectionLights.size();
-    */
     return count;
 }
 void Scene::clearAllEntities() noexcept {

@@ -15,7 +15,7 @@
 #include <core/engine/shaders/ShaderProgram.h>
 #include <core/engine/system/Engine.h>
 
-Engine::priv::ParticleSystem::ParticleSystem(unsigned int maxEmitters, unsigned int maxParticles) {
+Engine::priv::ParticleSystem::ParticleSystem(uint32_t maxEmitters, uint32_t maxParticles) {
     m_ParticleEmitters.reserve(maxEmitters);
     m_Particles.reserve(maxParticles);
     ParticlesDOD.resize(std::min(maxParticles, 300U));

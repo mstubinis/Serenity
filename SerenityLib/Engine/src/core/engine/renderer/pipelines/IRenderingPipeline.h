@@ -114,14 +114,21 @@ namespace Engine::priv {
             
             virtual void generatePBRData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, uint32_t convoludeSize, uint32_t prefilterSize) = 0;
 
+            virtual bool buildShadowCaster(SunLight&) = 0;
+            virtual bool buildShadowCaster(PointLight&) = 0;
+            virtual bool buildShadowCaster(DirectionalLight&) = 0;
+            virtual bool buildShadowCaster(SpotLight&) = 0;
+            virtual bool buildShadowCaster(RodLight&) = 0;
+            virtual bool buildShadowCaster(ProjectionLight&) = 0;
+
             virtual void sendGPUDataAllLights(Scene&, Camera&) = 0;
             virtual void sendGPUDataGI(Skybox*) = 0;
-            virtual void sendGPUDataLight(Camera& camera, SunLight& sunLight, const std::string& start) = 0;
-            virtual int sendGPUDataLight(Camera& camera, PointLight& pointLight, const std::string& start) = 0;
-            virtual void sendGPUDataLight(Camera& camera, DirectionalLight& directionalLight, const std::string& start) = 0;
-            virtual int sendGPUDataLight(Camera& camera, SpotLight& spotLight, const std::string& start) = 0;
-            virtual int sendGPUDataLight(Camera& camera, RodLight& rodLight, const std::string& start) = 0;
-            virtual int sendGPUDataLight(Camera& camera, ProjectionLight& projectionLight, const std::string& start) = 0;
+            virtual void sendGPUDataLight(Camera&, SunLight&,         const std::string& start) = 0;
+            virtual int  sendGPUDataLight(Camera&, PointLight&,       const std::string& start) = 0;
+            virtual void sendGPUDataLight(Camera&, DirectionalLight&, const std::string& start) = 0;
+            virtual int  sendGPUDataLight(Camera&, SpotLight&,        const std::string& start) = 0;
+            virtual int  sendGPUDataLight(Camera&, RodLight&,         const std::string& start) = 0;
+            virtual int  sendGPUDataLight(Camera&, ProjectionLight&,  const std::string& start) = 0;
 
             virtual void renderSunLight(Camera& camera, SunLight& sunLight, Viewport& viewport) = 0;
             virtual void renderPointLight(Camera& camera, PointLight& pointLight) = 0;
