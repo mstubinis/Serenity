@@ -236,8 +236,8 @@ bool Engine::setFullscreenWindowed(bool fullscreenWindowed) noexcept {
 
 void EngineCore::run(){
     while (!m_Misc.m_Destroyed) {
-        float dt = m_DebugManager.dt() * m_DebugManager.timeScale();
-        for (auto& window_itr : m_ResourceManager.m_Windows) {
+        const float dt = m_DebugManager.dt() * m_DebugManager.timeScale();
+        for (const auto& window_itr : m_ResourceManager.m_Windows) {
             auto& window = *window_itr;
             auto& scene  = *Engine::Resources::getCurrentScene();
             m_EngineEventHandler.poll_events(window);

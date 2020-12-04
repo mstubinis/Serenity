@@ -20,88 +20,88 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
 #pragma region OutputSubmissions
     if (ShaderHelper::sfind(code, "SUBMIT_DIFFUSE(")) {
         if (!ShaderHelper::sfind(code, "void SUBMIT_DIFFUSE(")) {
-            ShaderHelper::insertStringRightBeforeMainFunc(code,
-                "void SUBMIT_DIFFUSE(float r, float g, float b, float a){\n"
-                "    gl_FragData[0] = vec4(r, g, b, a);\n"
-                "}\n"
-                "void SUBMIT_DIFFUSE(vec4 color){\n"
-                "    gl_FragData[0] = color;\n"
-                "}\n"
-            );
+            ShaderHelper::insertStringRightBeforeMainFunc(code, R"(
+                void SUBMIT_DIFFUSE(float r, float g, float b, float a){
+                    gl_FragData[0] = vec4(r, g, b, a);
+                }
+                void SUBMIT_DIFFUSE(vec4 color){
+                    gl_FragData[0] = color;
+                }
+            )");
         }
     }
     if (ShaderHelper::sfind(code, "SUBMIT_NORMALS(")) {
         if (!ShaderHelper::sfind(code, "void SUBMIT_NORMALS(")) {
-            ShaderHelper::insertStringRightBeforeMainFunc(code,
-                "void SUBMIT_NORMALS(float x, float y, float z){\n"
-                "    gl_FragData[1].xy = EncodeOctahedron(vec3(x, y, z));\n"
-                "}\n"
-                "void SUBMIT_NORMALS(vec3 normals){\n"
-                "    gl_FragData[1].xy = EncodeOctahedron(normals);\n"
-                "}\n"
-                "void SUBMIT_NORMALS(float xCompressed, float yCompressed){\n"
-                "    gl_FragData[1].xy = vec2(xCompressed, yCompressed);\n"
-                "}\n"
-                "void SUBMIT_NORMALS(vec2 compressedNormals){\n"
-                "    gl_FragData[1].xy = compressedNormals;\n"
-                "}\n"
-            );
+            ShaderHelper::insertStringRightBeforeMainFunc(code, R"(
+                void SUBMIT_NORMALS(float x, float y, float z){
+                    gl_FragData[1].xy = EncodeOctahedron(vec3(x, y, z));
+                }
+                void SUBMIT_NORMALS(vec3 normals){
+                    gl_FragData[1].xy = EncodeOctahedron(normals);
+                }
+                void SUBMIT_NORMALS(float xCompressed, float yCompressed){
+                    gl_FragData[1].xy = vec2(xCompressed, yCompressed);
+                }
+                void SUBMIT_NORMALS(vec2 compressedNormals){
+                    gl_FragData[1].xy = compressedNormals;
+                }
+            )");
         }
     }
     if (ShaderHelper::sfind(code, "SUBMIT_GLOW(")) {
         if (!ShaderHelper::sfind(code, "void SUBMIT_GLOW(")) {
-            ShaderHelper::insertStringRightBeforeMainFunc(code,
-                "void SUBMIT_GLOW(float glow){\n"
-                "    gl_FragData[1].a = glow;\n"
-                "}\n"
-            );
+            ShaderHelper::insertStringRightBeforeMainFunc(code, R"(
+                void SUBMIT_GLOW(float glow){
+                    gl_FragData[1].a = glow;
+                }
+            )");
         }
     }
     if (ShaderHelper::sfind(code, "SUBMIT_SPECULAR(")) {
         if (!ShaderHelper::sfind(code, "void SUBMIT_SPECULAR(")) {
-            ShaderHelper::insertStringRightBeforeMainFunc(code,
-                "void SUBMIT_SPECULAR(float specular){\n"
-                "    gl_FragData[2].g = specular;\n"
-                "}\n"
-            );
+            ShaderHelper::insertStringRightBeforeMainFunc(code, R"(
+                void SUBMIT_SPECULAR(float specular){
+                    gl_FragData[2].g = specular;
+                }
+            )");
         }
     }
     if (ShaderHelper::sfind(code, "SUBMIT_MATERIAL_ID_AND_AO(")) {
         if (!ShaderHelper::sfind(code, "void SUBMIT_MATERIAL_ID_AND_AO(")) {
-            ShaderHelper::insertStringRightBeforeMainFunc(code,
-                "void SUBMIT_MATERIAL_ID_AND_AO(float matID, float ao){\n"
-                "    gl_FragData[1].b = matID + ao;\n"
-                "}\n"
-                "void SUBMIT_MATERIAL_ID_AND_AO(float matIDAndAO){\n"
-                "    gl_FragData[1].b = matIDAndAO;\n"
-                "}\n"
-            );
+            ShaderHelper::insertStringRightBeforeMainFunc(code, R"(
+                void SUBMIT_MATERIAL_ID_AND_AO(float matID, float ao){
+                    gl_FragData[1].b = matID + ao;
+                }
+                void SUBMIT_MATERIAL_ID_AND_AO(float matIDAndAO){
+                    gl_FragData[1].b = matIDAndAO;
+                }
+            )");
         }
     }
     if (ShaderHelper::sfind(code, "SUBMIT_GOD_RAYS_COLOR(")) {
         if (!ShaderHelper::sfind(code, "void SUBMIT_GOD_RAYS_COLOR(")) {
-            ShaderHelper::insertStringRightBeforeMainFunc(code,
-                "void SUBMIT_GOD_RAYS_COLOR(float godRaysR, float godRaysG, float godRaysB){\n"
-                "    float GodRaysRG = Pack2NibblesInto8BitChannel(godRaysR, godRaysG);\n"
-                "    gl_FragData[2].ba = vec2(GodRaysRG, godRaysB);\n"
-                "}\n"
-                "void SUBMIT_GOD_RAYS_COLOR(float godRaysPackedRG, float godRaysB){\n"
-                "    gl_FragData[2].ba = vec2(godRaysPackedRG, godRaysB);\n"
-                "}\n"
-            );
+            ShaderHelper::insertStringRightBeforeMainFunc(code, R"(
+                void SUBMIT_GOD_RAYS_COLOR(float godRaysR, float godRaysG, float godRaysB){
+                    float GodRaysRG = Pack2NibblesInto8BitChannel(godRaysR, godRaysG);
+                    gl_FragData[2].ba = vec2(GodRaysRG, godRaysB);
+                }
+                void SUBMIT_GOD_RAYS_COLOR(float godRaysPackedRG, float godRaysB){
+                    gl_FragData[2].ba = vec2(godRaysPackedRG, godRaysB);
+                }
+            )");
         }
     }
     if (ShaderHelper::sfind(code, "SUBMIT_METALNESS_AND_SMOOTHNESS(")) {
         if (!ShaderHelper::sfind(code, "void SUBMIT_METALNESS_AND_SMOOTHNESS(")) {
-            ShaderHelper::insertStringRightBeforeMainFunc(code,
-                "void SUBMIT_METALNESS_AND_SMOOTHNESS(float inMetal, float inSmooth){\n"
-                "    float PackedMetalSmooth = Pack2NibblesInto8BitChannel(inMetal, inSmooth);\n"
-                "    gl_FragData[2].r = PackedMetalSmooth;\n"
-                "}\n"
-                "void SUBMIT_METALNESS_AND_SMOOTHNESS(float inPackedMetalSmooth){\n"
-                "    gl_FragData[2].r = inPackedMetalSmooth;\n"
-                "}\n"
-            );
+            ShaderHelper::insertStringRightBeforeMainFunc(code, R"(
+                void SUBMIT_METALNESS_AND_SMOOTHNESS(float inMetal, float inSmooth){
+                    float PackedMetalSmooth = Pack2NibblesInto8BitChannel(inMetal, inSmooth);
+                    gl_FragData[2].r = PackedMetalSmooth;
+                }
+                void SUBMIT_METALNESS_AND_SMOOTHNESS(float inPackedMetalSmooth){
+                    gl_FragData[2].r = inPackedMetalSmooth;
+                }
+            )");
         }
     }
 #pragma endregion
@@ -109,96 +109,96 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
 #pragma region process component
     if (ShaderHelper::sfind(code, "ProcessComponent(") || ShaderHelper::sfind(code, "ProcessComponentLOD(")) {
         if (!ShaderHelper::sfind(code, "void ProcessComponent(")) {
-            ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "void ProcessComponent(in Component inComponent, inout InData data) {//generated\n"
-                "    if (inComponent.componentData.y == 0) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.diffuse = CalculateDiffuse(inComponent.layers[i], data.diffuse, data.objectColor, data.uv);\n"
-                "       }\n"
-                "    }else if (inComponent.componentData.y == 1) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.normals = CalculateNormals(inComponent.layers[i], data.normals, data.uv);\n"
-                "        }\n"
-                "    }else if (inComponent.componentData.y == 2) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.glow = CalculateGlow(inComponent.layers[i], data.glow, data.uv);\n"
-                "        }\n"
-                "    }else if (inComponent.componentData.y == 3) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.specular = CalculateSpecular(inComponent.layers[i], data.specular, data.uv);\n"
-                "        }\n"
-                "    }else if (inComponent.componentData.y == 4) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.ao = CalculateAO(inComponent.layers[i], data.ao, data.uv);\n"
-                "        }\n"
-                "    }else if (inComponent.componentData.y == 5) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.metalness = CalculateMetalness(inComponent.layers[i], data.metalness, data.uv);\n"
-                "        }\n"
-                "    }else if (inComponent.componentData.y == 6) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.smoothness = CalculateSmoothness(inComponent.layers[i], data.smoothness, data.uv);\n"
-                "        }\n"
-                "    }else if (inComponent.componentData.y == 7) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.diffuse = CalculateReflection(inComponent.layers[i], data.uv, data.diffuse, CamPosition, data.normals, data.worldPosition);\n"
-                "        }\n"
-                "    }else if (inComponent.componentData.y == 8) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.diffuse = CalculateRefraction(inComponent.layers[i], data.uv, data.diffuse, CamPosition, data.normals, data.worldPosition);\n"
-                "        }\n"
-                "    }else if (inComponent.componentData.y == 9) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            vec3 ViewDir = normalize(TangentCameraPos - TangentFragPos);\n"
-                "            data.uv = CalculateParallaxMap(inComponent.layers[i], ViewDir, data.uv);\n"
-                "        }\n"
-                "    }\n"
-                "}\n"
-                "void ProcessComponentLOD(in Component inComponent, inout InData data, in float lod) {//generated\n"
-                "    if (inComponent.componentData.y == 0) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.diffuse = CalculateDiffuseLOD(inComponent.layers[i], data.diffuse, data.objectColor, data.uv, lod);\n"
-                "       }\n"
-                "    }else if (inComponent.componentData.y == 1) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.normals = CalculateNormalsLOD(inComponent.layers[i], data.normals, data.uv, lod);\n"
-                "        }\n"
-                "    }else if (inComponent.componentData.y == 2) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.glow = CalculateGlowLOD(inComponent.layers[i], data.glow, data.uv, lod);\n"
-                "        }\n"
-                "    }else if (inComponent.componentData.y == 3) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.specular = CalculateSpecularLOD(inComponent.layers[i], data.specular, data.uv, lod);\n"
-                "        }\n"
-                "    }else if (inComponent.componentData.y == 4) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.ao = CalculateAOLOD(inComponent.layers[i], data.ao, data.uv, lod);\n"
-                "        }\n"
-                "    }else if (inComponent.componentData.y == 5) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.metalness = CalculateMetalnessLOD(inComponent.layers[i], data.metalness, data.uv, lod);\n"
-                "        }\n"
-                "    }else if (inComponent.componentData.y == 6) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.smoothness = CalculateSmoothnessLOD(inComponent.layers[i], data.smoothness, data.uv, lod);\n"
-                "        }\n"
-                "    }else if (inComponent.componentData.y == 7) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.diffuse = CalculateReflectionLOD(inComponent.layers[i], data.uv, data.diffuse, CamPosition, data.normals, data.worldPosition, lod);\n"
-                "        }\n"
-                "    }else if (inComponent.componentData.y == 8) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            data.diffuse = CalculateRefractionLOD(inComponent.layers[i], data.uv, data.diffuse, CamPosition, data.normals, data.worldPosition, lod);\n"
-                "        }\n"
-                "    }else if (inComponent.componentData.y == 9) {\n"
-                "        for (int i = 0; i < inComponent.componentData.x; ++i) {\n"
-                "            vec3 ViewDir = normalize(TangentCameraPos - TangentFragPos);\n"
-                "            data.uv = CalculateParallaxMapLOD(inComponent.layers[i], ViewDir, data.uv, lod);\n"
-                "        }\n"
-                "    }\n"
-                "}\n"
-            , " main(");
+            ShaderHelper::insertStringRightBeforeLineContent(code, R"(
+                void ProcessComponent(in Component inComponent, inout InData data) { //generated
+                    if (inComponent.componentData.y == 0) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.diffuse = CalculateDiffuse(inComponent.layers[i], data.diffuse, data.objectColor, data.uv);
+                       }
+                    }else if (inComponent.componentData.y == 1) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.normals = CalculateNormals(inComponent.layers[i], data.normals, data.uv);
+                        }
+                    }else if (inComponent.componentData.y == 2) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.glow = CalculateGlow(inComponent.layers[i], data.glow, data.uv);
+                        }
+                    }else if (inComponent.componentData.y == 3) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.specular = CalculateSpecular(inComponent.layers[i], data.specular, data.uv);
+                        }
+                    }else if (inComponent.componentData.y == 4) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.ao = CalculateAO(inComponent.layers[i], data.ao, data.uv);
+                        }
+                    }else if (inComponent.componentData.y == 5) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.metalness = CalculateMetalness(inComponent.layers[i], data.metalness, data.uv);
+                        }
+                    }else if (inComponent.componentData.y == 6) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.smoothness = CalculateSmoothness(inComponent.layers[i], data.smoothness, data.uv);
+                        }
+                    }else if (inComponent.componentData.y == 7) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.diffuse = CalculateReflection(inComponent.layers[i], data.uv, data.diffuse, CamPosition, data.normals, data.worldPosition);
+                        }
+                    }else if (inComponent.componentData.y == 8) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.diffuse = CalculateRefraction(inComponent.layers[i], data.uv, data.diffuse, CamPosition, data.normals, data.worldPosition);
+                        }
+                    }else if (inComponent.componentData.y == 9) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            vec3 ViewDir = normalize(TangentCameraPos - TangentFragPos);
+                            data.uv = CalculateParallaxMap(inComponent.layers[i], ViewDir, data.uv);
+                        }
+                    }
+                }
+                void ProcessComponentLOD(in Component inComponent, inout InData data, in float lod) { //generated
+                    if (inComponent.componentData.y == 0) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.diffuse = CalculateDiffuseLOD(inComponent.layers[i], data.diffuse, data.objectColor, data.uv, lod);
+                       }
+                    }else if (inComponent.componentData.y == 1) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.normals = CalculateNormalsLOD(inComponent.layers[i], data.normals, data.uv, lod);
+                        }
+                    }else if (inComponent.componentData.y == 2) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.glow = CalculateGlowLOD(inComponent.layers[i], data.glow, data.uv, lod);
+                        }
+                    }else if (inComponent.componentData.y == 3) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.specular = CalculateSpecularLOD(inComponent.layers[i], data.specular, data.uv, lod);
+                        }
+                    }else if (inComponent.componentData.y == 4) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.ao = CalculateAOLOD(inComponent.layers[i], data.ao, data.uv, lod);
+                        }
+                    }else if (inComponent.componentData.y == 5) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.metalness = CalculateMetalnessLOD(inComponent.layers[i], data.metalness, data.uv, lod);
+                        }
+                    }else if (inComponent.componentData.y == 6) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.smoothness = CalculateSmoothnessLOD(inComponent.layers[i], data.smoothness, data.uv, lod);
+                        }
+                    }else if (inComponent.componentData.y == 7) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.diffuse = CalculateReflectionLOD(inComponent.layers[i], data.uv, data.diffuse, CamPosition, data.normals, data.worldPosition, lod);
+                        }
+                    }else if (inComponent.componentData.y == 8) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            data.diffuse = CalculateRefractionLOD(inComponent.layers[i], data.uv, data.diffuse, CamPosition, data.normals, data.worldPosition, lod);
+                        }
+                    }else if (inComponent.componentData.y == 9) {
+                        for (int i = 0; i < inComponent.componentData.x; ++i) {
+                            vec3 ViewDir = normalize(TangentCameraPos - TangentFragPos);
+                            data.uv = CalculateParallaxMapLOD(inComponent.layers[i], ViewDir, data.uv, lod);
+                        }
+                    }
+                }
+            )", " main(");
         }
     }
 #pragma endregion
@@ -207,34 +207,34 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
 
     if (ShaderHelper::sfind(code, "CalculateDiffuse(") || ShaderHelper::sfind(code, "CalculateDiffuseLOD(")) {
         if (!ShaderHelper::sfind(code, "vec4 CalculateDiffuse(")) {
-            ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec4 CalculateDiffuse(in Layer inLayer, in vec4 canvas, in vec4 objectColor, in vec2 inUVs) {//generated\n"
-                "    vec4 paint = objectColor;\n"
-                "    if (inLayer.data1.y >= 0.5) {\n"
-                "        paint *= texture2D(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy);\n"
-                "    }else{\n"
-                "        paint *= vec4(Material_F0AndID.rgb, 1.0);\n"
-                "    }\n"
-                "    if (inLayer.data1.z >= 0.5) {\n"
-                "        paint *= texture2D(inLayer.mask, inUVs).r;\n"
-                "    }\n"
-                "    paint *= inLayer.data2;\n"
-                "    return DoBlend(paint, canvas, inLayer);\n"
-                "}\n"
-                "vec4 CalculateDiffuseLOD(in Layer inLayer, in vec4 canvas, in vec4 objectColor, in vec2 inUVs, in float lod) {//generated\n"
-                "    vec4 paint = objectColor;\n"
-                "    if (inLayer.data1.y >= 0.5) {\n"
-                "        paint *= texture2DLod(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, lod);\n"
-                "    }else{\n"
-                "        paint *= vec4(Material_F0AndID.rgb, 1.0);\n"
-                "    }\n"
-                "    if (inLayer.data1.z >= 0.5) {\n"
-                "        paint *= texture2DLod(inLayer.mask, inUVs, lod).r;\n"
-                "    }\n"
-                "    paint *= inLayer.data2;\n"
-                "    return DoBlend(paint, canvas, inLayer);\n"
-                "}\n"
-            , "void ProcessComponent(");
+            ShaderHelper::insertStringRightBeforeLineContent(code, R"(
+                vec4 CalculateDiffuse(in Layer inLayer, in vec4 canvas, in vec4 objectColor, in vec2 inUVs) {//generated
+                    vec4 paint = objectColor;
+                    if (inLayer.data1.y >= 0.5) {
+                        paint *= texture2D(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy);
+                    }else{
+                        paint *= vec4(Material_F0AndID.rgb, 1.0);
+                    }
+                    if (inLayer.data1.z >= 0.5) {
+                        paint *= texture2D(inLayer.mask, inUVs).r;
+                    }
+                    paint *= inLayer.data2;
+                    return DoBlend(paint, canvas, inLayer);
+                }
+                vec4 CalculateDiffuseLOD(in Layer inLayer, in vec4 canvas, in vec4 objectColor, in vec2 inUVs, in float lod) {//generated
+                    vec4 paint = objectColor;
+                    if (inLayer.data1.y >= 0.5) {
+                        paint *= texture2DLod(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, lod);
+                    }else{
+                        paint *= vec4(Material_F0AndID.rgb, 1.0);
+                    }
+                    if (inLayer.data1.z >= 0.5) {
+                        paint *= texture2DLod(inLayer.mask, inUVs, lod).r;
+                    }
+                    paint *= inLayer.data2;
+                    return DoBlend(paint, canvas, inLayer);
+                }
+            )", "void ProcessComponent(");
         }
     }
 #pragma endregion
@@ -242,36 +242,36 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
 #pragma region calculate normals
     if (ShaderHelper::sfind(code, "CalculateNormals(") || ShaderHelper::sfind(code, "CalculateNormalsLOD(")) {
         if (!ShaderHelper::sfind(code, "vec3 CalculateNormals(")) {
-            ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec3 CalculateNormals(in Layer inLayer, in vec3 objectNormals, in vec2 inUVs) {//generated\n"
-                "    vec3 outNormals = objectNormals;\n"
-                "    if (inLayer.data1.y > 0.9) {\n"
-                "        outNormals = CalcBumpedNormal(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture);\n"
-                "    }else if (inLayer.data1.y > 0.4) {\n"
-                "        outNormals = CalcBumpedNormalCompressed(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture);\n"
-                "    }\n"
-                "    if (inLayer.data1.z >= 0.5) {\n"
-                "        outNormals *= texture2D(inLayer.mask, inUVs).r;\n"
-                "    }\n"
-                "    outNormals *= inLayer.data2.xyz;\n"
-                "    outNormals *= inLayer.data2.w;\n"
-                "    return outNormals;\n"
-                "}\n"
-                "vec3 CalculateNormalsLOD(in Layer inLayer, in vec3 objectNormals, in vec2 inUVs, in float lod) {//generated\n"
-                "    vec3 outNormals = objectNormals;\n"
-                "    if (inLayer.data1.y > 0.9) {\n"
-                "        outNormals = CalcBumpedNormalLOD(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture, lod);\n"
-                "    }else if (inLayer.data1.y > 0.4) {\n"
-                "        outNormals = CalcBumpedNormalCompressedLOD(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture, lod);\n"
-                "    }\n"
-                "    if (inLayer.data1.z >= 0.5) {\n"
-                "        outNormals *= texture2D(inLayer.mask, inUVs).r;\n"
-                "    }\n"
-                "    outNormals *= inLayer.data2.xyz;\n"
-                "    outNormals *= inLayer.data2.w;\n"
-                "    return outNormals;\n"
-                "}\n"
-            , "vec4 CalculateDiffuse(");
+            ShaderHelper::insertStringRightBeforeLineContent(code, R"(
+                vec3 CalculateNormals(in Layer inLayer, in vec3 objectNormals, in vec2 inUVs) {//generated
+                    vec3 outNormals = objectNormals;
+                    if (inLayer.data1.y > 0.9) {
+                        outNormals = CalcBumpedNormal(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture);
+                    }else if (inLayer.data1.y > 0.4) {
+                        outNormals = CalcBumpedNormalCompressed(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture);
+                    }
+                    if (inLayer.data1.z >= 0.5) {
+                        outNormals *= texture2D(inLayer.mask, inUVs).r;
+                    }
+                    outNormals *= inLayer.data2.xyz;
+                    outNormals *= inLayer.data2.w;
+                    return outNormals;
+                }
+                vec3 CalculateNormalsLOD(in Layer inLayer, in vec3 objectNormals, in vec2 inUVs, in float lod) {//generated
+                    vec3 outNormals = objectNormals;
+                    if (inLayer.data1.y > 0.9) {
+                        outNormals = CalcBumpedNormalLOD(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture, lod);
+                    }else if (inLayer.data1.y > 0.4) {
+                        outNormals = CalcBumpedNormalCompressedLOD(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture, lod);
+                    }
+                    if (inLayer.data1.z >= 0.5) {
+                        outNormals *= texture2D(inLayer.mask, inUVs).r;
+                    }
+                    outNormals *= inLayer.data2.xyz;
+                    outNormals *= inLayer.data2.w;
+                    return outNormals;
+                }
+            )", "vec4 CalculateDiffuse(");
         }
     }
 #pragma endregion
@@ -279,32 +279,32 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
 #pragma region calculate glow
     if (ShaderHelper::sfind(code, "CalculateGlow(") || ShaderHelper::sfind(code, "CalculateGlowLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateGlow(")) {
-            ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "float CalculateGlow(in Layer inLayer, in float objectGlow, in vec2 inUVs) {//generated\n"
-                "    float outGlow = objectGlow;\n"
-                "    if (inLayer.data1.y >= 0.5) {\n"
-                "        outGlow += texture2D(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy).r;\n"
-                "    }\n"
-                "    if (inLayer.data1.z >= 0.5) {\n"
-                "        outGlow *= texture2D(inLayer.mask, inUVs).r;\n"
-                "    }\n"
-                "    outGlow = clamp(outGlow, inLayer.data2.x, inLayer.data2.y);\n"
-                "    outGlow *= inLayer.data2.z;\n"
-                "    return outGlow;\n"
-                "}\n"
-                "float CalculateGlowLOD(in Layer inLayer, in float objectGlow, in vec2 inUVs, in float lod) {//generated\n"
-                "    float outGlow = objectGlow;\n"
-                "    if (inLayer.data1.y >= 0.5) {\n"
-                "        outGlow += texture2DLod(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, lod).r;\n"
-                "    }\n"
-                "    if (inLayer.data1.z >= 0.5) {\n"
-                "        outGlow *= texture2DLod(inLayer.mask, inUVs, lod).r;\n"
-                "    }\n"
-                "    outGlow = clamp(outGlow, inLayer.data2.x, inLayer.data2.y);\n"
-                "    outGlow *= inLayer.data2.z;\n"
-                "    return outGlow;\n"
-                "}\n"
-            , "vec3 CalculateNormals(");
+            ShaderHelper::insertStringRightBeforeLineContent(code, R"(
+                float CalculateGlow(in Layer inLayer, in float objectGlow, in vec2 inUVs) {//generated
+                    float outGlow = objectGlow;
+                    if (inLayer.data1.y >= 0.5) {
+                        outGlow += texture2D(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy).r;
+                    }
+                    if (inLayer.data1.z >= 0.5) {
+                        outGlow *= texture2D(inLayer.mask, inUVs).r;
+                    }
+                    outGlow = clamp(outGlow, inLayer.data2.x, inLayer.data2.y);
+                    outGlow *= inLayer.data2.z;
+                    return outGlow;
+                }
+                float CalculateGlowLOD(in Layer inLayer, in float objectGlow, in vec2 inUVs, in float lod) {//generated
+                    float outGlow = objectGlow;
+                    if (inLayer.data1.y >= 0.5) {
+                        outGlow += texture2DLod(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, lod).r;
+                    }
+                    if (inLayer.data1.z >= 0.5) {
+                        outGlow *= texture2DLod(inLayer.mask, inUVs, lod).r;
+                    }
+                    outGlow = clamp(outGlow, inLayer.data2.x, inLayer.data2.y);
+                    outGlow *= inLayer.data2.z;
+                    return outGlow;
+                }
+            )", "vec3 CalculateNormals(");
         }
     }
 #pragma endregion
@@ -312,32 +312,32 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
 #pragma region calculate specular
     if (ShaderHelper::sfind(code, "CalculateSpecular(") || ShaderHelper::sfind(code, "CalculateSpecularLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateSpecular(")) {
-            ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "float CalculateSpecular(in Layer inLayer, in float objectSpecular, in vec2 inUVs) {//generated\n"
-                "    float outSpecular = objectSpecular;\n"
-                "    if (inLayer.data1.y >= 0.5) {\n"
-                "        outSpecular *= texture2D(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy).r;\n"
-                "    }\n"
-                "    if (inLayer.data1.z >= 0.5) {\n"
-                "        outSpecular *= texture2D(inLayer.mask, inUVs).r;\n"
-                "    }\n"
-                "    outSpecular = clamp(outSpecular, inLayer.data2.x, inLayer.data2.y);\n"
-                "    outSpecular *= inLayer.data2.z;\n"
-                "    return outSpecular;\n"
-                "}\n"
-                "float CalculateSpecularLOD(in Layer inLayer, in float objectSpecular, in vec2 inUVs, in float lod) {//generated\n"
-                "    float outSpecular = objectSpecular;\n"
-                "    if (inLayer.data1.y >= 0.5) {\n"
-                "        outSpecular *= texture2DLod(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, lod).r;\n"
-                "    }\n"
-                "    if (inLayer.data1.z >= 0.5) {\n"
-                "        outSpecular *= texture2DLod(inLayer.mask, inUVs, lod).r;\n"
-                "    }\n"
-                "    outSpecular = clamp(outSpecular, inLayer.data2.x, inLayer.data2.y);\n"
-                "    outSpecular *= inLayer.data2.z;\n"
-                "    return outSpecular;\n"
-                "}\n"
-            , "float CalculateGlow(");
+            ShaderHelper::insertStringRightBeforeLineContent(code, R"(
+                float CalculateSpecular(in Layer inLayer, in float objectSpecular, in vec2 inUVs) {//generated
+                    float outSpecular = objectSpecular;
+                    if (inLayer.data1.y >= 0.5) {
+                        outSpecular *= texture2D(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy).r;
+                    }
+                    if (inLayer.data1.z >= 0.5) {
+                        outSpecular *= texture2D(inLayer.mask, inUVs).r;
+                    }
+                    outSpecular = clamp(outSpecular, inLayer.data2.x, inLayer.data2.y);
+                    outSpecular *= inLayer.data2.z;
+                    return outSpecular;
+                }
+                float CalculateSpecularLOD(in Layer inLayer, in float objectSpecular, in vec2 inUVs, in float lod) {//generated
+                    float outSpecular = objectSpecular;
+                    if (inLayer.data1.y >= 0.5) {
+                        outSpecular *= texture2DLod(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, lod).r;
+                    }
+                    if (inLayer.data1.z >= 0.5) {
+                        outSpecular *= texture2DLod(inLayer.mask, inUVs, lod).r;
+                    }
+                    outSpecular = clamp(outSpecular, inLayer.data2.x, inLayer.data2.y);
+                    outSpecular *= inLayer.data2.z;
+                    return outSpecular;
+                }
+            )", "float CalculateGlow(");
         }
     }
 #pragma endregion
@@ -345,32 +345,32 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
 #pragma region calculate ao
     if (ShaderHelper::sfind(code, "CalculateAO(") || ShaderHelper::sfind(code, "CalculateAOLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateAO(")) {
-            ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "float CalculateAO(in Layer inLayer, in float objectAO, in vec2 inUVs) {//generated\n"
-                "    float outAO = objectAO;\n"
-                "    if (inLayer.data1.y >= 0.5) {\n"
-                "        outAO *= texture2D(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy).r;\n"
-                "    }\n"
-                "    if (inLayer.data1.z >= 0.5) {\n"
-                "        outAO *= texture2D(inLayer.mask, inUVs).r;\n"
-                "    }\n"
-                "    outAO = clamp(outAO, inLayer.data2.x, inLayer.data2.y);\n"
-                "    outAO *= inLayer.data2.z;\n"
-                "    return outAO;\n"
-                "}\n"
-                "float CalculateAOLOD(in Layer inLayer, in float objectAO, in vec2 inUVs, in float lod) {//generated\n"
-                "    float outAO = objectAO;\n"
-                "    if (inLayer.data1.y >= 0.5) {\n"
-                "        outAO *= texture2DLod(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, lod).r;\n"
-                "    }\n"
-                "    if (inLayer.data1.z >= 0.5) {\n"
-                "        outAO *= texture2DLod(inLayer.mask, inUVs, lod).r;\n"
-                "    }\n"
-                "    outAO = clamp(outAO, inLayer.data2.x, inLayer.data2.y);\n"
-                "    outAO *= inLayer.data2.z;\n"
-                "    return outAO;\n"
-                "}\n"
-            , "float CalculateSpecular(");
+            ShaderHelper::insertStringRightBeforeLineContent(code, R"(
+                float CalculateAO(in Layer inLayer, in float objectAO, in vec2 inUVs) {//generated
+                    float outAO = objectAO;
+                    if (inLayer.data1.y >= 0.5) {
+                        outAO *= texture2D(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy).r;
+                    }
+                    if (inLayer.data1.z >= 0.5) {
+                        outAO *= texture2D(inLayer.mask, inUVs).r;
+                    }
+                    outAO = clamp(outAO, inLayer.data2.x, inLayer.data2.y);
+                    outAO *= inLayer.data2.z;
+                    return outAO;
+                }
+                float CalculateAOLOD(in Layer inLayer, in float objectAO, in vec2 inUVs, in float lod) {//generated
+                    float outAO = objectAO;
+                    if (inLayer.data1.y >= 0.5) {
+                        outAO *= texture2DLod(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, lod).r;
+                    }
+                    if (inLayer.data1.z >= 0.5) {
+                        outAO *= texture2DLod(inLayer.mask, inUVs, lod).r;
+                    }
+                    outAO = clamp(outAO, inLayer.data2.x, inLayer.data2.y);
+                    outAO *= inLayer.data2.z;
+                    return outAO;
+                }
+            )", "float CalculateSpecular(");
         }
     }
 #pragma endregion
@@ -378,32 +378,32 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
 #pragma region calculate metalness
     if (ShaderHelper::sfind(code, "CalculateMetalness(") || ShaderHelper::sfind(code, "CalculateMetalnessLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateMetalness(")) {
-            ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "float CalculateMetalness(in Layer inLayer, in float objectMetalness, in vec2 inUVs) {//generated\n"
-                "    float outMetalness = objectMetalness;\n"
-                "    if (inLayer.data1.y >= 0.5) {\n"
-                "        outMetalness = texture2D(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy).r;\n"
-                "    }\n"
-                "    if (inLayer.data1.z >= 0.5) {\n"
-                "        outMetalness *= texture2D(inLayer.mask, inUVs).r;\n"
-                "    }\n"
-                "    outMetalness = clamp(outMetalness, inLayer.data2.x, inLayer.data2.y);\n"
-                "    outMetalness *= inLayer.data2.z;\n"
-                "    return outMetalness;\n"
-                "}\n"
-                "float CalculateMetalnessLOD(in Layer inLayer, in float objectMetalness, in vec2 inUVs, in float lod) {//generated\n"
-                "    float outMetalness = objectMetalness;\n"
-                "    if (inLayer.data1.y >= 0.5) {\n"
-                "        outMetalness = texture2DLod(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, lod).r;\n"
-                "    }\n"
-                "    if (inLayer.data1.z >= 0.5) {\n"
-                "        outMetalness *= texture2DLod(inLayer.mask, inUVs, lod).r;\n"
-                "    }\n"
-                "    outMetalness = clamp(outMetalness, inLayer.data2.x, inLayer.data2.y);\n"
-                "    outMetalness *= inLayer.data2.z;\n"
-                "    return outMetalness;\n"
-                "}\n"
-            , "float CalculateAO(");
+            ShaderHelper::insertStringRightBeforeLineContent(code, R"(
+                float CalculateMetalness(in Layer inLayer, in float objectMetalness, in vec2 inUVs) {//generated
+                    float outMetalness = objectMetalness;
+                    if (inLayer.data1.y >= 0.5) {
+                        outMetalness = texture2D(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy).r;
+                    }
+                    if (inLayer.data1.z >= 0.5) {
+                        outMetalness *= texture2D(inLayer.mask, inUVs).r;
+                    }
+                    outMetalness = clamp(outMetalness, inLayer.data2.x, inLayer.data2.y);
+                    outMetalness *= inLayer.data2.z;
+                    return outMetalness;
+                }
+                float CalculateMetalnessLOD(in Layer inLayer, in float objectMetalness, in vec2 inUVs, in float lod) {//generated
+                    float outMetalness = objectMetalness;
+                    if (inLayer.data1.y >= 0.5) {
+                        outMetalness = texture2DLod(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, lod).r;
+                    }
+                    if (inLayer.data1.z >= 0.5) {
+                        outMetalness *= texture2DLod(inLayer.mask, inUVs, lod).r;
+                    }
+                    outMetalness = clamp(outMetalness, inLayer.data2.x, inLayer.data2.y);
+                    outMetalness *= inLayer.data2.z;
+                    return outMetalness;
+                }
+            )", "float CalculateAO(");
         }
     }
 #pragma endregion
@@ -411,32 +411,32 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
 #pragma region calculate smoothness
     if (ShaderHelper::sfind(code, "CalculateSmoothness(") || ShaderHelper::sfind(code, "CalculateSmoothnessLOD(")) {
         if (!ShaderHelper::sfind(code, "float CalculateSmoothness(")) {
-            ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "float CalculateSmoothness(in Layer inLayer, in float objectSmoothness, in vec2 inUVs) {//generated\n"
-                "    float outSmoothness = objectSmoothness;\n"
-                "    if (inLayer.data1.y >= 0.5) {\n"
-                "        outSmoothness = texture2D(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy).r;\n"
-                "    }\n"
-                "    if (inLayer.data1.z >= 0.5) {\n"
-                "        outSmoothness *= texture2D(inLayer.mask, inUVs).r;\n"
-                "    }\n"
-                "    outSmoothness = clamp(outSmoothness, inLayer.data2.x, inLayer.data2.y);\n"
-                "    outSmoothness *= inLayer.data2.z;\n"
-                "    return outSmoothness;\n"
-                "}\n"
-                "float CalculateSmoothnessLOD(in Layer inLayer, in float objectSmoothness, in vec2 inUVs, in float lod) {//generated\n"
-                "    float outSmoothness = objectSmoothness;\n"
-                "    if (inLayer.data1.y >= 0.5) {\n"
-                "        outSmoothness = texture2DLod(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, lod).r;\n"
-                "    }\n"
-                "    if (inLayer.data1.z >= 0.5) {\n"
-                "        outSmoothness *= texture2DLod(inLayer.mask, inUVs, lod).r;\n"
-                "    }\n"
-                "    outSmoothness = clamp(outSmoothness, inLayer.data2.x, inLayer.data2.y);\n"
-                "    outSmoothness *= inLayer.data2.z;\n"
-                "    return outSmoothness;\n"
-                "}\n"
-            , "float CalculateMetalness(");
+            ShaderHelper::insertStringRightBeforeLineContent(code, R"(
+                float CalculateSmoothness(in Layer inLayer, in float objectSmoothness, in vec2 inUVs) {//generated
+                    float outSmoothness = objectSmoothness;
+                    if (inLayer.data1.y >= 0.5) {
+                        outSmoothness = texture2D(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy).r;
+                    }
+                    if (inLayer.data1.z >= 0.5) {
+                        outSmoothness *= texture2D(inLayer.mask, inUVs).r;
+                    }
+                    outSmoothness = clamp(outSmoothness, inLayer.data2.x, inLayer.data2.y);
+                    outSmoothness *= inLayer.data2.z;
+                    return outSmoothness;
+                }
+                float CalculateSmoothnessLOD(in Layer inLayer, in float objectSmoothness, in vec2 inUVs, in float lod) {//generated
+                    float outSmoothness = objectSmoothness;
+                    if (inLayer.data1.y >= 0.5) {
+                        outSmoothness = texture2DLod(inLayer.texture, inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, lod).r;
+                    }
+                    if (inLayer.data1.z >= 0.5) {
+                        outSmoothness *= texture2DLod(inLayer.mask, inUVs, lod).r;
+                    }
+                    outSmoothness = clamp(outSmoothness, inLayer.data2.x, inLayer.data2.y);
+                    outSmoothness *= inLayer.data2.z;
+                    return outSmoothness;
+                }
+            )", "float CalculateMetalness(");
         }
     }
 #pragma endregion
@@ -444,26 +444,26 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
 #pragma region calculate reflection
     if (ShaderHelper::sfind(code, "CalculateReflection(") || ShaderHelper::sfind(code, "CalculateReflectionLOD(")) {
         if (!ShaderHelper::sfind(code, "vec4 CalculateReflection(")) {
-            ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec4 CalculateReflection(in Layer inLayer, in vec2 inUVs, in vec4 inDiffuse, in vec3 inCameraPosition, in vec3 inNormals, in vec3 inWorldPosition){//generated\n"
-                //"    inUVs *= inLayer.uvModifications.zw;\n"
-                //"    inUVs += inLayer.uvModifications.xy;\n"
-                "    vec4 r = vec4(0.0);\n"
-                "    r = textureCube(inLayer.cubemap, reflect(inNormals,normalize(inCameraPosition - inWorldPosition))) * texture2D(inLayer.mask, inUVs).r;\n"
-                "    r.a *= inLayer.data2.x;\n"
-                "    r = PaintersAlgorithm(r, inDiffuse);\n"
-                "    return r;\n"
-                "}\n"
-                "vec4 CalculateReflectionLOD(in Layer inLayer, in vec2 inUVs, in vec4 inDiffuse, in vec3 inCameraPosition, in vec3 inNormals, in vec3 inWorldPosition, in float lod){//generated\n"
-                //"    inUVs *= inLayer.uvModifications.zw;\n"
-                //"    inUVs += inLayer.uvModifications.xy;\n"
-                "    vec4 r = vec4(0.0);\n"
-                "    r = textureCubeLod(inLayer.cubemap, reflect(inNormals,normalize(inCameraPosition - inWorldPosition)), lod) * texture2D(inLayer.mask, inUVs).r;\n"
-                "    r.a *= inLayer.data2.x;\n"
-                "    r = PaintersAlgorithm(r, inDiffuse);\n"
-                "    return r;\n"
-                "}\n"
-            , "float CalculateSmoothness(");
+            ShaderHelper::insertStringRightBeforeLineContent(code, R"(
+                vec4 CalculateReflection(in Layer inLayer, in vec2 inUVs, in vec4 inDiffuse, in vec3 inCameraPosition, in vec3 inNormals, in vec3 inWorldPosition){//generated
+                //    inUVs *= inLayer.uvModifications.zw;
+                //    inUVs += inLayer.uvModifications.xy;
+                    vec4 r = vec4(0.0);
+                    r = textureCube(inLayer.cubemap, reflect(inNormals,normalize(inCameraPosition - inWorldPosition))) * texture2D(inLayer.mask, inUVs).r;
+                    r.a *= inLayer.data2.x;
+                    r = PaintersAlgorithm(r, inDiffuse);
+                    return r;
+                }
+                vec4 CalculateReflectionLOD(in Layer inLayer, in vec2 inUVs, in vec4 inDiffuse, in vec3 inCameraPosition, in vec3 inNormals, in vec3 inWorldPosition, in float lod){//generated
+                //    inUVs *= inLayer.uvModifications.zw;
+                //    inUVs += inLayer.uvModifications.xy;
+                    vec4 r = vec4(0.0);
+                    r = textureCubeLod(inLayer.cubemap, reflect(inNormals,normalize(inCameraPosition - inWorldPosition)), lod) * texture2D(inLayer.mask, inUVs).r;
+                    r.a *= inLayer.data2.x;
+                    r = PaintersAlgorithm(r, inDiffuse);
+                    return r;
+                }
+            )", "float CalculateSmoothness(");
         }
     }
 #pragma endregion
@@ -471,26 +471,26 @@ void opengl::glsl::Materials::convert(std::string& code, unsigned int versionNum
 #pragma region calculate refraction
     if (ShaderHelper::sfind(code, "CalculateRefraction(") || ShaderHelper::sfind(code, "CalculateRefractionLOD(")) {
         if (!ShaderHelper::sfind(code, "vec4 CalculateRefraction(")) {
-            ShaderHelper::insertStringRightBeforeLineContent(code, 
-                "vec4 CalculateRefraction(in Layer inLayer, in vec2 inUVs, in vec4 inDiffuse, in vec3 inCameraPosition, in vec3 inNormals, in vec3 inWorldPosition){//generated\n"
-                //"    inUVs *= inLayer.uvModifications.zw;\n"
-                //"    inUVs += inLayer.uvModifications.xy;\n"
-                "    vec4 r = vec4(0.0);\n"
-                "    r = textureCube(inLayer.cubemap,refract(inNormals,normalize(inCameraPosition - inWorldPosition),1.0 / inLayer.data2.y)) * texture2D(inLayer.mask,inUVs).r;\n"
-                "    r.a *= inLayer.data2.x;\n"
-                "    r = PaintersAlgorithm(r, inDiffuse);\n"
-                "    return r;\n"
-                "}\n"
-                "vec4 CalculateRefractionLOD(in Layer inLayer, in vec2 inUVs, in vec4 inDiffuse, in vec3 inCameraPosition, in vec3 inNormals, in vec3 inWorldPosition, in float lod){//generated\n"
-                //"    inUVs *= inLayer.uvModifications.zw;\n"
-                //"    inUVs += inLayer.uvModifications.xy;\n"
-                "    vec4 r = vec4(0.0);\n"
-                "    r = textureCubeLod(inLayer.cubemap,refract(inNormals, normalize(inCameraPosition - inWorldPosition), 1.0 / inLayer.data2.y), lod) * texture2D(inLayer.mask, inUVs).r;\n"
-                "    r.a *= inLayer.data2.x;\n"
-                "    r = PaintersAlgorithm(r, inDiffuse);\n"
-                "    return r;\n"
-                "}\n"
-            , "vec4 CalculateReflection(");
+            ShaderHelper::insertStringRightBeforeLineContent(code, R"(
+                vec4 CalculateRefraction(in Layer inLayer, in vec2 inUVs, in vec4 inDiffuse, in vec3 inCameraPosition, in vec3 inNormals, in vec3 inWorldPosition){//generated
+                //    inUVs *= inLayer.uvModifications.zw;
+                //    inUVs += inLayer.uvModifications.xy;
+                    vec4 r = vec4(0.0);
+                    r = textureCube(inLayer.cubemap,refract(inNormals,normalize(inCameraPosition - inWorldPosition),1.0 / inLayer.data2.y)) * texture2D(inLayer.mask,inUVs).r;
+                    r.a *= inLayer.data2.x;
+                    r = PaintersAlgorithm(r, inDiffuse);
+                    return r;
+                }
+                vec4 CalculateRefractionLOD(in Layer inLayer, in vec2 inUVs, in vec4 inDiffuse, in vec3 inCameraPosition, in vec3 inNormals, in vec3 inWorldPosition, in float lod){//generated
+                //    inUVs *= inLayer.uvModifications.zw;
+                //    inUVs += inLayer.uvModifications.xy;
+                    vec4 r = vec4(0.0);
+                    r = textureCubeLod(inLayer.cubemap,refract(inNormals, normalize(inCameraPosition - inWorldPosition), 1.0 / inLayer.data2.y), lod) * texture2D(inLayer.mask, inUVs).r;
+                    r.a *= inLayer.data2.x;
+                    r = PaintersAlgorithm(r, inDiffuse);
+                    return r;
+                }
+            )", "vec4 CalculateReflection(");
         }
     }
 #pragma endregion

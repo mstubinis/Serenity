@@ -14,11 +14,10 @@ namespace Engine::priv::algorithms {
                 auto k = left;
                 while (i <= middle && j <= right) {
                     if (input[i] <= input[j]) {
-                        aux[k] = input[i++];
+                        aux[k++] = input[i++];
                     }else {
-                        aux[k] = input[j++];
+                        aux[k++] = input[j++];
                     }
-                    k++;
                 }
                 while (i <= middle) {
                     aux[k++] = input[i++];

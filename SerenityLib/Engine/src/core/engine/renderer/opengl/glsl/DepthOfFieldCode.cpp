@@ -19,41 +19,41 @@ void opengl::glsl::DepthOfFieldCode::convert(std::string& code, unsigned int ver
         #pragma region DOF function
         if (ShaderHelper::sfind(code, "DOFExecute(")) {
             if (!ShaderHelper::sfind(code, "vec4 DOFExecute(")) {
-                ShaderHelper::insertStringRightBeforeLineContent(code, 
-                    "vec4 DOFExecute(sampler2D in_texture, vec2 in_uvs, vec2 in_aspect, vec2 in_blur_factor){//generated\n"
-                    "    vec4 col = vec4(0.0);\n"
-                    "    col += texture2D(in_texture, in_uvs);\n"
-                    "    col += texture2D(in_texture, in_uvs + (vec2(0.0, 0.4)*in_aspect)     * in_blur_factor);\n"
-                    "    col += texture2D(in_texture, in_uvs + (vec2(0.0, -0.4)*in_aspect)    * in_blur_factor);\n"
-                    "    col += texture2D(in_texture, in_uvs + (vec2(0.4, 0.0)*in_aspect)     * in_blur_factor);\n"
-                    "    col += texture2D(in_texture, in_uvs + (vec2(-0.4, 0.0)*in_aspect)    * in_blur_factor);\n"
-                    "    col += texture2D(in_texture, in_uvs + (vec2(0.29, 0.29)*in_aspect)   * in_blur_factor);\n"
-                    "    col += texture2D(in_texture, in_uvs + (vec2(-0.29, 0.29)*in_aspect)  * in_blur_factor);\n"
-                    "    col += texture2D(in_texture, in_uvs + (vec2(0.29, -0.29)*in_aspect)  * in_blur_factor);\n"
-                    "    col += texture2D(in_texture, in_uvs + (vec2(-0.29, -0.29)*in_aspect) * in_blur_factor);\n"
-                    "    for (int i = 0; i < 2; ++i) {\n"
-                    "        int k = i+2;\n"
-                    "        col += texture2D(in_texture, in_uvs + (vec2(0.15, 0.37)*in_aspect)   * in_blur_factor * DOFWeight[i]);\n"
-                    "        col += texture2D(in_texture, in_uvs + (vec2(-0.15, -0.37)*in_aspect) * in_blur_factor * DOFWeight[i]);\n"
-                    "        col += texture2D(in_texture, in_uvs + (vec2(-0.15, 0.37)*in_aspect)  * in_blur_factor * DOFWeight[i]);\n"
-                    "        col += texture2D(in_texture, in_uvs + (vec2(0.15, -0.37)*in_aspect)  * in_blur_factor * DOFWeight[i]);\n"
-                    "        col += texture2D(in_texture, in_uvs + (vec2(-0.37, 0.15)*in_aspect)  * in_blur_factor * DOFWeight[i]);\n"
-                    "        col += texture2D(in_texture, in_uvs + (vec2(0.37, -0.15)*in_aspect)  * in_blur_factor * DOFWeight[i]);\n"
-                    "        col += texture2D(in_texture, in_uvs + (vec2(0.37, 0.15)*in_aspect)   * in_blur_factor * DOFWeight[i]);\n"
-                    "        col += texture2D(in_texture, in_uvs + (vec2(-0.37, -0.15)*in_aspect) * in_blur_factor * DOFWeight[i]);\n"
-                    "\n"
-                    "        col += texture2D(in_texture, in_uvs + (vec2(0.29, 0.29)*in_aspect)   * in_blur_factor * DOFWeight[k]);\n"
-                    "        col += texture2D(in_texture, in_uvs + (vec2(0.4, 0.0)*in_aspect)     * in_blur_factor * DOFWeight[k]);\n"
-                    "        col += texture2D(in_texture, in_uvs + (vec2(0.29, -0.29)*in_aspect)  * in_blur_factor * DOFWeight[k]);\n"
-                    "        col += texture2D(in_texture, in_uvs + (vec2(0.0, -0.4)*in_aspect)    * in_blur_factor * DOFWeight[k]);\n"
-                    "        col += texture2D(in_texture, in_uvs + (vec2(-0.29, 0.29)*in_aspect)  * in_blur_factor * DOFWeight[k]);\n"
-                    "        col += texture2D(in_texture, in_uvs + (vec2(-0.4, 0.0)*in_aspect)    * in_blur_factor * DOFWeight[k]);\n"
-                    "        col += texture2D(in_texture, in_uvs + (vec2(-0.29, -0.29)*in_aspect) * in_blur_factor * DOFWeight[k]);\n"
-                    "        col += texture2D(in_texture, in_uvs + (vec2(0.0, 0.4)*in_aspect)     * in_blur_factor * DOFWeight[k]);\n"
-                    "    }\n"
-                    "    return col;\n"
-                    "}\n"
-                , "void main(");
+                ShaderHelper::insertStringRightBeforeLineContent(code, R"(
+                    vec4 DOFExecute(sampler2D in_texture, vec2 in_uvs, vec2 in_aspect, vec2 in_blur_factor){ //generated
+                        vec4 col = vec4(0.0);
+                        col += texture2D(in_texture, in_uvs);
+                        col += texture2D(in_texture, in_uvs + (vec2(0.0, 0.4)*in_aspect)     * in_blur_factor);
+                        col += texture2D(in_texture, in_uvs + (vec2(0.0, -0.4)*in_aspect)    * in_blur_factor);
+                        col += texture2D(in_texture, in_uvs + (vec2(0.4, 0.0)*in_aspect)     * in_blur_factor);
+                        col += texture2D(in_texture, in_uvs + (vec2(-0.4, 0.0)*in_aspect)    * in_blur_factor);
+                        col += texture2D(in_texture, in_uvs + (vec2(0.29, 0.29)*in_aspect)   * in_blur_factor);
+                        col += texture2D(in_texture, in_uvs + (vec2(-0.29, 0.29)*in_aspect)  * in_blur_factor);
+                        col += texture2D(in_texture, in_uvs + (vec2(0.29, -0.29)*in_aspect)  * in_blur_factor);
+                        col += texture2D(in_texture, in_uvs + (vec2(-0.29, -0.29)*in_aspect) * in_blur_factor);
+                        for (int i = 0; i < 2; ++i) {
+                            int k = i+2;
+                            col += texture2D(in_texture, in_uvs + (vec2(0.15, 0.37)*in_aspect)   * in_blur_factor * DOFWeight[i]);
+                            col += texture2D(in_texture, in_uvs + (vec2(-0.15, -0.37)*in_aspect) * in_blur_factor * DOFWeight[i]);
+                            col += texture2D(in_texture, in_uvs + (vec2(-0.15, 0.37)*in_aspect)  * in_blur_factor * DOFWeight[i]);
+                            col += texture2D(in_texture, in_uvs + (vec2(0.15, -0.37)*in_aspect)  * in_blur_factor * DOFWeight[i]);
+                            col += texture2D(in_texture, in_uvs + (vec2(-0.37, 0.15)*in_aspect)  * in_blur_factor * DOFWeight[i]);
+                            col += texture2D(in_texture, in_uvs + (vec2(0.37, -0.15)*in_aspect)  * in_blur_factor * DOFWeight[i]);
+                            col += texture2D(in_texture, in_uvs + (vec2(0.37, 0.15)*in_aspect)   * in_blur_factor * DOFWeight[i]);
+                            col += texture2D(in_texture, in_uvs + (vec2(-0.37, -0.15)*in_aspect) * in_blur_factor * DOFWeight[i]);
+
+                            col += texture2D(in_texture, in_uvs + (vec2(0.29, 0.29)*in_aspect)   * in_blur_factor * DOFWeight[k]);
+                            col += texture2D(in_texture, in_uvs + (vec2(0.4, 0.0)*in_aspect)     * in_blur_factor * DOFWeight[k]);
+                            col += texture2D(in_texture, in_uvs + (vec2(0.29, -0.29)*in_aspect)  * in_blur_factor * DOFWeight[k]);
+                            col += texture2D(in_texture, in_uvs + (vec2(0.0, -0.4)*in_aspect)    * in_blur_factor * DOFWeight[k]);
+                            col += texture2D(in_texture, in_uvs + (vec2(-0.29, 0.29)*in_aspect)  * in_blur_factor * DOFWeight[k]);
+                            col += texture2D(in_texture, in_uvs + (vec2(-0.4, 0.0)*in_aspect)    * in_blur_factor * DOFWeight[k]);
+                            col += texture2D(in_texture, in_uvs + (vec2(-0.29, -0.29)*in_aspect) * in_blur_factor * DOFWeight[k]);
+                            col += texture2D(in_texture, in_uvs + (vec2(0.0, 0.4)*in_aspect)     * in_blur_factor * DOFWeight[k]);
+                        }
+                        return col;
+                    }
+                )", "void main(");
             }
         }
         #pragma endregion

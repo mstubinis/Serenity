@@ -58,64 +58,60 @@ void priv::EShaders::init(const uint32_t openglVersion, const uint32_t glslVersi
 
 #pragma region Functions
 
-priv::EShaders::conditional_functions =
-    "\n"
-    "vec4 when_eq(vec4 x, vec4 y) { return 1.0 - abs(sign(x - y)); }\n"
-    "vec4 when_neq(vec4 x, vec4 y) { return abs(sign(x - y)); }\n"
-    "vec4 when_gt(vec4 x, vec4 y) { return max(sign(x - y), 0.0); }\n"
-    "vec4 when_lt(vec4 x, vec4 y) { return max(sign(y - x), 0.0); }\n"
-    "vec4 when_ge(vec4 x, vec4 y) { return 1.0 - when_lt(x, y); }\n"
-    "vec4 when_le(vec4 x, vec4 y) { return 1.0 - when_gt(x, y); }\n"
-    "vec4 and(vec4 a, vec4 b) { return a * b; }\n"
-    "vec4 or(vec4 a, vec4 b) { return min(a + b, 1.0); }\n"
-    //"vec4 xor(vec4 a, vec4 b) { return (a + b) % 2.0; }\n"//this is commented out
-    "vec4 not(vec4 a) { return 1.0 - a; }\n"
-    "\n"
-    "vec3 when_eq(vec3 x, vec3 y) { return 1.0 - abs(sign(x - y)); }\n"
-    "vec3 when_neq(vec3 x, vec3 y) { return abs(sign(x - y)); }\n"
-    "vec3 when_gt(vec3 x, vec3 y) { return max(sign(x - y), 0.0); }\n"
-    "vec3 when_lt(vec3 x, vec3 y) { return max(sign(y - x), 0.0); }\n"
-    "vec3 when_ge(vec3 x, vec3 y) { return 1.0 - when_lt(x, y); }\n"
-    "vec3 when_le(vec3 x, vec3 y) { return 1.0 - when_gt(x, y); }\n"
-    "vec3 and(vec3 a, vec3 b) { return a * b; }\n"
-    "vec3 or(vec3 a, vec3 b) { return min(a + b, 1.0); }\n"
-    //"vec3 xor(vec3 a, vec3 b) { return (a + b) % 2.0; }\n"//this is commented out
-    "vec3 not(vec3 a) { return 1.0 - a; }\n"
-    "\n"
-    "vec2 when_eq(vec2 x, vec2 y) { return 1.0 - abs(sign(x - y)); }\n"
-    "vec2 when_neq(vec2 x, vec2 y) { return abs(sign(x - y)); }\n"
-    "vec2 when_gt(vec2 x, vec2 y) { return max(sign(x - y), 0.0); }\n"
-    "vec2 when_lt(vec2 x, vec2 y) { return max(sign(y - x), 0.0); }\n"
-    "vec2 when_ge(vec2 x, vec2 y) { return 1.0 - when_lt(x, y); }\n"
-    "vec2 when_le(vec2 x, vec2 y) { return 1.0 - when_gt(x, y); }\n"
-    "vec2 and(vec2 a, vec2 b) { return a * b; }\n"
-    "vec2 or(vec2 a, vec2 b) { return min(a + b, 1.0); }\n"
-    //"vec2 xor(vec2 a, vec2 b) { return (a + b) % 2.0; }\n"//this is commented out
-    "vec2 not(vec2 a) { return 1.0 - a; }\n"
-    "\n"
+priv::EShaders::conditional_functions = R"(
+    vec4 when_eq(vec4 x, vec4 y) { return 1.0 - abs(sign(x - y)); }
+    vec4 when_neq(vec4 x, vec4 y) { return abs(sign(x - y)); }
+    vec4 when_gt(vec4 x, vec4 y) { return max(sign(x - y), 0.0); }
+    vec4 when_lt(vec4 x, vec4 y) { return max(sign(y - x), 0.0); }
+    vec4 when_ge(vec4 x, vec4 y) { return 1.0 - when_lt(x, y); }
+    vec4 when_le(vec4 x, vec4 y) { return 1.0 - when_gt(x, y); }
+    vec4 and(vec4 a, vec4 b) { return a * b; }
+    vec4 or(vec4 a, vec4 b) { return min(a + b, 1.0); }
+    //vec4 xor(vec4 a, vec4 b) { return (a + b) % 2.0; } //this is commented out
+    vec4 not(vec4 a) { return 1.0 - a; }
 
-    "float when_eq(float x, float y) { return 1.0 - (abs(sign(x - y))); }\n"
-    "float when_neq(float x, float y) { return abs(sign(x - y)); }\n"
-    "float when_gt(float x, float y) { return max(sign(x - y), 0.0); }\n"
-    "float when_lt(float x, float y) { return max(sign(y - x), 0.0); }\n"
-    "float when_ge(float x, float y) { return 1.0 - when_lt(x, y); }\n"
-    "float when_le(float x, float y) { return 1.0 - when_gt(x, y); }\n"
-    "float and(float a, float b) { return a * b; }\n"
-    "float or(float a, float b) { return min(a + b, 1.0); }\n"
-    //"float xor(float a, float b) { return (a + b) % 2.0; }\n"//this is commented out
-    "float not(float a) { return 1.0 - a; }\n"
-    "\n"
-    "int when_ieq(int x, int y) { return 1 - (abs(sign(x - y))); }\n"
-    "int when_ineq(int x, int y) { return abs(sign(x - y)); }\n"
-    "int when_igt(int x, int y) { return max(sign(x - y), 0); }\n"
-    "int when_ilt(int x, int y) { return max(sign(y - x), 0); }\n"
-    "int when_ige(int x, int y) { return 1 - when_ilt(x, y); }\n"
-    "int when_ile(int x, int y) { return 1 - when_igt(x, y); }\n"
-    "int iand(int a, int b) { return a * b; }\n"
-    "int ior(int a, int b) { return min(a + b, 1); }\n"
-    "int inot(int a) { return 1 - a; }\n"
-    "\n";
+    vec3 when_eq(vec3 x, vec3 y) { return 1.0 - abs(sign(x - y)); }
+    vec3 when_neq(vec3 x, vec3 y) { return abs(sign(x - y)); }
+    vec3 when_gt(vec3 x, vec3 y) { return max(sign(x - y), 0.0); }
+    vec3 when_lt(vec3 x, vec3 y) { return max(sign(y - x), 0.0); }
+    vec3 when_ge(vec3 x, vec3 y) { return 1.0 - when_lt(x, y); }
+    vec3 when_le(vec3 x, vec3 y) { return 1.0 - when_gt(x, y); }
+    vec3 and(vec3 a, vec3 b) { return a * b; }
+    vec3 or(vec3 a, vec3 b) { return min(a + b, 1.0); }
+    //vec3 xor(vec3 a, vec3 b) { return (a + b) % 2.0; } //this is commented out
+    vec3 not(vec3 a) { return 1.0 - a; }
 
+    vec2 when_eq(vec2 x, vec2 y) { return 1.0 - abs(sign(x - y)); }
+    vec2 when_neq(vec2 x, vec2 y) { return abs(sign(x - y)); }
+    vec2 when_gt(vec2 x, vec2 y) { return max(sign(x - y), 0.0); }
+    vec2 when_lt(vec2 x, vec2 y) { return max(sign(y - x), 0.0); }
+    vec2 when_ge(vec2 x, vec2 y) { return 1.0 - when_lt(x, y); }
+    vec2 when_le(vec2 x, vec2 y) { return 1.0 - when_gt(x, y); }
+    vec2 and(vec2 a, vec2 b) { return a * b; }
+    vec2 or(vec2 a, vec2 b) { return min(a + b, 1.0); }
+    //vec2 xor(vec2 a, vec2 b) { return (a + b) % 2.0; } //this is commented out
+    vec2 not(vec2 a) { return 1.0 - a; }
+
+    float when_eq(float x, float y) { return 1.0 - (abs(sign(x - y))); }
+    float when_neq(float x, float y) { return abs(sign(x - y)); }
+    float when_gt(float x, float y) { return max(sign(x - y), 0.0); }
+    float when_lt(float x, float y) { return max(sign(y - x), 0.0); }
+    float when_ge(float x, float y) { return 1.0 - when_lt(x, y); }
+    float when_le(float x, float y) { return 1.0 - when_gt(x, y); }
+    float and(float a, float b) { return a * b; }
+    float or(float a, float b) { return min(a + b, 1.0); }
+    //float xor(float a, float b) { return (a + b) % 2.0; } //this is commented out
+    float not(float a) { return 1.0 - a; }
+    int when_ieq(int x, int y) { return 1 - (abs(sign(x - y))); }
+    int when_ineq(int x, int y) { return abs(sign(x - y)); }
+    int when_igt(int x, int y) { return max(sign(x - y), 0); }
+    int when_ilt(int x, int y) { return max(sign(y - x), 0); }
+    int when_ige(int x, int y) { return 1 - when_ilt(x, y); }
+    int when_ile(int x, int y) { return 1 - when_igt(x, y); }
+    int iand(int a, int b) { return a * b; }
+    int ior(int a, int b) { return min(a + b, 1); }
+    int inot(int a) { return 1 - a; }
+)";
 #pragma endregion
 
 #pragma region LightingVertex
@@ -157,27 +153,29 @@ priv::EShaders::lighting_vert =
 #pragma endregion
 
 #pragma region BulletPhysicsVertex
-priv::EShaders::bullet_physics_vert =
-    "layout (location = 0) in vec3 position;\n"
-    "layout (location = 1) in vec3 color;\n"
-    "\n"
-    "varying vec3 OutColor;\n"
-    "\n"
-    "uniform mat4 Model;\n"
-    "uniform mat4 VP;\n"
-    "\n"
-    "void main(){\n"
-    "	gl_Position = VP * Model * vec4(position, 1.0f);\n"
-    "	OutColor = color;\n"
-    "}";
+priv::EShaders::bullet_physics_vert = R"(
+    layout (location = 0) in vec3 position;
+    layout (location = 1) in vec3 color;
+
+    varying vec3 OutColor;
+
+    uniform mat4 Model;
+    uniform mat4 VP;
+
+    void main(){
+    	gl_Position = VP * Model * vec4(position, 1.0f);
+    	OutColor = color;
+    }
+)";
 #pragma endregion
 
 #pragma region BulletPhysicsFragment
-priv::EShaders::bullet_physcis_frag =
-    "in vec3 OutColor;\n"
-    "void main(){\n"
-    "	gl_FragColor = vec4(OutColor,1.0);\n"
-    "}";
+priv::EShaders::bullet_physcis_frag = R"(
+    in vec3 OutColor;
+    void main(){
+    	gl_FragColor = vec4(OutColor, 1.0);
+    }
+)";
 #pragma endregion
 
 #pragma region DecalVertex
@@ -461,30 +459,30 @@ priv::EShaders::vertex_basic =
 #pragma endregion
 
 #pragma region Vertex2DAPI
-priv::EShaders::vertex_2DAPI =
-    "layout (location = 0) in vec3 position;\n"
-    "layout (location = 1) in vec2 uv;\n"
-    "\n"
-    "uniform mat4 VP;\n"
-    "uniform mat4 Model;\n"
-    "varying vec2 UV;\n"
-    "void main(){\n"
-    "    UV = uv;\n"
-    "    gl_Position = VP * Model * vec4(position, 1.0);\n"
-    "}";
+priv::EShaders::vertex_2DAPI = R"(
+    layout (location = 0) in vec3 position;
+    layout (location = 1) in vec2 uv;
+    uniform mat4 VP;
+    uniform mat4 Model;
+    varying vec2 UV;
+    void main(){
+        UV = uv;
+        gl_Position = VP * Model * vec4(position, 1.0);
+    }
+)";
 #pragma endregion
 
 #pragma region VertexSkybox
-priv::EShaders::vertex_skybox =
-    "\n"
-    "layout (location = 0) in vec3 position;\n"
-    "uniform mat4 VP;\n"
-    "varying vec3 UV;\n"
-    "void main(){\n"
-    "    UV = position;\n"
-    "    gl_Position = VP * vec4(position, 1.0);\n"
-    "    gl_Position.z = gl_Position.w;\n"
-    "}";
+priv::EShaders::vertex_skybox = R"(
+    layout (location = 0) in vec3 position;
+    uniform mat4 VP;
+    varying vec3 UV;
+    void main(){
+        UV = position;
+        gl_Position = VP * vec4(position, 1.0);
+        gl_Position.z = gl_Position.w;
+    }
+)";
 #pragma endregion
 
 #pragma region CubemapConvoludeFrag
@@ -646,7 +644,6 @@ priv::EShaders::brdf_precompute =
     "    B /= float(NUM_SAMPLES);\n"
     "    return vec2(A, B);\n"
     "}\n"
-
     "void main(){\n"
     "    gl_FragColor.rg = IntegrateBRDF(texcoords.x, texcoords.y);\n"
     "}";
@@ -654,36 +651,35 @@ priv::EShaders::brdf_precompute =
 
 #pragma region StencilPass
 
-priv::EShaders::stencil_passover =
-    "\n"
-    "const vec3 comparison = vec3(1.0, 1.0, 1.0);\n"
-    "uniform SAMPLER_TYPE_2D gNormalMap;\n"
-    "varying vec2 texcoords;\n"
-    "void main(){\n"
-    "    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);\n"
-    "    if(distance(normal, comparison) < 0.01){\n"
-    "        discard;\n"//this is where the magic happens with the stencil buffer.
-    "    }\n"
-    "}";
-
+priv::EShaders::stencil_passover = R"(
+    const vec3 comparison = vec3(1.0, 1.0, 1.0);
+    uniform SAMPLER_TYPE_2D gNormalMap;
+    varying vec2 texcoords;
+    void main(){
+        vec3 normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);
+        if(distance(normal, comparison) < 0.01){
+            discard; //this is where the magic happens with the stencil buffer.
+        }
+    }
+)";
 #pragma endregion
 
 #pragma region FullscreenQuadVertex
-priv::EShaders::fullscreen_quad_vertex = 
-    "\n"
-    "layout (location = 0) in vec3 position;\n"
-    "layout (location = 1) in vec2 uv;\n"
-    "\n"
-    "uniform mat4 Model;\n"
-    "uniform mat4 VP;\n"
-    "\n"
-    "varying vec2 texcoords;\n"
-    "\n"
-    "void main(){\n"
-    "    vec3 vert = position;\n"
-    "    texcoords = uv;\n"
-    "    gl_Position = VP * Model * vec4(vert, 1.0);\n"
-    "}";
+priv::EShaders::fullscreen_quad_vertex = R"(
+    layout (location = 0) in vec3 position;
+    layout (location = 1) in vec2 uv;
+
+    uniform mat4 Model;
+    uniform mat4 VP;
+
+    varying vec2 texcoords;
+
+    void main(){
+        vec3 vert = position;
+        texcoords = uv;
+        gl_Position = VP * Model * vec4(vert, 1.0);
+    }
+)";
 #pragma endregion
    
 #pragma region ForwardFrag
@@ -966,122 +962,119 @@ priv::EShaders::deferred_frag =
 #pragma endregion
 
 #pragma region NormalessDiffuseFrag
-
-priv::EShaders::normaless_diffuse_frag = 
-    "\n"
-    "const vec3 comparison = vec3(1.0, 1.0, 1.0);\n"
-    "uniform SAMPLER_TYPE_2D gNormalMap;\n"
-    "uniform SAMPLER_TYPE_2D gDiffuseMap;\n"
-    "uniform int HasLighting;\n"
-    "varying vec2 texcoords;\n"
-    "void main(){\n"
-    "    vec3 normal   = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);\n"
-    "    vec3 diffuse  = texture2D(USE_SAMPLER_2D(gDiffuseMap), texcoords).rgb;\n"
-    "    if(HasLighting == 0 || distance(normal, comparison) < 0.01){\n"
-    "        gl_FragColor = vec4(diffuse, 1.0);\n"
-    "    }else{\n"
-    "        discard;\n"
-    "    }\n"
-    "}";
-
+priv::EShaders::normaless_diffuse_frag = R"(
+    const vec3 comparison = vec3(1.0, 1.0, 1.0);
+    uniform SAMPLER_TYPE_2D gNormalMap;
+    uniform SAMPLER_TYPE_2D gDiffuseMap;
+    uniform int HasLighting;
+    varying vec2 texcoords;
+    void main(){
+        vec3 normal   = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);
+        vec3 diffuse  = texture2D(USE_SAMPLER_2D(gDiffuseMap), texcoords).rgb;
+        if(HasLighting == 0 || distance(normal, comparison) < 0.01){
+            gl_FragColor = vec4(diffuse, 1.0);
+        }else{
+            discard;
+        }
+    }
+)";
 #pragma endregion
 
 #pragma region ZPrepassFrag
-priv::EShaders::zprepass_frag =
-    "USE_LOG_DEPTH_FRAGMENT\n"
-    //"USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
-    //"USE_MAX_MATERIAL_COMPONENTS\n"
-    "void main(){\n"
-    "}";
-
+priv::EShaders::zprepass_frag = R"(
+    USE_LOG_DEPTH_FRAGMENT
+    //USE_MAX_MATERIAL_LAYERS_PER_COMPONENT
+    //USE_MAX_MATERIAL_COMPONENTS
+    void main(){
+    }
+)";
 #pragma endregion
 
 #pragma region DeferredFragHUD
-priv::EShaders::deferred_frag_hud =
-    "\n"
-    "uniform SAMPLER_TYPE_2D DiffuseTexture;\n"
-
-    "uniform int DiffuseTextureEnabled;\n"
-    "uniform float ScreenGamma;\n"
-    "uniform vec4 Object_Color;\n"
-    "varying vec2 UV;\n"
-    "void main(){\n"
-
-    "    gl_FragColor = Object_Color;\n"
-    "    if(DiffuseTextureEnabled == 1){\n"
-    "        vec4 color = texture2D(DiffuseTexture, UV); \n"
-    "        color.rgb = pow(color.rgb, vec3(1.0 / ScreenGamma));\n" //ScreenGamma is gamma
-    "        gl_FragColor *= color;\n"
-    "    }\n"
-    "}";
+priv::EShaders::deferred_frag_hud = R"(
+    uniform SAMPLER_TYPE_2D DiffuseTexture;
+    uniform int DiffuseTextureEnabled;
+    uniform float ScreenGamma;
+    uniform vec4 Object_Color;
+    varying vec2 UV;
+    void main(){
+        gl_FragColor = Object_Color;
+        if(DiffuseTextureEnabled == 1){
+            vec4 color = texture2D(DiffuseTexture, UV);
+            color.rgb = pow(color.rgb, vec3(1.0 / ScreenGamma)); //ScreenGamma is gamma
+            gl_FragColor *= color;
+        }
+    }
+)";
 #pragma endregion
 
 #pragma region DeferredFragSkybox
-priv::EShaders::deferred_frag_skybox =
-    "\n"
-    "uniform vec4 Color;\n"
-    "uniform int IsFake;\n"
-    "uniform float ScreenGamma;\n"
-    "uniform SAMPLER_TYPE_Cube Texture;\n"
-    "varying vec3 UV;\n"
-    "varying vec3 WorldPosition;\n"
-    "void main(){\n"
-    "    if(IsFake == 1){\n"
-    "        SUBMIT_DIFFUSE(Color);\n"
-    "    }else{\n"
-    "        SUBMIT_DIFFUSE(textureCube(Texture, UV));\n"
-    "    }\n"
-    "    gl_FragData[0].rgb = pow(gl_FragData[0].rgb, vec3(1.0 / ScreenGamma));\n" //ScreenGamma is gamma
-    "    gl_FragData[1].rg = vec2(1.0);\n"
-    "    gl_FragData[2]    = vec4(0.0);\n"
-    "}";
+priv::EShaders::deferred_frag_skybox = R"(
+    uniform vec4 Color;
+    uniform int IsFake;
+    uniform float ScreenGamma;
+    uniform SAMPLER_TYPE_Cube Texture;
+    varying vec3 UV;
+    varying vec3 WorldPosition;
+    void main(){
+        if(IsFake == 1){
+            SUBMIT_DIFFUSE(Color);
+        }else{
+            SUBMIT_DIFFUSE(textureCube(Texture, UV));
+        }
+        gl_FragData[0].rgb = pow(gl_FragData[0].rgb, vec3(1.0 / ScreenGamma)); //ScreenGamma is gamma
+        gl_FragData[1].rg = vec2(1.0);
+        gl_FragData[2]    = vec4(0.0);
+    }
+)";
 #pragma endregion
 
 #pragma region CopyDepthFrag
-priv::EShaders::copy_depth_frag =
-    "\n"
-    "uniform SAMPLER_TYPE_2D gDepthMap;\n"
-    "varying vec2 texcoords;\n"
-    "void main(){\n"
-    "    gl_FragDepth = texture2D(gDepthMap, texcoords).r;\n"
-    "}";
+priv::EShaders::copy_depth_frag = R"(
+    uniform SAMPLER_TYPE_2D gDepthMap;
+    varying vec2 texcoords;
+    void main(){
+        gl_FragDepth = texture2D(gDepthMap, texcoords).r;
+    }
+)";
 #pragma endregion
 
 #pragma region Blur
-priv::EShaders::blur_frag =
-    "uniform SAMPLER_TYPE_2D image;\n"
-    "\n"
-    "uniform vec4 DataA;\n"//radius, UNUSED, H,V
-    "uniform vec4 strengthModifier;\n"
-    "\n"
-    "varying vec2 texcoords;\n"
-    "\n"
-    "const int NUM_SAMPLES = 9;\n"
-    "const float weight[NUM_SAMPLES] = float[](0.227,0.21,0.1946,0.162,0.12,0.08,0.054,0.03,0.016);\n"
-    "\n"
-    "void main(){\n"
-    "    vec4 Sum = vec4(0.0);\n"
-    "    vec2 inverseResolution = vec2(1.0) / vec2(ScreenInfo.z, ScreenInfo.w);\n"
-    "    for(int i = 0; i < NUM_SAMPLES; ++i){\n"
-    "        vec2 offset = (inverseResolution * float(i)) * DataA.x;\n"
-    "        Sum += (texture2D(image,texcoords + vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;\n"
-    "        Sum += (texture2D(image,texcoords - vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;\n"
-    "    }\n"
-    "    gl_FragColor = Sum;\n"
-    "}";
+priv::EShaders::blur_frag = R"(
+    uniform SAMPLER_TYPE_2D image;
+
+    uniform vec4 DataA; //radius, UNUSED, H,V
+    uniform vec4 strengthModifier;
+
+    varying vec2 texcoords;
+
+    const int NUM_SAMPLES = 9;
+    const float weight[NUM_SAMPLES] = float[](0.227, 0.21, 0.1946, 0.162, 0.12, 0.08, 0.054, 0.03, 0.016);
+
+    void main(){
+        vec4 Sum = vec4(0.0);
+        vec2 inverseResolution = vec2(1.0) / vec2(ScreenInfo.z, ScreenInfo.w);
+        for(int i = 0; i < NUM_SAMPLES; ++i){
+            vec2 offset = (inverseResolution * float(i)) * DataA.x;
+            Sum += (texture2D(image,texcoords + vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;
+            Sum += (texture2D(image,texcoords - vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;
+        }
+        gl_FragColor = Sum;
+    }
+)";
 #pragma endregion
 
 #pragma region Greyscale
 /*
-priv::EShaders::greyscale_frag =
-    "\n"
-    "uniform SAMPLER_TYPE_2D textureMap;\n"
-    "varying vec2 texcoords;\n"
-    "void main(){\n"
-    "    vec4 col = texture2D(textureMap, texcoords);\n"
-    "    float lum = dot(col.rgb, vec3(0.299, 0.587, 0.114));\n"
-    "    gl_FragColor = vec4(vec3(lum), 1.0);\n"
-    "}";
+priv::EShaders::greyscale_frag = R"(
+    uniform SAMPLER_TYPE_2D textureMap;
+    varying vec2 texcoords;
+    void main(){
+        vec4 col = texture2D(textureMap, texcoords);
+        float lum = dot(col.rgb, vec3(0.299, 0.587, 0.114));
+        gl_FragColor = vec4(vec3(lum), 1.0);
+    }
+)";
 */
 #pragma endregion
     

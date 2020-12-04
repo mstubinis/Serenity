@@ -252,48 +252,46 @@ void opengl::glsl::Common::convert(std::string& code, unsigned int versionNumber
     ShaderHelper::sfind(code, "CameraRealPosition") || ShaderHelper::sfind(code, "CameraInfo3") || ShaderHelper::sfind(code, "ScreenInfo")) {
         if (versionNumber >= 140) { //UBO only supported at 140 or above
             if (!ShaderHelper::sfind(code, "layout (std140) uniform Camera //generated")) {
-                ShaderHelper::insertStringAtLine(code, 
-                    "layout (std140) uniform Camera //generated\n"
-                    "{\n"
-                    "    mat4 CameraView;\n"
-                    "    mat4 CameraProj;\n"
-                    "    mat4 CameraViewProj;\n"
-                    "    mat4 CameraInvView;\n"
-                    "    mat4 CameraInvProj;\n"
-                    "    mat4 CameraInvViewProj;\n"
-                    "    vec4 CameraInfo1;\n"
-                    "    vec4 CameraInfo2;\n"
-                    "    vec4 CameraInfo3;\n"
-                    "    vec4 ScreenInfo;\n"
-                    "};\n"
-                    "vec3 CameraPosition = CameraInfo1.xyz;\n"
-                    "vec3 CameraViewVector = CameraInfo2.xyz;\n"
-                    "vec3 CameraRealPosition = CameraInfo3.xyz;\n"
-                    "float CameraNear = CameraInfo1.w;\n"
-                    "float CameraFar = CameraInfo2.w;\n"
-                    "\n"
-                , 1);
+                ShaderHelper::insertStringAtLine(code, R"(
+                    layout (std140) uniform Camera //generated
+                    {
+                        mat4 CameraView;
+                        mat4 CameraProj;
+                        mat4 CameraViewProj;
+                        mat4 CameraInvView;
+                        mat4 CameraInvProj;
+                        mat4 CameraInvViewProj;
+                        vec4 CameraInfo1;
+                        vec4 CameraInfo2;
+                        vec4 CameraInfo3;
+                        vec4 ScreenInfo;
+                    };
+                    vec3 CameraPosition = CameraInfo1.xyz;
+                    vec3 CameraViewVector = CameraInfo2.xyz;
+                    vec3 CameraRealPosition = CameraInfo3.xyz;
+                    float CameraNear = CameraInfo1.w;
+                    float CameraFar = CameraInfo2.w;
+                )", 1);
             }
         }else{ //no UBO's, just add a bunch of uniforms
-            if (!ShaderHelper::sfind(code, "uniform mat4 CameraView;//generated")) {
-                ShaderHelper::insertStringAtLine(code, 
-                    "uniform mat4 CameraView;//generated;\n"
-                    "uniform mat4 CameraProj;\n"
-                    "uniform mat4 CameraViewProj;\n"
-                    "uniform mat4 CameraInvView;\n"
-                    "uniform mat4 CameraInvProj;\n"
-                    "uniform mat4 CameraInvViewProj;\n"
-                    "uniform vec4 CameraInfo1;\n"
-                    "uniform vec4 CameraInfo2;\n"
-                    "uniform vec4 CameraInfo3;\n"
-                    "uniform vec4 ScreenInfo;\n"
-                    "vec3 CameraPosition = CameraInfo1.xyz;\n"
-                    "vec3 CameraViewVector = CameraInfo2.xyz;\n"
-                    "vec3 CameraRealPosition = CameraInfo3.xyz;\n"
-                    "float CameraNear = CameraInfo1.w;\n"
-                    "float CameraFar = CameraInfo2.w;\n"
-                    "\n"
-                , 1);
+            if (!ShaderHelper::sfind(code, "uniform mat4 CameraView; //generated")) {
+                ShaderHelper::insertStringAtLine(code, R"(
+                    uniform mat4 CameraView; //generated;
+                    uniform mat4 CameraProj;
+                    uniform mat4 CameraViewProj;
+                    uniform mat4 CameraInvView;
+                    uniform mat4 CameraInvProj;
+                    uniform mat4 CameraInvViewProj;
+                    uniform vec4 CameraInfo1;
+                    uniform vec4 CameraInfo2;
+                    uniform vec4 CameraInfo3;
+                    uniform vec4 ScreenInfo;
+                    vec3 CameraPosition = CameraInfo1.xyz;
+                    vec3 CameraViewVector = CameraInfo2.xyz;
+                    vec3 CameraRealPosition = CameraInfo3.xyz;
+                    float CameraNear = CameraInfo1.w;
+                    float CameraFar = CameraInfo2.w;
+                )", 1);
             }
         }
     }

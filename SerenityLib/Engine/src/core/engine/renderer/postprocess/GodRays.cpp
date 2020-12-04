@@ -17,33 +17,34 @@ bool Engine::priv::GodRays::init_shaders() {
         return false;
 
 #pragma region GodRays
-    m_GLSL_frag_code =
-        "uniform vec4 RaysInfo;\n"//exposure | decay | density | weight
-        "\n"
-        "uniform vec2 lightPositionOnScreen;\n"
-        "uniform SAMPLER_TYPE_2D firstPass;\n"
-        "uniform int samples;\n"
-        "\n"
-        "uniform float alpha;\n"
-        "varying vec2 texcoords;\n"
-        "void main(){\n"
-        "    vec2 uv = texcoords;\n"
-        "    vec2 deltaUV = vec2(uv - lightPositionOnScreen);\n"
-        "    deltaUV *= 1.0 /  float(samples) * RaysInfo.z;\n"
-        "    float illuminationDecay = 1.0;\n"
-        "    vec3 totalColor = vec3(0.0);\n"
-        "    for(int i = 0; i < samples; ++i){\n"
-        "        uv -= deltaUV / 2.0;\n"
-        "        vec2 sampleData = texture2D(firstPass,uv).ba;\n"
-        "        vec2 unpackedRG = Unpack2NibblesFrom8BitChannel(sampleData.r);\n"
-        "        vec3 realSample = vec3(unpackedRG.r,unpackedRG.g,sampleData.g);\n"
-        "        realSample *= illuminationDecay * RaysInfo.w;\n"
-        "        totalColor += realSample;\n"
-        "        illuminationDecay *= RaysInfo.y;\n"
-        "    }\n"
-        "    gl_FragColor.rgb = (totalColor * alpha) * RaysInfo.x;\n"
-        "    gl_FragColor.a = 1.0;\n"
-        "}";
+    m_GLSL_frag_code = R"(
+        uniform vec4 RaysInfo; //exposure | decay | density | weight
+
+        uniform vec2 lightPositionOnScreen;
+        uniform SAMPLER_TYPE_2D firstPass;
+        uniform int samples;
+
+        uniform float alpha;
+        varying vec2 texcoords;
+        void main(){
+            vec2 uv = texcoords;
+            vec2 deltaUV = vec2(uv - lightPositionOnScreen);
+            deltaUV *= 1.0 /  float(samples) * RaysInfo.z;
+            float illuminationDecay = 1.0;
+            vec3 totalColor = vec3(0.0);
+            for(int i = 0; i < samples; ++i){
+                uv -= deltaUV / 2.0;
+                vec2 sampleData = texture2D(firstPass,uv).ba;
+                vec2 unpackedRG = Unpack2NibblesFrom8BitChannel(sampleData.r);
+                vec3 realSample = vec3(unpackedRG.r,unpackedRG.g,sampleData.g);
+                realSample *= illuminationDecay * RaysInfo.w;
+                totalColor += realSample;
+                illuminationDecay *= RaysInfo.y;
+            }
+            gl_FragColor.rgb = (totalColor * alpha) * RaysInfo.x;
+            gl_FragColor.a = 1.0;
+        }
+    )";
 #pragma endregion
 
     auto lambda_part_a = [&]() {

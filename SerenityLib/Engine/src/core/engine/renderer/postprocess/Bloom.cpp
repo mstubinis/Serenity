@@ -17,18 +17,19 @@ bool Engine::priv::Bloom::init_shaders() {
         return false;
 
 #pragma region Bloom
-    m_GLSL_frag_code =
-        "const vec3 ConstantZeroVec3 = vec3(0.0, 0.0, 0.0);\n"
-        "uniform SAMPLER_TYPE_2D SceneTexture;\n"
-        "\n"
-        "uniform vec4 Data;\n" //x = scale y = threshold z = exposure w = UNUSED
-        "varying vec2 texcoords;\n"
-        "\n"
-        "void main(){\n"
-        "    vec3 sceneColor = texture2D(SceneTexture,texcoords).rgb;\n"
-        "    sceneColor = vec3(1.0) - exp(-sceneColor * Data.z);\n"//exposure
-        "    gl_FragColor.rgb = max(ConstantZeroVec3, sceneColor - vec3(Data.y)) * Data.x;\n"//threshold   scale
-        "}";
+    m_GLSL_frag_code = R"(
+        const vec3 ConstantZeroVec3 = vec3(0.0, 0.0, 0.0);
+        uniform SAMPLER_TYPE_2D SceneTexture;
+
+        uniform vec4 Data; //x = scale y = threshold z = exposure w = UNUSED
+        varying vec2 texcoords;
+
+        void main(){
+            vec3 sceneColor = texture2D(SceneTexture,texcoords).rgb;
+            sceneColor = vec3(1.0) - exp(-sceneColor * Data.z); //exposure
+            gl_FragColor.rgb = max(ConstantZeroVec3, sceneColor - vec3(Data.y)) * Data.x; //threshold   scale
+        }
+    )";
 #pragma endregion
 
     auto lambda_part_a = [&]() {

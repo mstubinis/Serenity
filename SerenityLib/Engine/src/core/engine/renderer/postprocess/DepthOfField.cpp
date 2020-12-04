@@ -16,58 +16,55 @@ bool Engine::priv::DepthOfField::init_shaders() {
         return false;
 
 #pragma region DepthOfField
-    m_GLSL_frag_code =
-        "\n"
-        "const float DOFWeight[4] = float[](1.0,0.9,0.7,0.4);\n"
-        "\n"
-        "uniform SAMPLER_TYPE_2D inTexture;\n"
-        "uniform SAMPLER_TYPE_2D depthTexture;\n"
-        "\n"
-        "uniform vec4 Data;\n" //x = blurClamp, y = bias, z = focus, w = UNUSED
-        "\n"
-        "varying vec2 texcoords;\n"
-        "void main(){\n"
-        "    vec2 aspectcorrect = vec2(1.0, ScreenInfo.z / ScreenInfo.w);\n"
-        "    float depth = texture2D(depthTexture, texcoords).r;\n"
-        "    float factor = (depth - Data.z);\n"
-        "    vec2 dofblur = vec2(clamp(factor * Data.y, -Data.x, Data.x));\n"
+    m_GLSL_frag_code = R"(
+        const float DOFWeight[4] = float[](1.0,0.9,0.7,0.4);
+
+        uniform SAMPLER_TYPE_2D inTexture;
+        uniform SAMPLER_TYPE_2D depthTexture;
+
+        uniform vec4 Data; //x = blurClamp, y = bias, z = focus, w = UNUSED
+
+        varying vec2 texcoords;
+        void main(){
+            vec2 aspectcorrect = vec2(1.0, ScreenInfo.z / ScreenInfo.w);
+            float depth = texture2D(depthTexture, texcoords).r;
+            float factor = (depth - Data.z);
+            vec2 dofblur = vec2(clamp(factor * Data.y, -Data.x, Data.x));
         //   vec4 col = DOFExecute(inTexture, texcoords, aspectcorrect, dofblur);
         //TODO: use the above commented function only and test if it works.
-        "    vec4 col = vec4(0.0);\n"
-        "    col += texture2D(inTexture, texcoords);\n"
-        "    col += texture2D(inTexture, texcoords + (vec2(0.0, 0.4) * aspectcorrect)     * dofblur);\n"
-        "    col += texture2D(inTexture, texcoords + (vec2(0.0, -0.4) * aspectcorrect)    * dofblur);\n"
-        "    col += texture2D(inTexture, texcoords + (vec2(0.4, 0.0) * aspectcorrect)     * dofblur);\n"
-        "    col += texture2D(inTexture, texcoords + (vec2(-0.4, 0.0) * aspectcorrect)    * dofblur);\n"
-        "    col += texture2D(inTexture, texcoords + (vec2(0.29, 0.29) * aspectcorrect)   * dofblur);\n"
-        "    col += texture2D(inTexture, texcoords + (vec2(-0.29, 0.29) * aspectcorrect)  * dofblur);\n"
-        "    col += texture2D(inTexture, texcoords + (vec2(0.29, -0.29) * aspectcorrect)  * dofblur);\n"
-        "    col += texture2D(inTexture, texcoords + (vec2(-0.29, -0.29) * aspectcorrect) * dofblur);\n"
-        "    for (int i = 0; i < 2; ++i) {\n"
-        "        int k = i+2;\n"
-        "        col += texture2D(inTexture, texcoords + (vec2(0.15, 0.37) * aspectcorrect)   * dofblur * DOFWeight[i]);\n"
-        "        col += texture2D(inTexture, texcoords + (vec2(-0.15, -0.37) * aspectcorrect) * dofblur * DOFWeight[i]);\n"
-        "        col += texture2D(inTexture, texcoords + (vec2(-0.15, 0.37) * aspectcorrect)  * dofblur * DOFWeight[i]);\n"
-        "        col += texture2D(inTexture, texcoords + (vec2(0.15, -0.37) * aspectcorrect)  * dofblur * DOFWeight[i]);\n"
-        "        col += texture2D(inTexture, texcoords + (vec2(-0.37, 0.15) * aspectcorrect)  * dofblur * DOFWeight[i]);\n"
-        "        col += texture2D(inTexture, texcoords + (vec2(0.37, -0.15) * aspectcorrect)  * dofblur * DOFWeight[i]);\n"
-        "        col += texture2D(inTexture, texcoords + (vec2(0.37, 0.15) * aspectcorrect)   * dofblur * DOFWeight[i]);\n"
-        "        col += texture2D(inTexture, texcoords + (vec2(-0.37, -0.15) * aspectcorrect) * dofblur * DOFWeight[i]);\n"
-        "\n"
-        "        col += texture2D(inTexture, texcoords + (vec2(0.29, 0.29) * aspectcorrect)   * dofblur * DOFWeight[k]);\n"
-        "        col += texture2D(inTexture, texcoords + (vec2(0.4, 0.0) * aspectcorrect)     * dofblur * DOFWeight[k]);\n"
-        "        col += texture2D(inTexture, texcoords + (vec2(0.29, -0.29) * aspectcorrect)  * dofblur * DOFWeight[k]);\n"
-        "        col += texture2D(inTexture, texcoords + (vec2(0.0, -0.4) * aspectcorrect)    * dofblur * DOFWeight[k]);\n"
-        "        col += texture2D(inTexture, texcoords + (vec2(-0.29, 0.29) * aspectcorrect)  * dofblur * DOFWeight[k]);\n"
-        "        col += texture2D(inTexture, texcoords + (vec2(-0.4, 0.0) * aspectcorrect)    * dofblur * DOFWeight[k]);\n"
-        "        col += texture2D(inTexture, texcoords + (vec2(-0.29, -0.29) * aspectcorrect) * dofblur * DOFWeight[k]);\n"
-        "        col += texture2D(inTexture, texcoords + (vec2(0.0, 0.4) * aspectcorrect)     * dofblur * DOFWeight[k]);\n"
-        "    }\n"
-        "    gl_FragColor.rgb = col.rgb * 0.02439; \n" //0.02439 = 1.0 / 41.0
+            vec4 col = vec4(0.0);
+            col += texture2D(inTexture, texcoords);
+            col += texture2D(inTexture, texcoords + (vec2(0.0, 0.4) * aspectcorrect)     * dofblur);
+            col += texture2D(inTexture, texcoords + (vec2(0.0, -0.4) * aspectcorrect)    * dofblur);
+            col += texture2D(inTexture, texcoords + (vec2(0.4, 0.0) * aspectcorrect)     * dofblur);
+            col += texture2D(inTexture, texcoords + (vec2(-0.4, 0.0) * aspectcorrect)    * dofblur);
+            col += texture2D(inTexture, texcoords + (vec2(0.29, 0.29) * aspectcorrect)   * dofblur);
+            col += texture2D(inTexture, texcoords + (vec2(-0.29, 0.29) * aspectcorrect)  * dofblur);
+            col += texture2D(inTexture, texcoords + (vec2(0.29, -0.29) * aspectcorrect)  * dofblur);
+            col += texture2D(inTexture, texcoords + (vec2(-0.29, -0.29) * aspectcorrect) * dofblur);
+            for (int i = 0; i < 2; ++i) {
+                int k = i+2;
+                col += texture2D(inTexture, texcoords + (vec2(0.15, 0.37) * aspectcorrect)   * dofblur * DOFWeight[i]);
+                col += texture2D(inTexture, texcoords + (vec2(-0.15, -0.37) * aspectcorrect) * dofblur * DOFWeight[i]);
+                col += texture2D(inTexture, texcoords + (vec2(-0.15, 0.37) * aspectcorrect)  * dofblur * DOFWeight[i]);
+                col += texture2D(inTexture, texcoords + (vec2(0.15, -0.37) * aspectcorrect)  * dofblur * DOFWeight[i]);
+                col += texture2D(inTexture, texcoords + (vec2(-0.37, 0.15) * aspectcorrect)  * dofblur * DOFWeight[i]);
+                col += texture2D(inTexture, texcoords + (vec2(0.37, -0.15) * aspectcorrect)  * dofblur * DOFWeight[i]);
+                col += texture2D(inTexture, texcoords + (vec2(0.37, 0.15) * aspectcorrect)   * dofblur * DOFWeight[i]);
+                col += texture2D(inTexture, texcoords + (vec2(-0.37, -0.15) * aspectcorrect) * dofblur * DOFWeight[i]);
 
-        //"    gl_FragColor.a = 1.0; \n"
-        "}\n"
-        "\n";
+                col += texture2D(inTexture, texcoords + (vec2(0.29, 0.29) * aspectcorrect)   * dofblur * DOFWeight[k]);
+                col += texture2D(inTexture, texcoords + (vec2(0.4, 0.0) * aspectcorrect)     * dofblur * DOFWeight[k]);
+                col += texture2D(inTexture, texcoords + (vec2(0.29, -0.29) * aspectcorrect)  * dofblur * DOFWeight[k]);
+                col += texture2D(inTexture, texcoords + (vec2(0.0, -0.4) * aspectcorrect)    * dofblur * DOFWeight[k]);
+                col += texture2D(inTexture, texcoords + (vec2(-0.29, 0.29) * aspectcorrect)  * dofblur * DOFWeight[k]);
+                col += texture2D(inTexture, texcoords + (vec2(-0.4, 0.0) * aspectcorrect)    * dofblur * DOFWeight[k]);
+                col += texture2D(inTexture, texcoords + (vec2(-0.29, -0.29) * aspectcorrect) * dofblur * DOFWeight[k]);
+                col += texture2D(inTexture, texcoords + (vec2(0.0, 0.4) * aspectcorrect)     * dofblur * DOFWeight[k]);
+            }
+            gl_FragColor.rgb = col.rgb * 0.02439; //0.02439 = 1.0 / 41.0
+        }
+    )";
 #pragma endregion
 
     Engine::priv::threading::addJobWithPostCallback([this]() {
