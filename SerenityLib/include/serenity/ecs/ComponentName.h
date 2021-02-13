@@ -7,7 +7,7 @@
 
 class ComponentName {
     private:
-        std::string  m_Data = "";
+        std::string  m_Data;
         Entity       m_Owner = Entity();
 
         ComponentName() = delete;
@@ -16,11 +16,11 @@ class ComponentName {
         ComponentName(Entity entity, const std::string& name);
         ComponentName(Entity entity, const char* name);
 
-        inline constexpr const std::string& name() const noexcept { return m_Data; }
+        [[nodiscard]] inline constexpr const std::string& name() const noexcept { return m_Data; }
         inline void setName(const std::string& name) noexcept { m_Data = name; }
         inline void setName(const char* name) noexcept { m_Data = name; }
-        inline size_t size() const noexcept { return m_Data.size(); }
-        inline bool empty() const noexcept { return m_Data.empty(); }
+        [[nodiscard]] inline size_t size() const noexcept { return m_Data.size(); }
+        [[nodiscard]] inline bool empty() const noexcept { return m_Data.empty(); }
 
 };
 class ComponentName_System_CI : public Engine::priv::ECSSystemCI {

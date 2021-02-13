@@ -4,11 +4,11 @@
 
 class Scene;
 namespace Engine::priv {
-    struct InternalEntityPublicInterface;
+    struct PublicEntity;
 };
 
-#include <serenity/core/engine/system/TypeDefs.h>
-#include <serenity/core/engine/types/ViewPointer.h>
+#include <serenity/system/TypeDefs.h>
+#include <serenity/types/ViewPointer.h>
 
 #include <serenity/ecs/ECSIncludes.h>
 
@@ -19,13 +19,11 @@ namespace Engine::priv {
         uint32_t versionID : VERSION_BIT_POSITIONS;
     };
 }
-#include <serenity/core/engine/lua/LuaIncludes.h>
-#include <serenity/core/engine/lua/LuaState.h>
+#include <serenity/lua/LuaIncludes.h>
+#include <serenity/lua/LuaState.h>
 
 
-/*
-The Entity class used in the ECS framework.
-*/
+/* The Entity class used in the ECS framework. */
 struct Entity {
     public:
         uint32_t m_Data = 0;
@@ -54,57 +52,57 @@ struct Entity {
         void destroy() noexcept;
         bool isDestroyed() const noexcept;
 
-        inline constexpr uint32_t id() const noexcept { return id(m_Data); }
-        inline constexpr uint32_t sceneID() const noexcept { return sceneID(m_Data); }
-        inline constexpr uint32_t versionID() const noexcept { return versionID(m_Data); }
+        [[nodiscard]] inline constexpr uint32_t id() const noexcept { return id(m_Data); }
+        [[nodiscard]] inline constexpr uint32_t sceneID() const noexcept { return sceneID(m_Data); }
+        [[nodiscard]] inline constexpr uint32_t versionID() const noexcept { return versionID(m_Data); }
 
-        static inline constexpr uint32_t id(uint32_t data) noexcept {
+        [[nodiscard]] static inline constexpr uint32_t id(uint32_t data) noexcept {
             Engine::priv::entity_packed_data p{};
             p.ID = (data & 4'194'303U) >> (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS - ID_BIT_POSITIONS);
             return p.ID;
         }
-        static inline constexpr uint32_t sceneID(uint32_t data) noexcept {
+        [[nodiscard]] static inline constexpr uint32_t sceneID(uint32_t data) noexcept {
             Engine::priv::entity_packed_data p{};
             p.sceneID = (data & 534'773'760U) >> (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS);
             return p.sceneID;
         }
-        static inline constexpr uint32_t versionID(uint32_t data) noexcept {
+        [[nodiscard]] static inline constexpr uint32_t versionID(uint32_t data) noexcept {
             Engine::priv::entity_packed_data p{};
             p.versionID = (data & 4'026'531'840U) >> (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS);
             return p.versionID;
         }
 
-        Engine::view_ptr<Scene> scene() const noexcept;
-        bool hasParent() const noexcept;
+        [[nodiscard]] Engine::view_ptr<Scene> scene() const noexcept;
+        [[nodiscard]] bool hasParent() const noexcept;
 
         void addChild(Entity child) const noexcept;
         void removeChild(Entity child) const noexcept;
         void removeAllChildren() const noexcept;
 
         template<typename T, typename... ARGS> inline bool addComponent(ARGS&&... args) noexcept {
-            return Engine::priv::InternalEntityPublicInterface::GetECS(*this)->addComponent<T>(*this, std::forward<ARGS>(args)...);
+            return Engine::priv::PublicEntity::GetECS(*this)->addComponent<T>(*this, std::forward<ARGS>(args)...);
         }
         template<typename T> inline bool removeComponent() noexcept {
-            return Engine::priv::InternalEntityPublicInterface::GetECS(*this)->removeComponent<T>(*this);
+            return Engine::priv::PublicEntity::GetECS(*this)->removeComponent<T>(*this);
         }
-        template<typename T> inline Engine::view_ptr<T> getComponent() const noexcept {
-            return Engine::priv::InternalEntityPublicInterface::GetECS(*this)->getComponent<T>(*this);
+        template<typename T> [[nodiscard]] inline Engine::view_ptr<T> getComponent() const noexcept {
+            return Engine::priv::PublicEntity::GetECS(*this)->getComponent<T>(*this);
         }
-        template<class... Types> inline std::tuple<Types*...> getComponents() const noexcept {
-            return Engine::priv::InternalEntityPublicInterface::GetECS(*this)->getComponents<Types...>(*this);
+        template<class... Types> [[nodiscard]] inline std::tuple<Types*...> getComponents() const noexcept {
+            return Engine::priv::PublicEntity::GetECS(*this)->getComponents<Types...>(*this);
         }
 
         bool addComponent(const std::string& componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8);
         bool removeComponent(const std::string& componentClassName);
-        luabridge::LuaRef getComponent(const std::string& componentClassName);
+        [[nodiscard]] luabridge::LuaRef getComponent(const std::string& componentClassName);
 };
 
 namespace Engine::priv {
     class ECS;
-    struct InternalEntityPublicInterface final {
+    struct PublicEntity final {
         static Engine::view_ptr<Engine::priv::ECS> GetECS(Entity entity);
 
-        template<typename T> static luabridge::LuaRef GetComponent(lua_State* L, Entity entity, const char* globalName){
+        template<typename T> [[nodiscard]] static luabridge::LuaRef GetComponent(lua_State* L, Entity entity, const char* globalName){
             luabridge::setGlobal(L, entity.getComponent<T>(), globalName);
             return luabridge::getGlobal(L, globalName);
         }

@@ -1,0 +1,117 @@
+#pragma once
+#ifndef ENGINE_RENDER_GRAPH_H
+#define ENGINE_RENDER_GRAPH_H
+
+class  ShaderProgram;
+class  Camera;
+class  Scene;
+class  Material;
+class  Mesh;
+class  ModelInstance;
+class  ModelInstanceHandle;
+struct Entity;
+class  Viewport;
+namespace Engine::priv {
+    class  RenderGraph;
+    class  RenderGraphContainer;
+    class  RenderModule;
+    struct PublicScene;
+};
+
+#include <serenity/utils/Utils.h>
+#include <serenity/renderer/RendererIncludes.h>
+#include <serenity/model/ModelInstanceHandle.h>
+#include <serenity/resources/Handle.h>
+#include <array>
+
+namespace Engine::priv {
+    class MeshNode final {
+        friend class  RenderGraph;
+        friend struct PublicScene;
+        private:
+            Handle                       mesh = Handle{};
+            std::vector<ModelInstance*>  instanceNodes;
+
+            MeshNode() = delete;
+        public:
+            MeshNode(Handle mesh_)
+                : mesh{ mesh_ }
+            {}
+    };
+    class MaterialNode final {
+        friend class  RenderGraph;
+        friend struct PublicScene;
+        private:
+            Handle                 material = Handle{};
+            std::vector<MeshNode>  meshNodes;
+
+            MaterialNode() = delete;
+        public:
+            MaterialNode(Handle material_)
+                : material{ material_ }
+            {}
+    };
+    class RenderGraph final {
+        friend class  Scene;
+        friend class  RenderGraphContainer;
+        friend struct Engine::priv::PublicScene;
+        private:
+            Handle                        m_ShaderProgram = Handle{};
+            std::vector<MaterialNode>     m_MaterialNodes;
+            std::vector<ModelInstance*>   m_InstancesTotal;
+
+            RenderGraph() = delete;
+
+            void addModelInstanceToPipeline(ModelInstance& modelInstance, ComponentModel&);
+            void removeModelInstanceFromPipeline(ModelInstance& modelInstance);
+        public:
+            RenderGraph(Handle shaderProgram)
+                : m_ShaderProgram{ shaderProgram }
+            {}
+
+            RenderGraph(const RenderGraph& other) = delete;
+            RenderGraph& operator=(const RenderGraph& other) = delete;
+            RenderGraph(RenderGraph&& other) noexcept = default;
+            RenderGraph& operator=(RenderGraph&& other) noexcept = default;
+
+            bool remove_material_node(MaterialNode& materialNode);
+            bool remove_mesh_node(MaterialNode& materialNode, MeshNode& meshNode);
+            bool remove_instance_node(MeshNode& meshNode, ModelInstance& instanceNode);
+
+            void clean(Entity entity);
+            void sort(Camera& camera, SortingMode sortingMode);
+            void sort_cheap(Camera& camera, SortingMode sortingMode);
+
+            void sort_bruteforce(Camera& camera, SortingMode sortingMode);
+            void sort_cheap_bruteforce(Camera& camera, SortingMode sortingMode);
+
+            void render(Engine::priv::RenderModule& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders = true, SortingMode sortingMode = SortingMode::None);
+            void render_bruteforce(Engine::priv::RenderModule& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders = true, SortingMode sortingMode = SortingMode::None);
+            void validate_model_instances_for_rendering(Viewport& viewport, Camera& camera);
+
+    };
+
+    class RenderGraphContainer final {
+        using ContainerType = std::array<std::vector<Engine::priv::RenderGraph>, (size_t)RenderStage::_TOTAL>;
+        private:
+            ContainerType m_RenderGraphs;
+        public:
+            bool hasItemsToRender() const noexcept { 
+                for (const auto& itr : m_RenderGraphs) {
+                    for (const auto& graph : itr) {
+                        if (graph.m_InstancesTotal.size() > 0) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+            inline std::vector<Engine::priv::RenderGraph>& operator[](size_t idx) noexcept { return m_RenderGraphs[idx]; }
+
+            inline ContainerType::iterator begin() noexcept { return m_RenderGraphs.begin(); }
+            inline ContainerType::iterator end() noexcept { return m_RenderGraphs.end(); }
+            inline ContainerType::const_iterator begin() const noexcept { return m_RenderGraphs.begin(); }
+            inline ContainerType::const_iterator end() const noexcept { return m_RenderGraphs.end(); }
+    };
+};
+#endif

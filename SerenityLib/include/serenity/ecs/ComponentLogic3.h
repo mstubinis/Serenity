@@ -9,7 +9,7 @@ namespace luabridge {
 
 #include <serenity/ecs/Entity.h>
 #include <serenity/ecs/ECSSystemConstructorInfo.h>
-#include <serenity/core/engine/lua/Lua.h>
+#include <serenity/lua/Lua.h>
 
 class ComponentLogic3 {
     using c_function = void(*)(const ComponentLogic3*, const float);
@@ -46,7 +46,7 @@ class ComponentLogic3 {
 
         ~ComponentLogic3() = default;
 
-        inline constexpr Entity getOwner() const noexcept { return m_Owner; }
+        [[nodiscard]] inline constexpr Entity getOwner() const noexcept { return m_Owner; }
         void call(const float dt) const noexcept;
 
         inline void setFunctor(c_function&& functor) noexcept { m_Functor.setFunctor(std::move(functor)); }
@@ -57,9 +57,9 @@ class ComponentLogic3 {
         inline void setUserPointer(void* UserPointer) noexcept { m_UserPointer = UserPointer; }
         inline void setUserPointer1(void* UserPointer1) noexcept { m_UserPointer1 = UserPointer1; }
         inline void setUserPointer2(void* UserPointer2) noexcept { m_UserPointer2 = UserPointer2; }
-        inline constexpr void* getUserPointer() const noexcept { return m_UserPointer; }
-        inline constexpr void* getUserPointer1() const noexcept { return m_UserPointer1; }
-        inline constexpr void* getUserPointer2() const noexcept { return m_UserPointer2; }
+        [[nodiscard]] inline constexpr void* getUserPointer() const noexcept { return m_UserPointer; }
+        [[nodiscard]] inline constexpr void* getUserPointer1() const noexcept { return m_UserPointer1; }
+        [[nodiscard]] inline constexpr void* getUserPointer2() const noexcept { return m_UserPointer2; }
 };
 
 class ComponentLogic3_System_CI : public Engine::priv::ECSSystemCI {

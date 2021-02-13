@@ -36,17 +36,11 @@
     <Filter Include="Header Files\Engine\Core\Lights">
       <UniqueIdentifier>{87f883df-0ded-4435-9200-f5f721ebe519}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Engine\Core\Mesh">
-      <UniqueIdentifier>{3aa26ab8-71b5-46ec-8ca5-df1b9827edad}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Engine\Core\Renderer">
       <UniqueIdentifier>{43f28ae7-e27b-493f-b142-808d878c6d2e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Engine\Core\Resources">
       <UniqueIdentifier>{a1f68254-f331-416d-85a5-b927d0d19f98}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Engine\Core\Textures">
-      <UniqueIdentifier>{d788449c-ddc4-45d7-a76f-a9a2cd321539}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Engine\Core\ECS">
       <UniqueIdentifier>{6a44899c-8abd-437c-94e0-6adfc6cc3b03}</UniqueIdentifier>
@@ -56,12 +50,6 @@
     </Filter>
     <Filter Include="Source Files\Engine\Core\Lights">
       <UniqueIdentifier>{4feec44e-fd34-4516-b4f1-491f8d9e2626}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Engine\Core\Mesh">
-      <UniqueIdentifier>{db7575a2-cb82-47ae-bc19-eff8357a4f48}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Engine\Core\Textures">
-      <UniqueIdentifier>{7d91cf80-ec2c-400d-b1c4-c03145667a8e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Engine\Core\Resources">
       <UniqueIdentifier>{546b5c1e-304d-4dd1-a13e-aacd2377169f}</UniqueIdentifier>
@@ -93,12 +81,6 @@
     <Filter Include="Source Files\Engine\Core\Networking">
       <UniqueIdentifier>{98f5d07f-e3e3-4fbf-b145-7d1a39265167}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Engine\Core\Sounds">
-      <UniqueIdentifier>{96c46fe8-ddf2-4662-8dfc-377be43d0fbe}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Engine\Core\Sounds">
-      <UniqueIdentifier>{75ca1937-a399-409c-81e9-ffc6120904d3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Engine\Core\Physics">
       <UniqueIdentifier>{16085c8a-c8b9-4b1e-9bbc-7a13745eb286}</UniqueIdentifier>
     </Filter>
@@ -110,12 +92,6 @@
     </Filter>
     <Filter Include="Source Files\Engine\Core\Threading">
       <UniqueIdentifier>{ee3979f0-7b9e-4557-b850-670c4748fd68}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Engine\Core\Fonts">
-      <UniqueIdentifier>{53017ab2-2812-457c-b4c5-b50ccf64eadb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Engine\Core\Fonts">
-      <UniqueIdentifier>{77f3db76-b623-487a-a2b7-9024dd3cbf3e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Engine\Core\Math">
       <UniqueIdentifier>{ac9a8eaa-c9de-4563-b8c4-871ad4efe60a}</UniqueIdentifier>
@@ -153,12 +129,6 @@
     <Filter Include="Header Files\Engine\Core\Utils">
       <UniqueIdentifier>{9aaf42ce-3977-4276-a952-6380cb19220a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Engine\Core\Materials">
-      <UniqueIdentifier>{d1737e78-3b87-4bf1-bef5-0f202a158950}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Engine\Core\Materials">
-      <UniqueIdentifier>{976b87db-df54-4718-a189-44530fed519b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Engine\Core\Renderer\opengl\glsl">
       <UniqueIdentifier>{3200d464-62a1-472a-8ee9-23b95a5cf0de}</UniqueIdentifier>
     </Filter>
@@ -170,12 +140,6 @@
     </Filter>
     <Filter Include="Source Files\Engine\Core\Renderer\direct3d\hlsl">
       <UniqueIdentifier>{615d3e26-61d4-4286-9ccf-9b064a77d168}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Engine\Core\Shaders">
-      <UniqueIdentifier>{1bfdbb98-556c-493a-83fe-72342f065af6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Engine\Core\Shaders">
-      <UniqueIdentifier>{9ce0f80b-4d37-44a3-864a-230877c0e19b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Engine\Core\Renderer\pipelines">
       <UniqueIdentifier>{095efaf1-5b4d-4232-985b-17f045ef4b1f}</UniqueIdentifier>
@@ -288,61 +252,115 @@
     <Filter Include="Header Files\Engine\Core\Dependencies">
       <UniqueIdentifier>{c2a70715-af41-4fed-afa6-8dafee60184e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Resources\Mesh">
+      <UniqueIdentifier>{49b13bbe-be6d-4d2a-8b15-ed9ad8507c27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Resources\Material">
+      <UniqueIdentifier>{d4b185d0-e49a-4527-b11f-3de3e4ae7a1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Resources\Sound">
+      <UniqueIdentifier>{6545e119-1989-4f53-b848-88b654b0db95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Resources\Texture">
+      <UniqueIdentifier>{42319ccb-b1d7-4891-8ee7-41f374990807}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Resources\Shader">
+      <UniqueIdentifier>{0afaf2d2-05d1-4c24-851a-f8fb8a68e3df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Resources\Mesh">
+      <UniqueIdentifier>{33f0799b-9ad2-472a-8842-3923ec7a5c9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Resources\Material">
+      <UniqueIdentifier>{1e9bebef-87bd-4f38-86f6-220f0d8d0a2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Resources\Shader">
+      <UniqueIdentifier>{1722ad0e-8794-42d6-a91e-ddff1dd7b6c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Resources\Texture">
+      <UniqueIdentifier>{91c8a52b-d51a-4da1-8a57-bdfd223caa73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Resources\Font">
+      <UniqueIdentifier>{b4d1cc51-b3b3-4b22-930b-4dd5f688af32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Resources\Font">
+      <UniqueIdentifier>{8a522d8d-3503-4b3d-959c-f7ac671def7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Resources\Sound">
+      <UniqueIdentifier>{71cb7d63-387a-4ec5-bddd-d4aad3162c1e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\serenity\core\engine\algorithms\MergeSort.cpp">
+    <ClCompile Include="src\serenity\algorithms\MergeSort.cpp">
       <Filter>Source Files\Engine\Core\Algorithms</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\algorithms\RadixSort.cpp">
+    <ClCompile Include="src\serenity\algorithms\RadixSort.cpp">
       <Filter>Source Files\Engine\Core\Algorithms</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\discord\src\achievement_manager.cpp">
-      <Filter>Source Files\Engine\Core\Discord\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\discord\src\activity_manager.cpp">
-      <Filter>Source Files\Engine\Core\Discord\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\discord\src\application_manager.cpp">
-      <Filter>Source Files\Engine\Core\Discord\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\discord\src\core.cpp">
-      <Filter>Source Files\Engine\Core\Discord\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\discord\src\image_manager.cpp">
-      <Filter>Source Files\Engine\Core\Discord\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\discord\src\lobby_manager.cpp">
-      <Filter>Source Files\Engine\Core\Discord\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\discord\src\network_manager.cpp">
-      <Filter>Source Files\Engine\Core\Discord\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\discord\src\overlay_manager.cpp">
-      <Filter>Source Files\Engine\Core\Discord\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\discord\src\relationship_manager.cpp">
-      <Filter>Source Files\Engine\Core\Discord\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\discord\src\storage_manager.cpp">
-      <Filter>Source Files\Engine\Core\Discord\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\discord\src\store_manager.cpp">
-      <Filter>Source Files\Engine\Core\Discord\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\discord\src\types.cpp">
-      <Filter>Source Files\Engine\Core\Discord\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\discord\src\user_manager.cpp">
-      <Filter>Source Files\Engine\Core\Discord\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\discord\src\voice_manager.cpp">
-      <Filter>Source Files\Engine\Core\Discord\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\discord\DiscordActivityEvent.cpp">
+    <ClCompile Include="src\serenity\discord\DiscordActivityEvent.cpp">
       <Filter>Source Files\Engine\Core\Discord</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\discord\DiscordModule.cpp">
+    <ClCompile Include="src\serenity\discord\DiscordModule.cpp">
       <Filter>Source Files\Engine\Core\Discord</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\discord\src\achievement_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\discord\src\activity_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\discord\src\application_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\discord\src\core.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\discord\src\image_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\discord\src\lobby_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\discord\src\network_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\discord\src\overlay_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\discord\src\relationship_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\discord\src\storage_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\discord\src\store_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\discord\src\types.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\discord\src\user_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\discord\src\voice_manager.cpp">
+      <Filter>Source Files\Engine\Core\Discord\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\ECS.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\ECSEntityPool.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\Entity.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\EntityBody.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\EntityRAII.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\EntityRAIIBody.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
     </ClCompile>
     <ClCompile Include="src\serenity\ecs\ComponentBody.cpp">
       <Filter>Source Files\Engine\Core\ECS\Components</Filter>
@@ -368,529 +386,511 @@
     <ClCompile Include="src\serenity\ecs\ComponentName.cpp">
       <Filter>Source Files\Engine\Core\ECS\Components</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\ecs\ECS.cpp">
-      <Filter>Source Files\Engine\Core\ECS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\ECSEntityPool.cpp">
-      <Filter>Source Files\Engine\Core\ECS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\Entity.cpp">
-      <Filter>Source Files\Engine\Core\ECS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\EntityBody.cpp">
-      <Filter>Source Files\Engine\Core\ECS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\EntityRAII.cpp">
-      <Filter>Source Files\Engine\Core\ECS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\EntityRAIIBody.cpp">
-      <Filter>Source Files\Engine\Core\ECS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\events\EventDispatcher.cpp">
+    <ClCompile Include="src\serenity\events\EventDispatcher.cpp">
       <Filter>Source Files\Engine\Core\Events</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\events\EventModule.cpp">
+    <ClCompile Include="src\serenity\events\EventModule.cpp">
       <Filter>Source Files\Engine\Core\Events</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\events\Observer.cpp">
+    <ClCompile Include="src\serenity\events\Observer.cpp">
       <Filter>Source Files\Engine\Core\Events</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\fonts\Font.cpp">
-      <Filter>Source Files\Engine\Core\Fonts</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\input\Joystick\JoystickAxises.cpp">
+    <ClCompile Include="src\serenity\input\Joystick\JoystickAxises.cpp">
       <Filter>Source Files\Engine\Core\Input\Joystick</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\input\Joystick\JoystickModule.cpp">
+    <ClCompile Include="src\serenity\input\Joystick\JoystickModule.cpp">
       <Filter>Source Files\Engine\Core\Input\Joystick</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\input\Keyboard\KeyboardKeys.cpp">
+    <ClCompile Include="src\serenity\input\Keyboard\KeyboardKeys.cpp">
       <Filter>Source Files\Engine\Core\Input\Keyboard</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\input\Keyboard\KeyboardModule.cpp">
+    <ClCompile Include="src\serenity\input\Keyboard\KeyboardModule.cpp">
       <Filter>Source Files\Engine\Core\Input\Keyboard</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\input\Mouse\MouseButtons.cpp">
+    <ClCompile Include="src\serenity\input\Mouse\MouseButtons.cpp">
       <Filter>Source Files\Engine\Core\Input\Mouse</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\input\Mouse\MouseModule.cpp">
+    <ClCompile Include="src\serenity\input\Mouse\MouseModule.cpp">
       <Filter>Source Files\Engine\Core\Input\Mouse</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\lights\DirectionalLight.cpp">
+    <ClCompile Include="src\serenity\lights\DirectionalLight.cpp">
       <Filter>Source Files\Engine\Core\Lights</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\lights\LightProbe.cpp">
+    <ClCompile Include="src\serenity\lights\LightProbe.cpp">
       <Filter>Source Files\Engine\Core\Lights</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\lights\PointLight.cpp">
+    <ClCompile Include="src\serenity\lights\PointLight.cpp">
       <Filter>Source Files\Engine\Core\Lights</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\lights\ProjectionLight.cpp">
+    <ClCompile Include="src\serenity\lights\ProjectionLight.cpp">
       <Filter>Source Files\Engine\Core\Lights</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\lights\RodLight.cpp">
+    <ClCompile Include="src\serenity\lights\RodLight.cpp">
       <Filter>Source Files\Engine\Core\Lights</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\lights\SpotLight.cpp">
+    <ClCompile Include="src\serenity\lights\SpotLight.cpp">
       <Filter>Source Files\Engine\Core\Lights</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\lights\SunLight.cpp">
+    <ClCompile Include="src\serenity\lights\SunLight.cpp">
       <Filter>Source Files\Engine\Core\Lights</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\lua\LuaBinder.cpp">
+    <ClCompile Include="src\serenity\lua\LuaBinder.cpp">
       <Filter>Source Files\Engine\Core\LUA</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\lua\LuaModule.cpp">
+    <ClCompile Include="src\serenity\lua\LuaModule.cpp">
       <Filter>Source Files\Engine\Core\LUA</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\lua\LuaScript.cpp">
+    <ClCompile Include="src\serenity\lua\LuaScript.cpp">
       <Filter>Source Files\Engine\Core\LUA</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\lua\LuaState.cpp">
+    <ClCompile Include="src\serenity\lua\LuaState.cpp">
       <Filter>Source Files\Engine\Core\LUA</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\materials\Material.cpp">
-      <Filter>Source Files\Engine\Core\Materials</Filter>
+    <ClCompile Include="src\serenity\math\Engine_Math.cpp">
+      <Filter>Source Files\Engine\Core\Math</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\materials\MaterialComponent.cpp">
-      <Filter>Source Files\Engine\Core\Materials</Filter>
+    <ClCompile Include="src\serenity\math\MathCompression.cpp">
+      <Filter>Source Files\Engine\Core\Math</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\materials\MaterialLayer.cpp">
-      <Filter>Source Files\Engine\Core\Materials</Filter>
+    <ClCompile Include="src\serenity\math\SimplexNoise.cpp">
+      <Filter>Source Files\Engine\Core\Math</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\materials\MaterialLoader.cpp">
-      <Filter>Source Files\Engine\Core\Materials</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\materials\MaterialRequest.cpp">
-      <Filter>Source Files\Engine\Core\Materials</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\math\shapes\Plane.cpp">
+    <ClCompile Include="src\serenity\math\shapes\Plane.cpp">
       <Filter>Source Files\Engine\Core\Math\shapes</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\math\shapes\Pyramid.cpp">
+    <ClCompile Include="src\serenity\math\shapes\Pyramid.cpp">
       <Filter>Source Files\Engine\Core\Math\shapes</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\math\Engine_Math.cpp">
-      <Filter>Source Files\Engine\Core\Math</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\math\MathCompression.cpp">
-      <Filter>Source Files\Engine\Core\Math</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\math\SimplexNoise.cpp">
-      <Filter>Source Files\Engine\Core\Math</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\mesh\AnimationData.cpp">
-      <Filter>Source Files\Engine\Core\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\mesh\BuiltInMeshes.cpp">
-      <Filter>Source Files\Engine\Core\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\mesh\Mesh.cpp">
-      <Filter>Source Files\Engine\Core\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\mesh\MeshCollisionFactory.cpp">
-      <Filter>Source Files\Engine\Core\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\mesh\MeshLoading.cpp">
-      <Filter>Source Files\Engine\Core\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\mesh\MeshRequest.cpp">
-      <Filter>Source Files\Engine\Core\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\mesh\smsh.cpp">
-      <Filter>Source Files\Engine\Core\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\mesh\VertexData.cpp">
-      <Filter>Source Files\Engine\Core\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\mesh\VertexDataFormat.cpp">
-      <Filter>Source Files\Engine\Core\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\model\ModelInstance.cpp">
+    <ClCompile Include="src\serenity\model\ModelInstance.cpp">
       <Filter>Source Files\Engine\Core\Model</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\model\ModelInstanceAnimation.cpp">
+    <ClCompile Include="src\serenity\model\ModelInstanceAnimation.cpp">
       <Filter>Source Files\Engine\Core\Model</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\model\ModelInstanceHandle.cpp">
+    <ClCompile Include="src\serenity\model\ModelInstanceHandle.cpp">
       <Filter>Source Files\Engine\Core\Model</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\networking\server\Server.cpp">
+    <ClCompile Include="src\serenity\networking\ListenerTCP.cpp">
+      <Filter>Source Files\Engine\Core\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\networking\NetworkingModule.cpp">
+      <Filter>Source Files\Engine\Core\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\networking\Packet.cpp">
+      <Filter>Source Files\Engine\Core\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\networking\SocketManager.cpp">
+      <Filter>Source Files\Engine\Core\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\networking\SocketTCP.cpp">
+      <Filter>Source Files\Engine\Core\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\networking\SocketUDP.cpp">
+      <Filter>Source Files\Engine\Core\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\networking\server\Server.cpp">
       <Filter>Source Files\Engine\Core\Networking\Server</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\networking\server\ServerClient.cpp">
+    <ClCompile Include="src\serenity\networking\server\ServerClient.cpp">
       <Filter>Source Files\Engine\Core\Networking\Server</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\networking\server\ServerClientsContainer.cpp">
+    <ClCompile Include="src\serenity\networking\server\ServerClientsContainer.cpp">
       <Filter>Source Files\Engine\Core\Networking\Server</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\networking\server\ServerThread.cpp">
+    <ClCompile Include="src\serenity\networking\server\ServerThread.cpp">
       <Filter>Source Files\Engine\Core\Networking\Server</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\networking\server\ServerThreadCollection.cpp">
+    <ClCompile Include="src\serenity\networking\server\ServerThreadCollection.cpp">
       <Filter>Source Files\Engine\Core\Networking\Server</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\networking\ListenerTCP.cpp">
-      <Filter>Source Files\Engine\Core\Networking</Filter>
+    <ClCompile Include="src\serenity\renderer\Decal.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\networking\NetworkingModule.cpp">
-      <Filter>Source Files\Engine\Core\Networking</Filter>
+    <ClCompile Include="src\serenity\renderer\FramebufferObject.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\networking\Packet.cpp">
-      <Filter>Source Files\Engine\Core\Networking</Filter>
+    <ClCompile Include="src\serenity\renderer\FullscreenItems.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\networking\SocketManager.cpp">
-      <Filter>Source Files\Engine\Core\Networking</Filter>
+    <ClCompile Include="src\serenity\renderer\GBuffer.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\networking\SocketTCP.cpp">
-      <Filter>Source Files\Engine\Core\Networking</Filter>
+    <ClCompile Include="src\serenity\renderer\GLImageConstants.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\networking\SocketUDP.cpp">
-      <Filter>Source Files\Engine\Core\Networking</Filter>
+    <ClCompile Include="src\serenity\renderer\Renderer.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\physics\Collision.cpp">
-      <Filter>Source Files\Engine\Core\Physics</Filter>
+    <ClCompile Include="src\serenity\renderer\RenderGraph.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\physics\DebugDrawer.cpp">
-      <Filter>Source Files\Engine\Core\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\physics\PhysicsModule.cpp">
-      <Filter>Source Files\Engine\Core\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\physics\PhysicsPipeline.cpp">
-      <Filter>Source Files\Engine\Core\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\glsl\Common.cpp">
-      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\glsl\Compression.cpp">
-      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\glsl\DepthOfFieldCode.cpp">
-      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\glsl\Lighting.cpp">
-      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\glsl\Materials.cpp">
-      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\glsl\SSAOCode.cpp">
-      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\glsl\VersionConversion.cpp">
-      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\Extensions.cpp">
+    <ClCompile Include="src\serenity\renderer\opengl\Extensions.cpp">
       <Filter>Source Files\Engine\Core\Renderer\opengl</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\OpenGL.cpp">
+    <ClCompile Include="src\serenity\renderer\opengl\OpenGL.cpp">
       <Filter>Source Files\Engine\Core\Renderer\opengl</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\State.cpp">
+    <ClCompile Include="src\serenity\renderer\opengl\State.cpp">
       <Filter>Source Files\Engine\Core\Renderer\opengl</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\UniformBufferObject.cpp">
+    <ClCompile Include="src\serenity\renderer\opengl\UniformBufferObject.cpp">
       <Filter>Source Files\Engine\Core\Renderer\opengl</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\particles\Particle.cpp">
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\Common.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\Compression.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\DepthOfFieldCode.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\Lighting.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\Materials.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\SSAOCode.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\VersionConversion.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\renderer\particles\Particle.cpp">
       <Filter>Source Files\Engine\Core\Renderer\particles</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\particles\ParticleEmissionProperties.cpp">
+    <ClCompile Include="src\serenity\renderer\particles\ParticleEmissionProperties.cpp">
       <Filter>Source Files\Engine\Core\Renderer\particles</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\particles\ParticleEmitter.cpp">
+    <ClCompile Include="src\serenity\renderer\particles\ParticleEmitter.cpp">
       <Filter>Source Files\Engine\Core\Renderer\particles</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\particles\ParticleSystem.cpp">
+    <ClCompile Include="src\serenity\renderer\particles\ParticleSystem.cpp">
       <Filter>Source Files\Engine\Core\Renderer\particles</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\pipelines\DeferredPipeline.cpp">
+    <ClCompile Include="src\serenity\renderer\pipelines\DeferredPipeline.cpp">
       <Filter>Source Files\Engine\Core\Renderer\pipelines</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\pipelines\DeferredShadowCasters.cpp">
+    <ClCompile Include="src\serenity\renderer\pipelines\DeferredShadowCasters.cpp">
       <Filter>Source Files\Engine\Core\Renderer\pipelines</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\postprocess\Bloom.cpp">
+    <ClCompile Include="src\serenity\renderer\postprocess\Bloom.cpp">
       <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\postprocess\DepthOfField.cpp">
+    <ClCompile Include="src\serenity\renderer\postprocess\DepthOfField.cpp">
       <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\postprocess\Fog.cpp">
+    <ClCompile Include="src\serenity\renderer\postprocess\Fog.cpp">
       <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\postprocess\FXAA.cpp">
+    <ClCompile Include="src\serenity\renderer\postprocess\FXAA.cpp">
       <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\postprocess\GodRays.cpp">
+    <ClCompile Include="src\serenity\renderer\postprocess\GodRays.cpp">
       <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\postprocess\SMAA.cpp">
+    <ClCompile Include="src\serenity\renderer\postprocess\HDR.cpp">
       <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\postprocess\SSAO.cpp">
+    <ClCompile Include="src\serenity\renderer\postprocess\SMAA.cpp">
       <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\resources\Engine_BuiltInShaders.cpp">
+    <ClCompile Include="src\serenity\renderer\postprocess\SSAO.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\Engine_BuiltInShaders.cpp">
       <Filter>Source Files\Engine\Core\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\resources\Engine_Resources.cpp">
+    <ClCompile Include="src\serenity\resources\Engine_Resources.cpp">
       <Filter>Source Files\Engine\Core\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\resources\Resource.cpp">
+    <ClCompile Include="src\serenity\resources\Handle.cpp">
       <Filter>Source Files\Engine\Core\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\Decal.cpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    <ClCompile Include="src\serenity\resources\Resource.cpp">
+      <Filter>Source Files\Engine\Core\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\FramebufferObject.cpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\FullscreenItems.cpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\GBuffer.cpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\GLImageConstants.cpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\Renderer.cpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\RenderGraph.cpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\scene\Camera.cpp">
+    <ClCompile Include="src\serenity\scene\Camera.cpp">
       <Filter>Source Files\Engine\Core\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\scene\Scene.cpp">
+    <ClCompile Include="src\serenity\scene\Scene.cpp">
       <Filter>Source Files\Engine\Core\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\scene\SceneOptions.cpp">
+    <ClCompile Include="src\serenity\scene\SceneOptions.cpp">
       <Filter>Source Files\Engine\Core\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\scene\Skybox.cpp">
+    <ClCompile Include="src\serenity\scene\Skybox.cpp">
       <Filter>Source Files\Engine\Core\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\scene\Viewport.cpp">
+    <ClCompile Include="src\serenity\scene\Viewport.cpp">
       <Filter>Source Files\Engine\Core\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\shaders\Shader.cpp">
-      <Filter>Source Files\Engine\Core\Shaders</Filter>
+    <ClCompile Include="src\serenity\system\Engine.cpp">
+      <Filter>Source Files\Engine\Core\System</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\shaders\ShaderHelper.cpp">
-      <Filter>Source Files\Engine\Core\Shaders</Filter>
+    <ClCompile Include="src\serenity\system\EngineEventHandler.cpp">
+      <Filter>Source Files\Engine\Core\System</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\shaders\ShaderProgram.cpp">
-      <Filter>Source Files\Engine\Core\Shaders</Filter>
+    <ClCompile Include="src\serenity\system\EngineMisc.cpp">
+      <Filter>Source Files\Engine\Core\System</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\sounds\SoundData.cpp">
-      <Filter>Source Files\Engine\Core\Sounds</Filter>
+    <ClCompile Include="src\serenity\system\window\Window.cpp">
+      <Filter>Source Files\Engine\Core\System\Window</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\sounds\SoundEffect.cpp">
-      <Filter>Source Files\Engine\Core\Sounds</Filter>
+    <ClCompile Include="src\serenity\system\window\WindowData.cpp">
+      <Filter>Source Files\Engine\Core\System\Window</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\sounds\SoundModule.cpp">
-      <Filter>Source Files\Engine\Core\Sounds</Filter>
+    <ClCompile Include="src\serenity\system\window\WindowThread.cpp">
+      <Filter>Source Files\Engine\Core\System\Window</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\sounds\SoundMusic.cpp">
-      <Filter>Source Files\Engine\Core\Sounds</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\sounds\SoundQueue.cpp">
-      <Filter>Source Files\Engine\Core\Sounds</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\system\cursor\Cursor.cpp">
+    <ClCompile Include="src\serenity\system\cursor\Cursor.cpp">
       <Filter>Source Files\Engine\Core\System\Cursor</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\system\window\Window.cpp">
-      <Filter>Source Files\Engine\Core\System\Window</Filter>
+    <ClCompile Include="src\serenity\threading\ThreadingHelpers.cpp">
+      <Filter>Source Files\Engine\Core\Threading</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\system\window\WindowData.cpp">
-      <Filter>Source Files\Engine\Core\System\Window</Filter>
+    <ClCompile Include="src\serenity\threading\ThreadingModule.cpp">
+      <Filter>Source Files\Engine\Core\Threading</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\system\window\WindowThread.cpp">
-      <Filter>Source Files\Engine\Core\System\Window</Filter>
+    <ClCompile Include="src\serenity\threading\ThreadPool.cpp">
+      <Filter>Source Files\Engine\Core\Threading</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\tests\main.cpp">
+    <ClCompile Include="src\serenity\threading\WorkerThreadContainer.cpp">
+      <Filter>Source Files\Engine\Core\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\tests\main.cpp">
       <Filter>Source Files\Engine\Core\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\tests\TestGLTypes.cpp">
+    <ClCompile Include="src\serenity\tests\TestGLTypes.cpp">
       <Filter>Source Files\Engine\Core\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\tests\TestTextureTypes.cpp">
+    <ClCompile Include="src\serenity\tests\TestTextureTypes.cpp">
       <Filter>Source Files\Engine\Core\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\textures\Texture.cpp">
-      <Filter>Source Files\Engine\Core\Textures</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\textures\TextureIncludes.cpp">
-      <Filter>Source Files\Engine\Core\Textures</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\textures\TextureLoader.cpp">
-      <Filter>Source Files\Engine\Core\Textures</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\textures\TextureRequest.cpp">
-      <Filter>Source Files\Engine\Core\Textures</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\threading\ThreadingHelpers.cpp">
-      <Filter>Source Files\Engine\Core\Threading</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\threading\ThreadingModule.cpp">
-      <Filter>Source Files\Engine\Core\Threading</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\threading\ThreadPool.cpp">
-      <Filter>Source Files\Engine\Core\Threading</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\threading\WorkerThreadContainer.cpp">
-      <Filter>Source Files\Engine\Core\Threading</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\utils\Engine_Debugging.cpp">
+    <ClCompile Include="src\serenity\utils\Engine_Debugging.cpp">
       <Filter>Source Files\Engine\Core\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\Constraint.cpp">
+    <ClCompile Include="src\serenity\Constraint.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\Terrain.cpp">
+    <ClCompile Include="src\serenity\Terrain.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\system\Engine.cpp">
-      <Filter>Source Files\Engine\Core\System</Filter>
+    <ClCompile Include="src\serenity\resources\font\Font.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Font</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\system\EngineEventHandler.cpp">
-      <Filter>Source Files\Engine\Core\System</Filter>
+    <ClCompile Include="src\serenity\resources\material\Material.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Material</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\system\EngineMisc.cpp">
-      <Filter>Source Files\Engine\Core\System</Filter>
+    <ClCompile Include="src\serenity\resources\material\MaterialComponent.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Material</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\resources\Handle.cpp">
-      <Filter>Source Files\Engine\Core\Resources</Filter>
+    <ClCompile Include="src\serenity\resources\material\MaterialLayer.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Material</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\renderer\postprocess\HDR.cpp">
-      <Filter>Source Files\Engine\Core\Renderer\postprocess</Filter>
+    <ClCompile Include="src\serenity\resources\material\MaterialLoader.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\material\MaterialRequest.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\mesh\AnimationData.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\mesh\BuiltInMeshes.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\mesh\Mesh.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\mesh\MeshCollisionFactory.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\mesh\MeshLoading.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\mesh\MeshRequest.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\mesh\smsh.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\mesh\VertexData.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\mesh\VertexDataFormat.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\shader\Shader.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\shader\ShaderHelper.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\shader\ShaderProgram.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\sound\SoundData.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\sound\SoundEffect.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\sound\SoundModule.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\sound\SoundMusic.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\sound\SoundQueue.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\texture\Texture.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\texture\TextureIncludes.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\texture\TextureLoader.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\texture\TextureRequest.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\physics\Collision.cpp">
+      <Filter>Source Files\Engine\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\physics\DebugDrawer.cpp">
+      <Filter>Source Files\Engine\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\physics\PhysicsModule.cpp">
+      <Filter>Source Files\Engine\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\physics\PhysicsPipeline.cpp">
+      <Filter>Source Files\Engine\Core\Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\serenity\core\engine\algorithms\MergeSort.h">
+    <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\Engine_Resources.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\Handle.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\IResourceVector.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\Resource.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\ResourceModule.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\ResourcesIncludes.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\ResourceVector.h">
+      <Filter>Header Files\Engine\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\algorithms\MergeSort.h">
       <Filter>Header Files\Engine\Core\Algorithms</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\algorithms\RadixSort.h">
+    <ClInclude Include="include\serenity\algorithms\RadixSort.h">
       <Filter>Header Files\Engine\Core\Algorithms</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\containers\BST.h">
+    <ClInclude Include="include\serenity\containers\BST.h">
       <Filter>Header Files\Engine\Core\Containers</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\containers\Freelist.h">
+    <ClInclude Include="include\serenity\containers\CircularBuffer.h">
       <Filter>Header Files\Engine\Core\Containers</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\containers\Heap.h">
+    <ClInclude Include="include\serenity\containers\Freelist.h">
       <Filter>Header Files\Engine\Core\Containers</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\containers\PartialArray.h">
+    <ClInclude Include="include\serenity\containers\Heap.h">
       <Filter>Header Files\Engine\Core\Containers</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\containers\PartialVectorPOD.h">
+    <ClInclude Include="include\serenity\containers\PartialArray.h">
       <Filter>Header Files\Engine\Core\Containers</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\containers\Queue_ts.h">
+    <ClInclude Include="include\serenity\containers\PartialVectorPOD.h">
       <Filter>Header Files\Engine\Core\Containers</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\containers\SparseSet.h">
+    <ClInclude Include="include\serenity\containers\Queue_ts.h">
       <Filter>Header Files\Engine\Core\Containers</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\containers\TypeRegistry.h">
+    <ClInclude Include="include\serenity\containers\SparseSet.h">
       <Filter>Header Files\Engine\Core\Containers</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\dependencies\glm.h">
+    <ClInclude Include="include\serenity\containers\TypeRegistry.h">
+      <Filter>Header Files\Engine\Core\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\dependencies\glm.h">
       <Filter>Header Files\Engine\Core\Dependencies</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\src\achievement_manager.h">
-      <Filter>Header Files\Engine\Core\Discord\src</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\src\activity_manager.h">
-      <Filter>Header Files\Engine\Core\Discord\src</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\src\application_manager.h">
-      <Filter>Header Files\Engine\Core\Discord\src</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\src\core.h">
-      <Filter>Header Files\Engine\Core\Discord\src</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\src\discord.h">
-      <Filter>Header Files\Engine\Core\Discord\src</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\src\event.h">
-      <Filter>Header Files\Engine\Core\Discord\src</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\src\ffi.h">
-      <Filter>Header Files\Engine\Core\Discord\src</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\src\image_manager.h">
-      <Filter>Header Files\Engine\Core\Discord\src</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\src\lobby_manager.h">
-      <Filter>Header Files\Engine\Core\Discord\src</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\src\network_manager.h">
-      <Filter>Header Files\Engine\Core\Discord\src</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\src\overlay_manager.h">
-      <Filter>Header Files\Engine\Core\Discord\src</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\src\relationship_manager.h">
-      <Filter>Header Files\Engine\Core\Discord\src</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\src\storage_manager.h">
-      <Filter>Header Files\Engine\Core\Discord\src</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\src\store_manager.h">
-      <Filter>Header Files\Engine\Core\Discord\src</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\src\types.h">
-      <Filter>Header Files\Engine\Core\Discord\src</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\src\user_manager.h">
-      <Filter>Header Files\Engine\Core\Discord\src</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\src\voice_manager.h">
-      <Filter>Header Files\Engine\Core\Discord\src</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\Discord.h">
+    <ClInclude Include="include\serenity\discord\Discord.h">
       <Filter>Header Files\Engine\Core\Discord</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\DiscordActivityEvent.h">
+    <ClInclude Include="include\serenity\discord\DiscordActivityEvent.h">
       <Filter>Header Files\Engine\Core\Discord</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\discord\DiscordModule.h">
+    <ClInclude Include="include\serenity\discord\DiscordModule.h">
       <Filter>Header Files\Engine\Core\Discord</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ComponentBody.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    <ClInclude Include="include\serenity\discord\src\achievement_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ComponentCamera.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    <ClInclude Include="include\serenity\discord\src\activity_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ComponentLogic.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    <ClInclude Include="include\serenity\discord\src\application_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ComponentLogic1.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    <ClInclude Include="include\serenity\discord\src\core.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ComponentLogic2.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    <ClInclude Include="include\serenity\discord\src\discord.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ComponentLogic3.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    <ClInclude Include="include\serenity\discord\src\event.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ComponentModel.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    <ClInclude Include="include\serenity\discord\src\ffi.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ComponentName.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    <ClInclude Include="include\serenity\discord\src\image_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\ecs\Components.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    <ClInclude Include="include\serenity\discord\src\lobby_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\discord\src\network_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\discord\src\overlay_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\discord\src\relationship_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\discord\src\storage_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\discord\src\store_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\discord\src\types.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\discord\src\user_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\discord\src\voice_manager.h">
+      <Filter>Header Files\Engine\Core\Discord\src</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\ecs\ECS.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
@@ -922,527 +922,530 @@
     <ClInclude Include="include\serenity\ecs\EntityRAIIBody.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\events\Event.h">
+    <ClInclude Include="include\serenity\ecs\ComponentBody.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\ComponentCamera.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\ComponentLogic.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\ComponentLogic1.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\ComponentLogic2.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\ComponentLogic3.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\ComponentModel.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\ComponentName.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\Components.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\events\Event.h">
       <Filter>Header Files\Engine\Core\Events</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\events\EventDispatcher.h">
+    <ClInclude Include="include\serenity\events\EventDispatcher.h">
       <Filter>Header Files\Engine\Core\Events</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\events\EventIncludes.h">
+    <ClInclude Include="include\serenity\events\EventIncludes.h">
       <Filter>Header Files\Engine\Core\Events</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\events\EventModule.h">
+    <ClInclude Include="include\serenity\events\EventModule.h">
       <Filter>Header Files\Engine\Core\Events</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\events\Observer.h">
+    <ClInclude Include="include\serenity\events\Observer.h">
       <Filter>Header Files\Engine\Core\Events</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\fonts\Font.h">
-      <Filter>Header Files\Engine\Core\Fonts</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\fonts\FontIncludes.h">
-      <Filter>Header Files\Engine\Core\Fonts</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\input\Joystick\JoystickAxises.h">
+    <ClInclude Include="include\serenity\input\Joystick\JoystickAxises.h">
       <Filter>Header Files\Engine\Core\Input\Joystick</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\input\Joystick\JoystickModule.h">
+    <ClInclude Include="include\serenity\input\Joystick\JoystickModule.h">
       <Filter>Header Files\Engine\Core\Input\Joystick</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\input\Keyboard\KeyboardKeys.h">
+    <ClInclude Include="include\serenity\input\Keyboard\KeyboardKeys.h">
       <Filter>Header Files\Engine\Core\Input\Keyboard</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\input\Keyboard\KeyboardModule.h">
+    <ClInclude Include="include\serenity\input\Keyboard\KeyboardModule.h">
       <Filter>Header Files\Engine\Core\Input\Keyboard</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\input\Mouse\MouseButtons.h">
+    <ClInclude Include="include\serenity\input\Mouse\MouseButtons.h">
       <Filter>Header Files\Engine\Core\Input\Mouse</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\input\Mouse\MouseModule.h">
+    <ClInclude Include="include\serenity\input\Mouse\MouseModule.h">
       <Filter>Header Files\Engine\Core\Input\Mouse</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\lights\DirectionalLight.h">
+    <ClInclude Include="include\serenity\lights\DirectionalLight.h">
       <Filter>Header Files\Engine\Core\Lights</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\lights\LightIncludes.h">
+    <ClInclude Include="include\serenity\lights\LightIncludes.h">
       <Filter>Header Files\Engine\Core\Lights</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\lights\LightProbe.h">
+    <ClInclude Include="include\serenity\lights\LightProbe.h">
       <Filter>Header Files\Engine\Core\Lights</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\lights\Lights.h">
+    <ClInclude Include="include\serenity\lights\Lights.h">
       <Filter>Header Files\Engine\Core\Lights</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\lights\PointLight.h">
+    <ClInclude Include="include\serenity\lights\PointLight.h">
       <Filter>Header Files\Engine\Core\Lights</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\lights\ProjectionLight.h">
+    <ClInclude Include="include\serenity\lights\ProjectionLight.h">
       <Filter>Header Files\Engine\Core\Lights</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\lights\RodLight.h">
+    <ClInclude Include="include\serenity\lights\RodLight.h">
       <Filter>Header Files\Engine\Core\Lights</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\lights\SpotLight.h">
+    <ClInclude Include="include\serenity\lights\SpotLight.h">
       <Filter>Header Files\Engine\Core\Lights</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\lights\SunLight.h">
+    <ClInclude Include="include\serenity\lights\SunLight.h">
       <Filter>Header Files\Engine\Core\Lights</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\lua\Lua.h">
+    <ClInclude Include="include\serenity\lua\Lua.h">
       <Filter>Header Files\Engine\Core\LUA</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\lua\LuaBinder.h">
+    <ClInclude Include="include\serenity\lua\LuaBinder.h">
       <Filter>Header Files\Engine\Core\LUA</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\lua\LuaIncludes.h">
+    <ClInclude Include="include\serenity\lua\LuaIncludes.h">
       <Filter>Header Files\Engine\Core\LUA</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\lua\LuaModule.h">
+    <ClInclude Include="include\serenity\lua\LuaModule.h">
       <Filter>Header Files\Engine\Core\LUA</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\lua\LuaScript.h">
+    <ClInclude Include="include\serenity\lua\LuaScript.h">
       <Filter>Header Files\Engine\Core\LUA</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\lua\LuaState.h">
+    <ClInclude Include="include\serenity\lua\LuaState.h">
       <Filter>Header Files\Engine\Core\LUA</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\materials\Material.h">
-      <Filter>Header Files\Engine\Core\Materials</Filter>
+    <ClInclude Include="include\serenity\math\BigNumbers.h">
+      <Filter>Header Files\Engine\Core\Math</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\materials\MaterialComponent.h">
-      <Filter>Header Files\Engine\Core\Materials</Filter>
+    <ClInclude Include="include\serenity\math\Engine_Math.h">
+      <Filter>Header Files\Engine\Core\Math</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\materials\MaterialEnums.h">
-      <Filter>Header Files\Engine\Core\Materials</Filter>
+    <ClInclude Include="include\serenity\math\MathCompression.h">
+      <Filter>Header Files\Engine\Core\Math</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\materials\MaterialLayer.h">
-      <Filter>Header Files\Engine\Core\Materials</Filter>
+    <ClInclude Include="include\serenity\math\SimplexNoise.h">
+      <Filter>Header Files\Engine\Core\Math</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\materials\MaterialLoader.h">
-      <Filter>Header Files\Engine\Core\Materials</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\materials\MaterialRequest.h">
-      <Filter>Header Files\Engine\Core\Materials</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\math\shapes\Plane.h">
+    <ClInclude Include="include\serenity\math\shapes\Plane.h">
       <Filter>Header Files\Engine\Core\Math\shapes</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\math\shapes\Pyramid.h">
+    <ClInclude Include="include\serenity\math\shapes\Pyramid.h">
       <Filter>Header Files\Engine\Core\Math\shapes</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\math\BigNumbers.h">
-      <Filter>Header Files\Engine\Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\math\Engine_Math.h">
-      <Filter>Header Files\Engine\Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\math\MathCompression.h">
-      <Filter>Header Files\Engine\Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\math\SimplexNoise.h">
-      <Filter>Header Files\Engine\Core\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\mesh\AnimationData.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\mesh\AnimationIncludes.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\mesh\BuiltInMeshes.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\mesh\Mesh.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\mesh\MeshCollisionFactory.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\mesh\MeshImportedData.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\mesh\MeshIncludes.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\mesh\MeshLoading.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\mesh\MeshRequest.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\mesh\Skeleton.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\mesh\smsh.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\mesh\VertexAttributeInfo.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\mesh\VertexBufferObject.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\mesh\VertexData.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\mesh\VertexDataFormat.h">
-      <Filter>Header Files\Engine\Core\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\model\ModelInstance.h">
+    <ClInclude Include="include\serenity\model\ModelInstance.h">
       <Filter>Header Files\Engine\Core\Model</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\model\ModelInstanceAnimation.h">
+    <ClInclude Include="include\serenity\model\ModelInstanceAnimation.h">
       <Filter>Header Files\Engine\Core\Model</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\model\ModelInstanceHandle.h">
+    <ClInclude Include="include\serenity\model\ModelInstanceHandle.h">
       <Filter>Header Files\Engine\Core\Model</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\model\ModelInstanceIncludes.h">
+    <ClInclude Include="include\serenity\model\ModelInstanceIncludes.h">
       <Filter>Header Files\Engine\Core\Model</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\networking\server\Server.h">
+    <ClInclude Include="include\serenity\networking\ISocket.h">
+      <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\networking\ListenerTCP.h">
+      <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\networking\Networking.h">
+      <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\networking\NetworkingIncludes.h">
+      <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\networking\NetworkingModule.h">
+      <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\networking\Packet.h">
+      <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\networking\SocketManager.h">
+      <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\networking\SocketTCP.h">
+      <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\networking\SocketUDP.h">
+      <Filter>Header Files\Engine\Core\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\networking\server\Server.h">
       <Filter>Header Files\Engine\Core\Networking\Server</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\networking\server\ServerClient.h">
+    <ClInclude Include="include\serenity\networking\server\ServerClient.h">
       <Filter>Header Files\Engine\Core\Networking\Server</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\networking\server\ServerClientsContainer.h">
+    <ClInclude Include="include\serenity\networking\server\ServerClientsContainer.h">
       <Filter>Header Files\Engine\Core\Networking\Server</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\networking\server\ServerThread.h">
+    <ClInclude Include="include\serenity\networking\server\ServerThread.h">
       <Filter>Header Files\Engine\Core\Networking\Server</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\networking\server\ServerThreadCollection.h">
+    <ClInclude Include="include\serenity\networking\server\ServerThreadCollection.h">
       <Filter>Header Files\Engine\Core\Networking\Server</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\networking\ISocket.h">
-      <Filter>Header Files\Engine\Core\Networking</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\networking\ListenerTCP.h">
-      <Filter>Header Files\Engine\Core\Networking</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\networking\Networking.h">
-      <Filter>Header Files\Engine\Core\Networking</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\networking\NetworkingIncludes.h">
-      <Filter>Header Files\Engine\Core\Networking</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\networking\NetworkingModule.h">
-      <Filter>Header Files\Engine\Core\Networking</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\networking\Packet.h">
-      <Filter>Header Files\Engine\Core\Networking</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\networking\SocketManager.h">
-      <Filter>Header Files\Engine\Core\Networking</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\networking\SocketTCP.h">
-      <Filter>Header Files\Engine\Core\Networking</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\networking\SocketUDP.h">
-      <Filter>Header Files\Engine\Core\Networking</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\physics\Collision.h">
+    <ClInclude Include="include\serenity\physics\Collision.h">
       <Filter>Header Files\Engine\Core\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\physics\DebugDrawer.h">
+    <ClInclude Include="include\serenity\physics\DebugDrawer.h">
       <Filter>Header Files\Engine\Core\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\physics\PhysicsIncludes.h">
+    <ClInclude Include="include\serenity\physics\PhysicsIncludes.h">
       <Filter>Header Files\Engine\Core\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\physics\PhysicsModule.h">
+    <ClInclude Include="include\serenity\physics\PhysicsModule.h">
       <Filter>Header Files\Engine\Core\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\physics\PhysicsPipeline.h">
+    <ClInclude Include="include\serenity\physics\PhysicsPipeline.h">
       <Filter>Header Files\Engine\Core\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\glsl\Common.h">
-      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    <ClInclude Include="include\serenity\renderer\Decal.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\glsl\Compression.h">
-      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    <ClInclude Include="include\serenity\renderer\FramebufferObject.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\glsl\DepthOfFieldCode.h">
-      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    <ClInclude Include="include\serenity\renderer\FullscreenItems.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\glsl\Lighting.h">
-      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    <ClInclude Include="include\serenity\renderer\GBuffer.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\glsl\Materials.h">
-      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    <ClInclude Include="include\serenity\renderer\GLImageConstants.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\glsl\SSAOCode.h">
-      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    <ClInclude Include="include\serenity\renderer\Renderer.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\glsl\VersionConversion.h">
-      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    <ClInclude Include="include\serenity\renderer\RendererIncludes.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\Extensions.h">
+    <ClInclude Include="include\serenity\renderer\RendererState.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\RenderGraph.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\SMAA_LUT.h">
+      <Filter>Header Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\opengl\Extensions.h">
       <Filter>Header Files\Engine\Core\Renderer\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\OpenGL.h">
+    <ClInclude Include="include\serenity\renderer\opengl\OpenGL.h">
       <Filter>Header Files\Engine\Core\Renderer\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\State.h">
+    <ClInclude Include="include\serenity\renderer\opengl\State.h">
       <Filter>Header Files\Engine\Core\Renderer\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\UniformBufferObject.h">
+    <ClInclude Include="include\serenity\renderer\opengl\UniformBufferObject.h">
       <Filter>Header Files\Engine\Core\Renderer\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\particles\Particle.h">
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\Common.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\Compression.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\DepthOfFieldCode.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\Lighting.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\Materials.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\SSAOCode.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\VersionConversion.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\particles\Particle.h">
       <Filter>Header Files\Engine\Core\Renderer\particles</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\particles\ParticleEmissionProperties.h">
+    <ClInclude Include="include\serenity\renderer\particles\ParticleEmissionProperties.h">
       <Filter>Header Files\Engine\Core\Renderer\particles</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\particles\ParticleEmitter.h">
+    <ClInclude Include="include\serenity\renderer\particles\ParticleEmitter.h">
       <Filter>Header Files\Engine\Core\Renderer\particles</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\particles\ParticleSystem.h">
+    <ClInclude Include="include\serenity\renderer\particles\ParticleSystem.h">
       <Filter>Header Files\Engine\Core\Renderer\particles</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\pipelines\DeferredPipeline.h">
+    <ClInclude Include="include\serenity\renderer\pipelines\DeferredPipeline.h">
       <Filter>Header Files\Engine\Core\Renderer\pipelines</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\pipelines\DeferredShadowCasters.h">
+    <ClInclude Include="include\serenity\renderer\pipelines\DeferredShadowCasters.h">
       <Filter>Header Files\Engine\Core\Renderer\pipelines</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\pipelines\IRenderingPipeline.h">
+    <ClInclude Include="include\serenity\renderer\pipelines\IRenderingPipeline.h">
       <Filter>Header Files\Engine\Core\Renderer\pipelines</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\postprocess\Bloom.h">
+    <ClInclude Include="include\serenity\renderer\postprocess\Bloom.h">
       <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\postprocess\DepthOfField.h">
+    <ClInclude Include="include\serenity\renderer\postprocess\DepthOfField.h">
       <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\postprocess\Fog.h">
+    <ClInclude Include="include\serenity\renderer\postprocess\Fog.h">
       <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\postprocess\FXAA.h">
+    <ClInclude Include="include\serenity\renderer\postprocess\FXAA.h">
       <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\postprocess\GodRays.h">
+    <ClInclude Include="include\serenity\renderer\postprocess\GodRays.h">
       <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\postprocess\HDR.h">
+    <ClInclude Include="include\serenity\renderer\postprocess\HDR.h">
       <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\postprocess\SMAA.h">
+    <ClInclude Include="include\serenity\renderer\postprocess\SMAA.h">
       <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\postprocess\SSAO.h">
+    <ClInclude Include="include\serenity\renderer\postprocess\SSAO.h">
       <Filter>Header Files\Engine\Core\Renderer\postprocess</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\Decal.h">
-      <Filter>Header Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\FramebufferObject.h">
-      <Filter>Header Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\FullscreenItems.h">
-      <Filter>Header Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\GBuffer.h">
-      <Filter>Header Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\GLImageConstants.h">
-      <Filter>Header Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\Renderer.h">
-      <Filter>Header Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\RendererIncludes.h">
-      <Filter>Header Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\RendererState.h">
-      <Filter>Header Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\RenderGraph.h">
-      <Filter>Header Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\renderer\SMAA_LUT.h">
-      <Filter>Header Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\resources\Engine_BuiltInShaders.h">
-      <Filter>Header Files\Engine\Core\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\resources\Engine_Resources.h">
-      <Filter>Header Files\Engine\Core\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\resources\Handle.h">
-      <Filter>Header Files\Engine\Core\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\resources\IResourceVector.h">
-      <Filter>Header Files\Engine\Core\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\resources\Resource.h">
-      <Filter>Header Files\Engine\Core\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\resources\ResourceModule.h">
-      <Filter>Header Files\Engine\Core\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\resources\ResourcesIncludes.h">
-      <Filter>Header Files\Engine\Core\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\resources\ResourceVector.h">
-      <Filter>Header Files\Engine\Core\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\scene\Camera.h">
+    <ClInclude Include="include\serenity\scene\Camera.h">
       <Filter>Header Files\Engine\Core\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\scene\LightContainer.h">
+    <ClInclude Include="include\serenity\scene\LightContainer.h">
       <Filter>Header Files\Engine\Core\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\scene\LightsModule.h">
+    <ClInclude Include="include\serenity\scene\LightsModule.h">
       <Filter>Header Files\Engine\Core\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\scene\Scene.h">
+    <ClInclude Include="include\serenity\scene\Scene.h">
       <Filter>Header Files\Engine\Core\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\scene\SceneOptions.h">
+    <ClInclude Include="include\serenity\scene\SceneOptions.h">
       <Filter>Header Files\Engine\Core\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\scene\Skybox.h">
+    <ClInclude Include="include\serenity\scene\Skybox.h">
       <Filter>Header Files\Engine\Core\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\scene\Viewport.h">
+    <ClInclude Include="include\serenity\scene\Viewport.h">
       <Filter>Header Files\Engine\Core\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\scene\ViewportIncludes.h">
+    <ClInclude Include="include\serenity\scene\ViewportIncludes.h">
       <Filter>Header Files\Engine\Core\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\shaders\Shader.h">
-      <Filter>Header Files\Engine\Core\Shaders</Filter>
+    <ClInclude Include="include\serenity\system\Engine.h">
+      <Filter>Header Files\Engine\Core\System</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\shaders\ShaderHelper.h">
-      <Filter>Header Files\Engine\Core\Shaders</Filter>
+    <ClInclude Include="include\serenity\system\EngineEventHandler.h">
+      <Filter>Header Files\Engine\Core\System</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\shaders\ShaderIncludes.h">
-      <Filter>Header Files\Engine\Core\Shaders</Filter>
+    <ClInclude Include="include\serenity\system\EngineGameFunctions.h">
+      <Filter>Header Files\Engine\Core\System</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\shaders\ShaderProgram.h">
-      <Filter>Header Files\Engine\Core\Shaders</Filter>
+    <ClInclude Include="include\serenity\system\EngineMisc.h">
+      <Filter>Header Files\Engine\Core\System</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\sounds\SoundBaseClass.h">
-      <Filter>Header Files\Engine\Core\Sounds</Filter>
+    <ClInclude Include="include\serenity\system\EngineOptions.h">
+      <Filter>Header Files\Engine\Core\System</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\sounds\SoundData.h">
-      <Filter>Header Files\Engine\Core\Sounds</Filter>
+    <ClInclude Include="include\serenity\system\Macros.h">
+      <Filter>Header Files\Engine\Core\System</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\sounds\SoundEffect.h">
-      <Filter>Header Files\Engine\Core\Sounds</Filter>
+    <ClInclude Include="include\serenity\system\TypeDefs.h">
+      <Filter>Header Files\Engine\Core\System</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\sounds\SoundModule.h">
-      <Filter>Header Files\Engine\Core\Sounds</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\sounds\SoundMusic.h">
-      <Filter>Header Files\Engine\Core\Sounds</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\sounds\SoundQueue.h">
-      <Filter>Header Files\Engine\Core\Sounds</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\sounds\Sounds.h">
-      <Filter>Header Files\Engine\Core\Sounds</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\system\cursor\Cursor.h">
+    <ClInclude Include="include\serenity\system\cursor\Cursor.h">
       <Filter>Header Files\Engine\Core\System\Cursor</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\system\window\Window.h">
+    <ClInclude Include="include\serenity\system\window\Window.h">
       <Filter>Header Files\Engine\Core\System\Window</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\system\window\WindowData.h">
+    <ClInclude Include="include\serenity\system\window\WindowData.h">
       <Filter>Header Files\Engine\Core\System\Window</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\system\window\WindowIncludes.h">
+    <ClInclude Include="include\serenity\system\window\WindowIncludes.h">
       <Filter>Header Files\Engine\Core\System\Window</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\system\window\WindowThread.h">
+    <ClInclude Include="include\serenity\system\window\WindowThread.h">
       <Filter>Header Files\Engine\Core\System\Window</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\system\Engine.h">
-      <Filter>Header Files\Engine\Core\System</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\system\EngineEventHandler.h">
-      <Filter>Header Files\Engine\Core\System</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\system\EngineGameFunctions.h">
-      <Filter>Header Files\Engine\Core\System</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\system\EngineMisc.h">
-      <Filter>Header Files\Engine\Core\System</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\system\EngineOptions.h">
-      <Filter>Header Files\Engine\Core\System</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\system\Macros.h">
-      <Filter>Header Files\Engine\Core\System</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\system\TypeDefs.h">
-      <Filter>Header Files\Engine\Core\System</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\textures\DDS.h">
-      <Filter>Header Files\Engine\Core\Textures</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\textures\Texture.h">
-      <Filter>Header Files\Engine\Core\Textures</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\textures\TextureIncludes.h">
-      <Filter>Header Files\Engine\Core\Textures</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\textures\TextureLoader.h">
-      <Filter>Header Files\Engine\Core\Textures</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\textures\TextureRequest.h">
-      <Filter>Header Files\Engine\Core\Textures</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\threading\ThreadingHelpers.h">
+    <ClInclude Include="include\serenity\threading\ThreadingHelpers.h">
       <Filter>Header Files\Engine\Core\Threading</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\threading\ThreadingModule.h">
+    <ClInclude Include="include\serenity\threading\ThreadingModule.h">
       <Filter>Header Files\Engine\Core\Threading</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\threading\ThreadPool.h">
+    <ClInclude Include="include\serenity\threading\ThreadPool.h">
       <Filter>Header Files\Engine\Core\Threading</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\threading\WorkerThreadContainer.h">
+    <ClInclude Include="include\serenity\threading\WorkerThreadContainer.h">
       <Filter>Header Files\Engine\Core\Threading</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\types\ColorVector.h">
+    <ClInclude Include="include\serenity\types\ColorVector.h">
       <Filter>Header Files\Engine\Core\Types</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\types\Flag.h">
+    <ClInclude Include="include\serenity\types\Flag.h">
       <Filter>Header Files\Engine\Core\Types</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\types\SmallMap.h">
+    <ClInclude Include="include\serenity\types\SmallMap.h">
       <Filter>Header Files\Engine\Core\Types</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\types\StaticString.h">
+    <ClInclude Include="include\serenity\types\StaticString.h">
       <Filter>Header Files\Engine\Core\Types</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\types\Types.h">
+    <ClInclude Include="include\serenity\types\Types.h">
       <Filter>Header Files\Engine\Core\Types</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\types\ViewPointer.h">
+    <ClInclude Include="include\serenity\types\ViewPointer.h">
       <Filter>Header Files\Engine\Core\Types</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\utils\BlockProfiler.h">
+    <ClInclude Include="include\serenity\utils\BlockProfiler.h">
       <Filter>Header Files\Engine\Core\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\utils\Engine_Debugging.h">
+    <ClInclude Include="include\serenity\utils\Engine_Debugging.h">
       <Filter>Header Files\Engine\Core\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\utils\Logger.h">
+    <ClInclude Include="include\serenity\utils\Logger.h">
       <Filter>Header Files\Engine\Core\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\engine\utils\Utils.h">
+    <ClInclude Include="include\serenity\utils\Utils.h">
       <Filter>Header Files\Engine\Core\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\Constraint.h">
+    <ClInclude Include="include\serenity\Constraint.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\core\Terrain.h">
+    <ClInclude Include="include\serenity\Terrain.h">
       <Filter>Header Files\Engine\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\AnimationData.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\AnimationIncludes.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\BuiltInMeshes.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\Mesh.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\MeshCollisionFactory.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\MeshImportedData.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\MeshIncludes.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\MeshLoading.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\MeshRequest.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\Skeleton.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\smsh.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\VertexAttributeInfo.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\VertexBufferObject.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\VertexData.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\VertexDataFormat.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\material\Material.h">
+      <Filter>Header Files\Engine\Core\Resources\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\material\MaterialComponent.h">
+      <Filter>Header Files\Engine\Core\Resources\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\material\MaterialEnums.h">
+      <Filter>Header Files\Engine\Core\Resources\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\material\MaterialLayer.h">
+      <Filter>Header Files\Engine\Core\Resources\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\material\MaterialLoader.h">
+      <Filter>Header Files\Engine\Core\Resources\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\material\MaterialRequest.h">
+      <Filter>Header Files\Engine\Core\Resources\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\font\Font.h">
+      <Filter>Header Files\Engine\Core\Resources\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\font\FontIncludes.h">
+      <Filter>Header Files\Engine\Core\Resources\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\shader\Shader.h">
+      <Filter>Header Files\Engine\Core\Resources\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\shader\ShaderHelper.h">
+      <Filter>Header Files\Engine\Core\Resources\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\shader\ShaderIncludes.h">
+      <Filter>Header Files\Engine\Core\Resources\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\shader\ShaderProgram.h">
+      <Filter>Header Files\Engine\Core\Resources\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\sound\SoundBaseClass.h">
+      <Filter>Header Files\Engine\Core\Resources\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\sound\SoundData.h">
+      <Filter>Header Files\Engine\Core\Resources\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\sound\SoundEffect.h">
+      <Filter>Header Files\Engine\Core\Resources\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\sound\SoundModule.h">
+      <Filter>Header Files\Engine\Core\Resources\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\sound\SoundMusic.h">
+      <Filter>Header Files\Engine\Core\Resources\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\sound\SoundQueue.h">
+      <Filter>Header Files\Engine\Core\Resources\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\sound\Sounds.h">
+      <Filter>Header Files\Engine\Core\Resources\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\texture\DDS.h">
+      <Filter>Header Files\Engine\Core\Resources\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\texture\Texture.h">
+      <Filter>Header Files\Engine\Core\Resources\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\texture\TextureIncludes.h">
+      <Filter>Header Files\Engine\Core\Resources\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\texture\TextureLoader.h">
+      <Filter>Header Files\Engine\Core\Resources\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\texture\TextureRequest.h">
+      <Filter>Header Files\Engine\Core\Resources\Texture</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

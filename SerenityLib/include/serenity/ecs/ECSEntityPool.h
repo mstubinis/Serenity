@@ -5,14 +5,14 @@
 struct SceneOptions;
 class  Scene;
 namespace Engine::priv {
-    struct InternalScenePublicInterface;
+    struct PublicScene;
 };
 
 #include <serenity/ecs/Entity.h>
 
 namespace Engine::priv {
     class ECSEntityPool final{
-        friend struct Engine::priv::InternalScenePublicInterface;
+        friend struct Engine::priv::PublicScene;
         private:
             std::vector<Entity>    m_Pool;
             std::vector<uint32_t>  m_Freelist;
@@ -29,8 +29,8 @@ namespace Engine::priv {
             bool isEntityVersionDifferent(Entity entity) const noexcept;
 
             void destroyFlaggedEntity(uint32_t entityID);
-            Entity addEntity(const Scene& scene) noexcept;
-            Entity getEntity(uint32_t entityData) const noexcept;
+            [[nodiscard]] Entity addEntity(const Scene& scene) noexcept;
+            [[nodiscard]] Entity getEntity(uint32_t entityData) const noexcept;
 
             void clear() noexcept {
                 m_Pool.clear();

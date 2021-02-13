@@ -19,12 +19,12 @@ namespace Engine::priv {
     struct ComponentBody_SceneLeftFunction;
 };
 
-#include <serenity/core/engine/dependencies/glm.h>
+#include <serenity/dependencies/glm.h>
 #include <serenity/ecs/ECS.h>
-#include <serenity/core/engine/physics/PhysicsIncludes.h>
+#include <serenity/physics/PhysicsIncludes.h>
 #include <LinearMath/btDefaultMotionState.h>
 #include <serenity/ecs/Entity.h>
-#include <serenity/core/engine/events/Observer.h>
+#include <serenity/events/Observer.h>
 
 
 struct CollisionCallbackEventData final {
@@ -39,8 +39,8 @@ struct CollisionCallbackEventData final {
     glm::vec3&         normalFromB;
     btCollisionObject* ownerCollisionObj       = nullptr;
     btCollisionObject* otherCollisionObj       = nullptr;
-    size_t             ownerModelInstanceIndex = 0;
-    size_t             otherModelInstanceIndex = 0;
+    uint32_t           ownerModelInstanceIndex = 0;
+    uint32_t           otherModelInstanceIndex = 0;
 
     CollisionCallbackEventData() = delete;
     CollisionCallbackEventData(const CollisionCallbackEventData&)                = delete;
@@ -140,7 +140,7 @@ class ComponentBody {
         ComponentBody& operator=(ComponentBody&&) noexcept;
         ~ComponentBody();
 
-        inline constexpr Entity getOwner() const noexcept { return m_Owner; }
+        [[nodiscard]] inline constexpr Entity getOwner() const noexcept { return m_Owner; }
 
         bool hasParent() const;
 
@@ -164,18 +164,18 @@ class ComponentBody {
         void setUserPointer(void* userPtr) noexcept { m_UserPointer = userPtr; }
         void setUserPointer1(void* userPtr) noexcept { m_UserPointer1 = userPtr; }
         void setUserPointer2(void* userPtr) noexcept { m_UserPointer2 = userPtr; }
-        inline constexpr void* getUserPointer() const noexcept { return m_UserPointer; }
-        inline constexpr void* getUserPointer1() const noexcept { return m_UserPointer1; }
-        inline constexpr void* getUserPointer2() const noexcept { return m_UserPointer2; }
+        [[nodiscard]] inline constexpr void* getUserPointer() const noexcept { return m_UserPointer; }
+        [[nodiscard]] inline constexpr void* getUserPointer1() const noexcept { return m_UserPointer1; }
+        [[nodiscard]] inline constexpr void* getUserPointer2() const noexcept { return m_UserPointer2; }
 
-        inline constexpr bool hasPhysics() const noexcept { return m_Physics; }
-        decimal getLinearDamping() const;
-        decimal getAngularDamping() const;
+        [[nodiscard]] inline constexpr bool hasPhysics() const noexcept { return m_Physics; }
+        [[nodiscard]] decimal getLinearDamping() const;
+        [[nodiscard]] decimal getAngularDamping() const;
 
-        inline MaskType getCollisionGroup() const noexcept { return (m_Physics) ? p->group : 0; }
-        inline MaskType getCollisionMask() const noexcept { return (m_Physics) ? p->mask : 0; }
+        [[nodiscard]] inline MaskType getCollisionGroup() const noexcept { return (m_Physics) ? p->group : 0; }
+        [[nodiscard]] inline MaskType getCollisionMask() const noexcept { return (m_Physics) ? p->mask : 0; }
 
-        MaskType getCollisionFlags() const;
+        [[nodiscard]] MaskType getCollisionFlags() const;
 
         void alignTo(decimal dirX, decimal dirY, decimal dirZ);
         void alignTo(const glm_vec3& direction);
@@ -205,33 +205,32 @@ class ComponentBody {
         inline void setScale(const glm_vec3& newScale) noexcept { setScale(newScale.x, newScale.y, newScale.z); }
         inline void setScale(decimal newScale) noexcept { setScale(newScale, newScale, newScale); }
 
-        inline float mass() const noexcept { return (m_Physics) ? p->mass : 0.0f; }
-        decimal getDistance(Entity other) const;
-        unsigned long long getDistanceLL(Entity other) const;
-        glm::vec3 getScreenCoordinates(bool clampToEdge = false) const;
+        [[nodiscard]] inline float mass() const noexcept { return (m_Physics) ? p->mass : 0.0f; }
+        [[nodiscard]] decimal getDistance(Entity other) const;
+        [[nodiscard]] unsigned long long getDistanceLL(Entity other) const;
+        [[nodiscard]] glm::vec3 getScreenCoordinates(bool clampToEdge = false) const;
 
-        ScreenBoxCoordinates getScreenBoxCoordinates(float minOffset = 10.0f) const;
+        [[nodiscard]] ScreenBoxCoordinates getScreenBoxCoordinates(float minOffset = 10.0f) const;
 
-		glm_quat getRotation() const;
-		glm_vec3 getScale() const;
-		glm_vec3 getPosition() const;
-        glm_vec3 getLocalPosition() const;
+        [[nodiscard]] glm_quat getRotation() const;
+        [[nodiscard]] glm_vec3 getScale() const;
+        [[nodiscard]] glm_vec3 getPosition() const;
+        [[nodiscard]] glm_vec3 getLocalPosition() const;
         
-        inline constexpr const glm_vec3& forward() const noexcept { return m_Forward; }
-        inline constexpr const glm_vec3& right() const noexcept { return m_Right; }
-        inline constexpr const glm_vec3& up() const noexcept { return m_Up; }
+        [[nodiscard]] inline constexpr const glm_vec3& forward() const noexcept { return m_Forward; }
+        [[nodiscard]] inline constexpr const glm_vec3& right() const noexcept { return m_Right; }
+        [[nodiscard]] inline constexpr const glm_vec3& up() const noexcept { return m_Up; }
         
-		glm_vec3 getLinearVelocity() const;
-		glm_vec3 getAngularVelocity() const;
-		glm_mat4 modelMatrix() const;
-        inline glm::mat4 modelMatrixRendering() const noexcept { return (glm::mat4)modelMatrix(); }
-        inline btRigidBody& getBtBody() const noexcept { return *p->bullet_rigidBody; }
+        [[nodiscard]] glm_vec3 getLinearVelocity() const;
+        [[nodiscard]] glm_vec3 getAngularVelocity() const;
+        [[nodiscard]] glm_mat4 modelMatrix() const;
+        [[nodiscard]] inline glm::mat4 modelMatrixRendering() const noexcept { return (glm::mat4)modelMatrix(); }
+        [[nodiscard]] inline btRigidBody& getBtBody() const noexcept { return *p->bullet_rigidBody; }
 
         void setCollision(CollisionType collisionType, float mass);
 
         //double check this...
-        template<typename ... ARGS>
-        Collision& setCollision(ARGS&&... args) {
+        template<typename ... ARGS> Collision& setCollision(ARGS&&... args) {
             if (p->collision) {
                 removePhysicsFromWorld(false, false);
             }
@@ -243,7 +242,7 @@ class ComponentBody {
             setInternalPhysicsUserPointer(this);
             return *p->collision.get();
         }
-        inline Engine::view_ptr<Collision> getCollision() const noexcept { return (m_Physics) ? p->collision.get() : nullptr; }
+        [[nodiscard]] inline Engine::view_ptr<Collision> getCollision() const noexcept { return (m_Physics) ? p->collision.get() : nullptr; }
 
         void setCollisionGroup(MaskType group);
         void setCollisionMask(MaskType mask);
@@ -303,9 +302,9 @@ namespace Engine::priv {
     class ComponentBody_System final : public Engine::priv::ECSSystem<ComponentBody> {
         class ParentChildVector final {
             private:
-                inline uint32_t& getParent(uint32_t childID) noexcept { return Parents[childID - 1U]; }
-                inline glm_mat4& getWorld(uint32_t ID) noexcept { return WorldTransforms[ID - 1U]; }
-                inline glm_mat4& getLocal(uint32_t ID) noexcept { return LocalTransforms[ID - 1U]; }
+                [[nodiscard]] inline uint32_t& getParent(uint32_t childID) noexcept { return Parents[childID - 1U]; }
+                [[nodiscard]] inline glm_mat4& getWorld(uint32_t ID) noexcept { return WorldTransforms[ID - 1U]; }
+                [[nodiscard]] inline glm_mat4& getLocal(uint32_t ID) noexcept { return LocalTransforms[ID - 1U]; }
 
                 void internal_reserve_from_insert(uint32_t parentID, uint32_t childID);
             public:
@@ -320,8 +319,8 @@ namespace Engine::priv {
                 void insert(uint32_t parent, uint32_t child);
                 void remove(uint32_t parent, uint32_t child);
 
-                inline constexpr uint32_t size() const noexcept { return OrderHead; }
-                inline size_t capacity() const noexcept { return Order.capacity(); }
+                [[nodiscard]] inline constexpr uint32_t size() const noexcept { return OrderHead; }
+                [[nodiscard]] inline size_t capacity() const noexcept { return Order.capacity(); }
         };
         public:
             ParentChildVector ParentChildSystem;

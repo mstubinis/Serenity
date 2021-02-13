@@ -20,8 +20,8 @@ namespace Engine::priv {
 
 #include <serenity/ecs/Entity.h>
 #include <serenity/ecs/ECSSystemConstructorInfo.h>
-#include <serenity/core/engine/model/ModelInstance.h>
-#include <serenity/core/engine/model/ModelInstanceHandle.h>
+#include <serenity/model/ModelInstance.h>
+#include <serenity/model/ModelInstanceHandle.h>
 
 using ModelInstanceVector = std::vector<std::unique_ptr<ModelInstance>>;
 
@@ -44,7 +44,7 @@ class ComponentModel: public Observer {
         ComponentModel(ComponentModel&& other) noexcept;
         ComponentModel& operator=(ComponentModel&& other) noexcept;
 
-        inline constexpr Entity getOwner() const noexcept { return m_Owner; }
+        [[nodiscard]] inline constexpr Entity getOwner() const noexcept { return m_Owner; }
 
         void onEvent(const Event&) override;
 
@@ -53,13 +53,13 @@ class ComponentModel: public Observer {
         inline void setViewportFlag(ViewportFlag::Flag flag) noexcept { setViewportFlag((uint32_t)flag); }
         inline void addViewportFlag(ViewportFlag::Flag flag) noexcept { addViewportFlag((uint32_t)flag); }
 
-        inline size_t getNumModels() const noexcept { return m_ModelInstances.size(); }
-        inline constexpr float radius() const noexcept { return m_Radius; }
-        inline constexpr const glm::vec3& boundingBox() const noexcept { return m_RadiusBox; }
+        [[nodiscard]] inline size_t getNumModels() const noexcept { return m_ModelInstances.size(); }
+        [[nodiscard]] inline constexpr float radius() const noexcept { return m_Radius; }
+        [[nodiscard]] inline constexpr const glm::vec3& boundingBox() const noexcept { return m_RadiusBox; }
         void show(bool shown = true) noexcept;
         inline void hide() noexcept { show(false); }
 
-        inline ModelInstance& getModel(size_t index = 0) noexcept { return *m_ModelInstances[index].get(); }
+        [[nodiscard]] inline ModelInstance& getModel(size_t index = 0) noexcept { return *m_ModelInstances[index].get(); }
         ModelInstanceHandle addModel(Handle meshHandle, Handle materialHandle, Handle = Handle{}, RenderStage = RenderStage::GeometryOpaque);
         inline void removeModel(size_t index) noexcept { m_ModelInstances.erase(m_ModelInstances.begin() + index); }
 
@@ -69,7 +69,7 @@ class ComponentModel: public Observer {
         void setModelMaterial(Handle materialHandle, size_t index, RenderStage = RenderStage::GeometryOpaque);
         void setModelShaderProgram(Handle shaderProgram, size_t index, RenderStage = RenderStage::GeometryOpaque);
 
-        bool rayIntersectSphere(const ComponentCamera& camera) const noexcept;
+        [[nodiscard]] bool rayIntersectSphere(const ComponentCamera& camera) const noexcept;
 
         void setUserPointer(void* UserPointer) noexcept;
 

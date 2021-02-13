@@ -2,21 +2,19 @@
 #include <serenity/ecs/ComponentBody.h>
 #include <serenity/ecs/ComponentCamera.h>
 
-#include <serenity/core/engine/resources/Engine_Resources.h>
-#include <serenity/core/engine/math/Engine_Math.h>
-#include <serenity/core/engine/model/ModelInstance.h>
-#include <serenity/core/engine/scene/Camera.h>
-#include <serenity/core/engine/mesh/Mesh.h>
-#include <serenity/core/engine/system/Engine.h>
-#include <serenity/core/engine/scene/Scene.h>
+#include <serenity/resources/Engine_Resources.h>
+#include <serenity/math/Engine_Math.h>
+#include <serenity/model/ModelInstance.h>
+#include <serenity/scene/Camera.h>
+#include <serenity/resources/mesh/Mesh.h>
+#include <serenity/system/Engine.h>
+#include <serenity/scene/Scene.h>
 
 using namespace Engine;
 using namespace Engine::priv;
 
 float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) {
-    std::vector<glm::vec3> points_total;
-    points_total.reserve(ComponentModel_Functions::GetTotalVertexCount(modelComponent));
-
+    auto points_total = Engine::create_and_reserve<std::vector<glm::vec3>>(ComponentModel_Functions::GetTotalVertexCount(modelComponent));
     for (const auto& modelInstance : modelComponent) {
         const Mesh& mesh = *modelInstance->mesh().get<Mesh>();
         if (!mesh.isLoaded()) {
@@ -98,8 +96,7 @@ ComponentModel& ComponentModel::operator=(ComponentModel&& other) noexcept {
 }
 void ComponentModel::onEvent(const Event& e) {
     if (e.type == EventType::ResourceLoaded && e.eventResource.resource->type() == ResourceType::Mesh) {
-        std::vector<Handle> unfinishedMeshes;
-        unfinishedMeshes.reserve(m_ModelInstances.size());
+        auto unfinishedMeshes = Engine::create_and_reserve<std::vector<Handle>>(m_ModelInstances.size());
         for (auto& instance : m_ModelInstances) {
             auto& mesh = *instance->m_MeshHandle.get<Mesh>();
             if (!mesh.isLoaded()) {
@@ -132,9 +129,9 @@ ModelInstanceHandle ComponentModel::addModel(Handle mesh, Handle material, Handl
 
     auto& modelInstance    = *m_ModelInstances.emplace_back(std::make_unique<ModelInstance>(m_Owner, mesh, material, shaderProgram));
     modelInstance.m_Stage  = renderStage;
-    modelInstance.m_Index  = m_ModelInstances.size() - 1U;
+    modelInstance.m_Index  = static_cast<uint32_t>(m_ModelInstances.size() - 1U);
 
-    InternalScenePublicInterface::AddModelInstanceToPipeline(*m_Owner.scene(), modelInstance, renderStage, *this);
+    PublicScene::AddModelInstanceToPipeline(*m_Owner.scene(), modelInstance, renderStage, *this);
     ComponentModel_Functions::CalculateRadius(*this);
     return { modelInstance.m_Index, *this };
 }
@@ -143,35 +140,35 @@ void ComponentModel::setModel(Handle mesh, Handle material, size_t index, Handle
 
     auto& model_instance                 = *m_ModelInstances[index];
     auto& scene                          = *m_Owner.scene();
-    InternalScenePublicInterface::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
+    PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
 
     model_instance.m_ShaderProgramHandle = shaderProgram;
     model_instance.m_MeshHandle          = mesh;
     model_instance.m_MaterialHandle      = material;
     model_instance.m_Stage               = renderStage;
 
-    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, renderStage, *this);
+    PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage, *this);
     ComponentModel_Functions::CalculateRadius(*this);
 }
 void ComponentModel::setModelShaderProgram(Handle shaderProgram, size_t index, RenderStage renderStage) {
     auto& model_instance                 = *m_ModelInstances[index];
     auto& scene                          = *m_Owner.scene();
-    InternalScenePublicInterface::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
+    PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
 
     model_instance.m_ShaderProgramHandle = shaderProgram;
     model_instance.m_Stage               = renderStage;
 
-    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, renderStage, *this);
+    PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage, *this);
     ComponentModel_Functions::CalculateRadius(*this);
 }
 void ComponentModel::setStage(RenderStage renderStage, size_t index) {
     auto& model_instance   = *m_ModelInstances[index];
     auto& scene            = *m_Owner.scene();
-    InternalScenePublicInterface::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
+    PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
 
     model_instance.m_Stage = renderStage;
 
-    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, renderStage, *this);
+    PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage, *this);
 }
 void ComponentModel::setModelMesh(Handle mesh, size_t index, RenderStage renderStage) {
     ComponentModel_Functions::RegisterDeferredMeshLoaded(*this, mesh);
@@ -179,23 +176,23 @@ void ComponentModel::setModelMesh(Handle mesh, size_t index, RenderStage renderS
     auto& model_instance        = *m_ModelInstances[index];
     auto& scene                 = *m_Owner.scene();
 
-    InternalScenePublicInterface::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
+    PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
 
     model_instance.m_MeshHandle = mesh;
     model_instance.m_Stage      = renderStage;
 
-    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, renderStage, *this);
+    PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage, *this);
     ComponentModel_Functions::CalculateRadius(*this);
 }
 void ComponentModel::setModelMaterial(Handle material, size_t index, RenderStage renderStage) {
     auto& model_instance            = *m_ModelInstances[index];
     auto& scene                     = *m_Owner.scene();
-    InternalScenePublicInterface::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
+    PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
 
     model_instance.m_MaterialHandle = material;
     model_instance.m_Stage          = renderStage;
 
-    InternalScenePublicInterface::AddModelInstanceToPipeline(scene, model_instance, renderStage, *this);
+    PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage, *this);
 }
 bool ComponentModel::rayIntersectSphere(const ComponentCamera& camera) const noexcept {
     auto body = m_Owner.getComponent<ComponentBody>();

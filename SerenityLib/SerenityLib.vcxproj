@@ -48,7 +48,8 @@
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <PreferredToolArchitecture>x86</PreferredToolArchitecture>
-    <VCToolsVersion>14.27.29110</VCToolsVersion>
+    <VCToolsVersion>
+    </VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -57,7 +58,8 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x86</PreferredToolArchitecture>
-    <VCToolsVersion>14.27.29110</VCToolsVersion>
+    <VCToolsVersion>
+    </VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -66,7 +68,8 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x86</PreferredToolArchitecture>
-    <VCToolsVersion>14.27.29110</VCToolsVersion>
+    <VCToolsVersion>
+    </VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -75,7 +78,8 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x86</PreferredToolArchitecture>
-    <VCToolsVersion>14.27.29110</VCToolsVersion>
+    <VCToolsVersion>
+    </VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -83,7 +87,8 @@
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
-    <VCToolsVersion>14.27.29110</VCToolsVersion>
+    <VCToolsVersion>
+    </VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -92,7 +97,8 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
-    <VCToolsVersion>14.27.29110</VCToolsVersion>
+    <VCToolsVersion>
+    </VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -101,7 +107,8 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
-    <VCToolsVersion>14.27.29110</VCToolsVersion>
+    <VCToolsVersion>
+    </VCToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -110,7 +117,8 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
-    <VCToolsVersion>14.27.29110</VCToolsVersion>
+    <VCToolsVersion>
+    </VCToolsVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -232,7 +240,7 @@
       <Message>Copying binary (Debug) ...</Message>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>%(AdditionalDependencies);assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug_d.lib;BulletDynamics_Debug_d.lib;BulletSoftBody_Debug_d.lib;LinearMath_Debug_d.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;freetyped.lib;lua.lib;lua53.lib</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug_d.lib;BulletDynamics_Debug_d.lib;BulletSoftBody_Debug_d.lib;LinearMath_Debug_d.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;freetyped.lib;lua.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;vcruntime.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Debug;D:\dev\discord_game_sdk\lib\x86;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Debug;D:\dev\assimp\lib\32\Debug;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Debug;D:\dev\lua\lib\32\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
@@ -300,7 +308,7 @@
       <Message>Copying Binary (Release) ...</Message>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>%(AdditionalDependencies);assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision_d.lib;BulletDynamics_d.lib;BulletSoftBody_d.lib;LinearMath_d.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision_d.lib;BulletDynamics_d.lib;BulletSoftBody_d.lib;LinearMath_d.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;vcruntime.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Release;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\lib\32\Release;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;D:\dev\discord_game_sdk\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
@@ -367,6 +375,7 @@
       <AssemblerOutput>All</AssemblerOutput>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
+      <ExceptionHandling>Sync</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -382,10 +391,13 @@
       <Message>Copying Binary (Release) ...</Message>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>%(AdditionalDependencies);assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision_d.lib;BulletDynamics_d.lib;BulletSoftBody_d.lib;LinearMath_d.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision_d.lib;BulletDynamics_d.lib;BulletSoftBody_d.lib;LinearMath_d.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;vcruntime.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Release;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\lib\32\Release;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;D:\dev\discord_game_sdk\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -472,6 +484,7 @@
       <AssemblerOutput>All</AssemblerOutput>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
+      <ExceptionHandling>Sync</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -482,183 +495,29 @@
     <Lib>
       <AdditionalLibraryDirectories>D:\dev\lua\lib\64\Release;D:\dev\freetype\lib\64\Release;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\lib\64\Release;D:\dev\SFML\lib\64;D:\dev\SFML\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;assimp.lib;freeglut64.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision_d.lib;BulletDynamics_d.lib;BulletSoftBody_d.lib;LinearMath_d.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4006 /NODEFAULTLIB %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\serenity\core\Constraint.cpp" />
-    <ClCompile Include="src\serenity\core\engine\algorithms\MergeSort.cpp" />
-    <ClCompile Include="src\serenity\core\engine\algorithms\RadixSort.cpp" />
-    <ClCompile Include="src\serenity\core\engine\discord\DiscordActivityEvent.cpp" />
-    <ClCompile Include="src\serenity\core\engine\discord\DiscordModule.cpp" />
-    <ClCompile Include="src\serenity\core\engine\discord\src\achievement_manager.cpp" />
-    <ClCompile Include="src\serenity\core\engine\discord\src\activity_manager.cpp" />
-    <ClCompile Include="src\serenity\core\engine\discord\src\application_manager.cpp" />
-    <ClCompile Include="src\serenity\core\engine\discord\src\core.cpp" />
-    <ClCompile Include="src\serenity\core\engine\discord\src\image_manager.cpp" />
-    <ClCompile Include="src\serenity\core\engine\discord\src\lobby_manager.cpp" />
-    <ClCompile Include="src\serenity\core\engine\discord\src\network_manager.cpp" />
-    <ClCompile Include="src\serenity\core\engine\discord\src\overlay_manager.cpp" />
-    <ClCompile Include="src\serenity\core\engine\discord\src\relationship_manager.cpp" />
-    <ClCompile Include="src\serenity\core\engine\discord\src\storage_manager.cpp" />
-    <ClCompile Include="src\serenity\core\engine\discord\src\store_manager.cpp" />
-    <ClCompile Include="src\serenity\core\engine\discord\src\types.cpp" />
-    <ClCompile Include="src\serenity\core\engine\discord\src\user_manager.cpp" />
-    <ClCompile Include="src\serenity\core\engine\discord\src\voice_manager.cpp" />
-    <ClCompile Include="src\serenity\core\engine\events\EventDispatcher.cpp" />
-    <ClCompile Include="src\serenity\core\engine\events\EventModule.cpp" />
-    <ClCompile Include="src\serenity\core\engine\events\Observer.cpp" />
-    <ClCompile Include="src\serenity\core\engine\fonts\Font.cpp" />
-    <ClCompile Include="src\serenity\core\engine\input\Joystick\JoystickAxises.cpp" />
-    <ClCompile Include="src\serenity\core\engine\input\Joystick\JoystickModule.cpp" />
-    <ClCompile Include="src\serenity\core\engine\input\Keyboard\KeyboardKeys.cpp" />
-    <ClCompile Include="src\serenity\core\engine\input\Keyboard\KeyboardModule.cpp" />
-    <ClCompile Include="src\serenity\core\engine\input\Mouse\MouseButtons.cpp" />
-    <ClCompile Include="src\serenity\core\engine\input\Mouse\MouseModule.cpp" />
-    <ClCompile Include="src\serenity\core\engine\lights\DirectionalLight.cpp" />
-    <ClCompile Include="src\serenity\core\engine\lights\LightProbe.cpp" />
-    <ClCompile Include="src\serenity\core\engine\lights\PointLight.cpp" />
-    <ClCompile Include="src\serenity\core\engine\lights\ProjectionLight.cpp" />
-    <ClCompile Include="src\serenity\core\engine\lights\RodLight.cpp" />
-    <ClCompile Include="src\serenity\core\engine\lights\SpotLight.cpp" />
-    <ClCompile Include="src\serenity\core\engine\lights\SunLight.cpp" />
-    <ClCompile Include="src\serenity\core\engine\lua\LuaBinder.cpp" />
-    <ClCompile Include="src\serenity\core\engine\lua\LuaModule.cpp" />
-    <ClCompile Include="src\serenity\core\engine\lua\LuaScript.cpp" />
-    <ClCompile Include="src\serenity\core\engine\lua\LuaState.cpp" />
-    <ClCompile Include="src\serenity\core\engine\materials\Material.cpp" />
-    <ClCompile Include="src\serenity\core\engine\materials\MaterialComponent.cpp" />
-    <ClCompile Include="src\serenity\core\engine\materials\MaterialLayer.cpp" />
-    <ClCompile Include="src\serenity\core\engine\materials\MaterialLoader.cpp" />
-    <ClCompile Include="src\serenity\core\engine\materials\MaterialRequest.cpp" />
-    <ClCompile Include="src\serenity\core\engine\math\Engine_Math.cpp" />
-    <ClCompile Include="src\serenity\core\engine\math\MathCompression.cpp" />
-    <ClCompile Include="src\serenity\core\engine\math\shapes\Plane.cpp" />
-    <ClCompile Include="src\serenity\core\engine\math\shapes\Pyramid.cpp" />
-    <ClCompile Include="src\serenity\core\engine\math\SimplexNoise.cpp" />
-    <ClCompile Include="src\serenity\core\engine\mesh\AnimationData.cpp" />
-    <ClCompile Include="src\serenity\core\engine\mesh\BuiltInMeshes.cpp" />
-    <ClCompile Include="src\serenity\core\engine\mesh\Mesh.cpp" />
-    <ClCompile Include="src\serenity\core\engine\mesh\MeshCollisionFactory.cpp" />
-    <ClCompile Include="src\serenity\core\engine\mesh\MeshLoading.cpp" />
-    <ClCompile Include="src\serenity\core\engine\mesh\MeshRequest.cpp" />
-    <ClCompile Include="src\serenity\core\engine\mesh\smsh.cpp" />
-    <ClCompile Include="src\serenity\core\engine\mesh\VertexData.cpp" />
-    <ClCompile Include="src\serenity\core\engine\mesh\VertexDataFormat.cpp" />
-    <ClCompile Include="src\serenity\core\engine\model\ModelInstance.cpp" />
-    <ClCompile Include="src\serenity\core\engine\model\ModelInstanceAnimation.cpp" />
-    <ClCompile Include="src\serenity\core\engine\model\ModelInstanceHandle.cpp" />
-    <ClCompile Include="src\serenity\core\engine\networking\ListenerTCP.cpp" />
-    <ClCompile Include="src\serenity\core\engine\networking\NetworkingModule.cpp" />
-    <ClCompile Include="src\serenity\core\engine\networking\Packet.cpp" />
-    <ClCompile Include="src\serenity\core\engine\networking\server\Server.cpp" />
-    <ClCompile Include="src\serenity\core\engine\networking\server\ServerClient.cpp" />
-    <ClCompile Include="src\serenity\core\engine\networking\server\ServerClientsContainer.cpp" />
-    <ClCompile Include="src\serenity\core\engine\networking\server\ServerThread.cpp" />
-    <ClCompile Include="src\serenity\core\engine\networking\server\ServerThreadCollection.cpp" />
-    <ClCompile Include="src\serenity\core\engine\networking\SocketManager.cpp" />
-    <ClCompile Include="src\serenity\core\engine\networking\SocketTCP.cpp" />
-    <ClCompile Include="src\serenity\core\engine\networking\SocketUDP.cpp" />
-    <ClCompile Include="src\serenity\core\engine\physics\Collision.cpp" />
-    <ClCompile Include="src\serenity\core\engine\physics\DebugDrawer.cpp" />
-    <ClCompile Include="src\serenity\core\engine\physics\PhysicsModule.cpp" />
-    <ClCompile Include="src\serenity\core\engine\physics\PhysicsPipeline.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\Decal.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\FramebufferObject.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\FullscreenItems.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\GBuffer.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\GLImageConstants.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\Extensions.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\glsl\Common.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\glsl\Compression.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\glsl\DepthOfFieldCode.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\glsl\Lighting.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\glsl\Materials.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\glsl\SSAOCode.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\glsl\VersionConversion.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\OpenGL.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\State.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\opengl\UniformBufferObject.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\particles\Particle.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\particles\ParticleEmissionProperties.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\particles\ParticleEmitter.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\particles\ParticleSystem.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\pipelines\DeferredPipeline.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\pipelines\DeferredShadowCasters.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\postprocess\Bloom.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\postprocess\DepthOfField.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\postprocess\Fog.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\postprocess\FXAA.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\postprocess\GodRays.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\postprocess\HDR.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\postprocess\SMAA.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\postprocess\SSAO.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\Renderer.cpp" />
-    <ClCompile Include="src\serenity\core\engine\renderer\RenderGraph.cpp" />
-    <ClCompile Include="src\serenity\core\engine\resources\Engine_BuiltInShaders.cpp" />
-    <ClCompile Include="src\serenity\core\engine\resources\Engine_Resources.cpp" />
-    <ClCompile Include="src\serenity\core\engine\resources\Handle.cpp" />
-    <ClCompile Include="src\serenity\core\engine\resources\Resource.cpp" />
-    <ClCompile Include="src\serenity\core\engine\scene\Camera.cpp" />
-    <ClCompile Include="src\serenity\core\engine\scene\Scene.cpp" />
-    <ClCompile Include="src\serenity\core\engine\scene\SceneOptions.cpp" />
-    <ClCompile Include="src\serenity\core\engine\scene\Skybox.cpp" />
-    <ClCompile Include="src\serenity\core\engine\scene\Viewport.cpp" />
-    <ClCompile Include="src\serenity\core\engine\shaders\Shader.cpp" />
-    <ClCompile Include="src\serenity\core\engine\shaders\ShaderHelper.cpp" />
-    <ClCompile Include="src\serenity\core\engine\shaders\ShaderProgram.cpp" />
-    <ClCompile Include="src\serenity\core\engine\sounds\SoundData.cpp" />
-    <ClCompile Include="src\serenity\core\engine\sounds\SoundEffect.cpp" />
-    <ClCompile Include="src\serenity\core\engine\sounds\SoundModule.cpp" />
-    <ClCompile Include="src\serenity\core\engine\sounds\SoundMusic.cpp" />
-    <ClCompile Include="src\serenity\core\engine\sounds\SoundQueue.cpp" />
-    <ClCompile Include="src\serenity\core\engine\system\cursor\Cursor.cpp" />
-    <ClCompile Include="src\serenity\core\engine\system\Engine.cpp" />
-    <ClCompile Include="src\serenity\core\engine\system\EngineEventHandler.cpp" />
-    <ClCompile Include="src\serenity\core\engine\system\EngineMisc.cpp" />
-    <ClCompile Include="src\serenity\core\engine\system\window\Window.cpp" />
-    <ClCompile Include="src\serenity\core\engine\system\window\WindowData.cpp" />
-    <ClCompile Include="src\serenity\core\engine\system\window\WindowThread.cpp" />
-    <ClCompile Include="src\serenity\core\engine\tests\main.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\tests\TestGLTypes.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\tests\TestTextureTypes.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="src\serenity\core\engine\textures\Texture.cpp" />
-    <ClCompile Include="src\serenity\core\engine\textures\TextureIncludes.cpp" />
-    <ClCompile Include="src\serenity\core\engine\textures\TextureLoader.cpp" />
-    <ClCompile Include="src\serenity\core\engine\textures\TextureRequest.cpp" />
-    <ClCompile Include="src\serenity\core\engine\threading\ThreadingHelpers.cpp" />
-    <ClCompile Include="src\serenity\core\engine\threading\ThreadingModule.cpp" />
-    <ClCompile Include="src\serenity\core\engine\threading\ThreadPool.cpp" />
-    <ClCompile Include="src\serenity\core\engine\threading\WorkerThreadContainer.cpp" />
-    <ClCompile Include="src\serenity\core\engine\utils\Engine_Debugging.cpp" />
-    <ClCompile Include="src\serenity\core\Terrain.cpp" />
+    <ClCompile Include="src\serenity\algorithms\MergeSort.cpp" />
+    <ClCompile Include="src\serenity\algorithms\RadixSort.cpp" />
+    <ClCompile Include="src\serenity\Constraint.cpp" />
+    <ClCompile Include="src\serenity\discord\DiscordActivityEvent.cpp" />
+    <ClCompile Include="src\serenity\discord\DiscordModule.cpp" />
+    <ClCompile Include="src\serenity\discord\src\achievement_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\activity_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\application_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\core.cpp" />
+    <ClCompile Include="src\serenity\discord\src\image_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\lobby_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\network_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\overlay_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\relationship_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\storage_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\store_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\types.cpp" />
+    <ClCompile Include="src\serenity\discord\src\user_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\voice_manager.cpp" />
     <ClCompile Include="src\serenity\ecs\ComponentBody.cpp" />
     <ClCompile Include="src\serenity\ecs\ComponentCamera.cpp" />
     <ClCompile Include="src\serenity\ecs\ComponentLogic.cpp" />
@@ -673,213 +532,195 @@
     <ClCompile Include="src\serenity\ecs\EntityBody.cpp" />
     <ClCompile Include="src\serenity\ecs\EntityRAII.cpp" />
     <ClCompile Include="src\serenity\ecs\EntityRAIIBody.cpp" />
+    <ClCompile Include="src\serenity\events\EventDispatcher.cpp" />
+    <ClCompile Include="src\serenity\events\EventModule.cpp" />
+    <ClCompile Include="src\serenity\events\Observer.cpp" />
+    <ClCompile Include="src\serenity\input\Joystick\JoystickAxises.cpp" />
+    <ClCompile Include="src\serenity\input\Joystick\JoystickModule.cpp" />
+    <ClCompile Include="src\serenity\input\Keyboard\KeyboardKeys.cpp" />
+    <ClCompile Include="src\serenity\input\Keyboard\KeyboardModule.cpp" />
+    <ClCompile Include="src\serenity\input\Mouse\MouseButtons.cpp" />
+    <ClCompile Include="src\serenity\input\Mouse\MouseModule.cpp" />
+    <ClCompile Include="src\serenity\lights\DirectionalLight.cpp" />
+    <ClCompile Include="src\serenity\lights\LightProbe.cpp" />
+    <ClCompile Include="src\serenity\lights\PointLight.cpp" />
+    <ClCompile Include="src\serenity\lights\ProjectionLight.cpp" />
+    <ClCompile Include="src\serenity\lights\RodLight.cpp" />
+    <ClCompile Include="src\serenity\lights\SpotLight.cpp" />
+    <ClCompile Include="src\serenity\lights\SunLight.cpp" />
+    <ClCompile Include="src\serenity\lua\LuaBinder.cpp" />
+    <ClCompile Include="src\serenity\lua\LuaModule.cpp" />
+    <ClCompile Include="src\serenity\lua\LuaScript.cpp" />
+    <ClCompile Include="src\serenity\lua\LuaState.cpp" />
+    <ClCompile Include="src\serenity\math\Engine_Math.cpp" />
+    <ClCompile Include="src\serenity\math\MathCompression.cpp" />
+    <ClCompile Include="src\serenity\math\shapes\Plane.cpp" />
+    <ClCompile Include="src\serenity\math\shapes\Pyramid.cpp" />
+    <ClCompile Include="src\serenity\math\SimplexNoise.cpp" />
+    <ClCompile Include="src\serenity\model\ModelInstance.cpp" />
+    <ClCompile Include="src\serenity\model\ModelInstanceAnimation.cpp" />
+    <ClCompile Include="src\serenity\model\ModelInstanceHandle.cpp" />
+    <ClCompile Include="src\serenity\networking\ListenerTCP.cpp" />
+    <ClCompile Include="src\serenity\networking\NetworkingModule.cpp" />
+    <ClCompile Include="src\serenity\networking\Packet.cpp" />
+    <ClCompile Include="src\serenity\networking\server\Server.cpp" />
+    <ClCompile Include="src\serenity\networking\server\ServerClient.cpp" />
+    <ClCompile Include="src\serenity\networking\server\ServerClientsContainer.cpp" />
+    <ClCompile Include="src\serenity\networking\server\ServerThread.cpp" />
+    <ClCompile Include="src\serenity\networking\server\ServerThreadCollection.cpp" />
+    <ClCompile Include="src\serenity\networking\SocketManager.cpp" />
+    <ClCompile Include="src\serenity\networking\SocketTCP.cpp" />
+    <ClCompile Include="src\serenity\networking\SocketUDP.cpp" />
+    <ClCompile Include="src\serenity\physics\Collision.cpp" />
+    <ClCompile Include="src\serenity\physics\DebugDrawer.cpp" />
+    <ClCompile Include="src\serenity\physics\PhysicsModule.cpp" />
+    <ClCompile Include="src\serenity\physics\PhysicsPipeline.cpp" />
+    <ClCompile Include="src\serenity\renderer\Decal.cpp" />
+    <ClCompile Include="src\serenity\renderer\FramebufferObject.cpp" />
+    <ClCompile Include="src\serenity\renderer\FullscreenItems.cpp" />
+    <ClCompile Include="src\serenity\renderer\GBuffer.cpp" />
+    <ClCompile Include="src\serenity\renderer\GLImageConstants.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\Extensions.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\Common.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\Compression.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\DepthOfFieldCode.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\Lighting.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\Materials.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\SSAOCode.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\VersionConversion.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\OpenGL.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\State.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\UniformBufferObject.cpp" />
+    <ClCompile Include="src\serenity\renderer\particles\Particle.cpp" />
+    <ClCompile Include="src\serenity\renderer\particles\ParticleEmissionProperties.cpp" />
+    <ClCompile Include="src\serenity\renderer\particles\ParticleEmitter.cpp" />
+    <ClCompile Include="src\serenity\renderer\particles\ParticleSystem.cpp" />
+    <ClCompile Include="src\serenity\renderer\pipelines\DeferredPipeline.cpp" />
+    <ClCompile Include="src\serenity\renderer\pipelines\DeferredShadowCasters.cpp" />
+    <ClCompile Include="src\serenity\renderer\postprocess\Bloom.cpp" />
+    <ClCompile Include="src\serenity\renderer\postprocess\DepthOfField.cpp" />
+    <ClCompile Include="src\serenity\renderer\postprocess\Fog.cpp" />
+    <ClCompile Include="src\serenity\renderer\postprocess\FXAA.cpp" />
+    <ClCompile Include="src\serenity\renderer\postprocess\GodRays.cpp" />
+    <ClCompile Include="src\serenity\renderer\postprocess\HDR.cpp" />
+    <ClCompile Include="src\serenity\renderer\postprocess\SMAA.cpp" />
+    <ClCompile Include="src\serenity\renderer\postprocess\SSAO.cpp" />
+    <ClCompile Include="src\serenity\renderer\Renderer.cpp" />
+    <ClCompile Include="src\serenity\renderer\RenderGraph.cpp" />
+    <ClCompile Include="src\serenity\resources\Engine_BuiltInShaders.cpp" />
+    <ClCompile Include="src\serenity\resources\Engine_Resources.cpp" />
+    <ClCompile Include="src\serenity\resources\font\Font.cpp" />
+    <ClCompile Include="src\serenity\resources\Handle.cpp" />
+    <ClCompile Include="src\serenity\resources\material\Material.cpp" />
+    <ClCompile Include="src\serenity\resources\material\MaterialComponent.cpp" />
+    <ClCompile Include="src\serenity\resources\material\MaterialLayer.cpp" />
+    <ClCompile Include="src\serenity\resources\material\MaterialLoader.cpp" />
+    <ClCompile Include="src\serenity\resources\material\MaterialRequest.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\AnimationData.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\BuiltInMeshes.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\Mesh.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\MeshCollisionFactory.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\MeshLoading.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\MeshRequest.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\smsh.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\VertexData.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\VertexDataFormat.cpp" />
+    <ClCompile Include="src\serenity\resources\Resource.cpp" />
+    <ClCompile Include="src\serenity\resources\shader\Shader.cpp" />
+    <ClCompile Include="src\serenity\resources\shader\ShaderHelper.cpp" />
+    <ClCompile Include="src\serenity\resources\shader\ShaderProgram.cpp" />
+    <ClCompile Include="src\serenity\resources\sound\SoundData.cpp" />
+    <ClCompile Include="src\serenity\resources\sound\SoundEffect.cpp" />
+    <ClCompile Include="src\serenity\resources\sound\SoundModule.cpp" />
+    <ClCompile Include="src\serenity\resources\sound\SoundMusic.cpp" />
+    <ClCompile Include="src\serenity\resources\sound\SoundQueue.cpp" />
+    <ClCompile Include="src\serenity\resources\texture\Texture.cpp" />
+    <ClCompile Include="src\serenity\resources\texture\TextureIncludes.cpp" />
+    <ClCompile Include="src\serenity\resources\texture\TextureLoader.cpp" />
+    <ClCompile Include="src\serenity\resources\texture\TextureRequest.cpp" />
+    <ClCompile Include="src\serenity\scene\Camera.cpp" />
+    <ClCompile Include="src\serenity\scene\Scene.cpp" />
+    <ClCompile Include="src\serenity\scene\SceneOptions.cpp" />
+    <ClCompile Include="src\serenity\scene\Skybox.cpp" />
+    <ClCompile Include="src\serenity\scene\Viewport.cpp" />
+    <ClCompile Include="src\serenity\system\cursor\Cursor.cpp" />
+    <ClCompile Include="src\serenity\system\Engine.cpp" />
+    <ClCompile Include="src\serenity\system\EngineEventHandler.cpp" />
+    <ClCompile Include="src\serenity\system\EngineMisc.cpp" />
+    <ClCompile Include="src\serenity\system\window\Window.cpp" />
+    <ClCompile Include="src\serenity\system\window\WindowData.cpp" />
+    <ClCompile Include="src\serenity\system\window\WindowThread.cpp" />
+    <ClCompile Include="src\serenity\Terrain.cpp" />
+    <ClCompile Include="src\serenity\tests\main.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\serenity\tests\TestGLTypes.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\serenity\tests\TestTextureTypes.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\serenity\threading\ThreadingHelpers.cpp" />
+    <ClCompile Include="src\serenity\threading\ThreadingModule.cpp" />
+    <ClCompile Include="src\serenity\threading\ThreadPool.cpp" />
+    <ClCompile Include="src\serenity\threading\WorkerThreadContainer.cpp" />
+    <ClCompile Include="src\serenity\utils\Engine_Debugging.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\serenity\core\Constraint.h" />
-    <ClInclude Include="include\serenity\core\engine\algorithms\MergeSort.h" />
-    <ClInclude Include="include\serenity\core\engine\algorithms\RadixSort.h" />
-    <ClInclude Include="include\serenity\core\engine\containers\BST.h" />
-    <ClInclude Include="include\serenity\core\engine\containers\Freelist.h" />
-    <ClInclude Include="include\serenity\core\engine\containers\Heap.h" />
-    <ClInclude Include="include\serenity\core\engine\containers\PartialArray.h" />
-    <ClInclude Include="include\serenity\core\engine\containers\PartialVectorPOD.h" />
-    <ClInclude Include="include\serenity\core\engine\containers\Queue_ts.h" />
-    <ClInclude Include="include\serenity\core\engine\containers\SparseSet.h" />
-    <ClInclude Include="include\serenity\core\engine\containers\TypeRegistry.h" />
-    <ClInclude Include="include\serenity\core\engine\dependencies\glm.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\Discord.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\DiscordActivityEvent.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\DiscordModule.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\src\achievement_manager.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\src\activity_manager.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\src\application_manager.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\src\core.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\src\discord.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\src\event.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\src\ffi.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\src\image_manager.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\src\lobby_manager.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\src\network_manager.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\src\overlay_manager.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\src\relationship_manager.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\src\storage_manager.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\src\store_manager.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\src\types.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\src\user_manager.h" />
-    <ClInclude Include="include\serenity\core\engine\discord\src\voice_manager.h" />
-    <ClInclude Include="include\serenity\core\engine\events\Event.h" />
-    <ClInclude Include="include\serenity\core\engine\events\EventDispatcher.h" />
-    <ClInclude Include="include\serenity\core\engine\events\EventIncludes.h" />
-    <ClInclude Include="include\serenity\core\engine\events\EventModule.h" />
-    <ClInclude Include="include\serenity\core\engine\events\Observer.h" />
-    <ClInclude Include="include\serenity\core\engine\fonts\Font.h" />
-    <ClInclude Include="include\serenity\core\engine\fonts\FontIncludes.h" />
-    <ClInclude Include="include\serenity\core\engine\input\Joystick\JoystickAxises.h" />
-    <ClInclude Include="include\serenity\core\engine\input\Joystick\JoystickModule.h" />
-    <ClInclude Include="include\serenity\core\engine\input\Keyboard\KeyboardKeys.h" />
-    <ClInclude Include="include\serenity\core\engine\input\Keyboard\KeyboardModule.h" />
-    <ClInclude Include="include\serenity\core\engine\input\Mouse\MouseButtons.h" />
-    <ClInclude Include="include\serenity\core\engine\input\Mouse\MouseModule.h" />
-    <ClInclude Include="include\serenity\core\engine\lights\DirectionalLight.h" />
-    <ClInclude Include="include\serenity\core\engine\lights\LightIncludes.h" />
-    <ClInclude Include="include\serenity\core\engine\lights\LightProbe.h" />
-    <ClInclude Include="include\serenity\core\engine\lights\Lights.h" />
-    <ClInclude Include="include\serenity\core\engine\lights\PointLight.h" />
-    <ClInclude Include="include\serenity\core\engine\lights\ProjectionLight.h" />
-    <ClInclude Include="include\serenity\core\engine\lights\RodLight.h" />
-    <ClInclude Include="include\serenity\core\engine\lights\SpotLight.h" />
-    <ClInclude Include="include\serenity\core\engine\lights\SunLight.h" />
-    <ClInclude Include="include\serenity\core\engine\lua\Lua.h" />
-    <ClInclude Include="include\serenity\core\engine\lua\LuaBinder.h" />
-    <ClInclude Include="include\serenity\core\engine\lua\LuaIncludes.h" />
-    <ClInclude Include="include\serenity\core\engine\lua\LuaModule.h" />
-    <ClInclude Include="include\serenity\core\engine\lua\LuaScript.h" />
-    <ClInclude Include="include\serenity\core\engine\lua\LuaState.h" />
-    <ClInclude Include="include\serenity\core\engine\materials\Material.h" />
-    <ClInclude Include="include\serenity\core\engine\materials\MaterialComponent.h" />
-    <ClInclude Include="include\serenity\core\engine\materials\MaterialEnums.h" />
-    <ClInclude Include="include\serenity\core\engine\materials\MaterialLayer.h" />
-    <ClInclude Include="include\serenity\core\engine\materials\MaterialLoader.h" />
-    <ClInclude Include="include\serenity\core\engine\materials\MaterialRequest.h" />
-    <ClInclude Include="include\serenity\core\engine\math\BigNumbers.h" />
-    <ClInclude Include="include\serenity\core\engine\math\Engine_Math.h" />
-    <ClInclude Include="include\serenity\core\engine\math\MathCompression.h" />
-    <ClInclude Include="include\serenity\core\engine\math\shapes\Plane.h" />
-    <ClInclude Include="include\serenity\core\engine\math\shapes\Pyramid.h" />
-    <ClInclude Include="include\serenity\core\engine\math\SimplexNoise.h" />
-    <ClInclude Include="include\serenity\core\engine\mesh\AnimationData.h" />
-    <ClInclude Include="include\serenity\core\engine\mesh\AnimationIncludes.h" />
-    <ClInclude Include="include\serenity\core\engine\mesh\BuiltInMeshes.h" />
-    <ClInclude Include="include\serenity\core\engine\mesh\Mesh.h" />
-    <ClInclude Include="include\serenity\core\engine\mesh\MeshCollisionFactory.h" />
-    <ClInclude Include="include\serenity\core\engine\mesh\MeshImportedData.h" />
-    <ClInclude Include="include\serenity\core\engine\mesh\MeshIncludes.h" />
-    <ClInclude Include="include\serenity\core\engine\mesh\MeshLoading.h" />
-    <ClInclude Include="include\serenity\core\engine\mesh\MeshRequest.h" />
-    <ClInclude Include="include\serenity\core\engine\mesh\Skeleton.h" />
-    <ClInclude Include="include\serenity\core\engine\mesh\smsh.h" />
-    <ClInclude Include="include\serenity\core\engine\mesh\VertexAttributeInfo.h" />
-    <ClInclude Include="include\serenity\core\engine\mesh\VertexBufferObject.h" />
-    <ClInclude Include="include\serenity\core\engine\mesh\VertexData.h" />
-    <ClInclude Include="include\serenity\core\engine\mesh\VertexDataFormat.h" />
-    <ClInclude Include="include\serenity\core\engine\model\ModelInstance.h" />
-    <ClInclude Include="include\serenity\core\engine\model\ModelInstanceAnimation.h" />
-    <ClInclude Include="include\serenity\core\engine\model\ModelInstanceHandle.h" />
-    <ClInclude Include="include\serenity\core\engine\model\ModelInstanceIncludes.h" />
-    <ClInclude Include="include\serenity\core\engine\networking\ISocket.h" />
-    <ClInclude Include="include\serenity\core\engine\networking\ListenerTCP.h" />
-    <ClInclude Include="include\serenity\core\engine\networking\Networking.h" />
-    <ClInclude Include="include\serenity\core\engine\networking\NetworkingIncludes.h" />
-    <ClInclude Include="include\serenity\core\engine\networking\NetworkingModule.h" />
-    <ClInclude Include="include\serenity\core\engine\networking\Packet.h" />
-    <ClInclude Include="include\serenity\core\engine\networking\server\Server.h" />
-    <ClInclude Include="include\serenity\core\engine\networking\server\ServerClient.h" />
-    <ClInclude Include="include\serenity\core\engine\networking\server\ServerClientsContainer.h" />
-    <ClInclude Include="include\serenity\core\engine\networking\server\ServerThread.h" />
-    <ClInclude Include="include\serenity\core\engine\networking\server\ServerThreadCollection.h" />
-    <ClInclude Include="include\serenity\core\engine\networking\SocketManager.h" />
-    <ClInclude Include="include\serenity\core\engine\networking\SocketTCP.h" />
-    <ClInclude Include="include\serenity\core\engine\networking\SocketUDP.h" />
-    <ClInclude Include="include\serenity\core\engine\physics\Collision.h" />
-    <ClInclude Include="include\serenity\core\engine\physics\DebugDrawer.h" />
-    <ClInclude Include="include\serenity\core\engine\physics\PhysicsIncludes.h" />
-    <ClInclude Include="include\serenity\core\engine\physics\PhysicsModule.h" />
-    <ClInclude Include="include\serenity\core\engine\physics\PhysicsPipeline.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\Decal.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\FramebufferObject.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\FullscreenItems.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\GBuffer.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\GLImageConstants.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\Extensions.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\glsl\Common.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\glsl\Compression.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\glsl\DepthOfFieldCode.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\glsl\Lighting.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\glsl\Materials.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\glsl\SSAOCode.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\glsl\VersionConversion.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\OpenGL.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\State.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\opengl\UniformBufferObject.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\particles\Particle.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\particles\ParticleEmissionProperties.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\particles\ParticleEmitter.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\particles\ParticleSystem.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\pipelines\DeferredPipeline.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\pipelines\DeferredShadowCasters.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\pipelines\IRenderingPipeline.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\postprocess\Bloom.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\postprocess\DepthOfField.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\postprocess\Fog.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\postprocess\FXAA.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\postprocess\GodRays.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\postprocess\HDR.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\postprocess\SMAA.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\postprocess\SSAO.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\Renderer.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\RendererIncludes.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\RendererState.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\RenderGraph.h" />
-    <ClInclude Include="include\serenity\core\engine\renderer\SMAA_LUT.h" />
-    <ClInclude Include="include\serenity\core\engine\resources\Engine_BuiltInShaders.h" />
-    <ClInclude Include="include\serenity\core\engine\resources\Engine_Resources.h" />
-    <ClInclude Include="include\serenity\core\engine\resources\Handle.h" />
-    <ClInclude Include="include\serenity\core\engine\resources\IResourceVector.h" />
-    <ClInclude Include="include\serenity\core\engine\resources\Resource.h" />
-    <ClInclude Include="include\serenity\core\engine\resources\ResourceModule.h" />
-    <ClInclude Include="include\serenity\core\engine\resources\ResourcesIncludes.h" />
-    <ClInclude Include="include\serenity\core\engine\resources\ResourceVector.h" />
-    <ClInclude Include="include\serenity\core\engine\scene\Camera.h" />
-    <ClInclude Include="include\serenity\core\engine\scene\LightContainer.h" />
-    <ClInclude Include="include\serenity\core\engine\scene\LightsModule.h" />
-    <ClInclude Include="include\serenity\core\engine\scene\Scene.h" />
-    <ClInclude Include="include\serenity\core\engine\scene\SceneOptions.h" />
-    <ClInclude Include="include\serenity\core\engine\scene\Skybox.h" />
-    <ClInclude Include="include\serenity\core\engine\scene\Viewport.h" />
-    <ClInclude Include="include\serenity\core\engine\scene\ViewportIncludes.h" />
-    <ClInclude Include="include\serenity\core\engine\shaders\Shader.h" />
-    <ClInclude Include="include\serenity\core\engine\shaders\ShaderHelper.h" />
-    <ClInclude Include="include\serenity\core\engine\shaders\ShaderIncludes.h" />
-    <ClInclude Include="include\serenity\core\engine\shaders\ShaderProgram.h" />
-    <ClInclude Include="include\serenity\core\engine\sounds\SoundBaseClass.h" />
-    <ClInclude Include="include\serenity\core\engine\sounds\SoundData.h" />
-    <ClInclude Include="include\serenity\core\engine\sounds\SoundEffect.h" />
-    <ClInclude Include="include\serenity\core\engine\sounds\SoundModule.h" />
-    <ClInclude Include="include\serenity\core\engine\sounds\SoundMusic.h" />
-    <ClInclude Include="include\serenity\core\engine\sounds\SoundQueue.h" />
-    <ClInclude Include="include\serenity\core\engine\sounds\Sounds.h" />
-    <ClInclude Include="include\serenity\core\engine\system\cursor\Cursor.h" />
-    <ClInclude Include="include\serenity\core\engine\system\Engine.h" />
-    <ClInclude Include="include\serenity\core\engine\system\EngineEventHandler.h" />
-    <ClInclude Include="include\serenity\core\engine\system\EngineGameFunctions.h" />
-    <ClInclude Include="include\serenity\core\engine\system\EngineMisc.h" />
-    <ClInclude Include="include\serenity\core\engine\system\EngineOptions.h" />
-    <ClInclude Include="include\serenity\core\engine\system\Macros.h" />
-    <ClInclude Include="include\serenity\core\engine\system\TypeDefs.h" />
-    <ClInclude Include="include\serenity\core\engine\system\window\Window.h" />
-    <ClInclude Include="include\serenity\core\engine\system\window\WindowData.h" />
-    <ClInclude Include="include\serenity\core\engine\system\window\WindowIncludes.h" />
-    <ClInclude Include="include\serenity\core\engine\system\window\WindowThread.h" />
-    <ClInclude Include="include\serenity\core\engine\textures\DDS.h" />
-    <ClInclude Include="include\serenity\core\engine\textures\Texture.h" />
-    <ClInclude Include="include\serenity\core\engine\textures\TextureIncludes.h" />
-    <ClInclude Include="include\serenity\core\engine\textures\TextureLoader.h" />
-    <ClInclude Include="include\serenity\core\engine\textures\TextureRequest.h" />
-    <ClInclude Include="include\serenity\core\engine\threading\ThreadingHelpers.h" />
-    <ClInclude Include="include\serenity\core\engine\threading\ThreadingModule.h" />
-    <ClInclude Include="include\serenity\core\engine\threading\ThreadPool.h" />
-    <ClInclude Include="include\serenity\core\engine\threading\WorkerThreadContainer.h" />
-    <ClInclude Include="include\serenity\core\engine\types\ColorVector.h" />
-    <ClInclude Include="include\serenity\core\engine\types\Flag.h" />
-    <ClInclude Include="include\serenity\core\engine\types\SmallMap.h" />
-    <ClInclude Include="include\serenity\core\engine\types\StaticString.h" />
-    <ClInclude Include="include\serenity\core\engine\types\Types.h" />
-    <ClInclude Include="include\serenity\core\engine\types\ViewPointer.h" />
-    <ClInclude Include="include\serenity\core\engine\utils\BlockProfiler.h" />
-    <ClInclude Include="include\serenity\core\engine\utils\Engine_Debugging.h" />
-    <ClInclude Include="include\serenity\core\engine\utils\Logger.h" />
-    <ClInclude Include="include\serenity\core\engine\utils\Utils.h" />
-    <ClInclude Include="include\serenity\core\Terrain.h" />
+    <ClInclude Include="include\serenity\algorithms\MergeSort.h" />
+    <ClInclude Include="include\serenity\algorithms\RadixSort.h" />
+    <ClInclude Include="include\serenity\Constraint.h" />
+    <ClInclude Include="include\serenity\containers\BST.h" />
+    <ClInclude Include="include\serenity\containers\CircularBuffer.h" />
+    <ClInclude Include="include\serenity\containers\Freelist.h" />
+    <ClInclude Include="include\serenity\containers\Heap.h" />
+    <ClInclude Include="include\serenity\containers\PartialArray.h" />
+    <ClInclude Include="include\serenity\containers\PartialVectorPOD.h" />
+    <ClInclude Include="include\serenity\containers\Queue_ts.h" />
+    <ClInclude Include="include\serenity\containers\SparseSet.h" />
+    <ClInclude Include="include\serenity\containers\TypeRegistry.h" />
+    <ClInclude Include="include\serenity\dependencies\glm.h" />
+    <ClInclude Include="include\serenity\discord\Discord.h" />
+    <ClInclude Include="include\serenity\discord\DiscordActivityEvent.h" />
+    <ClInclude Include="include\serenity\discord\DiscordModule.h" />
+    <ClInclude Include="include\serenity\discord\src\achievement_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\activity_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\application_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\core.h" />
+    <ClInclude Include="include\serenity\discord\src\discord.h" />
+    <ClInclude Include="include\serenity\discord\src\event.h" />
+    <ClInclude Include="include\serenity\discord\src\ffi.h" />
+    <ClInclude Include="include\serenity\discord\src\image_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\lobby_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\network_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\overlay_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\relationship_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\storage_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\store_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\types.h" />
+    <ClInclude Include="include\serenity\discord\src\user_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\voice_manager.h" />
     <ClInclude Include="include\serenity\ecs\ComponentBody.h" />
     <ClInclude Include="include\serenity\ecs\ComponentCamera.h" />
     <ClInclude Include="include\serenity\ecs\ComponentLogic.h" />
@@ -899,6 +740,179 @@
     <ClInclude Include="include\serenity\ecs\EntityBody.h" />
     <ClInclude Include="include\serenity\ecs\EntityRAII.h" />
     <ClInclude Include="include\serenity\ecs\EntityRAIIBody.h" />
+    <ClInclude Include="include\serenity\events\Event.h" />
+    <ClInclude Include="include\serenity\events\EventDispatcher.h" />
+    <ClInclude Include="include\serenity\events\EventIncludes.h" />
+    <ClInclude Include="include\serenity\events\EventModule.h" />
+    <ClInclude Include="include\serenity\events\Observer.h" />
+    <ClInclude Include="include\serenity\input\Joystick\JoystickAxises.h" />
+    <ClInclude Include="include\serenity\input\Joystick\JoystickModule.h" />
+    <ClInclude Include="include\serenity\input\Keyboard\KeyboardKeys.h" />
+    <ClInclude Include="include\serenity\input\Keyboard\KeyboardModule.h" />
+    <ClInclude Include="include\serenity\input\Mouse\MouseButtons.h" />
+    <ClInclude Include="include\serenity\input\Mouse\MouseModule.h" />
+    <ClInclude Include="include\serenity\lights\DirectionalLight.h" />
+    <ClInclude Include="include\serenity\lights\LightIncludes.h" />
+    <ClInclude Include="include\serenity\lights\LightProbe.h" />
+    <ClInclude Include="include\serenity\lights\Lights.h" />
+    <ClInclude Include="include\serenity\lights\PointLight.h" />
+    <ClInclude Include="include\serenity\lights\ProjectionLight.h" />
+    <ClInclude Include="include\serenity\lights\RodLight.h" />
+    <ClInclude Include="include\serenity\lights\SpotLight.h" />
+    <ClInclude Include="include\serenity\lights\SunLight.h" />
+    <ClInclude Include="include\serenity\lua\Lua.h" />
+    <ClInclude Include="include\serenity\lua\LuaBinder.h" />
+    <ClInclude Include="include\serenity\lua\LuaIncludes.h" />
+    <ClInclude Include="include\serenity\lua\LuaModule.h" />
+    <ClInclude Include="include\serenity\lua\LuaScript.h" />
+    <ClInclude Include="include\serenity\lua\LuaState.h" />
+    <ClInclude Include="include\serenity\math\BigNumbers.h" />
+    <ClInclude Include="include\serenity\math\Engine_Math.h" />
+    <ClInclude Include="include\serenity\math\MathCompression.h" />
+    <ClInclude Include="include\serenity\math\shapes\Plane.h" />
+    <ClInclude Include="include\serenity\math\shapes\Pyramid.h" />
+    <ClInclude Include="include\serenity\math\SimplexNoise.h" />
+    <ClInclude Include="include\serenity\model\ModelInstance.h" />
+    <ClInclude Include="include\serenity\model\ModelInstanceAnimation.h" />
+    <ClInclude Include="include\serenity\model\ModelInstanceHandle.h" />
+    <ClInclude Include="include\serenity\model\ModelInstanceIncludes.h" />
+    <ClInclude Include="include\serenity\networking\ISocket.h" />
+    <ClInclude Include="include\serenity\networking\ListenerTCP.h" />
+    <ClInclude Include="include\serenity\networking\Networking.h" />
+    <ClInclude Include="include\serenity\networking\NetworkingIncludes.h" />
+    <ClInclude Include="include\serenity\networking\NetworkingModule.h" />
+    <ClInclude Include="include\serenity\networking\Packet.h" />
+    <ClInclude Include="include\serenity\networking\server\Server.h" />
+    <ClInclude Include="include\serenity\networking\server\ServerClient.h" />
+    <ClInclude Include="include\serenity\networking\server\ServerClientsContainer.h" />
+    <ClInclude Include="include\serenity\networking\server\ServerThread.h" />
+    <ClInclude Include="include\serenity\networking\server\ServerThreadCollection.h" />
+    <ClInclude Include="include\serenity\networking\SocketManager.h" />
+    <ClInclude Include="include\serenity\networking\SocketTCP.h" />
+    <ClInclude Include="include\serenity\networking\SocketUDP.h" />
+    <ClInclude Include="include\serenity\physics\Collision.h" />
+    <ClInclude Include="include\serenity\physics\DebugDrawer.h" />
+    <ClInclude Include="include\serenity\physics\PhysicsIncludes.h" />
+    <ClInclude Include="include\serenity\physics\PhysicsModule.h" />
+    <ClInclude Include="include\serenity\physics\PhysicsPipeline.h" />
+    <ClInclude Include="include\serenity\renderer\Decal.h" />
+    <ClInclude Include="include\serenity\renderer\FramebufferObject.h" />
+    <ClInclude Include="include\serenity\renderer\FullscreenItems.h" />
+    <ClInclude Include="include\serenity\renderer\GBuffer.h" />
+    <ClInclude Include="include\serenity\renderer\GLImageConstants.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\Extensions.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\Common.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\Compression.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\DepthOfFieldCode.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\Lighting.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\Materials.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\SSAOCode.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\VersionConversion.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\OpenGL.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\State.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\UniformBufferObject.h" />
+    <ClInclude Include="include\serenity\renderer\particles\Particle.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleEmissionProperties.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleEmitter.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleSystem.h" />
+    <ClInclude Include="include\serenity\renderer\pipelines\DeferredPipeline.h" />
+    <ClInclude Include="include\serenity\renderer\pipelines\DeferredShadowCasters.h" />
+    <ClInclude Include="include\serenity\renderer\pipelines\IRenderingPipeline.h" />
+    <ClInclude Include="include\serenity\renderer\postprocess\Bloom.h" />
+    <ClInclude Include="include\serenity\renderer\postprocess\DepthOfField.h" />
+    <ClInclude Include="include\serenity\renderer\postprocess\Fog.h" />
+    <ClInclude Include="include\serenity\renderer\postprocess\FXAA.h" />
+    <ClInclude Include="include\serenity\renderer\postprocess\GodRays.h" />
+    <ClInclude Include="include\serenity\renderer\postprocess\HDR.h" />
+    <ClInclude Include="include\serenity\renderer\postprocess\SMAA.h" />
+    <ClInclude Include="include\serenity\renderer\postprocess\SSAO.h" />
+    <ClInclude Include="include\serenity\renderer\Renderer.h" />
+    <ClInclude Include="include\serenity\renderer\RendererIncludes.h" />
+    <ClInclude Include="include\serenity\renderer\RendererState.h" />
+    <ClInclude Include="include\serenity\renderer\RenderGraph.h" />
+    <ClInclude Include="include\serenity\renderer\SMAA_LUT.h" />
+    <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h" />
+    <ClInclude Include="include\serenity\resources\Engine_Resources.h" />
+    <ClInclude Include="include\serenity\resources\font\Font.h" />
+    <ClInclude Include="include\serenity\resources\font\FontIncludes.h" />
+    <ClInclude Include="include\serenity\resources\Handle.h" />
+    <ClInclude Include="include\serenity\resources\IResourceVector.h" />
+    <ClInclude Include="include\serenity\resources\material\Material.h" />
+    <ClInclude Include="include\serenity\resources\material\MaterialComponent.h" />
+    <ClInclude Include="include\serenity\resources\material\MaterialEnums.h" />
+    <ClInclude Include="include\serenity\resources\material\MaterialLayer.h" />
+    <ClInclude Include="include\serenity\resources\material\MaterialLoader.h" />
+    <ClInclude Include="include\serenity\resources\material\MaterialRequest.h" />
+    <ClInclude Include="include\serenity\resources\mesh\AnimationData.h" />
+    <ClInclude Include="include\serenity\resources\mesh\AnimationIncludes.h" />
+    <ClInclude Include="include\serenity\resources\mesh\BuiltInMeshes.h" />
+    <ClInclude Include="include\serenity\resources\mesh\Mesh.h" />
+    <ClInclude Include="include\serenity\resources\mesh\MeshCollisionFactory.h" />
+    <ClInclude Include="include\serenity\resources\mesh\MeshImportedData.h" />
+    <ClInclude Include="include\serenity\resources\mesh\MeshIncludes.h" />
+    <ClInclude Include="include\serenity\resources\mesh\MeshLoading.h" />
+    <ClInclude Include="include\serenity\resources\mesh\MeshRequest.h" />
+    <ClInclude Include="include\serenity\resources\mesh\Skeleton.h" />
+    <ClInclude Include="include\serenity\resources\mesh\smsh.h" />
+    <ClInclude Include="include\serenity\resources\mesh\VertexAttributeInfo.h" />
+    <ClInclude Include="include\serenity\resources\mesh\VertexBufferObject.h" />
+    <ClInclude Include="include\serenity\resources\mesh\VertexData.h" />
+    <ClInclude Include="include\serenity\resources\mesh\VertexDataFormat.h" />
+    <ClInclude Include="include\serenity\resources\Resource.h" />
+    <ClInclude Include="include\serenity\resources\ResourceModule.h" />
+    <ClInclude Include="include\serenity\resources\ResourcesIncludes.h" />
+    <ClInclude Include="include\serenity\resources\ResourceVector.h" />
+    <ClInclude Include="include\serenity\resources\shader\Shader.h" />
+    <ClInclude Include="include\serenity\resources\shader\ShaderHelper.h" />
+    <ClInclude Include="include\serenity\resources\shader\ShaderIncludes.h" />
+    <ClInclude Include="include\serenity\resources\shader\ShaderProgram.h" />
+    <ClInclude Include="include\serenity\resources\sound\SoundBaseClass.h" />
+    <ClInclude Include="include\serenity\resources\sound\SoundData.h" />
+    <ClInclude Include="include\serenity\resources\sound\SoundEffect.h" />
+    <ClInclude Include="include\serenity\resources\sound\SoundModule.h" />
+    <ClInclude Include="include\serenity\resources\sound\SoundMusic.h" />
+    <ClInclude Include="include\serenity\resources\sound\SoundQueue.h" />
+    <ClInclude Include="include\serenity\resources\sound\Sounds.h" />
+    <ClInclude Include="include\serenity\resources\texture\DDS.h" />
+    <ClInclude Include="include\serenity\resources\texture\Texture.h" />
+    <ClInclude Include="include\serenity\resources\texture\TextureIncludes.h" />
+    <ClInclude Include="include\serenity\resources\texture\TextureLoader.h" />
+    <ClInclude Include="include\serenity\resources\texture\TextureRequest.h" />
+    <ClInclude Include="include\serenity\scene\Camera.h" />
+    <ClInclude Include="include\serenity\scene\LightContainer.h" />
+    <ClInclude Include="include\serenity\scene\LightsModule.h" />
+    <ClInclude Include="include\serenity\scene\Scene.h" />
+    <ClInclude Include="include\serenity\scene\SceneOptions.h" />
+    <ClInclude Include="include\serenity\scene\Skybox.h" />
+    <ClInclude Include="include\serenity\scene\Viewport.h" />
+    <ClInclude Include="include\serenity\scene\ViewportIncludes.h" />
+    <ClInclude Include="include\serenity\system\cursor\Cursor.h" />
+    <ClInclude Include="include\serenity\system\Engine.h" />
+    <ClInclude Include="include\serenity\system\EngineEventHandler.h" />
+    <ClInclude Include="include\serenity\system\EngineGameFunctions.h" />
+    <ClInclude Include="include\serenity\system\EngineMisc.h" />
+    <ClInclude Include="include\serenity\system\EngineOptions.h" />
+    <ClInclude Include="include\serenity\system\Macros.h" />
+    <ClInclude Include="include\serenity\system\TypeDefs.h" />
+    <ClInclude Include="include\serenity\system\window\Window.h" />
+    <ClInclude Include="include\serenity\system\window\WindowData.h" />
+    <ClInclude Include="include\serenity\system\window\WindowIncludes.h" />
+    <ClInclude Include="include\serenity\system\window\WindowThread.h" />
+    <ClInclude Include="include\serenity\Terrain.h" />
+    <ClInclude Include="include\serenity\threading\ThreadingHelpers.h" />
+    <ClInclude Include="include\serenity\threading\ThreadingModule.h" />
+    <ClInclude Include="include\serenity\threading\ThreadPool.h" />
+    <ClInclude Include="include\serenity\threading\WorkerThreadContainer.h" />
+    <ClInclude Include="include\serenity\types\ColorVector.h" />
+    <ClInclude Include="include\serenity\types\Flag.h" />
+    <ClInclude Include="include\serenity\types\SmallMap.h" />
+    <ClInclude Include="include\serenity\types\StaticString.h" />
+    <ClInclude Include="include\serenity\types\Types.h" />
+    <ClInclude Include="include\serenity\types\ViewPointer.h" />
+    <ClInclude Include="include\serenity\utils\BlockProfiler.h" />
+    <ClInclude Include="include\serenity\utils\Engine_Debugging.h" />
+    <ClInclude Include="include\serenity\utils\Logger.h" />
+    <ClInclude Include="include\serenity\utils\Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

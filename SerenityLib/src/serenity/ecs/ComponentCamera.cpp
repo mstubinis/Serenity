@@ -1,9 +1,9 @@
 #include <serenity/ecs/ComponentCamera.h>
-#include <serenity/core/engine/resources/Engine_Resources.h>
-#include <serenity/core/engine/math/Engine_Math.h>
-#include <serenity/core/engine/threading/ThreadingModule.h>
-#include <serenity/core/engine/system/Engine.h>
-#include <serenity/core/engine/scene/Camera.h>
+#include <serenity/resources/Engine_Resources.h>
+#include <serenity/math/Engine_Math.h>
+#include <serenity/threading/ThreadingModule.h>
+#include <serenity/system/Engine.h>
+#include <serenity/scene/Camera.h>
 
 using namespace Engine;
 using namespace Engine::priv;
@@ -99,15 +99,15 @@ ComponentCamera& ComponentCamera::operator=(ComponentCamera&& other) noexcept {
     return *this;
 }
 
-void ComponentCamera::resize(unsigned int width, unsigned int height) noexcept {
+void ComponentCamera::resize(uint32_t width, uint32_t height) noexcept {
     if (m_Type == CameraType::Perspective) {
         m_AspectRatio = width / (float)height;
     }
     priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
 }
-unsigned int ComponentCamera::pointIntersectTest(const glm_vec3& position) const noexcept {
+uint32_t ComponentCamera::pointIntersectTest(const glm_vec3& position) const noexcept {
     auto zero = (decimal)0.0;
-    for (unsigned int i = 0; i < m_FrustumPlanes.size(); ++i) {
+    for (uint32_t i = 0; i < m_FrustumPlanes.size(); ++i) {
         auto d = m_FrustumPlanes[i].x * position.x + m_FrustumPlanes[i].y * position.y + m_FrustumPlanes[i].z * position.z + m_FrustumPlanes[i].w;
         if (d > zero) {
             return 0; //outside
@@ -115,10 +115,10 @@ unsigned int ComponentCamera::pointIntersectTest(const glm_vec3& position) const
     }
     return 1; //inside
 }
-unsigned int ComponentCamera::sphereIntersectTest(const glm_vec3& position, float radius) const noexcept {
-    unsigned int res = 1; //inside the viewing frustum
-    auto zero        = (decimal)0.0;
-    auto two         = (decimal)2.0;
+uint32_t ComponentCamera::sphereIntersectTest(const glm_vec3& position, float radius) const noexcept {
+    uint32_t res = 1; //inside the viewing frustum
+    auto zero    = (decimal)0.0;
+    auto two     = (decimal)2.0;
     if (radius <= zero) {
         return 0;
     }

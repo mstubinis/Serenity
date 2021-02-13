@@ -1,6 +1,6 @@
 #include <serenity/ecs/Entity.h>
-#include <serenity/core/engine/scene/Scene.h>
-#include <serenity/core/engine/system/Engine.h>
+#include <serenity/scene/Scene.h>
+#include <serenity/system/Engine.h>
 #include <serenity/ecs/Components.h>
 
 using namespace Engine::priv;
@@ -12,18 +12,18 @@ Entity::Entity(Scene& scene) {
 void Entity::destroy() noexcept {
     if (!null()) {
         Scene* scene_ptr = scene();
-        if (!scene_ptr || (scene_ptr && InternalScenePublicInterface::GetECS(*scene_ptr).getEntityPool().isEntityVersionDifferent(*this))) {
+        if (!scene_ptr || (scene_ptr && PublicScene::GetECS(*scene_ptr).getEntityPool().isEntityVersionDifferent(*this))) {
             return;
         }
-        InternalScenePublicInterface::CleanECS(*scene_ptr, *this);
-        InternalScenePublicInterface::GetECS(*scene_ptr).removeEntity(*this);
+        PublicScene::CleanECS(*scene_ptr, *this);
+        PublicScene::GetECS(*scene_ptr).removeEntity(*this);
     }
 }
 bool Entity::isDestroyed() const noexcept {
     if (!null()) {
         Scene* s = scene();
         if (s) {
-            return InternalScenePublicInterface::GetECS(*s).getEntityPool().isEntityVersionDifferent(*this);
+            return PublicScene::GetECS(*s).getEntityPool().isEntityVersionDifferent(*this);
         }
     }
     return false;
@@ -132,21 +132,21 @@ luabridge::LuaRef Entity::getComponent(const std::string& componentClassName) {
     std::string global_name = std::to_string(m_Data) + componentClassName;
     auto* global_name_cstr  = global_name.c_str();
     if (componentClassName == "ComponentBody") {
-        return InternalEntityPublicInterface::GetComponent<ComponentBody>(L, *this, global_name_cstr);
+        return PublicEntity::GetComponent<ComponentBody>(L, *this, global_name_cstr);
     }else if (componentClassName == "ComponentModel") {
-        return InternalEntityPublicInterface::GetComponent<ComponentModel>(L, *this, global_name_cstr);
+        return PublicEntity::GetComponent<ComponentModel>(L, *this, global_name_cstr);
     }else if (componentClassName == "ComponentCamera") {
-        return InternalEntityPublicInterface::GetComponent<ComponentCamera>(L, *this, global_name_cstr);
+        return PublicEntity::GetComponent<ComponentCamera>(L, *this, global_name_cstr);
     }else if (componentClassName == "ComponentName") {
-        return InternalEntityPublicInterface::GetComponent<ComponentName>(L, *this, global_name_cstr);
+        return PublicEntity::GetComponent<ComponentName>(L, *this, global_name_cstr);
     }else if (componentClassName == "ComponentLogic") {
-        return InternalEntityPublicInterface::GetComponent<ComponentLogic>(L, *this, global_name_cstr);
+        return PublicEntity::GetComponent<ComponentLogic>(L, *this, global_name_cstr);
     }else if (componentClassName == "ComponentLogic1") {
-        return InternalEntityPublicInterface::GetComponent<ComponentLogic1>(L, *this, global_name_cstr);
+        return PublicEntity::GetComponent<ComponentLogic1>(L, *this, global_name_cstr);
     }else if (componentClassName == "ComponentLogic2") {
-        return InternalEntityPublicInterface::GetComponent<ComponentLogic2>(L, *this, global_name_cstr);
+        return PublicEntity::GetComponent<ComponentLogic2>(L, *this, global_name_cstr);
     }else if (componentClassName == "ComponentLogic3") {
-        return InternalEntityPublicInterface::GetComponent<ComponentLogic3>(L, *this, global_name_cstr);
+        return PublicEntity::GetComponent<ComponentLogic3>(L, *this, global_name_cstr);
     }else{
         luabridge::setGlobal(L, nullptr, global_name_cstr); // Prevents errors
         //printError("Component: (" + componentClassName + ") not found.");
@@ -154,7 +154,7 @@ luabridge::LuaRef Entity::getComponent(const std::string& componentClassName) {
     return luabridge::getGlobal(L, global_name_cstr);
 }
 
-Engine::view_ptr<Engine::priv::ECS> Engine::priv::InternalEntityPublicInterface::GetECS(Entity entity) {
+Engine::view_ptr<Engine::priv::ECS> Engine::priv::PublicEntity::GetECS(Entity entity) {
     Scene* scene_ptr = entity.scene();
-    return (scene_ptr) ? &Engine::priv::InternalScenePublicInterface::GetECS(*scene_ptr) : nullptr;
+    return (scene_ptr) ? &Engine::priv::PublicScene::GetECS(*scene_ptr) : nullptr;
 }

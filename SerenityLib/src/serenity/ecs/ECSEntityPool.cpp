@@ -1,5 +1,5 @@
 #include <serenity/ecs/ECSEntityPool.h>
-#include <serenity/core/engine/scene/Scene.h>
+#include <serenity/scene/Scene.h>
 
 void Engine::priv::ECSEntityPool::init(const SceneOptions& options) {
     m_Pool.reserve(options.maxAmountOfEntities);

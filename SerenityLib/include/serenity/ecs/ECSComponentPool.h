@@ -4,7 +4,7 @@
 
 struct SceneOptions;
 
-#include <serenity/core/engine/containers/SparseSet.h>
+#include <serenity/containers/SparseSet.h>
 
 namespace Engine::priv {
     template <typename COMPONENT>
@@ -33,10 +33,10 @@ namespace Engine::priv {
             inline bool removeComponent(uint32_t entityID) noexcept {
                 return Engine::sparse_set<COMPONENT>::remove(entityID);
             }
-            inline constexpr COMPONENT* getComponent(Entity entity) const noexcept {
+            [[nodiscard]] inline constexpr COMPONENT* getComponent(Entity entity) const noexcept {
                 return Engine::sparse_set<COMPONENT>::get(entity.id());
             }
-            inline constexpr COMPONENT* getComponent(uint32_t entityID) const noexcept {
+            [[nodiscard]] inline constexpr COMPONENT* getComponent(uint32_t entityID) const noexcept {
                 return Engine::sparse_set<COMPONENT>::get(entityID);
             }
     };

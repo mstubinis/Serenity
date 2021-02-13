@@ -8,8 +8,8 @@ class ComponentBody;
 class Scene;
 
 #include <serenity/ecs/Entity.h>
-#include <serenity/core/engine/physics/PhysicsIncludes.h>
-#include <serenity/core/engine/dependencies/glm.h>
+#include <serenity/physics/PhysicsIncludes.h>
+#include <serenity/dependencies/glm.h>
 
 class EntityBody : public Entity {
     public:
@@ -25,18 +25,18 @@ class EntityBody : public Entity {
 
         virtual ~EntityBody() = default;
 
-        virtual float mass() const;
-        virtual glm_quat getRotation() const;
-        virtual glm_vec3 getScale() const;
-        virtual glm_vec3 getPosition() const;
-        virtual glm_vec3 getLocalPosition() const;
+        virtual [[nodiscard]] float mass() const;
+        virtual [[nodiscard]] glm_quat getRotation() const;
+        virtual [[nodiscard]] glm_vec3 getScale() const;
+        virtual [[nodiscard]] glm_vec3 getPosition() const;
+        virtual [[nodiscard]] glm_vec3 getLocalPosition() const;
 
-        const glm_vec3& forward() const;
-        const glm_vec3& right() const;
-        const glm_vec3& up() const;
+        const [[nodiscard]]glm_vec3& forward() const;
+        const [[nodiscard]]glm_vec3& right() const;
+        const [[nodiscard]]glm_vec3& up() const;
 
-        virtual glm_vec3 getLinearVelocity() const;
-        virtual glm_vec3 getAngularVelocity() const;
+        virtual [[nodiscard]] glm_vec3 getLinearVelocity() const;
+        virtual [[nodiscard]] glm_vec3 getAngularVelocity() const;
 
         virtual void translate(const glm_vec3& translation, bool local = true);
         virtual void translate(decimal x, decimal y, decimal z, bool local = true);

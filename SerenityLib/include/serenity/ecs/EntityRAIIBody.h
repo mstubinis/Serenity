@@ -34,22 +34,22 @@ class EntityRAIIBody final {
             m_Entity.destroy();
         }
 
-        inline uint32_t id() const noexcept { return id(m_Entity.m_Data); }
-        inline uint32_t sceneID() const noexcept { return sceneID(m_Entity.m_Data); }
-        inline uint32_t versionID() const noexcept { return versionID(m_Entity.m_Data); }
+        [[nodiscard]] inline uint32_t id() const noexcept { return id(m_Entity.m_Data); }
+        [[nodiscard]] inline uint32_t sceneID() const noexcept { return sceneID(m_Entity.m_Data); }
+        [[nodiscard]] inline uint32_t versionID() const noexcept { return versionID(m_Entity.m_Data); }
 
-        static inline uint32_t id(uint32_t data) noexcept { return Entity::id(data); }
-        static inline uint32_t sceneID(uint32_t data) noexcept { return Entity::sceneID(data); }
-        static inline uint32_t versionID(uint32_t data) noexcept { return Entity::versionID(data); }
+        [[nodiscard]] static inline uint32_t id(uint32_t data) noexcept { return Entity::id(data); }
+        [[nodiscard]] static inline uint32_t sceneID(uint32_t data) noexcept { return Entity::sceneID(data); }
+        [[nodiscard]] static inline uint32_t versionID(uint32_t data) noexcept { return Entity::versionID(data); }
 
-        inline bool null() const noexcept { return m_Entity.null(); }
-        inline bool isDestroyed() const noexcept { return m_Entity.isDestroyed(); }
+        [[nodiscard]] inline bool null() const noexcept { return m_Entity.null(); }
+        [[nodiscard]] inline bool isDestroyed() const noexcept { return m_Entity.isDestroyed(); }
 
         inline operator Entity() const noexcept { return m_Entity; }
         inline operator EntityBody() const noexcept { return m_Entity; }
 
-        inline Engine::view_ptr<Scene> scene() const noexcept { return m_Entity.scene(); }
-        inline bool hasParent() const noexcept { return m_Entity.hasParent(); }
+        [[nodiscard]] inline Engine::view_ptr<Scene> scene() const noexcept { return m_Entity.scene(); }
+        [[nodiscard]] inline bool hasParent() const noexcept { return m_Entity.hasParent(); }
 
         inline void addChild(Entity child) const noexcept { m_Entity.addChild(child); }
         inline void removeChild(Entity child) const noexcept { m_Entity.removeChild(child); }
@@ -61,10 +61,10 @@ class EntityRAIIBody final {
         template<typename T> inline bool removeComponent() noexcept {
             return m_Entity.removeComponent<T>();
         }
-        template<typename T> inline Engine::view_ptr<T> getComponent() const noexcept {
+        template<typename T> [[nodiscard]] inline Engine::view_ptr<T> getComponent() const noexcept {
             return m_Entity.getComponent<T>();
         }
-        template<class ... TYPES> inline std::tuple<TYPES*...> getComponents() const noexcept {
+        template<class ... TYPES> [[nodiscard]] inline std::tuple<TYPES*...> getComponents() const noexcept {
             return m_Entity.getComponents<TYPES...>();
         }
 
@@ -74,24 +74,24 @@ class EntityRAIIBody final {
         inline bool removeComponent(const std::string& componentClassName) {
             return m_Entity.removeComponent(componentClassName);
         }
-        inline luabridge::LuaRef getComponent(const std::string& componentClassName) {
+        [[nodiscard]] inline luabridge::LuaRef getComponent(const std::string& componentClassName) {
             return m_Entity.getComponent(componentClassName);
         }
 
         //
 
-        inline float mass() const noexcept { return m_Entity.mass(); }
-        inline glm_quat getRotation() const noexcept { return m_Entity.getRotation(); }
-        inline glm_vec3 getScale() const noexcept { return m_Entity.getScale(); }
-        inline glm_vec3 getPosition() const noexcept { return m_Entity.getPosition(); }
-        inline glm_vec3 getLocalPosition() const noexcept { return m_Entity.getLocalPosition(); }
+        [[nodiscard]] inline float mass() const noexcept { return m_Entity.mass(); }
+        [[nodiscard]] inline glm_quat getRotation() const noexcept { return m_Entity.getRotation(); }
+        [[nodiscard]] inline glm_vec3 getScale() const noexcept { return m_Entity.getScale(); }
+        [[nodiscard]] inline glm_vec3 getPosition() const noexcept { return m_Entity.getPosition(); }
+        [[nodiscard]] inline glm_vec3 getLocalPosition() const noexcept { return m_Entity.getLocalPosition(); }
 
-        inline const glm_vec3& forward() const noexcept { return m_Entity.forward(); }
-        inline const glm_vec3& right() const noexcept { return m_Entity.right(); }
-        inline const glm_vec3& up() const noexcept { return m_Entity.up(); }
+        [[nodiscard]] inline const glm_vec3& forward() const noexcept { return m_Entity.forward(); }
+        [[nodiscard]] inline const glm_vec3& right() const noexcept { return m_Entity.right(); }
+        [[nodiscard]] inline const glm_vec3& up() const noexcept { return m_Entity.up(); }
 
-        inline glm_vec3 getLinearVelocity() const noexcept { return m_Entity.getLinearVelocity(); }
-        inline glm_vec3 getAngularVelocity() const noexcept { return m_Entity.getAngularVelocity(); }
+        [[nodiscard]] inline glm_vec3 getLinearVelocity() const noexcept { return m_Entity.getLinearVelocity(); }
+        [[nodiscard]] inline glm_vec3 getAngularVelocity() const noexcept { return m_Entity.getAngularVelocity(); }
 
         inline void translate(const glm_vec3& translation, bool local = true) noexcept { m_Entity.translate(translation, local); }
         inline void translate(decimal x, decimal y, decimal z, bool local = true) noexcept { m_Entity.translate(x, y, z, local); }

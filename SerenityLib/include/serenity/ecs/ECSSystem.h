@@ -8,7 +8,7 @@ namespace Engine::priv {
 };
 
 #include <serenity/ecs/ECSSystemConstructorInfo.h>
-#include <serenity/core/engine/containers/SparseSet.h>
+#include <serenity/containers/SparseSet.h>
 
 namespace Engine::priv {
     class ECSSystemBase {
@@ -29,12 +29,12 @@ namespace Engine::priv {
             ECSSystemBase(ECSSystemBase&& other) noexcept            = delete;
             ECSSystemBase& operator=(ECSSystemBase&& other) noexcept = delete;
 
-            virtual void onUpdate(const float dt, Scene&) {}
-            virtual void onComponentAddedToEntity(void*, Entity) {}
-            virtual void onComponentRemovedFromEntity(Entity) {}
-            virtual void onEntityAddedToScene(Entity, Scene&) {}
-            virtual void onSceneLeft(Scene&) {}
-            virtual void onSceneEntered(Scene&) {}
+            inline virtual void onUpdate(const float dt, Scene&) {}
+            inline virtual void onComponentAddedToEntity(void*, Entity) {}
+            inline virtual void onComponentRemovedFromEntity(Entity) {}
+            inline virtual void onEntityAddedToScene(Entity, Scene&) {}
+            inline virtual void onSceneLeft(Scene&) {}
+            inline virtual void onSceneEntered(Scene&) {}
     };
 
     template <class COMPONENT>
@@ -60,22 +60,22 @@ namespace Engine::priv {
             ECSSystem(ECSSystem&& other) noexcept            = delete;
             ECSSystem& operator=(ECSSystem&& other) noexcept = delete;
 
-            void onUpdate(const float dt, Scene& scene) noexcept override { 
+            inline void onUpdate(const float dt, Scene& scene) noexcept override {
                 ECSSystemBase::SUF(this, &componentPool, dt, scene);
 			}
-            void onComponentAddedToEntity(void* component, Entity entity) noexcept override {
+            inline void onComponentAddedToEntity(void* component, Entity entity) noexcept override {
                 ECSSystemBase::CAE(this, component, entity);
 			}
-            void onComponentRemovedFromEntity(Entity entity) noexcept override {
+            inline void onComponentRemovedFromEntity(Entity entity) noexcept override {
                 ECSSystemBase::CRE(this, entity);
             }
-            void onEntityAddedToScene(Entity entity, Scene& scene) noexcept override {
+            inline void onEntityAddedToScene(Entity entity, Scene& scene) noexcept override {
                 ECSSystemBase::EAS(this, &componentPool, entity, scene);
 			}
-            void onSceneEntered(Scene& scene) noexcept override {
+            inline void onSceneEntered(Scene& scene) noexcept override {
                 ECSSystemBase::SEF(this, &componentPool, scene);
 			}
-            void onSceneLeft(Scene& scene) noexcept override {
+            inline void onSceneLeft(Scene& scene) noexcept override {
                 ECSSystemBase::SLF(this, &componentPool, scene);
 			}
     };

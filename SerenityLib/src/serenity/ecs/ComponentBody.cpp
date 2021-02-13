@@ -1,13 +1,13 @@
 #include <serenity/ecs/ComponentBody.h>
 #include <serenity/ecs/ComponentModel.h>
-#include <serenity/core/engine/math/Engine_Math.h>
-#include <serenity/core/engine/threading/ThreadingModule.h>
-#include <serenity/core/engine/physics/PhysicsModule.h>
-#include <serenity/core/engine/model/ModelInstance.h>
-#include <serenity/core/engine/scene/Camera.h>
-#include <serenity/core/engine/resources/Engine_Resources.h>
-#include <serenity/core/engine/physics/Collision.h>
-#include <serenity/core/engine/scene/Scene.h>
+#include <serenity/math/Engine_Math.h>
+#include <serenity/threading/ThreadingModule.h>
+#include <serenity/physics/PhysicsModule.h>
+#include <serenity/model/ModelInstance.h>
+#include <serenity/scene/Camera.h>
+#include <serenity/resources/Engine_Resources.h>
+#include <serenity/physics/Collision.h>
+#include <serenity/scene/Scene.h>
 
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
@@ -276,7 +276,7 @@ void ComponentBody::scale(decimal x, decimal y, decimal z) {
     }
 }
 void ComponentBody::setPosition(decimal x, decimal y, decimal z) {
-    auto& ecs        = Engine::priv::InternalScenePublicInterface::GetECS(*m_Owner.scene());
+    auto& ecs        = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
     auto& system     = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     auto& pcs        = system.ParentChildSystem;
     auto entityIndex = m_Owner.id() - 1U;
@@ -370,7 +370,7 @@ glm_vec3 ComponentBody::getPosition() const { //theres prob a better way to do t
         //auto& tr = p->bullet_rigidBody->getWorldTransform();
         return Math::btVectorToGLM(tr.getOrigin());
     }
-    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(*m_Owner.scene());
+    auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
     auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     auto& matrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return Math::getMatrixPosition(matrix);
@@ -465,7 +465,7 @@ glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way to do t
         }
         return modelMatrix_;
     }
-    auto& ecs         = Engine::priv::InternalScenePublicInterface::GetECS(*m_Owner.scene());
+    auto& ecs         = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
     auto& system      = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     auto& worldMatrix = system.ParentChildSystem.WorldTransforms[m_Owner.id() - 1U];
     return worldMatrix;
@@ -674,7 +674,7 @@ void ComponentBody::setMass(float mass) {
 }
 void ComponentBody::addChild(Entity child) const {
     if (child.sceneID() == m_Owner.sceneID()) {
-        auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(*m_Owner.scene());
+        auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
         auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
         auto& pcs    = system.ParentChildSystem;
         pcs.insert(m_Owner.id(), child.id());
@@ -682,14 +682,14 @@ void ComponentBody::addChild(Entity child) const {
 }
 void ComponentBody::removeChild(Entity child) const {
     if (child.sceneID() == m_Owner.sceneID()) {
-        auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(*m_Owner.scene());
+        auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
         auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
         auto& pcs    = system.ParentChildSystem;
         pcs.remove(m_Owner.id(), child.id());
     }
 }
 void ComponentBody::removeAllChildren() const {
-    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(*m_Owner.scene());
+    auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
     auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     auto& pcs    = system.ParentChildSystem;
 
@@ -707,7 +707,7 @@ void ComponentBody::removeAllChildren() const {
     }
 }
 bool ComponentBody::hasParent() const {
-    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(*m_Owner.scene());
+    auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
     auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     auto& pcs    = system.ParentChildSystem;
     return (pcs.Parents[m_Owner.id() - 1U] > 0);
@@ -731,7 +731,7 @@ void ComponentBody::internal_recalculateAllParentChildMatrices(ComponentBody_Sys
     }
 }
 void ComponentBody::recalculateAllParentChildMatrices(Scene& scene) {
-    auto& ecs    = Engine::priv::InternalScenePublicInterface::GetECS(scene);
+    auto& ecs    = Engine::priv::PublicScene::GetECS(scene);
     auto& system = (Engine::priv::ComponentBody_System&)ecs.getSystem<ComponentBody>();
     internal_recalculateAllParentChildMatrices(system);
 }

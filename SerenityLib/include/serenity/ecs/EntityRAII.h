@@ -40,20 +40,20 @@ class EntityRAII final {
         inline bool operator!=(const EntityRAII other) const noexcept { return (m_Entity.m_Data != other.m_Entity.m_Data); }
         inline bool operator==(const Entity other) const noexcept { return (m_Entity.m_Data == other.m_Data); }
         inline bool operator!=(const Entity other) const noexcept { return (m_Entity.m_Data != other.m_Data); }
-        inline bool null() const noexcept { return (m_Entity.m_Data == 0U); }
+        inline [[nodiscard]] bool null() const noexcept { return (m_Entity.m_Data == 0U); }
 
-        inline bool isDestroyed() const noexcept { return m_Entity.isDestroyed(); }
+        inline [[nodiscard]] bool isDestroyed() const noexcept { return m_Entity.isDestroyed(); }
 
-        inline uint32_t id() const noexcept { return id(m_Entity.m_Data); }
-        inline uint32_t sceneID() const noexcept { return sceneID(m_Entity.m_Data); }
-        inline uint32_t versionID() const noexcept { return versionID(m_Entity.m_Data); }
+        inline [[nodiscard]] uint32_t id() const noexcept { return id(m_Entity.m_Data); }
+        inline [[nodiscard]] uint32_t sceneID() const noexcept { return sceneID(m_Entity.m_Data); }
+        inline [[nodiscard]] uint32_t versionID() const noexcept { return versionID(m_Entity.m_Data); }
 
-        static inline uint32_t id(uint32_t data) noexcept { return Entity::id(data); }
-        static inline uint32_t sceneID(uint32_t data) noexcept { return Entity::sceneID(data); }
-        static inline uint32_t versionID(uint32_t data) noexcept { return Entity::versionID(data); }
+        static [[nodiscard]] inline uint32_t id(uint32_t data) noexcept { return Entity::id(data); }
+        static [[nodiscard]] inline uint32_t sceneID(uint32_t data) noexcept { return Entity::sceneID(data); }
+        static [[nodiscard]] inline uint32_t versionID(uint32_t data) noexcept { return Entity::versionID(data); }
 
-        inline Engine::view_ptr<Scene> scene() const noexcept { return m_Entity.scene(); }
-        inline bool hasParent() const noexcept { return m_Entity.hasParent(); }
+        inline [[nodiscard]] Engine::view_ptr<Scene> scene() const noexcept { return m_Entity.scene(); }
+        inline [[nodiscard]] bool hasParent() const noexcept { return m_Entity.hasParent(); }
 
         inline void addChild(Entity child) const noexcept { m_Entity.addChild(child); }
         inline void removeChild(Entity child) const noexcept { m_Entity.removeChild(child); }
@@ -65,10 +65,10 @@ class EntityRAII final {
         template<typename T> inline bool removeComponent() noexcept {
             return m_Entity.removeComponent<T>();
         }
-        template<typename T> inline Engine::view_ptr<T> getComponent() const noexcept {
+        template<typename T> [[nodiscard]] inline Engine::view_ptr<T> getComponent() const noexcept {
             return m_Entity.getComponent<T>();
         }
-        template<class ... TYPES> inline std::tuple<TYPES*...> getComponents() const noexcept {
+        template<class ... TYPES> [[nodiscard]] inline std::tuple<TYPES*...> getComponents() const noexcept {
             return m_Entity.getComponents<TYPES...>();
         }
 
@@ -78,7 +78,7 @@ class EntityRAII final {
         inline bool removeComponent(const std::string& componentClassName) {
             return m_Entity.removeComponent(componentClassName);
         }
-        inline luabridge::LuaRef getComponent(const std::string& componentClassName) {
+        inline [[nodiscard]] luabridge::LuaRef getComponent(const std::string& componentClassName) {
             return m_Entity.getComponent(componentClassName);
         }
 };
