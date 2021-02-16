@@ -20,17 +20,17 @@ class Texture;
 namespace Engine::priv {
     class MaterialLoader final {
         private: 
-            static LoadedResource<Texture> internal_load_texture(const std::string& file, bool mipmapped, ImageInternalFormat, TextureType);
+            static LoadedResource<Texture> internal_load_texture(std::string_view file, bool mipmapped, ImageInternalFormat, TextureType);
         public:
-            static LoadedResource<Texture> LoadTextureDiffuse(const std::string& file);
-            static LoadedResource<Texture> LoadTextureNormal(const std::string& file);
-            static LoadedResource<Texture> LoadTextureGlow(const std::string& file);
-            static LoadedResource<Texture> LoadTextureSpecular(const std::string& file);
-            static LoadedResource<Texture> LoadTextureAO(const std::string& file);
-            static LoadedResource<Texture> LoadTextureMetalness(const std::string& file);
-            static LoadedResource<Texture> LoadTextureSmoothness(const std::string& file);
-            static LoadedResource<Texture> LoadTextureMask(const std::string& file);
-            static LoadedResource<Texture> LoadTextureCubemap(const std::string& file);
+            static LoadedResource<Texture> LoadTextureDiffuse(std::string_view file);
+            static LoadedResource<Texture> LoadTextureNormal(std::string_view file);
+            static LoadedResource<Texture> LoadTextureGlow(std::string_view file);
+            static LoadedResource<Texture> LoadTextureSpecular(std::string_view file);
+            static LoadedResource<Texture> LoadTextureAO(std::string_view file);
+            static LoadedResource<Texture> LoadTextureMetalness(std::string_view file);
+            static LoadedResource<Texture> LoadTextureSmoothness(std::string_view file);
+            static LoadedResource<Texture> LoadTextureMask(std::string_view file);
+            static LoadedResource<Texture> LoadTextureCubemap(std::string_view file);
 
             static void InitBase(Material&);
             static void Init(Material&, Handle diffuse, Handle normal, Handle glow, Handle specular, Handle ao, Handle metalness, Handle smoothness);

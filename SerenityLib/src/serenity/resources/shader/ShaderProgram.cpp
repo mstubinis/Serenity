@@ -35,7 +35,7 @@ namespace Engine::priv {
     }};
 };
 
-ShaderProgram::ShaderProgram(const std::string& in_name, Handle vsHandle, Handle fsHandle)
+ShaderProgram::ShaderProgram(std::string_view in_name, Handle vsHandle, Handle fsHandle)
     : Resource{ ResourceType::ShaderProgram, in_name }
     , m_VertexShader{ vsHandle }
     , m_FragmentShader{ fsHandle }

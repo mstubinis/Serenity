@@ -7,7 +7,7 @@
 Resource::Resource(ResourceType type)
     : m_ResourceType{ type }
 {}
-Resource::Resource(ResourceType type, const std::string& name)
+Resource::Resource(ResourceType type, std::string_view name)
     : Resource{ type }
 {
     m_Name = name;

@@ -277,7 +277,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -403,7 +403,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -499,6 +499,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="include\serenity\resources\mesh\animation\Skeleton.cpp" />
     <ClCompile Include="src\serenity\algorithms\MergeSort.cpp" />
     <ClCompile Include="src\serenity\algorithms\RadixSort.cpp" />
     <ClCompile Include="src\serenity\Constraint.cpp" />
@@ -616,7 +617,8 @@
     <ClCompile Include="src\serenity\resources\material\MaterialLayer.cpp" />
     <ClCompile Include="src\serenity\resources\material\MaterialLoader.cpp" />
     <ClCompile Include="src\serenity\resources\material\MaterialRequest.cpp" />
-    <ClCompile Include="src\serenity\resources\mesh\AnimationData.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\animation\AnimationData.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\animation\AnimationIncludes.cpp" />
     <ClCompile Include="src\serenity\resources\mesh\BuiltInMeshes.cpp" />
     <ClCompile Include="src\serenity\resources\mesh\Mesh.cpp" />
     <ClCompile Include="src\serenity\resources\mesh\MeshCollisionFactory.cpp" />
@@ -843,8 +845,9 @@
     <ClInclude Include="include\serenity\resources\material\MaterialLayer.h" />
     <ClInclude Include="include\serenity\resources\material\MaterialLoader.h" />
     <ClInclude Include="include\serenity\resources\material\MaterialRequest.h" />
-    <ClInclude Include="include\serenity\resources\mesh\AnimationData.h" />
-    <ClInclude Include="include\serenity\resources\mesh\AnimationIncludes.h" />
+    <ClInclude Include="include\serenity\resources\mesh\animation\AnimationData.h" />
+    <ClInclude Include="include\serenity\resources\mesh\animation\AnimationIncludes.h" />
+    <ClInclude Include="include\serenity\resources\mesh\animation\Skeleton.h" />
     <ClInclude Include="include\serenity\resources\mesh\BuiltInMeshes.h" />
     <ClInclude Include="include\serenity\resources\mesh\Mesh.h" />
     <ClInclude Include="include\serenity\resources\mesh\MeshCollisionFactory.h" />
@@ -852,9 +855,7 @@
     <ClInclude Include="include\serenity\resources\mesh\MeshIncludes.h" />
     <ClInclude Include="include\serenity\resources\mesh\MeshLoading.h" />
     <ClInclude Include="include\serenity\resources\mesh\MeshRequest.h" />
-    <ClInclude Include="include\serenity\resources\mesh\Skeleton.h" />
     <ClInclude Include="include\serenity\resources\mesh\smsh.h" />
-    <ClInclude Include="include\serenity\resources\mesh\VertexAttributeInfo.h" />
     <ClInclude Include="include\serenity\resources\mesh\VertexBufferObject.h" />
     <ClInclude Include="include\serenity\resources\mesh\VertexData.h" />
     <ClInclude Include="include\serenity\resources\mesh\VertexDataFormat.h" />

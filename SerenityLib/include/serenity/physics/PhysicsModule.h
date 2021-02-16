@@ -8,7 +8,7 @@ class  btCollisionObject;
 class  ComponentBody;
 class  Camera;
 namespace Engine::priv {
-    struct MeshImportedData;
+    class  MeshImportedData;
     class  GLDebugDrawer;
 };
 

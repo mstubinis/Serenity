@@ -21,7 +21,7 @@ void Engine::priv::MaterialLoader::InitBase(Material& material) {
     material.internal_update_global_material_pool(true);
 }
 
-LoadedResource<Texture> Engine::priv::MaterialLoader::internal_load_texture(const std::string& file, bool mipmapped, ImageInternalFormat format, TextureType textureType) {
+LoadedResource<Texture> Engine::priv::MaterialLoader::internal_load_texture(std::string_view file, bool mipmapped, ImageInternalFormat format, TextureType textureType) {
     LoadedResource<Texture> texture;
     if (!file.empty()) {
         texture = Engine::Resources::getResource<Texture>(file);
@@ -32,31 +32,31 @@ LoadedResource<Texture> Engine::priv::MaterialLoader::internal_load_texture(cons
     }
     return texture;
 }
-LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureDiffuse(const std::string& file) {
+LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureDiffuse(std::string_view file) {
     return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D);
 }
-LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureNormal(const std::string& file) {
+LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureNormal(std::string_view file) {
     return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::RGB8, TextureType::Texture2D);
 }
-LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureGlow(const std::string& file) {
+LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureGlow(std::string_view file) {
     return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::R8, TextureType::Texture2D);
 }
-LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureSpecular(const std::string& file) {
+LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureSpecular(std::string_view file) {
     return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::R8, TextureType::Texture2D);
 }
-LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureAO(const std::string& file) {
+LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureAO(std::string_view file) {
     return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::R8, TextureType::Texture2D);
 }
-LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureMetalness(const std::string& file) {
+LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureMetalness(std::string_view file) {
     return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::R8, TextureType::Texture2D);
 }
-LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureSmoothness(const std::string& file) {
+LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureSmoothness(std::string_view file) {
     return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::R8, TextureType::Texture2D);
 }
-LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureMask(const std::string& file) {
+LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureMask(std::string_view file) {
     return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::R8, TextureType::Texture2D);
 }
-LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureCubemap(const std::string& file) {
+LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureCubemap(std::string_view file) {
     return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::SRGB8_ALPHA8, TextureType::CubeMap);
 }
 void Engine::priv::PublicMaterial::LoadGPU(Material& material) {

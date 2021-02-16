@@ -13,7 +13,7 @@
 using namespace Engine;
 using namespace Engine::priv;
 
-constexpr std::array<glm::vec4, (size_t)MaterialComponentType::_TOTAL> MISC_DATA_INFO{ {
+constexpr std::array<glm::vec4, (size_t)MaterialComponentType::_TOTAL> MISC_DATA_INFO { {
     {1.0f, 1.0f, 1.0f, 1.0f}, //Diffuse
     {1.0f, 1.0f, 1.0f, 1.0f}, //Normal
     {0.0f, 1.0f, 1.0f, 0.0f}, //Glow

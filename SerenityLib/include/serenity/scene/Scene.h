@@ -66,13 +66,11 @@ class Scene: public Observer {
         void preUpdate(const float dt);
         void postUpdate(const float dt);
     public:
-        Scene(const std::string& name);
-        Scene(const std::string& name, const SceneOptions& options);
+        Scene(std::string_view name);
+        Scene(std::string_view name, const SceneOptions& options);
         virtual ~Scene();
 
-        inline void setName(const std::string& name) noexcept { m_Name = name; }
-        inline void setName(std::string&& name) noexcept { m_Name = std::move(name); }
-        inline void setName(const char* name) noexcept { m_Name = name; }
+        inline void setName(std::string_view name) noexcept { m_Name = name; }
         [[nodiscard]] inline constexpr const std::string& name() const noexcept { return m_Name; }
 
         template<class LIGHT, typename ... ARGS> 

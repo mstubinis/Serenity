@@ -16,7 +16,7 @@ namespace Engine::priv {
     class  MeshLoader;
     class  MeshSkeleton;
     class  MeshCollisionFactory;
-    struct MeshImportedData;
+    class  MeshImportedData;
     struct MeshInfoNode;
     class  AnimationData;
     struct PublicMeshRequest;
@@ -25,7 +25,7 @@ namespace Engine::priv {
 };
 
 #include <serenity/resources/mesh/VertexData.h>
-#include <serenity/resources/mesh/Skeleton.h>
+#include <serenity/resources/mesh/animation/Skeleton.h>
 #include <serenity/resources/mesh/MeshCollisionFactory.h>
 #include <serenity/resources/Resource.h>
 #include <serenity/events/Observer.h>
@@ -54,43 +54,30 @@ namespace Engine::priv{
             static void CalculateRadius(Handle meshHandle);
     };
 };
-
+struct MeshNodeData final {
+    std::vector<uint16_t>                   m_NodeHeirarchy;
+    std::vector<Engine::priv::MeshInfoNode> m_Nodes;
+    std::vector<glm::mat4>                  m_NodeTransforms;
+};
 struct MeshCPUData final {
     std::string                                    m_File;
-    glm::vec3                                      m_RadiusBox        = glm::vec3(0.0f);
+    glm::vec3                                      m_RadiusBox        = glm::vec3{ 0.0f };
     mutable Engine::priv::MeshSkeleton*            m_Skeleton         = nullptr;
-    mutable Engine::priv::MeshInfoNode*            m_RootNode         = nullptr;
+
+    MeshNodeData                                   m_NodeData;
+
     mutable Engine::priv::MeshCollisionFactory*    m_CollisionFactory = nullptr;
     mutable VertexData*                            m_VertexData       = nullptr;
     float                                          m_Radius           = 0.0f;
     float                                          m_Threshold        = MESH_DEFAULT_THRESHOLD;
 
     MeshCPUData() = default;
-    MeshCPUData(const MeshCPUData& other);
-    MeshCPUData& operator=(const MeshCPUData& other);
-    MeshCPUData(MeshCPUData&& other) noexcept;
-    MeshCPUData& operator=(MeshCPUData&& other) noexcept;
+    MeshCPUData(const MeshCPUData&);
+    MeshCPUData& operator=(const MeshCPUData&);
+    MeshCPUData(MeshCPUData&&) noexcept;
+    MeshCPUData& operator=(MeshCPUData&&) noexcept;
     ~MeshCPUData() {
-        if (m_RootNode) {
-            std::vector<Engine::priv::MeshInfoNode*> sortedNodes;
-            std::queue<Engine::priv::MeshInfoNode*> q;
-            q.push(m_RootNode);
-            while (!q.empty()) {
-                auto qSize = q.size();
-                while (qSize--) {
-                    auto* front = q.front();
-                    sortedNodes.push_back(front);
-                    for (const auto& child : front->Children) {
-                        q.push(child.get());
-                    }
-                    q.pop();
-                }
-            }
-            SAFE_DELETE_VECTOR(sortedNodes);
-            m_RootNode = nullptr;
-        }
         SAFE_DELETE(m_Skeleton);
-        //SAFE_DELETE(m_RootNode);
         SAFE_DELETE(m_CollisionFactory);
         SAFE_DELETE(m_VertexData);
     }
@@ -124,15 +111,15 @@ class Mesh final: public Resource, public Observer {
         void internal_build_from_terrain(const Terrain& terrain);
     public:
         Mesh();
-        Mesh(VertexData&, const std::string& name, float threshold = MESH_DEFAULT_THRESHOLD);
-        Mesh(const std::string& name, float width, float height, float threshold); //plane
-        Mesh(const std::string& fileOrData, float threshold = MESH_DEFAULT_THRESHOLD); //file or data
-        Mesh(const std::string& name, const Terrain& terrain, float threshold);
+        Mesh(VertexData&, std::string_view name, float threshold = MESH_DEFAULT_THRESHOLD);
+        Mesh(std::string_view name, float width, float height, float threshold); //plane
+        Mesh(std::string_view fileOrData, float threshold = MESH_DEFAULT_THRESHOLD); //file or data
+        Mesh(std::string_view name, const Terrain& terrain, float threshold);
 
-        Mesh(const Mesh& other)                 = delete;
-        Mesh& operator=(const Mesh& other)      = delete;
-        Mesh(Mesh&& other) noexcept;
-        Mesh& operator=(Mesh&& other) noexcept;
+        Mesh(const Mesh&)                 = delete;
+        Mesh& operator=(const Mesh&)      = delete;
+        Mesh(Mesh&&) noexcept;
+        Mesh& operator=(Mesh&&) noexcept;
         ~Mesh();
 
         inline void setCustomBindFunctor(const bind_func& functor) noexcept { m_CustomBindFunctor = functor; }
@@ -140,7 +127,7 @@ class Mesh final: public Resource, public Observer {
         inline void setCustomBindFunctor(bind_func&& functor) noexcept { m_CustomBindFunctor = std::move(functor); }
         inline void setCustomUnbindFunctor(unbind_func&& functor) noexcept { m_CustomUnbindFunctor = std::move(functor); }
 
-        [[nodiscard]] std::unordered_map<std::string, Engine::priv::AnimationData>& getAnimationData();
+        [[nodiscard]] Engine::unordered_string_map<std::string, Engine::priv::AnimationData>& getAnimationData();
         [[nodiscard]] inline constexpr const glm::vec3& getRadiusBox() const noexcept { return m_CPUData.m_RadiusBox; }
         [[nodiscard]] inline constexpr float getRadius() const noexcept { return m_CPUData.m_Radius; }
         [[nodiscard]] inline constexpr const VertexData& getVertexData() const noexcept { return *m_CPUData.m_VertexData; }

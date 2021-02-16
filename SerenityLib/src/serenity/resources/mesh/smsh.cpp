@@ -2,7 +2,7 @@
 #include <serenity/resources/mesh/smsh.h>
 #include <serenity/math/Engine_Math.h>
 #include <serenity/resources/mesh/Mesh.h>
-#include <serenity/resources/mesh/Skeleton.h>
+#include <serenity/resources/mesh/animation/Skeleton.h>
 #include <serenity/system/TypeDefs.h>
 #include <fstream>
 #include <boost/iostreams/device/mapped_file.hpp>
@@ -108,7 +108,7 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
         }
     }
     cpuData.m_VertexData->setIndices(indices.data(), indices.size(), MeshModifyFlags::RecalculateTriangles);
-
+    /*
     //animation data
     if (smsh_header.m_NumberOfBones > 0U) {
         auto lamda_read_mat4_as_half_floats = [&blockStart, &streamDataBuffer](glm::mat4& inMatrix) {
@@ -121,27 +121,27 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
             }
         };
         SAFE_DELETE(cpuData.m_Skeleton);
-        cpuData.m_Skeleton = NEW Engine::priv::MeshSkeleton();
-        cpuData.m_Skeleton->m_NumBones = smsh_header.m_NumberOfBones;
+        cpuData.m_Skeleton = NEW Engine::priv::MeshSkeleton{};
+        cpuData.m_Skeleton->m_BoneInfo.resize(smsh_header.m_NumberOfBones);
         //global inverse transform (glm::mat4 stored as half floats)
         lamda_read_mat4_as_half_floats(cpuData.m_Skeleton->m_GlobalInverseTransform);
         //bone mapping
         for (size_t i = 0; i < smsh_header.m_NumberOfBones; ++i) {
-            uint32_t map_value;
+            uint32_t boneIndex;
             uint16_t str_len;
-            readBigEndian(map_value, streamDataBuffer, 4U, blockStart);
+            readBigEndian(boneIndex, streamDataBuffer, 4U, blockStart);
             readBigEndian(str_len, streamDataBuffer, 2U, blockStart);
-            auto map_name = Engine::create_and_reserve<std::string>(str_len);
+            auto boneName = Engine::create_and_reserve<std::string>(str_len);
             for (size_t j = 0; j < str_len; ++j) {
                 char c;
                 readBigEndian(c, streamDataBuffer, 1, blockStart);
-                map_name += c;
+                boneName += c;
             }
-            cpuData.m_Skeleton->m_BoneMapping.emplace(std::piecewise_construct, std::forward_as_tuple(map_name), std::forward_as_tuple(map_value));
+            cpuData.m_Skeleton->addBoneMapping(boneName, boneIndex);
         }
         //bone info vector
         for (size_t i = 0; i < smsh_header.m_NumberOfBones; ++i) {
-            auto& info = cpuData.m_Skeleton->m_BoneInfo.emplace_back();
+            auto& info = cpuData.m_Skeleton->m_BoneInfo[i];
             lamda_read_mat4_as_half_floats(info.BoneOffset);
             lamda_read_mat4_as_half_floats(info.FinalTransform);
         }
@@ -222,7 +222,7 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
                 }
                 animationData.m_KeyframeData.emplace(std::piecewise_construct, std::forward_as_tuple(keyframe_key), std::forward_as_tuple(std::move(channel)));
             }
-            cpuData.m_Skeleton->m_AnimationData.emplace(std::piecewise_construct, std::forward_as_tuple(anim_name), std::forward_as_tuple(std::move(animationData)));
+            cpuData.m_Skeleton->addAnimation(anim_name, std::move(animationData));
         }
         uint32_t num_of_nodes;
         readBigEndian(num_of_nodes, streamDataBuffer, 4U, blockStart);
@@ -261,13 +261,14 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
         SAFE_DELETE(cpuData.m_RootNode);
         cpuData.m_RootNode = (root);
     }
+    */
 }
 void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
     auto& vertexData = *cpuData.m_VertexData;
     auto* skeleton   = cpuData.m_Skeleton;
-    SMSH_Fileheader smsh_header(cpuData);
+    SMSH_Fileheader smsh_header{ cpuData };
 
-    std::ofstream stream(filename, std::ios::binary | std::ios::out);
+    std::ofstream stream{ filename, std::ios::binary | std::ios::out };
 
     writeBigEndian(stream, smsh_header.m_InterleavingType);
     writeBigEndian(stream, smsh_header.m_AttributeCount);
@@ -409,6 +410,7 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
             break;
         }
     }
+    /*
     //animation data
     if (smsh_header.m_NumberOfBones > 0U) {
         auto lamda_write_mat4_as_half_floats = [](std::ofstream& instream, const glm::mat4& inMatrix) {
@@ -516,14 +518,16 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
                 q.pop();
             }
         }
-        std::sort(std::begin(sortedNodes), std::end(sortedNodes), [](auto* a, auto* b) { return a->Name < b->Name; });
-        auto nameMap = Engine::create_and_reserve<std::unordered_map<std::string, uint32_t>>(sortedNodes.size()); //string name => index in sorted vector
+        Engine::sort(sortedNodes, [](auto* a, auto* b) { return a->Name < b->Name; });
+
+        auto nameMap = Engine::create_and_reserve<Engine::unordered_string_map<std::string, uint32_t>>(sortedNodes.size()); //string name => index in sorted vector
         for (uint32_t i = 0; i < sortedNodes.size(); ++i) {
             nameMap.emplace(std::piecewise_construct, std::forward_as_tuple(sortedNodes[i]->Name), std::forward_as_tuple(i));
         }
-        auto relationships = Engine::create_and_reserve<std::vector<std::vector<uint32_t>>>(sortedNodes.size());
+        auto relationships = Engine::create_and_resize<std::vector<std::vector<uint32_t>>>(sortedNodes.size(), std::vector<uint32_t>{});
         for (size_t i = 0; i < sortedNodes.size(); ++i) {
             auto* node = sortedNodes[i];
+            relationships[i].reserve(node->Children.size());
             for (size_t j = 0; j < node->Children.size(); ++j) {
                 auto* child = node->Children[j].get();
                 relationships[i].emplace_back(nameMap.at(child->Name));
@@ -543,5 +547,6 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
             }
         }
     }
+    */
     stream.close();
 }

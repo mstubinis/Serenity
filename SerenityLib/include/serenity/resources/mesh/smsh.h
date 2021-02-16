@@ -45,6 +45,8 @@ enum class SMSH_InterleavingType : uint8_t {
 };
 
 /*
+TODO: redo animation section with new linear layout
+
 smsh is a file extension for this engine that holds mesh / geometry data.
 
 metadata structure:

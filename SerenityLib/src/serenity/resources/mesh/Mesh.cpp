@@ -2,7 +2,7 @@
 #include <serenity/resources/mesh/Mesh.h>
 #include <serenity/resources/mesh/MeshLoading.h>
 #include <serenity/resources/mesh/MeshImportedData.h>
-#include <serenity/resources/mesh/Skeleton.h>
+#include <serenity/resources/mesh/animation/Skeleton.h>
 #include <serenity/resources/mesh/MeshCollisionFactory.h>
 #include <serenity/events/Event.h>
 #include <serenity/system/Engine.h>
@@ -33,7 +33,6 @@ using namespace Engine::priv;
 MeshCPUData::MeshCPUData(const MeshCPUData& other) 
     : m_RadiusBox        { other.m_RadiusBox }
     , m_Skeleton         { std::exchange(other.m_Skeleton, nullptr) }
-    , m_RootNode         { std::exchange(other.m_RootNode, nullptr) }
     , m_CollisionFactory { std::exchange(other.m_CollisionFactory, nullptr) }
     , m_VertexData       { std::exchange(other.m_VertexData, nullptr) }
     , m_File             { other.m_File }
@@ -44,14 +43,13 @@ MeshCPUData::MeshCPUData(const MeshCPUData& other)
     internal_calculate_radius(); //TODO: do we need this?
 }
 MeshCPUData& MeshCPUData::operator=(const MeshCPUData& other) {
-    m_RadiusBox        = other.m_RadiusBox;
-    m_Skeleton         = std::exchange(other.m_Skeleton, nullptr);
-    m_RootNode         = std::exchange(other.m_RootNode, nullptr);
-    m_CollisionFactory = std::exchange(other.m_CollisionFactory, nullptr);
-    m_VertexData       = std::exchange(other.m_VertexData, nullptr);
-    m_File             = other.m_File;
-    m_Radius           = other.m_Radius;
-    m_Threshold        = other.m_Threshold;
+    m_RadiusBox         = other.m_RadiusBox;
+    m_Skeleton          = std::exchange(other.m_Skeleton, nullptr);
+    m_CollisionFactory  = std::exchange(other.m_CollisionFactory, nullptr);
+    m_VertexData        = std::exchange(other.m_VertexData, nullptr);
+    m_File              = other.m_File;
+    m_Radius            = other.m_Radius;
+    m_Threshold         = other.m_Threshold;
     internal_transfer_cpu_datas();
     internal_calculate_radius(); //TODO: do we need this?
     return *this;
@@ -59,7 +57,6 @@ MeshCPUData& MeshCPUData::operator=(const MeshCPUData& other) {
 MeshCPUData::MeshCPUData(MeshCPUData&& other) noexcept 
     : m_RadiusBox        { std::move(other.m_RadiusBox) }
     , m_Skeleton         { std::exchange(other.m_Skeleton, nullptr) }
-    , m_RootNode         { std::exchange(other.m_RootNode, nullptr) }
     , m_CollisionFactory { std::exchange(other.m_CollisionFactory, nullptr) }
     , m_VertexData       { std::exchange(other.m_VertexData, nullptr) }
     , m_File             { std::move(other.m_File) }
@@ -72,7 +69,6 @@ MeshCPUData::MeshCPUData(MeshCPUData&& other) noexcept
 MeshCPUData& MeshCPUData::operator=(MeshCPUData&& other) noexcept {
     m_RadiusBox        = std::move(other.m_RadiusBox);
     m_Skeleton         = std::exchange(other.m_Skeleton, nullptr);
-    m_RootNode         = std::exchange(other.m_RootNode, nullptr);
     m_CollisionFactory = std::exchange(other.m_CollisionFactory, nullptr);
     m_VertexData       = std::exchange(other.m_VertexData, nullptr);
     m_File             = std::move(other.m_File);
@@ -86,17 +82,12 @@ void MeshCPUData::internal_transfer_cpu_datas() {
     if (m_CollisionFactory) {
         m_CollisionFactory->m_CPUData = this;
     }
-    if (m_Skeleton) {
-        for (auto& [name, anim] : m_Skeleton->getAnimationData()) {
-            anim.m_MeshCPUData = this;
-        }
-    }
 }
 void MeshCPUData::internal_calculate_radius() {
     if (!m_VertexData) {
         return;
     }
-    m_RadiusBox = glm::vec3(0.0f);
+    m_RadiusBox = glm::vec3{ 0.0f };
     auto points = m_VertexData->getPositions();
     for (const auto& vertex : points) {
         m_RadiusBox.x = std::max(m_RadiusBox.x, std::abs(vertex.x));
@@ -145,7 +136,7 @@ btCollisionShape* PublicMesh::internal_build_collision(Handle meshHandle, ModelI
     if (factory) {
         switch (collisionType) {
             case CollisionType::None: {
-                return new btEmptyShape();
+                return new btEmptyShape{};
             }case CollisionType::Box: {
                 return factory->buildBoxShape(modelInstance, isCompoundChild);
             }case CollisionType::ConvexHull: {
@@ -159,7 +150,7 @@ btCollisionShape* PublicMesh::internal_build_collision(Handle meshHandle, ModelI
             }
         }
     }
-    return new btEmptyShape();
+    return new btEmptyShape{};
 }
 btCollisionShape* PublicMesh::BuildCollision(Handle meshHandle, CollisionType collisionType, bool isCompoundChild) {
     return internal_build_collision(meshHandle, nullptr, collisionType, isCompoundChild);
@@ -173,15 +164,15 @@ void PublicMesh::FinalizeVertexData(Handle meshHandle, MeshImportedData& data) {
     PublicMesh::FinalizeVertexData(cpuData, data);
 }
 void PublicMesh::FinalizeVertexData(MeshCPUData& cpuData, MeshImportedData& data) {
-    data.uvs.resize(data.points.size());
-    data.normals.resize(data.points.size());
-    data.binormals.resize(data.points.size());
-    data.tangents.resize(data.points.size());
+    data.m_UVs.resize(data.m_Points.size());
+    data.m_Normals.resize(data.m_Points.size());
+    data.m_Binormals.resize(data.m_Points.size());
+    data.m_Tangents.resize(data.m_Points.size());
     if (!cpuData.m_VertexData) {
         if (cpuData.m_Skeleton) {
-            cpuData.m_VertexData = NEW VertexData(VertexDataFormat::VertexDataAnimated);
+            cpuData.m_VertexData = NEW VertexData{ VertexDataFormat::VertexDataAnimated };
         }else{
-            cpuData.m_VertexData = NEW VertexData(VertexDataFormat::VertexDataBasic);
+            cpuData.m_VertexData = NEW VertexData{ VertexDataFormat::VertexDataBasic };
         }
     }
     auto& vertexData = *cpuData.m_VertexData;
@@ -191,49 +182,49 @@ void PublicMesh::FinalizeVertexData(MeshCPUData& cpuData, MeshImportedData& data
     normals.resize(3);
     if (cpuData.m_Threshold == 0.0f) {
         #pragma region No Threshold
-        normals[0].reserve(data.normals.size());
-        normals[1].reserve(data.binormals.size());
-        normals[2].reserve(data.tangents.size());
-        for (size_t i = 0; i < data.normals.size(); ++i) {
-            normals[0].emplace_back(Engine::Compression::pack3NormalsInto32Int(data.normals[i]));
+        normals[0].reserve(data.m_Normals.size());
+        normals[1].reserve(data.m_Binormals.size());
+        normals[2].reserve(data.m_Tangents.size());
+        for (size_t i = 0; i < data.m_Normals.size(); ++i) {
+            normals[0].emplace_back(Engine::Compression::pack3NormalsInto32Int(data.m_Normals[i]));
         }
-        for (size_t i = 0; i < data.binormals.size(); ++i) {
-            normals[1].emplace_back(Engine::Compression::pack3NormalsInto32Int(data.binormals[i]));
+        for (size_t i = 0; i < data.m_Binormals.size(); ++i) {
+            normals[1].emplace_back(Engine::Compression::pack3NormalsInto32Int(data.m_Binormals[i]));
         }
-        for (size_t i = 0; i < data.tangents.size(); ++i) {
-            normals[2].emplace_back(Engine::Compression::pack3NormalsInto32Int(data.tangents[i]));
+        for (size_t i = 0; i < data.m_Tangents.size(); ++i) {
+            normals[2].emplace_back(Engine::Compression::pack3NormalsInto32Int(data.m_Tangents[i]));
         }
-        vertexData.setData(0, data.points.data(), data.points.size(), MeshModifyFlags::None);
-        vertexData.setData(1, data.uvs.data(), data.uvs.size(), MeshModifyFlags::None);
+        vertexData.setData(0, data.m_Points.data(), data.m_Points.size(), MeshModifyFlags::None);
+        vertexData.setData(1, data.m_UVs.data(), data.m_UVs.size(), MeshModifyFlags::None);
         vertexData.setData(2, normals[0].data(), normals[0].size(), MeshModifyFlags::None);
         vertexData.setData(3, normals[1].data(), normals[1].size(), MeshModifyFlags::None);
         vertexData.setData(4, normals[2].data(), normals[2].size(), MeshModifyFlags::None);
-        vertexData.setIndices(data.indices.data(), data.indices.size(), MeshModifyFlags::RecalculateTriangles);
+        vertexData.setIndices(data.m_Indices.data(), data.m_Indices.size(), MeshModifyFlags::RecalculateTriangles);
         #pragma endregion
     }else{
         #pragma region Some Threshold
-        auto indices        = Engine::create_and_reserve<std::vector<uint32_t>>(data.points.size());
-        auto temp_pos       = Engine::create_and_reserve<std::vector<glm::vec3>>(data.points.size());
-        auto temp_uvs       = Engine::create_and_reserve<std::vector<glm::vec2>>(data.uvs.size());
-        auto temp_normals   = Engine::create_and_reserve<std::vector<glm::vec3>>(data.normals.size());
-        auto temp_binormals = Engine::create_and_reserve<std::vector<glm::vec3>>(data.binormals.size());
-        auto temp_tangents  = Engine::create_and_reserve<std::vector<glm::vec3>>(data.tangents.size());
+        auto indices        = Engine::create_and_reserve<std::vector<uint32_t>>(data.m_Points.size());
+        auto temp_pos       = Engine::create_and_reserve<std::vector<glm::vec3>>(data.m_Points.size());
+        auto temp_uvs       = Engine::create_and_reserve<std::vector<glm::vec2>>(data.m_UVs.size());
+        auto temp_normals   = Engine::create_and_reserve<std::vector<glm::vec3>>(data.m_Normals.size());
+        auto temp_binormals = Engine::create_and_reserve<std::vector<glm::vec3>>(data.m_Binormals.size());
+        auto temp_tangents  = Engine::create_and_reserve<std::vector<glm::vec3>>(data.m_Tangents.size());
         auto boneIDs        = Engine::create_and_reserve<std::vector<glm::vec4>>(data.m_Bones.size());
         auto boneWeights    = Engine::create_and_reserve<std::vector<glm::vec4>>(data.m_Bones.size());
-        for (size_t i = 0; i < data.points.size(); ++i) {
+        for (size_t i = 0; i < data.m_Points.size(); ++i) {
             uint32_t index;
-            bool found = priv::MeshLoader::GetSimilarVertexIndex(data.points[i], data.uvs[i], data.normals[i], temp_pos, temp_uvs, temp_normals, index, cpuData.m_Threshold);
+            bool found = priv::MeshLoader::GetSimilarVertexIndex(data.m_Points[i], data.m_UVs[i], data.m_Normals[i], temp_pos, temp_uvs, temp_normals, index, cpuData.m_Threshold);
             if (found) {
                 indices.emplace_back(index);
                 //average out TBN. But it cancels out normal mapping on some flat surfaces
-                //temp_binormals[index] += data.binormals[i];
-                //temp_tangents[index] += data.tangents[i];
+                //temp_binormals[index] += data.m_Binormals[i];
+                //temp_tangents[index] += data.m_Tangents[i];
             }else{
-                temp_pos.emplace_back(data.points[i]);
-                temp_uvs.emplace_back(data.uvs[i]);
-                temp_normals.emplace_back(data.normals[i]);
-                temp_binormals.emplace_back(data.binormals[i]);
-                temp_tangents.emplace_back(data.tangents[i]);
+                temp_pos.emplace_back(data.m_Points[i]);
+                temp_uvs.emplace_back(data.m_UVs[i]);
+                temp_normals.emplace_back(data.m_Normals[i]);
+                temp_binormals.emplace_back(data.m_Binormals[i]);
+                temp_tangents.emplace_back(data.m_Tangents[i]);
 
                 if (data.m_Bones.size() > 0) {
                     boneIDs.emplace_back(
@@ -368,24 +359,24 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
                     verts[3].uv.y = (vertexAtY + 1.0f) / totalVertexSizeY;
 
                     for (int i = 0; i < 4; ++i) {
-                        data.points.emplace_back(verts[i].position);
-                        data.uvs.emplace_back(verts[i].uv);
-                        data.normals.emplace_back(verts[i].normal);
+                        data.m_Points.emplace_back(verts[i].position);
+                        data.m_UVs.emplace_back(verts[i].uv);
+                        data.m_Normals.emplace_back(verts[i].normal);
                     }
                     for (int i = 0; i < 4; ++i) {
                         smooths[i].normal = verts[i].normal;
-                        smooths[i].index = (data.points.size() - 1) - static_cast<size_t>(3 - i);
+                        smooths[i].index = (data.m_Points.size() - 1) - static_cast<size_t>(3 - i);
                         m_VertexMap[hash_position(verts[i].position, 4)].data.emplace_back(std::move(smooths[i]));
                     }
 
                     if (valid[0] || valid[1] || valid[2] || valid[3]) {
-                        data.indices.emplace_back(count + 0);
-                        data.indices.emplace_back(count + 2);
-                        data.indices.emplace_back(count + 1);
+                        data.m_Indices.emplace_back(count + 0);
+                        data.m_Indices.emplace_back(count + 2);
+                        data.m_Indices.emplace_back(count + 1);
 
-                        data.indices.emplace_back(count + 2);
-                        data.indices.emplace_back(count + 3);
-                        data.indices.emplace_back(count + 1);
+                        data.m_Indices.emplace_back(count + 2);
+                        data.m_Indices.emplace_back(count + 3);
+                        data.m_Indices.emplace_back(count + 1);
                     }
                     count += 4;
                 }
@@ -401,7 +392,7 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
         }
         smoothed = glm::normalize(smoothed);
         for (auto& v : vertex.data) {
-            data.normals[v.index] = smoothed;
+            data.m_Normals[v.index] = smoothed;
         }
     }
     MeshLoader::CalculateTBNAssimp(data);
@@ -427,13 +418,13 @@ void Mesh::internal_recalc_indices_from_terrain(const Terrain& terrain) {
                     valid[2] = heightfield.getAndValidateVertex(i, j + 1,     vert3, false);
                     valid[3] = heightfield.getAndValidateVertex(i + 1, j + 1, vert4, false);
                     if (valid[0] || valid[1] || valid[2] || valid[3]) {
-                        data.indices.emplace_back(count + 0);
-                        data.indices.emplace_back(count + 2);
-                        data.indices.emplace_back(count + 1);
+                        data.m_Indices.emplace_back(count + 0);
+                        data.m_Indices.emplace_back(count + 2);
+                        data.m_Indices.emplace_back(count + 1);
 
-                        data.indices.emplace_back(count + 2);
-                        data.indices.emplace_back(count + 3);
-                        data.indices.emplace_back(count + 1);
+                        data.m_Indices.emplace_back(count + 2);
+                        data.m_Indices.emplace_back(count + 3);
+                        data.m_Indices.emplace_back(count + 1);
                     }
                     count += 4;
                 }
@@ -441,10 +432,10 @@ void Mesh::internal_recalc_indices_from_terrain(const Terrain& terrain) {
         }
     }
     m_CPUData.m_VertexData->bind();
-    modifyIndices(data.indices.data(), data.indices.size());
+    modifyIndices(data.m_Indices.data(), data.m_Indices.size());
     m_CPUData.m_VertexData->unbind();
 }
-Mesh::Mesh(const std::string& name, const Terrain& terrain, float threshold) 
+Mesh::Mesh(std::string_view name, const Terrain& terrain, float threshold)
     : Resource{ ResourceType::Mesh }
 {
     m_CPUData.m_Threshold = threshold;
@@ -452,14 +443,14 @@ Mesh::Mesh(const std::string& name, const Terrain& terrain, float threshold)
     internal_build_from_terrain(terrain);
     load();
 }
-Mesh::Mesh(VertexData& data, const std::string& name, float threshold) 
+Mesh::Mesh(VertexData& data, std::string_view name, float threshold)
     : Resource{ ResourceType::Mesh, name }
 {
     m_CPUData.m_VertexData = &data;
     m_CPUData.m_Threshold  = threshold;
     PublicMesh::InitBlankMesh(*this);
 }
-Mesh::Mesh(const std::string& name, float width, float height, float threshold) 
+Mesh::Mesh(std::string_view name, float width, float height, float threshold)
     : Resource{ ResourceType::Mesh, name }
 {
     m_CPUData.m_Threshold = threshold;
@@ -467,32 +458,31 @@ Mesh::Mesh(const std::string& name, float width, float height, float threshold)
 
     MeshImportedData data;
 
-    std::vector<priv::Vertex> quad; quad.resize(4);
+    auto quad  = Engine::create_and_resize<std::vector<priv::Vertex>>(4, priv::Vertex{});
+    quad[0].uv = glm::vec2{ 0.0f, height };
+    quad[1].uv = glm::vec2{ width, height };
+    quad[2].uv = glm::vec2{ width, 0.0f };
+    quad[3].uv = glm::vec2{ 0.0f, 0.0f };
 
-    quad[0].uv = glm::vec2(0.0f, height);
-    quad[1].uv = glm::vec2(width, height);
-    quad[2].uv = glm::vec2(width, 0.0f);
-    quad[3].uv = glm::vec2(0.0f, 0.0f);
-
-    quad[0].position = glm::vec3(-width / 2.0f, -height / 2.0f, 0.0f);
-    quad[1].position = glm::vec3(width / 2.0f, -height / 2.0f, 0.0f);
-    quad[2].position = glm::vec3(width / 2.0f, height / 2.0f, 0.0f);
-    quad[3].position = glm::vec3(-width / 2.0f, height / 2.0f, 0.0f);
+    quad[0].position = glm::vec3{ -width / 2.0f, -height / 2.0f, 0.0f };
+    quad[1].position = glm::vec3{ width / 2.0f, -height / 2.0f, 0.0f };
+    quad[2].position = glm::vec3{ width / 2.0f, height / 2.0f, 0.0f };
+    quad[3].position = glm::vec3{ -width / 2.0f, height / 2.0f, 0.0f };
 
     for (uint32_t i = 0; i < 3; ++i) {   //triangle 1 (0, 1, 2)
-        data.points.emplace_back(quad[i].position);
-        data.uvs.emplace_back(quad[i].uv);
+        data.m_Points.emplace_back(quad[i].position);
+        data.m_UVs.emplace_back(quad[i].uv);
     }
     for (uint32_t i = 0; i < 3; ++i) {   //triangle 2 (2, 3, 0)
-        data.points.emplace_back(quad[(i + 2) % 4].position);
-        data.uvs.emplace_back(quad[(i + 2) % 4].uv);
+        data.m_Points.emplace_back(quad[(i + 2) % 4].position);
+        data.m_UVs.emplace_back(quad[(i + 2) % 4].uv);
     }
-    m_CPUData.m_VertexData = NEW VertexData(VertexDataFormat::VertexDataNoLighting);
+    m_CPUData.m_VertexData = NEW VertexData{ VertexDataFormat::VertexDataNoLighting };
     MeshLoader::FinalizeData(this->m_CPUData, data, threshold);
 
     load();
 }
-Mesh::Mesh(const std::string& fileOrData, float threshold) 
+Mesh::Mesh(std::string_view fileOrData, float threshold)
     : Resource{ ResourceType::Mesh }
 {
     m_CPUData.m_Threshold = threshold;
@@ -504,26 +494,25 @@ Mesh::Mesh(const std::string& fileOrData, float threshold)
     MeshImportedData data;
     std::vector<std::vector<uint>> indices;
     indices.resize(3);
-    std::istringstream stream;
-    stream.str(fileOrData);
+    std::istringstream stream{ fileOrData.data() };
 
     //first read in all data
     for (std::string line; std::getline(stream, line, '\n');) {
         if (line[0] == 'o') {
         }else if (line[0] == 'v' && line[1] == ' ') {
             if (flags && MeshLoadingFlags::Points) {
-                auto& p = data.file_points.emplace_back();
+                auto& p = data.m_FilePoints.emplace_back();
                 auto res = std::sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &p.x, &p.y, &p.z);
             }
         }else if (line[0] == 'v' && line[1] == 't') {
             if (flags && MeshLoadingFlags::UVs) {
-                auto& uv = data.file_uvs.emplace_back();
+                auto& uv = data.m_FileUVs.emplace_back();
                 auto res = std::sscanf(line.substr(2, line.size()).c_str(), "%f %f", &uv.x, &uv.y);
                 uv.y = 1.0f - uv.y;
             }
         }else if (line[0] == 'v' && line[1] == 'n') {
             if (flags && MeshLoadingFlags::Normals) {
-                auto& n = data.file_normals.emplace_back();
+                auto& n = data.m_FileNormals.emplace_back();
                 auto res = std::sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &n.x, &n.y, &n.z);
             }
         }else if (line[0] == 'f' && line[1] == ' ') {
@@ -580,7 +569,7 @@ Mesh::~Mesh() {
     unregisterEvent(EventType::WindowFullscreenChanged);
     unload();
 }
-std::unordered_map<std::string, AnimationData>& Mesh::getAnimationData() {
+Engine::unordered_string_map<std::string, AnimationData>& Mesh::getAnimationData() {
     return m_CPUData.m_Skeleton->m_AnimationData;
 }
 void Mesh::load() {
@@ -601,7 +590,7 @@ void Mesh::onEvent(const Event& e) {
         m_CPUData.m_VertexData->finalize();
     }
 }
-//TODO: optimize this a bit more (bubble sort?)
+//TODO: optimize this a bit more
 void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, SortingMode sortMode) {
     #ifndef _DEBUG
         auto& triangles      = m_CPUData.m_VertexData->m_Triangles;
@@ -627,7 +616,7 @@ void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const gl
             return false;
         };
         //std::execution::par_unseq seems to really help here for performance
-        std::sort( std::execution::par_unseq, std::begin(triangles), std::end(triangles), lambda_sorter);
+        Engine::sort(std::execution::par_unseq, triangles, lambda_sorter);
 
         auto newIndices = Engine::create_and_reserve<std::vector<uint32_t>>(m_CPUData.m_VertexData->m_Indices.size());
         for (size_t i = 0; i < triangles.size(); ++i) {

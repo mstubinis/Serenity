@@ -3,7 +3,7 @@
 #include <serenity/system/Engine.h>
 #include <serenity/math/Engine_Math.h>
 #include <serenity/resources/mesh/Mesh.h>
-#include <serenity/resources/mesh/Skeleton.h>
+#include <serenity/resources/mesh/animation/Skeleton.h>
 #include <serenity/resources/material/Material.h>
 #include <serenity/scene/Camera.h>
 #include <serenity/scene/Scene.h>
@@ -76,7 +76,7 @@ ModelInstance::ModelInstance(Entity parent, Handle mesh, Handle material, Handle
 }
 ModelInstance::ModelInstance(ModelInstance&& other) noexcept
     : m_DrawingMode         { std::move(other.m_DrawingMode) }
-    , m_AnimationVector     { std::move(other.m_AnimationVector) }
+    , m_Animations          { std::move(other.m_Animations) }
     , m_Parent              { std::move(other.m_Parent) }
     , m_Stage               { std::move(other.m_Stage) }
     , m_Position            { std::move(other.m_Position) }
@@ -105,7 +105,7 @@ ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
     m_DrawingMode            = std::move(other.m_DrawingMode);
     m_ViewportFlagDefault    = std::move(other.m_ViewportFlagDefault);
     m_ViewportFlag           = std::move(other.m_ViewportFlagDefault);
-    m_AnimationVector        = std::move(other.m_AnimationVector);
+    m_Animations             = std::move(other.m_Animations);
     m_Parent                 = std::move(other.m_Parent);
     m_Stage                  = std::move(other.m_Stage);
     m_Position               = std::move(other.m_Position);
@@ -200,15 +200,15 @@ void ModelInstance::setShaderProgram(Handle shaderProgram, ComponentModel& compo
     componentModel.setModel(m_MeshHandle, m_MaterialHandle, m_Index, shaderProgram, m_Stage);
 }
 void ModelInstance::setMesh(Handle mesh, ComponentModel& componentModel){
-    m_AnimationVector.clear();
+    m_Animations.clear();
     componentModel.setModel(mesh, m_MaterialHandle, m_Index, m_ShaderProgramHandle, m_Stage);
     internal_update_model_matrix();
 }
 void ModelInstance::setMaterial(Handle material, ComponentModel& componentModel){
     componentModel.setModel(m_MeshHandle, material, m_Index, m_ShaderProgramHandle, m_Stage);
 }
-void ModelInstance::playAnimation(const std::string& animationName, float start, float end, uint32_t requestedLoops){
-    m_AnimationVector.emplace_animation(m_MeshHandle, animationName, start, end, requestedLoops);
+void ModelInstance::playAnimation(std::string_view animationName, float start, float end, uint32_t requestedLoops){
+    m_Animations.emplace_animation(m_MeshHandle, animationName, start, end, requestedLoops);
 }
 void ModelInstance::onEvent(const Event& e) {
     if (e.type == EventType::ResourceLoaded && e.eventResource.resource->type() == ResourceType::Mesh) {

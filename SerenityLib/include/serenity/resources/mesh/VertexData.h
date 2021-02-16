@@ -2,6 +2,8 @@
 #ifndef ENGINE_VERTEX_DATA_H
 #define ENGINE_VERTEX_DATA_H
 
+struct VertexData;
+
 #include <serenity/resources/mesh/VertexBufferObject.h>
 #include <serenity/resources/mesh/VertexDataFormat.h>
 #include <serenity/resources/mesh/MeshIncludes.h>
@@ -16,24 +18,33 @@ struct VertexAttrDataBuffer final {
     std::vector<uint8_t>  m_Buffer;
     size_t                m_Size = 0;
 
-    inline void clear() noexcept { m_Buffer.clear(); m_Size = 0; }
+    VertexAttrDataBuffer() = default;
+    VertexAttrDataBuffer(const VertexAttrDataBuffer&)                = delete;
+    VertexAttrDataBuffer& operator=(const VertexAttrDataBuffer&)     = delete;
+    VertexAttrDataBuffer(VertexAttrDataBuffer&&) noexcept            = default;
+    VertexAttrDataBuffer& operator=(VertexAttrDataBuffer&&) noexcept = default;
+
+    inline void clear() noexcept { 
+        m_Buffer.clear(); 
+        m_Size = 0; 
+    }
 };
 
 struct VertexData final {
-    VertexDataFormat                               m_Format;
-    std::vector<VertexAttrDataBuffer>              m_Data;
-    std::vector<uint32_t>                          m_Indices;
-    std::vector<Engine::priv::Triangle>            m_Triangles;
-    std::vector<std::unique_ptr<BufferObject>>     m_Buffers;
-    GLuint                                         m_VAO        = 0;
+    VertexDataFormat                     m_Format;
+    std::vector<VertexAttrDataBuffer>    m_Data;
+    std::vector<uint32_t>                m_Indices;
+    std::vector<Engine::priv::Triangle>  m_Triangles;
+    std::vector<BufferObject>            m_Buffers;
+    GLuint                               m_VAO        = 0;
 
     VertexData() = delete;
     VertexData(VertexDataFormat& format);
 
-    VertexData(const VertexData& other) = delete;
-    VertexData& operator=(const VertexData& other) = delete;
-    VertexData(VertexData&& other) noexcept;
-    VertexData& operator=(VertexData&& other) noexcept;
+    VertexData(const VertexData&) = delete;
+    VertexData& operator=(const VertexData&) = delete;
+    VertexData(VertexData&&) noexcept;
+    VertexData& operator=(VertexData&&) noexcept;
     ~VertexData();
 
     template<typename T> 
@@ -47,7 +58,7 @@ struct VertexData final {
     template<typename T> 
     void setData(size_t attributeIndex, const T* source_new_data, size_t bufferCount, MeshModifyFlags::Flag flags = (MeshModifyFlags::Flag)MESH_DEFAULT_MODIFICATION_FLAGS) noexcept {
         if (m_Buffers.size() == 0) {
-            m_Buffers.push_back(std::make_unique<VertexBufferObject>());
+            m_Buffers.emplace_back(BufferDataType::VertexArray);
         }
         if (attributeIndex >= m_Data.size()) {
             return;
@@ -72,7 +83,7 @@ struct VertexData final {
 
     void setData(size_t attributeIndex, uint8_t* buffer, size_t source_new_data_amount, size_t vertexCount, MeshModifyFlags::Flag flags = (MeshModifyFlags::Flag)MESH_DEFAULT_MODIFICATION_FLAGS) noexcept {
         if (m_Buffers.size() == 0) {
-            m_Buffers.push_back(std::make_unique<VertexBufferObject>());
+            m_Buffers.emplace_back(BufferDataType::VertexArray);
         }
         if (attributeIndex >= m_Data.size()) {
             return;

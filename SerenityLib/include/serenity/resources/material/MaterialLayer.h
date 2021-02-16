@@ -71,10 +71,10 @@ class MaterialLayer final {
         float internal_get_texture_compression_value(Handle textureHandle) noexcept;
     public:
         MaterialLayer() = default;
-        MaterialLayer(const MaterialLayer& other)                 = delete;
-        MaterialLayer& operator=(const MaterialLayer& other)      = delete;
-        MaterialLayer(MaterialLayer&& other) noexcept;
-        MaterialLayer& operator=(MaterialLayer&& other) noexcept;
+        MaterialLayer(const MaterialLayer&)                 = delete;
+        MaterialLayer& operator=(const MaterialLayer&)      = delete;
+        MaterialLayer(MaterialLayer&&) noexcept;
+        MaterialLayer& operator=(MaterialLayer&&) noexcept;
         ~MaterialLayer() = default;
 
         inline constexpr bool operator==(const bool other) const noexcept { return (other == true && !m_TextureHandle.null()); }
@@ -97,9 +97,9 @@ class MaterialLayer final {
         void setTexture(Handle textureHandle) noexcept;
         void setMask(Handle maskHandle) noexcept;
         void setCubemap(Handle cubemapHandle) noexcept;
-        void setTexture(const std::string& textureFile) noexcept;
-        void setMask(const std::string& maskFile) noexcept;
-        void setCubemap(const std::string& cubemapFile) noexcept;
+        void setTexture(std::string_view textureFile) noexcept;
+        void setMask(std::string_view maskFile) noexcept;
+        void setCubemap(std::string_view cubemapFile) noexcept;
 
         inline void setTextureData(float x, float y, float z, float w) noexcept { m_MaterialLayerTextureData = { x, y, z, w }; }
         inline void setMiscData(float r, float g, float b, float a) noexcept { m_MaterialLayerMiscData = { r, g, b, a }; }

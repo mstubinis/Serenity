@@ -18,8 +18,8 @@ class Skybox: public Observer{
     public:
         static void bindMesh();
     public:
-        Skybox(const std::array<std::string, 6>& files);
-        Skybox(const std::string& file);
+        Skybox(const std::array<std::string_view, 6>& files);
+        Skybox(std::string_view file);
         virtual ~Skybox();
 
         virtual void update() {}

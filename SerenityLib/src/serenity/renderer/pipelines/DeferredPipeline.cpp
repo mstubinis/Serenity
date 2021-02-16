@@ -410,8 +410,8 @@ void DeferredPipeline::sort2DAPI() {
     auto lambda_sorter = [&](const API2DCommand& lhs, const API2DCommand& rhs) {
         return lhs.depth > rhs.depth;
     };
-    std::sort(std::execution::par_unseq, std::begin(m_Background2DAPICommands), std::end(m_Background2DAPICommands),  lambda_sorter);
-    std::sort(std::execution::par_unseq, std::begin(m_2DAPICommands),           std::end(m_2DAPICommands),            lambda_sorter);
+    Engine::sort(std::execution::par_unseq, m_Background2DAPICommands, lambda_sorter);
+    Engine::sort(std::execution::par_unseq, m_2DAPICommands,           lambda_sorter);
 }
 ShaderProgram* DeferredPipeline::getCurrentBoundShaderProgram() {
     return m_RendererState.current_bound_shader_program;

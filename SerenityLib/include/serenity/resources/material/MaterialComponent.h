@@ -9,16 +9,16 @@
 class MaterialComponent final {
     protected:
         std::array<MaterialLayer, MAX_MATERIAL_LAYERS_PER_COMPONENT>   m_Layers;
-        std::uint32_t                                                  m_NumLayers      = 0U;
+        uint32_t                                                       m_NumLayers      = 0U;
         MaterialComponentType                                          m_ComponentType  = MaterialComponentType::Diffuse;
     public:
         MaterialComponent() = default;
         MaterialComponent(MaterialComponentType type, Handle textureHandle, Handle maskHandle = Handle{}, Handle cubemapHandle = Handle{});
-        MaterialComponent(const MaterialComponent& other)                  = delete;
-        MaterialComponent& operator=(const MaterialComponent& other)       = delete;
-        MaterialComponent(MaterialComponent&& other) noexcept;
-        MaterialComponent& operator=(MaterialComponent&& other) noexcept;
-        ~MaterialComponent() = default;
+
+        MaterialComponent(const MaterialComponent&)                  = delete;
+        MaterialComponent& operator=(const MaterialComponent&)       = delete;
+        MaterialComponent(MaterialComponent&&) noexcept;
+        MaterialComponent& operator=(MaterialComponent&&) noexcept;
 
         inline constexpr bool operator==(const bool other) const noexcept { return (other == true && m_NumLayers > 0); }
         inline constexpr bool operator!=(const bool other) const noexcept { return !operator==(other); }
@@ -34,7 +34,7 @@ class MaterialComponent final {
         [[nodiscard]] inline Handle cubemap(size_t index = 0) const noexcept { return m_Layers[index].getCubemap(); }
         [[nodiscard]] inline MaterialLayer& layer(size_t index = 0) noexcept { return m_Layers[index]; }
 
-        [[nodiscard]] inline constexpr unsigned int numLayers() const { return m_NumLayers; }
+        [[nodiscard]] inline constexpr uint32_t numLayers() const { return m_NumLayers; }
         [[nodiscard]] inline constexpr MaterialComponentType type() const noexcept { return m_ComponentType; }
 
         void update(const float dt);

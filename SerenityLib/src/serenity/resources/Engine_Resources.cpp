@@ -119,7 +119,7 @@ Engine::view_ptr<Scene> Engine::Resources::getScene(std::string_view sceneName){
     }
     return nullptr;
 }
-std::vector<Handle> Engine::Resources::loadMesh(const std::string& fileOrData, float threshhold, MeshCollisionLoadingFlag::Flag flags) {
+std::vector<Handle> Engine::Resources::loadMesh(std::string_view fileOrData, float threshhold, MeshCollisionLoadingFlag::Flag flags) {
     MeshRequest request{ fileOrData, threshhold, flags, [](const std::vector<Handle>&) {} };
     request.request();
     auto handles = Engine::create_and_reserve<std::vector<Handle>>(request.m_Parts.size());
@@ -128,7 +128,7 @@ std::vector<Handle> Engine::Resources::loadMesh(const std::string& fileOrData, f
     }
     return handles;
 }
-std::vector<Handle> Engine::Resources::loadMeshAsync(const std::string& fileOrData, float threshhold, MeshCollisionLoadingFlag::Flag flags, MeshRequestCallback callback) {
+std::vector<Handle> Engine::Resources::loadMeshAsync(std::string_view fileOrData, float threshhold, MeshCollisionLoadingFlag::Flag flags, MeshRequestCallback callback) {
     MeshRequest request{ fileOrData, threshhold, flags, std::move(callback) };
     request.request(true);
     auto handles = Engine::create_and_reserve<std::vector<Handle>>(request.m_Parts.size());
@@ -137,7 +137,7 @@ std::vector<Handle> Engine::Resources::loadMeshAsync(const std::string& fileOrDa
     }
     return handles;
 }
-Handle Engine::Resources::loadTexture(const std::string& file, ImageInternalFormat internalFormat, bool mipmaps) {
+Handle Engine::Resources::loadTexture(std::string_view file, ImageInternalFormat internalFormat, bool mipmaps) {
     auto texture = Engine::Resources::getResource<Texture>(file);
     if (!texture.m_Resource) {
         TextureRequest request{ file, mipmaps, internalFormat, TextureType::Texture2D, [](Handle) {} };
@@ -146,7 +146,7 @@ Handle Engine::Resources::loadTexture(const std::string& file, ImageInternalForm
     }
     return Handle{};
 }
-Handle Engine::Resources::loadTexture(sf::Image& sfImage, const std::string& texture_name, ImageInternalFormat internalFormat, bool mipmaps) {
+Handle Engine::Resources::loadTexture(sf::Image& sfImage, std::string_view texture_name, ImageInternalFormat internalFormat, bool mipmaps) {
     auto texture = Engine::Resources::getResource<Texture>(texture_name);
     if (!texture.m_Resource) {
         TextureRequest request{ sfImage, texture_name, mipmaps, internalFormat, TextureType::Texture2D, [](Handle) {} };
@@ -155,7 +155,7 @@ Handle Engine::Resources::loadTexture(sf::Image& sfImage, const std::string& tex
     }
     return Handle{};
 }
-Handle Engine::Resources::loadTextureAsync(const std::string& file, ImageInternalFormat internalFormat, bool mipmaps, Engine::ResourceCallback callback) {
+Handle Engine::Resources::loadTextureAsync(std::string_view file, ImageInternalFormat internalFormat, bool mipmaps, Engine::ResourceCallback callback) {
     auto texture = Engine::Resources::getResource<Texture>(file);
     if (!texture.m_Resource) {
         TextureRequest request{ file, mipmaps, internalFormat, TextureType::Texture2D, std::move(callback) };
@@ -164,7 +164,7 @@ Handle Engine::Resources::loadTextureAsync(const std::string& file, ImageInterna
     }
     return Handle{};
 }
-Handle Engine::Resources::loadTextureAsync(sf::Image& sfImage, const std::string& texture_name, ImageInternalFormat internalFormat, bool mipmaps, Engine::ResourceCallback callback) {
+Handle Engine::Resources::loadTextureAsync(sf::Image& sfImage, std::string_view texture_name, ImageInternalFormat internalFormat, bool mipmaps, Engine::ResourceCallback callback) {
     auto texture = Engine::Resources::getResource<Texture>(texture_name);
     if (!texture.m_Resource) {
         TextureRequest request{ sfImage, texture_name, mipmaps, internalFormat, TextureType::Texture2D, std::move(callback) };
@@ -173,7 +173,7 @@ Handle Engine::Resources::loadTextureAsync(sf::Image& sfImage, const std::string
     }
     return Handle{};
 }
-Handle Engine::Resources::loadMaterial(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness) {
+Handle Engine::Resources::loadMaterial(std::string_view name, std::string_view diffuse, std::string_view normal, std::string_view glow, std::string_view specular, std::string_view ao, std::string_view metalness, std::string_view smoothness) {
     auto material = Engine::Resources::getResource<Material>(name);
     if (!material.m_Resource) {
         MaterialRequest request{ name, diffuse, normal, glow, specular, ao, metalness, smoothness, [](Handle) {} };
@@ -182,7 +182,7 @@ Handle Engine::Resources::loadMaterial(const std::string& name, const std::strin
     }
     return Handle{};
 }
-Handle Engine::Resources::loadMaterialAsync(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness, Engine::ResourceCallback callback) {
+Handle Engine::Resources::loadMaterialAsync(std::string_view name, std::string_view diffuse, std::string_view normal, std::string_view glow, std::string_view specular, std::string_view ao, std::string_view metalness, std::string_view smoothness, Engine::ResourceCallback callback) {
     auto material = Engine::Resources::getResource<Material>(name);
     if (!material.m_Resource) {
         MaterialRequest request{ name, diffuse, normal, glow, specular, ao, metalness, smoothness, std::move(callback) };
@@ -191,7 +191,7 @@ Handle Engine::Resources::loadMaterialAsync(const std::string& name, const std::
     }
     return Handle{};
 }
-Handle Engine::Resources::loadMaterial(const std::string& name, Handle diffuse, Handle normal, Handle glow, Handle specular, Handle ao, Handle metalness, Handle smoothness) {
+Handle Engine::Resources::loadMaterial(std::string_view name, Handle diffuse, Handle normal, Handle glow, Handle specular, Handle ao, Handle metalness, Handle smoothness) {
     auto material = Engine::Resources::getResource<Material>(name);
     if (!material.m_Resource) {
         MaterialRequest request{ name, diffuse, normal, glow, specular, ao, metalness, smoothness, [](Handle) {} };
@@ -200,10 +200,10 @@ Handle Engine::Resources::loadMaterial(const std::string& name, Handle diffuse, 
     }
     return Handle{};
 }
-Handle Engine::Resources::addShader(const std::string& fileOrData, ShaderType type, bool fromFile){
+Handle Engine::Resources::addShader(std::string_view fileOrData, ShaderType type, bool fromFile){
     return Engine::Resources::addResource<Shader>(fileOrData, type, fromFile);
 }
-Handle Engine::Resources::addShaderProgram(const std::string& n, Handle v, Handle f){
+Handle Engine::Resources::addShaderProgram(std::string_view n, Handle v, Handle f){
     auto vertexShader   = Engine::Resources::getResource<Shader>(v);
     auto fragmentShader = Engine::Resources::getResource<Shader>(f);
     return Engine::Resources::addResource<ShaderProgram>(n, v, f);

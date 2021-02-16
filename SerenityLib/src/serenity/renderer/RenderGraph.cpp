@@ -145,7 +145,7 @@ void RenderGraph::sort_bruteforce(Camera& camera, SortingMode sortingMode) {
             return false;
         return false;
     };
-    std::sort(/*std::execution::par_unseq, */ std::begin(m_InstancesTotal), std::end(m_InstancesTotal), lambda_sorter);
+    Engine::sort(/*std::execution::par_unseq, */ m_InstancesTotal, lambda_sorter);
 #endif
 }
 void RenderGraph::sort_cheap_bruteforce(Camera& camera, SortingMode sortingMode) {
@@ -169,7 +169,7 @@ void RenderGraph::sort_cheap_bruteforce(Camera& camera, SortingMode sortingMode)
             return false;
         return false;
     };
-    std::sort(/*std::execution::par_unseq, */ std::begin(m_InstancesTotal), std::end(m_InstancesTotal), lambda_sorter);
+    Engine::sort(/*std::execution::par_unseq, */ m_InstancesTotal, lambda_sorter);
 #endif
 }
 
@@ -198,8 +198,7 @@ void RenderGraph::sort_cheap(Camera& camera, SortingMode sortingMode) {
                     return false;
                 return false;
             };
-
-            std::sort(/*std::execution::par_unseq, */ std::begin(vect), std::end(vect), lambda_sorter);
+            Engine::sort(/*std::execution::par_unseq, */ vect, lambda_sorter);
         }
     }
 #endif
@@ -238,7 +237,7 @@ void RenderGraph::sort(Camera& camera, SortingMode sortingMode) {
                     return false;
                 return false;
             };
-            std::sort(/*std::execution::par_unseq, */ std::begin(vect), std::end(vect), lambda_sorter);
+            Engine::sort(/*std::execution::par_unseq, */ vect, lambda_sorter);
         }
     }
 #endif

@@ -45,11 +45,11 @@ class ShaderProgram final : public Resource {
 		bool                                                   m_LoadedGPU          = false;
     public:
         ShaderProgram() = default;
-        ShaderProgram(const std::string& name, Handle vertexShader, Handle fragmentShader);
-        ShaderProgram(const ShaderProgram& other)            = delete;
-        ShaderProgram& operator=(const ShaderProgram& other) = delete;
-        ShaderProgram(ShaderProgram&& other) noexcept;
-        ShaderProgram& operator=(ShaderProgram&& other) noexcept;
+        ShaderProgram(std::string_view name, Handle vertexShader, Handle fragmentShader);
+        ShaderProgram(const ShaderProgram&)            = delete;
+        ShaderProgram& operator=(const ShaderProgram&) = delete;
+        ShaderProgram(ShaderProgram&&) noexcept;
+        ShaderProgram& operator=(ShaderProgram&&) noexcept;
         ~ShaderProgram();
 
         inline void setCustomBindFunctor(std::function<void(ShaderProgram*)>&& function) noexcept { m_CustomBindFunctor = std::move(function); }

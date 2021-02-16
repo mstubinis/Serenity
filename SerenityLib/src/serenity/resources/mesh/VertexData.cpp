@@ -7,7 +7,7 @@ VertexData::VertexData(VertexDataFormat& format)
     : m_Format{ format }
 {
     m_Data.resize(format.m_Attributes.size());
-    m_Buffers.push_back(std::make_unique<VertexBufferObject>());
+    m_Buffers.emplace_back(BufferDataType::VertexArray);
 }
 VertexData::VertexData(VertexData&& other) noexcept
     : m_Format    { std::move(other.m_Format) }
@@ -54,7 +54,7 @@ void VertexData::bind() const {
         Engine::Renderer::bindVAO(m_VAO);
     }else{
         std::for_each(std::cbegin(m_Buffers), std::cend(m_Buffers), [](const auto& buffer) {
-            buffer->bind();
+            buffer.bind();
         });
         m_Format.bind(*this);
     }
@@ -86,7 +86,7 @@ std::vector<glm::vec3> VertexData::getPositions() const {
 
 void VertexData::setIndices(const uint32_t* data, size_t bufferCount, MeshModifyFlags::Flag flags) {
     if (m_Buffers.size() == 1) {
-        m_Buffers.push_back(std::make_unique<ElementBufferObject>());
+        m_Buffers.emplace_back(BufferDataType::ElementArray);
     }
     if (data != m_Indices.data()) {
         m_Indices.clear();
@@ -123,7 +123,7 @@ void VertexData::setIndices(const uint32_t* data, size_t bufferCount, MeshModify
         }
     }
     if (flags & MeshModifyFlags::UploadToGPU) {
-        auto& indiceBuffer = *m_Buffers[1];
+        auto& indiceBuffer = m_Buffers[1];
         indiceBuffer.generate();
         indiceBuffer.bind();
         !(flags & MeshModifyFlags::Orphan) ? indiceBuffer.setData(m_Indices, BufferDataDrawType::Static) : indiceBuffer.setDataOrphan(m_Indices);
@@ -135,7 +135,7 @@ void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
     Interleaved,    // | pos uv norm | pos uv norm | pos uv norm    | ... etc ... 
     NonInterleaved, // | pos pos pos | uv  uv  uv  | norm norm norm | ... etc ... 
     */
-    auto& vertexBuffer = *m_Buffers[0];
+    auto& vertexBuffer = m_Buffers[0];
     vertexBuffer.generate();
     vertexBuffer.bind();
 
@@ -190,7 +190,7 @@ void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
         }
     }
     if (attributeIndex == -1) {
-        auto& indiceBuffer = *m_Buffers[1];
+        auto& indiceBuffer = m_Buffers[1];
         indiceBuffer.generate();
         indiceBuffer.bind();
         indiceBuffer.setData(m_Indices, BufferDataDrawType::Static);

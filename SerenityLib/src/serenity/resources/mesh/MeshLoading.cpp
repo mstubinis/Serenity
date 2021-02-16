@@ -15,155 +15,70 @@
 
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <fstream>
+#include <stack>
 
-void Engine::priv::MeshLoader::LoadPopulateGlobalNodes(const aiScene& scene, MeshInfoNode* root, MeshInfoNode* parent, MeshInfoNode* node, aiNode* ai_node, MeshRequest& request) {
-    if (!request.m_MeshNodeMap.contains(node->Name)) {
-        request.m_MeshNodeMap.emplace( 
-            std::piecewise_construct, 
-            std::forward_as_tuple(node->Name), 
-            std::forward_as_tuple(node) 
-        );
-    }
-    for (uint32_t i = 0; i < ai_node->mNumMeshes; ++i) {
-        const aiMesh& aimesh  = *scene.mMeshes[ai_node->mMeshes[i]];
-        MeshRequestPart& part = request.m_Parts.emplace_back();
-        part.name             = request.m_FileOrData + " - " + std::string(aimesh.mName.C_Str());
+void Engine::priv::MeshLoader::LoadPopulateGlobalNodes(const aiScene& scene, aiNode* ai_node, MeshRequest& request) {
+    struct Parameters final {
+        aiNode*  ai_node     = nullptr;
+        uint16_t parentIndex = 0;
+        Parameters(aiNode* ai_node_, uint16_t parentIndex_)
+            : ai_node{ ai_node_ }
+            , parentIndex{ parentIndex_ }
+        {}
+    };
 
-        part.handle     = Engine::Resources::addResource<Mesh>();
-        part.cpuData.m_File     = request.m_FileOrData;
-        part.cpuData.m_RootNode = (root);
+    std::stack<Parameters> stk;
+    uint16_t ParentIndex = 0;
+    stk.emplace(ai_node, ParentIndex);
+    //dfs
+    while (!stk.empty()) {
+        auto data    = stk.top();
+        stk.pop();
+        auto& ainode = *data.ai_node;
+        request.m_NodeData.m_Nodes.emplace_back(ainode);
+        request.m_NodeData.m_NodeHeirarchy.emplace_back(data.parentIndex);
+        for (uint32_t i = 0; i < ainode.mNumMeshes; ++i) {
+            const aiMesh& aimesh  = *scene.mMeshes[ainode.mMeshes[i]];
+            MeshRequestPart& part = request.m_Parts.emplace_back();
+            part.name             = request.m_FileOrData + " - " + std::string{ aimesh.mName.C_Str() };
+            part.handle           = Engine::Resources::addResource<Mesh>();
+            part.cpuData.m_File   = request.m_FileOrData;
+        }
+        ++ParentIndex;
+        for (uint32_t i = 0; i < ainode.mNumChildren; ++i) {
+            auto* ai_child = ainode.mChildren[i];
+            stk.emplace(ai_child, ParentIndex);
+        }
     }
-    if (parent) {
-        parent->Children.emplace_back(std::unique_ptr<Engine::priv::MeshInfoNode>(node));
-    }
-    for (uint32_t i = 0; i < ai_node->mNumChildren; ++i) {
-        auto* ai_child = ai_node->mChildren[i];
-        auto* child    = NEW Engine::priv::MeshInfoNode{ ai_child->mName.C_Str(), Engine::Math::assimpToGLMMat4(ai_child->mTransformation) };
-        MeshLoader::LoadPopulateGlobalNodes(scene, root, node, child, ai_child, request);
+    request.m_NodeData.m_NodeTransforms.resize(request.m_NodeData.m_Nodes.size(), glm::mat4{1.0f});
+}
+void Engine::priv::MeshLoader::LoadProcessNodeData(MeshRequest& request, const aiScene& aiscene, const aiNode& rootAINode) {
+    auto& root         = *(aiscene.mRootNode);
+    uint32_t partIndex = 0;
+
+    std::stack<const aiNode*> stk;
+    stk.push(&rootAINode);
+    //dfs
+    while (!stk.empty()) {
+        auto& AINode = *stk.top();
+        stk.pop();
+        for (auto i = 0U; i < AINode.mNumMeshes; ++i) {
+            const aiMesh& aimesh = *aiscene.mMeshes[AINode.mMeshes[i]];
+            auto& part           = request.m_Parts[partIndex];
+            MeshImportedData data{ aimesh };
+       
+            if (aimesh.mNumBones > 0) {
+                part.cpuData.m_Skeleton = NEW MeshSkeleton{ aimesh, aiscene, request, &part.handle.get<Mesh>()->m_CPUData.m_NodeData, data };
+            }
+            MeshLoader::CalculateTBNAssimp(data);
+            MeshLoader::FinalizeData(part.cpuData, data, 0.0005f);
+            ++partIndex;
+        }
+        for (uint32_t i = 0; i < AINode.mNumChildren; ++i) {
+            stk.push(AINode.mChildren[i]);
+        }
     }
 }
-void Engine::priv::MeshLoader::LoadProcessNodeData(MeshRequest& request, const aiScene& aiScene, const aiNode& node, uint& count) {
-    auto& root = *(aiScene.mRootNode);
-
-    for (auto i = 0U; i < node.mNumMeshes; ++i) {
-        const aiMesh& aimesh = *aiScene.mMeshes[node.mMeshes[i]];
-
-        auto& part = request.m_Parts[count];
-        MeshImportedData data;
-
-        #pragma region vertices
-        data.points.reserve(aimesh.mNumVertices);
-        data.uvs.reserve(aimesh.mNumVertices);
-        data.normals.reserve(aimesh.mNumVertices);
-        data.binormals.reserve(aimesh.mNumVertices);
-        data.tangents.reserve(aimesh.mNumVertices);
-        for (uint32_t j = 0; j < aimesh.mNumVertices; ++j) {
-            //pos
-            auto& pos = aimesh.mVertices[j];
-            data.points.emplace_back(pos.x, pos.y, pos.z);
-            //uv
-            if (aimesh.mTextureCoords[0]) {
-                auto& uv = aimesh.mTextureCoords[0][j];
-                //this is to fix uv compression errors near the poles.
-                //if(uv.y <= 0.0001f){ uv.y = 0.001f; }
-                //if(uv.y >= 0.9999f){ uv.y = 0.999f; }
-                data.uvs.emplace_back(uv.x, uv.y);
-            }else{
-                data.uvs.emplace_back(0.0f, 0.0f);
-            }
-            if (aimesh.mNormals) {
-                auto& norm = aimesh.mNormals[j];
-                data.normals.emplace_back(norm.x, norm.y, norm.z);
-            }
-            if (aimesh.mTangents) {
-                //auto& tang = aimesh.mTangents[j];
-                //data.tangents.emplace_back(tang.x,tang.y,tang.z);
-            }
-            if (aimesh.mBitangents) {
-                //auto& binorm = aimesh.mBitangents[j];
-                //data.binormals.emplace_back(binorm.x,binorm.y,binorm.z);
-            }
-        }
-        #pragma endregion
-
-        #pragma region indices
-        data.indices.reserve(aimesh.mNumFaces * 3);
-        for (uint32_t j = 0; j < aimesh.mNumFaces; ++j) {
-            const auto& face = aimesh.mFaces[j];
-            data.indices.emplace_back(face.mIndices[0]);
-            data.indices.emplace_back(face.mIndices[1]);
-            data.indices.emplace_back(face.mIndices[2]);
-        }
-        #pragma endregion
-
-        #pragma region Skeleton
-        if (aimesh.mNumBones > 0) {
-            part.cpuData.m_Skeleton = NEW MeshSkeleton{};
-            auto& skeleton = *part.cpuData.m_Skeleton;
-
-            #pragma region IndividualBones
-            //build bone information
-            for (uint32_t k = 0; k < aimesh.mNumBones; ++k) {
-                auto& boneNode   = request.m_MeshNodeMap.at(aimesh.mBones[k]->mName.data);
-                auto& assimpBone = *aimesh.mBones[k];
-                uint32_t BoneIndex{ 0 };
-                if (!skeleton.m_BoneMapping.contains(boneNode->Name)) {
-                    BoneIndex = skeleton.m_NumBones;
-                    ++skeleton.m_NumBones;
-                    skeleton.m_BoneInfo.emplace_back();
-                }else{
-                    BoneIndex = skeleton.m_BoneMapping.at(boneNode->Name);
-                }
-                skeleton.m_BoneMapping.emplace(
-                    std::piecewise_construct,
-                    std::forward_as_tuple(boneNode->Name), 
-                    std::forward_as_tuple(BoneIndex)
-                );
-                skeleton.m_BoneInfo[BoneIndex].BoneOffset = Math::assimpToGLMMat4(assimpBone.mOffsetMatrix);
-                for (uint32_t j = 0; j < assimpBone.mNumWeights; ++j) {
-                    data.m_Bones.emplace(
-                        std::piecewise_construct,
-                        std::forward_as_tuple(assimpBone.mWeights[j].mVertexId),
-                        std::forward_as_tuple(BoneIndex, assimpBone.mWeights[j].mWeight)
-                    );
-                }
-            }
-            #pragma endregion
-
-            #pragma region Animations
-            if (aiScene.mAnimations && aiScene.mNumAnimations > 0) {
-                for (uint32_t k = 0; k < aiScene.mNumAnimations; ++k) {
-                    const aiAnimation& anim = *aiScene.mAnimations[k];
-                    std::string key{ anim.mName.C_Str() };
-                    if (key.empty()) {
-                        key = "Animation " + std::to_string(skeleton.m_AnimationData.size());
-                    }
-                    if (!skeleton.m_AnimationData.contains(key)) {
-                        skeleton.m_AnimationData.emplace(
-                            std::piecewise_construct, 
-                            std::forward_as_tuple(std::move(key)), 
-                            std::forward_as_tuple(part.handle.get<Mesh>()->m_CPUData, anim)
-                        );
-                    }
-                }
-            }
-            #pragma endregion
-        }
-        #pragma endregion
-        MeshLoader::CalculateTBNAssimp(data);
-        MeshLoader::FinalizeData(part.cpuData, data, 0.0005f);
-        ++count;
-    }
-    for (uint32_t i = 0; i < node.mNumChildren; ++i) {
-        MeshLoader::LoadProcessNodeData(request, aiScene, *node.mChildren[i], count);
-    }
-}
-/*
-void Engine::priv::MeshLoader::FinalizeData(Handle meshHandle, MeshImportedData& data, float threshold) {
-    auto& mesh = *meshHandle.get<Mesh>();
-    FinalizeData(mesh.m_CPUData, data, threshold);
-}
-*/
 void Engine::priv::MeshLoader::FinalizeData(MeshCPUData& cpuData, MeshImportedData& data, float threshold) {
     cpuData.m_Threshold = threshold;
     PublicMesh::FinalizeVertexData(cpuData, data);
@@ -173,9 +88,7 @@ void Engine::priv::MeshLoader::FinalizeData(MeshCPUData& cpuData, MeshImportedDa
 
 bool Engine::priv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& pts, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& norms, uint32_t& result, float thrshld) {
     for (uint32_t t = 0; t < pts.size(); ++t) {
-        if (Math::IsNear(in_pos, pts[t], thrshld) 
-        &&  Math::IsNear(in_uv, uvs[t], thrshld) 
-        &&  Math::IsNear(in_norm, norms[t], thrshld)) {
+        if (Math::IsNear(in_pos, pts[t], thrshld) &&  Math::IsNear(in_uv, uvs[t], thrshld) &&  Math::IsNear(in_norm, norms[t], thrshld)) {
             result = t;
             return true;
         }
@@ -183,25 +96,25 @@ bool Engine::priv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec
     return false;
 }
 void Engine::priv::MeshLoader::CalculateTBNAssimp(MeshImportedData& importedData) {
-    if (importedData.normals.size() == 0) {
+    if (importedData.m_Normals.size() == 0) {
         return;
     }
-    const size_t pointsSize{ importedData.points.size() };
-    importedData.tangents.reserve(importedData.normals.size());
-    importedData.binormals.reserve(importedData.normals.size());
+    const auto pointsSize = importedData.m_Points.size();
+    importedData.m_Tangents.reserve(importedData.m_Normals.size());
+    importedData.m_Binormals.reserve(importedData.m_Normals.size());
     for (size_t i = 0; i < pointsSize; i += 3) {
         const size_t p0{ i + 0 };
         const size_t p1{ i + 1 };
         const size_t p2{ i + 2 };
-        const size_t uvSize{ importedData.uvs.size() };
+        const size_t uvSize{ importedData.m_UVs.size() };
 
-        const glm::vec3 point1 = (pointsSize > p0) ? importedData.points[p0] : glm::vec3(0.0f);
-        const glm::vec3 point2 = (pointsSize > p1) ? importedData.points[p1] : glm::vec3(0.0f);
-        const glm::vec3 point3 = (pointsSize > p2) ? importedData.points[p2] : glm::vec3(0.0f);
+        const glm::vec3 point1 = (pointsSize > p0) ? importedData.m_Points[p0] : glm::vec3(0.0f);
+        const glm::vec3 point2 = (pointsSize > p1) ? importedData.m_Points[p1] : glm::vec3(0.0f);
+        const glm::vec3 point3 = (pointsSize > p2) ? importedData.m_Points[p2] : glm::vec3(0.0f);
 
-        const glm::vec2 uv1 = (uvSize > p0) ? importedData.uvs[p0] : glm::vec2(0.0f);
-        const glm::vec2 uv2 = (uvSize > p1) ? importedData.uvs[p1] : glm::vec2(0.0f);
-        const glm::vec2 uv3 = (uvSize > p2) ? importedData.uvs[p2] : glm::vec2(0.0f);
+        const glm::vec2 uv1 = (uvSize > p0) ? importedData.m_UVs[p0] : glm::vec2(0.0f);
+        const glm::vec2 uv2 = (uvSize > p1) ? importedData.m_UVs[p1] : glm::vec2(0.0f);
+        const glm::vec2 uv3 = (uvSize > p2) ? importedData.m_UVs[p2] : glm::vec2(0.0f);
 
         const glm::vec3 v{ point2 - point1 };
         const glm::vec3 w{ point3 - point1 };
@@ -245,8 +158,8 @@ void Engine::priv::MeshLoader::CalculateTBNAssimp(MeshImportedData& importedData
             else if (b == 1) p = p1;
             else             p = p2;
 
-            if (importedData.normals.size() > p)
-                normal = importedData.normals[p];
+            if (importedData.m_Normals.size() > p)
+                normal = importedData.m_Normals[p];
             else                         
                 normal = glm::vec3{ 0.0f };
 
@@ -265,15 +178,15 @@ void Engine::priv::MeshLoader::CalculateTBNAssimp(MeshImportedData& importedData
                 else                 
                     localBitangent = glm::normalize(glm::cross(localTangent, normal));
             }
-            importedData.tangents.emplace_back(localTangent);
-            importedData.binormals.emplace_back(localBitangent);
+            importedData.m_Tangents.emplace_back(localTangent);
+            importedData.m_Binormals.emplace_back(localBitangent);
         }
     }
-    for (size_t i = 0; i < importedData.points.size(); ++i) {
+    for (size_t i = 0; i < importedData.m_Points.size(); ++i) {
         //hmm.. should b and t be swapped here?
-        auto& n = importedData.normals[i];
-        auto& b = importedData.tangents[i];
-        auto& t = importedData.binormals[i];
+        auto& n = importedData.m_Normals[i];
+        auto& b = importedData.m_Tangents[i];
+        auto& t = importedData.m_Binormals[i];
         t = glm::normalize(t - n * glm::dot(n, t)); // Gram-Schmidt orthogonalize
     }
 };

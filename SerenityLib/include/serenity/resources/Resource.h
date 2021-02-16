@@ -14,12 +14,12 @@ class Resource {
     public:
         Resource() = default;
         Resource(ResourceType type);
-        Resource(ResourceType type, const std::string& name);
+        Resource(ResourceType type, std::string_view name);
 
-        Resource(const Resource& other)                 = delete;
-        Resource& operator=(const Resource& other)      = delete;
-        Resource(Resource&& other) noexcept;
-        Resource& operator=(Resource&& other) noexcept;
+        Resource(const Resource&)                 = delete;
+        Resource& operator=(const Resource&)      = delete;
+        Resource(Resource&&) noexcept;
+        Resource& operator=(Resource&&) noexcept;
         virtual ~Resource() {}
 
         [[nodiscard]] inline constexpr ResourceType type() const noexcept { return m_ResourceType; }
@@ -27,7 +27,7 @@ class Resource {
         [[nodiscard]] inline constexpr bool isLoaded() const noexcept { return m_IsLoaded; }
         //[[nodiscard]]inline constexpr uint32_t useCount() const noexcept { return m_UsageCount; }
 
-        inline void setName(const std::string& name) noexcept { m_Name = name; }
+        inline void setName(std::string_view name) noexcept { m_Name = name; }
 
         //inline void incrementUseCount() noexcept { ++m_UsageCount; }
         //inline void decrementUseCount() noexcept { if (m_UsageCount > 0) { --m_UsageCount; } }

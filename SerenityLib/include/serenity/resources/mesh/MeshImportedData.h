@@ -3,43 +3,102 @@
 #define ENGINE_MESH_IMPORTED_DATA_H
 
 #include <serenity/resources/mesh/MeshIncludes.h>
+#include <serenity/resources/mesh/MeshLoading.h>
 #include <serenity/dependencies/glm.h>
 #include <serenity/system/TypeDefs.h>
 #include <map>
 #include <vector>
 
 namespace Engine::priv {
-    struct MeshImportedData final {
-        std::map<uint32_t, VertexBoneData>      m_Bones;
-        std::vector<glm::vec3>                  file_points;
-        std::vector<glm::vec2>                  file_uvs;
-        std::vector<glm::vec3>                  file_normals;
-        std::vector<glm::vec3>                  points;
-        std::vector<glm::vec2>                  uvs;
-        std::vector<glm::vec3>                  normals;
-        std::vector<glm::vec3>                  binormals;
-        std::vector<glm::vec3>                  tangents;
-        std::vector<uint32_t>                   indices;
-
-        MeshImportedData() = default;
-        MeshImportedData(const MeshImportedData& other)                = delete;
-        MeshImportedData& operator=(const MeshImportedData& other)     = delete;
-        MeshImportedData(MeshImportedData&& other) noexcept            = default;
-        MeshImportedData& operator=(MeshImportedData&& other) noexcept = default;
-
-        void triangulateIndices(const std::vector<std::vector<uint32_t>>& indices, uint8_t flags) {
-            for (size_t i = 0; i < indices[0].size(); ++i) {
-                if ((flags & MeshLoadingFlags::Points) && file_points.size() > 0) {
-                    points.emplace_back(file_points[indices[0][i] - 1]);
-                }
-                if ((flags & MeshLoadingFlags::UVs) && file_uvs.size() > 0) {
-                    uvs.emplace_back(file_uvs[indices[1][i] - 1]);
-                }
-                if ((flags & MeshLoadingFlags::Normals) && file_normals.size() > 0) {
-                    normals.emplace_back(file_normals[indices[2][i] - 1]);
+    class MeshImportedData final {
+        private:
+            void internal_reserve(uint32_t capacity) {
+                m_Points.reserve(capacity);
+                m_UVs.reserve(capacity);
+                m_Normals.reserve(capacity);
+                m_Binormals.reserve(capacity);
+                m_Tangents.reserve(capacity);
+            }
+            void internal_build_vertices(const aiMesh& aimesh) {
+                for (auto j = 0U; j < aimesh.mNumVertices; ++j) {
+                    //pos
+                    auto& pos = aimesh.mVertices[j];
+                    m_Points.emplace_back(pos.x, pos.y, pos.z);
+                    //uv
+                    if (aimesh.mTextureCoords[0]) {
+                        auto& uv = aimesh.mTextureCoords[0][j];
+                        //this is to fix uv compression errors near the poles.
+                        //if(uv.y <= 0.0001f){ uv.y = 0.001f; }
+                        //if(uv.y >= 0.9999f){ uv.y = 0.999f; }
+                        m_UVs.emplace_back(uv.x, uv.y);
+                    }else{
+                        m_UVs.emplace_back(0.0f, 0.0f);
+                    }
+                    if (aimesh.mNormals) {
+                        auto& norm = aimesh.mNormals[j];
+                        m_Normals.emplace_back(norm.x, norm.y, norm.z);
+                    }
+                    if (aimesh.mBitangents) {
+                        //auto& binorm = aimesh.mBitangents[j];
+                        //m_Binormals.emplace_back(binorm.x,binorm.y,binorm.z);
+                    }
+                    if (aimesh.mTangents) {
+                        //auto& tang = aimesh.mTangents[j];
+                        //m_Tangents.emplace_back(tang.x,tang.y,tang.z);
+                    }
                 }
             }
-        }
+            void internal_build_indices(const aiMesh& aimesh) {
+                m_Indices.reserve(aimesh.mNumFaces * 3);
+                for (uint32_t j = 0; j < aimesh.mNumFaces; ++j) {
+                    const auto& face = aimesh.mFaces[j];
+                    m_Indices.emplace_back(face.mIndices[0]);
+                    m_Indices.emplace_back(face.mIndices[1]);
+                    m_Indices.emplace_back(face.mIndices[2]);
+                }
+            }
+        public:
+            std::map<uint32_t, VertexBoneData>      m_Bones; //TODO: use unordered_map or vector? (uint32_t as key for vector index)
+            std::vector<glm::vec3>                  m_FilePoints;
+            std::vector<glm::vec2>                  m_FileUVs;
+            std::vector<glm::vec3>                  m_FileNormals;
+            std::vector<glm::vec3>                  m_Points;
+            std::vector<glm::vec2>                  m_UVs;
+            std::vector<glm::vec3>                  m_Normals;
+            std::vector<glm::vec3>                  m_Binormals;
+            std::vector<glm::vec3>                  m_Tangents;
+            std::vector<uint32_t>                   m_Indices;
+
+            MeshImportedData() = default;
+            MeshImportedData(const MeshImportedData&)                = delete;
+            MeshImportedData& operator=(const MeshImportedData&)     = delete;
+            MeshImportedData(MeshImportedData&&) noexcept            = default;
+            MeshImportedData& operator=(MeshImportedData&&) noexcept = default;
+
+            MeshImportedData(uint32_t capacity) {
+                internal_reserve(capacity);
+            }
+            MeshImportedData(const aiMesh& aimesh) {
+                internal_reserve(aimesh.mNumVertices);
+                internal_build_vertices(aimesh);
+                internal_build_indices(aimesh);
+            }
+            inline void addBone(uint32_t vertexID, uint32_t boneIndex, float boneWeight) {
+                m_Bones.emplace(std::piecewise_construct, std::forward_as_tuple(vertexID), std::forward_as_tuple(boneIndex, boneWeight));
+            }
+            void triangulateIndices(const std::vector<std::vector<uint32_t>>& indices, uint8_t flags) {
+                for (size_t i = 0; i < indices[0].size(); ++i) {
+                    if ((flags & MeshLoadingFlags::Points) && m_FilePoints.size() > 0) {
+                        m_Points.emplace_back(m_FilePoints[indices[0][i] - 1]);
+                    }
+                    if ((flags & MeshLoadingFlags::UVs) && m_FileUVs.size() > 0) {
+                        m_UVs.emplace_back(m_FileUVs[indices[1][i] - 1]);
+                    }
+                    if ((flags & MeshLoadingFlags::Normals) && m_FileNormals.size() > 0) {
+                        m_Normals.emplace_back(m_FileNormals[indices[2][i] - 1]);
+                    }
+                }
+            }
     };
 };
 #endif

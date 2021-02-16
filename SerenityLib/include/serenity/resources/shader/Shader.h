@@ -25,12 +25,12 @@ class Shader final : public Resource {
         std::string  m_Code;
     public:
         Shader() = default;
-        Shader(const std::string& shaderFileOrData, ShaderType shaderType, bool fromFile = true);
+        Shader(std::string_view shaderFileOrData, ShaderType shaderType, bool fromFile = true);
 
-        Shader(const Shader& other) = default; //TODO: delete here?
-        Shader& operator=(const Shader& other) = delete;
-        Shader(Shader&& other) noexcept;
-        Shader& operator=(Shader&& other) noexcept;
+        Shader(const Shader&) = default; //TODO: delete here?
+        Shader& operator=(const Shader&) = delete;
+        Shader(Shader&&) noexcept;
+        Shader& operator=(Shader&&) noexcept;
 
         [[nodiscard]] inline constexpr ShaderType type() const noexcept { return m_Type; }
         [[nodiscard]] inline constexpr const std::string& data() const noexcept { return m_Code; }

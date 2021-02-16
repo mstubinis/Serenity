@@ -89,14 +89,14 @@ namespace Engine::Resources {
     bool deleteScene(Scene& scene);
 
     [[nodiscard]] std::vector<Handle> loadMesh(
-        const std::string& fileOrData, 
+        std::string_view fileOrData,
         float threshhold = MESH_DEFAULT_THRESHOLD,
         MeshCollisionLoadingFlag::Flag = MESH_COLLISION_FACTORY_DEFAULT_LOAD_FLAG
     );
 
 
     [[nodiscard]] std::vector<Handle> loadMeshAsync(
-        const std::string& fileOrData,
+        std::string_view fileOrData,
         float threshhold = MESH_DEFAULT_THRESHOLD,
         MeshCollisionLoadingFlag::Flag = MESH_COLLISION_FACTORY_DEFAULT_LOAD_FLAG,
         MeshRequestCallback callback = [](const std::vector<Handle>&) {}
@@ -117,52 +117,52 @@ namespace Engine::Resources {
     }
 
     [[nodiscard]] Handle loadTexture(
-        const std::string& file,
+        std::string_view file,
         ImageInternalFormat = ImageInternalFormat::SRGB8_ALPHA8,
         bool mipmaps        = false
     );
     [[nodiscard]] Handle loadTexture(
         sf::Image& sfImage,
-        const std::string& texture_name,
+        std::string_view texture_name,
         ImageInternalFormat = ImageInternalFormat::SRGB8_ALPHA8,
         bool mipmaps        = false
     );
     [[nodiscard]] Handle loadTextureAsync(
-        const std::string& file,
+        std::string_view file,
         ImageInternalFormat = ImageInternalFormat::SRGB8_ALPHA8,
         bool mipmaps        = false,
         Engine::ResourceCallback callback = [](Handle) {}
     );
     [[nodiscard]] Handle loadTextureAsync(
         sf::Image& sfImage,
-        const std::string& texture_name,
+        std::string_view texture_name,
         ImageInternalFormat = ImageInternalFormat::SRGB8_ALPHA8,
         bool mipmaps        = false,
         Engine::ResourceCallback callback = [](Handle) {}
     );
     [[nodiscard]] Handle loadMaterial(
-        const std::string& name, 
-        const std::string& diffuse, 
-        const std::string& normal     = "", 
-        const std::string& glow       = "", 
-        const std::string& specular   = "",
-        const std::string& ao         = "",
-        const std::string& metalness  = "",
-        const std::string& smoothness = ""
+        std::string_view name,
+        std::string_view diffuse,
+        std::string_view normal     = "",
+        std::string_view glow       = "",
+        std::string_view specular   = "",
+        std::string_view ao         = "",
+        std::string_view metalness  = "",
+        std::string_view smoothness = ""
     );
     [[nodiscard]] Handle loadMaterialAsync(
-        const std::string& name,
-        const std::string& diffuse,
-        const std::string& normal     = "",
-        const std::string& glow       = "",
-        const std::string& specular   = "",
-        const std::string& ao         = "",
-        const std::string& metalness  = "",
-        const std::string& smoothness = "",
+        std::string_view name,
+        std::string_view diffuse,
+        std::string_view normal     = "",
+        std::string_view glow       = "",
+        std::string_view specular   = "",
+        std::string_view ao         = "",
+        std::string_view metalness  = "",
+        std::string_view smoothness = "",
         Engine::ResourceCallback callback = [](Handle) {}
     );
     [[nodiscard]] Handle loadMaterial(
-        const std::string& name,
+        std::string_view name,
         Handle diffuse,
         Handle normal     = Handle{},
         Handle glow       = Handle{},
@@ -172,9 +172,9 @@ namespace Engine::Resources {
         Handle smoothness = Handle{}
     );
 
-    [[nodiscard]] Handle addShader(const std::string& shaderFileOrData, ShaderType shaderType, bool fromFile = true);
+    [[nodiscard]] Handle addShader(std::string_view shaderFileOrData, ShaderType shaderType, bool fromFile = true);
 
-    [[nodiscard]] Handle addShaderProgram(const std::string& name, Handle vertexShader, Handle fragmentShader);
+    [[nodiscard]] Handle addShaderProgram(std::string_view name, Handle vertexShader, Handle fragmentShader);
 };
 namespace Engine::Data{
     [[nodiscard]] std::string reportTime();

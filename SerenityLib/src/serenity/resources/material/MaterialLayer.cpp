@@ -46,7 +46,7 @@ void MaterialLayer::addUVModificationSimpleMultiplication(float mulX, float mulY
     });
 }
 
-void MaterialLayer::setTexture(const std::string& textureFile) noexcept {
+void MaterialLayer::setTexture(std::string_view textureFile) noexcept {
     auto texture = Engine::Resources::getResource<Texture>(textureFile);
     if (!texture.m_Resource) {
         if (!textureFile.empty()) {
@@ -56,11 +56,11 @@ void MaterialLayer::setTexture(const std::string& textureFile) noexcept {
     }
     setTexture(texture.m_Handle);
 }
-void MaterialLayer::setMask(const std::string& maskFile) noexcept {
+void MaterialLayer::setMask(std::string_view maskFile) noexcept {
     auto texture = Engine::priv::MaterialLoader::LoadTextureMask(maskFile);
     setMask(texture.m_Handle);
 }
-void MaterialLayer::setCubemap(const std::string& cubemapFile) noexcept {
+void MaterialLayer::setCubemap(std::string_view cubemapFile) noexcept {
     auto texture = Engine::priv::MaterialLoader::LoadTextureCubemap(cubemapFile);
     setCubemap(texture.m_Handle);
 }

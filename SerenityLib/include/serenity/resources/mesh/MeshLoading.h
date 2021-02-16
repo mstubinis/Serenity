@@ -8,7 +8,7 @@ struct aiNode;
 struct MeshCPUData;
 
 #include <serenity/utils/Utils.h>
-#include <serenity/resources/mesh/Skeleton.h>
+#include <serenity/resources/mesh/animation/Skeleton.h>
 #include <serenity/resources/mesh/MeshRequest.h>
 
 namespace Engine::priv {
@@ -35,10 +35,9 @@ namespace Engine::priv {
         friend struct MeshRequest;
         friend class  Engine::priv::MeshSkeleton;
         public:
-            static void        LoadProcessNodeData(MeshRequest& meshRequest, const aiScene& scene, const aiNode& node, uint& count);
-            static void        LoadPopulateGlobalNodes(const aiScene& scene, MeshInfoNode* root, MeshInfoNode* parent, MeshInfoNode* node, aiNode* ai_node, MeshRequest& meshRequest);
+            static void        LoadProcessNodeData(MeshRequest& meshRequest, const aiScene& scene, const aiNode& rootAINode);
+            static void        LoadPopulateGlobalNodes(const aiScene& scene, aiNode* ai_node, MeshRequest& meshRequest);
             
-            //static void        FinalizeData(Handle meshHandle, MeshImportedData& data, float threshold);
             static void        FinalizeData(MeshCPUData& cpuData, MeshImportedData& data, float threshold);
 
             static VertexData* LoadFrom_OBJCC(const std::string& filename);

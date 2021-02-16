@@ -16,7 +16,7 @@ struct TextureRequestPart final {
     bool                          m_Async       = false;
 
     TextureRequestPart() = default;
-    TextureRequestPart(const std::string& filename, ImageInternalFormat intFmt, bool mipmapped, TextureType textureType_) {
+    TextureRequestPart(std::string_view filename, ImageInternalFormat intFmt, bool mipmapped, TextureType textureType_) {
         m_CPUData.m_Name                            = filename;
         m_CPUData.m_IsToBeMipmapped                 = mipmapped;
         m_CPUData.m_TextureType                     = textureType_;
@@ -39,9 +39,9 @@ struct TextureRequest final {
     sf::Image                 m_SFMLImage;
 
     TextureRequest() = delete;
-    TextureRequest(const std::string& filenameOrData, bool genMipMaps, ImageInternalFormat, TextureType, Engine::ResourceCallback&& callback);
-    TextureRequest(const std::string& filenameOrData, bool genMipMaps, ImageInternalFormat, TextureType);
-    TextureRequest(const sf::Image&, const std::string& textureName, bool genMipMaps, ImageInternalFormat, TextureType, Engine::ResourceCallback&& callback);
+    TextureRequest(std::string_view filenameOrData, bool genMipMaps, ImageInternalFormat, TextureType, Engine::ResourceCallback&& callback);
+    TextureRequest(std::string_view filenameOrData, bool genMipMaps, ImageInternalFormat, TextureType);
+    TextureRequest(const sf::Image&, std::string_view textureName, bool genMipMaps, ImageInternalFormat, TextureType, Engine::ResourceCallback&& callback);
 
     [[nodiscard]] inline constexpr bool isFromFile() const noexcept { return (!m_FromMemory && m_FileData.m_FileExists); }
     [[nodiscard]] inline constexpr bool isFromMemory() const noexcept { return (m_FromMemory && m_SFMLImage.getSize().x > 0 && m_SFMLImage.getSize().y > 0); }

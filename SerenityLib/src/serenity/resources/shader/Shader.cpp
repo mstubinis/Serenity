@@ -57,7 +57,7 @@ constexpr const char* NormalDepthFunctions =
     "    return space.xyz / space.w;\n"
     "}\n";
 
-Shader::Shader(const std::string& filenameOrCode, ShaderType shaderType, bool fromFile) 
+Shader::Shader(std::string_view filenameOrCode, ShaderType shaderType, bool fromFile)
     : Resource   { ResourceType::Shader }
     , m_FileName { filenameOrCode }
     , m_Type     { shaderType }

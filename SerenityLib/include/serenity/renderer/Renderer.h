@@ -497,7 +497,7 @@ namespace Renderer{
 
     //Matrix 2x2
     inline void sendUniformMatrix2(const char* l, const glm::mat2& m){ glUniformMatrix2fv(getUniformLocUnsafe(l),1,0,glm::value_ptr(m)); }
-    inline void sendUniformMatrix2v(const char* l, const std::vector<glm::mat2>& m, const unsigned int count){ auto d = Engine::create_and_reserve<std::vector<float>>(m.size() * 4);for(auto& ma:m){const float* m = glm::value_ptr(ma);for(int i = 0; i < 4; ++i){d.push_back(m[i]);}}glUniformMatrix2fv(getUniformLocUnsafe(l),count,0,&d[0]); }
+    inline void sendUniformMatrix2v(const char* l, const std::vector<glm::mat2>& m, const unsigned int count){ auto d = Engine::create_and_reserve<std::vector<float>>(static_cast<uint32_t>(m.size()) * 4U);for(auto& ma:m){const float* m = glm::value_ptr(ma);for(int i = 0; i < 4; ++i){d.push_back(m[i]);}}glUniformMatrix2fv(getUniformLocUnsafe(l),count,0,&d[0]); }
     inline void sendUniformMatrix2(const char* l, const glm::dmat2& m){ glUniformMatrix2dv(getUniformLocUnsafe(l),1,0,glm::value_ptr(m)); }
     inline void sendUniformMatrix2v(const char* l, const std::vector<glm::dmat2>& m, const unsigned int count){ std::vector<double> d; d.reserve(m.size() * 4); for(auto& ma:m){ const double* m = glm::value_ptr(ma);for(uint i = 0; i < 4; ++i){d.push_back(m[i]);}}glUniformMatrix2dv(getUniformLocUnsafe(l),count,0,&d[0]); }
     inline void sendUniformMatrix2Safe(const char* l, const glm::mat2& m){ const auto& o=getUniformLoc(l);if(o==-1)return;glUniformMatrix2fv(o,1,0,glm::value_ptr(m)); }

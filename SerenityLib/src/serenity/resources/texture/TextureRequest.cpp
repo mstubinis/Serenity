@@ -11,7 +11,7 @@ using namespace Engine::priv;
 
 #pragma region TextureRequest
 
-TextureRequest::TextureRequest(const std::string& filename, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType) 
+TextureRequest::TextureRequest(std::string_view filename, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType)
     : m_Part{ filename, intFmt, genMipMaps, textureType }
 {
     if (!m_Part.m_CPUData.m_Name.empty()) {
@@ -21,13 +21,13 @@ TextureRequest::TextureRequest(const std::string& filename, bool genMipMaps, Ima
         }
     }
 }
-TextureRequest::TextureRequest(const std::string& filename, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType, Engine::ResourceCallback&& callback)
+TextureRequest::TextureRequest(std::string_view filename, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType, Engine::ResourceCallback&& callback)
     : TextureRequest{ filename, genMipMaps, intFmt, textureType }
 {
     m_Part.m_Callback = std::move(callback);
 }
 
-TextureRequest::TextureRequest(const sf::Image& sfImage, const std::string& filename, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType, Engine::ResourceCallback&& callback)
+TextureRequest::TextureRequest(const sf::Image& sfImage, std::string_view filename, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType, Engine::ResourceCallback&& callback)
     : m_SFMLImage{ sfImage }
     , m_Part{ filename, intFmt, genMipMaps, textureType }
 {

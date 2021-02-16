@@ -58,7 +58,7 @@ class ModelInstance final : public Observer {
 
         ModelDrawingMode                                     m_DrawingMode         = ModelDrawingMode::Triangles;
         Engine::Flag<uint32_t>                               m_ViewportFlag;     //determine what viewports this can be seen in
-        Engine::priv::ModelInstanceAnimationVector           m_AnimationVector;
+        Engine::priv::ModelInstanceAnimationContainer        m_Animations;
         Entity                                               m_Parent              = Entity();
         Handle                                               m_ShaderProgramHandle = Handle{};
         Handle                                               m_MeshHandle          = Handle{};
@@ -87,10 +87,10 @@ class ModelInstance final : public Observer {
     public:
         ModelInstance(Entity, Handle mesh, Handle material, Handle shaderProgram = Handle{});
 
-        ModelInstance(const ModelInstance& other)                = delete;
-        ModelInstance& operator=(const ModelInstance& other)     = delete;
-        ModelInstance(ModelInstance&& other) noexcept;
-        ModelInstance& operator=(ModelInstance&& other) noexcept;
+        ModelInstance(const ModelInstance&)                = delete;
+        ModelInstance& operator=(const ModelInstance&)     = delete;
+        ModelInstance(ModelInstance&&) noexcept;
+        ModelInstance& operator=(ModelInstance&&) noexcept;
 
         ~ModelInstance();
 
@@ -115,7 +115,7 @@ class ModelInstance final : public Observer {
         inline void removeViewportFlag(ViewportFlag::Flag flag) noexcept { m_ViewportFlag.remove(flag); }
         [[nodiscard]] inline uint32_t getViewportFlags() const noexcept { return m_ViewportFlag.get(); }
 
-        [[nodiscard]] inline const Engine::priv::ModelInstanceAnimationVector& getRunningAnimations() const noexcept { return m_AnimationVector; }
+        [[nodiscard]] inline const Engine::priv::ModelInstanceAnimationContainer& getRunningAnimations() const noexcept { return m_Animations; }
 
         [[nodiscard]] inline float radius() const noexcept { return m_Radius; }
         [[nodiscard]] inline uint32_t index() const noexcept { return m_Index; }
@@ -143,7 +143,7 @@ class ModelInstance final : public Observer {
 
         void setStage(RenderStage stage, ComponentModel& componentModel);
 
-        void playAnimation(const std::string& animName, float startTime, float endTime = -1.0f, uint32_t requestedLoops = 1);
+        void playAnimation(std::string_view animName, float startTime, float endTime = -1.0f, uint32_t requestedLoops = 1);
 
         inline void setColor(float r, float g, float b, float a = 1.0f) noexcept { m_Color = Engine::color_vector_4(r, g, b, a); }
         inline void setColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255_uc) noexcept { m_Color = Engine::color_vector_4(r, g, b, a); }

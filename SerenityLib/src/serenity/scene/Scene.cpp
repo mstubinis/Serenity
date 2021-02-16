@@ -221,7 +221,7 @@ bool Engine::priv::PublicScene::HasItemsToRender(Scene& scene) {
     return scene.m_RenderGraphs.hasItemsToRender();
 }
 
-Scene::Scene(const std::string& name, const SceneOptions& options) {
+Scene::Scene(std::string_view name, const SceneOptions& options) {
     m_LightsModule.registerLightType<SunLight>();
     m_LightsModule.registerLightType<PointLight>();
     m_LightsModule.registerLightType<DirectionalLight>();
@@ -236,7 +236,7 @@ Scene::Scene(const std::string& name, const SceneOptions& options) {
 
     registerEvent(EventType::SceneChanged);
 }
-Scene::Scene(const std::string& name) 
+Scene::Scene(std::string_view name)
     : Scene{ name, SceneOptions::DEFAULT_OPTIONS }
 {}
 Scene::~Scene() {

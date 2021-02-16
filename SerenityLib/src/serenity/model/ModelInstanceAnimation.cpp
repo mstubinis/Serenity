@@ -1,28 +1,26 @@
 
 #include <serenity/model/ModelInstanceAnimation.h>
 #include <serenity/resources/mesh/Mesh.h>
-#include <serenity/resources/mesh/Skeleton.h>
+#include <serenity/resources/mesh/animation/Skeleton.h>
+#include <serenity/resources/mesh/animation/AnimationData.h>
 
 using namespace Engine::priv;
 
 #pragma region ModelInstanceAnimation
 
-ModelInstanceAnimation::ModelInstanceAnimation(Handle meshHandle, const std::string& animName, float startTime, float endTime, uint32_t requestedLoops)
-    : m_Mesh           { meshHandle }
+ModelInstanceAnimation::ModelInstanceAnimation(Handle meshHandle, std::string_view animName, float startTime, float endTime, uint16_t requestedLoops)
+    : m_AnimationData  { &meshHandle.get<Mesh>()->getAnimationData().find(animName)->second }
+    , m_NumBones       { meshHandle.get<Mesh>()->getSkeleton()->numBones() }
     , m_RequestedLoops { requestedLoops }
     , m_StartTime      { startTime }
-    , m_AnimationName  { animName }
-    , m_EndTime        { (endTime < 0.0f) ? meshHandle.get<Mesh>()->getAnimationData().at(animName).duration() : endTime }
-{}
+    , m_EndTime        { (endTime < 0.0f) ? m_AnimationData->duration() : endTime }
+{
+}
 
 void ModelInstanceAnimation::process(const float dt, std::vector<glm::mat4>& transforms) {
     m_CurrentTime  += dt;
-    auto  mesh      = m_Mesh.get<Mesh>();
-    auto  skeleton  = mesh->m_CPUData.m_Skeleton;
-    auto& animation = skeleton->m_AnimationData.at(m_AnimationName);
-    transforms.resize(skeleton->numBones(), glm::mat4(1.0f));
-    animation.BoneTransform(m_AnimationName, m_CurrentTime, transforms);
-
+    transforms.resize(m_NumBones, glm::mat4{ 1.0f });
+    m_AnimationData->ComputeTransforms(m_CurrentTime, transforms, m_KeyframeIndices);
     if (m_CurrentTime >= m_EndTime) {
         m_CurrentTime = 0.0f;
         ++m_CurrentLoops;
@@ -30,16 +28,16 @@ void ModelInstanceAnimation::process(const float dt, std::vector<glm::mat4>& tra
 }
 #pragma endregion
 
-#pragma region ModelInstanceAnimationVector
+#pragma region ModelInstanceAnimationContainer
 
-void ModelInstanceAnimationVector::emplace_animation(Handle meshHandle, const std::string& animationName, float startTime, float endTime, uint32_t requestedLoops) {
+void ModelInstanceAnimationContainer::emplace_animation(Handle meshHandle, std::string_view animationName, float startTime, float endTime, uint16_t requestedLoops) {
     m_Animation_Instances.emplace_back(meshHandle, animationName, startTime, endTime, requestedLoops);
 }
-void ModelInstanceAnimationVector::clear() {
+void ModelInstanceAnimationContainer::clear() {
     m_Animation_Instances.clear();
     m_Transforms.clear();
 }
-void ModelInstanceAnimationVector::update(const float dt) {
+void ModelInstanceAnimationContainer::update(const float dt) {
     if (m_Animation_Instances.size() == 0) {
         return;
     }

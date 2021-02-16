@@ -395,67 +395,68 @@ normal = tangentToView * normal;
 #pragma endregion
 
 #pragma region VertexBasic
-priv::EShaders::vertex_basic = 
-    "USE_LOG_DEPTH_VERTEX\n"
-    "\n"
-    "layout (location = 0) in vec3 position;\n"
-    "layout (location = 1) in vec2 uv;\n"
-    "layout (location = 2) in vec4 normal;\n" //Order is ZYXW
-    "layout (location = 3) in vec4 binormal;\n"//Order is ZYXW
-    "layout (location = 4) in vec4 tangent;\n"//Order is ZYXW
-    "layout (location = 5) in vec4 BoneIDs;\n"
-    "layout (location = 6) in vec4 Weights;\n"
-    "\n"
-    "uniform mat4 Model;\n"
-    "uniform mat3 NormalMatrix;\n"
-    "uniform int AnimationPlaying;\n"
-    "uniform mat4 gBones[100];\n"
-    "\n"
-    "varying vec2 UV;\n"
-    "\n"
-    "varying vec3 Normals;\n"
-    "varying vec3 WorldPosition;\n"
-    "varying mat3 TBN;\n"
-    "\n"
-    "flat varying vec3 CamPosition;\n"
-    "flat varying vec3 CamRealPosition;\n"
-    "varying vec3 TangentCameraPos;\n"
-    "varying vec3 TangentFragPos;\n"
-    "\n"
-    "void main(){\n"
-    "    mat4 ModelMatrix = Model;\n"
-    "    ModelMatrix[3][0] -= CameraRealPosition.x;\n"
-    "    ModelMatrix[3][1] -= CameraRealPosition.y;\n"
-    "    ModelMatrix[3][2] -= CameraRealPosition.z;\n"
-    "    mat4 BoneTransform = mat4(1.0);\n"
-    "    if(AnimationPlaying == 1.0){\n"
-    "        BoneTransform  = gBones[int(BoneIDs.x)] * Weights.x;\n"
-    "        BoneTransform += gBones[int(BoneIDs.y)] * Weights.y;\n"
-    "        BoneTransform += gBones[int(BoneIDs.z)] * Weights.z;\n"
-    "        BoneTransform += gBones[int(BoneIDs.w)] * Weights.w;\n"
-    "    }\n"
-    "    vec4 PosTrans      =   BoneTransform * vec4(position,     1.0);\n"
-    "    vec3 NormalTrans   =  (BoneTransform * vec4(normal.zyx,   0.0)).xyz;\n"  //Order is ZYXW so to bring it to XYZ we need to use ZYX
-    "    vec3 BinormalTrans =  (BoneTransform * vec4(binormal.zyx, 0.0)).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
-    "    vec3 TangentTrans  =  (BoneTransform * vec4(tangent.zyx,  0.0)).xyz;\n" //Order is ZYXW so to bring it to XYZ we need to use ZYX
-    "\n"
-    "           Normals = NormalMatrix * NormalTrans;\n"
-    "    vec3 Binormals = NormalMatrix * BinormalTrans;\n"
-    "    vec3  Tangents = NormalMatrix * TangentTrans;\n"
-    "    TBN = mat3(Tangents,Binormals,Normals);\n"
-    "\n"
-    "    vec4 worldPos = (ModelMatrix * PosTrans);\n"
-    "\n"
-    "    gl_Position = CameraViewProj * worldPos;\n"
-    "    WorldPosition = worldPos.xyz;\n"
-    "\n"
-    "    CamPosition = CameraPosition;\n"
-    "    CamRealPosition = CameraRealPosition;\n"
-    "    TangentCameraPos = TBN * CameraPosition;\n"
-    "    TangentFragPos = TBN * WorldPosition;\n"
-    "\n"
-    "    UV = uv;\n"
-    "}";
+priv::EShaders::vertex_basic = R"(
+    USE_LOG_DEPTH_VERTEX
+
+    layout (location = 0) in vec3 position;
+    layout (location = 1) in vec2 uv;
+    layout (location = 2) in vec4 normal;
+    layout (location = 3) in vec4 binormal;
+    layout (location = 4) in vec4 tangent;
+    layout (location = 5) in vec4 BoneIDs;
+    layout (location = 6) in vec4 Weights;
+
+    uniform mat4 Model;
+    uniform mat3 NormalMatrix;
+    uniform int AnimationPlaying;
+    uniform mat4 gBones[100];
+
+    varying vec2 UV;
+
+    varying vec3 Normals;
+    varying vec3 WorldPosition;
+    varying mat3 TBN;
+
+    flat varying vec3 CamPosition;
+    flat varying vec3 CamRealPosition;
+    varying vec3 TangentCameraPos;
+    varying vec3 TangentFragPos;
+
+    void main(){
+        mat4 BoneTransform = mat4(1.0);
+        if(AnimationPlaying == 1.0){
+            BoneTransform  = gBones[int(BoneIDs[0])] * Weights[0];
+            BoneTransform += gBones[int(BoneIDs[1])] * Weights[1];
+            BoneTransform += gBones[int(BoneIDs[2])] * Weights[2];
+            BoneTransform += gBones[int(BoneIDs[3])] * Weights[3];
+        }
+        vec4 PosTrans      =   BoneTransform * vec4(position,     1.0);
+        vec3 NormalTrans   =  (BoneTransform * vec4(normal.zyx,   0.0)).xyz;
+        vec3 BinormalTrans =  (BoneTransform * vec4(binormal.zyx, 0.0)).xyz;
+        vec3 TangentTrans  =  (BoneTransform * vec4(tangent.zyx,  0.0)).xyz;
+
+             Normals   = (NormalMatrix * NormalTrans).xyz;
+        vec3 Binormals = (NormalMatrix * BinormalTrans).xyz;
+        vec3 Tangents  = (NormalMatrix * TangentTrans).xyz;
+        TBN = mat3(Tangents, Binormals, Normals);
+
+        mat4 ModelMatrix   = Model;
+        ModelMatrix[3][0] -= CameraRealPosition.x;
+        ModelMatrix[3][1] -= CameraRealPosition.y;
+        ModelMatrix[3][2] -= CameraRealPosition.z;
+
+        vec4 worldPos    = (ModelMatrix * PosTrans);
+        WorldPosition    = worldPos.xyz;
+        gl_Position      = CameraViewProj * worldPos;
+
+        CamPosition      = CameraPosition;
+        CamRealPosition  = CameraRealPosition;
+        TangentCameraPos = TBN * CameraPosition;
+        TangentFragPos   = TBN * WorldPosition;
+
+        UV = uv;
+    }
+)";
 #pragma endregion
 
 #pragma region Vertex2DAPI

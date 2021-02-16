@@ -288,6 +288,12 @@
     <Filter Include="Source Files\Engine\Core\Resources\Sound">
       <UniqueIdentifier>{71cb7d63-387a-4ec5-bddd-d4aad3162c1e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Resources\Mesh\Animation">
+      <UniqueIdentifier>{c5a44974-f8a6-43fa-8fc9-70d8e32e1942}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Resources\Mesh\Animation">
+      <UniqueIdentifier>{4e12d8eb-6f79-4e04-a400-99b2e07fef57}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\serenity\algorithms\MergeSort.cpp">
@@ -695,9 +701,6 @@
     <ClCompile Include="src\serenity\resources\material\MaterialRequest.cpp">
       <Filter>Source Files\Engine\Core\Resources\Material</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\resources\mesh\AnimationData.cpp">
-      <Filter>Source Files\Engine\Core\Resources\Mesh</Filter>
-    </ClCompile>
     <ClCompile Include="src\serenity\resources\mesh\BuiltInMeshes.cpp">
       <Filter>Source Files\Engine\Core\Resources\Mesh</Filter>
     </ClCompile>
@@ -769,6 +772,15 @@
     </ClCompile>
     <ClCompile Include="src\serenity\physics\PhysicsPipeline.cpp">
       <Filter>Source Files\Engine\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\mesh\animation\AnimationData.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Mesh\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\mesh\animation\AnimationIncludes.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Mesh\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="include\serenity\resources\mesh\animation\Skeleton.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Mesh\Animation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1330,12 +1342,6 @@
     <ClInclude Include="include\serenity\Terrain.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\resources\mesh\AnimationData.h">
-      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\resources\mesh\AnimationIncludes.h">
-      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
-    </ClInclude>
     <ClInclude Include="include\serenity\resources\mesh\BuiltInMeshes.h">
       <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
     </ClInclude>
@@ -1357,13 +1363,7 @@
     <ClInclude Include="include\serenity\resources\mesh\MeshRequest.h">
       <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\resources\mesh\Skeleton.h">
-      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
-    </ClInclude>
     <ClInclude Include="include\serenity\resources\mesh\smsh.h">
-      <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\resources\mesh\VertexAttributeInfo.h">
       <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\resources\mesh\VertexBufferObject.h">
@@ -1446,6 +1446,15 @@
     </ClInclude>
     <ClInclude Include="include\serenity\resources\texture\TextureRequest.h">
       <Filter>Header Files\Engine\Core\Resources\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\animation\AnimationData.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\animation\AnimationIncludes.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\animation\Skeleton.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh\Animation</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

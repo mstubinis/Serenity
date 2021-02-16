@@ -2,7 +2,7 @@
 #include <serenity/model/ModelInstanceHandle.h>
 #include <serenity/ecs/ComponentModel.h>
 
-ModelInstanceHandle::operator ModelInstance& () noexcept { 
+ModelInstanceHandle::operator ModelInstance&() noexcept { 
     return m_ComponentModel->getModel(m_Index); 
 }
 ModelInstance& ModelInstanceHandle::get() noexcept { 

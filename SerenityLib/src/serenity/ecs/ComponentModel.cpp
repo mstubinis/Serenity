@@ -213,7 +213,7 @@ struct priv::ComponentModel_UpdateFunction final { void operator()(void* system,
     auto& components = pool.data();
     auto lamda_update_component = [&](ComponentModel& componentModel, size_t i, size_t k) {
         for (auto& modelInstance : componentModel) {
-            modelInstance->m_AnimationVector.update(dt); //process the animations here
+            modelInstance->m_Animations.update(dt); //process the animations here
         }
     };
     if (components.size() < 100) {

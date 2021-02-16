@@ -69,7 +69,7 @@ void Engine::priv::ParticleSystem::internal_update_particles(const float dt, Cam
             if (particle.m_Timer >= prop.m_Lifetime) {
                 particle.m_Timer  = 0.0f;
                 {
-                    std::lock_guard lock(m_Mutex);
+                    std::lock_guard lock{ m_Mutex };
                     m_ParticleFreelist.emplace(j);
                 }
             }
@@ -230,7 +230,7 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
 #endif
         return glm::length2(lPos) > glm::length2(rPos);
     };
-    std::sort(std::execution::par_unseq, std::begin(ParticlesDOD), std::end(ParticlesDOD), lambda);
+    Engine::sort(std::execution::par_unseq, ParticlesDOD, lambda);
 
     renderer.m_Pipeline->renderParticles(*this, camera, program);
 }

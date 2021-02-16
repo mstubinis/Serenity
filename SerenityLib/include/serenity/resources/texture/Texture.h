@@ -32,7 +32,7 @@ namespace Engine::priv {
 
         void initFromMemory(const sf::Image& sfImage);
         void initFromFile();
-        void initFromCubemap(const std::array<std::string, 6>& files, ImageInternalFormat intFmt);
+        void initFromCubemap(const std::array<std::string_view, 6>& files, ImageInternalFormat intFmt);
     };
 };
 
@@ -56,7 +56,7 @@ class Texture: public Resource {
     public:
         //Empty Texture
         Texture(
-            const std::string& textureName = "",
+            std::string_view textureName = "",
             TextureType textureType = TextureType::Texture2D,
             bool mipMap = false
         );
@@ -73,7 +73,7 @@ class Texture: public Resource {
 
         //Single File
         Texture(
-            const std::string& filename,
+            std::string_view filename,
             bool generateMipmaps,
             ImageInternalFormat internalFormat,
             TextureType openglTexureType
@@ -82,7 +82,7 @@ class Texture: public Resource {
         //Pixels From SFML Image Memory
         Texture(
             const sf::Image& sfImage,
-            const std::string& textureName,
+            std::string_view textureName,
             bool generateMipmaps, 
             ImageInternalFormat internalFormat,
             TextureType openglTexureType
@@ -90,16 +90,16 @@ class Texture: public Resource {
 
         //Cubemap from 6 files
         Texture(
-            const std::array<std::string, 6>& files,
-            const std::string& textureName, 
+            const std::array<std::string_view, 6>& files,
+            std::string_view textureName,
             bool generateMipmaps,
             ImageInternalFormat internalFormat
         );
 
-        Texture(const Texture& other)                = delete;
-        Texture& operator=(const Texture& other)     = delete;
-        Texture(Texture&& other) noexcept;
-        Texture& operator=(Texture&& other) noexcept;
+        Texture(const Texture&)                = delete;
+        Texture& operator=(const Texture&)     = delete;
+        Texture(Texture&&) noexcept;
+        Texture& operator=(Texture&&) noexcept;
 
         virtual ~Texture();
 

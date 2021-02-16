@@ -90,18 +90,17 @@ namespace Engine::priv {
     };
 };
 
-Skybox::Skybox(const std::array<std::string, 6>& files) {
+Skybox::Skybox(const std::array<std::string_view, 6>& files) {
     Engine::priv::SkyboxImplInterface::initMesh();
 
-    std::array<std::string, 6> names = { files[0], files[1], files[2], files[3], files[4], files[5] };
     //instead of using files[0] generate a proper name using the directory?
 
-    m_Texture = Engine::Resources::addResource<Texture>(names, files[0] + "Cubemap", false, ImageInternalFormat::SRGB8_ALPHA8);
+    m_Texture = Engine::Resources::addResource<Texture>(files, std::string(files[0]) + "Cubemap", false, ImageInternalFormat::SRGB8_ALPHA8);
     Engine::priv::TextureLoader::GeneratePBRData(*m_Texture.get<Texture>(), 32, m_Texture.get<Texture>()->width() / 4);
 
     registerEvent(EventType::WindowFullscreenChanged);
 }
-Skybox::Skybox(const std::string& filename) {
+Skybox::Skybox(std::string_view filename) {
     Engine::priv::SkyboxImplInterface::initMesh();
 
     m_Texture = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.get<Texture>(filename).m_Handle;

@@ -10,7 +10,7 @@
 using namespace Engine;
 using namespace Engine::priv;
 
-MaterialRequest::MaterialRequest(const std::string& name, const std::string& diffuse, const std::string& normal, const std::string& glow, const std::string& specular, const std::string& ao, const std::string& metalness, const std::string& smoothness, Engine::ResourceCallback&& callback)
+MaterialRequest::MaterialRequest(std::string_view name, std::string_view diffuse, std::string_view normal, std::string_view glow, std::string_view specular, std::string_view ao, std::string_view metalness, std::string_view smoothness, Engine::ResourceCallback&& callback)
     : m_Callback{ std::move(callback) }
 {
     m_Part.m_Name = name;
@@ -22,7 +22,7 @@ MaterialRequest::MaterialRequest(const std::string& name, const std::string& dif
     m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>(metalness,  false, ImageInternalFormat::R8,           TextureType::Texture2D));
     m_Part.m_TextureRequests.emplace_back(std::make_shared<TextureRequest>(smoothness, false, ImageInternalFormat::R8,           TextureType::Texture2D));
 }
-MaterialRequest::MaterialRequest(const std::string& name, Handle diffuse, Handle normal, Handle glow, Handle specular, Handle ao, Handle metalness, Handle smoothness, Engine::ResourceCallback&& callback)
+MaterialRequest::MaterialRequest(std::string_view name, Handle diffuse, Handle normal, Handle glow, Handle specular, Handle ao, Handle metalness, Handle smoothness, Engine::ResourceCallback&& callback)
     : m_Callback{ std::move(callback) }
 {
     m_Part.m_Name   = name;

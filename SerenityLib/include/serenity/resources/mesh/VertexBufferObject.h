@@ -25,7 +25,7 @@ struct BufferObject {
     BufferDataType        type     = BufferDataType::VertexArray;
     size_t                capacity = 0;
 
-    BufferObject() = default;
+    BufferObject() = delete;
     BufferObject(BufferDataType bufferDataType) 
         : type { bufferDataType }
     {}
@@ -44,7 +44,9 @@ struct BufferObject {
         capacity = std::move(other.capacity);
         return *this;
     }
-    virtual ~BufferObject() { destroy(); }
+    ~BufferObject() { 
+        destroy(); 
+    }
 
     void generate() noexcept {
         if (!buffer) {
@@ -89,34 +91,6 @@ struct BufferObject {
     template<class T> inline void setData(const std::vector<T>& data, BufferDataDrawType drawType) noexcept { setData(data.size() * sizeof(T), (void*)data.data(), drawType); }
     template<class T> inline void setData(size_t startingIndex, const std::vector<T>& data) const noexcept { setData(data.size() * sizeof(T), startingIndex, (void*)data.data()); }
     template<class T> inline void setDataOrphan(const std::vector<T>& data) const noexcept { setDataOrphan((void*)data.data()); }
-};
-struct VertexBufferObject final : public BufferObject {
-    VertexBufferObject() 
-        : BufferObject(BufferDataType::VertexArray)
-    {}
-    VertexBufferObject(const VertexBufferObject& other)            = delete;
-    VertexBufferObject& operator=(const VertexBufferObject& other) = delete;
-    VertexBufferObject(VertexBufferObject&& other) noexcept 
-        : BufferObject{ std::move(other) }
-    {}
-    VertexBufferObject& operator=(VertexBufferObject&& other) noexcept {
-        BufferObject::operator=(std::move(other));
-        return *this;
-    }
-};
-struct ElementBufferObject final : public BufferObject {
-    ElementBufferObject() 
-        : BufferObject(BufferDataType::ElementArray)
-    {}
-    ElementBufferObject(const ElementBufferObject& other)            = delete;
-    ElementBufferObject& operator=(const ElementBufferObject& other) = delete;
-    ElementBufferObject(ElementBufferObject&& other) noexcept
-        : BufferObject{ std::move(other) }
-    {}
-    ElementBufferObject& operator=(ElementBufferObject&& other) noexcept {
-        BufferObject::operator=(std::move(other));
-        return *this;
-    }
 };
 
 #endif

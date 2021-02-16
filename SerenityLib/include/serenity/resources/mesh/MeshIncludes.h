@@ -19,39 +19,36 @@ struct MeshModifyFlags { enum Flag {
     UploadToGPU          = 1 << 2,
     RecalculateTriangles = 1 << 3,
 };};
-
 struct MeshCollisionLoadingFlag final { enum Flag : uint8_t {
-    None = 0,
-    LoadConvexHull = 1 << 0,
+    None             = 0,
+    LoadConvexHull   = 1 << 0,
     LoadTriangleMesh = 1 << 1,
 };};
 
 constexpr MeshCollisionLoadingFlag::Flag MESH_COLLISION_FACTORY_DEFAULT_LOAD_FLAG 
     = (MeshCollisionLoadingFlag::Flag)(MeshCollisionLoadingFlag::LoadConvexHull | MeshCollisionLoadingFlag::LoadTriangleMesh);
 
-
-
 namespace Engine::priv {
     struct VertexSmoothingData final {
-        glm::vec3  normal = glm::vec3(0.0f);
+        glm::vec3  normal = glm::vec3{ 0.0f };
         size_t     index  = 0U;
     };
     struct VertexSmoothingGroup final {
         std::vector<VertexSmoothingData>   data;
-        glm::vec3                          smoothedNormal = glm::vec3(0.0f);
+        glm::vec3                          smoothedNormal = glm::vec3{ 0.0f };
     };
     struct Vertex final {
-        glm::vec3 position = glm::vec3(0.0f);
-        glm::vec2 uv       = glm::vec2(0.0f);
-        glm::vec3 normal   = glm::vec3(0.0f);
-        glm::vec3 binormal = glm::vec3(0.0f);
-        glm::vec3 tangent  = glm::vec3(0.0f);
+        glm::vec3 position = glm::vec3{ 0.0f };
+        glm::vec2 uv       = glm::vec2{ 0.0f };
+        glm::vec3 normal   = glm::vec3{ 0.0f };
+        glm::vec3 binormal = glm::vec3{ 0.0f };
+        glm::vec3 tangent  = glm::vec3{ 0.0f };
     };
     struct Triangle final {
-        glm::vec3 position1 = glm::vec3(0.0f);
-        glm::vec3 position2 = glm::vec3(0.0f);
-        glm::vec3 position3 = glm::vec3(0.0f);
-        glm::vec3 midpoint  = glm::vec3(0.0f);
+        glm::vec3 position1 = glm::vec3{ 0.0f };
+        glm::vec3 position2 = glm::vec3{ 0.0f };
+        glm::vec3 position3 = glm::vec3{ 0.0f };
+        glm::vec3 midpoint  = glm::vec3{ 0.0f };
         uint32_t index1     = 0;
         uint32_t index2     = 0;
         uint32_t index3     = 0;
@@ -59,9 +56,9 @@ namespace Engine::priv {
         [[nodiscard]] float getArea() const noexcept {
             auto crossProduct = glm::cross(position2 - position1, position3 - position1);
             return 0.5f * glm::sqrt(
-                (crossProduct.x*crossProduct.x) + 
-                (crossProduct.y*crossProduct.y) + 
-                (crossProduct.z*crossProduct.z)
+                (crossProduct.x * crossProduct.x) + 
+                (crossProduct.y * crossProduct.y) + 
+                (crossProduct.z * crossProduct.z)
             );
         }
 
@@ -89,7 +86,6 @@ namespace Engine::priv {
         {
             AddBoneData(BoneID, Weight);
         }
-
         void AddBoneData(uint32_t BoneID, float Weight) noexcept {
             for (size_t i = 0; i < IDs.size(); ++i) {
                 if (Weights[i] == 0.0f) {
@@ -101,6 +97,5 @@ namespace Engine::priv {
         }
     };
 };
-
 
 #endif

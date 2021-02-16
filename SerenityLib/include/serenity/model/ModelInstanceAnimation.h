@@ -4,7 +4,8 @@
 
 namespace Engine::priv {
     struct DefaultModelInstanceBindFunctor;
-    class  ModelInstanceAnimationVector;
+    class  ModelInstanceAnimationContainer;
+    class  AnimationData;
 };
 
 #include <serenity/resources/Handle.h>
@@ -12,23 +13,27 @@ namespace Engine::priv {
 #include <serenity/system/TypeDefs.h>
 #include <string>
 #include <vector>
+#include <array>
 
 namespace Engine::priv {
     class ModelInstanceAnimation final {
         friend struct DefaultModelInstanceBindFunctor;
-        friend class  ModelInstanceAnimationVector;
+        friend class  ModelInstanceAnimationContainer;
         private:
-            std::string    m_AnimationName;
-            Handle         m_Mesh             = Handle{};
-            uint32_t       m_CurrentLoops     = 0U;
-            uint32_t       m_RequestedLoops   = 1U;
+            AnimationData* m_AnimationData    = nullptr;
+            uint16_t       m_NumBones         = 0;
+            uint16_t       m_CurrentLoops     = 0;
+            uint16_t       m_RequestedLoops   = 1;
+
+            std::array<uint16_t, 3> m_KeyframeIndices = { 0 }; //3 - 1 for pos, rot, and scale
+
             float          m_CurrentTime      = 0.0f;
             float          m_StartTime        = 0.0f;
             float          m_EndTime          = 0.0f;
 
             ModelInstanceAnimation() = delete;
         public:
-            ModelInstanceAnimation(Handle mesh, const std::string& animationName, float startTime, float endTime, uint32_t requestedLoops = 1);
+            ModelInstanceAnimation(Handle mesh, std::string_view animationName, float startTime, float endTime, uint16_t requestedLoops = 1);
 
             ModelInstanceAnimation(const ModelInstanceAnimation&)                = delete;
             ModelInstanceAnimation& operator=(const ModelInstanceAnimation&)     = delete;
@@ -37,13 +42,13 @@ namespace Engine::priv {
 
             void process(const float dt, std::vector<glm::mat4>& transforms);
     };
-    class ModelInstanceAnimationVector final {
+    class ModelInstanceAnimationContainer final {
         friend struct DefaultModelInstanceBindFunctor;
         private:
             std::vector<ModelInstanceAnimation> m_Animation_Instances;
             std::vector<glm::mat4>              m_Transforms;
         public:
-            void emplace_animation(Handle mesh, const std::string& animationName, float startTime, float endTime, uint32_t requestedLoops);
+            void emplace_animation(Handle mesh, std::string_view animationName, float startTime, float endTime, uint16_t requestedLoops);
 
             [[nodiscard]] inline const std::vector<glm::mat4>& getTransforms() const noexcept { return m_Transforms; }
 

@@ -15,12 +15,12 @@ struct MaterialRequestPart final {
     std::vector<std::shared_ptr<TextureRequest>>  m_TextureRequests;
 
     MaterialRequestPart() = default;
-    ~MaterialRequestPart() = default;
+    //~MaterialRequestPart() = default;
 
-    MaterialRequestPart(const MaterialRequestPart& other)                = default;
-    MaterialRequestPart& operator=(const MaterialRequestPart& other)     = default;
-    MaterialRequestPart(MaterialRequestPart&& other) noexcept            = delete;
-    MaterialRequestPart& operator=(MaterialRequestPart&& other) noexcept = delete;
+    MaterialRequestPart(const MaterialRequestPart&)                = default;
+    MaterialRequestPart& operator=(const MaterialRequestPart&)     = default;
+    MaterialRequestPart(MaterialRequestPart&&) noexcept            = delete;
+    MaterialRequestPart& operator=(MaterialRequestPart&&) noexcept = delete;
 };
 
 class MaterialRequest final {
@@ -35,18 +35,18 @@ class MaterialRequest final {
 
         MaterialRequest() = delete;
         MaterialRequest(
-            const std::string& name,
-            const std::string& diffuse,
-            const std::string& normal,
-            const std::string& glow,
-            const std::string& specular,
-            const std::string& ao,
-            const std::string& metalness,
-            const std::string& smoothness,
+            std::string_view name,
+            std::string_view diffuse,
+            std::string_view normal,
+            std::string_view glow,
+            std::string_view specular,
+            std::string_view ao,
+            std::string_view metalness,
+            std::string_view smoothness,
             Engine::ResourceCallback&& callback
         );
         MaterialRequest(
-            const std::string& name,
+            std::string_view name,
             Handle diffuse,
             Handle normal,
             Handle glow,
@@ -56,12 +56,12 @@ class MaterialRequest final {
             Handle smoothness,
             Engine::ResourceCallback&& callback
         );
-        ~MaterialRequest() = default;
+        //~MaterialRequest() = default;
 
-        MaterialRequest(const MaterialRequest& other)                = default;
-        MaterialRequest& operator=(const MaterialRequest& other)     = default;
-        MaterialRequest(MaterialRequest&& other) noexcept            = delete;
-        MaterialRequest& operator=(MaterialRequest&& other) noexcept = delete;
+        MaterialRequest(const MaterialRequest&)                = default;
+        MaterialRequest& operator=(const MaterialRequest&)     = default;
+        MaterialRequest(MaterialRequest&&) noexcept            = delete;
+        MaterialRequest& operator=(MaterialRequest&&) noexcept = delete;
 
         void request(bool async = false);
 };
