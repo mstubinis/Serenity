@@ -447,7 +447,7 @@ priv::EShaders::vertex_basic = R"(
 
         vec4 worldPos    = (ModelMatrix * PosTrans);
         WorldPosition    = worldPos.xyz;
-        gl_Position      = CameraViewProj * worldPos;
+        gl_Position      = (CameraViewProj * worldPos);
 
         CamPosition      = CameraPosition;
         CamRealPosition  = CameraRealPosition;

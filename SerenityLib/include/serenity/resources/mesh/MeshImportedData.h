@@ -83,8 +83,12 @@ namespace Engine::priv {
                 internal_build_vertices(aimesh);
                 internal_build_indices(aimesh);
             }
-            inline void addBone(uint32_t vertexID, uint32_t boneIndex, float boneWeight) {
-                m_Bones.emplace(std::piecewise_construct, std::forward_as_tuple(vertexID), std::forward_as_tuple(boneIndex, boneWeight));
+            VertexBoneData& addBone(uint32_t vertexID, uint32_t boneIndex, float boneWeight) {
+                if (!m_Bones.contains(vertexID)) {
+                    m_Bones.emplace(std::piecewise_construct, std::forward_as_tuple(vertexID), std::forward_as_tuple());
+                }
+                m_Bones.at(vertexID).AddBoneData(boneIndex, boneWeight);
+                return m_Bones.at(vertexID);
             }
             void triangulateIndices(const std::vector<std::vector<uint32_t>>& indices, uint8_t flags) {
                 for (size_t i = 0; i < indices[0].size(); ++i) {

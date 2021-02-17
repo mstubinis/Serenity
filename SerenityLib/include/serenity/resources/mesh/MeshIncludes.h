@@ -81,11 +81,11 @@ namespace Engine::priv {
             IDs.fill(0.0f);
             Weights.fill(0.0f);
         }
-        VertexBoneData(uint32_t BoneID, float Weight)
-            : VertexBoneData{}
-        {
-            AddBoneData(BoneID, Weight);
-        }
+        //VertexBoneData(uint32_t BoneID, float Weight)
+        //    : VertexBoneData{}
+        //{
+        //    AddBoneData(BoneID, Weight);
+        //}
         void AddBoneData(uint32_t BoneID, float Weight) noexcept {
             for (size_t i = 0; i < IDs.size(); ++i) {
                 if (Weights[i] == 0.0f) {

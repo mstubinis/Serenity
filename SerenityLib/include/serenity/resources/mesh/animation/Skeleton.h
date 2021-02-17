@@ -27,9 +27,7 @@ namespace Engine::priv {
         friend class  Engine::priv::PublicMesh;
         friend class  Engine::priv::ModelInstanceAnimation;
         private:
-            Engine::unordered_string_map<std::string, uint16_t>       m_BoneMapping;   // maps a bone name to its index
-            //Engine::unordered_string_set<std::string> m_BoneMapping;
-
+            Engine::unordered_string_set<std::string>                 m_BoneMapping;
             Engine::unordered_string_map<std::string, AnimationData>  m_AnimationData; //maps an animation name to its data
             glm::mat4                                                 m_GlobalInverseTransform = glm::mat4(1.0f);
             std::vector<BoneInfo>                                     m_BoneInfo;
@@ -59,20 +57,11 @@ namespace Engine::priv {
             [[nodiscard]] inline bool hasBone(std::string_view boneName) const noexcept { 
                 return m_BoneMapping.contains(boneName); 
             }
-            [[nodiscard]] inline uint16_t getBoneIndex(std::string_view boneName) const noexcept {
-                return m_BoneMapping.find(boneName)->second;
-            }
             [[nodiscard]] inline bool hasAnimation(std::string_view animName) const noexcept {
                 return m_AnimationData.contains(animName);
             }
             inline void setBoneOffsetMatrix(uint16_t boneIndex, glm::mat4&& matrix) noexcept {
                 m_BoneInfo[boneIndex].BoneOffset = std::move(matrix);
-            }
-            void addBoneMapping(std::string_view boneName, uint16_t boneIndex) {
-                if (hasBone(boneName)) {
-                    return;
-                }
-                m_BoneMapping.emplace(std::piecewise_construct, std::forward_as_tuple(boneName), std::forward_as_tuple(boneIndex));
             }
             void addAnimation(std::string_view animName, MeshNodeData& nodeData, const aiAnimation& anim, MeshNodeData& filledNodes) {
                 if (hasAnimation(animName)) {

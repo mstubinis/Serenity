@@ -8,28 +8,30 @@ Engine::priv::MeshSkeleton::MeshSkeleton(const aiMesh& assimpMesh, const aiScene
     m_GlobalInverseTransform = Engine::Math::assimpToGLMMat4(assimpScene.mRootNode->mTransformation.Inverse());
     
     //build bone information
+    Engine::unordered_string_map<std::string, uint16_t> hashedBones;
     m_BoneInfo.resize(assimpMesh.mNumBones);
-
+    hashedBones.reserve(assimpMesh.mNumBones);
+    uint16_t BoneIndex = 0;
     for (uint32_t k = 0; k < assimpMesh.mNumBones; ++k) {
         auto boneName      = std::string(assimpMesh.mBones[k]->mName.C_Str());
         auto& assimpBone   = *assimpMesh.mBones[k];
-        uint16_t BoneIndex = 0;
-
-        if (!hasBone(boneName)) {
-            BoneIndex = numBones();
-            m_BoneInfo.emplace_back();
-        }else{
-            BoneIndex = getBoneIndex(boneName);
-        }
-        addBoneMapping(boneName, BoneIndex);
-
-
-
-        setBoneOffsetMatrix(BoneIndex, Engine::Math::assimpToGLMMat4(assimpBone.mOffsetMatrix));
-        for (uint32_t j = 0; j < assimpBone.mNumWeights; ++j) {
-            data.addBone(assimpBone.mWeights[j].mVertexId, BoneIndex, assimpBone.mWeights[j].mWeight);
+        m_BoneMapping.insert(boneName);
+        hashedBones.emplace(boneName, BoneIndex);
+        ++BoneIndex;
+    }
+    int k = 0;
+    for (const auto& node : request.m_NodeData.m_Nodes) {
+        if (hashedBones.contains(node.Name)) {
+            int s = hashedBones.at(node.Name);
+            auto& assimpBone = *assimpMesh.mBones[s];
+            setBoneOffsetMatrix(k, Engine::Math::assimpToGLMMat4(assimpBone.mOffsetMatrix));
+            for (uint32_t j = 0; j < assimpBone.mNumWeights; ++j) {
+                data.addBone(assimpBone.mWeights[j].mVertexId, k, assimpBone.mWeights[j].mWeight);
+            }
+            ++k;
         }
     }
+
     //build animation information
     if (assimpScene.mAnimations && assimpScene.mNumAnimations > 0) {
         for (auto k = 0U; k < assimpScene.mNumAnimations; ++k) {

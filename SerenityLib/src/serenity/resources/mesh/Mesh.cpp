@@ -35,6 +35,7 @@ MeshCPUData::MeshCPUData(const MeshCPUData& other)
     , m_Skeleton         { std::exchange(other.m_Skeleton, nullptr) }
     , m_CollisionFactory { std::exchange(other.m_CollisionFactory, nullptr) }
     , m_VertexData       { std::exchange(other.m_VertexData, nullptr) }
+    , m_NodeData{ other.m_NodeData }
     , m_File             { other.m_File }
     , m_Radius           { other.m_Radius }
     , m_Threshold        { other.m_Threshold }
@@ -47,6 +48,7 @@ MeshCPUData& MeshCPUData::operator=(const MeshCPUData& other) {
     m_Skeleton          = std::exchange(other.m_Skeleton, nullptr);
     m_CollisionFactory  = std::exchange(other.m_CollisionFactory, nullptr);
     m_VertexData        = std::exchange(other.m_VertexData, nullptr);
+    m_NodeData = other.m_NodeData;
     m_File              = other.m_File;
     m_Radius            = other.m_Radius;
     m_Threshold         = other.m_Threshold;
@@ -59,6 +61,7 @@ MeshCPUData::MeshCPUData(MeshCPUData&& other) noexcept
     , m_Skeleton         { std::exchange(other.m_Skeleton, nullptr) }
     , m_CollisionFactory { std::exchange(other.m_CollisionFactory, nullptr) }
     , m_VertexData       { std::exchange(other.m_VertexData, nullptr) }
+    , m_NodeData{ std::move(other.m_NodeData) }
     , m_File             { std::move(other.m_File) }
     , m_Radius           { std::move(other.m_Radius) }
     , m_Threshold        { std::move(other.m_Threshold) }
@@ -71,6 +74,7 @@ MeshCPUData& MeshCPUData::operator=(MeshCPUData&& other) noexcept {
     m_Skeleton         = std::exchange(other.m_Skeleton, nullptr);
     m_CollisionFactory = std::exchange(other.m_CollisionFactory, nullptr);
     m_VertexData       = std::exchange(other.m_VertexData, nullptr);
+    m_NodeData = std::move(other.m_NodeData);
     m_File             = std::move(other.m_File);
     m_Radius           = std::move(other.m_Radius);
     m_Threshold        = std::move(other.m_Threshold);
@@ -178,8 +182,7 @@ void PublicMesh::FinalizeVertexData(MeshCPUData& cpuData, MeshImportedData& data
     auto& vertexData = *cpuData.m_VertexData;
     vertexData.clearData();
 
-    std::vector<std::vector<GLuint>> normals;
-    normals.resize(3);
+    auto normals = Engine::create_and_resize<std::vector<std::vector<GLuint>>>(3, std::vector<GLuint>{});
     if (cpuData.m_Threshold == 0.0f) {
         #pragma region No Threshold
         normals[0].reserve(data.m_Normals.size());
