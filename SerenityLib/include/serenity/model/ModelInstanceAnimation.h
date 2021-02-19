@@ -25,8 +25,6 @@ namespace Engine::priv {
             uint16_t       m_CurrentLoops     = 0;
             uint16_t       m_RequestedLoops   = 1;
 
-            std::array<uint16_t, 3> m_KeyframeIndices = { 0 }; //3 - 1 for pos, rot, and scale
-
             float          m_CurrentTime      = 0.0f;
             float          m_StartTime        = 0.0f;
             float          m_EndTime          = 0.0f;

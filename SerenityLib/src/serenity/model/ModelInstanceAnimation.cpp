@@ -20,7 +20,7 @@ ModelInstanceAnimation::ModelInstanceAnimation(Handle meshHandle, std::string_vi
 void ModelInstanceAnimation::process(const float dt, std::vector<glm::mat4>& transforms) {
     m_CurrentTime  += dt;
     transforms.resize(m_NumBones, glm::mat4{ 1.0f });
-    m_AnimationData->ComputeTransforms(m_CurrentTime, transforms, m_KeyframeIndices);
+    m_AnimationData->ComputeTransforms(m_CurrentTime, transforms);
     if (m_CurrentTime >= m_EndTime) {
         m_CurrentTime = 0.0f;
         ++m_CurrentLoops;

@@ -55,9 +55,9 @@ ShaderProgram::ShaderProgram(std::string_view in_name, Handle vsHandle, Handle f
 }
 ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept 
     : Resource(std::move(other))
-    , m_VertexShader      { std::exchange(other.m_VertexShader, Handle{})}
+    , m_VertexShader      { std::exchange(other.m_VertexShader, Handle{}) }
     , m_FragmentShader    { std::exchange(other.m_FragmentShader, Handle{}) }
-    , m_CustomBindFunctor {std::move(other.m_CustomBindFunctor)}
+    , m_CustomBindFunctor { std::move(other.m_CustomBindFunctor) }
     , m_ShaderProgram     { std::move(other.m_ShaderProgram) }
     , m_UniformLocations  { std::move(other.m_UniformLocations) }
     , m_AttachedUBOs      { std::move(other.m_AttachedUBOs) }
@@ -140,7 +140,7 @@ void PublicShaderProgram::LoadGPU(ShaderProgram& shaderP){
         GLCall(glAttachShader(shaderP.m_ShaderProgram, vid));
         GLCall(glAttachShader(shaderP.m_ShaderProgram, fid));
 
-        for (unsigned int i = 0; i < 100; ++i) {
+        for (uint32_t i = 0; i < 100; ++i) {
             std::string outFragCol = "out vec4 FRAG_COL_" + std::to_string(i) + ";";
             if (ShaderHelper::sfind(FragmentCode, outFragCol)) {
                 GLCall(glBindFragDataLocation(shaderP.m_ShaderProgram, i, std::string("FRAG_COL_" + std::to_string(i)).c_str()));
@@ -174,7 +174,7 @@ void PublicShaderProgram::LoadGPU(ShaderProgram& shaderP){
             for (i_ = 0; i_ < count_; ++i_) {
                 GLCall(glGetActiveUniform(shaderP.m_ShaderProgram, (GLuint)i_, bufSize_, &length_, &size_, &type_, name_));
                 if (length_ > 0) {
-                    std::string name1_((char*)name_, length_);
+                    std::string name1_( (char*)name_, length_ );
                     GLCall(GLint loc_ = glGetUniformLocation(shaderP.m_ShaderProgram, name_));
                     shaderP.m_UniformLocations.emplace(
                         std::piecewise_construct,

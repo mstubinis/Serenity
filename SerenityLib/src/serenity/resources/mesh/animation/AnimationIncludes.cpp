@@ -9,7 +9,8 @@ Engine::priv::AnimationChannel::AnimationChannel(const aiNodeAnim& aiAnimNode) {
         PositionKeys.emplace_back((float)aiAnimNode.mPositionKeys[i].mTime, Engine::Math::assimpToGLMVec3(aiAnimNode.mPositionKeys[i].mValue));
     }
     for (auto i = 0U; i < aiAnimNode.mNumRotationKeys; ++i) {
-        RotationKeys.emplace_back((float)aiAnimNode.mRotationKeys[i].mTime, aiAnimNode.mRotationKeys[i].mValue);
+        const auto& aiQuat = aiAnimNode.mRotationKeys[i].mValue;
+        RotationKeys.emplace_back((float)aiAnimNode.mRotationKeys[i].mTime, glm::quat{ aiQuat.w, aiQuat.x, aiQuat.y, aiQuat.z });
     }
     for (auto i = 0U; i < aiAnimNode.mNumScalingKeys; ++i) {
         ScalingKeys.emplace_back((float)aiAnimNode.mScalingKeys[i].mTime, Engine::Math::assimpToGLMVec3(aiAnimNode.mScalingKeys[i].mValue));

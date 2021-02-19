@@ -35,8 +35,9 @@ void Engine::priv::MeshLoader::LoadPopulateGlobalNodes(const aiScene& scene, aiN
         auto data    = stk.top();
         stk.pop();
         auto& ainode = *data.ai_node;
-        request.m_NodeData.m_Nodes.emplace_back(ainode);
+        auto& engineNode = request.m_NodeData.m_Nodes.emplace_back(ainode);
         request.m_NodeData.m_NodeHeirarchy.emplace_back(data.parentIndex);
+        request.m_NodeStrVector.push_back(ainode.mName.C_Str());
         for (uint32_t i = 0; i < ainode.mNumMeshes; ++i) {
             const aiMesh& aimesh  = *scene.mMeshes[ainode.mMeshes[i]];
             MeshRequestPart& part = request.m_Parts.emplace_back();
@@ -56,7 +57,7 @@ void Engine::priv::MeshLoader::LoadProcessNodeData(MeshRequest& request, const a
     auto& root         = *(aiscene.mRootNode);
     uint32_t partIndex = 0;
 
-    std::stack<const aiNode*> stk;
+    std::stack<const aiNode*> stk; 
     stk.push(&rootAINode);
     //dfs
     while (!stk.empty()) {

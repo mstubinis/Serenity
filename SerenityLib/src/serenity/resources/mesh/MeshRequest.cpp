@@ -36,6 +36,7 @@ MeshRequest::MeshRequest(MeshRequest&& other) noexcept
     , m_Async         { std::move(other.m_Async) }
     , m_Threshold     { std::move(other.m_Threshold) }
     , m_NodeData { std::move(other.m_NodeData) }
+    , m_NodeStrVector { std::move(other.m_NodeStrVector) }
     , m_Parts         { std::move(other.m_Parts) }
     , m_Callback      { std::move(other.m_Callback) }
     , m_Importer      { other.m_Importer }
@@ -47,6 +48,7 @@ MeshRequest& MeshRequest::operator=(MeshRequest&& other) noexcept {
     m_Async         = std::move(other.m_Async);
     m_Threshold     = std::move(other.m_Threshold);
     m_NodeData  = std::move(other.m_NodeData);
+    m_NodeStrVector = std::move(other.m_NodeStrVector);
     m_Parts         = std::move(other.m_Parts);
     m_Callback      = std::move(other.m_Callback);
     m_Importer      = (other.m_Importer);

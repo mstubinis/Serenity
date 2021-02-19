@@ -60,12 +60,10 @@ struct MeshNodeData final {
     std::vector<glm::mat4>                  m_NodeTransforms;
 };
 struct MeshCPUData final {
+    MeshNodeData                                   m_NodeData;
     std::string                                    m_File;
     glm::vec3                                      m_RadiusBox        = glm::vec3{ 0.0f };
     mutable Engine::priv::MeshSkeleton*            m_Skeleton         = nullptr;
-
-    MeshNodeData                                   m_NodeData;
-
     mutable Engine::priv::MeshCollisionFactory*    m_CollisionFactory = nullptr;
     mutable VertexData*                            m_VertexData       = nullptr;
     float                                          m_Radius           = 0.0f;
@@ -98,14 +96,13 @@ class Mesh final: public Resource, public Observer {
     friend class  Terrain;
     friend class  SMSH_File;
 
-    using bind_func   = void(*)(Mesh*, const Engine::priv::RenderModule*);
-    using unbind_func = void(*)(Mesh*, const Engine::priv::RenderModule*);
+    using BindFunc   = void(*)(Mesh*, const Engine::priv::RenderModule*);
+    using UnbindFunc = void(*)(Mesh*, const Engine::priv::RenderModule*);
 
     private:
-        bind_func       m_CustomBindFunctor   = [](Mesh*, const Engine::priv::RenderModule*) {};
-        unbind_func     m_CustomUnbindFunctor = [](Mesh*, const Engine::priv::RenderModule*) {};
-
-        MeshCPUData     m_CPUData;
+        MeshCPUData    m_CPUData;
+        BindFunc       m_CustomBindFunctor   = [](Mesh*, const Engine::priv::RenderModule*) {};
+        UnbindFunc     m_CustomUnbindFunctor = [](Mesh*, const Engine::priv::RenderModule*) {};
 
         void internal_recalc_indices_from_terrain(const Terrain& terrain);
         void internal_build_from_terrain(const Terrain& terrain);
@@ -122,12 +119,12 @@ class Mesh final: public Resource, public Observer {
         Mesh& operator=(Mesh&&) noexcept;
         ~Mesh();
 
-        inline void setCustomBindFunctor(const bind_func& functor) noexcept { m_CustomBindFunctor = functor; }
-        inline void setCustomUnbindFunctor(const unbind_func& functor) noexcept { m_CustomUnbindFunctor = functor; }
-        inline void setCustomBindFunctor(bind_func&& functor) noexcept { m_CustomBindFunctor = std::move(functor); }
-        inline void setCustomUnbindFunctor(unbind_func&& functor) noexcept { m_CustomUnbindFunctor = std::move(functor); }
+        inline void setCustomBindFunctor(const BindFunc& functor) noexcept { m_CustomBindFunctor = functor; }
+        inline void setCustomUnbindFunctor(const UnbindFunc& functor) noexcept { m_CustomUnbindFunctor = functor; }
+        inline void setCustomBindFunctor(BindFunc&& functor) noexcept { m_CustomBindFunctor = std::move(functor); }
+        inline void setCustomUnbindFunctor(UnbindFunc&& functor) noexcept { m_CustomUnbindFunctor = std::move(functor); }
 
-        [[nodiscard]] Engine::unordered_string_map<std::string, Engine::priv::AnimationData>& getAnimationData();
+        [[nodiscard]] Engine::priv::MeshSkeleton::AnimationMap& getAnimationData();
         [[nodiscard]] inline constexpr const glm::vec3& getRadiusBox() const noexcept { return m_CPUData.m_RadiusBox; }
         [[nodiscard]] inline constexpr float getRadius() const noexcept { return m_CPUData.m_Radius; }
         [[nodiscard]] inline constexpr const VertexData& getVertexData() const noexcept { return *m_CPUData.m_VertexData; }

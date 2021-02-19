@@ -89,11 +89,11 @@ void opengl::glsl::Common::convert(std::string& code, uint32_t versionNumber) {
 
 #pragma region Hammersley
     if (ShaderHelper::lacksDefinition(code, "HammersleySequence(", "vec2 HammersleySequence(")) {
-        ShaderHelper::insertStringAtLine(code, 
-            "vec2 HammersleySequence(int i, int N){\n"
-            "    return vec2(float(i) / float(N), VanDerCorpus(i));\n"
-            "}\n"
-        , 1);
+        ShaderHelper::insertStringAtLine(code, R"(
+vec2 HammersleySequence(int i, int N){
+    return vec2(float(i) / float(N), VanDerCorpus(i));
+}
+)", 1);
     }
 #pragma endregion
 
@@ -165,54 +165,54 @@ void opengl::glsl::Common::convert(std::string& code, uint32_t versionNumber) {
 #pragma region painters algorithm
     if (ShaderHelper::lacksDefinition(code, "PaintersAlgorithm(", "vec4 PaintersAlgorithm(")) {
         ShaderHelper::insertStringAtLine(code, R"(
-            vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){
-                float alpha = paint.a + canvas.a * (1.0 - paint.a);
-                vec4 ret = vec4(0.0);
-                ret = ((paint * paint.a + canvas * canvas.a * (1.0 - paint.a)) / alpha);
-                ret.a = alpha;
-                return ret;
-            }
-        )", 1);
+vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){
+    float alpha = paint.a + canvas.a * (1.0 - paint.a);
+    vec4 ret = vec4(0.0);
+    ret = ((paint * paint.a + canvas * canvas.a * (1.0 - paint.a)) / alpha);
+    ret.a = alpha;
+    return ret;
+}
+)", 1);
     }
 #pragma endregion
 
 #pragma region invert color
     if (ShaderHelper::lacksDefinition(code, "InvertColor(", "vec4 InvertColor(")) {
         ShaderHelper::insertStringAtLine(code, R"(
-            vec4 InvertColor(vec4 color){
-                return vec4(vec4(1.0) - color);
-            }
-        )", 1);
+vec4 InvertColor(vec4 color){
+    return vec4(vec4(1.0) - color);
+}
+)", 1);
     }
 #pragma endregion
 
 #pragma region invert color 255
     if (ShaderHelper::lacksDefinition(code, "InvertColor255(", "vec4 InvertColor255(")) {
         ShaderHelper::insertStringAtLine(code, R"(
-            vec4 InvertColor255(vec4 color){
-                return vec4(vec4(255.0) - color);
-            }
-        )", 1);
+vec4 InvertColor255(vec4 color){
+    return vec4(vec4(255.0) - color);
+}
+)", 1);
     }
 #pragma endregion
 
 #pragma region range to 255
     if (ShaderHelper::lacksDefinition(code, "RangeTo255(", "vec4 RangeTo255(")) {
         ShaderHelper::insertStringAtLine(code, R"(
-            vec4 RangeTo255(vec4 color){
-                return color * 255.0;
-            }
-        )", 1);
+vec4 RangeTo255(vec4 color){
+    return color * 255.0;
+}
+)", 1);
     }
 #pragma endregion
 
 #pragma region range to 1
     if (ShaderHelper::lacksDefinition(code, "RangeTo1(", "vec4 RangeTo1(")) {
         ShaderHelper::insertStringAtLine(code, R"(
-            vec4 RangeTo1(vec4 color){
-                return color / 255.0;
-            }
-        )", 1);
+vec4 RangeTo1(vec4 color){
+    return color / 255.0;
+}
+)", 1);
     }
 #pragma endregion
 
@@ -225,45 +225,45 @@ void opengl::glsl::Common::convert(std::string& code, uint32_t versionNumber) {
         if (versionNumber >= 140) { //UBO only supported at 140 or above
             if (!ShaderHelper::sfind(code, "layout (std140) uniform Camera //generated")) {
                 ShaderHelper::insertStringAtLine(code, R"(
-                    layout (std140) uniform Camera //generated
-                    {
-                        mat4 CameraView;
-                        mat4 CameraProj;
-                        mat4 CameraViewProj;
-                        mat4 CameraInvView;
-                        mat4 CameraInvProj;
-                        mat4 CameraInvViewProj;
-                        vec4 CameraInfo1;
-                        vec4 CameraInfo2;
-                        vec4 CameraInfo3;
-                        vec4 ScreenInfo;
-                    };
-                    vec3 CameraPosition = CameraInfo1.xyz;
-                    vec3 CameraViewVector = CameraInfo2.xyz;
-                    vec3 CameraRealPosition = CameraInfo3.xyz;
-                    float CameraNear = CameraInfo1.w;
-                    float CameraFar = CameraInfo2.w;
-                )", 1);
+layout (std140) uniform Camera //generated
+{
+    mat4 CameraView;
+    mat4 CameraProj;
+    mat4 CameraViewProj;
+    mat4 CameraInvView;
+    mat4 CameraInvProj;
+    mat4 CameraInvViewProj;
+    vec4 CameraInfo1;
+    vec4 CameraInfo2;
+    vec4 CameraInfo3;
+    vec4 ScreenInfo;
+};
+vec3 CameraPosition = CameraInfo1.xyz;
+vec3 CameraViewVector = CameraInfo2.xyz;
+vec3 CameraRealPosition = CameraInfo3.xyz;
+float CameraNear = CameraInfo1.w;
+float CameraFar = CameraInfo2.w;
+)", 1);
             }
         }else{ //no UBO's, just add a bunch of uniforms
             if (!ShaderHelper::sfind(code, "uniform mat4 CameraView; //generated")) {
                 ShaderHelper::insertStringAtLine(code, R"(
-                    uniform mat4 CameraView; //generated;
-                    uniform mat4 CameraProj;
-                    uniform mat4 CameraViewProj;
-                    uniform mat4 CameraInvView;
-                    uniform mat4 CameraInvProj;
-                    uniform mat4 CameraInvViewProj;
-                    uniform vec4 CameraInfo1;
-                    uniform vec4 CameraInfo2;
-                    uniform vec4 CameraInfo3;
-                    uniform vec4 ScreenInfo;
-                    vec3 CameraPosition = CameraInfo1.xyz;
-                    vec3 CameraViewVector = CameraInfo2.xyz;
-                    vec3 CameraRealPosition = CameraInfo3.xyz;
-                    float CameraNear = CameraInfo1.w;
-                    float CameraFar = CameraInfo2.w;
-                )", 1);
+uniform mat4 CameraView; //generated;
+uniform mat4 CameraProj;
+uniform mat4 CameraViewProj;
+uniform mat4 CameraInvView;
+uniform mat4 CameraInvProj;
+uniform mat4 CameraInvViewProj;
+uniform vec4 CameraInfo1;
+uniform vec4 CameraInfo2;
+uniform vec4 CameraInfo3;
+uniform vec4 ScreenInfo;
+vec3 CameraPosition = CameraInfo1.xyz;
+vec3 CameraViewVector = CameraInfo2.xyz;
+vec3 CameraRealPosition = CameraInfo3.xyz;
+float CameraNear = CameraInfo1.w;
+float CameraFar = CameraInfo2.w;
+)", 1);
             }
         }
     }

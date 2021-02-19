@@ -59,178 +59,180 @@ void priv::EShaders::init(const uint32_t openglVersion, const uint32_t glslVersi
 #pragma region Functions
 
 priv::EShaders::conditional_functions = R"(
-    vec4 when_eq(vec4 x, vec4 y) { return 1.0 - abs(sign(x - y)); }
-    vec4 when_neq(vec4 x, vec4 y) { return abs(sign(x - y)); }
-    vec4 when_gt(vec4 x, vec4 y) { return max(sign(x - y), 0.0); }
-    vec4 when_lt(vec4 x, vec4 y) { return max(sign(y - x), 0.0); }
-    vec4 when_ge(vec4 x, vec4 y) { return 1.0 - when_lt(x, y); }
-    vec4 when_le(vec4 x, vec4 y) { return 1.0 - when_gt(x, y); }
-    vec4 and(vec4 a, vec4 b) { return a * b; }
-    vec4 or(vec4 a, vec4 b) { return min(a + b, 1.0); }
-    //vec4 xor(vec4 a, vec4 b) { return (a + b) % 2.0; } //this is commented out
-    vec4 not(vec4 a) { return 1.0 - a; }
+vec4 when_eq(vec4 x, vec4 y) { return 1.0 - abs(sign(x - y)); }
+vec4 when_neq(vec4 x, vec4 y) { return abs(sign(x - y)); }
+vec4 when_gt(vec4 x, vec4 y) { return max(sign(x - y), 0.0); }
+vec4 when_lt(vec4 x, vec4 y) { return max(sign(y - x), 0.0); }
+vec4 when_ge(vec4 x, vec4 y) { return 1.0 - when_lt(x, y); }
+vec4 when_le(vec4 x, vec4 y) { return 1.0 - when_gt(x, y); }
+vec4 and(vec4 a, vec4 b) { return a * b; }
+vec4 or(vec4 a, vec4 b) { return min(a + b, 1.0); }
+//vec4 xor(vec4 a, vec4 b) { return (a + b) % 2.0; } //this is commented out
+vec4 not(vec4 a) { return 1.0 - a; }
 
-    vec3 when_eq(vec3 x, vec3 y) { return 1.0 - abs(sign(x - y)); }
-    vec3 when_neq(vec3 x, vec3 y) { return abs(sign(x - y)); }
-    vec3 when_gt(vec3 x, vec3 y) { return max(sign(x - y), 0.0); }
-    vec3 when_lt(vec3 x, vec3 y) { return max(sign(y - x), 0.0); }
-    vec3 when_ge(vec3 x, vec3 y) { return 1.0 - when_lt(x, y); }
-    vec3 when_le(vec3 x, vec3 y) { return 1.0 - when_gt(x, y); }
-    vec3 and(vec3 a, vec3 b) { return a * b; }
-    vec3 or(vec3 a, vec3 b) { return min(a + b, 1.0); }
-    //vec3 xor(vec3 a, vec3 b) { return (a + b) % 2.0; } //this is commented out
-    vec3 not(vec3 a) { return 1.0 - a; }
+vec3 when_eq(vec3 x, vec3 y) { return 1.0 - abs(sign(x - y)); }
+vec3 when_neq(vec3 x, vec3 y) { return abs(sign(x - y)); }
+vec3 when_gt(vec3 x, vec3 y) { return max(sign(x - y), 0.0); }
+vec3 when_lt(vec3 x, vec3 y) { return max(sign(y - x), 0.0); }
+vec3 when_ge(vec3 x, vec3 y) { return 1.0 - when_lt(x, y); }
+vec3 when_le(vec3 x, vec3 y) { return 1.0 - when_gt(x, y); }
+vec3 and(vec3 a, vec3 b) { return a * b; }
+vec3 or(vec3 a, vec3 b) { return min(a + b, 1.0); }
+//vec3 xor(vec3 a, vec3 b) { return (a + b) % 2.0; } //this is commented out
+vec3 not(vec3 a) { return 1.0 - a; }
 
-    vec2 when_eq(vec2 x, vec2 y) { return 1.0 - abs(sign(x - y)); }
-    vec2 when_neq(vec2 x, vec2 y) { return abs(sign(x - y)); }
-    vec2 when_gt(vec2 x, vec2 y) { return max(sign(x - y), 0.0); }
-    vec2 when_lt(vec2 x, vec2 y) { return max(sign(y - x), 0.0); }
-    vec2 when_ge(vec2 x, vec2 y) { return 1.0 - when_lt(x, y); }
-    vec2 when_le(vec2 x, vec2 y) { return 1.0 - when_gt(x, y); }
-    vec2 and(vec2 a, vec2 b) { return a * b; }
-    vec2 or(vec2 a, vec2 b) { return min(a + b, 1.0); }
-    //vec2 xor(vec2 a, vec2 b) { return (a + b) % 2.0; } //this is commented out
-    vec2 not(vec2 a) { return 1.0 - a; }
+vec2 when_eq(vec2 x, vec2 y) { return 1.0 - abs(sign(x - y)); }
+vec2 when_neq(vec2 x, vec2 y) { return abs(sign(x - y)); }
+vec2 when_gt(vec2 x, vec2 y) { return max(sign(x - y), 0.0); }
+vec2 when_lt(vec2 x, vec2 y) { return max(sign(y - x), 0.0); }
+vec2 when_ge(vec2 x, vec2 y) { return 1.0 - when_lt(x, y); }
+vec2 when_le(vec2 x, vec2 y) { return 1.0 - when_gt(x, y); }
+vec2 and(vec2 a, vec2 b) { return a * b; }
+vec2 or(vec2 a, vec2 b) { return min(a + b, 1.0); }
+//vec2 xor(vec2 a, vec2 b) { return (a + b) % 2.0; } //this is commented out
+vec2 not(vec2 a) { return 1.0 - a; }
 
-    float when_eq(float x, float y) { return 1.0 - (abs(sign(x - y))); }
-    float when_neq(float x, float y) { return abs(sign(x - y)); }
-    float when_gt(float x, float y) { return max(sign(x - y), 0.0); }
-    float when_lt(float x, float y) { return max(sign(y - x), 0.0); }
-    float when_ge(float x, float y) { return 1.0 - when_lt(x, y); }
-    float when_le(float x, float y) { return 1.0 - when_gt(x, y); }
-    float and(float a, float b) { return a * b; }
-    float or(float a, float b) { return min(a + b, 1.0); }
-    //float xor(float a, float b) { return (a + b) % 2.0; } //this is commented out
-    float not(float a) { return 1.0 - a; }
-    int when_ieq(int x, int y) { return 1 - (abs(sign(x - y))); }
-    int when_ineq(int x, int y) { return abs(sign(x - y)); }
-    int when_igt(int x, int y) { return max(sign(x - y), 0); }
-    int when_ilt(int x, int y) { return max(sign(y - x), 0); }
-    int when_ige(int x, int y) { return 1 - when_ilt(x, y); }
-    int when_ile(int x, int y) { return 1 - when_igt(x, y); }
-    int iand(int a, int b) { return a * b; }
-    int ior(int a, int b) { return min(a + b, 1); }
-    int inot(int a) { return 1 - a; }
+float when_eq(float x, float y) { return 1.0 - (abs(sign(x - y))); }
+float when_neq(float x, float y) { return abs(sign(x - y)); }
+float when_gt(float x, float y) { return max(sign(x - y), 0.0); }
+float when_lt(float x, float y) { return max(sign(y - x), 0.0); }
+float when_ge(float x, float y) { return 1.0 - when_lt(x, y); }
+float when_le(float x, float y) { return 1.0 - when_gt(x, y); }
+float and(float a, float b) { return a * b; }
+float or(float a, float b) { return min(a + b, 1.0); }
+//float xor(float a, float b) { return (a + b) % 2.0; } //this is commented out
+float not(float a) { return 1.0 - a; }
+int when_ieq(int x, int y) { return 1 - (abs(sign(x - y))); }
+int when_ineq(int x, int y) { return abs(sign(x - y)); }
+int when_igt(int x, int y) { return max(sign(x - y), 0); }
+int when_ilt(int x, int y) { return max(sign(y - x), 0); }
+int when_ige(int x, int y) { return 1 - when_ilt(x, y); }
+int when_ile(int x, int y) { return 1 - when_igt(x, y); }
+int iand(int a, int b) { return a * b; }
+int ior(int a, int b) { return min(a + b, 1); }
+int inot(int a) { return 1 - a; }
 )";
 #pragma endregion
 
 #pragma region LightingVertex
-priv::EShaders::lighting_vert = 
-    "layout (location = 0) in vec3 position;\n"
-    "layout (location = 1) in vec2 uv;\n"
-    "\n"
-    "uniform mat4 Model;\n"
-    "uniform mat4 VP;\n"
-    "uniform vec2 VertexShaderData;\n" //x = outercutoff, y = radius
-    "uniform float Type;\n" // 2.0 = spot light. 1.0 = any other light. 0.0 = fullscreen quad / triangle
-    "\n"
-    "varying vec2 texcoords;\n"
-    "flat varying vec3 CamRealPosition;\n"
-    "\n"
-    "vec3 doSpotLightStuff(vec3 inPositions){\n"
-    "    float opposite = tan(VertexShaderData.x * 0.5) * VertexShaderData.y;\n" //outerCutoff might need to be in degrees?
-    "    inPositions.xy *= vec2(opposite / VertexShaderData.y);\n" //might need to switch around x,y,z to fit GL's coordinate system
-    "    return inPositions;\n"
-    "}\n"
-    "void main(){\n"
-    "    mat4 ModelClone = Model;\n"
-    "    vec3 ModelSpacePositions = position;\n"
-    "    if(Type == 2.0){\n" //spot light
-    "        ModelSpacePositions = doSpotLightStuff(ModelSpacePositions);\n"
-    "        ModelClone[3][0] -= CameraRealPosition.x;\n"
-    "        ModelClone[3][1] -= CameraRealPosition.y;\n"
-    "        ModelClone[3][2] -= CameraRealPosition.z;\n"
-    "    }else if(Type == 1.0){\n" //point / rod / etc
-    "        ModelClone[3][0] -= CameraRealPosition.x;\n"
-    "        ModelClone[3][1] -= CameraRealPosition.y;\n"
-    "        ModelClone[3][2] -= CameraRealPosition.z;\n"
-    "    }else if(Type == 0.0){\n" //fullscreen quad / triangle
-    "    }\n"
-    "    texcoords = uv;\n"
-    "    CamRealPosition = CameraRealPosition;\n"
-    "    gl_Position = (VP * ModelClone) * vec4(ModelSpacePositions, 1.0);\n"
-    "}";
+priv::EShaders::lighting_vert = R"(
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec2 uv;
+
+uniform mat4 Model;
+uniform mat4 VP;
+uniform vec2 VertexShaderData; //x = outercutoff, y = radius
+uniform float Type; // 2.0 = spot light. 1.0 = any other light. 0.0 = fullscreen quad / triangle
+
+varying vec2 texcoords;
+flat varying vec3 CamRealPosition;
+
+vec3 doSpotLightStuff(vec3 inPositions){
+    float opposite = tan(VertexShaderData.x * 0.5) * VertexShaderData.y;
+    inPositions.xy *= vec2(opposite / VertexShaderData.y);
+    return inPositions;
+}
+void main(){
+    mat4 ModelClone = Model;
+    vec3 ModelSpacePositions = position;
+    if(Type == 2.0){ //spot light
+        ModelSpacePositions = doSpotLightStuff(ModelSpacePositions);
+        ModelClone[3][0] -= CameraRealPosition.x;
+        ModelClone[3][1] -= CameraRealPosition.y;
+        ModelClone[3][2] -= CameraRealPosition.z;
+    }else if(Type == 1.0){ //point / rod / etc
+        ModelClone[3][0] -= CameraRealPosition.x;
+        ModelClone[3][1] -= CameraRealPosition.y;
+        ModelClone[3][2] -= CameraRealPosition.z;
+    }else if(Type == 0.0){ //fullscreen quad / triangle
+    }
+    texcoords = uv;
+    CamRealPosition = CameraRealPosition;
+    gl_Position = (VP * ModelClone) * vec4(ModelSpacePositions, 1.0);
+}
+)";
 #pragma endregion
 
 #pragma region BulletPhysicsVertex
 priv::EShaders::bullet_physics_vert = R"(
-    layout (location = 0) in vec3 position;
-    layout (location = 1) in vec3 color;
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec3 color;
 
-    varying vec3 OutColor;
+varying vec3 OutColor;
 
-    uniform mat4 Model;
-    uniform mat4 VP;
+uniform mat4 Model;
+uniform mat4 VP;
 
-    void main(){
-    	gl_Position = VP * Model * vec4(position, 1.0f);
-    	OutColor = color;
-    }
+void main(){
+    gl_Position = VP * Model * vec4(position, 1.0f);
+    OutColor = color;
+}
 )";
 #pragma endregion
 
 #pragma region BulletPhysicsFragment
 priv::EShaders::bullet_physcis_frag = R"(
-    in vec3 OutColor;
-    void main(){
-    	gl_FragColor = vec4(OutColor, 1.0);
-    }
+in vec3 OutColor;
+void main(){
+    gl_FragColor = vec4(OutColor, 1.0);
+}
 )";
 #pragma endregion
 
 #pragma region DecalVertex
 //TODO: get rid of the useless info here
-priv::EShaders::decal_vertex =  
-    "USE_LOG_DEPTH_VERTEX\n"
+priv::EShaders::decal_vertex = R"(
+USE_LOG_DEPTH_VERTEX
 
-    "layout (location = 0) in vec3 position;\n"
-    "layout (location = 1) in vec2 uv;\n"
-    "layout (location = 2) in vec4 normal;\n" //Order is ZYXW
-    "layout (location = 3) in vec4 binormal;\n"//Order is ZYXW
-    "layout (location = 4) in vec4 tangent;\n"//Order is ZYXW
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec2 uv;
+layout (location = 2) in vec4 normal;
+layout (location = 3) in vec4 binormal;
+layout (location = 4) in vec4 tangent;
 
-    "uniform mat4 Model;\n"
-    "uniform mat3 NormalMatrix;\n"
+uniform mat4 Model;
+uniform mat3 NormalMatrix;
 
-    "varying vec3 Normals;\n"
-    "varying mat3 TBN;\n"
+varying vec3 Normals;
+varying mat3 TBN;
 
-    "flat varying mat4 WorldMatrix;\n"
-    "flat varying vec3 CamPosition;\n"
-    "flat varying vec3 CamRealPosition;\n"
+flat varying mat4 WorldMatrix;
+flat varying vec3 CamPosition;
+flat varying vec3 CamRealPosition;
 
-    "varying vec4 VertexPositionsClipSpace;\n"
-    "varying vec4 VertexPositionsViewSpace;\n"
-    "varying vec3 TangentCameraPos;\n"
-    "varying vec3 TangentFragPos;\n"
+varying vec4 VertexPositionsClipSpace;
+varying vec4 VertexPositionsViewSpace;
+varying vec3 TangentCameraPos;
+varying vec3 TangentFragPos;
 
-    "void main(){\n"
-    "    mat4 ModelMatrix = Model;\n"
-    "    ModelMatrix[3][0] -= CameraRealPosition.x;\n"
-    "    ModelMatrix[3][1] -= CameraRealPosition.y;\n"
-    "    ModelMatrix[3][2] -= CameraRealPosition.z;\n"
-    "    WorldMatrix = ModelMatrix;\n"
+void main(){
+    mat4 ModelMatrix = Model;
+    ModelMatrix[3][0] -= CameraRealPosition.x;
+    ModelMatrix[3][1] -= CameraRealPosition.y;
+    ModelMatrix[3][2] -= CameraRealPosition.z;
+    WorldMatrix = ModelMatrix;
 
-    "    vec4 worldPos = (ModelMatrix * vec4(position, 1.0));\n"
-    "    gl_Position = CameraViewProj * worldPos;\n"
-    "    VertexPositionsViewSpace = CameraView * worldPos;\n"
-    "    VertexPositionsClipSpace = gl_Position;\n"
+    vec4 worldPos = (ModelMatrix * vec4(position, 1.0));
+    gl_Position = CameraViewProj * worldPos;
+    VertexPositionsViewSpace = CameraView * worldPos;
+    VertexPositionsClipSpace = gl_Position;
 
-    "    vec3 NormalTrans   = vec4(normal.zyx,   0.0).xyz;\n"  //Order is ZYXW so to bring it to XYZ we need to use ZYX
-    "    vec3 BinormalTrans = vec4(binormal.zyx, 0.0).xyz;\n"//Order is ZYXW so to bring it to XYZ we need to use ZYX
-    "    vec3 TangentTrans  = vec4(tangent.zyx,  0.0).xyz;\n" //Order is ZYXW so to bring it to XYZ we need to use ZYX
+    vec3 NormalTrans   = vec4(normal.zyx,   0.0).xyz;
+    vec3 BinormalTrans = vec4(binormal.zyx, 0.0).xyz;
+    vec3 TangentTrans  = vec4(tangent.zyx,  0.0).xyz;
 
-    "           Normals = NormalMatrix * NormalTrans;\n"
-    "    vec3 Binormals = NormalMatrix * BinormalTrans;\n"
-    "    vec3  Tangents = NormalMatrix * TangentTrans;\n"
-    "    TBN = mat3(Tangents,Binormals,Normals);\n"
+            Normals = NormalMatrix * NormalTrans;
+    vec3 Binormals = NormalMatrix * BinormalTrans;
+    vec3  Tangents = NormalMatrix * TangentTrans;
+    TBN = mat3(Tangents,Binormals,Normals);
 
-    "    CamPosition = CameraPosition;\n"
+    CamPosition = CameraPosition;
 
-    "    CamRealPosition  = CameraRealPosition;\n"
-    "    TangentCameraPos = TBN * CameraPosition;\n"
-    "    TangentFragPos   = TBN * worldPos.xyz;\n"
-    "}";
+    CamRealPosition  = CameraRealPosition;
+    TangentCameraPos = TBN * CameraPosition;
+    TangentFragPos   = TBN * worldPos.xyz;
+}
+)";
 #pragma endregion
 
 #pragma region ParticleVertex
@@ -396,121 +398,123 @@ normal = tangentToView * normal;
 
 #pragma region VertexBasic
 priv::EShaders::vertex_basic = R"(
-    USE_LOG_DEPTH_VERTEX
+USE_LOG_DEPTH_VERTEX
 
-    layout (location = 0) in vec3 position;
-    layout (location = 1) in vec2 uv;
-    layout (location = 2) in vec4 normal;
-    layout (location = 3) in vec4 binormal;
-    layout (location = 4) in vec4 tangent;
-    layout (location = 5) in vec4 BoneIDs;
-    layout (location = 6) in vec4 Weights;
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec2 uv;
+layout (location = 2) in vec4 normal;
+layout (location = 3) in vec4 binormal;
+layout (location = 4) in vec4 tangent;
+layout (location = 5) in vec4 BoneIDs;
+layout (location = 6) in vec4 Weights;
 
-    uniform mat4 Model;
-    uniform mat3 NormalMatrix;
-    uniform int AnimationPlaying;
-    uniform mat4 gBones[100];
+uniform mat4 Model;
+uniform mat3 NormalMatrix;
+uniform int AnimationPlaying;
+uniform mat4 gBones[100];
 
-    varying vec2 UV;
+varying vec2 UV;
 
-    varying vec3 Normals;
-    varying vec3 WorldPosition;
-    varying mat3 TBN;
+varying vec3 Normals;
+varying vec3 WorldPosition;
+varying mat3 TBN;
 
-    flat varying vec3 CamPosition;
-    flat varying vec3 CamRealPosition;
-    varying vec3 TangentCameraPos;
-    varying vec3 TangentFragPos;
+flat varying vec3 CamPosition;
+flat varying vec3 CamRealPosition;
+varying vec3 TangentCameraPos;
+varying vec3 TangentFragPos;
 
-    void main(){
-        mat4 BoneTransform = mat4(1.0);
-        if(AnimationPlaying == 1.0){
-            BoneTransform  = gBones[int(BoneIDs[0])] * Weights[0];
-            BoneTransform += gBones[int(BoneIDs[1])] * Weights[1];
-            BoneTransform += gBones[int(BoneIDs[2])] * Weights[2];
-            BoneTransform += gBones[int(BoneIDs[3])] * Weights[3];
-        }
-        vec4 PosTrans      =   BoneTransform * vec4(position,     1.0);
-        vec3 NormalTrans   =  (BoneTransform * vec4(normal.zyx,   0.0)).xyz;
-        vec3 BinormalTrans =  (BoneTransform * vec4(binormal.zyx, 0.0)).xyz;
-        vec3 TangentTrans  =  (BoneTransform * vec4(tangent.zyx,  0.0)).xyz;
-
-             Normals   = (NormalMatrix * NormalTrans).xyz;
-        vec3 Binormals = (NormalMatrix * BinormalTrans).xyz;
-        vec3 Tangents  = (NormalMatrix * TangentTrans).xyz;
-        TBN = mat3(Tangents, Binormals, Normals);
-
-        mat4 ModelMatrix   = Model;
-        ModelMatrix[3][0] -= CameraRealPosition.x;
-        ModelMatrix[3][1] -= CameraRealPosition.y;
-        ModelMatrix[3][2] -= CameraRealPosition.z;
-
-        vec4 worldPos    = (ModelMatrix * PosTrans);
-        WorldPosition    = worldPos.xyz;
-        gl_Position      = (CameraViewProj * worldPos);
-
-        CamPosition      = CameraPosition;
-        CamRealPosition  = CameraRealPosition;
-        TangentCameraPos = TBN * CameraPosition;
-        TangentFragPos   = TBN * WorldPosition;
-
-        UV = uv;
+void main(){
+    mat4 BoneTransform = mat4(1.0);
+    if(AnimationPlaying == 1){
+        BoneTransform  = gBones[int(BoneIDs[0])] * Weights[0];
+        BoneTransform += gBones[int(BoneIDs[1])] * Weights[1];
+        BoneTransform += gBones[int(BoneIDs[2])] * Weights[2];
+        BoneTransform += gBones[int(BoneIDs[3])] * Weights[3];
     }
+    vec4 PosTrans      =  (BoneTransform * vec4(position,     1.0));
+    vec3 NormalTrans   =  (BoneTransform * vec4(normal.zyx,   0.0)).xyz;
+    vec3 BinormalTrans =  (BoneTransform * vec4(binormal.zyx, 0.0)).xyz;
+    vec3 TangentTrans  =  (BoneTransform * vec4(tangent.zyx,  0.0)).xyz;
+
+         Normals       = (NormalMatrix * NormalTrans).xyz;
+    vec3 Binormals     = (NormalMatrix * BinormalTrans).xyz;
+    vec3 Tangents      = (NormalMatrix * TangentTrans).xyz;
+    TBN = mat3(Tangents, Binormals, Normals);
+
+    mat4 ModelMatrix   = Model;
+    ModelMatrix[3][0] -= CameraRealPosition.x;
+    ModelMatrix[3][1] -= CameraRealPosition.y;
+    ModelMatrix[3][2] -= CameraRealPosition.z;
+
+    vec4 worldPos      = ModelMatrix * PosTrans;
+    WorldPosition      = worldPos.xyz;
+
+    gl_Position        = CameraViewProj * worldPos;
+
+    CamPosition        = CameraPosition;
+    CamRealPosition    = CameraRealPosition;
+    TangentCameraPos   = TBN * CameraPosition;
+    TangentFragPos     = TBN * WorldPosition;
+
+    UV = uv;
+}
 )";
+
 #pragma endregion
 
 #pragma region Vertex2DAPI
 priv::EShaders::vertex_2DAPI = R"(
-    layout (location = 0) in vec3 position;
-    layout (location = 1) in vec2 uv;
-    uniform mat4 VP;
-    uniform mat4 Model;
-    varying vec2 UV;
-    void main(){
-        UV = uv;
-        gl_Position = VP * Model * vec4(position, 1.0);
-    }
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec2 uv;
+uniform mat4 VP;
+uniform mat4 Model;
+varying vec2 UV;
+void main(){
+    UV = uv;
+    gl_Position = VP * Model * vec4(position, 1.0);
+}
 )";
 #pragma endregion
 
 #pragma region VertexSkybox
 priv::EShaders::vertex_skybox = R"(
-    layout (location = 0) in vec3 position;
-    uniform mat4 VP;
-    varying vec3 UV;
-    void main(){
-        UV = position;
-        gl_Position = VP * vec4(position, 1.0);
-        gl_Position.z = gl_Position.w;
-    }
+layout (location = 0) in vec3 position;
+uniform mat4 VP;
+varying vec3 UV;
+void main(){
+    UV = position;
+    gl_Position = VP * vec4(position, 1.0);
+    gl_Position.z = gl_Position.w;
+}
 )";
 #pragma endregion
 
 #pragma region CubemapConvoludeFrag
 priv::EShaders::cubemap_convolude_frag = R"(
-    varying vec3 UV;
-    uniform SAMPLER_TYPE_Cube cubemap;
-    const float PI = 3.14159265;
-    const vec3 UP = vec3(0.0, 1.0, 0.0);
-    void main(){
-        vec3 N = normalize(UV);
-        vec3 irradiance = vec3(0.0);
-        vec3 up = UP;
-        vec3 right = cross(up, N);
-        up = cross(N, right);
-        float sampleDelta = 0.025;
-        float nrSamples = 0.0;
-        for(float phi = 0.0; phi < 2.0 * PI; phi += sampleDelta){
-            for(float theta = 0.0; theta < 0.5 * PI; theta += sampleDelta){
-                vec3 tangentSample = vec3(sin(theta) * cos(phi),  sin(theta) * sin(phi), cos(theta));
-                vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * N;
-                irradiance += textureCube(cubemap, sampleVec).rgb * cos(theta) * sin(theta);
-                nrSamples++;
-            }
+varying vec3 UV;
+uniform SAMPLER_TYPE_Cube cubemap;
+const float PI = 3.14159265;
+const vec3 UP = vec3(0.0, 1.0, 0.0);
+void main(){
+    vec3 N = normalize(UV);
+    vec3 irradiance = vec3(0.0);
+    vec3 up = UP;
+    vec3 right = cross(up, N);
+    up = cross(N, right);
+    float sampleDelta = 0.025;
+    float nrSamples = 0.0;
+    for(float phi = 0.0; phi < 2.0 * PI; phi += sampleDelta){
+        for(float theta = 0.0; theta < 0.5 * PI; theta += sampleDelta){
+            vec3 tangentSample = vec3(sin(theta) * cos(phi),  sin(theta) * sin(phi), cos(theta));
+            vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * N;
+            irradiance += textureCube(cubemap, sampleVec).rgb * cos(theta) * sin(theta);
+            nrSamples++;
         }
-        irradiance = PI * irradiance * (1.0 / nrSamples);
-        gl_FragColor = vec4(irradiance, 1.0);
     }
+    irradiance = PI * irradiance * (1.0 / nrSamples);
+    gl_FragColor = vec4(irradiance, 1.0);
+}
 )";
 #pragma endregion
 
@@ -522,160 +526,159 @@ priv::EShaders::cubemap_convolude_frag = R"(
 // this shader is heavily modified based on optimizations in the link above. the optimizations are not complete yet, and 
 // what seems to look correct may not be. this shader might have to be modified against the original later on.
 priv::EShaders::cubemap_prefilter_envmap_frag = R"(
-    varying vec3 UV;
-    uniform SAMPLER_TYPE_Cube cubemap;
-    uniform float roughness;
-    uniform float a2;
-    uniform float PiFourDividedByResSquaredTimesSix;
-    uniform int NUM_SAMPLES;
-    const float PI = 3.14159265;
-    const float PI2 = 6.283185;
-    float DistributionGGX(vec3 Half){
-        float NdotH2 = Half.z * Half.z;
-        float denom = (NdotH2 * (a2 - 1.0) + 1.0);
-        denom = PI * denom * denom;
-        return a2 / denom;
-    }
-    vec3 ImportanceSampleGGX(vec2 Xi, mat3 TBN){
-        float phi = PI2 * Xi.x;
-        float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a2 - 1.0) * Xi.y));
-        float sinTheta = sqrt(1.0 - cosTheta*cosTheta);
-        vec3 Half;
-        Half.x = sinTheta * cos(phi);
-        Half.y = sinTheta * sin(phi);
-        Half.z = cosTheta;
-        return normalize(TBN * Half);
-    }
-    void main(){
-        vec3 N = normalize(UV);
-        vec3 R = N;
-        vec3 V = R;
-        vec3 PreEnv = vec3(0.0);
-        float totalWeight = 0.0;
-        vec3 up = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
-        vec3 tangent = normalize(cross(up, N));
-        vec3 bitangent = cross(N, tangent);
-        mat3 TBN = mat3(tangent,bitangent,N);
-        for(int i = 0; i < NUM_SAMPLES; ++i){
-            vec2 Xi = HammersleySequence(i, NUM_SAMPLES);
-            vec3 L = ImportanceSampleGGX(Xi,TBN);
-            float NdotL = max(dot(N, L), 0.0);
-            if(NdotL > 0.0){
-                float D   = DistributionGGX(L);
-                float pdf = D * L.z / (4.0 * L.z) + 0.0001;
-                float saSample = 1.0 / (float(NUM_SAMPLES) * pdf + 0.0001);
-                float mipLevel = (roughness == 0.0) ? 0.0 : 0.5 * log2(saSample / PiFourDividedByResSquaredTimesSix);
-                PreEnv += textureCubeLod(cubemap, L, mipLevel).rgb * NdotL;
-                totalWeight += NdotL;
-            }
+varying vec3 UV;
+uniform SAMPLER_TYPE_Cube cubemap;
+uniform float roughness;
+uniform float a2;
+uniform float PiFourDividedByResSquaredTimesSix;
+uniform int NUM_SAMPLES;
+const float PI = 3.14159265;
+const float PI2 = 6.283185;
+float DistributionGGX(vec3 Half){
+    float NdotH2 = Half.z * Half.z;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
+    return a2 / denom;
+}
+vec3 ImportanceSampleGGX(vec2 Xi, mat3 TBN){
+    float phi = PI2 * Xi.x;
+    float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a2 - 1.0) * Xi.y));
+    float sinTheta = sqrt(1.0 - cosTheta*cosTheta);
+    vec3 Half;
+    Half.x = sinTheta * cos(phi);
+    Half.y = sinTheta * sin(phi);
+    Half.z = cosTheta;
+    return normalize(TBN * Half);
+}
+void main(){
+    vec3 N = normalize(UV);
+    vec3 R = N;
+    vec3 V = R;
+    vec3 PreEnv = vec3(0.0);
+    float totalWeight = 0.0;
+    vec3 up = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
+    vec3 tangent = normalize(cross(up, N));
+    vec3 bitangent = cross(N, tangent);
+    mat3 TBN = mat3(tangent,bitangent,N);
+    for(int i = 0; i < NUM_SAMPLES; ++i){
+        vec2 Xi = HammersleySequence(i, NUM_SAMPLES);
+        vec3 L = ImportanceSampleGGX(Xi,TBN);
+        float NdotL = max(dot(N, L), 0.0);
+        if(NdotL > 0.0){
+            float D   = DistributionGGX(L);
+            float pdf = D * L.z / (4.0 * L.z) + 0.0001;
+            float saSample = 1.0 / (float(NUM_SAMPLES) * pdf + 0.0001);
+            float mipLevel = (roughness == 0.0) ? 0.0 : 0.5 * log2(saSample / PiFourDividedByResSquaredTimesSix);
+            PreEnv += textureCubeLod(cubemap, L, mipLevel).rgb * NdotL;
+            totalWeight += NdotL;
         }
-        PreEnv = PreEnv / totalWeight;
-        gl_FragColor = vec4(PreEnv, 1.0);
     }
+    PreEnv = PreEnv / totalWeight;
+    gl_FragColor = vec4(PreEnv, 1.0);
+}
 )";
 #pragma endregion
 
 #pragma region BRDFPrecompute
 priv::EShaders::brdf_precompute = R"(
-    const float PI2 = 6.283185;
-    uniform int NUM_SAMPLES;
-    varying vec2 texcoords;
-    vec3 ImportanceSampleGGX(vec2 Xi, float a2,mat3 TBN){
-        float phi = PI2 * Xi.x;
-        float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a2 - 1.0) * Xi.y));
-        float sinTheta = sqrt(1.0 - cosTheta*cosTheta);
-        vec3 Half;
-        Half.x = cos(phi) * sinTheta;
-        Half.y = sin(phi) * sinTheta;
-        Half.z = cosTheta;
-        return normalize(TBN * Half);
-    }
-    float GeometrySchlickGGX(float NdotV, float a){
-        float k = a / 2.0;
-        float denom = NdotV * (1.0 - k) + k;
-        return NdotV / denom;
-    }
-    float GeometrySmith(vec3 N, vec3 V, vec3 L, float a){
-        float NdotV = max(dot(N, V), 0.0);
-        float NdotL = max(dot(N, L), 0.0);
-        float ggx2 = GeometrySchlickGGX(NdotV, a);
-        float ggx1 = GeometrySchlickGGX(NdotL, a);
-        return ggx1 * ggx2;
-    }
-    vec2 IntegrateBRDF(float NdotV, float roughness){
-        vec3 V;
-        V.x = sqrt(1.0 - NdotV * NdotV);
-        V.y = 0.0;
-        V.z = NdotV;
-        float A = 0.0;
-        float B = 0.0;
-        vec3 N = vec3(0.0, 0.0, 1.0);
-        float a = roughness * roughness;
-        float a2 = a * a;
-        vec3 up = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
-        vec3 tangent   = normalize(cross(up, N));
-        vec3 bitangent = cross(N, tangent);
-        mat3 TBN = mat3(tangent,bitangent,N);
-        for(int i = 0; i < NUM_SAMPLES; ++i){
-            vec2 Xi = HammersleySequence(i, NUM_SAMPLES);
-            vec3 H = ImportanceSampleGGX(Xi,a2,TBN);
-            vec3 L = normalize(2.0 * dot(V, H) * H - V);
-            float NdotL = max(L.z, 0.0);
-            float NdotH = max(H.z, 0.0);
-            float VdotH = max(dot(V, H), 0.0);
-            if(NdotL > 0.0){
-                float G = GeometrySmith(N, V, L, a);
-                float G_Vis = (G * VdotH) / (NdotH * NdotV);
-                float Fc = pow(1.0 - VdotH, 5.0);
-                A += (1.0 - Fc) * G_Vis;
-                B += Fc * G_Vis;
-            }
+const float PI2 = 6.283185;
+uniform int NUM_SAMPLES;
+varying vec2 texcoords;
+vec3 ImportanceSampleGGX(vec2 Xi, float a2,mat3 TBN){
+    float phi = PI2 * Xi.x;
+    float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a2 - 1.0) * Xi.y));
+    float sinTheta = sqrt(1.0 - cosTheta*cosTheta);
+    vec3 Half;
+    Half.x = cos(phi) * sinTheta;
+    Half.y = sin(phi) * sinTheta;
+    Half.z = cosTheta;
+    return normalize(TBN * Half);
+}
+float GeometrySchlickGGX(float NdotV, float a){
+    float k = a / 2.0;
+    float denom = NdotV * (1.0 - k) + k;
+    return NdotV / denom;
+}
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float a){
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2 = GeometrySchlickGGX(NdotV, a);
+    float ggx1 = GeometrySchlickGGX(NdotL, a);
+    return ggx1 * ggx2;
+}
+vec2 IntegrateBRDF(float NdotV, float roughness){
+    vec3 V;
+    V.x = sqrt(1.0 - NdotV * NdotV);
+    V.y = 0.0;
+    V.z = NdotV;
+    float A = 0.0;
+    float B = 0.0;
+    vec3 N = vec3(0.0, 0.0, 1.0);
+    float a = roughness * roughness;
+    float a2 = a * a;
+    vec3 up = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
+    vec3 tangent   = normalize(cross(up, N));
+    vec3 bitangent = cross(N, tangent);
+    mat3 TBN = mat3(tangent,bitangent,N);
+    for(int i = 0; i < NUM_SAMPLES; ++i){
+        vec2 Xi = HammersleySequence(i, NUM_SAMPLES);
+        vec3 H = ImportanceSampleGGX(Xi,a2,TBN);
+        vec3 L = normalize(2.0 * dot(V, H) * H - V);
+        float NdotL = max(L.z, 0.0);
+        float NdotH = max(H.z, 0.0);
+        float VdotH = max(dot(V, H), 0.0);
+        if(NdotL > 0.0){
+            float G = GeometrySmith(N, V, L, a);
+            float G_Vis = (G * VdotH) / (NdotH * NdotV);
+            float Fc = pow(1.0 - VdotH, 5.0);
+            A += (1.0 - Fc) * G_Vis;
+            B += Fc * G_Vis;
         }
-        A /= float(NUM_SAMPLES);
-        B /= float(NUM_SAMPLES);
-        return vec2(A, B);
     }
-    void main(){
-        gl_FragColor.rg = IntegrateBRDF(texcoords.x, texcoords.y);
-    }
+    A /= float(NUM_SAMPLES);
+    B /= float(NUM_SAMPLES);
+    return vec2(A, B);
+}
+void main(){
+    gl_FragColor.rg = IntegrateBRDF(texcoords.x, texcoords.y);
+}
 )";
 #pragma endregion
 
 #pragma region StencilPass
 priv::EShaders::stencil_passover = R"(
-    const vec3 comparison = vec3(1.0, 1.0, 1.0);
-    uniform SAMPLER_TYPE_2D gNormalMap;
-    varying vec2 texcoords;
-    void main(){
-        vec3 normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);
-        if(distance(normal, comparison) < 0.01){
-            discard; //this is where the magic happens with the stencil buffer.
-        }
+const vec3 comparison = vec3(1.0, 1.0, 1.0);
+uniform SAMPLER_TYPE_2D gNormalMap;
+varying vec2 texcoords;
+void main(){
+    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);
+    if(distance(normal, comparison) < 0.01){
+        discard; //this is where the magic happens with the stencil buffer.
     }
+}
 )";
 #pragma endregion
 
 #pragma region FullscreenQuadVertex
 priv::EShaders::fullscreen_quad_vertex = R"(
-    layout (location = 0) in vec3 position;
-    layout (location = 1) in vec2 uv;
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec2 uv;
 
-    uniform mat4 Model;
-    uniform mat4 VP;
+uniform mat4 Model;
+uniform mat4 VP;
 
-    varying vec2 texcoords;
+varying vec2 texcoords;
 
-    void main(){
-        vec3 vert = position;
-        texcoords = uv;
-        gl_Position = VP * Model * vec4(vert, 1.0);
-    }
+void main(){
+    vec3 vert = position;
+    texcoords = uv;
+    gl_Position = VP * Model * vec4(vert, 1.0);
+}
 )";
 #pragma endregion
    
 #pragma region ForwardFrag
 priv::EShaders::forward_frag =
-    "\n"
     "USE_LOG_DEPTH_FRAGMENT\n"
     "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
     "USE_MAX_MATERIAL_COMPONENTS\n"
@@ -864,205 +867,204 @@ priv::EShaders::forward_frag =
 #pragma endregion
 
 #pragma region DeferredFrag
-priv::EShaders::deferred_frag =
-    "\n"
-    "USE_LOG_DEPTH_FRAGMENT\n"
-    "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
-    "USE_MAX_MATERIAL_COMPONENTS\n"
-    "\n"
-    "struct InData {\n"
-    "    vec2  uv;\n"
-    "    vec4  diffuse;\n"
-    "    vec4  objectColor;\n"
-    "    vec3  normals;\n"
-    "    float glow;\n"
-    "    float specular;\n"
-    "    float ao;\n"
-    "    float metalness;\n"
-    "    float smoothness;\n"
-    "    vec3  worldPosition;\n"
-    "};\n"
-    "struct Layer {\n"
-    "    vec4 data1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
-    "    vec4 data2;\n"
-    "    SAMPLER_TYPE_2D texture;\n"
-    "    SAMPLER_TYPE_2D mask;\n"
-    "    SAMPLER_TYPE_Cube cubemap;\n"
-    "    vec4 uvModifications;\n"
-    "};\n"
-    "struct Component {\n"
-    "    ivec2 componentData;\n" //x = numLayers, y = componentType
-    "    Layer layers[MAX_MATERIAL_LAYERS_PER_COMPONENT];\n"
-    "};\n"
-    "\n"
-    "uniform Component   components[MAX_MATERIAL_COMPONENTS];\n"
-    "uniform int         numComponents;\n"
-    "\n"
-    "uniform vec4        MaterialBasePropertiesOne;\n"//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
-    "uniform vec4        MaterialBasePropertiesTwo;\n"//x = BaseAlpha, y = diffuseModel, z = specularModel, w = UNUSED
-    "\n"
-    "uniform int Shadeless;\n"
-    "\n"
-    "uniform uint Object_Color;\n"
-    "uniform vec4 Material_F0AndID;\n"
-    "uniform uint Gods_Rays_Color;\n"
-    "\n"
-    "varying vec3 WorldPosition;\n"
-    "varying vec2 UV;\n"
-    "varying vec3 Normals;\n"
-    "varying mat3 TBN;\n"
-    "flat varying vec3 CamPosition;\n"
-    "varying vec3 TangentCameraPos;\n"
-    "varying vec3 TangentFragPos;\n"
-    "\n"
-    "void main(){\n"
-    "    InData inData;\n"
-    "    inData.uv = UV;\n"
-    "    inData.diffuse = vec4(0.0,0.0,0.0,0.0001);\n" //this is extremely wierd, but we need some form of alpha to get painters algorithm to work...
-    "    inData.objectColor = Unpack32BitUIntTo4ColorFloats(Object_Color);\n"
-    "    inData.normals = normalize(Normals);\n"
-    "    inData.glow = MaterialBasePropertiesOne.x;\n"
-    "    inData.specular = 1.0;\n"
-    "    inData.ao = MaterialBasePropertiesOne.y;\n"
-    "    inData.metalness = MaterialBasePropertiesOne.z;\n"
-    "    inData.smoothness = MaterialBasePropertiesOne.w;\n"
-    "    inData.worldPosition = WorldPosition;\n"
-    "\n"
-    "    for (int j = 0; j < numComponents; ++j) {\n"
-    "        ProcessComponent(components[j], inData);\n"
-    "    }\n"
-    "\n"
-    "    vec2 OutNormals = EncodeOctahedron(inData.normals);\n"
-    "    if(Shadeless == 1){\n"
-    "        OutNormals = ConstantOneVec2;\n"
-    "        inData.diffuse *= (1.0 + inData.glow);\n" // we want shadeless items to be influenced by the glow somewhat...
-    "    }\n"
-    "    vec4 GodRays = Unpack32BitUIntTo4ColorFloats(Gods_Rays_Color);\n"
-    "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
+priv::EShaders::deferred_frag = R"(
+USE_LOG_DEPTH_FRAGMENT
+USE_MAX_MATERIAL_LAYERS_PER_COMPONENT
+USE_MAX_MATERIAL_COMPONENTS
 
-    "    SUBMIT_DIFFUSE(inData.diffuse);\n"
-    "    SUBMIT_NORMALS(OutNormals);\n"
-    "    SUBMIT_MATERIAL_ID_AND_AO(Material_F0AndID.w, inData.ao);\n"
-    "    SUBMIT_METALNESS_AND_SMOOTHNESS(inData.metalness,inData.smoothness);\n"
-    "    SUBMIT_GLOW(inData.glow);\n"
-    "    SUBMIT_SPECULAR(inData.specular);\n"
-    "    SUBMIT_GOD_RAYS_COLOR(GodRays.r, GodRays.g, GodRays.b);\n"
-    "}";
+struct InData {
+    vec2  uv;
+    vec4  diffuse;
+    vec4  objectColor;
+    vec3  normals;
+    float glow;
+    float specular;
+    float ao;
+    float metalness;
+    float smoothness;
+    vec3  worldPosition;
+};
+struct Layer {
+    vec4 data1; //x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
+    vec4 data2;
+    SAMPLER_TYPE_2D texture;
+    SAMPLER_TYPE_2D mask;
+    SAMPLER_TYPE_Cube cubemap;
+    vec4 uvModifications;
+};
+struct Component {
+    ivec2 componentData; //x = numLayers, y = componentType
+    Layer layers[MAX_MATERIAL_LAYERS_PER_COMPONENT];
+};
+
+uniform Component   components[MAX_MATERIAL_COMPONENTS];
+uniform int         numComponents;
+
+uniform vec4        MaterialBasePropertiesOne; //x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
+uniform vec4        MaterialBasePropertiesTwo; //x = BaseAlpha, y = diffuseModel, z = specularModel, w = UNUSED
+
+uniform int Shadeless;
+
+uniform uint Object_Color;
+uniform vec4 Material_F0AndID;
+uniform uint Gods_Rays_Color;
+
+varying vec3 WorldPosition;
+varying vec2 UV;
+varying vec3 Normals;
+varying mat3 TBN;
+flat varying vec3 CamPosition;
+varying vec3 TangentCameraPos;
+varying vec3 TangentFragPos;
+
+void main(){
+    InData inData;
+    inData.uv = UV;
+    inData.diffuse = vec4(0.0,0.0,0.0,0.0001); //this is extremely wierd, but we need some form of alpha to get painters algorithm to work...
+    inData.objectColor = Unpack32BitUIntTo4ColorFloats(Object_Color);
+    inData.normals = normalize(Normals);
+    inData.glow = MaterialBasePropertiesOne.x;
+    inData.specular = 1.0;
+    inData.ao = MaterialBasePropertiesOne.y;
+    inData.metalness = MaterialBasePropertiesOne.z;
+    inData.smoothness = MaterialBasePropertiesOne.w;
+    inData.worldPosition = WorldPosition;
+
+    for (int j = 0; j < numComponents; ++j) {
+        ProcessComponent(components[j], inData);
+    }
+    vec2 OutNormals = EncodeOctahedron(inData.normals);
+    if(Shadeless == 1){
+        OutNormals = ConstantOneVec2;
+        inData.diffuse *= (1.0 + inData.glow); // we want shadeless items to be influenced by the glow somewhat...
+    }
+    vec4 GodRays = Unpack32BitUIntTo4ColorFloats(Gods_Rays_Color);
+    inData.diffuse.a *= MaterialBasePropertiesTwo.x;
+
+    SUBMIT_DIFFUSE(inData.diffuse);
+    SUBMIT_NORMALS(OutNormals);
+    SUBMIT_MATERIAL_ID_AND_AO(Material_F0AndID.w, inData.ao);
+    SUBMIT_METALNESS_AND_SMOOTHNESS(inData.metalness,inData.smoothness);
+    SUBMIT_GLOW(inData.glow);
+    SUBMIT_SPECULAR(inData.specular);
+    SUBMIT_GOD_RAYS_COLOR(GodRays.r, GodRays.g, GodRays.b);
+}
+)";
 #pragma endregion
 
 #pragma region NormalessDiffuseFrag
 priv::EShaders::normaless_diffuse_frag = R"(
-    const vec3 comparison = vec3(1.0, 1.0, 1.0);
-    uniform SAMPLER_TYPE_2D gNormalMap;
-    uniform SAMPLER_TYPE_2D gDiffuseMap;
-    uniform int HasLighting;
-    varying vec2 texcoords;
-    void main(){
-        vec3 normal   = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);
-        vec3 diffuse  = texture2D(USE_SAMPLER_2D(gDiffuseMap), texcoords).rgb;
-        if(HasLighting == 0 || distance(normal, comparison) < 0.01){
-            gl_FragColor = vec4(diffuse, 1.0);
-        }else{
-            discard;
-        }
+const vec3 comparison = vec3(1.0, 1.0, 1.0);
+uniform SAMPLER_TYPE_2D gNormalMap;
+uniform SAMPLER_TYPE_2D gDiffuseMap;
+uniform int HasLighting;
+varying vec2 texcoords;
+void main(){
+    vec3 normal   = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);
+    vec3 diffuse  = texture2D(USE_SAMPLER_2D(gDiffuseMap), texcoords).rgb;
+    if(HasLighting == 0 || distance(normal, comparison) < 0.01){
+        gl_FragColor = vec4(diffuse, 1.0);
+    }else{
+        discard;
     }
+}
 )";
 #pragma endregion
 
 #pragma region ZPrepassFrag
 priv::EShaders::zprepass_frag = R"(
-    USE_LOG_DEPTH_FRAGMENT
-    //USE_MAX_MATERIAL_LAYERS_PER_COMPONENT
-    //USE_MAX_MATERIAL_COMPONENTS
-    void main(){
-    }
+USE_LOG_DEPTH_FRAGMENT
+//USE_MAX_MATERIAL_LAYERS_PER_COMPONENT
+//USE_MAX_MATERIAL_COMPONENTS
+void main(){
+}
 )";
 #pragma endregion
 
 #pragma region DeferredFragHUD
 priv::EShaders::deferred_frag_hud = R"(
-    uniform SAMPLER_TYPE_2D DiffuseTexture;
-    uniform int DiffuseTextureEnabled;
-    uniform float ScreenGamma;
-    uniform vec4 Object_Color;
-    varying vec2 UV;
-    void main(){
-        gl_FragColor = Object_Color;
-        if(DiffuseTextureEnabled == 1){
-            vec4 color = texture2D(DiffuseTexture, UV);
-            color.rgb = pow(color.rgb, vec3(1.0 / ScreenGamma));
-            gl_FragColor *= color;
-        }
+uniform SAMPLER_TYPE_2D DiffuseTexture;
+uniform int DiffuseTextureEnabled;
+uniform float ScreenGamma;
+uniform vec4 Object_Color;
+varying vec2 UV;
+void main(){
+    gl_FragColor = Object_Color;
+    if(DiffuseTextureEnabled == 1){
+        vec4 color = texture2D(DiffuseTexture, UV);
+        color.rgb = pow(color.rgb, vec3(1.0 / ScreenGamma));
+        gl_FragColor *= color;
     }
+}
 )";
 #pragma endregion
 
 #pragma region DeferredFragSkybox
 priv::EShaders::deferred_frag_skybox = R"(
-    uniform vec4 Color;
-    uniform int IsFake;
-    uniform float ScreenGamma;
-    uniform SAMPLER_TYPE_Cube Texture;
-    varying vec3 UV;
-    varying vec3 WorldPosition;
-    void main(){
-        if(IsFake == 1){
-            SUBMIT_DIFFUSE(Color);
-        }else{
-            SUBMIT_DIFFUSE(textureCube(Texture, UV));
-        }
-        gl_FragData[0].rgb = pow(gl_FragData[0].rgb, vec3(1.0 / ScreenGamma)); //ScreenGamma is gamma
-        gl_FragData[1].rg = vec2(1.0);
-        gl_FragData[2]    = vec4(0.0);
+uniform vec4 Color;
+uniform int IsFake;
+uniform float ScreenGamma;
+uniform SAMPLER_TYPE_Cube Texture;
+varying vec3 UV;
+varying vec3 WorldPosition;
+void main(){
+    if(IsFake == 1){
+        SUBMIT_DIFFUSE(Color);
+    }else{
+        SUBMIT_DIFFUSE(textureCube(Texture, UV));
     }
+    gl_FragData[0].rgb = pow(gl_FragData[0].rgb, vec3(1.0 / ScreenGamma)); //ScreenGamma is gamma
+    gl_FragData[1].rg = vec2(1.0);
+    gl_FragData[2]    = vec4(0.0);
+}
 )";
 #pragma endregion
 
 #pragma region CopyDepthFrag
 priv::EShaders::copy_depth_frag = R"(
-    uniform SAMPLER_TYPE_2D gDepthMap;
-    varying vec2 texcoords;
-    void main(){
-        gl_FragDepth = texture2D(gDepthMap, texcoords).r;
-    }
+uniform SAMPLER_TYPE_2D gDepthMap;
+varying vec2 texcoords;
+void main(){
+    gl_FragDepth = texture2D(gDepthMap, texcoords).r;
+}
 )";
 #pragma endregion
 
 #pragma region Blur
 priv::EShaders::blur_frag = R"(
-    uniform SAMPLER_TYPE_2D image;
+uniform SAMPLER_TYPE_2D image;
 
-    uniform vec4 DataA; //radius, UNUSED, H,V
-    uniform vec4 strengthModifier;
+uniform vec4 DataA; //radius, UNUSED, H,V
+uniform vec4 strengthModifier;
 
-    varying vec2 texcoords;
+varying vec2 texcoords;
 
-    const int NUM_SAMPLES = 9;
-    const float weight[NUM_SAMPLES] = float[](0.227, 0.21, 0.1946, 0.162, 0.12, 0.08, 0.054, 0.03, 0.016);
+const int NUM_SAMPLES = 9;
+const float weight[NUM_SAMPLES] = float[](0.227, 0.21, 0.1946, 0.162, 0.12, 0.08, 0.054, 0.03, 0.016);
 
-    void main(){
-        vec4 Sum = vec4(0.0);
-        vec2 inverseResolution = vec2(1.0) / vec2(ScreenInfo.z, ScreenInfo.w);
-        for(int i = 0; i < NUM_SAMPLES; ++i){
-            vec2 offset = (inverseResolution * float(i)) * DataA.x;
-            Sum += (texture2D(image,texcoords + vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;
-            Sum += (texture2D(image,texcoords - vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;
-        }
-        gl_FragColor = Sum;
+void main(){
+    vec4 Sum = vec4(0.0);
+    vec2 inverseResolution = vec2(1.0) / vec2(ScreenInfo.z, ScreenInfo.w);
+    for(int i = 0; i < NUM_SAMPLES; ++i){
+        vec2 offset = (inverseResolution * float(i)) * DataA.x;
+        Sum += (texture2D(image,texcoords + vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;
+        Sum += (texture2D(image,texcoords - vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;
     }
+    gl_FragColor = Sum;
+}
 )";
 #pragma endregion
 
 #pragma region Greyscale
 /*
 priv::EShaders::greyscale_frag = R"(
-    uniform SAMPLER_TYPE_2D textureMap;
-    varying vec2 texcoords;
-    void main(){
-        vec4 col = texture2D(textureMap, texcoords);
-        float lum = dot(col.rgb, vec3(0.299, 0.587, 0.114));
-        gl_FragColor = vec4(vec3(lum), 1.0);
-    }
+uniform SAMPLER_TYPE_2D textureMap;
+varying vec2 texcoords;
+void main(){
+    vec4 col = texture2D(textureMap, texcoords);
+    float lum = dot(col.rgb, vec3(0.299, 0.587, 0.114));
+    gl_FragColor = vec4(vec3(lum), 1.0);
+}
 )";
 */
 #pragma endregion

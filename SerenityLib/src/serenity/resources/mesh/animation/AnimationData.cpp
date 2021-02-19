@@ -2,6 +2,7 @@
 #include <serenity/resources/mesh/animation/AnimationData.h>
 #include <serenity/math/Engine_Math.h>
 #include <serenity/resources/mesh/Mesh.h>
+#include <serenity/resources/mesh/MeshRequest.h>
 #include <serenity/resources/mesh/animation/Skeleton.h>
 #include <stack>
 
@@ -14,7 +15,7 @@ AnimationData::AnimationData( MeshNodeData& nodeData, Engine::priv::MeshSkeleton
     , m_DurationInTicks { durationInTicks }
 {
 }
-AnimationData::AnimationData( MeshNodeData& nodeData, Engine::priv::MeshSkeleton& skeleton, const aiAnimation& assimpAnim, MeshNodeData& filledNodes)
+AnimationData::AnimationData( MeshNodeData& nodeData, Engine::priv::MeshSkeleton& skeleton, const aiAnimation& assimpAnim, MeshRequest& request)
     : AnimationData{ nodeData, skeleton, (float)assimpAnim.mTicksPerSecond, (float)assimpAnim.mDuration }
 {
     Engine::unordered_string_map<std::string, AnimationChannel> hashedChannels;
@@ -24,15 +25,15 @@ AnimationData::AnimationData( MeshNodeData& nodeData, Engine::priv::MeshSkeleton
     }
 
     //sort into member data structure
-    m_Channels.resize(filledNodes.m_Nodes.size());
+    m_Channels.resize(request.m_NodeData.m_Nodes.size());
     for (uint32_t i = 0; i < m_Channels.size(); ++i) {
-        auto& nodeName = filledNodes.m_Nodes[i].Name;
+        auto& nodeName = request.m_NodeStrVector[i];
         if (hashedChannels.contains(nodeName)) {
             m_Channels[i] = std::move(hashedChannels.at(nodeName));
         }
     }
 }
-void AnimationData::ComputeTransforms(float TimeInSeconds, std::vector<glm::mat4>& Xforms, std::array<uint16_t, 3>& keyframeIndices) {
+void AnimationData::ComputeTransforms(float TimeInSeconds, std::vector<glm::mat4>& Xforms) {
     float TimeInTicks   = TimeInSeconds * m_TicksPerSecond;
     float AnimationTime = std::fmod(TimeInTicks, m_DurationInTicks);
     uint16_t BoneIndex = 0;
@@ -42,14 +43,13 @@ void AnimationData::ComputeTransforms(float TimeInSeconds, std::vector<glm::mat4
         auto& channel           = m_Channels[i];
         glm::mat4 NodeTransform = currNode.Transform;
         if (!channel.empty()) {
-            glm::vec3 s         = CalcInterpolatedScaling(AnimationTime, channel.ScalingKeys, keyframeIndices[2]);
-            aiQuaternion q      = CalcInterpolatedRotation(AnimationTime, channel.RotationKeys, keyframeIndices[1]);
-            glm::vec3 t         = CalcInterpolatedPosition(AnimationTime, channel.PositionKeys, keyframeIndices[0]);
-            glm::mat4 rotation  = Math::assimpToGLMMat3(q.GetMatrix());
-            NodeTransform       = glm::translate(t) * rotation * glm::scale(s);
+            glm::vec3 s         = CalcInterpolatedScaling(AnimationTime, channel.ScalingKeys, channel.CurrentKeyframes[2]);
+            glm::quat q         = CalcInterpolatedRotation(AnimationTime, channel.RotationKeys, channel.CurrentKeyframes[1]);
+            glm::vec3 t         = CalcInterpolatedPosition(AnimationTime, channel.PositionKeys, channel.CurrentKeyframes[0]);
+            NodeTransform       = glm::translate(t) * glm::mat4_cast(q) * glm::scale(s);
         }
         m_NodeData->m_NodeTransforms[i] = m_NodeData->m_NodeTransforms[parentIdx - 1] * NodeTransform;
-        if (m_Skeleton->hasBone(currNode.Name)) {
+        if (currNode.IsBone) {
             BoneInfo& boneInfo = m_Skeleton->m_BoneInfo[BoneIndex];
             glm::mat4& Final   = boneInfo.FinalTransform;
             Final              = m_Skeleton->m_GlobalInverseTransform * m_NodeData->m_NodeTransforms[i] * boneInfo.BoneOffset;
@@ -74,25 +74,24 @@ glm::vec3 AnimationData::internal_interpolate_vec3(float AnimTime, const std::ve
     float Factor     = AnimTime - keys[Index].time / DeltaTime;
     return keys[Index].value + Factor * (keys[Index + 1].value - keys[Index].value);
 }
-glm::vec3 AnimationData::CalcInterpolatedPosition(float AnimTime, const std::vector<Engine::priv::Vector3Key>& positions, uint16_t& LastKeyFrm) {
-    return internal_interpolate_vec3(AnimTime, positions, [this, &positions, AnimTime, &LastKeyFrm]() {
-        return FindPositionIdx(AnimTime, positions, LastKeyFrm);
+glm::vec3 AnimationData::CalcInterpolatedPosition(float AnimTime, const std::vector<Engine::priv::Vector3Key>& positions, uint16_t& CurrentKeyFrame) {
+    return internal_interpolate_vec3(AnimTime, positions, [this, &positions, AnimTime, &CurrentKeyFrame]() {
+        return FindPositionIdx(AnimTime, positions, CurrentKeyFrame);
     });
 }
-aiQuaternion AnimationData::CalcInterpolatedRotation(float AnimTime, const std::vector<Engine::priv::QuatKey>& rotations, uint16_t& LastKeyFrm) {
+glm::quat AnimationData::CalcInterpolatedRotation(float AnimTime, const std::vector<Engine::priv::QuatKey>& rotations, uint16_t& CurrentKeyFrame) {
     if (rotations.size() == 1) {
         return rotations[0].value;
     }
-    size_t Index     = FindRotationIdx(AnimTime, rotations, LastKeyFrm);
+    size_t Index     = FindRotationIdx(AnimTime, rotations, CurrentKeyFrame);
     float DeltaTime  = rotations[Index + 1].time - rotations[Index].time;
     float Factor     = AnimTime - rotations[Index].time / DeltaTime;
-    aiQuaternion out;
-    aiQuaternion::Interpolate(out, rotations[Index].value, rotations[Index + 1].value, Factor);
-    out = out.Normalize();
+    glm::quat out = glm::slerp(rotations[Index].value, rotations[Index + 1].value, Factor);
+    out = glm::normalize(out);
     return out;
 }
-glm::vec3 AnimationData::CalcInterpolatedScaling(float AnimTime, const std::vector<Engine::priv::Vector3Key>& scales, uint16_t& LastKeyFrm) {
-    return internal_interpolate_vec3(AnimTime, scales, [this, &scales, AnimTime, &LastKeyFrm]() {
-        return FindScalingIdx(AnimTime, scales, LastKeyFrm);
+glm::vec3 AnimationData::CalcInterpolatedScaling(float AnimTime, const std::vector<Engine::priv::Vector3Key>& scales, uint16_t& CurrentKeyFrame) {
+    return internal_interpolate_vec3(AnimTime, scales, [this, &scales, AnimTime, &CurrentKeyFrame]() {
+        return FindScalingIdx(AnimTime, scales, CurrentKeyFrame);
     });
 }

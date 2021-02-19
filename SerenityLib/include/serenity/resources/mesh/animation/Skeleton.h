@@ -13,9 +13,10 @@ namespace Engine::priv {
     class  MeshLoader;
     class  ModelInstanceAnimation;
 };
+
 #include <serenity/resources/mesh/animation/AnimationData.h>
-#include <serenity/utils/Utils.h>
 #include <serenity/system/Macros.h>
+#include <serenity/utils/Utils.h>
 
 namespace Engine::priv {
     class MeshSkeleton final {
@@ -26,15 +27,15 @@ namespace Engine::priv {
         friend class  Engine::priv::AnimationData;
         friend class  Engine::priv::PublicMesh;
         friend class  Engine::priv::ModelInstanceAnimation;
+        public:
+            using AnimationMap = Engine::unordered_string_map<std::string, AnimationData>;
         private:
-            Engine::unordered_string_set<std::string>                 m_BoneMapping;
-            Engine::unordered_string_map<std::string, AnimationData>  m_AnimationData; //maps an animation name to its data
-            glm::mat4                                                 m_GlobalInverseTransform = glm::mat4(1.0f);
-            std::vector<BoneInfo>                                     m_BoneInfo;
+            AnimationMap           m_AnimationData; //maps an animation name to its data
+            glm::mat4              m_GlobalInverseTransform = glm::mat4(1.0f);
+            std::vector<BoneInfo>  m_BoneInfo;
 
             void clear() noexcept {
-                m_BoneMapping.clear();
-                m_GlobalInverseTransform = glm::mat4(1.0f);
+                m_GlobalInverseTransform = glm::mat4{ 1.0f };
             }
         public:
             MeshSkeleton() = default;
@@ -45,29 +46,17 @@ namespace Engine::priv {
             MeshSkeleton(MeshSkeleton&&) noexcept        = default;
             MeshSkeleton& operator=(MeshSkeleton&&)      = default;
 
-            [[nodiscard]] inline Engine::unordered_string_map<std::string, AnimationData>& getAnimationData() noexcept { 
-                return m_AnimationData; 
-            }
-            [[nodiscard]] inline uint16_t numBones() const noexcept {
-                return (uint16_t)m_BoneInfo.size();
-            }
-            [[nodiscard]] inline uint32_t numAnimations() const noexcept {
-                return (uint32_t)m_AnimationData.size();
-            }
-            [[nodiscard]] inline bool hasBone(std::string_view boneName) const noexcept { 
-                return m_BoneMapping.contains(boneName); 
-            }
-            [[nodiscard]] inline bool hasAnimation(std::string_view animName) const noexcept {
-                return m_AnimationData.contains(animName);
-            }
-            inline void setBoneOffsetMatrix(uint16_t boneIndex, glm::mat4&& matrix) noexcept {
-                m_BoneInfo[boneIndex].BoneOffset = std::move(matrix);
-            }
-            void addAnimation(std::string_view animName, MeshNodeData& nodeData, const aiAnimation& anim, MeshNodeData& filledNodes) {
+            [[nodiscard]] inline AnimationMap& getAnimationData() noexcept { return m_AnimationData; }
+            [[nodiscard]] inline uint16_t numBones() const noexcept { return (uint16_t)m_BoneInfo.size(); }
+            [[nodiscard]] inline uint32_t numAnimations() const noexcept { return (uint32_t)m_AnimationData.size(); }
+            [[nodiscard]] inline bool hasAnimation(std::string_view animName) const noexcept { return m_AnimationData.contains(animName); }
+            inline void setBoneOffsetMatrix(uint16_t boneIdx, glm::mat4&& matrix) noexcept { m_BoneInfo[boneIdx].BoneOffset = std::move(matrix); }
+
+            void addAnimation(std::string_view animName, MeshNodeData& nodeData, const aiAnimation& anim, MeshRequest& request) {
                 if (hasAnimation(animName)) {
                     return;
                 }
-                m_AnimationData.emplace(std::piecewise_construct, std::forward_as_tuple(animName), std::forward_as_tuple(nodeData, *this, anim, filledNodes));
+                m_AnimationData.emplace(std::piecewise_construct, std::forward_as_tuple(animName), std::forward_as_tuple(nodeData, *this, anim, request));
                 ENGINE_PRODUCTION_LOG("Added animation: " << animName)
             }
             void addAnimation(std::string_view animName, AnimationData&& animationData) {

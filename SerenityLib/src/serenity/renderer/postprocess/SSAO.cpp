@@ -74,8 +74,6 @@ void Engine::priv::SSAO::internal_init_blur_fragment_code() {
 }
 void Engine::priv::SSAO::internal_init_fragment_code() {
     STATIC_SSAO.m_GLSL_frag_code = R"(
-        USE_LOG_DEPTH_FRAG_WORLD_POSITION
-
         uniform SAMPLER_TYPE_2D gNormalMap;
         uniform SAMPLER_TYPE_2D gRandomMap;
         uniform SAMPLER_TYPE_2D gDepthMap;

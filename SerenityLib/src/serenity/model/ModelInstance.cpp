@@ -23,13 +23,13 @@ decimal ModelInstance::m_GlobalDistanceFactor = (decimal)1100.0;
 
 namespace Engine::priv {
     constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
-        auto stage            = i->stage();
-        auto& scene           = *Resources::getCurrentScene();
-        auto* camera          = scene.getActiveCamera();
-        glm::vec3 camPos      = camera->getPosition();
-        ComponentBody* body   = (i->parent().getComponent<ComponentBody>());
-        glm::mat4 parentModel = body->modelMatrixRendering();
-        auto& animationVector = i->getRunningAnimations();
+        auto stage               = i->stage();
+        auto& scene              = *Engine::Resources::getCurrentScene();
+        auto* camera             = scene.getActiveCamera();
+        glm::vec3 camPos         = camera->getPosition();
+        ComponentBody* body      = (i->parent().getComponent<ComponentBody>());
+        glm::mat4 parentModel    = body->modelMatrixRendering();
+        auto& animationContainer = i->getRunningAnimations();
 
         Engine::Renderer::sendUniform1Safe("Object_Color", i->color().toPackedInt());
         Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", i->godRaysColor().toPackedInt());
@@ -40,9 +40,9 @@ namespace Engine::priv {
             renderer->m_Pipeline->sendGPUDataGI(skybox);
             Engine::Renderer::sendUniform4Safe("ScreenData", renderer->m_GI_Pack, Engine::Renderer::Settings::getGamma(), 0.0f, 0.0f);
         }
-        if (animationVector.size() > 0) {
+        if (animationContainer.size() > 0) {
             Engine::Renderer::sendUniform1Safe("AnimationPlaying", 1);
-            Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationVector.getTransforms(), (uint32_t)animationVector.getTransforms().size());
+            Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationContainer.getTransforms(), (uint32_t)animationContainer.getTransforms().size());
         }else{
             Engine::Renderer::sendUniform1Safe("AnimationPlaying", 0);
         }

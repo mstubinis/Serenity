@@ -42,6 +42,7 @@ struct MeshRequest final {
     Engine::priv::AssimpSceneImport    m_Importer;
 
     MeshNodeData m_NodeData;
+    std::vector<std::string> m_NodeStrVector;
 
     MeshRequestCallback                m_Callback;
     std::vector<MeshRequestPart>       m_Parts;

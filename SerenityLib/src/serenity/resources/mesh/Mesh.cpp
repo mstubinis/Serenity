@@ -31,12 +31,12 @@ using namespace Engine;
 using namespace Engine::priv;
 
 MeshCPUData::MeshCPUData(const MeshCPUData& other) 
-    : m_RadiusBox        { other.m_RadiusBox }
+    : m_NodeData         { other.m_NodeData }
+    , m_File             { other.m_File }
+    , m_RadiusBox        { other.m_RadiusBox }
     , m_Skeleton         { std::exchange(other.m_Skeleton, nullptr) }
     , m_CollisionFactory { std::exchange(other.m_CollisionFactory, nullptr) }
     , m_VertexData       { std::exchange(other.m_VertexData, nullptr) }
-    , m_NodeData{ other.m_NodeData }
-    , m_File             { other.m_File }
     , m_Radius           { other.m_Radius }
     , m_Threshold        { other.m_Threshold }
 {
@@ -44,12 +44,12 @@ MeshCPUData::MeshCPUData(const MeshCPUData& other)
     internal_calculate_radius(); //TODO: do we need this?
 }
 MeshCPUData& MeshCPUData::operator=(const MeshCPUData& other) {
+    m_NodeData          = other.m_NodeData;
+    m_File              = other.m_File;
     m_RadiusBox         = other.m_RadiusBox;
     m_Skeleton          = std::exchange(other.m_Skeleton, nullptr);
     m_CollisionFactory  = std::exchange(other.m_CollisionFactory, nullptr);
     m_VertexData        = std::exchange(other.m_VertexData, nullptr);
-    m_NodeData = other.m_NodeData;
-    m_File              = other.m_File;
     m_Radius            = other.m_Radius;
     m_Threshold         = other.m_Threshold;
     internal_transfer_cpu_datas();
@@ -57,12 +57,12 @@ MeshCPUData& MeshCPUData::operator=(const MeshCPUData& other) {
     return *this;
 }
 MeshCPUData::MeshCPUData(MeshCPUData&& other) noexcept 
-    : m_RadiusBox        { std::move(other.m_RadiusBox) }
+    : m_NodeData         { std::move(other.m_NodeData) }
+    , m_File             { std::move(other.m_File) }
+    , m_RadiusBox        { std::move(other.m_RadiusBox) }
     , m_Skeleton         { std::exchange(other.m_Skeleton, nullptr) }
     , m_CollisionFactory { std::exchange(other.m_CollisionFactory, nullptr) }
     , m_VertexData       { std::exchange(other.m_VertexData, nullptr) }
-    , m_NodeData{ std::move(other.m_NodeData) }
-    , m_File             { std::move(other.m_File) }
     , m_Radius           { std::move(other.m_Radius) }
     , m_Threshold        { std::move(other.m_Threshold) }
 {
@@ -70,12 +70,12 @@ MeshCPUData::MeshCPUData(MeshCPUData&& other) noexcept
     internal_calculate_radius(); //TODO: do we need this?
 }
 MeshCPUData& MeshCPUData::operator=(MeshCPUData&& other) noexcept {
+    m_NodeData         = std::move(other.m_NodeData);
+    m_File             = std::move(other.m_File);
     m_RadiusBox        = std::move(other.m_RadiusBox);
     m_Skeleton         = std::exchange(other.m_Skeleton, nullptr);
     m_CollisionFactory = std::exchange(other.m_CollisionFactory, nullptr);
     m_VertexData       = std::exchange(other.m_VertexData, nullptr);
-    m_NodeData = std::move(other.m_NodeData);
-    m_File             = std::move(other.m_File);
     m_Radius           = std::move(other.m_Radius);
     m_Threshold        = std::move(other.m_Threshold);
     internal_transfer_cpu_datas();
@@ -230,18 +230,10 @@ void PublicMesh::FinalizeVertexData(MeshCPUData& cpuData, MeshImportedData& data
                 temp_tangents.emplace_back(data.m_Tangents[i]);
 
                 if (data.m_Bones.size() > 0) {
-                    boneIDs.emplace_back(
-                        data.m_Bones[(uint32_t)i].IDs[0], 
-                        data.m_Bones[(uint32_t)i].IDs[1],
-                        data.m_Bones[(uint32_t)i].IDs[2],
-                        data.m_Bones[(uint32_t)i].IDs[3]
-                    );
-                    boneWeights.emplace_back(
-                        data.m_Bones[(uint32_t)i].Weights[0],
-                        data.m_Bones[(uint32_t)i].Weights[1],
-                        data.m_Bones[(uint32_t)i].Weights[2],
-                        data.m_Bones[(uint32_t)i].Weights[3]
-                    );
+                    const auto& ids     = data.m_Bones[(uint32_t)i].IDs;
+                    const auto& weights = data.m_Bones[(uint32_t)i].Weights;
+                    boneIDs.emplace_back(ids[0], ids[1], ids[2], ids[3]);
+                    boneWeights.emplace_back(weights[0], weights[1], weights[2], weights[3]);
                 }
                 indices.emplace_back((uint32_t)temp_pos.size() - 1);
             }
@@ -557,22 +549,22 @@ Mesh::Mesh(std::string_view fileOrData, float threshold)
 }
 Mesh::Mesh(Mesh&& other) noexcept 
     : Resource{ std::move(other) }
+    , m_CPUData             { std::move(other.m_CPUData) }
     , m_CustomBindFunctor   { std::move(other.m_CustomBindFunctor) }
     , m_CustomUnbindFunctor { std::move(other.m_CustomUnbindFunctor) }
-    , m_CPUData             { std::move(other.m_CPUData) }
 {}
 Mesh& Mesh::operator=(Mesh&& other) noexcept {
     Resource::operator=(std::move(other));
+    m_CPUData             = std::move(other.m_CPUData);
     m_CustomBindFunctor   = std::move(other.m_CustomBindFunctor);
     m_CustomUnbindFunctor = std::move(other.m_CustomUnbindFunctor);
-    m_CPUData             = std::move(other.m_CPUData);
     return *this;
 }
 Mesh::~Mesh() {
     unregisterEvent(EventType::WindowFullscreenChanged);
     unload();
 }
-Engine::unordered_string_map<std::string, AnimationData>& Mesh::getAnimationData() {
+Engine::priv::MeshSkeleton::AnimationMap& Mesh::getAnimationData() {
     return m_CPUData.m_Skeleton->m_AnimationData;
 }
 void Mesh::load() {

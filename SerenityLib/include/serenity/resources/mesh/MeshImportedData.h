@@ -58,16 +58,16 @@ namespace Engine::priv {
                 }
             }
         public:
-            std::map<uint32_t, VertexBoneData>      m_Bones; //TODO: use unordered_map or vector? (uint32_t as key for vector index)
-            std::vector<glm::vec3>                  m_FilePoints;
-            std::vector<glm::vec2>                  m_FileUVs;
-            std::vector<glm::vec3>                  m_FileNormals;
-            std::vector<glm::vec3>                  m_Points;
-            std::vector<glm::vec2>                  m_UVs;
-            std::vector<glm::vec3>                  m_Normals;
-            std::vector<glm::vec3>                  m_Binormals;
-            std::vector<glm::vec3>                  m_Tangents;
-            std::vector<uint32_t>                   m_Indices;
+            std::vector<VertexBoneData> m_Bones;
+            std::vector<glm::vec3>      m_FilePoints;
+            std::vector<glm::vec2>      m_FileUVs;
+            std::vector<glm::vec3>      m_FileNormals;
+            std::vector<glm::vec3>      m_Points;
+            std::vector<glm::vec2>      m_UVs;
+            std::vector<glm::vec3>      m_Normals;
+            std::vector<glm::vec3>      m_Binormals;
+            std::vector<glm::vec3>      m_Tangents;
+            std::vector<uint32_t>       m_Indices;
 
             MeshImportedData() = default;
             MeshImportedData(const MeshImportedData&)                = delete;
@@ -83,12 +83,8 @@ namespace Engine::priv {
                 internal_build_vertices(aimesh);
                 internal_build_indices(aimesh);
             }
-            VertexBoneData& addBone(uint32_t vertexID, uint32_t boneIndex, float boneWeight) {
-                if (!m_Bones.contains(vertexID)) {
-                    m_Bones.emplace(std::piecewise_construct, std::forward_as_tuple(vertexID), std::forward_as_tuple());
-                }
-                m_Bones.at(vertexID).AddBoneData(boneIndex, boneWeight);
-                return m_Bones.at(vertexID);
+            void addBone(uint32_t vertexID, uint32_t boneIndex, float boneWeight) {
+                m_Bones[vertexID].AddBoneData(boneIndex, boneWeight);
             }
             void triangulateIndices(const std::vector<std::vector<uint32_t>>& indices, uint8_t flags) {
                 for (size_t i = 0; i < indices[0].size(); ++i) {

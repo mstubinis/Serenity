@@ -10,6 +10,7 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
+#include <array>
 
 namespace Engine::priv {
     struct BoneInfo final {
@@ -17,17 +18,15 @@ namespace Engine::priv {
         glm::mat4 FinalTransform = glm::mat4{ 1.0f };
     };
     struct MeshInfoNode final {
-        glm::mat4     Transform = glm::mat4{ 1.0f };
-        std::string   Name;
+        glm::mat4 Transform = glm::mat4{ 1.0f };
+        bool      IsBone    = false;
 
         MeshInfoNode() = delete;
-        MeshInfoNode(std::string&& name_, glm::mat4&& transform_) 
-            : Name      { std::move(name_) }
-            , Transform { std::move(transform_) }
+        MeshInfoNode(glm::mat4&& transform_)
+            : Transform{ std::move(transform_) }
         {}
         MeshInfoNode(const aiNode& ainode) 
-            : Name      { ainode.mName.C_Str() }
-            , Transform { Engine::Math::assimpToGLMMat4(ainode.mTransformation) }
+            : Transform { Engine::Math::assimpToGLMMat4(ainode.mTransformation) }
         {}
     };
     struct Vector3Key final {
@@ -40,10 +39,10 @@ namespace Engine::priv {
         {}
     };
     struct QuatKey final {
-        aiQuaternion  value = aiQuaternion{ 1.0f, 0.0f, 0.0f, 0.0f };
-        float         time  = 0.0f;
+        glm::quat  value = glm::quat{ 1.0f, 0.0f, 0.0f, 0.0f };
+        float      time  = 0.0f;
         QuatKey() = default;
-        QuatKey(float time_, const aiQuaternion& value_) 
+        QuatKey(float time_, const glm::quat& value_)
             : time{ time_ }
             , value{ value_ }
         {}
@@ -52,6 +51,8 @@ namespace Engine::priv {
         std::vector<QuatKey>     RotationKeys;
         std::vector<Vector3Key>  PositionKeys;
         std::vector<Vector3Key>  ScalingKeys;
+
+        std::array<uint16_t, 3>  CurrentKeyframes = { 0, 0, 0 };
 
         AnimationChannel() = default;
         AnimationChannel(const aiNodeAnim& aiAnimNode);
