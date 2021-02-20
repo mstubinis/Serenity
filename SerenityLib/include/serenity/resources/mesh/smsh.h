@@ -72,13 +72,6 @@ metadata structure:
 
     then bone / animation data:
         - global inverse transform (glm::mat4)
-
-        - bone mapping (map of std::string keys => unsigned int value)
-            for each bone item in map:
-                unsigned 32 int: value in map
-                unsigned 16 int: length of string key
-                buffer of chars to form the string
-
         - bone info (vector of bone infos, which are just 2 mat4's : boneOffset and finalTransform)
 
         - unsigned 32 int: animation count
@@ -107,18 +100,17 @@ metadata structure:
 
         }
         -node heirarchy:
-        : will store all nodes in a vector and then sort them by name
-        : will then create a second 2d vector describing parent => child relationship using indices into the sorted vector
-        : will then write out the nodes to file in 2 passes:
-           - 1st pass: all data except children
-           - 2nd pass: children
+            std::vector<uint16_t>                   m_NodeHeirarchy;
+            std::vector<Engine::priv::MeshInfoNode> m_Nodes;
+            std::vector<glm::mat4>                  m_NodeTransforms;
 
-        - Node {
-            - parentNode
-            - name
-            - glm::mat4 transform
-            - vector of children
-        }
+            unsigned 32 int : number of nodes
+            data: heirarchy
+            data: transformations
+            data: nodes {
+                glm::mat4 transform
+                bool isBone
+            }
 
 */
 

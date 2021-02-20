@@ -108,7 +108,7 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
         }
     }
     cpuData.m_VertexData->setIndices(indices.data(), indices.size(), MeshModifyFlags::RecalculateTriangles);
-    /*
+
     //animation data
     if (smsh_header.m_NumberOfBones > 0U) {
         auto lamda_read_mat4_as_half_floats = [&blockStart, &streamDataBuffer](glm::mat4& inMatrix) {
@@ -120,36 +120,30 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
                 }
             }
         };
+        auto lambda_read_keyframe_component = [&blockStart, &streamDataBuffer]<typename KEYFRAME, size_t size>(KEYFRAME& keyframe) {
+            uint16_t data[size];
+            for (size_t i = 0; i < size; ++i) {
+                readBigEndian(data[i], streamDataBuffer, 2, blockStart);
+                Engine::Math::Float32From16(&keyframe.value[i], data[i]);
+            }
+            uint16_t time;
+            readBigEndian(time, streamDataBuffer, 2, blockStart);
+            Engine::Math::Float32From16(&keyframe.time, time);
+        };
         SAFE_DELETE(cpuData.m_Skeleton);
         cpuData.m_Skeleton = NEW Engine::priv::MeshSkeleton{};
         cpuData.m_Skeleton->m_BoneInfo.resize(smsh_header.m_NumberOfBones);
         //global inverse transform (glm::mat4 stored as half floats)
         lamda_read_mat4_as_half_floats(cpuData.m_Skeleton->m_GlobalInverseTransform);
-        //bone mapping
-        for (size_t i = 0; i < smsh_header.m_NumberOfBones; ++i) {
-            uint32_t boneIndex;
-            uint16_t str_len;
-            readBigEndian(boneIndex, streamDataBuffer, 4U, blockStart);
-            readBigEndian(str_len, streamDataBuffer, 2U, blockStart);
-            auto boneName = Engine::create_and_reserve<std::string>(str_len);
-            for (size_t j = 0; j < str_len; ++j) {
-                char c;
-                readBigEndian(c, streamDataBuffer, 1, blockStart);
-                boneName += c;
-            }
-            cpuData.m_Skeleton->addBoneMapping(boneName, boneIndex);
-        }
         //bone info vector
         for (size_t i = 0; i < smsh_header.m_NumberOfBones; ++i) {
             auto& info = cpuData.m_Skeleton->m_BoneInfo[i];
             lamda_read_mat4_as_half_floats(info.BoneOffset);
-            lamda_read_mat4_as_half_floats(info.FinalTransform);
         }
         //animation data
         uint32_t animCount;
         readBigEndian(animCount, streamDataBuffer, 4U, blockStart);
         for (uint32_t i = 0; i < animCount; ++i) {
-            //auto x = ret.skeleton->m_AnimationData.emplace_back();
             uint16_t half_float_ticks_per_second;
             uint16_t half_float_duration_in_ticks;
             uint16_t str_len;
@@ -162,106 +156,58 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
                 readBigEndian(anim_name_char, streamDataBuffer, 1U, blockStart);
                 anim_name += anim_name_char;
             }
-            uint32_t keyframeCount;
-            readBigEndian(keyframeCount, streamDataBuffer, 4U, blockStart);
-
+            uint32_t channelCount;
+            readBigEndian(channelCount, streamDataBuffer, 4U, blockStart);  
             float ticksPerSec, durInTicks;
             Engine::Math::Float32From16(&ticksPerSec, half_float_ticks_per_second);
             Engine::Math::Float32From16(&durInTicks, half_float_duration_in_ticks);
-            Engine::priv::AnimationData animationData{ cpuData, ticksPerSec, durInTicks };
-            for (size_t j = 0; j < keyframeCount; ++j) {
-                //itr.second.m_KeyframeData
+            Engine::priv::AnimationData animationData{ cpuData.m_NodeData, *cpuData.m_Skeleton, ticksPerSec, durInTicks };
+            animationData.m_Channels.reserve(channelCount);
+            for (size_t j = 0; j < channelCount; ++j) {
                 uint32_t pos_count, rot_count, scl_count;
-                uint16_t keyframe_name_len;
                 readBigEndian(pos_count, streamDataBuffer, 4U, blockStart);
                 readBigEndian(rot_count, streamDataBuffer, 4U, blockStart);
                 readBigEndian(scl_count, streamDataBuffer, 4U, blockStart);
-                readBigEndian(keyframe_name_len, streamDataBuffer, 2U, blockStart);
-                auto keyframe_key = Engine::create_and_reserve<std::string>(keyframe_name_len);
-                for (size_t k = 0; k < keyframe_name_len; ++k) {
-                    char keyframe_key_char;
-                    readBigEndian(keyframe_key_char, streamDataBuffer, 1U, blockStart);
-                    keyframe_key += keyframe_key_char;
-                }
-
                 Engine::priv::AnimationChannel channel;
                 for (size_t k = 0; k < pos_count; ++k) {
                     auto& posKey = channel.PositionKeys.emplace_back();
-                    uint16_t pos_half[3];
-                    for (int i = 0; i < 3; ++i) {
-                        readBigEndian(pos_half[i], streamDataBuffer, 2, blockStart);
-                        Engine::Math::Float32From16(&posKey.value[i], pos_half[i]);
-                    }
-                    uint16_t time;
-                    readBigEndian(time, streamDataBuffer, 2, blockStart);
-                    Engine::Math::Float32From16(&posKey.time, time);
+                    lambda_read_keyframe_component.operator()<Engine::priv::Vector3Key, 3>(posKey);
                 }
                 for (size_t k = 0; k < rot_count; ++k) {
                     auto& rotKey = channel.RotationKeys.emplace_back();
-                    uint16_t rot_half[4];
-
-                    readBigEndian(rot_half[0], streamDataBuffer, 2, blockStart); Engine::Math::Float32From16(&rotKey.value.x, rot_half[0]);
-                    readBigEndian(rot_half[1], streamDataBuffer, 2, blockStart); Engine::Math::Float32From16(&rotKey.value.y, rot_half[1]);
-                    readBigEndian(rot_half[2], streamDataBuffer, 2, blockStart); Engine::Math::Float32From16(&rotKey.value.z, rot_half[2]);
-                    readBigEndian(rot_half[3], streamDataBuffer, 2, blockStart); Engine::Math::Float32From16(&rotKey.value.w, rot_half[3]);
-
-                    uint16_t time;
-                    readBigEndian(time, streamDataBuffer, 2, blockStart);
-                    Engine::Math::Float32From16(&rotKey.time, time);
+                    lambda_read_keyframe_component.operator()<Engine::priv::QuatKey, 4>(rotKey);
                 }
                 for (size_t k = 0; k < scl_count; ++k) {
                     auto& sclKey = channel.ScalingKeys.emplace_back();
-                    uint16_t scl_half[3];
-                    for (int i = 0; i < 3; ++i) {
-                        readBigEndian(scl_half[i], streamDataBuffer, 2, blockStart);
-                        Engine::Math::Float32From16(&sclKey.value[i], scl_half[i]);
-                    }
-                    uint16_t time;
-                    readBigEndian(time, streamDataBuffer, 2, blockStart);
-                    Engine::Math::Float32From16(&sclKey.time, time);
+                    lambda_read_keyframe_component.operator()<Engine::priv::Vector3Key, 3>(sclKey);
                 }
-                animationData.m_KeyframeData.emplace(std::piecewise_construct, std::forward_as_tuple(keyframe_key), std::forward_as_tuple(std::move(channel)));
+                animationData.m_Channels.emplace_back(std::move(channel));
             }
             cpuData.m_Skeleton->addAnimation(anim_name, std::move(animationData));
         }
-        uint32_t num_of_nodes;
+        uint32_t num_of_nodes = 0;
         readBigEndian(num_of_nodes, streamDataBuffer, 4U, blockStart);
-
-        auto sortedNodes = Engine::create_and_reserve<std::vector<Engine::priv::MeshInfoNode*>>(num_of_nodes);
+        cpuData.m_NodeData.m_NodeHeirarchy.reserve(num_of_nodes);
+        cpuData.m_NodeData.m_NodeTransforms.reserve(num_of_nodes);
+        cpuData.m_NodeData.m_Nodes.reserve(num_of_nodes);
         for (uint32_t i = 0; i < num_of_nodes; ++i) {
-            glm::mat4 node_transform;
+            uint16_t parent = 0;
+            readBigEndian(parent, streamDataBuffer, 2U, blockStart);
+            cpuData.m_NodeData.m_NodeHeirarchy.push_back(parent);
+        }
+        for (uint32_t i = 0; i < num_of_nodes; ++i) {
+            auto& transform = cpuData.m_NodeData.m_NodeTransforms.emplace_back();
+            lamda_read_mat4_as_half_floats(transform);
+        }
+        for (uint32_t i = 0; i < num_of_nodes; ++i) {
+            glm::mat4  node_transform{ 1.0f };
+            uint8_t    isBone = 0;
             lamda_read_mat4_as_half_floats(node_transform);
-            uint16_t str_len;
-            readBigEndian(str_len, streamDataBuffer, 2U, blockStart);
-            auto node_name = Engine::create_and_reserve<std::string>(str_len);
-            for (auto j = 0; j < str_len; ++j) {
-                char node_name_char;
-                readBigEndian(node_name_char, streamDataBuffer, 1U, blockStart);
-                node_name += node_name_char;
-            }
-            sortedNodes.emplace_back(  NEW Engine::priv::MeshInfoNode(std::move(node_name), std::move(node_transform))  );
+            readBigEndian(isBone, streamDataBuffer, 1U, blockStart);
+            auto& node = cpuData.m_NodeData.m_Nodes.emplace_back(std::move(node_transform));
+            node.IsBone = static_cast<bool>(isBone);
         }
-        for (uint32_t i = 0; i < num_of_nodes; ++i) {
-            uint32_t num_of_children;
-            readBigEndian(num_of_children, streamDataBuffer, 4U, blockStart);
-            for (uint32_t j = 0; j < num_of_children; ++j) {
-                uint32_t child;
-                readBigEndian(child, streamDataBuffer, 4U, blockStart);
-                sortedNodes[i]->Children.emplace_back(std::unique_ptr<Engine::priv::MeshInfoNode>(sortedNodes[child]));
-                sortedNodes[child]->Parent = sortedNodes[i];
-            }
-        }
-        Engine::priv::MeshInfoNode* root = nullptr;
-        for (size_t i = 0; i < sortedNodes.size(); ++i) {
-            if (!sortedNodes[i]->Parent) {
-                root = sortedNodes[i];
-                break;
-            }
-        }
-        SAFE_DELETE(cpuData.m_RootNode);
-        cpuData.m_RootNode = (root);
     }
-    */
 }
 void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
     auto& vertexData = *cpuData.m_VertexData;
@@ -410,7 +356,7 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
             break;
         }
     }
-    /*
+   
     //animation data
     if (smsh_header.m_NumberOfBones > 0U) {
         auto lamda_write_mat4_as_half_floats = [](std::ofstream& instream, const glm::mat4& inMatrix) {
@@ -429,20 +375,24 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
                 writeBigEndian(instream, inString[i], 1U);
             }
         };
+        auto lamda_write_keyframe_component = []<typename KEYFRAME, size_t size>(std::ofstream& instream, const KEYFRAME& key) {
+            std::array<uint16_t, size> vec_half;
+            for (int i = 0; i < size; ++i) {
+                Engine::Math::Float16From32(&vec_half[i], key.value[i]);
+                writeBigEndian(instream, vec_half[i]);
+            }
+            uint16_t time_half;
+            Engine::Math::Float16From32(&time_half, key.time);
+            writeBigEndian(instream, time_half, 2U);
+        };
 
         //global inverse transform
         lamda_write_mat4_as_half_floats(stream, skeleton->m_GlobalInverseTransform);
-        //bone mapping (string key to unsigned int)
-        for (const auto& [key, id] : skeleton->m_BoneMapping) {
-            writeBigEndian(stream, id, 4U);
-            lamda_write_string(stream, key);
-        }
+
         //bone info vector
         for (const auto& info : skeleton->m_BoneInfo) {
-            //bone offset
+            //bone offset (info.FinalTransform is not needed, always initialized to identity matrix)
             lamda_write_mat4_as_half_floats(stream, info.BoneOffset);
-            //final transform
-            lamda_write_mat4_as_half_floats(stream, info.FinalTransform);
         }
         //animation data
         writeBigEndian(stream, (uint32_t)skeleton->m_AnimationData.size());
@@ -454,99 +404,41 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
             writeBigEndian(stream, half_float_ticks_per_second, 2U);
             writeBigEndian(stream, half_float_duration_in_ticks, 2U);
             lamda_write_string(stream, animName);
-            uint32_t keyframeSize = (uint32_t)animationData.m_KeyframeData.size();
-            writeBigEndian(stream, keyframeSize);
-            for (const auto& [name, channel] : animationData.m_KeyframeData) {
+            uint32_t channelSize = (uint32_t)animationData.m_Channels.size();
+            writeBigEndian(stream, channelSize);
+            for (const auto& channel : animationData.m_Channels) {
                 uint32_t pos_size = (uint32_t)channel.PositionKeys.size();
                 uint32_t rot_size = (uint32_t)channel.RotationKeys.size();
                 uint32_t scl_size = (uint32_t)channel.ScalingKeys.size();
-
                 writeBigEndian(stream, pos_size, 4U);
                 writeBigEndian(stream, rot_size, 4U);
                 writeBigEndian(stream, scl_size, 4U);
-                lamda_write_string(stream, name);
-                auto lamda_write_vec3 = [](std::ofstream& instream, const Engine::priv::Vector3Key& key) {
-                    std::array<uint16_t, 3> vec_half;
-                    for (int i = 0; i < 3; ++i) {
-                        Engine::Math::Float16From32(&vec_half[i], key.value[i]);
-                        writeBigEndian(instream, vec_half[i]);
-                    }
-                    uint16_t time_half;
-                    Engine::Math::Float16From32(&time_half, key.time);
-                    writeBigEndian(instream, time_half, 2U);
-                };
-
                 for (const auto& posKey : channel.PositionKeys) {
-                    lamda_write_vec3(stream, posKey);
+                    lamda_write_keyframe_component.operator()<Engine::priv::Vector3Key, 3>(stream, posKey);
                 }
                 for (const auto& rotKey : channel.RotationKeys) {
-                    std::array<uint16_t, 4> quat_half;
-
-                    Engine::Math::Float16From32(&quat_half[0], rotKey.value.x);
-                    writeBigEndian(stream, quat_half[0], 2U);
-
-                    Engine::Math::Float16From32(&quat_half[1], rotKey.value.y);
-                    writeBigEndian(stream, quat_half[1], 2U);
-
-                    Engine::Math::Float16From32(&quat_half[2], rotKey.value.z);
-                    writeBigEndian(stream, quat_half[2], 2U);
-
-                    Engine::Math::Float16From32(&quat_half[3], rotKey.value.w);
-                    writeBigEndian(stream, quat_half[3], 2U);
-
-                    uint16_t time_half;
-                    Engine::Math::Float16From32(&time_half, rotKey.time);
-                    writeBigEndian(stream, time_half, 2U);
+                    lamda_write_keyframe_component.operator()<Engine::priv::QuatKey, 4>(stream, rotKey);
                 }
                 for (const auto& sclKey : channel.ScalingKeys) {
-                    lamda_write_vec3(stream, sclKey);
+                    lamda_write_keyframe_component.operator()<Engine::priv::Vector3Key, 3>(stream, sclKey);
                 }
             }
         }
         //node heirarchy
-        std::vector<Engine::priv::MeshInfoNode*> sortedNodes;
-        std::queue<Engine::priv::MeshInfoNode*> q;
-        q.push(cpuData.m_RootNode);
-        while (!q.empty()) {
-            auto qSize = q.size();
-            while (qSize--) {
-                auto* front = q.front();
-                sortedNodes.push_back(front);
-                for (const auto& child : front->Children) {
-                    q.push(child.get());
-                }
-                q.pop();
-            }
+        uint32_t numNodes = (uint32_t)cpuData.m_NodeData.m_Nodes.size();
+        writeBigEndian(stream, numNodes);
+        for (uint32_t i = 0; i < numNodes; ++i) {
+            uint16_t parent = cpuData.m_NodeData.m_NodeHeirarchy[i];
+            writeBigEndian(stream, parent);
         }
-        Engine::sort(sortedNodes, [](auto* a, auto* b) { return a->Name < b->Name; });
-
-        auto nameMap = Engine::create_and_reserve<Engine::unordered_string_map<std::string, uint32_t>>(sortedNodes.size()); //string name => index in sorted vector
-        for (uint32_t i = 0; i < sortedNodes.size(); ++i) {
-            nameMap.emplace(std::piecewise_construct, std::forward_as_tuple(sortedNodes[i]->Name), std::forward_as_tuple(i));
+        for (uint32_t i = 0; i < numNodes; ++i) {
+            lamda_write_mat4_as_half_floats(stream, cpuData.m_NodeData.m_NodeTransforms[i]);
         }
-        auto relationships = Engine::create_and_resize<std::vector<std::vector<uint32_t>>>(sortedNodes.size(), std::vector<uint32_t>{});
-        for (size_t i = 0; i < sortedNodes.size(); ++i) {
-            auto* node = sortedNodes[i];
-            relationships[i].reserve(node->Children.size());
-            for (size_t j = 0; j < node->Children.size(); ++j) {
-                auto* child = node->Children[j].get();
-                relationships[i].emplace_back(nameMap.at(child->Name));
-            }
-        }
-        uint32_t number_of_nodes = (uint32_t)sortedNodes.size();
-        writeBigEndian(stream, number_of_nodes, 4U);
-        for (const auto& node : sortedNodes) {
-            lamda_write_mat4_as_half_floats(stream, node->Transform);
-            lamda_write_string(stream, node->Name);
-        }
-        for (size_t i = 0; i < relationships.size(); ++i) {
-            uint32_t number_of_children = (uint32_t)relationships[i].size();
-            writeBigEndian(stream, number_of_children, 4U);
-            for (size_t j = 0; j < number_of_children; ++j) {
-                writeBigEndian(stream, relationships[i][j], 4U);
-            }
+        for (uint32_t i = 0; i < numNodes; ++i) {
+            lamda_write_mat4_as_half_floats(stream, cpuData.m_NodeData.m_Nodes[i].Transform);
+            uint8_t isBone = static_cast<uint8_t>(cpuData.m_NodeData.m_Nodes[i].IsBone);
+            writeBigEndian(stream, isBone, 1U);
         }
     }
-    */
     stream.close();
 }

@@ -97,13 +97,13 @@ Collision::Collision(ComponentBody& body, CollisionType type, Handle meshHandle,
 Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, float mass, CollisionType type)
     : m_Owner{ body.getOwner() }
 {
-    auto modelInstances = Engine::create_and_reserve<std::vector<Engine::view_ptr<ModelInstance>>>(modelComponent.getNumModels());
+    auto modelInstances = Engine::create_and_reserve<std::vector<Engine::view_ptr<ModelInstance>>>((uint32_t)modelComponent.getNumModels());
 
     for (size_t i = 0; i < modelComponent.getNumModels(); ++i) {
         modelInstances.emplace_back(&modelComponent.getModel(i));
     }
     btCompoundShape* btCompound = new btCompoundShape();
-    auto unfinishedModels = Engine::create_and_reserve<std::vector<Engine::view_ptr<ModelInstance>>>(modelInstances.size());
+    auto unfinishedModels = Engine::create_and_reserve<std::vector<Engine::view_ptr<ModelInstance>>>((uint32_t)modelInstances.size());
     for (size_t i = 0; i < modelInstances.size(); ++i) {
         auto& instance  = *modelInstances[i];
         auto meshHandle = instance.mesh();

@@ -79,7 +79,7 @@ void MeshRequest::request(bool inAsync) {
                             PublicMesh::LoadGPU(mesh);
                         }
                     }
-                    auto handles = Engine::create_and_reserve<std::vector<Handle>>(meshRequest.m_Parts.size());
+                    auto handles = Engine::create_and_reserve<std::vector<Handle>>((uint32_t)meshRequest.m_Parts.size());
                     for (auto& part : meshRequest.m_Parts) {
                         handles.emplace_back(part.handle);
                     }
@@ -129,19 +129,17 @@ void PublicMeshRequest::LoadCPU(MeshRequest& meshRequest) {
         auto& aiRootNode  = *meshRequest.m_Importer.m_AIRoot;
         MeshLoader::LoadProcessNodeData(meshRequest, aiscene, aiRootNode);
         auto& part        = meshRequest.m_Parts[0];
-
-        //TODO: this just saves any imported model as the engine's optimized format. Remove this upon release.
-        std::string saveFileName = (meshRequest.m_FileOrData.substr(0, meshRequest.m_FileOrData.find_last_of(".")) + ".smsh").c_str();
-        SMSH_File::SaveFile(saveFileName.c_str(), part.cpuData);
-
-
-        auto mutex = part.handle.getMutex();
+        auto mutex        = part.handle.getMutex();
         if (mutex) {
             std::unique_lock lock{ *mutex };
             auto& mesh = *part.handle.get<Mesh>();
             mesh.setName(part.name);
             mesh.m_CPUData = std::move(part.cpuData);
             mesh.m_CPUData.m_NodeData = std::move(meshRequest.m_NodeData);
+
+            //TODO: this just saves any imported model as the engine's optimized format. Remove this upon release.
+            std::string saveFileName = (meshRequest.m_FileOrData.substr(0, meshRequest.m_FileOrData.find_last_of(".")) + ".smsh").c_str();
+            SMSH_File::SaveFile(saveFileName.c_str(), mesh.m_CPUData);
         }
     }else if (meshRequest.m_FileExtension == ".smsh") {
         for (auto& part : meshRequest.m_Parts) {

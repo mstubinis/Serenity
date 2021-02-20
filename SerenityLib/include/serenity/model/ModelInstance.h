@@ -11,8 +11,6 @@ class  Viewport;
 class  ModelInstance;
 class  Collision;
 namespace Engine::priv {
-    struct DefaultModelInstanceBindFunctor;
-    struct DefaultModelInstanceUnbindFunctor;
     struct ComponentModel_UpdateFunction;
     class  ModelInstanceAnimation;
     class  RenderModule;
@@ -35,43 +33,41 @@ namespace Engine::priv {
 #include <serenity/types/Types.h>
 
 class ModelInstance final : public Observer {
-    friend struct Engine::priv::DefaultModelInstanceBindFunctor;
-    friend struct Engine::priv::DefaultModelInstanceUnbindFunctor;
     friend struct Engine::priv::ComponentModel_UpdateFunction;
     friend class  Engine::priv::RenderModule;
     friend class  ComponentModel;
     friend class  Collision;
 
-    using bind_function   = void(*)(ModelInstance*, const Engine::priv::RenderModule*);
-    using unbind_function = void(*)(ModelInstance*, const Engine::priv::RenderModule*);
+    using BindFunc   = void(*)(ModelInstance*, const Engine::priv::RenderModule*);
+    using UnbindFunc = void(*)(ModelInstance*, const Engine::priv::RenderModule*);
 
     private:
-        static decimal                                       m_GlobalDistanceFactor;
-        static uint32_t                                      m_ViewportFlagDefault;
+        static decimal                                    m_GlobalDistanceFactor;
+        static uint32_t                                   m_ViewportFlagDefault;
     private:
-        glm::mat4                                            m_ModelMatrix         = glm::mat4(1.0f);
-        glm::quat                                            m_Orientation         = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-        glm::vec3                                            m_Position            = glm::vec3(0.0f, 0.0f, 0.0f);
-        glm::vec3                                            m_Scale               = glm::vec3(1.0f, 1.0f, 1.0f);
-        bind_function                                        m_CustomBindFunctor   = [](ModelInstance*, const Engine::priv::RenderModule*) {};
-        unbind_function                                      m_CustomUnbindFunctor = [](ModelInstance*, const Engine::priv::RenderModule*) {};
+        glm::mat4                                         m_ModelMatrix         = glm::mat4(1.0f);
+        glm::quat                                         m_Orientation         = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+        glm::vec3                                         m_Position            = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3                                         m_Scale               = glm::vec3(1.0f, 1.0f, 1.0f);
+        BindFunc                                          m_CustomBindFunctor   = [](ModelInstance*, const Engine::priv::RenderModule*) {};
+        UnbindFunc                                        m_CustomUnbindFunctor = [](ModelInstance*, const Engine::priv::RenderModule*) {};
 
-        ModelDrawingMode                                     m_DrawingMode         = ModelDrawingMode::Triangles;
-        Engine::Flag<uint32_t>                               m_ViewportFlag;     //determine what viewports this can be seen in
-        Engine::priv::ModelInstanceAnimationContainer        m_Animations;
-        Entity                                               m_Parent              = Entity();
-        Handle                                               m_ShaderProgramHandle = Handle{};
-        Handle                                               m_MeshHandle          = Handle{};
-        Handle                                               m_MaterialHandle      = Handle{};
-        RenderStage                                          m_Stage               = RenderStage::GeometryOpaque;
-        Engine::color_vector_4                               m_GodRaysColor        = Engine::color_vector_4(0_uc);
-        Engine::color_vector_4                               m_Color               = Engine::color_vector_4(255_uc);
-        void*                                                m_UserPointer         = nullptr;
-        float                                                m_Radius              = 0.0f;
-        uint32_t                                             m_Index               = 0U;
-        bool                                                 m_PassedRenderCheck   = false;
-        bool                                                 m_Visible             = true;
-        bool                                                 m_ForceRender         = false;
+        ModelDrawingMode                                  m_DrawingMode         = ModelDrawingMode::Triangles;
+        Engine::Flag<uint32_t>                            m_ViewportFlag;     //determine what viewports this can be seen in
+        Engine::priv::ModelInstanceAnimationContainer     m_Animations;
+        Entity                                            m_Parent              = Entity();
+        Handle                                            m_ShaderProgramHandle = Handle{};
+        Handle                                            m_MeshHandle          = Handle{};
+        Handle                                            m_MaterialHandle      = Handle{};
+        RenderStage                                       m_Stage               = RenderStage::GeometryOpaque;
+        Engine::color_vector_4                            m_GodRaysColor        = Engine::color_vector_4(0_uc);
+        Engine::color_vector_4                            m_Color               = Engine::color_vector_4(255_uc);
+        void*                                             m_UserPointer         = nullptr;
+        float                                             m_Radius              = 0.0f;
+        uint32_t                                          m_Index               = 0U;
+        bool                                              m_PassedRenderCheck   = false;
+        bool                                              m_Visible             = true;
+        bool                                              m_ForceRender         = false;
 
         float internal_calculate_radius();
         void internal_init(Handle mesh, Handle mat, Handle program);
@@ -82,8 +78,8 @@ class ModelInstance final : public Observer {
 
         ModelInstance() = delete;
     public:
-        static void setDefaultViewportFlag(uint32_t flag) noexcept { m_ViewportFlagDefault = flag; }
-        static void setDefaultViewportFlag(ViewportFlag::Flag flag) noexcept { m_ViewportFlagDefault = flag; }
+        static inline void setDefaultViewportFlag(uint32_t flag) noexcept { m_ViewportFlagDefault = flag; }
+        static inline void setDefaultViewportFlag(ViewportFlag::Flag flag) noexcept { m_ViewportFlagDefault = flag; }
     public:
         ModelInstance(Entity, Handle mesh, Handle material, Handle shaderProgram = Handle{});
 
@@ -102,10 +98,10 @@ class ModelInstance final : public Observer {
         inline void setUserPointer(void* userPtr) noexcept { m_UserPointer = userPtr; }
         inline void* getUserPointer() const noexcept { return m_UserPointer; }
 
-        inline void setCustomBindFunctor(bind_function&& functor) noexcept { m_CustomBindFunctor   = std::move(functor); }
-        inline void setCustomUnbindFunctor(unbind_function&& functor) noexcept { m_CustomUnbindFunctor = std::move(functor); }
-        inline void setCustomBindFunctor(const bind_function& functor) noexcept { m_CustomBindFunctor = functor; }
-        inline void setCustomUnbindFunctor(const unbind_function& functor) noexcept { m_CustomUnbindFunctor = functor; }
+        inline void setCustomBindFunctor(BindFunc&& functor) noexcept { m_CustomBindFunctor   = std::move(functor); }
+        inline void setCustomUnbindFunctor(UnbindFunc&& functor) noexcept { m_CustomUnbindFunctor = std::move(functor); }
+        inline void setCustomBindFunctor(const BindFunc& functor) noexcept { m_CustomBindFunctor = functor; }
+        inline void setCustomUnbindFunctor(const UnbindFunc& functor) noexcept { m_CustomUnbindFunctor = functor; }
 
         inline void setViewportFlag(uint32_t flag) noexcept { m_ViewportFlag = flag; }
         inline void addViewportFlag(uint32_t flag) noexcept { m_ViewportFlag.add(flag); }

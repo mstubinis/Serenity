@@ -72,7 +72,7 @@ class Scene::impl final {
             if (!renderGraph) {
                 renderGraph = &scene.m_RenderGraphs[(size_t)stage].emplace_back(inModelInstance.shaderProgram());
             }
-            renderGraph->addModelInstanceToPipeline(inModelInstance, componentModel);
+            renderGraph->internal_addModelInstanceToPipeline(inModelInstance, componentModel);
         }
         void _removeModelInstanceFromPipeline(ModelInstance& inModelInstance, std::vector<Engine::priv::RenderGraph>& renderGraphs) {
             Engine::priv::RenderGraph* renderGraph = nullptr;
@@ -83,7 +83,7 @@ class Scene::impl final {
                 }
             }
             if (renderGraph) {
-                renderGraph->removeModelInstanceFromPipeline(inModelInstance);
+                renderGraph->internal_removeModelInstanceFromPipeline(inModelInstance);
             }
         }
 };

@@ -25,24 +25,24 @@ namespace Engine::priv {
 
 using ModelInstanceVector = std::vector<std::unique_ptr<ModelInstance>>;
 
-class ComponentModel: public Observer {
+class ComponentModel : public Observer {
     friend struct Engine::priv::ComponentModel_UpdateFunction;
     friend struct Engine::priv::ComponentModel_Functions;
     friend class  ComponentCamera;
     private:
-        ModelInstanceVector          m_ModelInstances;
-        glm::vec3                    m_RadiusBox = glm::vec3(0.0f);
-        float                        m_Radius = 0.0f;
-        Entity                       m_Owner;
+        ModelInstanceVector     m_ModelInstances;
+        glm::vec3               m_RadiusBox       = glm::vec3{0.0f};
+        float                   m_Radius          = 0.0f;
+        Entity                  m_Owner;
 
         ComponentModel() = delete;
     public:
-        ComponentModel(Entity, Handle meshHandle, Handle materialHandle, Handle = Handle{}, RenderStage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity, Handle mesh, Handle material, Handle shaderProgram = Handle{}, RenderStage = RenderStage::GeometryOpaque);
        
-        ComponentModel(const ComponentModel& other)                = delete;
-        ComponentModel& operator=(const ComponentModel& other)     = delete;
-        ComponentModel(ComponentModel&& other) noexcept;
-        ComponentModel& operator=(ComponentModel&& other) noexcept;
+        ComponentModel(const ComponentModel&)                = delete;
+        ComponentModel& operator=(const ComponentModel&)     = delete;
+        ComponentModel(ComponentModel&&) noexcept;
+        ComponentModel& operator=(ComponentModel&&) noexcept;
 
         [[nodiscard]] inline constexpr Entity getOwner() const noexcept { return m_Owner; }
 
@@ -60,30 +60,30 @@ class ComponentModel: public Observer {
         inline void hide() noexcept { show(false); }
 
         [[nodiscard]] inline ModelInstance& getModel(size_t index = 0) noexcept { return *m_ModelInstances[index].get(); }
-        ModelInstanceHandle addModel(Handle meshHandle, Handle materialHandle, Handle = Handle{}, RenderStage = RenderStage::GeometryOpaque);
+        ModelInstanceHandle addModel(Handle mesh, Handle material, Handle shaderProgram = Handle{}, RenderStage = RenderStage::GeometryOpaque);
         inline void removeModel(size_t index) noexcept { m_ModelInstances.erase(m_ModelInstances.begin() + index); }
 
         void setStage(RenderStage stage, size_t index = 0);
-        void setModel(Handle meshHandle, Handle materialHandle, size_t index, Handle = Handle{}, RenderStage = RenderStage::GeometryOpaque);
-        void setModelMesh(Handle meshHandle, size_t index, RenderStage = RenderStage::GeometryOpaque);
-        void setModelMaterial(Handle materialHandle, size_t index, RenderStage = RenderStage::GeometryOpaque);
+        void setModel(Handle mesh, Handle material, size_t index, Handle = Handle{}, RenderStage = RenderStage::GeometryOpaque);
+        void setModelMesh(Handle mesh, size_t index, RenderStage = RenderStage::GeometryOpaque);
+        void setModelMaterial(Handle material, size_t index, RenderStage = RenderStage::GeometryOpaque);
         void setModelShaderProgram(Handle shaderProgram, size_t index, RenderStage = RenderStage::GeometryOpaque);
 
         [[nodiscard]] bool rayIntersectSphere(const ComponentCamera& camera) const noexcept;
 
         void setUserPointer(void* UserPointer) noexcept;
 
-        inline void setCustomBindFunctor(ModelInstance::bind_function&& functor, size_t index = 0) noexcept {
-            m_ModelInstances[index]->setCustomBindFunctor(std::move(functor));
+        inline void setCustomBindFunctor(ModelInstance::BindFunc&& func, size_t index = 0) noexcept {
+            m_ModelInstances[index]->setCustomBindFunctor(std::move(func));
         }
-        inline void setCustomUnbindFunctor(ModelInstance::unbind_function&& functor, size_t index = 0) noexcept {
-            m_ModelInstances[index]->setCustomUnbindFunctor(std::move(functor));
+        inline void setCustomUnbindFunctor(ModelInstance::UnbindFunc&& func, size_t index = 0) noexcept {
+            m_ModelInstances[index]->setCustomUnbindFunctor(std::move(func));
         }
-        inline void setCustomBindFunctor(const ModelInstance::bind_function& functor, size_t index = 0) noexcept {
-            m_ModelInstances[index]->setCustomBindFunctor(functor);
+        inline void setCustomBindFunctor(const ModelInstance::BindFunc& func, size_t index = 0) noexcept {
+            m_ModelInstances[index]->setCustomBindFunctor(func);
         }
-        inline void setCustomUnbindFunctor(const ModelInstance::unbind_function& functor, size_t index = 0) noexcept {
-            m_ModelInstances[index]->setCustomUnbindFunctor(functor);
+        inline void setCustomUnbindFunctor(const ModelInstance::UnbindFunc& func, size_t index = 0) noexcept {
+            m_ModelInstances[index]->setCustomUnbindFunctor(func);
         }
 
         inline ModelInstance& operator[](size_t index) { return *m_ModelInstances[index].get(); }
@@ -98,7 +98,6 @@ class ComponentModel: public Observer {
 class ComponentModel_System_CI : public Engine::priv::ECSSystemCI {
     public:
         ComponentModel_System_CI();
-        ~ComponentModel_System_CI() = default;
 };
 
 #endif

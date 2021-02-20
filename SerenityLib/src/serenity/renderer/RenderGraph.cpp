@@ -12,7 +12,7 @@
 using namespace Engine;
 using namespace Engine::priv;
 
-void RenderGraph::addModelInstanceToPipeline(ModelInstance& inModelInstance, ComponentModel& componentModel) {
+void RenderGraph::internal_addModelInstanceToPipeline(ModelInstance& inModelInstance, ComponentModel& componentModel) {
     //material node check
     priv::MaterialNode* materialNode  = nullptr;
     priv::MeshNode*     meshNode      = nullptr;
@@ -46,7 +46,7 @@ void RenderGraph::addModelInstanceToPipeline(ModelInstance& inModelInstance, Com
         m_InstancesTotal.emplace_back(&inModelInstance);
     }
 }
-void RenderGraph::removeModelInstanceFromPipeline(ModelInstance& inModelInstance) {
+void RenderGraph::internal_removeModelInstanceFromPipeline(ModelInstance& inModelInstance) {
     //material node check
     priv::MaterialNode*  materialNode  = nullptr;
     priv::MeshNode*      meshNode      = nullptr;
@@ -246,10 +246,10 @@ void RenderGraph::clean(Entity inEntity) {
     if (inEntity.null()) {
         return;
     }
-    auto kept_nodes_total = Engine::create_and_reserve<std::vector<ModelInstance*>>(m_InstancesTotal.size());
+    auto kept_nodes_total = Engine::create_and_reserve<std::vector<ModelInstance*>>((uint32_t)m_InstancesTotal.size());
     for (auto& materialNode : m_MaterialNodes) {
         for (auto& meshNode : materialNode.meshNodes) {
-            auto kept_nodes = Engine::create_and_reserve<std::vector<ModelInstance*>>(meshNode.instanceNodes.size());
+            auto kept_nodes = Engine::create_and_reserve<std::vector<ModelInstance*>>((uint32_t)meshNode.instanceNodes.size());
             for (auto& modelInstance : meshNode.instanceNodes) {
                 auto entity = modelInstance->parent();
                 if (entity != inEntity) {

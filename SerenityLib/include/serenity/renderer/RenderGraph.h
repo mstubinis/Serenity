@@ -62,17 +62,17 @@ namespace Engine::priv {
 
             RenderGraph() = delete;
 
-            void addModelInstanceToPipeline(ModelInstance& modelInstance, ComponentModel&);
-            void removeModelInstanceFromPipeline(ModelInstance& modelInstance);
+            void internal_addModelInstanceToPipeline(ModelInstance& modelInstance, ComponentModel&);
+            void internal_removeModelInstanceFromPipeline(ModelInstance& modelInstance);
         public:
             RenderGraph(Handle shaderProgram)
                 : m_ShaderProgram{ shaderProgram }
             {}
 
-            RenderGraph(const RenderGraph& other) = delete;
-            RenderGraph& operator=(const RenderGraph& other) = delete;
-            RenderGraph(RenderGraph&& other) noexcept = default;
-            RenderGraph& operator=(RenderGraph&& other) noexcept = default;
+            RenderGraph(const RenderGraph&)                = delete;
+            RenderGraph& operator=(const RenderGraph&)     = delete;
+            RenderGraph(RenderGraph&&) noexcept            = default;
+            RenderGraph& operator=(RenderGraph&&) noexcept = default;
 
             bool remove_material_node(MaterialNode& materialNode);
             bool remove_mesh_node(MaterialNode& materialNode, MeshNode& meshNode);

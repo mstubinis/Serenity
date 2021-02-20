@@ -14,7 +14,7 @@ using namespace Engine;
 using namespace Engine::priv;
 
 float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) {
-    auto points_total = Engine::create_and_reserve<std::vector<glm::vec3>>(ComponentModel_Functions::GetTotalVertexCount(modelComponent));
+    auto points_total = Engine::create_and_reserve<std::vector<glm::vec3>>((uint32_t)ComponentModel_Functions::GetTotalVertexCount(modelComponent));
     for (const auto& modelInstance : modelComponent) {
         const Mesh& mesh = *modelInstance->mesh().get<Mesh>();
         if (!mesh.isLoaded()) {
@@ -72,10 +72,10 @@ ComponentModel::ComponentModel(Entity entity, Handle mesh, Handle material, Hand
     addModel(mesh, material, shaderProgram, stage);
 }
 ComponentModel::ComponentModel(ComponentModel&& other) noexcept 
-    : m_Owner          { std::move(other.m_Owner) }
-    , m_ModelInstances { std::move(other.m_ModelInstances) }
-    , m_Radius         { std::move(other.m_Radius) }
+    : m_ModelInstances { std::move(other.m_ModelInstances) }
     , m_RadiusBox      { std::move(other.m_RadiusBox) }
+    , m_Radius         { std::move(other.m_Radius) }
+    , m_Owner          { std::move(other.m_Owner) }
 {
     if (other.isRegistered(EventType::ResourceLoaded)) {
         registerEvent(EventType::ResourceLoaded);
@@ -83,10 +83,10 @@ ComponentModel::ComponentModel(ComponentModel&& other) noexcept
     }
 }
 ComponentModel& ComponentModel::operator=(ComponentModel&& other) noexcept {
-    m_Owner          = std::move(other.m_Owner);
     m_ModelInstances = std::move(other.m_ModelInstances);
-    m_Radius         = std::move(other.m_Radius);
     m_RadiusBox      = std::move(other.m_RadiusBox);
+    m_Radius         = std::move(other.m_Radius);
+    m_Owner          = std::move(other.m_Owner);
 
     if (other.isRegistered(EventType::ResourceLoaded)) {
         registerEvent(EventType::ResourceLoaded);
@@ -96,7 +96,7 @@ ComponentModel& ComponentModel::operator=(ComponentModel&& other) noexcept {
 }
 void ComponentModel::onEvent(const Event& e) {
     if (e.type == EventType::ResourceLoaded && e.eventResource.resource->type() == ResourceType::Mesh) {
-        auto unfinishedMeshes = Engine::create_and_reserve<std::vector<Handle>>(m_ModelInstances.size());
+        auto unfinishedMeshes = Engine::create_and_reserve<std::vector<Handle>>((uint32_t)m_ModelInstances.size());
         for (auto& instance : m_ModelInstances) {
             auto& mesh = *instance->m_MeshHandle.get<Mesh>();
             if (!mesh.isLoaded()) {
@@ -208,7 +208,7 @@ void ComponentModel::setUserPointer(void* UserPointer) noexcept {
 
 #pragma region System
 
-struct priv::ComponentModel_UpdateFunction final { void operator()(void* system, void* componentPool, const float dt, Scene& scene) const {
+struct Engine::priv::ComponentModel_UpdateFunction final { void operator()(void* system, void* componentPool, const float dt, Scene& scene) const {
     auto& pool       = *(ECSComponentPool<ComponentModel>*)componentPool;
     auto& components = pool.data();
     auto lamda_update_component = [&](ComponentModel& componentModel, size_t i, size_t k) {

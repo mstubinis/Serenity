@@ -21,47 +21,46 @@ using namespace Engine;
 uint32_t ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
 decimal ModelInstance::m_GlobalDistanceFactor = (decimal)1100.0;
 
-namespace Engine::priv {
-    constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
-        auto stage               = i->stage();
-        auto& scene              = *Engine::Resources::getCurrentScene();
-        auto* camera             = scene.getActiveCamera();
-        glm::vec3 camPos         = camera->getPosition();
-        ComponentBody* body      = (i->parent().getComponent<ComponentBody>());
-        glm::mat4 parentModel    = body->modelMatrixRendering();
-        auto& animationContainer = i->getRunningAnimations();
+constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
+    auto stage               = i->stage();
+    auto& scene              = *Engine::Resources::getCurrentScene();
+    auto* camera             = scene.getActiveCamera();
+    glm::vec3 camPos         = camera->getPosition();
+    ComponentBody* body      = (i->parent().getComponent<ComponentBody>());
+    glm::mat4 parentModel    = body->modelMatrixRendering();
+    auto& animationContainer = i->getRunningAnimations();
 
-        Engine::Renderer::sendUniform1Safe("Object_Color", i->color().toPackedInt());
-        Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", i->godRaysColor().toPackedInt());
+    Engine::Renderer::sendUniform1Safe("Object_Color", i->color().toPackedInt());
+    Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", i->godRaysColor().toPackedInt());
 
-        if (stage == RenderStage::ForwardTransparentTrianglesSorted || stage == RenderStage::ForwardTransparent || stage == RenderStage::ForwardOpaque) {
-            Skybox* skybox          = scene.skybox();
-            renderer->m_Pipeline->sendGPUDataAllLights(scene, *camera);
-            renderer->m_Pipeline->sendGPUDataGI(skybox);
-            Engine::Renderer::sendUniform4Safe("ScreenData", renderer->m_GI_Pack, Engine::Renderer::Settings::getGamma(), 0.0f, 0.0f);
-        }
-        if (animationContainer.size() > 0) {
-            Engine::Renderer::sendUniform1Safe("AnimationPlaying", 1);
-            Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationContainer.getTransforms(), (uint32_t)animationContainer.getTransforms().size());
-        }else{
-            Engine::Renderer::sendUniform1Safe("AnimationPlaying", 0);
-        }
-        glm::mat4 modelMatrix = parentModel * i->modelMatrix();
+    if (stage == RenderStage::ForwardTransparentTrianglesSorted || stage == RenderStage::ForwardTransparent || stage == RenderStage::ForwardOpaque) {
+        Skybox* skybox          = scene.skybox();
+        renderer->m_Pipeline->sendGPUDataAllLights(scene, *camera);
+        renderer->m_Pipeline->sendGPUDataGI(skybox);
+        Engine::Renderer::sendUniform4Safe("ScreenData", renderer->m_GI_Pack, Engine::Renderer::Settings::getGamma(), 0.0f, 0.0f);
+    }
+    if (animationContainer.size() > 0) {
+        Engine::Renderer::sendUniform1Safe("AnimationPlaying", 1);
+        Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationContainer.getTransforms(), (uint32_t)animationContainer.getTransforms().size());
+    }else{
+        Engine::Renderer::sendUniform1Safe("AnimationPlaying", 0);
+    }
+    glm::mat4 modelMatrix = parentModel * i->modelMatrix();
 
-        //world space normals
-        glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
+    //world space normals
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
 
-        //view space normals
-        //glm::mat4 view = cam.getView();
-        //glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(view * model)));
+    //view space normals
+    //glm::mat4 view = cam.getView();
+    //glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(view * model)));
 
-        Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
-        Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
-    };
-    constexpr auto DefaultModelInstanceUnbindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
-        //auto& i = *static_cast<ModelInstance*>(r);
-    };
+    Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
+    Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 };
+constexpr auto DefaultModelInstanceUnbindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
+    //auto& i = *static_cast<ModelInstance*>(r);
+};
+
 bool priv::PublicModelInstance::IsViewportValid(const ModelInstance& modelInstance, const Viewport& viewport) {
     const auto flags = modelInstance.getViewportFlags();
     return (flags & (1 << viewport.id()) || flags == 0);
@@ -71,8 +70,8 @@ ModelInstance::ModelInstance(Entity parent, Handle mesh, Handle material, Handle
     : m_Parent{ parent }
 {
     internal_init(mesh, material, shaderProgram);
-    setCustomBindFunctor(priv::DefaultModelInstanceBindFunctor);
-    setCustomUnbindFunctor(priv::DefaultModelInstanceUnbindFunctor);
+    setCustomBindFunctor(DefaultModelInstanceBindFunctor);
+    setCustomUnbindFunctor(DefaultModelInstanceUnbindFunctor);
 }
 ModelInstance::ModelInstance(ModelInstance&& other) noexcept
     : m_DrawingMode         { std::move(other.m_DrawingMode) }

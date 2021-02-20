@@ -122,7 +122,7 @@ Engine::view_ptr<Scene> Engine::Resources::getScene(std::string_view sceneName){
 std::vector<Handle> Engine::Resources::loadMesh(std::string_view fileOrData, float threshhold, MeshCollisionLoadingFlag::Flag flags) {
     MeshRequest request{ fileOrData, threshhold, flags, [](const std::vector<Handle>&) {} };
     request.request();
-    auto handles = Engine::create_and_reserve<std::vector<Handle>>(request.m_Parts.size());
+    auto handles = Engine::create_and_reserve<std::vector<Handle>>((uint32_t)request.m_Parts.size());
     for (auto& part : request.m_Parts) {
         handles.emplace_back(part.handle);
     }
@@ -131,7 +131,7 @@ std::vector<Handle> Engine::Resources::loadMesh(std::string_view fileOrData, flo
 std::vector<Handle> Engine::Resources::loadMeshAsync(std::string_view fileOrData, float threshhold, MeshCollisionLoadingFlag::Flag flags, MeshRequestCallback callback) {
     MeshRequest request{ fileOrData, threshhold, flags, std::move(callback) };
     request.request(true);
-    auto handles = Engine::create_and_reserve<std::vector<Handle>>(request.m_Parts.size());
+    auto handles = Engine::create_and_reserve<std::vector<Handle>>((uint32_t)request.m_Parts.size());
     for (auto& part : request.m_Parts) {
         handles.emplace_back(part.handle);
     }

@@ -60,7 +60,7 @@ glm::vec3 Math::polynomial_interpolate_linear(const std::vector<glm::vec3>& poin
 //this works perfectly
 glm::vec3 Math::polynomial_interpolate_cubic(const std::vector<glm::vec3>& points, float time) {
     glm::vec3 ret{ 0.0f };
-    auto n = points.size();
+    uint32_t n  = (uint32_t)points.size();
     auto x_vals = Engine::create_and_reserve<std::vector<float>>(n);
     auto y_vals = Engine::create_and_reserve<std::vector<float>>(n);
     auto z_vals = Engine::create_and_reserve<std::vector<float>>(n);

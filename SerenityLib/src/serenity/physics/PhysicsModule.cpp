@@ -324,7 +324,7 @@ std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const glm::vec3& sta
 std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const glm::vec3& start, const glm::vec3& end , std::vector<Entity>& ignoredEntities, MaskType group, MaskType mask){
     btVector3 start_ = Engine::Math::btVectorFromGLM(start);
     btVector3 end_   = Engine::Math::btVectorFromGLM(end);
-    auto objs = Engine::create_and_reserve<std::vector<ComponentBody*>>(ignoredEntities.size());
+    auto objs = Engine::create_and_reserve<std::vector<ComponentBody*>>((uint32_t)ignoredEntities.size());
     for(auto ignoredEntity : ignoredEntities){
         auto body = ignoredEntity.getComponent<ComponentBody>();
         if(body && body->hasPhysics()) {
@@ -368,7 +368,7 @@ Engine::RayCastResult Engine::Physics::rayCastNearest(const glm::vec3& start, co
 Engine::RayCastResult Engine::Physics::rayCastNearest(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredEntities, MaskType group, MaskType mask) {
     btVector3 start_ = Engine::Math::btVectorFromGLM(start);
     btVector3 end_   = Engine::Math::btVectorFromGLM(end);
-    auto objs = Engine::create_and_reserve<std::vector<ComponentBody*>>(ignoredEntities.size());
+    auto objs = Engine::create_and_reserve<std::vector<ComponentBody*>>((uint32_t)ignoredEntities.size());
     for (auto ignoredEntity : ignoredEntities) {
         auto body = ignoredEntity.getComponent<ComponentBody>();
         if (body && body->hasPhysics()) {
