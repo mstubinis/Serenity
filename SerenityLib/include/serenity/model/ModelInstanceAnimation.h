@@ -2,10 +2,12 @@
 #ifndef ENGINE_MODEL_INSTANCE_ANIMATION_H
 #define ENGINE_MODEL_INSTANCE_ANIMATION_H
 
+struct MeshNodeData;
 namespace Engine::priv {
     struct DefaultModelInstanceBindFunctor;
     class  ModelInstanceAnimationContainer;
     class  AnimationData;
+    class  MeshSkeleton;
 };
 
 #include <serenity/resources/Handle.h>
@@ -21,6 +23,8 @@ namespace Engine::priv {
         friend class  ModelInstanceAnimationContainer;
         private:
             AnimationData* m_AnimationData    = nullptr;
+            MeshSkeleton*  m_Skeleton         = nullptr;
+            MeshNodeData*  m_NodeData         = nullptr;
             uint16_t       m_NumBones         = 0;
             uint16_t       m_CurrentLoops     = 0;
             uint16_t       m_RequestedLoops   = 1;
@@ -31,7 +35,7 @@ namespace Engine::priv {
 
             ModelInstanceAnimation() = delete;
         public:
-            ModelInstanceAnimation(Handle mesh, std::string_view animationName, float startTime, float endTime, uint16_t requestedLoops = 1);
+            ModelInstanceAnimation(MeshNodeData&, AnimationData&, MeshSkeleton&, std::string_view animationName, float startTime, float endTime, uint16_t requestedLoops = 1);
 
             ModelInstanceAnimation(const ModelInstanceAnimation&)                = delete;
             ModelInstanceAnimation& operator=(const ModelInstanceAnimation&)     = delete;

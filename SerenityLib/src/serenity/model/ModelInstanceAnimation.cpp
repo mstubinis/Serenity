@@ -8,19 +8,21 @@ using namespace Engine::priv;
 
 #pragma region ModelInstanceAnimation
 
-ModelInstanceAnimation::ModelInstanceAnimation(Handle meshHandle, std::string_view animName, float startTime, float endTime, uint16_t requestedLoops)
-    : m_AnimationData  { &meshHandle.get<Mesh>()->getAnimationData().find(animName)->second }
-    , m_NumBones       { meshHandle.get<Mesh>()->getSkeleton()->numBones() }
+ModelInstanceAnimation::ModelInstanceAnimation(MeshNodeData& nodeData, AnimationData& animData, MeshSkeleton& skeleton, std::string_view animName, float startTime, float endTime, uint16_t requestedLoops)
+    : m_AnimationData  { &animData }
+    , m_NodeData       { &nodeData }
+    , m_Skeleton       { &skeleton }
+    , m_NumBones       { skeleton.numBones() }
     , m_RequestedLoops { requestedLoops }
     , m_StartTime      { startTime }
-    , m_EndTime        { (endTime < 0.0f) ? m_AnimationData->duration() : endTime }
+    , m_EndTime        { (endTime < 0.0f) ? animData.duration() : endTime }
 {
 }
 
 void ModelInstanceAnimation::process(const float dt, std::vector<glm::mat4>& transforms) {
     m_CurrentTime  += dt;
     transforms.resize(m_NumBones, glm::mat4{ 1.0f });
-    m_AnimationData->ComputeTransforms(m_CurrentTime, transforms);
+    m_AnimationData->ComputeTransforms(m_CurrentTime, transforms, *m_Skeleton, *m_NodeData);
     if (m_CurrentTime >= m_EndTime) {
         m_CurrentTime = 0.0f;
         ++m_CurrentLoops;
@@ -31,7 +33,11 @@ void ModelInstanceAnimation::process(const float dt, std::vector<glm::mat4>& tra
 #pragma region ModelInstanceAnimationContainer
 
 void ModelInstanceAnimationContainer::emplace_animation(Handle meshHandle, std::string_view animationName, float startTime, float endTime, uint16_t requestedLoops) {
-    m_Animation_Instances.emplace_back(meshHandle, animationName, startTime, endTime, requestedLoops);
+    auto& mesh     = *meshHandle.get<Mesh>();
+    auto& nodeData = mesh.m_CPUData.m_NodeData;
+    auto& skeleton = *mesh.getSkeleton();
+    auto& animData = skeleton.m_AnimationData.find(animationName)->second;
+    m_Animation_Instances.emplace_back(nodeData, animData, skeleton, animationName, startTime, endTime, requestedLoops);
 }
 void ModelInstanceAnimationContainer::clear() {
     m_Animation_Instances.clear();

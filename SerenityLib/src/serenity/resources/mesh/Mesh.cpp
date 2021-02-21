@@ -564,7 +564,7 @@ Mesh::~Mesh() {
     unregisterEvent(EventType::WindowFullscreenChanged);
     unload();
 }
-Engine::priv::MeshSkeleton::AnimationMap& Mesh::getAnimationData() {
+Engine::priv::MeshSkeleton::AnimationDataMap& Mesh::getAnimationData() {
     return m_CPUData.m_Skeleton->m_AnimationData;
 }
 void Mesh::load() {

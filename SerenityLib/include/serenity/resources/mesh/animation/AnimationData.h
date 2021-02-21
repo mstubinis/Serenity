@@ -27,15 +27,13 @@ namespace Engine::priv {
         friend class  SMSH_File;
         private:
             std::vector<AnimationChannel>  m_Channels;
-            MeshNodeData*                  m_NodeData        = nullptr;
-            Engine::priv::MeshSkeleton*    m_Skeleton        = nullptr;
             float                          m_TicksPerSecond  = 0.0f;
             float                          m_DurationInTicks = 0.0f;
 
             //O(1) with high probability
             template<typename T> [[nodiscard]] uint16_t internal_find_keyframe_idx(float AnimTime, const T& KeyFrms, uint16_t& CurrentKeyFrame) const noexcept {
-                for (uint16_t i = CurrentKeyFrame; i < static_cast<uint16_t>(KeyFrms.size() - 1); ++i) {
-                    if (AnimTime >= KeyFrms[i].time && AnimTime < KeyFrms[i + static_cast<uint16_t>(1)].time) {
+                for (uint16_t i = CurrentKeyFrame; i < KeyFrms.size() - 1; ++i) {
+                    if (AnimTime >= KeyFrms[i].time && AnimTime < KeyFrms[i + 1].time) {
                         CurrentKeyFrame = i;
                         return i;
                     }
@@ -45,7 +43,7 @@ namespace Engine::priv {
             }
             [[nodiscard]] glm::vec3 internal_interpolate_vec3(float AnimTime, const std::vector<Vector3Key>& keys, std::function<size_t()>&& FindKeyFrmIdx);
 
-            void                      ComputeTransforms(float time, std::vector<glm::mat4>& Transforms);
+            void                      ComputeTransforms(float time, std::vector<glm::mat4>& Transforms, MeshSkeleton&, MeshNodeData&);
             [[nodiscard]] glm::vec3   CalcInterpolatedPosition(float AnimTime, const std::vector<Vector3Key>&, uint16_t& CurrentKeyFrame);
             [[nodiscard]] glm::quat   CalcInterpolatedRotation(float AnimTime, const std::vector<QuatKey>&, uint16_t& CurrentKeyFrame);
             [[nodiscard]] glm::vec3   CalcInterpolatedScaling(float AnimTime, const std::vector<Vector3Key>&, uint16_t& CurrentKeyFrame);
@@ -60,9 +58,9 @@ namespace Engine::priv {
             }
 
             AnimationData() = delete;
-            AnimationData( MeshNodeData& nodeData, Engine::priv::MeshSkeleton&, float ticksPerSecond, float durationInTicks);
+            AnimationData( float ticksPerSecond, float durationInTicks);
         public:
-            AnimationData( MeshNodeData& nodeData, Engine::priv::MeshSkeleton&, const aiAnimation&, MeshRequest&);
+            AnimationData( const aiAnimation&, MeshRequest&);
 
             [[nodiscard]] inline constexpr float duration() const noexcept { return m_DurationInTicks / m_TicksPerSecond; }
             [[nodiscard]] inline constexpr float durationInTicks() const noexcept { return m_DurationInTicks; }

@@ -2,8 +2,9 @@
 #ifndef ENGINE_MESH_SMSH_H
 #define ENGINE_MESH_SMSH_H
 
-class Mesh;
+class  Mesh;
 struct MeshCPUData;
+struct MeshRequestPart;
 namespace Engine::priv {
     class MeshSkeleton;
 }
@@ -113,7 +114,6 @@ metadata structure:
             }
 
 */
-
 struct SMSH_Fileheader final {
     uint8_t   m_InterleavingType   = (uint8_t)SMSH_InterleavingType::Interleaved;
     uint32_t  m_AttributeCount     = 0;
@@ -124,6 +124,16 @@ struct SMSH_Fileheader final {
 
     SMSH_Fileheader() = default;
     SMSH_Fileheader(MeshCPUData& cpuData);
+    template<class TSTREAM>
+    SMSH_Fileheader(TSTREAM& stream, uint32_t& blockStart) {
+        const uint8_t* streamDataBuffer = (uint8_t*)stream.data();
+        readBigEndian(m_InterleavingType,   streamDataBuffer, 1, blockStart);
+        readBigEndian(m_AttributeCount,     streamDataBuffer, 4, blockStart);
+        readBigEndian(m_IndiceCount,        streamDataBuffer, 4, blockStart);
+        readBigEndian(m_IndiceDataTypeSize, streamDataBuffer, 4, blockStart);
+        readBigEndian(m_UserDataCount,      streamDataBuffer, 4, blockStart);
+        readBigEndian(m_NumberOfBones,      streamDataBuffer, 4, blockStart);
+    }
 };
 
 struct SMSH_AttributeNoBuffer {
@@ -181,8 +191,8 @@ struct SMSH_Attribute final : public SMSH_AttributeNoBuffer {
 
 class SMSH_File final {
     public:
-        static void LoadFile(const char* filename, MeshCPUData& cpuData);
-        static void SaveFile(const char* filename, MeshCPUData& cpuData);
+        static void LoadFile(const char* filename, MeshCPUData&);
+        static void SaveFile(const char* filename, MeshCPUData&);
 };
 
 #endif

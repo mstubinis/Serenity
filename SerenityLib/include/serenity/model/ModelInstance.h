@@ -139,7 +139,9 @@ class ModelInstance final : public Observer {
 
         void setStage(RenderStage stage, ComponentModel& componentModel);
 
-        void playAnimation(std::string_view animName, float startTime, float endTime = -1.0f, uint32_t requestedLoops = 1);
+        inline void playAnimation(std::string_view animName, float startTime, float endTime = -1.0f, uint32_t requestedLoops = 1) {
+            m_Animations.emplace_animation(m_MeshHandle, animName, startTime, endTime, requestedLoops);
+        }
 
         inline void setColor(float r, float g, float b, float a = 1.0f) noexcept { m_Color = Engine::color_vector_4(r, g, b, a); }
         inline void setColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255_uc) noexcept { m_Color = Engine::color_vector_4(r, g, b, a); }

@@ -143,32 +143,30 @@ void PublicMeshRequest::LoadCPU(MeshRequest& meshRequest) {
         }
     }else if (meshRequest.m_FileExtension == ".smsh") {
         for (auto& part : meshRequest.m_Parts) {
+            part.cpuData.m_Threshold = meshRequest.m_Threshold;
             SMSH_File::LoadFile(meshRequest.m_FileOrData.c_str(), part.cpuData);
-            part.cpuData.m_Threshold        = meshRequest.m_Threshold;
             part.cpuData.internal_calculate_radius();
-            part.cpuData.m_CollisionFactory = (NEW MeshCollisionFactory(part.cpuData, meshRequest.m_CollisionLoadingFlags));
+            part.cpuData.m_CollisionFactory = NEW MeshCollisionFactory{ part.cpuData, meshRequest.m_CollisionLoadingFlags };
             auto mutex                      = part.handle.getMutex();
             if (mutex) {
                 std::unique_lock lock{ *mutex };
                 auto& mesh = *part.handle.get<Mesh>();
                 mesh.setName(part.name);
                 mesh.m_CPUData = std::move(part.cpuData);
-                mesh.m_CPUData.m_NodeData = std::move(meshRequest.m_NodeData);
             }
         }
     }else{ //objcc
         for (auto& part : meshRequest.m_Parts) {
-            part.cpuData.m_VertexData       = (MeshLoader::LoadFrom_OBJCC(meshRequest.m_FileOrData));
+            part.cpuData.m_VertexData       = MeshLoader::LoadFrom_OBJCC(meshRequest.m_FileOrData);
             part.cpuData.m_Threshold        = meshRequest.m_Threshold;
             part.cpuData.internal_calculate_radius();
-            part.cpuData.m_CollisionFactory = (NEW MeshCollisionFactory(part.cpuData, meshRequest.m_CollisionLoadingFlags));
+            part.cpuData.m_CollisionFactory = NEW MeshCollisionFactory{ part.cpuData, meshRequest.m_CollisionLoadingFlags };
             auto mutex                      = part.handle.getMutex();
             if (mutex) {
                 std::unique_lock lock{ *mutex };
                 auto& mesh = *part.handle.get<Mesh>();
                 mesh.setName(part.name);
                 mesh.m_CPUData = std::move(part.cpuData);
-                mesh.m_CPUData.m_NodeData = std::move(meshRequest.m_NodeData);
             }
         }
     }

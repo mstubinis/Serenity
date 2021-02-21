@@ -2,6 +2,7 @@
 #include <serenity/resources/mesh/smsh.h>
 #include <serenity/math/Engine_Math.h>
 #include <serenity/resources/mesh/Mesh.h>
+#include <serenity/resources/mesh/MeshRequest.h>
 #include <serenity/resources/mesh/animation/Skeleton.h>
 #include <serenity/system/TypeDefs.h>
 #include <fstream>
@@ -28,17 +29,10 @@ SMSH_Fileheader::SMSH_Fileheader(MeshCPUData& cpuData) {
 
 void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
     boost::iostreams::mapped_file_source stream{ filename };
-    SMSH_Fileheader smsh_header;
-
     uint32_t blockStart = 0;
     const uint8_t* streamDataBuffer = (uint8_t*)stream.data();
 
-    readBigEndian(smsh_header.m_InterleavingType,   streamDataBuffer, 1, blockStart);
-    readBigEndian(smsh_header.m_AttributeCount,     streamDataBuffer, 4, blockStart);
-    readBigEndian(smsh_header.m_IndiceCount,        streamDataBuffer, 4, blockStart);
-    readBigEndian(smsh_header.m_IndiceDataTypeSize, streamDataBuffer, 4, blockStart);
-    readBigEndian(smsh_header.m_UserDataCount,      streamDataBuffer, 4, blockStart);
-    readBigEndian(smsh_header.m_NumberOfBones,      streamDataBuffer, 4, blockStart);
+    SMSH_Fileheader smsh_header{ stream, blockStart };
 
     std::vector<uint32_t> userData{ smsh_header.m_UserDataCount, 0 };
     for (size_t i = 0; i < smsh_header.m_UserDataCount; ++i) {
@@ -161,7 +155,7 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
             float ticksPerSec, durInTicks;
             Engine::Math::Float32From16(&ticksPerSec, half_float_ticks_per_second);
             Engine::Math::Float32From16(&durInTicks, half_float_duration_in_ticks);
-            Engine::priv::AnimationData animationData{ cpuData.m_NodeData, *cpuData.m_Skeleton, ticksPerSec, durInTicks };
+            Engine::priv::AnimationData animationData{ ticksPerSec, durInTicks };
             animationData.m_Channels.reserve(channelCount);
             for (size_t j = 0; j < channelCount; ++j) {
                 uint32_t pos_count, rot_count, scl_count;
@@ -188,7 +182,7 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
         uint32_t num_of_nodes = 0;
         readBigEndian(num_of_nodes, streamDataBuffer, 4U, blockStart);
         cpuData.m_NodeData.m_NodeHeirarchy.reserve(num_of_nodes);
-        cpuData.m_NodeData.m_NodeTransforms.reserve(num_of_nodes);
+        cpuData.m_NodeData.m_NodeTransforms.resize(num_of_nodes, glm::mat4{ 1.0f });
         cpuData.m_NodeData.m_Nodes.reserve(num_of_nodes);
         for (uint32_t i = 0; i < num_of_nodes; ++i) {
             uint16_t parent = 0;
@@ -196,15 +190,11 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
             cpuData.m_NodeData.m_NodeHeirarchy.push_back(parent);
         }
         for (uint32_t i = 0; i < num_of_nodes; ++i) {
-            auto& transform = cpuData.m_NodeData.m_NodeTransforms.emplace_back();
-            lamda_read_mat4_as_half_floats(transform);
-        }
-        for (uint32_t i = 0; i < num_of_nodes; ++i) {
             glm::mat4  node_transform{ 1.0f };
             uint8_t    isBone = 0;
             lamda_read_mat4_as_half_floats(node_transform);
             readBigEndian(isBone, streamDataBuffer, 1U, blockStart);
-            auto& node = cpuData.m_NodeData.m_Nodes.emplace_back(std::move(node_transform));
+            auto& node  = cpuData.m_NodeData.m_Nodes.emplace_back(std::move(node_transform));
             node.IsBone = static_cast<bool>(isBone);
         }
     }
@@ -430,9 +420,6 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
         for (uint32_t i = 0; i < numNodes; ++i) {
             uint16_t parent = cpuData.m_NodeData.m_NodeHeirarchy[i];
             writeBigEndian(stream, parent);
-        }
-        for (uint32_t i = 0; i < numNodes; ++i) {
-            lamda_write_mat4_as_half_floats(stream, cpuData.m_NodeData.m_NodeTransforms[i]);
         }
         for (uint32_t i = 0; i < numNodes; ++i) {
             lamda_write_mat4_as_half_floats(stream, cpuData.m_NodeData.m_Nodes[i].Transform);

@@ -206,9 +206,6 @@ void ModelInstance::setMesh(Handle mesh, ComponentModel& componentModel){
 void ModelInstance::setMaterial(Handle material, ComponentModel& componentModel){
     componentModel.setModel(m_MeshHandle, material, m_Index, m_ShaderProgramHandle, m_Stage);
 }
-void ModelInstance::playAnimation(std::string_view animationName, float start, float end, uint32_t requestedLoops){
-    m_Animations.emplace_animation(m_MeshHandle, animationName, start, end, requestedLoops);
-}
 void ModelInstance::onEvent(const Event& e) {
     if (e.type == EventType::ResourceLoaded && e.eventResource.resource->type() == ResourceType::Mesh) {
         Mesh* mesh           = (Mesh*)e.eventResource.resource;

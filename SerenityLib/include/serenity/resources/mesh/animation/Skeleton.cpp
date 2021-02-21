@@ -42,7 +42,7 @@ Engine::priv::MeshSkeleton::MeshSkeleton(const aiMesh& assimpMesh, const aiScene
             if (key.empty()) {
                 key = "Animation " + std::to_string(numAnimations());
             }
-            addAnimation(key, *nodeData, Ai_Animation, request);
+            addAnimation(key, Ai_Animation, request);
         }
     }
 }

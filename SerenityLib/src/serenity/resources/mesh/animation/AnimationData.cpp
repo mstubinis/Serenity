@@ -8,15 +8,12 @@
 
 using namespace Engine::priv;
 
-AnimationData::AnimationData( MeshNodeData& nodeData, Engine::priv::MeshSkeleton& skeleton, float ticksPerSecond, float durationInTicks)
-    : m_NodeData        { &nodeData }
-    , m_Skeleton        { &skeleton }
-    , m_TicksPerSecond  { ticksPerSecond != 0.0f ? ticksPerSecond : 25.0f }
+AnimationData::AnimationData( float ticksPerSecond, float durationInTicks)
+    : m_TicksPerSecond  { ticksPerSecond != 0.0f ? ticksPerSecond : 25.0f }
     , m_DurationInTicks { durationInTicks }
-{
-}
-AnimationData::AnimationData( MeshNodeData& nodeData, Engine::priv::MeshSkeleton& skeleton, const aiAnimation& assimpAnim, MeshRequest& request)
-    : AnimationData{ nodeData, skeleton, (float)assimpAnim.mTicksPerSecond, (float)assimpAnim.mDuration }
+{}
+AnimationData::AnimationData( const aiAnimation& assimpAnim, MeshRequest& request)
+    : AnimationData{ (float)assimpAnim.mTicksPerSecond, (float)assimpAnim.mDuration }
 {
     Engine::unordered_string_map<std::string, AnimationChannel> hashedChannels;
     for (uint32_t channelIdx = 0; channelIdx < assimpAnim.mNumChannels; ++channelIdx) {
@@ -33,13 +30,13 @@ AnimationData::AnimationData( MeshNodeData& nodeData, Engine::priv::MeshSkeleton
         }
     }
 }
-void AnimationData::ComputeTransforms(float TimeInSeconds, std::vector<glm::mat4>& Xforms) {
+void AnimationData::ComputeTransforms(float TimeInSeconds, std::vector<glm::mat4>& Xforms, MeshSkeleton& skeleton, MeshNodeData& nodeData) {
     float TimeInTicks   = TimeInSeconds * m_TicksPerSecond;
     float AnimationTime = std::fmod(TimeInTicks, m_DurationInTicks);
     uint16_t BoneIndex = 0;
-    for (uint32_t i = 1; i < m_NodeData->m_Nodes.size(); ++i) {
-        const auto parentIdx    = m_NodeData->m_NodeHeirarchy[i];
-        const auto& currNode    = m_NodeData->m_Nodes[i];
+    for (uint32_t i = 1; i < nodeData.m_Nodes.size(); ++i) {
+        const auto parentIdx    = nodeData.m_NodeHeirarchy[i];
+        const auto& currNode    = nodeData.m_Nodes[i];
         auto& channel           = m_Channels[i];
         glm::mat4 NodeTransform = currNode.Transform;
         if (!channel.empty()) {
@@ -48,11 +45,11 @@ void AnimationData::ComputeTransforms(float TimeInSeconds, std::vector<glm::mat4
             glm::vec3 t         = CalcInterpolatedPosition(AnimationTime, channel.PositionKeys, channel.CurrentKeyframes[0]);
             NodeTransform       = glm::translate(t) * glm::mat4_cast(q) * glm::scale(s);
         }
-        m_NodeData->m_NodeTransforms[i] = m_NodeData->m_NodeTransforms[parentIdx - 1] * NodeTransform;
+        nodeData.m_NodeTransforms[i] = nodeData.m_NodeTransforms[parentIdx - 1] * NodeTransform;
         if (currNode.IsBone) {
-            BoneInfo& boneInfo = m_Skeleton->m_BoneInfo[BoneIndex];
+            BoneInfo& boneInfo = skeleton.m_BoneInfo[BoneIndex];
             glm::mat4& Final   = boneInfo.FinalTransform;
-            Final              = m_Skeleton->m_GlobalInverseTransform * m_NodeData->m_NodeTransforms[i] * boneInfo.BoneOffset;
+            Final              = skeleton.m_GlobalInverseTransform * nodeData.m_NodeTransforms[i] * boneInfo.BoneOffset;
             //this line allows for animation combinations. only works when additional animations start off in their resting places...
             Final              = Xforms[BoneIndex] * Final;
             Xforms[BoneIndex]  = Final;
@@ -61,8 +58,8 @@ void AnimationData::ComputeTransforms(float TimeInSeconds, std::vector<glm::mat4
 
     }
     //this is wierd... TODO: see if this can be removed by doing this step above
-    //for (auto i = 0U; i < m_Skeleton->numBones(); ++i) {
-    //    Xforms[i] = m_Skeleton->m_BoneInfo[i].FinalTransform;
+    //for (auto i = 0U; i < skeleton.numBones(); ++i) {
+    //    Xforms[i] = skeleton.m_BoneInfo[i].FinalTransform;
     //}
 }
 glm::vec3 AnimationData::internal_interpolate_vec3(float AnimTime, const std::vector<Engine::priv::Vector3Key>& keys, std::function<size_t()>&& FindKeyFrmIdx) {

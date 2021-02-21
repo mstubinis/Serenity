@@ -146,9 +146,8 @@ void Engine::priv::PhysicsModule::update(const float dt, int maxSubSteps, float 
     }
 }
 void Engine::priv::PhysicsModule::render(const Camera& camera){
-    const glm::vec3 camPos = camera.getPosition();
     m_Pipeline.m_World->debugDrawWorld();
-    Engine::Renderer::sendUniformMatrix4("Model", glm::mat4(1.0f));
+    Engine::Renderer::sendUniformMatrix4("Model", glm::mat4{ 1.0f });
     Engine::Renderer::sendUniformMatrix4("VP", camera.getViewProjection());
     m_Pipeline.m_DebugDrawer.drawAccumulatedLines();
     m_Pipeline.m_DebugDrawer.postRender();
@@ -224,27 +223,27 @@ bool Engine::Physics::removeRigidBody(ComponentBody& body) {
     return Physics::removeRigidBody(&body.getBtBody());
 }
 bool Engine::Physics::addRigidBodyThreadSafe(Entity entity) {
-    std::lock_guard lock(Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Mutex);
+    std::lock_guard lock{ Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Mutex };
     return Physics::addRigidBody(entity);
 }
 bool Engine::Physics::addRigidBodyThreadSafe(btRigidBody* body, MaskType group, MaskType mask) {
-    std::lock_guard lock(Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Mutex);
+    std::lock_guard lock{ Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Mutex };
     return Physics::addRigidBody(body, group, mask);
 }
 bool Engine::Physics::addRigidBodyThreadSafe(btRigidBody* body) {
-    std::lock_guard lock(Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Mutex);
+    std::lock_guard lock{ Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Mutex };
     return Physics::addRigidBody(body);
 }
 bool Engine::Physics::removeRigidBodyThreadSafe(Entity entity) {
-    std::lock_guard lock(Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Mutex);
+    std::lock_guard lock{ Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Mutex };
     return Physics::removeRigidBody(entity);
 }
 bool Engine::Physics::removeRigidBodyThreadSafe(btRigidBody* body) {
-    std::lock_guard lock(Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Mutex);
+    std::lock_guard lock{ Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Mutex };
     return Physics::removeRigidBody(body);
 }
 void Engine::Physics::updateRigidBodyThreadSafe(btRigidBody* body) {
-    std::lock_guard lock(Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Mutex);
+    std::lock_guard lock{ Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Mutex };
     Physics::updateRigidBody(body);
 }
 bool Engine::Physics::addRigidBodyThreadSafe(ComponentBody& body){
@@ -254,7 +253,7 @@ bool Engine::Physics::removeRigidBodyThreadSafe(ComponentBody& body) {
     return Physics::removeRigidBodyThreadSafe(&body.getBtBody());
 }
 bool Engine::Physics::removeCollisionObjectThreadSafe(btCollisionObject* object) {
-    std::lock_guard lock(Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Mutex);
+    std::lock_guard lock{ Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Mutex };
     return Physics::removeCollisionObject(object);
 }
 

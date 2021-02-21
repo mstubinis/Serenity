@@ -21,6 +21,7 @@ namespace Engine::priv {
     class  AnimationData;
     struct PublicMeshRequest;
     class  ModelInstanceAnimation;
+    class  ModelInstanceAnimationContainer;
     class  RenderModule;
 };
 
@@ -91,6 +92,7 @@ class Mesh final: public Resource, public Observer {
     friend class  Engine::priv::MeshLoader;
     friend class  Engine::priv::MeshCollisionFactory;
     friend class  Engine::priv::ModelInstanceAnimation;
+    friend class  Engine::priv::ModelInstanceAnimationContainer;
     friend class  Engine::priv::RenderModule;
     friend class  Collision;
     friend class  Terrain;
@@ -124,11 +126,11 @@ class Mesh final: public Resource, public Observer {
         inline void setCustomBindFunctor(BindFunc&& functor) noexcept { m_CustomBindFunctor = std::move(functor); }
         inline void setCustomUnbindFunctor(UnbindFunc&& functor) noexcept { m_CustomUnbindFunctor = std::move(functor); }
 
-        [[nodiscard]] Engine::priv::MeshSkeleton::AnimationMap& getAnimationData();
+        [[nodiscard]] Engine::priv::MeshSkeleton::AnimationDataMap& getAnimationData();
         [[nodiscard]] inline constexpr const glm::vec3& getRadiusBox() const noexcept { return m_CPUData.m_RadiusBox; }
         [[nodiscard]] inline constexpr float getRadius() const noexcept { return m_CPUData.m_Radius; }
         [[nodiscard]] inline constexpr const VertexData& getVertexData() const noexcept { return *m_CPUData.m_VertexData; }
-        [[nodiscard]] inline constexpr const Engine::priv::MeshSkeleton* getSkeleton() const noexcept { return m_CPUData.m_Skeleton; }
+        [[nodiscard]] inline Engine::priv::MeshSkeleton* getSkeleton() noexcept { return m_CPUData.m_Skeleton; }
 
         void onEvent(const Event&);
 
