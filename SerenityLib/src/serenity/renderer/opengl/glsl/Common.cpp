@@ -237,12 +237,14 @@ layout (std140) uniform Camera //generated
     vec4 CameraInfo2;
     vec4 CameraInfo3;
     vec4 ScreenInfo;
+    vec4 RendererInfo1;
 };
 vec3 CameraPosition = CameraInfo1.xyz;
 vec3 CameraViewVector = CameraInfo2.xyz;
 vec3 CameraRealPosition = CameraInfo3.xyz;
 float CameraNear = CameraInfo1.w;
 float CameraFar = CameraInfo2.w;
+float LogFCoefficient = CameraInfo3.w;
 )", 1);
             }
         }else{ //no UBO's, just add a bunch of uniforms
@@ -258,11 +260,13 @@ uniform vec4 CameraInfo1;
 uniform vec4 CameraInfo2;
 uniform vec4 CameraInfo3;
 uniform vec4 ScreenInfo;
+uniform vec4 RendererInfo1;
 vec3 CameraPosition = CameraInfo1.xyz;
 vec3 CameraViewVector = CameraInfo2.xyz;
 vec3 CameraRealPosition = CameraInfo3.xyz;
 float CameraNear = CameraInfo1.w;
 float CameraFar = CameraInfo2.w;
+float LogFCoefficient = CameraInfo3.w;
 )", 1);
             }
         }

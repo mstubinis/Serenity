@@ -31,8 +31,8 @@ AnimationData::AnimationData( const aiAnimation& assimpAnim, MeshRequest& reques
     }
 }
 void AnimationData::ComputeTransforms(float TimeInSeconds, std::vector<glm::mat4>& Xforms, MeshSkeleton& skeleton, MeshNodeData& nodeData) {
-    float TimeInTicks   = TimeInSeconds * m_TicksPerSecond;
-    float AnimationTime = std::fmod(TimeInTicks, m_DurationInTicks);
+    const float TimeInTicks   = TimeInSeconds * m_TicksPerSecond;
+    const float AnimationTime = std::fmod(TimeInTicks, m_DurationInTicks);
     uint16_t BoneIndex = 0;
     for (uint32_t i = 1; i < nodeData.m_Nodes.size(); ++i) {
         const auto parentIdx    = nodeData.m_NodeHeirarchy[i];
@@ -47,12 +47,11 @@ void AnimationData::ComputeTransforms(float TimeInSeconds, std::vector<glm::mat4
         }
         nodeData.m_NodeTransforms[i] = nodeData.m_NodeTransforms[parentIdx - 1] * NodeTransform;
         if (currNode.IsBone) {
-            BoneInfo& boneInfo = skeleton.m_BoneInfo[BoneIndex];
-            glm::mat4& Final   = boneInfo.FinalTransform;
-            Final              = skeleton.m_GlobalInverseTransform * nodeData.m_NodeTransforms[i] * boneInfo.BoneOffset;
-            //this line allows for animation combinations. only works when additional animations start off in their resting places...
-            Final              = Xforms[BoneIndex] * Final;
-            Xforms[BoneIndex]  = Final;
+            BoneInfo& boneInfo  = skeleton.m_BoneInfo[BoneIndex];
+            glm::mat4& Final    = boneInfo.FinalTransform;
+            Final               = skeleton.m_GlobalInverseTransform * nodeData.m_NodeTransforms[i] * boneInfo.BoneOffset;
+            Final               = Xforms[BoneIndex] * Final; //this line allows for animation combinations. only works when additional animations start off in their resting places...
+            Xforms[BoneIndex]   = Final;
             ++BoneIndex;
         }
 
@@ -83,9 +82,7 @@ glm::quat AnimationData::CalcInterpolatedRotation(float AnimTime, const std::vec
     size_t Index     = FindRotationIdx(AnimTime, rotations, CurrentKeyFrame);
     float DeltaTime  = rotations[Index + 1].time - rotations[Index].time;
     float Factor     = AnimTime - rotations[Index].time / DeltaTime;
-    glm::quat out = glm::slerp(rotations[Index].value, rotations[Index + 1].value, Factor);
-    out = glm::normalize(out);
-    return out;
+    return glm::normalize(glm::slerp(rotations[Index].value, rotations[Index + 1].value, Factor));
 }
 glm::vec3 AnimationData::CalcInterpolatedScaling(float AnimTime, const std::vector<Engine::priv::Vector3Key>& scales, uint16_t& CurrentKeyFrame) {
     return internal_interpolate_vec3(AnimTime, scales, [this, &scales, AnimTime, &CurrentKeyFrame]() {

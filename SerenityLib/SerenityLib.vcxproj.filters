@@ -294,6 +294,18 @@
     <Filter Include="Source Files\Engine\Core\Resources\Mesh\Animation">
       <UniqueIdentifier>{4e12d8eb-6f79-4e04-a400-99b2e07fef57}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\ECS\Systems">
+      <UniqueIdentifier>{fea47b01-5ab7-4186-a53d-144264c0c5e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\ECS\Systems">
+      <UniqueIdentifier>{da94126d-0c03-4e45-b0ec-9c7ceaaa6c41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\ECS\Entity">
+      <UniqueIdentifier>{3bbed047-3c12-4bdc-ae1e-da42d2ffd5d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\ECS\Entity">
+      <UniqueIdentifier>{539bdbd7-660e-45ee-959e-b18d2f19bd52}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\serenity\algorithms\MergeSort.cpp">
@@ -355,42 +367,6 @@
     </ClCompile>
     <ClCompile Include="src\serenity\ecs\ECSEntityPool.cpp">
       <Filter>Source Files\Engine\Core\ECS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\Entity.cpp">
-      <Filter>Source Files\Engine\Core\ECS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\EntityBody.cpp">
-      <Filter>Source Files\Engine\Core\ECS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\EntityRAII.cpp">
-      <Filter>Source Files\Engine\Core\ECS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\EntityRAIIBody.cpp">
-      <Filter>Source Files\Engine\Core\ECS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\ComponentBody.cpp">
-      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\ComponentCamera.cpp">
-      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\ComponentLogic.cpp">
-      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\ComponentLogic1.cpp">
-      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\ComponentLogic2.cpp">
-      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\ComponentLogic3.cpp">
-      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\ComponentModel.cpp">
-      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\ComponentName.cpp">
-      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
     </ClCompile>
     <ClCompile Include="src\serenity\events\EventDispatcher.cpp">
       <Filter>Source Files\Engine\Core\Events</Filter>
@@ -782,6 +758,66 @@
     <ClCompile Include="include\serenity\resources\mesh\animation\Skeleton.cpp">
       <Filter>Source Files\Engine\Core\Resources\Mesh\Animation</Filter>
     </ClCompile>
+    <ClCompile Include="src\serenity\ecs\components\ComponentBody.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\components\ComponentCamera.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\components\ComponentLogic.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\components\ComponentLogic1.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\components\ComponentLogic2.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\components\ComponentLogic3.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\components\ComponentModel.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\components\ComponentName.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentModel.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentLogic.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentLogic1.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentLogic2.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentLogic3.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentCamera.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentBody.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemBaseClass.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\entity\Entity.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\entity\EntityBody.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\entity\EntityRAII.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\entity\EntityRAIIBody.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Entity</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h">
@@ -915,51 +951,6 @@
     </ClInclude>
     <ClInclude Include="include\serenity\ecs\ECSIncludes.h">
       <Filter>Header Files\Engine\Core\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ECSSystem.h">
-      <Filter>Header Files\Engine\Core\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ECSSystemConstructorInfo.h">
-      <Filter>Header Files\Engine\Core\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\Entity.h">
-      <Filter>Header Files\Engine\Core\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\EntityBody.h">
-      <Filter>Header Files\Engine\Core\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\EntityRAII.h">
-      <Filter>Header Files\Engine\Core\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\EntityRAIIBody.h">
-      <Filter>Header Files\Engine\Core\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ComponentBody.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ComponentCamera.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ComponentLogic.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ComponentLogic1.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ComponentLogic2.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ComponentLogic3.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ComponentModel.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\ComponentName.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\Components.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\events\Event.h">
       <Filter>Header Files\Engine\Core\Events</Filter>
@@ -1456,5 +1447,82 @@
     <ClInclude Include="include\serenity\resources\mesh\animation\Skeleton.h">
       <Filter>Header Files\Engine\Core\Resources\Mesh\Animation</Filter>
     </ClInclude>
+    <ClInclude Include="include\serenity\ecs\components\ComponentBaseClass.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\components\ComponentBody.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\components\ComponentCamera.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\components\ComponentLogic.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\components\ComponentLogic1.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\components\ComponentLogic2.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\components\ComponentLogic3.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\components\ComponentModel.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\components\ComponentName.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\components\Components.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\ECSSystemPool.h">
+      <Filter>Header Files\Engine\Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentModel.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentLogic3.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentLogic2.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentLogic1.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentLogic.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentCamera.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentBody.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\entity\Entity.h">
+      <Filter>Header Files\Engine\Core\ECS\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\entity\EntityBody.h">
+      <Filter>Header Files\Engine\Core\ECS\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\entity\EntityRAII.h">
+      <Filter>Header Files\Engine\Core\ECS\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\entity\EntityRAIIBody.h">
+      <Filter>Header Files\Engine\Core\ECS\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemBaseClass.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="include\serenity\ecs\systems\SystemBaseClass.inl">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </None>
+    <None Include="include\serenity\ecs\entity\Entity.inl">
+      <Filter>Header Files\Engine\Core\ECS\Entity</Filter>
+    </None>
   </ItemGroup>
 </Project>

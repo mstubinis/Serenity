@@ -1,6 +1,6 @@
 
 #include <serenity/Terrain.h>
-#include <serenity/ecs/Components.h>
+#include <serenity/ecs/components/Components.h>
 #include <serenity/system/Engine.h>
 #include <serenity/resources/mesh/Mesh.h>
 #include <serenity/system/Engine.h>

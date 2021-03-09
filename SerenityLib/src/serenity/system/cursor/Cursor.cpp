@@ -6,7 +6,7 @@
 Cursor::Cursor() {
     bool success = m_SFMLCursor.loadFromSystem(sf::Cursor::Type::Arrow);
 }
-Cursor::Cursor(const std::string& textureFile) {
+Cursor::Cursor(std::string_view textureFile) {
     auto texture  = Engine::Resources::getResource<Texture>(textureFile);
     if (!texture.m_Resource) {
         texture.m_Handle   = Engine::Resources::loadTexture(textureFile);

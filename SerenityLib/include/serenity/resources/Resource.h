@@ -4,35 +4,52 @@
 
 #include <serenity/resources/ResourcesIncludes.h>
 #include <string>
+#include <atomic>
 
-class Resource {
-    private:
+class ResourceBaseClass {
+    protected:
         std::string    m_Name;
-        //uint32_t       m_UsageCount    = 0U;
-        ResourceType   m_ResourceType  = ResourceType::Unknown;
-        bool           m_IsLoaded      = false;
+        ResourceType   m_ResourceType = ResourceType::Unknown;
+        bool           m_IsLoaded     = false;
     public:
-        Resource() = default;
-        Resource(ResourceType type);
-        Resource(ResourceType type, std::string_view name);
+        ResourceBaseClass() = default;
+        ResourceBaseClass(ResourceType type);
+        ResourceBaseClass(ResourceType type, std::string_view name);
 
-        Resource(const Resource&)                 = delete;
-        Resource& operator=(const Resource&)      = delete;
-        Resource(Resource&&) noexcept;
-        Resource& operator=(Resource&&) noexcept;
-        virtual ~Resource() {}
+        ResourceBaseClass(const ResourceBaseClass&)                 = delete;
+        ResourceBaseClass& operator=(const ResourceBaseClass&)      = delete;
+        ResourceBaseClass(ResourceBaseClass&&) noexcept;
+        ResourceBaseClass& operator=(ResourceBaseClass&&) noexcept;
+        virtual ~ResourceBaseClass() = default;
 
         [[nodiscard]] inline constexpr ResourceType type() const noexcept { return m_ResourceType; }
-        [[nodiscard]] inline constexpr const std::string& name() const noexcept { return m_Name;}
+        [[nodiscard]] inline constexpr const std::string& name() const noexcept { return m_Name; }
         [[nodiscard]] inline constexpr bool isLoaded() const noexcept { return m_IsLoaded; }
-        //[[nodiscard]]inline constexpr uint32_t useCount() const noexcept { return m_UsageCount; }
 
         inline void setName(std::string_view name) noexcept { m_Name = name; }
 
-        //inline void incrementUseCount() noexcept { ++m_UsageCount; }
-        //inline void decrementUseCount() noexcept { if (m_UsageCount > 0) { --m_UsageCount; } }
-
         virtual void load();
         virtual void unload();
+};
+
+template<class RESOURCE>
+class Resource : public ResourceBaseClass {
+    public:
+        //static inline std::atomic<uint32_t> TYPE_ID = 0;
+        static inline uint32_t TYPE_ID = 0;
+    public:
+        Resource() = default;
+        Resource(ResourceType type) 
+            : ResourceBaseClass { type }
+        {}
+        Resource(ResourceType type, std::string_view name) 
+            : ResourceBaseClass { type, name }
+        {}
+
+        Resource(const Resource&)                = delete;
+        Resource& operator=(const Resource&)     = delete;
+        Resource(Resource&&) noexcept            = default;
+        Resource& operator=(Resource&&) noexcept = default;
+        virtual ~Resource() = default;
 };
 #endif

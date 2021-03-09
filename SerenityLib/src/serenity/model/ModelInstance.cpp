@@ -9,7 +9,7 @@
 #include <serenity/scene/Scene.h>
 #include <serenity/scene/Viewport.h>
 #include <serenity/resources/shader/ShaderProgram.h>
-#include <serenity/ecs/Components.h>
+#include <serenity/ecs/components/Components.h>
 
 #include <serenity/lights/Lights.h>
 #include <serenity/scene/Skybox.h>
@@ -25,8 +25,7 @@ constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engi
     auto stage               = i->stage();
     auto& scene              = *Engine::Resources::getCurrentScene();
     auto* camera             = scene.getActiveCamera();
-    glm::vec3 camPos         = camera->getPosition();
-    ComponentBody* body      = (i->parent().getComponent<ComponentBody>());
+    ComponentBody* body      = i->parent().getComponent<ComponentBody>();
     glm::mat4 parentModel    = body->modelMatrixRendering();
     auto& animationContainer = i->getRunningAnimations();
 
@@ -37,7 +36,6 @@ constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engi
         Skybox* skybox          = scene.skybox();
         renderer->m_Pipeline->sendGPUDataAllLights(scene, *camera);
         renderer->m_Pipeline->sendGPUDataGI(skybox);
-        Engine::Renderer::sendUniform4Safe("ScreenData", renderer->m_GI_Pack, Engine::Renderer::Settings::getGamma(), 0.0f, 0.0f);
     }
     if (animationContainer.size() > 0) {
         Engine::Renderer::sendUniform1Safe("AnimationPlaying", 1);
@@ -48,11 +46,11 @@ constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engi
     glm::mat4 modelMatrix = parentModel * i->modelMatrix();
 
     //world space normals
-    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ modelMatrix }));
 
     //view space normals
     //glm::mat4 view = cam.getView();
-    //glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(view * model)));
+    //glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ view * model }));
 
     Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);

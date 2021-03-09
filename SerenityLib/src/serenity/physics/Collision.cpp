@@ -2,8 +2,8 @@
 #include <serenity/physics/Collision.h>
 #include <serenity/math/Engine_Math.h>
 
-#include <serenity/ecs/ComponentModel.h>
-#include <serenity/ecs/ComponentBody.h>
+#include <serenity/ecs/components/ComponentModel.h>
+#include <serenity/ecs/components/ComponentBody.h>
 #include <serenity/resources/mesh/Mesh.h>
 #include <serenity/resources/mesh/BuiltInMeshes.h>
 #include <serenity/system/Engine.h>

@@ -9,7 +9,7 @@ namespace Engine::priv {
 };
 
 #include <serenity/lights/LightIncludes.h>
-#include <serenity/ecs/EntityBody.h>
+#include <serenity/ecs/entity/EntityBody.h>
 #include <glm/vec4.hpp>
 
 constexpr float LIGHT_DEFAULT_AMBIENT_INTENSITY  = 0.005f;

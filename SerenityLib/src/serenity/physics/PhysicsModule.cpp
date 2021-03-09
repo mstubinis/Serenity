@@ -4,9 +4,8 @@
 
 #include <serenity/renderer/Renderer.h>
 #include <serenity/scene/Camera.h>
-// ecs
-#include <serenity/ecs/ComponentModel.h>
-#include <serenity/ecs/ComponentBody.h>
+#include <serenity/ecs/components/ComponentModel.h>
+#include <serenity/ecs/components/ComponentBody.h>
 
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleShape.h>

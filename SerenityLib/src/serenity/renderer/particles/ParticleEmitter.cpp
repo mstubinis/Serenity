@@ -4,8 +4,8 @@
 #include <serenity/renderer/particles/ParticleEmissionProperties.h>
 #include <serenity/system/Engine.h>
 #include <serenity/resources/Engine_Resources.h>
-#include <serenity/ecs/ComponentBody.h>
-#include <serenity/ecs/ComponentModel.h>
+#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentModel.h>
 
 #include <serenity/resources/mesh/Mesh.h>
 #include <serenity/resources/material/Material.h>

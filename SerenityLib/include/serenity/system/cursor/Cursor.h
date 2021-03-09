@@ -43,7 +43,7 @@ class Cursor {
 
     public:
         Cursor();
-        Cursor(const std::string& textureFile);
+        Cursor(std::string_view textureFile);
         virtual ~Cursor();
 
         virtual bool rotateLeft() noexcept;

@@ -8,21 +8,18 @@
 using namespace Engine;
 using namespace Engine::priv;
 
-GLint UniformBufferObject::MAX_UBO_BINDINGS;
-unsigned int UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT = 0;
-UniformBufferObject* UniformBufferObject::UBO_CAMERA         = nullptr;
+GLint     UniformBufferObject::MAX_UBO_BINDINGS;
+uint32_t  UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT = 0;
 
 UniformBufferObject::UniformBufferObject(const char* nameInShader, uint32_t sizeofStruct, const int globalBindingPointNumber) 
-    : m_NameInShader{ nameInShader }
-    , m_SizeOfStruct{ sizeofStruct }
+    : m_SizeOfStruct{ sizeofStruct }
 {
+    setName(nameInShader);
     if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
         return;
     }
     if (globalBindingPointNumber == -1) {
-        //automatic assignment
-        m_GlobalBindingPointNumber = (UniformBufferObject::MAX_UBO_BINDINGS - 1) - UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT;
-        ++UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT;
+        m_GlobalBindingPointNumber = (UniformBufferObject::MAX_UBO_BINDINGS - 1) - UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT++;
         if (m_GlobalBindingPointNumber < 0) {
             ENGINE_PRODUCTION_LOG("Warning: Max UBO Limit reached!")
             m_GlobalBindingPointNumber = 0;
@@ -30,37 +27,37 @@ UniformBufferObject::UniformBufferObject(const char* nameInShader, uint32_t size
     }else{
         m_GlobalBindingPointNumber = globalBindingPointNumber;
     }
-    _load_CPU();
-    _load_GPU();
+    internal_load_CPU();
+    internal_load_GPU();
     registerEvent(EventType::WindowFullscreenChanged);
 }
 UniformBufferObject::~UniformBufferObject() {
     unregisterEvent(EventType::WindowFullscreenChanged);
-    _unload_GPU();
-    _unload_CPU();
+    internal_unload_GPU();
+    internal_unload_CPU();
 }
-void UniformBufferObject::_load_CPU() {
+void UniformBufferObject::internal_load_CPU() {
     if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
         return;
     }
-    _unload_CPU();
+    internal_unload_CPU();
 }
-void UniformBufferObject::_unload_CPU() {
+void UniformBufferObject::internal_unload_CPU() {
     if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
         return;
     }
 }
-void UniformBufferObject::_load_GPU() {
+void UniformBufferObject::internal_load_GPU() {
     if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
         return;
     }
-    _unload_GPU();
+    internal_unload_GPU();
     GLCall(glGenBuffers(1, &m_UBOObject));
-    GLCall(glBindBuffer(GL_UNIFORM_BUFFER, m_UBOObject));//gen and bind buffer
-    GLCall(glBufferData(GL_UNIFORM_BUFFER, m_SizeOfStruct, NULL, GL_DYNAMIC_DRAW)); //create buffer data storage
-    GLCall(glBindBufferBase(GL_UNIFORM_BUFFER, m_GlobalBindingPointNumber, m_UBOObject));//link UBO to it's global numerical index
+    GLCall(glBindBuffer(GL_UNIFORM_BUFFER, m_UBOObject));                                 // gen and bind buffer
+    GLCall(glBufferData(GL_UNIFORM_BUFFER, m_SizeOfStruct, NULL, GL_DYNAMIC_DRAW));       // create buffer data storage
+    GLCall(glBindBufferBase(GL_UNIFORM_BUFFER, m_GlobalBindingPointNumber, m_UBOObject)); // link UBO to it's global numerical index
 }
-void UniformBufferObject::_unload_GPU() {
+void UniformBufferObject::internal_unload_GPU() {
     if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
         return;
     }
@@ -75,16 +72,20 @@ void UniformBufferObject::updateData(void* data) {
     GLCall(glBufferData(GL_UNIFORM_BUFFER, m_SizeOfStruct, NULL, GL_STREAM_DRAW));
     GLCall(glBufferSubData(GL_UNIFORM_BUFFER, 0, m_SizeOfStruct, data));
 }
-void UniformBufferObject::attachToShader(const ShaderProgram& shaderProgram) {
+bool UniformBufferObject::attachToShaderProgram(ShaderProgram& shaderProgram) {
     if (Engine::priv::RenderModule::GLSL_VERSION < 140 || shaderProgram.m_AttachedUBOs.contains(m_UBOObject)) {
-        return;
+        return false;
     }
-    const unsigned int programBlockIndex = glGetUniformBlockIndex(shaderProgram.m_ShaderProgram, m_NameInShader);
+    const uint32_t programBlockIndex = glGetUniformBlockIndex(shaderProgram.m_ShaderProgram, name().c_str());
+    if (programBlockIndex == GL_INVALID_INDEX) {
+        return false; //error: was not found
+    }
     GLCall(glUniformBlockBinding(shaderProgram.m_ShaderProgram, programBlockIndex, m_GlobalBindingPointNumber));
-    const_cast<ShaderProgram&>(shaderProgram).m_AttachedUBOs.emplace(m_UBOObject);
+    shaderProgram.m_AttachedUBOs.emplace(m_UBOObject);
+    return true;
 }
 void UniformBufferObject::onEvent(const Event& e) {
     if (e.type == EventType::WindowFullscreenChanged) {
-        _load_GPU();
+        internal_load_GPU();
     }
 }

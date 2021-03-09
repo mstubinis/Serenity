@@ -28,7 +28,7 @@ struct CharGlyph final {
     std::vector<glm::vec3> pts;
     std::vector<glm::vec2> uvs;
 };
-class Font final: public Resource {
+class Font final: public Resource<Font> {
     public:
         static constexpr uint32_t MAX_CHARACTERS_RENDERED_PER_FRAME    = 4096;
     private:

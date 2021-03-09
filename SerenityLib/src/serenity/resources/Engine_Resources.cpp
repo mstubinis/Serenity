@@ -21,13 +21,13 @@ Engine::view_ptr<Engine::priv::ResourceManager> Engine::priv::ResourceManager::R
 Engine::priv::ResourceManager::ResourceManager(const EngineOptions& options) {
     RESOURCE_MANAGER = this;
 
-    m_ResourceModule.registerResourceType<Texture>();
-    m_ResourceModule.registerResourceType<Mesh>();
-    m_ResourceModule.registerResourceType<Material>();
-    m_ResourceModule.registerResourceType<Font>();
-    m_ResourceModule.registerResourceType<Shader>();
-    m_ResourceModule.registerResourceType<ShaderProgram>();
-    m_ResourceModule.registerResourceType<SoundData>();
+    m_ResourceModule.registerResourceTypeID<Texture>();
+    m_ResourceModule.registerResourceTypeID<Mesh>();
+    m_ResourceModule.registerResourceTypeID<Material>();
+    m_ResourceModule.registerResourceTypeID<Font>();
+    m_ResourceModule.registerResourceTypeID<Shader>();
+    m_ResourceModule.registerResourceTypeID<ShaderProgram>();
+    m_ResourceModule.registerResourceTypeID<SoundData>();
 }
 void Engine::priv::ResourceManager::init(const EngineOptions& options){
     auto& window = m_Windows.emplace_back(std::unique_ptr<Window>(NEW Window{}));

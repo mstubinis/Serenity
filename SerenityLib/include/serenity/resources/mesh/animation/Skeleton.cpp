@@ -3,7 +3,7 @@
 #include <serenity/resources/mesh/MeshImportedData.h>
 #include <serenity/math/Engine_Math.h>
 
-Engine::priv::MeshSkeleton::MeshSkeleton(const aiMesh& assimpMesh, const aiScene& assimpScene, MeshRequest& request, MeshNodeData* nodeData, Engine::priv::MeshImportedData& data) {
+Engine::priv::MeshSkeleton::MeshSkeleton(const aiMesh& assimpMesh, const aiScene& assimpScene, MeshRequest& request, Engine::priv::MeshImportedData& data) {
     //build general information
     m_GlobalInverseTransform = Engine::Math::assimpToGLMMat4(assimpScene.mRootNode->mTransformation.Inverse());
     
@@ -35,6 +35,7 @@ Engine::priv::MeshSkeleton::MeshSkeleton(const aiMesh& assimpMesh, const aiScene
 
     //build animation information
     if (assimpScene.mAnimations && assimpScene.mNumAnimations > 0) {
+        m_AnimationMapping.reserve(assimpScene.mNumAnimations);
         m_AnimationData.reserve(assimpScene.mNumAnimations);
         for (auto k = 0U; k < assimpScene.mNumAnimations; ++k) {
             const auto& Ai_Animation = *assimpScene.mAnimations[k];
@@ -42,7 +43,7 @@ Engine::priv::MeshSkeleton::MeshSkeleton(const aiMesh& assimpMesh, const aiScene
             if (key.empty()) {
                 key = "Animation " + std::to_string(numAnimations());
             }
-            addAnimation(key, Ai_Animation, request);
+            const auto animIndex = addAnimation(key, Ai_Animation, request);
         }
     }
 }

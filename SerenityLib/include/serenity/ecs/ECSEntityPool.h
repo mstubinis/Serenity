@@ -8,7 +8,7 @@ namespace Engine::priv {
     struct PublicScene;
 };
 
-#include <serenity/ecs/Entity.h>
+#include <serenity/ecs/entity/Entity.h>
 
 namespace Engine::priv {
     class ECSEntityPool final{
@@ -18,10 +18,10 @@ namespace Engine::priv {
             std::vector<uint32_t>  m_Freelist;
         public:
             ECSEntityPool() = default;
-            ECSEntityPool(const ECSEntityPool&)                      = delete;
-            ECSEntityPool& operator=(const ECSEntityPool&)           = delete;
-            ECSEntityPool(ECSEntityPool&& other) noexcept            = delete;
-            ECSEntityPool& operator=(ECSEntityPool&& other) noexcept = delete;
+            ECSEntityPool(const ECSEntityPool&)                = delete;
+            ECSEntityPool& operator=(const ECSEntityPool&)     = delete;
+            ECSEntityPool(ECSEntityPool&&) noexcept            = delete;
+            ECSEntityPool& operator=(ECSEntityPool&&) noexcept = delete;
             ~ECSEntityPool() = default;
 
             void init(const SceneOptions& options);
@@ -30,7 +30,7 @@ namespace Engine::priv {
 
             void destroyFlaggedEntity(uint32_t entityID);
             [[nodiscard]] Entity addEntity(const Scene& scene) noexcept;
-            [[nodiscard]] Entity getEntity(uint32_t entityData) const noexcept;
+            //[[nodiscard]] Entity getEntity(uint32_t entityData) const noexcept;
 
             void clear() noexcept {
                 m_Pool.clear();

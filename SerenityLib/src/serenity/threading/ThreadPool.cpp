@@ -79,7 +79,7 @@ void ThreadPool::update() {
         }
     }
     {
-        std::lock_guard lock(m_Mutex);
+        std::lock_guard lock{ m_Mutex };
         //this CANNOT be split up in different loops / steps: future is_ready MIGHT be false for the first run,
         //and then true for the second run, in which case it gets removed without calling its then function
         for (auto& callbackSection : m_FuturesCallback) {

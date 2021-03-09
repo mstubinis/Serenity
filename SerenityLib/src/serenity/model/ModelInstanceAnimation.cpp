@@ -8,7 +8,7 @@ using namespace Engine::priv;
 
 #pragma region ModelInstanceAnimation
 
-ModelInstanceAnimation::ModelInstanceAnimation(MeshNodeData& nodeData, AnimationData& animData, MeshSkeleton& skeleton, std::string_view animName, float startTime, float endTime, uint16_t requestedLoops)
+ModelInstanceAnimation::ModelInstanceAnimation(MeshNodeData& nodeData, AnimationData& animData, MeshSkeleton& skeleton, float startTime, float endTime, uint16_t requestedLoops)
     : m_AnimationData  { &animData }
     , m_NodeData       { &nodeData }
     , m_Skeleton       { &skeleton }
@@ -19,7 +19,7 @@ ModelInstanceAnimation::ModelInstanceAnimation(MeshNodeData& nodeData, Animation
 {
 }
 
-void ModelInstanceAnimation::process(const float dt, std::vector<glm::mat4>& transforms) {
+void ModelInstanceAnimation::update(const float dt, std::vector<glm::mat4>& transforms) {
     m_CurrentTime  += dt;
     transforms.resize(m_NumBones, glm::mat4{ 1.0f });
     m_AnimationData->ComputeTransforms(m_CurrentTime, transforms, *m_Skeleton, *m_NodeData);
@@ -32,12 +32,21 @@ void ModelInstanceAnimation::process(const float dt, std::vector<glm::mat4>& tra
 
 #pragma region ModelInstanceAnimationContainer
 
-void ModelInstanceAnimationContainer::emplace_animation(Handle meshHandle, std::string_view animationName, float startTime, float endTime, uint16_t requestedLoops) {
+void ModelInstanceAnimationContainer::internal_emplace_animation(Handle meshHandle, const uint16_t animationIndex, float startTime, float endTime, uint16_t requestedLoops) noexcept {
     auto& mesh     = *meshHandle.get<Mesh>();
     auto& nodeData = mesh.m_CPUData.m_NodeData;
     auto& skeleton = *mesh.getSkeleton();
-    auto& animData = skeleton.m_AnimationData.find(animationName)->second;
-    m_Animation_Instances.emplace_back(nodeData, animData, skeleton, animationName, startTime, endTime, requestedLoops);
+    auto& animData = skeleton.m_AnimationData[animationIndex];
+    m_Animation_Instances.emplace_back(nodeData, animData, skeleton, startTime, endTime, requestedLoops);
+}
+
+void ModelInstanceAnimationContainer::emplace_animation(Handle meshHandle, std::string_view animationName, float startTime, float endTime, uint16_t requestedLoops) {
+    auto& mesh      = *meshHandle.get<Mesh>();
+    auto& skeleton  = *mesh.getSkeleton();
+    internal_emplace_animation(meshHandle, skeleton.getAnimationIndex(animationName), startTime, endTime, requestedLoops);
+}
+void ModelInstanceAnimationContainer::emplace_animation(Handle meshHandle, const uint16_t animationIndex, float startTime, float endTime, uint16_t requestedLoops) {
+    internal_emplace_animation(meshHandle, animationIndex, startTime, endTime, requestedLoops);
 }
 void ModelInstanceAnimationContainer::clear() {
     m_Animation_Instances.clear();
@@ -49,7 +58,7 @@ void ModelInstanceAnimationContainer::update(const float dt) {
     }
     m_Transforms.clear();
     std::for_each(std::begin(m_Animation_Instances), std::end(m_Animation_Instances), [this, dt](auto& animation) {
-        animation.process(dt, m_Transforms);
+        animation.update(dt, m_Transforms);
     });
     //cleanup any completed animations
     std::erase_if(m_Animation_Instances, [](const auto& anim) {

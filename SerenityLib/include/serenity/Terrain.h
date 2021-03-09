@@ -17,7 +17,7 @@ class  TerrainData;
 class  Mesh;
 
 #include <serenity/dependencies/glm.h>
-#include <serenity/ecs/Entity.h>
+#include <serenity/ecs/entity/Entity.h>
 #include <serenity/events/Observer.h>
 
 #include <LinearMath/btScalar.h>

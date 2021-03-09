@@ -35,7 +35,7 @@ MeshRequest::MeshRequest(MeshRequest&& other) noexcept
     , m_FileExists    { std::move(other.m_FileExists) }
     , m_Async         { std::move(other.m_Async) }
     , m_Threshold     { std::move(other.m_Threshold) }
-    , m_NodeData { std::move(other.m_NodeData) }
+    , m_NodeData      { std::move(other.m_NodeData) }
     , m_NodeStrVector { std::move(other.m_NodeStrVector) }
     , m_Parts         { std::move(other.m_Parts) }
     , m_Callback      { std::move(other.m_Callback) }
@@ -47,7 +47,7 @@ MeshRequest& MeshRequest::operator=(MeshRequest&& other) noexcept {
     m_FileExists    = std::move(other.m_FileExists);
     m_Async         = std::move(other.m_Async);
     m_Threshold     = std::move(other.m_Threshold);
-    m_NodeData  = std::move(other.m_NodeData);
+    m_NodeData      = std::move(other.m_NodeData);
     m_NodeStrVector = std::move(other.m_NodeStrVector);
     m_Parts         = std::move(other.m_Parts);
     m_Callback      = std::move(other.m_Callback);
@@ -105,7 +105,7 @@ void MeshRequest::request(bool inAsync) {
 }
 
 bool MeshRequest::populate() {
-    if (m_FileExtension != ".objcc" && m_FileExtension != ".smsh") {
+    if (m_FileExtension != ".smsh") {
         m_Importer.m_AIScene = const_cast<aiScene*>(m_Importer.m_Importer_ptr->ReadFile(m_FileOrData, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace));
         m_Importer.m_AIRoot  = m_Importer.m_AIScene->mRootNode;
         auto& aiscene        = *m_Importer.m_AIScene;
@@ -124,7 +124,7 @@ bool MeshRequest::populate() {
     return true;
 }
 void PublicMeshRequest::LoadCPU(MeshRequest& meshRequest) {
-    if (meshRequest.m_FileExtension != ".objcc" && meshRequest.m_FileExtension != ".smsh") {
+    if (meshRequest.m_FileExtension != ".smsh") {
         auto& aiscene     = *meshRequest.m_Importer.m_AIScene;
         auto& aiRootNode  = *meshRequest.m_Importer.m_AIRoot;
         MeshLoader::LoadProcessNodeData(meshRequest, aiscene, aiRootNode);
@@ -145,20 +145,6 @@ void PublicMeshRequest::LoadCPU(MeshRequest& meshRequest) {
         for (auto& part : meshRequest.m_Parts) {
             part.cpuData.m_Threshold = meshRequest.m_Threshold;
             SMSH_File::LoadFile(meshRequest.m_FileOrData.c_str(), part.cpuData);
-            part.cpuData.internal_calculate_radius();
-            part.cpuData.m_CollisionFactory = NEW MeshCollisionFactory{ part.cpuData, meshRequest.m_CollisionLoadingFlags };
-            auto mutex                      = part.handle.getMutex();
-            if (mutex) {
-                std::unique_lock lock{ *mutex };
-                auto& mesh = *part.handle.get<Mesh>();
-                mesh.setName(part.name);
-                mesh.m_CPUData = std::move(part.cpuData);
-            }
-        }
-    }else{ //objcc
-        for (auto& part : meshRequest.m_Parts) {
-            part.cpuData.m_VertexData       = MeshLoader::LoadFrom_OBJCC(meshRequest.m_FileOrData);
-            part.cpuData.m_Threshold        = meshRequest.m_Threshold;
             part.cpuData.internal_calculate_radius();
             part.cpuData.m_CollisionFactory = NEW MeshCollisionFactory{ part.cpuData, meshRequest.m_CollisionLoadingFlags };
             auto mutex                      = part.handle.getMutex();

@@ -1,5 +1,5 @@
 #include <serenity/lights/DirectionalLight.h>
-#include <serenity/ecs/ComponentBody.h>
+#include <serenity/ecs/components/ComponentBody.h>
 #include <serenity/utils/Utils.h>
 #include <serenity/scene/Scene.h>
 #include <serenity/system/Engine.h>

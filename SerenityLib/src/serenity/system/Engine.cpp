@@ -3,7 +3,7 @@
 #include <serenity/system/EngineOptions.h>
 #include <serenity/system/EngineGameFunctions.h>
 #include <serenity/ecs/ECS.h>
-#include <serenity/ecs/ComponentCamera.h>
+#include <serenity/ecs/components/ComponentCamera.h>
 
 #include <serenity/scene/Scene.h>
 #include <serenity/scene/Camera.h>

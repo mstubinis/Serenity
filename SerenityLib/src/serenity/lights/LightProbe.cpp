@@ -1,5 +1,5 @@
 #include <serenity/lights/LightProbe.h>
-#include <serenity/ecs/ComponentBody.h>
+#include <serenity/ecs/components/ComponentBody.h>
 #include <serenity/resources/Engine_Resources.h>
 
 LightProbe::LightProbe(Scene* scene, ProbeType::Type type, const glm::vec3& position)

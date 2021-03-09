@@ -746,7 +746,6 @@ priv::EShaders::forward_frag =
     "uniform SAMPLER_TYPE_Cube prefilterMap;\n"
     "uniform SAMPLER_TYPE_2D brdfLUT;\n"
     "uniform SAMPLER_TYPE_2D gTextureMap;\n"
-    "uniform vec4 ScreenData;\n" //x = GIContribution, y = gamma, z = winSize.x, w = winSize.y
     "\n"
     "const float MAX_REFLECTION_LOD = 5.0;\n"
     "\n"
@@ -797,7 +796,7 @@ priv::EShaders::forward_frag =
     "            lightTotal += lightCalculation;\n"
     "        }\n"
              //GI here
-    "        vec3 inGIContribution = Unpack3FloatsInto1FloatUnsigned(ScreenData.x);\n" //x = diffuse, y = specular, z = global
+    "        vec3 inGIContribution = Unpack3FloatsInto1FloatUnsigned(RendererInfo1.x);\n" //x = diffuse, y = specular, z = global
     "        lightTotal           += CalcGILight(SSAO, inData.normals, inData.diffuse.xyz, WorldPosition, AO, MetalSmooth.x, MetalSmooth.y, inData.glow, inData.materialF0, MaterialBasePropertiesTwo.x, inGIContribution).rgb;\n"
     "    }else{\n"
     "        lightTotal = inData.diffuse.rgb;\n"
@@ -1157,14 +1156,13 @@ priv::EShaders::lighting_frag =
     "uniform SAMPLER_TYPE_2D gSSAOMap;\n"
     "uniform SAMPLER_TYPE_2D gTextureMap;\n"
     "\n"
-    "uniform vec4 ScreenData;\n" //x = UNUSED, y = screenGamma, z = winSize.x, w = winSize.y
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
     "\n"
     "varying vec2 texcoords;\n"
     "flat varying vec3 CamRealPosition;\n"
     "\n"
     "void main(){\n"                      //windowX      //windowY
-    "    vec2 uv = gl_FragCoord.xy / vec2(ScreenData.z, ScreenData.w);\n"
+    "    vec2 uv = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y);\n"
     "    vec3 PxlNormal        = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), uv).rg);\n"
     "    vec3 PxlPosition      = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv, CameraNear, CameraFar);\n"
     "    vec3 lightCalculation = ConstantZeroVec3;\n"
@@ -1214,7 +1212,6 @@ priv::EShaders::lighting_frag_gi =
     "uniform SAMPLER_TYPE_Cube irradianceMap;\n"
     "uniform SAMPLER_TYPE_Cube prefilterMap;\n"
     "\n"
-    "uniform vec4 ScreenData;\n" //x = GIContribution, y = gamma, z = winSize.x, w = winSize.y
     "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
     "\n"
     "varying vec2 texcoords;\n"
@@ -1224,7 +1221,7 @@ priv::EShaders::lighting_frag_gi =
     "    return inF0 + (max(vec3(1.0 - inRoughness), inF0) - inF0) * pow(1.0 - inTheta, 5.0);\n"
     "}\n"
     "void main(){\n"
-    "    vec2 uv               = gl_FragCoord.xy / vec2(ScreenData.z, ScreenData.w);\n"
+    "    vec2 uv               = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y);\n"
 
     "    float inSSAO          = 1.0 - texture2D(USE_SAMPLER_2D(gSSAOMap), uv).a;\n"
     "    vec3 inNormals        = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), uv).rg);\n"
@@ -1237,7 +1234,7 @@ priv::EShaders::lighting_frag_gi =
     "    highp int index       = int(floor(MatIDAndAO));\n"
     "    float inAO            = (fract(MatIDAndAO) + 0.0001);\n"
     "    vec3 inMatF0          = Unpack3FloatsInto1FloatUnsigned(materials[index].r);\n"
-    "    vec3 inGIContribution = Unpack3FloatsInto1FloatUnsigned(ScreenData.x);\n" //x = diffuse, y = specular, z = global
+    "    vec3 inGIContribution = Unpack3FloatsInto1FloatUnsigned(RendererInfo1.x);\n" //x = diffuse, y = specular, z = global
     "    gl_FragColor         += CalcGILight(inSSAO, inNormals, inAlbedo, inWorldPosition, inAO, inMetalSmooth.x, inMetalSmooth.y, inGlow, inMatF0, materials[index].g, inGIContribution);\n"
     "}";
 

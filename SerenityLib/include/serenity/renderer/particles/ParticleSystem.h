@@ -2,7 +2,7 @@
 #ifndef ENGINE_RENDERER_PARTICLE_SYSTEM_H
 #define ENGINE_RENDERER_PARTICLE_SYSTEM_H
 
-struct Entity;
+class  Entity;
 class  ParticleEmissionProperties;
 class  Scene;
 class  Camera;

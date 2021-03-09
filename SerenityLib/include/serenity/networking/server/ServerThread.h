@@ -9,6 +9,7 @@ namespace Engine::Networking {
     class ServerThread;
 };
 
+#include <serenity/utils/Utils.h>
 #include <vector>
 #include <unordered_map>
 #include <memory>
@@ -18,20 +19,20 @@ namespace Engine::Networking {
     class ServerThread final {
         friend class ServerThreadContainer;
         friend class ServerThreadCollection;
-        using ClientContainer = std::unordered_map<std::string, std::unique_ptr<ServerClient>>;
+        using ClientContainer = Engine::unordered_string_map<std::string, std::unique_ptr<ServerClient>>;
         protected:
             mutable ClientContainer  m_HashedServerClients;
         public:
             ServerThread() = default;
-            ServerThread(const ServerThread&) = delete;
+            ServerThread(const ServerThread&)            = delete;
             ServerThread& operator=(const ServerThread&) = delete;
             ServerThread(ServerThread&&) noexcept;
             ServerThread& operator=(ServerThread&&) noexcept;
 
             void clearAllClients();
-            bool remove_client(const std::string& hash);
-            bool add_client(const std::string& hash, ServerClient* client);
-            [[nodiscard]] inline bool has(const std::string& hash) const noexcept { return m_HashedServerClients.contains(hash); }
+            bool remove_client(std::string_view hash);
+            bool add_client(std::string_view hash, ServerClient* client);
+            [[nodiscard]] inline bool has(std::string_view hash) const noexcept { return m_HashedServerClients.contains(hash); }
 
             [[nodiscard]] inline size_t num_clients() const noexcept { return m_HashedServerClients.size(); }
             [[nodiscard]] inline ClientContainer& clients() const noexcept { return m_HashedServerClients; }
@@ -52,11 +53,11 @@ namespace Engine::Networking {
             ServerThreadContainer(size_t threadCount);
 
             void setBlocking(bool blocking);
-            void setBlocking(const std::string& hash, bool blocking);
+            void setBlocking(std::string_view hash, bool blocking);
 
             void removeAllClients();
-            bool addClient(const std::string& hash, ServerClient* client);
-            bool removeClient(const std::string& hash);
+            bool addClient(std::string_view hash, ServerClient* client);
+            bool removeClient(std::string_view hash);
 
             [[nodiscard]] inline constexpr size_t getNumClients() const noexcept { return m_NumClients; }
             [[nodiscard]] ServerThread* getNextAvailableClientThread();

@@ -11,7 +11,6 @@ namespace Engine::priv {
 
 class  Handle;
 struct EngineOptions;
-class  Resource;
 class  Window;
 class  Scene;
 class  Font;
@@ -45,25 +44,23 @@ namespace Engine::priv {
             std::vector<Scene*>                   m_ScenesToBeDeleted;
             Scene*                                m_CurrentScene = nullptr;
         public:
-            ResourceManager(const EngineOptions& engineOptions);
+            ResourceManager(const EngineOptions&);
 
             void postUpdate();
 
-            void init(const EngineOptions& engineOptions);
+            void init(const EngineOptions&);
 
-            template<typename TResource, typename ... ARGS>
-            [[nodiscard]] Handle addResource(ARGS&&... args) {
-                return m_ResourceModule.emplace<TResource>(std::forward<ARGS>(args)...);
-            }
+            template<class TResource, class ... ARGS>
+            [[nodiscard]] inline Handle addResource(ARGS&&... args) { return m_ResourceModule.emplace<TResource>(std::forward<ARGS>(args)...); }
 
 
             [[nodiscard]] Engine::view_ptr<Scene> getSceneByID(uint32_t sceneID);
 
             [[nodiscard]] inline constexpr std::vector<std::unique_ptr<Scene>>& scenes() noexcept { return m_Scenes; }
 
-            template<typename T> 
-            [[nodiscard]] std::list<Engine::view_ptr<T>> GetAllResourcesOfType() noexcept {
-                return m_ResourceModule.getAllResourcesOfType<T>();
+            template<class TResource>
+            [[nodiscard]] inline std::list<Engine::view_ptr<TResource>> GetAllResourcesOfType() noexcept {
+                return m_ResourceModule.getAllResourcesOfType<TResource>();
             }
 
 
@@ -102,17 +99,22 @@ namespace Engine::Resources {
         MeshRequestCallback callback = [](const std::vector<Handle>&) {}
     );
 
-    template<typename TResource>
-    [[nodiscard]] LoadedResource<TResource> getResource(std::string_view name) noexcept {
+    template<class TResource>
+    [[nodiscard]] inline LoadedResource<TResource> getResource(std::string_view name) noexcept {
         return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<TResource>(name);
     }
-    template<typename TResource>
-    [[nodiscard]] Engine::view_ptr<TResource> getResource(Handle inHandle) noexcept {
+    template<class TResource>
+    [[nodiscard]] inline Engine::view_ptr<TResource> getResource(Handle inHandle) noexcept {
         return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<TResource>(inHandle);
     }
 
-    template<typename TResource, typename ... ARGS>
-    [[nodiscard]] Handle addResource(ARGS&&... args) {
+    template<class TResource>
+    [[nodiscard]] inline std::list<Engine::view_ptr<TResource>> GetAllResourcesOfType() noexcept {
+        return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.getAllResourcesOfType<TResource>();
+    }
+
+    template<class TResource, class ... ARGS>
+    [[nodiscard]] inline Handle addResource(ARGS&&... args) {
         return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.emplace<TResource>(std::forward<ARGS>(args)...);
     }
 

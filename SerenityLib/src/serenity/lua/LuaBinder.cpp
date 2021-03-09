@@ -12,8 +12,8 @@
 #include <serenity/scene/Viewport.h>
 #include <serenity/scene/Skybox.h>
 
-#include <serenity/ecs/Entity.h>
-#include <serenity/ecs/Components.h>
+#include <serenity/ecs/entity/Entity.h>
+#include <serenity/ecs/components/Components.h>
 
 using namespace Engine::priv;
 
@@ -240,9 +240,9 @@ LUABinder::LUABinder()
             .addFunction("versionID", &Entity::versionID)
             .addFunction("addChild", &Entity::addChild)
             .addFunction("removeChild", &Entity::removeChild)
-            .addFunction("removeComponent", static_cast<bool(Entity::*)(const std::string&)>(&Entity::removeComponent))
-            .addFunction("getComponent", static_cast<luabridge::LuaRef(Entity::*)(const std::string&)>(&Entity::getComponent))
-            .addFunction("addComponent", static_cast<bool(Entity::*)(const std::string&, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef)>(&Entity::addComponent))
+            .addFunction("removeComponent", static_cast<bool(Entity::*)(std::string_view)>(&Entity::removeComponent))
+            .addFunction("getComponent", static_cast<luabridge::LuaRef(Entity::*)(std::string_view)>(&Entity::getComponent))
+            .addFunction("addComponent", static_cast<bool(Entity::*)(std::string_view, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef)>(&Entity::addComponent))
         .endClass()
         //component name
         .beginClass<ComponentName>("ComponentName")
@@ -374,7 +374,7 @@ LUABinder::LUABinder()
             .addFunction("visible", &ModelInstance::visible)
             .addFunction("index", &ModelInstance::index)
             .addFunction("isForceRendered", &ModelInstance::isForceRendered)
-            .addFunction("playAnimation", &ModelInstance::playAnimation)
+            .addFunction("playAnimation", static_cast<void(ModelInstance::*)(std::string_view, float, float, uint32_t)>(&ModelInstance::playAnimation))
             .addFunction("setOrientation", static_cast<void(ModelInstance::*)(const float, const float, const float)>(&ModelInstance::setOrientation))
         .endClass()
     ;

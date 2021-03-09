@@ -21,8 +21,9 @@ void Engine::priv::ECSEntityPool::destroyFlaggedEntity(uint32_t entityID) {
     }
 #endif
 
-    const Entity storedEntity = m_Pool[index];
-    m_Pool[index]             = Entity{ storedEntity.id(), storedEntity.sceneID(), storedEntity.versionID() + 1 };
+    //const Entity storedEntity = m_Pool[index];
+    //m_Pool[index]             = Entity{ storedEntity.id(), storedEntity.sceneID(), storedEntity.versionID() + 1 };
+    m_Pool[index].m_VersionID++;
     m_Freelist.emplace_back(index);
 }
 Entity Engine::priv::ECSEntityPool::addEntity(const Scene& scene) noexcept {
@@ -37,6 +38,7 @@ Entity Engine::priv::ECSEntityPool::addEntity(const Scene& scene) noexcept {
     m_Pool[id]    = entity;
     return entity;
 }
+/*
 Entity Engine::priv::ECSEntityPool::getEntity(uint32_t entityData) const noexcept {
     if (entityData == 0) {
         return Entity{};
@@ -49,3 +51,4 @@ Entity Engine::priv::ECSEntityPool::getEntity(uint32_t entityData) const noexcep
     }
     return Entity{};
 }
+*/

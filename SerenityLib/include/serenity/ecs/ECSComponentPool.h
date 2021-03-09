@@ -21,9 +21,7 @@ namespace Engine::priv {
             ECSComponentPool(ECSComponentPool&&) noexcept            = default;
             ECSComponentPool& operator=(ECSComponentPool&&) noexcept = default;
 
-            ~ECSComponentPool() = default;
-
-            template<typename... ARGS> 
+            template<typename ... ARGS> 
             inline constexpr COMPONENT* addComponent(Entity entity, ARGS&&... args) noexcept {
                 return Engine::sparse_set<COMPONENT>::add(entity.id(), entity, std::forward<ARGS>(args)...);
             }

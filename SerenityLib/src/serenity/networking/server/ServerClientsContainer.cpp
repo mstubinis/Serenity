@@ -6,7 +6,7 @@
 Engine::Networking::ServerClientsContainer::ServerClientsContainer(size_t numThreads)
     : m_ThreadContainer{ numThreads }
 {}
-bool Engine::Networking::ServerClientsContainer::addClient(const std::string& hash, ServerClient* serverClient) {
+bool Engine::Networking::ServerClientsContainer::addClient(std::string_view hash, ServerClient* serverClient) {
     bool result = m_ThreadContainer.addClient(hash, serverClient);
     if (result) {
         m_HashedClients.emplace(
@@ -16,7 +16,7 @@ bool Engine::Networking::ServerClientsContainer::addClient(const std::string& ha
         );
         return result;
     }
-    ENGINE_PRODUCTION_LOG("ServerClientsContainer::addClient() failed to add client!") 
+    ENGINE_PRODUCTION_LOG(__FUNCTION__ << "() failed to add client!") 
     return false;
 }
 

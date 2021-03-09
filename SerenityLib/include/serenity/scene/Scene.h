@@ -15,7 +15,7 @@ class  Viewport;
 class  Skybox;
 class  ModelInstance;
 class  ComponentModel;
-struct Entity;
+class  Entity;
 struct SceneOptions;
 
 class ParticleEmitter;
@@ -55,10 +55,10 @@ class Scene: public Observer {
         UpdateFP                                    m_OnUpdateFunctor     = [](Scene*, const float) {};
         std::string                                 m_Name;
         uint32_t                                    m_ID                  = 0;
-        glm::vec3                                   m_GI                  = glm::vec3(1.0f);
+        glm::vec3                                   m_GI                  = glm::vec3{ 1.0f };
         bool                                        m_SkipRenderThisFrame = false;
 
-        Entity                                      m_Sun                 = Entity{};
+        Entity                                      m_Sun;
         Skybox*                                     m_Skybox              = nullptr;
 
         class impl; std::unique_ptr<impl>           m_i                   = nullptr;
@@ -67,7 +67,11 @@ class Scene: public Observer {
         void postUpdate(const float dt);
     public:
         Scene(std::string_view name);
-        Scene(std::string_view name, const SceneOptions& options);
+        Scene(std::string_view name, const SceneOptions&);
+        Scene(const Scene&)                = delete;
+        Scene& operator=(const Scene&)     = delete;
+        Scene(Scene&&) noexcept            = delete;
+        Scene& operator=(Scene&&) noexcept = delete;
         virtual ~Scene();
 
         inline void setName(std::string_view name) noexcept { m_Name = name; }
@@ -85,7 +89,7 @@ class Scene: public Observer {
         void clearAllEntities() noexcept;
         void update(const float dt);
         virtual void render() {}
-        virtual void onEvent(const Event& event);
+        virtual void onEvent(const Event&);
         virtual void onResize(unsigned int width, unsigned int height) {}
 
         inline void setOnUpdateFunctor(const UpdateFP& functor) noexcept { m_OnUpdateFunctor = functor; }
@@ -96,7 +100,7 @@ class Scene: public Observer {
 
 
         [[nodiscard]] Entity createEntity();
-        void removeEntity(Entity entity);
+        void removeEntity(Entity);
 
         [[nodiscard]] size_t getNumLights() const noexcept;
 
@@ -107,9 +111,9 @@ class Scene: public Observer {
 
 
         [[nodiscard]] Camera* getActiveCamera() const;
-        void setActiveCamera(Camera& camera);
+        void setActiveCamera(Camera&);
 
-        void addCamera(Camera& camera);
+        void addCamera(Camera&);
         [[nodiscard]] Camera* addCamera(float left, float right, float top, float bottom, float Near, float Far);
         [[nodiscard]] Camera* addCamera(float angle, float aspectRatio, float Near, float Far);
 
@@ -126,7 +130,7 @@ class Scene: public Observer {
         [[nodiscard]] inline constexpr Skybox* skybox() const noexcept { return m_Skybox; }
         inline void setSkybox(Skybox* s) noexcept { m_Skybox = s; }
 
-        void centerSceneToObject(Entity centerEntity);
+        void centerSceneToObject(Entity);
 };
 namespace Engine::priv {
     struct PublicScene final {
@@ -138,7 +142,6 @@ namespace Engine::priv {
         static std::vector<Viewport>&            GetViewports(const Scene& scene);
         static std::vector<Camera*>&             GetCameras(const Scene& scene);
 
-
         template<class LIGHT>
         [[nodiscard]] static inline const Engine::priv::LightContainer<LIGHT>& GetLights(const Scene& scene) noexcept {
             return scene.m_LightsModule.getLights<LIGHT>(); 
@@ -148,25 +151,25 @@ namespace Engine::priv {
             return scene.m_LightsModule.setShadowCaster(&light, isShadowCaster);
         }
 
-        static void                       UpdateMaterials(Scene& scene, const float dt);
+        static void                       UpdateMaterials(Scene&, const float dt);
 
-        static void                       RenderGeometryOpaque(RenderModule&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void                       RenderGeometryTransparent(RenderModule&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void                       RenderGeometryTransparentTrianglesSorted(RenderModule&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void                       RenderForwardOpaque(RenderModule&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void                       RenderForwardTransparent(RenderModule&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void                       RenderForwardTransparentTrianglesSorted(RenderModule&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void                       RenderForwardParticles(RenderModule&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void                       RenderDecals(RenderModule&, Scene& scene, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void                       RenderParticles(RenderModule&, Scene& scene, Viewport&, Camera&, Handle program);
+        static void                       RenderGeometryOpaque(RenderModule&, Scene&, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void                       RenderGeometryTransparent(RenderModule&, Scene&, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void                       RenderGeometryTransparentTrianglesSorted(RenderModule&, Scene&, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void                       RenderForwardOpaque(RenderModule&, Scene&, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void                       RenderForwardTransparent(RenderModule&, Scene&, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void                       RenderForwardTransparentTrianglesSorted(RenderModule&, Scene&, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void                       RenderForwardParticles(RenderModule&, Scene&, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void                       RenderDecals(RenderModule&, Scene&, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void                       RenderParticles(RenderModule&, Scene&, Viewport&, Camera&, Handle program);
 
-        static void                       AddModelInstanceToPipeline(Scene& scene, ModelInstance&, RenderStage stage, ComponentModel&);
-        static void                       RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance&, RenderStage stage);
-        [[nodiscard]] static Engine::priv::ECS& GetECS(Scene& scene);
-        static void                       CleanECS(Scene& scene, Entity entity);
-        static void                       SkipRenderThisFrame(Scene& scene, bool isSkip);
-        [[nodiscard]] static bool                       IsSkipRenderThisFrame(Scene& scene);
-        [[nodiscard]] static bool                       HasItemsToRender(Scene& scene);
+        static void                       AddModelInstanceToPipeline(Scene&, ModelInstance&, RenderStage);
+        static void                       RemoveModelInstanceFromPipeline(Scene&, ModelInstance&, RenderStage);
+        [[nodiscard]] static Engine::priv::ECS& GetECS(Scene&);
+        static void                       CleanECS(Scene&, Entity);
+        static void                       SkipRenderThisFrame(Scene&, bool isSkip);
+        [[nodiscard]] static bool         IsSkipRenderThisFrame(Scene&);
+        [[nodiscard]] static bool         HasItemsToRender(Scene&);
     };
 };
 

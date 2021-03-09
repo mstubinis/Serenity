@@ -4,7 +4,7 @@
 
 class  ShaderProgram;
 class  Shader;
-struct Entity;
+class  Entity;
 class  Viewport;
 
 #include <serenity/resources/Handle.h>

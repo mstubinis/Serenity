@@ -65,6 +65,18 @@ class Handle final {
         [[nodiscard]] Engine::view_ptr<std::mutex> getMutex() noexcept;
 };
 
+namespace std {
+    template <>
+    struct hash<Handle> {
+        std::size_t operator()(const Handle& handle) const {
+            using std::hash;
+            return ((hash<uint32_t>()(handle.index())
+                ^ (hash<uint32_t>()(handle.version()) << 1)) >> 1)
+                ^ (hash<uint32_t>()(handle.type()) << 1);
+        }
+    };
+};
+
 template<class TResource>
 struct LoadedResource final {
     Engine::view_ptr<TResource> m_Resource = nullptr;

@@ -27,18 +27,17 @@ namespace Engine::priv {
     class DeferredPipeline final : public IRenderingPipeline {
         friend class RenderModule;
         public: struct UBOCameraDataStruct final {
-            glm::mat4 View;
-            glm::mat4 Proj;
-            glm::mat4 ViewProj;
-            glm::mat4 InvView;
-            glm::mat4 InvProj;
-            glm::mat4 InvViewProj;
-
-            glm::vec4 Info1; //renderPosX, renderPosY, renderPosZ, near
-            glm::vec4 Info2; //viewVecX, viewVecY, viewVecZ, far
-            glm::vec4 Info3; //realposX, realposY, realposZ, UNUSED
-
-            glm::vec4 Info4; //mainWindowSizeX, mainWindowSizeY, viewportSizeX, viewportSizeY
+            glm::mat4 CameraView;
+            glm::mat4 CameraProj;
+            glm::mat4 CameraViewProj;
+            glm::mat4 CameraInvView;
+            glm::mat4 CameraInvProj;
+            glm::mat4 CameraInvViewProj;
+            glm::vec4 CameraInfo1;      //renderPosX, renderPosY, renderPosZ, near
+            glm::vec4 CameraInfo2;      //viewVecX, viewVecY, viewVecZ, far
+            glm::vec4 CameraInfo3;      //realposX, realposY, realposZ, logarithmDepthBufferFCoefficient
+            glm::vec4 ScreenInfo;       //mainWindowSizeX, mainWindowSizeY, viewportSizeX, viewportSizeY
+            glm::vec4 RendererInfo1;    //GIPacked, gamma, unused, unused
         };
         private:
             Engine::priv::RenderModule&                        m_Renderer;
@@ -57,6 +56,7 @@ namespace Engine::priv {
             Engine::partial_array<glm::vec2, Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4>    m_Text_UVs;//4 uvs per char
             Engine::partial_array<uint32_t,  Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 6>    m_Text_Indices;//6 ind per char
 
+            std::unique_ptr<UniformBufferObject>               m_UBOCamera;
             UBOCameraDataStruct                                m_UBOCameraDataStruct;
             glm::mat4                                          m_2DProjectionMatrix;
             GBuffer                                            m_GBuffer;
@@ -94,9 +94,9 @@ namespace Engine::priv {
             void internal_generate_pbr_data_for_texture(Handle covoludeShaderProgram, Handle prefilterShaderProgram, Texture& texture, Handle convolutionTexture, Handle preEnvTexture, uint32_t convoludeTextureSize, uint32_t preEnvFilterSize);
             void internal_generate_brdf_lut(Handle shaderProgram, uint32_t brdfSize, int numSamples);
 
-            void internal_render_2d_text_left(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
-            void internal_render_2d_text_center(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
-            void internal_render_2d_text_right(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
+            void internal_render_2d_text_left(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
+            void internal_render_2d_text_center(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
+            void internal_render_2d_text_right(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
 
 
 

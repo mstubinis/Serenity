@@ -6,7 +6,7 @@
 #include <SFML/Audio.hpp>
 #include <serenity/dependencies/glm.h>
 
-class SoundData final : public Resource {
+class SoundData final : public Resource<SoundData> {
     private:
         std::string                       m_File;
         std::unique_ptr<sf::SoundBuffer>  m_Buffer;

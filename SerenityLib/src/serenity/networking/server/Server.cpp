@@ -17,8 +17,8 @@ Server::Server(ServerType type, bool multithreaded)
 Server::~Server() {
     shutdown();
 }
-ServerClient* Server::getClientFromUDPData(const std::string& ip, uint16_t port, sf::Packet& sf_packet) const {
-    auto hash = m_Client_Hash_Function(ip, port, sf_packet);
+ServerClient* Server::getClientFromUDPData(std::string_view ip, uint16_t port, sf::Packet& sf_packet) const {
+    auto hash = m_Client_Hash_Function(std::string{ ip }, port, sf_packet);
     return m_Clients.getClient(hash);
 }
 bool Server::startup(uint16_t port, std::string ip_restriction) {

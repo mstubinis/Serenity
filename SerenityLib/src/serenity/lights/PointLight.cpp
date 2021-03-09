@@ -2,7 +2,7 @@
 #include <serenity/math/Engine_Math.h>
 #include <serenity/resources/Engine_Resources.h>
 #include <serenity/utils/Utils.h>
-#include <serenity/ecs/ComponentBody.h>
+#include <serenity/ecs/components/ComponentBody.h>
 #include <serenity/scene/Scene.h>
 
 constexpr std::array<PointLightDefaultAttenuationData, (size_t)LightRange::_TOTAL> LIGHT_RANGES { {

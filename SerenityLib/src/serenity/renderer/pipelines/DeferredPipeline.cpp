@@ -17,7 +17,7 @@
 #include <serenity/scene/Scene.h>
 #include <serenity/scene/Camera.h>
 
-#include <serenity/ecs/ComponentBody.h>
+#include <serenity/ecs/components/ComponentBody.h>
 
 #include <serenity/renderer/postprocess/SSAO.h>
 #include <serenity/renderer/postprocess/HDR.h>
@@ -39,12 +39,12 @@ using namespace Engine::priv;
 using namespace Engine::Renderer;
 
 constexpr std::array<glm::mat4, 6> CAPTURE_VIEWS = {
-    glm::mat4(0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-    glm::mat4(0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-    glm::mat4(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-    glm::mat4(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-    glm::mat4(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-    glm::mat4(-1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+    glm::mat4{ 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f },
+    glm::mat4{ 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f },
+    glm::mat4{ 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f },
+    glm::mat4{ 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f },
+    glm::mat4{ 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f },
+    glm::mat4{ -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f },
 };
 
 struct ShaderEnum final { enum Shader : uint32_t {
@@ -106,8 +106,6 @@ DeferredPipeline::DeferredPipeline(Engine::priv::RenderModule& renderer)
 {
 }
 DeferredPipeline::~DeferredPipeline() {
-    SAFE_DELETE(UniformBufferObject::UBO_CAMERA);
-
     //TODO: add cleanup() from ssao / smaa here?
 }
 
@@ -151,13 +149,11 @@ void DeferredPipeline::init() {
     Engine::Renderer::setDepthFunc(GL_LEQUAL);
     GLCall(glDepthRange(0.0f, 1.0f));
 
+    Handle uboCameraHandle = Engine::Resources::addResource<UniformBufferObject>("Camera", sizeof(UBOCameraDataStruct));
+    m_UBOCamera.reset(uboCameraHandle.get<UniformBufferObject>());
+    m_UBOCamera->updateData(&m_UBOCameraDataStruct);
 
     priv::EShaders::init(Engine::priv::RenderModule::OPENGL_VERSION, Engine::priv::RenderModule::GLSL_VERSION);
-
-
-    UniformBufferObject::UBO_CAMERA = NEW UniformBufferObject("Camera", sizeof(UBOCameraDataStruct));
-    UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraDataStruct);
-
 
     m_FullscreenQuad.init();
     m_FullscreenTriangle.init();
@@ -281,6 +277,7 @@ void DeferredPipeline::init() {
 
     auto sizeofOne = sizeof(ParticleSystem::ParticleFloatType) * 4;
     auto sizeofTwo = sizeof(ParticleSystem::ParticleFloatType) * 2;
+
 
 #if defined(ENGINE_PARTICLES_HALF_SIZE)
     GLCall(glEnableVertexAttribArray(2));
@@ -806,7 +803,7 @@ void DeferredPipeline::renderPointLight(Camera& camera, PointLight& pointLight) 
     auto body        = pointLight.getComponent<ComponentBody>();
     auto modelMatrix = body->modelMatrixRendering();
     sendUniformMatrix4("Model", modelMatrix);
-    sendUniformMatrix4("VP", m_UBOCameraDataStruct.ViewProj);
+    sendUniformMatrix4("VP", m_UBOCameraDataStruct.CameraViewProj);
 
     if(result == 1){
         cullFace(GL_FRONT);
@@ -833,7 +830,7 @@ void DeferredPipeline::renderSpotLight(Camera& camera, SpotLight& spotLight) {
     auto body        = spotLight.getComponent<ComponentBody>();
     auto modelMatrix = body->modelMatrixRendering();
     sendUniformMatrix4("Model", modelMatrix);
-    sendUniformMatrix4("VP", m_UBOCameraDataStruct.ViewProj);
+    sendUniformMatrix4("VP", m_UBOCameraDataStruct.CameraViewProj);
 
     if (result == 1) {
         cullFace(GL_FRONT);
@@ -861,7 +858,7 @@ void DeferredPipeline::renderRodLight(Camera& camera, RodLight& rodLight) {
     auto body        = rodLight.getComponent<ComponentBody>();
     auto modelMatrix = body->modelMatrixRendering();
     sendUniformMatrix4("Model", modelMatrix);
-    sendUniformMatrix4("VP", m_UBOCameraDataStruct.ViewProj);
+    sendUniformMatrix4("VP", m_UBOCameraDataStruct.CameraViewProj);
 
     if (result == 1) {
         cullFace(GL_FRONT);
@@ -960,7 +957,7 @@ void DeferredPipeline::renderMesh(Mesh& mesh, uint32_t mode) {
 void DeferredPipeline::renderLightProbe(LightProbe& lightProbe) {
     //goal: render all 6 sides into a fbo and into a cubemap, and have that cubemap stored in the light probe to be used for Global Illumination
 }
-void DeferredPipeline::internal_render_2d_text_left(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
+void DeferredPipeline::internal_render_2d_text_left(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
     uint32_t i = 0;
     for (const auto character : text) {
         if (character == '\n') {
@@ -991,7 +988,7 @@ void DeferredPipeline::internal_render_2d_text_left(const std::string& text, con
         }
     }
 }
-void DeferredPipeline::internal_render_2d_text_center(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
+void DeferredPipeline::internal_render_2d_text_center(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
     std::vector<std::string> lines;
     std::vector<uint16_t> lines_sizes;
     std::string line_accumulator;
@@ -1047,7 +1044,7 @@ void DeferredPipeline::internal_render_2d_text_center(const std::string& text, c
         x = 0.0f;
     }
 }
-void DeferredPipeline::internal_render_2d_text_right(const std::string& text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
+void DeferredPipeline::internal_render_2d_text_right(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
     std::vector<std::string> lines;
     std::string line_accumulator;
     for (const auto character : text) {
@@ -1389,7 +1386,6 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
         Engine::Renderer::sendUniform4Safe("CameraInfo2", glm::vec4(camera.getViewVector(), camera.getFar()));
     }
     Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (uint32_t)Material::m_MaterialProperities.size());
-    Engine::Renderer::sendUniform4Safe("ScreenData", 0.0f, m_Renderer.m_Gamma, winSize.x, winSize.y);
 
     Engine::Renderer::sendTexture("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0);
     Engine::Renderer::sendTexture("gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1);
@@ -1438,7 +1434,6 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
             Engine::Renderer::sendUniform4Safe("CameraInfo2", glm::vec4(camera.getViewVector(), camera.getFar()));
         }
         Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (uint32_t)Material::m_MaterialProperities.size());
-        Engine::Renderer::sendUniform4Safe("ScreenData", m_Renderer.m_GI_Pack, m_Renderer.m_Gamma, winSize.x, winSize.y);
         Engine::Renderer::sendTexture("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0);
         Engine::Renderer::sendTexture("gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1);
         Engine::Renderer::sendTexture("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), 2);
@@ -1700,38 +1695,43 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
         internal_init_frame_gbuffer(viewport, camera);
         if (mainRenderFunction) {
 #pragma region Camera UBO
-            if (Engine::priv::RenderModule::GLSL_VERSION >= 140 && UniformBufferObject::UBO_CAMERA) {
+            if (Engine::priv::RenderModule::GLSL_VERSION >= 140 && m_UBOCamera) {
+                float logDepthBufferFCoeff = (2.0f / glm::log2(camera.getFar() + 1.0f)) * 0.5f;
                 //TODO: change the manual camera uniform sending (for when glsl version < 140) to give a choice between the two render spaces
 
                 //same simulation and render space
-                //m_UBOCameraDataStruct.View        = camera.getView();
-                //m_UBOCameraDataStruct.Proj        = camera.getProjection();
-                //m_UBOCameraDataStruct.ViewProj    = camera.getViewProjection();
-                //m_UBOCameraDataStruct.InvProj     = camera.getProjectionInverse();
-                //m_UBOCameraDataStruct.InvView     = camera.getViewInverse();
-                //m_UBOCameraDataStruct.InvViewProj = camera.getViewProjectionInverse();
-                //m_UBOCameraDataStruct.Info1       = glm::vec4(camera.getPosition(),camera.getNear());
-                //m_UBOCameraDataStruct.Info2       = glm::vec4(camera.getViewVector(),camera.getFar());
-                //m_UBOCameraDataStruct.Info3       = glm::vec4(0.0f,0.0f,0.0f, 0.0f);
-                //m_UBOCameraDataStruct.Info4       = glm::vec4(winSize.x, winSize.y, dimensions.z, dimensions.w);
-
-
+                //m_UBOCameraDataStruct.CameraView        = camera.getView();
+                //m_UBOCameraDataStruct.CameraProj        = camera.getProjection();
+                //m_UBOCameraDataStruct.CameraViewProj    = camera.getViewProjection();
+                //m_UBOCameraDataStruct.CameraInvProj     = camera.getProjectionInverse();
+                //m_UBOCameraDataStruct.CameraInvView     = camera.getViewInverse();
+                //m_UBOCameraDataStruct.CameraInvViewProj = camera.getViewProjectionInverse();
+                //m_UBOCameraDataStruct.CameraInfo1       = glm::vec4{ camera.getPosition(), camera.getNear() };
+                //m_UBOCameraDataStruct.CameraInfo2       = glm::vec4{ camera.getViewVector(), camera.getFar() };
+                //m_UBOCameraDataStruct.CameraInfo3       = glm::vec4{ 0.0f, 0.0f, 0.0f, logDepthBufferFCoeff };
+                //m_UBOCameraDataStruct.ScreenInfo        = glm::vec4{ winSize.x, winSize.y, dimensions.z, dimensions.w };
+                //m_UBOCameraDataStruct.RendererInfo1     = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
+                
                 //this render space places the camera at the origin and offsets submitted model matrices to the vertex shaders
                 //by the camera's real simulation position
                 //this helps to deal with shading inaccuracies for when the camera is very far away from the origin
+                glm::mat4 viewNoTranslation = camera.getView();
+                viewNoTranslation[3][0]     = 0.001f;
+                viewNoTranslation[3][1]     = 0.001f;
+                viewNoTranslation[3][2]     = 0.001f;
+                m_UBOCameraDataStruct.CameraView        = viewNoTranslation;
+                m_UBOCameraDataStruct.CameraProj        = camera.getProjection();
+                m_UBOCameraDataStruct.CameraViewProj    = m_UBOCameraDataStruct.CameraProj * viewNoTranslation;
+                m_UBOCameraDataStruct.CameraInvProj     = camera.getProjectionInverse();
+                m_UBOCameraDataStruct.CameraInvView     = glm::inverse(m_UBOCameraDataStruct.CameraView);
+                m_UBOCameraDataStruct.CameraInvViewProj = glm::inverse(m_UBOCameraDataStruct.CameraViewProj);
+                m_UBOCameraDataStruct.CameraInfo1       = glm::vec4{ 0.001f, 0.001f, 0.001f, camera.getNear() };
+                m_UBOCameraDataStruct.CameraInfo2       = glm::vec4{ glm::vec3{viewNoTranslation[0][2], viewNoTranslation[1][2], viewNoTranslation[2][2]}, camera.getFar() };
+                m_UBOCameraDataStruct.CameraInfo3       = glm::vec4{ camera.getPosition(), logDepthBufferFCoeff };
+                m_UBOCameraDataStruct.ScreenInfo        = glm::vec4{ winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w };
+                m_UBOCameraDataStruct.RendererInfo1     = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
 
-                m_UBOCameraDataStruct.View = ComponentCamera_Functions::GetViewNoTranslation(camera);
-                m_UBOCameraDataStruct.Proj = camera.getProjection();
-                m_UBOCameraDataStruct.ViewProj = ComponentCamera_Functions::GetViewProjectionNoTranslation(camera);
-                m_UBOCameraDataStruct.InvProj = camera.getProjectionInverse();
-                m_UBOCameraDataStruct.InvView = ComponentCamera_Functions::GetViewInverseNoTranslation(camera);
-                m_UBOCameraDataStruct.InvViewProj = ComponentCamera_Functions::GetViewProjectionInverseNoTranslation(camera);
-                m_UBOCameraDataStruct.Info1 = glm::vec4(0.0001f, 0.0001f, 0.0001f, camera.getNear());
-                m_UBOCameraDataStruct.Info2 = glm::vec4(ComponentCamera_Functions::GetViewVectorNoTranslation(camera), camera.getFar());
-                m_UBOCameraDataStruct.Info3 = glm::vec4(camera.getPosition(), 0.0f);
-                m_UBOCameraDataStruct.Info4 = glm::vec4(winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w);
-
-                UniformBufferObject::UBO_CAMERA->updateData(&m_UBOCameraDataStruct);
+                m_UBOCamera->updateData(&m_UBOCameraDataStruct);
             }
 #pragma endregion
         }
@@ -1873,18 +1873,18 @@ void DeferredPipeline::renderBackgroundTriangle(const glm::vec2& position, const
 }
 
 void DeferredPipeline::renderFullscreenTriangle() {
-    glm::vec2 winSize = glm::vec2(Resources::getWindowSize());
+    glm::vec2 winSize{ Resources::getWindowSize() };
 
     glm::mat4 projection = glm::ortho(0.0f, winSize.x, 0.0f, winSize.y);
-    Engine::Renderer::sendUniformMatrix4Safe("Model", glm::mat4(1.0f));
+    Engine::Renderer::sendUniformMatrix4Safe("Model", glm::mat4{ 1.0f });
     Engine::Renderer::sendUniformMatrix4Safe("VP", projection);
     m_FullscreenTriangle.render();
 }
 void DeferredPipeline::renderFullscreenQuad() {
-    glm::vec2 winSize = glm::vec2(Resources::getWindowSize());
+    glm::vec2 winSize{ Resources::getWindowSize() };
 
     glm::mat4 projection = glm::ortho(0.0f, winSize.x, 0.0f, winSize.y);
-    Engine::Renderer::sendUniformMatrix4Safe("Model", glm::mat4(1.0f));
+    Engine::Renderer::sendUniformMatrix4Safe("Model", glm::mat4{ 1.0f });
     Engine::Renderer::sendUniformMatrix4Safe("VP", projection);
     m_FullscreenQuad.render();
 }

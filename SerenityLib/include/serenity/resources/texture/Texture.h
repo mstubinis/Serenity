@@ -36,7 +36,7 @@ namespace Engine::priv {
     };
 };
 
-class Texture: public Resource {
+class Texture: public Resource<Texture> {
     friend class  Engine::priv::ResourceVector<Texture>;
     friend class  Engine::priv::GBuffer;
     friend struct Engine::priv::TextureLoader;

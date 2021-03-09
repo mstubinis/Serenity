@@ -30,7 +30,7 @@ struct MaterialDefaultPhysicsProperty final {
     uint8_t metalness  = 0;
 };
 
-class Material final : public Resource {
+class Material final : public Resource<Material> {
     friend struct Engine::priv::PublicScene;
     friend struct Engine::priv::PublicMaterial;
     friend class  Engine::priv::MaterialLoader;

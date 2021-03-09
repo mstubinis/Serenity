@@ -57,10 +57,10 @@ vec3 GetViewPosition(sampler2D inTexture, vec2 inUV, float inNear, float inFar){
 };
 )";
 Shader::Shader(std::string_view filenameOrCode, ShaderType shaderType, bool fromFile)
-    : Resource   { ResourceType::Shader }
-    , m_FileName { filenameOrCode }
-    , m_Type     { shaderType }
-    , m_FromFile { fromFile }
+    : Resource    { ResourceType::Shader }
+    , m_FileName  { filenameOrCode }
+    , m_ShaderType{ shaderType }
+    , m_FromFile  { fromFile }
 {
     if (fromFile) {
         setName(filenameOrCode);
@@ -72,18 +72,18 @@ Shader::Shader(std::string_view filenameOrCode, ShaderType shaderType, bool from
     priv::PublicShader::ConvertCode(*this);
 }
 Shader::Shader(Shader&& other) noexcept 
-    : Resource(std::move(other))
-    , m_Type     { std::move(other.m_Type) }
-    , m_FromFile { std::move(other.m_FromFile) }
-    , m_FileName { std::move(other.m_FileName) }
-    , m_Code     { std::move(other.m_Code) }
+    : Resource{ std::move(other) }
+    , m_ShaderType{ std::move(other.m_ShaderType) }
+    , m_FromFile  { std::move(other.m_FromFile) }
+    , m_FileName  { std::move(other.m_FileName) }
+    , m_Code      { std::move(other.m_Code) }
 {}
 Shader& Shader::operator=(Shader&& other) noexcept {
     Resource::operator=(std::move(other));
-    m_Type     = std::move(other.m_Type);
-    m_FromFile = std::move(other.m_FromFile);
-    m_FileName = std::move(other.m_FileName);
-    m_Code     = std::move(other.m_Code);
+    m_ShaderType = std::move(other.m_ShaderType);
+    m_FromFile   = std::move(other.m_FromFile);
+    m_FileName   = std::move(other.m_FileName);
+    m_Code       = std::move(other.m_Code);
     return *this;
 }
 
@@ -118,26 +118,25 @@ void priv::PublicShader::ConvertCode(Shader& shader) {
     const uint32_t versionNumber = boost::lexical_cast<uint32_t>(std::regex_replace(versionLine, std::regex("([^0-9])"), ""));
 
     //common code
-    opengl::glsl::Materials::convert(shader.m_Code, versionNumber, shader.m_Type);
-    opengl::glsl::Lighting::convert(shader.m_Code, versionNumber, shader.m_Type);
-    opengl::glsl::SSAOCode::convert(shader.m_Code, versionNumber, shader.m_Type);
+    opengl::glsl::Materials::convert(shader.m_Code, versionNumber, shader.m_ShaderType);
+    opengl::glsl::Lighting::convert(shader.m_Code, versionNumber, shader.m_ShaderType);
+    opengl::glsl::SSAOCode::convert(shader.m_Code, versionNumber, shader.m_ShaderType);
     opengl::glsl::Compression::convert(shader.m_Code, versionNumber);
-    opengl::glsl::DepthOfFieldCode::convert(shader.m_Code, versionNumber, shader.m_Type);
+    opengl::glsl::DepthOfFieldCode::convert(shader.m_Code, versionNumber, shader.m_ShaderType);
     
 
     //check for log depth - vertex
-    if (ShaderHelper::sfind(shader.m_Code, "USE_LOG_DEPTH_VERTEX") && !ShaderHelper::sfind(shader.m_Code, "//USE_LOG_DEPTH_VERTEX") && shader.m_Type == ShaderType::Vertex) {
+    if (ShaderHelper::sfind(shader.m_Code, "USE_LOG_DEPTH_VERTEX") && !ShaderHelper::sfind(shader.m_Code, "//USE_LOG_DEPTH_VERTEX") && shader.m_ShaderType == ShaderType::Vertex) {
         boost::replace_all(shader.m_Code, "USE_LOG_DEPTH_VERTEX", "");
             #ifndef ENGINE_FORCE_NO_LOG_DEPTH
                 ShaderHelper::insertStringAtLine(shader.m_Code, R"(
-uniform float fcoeff;
 flat varying float FC;
 varying float logz_f;
 )", 1);
                 ShaderHelper::insertStringAtEndOfMainFunc(shader.m_Code, R"(
 logz_f = 1.0 + gl_Position.w;
-gl_Position.z = (log2(max(0.000001, logz_f)) * fcoeff - 1.0) * gl_Position.w;
-FC = fcoeff;
+gl_Position.z = (log2(max(0.000001, logz_f)) * LogFCoefficient - 1.0) * gl_Position.w;
+FC = LogFCoefficient;
 )");
             #endif
     }
@@ -164,7 +163,7 @@ vec3 GetWorldNormalsFromView(vec3 viewNormals, mat4 camView){ //generated
     }
 
     //check for log depth - fragment
-    if (ShaderHelper::sfind(shader.m_Code, "USE_LOG_DEPTH_FRAGMENT") && !ShaderHelper::sfind(shader.m_Code, "//USE_LOG_DEPTH_FRAGMENT") && shader.m_Type == ShaderType::Fragment) {
+    if (ShaderHelper::sfind(shader.m_Code, "USE_LOG_DEPTH_FRAGMENT") && !ShaderHelper::sfind(shader.m_Code, "//USE_LOG_DEPTH_FRAGMENT") && shader.m_ShaderType == ShaderType::Fragment) {
         boost::replace_all(shader.m_Code, "USE_LOG_DEPTH_FRAGMENT", "");
         #ifndef ENGINE_FORCE_NO_LOG_DEPTH
             ShaderHelper::insertStringRightBeforeMainFunc(shader.m_Code, R"(
@@ -186,7 +185,7 @@ gl_FragDepth = log2(logz_f) * FC;
 }
         }
     opengl::glsl::Common::convert(shader.m_Code, versionNumber);
-    opengl::glsl::VersionConversion::convert(shader.m_Code, versionNumber, shader.m_Type);
+    opengl::glsl::VersionConversion::convert(shader.m_Code, versionNumber, shader.m_ShaderType);
 
     //put the version on top as the last step :)
     shader.m_Code = versionLine + shader.m_Code;

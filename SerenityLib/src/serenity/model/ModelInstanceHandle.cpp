@@ -1,6 +1,6 @@
 
 #include <serenity/model/ModelInstanceHandle.h>
-#include <serenity/ecs/ComponentModel.h>
+#include <serenity/ecs/components/ComponentModel.h>
 
 ModelInstanceHandle::operator ModelInstance&() noexcept { 
     return m_ComponentModel->getModel(m_Index); 

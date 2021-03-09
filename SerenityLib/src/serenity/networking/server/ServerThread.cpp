@@ -6,18 +6,18 @@
 using namespace Engine;
 using namespace Engine::Networking;
 
-bool ServerThread::remove_client(const std::string& hash) {
+bool ServerThread::remove_client(std::string_view hash) {
     bool has_client_hash        = m_HashedServerClients.contains(hash);
     if (has_client_hash) {
-        m_HashedServerClients.erase(hash);
+        m_HashedServerClients.erase(m_HashedServerClients.find(hash));
         return true;
     }
     if (!has_client_hash) {
-        ENGINE_PRODUCTION_LOG("error: ServerThread::remove_client() client removal - hash: " << hash << " is not in m_Clients")
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "() client removal - hash: " << hash << " is not in m_Clients")
     }
     return false;
 }
-bool ServerThread::add_client(const std::string& hash, ServerClient* serverClient) {
+bool ServerThread::add_client(std::string_view hash, ServerClient* serverClient) {
     bool has_client_hash = m_HashedServerClients.contains(hash);
     if (!has_client_hash) {
         m_HashedServerClients.emplace(
@@ -28,7 +28,7 @@ bool ServerThread::add_client(const std::string& hash, ServerClient* serverClien
         return true;
     }
     if (has_client_hash) {
-        ENGINE_PRODUCTION_LOG("error: ServerThread::add_client() client addition - hash: " << hash << " is already in m_Clients")
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "() client addition - hash: " << hash << " is already in m_Clients")
     }
     return false;
 }
@@ -60,15 +60,15 @@ void ServerThreadContainer::setBlocking(bool blocking) {
         }
     }
 }
-void ServerThreadContainer::setBlocking(const std::string& hash, bool blocking) {
+void ServerThreadContainer::setBlocking(std::string_view hash, bool blocking) {
     for (auto& thread : m_Threads) {
         if (thread.m_HashedServerClients.contains(hash)) {
-            thread.m_HashedServerClients.at(hash)->socket()->setBlocking(blocking);
+            thread.m_HashedServerClients.find(hash)->second->socket()->setBlocking(blocking);
             return;
         }
     }
 }
-bool ServerThreadContainer::addClient(const std::string& hash, ServerClient* client) {
+bool ServerThreadContainer::addClient(std::string_view hash, ServerClient* client) {
     auto next_thread = getNextAvailableClientThread();
     if (next_thread) {
         bool result = next_thread->add_client(hash, client);
@@ -77,7 +77,7 @@ bool ServerThreadContainer::addClient(const std::string& hash, ServerClient* cli
         }
         return result;
     }else{
-        ENGINE_PRODUCTION_LOG("ServerThreadCollection::addClient() could not get a next thread")
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "() could not get a next thread")
     }
     return false;
 }
@@ -87,7 +87,7 @@ void ServerThreadContainer::removeAllClients() {
     }
     m_NumClients = 0;
 }
-bool ServerThreadContainer::removeClient(const std::string& hash) {
+bool ServerThreadContainer::removeClient(std::string_view hash) {
     bool complete = false;
     bool result   = false;
     for (auto& thread : m_Threads) {

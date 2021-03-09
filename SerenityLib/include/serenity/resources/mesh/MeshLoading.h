@@ -35,16 +35,13 @@ namespace Engine::priv {
         friend struct MeshRequest;
         friend class  Engine::priv::MeshSkeleton;
         public:
-            static void        LoadProcessNodeData(MeshRequest& meshRequest, const aiScene& scene, const aiNode& rootAINode);
-            static void        LoadPopulateGlobalNodes(const aiScene& scene, aiNode* ai_node, MeshRequest& meshRequest);
+            static void    LoadProcessNodeData(MeshRequest& meshRequest, const aiScene& scene, const aiNode& rootAINode);
+            static void    LoadPopulateGlobalNodes(const aiScene& scene, aiNode* ai_node, MeshRequest& meshRequest);
             
-            static void        FinalizeData(MeshCPUData& cpuData, MeshImportedData& data, float threshold);
+            static void    FinalizeData(MeshCPUData& cpuData, MeshImportedData& data, float threshold);
 
-            static VertexData* LoadFrom_OBJCC(const std::string& filename);
-            static void        SaveTo_OBJCC(VertexData& data, std::string filename);
-
-            static bool        GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& pts, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& norms, uint32_t& result, float threshold);
-            static void        CalculateTBNAssimp(MeshImportedData& data);
+            static bool    GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& pts, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& norms, uint32_t& result, float threshold);
+            static void    CalculateTBNAssimp(MeshImportedData& data);
     };
 };
 

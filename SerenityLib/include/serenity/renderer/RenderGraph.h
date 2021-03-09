@@ -9,7 +9,7 @@ class  Material;
 class  Mesh;
 class  ModelInstance;
 class  ModelInstanceHandle;
-struct Entity;
+class  Entity;
 class  Viewport;
 namespace Engine::priv {
     class  RenderGraph;
@@ -29,7 +29,7 @@ namespace Engine::priv {
         friend class  RenderGraph;
         friend struct PublicScene;
         private:
-            Handle                       mesh = Handle{};
+            Handle                       mesh;
             std::vector<ModelInstance*>  instanceNodes;
 
             MeshNode() = delete;
@@ -42,7 +42,7 @@ namespace Engine::priv {
         friend class  RenderGraph;
         friend struct PublicScene;
         private:
-            Handle                 material = Handle{};
+            Handle                 material;
             std::vector<MeshNode>  meshNodes;
 
             MaterialNode() = delete;
@@ -56,14 +56,14 @@ namespace Engine::priv {
         friend class  RenderGraphContainer;
         friend struct Engine::priv::PublicScene;
         private:
-            Handle                        m_ShaderProgram = Handle{};
+            Handle                        m_ShaderProgram;
             std::vector<MaterialNode>     m_MaterialNodes;
             std::vector<ModelInstance*>   m_InstancesTotal;
 
             RenderGraph() = delete;
 
-            void internal_addModelInstanceToPipeline(ModelInstance& modelInstance, ComponentModel&);
-            void internal_removeModelInstanceFromPipeline(ModelInstance& modelInstance);
+            void internal_addModelInstanceToPipeline(ModelInstance&);
+            void internal_removeModelInstanceFromPipeline(ModelInstance&);
         public:
             RenderGraph(Handle shaderProgram)
                 : m_ShaderProgram{ shaderProgram }
@@ -74,21 +74,20 @@ namespace Engine::priv {
             RenderGraph(RenderGraph&&) noexcept            = default;
             RenderGraph& operator=(RenderGraph&&) noexcept = default;
 
-            bool remove_material_node(MaterialNode& materialNode);
-            bool remove_mesh_node(MaterialNode& materialNode, MeshNode& meshNode);
-            bool remove_instance_node(MeshNode& meshNode, ModelInstance& instanceNode);
+            bool remove_material_node(MaterialNode&);
+            bool remove_mesh_node(MaterialNode&, MeshNode&);
+            bool remove_instance_node(MeshNode&, ModelInstance&);
 
             void clean(Entity entity);
-            void sort(Camera& camera, SortingMode sortingMode);
-            void sort_cheap(Camera& camera, SortingMode sortingMode);
+            void sort(Camera&, SortingMode);
+            void sort_cheap(Camera&, SortingMode);
 
-            void sort_bruteforce(Camera& camera, SortingMode sortingMode);
-            void sort_cheap_bruteforce(Camera& camera, SortingMode sortingMode);
+            void sort_bruteforce(Camera&, SortingMode);
+            void sort_cheap_bruteforce(Camera&, SortingMode);
 
-            void render(Engine::priv::RenderModule& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders = true, SortingMode sortingMode = SortingMode::None);
-            void render_bruteforce(Engine::priv::RenderModule& renderer, Viewport& viewport, Camera& camera, bool useDefaultShaders = true, SortingMode sortingMode = SortingMode::None);
-            void validate_model_instances_for_rendering(Viewport& viewport, Camera& camera);
-
+            void render(Engine::priv::RenderModule&, Viewport&, Camera&, bool useDefaultShaders = true, SortingMode = SortingMode::None);
+            void render_bruteforce(Engine::priv::RenderModule&, Viewport&, Camera&, bool useDefaultShaders = true, SortingMode = SortingMode::None);
+            void validate_model_instances_for_rendering(Viewport&, Camera&);
     };
 
     class RenderGraphContainer final {

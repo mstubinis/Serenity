@@ -25,32 +25,34 @@ namespace Engine::priv {
             AnimationData* m_AnimationData    = nullptr;
             MeshSkeleton*  m_Skeleton         = nullptr;
             MeshNodeData*  m_NodeData         = nullptr;
+            float          m_CurrentTime      = 0.0f;
+            float          m_StartTime        = 0.0f;
+            float          m_EndTime          = 0.0f;
             uint16_t       m_NumBones         = 0;
             uint16_t       m_CurrentLoops     = 0;
             uint16_t       m_RequestedLoops   = 1;
 
-            float          m_CurrentTime      = 0.0f;
-            float          m_StartTime        = 0.0f;
-            float          m_EndTime          = 0.0f;
-
             ModelInstanceAnimation() = delete;
         public:
-            ModelInstanceAnimation(MeshNodeData&, AnimationData&, MeshSkeleton&, std::string_view animationName, float startTime, float endTime, uint16_t requestedLoops = 1);
+            ModelInstanceAnimation(MeshNodeData&, AnimationData&, MeshSkeleton&, float startTime, float endTime, uint16_t requestedLoops = 1);
 
             ModelInstanceAnimation(const ModelInstanceAnimation&)                = delete;
             ModelInstanceAnimation& operator=(const ModelInstanceAnimation&)     = delete;
             ModelInstanceAnimation(ModelInstanceAnimation&&) noexcept            = default;
             ModelInstanceAnimation& operator=(ModelInstanceAnimation&&) noexcept = default;
 
-            void process(const float dt, std::vector<glm::mat4>& transforms);
+            void update(const float dt, std::vector<glm::mat4>& transforms);
     };
     class ModelInstanceAnimationContainer final {
         friend struct DefaultModelInstanceBindFunctor;
         private:
             std::vector<ModelInstanceAnimation> m_Animation_Instances;
             std::vector<glm::mat4>              m_Transforms;
+
+            void internal_emplace_animation(Handle mesh, const uint16_t animationIndex, float startTime, float endTime, uint16_t requestedLoops) noexcept;
         public:
             void emplace_animation(Handle mesh, std::string_view animationName, float startTime, float endTime, uint16_t requestedLoops);
+            void emplace_animation(Handle mesh, const uint16_t animationIndex, float startTime, float endTime, uint16_t requestedLoops);
 
             [[nodiscard]] inline const std::vector<glm::mat4>& getTransforms() const noexcept { return m_Transforms; }
 

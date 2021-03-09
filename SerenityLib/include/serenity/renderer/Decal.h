@@ -8,7 +8,7 @@ namespace Engine::priv {
     struct DefaultDecalUnbindFunctor;
 };
 
-#include <serenity/ecs/EntityBody.h>
+#include <serenity/ecs/entity/EntityBody.h>
 #include <serenity/renderer/RendererIncludes.h>
 #include <serenity/resources/Handle.h>
 

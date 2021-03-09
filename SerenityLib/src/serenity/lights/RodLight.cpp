@@ -1,6 +1,6 @@
 #include <serenity/lights/RodLight.h>
 #include <serenity/utils/Utils.h>
-#include <serenity/ecs/ComponentBody.h>
+#include <serenity/ecs/components/ComponentBody.h>
 #include <serenity/scene/Scene.h>
 
 RodLight::RodLight(Scene* scene, const glm_vec3& pos, float rodLength)

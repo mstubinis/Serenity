@@ -11,6 +11,14 @@
 #include <serenity/renderer/RenderGraph.h>
 #include <serenity/lights/Lights.h>
 
+#include <serenity/ecs/systems/SystemComponentBody.h>
+#include <serenity/ecs/systems/SystemComponentCamera.h>
+#include <serenity/ecs/systems/SystemComponentLogic.h>
+#include <serenity/ecs/systems/SystemComponentLogic1.h>
+#include <serenity/ecs/systems/SystemComponentLogic2.h>
+#include <serenity/ecs/systems/SystemComponentLogic3.h>
+#include <serenity/ecs/systems/SystemComponentModel.h>
+
 class Scene::impl final {
     public:
         Engine::priv::ParticleSystem   m_ParticleSystem;
@@ -24,14 +32,24 @@ class Scene::impl final {
 
         void _init(Scene& super, const SceneOptions& options) {
             m_ECS.init(options);
-            m_ECS.assignSystem<ComponentLogic> (ComponentLogic_System_CI()/*, 20000*/);
-            m_ECS.assignSystem<ComponentBody, Engine::priv::ComponentBody_System>(ComponentBody_System_CI()/*, 10000*/);
-            m_ECS.assignSystem<ComponentLogic1>(ComponentLogic1_System_CI()/*, 30000*/);
-            m_ECS.assignSystem<ComponentModel>(ComponentModel_System_CI()/*, 60000*/);
-            m_ECS.assignSystem<ComponentLogic2>(ComponentLogic2_System_CI()/*, 40000*/);
-            m_ECS.assignSystem<ComponentCamera>(ComponentCamera_System_CI()/*, 70000*/);
-            m_ECS.assignSystem<ComponentLogic3>(ComponentLogic3_System_CI()/*, 50000*/);
-            m_ECS.assignSystem<ComponentName>  (ComponentName_System_CI()/*, 80000*/);
+
+
+            m_ECS.registerComponent<ComponentLogic>();
+            m_ECS.registerComponent<ComponentBody>();
+            m_ECS.registerComponent<ComponentLogic1>();
+            m_ECS.registerComponent<ComponentModel>();
+            m_ECS.registerComponent<ComponentLogic2>();
+            m_ECS.registerComponent<ComponentCamera>();
+            m_ECS.registerComponent<ComponentLogic3>();
+            m_ECS.registerComponent<ComponentName>();
+
+            auto* logicSystem  = m_ECS.registerSystem<SystemComponentLogic, ComponentLogic>();
+            auto* bodySystem   = m_ECS.registerSystem<SystemComponentBody, ComponentBody>();
+            auto* logic1System = m_ECS.registerSystem<SystemComponentLogic1, ComponentLogic1>();
+            auto* modelSystem  = m_ECS.registerSystem<SystemComponentModel, ComponentModel>();
+            auto* logic2System = m_ECS.registerSystem<SystemComponentLogic2, ComponentLogic2>();
+            auto* cameraSystem = m_ECS.registerSystem<SystemComponentCamera, ComponentCamera>();
+            auto* logic3System = m_ECS.registerSystem<SystemComponentLogic3, ComponentLogic3>();
         }
         void _centerToObject(Scene& super, Entity centerEntity) {
             auto centerBody     = centerEntity.getComponent<ComponentBody>();
@@ -61,7 +79,7 @@ class Scene::impl final {
             Engine::priv::Core::m_Engine->m_SoundModule.updateCameraPosition(super);
             ComponentBody::recalculateAllParentChildMatrices(super);
         }
-        void _addModelInstanceToPipeline(Scene& scene, ModelInstance& inModelInstance, std::vector<Engine::priv::RenderGraph>& renderGraphs, RenderStage stage, ComponentModel& componentModel) {
+        void _addModelInstanceToPipeline(Scene& scene, ModelInstance& inModelInstance, std::vector<Engine::priv::RenderGraph>& renderGraphs, RenderStage stage) {
             Engine::priv::RenderGraph* renderGraph = nullptr;
             for (auto& graph : renderGraphs) {
                 if (graph.m_ShaderProgram == inModelInstance.shaderProgram()) {
@@ -72,7 +90,7 @@ class Scene::impl final {
             if (!renderGraph) {
                 renderGraph = &scene.m_RenderGraphs[(size_t)stage].emplace_back(inModelInstance.shaderProgram());
             }
-            renderGraph->internal_addModelInstanceToPipeline(inModelInstance, componentModel);
+            renderGraph->internal_addModelInstanceToPipeline(inModelInstance);
         }
         void _removeModelInstanceFromPipeline(ModelInstance& inModelInstance, std::vector<Engine::priv::RenderGraph>& renderGraphs) {
             Engine::priv::RenderGraph* renderGraph = nullptr;
@@ -205,8 +223,8 @@ void Engine::priv::PublicScene::RenderDecals(RenderModule& renderer, Scene& scen
 void Engine::priv::PublicScene::RenderParticles(RenderModule& renderer, Scene& scene, Viewport& viewport, Camera& camera, Handle program) {
     scene.m_i->m_ParticleSystem.render(viewport, camera, program, renderer);
 }
-void Engine::priv::PublicScene::AddModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage stage, ComponentModel& componentModel) {
-    scene.m_i->_addModelInstanceToPipeline(scene, modelInstance, scene.m_RenderGraphs[(uint32_t)stage], stage, componentModel);
+void Engine::priv::PublicScene::AddModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage stage) {
+    scene.m_i->_addModelInstanceToPipeline(scene, modelInstance, scene.m_RenderGraphs[(uint32_t)stage], stage);
 }
 void Engine::priv::PublicScene::RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage stage){
     scene.m_i->_removeModelInstanceFromPipeline(modelInstance, scene.m_RenderGraphs[(uint32_t)stage]);
@@ -244,7 +262,6 @@ Scene::~Scene() {
     SAFE_DELETE_VECTOR(m_Cameras);
     unregisterEvent(EventType::SceneChanged);
 }
-
 size_t Scene::getNumLights() const noexcept {
     size_t count = 0;
     for (const auto& itr : m_LightsModule) {

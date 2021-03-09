@@ -8,7 +8,7 @@
 #include <serenity/resources/Engine_Resources.h>
 #include <serenity/renderer/Renderer.h>
 #include <serenity/scene/Scene.h>
-#include <serenity/ecs/ComponentCamera.h>
+#include <serenity/ecs/components/ComponentCamera.h>
 
 using namespace Engine::priv;
 

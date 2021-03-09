@@ -216,7 +216,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -240,7 +240,7 @@
       <Message>Copying binary (Debug) ...</Message>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>assimp-d.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug_d.lib;BulletDynamics_Debug_d.lib;BulletSoftBody_Debug_d.lib;LinearMath_Debug_d.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;freetyped.lib;lua.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;vcruntime.lib</AdditionalDependencies>
+      <AdditionalDependencies>assimp-d.lib;IrrXML-d.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug_d.lib;BulletDynamics_Debug_d.lib;BulletSoftBody_Debug_d.lib;LinearMath_Debug_d.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;freetyped.lib;lua.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;vcruntime.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Debug;D:\dev\discord_game_sdk\lib\x86;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Debug;D:\dev\assimp\install32\lib;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Debug;D:\dev\lua\lib\32\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
@@ -268,7 +268,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>D:\dev\freetype\lib\64\Debug;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib\64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Debug;D:\dev\assimp\install64\install64;D:\dev\SFML\lib\64\Debug;D:\dev\lua\lib\64\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;lua.lib;assimp-d.lib;freeglut64.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug_d.lib;BulletDynamics_Debug_d.lib;BulletSoftBody_Debug_d.lib;LinearMath_Debug_d.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;freetyped.lib</AdditionalDependencies>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML-d.lib;zlibstatic.lib;lua.lib;assimp-d.lib;freeglut64.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug_d.lib;BulletDynamics_Debug_d.lib;BulletSoftBody_Debug_d.lib;LinearMath_Debug_d.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;freetyped.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
       <Verbose>true</Verbose>
     </Lib>
@@ -519,20 +519,28 @@
     <ClCompile Include="src\serenity\discord\src\types.cpp" />
     <ClCompile Include="src\serenity\discord\src\user_manager.cpp" />
     <ClCompile Include="src\serenity\discord\src\voice_manager.cpp" />
-    <ClCompile Include="src\serenity\ecs\ComponentBody.cpp" />
-    <ClCompile Include="src\serenity\ecs\ComponentCamera.cpp" />
-    <ClCompile Include="src\serenity\ecs\ComponentLogic.cpp" />
-    <ClCompile Include="src\serenity\ecs\ComponentLogic1.cpp" />
-    <ClCompile Include="src\serenity\ecs\ComponentLogic2.cpp" />
-    <ClCompile Include="src\serenity\ecs\ComponentLogic3.cpp" />
-    <ClCompile Include="src\serenity\ecs\ComponentModel.cpp" />
-    <ClCompile Include="src\serenity\ecs\ComponentName.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentBody.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentCamera.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentLogic.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentLogic1.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentLogic2.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentLogic3.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentModel.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentName.cpp" />
     <ClCompile Include="src\serenity\ecs\ECS.cpp" />
     <ClCompile Include="src\serenity\ecs\ECSEntityPool.cpp" />
-    <ClCompile Include="src\serenity\ecs\Entity.cpp" />
-    <ClCompile Include="src\serenity\ecs\EntityBody.cpp" />
-    <ClCompile Include="src\serenity\ecs\EntityRAII.cpp" />
-    <ClCompile Include="src\serenity\ecs\EntityRAIIBody.cpp" />
+    <ClCompile Include="src\serenity\ecs\entity\Entity.cpp" />
+    <ClCompile Include="src\serenity\ecs\entity\EntityBody.cpp" />
+    <ClCompile Include="src\serenity\ecs\entity\EntityRAII.cpp" />
+    <ClCompile Include="src\serenity\ecs\entity\EntityRAIIBody.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemBaseClass.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentBody.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentCamera.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentLogic.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentLogic1.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentLogic2.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentLogic3.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentModel.cpp" />
     <ClCompile Include="src\serenity\events\EventDispatcher.cpp" />
     <ClCompile Include="src\serenity\events\EventModule.cpp" />
     <ClCompile Include="src\serenity\events\Observer.cpp" />
@@ -723,25 +731,33 @@
     <ClInclude Include="include\serenity\discord\src\types.h" />
     <ClInclude Include="include\serenity\discord\src\user_manager.h" />
     <ClInclude Include="include\serenity\discord\src\voice_manager.h" />
-    <ClInclude Include="include\serenity\ecs\ComponentBody.h" />
-    <ClInclude Include="include\serenity\ecs\ComponentCamera.h" />
-    <ClInclude Include="include\serenity\ecs\ComponentLogic.h" />
-    <ClInclude Include="include\serenity\ecs\ComponentLogic1.h" />
-    <ClInclude Include="include\serenity\ecs\ComponentLogic2.h" />
-    <ClInclude Include="include\serenity\ecs\ComponentLogic3.h" />
-    <ClInclude Include="include\serenity\ecs\ComponentModel.h" />
-    <ClInclude Include="include\serenity\ecs\ComponentName.h" />
-    <ClInclude Include="include\serenity\ecs\Components.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentBaseClass.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentBody.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentCamera.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentLogic.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentLogic1.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentLogic2.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentLogic3.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentModel.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentName.h" />
+    <ClInclude Include="include\serenity\ecs\components\Components.h" />
     <ClInclude Include="include\serenity\ecs\ECS.h" />
     <ClInclude Include="include\serenity\ecs\ECSComponentPool.h" />
     <ClInclude Include="include\serenity\ecs\ECSEntityPool.h" />
     <ClInclude Include="include\serenity\ecs\ECSIncludes.h" />
-    <ClInclude Include="include\serenity\ecs\ECSSystem.h" />
-    <ClInclude Include="include\serenity\ecs\ECSSystemConstructorInfo.h" />
-    <ClInclude Include="include\serenity\ecs\Entity.h" />
-    <ClInclude Include="include\serenity\ecs\EntityBody.h" />
-    <ClInclude Include="include\serenity\ecs\EntityRAII.h" />
-    <ClInclude Include="include\serenity\ecs\EntityRAIIBody.h" />
+    <ClInclude Include="include\serenity\ecs\ECSSystemPool.h" />
+    <ClInclude Include="include\serenity\ecs\entity\Entity.h" />
+    <ClInclude Include="include\serenity\ecs\entity\EntityBody.h" />
+    <ClInclude Include="include\serenity\ecs\entity\EntityRAII.h" />
+    <ClInclude Include="include\serenity\ecs\entity\EntityRAIIBody.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemBaseClass.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentBody.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentCamera.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentLogic.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentLogic1.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentLogic2.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentLogic3.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentModel.h" />
     <ClInclude Include="include\serenity\events\Event.h" />
     <ClInclude Include="include\serenity\events\EventDispatcher.h" />
     <ClInclude Include="include\serenity\events\EventIncludes.h" />
@@ -914,6 +930,10 @@
     <ClInclude Include="include\serenity\utils\Engine_Debugging.h" />
     <ClInclude Include="include\serenity\utils\Logger.h" />
     <ClInclude Include="include\serenity\utils\Utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="include\serenity\ecs\entity\Entity.inl" />
+    <None Include="include\serenity\ecs\systems\SystemBaseClass.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

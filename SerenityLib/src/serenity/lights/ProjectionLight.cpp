@@ -1,5 +1,5 @@
 #include <serenity/lights/ProjectionLight.h>
-#include <serenity/ecs/ComponentBody.h>
+#include <serenity/ecs/components/ComponentBody.h>
 #include <serenity/utils/Utils.h>
 #include <serenity/resources/texture/Texture.h>
 #include <serenity/scene/Scene.h>

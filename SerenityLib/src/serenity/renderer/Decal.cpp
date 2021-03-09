@@ -10,8 +10,8 @@
 #include <serenity/system/Engine.h>
 #include <serenity/renderer/pipelines/IRenderingPipeline.h>
 
-#include <serenity/ecs/ComponentBody.h>
-#include <serenity/ecs/ComponentModel.h>
+#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentModel.h>
 
 using namespace Engine;
 

@@ -10,6 +10,7 @@ class  ComponentModel;
 class  Viewport;
 class  ModelInstance;
 class  Collision;
+class  SystemComponentModel;
 namespace Engine::priv {
     struct ComponentModel_UpdateFunction;
     class  ModelInstanceAnimation;
@@ -20,7 +21,7 @@ namespace Engine::priv {
 };
 
 #include <serenity/events/Event.h>
-#include <serenity/ecs/Entity.h>
+#include <serenity/ecs/entity/Entity.h>
 
 #include <serenity/model/ModelInstanceIncludes.h>
 #include <serenity/model/ModelInstanceAnimation.h>
@@ -37,6 +38,7 @@ class ModelInstance final : public Observer {
     friend class  Engine::priv::RenderModule;
     friend class  ComponentModel;
     friend class  Collision;
+    friend class  SystemComponentModel;
 
     using BindFunc   = void(*)(ModelInstance*, const Engine::priv::RenderModule*);
     using UnbindFunc = void(*)(ModelInstance*, const Engine::priv::RenderModule*);
@@ -45,20 +47,20 @@ class ModelInstance final : public Observer {
         static decimal                                    m_GlobalDistanceFactor;
         static uint32_t                                   m_ViewportFlagDefault;
     private:
-        glm::mat4                                         m_ModelMatrix         = glm::mat4(1.0f);
-        glm::quat                                         m_Orientation         = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-        glm::vec3                                         m_Position            = glm::vec3(0.0f, 0.0f, 0.0f);
-        glm::vec3                                         m_Scale               = glm::vec3(1.0f, 1.0f, 1.0f);
+        glm::mat4                                         m_ModelMatrix         = glm::mat4{ 1.0f };
+        glm::quat                                         m_Orientation         = glm::quat{ 1.0f, 0.0f, 0.0f, 0.0f };
+        glm::vec3                                         m_Position            = glm::vec3{ 0.0f, 0.0f, 0.0f };
+        glm::vec3                                         m_Scale               = glm::vec3{ 1.0f, 1.0f, 1.0f };
         BindFunc                                          m_CustomBindFunctor   = [](ModelInstance*, const Engine::priv::RenderModule*) {};
         UnbindFunc                                        m_CustomUnbindFunctor = [](ModelInstance*, const Engine::priv::RenderModule*) {};
 
         ModelDrawingMode                                  m_DrawingMode         = ModelDrawingMode::Triangles;
         Engine::Flag<uint32_t>                            m_ViewportFlag;     //determine what viewports this can be seen in
         Engine::priv::ModelInstanceAnimationContainer     m_Animations;
-        Entity                                            m_Parent              = Entity();
-        Handle                                            m_ShaderProgramHandle = Handle{};
-        Handle                                            m_MeshHandle          = Handle{};
-        Handle                                            m_MaterialHandle      = Handle{};
+        Entity                                            m_Parent;
+        Handle                                            m_ShaderProgramHandle;
+        Handle                                            m_MeshHandle;
+        Handle                                            m_MaterialHandle;
         RenderStage                                       m_Stage               = RenderStage::GeometryOpaque;
         Engine::color_vector_4                            m_GodRaysColor        = Engine::color_vector_4(0_uc);
         Engine::color_vector_4                            m_Color               = Engine::color_vector_4(255_uc);
@@ -83,8 +85,8 @@ class ModelInstance final : public Observer {
     public:
         ModelInstance(Entity, Handle mesh, Handle material, Handle shaderProgram = Handle{});
 
-        ModelInstance(const ModelInstance&)                = delete;
-        ModelInstance& operator=(const ModelInstance&)     = delete;
+        ModelInstance(const ModelInstance&)                 = delete;
+        ModelInstance& operator=(const ModelInstance&)      = delete;
         ModelInstance(ModelInstance&&) noexcept;
         ModelInstance& operator=(ModelInstance&&) noexcept;
 
@@ -141,6 +143,9 @@ class ModelInstance final : public Observer {
 
         inline void playAnimation(std::string_view animName, float startTime, float endTime = -1.0f, uint32_t requestedLoops = 1) {
             m_Animations.emplace_animation(m_MeshHandle, animName, startTime, endTime, requestedLoops);
+        }
+        inline void playAnimation(const uint16_t animIndex, float startTime, float endTime = -1.0f, uint32_t requestedLoops = 1) {
+            m_Animations.emplace_animation(m_MeshHandle, animIndex, startTime, endTime, requestedLoops);
         }
 
         inline void setColor(float r, float g, float b, float a = 1.0f) noexcept { m_Color = Engine::color_vector_4(r, g, b, a); }

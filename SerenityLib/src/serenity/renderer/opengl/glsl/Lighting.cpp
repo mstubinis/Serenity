@@ -168,7 +168,7 @@ vec3 CalcPointLight(in Light inLight, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNo
             "    vec3 GISpecular       = prefilteredColor * (kS * brdf.x + brdf.y) * GIContribution.y;\n"
 
             "    vec3 TotalIrradiance  = (GIDiffuse + GISpecular) * ao;\n"
-            "    TotalIrradiance       = pow(TotalIrradiance, vec3(1.0 / ScreenData.y));\n" //ScreenData.y is gamma
+            "    TotalIrradiance       = pow(TotalIrradiance, vec3(1.0 / RendererInfo1.y));\n" //RendererInfo1.y is gamma
 
             "    vec4 FinalColor       = vec4(0.0, 0.0, 0.0, 0.0);\n"
             "    FinalColor           += (vec4(TotalIrradiance, 1.0) * vec4(vec3(GIContribution.z), 1.0)) * MatAlpha;\n"

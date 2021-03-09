@@ -565,7 +565,7 @@ Mesh::~Mesh() {
     unload();
 }
 Engine::priv::MeshSkeleton::AnimationDataMap& Mesh::getAnimationData() {
-    return m_CPUData.m_Skeleton->m_AnimationData;
+    return m_CPUData.m_Skeleton->m_AnimationMapping;
 }
 void Mesh::load() {
     if(!isLoaded()){

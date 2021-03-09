@@ -5,34 +5,35 @@
 class ShaderProgram;
 class Shader;
 namespace Engine::priv {
-    struct PublicShaderProgram;
-    struct PublicShader final {
-        static void ConvertCode(Shader&);
+    class PublicShaderProgram;
+    class PublicShader final {
+        public:
+            static void ConvertCode(Shader&);
     };
 };
 
 #include <serenity/resources/Resource.h>
 #include <serenity/resources/shader/ShaderIncludes.h>
 
-class Shader final : public Resource {
-    friend class  ShaderProgram;
-    friend struct Engine::priv::PublicShader;
-    friend struct Engine::priv::PublicShaderProgram;
+class Shader final : public Resource<Shader> {
+    friend class ShaderProgram;
+    friend class Engine::priv::PublicShader;
+    friend class Engine::priv::PublicShaderProgram;
     private:
-        ShaderType   m_Type     = ShaderType::Unknown;
-        bool         m_FromFile = false;
         std::string  m_FileName;
         std::string  m_Code;
+        ShaderType   m_ShaderType = ShaderType::Unknown;
+        bool         m_FromFile   = false;
     public:
         Shader() = default;
         Shader(std::string_view shaderFileOrData, ShaderType shaderType, bool fromFile = true);
 
-        Shader(const Shader&) = default; //TODO: delete here?
-        Shader& operator=(const Shader&) = delete;
+        Shader(const Shader&)                  = default; //TODO: delete here?
+        Shader& operator=(const Shader&)       = delete;
         Shader(Shader&&) noexcept;
         Shader& operator=(Shader&&) noexcept;
 
-        [[nodiscard]] inline constexpr ShaderType type() const noexcept { return m_Type; }
+        [[nodiscard]] inline constexpr ShaderType type() const noexcept { return m_ShaderType; }
         [[nodiscard]] inline constexpr const std::string& data() const noexcept { return m_Code; }
         [[nodiscard]] inline constexpr bool fromFile() const noexcept { return m_FromFile; }
 };

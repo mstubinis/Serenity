@@ -4,7 +4,7 @@
 
 class  Window;
 class  Scene;
-class  Resource;
+class  ResourceBaseClass;
 namespace sf {
     class Packet;
 }
@@ -66,9 +66,9 @@ namespace Engine::priv {
         {}
     };
     struct EventResource final {
-        Resource* resource = nullptr;
+        ResourceBaseClass* resource = nullptr;
         EventResource() = default;
-        EventResource(Resource* resource_) 
+        EventResource(ResourceBaseClass* resource_)
             : resource{ resource_ }
         {}
     };
@@ -116,7 +116,7 @@ namespace Engine::priv {
             std::for_each(std::cbegin(ws), std::cend(ws), [&res](const auto c) {
                 res += (char)c;
             });
-            //res = res[0]; TODO: ???, what was this for?
+            res = res[0]; //this is to remove garbage characters, which are from the wide string
             return res;
         }
     };

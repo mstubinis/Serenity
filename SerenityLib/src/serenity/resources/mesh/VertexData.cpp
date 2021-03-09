@@ -3,12 +3,13 @@
 #include <serenity/math/Engine_Math.h>
 #include <serenity/renderer/Renderer.h>
 
-VertexData::VertexData(VertexDataFormat& format)
+VertexData::VertexData(const VertexDataFormat& format)
     : m_Format{ format }
 {
     m_Data.resize(format.m_Attributes.size());
     m_Buffers.emplace_back(BufferDataType::VertexArray);
 }
+
 VertexData::VertexData(VertexData&& other) noexcept
     : m_Format    { std::move(other.m_Format) }
     , m_Data      { std::move(other.m_Data) }
@@ -18,21 +19,21 @@ VertexData::VertexData(VertexData&& other) noexcept
     , m_VAO       { std::exchange(other.m_VAO, 0)  }
 {}
 VertexData& VertexData::operator=(VertexData&& other) noexcept {
-    m_Format      = std::move(other.m_Format);
-    m_Data        = std::move(other.m_Data);
-    m_Indices     = std::move(other.m_Indices);
-    m_Triangles   = std::move(other.m_Triangles);
-    m_Buffers     = std::move(other.m_Buffers);
-    m_VAO         = std::exchange(other.m_VAO, 0);
+    m_Format    = std::move(other.m_Format);
+    m_Data      = std::move(other.m_Data);
+    m_Indices   = std::move(other.m_Indices);
+    m_Triangles = std::move(other.m_Triangles);
+    m_Buffers   = std::move(other.m_Buffers);
+    m_VAO       = std::exchange(other.m_VAO, 0);
     return *this;
 }
 VertexData::~VertexData() {
     Engine::Renderer::deleteVAO(m_VAO);
 }
 void VertexData::clearData() {
-    for (size_t i = 0; i < m_Data.size(); ++i) {
-        m_Data[i].clear();
-    }
+    std::for_each(std::begin(m_Data), std::end(m_Data), [](auto& data) {
+        data.clear();
+    });
     m_Indices.clear();
     m_Triangles.clear();
 }

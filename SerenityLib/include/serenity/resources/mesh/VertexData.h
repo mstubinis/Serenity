@@ -39,9 +39,9 @@ struct VertexData final {
     GLuint                               m_VAO        = 0;
 
     VertexData() = delete;
-    VertexData(VertexDataFormat& format);
+    VertexData(const VertexDataFormat& format);
 
-    VertexData(const VertexData&) = delete;
+    VertexData(const VertexData&)            = delete;
     VertexData& operator=(const VertexData&) = delete;
     VertexData(VertexData&&) noexcept;
     VertexData& operator=(VertexData&&) noexcept;

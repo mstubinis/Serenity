@@ -9,7 +9,7 @@ namespace Engine::priv {
     class  ParticleSystem;
 };
 
-#include <serenity/ecs/EntityBody.h>
+#include <serenity/ecs/entity/EntityBody.h>
 #include <mutex>
 
 /*

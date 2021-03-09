@@ -177,7 +177,7 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
                 }
                 animationData.m_Channels.emplace_back(std::move(channel));
             }
-            cpuData.m_Skeleton->addAnimation(anim_name, std::move(animationData));
+            const auto animIndex = cpuData.m_Skeleton->addAnimation(anim_name, std::move(animationData));
         }
         uint32_t num_of_nodes = 0;
         readBigEndian(num_of_nodes, streamDataBuffer, 4U, blockStart);
@@ -358,7 +358,7 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
                 }
             }
         };
-        auto lamda_write_string = [](std::ofstream& instream, const std::string& inString) {
+        auto lamda_write_string = [](std::ofstream& instream, std::string_view inString) {
             uint16_t str_len = (uint16_t)inString.length();
             writeBigEndian(instream, str_len);
             for (size_t i = 0; i < str_len; ++i) {
@@ -386,7 +386,8 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
         }
         //animation data
         writeBigEndian(stream, (uint32_t)skeleton->m_AnimationData.size());
-        for (const auto& [animName, animationData] : skeleton->m_AnimationData) {
+        for (const auto& [animName, animationIndex] : skeleton->m_AnimationMapping) {
+            const auto& animationData = skeleton->m_AnimationData[animationIndex];
             uint16_t half_float_ticks_per_second;
             uint16_t half_float_duration_in_ticks;
             Engine::Math::Float16From32(&half_float_ticks_per_second, animationData.m_TicksPerSecond);

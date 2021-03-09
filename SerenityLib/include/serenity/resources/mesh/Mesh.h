@@ -36,7 +36,7 @@ namespace Engine::priv {
 #include <queue>
 #include <serenity/dependencies/glm.h>
 
-namespace Engine::priv{
+namespace Engine::priv {
     class PublicMesh final {
         private:
             static btCollisionShape* internal_build_collision(Handle meshHandle, ModelInstance*, CollisionType, bool isCompoundChild) noexcept;
@@ -84,7 +84,7 @@ struct MeshCPUData final {
     void internal_calculate_radius();
 };
 
-class Mesh final: public Resource, public Observer {
+class Mesh final: public Resource<Mesh>, public Observer {
     friend class  Engine::priv::PublicMesh;
     friend struct Engine::priv::PublicMeshRequest;
     friend class  Engine::priv::AnimationData;

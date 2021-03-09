@@ -14,7 +14,7 @@ class  btCompoundShape;
 #include <serenity/events/Event.h>
 #include <serenity/events/Observer.h>
 #include <LinearMath/btVector3.h>
-#include <serenity/ecs/Entity.h>
+#include <serenity/ecs/entity/Entity.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <serenity/resources/Handle.h>
 

@@ -12,15 +12,15 @@ void Engine::Networking::ServerThreadCollection::setBlocking(bool blocking) {
         }
     }
 }
-void Engine::Networking::ServerThreadCollection::setBlocking(const std::string& hash, bool blocking) {
+void Engine::Networking::ServerThreadCollection::setBlocking(std::string_view hash, bool blocking) {
     for (auto& thread : m_ServerClientThreads) {
         if (thread.m_HashedServerClients.count(hash)) {
-            thread.m_HashedServerClients.at(hash)->socket()->setBlocking(blocking);
+            thread.m_HashedServerClients.find(hash)->second->socket()->setBlocking(blocking);
             return;
         }
     }
 }
-bool Engine::Networking::ServerThreadCollection::addClient(const std::string& hash, ServerClient* client) {
+bool Engine::Networking::ServerThreadCollection::addClient(std::string_view hash, ServerClient* client) {
     auto next_thread = getNextAvailableClientThread();
     if (next_thread) {
         bool result = next_thread->add_client(hash, client);
@@ -29,11 +29,11 @@ bool Engine::Networking::ServerThreadCollection::addClient(const std::string& ha
         }
         return result;
     }else{
-        ENGINE_PRODUCTION_LOG("ServerThreadCollection::addClient() could not get a next thread")
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "() could not get a next thread")
     }
     return false;
 }
-bool Engine::Networking::ServerThreadCollection::removeClient(const std::string& hash) {
+bool Engine::Networking::ServerThreadCollection::removeClient(std::string_view hash) {
     bool complete = false;
     bool result = false;
     for (auto& thread : m_ServerClientThreads) {

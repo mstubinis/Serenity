@@ -67,7 +67,7 @@ namespace Engine::Networking {
 
             virtual void clearAllClients();
 
-            [[nodiscard]] ServerClient* getClientFromUDPData(const std::string& ip, uint16_t port, sf::Packet& sf_packet) const;
+            [[nodiscard]] ServerClient* getClientFromUDPData(std::string_view ip, uint16_t port, sf::Packet& sf_packet) const;
 
             [[nodiscard]] inline constexpr uint16_t getPort() const noexcept { return m_Port; }
             [[nodiscard]] inline SocketUDP& getUDPSocket() const noexcept { return *m_UdpSocket.get(); }
