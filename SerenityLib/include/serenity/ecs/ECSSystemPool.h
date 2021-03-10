@@ -11,6 +11,8 @@ class  SystemBaseClass;
 #include <serenity/ecs/systems/SystemBaseClass.h>
 #include <serenity/system/Macros.h>
 
+#include <iostream>
+
 namespace Engine::priv {
     class ECSSystemPool final {
         using SystemComponentHashContainer = std::vector<std::vector<SystemBaseClass*>>;
@@ -23,16 +25,17 @@ namespace Engine::priv {
             template<class SYSTEM, class COMPONENT>
             void hashSystemImpl(SYSTEM* inSystem) {
                 ASSERT(COMPONENT::TYPE_ID != 0, __FUNCTION__ << "(): COMPONENT::TYPE_ID was 0, please register this component type! (component class: " << typeid(COMPONENT).name());
-                m_ComponentIDToSystems.resize(COMPONENT::TYPE_ID);
+                if (m_ComponentIDToSystems.size() < COMPONENT::TYPE_ID) {
+                    m_ComponentIDToSystems.resize(COMPONENT::TYPE_ID);
+                }
                 //TODO: assert if system is not already in the container ?
                 m_ComponentIDToSystems[COMPONENT::TYPE_ID - 1].push_back(inSystem);
                 inSystem->associateComponent<COMPONENT>();
             }
 
             template<class SYSTEM, class ... COMPONENTS>
-            void hashSystem(SYSTEM* inSystem) {
-                int _[] = { 0, (hashSystemImpl<SYSTEM, COMPONENTS>(inSystem), 0)... }; //brace-initialization to force left to right parameter pack processing order
-                (void)_; //gets rid of some warnings
+            inline void hashSystem(SYSTEM* inSystem) {
+                (hashSystemImpl<SYSTEM, COMPONENTS>(inSystem) , ...);
             }
         public:
             ECSSystemPool() = default;
@@ -71,9 +74,10 @@ namespace Engine::priv {
                 }
             }
             void onComponentRemovedFromEntity(uint32_t componentTypeID, Entity entity) {
-                if (m_ComponentIDToSystems.size() < componentTypeID) {
-                    return;
-                }
+                ASSERT(m_ComponentIDToSystems.size() >= componentTypeID, __FUNCTION__ << "(): m_ComponentIDToSystems did not have componentTypeID");
+                //if (m_ComponentIDToSystems.size() < componentTypeID) {
+                //    return;
+                //}
                 for (const auto& associatedSystem : m_ComponentIDToSystems[componentTypeID - 1]) {
                     associatedSystem->removeEntity(entity);
                 }

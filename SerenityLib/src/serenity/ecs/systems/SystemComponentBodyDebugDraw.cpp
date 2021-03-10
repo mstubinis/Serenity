@@ -15,13 +15,13 @@ SystemComponentBodyDebugDraw::SystemComponentBodyDebugDraw(Engine::priv::ECS& ec
     : SystemCRTP{ ecs }
 {
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
-        //#if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
+        #if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
         auto& system = (SystemComponentBodyDebugDraw&)inSystem;
         system.forEach<Scene*>([](Scene* scene, Entity entity, ComponentBody* body, ComponentModel* model) {
             //ASSERT(scene && body && model, __FUNCTION__ << "(): parameter(s) was nullptr!");
-            auto world_pos = glm::vec3{ body->getPosition() };
-            auto world_rot = glm::quat{ body->getRotation() };
-            auto world_scl = glm::vec3{ body->getScale() };
+            const auto world_pos = glm::vec3{ body->getPosition() };
+            const auto world_rot = glm::quat{ body->getRotation() };
+            const auto world_scl = glm::vec3{ body->getScale() };
             for (size_t i = 0; i < model->getNumModels(); ++i) {
                 auto& modelInstance = (*model)[i];
 
@@ -30,7 +30,6 @@ SystemComponentBodyDebugDraw::SystemComponentBodyDebugDraw(Engine::priv::ECS& ec
                 auto right    = glm::normalize(Engine::Math::getRight(rotation)) * 0.3f;
                 auto up       = glm::normalize(Engine::Math::getUp(rotation)) * 0.3f;
 
-                auto& physics = Engine::priv::Core::m_Engine->m_PhysicsModule;
                 auto& physicsPipeline = Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline;
 
                 physicsPipeline.drawLine(world_pos, (world_pos + fwd),   1.0f, 0.0f, 0.0f);
@@ -43,6 +42,6 @@ SystemComponentBodyDebugDraw::SystemComponentBodyDebugDraw(Engine::priv::ECS& ec
             //    Font::renderTextStatic(text, glm::vec2{ screenPos.x, screenPos.y }, glm::vec4{ 1.0f }, 0.0f, glm::vec2{ 0.5f }, 0.1f, TextAlignment::Left);
             //}
         }, &scene, SystemExecutionPolicy::Normal);
-        //#endif
+        #endif
     });  
 }

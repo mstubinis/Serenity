@@ -62,23 +62,23 @@ class SystemBaseClass {
         void removeEntity(Entity entity) noexcept;
         void eraseEntity(std::vector<Entity>& vec, Entity entity);
 
-        template<class T> void setUpdateFunction(T&& func) noexcept;
-        template<class T> void setUpdateFunction(const T& func) noexcept;
+        template<class FUNC> void setUpdateFunction(FUNC&& func) noexcept;
+        template<class FUNC> void setUpdateFunction(const FUNC& func) noexcept;
 
-        template<class T> void setComponentAddedToEntityFunction(T&& func) noexcept;
-        template<class T> void setComponentAddedToEntityFunction(const T& func) noexcept;
+        template<class FUNC> void setComponentAddedToEntityFunction(FUNC&& func) noexcept;
+        template<class FUNC> void setComponentAddedToEntityFunction(const FUNC& func) noexcept;
 
-        template<class T> void setComponentRemovedFromEntityFunction(T&& func) noexcept;
-        template<class T> void setComponentRemovedFromEntityFunction(const T& func) noexcept;
+        template<class FUNC> void setComponentRemovedFromEntityFunction(FUNC&& func) noexcept;
+        template<class FUNC> void setComponentRemovedFromEntityFunction(const FUNC& func) noexcept;
 
-        template<class T> void setEntityAddedToSceneFunction(T&& func) noexcept;
-        template<class T> void setEntityAddedToSceneFunction(const T& func) noexcept;
+        template<class FUNC> void setEntityAddedToSceneFunction(FUNC&& func) noexcept;
+        template<class FUNC> void setEntityAddedToSceneFunction(const FUNC& func) noexcept;
 
-        template<class T> void setSceneEnteredFunction(T&& func) noexcept;
-        template<class T> void setSceneEnteredFunction(const T& func) noexcept;
+        template<class FUNC> void setSceneEnteredFunction(FUNC&& func) noexcept;
+        template<class FUNC> void setSceneEnteredFunction(const FUNC& func) noexcept;
 
-        template<class T> void setSceneLeftFunction(T&& func) noexcept;
-        template<class T> void setSceneLeftFunction(const T& func) noexcept;
+        template<class FUNC> void setSceneLeftFunction(FUNC&& func) noexcept;
+        template<class FUNC> void setSceneLeftFunction(const FUNC& func) noexcept;
 
         template<class COMPONENT> void associateComponent();
         template<class COMPONENT> [[nodiscard]] bool hasAssociatedComponent() noexcept;

@@ -48,9 +48,9 @@ class Scene::impl final {
             auto* logic1System    = m_ECS.registerSystem<SystemComponentLogic1, ComponentLogic1>();
             auto* modelSystem     = m_ECS.registerSystem<SystemComponentModel, ComponentModel>();
             auto* logic2System    = m_ECS.registerSystem<SystemComponentLogic2, ComponentLogic2>();
-            auto* debugDrawSystem = m_ECS.registerSystem <SystemComponentBodyDebugDraw, ComponentBody, ComponentModel>();
             auto* cameraSystem    = m_ECS.registerSystem<SystemComponentCamera, ComponentCamera>();
             auto* logic3System    = m_ECS.registerSystem<SystemComponentLogic3, ComponentLogic3>();
+            auto* debugDrawSystem = m_ECS.registerSystem <SystemComponentBodyDebugDraw, ComponentBody, ComponentModel>();
         }
         void _centerToObject(Scene& super, Entity centerEntity) {
             auto centerBody     = centerEntity.getComponent<ComponentBody>();

@@ -1,57 +1,16 @@
 
-template<class T> 
-void SystemBaseClass::setUpdateFunction(T&& func) noexcept {
-    m_UpdateFunction = std::move(func);
-}
-template<class T> 
-void SystemBaseClass::setUpdateFunction(const T& func) noexcept {
-    m_UpdateFunction = func;
-}
-
-template<class T> 
-void SystemBaseClass::setComponentAddedToEntityFunction(T&& func) noexcept {
-    m_ComponentAddedToEntityFunction = std::move(func);
-}
-template<class T> 
-void SystemBaseClass::setComponentAddedToEntityFunction(const T& func) noexcept {
-    m_ComponentAddedToEntityFunction = func;
-}
-
-template<class T> 
-void SystemBaseClass::setComponentRemovedFromEntityFunction(T&& func) noexcept {
-    m_ComponentRemovedFromEntityFunction = std::move(func);
-}
-template<class T> 
-void SystemBaseClass::setComponentRemovedFromEntityFunction(const T& func) noexcept {
-    m_ComponentRemovedFromEntityFunction = func;
-}
-
-template<class T> 
-void SystemBaseClass::setEntityAddedToSceneFunction(T&& func) noexcept {
-    m_EntityToSceneFunction = std::move(func);
-}
-template<class T> 
-void SystemBaseClass::setEntityAddedToSceneFunction(const T& func) noexcept {
-    m_EntityToSceneFunction = func;
-}
-
-template<class T> 
-void SystemBaseClass::setSceneEnteredFunction(T&& func) noexcept {
-    m_SceneEnteredFunction = std::move(func);
-}
-template<class T> 
-void SystemBaseClass::setSceneEnteredFunction(const T& func) noexcept {
-    m_SceneEnteredFunction = func;
-}
-
-template<class T> 
-void SystemBaseClass::setSceneLeftFunction(T&& func) noexcept {
-    m_SceneLeftFunction = std::move(func);
-}
-template<class T> 
-void SystemBaseClass::setSceneLeftFunction(const T& func) noexcept {
-    m_SceneLeftFunction = func;
-}
+template<class FUNC> void SystemBaseClass::setUpdateFunction(FUNC&& func) noexcept { m_UpdateFunction = std::move(func); }
+template<class FUNC> void SystemBaseClass::setUpdateFunction(const FUNC& func) noexcept { m_UpdateFunction = func; }
+template<class FUNC> void SystemBaseClass::setComponentAddedToEntityFunction(FUNC&& func) noexcept { m_ComponentAddedToEntityFunction = std::move(func); }
+template<class FUNC> void SystemBaseClass::setComponentAddedToEntityFunction(const FUNC& func) noexcept { m_ComponentAddedToEntityFunction = func; }
+template<class FUNC> void SystemBaseClass::setComponentRemovedFromEntityFunction(FUNC&& func) noexcept { m_ComponentRemovedFromEntityFunction = std::move(func); }
+template<class FUNC> void SystemBaseClass::setComponentRemovedFromEntityFunction(const FUNC& func) noexcept { m_ComponentRemovedFromEntityFunction = func; }
+template<class FUNC> void SystemBaseClass::setEntityAddedToSceneFunction(FUNC&& func) noexcept { m_EntityToSceneFunction = std::move(func); }
+template<class FUNC> void SystemBaseClass::setEntityAddedToSceneFunction(const FUNC& func) noexcept { m_EntityToSceneFunction = func; }
+template<class FUNC> void SystemBaseClass::setSceneEnteredFunction(FUNC&& func) noexcept { m_SceneEnteredFunction = std::move(func); }
+template<class FUNC> void SystemBaseClass::setSceneEnteredFunction(const FUNC& func) noexcept { m_SceneEnteredFunction = func; }
+template<class FUNC> void SystemBaseClass::setSceneLeftFunction(FUNC&& func) noexcept { m_SceneLeftFunction = std::move(func); }
+template<class FUNC> void SystemBaseClass::setSceneLeftFunction(const FUNC& func) noexcept { m_SceneLeftFunction = func; }
 
 template<class COMPONENT>
 void SystemBaseClass::associateComponent() {
