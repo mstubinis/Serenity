@@ -24,15 +24,15 @@ namespace Engine::priv {
             void hashSystemImpl(SYSTEM* inSystem) {
                 ASSERT(COMPONENT::TYPE_ID != 0, __FUNCTION__ << "(): COMPONENT::TYPE_ID was 0, please register this component type! (component class: " << typeid(COMPONENT).name());
                 m_ComponentIDToSystems.resize(COMPONENT::TYPE_ID);
-                //TODO: assert if system is not already in the container
+                //TODO: assert if system is not already in the container ?
                 m_ComponentIDToSystems[COMPONENT::TYPE_ID - 1].push_back(inSystem);
                 inSystem->associateComponent<COMPONENT>();
             }
 
             template<class SYSTEM, class ... COMPONENTS>
             void hashSystem(SYSTEM* inSystem) {
-                int _[] = { 0, (hashSystemImpl<SYSTEM, COMPONENTS>(inSystem), 0)... };
-                (void)_;
+                int _[] = { 0, (hashSystemImpl<SYSTEM, COMPONENTS>(inSystem), 0)... }; //brace-initialization to force left to right parameter pack processing order
+                (void)_; //gets rid of some warnings
             }
         public:
             ECSSystemPool() = default;
@@ -64,10 +64,10 @@ namespace Engine::priv {
                     return;
                 }
                 for (const auto& associatedSystem : m_ComponentIDToSystems[componentTypeID - 1]) {
-                    associatedSystem->addEntity(entity);
+                    associatedSystem->onComponentAddedToEntity(component, entity);
                 }
                 for (const auto& associatedSystem : m_ComponentIDToSystems[componentTypeID - 1]) {
-                    associatedSystem->onComponentAddedToEntity(component, entity);
+                    associatedSystem->addEntity(entity);
                 }
             }
             void onComponentRemovedFromEntity(uint32_t componentTypeID, Entity entity) {

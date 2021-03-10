@@ -12,31 +12,34 @@ SystemComponentBody::SystemComponentBody(Engine::priv::ECS& ecs)
     : SystemCRTP{ ecs }
 {
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
-        auto& system     = (SystemComponentBody&)inSystem;
-        auto& components = inSystem.getComponentPool<ComponentBody>(0).data();
-        auto lamda_update_component = [dt, &system](ComponentBody& b, size_t i, size_t k) {
-            const auto entityIndex = b.m_Owner.id() - 1U;
-            auto& localMatrix = system.ParentChildSystem.LocalTransforms[entityIndex];
-            auto& worldMatrix = system.ParentChildSystem.WorldTransforms[entityIndex];
-            if (b.m_Physics) {
-                auto& BtRigidBody = *b.p->bullet_rigidBody;
-                Engine::Math::recalculateForwardRightUp(BtRigidBody, b.m_Forward, b.m_Right, b.m_Up);
-                localMatrix = b.modelMatrix();
+        struct ARGS final {
+            float dt = 0.0f;
+            SystemComponentBody& system;
+            ARGS() = delete;
+            ARGS(float dt_, SystemComponentBody& system_)
+                : dt { dt_ }
+                , system { system_ }
+            {}
+        };
+
+        auto& system = (SystemComponentBody&)inSystem;
+        ARGS args{ dt, system };
+        system.forEach<ARGS*>([](ARGS* args, Entity entity, ComponentBody* b) {
+            const auto entityIndex = b->m_Owner.id() - 1U;
+            auto& localMatrix = args->system.ParentChildSystem.LocalTransforms[entityIndex];
+            auto& worldMatrix = args->system.ParentChildSystem.WorldTransforms[entityIndex];
+            if (b->hasPhysics()) {
+                auto& BtRigidBody = *b->p->bullet_rigidBody;
+                Engine::Math::recalculateForwardRightUp(BtRigidBody, b->m_Forward, b->m_Right, b->m_Up);
+                localMatrix = b->modelMatrix();
                 worldMatrix = localMatrix;
             }else{
-                auto& n = *b.n;
-                n.position += (n.linearVelocity * (decimal)dt);
+                auto& n = *b->n;
+                n.position += (n.linearVelocity * (decimal)args->dt);
                 localMatrix = glm::translate(n.position) * glm::mat4_cast(n.rotation) * glm::scale(n.scale);
                 worldMatrix = localMatrix;
             }
-        };
-        if (components.size() < 200) {
-            for (size_t i = 0; i < components.size(); ++i) {
-                lamda_update_component(components[i], i, 0);
-            }
-        }else{
-            Engine::priv::threading::addJobSplitVectored(lamda_update_component, components, true, 0);
-        }
+        }, &args, SystemExecutionPolicy::ParallelWait);
 
         ComponentBody::internal_recalculateAllParentChildMatrices(system);
         /*
@@ -111,20 +114,20 @@ SystemComponentBody::SystemComponentBody(Engine::priv::ECS& ecs)
         }
     });
     setSceneEnteredFunction([](SystemBaseClass& inSystem, Scene& scene) {
-        auto& components = inSystem.getComponentPool<ComponentBody>(0).data();
-        for (auto& component : components) {
-            if (component.hasPhysics()) {
-                component.addPhysicsToWorld(true);
+        auto& system = (SystemComponentBody&)inSystem;
+        system.forEach([](Entity entity, ComponentBody* component) {
+            if (component->hasPhysics()) {
+                component->addPhysicsToWorld(true, false);
             }
-        }
+        }, SystemExecutionPolicy::Normal);
     });
     setSceneLeftFunction([](SystemBaseClass& inSystem, Scene& scene) {
-        auto& components = inSystem.getComponentPool<ComponentBody>(0).data();
-        for (auto& component : components) {
-            if (component.hasPhysics()) {
-                component.removePhysicsFromWorld(true);
+        auto& system = (SystemComponentBody&)inSystem;
+        system.forEach([](Entity entity, ComponentBody* component) {
+            if (component->hasPhysics()) {
+                component->removePhysicsFromWorld(true, false);
             }
-        }
+        }, SystemExecutionPolicy::Normal);
     });
 }
 

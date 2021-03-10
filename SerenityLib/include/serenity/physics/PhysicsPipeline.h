@@ -69,6 +69,9 @@ namespace Engine::priv {
             PhysicsPipeline();
             ~PhysicsPipeline();
 
+
+            void drawLine(const glm::vec3& start, const glm::vec3& end, float r, float g, float b);
+
             void cleanup();
 
             void update(const float dt);

@@ -286,18 +286,19 @@ void ComponentBody::setPosition(decimal x, decimal y, decimal z) {
         tr.setOrigin(btVector3((btScalar)x, (btScalar)y, (btScalar)z));
         tr.setRotation(p->bullet_rigidBody->getOrientation());
         if (p->collision->getType() == CollisionType::TriangleShapeStatic) {
-            removePhysicsFromWorld(false);
+            //removePhysicsFromWorld(false, false);
+            removePhysicsFromWorld(false, true);
         }
         p->bullet_motionState.setWorldTransform(tr);
         p->bullet_rigidBody->setMotionState(&p->bullet_motionState); //is this needed?
         p->bullet_rigidBody->setWorldTransform(tr);
         p->bullet_rigidBody->setCenterOfMassTransform(tr);
         if (p->collision->getType() == CollisionType::TriangleShapeStatic) {
-            addPhysicsToWorld(false);
+            //addPhysicsToWorld(false, false);
+            addPhysicsToWorld(false, true);
         }
     }else{
         auto& position_     = n->position;
-
 		position_.x         = x;
 		position_.y         = y;
 		position_.z         = z;
@@ -382,11 +383,11 @@ glm::vec3 ComponentBody::getScreenCoordinates(bool clampToEdge) const {
 ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(float minOffset) const {
     ScreenBoxCoordinates ret;
     const auto& worldPos    = getPosition();
-    auto radius             = 0.0001f;
     auto model              = m_Owner.getComponent<ComponentModel>();
+    auto radius             = 0.0001f;
     auto& camera            = *m_Owner.scene()->getActiveCamera();
-    const auto center2DRes  = Math::getScreenCoordinates(worldPos, camera, false);
-    const auto center2D     = glm::vec2(center2DRes.x, center2DRes.y);
+    const auto center2DRes  = Engine::Math::getScreenCoordinates(worldPos, camera, false);
+    const auto center2D     = glm::vec2{ center2DRes.x, center2DRes.y };
     if (model) {
         radius = model->radius();
     }else{
@@ -397,20 +398,20 @@ ScreenBoxCoordinates ComponentBody::getScreenBoxCoordinates(float minOffset) con
         ret.inBounds        = center2DRes.z;
         return ret;
     }
-    auto& cam                    = *Resources::getCurrentScene()->getActiveCamera();
-    const auto camvectest        = cam.up();   
-    const auto  testRes          = Math::getScreenCoordinates(worldPos + (camvectest * (decimal)radius), camera, false);
-    const auto test              = glm::vec2(testRes.x, testRes.y);
-    const auto radius2D          = glm::max(minOffset, glm::distance(test, center2D));
-    const auto yPlus             = center2D.y + radius2D;
-    const auto yNeg              = center2D.y - radius2D;
-    const auto xPlus             = center2D.x + radius2D;
-    const auto xNeg              = center2D.x - radius2D;
-    ret.topLeft                  = glm::vec2(xNeg,  yPlus);
-    ret.topRight                 = glm::vec2(xPlus, yPlus);
-    ret.bottomLeft               = glm::vec2(xNeg,  yNeg);
-    ret.bottomRight              = glm::vec2(xPlus, yNeg);
-    ret.inBounds                 = center2DRes.z;
+    auto& cam               = *Engine::Resources::getCurrentScene()->getActiveCamera();
+    const auto camvectest   = cam.up();   
+    const auto  testRes     = Engine::Math::getScreenCoordinates(worldPos + (camvectest * (decimal)radius), camera, false);
+    const auto test         = glm::vec2{ testRes.x, testRes.y };
+    const auto radius2D     = glm::max(minOffset, glm::distance(test, center2D));
+    const auto yPlus        = center2D.y + radius2D;
+    const auto yNeg         = center2D.y - radius2D;
+    const auto xPlus        = center2D.x + radius2D;
+    const auto xNeg         = center2D.x - radius2D;
+    ret.topLeft             = glm::vec2{ xNeg,  yPlus };
+    ret.topRight            = glm::vec2{ xPlus, yPlus };
+    ret.bottomLeft          = glm::vec2{ xNeg,  yNeg };
+    ret.bottomRight         = glm::vec2{ xPlus, yNeg };
+    ret.inBounds            = center2DRes.z;
     return ret;
 }
 glm_vec3 ComponentBody::getScale() const {
@@ -451,20 +452,20 @@ glm_vec3 ComponentBody::getAngularVelocity() const  {
 glm_mat4 ComponentBody::modelMatrix() const { //theres prob a better way to do this
     if (m_Physics) {
 #ifndef BT_USE_DOUBLE_PRECISION
-        glm::mat4 modelMatrix_(1.0f);
+        glm::mat4 outModelMatrix{ 1.0f };
 #else
-        glm_mat4 modelMatrix_((decimal)1.0);
+        glm_mat4 outModelMatrix{ (decimal)1.0 };
 #endif
         btTransform tr;
         p->bullet_rigidBody->getMotionState()->getWorldTransform(tr);
         //auto& tr = p->bullet_rigidBody->getWorldTransform();
-        btScalar* val_ptr = (btScalar*)glm::value_ptr(modelMatrix_);
+        btScalar* val_ptr = (btScalar*)glm::value_ptr(outModelMatrix);
         tr.getOpenGLMatrix(val_ptr);
         if (p->collision->getBtShape()) {
             auto scale   = getScale();
-            modelMatrix_ = glm::scale(modelMatrix_, scale);
+            outModelMatrix = glm::scale(outModelMatrix, scale);
         }
-        return modelMatrix_;
+        return outModelMatrix;
     }
     auto& ecs         = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
     auto& system      = (SystemComponentBody&)ecs.getSystem<ComponentBody>();
@@ -568,7 +569,7 @@ void ComponentBody::setDynamic(bool dynamic) {
 }
 btVector3 ComponentBody::internal_activate_and_get_vector(decimal x, decimal y, decimal z, bool local) noexcept {
     p->bullet_rigidBody->activate();
-    btVector3 vec((btScalar)x, (btScalar)y, (btScalar)z);
+    btVector3 vec{ static_cast<btScalar>(x), static_cast<btScalar>(y), static_cast<btScalar>(z) };
     Math::translate(*p->bullet_rigidBody, vec, local);
     return vec;
 }
@@ -578,7 +579,7 @@ void ComponentBody::setLinearVelocity(decimal x, decimal y, decimal z, bool loca
         btVector3 v = internal_activate_and_get_vector(x, y, z, local);
         BtRigidBody.setLinearVelocity(v);
     }else{
-        glm_vec3 offset(x, y, z);
+        glm_vec3 offset{ x, y, z };
         if (local) {
             offset = n->rotation * offset;
         }
@@ -603,7 +604,7 @@ void ComponentBody::applyForce(const glm_vec3& force, const glm_vec3& origin, bo
     if (m_Physics) {
         auto& BtRigidBody = *p->bullet_rigidBody;
         btVector3 v = internal_activate_and_get_vector(force.x, force.y, force.z, local);
-        BtRigidBody.applyForce(v, btVector3(static_cast<btScalar>(origin.x), static_cast<btScalar>(origin.y), static_cast<btScalar>(origin.z)));
+        BtRigidBody.applyForce(v, btVector3{ static_cast<btScalar>(origin.x), static_cast<btScalar>(origin.y), static_cast<btScalar>(origin.z) });
     }
 }
 void ComponentBody::applyImpulse(decimal x, decimal y, decimal z, bool local) {
@@ -617,7 +618,7 @@ void ComponentBody::applyImpulse(const glm_vec3& impulse, const glm_vec3& origin
     if (m_Physics) {
         auto& BtRigidBody = *p->bullet_rigidBody;
         btVector3 v = internal_activate_and_get_vector(impulse.x, impulse.y, impulse.z, local);
-        BtRigidBody.applyImpulse(v, btVector3(static_cast<btScalar>(origin.x), static_cast<btScalar>(origin.y), static_cast<btScalar>(origin.z)));
+        BtRigidBody.applyImpulse(v, btVector3{ static_cast<btScalar>(origin.x), static_cast<btScalar>(origin.y), static_cast<btScalar>(origin.z) });
     }
 }
 void ComponentBody::applyTorque(decimal x, decimal y, decimal z, bool local) {
@@ -645,7 +646,7 @@ void ComponentBody::clearLinearForces() {
         auto& BtRigidBody = *p->bullet_rigidBody;
         BtRigidBody.setActivationState(0);
         BtRigidBody.activate();
-        BtRigidBody.setLinearVelocity(btVector3(0, 0, 0));
+        BtRigidBody.setLinearVelocity(btVector3{ 0, 0, 0 });
     }
 }
 void ComponentBody::clearAngularForces() {
@@ -653,7 +654,7 @@ void ComponentBody::clearAngularForces() {
         auto& BtRigidBody = *p->bullet_rigidBody;
         BtRigidBody.setActivationState(0);
         BtRigidBody.activate();
-        BtRigidBody.setAngularVelocity(btVector3(0, 0, 0));
+        BtRigidBody.setAngularVelocity(btVector3{ 0, 0, 0 });
     }
 }
 void ComponentBody::clearAllForces() {
@@ -668,7 +669,7 @@ void ComponentBody::setMass(float mass) {
         if (collision.getBtShape()) {
             collision.setMass(physicsData.mass);
             if (physicsData.bullet_rigidBody) {
-                physicsData.bullet_rigidBody->setMassProps((btScalar)(physicsData.mass), collision.getBtInertia());
+                physicsData.bullet_rigidBody->setMassProps(static_cast<btScalar>(physicsData.mass), collision.getBtInertia());
             }
         }
     }

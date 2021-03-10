@@ -112,6 +112,9 @@ Engine::priv::PhysicsPipeline::PhysicsPipeline() {
 Engine::priv::PhysicsPipeline::~PhysicsPipeline() {
     cleanup();
 }
+void Engine::priv::PhysicsPipeline::drawLine(const glm::vec3& start, const glm::vec3& end, float r, float g, float b) {
+    m_DebugDrawer.drawLine(btVector3{ start.x, start.y, start.z }, btVector3{ end.x, end.y, end.z }, btVector3{ r, g, b });
+}
 void Engine::priv::PhysicsPipeline::cleanup() {
     int collisionObjCount = m_World->getNumCollisionObjects();
     for (int i = 0; i < collisionObjCount; ++i) {

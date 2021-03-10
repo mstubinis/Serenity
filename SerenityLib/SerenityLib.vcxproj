@@ -535,6 +535,7 @@
     <ClCompile Include="src\serenity\ecs\entity\EntityRAIIBody.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemBaseClass.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentBody.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentBodyDebugDraw.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentCamera.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentLogic.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentLogic1.cpp" />
@@ -752,6 +753,7 @@
     <ClInclude Include="include\serenity\ecs\entity\EntityRAIIBody.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemBaseClass.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentBody.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentBodyDebugDraw.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentCamera.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentLogic.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentLogic1.h" />

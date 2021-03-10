@@ -28,9 +28,7 @@ class Entity {
             : m_ID{ entityID }
             , m_SceneID{ sceneID }
             , m_VersionID{ versionID }
-        {
-            //m_Data = versionID << (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS) | sceneID << (ENTITY_BIT_SIZE - VERSION_BIT_POSITIONS - SCENE_BIT_POSITIONS) | entityID;
-        }
+        {}
 
         Entity(const Entity&)                = default;
         Entity& operator=(const Entity&)     = default;
@@ -39,12 +37,12 @@ class Entity {
 
         inline constexpr operator bool() const noexcept { return !null(); }
         inline constexpr bool null() const noexcept { return (m_ID == 0 && m_SceneID == 0 && m_VersionID == 0); }
-        inline constexpr bool operator<(Entity other) noexcept { return m_ID < other.m_ID; }
-        inline constexpr bool operator>(Entity other) noexcept { return m_ID > other.m_ID; }
-        inline constexpr bool operator<=(Entity other) noexcept { return m_ID <= other.m_ID; }
-        inline constexpr bool operator>=(Entity other) noexcept { return m_ID >= other.m_ID; }
-        inline constexpr bool operator==(const Entity other) const noexcept { return (m_ID == other.m_ID && m_SceneID == other.m_SceneID && m_VersionID == other.m_VersionID); }
-        inline constexpr bool operator!=(const Entity other) const noexcept { return !operator==(other); }
+        inline constexpr bool operator<(Entity other) const noexcept { return m_ID < other.m_ID; }
+        inline constexpr bool operator>(Entity other) const noexcept { return m_ID > other.m_ID; }
+        inline constexpr bool operator<=(Entity other) const noexcept { return m_ID <= other.m_ID; }
+        inline constexpr bool operator>=(Entity other) const noexcept { return m_ID >= other.m_ID; }
+        inline constexpr bool operator==(Entity other) const noexcept { return (m_ID == other.m_ID && m_SceneID == other.m_SceneID && m_VersionID == other.m_VersionID); }
+        inline constexpr bool operator!=(Entity other) const noexcept { return !Entity::operator==(other); }
 
         inline std::string toString() const { return std::to_string(m_ID) + "," + std::to_string(m_SceneID) + "," + std::to_string(m_VersionID); }
         void fill(uint32_t entityID, uint32_t sceneID, uint32_t versionID) noexcept {

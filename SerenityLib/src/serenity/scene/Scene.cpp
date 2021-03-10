@@ -18,6 +18,7 @@
 #include <serenity/ecs/systems/SystemComponentLogic2.h>
 #include <serenity/ecs/systems/SystemComponentLogic3.h>
 #include <serenity/ecs/systems/SystemComponentModel.h>
+#include <serenity/ecs/systems/SystemComponentBodyDebugDraw.h>
 
 class Scene::impl final {
     public:
@@ -33,7 +34,6 @@ class Scene::impl final {
         void _init(Scene& super, const SceneOptions& options) {
             m_ECS.init(options);
 
-
             m_ECS.registerComponent<ComponentLogic>();
             m_ECS.registerComponent<ComponentBody>();
             m_ECS.registerComponent<ComponentLogic1>();
@@ -43,13 +43,14 @@ class Scene::impl final {
             m_ECS.registerComponent<ComponentLogic3>();
             m_ECS.registerComponent<ComponentName>();
 
-            auto* logicSystem  = m_ECS.registerSystem<SystemComponentLogic, ComponentLogic>();
-            auto* bodySystem   = m_ECS.registerSystem<SystemComponentBody, ComponentBody>();
-            auto* logic1System = m_ECS.registerSystem<SystemComponentLogic1, ComponentLogic1>();
-            auto* modelSystem  = m_ECS.registerSystem<SystemComponentModel, ComponentModel>();
-            auto* logic2System = m_ECS.registerSystem<SystemComponentLogic2, ComponentLogic2>();
-            auto* cameraSystem = m_ECS.registerSystem<SystemComponentCamera, ComponentCamera>();
-            auto* logic3System = m_ECS.registerSystem<SystemComponentLogic3, ComponentLogic3>();
+            auto* logicSystem     = m_ECS.registerSystem<SystemComponentLogic, ComponentLogic>();
+            auto* bodySystem      = m_ECS.registerSystem<SystemComponentBody, ComponentBody>();
+            auto* logic1System    = m_ECS.registerSystem<SystemComponentLogic1, ComponentLogic1>();
+            auto* modelSystem     = m_ECS.registerSystem<SystemComponentModel, ComponentModel>();
+            auto* logic2System    = m_ECS.registerSystem<SystemComponentLogic2, ComponentLogic2>();
+            auto* debugDrawSystem = m_ECS.registerSystem <SystemComponentBodyDebugDraw, ComponentBody, ComponentModel>();
+            auto* cameraSystem    = m_ECS.registerSystem<SystemComponentCamera, ComponentCamera>();
+            auto* logic3System    = m_ECS.registerSystem<SystemComponentLogic3, ComponentLogic3>();
         }
         void _centerToObject(Scene& super, Entity centerEntity) {
             auto centerBody     = centerEntity.getComponent<ComponentBody>();

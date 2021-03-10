@@ -32,9 +32,9 @@ class Font final: public Resource<Font> {
     public:
         static constexpr uint32_t MAX_CHARACTERS_RENDERED_PER_FRAME    = 4096;
     private:
-        Handle                                        m_FontTexture    = Handle{};
-        float                                         m_MaxHeight      = 0.0f;
-        float                                         m_LineHeight     = 8.0f;
+        Handle                                   m_FontTexture    = Handle{};
+        float                                    m_MaxHeight      = 0.0f;
+        float                                    m_LineHeight     = 8.0f;
         std::unordered_map<uint8_t, CharGlyph>   m_CharGlyphs;
 
         void init_simple(const std::string& filename, int height, int width);
@@ -46,10 +46,11 @@ class Font final: public Resource<Font> {
     public:
         Font() = default;
         Font(const std::string& filename, int height, int width, float line_height);
-        Font(const Font& other) = delete;
-        Font& operator=(const Font& other) = delete;
-        Font(Font&& other) noexcept;
-        Font& operator=(Font&& other) noexcept;
+
+        Font(const Font&)                = delete;
+        Font& operator=(const Font&)     = delete;
+        Font(Font&&) noexcept;
+        Font& operator=(Font&&) noexcept;
         ~Font();
 
         [[nodiscard]] float getTextWidth(std::string_view text) const;

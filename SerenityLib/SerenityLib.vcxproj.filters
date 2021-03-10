@@ -818,6 +818,9 @@
     <ClCompile Include="src\serenity\ecs\entity\EntityRAIIBody.cpp">
       <Filter>Source Files\Engine\Core\ECS\Entity</Filter>
     </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentBodyDebugDraw.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h">
@@ -1514,6 +1517,9 @@
       <Filter>Header Files\Engine\Core\ECS\Entity</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\ecs\systems\SystemBaseClass.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentBodyDebugDraw.h">
       <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
     </ClInclude>
   </ItemGroup>

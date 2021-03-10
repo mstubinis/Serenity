@@ -1,10 +1,23 @@
 #include <serenity/ecs/systems/SystemBaseClass.h>
 #include <serenity/ecs/ECS.h>
 
+struct entity_less final {
+    inline bool operator()(Entity lhs, Entity rhs) const noexcept { 
+        return lhs.id() < rhs.id(); 
+    }
+};
+
 void SystemBaseClass::addEntity(Entity entity) noexcept {
     //ASSERT(!hasEntity(entity), __FUNCTION__ << "(): entity was already in m_Entities!");
     if (hasEntity(entity)) {
         return;
+    }
+    if (m_Components.size() >= 2) {
+        for (const auto& [id, pool] : m_Components) {
+            if (!pool->has(entity.id())) {
+                return;
+            }
+        }
     }
     m_Entities.push_back(entity);
     sortEntities();
@@ -19,7 +32,7 @@ void SystemBaseClass::associateComponentImpl(uint32_t typeID) {
 }
 
 bool SystemBaseClass::hasEntity(Entity entity) const noexcept {
-    return std::binary_search(std::begin(m_Entities), std::end(m_Entities), entity/*, entity_less{}*/);
+    return std::binary_search(std::begin(m_Entities), std::end(m_Entities), entity, entity_less{});
 }
 bool SystemBaseClass::hasAssociatedComponent(uint32_t typeID) noexcept {
     for (const auto& [id, pool] : m_Components) {
@@ -30,8 +43,8 @@ bool SystemBaseClass::hasAssociatedComponent(uint32_t typeID) noexcept {
     return false;
 }
 void SystemBaseClass::eraseEntity(std::vector<Entity>& vec, Entity entity) {
-    auto bounds = std::equal_range(std::begin(vec), std::end(vec), entity/*, entity_less{}*/);
-    auto last = vec.end() - std::distance(bounds.first, bounds.second);
+    auto bounds = std::equal_range(std::begin(vec), std::end(vec), entity, entity_less{});
+    auto last   = vec.end() - std::distance(bounds.first, bounds.second);
     std::swap_ranges(bounds.first, bounds.second, last);
     vec.erase(last, std::end(vec));
 }
@@ -41,7 +54,7 @@ void SystemBaseClass::insertionSort(std::vector<Entity>& container) noexcept {
         int j = i - 1;
         while (j >= 0 && container[j] > key) {
             container[j + 1] = container[j];
-            j = j - 1;
+            --j;
         }
         container[j + 1] = key;
     }

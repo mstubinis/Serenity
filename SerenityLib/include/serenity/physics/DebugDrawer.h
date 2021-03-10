@@ -37,8 +37,8 @@ namespace Engine::priv {
             GLuint m_VertexBuffer  = 0U;
             GLuint C_MAX_POINTS    = 2'097'152U;
             struct LineVertex final {
-                glm::vec3 position = glm::vec3(0.0f);
-                glm::vec3 color    = glm::vec3(1.0f);
+                glm::vec3 position = glm::vec3{ 0.0f };
+                glm::vec3 color    = glm::vec3{ 1.0f };
             };
             std::vector<LineVertex> m_LineVertices;
 

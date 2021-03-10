@@ -22,6 +22,10 @@ namespace Engine {
                 sparse_set_base(sparse_set_base&&) noexcept            = default;
                 sparse_set_base& operator=(sparse_set_base&&) noexcept = default;
 
+                inline bool has(uint32_t id) noexcept { 
+                    return (m_Sparse.size() < id) ? false : m_Sparse[id - 1] != 0; 
+                }
+
                 virtual ~sparse_set_base() = default;
                 virtual bool remove(uint32_t id) {
                     return false;
