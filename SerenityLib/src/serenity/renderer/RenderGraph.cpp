@@ -118,23 +118,18 @@ bool RenderGraph::remove_instance_node(MeshNode& meshNode, ModelInstance& instan
 void RenderGraph::sort_bruteforce(Camera& camera, SortingMode sortingMode) {
 #ifndef _DEBUG
     glm_vec3 camPos = (camera.getPosition());
-    auto lambda_sorter = [&](ModelInstance* lhs, ModelInstance* rhs) {
-        auto lhsParent = lhs->parent();
-        auto rhsParent = rhs->parent();
+    auto lambda_sorter = [sortingMode, &camPos](ModelInstance* lhs, ModelInstance* rhs) {
+        auto [lhsBody, lhsRigid, lhsModel] = lhs->parent().getComponents<ComponentBody, ComponentBodyRigid, ComponentModel>();
+        auto [rhsBody, rhsRigid, rhsModel] = rhs->parent().getComponents<ComponentBody, ComponentBodyRigid, ComponentModel>();
 
-        auto [lhsBody, lhsModel] = lhsParent.getComponents<ComponentBody, ComponentModel>();
-        auto [rhsBody, rhsModel] = rhsParent.getComponents<ComponentBody, ComponentModel>();
-
-        auto lhsPos    = lhsBody->getPosition();
-        auto rhsPos    = rhsBody->getPosition();
-        auto lhsRad    = lhsModel->radius();
-        auto rhsRad    = rhsModel->radius();
+        auto lhsPos    = lhsBody ? lhsBody->getPosition() : lhsRigid->getPosition();
+        auto rhsPos    = rhsBody ? rhsBody->getPosition() : rhsRigid->getPosition();
 
         auto leftDir   = glm::normalize(lhsPos - camPos);
         auto rightDir  = glm::normalize(rhsPos - camPos);
 
-        auto leftPos   = lhsPos - (leftDir * (decimal)lhsRad);
-        auto rightPos  = rhsPos - (rightDir * (decimal)rhsRad);
+        auto leftPos   = lhsPos - (leftDir * (decimal)lhsModel->radius());
+        auto rightPos  = rhsPos - (rightDir * (decimal)rhsModel->radius());
 
         if (sortingMode == SortingMode::FrontToBack)
             return glm::distance2(leftPos, camPos) < glm::distance2(rightPos, camPos);
@@ -148,15 +143,12 @@ void RenderGraph::sort_bruteforce(Camera& camera, SortingMode sortingMode) {
 void RenderGraph::sort_cheap_bruteforce(Camera& camera, SortingMode sortingMode) {
 #ifndef _DEBUG
     glm::vec3 camPos = glm::vec3(camera.getPosition());
-    auto lambda_sorter = [&](ModelInstance* lhs, ModelInstance* rhs) {
-        auto& lhsInstance      = *lhs;
-        auto& rhsInstance      = *rhs;
-        auto lhsParent         = lhsInstance.parent();
-        auto rhsParent         = rhsInstance.parent();
-        ComponentBody& lhsBody = *lhsParent.getComponent<ComponentBody>();
-        ComponentBody& rhsBody = *rhsParent.getComponent<ComponentBody>();
-        glm::vec3 lhsPos       = glm::vec3(lhsBody.getPosition()) + lhsInstance.position();
-        glm::vec3 rhsPos       = glm::vec3(rhsBody.getPosition()) + rhsInstance.position();
+    auto lambda_sorter = [sortingMode, &camPos](ModelInstance* lhs, ModelInstance* rhs) {
+        auto [lhsBody, lhsRigid] = lhs->parent().getComponents<ComponentBody, ComponentBodyRigid>();
+        auto [rhsBody, rhsRigid] = rhs->parent().getComponents<ComponentBody, ComponentBodyRigid>();
+
+        glm::vec3 lhsPos         = glm::vec3(lhsBody ? lhsBody->getPosition() : lhsRigid->getPosition()) + lhs->position();
+        glm::vec3 rhsPos         = glm::vec3(rhsBody ? rhsBody->getPosition() : rhsRigid->getPosition()) + rhs->position();
 
         if (sortingMode == SortingMode::FrontToBack)
             return glm::distance2(lhsPos, camPos) < glm::distance2(rhsPos, camPos);
@@ -167,29 +159,27 @@ void RenderGraph::sort_cheap_bruteforce(Camera& camera, SortingMode sortingMode)
     Engine::sort(/*std::execution::par_unseq, */ m_InstancesTotal, lambda_sorter);
 #endif
 }
-
 void RenderGraph::sort_cheap(Camera& camera, SortingMode sortingMode) {
 #ifndef _DEBUG
     glm::vec3 camPos = glm::vec3(camera.getPosition());
     for (auto& materialNode : m_MaterialNodes) {
         for (auto& meshNode : materialNode.meshNodes) {
-            auto& vect = meshNode.instanceNodes;
-            auto lambda_sorter = [&](ModelInstance* lhs, ModelInstance* rhs) {
-                auto& lhsInstance      = *lhs;
-                auto& rhsInstance      = *rhs;
-                auto  lhsParent        = lhsInstance.parent();
-                auto  rhsParent        = rhsInstance.parent();
-                ComponentBody& lhsBody = *lhsParent.getComponent<ComponentBody>();
-                ComponentBody& rhsBody = *rhsParent.getComponent<ComponentBody>();
-                glm::vec3 lhsPos       = glm::vec3(lhsBody.getPosition()) + lhsInstance.position();
-                glm::vec3 rhsPos       = glm::vec3(rhsBody.getPosition()) + rhsInstance.position();
+            auto lambda_sorter = [sortingMode, &camPos](ModelInstance* lhs, ModelInstance* rhs) {
+                auto  lhsParent        = lhs->parent();
+                auto  rhsParent        = rhs->parent();
+
+                auto [lhsBody, lhsRigid] = lhsParent.getComponents<ComponentBody, ComponentBodyRigid>();
+                auto [rhsBody, rhsRigid] = rhsParent.getComponents<ComponentBody, ComponentBodyRigid>();
+
+                glm::vec3 lhsPos       = glm::vec3(lhsBody ? lhsBody->getPosition() : lhsRigid->getPosition()) + lhs->position();
+                glm::vec3 rhsPos       = glm::vec3(rhsBody ? rhsBody->getPosition() : rhsRigid->getPosition()) + rhs->position();
                 if (sortingMode == SortingMode::FrontToBack)
                     return glm::distance2(lhsPos, camPos) < glm::distance2(rhsPos, camPos);
                 else if (sortingMode == SortingMode::BackToFront)
                     return glm::distance2(lhsPos, camPos) > glm::distance2(rhsPos, camPos);
                 return false;
             };
-            Engine::sort(/*std::execution::par_unseq, */ vect, lambda_sorter);
+            Engine::sort(/*std::execution::par_unseq, */ meshNode.instanceNodes, lambda_sorter);
         }
     }
 #endif
@@ -201,23 +191,18 @@ void RenderGraph::sort(Camera& camera, SortingMode sortingMode) {
     for (auto& materialNode : m_MaterialNodes) {
         for (auto& meshNode : materialNode.meshNodes) {
             auto& vect = meshNode.instanceNodes;
-            auto lambda_sorter = [&](ModelInstance* lhs, ModelInstance* rhs) {
-                auto  lhsParent = lhs->parent();
-                auto  rhsParent = rhs->parent();
+            auto lambda_sorter = [sortingMode, &camPos](ModelInstance* lhs, ModelInstance* rhs) {
+                auto [lhsBody, lhsRigid, lhsModel] = lhs->parent().getComponents<ComponentBody, ComponentBodyRigid, ComponentModel>();
+                auto [rhsBody, rhsRigid, rhsModel] = rhs->parent().getComponents<ComponentBody, ComponentBodyRigid, ComponentModel>();
 
-                auto [lhsBody, lhsModel] = lhsParent.getComponents<ComponentBody, ComponentModel>();
-                auto [rhsBody, rhsModel] = rhsParent.getComponents<ComponentBody, ComponentModel>();
-
-                auto lhsPos     = lhsBody->getPosition();
-                auto rhsPos     = rhsBody->getPosition();
-                auto lhsRad     = lhsModel->radius();
-                auto rhsRad     = rhsModel->radius();
+                auto lhsPos     = lhsBody ? lhsBody->getPosition() : lhsRigid->getPosition();
+                auto rhsPos     = rhsBody ? rhsBody->getPosition() : rhsRigid->getPosition();
 
                 auto leftDir    = glm::normalize(lhsPos - camPos);
                 auto rightDir   = glm::normalize(rhsPos - camPos);
 
-                auto leftPos    = lhsPos - (leftDir * (decimal)lhsRad);
-                auto rightPos   = rhsPos - (rightDir * (decimal)rhsRad);
+                auto leftPos    = lhsPos - (leftDir * (decimal)lhsModel->radius());
+                auto rightPos   = rhsPos - (rightDir * (decimal)rhsModel->radius());
 
                 if (sortingMode == SortingMode::FrontToBack)
                     return glm::distance2(leftPos, camPos) < glm::distance2(rightPos, camPos);
@@ -257,16 +242,19 @@ void RenderGraph::validate_model_instances_for_rendering(Viewport& viewport, Cam
     auto lambda = [&](std::vector<ModelInstance*>& inInstanceNodes, const glm_vec3& camPos) {
         for (auto& modelInstancePtr : inInstanceNodes) {
             auto& modelInstance    = *modelInstancePtr;
+
+            auto rigid             = modelInstance.parent().getComponent<ComponentBodyRigid>();
             auto body              = modelInstance.parent().getComponent<ComponentBody>();
+
             auto model             = modelInstance.parent().getComponent<ComponentModel>();
             bool is_valid_viewport = PublicModelInstance::IsViewportValid(modelInstance, viewport);
             if (is_valid_viewport) {
-                if (body) {
+                if (body || rigid) {
                     if (modelInstance.isForceRendered()) {
                         modelInstance.setPassedRenderCheck(modelInstance.visible());
                     }else{
                         float radius            = model->radius();
-                        glm_vec3 pos            = body->getPosition() + glm_vec3(modelInstance.position());
+                        glm_vec3 pos            = (body ? body->getPosition() : rigid->getPosition()) + glm_vec3(modelInstance.position());
                         uint32_t sphereTest     = camera.sphereIntersectTest(pos, radius); //per mesh instance radius instead?
                         decimal comparison      = (decimal)radius * global_distance_factor;
 
@@ -302,8 +290,9 @@ void RenderGraph::render(Engine::priv::RenderModule& renderer, Viewport& viewpor
                     renderer.bind(&mesh);
                     for (auto& modelInstancePtr : meshNode.instanceNodes) {
                         auto& modelInstance   = *modelInstancePtr;
+                        auto rigid            = modelInstance.parent().getComponent<ComponentBodyRigid>();
                         auto body             = modelInstance.parent().getComponent<ComponentBody>();
-                        glm::mat4 modelMatrix = body->modelMatrixRendering();
+                        glm::mat4 modelMatrix = body ? body->modelMatrixRendering() : rigid->modelMatrixRendering();
                         if (modelInstance.passedRenderCheck()) {
                             if (sortingMode != SortingMode::None) {
                                 mesh.sortTriangles(camera, modelInstance, modelMatrix, sortingMode);
@@ -336,8 +325,11 @@ void RenderGraph::render_bruteforce(Engine::priv::RenderModule& renderer, Viewpo
         auto& modelInstance   = *modelInstancePtr;
         auto* mesh            = modelInstance.mesh().get<Mesh>();
         auto* material        = modelInstance.material().get<Material>();
+
+        auto  rigid           = modelInstance.parent().getComponent<ComponentBodyRigid>();
         auto  body            = modelInstance.parent().getComponent<ComponentBody>();
-        glm::mat4 modelMatrix = body->modelMatrixRendering();
+
+        glm::mat4 modelMatrix = body ? body->modelMatrixRendering() : rigid->modelMatrixRendering();
         if (modelInstance.passedRenderCheck()) {
             if (sortingMode != SortingMode::None) {
                 mesh->sortTriangles(camera, modelInstance, modelMatrix, sortingMode);

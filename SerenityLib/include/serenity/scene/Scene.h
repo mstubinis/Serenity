@@ -32,6 +32,7 @@ namespace Engine::priv {
     class  EngineCore;
 };
 #include <serenity/ecs/ECS.h>
+#include <serenity/physics/PhysicsPipeline.h>
 #include <serenity/renderer/RendererIncludes.h>
 #include <serenity/scene/Viewport.h>
 #include <serenity/events/Observer.h>
@@ -46,6 +47,9 @@ class Scene: public Observer {
     friend class  Engine::priv::EngineCore;
     using UpdateFP             = void(*)(Scene*, const float);
     private:
+        //Engine::priv::PhysicsPipeline               m_Pipeline;
+
+        Engine::priv::ECS                           m_ECS;
         mutable std::vector<Viewport>               m_Viewports;
         mutable std::vector<Camera*>                m_Cameras;
         mutable Engine::priv::RenderGraphContainer  m_RenderGraphs;
@@ -73,6 +77,12 @@ class Scene: public Observer {
         Scene(Scene&&) noexcept            = delete;
         Scene& operator=(Scene&&) noexcept = delete;
         virtual ~Scene();
+
+
+        template<class COMPONENT>
+        inline void registerComponent() { m_ECS.registerComponent<COMPONENT>(); }
+        template<class SYSTEM, class ... COMPONENTS>
+        inline void registerSystem() { m_ECS.registerSystem<SYSTEM, COMPONENTS...>(); }
 
         inline void setName(std::string_view name) noexcept { m_Name = name; }
         [[nodiscard]] inline constexpr const std::string& name() const noexcept { return m_Name; }
@@ -138,7 +148,7 @@ namespace Engine::priv {
         friend class Engine::priv::RenderGraph;
 
         static std::vector<Particle>&            GetParticles(const Scene& scene);
-        static std::vector<Entity>&              GetEntities(const Scene& scene);
+        static std::vector<Entity>&              GetEntities(Scene& scene);
         static std::vector<Viewport>&            GetViewports(const Scene& scene);
         static std::vector<Camera*>&             GetCameras(const Scene& scene);
 

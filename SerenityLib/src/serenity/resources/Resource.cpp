@@ -13,6 +13,7 @@ ResourceBaseClass::ResourceBaseClass(ResourceType type, std::string_view name)
     m_Name = name;
 }
 
+
 ResourceBaseClass::ResourceBaseClass(ResourceBaseClass&& other) noexcept
     : m_IsLoaded     { std::exchange(other.m_IsLoaded, false) }
     , m_Name         { std::move(other.m_Name) }
@@ -30,7 +31,7 @@ void ResourceBaseClass::load() {
         m_IsLoaded = true;
         if (Engine::priv::Core::m_Engine) {
             Event e(EventType::ResourceLoaded);
-            e.eventResource = Engine::priv::EventResource(this);
+            e.eventResource = Engine::priv::EventResource{ this };
             Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(e);
         }
         //ENGINE_PRODUCTION_LOG(typeid(*this).name() << ": " << m_Name << " - loaded.");
@@ -41,7 +42,7 @@ void ResourceBaseClass::unload() {
         m_IsLoaded = false;
         if (Engine::priv::Core::m_Engine) {
             Event e(EventType::ResourceUnloaded);
-            e.eventResource = Engine::priv::EventResource(this);
+            e.eventResource = Engine::priv::EventResource{ this };
             Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(e);
         }
         //ENGINE_PRODUCTION_LOG(typeid(*this).name() << ": " << m_Name << " - unloaded.");

@@ -13,7 +13,6 @@ namespace Engine::priv {
     class FullscreenTriangle;
     class RenderModule;
 };
-
 #include <serenity/renderer/pipelines/IRenderingPipeline.h>
 #include <serenity/model/ModelInstanceIncludes.h>
 #include <serenity/renderer/opengl/State.h>
@@ -56,7 +55,7 @@ namespace Engine::priv {
             Engine::partial_array<glm::vec2, Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4>    m_Text_UVs;//4 uvs per char
             Engine::partial_array<uint32_t,  Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 6>    m_Text_Indices;//6 ind per char
 
-            std::unique_ptr<UniformBufferObject>               m_UBOCamera;
+            UniformBufferObject*                               m_UBOCamera = nullptr;
             UBOCameraDataStruct                                m_UBOCameraDataStruct;
             glm::mat4                                          m_2DProjectionMatrix;
             GBuffer                                            m_GBuffer;

@@ -326,12 +326,9 @@ void TextureLoader::LoadCPU(TextureCPUData& cpuData, Handle inHandle) {
     }
 }
 void TextureLoader::LoadGPU(Handle textureHandle) {
-    auto mutex = textureHandle.getMutex();
-    if (mutex) {
-        std::lock_guard lock(*mutex);
-        auto& texture = *textureHandle.get<Texture>();
-        LoadGPU(texture);
-    }
+    std::lock_guard lock{ Engine::Resources::getMutex() };
+    auto& texture = *textureHandle.get<Texture>();
+    LoadGPU(texture);
 }
 void TextureLoader::LoadGPU(Texture& texture) {
     Engine::Renderer::genAndBindTexture(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);

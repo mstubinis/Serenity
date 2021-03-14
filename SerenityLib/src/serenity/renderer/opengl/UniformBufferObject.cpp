@@ -11,10 +11,10 @@ using namespace Engine::priv;
 GLint     UniformBufferObject::MAX_UBO_BINDINGS;
 uint32_t  UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT = 0;
 
-UniformBufferObject::UniformBufferObject(const char* nameInShader, uint32_t sizeofStruct, const int globalBindingPointNumber) 
-    : m_SizeOfStruct{ sizeofStruct }
+UniformBufferObject::UniformBufferObject(std::string_view nameInShader, uint32_t sizeofStruct, const int globalBindingPointNumber) 
+    : Resource{ ResourceType::UniformBufferObject, nameInShader }
+    , m_SizeOfStruct{ sizeofStruct }
 {
-    setName(nameInShader);
     if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
         return;
     }

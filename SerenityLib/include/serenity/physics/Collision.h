@@ -6,7 +6,7 @@ class  btCollisionShape;
 class  Mesh;
 class  ModelInstance;
 class  ComponentModel;
-class  ComponentBody;
+class  ComponentBodyRigid;
 class  btHeightfieldTerrainShape;
 class  btCompoundShape;
 
@@ -35,10 +35,10 @@ class Collision final: public Observer {
 
         Collision() = delete;
     public:
-        Collision(ComponentBody&);
-        Collision(ComponentBody&, CollisionType, Engine::view_ptr<ModelInstance>, float mass = 0);
-        Collision(ComponentBody&, CollisionType, Handle mesh, float mass = 0);
-        Collision(ComponentBody&, ComponentModel&, float mass = 0, CollisionType = CollisionType::ConvexHull);
+        Collision(ComponentBodyRigid&);
+        Collision(ComponentBodyRigid&, CollisionType, Engine::view_ptr<ModelInstance>, float mass = 0);
+        Collision(ComponentBodyRigid&, CollisionType, Handle mesh, float mass = 0);
+        Collision(ComponentBodyRigid&, ComponentModel&, float mass = 0, CollisionType = CollisionType::ConvexHull);
 
         Collision(const Collision&)                  = delete;
         Collision& operator=(const Collision&)       = delete;

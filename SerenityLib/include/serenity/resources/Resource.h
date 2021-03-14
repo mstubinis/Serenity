@@ -20,7 +20,6 @@ class ResourceBaseClass {
         ResourceBaseClass& operator=(const ResourceBaseClass&)      = delete;
         ResourceBaseClass(ResourceBaseClass&&) noexcept;
         ResourceBaseClass& operator=(ResourceBaseClass&&) noexcept;
-        virtual ~ResourceBaseClass() = default;
 
         [[nodiscard]] inline constexpr ResourceType type() const noexcept { return m_ResourceType; }
         [[nodiscard]] inline constexpr const std::string& name() const noexcept { return m_Name; }
@@ -50,6 +49,5 @@ class Resource : public ResourceBaseClass {
         Resource& operator=(const Resource&)     = delete;
         Resource(Resource&&) noexcept            = default;
         Resource& operator=(Resource&&) noexcept = default;
-        virtual ~Resource() = default;
 };
 #endif

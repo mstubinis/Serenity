@@ -25,8 +25,8 @@ constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engi
     auto stage               = i->stage();
     auto& scene              = *Engine::Resources::getCurrentScene();
     auto* camera             = scene.getActiveCamera();
-    ComponentBody* body      = i->parent().getComponent<ComponentBody>();
-    glm::mat4 parentModel    = body->modelMatrixRendering();
+    auto [body, rigid]       = i->parent().getComponents<ComponentBody, ComponentBodyRigid>();
+    glm::mat4 parentModel    = body ? body->modelMatrixRendering() : rigid->modelMatrixRendering();
     auto& animationContainer = i->getRunningAnimations();
 
     Engine::Renderer::sendUniform1Safe("Object_Color", i->color().toPackedInt());

@@ -53,6 +53,7 @@ namespace Engine::priv {
             template<class TResource, class ... ARGS>
             [[nodiscard]] inline Handle addResource(ARGS&&... args) { return m_ResourceModule.emplace<TResource>(std::forward<ARGS>(args)...); }
 
+            [[nodiscard]] inline std::mutex& getMutex() const noexcept { return m_ResourceModule.m_Mutex; }
 
             [[nodiscard]] Engine::view_ptr<Scene> getSceneByID(uint32_t sceneID);
 
@@ -70,6 +71,8 @@ namespace Engine::Resources {
     [[nodiscard]] Engine::view_ptr<Scene> getCurrentScene();
     bool setCurrentScene(Scene* scene);
     bool setCurrentScene(std::string_view sceneName);
+
+    [[nodiscard]] std::mutex& getMutex() noexcept;
 
     [[nodiscard]] double dt();
     [[nodiscard]] double timeScale();

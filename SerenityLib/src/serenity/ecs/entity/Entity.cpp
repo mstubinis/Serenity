@@ -30,39 +30,46 @@ bool Entity::isDestroyed() const noexcept {
 }
 void Entity::addChild(Entity child) const noexcept {
     auto body = getComponent<ComponentBody>();
-    if (body) {
+    auto rigid = getComponent<ComponentBodyRigid>();
+    if (body)
         body->addChild(child);
-    }
+    else if (rigid)
+        rigid->addChild(child);
 }
 void Entity::removeChild(Entity child) const noexcept {
     auto body = getComponent<ComponentBody>();
-    if (body) {
+    auto rigid = getComponent<ComponentBodyRigid>();
+    if (body)
         body->removeChild(child);
-    }
+    else if (rigid)
+        rigid->removeChild(child);
 }
 void Entity::removeAllChildren() const noexcept {
     auto body = getComponent<ComponentBody>();
-    if (body) {
+    auto rigid = getComponent<ComponentBodyRigid>();
+    if (body)
         body->removeAllChildren();
-    }
+    else if (rigid)
+        rigid->removeAllChildren();
 }
 bool Entity::hasParent() const noexcept {
     auto body = getComponent<ComponentBody>();
-    if (body) {
+    auto rigid = getComponent<ComponentBodyRigid>();
+    if (body)
         return body->hasParent();
-    }
+    else if (rigid)
+        return rigid->hasParent();
     return false;
 }
 Engine::view_ptr<Scene> Entity::scene() const noexcept {
     return Core::m_Engine->m_ResourceManager.getSceneByID(sceneID());
 }
-
 bool Entity::addComponent(std::string_view componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8) {
     if (componentClassName == "ComponentBody") {
+        return addComponent<ComponentBody>();
+    }else if ("ComponentBodyRigid") {
         if (!a1.isNil()) {
-            return addComponent<ComponentBody>(a1.cast<CollisionType>());
-        }else{
-            return addComponent<ComponentBody>();
+            return addComponent<ComponentBodyRigid>(a1.cast<CollisionType>());
         }
     }else if (componentClassName == "ComponentModel") {
         if (!a3.isNil() && !a4.isNil()) {
@@ -110,6 +117,8 @@ bool Entity::addComponent(std::string_view componentClassName, luabridge::LuaRef
 bool Entity::removeComponent(std::string_view componentClassName) {
     if (componentClassName == "ComponentBody") {
         return removeComponent<ComponentBody>();
+    }else if (componentClassName == "ComponentBodyRigid") {
+        return removeComponent<ComponentBodyRigid>();
     }else if (componentClassName == "ComponentModel") {
         return removeComponent<ComponentModel>();
     }else if (componentClassName == "ComponentCamera") {
@@ -133,6 +142,8 @@ luabridge::LuaRef Entity::getComponent(std::string_view componentClassName) {
     auto* global_name_cstr  = global_name.c_str();
     if (componentClassName == "ComponentBody") {
         return PublicEntity::GetComponent<ComponentBody>(L, *this, global_name_cstr);
+    }else if (componentClassName == "ComponentBodyRigid") {
+        return PublicEntity::GetComponent<ComponentBodyRigid>(L, *this, global_name_cstr);
     }else if (componentClassName == "ComponentModel") {
         return PublicEntity::GetComponent<ComponentModel>(L, *this, global_name_cstr);
     }else if (componentClassName == "ComponentCamera") {
@@ -153,7 +164,6 @@ luabridge::LuaRef Entity::getComponent(std::string_view componentClassName) {
     }
     return luabridge::getGlobal(L, global_name_cstr);
 }
-
 Engine::view_ptr<Engine::priv::ECS> Engine::priv::PublicEntity::GetECS(Entity entity) {
     Scene* scene_ptr = entity.scene();
     return (scene_ptr) ? &Engine::priv::PublicScene::GetECS(*scene_ptr) : nullptr;

@@ -40,8 +40,9 @@ float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) 
     modelComponent.m_Radius          = maxRadius;
     modelComponent.m_RadiusBox       = maxBoundingBox;
     auto body                        = modelComponent.m_Owner.getComponent<ComponentBody>();
-    if (body) {
-        auto bodyScale               = Engine::Math::Max(glm::vec3{ body->getScale() });
+    auto rigid                       = modelComponent.m_Owner.getComponent<ComponentBodyRigid>();
+    if (body || rigid) {
+        auto bodyScale               = Engine::Math::Max(glm::vec3{ body ? body->getScale() : rigid->getScale() });
         modelComponent.m_Radius     *= bodyScale;
         modelComponent.m_RadiusBox  *= bodyScale;
     }

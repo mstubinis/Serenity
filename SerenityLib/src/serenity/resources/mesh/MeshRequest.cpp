@@ -71,13 +71,10 @@ void MeshRequest::request(bool inAsync) {
                     PublicMeshRequest::LoadCPU(meshRequest);
                 };
                 auto l_gpu = [meshRequest{ *this }]() mutable {
-                    auto mutex = meshRequest.m_Parts[0].handle.getMutex();
-                    if (mutex) {
-                        std::unique_lock lock{ *mutex };
-                        for (auto& part : meshRequest.m_Parts) {
-                            auto& mesh = *part.handle.get<Mesh>();
-                            PublicMesh::LoadGPU(mesh);
-                        }
+                    std::unique_lock lock{ Engine::Resources::getMutex() };
+                    for (auto& part : meshRequest.m_Parts) {
+                        auto& mesh = *part.handle.get<Mesh>();
+                        PublicMesh::LoadGPU(mesh);
                     }
                     auto handles = Engine::create_and_reserve<std::vector<Handle>>((uint32_t)meshRequest.m_Parts.size());
                     for (auto& part : meshRequest.m_Parts) {

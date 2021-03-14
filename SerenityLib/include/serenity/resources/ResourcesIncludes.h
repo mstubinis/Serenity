@@ -10,6 +10,7 @@ enum class ResourceType : unsigned char {
     Font,
     Shader,
     ShaderProgram,
+    UniformBufferObject,
     SoundData,
 };
 

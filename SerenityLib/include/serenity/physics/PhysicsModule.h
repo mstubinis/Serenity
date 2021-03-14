@@ -2,10 +2,11 @@
 #ifndef ENGINE_PHYSICS_MODULE_H
 #define ENGINE_PHYSICS_MODULE_H
 
+class  Scene;
 class  Entity;
 class  btRigidBody;
 class  btCollisionObject;
-class  ComponentBody;
+class  ComponentBodyRigid;
 class  Camera;
 namespace Engine::priv {
     class  MeshImportedData;
@@ -22,9 +23,9 @@ namespace Engine::priv {
 
 namespace Engine{
     struct RayCastResult final {
-        glm::vec3          hitPosition           = glm::vec3(0.0f);
-        glm::vec3          hitNormal             = glm::vec3(0.0f);
-        btCollisionObject* collisionObject       = nullptr;
+        glm::vec3          hitPosition     = glm::vec3{ 0.0f };
+        glm::vec3          hitNormal       = glm::vec3{ 0.0f };
+        btCollisionObject* collisionObject = nullptr;
   
         RayCastResult(const btCollisionWorld::ClosestRayResultCallback& closestHitResult) {
             if (closestHitResult.hasHit()) {
@@ -53,23 +54,21 @@ namespace Engine{
 
                 void init();
 
-                void preUpdate(const float dt) noexcept;
-                void update(const float dt, int maxSubSteps = 1, float fixedTimeStep = 0.0166666f);
-                void render(const Camera& camera);
-
-                bool add_rigid_body(btRigidBody* rigidBody, MaskType group, MaskType mask, bool doGroupAndMask) noexcept;
+                void preUpdate(Scene&, const float dt) noexcept;
+                void update(Scene&, const float dt, int maxSubSteps = 1, float fixedTimeStep = 0.0166666f);
+                void render(Scene&, const Camera& camera);
         };
     };
     namespace Physics{
-        std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, ComponentBody* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
-        std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, std::vector<ComponentBody*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
+        std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, ComponentBodyRigid* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
+        std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, std::vector<ComponentBodyRigid*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
         std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, Entity* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
         std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
 
-        RayCastResult rayCastNearest(const btVector3& start, const btVector3& end, ComponentBody* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
-        RayCastResult rayCastNearest(const btVector3& start, const btVector3& end, std::vector<ComponentBody*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
+        RayCastResult rayCastNearest(const btVector3& start, const btVector3& end, ComponentBodyRigid* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
+        RayCastResult rayCastNearest(const btVector3& start, const btVector3& end, std::vector<ComponentBodyRigid*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
         RayCastResult rayCastNearest(const glm::vec3& start, const glm::vec3& end, Entity* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
         RayCastResult rayCastNearest(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
@@ -80,28 +79,28 @@ namespace Engine{
         void updateDiscreteCollisionDetection() noexcept;
 
         void setGravity(float x, float y, float z);
-        void setGravity(const glm::vec3& gravity);
+        inline void setGravity(const glm::vec3& gravity) noexcept { setGravity(gravity.x, gravity.y, gravity.z); }
         void pause(bool paused = true);
         void unpause();
 
         bool addRigidBody(Entity entity);
-        bool addRigidBody(ComponentBody&);
+        bool addRigidBody(ComponentBodyRigid&);
         bool addRigidBody(btRigidBody*, MaskType group, MaskType mask);
         bool addRigidBody(btRigidBody*);
         bool removeRigidBody(Entity entity);
         bool removeRigidBody(btRigidBody*);
-        bool removeRigidBody(ComponentBody&);
+        bool removeRigidBody(ComponentBodyRigid&);
         bool removeCollisionObject(btCollisionObject* object);
 
         void updateRigidBody(btRigidBody*);
 
         bool addRigidBodyThreadSafe(Entity entity);
-        bool addRigidBodyThreadSafe(ComponentBody&);
+        bool addRigidBodyThreadSafe(ComponentBodyRigid&);
         bool addRigidBodyThreadSafe(btRigidBody*, MaskType group, MaskType mask);
         bool addRigidBodyThreadSafe(btRigidBody*);
         bool removeRigidBodyThreadSafe(Entity entity);
         bool removeRigidBodyThreadSafe(btRigidBody*);
-        bool removeRigidBodyThreadSafe(ComponentBody&);
+        bool removeRigidBodyThreadSafe(ComponentBodyRigid&);
         bool removeCollisionObjectThreadSafe(btCollisionObject* object);
 
         void updateRigidBodyThreadSafe(btRigidBody*);

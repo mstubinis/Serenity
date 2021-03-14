@@ -150,7 +150,7 @@ void DeferredPipeline::init() {
     GLCall(glDepthRange(0.0f, 1.0f));
 
     Handle uboCameraHandle = Engine::Resources::addResource<UniformBufferObject>("Camera", sizeof(UBOCameraDataStruct));
-    m_UBOCamera.reset(uboCameraHandle.get<UniformBufferObject>());
+    m_UBOCamera = uboCameraHandle.get<UniformBufferObject>();
     m_UBOCamera->updateData(&m_UBOCameraDataStruct);
 
     priv::EShaders::init(Engine::priv::RenderModule::OPENGL_VERSION, Engine::priv::RenderModule::GLSL_VERSION);
@@ -311,7 +311,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(Handle covoludeSha
     auto& convolutionTexture = *convolutionTextureHandle.get<Texture>();
     Engine::Renderer::bindTextureForModification(texType, convolutionTexture.address());
     //Engine::Renderer::unbindFBO();
-    priv::FramebufferObject fbo(size, size); //try without a depth format
+    priv::FramebufferObject fbo{ size, size }; //try without a depth format
     fbo.bind();
 
     //make these 2 variables global / constexpr in the renderer class?
@@ -360,7 +360,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(Handle covoludeSha
     fbo.unbind();
 }
 void DeferredPipeline::internal_generate_brdf_lut(Handle program, uint32_t brdfSize, int numSamples) {
-    FramebufferObject fbo(brdfSize, brdfSize); //try without a depth format
+    FramebufferObject fbo{ brdfSize, brdfSize }; //try without a depth format
     fbo.bind();
 
     Engine::Renderer::bindTextureForModification(TextureType::Texture2D, Texture::BRDF.get<Texture>()->address());
@@ -682,7 +682,7 @@ void DeferredPipeline::sendGPUDataGI(Skybox* skybox) {
 }
 void DeferredPipeline::sendGPUDataLight(Camera& camera, SunLight& sunLight, const std::string& start) {
     auto body        = sunLight.getComponent<ComponentBody>();
-    auto pos         = glm::vec3(body->getPosition());
+    auto pos         = glm::vec3{ body->getPosition() };
     const auto& col  = sunLight.color();
     sendUniform4Safe((start + "DataA").c_str(), sunLight.getAmbientIntensity(), sunLight.getDiffuseIntensity(), sunLight.getSpecularIntensity(), 0.0f);
     sendUniform4Safe((start + "DataC").c_str(), 0.0f, pos.x, pos.y, pos.z);
@@ -691,7 +691,7 @@ void DeferredPipeline::sendGPUDataLight(Camera& camera, SunLight& sunLight, cons
 }
 int DeferredPipeline::sendGPUDataLight(Camera& camera, PointLight& pointLight, const std::string& start) {
     auto body       = pointLight.getComponent<ComponentBody>();
-    auto pos        = glm::vec3(body->getPosition());
+    auto pos        = glm::vec3{ body->getPosition() };
     auto cull       = pointLight.getCullingRadius();
     auto factor     = 1100.0f * cull;
     auto distSq     = (float)camera.getDistanceSquared(pos);
@@ -713,7 +713,7 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, PointLight& pointLight, c
 }
 void DeferredPipeline::sendGPUDataLight(Camera& camera, DirectionalLight& directionalLight, const std::string& start) {
     auto body       = directionalLight.getComponent<ComponentBody>();
-    auto forward    = glm::vec3(body->forward());
+    auto forward    = glm::vec3{ body->forward() };
     const auto& col = directionalLight.color();
     sendUniform4Safe((start + "DataA").c_str(), directionalLight.getAmbientIntensity(), directionalLight.getDiffuseIntensity(), directionalLight.getSpecularIntensity(), forward.x);
     sendUniform4Safe((start + "DataB").c_str(), forward.y, forward.z, 0.0f, 0.0f);
@@ -722,8 +722,8 @@ void DeferredPipeline::sendGPUDataLight(Camera& camera, DirectionalLight& direct
 }
 int DeferredPipeline::sendGPUDataLight(Camera& camera, SpotLight& spotLight, const std::string& start) {
     auto body    = spotLight.getComponent<ComponentBody>();
-    auto pos     = glm::vec3(body->getPosition());
-    auto forward = glm::vec3(body->forward());
+    auto pos     = glm::vec3{ body->getPosition() };
+    auto forward = glm::vec3{ body->forward() };
     auto cull    = spotLight.getCullingRadius();
     auto factor  = 1100.0f * cull;
     auto distSq  = (float)camera.getDistanceSquared(pos);
@@ -749,7 +749,7 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, SpotLight& spotLight, con
 }
 int DeferredPipeline::sendGPUDataLight(Camera& camera, RodLight& rodLight, const std::string& start) {
     auto body            = rodLight.getComponent<ComponentBody>();
-    auto pos             = glm::vec3(body->getPosition());
+    auto pos             = glm::vec3{ body->getPosition() };
     auto cullingDistance = rodLight.rodLength() + (rodLight.getCullingRadius() * 2.0f);
     auto factor          = 1100.0f * cullingDistance;
     auto distSq          = (float)camera.getDistanceSquared(pos);
@@ -758,8 +758,8 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, RodLight& rodLight, const
     }
     const auto& col      = rodLight.color();
     float half           = rodLight.rodLength() / 2.0f;
-    auto firstEndPt      = pos + (glm::vec3(body->forward()) * half);
-    auto secndEndPt      = pos - (glm::vec3(body->forward()) * half);
+    auto firstEndPt      = pos + (glm::vec3{ body->forward() } *half);
+    auto secndEndPt      = pos - (glm::vec3{ body->forward() } *half);
     sendUniform4Safe((start + "DataA").c_str(), rodLight.getAmbientIntensity(), rodLight.getDiffuseIntensity(), rodLight.getSpecularIntensity(), firstEndPt.x);
     sendUniform4Safe((start + "DataB").c_str(), firstEndPt.y, firstEndPt.z, rodLight.getConstant(), rodLight.getLinear());
     sendUniform4Safe((start + "DataC").c_str(), rodLight.getExponent(), secndEndPt.x, secndEndPt.y, secndEndPt.z);
@@ -989,9 +989,9 @@ void DeferredPipeline::internal_render_2d_text_left(std::string_view text, const
     }
 }
 void DeferredPipeline::internal_render_2d_text_center(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
-    std::vector<std::string> lines;
-    std::vector<uint16_t> lines_sizes;
-    std::string line_accumulator;
+    std::vector<std::string>  lines;
+    std::vector<uint16_t>     lines_sizes;
+    std::string               line_accumulator;
     for (const auto character : text) {
         if (character == '\n') {
             lines.emplace_back(line_accumulator);
@@ -1017,7 +1017,7 @@ void DeferredPipeline::internal_render_2d_text_center(std::string_view text, con
         const auto& line_size = lines_sizes[l] / 2;
         for (auto& character : line) {
             if (character != '\0') {
-                uint32_t accum     = i * 4;
+                uint32_t accum         = i * 4;
                 const CharGlyph& glyph = font.getGlyphData(character);
                 float startingY        = y - (glyph.height + glyph.yoffset);
                 ++i;
@@ -1045,8 +1045,8 @@ void DeferredPipeline::internal_render_2d_text_center(std::string_view text, con
     }
 }
 void DeferredPipeline::internal_render_2d_text_right(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
-    std::vector<std::string> lines;
-    std::string line_accumulator;
+    std::vector<std::string>  lines;
+    std::string               line_accumulator;
     for (const auto character : text) {
         if (character == '\n') {
             lines.emplace_back(line_accumulator);
@@ -1115,10 +1115,10 @@ void DeferredPipeline::render2DText(const std::string& text, Handle fontHandle, 
     float x = 0.0f;
     float z = -0.001f - depth;
 
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    modelMatrix           = glm::translate(modelMatrix, glm::vec3(position.x, position.y, 0));
-    modelMatrix           = glm::rotate(modelMatrix, Math::toRadians(angle), glm::vec3(0, 0, 1));
-    modelMatrix           = glm::scale(modelMatrix, glm::vec3(scale.x, scale.y, 1));
+    glm::mat4 modelMatrix = glm::mat4{ 1.0f };
+    modelMatrix           = glm::translate(modelMatrix, glm::vec3{ position.x, position.y, 0 });
+    modelMatrix           = glm::rotate(modelMatrix, Math::toRadians(angle), glm::vec3{ 0, 0, 1 });
+    modelMatrix           = glm::scale(modelMatrix, glm::vec3{ scale.x, scale.y, 1 });
 
     Engine::Renderer::sendUniform1("DiffuseTextureEnabled", 1);
     Engine::Renderer::sendTexture("DiffuseTexture", *textureHandle.get<Texture>(), 0);
@@ -1160,10 +1160,10 @@ void DeferredPipeline::render2DTexture(Handle textureHandle, const glm::vec2& po
     }
     Engine::Renderer::alignmentOffset(align, translationX, translationY, totalSizeX, totalSizeY);
 
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    modelMatrix           = glm::translate(modelMatrix, glm::vec3(translationX, translationY, -0.001f - depth));
-    modelMatrix           = glm::rotate(modelMatrix, Math::toRadians(angle), glm::vec3(0, 0, 1));
-    modelMatrix           = glm::scale(modelMatrix, glm::vec3(totalSizeX, totalSizeY, 1.0f));
+    glm::mat4 modelMatrix = glm::mat4{ 1.0f };
+    modelMatrix           = glm::translate(modelMatrix, glm::vec3{ translationX, translationY, -0.001f - depth });
+    modelMatrix           = glm::rotate(modelMatrix, Math::toRadians(angle), glm::vec3{ 0, 0, 1 });
+    modelMatrix           = glm::scale(modelMatrix, glm::vec3{ totalSizeX, totalSizeY, 1.0f });
 
     Engine::Renderer::sendUniform4("Object_Color", color);
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
@@ -1190,10 +1190,10 @@ void DeferredPipeline::render2DTexture(uint32_t textureAddress, int textureWidth
 
     Engine::Renderer::alignmentOffset(align, translationX, translationY, totalSizeX, totalSizeY);
 
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    modelMatrix = glm::translate(modelMatrix, glm::vec3(translationX, translationY, -0.001f - depth));
-    modelMatrix = glm::rotate(modelMatrix, Math::toRadians(angle), glm::vec3(0, 0, 1));
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(totalSizeX, totalSizeY, 1.0f));
+    glm::mat4 modelMatrix = glm::mat4{ 1.0f };
+    modelMatrix           = glm::translate(modelMatrix, glm::vec3{ translationX, translationY, -0.001f - depth });
+    modelMatrix           = glm::rotate(modelMatrix, Math::toRadians(angle), glm::vec3{ 0, 0, 1 });
+    modelMatrix           = glm::scale(modelMatrix, glm::vec3{ totalSizeX, totalSizeY, 1.0f });
 
     Engine::Renderer::sendUniform4("Object_Color", color);
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
@@ -1214,10 +1214,10 @@ void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::ve
 
     Engine::Renderer::alignmentOffset(alignment, translationX, translationY, width, height);
 
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    modelMatrix           = glm::translate(modelMatrix, glm::vec3(translationX, translationY, -0.001f - depth));
-    modelMatrix           = glm::rotate(modelMatrix, Math::toRadians(angle), glm::vec3(0, 0, 1));
-    modelMatrix           = glm::scale(modelMatrix, glm::vec3(width, height, 1));
+    glm::mat4 modelMatrix = glm::mat4{ 1.0f };
+    modelMatrix           = glm::translate(modelMatrix, glm::vec3{ translationX, translationY, -0.001f - depth });
+    modelMatrix           = glm::rotate(modelMatrix, Math::toRadians(angle), glm::vec3{ 0, 0, 1 });
+    modelMatrix           = glm::scale(modelMatrix, glm::vec3{ width, height, 1 });
 
     Engine::Renderer::sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
     Engine::Renderer::sendUniform1("DiffuseTextureEnabled", 0);
@@ -1231,7 +1231,7 @@ void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::ve
 }
 void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport, Camera& camera) {
     const auto& winSize    = Resources::getWindowSize();
-    const auto& dimensions = glm::vec4(viewport.getViewportDimensions());
+    const auto& dimensions = glm::vec4{ viewport.getViewportDimensions() };
     if (viewport.isAspectRatioSynced()) {
         camera.setAspect(dimensions.z / dimensions.w);
     }
@@ -1648,7 +1648,7 @@ void DeferredPipeline::renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport,
                 Engine::Renderer::GLDisable(GL_DEPTH_TEST);
                 GLCall(glDepthMask(GL_FALSE));
                 m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::BulletPhysics].get<ShaderProgram>());
-                Core::m_Engine->m_PhysicsModule.render(camera);
+                Core::m_Engine->m_PhysicsModule.render(scene, camera);
         #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
             }
         #endif

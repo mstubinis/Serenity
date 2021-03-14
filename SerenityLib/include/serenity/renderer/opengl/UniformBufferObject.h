@@ -26,7 +26,7 @@ class UniformBufferObject final : public Observer, public Resource<UniformBuffer
         void internal_load_GPU();
         void internal_unload_GPU();
     public:
-        UniformBufferObject(const char* nameInShader, uint32_t sizeofStruct, const int globalBindingPointIndex = -1);
+        UniformBufferObject(std::string_view nameInShader, uint32_t sizeofStruct, const int globalBindingPointIndex = -1);
         ~UniformBufferObject();
 
         void onEvent(const Event&);

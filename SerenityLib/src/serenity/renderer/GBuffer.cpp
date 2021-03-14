@@ -78,8 +78,7 @@ bool Engine::priv::GBuffer::resize(uint32_t width, uint32_t height) {
 }
 void Engine::priv::GBuffer::internal_Build_Texture_Buffer(FramebufferObject& fbo, GBufferType::Type gbufferType, uint32_t w, uint32_t h) {
     const auto [internalFmt, pxlFmt, pxlType, fbAttatch] = GBUFFER_TYPE_DATA[gbufferType];
-    Texture* texture  = NEW Texture(w, h, pxlType, pxlFmt, internalFmt, fbo.divisor());
-    m_FramebufferTextures[gbufferType] = fbo.attatchTexture(texture, fbAttatch);
+    m_FramebufferTextures[gbufferType] = fbo.attatchTexture(fbAttatch, w, h, pxlType, pxlFmt, internalFmt, fbo.divisor());
 }
 void Engine::priv::GBuffer::internal_Start(std::vector<uint32_t>& types, std::string_view channels, bool first_fbo) {
     ASSERT(types.size() > 0, __FUNCTION__ << "(): types was empty!");

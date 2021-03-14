@@ -1,36 +1,36 @@
 #pragma once
-#ifndef ENGINE_ECS_ENTITY_RAII_BODY_H
-#define ENGINE_ECS_ENTITY_RAII_BODY_H
+#ifndef ENGINE_ECS_ENTITY_RAII_BODY_RIGID_H
+#define ENGINE_ECS_ENTITY_RAII_BODY_RIGID_H
 
-#include <serenity/ecs/entity/EntityBody.h>
+#include <serenity/ecs/entity/EntityBodyRigid.h>
 
-class EntityRAIIBody final {
+class EntityRAIIBodyRigid final {
     private:
-        EntityBody m_Entity;
+        EntityBodyRigid m_Entity;
     public:
-        EntityRAIIBody() = default;
-        EntityRAIIBody(Scene& scene) 
+        EntityRAIIBodyRigid() = default;
+        EntityRAIIBodyRigid(Scene& scene)
             : m_Entity{ scene }
         {}
-        EntityRAIIBody(const EntityBody& other)
+        EntityRAIIBodyRigid(const EntityBodyRigid& other)
             : m_Entity{ other }
         {}
-        EntityRAIIBody(const Entity& other) 
+        EntityRAIIBodyRigid(const Entity& other)
             : m_Entity{ other }
         {}
-        EntityRAIIBody(uint32_t entityID, uint32_t sceneID, uint32_t versionID)
+        EntityRAIIBodyRigid(uint32_t entityID, uint32_t sceneID, uint32_t versionID)
             : m_Entity{ entityID, sceneID, versionID }
         {}
-        EntityRAIIBody(const EntityRAIIBody& other) = delete;
-        EntityRAIIBody& operator=(const EntityRAIIBody& other) = delete;
-        EntityRAIIBody(EntityRAIIBody&& other) noexcept 
-            : m_Entity{ std::exchange(other.m_Entity, EntityBody{}) }
+        EntityRAIIBodyRigid(const EntityRAIIBodyRigid& other) = delete;
+        EntityRAIIBodyRigid& operator=(const EntityRAIIBodyRigid& other) = delete;
+        EntityRAIIBodyRigid(EntityRAIIBodyRigid&& other) noexcept
+            : m_Entity{ std::exchange(other.m_Entity, EntityBodyRigid{}) }
         {}
-        EntityRAIIBody& operator=(EntityRAIIBody&& other) noexcept {
-            m_Entity = std::exchange(other.m_Entity, EntityBody{});
+        EntityRAIIBodyRigid& operator=(EntityRAIIBodyRigid&& other) noexcept {
+            m_Entity = std::exchange(other.m_Entity, EntityBodyRigid{});
             return *this;
         }
-        ~EntityRAIIBody() {
+        ~EntityRAIIBodyRigid() {
             m_Entity.destroy();
         }
 
@@ -42,7 +42,7 @@ class EntityRAIIBody final {
         [[nodiscard]] inline bool isDestroyed() const noexcept { return m_Entity.isDestroyed(); }
 
         inline operator Entity() const noexcept { return m_Entity; }
-        inline operator EntityBody() const noexcept { return m_Entity; }
+        inline operator EntityBodyRigid() const noexcept { return m_Entity; }
 
         [[nodiscard]] inline Engine::view_ptr<Scene> scene() const noexcept { return m_Entity.scene(); }
         [[nodiscard]] inline bool hasParent() const noexcept { return m_Entity.hasParent(); }
@@ -70,15 +70,24 @@ class EntityRAIIBody final {
         inline bool removeComponent(const std::string& componentClassName) {
             return m_Entity.removeComponent(componentClassName);
         }
-        [[nodiscard]] inline luabridge::LuaRef getComponent(const std::string& componentClassName) { return m_Entity.getComponent(componentClassName); }
+        [[nodiscard]] inline luabridge::LuaRef getComponent(const std::string& componentClassName) {
+            return m_Entity.getComponent(componentClassName);
+        }
+
+        //
+
+        [[nodiscard]] inline float mass() const noexcept { return m_Entity.mass(); }
         [[nodiscard]] inline glm_quat getRotation() const noexcept { return m_Entity.getRotation(); }
         [[nodiscard]] inline glm_vec3 getScale() const noexcept { return m_Entity.getScale(); }
         [[nodiscard]] inline glm_vec3 getPosition() const noexcept { return m_Entity.getPosition(); }
         [[nodiscard]] inline glm_vec3 getLocalPosition() const noexcept { return m_Entity.getLocalPosition(); }
+
         [[nodiscard]] inline const glm_vec3& forward() const noexcept { return m_Entity.forward(); }
         [[nodiscard]] inline const glm_vec3& right() const noexcept { return m_Entity.right(); }
         [[nodiscard]] inline const glm_vec3& up() const noexcept { return m_Entity.up(); }
+
         [[nodiscard]] inline glm_vec3 getLinearVelocity() const noexcept { return m_Entity.getLinearVelocity(); }
+        [[nodiscard]] inline glm_vec3 getAngularVelocity() const noexcept { return m_Entity.getAngularVelocity(); }
 
         inline void translate(const glm_vec3& translation, bool local = true) noexcept { m_Entity.translate(translation, local); }
         inline void translate(decimal x, decimal y, decimal z, bool local = true) noexcept { m_Entity.translate(x, y, z, local); }
@@ -102,8 +111,33 @@ class EntityRAIIBody final {
         inline void setScale(decimal x, decimal y, decimal z) noexcept { m_Entity.setScale(x, y, z); }
         inline void setScale(decimal s) noexcept { m_Entity.setScale(s); }
 
+        inline void setDamping(decimal linear, decimal angular) noexcept { m_Entity.setDamping(linear, angular); }
+
+        inline void setDynamic(bool dynamic) noexcept { m_Entity.setDynamic(dynamic); }
+        inline void setMass(float mass) noexcept { m_Entity.setMass(mass); }
+        inline void setGravity(decimal x, decimal y, decimal z) noexcept { m_Entity.setGravity(x, y, z); }
+
+        inline void clearLinearForces() noexcept { m_Entity.clearLinearForces(); }
+        inline void clearAngularForces() noexcept { m_Entity.clearAngularForces(); }
+        inline void clearAllForces() noexcept { m_Entity.clearAllForces(); }
+
         inline void setLinearVelocity(decimal x, decimal y, decimal z, bool local = true) noexcept { m_Entity.setLinearVelocity(x, y, z, local); }
         inline void setLinearVelocity(const glm_vec3& velocity, bool local = true) noexcept { m_Entity.setLinearVelocity(velocity, local); }
+
+        inline void setAngularVelocity(decimal x, decimal y, decimal z, bool local = true) noexcept { m_Entity.setAngularVelocity(x, y, z, local); }
+        inline void setAngularVelocity(const glm_vec3& velocity, bool local = true) noexcept { m_Entity.setAngularVelocity(velocity, local); }
+
+        inline void applyForce(decimal x, decimal y, decimal z, bool local = true) noexcept { m_Entity.applyForce(x, y, z, local); }
+        inline void applyForce(const glm_vec3& force, const glm_vec3& origin = glm_vec3(0.0f), const bool local = true) noexcept { m_Entity.applyForce(force, origin, local); }
+
+        inline void applyImpulse(decimal x, decimal y, decimal z, bool local = true) noexcept { m_Entity.applyImpulse(x, y, z, local); }
+        inline void applyImpulse(const glm_vec3& impulse, const glm_vec3& origin = glm_vec3(0.0f), bool local = true) noexcept { m_Entity.applyImpulse(impulse, origin, local); }
+
+        inline void applyTorque(decimal x, decimal y, decimal z, bool local = true) noexcept { m_Entity.applyTorque(x, y, z, local); }
+        inline void applyTorque(const glm_vec3& torque, bool local = true) noexcept { m_Entity.applyTorque(torque, local); }
+
+        inline void applyTorqueImpulse(decimal x, decimal y, decimal z, bool local = true) noexcept { m_Entity.applyTorqueImpulse(x, y, z, local); }
+        inline void applyTorqueImpulse(const glm_vec3& torqueImpulse, bool local = true) noexcept { m_Entity.applyTorqueImpulse(torqueImpulse, local); }
 };
 
 #endif

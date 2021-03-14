@@ -4,6 +4,7 @@
 
 #include <serenity/ecs/components/ComponentModel.h>
 #include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentBodyRigid.h>
 #include <serenity/resources/mesh/Mesh.h>
 #include <serenity/resources/mesh/BuiltInMeshes.h>
 #include <serenity/system/Engine.h>
@@ -15,8 +16,8 @@
 #include <LinearMath/btIDebugDraw.h>
 
 void Collision::internal_load_1(Engine::view_ptr<Collision> collision, CollisionType collisionType, Handle mesh) {
-    auto body  = collision->m_Owner.getComponent<ComponentBody>();
     collision->m_DeferredMeshes.clear();
+    auto body  = collision->m_Owner.getComponent<ComponentBodyRigid>();
     auto scale = body->getScale();
     Engine::Physics::removeRigidBodyThreadSafe(*body);
     collision->internal_free_memory();
@@ -30,7 +31,7 @@ void Collision::internal_load_1(Engine::view_ptr<Collision> collision, Collision
     }
 }
 void Collision::internal_load_2(Engine::view_ptr<Collision> collision, Engine::view_ptr<btCompoundShape> btCompound, std::vector<Engine::view_ptr<ModelInstance>> instances, float mass, CollisionType collisionType) {
-    auto body  = collision->m_Owner.getComponent<ComponentBody>();
+    auto body  = collision->m_Owner.getComponent<ComponentBodyRigid>();
     auto scale = body->getScale();
     for (auto& instance : instances) {
         btCollisionShape* built_collision_shape = Engine::priv::PublicMesh::BuildCollision(instance, collisionType, true);
@@ -52,17 +53,17 @@ void Collision::internal_base_init(CollisionType type, float mass) {
     m_Type = type;
     setMass(mass);
 }
-Collision::Collision(ComponentBody& body)
+Collision::Collision(ComponentBodyRigid& body)
     : m_Owner{ body.getOwner() }
 {
     internal_base_init(body.getCollision()->getType(), body.mass());
 }
-Collision::Collision(ComponentBody& body, CollisionType type, Engine::view_ptr<ModelInstance> modelInstance, float mass)
+Collision::Collision(ComponentBodyRigid& body, CollisionType type, Engine::view_ptr<ModelInstance> modelInstance, float mass)
     : m_Owner{ body.getOwner() }
 {
     if (modelInstance) {
         Handle meshHandle = modelInstance->mesh();
-        auto& mesh        = *meshHandle.get<Mesh>();
+        auto& mesh = *meshHandle.get<Mesh>();
         if (!mesh.isLoaded() || !mesh.m_CPUData.m_CollisionFactory) {
             m_BtShape = std::unique_ptr<btCollisionShape>(Engine::priv::PublicMesh::BuildCollision(Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), type));
             m_DeferredMeshes.emplace_back(meshHandle);
@@ -78,7 +79,7 @@ Collision::Collision(ComponentBody& body, CollisionType type, Engine::view_ptr<M
     }
     internal_base_init(type, mass);
 }
-Collision::Collision(ComponentBody& body, CollisionType type, Handle meshHandle, float mass)
+Collision::Collision(ComponentBodyRigid& body, CollisionType type, Handle meshHandle, float mass)
     : m_Owner{ body.getOwner() }
 {
     auto& mesh = *meshHandle.get<Mesh>();
@@ -94,7 +95,7 @@ Collision::Collision(ComponentBody& body, CollisionType type, Handle meshHandle,
     }
     internal_base_init(type, mass);
 }
-Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, float mass, CollisionType type)
+Collision::Collision(ComponentBodyRigid& body, ComponentModel& modelComponent, float mass, CollisionType type)
     : m_Owner{ body.getOwner() }
 {
     auto modelInstances = Engine::create_and_reserve<std::vector<Engine::view_ptr<ModelInstance>>>((uint32_t)modelComponent.getNumModels());
@@ -113,7 +114,7 @@ Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, float 
             unfinishedModels.emplace_back(&instance);
         }else{
             btCollisionShape* built_collision_shape = Engine::priv::PublicMesh::BuildCollision(&instance, type, true);
-            btTransform localTransform = btTransform(Engine::Math::glmToBTQuat(instance.orientation()), Engine::Math::btVectorFromGLM(instance.position()));
+            btTransform localTransform              = btTransform(Engine::Math::glmToBTQuat(instance.orientation()), Engine::Math::btVectorFromGLM(instance.position()));
             built_collision_shape->setMargin(0.001f);
             if (built_collision_shape->getShapeType() != BroadphaseNativeTypes::EMPTY_SHAPE_PROXYTYPE) {
                 built_collision_shape->calculateLocalInertia(mass, m_BtInertia); //this is important
@@ -134,6 +135,7 @@ Collision::Collision(ComponentBody& body, ComponentModel& modelComponent, float 
     m_BtShape = std::unique_ptr<btCollisionShape>(btCompound);
     setMass(mass);
 }
+
 Collision::~Collision() {
     internal_free_memory();
 }

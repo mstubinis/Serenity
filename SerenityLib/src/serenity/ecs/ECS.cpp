@@ -1,6 +1,5 @@
 #include <serenity/ecs/ECS.h>
 
-
 Entity Engine::priv::ECS::createEntity(Scene& scene) {
     Entity entity = m_EntityPool.addEntity(scene);
     #ifndef ENGINE_PRODUCTION
@@ -58,10 +57,10 @@ void Engine::priv::ECS::postUpdate(Scene& scene, const float dt) {
     if (m_DestroyedEntities.size() > 0) {
         for (const auto entity : m_DestroyedEntities) {
             const auto id = entity.id();
+            m_SystemPool.onComponentRemovedFromEntity(entity);
             for (size_t i = 0; i < m_ComponentPools.size(); ++i) {
                 m_ComponentPools[i]->remove(id);
             }
-            m_SystemPool.onComponentRemovedFromEntity(entity);
             m_EntityPool.destroyFlaggedEntity(id);
         }
         m_DestroyedEntities.clear();

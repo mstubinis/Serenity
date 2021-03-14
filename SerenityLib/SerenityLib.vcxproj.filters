@@ -812,14 +812,23 @@
     <ClCompile Include="src\serenity\ecs\entity\EntityBody.cpp">
       <Filter>Source Files\Engine\Core\ECS\Entity</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\ecs\entity\EntityRAII.cpp">
-      <Filter>Source Files\Engine\Core\ECS\Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\entity\EntityRAIIBody.cpp">
-      <Filter>Source Files\Engine\Core\ECS\Entity</Filter>
-    </ClCompile>
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentBodyDebugDraw.cpp">
       <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\physics\PhysicsTaskScheduler.cpp">
+      <Filter>Source Files\Engine\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\components\ComponentBodyRigid.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemBodyParentChild.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentBodyRigid.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\entity\EntityBodyRigid.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Entity</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1521,6 +1530,24 @@
     </ClInclude>
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentBodyDebugDraw.h">
       <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\physics\PhysicsTaskScheduler.h">
+      <Filter>Header Files\Engine\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\components\ComponentBodyRigid.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemBodyParentChild.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentBodyRigid.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\entity\EntityBodyRigid.h">
+      <Filter>Header Files\Engine\Core\ECS\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\entity\EntityRAIIBodyRigid.h">
+      <Filter>Header Files\Engine\Core\ECS\Entity</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

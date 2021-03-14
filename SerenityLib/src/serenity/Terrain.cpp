@@ -311,13 +311,11 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
     m_TerrainData.calculate_data(heightmapImage, sectorSizeInPixels, pointsPerPixel);
     Terrain::setUseDiamondSubdivision(useDiamondSubdivisions);
 
-    //m_Mesh = NEW Mesh(name, *this, 0.0f);
-    //Handle handle = priv::Core::m_Engine->m_ResourceManager.m_ResourcePool.add(m_Mesh, (unsigned int)ResourceType::Mesh);
     m_MeshHandle = Engine::Resources::addResource<Mesh>(name, *this, 0.0f);
 
     addComponent<ComponentModel>(m_MeshHandle, materialHandle);
-    addComponent<ComponentBody>(CollisionType::Compound); //TODO: check CollisionType::TriangleShapeStatic
-    auto body  = getComponent<ComponentBody>();
+    addComponent<ComponentBodyRigid>(CollisionType::Compound); //TODO: check CollisionType::TriangleShapeStatic
+    auto body  = getComponent<ComponentBodyRigid>();
     auto model = getComponent<ComponentModel>();
     m_TerrainData.m_FinalCompoundShape = new btCompoundShape();
     for (unsigned int sectorX = 0; sectorX < m_TerrainData.m_BtHeightfieldShapes.size(); ++sectorX) {
@@ -432,7 +430,7 @@ bool Terrain::removeQuads(std::vector<std::tuple<unsigned int, unsigned int>>& q
 void Terrain::update(const float dt) {
 }
 void Terrain::setPosition(float x, float y, float z) {
-    ComponentBody& body = *getComponent<ComponentBody>();
+    ComponentBodyRigid& body = *getComponent<ComponentBodyRigid>();
     //Physics::removeRigidBody(body);
     body.setPosition(x, y, z);
     //Physics::addRigidBody(body);
@@ -441,7 +439,7 @@ void Terrain::setPosition(const glm::vec3& position) {
     Terrain::setPosition(position.x, position.y, position.z);
 }
 void Terrain::setScale(float x, float y, float z) {
-    auto body = getComponent<ComponentBody>();
+    auto body = getComponent<ComponentBodyRigid>();
     body->setScale(x, y, z);
 }
 void Terrain::setScale(const glm::vec3& scl) {

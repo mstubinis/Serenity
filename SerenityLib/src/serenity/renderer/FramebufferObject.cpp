@@ -1,8 +1,6 @@
 
 #include <serenity/renderer/FramebufferObject.h>
-#include <serenity/renderer/Renderer.h>
 #include <serenity/resources/Engine_Resources.h>
-#include <serenity/resources/texture/Texture.h>
 
 using namespace Engine::priv;
 
@@ -27,20 +25,18 @@ uint32_t FramebufferObjectAttatchment::height() const {
 
 #pragma region FrameBufferTexture
 
-FramebufferTexture::FramebufferTexture(const FramebufferObject& fbo, FramebufferAttatchment a, const Texture& t) 
-    : FramebufferObjectAttatchment{ fbo, a, t }
-    , m_Texture{ const_cast<Texture&>(t) }
-    , m_PixelFormat{ (GLuint)t.pixelFormat() }
-    , m_PixelType{ (GLuint)t.pixelType() }
-{}
-FramebufferTexture::~FramebufferTexture() { 
-
+FramebufferTexture::FramebufferTexture(const FramebufferObject& fbo, FramebufferAttatchment a, Texture* t) 
+    : FramebufferObjectAttatchment{ fbo, a, *t }
+    , m_PixelFormat{ (GLuint)t->pixelFormat() }
+    , m_PixelType{ (GLuint)t->pixelType() }
+{
+    m_Texture = std::unique_ptr<Texture>(t);
 }
 void FramebufferTexture::resize(FramebufferObject& fbo, uint32_t width, uint32_t height){
-    TextureLoader::Resize(m_Texture, fbo, width, height);
+    TextureLoader::Resize(*m_Texture, fbo, width, height);
 }
 GLuint FramebufferTexture::address() const {
-    return m_Texture.address(); 
+    return m_Texture->address(); 
 }
 
 #pragma endregion
@@ -117,18 +113,15 @@ void FramebufferObject::init(uint32_t width, uint32_t height, float divisor, uin
     setCustomUnbindFunctor(FramebufferObjectDefaultUnbindFunctor());
 }
 void FramebufferObject::init(uint32_t width, uint32_t height, ImageInternalFormat depthInternalFormat, float divisor, uint32_t swapBufferCount) {
-    RenderbufferObject* rbo;
     if (depthInternalFormat == ImageInternalFormat::Depth24Stencil8 || depthInternalFormat == ImageInternalFormat::Depth32FStencil8) {
-        rbo = NEW RenderbufferObject(*this, FramebufferAttatchment::DepthAndStencil, depthInternalFormat);
+        attatchRenderBuffer(*this, FramebufferAttatchment::DepthAndStencil, depthInternalFormat);
     }else if (depthInternalFormat == ImageInternalFormat::StencilIndex8) {
-        rbo = NEW RenderbufferObject(*this, FramebufferAttatchment::Stencil, depthInternalFormat);
+        attatchRenderBuffer(*this, FramebufferAttatchment::Stencil, depthInternalFormat);
     }else {
-        rbo = NEW RenderbufferObject(*this, FramebufferAttatchment::Depth, depthInternalFormat);
+        attatchRenderBuffer(*this, FramebufferAttatchment::Depth, depthInternalFormat);
     }
-    attatchRenderBuffer(*rbo);
 }
 void FramebufferObject::cleanup() {
-    SAFE_DELETE_MAP(m_Attatchments);
     for (size_t i = 0; i < m_FBOs.size(); ++i) {
         GLCall(glDeleteFramebuffers(1, &m_FBOs[i]));
     }
@@ -143,49 +136,6 @@ void FramebufferObject::resize(uint32_t w, uint32_t h){
             attatchment.second->resize(*this, w, h);
         }
     }
-}
-FramebufferTexture* FramebufferObject::attatchTexture(Texture* texture, FramebufferAttatchment attatchment){
-    if (m_Attatchments.contains((uint32_t)attatchment)) {
-        return nullptr;
-    }
-    FramebufferTexture* framebufferTexture = NEW FramebufferTexture(*this, attatchment, *texture);
-    for (const auto fbo : m_FBOs) {
-        Engine::Renderer::bindFBO(fbo);
-        GLCall(glFramebufferTexture2D(
-            GL_FRAMEBUFFER, 
-            framebufferTexture->attatchment(), 
-            framebufferTexture->m_Texture.getTextureType().toGLType(), 
-            framebufferTexture->m_Texture.address(), 
-            0
-        ));
-    }
-    m_Attatchments.emplace(
-        std::piecewise_construct,
-        std::forward_as_tuple((uint32_t)attatchment),
-        std::forward_as_tuple(framebufferTexture)
-    );
-    Engine::Renderer::unbindFBO();
-    return framebufferTexture;
-}
-RenderbufferObject* FramebufferObject::attatchRenderBuffer(RenderbufferObject& rbo){ 
-    if (m_Attatchments.contains(rbo.attatchment())) {
-        return nullptr;
-    }
-    for (const auto fbo : m_FBOs) {
-        Engine::Renderer::bindFBO(fbo);
-        Engine::Renderer::bindRBO(rbo);
-        GLCall(glRenderbufferStorage(GL_RENDERBUFFER, rbo.internalFormat(), width(), height()));
-        GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, rbo.internalFormat(), GL_RENDERBUFFER, rbo.address()));
-        Engine::Renderer::unbindRBO();
-    }
-    m_Attatchments.emplace(
-        std::piecewise_construct,
-        std::forward_as_tuple(rbo.attatchment()),
-        std::forward_as_tuple(&rbo)
-    );
-    Engine::Renderer::unbindRBO();
-    Engine::Renderer::unbindFBO();
-    return &rbo;
 }
 bool FramebufferObject::checkStatus() {
     for (const auto fbo : m_FBOs) {

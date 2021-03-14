@@ -15,21 +15,21 @@
 #include <glm/gtx/transform.hpp>
 
 #ifndef ENGINE_HIGH_PRECISION
-    typedef float       decimal;
-    typedef glm::vec2   glm_vec2;
-    typedef glm::vec3   glm_vec3;
-    typedef glm::vec4   glm_vec4;
-    typedef glm::quat   glm_quat;
-    typedef glm::mat4   glm_mat3;
-    typedef glm::mat4   glm_mat4;
+    using decimal  = float;
+    using glm_vec2 = glm::vec2;
+    using glm_vec3 = glm::vec3;
+    using glm_vec4 = glm::vec4;
+    using glm_quat = glm::quat;
+    using glm_mat3 = glm::mat3;
+    using glm_mat4 = glm::mat4;
 #else
     #define BT_USE_DOUBLE_PRECISION
-    typedef double      decimal;
-    typedef glm::dvec2  glm_vec2;
-    typedef glm::dvec3  glm_vec3;
-    typedef glm::dvec4  glm_vec4;
-    typedef glm::dquat  glm_quat;
-    typedef glm::dmat3  glm_mat3;
-    typedef glm::dmat4  glm_mat4;
+    using decimal  = double;
+    using glm_vec2 = glm::dvec2;
+    using glm_vec3 = glm::dvec3;
+    using glm_vec4 = glm::dvec4;
+    using glm_quat = glm::dquat;
+    using glm_mat3 = glm::dmat3;
+    using glm_mat4 = glm::dmat4;
 #endif
 #endif

@@ -11,9 +11,6 @@ EntityBody::EntityBody(const Entity& other)
     : Entity{ other }
 {}
 
-float EntityBody::mass() const {
-    return getComponent<ComponentBody>()->mass();
-}
 glm_quat EntityBody::getRotation() const {
     return getComponent<ComponentBody>()->getRotation();
 }
@@ -41,10 +38,6 @@ const glm_vec3& EntityBody::up() const {
 glm_vec3 EntityBody::getLinearVelocity() const {
     return getComponent<ComponentBody>()->getLinearVelocity();
 }
-glm_vec3 EntityBody::getAngularVelocity() const {
-    return getComponent<ComponentBody>()->getAngularVelocity();
-}
-
 
 void EntityBody::translate(const glm_vec3& translation, bool local) {
     getComponent<ComponentBody>()->translate(translation, local);
@@ -102,75 +95,9 @@ void EntityBody::setScale(decimal s) {
     getComponent<ComponentBody>()->setScale(s);
 }
 
-void EntityBody::setDamping(decimal linear, decimal angular) {
-    getComponent<ComponentBody>()->setDamping(linear, angular);
-}
-
-void EntityBody::setDynamic(bool dynamic) {
-    getComponent<ComponentBody>()->setDynamic(dynamic);
-}
-void EntityBody::setMass(float mass) {
-    getComponent<ComponentBody>()->setMass(mass);
-}
-void EntityBody::setGravity(decimal x, decimal y, decimal z) {
-    getComponent<ComponentBody>()->setGravity(x, y, z);
-}
-
-void EntityBody::clearLinearForces() {
-    getComponent<ComponentBody>()->clearLinearForces();
-}
-void EntityBody::clearAngularForces() {
-    getComponent<ComponentBody>()->clearAngularForces();
-}
-void EntityBody::clearAllForces() {
-    getComponent<ComponentBody>()->clearAllForces();
-}
-
-
-
 void EntityBody::setLinearVelocity(decimal x, decimal y, decimal z, bool local) {
     getComponent<ComponentBody>()->setLinearVelocity(x, y, z, local);
 }
 void EntityBody::setLinearVelocity(const glm_vec3& velocity, bool local) {
     getComponent<ComponentBody>()->setLinearVelocity(velocity, local);
-}
-
-
-void EntityBody::setAngularVelocity(decimal x, decimal y, decimal z, bool local) {
-    getComponent<ComponentBody>()->setAngularVelocity(x, y, z, local);
-}
-void EntityBody::setAngularVelocity(const glm_vec3& velocity, bool local) {
-    getComponent<ComponentBody>()->setAngularVelocity(velocity, local);
-}
-
-
-void EntityBody::applyForce(decimal x, decimal y, decimal z, bool local) {
-    getComponent<ComponentBody>()->applyForce(x, y, z, local);
-}
-void EntityBody::applyForce(const glm_vec3& force, const glm_vec3& origin, bool local) {
-    getComponent<ComponentBody>()->applyForce(force, origin, local);
-}
-
-
-void EntityBody::applyImpulse(decimal x, decimal y, decimal z, bool local) {
-    getComponent<ComponentBody>()->applyImpulse(x, y, z, local);
-}
-void EntityBody::applyImpulse(const glm_vec3& impulse, const glm_vec3& origin, bool local) {
-    getComponent<ComponentBody>()->applyImpulse(impulse, origin, local);
-}
-
-
-void EntityBody::applyTorque(decimal x, decimal y, decimal z, bool local) {
-    getComponent<ComponentBody>()->applyTorque(x, y, z, local);
-}
-void EntityBody::applyTorque(const glm_vec3& torque, bool local) {
-    getComponent<ComponentBody>()->applyTorque(torque, local);
-}
-
-
-void EntityBody::applyTorqueImpulse(decimal x, decimal y, decimal z, bool local) {
-    getComponent<ComponentBody>()->applyTorqueImpulse(x, y, z, local);
-}
-void EntityBody::applyTorqueImpulse(const glm_vec3& torqueImpulse, bool local) {
-    getComponent<ComponentBody>()->applyTorqueImpulse(torqueImpulse, local);
 }

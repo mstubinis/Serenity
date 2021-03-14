@@ -13,6 +13,8 @@ namespace Engine::priv {
 };
 
 #include <serenity/renderer/GLImageConstants.h>
+#include <serenity/resources/texture/Texture.h>
+#include <serenity/renderer/Renderer.h>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <functional>
@@ -43,16 +45,16 @@ namespace Engine::priv {
     class FramebufferTexture final: public FramebufferObjectAttatchment {
         friend class  Engine::priv::FramebufferObject;
         private:
-            Texture&       m_Texture;
-            GLuint         m_PixelFormat  = 0;
-            GLuint         m_PixelType    = 0;
+            std::unique_ptr<Texture>  m_Texture;
+            GLuint                    m_PixelFormat  = 0;
+            GLuint                    m_PixelType    = 0;
         public:
-            FramebufferTexture(const FramebufferObject&, FramebufferAttatchment, const Texture&);
-            ~FramebufferTexture();
+            FramebufferTexture(const FramebufferObject&, FramebufferAttatchment, Texture*);
+
 
             void resize(FramebufferObject&, uint32_t width, uint32_t height) override;
             GLuint address() const override;
-            inline Texture& texture() const noexcept { return m_Texture; }
+            inline Texture& texture() const noexcept { return *m_Texture; }
     };
     class RenderbufferObject final: public FramebufferObjectAttatchment {
         friend class  Engine::priv::FramebufferObject;
@@ -76,7 +78,7 @@ namespace Engine::priv {
         friend struct Engine::priv::FramebufferObjectDefaultUnbindFunctor;
         using BindFP         = std::function<void(const FramebufferObject*)>;
         using UnbindFP       = std::function<void(const FramebufferObject*)>;
-        using AttatchmentMap = std::unordered_map<uint32_t, FramebufferObjectAttatchment*>;
+        using AttatchmentMap = std::unordered_map<uint32_t, std::unique_ptr<FramebufferObjectAttatchment>>;
         private:
             BindFP                    m_CustomBindFunctor   = [](const FramebufferObject*) {};
             UnbindFP                  m_CustomUnbindFunctor = [](const FramebufferObject*) {};
@@ -103,14 +105,52 @@ namespace Engine::priv {
             inline void setCustomUnbindFunctor(UnbindFP&& functor) noexcept { m_CustomUnbindFunctor = std::move(functor); }
             inline void bind() const noexcept { m_CustomBindFunctor(this); }
             inline void unbind() const noexcept { m_CustomUnbindFunctor(this); }
-            inline FramebufferObjectAttatchment* getAttatchement(uint32_t index) const noexcept { return m_Attatchments.at(index); }
+            inline FramebufferObjectAttatchment* getAttatchement(uint32_t index) const noexcept { return m_Attatchments.at(index).get(); }
 
             void resize(uint32_t width, uint32_t height);
-            FramebufferTexture* attatchTexture(Texture*, FramebufferAttatchment);
-            RenderbufferObject* attatchRenderBuffer(RenderbufferObject&);
+
+            template<class ... ARGS>
+            FramebufferTexture* attatchTexture(FramebufferAttatchment attatchment, ARGS&&... args) {
+                if (m_Attatchments.contains((uint32_t)attatchment)) {
+                    return nullptr;
+                }
+                m_Attatchments.emplace(
+                    std::piecewise_construct,
+                    std::forward_as_tuple((uint32_t)attatchment),
+                    std::forward_as_tuple(std::make_unique<FramebufferTexture>(*this, attatchment, NEW Texture(std::forward<ARGS>(args)...)))
+                );
+                FramebufferTexture& fbTexture = *static_cast<FramebufferTexture*>(m_Attatchments.at((uint32_t)attatchment).get());
+                for (const auto fbo : m_FBOs) {
+                    Engine::Renderer::bindFBO(fbo);
+                    GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, fbTexture.attatchment(), fbTexture.m_Texture->getTextureType().toGLType(), fbTexture.m_Texture->address(), 0));
+                }
+                Engine::Renderer::unbindFBO();
+                return &fbTexture;
+            }
+            template<class ... ARGS>
+            RenderbufferObject* attatchRenderBuffer(ARGS&&... args) {
+                RenderbufferObject* rbo = NEW RenderbufferObject(std::forward<ARGS>(args)...);
+                if (m_Attatchments.contains(rbo->attatchment())) {
+                    delete rbo;
+                    return nullptr;
+                }
+                for (const auto fbo : m_FBOs) {
+                    Engine::Renderer::bindFBO(fbo);
+                    Engine::Renderer::bindRBO(*rbo);
+                    GLCall(glRenderbufferStorage(GL_RENDERBUFFER, rbo->internalFormat(), width(), height()));
+                    GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, rbo->internalFormat(), GL_RENDERBUFFER, rbo->address()));
+                    Engine::Renderer::unbindRBO();
+                }
+                m_Attatchments.emplace(std::piecewise_construct, std::forward_as_tuple(rbo->attatchment()), std::forward_as_tuple(rbo));
+                Engine::Renderer::unbindRBO();
+                Engine::Renderer::unbindFBO();
+                return rbo;
+            }
+
+
             inline constexpr uint32_t width() const noexcept { return m_FramebufferWidth; }
             inline constexpr uint32_t height() const noexcept { return m_FramebufferHeight; }
-            inline constexpr std::unordered_map<uint32_t, FramebufferObjectAttatchment*>& attatchments() const noexcept { return m_Attatchments; }
+            inline constexpr AttatchmentMap& attatchments() const noexcept { return m_Attatchments; }
             inline GLuint address() const noexcept { return m_FBOs[m_CurrentFBOIndex]; }
             bool checkStatus();
             inline constexpr float divisor() const noexcept { return m_Divisor; }

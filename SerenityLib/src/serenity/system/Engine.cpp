@@ -116,7 +116,7 @@ void EngineCore::init(const EngineOptions& options) {
 
     //the scene is the root of all games. create the default scene if 1 does not exist already
     if (m_ResourceManager.m_Scenes.size() == 0){
-        Scene* defaultScene = NEW Scene("Default");
+        Scene* defaultScene = NEW Scene{ "Default" };
         Resources::setCurrentScene(defaultScene);
     }
     Scene& scene = *m_ResourceManager.m_CurrentScene;
@@ -133,7 +133,7 @@ void EngineCore::init(const EngineOptions& options) {
 void EngineCore::internal_update_physics(Scene& scene, Window& window, const float timeStep) {
     m_DebugManager.stop_clock();
     float fixed_time_step = PHYSICS_MIN_STEP / (float)Physics::getNumberOfStepsPerFrame();
-    m_PhysicsModule.update(timeStep, 100, fixed_time_step);
+    m_PhysicsModule.update(scene, timeStep, 100, fixed_time_step);
     m_DebugManager.calculate_physics();
 }
 void EngineCore::internal_update_logic(Scene& scene, Window& window, const float dt){
@@ -159,7 +159,7 @@ void EngineCore::internal_pre_update(Scene& scene, Window& window, const float d
     if (Engine::priv::PublicScene::IsSkipRenderThisFrame(scene)) {
         Engine::priv::PublicScene::SkipRenderThisFrame(scene, false);
     }
-    m_PhysicsModule.preUpdate(dt);
+    m_PhysicsModule.preUpdate(scene, dt);
     Game::onPreUpdate(dt);
     scene.preUpdate(dt);
 }
@@ -177,7 +177,7 @@ void EngineCore::internal_render(Scene& scene, Window& window, const float dt, c
     }
     scene.render();
     m_RenderModule._sort2DAPICommands();
-    auto& scene_viewports = PublicScene::GetViewports(scene);
+    auto& scene_viewports = Engine::priv::PublicScene::GetViewports(scene);
     for (auto& viewport : scene_viewports) {
         if (viewport.isActive()) {
             viewport.render(m_RenderModule, viewport, true);

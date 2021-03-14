@@ -28,6 +28,7 @@ namespace Engine::priv {
 
 #include <serenity/resources/Resource.h>
 #include <serenity/resources/Handle.h>
+#include <serenity/renderer/opengl/UniformBufferObject.h>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <serenity/utils/Utils.h>

@@ -12,18 +12,19 @@
 #include <serenity/lights/Lights.h>
 
 #include <serenity/ecs/systems/SystemComponentBody.h>
+#include <serenity/ecs/systems/SystemComponentBodyRigid.h>
+#include <serenity/ecs/systems/SystemBodyParentChild.h>
+#include <serenity/ecs/systems/SystemComponentBodyDebugDraw.h>
 #include <serenity/ecs/systems/SystemComponentCamera.h>
 #include <serenity/ecs/systems/SystemComponentLogic.h>
 #include <serenity/ecs/systems/SystemComponentLogic1.h>
 #include <serenity/ecs/systems/SystemComponentLogic2.h>
 #include <serenity/ecs/systems/SystemComponentLogic3.h>
 #include <serenity/ecs/systems/SystemComponentModel.h>
-#include <serenity/ecs/systems/SystemComponentBodyDebugDraw.h>
 
 class Scene::impl final {
     public:
         Engine::priv::ParticleSystem   m_ParticleSystem;
-        Engine::priv::ECS              m_ECS;
 
         impl() = delete;
 
@@ -32,37 +33,44 @@ class Scene::impl final {
         {}
 
         void _init(Scene& super, const SceneOptions& options) {
-            m_ECS.init(options);
+            super.m_ECS.init(options);
 
-            m_ECS.registerComponent<ComponentLogic>();
-            m_ECS.registerComponent<ComponentBody>();
-            m_ECS.registerComponent<ComponentLogic1>();
-            m_ECS.registerComponent<ComponentModel>();
-            m_ECS.registerComponent<ComponentLogic2>();
-            m_ECS.registerComponent<ComponentCamera>();
-            m_ECS.registerComponent<ComponentLogic3>();
-            m_ECS.registerComponent<ComponentName>();
+            super.m_ECS.registerComponent<ComponentLogic>();
+            super.m_ECS.registerComponent<ComponentBody>();
+            super.m_ECS.registerComponent<ComponentBodyRigid>();
+            super.m_ECS.registerComponent<ComponentLogic1>();
+            super.m_ECS.registerComponent<ComponentModel>();
+            super.m_ECS.registerComponent<ComponentLogic2>();
+            super.m_ECS.registerComponent<ComponentCamera>();
+            super.m_ECS.registerComponent<ComponentLogic3>();
+            super.m_ECS.registerComponent<ComponentName>();
 
-            auto* logicSystem     = m_ECS.registerSystem<SystemComponentLogic, ComponentLogic>();
-            auto* bodySystem      = m_ECS.registerSystem<SystemComponentBody, ComponentBody>();
-            auto* logic1System    = m_ECS.registerSystem<SystemComponentLogic1, ComponentLogic1>();
-            auto* modelSystem     = m_ECS.registerSystem<SystemComponentModel, ComponentModel>();
-            auto* logic2System    = m_ECS.registerSystem<SystemComponentLogic2, ComponentLogic2>();
-            auto* cameraSystem    = m_ECS.registerSystem<SystemComponentCamera, ComponentCamera>();
-            auto* logic3System    = m_ECS.registerSystem<SystemComponentLogic3, ComponentLogic3>();
-            auto* debugDrawSystem = m_ECS.registerSystem <SystemComponentBodyDebugDraw, ComponentBody, ComponentModel>();
+            super.m_ECS.registerSystem<SystemComponentLogic, ComponentLogic>();
+            super.m_ECS.registerSystem<SystemComponentBody, ComponentBody>();
+            super.m_ECS.registerSystem<SystemComponentBodyRigid, ComponentBodyRigid>();
+            super.m_ECS.registerSystem<SystemBodyParentChild, ComponentBody, ComponentBodyRigid>();
+            super.m_ECS.registerSystem<SystemComponentLogic1, ComponentLogic1>();
+            super.m_ECS.registerSystem<SystemComponentModel, ComponentModel>();
+            super.m_ECS.registerSystem<SystemComponentLogic2, ComponentLogic2>();
+            super.m_ECS.registerSystem<SystemComponentCamera, ComponentCamera>();
+            super.m_ECS.registerSystem<SystemComponentLogic3, ComponentLogic3>();
+            super.m_ECS.registerSystem<SystemComponentBodyDebugDraw, ComponentBody, ComponentBodyRigid, ComponentModel>();
         }
         void _centerToObject(Scene& super, Entity centerEntity) {
             auto centerBody     = centerEntity.getComponent<ComponentBody>();
-            auto centerPos      = centerBody->getPosition();
+            auto centerRigid    = centerEntity.getComponent<ComponentBodyRigid>();
+
+            auto centerPos      = centerBody ? centerBody->getPosition() : centerRigid->getPosition();
             auto centerPosFloat = glm::vec3(centerPos);
             for (const auto e : Engine::priv::PublicScene::GetEntities(super)) {
                 if (e != centerEntity) {
-                    auto eBody = e.getComponent<ComponentBody>();
-                    if (eBody) {
-                        if (!eBody->hasParent()) {
-                            eBody->setPosition(eBody->getPosition() - centerPos);
-                        }
+                    auto eBody  = e.getComponent<ComponentBody>();
+                    auto eRigid = e.getComponent<ComponentBodyRigid>();
+                    if (eBody && !eBody->hasParent()) {
+                        eBody->setPosition(eBody->getPosition() - centerPos);
+                    }
+                    if (eRigid && !eRigid->hasParent()) {
+                        eRigid->setPosition(eRigid->getPosition() - centerPos);
                     }
                 }
             }
@@ -76,7 +84,11 @@ class Scene::impl final {
                     soundEffect.setPosition(soundEffect.getPosition() - centerPosFloat);
                 }
             }
-            centerBody->setPosition((decimal)0.0, (decimal)0.0, (decimal)0.0);
+            if (centerBody) {
+                centerBody->setPosition((decimal)0.0);
+            }else if(centerRigid) {
+                centerRigid->setPosition((decimal)0.0);
+            }
             Engine::priv::Core::m_Engine->m_SoundModule.updateCameraPosition(super);
             ComponentBody::recalculateAllParentChildMatrices(super);
         }
@@ -115,11 +127,11 @@ std::vector<Viewport>& Engine::priv::PublicScene::GetViewports(const Scene& scen
 std::vector<Camera*>& Engine::priv::PublicScene::GetCameras(const Scene& scene) {
     return scene.m_Cameras;
 }
-std::vector<Entity>& Engine::priv::PublicScene::GetEntities(const Scene& scene) {
-    return scene.m_i->m_ECS.m_EntityPool.m_Pool;
+std::vector<Entity>& Engine::priv::PublicScene::GetEntities(Scene& scene) {
+    return scene.m_ECS.m_EntityPool.m_Pool;
 }
 Engine::priv::ECS& Engine::priv::PublicScene::GetECS(Scene& scene) {
-    return scene.m_i->m_ECS;
+    return scene.m_ECS;
 }
 void Engine::priv::PublicScene::CleanECS(Scene& scene, Entity inEntity) {
     for (auto& pipelines : scene.m_RenderGraphs) {
@@ -241,6 +253,8 @@ bool Engine::priv::PublicScene::HasItemsToRender(Scene& scene) {
 }
 
 Scene::Scene(std::string_view name, const SceneOptions& options) {
+    //m_Pipeline.init();
+
     m_LightsModule.registerLightType<SunLight>();
     m_LightsModule.registerLightType<PointLight>();
     m_LightsModule.registerLightType<DirectionalLight>();
@@ -271,7 +285,7 @@ size_t Scene::getNumLights() const noexcept {
     return count;
 }
 void Scene::clearAllEntities() noexcept {
-    m_i->m_ECS.clearAllEntities();
+    m_ECS.clearAllEntities();
 }
 void Scene::addCamera(Camera& camera) {
     m_Cameras.emplace_back(&camera);
@@ -300,10 +314,10 @@ Viewport& Scene::addViewport(float x, float y, float width, float height, Camera
     return viewport;
 }
 Entity Scene::createEntity() { 
-    return m_i->m_ECS.createEntity(*this); 
+    return m_ECS.createEntity(*this); 
 }
 void Scene::removeEntity(Entity entity) { 
-    m_i->m_ECS.removeEntity(entity);
+    m_ECS.removeEntity(entity);
 }
 Viewport& Scene::getMainViewport() {
     return m_Viewports[0];
@@ -328,17 +342,17 @@ void Scene::centerSceneToObject(Entity centerEntity){
 }
 void Scene::update(const float dt){
     m_OnUpdateFunctor(this, dt);
-    m_i->m_ECS.update(dt, *this);
+    m_ECS.update(dt, *this);
 
     Engine::priv::PublicScene::UpdateMaterials(*this, dt);
 
     m_i->m_ParticleSystem.update(dt, *getActiveCamera());
 }
 void Scene::preUpdate(const float dt) {
-    m_i->m_ECS.preUpdate(*this, dt);
+    m_ECS.preUpdate(*this, dt);
 }
 void Scene::postUpdate(const float dt) {
-    m_i->m_ECS.postUpdate(*this, dt);
+    m_ECS.postUpdate(*this, dt);
 }
 const glm::vec4& Scene::getBackgroundColor() const {
     return m_Viewports[0].m_BackgroundColor;

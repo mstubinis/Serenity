@@ -2,6 +2,11 @@
 #ifndef ENGINE_PHYSICS_DEBUG_DRAWER_H
 #define ENGINE_PHYSICS_DEBUG_DRAWER_H
 
+namespace Engine::priv {
+    class  PhysicsPipeline;
+    class  PhysicsModule;
+};
+
 #include <serenity/dependencies/glm.h>
 #include <serenity/system/Macros.h>
 #include <serenity/events/Observer.h>
@@ -15,7 +20,6 @@
 #include <vector>
 
 namespace Engine::priv {
-    class PhysicsModule;
     class PhysicsDebugDrawcallback final : public btTriangleCallback, public btInternalTriangleIndexCallback {
         private:
             btIDebugDraw& m_DebugDrawer;
@@ -29,6 +33,7 @@ namespace Engine::priv {
             virtual void processTriangle(btVector3* triangle, int partId, int triangleIndex);
     };
     class GLDebugDrawer final : public btIDebugDraw, public Observer {
+        friend class Engine::priv::PhysicsPipeline;
         friend class Engine::priv::PhysicsModule;
         private:
             GLuint m_PerFrameCount = 0U;

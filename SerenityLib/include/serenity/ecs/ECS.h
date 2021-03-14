@@ -65,8 +65,9 @@ namespace Engine::priv {
                 if (COMPONENT::TYPE_ID == 0) {
                     COMPONENT::TYPE_ID = ++m_RegisteredComponents;
                 }
-                if (m_ComponentPools.size() < COMPONENT::TYPE_ID) {
-                    m_ComponentPools.resize(COMPONENT::TYPE_ID);
+                auto threshold = std::max(COMPONENT::TYPE_ID, m_RegisteredComponents);
+                if (m_ComponentPools.size() < threshold) {
+                    m_ComponentPools.resize(threshold);
                     m_ComponentPools[COMPONENT::TYPE_ID - 1].reset( NEW ECSComponentPool<COMPONENT>{m_SceneOptions} );
                 }
                 return COMPONENT::TYPE_ID - 1;
@@ -89,8 +90,8 @@ namespace Engine::priv {
             //destroy flagged entities & their components, if any
             void postUpdate(Scene&, const float dt);
 
-            template<class COMPONENT> [[nodiscard]] inline const SystemBaseClass& getSystem() const noexcept { return m_SystemPool[COMPONENT::TYPE_ID - 1]; }
-            template<class COMPONENT> [[nodiscard]] inline SystemBaseClass& getSystem() noexcept { return m_SystemPool[COMPONENT::TYPE_ID - 1]; }
+            template<class SYSTEM> [[nodiscard]] inline const SystemBaseClass& getSystem() const noexcept { return m_SystemPool[SYSTEM::TYPE_ID - 1]; }
+            template<class SYSTEM> [[nodiscard]] inline SystemBaseClass& getSystem() noexcept { return m_SystemPool[SYSTEM::TYPE_ID - 1]; }
 
             template<class SYSTEM, class ... COMPONENTS, class ... ARGS>
             inline SYSTEM* registerSystem(ARGS&&... args) { return m_SystemPool.registerSystem<SYSTEM, COMPONENTS..., ARGS...>(*this, std::forward<ARGS>(args)...); }

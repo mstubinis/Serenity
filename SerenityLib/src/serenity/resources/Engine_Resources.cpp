@@ -27,6 +27,7 @@ Engine::priv::ResourceManager::ResourceManager(const EngineOptions& options) {
     m_ResourceModule.registerResourceTypeID<Font>();
     m_ResourceModule.registerResourceTypeID<Shader>();
     m_ResourceModule.registerResourceTypeID<ShaderProgram>();
+    m_ResourceModule.registerResourceTypeID<UniformBufferObject>();
     m_ResourceModule.registerResourceTypeID<SoundData>();
 }
 void Engine::priv::ResourceManager::init(const EngineOptions& options){
@@ -66,6 +67,9 @@ uint32_t Engine::priv::ResourceManager::AddScene(Scene& s){
 }
 std::string Engine::Data::reportTime() {
     return priv::Core::m_Engine->m_DebugManager.reportTime();
+}
+std::mutex& Engine::Resources::getMutex() noexcept {
+    return Engine::priv::ResourceManager::RESOURCE_MANAGER->getMutex();
 }
 double Engine::Resources::dt() {
     return priv::Core::m_Engine->m_Misc.m_Dt;

@@ -9,6 +9,14 @@
 
 constexpr const glm::vec4 NO_SCISSOR = glm::vec4(-1.0f);
 
+struct ScreenBoxCoordinates final {
+    bool      inBounds    = false;
+    glm::vec2 topLeft     = glm::vec2{ 0.0f, 0.0f };
+    glm::vec2 topRight    = glm::vec2{ 0.0f, 0.0f };
+    glm::vec2 bottomLeft  = glm::vec2{ 0.0f, 0.0f };
+    glm::vec2 bottomRight = glm::vec2{ 0.0f, 0.0f };
+};
+
 enum class SortingMode : uint32_t {
     None = 0,
     FrontToBack,

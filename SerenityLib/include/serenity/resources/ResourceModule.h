@@ -2,6 +2,10 @@
 #ifndef ENGINE_RESOURCES_RESOURCE_MODULE_H
 #define ENGINE_RESOURCES_RESOURCE_MODULE_H
 
+namespace Engine::priv {
+    class ResourceManager;
+};
+
 #include <serenity/resources/ResourceVector.h>
 #include <mutex>
 #include <vector>
@@ -10,6 +14,7 @@
 
 namespace Engine::priv {
     class ResourceModule final {
+        friend class Engine::priv::ResourceManager;
         private:
             std::atomic<uint32_t>                          m_RegisteredResources = 0;
             std::vector<std::unique_ptr<IResourceVector>>  m_Resources;
