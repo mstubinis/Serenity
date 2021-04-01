@@ -29,14 +29,14 @@ namespace Engine{
   
         RayCastResult(const btCollisionWorld::ClosestRayResultCallback& closestHitResult) {
             if (closestHitResult.hasHit()) {
-                hitPosition     = Engine::Math::btVectorToGLM(closestHitResult.m_hitPointWorld);
-                hitNormal       = Engine::Math::btVectorToGLM(closestHitResult.m_hitNormalWorld);
+                hitPosition     = Engine::Math::toGLM(closestHitResult.m_hitPointWorld);
+                hitNormal       = Engine::Math::toGLM(closestHitResult.m_hitNormalWorld);
                 collisionObject = const_cast<btCollisionObject*>(closestHitResult.m_collisionObject);
             }
         }
         RayCastResult(const btCollisionWorld::AllHitsRayResultCallback& allHitResult, int index) {
-            hitPosition         = Engine::Math::btVectorToGLM(allHitResult.m_hitPointWorld[index]);
-            hitNormal           = Engine::Math::btVectorToGLM(allHitResult.m_hitNormalWorld[index]);
+            hitPosition         = Engine::Math::toGLM(allHitResult.m_hitPointWorld[index]);
+            hitNormal           = Engine::Math::toGLM(allHitResult.m_hitNormalWorld[index]);
             collisionObject     = const_cast<btCollisionObject*>(allHitResult.m_collisionObjects[index]);
         }
     };
@@ -76,33 +76,26 @@ namespace Engine{
         void setNumberOfStepsPerFrame(uint32_t numSteps);
         [[nodiscard]] uint32_t getNumberOfStepsPerFrame();
 
+        void cleanProxyFromPairs(btRigidBody*);
         void updateDiscreteCollisionDetection() noexcept;
+        void updateAABBs() noexcept;
+        void recalculateOverlappingPairs() noexcept;
 
         void setGravity(float x, float y, float z);
         inline void setGravity(const glm::vec3& gravity) noexcept { setGravity(gravity.x, gravity.y, gravity.z); }
         void pause(bool paused = true);
         void unpause();
 
-        bool addRigidBody(Entity entity);
-        bool addRigidBody(ComponentBodyRigid&);
         bool addRigidBody(btRigidBody*, MaskType group, MaskType mask);
         bool addRigidBody(btRigidBody*);
-        bool removeRigidBody(Entity entity);
         bool removeRigidBody(btRigidBody*);
-        bool removeRigidBody(ComponentBodyRigid&);
         bool removeCollisionObject(btCollisionObject* object);
-
         void updateRigidBody(btRigidBody*);
 
-        bool addRigidBodyThreadSafe(Entity entity);
-        bool addRigidBodyThreadSafe(ComponentBodyRigid&);
         bool addRigidBodyThreadSafe(btRigidBody*, MaskType group, MaskType mask);
         bool addRigidBodyThreadSafe(btRigidBody*);
-        bool removeRigidBodyThreadSafe(Entity entity);
         bool removeRigidBodyThreadSafe(btRigidBody*);
-        bool removeRigidBodyThreadSafe(ComponentBodyRigid&);
         bool removeCollisionObjectThreadSafe(btCollisionObject* object);
-
         void updateRigidBodyThreadSafe(btRigidBody*);
     };
 };

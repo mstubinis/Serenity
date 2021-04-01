@@ -22,12 +22,13 @@ uint32_t ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
 decimal ModelInstance::m_GlobalDistanceFactor = (decimal)1100.0;
 
 constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
-    auto stage               = i->stage();
-    auto& scene              = *Engine::Resources::getCurrentScene();
-    auto* camera             = scene.getActiveCamera();
-    auto [body, rigid]       = i->parent().getComponents<ComponentBody, ComponentBodyRigid>();
-    glm::mat4 parentModel    = body ? body->modelMatrixRendering() : rigid->modelMatrixRendering();
-    auto& animationContainer = i->getRunningAnimations();
+    auto stage                   = i->stage();
+    auto& scene                  = *Engine::Resources::getCurrentScene();
+    auto* camera                 = scene.getActiveCamera();
+    Entity parent                = i->parent();
+    auto transform               = parent.getComponent<ComponentBody>();
+    glm::mat4 parentWorldMatrix  = transform->getWorldMatrixRendering();
+    auto& animationContainer     = i->getRunningAnimations();
 
     Engine::Renderer::sendUniform1Safe("Object_Color", i->color().toPackedInt());
     Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", i->godRaysColor().toPackedInt());
@@ -43,16 +44,16 @@ constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engi
     }else{
         Engine::Renderer::sendUniform1Safe("AnimationPlaying", 0);
     }
-    glm::mat4 modelMatrix = parentModel * i->modelMatrix();
+    glm::mat4 renderingMatrix = parentWorldMatrix * i->modelMatrix();
 
     //world space normals
-    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ modelMatrix }));
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ renderingMatrix }));
 
     //view space normals
     //glm::mat4 view = cam.getView();
     //glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ view * model }));
 
-    Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
+    Engine::Renderer::sendUniformMatrix4Safe("Model", renderingMatrix);
     Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 };
 constexpr auto DefaultModelInstanceUnbindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {

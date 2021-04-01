@@ -13,6 +13,19 @@
 using namespace Engine;
 using namespace Engine::priv;
 
+std::pair<glm::vec3, float> ComponentModel_Functions::CalculateBoundingBoxAndRadius(const std::vector<glm::vec3>& points) {
+    float     maxRadius = 0.0f;
+    glm::vec3 maxBoundingBox{ 0.0f };
+    for (const auto& point : points) {
+        auto abs_point   = glm::abs(point);
+        float radius     = glm::length(abs_point);
+        maxRadius        = std::max(maxRadius, radius);
+        maxBoundingBox.x = std::max(maxBoundingBox.x, abs_point.x);
+        maxBoundingBox.y = std::max(maxBoundingBox.y, abs_point.y);
+        maxBoundingBox.z = std::max(maxBoundingBox.z, abs_point.z);
+    }
+    return {maxBoundingBox, maxRadius};
+}
 float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) {
     auto points_total = Engine::create_and_reserve<std::vector<glm::vec3>>((uint32_t)ComponentModel_Functions::GetTotalVertexCount(modelComponent));
     for (const auto& modelInstance : modelComponent) {
@@ -27,27 +40,55 @@ float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) 
             points_total.emplace_back(localPosition + (vertexPosition * modelInstanceScale));
         }
     }
-    float     maxRadius      = 0.0f;
-    glm::vec3 maxBoundingBox = glm::vec3{ 0.0f };
-    for (const auto& point : points_total) {
-        auto abs_point   = glm::abs(point);
-        float radius     = glm::length(abs_point);
-        maxRadius        = std::max(maxRadius, radius);
-        maxBoundingBox.x = std::max(maxBoundingBox.x, abs_point.x);
-        maxBoundingBox.y = std::max(maxBoundingBox.y, abs_point.y);
-        maxBoundingBox.z = std::max(maxBoundingBox.z, abs_point.z);
-    }
-    modelComponent.m_Radius          = maxRadius;
-    modelComponent.m_RadiusBox       = maxBoundingBox;
+    auto boxAndRadius = CalculateBoundingBoxAndRadius(points_total);
+    modelComponent.m_Radius          = boxAndRadius.second;
+    modelComponent.m_RadiusBox       = boxAndRadius.first;
     auto body                        = modelComponent.m_Owner.getComponent<ComponentBody>();
-    auto rigid                       = modelComponent.m_Owner.getComponent<ComponentBodyRigid>();
-    if (body || rigid) {
-        auto bodyScale               = Engine::Math::Max(glm::vec3{ body ? body->getScale() : rigid->getScale() });
+    if (body) {
+        auto bodyScale               = Engine::Math::Max(glm::vec3{ body->getScale() });
         modelComponent.m_Radius     *= bodyScale;
         modelComponent.m_RadiusBox  *= bodyScale;
     }
     return modelComponent.m_Radius; //now modified by the body scale
-};
+}
+std::pair<glm::vec3, float> ComponentModel_Functions::CalculateRadi(const std::vector<Entity>& entities) {
+    float maxRad = 0.0f;
+    glm::vec3 maxRadBox{ 0.0f };
+    for (const auto entity : entities) {
+        auto body         = entity.getComponent<ComponentBody>();
+        auto model        = entity.getComponent<ComponentModel>();
+        auto points_total = Engine::create_and_reserve<std::vector<glm::vec3>>((uint32_t)ComponentModel_Functions::GetTotalVertexCount(*model));
+        for (const auto& modelInstance : *model) {
+            const Mesh& mesh = *modelInstance->mesh().get<Mesh>();
+            if (!mesh.isLoaded()) {
+                continue;
+            }
+            float modelInstanceScale = Engine::Math::Max(modelInstance->getScale());
+            glm::vec3 localPosition  = Engine::Math::getMatrixPosition(modelInstance->modelMatrix());
+            if (body->hasParent()) {
+                localPosition += glm::vec3(body->getLocalPosition());
+            }
+            auto positions = mesh.getVertexData().getPositions();
+            for (auto& vertexPosition : positions) {
+                points_total.emplace_back(localPosition + (vertexPosition * modelInstanceScale));
+            }
+        }
+        auto boxAndRadius  = CalculateBoundingBoxAndRadius(points_total);
+        model->m_Radius    = boxAndRadius.second;
+        model->m_RadiusBox = boxAndRadius.first;
+        if (body) {
+            auto bodyScale      = Engine::Math::Max(glm::vec3{ body->getScale() });
+            model->m_Radius    *= bodyScale;
+            model->m_RadiusBox *= bodyScale;
+        }
+        maxRad      = std::max(maxRad, model->m_Radius);
+        maxRadBox.x = std::max(maxRadBox.x, model->m_RadiusBox.x);
+        maxRadBox.y = std::max(maxRadBox.y, model->m_RadiusBox.y);
+        maxRadBox.z = std::max(maxRadBox.z, model->m_RadiusBox.z);
+    }
+    return { maxRadBox, maxRad }; //now modified by the body scale
+}
+
 size_t ComponentModel_Functions::GetTotalVertexCount(ComponentModel& modelComponent) {
     size_t totalCapacity = 0;
     for (const auto& modelInstance : modelComponent) {
@@ -89,7 +130,7 @@ ComponentModel& ComponentModel::operator=(ComponentModel&& other) noexcept {
     m_Radius         = std::move(other.m_Radius);
     m_Owner          = std::move(other.m_Owner);
 
-    if (other.isRegistered(EventType::ResourceLoaded)) {
+    if (other.isRegistered(EventType::ResourceLoaded) && &other != this) {
         registerEvent(EventType::ResourceLoaded);
         other.unregisterEvent(EventType::ResourceLoaded);
     }
@@ -128,9 +169,10 @@ void ComponentModel::show(bool shown) noexcept {
 ModelInstanceHandle ComponentModel::addModel(Handle mesh, Handle material, Handle shaderProgram, RenderStage renderStage) {
     ComponentModel_Functions::RegisterDeferredMeshLoaded(*this, mesh);
 
-    auto& modelInstance    = *m_ModelInstances.emplace_back(std::make_unique<ModelInstance>(m_Owner, mesh, material, shaderProgram));
-    modelInstance.m_Stage  = renderStage;
-    modelInstance.m_Index  = static_cast<uint32_t>(m_ModelInstances.size() - 1U);
+    auto& modelInstance        = *m_ModelInstances.emplace_back(std::make_unique<ModelInstance>(m_Owner, mesh, material, shaderProgram));
+    modelInstance.m_Stage      = renderStage;
+    modelInstance.m_MeshHandle = mesh;
+    modelInstance.m_Index      = static_cast<uint32_t>(m_ModelInstances.size() - 1);
 
     PublicScene::AddModelInstanceToPipeline(*m_Owner.scene(), modelInstance, renderStage);
     ComponentModel_Functions::CalculateRadius(*this);

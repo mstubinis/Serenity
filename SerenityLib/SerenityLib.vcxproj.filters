@@ -737,9 +737,6 @@
     <ClCompile Include="src\serenity\resources\texture\TextureRequest.cpp">
       <Filter>Source Files\Engine\Core\Resources\Texture</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\physics\Collision.cpp">
-      <Filter>Source Files\Engine\Core\Physics</Filter>
-    </ClCompile>
     <ClCompile Include="src\serenity\physics\DebugDrawer.cpp">
       <Filter>Source Files\Engine\Core\Physics</Filter>
     </ClCompile>
@@ -829,6 +826,45 @@
     </ClCompile>
     <ClCompile Include="src\serenity\ecs\entity\EntityBodyRigid.cpp">
       <Filter>Source Files\Engine\Core\ECS\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemRigidTransformSync.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemResolveTransformDirty.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemStepPhysics.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemSceneUpdate.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemGameUpdate.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\utils\Utils.cpp">
+      <Filter>Source Files\Engine\Core\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\components\ComponentCollisionShape.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemAddRigidBodies.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemRemoveRigidBodies.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemSceneChanging.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="include\serenity\physics\btRigidBodyEnhanced.cpp">
+      <Filter>Source Files\Engine\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemCompoundChildTransforms.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\tests\TestSystemParentChild.cpp">
+      <Filter>Source Files\Engine\Core\Tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1113,9 +1149,6 @@
     </ClInclude>
     <ClInclude Include="include\serenity\networking\server\ServerThreadCollection.h">
       <Filter>Header Files\Engine\Core\Networking\Server</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\physics\Collision.h">
-      <Filter>Header Files\Engine\Core\Physics</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\physics\DebugDrawer.h">
       <Filter>Header Files\Engine\Core\Physics</Filter>
@@ -1548,6 +1581,39 @@
     </ClInclude>
     <ClInclude Include="include\serenity\ecs\entity\EntityRAIIBodyRigid.h">
       <Filter>Header Files\Engine\Core\ECS\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemRigidTransformSync.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemResolveTransformDirty.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemStepPhysics.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemSceneUpdate.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemGameUpdate.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\components\ComponentCollisionShape.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemRemoveRigidBodies.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemAddRigidBodies.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemSceneChanging.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\physics\btRigidBodyEnhanced.h">
+      <Filter>Header Files\Engine\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemCompoundChildTransforms.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

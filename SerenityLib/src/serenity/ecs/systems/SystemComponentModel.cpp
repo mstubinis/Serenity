@@ -1,7 +1,6 @@
 #include <serenity/ecs/systems/SystemComponentModel.h>
 #include <serenity/ecs/components/ComponentModel.h>
-#include <serenity/ecs/ECS.h>
-#include <serenity/threading/ThreadingModule.h>
+#include <serenity/ecs/ECSComponentPool.h>
 
 SystemComponentModel::SystemComponentModel(Engine::priv::ECS& ecs) 
     : SystemCRTP{ ecs }

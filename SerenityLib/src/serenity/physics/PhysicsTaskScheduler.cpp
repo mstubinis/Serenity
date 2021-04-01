@@ -25,8 +25,8 @@ void Engine::priv::PhysicsTaskScheduler::parallelFor(int iBegin, int iEnd, int g
     auto parallel = [this, &body, iEnd, iBegin]() {
         auto pairs = Engine::splitVectorPairs(iEnd - iBegin, 0);
         for (size_t i = 0; i < pairs.size(); ++i) {
-            auto lambda = [&body, i, &pairs]() {
-                body.forLoop((int)pairs[i].first, (int)pairs[i].second + 1);
+            auto lambda = [&body, i, iBegin, &pairs]() {
+                body.forLoop((int)pairs[i].first + iBegin, (int)pairs[i].second + 1 + iBegin);
             };
             Engine::priv::threading::addJob(lambda, 0);
         }
@@ -43,9 +43,9 @@ btScalar Engine::priv::PhysicsTaskScheduler::parallelSum(int iBegin, int iEnd, i
         auto pairs = Engine::splitVectorPairs(iEnd - iBegin, 0);
         m_sumRes = btScalar(0.0);
         for (size_t i = 0; i < pairs.size(); ++i) {
-            auto lambda = [&body, this, i, &pairs]() {
+            auto lambda = [&body, this, i, iBegin, &pairs]() {
 #ifdef ENVIRONMENT64
-                m_sumRes += body.sumLoop((int)pairs[i].first, (int)pairs[i].second + 1);
+                m_sumRes += body.sumLoop((int)pairs[i].first + iBegin, (int)pairs[i].second + 1 + iBegin);
 #else
                 auto data = m_sumRes.load();
                 data += body.sumLoop((int)pairs[i].first, (int)pairs[i].second + 1);

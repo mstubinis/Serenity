@@ -104,9 +104,17 @@
 
 #pragma region MemoryLeakDetection
 
-#if defined(_DEBUG) && !defined(ENVIRONMENT32)
-// Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the allocations to be of _CLIENT_BLOCK type
+#if (defined(_DEBUG) && !defined(ENVIRONMENT32)) || defined(_CRTDBG_MAP_ALLOC)
+
+#ifndef BT_DEBUG_MEMORY_ALLOCATIONS
+#define BT_DEBUG_MEMORY_ALLOCATIONS
+#endif
+
+#ifndef _CRTDBG_MAP_ALLOC
 #define _CRTDBG_MAP_ALLOC
+#endif
+
+// Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the allocations to be of _CLIENT_BLOCK type
 #define NEW new( _NORMAL_BLOCK, __FILE__, __LINE__)
 #define MALLOC(size) _malloc_dbg(size, _NORMAL_BLOCK, __FILE__, __LINE__)
 #define FREE(block) _free_dbg(block, _NORMAL_BLOCK)

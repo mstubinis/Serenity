@@ -23,8 +23,8 @@ class TextureWrap final {
         static constexpr const std::array<GLuint, (size_t)TextureWrap::_TOTAL> GL_VALUES { {
             GL_REPEAT,
             GL_MIRRORED_REPEAT,
-            GL_CLAMP_TO_BORDER,
             GL_CLAMP_TO_EDGE,
+            GL_CLAMP_TO_BORDER,
         } };
 
     public:

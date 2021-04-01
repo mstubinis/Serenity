@@ -7,6 +7,8 @@ class  ComponentModel;
 class  ComponentBody;
 class  SystemComponentBody;
 class  SystemBodyParentChild;
+class  SystemRigidTransformSync;
+class  SystemResolveTransformDirty;
 namespace Engine::priv {
     class  sparse_set_base;
 };
@@ -22,6 +24,8 @@ class ComponentBody : public ComponentBaseClass<ComponentBody> {
     friend class  ComponentModel;
     friend class  SystemComponentBody;
     friend class  SystemBodyParentChild;
+    friend class  SystemRigidTransformSync;
+    friend class  SystemResolveTransformDirty;
     private:
         glm_vec3   m_Forward          = glm_vec3{ 0.0, 0.0, -1.0 };
         glm_vec3   m_Right            = glm_vec3{ 1.0, 0.0, 0.0 };
@@ -30,7 +34,7 @@ class ComponentBody : public ComponentBaseClass<ComponentBody> {
         glm_quat   m_Rotation         = glm_quat{ 1.0, 0.0, 0.0, 0.0 };
         glm_vec3   m_Scale            = glm_vec3{ 1.0 };
         glm_vec3   m_Position         = glm_vec3{ 0.0 };
-        glm_vec3   m_LinearVelocity   = glm_vec3{ 0.0 };
+        //glm_vec3   m_LinearVelocity   = glm_vec3{ 0.0 };
 
         void*      m_UserPointer      = nullptr;
         void*      m_UserPointer1     = nullptr;
@@ -47,14 +51,15 @@ class ComponentBody : public ComponentBaseClass<ComponentBody> {
 
         [[nodiscard]] inline Entity getOwner() const noexcept { return m_Owner; }
 
-        bool hasParent() const;
+        [[nodiscard]] bool hasParent() const;
+        [[nodiscard]] Entity getParent() const;
 
         void addChild(Entity child) const;
         inline void addChild(const ComponentBody& child) const noexcept { addChild(child.m_Owner); }
 
         void removeChild(Entity child) const;
         inline void removeChild(const ComponentBody& child) const noexcept { removeChild(child.m_Owner); }
-        void removeAllChildren() const;
+        //void removeAllChildren() const;
 
         void setUserPointer(void* userPtr) noexcept { m_UserPointer = userPtr; }
         void setUserPointer1(void* userPtr) noexcept { m_UserPointer1 = userPtr; }
@@ -81,6 +86,11 @@ class ComponentBody : public ComponentBaseClass<ComponentBody> {
         inline void setPosition(decimal newPosition) noexcept { setPosition(newPosition, newPosition, newPosition); }
         void setPosition(decimal x, decimal y, decimal z);
 
+
+        inline void setLocalPosition(const glm_vec3& newPosition) noexcept { setLocalPosition(newPosition.x, newPosition.y, newPosition.z); }
+        inline void setLocalPosition(decimal newPosition) noexcept { setLocalPosition(newPosition, newPosition, newPosition); }
+        void setLocalPosition(decimal x, decimal y, decimal z);
+
         inline void setRotation(const glm_quat& newRotation) noexcept { setRotation(newRotation.x, newRotation.y, newRotation.z, newRotation.w); }
         void setRotation(decimal quat_x, decimal quat_y, decimal quat_z, decimal quat_w);
 
@@ -95,20 +105,25 @@ class ComponentBody : public ComponentBaseClass<ComponentBody> {
         [[nodiscard]] ScreenBoxCoordinates getScreenBoxCoordinates(float minOffset = 10.0f) const;
 
         [[nodiscard]] inline glm_quat getRotation() const noexcept { return m_Rotation; }
+        [[nodiscard]] inline glm_quat getLocalRotation() const noexcept { return getRotation(); }
+        [[nodiscard]] glm_quat getWorldRotation() const;
+
         [[nodiscard]] inline glm_vec3 getScale() const noexcept { return m_Scale; }
         [[nodiscard]] glm_vec3 getPosition() const;
+        [[nodiscard]] glm_vec3 getWorldPosition() const;
         [[nodiscard]] inline glm_vec3 getLocalPosition() const noexcept { return m_Position; }
         
         [[nodiscard]] inline const glm_vec3& forward() const noexcept { return m_Forward; }
         [[nodiscard]] inline const glm_vec3& right() const noexcept { return m_Right; }
         [[nodiscard]] inline const glm_vec3& up() const noexcept { return m_Up; }
         
-        [[nodiscard]] inline glm_vec3 getLinearVelocity() const noexcept { return m_LinearVelocity; }
-        [[nodiscard]] glm_mat4 modelMatrix() const;
-        [[nodiscard]] inline glm::mat4 modelMatrixRendering() const noexcept { return (glm::mat4)modelMatrix(); }
+        //[[nodiscard]] inline glm_vec3 getLinearVelocity() const noexcept { return m_LinearVelocity; }
+        [[nodiscard]] inline glm::mat4 getWorldMatrixRendering() const noexcept { return glm::mat4(getWorldMatrix()); }
+        [[nodiscard]] const glm_mat4& getWorldMatrix() const noexcept;
+        [[nodiscard]] const glm_mat4& getLocalMatrix() const noexcept;
 
-        void setLinearVelocity(decimal x, decimal y, decimal z, bool local = true);
-        inline void setLinearVelocity(const glm_vec3& velocity, bool local = true) noexcept { setLinearVelocity(velocity.x, velocity.y, velocity.z, local); }
+        //void setLinearVelocity(decimal x, decimal y, decimal z, bool local = true);
+        //inline void setLinearVelocity(const glm_vec3& velocity, bool local = true) noexcept { setLinearVelocity(velocity.x, velocity.y, velocity.z, local); }
 };
 
 #endif

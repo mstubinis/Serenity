@@ -45,8 +45,8 @@ class TerrainHeightfieldShape : public btHeightfieldTerrainShape {
 
 class TerrainData {
     struct AdjacentPixels final {
-        unsigned int imgSizeX = 0U;
-        unsigned int imgSizeY = 0U;
+        uint32_t imgSizeX = 0U;
+        uint32_t imgSizeY = 0U;
 
         std::array<std::array<btScalar, 3>, 3> pixels;
 
@@ -67,9 +67,9 @@ class TerrainData {
         btCompoundShape*                                     m_FinalCompoundShape    = nullptr;
         unsigned int                                         m_VerticesPerSector     = 0;
 
-        bool calculate_data(sf::Image& heightmapImage, unsigned int sectorSizeInPixels, unsigned int pointsPerPixel);
+        bool calculate_data(sf::Image& heightmapImage, uint32_t sectorSizeInPixels, uint32_t pointsPerPixel);
 
-        AdjacentPixels get_adjacent_pixels(unsigned int x, unsigned int y, sf::Image& heightmapImage);
+        AdjacentPixels get_adjacent_pixels(uint32_t x, uint32_t y, sf::Image& heightmapImage);
     public:
         TerrainData();
         virtual ~TerrainData();
@@ -83,16 +83,16 @@ class Terrain : public Observer, public Entity {
         Handle       m_MeshHandle   = Handle{};
         TerrainData  m_TerrainData;
 
-        bool internal_remove_quad(unsigned int indexX, unsigned int indexY);
-        bool internal_remove_quad(unsigned int sectorX, unsigned int sectorY, unsigned int indexX, unsigned int indexY);
+        bool internal_remove_quad(uint32_t indexX, uint32_t indexY);
+        bool internal_remove_quad(uint32_t sectorX, uint32_t sectorY, uint32_t indexX, uint32_t indexY);
     public:
-        Terrain(const std::string& name, sf::Image& heightmapImage, Handle& material, unsigned int sectorSizeInPixels = 4, unsigned int pointsPerPixel = 3, bool useDiamondSubdivisions = false, Scene* scene = nullptr);
+        Terrain(const std::string& name, sf::Image& heightmapImage, Handle& material, uint32_t sectorSizeInPixels = 4, uint32_t pointsPerPixel = 3, bool useDiamondSubdivisions = false, Scene* scene = nullptr);
         virtual ~Terrain();
 
-        bool removeQuad(unsigned int sectorX, unsigned int sectorY, unsigned int indexX, unsigned int indexY);
-        bool removeQuads(std::vector<std::tuple<unsigned int, unsigned int, unsigned int, unsigned int>>& quads);
-        bool removeQuad(unsigned int indexX, unsigned int indexY);
-        bool removeQuads(std::vector<std::tuple<unsigned int, unsigned int>>& quads);
+        bool removeQuad(uint32_t sectorX, uint32_t sectorY, uint32_t indexX, uint32_t indexY);
+        bool removeQuads(std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t>>& quads);
+        bool removeQuad(uint32_t indexX, uint32_t indexY);
+        bool removeQuads(std::vector<std::tuple<uint32_t, uint32_t>>& quads);
 
         void setPosition(float x, float y, float z); 
         void setPosition(const glm::vec3& position);

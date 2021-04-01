@@ -26,7 +26,7 @@ namespace Engine::priv {
             : Transform{ std::move(transform_) }
         {}
         MeshInfoNode(const aiNode& ainode) 
-            : Transform { Engine::Math::assimpToGLMMat4(ainode.mTransformation) }
+            : Transform { Engine::Math::toGLM(ainode.mTransformation) }
         {}
     };
     struct Vector3Key final {

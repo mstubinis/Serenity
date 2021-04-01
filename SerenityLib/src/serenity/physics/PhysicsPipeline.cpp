@@ -5,12 +5,12 @@
 #include <serenity/utils/Utils.h>
 
 #include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
-#include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h>
-#include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolverMT.h>
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
-#include <BulletDynamics/Dynamics/btDiscreteDynamicsWorldMT.h>
 #include <BulletCollision/CollisionDispatch/btCollisionDispatcherMt.h>
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
+#include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h>
+#include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolverMT.h>
+#include <BulletDynamics/Dynamics/btDiscreteDynamicsWorldMT.h>
 
 #include <LinearMath/btIDebugDraw.h>
 

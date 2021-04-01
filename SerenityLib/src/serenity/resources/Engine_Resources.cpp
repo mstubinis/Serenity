@@ -96,8 +96,6 @@ Window& Engine::Resources::getWindow(uint32_t index) {
 glm::uvec2 Engine::Resources::getWindowSize(uint32_t index) {
     return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_Windows[index]->getSize();
 }
-
-
 bool Engine::Resources::deleteScene(std::string_view sceneName) {
     for (auto& scene_ptr : Engine::priv::ResourceManager::RESOURCE_MANAGER->m_Scenes) {
         if (scene_ptr && scene_ptr->name() == sceneName) {
@@ -213,31 +211,17 @@ Handle Engine::Resources::addShaderProgram(std::string_view n, Handle v, Handle 
     return Engine::Resources::addResource<ShaderProgram>(n, v, f);
 }
 bool Engine::Resources::setCurrentScene(Scene* newScene){
-    Scene* oldScene = Engine::priv::ResourceManager::RESOURCE_MANAGER->m_CurrentScene;
-
-    Event ev{ EventType::SceneChanged };
-    ev.eventSceneChanged = Engine::priv::EventSceneChanged{ oldScene, newScene };
-    Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
-    
-    if(!oldScene){
-        ENGINE_PRODUCTION_LOG("---- Initial scene set to: " << newScene->name())
-        Engine::priv::ResourceManager::RESOURCE_MANAGER->m_CurrentScene = newScene;
-        Engine::priv::PublicScene::GetECS(*newScene).onSceneEntered(*newScene);
+    auto& resourceMgr = *Engine::priv::ResourceManager::RESOURCE_MANAGER;
+    Scene* oldScene   = resourceMgr.m_CurrentScene;
+    if (oldScene == newScene || std::get<2>(resourceMgr.m_SceneSwap) == true) {
         return false;
     }
-    if(oldScene != newScene){
-        ENGINE_PRODUCTION_LOG("---- Scene Change started (" << oldScene->name() << ") to (" << newScene->name() << ") ----")
-        Engine::priv::PublicScene::GetECS(*oldScene).onSceneLeft(*oldScene);
-        Engine::priv::ResourceManager::RESOURCE_MANAGER->m_CurrentScene = newScene;
-        Engine::priv::PublicScene::GetECS(*newScene).onSceneEntered(*newScene);
-
-        Engine::priv::PublicScene::SkipRenderThisFrame(*newScene, true);
-
-        ENGINE_PRODUCTION_LOG("-------- Scene Change to (" << newScene->name() << ") ended --------")
-
-        return true;
-    }
-    return false;
+    if (newScene == std::get<1>(resourceMgr.m_SceneSwap)) {
+        return false;
+    }   
+    resourceMgr.m_CurrentScene = newScene;
+    resourceMgr.m_SceneSwap = { oldScene, newScene, true };
+    return true;
 }
 bool Engine::Resources::setCurrentScene(std::string_view sceneName){
     return Engine::Resources::setCurrentScene(Engine::Resources::getScene(sceneName));

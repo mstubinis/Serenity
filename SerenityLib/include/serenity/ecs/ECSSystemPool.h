@@ -50,7 +50,10 @@ namespace Engine::priv {
                 if (SYSTEM::TYPE_ID == 0) {
                     SYSTEM::TYPE_ID = ++m_RegisteredSystems;
                 }
-                m_Systems.resize(SYSTEM::TYPE_ID);
+                auto threshold = std::max(SYSTEM::TYPE_ID, m_RegisteredSystems);
+                if (m_Systems.size() < threshold) {
+                    m_Systems.resize(threshold);
+                }
                 m_Systems[SYSTEM::TYPE_ID - 1].reset( NEW SYSTEM(std::forward<ARGS>(args)...) );
                 createdSystem = static_cast<SYSTEM*>(m_Systems[SYSTEM::TYPE_ID - 1].get());
                 hashSystem<SYSTEM, COMPONENTS...>(createdSystem);
@@ -58,19 +61,19 @@ namespace Engine::priv {
             }
 
             void update(const float dt, Scene& scene) {
-                for (const auto& systemItr : m_Systems) {
-                    systemItr->onUpdate(dt, scene);
+                for (int i = 0; i < m_Systems.size(); ++i) {
+                    m_Systems[i]->onUpdate(dt, scene);
                 }
             }
             void onComponentAddedToEntity(uint32_t componentTypeID, void* component, Entity entity) {
                 if (m_ComponentIDToSystems.size() < componentTypeID) {
                     return;
                 }
-                for (const auto& associatedSystem : m_ComponentIDToSystems[componentTypeID - 1]) {
-                    associatedSystem->onComponentAddedToEntity(component, entity);
+                for (int i = 0; i < m_ComponentIDToSystems[componentTypeID - 1].size(); ++i) {
+                    m_ComponentIDToSystems[componentTypeID - 1][i]->onComponentAddedToEntity(component, entity);
                 }
-                for (const auto& associatedSystem : m_ComponentIDToSystems[componentTypeID - 1]) {
-                    associatedSystem->addEntity(entity);
+                for (int i = 0; i < m_ComponentIDToSystems[componentTypeID - 1].size(); ++i) {
+                    m_ComponentIDToSystems[componentTypeID - 1][i]->addEntity(entity);
                 }
             }
             void onComponentRemovedFromEntity(uint32_t componentTypeID, Entity entity) {
@@ -78,30 +81,30 @@ namespace Engine::priv {
                 //if (m_ComponentIDToSystems.size() < componentTypeID) {
                 //    return;
                 //}
-                for (const auto& associatedSystem : m_ComponentIDToSystems[componentTypeID - 1]) {
-                    associatedSystem->removeEntity(entity);
+                for (int i = 0; i < m_ComponentIDToSystems[componentTypeID - 1].size(); ++i) {
+                    m_ComponentIDToSystems[componentTypeID - 1][i]->removeEntity(entity);
                 }
-                for (const auto& associatedSystem : m_ComponentIDToSystems[componentTypeID - 1]) {
-                    associatedSystem->onComponentRemovedFromEntity(entity);
+                for (int i = 0; i < m_ComponentIDToSystems[componentTypeID - 1].size(); ++i) {
+                    m_ComponentIDToSystems[componentTypeID - 1][i]->onComponentRemovedFromEntity(entity);
                 }
             }
             void onComponentRemovedFromEntity(Entity entity) {
-                for (const auto& system : m_Systems) {
-                    system->removeEntity(entity);
+                for (int i = 0; i < m_Systems.size(); ++i) {
+                    m_Systems[i]->removeEntity(entity);
                 }
-                for (const auto& system : m_Systems) {
-                    system->onComponentRemovedFromEntity(entity);
+                for (int i = 0; i < m_Systems.size(); ++i) {
+                    m_Systems[i]->onComponentRemovedFromEntity(entity);
                 }
             }
 
             void onSceneEntered(Scene& scene) noexcept {
-                for (const auto& systemItr : m_Systems) {
-                    systemItr->onSceneEntered(scene);
+                for (int i = 0; i < m_Systems.size(); ++i) {
+                    m_Systems[i]->onSceneEntered(scene);
                 }
             }
             void onSceneLeft(Scene& scene) noexcept {
-                for (const auto& systemItr : m_Systems) {
-                    systemItr->onSceneLeft(scene);
+                for (int i = 0; i < m_Systems.size(); ++i) {
+                    m_Systems[i]->onSceneLeft(scene);
                 }
             }
 

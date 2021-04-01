@@ -8,7 +8,6 @@
 #include <serenity/system/Engine.h>
 #include <serenity/Terrain.h>
 
-#include <serenity/physics/Collision.h>
 #include <serenity/math/Engine_Math.h>
 #include <serenity/math/MathCompression.h>
 #include <serenity/scene/Camera.h>
@@ -16,6 +15,7 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 
 #include <BulletCollision/CollisionShapes/btEmptyShape.h>
+#include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletCollision/CollisionShapes/btMultiSphereShape.h>
 #include <BulletCollision/CollisionShapes/btUniformScalingShape.h>
 #include <BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h>
@@ -139,17 +139,19 @@ btCollisionShape* PublicMesh::internal_build_collision(Handle meshHandle, ModelI
     }
     if (factory) {
         switch (collisionType) {
-            case CollisionType::None: {
-                return new btEmptyShape{};
-            }case CollisionType::Box: {
+            case CollisionType::BOX_SHAPE_PROXYTYPE: {
                 return factory->buildBoxShape(modelInstance, isCompoundChild);
-            }case CollisionType::ConvexHull: {
+            }case CollisionType::CONVEX_HULL_SHAPE_PROXYTYPE: {
                 return factory->buildConvexHull(modelInstance, isCompoundChild);
-            }case CollisionType::Sphere: {
+            }case CollisionType::SPHERE_SHAPE_PROXYTYPE: {
                 return factory->buildSphereShape(modelInstance, isCompoundChild);
-            }case CollisionType::TriangleShapeStatic: {
+            }case CollisionType::MULTI_SPHERE_SHAPE_PROXYTYPE: {
+                return factory->buildMultiSphereShape(modelInstance, isCompoundChild);
+            }case CollisionType::TRIANGLE_MESH_SHAPE_PROXYTYPE: {
                 return factory->buildTriangleShape(modelInstance, isCompoundChild);
-            }case CollisionType::TriangleShape: {
+            }case CollisionType::SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE: {
+                return factory->buildTriangleShape(modelInstance, isCompoundChild);
+            }case CollisionType::GIMPACT_SHAPE_PROXYTYPE: {
                 return factory->buildTriangleShapeGImpact(modelInstance, isCompoundChild);
             }
         }
@@ -593,10 +595,10 @@ void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const gl
             return;
         }
         glm::vec3 camPos     = camera.getPosition();
-
-        auto lambda_sorter   = [&camPos, sortMode, &instance, &bodyModelMatrix](priv::Triangle& lhs, priv::Triangle& rhs) {
-            glm::mat4 model1 = instance.modelMatrix() * bodyModelMatrix;
-            glm::mat4 model2 = model1;
+        glm::mat4 worldModelMatrix = instance.modelMatrix() * bodyModelMatrix;
+        auto lambda_sorter   = [&camPos, sortMode, &worldModelMatrix](priv::Triangle& lhs, priv::Triangle& rhs) {
+            glm::mat4 model1 = worldModelMatrix;
+            glm::mat4 model2 = worldModelMatrix;
 
             model1 = glm::translate(model1, lhs.midpoint);
             model2 = glm::translate(model2, rhs.midpoint);
@@ -613,7 +615,7 @@ void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const gl
         //std::execution::par_unseq seems to really help here for performance
         Engine::sort(std::execution::par_unseq, triangles, lambda_sorter);
 
-        auto newIndices = Engine::create_and_reserve<std::vector<uint32_t>>((uint32_t)m_CPUData.m_VertexData->m_Indices.size());
+        auto newIndices = Engine::create_and_reserve<std::vector<uint32_t>>( static_cast<uint32_t>(m_CPUData.m_VertexData->m_Indices.size()) );
         for (size_t i = 0; i < triangles.size(); ++i) {
             auto& triangle = triangles[i];
             newIndices.emplace_back(triangle.index1);

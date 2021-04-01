@@ -278,11 +278,12 @@ LUABinder::LUABinder()
             .addFunction("forward", &ComponentBody::forward)
             .addFunction("right", &ComponentBody::right)
             .addFunction("up", &ComponentBody::up)
-            .addFunction("getLinearVelocity", &ComponentBody::getLinearVelocity)
-            .addFunction("modelMatrix", &ComponentBody::modelMatrix)
-            .addFunction("modelMatrixRendering", &ComponentBody::modelMatrixRendering)
+            //.addFunction("getLinearVelocity", &ComponentBody::getLinearVelocity)
+            .addFunction("getWorldMatrix", &ComponentBody::getWorldMatrix)
+            .addFunction("getWorldMatrixRendering", &ComponentBody::getWorldMatrixRendering)
+            .addFunction("getLocalMatrix", &ComponentBody::getLocalMatrix)
 
-            .addFunction("setLinearVelocity", static_cast<void(ComponentBody::*)(decimal, decimal, decimal, bool)>(&ComponentBody::setLinearVelocity))
+            //.addFunction("setLinearVelocity", static_cast<void(ComponentBody::*)(decimal, decimal, decimal, bool)>(&ComponentBody::setLinearVelocity))
 
         .endClass()
         //component camera

@@ -800,9 +800,9 @@ void DeferredPipeline::renderPointLight(Camera& camera, PointLight& pointLight) 
     if (result == 0) {
         return;
     }
-    auto body        = pointLight.getComponent<ComponentBody>();
-    auto modelMatrix = body->modelMatrixRendering();
-    sendUniformMatrix4("Model", modelMatrix);
+    auto transform       = pointLight.getComponent<ComponentBody>();
+    auto renderingMatrix = transform->getWorldMatrixRendering();
+    sendUniformMatrix4("Model", renderingMatrix);
     sendUniformMatrix4("VP", m_UBOCameraDataStruct.CameraViewProj);
 
     if(result == 1){
@@ -827,9 +827,9 @@ void DeferredPipeline::renderSpotLight(Camera& camera, SpotLight& spotLight) {
     if (result == 0) {
         return;
     }
-    auto body        = spotLight.getComponent<ComponentBody>();
-    auto modelMatrix = body->modelMatrixRendering();
-    sendUniformMatrix4("Model", modelMatrix);
+    auto transform       = spotLight.getComponent<ComponentBody>();
+    auto renderingMatrix = transform->getWorldMatrixRendering();
+    sendUniformMatrix4("Model", renderingMatrix);
     sendUniformMatrix4("VP", m_UBOCameraDataStruct.CameraViewProj);
 
     if (result == 1) {
@@ -855,9 +855,9 @@ void DeferredPipeline::renderRodLight(Camera& camera, RodLight& rodLight) {
     if (result == 0) {
         return;
     }
-    auto body        = rodLight.getComponent<ComponentBody>();
-    auto modelMatrix = body->modelMatrixRendering();
-    sendUniformMatrix4("Model", modelMatrix);
+    auto transform       = rodLight.getComponent<ComponentBody>();
+    auto renderingMatrix = transform->getWorldMatrixRendering();
+    sendUniformMatrix4("Model", renderingMatrix);
     sendUniformMatrix4("VP", m_UBOCameraDataStruct.CameraViewProj);
 
     if (result == 1) {
@@ -905,8 +905,8 @@ void DeferredPipeline::renderProjectionLight(Camera& camera, ProjectionLight& pr
 }
 void DeferredPipeline::renderDecal(ModelInstance& decalModelInstance) {
     Entity parent          = decalModelInstance.parent();
-    auto body              = parent.getComponent<ComponentBody>();
-    glm::mat4 parentModel  = body->modelMatrixRendering();
+    auto transform         = parent.getComponent<ComponentBody>();
+    glm::mat4 parentModel  = transform->getWorldMatrixRendering();
     auto maxTextures       = getMaxNumTextureUnits() - 1U;
 
     Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), maxTextures);
@@ -1173,8 +1173,6 @@ void DeferredPipeline::render2DTexture(Handle textureHandle, const glm::vec2& po
     renderMesh(plane);
     m_Renderer.unbind(&plane);
 }
-
-
 void DeferredPipeline::render2DTexture(uint32_t textureAddress, int textureWidth, int textureHeight, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, Alignment align, const glm::vec4& scissor) {
     internal_gl_scissor(scissor, depth);
 
@@ -1203,9 +1201,6 @@ void DeferredPipeline::render2DTexture(uint32_t textureAddress, int textureWidth
     renderMesh(plane);
     m_Renderer.unbind(&plane);
 }
-
-
-
 void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment alignment, const glm::vec4& scissor) {
     internal_gl_scissor(scissor, depth);
 

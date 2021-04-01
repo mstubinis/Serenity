@@ -1,6 +1,5 @@
 #include <serenity/ecs/systems/SystemComponentCamera.h>
 #include <serenity/ecs/components/ComponentCamera.h>
-#include <serenity/threading/ThreadingModule.h>
 #include <serenity/math/Engine_Math.h>
 
 SystemComponentCamera::SystemComponentCamera(Engine::priv::ECS& ecs)

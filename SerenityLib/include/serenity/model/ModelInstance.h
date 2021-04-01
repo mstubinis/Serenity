@@ -9,7 +9,6 @@ class  Mesh;
 class  ComponentModel;
 class  Viewport;
 class  ModelInstance;
-class  Collision;
 class  SystemComponentModel;
 namespace Engine::priv {
     struct ComponentModel_UpdateFunction;
@@ -37,7 +36,6 @@ class ModelInstance final : public Observer {
     friend struct Engine::priv::ComponentModel_UpdateFunction;
     friend class  Engine::priv::RenderModule;
     friend class  ComponentModel;
-    friend class  Collision;
     friend class  SystemComponentModel;
 
     using BindFunc   = void(*)(ModelInstance*, const Engine::priv::RenderModule*);

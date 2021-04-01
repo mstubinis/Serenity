@@ -34,7 +34,7 @@ void Particle::init(const glm::vec3& emitterPosition, const glm::quat& emitterRo
     if (!emitter.m_Parent.null()) {
         auto parentBody = emitter.m_Parent.getComponent<ComponentBody>();
         if (parentBody) {
-            m_Velocity = glm::vec3(parentBody->getLinearVelocity()) /* * emitter.m_Properties->m_Drag */ ;
+            //m_Velocity = glm::vec3(parentBody->getLinearVelocity()) /* * emitter.m_Properties->m_Drag */ ;
         }
     }
     m_Velocity += rotated_initial_velocity;

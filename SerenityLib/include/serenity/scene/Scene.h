@@ -17,6 +17,10 @@ class  ModelInstance;
 class  ComponentModel;
 class  Entity;
 struct SceneOptions;
+class  SystemSceneUpdate;
+class  SystemSceneChanging;
+class  SystemAddRigidBodies;
+class  SystemRemoveRigidBodies;
 
 class ParticleEmitter;
 class ParticleEmissionProperties;
@@ -32,7 +36,6 @@ namespace Engine::priv {
     class  EngineCore;
 };
 #include <serenity/ecs/ECS.h>
-#include <serenity/physics/PhysicsPipeline.h>
 #include <serenity/renderer/RendererIncludes.h>
 #include <serenity/scene/Viewport.h>
 #include <serenity/events/Observer.h>
@@ -45,10 +48,12 @@ class Scene: public Observer {
     friend class  Engine::priv::ResourceManager;
     friend struct Engine::priv::PublicScene;
     friend class  Engine::priv::EngineCore;
-    using UpdateFP             = void(*)(Scene*, const float);
+    friend class  SystemSceneUpdate;
+    friend class  SystemSceneChanging;
+    friend class  SystemAddRigidBodies;
+    friend class  SystemRemoveRigidBodies;
+    using UpdateFP = void(*)(Scene*, const float);
     private:
-        //Engine::priv::PhysicsPipeline               m_Pipeline;
-
         Engine::priv::ECS                           m_ECS;
         mutable std::vector<Viewport>               m_Viewports;
         mutable std::vector<Camera*>                m_Cameras;
@@ -61,6 +66,7 @@ class Scene: public Observer {
         uint32_t                                    m_ID                  = 0;
         glm::vec3                                   m_GI                  = glm::vec3{ 1.0f };
         bool                                        m_SkipRenderThisFrame = false;
+        bool                                        m_WasJustSwappedTo    = false;
 
         Entity                                      m_Sun;
         Skybox*                                     m_Skybox              = nullptr;
@@ -117,7 +123,7 @@ class Scene: public Observer {
         [[nodiscard]] Viewport& getMainViewport();
         Viewport& addViewport(float x, float y, float width, float height, Camera& camera);
 
-        [[nodiscard]] ParticleEmitter* addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity* parent = nullptr);
+        [[nodiscard]] ParticleEmitter* addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent = Entity{});
 
 
         [[nodiscard]] Camera* getActiveCamera() const;
@@ -177,7 +183,7 @@ namespace Engine::priv {
         static void                       RemoveModelInstanceFromPipeline(Scene&, ModelInstance&, RenderStage);
         [[nodiscard]] static Engine::priv::ECS& GetECS(Scene&);
         static void                       CleanECS(Scene&, Entity);
-        static void                       SkipRenderThisFrame(Scene&, bool isSkip);
+        static void                       SkipRenderThisFrame(Scene&);
         [[nodiscard]] static bool         IsSkipRenderThisFrame(Scene&);
         [[nodiscard]] static bool         HasItemsToRender(Scene&);
     };

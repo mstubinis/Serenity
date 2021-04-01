@@ -196,27 +196,29 @@ void Math::extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProject
     }
     //https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
 }
-glm_quat Math::btToGLMQuat(const btQuaternion& q){
+glm_quat Math::toGLM(const btQuaternion& q){
     return glm_quat{ q.getW(), q.getX(), q.getY(), q.getZ() };
 }
-btQuaternion Math::glmToBTQuat(const glm_quat& q){
+btQuaternion Math::toBT(const glm_quat& q){
     return btQuaternion{ q.x, q.y, q.z, q.w };
 }
-glm::vec3 Math::assimpToGLMVec3(const aiVector3D& n){
+glm::vec3 Math::toGLM(const aiVector3D& n){
     return glm::vec3{ n.x, n.y, n.z };
 }
-glm::mat4 Math::assimpToGLMMat4(const aiMatrix4x4& n){
+glm::mat4 Math::toGLM(const aiMatrix4x4& n){
     return glm::mat4{ n.a1, n.b1, n.c1, n.d1, n.a2, n.b2, n.c2, n.d2, n.a3, n.b3, n.c3, n.d3, n.a4, n.b4, n.c4, n.d4 };
 }
-glm::mat3 Math::assimpToGLMMat3(const aiMatrix3x3& n){
+glm::mat3 Math::toGLM(const aiMatrix3x3& n){
     return glm::mat3{ n.a1, n.b1, n.c1, n.a2, n.b2, n.c2, n.a3, n.b3, n.c3 };
 }
+glm::quat Math::toGLM(const aiQuaternion& aiQuat) {
+    return glm::quat{ aiQuat.w, aiQuat.x, aiQuat.y, aiQuat.z };
+}
 
-
-glm_vec3 Math::btVectorToGLM(const btVector3& btvector){
+glm_vec3 Math::toGLM(const btVector3& btvector){
     return glm_vec3{ btvector.x(), btvector.y(), btvector.z() };
 }
-btVector3 Math::btVectorFromGLM(const glm_vec3& vector){ 
+btVector3 Math::toBT(const glm_vec3& vector){ 
     return btVector3{ vector.x, vector.y, vector.z };
 }
 glm_vec3 Math::getMatrixPosition(const glm_mat4& matrix) {

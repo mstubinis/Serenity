@@ -1,6 +1,16 @@
 
 #include <serenity/networking/Packet.h>
 
+sf::Packet& operator <<(sf::Packet& packet, Entity entity) noexcept {
+    return packet << entity.id() << entity.versionID() << entity.sceneID();
+}
+sf::Packet& operator >>(sf::Packet& packet, Entity entity) noexcept {
+    auto id = entity.id();
+    auto version = entity.versionID();
+    auto scene = entity.sceneID();
+    return packet >> id >> version >> scene;
+}
+
 //glm vector floats
 sf::Packet& operator <<(sf::Packet& packet, const glm::vec2& data) noexcept { return packet << data.x << data.y; }
 sf::Packet& operator <<(sf::Packet& packet, const glm::vec3& data) noexcept { return packet << data.x << data.y << data.z; }

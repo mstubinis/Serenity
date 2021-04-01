@@ -25,7 +25,7 @@ ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& 
 }
 void ParticleEmitter::init(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
     setProperties(properties);
-    removeAllChildren();
+    //removeAllChildren();
     float maxFloat = std::numeric_limits<float>().max();
     setPosition(maxFloat, maxFloat, maxFloat);
     if (!parent.null()) {
@@ -34,7 +34,7 @@ void ParticleEmitter::init(ParticleEmissionProperties& properties, Scene& scene,
     m_Lifetime      = lifetime;
     m_SpawningTimer = m_Properties->m_SpawnRate - 0.01f;
 
-    setLinearVelocity(0.0, 0.0, 0.0);
+    //setLinearVelocity(0.0, 0.0, 0.0);
     setScale(1.0, 1.0, 1.0);
 }
 
@@ -99,6 +99,7 @@ void ParticleEmitter::update(size_t index, const float dt, Engine::priv::Particl
 }
 
 void ParticleEmitter::applyLinearVelocity(decimal x, decimal y, decimal z, bool local) {
+    /*
     auto& body = *getComponent<ComponentBody>();
     const auto currVel = body.getLinearVelocity();
     auto newVel = glm_vec3(x, y, z);
@@ -106,12 +107,15 @@ void ParticleEmitter::applyLinearVelocity(decimal x, decimal y, decimal z, bool 
         newVel = body.getRotation() * newVel;
     }
     body.setLinearVelocity(currVel + newVel, false);
+    */
 }
 void ParticleEmitter::applyLinearVelocity(glm_vec3& velocity, const bool local) {
+    /*
     auto& body = *getComponent<ComponentBody>();
     const auto currVel = body.getLinearVelocity();
     if (local) {
         velocity = body.getRotation() * velocity;
     }
     body.setLinearVelocity(currVel + velocity, false);
+    */
 }

@@ -118,14 +118,11 @@ template<class E, class B> bool isInVector(std::vector<B*>& v, E* e) noexcept {
 }
 
 //formats a number to have commas to represent thousandth places
+std::string numToCommasImpl(std::string s, int start, int end) noexcept;
+
 template<class T> std::string convertNumToNumWithCommas(const T& n) noexcept {
     std::string r = std::to_string(n);
-    int p         = (int)r.length() - 3;
-    while (p > 0) {
-        r.insert(p, ",");
-        p -= 3;
-    }
-    return r;
+    return numToCommasImpl(r, 0, r.size() - 1);
 }
 
 #endif

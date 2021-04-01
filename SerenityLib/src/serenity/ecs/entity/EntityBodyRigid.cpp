@@ -1,4 +1,5 @@
 #include <serenity/ecs/entity/EntityBodyRigid.h>
+#include <serenity/ecs/components/ComponentBody.h>
 #include <serenity/ecs/components/ComponentBodyRigid.h>
 
 EntityBodyRigid::EntityBodyRigid(Scene& scene)
@@ -11,30 +12,35 @@ EntityBodyRigid::EntityBodyRigid(const Entity& other)
     : Entity{ other }
 {}
 
-float EntityBodyRigid::mass() const {
-    return getComponent<ComponentBodyRigid>()->mass();
-}
 glm_quat EntityBodyRigid::getRotation() const {
-    return getComponent<ComponentBodyRigid>()->getRotation();
+    return getComponent<ComponentBody>()->getRotation();
+}
+glm_quat EntityBodyRigid::getLocalRotation() const {
+    return getRotation();
+}
+glm_quat EntityBodyRigid::getWorldRotation() const {
+    return getComponent<ComponentBody>()->getWorldRotation();
 }
 glm_vec3 EntityBodyRigid::getScale() const {
-    return getComponent<ComponentBodyRigid>()->getScale();
+    return getComponent<ComponentBody>()->getScale();
 }
 glm_vec3 EntityBodyRigid::getPosition() const {
-    return getComponent<ComponentBodyRigid>()->getPosition();
+    return getComponent<ComponentBody>()->getPosition();
 }
 glm_vec3 EntityBodyRigid::getLocalPosition() const {
-    return getComponent<ComponentBodyRigid>()->getLocalPosition();
+    return getComponent<ComponentBody>()->getLocalPosition();
 }
-
+glm_vec3 EntityBodyRigid::getWorldPosition() const {
+    return getComponent<ComponentBody>()->getWorldPosition();
+}
 const glm_vec3& EntityBodyRigid::forward() const {
-    return getComponent<ComponentBodyRigid>()->forward();
+    return getComponent<ComponentBody>()->forward();
 }
 const glm_vec3& EntityBodyRigid::right() const {
-    return getComponent<ComponentBodyRigid>()->right();
+    return getComponent<ComponentBody>()->right();
 }
 const glm_vec3& EntityBodyRigid::up() const {
-    return getComponent<ComponentBodyRigid>()->up();
+    return getComponent<ComponentBody>()->up();
 }
 
 
@@ -47,59 +53,59 @@ glm_vec3 EntityBodyRigid::getAngularVelocity() const {
 
 
 void EntityBodyRigid::translate(const glm_vec3& translation, bool local) {
-    getComponent<ComponentBodyRigid>()->translate(translation, local);
+    getComponent<ComponentBody>()->translate(translation, local);
 }
 void EntityBodyRigid::translate(decimal x, decimal y, decimal z, bool local) {
-    getComponent<ComponentBodyRigid>()->translate(x, y, z, local);
+    getComponent<ComponentBody>()->translate(x, y, z, local);
 }
 void EntityBodyRigid::translate(decimal t, bool local) {
-    getComponent<ComponentBodyRigid>()->translate(t, local);
+    getComponent<ComponentBody>()->translate(t, local);
 }
 
 
 void EntityBodyRigid::rotate(const glm_vec3& rotation, bool local) {
-    getComponent<ComponentBodyRigid>()->rotate(rotation, local);
+    getComponent<ComponentBody>()->rotate(rotation, local);
 }
 void EntityBodyRigid::rotate(decimal pitch_radians, decimal yaw_radians, decimal roll_radians, bool local) {
-    getComponent<ComponentBodyRigid>()->rotate(pitch_radians, yaw_radians, roll_radians, local);
+    getComponent<ComponentBody>()->rotate(pitch_radians, yaw_radians, roll_radians, local);
 }
 
 
 void EntityBodyRigid::scale(const glm_vec3& amount) {
-    getComponent<ComponentBodyRigid>()->scale(amount);
+    getComponent<ComponentBody>()->scale(amount);
 }
 void EntityBodyRigid::scale(decimal x, decimal y, decimal z) {
-    getComponent<ComponentBodyRigid>()->scale(x, y, z);
+    getComponent<ComponentBody>()->scale(x, y, z);
 }
 void EntityBodyRigid::scale(decimal s) {
-    getComponent<ComponentBodyRigid>()->scale(s);
+    getComponent<ComponentBody>()->scale(s);
 }
 
 void EntityBodyRigid::setPosition(const glm_vec3& newPosition) {
-    getComponent<ComponentBodyRigid>()->setPosition(newPosition);
+    getComponent<ComponentBody>()->setPosition(newPosition);
 }
 void EntityBodyRigid::setPosition(decimal x, decimal y, decimal z) {
-    getComponent<ComponentBodyRigid>()->setPosition(x, y, z);
+    getComponent<ComponentBody>()->setPosition(x, y, z);
 }
 void EntityBodyRigid::setPosition(decimal p) {
-    getComponent<ComponentBodyRigid>()->setPosition(p);
+    getComponent<ComponentBody>()->setPosition(p);
 }
 
 void EntityBodyRigid::setRotation(const glm_quat& newRotation) {
-    getComponent<ComponentBodyRigid>()->setRotation(newRotation);
+    getComponent<ComponentBody>()->setRotation(newRotation);
 }
 void EntityBodyRigid::setRotation(decimal quat_x, decimal quat_y, decimal quat_z, decimal quat_w) {
-    getComponent<ComponentBodyRigid>()->setRotation(quat_x, quat_y, quat_z, quat_w);
+    getComponent<ComponentBody>()->setRotation(quat_x, quat_y, quat_z, quat_w);
 }
 
 void EntityBodyRigid::setScale(const glm_vec3& newScale) {
-    getComponent<ComponentBodyRigid>()->setScale(newScale);
+    getComponent<ComponentBody>()->setScale(newScale);
 }
 void EntityBodyRigid::setScale(decimal x, decimal y, decimal z) {
-    getComponent<ComponentBodyRigid>()->setScale(x, y, z);
+    getComponent<ComponentBody>()->setScale(x, y, z);
 }
 void EntityBodyRigid::setScale(decimal s) {
-    getComponent<ComponentBodyRigid>()->setScale(s);
+    getComponent<ComponentBody>()->setScale(s);
 }
 
 void EntityBodyRigid::setDamping(decimal linear, decimal angular) {

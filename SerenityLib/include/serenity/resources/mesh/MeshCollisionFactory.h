@@ -43,7 +43,8 @@ namespace Engine::priv {
             MeshCollisionFactory(MeshCollisionFactory&&) noexcept;
             MeshCollisionFactory& operator=(MeshCollisionFactory&&) noexcept;
   
-            [[nodiscard]] btMultiSphereShape*            buildSphereShape(ModelInstance* modelInstance, bool isCompoundChild = false);
+            [[nodiscard]] btSphereShape*                 buildSphereShape(ModelInstance* modelInstance, bool isCompoundChild = false);
+            [[nodiscard]] btMultiSphereShape*            buildMultiSphereShape(ModelInstance* modelInstance, bool isCompoundChild = false);
             [[nodiscard]] btBoxShape*                    buildBoxShape(ModelInstance* modelInstance, bool isCompoundChild = false);
             [[nodiscard]] btUniformScalingShape*         buildConvexHull(ModelInstance* modelInstance, bool isCompoundChild = false);
             [[nodiscard]] btScaledBvhTriangleMeshShape*  buildTriangleShape(ModelInstance* modelInstance, bool isCompoundChild = false);

@@ -1,7 +1,7 @@
 #include <serenity/ecs/ECS.h>
 
 Entity Engine::priv::ECS::createEntity(Scene& scene) {
-    Entity entity = m_EntityPool.addEntity(scene);
+    Entity entity = m_EntityPool.createEntity(scene);
     #ifndef ENGINE_PRODUCTION
         for (auto e : m_JustAddedEntities) {
             if (e == entity) {
@@ -17,12 +17,12 @@ void Engine::priv::ECS::init(const SceneOptions& options) {
     m_EntityPool.init(m_SceneOptions);
 }
 void Engine::priv::ECS::clearAllEntities() noexcept {
-    m_JustAddedEntities.clear();
-    m_DestroyedEntities.clear();
-    m_EntityPool.clear();
     for (auto& pool : m_ComponentPools) {
         pool->clear();
     }
+    m_JustAddedEntities.clear();
+    m_DestroyedEntities.clear();
+    m_EntityPool.clear();
 }
 void Engine::priv::ECS::removeEntity(Entity entity) {
     #ifndef ENGINE_PRODUCTION
@@ -33,15 +33,6 @@ void Engine::priv::ECS::removeEntity(Entity entity) {
         }
     #endif
     m_DestroyedEntities.emplace_back(entity);
-}
-void Engine::priv::ECS::update(const float dt, Scene& scene) {
-    m_SystemPool.update(dt, scene);
-}
-void Engine::priv::ECS::onSceneEntered(Scene& scene) {
-    m_SystemPool.onSceneEntered(scene);
-}
-void Engine::priv::ECS::onSceneLeft(Scene& scene) {
-    m_SystemPool.onSceneLeft(scene);
 }
 void Engine::priv::ECS::preUpdate(Scene& scene, const float dt) {
     if (m_JustAddedEntities.size() > 0) {

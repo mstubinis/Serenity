@@ -42,25 +42,23 @@ namespace Engine::Math {
 
     [[nodiscard]] glm::vec2 rotate2DPoint(const glm::vec2& point, float angle, const glm::vec2& origin = glm::vec2(0.0f, 0.0f));
 
-    [[nodiscard]] glm_quat btToGLMQuat(const btQuaternion& q);
-    [[nodiscard]] btQuaternion glmToBTQuat(const glm_quat& q);
+    [[nodiscard]] glm_quat toGLM(const btQuaternion& q);
+    [[nodiscard]] glm_vec3 toGLM(const btVector3&);
+    [[nodiscard]] glm::vec3 toGLM(const aiVector3D&);
+    [[nodiscard]] glm::mat4 toGLM(const aiMatrix4x4&);
+    [[nodiscard]] glm::mat3 toGLM(const aiMatrix3x3&);
+    [[nodiscard]] glm::quat toGLM(const aiQuaternion&);
 
-    [[nodiscard]] glm_vec3 btVectorToGLM(const btVector3&);
-    [[nodiscard]] btVector3 btVectorFromGLM(const glm_vec3&);
+    [[nodiscard]] btQuaternion toBT(const glm_quat& q);
+    [[nodiscard]] btVector3 toBT(const glm_vec3&);
 
     [[nodiscard]] bool rect_fully_contained(const glm::vec4& bigger, const glm::vec4& smaller) noexcept;
     [[nodiscard]] glm::vec4 rect_union(const glm::vec4& bigger, const glm::vec4& smaller) noexcept;
-
-    [[nodiscard]] glm::vec3 assimpToGLMVec3(const aiVector3D&);
-    [[nodiscard]] glm::mat4 assimpToGLMMat4(const aiMatrix4x4&);
-    [[nodiscard]] glm::mat3 assimpToGLMMat3(const aiMatrix3x3&);
-
     [[nodiscard]] glm::vec3 getScreenCoordinates(const glm::vec3& position, const Camera&, bool clampToEdge = true);
     [[nodiscard]] glm::vec3 getScreenCoordinates(const glm::vec3& position, const Camera&, const glm::vec4& viewport, bool clampToEdge = true);
     [[nodiscard]] glm::vec3 getScreenCoordinates(const glm::vec3& position, const Camera&, const glm::mat4& view, const glm::mat4& projection, const glm::vec4& viewport, bool clampToEdge = true);
 
     [[nodiscard]] glm::vec3 midpoint(const glm::vec3& a, const glm::vec3& b);
-
     [[nodiscard]] glm::vec3 direction(const glm::vec3& eye, const glm::vec3& target);
 
     void translate(const btRigidBody&, btVector3&, bool local) noexcept;

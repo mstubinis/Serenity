@@ -31,10 +31,10 @@ namespace Engine::priv {
             inline bool removeComponent(uint32_t entityID) noexcept {
                 return Engine::sparse_set<COMPONENT>::remove(entityID);
             }
-            [[nodiscard]] inline constexpr COMPONENT* getComponent(Entity entity) const noexcept {
+            [[nodiscard]] inline COMPONENT* getComponent(Entity entity) noexcept {
                 return Engine::sparse_set<COMPONENT>::get(entity.id());
             }
-            [[nodiscard]] inline constexpr COMPONENT* getComponent(uint32_t entityID) const noexcept {
+            [[nodiscard]] inline COMPONENT* getComponent(uint32_t entityID) noexcept {
                 return Engine::sparse_set<COMPONENT>::get(entityID);
             }
     };

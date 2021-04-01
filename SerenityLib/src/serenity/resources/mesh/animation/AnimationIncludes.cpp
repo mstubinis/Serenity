@@ -6,13 +6,12 @@ Engine::priv::AnimationChannel::AnimationChannel(const aiNodeAnim& aiAnimNode) {
     RotationKeys.reserve(aiAnimNode.mNumRotationKeys);
     ScalingKeys.reserve(aiAnimNode.mNumScalingKeys);
     for (auto i = 0U; i < aiAnimNode.mNumPositionKeys; ++i) {
-        PositionKeys.emplace_back((float)aiAnimNode.mPositionKeys[i].mTime, Engine::Math::assimpToGLMVec3(aiAnimNode.mPositionKeys[i].mValue));
+        PositionKeys.emplace_back((float)aiAnimNode.mPositionKeys[i].mTime, Engine::Math::toGLM(aiAnimNode.mPositionKeys[i].mValue));
     }
     for (auto i = 0U; i < aiAnimNode.mNumRotationKeys; ++i) {
-        const auto& aiQuat = aiAnimNode.mRotationKeys[i].mValue;
-        RotationKeys.emplace_back((float)aiAnimNode.mRotationKeys[i].mTime, glm::quat{ aiQuat.w, aiQuat.x, aiQuat.y, aiQuat.z });
+        RotationKeys.emplace_back((float)aiAnimNode.mRotationKeys[i].mTime, Engine::Math::toGLM(aiAnimNode.mRotationKeys[i].mValue));
     }
     for (auto i = 0U; i < aiAnimNode.mNumScalingKeys; ++i) {
-        ScalingKeys.emplace_back((float)aiAnimNode.mScalingKeys[i].mTime, Engine::Math::assimpToGLMVec3(aiAnimNode.mScalingKeys[i].mValue));
+        ScalingKeys.emplace_back((float)aiAnimNode.mScalingKeys[i].mTime, Engine::Math::toGLM(aiAnimNode.mScalingKeys[i].mValue));
     }
 }

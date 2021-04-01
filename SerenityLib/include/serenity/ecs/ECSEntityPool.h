@@ -29,12 +29,10 @@ namespace Engine::priv {
             bool isEntityVersionDifferent(Entity entity) const noexcept;
 
             void destroyFlaggedEntity(uint32_t entityID);
-            [[nodiscard]] Entity addEntity(const Scene& scene) noexcept;
-            //[[nodiscard]] Entity getEntity(uint32_t entityData) const noexcept;
+            [[nodiscard]] Entity createEntity(const Scene& scene) noexcept;
 
             void clear() noexcept {
-                m_Pool.clear();
-                m_Freelist.clear();
+                m_Pool.clear(); m_Freelist.clear();
             }
 
             inline std::vector<Entity>::iterator begin() noexcept { return m_Pool.begin(); }

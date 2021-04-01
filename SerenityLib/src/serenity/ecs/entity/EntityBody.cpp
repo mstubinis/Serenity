@@ -14,11 +14,20 @@ EntityBody::EntityBody(const Entity& other)
 glm_quat EntityBody::getRotation() const {
     return getComponent<ComponentBody>()->getRotation();
 }
+glm_quat EntityBody::getLocalRotation() const {
+    return getRotation();
+}
+glm_quat EntityBody::getWorldRotation() const {
+    return getComponent<ComponentBody>()->getWorldRotation();
+}
 glm_vec3 EntityBody::getScale() const {
     return getComponent<ComponentBody>()->getScale();
 }
 glm_vec3 EntityBody::getPosition() const {
     return getComponent<ComponentBody>()->getPosition();
+}
+glm_vec3 EntityBody::getWorldPosition() const {
+    return getComponent<ComponentBody>()->getWorldPosition();
 }
 glm_vec3 EntityBody::getLocalPosition() const {
     return getComponent<ComponentBody>()->getLocalPosition();
@@ -34,11 +43,11 @@ const glm_vec3& EntityBody::up() const {
     return getComponent<ComponentBody>()->up();
 }
 
-
+/*
 glm_vec3 EntityBody::getLinearVelocity() const {
     return getComponent<ComponentBody>()->getLinearVelocity();
 }
-
+*/
 void EntityBody::translate(const glm_vec3& translation, bool local) {
     getComponent<ComponentBody>()->translate(translation, local);
 }
@@ -94,10 +103,11 @@ void EntityBody::setScale(decimal x, decimal y, decimal z) {
 void EntityBody::setScale(decimal s) {
     getComponent<ComponentBody>()->setScale(s);
 }
-
+/*
 void EntityBody::setLinearVelocity(decimal x, decimal y, decimal z, bool local) {
     getComponent<ComponentBody>()->setLinearVelocity(x, y, z, local);
 }
 void EntityBody::setLinearVelocity(const glm_vec3& velocity, bool local) {
     getComponent<ComponentBody>()->setLinearVelocity(velocity, local);
 }
+*/

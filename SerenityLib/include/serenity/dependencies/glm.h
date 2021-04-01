@@ -31,5 +31,30 @@
     using glm_quat = glm::dquat;
     using glm_mat3 = glm::dmat3;
     using glm_mat4 = glm::dmat4;
+
+    inline constexpr glm_vec3 operator* (const glm_vec3& lhs, const glm::vec3& rhs) noexcept { return lhs * glm_vec3{ rhs }; }
+    inline constexpr glm_vec3 operator* (const glm::vec3& lhs, const glm_vec3& rhs) noexcept { return glm_vec3{ lhs } *rhs; }
+    inline constexpr glm_vec3 operator+ (const glm_vec3& lhs, const glm::vec3& rhs) noexcept { return lhs + glm_vec3{ rhs }; }
+    inline constexpr glm_vec3 operator+ (const glm::vec3& lhs, const glm_vec3& rhs) noexcept { return glm_vec3{ lhs } + rhs; }
+    inline constexpr glm_vec3 operator- (const glm_vec3& lhs, const glm::vec3& rhs) noexcept { return lhs - glm_vec3{ rhs }; }
+    inline constexpr glm_vec3 operator- (const glm::vec3& lhs, const glm_vec3& rhs) noexcept { return glm_vec3{ lhs } - rhs; }
+    inline constexpr glm_vec3 operator/ (const glm_vec3& lhs, const glm::vec3& rhs) noexcept { return lhs / glm_vec3{ rhs }; }
+    inline constexpr glm_vec3 operator/ (const glm::vec3& lhs, const glm_vec3& rhs) noexcept { return glm_vec3{ lhs } / rhs; }
+
+    inline constexpr glm_quat operator* (const glm_quat& lhs, const glm::quat& rhs) noexcept { return lhs * glm_quat{ rhs }; }
+    inline constexpr glm_quat operator* (const glm::quat& lhs, const glm_quat& rhs) noexcept { return glm_quat{ lhs } *rhs; }
+    inline constexpr glm_quat operator+ (const glm_quat& lhs, const glm::quat& rhs) noexcept { return lhs + glm_quat{ rhs }; }
+    inline constexpr glm_quat operator+ (const glm::quat& lhs, const glm_quat& rhs) noexcept { return glm_quat{ lhs } + rhs; }
+    inline constexpr glm_quat operator- (const glm_quat& lhs, const glm::quat& rhs) noexcept { return lhs - glm_quat{ rhs }; }
+    inline constexpr glm_quat operator- (const glm::quat& lhs, const glm_quat& rhs) noexcept { return glm_quat{ lhs } - rhs; }
+
+
+    inline constexpr glm::vec3 operator* (const glm::vec3& lhs, const glm_quat& rhs) noexcept { return lhs * rhs; }
+    inline constexpr glm_vec3 operator* (const glm_vec3& lhs, const glm::quat& rhs) noexcept { return lhs * rhs; }
+
+    inline constexpr glm::vec3 operator* (const glm_quat& lhs, const glm::vec3& rhs) noexcept { return lhs * rhs; }
+    inline constexpr glm_vec3 operator* (const glm::quat& lhs, const glm_vec3& rhs) noexcept { return lhs * rhs; }
+
 #endif
+
 #endif

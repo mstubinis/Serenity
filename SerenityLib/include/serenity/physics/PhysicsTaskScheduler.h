@@ -3,6 +3,7 @@
 #pragma once
 
 #include <atomic>
+#include <serenity/dependencies/glm.h>
 #include <LinearMath/btThreads.h>
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
 
@@ -23,8 +24,8 @@ namespace Engine::priv {
         int getMaxNumThreads() const override;
         int getNumThreads() const override;
         void setNumThreads(int numThreads) override;
-        void parallelFor(int iBegin, int iEnd, int grainSize, const btIParallelForBody& body) override;
-        btScalar parallelSum(int iBegin, int iEnd, int grainSize, const btIParallelSumBody& body) override;
+        void parallelFor(int iBegin, int iEnd, int grainSize, const btIParallelForBody&) override;
+        btScalar parallelSum(int iBegin, int iEnd, int grainSize, const btIParallelSumBody&) override;
         void sleepWorkerThreadsHint() override {}
 
         // internal use only

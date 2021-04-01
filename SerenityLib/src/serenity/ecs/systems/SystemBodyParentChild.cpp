@@ -2,39 +2,51 @@
 #include <serenity/ecs/components/ComponentBody.h>
 #include <serenity/ecs/components/ComponentBodyRigid.h>
 #include <serenity/ecs/components/ComponentModel.h>
-#include <serenity/ecs/ECS.h>
-#include <serenity/threading/ThreadingModule.h>
-#include <serenity/math/Engine_Math.h>
-#include <serenity/ecs/ECSComponentPool.h>
-#include <serenity/physics/Collision.h>
-#include <serenity/resources/Engine_Resources.h>
+
+#include <serenity/utils/Utils.h>
 
 SystemBodyParentChild::SystemBodyParentChild(Engine::priv::ECS& ecs)
     : SystemCRTP{ ecs }
 {
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
         auto& system = (SystemBodyParentChild&)inSystem;
-        system.forEach<SystemBodyParentChild*>([](SystemBodyParentChild* system, Entity entity, ComponentBody* body, ComponentBodyRigid* rigid) {
-            const auto entityIndex = entity.id() - 1;
-            auto& localMatrix = system->LocalTransforms[entityIndex];
-            auto& worldMatrix = system->WorldTransforms[entityIndex];
-            if (body) {
-                localMatrix = glm::translate(body->m_Position) * glm::mat4_cast(body->m_Rotation) * glm::scale(body->m_Scale);
-                worldMatrix = localMatrix;
-            }else if(rigid){
-                localMatrix = rigid->modelMatrix();
-                worldMatrix = localMatrix;
+
+        // compute local matrices and apply starting world matrices as locals
+        system.forEach<SystemBodyParentChild*>([](SystemBodyParentChild* system, Entity entity, ComponentBody* transform) {
+            auto entityIndex  = entity.id() - 1;
+            auto& localMatrix = system->m_LocalTransforms[entityIndex];
+            auto& worldMatrix = system->m_WorldTransforms[entityIndex];
+            localMatrix       = glm::translate(transform->m_Position) * glm::mat4_cast(transform->m_Rotation) * glm::scale(transform->m_Scale);
+            worldMatrix       = localMatrix;
+        }, &system, SystemExecutionPolicy::ParallelWait);
+
+        // traverse parent child relationships and build the proper world matrices
+        system.computeAllParentChildWorldTransforms();
+
+        //finalize bullet rigid body positions by giving them their true world locations and rotations. TODO: move to separate system?
+        system.forEach<SystemBodyParentChild*>([](SystemBodyParentChild* system, Entity entity, ComponentBody* transform) {
+            auto rigidBody = entity.getComponent<ComponentBodyRigid>();
+            if (rigidBody) {
+                const auto entityIndex  = entity.id() - 1;
+                auto& worldMatrix       = system->m_WorldTransforms[entityIndex];
+                const uint32_t parentID = system->m_Parents[entityIndex];
+                rigidBody->internal_setPosition(worldMatrix[3][0], worldMatrix[3][1], worldMatrix[3][2]);
+                if (parentID == 0) {
+                    rigidBody->internal_setRotation(transform->m_Rotation.x, transform->m_Rotation.y, transform->m_Rotation.z, transform->m_Rotation.w);
+                }else{
+                    auto worldRotation  = glm::quat_cast( system->m_WorldTransforms[parentID - 1] * glm::mat4_cast(transform->m_Rotation) );
+                    rigidBody->internal_setRotation(worldRotation.x, worldRotation.y, worldRotation.z, worldRotation.w);
+                }
             }
         }, &system, SystemExecutionPolicy::ParallelWait);
-        system.computeAllMatrices();
     });
     setComponentAddedToEntityFunction([](SystemBaseClass& inSystem, void* component, Entity entity) {
         auto& system  = (SystemBodyParentChild&)inSystem;
         const auto id = entity.id();
-        if (system.Parents.capacity() < id) {
+        if (system.m_Parents.capacity() < id) {
             system.reserve(id + 50);
         }
-        if (system.Parents.size() < id) {
+        if (system.m_Parents.size() < id) {
             system.resize(id);
         }
         auto model = entity.getComponent<ComponentModel>();
@@ -46,23 +58,29 @@ SystemBodyParentChild::SystemBodyParentChild(Engine::priv::ECS& ecs)
         auto& system         = (SystemBodyParentChild&)inSystem;
         const auto id        = entity.id();
         const auto thisIndex = id - 1;
-        if (system.Parents[thisIndex] > 0) {
-            system.remove(system.Parents[thisIndex], id);
+        if (system.m_Parents[thisIndex] > 0) {
+            system.removeChild(system.m_Parents[thisIndex], id);
         }
     });
 }
-
-void SystemBodyParentChild::computeAllMatrices() {
-    for (size_t i = 0; i < Order.size(); ++i) {
-        const uint32_t entityID = Order[i];
+Entity SystemBodyParentChild::getParentEntity(Entity entity) const {
+    auto parent = m_Parents[entity.id() - 1];
+    if (parent > 0) {
+        return getEntity(parent);
+    }
+    return Entity{};
+}
+void SystemBodyParentChild::computeAllParentChildWorldTransforms() {
+    for (size_t i = 0; i < m_Order.size(); ++i) {
+        const uint32_t entityID = m_Order[i];
         if (entityID > 0) {
             const uint32_t entityIndex = entityID - 1U;
-            const uint32_t parentID    = Parents[entityIndex];
+            const uint32_t parentID    = m_Parents[entityIndex];
             if (parentID == 0) {
-                WorldTransforms[entityIndex] = LocalTransforms[entityIndex];
+                m_WorldTransforms[entityIndex] = m_LocalTransforms[entityIndex];
             }else{
                 const uint32_t parentIndex = parentID - 1U;
-                WorldTransforms[entityIndex] = WorldTransforms[parentIndex] * LocalTransforms[entityIndex];
+                m_WorldTransforms[entityIndex] = m_WorldTransforms[parentIndex] * m_LocalTransforms[entityIndex];
             }
         }else{
             break;
@@ -74,137 +92,117 @@ void SystemBodyParentChild::computeAllMatrices() {
 #pragma region ParentChildVector
 
 void SystemBodyParentChild::resize(size_t size) {
-    Parents.resize(size, 0U);
-    Order.resize(size, 0U);
-    WorldTransforms.resize(size, glm_mat4{ 1.0 });
-    LocalTransforms.resize(size, glm_mat4{ 1.0 });
+    m_Parents.resize(size, 0U);
+    m_WorldTransforms.resize(size, glm_mat4{ 1.0 });
+    m_LocalTransforms.resize(size, glm_mat4{ 1.0 });
 }
 void SystemBodyParentChild::reserve(size_t size) {
-    Parents.reserve(size);
-    Order.reserve(size);
-    WorldTransforms.reserve(size);
-    LocalTransforms.reserve(size);
+    m_Parents.reserve(size);
+    m_WorldTransforms.reserve(size);
+    m_LocalTransforms.reserve(size);
 }
 void SystemBodyParentChild::internal_reserve_from_insert(uint32_t parentID, uint32_t childID) {
-    if (Parents.capacity() < parentID || Parents.capacity() < childID) {
+    if (m_Parents.capacity() < parentID || m_Parents.capacity() < childID) {
         reserve(std::max(parentID, childID) + 50);
     }
-    if (Parents.size() < parentID || Parents.size() < childID) {
+    if (m_Parents.size() < parentID || m_Parents.size() < childID) {
         resize(std::max(parentID, childID));
     }
 }
-void SystemBodyParentChild::insert(uint32_t parentID, uint32_t childID) {
+void SystemBodyParentChild::addChild(uint32_t parentID, uint32_t childID) {
     internal_reserve_from_insert(parentID, childID);
     if (getParent(childID) == parentID) {
-        //ENGINE_PRODUCTION_LOG(parentID << ", " << childID << " - added: already added")
         return;
     }
-    //ENGINE_PRODUCTION_LOG(parentID << ", " << childID << " - adding")
-    bool added = false;
-    for (size_t i = 0; i < Order.size(); ++i) {
-        auto entityID = Order[i];
-        if (entityID == parentID) {
-            //insert after the parent node where the next available spot is
-            //the next available spot is either the next zero or the next spot where that spot's parent is zero
-            for (size_t j = i + 1; j < Order.size(); ++j) {
-                auto entityIDCaseOne = Order[j];
-                if (entityIDCaseOne == 0 || Parents[entityIDCaseOne - 1] == 0) {
-                    Order.insert(Order.begin() + j, childID);
-                    Order.pop_back();
-                    ++OrderHead;
-                    added = true;
-                    goto END_LOOP;
-                }
+    auto parentBlock = getBlockIndices(parentID); //O(order.size())
+    auto childBlock  = getBlockIndices(childID);  //O(order.size())
+
+    if (parentBlock.first == NULL_INDEX && childBlock.first == NULL_INDEX) {
+        m_Order.push_back(parentID);
+        m_Order.push_back(childID);
+    }else if (parentBlock.first != NULL_INDEX && childBlock.first == NULL_INDEX) {
+        //parent found, not child
+        m_Order.insert(std::begin(m_Order) + (parentBlock.first + 1), childID); //TODO: test edge case of parentBlock.first being at [size - 1]
+    }else if (parentBlock.first == NULL_INDEX && childBlock.first != NULL_INDEX) {
+        //child found, not parent
+        m_Order.insert(std::begin(m_Order) + childBlock.first, parentID);
+    }else{
+        //both found
+        uint32_t childBlockSize = (childBlock.second - childBlock.first) + 1;
+        if (childBlockSize <= 1) {
+            //child is by itself, add child right after parent. is this case ever hit?
+            m_Order.erase(std::begin(m_Order) + childBlock.first);
+            m_Order.insert(std::begin(m_Order) + (parentBlock.first + 1), childID); //TODO: test edge case of parentBlock.first being at [size - 1]
+        }else{
+            //child has multiple children itself. insert it at the end of parent's block
+            auto temp = Engine::create_and_reserve<std::vector<uint32_t>>(childBlockSize);
+            for (uint32_t i = childBlock.first; i <= childBlock.second; ++i) {
+                temp.push_back(m_Order[i]);
             }
-        }else if (entityID == childID) {
-            //insert right before the child node
-            Order.insert(Order.begin() + i, parentID);
-            Order.pop_back();
-            ++OrderHead;
-            added = true;
-            break;
-        }else if (entityID == 0) {
-            break;
+            m_Order.erase(std::cbegin(m_Order) + childBlock.first, std::cbegin(m_Order) + childBlock.second + 1);
+            m_Order.insert(std::cbegin(m_Order) + (parentBlock.second + 1), std::begin(temp), std::end(temp));  //TODO: test edge case of parentBlock.first being at [size - 1]
         }
     }
-END_LOOP:
 
-    if (!added) {
-        /* add both at order head */
-        Order[OrderHead] = parentID;
-        Order[OrderHead + 1] = childID;
-        OrderHead += 2;
-    }
     getParent(childID) = parentID;
-
-    getWorld(childID) = getWorld(parentID) * getLocal(childID);
+    getWorld(childID)  = getWorld(parentID) * getLocal(childID);
 }
-void SystemBodyParentChild::remove(uint32_t parentID, uint32_t childID) {
-    if (getParent(childID) == 0) {
-        //std::cout << parentID << ", " << childID << " - remove: already removed\n";
+void SystemBodyParentChild::removeChild(uint32_t parentID, uint32_t childID) {
+    if (getParent(childID) != parentID) {
         return;
     }
-    size_t parentIndex = 0;
-    size_t erasedIndex = 0;
-    bool foundParent = false;
-
-    for (size_t i = 0; i < Order.size(); ++i) {
-        auto entityID = Order[i];
-        if (entityID == 0) {
-            break;
-        }
-        else if (entityID == parentID) {
-            parentIndex = i;
-            foundParent = true;
-            break;
-        }
-    }
-    if (!foundParent) {
-        //ENGINE_PRODUCTION_LOG(parentID << ", " << childID << " - remove: not found")
+    auto parentBlock = getBlockIndices(parentID); //O(order.size())
+    if (parentBlock.first == NULL_INDEX) {
         return;
+    }
+    auto childBlock         = getBlockIndices(childID);  //O(order.size())
+    uint32_t childBlockSize = (childBlock.second - childBlock.first) + 1;
+    if (childBlockSize == 1) {
+        m_Order.erase(std::cbegin(m_Order) + childBlock.first);
+    }else{
+        auto temp = Engine::create_and_reserve<std::vector<uint32_t>>(childBlockSize);
+        for (uint32_t i = childBlock.first; i <= childBlock.second; ++i) {
+            temp.push_back(m_Order[i]);
+        }
+        m_Order.erase(std::cbegin(m_Order) + childBlock.first, std::cbegin(m_Order) + childBlock.second + 1);
+        m_Order.insert(std::cend(m_Order), std::begin(temp), std::end(temp));
+    }
+    if (parentBlock.first == m_Order.size() - 1 || getParent(m_Order[parentBlock.first + 1]) == 0) { //TODO: check for out of bounds possibility
+        m_Order.erase(std::cbegin(m_Order) + parentBlock.first);
     }
     getParent(childID) = 0;
-    erasedIndex = parentIndex;
-    //ENGINE_PRODUCTION_LOG(parentID << ", " << childID << " - removing")
-    for (size_t i = parentIndex; i < Order.size(); ++i) {
-        auto entityID = Order[i];
-        if (entityID == childID) {
-            erasedIndex = i;
-            Order[i] = 0;
-
-            //now move all children of parent to be next to parent
-            for (size_t j = i + 1; j < Order.size(); ++j) {
-                auto entityIDCaseOne = Order[j];
-                if (Order[j] == 0) {
-                    break;
-                }
-                if (getParent(entityIDCaseOne) == parentID) {
-                    std::swap(Order[j - 1], Order[j]);
-                    ++erasedIndex;
-                }
-                else if (getParent(entityIDCaseOne) == childID && Order[j - 1] == 0) {
-                    Order[j - 1U] = childID;
-                }
-                else if (getParent(entityIDCaseOne) == 0) {
-                    break;
-                }
-            }
-            //cleanup / edge cases
-            //if (Order[erasedIndex + 1] == 0) {
-            if (Order[erasedIndex] == 0) {
-                Order.erase(Order.begin() + erasedIndex);
-                Order.emplace_back(0);
-                --OrderHead;
-            }
-            if (parentIndex > 0 && Order[parentIndex + 1] == 0) {
-                Order[parentIndex] = 0;
-                Order.erase(Order.begin() + parentIndex);
-                Order.emplace_back(0);
-                --OrderHead;
-            }
+}
+std::pair<uint32_t, uint32_t> SystemBodyParentChild::getBlockIndices(uint32_t ID) {
+    std::pair<uint32_t, uint32_t> ret = std::make_pair(NULL_INDEX, NULL_INDEX);
+    //find first index
+    for (uint32_t i = 0; i < m_Order.size(); ++i) {
+        if (m_Order[i] == ID) {
+            ret.first = i;
             break;
         }
     }
+    //find second index
+    ret.second = m_Order.size() - 1;
+    if (m_Order.size() > 0) {
+        for (uint32_t i = ret.first; i < m_Order.size() - 1; ++i) {
+            const auto nextID     = m_Order[i + 1];
+            const auto rootParent = getRootParent(nextID);
+            if (rootParent != ID) {
+                ret.second = i;
+                break;
+            }
+        }
+    }
+    return ret;
 }
-
+void SystemBodyParentChild::clear_all() {
+    m_Parents.clear();
+    m_Order.clear();
+    m_OrderHead = 0;
+}
+void SystemBodyParentChild::clear_and_shrink_all() {
+    clear_all();
+    m_Parents.shrink_to_fit();
+    m_Order.shrink_to_fit();
+}
 #pragma endregion

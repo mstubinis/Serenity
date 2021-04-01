@@ -6,7 +6,6 @@ class  Mesh;
 class  Camera;
 class  btHeightfieldTerrainShape;
 class  btCollisionShape;
-class  Collision;
 class  Terrain;
 class  TerrainHeightfieldShape;
 class  SMSH_File;
@@ -94,7 +93,6 @@ class Mesh final: public Resource<Mesh>, public Observer {
     friend class  Engine::priv::ModelInstanceAnimation;
     friend class  Engine::priv::ModelInstanceAnimationContainer;
     friend class  Engine::priv::RenderModule;
-    friend class  Collision;
     friend class  Terrain;
     friend class  SMSH_File;
 

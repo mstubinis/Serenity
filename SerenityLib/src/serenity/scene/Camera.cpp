@@ -11,11 +11,11 @@ Camera::Camera(float angle, float aspectRatio, float Near, float Far, Scene* sce
         scene = Engine::Resources::getCurrentScene();
     }
     addComponent<ComponentCamera>(angle, aspectRatio, Near, Far);
-    addComponent<ComponentLogic1>();
+    addComponent<CameraLogicComponent>();
     addComponent<ComponentBody>();
 
     auto cam   = getComponent<ComponentCamera>();
-    auto logic = getComponent<ComponentLogic1>();
+    auto logic = getComponent<CameraLogicComponent>();
     auto body  = getComponent<ComponentBody>();
 
     cam->lookAt(glm_vec3(0.0), glm_vec3(0.0) + body->forward(), body->up());
@@ -28,11 +28,11 @@ Camera::Camera(float left, float right, float bottom, float top, float Near, flo
         scene = Engine::Resources::getCurrentScene();
     }
     addComponent<ComponentCamera>(left, right, bottom, top, Near, Far);
-    addComponent<ComponentLogic1>();
+    addComponent<CameraLogicComponent>();
     addComponent<ComponentBody>();
 
     auto cam   = getComponent<ComponentCamera>();
-    auto logic = getComponent<ComponentLogic1>();
+    auto logic = getComponent<CameraLogicComponent>();
     auto body  = getComponent<ComponentBody>();
 
     cam->lookAt(glm_vec3(0.0), glm_vec3(0.0) + body->forward(), body->up());
@@ -130,11 +130,11 @@ decimal Camera::getDistanceSquared(Entity otherEntity, const glm_vec3& thisPosit
 decimal Camera::getDistanceSquared(const glm_vec3& otherPosition, const glm_vec3& thisPosition) const noexcept {
     return glm::distance2(otherPosition, thisPosition);
 }
-uint32_t Camera::sphereIntersectTest(const glm_vec3& otherPosition, float otherRadius) const noexcept {
-    return getComponent<ComponentCamera>()->sphereIntersectTest(otherPosition, otherRadius);
+uint32_t Camera::sphereIntersectTest(const glm_vec3& otherWorldPosition, float otherRadius) const noexcept {
+    return getComponent<ComponentCamera>()->sphereIntersectTest(otherWorldPosition, otherRadius);
 }
-uint32_t Camera::pointIntersectTest(const glm_vec3& otherPosition) const noexcept {
-    return getComponent<ComponentCamera>()->pointIntersectTest(otherPosition);
+uint32_t Camera::pointIntersectTest(const glm_vec3& otherWorldPosition) const noexcept {
+    return getComponent<ComponentCamera>()->pointIntersectTest(otherWorldPosition);
 }
 bool Camera::rayIntersectSphere(Entity entity) const noexcept {
     ComponentBody* entityBody   = entity.getComponent<ComponentBody>();

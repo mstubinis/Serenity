@@ -22,6 +22,22 @@ void SystemBaseClass::addEntity(Entity entity) noexcept {
     m_Entities.push_back(entity);
     sortEntities();
 }
+Entity SystemBaseClass::getEntity(uint32_t entityID) const noexcept {
+    //binary search
+    int left = 0;
+    int right = static_cast<int>(m_Entities.size()) - 1;
+    while (left <= right) {
+        const int mid = left + (right - left) / 2;
+        if (m_Entities[mid].id() == entityID) {
+            return m_Entities[mid];
+        } else if (m_Entities[mid].id() > entityID) {
+            right = mid - 1;
+        } else {
+            left = mid + 1;
+        }
+    }
+    return Entity{};
+}
 void SystemBaseClass::removeEntity(Entity entity) noexcept {
     eraseEntity(m_Entities, entity);
     sortEntities();
@@ -42,11 +58,11 @@ bool SystemBaseClass::hasAssociatedComponent(uint32_t typeID) noexcept {
     }
     return false;
 }
-void SystemBaseClass::eraseEntity(std::vector<Entity>& vec, Entity entity) {
-    auto bounds = std::equal_range(std::begin(vec), std::end(vec), entity, entity_less{});
-    auto last   = vec.end() - std::distance(bounds.first, bounds.second);
-    std::swap_ranges(bounds.first, bounds.second, last);
-    vec.erase(last, std::end(vec));
+void SystemBaseClass::eraseEntity(std::vector<Entity>& entityVector, Entity entity) {
+    auto boundsIter = std::equal_range(std::begin(entityVector), std::end(entityVector), entity, entity_less{});
+    auto lastIter   = entityVector.end() - std::distance(boundsIter.first, boundsIter.second);
+    std::swap_ranges(boundsIter.first, boundsIter.second, lastIter);
+    entityVector.erase(lastIter, std::end(entityVector));
 }
 void SystemBaseClass::insertionSort(std::vector<Entity>& container) noexcept {
     for (int i = 1; i < container.size(); i++) {

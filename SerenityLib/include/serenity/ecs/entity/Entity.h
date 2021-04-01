@@ -60,10 +60,11 @@ class Entity {
         [[nodiscard]] inline constexpr uint32_t versionID() const noexcept { return m_VersionID; }
         [[nodiscard]] Engine::view_ptr<Scene> scene() const noexcept;
         [[nodiscard]] bool hasParent() const noexcept;
+        [[nodiscard]] Entity getParent() const noexcept;
 
         void addChild(Entity child) const noexcept;
         void removeChild(Entity child) const noexcept;
-        void removeAllChildren() const noexcept;
+        //void removeAllChildren() const noexcept;
 
         template<class T, class ... ARGS>
         bool addComponent(ARGS&&... args) noexcept {

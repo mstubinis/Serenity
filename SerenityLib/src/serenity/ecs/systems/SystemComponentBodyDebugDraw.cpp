@@ -1,12 +1,7 @@
 #include <serenity/ecs/systems/SystemComponentBodyDebugDraw.h>
 #include <serenity/ecs/components/ComponentBody.h>
-#include <serenity/ecs/components/ComponentBodyRigid.h>
 #include <serenity/ecs/components/ComponentModel.h>
-#include <serenity/ecs/ECS.h>
-#include <serenity/threading/ThreadingModule.h>
 #include <serenity/math/Engine_Math.h>
-#include <serenity/ecs/ECSComponentPool.h>
-#include <serenity/physics/Collision.h>
 #include <serenity/resources/Engine_Resources.h>
 #include <serenity/system/Engine.h>
 #include <serenity/resources/font/Font.h>
@@ -18,11 +13,11 @@ SystemComponentBodyDebugDraw::SystemComponentBodyDebugDraw(Engine::priv::ECS& ec
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
         #if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
         auto& system = (SystemComponentBodyDebugDraw&)inSystem;
-        system.forEach<Scene*>([](Scene* scene, Entity entity, ComponentBody* body, ComponentBodyRigid* rigid, ComponentModel* model) {
+        system.forEach<Scene*>([](Scene* scene, Entity entity, ComponentBody* transform, ComponentModel* model) {
             //ASSERT(scene && body && model, __FUNCTION__ << "(): parameter(s) was nullptr!");
-            const auto world_pos = glm::vec3{ body ? body->getPosition() : rigid->getPosition() };
-            const auto world_rot = glm::quat{ body ? body->getRotation() : rigid->getRotation() };
-            const auto world_scl = glm::vec3{ body ? body->getScale() : rigid->getScale() };
+            const auto world_pos = glm::vec3{ transform->getPosition() };
+            const auto world_rot = glm::quat{ transform->getRotation() };
+            const auto world_scl = glm::vec3{ transform->getScale() };
             for (size_t i = 0; i < model->getNumModels(); ++i) {
                 auto& modelInstance = (*model)[i];
 

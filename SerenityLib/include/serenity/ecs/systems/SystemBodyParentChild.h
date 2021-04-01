@@ -3,39 +3,53 @@
 #define ENGINE_ECS_SYSTEM_BODY_PARENT_CHILD_H
 
 class  ComponentBody;
-class  ComponentBodyRigid;
 
 #include <serenity/ecs/systems/SystemBaseClass.h>
 #include <cstdint>
 #include <serenity/dependencies/glm.h>
 
-class SystemBodyParentChild final : public SystemCRTP<SystemBodyParentChild, ComponentBody, ComponentBodyRigid> {
+class SystemBodyParentChild final : public SystemCRTP<SystemBodyParentChild, ComponentBody> {
     friend class  ComponentBody;
-    friend class  ComponentBodyRigid;
     private:
-        [[nodiscard]] inline uint32_t& getParent(uint32_t childID) noexcept { return Parents[childID - 1U]; }
-        [[nodiscard]] inline glm_mat4& getWorld(uint32_t ID) noexcept { return WorldTransforms[ID - 1U]; }
-        [[nodiscard]] inline glm_mat4& getLocal(uint32_t ID) noexcept { return LocalTransforms[ID - 1U]; }
+        static inline constexpr const uint32_t NULL_INDEX = std::numeric_limits<uint32_t>().max();
+    private:
+        [[nodiscard]] inline uint32_t& getParent(uint32_t childID) noexcept { return m_Parents[childID - 1U]; }
+        [[nodiscard]] uint32_t getRootParent(uint32_t childID) noexcept { 
+            uint32_t parent = m_Parents[childID - 1U];
+            while (parent != 0 && getParent(parent) != 0) {
+                parent = getParent(parent);
+            }
+            return parent;
+        }
+        [[nodiscard]] inline glm_mat4& getWorld(uint32_t ID) noexcept { return m_WorldTransforms[ID - 1U]; }
+        [[nodiscard]] inline glm_mat4& getLocal(uint32_t ID) noexcept { return m_LocalTransforms[ID - 1U]; }
 
         void internal_reserve_from_insert(uint32_t parentID, uint32_t childID);    
     public:
-        std::vector<glm_mat4>    WorldTransforms;
-        std::vector<glm_mat4>    LocalTransforms;
-        std::vector<uint32_t>    Parents;
-        std::vector<uint32_t>    Order;
-        uint32_t                 OrderHead = 0;
+        std::vector<glm_mat4>    m_WorldTransforms;
+        std::vector<glm_mat4>    m_LocalTransforms;
+        std::vector<uint32_t>    m_Parents;
+        std::vector<uint32_t>    m_Order;
+        uint32_t                 m_OrderHead = 0;
+
+        void clear_all();
+        void clear_and_shrink_all();
 
         void resize(size_t size);
         void reserve(size_t size);
-        void insert(uint32_t parent, uint32_t child);
-        void remove(uint32_t parent, uint32_t child);
 
-        [[nodiscard]] inline constexpr uint32_t size() const noexcept { return OrderHead; }
-        [[nodiscard]] inline size_t capacity() const noexcept { return Order.capacity(); }
+        void addChild(uint32_t parentID, uint32_t childID);
+        void removeChild(uint32_t parentID, uint32_t childID);
+        std::pair<uint32_t, uint32_t> getBlockIndices(uint32_t parentID);
+
+        [[nodiscard]] inline size_t size() const noexcept { return m_Order.size(); }
+        [[nodiscard]] inline size_t capacity() const noexcept { return m_Order.capacity(); }
     public:
         SystemBodyParentChild(Engine::priv::ECS& ecs);
 
-        void computeAllMatrices();
+        void computeAllParentChildWorldTransforms();
+
+        [[nodiscard]] Entity getParentEntity(Entity) const;
 };
 
 #endif

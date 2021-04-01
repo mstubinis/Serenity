@@ -21,34 +21,18 @@ void Engine::priv::ECSEntityPool::destroyFlaggedEntity(uint32_t entityID) {
     }
 #endif
 
-    //const Entity storedEntity = m_Pool[index];
-    //m_Pool[index]             = Entity{ storedEntity.id(), storedEntity.sceneID(), storedEntity.versionID() + 1 };
     m_Pool[index].m_VersionID++;
     m_Freelist.emplace_back(index);
 }
-Entity Engine::priv::ECSEntityPool::addEntity(const Scene& scene) noexcept {
+Entity Engine::priv::ECSEntityPool::createEntity(const Scene& scene) noexcept {
     if (m_Freelist.empty()) {
-        m_Pool.emplace_back(0U, 0U, 0U);
-        m_Freelist.emplace_back((uint32_t)m_Pool.size() - 1U);
+        m_Pool.emplace_back(0, 0, 0);
+        m_Freelist.emplace_back((uint32_t)m_Pool.size() - 1);
     }
     const auto id = m_Freelist.back();
     m_Freelist.pop_back();
     ASSERT(id >= 0 && id < m_Pool.size(), __FUNCTION__ << "(): id was not in the range of m_Pool!");
-    Entity entity = Entity{ id + 1U, scene.id(), m_Pool[id].versionID() };
+    Entity entity { id + 1, scene.id(), m_Pool[id].versionID() };
     m_Pool[id]    = entity;
     return entity;
 }
-/*
-Entity Engine::priv::ECSEntityPool::getEntity(uint32_t entityData) const noexcept {
-    if (entityData == 0) {
-        return Entity{};
-    }
-    const auto index = Entity::id(entityData) - 1U;
-    if (index < m_Pool.size()) {
-        if (m_Pool[index].versionID() == Entity::versionID(entityData)) {
-            return m_Pool[index];
-        }
-    }
-    return Entity{};
-}
-*/

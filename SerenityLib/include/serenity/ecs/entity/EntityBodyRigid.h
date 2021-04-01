@@ -2,7 +2,6 @@
 #ifndef ENGINE_ECS_ENTITY_BODY_RIGID_H
 #define ENGINE_ECS_ENTITY_BODY_RIGID_H
 
-class Collision;
 class btRigidBody;
 class ComponentBodyRigid;
 class Scene;
@@ -25,15 +24,17 @@ class EntityBodyRigid : public Entity {
 
         virtual ~EntityBodyRigid() = default;
 
-        virtual [[nodiscard]] float mass() const;
         virtual [[nodiscard]] glm_quat getRotation() const;
+        virtual [[nodiscard]] glm_quat getLocalRotation() const;
+        virtual [[nodiscard]] glm_quat getWorldRotation() const;
         virtual [[nodiscard]] glm_vec3 getScale() const;
         virtual [[nodiscard]] glm_vec3 getPosition() const;
         virtual [[nodiscard]] glm_vec3 getLocalPosition() const;
+        virtual [[nodiscard]] glm_vec3 getWorldPosition() const;
 
-        const [[nodiscard]]glm_vec3& forward() const;
-        const [[nodiscard]]glm_vec3& right() const;
-        const [[nodiscard]]glm_vec3& up() const;
+        const [[nodiscard]] glm_vec3& forward() const;
+        const [[nodiscard]] glm_vec3& right() const;
+        const [[nodiscard]] glm_vec3& up() const;
 
         virtual [[nodiscard]] glm_vec3 getLinearVelocity() const;
         virtual [[nodiscard]] glm_vec3 getAngularVelocity() const;

@@ -8,6 +8,14 @@ namespace Engine::priv {
     class WindowData;
 };
 
+#ifndef ENGINE_FIXED_TIMESTEP_VALUE
+#define ENGINE_FIXED_TIMESTEP_VALUE 0.01666666666666666666f
+#endif
+
+#ifndef ENGINE_FIXED_TIMESTEP_VALUE_D
+#define ENGINE_FIXED_TIMESTEP_VALUE_D 0.01666666666666666666
+#endif
+
 #include <serenity/system/window/Window.h>
 #include <serenity/utils/Engine_Debugging.h>
 #include <serenity/resources/Engine_Resources.h>
@@ -37,7 +45,7 @@ namespace Engine::priv {
 
             void internal_update_logic(Scene& scene, Window& window, const float dt);
             void internal_update_sounds(Scene& scene, Window& window, const float dt);
-            void internal_update_physics(Scene& scene, Window& window, const float dt);
+            //void internal_update_physics(Scene& scene, Window& window, const float dt);
             void internal_render(Scene& scene, Window& window, const float dt, const double alpha);
             void internal_cleanup(Window& window, const float dt);
         public:

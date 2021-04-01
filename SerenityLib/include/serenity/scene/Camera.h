@@ -9,6 +9,8 @@ enum class CameraType : unsigned char {
     Perspective, 
     Orthographic,
 };
+
+using CameraLogicComponent = ComponentLogic2;
 class Camera: public Entity {
     friend struct Engine::priv::ComponentCamera_Functions;
     public:
@@ -53,8 +55,8 @@ class Camera: public Entity {
         [[nodiscard]] glm::mat4 getViewProjection() const noexcept;
         [[nodiscard]] glm::mat4 getViewProjectionInverse() const noexcept;
 
-        [[nodiscard]] uint32_t sphereIntersectTest(const glm_vec3& pos, float radius) const noexcept;
-        [[nodiscard]] uint32_t pointIntersectTest(const glm_vec3& pos) const noexcept;
+        [[nodiscard]] uint32_t sphereIntersectTest(const glm_vec3& worldPos, float radius) const noexcept;
+        [[nodiscard]] uint32_t pointIntersectTest(const glm_vec3& worldPos) const noexcept;
 
         [[nodiscard]] bool rayIntersectSphere(Entity) const noexcept;
 };

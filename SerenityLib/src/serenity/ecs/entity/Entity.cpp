@@ -30,37 +30,34 @@ bool Entity::isDestroyed() const noexcept {
 }
 void Entity::addChild(Entity child) const noexcept {
     auto body = getComponent<ComponentBody>();
-    auto rigid = getComponent<ComponentBodyRigid>();
     if (body)
         body->addChild(child);
-    else if (rigid)
-        rigid->addChild(child);
 }
 void Entity::removeChild(Entity child) const noexcept {
     auto body = getComponent<ComponentBody>();
-    auto rigid = getComponent<ComponentBodyRigid>();
     if (body)
         body->removeChild(child);
-    else if (rigid)
-        rigid->removeChild(child);
 }
+/*
 void Entity::removeAllChildren() const noexcept {
     auto body = getComponent<ComponentBody>();
-    auto rigid = getComponent<ComponentBodyRigid>();
     if (body)
         body->removeAllChildren();
-    else if (rigid)
-        rigid->removeAllChildren();
 }
+*/
 bool Entity::hasParent() const noexcept {
     auto body = getComponent<ComponentBody>();
-    auto rigid = getComponent<ComponentBodyRigid>();
     if (body)
         return body->hasParent();
-    else if (rigid)
-        return rigid->hasParent();
     return false;
 }
+[[nodiscard]] Entity Entity::getParent() const noexcept {
+    auto body = getComponent<ComponentBody>();
+    if (body)
+        return body->getParent();
+    return Entity{};
+}
+
 Engine::view_ptr<Scene> Entity::scene() const noexcept {
     return Core::m_Engine->m_ResourceManager.getSceneByID(sceneID());
 }
@@ -68,8 +65,10 @@ bool Entity::addComponent(std::string_view componentClassName, luabridge::LuaRef
     if (componentClassName == "ComponentBody") {
         return addComponent<ComponentBody>();
     }else if ("ComponentBodyRigid") {
+        return addComponent<ComponentBodyRigid>();
+    }else if ("ComponentCollisionShape") {
         if (!a1.isNil()) {
-            return addComponent<ComponentBodyRigid>(a1.cast<CollisionType>());
+            return addComponent<ComponentCollisionShape>(a1);
         }
     }else if (componentClassName == "ComponentModel") {
         if (!a3.isNil() && !a4.isNil()) {
@@ -119,6 +118,8 @@ bool Entity::removeComponent(std::string_view componentClassName) {
         return removeComponent<ComponentBody>();
     }else if (componentClassName == "ComponentBodyRigid") {
         return removeComponent<ComponentBodyRigid>();
+    }else if (componentClassName == "ComponentCollisionShape") {
+        return removeComponent<ComponentCollisionShape>();
     }else if (componentClassName == "ComponentModel") {
         return removeComponent<ComponentModel>();
     }else if (componentClassName == "ComponentCamera") {
@@ -144,6 +145,8 @@ luabridge::LuaRef Entity::getComponent(std::string_view componentClassName) {
         return PublicEntity::GetComponent<ComponentBody>(L, *this, global_name_cstr);
     }else if (componentClassName == "ComponentBodyRigid") {
         return PublicEntity::GetComponent<ComponentBodyRigid>(L, *this, global_name_cstr);
+    }else if (componentClassName == "ComponentCollisionShape") {
+        return PublicEntity::GetComponent<ComponentCollisionShape>(L, *this, global_name_cstr);
     }else if (componentClassName == "ComponentModel") {
         return PublicEntity::GetComponent<ComponentModel>(L, *this, global_name_cstr);
     }else if (componentClassName == "ComponentCamera") {

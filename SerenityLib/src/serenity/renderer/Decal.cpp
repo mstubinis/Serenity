@@ -31,29 +31,33 @@ Decal::Decal(Handle materialHandle, const glm_vec3& localPosition, const glm::ve
     addComponent<ComponentBody>();
     addComponent<ComponentModel>(priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), materialHandle, ShaderProgram::Decal, stage);
 
-    auto& body  = *getComponent<ComponentBody>();
-    auto& model = *getComponent<ComponentModel>();
+    auto& transform  = *getComponent<ComponentBody>();
+    auto& model      = *getComponent<ComponentModel>();
 
-    body.setPosition(localPosition);
+    const decimal factor = static_cast<decimal>(0.2f * size);
+
+    //transform.setScale(factor, factor, (decimal)0.04);
+    model.getModel(0).setScale(factor, factor, (decimal)0.04);
+
+    transform.setPosition(localPosition);
     auto q = Math::alignTo(hitNormal);
     m_InitialRotation = q;
-    body.setRotation(q);
-    const decimal factor = (decimal)(0.2f * size);
-    body.setScale(factor, factor, (decimal)0.04);
-
+    transform.setRotation(q);
+    
+    
     model.setCustomBindFunctor(Engine::priv::DefaultDecalBindFunctor);
     model.setCustomUnbindFunctor(Engine::priv::DefaultDecalUnbindFunctor);
 }
 Decal::Decal(Decal&& other) noexcept 
-    : EntityBody{ std::move(other) }
+    : EntityBody       { std::move(other) }
     , m_LifetimeCurrent{ std::move(other.m_LifetimeCurrent) }
-    , m_LifetimeMax{ std::move(other.m_LifetimeMax) }
-    , m_Active{ std::move(other.m_Active) }
+    , m_LifetimeMax    { std::move(other.m_LifetimeMax) }
+    , m_Active         { std::move(other.m_Active) }
     , m_InitialPosition{ std::move(other.m_InitialPosition) }
     , m_InitialRotation{ std::move(other.m_InitialRotation) }
 {}
 Decal& Decal::operator=(Decal&& other) noexcept {
-    EntityBody::operator=(std::move(other));
+    EntityBody::operator=( std::move(other) );
     m_LifetimeCurrent   = std::move(other.m_LifetimeCurrent);
     m_LifetimeMax       = std::move(other.m_LifetimeMax);
     m_Active            = std::move(other.m_Active);

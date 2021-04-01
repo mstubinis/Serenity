@@ -49,7 +49,7 @@ class EntityRAIIBody final {
 
         inline void addChild(Entity child) const noexcept { m_Entity.addChild(child); }
         inline void removeChild(Entity child) const noexcept { m_Entity.removeChild(child); }
-        inline void removeAllChildren() const noexcept { m_Entity.removeAllChildren(); }
+        //inline void removeAllChildren() const noexcept { m_Entity.removeAllChildren(); }
 
         template<typename T, typename... ARGS> inline bool addComponent(ARGS&&... args) noexcept {
             return m_Entity.addComponent<T>(std::forward<ARGS>(args)...);
@@ -72,13 +72,16 @@ class EntityRAIIBody final {
         }
         [[nodiscard]] inline luabridge::LuaRef getComponent(const std::string& componentClassName) { return m_Entity.getComponent(componentClassName); }
         [[nodiscard]] inline glm_quat getRotation() const noexcept { return m_Entity.getRotation(); }
+        [[nodiscard]] inline glm_quat getLocalRotation() const noexcept { return getRotation(); }
+        [[nodiscard]] inline glm_quat getWorldRotation() const noexcept { return m_Entity.getWorldRotation(); }
         [[nodiscard]] inline glm_vec3 getScale() const noexcept { return m_Entity.getScale(); }
         [[nodiscard]] inline glm_vec3 getPosition() const noexcept { return m_Entity.getPosition(); }
+        [[nodiscard]] inline glm_vec3 getWorldPosition() const noexcept { return m_Entity.getWorldPosition(); }
         [[nodiscard]] inline glm_vec3 getLocalPosition() const noexcept { return m_Entity.getLocalPosition(); }
         [[nodiscard]] inline const glm_vec3& forward() const noexcept { return m_Entity.forward(); }
         [[nodiscard]] inline const glm_vec3& right() const noexcept { return m_Entity.right(); }
         [[nodiscard]] inline const glm_vec3& up() const noexcept { return m_Entity.up(); }
-        [[nodiscard]] inline glm_vec3 getLinearVelocity() const noexcept { return m_Entity.getLinearVelocity(); }
+        //[[nodiscard]] inline glm_vec3 getLinearVelocity() const noexcept { return m_Entity.getLinearVelocity(); }
 
         inline void translate(const glm_vec3& translation, bool local = true) noexcept { m_Entity.translate(translation, local); }
         inline void translate(decimal x, decimal y, decimal z, bool local = true) noexcept { m_Entity.translate(x, y, z, local); }
@@ -102,8 +105,8 @@ class EntityRAIIBody final {
         inline void setScale(decimal x, decimal y, decimal z) noexcept { m_Entity.setScale(x, y, z); }
         inline void setScale(decimal s) noexcept { m_Entity.setScale(s); }
 
-        inline void setLinearVelocity(decimal x, decimal y, decimal z, bool local = true) noexcept { m_Entity.setLinearVelocity(x, y, z, local); }
-        inline void setLinearVelocity(const glm_vec3& velocity, bool local = true) noexcept { m_Entity.setLinearVelocity(velocity, local); }
+        //inline void setLinearVelocity(decimal x, decimal y, decimal z, bool local = true) noexcept { m_Entity.setLinearVelocity(x, y, z, local); }
+        //inline void setLinearVelocity(const glm_vec3& velocity, bool local = true) noexcept { m_Entity.setLinearVelocity(velocity, local); }
 };
 
 #endif

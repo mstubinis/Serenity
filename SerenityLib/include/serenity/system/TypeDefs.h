@@ -10,7 +10,8 @@ using namespace std::literals;
 using namespace std::chrono_literals;
 using namespace std::literals::chrono_literals;
 
-using MaskType = uint32_t;
+using MaskType = int;
+//using MaskType = uint32_t;
 using uint     = uint32_t;
 using uchar    = uint8_t;
 using ushort   = uint16_t;

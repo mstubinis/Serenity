@@ -9,15 +9,21 @@ class  Material;
 class  ComponentModel;
 class  ComponentCamera;
 class  ModelInstanceHandle;
+
+#include <vector>
+#include <serenity/ecs/entity/Entity.h>
+#include <serenity/dependencies/glm.h>
+
 namespace Engine::priv {
     struct ComponentModel_Functions final {
+        static std::pair<glm::vec3, float> CalculateBoundingBoxAndRadius(const std::vector<glm::vec3>& points);
         static float CalculateRadius(ComponentModel&);
+        static std::pair<glm::vec3, float> CalculateRadi(const std::vector<Entity>&);
         static size_t GetTotalVertexCount(ComponentModel&);
         static void RegisterDeferredMeshLoaded(ComponentModel&, Mesh*);
     };
 };
 
-#include <serenity/ecs/entity/Entity.h>
 #include <serenity/model/ModelInstance.h>
 #include <serenity/model/ModelInstanceHandle.h>
 #include <serenity/ecs/components/ComponentBaseClass.h>

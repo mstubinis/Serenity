@@ -5,7 +5,7 @@
 
 Engine::priv::MeshSkeleton::MeshSkeleton(const aiMesh& assimpMesh, const aiScene& assimpScene, MeshRequest& request, Engine::priv::MeshImportedData& data) {
     //build general information
-    m_GlobalInverseTransform = Engine::Math::assimpToGLMMat4(assimpScene.mRootNode->mTransformation.Inverse());
+    m_GlobalInverseTransform = Engine::Math::toGLM(assimpScene.mRootNode->mTransformation.Inverse());
     
     //build bone information
     auto hashedBones = Engine::create_and_reserve<Engine::unordered_string_map<std::string, uint16_t>>(assimpMesh.mNumBones);
@@ -25,7 +25,7 @@ Engine::priv::MeshSkeleton::MeshSkeleton(const aiMesh& assimpMesh, const aiScene
         if (hashedBones.contains(nodeName)) {
             node.IsBone = true;
             auto& assimpBone = *assimpMesh.mBones[hashedBones.at(nodeName)];
-            setBoneOffsetMatrix(k, Engine::Math::assimpToGLMMat4(assimpBone.mOffsetMatrix));
+            setBoneOffsetMatrix(k, Engine::Math::toGLM(assimpBone.mOffsetMatrix));
             for (uint32_t j = 0; j < assimpBone.mNumWeights; ++j) {
                 data.addBone(assimpBone.mWeights[j].mVertexId, k, assimpBone.mWeights[j].mWeight);
             }

@@ -218,7 +218,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;BT_DEBUG_MEMORY_ALLOCATIONS;_CRTDBG_MAP_ALLOC;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)include;D:\dev\Catch2\include;D:\dev\LuaBridge\Source;D:\dev\freetype\include;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -251,7 +251,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;BT_DEBUG_MEMORY_ALLOCATIONS;_CRTDBG_MAP_ALLOC;NDEBUG;_NO_DEBUG_HEAP;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)include;D:\dev\Catch2\include;D:\dev\LuaBridge\Source;D:\dev\freetype\include;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -261,6 +261,7 @@
       </ForcedIncludeFiles>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -293,6 +294,7 @@
       <AssemblerOutput>All</AssemblerOutput>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -317,7 +319,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -333,6 +335,7 @@
       <AssemblerOutput>All</AssemblerOutput>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -376,6 +379,8 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -403,7 +408,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -418,6 +423,7 @@
       <AssemblerOutput>All</AssemblerOutput>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -435,7 +441,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -450,6 +456,7 @@
       <AssemblerOutput>All</AssemblerOutput>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -485,6 +492,8 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -499,6 +508,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="include\serenity\physics\btRigidBodyEnhanced.cpp" />
     <ClCompile Include="include\serenity\resources\mesh\animation\Skeleton.cpp" />
     <ClCompile Include="src\serenity\algorithms\MergeSort.cpp" />
     <ClCompile Include="src\serenity\algorithms\RadixSort.cpp" />
@@ -522,6 +532,7 @@
     <ClCompile Include="src\serenity\ecs\components\ComponentBody.cpp" />
     <ClCompile Include="src\serenity\ecs\components\ComponentBodyRigid.cpp" />
     <ClCompile Include="src\serenity\ecs\components\ComponentCamera.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentCollisionShape.cpp" />
     <ClCompile Include="src\serenity\ecs\components\ComponentLogic.cpp" />
     <ClCompile Include="src\serenity\ecs\components\ComponentLogic1.cpp" />
     <ClCompile Include="src\serenity\ecs\components\ComponentLogic2.cpp" />
@@ -533,6 +544,7 @@
     <ClCompile Include="src\serenity\ecs\entity\Entity.cpp" />
     <ClCompile Include="src\serenity\ecs\entity\EntityBody.cpp" />
     <ClCompile Include="src\serenity\ecs\entity\EntityBodyRigid.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemAddRigidBodies.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemBaseClass.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemBodyParentChild.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentBody.cpp" />
@@ -544,6 +556,14 @@
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentLogic2.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentLogic3.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentModel.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemCompoundChildTransforms.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemGameUpdate.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemRemoveRigidBodies.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemResolveTransformDirty.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemRigidTransformSync.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemSceneChanging.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemSceneUpdate.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemStepPhysics.cpp" />
     <ClCompile Include="src\serenity\events\EventDispatcher.cpp" />
     <ClCompile Include="src\serenity\events\EventModule.cpp" />
     <ClCompile Include="src\serenity\events\Observer.cpp" />
@@ -583,7 +603,6 @@
     <ClCompile Include="src\serenity\networking\SocketManager.cpp" />
     <ClCompile Include="src\serenity\networking\SocketTCP.cpp" />
     <ClCompile Include="src\serenity\networking\SocketUDP.cpp" />
-    <ClCompile Include="src\serenity\physics\Collision.cpp" />
     <ClCompile Include="src\serenity\physics\DebugDrawer.cpp" />
     <ClCompile Include="src\serenity\physics\PhysicsModule.cpp" />
     <ClCompile Include="src\serenity\physics\PhysicsPipeline.cpp" />
@@ -685,6 +704,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="src\serenity\tests\TestSystemParentChild.cpp" />
     <ClCompile Include="src\serenity\tests\TestTextureTypes.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">false</ExcludedFromBuild>
@@ -700,6 +720,7 @@
     <ClCompile Include="src\serenity\threading\ThreadPool.cpp" />
     <ClCompile Include="src\serenity\threading\WorkerThreadContainer.cpp" />
     <ClCompile Include="src\serenity\utils\Engine_Debugging.cpp" />
+    <ClCompile Include="src\serenity\utils\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\serenity\algorithms\MergeSort.h" />
@@ -739,6 +760,7 @@
     <ClInclude Include="include\serenity\ecs\components\ComponentBody.h" />
     <ClInclude Include="include\serenity\ecs\components\ComponentBodyRigid.h" />
     <ClInclude Include="include\serenity\ecs\components\ComponentCamera.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentCollisionShape.h" />
     <ClInclude Include="include\serenity\ecs\components\ComponentLogic.h" />
     <ClInclude Include="include\serenity\ecs\components\ComponentLogic1.h" />
     <ClInclude Include="include\serenity\ecs\components\ComponentLogic2.h" />
@@ -757,6 +779,7 @@
     <ClInclude Include="include\serenity\ecs\entity\EntityRAII.h" />
     <ClInclude Include="include\serenity\ecs\entity\EntityRAIIBody.h" />
     <ClInclude Include="include\serenity\ecs\entity\EntityRAIIBodyRigid.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemAddRigidBodies.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemBaseClass.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemBodyParentChild.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentBody.h" />
@@ -768,6 +791,14 @@
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentLogic2.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentLogic3.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentModel.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemCompoundChildTransforms.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemGameUpdate.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemRemoveRigidBodies.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemResolveTransformDirty.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemRigidTransformSync.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemSceneChanging.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemSceneUpdate.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemStepPhysics.h" />
     <ClInclude Include="include\serenity\events\Event.h" />
     <ClInclude Include="include\serenity\events\EventDispatcher.h" />
     <ClInclude Include="include\serenity\events\EventIncludes.h" />
@@ -818,7 +849,7 @@
     <ClInclude Include="include\serenity\networking\SocketManager.h" />
     <ClInclude Include="include\serenity\networking\SocketTCP.h" />
     <ClInclude Include="include\serenity\networking\SocketUDP.h" />
-    <ClInclude Include="include\serenity\physics\Collision.h" />
+    <ClInclude Include="include\serenity\physics\btRigidBodyEnhanced.h" />
     <ClInclude Include="include\serenity\physics\DebugDrawer.h" />
     <ClInclude Include="include\serenity\physics\PhysicsIncludes.h" />
     <ClInclude Include="include\serenity\physics\PhysicsModule.h" />

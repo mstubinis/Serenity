@@ -6,6 +6,7 @@
 #include <serenity/system/TypeDefs.h>
 #include <serenity/dependencies/glm.h>
 #include <serenity/system/Macros.h>
+#include <serenity/ecs/entity/Entity.h>
 #include <array>
 #include <functional>
 
@@ -18,35 +19,37 @@ namespace Engine::Networking {
     class ServerClient;
 };
 
+sf::Packet& operator <<(sf::Packet&, Entity) noexcept;
+sf::Packet& operator >>(sf::Packet&, Entity) noexcept;
 
 //glm vector floats
-sf::Packet& operator <<(sf::Packet& packet, const glm::vec2& data) noexcept;
-sf::Packet& operator <<(sf::Packet& packet, const glm::vec3& data) noexcept;
-sf::Packet& operator <<(sf::Packet& packet, const glm::vec4& data) noexcept;
-sf::Packet& operator >>(sf::Packet& packet, glm::vec2& data) noexcept;
-sf::Packet& operator >>(sf::Packet& packet, glm::vec3& data) noexcept;
-sf::Packet& operator >>(sf::Packet& packet, glm::vec4& data) noexcept;
+sf::Packet& operator <<(sf::Packet&, const glm::vec2&) noexcept;
+sf::Packet& operator <<(sf::Packet&, const glm::vec3&) noexcept;
+sf::Packet& operator <<(sf::Packet&, const glm::vec4&) noexcept;
+sf::Packet& operator >>(sf::Packet&, glm::vec2&) noexcept;
+sf::Packet& operator >>(sf::Packet&, glm::vec3&) noexcept;
+sf::Packet& operator >>(sf::Packet&, glm::vec4&) noexcept;
 //glm vector ints
-sf::Packet& operator <<(sf::Packet& packet, const glm::ivec2& data) noexcept;
-sf::Packet& operator <<(sf::Packet& packet, const glm::ivec3& data) noexcept;
-sf::Packet& operator <<(sf::Packet& packet, const glm::ivec4& data) noexcept;
-sf::Packet& operator >>(sf::Packet& packet, glm::ivec2& data) noexcept;
-sf::Packet& operator >>(sf::Packet& packet, glm::ivec3& data) noexcept;
-sf::Packet& operator >>(sf::Packet& packet, glm::ivec4& data) noexcept;
+sf::Packet& operator <<(sf::Packet&, const glm::ivec2&) noexcept;
+sf::Packet& operator <<(sf::Packet&, const glm::ivec3&) noexcept;
+sf::Packet& operator <<(sf::Packet&, const glm::ivec4&) noexcept;
+sf::Packet& operator >>(sf::Packet&, glm::ivec2&) noexcept;
+sf::Packet& operator >>(sf::Packet&, glm::ivec3&) noexcept;
+sf::Packet& operator >>(sf::Packet&, glm::ivec4&) noexcept;
 //glm vector uints
-sf::Packet& operator <<(sf::Packet& packet, const glm::uvec2& data) noexcept;
-sf::Packet& operator <<(sf::Packet& packet, const glm::uvec3& data) noexcept;
-sf::Packet& operator <<(sf::Packet& packet, const glm::uvec4& data) noexcept;
-sf::Packet& operator >>(sf::Packet& packet, glm::uvec2& data) noexcept;
-sf::Packet& operator >>(sf::Packet& packet, glm::uvec3& data) noexcept;
-sf::Packet& operator >>(sf::Packet& packet, glm::uvec4& data) noexcept;
+sf::Packet& operator <<(sf::Packet&, const glm::uvec2&) noexcept;
+sf::Packet& operator <<(sf::Packet&, const glm::uvec3&) noexcept;
+sf::Packet& operator <<(sf::Packet&, const glm::uvec4&) noexcept;
+sf::Packet& operator >>(sf::Packet&, glm::uvec2&) noexcept;
+sf::Packet& operator >>(sf::Packet&, glm::uvec3&) noexcept;
+sf::Packet& operator >>(sf::Packet&, glm::uvec4&) noexcept;
 //glm vector doubles
-sf::Packet& operator <<(sf::Packet& packet, const glm::dvec2& data) noexcept;
-sf::Packet& operator <<(sf::Packet& packet, const glm::dvec3& data) noexcept;
-sf::Packet& operator <<(sf::Packet& packet, const glm::dvec4& data) noexcept;
-sf::Packet& operator >>(sf::Packet& packet, glm::dvec2& data) noexcept;
-sf::Packet& operator >>(sf::Packet& packet, glm::dvec3& data) noexcept;
-sf::Packet& operator >>(sf::Packet& packet, glm::dvec4& data) noexcept;
+sf::Packet& operator <<(sf::Packet&, const glm::dvec2&) noexcept;
+sf::Packet& operator <<(sf::Packet&, const glm::dvec3&) noexcept;
+sf::Packet& operator <<(sf::Packet&, const glm::dvec4&) noexcept;
+sf::Packet& operator >>(sf::Packet&, glm::dvec2&) noexcept;
+sf::Packet& operator >>(sf::Packet&, glm::dvec3&) noexcept;
+sf::Packet& operator >>(sf::Packet&, glm::dvec4&) noexcept;
 
 template<typename T, size_t size>
 inline sf::Packet& operator <<(sf::Packet& packet, const std::array<T, size>& data) noexcept {

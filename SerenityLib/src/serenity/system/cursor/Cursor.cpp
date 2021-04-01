@@ -47,7 +47,7 @@ bool Cursor::internal_rotate(long long startIndex, long long increment1, long lo
     std::swap(m_Width, m_Height);
     long long pixel = startIndex;
 
-    auto newPixels = Engine::create_and_reserve<std::vector<uint8_t>>(numBytes);
+    auto newPixels = Engine::create_and_reserve<std::vector<uint8_t>>((uint32_t)numBytes);
     for (size_t i = 0; i < numBytes; i += 4) {
         uint8_t r = static_cast<uint8_t>((float)m_Pixels[(pixel * 4) + 0]);
         uint8_t g = static_cast<uint8_t>((float)m_Pixels[(pixel * 4) + 1]);

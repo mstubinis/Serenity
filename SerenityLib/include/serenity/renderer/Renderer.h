@@ -29,10 +29,12 @@ namespace Engine::priv {
 #include <serenity/types/Types.h>
 #include <glm/gtc/type_ptr.hpp>
 
+/*
 extern "C" {
     __declspec(dllexport) unsigned long NvOptimusEnablement = 1; //enable dedicated graphics for nvidia
     __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1; //enable dedicated graphics for amd radeon
 }
+*/
 
 namespace Engine {
 namespace priv {

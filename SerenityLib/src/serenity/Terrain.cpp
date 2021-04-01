@@ -5,7 +5,6 @@
 #include <serenity/resources/mesh/Mesh.h>
 #include <serenity/system/Engine.h>
 #include <serenity/resources/mesh/MeshRequest.h>
-#include <serenity/physics/Collision.h>
 #include <serenity/model/ModelInstance.h>
 
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
@@ -188,7 +187,7 @@ bool TerrainData::AdjacentPixels::valid(int offsetX, int offsetY, int centerX, i
     return false;
 }
 
-bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorSizeInPixels, unsigned int pointsPerPixel) {
+bool TerrainData::calculate_data(sf::Image& heightmapImage, uint32_t sectorSizeInPixels, uint32_t pointsPerPixel) {
     const auto pixelSize = heightmapImage.getSize();
     if (pixelSize.x == 0 || pixelSize.y == 0) {
         return false;
@@ -200,8 +199,8 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
     m_MinAndMaxHeight = { std::numeric_limits<float>::max(), std::numeric_limits<float>::min() };
 
     m_VerticesPerSector = sectorSizeInPixels * pointsPerPixel;
-    unsigned int numSectorsWidth = (unsigned int)temp[0].size() / m_VerticesPerSector;
-    unsigned int numSectorsHeight = (unsigned int)temp.size() / m_VerticesPerSector;
+    uint32_t numSectorsWidth  = (uint32_t)temp[0].size() / m_VerticesPerSector;
+    uint32_t numSectorsHeight = (uint32_t)temp.size() / m_VerticesPerSector;
     //calculate the point heights based on neighboring pixels
     for (int pxlX = 0; pxlX < (int)pixelSize.x; ++pxlX) {
         for (int pxlY = 0; pxlY < (int)pixelSize.y; ++pxlY) {
@@ -246,9 +245,9 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
 
     //prepare data
     m_BtHeightfieldShapes.resize(numSectorsWidth);
-    for (unsigned int sectorX = 0; sectorX < numSectorsWidth; ++sectorX) {
+    for (uint32_t sectorX = 0; sectorX < numSectorsWidth; ++sectorX) {
         m_BtHeightfieldShapes[sectorX].reserve(numSectorsHeight);
-        for (unsigned int sectorY = 0; sectorY < numSectorsHeight; ++sectorY) {
+        for (uint32_t sectorY = 0; sectorY < numSectorsHeight; ++sectorY) {
             std::vector<float> dummy_values = { 1.0f };//Bullet will do an assert check for null data, but i am manually assigning the data later on
             TerrainHeightfieldShape* shape = new TerrainHeightfieldShape(m_VerticesPerSector + 1, m_VerticesPerSector + 1, dummy_values.data(), (float)m_HeightScale, m_MinAndMaxHeight.first, m_MinAndMaxHeight.second, 1, PHY_ScalarType::PHY_FLOAT, false);
             shape->setUserIndex(m_VerticesPerSector);
@@ -257,15 +256,15 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
         }
     }
     //fill in data
-    for (unsigned int sectorX = 0; sectorX < numSectorsWidth; ++sectorX) {
-        for (unsigned int sectorY = 0; sectorY < numSectorsHeight; ++sectorY) {
+    for (uint32_t sectorX = 0; sectorX < numSectorsWidth; ++sectorX) {
+        for (uint32_t sectorY = 0; sectorY < numSectorsHeight; ++sectorY) {
             auto& shape = *m_BtHeightfieldShapes[sectorX][sectorY];
-            for (unsigned int x = 0; x < m_VerticesPerSector + 1; ++x) {
-                for (unsigned int y = 0; y < m_VerticesPerSector + 1; ++y) {
-                    unsigned int offset_x = (sectorX * m_VerticesPerSector) + x;
-                    unsigned int offset_y = (sectorY * m_VerticesPerSector) + y;
-                    unsigned int x_ = glm::min(offset_x, (unsigned int)temp.size() - 1U);
-                    unsigned int y_ = glm::min(offset_y, (unsigned int)temp[x].size() - 1U);
+            for (uint32_t x = 0; x < m_VerticesPerSector + 1; ++x) {
+                for (uint32_t y = 0; y < m_VerticesPerSector + 1; ++y) {
+                    uint32_t offset_x = (sectorX * m_VerticesPerSector) + x;
+                    uint32_t offset_y = (sectorY * m_VerticesPerSector) + y;
+                    uint32_t x_ = glm::min(offset_x, (uint32_t)temp.size() - 1U);
+                    uint32_t y_ = glm::min(offset_y, (uint32_t)temp[x].size() - 1U);
 
                     btScalar height = temp[x_][y_];
                     shape.m_Data.push_back(height);
@@ -276,7 +275,7 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, unsigned int sectorS
     }
     return true;
 }
-TerrainData::AdjacentPixels TerrainData::get_adjacent_pixels(unsigned int pixelX, unsigned int pixelY, sf::Image& heightmapImage) {
+TerrainData::AdjacentPixels TerrainData::get_adjacent_pixels(uint32_t pixelX, uint32_t pixelY, sf::Image& heightmapImage) {
     AdjacentPixels ret;
     int pxlX = (int)pixelX;
     int pxlY = (int)pixelY;
@@ -305,7 +304,7 @@ TerrainData::AdjacentPixels TerrainData::get_adjacent_pixels(unsigned int pixelX
 
 #pragma region Terrain
 
-Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& materialHandle, unsigned int sectorSizeInPixels, unsigned int pointsPerPixel, bool useDiamondSubdivisions, Scene* scene) 
+Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& materialHandle, uint32_t sectorSizeInPixels, uint32_t pointsPerPixel, bool useDiamondSubdivisions, Scene* scene)
     : Entity{ *scene }
 {
     m_TerrainData.calculate_data(heightmapImage, sectorSizeInPixels, pointsPerPixel);
@@ -314,14 +313,18 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
     m_MeshHandle = Engine::Resources::addResource<Mesh>(name, *this, 0.0f);
 
     addComponent<ComponentModel>(m_MeshHandle, materialHandle);
-    addComponent<ComponentBodyRigid>(CollisionType::Compound); //TODO: check CollisionType::TriangleShapeStatic
-    auto body  = getComponent<ComponentBodyRigid>();
+    addComponent<ComponentBody>();
+    addComponent<ComponentCollisionShape>(CollisionType::COMPOUND_SHAPE_PROXYTYPE); //TODO: check CollisionType::TriangleShapeStatic
+    addComponent<ComponentBodyRigid>();
+
+    auto rigid = getComponent<ComponentBodyRigid>();
+    auto shape = getComponent<ComponentCollisionShape>();
     auto model = getComponent<ComponentModel>();
     m_TerrainData.m_FinalCompoundShape = new btCompoundShape();
-    for (unsigned int sectorX = 0; sectorX < m_TerrainData.m_BtHeightfieldShapes.size(); ++sectorX) {
-        for (unsigned int sectorY = 0; sectorY < m_TerrainData.m_BtHeightfieldShapes[sectorX].size(); ++sectorY) {
+    for (uint32_t sectorX = 0; sectorX < m_TerrainData.m_BtHeightfieldShapes.size(); ++sectorX) {
+        for (uint32_t sectorY = 0; sectorY < m_TerrainData.m_BtHeightfieldShapes[sectorX].size(); ++sectorY) {
             auto* heightfield = m_TerrainData.m_BtHeightfieldShapes[sectorX][sectorY];
-            auto  dimensions = glm::ivec2(heightfield->getUserIndex(), heightfield->getUserIndex2());
+            auto  dimensions  = glm::ivec2(heightfield->getUserIndex(), heightfield->getUserIndex2());
 
             btTransform xform;
             xform.setIdentity();
@@ -332,11 +335,10 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
             m_TerrainData.m_FinalCompoundShape->recalculateLocalAabb();
         }
     }
-    Collision& c = body->setCollision(*body);
-    c.setBtShape(m_TerrainData.m_FinalCompoundShape);
-    body->setMass(0.0f);
-    body->setDynamic(false);
-    body->setGravity(0, 0, 0);
+    shape->setCollision(m_TerrainData.m_FinalCompoundShape);
+    rigid->setMass(0.0f);
+    rigid->setDynamic(false);
+    rigid->setGravity(0, 0, 0);
     setScale(25, 25, 25);
 }
 Terrain::~Terrain() {
@@ -356,7 +358,7 @@ void Terrain::setUseDiamondSubdivision(bool useDiamond) {
         }
     }
 }
-bool Terrain::internal_remove_quad(unsigned int indexX, unsigned int indexY) {
+bool Terrain::internal_remove_quad(uint32_t indexX, uint32_t indexY) {
     int sectorX = (indexX / m_TerrainData.m_VerticesPerSector);
     int sectorY = (indexY / m_TerrainData.m_VerticesPerSector);
 
@@ -365,7 +367,7 @@ bool Terrain::internal_remove_quad(unsigned int indexX, unsigned int indexY) {
 
     return internal_remove_quad(sectorX, sectorY, modX, modY);
 }
-bool Terrain::internal_remove_quad(unsigned int sectorX, unsigned int sectorY, unsigned int indexX, unsigned int indexY) {
+bool Terrain::internal_remove_quad(uint32_t sectorX, uint32_t sectorY, uint32_t indexX, uint32_t indexY) {
     if (sectorX >= m_TerrainData.m_BtHeightfieldShapes.size() || sectorY >= m_TerrainData.m_BtHeightfieldShapes[0].size()) {
         return false;
     }
@@ -379,14 +381,14 @@ bool Terrain::internal_remove_quad(unsigned int sectorX, unsigned int sectorY, u
     sectorData->m_ProcessedVertices[indexX + 1][indexY] = false;
     return true;
 }
-bool Terrain::removeQuad(unsigned int sectorX, unsigned int sectorY, unsigned int indexX, unsigned int indexY) {
+bool Terrain::removeQuad(uint32_t sectorX, uint32_t sectorY, uint32_t indexX, uint32_t indexY) {
     bool removal_result = internal_remove_quad(sectorX, sectorY, indexX, indexY);
     if (removal_result) {
         m_MeshHandle.get<Mesh>()->internal_recalc_indices_from_terrain(*this);
     }
     return removal_result;
 }
-bool Terrain::removeQuads(std::vector<std::tuple<unsigned int, unsigned int, unsigned int, unsigned int>>& quads) {
+bool Terrain::removeQuads(std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t>>& quads) {
     if (quads.size() == 0) {
         return false;
     }
@@ -402,14 +404,14 @@ bool Terrain::removeQuads(std::vector<std::tuple<unsigned int, unsigned int, uns
     }
     return atLeastOne;
 }
-bool Terrain::removeQuad(unsigned int indexX, unsigned int indexY) {
+bool Terrain::removeQuad(uint32_t indexX, uint32_t indexY) {
     bool removal_result = internal_remove_quad(indexX, indexY);
     if (removal_result) {
         m_MeshHandle.get<Mesh>()->internal_recalc_indices_from_terrain(*this);
     }
     return removal_result;
 }
-bool Terrain::removeQuads(std::vector<std::tuple<unsigned int, unsigned int>>& quads) {
+bool Terrain::removeQuads(std::vector<std::tuple<uint32_t, uint32_t>>& quads) {
     if (quads.size() == 0) {
         return false;
     }
@@ -430,17 +432,18 @@ bool Terrain::removeQuads(std::vector<std::tuple<unsigned int, unsigned int>>& q
 void Terrain::update(const float dt) {
 }
 void Terrain::setPosition(float x, float y, float z) {
-    ComponentBodyRigid& body = *getComponent<ComponentBodyRigid>();
-    //Physics::removeRigidBody(body);
-    body.setPosition(x, y, z);
-    //Physics::addRigidBody(body);
+    //auto rigidBody  = getComponent<ComponentBodyRigid>();
+    auto transform  = getComponent<ComponentBody>();
+    //Engine::Physics::removeRigidBody(rigidBody);
+    transform->setPosition(x, y, z);
+    //Engine::Physics::addRigidBody(rigidBody);
 }
 void Terrain::setPosition(const glm::vec3& position) {
     Terrain::setPosition(position.x, position.y, position.z);
 }
 void Terrain::setScale(float x, float y, float z) {
-    auto body = getComponent<ComponentBodyRigid>();
-    body->setScale(x, y, z);
+    auto transform = getComponent<ComponentBody>();
+    transform->setScale(x, y, z);
 }
 void Terrain::setScale(const glm::vec3& scl) {
     Terrain::setScale(scl.x, scl.y, scl.z);

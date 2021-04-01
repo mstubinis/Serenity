@@ -4,6 +4,7 @@
 
 #include <serenity/ecs/components/ComponentBody.h>
 #include <serenity/ecs/components/ComponentBodyRigid.h>
+#include <serenity/ecs/components/ComponentCollisionShape.h>
 #include <serenity/ecs/components/ComponentCamera.h>
 #include <serenity/ecs/components/ComponentLogic.h>
 #include <serenity/ecs/components/ComponentLogic1.h>

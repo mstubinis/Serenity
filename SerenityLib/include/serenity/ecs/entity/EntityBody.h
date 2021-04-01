@@ -2,7 +2,6 @@
 #ifndef ENGINE_ECS_ENTITY_BODY_H
 #define ENGINE_ECS_ENTITY_BODY_H
 
-class Collision;
 class btRigidBody;
 class ComponentBody;
 class Scene;
@@ -26,15 +25,18 @@ class EntityBody : public Entity {
         virtual ~EntityBody() = default;
 
         virtual [[nodiscard]] glm_quat getRotation() const;
+        virtual [[nodiscard]] glm_quat getLocalRotation() const;
+        virtual [[nodiscard]] glm_quat getWorldRotation() const;
         virtual [[nodiscard]] glm_vec3 getScale() const;
         virtual [[nodiscard]] glm_vec3 getPosition() const;
+        virtual [[nodiscard]] glm_vec3 getWorldPosition() const;
         virtual [[nodiscard]] glm_vec3 getLocalPosition() const;
 
-        const [[nodiscard]]glm_vec3& forward() const;
-        const [[nodiscard]]glm_vec3& right() const;
-        const [[nodiscard]]glm_vec3& up() const;
+        const [[nodiscard]] glm_vec3& forward() const;
+        const [[nodiscard]] glm_vec3& right() const;
+        const [[nodiscard]] glm_vec3& up() const;
 
-        virtual [[nodiscard]] glm_vec3 getLinearVelocity() const;
+        //virtual [[nodiscard]] glm_vec3 getLinearVelocity() const;
 
         virtual void translate(const glm_vec3& translation, bool local = true);
         virtual void translate(decimal x, decimal y, decimal z, bool local = true);
@@ -58,8 +60,8 @@ class EntityBody : public Entity {
         virtual void setScale(decimal x, decimal y, decimal z);
         virtual void setScale(decimal s);
 
-        virtual void setLinearVelocity(decimal x, decimal y, decimal z, bool local = true);
-        virtual void setLinearVelocity(const glm_vec3& velocity, bool local = true);
+        //virtual void setLinearVelocity(decimal x, decimal y, decimal z, bool local = true);
+        //virtual void setLinearVelocity(const glm_vec3& velocity, bool local = true);
 };
 
 #endif

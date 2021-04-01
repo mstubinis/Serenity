@@ -384,6 +384,9 @@ normal = tangentToView * normal;
     "    }\n"
     "    vec4 GodRays = Unpack32BitUIntTo4ColorFloats(Gods_Rays_Color);\n"
     "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
+
+    //"    inData.diffuse = (inData.diffuse * vec4(0.001)) + vec4(1.0, 0.0, 0.0, 1.0);\n"
+
     "\n"
     "    SUBMIT_DIFFUSE(inData.diffuse);\n"
     //"    SUBMIT_NORMALS(1.0, 1.0);\n"

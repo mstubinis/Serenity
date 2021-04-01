@@ -22,6 +22,7 @@ class  SunLight;
 class  SoundData;
 class  Shader;
 class  ShaderProgram;
+class  SystemSceneChanging;
 
 #include <serenity/renderer/GLImageConstants.h>
 #include <serenity/resources/shader/ShaderIncludes.h>
@@ -33,16 +34,18 @@ class  ShaderProgram;
 namespace Engine::priv {
     class ResourceManager final{
         friend class  Scene;
+        friend class  SystemSceneChanging;
         public:
             static Engine::view_ptr<ResourceManager> RESOURCE_MANAGER;
         private:
             uint32_t AddScene(Scene& scene);
         public:
-            ResourceModule                        m_ResourceModule;
-            std::vector<std::unique_ptr<Window>>  m_Windows;
-            std::vector<std::unique_ptr<Scene>>   m_Scenes;
-            std::vector<Scene*>                   m_ScenesToBeDeleted;
-            Scene*                                m_CurrentScene = nullptr;
+            ResourceModule                         m_ResourceModule;
+            std::vector<std::unique_ptr<Window>>   m_Windows;
+            std::vector<std::unique_ptr<Scene>>    m_Scenes;
+            std::vector<Scene*>                    m_ScenesToBeDeleted;
+            std::tuple<Scene*, Scene*, bool>       m_SceneSwap = {nullptr, nullptr, false}; // { oldScene, newScene, isSwapOccuring }
+            Scene*                                 m_CurrentScene = nullptr;
         public:
             ResourceManager(const EngineOptions&);
 

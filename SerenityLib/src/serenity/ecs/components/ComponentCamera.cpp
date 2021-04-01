@@ -1,9 +1,7 @@
 #include <serenity/ecs/components/ComponentCamera.h>
-#include <serenity/resources/Engine_Resources.h>
+
 #include <serenity/math/Engine_Math.h>
-#include <serenity/threading/ThreadingModule.h>
-#include <serenity/system/Engine.h>
-#include <serenity/scene/Camera.h>
+
 
 using namespace Engine;
 using namespace Engine::priv;
@@ -19,25 +17,25 @@ void Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentC
 #pragma region Component
 
 ComponentCamera::ComponentCamera(Entity entity, float angleDegrees, float aspectRatio, float nearPlane, float farPlane) 
-    : m_Owner(entity)
-    , m_Angle(glm::radians(angleDegrees))
-    , m_AspectRatio(aspectRatio)
-    , m_NearPlane(nearPlane)
-    , m_FarPlane(farPlane)
-    , m_Type(CameraType::Perspective)
+    : m_Owner{ entity }
+    , m_Angle{ glm::radians(angleDegrees) }
+    , m_AspectRatio{ aspectRatio }
+    , m_NearPlane{ nearPlane }
+    , m_FarPlane{ farPlane }
+    , m_Type{ CameraType::Perspective }
 {
     setProjectionMatrix(glm::perspective(m_Angle, m_AspectRatio, m_NearPlane, m_FarPlane));
     setViewMatrix(glm::lookAt(m_Eye, m_Forward, m_Up));
 }
 ComponentCamera::ComponentCamera(Entity entity, float left, float right, float bottom, float top, float nearPlane, float farPlane) 
-    : m_Owner(entity)
-    , m_Left(left)
-    , m_Right(right)
-    , m_Bottom(bottom)
-    , m_Top(top)
-    , m_NearPlane(nearPlane)
-    , m_FarPlane(farPlane)
-    , m_Type(CameraType::Orthographic)
+    : m_Owner{ entity }
+    , m_Left{ left }
+    , m_Right{ right }
+    , m_Bottom{ bottom }
+    , m_Top{ top }
+    , m_NearPlane{ nearPlane }
+    , m_FarPlane{ farPlane }
+    , m_Type{ CameraType::Orthographic }
 {
     setProjectionMatrix(glm::ortho(m_Left, m_Right, m_Bottom, m_Top, m_NearPlane, m_FarPlane));
     setViewMatrix(glm::lookAt(m_Eye, m_Forward, m_Up));
@@ -59,22 +57,20 @@ ComponentCamera::ComponentCamera(ComponentCamera&& other) noexcept
     , m_Type(std::move(other.m_Type))
 {}
 ComponentCamera& ComponentCamera::operator=(ComponentCamera&& other) noexcept {
-    if (&other != this) {
-        m_Owner                   = std::move(other.m_Owner);
-        m_Eye                     = std::move(other.m_Eye);
-        m_Up                      = std::move(other.m_Up);
-        m_Forward                 = std::move(other.m_Forward);
-        m_Angle                   = std::move(other.m_Angle);
-        m_AspectRatio             = std::move(other.m_AspectRatio);
-        m_NearPlane               = std::move(other.m_NearPlane);
-        m_FarPlane                = std::move(other.m_FarPlane);
-        m_Bottom                  = std::move(other.m_Bottom);
-        m_Top                     = std::move(other.m_Top);
-        m_ProjectionMatrix        = std::move(other.m_ProjectionMatrix);
-        m_ViewMatrix              = std::move(other.m_ViewMatrix);
-        m_FrustumPlanes           = std::move(other.m_FrustumPlanes);
-        m_Type                    = std::move(other.m_Type);
-    }
+    m_Owner                   = std::move(other.m_Owner);
+    m_Eye                     = std::move(other.m_Eye);
+    m_Up                      = std::move(other.m_Up);
+    m_Forward                 = std::move(other.m_Forward);
+    m_Angle                   = std::move(other.m_Angle);
+    m_AspectRatio             = std::move(other.m_AspectRatio);
+    m_NearPlane               = std::move(other.m_NearPlane);
+    m_FarPlane                = std::move(other.m_FarPlane);
+    m_Bottom                  = std::move(other.m_Bottom);
+    m_Top                     = std::move(other.m_Top);
+    m_ProjectionMatrix        = std::move(other.m_ProjectionMatrix);
+    m_ViewMatrix              = std::move(other.m_ViewMatrix);
+    m_FrustumPlanes           = std::move(other.m_FrustumPlanes);
+    m_Type                    = std::move(other.m_Type);
     return *this;
 }
 
@@ -84,17 +80,17 @@ void ComponentCamera::resize(uint32_t width, uint32_t height) noexcept {
     }
     priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
 }
-uint32_t ComponentCamera::pointIntersectTest(const glm_vec3& position) const noexcept {
+uint32_t ComponentCamera::pointIntersectTest(const glm_vec3& worldPosition) const noexcept {
     auto zero = (decimal)0.0;
     for (uint32_t i = 0; i < m_FrustumPlanes.size(); ++i) {
-        auto d = m_FrustumPlanes[i].x * position.x + m_FrustumPlanes[i].y * position.y + m_FrustumPlanes[i].z * position.z + m_FrustumPlanes[i].w;
+        auto d = m_FrustumPlanes[i].x * worldPosition.x + m_FrustumPlanes[i].y * worldPosition.y + m_FrustumPlanes[i].z * worldPosition.z + m_FrustumPlanes[i].w;
         if (d > zero) {
             return 0; //outside
         }
     }
     return 1; //inside
 }
-uint32_t ComponentCamera::sphereIntersectTest(const glm_vec3& position, float radius) const noexcept {
+uint32_t ComponentCamera::sphereIntersectTest(const glm_vec3& worldPosition, float radius) const noexcept {
     uint32_t res = 1; //inside the viewing frustum
     auto zero    = (decimal)0.0;
     auto two     = (decimal)2.0;
@@ -102,7 +98,7 @@ uint32_t ComponentCamera::sphereIntersectTest(const glm_vec3& position, float ra
         return 0;
     }
     for (size_t i = 0; i < m_FrustumPlanes.size(); ++i) {
-        auto d = m_FrustumPlanes[i].x * position.x + m_FrustumPlanes[i].y * position.y + m_FrustumPlanes[i].z * position.z + m_FrustumPlanes[i].w;
+        auto d = m_FrustumPlanes[i].x * worldPosition.x + m_FrustumPlanes[i].y * worldPosition.y + m_FrustumPlanes[i].z * worldPosition.z + m_FrustumPlanes[i].w;
         if (d > radius * two) {
             return 0; //outside the viewing frustrum
         }else if (d > zero) {

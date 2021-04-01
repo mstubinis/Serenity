@@ -49,7 +49,7 @@ class EntityRAIIBodyRigid final {
 
         inline void addChild(Entity child) const noexcept { m_Entity.addChild(child); }
         inline void removeChild(Entity child) const noexcept { m_Entity.removeChild(child); }
-        inline void removeAllChildren() const noexcept { m_Entity.removeAllChildren(); }
+        //inline void removeAllChildren() const noexcept { m_Entity.removeAllChildren(); }
 
         template<typename T, typename... ARGS> inline bool addComponent(ARGS&&... args) noexcept {
             return m_Entity.addComponent<T>(std::forward<ARGS>(args)...);
@@ -76,8 +76,8 @@ class EntityRAIIBodyRigid final {
 
         //
 
-        [[nodiscard]] inline float mass() const noexcept { return m_Entity.mass(); }
         [[nodiscard]] inline glm_quat getRotation() const noexcept { return m_Entity.getRotation(); }
+        [[nodiscard]] inline glm_quat getLocalRotation() const noexcept { return getRotation(); }
         [[nodiscard]] inline glm_vec3 getScale() const noexcept { return m_Entity.getScale(); }
         [[nodiscard]] inline glm_vec3 getPosition() const noexcept { return m_Entity.getPosition(); }
         [[nodiscard]] inline glm_vec3 getLocalPosition() const noexcept { return m_Entity.getLocalPosition(); }
