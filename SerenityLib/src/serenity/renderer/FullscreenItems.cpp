@@ -61,7 +61,7 @@ void Engine::priv::FullscreenTriangle::changeDimensions(float width, float heigh
 }
 void Engine::priv::FullscreenTriangle::buildVAO() {
     Engine::Renderer::deleteVAO(m_VAO);
-    if (Engine::priv::RenderModule::OPENGL_VERSION >= 30) {
+    if (Engine::priv::OpenGLState::constants.supportsVAO()) {
         Engine::Renderer::genAndBindVAO(m_VAO);
         bindToGPU();
         Engine::Renderer::bindVAO(0);
@@ -159,7 +159,7 @@ void Engine::priv::FullscreenQuad::changeDimensions(float width, float height) {
 }
 void Engine::priv::FullscreenQuad::buildVAO() {
     Engine::Renderer::deleteVAO(m_VAO);
-    if (Engine::priv::RenderModule::OPENGL_VERSION >= 30) {
+    if (Engine::priv::OpenGLState::constants.supportsVAO()) {
         Engine::Renderer::genAndBindVAO(m_VAO);
         bindToGPU();
         Engine::Renderer::bindVAO(0);

@@ -75,7 +75,6 @@ class MaterialLayer final {
         MaterialLayer& operator=(const MaterialLayer&)      = delete;
         MaterialLayer(MaterialLayer&&) noexcept;
         MaterialLayer& operator=(MaterialLayer&&) noexcept;
-        ~MaterialLayer() = default;
 
         inline constexpr bool operator==(const bool other) const noexcept { return (other == true && !m_TextureHandle.null()); }
         inline constexpr bool operator!=(const bool other) const noexcept { return !operator==(other); }
@@ -86,7 +85,7 @@ class MaterialLayer final {
 
         [[nodiscard]] inline constexpr const MaterialLayerTextureData& getMaterialLayerTextureData() const noexcept { return m_MaterialLayerTextureData; }
         [[nodiscard]] inline constexpr const MaterialLayerMiscData& getMaterialLayerMiscData() const noexcept { return m_MaterialLayerMiscData; }
-        [[nodiscard]] inline constexpr MaterialLayerBlendMode blendMode() const noexcept { return (MaterialLayerBlendMode)((unsigned int)m_MaterialLayerTextureData.blendMode); }
+        [[nodiscard]] inline constexpr MaterialLayerBlendMode getBlendMode() const noexcept { return (MaterialLayerBlendMode)((unsigned int)m_MaterialLayerTextureData.blendMode); }
         [[nodiscard]] inline constexpr const glm::vec4& getUVModifications() const noexcept { return m_UVModifications; }
 
         inline void addUVModificationFunctor(FuncModifyUVs&& functor) { m_UVModFuncs.emplace_back(std::move(functor)); }
@@ -105,7 +104,6 @@ class MaterialLayer final {
         inline void setMiscData(float r, float g, float b, float a) noexcept { m_MaterialLayerMiscData = { r, g, b, a }; }
         inline void setTextureData(const glm::vec4& data) noexcept { setTextureData(data.r, data.g, data.b, data.a); }
         inline void setMiscData(const glm::vec4& data) noexcept { setMiscData(data.r, data.g, data.b, data.a); }
-
 
         void sendDataToGPU(const std::string& uniform_component_string, size_t component_index, size_t layer_index, size_t& textureUnit) const;
 

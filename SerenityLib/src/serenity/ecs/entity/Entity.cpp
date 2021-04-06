@@ -29,30 +29,30 @@ bool Entity::isDestroyed() const noexcept {
     return false;
 }
 void Entity::addChild(Entity child) const noexcept {
-    auto body = getComponent<ComponentBody>();
+    auto body = getComponent<ComponentTransform>();
     if (body)
         body->addChild(child);
 }
 void Entity::removeChild(Entity child) const noexcept {
-    auto body = getComponent<ComponentBody>();
+    auto body = getComponent<ComponentTransform>();
     if (body)
         body->removeChild(child);
 }
 /*
 void Entity::removeAllChildren() const noexcept {
-    auto body = getComponent<ComponentBody>();
+    auto body = getComponent<ComponentTransform>();
     if (body)
         body->removeAllChildren();
 }
 */
 bool Entity::hasParent() const noexcept {
-    auto body = getComponent<ComponentBody>();
+    auto body = getComponent<ComponentTransform>();
     if (body)
         return body->hasParent();
     return false;
 }
 [[nodiscard]] Entity Entity::getParent() const noexcept {
-    auto body = getComponent<ComponentBody>();
+    auto body = getComponent<ComponentTransform>();
     if (body)
         return body->getParent();
     return Entity{};
@@ -63,9 +63,9 @@ Engine::view_ptr<Scene> Entity::scene() const noexcept {
 }
 bool Entity::addComponent(std::string_view componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8) {
     if (componentClassName == "ComponentBody") {
-        return addComponent<ComponentBody>();
-    }else if ("ComponentBodyRigid") {
-        return addComponent<ComponentBodyRigid>();
+        return addComponent<ComponentTransform>();
+    }else if ("ComponentRigidBody") {
+        return addComponent<ComponentRigidBody>();
     }else if ("ComponentCollisionShape") {
         if (!a1.isNil()) {
             return addComponent<ComponentCollisionShape>(a1);
@@ -115,9 +115,9 @@ bool Entity::addComponent(std::string_view componentClassName, luabridge::LuaRef
 }
 bool Entity::removeComponent(std::string_view componentClassName) {
     if (componentClassName == "ComponentBody") {
-        return removeComponent<ComponentBody>();
-    }else if (componentClassName == "ComponentBodyRigid") {
-        return removeComponent<ComponentBodyRigid>();
+        return removeComponent<ComponentTransform>();
+    }else if (componentClassName == "ComponentRigidBody") {
+        return removeComponent<ComponentRigidBody>();
     }else if (componentClassName == "ComponentCollisionShape") {
         return removeComponent<ComponentCollisionShape>();
     }else if (componentClassName == "ComponentModel") {
@@ -142,9 +142,9 @@ luabridge::LuaRef Entity::getComponent(std::string_view componentClassName) {
     std::string global_name = toString() + ":" + std::string{ componentClassName };
     auto* global_name_cstr  = global_name.c_str();
     if (componentClassName == "ComponentBody") {
-        return PublicEntity::GetComponent<ComponentBody>(L, *this, global_name_cstr);
-    }else if (componentClassName == "ComponentBodyRigid") {
-        return PublicEntity::GetComponent<ComponentBodyRigid>(L, *this, global_name_cstr);
+        return PublicEntity::GetComponent<ComponentTransform>(L, *this, global_name_cstr);
+    }else if (componentClassName == "ComponentRigidBody") {
+        return PublicEntity::GetComponent<ComponentRigidBody>(L, *this, global_name_cstr);
     }else if (componentClassName == "ComponentCollisionShape") {
         return PublicEntity::GetComponent<ComponentCollisionShape>(L, *this, global_name_cstr);
     }else if (componentClassName == "ComponentModel") {

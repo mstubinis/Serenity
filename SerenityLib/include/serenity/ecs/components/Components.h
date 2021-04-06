@@ -2,8 +2,8 @@
 #ifndef ENGINE_ECS_COMPONENTS_H
 #define ENGINE_ECS_COMPONENTS_H
 
-#include <serenity/ecs/components/ComponentBody.h>
-#include <serenity/ecs/components/ComponentBodyRigid.h>
+#include <serenity/ecs/components/ComponentTransform.h>
+#include <serenity/ecs/components/ComponentRigidBody.h>
 #include <serenity/ecs/components/ComponentCollisionShape.h>
 #include <serenity/ecs/components/ComponentCamera.h>
 #include <serenity/ecs/components/ComponentLogic.h>

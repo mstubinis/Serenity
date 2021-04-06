@@ -16,6 +16,67 @@ namespace Engine::priv {
     class  OpenGLState final {
         friend class  RenderModule;
         private:
+            struct Constants final {
+                std::vector<GLint> COMPRESSED_TEXTURE_FORMATS; //TODO: change this into an unordered_set so the texture types can be queried in O(1) time?
+
+                GLint MAJOR_VERSION;
+                GLint MAX_3D_TEXTURE_SIZE;
+                GLint MAX_ARRAY_TEXTURE_LAYERS;
+                GLint MAX_COLOR_ATTACHMENTS;
+                GLint MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS;
+                GLint MAX_COMBINED_TEXTURE_IMAGE_UNITS;
+                GLint MAX_COMBINED_UNIFORM_BLOCKS;
+                GLint MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS;
+                GLint MAX_COMPUTE_SHADER_STORAGE_BLOCKS;
+                GLint MAX_CUBE_MAP_TEXTURE_SIZE;
+                GLint MAX_DRAW_BUFFERS;
+                GLint MAX_ELEMENT_INDEX;
+                GLint MAX_ELEMENTS_INDICES;
+                GLint MAX_ELEMENTS_VERTICES;
+                GLint MAX_FRAGMENT_INPUT_COMPONENTS;
+                GLint MAX_FRAGMENT_UNIFORM_BLOCKS;
+                GLint MAX_FRAGMENT_UNIFORM_COMPONENTS;
+                GLint MAX_FRAGMENT_UNIFORM_VECTORS;
+                GLint MAX_PROGRAM_TEXEL_OFFSET;
+                GLint MAX_RENDERBUFFER_SIZE;
+                GLint MAX_SAMPLES;
+                GLint MAX_SERVER_WAIT_TIMEOUT;
+                GLint MAX_TEXTURE_IMAGE_UNITS;
+                GLint MAX_TEXTURE_LOD_BIAS;
+                GLint MAX_TEXTURE_SIZE;
+                GLint MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS;
+                GLint MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS;
+                GLint MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS;
+                GLint MAX_UNIFORM_BLOCK_SIZE;
+                GLint MAX_UNIFORM_BUFFER_BINDINGS;
+                GLint MAX_VARYING_COMPONENTS;
+                GLint MAX_VARYING_VECTORS;
+                GLint MAX_VERTEX_ATTRIBS;
+                GLint MAX_VERTEX_TEXTURE_IMAGE_UNITS;
+                GLint MAX_VERTEX_OUTPUT_COMPONENTS;
+                GLint MAX_VERTEX_UNIFORM_BLOCKS;
+                GLint MAX_VERTEX_UNIFORM_COMPONENTS;
+                GLint MAX_VERTEX_UNIFORM_VECTORS;
+                GLint MAX_VIEWPORT_DIMS;
+                GLint MIN_PROGRAM_TEXEL_OFFSET;
+                GLint MINOR_VERSION;
+                GLint NUM_COMPRESSED_TEXTURE_FORMATS;
+                GLint NUM_EXTENSIONS;
+                GLint NUM_PROGRAM_BINARY_FORMATS;
+                GLint NUM_SHADER_BINARY_FORMATS;
+                GLint GLSL_VERSION;
+
+                GLfloat MAX_TEXTURE_MAX_ANISOTROPY;
+
+                void calculate();
+
+                inline bool supportsVAO() const noexcept { return (MAJOR_VERSION >= 3 && MINOR_VERSION >= 0); }
+                inline bool supportsAniosotropicFiltering() const noexcept { return (MAJOR_VERSION >= 4 && MINOR_VERSION >= 6); }
+                inline bool supportsCubemapSeamless() const noexcept { return (MAJOR_VERSION >= 4 && MINOR_VERSION >= 0); }
+                inline bool supportsInstancing() const noexcept { return (MAJOR_VERSION >= 3 && MINOR_VERSION >= 1); }
+                inline bool supportsUBO() const noexcept { return GLSL_VERSION >= 140; }
+            };
+
             #pragma region TextureUnits
             struct TextureUnitState final {
                 std::array<GLuint, (size_t)TextureType::_TOTAL - 1> openglIDs; //-1 for the "Unknown" enum 
@@ -243,8 +304,9 @@ namespace Engine::priv {
             #pragma endregion
 
         public:
-            static float     MAX_TEXTURE_MAX_ANISOTROPY;
-            static uint32_t  MAX_TEXTURE_UNITS;
+            static Constants constants;
+
+            static std::string getHighestGLSLVersion() noexcept;
 
             GLuint getCurrentlyBoundTextureOfType(GLenum textureType) noexcept;
 

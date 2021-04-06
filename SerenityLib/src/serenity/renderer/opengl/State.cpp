@@ -2,12 +2,92 @@
 #include <serenity/renderer/opengl/State.h>
 #include <serenity/renderer/opengl/OpenGL.h>
 #include <serenity/dependencies/glm.h>
+#include <serenity/utils/Utils.h>
+
 
 using namespace Engine;
 using namespace Engine::priv;
 
-uint32_t OpenGLState::MAX_TEXTURE_UNITS           = 0;
-float    OpenGLState::MAX_TEXTURE_MAX_ANISOTROPY  = 1.0f;
+Engine::priv::OpenGLState::Constants Engine::priv::OpenGLState::constants;
+
+Engine::unordered_string_map<std::string, std::string> VERSION_MAP;
+Engine::unordered_string_map<std::string, std::string> POPULATE_VERSION_MAP() {
+    Engine::unordered_string_map<std::string, std::string> ret;
+    ret["1.1"] = "110";
+    ret["2.0"] = "110";
+    ret["2.1"] = "120";
+    ret["3.0"] = "130";
+    ret["3.1"] = "140";
+    ret["3.2"] = "150";
+    ret["3.3"] = "330";
+    ret["4.0"] = "400";
+    ret["4.1"] = "410";
+    ret["4.2"] = "420";
+    ret["4.3"] = "430";
+    ret["4.4"] = "440";
+    ret["4.5"] = "450";
+    ret["4.6"] = "460";
+    return ret;
+}
+
+
+void OpenGLState::Constants::calculate() {
+    glGetIntegerv(GL_MAJOR_VERSION, &MAJOR_VERSION);
+    glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &MAX_3D_TEXTURE_SIZE);
+    glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &MAX_ARRAY_TEXTURE_LAYERS);
+    glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &MAX_COLOR_ATTACHMENTS);
+    glGetIntegerv(GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS, &MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS);
+    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+    glGetIntegerv(GL_MAX_COMBINED_UNIFORM_BLOCKS, &MAX_COMBINED_UNIFORM_BLOCKS);
+    glGetIntegerv(GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS, &MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS);
+    glGetIntegerv(GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS, &MAX_COMPUTE_SHADER_STORAGE_BLOCKS);
+    glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &MAX_CUBE_MAP_TEXTURE_SIZE);
+    glGetIntegerv(GL_MAX_DRAW_BUFFERS, &MAX_DRAW_BUFFERS);
+    glGetIntegerv(GL_MAX_ELEMENT_INDEX, &MAX_ELEMENT_INDEX);
+    glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &MAX_ELEMENTS_INDICES);
+    glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &MAX_ELEMENTS_VERTICES);
+    glGetIntegerv(GL_MAX_FRAGMENT_INPUT_COMPONENTS, &MAX_FRAGMENT_INPUT_COMPONENTS);
+    glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &MAX_FRAGMENT_UNIFORM_BLOCKS);
+    glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &MAX_FRAGMENT_UNIFORM_COMPONENTS);
+    glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, &MAX_FRAGMENT_UNIFORM_VECTORS);
+    glGetIntegerv(GL_MAX_PROGRAM_TEXEL_OFFSET, &MAX_PROGRAM_TEXEL_OFFSET);
+    glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &MAX_RENDERBUFFER_SIZE);
+    glGetIntegerv(GL_MAX_SAMPLES, &MAX_SAMPLES);
+
+    glGetIntegerv(GL_MAX_SERVER_WAIT_TIMEOUT, &MAX_SERVER_WAIT_TIMEOUT);
+
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &MAX_TEXTURE_IMAGE_UNITS);
+    glGetIntegerv(GL_MAX_TEXTURE_LOD_BIAS, &MAX_TEXTURE_LOD_BIAS);
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MAX_TEXTURE_SIZE);
+    glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS, &MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS);
+    glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS, &MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS);
+    glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS, &MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS);
+    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &MAX_UNIFORM_BLOCK_SIZE);
+    glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &MAX_UNIFORM_BUFFER_BINDINGS);
+    glGetIntegerv(GL_MAX_VARYING_COMPONENTS, &MAX_VARYING_COMPONENTS);
+    glGetIntegerv(GL_MAX_VARYING_VECTORS, &MAX_VARYING_VECTORS);
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &MAX_VERTEX_ATTRIBS);
+    glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &MAX_VERTEX_TEXTURE_IMAGE_UNITS);
+    glGetIntegerv(GL_MAX_VERTEX_OUTPUT_COMPONENTS, &MAX_VERTEX_OUTPUT_COMPONENTS);
+    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &MAX_VERTEX_UNIFORM_BLOCKS);
+    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &MAX_VERTEX_UNIFORM_BLOCKS);
+    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, &MAX_VERTEX_UNIFORM_COMPONENTS);
+    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &MAX_VERTEX_UNIFORM_VECTORS);
+    glGetIntegerv(GL_MAX_VIEWPORT_DIMS, &MAX_VIEWPORT_DIMS);
+    glGetIntegerv(GL_MIN_PROGRAM_TEXEL_OFFSET, &MIN_PROGRAM_TEXEL_OFFSET);
+    glGetIntegerv(GL_MINOR_VERSION, &MINOR_VERSION);
+    glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &NUM_COMPRESSED_TEXTURE_FORMATS);
+    glGetIntegerv(GL_NUM_EXTENSIONS, &NUM_EXTENSIONS);
+    glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &NUM_PROGRAM_BINARY_FORMATS);
+    glGetIntegerv(GL_NUM_SHADER_BINARY_FORMATS, &NUM_SHADER_BINARY_FORMATS);
+
+    COMPRESSED_TEXTURE_FORMATS.resize(NUM_COMPRESSED_TEXTURE_FORMATS, 0);
+    glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS, COMPRESSED_TEXTURE_FORMATS.data());
+
+    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &MAX_TEXTURE_MAX_ANISOTROPY);
+
+    GLSL_VERSION = std::stoi(OpenGLState::getHighestGLSLVersion());
+}
 
 void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(uint32_t windowWidth, uint32_t windowHeight) {
     GLint    int_value;
@@ -16,14 +96,9 @@ void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(uint32_t windowWidth, uint32_t w
 
     viewportState = ViewportState((GLsizei)windowWidth, (GLsizei)windowHeight);
 
-    GLCall(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &int_value)); //what about GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS?
-    MAX_TEXTURE_UNITS = std::max(MAX_TEXTURE_UNITS, (uint32_t)int_value);
+    constants.calculate();
 
-    GLCall(glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &float_value));
-    MAX_TEXTURE_MAX_ANISOTROPY = float_value;
-
-
-    textureUnits.reserve(MAX_TEXTURE_UNITS);
+    textureUnits.reserve(constants.MAX_TEXTURE_IMAGE_UNITS);
     for (size_t i = 0; i < textureUnits.capacity(); ++i) {
         textureUnits.emplace_back();
     }
@@ -1097,4 +1172,15 @@ bool OpenGLState::GL_glBlendEquationi(GLuint buf, GLenum mode) {
         return true;
     }
     return false;   
+}
+
+
+std::string OpenGLState::getHighestGLSLVersion() noexcept {
+    if (VERSION_MAP.size() == 0) {
+        VERSION_MAP = POPULATE_VERSION_MAP();
+    }
+    std::string version = std::to_string(Engine::priv::OpenGLState::constants.MAJOR_VERSION) + "." + std::to_string(Engine::priv::OpenGLState::constants.MINOR_VERSION);
+
+    std::string res = VERSION_MAP.contains(version) ? VERSION_MAP.at(version) : "";
+    return res;
 }

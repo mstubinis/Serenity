@@ -14,16 +14,16 @@ using namespace Engine;
 using namespace Engine::priv;
 
 constexpr std::array<glm::vec4, (size_t)MaterialComponentType::_TOTAL> MISC_DATA_INFO { {
-    {1.0f, 1.0f, 1.0f, 1.0f}, //Diffuse
-    {1.0f, 1.0f, 1.0f, 1.0f}, //Normal
-    {0.0f, 1.0f, 1.0f, 0.0f}, //Glow
-    {0.0f, 1.0f, 1.0f, 0.0f}, //Specular
-    {0.0f, 1.0f, 1.0f, 0.0f}, //AO
-    {0.0f, 1.0f, 1.0f, 0.0f}, //Metalness
-    {0.0f, 1.0f, 1.0f, 0.0f}, //Smoothness
-    {1.0f, 1.0f, 1.0f, 1.0f}, //Reflection
-    {1.0f, 1.0f, 1.0f, 1.0f}, //Refraction
-    {1.0f, 1.0f, 1.0f, 1.0f}, //ParallaxOcclusion
+    { 1.0f, 1.0f, 1.0f, 1.0f }, // Diffuse
+    { 1.0f, 1.0f, 1.0f, 1.0f }, // Normal
+    { 0.0f, 1.0f, 1.0f, 0.0f }, // Glow
+    { 0.0f, 1.0f, 1.0f, 0.0f }, // Specular
+    { 0.0f, 1.0f, 1.0f, 0.0f }, // AO
+    { 0.0f, 1.0f, 1.0f, 0.0f }, // Metalness
+    { 0.0f, 1.0f, 1.0f, 0.0f }, // Smoothness
+    { 1.0f, 1.0f, 1.0f, 1.0f }, // Reflection
+    { 1.0f, 1.0f, 1.0f, 1.0f }, // Refraction
+    { 1.0f, 1.0f, 1.0f, 1.0f }, // ParallaxOcclusion
 } };
 
 MaterialComponent::MaterialComponent(MaterialComponentType type, Handle textureHandle, Handle maskHandle, Handle cubemapHandle)
@@ -52,17 +52,14 @@ MaterialLayer* MaterialComponent::addLayer(const std::string& textureFile, const
     auto cubemap = Engine::Resources::getResource<Texture>(cubemapFile);
 
     if (!texture.m_Resource && !textureFile.empty()) {
-        //texture.m_Handle = Engine::Resources::loadTextureAsync(textureFile, ImageInternalFormat::SRGB8_ALPHA8, false);
         texture.m_Handle   = Engine::Resources::addResource<Texture>(textureFile, false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D);
         texture.m_Resource = texture.m_Handle.get<Texture>();
     }
     if (!mask.m_Resource && !maskFile.empty()) {
-        //mask.m_Handle = Engine::Resources::loadTextureAsync(maskFile, ImageInternalFormat::R8, false);
         mask.m_Handle   = Engine::Resources::addResource<Texture>(maskFile, false, ImageInternalFormat::R8, TextureType::Texture2D);
         mask.m_Resource = mask.m_Handle.get<Texture>();
     }
     if (!cubemap.m_Resource && !cubemapFile.empty()) {
-        //cubemap.m_Handle = Engine::Resources::loadTextureAsync(cubemapFile, ImageInternalFormat::SRGB8_ALPHA8, false);
         cubemap.m_Handle   = Engine::Resources::addResource<Texture>(cubemapFile, false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::CubeMap);
         cubemap.m_Resource = cubemap.m_Handle.get<Texture>();
     }

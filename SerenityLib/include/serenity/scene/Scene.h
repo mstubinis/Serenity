@@ -76,8 +76,8 @@ class Scene: public Observer {
         void preUpdate(const float dt);
         void postUpdate(const float dt);
     public:
-        Scene(std::string_view name);
-        Scene(std::string_view name, const SceneOptions&);
+        Scene(uint32_t id, std::string_view name);
+        Scene(uint32_t id, std::string_view name, const SceneOptions&);
         Scene(const Scene&)                = delete;
         Scene& operator=(const Scene&)     = delete;
         Scene(Scene&&) noexcept            = delete;
@@ -129,10 +129,21 @@ class Scene: public Observer {
         [[nodiscard]] Camera* getActiveCamera() const;
         void setActiveCamera(Camera&);
 
+        template<class T, class ... ARGS>
+        T* addCamera(ARGS&&... args) {
+            T* camera = NEW T(this, std::forward<ARGS>(args)...);
+            m_Cameras.push_back(camera);
+            if (!getActiveCamera()) {
+                setActiveCamera(*camera);
+            }
+            return camera;
+        }
+
+        /*
         void addCamera(Camera&);
         [[nodiscard]] Camera* addCamera(float left, float right, float top, float bottom, float Near, float Far);
         [[nodiscard]] Camera* addCamera(float angle, float aspectRatio, float Near, float Far);
-
+        */
         [[nodiscard]] const glm::vec4& getBackgroundColor() const;
         void setBackgroundColor(float r, float g, float b, float a);
         void setBackgroundColor(const glm::vec4& backgroundColor);

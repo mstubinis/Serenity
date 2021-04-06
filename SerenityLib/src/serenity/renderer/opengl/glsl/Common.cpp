@@ -100,31 +100,37 @@ vec2 HammersleySequence(int i, int N){
 #pragma region VanDerCorpus
     if (ShaderHelper::lacksDefinition(code, "VanDerCorpus(", "float VanDerCorpus(")){
         ShaderHelper::insertStringAtLine(code, 
-            "float VanDerCorpus(uint bits){\n"
-            "    bits = (bits << 16u) | (bits >> 16u);\n"
-            "    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);\n"
-            "    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);\n"
-            "    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);\n"
-            "    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);\n"
-            "    return float(bits) * 2.3283064365386963e-10;\n" // / 0x100000000
-            "}\n"
-            //use this if bit shitfing is not supported
-            /*
-            "float VanDerCorpus(int n){\n"
-            "    float invBase = 0.5;\n"
-            "    float denom   = 1.0;\n"
-            "    float result  = 0.0;\n"
-            "    for(int i = 0; i < 32; ++i){\n"
-            "        if(n > 0){\n"
-            "            denom = mod(float(n), 2.0);\n"
-            "            result += denom * invBase;\n"
-            "            invBase *= 0.5;\n"
-            "            n = int(float(n) * 0.5);\n"
-            "        }\n"
-            "    }\n"
-            "    return result;\n"
-            "}\n"
-            */
+R"(
+float VanDerCorpus(uint bits){
+    bits = (bits << 16u) | (bits >> 16u);
+    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+    return float(bits) * 2.3283064365386963e-10;
+}
+)"
+//2.3283064365386963e-10 = 0x100000000
+
+//use this if bit shitfing is not supported
+/*
+R"(
+float VanDerCorpus(int n){
+    float invBase = 0.5;
+    float denom   = 1.0;
+    float result  = 0.0;
+    for(int i = 0; i < 32; ++i){
+        if(n > 0){
+            denom = mod(float(n), 2.0);
+            result += denom * invBase;
+            invBase *= 0.5;
+            n = int(float(n) * 0.5);
+        }
+    }
+    return result;
+}
+)"
+*/
         , 1);
     }
 #pragma endregion
@@ -275,13 +281,13 @@ float LogFCoefficient = CameraInfo3.w;
 
 #pragma region material constants
     if (ShaderHelper::sfind(code, "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT") && !ShaderHelper::sfind(code, "//USE_MAX_MATERIAL_LAYERS_PER_COMPONENT")) {
-        boost::replace_all(code, "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT", "#define MAX_MATERIAL_LAYERS_PER_COMPONENT " + std::to_string(MAX_MATERIAL_LAYERS_PER_COMPONENT) + "\n");
+        boost::replace_all(code, "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT", "#define MAX_MATERIAL_LAYERS_PER_COMPONENT " + std::to_string(MAX_MATERIAL_LAYERS_PER_COMPONENT) + '\n');
     }
     if (ShaderHelper::sfind(code, "USE_MAX_MATERIAL_COMPONENTS") && !ShaderHelper::sfind(code, "//USE_MAX_MATERIAL_COMPONENTS")) {
-        boost::replace_all(code, "USE_MAX_MATERIAL_COMPONENTS", "#define MAX_MATERIAL_COMPONENTS " + std::to_string(MAX_MATERIAL_COMPONENTS) + "\n");
+        boost::replace_all(code, "USE_MAX_MATERIAL_COMPONENTS", "#define MAX_MATERIAL_COMPONENTS " + std::to_string(MAX_MATERIAL_COMPONENTS) + '\n');
     }
     if (ShaderHelper::sfind(code, "USE_MAX_LIGHTS_PER_PASS") && !ShaderHelper::sfind(code, "//USE_MAX_LIGHTS_PER_PASS")) {
-        boost::replace_all(code, "USE_MAX_LIGHTS_PER_PASS", "#define MAX_LIGHTS_PER_PASS " + std::to_string(MAX_MATERIAL_COMPONENTS) + "\n");
+        boost::replace_all(code, "USE_MAX_LIGHTS_PER_PASS", "#define MAX_LIGHTS_PER_PASS " + std::to_string(MAX_MATERIAL_COMPONENTS) + '\n');
     }
 #pragma endregion
 }

@@ -1,5 +1,5 @@
 #include <serenity/lights/DirectionalLight.h>
-#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/utils/Utils.h>
 #include <serenity/scene/Scene.h>
 #include <serenity/system/Engine.h>
@@ -7,7 +7,7 @@
 DirectionalLight::DirectionalLight(Scene* scene, const glm::vec3& direction)
     : SunLight{ scene, glm::vec3(0.0f), LightType::Directional }
 {
-    getComponent<ComponentBody>()->alignTo(direction);
+    getComponent<ComponentTransform>()->alignTo(direction);
 }
 DirectionalLight::~DirectionalLight() {
 }

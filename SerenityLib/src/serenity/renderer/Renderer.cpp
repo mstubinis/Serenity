@@ -25,9 +25,6 @@ using namespace Engine::priv;
 
 Engine::view_ptr<RenderModule> RenderModule::RENDER_MODULE = nullptr;
 
-uint32_t RenderModule::GLSL_VERSION;
-uint32_t RenderModule::OPENGL_VERSION;
-
 RenderModule::RenderModule(const EngineOptions& options)
     : m_GI_Pack{ Engine::Compression::pack3FloatsInto1FloatUnsigned(m_GI_Diffuse, m_GI_Specular, m_GI_Global) }
 {
@@ -46,8 +43,8 @@ void RenderModule::_resize(uint32_t w, uint32_t h){
 void RenderModule::_onFullscreen(uint32_t width, uint32_t height) {
     m_Pipeline->onFullscreen();
 }
-void RenderModule::_onOpenGLContextCreation(uint windowWidth,uint windowHeight,uint _glslVersion,uint _openglVersion){
-    m_Pipeline->onOpenGLContextCreation(windowWidth, windowHeight, _glslVersion, _openglVersion);
+void RenderModule::_onOpenGLContextCreation(uint32_t windowWidth, uint32_t windowHeight){
+    m_Pipeline->onOpenGLContextCreation(windowWidth, windowHeight);
 }
 void RenderModule::_clear2DAPICommands() {
     m_Pipeline->clear2DAPI();
@@ -150,7 +147,7 @@ bool RenderModule::bind(Material* material) const {
 bool RenderModule::unbind(Material* material) const {
     return m_Pipeline->unbind(material);
 }
-void RenderModule::_genPBREnvMapData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, uint size1, uint size2){
+void RenderModule::_genPBREnvMapData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, uint32_t size1, uint32_t size2){
     return m_Pipeline->generatePBRData(texture, convolutionTexture, preEnvTexture, size1, size2);
 }
 void Engine::Renderer::restoreDefaultOpenGLState() {

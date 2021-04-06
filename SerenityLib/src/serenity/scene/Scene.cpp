@@ -4,18 +4,18 @@
 #include <serenity/system/Engine.h>
 #include <serenity/math/Engine_Math.h>
 #include <serenity/model/ModelInstance.h>
-#include <serenity/scene/Camera.h>
 #include <serenity/scene/Skybox.h>
 #include <serenity/resources/material/Material.h>
 #include <serenity/renderer/particles/ParticleSystem.h>
 #include <serenity/renderer/RenderGraph.h>
 #include <serenity/lights/Lights.h>
+#include <serenity/scene/Camera.h>
 
 #include <serenity/ecs/systems/SystemGameUpdate.h>
 #include <serenity/ecs/systems/SystemSceneUpdate.h>
 #include <serenity/ecs/systems/SystemSceneChanging.h>
 #include <serenity/ecs/systems/SystemComponentBody.h>
-#include <serenity/ecs/systems/SystemComponentBodyRigid.h>
+#include <serenity/ecs/systems/SystemComponentRigidBody.h>
 #include <serenity/ecs/systems/SystemAddRigidBodies.h>
 #include <serenity/ecs/systems/SystemRemoveRigidBodies.h>
 #include <serenity/ecs/systems/SystemResolveTransformDirty.h>
@@ -43,8 +43,8 @@ class Scene::impl final {
 
         void _initComponents(Scene& super) {
             super.m_ECS.registerComponent<ComponentLogic>();
-            super.m_ECS.registerComponent<ComponentBody>();
-            super.m_ECS.registerComponent<ComponentBodyRigid>();
+            super.m_ECS.registerComponent<ComponentTransform>();
+            super.m_ECS.registerComponent<ComponentRigidBody>();
             super.m_ECS.registerComponent<ComponentCollisionShape>();
             super.m_ECS.registerComponent<ComponentLogic1>();
             super.m_ECS.registerComponent<ComponentModel>();
@@ -59,21 +59,21 @@ class Scene::impl final {
         void _initSystems(Scene& super) {
             super.m_ECS.registerSystem<SystemAddRigidBodies>();
 
-            super.m_ECS.registerSystem<SystemResolveTransformDirty, ComponentBody, ComponentBodyRigid>();
-            super.m_ECS.registerSystem<SystemStepPhysics, ComponentBodyRigid>();
-            super.m_ECS.registerSystem<SystemRigidTransformSync, ComponentBody, ComponentBodyRigid>();
+            super.m_ECS.registerSystem<SystemResolveTransformDirty, ComponentTransform, ComponentRigidBody>();
+            super.m_ECS.registerSystem<SystemStepPhysics, ComponentRigidBody>();
+            super.m_ECS.registerSystem<SystemRigidTransformSync, ComponentTransform, ComponentRigidBody>();
 
             super.m_ECS.registerSystem<SystemGameUpdate>();
             super.m_ECS.registerSystem<SystemSceneUpdate>();
 
             super.m_ECS.registerSystem<SystemComponentLogic, ComponentLogic>();
-            super.m_ECS.registerSystem<SystemComponentBody, ComponentBody>();
-            super.m_ECS.registerSystem<SystemComponentBodyRigid, ComponentBodyRigid>();
+            super.m_ECS.registerSystem<SystemComponentBody, ComponentTransform>();
+            super.m_ECS.registerSystem<SystemComponentRigidBody, ComponentRigidBody>();
             super.m_ECS.registerSystem<SystemComponentLogic1, ComponentLogic1>();
             super.m_ECS.registerSystem<SystemComponentModel, ComponentModel>();
 
-            super.m_ECS.registerSystem<SystemBodyParentChild, ComponentBody>();
-            super.m_ECS.registerSystem< SystemCompoundChildTransforms, ComponentBody, ComponentCollisionShape>();
+            super.m_ECS.registerSystem<SystemBodyParentChild, ComponentTransform>();
+            super.m_ECS.registerSystem< SystemCompoundChildTransforms, ComponentTransform, ComponentCollisionShape>();
 
             super.m_ECS.registerSystem<SystemComponentLogic2, ComponentLogic2>();
             super.m_ECS.registerSystem<SystemComponentCamera, ComponentCamera>();
@@ -82,7 +82,7 @@ class Scene::impl final {
             super.m_ECS.registerSystem<SystemSceneChanging>();
             super.m_ECS.registerSystem<SystemRemoveRigidBodies>();
 
-            super.m_ECS.registerSystem<SystemComponentBodyDebugDraw, ComponentBody, ComponentModel>();
+            super.m_ECS.registerSystem<SystemComponentBodyDebugDraw, ComponentTransform, ComponentModel>();
         }
         void _init(Scene& super, const SceneOptions& options) {
             super.m_ECS.init(options);
@@ -90,12 +90,12 @@ class Scene::impl final {
             _initSystems(super);
         }
         void _centerToObject(Scene& super, Entity centerEntity) {
-            auto centerTransform = centerEntity.getComponent<ComponentBody>();
+            auto centerTransform = centerEntity.getComponent<ComponentTransform>();
             auto centerPos       = centerTransform->getPosition();
             auto centerPosFloat  = glm::vec3(centerPos);
             for (const auto e : Engine::priv::PublicScene::GetEntities(super)) {
                 if (e != centerEntity) {
-                    auto eTransform  = e.getComponent<ComponentBody>();
+                    auto eTransform  = e.getComponent<ComponentTransform>();
                     if (eTransform && !eTransform->hasParent()) {
                         eTransform->setPosition(eTransform->getPosition() - centerPos);
                     }
@@ -115,25 +115,25 @@ class Scene::impl final {
                 centerTransform->setPosition((decimal)0.0);
             }
             Engine::priv::Core::m_Engine->m_SoundModule.updateCameraPosition(super);
-            ComponentBody::recalculateAllParentChildMatrices(super);
+            ComponentTransform::recalculateAllParentChildMatrices(super);
         }
         void _addModelInstanceToPipeline(Scene& scene, ModelInstance& inModelInstance, std::vector<Engine::priv::RenderGraph>& renderGraphs, RenderStage stage) {
             Engine::priv::RenderGraph* renderGraph = nullptr;
             for (auto& graph : renderGraphs) {
-                if (graph.m_ShaderProgram == inModelInstance.shaderProgram()) {
+                if (graph.m_ShaderProgram == inModelInstance.getShaderProgram()) {
                     renderGraph = &graph;
                     break;
                 }
             }
             if (!renderGraph) {
-                renderGraph = &scene.m_RenderGraphs[(size_t)stage].emplace_back(inModelInstance.shaderProgram());
+                renderGraph = &scene.m_RenderGraphs[(size_t)stage].emplace_back(inModelInstance.getShaderProgram());
             }
             renderGraph->internal_addModelInstanceToPipeline(inModelInstance);
         }
         void _removeModelInstanceFromPipeline(ModelInstance& inModelInstance, std::vector<Engine::priv::RenderGraph>& renderGraphs) {
             Engine::priv::RenderGraph* renderGraph = nullptr;
             for (auto& graph : renderGraphs) {
-                if (graph.m_ShaderProgram == inModelInstance.shaderProgram()) {
+                if (graph.m_ShaderProgram == inModelInstance.getShaderProgram()) {
                     renderGraph = &graph;
                     break;
                 }
@@ -277,9 +277,8 @@ bool Engine::priv::PublicScene::HasItemsToRender(Scene& scene) {
     return scene.m_RenderGraphs.hasItemsToRender();
 }
 
-Scene::Scene(std::string_view name, const SceneOptions& options) {
-    //m_Pipeline.init();
 
+Scene::Scene(uint32_t id, std::string_view name, const SceneOptions& options) {
     m_LightsModule.registerLightType<SunLight>();
     m_LightsModule.registerLightType<PointLight>();
     m_LightsModule.registerLightType<DirectionalLight>();
@@ -287,15 +286,15 @@ Scene::Scene(std::string_view name, const SceneOptions& options) {
     m_LightsModule.registerLightType<RodLight>();
     m_LightsModule.registerLightType<ProjectionLight>();
 
-    m_ID      = Engine::priv::Core::m_Engine->m_ResourceManager.AddScene(*this);
-    m_i       = std::make_unique<impl>(options.maxAmountOfParticleEmitters, options.maxAmountOfParticles);
+    m_i = std::make_unique<impl>(options.maxAmountOfParticleEmitters, options.maxAmountOfParticles);
+    m_ID = id;
     m_i->_init(*this, options);
     setName(name);
 
     registerEvent(EventType::SceneChanged);
 }
-Scene::Scene(std::string_view name)
-    : Scene{ name, SceneOptions::DEFAULT_OPTIONS }
+Scene::Scene(uint32_t id, std::string_view name)
+    : Scene{ id, name, SceneOptions::DEFAULT_OPTIONS }
 {}
 Scene::~Scene() {
     SAFE_DELETE(m_Skybox);
@@ -311,22 +310,6 @@ size_t Scene::getNumLights() const noexcept {
 }
 void Scene::clearAllEntities() noexcept {
     m_ECS.clearAllEntities();
-}
-void Scene::addCamera(Camera& camera) {
-    m_Cameras.emplace_back(&camera);
-    if (!getActiveCamera()) {
-        setActiveCamera(camera);
-    }
-}
-Camera* Scene::addCamera(float left, float right, float bottom, float top, float Near, float Far) {
-    Camera* camera = NEW Camera(left, right, bottom, top, Near, Far, this);
-    Scene::addCamera(*camera);
-    return camera;
-}
-Camera* Scene::addCamera(float angle, float aspectRatio, float Near, float Far) {
-    Camera* camera = NEW Camera(angle, aspectRatio, Near, Far, this);
-    Scene::addCamera(*camera);
-    return camera;
 }
 ParticleEmitter* Scene::addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
     return m_i->m_ParticleSystem.add_emitter(properties, scene, lifetime, parent);

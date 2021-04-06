@@ -2,8 +2,6 @@
 #ifndef ENGINE_RENDERER_OPENGL_H
 #define ENGINE_RENDERER_OPENGL_H
 
-//#define ENGINE_GL_DEBUG
-
 class Window;
 
 #include <GL/glew.h>
@@ -31,14 +29,5 @@ static bool GLLogCall(const char* function, const char* file, int line) {
     }
     return true;
 }
-
-namespace Engine::priv {
-    class OpenGL final {
-        private:
-
-        public:
-            static std::string getHighestGLSLVersion(Window& window) noexcept;
-    };
-};
 
 #endif

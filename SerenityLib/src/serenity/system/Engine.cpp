@@ -26,8 +26,8 @@ using namespace Engine::priv;
 
 //faux game functions if test suite enabled
 #if defined(ENGINE_TESTS)
-    void Game::initResources() {}
-    void Game::initLogic() {}
+    void Game::initResources(const EngineOptions& options) {}
+    void Game::initLogic(const EngineOptions& options) {}
     void Game::update(const float dt) {}
     void Game::render() {}
     void Game::cleanup() {}
@@ -63,6 +63,7 @@ EngineCore::EngineCore(const EngineOptions& options)
     , m_RenderModule{ options }
     , m_EngineEventHandler{ m_EventModule, m_RenderModule, m_ResourceManager }
 {
+    std::srand(static_cast<uint32_t>(std::time(0)));
     m_Misc.m_MainThreadID = std::this_thread::get_id();
 }
 EngineCore::~EngineCore(){
@@ -111,17 +112,17 @@ void EngineCore::init(const EngineOptions& options) {
 
     //init the game here
     Engine::setMousePosition(options.width / 2, options.height / 2);
-    Game::initResources();
-    Game::initLogic();
+    Game::initResources(options);
+    Game::initLogic(options);
 
     //the scene is the root of all games. create the default scene if 1 does not exist already
     if (m_ResourceManager.m_Scenes.size() == 0){
-        Scene* defaultScene = NEW Scene{ "Default" };
-        Resources::setCurrentScene(defaultScene);
+        Scene* defaultScene = Engine::Resources::addScene<Scene>("Default");
+        Engine::Resources::setCurrentScene(defaultScene);
     }
     Scene& scene = *m_ResourceManager.m_CurrentScene;
     if (!scene.getActiveCamera()) {
-        Camera* default_camera = scene.addCamera(60, (float)options.width / (float)options.height, 0.01f, 1000.0f);
+        auto default_camera = scene.addCamera<Camera>(60.0f, (float)options.width / (float)options.height, 0.01f, 1000.0f);
     }
 
     Engine::Renderer::ssao::setLevel((SSAOLevel::Level)options.ssao_level);

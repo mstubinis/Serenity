@@ -1,5 +1,5 @@
 #include <serenity/ecs/systems/SystemComponentBody.h>
-#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/ecs/components/ComponentModel.h>
 
 SystemComponentBody::SystemComponentBody(Engine::priv::ECS& ecs)

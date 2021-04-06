@@ -29,7 +29,6 @@ void TextureLoader::ImportIntoOpengl(Texture& texture, const Engine::priv::Image
         ));
     }
 }
-
 bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded_struct) {
     std::ifstream stream(image_loaded_struct.m_Filename.c_str(), std::ios::binary);
     if (!stream) {
@@ -254,9 +253,9 @@ void TextureLoader::WithdrawPixelsFromOpenGLMemory(Texture& texture, uint32_t im
     Engine::Renderer::bindTextureForModification(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
     GLCall(glGetTexImage(texture.m_CPUData.m_TextureType.toGLType(), 0, (GLenum)image.m_PixelFormat, (GLenum)image.m_PixelType, &pxls[0]));
 }
-void TextureLoader::GenerateMipmapsOpenGL(Texture& texture) {
-    if (texture.m_CPUData.m_Mipmapped) {
-        return;
+bool TextureLoader::GenerateMipmapsOpenGL(Texture& texture) {
+    if (texture.m_CPUData.m_Mipmapped || texture.m_TextureAddress == 0) {
+        return false;
     }
     Engine::Renderer::bindTextureForModification(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
     GLCall(glTexParameteri(texture.m_CPUData.m_TextureType.toGLType(), GL_TEXTURE_BASE_LEVEL, 0));
@@ -268,6 +267,7 @@ void TextureLoader::GenerateMipmapsOpenGL(Texture& texture) {
     GLCall(glTexParameteri(texture.m_CPUData.m_TextureType.toGLType(), GL_TEXTURE_MIN_FILTER, texture.m_CPUData.m_MinFilter));
     GLCall(glGenerateMipmap(texture.m_CPUData.m_TextureType.toGLType()));
     texture.m_CPUData.m_Mipmapped = true;
+    return true;
 }
 void TextureLoader::GeneratePBRData(Texture& texture, int convoludeTextureSize, int preEnvFilterSize) {
     auto cubemapConvolution            = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.get<Texture>(texture.name() + "Convolution");

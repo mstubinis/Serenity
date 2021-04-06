@@ -42,7 +42,7 @@ void Engine::priv::SMAA::internal_init_edge_vertex_code(const std::string& commo
             _offset[0] = mad(SMAA_PIXEL_SIZE.xyxy, vec4(-1.0, 0.0, 0.0, API_V_DIR(-1.0)), uv.xyxy);
             _offset[1] = mad(SMAA_PIXEL_SIZE.xyxy, vec4( 1.0, 0.0, 0.0,  API_V_DIR(1.0)), uv.xyxy);
             _offset[2] = mad(SMAA_PIXEL_SIZE.xyxy, vec4(-2.0, 0.0, 0.0, API_V_DIR(-2.0)), uv.xyxy);
-            gl_Position = VP * Model * vec4(vert,1.0);
+            gl_Position = VP * Model * vec4(vert, 1.0);
         }
     )";
 }
@@ -571,11 +571,14 @@ void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec
 
     Engine::Renderer::Settings::clear(true, false, true);//lighting rgba, stencil is completely filled with 0's
 
-    Engine::Renderer::stencilMask(0xFFFFFFFF);
-    Engine::Renderer::stencilFunc(GL_ALWAYS, 0xFFFFFFFF, 0xFFFFFFFF);
-    Engine::Renderer::stencilOp(GL_KEEP, GL_INCR, GL_INCR);
     Engine::Renderer::GLEnable(GL_STENCIL_TEST);
+    Engine::Renderer::stencilMask(0b11111111);
 
+    //fragments written during the edge test always pass. the edge fragment pass will discard bad pixels, leaving their stencil value in the buffer at zero.
+    Engine::Renderer::stencilFunc(GL_ALWAYS, 0b11111111, 0b11111111);
+
+    Engine::Renderer::stencilOp(GL_KEEP, GL_INCR, GL_INCR);
+    
     Engine::Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
 
     Engine::Renderer::sendUniform4Safe("SMAAInfo1Floats", THRESHOLD, DEPTH_THRESHOLD, LOCAL_CONTRAST_ADAPTATION_FACTOR, PREDICATION_THRESHOLD);
@@ -591,8 +594,9 @@ void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec
     Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
     Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
 
-    Engine::Renderer::stencilMask(0xFFFFFFFF);
-    Engine::Renderer::stencilFunc(GL_EQUAL, 0x00000001, 0x00000001);
+    Engine::Renderer::stencilMask(0b11111111);
+    //only if the stored stencil value is 0b00000001 will the fragments be evaluated
+    Engine::Renderer::stencilFunc(GL_EQUAL, 0b00000001, 0b11111111);
     Engine::Renderer::stencilOp(GL_KEEP, GL_KEEP, GL_KEEP); //Do not change stencil
 }
 void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, uint32_t outTexture, const Engine::priv::RenderModule& renderer) {

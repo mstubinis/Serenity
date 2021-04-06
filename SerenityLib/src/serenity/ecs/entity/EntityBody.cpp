@@ -1,5 +1,5 @@
 #include <serenity/ecs/entity/EntityBody.h>
-#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentTransform.h>
 
 EntityBody::EntityBody(Scene& scene) 
     : Entity{ scene }
@@ -11,103 +11,103 @@ EntityBody::EntityBody(const Entity& other)
     : Entity{ other }
 {}
 
-glm_quat EntityBody::getRotation() const {
-    return getComponent<ComponentBody>()->getRotation();
+glm::quat EntityBody::getRotation() const {
+    return getComponent<ComponentTransform>()->getRotation();
 }
-glm_quat EntityBody::getLocalRotation() const {
+glm::quat EntityBody::getLocalRotation() const {
     return getRotation();
 }
-glm_quat EntityBody::getWorldRotation() const {
-    return getComponent<ComponentBody>()->getWorldRotation();
+glm::quat EntityBody::getWorldRotation() const {
+    return getComponent<ComponentTransform>()->getWorldRotation();
 }
-glm_vec3 EntityBody::getScale() const {
-    return getComponent<ComponentBody>()->getScale();
+glm::vec3 EntityBody::getScale() const {
+    return getComponent<ComponentTransform>()->getScale();
 }
 glm_vec3 EntityBody::getPosition() const {
-    return getComponent<ComponentBody>()->getPosition();
+    return getComponent<ComponentTransform>()->getPosition();
 }
 glm_vec3 EntityBody::getWorldPosition() const {
-    return getComponent<ComponentBody>()->getWorldPosition();
+    return getComponent<ComponentTransform>()->getWorldPosition();
 }
 glm_vec3 EntityBody::getLocalPosition() const {
-    return getComponent<ComponentBody>()->getLocalPosition();
+    return getComponent<ComponentTransform>()->getLocalPosition();
 }
 
-const glm_vec3& EntityBody::forward() const {
-    return getComponent<ComponentBody>()->forward();
+const glm::vec3& EntityBody::getForward() const {
+    return getComponent<ComponentTransform>()->getForward();
 }
-const glm_vec3& EntityBody::right() const {
-    return getComponent<ComponentBody>()->right();
+const glm::vec3& EntityBody::getRight() const {
+    return getComponent<ComponentTransform>()->getRight();
 }
-const glm_vec3& EntityBody::up() const {
-    return getComponent<ComponentBody>()->up();
+const glm::vec3& EntityBody::getUp() const {
+    return getComponent<ComponentTransform>()->getUp();
 }
 
 /*
 glm_vec3 EntityBody::getLinearVelocity() const {
-    return getComponent<ComponentBody>()->getLinearVelocity();
+    return getComponent<ComponentTransform>()->getLinearVelocity();
 }
 */
 void EntityBody::translate(const glm_vec3& translation, bool local) {
-    getComponent<ComponentBody>()->translate(translation, local);
+    getComponent<ComponentTransform>()->translate(translation, local);
 }
 void EntityBody::translate(decimal x, decimal y, decimal z, bool local) {
-    getComponent<ComponentBody>()->translate(x, y, z, local);
+    getComponent<ComponentTransform>()->translate(x, y, z, local);
 }
 void EntityBody::translate(decimal t, bool local) {
-    getComponent<ComponentBody>()->translate(t, local);
+    getComponent<ComponentTransform>()->translate(t, local);
 }
 
 
-void EntityBody::rotate(const glm_vec3& rotation, bool local) {
-    getComponent<ComponentBody>()->rotate(rotation, local);
+void EntityBody::rotate(const glm::vec3& rotation, bool local) {
+    getComponent<ComponentTransform>()->rotate(rotation, local);
 }
-void EntityBody::rotate(decimal pitch_radians, decimal yaw_radians, decimal roll_radians, bool local) {
-    getComponent<ComponentBody>()->rotate(pitch_radians, yaw_radians, roll_radians, local);
+void EntityBody::rotate(float pitch_radians, float yaw_radians, float roll_radians, bool local) {
+    getComponent<ComponentTransform>()->rotate(pitch_radians, yaw_radians, roll_radians, local);
 }
 
 
-void EntityBody::scale(const glm_vec3& amount) {
-    getComponent<ComponentBody>()->scale(amount);
+void EntityBody::scale(const glm::vec3& amount) {
+    getComponent<ComponentTransform>()->scale(amount);
 }
-void EntityBody::scale(decimal x, decimal y, decimal z) {
-    getComponent<ComponentBody>()->scale(x, y, z);
+void EntityBody::scale(float x, float y, float z) {
+    getComponent<ComponentTransform>()->scale(x, y, z);
 }
-void EntityBody::scale(decimal s) {
-    getComponent<ComponentBody>()->scale(s);
+void EntityBody::scale(float s) {
+    getComponent<ComponentTransform>()->scale(s);
 }
 
 void EntityBody::setPosition(const glm_vec3& newPosition) {
-    getComponent<ComponentBody>()->setPosition(newPosition);
+    getComponent<ComponentTransform>()->setPosition(newPosition);
 }
 void EntityBody::setPosition(decimal x, decimal y, decimal z) {
-    getComponent<ComponentBody>()->setPosition(x, y, z);
+    getComponent<ComponentTransform>()->setPosition(x, y, z);
 }
 void EntityBody::setPosition(decimal p) {
-    getComponent<ComponentBody>()->setPosition(p);
+    getComponent<ComponentTransform>()->setPosition(p);
 }
 
-void EntityBody::setRotation(const glm_quat& newRotation) {
-    getComponent<ComponentBody>()->setRotation(newRotation);
+void EntityBody::setRotation(const glm::quat& newRotation) {
+    getComponent<ComponentTransform>()->setRotation(newRotation);
 }
-void EntityBody::setRotation(decimal quat_x, decimal quat_y, decimal quat_z, decimal quat_w) {
-    getComponent<ComponentBody>()->setRotation(quat_x, quat_y, quat_z, quat_w);
+void EntityBody::setRotation(float quat_x, float quat_y, float quat_z, float quat_w) {
+    getComponent<ComponentTransform>()->setRotation(quat_x, quat_y, quat_z, quat_w);
 }
 
-void EntityBody::setScale(const glm_vec3& newScale) {
-    getComponent<ComponentBody>()->setScale(newScale);
+void EntityBody::setScale(const glm::vec3& newScale) {
+    getComponent<ComponentTransform>()->setScale(newScale);
 }
-void EntityBody::setScale(decimal x, decimal y, decimal z) {
-    getComponent<ComponentBody>()->setScale(x, y, z);
+void EntityBody::setScale(float x, float y, float z) {
+    getComponent<ComponentTransform>()->setScale(x, y, z);
 }
-void EntityBody::setScale(decimal s) {
-    getComponent<ComponentBody>()->setScale(s);
+void EntityBody::setScale(float s) {
+    getComponent<ComponentTransform>()->setScale(s);
 }
 /*
 void EntityBody::setLinearVelocity(decimal x, decimal y, decimal z, bool local) {
-    getComponent<ComponentBody>()->setLinearVelocity(x, y, z, local);
+    getComponent<ComponentTransform>()->setLinearVelocity(x, y, z, local);
 }
 void EntityBody::setLinearVelocity(const glm_vec3& velocity, bool local) {
-    getComponent<ComponentBody>()->setLinearVelocity(velocity, local);
+    getComponent<ComponentTransform>()->setLinearVelocity(velocity, local);
 }
 */

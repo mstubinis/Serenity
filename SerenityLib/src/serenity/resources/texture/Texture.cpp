@@ -105,6 +105,14 @@ bool Texture::internal_bind_if_not_bound(uint32_t requestedAddress) noexcept {
     }
     return false;
 }
+bool Texture::generateMipmaps() {
+    if (*this == false) {
+        m_CommandQueue.emplace([this]() { generateMipmaps(); });
+        return false;
+    }
+    internal_bind_if_not_bound(m_TextureAddress);
+    return Engine::priv::TextureLoader::GenerateMipmapsOpenGL(*this);
+}
 void Texture::setXWrapping(TextureWrap wrap) {
     if (*this == false) {
         m_CommandQueue.emplace([this, wrap]() { setXWrapping(wrap); });
@@ -183,13 +191,15 @@ void Texture::setWrapping(TextureType type, TextureWrap wrap) {
     }
 }
 void Texture::setMinFilter(TextureType type, TextureFilter filter) {
-    GLCall(glTexParameteri(type.toGLType(), GL_TEXTURE_MIN_FILTER, filter.toGLType(true)));
+    const auto glType = filter.toGLType(true);
+    GLCall(glTexParameteri(type.toGLType(), GL_TEXTURE_MIN_FILTER, glType));
 }
 void Texture::setMaxFilter(TextureType type, TextureFilter filter) {
-    GLCall(glTexParameteri(type.toGLType(), GL_TEXTURE_MAG_FILTER, filter.toGLType(false)));
+    const auto glType = filter.toGLType(false);
+    GLCall(glTexParameteri(type.toGLType(), GL_TEXTURE_MAG_FILTER, glType));
 }
 void Texture::setAnisotropicFiltering(float anisotropicFiltering) {
-    anisotropicFiltering = glm::clamp(anisotropicFiltering, 1.0f, Engine::priv::OpenGLState::MAX_TEXTURE_MAX_ANISOTROPY);
+    anisotropicFiltering = glm::clamp(anisotropicFiltering, 1.0f, Engine::priv::OpenGLState::constants.MAX_TEXTURE_MAX_ANISOTROPY);
 
     if (*this == false) {
         m_CommandQueue.emplace([this, anisotropicFiltering]() {
@@ -198,7 +208,7 @@ void Texture::setAnisotropicFiltering(float anisotropicFiltering) {
         return;
     }
     internal_bind_if_not_bound(m_TextureAddress);
-    if (Engine::priv::RenderModule::OPENGL_VERSION >= 46) {
+    if (Engine::priv::OpenGLState::constants.supportsAniosotropicFiltering()) {
         GLCall(glTexParameterf(m_CPUData.m_TextureType.toGLType(), GL_TEXTURE_MAX_ANISOTROPY, anisotropicFiltering));
     }else{
         if (Engine::priv::OpenGLExtensions::supported(Engine::priv::OpenGLExtensions::ARB_texture_filter_anisotropic)) {

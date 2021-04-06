@@ -113,27 +113,27 @@ class ModelInstance final : public Observer {
 
         [[nodiscard]] inline const Engine::priv::ModelInstanceAnimationContainer& getRunningAnimations() const noexcept { return m_Animations; }
 
-        [[nodiscard]] inline float radius() const noexcept { return m_Radius; }
-        [[nodiscard]] inline uint32_t index() const noexcept { return m_Index; }
+        [[nodiscard]] inline float getRadius() const noexcept { return m_Radius; }
+        [[nodiscard]] inline uint32_t getIndex() const noexcept { return m_Index; }
         [[nodiscard]] inline ModelDrawingMode getDrawingMode() const noexcept { return m_DrawingMode; }
         inline void setDrawingMode(ModelDrawingMode drawMode) noexcept { m_DrawingMode = drawMode; }
         inline void forceRender(bool forced = true) noexcept { m_ForceRender = forced; }
         [[nodiscard]] inline bool isForceRendered() const noexcept { return m_ForceRender; }
-        [[nodiscard]] inline Entity parent() const noexcept { return m_Parent; }
-        [[nodiscard]] inline const Engine::color_vector_4& color() const noexcept { return m_Color; }
-        [[nodiscard]] inline const Engine::color_vector_4& godRaysColor() const noexcept { return m_GodRaysColor; }
-        [[nodiscard]] inline const glm::mat4& modelMatrix() const noexcept { return m_ModelMatrix; }
+        [[nodiscard]] inline Entity getParent() const noexcept { return m_Parent; }
+        [[nodiscard]] inline const Engine::color_vector_4& getColor() const noexcept { return m_Color; }
+        [[nodiscard]] inline const Engine::color_vector_4& getGodRaysColor() const noexcept { return m_GodRaysColor; }
+        [[nodiscard]] inline const glm::mat4& getModelMatrix() const noexcept { return m_ModelMatrix; }
         [[nodiscard]] inline const glm::vec3& getScale() const noexcept { return m_Scale; }
-        [[nodiscard]] inline const glm::vec3& position() const noexcept { return m_Position; }
-        [[nodiscard]] inline const glm::quat& orientation() const noexcept { return m_Orientation; }
-        [[nodiscard]] inline Handle shaderProgram() const noexcept { return m_ShaderProgramHandle; }
-        [[nodiscard]] inline Handle mesh() const noexcept { return m_MeshHandle; }
-        [[nodiscard]] inline Handle material() const noexcept { return m_MaterialHandle; }
-        [[nodiscard]] inline RenderStage stage() const noexcept { return m_Stage; }
+        [[nodiscard]] inline const glm::vec3& getPosition() const noexcept { return m_Position; }
+        [[nodiscard]] inline const glm::quat& getRotation() const noexcept { return m_Orientation; }
+        [[nodiscard]] inline Handle getShaderProgram() const noexcept { return m_ShaderProgramHandle; }
+        [[nodiscard]] inline Handle getMesh() const noexcept { return m_MeshHandle; }
+        [[nodiscard]] inline Handle getMaterial() const noexcept { return m_MaterialHandle; }
+        [[nodiscard]] inline RenderStage getStage() const noexcept { return m_Stage; }
         inline void show(bool shown = true) noexcept { m_Visible = shown; }
         inline void hide() noexcept { m_Visible = false; }
-        [[nodiscard]] inline bool visible() const noexcept { return m_Visible; }
-        [[nodiscard]] inline bool passedRenderCheck() const noexcept { return m_PassedRenderCheck; }
+        [[nodiscard]] inline bool isVisible() const noexcept { return m_Visible; }
+        [[nodiscard]] inline bool hasPassedRenderCheck() const noexcept { return m_PassedRenderCheck; }
         inline void setPassedRenderCheck(bool passed) noexcept { m_PassedRenderCheck = passed; }
 
 

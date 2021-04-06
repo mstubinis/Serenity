@@ -1,5 +1,5 @@
 #include <serenity/ecs/systems/SystemRemoveRigidBodies.h>
-#include <serenity/ecs/components/ComponentBodyRigid.h>
+#include <serenity/ecs/components/ComponentRigidBody.h>
 #include <serenity/physics/PhysicsModule.h>
 
 SystemRemoveRigidBodies::SystemRemoveRigidBodies(Engine::priv::ECS& ecs)

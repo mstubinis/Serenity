@@ -17,13 +17,10 @@ void Window::init(const EngineOptions& options) noexcept {
     m_Data.m_VideoMode.width   = options.width;
     m_Data.m_VideoMode.height  = options.height;
     m_Data.m_SFContextSettings = m_Data.internal_create(*this, options.window_title);
-    int requested_glsl_version = std::stoi(Engine::priv::OpenGL::getHighestGLSLVersion(*this));
     int opengl_version         = std::stoi(std::to_string(m_Data.m_SFContextSettings.majorVersion) + std::to_string(m_Data.m_SFContextSettings.minorVersion));
     Engine::priv::Core::m_Engine->m_RenderModule._onOpenGLContextCreation(
         m_Data.m_VideoMode.width, 
-        m_Data.m_VideoMode.height, 
-        (unsigned int)requested_glsl_version, 
-        (unsigned int)opengl_version
+        m_Data.m_VideoMode.height
     );
 
     m_Data.internal_init_position(*this);
@@ -50,8 +47,7 @@ void Window::init(const EngineOptions& options) noexcept {
     if (options.show_console) {
         ENGINE_PRODUCTION_LOG("Using OpenGL: " << m_Data.m_SFContextSettings.majorVersion << "." << m_Data.m_SFContextSettings.minorVersion <<
             ", with depth bits: " << m_Data.m_SFContextSettings.depthBits <<
-            " and stencil bits: " << m_Data.m_SFContextSettings.stencilBits <<
-            " and glsl version: " << requested_glsl_version)
+            " and stencil bits: " << m_Data.m_SFContextSettings.stencilBits)
     }
 }
 void Window::internal_init() noexcept {

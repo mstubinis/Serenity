@@ -10,7 +10,7 @@
 #include <serenity/system/Engine.h>
 #include <serenity/renderer/pipelines/IRenderingPipeline.h>
 
-#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/ecs/components/ComponentModel.h>
 
 using namespace Engine;
@@ -28,10 +28,10 @@ Decal::Decal(Handle materialHandle, const glm_vec3& localPosition, const glm::ve
     , m_InitialPosition{ localPosition }
     , m_LifetimeMax{ lifetimeMax}
 {
-    addComponent<ComponentBody>();
+    addComponent<ComponentTransform>();
     addComponent<ComponentModel>(priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), materialHandle, ShaderProgram::Decal, stage);
 
-    auto& transform  = *getComponent<ComponentBody>();
+    auto& transform  = *getComponent<ComponentTransform>();
     auto& model      = *getComponent<ComponentModel>();
 
     const decimal factor = static_cast<decimal>(0.2f * size);
@@ -74,7 +74,7 @@ void Decal::update(const float dt) {
         if (m_LifetimeCurrent < m_LifetimeMax && m_LifetimeCurrent >= m_LifetimeMax - 1.0f) {
             auto& model       = *getComponent<ComponentModel>();
             auto& instance    = model.getModel();
-            const auto& color = instance.color();
+            const auto& color = instance.getColor();
             const float alpha = m_LifetimeMax - m_LifetimeCurrent;
             instance.setColor(color.r(), color.g(), color.b(), alpha);
         }

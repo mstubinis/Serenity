@@ -119,8 +119,8 @@ void RenderGraph::sort_bruteforce(Camera& camera, SortingMode sortingMode) {
 #ifndef _DEBUG
     glm_vec3 camPos = (camera.getPosition());
     auto lambda_sorter = [sortingMode, &camPos](ModelInstance* lhs, ModelInstance* rhs) {
-        auto [lhsBody, lhsModel] = lhs->parent().getComponents<ComponentBody, ComponentModel>();
-        auto [rhsBody, rhsModel] = rhs->parent().getComponents<ComponentBody, ComponentModel>();
+        auto [lhsBody, lhsModel] = lhs->parent().getComponents<ComponentTransform, ComponentModel>();
+        auto [rhsBody, rhsModel] = rhs->parent().getComponents<ComponentTransform, ComponentModel>();
 
         auto lhsPos    = lhsBody->getPosition();
         auto rhsPos    = rhsBody->getPosition();
@@ -144,8 +144,8 @@ void RenderGraph::sort_cheap_bruteforce(Camera& camera, SortingMode sortingMode)
 #ifndef _DEBUG
     glm::vec3 camPos = glm::vec3(camera.getPosition());
     auto lambda_sorter = [sortingMode, &camPos](ModelInstance* lhs, ModelInstance* rhs) {
-        auto lhsBody = lhs->parent().getComponent<ComponentBody>();
-        auto rhsBody = rhs->parent().getComponent<ComponentBody>();
+        auto lhsBody = lhs->parent().getComponent<ComponentTransform>();
+        auto rhsBody = rhs->parent().getComponent<ComponentTransform>();
 
         glm::vec3 lhsPos = glm::vec3(lhsBody->getPosition()) + lhs->position();
         glm::vec3 rhsPos = glm::vec3(rhsBody->getPosition()) + rhs->position();
@@ -168,8 +168,8 @@ void RenderGraph::sort_cheap(Camera& camera, SortingMode sortingMode) {
                 auto  lhsParent        = lhs->parent();
                 auto  rhsParent        = rhs->parent();
 
-                auto lhsBody = lhsParent.getComponent<ComponentBody>();
-                auto rhsBody = rhsParent.getComponent<ComponentBody>();
+                auto lhsBody = lhsParent.getComponent<ComponentTransform>();
+                auto rhsBody = rhsParent.getComponent<ComponentTransform>();
 
                 glm::vec3 lhsPos       = glm::vec3(lhsBody->getPosition()) + lhs->position();
                 glm::vec3 rhsPos       = glm::vec3(rhsBody->getPosition()) + rhs->position();
@@ -192,8 +192,8 @@ void RenderGraph::sort(Camera& camera, SortingMode sortingMode) {
         for (auto& meshNode : materialNode.meshNodes) {
             auto& vect = meshNode.instanceNodes;
             auto lambda_sorter = [sortingMode, &camPos](ModelInstance* lhs, ModelInstance* rhs) {
-                auto [lhsBody, lhsModel] = lhs->parent().getComponents<ComponentBody, ComponentModel>();
-                auto [rhsBody, rhsModel] = rhs->parent().getComponents<ComponentBody, ComponentModel>();
+                auto [lhsBody, lhsModel] = lhs->parent().getComponents<ComponentTransform, ComponentModel>();
+                auto [rhsBody, rhsModel] = rhs->parent().getComponents<ComponentTransform, ComponentModel>();
 
                 auto lhsPos     = lhsBody->getPosition();
                 auto rhsPos     = rhsBody->getPosition();
@@ -242,7 +242,7 @@ void RenderGraph::validate_model_instances_for_rendering(Viewport& viewport, Cam
     auto lambda = [&](std::vector<ModelInstance*>& inInstanceNodes, const glm_vec3& camPos) {
         for (auto& modelInstancePtr : inInstanceNodes) {
             auto& modelInstance    = *modelInstancePtr;
-            auto body              = modelInstance.parent().getComponent<ComponentBody>();
+            auto body              = modelInstance.parent().getComponent<ComponentTransform>();
             auto model             = modelInstance.parent().getComponent<ComponentModel>();
             bool is_valid_viewport = PublicModelInstance::IsViewportValid(modelInstance, viewport);
             if (is_valid_viewport) {
@@ -286,7 +286,7 @@ void RenderGraph::render(Engine::priv::RenderModule& renderer, Viewport& viewpor
                     auto mesh = meshNode.mesh.get<Mesh>();
                     renderer.bind(mesh);
                     for (auto& modelInstance : meshNode.instanceNodes) {
-                        auto transform       = modelInstance->parent().getComponent<ComponentBody>();
+                        auto transform       = modelInstance->parent().getComponent<ComponentTransform>();
                         auto renderingMatrix = transform->getWorldMatrixRendering();
                         if (modelInstance->passedRenderCheck()) {
                             if (sortingMode != SortingMode::None) {
@@ -319,7 +319,7 @@ void RenderGraph::render_bruteforce(Engine::priv::RenderModule& renderer, Viewpo
     for (auto& modelInstance : m_InstancesTotal) {
         auto mesh            = modelInstance->mesh().get<Mesh>();
         auto material        = modelInstance->material().get<Material>();
-        auto transform       = modelInstance->parent().getComponent<ComponentBody>();
+        auto transform       = modelInstance->parent().getComponent<ComponentTransform>();
         auto renderingMatrix = transform->getWorldMatrixRendering();
         if (modelInstance->passedRenderCheck()) {
             if (sortingMode != SortingMode::None) {

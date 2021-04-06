@@ -1,6 +1,6 @@
 #include <serenity/lights/SpotLight.h>
 #include <serenity/utils/Utils.h>
-#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/scene/Scene.h>
 
 SpotLight::SpotLight(Scene* scene, const glm_vec3& pos, const glm_vec3& direction, float innerCutoffInDegrees, float outerCutoffInDegrees)
@@ -14,7 +14,7 @@ SpotLight::SpotLight(Scene* scene, const glm_vec3& pos, const glm_vec3& directio
 SpotLight::~SpotLight() {
 }
 void SpotLight::setDirection(decimal xDir, decimal yDir, decimal zDir) noexcept {
-    auto body = getComponent<ComponentBody>();
+    auto body = getComponent<ComponentTransform>();
     if (body) {
         body->alignTo(xDir, yDir, zDir);
     }

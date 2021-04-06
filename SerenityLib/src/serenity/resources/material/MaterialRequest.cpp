@@ -68,7 +68,7 @@ void MaterialRequest::request(bool inAsync) {
         uint32_t count = 0;
         for (const auto& textureRequest : texture_requests) {
             if (textureRequest->m_FileData.m_FileExists) {
-                materialRequest.m_Part.m_Handle.get<Material>()->getComponent(count).layer(0).setTexture(textureRequest->m_Part.m_Handle);
+                materialRequest.m_Part.m_Handle.get<Material>()->getComponent(count).getLayer(0).setTexture(textureRequest->m_Part.m_Handle);
                 ++count;
             }
         }

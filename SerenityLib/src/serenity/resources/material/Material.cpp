@@ -58,15 +58,15 @@ constexpr auto DEFAULT_MATERIAL_BIND_FUNCTOR = [](Material* m) {
         }
     }
     Engine::Renderer::sendUniform1Safe("numComponents", (int)numComponents);
-    Engine::Renderer::sendUniform1Safe("Shadeless", (int)m->shadeless());
-    Engine::Renderer::sendUniform4Safe("Material_F0AndID", m->f0().r(), m->f0().g(), m->f0().b(), (float)m->id());
+    Engine::Renderer::sendUniform1Safe("Shadeless", (int)m->getShadeless());
+    Engine::Renderer::sendUniform4Safe("Material_F0AndID", m->getF0().r(), m->getF0().g(), m->getF0().b(), (float)m->getID());
     Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesOne",
-        (float)m->glow() * ONE_OVER_255,
-        (float)m->ao() * ONE_OVER_255,
-        (float)m->metalness() * ONE_OVER_255,
-        (float)m->smoothness() * ONE_OVER_255
+        (float)m->getGlow()       * ONE_OVER_255,
+        (float)m->getAO()         * ONE_OVER_255,
+        (float)m->getMetalness()  * ONE_OVER_255,
+        (float)m->getSmoothness() * ONE_OVER_255
     );
-    Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesTwo", (float)(m->alpha()) * ONE_OVER_255, (float)m->diffuseModel(), (float)m->specularModel(), 0.0f);
+    Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesTwo", (float)(m->getAlpha()) * ONE_OVER_255, (float)m->getDiffuseModel(), (float)m->getSpecularModel(), 0.0f);
 };
 
 #pragma region Material
@@ -190,7 +190,7 @@ MaterialComponent& Material::addComponentSpecular(std::string_view textureFile){
 MaterialComponent& Material::addComponentAO(std::string_view textureFile, uint8_t baseValue){
     auto texture     = Engine::priv::MaterialLoader::LoadTextureAO(textureFile);
     auto& component  = *internal_add_component_generic(MaterialComponentType::AO, texture.m_Handle);
-    auto& layer      = component.layer(0);
+    auto& layer      = component.getLayer(0);
     auto& data2_     = layer.getMaterialLayerMiscData();
     layer.setMiscData(0.0f, 1.0f, 1.0f, data2_.aMultiplier);
     setAO(baseValue);
@@ -199,7 +199,7 @@ MaterialComponent& Material::addComponentAO(std::string_view textureFile, uint8_
 MaterialComponent& Material::addComponentMetalness(std::string_view textureFile, uint8_t baseValue){
     auto texture     = Engine::priv::MaterialLoader::LoadTextureMetalness(textureFile);
     auto& component  = *internal_add_component_generic(MaterialComponentType::Metalness, texture.m_Handle);
-    auto& layer      = component.layer(0);
+    auto& layer      = component.getLayer(0);
     auto& data2_     = layer.getMaterialLayerMiscData();
     layer.setMiscData(0.01f, 0.99f, 1.0f, data2_.aMultiplier);
     setMetalness(baseValue);
@@ -208,7 +208,7 @@ MaterialComponent& Material::addComponentMetalness(std::string_view textureFile,
 MaterialComponent& Material::addComponentSmoothness(std::string_view textureFile, uint8_t baseValue){
     auto texture     = Engine::priv::MaterialLoader::LoadTextureSmoothness(textureFile);
     auto& component  = *internal_add_component_generic(MaterialComponentType::Smoothness, texture.m_Handle);
-    auto& layer      = component.layer(0);
+    auto& layer      = component.getLayer(0);
     auto& data2_     = layer.getMaterialLayerMiscData();
     layer.setMiscData(0.01f, 0.99f, 1.0f, data2_.aMultiplier);
     setSmoothness(baseValue);
@@ -222,7 +222,7 @@ MaterialComponent& Material::addComponentReflection(std::string_view cubemapName
         cubemap.m_Handle = Engine::Resources::getCurrentScene()->skybox()->texture();
     }
     auto& component = *internal_add_component_generic(MaterialComponentType::Reflection, Handle{});
-    auto& layer     = component.layer(0);
+    auto& layer     = component.getLayer(0);
     auto& data2_    = layer.getMaterialLayerMiscData();
     layer.setMask(mask.m_Handle);
     layer.setCubemap(cubemap.m_Handle);
@@ -237,7 +237,7 @@ MaterialComponent& Material::addComponentRefraction(std::string_view cubemapName
         cubemap.m_Handle = Engine::Resources::getCurrentScene()->skybox()->texture();
     }
     auto& component = *internal_add_component_generic(MaterialComponentType::Refraction, Handle{});
-    auto& layer     = component.layer(0);
+    auto& layer     = component.getLayer(0);
     auto& data2_    = layer.getMaterialLayerMiscData();
     layer.setMask(mask.m_Handle);
     layer.setCubemap(cubemap.m_Handle);
@@ -247,7 +247,7 @@ MaterialComponent& Material::addComponentRefraction(std::string_view cubemapName
 MaterialComponent& Material::addComponentParallaxOcclusion(std::string_view textureFile, float heightScale){
     auto texture     = Engine::priv::MaterialLoader::LoadTextureNormal(textureFile);
     auto& component  = *internal_add_component_generic(MaterialComponentType::ParallaxOcclusion, texture.m_Handle);
-    auto& layer      = component.layer(0);
+    auto& layer      = component.getLayer(0);
     auto& data2_     = layer.getMaterialLayerMiscData();
     layer.setMiscData(heightScale, data2_.gMultiplier, data2_.bMultiplier, data2_.aMultiplier);
     return component;
@@ -298,8 +298,8 @@ void Material::setAlpha(uint8_t alpha) {
     internal_update_global_material_pool(false);
 }
 void Material::update(const float dt) {
-    std::for_each(std::begin(m_Components), std::end(m_Components), [dt](auto& component) {
+    for (auto& component : m_Components) {
         component.update(dt);
-    });
+    }
 }
 #pragma endregion

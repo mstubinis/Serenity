@@ -26,7 +26,7 @@ constexpr ShaderProgram::BindFunc DefaultShaderBindFunctor = [](ShaderProgram* s
         return;
     }
     //yes this is needed
-    if (priv::RenderModule::GLSL_VERSION < 140) {
+    if (!Engine::priv::OpenGLState::constants.supportsUBO()) {
         Engine::Renderer::sendUniformMatrix4Safe("CameraViewProj", camera->getViewProjection());
     }
 };

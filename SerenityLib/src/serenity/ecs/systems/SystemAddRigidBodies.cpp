@@ -1,5 +1,5 @@
 #include <serenity/ecs/systems/SystemAddRigidBodies.h>
-#include <serenity/ecs/components/ComponentBodyRigid.h>
+#include <serenity/ecs/components/ComponentRigidBody.h>
 #include <serenity/physics/PhysicsModule.h>
 #include <serenity/scene/Scene.h>
 

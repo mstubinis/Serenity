@@ -5,7 +5,7 @@
 #include <serenity/renderer/Renderer.h>
 #include <serenity/scene/Camera.h>
 #include <serenity/ecs/components/ComponentModel.h>
-#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentTransform.h>
 
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleShape.h>
@@ -18,8 +18,8 @@
 Engine::view_ptr<Engine::priv::PhysicsModule> Engine::priv::PhysicsModule::PHYSICS_MANAGER = nullptr;
 
 void ProcessManifoldContact(btManifoldPoint& cp, btCollisionObject* collObjA, btCollisionObject* collObjB, btCollisionShape* childShapeA, btCollisionShape* childShapeB, const btCollisionShape* shapeA, const btCollisionShape* shapeB) {
-    auto aRigidBody   = static_cast<ComponentBodyRigid*>(collObjA->getUserPointer());
-    auto bRigidBody   = static_cast<ComponentBodyRigid*>(collObjB->getUserPointer());
+    auto aRigidBody   = static_cast<ComponentRigidBody*>(collObjA->getUserPointer());
+    auto bRigidBody   = static_cast<ComponentRigidBody*>(collObjB->getUserPointer());
     if (aRigidBody && bRigidBody) {
         glm::vec3 ptA            = Engine::Math::toGLM(cp.getPositionWorldOnA());
         glm::vec3 ptB            = Engine::Math::toGLM(cp.getPositionWorldOnB());
@@ -318,7 +318,7 @@ std::vector<Engine::RayCastResult> internal_ray_cast(const btVector3& start, con
     }
     return result;
 }
-std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const btVector3& start, const btVector3& end, ComponentBodyRigid* ignoredRigidBody, MaskType group, MaskType mask){
+std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const btVector3& start, const btVector3& end, ComponentRigidBody* ignoredRigidBody, MaskType group, MaskType mask){
     if (ignoredRigidBody) {
         Engine::Physics::removeRigidBody(ignoredRigidBody->getBtBody());
     }
@@ -328,7 +328,7 @@ std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const btVector3& sta
     }
     return result;
 }
-std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const btVector3& start, const btVector3& end, std::vector<ComponentBodyRigid*>& ignoredRigidBodies, MaskType group, MaskType mask){
+std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const btVector3& start, const btVector3& end, std::vector<ComponentRigidBody*>& ignoredRigidBodies, MaskType group, MaskType mask){
     for (auto& ignoredRigidBody : ignoredRigidBodies) {
         Engine::Physics::removeRigidBody(ignoredRigidBody->getBtBody());
     }
@@ -342,7 +342,7 @@ std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const glm::vec3& sta
     btVector3 start_ = Engine::Math::toBT(start);
     btVector3 end_   = Engine::Math::toBT(end);
     if (ignoredEntity) {
-        auto rigid = ignoredEntity->getComponent<ComponentBodyRigid>();
+        auto rigid = ignoredEntity->getComponent<ComponentRigidBody>();
         if (rigid) {
             return Engine::Physics::rayCast(start_, end_, rigid, group, mask);
         }
@@ -352,16 +352,16 @@ std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const glm::vec3& sta
 std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const glm::vec3& start, const glm::vec3& end , std::vector<Entity>& ignoredEntities, MaskType group, MaskType mask){
     btVector3 start_ = Engine::Math::toBT(start);
     btVector3 end_   = Engine::Math::toBT(end);
-    auto objs = Engine::create_and_reserve<std::vector<ComponentBodyRigid*>>((uint32_t)ignoredEntities.size());
+    auto objs = Engine::create_and_reserve<std::vector<ComponentRigidBody*>>((uint32_t)ignoredEntities.size());
     for(auto ignoredEntity : ignoredEntities){
-        auto rigid = ignoredEntity.getComponent<ComponentBodyRigid>();
+        auto rigid = ignoredEntity.getComponent<ComponentRigidBody>();
         if(rigid) {
             objs.emplace_back(rigid);
         }
     }
     return Engine::Physics::rayCast(start_, end_, objs, group, mask);
 }
-Engine::RayCastResult Engine::Physics::rayCastNearest(const btVector3& start, const btVector3& end, ComponentBodyRigid* ignoredRigidBody, MaskType group, MaskType mask) {
+Engine::RayCastResult Engine::Physics::rayCastNearest(const btVector3& start, const btVector3& end, ComponentRigidBody* ignoredRigidBody, MaskType group, MaskType mask) {
     if (ignoredRigidBody) {
         Engine::Physics::removeRigidBody(ignoredRigidBody->getBtBody());
     }
@@ -371,7 +371,7 @@ Engine::RayCastResult Engine::Physics::rayCastNearest(const btVector3& start, co
     }
     return result;
 }
-Engine::RayCastResult Engine::Physics::rayCastNearest(const btVector3& start, const btVector3& end, std::vector<ComponentBodyRigid*>& ignoredRigidBodies, MaskType group, MaskType mask) {
+Engine::RayCastResult Engine::Physics::rayCastNearest(const btVector3& start, const btVector3& end, std::vector<ComponentRigidBody*>& ignoredRigidBodies, MaskType group, MaskType mask) {
     for (auto& ignoredRigidBody : ignoredRigidBodies) {
         Physics::removeRigidBody(ignoredRigidBody->getBtBody());
     }
@@ -385,7 +385,7 @@ Engine::RayCastResult Engine::Physics::rayCastNearest(const glm::vec3& start, co
     btVector3 start_ = Engine::Math::toBT(start);
     btVector3 end_   = Engine::Math::toBT(end);
     if (ignoredEntity) {
-        auto rigid = ignoredEntity->getComponent<ComponentBodyRigid>();
+        auto rigid = ignoredEntity->getComponent<ComponentRigidBody>();
         if (rigid) {
             return Engine::Physics::rayCastNearest(start_, end_, rigid, group, mask);
         }
@@ -395,9 +395,9 @@ Engine::RayCastResult Engine::Physics::rayCastNearest(const glm::vec3& start, co
 Engine::RayCastResult Engine::Physics::rayCastNearest(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredEntities, MaskType group, MaskType mask) {
     btVector3 start_ = Engine::Math::toBT(start);
     btVector3 end_   = Engine::Math::toBT(end);
-    auto objs = Engine::create_and_reserve<std::vector<ComponentBodyRigid*>>((uint32_t)ignoredEntities.size());
+    auto objs = Engine::create_and_reserve<std::vector<ComponentRigidBody*>>((uint32_t)ignoredEntities.size());
     for (auto ignoredEntity : ignoredEntities) {
-        auto rigid = ignoredEntity.getComponent<ComponentBodyRigid>();
+        auto rigid = ignoredEntity.getComponent<ComponentRigidBody>();
         if (rigid) {
             objs.emplace_back(rigid);
         }

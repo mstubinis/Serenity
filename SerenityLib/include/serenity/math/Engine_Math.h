@@ -40,17 +40,20 @@ namespace Engine::Math {
     void Float32From16(float*    out, const uint16_t* in, uint32_t arraySize) noexcept;
     void Float16From32(uint16_t* out, const float*    in, uint32_t arraySize) noexcept;
 
-    [[nodiscard]] glm::vec2 rotate2DPoint(const glm::vec2& point, float angle, const glm::vec2& origin = glm::vec2(0.0f, 0.0f));
+    [[nodiscard]] glm::vec2 rotate2DPoint(const glm::vec2& point, float angle, const glm::vec2& origin = glm::vec2{ 0.0f, 0.0f });
 
-    [[nodiscard]] glm_quat toGLM(const btQuaternion& q);
+    [[nodiscard]] glm::quat toGLM(const btQuaternion&);
     [[nodiscard]] glm_vec3 toGLM(const btVector3&);
     [[nodiscard]] glm::vec3 toGLM(const aiVector3D&);
     [[nodiscard]] glm::mat4 toGLM(const aiMatrix4x4&);
     [[nodiscard]] glm::mat3 toGLM(const aiMatrix3x3&);
     [[nodiscard]] glm::quat toGLM(const aiQuaternion&);
 
-    [[nodiscard]] btQuaternion toBT(const glm_quat& q);
+    [[nodiscard]] btQuaternion toBT(const glm::quat&);
+#if defined(ENGINE_HIGH_PRECISION)
     [[nodiscard]] btVector3 toBT(const glm_vec3&);
+#endif
+    [[nodiscard]] btVector3 toBT(const glm::vec3&);
 
     [[nodiscard]] bool rect_fully_contained(const glm::vec4& bigger, const glm::vec4& smaller) noexcept;
     [[nodiscard]] glm::vec4 rect_union(const glm::vec4& bigger, const glm::vec4& smaller) noexcept;
@@ -62,34 +65,48 @@ namespace Engine::Math {
     [[nodiscard]] glm::vec3 direction(const glm::vec3& eye, const glm::vec3& target);
 
     void translate(const btRigidBody&, btVector3&, bool local) noexcept;
-    void rotate(glm_quat& orientation, decimal pitch, decimal yaw, decimal roll) noexcept;
     void rotate(glm::quat& orientation, float pitch, float yaw, float roll) noexcept;
-    void setRotation(glm_quat& orientation, decimal pitch, decimal yaw, decimal roll) noexcept;
     void setRotation(glm::quat& orientation, float pitch, float yaw, float roll) noexcept;
-    void setFinalModelMatrix(glm_mat4& modelMatrix, const glm_vec3& position,const glm_quat& rotation, const glm_vec3& scale) noexcept;
+    void setFinalModelMatrix(glm_mat4& modelMatrix, const glm_vec3& position, const glm::quat& rotation, const glm::vec3& scale) noexcept;
     void setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) noexcept;
 
     [[nodiscard]] glm::vec3 getMatrixPosition(const glm::mat4& matrix);
+#if defined(ENGINE_HIGH_PRECISION)
     [[nodiscard]] glm_vec3 getMatrixPosition(const glm_mat4& matrix);
-    void removeMatrixPosition(glm::mat4&);
+#endif
 
-    void recalculateForwardRightUp(const glm_quat&, glm_vec3& forward, glm_vec3& right, glm_vec3& up);
-    void recalculateForwardRightUp(const btRigidBody&, glm_vec3& forward, glm_vec3& right, glm_vec3& up);
+    template<class MATRIX> void removeMatrixPosition(MATRIX& matrix) noexcept {
+        matrix[3][0] = 0.0f;
+        matrix[3][1] = 0.0f;
+        matrix[3][2] = 0.0f;
+    }
 
-    [[nodiscard]] glm::vec3 getForward(const glm_quat& q);
-    [[nodiscard]] glm::vec3 getRight(const glm_quat& q);
-    [[nodiscard]] glm::vec3 getUp(const glm_quat& q);
-    [[nodiscard]] glm::vec3 getColumnVector(const btRigidBody& b, unsigned int column);
+    template<class QUAT> [[nodiscard]] inline glm::vec3 getForward(const QUAT& q) noexcept { return glm::normalize(q * glm::vec3{ 0.0f, 0.0f, -1.0f }); }
+    template<class QUAT> [[nodiscard]] inline glm::vec3 getRight(const QUAT& q) noexcept { return glm::normalize(q * glm::vec3{ 1.0f, 0.0f, 0.0f }); }
+    template<class QUAT> [[nodiscard]] inline glm::vec3 getUp(const QUAT& q) noexcept { return glm::normalize(q * glm::vec3{ 0.0f, 1.0f, 0.0f }); }
+
+
+    [[nodiscard]] glm::vec3 getColumnVector(const btRigidBody& b, uint32_t column);
     [[nodiscard]] glm::vec3 getForward(const btRigidBody& b);
     [[nodiscard]] glm::vec3 getRight(const btRigidBody& b);
     [[nodiscard]] glm::vec3 getUp(const btRigidBody& b);
 
+    template<class F, class R, class U> void recalculateForwardRightUp(const glm::quat& quat, F& f, R& r, U& u) noexcept {
+        f = getForward(quat);
+        r = getRight(quat);
+        u = getUp(quat);
+    }
+    template<class F, class R, class U> void recalculateForwardRightUp(const btRigidBody& BTRigidBody, F& f, R& r, U& u) noexcept {
+        f = getForward(BTRigidBody);
+        r = getRight(BTRigidBody);
+        u = getUp(BTRigidBody);
+    }
+
     [[nodiscard]] float getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bool degrees = true);
 
-    //void alignTo(glm_quat& o, const glm_vec3& direction) noexcept;
-    //void alignTo(glm_quat& o, decimal x, decimal y, decimal z) noexcept;
-    [[nodiscard]] glm_quat alignTo(decimal x, decimal y, decimal z) noexcept;
-    [[nodiscard]] inline glm_quat alignTo(const glm_vec3& direction) noexcept { return alignTo(direction.x, direction.y, direction.z); }
+
+    [[nodiscard]] glm::quat alignTo(float x, float y, float z) noexcept;
+    template<class VECTOR3> [[nodiscard]] inline glm::quat alignTo(const VECTOR3& direction) noexcept { return alignTo(direction.x, direction.y, direction.z); }
 
     void setColor(glm::vec3& color, float r, float g, float b);
     void setColor(glm::vec4& color, float r, float g, float b, float a);

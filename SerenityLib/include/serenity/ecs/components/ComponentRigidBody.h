@@ -1,16 +1,16 @@
 #pragma once
-#ifndef ENGINE_ECS_COMPONENT_BODY_RIGID_H
-#define ENGINE_ECS_COMPONENT_BODY_RIGID_H
+#ifndef ENGINE_ECS_COMPONENT_RIGID_BODY_H
+#define ENGINE_ECS_COMPONENT_RIGID_BODY_H
 
 struct SceneOptions;
 class  ComponentModel;
-class  ComponentBodyRigid;
-class  ComponentBody;
+class  ComponentRigidBody;
+class  ComponentTransform;
 class  btCollisionObject;
 class  btRigidBody;
 class  btRigidBodyEnhanced;
 class  SystemComponentBody;
-class  SystemComponentBodyRigid;
+class  SystemComponentRigidBody;
 class  SystemBodyParentChild;
 class  SystemRigidTransformSync;
 class  SystemResolveTransformDirty;
@@ -22,7 +22,6 @@ namespace Engine::priv {
 #include <serenity/ecs/ECS.h>
 #include <serenity/physics/PhysicsIncludes.h>
 #include <LinearMath/btDefaultMotionState.h>
-#include <serenity/ecs/entity/Entity.h>
 #include <serenity/events/Observer.h>
 #include <serenity/ecs/components/ComponentBaseClass.h>
 #include <serenity/renderer/RendererIncludes.h>
@@ -36,8 +35,8 @@ using btRigidBodyType = btRigidBody;
 #endif
 
 struct RigidCollisionCallbackEventData final {
-    ComponentBodyRigid&  ownerRigid;
-    ComponentBodyRigid&  otherRigid;
+    ComponentRigidBody&  ownerRigid;
+    ComponentRigidBody&  otherRigid;
     glm::vec3&           ownerHit;
     glm::vec3&           otherHit;
     glm::vec3&           ownerLocalHit;
@@ -60,7 +59,7 @@ struct RigidCollisionCallbackEventData final {
     RigidCollisionCallbackEventData(RigidCollisionCallbackEventData&&) noexcept = delete;
     RigidCollisionCallbackEventData& operator=(RigidCollisionCallbackEventData&&) noexcept = delete;
 
-    RigidCollisionCallbackEventData(ComponentBodyRigid& ownerRigid_, ComponentBodyRigid& otherRigid_, glm::vec3& ownerHit_, glm::vec3& otherHit_, glm::vec3& normal_,
+    RigidCollisionCallbackEventData(ComponentRigidBody& ownerRigid_, ComponentRigidBody& otherRigid_, glm::vec3& ownerHit_, glm::vec3& otherHit_, glm::vec3& normal_,
         glm::vec3& ownerLocalHit_, glm::vec3& otherLocalHit_, glm::vec3& normalFromA_, glm::vec3& normalFromB_
     )
         : ownerRigid{ ownerRigid_ }
@@ -75,10 +74,10 @@ struct RigidCollisionCallbackEventData final {
     {}
 };
 
-class ComponentBodyRigid : public ComponentBaseClass<ComponentBodyRigid> {
+class ComponentRigidBody : public ComponentBaseClass<ComponentRigidBody> {
     friend class  ComponentModel;
     friend class  SystemComponentBody;
-    friend class  SystemComponentBodyRigid;
+    friend class  SystemComponentRigidBody;
     friend class  SystemBodyParentChild;
     friend class  SystemRigidTransformSync;
     friend class  SystemResolveTransformDirty;
@@ -99,22 +98,22 @@ class ComponentBodyRigid : public ComponentBaseClass<ComponentBodyRigid> {
         void internal_update_misc() noexcept;
 
         void internal_setPosition(decimal x, decimal y, decimal z);
-        void internal_setRotation(decimal x, decimal y, decimal z, decimal w);
-        void internal_setScale(decimal x, decimal y, decimal z);
+        void internal_setRotation(float x, float y, float z, float w);
+        void internal_setScale(float x, float y, float z);
         void internal_calculate_mass();
 
         glm_vec3 internal_getPosition();
-        glm_quat internal_getRotation();
+        glm::quat internal_getRotation();
     public:
-        ComponentBodyRigid(Entity entity);
-        ComponentBodyRigid(const ComponentBodyRigid&)            = delete;
-        ComponentBodyRigid& operator=(const ComponentBodyRigid&) = delete;
-        ComponentBodyRigid(ComponentBodyRigid&&) noexcept;
-        ComponentBodyRigid& operator=(ComponentBodyRigid&&) noexcept;
-        ~ComponentBodyRigid();
+        ComponentRigidBody(Entity entity);
+        ComponentRigidBody(const ComponentRigidBody&)            = delete;
+        ComponentRigidBody& operator=(const ComponentRigidBody&) = delete;
+        ComponentRigidBody(ComponentRigidBody&&) noexcept;
+        ComponentRigidBody& operator=(ComponentRigidBody&&) noexcept;
+        ~ComponentRigidBody();
 
         [[nodiscard]] inline Entity getOwner() const noexcept { return m_Owner; }
-        [[nodiscard]] inline float mass() const noexcept { return m_Mass; }
+        [[nodiscard]] inline float getMass() const noexcept { return m_Mass; }
 
         //immediately syncs physics object to graphics object without waiting for it to occur normally for this frame
         void forcePhysicsSync() noexcept;

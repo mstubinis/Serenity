@@ -62,15 +62,13 @@ class Viewport final {
 
         ~Viewport() = default;
 
-        [[nodiscard]] inline constexpr uint32_t id() const noexcept { return m_ID; }
+        [[nodiscard]] inline constexpr uint32_t getId() const noexcept { return m_ID; }
         inline void setID(uint32_t id) noexcept { m_ID = id; }
 
         inline void render(Engine::priv::RenderModule& renderModule, Viewport& viewport, bool mainRenderFunc) const noexcept { 
             if(m_RenderFuncPointer) m_RenderFuncPointer(renderModule, viewport, mainRenderFunc); 
         }
-        inline void setRenderFunc(RenderFunc renderFuncPtr) noexcept { 
-            m_RenderFuncPointer = renderFuncPtr; 
-        }
+        inline void setRenderFunc(RenderFunc renderFuncPtr) noexcept { m_RenderFuncPointer = renderFuncPtr; }
 
         [[nodiscard]] inline Engine::Flag<uint16_t> getRenderFlags() const noexcept { return m_RenderFlags; }
         inline void setRenderFlag(ViewportRenderingFlag::Flag flag) noexcept { m_RenderFlags = flag; }

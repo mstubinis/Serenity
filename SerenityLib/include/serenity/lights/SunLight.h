@@ -23,7 +23,7 @@ class ISunLightShadowData {
 class SunLight : public EntityBody {
     friend class ::Engine::priv::RenderModule;
     protected:
-        glm::vec4          m_Color             = glm::vec4(1.0f);
+        glm::vec4          m_Color             = glm::vec4{ 1.0f };
         float              m_AmbientIntensity  = LIGHT_DEFAULT_AMBIENT_INTENSITY;
         float              m_DiffuseIntensity  = LIGHT_DEFAULT_DIFFUSE_INTENSITY;
         float              m_SpecularIntensity = LIGHT_DEFAULT_SPECULAR_INTENSITY;
@@ -35,27 +35,40 @@ class SunLight : public EntityBody {
         SunLight(Scene* scene, const glm_vec3& position = glm_vec3(0.0), LightType type = LightType::Sun);
         virtual ~SunLight();
 
-        [[nodiscard]] glm_vec3 position() const;
+
 
         [[nodiscard]] bool isShadowCaster() const noexcept;
         virtual bool setShadowCaster(bool castsShadow) noexcept;
 
-        [[nodiscard]] inline  const glm::vec4& color() const noexcept { return m_Color; }
+        [[nodiscard]] glm_vec3 getPosition() const;
+        [[nodiscard]] inline  const glm::vec4& getColor() const noexcept { return m_Color; }
         [[nodiscard]] inline constexpr bool isActive() const noexcept { return m_Active; }
-        [[nodiscard]] inline constexpr LightType type() const noexcept { return m_Type; }
+        [[nodiscard]] inline constexpr LightType getType() const noexcept { return m_Type; }
         [[nodiscard]] inline constexpr float getAmbientIntensity() const noexcept { return m_AmbientIntensity; }
         [[nodiscard]] inline constexpr float getDiffuseIntensity() const noexcept { return m_DiffuseIntensity; }
         [[nodiscard]] inline constexpr float getSpecularIntensity() const noexcept { return m_SpecularIntensity; }
 
+        //default ambient intensity is 0.005
         void setAmbientIntensity(float a) noexcept { m_AmbientIntensity = a; }
+
+        //default diffuse intensity is 2.0
         void setDiffuseIntensity(float d) noexcept { m_DiffuseIntensity = d; }
+
+        //default specular intensity is 1.0
         void setSpecularIntensity(float s) noexcept { m_SpecularIntensity = s; }
+
         void activate(bool b = true) noexcept { m_Active = b; }
         void deactivate() noexcept { m_Active = false; }
 
+        //default color is white (1.0, 1.0, 1.0, 1.0)
         void setColor(float r, float g, float b, float a = 1.0f) noexcept { m_Color = glm::vec4(r, g, b, a); }
+
+        //default color is white (1.0, 1.0, 1.0, 1.0)
         void setColor(const glm::vec4& color) noexcept { m_Color = color; }
+
+        //default color is white (1.0, 1.0, 1.0, 1.0)
         void setColor(const glm::vec3& color) noexcept { m_Color.r = color.r; m_Color.g = color.g; m_Color.b = color.b; }
+
 
         void setPosition(decimal x, decimal y, decimal z);
         void setPosition(decimal position);

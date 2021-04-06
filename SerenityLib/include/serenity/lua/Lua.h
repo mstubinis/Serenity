@@ -40,6 +40,10 @@ class LuaCallableFunction final {
         LuaCallableFunction(LuaCallableFunction&& other) noexcept = default;
         LuaCallableFunction& operator=(LuaCallableFunction&& other) noexcept = default;
 
+        void setFunctor(const cpp_type& functor) noexcept {
+            internal_delete();
+            m_CPPFunctor = std::make_unique<cpp_type>(functor);
+        }
         void setFunctor(cpp_type&& functor) noexcept {
             internal_delete();
             m_CPPFunctor = std::make_unique<cpp_type>(std::move(functor));

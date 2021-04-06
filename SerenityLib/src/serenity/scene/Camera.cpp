@@ -4,38 +4,86 @@
 #include <serenity/math/Engine_Math.h>
 #include <serenity/resources/Engine_Resources.h>
 
-Camera::Camera(float angle, float aspectRatio, float Near, float Far, Scene* scene) 
-    : Entity{ *scene }
+CameraLogicFunctionPtr CAMERA_DEFAULT_MOUSELOOK_FUNCTION = [](const CameraLogicComponent* component, const float dt) {
+    auto& camera          = *static_cast<Camera*>(component->getUserPointer());
+    auto cameraComponent  = camera.getComponent<ComponentCamera>();
+    auto transform        = camera.getComponent<ComponentTransform>();
+};
+CameraLogicFunctionPtr CAMERA_DEFAULT_MOUSELOOK_NO_GIMBLE_LOCK_FUNCTION = [](const CameraLogicComponent* component, const float dt) {
+    auto& camera          = *static_cast<Camera*>(component->getUserPointer());
+    auto cameraComponent  = camera.getComponent<ComponentCamera>();
+    auto transform        = camera.getComponent<ComponentTransform>();
+    const auto& mouse     = Engine::getMouseDifference();
+
+    const auto rotSpeedX   = (mouse.x * dt) * 0.4f;
+    const auto rotSpeedY   = -(mouse.y * dt) * 0.4f;
+    auto transSpeed        = static_cast<decimal>(5.0f * dt);
+    const auto transSpeed2 = static_cast<decimal>(5.0f * dt);
+
+    if (Engine::isKeyDown(KeyboardKey::LeftShift) || Engine::isKeyDown(KeyboardKey::RightShift)) {
+        transSpeed *= static_cast<decimal>(6.0);
+    }
+
+    if (Engine::isMouseButtonDown(MouseButton::Left)) {
+        if (std::abs(mouse.x) > 0.05f) {
+            transform->rotate(0.0f, rotSpeedX, 0.0f);
+        }
+        if (std::abs(mouse.y) > 0.05f) {
+            transform->rotate(rotSpeedY, 0.0f, 0.0f);
+        }
+    }
+    if (Engine::isKeyDown(KeyboardKey::W)) {
+        transform->translate(0, 0, -transSpeed);
+    }else if (Engine::isKeyDown(KeyboardKey::S)) {
+        transform->translate(0, 0, transSpeed);
+    }
+    if (Engine::isKeyDown(KeyboardKey::A)) {
+        transform->translate(-transSpeed, 0, 0);
+    }else if (Engine::isKeyDown(KeyboardKey::D)) {
+        transform->translate(transSpeed, 0, 0);
+    }
+
+    if (Engine::isKeyDown(KeyboardKey::Q)) {
+        transform->rotate(0, 0, transSpeed2 * 0.5);
+    }else if (Engine::isKeyDown(KeyboardKey::E)) {
+        transform->rotate(0, 0, -transSpeed2 * 0.5);
+    }
+    cameraComponent->lookAt(transform->getWorldPosition(), transform->getWorldPosition() + transform->getForward(), transform->getUp());
+};
+
+
+Camera::Camera(Scene* scene, float angle, float aspectRatio, float Near, float Far)
+    : Entity{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
 {
     if (!scene) {
         scene = Engine::Resources::getCurrentScene();
     }
     addComponent<ComponentCamera>(angle, aspectRatio, Near, Far);
     addComponent<CameraLogicComponent>();
-    addComponent<ComponentBody>();
+    addComponent<ComponentTransform>();
 
     auto cam   = getComponent<ComponentCamera>();
     auto logic = getComponent<CameraLogicComponent>();
-    auto body  = getComponent<ComponentBody>();
+    auto body  = getComponent<ComponentTransform>();
 
-    cam->lookAt(glm_vec3(0.0), glm_vec3(0.0) + body->forward(), body->up());
+    cam->lookAt(glm::vec3{ 0.0f }, glm::vec3{ 0.0f } + body->getForward(), body->getUp());
     logic->setUserPointer(this);
 }
-Camera::Camera(float left, float right, float bottom, float top, float Near, float Far, Scene* scene) 
-    : Entity{ *scene }
+Camera::Camera(Scene* scene, float left, float right, float bottom, float top, float Near, float Far)
+    : Entity{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
 {
     if (!scene) {
         scene = Engine::Resources::getCurrentScene();
     }
     addComponent<ComponentCamera>(left, right, bottom, top, Near, Far);
     addComponent<CameraLogicComponent>();
-    addComponent<ComponentBody>();
+    addComponent<ComponentTransform>();
 
     auto cam   = getComponent<ComponentCamera>();
     auto logic = getComponent<CameraLogicComponent>();
-    auto body  = getComponent<ComponentBody>();
+    auto body  = getComponent<ComponentTransform>();
 
-    cam->lookAt(glm_vec3(0.0), glm_vec3(0.0) + body->forward(), body->up());
+    cam->lookAt(glm::vec3{ 0.0f }, glm::vec3{ 0.0f } + body->getForward(), body->getUp());
     logic->setUserPointer(this);
 }
 Camera::~Camera() { 
@@ -50,9 +98,9 @@ void Camera::lookAt(const glm_vec3& eye, const glm_vec3& center, const glm_vec3&
     getComponent<ComponentCamera>()->lookAt(eye, center, up);
 }
 glm_vec3 Camera::getPosition() const noexcept {
-    return getComponent<ComponentBody>()->getPosition();
+    return getComponent<ComponentTransform>()->getPosition();
 }
-glm::quat Camera::getOrientation() const noexcept {
+glm::quat Camera::getRotation() const noexcept {
     return glm::conjugate(glm::quat_cast(getComponent<ComponentCamera>()->getView())); 
 }
 float Camera::getAngle() const noexcept {
@@ -100,31 +148,31 @@ glm::mat4 Camera::getViewProjection() const noexcept {
 glm::vec3 Camera::getViewVector() const noexcept {
     return getComponent<ComponentCamera>()->getViewVector(); 
 }
-glm_vec3 Camera::forward() const noexcept {
-    return getComponent<ComponentCamera>()->forward(); 
+glm::vec3 Camera::getForward() const noexcept {
+    return getComponent<ComponentCamera>()->getForward(); 
 }
-glm_vec3 Camera::right() const noexcept {
-    return getComponent<ComponentCamera>()->right(); 
+glm::vec3 Camera::getRight() const noexcept {
+    return getComponent<ComponentCamera>()->getRight(); 
 }
-glm_vec3 Camera::up() const noexcept {
-    return getComponent<ComponentCamera>()->up(); 
+glm::vec3 Camera::getUp() const noexcept {
+    return getComponent<ComponentCamera>()->getUp(); 
 }
 decimal Camera::getDistance(Entity otherEntity) const noexcept {
-    ComponentBody* otherEntityBody = otherEntity.getComponent<ComponentBody>();
+    auto otherEntityBody = otherEntity.getComponent<ComponentTransform>();
     return glm::distance(otherEntityBody->getPosition(), getPosition());
 }
 decimal Camera::getDistance(const glm_vec3& otherPosition) const noexcept {
     return glm::distance(otherPosition, getPosition());
 }
 decimal Camera::getDistanceSquared(Entity otherEntity) const noexcept {
-    ComponentBody* otherEntityBody = otherEntity.getComponent<ComponentBody>();
+    auto otherEntityBody = otherEntity.getComponent<ComponentTransform>();
     return glm::distance2(otherEntityBody->getPosition(), getPosition());
 }
 decimal Camera::getDistanceSquared(const glm_vec3& otherPosition) const noexcept {
     return glm::distance2(otherPosition, getPosition());
 }
 decimal Camera::getDistanceSquared(Entity otherEntity, const glm_vec3& thisPosition) const noexcept {
-    ComponentBody* otherEntityBody = otherEntity.getComponent<ComponentBody>();
+    auto otherEntityBody = otherEntity.getComponent<ComponentTransform>();
     return glm::distance2(otherEntityBody->getPosition(), thisPosition);
 }
 decimal Camera::getDistanceSquared(const glm_vec3& otherPosition, const glm_vec3& thisPosition) const noexcept {
@@ -137,14 +185,14 @@ uint32_t Camera::pointIntersectTest(const glm_vec3& otherWorldPosition) const no
     return getComponent<ComponentCamera>()->pointIntersectTest(otherWorldPosition);
 }
 bool Camera::rayIntersectSphere(Entity entity) const noexcept {
-    ComponentBody* entityBody   = entity.getComponent<ComponentBody>();
-    ComponentModel* entityModel = entity.getComponent<ComponentModel>();
-    float entityRadius          = 0.0f;
+    auto entityTransform = entity.getComponent<ComponentTransform>();
+    auto entityModel     = entity.getComponent<ComponentModel>();
+    float entityRadius   = 0.0f;
     if (entityModel) {
-        entityRadius            = entityModel->radius();
+        entityRadius     = entityModel->getRadius();
     }
-    if (!entityBody) {
+    if (!entityTransform) {
         return false;
     }
-    return Engine::Math::rayIntersectSphere(entityBody->getPosition(), entityRadius, getPosition(), getViewVector());
+    return Engine::Math::rayIntersectSphere(entityTransform->getPosition(), entityRadius, getPosition(), getViewVector());
 }

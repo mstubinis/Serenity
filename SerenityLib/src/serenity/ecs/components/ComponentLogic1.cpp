@@ -4,12 +4,12 @@
 #pragma region Component
 
 ComponentLogic1::ComponentLogic1(ComponentLogic1&& other) noexcept
-    : m_UserPointer1{ std::exchange(other.m_UserPointer1, nullptr) }
+    : m_UserPointer { std::exchange(other.m_UserPointer, nullptr) }
+    , m_UserPointer1{ std::exchange(other.m_UserPointer1, nullptr) }
     , m_UserPointer2{ std::exchange(other.m_UserPointer2, nullptr) }
     , m_Owner       { std::move(other.m_Owner) }
     , m_Functor     { std::move(other.m_Functor) }
 {
-    m_UserPointer = std::exchange(other.m_UserPointer, nullptr);
 }
 ComponentLogic1& ComponentLogic1::operator=(ComponentLogic1&& other) noexcept {
     m_UserPointer  = std::exchange(other.m_UserPointer, nullptr);

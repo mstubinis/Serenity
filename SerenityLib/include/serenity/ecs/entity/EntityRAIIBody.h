@@ -71,39 +71,39 @@ class EntityRAIIBody final {
             return m_Entity.removeComponent(componentClassName);
         }
         [[nodiscard]] inline luabridge::LuaRef getComponent(const std::string& componentClassName) { return m_Entity.getComponent(componentClassName); }
-        [[nodiscard]] inline glm_quat getRotation() const noexcept { return m_Entity.getRotation(); }
-        [[nodiscard]] inline glm_quat getLocalRotation() const noexcept { return getRotation(); }
-        [[nodiscard]] inline glm_quat getWorldRotation() const noexcept { return m_Entity.getWorldRotation(); }
-        [[nodiscard]] inline glm_vec3 getScale() const noexcept { return m_Entity.getScale(); }
+        [[nodiscard]] inline glm::quat getRotation() const noexcept { return m_Entity.getRotation(); }
+        [[nodiscard]] inline glm::quat getLocalRotation() const noexcept { return getRotation(); }
+        [[nodiscard]] inline glm::quat getWorldRotation() const noexcept { return m_Entity.getWorldRotation(); }
+        [[nodiscard]] inline glm::vec3 getScale() const noexcept { return m_Entity.getScale(); }
         [[nodiscard]] inline glm_vec3 getPosition() const noexcept { return m_Entity.getPosition(); }
         [[nodiscard]] inline glm_vec3 getWorldPosition() const noexcept { return m_Entity.getWorldPosition(); }
         [[nodiscard]] inline glm_vec3 getLocalPosition() const noexcept { return m_Entity.getLocalPosition(); }
-        [[nodiscard]] inline const glm_vec3& forward() const noexcept { return m_Entity.forward(); }
-        [[nodiscard]] inline const glm_vec3& right() const noexcept { return m_Entity.right(); }
-        [[nodiscard]] inline const glm_vec3& up() const noexcept { return m_Entity.up(); }
+        [[nodiscard]] inline const glm::vec3& getForward() const noexcept { return m_Entity.getForward(); }
+        [[nodiscard]] inline const glm::vec3& getRight() const noexcept { return m_Entity.getRight(); }
+        [[nodiscard]] inline const glm::vec3& getUp() const noexcept { return m_Entity.getUp(); }
         //[[nodiscard]] inline glm_vec3 getLinearVelocity() const noexcept { return m_Entity.getLinearVelocity(); }
 
         inline void translate(const glm_vec3& translation, bool local = true) noexcept { m_Entity.translate(translation, local); }
         inline void translate(decimal x, decimal y, decimal z, bool local = true) noexcept { m_Entity.translate(x, y, z, local); }
         inline void translate(decimal t, bool local = true) noexcept { m_Entity.translate(t, local); }
 
-        inline void rotate(const glm_vec3& rotation, bool local = true) noexcept { m_Entity.rotate(rotation, local); }
-        inline void rotate(decimal pitch_radians, decimal yaw_radians, decimal roll_radians, bool local = true) noexcept { m_Entity.rotate(pitch_radians, yaw_radians, roll_radians, local); }
+        inline void rotate(const glm::vec3& rotation, bool local = true) noexcept { m_Entity.rotate(rotation, local); }
+        inline void rotate(float pitch_radians, float yaw_radians, float roll_radians, bool local = true) noexcept { m_Entity.rotate(pitch_radians, yaw_radians, roll_radians, local); }
 
-        inline void scale(const glm_vec3& amount) noexcept { m_Entity.scale(amount); }
-        inline void scale(decimal x, decimal y, decimal z) noexcept { m_Entity.scale(x, y, z); }
-        inline void scale(decimal s) noexcept { m_Entity.scale(s); }
+        inline void scale(const glm::vec3& amount) noexcept { m_Entity.scale(amount); }
+        inline void scale(float x, float y, float z) noexcept { m_Entity.scale(x, y, z); }
+        inline void scale(float s) noexcept { m_Entity.scale(s); }
 
         inline void setPosition(const glm_vec3& newPosition) noexcept { m_Entity.setPosition(newPosition); }
         inline void setPosition(decimal x, decimal y, decimal z) noexcept { m_Entity.setPosition(x, y, z); }
         inline void setPosition(decimal p) noexcept { m_Entity.setPosition(p); }
 
-        inline void setRotation(const glm_quat& newRotation) noexcept { m_Entity.setRotation(newRotation); }
-        inline void setRotation(decimal quat_x, decimal quat_y, decimal quat_z, decimal quat_w) noexcept { m_Entity.setRotation(quat_x, quat_y, quat_z, quat_w); }
+        inline void setRotation(const glm::quat& newRotation) noexcept { m_Entity.setRotation(newRotation); }
+        inline void setRotation(float quat_x, float quat_y, float quat_z, float quat_w) noexcept { m_Entity.setRotation(quat_x, quat_y, quat_z, quat_w); }
 
-        inline void setScale(const glm_vec3& newScale) noexcept { m_Entity.setScale(newScale); }
-        inline void setScale(decimal x, decimal y, decimal z) noexcept { m_Entity.setScale(x, y, z); }
-        inline void setScale(decimal s) noexcept { m_Entity.setScale(s); }
+        inline void setScale(const glm::vec3& newScale) noexcept { m_Entity.setScale(newScale); }
+        inline void setScale(float x, float y, float z) noexcept { m_Entity.setScale(x, y, z); }
+        inline void setScale(float s) noexcept { m_Entity.setScale(s); }
 
         //inline void setLinearVelocity(decimal x, decimal y, decimal z, bool local = true) noexcept { m_Entity.setLinearVelocity(x, y, z, local); }
         //inline void setLinearVelocity(const glm_vec3& velocity, bool local = true) noexcept { m_Entity.setLinearVelocity(velocity, local); }

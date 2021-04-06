@@ -6,7 +6,7 @@ class  Scene;
 class  Entity;
 class  btRigidBody;
 class  btCollisionObject;
-class  ComponentBodyRigid;
+class  ComponentRigidBody;
 class  Camera;
 namespace Engine::priv {
     class  MeshImportedData;
@@ -60,15 +60,15 @@ namespace Engine{
         };
     };
     namespace Physics{
-        std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, ComponentBodyRigid* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
-        std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, std::vector<ComponentBodyRigid*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
+        std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, ComponentRigidBody* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
+        std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, std::vector<ComponentRigidBody*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
         std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, Entity* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
         std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
 
-        RayCastResult rayCastNearest(const btVector3& start, const btVector3& end, ComponentBodyRigid* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
-        RayCastResult rayCastNearest(const btVector3& start, const btVector3& end, std::vector<ComponentBodyRigid*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
+        RayCastResult rayCastNearest(const btVector3& start, const btVector3& end, ComponentRigidBody* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
+        RayCastResult rayCastNearest(const btVector3& start, const btVector3& end, std::vector<ComponentRigidBody*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
         RayCastResult rayCastNearest(const glm::vec3& start, const glm::vec3& end, Entity* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
         RayCastResult rayCastNearest(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredObjects, MaskType group = -1, MaskType mask = -1);

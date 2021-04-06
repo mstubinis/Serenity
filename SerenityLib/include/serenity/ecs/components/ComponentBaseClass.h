@@ -2,6 +2,7 @@
 #ifndef ENGINE_ECS_COMPONENT_BASE_CLASS_H
 #define ENGINE_ECS_COMPONENT_BASE_CLASS_H
 
+#include <serenity/ecs/entity/Entity.h>
 #include <cstdint>
 //#include <atomic>
 

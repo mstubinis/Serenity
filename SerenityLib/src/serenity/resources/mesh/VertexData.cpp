@@ -39,7 +39,7 @@ void VertexData::clearData() {
 }
 void VertexData::finalize() {
     Engine::Renderer::deleteVAO(m_VAO);
-    if (Engine::priv::RenderModule::OPENGL_VERSION >= 30) {
+    if (Engine::priv::OpenGLState::constants.supportsVAO()) {
         //build the vao itself
         Engine::Renderer::genAndBindVAO(m_VAO);
         sendDataToGPU(false, -1);

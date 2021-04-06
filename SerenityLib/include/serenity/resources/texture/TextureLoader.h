@@ -18,7 +18,7 @@ namespace Engine::priv {
         static void LoadTextureFramebufferIntoOpenGL(Texture& texture);
         static void LoadTextureCubemapIntoOpenGL(Texture& texture);
 
-        static void GenerateMipmapsOpenGL(Texture& texture);
+        static bool GenerateMipmapsOpenGL(Texture& texture);
         static void WithdrawPixelsFromOpenGLMemory(Texture& texture, unsigned int imageIndex = 0, unsigned int mipmapLevel = 0);
 
         static void GeneratePBRData(Texture&, int convoludeTextureSize, int preEnvFilterSize);

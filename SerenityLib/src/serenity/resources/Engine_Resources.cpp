@@ -7,7 +7,6 @@
 #include <serenity/resources/sound/SoundData.h>
 #include <serenity/resources/shader/ShaderProgram.h>
 #include <serenity/resources/shader/Shader.h>
-#include <serenity/scene/Scene.h>
 #include <serenity/system/window/Window.h>
 #include <serenity/resources/mesh/MeshRequest.h>
 #include <serenity/resources/texture/TextureRequest.h>
@@ -55,16 +54,8 @@ Engine::view_ptr<Scene> Engine::priv::ResourceManager::getSceneByID(uint32_t id)
     uint32_t index = id - 1;
     return (index < m_Scenes.size()) ? m_Scenes[index].get() : nullptr;
 }
-uint32_t Engine::priv::ResourceManager::AddScene(Scene& s){
-    for (size_t i = 0; i < m_Scenes.size(); ++i) {
-        if (m_Scenes[i] == nullptr) {
-            m_Scenes[i].reset(&s);
-            return (uint32_t)i + 1U;
-        }
-    }
-    m_Scenes.emplace_back(std::unique_ptr<Scene>(&s));
-    return (uint32_t)m_Scenes.size();
-}
+
+
 std::string Engine::Data::reportTime() {
     return priv::Core::m_Engine->m_DebugManager.reportTime();
 }

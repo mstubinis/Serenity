@@ -6,6 +6,7 @@
 #include <serenity/resources/mesh/MeshCollisionFactory.h>
 #include <serenity/events/Event.h>
 #include <serenity/system/Engine.h>
+
 #include <serenity/Terrain.h>
 
 #include <serenity/math/Engine_Math.h>
@@ -124,11 +125,7 @@ void PublicMesh::InitBlankMesh(Mesh& mesh) {
     mesh.setCustomUnbindFunctor(DefaultMeshUnbindFunctor);
 }
 bool PublicMesh::SupportsInstancing() {
-    return (
-        RenderModule::OPENGL_VERSION >= 31 ||
-        OpenGLExtensions::supported(OpenGLExtensions::EXT_draw_instanced) || 
-        OpenGLExtensions::supported(OpenGLExtensions::ARB_draw_instanced)
-    );
+    return (Engine::priv::OpenGLState::constants.supportsInstancing() || OpenGLExtensions::supported(OpenGLExtensions::EXT_draw_instanced) || OpenGLExtensions::supported(OpenGLExtensions::ARB_draw_instanced));
 }
 btCollisionShape* PublicMesh::internal_build_collision(Handle meshHandle, ModelInstance* modelInstance, CollisionType collisionType, bool isCompoundChild) noexcept {
     Engine::priv::MeshCollisionFactory* factory = nullptr;
@@ -162,7 +159,7 @@ btCollisionShape* PublicMesh::BuildCollision(Handle meshHandle, CollisionType co
     return internal_build_collision(meshHandle, nullptr, collisionType, isCompoundChild);
 }
 btCollisionShape* PublicMesh::BuildCollision(ModelInstance* modelInstance, CollisionType collisionType, bool isCompoundChild) {
-    Handle meshHandle = (modelInstance && modelInstance->mesh()) ? modelInstance->mesh() : Handle{};
+    Handle meshHandle = (modelInstance && modelInstance->getMesh()) ? modelInstance->getMesh() : Handle{};
     return internal_build_collision(meshHandle, modelInstance, collisionType, isCompoundChild);
 }
 void PublicMesh::FinalizeVertexData(Handle meshHandle, MeshImportedData& data) {
@@ -270,7 +267,9 @@ void PublicMesh::CalculateRadius(Handle meshHandle) {
     Mesh& mesh       = *meshHandle.get<Mesh>();
     mesh.m_CPUData.internal_calculate_radius();
 }
-
+void PublicMesh::CalculateRadius(MeshCPUData& cpuData) {
+    cpuData.internal_calculate_radius();
+}
 
 
 
@@ -291,36 +290,35 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
     float offsetSectorX = 0.0f;
     float offsetSectorY = 0.0f;
 
-    auto hash_position  = [](glm::vec3& position, uint32_t decimal_places) {
-        std::stringstream one, two, thr;
-        one << std::fixed << std::setprecision(decimal_places) << position.x;
-        two << std::fixed << std::setprecision(decimal_places) << position.y;
-        thr << std::fixed << std::setprecision(decimal_places) << position.z;
-        return one.str() + "_" + two.str() + "_" + thr.str();
+    auto hash_position  = [](const glm::vec3& position) {
+        int64_t hash = 0;
+        int32_t x    = static_cast<int32_t>(position.x);
+        int32_t z    = static_cast<int32_t>(position.z);
+        hash         = (static_cast<int64_t>(x) << 32) | z;
+        return hash;
     };
 
-    std::unordered_map<std::string, VertexSmoothingGroup> m_VertexMap;
-    auto& heightfields  = terrain.m_TerrainData.m_BtHeightfieldShapes;
 
-    uint32_t width      = (uint32_t)heightfields[0][0]->getUserIndex();
-    uint32_t length     = (uint32_t)heightfields[0][0]->getUserIndex2();
-    const float fWidth  = (float)width;
-    const float fLength = (float)length;
+    std::unordered_map<int64_t, VertexSmoothingGroup> m_VertexMap;
+    auto& heightfields     = terrain.m_TerrainData.m_BtHeightfieldShapes;
 
-    float totalVertexSizeX = fWidth * heightfields.size();
-    float totalVertexSizeY = fLength * heightfields[0].size();
+    uint32_t sideSize      = terrain.m_TerrainData.m_BtHeightfieldShapesSizeRows > 0 ? (uint32_t)heightfields[0]->getUserIndex2() : 0;
+    const float fsideSize  = (float)sideSize;
 
-    for (size_t sectorX = 0; sectorX < heightfields.size(); ++sectorX) {
-        for (size_t sectorY = 0; sectorY < heightfields[sectorX].size(); ++sectorY) {
-            auto& heightfield = *heightfields[sectorX][sectorY];
-            offsetSectorX     = sectorX * fWidth;
-            offsetSectorY     = sectorY * fLength;
+    float totalVertexSizeX = fsideSize * terrain.m_TerrainData.m_BtHeightfieldShapesSizeRows;
+    float totalVertexSizeY = terrain.m_TerrainData.m_BtHeightfieldShapesSizeRows > 0 ? (fsideSize * terrain.m_TerrainData.m_BtHeightfieldShapesSizeCols) : 0.0f;
 
-            for (uint32_t i = 0; i < width; ++i) {
-                for (uint32_t j = 0; j < length; ++j) {
+    for (size_t sectorX = 0; sectorX < terrain.m_TerrainData.m_BtHeightfieldShapesSizeRows; ++sectorX) {
+        for (size_t sectorY = 0; sectorY < terrain.m_TerrainData.m_BtHeightfieldShapesSizeCols; ++sectorY) {
+            auto& heightfield = *heightfields[(terrain.m_TerrainData.m_BtHeightfieldShapesSizeRows * sectorX) + sectorY];
+            offsetSectorX     = sectorX * fsideSize;
+            offsetSectorY     = sectorY * fsideSize;
 
-                    uint32_t vertexAtX = i + (width * (uint32_t)sectorY);
-                    uint32_t vertexAtY = j + (length * (uint32_t)sectorX);
+            for (uint32_t i = 0; i < sideSize; ++i) {
+                for (uint32_t j = 0; j < sideSize; ++j) {
+
+                    uint32_t vertexAtX = i + (sideSize * (uint32_t)sectorY);
+                    uint32_t vertexAtY = j + (sideSize * (uint32_t)sectorX);
 
                     btVector3 btVerts[4];
                     priv::Vertex verts[4];
@@ -361,9 +359,10 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
                         data.m_Normals.emplace_back(verts[i].normal);
                     }
                     for (int i = 0; i < 4; ++i) {
-                        smooths[i].normal = verts[i].normal;
+                        smooths[i].normal = verts[i].normal + glm::vec3{ 0.0001f };
                         smooths[i].index = (data.m_Points.size() - 1) - static_cast<size_t>(3 - i);
-                        m_VertexMap[hash_position(verts[i].position, 4)].data.emplace_back(std::move(smooths[i]));
+
+                        m_VertexMap[hash_position(verts[i].position)].data.emplace_back(std::move(smooths[i]));
                     }
 
                     if (valid[0] || valid[1] || valid[2] || valid[3]) {
@@ -380,6 +379,7 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
             }
         }
     }
+
     //TODO: optimize if possible
     //now smooth the normals
     for (auto& [name, vertex] : m_VertexMap) {
@@ -393,17 +393,22 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
         }
     }
     MeshLoader::CalculateTBNAssimp(data);
-    PublicMesh::FinalizeVertexData(terrain.m_MeshHandle, data);
-    PublicMesh::CalculateRadius(terrain.m_MeshHandle);
+    if (terrain.m_MeshHandle.null()) {
+        PublicMesh::FinalizeVertexData(m_CPUData, data);
+        PublicMesh::CalculateRadius(m_CPUData);
+    }else{
+        PublicMesh::FinalizeVertexData(terrain.m_MeshHandle, data);
+        PublicMesh::CalculateRadius(terrain.m_MeshHandle);
+    }
     SAFE_DELETE(m_CPUData.m_CollisionFactory);
 }
 void Mesh::internal_recalc_indices_from_terrain(const Terrain& terrain) {
     MeshImportedData data;
     uint32_t count = 0;
     auto& heightfields = terrain.m_TerrainData.m_BtHeightfieldShapes;
-    for (size_t sectorX = 0; sectorX < heightfields.size(); ++sectorX) {
-        for (size_t sectorY = 0; sectorY < heightfields[sectorX].size(); ++sectorY) {
-            auto& heightfield = *heightfields[sectorX][sectorY];
+    for (size_t sectorX = 0; sectorX < terrain.m_TerrainData.m_BtHeightfieldShapesSizeRows; ++sectorX) {
+        for (size_t sectorY = 0; sectorY < terrain.m_TerrainData.m_BtHeightfieldShapesSizeCols; ++sectorY) {
+            auto& heightfield = *heightfields[(terrain.m_TerrainData.m_BtHeightfieldShapesSizeRows * sectorX) + sectorY];
             uint32_t width  = (uint32_t)heightfield.getUserIndex();
             uint32_t length = (uint32_t)heightfield.getUserIndex2();
             for (uint32_t i = 0; i < width; ++i) {
@@ -595,7 +600,7 @@ void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const gl
             return;
         }
         glm::vec3 camPos     = camera.getPosition();
-        glm::mat4 worldModelMatrix = instance.modelMatrix() * bodyModelMatrix;
+        glm::mat4 worldModelMatrix = instance.getModelMatrix() * bodyModelMatrix;
         auto lambda_sorter   = [&camPos, sortMode, &worldModelMatrix](priv::Triangle& lhs, priv::Triangle& rhs) {
             glm::mat4 model1 = worldModelMatrix;
             glm::mat4 model2 = worldModelMatrix;

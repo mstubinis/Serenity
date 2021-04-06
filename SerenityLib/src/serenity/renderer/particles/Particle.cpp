@@ -26,13 +26,13 @@ void Particle::init(const glm::vec3& emitterPosition, const glm::quat& emitterRo
     m_EmitterSource               = &emitter;
     m_Material                    = &const_cast<Material&>(emitter.m_Properties->getParticleMaterialRandom());
 
-    auto& emitterBody             = *emitter.getComponent<ComponentBody>();
+    auto& emitterBody             = *emitter.getComponent<ComponentTransform>();
     auto emitterScale             = glm::vec3(emitterBody.getScale());
 
     m_Velocity                    = emitter.m_Properties->m_InitialVelocityFunctor(*this) * emitterScale;
     auto rotated_initial_velocity = Engine::Math::rotate_vec3(emitter.getRotation(), m_Velocity);
     if (!emitter.m_Parent.null()) {
-        auto parentBody = emitter.m_Parent.getComponent<ComponentBody>();
+        auto parentBody = emitter.m_Parent.getComponent<ComponentTransform>();
         if (parentBody) {
             //m_Velocity = glm::vec3(parentBody->getLinearVelocity()) /* * emitter.m_Properties->m_Drag */ ;
         }

@@ -110,10 +110,10 @@ void priv::PublicShader::ConvertCode(Shader& shader) {
     }else{
         //generate one
         std::string core;
-        if (Engine::priv::RenderModule::GLSL_VERSION >= 330 && Engine::priv::RenderModule::GLSL_VERSION < 440) {
+        if (Engine::priv::OpenGLState::constants.GLSL_VERSION >= 330 && Engine::priv::OpenGLState::constants.GLSL_VERSION < 440) {
             core = " core";
         }
-        versionLine = "#version " + std::to_string(Engine::priv::RenderModule::GLSL_VERSION) + core + "\n";
+        versionLine = "#version " + std::to_string(Engine::priv::OpenGLState::constants.GLSL_VERSION) + core + "\n";
     }
     const uint32_t versionNumber = boost::lexical_cast<uint32_t>(std::regex_replace(versionLine, std::regex("([^0-9])"), ""));
 

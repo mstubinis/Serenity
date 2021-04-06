@@ -143,6 +143,8 @@ class Texture: public Resource<Texture> {
             return m_CPUData.m_ImagesDatas[0].m_PixelType; 
         }
 
+        bool generateMipmaps();
+
         void setXWrapping(TextureWrap);
         void setYWrapping(TextureWrap);
         void setZWrapping(TextureWrap);

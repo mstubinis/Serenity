@@ -509,9 +509,6 @@
     <ClCompile Include="src\serenity\renderer\opengl\Extensions.cpp">
       <Filter>Source Files\Engine\Core\Renderer\opengl</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\renderer\opengl\OpenGL.cpp">
-      <Filter>Source Files\Engine\Core\Renderer\opengl</Filter>
-    </ClCompile>
     <ClCompile Include="src\serenity\renderer\opengl\State.cpp">
       <Filter>Source Files\Engine\Core\Renderer\opengl</Filter>
     </ClCompile>
@@ -656,9 +653,6 @@
     <ClCompile Include="src\serenity\Constraint.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\Terrain.cpp">
-      <Filter>Source Files\Engine\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="src\serenity\resources\font\Font.cpp">
       <Filter>Source Files\Engine\Core\Resources\Font</Filter>
     </ClCompile>
@@ -755,9 +749,6 @@
     <ClCompile Include="include\serenity\resources\mesh\animation\Skeleton.cpp">
       <Filter>Source Files\Engine\Core\Resources\Mesh\Animation</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\ecs\components\ComponentBody.cpp">
-      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
-    </ClCompile>
     <ClCompile Include="src\serenity\ecs\components\ComponentCamera.cpp">
       <Filter>Source Files\Engine\Core\ECS\Components</Filter>
     </ClCompile>
@@ -815,13 +806,7 @@
     <ClCompile Include="src\serenity\physics\PhysicsTaskScheduler.cpp">
       <Filter>Source Files\Engine\Core\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\ecs\components\ComponentBodyRigid.cpp">
-      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
-    </ClCompile>
     <ClCompile Include="src\serenity\ecs\systems\SystemBodyParentChild.cpp">
-      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\systems\SystemComponentBodyRigid.cpp">
       <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
     </ClCompile>
     <ClCompile Include="src\serenity\ecs\entity\EntityBodyRigid.cpp">
@@ -865,6 +850,18 @@
     </ClCompile>
     <ClCompile Include="src\serenity\tests\TestSystemParentChild.cpp">
       <Filter>Source Files\Engine\Core\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\components\ComponentTransform.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\components\ComponentRigidBody.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentRigidBody.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\Terrain.cpp">
+      <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1375,9 +1372,6 @@
     <ClInclude Include="include\serenity\Constraint.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\Terrain.h">
-      <Filter>Header Files\Engine\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="include\serenity\resources\mesh\BuiltInMeshes.h">
       <Filter>Header Files\Engine\Core\Resources\Mesh</Filter>
     </ClInclude>
@@ -1495,9 +1489,6 @@
     <ClInclude Include="include\serenity\ecs\components\ComponentBaseClass.h">
       <Filter>Header Files\Engine\Core\ECS\Components</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\ecs\components\ComponentBody.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
-    </ClInclude>
     <ClInclude Include="include\serenity\ecs\components\ComponentCamera.h">
       <Filter>Header Files\Engine\Core\ECS\Components</Filter>
     </ClInclude>
@@ -1567,13 +1558,7 @@
     <ClInclude Include="include\serenity\physics\PhysicsTaskScheduler.h">
       <Filter>Header Files\Engine\Core\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\ecs\components\ComponentBodyRigid.h">
-      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
-    </ClInclude>
     <ClInclude Include="include\serenity\ecs\systems\SystemBodyParentChild.h">
-      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\systems\SystemComponentBodyRigid.h">
       <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\ecs\entity\EntityBodyRigid.h">
@@ -1614,6 +1599,18 @@
     </ClInclude>
     <ClInclude Include="include\serenity\ecs\systems\SystemCompoundChildTransforms.h">
       <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\components\ComponentTransform.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\components\ComponentRigidBody.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentRigidBody.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\Terrain.h">
+      <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

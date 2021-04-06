@@ -48,10 +48,11 @@ namespace Engine::priv {
             static btCollisionShape* BuildCollision(ModelInstance*, CollisionType, bool isCompoundChild = false);
             static btCollisionShape* BuildCollision(Handle meshHandle, CollisionType, bool isCompoundChild = false);
 
-            static void FinalizeVertexData(Handle meshHandle, MeshImportedData& data);
-            static void FinalizeVertexData(MeshCPUData& cpuData, MeshImportedData& data);
+            static void FinalizeVertexData(Handle meshHandle, MeshImportedData&);
+            static void FinalizeVertexData(MeshCPUData&, MeshImportedData&);
 
             static void CalculateRadius(Handle meshHandle);
+            static void CalculateRadius(MeshCPUData&);
     };
 };
 struct MeshNodeData final {

@@ -14,6 +14,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 
+
 #ifndef ENGINE_HIGH_PRECISION
     using decimal  = float;
     using glm_vec2 = glm::vec2;
@@ -56,5 +57,19 @@
     inline constexpr glm_vec3 operator* (const glm::quat& lhs, const glm_vec3& rhs) noexcept { return lhs * rhs; }
 
 #endif
+
+#include <LinearMath/btVector3.h>
+
+inline constexpr glm::vec3 operator* (const glm::vec3& lhs, const btVector3& rhs) { return lhs * glm::vec3{ rhs.x(), rhs.y(), rhs.z() }; }
+inline btVector3 operator* (const btVector3& lhs, const glm::vec3& rhs) { return lhs * btVector3(rhs.x, rhs.y, rhs.z); }
+
+inline constexpr glm::vec3 operator/ (const glm::vec3& lhs, const btVector3& rhs) { return lhs / glm::vec3{ rhs.x(), rhs.y(), rhs.z() }; }
+inline btVector3 operator/ (const btVector3& lhs, const glm::vec3& rhs) { return lhs / btVector3(rhs.x, rhs.y, rhs.z); }
+
+inline constexpr glm::vec3 operator+ (const glm::vec3& lhs, const btVector3& rhs) { return lhs + glm::vec3{ rhs.x(), rhs.y(), rhs.z() }; }
+inline btVector3 operator+ (const btVector3& lhs, const glm::vec3& rhs) { return lhs + btVector3(rhs.x, rhs.y, rhs.z); }
+
+inline constexpr glm::vec3 operator- (const glm::vec3& lhs, const btVector3& rhs) { return lhs - glm::vec3{ rhs.x(), rhs.y(), rhs.z() }; }
+inline btVector3 operator- (const btVector3& lhs, const glm::vec3& rhs) { return lhs - btVector3(rhs.x, rhs.y, rhs.z); }
 
 #endif

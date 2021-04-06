@@ -1,5 +1,5 @@
 #include <serenity/ecs/systems/SystemCompoundChildTransforms.h>
-#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/ecs/components/ComponentCollisionShape.h>
 #include <serenity/ecs/systems/SystemBodyParentChild.h>
 
@@ -15,7 +15,7 @@ SystemCompoundChildTransforms::SystemCompoundChildTransforms(Engine::priv::ECS& 
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
         auto& system   = (SystemCompoundChildTransforms&)inSystem;
         auto& systemPC = Engine::priv::PublicScene::GetECS(scene).getSystem<SystemBodyParentChild>();
-        system.forEach<SystemBodyParentChild*>([](SystemBodyParentChild* pcs, Entity entity, ComponentBody* transform, ComponentCollisionShape* collisionShape) {
+        system.forEach<SystemBodyParentChild*>([](SystemBodyParentChild* pcs, Entity entity, ComponentTransform* transform, ComponentCollisionShape* collisionShape) {
             if (collisionShape->isChildShape()) {
                 auto  parentCompound          = collisionShape->getParentCompoundShape();
 

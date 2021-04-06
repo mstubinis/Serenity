@@ -3,10 +3,13 @@
 #define ENGINE_ENGINE_GAME_FUNCTIONS_H
 
 class  Window;
+struct EngineOptions;
+
+#include <serenity/system/TypeDefs.h>
 
 namespace Game {
-    void initResources();
-    void initLogic();
+    void initResources(const EngineOptions& options);
+    void initLogic(const EngineOptions& options);
     void update(const float dt);
     void render();
     void cleanup();

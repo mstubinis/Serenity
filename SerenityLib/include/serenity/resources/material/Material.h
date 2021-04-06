@@ -110,21 +110,21 @@ class Material final : public Resource<Material> {
         MaterialComponent& addComponentRefraction(std::string_view cubeMapName, const std::string& mapFile, float refractiveIndex = 1.0f, float mixFactor = 1.0f);
         MaterialComponent& addComponentParallaxOcclusion(std::string_view textureFile, float heightScale = 0.1f);
 
-        [[nodiscard]] inline bool shadeless() const noexcept { return m_Shadeless; }
-        [[nodiscard]] inline const Engine::color_vector_4& f0() const noexcept { return m_F0Color; }
-        [[nodiscard]] inline uint8_t glow() const noexcept { return m_BaseGlow; }
-        [[nodiscard]] inline MaterialID id() const noexcept { return m_ID; }
-        [[nodiscard]] inline DiffuseModel diffuseModel() const noexcept { return m_DiffuseModel; }
-        [[nodiscard]] inline SpecularModel specularModel() const noexcept { return m_SpecularModel; }
-        [[nodiscard]] inline uint8_t ao() const noexcept { return m_BaseAO; }
-        [[nodiscard]] inline uint8_t metalness() const noexcept { return m_BaseMetalness; }
-        [[nodiscard]] inline uint8_t smoothness() const noexcept { return m_BaseSmoothness; }
-        [[nodiscard]] inline uint8_t alpha() const noexcept { return m_BaseAlpha; }
+        [[nodiscard]] inline bool getShadeless() const noexcept { return m_Shadeless; }
+        [[nodiscard]] inline const Engine::color_vector_4& getF0() const noexcept { return m_F0Color; }
+        [[nodiscard]] inline uint8_t getGlow() const noexcept { return m_BaseGlow; }
+        [[nodiscard]] inline MaterialID getID() const noexcept { return m_ID; }
+        [[nodiscard]] inline DiffuseModel getDiffuseModel() const noexcept { return m_DiffuseModel; }
+        [[nodiscard]] inline SpecularModel getSpecularModel() const noexcept { return m_SpecularModel; }
+        [[nodiscard]] inline uint8_t getAO() const noexcept { return m_BaseAO; }
+        [[nodiscard]] inline uint8_t getMetalness() const noexcept { return m_BaseMetalness; }
+        [[nodiscard]] inline uint8_t getSmoothness() const noexcept { return m_BaseSmoothness; }
+        [[nodiscard]] inline uint8_t getAlpha() const noexcept { return m_BaseAlpha; }
         
         void setF0Color(uint8_t r, uint8_t g, uint8_t b) noexcept;
         inline void setF0Color(const Engine::color_vector_4& f0Color) noexcept { Material::setF0Color(f0Color.rc(), f0Color.gc(), f0Color.bc()); }
 
-        void setMaterialPhysics(MaterialPhysics materialPhysics);
+        void setMaterialPhysics(MaterialPhysics);
         void setShadeless(bool shadeless);
         void setGlow(uint8_t glow);
         void setSmoothness(uint8_t smoothness);
@@ -132,8 +132,8 @@ class Material final : public Resource<Material> {
         void setMetalness(uint8_t metalness);
         void setAlpha(uint8_t alpha);
     
-        void setSpecularModel(SpecularModel specularModel);
-        void setDiffuseModel(DiffuseModel diffuseModel);
+        void setSpecularModel(SpecularModel);
+        void setDiffuseModel(DiffuseModel);
 
         void update(const float dt);
 };

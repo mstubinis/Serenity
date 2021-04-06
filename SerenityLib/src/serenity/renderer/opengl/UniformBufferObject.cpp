@@ -15,7 +15,7 @@ UniformBufferObject::UniformBufferObject(std::string_view nameInShader, uint32_t
     : Resource{ ResourceType::UniformBufferObject, nameInShader }
     , m_SizeOfStruct{ sizeofStruct }
 {
-    if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
+    if (!Engine::priv::OpenGLState::constants.supportsUBO()) {
         return;
     }
     if (globalBindingPointNumber == -1) {
@@ -37,18 +37,18 @@ UniformBufferObject::~UniformBufferObject() {
     internal_unload_CPU();
 }
 void UniformBufferObject::internal_load_CPU() {
-    if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
+    if (!Engine::priv::OpenGLState::constants.supportsUBO()) {
         return;
     }
     internal_unload_CPU();
 }
 void UniformBufferObject::internal_unload_CPU() {
-    if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
+    if (!Engine::priv::OpenGLState::constants.supportsUBO()) {
         return;
     }
 }
 void UniformBufferObject::internal_load_GPU() {
-    if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
+    if (!Engine::priv::OpenGLState::constants.supportsUBO()) {
         return;
     }
     internal_unload_GPU();
@@ -58,13 +58,13 @@ void UniformBufferObject::internal_load_GPU() {
     GLCall(glBindBufferBase(GL_UNIFORM_BUFFER, m_GlobalBindingPointNumber, m_UBOObject)); // link UBO to it's global numerical index
 }
 void UniformBufferObject::internal_unload_GPU() {
-    if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
+    if (!Engine::priv::OpenGLState::constants.supportsUBO()) {
         return;
     }
     GLCall(glDeleteBuffers(1, &m_UBOObject));
 }
 void UniformBufferObject::updateData(void* data) {
-    if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
+    if (!Engine::priv::OpenGLState::constants.supportsUBO()) {
         return;
     } 
     GLCall(glBindBuffer(GL_UNIFORM_BUFFER, m_UBOObject));
@@ -73,7 +73,7 @@ void UniformBufferObject::updateData(void* data) {
     GLCall(glBufferSubData(GL_UNIFORM_BUFFER, 0, m_SizeOfStruct, data));
 }
 bool UniformBufferObject::attachToShaderProgram(ShaderProgram& shaderProgram) {
-    if (Engine::priv::RenderModule::GLSL_VERSION < 140 || shaderProgram.m_AttachedUBOs.contains(m_UBOObject)) {
+    if (!Engine::priv::OpenGLState::constants.supportsUBO() || shaderProgram.m_AttachedUBOs.contains(m_UBOObject)) {
         return false;
     }
     const uint32_t programBlockIndex = glGetUniformBlockIndex(shaderProgram.m_ShaderProgram, name().c_str());

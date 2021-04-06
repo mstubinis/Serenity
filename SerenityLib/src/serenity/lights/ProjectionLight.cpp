@@ -1,5 +1,5 @@
 #include <serenity/lights/ProjectionLight.h>
-#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/utils/Utils.h>
 #include <serenity/resources/texture/Texture.h>
 #include <serenity/scene/Scene.h>
@@ -7,7 +7,7 @@
 ProjectionLight::ProjectionLight(Scene* scene, Handle textureHandle, const glm::vec3& direction)
     : SunLight{ scene, glm::vec3(0.0f), LightType::Projection }
 {
-    getComponent<ComponentBody>()->alignTo(direction);
+    getComponent<ComponentTransform>()->alignTo(direction);
     setTexture(textureHandle);
     recalc_frustum_indices();
 }

@@ -29,6 +29,7 @@ class  SystemSceneChanging;
 #include <serenity/resources/ResourceModule.h>
 #include <serenity/resources/mesh/MeshIncludes.h>
 #include <serenity/resources/mesh/MeshRequest.h>
+#include <serenity/scene/Scene.h>
 #include <serenity/types/Types.h>
 
 namespace Engine::priv {
@@ -37,8 +38,6 @@ namespace Engine::priv {
         friend class  SystemSceneChanging;
         public:
             static Engine::view_ptr<ResourceManager> RESOURCE_MANAGER;
-        private:
-            uint32_t AddScene(Scene& scene);
         public:
             ResourceModule                         m_ResourceModule;
             std::vector<std::unique_ptr<Window>>   m_Windows;
@@ -74,6 +73,19 @@ namespace Engine::Resources {
     [[nodiscard]] Engine::view_ptr<Scene> getCurrentScene();
     bool setCurrentScene(Scene* scene);
     bool setCurrentScene(std::string_view sceneName);
+
+    template<class T, class ... ARGS>
+    T* addScene(ARGS&&... args) {
+        auto& mgr = *Engine::priv::ResourceManager::RESOURCE_MANAGER;
+        for (uint32_t i = 0; i < mgr.m_Scenes.size(); ++i) {
+            if (mgr.m_Scenes[i] == nullptr) {
+                mgr.m_Scenes[i].reset( NEW T{ i + 1, std::forward<ARGS>(args)... } );
+                return static_cast<T*>(mgr.m_Scenes[i].get());
+            }
+        }
+        mgr.m_Scenes.emplace_back(std::unique_ptr<T>( NEW T{ static_cast<uint32_t>(mgr.m_Scenes.size() + 1), std::forward<ARGS>(args)... } ));
+        return static_cast<T*>(mgr.m_Scenes.back().get());
+    }
 
     [[nodiscard]] std::mutex& getMutex() noexcept;
 

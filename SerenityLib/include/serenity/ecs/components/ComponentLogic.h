@@ -7,12 +7,11 @@ namespace luabridge {
     class LuaRef;
 };
 
-#include <serenity/ecs/entity/Entity.h>
 #include <serenity/lua/Lua.h>
 #include <serenity/ecs/components/ComponentBaseClass.h>
 
 class ComponentLogic : public ComponentBaseClass<ComponentLogic> {
-    using c_function = void(*)(const ComponentLogic*, const float);
+    using CFunction = void(*)(const ComponentLogic*, const float);
     private:
         LuaCallableFunction<ComponentLogic, const float>   m_Functor;
         void*                                              m_UserPointer   = nullptr;
@@ -21,22 +20,30 @@ class ComponentLogic : public ComponentBaseClass<ComponentLogic> {
         Entity                                             m_Owner;
     public:
         ComponentLogic(Entity entity) 
-            : m_Owner(entity)
+            : m_Owner{ entity }
         {}
-        ComponentLogic(Entity entity, c_function&& Functor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr) 
-            : m_Owner(entity)
-            , m_UserPointer1(Ptr2)
-            , m_UserPointer2(Ptr3)
+        ComponentLogic(Entity entity, CFunction&& CFunctor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr)
+            : m_Owner{ entity }
+            , m_UserPointer{ Ptr1 }
+            , m_UserPointer1{ Ptr2 }
+            , m_UserPointer2{ Ptr3 }
         {
-            m_UserPointer  = Ptr1;
-            setFunctor(std::move(Functor));
+            setFunctor(std::move(CFunctor));
+        }
+        ComponentLogic(Entity entity, const CFunction& CFunctor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr)
+            : m_Owner{ entity }
+            , m_UserPointer{ Ptr1 }
+            , m_UserPointer1{ Ptr2 }
+            , m_UserPointer2{ Ptr3 }
+        {
+            setFunctor(CFunctor);
         }
         ComponentLogic(Entity entity, luabridge::LuaRef luaFunction, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr)
-            : m_Owner(entity)
-            , m_UserPointer1(Ptr2)
-            , m_UserPointer2(Ptr3)
+            : m_Owner{ entity }
+            , m_UserPointer{ Ptr1 }
+            , m_UserPointer1{ Ptr2 }
+            , m_UserPointer2{ Ptr3 }
         {
-            m_UserPointer = Ptr1;
             setFunctor(luaFunction);
         }
 
@@ -45,12 +52,11 @@ class ComponentLogic : public ComponentBaseClass<ComponentLogic> {
         ComponentLogic(ComponentLogic&&) noexcept;
         ComponentLogic& operator=(ComponentLogic&&) noexcept;
 
-        ~ComponentLogic() = default;
-
         [[nodiscard]] inline constexpr Entity getOwner() const noexcept { return m_Owner; }
         void call(const float dt) const noexcept;
 
-        inline void setFunctor(c_function&& functor) noexcept { m_Functor.setFunctor(std::move(functor)); }
+        inline void setFunctor(const CFunction& functor) noexcept { m_Functor.setFunctor(functor); }
+        inline void setFunctor(CFunction&& functor) noexcept { m_Functor.setFunctor(std::move(functor)); }
         inline void setFunctor(luabridge::LuaRef luaFunction) noexcept {
             ASSERT(!luaFunction.isNil() && luaFunction.isFunction(), __FUNCTION__ << "(luabridge::LuaRef): lua ref is invalid!");
             m_Functor.setFunctor(luaFunction);

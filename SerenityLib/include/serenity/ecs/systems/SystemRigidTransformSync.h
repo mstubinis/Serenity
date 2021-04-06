@@ -2,14 +2,14 @@
 #ifndef ENGINE_ECS_SYSTEM_RIGID_TRANSFORM_SYNC_H
 #define ENGINE_ECS_SYSTEM_RIGID_TRANSFORM_SYNC_H
 
-class  ComponentBody;
-class  ComponentBodyRigid;
+class  ComponentTransform;
+class  ComponentRigidBody;
 
 #include <serenity/ecs/systems/SystemBaseClass.h>
 
-class SystemRigidTransformSync final : public SystemCRTP<SystemRigidTransformSync, ComponentBody, ComponentBodyRigid> {
-    friend class  ComponentBody;
-    friend class  ComponentBodyRigid;
+class SystemRigidTransformSync final : public SystemCRTP<SystemRigidTransformSync, ComponentTransform, ComponentRigidBody> {
+    friend class  ComponentTransform;
+    friend class  ComponentRigidBody;
     private:
 
     public:

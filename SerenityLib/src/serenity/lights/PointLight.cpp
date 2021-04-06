@@ -2,7 +2,7 @@
 #include <serenity/math/Engine_Math.h>
 #include <serenity/resources/Engine_Resources.h>
 #include <serenity/utils/Utils.h>
-#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/scene/Scene.h>
 
 constexpr std::array<PointLightDefaultAttenuationData, (size_t)LightRange::_TOTAL> LIGHT_RANGES { {
@@ -41,7 +41,7 @@ float PointLight::calculateCullingRadius() {
     //else if(m_AttenuationModel == LightAttenuation::Distance){
     //    radius = (lightMax * (256.0f / 5.0f));
     //}
-    auto& body = *getComponent<ComponentBody>();
+    auto& body = *getComponent<ComponentTransform>();
     body.setScale(radius, radius, radius);
     return radius;
 }

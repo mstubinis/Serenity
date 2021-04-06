@@ -61,8 +61,8 @@ void priv::SoundModule::updateCameraPosition(Scene& scene) {
     auto* camera = scene.getActiveCamera();
     if (camera && !camera->isDestroyed()) {
         auto camPos     = glm::vec3(camera->getPosition());
-        auto camForward = glm::vec3(camera->forward());
-        auto camUp      = glm::vec3(camera->up());
+        auto camForward = camera->getForward();
+        auto camUp      = camera->getUp();
         sf::Listener::setPosition(camPos.x, camPos.y, camPos.z);
         sf::Listener::setDirection(camForward.x, camForward.y, camForward.z);
         sf::Listener::setUpVector(camUp.x, camUp.y, camUp.z);

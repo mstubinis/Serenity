@@ -73,7 +73,7 @@ void Engine::priv::GLDebugDrawer::render() {
 }
 void Engine::priv::GLDebugDrawer::buildVAO() {
     Engine::Renderer::deleteVAO(m_VAO);
-    if (Engine::priv::RenderModule::OPENGL_VERSION >= 30) {
+    if (Engine::priv::OpenGLState::constants.supportsVAO()) {
         Engine::Renderer::genAndBindVAO(m_VAO);
         bindDataToGPU();
         Engine::Renderer::bindVAO(0);

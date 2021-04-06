@@ -22,16 +22,16 @@ uint32_t ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
 decimal ModelInstance::m_GlobalDistanceFactor = (decimal)1100.0;
 
 constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
-    auto stage                   = i->stage();
+    auto stage                   = i->getStage();
     auto& scene                  = *Engine::Resources::getCurrentScene();
     auto* camera                 = scene.getActiveCamera();
-    Entity parent                = i->parent();
-    auto transform               = parent.getComponent<ComponentBody>();
+    Entity parent                = i->getParent();
+    auto transform               = parent.getComponent<ComponentTransform>();
     glm::mat4 parentWorldMatrix  = transform->getWorldMatrixRendering();
     auto& animationContainer     = i->getRunningAnimations();
 
-    Engine::Renderer::sendUniform1Safe("Object_Color", i->color().toPackedInt());
-    Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", i->godRaysColor().toPackedInt());
+    Engine::Renderer::sendUniform1Safe("Object_Color", i->getColor().toPackedInt());
+    Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", i->getGodRaysColor().toPackedInt());
 
     if (stage == RenderStage::ForwardTransparentTrianglesSorted || stage == RenderStage::ForwardTransparent || stage == RenderStage::ForwardOpaque) {
         Skybox* skybox          = scene.skybox();
@@ -44,7 +44,7 @@ constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engi
     }else{
         Engine::Renderer::sendUniform1Safe("AnimationPlaying", 0);
     }
-    glm::mat4 renderingMatrix = parentWorldMatrix * i->modelMatrix();
+    glm::mat4 renderingMatrix = parentWorldMatrix * i->getModelMatrix();
 
     //world space normals
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ renderingMatrix }));
@@ -62,7 +62,7 @@ constexpr auto DefaultModelInstanceUnbindFunctor = [](ModelInstance* i, const En
 
 bool priv::PublicModelInstance::IsViewportValid(const ModelInstance& modelInstance, const Viewport& viewport) {
     const auto flags = modelInstance.getViewportFlags();
-    return (flags & (1 << viewport.id()) || flags == 0);
+    return (flags & (1 << viewport.getId()) || flags == 0);
 }
 
 ModelInstance::ModelInstance(Entity parent, Handle mesh, Handle material, Handle shaderProgram)

@@ -2,18 +2,20 @@
 #ifndef ENGINE_ECS_COMPONENT_NAME_H
 #define ENGINE_ECS_COMPONENT_NAME_H
 
-#include <serenity/ecs/entity/Entity.h>
 #include <serenity/ecs/components/ComponentBaseClass.h>
 
 class ComponentName : public ComponentBaseClass<ComponentName> {
     private:
         std::string  m_Data;
-        Entity       m_Owner;
 
         ComponentName() = delete;
     public:
         ComponentName(Entity entity);
         ComponentName(Entity entity, std::string_view name);
+        ComponentName(const ComponentName&)                = default;
+        ComponentName& operator=(const ComponentName&)     = default;
+        ComponentName(ComponentName&&) noexcept            = default;
+        ComponentName& operator=(ComponentName&&) noexcept = default;
 
         [[nodiscard]] inline const std::string& name() const noexcept { return m_Data; }
         inline void setName(std::string_view name) noexcept { m_Data = name; }

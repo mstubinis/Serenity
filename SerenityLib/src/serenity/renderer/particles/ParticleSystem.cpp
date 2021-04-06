@@ -21,7 +21,7 @@ Engine::priv::ParticleSystem::ParticleSystem(uint32_t maxEmitters, uint32_t maxP
     m_Particles.reserve(maxParticles);
     ParticlesDOD.resize(std::min(maxParticles, 300U));
 
-    const auto maxMaterialSlots = std::min(Engine::priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME);
+    const auto maxMaterialSlots = std::min(Engine::priv::OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME);
 
     MaterialToIndex.reserve(maxMaterialSlots);
     MaterialToIndexReverse.reserve(maxMaterialSlots);
@@ -117,7 +117,7 @@ bool Engine::priv::ParticleSystem::add_particle(ParticleEmitter& emitter, const 
     return false;
 }
 bool Engine::priv::ParticleSystem::add_particle(ParticleEmitter& emitter) {
-    auto body = emitter.getComponent<ComponentBody>();
+    auto body = emitter.getComponent<ComponentTransform>();
     return (body) ? add_particle(emitter, body->getPosition(), body->getRotation()) : false;
 }
 
@@ -162,8 +162,8 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
         if (particle.isActive() && (glm::distance2(pos, camPos) <= (comparison * comparison)) && sphereTest > 0) {
             //its just pretty expensive in general...
             if (!THREAD_PART_4[k].contains(particle.m_Material)) {
-                THREAD_PART_4[k].try_emplace(particle.m_Material,       particle.m_Material->id());
-                THREAD_PART_5[k].try_emplace(particle.m_Material->id(), particle.m_Material);
+                THREAD_PART_4[k].try_emplace(particle.m_Material,       particle.m_Material->getID());
+                THREAD_PART_5[k].try_emplace(particle.m_Material->getID(), particle.m_Material);
             }
             ///////////////////////////////////////////
 

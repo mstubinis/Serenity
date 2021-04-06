@@ -29,13 +29,12 @@ class MaterialComponent final {
         MaterialLayer* addLayer(const std::string& textureFile, const std::string& maskFile = "", const std::string& cubemapFile = "");
         MaterialLayer* addLayer(Handle textureHandle, Handle maskHandle = Handle{}, Handle cubemapHandle = Handle{});
 
-        [[nodiscard]] inline Handle texture(size_t index = 0) const noexcept { return m_Layers[index].getTexture(); }
-        [[nodiscard]] inline Handle mask(size_t index = 0) const noexcept { return m_Layers[index].getMask(); }
-        [[nodiscard]] inline Handle cubemap(size_t index = 0) const noexcept { return m_Layers[index].getCubemap(); }
-        [[nodiscard]] inline MaterialLayer& layer(size_t index = 0) noexcept { return m_Layers[index]; }
-
-        [[nodiscard]] inline constexpr uint32_t numLayers() const { return m_NumLayers; }
-        [[nodiscard]] inline constexpr MaterialComponentType type() const noexcept { return m_ComponentType; }
+        [[nodiscard]] inline Handle getTexture(size_t index = 0) const noexcept { return m_Layers[index].getTexture(); }
+        [[nodiscard]] inline Handle getMask(size_t index = 0) const noexcept { return m_Layers[index].getMask(); }
+        [[nodiscard]] inline Handle getCubemap(size_t index = 0) const noexcept { return m_Layers[index].getCubemap(); }
+        [[nodiscard]] inline MaterialLayer& getLayer(size_t index = 0) noexcept { return m_Layers[index]; }
+        [[nodiscard]] inline uint32_t getNumLayers() const { return m_NumLayers; }
+        [[nodiscard]] inline MaterialComponentType getType() const noexcept { return m_ComponentType; }
 
         void update(const float dt);
 };

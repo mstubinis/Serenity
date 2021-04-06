@@ -10,21 +10,28 @@ enum class CameraType : unsigned char {
     Orthographic,
 };
 
-using CameraLogicComponent = ComponentLogic2;
+using CameraLogicComponent   = ComponentLogic2;
+using CameraLogicFunctionPtr = void(*)(const CameraLogicComponent*, const float);
+
+extern CameraLogicFunctionPtr CAMERA_DEFAULT_MOUSELOOK_FUNCTION;
+extern CameraLogicFunctionPtr CAMERA_DEFAULT_MOUSELOOK_NO_GIMBLE_LOCK_FUNCTION;
+
 class Camera: public Entity {
     friend struct Engine::priv::ComponentCamera_Functions;
     public:
-        Camera(float angle, float aspectRatio, float nearPlane, float farPlane, Scene* = nullptr);
-        Camera(float left, float right, float bottom, float top, float nearPlane, float farPlane, Scene* = nullptr);
+
+    public:
+        Camera(Scene*, float angle, float aspectRatio, float nearPlane, float farPlane);
+        Camera(Scene*, float left, float right, float bottom, float top, float nearPlane, float farPlane);
         virtual ~Camera();
 
         void lookAt(const glm_vec3& eye, const glm_vec3& center, const glm_vec3& up) noexcept;
 
         [[nodiscard]] glm_vec3 getPosition() const noexcept;
-        [[nodiscard]] glm_vec3 forward() const noexcept;
-        [[nodiscard]] glm_vec3 right() const noexcept;
-        [[nodiscard]] glm_vec3 up() const noexcept;
-        [[nodiscard]] glm::quat getOrientation() const noexcept;
+        [[nodiscard]] glm::vec3 getForward() const noexcept;
+        [[nodiscard]] glm::vec3 getRight() const noexcept;
+        [[nodiscard]] glm::vec3 getUp() const noexcept;
+        [[nodiscard]] glm::quat getRotation() const noexcept;
 
         [[nodiscard]] decimal getDistance(Entity) const noexcept;
         [[nodiscard]] decimal getDistance(const glm_vec3&) const noexcept;
@@ -37,6 +44,8 @@ class Camera: public Entity {
         [[nodiscard]] float getAspect() const noexcept;
         [[nodiscard]] float getNear() const noexcept;
         [[nodiscard]] float getFar() const noexcept;
+
+        template<class T> inline void setUpdateFunction(T&& func) noexcept { getComponent<CameraLogicComponent>()->setFunctor(std::forward<T>(func)); };
 
         void setAngle(float angle) noexcept;
         void setAspect(float aspectRatio) noexcept;

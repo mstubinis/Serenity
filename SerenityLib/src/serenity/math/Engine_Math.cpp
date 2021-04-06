@@ -16,7 +16,7 @@
 
 using namespace Engine;
 
-constexpr float ROTATION_THRESHOLD = 0.00001f;
+constexpr float ROTATION_THRESHOLD = 0.005f;
 
 //could use some fixing
 glm::vec3 Math::polynomial_interpolate_linear(const std::vector<glm::vec3>& points, float time) {
@@ -108,10 +108,10 @@ glm::vec4 Math::rect_union(const glm::vec4& bigger, const glm::vec4& smaller) no
     if (bigger == glm::vec4{ -1.0f }) {
         return smaller;
     }
-    float x = std::max(bigger.x, smaller.x);
-    float y = std::max(bigger.y, smaller.y);
-    float z = std::min(bigger.x + bigger.z, smaller.x + smaller.z);
-    float w = std::min(bigger.y + bigger.w, smaller.y + smaller.w);
+    auto x = std::max(bigger.x, smaller.x);
+    auto y = std::max(bigger.y, smaller.y);
+    auto z = std::min(bigger.x + bigger.z, smaller.x + smaller.z);
+    auto w = std::min(bigger.y + bigger.w, smaller.y + smaller.w);
     if (x > z || y > w) { //no intersection
         return bigger;
     }
@@ -128,51 +128,33 @@ void Math::Float16From32(uint16_t* out, const float* in, uint32_t arraySize) noe
         Math::Float16From32(&(out[i]), in[i]);
     }
 }
-void Math::setFinalModelMatrix(glm_mat4& modelMatrix, const glm_vec3& position, const glm_quat& rotation, const glm_vec3& inScale) noexcept {
-    modelMatrix            = glm_mat4(1.0);
-    auto translationMatrix = glm::translate(position);
-    auto rotationMatrix    = glm::mat4_cast(rotation);
-    auto scaleMatrix       = glm::scale(inScale);
-    modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+void Math::setFinalModelMatrix(glm_mat4& modelMatrix, const glm_vec3& position, const glm::quat& rotation, const glm::vec3& inScale) noexcept {
+    modelMatrix  = glm_mat4{ 1.0 };
+    modelMatrix  = glm::translate(modelMatrix, position);
+    modelMatrix *= glm::mat4_cast(glm_quat(rotation));
+    modelMatrix  = glm::scale(modelMatrix, glm_vec3(inScale));
 }
 void Math::setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& inScale) noexcept {
-    modelMatrix            = glm::mat4(1.0f);
-    auto translationMatrix = glm::translate(position);
-    auto rotationMatrix    = glm::mat4_cast(rotation);
-    auto scaleMatrix       = glm::scale(inScale);
-    modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
-}
-void Math::setRotation(glm_quat& orientation, decimal pitch, decimal yaw, decimal roll) noexcept {
-    if (abs(pitch) > ROTATION_THRESHOLD)
-        orientation               = (glm::angleAxis(pitch, glm_vec3{ -1, 0, 0 }));   //pitch
-    if (abs(yaw) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(yaw,   glm_vec3{0, -1, 0}));   //yaw
-    if (abs(roll) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(roll,  glm_vec3{ 0, 0, 1 }));   //roll
+    modelMatrix  = glm::mat4{ 1.0f };
+    modelMatrix  = glm::translate(modelMatrix, position);
+    modelMatrix *= glm::mat4_cast(rotation);
+    modelMatrix  = glm::scale(modelMatrix, inScale);
 }
 void Math::setRotation(glm::quat& orientation, float pitch, float yaw, float roll) noexcept {
     if (abs(pitch) > ROTATION_THRESHOLD)
-        orientation =               (glm::angleAxis(pitch, glm::vec3{ -1, 0, 0 }));   //pitch
+        orientation =               (glm::angleAxis(pitch, glm::vec3{ -1.0f, 0.0f, 0.0f }));   //pitch
     if (abs(yaw) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(yaw,   glm::vec3{ 0, -1, 0 }));   //yaw
+        orientation = orientation * (glm::angleAxis(yaw,   glm::vec3{ 0.0f, -1.0f, 0.0f }));   //yaw
     if (abs(roll) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(roll,  glm::vec3{ 0, 0, 1 }));   //roll
-}
-void Math::rotate(glm_quat& orientation, decimal pitch, decimal yaw, decimal roll) noexcept {
-    if (abs(pitch) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(pitch, glm_vec3{ -1, 0, 0 }));   //pitch
-    if (abs(yaw) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(yaw,   glm_vec3{ 0, -1, 0 }));   //yaw
-    if (abs(roll) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(roll,  glm_vec3{ 0, 0, 1 }));   //roll
+        orientation = orientation * (glm::angleAxis(roll,  glm::vec3{ 0.0f, 0.0f, 1.0f }));   //roll
 }
 void Math::rotate(glm::quat& orientation, float pitch, float yaw, float roll) noexcept {
     if (abs(pitch) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(pitch, glm::vec3{ -1, 0, 0 }));   //pitch
+        orientation = orientation * (glm::angleAxis(pitch, glm::vec3{ -1.0f, 0.0f, 0.0f }));   //pitch
     if (abs(yaw) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(yaw,   glm::vec3{ 0, -1, 0 }));   //yaw
+        orientation = orientation * (glm::angleAxis(yaw,   glm::vec3{ 0.0f, -1.0f, 0.0f }));   //yaw
     if (abs(roll) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(roll,  glm::vec3{ 0, 0, 1 }));   //roll
+        orientation = orientation * (glm::angleAxis(roll,  glm::vec3{ 0.0f, 0.0f, 1.0f }));   //roll
 }
 glm::vec2 Math::rotate2DPoint(const glm::vec2& point, float angle, const glm::vec2& origin) {
     float s = glm::sin(angle);
@@ -196,20 +178,20 @@ void Math::extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProject
     }
     //https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
 }
-glm_quat Math::toGLM(const btQuaternion& q){
-    return glm_quat{ q.getW(), q.getX(), q.getY(), q.getZ() };
+glm::quat Math::toGLM(const btQuaternion& BTquat){
+    return glm::quat(BTquat.getW(), BTquat.getX(), BTquat.getY(), BTquat.getZ() );
 }
-btQuaternion Math::toBT(const glm_quat& q){
-    return btQuaternion{ q.x, q.y, q.z, q.w };
+btQuaternion Math::toBT(const glm::quat& quat){
+    return btQuaternion{ quat.x, quat.y, quat.z, quat.w };
 }
-glm::vec3 Math::toGLM(const aiVector3D& n){
-    return glm::vec3{ n.x, n.y, n.z };
+glm::vec3 Math::toGLM(const aiVector3D& aiVec){
+    return glm::vec3{ aiVec.x, aiVec.y, aiVec.z };
 }
-glm::mat4 Math::toGLM(const aiMatrix4x4& n){
-    return glm::mat4{ n.a1, n.b1, n.c1, n.d1, n.a2, n.b2, n.c2, n.d2, n.a3, n.b3, n.c3, n.d3, n.a4, n.b4, n.c4, n.d4 };
+glm::mat4 Math::toGLM(const aiMatrix4x4& aiMat){
+    return glm::mat4{ aiMat.a1, aiMat.b1, aiMat.c1, aiMat.d1, aiMat.a2, aiMat.b2, aiMat.c2, aiMat.d2, aiMat.a3, aiMat.b3, aiMat.c3, aiMat.d3, aiMat.a4, aiMat.b4, aiMat.c4, aiMat.d4 };
 }
-glm::mat3 Math::toGLM(const aiMatrix3x3& n){
-    return glm::mat3{ n.a1, n.b1, n.c1, n.a2, n.b2, n.c2, n.a3, n.b3, n.c3 };
+glm::mat3 Math::toGLM(const aiMatrix3x3& aiMat){
+    return glm::mat3{ aiMat.a1, aiMat.b1, aiMat.c1, aiMat.a2, aiMat.b2, aiMat.c2, aiMat.a3, aiMat.b3, aiMat.c3 };
 }
 glm::quat Math::toGLM(const aiQuaternion& aiQuat) {
     return glm::quat{ aiQuat.w, aiQuat.x, aiQuat.y, aiQuat.z };
@@ -218,40 +200,36 @@ glm::quat Math::toGLM(const aiQuaternion& aiQuat) {
 glm_vec3 Math::toGLM(const btVector3& btvector){
     return glm_vec3{ btvector.x(), btvector.y(), btvector.z() };
 }
-btVector3 Math::toBT(const glm_vec3& vector){ 
+#if defined(ENGINE_HIGH_PRECISION)
+btVector3 Math::toBT(const glm_vec3& vector) {
     return btVector3{ vector.x, vector.y, vector.z };
 }
+#endif
+btVector3 Math::toBT(const glm::vec3& vector){ 
+    return btVector3{ vector.x, vector.y, vector.z };
+}
+#if defined(ENGINE_HIGH_PRECISION)
 glm_vec3 Math::getMatrixPosition(const glm_mat4& matrix) {
     return glm_vec3{ matrix[3][0], matrix[3][1], matrix[3][2] };
 }
+#endif
 glm::vec3 Math::getMatrixPosition(const glm::mat4& matrix) {
     return glm::vec3{ matrix[3][0], matrix[3][1], matrix[3][2] };
 }
-void Math::removeMatrixPosition(glm::mat4& matrix){
-	matrix[3][0] = 0.0f;
-	matrix[3][1] = 0.0f;
-	matrix[3][2] = 0.0f;
-}
+
 
 bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector, const glm::vec3& point, float fovRadians){
     glm::vec3 diff = glm::normalize(point - conePos);
-    float t = glm::dot(coneVector, diff);
+    float t        = glm::dot(coneVector, diff);
     return ( t >= glm::cos( fovRadians ) );
 }
 bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector, const glm::vec3& point, float fovRadians, float maxDistance){
     glm::vec3 diff = glm::normalize(point - conePos);
-    float t = glm::dot(coneVector, diff);
-    float length = glm::length(point - conePos);
+    float t        = glm::dot(coneVector, diff);
+    float length   = glm::length(point - conePos);
     return (length > maxDistance) ? false : (t >= glm::cos(fovRadians));
 }
-glm::vec3 Math::getScreenCoordinates(
-const glm::vec3& position, 
-const Camera& camera, 
-const glm::mat4& view, 
-const glm::mat4& projection, 
-const glm::vec4& viewport, 
-bool clampToEdge
-){
+glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& camera, const glm::mat4& view, const glm::mat4& projection, const glm::vec4& viewport, bool clampToEdge){
     using v2 = glm::vec2;
     auto getIntersection = [&](const v2& a1, const v2& a2, const v2& b1, const v2& b2){
         auto b = a2 - a1;
@@ -311,7 +289,7 @@ bool clampToEdge
         }
     }
     if (inBounds) {
-        return glm::vec3(screen_pos.x, screen_pos.y, inBounds);
+        return glm::vec3(screen_pos.x, screen_pos.y, static_cast<float>(inBounds));
     }
     if (clampToEdge) {
         v2 center(viewport.z / 2.0f, viewport.w / 2.0f);
@@ -335,7 +313,7 @@ bool clampToEdge
         res.y = perm.y;
         return res;
     }
-    return glm::vec3(screen_pos.x, screen_pos.y, inBounds);
+    return glm::vec3(screen_pos.x, screen_pos.y, static_cast<float>(inBounds));
 }
 glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& camera, const glm::vec4& viewport, bool clampToEdge) {
     return Math::getScreenCoordinates(position, camera, camera.getView(), camera.getProjection(), viewport, clampToEdge);
@@ -348,32 +326,22 @@ glm::vec3 Math::getScreenCoordinates(const glm::vec3& objPos, const Camera& came
 
 
 
-void Math::translate(const btRigidBody& body, btVector3& vec, bool local) noexcept {
+void Math::translate(const btRigidBody& BTRigidBody, btVector3& vec, bool local) noexcept {
     if (local) {
-        btQuaternion q = body.getWorldTransform().getRotation().normalize();
-        vec = vec.rotate(q.getAxis(), q.getAngle());
+        btQuaternion quat = BTRigidBody.getWorldTransform().getRotation().normalize();
+        vec = vec.rotate(quat.getAxis(), quat.getAngle());
     }
 }
 glm::vec3 Math::midpoint(const glm::vec3& a, const glm::vec3& b) {
-    return glm::vec3{ (a.x + b.x) / 2.0f, (a.y + b.y) / 2.0f, (a.z + b.z) / 2.0f };
+    return glm::vec3{ (a + b) * 0.5f };
 }
 glm::vec3 Math::direction(const glm::vec3& eye, const glm::vec3& target) {
     return glm::normalize(eye - target);
 }
-glm::vec3 Math::getForward(const glm_quat& q) {
-    return glm::normalize(q * glm_vec3{ 0, 0, -1 });
-}
-glm::vec3 Math::getRight(const glm_quat& q) {
-    return glm::normalize(q * glm_vec3{ 1, 0, 0 });
-}
-glm::vec3 Math::getUp(const glm_quat& q) {
-    return glm::normalize(q * glm_vec3{ 0, 1, 0 });
-}
-glm::vec3 Math::getColumnVector(const btRigidBody& b, unsigned int column) {
+glm::vec3 Math::getColumnVector(const btRigidBody& b, uint32_t column) {
     btTransform t;
     b.getMotionState()->getWorldTransform(t);
-    btVector3 v = t.getBasis().getColumn(column);
-    return glm::normalize(glm::vec3{ v.x(), v.y(), v.z() });
+    return glm::normalize(Math::toGLM(t.getBasis().getColumn(column)));
 }
 glm::vec3 Math::getForward(const btRigidBody& b) {
     return Math::getColumnVector(b, 2);
@@ -384,16 +352,6 @@ glm::vec3 Math::getRight(const btRigidBody& b) {
 glm::vec3 Math::getUp(const btRigidBody& b) {
     return Math::getColumnVector(b, 1);
 }
-void Math::recalculateForwardRightUp(const glm_quat& o, glm_vec3& f, glm_vec3& r, glm_vec3& u) {
-    f = Math::getForward(o);
-    r = Math::getRight(o);
-    u = Math::getUp(o);
-}
-void Math::recalculateForwardRightUp(const btRigidBody& b, glm_vec3& f, glm_vec3& r, glm_vec3& u) {
-    f = Math::getForward(b);
-    r = Math::getRight(b);
-    u = Math::getUp(b);
-}
 float Math::getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bool degrees) {
     if (a == b)
         return 0.0f;
@@ -402,11 +360,10 @@ float Math::getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bo
         angle *= 57.2958f;
     return angle;
 }
-glm_quat Math::alignTo(decimal x, decimal y, decimal z) noexcept {
-    glm_quat o{ 1.0, 0.0, 0.0, 0.0 };
-    o = glm::conjugate(glm::toQuat(glm::lookAt(glm_vec3{ 0.0f }, -glm_vec3{ x, y, z }, glm_vec3{ 0, 1, 0 })));
-    o = glm::normalize(o);
-    return o;
+glm::quat Math::alignTo(float x, float y, float z) noexcept {
+    glm::quat outQuat{ 1.0, 0.0, 0.0, 0.0 };
+    outQuat = glm::normalize(glm::conjugate(glm::toQuat(glm::lookAt(glm::vec3{ 0.0f }, -glm::vec3{ x, y, z }, glm::vec3{ 0.0f, 1.0f, 0.0f }))));
+    return outQuat;
 }
 
 

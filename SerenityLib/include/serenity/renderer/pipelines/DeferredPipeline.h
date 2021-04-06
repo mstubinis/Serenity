@@ -119,7 +119,7 @@ namespace Engine::priv {
             void onPipelineChanged() override;
             void onFullscreen() override;
             void onResize(uint32_t newWidth, uint32_t newHeight) override;
-            void onOpenGLContextCreation(uint32_t windowWidth, uint32_t windowHeight, uint32_t glslVersion, uint32_t openglVersion) override;
+            void onOpenGLContextCreation(uint32_t windowWidth, uint32_t windowHeight) override;
             void restoreDefaultState() override;
             void restoreCurrentState() override;
             void clear2DAPI() override;

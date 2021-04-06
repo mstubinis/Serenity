@@ -54,7 +54,7 @@ std::string priv::EShaders::lighting_frag;
 std::string priv::EShaders::lighting_frag_gi;
 #pragma endregion
 
-void priv::EShaders::init(const uint32_t openglVersion, const uint32_t glslVersion){
+void priv::EShaders::init(){
 
 #pragma region Functions
 
@@ -115,14 +115,23 @@ int inot(int a) { return 1 - a; }
 #pragma endregion
 
 #pragma region LightingVertex
+
+// vec2 VertexShaderData; x = outercutoff, y = radius
+// float Type; 2.0 = spot light. 1.0 = any other light. 0.0 = fullscreen quad / triangle
+//
+//
+//
+//
+//
+
 priv::EShaders::lighting_vert = R"(
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec2 uv;
 
 uniform mat4 Model;
 uniform mat4 VP;
-uniform vec2 VertexShaderData; //x = outercutoff, y = radius
-uniform float Type; // 2.0 = spot light. 1.0 = any other light. 0.0 = fullscreen quad / triangle
+uniform vec2 VertexShaderData;
+uniform float Type;
 
 varying vec2 texcoords;
 flat varying vec3 CamRealPosition;
@@ -135,16 +144,16 @@ vec3 doSpotLightStuff(vec3 inPositions){
 void main(){
     mat4 ModelClone = Model;
     vec3 ModelSpacePositions = position;
-    if(Type == 2.0){ //spot light
+    if(Type == 2.0){
         ModelSpacePositions = doSpotLightStuff(ModelSpacePositions);
         ModelClone[3][0] -= CameraRealPosition.x;
         ModelClone[3][1] -= CameraRealPosition.y;
         ModelClone[3][2] -= CameraRealPosition.z;
-    }else if(Type == 1.0){ //point / rod / etc
+    }else if(Type == 1.0){
         ModelClone[3][0] -= CameraRealPosition.x;
         ModelClone[3][1] -= CameraRealPosition.y;
         ModelClone[3][2] -= CameraRealPosition.z;
-    }else if(Type == 0.0){ //fullscreen quad / triangle
+    }else if(Type == 0.0){
     }
     texcoords = uv;
     CamRealPosition = CameraRealPosition;
@@ -299,10 +308,10 @@ priv::EShaders::decal_frag =
     "struct Layer {\n"
     "    vec4 data1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
     "    vec4 data2;\n"
+    "    vec4 uvModifications;\n"
     "    SAMPLER_TYPE_2D texture;\n"
     "    SAMPLER_TYPE_2D mask;\n"
     "    SAMPLER_TYPE_Cube cubemap;\n"
-    "    vec4 uvModifications;\n"
     "};\n"
     "struct Component {\n"
     "    ivec2 componentData;\n" //x = numLayers, y = componentType
@@ -587,10 +596,11 @@ priv::EShaders::brdf_precompute = R"(
 const float PI2 = 6.283185;
 uniform int NUM_SAMPLES;
 varying vec2 texcoords;
-vec3 ImportanceSampleGGX(vec2 Xi, float a2,mat3 TBN){
+
+vec3 ImportanceSampleGGX(vec2 Xi, float a2, mat3 TBN){
     float phi = PI2 * Xi.x;
     float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a2 - 1.0) * Xi.y));
-    float sinTheta = sqrt(1.0 - cosTheta*cosTheta);
+    float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
     vec3 Half;
     Half.x = cos(phi) * sinTheta;
     Half.y = sin(phi) * sinTheta;
@@ -623,14 +633,14 @@ vec2 IntegrateBRDF(float NdotV, float roughness){
     vec3 tangent   = normalize(cross(up, N));
     vec3 bitangent = cross(N, tangent);
     mat3 TBN = mat3(tangent,bitangent,N);
-    for(int i = 0; i < NUM_SAMPLES; ++i){
+    for (int i = 0; i < NUM_SAMPLES; ++i) {
         vec2 Xi = HammersleySequence(i, NUM_SAMPLES);
-        vec3 H = ImportanceSampleGGX(Xi,a2,TBN);
+        vec3 H = ImportanceSampleGGX(Xi, a2, TBN);
         vec3 L = normalize(2.0 * dot(V, H) * H - V);
         float NdotL = max(L.z, 0.0);
         float NdotH = max(H.z, 0.0);
         float VdotH = max(dot(V, H), 0.0);
-        if(NdotL > 0.0){
+        if (NdotL > 0.0) {
             float G = GeometrySmith(N, V, L, a);
             float G_Vis = (G * VdotH) / (NdotH * NdotV);
             float Fc = pow(1.0 - VdotH, 5.0);
@@ -703,10 +713,10 @@ priv::EShaders::forward_frag =
     "struct Layer {\n"
     "    vec4 data1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
     "    vec4 data2;\n"
+    "    vec4 uvModifications;\n"
     "    SAMPLER_TYPE_2D texture;\n"
     "    SAMPLER_TYPE_2D mask;\n"
     "    SAMPLER_TYPE_Cube cubemap;\n"
-    "    vec4 uvModifications;\n"
     "};\n"
     "struct Component {\n"
     "    ivec2 componentData;\n" //x = numLayers, y = componentType
@@ -824,7 +834,7 @@ priv::EShaders::forward_frag =
 
     "uniform SAMPLER_TYPE_2D DiffuseTexture0;\n";
 
-    for (uint32_t i = 1; i < std::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
+    for (uint32_t i = 1; i < std::min(priv::OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
         priv::EShaders::particle_frag +=
          "uniform SAMPLER_TYPE_2D DiffuseTexture" + std::to_string(i) + ";\n";
     }
@@ -851,7 +861,7 @@ priv::EShaders::forward_frag =
     "    if(MaterialIndex == 0U)\n"
     "        finalColor *= texture2D(DiffuseTexture0, UV); \n";
 
-    for (uint32_t i = 1; i < std::min(priv::OpenGLState::MAX_TEXTURE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
+    for (uint32_t i = 1; i < std::min(priv::OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
         priv::EShaders::particle_frag +=
             "    else if (MaterialIndex == " + std::to_string(i) + "U)\n"
             "        finalColor *= texture2D(DiffuseTexture" + std::to_string(i) + ", UV); \n";
@@ -889,10 +899,10 @@ struct InData {
 struct Layer {
     vec4 data1; //x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
     vec4 data2;
+    vec4 uvModifications;
     SAMPLER_TYPE_2D texture;
     SAMPLER_TYPE_2D mask;
     SAMPLER_TYPE_Cube cubemap;
-    vec4 uvModifications;
 };
 struct Component {
     ivec2 componentData; //x = numLayers, y = componentType
@@ -1072,41 +1082,39 @@ void main(){
 #pragma endregion
     
 #pragma region FinalFrag
-priv::EShaders::final_frag =
-    "\n"
-    "uniform SAMPLER_TYPE_2D SceneTexture;\n"
-    "uniform SAMPLER_TYPE_2D gBloomMap;\n"
-    "uniform SAMPLER_TYPE_2D gDepthMap;\n"
-    "uniform SAMPLER_TYPE_2D gDiffuseMap;\n"
-    "\n"
-    "uniform int HasBloom;\n"
-    "uniform int HasFog;\n"
-    "\n"
-    "uniform vec4 FogColor;\n"
-    "uniform float FogDistNull;\n"
-    "uniform float FogDistBlend;\n"
-    "\n"
-    "varying vec2 texcoords;\n"
-    "\n"
-    "void main(){\n"
-    "    vec4 scene = texture2D(SceneTexture,texcoords);\n"
-    "    vec4 diffuse = texture2D(gDiffuseMap,texcoords);\n"
-    "    if(HasBloom == 1){\n"
-    "        vec4 bloom = texture2D(gBloomMap,texcoords);\n"
-    "        scene += bloom;\n"
-    "    }\n"
-    "    gl_FragColor = scene;\n"
-    "    if(HasFog == 1){\n"
-    "        float distFrag = distance(GetWorldPosition(USE_SAMPLER_2D(gDepthMap), texcoords,CameraNear,CameraFar),CameraPosition);\n"
-    "        float distVoid = FogDistNull + FogDistBlend;\n"
-    "        float distBlendIn = FogDistBlend - (distVoid - distFrag);\n"
-    "        float omega = smoothstep(0.0,1.0,(distBlendIn / FogDistBlend));\n"
-    "        vec4 fc = FogColor * clamp(omega,0.0,1.0);\n"
-    "        gl_FragColor = PaintersAlgorithm(fc,gl_FragColor);\n"
-    "    }\n"
-    //"    gl_FragColor = (gl_FragColor * 0.0001) + vec4(1.0 - texture2D(gBloomMap,texcoords).a);\n"
-    "}";
+priv::EShaders::final_frag = R"(
+uniform SAMPLER_TYPE_2D SceneTexture;
+uniform SAMPLER_TYPE_2D gBloomMap;
+uniform SAMPLER_TYPE_2D gDepthMap;
+uniform SAMPLER_TYPE_2D gDiffuseMap;
 
+uniform int HasBloom;
+uniform int HasFog;
+
+uniform vec4 FogColor;
+uniform float FogDistNull;
+uniform float FogDistBlend;
+
+varying vec2 texcoords;
+
+void main(){
+    vec4 scene = texture2D(SceneTexture, texcoords);
+    vec4 diffuse = texture2D(gDiffuseMap, texcoords);
+    if (HasBloom == 1) {
+        vec4 bloom = texture2D(gBloomMap, texcoords);
+        scene += bloom;
+    }
+    gl_FragColor = scene;
+    if (HasFog == 1) {
+        float distFrag = distance(GetWorldPosition(USE_SAMPLER_2D(gDepthMap), texcoords, CameraNear, CameraFar), CameraPosition);
+        float distVoid = FogDistNull + FogDistBlend;
+        float distBlendIn = FogDistBlend - (distVoid - distFrag);
+        float omega = smoothstep(0.0, 1.0, (distBlendIn / FogDistBlend));
+        vec4 fc = FogColor * clamp(omega, 0.0, 1.0);
+        gl_FragColor = PaintersAlgorithm(fc, gl_FragColor);
+    }
+}
+)";
 #pragma endregion
 
 #pragma region DepthAndTransparency
@@ -1140,107 +1148,130 @@ priv::EShaders::depth_and_transparency_frag +=
 #pragma endregion
 
 #pragma region LightingFrag
-priv::EShaders::lighting_frag =
-    "#define MATERIAL_COUNT_LIMIT 255\n"
-    "\n"
-    "struct Light {\n"
-    "    vec4 DataA;\n" //x = ambient,          y = diffuse,          z = specular,         w = LightDirection.x
-    "    vec4 DataB;\n" //x = LightDirection.y, y = LightDirection.z, z = const,            w = linear
-    "    vec4 DataC;\n" //x = exp,              y = LightPosition.x,  z = LightPosition.y,  w = LightPosition.z
-    "    vec4 DataD;\n" //x = LightColor.r,     y = LightColor.g,     z = LightColor.b,     w = LightType
-    "    vec4 DataE;\n" //x = cutoff,           y = outerCutoff,      z = AttenuationModel, w = UNUSED
-    "};\n"
-    "uniform Light light;\n"
-    "\n"
-    "uniform SAMPLER_TYPE_2D gDiffuseMap;\n"
-    "uniform SAMPLER_TYPE_2D gNormalMap;\n"
-    "uniform SAMPLER_TYPE_2D gMiscMap;\n"
-    "uniform SAMPLER_TYPE_2D gDepthMap;\n"
-    "uniform SAMPLER_TYPE_2D gSSAOMap;\n"
-    "uniform SAMPLER_TYPE_2D gTextureMap;\n"
-    "\n"
-    "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
-    "\n"
-    "varying vec2 texcoords;\n"
-    "flat varying vec3 CamRealPosition;\n"
-    "\n"
-    "void main(){\n"                      //windowX      //windowY
-    "    vec2 uv = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y);\n"
-    "    vec3 PxlNormal        = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), uv).rg);\n"
-    "    vec3 PxlPosition      = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv, CameraNear, CameraFar);\n"
-    "    vec3 lightCalculation = ConstantZeroVec3;\n"
-    "    vec3 LightPosition    = vec3(light.DataC.yzw) - CamRealPosition;\n"
-    "    vec3 LightDirection   = normalize(vec3(light.DataA.w, light.DataB.x, light.DataB.y));\n"
-    "    float Specular        = texture2D(USE_SAMPLER_2D(gMiscMap), uv).g;\n"
-    "    vec3 Albedo           = texture2D(USE_SAMPLER_2D(gDiffuseMap), uv).rgb;\n"
-    "    float MatIDAndAO      = texture2D(USE_SAMPLER_2D(gNormalMap), uv).b;\n"
-    "    float SSAO            = 1.0 - texture2D(gSSAOMap, uv).a;\n"
-    "    vec2 MetalSmooth      = Unpack2NibblesFrom8BitChannel(texture2D(USE_SAMPLER_2D(gMiscMap), uv).r);\n"
-    "    highp int matID       = int(floor(MatIDAndAO));\n"
-    "    float MatAlpha        = materials[matID].g;\n"
-    "    vec3 MatF0            = Unpack3FloatsInto1FloatUnsigned(materials[matID].r);\n"
-    "    float MatTypeDiffuse  = materials[matID].a;\n"
-    "    float MatTypeSpecular = materials[matID].b;\n"
-    "    float AO              = (fract(MatIDAndAO) + 0.0001);\n"
-    "    if(light.DataD.w == 0.0){\n"       //sun
-    "        lightCalculation = CalcLightInternal(light, normalize(LightPosition - PxlPosition), PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);\n"
-    "    }else if(light.DataD.w == 1.0){\n" //point
-    "        lightCalculation = CalcPointLight(light, LightPosition, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);\n"
-    "    }else if(light.DataD.w == 2.0){\n" //directional
-    "        lightCalculation = CalcLightInternal(light, LightDirection, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);\n"
-    "    }else if(light.DataD.w == 3.0){\n" //spot
-    "        lightCalculation = CalcSpotLight(light, LightDirection, LightPosition, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);\n"
-    "    }else if(light.DataD.w == 4.0){\n" //rod
-    "        lightCalculation = CalcRodLight(light, vec3(light.DataA.w, light.DataB.xy), light.DataC.yzw, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);\n"
-    "    }else if(light.DataD.w == 5.0){\n" //projection
-    "        lightCalculation = CalcProjectionLight(light, vec3(light.DataA.w, light.DataB.xy), light.DataC.yzw, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);\n"
-    "    }\n"
-    "    gl_FragData[0].rgb = lightCalculation;\n"
-    "}";
+
+/*
+struct Light {
+    vec4 DataA;   //x = ambient,          y = diffuse,          z = specular,         w = LightDirection.x
+    vec4 DataB;   //x = LightDirection.y, y = LightDirection.z, z = const,            w = linear
+    vec4 DataC;   //x = exp,              y = LightPosition.x,  z = LightPosition.y,  w = LightPosition.z
+    vec4 DataD;   //x = LightColor.r,     y = LightColor.g,     z = LightColor.b,     w = LightType
+    vec4 DataE;   //x = cutoff,           y = outerCutoff,      z = AttenuationModel, w = UNUSED
+};
+vec4 materials[MATERIAL_COUNT_LIMIT]; //r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
+
+if     (light.DataD.w == 0.0){  //sun
+else if(light.DataD.w == 1.0){  //point
+else if(light.DataD.w == 2.0){  //directional
+else if(light.DataD.w == 3.0){  //spot
+else if(light.DataD.w == 4.0){  //rod
+else if(light.DataD.w == 5.0){  //projection
+*/
+
+priv::EShaders::lighting_frag = R"(
+#define MATERIAL_COUNT_LIMIT 255
+
+struct Light {
+    vec4 DataA;
+    vec4 DataB;
+    vec4 DataC;
+    vec4 DataD;
+    vec4 DataE;
+};
+uniform Light light;
+
+uniform SAMPLER_TYPE_2D gDiffuseMap;
+uniform SAMPLER_TYPE_2D gNormalMap;
+uniform SAMPLER_TYPE_2D gMiscMap;
+uniform SAMPLER_TYPE_2D gDepthMap;
+uniform SAMPLER_TYPE_2D gSSAOMap;
+uniform SAMPLER_TYPE_2D gTextureMap;
+
+uniform vec4 materials[MATERIAL_COUNT_LIMIT];
+
+varying vec2 texcoords;
+flat varying vec3 CamRealPosition;
+
+void main(){
+    vec2 uv = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y);
+    vec3 PxlNormal        = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), uv).rg);
+    vec3 PxlPosition      = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv, CameraNear, CameraFar);
+    vec3 lightCalculation = ConstantZeroVec3;
+    vec3 LightPosition    = vec3(light.DataC.yzw) - CamRealPosition;
+    vec3 LightDirection   = normalize(vec3(light.DataA.w, light.DataB.x, light.DataB.y));
+    float Specular        = texture2D(USE_SAMPLER_2D(gMiscMap), uv).g;
+    vec3 Albedo           = texture2D(USE_SAMPLER_2D(gDiffuseMap), uv).rgb;
+    float MatIDAndAO      = texture2D(USE_SAMPLER_2D(gNormalMap), uv).b;
+    float SSAO            = 1.0 - texture2D(gSSAOMap, uv).a;
+    vec2 MetalSmooth      = Unpack2NibblesFrom8BitChannel(texture2D(USE_SAMPLER_2D(gMiscMap), uv).r);
+    highp int matID       = int(floor(MatIDAndAO));
+    float MatAlpha        = materials[matID].g;
+    vec3 MatF0            = Unpack3FloatsInto1FloatUnsigned(materials[matID].r);
+    float MatTypeDiffuse  = materials[matID].a;
+    float MatTypeSpecular = materials[matID].b;
+    float AO              = fract(MatIDAndAO) + 0.0001;
+    if(light.DataD.w == 0.0){
+        lightCalculation = CalcLightInternal(light, normalize(LightPosition - PxlPosition), PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+    }else if(light.DataD.w == 1.0){
+        lightCalculation = CalcPointLight(light, LightPosition, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+    }else if(light.DataD.w == 2.0){
+        lightCalculation = CalcLightInternal(light, LightDirection, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+    }else if(light.DataD.w == 3.0){
+        lightCalculation = CalcSpotLight(light, LightDirection, LightPosition, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+    }else if(light.DataD.w == 4.0){
+        lightCalculation = CalcRodLight(light, vec3(light.DataA.w, light.DataB.xy), light.DataC.yzw, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+    }else if(light.DataD.w == 5.0){
+        lightCalculation = CalcProjectionLight(light, vec3(light.DataA.w, light.DataB.xy), light.DataC.yzw, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+    }
+    gl_FragData[0].rgb = lightCalculation;
+}
+)";
 #pragma endregion
 
 #pragma region LightingFragGI
-priv::EShaders::lighting_frag_gi =
-    "#define MATERIAL_COUNT_LIMIT 255\n"
-    "\n"
-    "const float MAX_REFLECTION_LOD = 5.0;\n"
-    "\n"
-    "uniform SAMPLER_TYPE_2D gDiffuseMap;\n"
-    "uniform SAMPLER_TYPE_2D gNormalMap;\n"
-    "uniform SAMPLER_TYPE_2D gDepthMap;\n"
-    "uniform SAMPLER_TYPE_2D gSSAOMap;\n"
-    "uniform SAMPLER_TYPE_2D gMiscMap;\n"
-    "uniform SAMPLER_TYPE_2D brdfLUT;\n"
-    "\n"
-    "uniform SAMPLER_TYPE_Cube irradianceMap;\n"
-    "uniform SAMPLER_TYPE_Cube prefilterMap;\n"
-    "\n"
-    "uniform vec4 materials[MATERIAL_COUNT_LIMIT];\n"//r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
-    "\n"
-    "varying vec2 texcoords;\n"
-    "flat varying vec3 CamRealPosition;\n" //add this to calculations?
-    "\n"
-    "vec3 SchlickFrenselRoughness(float inTheta, vec3 inF0, float inRoughness){\n"
-    "    return inF0 + (max(vec3(1.0 - inRoughness), inF0) - inF0) * pow(1.0 - inTheta, 5.0);\n"
-    "}\n"
-    "void main(){\n"
-    "    vec2 uv               = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y);\n"
+/*
+vec4 materials[MATERIAL_COUNT_LIMIT];  //r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
+*/
+priv::EShaders::lighting_frag_gi = R"(
+#define MATERIAL_COUNT_LIMIT 255
 
-    "    float inSSAO          = 1.0 - texture2D(USE_SAMPLER_2D(gSSAOMap), uv).a;\n"
-    "    vec3 inNormals        = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), uv).rg);\n"
-    "    vec3 inAlbedo         = texture2D(USE_SAMPLER_2D(gDiffuseMap), uv).rgb;\n"
-    "    vec3 inWorldPosition  = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv, CameraNear, CameraFar);\n"
-    "    float inGlow          = texture2D(USE_SAMPLER_2D(gNormalMap), uv).a;\n"
-    "    vec2 inMetalSmooth    = Unpack2NibblesFrom8BitChannel(texture2D(USE_SAMPLER_2D(gMiscMap), uv).r);\n"
-    "    float MatIDAndAO      = texture2D(USE_SAMPLER_2D(gNormalMap), uv).b;\n"
+const float MAX_REFLECTION_LOD = 5.0;
 
-    "    highp int index       = int(floor(MatIDAndAO));\n"
-    "    float inAO            = (fract(MatIDAndAO) + 0.0001);\n"
-    "    vec3 inMatF0          = Unpack3FloatsInto1FloatUnsigned(materials[index].r);\n"
-    "    vec3 inGIContribution = Unpack3FloatsInto1FloatUnsigned(RendererInfo1.x);\n" //x = diffuse, y = specular, z = global
-    "    gl_FragColor         += CalcGILight(inSSAO, inNormals, inAlbedo, inWorldPosition, inAO, inMetalSmooth.x, inMetalSmooth.y, inGlow, inMatF0, materials[index].g, inGIContribution);\n"
-    "}";
+uniform SAMPLER_TYPE_2D gDiffuseMap;
+uniform SAMPLER_TYPE_2D gNormalMap;
+uniform SAMPLER_TYPE_2D gDepthMap;
+uniform SAMPLER_TYPE_2D gSSAOMap;
+uniform SAMPLER_TYPE_2D gMiscMap;
+uniform SAMPLER_TYPE_2D brdfLUT;
 
+uniform SAMPLER_TYPE_Cube irradianceMap;
+uniform SAMPLER_TYPE_Cube prefilterMap;
+
+uniform vec4 materials[MATERIAL_COUNT_LIMIT];
+
+varying vec2 texcoords;
+flat varying vec3 CamRealPosition;
+
+vec3 SchlickFrenselRoughness(float inTheta, vec3 inF0, float inRoughness){
+    return inF0 + (max(vec3(1.0 - inRoughness), inF0) - inF0) * pow(1.0 - inTheta, 5.0);
+}
+void main(){
+    vec2 uv               = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y);
+
+    float inSSAO          = 1.0 - texture2D(USE_SAMPLER_2D(gSSAOMap), uv).a;
+    vec3 inNormals        = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), uv).rg);
+    vec3 inAlbedo         = texture2D(USE_SAMPLER_2D(gDiffuseMap), uv).rgb;
+    vec3 inWorldPosition  = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv, CameraNear, CameraFar);
+    float inGlow          = texture2D(USE_SAMPLER_2D(gNormalMap), uv).a;
+    vec2 inMetalSmooth    = Unpack2NibblesFrom8BitChannel(texture2D(USE_SAMPLER_2D(gMiscMap), uv).r);
+    float MatIDAndAO      = texture2D(USE_SAMPLER_2D(gNormalMap), uv).b;
+
+    highp int index       = int(floor(MatIDAndAO));
+    float inAO            = fract(MatIDAndAO) + 0.0001;
+    vec3 inMatF0          = Unpack3FloatsInto1FloatUnsigned(materials[index].r);
+    vec3 inGIContribution = Unpack3FloatsInto1FloatUnsigned(RendererInfo1.x);
+    gl_FragColor         += CalcGILight(inSSAO, inNormals, inAlbedo, inWorldPosition, inAO, inMetalSmooth.x, inMetalSmooth.y, inGlow, inMatF0, materials[index].g, inGIContribution);
+}
+)";
 #pragma endregion
 
 }

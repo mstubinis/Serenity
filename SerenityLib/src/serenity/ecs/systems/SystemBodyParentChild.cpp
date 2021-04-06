@@ -1,6 +1,6 @@
 #include <serenity/ecs/systems/SystemBodyParentChild.h>
-#include <serenity/ecs/components/ComponentBody.h>
-#include <serenity/ecs/components/ComponentBodyRigid.h>
+#include <serenity/ecs/components/ComponentTransform.h>
+#include <serenity/ecs/components/ComponentRigidBody.h>
 #include <serenity/ecs/components/ComponentModel.h>
 
 #include <serenity/utils/Utils.h>
@@ -12,11 +12,15 @@ SystemBodyParentChild::SystemBodyParentChild(Engine::priv::ECS& ecs)
         auto& system = (SystemBodyParentChild&)inSystem;
 
         // compute local matrices and apply starting world matrices as locals
-        system.forEach<SystemBodyParentChild*>([](SystemBodyParentChild* system, Entity entity, ComponentBody* transform) {
+        system.forEach<SystemBodyParentChild*>([](SystemBodyParentChild* system, Entity entity, ComponentTransform* transform) {
             auto entityIndex  = entity.id() - 1;
             auto& localMatrix = system->m_LocalTransforms[entityIndex];
             auto& worldMatrix = system->m_WorldTransforms[entityIndex];
+#if defined(ENGINE_HIGH_PRECISION)
+            localMatrix       = glm::translate(transform->m_Position) * glm_mat4(glm::mat4_cast(transform->m_Rotation)) * glm_mat4(glm::scale(transform->m_Scale));
+#else
             localMatrix       = glm::translate(transform->m_Position) * glm::mat4_cast(transform->m_Rotation) * glm::scale(transform->m_Scale);
+#endif
             worldMatrix       = localMatrix;
         }, &system, SystemExecutionPolicy::ParallelWait);
 
@@ -24,8 +28,8 @@ SystemBodyParentChild::SystemBodyParentChild(Engine::priv::ECS& ecs)
         system.computeAllParentChildWorldTransforms();
 
         //finalize bullet rigid body positions by giving them their true world locations and rotations. TODO: move to separate system?
-        system.forEach<SystemBodyParentChild*>([](SystemBodyParentChild* system, Entity entity, ComponentBody* transform) {
-            auto rigidBody = entity.getComponent<ComponentBodyRigid>();
+        system.forEach<SystemBodyParentChild*>([](SystemBodyParentChild* system, Entity entity, ComponentTransform* transform) {
+            auto rigidBody = entity.getComponent<ComponentRigidBody>();
             if (rigidBody) {
                 const auto entityIndex  = entity.id() - 1;
                 auto& worldMatrix       = system->m_WorldTransforms[entityIndex];
@@ -34,7 +38,11 @@ SystemBodyParentChild::SystemBodyParentChild(Engine::priv::ECS& ecs)
                 if (parentID == 0) {
                     rigidBody->internal_setRotation(transform->m_Rotation.x, transform->m_Rotation.y, transform->m_Rotation.z, transform->m_Rotation.w);
                 }else{
-                    auto worldRotation  = glm::quat_cast( system->m_WorldTransforms[parentID - 1] * glm::mat4_cast(transform->m_Rotation) );
+#if defined(ENGINE_HIGH_PRECISION)
+                    auto worldRotation  = glm::quat_cast( system->m_WorldTransforms[parentID - 1] * glm_mat4(glm::mat4_cast(transform->m_Rotation)) );
+#else
+                    auto worldRotation = glm::quat_cast(system->m_WorldTransforms[parentID - 1] * glm::mat4_cast(transform->m_Rotation));
+#endif
                     rigidBody->internal_setRotation(worldRotation.x, worldRotation.y, worldRotation.z, worldRotation.w);
                 }
             }

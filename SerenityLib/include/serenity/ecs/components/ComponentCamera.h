@@ -6,7 +6,6 @@ class Camera;
 class ComponentModel;
 class ComponentCamera;
 
-#include <serenity/ecs/entity/Entity.h>
 #include <serenity/dependencies/glm.h>
 #include <serenity/ecs/components/ComponentBaseClass.h>
 #include <array>
@@ -25,37 +24,35 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
 			Perspective,
 			Orthographic, 
 		};
-        glm::mat4                m_ViewMatrix                = glm::mat4{ 1.0f };
-        glm::mat4                m_ProjectionMatrix;
+        glm::mat4                m_ViewMatrix        = glm::mat4{ 1.0f };
+        glm::mat4                m_ProjectionMatrix  = glm::mat4{ 1.0f };
 
         std::array<glm::vec4, 6> m_FrustumPlanes;
-        glm::vec3                m_Eye                       = glm::vec3{ 0.0f };
-        glm::vec3                m_Up                        = glm::vec3{ 0.0f, 1.0f, 0.0f };
-        glm::vec3                m_Forward                   = glm::vec3{ 0.0f, 0.0f, -1.0f };
-        Entity                   m_Owner;
+        glm::vec3                m_Eye               = glm::vec3{ 0.0f };
+        glm::vec3                m_Up                = glm::vec3{ 0.0f, 1.0f, 0.0f };
+        glm::vec3                m_Forward           = glm::vec3{ 0.0f, 0.0f, -1.0f };
 
-        float                    m_NearPlane                 = 0.01f;
-        float                    m_FarPlane                  = 2000.0f;
-        float                    m_Bottom                    = 0.0f;
-        float                    m_Top                       = 0.0f;
+        float                    m_NearPlane         = 0.01f;
+        float                    m_FarPlane          = 2000.0f;
+        float                    m_Bottom            = 0.0f;
+        float                    m_Top               = 0.0f;
         union { 
-			float                m_Angle;
+			float                m_Angle             = 60.0f;
 			float                m_Left; 
 		};
         union { 
-			float                m_AspectRatio;
+			float                m_AspectRatio       = 1.0f;
 			float                m_Right; 
 		};
-        CameraType               m_Type = CameraType::Perspective;
+        CameraType               m_Type              = CameraType::Perspective;
 
         ComponentCamera() = delete;
     public:
-        //BOOST_TYPE_INDEX_REGISTER_CLASS
         ComponentCamera(Entity entity, float angle, float aspectRatio, float nearPlane, float farPlane);
 		ComponentCamera(Entity entity, float left, float right, float bottom, float top, float nearPlane, float farPlane);
 
-        ComponentCamera(const ComponentCamera&)                = delete;
-        ComponentCamera& operator=(const ComponentCamera&)     = delete;
+        ComponentCamera(const ComponentCamera&);
+        ComponentCamera& operator=(const ComponentCamera&);
         ComponentCamera(ComponentCamera&&) noexcept;
         ComponentCamera& operator=(ComponentCamera&&) noexcept;
 
@@ -86,9 +83,9 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
         [[nodiscard]] inline glm::vec3 getViewVector() const noexcept { return glm::normalize(glm::vec3(m_ViewMatrix[0][2], m_ViewMatrix[1][2], m_ViewMatrix[2][2])); }
 
         [[nodiscard]] inline std::array<glm::vec4, 6>& getFrustrumPlanes() noexcept { return m_FrustumPlanes; }
-        [[nodiscard]] inline constexpr glm::vec3 forward() const noexcept { return m_Forward; }
-        [[nodiscard]] inline glm::vec3 right() const noexcept { return glm::normalize(glm::vec3(m_ViewMatrix[0][0], m_ViewMatrix[1][0], m_ViewMatrix[2][0])); }
-        [[nodiscard]] inline constexpr glm::vec3 up() const noexcept { return m_Up; /*normalize later?*/ }
+        [[nodiscard]] inline constexpr glm::vec3 getForward() const noexcept { return m_Forward; }
+        [[nodiscard]] inline glm::vec3 getRight() const noexcept { return glm::normalize(glm::vec3(m_ViewMatrix[0][0], m_ViewMatrix[1][0], m_ViewMatrix[2][0])); }
+        [[nodiscard]] inline constexpr glm::vec3 getUp() const noexcept { return m_Up; /*normalize later?*/ }
 
         [[nodiscard]] uint32_t pointIntersectTest(const glm_vec3& objectPosition) const noexcept;
         [[nodiscard]] uint32_t sphereIntersectTest(const glm_vec3& objectPosition, float objectRadius) const noexcept;

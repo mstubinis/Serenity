@@ -11,7 +11,7 @@ class  ComponentCamera;
 class  ModelInstanceHandle;
 
 #include <vector>
-#include <serenity/ecs/entity/Entity.h>
+#include <serenity/ecs/components/ComponentBaseClass.h>
 #include <serenity/dependencies/glm.h>
 
 namespace Engine::priv {
@@ -26,7 +26,6 @@ namespace Engine::priv {
 
 #include <serenity/model/ModelInstance.h>
 #include <serenity/model/ModelInstanceHandle.h>
-#include <serenity/ecs/components/ComponentBaseClass.h>
 
 using ModelInstanceVector = std::vector<std::unique_ptr<ModelInstance>>;
 
@@ -58,8 +57,8 @@ class ComponentModel : public Observer, public ComponentBaseClass<ComponentModel
         inline void addViewportFlag(ViewportFlag::Flag flag) noexcept { addViewportFlag((uint32_t)flag); }
 
         [[nodiscard]] inline size_t getNumModels() const noexcept { return m_ModelInstances.size(); }
-        [[nodiscard]] inline constexpr float radius() const noexcept { return m_Radius; }
-        [[nodiscard]] inline constexpr const glm::vec3& boundingBox() const noexcept { return m_RadiusBox; }
+        [[nodiscard]] inline constexpr float getRadius() const noexcept { return m_Radius; }
+        [[nodiscard]] inline constexpr const glm::vec3& getBoundingBox() const noexcept { return m_RadiusBox; }
         void show(bool shown = true) noexcept;
         inline void hide() noexcept { show(false); }
 

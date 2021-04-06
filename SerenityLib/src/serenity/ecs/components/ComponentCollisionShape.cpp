@@ -1,6 +1,6 @@
 #include <serenity/ecs/components/ComponentCollisionShape.h>
-#include <serenity/ecs/components/ComponentBodyRigid.h>
-#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentRigidBody.h>
+#include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/ecs/components/ComponentModel.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <serenity/physics/PhysicsModule.h>
@@ -12,7 +12,7 @@
 ComponentCollisionShape::ComponentCollisionShape(Entity entity, CollisionType collisionType) 
     : m_Owner{ entity }
 {
-    auto rigidBody = m_Owner.getComponent<ComponentBodyRigid>();
+    auto rigidBody = m_Owner.getComponent<ComponentRigidBody>();
     auto model     = m_Owner.getComponent<ComponentModel>();
     if (model) {
         if (model->getNumModels() >= 2) {
@@ -64,7 +64,7 @@ void ComponentCollisionShape::internal_update_ptrs() {
     if (!m_Owner) {
         return;
     }
-    auto rigidBody = m_Owner.getComponent<ComponentBodyRigid>();
+    auto rigidBody = m_Owner.getComponent<ComponentRigidBody>();
     if (rigidBody) {
         rigidBody->getBtBody()->setCollisionShape(m_CollisionShape.get());
         //Engine::Physics::cleanProxyFromPairs(rigidBody->getBtBody());
@@ -77,7 +77,7 @@ bool ComponentCollisionShape::promoteToCompoundShape(CollisionType collisionType
     if (getType() == CollisionType::COMPOUND_SHAPE_PROXYTYPE) {
         return false;
     }
-    auto rigidBody = m_Owner.getComponent<ComponentBodyRigid>();
+    auto rigidBody = m_Owner.getComponent<ComponentRigidBody>();
     auto oldShape  = m_CollisionShape.get();
     m_CollisionShape.release();
     auto compound  = new btCompoundShape{};
@@ -93,8 +93,8 @@ bool ComponentCollisionShape::promoteToCompoundShape(CollisionType collisionType
     if (getType() == CollisionType::COMPOUND_SHAPE_PROXYTYPE) {
         return false;
     }
-    auto rigidBody = m_Owner.getComponent<ComponentBodyRigid>();
-    setCollision(collisionType, entities, rigidBody ? rigidBody->mass() : 0.0f);
+    auto rigidBody = m_Owner.getComponent<ComponentRigidBody>();
+    setCollision(collisionType, entities, rigidBody ? rigidBody->getMass() : 0.0f);
     internal_update_ptrs();
     return (entities.size() >= 2 && rigidBody != nullptr);
 }
@@ -110,7 +110,7 @@ bool ComponentCollisionShape::addChildShape(ComponentCollisionShape& other) {
     }
     btTransform tr;
     tr.setIdentity();
-    auto transform = other.getOwner().getComponent<ComponentBody>();
+    auto transform = other.getOwner().getComponent<ComponentTransform>();
     if (transform) {
         tr.setOrigin(Engine::Math::toBT(transform->getLocalPosition()));
         tr.setRotation(Engine::Math::toBT(transform->getRotation()));
@@ -150,6 +150,21 @@ void ComponentCollisionShape::setCollision(btCollisionShape* shape) {
             }
         }
     }
+    auto transform = m_Owner.getComponent<ComponentTransform>();
+    auto rigidBody = m_Owner.getComponent<ComponentRigidBody>();
+    auto model     = m_Owner.getComponent<ComponentModel>();
+    //Engine::Physics::removeRigidBodyThreadSafe(rigidBody->getBtBody());
+    if (rigidBody) {
+        //rigidBody->rebuildRigidBody(true);
+    }
+    if (transform) {
+        transform->setScale(transform->getScale());
+    }
+    if (model) {
+        Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
+    }
+    internal_update_ptrs();
+
 }
 void ComponentCollisionShape::setCollision(CollisionType collisionType, Handle meshHandle, float mass) {
     internal_free_memory();
@@ -163,7 +178,7 @@ void ComponentCollisionShape::setCollision(CollisionType collisionType, Handle m
     }
 }
 void ComponentCollisionShape::setCollision(CollisionType collisionType, ModelInstance* modelInstance, float mass) {
-    ComponentCollisionShape::setCollision(collisionType, modelInstance->mesh(), mass);
+    ComponentCollisionShape::setCollision(collisionType, modelInstance->getMesh(), mass);
 }
 void ComponentCollisionShape::setCollision(CollisionType collisionType, ComponentModel& componentModel, float mass) {
     if (componentModel.getNumModels() >= 2) {
@@ -173,7 +188,7 @@ void ComponentCollisionShape::setCollision(CollisionType collisionType, Componen
         bool allLoaded = true;
         for (int i = 0; i < componentModel.getNumModels(); ++i) {
             auto& instance = componentModel.getModel(i);
-            if (!instance.mesh().get<Mesh>()->isLoaded()) {
+            if (!instance.getMesh().get<Mesh>()->isLoaded()) {
                 allLoaded = false;
             }
             instances.push_back(&instance);
@@ -195,7 +210,7 @@ void ComponentCollisionShape::setCollision(CollisionType collisionType, const st
         if (componentModel) {
             for (int i = 0; i < componentModel->getNumModels(); ++i) {
                 auto& instance = componentModel->getModel(i);
-                if (!instance.mesh().get<Mesh>()->isLoaded()) {
+                if (!instance.getMesh().get<Mesh>()->isLoaded()) {
                     allLoaded = false;
                 }
                 instances.push_back(&instance);
@@ -217,16 +232,16 @@ void ComponentCollisionShape::setCollision(CollisionType collisionType, const st
 
 
 void ComponentCollisionShape::forcePhysicsSync() noexcept {
-    auto transform = m_Owner.getComponent<ComponentBody>();
+    auto transform = m_Owner.getComponent<ComponentTransform>();
     if (transform) {
         auto scl = transform->getScale();
         internal_setScale(scl.x, scl.y, scl.z);
     }
 }
-void ComponentCollisionShape::internal_setScale(decimal x, decimal y, decimal z) {
+void ComponentCollisionShape::internal_setScale(float x, float y, float z) {
     auto btColShape = m_CollisionShape.get();
     auto model = m_Owner.getComponent<ComponentModel>();
-    //auto rigidBody = m_Owner.getComponent<ComponentBodyRigid>();
+    //auto rigidBody = m_Owner.getComponent<ComponentRigidBody>();
     if (btColShape) {
         btColShape->setLocalScaling(btVector3{ (btScalar)x, (btScalar)y, (btScalar)z });
     }
@@ -272,15 +287,15 @@ void ComponentCollisionShape::internal_load_multiple_meshes(Entity entity, std::
     }
 }
 void ComponentCollisionShape::internal_load_single_mesh_impl(ComponentCollisionShape& collisionShape, CollisionType collisionType, Handle meshHandle, float mass) {
-    auto transform = collisionShape.m_Owner.getComponent<ComponentBody>();
-    auto rigidBody = collisionShape.m_Owner.getComponent<ComponentBodyRigid>();
+    auto transform = collisionShape.m_Owner.getComponent<ComponentTransform>();
+    auto rigidBody = collisionShape.m_Owner.getComponent<ComponentRigidBody>();
     auto model     = collisionShape.m_Owner.getComponent<ComponentModel>();
     //Engine::Physics::removeRigidBodyThreadSafe(rigidBody->getBtBody());
     collisionShape.internal_free_memory();
     collisionShape.m_CollisionShape = std::unique_ptr<btCollisionShape>(Engine::priv::PublicMesh::BuildCollision(meshHandle, collisionType));
     if (rigidBody) {
         //rigidBody->rebuildRigidBody(true);
-        rigidBody->getBtBody()->setCollisionShape(collisionShape.m_CollisionShape.get());
+        rigidBody->getBtBody()->setCollisionShape(collisionShape.m_CollisionShape.get()); //TODO: do we need this? (internal_update_ptrs() does this)
     }
     if (transform) {
         transform->setScale(transform->getScale());
@@ -292,22 +307,22 @@ void ComponentCollisionShape::internal_load_single_mesh_impl(ComponentCollisionS
     collisionShape.internal_update_ptrs();
 }
 void ComponentCollisionShape::internal_load_multiple_meshes_impl(ComponentCollisionShape& collisionShape, std::vector<ModelInstance*>& instances, float mass, CollisionType collisionType) {
-    auto transform  = collisionShape.m_Owner.getComponent<ComponentBody>();
-    auto rigidBody  = collisionShape.m_Owner.getComponent<ComponentBodyRigid>();
+    auto transform  = collisionShape.m_Owner.getComponent<ComponentTransform>();
+    auto rigidBody  = collisionShape.m_Owner.getComponent<ComponentRigidBody>();
     auto model      = collisionShape.m_Owner.getComponent<ComponentModel>();
     auto scale      = transform->getScale();
     auto btCompound = static_cast<btCompoundShape*>(collisionShape.getBtShape());
     for (auto& instance : instances) {
         ASSERT(instance, __FUNCTION__ << "(): instance in instances was null!");
-        auto transformChild = instance->parent().getComponent<ComponentBody>();
+        auto transformChild = instance->getParent().getComponent<ComponentTransform>();
         btCollisionShape* built_collision_shape = Engine::priv::PublicMesh::BuildCollision(instance, collisionType, true);
         btTransform localTransform;
         if (transformChild && &(*transformChild) != &(*transform)) {
-            auto rot = transformChild->getRotation() * instance->orientation();
-            auto pos = transformChild->getLocalPosition() * instance->position();
+            auto rot = transformChild->getRotation() * instance->getRotation();
+            auto pos = transformChild->getLocalPosition() * instance->getPosition();
             localTransform = btTransform{ Engine::Math::toBT(rot), Engine::Math::toBT(pos) };
         }else{
-            localTransform = btTransform{ Engine::Math::toBT(instance->orientation()), Engine::Math::toBT(instance->position()) };
+            localTransform = btTransform{ Engine::Math::toBT(instance->getRotation()), Engine::Math::toBT(instance->getPosition()) };
         }
         built_collision_shape->setMargin(0.04f);
         built_collision_shape->calculateLocalInertia(mass, collisionShape.m_BtInertia); //this is important
@@ -350,7 +365,7 @@ void Engine::priv::ComponentCollisionShapeDeferredLoading::onEvent(const Event& 
             auto& data       = *itrMulti;
             auto& instances  = std::get<0>(data.second);
             for (auto& modelInstance : instances) {
-                Mesh* modelInstanceMesh = modelInstance->mesh().get<Mesh>();
+                Mesh* modelInstanceMesh = modelInstance->getMesh().get<Mesh>();
                 if (modelInstanceMesh == loadedMesh || modelInstanceMesh->isLoaded()) {
                     counter++;
                 }

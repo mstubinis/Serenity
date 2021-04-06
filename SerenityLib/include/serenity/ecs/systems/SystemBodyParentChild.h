@@ -2,14 +2,14 @@
 #ifndef ENGINE_ECS_SYSTEM_BODY_PARENT_CHILD_H
 #define ENGINE_ECS_SYSTEM_BODY_PARENT_CHILD_H
 
-class  ComponentBody;
+class  ComponentTransform;
 
 #include <serenity/ecs/systems/SystemBaseClass.h>
 #include <cstdint>
 #include <serenity/dependencies/glm.h>
 
-class SystemBodyParentChild final : public SystemCRTP<SystemBodyParentChild, ComponentBody> {
-    friend class  ComponentBody;
+class SystemBodyParentChild final : public SystemCRTP<SystemBodyParentChild, ComponentTransform> {
+    friend class  ComponentTransform;
     private:
         static inline constexpr const uint32_t NULL_INDEX = std::numeric_limits<uint32_t>().max();
     private:

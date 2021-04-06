@@ -1,6 +1,6 @@
 #include <serenity/ecs/systems/SystemResolveTransformDirty.h>
-#include <serenity/ecs/components/ComponentBody.h>
-#include <serenity/ecs/components/ComponentBodyRigid.h>
+#include <serenity/ecs/components/ComponentTransform.h>
+#include <serenity/ecs/components/ComponentRigidBody.h>
 
 SystemResolveTransformDirty::SystemResolveTransformDirty(Engine::priv::ECS& ecs)
     : SystemCRTP{ ecs }
@@ -9,7 +9,7 @@ SystemResolveTransformDirty::SystemResolveTransformDirty(Engine::priv::ECS& ecs)
         auto& system = (SystemResolveTransformDirty&)inSystem;
 
         //TODO: rethink this, should these be worldPositions, worldRotations, worldScales instead of local? (except for compound children?)
-        system.forEach([](Entity entity, ComponentBody* transform, ComponentBodyRigid* rigidBody) {
+        system.forEach([](Entity entity, ComponentTransform* transform, ComponentRigidBody* rigidBody) {
             if (!transform->hasParent()) {
                 rigidBody->internal_setPosition(transform->m_Position.x, transform->m_Position.y, transform->m_Position.z);
                 rigidBody->internal_setRotation(transform->m_Rotation.x, transform->m_Rotation.y, transform->m_Rotation.z, transform->m_Rotation.w); //TODO: is this needed below instead?

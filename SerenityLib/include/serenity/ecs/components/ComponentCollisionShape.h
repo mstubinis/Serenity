@@ -4,7 +4,7 @@
 
 struct SceneOptions;
 class  ComponentModel;
-class  ComponentBodyRigid;
+class  ComponentRigidBody;
 class  btCollisionObject;
 class  btCollisionShape;
 class  btCompoundShape;
@@ -18,7 +18,6 @@ namespace Engine::priv {
 #include <serenity/dependencies/glm.h>
 #include <serenity/ecs/ECS.h>
 #include <serenity/physics/PhysicsIncludes.h>
-#include <serenity/ecs/entity/Entity.h>
 #include <serenity/events/Observer.h>
 #include <serenity/ecs/components/ComponentBaseClass.h>
 #include <serenity/renderer/RendererIncludes.h>
@@ -26,7 +25,7 @@ namespace Engine::priv {
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 
 class ComponentCollisionShape : public ComponentBaseClass<ComponentCollisionShape> {
-    friend class ComponentBodyRigid;
+    friend class ComponentRigidBody;
     friend class Engine::priv::ComponentCollisionShapeDeferredLoading;
     private:
         static void internal_load_single_mesh(Entity, CollisionType, Handle mesh, float mass);
@@ -40,7 +39,7 @@ class ComponentCollisionShape : public ComponentBaseClass<ComponentCollisionShap
         Entity                                      m_Owner;
 
         void internal_free_memory();
-        void internal_setScale(decimal x, decimal y, decimal z);
+        void internal_setScale(float x, float y, float z);
         void internal_update_ptrs();
     public:
         ComponentCollisionShape(Entity entity, CollisionType collisionType);
@@ -49,7 +48,6 @@ class ComponentCollisionShape : public ComponentBaseClass<ComponentCollisionShap
         ComponentCollisionShape(ComponentCollisionShape&&) noexcept;
         ComponentCollisionShape& operator=(ComponentCollisionShape&&) noexcept;
         ~ComponentCollisionShape();
-
 
         inline void setMargin(float margin) noexcept {
             ASSERT(margin >= 0.0f, __FUNCTION__ << "(): margin was negative!");
@@ -72,8 +70,6 @@ class ComponentCollisionShape : public ComponentBaseClass<ComponentCollisionShap
         inline void setCollisionUserIndex2(int idx) const noexcept { getBtShape()->setUserIndex2(idx); }
 
         inline bool isStaticTriangleType() const noexcept { return (getType() == CollisionType::TRIANGLE_MESH_SHAPE_PROXYTYPE || getType() == CollisionType::SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE || getType() == CollisionType::TRIANGLE_SHAPE_PROXYTYPE); }
-
-        //void setInternalPhysicsUserPointer(void* userPtr);
 
         void calculateLocalInertia(float mass) noexcept;
 
@@ -121,7 +117,6 @@ namespace Engine::priv {
                     multi.emplace( owner, std::make_tuple(instances, mass, collisionType) );
                 }
             }
-
 
             void onEvent(const Event&) override;
     };

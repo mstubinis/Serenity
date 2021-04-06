@@ -1,5 +1,5 @@
 #include <serenity/ecs/systems/SystemComponentBodyDebugDraw.h>
-#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/ecs/components/ComponentModel.h>
 #include <serenity/math/Engine_Math.h>
 #include <serenity/resources/Engine_Resources.h>
@@ -13,7 +13,7 @@ SystemComponentBodyDebugDraw::SystemComponentBodyDebugDraw(Engine::priv::ECS& ec
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
         #if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
         auto& system = (SystemComponentBodyDebugDraw&)inSystem;
-        system.forEach<Scene*>([](Scene* scene, Entity entity, ComponentBody* transform, ComponentModel* model) {
+        system.forEach<Scene*>([](Scene* scene, Entity entity, ComponentTransform* transform, ComponentModel* model) {
             //ASSERT(scene && body && model, __FUNCTION__ << "(): parameter(s) was nullptr!");
             const auto world_pos = glm::vec3{ transform->getPosition() };
             const auto world_rot = glm::quat{ transform->getRotation() };

@@ -1,8 +1,8 @@
 #pragma once
 #ifndef ENGINE_TERRAIN_H
-#define ENINGE_TERRAIN_H
+#define ENGINE_TERRAIN_H
 
-namespace sf{ 
+namespace sf {
     class Image;
 }
 class  Scene;
@@ -27,52 +27,42 @@ class  Mesh;
 
 constexpr btScalar NULL_VERTEX = static_cast<btScalar>(-255.0);
 
-class TerrainHeightfieldShape : public btHeightfieldTerrainShape {
+class TerrainHeightfieldShape final : public btHeightfieldTerrainShape {
     friend class TerrainData;
     friend class Terrain;
     friend class Mesh;
     private:
-        std::vector<btScalar>           m_Data;
-        std::vector<std::vector<bool>>  m_ProcessedVertices;
+        std::vector<btScalar>  m_Data;
+        std::vector<bool>      m_ProcessedVertices;
+        uint32_t               m_ProcessedVerticesSizeRows = 0;
+        uint32_t               m_ProcessedVerticesSizeCols = 0;
     public:
-        TerrainHeightfieldShape(int heightWidth, int heightLength, void* data, float heightScale, float minHeight, float maxHeight, int upAxis, PHY_ScalarType type, bool flipQuads = false);
-        virtual ~TerrainHeightfieldShape();
+        TerrainHeightfieldShape(int heightWidth, int heightLength, void* data, float heightScale, float minHeight, float maxHeight, int upAxis, PHY_ScalarType, bool flipQuads = false);
 
         bool getAndValidateVertex(int x, int y, btVector3& vertex, bool doBTScale) const;
-        void processAllTriangles(btTriangleCallback* callback, const btVector3& aabbMin, const btVector3& aabbMax) const override;
+        void processAllTriangles(btTriangleCallback*, const btVector3& aabbMin, const btVector3& aabbMax) const override;
         void setData(void* data);
 };
 
-class TerrainData {
-    struct AdjacentPixels final {
-        uint32_t imgSizeX = 0U;
-        uint32_t imgSizeY = 0U;
-
-        std::array<std::array<btScalar, 3>, 3> pixels;
-
-        bool valid(int x, int y, int centerX, int centerY) const;
-        AdjacentPixels() {
-            for (size_t i = 0; i < pixels.size(); ++i) {
-                pixels[i].fill(NULL_VERTEX);
-            }
-        }
-    };
+class TerrainData final {
     friend class Terrain;
     friend class Mesh;
     private:
-        bool                                                 m_UseDiamondSubDivision = false;
-        btScalar                                             m_HeightScale           = 1.0;
-        std::vector<std::vector<TerrainHeightfieldShape*>>   m_BtHeightfieldShapes;
-        std::pair<float, float>                              m_MinAndMaxHeight       = { std::numeric_limits<float>::max(), std::numeric_limits<float>::min() };
-        btCompoundShape*                                     m_FinalCompoundShape    = nullptr;
-        unsigned int                                         m_VerticesPerSector     = 0;
+        std::vector<TerrainHeightfieldShape*>                m_BtHeightfieldShapes;
+        std::pair<float, float>                              m_MinAndMaxHeight             = { std::numeric_limits<float>::max(), std::numeric_limits<float>::min() };
+        btCompoundShape*                                     m_FinalCompoundShape          = nullptr;
+        uint32_t                                             m_PointsPerPixel              = 0;
+        uint32_t                                             m_BtHeightfieldShapesSizeRows = 0;
+        uint32_t                                             m_BtHeightfieldShapesSizeCols = 0;
+        btScalar                                             m_HeightScale                 = 1.0;
+        bool                                                 m_UseDiamondSubDivision       = false;
 
-        bool calculate_data(sf::Image& heightmapImage, uint32_t sectorSizeInPixels, uint32_t pointsPerPixel);
+        bool calculate_data(sf::Image& heightmapImage, uint32_t pointsPerPixel, float heightScale, int blurIterations);
+        btScalar bilinearFilter(uint32_t pixelX, uint32_t pixelY, uint32_t vertexX, uint32_t vertexY, sf::Image& heightmapImage);
 
-        AdjacentPixels get_adjacent_pixels(uint32_t x, uint32_t y, sf::Image& heightmapImage);
     public:
-        TerrainData();
-        virtual ~TerrainData();
+        TerrainData() = default;
+        ~TerrainData();
 
         void clearData();
 };
@@ -80,29 +70,30 @@ class TerrainData {
 class Terrain : public Observer, public Entity {
     friend class Mesh;
     private:
-        Handle       m_MeshHandle   = Handle{};
-        TerrainData  m_TerrainData;
+        Handle        m_MeshHandle;
+        TerrainData   m_TerrainData;
 
         bool internal_remove_quad(uint32_t indexX, uint32_t indexY);
         bool internal_remove_quad(uint32_t sectorX, uint32_t sectorY, uint32_t indexX, uint32_t indexY);
     public:
-        Terrain(const std::string& name, sf::Image& heightmapImage, Handle& material, uint32_t sectorSizeInPixels = 4, uint32_t pointsPerPixel = 3, bool useDiamondSubdivisions = false, Scene* scene = nullptr);
+        Terrain(const std::string& name, sf::Image& heightmapImage, Handle& material, uint32_t pointsPerPixel = 2, float heightScale = 1.0f, int blurIterations = 4, bool useDiamondSubdivisions = false, Scene* scene = nullptr);
         virtual ~Terrain();
 
         bool removeQuad(uint32_t sectorX, uint32_t sectorY, uint32_t indexX, uint32_t indexY);
-        bool removeQuads(std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t>>& quads);
+        bool removeQuads(const std::vector<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t>>& quads);
         bool removeQuad(uint32_t indexX, uint32_t indexY);
-        bool removeQuads(std::vector<std::tuple<uint32_t, uint32_t>>& quads);
+        bool removeQuads(const std::vector<std::tuple<uint32_t, uint32_t>>& quads);
 
-        void setPosition(float x, float y, float z); 
-        void setPosition(const glm::vec3& position);
+        void setPosition(decimal x, decimal y, decimal z);
+        void setPosition(const glm_vec3& position);
 
-        void setScale(float x, float y, float z); 
-        void setScale(const glm::vec3& scale);
+        void translate(decimal x, decimal y, decimal z);
+        void translate(const glm_vec3& position);
+
+        void setScale(decimal x, decimal y, decimal z);
+        void setScale(const glm_vec3& scale);
 
         bool getUseDiamondSubdivision() const;
         void setUseDiamondSubdivision(bool useDiamond);
-
-        virtual void update(const float dt);
 };
 #endif

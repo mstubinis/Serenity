@@ -1,5 +1,5 @@
-#include <serenity/ecs/components/ComponentBodyRigid.h>
-#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentRigidBody.h>
+#include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/ecs/components/ComponentCollisionShape.h>
 #include <serenity/ecs/components/ComponentModel.h>
 #include <serenity/ecs/systems/SystemAddRigidBodies.h>
@@ -8,13 +8,13 @@
 #include <serenity/scene/Scene.h>
 #include <serenity/ecs/ECS.h>
 
-#pragma region ComponentBodyRigid
+#pragma region ComponentRigidBody
 
-ComponentBodyRigid::ComponentBodyRigid(Entity entity) {
+ComponentRigidBody::ComponentRigidBody(Entity entity) {
     m_Owner = entity;
     rebuildRigidBody(false);
 }
-ComponentBodyRigid::~ComponentBodyRigid() {
+ComponentRigidBody::~ComponentRigidBody() {
     if (m_Owner) { //do not call from moved from destructors
         auto& ecs          = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
         auto& systemRemove = ecs.getSystem<SystemRemoveRigidBodies>();
@@ -27,7 +27,7 @@ ComponentBodyRigid::~ComponentBodyRigid() {
         }
     }
 }
-ComponentBodyRigid::ComponentBodyRigid(ComponentBodyRigid&& other) noexcept
+ComponentRigidBody::ComponentRigidBody(ComponentRigidBody&& other) noexcept
     : m_CollisionFunctor  { std::move(other.m_CollisionFunctor) }
     , m_BulletRigidBody   { std::move(other.m_BulletRigidBody) }
     , m_BulletMotionState { std::move(other.m_BulletMotionState) }
@@ -41,7 +41,7 @@ ComponentBodyRigid::ComponentBodyRigid(ComponentBodyRigid&& other) noexcept
 {
     internal_update_misc();
 }
-ComponentBodyRigid& ComponentBodyRigid::operator=(ComponentBodyRigid&& other) noexcept {
+ComponentRigidBody& ComponentRigidBody::operator=(ComponentRigidBody&& other) noexcept {
     m_CollisionFunctor  = std::move(other.m_CollisionFunctor);
     m_BulletRigidBody   = std::move(other.m_BulletRigidBody);
     m_BulletMotionState = std::move(other.m_BulletMotionState);
@@ -56,7 +56,7 @@ ComponentBodyRigid& ComponentBodyRigid::operator=(ComponentBodyRigid&& other) no
     internal_update_misc();
     return *this;
 }
-void ComponentBodyRigid::internal_update_misc() noexcept {
+void ComponentRigidBody::internal_update_misc() noexcept {
     if (m_BulletRigidBody) {
         m_BulletRigidBody->setMotionState(&m_BulletMotionState);
         auto collisionShape = m_Owner.getComponent<ComponentCollisionShape>();
@@ -68,9 +68,9 @@ void ComponentBodyRigid::internal_update_misc() noexcept {
         m_BulletRigidBody->setUserPointer(this);
     }
 }
-bool ComponentBodyRigid::rebuildRigidBody(bool addBodyToPhysicsWorld) {
+bool ComponentRigidBody::rebuildRigidBody(bool addBodyToPhysicsWorld) {
     auto collisionShape = m_Owner.getComponent<ComponentCollisionShape>();
-    auto transform      = m_Owner.getComponent<ComponentBody>();
+    auto transform      = m_Owner.getComponent<ComponentTransform>();
     ASSERT(collisionShape, __FUNCTION__ << "(): collisionShape was nullptr!");
     if (m_BulletRigidBody) {
         removePhysicsFromWorld();
@@ -81,7 +81,7 @@ bool ComponentBodyRigid::rebuildRigidBody(bool addBodyToPhysicsWorld) {
         btTransform t;
         t.setOrigin(Engine::Math::toBT(transform->getWorldPosition()));
         t.setRotation(Engine::Math::toBT(transform->getWorldRotation()));
-        ci.m_startWorldTransform      = t;
+        ci.m_startWorldTransform  = t;
     }
     ci.m_linearDamping            = (btScalar)0.1;
     ci.m_angularDamping           = (btScalar)0.4;
@@ -99,36 +99,36 @@ bool ComponentBodyRigid::rebuildRigidBody(bool addBodyToPhysicsWorld) {
     }
     return (collisionShape != nullptr);
 }
-bool ComponentBodyRigid::removePhysicsFromWorld() {
+bool ComponentRigidBody::removePhysicsFromWorld() {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     auto& ecs          = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
     auto& systemRemove = ecs.getSystem<SystemRemoveRigidBodies>();
     return systemRemove.enqueueBody(getBtBody());
 }
-bool ComponentBodyRigid::addPhysicsToWorld() {
+bool ComponentRigidBody::addPhysicsToWorld() {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     auto& ecs       = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
     auto& systemAdd = ecs.getSystem<SystemAddRigidBodies>();
     return systemAdd.enqueueBody(getBtBody(), m_Group, m_Mask);
 }
-decimal ComponentBodyRigid::getLinearDamping() const {
+decimal ComponentRigidBody::getLinearDamping() const {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    return (decimal)m_BulletRigidBody->getLinearDamping();
+    return static_cast<decimal>(m_BulletRigidBody->getLinearDamping());
 }
-decimal ComponentBodyRigid::getAngularDamping() const {
+decimal ComponentRigidBody::getAngularDamping() const {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    return (decimal)m_BulletRigidBody->getAngularDamping();
+    return static_cast<decimal>(m_BulletRigidBody->getAngularDamping());
 }
-void ComponentBodyRigid::collisionResponse(RigidCollisionCallbackEventData& data) const {
+void ComponentRigidBody::collisionResponse(RigidCollisionCallbackEventData& data) const {
     if (m_CollisionFunctor) { //TODO: find out why this is needed and possibly remove this if check
         m_CollisionFunctor(data);
     }
 }
-MaskType ComponentBodyRigid::getCollisionFlags() const {
+MaskType ComponentRigidBody::getCollisionFlags() const {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     return static_cast<MaskType>(m_BulletRigidBody->getCollisionFlags());
 }
-void ComponentBodyRigid::internal_setPosition(decimal x, decimal y, decimal z) {
+void ComponentRigidBody::internal_setPosition(decimal x, decimal y, decimal z) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     auto collisionShape = m_Owner.getComponent<ComponentCollisionShape>();
     btTransform tr;
@@ -148,21 +148,21 @@ void ComponentBodyRigid::internal_setPosition(decimal x, decimal y, decimal z) {
         Engine::Physics::addRigidBodyThreadSafe(getBtBody(), m_Group, m_Mask);
     }
 }
-void ComponentBodyRigid::internal_calculate_mass() {
+void ComponentRigidBody::internal_calculate_mass() {
     if (m_Mass != 0.0f) {
         return;
     }
     auto model = m_Owner.getComponent<ComponentModel>();
     if (model) {
-        const auto& boundingBox = model->boundingBox();
+        const auto& boundingBox = model->getBoundingBox();
         float volume            = boundingBox.x * boundingBox.y * boundingBox.z;
         float mass_             = (volume * 0.4f);
         setMass(mass_);
     }
 }
-void ComponentBodyRigid::forcePhysicsSync() noexcept {
+void ComponentRigidBody::forcePhysicsSync() noexcept {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    auto transform = m_Owner.getComponent<ComponentBody>();
+    auto transform = m_Owner.getComponent<ComponentTransform>();
     if (transform) {
         auto pos = transform->getPosition();
         auto rot = transform->getRotation();
@@ -172,12 +172,12 @@ void ComponentBodyRigid::forcePhysicsSync() noexcept {
         internal_setScale(scl.x, scl.y, scl.z);
     }
 }
-void ComponentBodyRigid::setGravity(decimal x, decimal y, decimal z) {
+void ComponentRigidBody::setGravity(decimal x, decimal y, decimal z) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->setGravity(btVector3{ (btScalar)x, (btScalar)y, (btScalar)z });
 }
 
-void ComponentBodyRigid::internal_setRotation(decimal x, decimal y, decimal z, decimal w) {
+void ComponentRigidBody::internal_setRotation(float x, float y, float z, float w) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     btQuaternion quat{ (btScalar)x, (btScalar)y, (btScalar)z, (btScalar)w };
     quat = quat.normalize();
@@ -188,87 +188,87 @@ void ComponentBodyRigid::internal_setRotation(decimal x, decimal y, decimal z, d
     m_BulletRigidBody->setCenterOfMassTransform(tr);
     m_BulletMotionState.setWorldTransform(tr);
 }
-void ComponentBodyRigid::internal_setScale(decimal x, decimal y, decimal z) {
+void ComponentRigidBody::internal_setScale(float x, float y, float z) {
     auto collisionShape = m_Owner.getComponent<ComponentCollisionShape>();
     if (collisionShape) {
         collisionShape->internal_setScale(x, y, z);
     }
 }
 
-glm_vec3 ComponentBodyRigid::internal_getPosition() {
+glm_vec3 ComponentRigidBody::internal_getPosition() {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     //btTransform tr;
     //m_BulletRigidBody->getMotionState()->getWorldTransform(tr);
     auto& tr = m_BulletRigidBody->getWorldTransform();
     return Engine::Math::toGLM(tr.getOrigin());
 }
-glm_quat ComponentBodyRigid::internal_getRotation() {
+glm::quat ComponentRigidBody::internal_getRotation() {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     //btTransform tr;
     //m_BulletRigidBody->getMotionState()->getWorldTransform(tr);
     auto& tr = m_BulletRigidBody->getWorldTransform();
     return Engine::Math::toGLM(tr.getRotation());
 }
-glm_vec3 ComponentBodyRigid::getLinearVelocity() const {
+glm_vec3 ComponentRigidBody::getLinearVelocity() const {
     return Engine::Math::toGLM(m_BulletRigidBody->getLinearVelocity());
 }
-glm_vec3 ComponentBodyRigid::getAngularVelocity() const {
+glm_vec3 ComponentRigidBody::getAngularVelocity() const {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     return Engine::Math::toGLM(m_BulletRigidBody->getAngularVelocity());
 }
-void ComponentBodyRigid::setDamping(decimal linearFactor, decimal angularFactor) {
+void ComponentRigidBody::setDamping(decimal linearFactor, decimal angularFactor) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->setDamping((btScalar)linearFactor, (btScalar)angularFactor);
 }
-void ComponentBodyRigid::setCollisionGroup(MaskType group) {
+void ComponentRigidBody::setCollisionGroup(MaskType group) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     removePhysicsFromWorld();
     m_Group = group;
     addPhysicsToWorld();
 }
-void ComponentBodyRigid::setCollisionMask(MaskType mask) {
+void ComponentRigidBody::setCollisionMask(MaskType mask) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     removePhysicsFromWorld();
     m_Mask = mask;
     addPhysicsToWorld();
 }
-void ComponentBodyRigid::addCollisionGroup(MaskType group) {
+void ComponentRigidBody::addCollisionGroup(MaskType group) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     removePhysicsFromWorld();
     m_Group |= group;
     addPhysicsToWorld();
 }
-void ComponentBodyRigid::addCollisionMask(MaskType mask) {
+void ComponentRigidBody::addCollisionMask(MaskType mask) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     removePhysicsFromWorld();
     m_Mask |= mask;
     addPhysicsToWorld();
 }
-void ComponentBodyRigid::setCollisionFlag(MaskType flag) {
+void ComponentRigidBody::setCollisionFlag(MaskType flag) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->setCollisionFlags(flag);
 }
-void ComponentBodyRigid::addCollisionFlag(MaskType flag) {
+void ComponentRigidBody::addCollisionFlag(MaskType flag) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->setCollisionFlags(m_BulletRigidBody->getCollisionFlags() | flag);
 }
-void ComponentBodyRigid::removeCollisionGroup(MaskType group) {
+void ComponentRigidBody::removeCollisionGroup(MaskType group) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     removePhysicsFromWorld();
     m_Group &= ~group;
     addPhysicsToWorld();
 }
-void ComponentBodyRigid::removeCollisionMask(MaskType mask) {
+void ComponentRigidBody::removeCollisionMask(MaskType mask) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     removePhysicsFromWorld();
     m_Mask &= ~mask;
     addPhysicsToWorld();
 }
-void ComponentBodyRigid::removeCollisionFlag(MaskType flag) {
+void ComponentRigidBody::removeCollisionFlag(MaskType flag) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->setCollisionFlags(m_BulletRigidBody->getCollisionFlags() & ~flag);
 }
-void ComponentBodyRigid::setCollisionGroupAndMask(MaskType group, MaskType mask) {
+void ComponentRigidBody::setCollisionGroupAndMask(MaskType group, MaskType mask) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     removePhysicsFromWorld();
     m_Group = group;
@@ -277,51 +277,51 @@ void ComponentBodyRigid::setCollisionGroupAndMask(MaskType group, MaskType mask)
 }
 
 //TODO: reconsider how this works
-void ComponentBodyRigid::setDynamic(bool dynamic) {
+void ComponentRigidBody::setDynamic(bool dynamic) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     if (dynamic) {
         m_BulletRigidBody->setCollisionFlags(btCollisionObject::CF_ANISOTROPIC_FRICTION_DISABLED);
         m_BulletRigidBody->activate();
     }else{
         m_BulletRigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
-        ComponentBodyRigid::clearAllForces();
+        ComponentRigidBody::clearAllForces();
         m_BulletRigidBody->activate();
     }
 }
-btVector3 ComponentBodyRigid::internal_activate_and_get_vector(decimal x, decimal y, decimal z, bool local) noexcept {
+btVector3 ComponentRigidBody::internal_activate_and_get_vector(decimal x, decimal y, decimal z, bool local) noexcept {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->activate();
     btVector3 vec{ static_cast<btScalar>(x), static_cast<btScalar>(y), static_cast<btScalar>(z) };
     Engine::Math::translate(*m_BulletRigidBody, vec, local);
     return vec;
 }
-void ComponentBodyRigid::setLinearVelocity(decimal x, decimal y, decimal z, bool local) {
+void ComponentRigidBody::setLinearVelocity(decimal x, decimal y, decimal z, bool local) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->setLinearVelocity(internal_activate_and_get_vector(x, y, z, local));
 }
-void ComponentBodyRigid::setAngularVelocity(decimal x, decimal y, decimal z, bool local) {
+void ComponentRigidBody::setAngularVelocity(decimal x, decimal y, decimal z, bool local) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->setAngularVelocity(internal_activate_and_get_vector(x, y, z, local));
 }
-void ComponentBodyRigid::applyForce(decimal x, decimal y, decimal z, bool local) {
+void ComponentRigidBody::applyForce(decimal x, decimal y, decimal z, bool local) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->applyCentralForce(internal_activate_and_get_vector(x, y, z, local));
 }
-void ComponentBodyRigid::applyForce(const glm_vec3& force, const glm_vec3& origin, bool local) {
+void ComponentRigidBody::applyForce(const glm_vec3& force, const glm_vec3& origin, bool local) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     btVector3 v = internal_activate_and_get_vector(force.x, force.y, force.z, local);
-    m_BulletRigidBody->applyForce(v, btVector3{ static_cast<btScalar>(origin.x), static_cast<btScalar>(origin.y), static_cast<btScalar>(origin.z) });
+    m_BulletRigidBody->applyForce(v, Engine::Math::toBT(origin));
 }
-void ComponentBodyRigid::applyImpulse(decimal x, decimal y, decimal z, bool local) {
+void ComponentRigidBody::applyImpulse(decimal x, decimal y, decimal z, bool local) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->applyCentralImpulse(internal_activate_and_get_vector(x, y, z, local));
 }
-void ComponentBodyRigid::applyImpulse(const glm_vec3& impulse, const glm_vec3& origin, bool local) {
+void ComponentRigidBody::applyImpulse(const glm_vec3& impulse, const glm_vec3& origin, bool local) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     btVector3 v = internal_activate_and_get_vector(impulse.x, impulse.y, impulse.z, local);
-    m_BulletRigidBody->applyImpulse(v, btVector3{ static_cast<btScalar>(origin.x), static_cast<btScalar>(origin.y), static_cast<btScalar>(origin.z) });
+    m_BulletRigidBody->applyImpulse(v, Engine::Math::toBT(origin));
 }
-void ComponentBodyRigid::applyTorque(decimal x, decimal y, decimal z, bool local) {
+void ComponentRigidBody::applyTorque(decimal x, decimal y, decimal z, bool local) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     btVector3 v = internal_activate_and_get_vector(x, y, z, false); //yes, keep this false
     if (local) {
@@ -329,7 +329,7 @@ void ComponentBodyRigid::applyTorque(decimal x, decimal y, decimal z, bool local
     }
     m_BulletRigidBody->applyTorque(v);
 }
-void ComponentBodyRigid::applyTorqueImpulse(decimal x, decimal y, decimal z, bool local) {
+void ComponentRigidBody::applyTorqueImpulse(decimal x, decimal y, decimal z, bool local) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     btVector3 v = internal_activate_and_get_vector(x, y, z, false); //yes, keep this false
     if (local) {
@@ -337,24 +337,24 @@ void ComponentBodyRigid::applyTorqueImpulse(decimal x, decimal y, decimal z, boo
     }
     m_BulletRigidBody->applyTorqueImpulse(v);
 }
-void ComponentBodyRigid::clearLinearForces() {
+void ComponentRigidBody::clearLinearForces() {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->setActivationState(0);
     m_BulletRigidBody->activate();
     m_BulletRigidBody->setLinearVelocity(btVector3{ 0, 0, 0 });
 }
-void ComponentBodyRigid::clearAngularForces() {
+void ComponentRigidBody::clearAngularForces() {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->setActivationState(0);
     m_BulletRigidBody->activate();
     m_BulletRigidBody->setAngularVelocity(btVector3{ 0, 0, 0 });
 }
-void ComponentBodyRigid::clearAllForces() {
+void ComponentRigidBody::clearAllForces() {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     clearLinearForces();
     clearAngularForces();
 }
-void ComponentBodyRigid::setMass(float mass) {
+void ComponentRigidBody::setMass(float mass) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_Mass = mass;
     auto collisionShape = m_Owner.getComponent<ComponentCollisionShape>();

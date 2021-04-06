@@ -1,15 +1,15 @@
 #include <serenity/lights/LightProbe.h>
-#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/resources/Engine_Resources.h>
 
 LightProbe::LightProbe(Scene* scene, ProbeType::Type type, const glm::vec3& position)
     : Entity{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
-    , m_Camera{ glm::radians(90.0f), 1.0f, 0.1f, 3000000.0f, scene }
+    , m_Camera{ scene, glm::radians(90.0f), 1.0f, 0.1f, 3000000.0f }
     , m_Viewport{}
     , m_ProbeType{ type }
 {
-    addComponent<ComponentBody>();
-    getComponent<ComponentBody>()->setPosition(position);
+    addComponent<ComponentTransform>();
+    getComponent<ComponentTransform>()->setPosition(position);
 
     m_Viewport.setCamera(m_Camera);
 }

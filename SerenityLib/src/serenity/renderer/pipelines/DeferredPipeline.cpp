@@ -17,7 +17,7 @@
 #include <serenity/scene/Scene.h>
 #include <serenity/scene/Camera.h>
 
-#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentTransform.h>
 
 #include <serenity/renderer/postprocess/SSAO.h>
 #include <serenity/renderer/postprocess/HDR.h>
@@ -142,7 +142,7 @@ void DeferredPipeline::init() {
     m_OpenGLStateMachine.GL_glEnable(GL_DEPTH_TEST);
     m_OpenGLStateMachine.GL_glDisable(GL_STENCIL_TEST);
     m_OpenGLStateMachine.GL_glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //for non Power of Two textures
-    if (Engine::priv::RenderModule::OPENGL_VERSION >= 40) {
+    if (Engine::priv::OpenGLState::constants.supportsCubemapSeamless()) {
         m_OpenGLStateMachine.GL_glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); //can run real slowly on some gpu's / drivers. its core 32 but just to be safe, set it to 40
     }
     m_OpenGLStateMachine.GL_glEnable(GL_DEPTH_CLAMP);
@@ -153,7 +153,7 @@ void DeferredPipeline::init() {
     m_UBOCamera = uboCameraHandle.get<UniformBufferObject>();
     m_UBOCamera->updateData(&m_UBOCameraDataStruct);
 
-    priv::EShaders::init(Engine::priv::RenderModule::OPENGL_VERSION, Engine::priv::RenderModule::GLSL_VERSION);
+    priv::EShaders::init();
 
     m_FullscreenQuad.init();
     m_FullscreenTriangle.init();
@@ -390,7 +390,7 @@ uint32_t DeferredPipeline::getUniformLocationUnsafe(const char* location) {
     return m_RendererState.current_bound_shader_program->uniforms().at(location);
 }
 uint32_t DeferredPipeline::getMaxNumTextureUnits() {
-    return Engine::priv::OpenGLState::MAX_TEXTURE_UNITS;
+    return Engine::priv::OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS;
 }
 void DeferredPipeline::restoreDefaultState() {
     auto winWidth = Resources::getWindowSize();
@@ -594,10 +594,8 @@ void DeferredPipeline::onResize(uint32_t newWidth, uint32_t newHeight) {
 
     m_GBuffer.resize(newWidth, newHeight);
 }
-void DeferredPipeline::onOpenGLContextCreation(uint32_t windowWidth, uint32_t windowHeight, uint32_t glslVersion, uint32_t openglVersion) {
+void DeferredPipeline::onOpenGLContextCreation(uint32_t windowWidth, uint32_t windowHeight) {
     //TODO: move to a more generic area
-    Engine::priv::RenderModule::GLSL_VERSION   = glslVersion;
-    Engine::priv::RenderModule::OPENGL_VERSION = openglVersion;
     m_OpenGLStateMachine.GL_INIT_DEFAULT_STATE_MACHINE(windowWidth, windowHeight);
     Engine::Renderer::GLEnable(GL_CULL_FACE);
     m_GBuffer.init(windowWidth, windowHeight);
@@ -681,16 +679,16 @@ void DeferredPipeline::sendGPUDataGI(Skybox* skybox) {
     }
 }
 void DeferredPipeline::sendGPUDataLight(Camera& camera, SunLight& sunLight, const std::string& start) {
-    auto body        = sunLight.getComponent<ComponentBody>();
+    auto body        = sunLight.getComponent<ComponentTransform>();
     auto pos         = glm::vec3{ body->getPosition() };
-    const auto& col  = sunLight.color();
+    const auto& col  = sunLight.getColor();
     sendUniform4Safe((start + "DataA").c_str(), sunLight.getAmbientIntensity(), sunLight.getDiffuseIntensity(), sunLight.getSpecularIntensity(), 0.0f);
     sendUniform4Safe((start + "DataC").c_str(), 0.0f, pos.x, pos.y, pos.z);
-    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)sunLight.type());
+    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)sunLight.getType());
     sendUniform1Safe("Type", 0.0f);
 }
 int DeferredPipeline::sendGPUDataLight(Camera& camera, PointLight& pointLight, const std::string& start) {
-    auto body       = pointLight.getComponent<ComponentBody>();
+    auto body       = pointLight.getComponent<ComponentTransform>();
     auto pos        = glm::vec3{ body->getPosition() };
     auto cull       = pointLight.getCullingRadius();
     auto factor     = 1100.0f * cull;
@@ -698,11 +696,11 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, PointLight& pointLight, c
     if ((!camera.sphereIntersectTest(pos, cull)) || (distSq > factor * factor)) {
         return 0;
     }
-    const auto& col = pointLight.color();
+    const auto& col = pointLight.getColor();
     sendUniform4Safe((start + "DataA").c_str(), pointLight.getAmbientIntensity(), pointLight.getDiffuseIntensity(), pointLight.getSpecularIntensity(), 0.0f);
     sendUniform4Safe((start + "DataB").c_str(), 0.0f, 0.0f, pointLight.getConstant(), pointLight.getLinear());
     sendUniform4Safe((start + "DataC").c_str(), pointLight.getExponent(), pos.x, pos.y, pos.z);
-    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)pointLight.type());
+    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)pointLight.getType());
     sendUniform4Safe((start + "DataE").c_str(), 0.0f, 0.0f, (float)pointLight.getAttenuationModel(), 0.0f);
     sendUniform1Safe("Type", 1.0f);
 
@@ -712,18 +710,18 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, PointLight& pointLight, c
     return 2;
 }
 void DeferredPipeline::sendGPUDataLight(Camera& camera, DirectionalLight& directionalLight, const std::string& start) {
-    auto body       = directionalLight.getComponent<ComponentBody>();
-    auto forward    = glm::vec3{ body->forward() };
-    const auto& col = directionalLight.color();
+    auto body       = directionalLight.getComponent<ComponentTransform>();
+    auto forward    = body->getForward();
+    const auto& col = directionalLight.getColor();
     sendUniform4Safe((start + "DataA").c_str(), directionalLight.getAmbientIntensity(), directionalLight.getDiffuseIntensity(), directionalLight.getSpecularIntensity(), forward.x);
     sendUniform4Safe((start + "DataB").c_str(), forward.y, forward.z, 0.0f, 0.0f);
-    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)directionalLight.type());
+    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)directionalLight.getType());
     sendUniform1Safe("Type", 0.0f);
 }
 int DeferredPipeline::sendGPUDataLight(Camera& camera, SpotLight& spotLight, const std::string& start) {
-    auto body    = spotLight.getComponent<ComponentBody>();
+    auto body    = spotLight.getComponent<ComponentTransform>();
     auto pos     = glm::vec3{ body->getPosition() };
-    auto forward = glm::vec3{ body->forward() };
+    auto forward = body->getForward();
     auto cull    = spotLight.getCullingRadius();
     auto factor  = 1100.0f * cull;
     auto distSq  = (float)camera.getDistanceSquared(pos);
@@ -733,11 +731,11 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, SpotLight& spotLight, con
     if (distSq > factor * factor) {
         return 0;
     }
-    const auto& col = spotLight.color();
+    const auto& col = spotLight.getColor();
     sendUniform4Safe((start + "DataA").c_str(), spotLight.getAmbientIntensity(), spotLight.getDiffuseIntensity(), spotLight.getSpecularIntensity(), forward.x);
     sendUniform4Safe((start + "DataB").c_str(), forward.y, forward.z, spotLight.getConstant(), spotLight.getLinear());
     sendUniform4Safe((start + "DataC").c_str(), spotLight.getExponent(), pos.x, pos.y, pos.z);
-    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)spotLight.type());
+    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)spotLight.getType());
     sendUniform4Safe((start + "DataE").c_str(), spotLight.getCutoff(), spotLight.getCutoffOuter(), (float)spotLight.getAttenuationModel(), 0.0f);
     sendUniform2Safe("VertexShaderData", spotLight.getCutoffOuter(), cull);
     sendUniform1Safe("Type", 2.0f);
@@ -748,23 +746,23 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, SpotLight& spotLight, con
     return 2;
 }
 int DeferredPipeline::sendGPUDataLight(Camera& camera, RodLight& rodLight, const std::string& start) {
-    auto body            = rodLight.getComponent<ComponentBody>();
+    auto body            = rodLight.getComponent<ComponentTransform>();
     auto pos             = glm::vec3{ body->getPosition() };
-    auto cullingDistance = rodLight.rodLength() + (rodLight.getCullingRadius() * 2.0f);
+    auto cullingDistance = rodLight.getRodLength() + (rodLight.getCullingRadius() * 2.0f);
     auto factor          = 1100.0f * cullingDistance;
     auto distSq          = (float)camera.getDistanceSquared(pos);
     if (!camera.sphereIntersectTest(pos, cullingDistance) || (distSq > factor * factor)) {
         return 0;
     }
-    const auto& col      = rodLight.color();
-    float half           = rodLight.rodLength() / 2.0f;
-    auto firstEndPt      = pos + (glm::vec3{ body->forward() } *half);
-    auto secndEndPt      = pos - (glm::vec3{ body->forward() } *half);
+    const auto& col      = rodLight.getColor();
+    float half           = rodLight.getRodLength() / 2.0f;
+    auto firstEndPt      = pos + (body->getForward() * half);
+    auto secndEndPt      = pos - (body->getForward() * half);
     sendUniform4Safe((start + "DataA").c_str(), rodLight.getAmbientIntensity(), rodLight.getDiffuseIntensity(), rodLight.getSpecularIntensity(), firstEndPt.x);
     sendUniform4Safe((start + "DataB").c_str(), firstEndPt.y, firstEndPt.z, rodLight.getConstant(), rodLight.getLinear());
     sendUniform4Safe((start + "DataC").c_str(), rodLight.getExponent(), secndEndPt.x, secndEndPt.y, secndEndPt.z);
-    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)rodLight.type());
-    sendUniform4Safe((start + "DataE").c_str(), rodLight.rodLength(), 0.0f, (float)rodLight.getAttenuationModel(), 0.0f);
+    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)rodLight.getType());
+    sendUniform4Safe((start + "DataE").c_str(), rodLight.getRodLength(), 0.0f, (float)rodLight.getAttenuationModel(), 0.0f);
     sendUniform1Safe("Type", 1.0f);
 
     if (distSq <= (cullingDistance * cullingDistance)) {
@@ -800,7 +798,7 @@ void DeferredPipeline::renderPointLight(Camera& camera, PointLight& pointLight) 
     if (result == 0) {
         return;
     }
-    auto transform       = pointLight.getComponent<ComponentBody>();
+    auto transform       = pointLight.getComponent<ComponentTransform>();
     auto renderingMatrix = transform->getWorldMatrixRendering();
     sendUniformMatrix4("Model", renderingMatrix);
     sendUniformMatrix4("VP", m_UBOCameraDataStruct.CameraViewProj);
@@ -827,7 +825,7 @@ void DeferredPipeline::renderSpotLight(Camera& camera, SpotLight& spotLight) {
     if (result == 0) {
         return;
     }
-    auto transform       = spotLight.getComponent<ComponentBody>();
+    auto transform       = spotLight.getComponent<ComponentTransform>();
     auto renderingMatrix = transform->getWorldMatrixRendering();
     sendUniformMatrix4("Model", renderingMatrix);
     sendUniformMatrix4("VP", m_UBOCameraDataStruct.CameraViewProj);
@@ -855,7 +853,7 @@ void DeferredPipeline::renderRodLight(Camera& camera, RodLight& rodLight) {
     if (result == 0) {
         return;
     }
-    auto transform       = rodLight.getComponent<ComponentBody>();
+    auto transform       = rodLight.getComponent<ComponentTransform>();
     auto renderingMatrix = transform->getWorldMatrixRendering();
     sendUniformMatrix4("Model", renderingMatrix);
     sendUniformMatrix4("VP", m_UBOCameraDataStruct.CameraViewProj);
@@ -904,17 +902,17 @@ void DeferredPipeline::renderProjectionLight(Camera& camera, ProjectionLight& pr
     cullFace(GL_BACK);
 }
 void DeferredPipeline::renderDecal(ModelInstance& decalModelInstance) {
-    Entity parent          = decalModelInstance.parent();
-    auto transform         = parent.getComponent<ComponentBody>();
+    Entity parent          = decalModelInstance.getParent();
+    auto transform         = parent.getComponent<ComponentTransform>();
     glm::mat4 parentModel  = transform->getWorldMatrixRendering();
     auto maxTextures       = getMaxNumTextureUnits() - 1U;
 
     Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), maxTextures);
-    Engine::Renderer::sendUniform1Safe("Object_Color", decalModelInstance.color().toPackedInt());
-    Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", decalModelInstance.godRaysColor().toPackedInt());
+    Engine::Renderer::sendUniform1Safe("Object_Color", decalModelInstance.getColor().toPackedInt());
+    Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", decalModelInstance.getGodRaysColor().toPackedInt());
 
-    glm::mat4 modelMatrix  = parentModel * decalModelInstance.modelMatrix();
-    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
+    glm::mat4 modelMatrix  = parentModel * decalModelInstance.getModelMatrix();
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ modelMatrix }));
 
     Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
@@ -931,7 +929,7 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, H
         }
         for (auto& [id, index] : system.MaterialIDToIndex) {
             Material* mat         = system.MaterialToIndexReverse.at(id);
-            Texture& texture      = *mat->getComponent((uint32_t)MaterialComponentType::Diffuse).texture(0).get<Texture>();
+            Texture& texture      = *mat->getComponent((uint32_t)MaterialComponentType::Diffuse).getTexture(0).get<Texture>();
             std::string location  = "DiffuseTexture" + std::to_string(index) + "";
             Engine::Renderer::sendTextureSafe(location.c_str(), texture, index);
         }
@@ -1350,19 +1348,28 @@ void DeferredPipeline::internal_pass_stencil() {
 
     Engine::Renderer::GLEnable(GL_STENCIL_TEST);
     Engine::Renderer::Settings::clear(false, false, true); //stencil is completely filled with 0's
-    Engine::Renderer::stencilMask(0xFFFFFFFF);
+    Engine::Renderer::stencilMask(0b11111111);
 
-    Engine::Renderer::stencilFunc(GL_ALWAYS, 0x00000000, 0x00000000);
-    //exclude shadeless normals
-    Engine::Renderer::stencilOp(GL_KEEP, GL_INCR_WRAP, GL_INCR_WRAP);
+    //if a fragment is written, it passed. discard in the glsl shader is needed to fail this test.
+    Engine::Renderer::stencilFunc(GL_ALWAYS, 0b00000000, 0b00000000);
 
+    //if test fails - do nothing
+    //if stencil passes but depth fails  - increment
+    //if stencil passes and depth passes - increment
+    Engine::Renderer::stencilOp(GL_KEEP, GL_INCR, GL_INCR);
+
+    //this sneaky shader discards pixels that are "shadeless" based on their normal being (1,1,1). the discarding allows the stencil to not be written and thus disabling these pixels
+    //from the lighting calculations
     Engine::Renderer::sendTexture("gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 0);
     Engine::Renderer::renderFullscreenQuad();
 
     Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
 
-    Engine::Renderer::stencilMask(0xFFFFFFFF);
-    Engine::Renderer::stencilFunc(GL_NOTEQUAL, 0x00000000, 0xFFFFFFFF);
+    Engine::Renderer::stencilMask(0b11111111);
+
+    //any fragments happening later on pass only if the value in the buffer is NOT EQUAL to zero.
+    Engine::Renderer::stencilFunc(GL_NOTEQUAL, 0b00000000, 0b11111111);
+
     Engine::Renderer::stencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Do not change stencil
     Engine::Renderer::colorMask(true, true, true, true);
 }
@@ -1370,7 +1377,7 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
     const Scene& scene = viewport.getScene();
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLighting].get<ShaderProgram>());
     auto winSize = glm::vec2(Engine::Resources::getWindowSize());
-    if (RenderModule::GLSL_VERSION < 140) {
+    if (!Engine::priv::OpenGLState::constants.supportsUBO()) {
         Engine::Renderer::sendUniformMatrix4Safe("CameraView", camera.getView());
         Engine::Renderer::sendUniformMatrix4Safe("CameraProj", camera.getProjection());
         //sendUniformMatrix4Safe("CameraViewProj",camera.getViewProjection()); //moved to shader binding function
@@ -1421,7 +1428,7 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
     if (mainRenderFunction) {
         //do GI here. (only doing GI during the main render pass, not during light probes
         m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingGI].get<ShaderProgram>());
-        if (Engine::priv::RenderModule::GLSL_VERSION < 140) {
+        if (!Engine::priv::OpenGLState::constants.supportsUBO()) {
             Engine::Renderer::sendUniformMatrix4Safe("CameraInvView", camera.getViewInverse());
             Engine::Renderer::sendUniformMatrix4Safe("CameraInvProj", camera.getProjectionInverse());
             Engine::Renderer::sendUniformMatrix4Safe("CameraInvViewProj", camera.getViewProjectionInverse());
@@ -1468,7 +1475,7 @@ void DeferredPipeline::internal_pass_god_rays(Viewport& viewport, Camera& camera
     auto& godRaysPlatform = GodRays::STATIC_GOD_RAYS;
     auto sun = Engine::Renderer::godRays::getSun();
     if (!sun.null() && viewport.getRenderFlags().has(ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active) {
-        auto body        = sun.getComponent<ComponentBody>();
+        auto body        = sun.getComponent<ComponentTransform>();
         if (!body) {
             return;
         }
@@ -1690,7 +1697,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
         internal_init_frame_gbuffer(viewport, camera);
         if (mainRenderFunction) {
 #pragma region Camera UBO
-            if (Engine::priv::RenderModule::GLSL_VERSION >= 140 && m_UBOCamera) {
+            if (m_UBOCamera && Engine::priv::OpenGLState::constants.supportsUBO()) {
                 float logDepthBufferFCoeff = (2.0f / glm::log2(camera.getFar() + 1.0f)) * 0.5f;
                 //TODO: change the manual camera uniform sending (for when glsl version < 140) to give a choice between the two render spaces
 
@@ -1771,7 +1778,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
         internal_pass_forward(viewport, camera, depthPrepass);
 
         //this is god awful and ugly, but it's needed. find a way to refactor this properly
-        for (uint32_t i = 0; i < OpenGLState::MAX_TEXTURE_UNITS; ++i) {
+        for (uint32_t i = 0; i < OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS; ++i) {
             Engine::Renderer::clearTexture(i, GL_TEXTURE_2D);
             Engine::Renderer::clearTexture(i, GL_TEXTURE_CUBE_MAP);
         }

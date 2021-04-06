@@ -423,7 +423,7 @@
       <AssemblerOutput>All</AssemblerOutput>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <FloatingPointModel>Fast</FloatingPointModel>
+      <FloatingPointModel>Precise</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -529,8 +529,8 @@
     <ClCompile Include="src\serenity\discord\src\types.cpp" />
     <ClCompile Include="src\serenity\discord\src\user_manager.cpp" />
     <ClCompile Include="src\serenity\discord\src\voice_manager.cpp" />
-    <ClCompile Include="src\serenity\ecs\components\ComponentBody.cpp" />
-    <ClCompile Include="src\serenity\ecs\components\ComponentBodyRigid.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentTransform.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentRigidBody.cpp" />
     <ClCompile Include="src\serenity\ecs\components\ComponentCamera.cpp" />
     <ClCompile Include="src\serenity\ecs\components\ComponentCollisionShape.cpp" />
     <ClCompile Include="src\serenity\ecs\components\ComponentLogic.cpp" />
@@ -549,7 +549,7 @@
     <ClCompile Include="src\serenity\ecs\systems\SystemBodyParentChild.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentBody.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentBodyDebugDraw.cpp" />
-    <ClCompile Include="src\serenity\ecs\systems\SystemComponentBodyRigid.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentRigidBody.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentCamera.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentLogic.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentLogic1.cpp" />
@@ -620,7 +620,6 @@
     <ClCompile Include="src\serenity\renderer\opengl\glsl\Materials.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\glsl\SSAOCode.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\glsl\VersionConversion.cpp" />
-    <ClCompile Include="src\serenity\renderer\opengl\OpenGL.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\State.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\UniformBufferObject.cpp" />
     <ClCompile Include="src\serenity\renderer\particles\Particle.cpp" />
@@ -757,8 +756,8 @@
     <ClInclude Include="include\serenity\discord\src\user_manager.h" />
     <ClInclude Include="include\serenity\discord\src\voice_manager.h" />
     <ClInclude Include="include\serenity\ecs\components\ComponentBaseClass.h" />
-    <ClInclude Include="include\serenity\ecs\components\ComponentBody.h" />
-    <ClInclude Include="include\serenity\ecs\components\ComponentBodyRigid.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentTransform.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentRigidBody.h" />
     <ClInclude Include="include\serenity\ecs\components\ComponentCamera.h" />
     <ClInclude Include="include\serenity\ecs\components\ComponentCollisionShape.h" />
     <ClInclude Include="include\serenity\ecs\components\ComponentLogic.h" />
@@ -784,7 +783,7 @@
     <ClInclude Include="include\serenity\ecs\systems\SystemBodyParentChild.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentBody.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentBodyDebugDraw.h" />
-    <ClInclude Include="include\serenity\ecs\systems\SystemComponentBodyRigid.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentRigidBody.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentCamera.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentLogic.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentLogic1.h" />

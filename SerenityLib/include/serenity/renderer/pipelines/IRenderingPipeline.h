@@ -52,7 +52,7 @@ namespace Engine::priv {
             virtual void onPipelineChanged() = 0;
             virtual void onFullscreen() = 0;
             virtual void onResize(uint32_t newWidth, uint32_t newHeight) = 0;
-            virtual void onOpenGLContextCreation(uint32_t windowWidth, uint32_t windowHeight, uint32_t glslVersion, uint32_t openglVersion) = 0;
+            virtual void onOpenGLContextCreation(uint32_t windowWidth, uint32_t windowHeight) = 0;
             virtual void restoreDefaultState() = 0;
             virtual void restoreCurrentState() = 0;
             virtual void clear2DAPI() = 0;

@@ -18,7 +18,6 @@ class SpotLight : public PointLight {
     private:
         float   m_Cutoff      = SPOT_LIGHT_DEFAULT_CUTOFF;
         float   m_OuterCutoff = SPOT_LIGHT_DEFAULT_OUTER_CUTOFF;
-
     public:
         SpotLight() = delete;
         SpotLight(

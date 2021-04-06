@@ -1,5 +1,5 @@
 #include <serenity/ecs/components/ComponentModel.h>
-#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/ecs/components/ComponentCamera.h>
 
 #include <serenity/resources/Engine_Resources.h>
@@ -29,12 +29,12 @@ std::pair<glm::vec3, float> ComponentModel_Functions::CalculateBoundingBoxAndRad
 float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) {
     auto points_total = Engine::create_and_reserve<std::vector<glm::vec3>>((uint32_t)ComponentModel_Functions::GetTotalVertexCount(modelComponent));
     for (const auto& modelInstance : modelComponent) {
-        const Mesh& mesh = *modelInstance->mesh().get<Mesh>();
+        const Mesh& mesh = *modelInstance->getMesh().get<Mesh>();
         if (!mesh.isLoaded()) {
             continue;
         }
         float modelInstanceScale = Engine::Math::Max(modelInstance->getScale());
-        glm::vec3 localPosition  = Engine::Math::getMatrixPosition(modelInstance->modelMatrix());
+        glm::vec3 localPosition  = Engine::Math::getMatrixPosition(modelInstance->getModelMatrix());
         auto positions           = mesh.getVertexData().getPositions();
         for (auto& vertexPosition : positions) {
             points_total.emplace_back(localPosition + (vertexPosition * modelInstanceScale));
@@ -43,7 +43,7 @@ float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) 
     auto boxAndRadius = CalculateBoundingBoxAndRadius(points_total);
     modelComponent.m_Radius          = boxAndRadius.second;
     modelComponent.m_RadiusBox       = boxAndRadius.first;
-    auto body                        = modelComponent.m_Owner.getComponent<ComponentBody>();
+    auto body                        = modelComponent.m_Owner.getComponent<ComponentTransform>();
     if (body) {
         auto bodyScale               = Engine::Math::Max(glm::vec3{ body->getScale() });
         modelComponent.m_Radius     *= bodyScale;
@@ -55,16 +55,16 @@ std::pair<glm::vec3, float> ComponentModel_Functions::CalculateRadi(const std::v
     float maxRad = 0.0f;
     glm::vec3 maxRadBox{ 0.0f };
     for (const auto entity : entities) {
-        auto body         = entity.getComponent<ComponentBody>();
+        auto body         = entity.getComponent<ComponentTransform>();
         auto model        = entity.getComponent<ComponentModel>();
         auto points_total = Engine::create_and_reserve<std::vector<glm::vec3>>((uint32_t)ComponentModel_Functions::GetTotalVertexCount(*model));
         for (const auto& modelInstance : *model) {
-            const Mesh& mesh = *modelInstance->mesh().get<Mesh>();
+            const Mesh& mesh = *modelInstance->getMesh().get<Mesh>();
             if (!mesh.isLoaded()) {
                 continue;
             }
             float modelInstanceScale = Engine::Math::Max(modelInstance->getScale());
-            glm::vec3 localPosition  = Engine::Math::getMatrixPosition(modelInstance->modelMatrix());
+            glm::vec3 localPosition  = Engine::Math::getMatrixPosition(modelInstance->getModelMatrix());
             if (body->hasParent()) {
                 localPosition += glm::vec3(body->getLocalPosition());
             }
@@ -92,7 +92,7 @@ std::pair<glm::vec3, float> ComponentModel_Functions::CalculateRadi(const std::v
 size_t ComponentModel_Functions::GetTotalVertexCount(ComponentModel& modelComponent) {
     size_t totalCapacity = 0;
     for (const auto& modelInstance : modelComponent) {
-        const Mesh& mesh = *modelInstance->mesh().get<Mesh>();
+        const Mesh& mesh = *modelInstance->getMesh().get<Mesh>();
         if (!mesh.isLoaded()) {
             continue;
         }
@@ -183,7 +183,7 @@ void ComponentModel::setModel(Handle mesh, Handle material, size_t index, Handle
 
     auto& model_instance                 = *m_ModelInstances[index];
     auto& scene                          = *m_Owner.scene();
-    PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
+    PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.getStage());
 
     model_instance.m_ShaderProgramHandle = shaderProgram;
     model_instance.m_MeshHandle          = mesh;
@@ -196,7 +196,7 @@ void ComponentModel::setModel(Handle mesh, Handle material, size_t index, Handle
 void ComponentModel::setModelShaderProgram(Handle shaderProgram, size_t index, RenderStage renderStage) {
     auto& model_instance                 = *m_ModelInstances[index];
     auto& scene                          = *m_Owner.scene();
-    PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
+    PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.getStage());
 
     model_instance.m_ShaderProgramHandle = shaderProgram;
     model_instance.m_Stage               = renderStage;
@@ -207,7 +207,7 @@ void ComponentModel::setModelShaderProgram(Handle shaderProgram, size_t index, R
 void ComponentModel::setStage(RenderStage renderStage, size_t index) {
     auto& model_instance   = *m_ModelInstances[index];
     auto& scene            = *m_Owner.scene();
-    PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
+    PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.getStage());
 
     model_instance.m_Stage = renderStage;
 
@@ -219,7 +219,7 @@ void ComponentModel::setModelMesh(Handle mesh, size_t index, RenderStage renderS
     auto& model_instance        = *m_ModelInstances[index];
     auto& scene                 = *m_Owner.scene();
 
-    PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
+    PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.getStage());
 
     model_instance.m_MeshHandle = mesh;
     model_instance.m_Stage      = renderStage;
@@ -230,7 +230,7 @@ void ComponentModel::setModelMesh(Handle mesh, size_t index, RenderStage renderS
 void ComponentModel::setModelMaterial(Handle material, size_t index, RenderStage renderStage) {
     auto& model_instance            = *m_ModelInstances[index];
     auto& scene                     = *m_Owner.scene();
-    PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.stage());
+    PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.getStage());
 
     model_instance.m_MaterialHandle = material;
     model_instance.m_Stage          = renderStage;
@@ -238,7 +238,7 @@ void ComponentModel::setModelMaterial(Handle material, size_t index, RenderStage
     PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage);
 }
 bool ComponentModel::rayIntersectSphere(const ComponentCamera& camera) const noexcept {
-    auto body = m_Owner.getComponent<ComponentBody>();
+    auto body = m_Owner.getComponent<ComponentTransform>();
     return Math::rayIntersectSphere(body->getPosition(), m_Radius, camera.m_Eye, camera.getViewVector());
 }
 void ComponentModel::setUserPointer(void* UserPointer) noexcept {

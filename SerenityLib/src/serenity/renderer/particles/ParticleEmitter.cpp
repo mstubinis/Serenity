@@ -4,7 +4,7 @@
 #include <serenity/renderer/particles/ParticleEmissionProperties.h>
 #include <serenity/system/Engine.h>
 #include <serenity/resources/Engine_Resources.h>
-#include <serenity/ecs/components/ComponentBody.h>
+#include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/ecs/components/ComponentModel.h>
 
 #include <serenity/resources/mesh/Mesh.h>
@@ -13,7 +13,7 @@
 ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) 
     : EntityBody{ scene }
 {
-    addComponent<ComponentBody>();
+    addComponent<ComponentTransform>();
 
     /*
     addComponent<ComponentModel>(Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), Material::Checkers);
@@ -100,7 +100,7 @@ void ParticleEmitter::update(size_t index, const float dt, Engine::priv::Particl
 
 void ParticleEmitter::applyLinearVelocity(decimal x, decimal y, decimal z, bool local) {
     /*
-    auto& body = *getComponent<ComponentBody>();
+    auto& body = *getComponent<ComponentTransform>();
     const auto currVel = body.getLinearVelocity();
     auto newVel = glm_vec3(x, y, z);
     if (local) {
@@ -111,7 +111,7 @@ void ParticleEmitter::applyLinearVelocity(decimal x, decimal y, decimal z, bool 
 }
 void ParticleEmitter::applyLinearVelocity(glm_vec3& velocity, const bool local) {
     /*
-    auto& body = *getComponent<ComponentBody>();
+    auto& body = *getComponent<ComponentTransform>();
     const auto currVel = body.getLinearVelocity();
     if (local) {
         velocity = body.getRotation() * velocity;

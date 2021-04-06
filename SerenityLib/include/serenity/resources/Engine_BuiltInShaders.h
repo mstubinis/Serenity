@@ -8,7 +8,7 @@
 namespace Engine::priv{
     class EShaders{
         public:
-            static void init(const uint32_t openglVersion, const uint32_t glslVersion);
+            static void init();
 
             static std::string decal_vertex;
             static std::string decal_frag;
