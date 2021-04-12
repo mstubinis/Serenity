@@ -112,8 +112,8 @@ namespace Engine::priv {
             bool add_particle(ParticleEmitter& emitter, const glm::vec3& emitterPosition, const glm::quat& emitterRotation);
             bool add_particle(ParticleEmitter& emitter);
 
-            inline constexpr std::vector<ParticleEmitter>& getParticleEmitters() noexcept { return m_ParticleEmitters; }
-            inline constexpr std::vector<Particle>& getParticles() noexcept { return m_Particles; }
+            inline std::vector<ParticleEmitter>& getParticleEmitters() noexcept { return m_ParticleEmitters; }
+            inline std::vector<Particle>& getParticles() noexcept { return m_Particles; }
 
             void update(const float dt, Camera& camera);
             void render(Viewport& viewport, Camera& camera, Handle program, RenderModule& renderer);

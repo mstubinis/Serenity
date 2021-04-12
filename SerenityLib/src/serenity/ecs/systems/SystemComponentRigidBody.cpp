@@ -27,7 +27,6 @@ SystemComponentRigidBody::SystemComponentRigidBody(Engine::priv::ECS& ecs)
             auto currentScene = Engine::Resources::getCurrentScene();
             if (currentScene && currentScene == &scene) {
                 rigidBodyComponent->addPhysicsToWorld();
-                //Engine::Physics::addRigidBodyThreadSafe(rigidBodyComponent->getBtBody(), rigidBodyComponent->getCollisionGroup(), rigidBodyComponent->getCollisionMask());
                 rigidBodyComponent->internal_calculate_mass();
             }
         }
@@ -35,14 +34,12 @@ SystemComponentRigidBody::SystemComponentRigidBody(Engine::priv::ECS& ecs)
     setSceneLeftFunction([](SystemBaseClass& inSystem, Scene& scene) {
         auto& system = (SystemComponentRigidBody&)inSystem;
         system.forEach([](Entity entity, ComponentRigidBody* rigidBodyComponent) {
-            //Engine::Physics::removeRigidBody(rigidBodyComponent->getBtBody());
             rigidBodyComponent->removePhysicsFromWorld();
         }, SystemExecutionPolicy::Normal);
     });
     setSceneEnteredFunction([](SystemBaseClass& inSystem, Scene& scene) {
         auto& system = (SystemComponentRigidBody&)inSystem;
         system.forEach([](Entity entity, ComponentRigidBody* rigidBodyComponent) {
-            //Engine::Physics::addRigidBody(rigidBodyComponent->getBtBody(), rigidBodyComponent->getCollisionGroup(), rigidBodyComponent->getCollisionMask());
             rigidBodyComponent->addPhysicsToWorld();
         }, SystemExecutionPolicy::Normal);
     });

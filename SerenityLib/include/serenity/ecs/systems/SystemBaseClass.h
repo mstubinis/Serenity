@@ -34,7 +34,6 @@ class SystemBaseClass {
         bool hasAssociatedComponent(uint32_t typeID) noexcept;
         void associateComponentImpl(uint32_t typeID);
         void sortEntities() noexcept;
-        void insertionSort(std::vector<Entity>& container) noexcept;
     protected:
         Engine::priv::ECS&             m_ECS;
         std::vector<Entity>            m_Entities;

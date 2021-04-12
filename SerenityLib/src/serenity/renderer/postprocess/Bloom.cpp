@@ -21,7 +21,7 @@ void Engine::priv::Bloom::internal_init_fragment_code() {
         varying vec2 texcoords;
 
         void main(){
-            vec3 sceneColor = texture2D(SceneTexture,texcoords).rgb;
+            vec3 sceneColor = texture2D(SceneTexture, texcoords).rgb;
             sceneColor = vec3(1.0) - exp(-sceneColor * Data.z); //exposure
             gl_FragColor.rgb = max(ConstantZeroVec3, sceneColor - vec3(Data.y)) * Data.x; //threshold   scale
         }

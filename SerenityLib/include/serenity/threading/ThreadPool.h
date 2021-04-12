@@ -80,14 +80,7 @@ namespace Engine::priv {
             std::condition_variable_any                         m_ConditionVariableAny;
             bool                                                m_Stopped               = true;
       
-            bool internal_task_queue_is_empty() const noexcept {
-                for (const auto& queue : m_TaskQueues) {
-                    if (!queue.empty()) {
-                        return false;
-                    }
-                }
-                return true;
-            }
+            bool internal_task_queue_is_empty() const noexcept;
             [[nodiscard]] PoolTaskPtr internal_get_next_available_job() noexcept;
         public:
             ThreadPool(size_t sections = 2U);
@@ -100,21 +93,9 @@ namespace Engine::priv {
             ThreadPool(ThreadPool&&) noexcept                 = delete;
             ThreadPool& operator=(ThreadPool&&) noexcept      = delete;
 
-            void shutdown() noexcept {
-                if (!m_Stopped) {
-                    m_Stopped = true;
-                    m_ConditionVariableAny.notify_all();// wake up all threads.
-                    m_WorkerThreads.clear();
-                }
-            }
+            void shutdown() noexcept;
 
-            [[nodiscard]] size_t get_number_of_tasks_in_queue() const noexcept {
-                size_t count = 0;
-                for (const auto& q : m_TaskQueues) {
-                    count += q.size();
-                }
-                return count;
-            }
+            [[nodiscard]] size_t get_number_of_tasks_in_queue() const noexcept;
             [[nodiscard]] inline size_t size() const noexcept { return m_WorkerThreads.size(); }
 
             template<class JOB> [[nodiscard]] FutureType& add_job(JOB&& job, size_t section) {
@@ -151,30 +132,7 @@ namespace Engine::priv {
             }
 
             void update();
-
-            void join_all() noexcept {
-                for (auto& worker_thread : m_WorkerThreads) {
-                    if (worker_thread.joinable()) {
-                        worker_thread.join();
-                    }
-                }
-            }
-            void wait_for_all(size_t section) noexcept {
-                if (size() > 0) {
-                    //TODO: use std::experimental::when_all when it becomes available, as it should be faster than individual wait's
-                    std::for_each(m_FuturesBasic[section].cbegin(), m_FuturesBasic[section].cend(), [](const Engine::priv::ThreadPoolFuture& future) {
-                        if (!future.isReady()) {
-                            future.m_Future.wait();
-                        }
-                    });
-                    std::for_each(m_FuturesCallback[section].cbegin(), m_FuturesCallback[section].cend(), [](const Engine::priv::ThreadPoolFutureCallback& callback) {
-                        if (!callback.isReady()) {
-                            callback.m_Future.wait();
-                        }
-                    });
-                }
-                update();
-            }
+            void wait_for_all(size_t section) noexcept;
     };
 };
 #endif

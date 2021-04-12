@@ -227,7 +227,8 @@ vec4 RangeTo1(vec4 color){
     ShaderHelper::sfind(code, "CameraPosition") || ShaderHelper::sfind(code, "CameraInvView") || ShaderHelper::sfind(code, "CameraInvProj") ||
     ShaderHelper::sfind(code, "CameraInvViewProj") || ShaderHelper::sfind(code, "CameraNear") || ShaderHelper::sfind(code, "CameraFar") ||
     ShaderHelper::sfind(code, "CameraInfo1") || ShaderHelper::sfind(code, "CameraInfo2") || ShaderHelper::sfind(code, "CameraViewVector") ||
-    ShaderHelper::sfind(code, "CameraRealPosition") || ShaderHelper::sfind(code, "CameraInfo3") || ShaderHelper::sfind(code, "ScreenInfo")) {
+    ShaderHelper::sfind(code, "CameraRealPosition") || ShaderHelper::sfind(code, "CameraInfo3") || ShaderHelper::sfind(code, "ScreenInfo") || 
+    ShaderHelper::sfind(code, "RendererInfo1")) {
         if (versionNumber >= 140) { //UBO only supported at 140 or above
             if (!ShaderHelper::sfind(code, "layout (std140) uniform Camera //generated")) {
                 ShaderHelper::insertStringAtLine(code, R"(

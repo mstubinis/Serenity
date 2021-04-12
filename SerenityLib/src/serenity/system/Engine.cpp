@@ -61,7 +61,8 @@ EngineCore* Core::m_Engine = nullptr;
 EngineCore::EngineCore(const EngineOptions& options) 
     : m_ResourceManager{ options }
     , m_RenderModule{ options }
-    , m_EngineEventHandler{ m_EventModule, m_RenderModule, m_ResourceManager }
+    , m_Editor{ options }
+    , m_EngineEventHandler{ m_Editor, m_EventModule, m_RenderModule, m_ResourceManager }
 {
     std::srand(static_cast<uint32_t>(std::time(0)));
     m_Misc.m_MainThreadID = std::this_thread::get_id();
@@ -89,6 +90,7 @@ void EngineCore::internal_init_os_specific(const EngineOptions& options) {
             if (GetConsoleWindow() == NULL) {
                 AllocConsole();
             }
+            ShowWindow(GetConsoleWindow(), SW_SHOW);//show console window
         }else if (!args.contains("console")) {
             ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window
         }
@@ -109,6 +111,7 @@ void EngineCore::init(const EngineOptions& options) {
     m_Misc.m_BuiltInMeshes.init();
     m_RenderModule._init();
     m_PhysicsModule.init();
+    m_Editor.init(options, m_ResourceManager);
 
     //init the game here
     Engine::setMousePosition(options.width / 2, options.height / 2);
@@ -183,6 +186,9 @@ void EngineCore::internal_render(Scene& scene, Window& window, const float dt, c
             viewport.render(m_RenderModule, viewport, true);
         }
     }
+
+    m_Editor.render(window);
+
     window.display();
     m_RenderModule._clear2DAPICommands();
     m_DebugManager.calculate_render();
@@ -222,6 +228,7 @@ void EngineCore::run() {
             auto& scene = *Engine::Resources::getCurrentScene();
             m_EngineEventHandler.poll_events(window);
             internal_pre_update(scene, window, timeElasped);
+            m_Editor.update(window, timeElasped);
             //internal_update_physics(scene, window, timeElasped);
             internal_update_logic(scene, window, timeElasped);
             internal_update_sounds(scene, window, timeElasped);
@@ -250,6 +257,7 @@ void EngineCore::run() {
             accumulator -= ENGINE_FIXED_TIMESTEP_VALUE_D;
         }
         renderSimulation();
+
         m_DebugManager.calculate();
         m_Misc.m_FPS.update(m_Misc.m_Dt);  
     }

@@ -40,6 +40,10 @@ enum class AntiAliasingAlgorithm : uint32_t {
     SMAA_HIGH,
     SMAA_ULTRA,
 };
+enum class LightingAlgorithm : uint32_t {
+    Basic = 0,
+    PBR,
+};
 enum class Alignment : uint32_t {
     TopLeft = 0,
     TopCenter,

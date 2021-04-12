@@ -1,4 +1,4 @@
-#include <serenity/ecs/systems/SystemComponentBodyDebugDraw.h>
+#include <serenity/ecs/systems/SystemComponentTransformDebugDraw.h>
 #include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/ecs/components/ComponentModel.h>
 #include <serenity/math/Engine_Math.h>
@@ -7,12 +7,12 @@
 #include <serenity/resources/font/Font.h>
 #include <serenity/scene/Scene.h>
 
-SystemComponentBodyDebugDraw::SystemComponentBodyDebugDraw(Engine::priv::ECS& ecs)
+SystemComponentTransformDebugDraw::SystemComponentTransformDebugDraw(Engine::priv::ECS& ecs)
     : SystemCRTP{ ecs }
 {
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
         #if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
-        auto& system = (SystemComponentBodyDebugDraw&)inSystem;
+        auto& system = (SystemComponentTransformDebugDraw&)inSystem;
         system.forEach<Scene*>([](Scene* scene, Entity entity, ComponentTransform* transform, ComponentModel* model) {
             //ASSERT(scene && body && model, __FUNCTION__ << "(): parameter(s) was nullptr!");
             const auto world_pos = glm::vec3{ transform->getPosition() };
@@ -21,7 +21,7 @@ SystemComponentBodyDebugDraw::SystemComponentBodyDebugDraw(Engine::priv::ECS& ec
             for (size_t i = 0; i < model->getNumModels(); ++i) {
                 auto& modelInstance = (*model)[i];
 
-                auto rotation = world_rot * modelInstance.orientation();
+                auto rotation = world_rot * modelInstance.getRotation();
                 auto fwd      = glm::normalize(Engine::Math::getForward(rotation)) * 0.3f;
                 auto right    = glm::normalize(Engine::Math::getRight(rotation)) * 0.3f;
                 auto up       = glm::normalize(Engine::Math::getUp(rotation)) * 0.3f;

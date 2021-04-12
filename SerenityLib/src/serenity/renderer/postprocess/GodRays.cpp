@@ -30,9 +30,9 @@ void Engine::priv::GodRays::internal_init_fragment_code() {
             vec3 totalColor = vec3(0.0);
             for(int i = 0; i < samples; ++i){
                 uv -= deltaUV / 2.0;
-                vec2 sampleData = texture2D(firstPass,uv).ba;
+                vec2 sampleData = texture2D(firstPass, uv).ba;
                 vec2 unpackedRG = Unpack2NibblesFrom8BitChannel(sampleData.r);
-                vec3 realSample = vec3(unpackedRG.r,unpackedRG.g,sampleData.g);
+                vec3 realSample = vec3(unpackedRG.r, unpackedRG.g, sampleData.g);
                 realSample *= illuminationDecay * RaysInfo.w;
                 totalColor += realSample;
                 illuminationDecay *= RaysInfo.y;

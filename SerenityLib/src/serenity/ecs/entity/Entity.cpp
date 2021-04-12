@@ -3,6 +3,8 @@
 #include <serenity/system/Engine.h>
 #include <serenity/ecs/components/Components.h>
 
+#include <serenity/ecs/systems/SystemBodyParentChild.h>
+
 using namespace Engine::priv;
 
 Entity::Entity(Scene& scene) {
@@ -38,13 +40,21 @@ void Entity::removeChild(Entity child) const noexcept {
     if (body)
         body->removeChild(child);
 }
-/*
-void Entity::removeAllChildren() const noexcept {
+std::vector<Entity> Entity::getChildren() const noexcept {
     auto body = getComponent<ComponentTransform>();
-    if (body)
-        body->removeAllChildren();
+    std::vector<Entity> output;
+    if (body) {
+        auto& ecs = *Engine::priv::PublicEntity::GetECS(*this);
+        auto& pcs = ecs.getSystem<SystemBodyParentChild>();
+        for (size_t i = 0; i < pcs.m_Parents.size(); ++i) {
+            const auto parentID = pcs.m_Parents[i];
+            if (parentID == m_ID) {
+                output.push_back(ecs.getEntityPool().getEntityFromID(i + 1));
+            }
+        }
+    }
+    return output;
 }
-*/
 bool Entity::hasParent() const noexcept {
     auto body = getComponent<ComponentTransform>();
     if (body)

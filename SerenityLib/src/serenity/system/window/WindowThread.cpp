@@ -5,9 +5,6 @@
 Engine::priv::WindowThread::WindowThread(WindowData& data) 
     : m_Data{ data }
 {}
-Engine::priv::WindowThread::~WindowThread() {
-    internal_cleanup();
-}
 std::optional<sf::Event> Engine::priv::WindowThread::internal_try_pop() {
     return m_SFEventQueue.try_pop();
 }
@@ -49,7 +46,7 @@ void Engine::priv::WindowThread::internal_update_loop() {
     }
 }
 void Engine::priv::WindowThread::internal_startup(Window& super, const std::string& name, boost::latch* bLatch) {
-    m_EventThread.reset(NEW std::thread([this, &super, &name, &bLatch]() {
+    m_EventThread.reset(NEW std::jthread([this, &super, &name, &bLatch]() {
         m_Data.m_SFMLWindow.create(m_Data.m_VideoMode, name, m_Data.m_Style, m_Data.m_SFContextSettings);
         super.setIcon(m_Data.m_IconFile);
         bool successfulDeactivation = m_Data.m_SFMLWindow.setActive(false);
@@ -61,9 +58,4 @@ void Engine::priv::WindowThread::internal_startup(Window& super, const std::stri
             internal_update_loop();
         }
     }));
-}
-void Engine::priv::WindowThread::internal_cleanup() {
-    if (m_EventThread && m_EventThread->joinable()) {
-        m_EventThread->join();
-    }
 }

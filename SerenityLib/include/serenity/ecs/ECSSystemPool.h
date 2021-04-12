@@ -10,6 +10,7 @@ class  SystemBaseClass;
 #include <cstdint>
 #include <serenity/ecs/systems/SystemBaseClass.h>
 #include <serenity/system/Macros.h>
+#include <serenity/utils/Utils.h>
 
 #include <iostream>
 
@@ -18,9 +19,26 @@ namespace Engine::priv {
         using SystemComponentHashContainer = std::vector<std::vector<SystemBaseClass*>>;
         using SystemMainContainer          = std::vector<std::unique_ptr<SystemBaseClass>>;
         private:
-            uint32_t                       m_RegisteredSystems     = 0;
+            struct OrderEntry final {
+                uint32_t order;
+                uint32_t typeID;
+                OrderEntry() = default;
+                OrderEntry(uint32_t order_, uint32_t typeID_)
+                    : order { order_ }
+                    , typeID { typeID_ }
+                {}
+                inline bool operator<(const OrderEntry& other) { return order < other.order; }
+                inline bool operator>(const OrderEntry& other) { return order > other.order; }
+                inline bool operator<=(const OrderEntry& other) { return order <= other.order; }
+                inline bool operator>=(const OrderEntry& other) { return order >= other.order; }
+                inline bool operator==(const OrderEntry& other) { return order == other.order; }
+            };
+        using SystemOrderContainer = std::vector<OrderEntry>;
+        private:
+            static inline uint32_t         m_RegisteredSystems     = 0;
             SystemComponentHashContainer   m_ComponentIDToSystems;  //component type_id => systems associated with that component
             SystemMainContainer            m_Systems;               //main system container, system type_id => system
+            SystemOrderContainer           m_Order;                 //Order => TYPE_ID
 
             template<class SYSTEM, class COMPONENT>
             void hashSystemImpl(SYSTEM* inSystem) {
@@ -53,16 +71,41 @@ namespace Engine::priv {
                 auto threshold = std::max(SYSTEM::TYPE_ID, m_RegisteredSystems);
                 if (m_Systems.size() < threshold) {
                     m_Systems.resize(threshold);
+                    m_Order.resize(threshold, OrderEntry{ std::numeric_limits<uint32_t>().max(), std::numeric_limits<uint32_t>().max() });
                 }
                 m_Systems[SYSTEM::TYPE_ID - 1].reset( NEW SYSTEM(std::forward<ARGS>(args)...) );
+                m_Order[SYSTEM::TYPE_ID - 1] = OrderEntry{ ((SYSTEM::TYPE_ID - 1) * 1000) + 1000, SYSTEM::TYPE_ID };
+
+                createdSystem = static_cast<SYSTEM*>(m_Systems[SYSTEM::TYPE_ID - 1].get());
+                hashSystem<SYSTEM, COMPONENTS...>(createdSystem);
+                return createdSystem;
+            }
+            template<class SYSTEM, class ... COMPONENTS, class ... ARGS>
+            SYSTEM* registerSystemOrdered(uint32_t order, ARGS&&... args) {
+                SYSTEM* createdSystem = nullptr;
+                if (SYSTEM::TYPE_ID == 0) {
+                    SYSTEM::TYPE_ID = ++m_RegisteredSystems;
+                }
+                auto threshold = std::max(SYSTEM::TYPE_ID, m_RegisteredSystems);
+                if (m_Systems.size() < threshold) {
+                    m_Systems.resize(threshold);
+                    m_Order.resize(threshold, OrderEntry{ std::numeric_limits<uint32_t>().max(), std::numeric_limits<uint32_t>().max() });
+                }
+                m_Systems[SYSTEM::TYPE_ID - 1].reset(NEW SYSTEM(std::forward<ARGS>(args)...));
+                m_Order[SYSTEM::TYPE_ID - 1] = OrderEntry{ order, SYSTEM::TYPE_ID };
+
+                //auto comp = [](const auto& lhs, const auto& rhs) { return lhs.first < rhs.first; };
+                //std::sort(std::begin(m_Order), std::end(m_Order), comp);
+                Engine::insertion_sort(m_Order);
+
                 createdSystem = static_cast<SYSTEM*>(m_Systems[SYSTEM::TYPE_ID - 1].get());
                 hashSystem<SYSTEM, COMPONENTS...>(createdSystem);
                 return createdSystem;
             }
 
             void update(const float dt, Scene& scene) {
-                for (int i = 0; i < m_Systems.size(); ++i) {
-                    m_Systems[i]->onUpdate(dt, scene);
+                for (int i = 0; i < m_Order.size(); ++i) {
+                    m_Systems[m_Order[i].typeID - 1]->onUpdate(dt, scene);
                 }
             }
             void onComponentAddedToEntity(uint32_t componentTypeID, void* component, Entity entity) {
@@ -89,22 +132,22 @@ namespace Engine::priv {
                 }
             }
             void onComponentRemovedFromEntity(Entity entity) {
-                for (int i = 0; i < m_Systems.size(); ++i) {
-                    m_Systems[i]->removeEntity(entity);
+                for (int i = 0; i < m_Order.size(); ++i) {
+                    m_Systems[m_Order[i].typeID - 1]->removeEntity(entity);
                 }
-                for (int i = 0; i < m_Systems.size(); ++i) {
-                    m_Systems[i]->onComponentRemovedFromEntity(entity);
+                for (int i = 0; i < m_Order.size(); ++i) {
+                    m_Systems[m_Order[i].typeID - 1]->onComponentRemovedFromEntity(entity);
                 }
             }
 
             void onSceneEntered(Scene& scene) noexcept {
-                for (int i = 0; i < m_Systems.size(); ++i) {
-                    m_Systems[i]->onSceneEntered(scene);
+                for (int i = 0; i < m_Order.size(); ++i) {
+                    m_Systems[m_Order[i].typeID - 1]->onSceneEntered(scene);
                 }
             }
             void onSceneLeft(Scene& scene) noexcept {
-                for (int i = 0; i < m_Systems.size(); ++i) {
-                    m_Systems[i]->onSceneLeft(scene);
+                for (int i = 0; i < m_Order.size(); ++i) {
+                    m_Systems[m_Order[i].typeID - 1]->onSceneLeft(scene);
                 }
             }
 

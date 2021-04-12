@@ -30,7 +30,6 @@ class SystemBodyParentChild final : public SystemCRTP<SystemBodyParentChild, Com
         std::vector<glm_mat4>    m_LocalTransforms;
         std::vector<uint32_t>    m_Parents;
         std::vector<uint32_t>    m_Order;
-        uint32_t                 m_OrderHead = 0;
 
         void clear_all();
         void clear_and_shrink_all();

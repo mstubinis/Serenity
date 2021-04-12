@@ -21,10 +21,6 @@ void Engine::priv::WindowData::internal_on_close() {
     while (m_SFMLWindow.pollEvent(dummyEvent)); //clear all queued events
     m_SFMLWindow.setVisible(false);
     m_SFMLWindow.close();
-
-    #ifdef ENGINE_THREAD_WINDOW_EVENTS
-        m_WindowThread.internal_cleanup();
-    #endif
 }
 void Engine::priv::WindowData::internal_on_mouse_wheel_scrolled(float delta, int x, int y) {
     m_MouseDelta += ((double)delta * 10.0);

@@ -19,6 +19,7 @@ class Observer {
 
         void registerEvent(EventType type) noexcept;
         void unregisterEvent(EventType type) noexcept;
+        void unregisterEventImmediate(EventType type) noexcept;
         [[nodiscard]] bool isRegistered(EventType type) const noexcept;
         
         virtual void onEvent(const Event& e) {}

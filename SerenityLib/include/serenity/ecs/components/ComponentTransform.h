@@ -11,6 +11,7 @@ class  SystemRigidTransformSync;
 class  SystemResolveTransformDirty;
 namespace Engine::priv {
     class  sparse_set_base;
+    class  EditorWindowScene;
 };
 
 #include <serenity/dependencies/glm.h>
@@ -25,6 +26,7 @@ class ComponentTransform : public ComponentBaseClass<ComponentTransform> {
     friend class  SystemBodyParentChild;
     friend class  SystemRigidTransformSync;
     friend class  SystemResolveTransformDirty;
+    friend class  Engine::priv::EditorWindowScene;
     private:
         glm_vec3    m_Position          = glm_vec3{ 0.0 };
         //glm_vec3    m_LinearVelocity    = glm_vec3{ 0.0 };

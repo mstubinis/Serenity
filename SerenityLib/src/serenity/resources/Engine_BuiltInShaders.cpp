@@ -4,8 +4,6 @@
 #include <serenity/resources/material/MaterialEnums.h>
 #include <serenity/renderer/opengl/State.h>
 
-using namespace Engine;
-
 /*
 GLSL Version    OpenGL Version
 110              2.0
@@ -24,37 +22,39 @@ GLSL Version    OpenGL Version
 */
 
 #pragma region Declarations
-std::string priv::EShaders::conditional_functions;
-std::string priv::EShaders::decal_vertex;
-std::string priv::EShaders::decal_frag;
-std::string priv::EShaders::bullet_physics_vert;
-std::string priv::EShaders::bullet_physcis_frag;
-std::string priv::EShaders::fullscreen_quad_vertex;
-std::string priv::EShaders::vertex_basic;
-std::string priv::EShaders::vertex_2DAPI;
-std::string priv::EShaders::vertex_skybox;
-std::string priv::EShaders::particle_vertex;
-std::string priv::EShaders::lighting_vert;
-std::string priv::EShaders::stencil_passover;
-std::string priv::EShaders::forward_frag;
-std::string priv::EShaders::particle_frag;
-std::string priv::EShaders::deferred_frag;
-std::string priv::EShaders::zprepass_frag;
-std::string priv::EShaders::deferred_frag_hud;
-std::string priv::EShaders::deferred_frag_skybox;
-std::string priv::EShaders::copy_depth_frag;
-std::string priv::EShaders::cubemap_convolude_frag;
-std::string priv::EShaders::cubemap_prefilter_envmap_frag;
-std::string priv::EShaders::brdf_precompute;
-std::string priv::EShaders::blur_frag;
-std::string priv::EShaders::normaless_diffuse_frag;
-std::string priv::EShaders::final_frag;
-std::string priv::EShaders::depth_and_transparency_frag;
-std::string priv::EShaders::lighting_frag;
-std::string priv::EShaders::lighting_frag_gi;
+std::string Engine::priv::EShaders::conditional_functions;
+std::string Engine::priv::EShaders::decal_vertex;
+std::string Engine::priv::EShaders::decal_frag;
+std::string Engine::priv::EShaders::bullet_physics_vert;
+std::string Engine::priv::EShaders::bullet_physcis_frag;
+std::string Engine::priv::EShaders::fullscreen_quad_vertex;
+std::string Engine::priv::EShaders::vertex_basic;
+std::string Engine::priv::EShaders::vertex_2DAPI;
+std::string Engine::priv::EShaders::vertex_skybox;
+std::string Engine::priv::EShaders::particle_vertex;
+std::string Engine::priv::EShaders::lighting_vert;
+std::string Engine::priv::EShaders::stencil_passover;
+std::string Engine::priv::EShaders::forward_frag;
+std::string Engine::priv::EShaders::particle_frag;
+std::string Engine::priv::EShaders::deferred_frag;
+std::string Engine::priv::EShaders::zprepass_frag;
+std::string Engine::priv::EShaders::deferred_frag_hud;
+std::string Engine::priv::EShaders::deferred_frag_skybox;
+std::string Engine::priv::EShaders::copy_depth_frag;
+std::string Engine::priv::EShaders::cubemap_convolude_frag;
+std::string Engine::priv::EShaders::cubemap_prefilter_envmap_frag;
+std::string Engine::priv::EShaders::brdf_precompute;
+std::string Engine::priv::EShaders::blur_frag;
+std::string Engine::priv::EShaders::normaless_diffuse_frag;
+std::string Engine::priv::EShaders::final_frag;
+std::string Engine::priv::EShaders::depth_and_transparency_frag;
+std::string Engine::priv::EShaders::lighting_frag;
+std::string Engine::priv::EShaders::lighting_frag_gi;
+std::string Engine::priv::EShaders::lighting_frag_basic;
+std::string Engine::priv::EShaders::lighting_frag_gi_basic;
 #pragma endregion
 
-void priv::EShaders::init(){
+void Engine::priv::EShaders::init(){
 
 #pragma region Functions
 
@@ -118,11 +118,6 @@ int inot(int a) { return 1 - a; }
 
 // vec2 VertexShaderData; x = outercutoff, y = radius
 // float Type; 2.0 = spot light. 1.0 = any other light. 0.0 = fullscreen quad / triangle
-//
-//
-//
-//
-//
 
 priv::EShaders::lighting_vert = R"(
 layout (location = 0) in vec3 position;
@@ -666,7 +661,7 @@ varying vec2 texcoords;
 void main(){
     vec3 normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);
     if(distance(normal, comparison) < 0.01){
-        discard; //this is where the magic happens with the stencil buffer.
+        discard;
     }
 }
 )";
@@ -879,6 +874,14 @@ priv::EShaders::forward_frag =
 #pragma endregion
 
 #pragma region DeferredFrag
+
+//ivec2 componentData; //x = numLayers, y = componentType
+//vec4 data1; //x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
+//uniform vec4        MaterialBasePropertiesOne; //x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
+//uniform vec4        MaterialBasePropertiesTwo; //x = BaseAlpha, y = diffuseModel, z = specularModel, w = UNUSED
+//inData.diffuse = vec4(0.0,0.0,0.0,0.0001); //this is extremely wierd, but we need some form of alpha to get painters algorithm to work...
+//inData.diffuse *= (1.0 + inData.glow); // we want shadeless items to be influenced by the glow somewhat...
+
 priv::EShaders::deferred_frag = R"(
 USE_LOG_DEPTH_FRAGMENT
 USE_MAX_MATERIAL_LAYERS_PER_COMPONENT
@@ -897,7 +900,7 @@ struct InData {
     vec3  worldPosition;
 };
 struct Layer {
-    vec4 data1; //x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
+    vec4 data1;
     vec4 data2;
     vec4 uvModifications;
     SAMPLER_TYPE_2D texture;
@@ -905,15 +908,15 @@ struct Layer {
     SAMPLER_TYPE_Cube cubemap;
 };
 struct Component {
-    ivec2 componentData; //x = numLayers, y = componentType
+    ivec2 componentData;
     Layer layers[MAX_MATERIAL_LAYERS_PER_COMPONENT];
 };
 
 uniform Component   components[MAX_MATERIAL_COMPONENTS];
 uniform int         numComponents;
 
-uniform vec4        MaterialBasePropertiesOne; //x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
-uniform vec4        MaterialBasePropertiesTwo; //x = BaseAlpha, y = diffuseModel, z = specularModel, w = UNUSED
+uniform vec4        MaterialBasePropertiesOne;
+uniform vec4        MaterialBasePropertiesTwo;
 
 uniform int Shadeless;
 
@@ -932,7 +935,7 @@ varying vec3 TangentFragPos;
 void main(){
     InData inData;
     inData.uv = UV;
-    inData.diffuse = vec4(0.0,0.0,0.0,0.0001); //this is extremely wierd, but we need some form of alpha to get painters algorithm to work...
+    inData.diffuse = vec4(0.0,0.0,0.0,0.0001);
     inData.objectColor = Unpack32BitUIntTo4ColorFloats(Object_Color);
     inData.normals = normalize(Normals);
     inData.glow = MaterialBasePropertiesOne.x;
@@ -948,7 +951,7 @@ void main(){
     vec2 OutNormals = EncodeOctahedron(inData.normals);
     if(Shadeless == 1){
         OutNormals = ConstantOneVec2;
-        inData.diffuse *= (1.0 + inData.glow); // we want shadeless items to be influenced by the glow somewhat...
+        inData.diffuse *= (1.0 + inData.glow);
     }
     vec4 GodRays = Unpack32BitUIntTo4ColorFloats(Gods_Rays_Color);
     inData.diffuse.a *= MaterialBasePropertiesTwo.x;
@@ -956,7 +959,7 @@ void main(){
     SUBMIT_DIFFUSE(inData.diffuse);
     SUBMIT_NORMALS(OutNormals);
     SUBMIT_MATERIAL_ID_AND_AO(Material_F0AndID.w, inData.ao);
-    SUBMIT_METALNESS_AND_SMOOTHNESS(inData.metalness,inData.smoothness);
+    SUBMIT_METALNESS_AND_SMOOTHNESS(inData.metalness, inData.smoothness);
     SUBMIT_GLOW(inData.glow);
     SUBMIT_SPECULAR(inData.specular);
     SUBMIT_GOD_RAYS_COLOR(GodRays.r, GodRays.g, GodRays.b);
@@ -997,16 +1000,15 @@ void main(){
 priv::EShaders::deferred_frag_hud = R"(
 uniform SAMPLER_TYPE_2D DiffuseTexture;
 uniform int DiffuseTextureEnabled;
-uniform float ScreenGamma;
 uniform vec4 Object_Color;
 varying vec2 UV;
 void main(){
     gl_FragColor = Object_Color;
     if(DiffuseTextureEnabled == 1){
         vec4 color = texture2D(DiffuseTexture, UV);
-        color.rgb = pow(color.rgb, vec3(1.0 / ScreenGamma));
         gl_FragColor *= color;
     }
+    gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(1.0 / RendererInfo1.y));
 }
 )";
 #pragma endregion
@@ -1015,7 +1017,6 @@ void main(){
 priv::EShaders::deferred_frag_skybox = R"(
 uniform vec4 Color;
 uniform int IsFake;
-uniform float ScreenGamma;
 uniform SAMPLER_TYPE_Cube Texture;
 varying vec3 UV;
 varying vec3 WorldPosition;
@@ -1025,7 +1026,7 @@ void main(){
     }else{
         SUBMIT_DIFFUSE(textureCube(Texture, UV));
     }
-    gl_FragData[0].rgb = pow(gl_FragData[0].rgb, vec3(1.0 / ScreenGamma)); //ScreenGamma is gamma
+    gl_FragData[0].rgb = pow(gl_FragData[0].rgb, vec3(1.0 / RendererInfo1.y));
     gl_FragData[1].rg = vec2(1.0);
     gl_FragData[2]    = vec4(0.0);
 }
@@ -1149,23 +1150,22 @@ priv::EShaders::depth_and_transparency_frag +=
 
 #pragma region LightingFrag
 
-/*
-struct Light {
-    vec4 DataA;   //x = ambient,          y = diffuse,          z = specular,         w = LightDirection.x
-    vec4 DataB;   //x = LightDirection.y, y = LightDirection.z, z = const,            w = linear
-    vec4 DataC;   //x = exp,              y = LightPosition.x,  z = LightPosition.y,  w = LightPosition.z
-    vec4 DataD;   //x = LightColor.r,     y = LightColor.g,     z = LightColor.b,     w = LightType
-    vec4 DataE;   //x = cutoff,           y = outerCutoff,      z = AttenuationModel, w = UNUSED
-};
-vec4 materials[MATERIAL_COUNT_LIMIT]; //r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
+//struct Light {
+//    vec4 DataA;   //x = ambient,          y = diffuse,          z = specular,         w = LightDirection.x
+//    vec4 DataB;   //x = LightDirection.y, y = LightDirection.z, z = const,            w = linear
+//    vec4 DataC;   //x = exp,              y = LightPosition.x,  z = LightPosition.y,  w = LightPosition.z
+//    vec4 DataD;   //x = LightColor.r,     y = LightColor.g,     z = LightColor.b,     w = LightType
+//    vec4 DataE;   //x = cutoff,           y = outerCutoff,      z = AttenuationModel, w = UNUSED
+//};
+//vec4 materials[MATERIAL_COUNT_LIMIT]; //r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
+//
+//if     (light.DataD.w == 0.0){  //sun
+//else if(light.DataD.w == 1.0){  //point
+//else if(light.DataD.w == 2.0){  //directional
+//else if(light.DataD.w == 3.0){  //spot
+//else if(light.DataD.w == 4.0){  //rod
+//else if(light.DataD.w == 5.0){  //projection
 
-if     (light.DataD.w == 0.0){  //sun
-else if(light.DataD.w == 1.0){  //point
-else if(light.DataD.w == 2.0){  //directional
-else if(light.DataD.w == 3.0){  //spot
-else if(light.DataD.w == 4.0){  //rod
-else if(light.DataD.w == 5.0){  //projection
-*/
 
 priv::EShaders::lighting_frag = R"(
 #define MATERIAL_COUNT_LIMIT 255
@@ -1228,9 +1228,9 @@ void main(){
 #pragma endregion
 
 #pragma region LightingFragGI
-/*
-vec4 materials[MATERIAL_COUNT_LIMIT];  //r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
-*/
+
+//vec4 materials[MATERIAL_COUNT_LIMIT];  //r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
+
 priv::EShaders::lighting_frag_gi = R"(
 #define MATERIAL_COUNT_LIMIT 255
 
@@ -1269,7 +1269,87 @@ void main(){
     float inAO            = fract(MatIDAndAO) + 0.0001;
     vec3 inMatF0          = Unpack3FloatsInto1FloatUnsigned(materials[index].r);
     vec3 inGIContribution = Unpack3FloatsInto1FloatUnsigned(RendererInfo1.x);
-    gl_FragColor         += CalcGILight(inSSAO, inNormals, inAlbedo, inWorldPosition, inAO, inMetalSmooth.x, inMetalSmooth.y, inGlow, inMatF0, materials[index].g, inGIContribution);
+    vec4 GILight = CalcGILight(inSSAO, inNormals, inAlbedo, inWorldPosition, inAO, inMetalSmooth.x, inMetalSmooth.y, inGlow, inMatF0, materials[index].g, inGIContribution);
+    gl_FragColor          += GILight;
+    gl_FragColor.rgb = max(gl_FragColor.rgb, inGlow * inAlbedo);
+}
+)";
+#pragma endregion
+
+#pragma region LightingFragBasic
+
+priv::EShaders::lighting_frag_basic = R"(
+#define MATERIAL_COUNT_LIMIT 255
+
+struct Light {
+    vec4 DataA;
+    vec4 DataB;
+    vec4 DataC;
+    vec4 DataD;
+    vec4 DataE;
+};
+uniform Light light;
+
+uniform SAMPLER_TYPE_2D gDiffuseMap;
+uniform SAMPLER_TYPE_2D gNormalMap;
+uniform SAMPLER_TYPE_2D gMiscMap;
+uniform SAMPLER_TYPE_2D gDepthMap;
+uniform SAMPLER_TYPE_2D gSSAOMap;
+uniform SAMPLER_TYPE_2D gTextureMap;
+
+uniform vec4 materials[MATERIAL_COUNT_LIMIT];
+
+varying vec2 texcoords;
+flat varying vec3 CamRealPosition;
+
+void main(){
+    vec2 uv = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y);
+    vec3 PxlNormal        = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), uv).rg);
+    vec3 PxlPosition      = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv, CameraNear, CameraFar);
+    vec3 LightPosition    = vec3(light.DataC.yzw) - CamRealPosition;
+    vec3 LightDirection   = normalize(vec3(light.DataA.w, light.DataB.x, light.DataB.y));
+    float Specular        = texture2D(USE_SAMPLER_2D(gMiscMap), uv).g;
+    vec3 Albedo           = texture2D(USE_SAMPLER_2D(gDiffuseMap), uv).rgb;
+    float MatIDAndAO      = texture2D(USE_SAMPLER_2D(gNormalMap), uv).b;
+    float SSAO            = 1.0 - texture2D(gSSAOMap, uv).a;
+    highp int matID       = int(floor(MatIDAndAO));
+    float MatAlpha        = materials[matID].g;
+    float AO              = fract(MatIDAndAO) + 0.0001;
+    vec3 LightCalculation = ConstantZeroVec3;
+    if(light.DataD.w == 0.0){
+        LightCalculation = CalcLightInternalBasic(light, normalize(LightPosition - PxlPosition), PxlPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
+    }else if(light.DataD.w == 1.0){
+        LightCalculation = CalcPointLightBasic(light, LightPosition, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
+    }else if(light.DataD.w == 2.0){
+        LightCalculation = CalcLightInternalBasic(light, LightDirection, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
+    }else if(light.DataD.w == 3.0){
+        LightCalculation = CalcSpotLightBasic(light, LightDirection, LightPosition, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
+    }else if(light.DataD.w == 4.0){
+        LightCalculation = CalcRodLightBasic(light, vec3(light.DataA.w, light.DataB.xy), light.DataC.yzw, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
+    }else if(light.DataD.w == 5.0){
+        LightCalculation = CalcProjectionLightBasic(light, vec3(light.DataA.w, light.DataB.xy), light.DataC.yzw, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
+    }
+    gl_FragData[0].rgb = LightCalculation;
+}
+)";
+#pragma endregion
+
+#pragma region LightingFragGIBasic
+
+priv::EShaders::lighting_frag_gi_basic = R"(
+#define MATERIAL_COUNT_LIMIT 255
+
+uniform SAMPLER_TYPE_2D gDiffuseMap;
+uniform SAMPLER_TYPE_2D gNormalMap;
+
+varying vec2 texcoords;
+flat varying vec3 CamRealPosition;
+
+void main(){
+    vec2 uv          = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y);
+    vec3 inAlbedo    = texture2D(USE_SAMPLER_2D(gDiffuseMap), uv).rgb;
+    float inGlow     = texture2D(USE_SAMPLER_2D(gNormalMap), uv).a;
+    gl_FragColor.rgb = max(gl_FragColor.rgb, inAlbedo * inGlow);
 }
 )";
 #pragma endregion

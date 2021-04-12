@@ -20,16 +20,14 @@ namespace Engine::priv {
             WindowData&                                       m_Data;
             Engine::queue_ts<sf::Event>                       m_SFEventQueue;
             Engine::queue_ts<WindowEventThreadOnlyCommands>   m_MainThreadToEventThreadQueue;
-            std::unique_ptr<std::thread>                      m_EventThread = nullptr;
+            std::unique_ptr<std::jthread>                     m_EventThread = nullptr;
 
-            void internal_cleanup();
             void internal_startup(Window& super, const std::string& name, boost::latch* bLatch);
             void internal_push(WindowEventThreadOnlyCommands command);
             std::optional<sf::Event> internal_try_pop();
             void internal_update_loop();
         public:
             WindowThread(WindowData&);
-            ~WindowThread();
 
             bool operator==(bool rhs) const {
                 bool res = (bool)m_EventThread.get();

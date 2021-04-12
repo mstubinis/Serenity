@@ -29,25 +29,45 @@ void priv::DebugManager::endGLQuery(const char* tag) {
     glGetQueryObjectuiv(queryID, GL_QUERY_RESULT, &queryObject);
     printf(msg.c_str(), queryObject / 1'000'000.0);
 }
-
+std::string priv::DebugManager::updateTimeInMs() const noexcept {
+    std::stringstream strm;
+    strm << std::fixed << std::setprecision(m_Decimals) << logicTime() * 1000.0;
+    return strm.str();
+}
+std::string priv::DebugManager::physicsTimeInMs() const noexcept {
+    std::stringstream strm;
+    strm << std::fixed << std::setprecision(m_Decimals) << physicsTime() * 1000.0;
+    return strm.str();
+}
+std::string priv::DebugManager::soundsTimeInMs() const noexcept {
+    std::stringstream strm;
+    strm << std::fixed << std::setprecision(m_Decimals) << soundsTime() * 1000.0;
+    return strm.str();
+}
+std::string priv::DebugManager::renderTimeInMs() const noexcept {
+    std::stringstream strm;
+    strm << std::fixed << std::setprecision(m_Decimals) << renderTime() * 1000.0;
+    return strm.str();
+}
+std::string priv::DebugManager::deltaTimeInMs() const noexcept {
+    const auto dt = (Engine::priv::Core::m_Engine->m_Misc.m_Dt * 1000.0);
+    std::stringstream strm;
+    strm << std::fixed << std::setprecision(m_Decimals) << dt;
+    return strm.str();
+}
+std::string priv::DebugManager::fps() const noexcept {
+    const auto fps = Engine::priv::Core::m_Engine->m_Misc.m_FPS.fps();
+    return std::to_string(fps);
+}
 std::string& priv::DebugManager::reportTime(uint32_t decimals_) {
     m_Decimals     = decimals_;
     if ((m_Output_frame >= m_Output_frame_delay - 1) || m_Output_frame_delay == 0) {
-        std::stringstream st1, st2, st3, st4, st5;
-        const auto fps = Engine::priv::Core::m_Engine->m_Misc.m_FPS.fps();
-        const auto dt  = (Engine::priv::Core::m_Engine->m_Misc.m_Dt * 1000.0);
-        st1 << std::fixed << std::setprecision(m_Decimals) << logicTime()   * 1000.0;
-        st2 << std::fixed << std::setprecision(m_Decimals) << physicsTime() * 1000.0;
-        st3 << std::fixed << std::setprecision(m_Decimals) << soundsTime()  * 1000.0;
-        st4 << std::fixed << std::setprecision(m_Decimals) << renderTime()  * 1000.0;
-        st5 << std::fixed << std::setprecision(m_Decimals) << dt;
-
-        m_Output = "Update Time:  " + st1.str() + " ms" +
-                 "\nPhysics Time: " + st2.str() + " ms" +
-                 "\nSounds Time:  " + st3.str() + " ms" +
-                 "\nRender Time:  " + st4.str() + " ms" +
-                 "\nDelta Time:   " + st5.str() + " ms" +
-                 "\nFPS: " + std::to_string(fps);
+        m_Output = "Update Time:  " + updateTimeInMs() + " ms" +
+                 "\nPhysics Time: " + physicsTimeInMs() + " ms" +
+                 "\nSounds Time:  " + soundsTimeInMs() + " ms" +
+                 "\nRender Time:  " + renderTimeInMs() + " ms" +
+                 "\nDelta Time:   " + deltaTimeInMs() + " ms" +
+                 "\nFPS: " + fps();
     }
     return m_Output;
 }

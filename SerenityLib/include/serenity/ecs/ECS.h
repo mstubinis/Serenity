@@ -23,7 +23,7 @@ namespace Engine::priv {
     class ECS final {
         friend struct Engine::priv::PublicScene;
         private:
-            uint32_t                                        m_RegisteredComponents = 0;
+            static inline uint32_t                          m_RegisteredComponents = 0;
             ECSEntityPool                                   m_EntityPool;
             ECSSystemPool                                   m_SystemPool;
             std::vector<Entity>                             m_JustAddedEntities;
@@ -101,6 +101,8 @@ namespace Engine::priv {
 
             template<class SYSTEM, class ... COMPONENTS, class ... ARGS>
             inline SYSTEM* registerSystem(ARGS&&... args) { return m_SystemPool.registerSystem<SYSTEM, COMPONENTS..., ARGS...>(*this, std::forward<ARGS>(args)...); }
+            template<class SYSTEM, class ... COMPONENTS, class ... ARGS>
+            inline SYSTEM* registerSystemOrdered(uint32_t order, ARGS&&... args) { return m_SystemPool.registerSystemOrdered<SYSTEM, COMPONENTS..., ARGS...>(order, *this, std::forward<ARGS>(args)...); }
 
             template<class COMPONENT, class ... ARGS> bool addComponent(Entity entity, ARGS&&... args) noexcept {
                 COMPONENT* addedComponent = nullptr;

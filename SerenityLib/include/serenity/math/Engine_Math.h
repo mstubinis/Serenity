@@ -106,7 +106,9 @@ namespace Engine::Math {
 
 
     [[nodiscard]] glm::quat alignTo(float x, float y, float z) noexcept;
-    template<class VECTOR3> [[nodiscard]] inline glm::quat alignTo(const VECTOR3& direction) noexcept { return alignTo(direction.x, direction.y, direction.z); }
+    template<class VECTOR3> [[nodiscard]] inline glm::quat alignTo(const VECTOR3& direction) noexcept { 
+        return alignTo(static_cast<float>(direction.x), static_cast<float>(direction.y), static_cast<float>(direction.z)); 
+    }
 
     void setColor(glm::vec3& color, float r, float g, float b);
     void setColor(glm::vec4& color, float r, float g, float b, float a);

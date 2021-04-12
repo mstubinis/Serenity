@@ -66,13 +66,13 @@ void ProcessManifoldContact(btManifoldPoint& cp, btCollisionObject* collObjA, bt
 
         if (childShapeA && childShapeA->getUserPointer()) {
             auto modelInstanceChildA      = static_cast<ModelInstance*>(childShapeA->getUserPointer());
-            dataA.ownerModelInstanceIndex = modelInstanceChildA->index();
-            dataB.otherModelInstanceIndex = modelInstanceChildA->index();
+            dataA.ownerModelInstanceIndex = modelInstanceChildA->getIndex();
+            dataB.otherModelInstanceIndex = modelInstanceChildA->getIndex();
         }
         if (childShapeB && childShapeB->getUserPointer()) {
             auto modelInstanceChildB      = static_cast<ModelInstance*>(childShapeB->getUserPointer());
-            dataA.otherModelInstanceIndex = modelInstanceChildB->index();
-            dataB.ownerModelInstanceIndex = modelInstanceChildB->index();
+            dataA.otherModelInstanceIndex = modelInstanceChildB->getIndex();
+            dataB.ownerModelInstanceIndex = modelInstanceChildB->getIndex();
         }
         aRigidBody->collisionResponse(dataA);
         bRigidBody->collisionResponse(dataB);

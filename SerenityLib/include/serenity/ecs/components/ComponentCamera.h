@@ -5,6 +5,9 @@
 class Camera;
 class ComponentModel;
 class ComponentCamera;
+namespace Engine::priv {
+    class  EditorWindowScene;
+};
 
 #include <serenity/dependencies/glm.h>
 #include <serenity/ecs/components/ComponentBaseClass.h>
@@ -19,11 +22,13 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
     friend class  Camera;
     friend class  ComponentModel;
     friend struct Engine::priv::ComponentCamera_Functions;
+    friend class  Engine::priv::EditorWindowScene;
+    public:
+        enum class CameraType : uint8_t {
+            Perspective,
+            Orthographic,
+        };
     private:
-        enum class CameraType : uint8_t { 
-			Perspective,
-			Orthographic, 
-		};
         glm::mat4                m_ViewMatrix        = glm::mat4{ 1.0f };
         glm::mat4                m_ProjectionMatrix  = glm::mat4{ 1.0f };
 
@@ -64,6 +69,7 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
         void setViewMatrix(glm::mat4&& viewMatrix) noexcept;
         inline void setProjectionMatrix(const glm::mat4& projectionMatrix) noexcept { m_ProjectionMatrix = projectionMatrix; }
 
+        [[nodiscard]] inline constexpr CameraType getType() const noexcept { return m_Type; }
         [[nodiscard]] inline constexpr float getAngle() const noexcept { return m_Angle; }
         [[nodiscard]] inline constexpr float getAspect() const noexcept { return m_AspectRatio; }
         [[nodiscard]] inline constexpr float getNear() const noexcept { return m_NearPlane; }

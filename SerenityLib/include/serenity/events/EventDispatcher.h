@@ -32,10 +32,12 @@ namespace Engine::priv{
 
             template<class T> void registerObject(Observer&, const T&) noexcept = delete;
             template<class T> void unregisterObject(Observer&, const T&) noexcept = delete;
+            template<class T> void unregisterObjectImmediate(Observer&, const T&) noexcept = delete;
             template<class T> [[nodiscard]] bool isObjectRegistered(Observer&, const T&) const noexcept = delete;
 
             void registerObject(Observer&, EventType eventType) noexcept;
             void unregisterObject(Observer&, EventType eventType) noexcept;
+            void unregisterObjectImmediate(Observer&, EventType eventType) noexcept;
             [[nodiscard]] bool isObjectRegistered(const Observer&, EventType eventType) const noexcept;
 
             void dispatchEvent(const Event&) noexcept;

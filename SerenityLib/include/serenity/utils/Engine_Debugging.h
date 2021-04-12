@@ -50,6 +50,13 @@ namespace Engine::priv {
             inline void calculate_sounds() noexcept { m_SoundTime = m_Clock.restart().asMicroseconds(); }
             inline void calculate_render() noexcept { m_RenderTime = m_Clock.restart().asMicroseconds(); }
 
+            [[nodiscard]] std::string updateTimeInMs() const noexcept;
+            [[nodiscard]] std::string physicsTimeInMs() const noexcept;
+            [[nodiscard]] std::string soundsTimeInMs() const noexcept;
+            [[nodiscard]] std::string renderTimeInMs() const noexcept;
+            [[nodiscard]] std::string deltaTimeInMs() const noexcept;
+            [[nodiscard]] std::string fps() const noexcept;
+
             [[nodiscard]] inline constexpr double logicTime() const noexcept { return (double)((double)m_LogicTime / m_Divisor); }
             [[nodiscard]] inline constexpr double physicsTime() const noexcept { return (double)((double)m_PhysicsTime / m_Divisor); }
             [[nodiscard]] inline constexpr double renderTime() const noexcept { return (double)((double)m_RenderTime / m_Divisor); }

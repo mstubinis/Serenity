@@ -70,12 +70,12 @@ bool Server::shutdown() {
     if (m_Active.load(std::memory_order_relaxed) == false) {
         return false;
     }
-    unregisterEvent(EventType::ClientConnected);
-    unregisterEvent(EventType::ClientDisconnected);
-    unregisterEvent(EventType::ServerStarted);
-    unregisterEvent(EventType::ServerShutdowned);
-    unregisterEvent(EventType::PacketSent);
-    unregisterEvent(EventType::PacketReceived);
+    unregisterEventImmediate(EventType::ClientConnected);
+    unregisterEventImmediate(EventType::ClientDisconnected);
+    unregisterEventImmediate(EventType::ServerStarted);
+    unregisterEventImmediate(EventType::ServerShutdowned);
+    unregisterEventImmediate(EventType::PacketSent);
+    unregisterEventImmediate(EventType::PacketReceived);
 
     if (m_UdpSocket) {
         m_UdpSocket->unbind();

@@ -362,5 +362,6 @@ void ComponentRigidBody::setMass(float mass) {
         collisionShape->calculateLocalInertia(mass);
         m_BulletRigidBody->setMassProps(mass, collisionShape->getInertia());
     }
+    m_BulletRigidBody->updateInertiaTensor();
 }
 #pragma endregion

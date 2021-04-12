@@ -49,6 +49,9 @@ namespace Engine::priv{
 
             static std::string lighting_frag;
             static std::string lighting_frag_gi;
+
+            static std::string lighting_frag_basic;
+            static std::string lighting_frag_gi_basic;
     };
 };
 

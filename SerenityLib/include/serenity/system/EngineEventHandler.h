@@ -10,6 +10,7 @@ namespace Engine::priv {
     class  EventModule;
     class  RenderModule;
     class  ResourceManager;
+    class  EditorCore;
 }
 
 #include <serenity/system/TypeDefs.h>
@@ -20,6 +21,7 @@ namespace Engine::priv {
         friend class  Window;
         friend class  WindowData;
         private:
+            EditorCore&       m_EditorCore;
             EventModule&      m_EventModule;
             RenderModule&     m_RenderModule;
             ResourceManager&  m_ResourceManager;
@@ -47,7 +49,7 @@ namespace Engine::priv {
             void internal_on_event_joystick_connected(Window&, uint32_t id);
             void internal_on_event_joystick_disconnected(Window&, uint32_t id);
         public:
-            EngineEventHandler(EventModule&, RenderModule&, ResourceManager&);
+            EngineEventHandler(EditorCore&, EventModule&, RenderModule&, ResourceManager&);
 
             void poll_events(Window&);
     };

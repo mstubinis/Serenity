@@ -205,7 +205,16 @@ void Engine::Renderer::Settings::Lighting::setGIContribution(float g, float d, f
         Engine::priv::RenderModule::RENDER_MODULE->m_GI_Global
     );
 }
-
+LightingAlgorithm Engine::Renderer::Settings::Lighting::getLightingAlgorithm() {
+    return Engine::priv::RenderModule::RENDER_MODULE->m_LightingAlgorithm;
+}
+bool Engine::Renderer::Settings::Lighting::setLightingAlgorithm(LightingAlgorithm algorithm) {
+    if (Engine::priv::RenderModule::RENDER_MODULE->m_LightingAlgorithm != algorithm) {
+        Engine::priv::RenderModule::RENDER_MODULE->m_LightingAlgorithm = algorithm;
+        return true;
+    }
+    return false;
+}
 bool Engine::Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm algorithm){
     switch (algorithm) {
         case AntiAliasingAlgorithm::None: {

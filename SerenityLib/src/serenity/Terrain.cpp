@@ -445,11 +445,11 @@ void Terrain::setPosition(decimal x, decimal y, decimal z) {
 void Terrain::setPosition(const glm_vec3& position) {
     Terrain::setPosition(position.x, position.y, position.z);
 }
-void Terrain::setScale(decimal x, decimal y, decimal z) {
+void Terrain::setScale(float x, float y, float z) {
     auto transform = getComponent<ComponentTransform>();
     transform->setScale(x, y, z);
 }
-void Terrain::setScale(const glm_vec3& scl) {
+void Terrain::setScale(const glm::vec3& scl) {
     Terrain::setScale(scl.x, scl.y, scl.z);
 }
 

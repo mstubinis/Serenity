@@ -7,25 +7,26 @@
 #include <serenity/system/Macros.h>
 #include <memory>
 
-template <typename OWNER, typename... ARGS> 
+template <class OWNER, class ... ARGS>
 class LuaCallableFunction final {
-    using cpp_type = void(*)(const OWNER*, ARGS... args);
+    using CPPFunctor = void(*)(const OWNER*, ARGS... args);
     private:
-        std::unique_ptr<cpp_type>             m_CPPFunctor = std::make_unique<cpp_type>([](const OWNER*, ARGS... args) {});
+        std::unique_ptr<CPPFunctor>           m_CPPFunctor;
         std::unique_ptr<luabridge::LuaRef>    m_LUAFunctor;
 
         void internal_delete() noexcept {
-            m_CPPFunctor.reset();
-            m_LUAFunctor.reset();
+            m_CPPFunctor.reset(nullptr);
+            m_LUAFunctor.reset(nullptr);
         }
         void internal_clone_from(const LuaCallableFunction& other) {
             if (other.m_LUAFunctor) {
                 m_LUAFunctor = std::make_unique<luabridge::LuaRef>(*other.m_LUAFunctor);
             }
             if (other.m_CPPFunctor) {
-                m_CPPFunctor = std::make_unique<cpp_type>(*other.m_CPPFunctor);
+                m_CPPFunctor = std::make_unique<CPPFunctor>(*other.m_CPPFunctor);
             }
         }
+
     public:
         LuaCallableFunction() = default;
         LuaCallableFunction(const LuaCallableFunction& other) {
@@ -37,16 +38,23 @@ class LuaCallableFunction final {
             }
             return *this;
         }
-        LuaCallableFunction(LuaCallableFunction&& other) noexcept = default;
-        LuaCallableFunction& operator=(LuaCallableFunction&& other) noexcept = default;
-
-        void setFunctor(const cpp_type& functor) noexcept {
-            internal_delete();
-            m_CPPFunctor = std::make_unique<cpp_type>(functor);
+        LuaCallableFunction(LuaCallableFunction&& other) noexcept 
+            : m_CPPFunctor{ std::exchange(other.m_CPPFunctor, nullptr)}
+            , m_LUAFunctor{ std::exchange(other.m_LUAFunctor, nullptr) }
+        {}
+        LuaCallableFunction& operator=(LuaCallableFunction&& other) noexcept {
+            m_CPPFunctor = std::exchange(other.m_CPPFunctor, nullptr);
+            m_LUAFunctor = std::exchange(other.m_LUAFunctor, nullptr);
+            return *this;
         }
-        void setFunctor(cpp_type&& functor) noexcept {
+
+        void setFunctor(const CPPFunctor& functor) noexcept {
             internal_delete();
-            m_CPPFunctor = std::make_unique<cpp_type>(std::move(functor));
+            m_CPPFunctor = std::make_unique<CPPFunctor>(functor);
+        }
+        void setFunctor(CPPFunctor&& functor) noexcept {
+            internal_delete();
+            m_CPPFunctor = std::make_unique<CPPFunctor>(std::move(functor));
         }
         void setFunctor(luabridge::LuaRef& luaFunction) noexcept {
             if (!luaFunction.isNil() && luaFunction.isFunction()) {
@@ -59,14 +67,14 @@ class LuaCallableFunction final {
             void operator()(const OWNER* owner, ARGS... args) const noexcept {
                 if (m_CPPFunctor)
                     (*m_CPPFunctor)(owner, (args)...);
-                else
+                else if(m_LUAFunctor)
                     (*m_LUAFunctor)(owner, (args)...);
             }
         #else
             void operator()(const OWNER* owner, ARGS... args) const {
                 if (m_CPPFunctor) {
                     (*m_CPPFunctor)(owner, (args)...);
-                }else{
+                }else if(m_LUAFunctor){
                     try {
                         (*m_LUAFunctor)(owner, (args)...);
                     }catch (const luabridge::LuaException& luaException) {

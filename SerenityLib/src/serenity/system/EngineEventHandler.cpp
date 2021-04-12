@@ -9,11 +9,13 @@
 #include <serenity/renderer/Renderer.h>
 #include <serenity/scene/Scene.h>
 #include <serenity/ecs/components/ComponentCamera.h>
+#include <serenity/editor/core/EditorCore.h>
 
 using namespace Engine::priv;
 
-EngineEventHandler::EngineEventHandler(EventModule& eventModule, RenderModule& renderModule, ResourceManager& resourceManager)
-    : m_EventModule     { eventModule }
+EngineEventHandler::EngineEventHandler(EditorCore& editorCore, EventModule& eventModule, RenderModule& renderModule, ResourceManager& resourceManager)
+    : m_EditorCore      { editorCore }
+    , m_EventModule     { eventModule }
     , m_RenderModule    { renderModule }
     , m_ResourceManager { resourceManager }
 {}
@@ -149,6 +151,7 @@ void EngineEventHandler::internal_on_event_joystick_disconnected(Window& window,
 void EngineEventHandler::poll_events(Window& window) {
     sf::Event e;
     while (window.pollEvents(e)) {
+        m_EditorCore.processEvent(e);
         switch (e.type) {
             case sf::Event::Closed: {
                 internal_on_event_window_requested_closed(window); break;

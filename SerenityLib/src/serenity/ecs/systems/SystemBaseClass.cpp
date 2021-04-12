@@ -1,5 +1,6 @@
 #include <serenity/ecs/systems/SystemBaseClass.h>
 #include <serenity/ecs/ECS.h>
+#include <serenity/utils/Utils.h>
 
 struct entity_less final {
     inline bool operator()(Entity lhs, Entity rhs) const noexcept { 
@@ -64,20 +65,9 @@ void SystemBaseClass::eraseEntity(std::vector<Entity>& entityVector, Entity enti
     std::swap_ranges(boundsIter.first, boundsIter.second, lastIter);
     entityVector.erase(lastIter, std::end(entityVector));
 }
-void SystemBaseClass::insertionSort(std::vector<Entity>& container) noexcept {
-    for (int i = 1; i < container.size(); i++) {
-        auto key = container[i];
-        int j = i - 1;
-        while (j >= 0 && container[j] > key) {
-            container[j + 1] = container[j];
-            --j;
-        }
-        container[j + 1] = key;
-    }
-}
 void SystemBaseClass::sortEntities() noexcept {
     //std::sort(std::execution::par_unseq, std::begin(m_Entities), std::end(m_Entities), entity_less{});
-    insertionSort(m_Entities);
+    Engine::insertion_sort(m_Entities);
 }
 
 void SystemBaseClass::onUpdate(const float dt, Scene& scene) noexcept { 

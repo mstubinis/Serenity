@@ -38,6 +38,19 @@ namespace Engine {
     inline void sort(ExecPolicy&& policy, Container& container) noexcept {
         std::sort(policy, std::begin(container), std::end(container), std::less<>{}); 
     }
+    //TODO: create insertion sort
+    template<class Container>
+    void insertion_sort(Container& container) {
+        for (int i = 1; i < container.size(); i++) {
+            auto key = container[i];
+            int j = i - 1;
+            while (j >= 0 && container[j] > key) {
+                container[j + 1] = container[j];
+                --j;
+            }
+            container[j + 1] = key;
+        }
+    }
 
 
     template<class KEY, class VALUE> using unordered_string_map = std::unordered_map<KEY, VALUE, Engine::string_hash, Engine::string_hash::equals>;

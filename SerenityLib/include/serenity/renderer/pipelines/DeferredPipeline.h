@@ -78,6 +78,7 @@ namespace Engine::priv {
             void internal_pass_ssao(Viewport& viewport, Camera& camera);
             void internal_pass_stencil();
             void internal_pass_lighting(Viewport& viewport, Camera& camera, bool mainRenderFunction);
+            void internal_pass_lighting_basic(Viewport& viewport, Camera& camera, bool mainRenderFunction);
             void internal_pass_forward(Viewport& viewport, Camera& camera, bool depthPrepass);
             void internal_pass_god_rays(Viewport& viewport, Camera& camera);
             void internal_pass_hdr(Viewport& viewport, Camera& camera, GBufferType::Type outTexture, GBufferType::Type outTexture2);

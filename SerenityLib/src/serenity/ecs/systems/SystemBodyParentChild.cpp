@@ -151,7 +151,6 @@ void SystemBodyParentChild::addChild(uint32_t parentID, uint32_t childID) {
             m_Order.insert(std::cbegin(m_Order) + (parentBlock.second + 1), std::begin(temp), std::end(temp));  //TODO: test edge case of parentBlock.first being at [size - 1]
         }
     }
-
     getParent(childID) = parentID;
     getWorld(childID)  = getWorld(parentID) * getLocal(childID);
 }
@@ -206,7 +205,6 @@ std::pair<uint32_t, uint32_t> SystemBodyParentChild::getBlockIndices(uint32_t ID
 void SystemBodyParentChild::clear_all() {
     m_Parents.clear();
     m_Order.clear();
-    m_OrderHead = 0;
 }
 void SystemBodyParentChild::clear_and_shrink_all() {
     clear_all();

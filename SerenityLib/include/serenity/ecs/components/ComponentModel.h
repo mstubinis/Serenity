@@ -9,6 +9,9 @@ class  Material;
 class  ComponentModel;
 class  ComponentCamera;
 class  ModelInstanceHandle;
+namespace Engine::priv {
+    class  EditorWindowScene;
+}
 
 #include <vector>
 #include <serenity/ecs/components/ComponentBaseClass.h>
@@ -22,7 +25,7 @@ namespace Engine::priv {
         static size_t GetTotalVertexCount(ComponentModel&);
         static void RegisterDeferredMeshLoaded(ComponentModel&, Mesh*);
     };
-};
+}
 
 #include <serenity/model/ModelInstance.h>
 #include <serenity/model/ModelInstanceHandle.h>
@@ -32,6 +35,7 @@ using ModelInstanceVector = std::vector<std::unique_ptr<ModelInstance>>;
 class ComponentModel : public Observer, public ComponentBaseClass<ComponentModel> {
     friend struct Engine::priv::ComponentModel_Functions;
     friend class  ComponentCamera;
+    friend class  Engine::priv::EditorWindowScene;
     private:
         ModelInstanceVector     m_ModelInstances;
         glm::vec3               m_RadiusBox       = glm::vec3{0.0f};

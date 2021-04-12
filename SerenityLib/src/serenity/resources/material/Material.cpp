@@ -61,12 +61,17 @@ constexpr auto DEFAULT_MATERIAL_BIND_FUNCTOR = [](Material* m) {
     Engine::Renderer::sendUniform1Safe("Shadeless", (int)m->getShadeless());
     Engine::Renderer::sendUniform4Safe("Material_F0AndID", m->getF0().r(), m->getF0().g(), m->getF0().b(), (float)m->getID());
     Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesOne",
-        (float)m->getGlow()       * ONE_OVER_255,
-        (float)m->getAO()         * ONE_OVER_255,
-        (float)m->getMetalness()  * ONE_OVER_255,
-        (float)m->getSmoothness() * ONE_OVER_255
+        float(m->getGlow())       * ONE_OVER_255,
+        float(m->getAO())         * ONE_OVER_255,
+        float(m->getMetalness())  * ONE_OVER_255,
+        float(m->getSmoothness()) * ONE_OVER_255
     );
-    Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesTwo", (float)(m->getAlpha()) * ONE_OVER_255, (float)m->getDiffuseModel(), (float)m->getSpecularModel(), 0.0f);
+    Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesTwo", 
+        float(m->getAlpha())        * ONE_OVER_255, 
+        float(m->getDiffuseModel()), 
+        float(m->getSpecularModel()), 
+        0.0f
+    );
 };
 
 #pragma region Material

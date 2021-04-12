@@ -229,6 +229,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <AdditionalOptions>/Zm1000 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -240,7 +241,7 @@
       <Message>Copying binary (Debug) ...</Message>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>assimp-d.lib;IrrXML-d.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;freetyped.lib;lua.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;vcruntime.lib</AdditionalDependencies>
+      <AdditionalDependencies>assimp-d.lib;IrrXML-d.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;freetyped.lib;lua.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;vcruntime.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Debug;D:\dev\discord_game_sdk\lib\x86;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Debug;D:\dev\assimp\install32\lib;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Debug;D:\dev\lua\lib\32\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
@@ -262,6 +263,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -269,7 +271,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>D:\dev\freetype\lib\64\Debug;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib\64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Debug;D:\dev\assimp\install64\install64;D:\dev\SFML\lib\64\Debug;D:\dev\lua\lib\64\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML-d.lib;zlibstatic.lib;lua.lib;assimp-d.lib;freeglut64.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;freetyped.lib</AdditionalDependencies>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML-d.lib;zlibstatic.lib;lua.lib;assimp-d.lib;freeglut64.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;freetyped.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
       <Verbose>true</Verbose>
     </Lib>
@@ -295,6 +297,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -310,7 +313,7 @@
       <Message>Copying Binary (Release) ...</Message>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;vcruntime.lib</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;psapi.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;vcruntime.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Release;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\install32\lib;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;D:\dev\discord_game_sdk\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
@@ -336,13 +339,14 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>%(AdditionalDependencies);assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Release;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\install32\lib;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;D:\dev\discord_game_sdk\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -381,6 +385,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>None</DebugInformationFormat>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -396,7 +401,7 @@
       <Message>Copying Binary (Release) ...</Message>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;vcruntime.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;psapi.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;vcruntime.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Release;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\install32\lib;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;D:\dev\discord_game_sdk\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
@@ -424,6 +429,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <FloatingPointModel>Precise</FloatingPointModel>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -433,7 +439,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>D:\dev\lua\lib\64\Release;D:\dev\freetype\lib\64\Release;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\install64\install64;D:\dev\SFML\lib\64;D:\dev\SFML\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;assimp.lib;freeglut64.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;assimp.lib;freeglut64.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -457,13 +463,14 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;assimp.lib;freeglut64.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;assimp.lib;freeglut64.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\dev\lua\lib\64\Release;D:\dev\freetype\lib\64\Release;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\install64\install64;D:\dev\SFML\lib\64;D:\dev\SFML\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Lib>
@@ -494,6 +501,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>None</DebugInformationFormat>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -503,7 +511,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>D:\dev\lua\lib\64\Release;D:\dev\freetype\lib\64\Release;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\install64\install64;D:\dev\SFML\lib\64;D:\dev\SFML\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;assimp.lib;freeglut64.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;assimp.lib;freeglut64.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /NODEFAULTLIB %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -547,8 +555,8 @@
     <ClCompile Include="src\serenity\ecs\systems\SystemAddRigidBodies.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemBaseClass.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemBodyParentChild.cpp" />
-    <ClCompile Include="src\serenity\ecs\systems\SystemComponentBody.cpp" />
-    <ClCompile Include="src\serenity\ecs\systems\SystemComponentBodyDebugDraw.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentTransform.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentTransformDebugDraw.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentRigidBody.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentCamera.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentLogic.cpp" />
@@ -564,6 +572,14 @@
     <ClCompile Include="src\serenity\ecs\systems\SystemSceneChanging.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemSceneUpdate.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemStepPhysics.cpp" />
+    <ClCompile Include="src\serenity\editor\core\EditorCore.cpp" />
+    <ClCompile Include="src\serenity\editor\imgui\imgui-SFML.cpp" />
+    <ClCompile Include="src\serenity\editor\imgui\imgui.cpp" />
+    <ClCompile Include="src\serenity\editor\imgui\imgui_demo.cpp" />
+    <ClCompile Include="src\serenity\editor\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\serenity\editor\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\serenity\editor\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\serenity\editor\windowScene\WindowScene.cpp" />
     <ClCompile Include="src\serenity\events\EventDispatcher.cpp" />
     <ClCompile Include="src\serenity\events\EventModule.cpp" />
     <ClCompile Include="src\serenity\events\Observer.cpp" />
@@ -703,6 +719,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="src\serenity\tests\TestOpenGLRenderableProperties.cpp" />
     <ClCompile Include="src\serenity\tests\TestSystemParentChild.cpp" />
     <ClCompile Include="src\serenity\tests\TestTextureTypes.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -781,8 +798,8 @@
     <ClInclude Include="include\serenity\ecs\systems\SystemAddRigidBodies.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemBaseClass.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemBodyParentChild.h" />
-    <ClInclude Include="include\serenity\ecs\systems\SystemComponentBody.h" />
-    <ClInclude Include="include\serenity\ecs\systems\SystemComponentBodyDebugDraw.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentTransform.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentTransformDebugDraw.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentRigidBody.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentCamera.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentLogic.h" />
@@ -798,6 +815,18 @@
     <ClInclude Include="include\serenity\ecs\systems\SystemSceneChanging.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemSceneUpdate.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemStepPhysics.h" />
+    <ClInclude Include="include\serenity\editor\core\EditorCore.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imconfig-SFML.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imconfig.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imgui-SFML.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imgui-SFML_export.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imgui.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imgui_internal.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imstb_rectpack.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imstb_textedit.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imstb_truetype.h" />
+    <ClInclude Include="include\serenity\editor\windowScene\WindowScene.h" />
     <ClInclude Include="include\serenity\events\Event.h" />
     <ClInclude Include="include\serenity\events\EventDispatcher.h" />
     <ClInclude Include="include\serenity\events\EventIncludes.h" />
@@ -868,6 +897,7 @@
     <ClInclude Include="include\serenity\renderer\opengl\glsl\SSAOCode.h" />
     <ClInclude Include="include\serenity\renderer\opengl\glsl\VersionConversion.h" />
     <ClInclude Include="include\serenity\renderer\opengl\OpenGL.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\OpenGLRenderableProperties.h" />
     <ClInclude Include="include\serenity\renderer\opengl\State.h" />
     <ClInclude Include="include\serenity\renderer\opengl\UniformBufferObject.h" />
     <ClInclude Include="include\serenity\renderer\particles\Particle.h" />

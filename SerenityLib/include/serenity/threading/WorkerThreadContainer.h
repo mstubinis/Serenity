@@ -10,9 +10,10 @@
 
 namespace Engine::priv {
     class WorkerThreadContainer final {
+        using ThreadVector = std::vector<std::jthread>;
         private:
-            std::vector<std::thread>                            m_WorkerThreads;
-            std::unordered_map<std::thread::id, std::thread*>   m_WorkerThreadsHashed;
+            ThreadVector                                         m_WorkerThreads;
+            std::unordered_map<std::jthread::id, std::jthread*>  m_WorkerThreadsHashed;
         public:
             WorkerThreadContainer() = default;
             ~WorkerThreadContainer();
@@ -21,10 +22,9 @@ namespace Engine::priv {
             void reserve(size_t newReserveSize) noexcept;
 
             [[nodiscard]] inline size_t size() const noexcept { return m_WorkerThreads.size(); }
-            void join_all() noexcept;
 
             template<typename FUNCTION>
-            Engine::view_ptr<std::thread> add_thread(FUNCTION&& function) noexcept {
+            Engine::view_ptr<std::jthread> add_thread(FUNCTION&& function) noexcept {
                 if (m_WorkerThreads.size() >= m_WorkerThreads.capacity()) {
                     ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): m_WorkerThreads reached its capacity!")
                     return nullptr;
@@ -38,12 +38,12 @@ namespace Engine::priv {
                 return &worker;
             }
 
-            [[nodiscard]] inline std::thread* operator[](std::thread::id threadID) noexcept { return m_WorkerThreadsHashed.at(threadID); }
+            [[nodiscard]] inline std::jthread* operator[](std::thread::id threadID) noexcept { return m_WorkerThreadsHashed.at(threadID); }
 
-            inline std::vector<std::thread>::iterator begin() { return m_WorkerThreads.begin(); }
-            inline std::vector<std::thread>::iterator end() { return m_WorkerThreads.end(); }
-            inline std::vector<std::thread>::const_iterator begin() const { return m_WorkerThreads.begin(); }
-            inline std::vector<std::thread>::const_iterator end() const { return m_WorkerThreads.end(); }
+            inline ThreadVector::iterator begin() { return m_WorkerThreads.begin(); }
+            inline ThreadVector::iterator end() { return m_WorkerThreads.end(); }
+            inline ThreadVector::const_iterator begin() const { return m_WorkerThreads.begin(); }
+            inline ThreadVector::const_iterator end() const { return m_WorkerThreads.end(); }
     };
 };
 

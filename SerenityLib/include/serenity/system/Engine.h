@@ -30,6 +30,7 @@ namespace Engine::priv {
 #include <serenity/discord/DiscordModule.h>
 #include <serenity/lua/LuaModule.h>
 #include <serenity/resources/mesh/BuiltInMeshes.h>
+#include <serenity/editor/core/EditorCore.h>
 #include <serenity/containers/Queue_ts.h>
 
 namespace Engine::priv {
@@ -80,6 +81,7 @@ namespace Engine::priv {
             };
             Misc                m_Misc;
 
+            EditorCore          m_Editor;
             LUAModule           m_LUAModule;
             NetworkingModule    m_NetworkingModule;
             DiscordModule       m_DiscordModule;

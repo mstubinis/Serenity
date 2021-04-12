@@ -76,6 +76,8 @@ struct ShaderEnum final { enum Shader : uint32_t {
     ParticleVertex,
     ParticleFrag,
     NormalessDiffuseFrag,
+    LightingFragBasic,
+    LightingGIFragBasic,
     _TOTAL,
 };};
 
@@ -97,6 +99,8 @@ struct ShaderProgramEnum final { enum Program : uint32_t {
     StencilPass,
     Particle,
     NormalessDiffuse,
+    DeferredLightingBasic,
+    DeferredLightingGIBasic,
     _TOTAL,
 };};
 
@@ -206,6 +210,8 @@ void DeferredPipeline::init() {
     priv::threading::addJob([this, &emplaceShader]() {emplaceShader(24, EShaders::particle_vertex, m_InternalShaders, ShaderType::Vertex); });
     priv::threading::addJob([this, &emplaceShader]() {emplaceShader(25, EShaders::particle_frag, m_InternalShaders, ShaderType::Fragment); });
     priv::threading::addJob([this, &emplaceShader]() {emplaceShader(26, EShaders::normaless_diffuse_frag, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(27, EShaders::lighting_frag_basic, m_InternalShaders, ShaderType::Fragment); });
+    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(28, EShaders::lighting_frag_gi_basic, m_InternalShaders, ShaderType::Fragment); });
 
     priv::threading::waitForAll();
 
@@ -229,7 +235,8 @@ void DeferredPipeline::init() {
     m_InternalShaderPrograms[ShaderProgramEnum::StencilPass] = Engine::Resources::addResource<ShaderProgram>("Stencil_Pass", m_InternalShaders[ShaderEnum::FullscreenVertex], m_InternalShaders[ShaderEnum::StencilPassFrag]);
     m_InternalShaderPrograms[ShaderProgramEnum::Particle] = Engine::Resources::addResource<ShaderProgram>("Particle", m_InternalShaders[ShaderEnum::ParticleVertex], m_InternalShaders[ShaderEnum::ParticleFrag]);
     m_InternalShaderPrograms[ShaderProgramEnum::NormalessDiffuse] = Engine::Resources::addResource<ShaderProgram>("NormalessDiffuse", m_InternalShaders[ShaderEnum::FullscreenVertex], m_InternalShaders[ShaderEnum::NormalessDiffuseFrag]);
-
+    m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingBasic] = Engine::Resources::addResource<ShaderProgram>("Deferred_Light_Basic", m_InternalShaders[ShaderEnum::LightingVertex], m_InternalShaders[ShaderEnum::LightingFragBasic]);
+    m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingGIBasic] = Engine::Resources::addResource<ShaderProgram>("Deferred_Light_GI_Basic", m_InternalShaders[ShaderEnum::FullscreenVertex], m_InternalShaders[ShaderEnum::LightingGIFragBasic]);
 
     sf::Image sfImageWhite;
     sfImageWhite.create(2, 2, sf::Color::White);
@@ -614,7 +621,6 @@ void DeferredPipeline::renderSkybox(Skybox* skybox, Handle shaderProgram, Scene&
         const auto& bgColor = scene.getBackgroundColor();
         Engine::Renderer::sendUniform4Safe("Color", bgColor.r, bgColor.g, bgColor.b, bgColor.a);
     }
-    Engine::Renderer::sendUniform1Safe("ScreenGamma", m_Renderer.m_Gamma);
     Engine::Renderer::sendUniformMatrix4("VP", camera.getProjection() * view_no_position);
     Skybox::bindMesh();
 
@@ -1427,6 +1433,7 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
 
     if (mainRenderFunction) {
         //do GI here. (only doing GI during the main render pass, not during light probes
+        glBlendEquationSeparate(GL_MAX, GL_FUNC_ADD);
         m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingGI].get<ShaderProgram>());
         if (!Engine::priv::OpenGLState::constants.supportsUBO()) {
             Engine::Renderer::sendUniformMatrix4Safe("CameraInvView", camera.getViewInverse());
@@ -1467,6 +1474,77 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
             Engine::Renderer::clearTexture(6, GL_TEXTURE_2D);
         }
         Engine::Renderer::clearTexture(7, GL_TEXTURE_2D);
+        glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+    }
+}
+void DeferredPipeline::internal_pass_lighting_basic(Viewport& viewport, Camera& camera, bool mainRenderFunction) {
+    const Scene& scene = viewport.getScene();
+    m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingBasic].get<ShaderProgram>());
+    auto winSize = glm::vec2(Engine::Resources::getWindowSize());
+    if (!Engine::priv::OpenGLState::constants.supportsUBO()) {
+        Engine::Renderer::sendUniformMatrix4Safe("CameraView", camera.getView());
+        Engine::Renderer::sendUniformMatrix4Safe("CameraProj", camera.getProjection());
+        //sendUniformMatrix4Safe("CameraViewProj",camera.getViewProjection()); //moved to shader binding function
+        Engine::Renderer::sendUniformMatrix4Safe("CameraInvView", camera.getViewInverse());
+        Engine::Renderer::sendUniformMatrix4Safe("CameraInvProj", camera.getProjectionInverse());
+        Engine::Renderer::sendUniformMatrix4Safe("CameraInvViewProj", camera.getViewProjectionInverse());
+        Engine::Renderer::sendUniform4Safe("CameraInfo1", glm::vec4(camera.getPosition(), camera.getNear()));
+        Engine::Renderer::sendUniform4Safe("CameraInfo2", glm::vec4(camera.getViewVector(), camera.getFar()));
+    }
+    Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (uint32_t)Material::m_MaterialProperities.size());
+
+    Engine::Renderer::sendTexture("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0);
+    Engine::Renderer::sendTexture("gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1);
+    Engine::Renderer::sendTexture("gMiscMap", m_GBuffer.getTexture(GBufferType::Misc), 2);
+    Engine::Renderer::sendTexture("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), 3);
+    Engine::Renderer::sendTexture("gSSAOMap", m_GBuffer.getTexture(GBufferType::Bloom), 4);
+
+    Engine::Renderer::setDepthFunc(GL_GEQUAL);
+    Engine::Renderer::GLEnable(GL_DEPTH_TEST);
+
+    for (const auto& light : PublicScene::GetLights<PointLight>(scene)) {
+        renderPointLight(camera, *light);
+    }
+    for (const auto& light : PublicScene::GetLights<SpotLight>(scene)) {
+        renderSpotLight(camera, *light);
+    }
+    for (const auto& light : PublicScene::GetLights<RodLight>(scene)) {
+        renderRodLight(camera, *light);
+    }
+    for (const auto& light : PublicScene::GetLights<ProjectionLight>(scene)) {
+        renderProjectionLight(camera, *light);
+    }
+    Engine::Renderer::setDepthFunc(GL_LEQUAL);
+    Engine::Renderer::GLDisable(GL_DEPTH_TEST);
+    for (const auto& light : PublicScene::GetLights<SunLight>(scene)) {
+        renderSunLight(camera, *light, viewport);
+    }
+    for (const auto& light : PublicScene::GetLights<DirectionalLight>(scene)) {
+        renderDirectionalLight(camera, *light, viewport);
+    }
+    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
+    Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
+    Engine::Renderer::clearTexture(2, GL_TEXTURE_2D);
+    Engine::Renderer::clearTexture(3, GL_TEXTURE_2D);
+    Engine::Renderer::clearTexture(4, GL_TEXTURE_2D);
+
+    if (mainRenderFunction) {
+        //do GI here. (only doing GI during the main render pass, not during light probes)
+        m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingGIBasic].get<ShaderProgram>());
+        if (!Engine::priv::OpenGLState::constants.supportsUBO()) {
+            Engine::Renderer::sendUniformMatrix4Safe("CameraInvView", camera.getViewInverse());
+            Engine::Renderer::sendUniformMatrix4Safe("CameraInvProj", camera.getProjectionInverse());
+            Engine::Renderer::sendUniformMatrix4Safe("CameraInvViewProj", camera.getViewProjectionInverse());
+            Engine::Renderer::sendUniform4Safe("CameraInfo1", glm::vec4(camera.getPosition(), camera.getNear()));
+            Engine::Renderer::sendUniform4Safe("CameraInfo2", glm::vec4(camera.getViewVector(), camera.getFar()));
+        }
+        Engine::Renderer::sendTexture("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0);
+        Engine::Renderer::sendTexture("gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1);
+
+        Engine::Renderer::renderFullscreenQuad();
+
+        Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
+        Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
     }
 }
 void DeferredPipeline::internal_pass_god_rays(Viewport& viewport, Camera& camera) {
@@ -1475,11 +1553,11 @@ void DeferredPipeline::internal_pass_god_rays(Viewport& viewport, Camera& camera
     auto& godRaysPlatform = GodRays::STATIC_GOD_RAYS;
     auto sun = Engine::Renderer::godRays::getSun();
     if (!sun.null() && viewport.getRenderFlags().has(ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active) {
-        auto body        = sun.getComponent<ComponentTransform>();
-        if (!body) {
+        auto transform        = sun.getComponent<ComponentTransform>();
+        if (!transform) {
             return;
         }
-        glm::vec3 oPos   = body->getPosition();
+        glm::vec3 oPos   = transform->getPosition();
         glm::vec3 camPos = camera.getPosition();
         glm::vec3 camVec = camera.getViewVector();
         bool infront     = Engine::Math::isPointWithinCone(camPos, -camVec, oPos, Engine::Math::toRadians(godRaysPlatform.fovDegrees));
@@ -1657,33 +1735,25 @@ void DeferredPipeline::renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport,
     }
 }
 void DeferredPipeline::render2DAPI(const std::vector<IRenderingPipeline::API2DCommand>& commands, bool mainRenderFunc, Viewport& viewport, bool clearDepth) {
-    if (commands.size() > 0) {
-        m_GBuffer.bindBackbuffer(viewport);
-        Engine::Renderer::GLEnablei(GL_BLEND, 0);
-        //Engine::Renderer::GLEnable(GL_DEPTH_TEST);
-        //Engine::Renderer::GLDisable(GL_DEPTH_TEST);
-        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-        GLCall(glDepthMask(GL_TRUE));
-        if (mainRenderFunc) {
-            if (viewport.getRenderFlags().has(ViewportRenderingFlag::API2D)) {
-                Engine::Renderer::Settings::clear(false, clearDepth, false); //clear depth only
-                m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::Deferred2DAPI].get<ShaderProgram>());
-                Engine::Renderer::sendUniformMatrix4("VP", m_2DProjectionMatrix);
-                Engine::Renderer::sendUniform1Safe("ScreenGamma", m_Renderer.m_Gamma);
+    m_GBuffer.bindBackbuffer(viewport);
+    Engine::Renderer::GLEnablei(GL_BLEND, 0);
+    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+    GLCall(glDepthMask(GL_TRUE));
+    if (mainRenderFunc) {
+        if (viewport.getRenderFlags().has(ViewportRenderingFlag::API2D)) {
+            Engine::Renderer::Settings::clear(false, clearDepth, false); //clear depth only
+            m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::Deferred2DAPI].get<ShaderProgram>());
+            Engine::Renderer::sendUniformMatrix4("VP", m_2DProjectionMatrix);
+            if (commands.size() > 0) {
                 Engine::Renderer::GLEnable(GL_SCISSOR_TEST);
-
                 for (const auto& command : commands) {
                     command.func();
                 }
                 Engine::Renderer::GLDisable(GL_SCISSOR_TEST);
             }
         }
-        Engine::Renderer::GLDisablei(GL_BLEND, 0);
-
-        //Engine::Renderer::GLEnable(GL_DEPTH_TEST);
-        //GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-        //GLCall(glDepthMask(GL_FALSE));
-    }
+    } 
+    Engine::Renderer::GLDisablei(GL_BLEND, 0);
 }
 
 void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& viewport, bool mainRenderFunction) {
@@ -1759,7 +1829,11 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
         Engine::Renderer::Settings::clear(true, false, false);//lighting rgb channels cleared to black
 
         if (m_Renderer.m_Lighting) {
-            internal_pass_lighting(viewport, camera, mainRenderFunction);
+            if (renderer.m_LightingAlgorithm == LightingAlgorithm::PBR) {
+                internal_pass_lighting(viewport, camera, mainRenderFunction);
+            }else{
+                internal_pass_lighting_basic(viewport, camera, mainRenderFunction);
+            }
         }
         Engine::Renderer::GLDisablei(GL_BLEND, 0);
         Engine::Renderer::GLDisable(GL_STENCIL_TEST);
@@ -1806,8 +1880,6 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
 }
 
 
-
-
 void DeferredPipeline::internal_renderTexture(std::vector<IRenderingPipeline::API2DCommand>& commands, Handle textureHandle, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) {
     commands.emplace_back([textureHandle, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DTexture(textureHandle, p, c, a, s, d, align, scissor); }, d);
 }
@@ -1838,7 +1910,6 @@ void DeferredPipeline::internal_renderRectangle(std::vector<IRenderingPipeline::
 void DeferredPipeline::internal_renderTriangle(std::vector<IRenderingPipeline::API2DCommand>& commands, const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) {
     commands.emplace_back([=]() { DeferredPipeline::render2DTriangle(position, color, angle, width, height, depth, align, scissor); }, depth);
 }
-
 void DeferredPipeline::renderTexture(Handle textureHandle, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) {
     internal_renderTexture(m_2DAPICommands, textureHandle, p, c, a, s, d, align, scissor);
 }
@@ -1857,7 +1928,6 @@ void DeferredPipeline::renderRectangle(const glm::vec2& pos, const glm::vec4& co
 void DeferredPipeline::renderTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) {
     internal_renderTriangle(m_2DAPICommands, position, color, angle, width, height, depth, align, scissor);
 }
-
 void DeferredPipeline::renderBackgroundTexture(Handle textureHandle, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) {
     internal_renderTexture(m_Background2DAPICommands, textureHandle, p, c, a, s, d, align, scissor);
 }
@@ -1873,7 +1943,6 @@ void DeferredPipeline::renderBackgroundRectangle(const glm::vec2& pos, const glm
 void DeferredPipeline::renderBackgroundTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) {
     internal_renderTriangle(m_Background2DAPICommands, position, color, angle, width, height, depth, align, scissor);
 }
-
 void DeferredPipeline::renderFullscreenTriangle() {
     glm::vec2 winSize{ Resources::getWindowSize() };
 

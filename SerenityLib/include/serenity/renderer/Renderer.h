@@ -43,6 +43,7 @@ namespace Engine::priv {
         public:
             std::unique_ptr<IRenderingPipeline>  m_Pipeline;
             AntiAliasingAlgorithm                m_AA_algorithm      = AntiAliasingAlgorithm::FXAA;
+            LightingAlgorithm                    m_LightingAlgorithm = LightingAlgorithm::PBR;
             DepthFunc                            m_Depth_Function    = DepthFunc::Less;
             float                                m_Gamma             = 2.2f;
             float                                m_GI_Diffuse        = 1.0f;
@@ -110,6 +111,8 @@ namespace Engine::Renderer {
             float getGIContributionSpecular();
             void setGIContributionSpecular(float giSpecular);
             void setGIContribution(float global, float diffuse, float specular);
+            LightingAlgorithm getLightingAlgorithm();
+            bool setLightingAlgorithm(LightingAlgorithm);
         }
     }
     void restoreDefaultOpenGLState();

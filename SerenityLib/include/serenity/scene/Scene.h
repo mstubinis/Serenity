@@ -42,6 +42,7 @@ namespace Engine::priv {
 #include <serenity/resources/Handle.h>
 #include <serenity/scene/LightsModule.h>
 #include <serenity/renderer/RenderGraph.h>
+#include <serenity/renderer/particles/ParticleSystem.h>
 
 class Scene: public Observer {
     friend class  Engine::priv::RenderGraph;
@@ -55,23 +56,19 @@ class Scene: public Observer {
     using UpdateFP = void(*)(Scene*, const float);
     private:
         Engine::priv::ECS                           m_ECS;
+        mutable Engine::priv::ParticleSystem        m_ParticleSystem;
         mutable std::vector<Viewport>               m_Viewports;
         mutable std::vector<Camera*>                m_Cameras;
         mutable Engine::priv::RenderGraphContainer  m_RenderGraphs;
-
         mutable Engine::priv::LightsModule          m_LightsModule;
-
         UpdateFP                                    m_OnUpdateFunctor     = [](Scene*, const float) {};
-        std::string                                 m_Name;
-        uint32_t                                    m_ID                  = 0;
         glm::vec3                                   m_GI                  = glm::vec3{ 1.0f };
+        std::string                                 m_Name;
+        Skybox*                                     m_Skybox              = nullptr;
+        uint32_t                                    m_ID                  = 0;
+        Entity                                      m_Sun;
         bool                                        m_SkipRenderThisFrame = false;
         bool                                        m_WasJustSwappedTo    = false;
-
-        Entity                                      m_Sun;
-        Skybox*                                     m_Skybox              = nullptr;
-
-        class impl; std::unique_ptr<impl>           m_i                   = nullptr;
 
         void preUpdate(const float dt);
         void postUpdate(const float dt);
@@ -89,6 +86,8 @@ class Scene: public Observer {
         inline void registerComponent() { m_ECS.registerComponent<COMPONENT>(); }
         template<class SYSTEM, class ... COMPONENTS>
         inline void registerSystem() { m_ECS.registerSystem<SYSTEM, COMPONENTS...>(); }
+        template<class SYSTEM, class ... COMPONENTS>
+        inline void registerSystemOrdered(uint32_t order) { m_ECS.registerSystemOrdered<SYSTEM, COMPONENTS...>(order); }
 
         inline void setName(std::string_view name) noexcept { m_Name = name; }
         [[nodiscard]] inline constexpr const std::string& name() const noexcept { return m_Name; }

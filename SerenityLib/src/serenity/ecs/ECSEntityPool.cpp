@@ -24,6 +24,10 @@ void Engine::priv::ECSEntityPool::destroyFlaggedEntity(uint32_t entityID) {
     m_Pool[index].m_VersionID++;
     m_Freelist.emplace_back(index);
 }
+Entity Engine::priv::ECSEntityPool::getEntityFromID(uint32_t entityID) const noexcept {
+    const auto index = entityID - 1U;
+    return m_Pool[index];
+}
 Entity Engine::priv::ECSEntityPool::createEntity(const Scene& scene) noexcept {
     if (m_Freelist.empty()) {
         m_Pool.emplace_back(0, 0, 0);

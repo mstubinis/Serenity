@@ -7,38 +7,24 @@
 #include <serenity/renderer/postprocess/SSAO.h>
 
 struct EngineOptions final {
-    AntiAliasingAlgorithm   aa_algorithm;
+    AntiAliasingAlgorithm              aa_algorithm       = AntiAliasingAlgorithm::None;
     char**                             argv;
-    int                                argc;
-    unsigned char                      ssao_level;
-    unsigned char                      hdr;
+    int                                argc               = 0;
+    unsigned char                      ssao_level         = SSAOLevel::Medium;
+    unsigned char                      hdr                = HDRAlgorithm::None;
 
-    int                                window_mode; //0 = normal, 1 = fullscreen, 2 = windowed_fullscreen
+    int                                window_mode        = 0; //0 = normal, 1 = fullscreen, 2 = windowed_fullscreen
 
-    bool                               god_rays_enabled;
-    bool                               fog_enabled;
-    bool                               show_console;
-    bool                               maximized;
-    bool                               vsync;
-    unsigned int                       width;
-    unsigned int                       height;
-    std::string                        window_title;
+    bool                               editor_enabled     = false;
+    bool                               god_rays_enabled   = true;
+    bool                               fog_enabled        = false;
+    bool                               show_console       = false;
+    bool                               maximized          = false;
+    bool                               vsync              = true;
+    unsigned int                       width              = 1024;
+    unsigned int                       height             = 768;
+    std::string                        window_title       = "Engine";
     std::string                        icon;
-    EngineOptions() {
-        window_title      = "Engine";
-        width             = 1024;
-        height            = 768;
-        ssao_level        = SSAOLevel::Medium;
-        hdr               = HDRAlgorithm::None;
-        god_rays_enabled  = true;
-        vsync             = true;
-        window_mode       = 0;
-        fog_enabled       = false;
-        show_console      = false;
-        maximized         = false;
-        aa_algorithm      = AntiAliasingAlgorithm::None;
-        argc              = 0;
-    }
 };
 
 #endif

@@ -29,7 +29,10 @@ namespace Engine::priv {
             bool isEntityVersionDifferent(Entity entity) const noexcept;
 
             void destroyFlaggedEntity(uint32_t entityID);
+
             [[nodiscard]] Entity createEntity(const Scene& scene) noexcept;
+            [[nodiscard]] Entity getEntityFromID(uint32_t entityID) const noexcept;
+
 
             void clear() noexcept {
                 m_Pool.clear(); m_Freelist.clear();

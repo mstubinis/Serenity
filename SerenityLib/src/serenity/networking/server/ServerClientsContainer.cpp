@@ -33,8 +33,10 @@ bool Engine::Networking::ServerClientsContainer::removeClientImmediately(ServerC
     }
     if (!foundHash.empty()) {
         {
-            std::lock_guard lock(inMutex);
+            std::lock_guard lock{ inMutex };
+            m_HashedClients.erase(m_HashedClients.find(foundHash));
             removed = m_ThreadContainer.removeClient(foundHash);
+            
         }
     }
     if (!removed) {
@@ -68,8 +70,9 @@ void Engine::Networking::ServerClientsContainer::clearAllClients() {
 void Engine::Networking::ServerClientsContainer::internal_update_remove_clients() noexcept {
     if (m_RemovedClients.size() > 0) {
         Engine::priv::threading::waitForAll();
-        for (const auto& itr : m_RemovedClients) {
-            bool result = m_ThreadContainer.removeClient(itr.first);
+        for (const auto& [hash, client] : m_RemovedClients) {
+            m_HashedClients.erase(m_HashedClients.find(hash));
+            bool result = m_ThreadContainer.removeClient(hash);
         }
         m_RemovedClients.clear();
     }

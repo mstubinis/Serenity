@@ -29,12 +29,12 @@ ServerClient::ServerClient(const std::string& hash, Server& server, SocketTCP* t
     registerEvent(EventType::PacketReceived);
 }
 ServerClient::~ServerClient() {
-    unregisterEvent(EventType::ClientConnected);
-    unregisterEvent(EventType::ClientDisconnected);
-    unregisterEvent(EventType::ServerStarted);
-    unregisterEvent(EventType::ServerShutdowned);
-    unregisterEvent(EventType::PacketSent);
-    unregisterEvent(EventType::PacketReceived);
+    unregisterEventImmediate(EventType::ClientConnected);
+    unregisterEventImmediate(EventType::ClientDisconnected);
+    unregisterEventImmediate(EventType::ServerStarted);
+    unregisterEventImmediate(EventType::ServerShutdowned);
+    unregisterEventImmediate(EventType::PacketSent);
+    unregisterEventImmediate(EventType::PacketReceived);
 }
 uint32_t ServerClient::generate_nonce() const noexcept {
     return Engine::Networking::NetworkingHelpers::generate_nonce();

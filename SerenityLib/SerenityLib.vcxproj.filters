@@ -45,9 +45,6 @@
     <Filter Include="Source Files\Engine\Core\ECS">
       <UniqueIdentifier>{6a44899c-8abd-437c-94e0-6adfc6cc3b03}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Engine\Core\Events">
-      <UniqueIdentifier>{8b30c9c6-6e01-4c19-939e-30e6fbfd7cb2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Engine\Core\Lights">
       <UniqueIdentifier>{4feec44e-fd34-4516-b4f1-491f8d9e2626}</UniqueIdentifier>
     </Filter>
@@ -305,6 +302,33 @@
     </Filter>
     <Filter Include="Source Files\Engine\Core\ECS\Entity">
       <UniqueIdentifier>{539bdbd7-660e-45ee-959e-b18d2f19bd52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Editor">
+      <UniqueIdentifier>{1afde67d-5798-41d4-a786-cde5a4993bc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Editor">
+      <UniqueIdentifier>{4a6b661c-903b-4da1-b164-b3c814bf8ec3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Editor\Core">
+      <UniqueIdentifier>{1afe9411-0c23-4070-b65c-c0f5a620a974}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Editor\Core">
+      <UniqueIdentifier>{c65d930a-920a-461a-a109-d584e094f390}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Editor\WindowScene">
+      <UniqueIdentifier>{e68deaa3-c2b5-4faf-8255-d8b4f71d46cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Editor\WindowScene">
+      <UniqueIdentifier>{e0509fff-4583-4b5d-8506-7fb58ae9ffed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Events">
+      <UniqueIdentifier>{8b30c9c6-6e01-4c19-939e-30e6fbfd7cb2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Editor\Imgui">
+      <UniqueIdentifier>{ae8a3519-43ca-4ed2-9ee9-0ade6e414d2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Editor\Imgui">
+      <UniqueIdentifier>{5cfe8af1-f726-4125-9093-bf52400d7649}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -788,9 +812,6 @@
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentCamera.cpp">
       <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\ecs\systems\SystemComponentBody.cpp">
-      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
-    </ClCompile>
     <ClCompile Include="src\serenity\ecs\systems\SystemBaseClass.cpp">
       <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
     </ClCompile>
@@ -799,9 +820,6 @@
     </ClCompile>
     <ClCompile Include="src\serenity\ecs\entity\EntityBody.cpp">
       <Filter>Source Files\Engine\Core\ECS\Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\systems\SystemComponentBodyDebugDraw.cpp">
-      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
     </ClCompile>
     <ClCompile Include="src\serenity\physics\PhysicsTaskScheduler.cpp">
       <Filter>Source Files\Engine\Core\Physics</Filter>
@@ -862,6 +880,39 @@
     </ClCompile>
     <ClCompile Include="src\serenity\Terrain.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\tests\TestOpenGLRenderableProperties.cpp">
+      <Filter>Source Files\Engine\Core\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\editor\core\EditorCore.cpp">
+      <Filter>Source Files\Engine\Core\Editor\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\editor\windowScene\WindowScene.cpp">
+      <Filter>Source Files\Engine\Core\Editor\WindowScene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\editor\imgui\imgui.cpp">
+      <Filter>Source Files\Engine\Core\Editor\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\editor\imgui\imgui_demo.cpp">
+      <Filter>Source Files\Engine\Core\Editor\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\editor\imgui\imgui_draw.cpp">
+      <Filter>Source Files\Engine\Core\Editor\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\editor\imgui\imgui_impl_opengl3.cpp">
+      <Filter>Source Files\Engine\Core\Editor\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\editor\imgui\imgui_widgets.cpp">
+      <Filter>Source Files\Engine\Core\Editor\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\editor\imgui\imgui-SFML.cpp">
+      <Filter>Source Files\Engine\Core\Editor\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentTransform.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentTransformDebugDraw.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1534,9 +1585,6 @@
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentCamera.h">
       <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\ecs\systems\SystemComponentBody.h">
-      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
-    </ClInclude>
     <ClInclude Include="include\serenity\ecs\entity\Entity.h">
       <Filter>Header Files\Engine\Core\ECS\Entity</Filter>
     </ClInclude>
@@ -1550,9 +1598,6 @@
       <Filter>Header Files\Engine\Core\ECS\Entity</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\ecs\systems\SystemBaseClass.h">
-      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\systems\SystemComponentBodyDebugDraw.h">
       <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\physics\PhysicsTaskScheduler.h">
@@ -1611,6 +1656,51 @@
     </ClInclude>
     <ClInclude Include="include\serenity\Terrain.h">
       <Filter>Header Files\Engine\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\opengl\OpenGLRenderableProperties.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\editor\core\EditorCore.h">
+      <Filter>Header Files\Engine\Core\Editor\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\editor\windowScene\WindowScene.h">
+      <Filter>Header Files\Engine\Core\Editor\WindowScene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\editor\imgui\imconfig.h">
+      <Filter>Header Files\Engine\Core\Editor\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\editor\imgui\imconfig-SFML.h">
+      <Filter>Header Files\Engine\Core\Editor\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\editor\imgui\imgui.h">
+      <Filter>Header Files\Engine\Core\Editor\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\editor\imgui\imgui_impl_opengl3.h">
+      <Filter>Header Files\Engine\Core\Editor\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\editor\imgui\imgui_internal.h">
+      <Filter>Header Files\Engine\Core\Editor\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\editor\imgui\imgui-SFML.h">
+      <Filter>Header Files\Engine\Core\Editor\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\editor\imgui\imgui-SFML_export.h">
+      <Filter>Header Files\Engine\Core\Editor\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\editor\imgui\imstb_rectpack.h">
+      <Filter>Header Files\Engine\Core\Editor\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\editor\imgui\imstb_textedit.h">
+      <Filter>Header Files\Engine\Core\Editor\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\editor\imgui\imstb_truetype.h">
+      <Filter>Header Files\Engine\Core\Editor\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentTransform.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentTransformDebugDraw.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -6,7 +6,6 @@
 #include <serenity/model/ModelInstance.h>
 #include <serenity/scene/Skybox.h>
 #include <serenity/resources/material/Material.h>
-#include <serenity/renderer/particles/ParticleSystem.h>
 #include <serenity/renderer/RenderGraph.h>
 #include <serenity/lights/Lights.h>
 #include <serenity/scene/Camera.h>
@@ -14,7 +13,7 @@
 #include <serenity/ecs/systems/SystemGameUpdate.h>
 #include <serenity/ecs/systems/SystemSceneUpdate.h>
 #include <serenity/ecs/systems/SystemSceneChanging.h>
-#include <serenity/ecs/systems/SystemComponentBody.h>
+#include <serenity/ecs/systems/SystemComponentTransform.h>
 #include <serenity/ecs/systems/SystemComponentRigidBody.h>
 #include <serenity/ecs/systems/SystemAddRigidBodies.h>
 #include <serenity/ecs/systems/SystemRemoveRigidBodies.h>
@@ -23,7 +22,7 @@
 #include <serenity/ecs/systems/SystemRigidTransformSync.h>
 #include <serenity/ecs/systems/SystemBodyParentChild.h>
 #include <serenity/ecs/systems/SystemCompoundChildTransforms.h>
-#include <serenity/ecs/systems/SystemComponentBodyDebugDraw.h>
+#include <serenity/ecs/systems/SystemComponentTransformDebugDraw.h>
 #include <serenity/ecs/systems/SystemComponentCamera.h>
 #include <serenity/ecs/systems/SystemComponentLogic.h>
 #include <serenity/ecs/systems/SystemComponentLogic1.h>
@@ -31,120 +30,8 @@
 #include <serenity/ecs/systems/SystemComponentLogic3.h>
 #include <serenity/ecs/systems/SystemComponentModel.h>
 
-class Scene::impl final {
-    public:
-        Engine::priv::ParticleSystem   m_ParticleSystem;
-
-        impl() = delete;
-
-        impl(uint32_t maxEmitters, uint32_t maxParticles)
-            : m_ParticleSystem{ maxEmitters, maxParticles }
-        {}
-
-        void _initComponents(Scene& super) {
-            super.m_ECS.registerComponent<ComponentLogic>();
-            super.m_ECS.registerComponent<ComponentTransform>();
-            super.m_ECS.registerComponent<ComponentRigidBody>();
-            super.m_ECS.registerComponent<ComponentCollisionShape>();
-            super.m_ECS.registerComponent<ComponentLogic1>();
-            super.m_ECS.registerComponent<ComponentModel>();
-            super.m_ECS.registerComponent<ComponentLogic2>();
-            super.m_ECS.registerComponent<ComponentCamera>();
-            super.m_ECS.registerComponent<ComponentLogic3>();
-            super.m_ECS.registerComponent<ComponentName>();
-
-            Engine::priv::ComponentCollisionShapeDeferredLoading::get().registerEvent(EventType::ResourceLoaded);
-
-        }
-        void _initSystems(Scene& super) {
-            super.m_ECS.registerSystem<SystemAddRigidBodies>();
-
-            super.m_ECS.registerSystem<SystemResolveTransformDirty, ComponentTransform, ComponentRigidBody>();
-            super.m_ECS.registerSystem<SystemStepPhysics, ComponentRigidBody>();
-            super.m_ECS.registerSystem<SystemRigidTransformSync, ComponentTransform, ComponentRigidBody>();
-
-            super.m_ECS.registerSystem<SystemGameUpdate>();
-            super.m_ECS.registerSystem<SystemSceneUpdate>();
-
-            super.m_ECS.registerSystem<SystemComponentLogic, ComponentLogic>();
-            super.m_ECS.registerSystem<SystemComponentBody, ComponentTransform>();
-            super.m_ECS.registerSystem<SystemComponentRigidBody, ComponentRigidBody>();
-            super.m_ECS.registerSystem<SystemComponentLogic1, ComponentLogic1>();
-            super.m_ECS.registerSystem<SystemComponentModel, ComponentModel>();
-
-            super.m_ECS.registerSystem<SystemBodyParentChild, ComponentTransform>();
-            super.m_ECS.registerSystem< SystemCompoundChildTransforms, ComponentTransform, ComponentCollisionShape>();
-
-            super.m_ECS.registerSystem<SystemComponentLogic2, ComponentLogic2>();
-            super.m_ECS.registerSystem<SystemComponentCamera, ComponentCamera>();
-            super.m_ECS.registerSystem<SystemComponentLogic3, ComponentLogic3>();
-
-            super.m_ECS.registerSystem<SystemSceneChanging>();
-            super.m_ECS.registerSystem<SystemRemoveRigidBodies>();
-
-            super.m_ECS.registerSystem<SystemComponentBodyDebugDraw, ComponentTransform, ComponentModel>();
-        }
-        void _init(Scene& super, const SceneOptions& options) {
-            super.m_ECS.init(options);
-            _initComponents(super);
-            _initSystems(super);
-        }
-        void _centerToObject(Scene& super, Entity centerEntity) {
-            auto centerTransform = centerEntity.getComponent<ComponentTransform>();
-            auto centerPos       = centerTransform->getPosition();
-            auto centerPosFloat  = glm::vec3(centerPos);
-            for (const auto e : Engine::priv::PublicScene::GetEntities(super)) {
-                if (e != centerEntity) {
-                    auto eTransform  = e.getComponent<ComponentTransform>();
-                    if (eTransform && !eTransform->hasParent()) {
-                        eTransform->setPosition(eTransform->getPosition() - centerPos);
-                    }
-                }
-            }
-            for (auto& particle : m_ParticleSystem.getParticles()) {
-                if (particle.isActive()) {
-                    particle.setPosition(particle.position() - centerPosFloat);
-                }
-            }
-            for (auto& soundEffect : Engine::Sound::getAllSoundEffects()) {
-                if (soundEffect.isActive() && soundEffect.getAttenuation() > 0.0f) {
-                    soundEffect.setPosition(soundEffect.getPosition() - centerPosFloat);
-                }
-            }
-            if (centerTransform) {
-                centerTransform->setPosition((decimal)0.0);
-            }
-            Engine::priv::Core::m_Engine->m_SoundModule.updateCameraPosition(super);
-            ComponentTransform::recalculateAllParentChildMatrices(super);
-        }
-        void _addModelInstanceToPipeline(Scene& scene, ModelInstance& inModelInstance, std::vector<Engine::priv::RenderGraph>& renderGraphs, RenderStage stage) {
-            Engine::priv::RenderGraph* renderGraph = nullptr;
-            for (auto& graph : renderGraphs) {
-                if (graph.m_ShaderProgram == inModelInstance.getShaderProgram()) {
-                    renderGraph = &graph;
-                    break;
-                }
-            }
-            if (!renderGraph) {
-                renderGraph = &scene.m_RenderGraphs[(size_t)stage].emplace_back(inModelInstance.getShaderProgram());
-            }
-            renderGraph->internal_addModelInstanceToPipeline(inModelInstance);
-        }
-        void _removeModelInstanceFromPipeline(ModelInstance& inModelInstance, std::vector<Engine::priv::RenderGraph>& renderGraphs) {
-            Engine::priv::RenderGraph* renderGraph = nullptr;
-            for (auto& graph : renderGraphs) {
-                if (graph.m_ShaderProgram == inModelInstance.getShaderProgram()) {
-                    renderGraph = &graph;
-                    break;
-                }
-            }
-            if (renderGraph) {
-                renderGraph->internal_removeModelInstanceFromPipeline(inModelInstance);
-            }
-        }
-};
 std::vector<Particle>& Engine::priv::PublicScene::GetParticles(const Scene& scene) {
-    return scene.m_i->m_ParticleSystem.getParticles();
+    return scene.m_ParticleSystem.getParticles();
 }
 std::vector<Viewport>& Engine::priv::PublicScene::GetViewports(const Scene& scene) {
     return scene.m_Viewports;
@@ -259,13 +146,34 @@ void Engine::priv::PublicScene::RenderDecals(RenderModule& renderer, Scene& scen
     }
 }
 void Engine::priv::PublicScene::RenderParticles(RenderModule& renderer, Scene& scene, Viewport& viewport, Camera& camera, Handle program) {
-    scene.m_i->m_ParticleSystem.render(viewport, camera, program, renderer);
+    scene.m_ParticleSystem.render(viewport, camera, program, renderer);
 }
 void Engine::priv::PublicScene::AddModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage stage) {
-    scene.m_i->_addModelInstanceToPipeline(scene, modelInstance, scene.m_RenderGraphs[(uint32_t)stage], stage);
+    auto& renderGraphs = scene.m_RenderGraphs[(uint32_t)stage];
+    Engine::priv::RenderGraph* renderGraph = nullptr;
+    for (auto& graph : renderGraphs) {
+        if (graph.m_ShaderProgram == modelInstance.getShaderProgram()) {
+            renderGraph = &graph;
+            break;
+        }
+    }
+    if (!renderGraph) {
+        renderGraph = &scene.m_RenderGraphs[(size_t)stage].emplace_back(modelInstance.getShaderProgram());
+    }
+    renderGraph->internal_addModelInstanceToPipeline(modelInstance);
 }
 void Engine::priv::PublicScene::RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage stage){
-    scene.m_i->_removeModelInstanceFromPipeline(modelInstance, scene.m_RenderGraphs[(uint32_t)stage]);
+    auto& renderGraphs = scene.m_RenderGraphs[(uint32_t)stage];
+    Engine::priv::RenderGraph* renderGraph = nullptr;
+    for (auto& graph : renderGraphs) {
+        if (graph.m_ShaderProgram == modelInstance.getShaderProgram()) {
+            renderGraph = &graph;
+            break;
+        }
+    }
+    if (renderGraph) {
+        renderGraph->internal_removeModelInstanceFromPipeline(modelInstance);
+    }
 }
 void Engine::priv::PublicScene::SkipRenderThisFrame(Scene& scene) {
     scene.m_SkipRenderThisFrame = true;
@@ -278,7 +186,11 @@ bool Engine::priv::PublicScene::HasItemsToRender(Scene& scene) {
 }
 
 
-Scene::Scene(uint32_t id, std::string_view name, const SceneOptions& options) {
+Scene::Scene(uint32_t id, std::string_view name, const SceneOptions& options) 
+    : m_ParticleSystem{ options.maxAmountOfParticleEmitters, options.maxAmountOfParticles }
+{
+    m_ECS.init(options);
+
     m_LightsModule.registerLightType<SunLight>();
     m_LightsModule.registerLightType<PointLight>();
     m_LightsModule.registerLightType<DirectionalLight>();
@@ -286,9 +198,48 @@ Scene::Scene(uint32_t id, std::string_view name, const SceneOptions& options) {
     m_LightsModule.registerLightType<RodLight>();
     m_LightsModule.registerLightType<ProjectionLight>();
 
-    m_i = std::make_unique<impl>(options.maxAmountOfParticleEmitters, options.maxAmountOfParticles);
+    //init components
+    m_ECS.registerComponent<ComponentLogic>();
+    m_ECS.registerComponent<ComponentTransform>();
+    m_ECS.registerComponent<ComponentRigidBody>();
+    m_ECS.registerComponent<ComponentCollisionShape>();
+    m_ECS.registerComponent<ComponentLogic1>();
+    m_ECS.registerComponent<ComponentModel>();
+    m_ECS.registerComponent<ComponentLogic2>();
+    m_ECS.registerComponent<ComponentCamera>();
+    m_ECS.registerComponent<ComponentLogic3>();
+    m_ECS.registerComponent<ComponentName>();
+
+    Engine::priv::ComponentCollisionShapeDeferredLoading::get().registerEvent(EventType::ResourceLoaded);
+    //init systems
+    m_ECS.registerSystemOrdered<SystemAddRigidBodies>(1000);
+
+    m_ECS.registerSystemOrdered<SystemResolveTransformDirty, ComponentTransform, ComponentRigidBody>(2000);
+    m_ECS.registerSystemOrdered<SystemStepPhysics, ComponentRigidBody>(3000);
+    m_ECS.registerSystemOrdered<SystemRigidTransformSync, ComponentTransform, ComponentRigidBody>(4000);
+
+    m_ECS.registerSystemOrdered<SystemGameUpdate>(5000);
+    m_ECS.registerSystemOrdered<SystemSceneUpdate>(6000);
+
+    m_ECS.registerSystemOrdered<SystemComponentLogic, ComponentLogic>(7000);
+    m_ECS.registerSystemOrdered<SystemComponentTransform, ComponentTransform>(8000);
+    m_ECS.registerSystemOrdered<SystemComponentRigidBody, ComponentRigidBody>(9000);
+    m_ECS.registerSystemOrdered<SystemComponentLogic1, ComponentLogic1>(10000);
+    m_ECS.registerSystemOrdered<SystemComponentModel, ComponentModel>(11000);
+
+    m_ECS.registerSystemOrdered<SystemBodyParentChild, ComponentTransform>(12000);
+    m_ECS.registerSystemOrdered<SystemCompoundChildTransforms, ComponentTransform, ComponentCollisionShape>(13000);
+
+    m_ECS.registerSystemOrdered<SystemComponentLogic2, ComponentLogic2>(14000);
+    m_ECS.registerSystemOrdered<SystemComponentCamera, ComponentCamera>(15000);
+    m_ECS.registerSystemOrdered<SystemComponentLogic3, ComponentLogic3>(16000);
+
+    m_ECS.registerSystemOrdered<SystemSceneChanging>(17000);
+    m_ECS.registerSystemOrdered<SystemRemoveRigidBodies>(18000);
+
+    m_ECS.registerSystemOrdered<SystemComponentTransformDebugDraw, ComponentTransform, ComponentModel>(19000);
+
     m_ID = id;
-    m_i->_init(*this, options);
     setName(name);
 
     registerEvent(EventType::SceneChanged);
@@ -312,7 +263,7 @@ void Scene::clearAllEntities() noexcept {
     m_ECS.clearAllEntities();
 }
 ParticleEmitter* Scene::addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
-    return m_i->m_ParticleSystem.add_emitter(properties, scene, lifetime, parent);
+    return m_ParticleSystem.add_emitter(properties, scene, lifetime, parent);
 }
 Viewport& Scene::addViewport(float x, float y, float width, float height, Camera& camera) {
     uint32_t id         = numViewports();
@@ -346,14 +297,39 @@ void Scene::setActiveCamera(Camera& camera){
     m_Viewports[0].setCamera(camera);
 }
 void Scene::centerSceneToObject(Entity centerEntity){
-    return m_i->_centerToObject(*this, centerEntity);
+    auto centerTransform = centerEntity.getComponent<ComponentTransform>();
+    auto centerPos = centerTransform->getWorldPosition();
+    auto centerPosFloat = glm::vec3(centerPos);
+    for (const auto e : Engine::priv::PublicScene::GetEntities(*this)) {
+        if (e != centerEntity) {
+            auto eTransform = e.getComponent<ComponentTransform>();
+            if (eTransform && !eTransform->hasParent()) {
+                eTransform->setPosition(eTransform->getWorldPosition() - centerPos);
+            }
+        }
+    }
+    for (auto& particle : m_ParticleSystem.getParticles()) {
+        if (particle.isActive()) {
+            particle.setPosition(particle.position() - centerPosFloat);
+        }
+    }
+    for (auto& soundEffect : Engine::Sound::getAllSoundEffects()) {
+        if (soundEffect.isActive() && soundEffect.getAttenuation() > 0.0f) {
+            soundEffect.setPosition(soundEffect.getPosition() - centerPosFloat);
+        }
+    }
+    if (centerTransform) {
+        centerTransform->setPosition(decimal(0.0));
+    }
+    Engine::priv::Core::m_Engine->m_SoundModule.updateCameraPosition(*this);
+    ComponentTransform::recalculateAllParentChildMatrices(*this);
 }
 void Scene::update(const float dt){
     m_ECS.update(dt, *this);
 
     Engine::priv::PublicScene::UpdateMaterials(*this, dt);
 
-    m_i->m_ParticleSystem.update(dt, *getActiveCamera());
+    m_ParticleSystem.update(dt, *getActiveCamera());
 }
 void Scene::preUpdate(const float dt) {
     m_ECS.preUpdate(*this, dt);

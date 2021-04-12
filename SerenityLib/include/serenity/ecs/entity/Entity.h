@@ -61,6 +61,7 @@ class Entity {
         [[nodiscard]] Engine::view_ptr<Scene> scene() const noexcept;
         [[nodiscard]] bool hasParent() const noexcept;
         [[nodiscard]] Entity getParent() const noexcept;
+        [[nodiscard]] std::vector<Entity> getChildren() const noexcept;
 
         void addChild(Entity child) const noexcept;
         void removeChild(Entity child) const noexcept;

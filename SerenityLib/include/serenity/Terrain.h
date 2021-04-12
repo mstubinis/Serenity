@@ -90,8 +90,8 @@ class Terrain : public Observer, public Entity {
         void translate(decimal x, decimal y, decimal z);
         void translate(const glm_vec3& position);
 
-        void setScale(decimal x, decimal y, decimal z);
-        void setScale(const glm_vec3& scale);
+        void setScale(float x, float y, float z);
+        void setScale(const glm::vec3& scale);
 
         bool getUseDiamondSubdivision() const;
         void setUseDiamondSubdivision(bool useDiamond);
