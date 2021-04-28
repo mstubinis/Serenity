@@ -53,8 +53,8 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
 
         ComponentCamera() = delete;
     public:
-        ComponentCamera(Entity entity, float angle, float aspectRatio, float nearPlane, float farPlane);
-		ComponentCamera(Entity entity, float left, float right, float bottom, float top, float nearPlane, float farPlane);
+        ComponentCamera(Entity, float angle, float aspectRatio, float nearPlane, float farPlane);
+		ComponentCamera(Entity, float left, float right, float bottom, float top, float nearPlane, float farPlane);
 
         ComponentCamera(const ComponentCamera&);
         ComponentCamera& operator=(const ComponentCamera&);

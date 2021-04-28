@@ -47,15 +47,13 @@ constexpr float ONE_OVER_255 = 0.003921568627451f;
 
 
 constexpr auto DEFAULT_MATERIAL_BIND_FUNCTOR = [](Material* m) {
-    auto&  components    = m->getComponents();
-    size_t numComponents = components.size();
-    size_t textureUnit   = 0;
+    const auto&  components = m->getComponents();
+    size_t numComponents    = components.size();
+    size_t textureUnit      = 0;
 
     for (size_t i = 0; i < numComponents; ++i) {
-        auto& component = components[i];
-        if (component == true) {
-            component.bind(i, textureUnit);
-        }
+        const auto& component = components[i];
+        component.bind(i, textureUnit);
     }
     Engine::Renderer::sendUniform1Safe("numComponents", (int)numComponents);
     Engine::Renderer::sendUniform1Safe("Shadeless", (int)m->getShadeless());
@@ -89,9 +87,9 @@ Material::Material(std::string_view name, std::string_view diffuse, std::string_
     auto n  = Engine::priv::MaterialLoader::LoadTextureNormal(normal);
     auto g  = Engine::priv::MaterialLoader::LoadTextureGlow(glow);
     auto s  = Engine::priv::MaterialLoader::LoadTextureSpecular(specular);
-    auto a  = Engine::priv::MaterialLoader::LoadTextureAO(ao);
     auto m  = Engine::priv::MaterialLoader::LoadTextureMetalness(metalness);
     auto sm = Engine::priv::MaterialLoader::LoadTextureSmoothness(smoothness);
+    auto a  = Engine::priv::MaterialLoader::LoadTextureAO(ao);
 
     Engine::priv::MaterialLoader::Init(*this, d.m_Handle, n.m_Handle, g.m_Handle, s.m_Handle, a.m_Handle, m.m_Handle, sm.m_Handle);
     Engine::priv::PublicMaterial::Load(*this);
@@ -114,9 +112,9 @@ Material::Material(Material&& other) noexcept
     , m_UpdatedThisFrame  { std::move(other.m_UpdatedThisFrame) }
     , m_F0Color           { std::move(other.m_F0Color) }
     , m_BaseGlow          { std::move(other.m_BaseGlow) }
-    , m_BaseAO            { std::move(other.m_BaseAO) }
     , m_BaseMetalness     { std::move(other.m_BaseMetalness) }
     , m_BaseSmoothness    { std::move(other.m_BaseSmoothness) }
+    , m_BaseAO            { std::move(other.m_BaseAO) }
     , m_BaseAlpha         { std::move(other.m_BaseAlpha) }
     , m_ID                { std::move(other.m_ID) }
 {}
@@ -130,9 +128,9 @@ Material& Material::operator=(Material&& other) noexcept {
     m_UpdatedThisFrame  = std::move(other.m_UpdatedThisFrame);
     m_F0Color           = std::move(other.m_F0Color);
     m_BaseGlow          = std::move(other.m_BaseGlow);
-    m_BaseAO            = std::move(other.m_BaseAO);
     m_BaseMetalness     = std::move(other.m_BaseMetalness);
     m_BaseSmoothness    = std::move(other.m_BaseSmoothness);
+    m_BaseAO            = std::move(other.m_BaseAO);
     m_BaseAlpha         = std::move(other.m_BaseAlpha);
     m_ID                = std::move(other.m_ID);
     return *this;
@@ -141,7 +139,15 @@ Material::~Material() {
     Engine::priv::PublicMaterial::Unload(*this);
 }
 MaterialComponent* Material::internal_add_component_generic(MaterialComponentType type, Handle texture, Handle mask, Handle cubemap) {
-    return &m_Components.emplace_back(type, texture, mask, cubemap);
+    uint32_t idx = (uint32_t)type;
+    if (m_Components.size() <= idx) {
+        m_Components.resize(idx + 1);
+    }
+    if (m_Components[idx].getType() == type) {
+        return &m_Components[idx];
+    }
+    m_Components[idx] = MaterialComponent(type, texture, mask, cubemap);
+    return &m_Components[idx];
 }
 void Material::internal_update_global_material_pool(bool addToDatabase) noexcept {
     //this data is kept around to be deferred to the lighting pass
@@ -224,7 +230,7 @@ MaterialComponent& Material::addComponentReflection(std::string_view cubemapName
     auto cubemap = Engine::priv::MaterialLoader::LoadTextureCubemap(cubemapName);
     auto mask    = Engine::priv::MaterialLoader::LoadTextureMask(maskFile);
     if (!cubemap.m_Resource) {
-        cubemap.m_Handle = Engine::Resources::getCurrentScene()->skybox()->texture();
+        cubemap.m_Handle = Engine::Resources::getCurrentScene()->skybox()->cubemap();
     }
     auto& component = *internal_add_component_generic(MaterialComponentType::Reflection, Handle{});
     auto& layer     = component.getLayer(0);
@@ -239,7 +245,7 @@ MaterialComponent& Material::addComponentRefraction(std::string_view cubemapName
     auto cubemap = Engine::priv::MaterialLoader::LoadTextureCubemap(cubemapName);
     auto mask    = Engine::priv::MaterialLoader::LoadTextureMask(maskFile);
     if (!cubemap.m_Resource) {
-        cubemap.m_Handle = Engine::Resources::getCurrentScene()->skybox()->texture();
+        cubemap.m_Handle = Engine::Resources::getCurrentScene()->skybox()->cubemap();
     }
     auto& component = *internal_add_component_generic(MaterialComponentType::Refraction, Handle{});
     auto& layer     = component.getLayer(0);
@@ -267,7 +273,7 @@ void Material::setGlow(uint8_t glow){
 }
 
 void Material::setF0Color(uint8_t r, uint8_t g, uint8_t b) noexcept {
-    m_F0Color = Engine::color_vector_4(glm::clamp(r, 1_uc, 255_uc), glm::clamp(g, 1_uc, 255_uc), glm::clamp(b, 1_uc, 255_uc), 255_uc);
+    m_F0Color = Engine::color_vector_4{ glm::clamp(r, 1_uc, 255_uc), glm::clamp(g, 1_uc, 255_uc), glm::clamp(b, 1_uc, 255_uc), 255_uc };
     internal_update_global_material_pool(false);
 }
 

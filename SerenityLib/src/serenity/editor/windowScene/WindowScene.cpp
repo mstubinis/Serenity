@@ -103,6 +103,7 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                         ImGui::InputFloat("Near", &cam->m_NearPlane);
                         ImGui::InputFloat("Far", &cam->m_FarPlane);
                     }
+                    Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(*cam);
                     ImGui::TreePop();
                 }
                 ImGui::TreePop();
@@ -168,9 +169,14 @@ void Engine::priv::EditorWindowScene::internal_render_profiler() {
 void Engine::priv::EditorWindowScene::internal_render_renderer() {
     auto& renderer = Engine::priv::Core::m_Engine->m_RenderModule;
 
+    //skybox
+    ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Skybox");
+    ImGui::Checkbox("Enabled ", &renderer.m_DrawSkybox);
+
     //lighting
     ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Lighting");
     ImGui::Checkbox("Enabled", &renderer.m_Lighting);
+
     ImGui::SliderFloat("GI Contribution Diffuse", &renderer.m_GI_Diffuse, 0.0f, 1.0f);
     ImGui::SliderFloat("GI Contribution Specular", &renderer.m_GI_Specular, 0.0f, 1.0f);
     ImGui::SliderFloat("GI Contribution Global", &renderer.m_GI_Global, 0.0f, 1.0f);
@@ -178,6 +184,15 @@ void Engine::priv::EditorWindowScene::internal_render_renderer() {
     const char* LightingModels[] = { "Basic", "Physical" };
     static int lighting_model_current = (int)renderer.m_LightingAlgorithm;
     ImGui::ListBox("Lighting Model", &lighting_model_current, LightingModels, IM_ARRAYSIZE(LightingModels));
+    if (lighting_model_current == (int)LightingAlgorithm::Basic) {
+        auto scene = Engine::Resources::getCurrentScene();
+        if (scene) {
+            const auto& ambientColor = Engine::Resources::getCurrentScene()->getAmbientColor();
+            float ambientColors[3] = { ambientColor.r, ambientColor.g, ambientColor.b };
+            ImGui::ColorEdit3("Ambient Color", &ambientColors[0]);
+            scene->setAmbientColor(ambientColors[0], ambientColors[1], ambientColors[2]);
+        }
+    }
     ImGui::Separator();
 
     //hdr

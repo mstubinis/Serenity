@@ -3,38 +3,36 @@
 #define ENGINE_TEXTURES_TEXTURE_LOADER_H
 
 struct TextureRequest;
-
+class  Texture;
+namespace Engine::priv {
+    struct TextureCPUData;
+}
 #include <serenity/resources/texture/TextureIncludes.h>
 
 namespace Engine::priv {
-    struct TextureCPUData;
-
-    struct TextureLoader final {
+    class TextureLoader final {
         friend class Texture;
+        public:
+            static bool LoadDDSFile(TextureCPUData&, priv::ImageData&);
 
-        static bool LoadDDSFile(TextureCPUData& texture, priv::ImageData& image);
+            static void LoadTexture2DIntoOpenGL(Texture&);
+            static void LoadTextureFramebufferIntoOpenGL(Texture&);
+            static void LoadTextureCubemapIntoOpenGL(Texture&);
 
-        static void LoadTexture2DIntoOpenGL(Texture& texture);
-        static void LoadTextureFramebufferIntoOpenGL(Texture& texture);
-        static void LoadTextureCubemapIntoOpenGL(Texture& texture);
+            static bool GenerateMipmapsOpenGL(Texture&);
+            static void WithdrawPixelsFromOpenGLMemory(Texture&, uint32_t imageIndex = 0, uint32_t mipmapLevel = 0);
 
-        static bool GenerateMipmapsOpenGL(Texture& texture);
-        static void WithdrawPixelsFromOpenGLMemory(Texture& texture, unsigned int imageIndex = 0, unsigned int mipmapLevel = 0);
+            static void ImportIntoOpengl(Texture&, const Engine::priv::ImageMipmap&, TextureType);
+            static void Resize(Texture&, Engine::priv::FramebufferObject&, int width, int height);
 
-        static void GeneratePBRData(Texture&, int convoludeTextureSize, int preEnvFilterSize);
-        static void ImportIntoOpengl(Texture&, const Engine::priv::ImageMipmap& mipmap, TextureType textureType);
+            static void LoadCPU(TextureCPUData&, Handle);
 
-        static void LoadGPU(Handle);
-        static void LoadGPU(Texture&);
+            static void LoadGPU(Handle);
+            static void LoadGPU(Texture&);
+            static void UnloadGPU(Texture&);
 
-        static void UnloadGPU(Texture&);
-        static void Load(Texture&);
-        static void Unload(Texture&);
-
-        static void LoadCPU(TextureCPUData&, Handle);
-
-        static void Resize(Texture& texture, Engine::priv::FramebufferObject&, int width, int height);
-
+            static void Load(Texture&);
+            static void Unload(Texture&);
     };
 };
 

@@ -17,6 +17,7 @@ class ProjectionLight;
 class Skybox;
 class Font;
 class Texture;
+class TextureCubemap;
 class Particle;
 class ModelInstance;
 class LightProbe;
@@ -45,7 +46,6 @@ namespace Engine::priv {
                     , depth{ depth_ }
                 {}
             };
-
             virtual ~IRenderingPipeline(){}
 
             virtual void init() = 0;
@@ -58,8 +58,8 @@ namespace Engine::priv {
             virtual void clear2DAPI() = 0;
             virtual void sort2DAPI() = 0;
 
-            virtual void renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport, Camera& camera, Scene& scene) = 0;
-            virtual void render2DAPI(const std::vector<IRenderingPipeline::API2DCommand>& commands, bool mainRenderFunc, Viewport& viewport, bool clearDepth = true) = 0;
+            virtual void renderPhysicsAPI(bool mainRenderFunc, Viewport&, Camera&, Scene&) = 0;
+            virtual void render2DAPI(const std::vector<IRenderingPipeline::API2DCommand>& commands, bool mainRenderFunc, Viewport&, bool clearDepth = true) = 0;
 
 
             virtual ShaderProgram* getCurrentBoundShaderProgram() = 0;
@@ -82,10 +82,10 @@ namespace Engine::priv {
             virtual bool colorMask(bool r, bool g, bool b, bool alpha) = 0;
             virtual bool clearColor(bool r, bool g, bool b, bool alpha) = 0;
 
-            virtual bool bindTextureForModification(TextureType textureType, uint32_t textureObject) = 0;
+            virtual bool bindTextureForModification(TextureType, uint32_t textureObject) = 0;
             virtual bool bindVAO(uint32_t vaoObject) = 0;
             virtual bool deleteVAO(uint32_t& vaoObject) = 0;
-            virtual void generateAndBindTexture(TextureType textureType, uint32_t& textureObject) = 0;
+            virtual void generateAndBindTexture(TextureType, uint32_t& textureObject) = 0;
             virtual void generateAndBindVAO(uint32_t& vaoObject) = 0;
 
             virtual bool enableAPI(uint32_t apiEnum) = 0;
@@ -94,26 +94,35 @@ namespace Engine::priv {
             virtual bool disableAPI_i(uint32_t apiEnum, uint32_t index) = 0;
 
             virtual void clearTexture(int unit, uint32_t textureTarget) = 0;
-            virtual void sendTexture(const char* location, Texture& texture, int unit) = 0;
+            virtual void sendTexture(const char* location, Texture&, int unit) = 0;
+            virtual void sendTexture(const char* location, TextureCubemap&, int unit) = 0;
             virtual void sendTexture(const char* location, uint32_t textureObject, int unit, uint32_t textureTarget) = 0;
-            virtual void sendTextureSafe(const char* location, Texture& texture, int unit) = 0;
+            virtual void sendTextureSafe(const char* location, Texture&, int unit) = 0;
+            virtual void sendTextureSafe(const char* location, TextureCubemap&, int unit) = 0;
             virtual void sendTextureSafe(const char* location, uint32_t textureObject, int unit, uint32_t textureTarget) = 0;
 
             virtual bool bindReadFBO(uint32_t fbo) = 0;
             virtual bool bindDrawFBO(uint32_t fbo) = 0;
             virtual bool bindRBO(uint32_t rbo) = 0;
 
-            virtual bool bind(ModelInstance* modelInstance) = 0;
-            virtual bool bind(ShaderProgram* program) = 0;
-            virtual bool bind(Material* material) = 0;
-            virtual bool bind(Mesh* mesh) = 0;
+            virtual bool bind(ModelInstance*) = 0;
+            virtual bool bind(ShaderProgram*) = 0;
+            virtual bool bind(Material*) = 0;
+            virtual bool bind(Mesh*) = 0;
 
-            virtual bool unbind(ModelInstance* modelInstance) = 0;
-            virtual bool unbind(ShaderProgram* program) = 0;
-            virtual bool unbind(Material* material) = 0;
-            virtual bool unbind(Mesh* mesh) = 0;
+            virtual bool unbind(ModelInstance*) = 0;
+            virtual bool unbind(ShaderProgram*) = 0;
+            virtual bool unbind(Material*) = 0;
+            virtual bool unbind(Mesh*) = 0;
             
-            virtual void generatePBRData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, uint32_t convoludeSize, uint32_t prefilterSize) = 0;
+            virtual void generatePBRData(TextureCubemap&, Handle convolutionTexture, Handle preEnvTexture, uint32_t convoludeSize, uint32_t prefilterSize) = 0;
+
+            virtual void toggleShadowCaster(SunLight&, bool) = 0;
+            virtual void toggleShadowCaster(PointLight&, bool) = 0;
+            virtual void toggleShadowCaster(DirectionalLight&, bool) = 0;
+            virtual void toggleShadowCaster(SpotLight&, bool) = 0;
+            virtual void toggleShadowCaster(RodLight&, bool) = 0;
+            virtual void toggleShadowCaster(ProjectionLight&, bool) = 0;
 
             virtual bool buildShadowCaster(SunLight&) = 0;
             virtual bool buildShadowCaster(PointLight&) = 0;
@@ -121,6 +130,7 @@ namespace Engine::priv {
             virtual bool buildShadowCaster(SpotLight&) = 0;
             virtual bool buildShadowCaster(RodLight&) = 0;
             virtual bool buildShadowCaster(ProjectionLight&) = 0;
+            virtual void setShadowDirectionalLightDirection(DirectionalLight&, const glm::vec3& direction) = 0;
 
             virtual void sendGPUDataAllLights(Scene&, Camera&) = 0;
             virtual void sendGPUDataGI(Skybox*) = 0;
@@ -131,19 +141,19 @@ namespace Engine::priv {
             virtual int  sendGPUDataLight(Camera&, RodLight&,         const std::string& start) = 0;
             virtual int  sendGPUDataLight(Camera&, ProjectionLight&,  const std::string& start) = 0;
 
-            virtual void renderSunLight(Camera& camera, SunLight& sunLight, Viewport& viewport) = 0;
-            virtual void renderPointLight(Camera& camera, PointLight& pointLight) = 0;
-            virtual void renderDirectionalLight(Camera& camera, DirectionalLight& directionalLight, Viewport& viewport) = 0;
-            virtual void renderSpotLight(Camera& camera, SpotLight& spotLight) = 0;
-            virtual void renderRodLight(Camera& camera, RodLight& rodLight) = 0;
-            virtual void renderProjectionLight(Camera& camera, ProjectionLight& rodLight) = 0;
+            virtual void renderSunLight(Camera&, SunLight&, Viewport&) = 0;
+            virtual void renderPointLight(Camera&, PointLight&) = 0;
+            virtual void renderDirectionalLight(Camera&, DirectionalLight&, Viewport&) = 0;
+            virtual void renderSpotLight(Camera&, SpotLight&) = 0;
+            virtual void renderRodLight(Camera&, RodLight&) = 0;
+            virtual void renderProjectionLight(Camera&, ProjectionLight&) = 0;
 
-            virtual void renderSkybox(Skybox*, Handle shaderProgram, Scene& scene, Viewport& viewport, Camera& camera) = 0;
-            virtual void renderMesh(Mesh& mesh, uint32_t mode) = 0;
-            virtual void renderDecal(ModelInstance& decalModelInstance) = 0;
-            virtual void renderLightProbe(LightProbe& lightProbe) = 0;
+            virtual void renderSkybox(Skybox*, Handle shaderProgram, Scene&, Viewport&, Camera&) = 0;
+            virtual void renderMesh(Mesh&, uint32_t mode) = 0;
+            virtual void renderDecal(ModelInstance&) = 0;
+            virtual void renderLightProbe(LightProbe&) = 0;
 
-            virtual void renderParticles(ParticleSystem& particleSystem, Camera& camera, Handle program) = 0;
+            virtual void renderParticles(ParticleSystem&, Camera&, Handle program) = 0;
 
             virtual void render2DText(
                 const std::string& text, 
@@ -315,7 +325,7 @@ namespace Engine::priv {
             virtual void renderFullscreenTriangle() = 0;
             virtual void renderFullscreenQuad() = 0;
 
-            virtual void render(Engine::priv::RenderModule& renderer, Viewport& viewport, bool mainRenderFunction) = 0;
+            virtual void render(Engine::priv::RenderModule&, Viewport&, bool mainRenderFunction) = 0;
     };
 };
 

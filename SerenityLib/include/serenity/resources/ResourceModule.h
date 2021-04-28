@@ -16,7 +16,7 @@ namespace Engine::priv {
     class ResourceModule final {
         friend class Engine::priv::ResourceManager;
         private:
-            std::atomic<uint32_t>                          m_RegisteredResources = 0;
+            static inline std::atomic<uint32_t>            m_RegisteredResources = 0;
             std::vector<std::unique_ptr<IResourceVector>>  m_Resources;
             mutable std::mutex                             m_Mutex;
         public:
@@ -45,24 +45,19 @@ namespace Engine::priv {
             template<class TResource> [[nodiscard]] inline uint32_t getResourceTypeID() const noexcept {
                 return TResource::TYPE_ID - 1;
             }
-
             template<typename TResource>
             [[nodiscard]] LoadedResource<TResource> get(const std::string_view sv) noexcept {
                 if (sv.empty()) {
                     return {};
                 }
-                using collectionType                    = Engine::priv::ResourceVector<TResource>*;
-                const uint32_t typeIndex                = getResourceTypeID<TResource>();
-                LoadedResource<TResource> returned_data = static_cast<collectionType>(m_Resources[typeIndex].get())->get(sv);
-                returned_data.m_Handle.m_Type           = typeIndex + 1;
-                return returned_data;
+                const uint32_t typeIndex           = getResourceTypeID<TResource>();
+                LoadedResource<TResource> ret_data = static_cast<ResourceVector<TResource>*>(m_Resources[typeIndex].get())->get(sv);
+                return ret_data;
             }
-
             template<typename TResource>
             [[nodiscard]] Engine::view_ptr<TResource> get(const Handle inHandle) noexcept {
-                using collectionType     = Engine::priv::ResourceVector<TResource>*;
                 const uint32_t typeIndex = getResourceTypeID<TResource>();
-                return static_cast<collectionType>(m_Resources[typeIndex].get())->get(inHandle);
+                return static_cast<ResourceVector<TResource>*>(m_Resources[typeIndex].get())->get(inHandle);
             }
             [[nodiscard]] inline void get(void*& out, const Handle inHandle) const noexcept {
                 if (inHandle.null()) {
@@ -71,28 +66,22 @@ namespace Engine::priv {
                 }
                 m_Resources[inHandle.type() - 1]->get(out, inHandle);
             }
-
             template<typename TResource, typename ... ARGS>
             [[nodiscard]] Handle emplace(ARGS&&... args) {
-                using collectionType     = Engine::priv::ResourceVector<TResource>*;
                 const uint32_t typeIndex = registerResourceTypeID<TResource>();
-                const uint32_t index     = static_cast<const uint32_t>(static_cast<collectionType>(m_Resources[typeIndex].get())->emplace_back(std::forward<ARGS>(args)...));
+                const uint32_t index     = static_cast<const uint32_t>(static_cast<ResourceVector<TResource>*>(m_Resources[typeIndex].get())->emplace_back(std::forward<ARGS>(args)...));
                 return Handle( index, 0, typeIndex + 1 );
             }
-
             template<typename TResource>
             [[nodiscard]] Handle push(TResource&& inResource) {
-                using collectionType     = Engine::priv::ResourceVector<TResource>*;
                 const uint32_t typeIndex = registerResourceTypeID<TResource>();
-                const uint32_t index     = (const uint32_t)static_cast<collectionType>(m_Resources[typeIndex].get())->push_back(std::move(inResource));
+                const uint32_t index     = (const uint32_t)static_cast<ResourceVector<TResource>*>(m_Resources[typeIndex].get())->push_back(std::move(inResource));
                 return Handle( index, 0, typeIndex + 1 );
             }
-
             template<typename TResource>
             [[nodiscard]] std::list<Engine::view_ptr<TResource>> getAllResourcesOfType() {
-                using collectionType     = Engine::priv::ResourceVector<TResource>*;
                 const uint32_t typeIndex = getResourceTypeID<TResource>();
-                return static_cast<collectionType>(m_Resources[typeIndex].get())->getAsList();
+                return static_cast<ResourceVector<TResource>*>(m_Resources[typeIndex].get())->getAsList();
             }
     };
 };

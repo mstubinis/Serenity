@@ -9,7 +9,7 @@ class SpotLight;
 constexpr float SPOT_LIGHT_DEFAULT_CUTOFF = 11.0f;
 constexpr float SPOT_LIGHT_DEFAULT_OUTER_CUTOFF = 13.0f;
 
-class ISpotLightShadowData {
+class SpotLightShadowData {
 
 };
 

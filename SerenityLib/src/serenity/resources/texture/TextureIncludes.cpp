@@ -9,7 +9,7 @@ void ImageData::load(int width, int height, ImagePixelType pixelType, ImagePixel
     m_PixelType                = pixelType;
     m_InternalFormat           = internalFormat;
     for (auto& mip : m_Mipmaps) {
-        if (mip.null()) {
+        if (mip.isNull()) {
             mip.compressedSize = 0;
             mip.width          = width;
             mip.height         = height;
@@ -21,7 +21,7 @@ void ImageData::load(const sf::Image& sfImage, const std::string& filename) {
     m_Filename                 = filename;
     const auto imgSize         = sfImage.getSize();
     for (auto& mip : m_Mipmaps) {
-        if (mip.null()) {
+        if (mip.isNull()) {
             mip.compressedSize = 0;
             mip.width          = imgSize.x;
             mip.height         = imgSize.y;

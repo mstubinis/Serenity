@@ -27,7 +27,7 @@ namespace Engine::priv {
             std::string m_Output;
 
             //opengl timers
-            uint32_t queryID              = 0;
+            GLuint queryID                = 0;
             GLuint queryObject            = 0;
 
             //general text debugging

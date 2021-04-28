@@ -14,6 +14,7 @@ namespace Engine::priv {
     class RenderModule;
 };
 #include <serenity/renderer/pipelines/IRenderingPipeline.h>
+#include <serenity/renderer/pipelines/DeferredShadowCasters.h>
 #include <serenity/model/ModelInstanceIncludes.h>
 #include <serenity/renderer/opengl/State.h>
 #include <serenity/renderer/opengl/Extensions.h>
@@ -37,8 +38,10 @@ namespace Engine::priv {
             glm::vec4 CameraInfo3;      //realposX, realposY, realposZ, logarithmDepthBufferFCoefficient
             glm::vec4 ScreenInfo;       //mainWindowSizeX, mainWindowSizeY, viewportSizeX, viewportSizeY
             glm::vec4 RendererInfo1;    //GIPacked, gamma, unused, unused
+            glm::vec4 RendererInfo2;    //ambientR, ambientG, ambientB, unused
         };
         private:
+            Engine::priv::GLDeferredLightShadowCasters         m_ShadowCasters;
             Engine::priv::RenderModule&                        m_Renderer;
 
             glm::vec4                                          m_CurrentScissorState = glm::vec4(-1.0f);
@@ -51,9 +54,9 @@ namespace Engine::priv {
             FullscreenQuad                                     m_FullscreenQuad;
             FullscreenTriangle                                 m_FullscreenTriangle;
 
-            Engine::partial_array<glm::vec3, Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4>    m_Text_Points; //4 points per char
-            Engine::partial_array<glm::vec2, Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4>    m_Text_UVs;//4 uvs per char
-            Engine::partial_array<uint32_t,  Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 6>    m_Text_Indices;//6 ind per char
+            Engine::partial_array<glm::vec3, Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4>    m_Text_Points;  // 4 points per char
+            Engine::partial_array<glm::vec2, Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4>    m_Text_UVs;     // 4 uvs per char
+            Engine::partial_array<uint32_t,  Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 6>    m_Text_Indices; // 6 ind per char
 
             UniformBufferObject*                               m_UBOCamera = nullptr;
             UBOCameraDataStruct                                m_UBOCameraDataStruct;
@@ -72,48 +75,44 @@ namespace Engine::priv {
             void internal_gl_scissor(const glm::vec4& scissor, float depth) noexcept;
 
 
-            void internal_render_per_frame_preparation(Viewport& viewport, Camera& camera);
-            void internal_init_frame_gbuffer(Viewport& viewport, Camera& camera);
-            void internal_pass_geometry(Viewport& viewport, Camera& camera);
-            void internal_pass_ssao(Viewport& viewport, Camera& camera);
+            void internal_render_per_frame_preparation(Viewport&, Camera&);
+            void internal_pass_shadows_depth(Viewport&, Scene&);
+            void internal_init_frame_gbuffer(Viewport&, Camera&);
+            void internal_pass_geometry(Viewport&, Camera&);
+            void internal_pass_ssao(Viewport&, Camera&);
             void internal_pass_stencil();
-            void internal_pass_lighting(Viewport& viewport, Camera& camera, bool mainRenderFunction);
-            void internal_pass_lighting_basic(Viewport& viewport, Camera& camera, bool mainRenderFunction);
-            void internal_pass_forward(Viewport& viewport, Camera& camera, bool depthPrepass);
-            void internal_pass_god_rays(Viewport& viewport, Camera& camera);
-            void internal_pass_hdr(Viewport& viewport, Camera& camera, GBufferType::Type outTexture, GBufferType::Type outTexture2);
-            void internal_pass_bloom(Viewport& viewport, GBufferType::Type sceneTexture);
-            void internal_pass_depth_of_field(Viewport& viewport, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture);
-            void internal_pass_aa(bool mainRenderFunction, Viewport& viewport, Camera& camera, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture);
+            void internal_pass_lighting(Viewport&, Camera&, bool mainRenderFunction);
+            void internal_pass_lighting_basic(Viewport&, Camera&, bool mainRenderFunction);
+            void internal_pass_forward(Viewport&, Camera&, bool depthPrepass);
+            void internal_pass_god_rays(Viewport&, Camera&);
+            void internal_pass_hdr(Viewport&, Camera&, GBufferType::Type outTexture, GBufferType::Type outTexture2);
+            void internal_pass_bloom(Viewport&, GBufferType::Type sceneTexture);
+            void internal_pass_depth_of_field(Viewport&, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture);
+            void internal_pass_aa(bool mainRenderFunction, Viewport&, Camera&, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture);
             void internal_pass_final(GBufferType::Type sceneTexture);
-            void internal_pass_depth_and_transparency(Viewport& viewport, GBufferType::Type sceneTexture); //TODO: recheck this
-            bool internal_pass_depth_prepass(Viewport& viewport, Camera& camera);
-            void internal_pass_blur(Viewport& viewport, GLuint texture, std::string_view type);
+            void internal_pass_depth_and_transparency(Viewport&, GBufferType::Type sceneTexture); //TODO: recheck this
+            bool internal_pass_depth_prepass(Viewport&, Camera&);
+            void internal_pass_blur(Viewport&, GLuint texture, std::string_view type);
             void internal_pass_normaless_diffuse();
 
-            void internal_generate_pbr_data_for_texture(Handle covoludeShaderProgram, Handle prefilterShaderProgram, Texture& texture, Handle convolutionTexture, Handle preEnvTexture, uint32_t convoludeTextureSize, uint32_t preEnvFilterSize);
+            void internal_generate_pbr_data_for_texture(Handle covoludeShaderProgram, Handle prefilterShaderProgram, TextureCubemap&, Handle convolutionTexture, Handle preEnvTexture, uint32_t convoludeTextureSize, uint32_t preEnvFilterSize);
             void internal_generate_brdf_lut(Handle shaderProgram, uint32_t brdfSize, int numSamples);
 
-            void internal_render_2d_text_left(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
-            void internal_render_2d_text_center(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
-            void internal_render_2d_text_right(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z);
+            void internal_render_2d_text_left(std::string_view text, const Font&, float newLineGlyphHeight, float& x, float& y, float z);
+            void internal_render_2d_text_center(std::string_view text, const Font&, float newLineGlyphHeight, float& x, float& y, float z);
+            void internal_render_2d_text_right(std::string_view text, const Font&, float newLineGlyphHeight, float& x, float& y, float z);
 
-
-
-
-            void internal_renderTexture(std::vector<IRenderingPipeline::API2DCommand>& commands, Handle texture, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor);
-            void internal_renderTexture(std::vector<IRenderingPipeline::API2DCommand>& commands, uint32_t textureAddress,int textureWidth, int textureHeight, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor);
-            void internal_renderText(std::vector<IRenderingPipeline::API2DCommand>& commands, const std::string& t, Handle font, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor);
-            void internal_renderBorder(std::vector<IRenderingPipeline::API2DCommand>& commands, float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor);
-            void internal_renderRectangle(std::vector<IRenderingPipeline::API2DCommand>& commands, const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment align, const glm::vec4& scissor);
-            void internal_renderTriangle(std::vector<IRenderingPipeline::API2DCommand>& commands, const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor);
-
-
+            void internal_renderTexture(std::vector<IRenderingPipeline::API2DCommand>&, Handle texture, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment, const glm::vec4& scissor);
+            void internal_renderTexture(std::vector<IRenderingPipeline::API2DCommand>&, uint32_t textureAddress,int textureWidth, int textureHeight, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment, const glm::vec4& scissor);
+            void internal_renderText(std::vector<IRenderingPipeline::API2DCommand>&, const std::string& t, Handle font, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment, const glm::vec4& scissor);
+            void internal_renderBorder(std::vector<IRenderingPipeline::API2DCommand>&, float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment, const glm::vec4& scissor);
+            void internal_renderRectangle(std::vector<IRenderingPipeline::API2DCommand>&, const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment, const glm::vec4& scissor);
+            void internal_renderTriangle(std::vector<IRenderingPipeline::API2DCommand>&, const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment, const glm::vec4& scissor);
 
 
             DeferredPipeline() = delete;
         public:
-            DeferredPipeline(Engine::priv::RenderModule& renderer);
+            DeferredPipeline(Engine::priv::RenderModule&);
             ~DeferredPipeline();
 
             void init() override;
@@ -126,8 +125,8 @@ namespace Engine::priv {
             void clear2DAPI() override;
             void sort2DAPI() override;
 
-            void renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport, Camera& camera, Scene& scene) override;
-            void render2DAPI(const std::vector<IRenderingPipeline::API2DCommand>& commands, bool mainRenderFunc, Viewport& viewport, bool clearDepth = true) override;
+            void renderPhysicsAPI(bool mainRenderFunc, Viewport&, Camera&, Scene&) override;
+            void render2DAPI(const std::vector<IRenderingPipeline::API2DCommand>& commands, bool mainRenderFunc, Viewport&, bool clearDepth = true) override;
 
             ShaderProgram* getCurrentBoundShaderProgram() override;
             Material* getCurrentBoundMaterial() override;
@@ -148,10 +147,10 @@ namespace Engine::priv {
             bool colorMask(bool r, bool g, bool b, bool alpha) override;
             bool clearColor(bool r, bool g, bool b, bool alpha) override;
 
-            bool bindTextureForModification(TextureType textureType, uint32_t textureObject) override;
+            bool bindTextureForModification(TextureType, uint32_t textureObject) override;
             bool bindVAO(uint32_t vaoObject) override;
             bool deleteVAO(uint32_t& vaoObject) override;
-            void generateAndBindTexture(TextureType textureType, uint32_t& textureObject) override;
+            void generateAndBindTexture(TextureType, uint32_t& textureObject) override;
             void generateAndBindVAO(uint32_t& vaoObject) override;
 
             bool enableAPI(uint32_t apiEnum) override;
@@ -160,27 +159,35 @@ namespace Engine::priv {
             bool disableAPI_i(uint32_t apiEnum, uint32_t index) override;
 
             void clearTexture(int unit, uint32_t textureTarget) override;
-            void sendTexture(const char* location, Texture& texture, int unit) override;
+            void sendTexture(const char* location, Texture&, int unit) override;
+            void sendTexture(const char* location, TextureCubemap&, int unit) override;
             void sendTexture(const char* location, uint32_t textureObject, int unit, uint32_t textureTarget) override;
-            void sendTextureSafe(const char* location, Texture& texture, int unit) override;
+            void sendTextureSafe(const char* location, Texture&, int unit) override;
+            void sendTextureSafe(const char* location, TextureCubemap&, int unit) override;
             void sendTextureSafe(const char* location, uint32_t textureObject, int unit, uint32_t textureTarget) override;
 
             bool bindReadFBO(uint32_t fbo) override;
             bool bindDrawFBO(uint32_t fbo) override;
             bool bindRBO(uint32_t rbo) override;
 
-            bool bind(ModelInstance* modelInstance) override;
-            bool bind(ShaderProgram* program) override;
-            bool bind(Material* material) override;
-            bool bind(Mesh* mesh) override;
+            bool bind(ModelInstance*) override;
+            bool bind(ShaderProgram*) override;
+            bool bind(Material*) override;
+            bool bind(Mesh*) override;
 
-            bool unbind(ModelInstance* modelInstance) override;
-            bool unbind(ShaderProgram* program) override;
-            bool unbind(Material* material) override;
-            bool unbind(Mesh* mesh) override;
+            bool unbind(ModelInstance*) override;
+            bool unbind(ShaderProgram*) override;
+            bool unbind(Material*) override;
+            bool unbind(Mesh*) override;
 
-            void generatePBRData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, uint32_t convoludeSize, uint32_t prefilterSize) override;
+            void generatePBRData(TextureCubemap&, Handle convolutionTexture, Handle preEnvTexture, uint32_t convoludeSize, uint32_t prefilterSize) override;
 
+            void toggleShadowCaster(SunLight&, bool) override;
+            void toggleShadowCaster(PointLight&, bool) override;
+            void toggleShadowCaster(DirectionalLight&, bool) override;
+            void toggleShadowCaster(SpotLight&, bool) override;
+            void toggleShadowCaster(RodLight&, bool) override;
+            void toggleShadowCaster(ProjectionLight&, bool) override;
 
             bool buildShadowCaster(SunLight&) override;
             bool buildShadowCaster(PointLight&) override;
@@ -188,6 +195,7 @@ namespace Engine::priv {
             bool buildShadowCaster(SpotLight&) override;
             bool buildShadowCaster(RodLight&) override;
             bool buildShadowCaster(ProjectionLight&) override;
+            void setShadowDirectionalLightDirection(DirectionalLight&, const glm::vec3& direction) override;
 
             void sendGPUDataAllLights(Scene&, Camera&) override;
             void sendGPUDataGI(Skybox*) override;
@@ -198,45 +206,45 @@ namespace Engine::priv {
             int  sendGPUDataLight(Camera&, RodLight&,         const std::string& start) override;
             int  sendGPUDataLight(Camera&, ProjectionLight&,  const std::string& start) override;
 
-            void renderSkybox(Skybox*, Handle shaderProgram, Scene& scene, Viewport& viewport, Camera& camera) override;
-            void renderSunLight(Camera& c, SunLight& s, Viewport& viewport) override;
-            void renderPointLight(Camera& c, PointLight& p) override;
-            void renderDirectionalLight(Camera& c, DirectionalLight& d, Viewport& viewport) override;
-            void renderSpotLight(Camera& c, SpotLight& s) override;
-            void renderRodLight(Camera& c, RodLight& r) override;
-            void renderProjectionLight(Camera& c, ProjectionLight& r) override;
-            void renderMesh(Mesh& mesh, uint32_t mode = (uint32_t)ModelDrawingMode::Triangles) override;
-            void renderDecal(ModelInstance& decalModelInstance) override;
+            void renderSkybox(Skybox*, Handle shaderProgram, Scene&, Viewport&, Camera&) override;
+            void renderSunLight(Camera&, SunLight&, Viewport&) override;
+            void renderPointLight(Camera&, PointLight&) override;
+            void renderDirectionalLight(Camera&, DirectionalLight&, Viewport&) override;
+            void renderSpotLight(Camera&, SpotLight&) override;
+            void renderRodLight(Camera&, RodLight&) override;
+            void renderProjectionLight(Camera&, ProjectionLight&) override;
+            void renderMesh(Mesh&, uint32_t mode = (uint32_t)ModelDrawingMode::Triangles) override;
+            void renderDecal(ModelInstance&) override;
 
-            void renderParticles(ParticleSystem& particleSystem, Camera& camera, Handle program) override;
+            void renderParticles(ParticleSystem&, Camera&, Handle program) override;
 
-            void renderLightProbe(LightProbe& lightProbe) override;
+            void renderLightProbe(LightProbe&) override;
 
-            void render2DText(const std::string& text, Handle font, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, TextAlignment textAlignment, const glm::vec4& scissor = NO_SCISSOR) override;
-            void render2DTexture(Handle texture, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, Alignment align, const glm::vec4& scissor = NO_SCISSOR) override;
-            void render2DTexture(uint32_t textureAddress, int textureWidth, int textureHeight, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, Alignment align, const glm::vec4& scissor = NO_SCISSOR) override;
-            void render2DTriangle(const glm::vec2& pos, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor = NO_SCISSOR) override;
-
-
-            void renderTexture(Handle texture, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) override;
-            void renderTexture(uint32_t textureAddress, int textureWidth, int textureHeight, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) override;
-            void renderText(const std::string& t, Handle font, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) override;
-            void renderBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) override;
-            void renderRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment align, const glm::vec4& scissor) override;
-            void renderTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) override;
+            void render2DText(const std::string& text, Handle font, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, TextAlignment, const glm::vec4& scissor = NO_SCISSOR) override;
+            void render2DTexture(Handle texture, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, Alignment, const glm::vec4& scissor = NO_SCISSOR) override;
+            void render2DTexture(uint32_t textureAddress, int textureWidth, int textureHeight, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, Alignment, const glm::vec4& scissor = NO_SCISSOR) override;
+            void render2DTriangle(const glm::vec2& pos, const glm::vec4& color, float angle, float width, float height, float depth, Alignment, const glm::vec4& scissor = NO_SCISSOR) override;
 
 
-            void renderBackgroundTexture(Handle texture, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) override;
-            void renderBackgroundText(const std::string& t, Handle font, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) override;
-            void renderBackgroundBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) override;
-            void renderBackgroundRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment align, const glm::vec4& scissor) override;
-            void renderBackgroundTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) override;
+            void renderTexture(Handle texture, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment, const glm::vec4& scissor) override;
+            void renderTexture(uint32_t textureAddress, int textureWidth, int textureHeight, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment, const glm::vec4& scissor) override;
+            void renderText(const std::string& t, Handle font, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment, const glm::vec4& scissor) override;
+            void renderBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment, const glm::vec4& scissor) override;
+            void renderRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment, const glm::vec4& scissor) override;
+            void renderTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment, const glm::vec4& scissor) override;
+
+
+            void renderBackgroundTexture(Handle texture, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment, const glm::vec4& scissor) override;
+            void renderBackgroundText(const std::string& t, Handle font, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment, const glm::vec4& scissor) override;
+            void renderBackgroundBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment, const glm::vec4& scissor) override;
+            void renderBackgroundRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment, const glm::vec4& scissor) override;
+            void renderBackgroundTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment, const glm::vec4& scissor) override;
 
 
             void renderFullscreenTriangle() override;
             void renderFullscreenQuad() override;
 
-            void render(Engine::priv::RenderModule& renderer, Viewport& viewport, bool mainRenderFunction) override;
+            void render(Engine::priv::RenderModule&, Viewport&, bool mainRenderFunction) override;
     };
 };
 

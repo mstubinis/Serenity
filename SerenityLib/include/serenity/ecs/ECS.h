@@ -29,8 +29,13 @@ namespace Engine::priv {
             std::vector<Entity>                             m_JustAddedEntities;
             std::vector<Entity>                             m_DestroyedEntities;
             std::vector<std::unique_ptr<sparse_set_base>>   m_ComponentPools;
-            std::mutex                                      m_Mutex;
+            std::recursive_mutex                            m_MutexRecursive; //recursive as addComponent() can often be nested
             SceneOptions                                    m_SceneOptions;
+
+
+            template<class COMPONENT> [[nodiscard]] Engine::view_ptr<COMPONENT> internal_get_component(Entity entity) noexcept {
+                return getComponentPool<COMPONENT>().getComponent(entity);
+            }
         public:
             ECS() = default;
             ECS(const ECS&)                = delete;
@@ -107,7 +112,7 @@ namespace Engine::priv {
             template<class COMPONENT, class ... ARGS> bool addComponent(Entity entity, ARGS&&... args) noexcept {
                 COMPONENT* addedComponent = nullptr;
                 {
-                    std::lock_guard lock{ m_Mutex };
+                    std::lock_guard lock{ m_MutexRecursive };
                     addedComponent = getComponentPool<COMPONENT>().addComponent(entity, std::forward<ARGS>(args)...);
                 }
                 if (addedComponent) {
@@ -119,7 +124,7 @@ namespace Engine::priv {
             template<class COMPONENT> bool removeComponent(Entity entity) noexcept {
                 bool didRemove  = false;
                 {
-                    std::lock_guard lock{ m_Mutex };
+                    std::lock_guard lock{ m_MutexRecursive };
                     didRemove = getComponentPool<COMPONENT>().removeComponent(entity);
                     if (didRemove) {
                         m_SystemPool.onComponentRemovedFromEntity(COMPONENT::TYPE_ID, entity);
@@ -127,13 +132,23 @@ namespace Engine::priv {
                 }
                 return didRemove;
             }
-
-            template<class COMPONENT> [[nodiscard]] inline constexpr Engine::view_ptr<COMPONENT> getComponent(Entity entity) noexcept {
-                return getComponentPool<COMPONENT>().getComponent(entity);
+            //gets the component. this is NOT thread safe
+            template<class COMPONENT> [[nodiscard]] Engine::view_ptr<COMPONENT> getComponent(Entity entity) noexcept {
+                return internal_get_component<COMPONENT>(entity);
             }
-
-            template<class ... TYPES> [[nodiscard]] inline constexpr std::tuple<Engine::view_ptr<TYPES>...> getComponents(Entity entity) noexcept {
-                return std::make_tuple( getComponent<TYPES>(entity)... );
+            //gets the components. this is NOT thread safe
+            template<class ... TYPES> [[nodiscard]] std::tuple<Engine::view_ptr<TYPES>...> getComponents(Entity entity) noexcept { 
+                return std::make_tuple(internal_get_component<TYPES>(entity)...);
+            }
+            //gets the component in a thread safe manner
+            template<class COMPONENT> [[nodiscard]] Engine::view_ptr<COMPONENT> getComponentMt(Entity entity) noexcept {
+                std::lock_guard lock{ m_MutexRecursive };
+                return internal_get_component<COMPONENT>(entity);
+            }
+            //gets the components in a thread safe manner
+            template<class ... TYPES> [[nodiscard]] std::tuple<Engine::view_ptr<TYPES>...> getComponentsMt(Entity entity) noexcept {
+                std::lock_guard lock{ m_MutexRecursive };
+                return std::make_tuple(internal_get_component<TYPES>(entity)...);
             }
     };
 };

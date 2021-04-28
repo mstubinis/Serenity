@@ -88,7 +88,7 @@ void Engine::priv::GBuffer::internal_Start(std::vector<uint32_t>& types, std::st
     bool b = (channels.find("B") != std::string::npos);
     bool a = (channels.find("A") != std::string::npos);
 
-    GLCall(glDrawBuffers(types[0] != 0 ? (GLsizei)types.size() : (GLsizei)0, types.data()));
+    glDrawBuffers(types[0] != 0 ? (GLsizei)types.size() : (GLsizei)0, types.data());
     Engine::Renderer::colorMask(r, g, b, a);
 }
 void Engine::priv::GBuffer::bindFramebuffers(std::string_view channels, bool mainFBO) {

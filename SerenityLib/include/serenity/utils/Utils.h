@@ -75,55 +75,42 @@ namespace Engine {
         return inPtr && typeid(DERIVED) == typeid(*inPtr);
     }
 }
-template <class OutType, class Data> void readBigEndian(OutType& out, Data& dataBuffer, uint32_t inBufferSizeInBytes, uint32_t& offset) noexcept {
-    out = (uint32_t)dataBuffer[offset + 0U] << (8U * (inBufferSizeInBytes - 1U));
-    for (auto i = 1U; i < inBufferSizeInBytes; ++i) {
-        out |= (uint32_t)dataBuffer[offset + i] << (8U * ((inBufferSizeInBytes - i) - 1U));
+
+template <class OutType, class Data> void readBigEndian(OutType& out, const Data& dataBuffer, const uint32_t inBufferSizeInBytes, uint32_t& offset) noexcept {
+    out = (OutType)dataBuffer[offset] << 8 * (inBufferSizeInBytes - 1);
+    for (uint32_t i = 1; i < inBufferSizeInBytes; ++i) {
+        out |= (OutType)dataBuffer[offset + i] << 8 * ((inBufferSizeInBytes - i) - 1);
     }
     offset += inBufferSizeInBytes;
 }
-template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutType& out, uint32_t inBufferSizeInBytes) noexcept {
-    std::vector<uint8_t> buffer(inBufferSizeInBytes, 0);
+template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutType& out, const uint32_t inBufferSizeInBytes) noexcept {
+    std::vector<uint8_t> buffer( inBufferSizeInBytes, 0 );
     inStream.read((char*)buffer.data(), inBufferSizeInBytes);
-
-    out = (uint32_t)buffer[0] << (8U * (inBufferSizeInBytes - 1U));
-    for (auto i = 1U; i < inBufferSizeInBytes; ++i) {
-        out |= (uint32_t)buffer[i] << (8U * ((inBufferSizeInBytes - i) - 1U));
+    out = (OutType)buffer[0] << 8 * (inBufferSizeInBytes - 1);
+    for (uint32_t i = 1; i < inBufferSizeInBytes; ++i) {
+        out |= (OutType)buffer[i] << 8 * ((inBufferSizeInBytes - i) - 1);
     }
 }
 template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutType& out) noexcept {
     readBigEndian(inStream, out, sizeof(out));
 }
-template <class InType, class Stream> void writeBigEndian(Stream& inStream, InType& in, uint32_t inBufferSizeInBytes) noexcept {
-    std::vector<uint8_t> buffer(inBufferSizeInBytes, 0);
-    uint64_t offset = 255U;
+template <class InType, class Stream> void writeBigEndian(Stream& inStream, const InType& in, const uint32_t inBufferSizeInBytes) noexcept {
+    std::vector<uint8_t> buffer( inBufferSizeInBytes, 0 );
+    uint64_t offset    = 255;
     for (int i = int(inBufferSizeInBytes) - 1; i >= 0; --i) {
-        uint32_t shift = (8U * ((inBufferSizeInBytes - 1U) - i));
-        buffer[i] = (in & (InType)offset) >> shift;
-        offset = (offset * 255U) + offset;
+        uint32_t shift = (8 * ((inBufferSizeInBytes - 1) - i));
+        buffer[i]      = (in & (InType)offset) >> shift;
+        offset       <<= 8;
     }
     inStream.write((char*)buffer.data(), buffer.size());
 }
-template <class InType, class Stream> void writeBigEndian(Stream& inStream, InType&& in, uint32_t inBufferSizeInBytes) noexcept {
-    std::vector<uint8_t> buffer(inBufferSizeInBytes, 0);
-    uint64_t offset = 255U;
-    for (int i = int(inBufferSizeInBytes) - 1; i >= 0; --i) {
-        uint32_t shift = (8U * ((inBufferSizeInBytes - 1U) - i));
-        buffer[i]  = (in & (InType)offset) >> shift;
-        offset     = (offset * 255U) + offset;
-    }
-    inStream.write((char*)buffer.data(), buffer.size());
-}
-template <class InType, class Stream> void writeBigEndian(Stream& inStream, InType& in) noexcept {
-    writeBigEndian(inStream, in, sizeof(in));
-}
-template <class InType, class Stream> void writeBigEndian(Stream& inStream, InType&& in) noexcept {
+template <class InType, class Stream> void writeBigEndian(Stream& inStream, const InType& in) noexcept {
     writeBigEndian(inStream, in, sizeof(in));
 }
 //specifies if a specific pointer element is in a vector
-template<class E, class B> bool isInVector(std::vector<B*>& v, E* e) noexcept {
-    for (auto& item : v) {
-        if (item == e) {
+template<class E, class B> bool isInVector(const std::vector<B*>& inVector, const E* element) noexcept {
+    for (auto& item : inVector) {
+        if (item == element) {
             return true;
         }
     }
@@ -131,11 +118,11 @@ template<class E, class B> bool isInVector(std::vector<B*>& v, E* e) noexcept {
 }
 
 //formats a number to have commas to represent thousandth places
-std::string numToCommasImpl(std::string s, int start, int end) noexcept;
+std::string numToCommasImpl(std::string str, int start, int end) noexcept;
 
-template<class T> std::string convertNumToNumWithCommas(const T& n) noexcept {
-    std::string r = std::to_string(n);
-    return numToCommasImpl(r, 0, r.size() - 1);
+template<class T> std::string convertNumToNumWithCommas(const T& number) noexcept {
+    std::string res = std::to_string(number);
+    return numToCommasImpl(res, 0, (int)res.size() - 1);
 }
 
 #endif

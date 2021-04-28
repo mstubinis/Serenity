@@ -2,6 +2,7 @@
 #include <serenity/resources/material/MaterialLoader.h>
 #include <serenity/resources/material/MaterialComponent.h>
 #include <serenity/resources/texture/Texture.h>
+#include <serenity/resources/texture/TextureCubemap.h>
 #include <serenity/resources/material/Material.h>
 #include <serenity/system/Engine.h>
 #include <serenity/events/Event.h>
@@ -12,12 +13,12 @@ void Engine::priv::MaterialLoader::Init(Material& material, Handle diffuse, Hand
     if (!normal.null())      material.internal_add_component_generic(MaterialComponentType::Normal,     normal);
     if (!glow.null())        material.internal_add_component_generic(MaterialComponentType::Glow,       glow);
     if (!specular.null())    material.internal_add_component_generic(MaterialComponentType::Specular,   specular);
-    if (!ao.null())          material.internal_add_component_generic(MaterialComponentType::AO,         ao);
     if (!metal.null())       material.internal_add_component_generic(MaterialComponentType::Metalness,  metal);
     if (!smooth.null())      material.internal_add_component_generic(MaterialComponentType::Smoothness, smooth);
+    if (!ao.null())          material.internal_add_component_generic(MaterialComponentType::AO, ao);
 }
 void Engine::priv::MaterialLoader::InitBase(Material& material) {
-    material.m_Components.reserve(MAX_MATERIAL_COMPONENTS);
+    material.m_Components.resize(MAX_MATERIAL_COMPONENTS);
     material.internal_update_global_material_pool(true);
 }
 
@@ -31,6 +32,17 @@ LoadedResource<Texture> Engine::priv::MaterialLoader::internal_load_texture(std:
         }
     }
     return texture;
+}
+LoadedResource<TextureCubemap> Engine::priv::MaterialLoader::internal_load_texture_cubemap(std::string_view file, bool mipmapped, ImageInternalFormat format) {
+    LoadedResource<TextureCubemap> cubemap;
+    if (!file.empty()) {
+        cubemap = Engine::Resources::getResource<TextureCubemap>(file);
+        if (!cubemap.m_Resource) {
+            cubemap.m_Handle   = Engine::Resources::addResource<TextureCubemap>(file, mipmapped, format);
+            cubemap.m_Resource = cubemap.m_Handle.get<TextureCubemap>();
+        }
+    }
+    return cubemap;
 }
 LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureDiffuse(std::string_view file) {
     return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D);
@@ -56,8 +68,8 @@ LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureSmoothness(std:
 LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureMask(std::string_view file) {
     return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::R8, TextureType::Texture2D);
 }
-LoadedResource<Texture> Engine::priv::MaterialLoader::LoadTextureCubemap(std::string_view file) {
-    return internal_load_texture(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::SRGB8_ALPHA8, TextureType::CubeMap);
+LoadedResource<TextureCubemap> Engine::priv::MaterialLoader::LoadTextureCubemap(std::string_view file) {
+    return internal_load_texture_cubemap(file, ENGINE_MIPMAP_DEFAULT, ImageInternalFormat::SRGB8_ALPHA8);
 }
 void Engine::priv::PublicMaterial::LoadGPU(Material& material) {
     material.Resource::load();

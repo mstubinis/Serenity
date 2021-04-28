@@ -11,7 +11,7 @@ class Texture;
 
 struct TextureRequestPart final {
     Engine::priv::TextureCPUData  m_CPUData;
-    Engine::ResourceCallback      m_Callback  = [](Handle) {};
+    Engine::ResourceCallback      m_Callback    = [](Handle) {};
     Handle                        m_Handle      = Handle{};
     bool                          m_Async       = false;
 
@@ -30,12 +30,11 @@ struct TextureRequest final {
         std::string           m_FileExtension;
         bool                  m_FileExists    = false;
     };
-
     TextureRequestPart        m_Part;
     bool                      m_FromMemory    = false;
 
     //either one or the other, using both at once won't happen
-    FileData                  m_FileData;
+    TextureRequest::FileData  m_FileData;
     sf::Image                 m_SFMLImage;
 
     TextureRequest() = delete;

@@ -16,7 +16,7 @@ namespace Engine::priv {
 constexpr float PROJECTION_LIGHT_DEFAULT_NEAR = 0.01f;
 constexpr float PROJECTION_LIGHT_DEFAULT_FAR  = 1000.0f;
 
-class IProjectionLightShadowData {
+class ProjectionLightShadowData {
 
 };
 

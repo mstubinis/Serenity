@@ -73,75 +73,75 @@ void Engine::priv::PublicScene::UpdateMaterials(Scene& scene, const float dt) {
         }
     }
 }
-void Engine::priv::PublicScene::RenderGeometryOpaque(RenderModule& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
+void Engine::priv::PublicScene::RenderGeometryOpaque(RenderModule& renderer, Scene& scene, Viewport* viewport, Camera* camera, bool useDefaultShaders) {
     for (size_t i = (size_t)RenderStage::GeometryOpaque; i < (size_t)RenderStage::GeometryOpaque_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
-            render_graph_ptr.render(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
+            render_graph_ptr.validate_model_instances_for_rendering(camera, viewport);
+            render_graph_ptr.render(renderer, camera, useDefaultShaders, SortingMode::None);
         }
     }
 }
-void Engine::priv::PublicScene::RenderGeometryTransparent(RenderModule& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
+void Engine::priv::PublicScene::RenderGeometryTransparent(RenderModule& renderer, Scene& scene, Viewport* viewport, Camera* camera, bool useDefaultShaders) {
     for (size_t i = (size_t)RenderStage::GeometryTransparent; i < (size_t)RenderStage::GeometryTransparent_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             render_graph_ptr.sort(camera, SortingMode::BackToFront);
-            render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
-            render_graph_ptr.render(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
+            render_graph_ptr.validate_model_instances_for_rendering(camera, viewport);
+            render_graph_ptr.render(renderer, camera, useDefaultShaders, SortingMode::None);
         }
     }
 }
-void Engine::priv::PublicScene::RenderGeometryTransparentTrianglesSorted(RenderModule& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
+void Engine::priv::PublicScene::RenderGeometryTransparentTrianglesSorted(RenderModule& renderer, Scene& scene, Viewport* viewport, Camera* camera, bool useDefaultShaders) {
     for (size_t i = (size_t)RenderStage::GeometryTransparentTrianglesSorted; i < (size_t)RenderStage::GeometryTransparentTrianglesSorted_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             render_graph_ptr.sort(camera, SortingMode::FrontToBack);
-            render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
-            render_graph_ptr.render(renderer, viewport, camera, useDefaultShaders, SortingMode::FrontToBack);
+            render_graph_ptr.validate_model_instances_for_rendering(camera, viewport);
+            render_graph_ptr.render(renderer, camera, useDefaultShaders, SortingMode::FrontToBack);
         }
     }
 }
-void Engine::priv::PublicScene::RenderForwardOpaque(RenderModule& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
+void Engine::priv::PublicScene::RenderForwardOpaque(RenderModule& renderer, Scene& scene, Viewport* viewport, Camera* camera, bool useDefaultShaders) {
     for (size_t i = (size_t)RenderStage::ForwardOpaque; i < (size_t)RenderStage::ForwardOpaque_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
-            render_graph_ptr.render(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
+            render_graph_ptr.validate_model_instances_for_rendering(camera, viewport);
+            render_graph_ptr.render(renderer, camera, useDefaultShaders, SortingMode::None);
         }
     }
 }
-void Engine::priv::PublicScene::RenderForwardTransparent(RenderModule& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
+void Engine::priv::PublicScene::RenderForwardTransparent(RenderModule& renderer, Scene& scene, Viewport* viewport, Camera* camera, bool useDefaultShaders) {
     for (size_t i = (size_t)RenderStage::ForwardTransparent; i < (size_t)RenderStage::ForwardTransparent_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             render_graph_ptr.sort_bruteforce(camera, SortingMode::BackToFront);
-            render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
-            render_graph_ptr.render_bruteforce(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
+            render_graph_ptr.validate_model_instances_for_rendering(camera, viewport);
+            render_graph_ptr.render_bruteforce(renderer, camera, useDefaultShaders, SortingMode::None);
         }
     }
 }
-void Engine::priv::PublicScene::RenderForwardTransparentTrianglesSorted(RenderModule& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
+void Engine::priv::PublicScene::RenderForwardTransparentTrianglesSorted(RenderModule& renderer, Scene& scene, Viewport* viewport, Camera* camera, bool useDefaultShaders) {
     for (size_t i = (size_t)RenderStage::ForwardTransparentTrianglesSorted; i < (size_t)RenderStage::ForwardTransparentTrianglesSorted_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             //TODO: sort_bruteforce and render_bruteforce doesn't work here... probably has to do with custom binds and unbinds and custom shader(s)
             render_graph_ptr.sort(camera, SortingMode::FrontToBack);
-            render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
-            render_graph_ptr.render(renderer, viewport, camera, useDefaultShaders, SortingMode::FrontToBack);
+            render_graph_ptr.validate_model_instances_for_rendering(camera, viewport);
+            render_graph_ptr.render(renderer, camera, useDefaultShaders, SortingMode::FrontToBack);
         }
     }
 }
-void Engine::priv::PublicScene::RenderForwardParticles(RenderModule& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
+void Engine::priv::PublicScene::RenderForwardParticles(RenderModule& renderer, Scene& scene, Viewport* viewport, Camera* camera, bool useDefaultShaders) {
     for (size_t i = (size_t)RenderStage::ForwardParticles; i < (size_t)RenderStage::ForwardParticles_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             auto& render_graph = const_cast<RenderGraph&>(render_graph_ptr);
             render_graph.sort_cheap_bruteforce(camera, SortingMode::BackToFront);
-            render_graph.validate_model_instances_for_rendering(viewport, camera);
-            render_graph.render_bruteforce(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
+            render_graph.validate_model_instances_for_rendering(camera, viewport);
+            render_graph.render_bruteforce(renderer, camera, useDefaultShaders, SortingMode::None);
         }
     }
 }
-void Engine::priv::PublicScene::RenderDecals(RenderModule& renderer, Scene& scene, Viewport& viewport, Camera& camera, bool useDefaultShaders) {
+void Engine::priv::PublicScene::RenderDecals(RenderModule& renderer, Scene& scene, Viewport* viewport, Camera* camera, bool useDefaultShaders) {
     for (size_t i = (size_t)RenderStage::Decals; i < (size_t)RenderStage::Decals_4; ++i) {
         for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
             render_graph_ptr.sort(camera, SortingMode::None);
-            render_graph_ptr.validate_model_instances_for_rendering(viewport, camera);
-            render_graph_ptr.render(renderer, viewport, camera, useDefaultShaders, SortingMode::None);
+            render_graph_ptr.validate_model_instances_for_rendering(camera, viewport);
+            render_graph_ptr.render(renderer, camera, useDefaultShaders, SortingMode::None);
         }
     }
 }
@@ -190,7 +190,7 @@ Scene::Scene(uint32_t id, std::string_view name, const SceneOptions& options)
     : m_ParticleSystem{ options.maxAmountOfParticleEmitters, options.maxAmountOfParticles }
 {
     m_ECS.init(options);
-
+    //register lights
     m_LightsModule.registerLightType<SunLight>();
     m_LightsModule.registerLightType<PointLight>();
     m_LightsModule.registerLightType<DirectionalLight>();
@@ -198,7 +198,7 @@ Scene::Scene(uint32_t id, std::string_view name, const SceneOptions& options)
     m_LightsModule.registerLightType<RodLight>();
     m_LightsModule.registerLightType<ProjectionLight>();
 
-    //init components
+    //register components
     m_ECS.registerComponent<ComponentLogic>();
     m_ECS.registerComponent<ComponentTransform>();
     m_ECS.registerComponent<ComponentRigidBody>();
@@ -211,7 +211,7 @@ Scene::Scene(uint32_t id, std::string_view name, const SceneOptions& options)
     m_ECS.registerComponent<ComponentName>();
 
     Engine::priv::ComponentCollisionShapeDeferredLoading::get().registerEvent(EventType::ResourceLoaded);
-    //init systems
+    //register systems
     m_ECS.registerSystemOrdered<SystemAddRigidBodies>(1000);
 
     m_ECS.registerSystemOrdered<SystemResolveTransformDirty, ComponentTransform, ComponentRigidBody>(2000);
@@ -238,7 +238,7 @@ Scene::Scene(uint32_t id, std::string_view name, const SceneOptions& options)
     m_ECS.registerSystemOrdered<SystemRemoveRigidBodies>(18000);
 
     m_ECS.registerSystemOrdered<SystemComponentTransformDebugDraw, ComponentTransform, ComponentModel>(19000);
-
+    //
     m_ID = id;
     setName(name);
 

@@ -20,15 +20,19 @@ constexpr std::array<PointLightDefaultAttenuationData, (size_t)LightRange::_TOTA
     { 1.0f, 0.0014f, 0.000007f },
 } };
 
-PointLight::PointLight(Scene* scene, LightType type, const glm_vec3& pos)
-    : SunLight{ scene, pos, type }
+PointLight::PointLight(Scene* scene, LightType type, decimal x, decimal y, decimal z)
+    : SunLight{ scene, x, y, z, type }
     , m_CullingRadius{ calculateCullingRadius() }
 {}
-PointLight::PointLight(Scene* scene, const glm_vec3& pos)
-    : PointLight{ scene, LightType::Point, pos }
+PointLight::PointLight(Scene* scene, LightType type, const glm_vec3& pos)
+    : PointLight{ scene, type, pos.x, pos.y, pos.z }
 {}
-PointLight::~PointLight() {
-}
+PointLight::PointLight(Scene* scene, decimal x, decimal y, decimal z)
+    : PointLight{ scene, LightType::Point, x, y, z }
+{}
+PointLight::PointLight(Scene* scene, const glm_vec3& pos)
+    : PointLight{ scene, LightType::Point, pos.x, pos.y, pos.z }
+{}
 float PointLight::calculateCullingRadius() {
     float lightMax = Engine::Math::Max(m_Color.x, m_Color.y, m_Color.z);
     float radius = 0;

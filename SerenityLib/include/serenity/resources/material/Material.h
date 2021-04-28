@@ -54,14 +54,14 @@ class Material final : public Resource<Material> {
         DiffuseModel                      m_DiffuseModel        = DiffuseModel::Lambert; //uint8_t
         SpecularModel                     m_SpecularModel       = SpecularModel::Cook_Torrance; //uint8_t
         uint8_t                           m_BaseGlow            = 1_uc;
-        uint8_t                           m_BaseAO              = 254_uc;
         uint8_t                           m_BaseMetalness       = 1_uc;
         uint8_t                           m_BaseSmoothness      = 64_uc;
+        uint8_t                           m_BaseAO              = 254_uc;
         uint8_t                           m_BaseAlpha           = 254_uc;
         bool                              m_Shadeless           = false;
         bool                              m_UpdatedThisFrame    = false;
     private:
-        MaterialComponent* internal_add_component_generic(MaterialComponentType type, Handle texture, Handle mask = Handle{}, Handle cubemap = {});
+        MaterialComponent* internal_add_component_generic(MaterialComponentType type, Handle texture, Handle mask = Handle{}, Handle cubemap = Handle{});
         void internal_update_global_material_pool(bool addToDatabase) noexcept;
     public:
         Material();
@@ -86,10 +86,10 @@ class Material final : public Resource<Material> {
             Handle smoothness = Handle{}
         );
 
-        Material(const Material& other)                 = delete;
-        Material& operator=(const Material& other)      = delete;
-        Material(Material&& other) noexcept;
-        Material& operator=(Material&& other) noexcept;
+        Material(const Material&)                 = delete;
+        Material& operator=(const Material&)      = delete;
+        Material(Material&&) noexcept;
+        Material& operator=(Material&&) noexcept;
         ~Material();
 
         inline void setCustomBindFunctor(const bind_fp& functor) noexcept { m_CustomBindFunctor = functor; }
@@ -103,9 +103,9 @@ class Material final : public Resource<Material> {
         MaterialComponent& addComponentNormal(std::string_view textureFile);
         MaterialComponent& addComponentGlow(std::string_view textureFile);
         MaterialComponent& addComponentSpecular(std::string_view textureFile);
-        MaterialComponent& addComponentAO(std::string_view textureFile, uint8_t baseValue = 255_uc);
         MaterialComponent& addComponentMetalness(std::string_view textureFile, uint8_t baseValue = 255_uc);
         MaterialComponent& addComponentSmoothness(std::string_view textureFile, uint8_t baseValue = 255_uc);
+        MaterialComponent& addComponentAO(std::string_view textureFile, uint8_t baseValue = 255_uc);
         MaterialComponent& addComponentReflection(std::string_view cubeMapName, const std::string& mapFile, float mixFactor = 1.0f);
         MaterialComponent& addComponentRefraction(std::string_view cubeMapName, const std::string& mapFile, float refractiveIndex = 1.0f, float mixFactor = 1.0f);
         MaterialComponent& addComponentParallaxOcclusion(std::string_view textureFile, float heightScale = 0.1f);
@@ -116,9 +116,9 @@ class Material final : public Resource<Material> {
         [[nodiscard]] inline MaterialID getID() const noexcept { return m_ID; }
         [[nodiscard]] inline DiffuseModel getDiffuseModel() const noexcept { return m_DiffuseModel; }
         [[nodiscard]] inline SpecularModel getSpecularModel() const noexcept { return m_SpecularModel; }
-        [[nodiscard]] inline uint8_t getAO() const noexcept { return m_BaseAO; }
         [[nodiscard]] inline uint8_t getMetalness() const noexcept { return m_BaseMetalness; }
         [[nodiscard]] inline uint8_t getSmoothness() const noexcept { return m_BaseSmoothness; }
+        [[nodiscard]] inline uint8_t getAO() const noexcept { return m_BaseAO; }
         [[nodiscard]] inline uint8_t getAlpha() const noexcept { return m_BaseAlpha; }
         
         void setF0Color(uint8_t r, uint8_t g, uint8_t b) noexcept;
@@ -127,9 +127,9 @@ class Material final : public Resource<Material> {
         void setMaterialPhysics(MaterialPhysics);
         void setShadeless(bool shadeless);
         void setGlow(uint8_t glow);
+        void setMetalness(uint8_t metalness);
         void setSmoothness(uint8_t smoothness);
         void setAO(uint8_t ao);
-        void setMetalness(uint8_t metalness);
         void setAlpha(uint8_t alpha);
     
         void setSpecularModel(SpecularModel);

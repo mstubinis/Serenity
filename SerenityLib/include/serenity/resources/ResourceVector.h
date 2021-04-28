@@ -6,19 +6,19 @@
 #include <serenity/threading/ThreadingModule.h>
 
 namespace Engine::priv {
-    template<typename TResource>
+    template<class TResource>
     class ResourceVector final : public IResourceVector {
 
         struct Entry final {
             std::unique_ptr<TResource>  m_Resource;
-            uint32_t                    m_Version{ 0 };
+            uint32_t                    m_Version   = 0;
 
-            template<typename ... ARGS>
+            template<class ... ARGS>
             Entry(ARGS&&... args){
                 m_Resource = std::make_unique<TResource>(std::forward<ARGS>(args)...);
             }
-            Entry(const Entry& other)                = delete;
-            Entry& operator=(const Entry& other)     = delete;
+            Entry(const Entry&)                = delete;
+            Entry& operator=(const Entry&)     = delete;
             Entry(Entry&& other) noexcept
                 : m_Version  { std::move(other.m_Version) }
                 , m_Resource { std::move(other.m_Resource) }
@@ -43,10 +43,10 @@ namespace Engine::priv {
                 m_Resources.reserve(reserveSize);
                 m_AvailableIndices.reserve(reserveSize);
             }
-            ResourceVector(const ResourceVector& other)                = delete;
-            ResourceVector& operator=(const ResourceVector& other)     = delete;
-            ResourceVector(ResourceVector&& other) noexcept            = delete;
-            ResourceVector& operator=(ResourceVector&& other) noexcept = delete;
+            ResourceVector(const ResourceVector&)                = delete;
+            ResourceVector& operator=(const ResourceVector&)     = delete;
+            ResourceVector(ResourceVector&&) noexcept            = delete;
+            ResourceVector& operator=(ResourceVector&&) noexcept = delete;
 
             [[nodiscard]] inline constexpr size_t size() const noexcept override {
                 return m_Resources.size(); 
@@ -93,10 +93,11 @@ namespace Engine::priv {
                 out = (void*)internal_get(inHandle);
             }
 
+            //O(n) linear search
             [[nodiscard]] LoadedResource<TResource> get(const std::string_view sv) noexcept {
                 for (uint32_t i = 0; i < (uint32_t)m_Resources.size(); ++i) {
                     if (m_Resources[i].m_Resource->name() == sv) {
-                        return { internal_get(i), Handle{i, m_Resources[i].m_Version, 0U} };
+                        return { internal_get(i), Handle{i, m_Resources[i].m_Version, TResource::TYPE_ID} };
                     }
                 }
                 return {};
@@ -164,7 +165,7 @@ namespace Engine::priv {
                 m_Resources.reserve(inSize); 
             }
 
-
+            //O(n) linked-list assembly from array
             [[nodiscard]] std::list<Engine::view_ptr<TResource>> getAsList() {
                 std::list<Engine::view_ptr<TResource>> returnedList;
                 for (const auto& entry : m_Resources) {

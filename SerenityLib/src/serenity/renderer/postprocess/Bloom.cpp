@@ -14,17 +14,17 @@ Engine::priv::Bloom Engine::priv::Bloom::STATIC_BLOOM;
 
 void Engine::priv::Bloom::internal_init_fragment_code() {
     STATIC_BLOOM.m_GLSL_frag_code = R"(
-        const vec3 ConstantZeroVec3 = vec3(0.0, 0.0, 0.0);
-        uniform SAMPLER_TYPE_2D SceneTexture;
+const vec3 ConstantZeroVec3 = vec3(0.0, 0.0, 0.0);
+uniform SAMPLER_TYPE_2D SceneTexture;
 
-        uniform vec4 Data; //x = scale y = threshold z = exposure w = UNUSED
-        varying vec2 texcoords;
+uniform vec4 Data; //x = scale y = threshold z = exposure w = UNUSED
+varying vec2 texcoords;
 
-        void main(){
-            vec3 sceneColor = texture2D(SceneTexture, texcoords).rgb;
-            sceneColor = vec3(1.0) - exp(-sceneColor * Data.z); //exposure
-            gl_FragColor.rgb = max(ConstantZeroVec3, sceneColor - vec3(Data.y)) * Data.x; //threshold   scale
-        }
+void main(){
+    vec3 sceneColor = texture2D(SceneTexture, texcoords).rgb;
+    sceneColor = vec3(1.0) - exp(-sceneColor * Data.z); //exposure
+    gl_FragColor.rgb = max(ConstantZeroVec3, sceneColor - vec3(Data.y)) * Data.x; //threshold   scale
+}
     )";
 }
 bool Engine::priv::Bloom::init() {

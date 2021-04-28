@@ -2,6 +2,7 @@
 #ifndef ENGINE_MATERIAL_LAYER_H
 #define ENGINE_MATERIAL_LAYER_H
 
+class  MaterialComponent;
 class  MaterialLayer;
 class  Texture;
 
@@ -10,6 +11,22 @@ class  Texture;
 #include <serenity/dependencies/glm.h>
 #include <vector>
 #include <functional>
+
+
+struct MaterialLayerBaseData final {
+    float enabled  = 0.0f;
+    float unused_1 = 0.0f;
+    float unused_2 = 0.0f;
+    float unused_3 = 0.0f;
+
+    constexpr MaterialLayerBaseData() = default;
+    constexpr MaterialLayerBaseData(const float enabled_, const float unused_1_, const float unused_2_, const float unused_3_)
+        : enabled{ enabled_ }
+        , unused_1{ unused_1_ }
+        , unused_2{ unused_2_ }
+        , unused_3{ unused_3_ }
+    {}
+};
 
 struct MaterialLayerTextureData final {
     float blendMode      = (float)MaterialLayerBlendMode::Default;
@@ -41,6 +58,7 @@ struct MaterialLayerMiscData final {
 };
 
 class MaterialLayer final {
+    friend class MaterialComponent;
     struct FuncModifyUVs final {
         using FuncPtr = void(*)(const float x, const float y, const float dt, MaterialLayer& layer);
 
@@ -57,6 +75,7 @@ class MaterialLayer final {
     private:
         std::vector<FuncModifyUVs> m_UVModFuncs;
 
+        MaterialLayerBaseData      m_MaterialLayerBaseData;
         MaterialLayerTextureData   m_MaterialLayerTextureData;
         MaterialLayerMiscData      m_MaterialLayerMiscData;
 
@@ -68,7 +87,19 @@ class MaterialLayer final {
         Handle                     m_CubemapHandle                 = Handle{};
 
         void internal_set_texture_and_property(Handle textureHandleValue, Handle& textureHandle, float& propertyVar, float value) noexcept;
-        float internal_get_texture_compression_value(Handle textureHandle) noexcept;
+
+        template<class TEXTURE> float internal_get_texture_compression_value(Handle textureHandle) noexcept {
+            if (!textureHandle.null()) {
+                auto mutex = textureHandle.getMutex();
+                bool isCompressed = false;
+                if (mutex) {
+                    std::lock_guard lock{ *mutex };
+                    isCompressed = textureHandle.get<TEXTURE>()->compressed();
+                }
+                return isCompressed ? 0.5f : 1.0f;
+            }
+            return 0.0f;
+        }
     public:
         MaterialLayer() = default;
         MaterialLayer(const MaterialLayer&)                 = delete;
@@ -83,6 +114,7 @@ class MaterialLayer final {
         [[nodiscard]] inline constexpr Handle getMask() const noexcept { return m_MaskHandle; }
         [[nodiscard]] inline constexpr Handle getCubemap() const noexcept { return m_CubemapHandle; }
 
+        [[nodiscard]] inline constexpr const MaterialLayerBaseData& getMaterialLayerBaseData() const noexcept { return m_MaterialLayerBaseData; }
         [[nodiscard]] inline constexpr const MaterialLayerTextureData& getMaterialLayerTextureData() const noexcept { return m_MaterialLayerTextureData; }
         [[nodiscard]] inline constexpr const MaterialLayerMiscData& getMaterialLayerMiscData() const noexcept { return m_MaterialLayerMiscData; }
         [[nodiscard]] inline constexpr MaterialLayerBlendMode getBlendMode() const noexcept { return (MaterialLayerBlendMode)((unsigned int)m_MaterialLayerTextureData.blendMode); }

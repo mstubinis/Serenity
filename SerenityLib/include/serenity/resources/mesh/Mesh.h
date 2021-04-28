@@ -126,9 +126,9 @@ class Mesh final: public Resource<Mesh>, public Observer {
         inline void setCustomUnbindFunctor(UnbindFunc&& functor) noexcept { m_CustomUnbindFunctor = std::move(functor); }
 
         [[nodiscard]] Engine::priv::MeshSkeleton::AnimationDataMap& getAnimationData();
-        [[nodiscard]] inline constexpr const glm::vec3& getRadiusBox() const noexcept { return m_CPUData.m_RadiusBox; }
-        [[nodiscard]] inline constexpr float getRadius() const noexcept { return m_CPUData.m_Radius; }
-        [[nodiscard]] inline constexpr const VertexData& getVertexData() const noexcept { return *m_CPUData.m_VertexData; }
+        [[nodiscard]] inline const glm::vec3& getRadiusBox() const noexcept { return m_CPUData.m_RadiusBox; }
+        [[nodiscard]] inline float getRadius() const noexcept { return m_CPUData.m_Radius; }
+        [[nodiscard]] inline const VertexData& getVertexData() const noexcept { return *m_CPUData.m_VertexData; }
         [[nodiscard]] inline Engine::priv::MeshSkeleton* getSkeleton() noexcept { return m_CPUData.m_Skeleton; }
 
         void onEvent(const Event&);

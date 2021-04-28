@@ -41,12 +41,13 @@ enum class MaterialComponentType : uint8_t {
     Normal,
     Glow,
     Specular,
-    AO,
     Metalness,
     Smoothness,
+    AO,
     Reflection,
     Refraction,
     ParallaxOcclusion,
+    Empty,
 _TOTAL};
 enum class MaterialPhysics : uint8_t {
     Water = 0,

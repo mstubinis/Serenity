@@ -40,23 +40,24 @@ void Engine::priv::SSAO::internal_generate_noise(std::uniform_real_distribution<
     for (uint32_t i = 0; i < SSAO_NORMALMAP_SIZE * SSAO_NORMALMAP_SIZE; ++i) {
         ssaoNoise.emplace_back(rand_dist(gen) * 2.0 - 1.0, rand_dist(gen) * 2.0 - 1.0, 0.0f);
     }
-    Engine::Renderer::genAndBindTexture(TextureType::Texture2D, m_ssao_noise_texture);
-    GLCall(glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB16F, SSAO_NORMALMAP_SIZE, SSAO_NORMALMAP_SIZE, 0, GL_RGB, GL_FLOAT, ssaoNoise.data() ));
-    Texture::setFilter(TextureType::Texture2D, TextureFilter::Nearest);
-    Texture::setWrapping(TextureType::Texture2D, TextureWrap::Repeat);
+    const TextureType textureType = TextureType::Texture2D;
+    Engine::Renderer::genAndBindTexture(textureType, m_ssao_noise_texture);
+    glTexImage2D(textureType.toGLType(), 0, GL_RGB16F, SSAO_NORMALMAP_SIZE, SSAO_NORMALMAP_SIZE, 0, GL_RGB, GL_FLOAT, ssaoNoise.data() );
+    Texture::setFilter(textureType, TextureFilter::Nearest);
+    TextureBaseClass::setWrapping(textureType, TextureWrap::Repeat);
 }
 void Engine::priv::SSAO::internal_init_blur_fragment_code() {
     STATIC_SSAO.m_GLSL_frag_code_blur = R"(
-        uniform sampler2D image;
-        uniform vec4 Data;
-        varying vec2 texcoords;
-        const int NUM_SAMPLES = 9;
-        const float weight[NUM_SAMPLES] = float[](0.227, 0.21, 0.1946, 0.162, 0.12, 0.08, 0.054, 0.03, 0.016);
-        void main(){
-            float Sum = 0.0;
-            vec2 inverseResolution = vec2(1.0) / vec2(ScreenInfo.z, ScreenInfo.w);
-            for(int i = 0; i < NUM_SAMPLES; ++i){
-                vec2 offset = (inverseResolution * float(i)) * Data.x;
+uniform sampler2D image;
+uniform vec4 Data;
+varying vec2 texcoords;
+const int NUM_SAMPLES = 9;
+const float weight[NUM_SAMPLES] = float[](0.227, 0.21, 0.1946, 0.162, 0.12, 0.08, 0.054, 0.03, 0.016);
+void main(){
+    float Sum = 0.0;
+    vec2 inverseResolution = vec2(1.0) / ScreenInfo.zw;
+    for(int i = 0; i < NUM_SAMPLES; ++i){
+        vec2 offset = (inverseResolution * float(i)) * Data.x;
     )";
     std::string varName = "image";
     if (OpenGLExtensions::isBindlessTexturesSupported()) {
@@ -67,32 +68,32 @@ void Engine::priv::SSAO::internal_init_blur_fragment_code() {
         "Sum += texture2D(" + varName + ", texcoords + vec2(offset.x * Data.z, offset.y * Data.w)).a * weight[i] * Data.y;\n"
         "Sum += texture2D(" + varName + ", texcoords - vec2(offset.x * Data.z, offset.y * Data.w)).a * weight[i] * Data.y;\n";
     STATIC_SSAO.m_GLSL_frag_code_blur += R"(
-            }
-            gl_FragColor.a = Sum;
-        }
+    }
+    gl_FragColor.a = Sum;
+}
     )";
 }
 void Engine::priv::SSAO::internal_init_fragment_code() {
     STATIC_SSAO.m_GLSL_frag_code = R"(
-        uniform SAMPLER_TYPE_2D gNormalMap;
-        uniform SAMPLER_TYPE_2D gRandomMap;
-        uniform SAMPLER_TYPE_2D gDepthMap;
+uniform SAMPLER_TYPE_2D gNormalMap;
+uniform SAMPLER_TYPE_2D gRandomMap;
+uniform SAMPLER_TYPE_2D gDepthMap;
 
-        uniform vec2  ScreenSize;
-        uniform vec4  SSAOInfo;  //   x = radius     y = intensity    z = bias        w = scale
-        uniform ivec4 SSAOInfoA;//    x = UNUSED     y = UNUSED       z = Samples     w = NoiseTextureSize
+uniform vec2  ScreenSize;
+uniform vec4  SSAOInfo;  //   x = radius     y = intensity    z = bias        w = scale
+uniform ivec4 SSAOInfoA;//    x = UNUSED     y = UNUSED       z = Samples     w = NoiseTextureSize
 
-        varying vec2 texcoords;
-        void main(){
-            vec3 Pos = GetViewPosition(USE_SAMPLER_2D(gDepthMap), texcoords, CameraNear, CameraFar);
-            vec3 Normal = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), texcoords).rg);
-            Normal = GetViewNormalsFromWorld(Normal, CameraView);
-            vec2 RandVector = normalize(texture2D(USE_SAMPLER_2D(gRandomMap), ScreenSize * texcoords / SSAOInfoA.w).xy);
-        //  float CamZ = distance(Pos, CameraPosition);
-            float Radius = SSAOInfo.x / max(Pos.z, 100.0);
-        //  float Radius = SSAOInfo.x / Pos.z;
-            gl_FragColor.a = SSAOExecute(USE_SAMPLER_2D(gDepthMap), texcoords, SSAOInfoA.z, SSAOInfoA.w, RandVector, Radius, Pos, Normal, SSAOInfo.y, SSAOInfo.z, SSAOInfo.w);
-        }
+varying vec2 texcoords;
+void main(){
+    vec3 Pos = GetViewPosition(USE_SAMPLER_2D(gDepthMap), texcoords, CameraNear, CameraFar);
+    vec3 Normal = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), texcoords).rg);
+    Normal = GetViewNormalsFromWorld(Normal, CameraView);
+    vec2 RandVector = normalize(texture2D(USE_SAMPLER_2D(gRandomMap), ScreenSize * texcoords / SSAOInfoA.w).xy);
+//  float CamZ = distance(Pos, CameraPosition);
+    float Radius = SSAOInfo.x / max(Pos.z, 100.0);
+//  float Radius = SSAOInfo.x / Pos.z;
+    gl_FragColor.a = SSAOExecute(USE_SAMPLER_2D(gDepthMap), texcoords, SSAOInfoA.z, SSAOInfoA.w, RandVector, Radius, Pos, Normal, SSAOInfo.y, SSAOInfo.z, SSAOInfo.w);
+}
     )";
 }
 bool Engine::priv::SSAO::init() {

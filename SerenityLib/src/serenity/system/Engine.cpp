@@ -90,9 +90,9 @@ void EngineCore::internal_init_os_specific(const EngineOptions& options) {
             if (GetConsoleWindow() == NULL) {
                 AllocConsole();
             }
-            ShowWindow(GetConsoleWindow(), SW_SHOW);//show console window
+            ShowWindow(GetConsoleWindow(), SW_SHOW); //show console window
         }else if (!args.contains("console")) {
-            ShowWindow(GetConsoleWindow(), SW_HIDE);//hide console window
+            ShowWindow(GetConsoleWindow(), SW_HIDE); //hide console window
         }
     #endif
 }

@@ -4,6 +4,7 @@
 
 class  Viewport;
 class  Texture;
+class  TextureCubemap;
 class  Font;
 class  Decal;
 struct BufferObject;
@@ -51,10 +52,10 @@ namespace Engine::priv {
             float                                m_GI_Global         = 1.0f;
             float                                m_GI_Pack           = 0.0f;
             bool                                 m_Lighting          = true;
+            bool                                 m_DrawSkybox        = true;
             bool                                 m_DrawPhysicsDebug  = false;
         public:
-            RenderModule(const EngineOptions& options);
-            ~RenderModule() = default;
+            RenderModule(const EngineOptions&);
 
             void _init();
             void _resize(uint32_t width, uint32_t height);
@@ -73,20 +74,20 @@ namespace Engine::priv {
             void _clear2DAPICommands();
             void _sort2DAPICommands();
 
-            bool bind(ModelInstance* modelInstance) const;
-            bool unbind(ModelInstance* modelInstance) const;
+            bool bind(ModelInstance*) const;
+            bool unbind(ModelInstance*) const;
 
-            bool bind(ShaderProgram* shaderProgram) const;
-            bool unbind(ShaderProgram* shaderProgram) const;
+            bool bind(ShaderProgram*) const;
+            bool unbind(ShaderProgram*) const;
 
-            bool bind(Mesh* mesh) const;
-            bool unbind(Mesh* mesh) const;
+            bool bind(Mesh*) const;
+            bool unbind(Mesh*) const;
 
-            bool bind(Material* material) const;
-            bool unbind(Material* material) const;
+            bool bind(Material*) const;
+            bool unbind(Material*) const;
 
             inline float _getGIPackedData() noexcept { return m_GI_Pack; }
-            void _genPBREnvMapData(Texture&, Handle convolutionTexture, Handle preEnvTexture, uint32_t, uint32_t);
+            void _genPBREnvMapData(TextureCubemap&, Handle convolutionTexture, Handle preEnvTexture, uint32_t, uint32_t);
     };
 }
 
@@ -97,9 +98,11 @@ namespace Engine::Renderer {
         const float getGamma();
         void clear(bool color = true, bool depth = true, bool stencil = true);
         void applyGlobalAnisotropicFiltering(float filtering);
-        bool setAntiAliasingAlgorithm(AntiAliasingAlgorithm AA_algorithm);
+        bool setAntiAliasingAlgorithm(AntiAliasingAlgorithm);
         void enableDrawPhysicsInfo(bool b = true);
         void disableDrawPhysicsInfo();
+        void enableSkybox(bool = true);
+        void disableSkybox();
 
         namespace Lighting {
             void enable(bool b = true);
@@ -162,9 +165,9 @@ namespace Engine::Renderer {
     bool stencilOp(GLenum sFail, GLenum sPassDepthFail, GLenum sPassDepthPass);
 
     void bindFBO(GLuint fbo);
-    void bindFBO(const priv::FramebufferObject& rbo);
+    void bindFBO(const priv::FramebufferObject&);
     bool bindRBO(GLuint rbo);
-    bool bindRBO(priv::RenderbufferObject& rbo);
+    bool bindRBO(priv::RenderbufferObject&);
     bool bindReadFBO(GLuint fbo);
     bool bindDrawFBO(GLuint fbo);
 
@@ -178,22 +181,24 @@ namespace Engine::Renderer {
     bool GLEnablei(GLenum capability, GLuint index);
     bool GLDisablei(GLenum capability, GLuint index);
 
-    bool bindTextureForModification(TextureType textureType, GLuint textureObject);
+    bool bindTextureForModification(TextureType, GLuint textureObject);
 
     bool bindVAO(GLuint vaoObject);
-    void genAndBindTexture(TextureType textureType, GLuint& textureObject);
+    void genAndBindTexture(TextureType, GLuint& textureObject);
     void genAndBindVAO(GLuint& vaoObject);
     bool deleteVAO(GLuint& vaoObject);
     bool colorMask(bool r, bool g, bool b, bool a);
     bool clearColor(float r, float g, float b, float a);
 
     void clearTexture(int slot, GLuint glTextureType);
-    void sendTexture(const char* location, Texture& texture, int slot);
+    void sendTexture(const char* location, Texture&, int slot);
+    void sendTexture(const char* location, TextureCubemap&, int slot);
     void sendTexture(const char* location, GLuint textureAddress, int slot, GLuint glTextureType);
-    void sendTextureSafe(const char* location, Texture& texture, int slot);
+    void sendTextureSafe(const char* location, Texture&, int slot);
+    void sendTextureSafe(const char* location, TextureCubemap&, int slot);
     void sendTextureSafe(const char* location, GLuint textureAddress, int slot, GLuint glTextureType);
 
-    void alignmentOffset(Alignment align, float& x, float& y, float width, float height);
+    void alignmentOffset(Alignment, float& x, float& y, float width, float height);
 
     void renderTexture(
         Handle texture,

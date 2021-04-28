@@ -14,32 +14,32 @@ Engine::priv::GodRays Engine::priv::GodRays::STATIC_GOD_RAYS;
 
 void Engine::priv::GodRays::internal_init_fragment_code() {
     STATIC_GOD_RAYS.m_GLSL_frag_code = R"(
-        uniform vec4 RaysInfo; //exposure | decay | density | weight
+uniform vec4 RaysInfo; //exposure | decay | density | weight
 
-        uniform vec2 lightPositionOnScreen;
-        uniform SAMPLER_TYPE_2D firstPass;
-        uniform int samples;
+uniform vec2 lightPositionOnScreen;
+uniform SAMPLER_TYPE_2D firstPass;
+uniform int samples;
 
-        uniform float alpha;
-        varying vec2 texcoords;
-        void main(){
-            vec2 uv = texcoords;
-            vec2 deltaUV = vec2(uv - lightPositionOnScreen);
-            deltaUV *= 1.0 /  float(samples) * RaysInfo.z;
-            float illuminationDecay = 1.0;
-            vec3 totalColor = vec3(0.0);
-            for(int i = 0; i < samples; ++i){
-                uv -= deltaUV / 2.0;
-                vec2 sampleData = texture2D(firstPass, uv).ba;
-                vec2 unpackedRG = Unpack2NibblesFrom8BitChannel(sampleData.r);
-                vec3 realSample = vec3(unpackedRG.r, unpackedRG.g, sampleData.g);
-                realSample *= illuminationDecay * RaysInfo.w;
-                totalColor += realSample;
-                illuminationDecay *= RaysInfo.y;
-            }
-            gl_FragColor.rgb = (totalColor * alpha) * RaysInfo.x;
-            gl_FragColor.a = 1.0;
-        }
+uniform float alpha;
+varying vec2 texcoords;
+void main(){
+    vec2 uv = texcoords;
+    vec2 deltaUV = vec2(uv - lightPositionOnScreen);
+    deltaUV *= 1.0 /  float(samples) * RaysInfo.z;
+    float illuminationDecay = 1.0;
+    vec3 totalColor = vec3(0.0);
+    for(int i = 0; i < samples; ++i){
+        uv -= deltaUV / 2.0;
+        vec2 sampleData = texture2D(firstPass, uv).ba;
+        vec2 unpackedRG = Unpack2NibblesFrom8BitChannel(sampleData.r);
+        vec3 realSample = vec3(unpackedRG.r, unpackedRG.g, sampleData.g);
+        realSample *= illuminationDecay * RaysInfo.w;
+        totalColor += realSample;
+        illuminationDecay *= RaysInfo.y;
+    }
+    gl_FragColor.rgb = (totalColor * alpha) * RaysInfo.x;
+    gl_FragColor.a = 1.0;
+}
     )";
 }
 bool Engine::priv::GodRays::init() {

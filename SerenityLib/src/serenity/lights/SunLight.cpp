@@ -5,15 +5,16 @@
 #include <serenity/scene/Scene.h>
 #include <serenity/system/Engine.h>
 
-SunLight::SunLight(Scene* scene, const glm_vec3& pos, LightType type)
+SunLight::SunLight(Scene* scene, decimal x, decimal y, decimal z, LightType type)
     : EntityBody{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
     , m_Type{ type }
 {
     addComponent<ComponentTransform>();
-    SunLight::setPosition(pos);
+    SunLight::setPosition(x, y, z);
 }
-SunLight::~SunLight() {
-}
+SunLight::SunLight(Scene* scene, const glm_vec3& pos, LightType type)
+    : SunLight{ scene, pos.x, pos.y, pos.z, type }
+{}
 glm_vec3 SunLight::getPosition() const { return getComponent<ComponentTransform>()->getPosition(); }
 void SunLight::setPosition(decimal x, decimal y, decimal z) { getComponent<ComponentTransform>()->setPosition(x, y, z); }
 void SunLight::setPosition(decimal position) { getComponent<ComponentTransform>()->setPosition(position, position, position); }

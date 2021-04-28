@@ -63,6 +63,7 @@ class Scene: public Observer {
         mutable Engine::priv::LightsModule          m_LightsModule;
         UpdateFP                                    m_OnUpdateFunctor     = [](Scene*, const float) {};
         glm::vec3                                   m_GI                  = glm::vec3{ 1.0f };
+        glm::vec3                                   m_AmbientColor        = glm::vec3{ 0.05f, 0.05f, 0.05f };
         std::string                                 m_Name;
         Skybox*                                     m_Skybox              = nullptr;
         uint32_t                                    m_ID                  = 0;
@@ -109,6 +110,10 @@ class Scene: public Observer {
 
         inline void setOnUpdateFunctor(const UpdateFP& functor) noexcept { m_OnUpdateFunctor = functor; }
         inline void setOnUpdateFunctor(UpdateFP&& functor) noexcept { m_OnUpdateFunctor = std::move(functor); }
+
+        [[nodiscard]] inline const glm::vec3& getAmbientColor() const noexcept { return m_AmbientColor; }
+        inline void setAmbientColor(const glm::vec3& color) noexcept { Scene::setAmbientColor(color.r, color.g, color.b); }
+        inline void setAmbientColor(float r, float g, float b) noexcept { m_AmbientColor = glm::vec3{ r, g, b }; }
 
         [[nodiscard]] inline constexpr uint32_t id() const noexcept { return m_ID; }
         [[nodiscard]] inline uint32_t numViewports() const noexcept { return (uint32_t)m_Viewports.size(); }
@@ -179,14 +184,14 @@ namespace Engine::priv {
 
         static void                       UpdateMaterials(Scene&, const float dt);
 
-        static void                       RenderGeometryOpaque(RenderModule&, Scene&, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void                       RenderGeometryTransparent(RenderModule&, Scene&, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void                       RenderGeometryTransparentTrianglesSorted(RenderModule&, Scene&, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void                       RenderForwardOpaque(RenderModule&, Scene&, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void                       RenderForwardTransparent(RenderModule&, Scene&, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void                       RenderForwardTransparentTrianglesSorted(RenderModule&, Scene&, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void                       RenderForwardParticles(RenderModule&, Scene&, Viewport&, Camera&, bool useDefaultShaders = true);
-        static void                       RenderDecals(RenderModule&, Scene&, Viewport&, Camera&, bool useDefaultShaders = true);
+        static void                       RenderGeometryOpaque(RenderModule&, Scene&, Viewport*, Camera*, bool useDefaultShaders = true);
+        static void                       RenderGeometryTransparent(RenderModule&, Scene&, Viewport*, Camera*, bool useDefaultShaders = true);
+        static void                       RenderGeometryTransparentTrianglesSorted(RenderModule&, Scene&, Viewport*, Camera*, bool useDefaultShaders = true);
+        static void                       RenderForwardOpaque(RenderModule&, Scene&, Viewport*, Camera*, bool useDefaultShaders = true);
+        static void                       RenderForwardTransparent(RenderModule&, Scene&, Viewport*, Camera*, bool useDefaultShaders = true);
+        static void                       RenderForwardTransparentTrianglesSorted(RenderModule&, Scene&, Viewport*, Camera*, bool useDefaultShaders = true);
+        static void                       RenderForwardParticles(RenderModule&, Scene&, Viewport*, Camera*, bool useDefaultShaders = true);
+        static void                       RenderDecals(RenderModule&, Scene&, Viewport*, Camera*, bool useDefaultShaders = true);
         static void                       RenderParticles(RenderModule&, Scene&, Viewport&, Camera&, Handle program);
 
         static void                       AddModelInstanceToPipeline(Scene&, ModelInstance&, RenderStage);

@@ -12,11 +12,10 @@ namespace Engine::priv {
 #include <serenity/ecs/entity/EntityBody.h>
 #include <glm/vec4.hpp>
 
-constexpr float LIGHT_DEFAULT_AMBIENT_INTENSITY  = 0.005f;
 constexpr float LIGHT_DEFAULT_DIFFUSE_INTENSITY  = 2.0f;
 constexpr float LIGHT_DEFAULT_SPECULAR_INTENSITY = 1.0f;
 
-class ISunLightShadowData {
+class SunLightShadowData {
 
 };
 
@@ -24,7 +23,6 @@ class SunLight : public EntityBody {
     friend class ::Engine::priv::RenderModule;
     protected:
         glm::vec4          m_Color             = glm::vec4{ 1.0f };
-        float              m_AmbientIntensity  = LIGHT_DEFAULT_AMBIENT_INTENSITY;
         float              m_DiffuseIntensity  = LIGHT_DEFAULT_DIFFUSE_INTENSITY;
         float              m_SpecularIntensity = LIGHT_DEFAULT_SPECULAR_INTENSITY;
         LightType          m_Type              = LightType::Sun;
@@ -32,10 +30,9 @@ class SunLight : public EntityBody {
         bool               m_Active            = true;
     public:
         SunLight() = delete;
-        SunLight(Scene* scene, const glm_vec3& position = glm_vec3(0.0), LightType type = LightType::Sun);
-        virtual ~SunLight();
-
-
+        SunLight(Scene* scene, const glm_vec3& position, LightType type = LightType::Sun);
+        SunLight(Scene* scene, decimal x, decimal y, decimal z, LightType type = LightType::Sun);
+        virtual ~SunLight() = default;
 
         [[nodiscard]] bool isShadowCaster() const noexcept;
         virtual bool setShadowCaster(bool castsShadow) noexcept;
@@ -44,12 +41,8 @@ class SunLight : public EntityBody {
         [[nodiscard]] inline  const glm::vec4& getColor() const noexcept { return m_Color; }
         [[nodiscard]] inline constexpr bool isActive() const noexcept { return m_Active; }
         [[nodiscard]] inline constexpr LightType getType() const noexcept { return m_Type; }
-        [[nodiscard]] inline constexpr float getAmbientIntensity() const noexcept { return m_AmbientIntensity; }
         [[nodiscard]] inline constexpr float getDiffuseIntensity() const noexcept { return m_DiffuseIntensity; }
         [[nodiscard]] inline constexpr float getSpecularIntensity() const noexcept { return m_SpecularIntensity; }
-
-        //default ambient intensity is 0.005
-        void setAmbientIntensity(float a) noexcept { m_AmbientIntensity = a; }
 
         //default diffuse intensity is 2.0
         void setDiffuseIntensity(float d) noexcept { m_DiffuseIntensity = d; }
@@ -68,7 +61,6 @@ class SunLight : public EntityBody {
 
         //default color is white (1.0, 1.0, 1.0, 1.0)
         void setColor(const glm::vec3& color) noexcept { m_Color.r = color.r; m_Color.g = color.g; m_Color.b = color.b; }
-
 
         void setPosition(decimal x, decimal y, decimal z);
         void setPosition(decimal position);

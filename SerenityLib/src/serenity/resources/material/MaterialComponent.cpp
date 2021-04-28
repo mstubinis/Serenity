@@ -6,24 +6,23 @@
 #include <serenity/scene/Scene.h>
 #include <serenity/scene/Skybox.h>
 #include <serenity/resources/texture/Texture.h>
+#include <serenity/resources/texture/TextureCubemap.h>
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-
-using namespace Engine;
-using namespace Engine::priv;
 
 constexpr std::array<glm::vec4, (size_t)MaterialComponentType::_TOTAL> MISC_DATA_INFO { {
     { 1.0f, 1.0f, 1.0f, 1.0f }, // Diffuse
     { 1.0f, 1.0f, 1.0f, 1.0f }, // Normal
     { 0.0f, 1.0f, 1.0f, 0.0f }, // Glow
     { 0.0f, 1.0f, 1.0f, 0.0f }, // Specular
-    { 0.0f, 1.0f, 1.0f, 0.0f }, // AO
     { 0.0f, 1.0f, 1.0f, 0.0f }, // Metalness
     { 0.0f, 1.0f, 1.0f, 0.0f }, // Smoothness
+    { 0.0f, 1.0f, 1.0f, 0.0f }, // AO
     { 1.0f, 1.0f, 1.0f, 1.0f }, // Reflection
     { 1.0f, 1.0f, 1.0f, 1.0f }, // Refraction
     { 1.0f, 1.0f, 1.0f, 1.0f }, // ParallaxOcclusion
+    { 0.0f, 0.0f, 0.0f, 0.0f }, // Empty
 } };
 
 MaterialComponent::MaterialComponent(MaterialComponentType type, Handle textureHandle, Handle maskHandle, Handle cubemapHandle)
@@ -44,12 +43,12 @@ MaterialComponent& MaterialComponent::operator=(MaterialComponent&& other) noexc
 }
 MaterialLayer* MaterialComponent::addLayer(const std::string& textureFile, const std::string& maskFile, const std::string& cubemapFile) {
     if (m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT) {
-        ENGINE_PRODUCTION_LOG("MaterialComponent::addLayer(string...): m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT!")
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(string...): m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT!")
         return nullptr;
     }
     auto texture = Engine::Resources::getResource<Texture>(textureFile);
     auto mask    = Engine::Resources::getResource<Texture>(maskFile);
-    auto cubemap = Engine::Resources::getResource<Texture>(cubemapFile);
+    auto cubemap = Engine::Resources::getResource<TextureCubemap>(cubemapFile);
 
     if (!texture.m_Resource && !textureFile.empty()) {
         texture.m_Handle   = Engine::Resources::addResource<Texture>(textureFile, false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D);
@@ -60,17 +59,18 @@ MaterialLayer* MaterialComponent::addLayer(const std::string& textureFile, const
         mask.m_Resource = mask.m_Handle.get<Texture>();
     }
     if (!cubemap.m_Resource && !cubemapFile.empty()) {
-        cubemap.m_Handle   = Engine::Resources::addResource<Texture>(cubemapFile, false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::CubeMap);
-        cubemap.m_Resource = cubemap.m_Handle.get<Texture>();
+        cubemap.m_Handle   = Engine::Resources::addResource<TextureCubemap>(cubemapFile, false, ImageInternalFormat::SRGB8_ALPHA8);
+        cubemap.m_Resource = cubemap.m_Handle.get<TextureCubemap>();
     }
     return addLayer(texture.m_Handle, mask.m_Handle, cubemap.m_Handle);
 }
 MaterialLayer* MaterialComponent::addLayer(Handle textureHandle, Handle maskHandle, Handle cubemapHandle) {
     if (m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT) {
-        ENGINE_PRODUCTION_LOG("MaterialComponent::addLayer(Handle...): m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT!")
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(Handle...): m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT!")
         return nullptr;
     }
     auto& layer = m_Layers[m_NumLayers];
+    layer.m_MaterialLayerBaseData.enabled = 1.0f;
     layer.setTexture(textureHandle);
     layer.setMask(maskHandle);
     layer.setCubemap(cubemapHandle);
@@ -80,8 +80,8 @@ MaterialLayer* MaterialComponent::addLayer(Handle textureHandle, Handle maskHand
 }
 void MaterialComponent::bind(size_t component_index, size_t& inTextureUnit) const {
     const std::string wholeString = "components[" + std::to_string(component_index) + "].";
-    Engine::Renderer::sendUniform2Safe((wholeString + "componentData").c_str(), (int)m_NumLayers, (int)m_ComponentType);
-    for (uint32_t layerNumber = 0; layerNumber < m_NumLayers; ++layerNumber) {
+    Engine::Renderer::sendUniform2Safe((wholeString + "componentData").c_str(), (int)m_NumLayers, (int)static_cast<bool>(m_ComponentType != MaterialComponentType::Empty));
+    for (uint32_t layerNumber = 0; layerNumber < MAX_MATERIAL_LAYERS_PER_COMPONENT; ++layerNumber) {
         m_Layers[layerNumber].sendDataToGPU(wholeString, component_index, layerNumber, inTextureUnit);
     }
 }

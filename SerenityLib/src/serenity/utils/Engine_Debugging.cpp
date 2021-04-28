@@ -8,8 +8,7 @@ using namespace Engine;
 
 void priv::DebugManager::_init() {
     //TODO: check if this is still needed
-	GLuint cast = (GLuint)queryID;
-    glGenQueries(1, &cast);
+    glGenQueries(1, &queryID);
     glQueryCounter(queryID, GL_TIMESTAMP);// dummy query to prevent OpenGL errors from popping out 
     m_Output.reserve(400);
 }

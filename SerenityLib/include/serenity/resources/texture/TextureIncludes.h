@@ -2,6 +2,14 @@
 #ifndef ENGINE_TEXTURE_INCLUDES_H
 #define ENGINE_TEXTURE_INCLUDES_H
 
+class Texture;
+namespace sf {
+    class Image;
+}
+namespace Engine::priv {
+    class  FramebufferObject;
+};
+
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <array>
@@ -35,7 +43,7 @@ class TextureWrap final {
         inline constexpr void operator=(const TextureWrap::Type other) noexcept { m_Type = other; }
         inline explicit constexpr operator TextureWrap::Type() const noexcept { return m_Type; }
         inline explicit constexpr operator GLuint() const noexcept { return static_cast<GLuint>(toGLType()); }
-        [[nodiscard]] constexpr GLuint toGLType() const noexcept {
+        [[nodiscard]] inline constexpr GLuint toGLType() const noexcept {
             ASSERT(m_Type < TextureWrap::_TOTAL, "TextureWrap::m_Type is an invalid value!");
             return GL_VALUES[m_Type];
         }
@@ -131,18 +139,10 @@ class TextureType final {
         inline constexpr bool operator>=(const TextureType::Type other) noexcept { return m_Type >= other; }
         inline constexpr bool operator<=(const TextureType::Type other) noexcept { return m_Type <= other; }
         inline explicit constexpr operator TextureType::Type() const noexcept { return m_Type; }
-        [[nodiscard]] constexpr GLuint toGLType() const noexcept {
+        [[nodiscard]] inline constexpr GLuint toGLType() const noexcept {
             ASSERT(m_Type > TextureType::Unknown && m_Type < TextureType::_TOTAL, "TextureType::m_Type is an invalid value!");
             return GL_VALUES[m_Type];
         }
-};
-
-class Texture;
-namespace sf { 
-    class Image; 
-}
-namespace Engine::priv {
-    class  FramebufferObject;
 };
 
 #include <serenity/renderer/GLImageConstants.h>
@@ -150,19 +150,19 @@ namespace Engine::priv {
 namespace Engine::priv {
     struct ImageMipmap final {
         std::vector<uint8_t>   pixels;
-        uint32_t               compressedSize = 0U;
-        int                         width          = 0U;
-        int                         height         = 0U;
-        int                         level          = 0U;
+        uint32_t               compressedSize = 0;
+        int                    width          = 0;
+        int                    height         = 0;
+        int                    level          = 0;
 
-        [[nodiscard]] inline bool null() const noexcept { return pixels.size() == 0; }
+        [[nodiscard]] inline bool isNull() const noexcept { return pixels.size() == 0; }
     };
     struct ImageData final {
-        std::vector<priv::ImageMipmap>  m_Mipmaps         = { priv::ImageMipmap {} };
-        std::string                     m_Filename;
-        ImageInternalFormat             m_InternalFormat  = ImageInternalFormat::Unknown;
-        ImagePixelFormat                m_PixelFormat     = ImagePixelFormat::Unknown;
-        ImagePixelType                  m_PixelType       = ImagePixelType::UNSIGNED_BYTE;
+        std::vector<ImageMipmap>     m_Mipmaps         = { ImageMipmap{} };
+        std::string                  m_Filename;
+        ImageInternalFormat          m_InternalFormat  = ImageInternalFormat::Unknown;
+        ImagePixelFormat             m_PixelFormat     = ImagePixelFormat::Unknown;
+        ImagePixelType               m_PixelType       = ImagePixelType::UNSIGNED_BYTE;
 
         void setInternalFormat(ImageInternalFormat);
         void load(int width, int height, ImagePixelType pixelType, ImagePixelFormat pixelFormat, ImageInternalFormat internalFormat);
@@ -172,7 +172,7 @@ namespace Engine::priv {
             bool res = m_Mipmaps.size() == 0;
             if (!res) {
                 for (const auto& mip : m_Mipmaps) {
-                    if (mip.null()) {
+                    if (mip.isNull()) {
                         return true;
                     }
                 }
@@ -181,6 +181,5 @@ namespace Engine::priv {
         }
     };
 };
-
 
 #endif

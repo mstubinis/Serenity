@@ -16,7 +16,7 @@ struct PointLightDefaultAttenuationData final {
     float exponent = POINT_LIGHT_DEFAULT_EXPONENT;
 };
 
-class IPointLightShadowData {
+class PointLightShadowData {
 
 };
 
@@ -33,16 +33,11 @@ class PointLight : public SunLight {
 
     public:
         PointLight() = delete;
-        PointLight(
-            Scene* scene,
-            const glm_vec3& position = glm_vec3(0.0f, 0.0f, 0.0f)
-        );
-        PointLight(
-            Scene* scene,
-            LightType type,
-            const glm_vec3& position = glm_vec3(0.0f, 0.0f, 0.0f)
-        );
-        virtual ~PointLight();
+        PointLight(Scene*, const glm_vec3& position);
+        PointLight(Scene*, decimal x, decimal y, decimal z);
+        PointLight(Scene*, LightType, const glm_vec3& position);
+        PointLight(Scene*, LightType, decimal x, decimal y, decimal z);
+        virtual ~PointLight() = default;
 
         void setConstant(float constant);
         void setLinear(float linear);

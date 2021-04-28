@@ -8,7 +8,7 @@ class RodLight;
 
 constexpr float ROD_LIGHT_DEFAULT_ROD_LENGTH = 2.0f;
 
-class IRodLightShadowData {
+class RodLightShadowData {
 
 };
 

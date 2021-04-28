@@ -141,28 +141,29 @@ float VanDerCorpus(int n){
             if (ShaderHelper::sfind(code, "varying mat3 TBN;")) {
                 boost::replace_all(code, "varying mat3 TBN;", "");
             }
-            ShaderHelper::insertStringAtLine(code, 
-                "varying mat3 TBN;\n"
-                "vec3 CalcBumpedNormal(vec2 _uv,sampler2D _inTexture){//generated\n"
-                "    vec3 _t = (texture2D(_inTexture, _uv).xyz) * 2.0 - 1.0;\n"
-                "    return normalize(TBN * _t);\n"
-                "}\n"
-                "vec3 CalcBumpedNormalCompressed(vec2 _uv,sampler2D _inTexture){//generated\n"
-                "    vec2 _t = (texture2D(_inTexture, _uv).yx) * 2.0 - 1.0;\n" //notice the yx flip, its needed
-                "    float _z = sqrt(1.0 - _t.x * _t.x - _t.y * _t.y);\n"
-                "    vec3 normal = vec3(_t.xy, _z);\n"//recalc z in the shader
-                "    return normalize(TBN * normal);\n"
-                "}\n"
-                "vec3 CalcBumpedNormalLOD(vec2 _uv,sampler2D _inTexture, in float lod){//generated\n"
-                "    vec3 _t = (texture2DLod(_inTexture, _uv, lod).xyz) * 2.0 - 1.0;\n"
-                "    return normalize(TBN * _t);\n"
-                "}\n"
-                "vec3 CalcBumpedNormalCompressedLOD(vec2 _uv,sampler2D _inTexture, in float lod){//generated\n"
-                "    vec2 _t = (texture2DLod(_inTexture, _uv, lod).yx) * 2.0 - 1.0;\n" //notice the yx flip, its needed
-                "    float _z = sqrt(1.0 - _t.x * _t.x - _t.y * _t.y);\n"
-                "    vec3 normal = vec3(_t.xy, _z);\n"//recalc z in the shader
-                "    return normalize(TBN * normal);\n"
-                "}\n"
+            ShaderHelper::insertStringAtLine(code, R"(
+varying mat3 TBN;
+vec3 CalcBumpedNormal(vec2 inUVs, sampler2D inTexture){
+    vec3 t_ = (texture2D(inTexture, inUVs).xyz) * 2.0 - 1.0;
+    return normalize(TBN * t_);
+}
+vec3 CalcBumpedNormalCompressed(vec2 inUVs, sampler2D inTexture){
+    vec2 t_ = (texture2D(inTexture, inUVs).yx) * 2.0 - 1.0;
+    float z_ = sqrt(1.0 - t_.x * t_.x - t_.y * t_.y);
+    vec3 normal = vec3(t_.xy, z_);
+    return normalize(TBN * normal);
+}
+vec3 CalcBumpedNormalLOD(vec2 inUVs, sampler2D inTexture, in float lod){
+    vec3 t_ = (texture2DLod(inTexture, inUVs, lod).xyz) * 2.0 - 1.0;
+    return normalize(TBN * t_);
+}
+vec3 CalcBumpedNormalCompressedLOD(vec2 inUVs, sampler2D inTexture, in float lod){
+    vec2 t_ = (texture2DLod(inTexture, inUVs, lod).yx) * 2.0 - 1.0;
+    float z_ = sqrt(1.0 - t_.x * t_.x - t_.y * t_.y);
+    vec3 normal = vec3(t_.xy, z_);
+    return normalize(TBN * normal);
+}
+)"
             , 1);
         }
     }
@@ -173,8 +174,7 @@ float VanDerCorpus(int n){
         ShaderHelper::insertStringAtLine(code, R"(
 vec4 PaintersAlgorithm(vec4 paint, vec4 canvas){
     float alpha = paint.a + canvas.a * (1.0 - paint.a);
-    vec4 ret = vec4(0.0);
-    ret = ((paint * paint.a + canvas * canvas.a * (1.0 - paint.a)) / alpha);
+    vec4 ret = ((paint * paint.a + canvas * canvas.a * (1.0 - paint.a)) / alpha);
     ret.a = alpha;
     return ret;
 }
@@ -216,7 +216,7 @@ vec4 RangeTo255(vec4 color){
     if (ShaderHelper::lacksDefinition(code, "RangeTo1(", "vec4 RangeTo1(")) {
         ShaderHelper::insertStringAtLine(code, R"(
 vec4 RangeTo1(vec4 color){
-    return color / 255.0;
+    return color * 0.00392156862;
 }
 )", 1);
     }
@@ -228,7 +228,7 @@ vec4 RangeTo1(vec4 color){
     ShaderHelper::sfind(code, "CameraInvViewProj") || ShaderHelper::sfind(code, "CameraNear") || ShaderHelper::sfind(code, "CameraFar") ||
     ShaderHelper::sfind(code, "CameraInfo1") || ShaderHelper::sfind(code, "CameraInfo2") || ShaderHelper::sfind(code, "CameraViewVector") ||
     ShaderHelper::sfind(code, "CameraRealPosition") || ShaderHelper::sfind(code, "CameraInfo3") || ShaderHelper::sfind(code, "ScreenInfo") || 
-    ShaderHelper::sfind(code, "RendererInfo1")) {
+    ShaderHelper::sfind(code, "RendererInfo1") || ShaderHelper::sfind(code, "RendererInfo2") || ShaderHelper::sfind(code, "LogFCoefficient")) {
         if (versionNumber >= 140) { //UBO only supported at 140 or above
             if (!ShaderHelper::sfind(code, "layout (std140) uniform Camera //generated")) {
                 ShaderHelper::insertStringAtLine(code, R"(
@@ -245,6 +245,7 @@ layout (std140) uniform Camera //generated
     vec4 CameraInfo3;
     vec4 ScreenInfo;
     vec4 RendererInfo1;
+    vec4 RendererInfo2;
 };
 vec3 CameraPosition = CameraInfo1.xyz;
 vec3 CameraViewVector = CameraInfo2.xyz;
@@ -268,6 +269,7 @@ uniform vec4 CameraInfo2;
 uniform vec4 CameraInfo3;
 uniform vec4 ScreenInfo;
 uniform vec4 RendererInfo1;
+uniform vec4 RendererInfo2;
 vec3 CameraPosition = CameraInfo1.xyz;
 vec3 CameraViewVector = CameraInfo2.xyz;
 vec3 CameraRealPosition = CameraInfo3.xyz;

@@ -683,8 +683,11 @@
     <ClCompile Include="src\serenity\resources\sound\SoundMusic.cpp" />
     <ClCompile Include="src\serenity\resources\sound\SoundQueue.cpp" />
     <ClCompile Include="src\serenity\resources\texture\Texture.cpp" />
+    <ClCompile Include="src\serenity\resources\texture\TextureBaseClass.cpp" />
+    <ClCompile Include="src\serenity\resources\texture\TextureCubemap.cpp" />
     <ClCompile Include="src\serenity\resources\texture\TextureIncludes.cpp" />
     <ClCompile Include="src\serenity\resources\texture\TextureLoader.cpp" />
+    <ClCompile Include="src\serenity\resources\texture\TextureLoaderCubemap.cpp" />
     <ClCompile Include="src\serenity\resources\texture\TextureRequest.cpp" />
     <ClCompile Include="src\serenity\scene\Camera.cpp" />
     <ClCompile Include="src\serenity\scene\Scene.cpp" />
@@ -963,8 +966,11 @@
     <ClInclude Include="include\serenity\resources\sound\Sounds.h" />
     <ClInclude Include="include\serenity\resources\texture\DDS.h" />
     <ClInclude Include="include\serenity\resources\texture\Texture.h" />
+    <ClInclude Include="include\serenity\resources\texture\TextureBaseClass.h" />
+    <ClInclude Include="include\serenity\resources\texture\TextureCubemap.h" />
     <ClInclude Include="include\serenity\resources\texture\TextureIncludes.h" />
     <ClInclude Include="include\serenity\resources\texture\TextureLoader.h" />
+    <ClInclude Include="include\serenity\resources\texture\TextureLoaderCubemap.h" />
     <ClInclude Include="include\serenity\resources\texture\TextureRequest.h" />
     <ClInclude Include="include\serenity\scene\Camera.h" />
     <ClInclude Include="include\serenity\scene\LightContainer.h" />

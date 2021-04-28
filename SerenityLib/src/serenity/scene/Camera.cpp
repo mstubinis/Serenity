@@ -44,9 +44,9 @@ CameraLogicFunctionPtr CAMERA_DEFAULT_MOUSELOOK_NO_GIMBLE_LOCK_FUNCTION = [](con
     }
 
     if (Engine::isKeyDown(KeyboardKey::Q)) {
-        transform->rotate(0, 0, transSpeed2 * 0.5);
+        transform->rotate(0.0f, 0.0f, static_cast<float>(transSpeed2) * 0.5f);
     }else if (Engine::isKeyDown(KeyboardKey::E)) {
-        transform->rotate(0, 0, -transSpeed2 * 0.5);
+        transform->rotate(0.0f, 0.0f, static_cast<float>(-transSpeed2) * 0.5f);
     }
     cameraComponent->lookAt(transform->getWorldPosition(), transform->getWorldPosition() + transform->getForward(), transform->getUp());
 };
@@ -62,11 +62,11 @@ Camera::Camera(Scene* scene, float angle, float aspectRatio, float Near, float F
     addComponent<CameraLogicComponent>();
     addComponent<ComponentTransform>();
 
-    auto cam   = getComponent<ComponentCamera>();
-    auto logic = getComponent<CameraLogicComponent>();
-    auto body  = getComponent<ComponentTransform>();
+    auto camera    = getComponent<ComponentCamera>();
+    auto logic     = getComponent<CameraLogicComponent>();
+    auto transform = getComponent<ComponentTransform>();
 
-    cam->lookAt(glm::vec3{ 0.0f }, glm::vec3{ 0.0f } + body->getForward(), body->getUp());
+    camera->lookAt(glm::vec3{ 0.0f }, glm::vec3{ 0.0f } + transform->getForward(), transform->getUp());
     logic->setUserPointer(this);
 }
 Camera::Camera(Scene* scene, float left, float right, float bottom, float top, float Near, float Far)
@@ -79,11 +79,11 @@ Camera::Camera(Scene* scene, float left, float right, float bottom, float top, f
     addComponent<CameraLogicComponent>();
     addComponent<ComponentTransform>();
 
-    auto cam   = getComponent<ComponentCamera>();
-    auto logic = getComponent<CameraLogicComponent>();
-    auto body  = getComponent<ComponentTransform>();
+    auto camera     = getComponent<ComponentCamera>();
+    auto logic      = getComponent<CameraLogicComponent>();
+    auto transform  = getComponent<ComponentTransform>();
 
-    cam->lookAt(glm::vec3{ 0.0f }, glm::vec3{ 0.0f } + body->getForward(), body->getUp());
+    camera->lookAt(glm::vec3{ 0.0f }, glm::vec3{ 0.0f } + camera->getForward(), camera->getUp());
     logic->setUserPointer(this);
 }
 Camera::~Camera() { 

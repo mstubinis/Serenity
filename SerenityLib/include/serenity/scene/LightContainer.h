@@ -5,15 +5,25 @@
 namespace Engine::priv {
     class ILightContainer {
         public:
-            virtual ~ILightContainer() {}
+            virtual ~ILightContainer() = default;
             virtual size_t size() const noexcept = 0;
     };
 
     template<class LIGHT>
     class LightContainer final : public ILightContainer {
+        using ContainerType = std::vector<LIGHT*>;
         private:
-            mutable std::vector<LIGHT*>  m_Lights;
-            mutable std::vector<LIGHT*>  m_LightsShadows;
+            mutable ContainerType  m_Lights;
+            mutable ContainerType  m_LightsShadows; //lights that have their shadow casting enabled
+
+            bool internal_is_light_in_container(LIGHT* light, const ContainerType& container) noexcept {
+                for (const auto itr : container) {
+                    if (itr == light) {
+                        return true;
+                    }
+                }
+                return false;
+            }
         public:
             LightContainer() = default;
             LightContainer(const LightContainer&)                = delete;
@@ -24,34 +34,30 @@ namespace Engine::priv {
                 SAFE_DELETE_VECTOR(m_Lights);
             }
 
-            template<typename ... ARGS> 
+            template<class ... ARGS> 
             [[nodiscard]] inline Engine::view_ptr<LIGHT> createLight(ARGS&& ... args) {
                 return m_Lights.emplace_back(NEW LIGHT(std::forward<ARGS>(args)...)); 
             }
 
             bool deleteLight(LIGHT* light) noexcept {
                 ASSERT(light != nullptr, __FUNCTION__ << "(): light parameter must not be a null pointer!");
-                //if (!light) {
-                //    return false;
-                //}
+                if (!light) {
+                    return false;
+                }
                 light->destroy();
                 auto resultEraseLight           = std::erase_if(m_Lights,        [&light](auto& itr) { return itr == light; });
                 auto resultEraseLightShdwCaster = std::erase_if(m_LightsShadows, [&light](auto& itr) { return itr == light; });
                 SAFE_DELETE(light);
                 return true;
             }
-
             bool setShadowCaster(LIGHT* light, bool isShadowCaster) {
                 if (isShadowCaster){
-                    for (const auto itr : m_LightsShadows) {
-                        if (itr == light) {
-                            return false;
-                        }
+                    if (!internal_is_light_in_container(light, m_LightsShadows)) {
+                        m_LightsShadows.push_back(light);
+                        return true;
                     }
-                    m_LightsShadows.push_back(light);
-                    return true;
                 }else{
-                    auto result = std::erase_if(m_LightsShadows, [&light](auto& itr) { return itr == light; });
+                    const auto result = std::erase_if(m_LightsShadows, [&light](auto& itr) { return itr == light; });
                     return (bool)result;
                 }
                 return false;
@@ -62,12 +68,12 @@ namespace Engine::priv {
             [[nodiscard]] inline LIGHT* operator[](size_t idx) noexcept { return m_Lights[idx]; }
             [[nodiscard]] inline const LIGHT* operator[](size_t idx) const noexcept { return m_Lights[idx]; }
 
-            [[nodiscard]] inline const std::vector<LIGHT*>& getShadowCasters() const noexcept { return m_LightsShadows; }
+            [[nodiscard]] inline const ContainerType& getShadowCasters() const noexcept { return m_LightsShadows; }
 
-            inline typename std::vector<LIGHT*>::iterator begin() noexcept { return m_Lights.begin(); }
-            inline typename std::vector<LIGHT*>::const_iterator begin() const noexcept { return m_Lights.begin(); }
-            inline typename std::vector<LIGHT*>::iterator end() noexcept { return m_Lights.end(); }
-            inline typename std::vector<LIGHT*>::const_iterator end() const noexcept { return m_Lights.end(); }
+            inline typename ContainerType::iterator begin() noexcept { return m_Lights.begin(); }
+            inline typename ContainerType::const_iterator begin() const noexcept { return m_Lights.begin(); }
+            inline typename ContainerType::iterator end() noexcept { return m_Lights.end(); }
+            inline typename ContainerType::const_iterator end() const noexcept { return m_Lights.end(); }
     };
 }
 

@@ -79,15 +79,15 @@ namespace Engine::priv {
             bool remove_instance_node(MeshNode&, ModelInstance&);
 
             void clean(Entity entity);
-            void sort(Camera&, SortingMode);
-            void sort_cheap(Camera&, SortingMode);
 
-            void sort_bruteforce(Camera&, SortingMode);
-            void sort_cheap_bruteforce(Camera&, SortingMode);
+            void sort(Camera*, SortingMode);
+            void sort_cheap(Camera*, SortingMode);
+            void sort_bruteforce(Camera*, SortingMode);
+            void sort_cheap_bruteforce(Camera*, SortingMode);
 
-            void render(Engine::priv::RenderModule&, Viewport&, Camera&, bool useDefaultShaders = true, SortingMode = SortingMode::None);
-            void render_bruteforce(Engine::priv::RenderModule&, Viewport&, Camera&, bool useDefaultShaders = true, SortingMode = SortingMode::None);
-            void validate_model_instances_for_rendering(Viewport&, Camera&);
+            void render(Engine::priv::RenderModule&, Camera*, bool useDefaultShaders = true, SortingMode = SortingMode::None);
+            void render_bruteforce(Engine::priv::RenderModule&, Camera*, bool useDefaultShaders = true, SortingMode = SortingMode::None);
+            void validate_model_instances_for_rendering(Camera*, Viewport*);
     };
 
     class RenderGraphContainer final {

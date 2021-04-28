@@ -54,40 +54,52 @@ void RenderModule::_sort2DAPICommands() {
 }
 
 bool RenderModule::setShadowCaster(SunLight& sunLight, bool isShadowCaster) {
+    bool res = false;
     if (isShadowCaster) {
-        return m_Pipeline->buildShadowCaster(sunLight);
+        res = m_Pipeline->buildShadowCaster(sunLight);
     }
-    return false;
+    m_Pipeline->toggleShadowCaster(sunLight, isShadowCaster);
+    return res;
 }
 bool RenderModule::setShadowCaster(PointLight& pointLight, bool isShadowCaster) {
+    bool res = false;
     if (isShadowCaster) {
-        return m_Pipeline->buildShadowCaster(pointLight);
+        res = m_Pipeline->buildShadowCaster(pointLight);
     }
-    return false;
+    m_Pipeline->toggleShadowCaster(pointLight, isShadowCaster);
+    return res;
 }
 bool RenderModule::setShadowCaster(DirectionalLight& directionalLight, bool isShadowCaster) {
+    bool res = false;
     if (isShadowCaster) {
-        return m_Pipeline->buildShadowCaster(directionalLight);
+        res = m_Pipeline->buildShadowCaster(directionalLight);
     }
-    return false;
+    m_Pipeline->toggleShadowCaster(directionalLight, isShadowCaster);
+    return res;
 }
 bool RenderModule::setShadowCaster(SpotLight& spotLight, bool isShadowCaster) {
+    bool res = false;
     if (isShadowCaster) {
-        return m_Pipeline->buildShadowCaster(spotLight);
+        res = m_Pipeline->buildShadowCaster(spotLight);
     }
-    return false;
+    m_Pipeline->toggleShadowCaster(spotLight, isShadowCaster);
+    return res;
 }
 bool RenderModule::setShadowCaster(RodLight& rodLight, bool isShadowCaster) {
+    bool res = false;
     if (isShadowCaster) {
-        return m_Pipeline->buildShadowCaster(rodLight);
+        res = m_Pipeline->buildShadowCaster(rodLight);
     }
-    return false;
+    m_Pipeline->toggleShadowCaster(rodLight, isShadowCaster);
+    return res;
 }
 bool RenderModule::setShadowCaster(ProjectionLight& projectionLight, bool isShadowCaster) {
+    bool res = false;
     if (isShadowCaster) {
-        return m_Pipeline->buildShadowCaster(projectionLight);
+        res = m_Pipeline->buildShadowCaster(projectionLight);
     }
-    return false;
+    m_Pipeline->toggleShadowCaster(projectionLight, isShadowCaster);
+    return res;
 }
 
 bool RenderModule::bind(ModelInstance* modelInstance) const {
@@ -147,8 +159,8 @@ bool RenderModule::bind(Material* material) const {
 bool RenderModule::unbind(Material* material) const {
     return m_Pipeline->unbind(material);
 }
-void RenderModule::_genPBREnvMapData(Texture& texture, Handle convolutionTexture, Handle preEnvTexture, uint32_t size1, uint32_t size2){
-    return m_Pipeline->generatePBRData(texture, convolutionTexture, preEnvTexture, size1, size2);
+void RenderModule::_genPBREnvMapData(TextureCubemap& cubemap, Handle convolutionTexture, Handle preEnvTexture, uint32_t size1, uint32_t size2){
+    return m_Pipeline->generatePBRData(cubemap, convolutionTexture, preEnvTexture, size1, size2);
 }
 void Engine::Renderer::restoreDefaultOpenGLState() {
     Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->restoreDefaultState();
@@ -214,6 +226,12 @@ bool Engine::Renderer::Settings::Lighting::setLightingAlgorithm(LightingAlgorith
         return true;
     }
     return false;
+}
+void Engine::Renderer::Settings::enableSkybox(bool enabled) {
+    Engine::priv::RenderModule::RENDER_MODULE->m_DrawSkybox = enabled;
+}
+void Engine::Renderer::Settings::disableSkybox() {
+    Engine::priv::RenderModule::RENDER_MODULE->m_DrawSkybox = false;
 }
 bool Engine::Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm algorithm){
     switch (algorithm) {
@@ -323,11 +341,17 @@ void Engine::Renderer::clearTexture(int unit, GLuint glTextureType) {
 void Engine::Renderer::sendTexture(const char* location, Texture& texture, int unit){
     Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->sendTexture(location, texture, unit);
 }
+void Engine::Renderer::sendTexture(const char* location, TextureCubemap& cubemap, int unit) {
+    Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->sendTexture(location, cubemap, unit);
+}
 void Engine::Renderer::sendTexture(const char* location, GLuint textureObject, int unit, GLuint textureTarget){
     Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->sendTexture(location, textureObject, unit, textureTarget);
 }
 void Engine::Renderer::sendTextureSafe(const char* location, Texture& texture, int unit){
     Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->sendTextureSafe(location, texture, unit);
+}
+void Engine::Renderer::sendTextureSafe(const char* location, TextureCubemap& cubemap, int unit) {
+    Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->sendTextureSafe(location, cubemap, unit);
 }
 void Engine::Renderer::sendTextureSafe(const char* location, GLuint textureObject, int unit, GLuint textureTarget){
     Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->sendTextureSafe(location, textureObject, unit, textureTarget);

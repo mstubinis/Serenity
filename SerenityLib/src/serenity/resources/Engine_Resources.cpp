@@ -3,6 +3,7 @@
 #include <serenity/resources/mesh/Mesh.h>
 #include <serenity/resources/material/Material.h>
 #include <serenity/resources/texture/Texture.h>
+#include <serenity/resources/texture/TextureCubemap.h>
 #include <serenity/resources/font/Font.h>
 #include <serenity/resources/sound/SoundData.h>
 #include <serenity/resources/shader/ShaderProgram.h>
@@ -21,6 +22,7 @@ Engine::priv::ResourceManager::ResourceManager(const EngineOptions& options) {
     RESOURCE_MANAGER = this;
 
     m_ResourceModule.registerResourceTypeID<Texture>();
+    m_ResourceModule.registerResourceTypeID<TextureCubemap>();
     m_ResourceModule.registerResourceTypeID<Mesh>();
     m_ResourceModule.registerResourceTypeID<Material>();
     m_ResourceModule.registerResourceTypeID<Font>();

@@ -5,7 +5,9 @@
 enum class ResourceType : unsigned char {
     Unknown = 0,
     Texture,
+    TextureCubemap,
     Mesh,
+    MeshStatic,
     Material,
     Font,
     Shader,

@@ -20,9 +20,9 @@ class Handle final {
         void* internal_get_base() const noexcept;
         void* internal_get_base_thread_safe() noexcept;
 
-        uint32_t m_Index   : 12;
-        uint32_t m_Version : 15;
-        uint32_t m_Type    : 5;
+        uint32_t m_Index   : 23;
+        uint32_t m_Version : 3;
+        uint32_t m_Type    : 6;
     public:
         constexpr Handle()
             : m_Index{ 0 }

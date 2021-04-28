@@ -914,6 +914,15 @@
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentTransformDebugDraw.cpp">
       <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
     </ClCompile>
+    <ClCompile Include="src\serenity\resources\texture\TextureCubemap.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\texture\TextureLoaderCubemap.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\texture\TextureBaseClass.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Texture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h">
@@ -1701,6 +1710,15 @@
     </ClInclude>
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentTransformDebugDraw.h">
       <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\texture\TextureCubemap.h">
+      <Filter>Header Files\Engine\Core\Resources\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\texture\TextureLoaderCubemap.h">
+      <Filter>Header Files\Engine\Core\Resources\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\texture\TextureBaseClass.h">
+      <Filter>Header Files\Engine\Core\Resources\Texture</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

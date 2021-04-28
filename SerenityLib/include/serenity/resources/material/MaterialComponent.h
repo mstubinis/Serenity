@@ -10,7 +10,7 @@ class MaterialComponent final {
     protected:
         std::array<MaterialLayer, MAX_MATERIAL_LAYERS_PER_COMPONENT>   m_Layers;
         uint32_t                                                       m_NumLayers      = 0U;
-        MaterialComponentType                                          m_ComponentType  = MaterialComponentType::Diffuse;
+        MaterialComponentType                                          m_ComponentType  = MaterialComponentType::Empty;
     public:
         MaterialComponent() = default;
         MaterialComponent(MaterialComponentType type, Handle textureHandle, Handle maskHandle = Handle{}, Handle cubemapHandle = Handle{});
@@ -20,7 +20,7 @@ class MaterialComponent final {
         MaterialComponent(MaterialComponent&&) noexcept;
         MaterialComponent& operator=(MaterialComponent&&) noexcept;
 
-        inline constexpr bool operator==(const bool other) const noexcept { return (other == true && m_NumLayers > 0); }
+        inline constexpr bool operator==(const bool other) const noexcept { return (other && m_ComponentType != MaterialComponentType::Empty && m_NumLayers > 0); }
         inline constexpr bool operator!=(const bool other) const noexcept { return !operator==(other); }
 
         void bind(size_t component_index, size_t& inTextureUnit) const;

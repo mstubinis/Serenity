@@ -2,10 +2,6 @@
 
 #include <serenity/math/Engine_Math.h>
 
-
-using namespace Engine;
-using namespace Engine::priv;
-
 void Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentCamera& component) noexcept {
     if (component.m_Type == ComponentCamera::CameraType::Perspective) {
         component.m_ProjectionMatrix = glm::perspective(component.m_Angle, component.m_AspectRatio, component.m_NearPlane, component.m_FarPlane);
@@ -52,9 +48,7 @@ ComponentCamera::ComponentCamera(const ComponentCamera& other)
     , m_ViewMatrix      { (other.m_ViewMatrix) }
     , m_FrustumPlanes   { (other.m_FrustumPlanes) }
     , m_Type            { (other.m_Type) }
-{
-
-}
+{}
 ComponentCamera& ComponentCamera::operator=(const ComponentCamera& other) {
     if (&other != this) {
         m_Eye              = (other.m_Eye);
@@ -109,7 +103,7 @@ void ComponentCamera::resize(uint32_t width, uint32_t height) noexcept {
     if (m_Type == CameraType::Perspective) {
         m_AspectRatio = width / (float)height;
     }
-    priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
+    Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
 }
 uint32_t ComponentCamera::pointIntersectTest(const glm_vec3& worldPosition) const noexcept {
     auto zero = (decimal)0.0;
@@ -158,19 +152,19 @@ void ComponentCamera::lookAt(glm::vec3&& eye, glm::vec3&& center, glm::vec3&& up
 }
 void ComponentCamera::setAngle(float angle) noexcept {
 	m_Angle = angle;
-	priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
+    Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
 }
 void ComponentCamera::setAspect(float aspectRatio) noexcept {
 	m_AspectRatio = aspectRatio;
-	priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
+    Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
 }
 void ComponentCamera::setNear(float nearPlane) noexcept {
 	m_NearPlane = nearPlane;
-	priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
+    Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
 }
 void ComponentCamera::setFar(float farPlane) noexcept {
 	m_FarPlane = farPlane;
-	priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this); 
+    Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
 }
 
 #pragma endregion

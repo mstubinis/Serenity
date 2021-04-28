@@ -1,5 +1,6 @@
 
 #include <serenity/resources/texture/Texture.h>
+#include <serenity/resources/texture/TextureCubemap.h>
 #include <serenity/resources/texture/TextureLoader.h>
 #include <serenity/resources/texture/DDS.h>
 #include <serenity/math/Engine_Math.h>
@@ -268,39 +269,6 @@ bool TextureLoader::GenerateMipmapsOpenGL(Texture& texture) {
     GLCall(glGenerateMipmap(texture.m_CPUData.m_TextureType.toGLType()));
     texture.m_CPUData.m_Mipmapped = true;
     return true;
-}
-void TextureLoader::GeneratePBRData(Texture& texture, int convoludeTextureSize, int preEnvFilterSize) {
-    auto cubemapConvolution            = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.get<Texture>(texture.name() + "Convolution");
-    auto cubemapPreEnvFilter           = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.get<Texture>(texture.name() + "PreEnvFilter");
-    texture.m_ConvolutionTextureHandle = cubemapConvolution.m_Handle;
-    texture.m_PreEnvTextureHandle      = cubemapPreEnvFilter.m_Handle;
-    if (!cubemapConvolution.m_Resource) {
-        texture.m_ConvolutionTextureHandle = Engine::Resources::addResource<Texture>(
-            texture.name() + "Convolution", TextureType::CubeMap, false
-        );
-        cubemapConvolution.m_Resource = texture.m_ConvolutionTextureHandle.get<Texture>();
-        Engine::Renderer::genAndBindTexture(cubemapConvolution.m_Resource->getTextureType(), cubemapConvolution.m_Resource->internal_get_address_for_generation());
-        for (uint32_t i = 0; i < 6; ++i) {
-            GLCall(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, convoludeTextureSize, convoludeTextureSize, 0, GL_RGB, GL_FLOAT, NULL));
-        }
-        cubemapConvolution.m_Resource->setWrapping(TextureWrap::ClampToEdge);
-        cubemapConvolution.m_Resource->setFilter(TextureFilter::Linear);
-    }
-    if (!cubemapPreEnvFilter.m_Resource) {
-        texture.m_PreEnvTextureHandle = Engine::Resources::addResource<Texture>(
-            texture.name() + "PreEnvFilter", TextureType::CubeMap, true
-        );
-        cubemapPreEnvFilter.m_Resource = texture.m_PreEnvTextureHandle.get<Texture>();
-        Engine::Renderer::genAndBindTexture(cubemapPreEnvFilter.m_Resource->getTextureType(), cubemapPreEnvFilter.m_Resource->internal_get_address_for_generation());
-        for (uint32_t i = 0; i < 6; ++i) {
-            GLCall(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, preEnvFilterSize, preEnvFilterSize, 0, GL_RGB, GL_FLOAT, NULL));
-        }
-        cubemapPreEnvFilter.m_Resource->setWrapping(TextureWrap::ClampToEdge);
-        cubemapPreEnvFilter.m_Resource->setMinFilter(TextureFilter::Linear_Mipmap_Linear);
-        cubemapPreEnvFilter.m_Resource->setMaxFilter(TextureFilter::Linear);
-    }
-
-    Core::m_Engine->m_RenderModule._genPBREnvMapData(texture, texture.m_ConvolutionTextureHandle, texture.m_PreEnvTextureHandle, convoludeTextureSize, preEnvFilterSize);
 }
 void TextureLoader::LoadCPU(TextureCPUData& cpuData, Handle inHandle) {
     for (auto& imageData : cpuData.m_ImagesDatas) {

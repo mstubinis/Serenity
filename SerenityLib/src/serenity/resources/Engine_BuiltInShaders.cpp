@@ -52,13 +52,15 @@ std::string Engine::priv::EShaders::lighting_frag;
 std::string Engine::priv::EShaders::lighting_frag_gi;
 std::string Engine::priv::EShaders::lighting_frag_basic;
 std::string Engine::priv::EShaders::lighting_frag_gi_basic;
+std::string Engine::priv::EShaders::shadow_depth_vert;
+std::string Engine::priv::EShaders::shadow_depth_frag;
 #pragma endregion
 
 void Engine::priv::EShaders::init(){
 
 #pragma region Functions
 
-priv::EShaders::conditional_functions = R"(
+Engine::priv::EShaders::conditional_functions = R"(
 vec4 when_eq(vec4 x, vec4 y) { return 1.0 - abs(sign(x - y)); }
 vec4 when_neq(vec4 x, vec4 y) { return abs(sign(x - y)); }
 vec4 when_gt(vec4 x, vec4 y) { return max(sign(x - y), 0.0); }
@@ -119,7 +121,7 @@ int inot(int a) { return 1 - a; }
 // vec2 VertexShaderData; x = outercutoff, y = radius
 // float Type; 2.0 = spot light. 1.0 = any other light. 0.0 = fullscreen quad / triangle
 
-priv::EShaders::lighting_vert = R"(
+Engine::priv::EShaders::lighting_vert = R"(
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec2 uv;
 
@@ -127,9 +129,11 @@ uniform mat4 Model;
 uniform mat4 VP;
 uniform vec2 VertexShaderData;
 uniform float Type;
+uniform vec3 uSceneAmbientColor;
 
 varying vec2 texcoords;
 flat varying vec3 CamRealPosition;
+flat varying vec3 SceneAmbientColor;
 
 vec3 doSpotLightStuff(vec3 inPositions){
     float opposite = tan(VertexShaderData.x * 0.5) * VertexShaderData.y;
@@ -152,13 +156,15 @@ void main(){
     }
     texcoords = uv;
     CamRealPosition = CameraRealPosition;
-    gl_Position = (VP * ModelClone) * vec4(ModelSpacePositions, 1.0);
+    SceneAmbientColor = uSceneAmbientColor;
+    vec4 worldPosition = ModelClone * vec4(ModelSpacePositions, 1.0);
+    gl_Position = (VP * worldPosition);
 }
 )";
 #pragma endregion
 
 #pragma region BulletPhysicsVertex
-priv::EShaders::bullet_physics_vert = R"(
+Engine::priv::EShaders::bullet_physics_vert = R"(
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 color;
 
@@ -175,7 +181,7 @@ void main(){
 #pragma endregion
 
 #pragma region BulletPhysicsFragment
-priv::EShaders::bullet_physcis_frag = R"(
+Engine::priv::EShaders::bullet_physcis_frag = R"(
 in vec3 OutColor;
 void main(){
     gl_FragColor = vec4(OutColor, 1.0);
@@ -185,7 +191,7 @@ void main(){
 
 #pragma region DecalVertex
 //TODO: get rid of the useless info here
-priv::EShaders::decal_vertex = R"(
+Engine::priv::EShaders::decal_vertex = R"(
 USE_LOG_DEPTH_VERTEX
 
 layout (location = 0) in vec3 position;
@@ -201,6 +207,7 @@ varying vec3 Normals;
 varying mat3 TBN;
 
 flat varying mat4 WorldMatrix;
+flat varying mat4 InvWorldMatrix;
 flat varying vec3 CamPosition;
 flat varying vec3 CamRealPosition;
 
@@ -215,7 +222,7 @@ void main(){
     ModelMatrix[3][1] -= CameraRealPosition.y;
     ModelMatrix[3][2] -= CameraRealPosition.z;
     WorldMatrix = ModelMatrix;
-
+    InvWorldMatrix = inverse(ModelMatrix);
     vec4 worldPos = (ModelMatrix * vec4(position, 1.0));
     gl_Position = CameraViewProj * worldPos;
     VertexPositionsViewSpace = CameraView * worldPos;
@@ -240,7 +247,7 @@ void main(){
 #pragma endregion
 
 #pragma region ParticleVertex
-priv::EShaders::particle_vertex = 
+Engine::priv::EShaders::particle_vertex =
     "USE_LOG_DEPTH_VERTEX\n"
 
     "layout (location = 0) in vec3 position;\n"
@@ -283,73 +290,73 @@ priv::EShaders::particle_vertex =
 
 #pragma region DecalFrag
 //TODO: get rid of the useless info here
-priv::EShaders::decal_frag =
-    "USE_LOG_DEPTH_FRAGMENT\n"
-    "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
-    "USE_MAX_MATERIAL_COMPONENTS\n"
-    "\n"
-    "struct InData {\n"
-    "    vec2  uv;\n"
-    "    vec4  diffuse;\n"
-    "    vec4  objectColor;\n"
-    "    vec3  normals;\n"
-    "    float glow;\n"
-    "    float specular;\n"
-    "    float ao;\n"
-    "    float metalness;\n"
-    "    float smoothness;\n"
-    "    vec3  worldPosition;\n"
-    "};\n"
-    "struct Layer {\n"
-    "    vec4 data1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
-    "    vec4 data2;\n"
-    "    vec4 uvModifications;\n"
-    "    SAMPLER_TYPE_2D texture;\n"
-    "    SAMPLER_TYPE_2D mask;\n"
-    "    SAMPLER_TYPE_Cube cubemap;\n"
-    "};\n"
-    "struct Component {\n"
-    "    ivec2 componentData;\n" //x = numLayers, y = componentType
-    "    Layer layers[MAX_MATERIAL_LAYERS_PER_COMPONENT];\n"
-    "};\n"
-    "uniform Component   components[MAX_MATERIAL_COMPONENTS];\n"
-    "uniform int         numComponents;\n"
-    "\n"
-    "\n"
-    "uniform vec4        MaterialBasePropertiesOne;\n"//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
-    "uniform vec4        MaterialBasePropertiesTwo;\n"//x = BaseAlpha, y = diffuseModel, z = specularModel, w = UNUSED
-    "\n"
-    "uniform int Shadeless;\n"
-    "\n"
-    "uniform uint Object_Color;\n"
-    "uniform vec4 Material_F0AndID;\n"
-    "uniform uint Gods_Rays_Color;\n"
-    "\n"
-    "uniform SAMPLER_TYPE_2D gDepthMap;\n"
-    "\n"
-    "varying vec3 Normals;\n"
-    "varying mat3 TBN;\n"
-    "flat varying mat4 WorldMatrix;\n"
-    "flat varying vec3 CamPosition;\n"
-    "flat varying vec3 CamRealPosition;\n"
-    "varying vec3 TangentCameraPos;\n"
-    "varying vec3 TangentFragPos;\n"
-    "varying vec4 VertexPositionsClipSpace;\n"
-    "varying vec4 VertexPositionsViewSpace;\n"
-    "\n"
-    "void main(){\n"
-    "    vec2 screenPos = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y); \n"
-    "    vec3 WorldPosition = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), screenPos, CameraNear, CameraFar);\n"
-    "    vec4 ObjectPosition = inverse(WorldMatrix) * vec4(WorldPosition, 1.0);\n"
-    "    float x = 1.0 - abs(ObjectPosition.x);\n"
-    "    float y = 1.0 - abs(ObjectPosition.y);\n"
-    "    float z = 1.0 - abs(ObjectPosition.z);\n"
-    "    if ( x < 0.0 || y < 0.0 || z < 0.0 || length(WorldPosition) > 500.0) {\n" //hacky way of eliminating against skybox
-    "        discard;\n"
-    "    }\n"
-    "    vec2 uvs = (ObjectPosition.xy + 1.0) * 0.5;\n"
-    //normal mapping...
-    /*
+Engine::priv::EShaders::decal_frag =
+"USE_LOG_DEPTH_FRAGMENT\n"
+"USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
+"USE_MAX_MATERIAL_COMPONENTS\n"
+"\n"
+"struct InData {\n"
+"    vec4  diffuse;\n"
+"    vec4  objectColor;\n"
+"    vec3  normals;\n"
+"    float glow;\n"
+"    vec2  uv;\n"
+"    float specular;\n"
+"    float ao;\n"
+"    vec3  worldPosition;\n"
+"    float metalness;\n"
+"    float smoothness;\n"
+"};\n"
+"struct Layer {\n"
+"    vec4 data0;\n"
+"    vec4 data1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
+"    vec4 data2;\n"
+"    vec4 uvModifications;\n"
+"    SAMPLER_TYPE_2D texture;\n"
+"    SAMPLER_TYPE_2D mask;\n"
+"    SAMPLER_TYPE_Cube cubemap;\n"
+"};\n"
+"struct Component {\n"
+"    ivec2 componentData;\n" //x = numLayers, y = componentType
+"    Layer layers[MAX_MATERIAL_LAYERS_PER_COMPONENT];\n"
+"};\n"
+"uniform Component   components[MAX_MATERIAL_COMPONENTS];\n"
+"uniform int         numComponents;\n"
+"\n"
+"\n"
+"uniform vec4        MaterialBasePropertiesOne;\n"//x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
+"uniform vec4        MaterialBasePropertiesTwo;\n"//x = BaseAlpha, y = diffuseModel, z = specularModel, w = UNUSED
+"\n"
+"uniform int Shadeless;\n"
+"\n"
+"uniform uint Object_Color;\n"
+"uniform vec4 Material_F0AndID;\n"
+"uniform uint Gods_Rays_Color;\n"
+"\n"
+"uniform SAMPLER_TYPE_2D gDepthMap;\n"
+"\n"
+"varying vec3 Normals;\n"
+"varying mat3 TBN;\n"
+"flat varying mat4 WorldMatrix;\n"
+"flat varying mat4 InvWorldMatrix;\n"
+"flat varying vec3 CamPosition;\n"
+"flat varying vec3 CamRealPosition;\n"
+"varying vec3 TangentCameraPos;\n"
+"varying vec3 TangentFragPos;\n"
+"varying vec4 VertexPositionsClipSpace;\n"
+"varying vec4 VertexPositionsViewSpace;\n"
+"\n"
+"void main(){\n"
+"    vec2 screenPos = gl_FragCoord.xy / ScreenInfo.xy; \n"
+"    vec3 WorldPosition = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), screenPos, CameraNear, CameraFar);\n"
+"    vec4 ObjectPosition = InvWorldMatrix * vec4(WorldPosition, 1.0);\n"
+"    vec3 absData = abs(ObjectPosition.xyz);\n"
+"    if ( absData.x > 0.5 || absData.y > 0.5 || absData.z > 0.5 || length(WorldPosition) > 500.0) {\n" //hacky way of eliminating against skybox
+"        discard;\n"
+"    }\n"
+"    vec2 uvs = (ObjectPosition.xy + 0.5);\n"
+//normal mapping...
+/*
 vec3 ddxWp = ddx(WorldPosition);
 vec3 ddyWp = ddy(WorldPosition);
 vec3 normal = normalize(cross(ddyWp, ddxWp));
@@ -366,45 +373,54 @@ tangentToView[2] = CameraView * normal;
 
 //Transform normal from tangent space into view space
 normal = tangentToView * normal;
-    */
-    "    InData inData;\n"
-    "    inData.uv = uvs;\n"
-    "    inData.diffuse = vec4(0.0, 0.0, 0.0, 0.0001);\n" //this is extremely wierd, but we need some form of alpha to get painters algorithm to work...
-    "    inData.objectColor = Unpack32BitUIntTo4ColorFloats(Object_Color);\n"
-    "    inData.normals = normalize(Normals);\n"
-    "    inData.glow = MaterialBasePropertiesOne.x;\n"
-    "    inData.specular = 1.0;\n"
-    "    inData.ao = MaterialBasePropertiesOne.y;\n"
-    "    inData.metalness = MaterialBasePropertiesOne.z;\n"
-    "    inData.smoothness = MaterialBasePropertiesOne.w;\n"
-    "    inData.worldPosition = WorldPosition;\n"
-    "\n"
-    "    for (int j = 0; j < numComponents; ++j) {\n"
-    "        ProcessComponent(components[j], inData);\n"
-    "    }\n"
-    "    if(Shadeless == 1){\n"
-    "        inData.normals = ConstantOneVec3;\n"
-    "        inData.diffuse *= (1.0 + inData.glow);\n" // we want shadeless items to be influenced by the glow somewhat...
-    "    }\n"
-    "    vec4 GodRays = Unpack32BitUIntTo4ColorFloats(Gods_Rays_Color);\n"
-    "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
+*/
+"    InData inData;\n"
+"    inData.uv = uvs;\n"
+"    inData.diffuse = vec4(0.0, 0.0, 0.0, 0.0001);\n" //this is extremely wierd, but we need some form of alpha to get painters algorithm to work...
+"    inData.objectColor = Unpack32BitUIntTo4ColorFloats(Object_Color);\n"
+"    inData.normals = normalize(Normals);\n"
+"    inData.glow = MaterialBasePropertiesOne.x;\n"
+"    inData.specular = 1.0;\n"
+"    inData.ao = MaterialBasePropertiesOne.y;\n"
+"    inData.metalness = MaterialBasePropertiesOne.z;\n"
+"    inData.smoothness = MaterialBasePropertiesOne.w;\n"
+"    inData.worldPosition = WorldPosition;\n"
+"\n"
+"    ProcessComponentDiffuse(components[0], inData);\n"
+"    ProcessComponentNormal(components[1], inData);\n"
+"    ProcessComponentGlow(components[2], inData);\n"
+"    ProcessComponentSpecular(components[3], inData);\n"
+//"    ProcessComponentMetalness(components[4], inData);\n"
+//"    ProcessComponentSmoothness(components[5], inData);\n"
+//"    ProcessComponentAO(components[6], inData);\n"
+//"    ProcessComponentReflection(components[7], inData);\n"
+//"    ProcessComponentRefraction(components[8], inData);\n"
+//"    ProcessComponentParallax(components[9], inData);\n"
 
-    //"    inData.diffuse = (inData.diffuse * vec4(0.001)) + vec4(1.0, 0.0, 0.0, 1.0);\n"
 
-    "\n"
-    "    SUBMIT_DIFFUSE(inData.diffuse);\n"
-    //"    SUBMIT_NORMALS(1.0, 1.0);\n"
-    //"    SUBMIT_MATERIAL_ID_AND_AO(0.0, 0.0);\n"
-    //"    SUBMIT_METALNESS_AND_SMOOTHNESS(0.0);\n"
-    //"    SUBMIT_GLOW(0.0);\n"
-    //"    SUBMIT_SPECULAR(inData.specular);\n"
-    //"    SUBMIT_GOD_RAYS_COLOR(GodRays.r, GodRays.g, GodRays.b);\n"
-    "    gl_FragData[3] = inData.diffuse;\n"
-    "}";
+"    if(Shadeless == 1){\n"
+"        inData.normals = ConstantOneVec3;\n"
+"        inData.diffuse *= (1.0 + inData.glow);\n" // we want shadeless items to be influenced by the glow somewhat...
+"    }\n"
+"    vec4 GodRays = Unpack32BitUIntTo4ColorFloats(Gods_Rays_Color);\n"
+"    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
+
+//"    inData.diffuse = (inData.diffuse * vec4(0.001)) + vec4(1.0, 0.0, 0.0, 1.0);\n"
+
+"\n"
+"    SUBMIT_DIFFUSE(inData.diffuse);\n"
+//"    SUBMIT_NORMALS(1.0, 1.0);\n"
+//"    SUBMIT_MATERIAL_ID_AND_AO(0.0, 0.0);\n"
+//"    SUBMIT_METALNESS_AND_SMOOTHNESS(0.0);\n"
+//"    SUBMIT_GLOW(0.0);\n"
+//"    SUBMIT_SPECULAR(inData.specular);\n"
+//"    SUBMIT_GOD_RAYS_COLOR(GodRays.r, GodRays.g, GodRays.b);\n"
+"    gl_FragData[3] = inData.diffuse;\n"
+"}";
 #pragma endregion
 
 #pragma region VertexBasic
-priv::EShaders::vertex_basic = R"(
+Engine::priv::EShaders::vertex_basic = R"(
 USE_LOG_DEPTH_VERTEX
 
 layout (location = 0) in vec3 position;
@@ -471,7 +487,7 @@ void main(){
 #pragma endregion
 
 #pragma region Vertex2DAPI
-priv::EShaders::vertex_2DAPI = R"(
+Engine::priv::EShaders::vertex_2DAPI = R"(
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec2 uv;
 uniform mat4 VP;
@@ -485,7 +501,7 @@ void main(){
 #pragma endregion
 
 #pragma region VertexSkybox
-priv::EShaders::vertex_skybox = R"(
+Engine::priv::EShaders::vertex_skybox = R"(
 layout (location = 0) in vec3 position;
 uniform mat4 VP;
 varying vec3 UV;
@@ -498,7 +514,7 @@ void main(){
 #pragma endregion
 
 #pragma region CubemapConvoludeFrag
-priv::EShaders::cubemap_convolude_frag = R"(
+Engine::priv::EShaders::cubemap_convolude_frag = R"(
 varying vec3 UV;
 uniform SAMPLER_TYPE_Cube cubemap;
 const float PI = 3.14159265;
@@ -532,7 +548,7 @@ void main(){
 //
 // this shader is heavily modified based on optimizations in the link above. the optimizations are not complete yet, and 
 // what seems to look correct may not be. this shader might have to be modified against the original later on.
-priv::EShaders::cubemap_prefilter_envmap_frag = R"(
+Engine::priv::EShaders::cubemap_prefilter_envmap_frag = R"(
 varying vec3 UV;
 uniform SAMPLER_TYPE_Cube cubemap;
 uniform float roughness;
@@ -587,7 +603,7 @@ void main(){
 #pragma endregion
 
 #pragma region BRDFPrecompute
-priv::EShaders::brdf_precompute = R"(
+Engine::priv::EShaders::brdf_precompute = R"(
 const float PI2 = 6.283185;
 uniform int NUM_SAMPLES;
 varying vec2 texcoords;
@@ -654,7 +670,7 @@ void main(){
 #pragma endregion
 
 #pragma region StencilPass
-priv::EShaders::stencil_passover = R"(
+Engine::priv::EShaders::stencil_passover = R"(
 const vec3 comparison = vec3(1.0, 1.0, 1.0);
 uniform SAMPLER_TYPE_2D gNormalMap;
 varying vec2 texcoords;
@@ -668,7 +684,7 @@ void main(){
 #pragma endregion
 
 #pragma region FullscreenQuadVertex
-priv::EShaders::fullscreen_quad_vertex = R"(
+Engine::priv::EShaders::fullscreen_quad_vertex = R"(
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec2 uv;
 
@@ -686,26 +702,27 @@ void main(){
 #pragma endregion
    
 #pragma region ForwardFrag
-priv::EShaders::forward_frag =
+Engine::priv::EShaders::forward_frag =
     "USE_LOG_DEPTH_FRAGMENT\n"
     "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT\n"
     "USE_MAX_MATERIAL_COMPONENTS\n"
     "USE_MAX_LIGHTS_PER_PASS\n"
     "\n"
     "struct InData {\n"
-    "    vec2  uv;\n"
     "    vec4  diffuse;\n"
     "    vec4  objectColor;\n"
     "    vec3  normals;\n"
     "    float glow;\n"
+    "    vec2  uv;\n"
     "    float specular;\n"
     "    float ao;\n"
-    "    float metalness;\n"
-    "    float smoothness;\n"
     "    vec3  materialF0;\n"
+    "    float metalness;\n"
     "    vec3  worldPosition;\n"
+    "    float smoothness;\n"
     "};\n"
     "struct Layer {\n"
+    "    vec4 data0;\n"
     "    vec4 data1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
     "    vec4 data2;\n"
     "    vec4 uvModifications;\n"
@@ -748,12 +765,16 @@ priv::EShaders::forward_frag =
     "flat varying vec3 CamPosition;\n"
     "flat varying vec3 CamRealPosition;\n"
     "varying vec3 TangentCameraPos;\n"
+    "varying vec4 FragPosLightSpace;\n"
     "varying vec3 TangentFragPos;\n"
     "\n"
     "uniform SAMPLER_TYPE_Cube irradianceMap;\n"
     "uniform SAMPLER_TYPE_Cube prefilterMap;\n"
     "uniform SAMPLER_TYPE_2D brdfLUT;\n"
     "uniform SAMPLER_TYPE_2D gTextureMap;\n"
+
+    "uniform mat4 LightMatrix;\n"
+
     "\n"
     "const float MAX_REFLECTION_LOD = 5.0;\n"
     "\n"
@@ -774,9 +795,18 @@ priv::EShaders::forward_frag =
     "    inData.smoothness = MaterialBasePropertiesOne.w;\n"
     "    inData.materialF0 = Material_F0AndID.rgb;\n"
     "    inData.worldPosition = WorldPosition;\n"
-    "    for (int j = 0; j < numComponents; ++j) {\n"
-    "        ProcessComponent(components[j], inData);\n"
-    "    }\n"
+
+    "    ProcessComponentDiffuse(components[0], inData);\n"
+    "    ProcessComponentNormal(components[1], inData);\n"
+    "    ProcessComponentGlow(components[2], inData);\n"
+    "    ProcessComponentSpecular(components[3], inData);\n"
+    "    ProcessComponentMetalness(components[4], inData);\n"
+    "    ProcessComponentSmoothness(components[5], inData);\n"
+    "    ProcessComponentAO(components[6], inData);\n"
+    "    ProcessComponentReflection(components[7], inData);\n"
+    "    ProcessComponentRefraction(components[8], inData);\n"
+    "    ProcessComponentParallax(components[9], inData);\n"
+
     "    vec3 lightTotal = ConstantZeroVec3;\n"
     "    if(Shadeless != 1){\n"
     "        vec3 lightCalculation = ConstantZeroVec3;\n"
@@ -823,54 +853,54 @@ priv::EShaders::forward_frag =
 #pragma endregion
 
 #pragma region ParticleFrag
-    priv::EShaders::particle_frag =
-    "\n"
-    "USE_LOG_DEPTH_FRAGMENT\n"
+Engine::priv::EShaders::particle_frag =
+"\n"
+"USE_LOG_DEPTH_FRAGMENT\n"
 
-    "uniform SAMPLER_TYPE_2D DiffuseTexture0;\n";
+"uniform SAMPLER_TYPE_2D DiffuseTexture0;\n";
 
-    for (uint32_t i = 1; i < std::min(priv::OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
-        priv::EShaders::particle_frag +=
-         "uniform SAMPLER_TYPE_2D DiffuseTexture" + std::to_string(i) + ";\n";
-    }
-
+for (uint32_t i = 1; i < std::min(priv::OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
     priv::EShaders::particle_frag +=
+        "uniform SAMPLER_TYPE_2D DiffuseTexture" + std::to_string(i) + ";\n";
+}
 
-    "uniform SAMPLER_TYPE_2D gDepthMap;\n"
+priv::EShaders::particle_frag +=
 
-    "varying vec2 UV;\n"
-    "varying vec3 WorldPosition;\n"
+"uniform SAMPLER_TYPE_2D gDepthMap;\n"
 
-    "flat varying uint MaterialIndex;\n"
-    "flat varying vec4 ParticleColor;\n"
+"varying vec2 UV;\n"
+"varying vec3 WorldPosition;\n"
 
-    "void main(){\n"
-    //this code is for soft particles////////////////////////////////////
-    "    vec2 screen_uv = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y);\n"
-    "    vec3 worldPos = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), screen_uv, CameraNear, CameraFar);\n"
-    "    float dist = distance(worldPos, WorldPosition) * 4.2;\n" //increasing that number will make the particles fade less from edges, but might increase the risk for sharper edges like without soft particles
-    "    float alpha = clamp(dist, 0.0, 1.0);\n"
-    //////////////////////////////////////////////////////////////////////////
-    "    vec4 finalColor = ParticleColor;\n"
+"flat varying uint MaterialIndex;\n"
+"flat varying vec4 ParticleColor;\n"
 
-    "    if(MaterialIndex == 0U)\n"
-    "        finalColor *= texture2D(DiffuseTexture0, UV); \n";
+"void main(){\n"
+//this code is for soft particles////////////////////////////////////
+"    vec2 screen_uv = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y);\n"
+"    vec3 worldPos = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), screen_uv, CameraNear, CameraFar);\n"
+"    float dist = distance(worldPos, WorldPosition) * 4.2;\n" //increasing that number will make the particles fade less from edges, but might increase the risk for sharper edges like without soft particles
+"    float alpha = clamp(dist, 0.0, 1.0);\n"
+//////////////////////////////////////////////////////////////////////////
+"    vec4 finalColor = ParticleColor;\n"
 
-    for (uint32_t i = 1; i < std::min(priv::OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
-        priv::EShaders::particle_frag +=
-            "    else if (MaterialIndex == " + std::to_string(i) + "U)\n"
-            "        finalColor *= texture2D(DiffuseTexture" + std::to_string(i) + ", UV); \n";
-    }
+"    if(MaterialIndex == 0U)\n"
+"        finalColor *= texture2D(DiffuseTexture0, UV); \n";
 
+for (uint32_t i = 1; i < std::min(priv::OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
     priv::EShaders::particle_frag +=
-    "    else\n"
-    "        finalColor *= texture2D(DiffuseTexture0, UV); \n"
+        "    else if (MaterialIndex == " + std::to_string(i) + "U)\n"
+        "        finalColor *= texture2D(DiffuseTexture" + std::to_string(i) + ", UV); \n";
+}
 
-    "    finalColor.a *= alpha;\n"
+priv::EShaders::particle_frag +=
+"    else\n"
+"        finalColor *= texture2D(DiffuseTexture0, UV); \n"
 
-    "    SUBMIT_DIFFUSE(finalColor);\n"
-    "    gl_FragData[3] = finalColor;\n"
-    "}";
+"    finalColor.a *= alpha;\n"
+
+"    SUBMIT_DIFFUSE(finalColor);\n"
+"    gl_FragData[3] = finalColor;\n"
+"}";
 #pragma endregion
 
 #pragma region DeferredFrag
@@ -882,24 +912,25 @@ priv::EShaders::forward_frag =
 //inData.diffuse = vec4(0.0,0.0,0.0,0.0001); //this is extremely wierd, but we need some form of alpha to get painters algorithm to work...
 //inData.diffuse *= (1.0 + inData.glow); // we want shadeless items to be influenced by the glow somewhat...
 
-priv::EShaders::deferred_frag = R"(
+Engine::priv::EShaders::deferred_frag = R"(
 USE_LOG_DEPTH_FRAGMENT
 USE_MAX_MATERIAL_LAYERS_PER_COMPONENT
 USE_MAX_MATERIAL_COMPONENTS
 
 struct InData {
-    vec2  uv;
     vec4  diffuse;
     vec4  objectColor;
     vec3  normals;
     float glow;
+    vec2  uv;
     float specular;
     float ao;
+    vec3  worldPosition;
     float metalness;
     float smoothness;
-    vec3  worldPosition;
 };
 struct Layer {
+    vec4 data0;
     vec4 data1;
     vec4 data2;
     vec4 uvModifications;
@@ -935,7 +966,7 @@ varying vec3 TangentFragPos;
 void main(){
     InData inData;
     inData.uv = UV;
-    inData.diffuse = vec4(0.0,0.0,0.0,0.0001);
+    inData.diffuse = vec4(0.0, 0.0, 0.0, 0.0001);
     inData.objectColor = Unpack32BitUIntTo4ColorFloats(Object_Color);
     inData.normals = normalize(Normals);
     inData.glow = MaterialBasePropertiesOne.x;
@@ -945,9 +976,17 @@ void main(){
     inData.smoothness = MaterialBasePropertiesOne.w;
     inData.worldPosition = WorldPosition;
 
-    for (int j = 0; j < numComponents; ++j) {
-        ProcessComponent(components[j], inData);
-    }
+    ProcessComponentDiffuse(components[0], inData);
+    ProcessComponentNormal(components[1], inData);
+    ProcessComponentGlow(components[2], inData);
+    ProcessComponentSpecular(components[3], inData);
+    ProcessComponentMetalness(components[4], inData);
+    ProcessComponentSmoothness(components[5], inData);
+    ProcessComponentAO(components[6], inData);
+    ProcessComponentReflection(components[7], inData);
+    ProcessComponentRefraction(components[8], inData);
+    ProcessComponentParallax(components[9], inData);
+
     vec2 OutNormals = EncodeOctahedron(inData.normals);
     if(Shadeless == 1){
         OutNormals = ConstantOneVec2;
@@ -957,18 +996,14 @@ void main(){
     inData.diffuse.a *= MaterialBasePropertiesTwo.x;
 
     SUBMIT_DIFFUSE(inData.diffuse);
-    SUBMIT_NORMALS(OutNormals);
-    SUBMIT_MATERIAL_ID_AND_AO(Material_F0AndID.w, inData.ao);
-    SUBMIT_METALNESS_AND_SMOOTHNESS(inData.metalness, inData.smoothness);
-    SUBMIT_GLOW(inData.glow);
-    SUBMIT_SPECULAR(inData.specular);
-    SUBMIT_GOD_RAYS_COLOR(GodRays.r, GodRays.g, GodRays.b);
+    gl_FragData[1] = vec4(OutNormals, Material_F0AndID.w + inData.ao, inData.glow);
+    gl_FragData[2] = vec4(Pack2NibblesInto8BitChannel(inData.metalness, inData.smoothness), inData.specular, Pack2NibblesInto8BitChannel(GodRays.r, GodRays.g), GodRays.b);
 }
 )";
 #pragma endregion
 
 #pragma region NormalessDiffuseFrag
-priv::EShaders::normaless_diffuse_frag = R"(
+Engine::priv::EShaders::normaless_diffuse_frag = R"(
 const vec3 comparison = vec3(1.0, 1.0, 1.0);
 uniform SAMPLER_TYPE_2D gNormalMap;
 uniform SAMPLER_TYPE_2D gDiffuseMap;
@@ -987,7 +1022,7 @@ void main(){
 #pragma endregion
 
 #pragma region ZPrepassFrag
-priv::EShaders::zprepass_frag = R"(
+Engine::priv::EShaders::zprepass_frag = R"(
 USE_LOG_DEPTH_FRAGMENT
 //USE_MAX_MATERIAL_LAYERS_PER_COMPONENT
 //USE_MAX_MATERIAL_COMPONENTS
@@ -997,7 +1032,7 @@ void main(){
 #pragma endregion
 
 #pragma region DeferredFragHUD
-priv::EShaders::deferred_frag_hud = R"(
+Engine::priv::EShaders::deferred_frag_hud = R"(
 uniform SAMPLER_TYPE_2D DiffuseTexture;
 uniform int DiffuseTextureEnabled;
 uniform vec4 Object_Color;
@@ -1014,7 +1049,7 @@ void main(){
 #pragma endregion
 
 #pragma region DeferredFragSkybox
-priv::EShaders::deferred_frag_skybox = R"(
+Engine::priv::EShaders::deferred_frag_skybox = R"(
 uniform vec4 Color;
 uniform int IsFake;
 uniform SAMPLER_TYPE_Cube Texture;
@@ -1034,7 +1069,7 @@ void main(){
 #pragma endregion
 
 #pragma region CopyDepthFrag
-priv::EShaders::copy_depth_frag = R"(
+Engine::priv::EShaders::copy_depth_frag = R"(
 uniform SAMPLER_TYPE_2D gDepthMap;
 varying vec2 texcoords;
 void main(){
@@ -1044,7 +1079,7 @@ void main(){
 #pragma endregion
 
 #pragma region Blur
-priv::EShaders::blur_frag = R"(
+Engine::priv::EShaders::blur_frag = R"(
 uniform SAMPLER_TYPE_2D image;
 
 uniform vec4 DataA; //radius, UNUSED, H,V
@@ -1057,11 +1092,11 @@ const float weight[NUM_SAMPLES] = float[](0.227, 0.21, 0.1946, 0.162, 0.12, 0.08
 
 void main(){
     vec4 Sum = vec4(0.0);
-    vec2 inverseResolution = vec2(1.0) / vec2(ScreenInfo.z, ScreenInfo.w);
+    vec2 inverseResolution = vec2(1.0) / ScreenInfo.zw;
     for(int i = 0; i < NUM_SAMPLES; ++i){
         vec2 offset = (inverseResolution * float(i)) * DataA.x;
-        Sum += (texture2D(image,texcoords + vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;
-        Sum += (texture2D(image,texcoords - vec2(offset.x * DataA.z,offset.y * DataA.w)) * weight[i]) * strengthModifier;
+        Sum += (texture2D(image,texcoords + vec2(offset.x * DataA.z, offset.y * DataA.w)) * weight[i]) * strengthModifier;
+        Sum += (texture2D(image,texcoords - vec2(offset.x * DataA.z, offset.y * DataA.w)) * weight[i]) * strengthModifier;
     }
     gl_FragColor = Sum;
 }
@@ -1070,7 +1105,7 @@ void main(){
 
 #pragma region Greyscale
 /*
-priv::EShaders::greyscale_frag = R"(
+Engine::priv::EShaders::greyscale_frag = R"(
 uniform SAMPLER_TYPE_2D textureMap;
 varying vec2 texcoords;
 void main(){
@@ -1083,7 +1118,7 @@ void main(){
 #pragma endregion
     
 #pragma region FinalFrag
-priv::EShaders::final_frag = R"(
+Engine::priv::EShaders::final_frag = R"(
 uniform SAMPLER_TYPE_2D SceneTexture;
 uniform SAMPLER_TYPE_2D gBloomMap;
 uniform SAMPLER_TYPE_2D gDepthMap;
@@ -1119,8 +1154,7 @@ void main(){
 #pragma endregion
 
 #pragma region DepthAndTransparency
-
-priv::EShaders::depth_and_transparency_frag = 
+Engine::priv::EShaders::depth_and_transparency_frag =
     "\n"
     "uniform SAMPLER_TYPE_2D SceneTexture;\n"
     "uniform SAMPLER_TYPE_2D gDepthMap;\n"
@@ -1132,10 +1166,10 @@ priv::EShaders::depth_and_transparency_frag =
     "\n"
     "varying vec2 texcoords;\n"
     "\n";
-priv::EShaders::depth_and_transparency_frag +=
+Engine::priv::EShaders::depth_and_transparency_frag +=
     "\n"
     "void main(){\n"
-    "    vec4 scene = texture2D(SceneTexture,texcoords);\n"
+    "    vec4 scene = texture2D(SceneTexture, texcoords);\n"
     "    float depth = distance(GetWorldPosition(USE_SAMPLER_2D(gDepthMap), texcoords, CameraNear, CameraFar), CameraPosition);\n"
     //"    if(TransparencyMaskActive == 1 && scene.rgb == TransparencyMaskColor.rgb){\n"
     //"        scene.a = 0.0;\n"
@@ -1166,8 +1200,7 @@ priv::EShaders::depth_and_transparency_frag +=
 //else if(light.DataD.w == 4.0){  //rod
 //else if(light.DataD.w == 5.0){  //projection
 
-
-priv::EShaders::lighting_frag = R"(
+Engine::priv::EShaders::lighting_frag = R"(
 #define MATERIAL_COUNT_LIMIT 255
 
 struct Light {
@@ -1186,13 +1219,16 @@ uniform SAMPLER_TYPE_2D gDepthMap;
 uniform SAMPLER_TYPE_2D gSSAOMap;
 uniform SAMPLER_TYPE_2D gTextureMap;
 
+uniform mat4 LightMatrix;
+
 uniform vec4 materials[MATERIAL_COUNT_LIMIT];
 
 varying vec2 texcoords;
 flat varying vec3 CamRealPosition;
+flat varying vec3 SceneAmbientColor;
 
 void main(){
-    vec2 uv = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y);
+    vec2 uv = gl_FragCoord.xy / ScreenInfo.xy;
     vec3 PxlNormal        = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), uv).rg);
     vec3 PxlPosition      = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv, CameraNear, CameraFar);
     vec3 lightCalculation = ConstantZeroVec3;
@@ -1228,10 +1264,8 @@ void main(){
 #pragma endregion
 
 #pragma region LightingFragGI
-
 //vec4 materials[MATERIAL_COUNT_LIMIT];  //r = MaterialF0Color (packed into float), g = baseSmoothness, b = specularModel, a = diffuseModel
-
-priv::EShaders::lighting_frag_gi = R"(
+Engine::priv::EShaders::lighting_frag_gi = R"(
 #define MATERIAL_COUNT_LIMIT 255
 
 const float MAX_REFLECTION_LOD = 5.0;
@@ -1255,7 +1289,7 @@ vec3 SchlickFrenselRoughness(float inTheta, vec3 inF0, float inRoughness){
     return inF0 + (max(vec3(1.0 - inRoughness), inF0) - inF0) * pow(1.0 - inTheta, 5.0);
 }
 void main(){
-    vec2 uv               = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y);
+    vec2 uv               = gl_FragCoord.xy / ScreenInfo.xy;
 
     float inSSAO          = 1.0 - texture2D(USE_SAMPLER_2D(gSSAOMap), uv).a;
     vec3 inNormals        = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), uv).rg);
@@ -1277,8 +1311,7 @@ void main(){
 #pragma endregion
 
 #pragma region LightingFragBasic
-
-priv::EShaders::lighting_frag_basic = R"(
+Engine::priv::EShaders::lighting_frag_basic = R"(
 #define MATERIAL_COUNT_LIMIT 255
 
 struct Light {
@@ -1297,13 +1330,15 @@ uniform SAMPLER_TYPE_2D gDepthMap;
 uniform SAMPLER_TYPE_2D gSSAOMap;
 uniform SAMPLER_TYPE_2D gTextureMap;
 
+uniform mat4 LightMatrix;
+
 uniform vec4 materials[MATERIAL_COUNT_LIMIT];
 
 varying vec2 texcoords;
 flat varying vec3 CamRealPosition;
 
 void main(){
-    vec2 uv = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y);
+    vec2 uv = gl_FragCoord.xy / ScreenInfo.xy;
     vec3 PxlNormal        = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), uv).rg);
     vec3 PxlPosition      = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv, CameraNear, CameraFar);
     vec3 LightPosition    = vec3(light.DataC.yzw) - CamRealPosition;
@@ -1335,8 +1370,7 @@ void main(){
 #pragma endregion
 
 #pragma region LightingFragGIBasic
-
-priv::EShaders::lighting_frag_gi_basic = R"(
+Engine::priv::EShaders::lighting_frag_gi_basic = R"(
 #define MATERIAL_COUNT_LIMIT 255
 
 uniform SAMPLER_TYPE_2D gDiffuseMap;
@@ -1346,7 +1380,7 @@ varying vec2 texcoords;
 flat varying vec3 CamRealPosition;
 
 void main(){
-    vec2 uv          = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y);
+    vec2 uv          = gl_FragCoord.xy / ScreenInfo.xy;
     vec3 inAlbedo    = texture2D(USE_SAMPLER_2D(gDiffuseMap), uv).rgb;
     float inGlow     = texture2D(USE_SAMPLER_2D(gNormalMap), uv).a;
     gl_FragColor.rgb = max(gl_FragColor.rgb, inAlbedo * inGlow);
@@ -1354,4 +1388,24 @@ void main(){
 )";
 #pragma endregion
 
+#pragma region ShadowMapDepth
+
+Engine::priv::EShaders::shadow_depth_vert = R"(
+layout(location = 0) in vec3 position;
+
+uniform mat4 LightMatrix;
+uniform mat4 Model;
+
+void main() {
+    gl_Position = LightMatrix * Model * vec4(position, 1.0);
+}  
+)";
+Engine::priv::EShaders::shadow_depth_frag = R"(
+#define BIAS 0.0001
+void main() {
+    gl_FragDepth = gl_FragCoord.z;
+    gl_FragDepth += gl_FrontFacing ? BIAS : 0.0;
+}
+)";
+#pragma endregion
 }

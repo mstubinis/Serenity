@@ -26,24 +26,24 @@ Engine::priv::SMAA::~SMAA() {
 }
 void Engine::priv::SMAA::internal_init_edge_vertex_code(const std::string& common) {
     STATIC_SMAA.m_Vertex_Shaders_Code[PassStage::Edge] = common + R"(
-        layout (location = 0) in vec3 position;
-        layout (location = 1) in vec2 UV;
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec2 UV;
 
-        uniform vec4 SMAA_PIXEL_SIZE; //make this globally inherit for all smaa shaders
-        uniform mat4 Model;
-        uniform mat4 VP;
+uniform vec4 SMAA_PIXEL_SIZE; //make this globally inherit for all smaa shaders
+uniform mat4 Model;
+uniform mat4 VP;
 
-        varying vec2 uv;
-        varying vec4 _offset[3];
+varying vec2 uv;
+varying vec4 _offset[3];
 
-        void main(){
-            uv = UV;
-            vec3 vert = position;
-            _offset[0] = mad(SMAA_PIXEL_SIZE.xyxy, vec4(-1.0, 0.0, 0.0, API_V_DIR(-1.0)), uv.xyxy);
-            _offset[1] = mad(SMAA_PIXEL_SIZE.xyxy, vec4( 1.0, 0.0, 0.0,  API_V_DIR(1.0)), uv.xyxy);
-            _offset[2] = mad(SMAA_PIXEL_SIZE.xyxy, vec4(-2.0, 0.0, 0.0, API_V_DIR(-2.0)), uv.xyxy);
-            gl_Position = VP * Model * vec4(vert, 1.0);
-        }
+void main(){
+    uv = UV;
+    vec3 vert = position;
+    _offset[0] = mad(SMAA_PIXEL_SIZE.xyxy, vec4(-1.0, 0.0, 0.0, API_V_DIR(-1.0)), uv.xyxy);
+    _offset[1] = mad(SMAA_PIXEL_SIZE.xyxy, vec4( 1.0, 0.0, 0.0,  API_V_DIR(1.0)), uv.xyxy);
+    _offset[2] = mad(SMAA_PIXEL_SIZE.xyxy, vec4(-2.0, 0.0, 0.0, API_V_DIR(-2.0)), uv.xyxy);
+    gl_Position = VP * Model * vec4(vert, 1.0);
+}
     )";
 }
 void Engine::priv::SMAA::internal_init_edge_fragment_code(const std::string& common) {
@@ -152,26 +152,26 @@ void Engine::priv::SMAA::internal_init_edge_fragment_code(const std::string& com
 }
 void Engine::priv::SMAA::internal_init_blend_vertex_code(const std::string& common) {
     STATIC_SMAA.m_Vertex_Shaders_Code[PassStage::Blend] = common + R"(
-        layout (location = 0) in vec3 position;
-        layout (location = 1) in vec2 UV;
-        uniform mat4 Model;
-        uniform mat4 VP;
-        uniform vec4 SMAA_PIXEL_SIZE; //make this globally inherit for all smaa shaders
-        uniform int SMAA_MAX_SEARCH_STEPS; //make this globally inherit for all smaa shaders
-        varying vec2 uv;
-        varying vec2 pixCoord;
-        varying vec4 _offset[3];
-        flat varying vec4 _SMAA_PIXEL_SIZE;
-        void main(){
-            uv = UV;
-            vec3 vert = position;
-            pixCoord = uv * SMAA_PIXEL_SIZE.zw;
-            _offset[0] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-0.25,API_V_DIR(-0.125), 1.25,API_V_DIR(-0.125)),uv.xyxy);
-            _offset[1] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-0.125,API_V_DIR(-0.25),-0.125,API_V_DIR(1.25)),uv.xyxy);
-            _offset[2] = mad(SMAA_PIXEL_SIZE.xxyy,vec4(-2.0, 2.0, API_V_DIR(-2.0), API_V_DIR(2.0)) * float(SMAA_MAX_SEARCH_STEPS),vec4(_offset[0].xz, _offset[1].yw));
-            gl_Position = VP * Model * vec4(vert,1.0);
-            _SMAA_PIXEL_SIZE = SMAA_PIXEL_SIZE;
-        }
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec2 UV;
+uniform mat4 Model;
+uniform mat4 VP;
+uniform vec4 SMAA_PIXEL_SIZE; //make this globally inherit for all smaa shaders
+uniform int SMAA_MAX_SEARCH_STEPS; //make this globally inherit for all smaa shaders
+varying vec2 uv;
+varying vec2 pixCoord;
+varying vec4 _offset[3];
+flat varying vec4 _SMAA_PIXEL_SIZE;
+void main(){
+    uv = UV;
+    vec3 vert = position;
+    pixCoord = uv * SMAA_PIXEL_SIZE.zw;
+    _offset[0] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-0.25,API_V_DIR(-0.125), 1.25,API_V_DIR(-0.125)),uv.xyxy);
+    _offset[1] = mad(SMAA_PIXEL_SIZE.xyxy,vec4(-0.125,API_V_DIR(-0.25),-0.125,API_V_DIR(1.25)),uv.xyxy);
+    _offset[2] = mad(SMAA_PIXEL_SIZE.xxyy,vec4(-2.0, 2.0, API_V_DIR(-2.0), API_V_DIR(2.0)) * float(SMAA_MAX_SEARCH_STEPS),vec4(_offset[0].xz, _offset[1].yw));
+    gl_Position = VP * Model * vec4(vert,1.0);
+    _SMAA_PIXEL_SIZE = SMAA_PIXEL_SIZE;
+}
     )";
 }
 void Engine::priv::SMAA::internal_init_blend_fragment_code(const std::string& common) {
@@ -410,54 +410,54 @@ void Engine::priv::SMAA::internal_init_blend_fragment_code(const std::string& co
 }
 void Engine::priv::SMAA::internal_init_neighbor_vertex_code(const std::string& common) {
     STATIC_SMAA.m_Vertex_Shaders_Code[PassStage::Neighbor] = common + R"(
-        layout (location = 0) in vec3 position;
-        layout (location = 1) in vec2 UV;
-        uniform mat4 Model;
-        uniform mat4 VP;
-        uniform vec4 SMAA_PIXEL_SIZE;
-        varying vec2 uv;
-        varying vec4 _offset;
-        flat varying vec4 _SMAA_PIXEL_SIZE;
-        void main(){
-            uv = UV;
-            vec3 vert = position;
-            _offset = mad(SMAA_PIXEL_SIZE.xyxy,vec4(1.0, 0.0, 0.0, API_V_DIR(1.0)), uv.xyxy);
-            gl_Position = VP * Model * vec4(vert, 1.0);
-            _SMAA_PIXEL_SIZE = SMAA_PIXEL_SIZE;
-        }
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec2 UV;
+uniform mat4 Model;
+uniform mat4 VP;
+uniform vec4 SMAA_PIXEL_SIZE;
+varying vec2 uv;
+varying vec4 _offset;
+flat varying vec4 _SMAA_PIXEL_SIZE;
+void main(){
+    uv = UV;
+    vec3 vert = position;
+    _offset = mad(SMAA_PIXEL_SIZE.xyxy,vec4(1.0, 0.0, 0.0, API_V_DIR(1.0)), uv.xyxy);
+    gl_Position = VP * Model * vec4(vert, 1.0);
+    _SMAA_PIXEL_SIZE = SMAA_PIXEL_SIZE;
+}
     )";
 }
 void Engine::priv::SMAA::internal_init_neighbor_fragment_code(const std::string& common) {
     STATIC_SMAA.m_Fragment_Shaders_Code[PassStage::Neighbor] = common + R"(
-        uniform SAMPLER_TYPE_2D textureMap;
-        uniform SAMPLER_TYPE_2D blend_tex;
-        varying vec2 uv;
-        varying vec4 _offset;
-        flat varying vec4 _SMAA_PIXEL_SIZE;
-        vec4 SMAANeighborhoodBlendingPS(vec2 texcoord, vec4 offset, sampler2D inColorTexture, sampler2D inBlendTexture) {
-            vec4 a;
-            a.x = texture2D(inBlendTexture, offset.xy).a;
-            a.y = texture2D(inBlendTexture, offset.zw).g;
-            a.wz = texture2D(inBlendTexture, texcoord).xz;
-            if (dot(a, vec4(1.0, 1.0, 1.0, 1.0)) <= 1e-5) {
-                vec4 color = texture2DLod(inColorTexture, texcoord,0.0);
-                return color;
-            }else{
-                bool h = max(a.x, a.z) > max(a.y, a.w);
-                vec4 blendingOffset = vec4(0.0, API_V_DIR(a.y), 0.0, API_V_DIR(a.w));
-                vec2 blendingWeight = a.yw;
-                SMAAMovc(bvec4(h, h, h, h), blendingOffset, vec4(a.x, 0.0, a.z, 0.0));
-                SMAAMovc(bvec2(h, h), blendingWeight, a.xz);
-                blendingWeight /= dot(blendingWeight, vec2(1.0, 1.0));
-                vec4 blendingCoord = mad(blendingOffset, vec4(_SMAA_PIXEL_SIZE.xy, -_SMAA_PIXEL_SIZE.xy), texcoord.xyxy);
-                vec4 color = blendingWeight.x * texture2D(inColorTexture, blendingCoord.xy);
-                color += blendingWeight.y * texture2D(inColorTexture, blendingCoord.zw);
-                return color;
-            }
-        }
-        void main(){
-            gl_FragColor = SMAANeighborhoodBlendingPS(uv, _offset, USE_SAMPLER_2D(textureMap), USE_SAMPLER_2D(blend_tex));
-        }
+uniform SAMPLER_TYPE_2D textureMap;
+uniform SAMPLER_TYPE_2D blend_tex;
+varying vec2 uv;
+varying vec4 _offset;
+flat varying vec4 _SMAA_PIXEL_SIZE;
+vec4 SMAANeighborhoodBlendingPS(vec2 texcoord, vec4 offset, sampler2D inColorTexture, sampler2D inBlendTexture) {
+    vec4 a;
+    a.x = texture2D(inBlendTexture, offset.xy).a;
+    a.y = texture2D(inBlendTexture, offset.zw).g;
+    a.wz = texture2D(inBlendTexture, texcoord).xz;
+    if (dot(a, vec4(1.0, 1.0, 1.0, 1.0)) <= 1e-5) {
+        vec4 color = texture2DLod(inColorTexture, texcoord,0.0);
+        return color;
+    }else{
+        bool h = max(a.x, a.z) > max(a.y, a.w);
+        vec4 blendingOffset = vec4(0.0, API_V_DIR(a.y), 0.0, API_V_DIR(a.w));
+        vec2 blendingWeight = a.yw;
+        SMAAMovc(bvec4(h, h, h, h), blendingOffset, vec4(a.x, 0.0, a.z, 0.0));
+        SMAAMovc(bvec2(h, h), blendingWeight, a.xz);
+        blendingWeight /= dot(blendingWeight, vec2(1.0, 1.0));
+        vec4 blendingCoord = mad(blendingOffset, vec4(_SMAA_PIXEL_SIZE.xy, -_SMAA_PIXEL_SIZE.xy), texcoord.xyxy);
+        vec4 color = blendingWeight.x * texture2D(inColorTexture, blendingCoord.xy);
+        color += blendingWeight.y * texture2D(inColorTexture, blendingCoord.zw);
+        return color;
+    }
+}
+void main(){
+    gl_FragColor = SMAANeighborhoodBlendingPS(uv, _offset, USE_SAMPLER_2D(textureMap), USE_SAMPLER_2D(blend_tex));
+}
     )";
 }
 bool Engine::priv::SMAA::init() {
@@ -466,35 +466,35 @@ bool Engine::priv::SMAA::init() {
         return false;
 
     std::string smaa_common = R"(
-        vec4 mad(vec4 a, vec4 b, vec4 c){ return (a * b) + c; }
-        vec3 mad(vec3 a, vec3 b, vec3 c){ return (a * b) + c; }
-        vec2 mad(vec2 a, vec2 b, vec2 c){ return (a * b) + c; }
-        float mad(float a, float b, float c){ return (a * b) + c; }
-        vec4 saturate(vec4 a){ return clamp(a,0.0,1.0); }
-        vec3 saturate(vec3 a){ return clamp(a,0.0,1.0); }
-        vec2 saturate(vec2 a){ return clamp(a,0.0,1.0); }
-        float saturate(float a){ return clamp(a,0.0,1.0); }
-        vec4 round(vec4 a){ return floor(a + vec4(0.5)); }
-        vec3 round(vec3 a){ return floor(a + vec3(0.5)); }
-        vec2 round(vec2 a){ return floor(a + vec2(0.5)); }
-        float round(float a){ return floor(a + 0.5); }
-        void SMAAMovc(bvec2 cond, inout vec2 variable, vec2 value) {
-            if (cond.x) variable.x = value.x;
-            if (cond.y) variable.y = value.y;
-        }
-        void SMAAMovc(bvec4 cond, inout vec4 variable, vec4 value) {
-            SMAAMovc(cond.xy, variable.xy, value.xy);
-            SMAAMovc(cond.zw, variable.zw, value.zw);
-        }
-        float API_V_DIR(float v){ return -v; }
-        //float API_V_COORD(float v){ return 1.0 - v; }
-        bool API_V_BELOW(float v1, float v2){ if(v1 < v2) return true; return false; }
-        bool API_V_ABOVE(float v1, float v2){ if(v1 > v2) return true; return false; }
+vec4 mad(vec4 a, vec4 b, vec4 c){ return (a * b) + c; }
+vec3 mad(vec3 a, vec3 b, vec3 c){ return (a * b) + c; }
+vec2 mad(vec2 a, vec2 b, vec2 c){ return (a * b) + c; }
+float mad(float a, float b, float c){ return (a * b) + c; }
+vec4 saturate(vec4 a){ return clamp(a,0.0,1.0); }
+vec3 saturate(vec3 a){ return clamp(a,0.0,1.0); }
+vec2 saturate(vec2 a){ return clamp(a,0.0,1.0); }
+float saturate(float a){ return clamp(a,0.0,1.0); }
+vec4 round(vec4 a){ return floor(a + vec4(0.5)); }
+vec3 round(vec3 a){ return floor(a + vec3(0.5)); }
+vec2 round(vec2 a){ return floor(a + vec2(0.5)); }
+float round(float a){ return floor(a + 0.5); }
+void SMAAMovc(bvec2 cond, inout vec2 variable, vec2 value) {
+    if (cond.x) variable.x = value.x;
+    if (cond.y) variable.y = value.y;
+}
+void SMAAMovc(bvec4 cond, inout vec4 variable, vec4 value) {
+    SMAAMovc(cond.xy, variable.xy, value.xy);
+    SMAAMovc(cond.zw, variable.zw, value.zw);
+}
+float API_V_DIR(float v){ return -v; }
+//float API_V_COORD(float v){ return 1.0 - v; }
+bool API_V_BELOW(float v1, float v2){ if(v1 < v2) return true; return false; }
+bool API_V_ABOVE(float v1, float v2){ if(v1 > v2) return true; return false; }
 
-        //float API_V_DIR(float v){ return v; }
-        float API_V_COORD(float v){ return v; }
-        //bool API_V_BELOW(float v1, float v2){ if(v1 > v2) return true; return false; }
-        //bool API_V_ABOVE(float v1, float v2){ if(v1 < v2) return true; return false; }
+//float API_V_DIR(float v){ return v; }
+float API_V_COORD(float v){ return v; }
+//bool API_V_BELOW(float v1, float v2){ if(v1 > v2) return true; return false; }
+//bool API_V_ABOVE(float v1, float v2){ if(v1 < v2) return true; return false; }
      )";
 
     STATIC_SMAA.internal_init_edge_vertex_code(smaa_common);
@@ -510,32 +510,32 @@ bool Engine::priv::SMAA::init() {
 
 #pragma region VertFinal
         STATIC_SMAA.m_Vertex_Shaders_Code[PassStage::Final] = smaa_common + R"(
-        layout (location = 0) in vec3 position;
-        layout (location = 1) in vec2 UV;
-        uniform mat4 Model;
-        uniform mat4 VP;
-        varying vec2 uv;
-        void SMAAResolveVS(inout vec2 uv){}
-        void SMAASeparateVS(inout vec2 uv){}
-        void main(){
-            uv = UV;
-            vec3 vert = position;
-            gl_Position = VP * Model * vec4(vert, 1.0);
-        }
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec2 UV;
+uniform mat4 Model;
+uniform mat4 VP;
+varying vec2 uv;
+void SMAAResolveVS(inout vec2 uv){}
+void SMAASeparateVS(inout vec2 uv){}
+void main(){
+    uv = UV;
+    vec3 vert = position;
+    gl_Position = VP * Model * vec4(vert, 1.0);
+}
     )";
 #pragma endregion
 
 #pragma region FragFinal
         STATIC_SMAA.m_Fragment_Shaders_Code[PassStage::Final] = smaa_common + R"(
-        varying vec2 uv;
-        vec4 SMAAResolvePS(vec2 texcoord, sampler2D currentColorTex, sampler2D previousColorTex){
-            vec4 current = texture2D(currentColorTex, texcoord);
-            vec4 previous = texture2D(previousColorTex, texcoord);
-            return mix(current, previous, 0.5);
-        }
-        void main(){
-            gl_FragColor = vec4(0.0,0.0,0.0,1.0);
-        }
+varying vec2 uv;
+vec4 SMAAResolvePS(vec2 texcoord, sampler2D currentColorTex, sampler2D previousColorTex){
+    vec4 current = texture2D(currentColorTex, texcoord);
+    vec4 previous = texture2D(previousColorTex, texcoord);
+    return mix(current, previous, 0.5);
+}
+void main(){
+    gl_FragColor = vec4(0.0,0.0,0.0,1.0);
+}
     )";
 #pragma endregion
 
@@ -550,15 +550,16 @@ bool Engine::priv::SMAA::init() {
         Engine::priv::threading::addJobWithPostCallback(lambda_part_a, lambda_part_b);
     }
 
-    Engine::Renderer::genAndBindTexture(TextureType::Texture2D, STATIC_SMAA.AreaTexture);
-    GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RG8, 160, 560, 0, GL_RG, GL_UNSIGNED_BYTE, SMAA_areaTexBytes));
-    Texture::setFilter(TextureType::Texture2D, TextureFilter::Linear);
-    Texture::setWrapping(TextureType::Texture2D, TextureWrap::ClampToBorder);
+    const TextureType textureType = TextureType::Texture2D;
+    Engine::Renderer::genAndBindTexture(textureType, STATIC_SMAA.AreaTexture);
+    GLCall(glTexImage2D(textureType.toGLType(), 0, GL_RG8, 160, 560, 0, GL_RG, GL_UNSIGNED_BYTE, SMAA_areaTexBytes));
+    Texture::setFilter(textureType, TextureFilter::Linear);
+    TextureBaseClass::setWrapping(textureType, TextureWrap::ClampToBorder);
 
-    Engine::Renderer::genAndBindTexture(TextureType::Texture2D, STATIC_SMAA.SearchTexture);
-    GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, 64, 16, 0, GL_RED, GL_UNSIGNED_BYTE, SMAA_searchTexBytes));
-    Texture::setFilter(TextureType::Texture2D, TextureFilter::Linear);
-    Texture::setWrapping(TextureType::Texture2D, TextureWrap::ClampToBorder);
+    Engine::Renderer::genAndBindTexture(textureType, STATIC_SMAA.SearchTexture);
+    GLCall(glTexImage2D(textureType.toGLType(), 0, GL_R8, 64, 16, 0, GL_RED, GL_UNSIGNED_BYTE, SMAA_searchTexBytes));
+    Texture::setFilter(textureType, TextureFilter::Linear);
+    TextureBaseClass::setWrapping(textureType, TextureWrap::ClampToBorder);
 
     return true;
 }

@@ -140,7 +140,7 @@ void FramebufferObject::resize(uint32_t w, uint32_t h){
 bool FramebufferObject::checkStatus() {
     for (const auto fbo : m_FBOs) {
         Engine::Renderer::bindFBO(fbo);
-        GLCall(GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER));
+        GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
             ENGINE_PRODUCTION_LOG("Framebuffer completeness in FramebufferObject::impl _check() (index " + std::to_string(fbo) + ") is incomplete!")
             ENGINE_PRODUCTION_LOG("Error is: " << framebufferStatus)

@@ -11,10 +11,10 @@ namespace Engine::priv {
 #include <serenity/utils/Utils.h>
 #include <serenity/resources/Handle.h>
 
-class Skybox: public Observer{
+class Skybox: public Observer {
     friend class Engine::priv::SkyboxImplInterface;
     private:
-        Handle  m_Texture = Handle{};
+        Handle  m_TextureCubemap = Handle{};
     public:
         static void bindMesh();
     public:
@@ -24,8 +24,8 @@ class Skybox: public Observer{
 
         virtual void update() {}
 
-        [[nodiscard]] inline constexpr Handle texture() const noexcept { return m_Texture; }
+        [[nodiscard]] inline constexpr Handle cubemap() const noexcept { return m_TextureCubemap; }
 
-        void onEvent(const Event& e);
+        void onEvent(const Event&);
 };
 #endif

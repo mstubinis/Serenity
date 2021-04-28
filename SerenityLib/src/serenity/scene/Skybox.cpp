@@ -1,11 +1,9 @@
 
 #include <serenity/scene/Skybox.h>
 #include <serenity/system/Engine.h>
-#include <serenity/resources/texture/Texture.h>
-#include <serenity/resources/texture/TextureLoader.h>
+#include <serenity/resources/texture/TextureCubemap.h>
+#include <serenity/resources/texture/TextureLoaderCubemap.h>
 #include <serenity/events/Event.h>
-
-using namespace Engine;
 
 GLuint m_Buffer   = 0;
 GLuint m_VAO      = 0;
@@ -95,18 +93,18 @@ Skybox::Skybox(const std::array<std::string_view, 6>& files) {
 
     //instead of using files[0] generate a proper name using the directory?
 
-    m_Texture = Engine::Resources::addResource<Texture>(files, std::string(files[0]) + "Cubemap", false, ImageInternalFormat::SRGB8_ALPHA8);
-    Engine::priv::TextureLoader::GeneratePBRData(*m_Texture.get<Texture>(), 32, m_Texture.get<Texture>()->width() / 4);
+    m_TextureCubemap = Engine::Resources::addResource<TextureCubemap>(files, std::string(files[0]) + "Cubemap", false, ImageInternalFormat::SRGB8_ALPHA8);
+    Engine::priv::TextureLoaderCubemap::GeneratePBRData(*m_TextureCubemap.get<TextureCubemap>(), 32, m_TextureCubemap.get<TextureCubemap>()->width() / 4);
 
     registerEvent(EventType::WindowFullscreenChanged);
 }
 Skybox::Skybox(std::string_view filename) {
     Engine::priv::SkyboxImplInterface::initMesh();
 
-    m_Texture = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.get<Texture>(filename).m_Handle;
-    if (m_Texture) {
-        m_Texture = Engine::Resources::addResource<Texture>(filename, false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::CubeMap);
-        Engine::priv::TextureLoader::GeneratePBRData(*m_Texture.get<Texture>(), 32, m_Texture.get<Texture>()->width() / 4);
+    m_TextureCubemap = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.get<TextureCubemap>(filename).m_Handle;
+    if (!m_TextureCubemap) {
+        m_TextureCubemap = Engine::Resources::addResource<TextureCubemap>(filename, false, ImageInternalFormat::SRGB8_ALPHA8);
+        Engine::priv::TextureLoaderCubemap::GeneratePBRData(*m_TextureCubemap.get<TextureCubemap>(), 32, m_TextureCubemap.get<TextureCubemap>()->width() / 4);
     }
     registerEvent(EventType::WindowFullscreenChanged);
 }
