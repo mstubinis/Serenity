@@ -194,6 +194,16 @@ namespace Engine::priv {
         static void                       RenderDecals(RenderModule&, Scene&, Viewport*, Camera*, bool useDefaultShaders = true);
         static void                       RenderParticles(RenderModule&, Scene&, Viewport&, Camera&, Handle program);
 
+
+        static void                       RenderGeometryOpaqueShadowMap(RenderModule&, Scene&, Viewport*, Camera*);
+        static void                       RenderGeometryTransparentShadowMap(RenderModule&, Scene&, Viewport*, Camera*);
+        static void                       RenderGeometryTransparentTrianglesSortedShadowMap(RenderModule&, Scene&, Viewport*, Camera*);
+        static void                       RenderForwardOpaqueShadowMap(RenderModule&, Scene&, Viewport*, Camera*);
+        static void                       RenderForwardTransparentShadowMap(RenderModule&, Scene&, Viewport*, Camera*);
+        static void                       RenderForwardTransparentTrianglesSortedShadowMap(RenderModule&, Scene&, Viewport*, Camera*);
+
+
+
         static void                       AddModelInstanceToPipeline(Scene&, ModelInstance&, RenderStage);
         static void                       RemoveModelInstanceFromPipeline(Scene&, ModelInstance&, RenderStage);
         [[nodiscard]] static Engine::priv::ECS& GetECS(Scene&);

@@ -87,6 +87,10 @@ namespace Engine::priv {
 
             void render(Engine::priv::RenderModule&, Camera*, bool useDefaultShaders = true, SortingMode = SortingMode::None);
             void render_bruteforce(Engine::priv::RenderModule&, Camera*, bool useDefaultShaders = true, SortingMode = SortingMode::None);
+
+            void render_shadow_map(Engine::priv::RenderModule&, Camera*);
+            void render_bruteforce_shadow_map(Engine::priv::RenderModule&, Camera*);
+
             void validate_model_instances_for_rendering(Camera*, Viewport*);
     };
 

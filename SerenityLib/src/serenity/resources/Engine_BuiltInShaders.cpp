@@ -3,6 +3,7 @@
 #include <serenity/renderer/particles/ParticleSystem.h>
 #include <serenity/resources/material/MaterialEnums.h>
 #include <serenity/renderer/opengl/State.h>
+#include <serenity/lights/Lights.h>
 
 /*
 GLSL Version    OpenGL Version
@@ -440,6 +441,7 @@ varying vec2 UV;
 
 varying vec3 Normals;
 varying vec3 WorldPosition;
+varying vec3 ViewPosition;
 varying mat3 TBN;
 
 flat varying vec3 CamPosition;
@@ -472,6 +474,7 @@ void main(){
 
     vec4 worldPos      = ModelMatrix * PosTrans;
     WorldPosition      = worldPos.xyz;
+    ViewPosition       = vec4(CameraView * worldPos).xyz;
 
     gl_Position        = CameraViewProj * worldPos;
 
@@ -759,6 +762,7 @@ Engine::priv::EShaders::forward_frag =
     "uniform uint Gods_Rays_Color;\n"
     "\n"
     "varying vec3 WorldPosition;\n"
+    "varying vec3 ViewPosition;\n"
     "varying vec2 UV;\n"
     "varying vec3 Normals;\n"
     "varying mat3 TBN;\n"
@@ -768,12 +772,13 @@ Engine::priv::EShaders::forward_frag =
     "varying vec4 FragPosLightSpace;\n"
     "varying vec3 TangentFragPos;\n"
     "\n"
+    "uniform SAMPLER_TYPE_2D gDepthMap;\n"
     "uniform SAMPLER_TYPE_Cube irradianceMap;\n"
     "uniform SAMPLER_TYPE_Cube prefilterMap;\n"
     "uniform SAMPLER_TYPE_2D brdfLUT;\n"
     "uniform SAMPLER_TYPE_2D gTextureMap;\n"
 
-    "uniform mat4 LightMatrix;\n"
+    "uniform mat4 LightMatrix[NUM_CASCADES];\n"
 
     "\n"
     "const float MAX_REFLECTION_LOD = 5.0;\n"
@@ -819,17 +824,17 @@ Engine::priv::EShaders::forward_frag =
     "            vec3 LightPosition    = vec3(currentLight.DataC.yzw) - CamRealPosition;\n"
     "            vec3 LightDirection   = normalize(vec3(currentLight.DataA.w, currentLight.DataB.x, currentLight.DataB.y));\n"
     "            if(currentLight.DataD.w == 0.0){\n"       //sun
-    "                lightCalculation = CalcLightInternal(currentLight, normalize(LightPosition - WorldPosition), WorldPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
+    "                lightCalculation = CalcLightInternal(currentLight, normalize(LightPosition - WorldPosition), WorldPosition, ViewPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
     "            }else if(currentLight.DataD.w == 1.0){\n" //point
-    "                lightCalculation = CalcPointLight(currentLight, LightPosition, WorldPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
+    "                lightCalculation = CalcPointLight(currentLight, LightPosition, WorldPosition, ViewPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
     "            }else if(currentLight.DataD.w == 2.0){\n" //directional
-    "                lightCalculation = CalcLightInternal(currentLight, LightDirection, WorldPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
+    "                lightCalculation = CalcLightInternal(currentLight, LightDirection, WorldPosition, ViewPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
     "            }else if(currentLight.DataD.w == 3.0){\n" //spot
-    "                lightCalculation = CalcSpotLight(currentLight, LightDirection, LightPosition, WorldPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
+    "                lightCalculation = CalcSpotLight(currentLight, LightDirection, LightPosition, WorldPosition, ViewPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
     "            }else if(currentLight.DataD.w == 4.0){\n" //rod
-    "                lightCalculation = CalcRodLight(currentLight, vec3(currentLight.DataA.w, currentLight.DataB.xy), currentLight.DataC.yzw, WorldPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
+    "                lightCalculation = CalcRodLight(currentLight, vec3(currentLight.DataA.w, currentLight.DataB.xy), currentLight.DataC.yzw, WorldPosition, ViewPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
     "            }else if(currentLight.DataD.w == 5.0){\n" //projection
-    "                lightCalculation = CalcProjectionLight(currentLight, vec3(currentLight.DataA.w, currentLight.DataB.xy), currentLight.DataC.yzw, WorldPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
+    "                lightCalculation = CalcProjectionLight(currentLight, vec3(currentLight.DataA.w, currentLight.DataB.xy), currentLight.DataC.yzw, WorldPosition, ViewPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
     "            }\n"
     "            lightTotal += lightCalculation;\n"
     "        }\n"
@@ -1200,6 +1205,8 @@ Engine::priv::EShaders::depth_and_transparency_frag +=
 //else if(light.DataD.w == 4.0){  //rod
 //else if(light.DataD.w == 5.0){  //projection
 
+//vec3 PxlViewPosition  = CameraView * vec4(PxlPosition.xyz, 1.0); TODO: pass this into lighting functions for shadows
+
 Engine::priv::EShaders::lighting_frag = R"(
 #define MATERIAL_COUNT_LIMIT 255
 
@@ -1219,7 +1226,7 @@ uniform SAMPLER_TYPE_2D gDepthMap;
 uniform SAMPLER_TYPE_2D gSSAOMap;
 uniform SAMPLER_TYPE_2D gTextureMap;
 
-uniform mat4 LightMatrix;
+uniform mat4 LightMatrix[NUM_CASCADES];
 
 uniform vec4 materials[MATERIAL_COUNT_LIMIT];
 
@@ -1231,6 +1238,7 @@ void main(){
     vec2 uv = gl_FragCoord.xy / ScreenInfo.xy;
     vec3 PxlNormal        = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), uv).rg);
     vec3 PxlPosition      = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv, CameraNear, CameraFar);
+    vec3 PxlViewPosition  = (CameraView * vec4(PxlPosition, 1.0)).xyz;
     vec3 lightCalculation = ConstantZeroVec3;
     vec3 LightPosition    = vec3(light.DataC.yzw) - CamRealPosition;
     vec3 LightDirection   = normalize(vec3(light.DataA.w, light.DataB.x, light.DataB.y));
@@ -1246,17 +1254,17 @@ void main(){
     float MatTypeSpecular = materials[matID].b;
     float AO              = fract(MatIDAndAO) + 0.0001;
     if(light.DataD.w == 0.0){
-        lightCalculation = CalcLightInternal(light, normalize(LightPosition - PxlPosition), PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+        lightCalculation = CalcLightInternal(light, normalize(LightPosition - PxlPosition), PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
     }else if(light.DataD.w == 1.0){
-        lightCalculation = CalcPointLight(light, LightPosition, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+        lightCalculation = CalcPointLight(light, LightPosition, PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
     }else if(light.DataD.w == 2.0){
-        lightCalculation = CalcLightInternal(light, LightDirection, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+        lightCalculation = CalcLightInternal(light, LightDirection, PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
     }else if(light.DataD.w == 3.0){
-        lightCalculation = CalcSpotLight(light, LightDirection, LightPosition, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+        lightCalculation = CalcSpotLight(light, LightDirection, LightPosition, PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
     }else if(light.DataD.w == 4.0){
-        lightCalculation = CalcRodLight(light, vec3(light.DataA.w, light.DataB.xy), light.DataC.yzw, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+        lightCalculation = CalcRodLight(light, vec3(light.DataA.w, light.DataB.xy), light.DataC.yzw, PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
     }else if(light.DataD.w == 5.0){
-        lightCalculation = CalcProjectionLight(light, vec3(light.DataA.w, light.DataB.xy), light.DataC.yzw, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+        lightCalculation = CalcProjectionLight(light, vec3(light.DataA.w, light.DataB.xy), light.DataC.yzw, PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
     }
     gl_FragData[0].rgb = lightCalculation;
 }
@@ -1330,7 +1338,7 @@ uniform SAMPLER_TYPE_2D gDepthMap;
 uniform SAMPLER_TYPE_2D gSSAOMap;
 uniform SAMPLER_TYPE_2D gTextureMap;
 
-uniform mat4 LightMatrix;
+uniform mat4 LightMatrix[NUM_CASCADES];
 
 uniform vec4 materials[MATERIAL_COUNT_LIMIT];
 
@@ -1341,6 +1349,7 @@ void main(){
     vec2 uv = gl_FragCoord.xy / ScreenInfo.xy;
     vec3 PxlNormal        = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), uv).rg);
     vec3 PxlPosition      = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv, CameraNear, CameraFar);
+    vec3 PxlViewPosition  = (CameraView * vec4(PxlPosition, 1.0)).xyz;
     vec3 LightPosition    = vec3(light.DataC.yzw) - CamRealPosition;
     vec3 LightDirection   = normalize(vec3(light.DataA.w, light.DataB.x, light.DataB.y));
     float Specular        = texture2D(USE_SAMPLER_2D(gMiscMap), uv).g;
@@ -1352,17 +1361,17 @@ void main(){
     float AO              = fract(MatIDAndAO) + 0.0001;
     vec3 LightCalculation = ConstantZeroVec3;
     if(light.DataD.w == 0.0){
-        LightCalculation = CalcLightInternalBasic(light, normalize(LightPosition - PxlPosition), PxlPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
+        LightCalculation = CalcLightInternalBasic(light, normalize(LightPosition - PxlPosition), PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
     }else if(light.DataD.w == 1.0){
-        LightCalculation = CalcPointLightBasic(light, LightPosition, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
+        LightCalculation = CalcPointLightBasic(light, LightPosition, PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
     }else if(light.DataD.w == 2.0){
-        LightCalculation = CalcLightInternalBasic(light, LightDirection, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
+        LightCalculation = CalcLightInternalBasic(light, LightDirection, PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
     }else if(light.DataD.w == 3.0){
-        LightCalculation = CalcSpotLightBasic(light, LightDirection, LightPosition, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
+        LightCalculation = CalcSpotLightBasic(light, LightDirection, LightPosition, PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
     }else if(light.DataD.w == 4.0){
-        LightCalculation = CalcRodLightBasic(light, vec3(light.DataA.w, light.DataB.xy), light.DataC.yzw, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
+        LightCalculation = CalcRodLightBasic(light, vec3(light.DataA.w, light.DataB.xy), light.DataC.yzw, PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
     }else if(light.DataD.w == 5.0){
-        LightCalculation = CalcProjectionLightBasic(light, vec3(light.DataA.w, light.DataB.xy), light.DataC.yzw, PxlPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
+        LightCalculation = CalcProjectionLightBasic(light, vec3(light.DataA.w, light.DataB.xy), light.DataC.yzw, PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
     }
     gl_FragData[0].rgb = LightCalculation;
 }
@@ -1401,7 +1410,8 @@ void main() {
 }  
 )";
 Engine::priv::EShaders::shadow_depth_frag = R"(
-#define BIAS 0.0001
+#define BIAS 0.002
+
 void main() {
     gl_FragDepth = gl_FragCoord.z;
     gl_FragDepth += gl_FrontFacing ? BIAS : 0.0;

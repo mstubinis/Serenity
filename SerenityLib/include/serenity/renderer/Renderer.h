@@ -198,6 +198,14 @@ namespace Engine::Renderer {
     void sendTextureSafe(const char* location, TextureCubemap&, int slot);
     void sendTextureSafe(const char* location, GLuint textureAddress, int slot, GLuint glTextureType);
 
+    void sendTextures(const char* location, const Texture**, int slot, const int arrSize);
+    void sendTextures(const char* location, const TextureCubemap**, int slot, const int arrSize);
+    void sendTextures(const char* location, const GLuint*, int slot, GLuint glTextureType, const int arrSize);
+    void sendTexturesSafe(const char* location, const Texture**, int slot, const int arrSize);
+    void sendTexturesSafe(const char* location, const TextureCubemap**, int slot, const int arrSize);
+    void sendTexturesSafe(const char* location, const GLuint*, int slot, GLuint glTextureType, const int arrSize);
+
+
     void alignmentOffset(Alignment, float& x, float& y, float width, float height);
 
     void renderTexture(
@@ -336,6 +344,25 @@ namespace Engine::Renderer {
     inline void sendUniform1Force(const char* l, int x) { glUniform1i(getUniformLoc(l), x); }
     inline void sendUniform1Force(const char* l, float x) { glUniform1f(getUniformLoc(l), x); }
     inline void sendUniform1Force(const char* l, uint32_t x) { glUniform1ui(getUniformLoc(l), x); }
+    //vector and array of values
+    inline void sendUniform1v(const char* l, const std::vector<double>& d, const uint32_t i) { glUniform1dv(getUniformLocUnsafe(l), i, d.data()); }
+    inline void sendUniform1v(const char* l, const std::vector<int>& d, const uint32_t i) { glUniform1iv(getUniformLocUnsafe(l), i, d.data()); }
+    inline void sendUniform1v(const char* l, const std::vector<float>& d, const uint32_t i) { glUniform1fv(getUniformLocUnsafe(l), i, d.data()); }
+    inline void sendUniform1v(const char* l, double* d, const uint32_t i) { glUniform1dv(getUniformLocUnsafe(l), i, d); }
+    inline void sendUniform1v(const char* l, int* d, const uint32_t i) { glUniform1iv(getUniformLocUnsafe(l), i, d); }
+    inline void sendUniform1v(const char* l, float* d, const uint32_t i) { glUniform1fv(getUniformLocUnsafe(l), i, d); }
+    inline void sendUniform1vSafe(const char* l, const std::vector<float>& d, const uint32_t i) { const auto& o = getUniformLoc(l); if (o == -1) return; glUniform1fv(o, i, d.data()); }
+    inline void sendUniform1vSafe(const char* l, float* d, const uint32_t i) { const auto& o = getUniformLoc(l); if (o == -1) return; glUniform1fv(o, i, d); }
+    inline void sendUniform1vForce(const char* l, const std::vector<float>& d, const uint32_t i) { glUniform1fv(getUniformLoc(l), i, d.data()); }
+    inline void sendUniform1vForce(const char* l, float* d, const uint32_t i) { glUniform1fv(getUniformLoc(l), i, d); }
+    inline void sendUniform1vSafe(const char* l, const std::vector<double>& d, const uint32_t i) { const auto& o = getUniformLoc(l); if (o == -1) return; glUniform1dv(o, i, d.data()); }
+    inline void sendUniform1vSafe(const char* l, double* d, const uint32_t i) { const auto& o = getUniformLoc(l); if (o == -1) return; glUniform1dv(o, i, d); }
+    inline void sendUniform1vForce(const char* l, const std::vector<double>& d, const uint32_t i) { glUniform1dv(getUniformLoc(l), i, d.data()); }
+    inline void sendUniform1vForce(const char* l, double* d, const uint32_t i) { glUniform1dv(getUniformLoc(l), i, d); }
+    inline void sendUniform1vSafe(const char* l, const std::vector<int>& d, const uint32_t i) { const auto& o = getUniformLoc(l); if (o == -1) return; glUniform1iv(o, i, d.data()); }
+    inline void sendUniform1vSafe(const char* l, int* d, const uint32_t i) { const auto& o = getUniformLoc(l); if (o == -1) return; glUniform1iv(o, i, d); }
+    inline void sendUniform1vForce(const char* l, const std::vector<int>& d, const uint32_t i) { glUniform1iv(getUniformLoc(l), i, d.data()); }
+    inline void sendUniform1vForce(const char* l, int* d, const uint32_t i) { glUniform1iv(getUniformLoc(l), i, d); }
 
     //Uniform 2
     //vectors

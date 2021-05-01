@@ -35,7 +35,6 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
         std::array<glm::vec4, 6> m_FrustumPlanes;
         glm::vec3                m_Eye               = glm::vec3{ 0.0f };
         glm::vec3                m_Up                = glm::vec3{ 0.0f, 1.0f, 0.0f };
-        glm::vec3                m_Forward           = glm::vec3{ 0.0f, 0.0f, -1.0f };
 
         float                    m_NearPlane         = 0.01f;
         float                    m_FarPlane          = 2000.0f;
@@ -63,7 +62,6 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
 
         void resize(uint32_t width, uint32_t height) noexcept;
         void lookAt(const glm::vec3& eye, const glm::vec3& forward, const glm::vec3& up) noexcept;
-        void lookAt(glm::vec3&& eye, glm::vec3&& forward, glm::vec3&& up) noexcept;
 
         void setViewMatrix(const glm::mat4& viewMatrix) noexcept;
         void setViewMatrix(glm::mat4&& viewMatrix) noexcept;
@@ -71,12 +69,12 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
 
         [[nodiscard]] inline constexpr CameraType getType() const noexcept { return m_Type; }
         [[nodiscard]] inline constexpr float getAngle() const noexcept { return m_Angle; }
-        [[nodiscard]] inline constexpr float getAspect() const noexcept { return m_AspectRatio; }
+        [[nodiscard]] inline constexpr float getAspectRatio() const noexcept { return m_AspectRatio; }
         [[nodiscard]] inline constexpr float getNear() const noexcept { return m_NearPlane; }
         [[nodiscard]] inline constexpr float getFar() const noexcept { return m_FarPlane; }
 
         void setAngle(float angle) noexcept;
-        void setAspect(float aspectRatio) noexcept;
+        void setAspectRatio(float aspectRatio) noexcept;
         void setNear(float Near) noexcept;
         void setFar(float Far) noexcept;
 
@@ -89,7 +87,6 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
         [[nodiscard]] inline glm::vec3 getViewVector() const noexcept { return glm::normalize(glm::vec3(m_ViewMatrix[0][2], m_ViewMatrix[1][2], m_ViewMatrix[2][2])); }
 
         [[nodiscard]] inline std::array<glm::vec4, 6>& getFrustrumPlanes() noexcept { return m_FrustumPlanes; }
-        [[nodiscard]] inline constexpr glm::vec3 getForward() const noexcept { return m_Forward; }
         [[nodiscard]] inline glm::vec3 getRight() const noexcept { return glm::normalize(glm::vec3(m_ViewMatrix[0][0], m_ViewMatrix[1][0], m_ViewMatrix[2][0])); }
         [[nodiscard]] inline constexpr glm::vec3 getUp() const noexcept { return m_Up; /*normalize later?*/ }
 

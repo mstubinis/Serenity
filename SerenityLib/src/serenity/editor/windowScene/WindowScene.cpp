@@ -5,6 +5,8 @@
 #include <serenity/system/Engine.h>
 #include <serenity/math/MathCompression.h>
 
+#include <serenity/lights/Lights.h>
+
 #include <serenity/renderer/postprocess/HDR.h>
 #include <serenity/renderer/postprocess/SSAO.h>
 #include <serenity/renderer/postprocess/SMAA.h>
@@ -112,6 +114,14 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
         ImGui::TreePop();
         ImGui::Separator();
     }
+    //do lights...
+    //const auto& directionalLights = Engine::priv::PublicScene::GetLights<DirectionalLight>(currentScene);
+    //if (ImGui::TreeNode("Entities")) {
+
+
+    //    ImGui::TreePop();
+    //    ImGui::Separator();
+    //}
     ImGui::EndChild();
 }
 void Engine::priv::EditorWindowScene::internal_render_profiler() {

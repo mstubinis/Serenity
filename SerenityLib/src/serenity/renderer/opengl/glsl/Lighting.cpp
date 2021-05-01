@@ -1,5 +1,6 @@
 
 #include <serenity/renderer/opengl/glsl/Lighting.h>
+#include <serenity/lights/Lights.h>
 
 #include <serenity/renderer/opengl/Extensions.h>
 #include <serenity/resources/shader/ShaderHelper.h>
@@ -19,7 +20,7 @@ void opengl::glsl::Lighting::convert(std::string& code, uint32_t versionNumber, 
 #pragma region Projection Light
     if (ShaderHelper::lacksDefinition(code, "CalcProjectionLight(", "vec3 CalcProjectionLight(")) {
         ShaderHelper::insertStringRightBeforeLineContent(code, 
-            "vec3 CalcProjectionLight(in Light inLight, vec3 A, vec3 B,vec3 PxlWorldPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){//generated\n"
+            "vec3 CalcProjectionLight(in Light inLight, vec3 A, vec3 B,vec3 PxlWorldPos, vec3 PxlViewPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){//generated\n"
             /*
             //TODO: implement
             "    vec3 BMinusA = B - A;\n"
@@ -28,7 +29,7 @@ void opengl::glsl::Lighting::convert(std::string& code, uint32_t versionNumber, 
             "    vec3 _Normal = BMinusA / Dist;\n"
             "    float t = clamp(dot(CMinusA, _Normal / Dist), 0.0, 1.0);\n"
             "    vec3 LightPos = A + t * BMinusA;\n"
-            "    vec3 c = CalcPointLight(inLight, LightPos, PxlWorldPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);\n"
+            "    vec3 c = CalcPointLight(inLight, LightPos, PxlWorldPos, PxlViewPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);\n"
             "    return c;\n"
             */
             "    return vec3(0.0, 1.0, 0.0);\n"
@@ -40,14 +41,14 @@ void opengl::glsl::Lighting::convert(std::string& code, uint32_t versionNumber, 
 #pragma region Rod Light
     if (ShaderHelper::lacksDefinition(code, "CalcRodLight(", "vec3 CalcRodLight(")) {
         ShaderHelper::insertStringRightBeforeLineContent(code, R"(
-vec3 CalcRodLight(in Light inLight, vec3 A, vec3 B, vec3 PxlWorldPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){ //generated
+vec3 CalcRodLight(in Light inLight, vec3 A, vec3 B, vec3 PxlWorldPos, vec3 PxlViewPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){ //generated
     vec3 BMinusA = B - A;
     vec3 CMinusA = PxlWorldPos - A;
     float Dist = length(BMinusA);
     vec3 _Normal = BMinusA / Dist;
     float t = clamp(dot(CMinusA, _Normal / Dist), 0.0, 1.0);
     vec3 LightPos = A + t * BMinusA;
-    vec3 c = CalcPointLight(inLight, LightPos, PxlWorldPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+    vec3 c = CalcPointLight(inLight, LightPos, PxlWorldPos, PxlViewPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
     return c;
 }
 )", "void main(");
@@ -57,9 +58,9 @@ vec3 CalcRodLight(in Light inLight, vec3 A, vec3 B, vec3 PxlWorldPos, vec3 PxlNo
 #pragma region Spot Light
     if (ShaderHelper::lacksDefinition(code, "CalcSpotLight(", "vec3 CalcSpotLight(")) {
         ShaderHelper::insertStringRightBeforeLineContent(code, R"(
-vec3 CalcSpotLight(in Light inLight, vec3 SpotLightDir, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){ //generated
+vec3 CalcSpotLight(in Light inLight, vec3 SpotLightDir, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlViewPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){ //generated
     vec3 LightDir = normalize(LightPos - PxlWorldPos);
-    vec3 c = CalcPointLight(inLight, LightPos, PxlWorldPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+    vec3 c = CalcPointLight(inLight, LightPos, PxlWorldPos, PxlViewPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
     float cosAngle = dot(LightDir, -SpotLightDir);
     float spotEffect = smoothstep(inLight.DataE.y, inLight.DataE.x, cosAngle);
     return c * spotEffect;
@@ -71,11 +72,11 @@ vec3 CalcSpotLight(in Light inLight, vec3 SpotLightDir, vec3 LightPos,vec3 PxlWo
 #pragma region Point Light
     if (ShaderHelper::lacksDefinition(code, "CalcPointLight(", "vec3 CalcPointLight(")) {
         ShaderHelper::insertStringRightBeforeLineContent(code, R"(
-vec3 CalcPointLight(in Light inLight, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){ //generated
+vec3 CalcPointLight(in Light inLight, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlViewPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){ //generated
     vec3 RawDirection = LightPos - PxlWorldPos;
     float Dist = length(RawDirection);
     vec3 LightDir = RawDirection / Dist;
-    vec3 c = CalcLightInternal(inLight, LightDir, PxlWorldPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+    vec3 c = CalcLightInternal(inLight, LightDir, PxlWorldPos, PxlViewPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
     float attenuation = CalculateAttenuation(inLight, Dist, 1.0);
     return c * attenuation;
 }
@@ -86,14 +87,26 @@ vec3 CalcPointLight(in Light inLight, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNo
 #pragma region Lighting Internal Function
     if (ShaderHelper::lacksDefinition(code, "CalcLightInternal(", "vec3 CalcLightInternal(")) {
         ShaderHelper::insertStringRightBeforeLineContent(code, R"(
-vec3 CalcLightInternal(in Light currentLight, vec3 LightDir, vec3 PxlWorldPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){
+vec3 CalcLightInternal(in Light currentLight, vec3 LightDir, vec3 PxlWorldPos, vec3 PxlViewPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){
     vec3 LightDiffuseColor  = currentLight.DataD.xyz;
     vec3 LightSpecularColor = currentLight.DataD.xyz * Specular;
     vec3 SpecularFactor     = ConstantZeroVec3;
 
-    vec4 FragPosLightSpace  = LightMatrix * vec4(PxlWorldPos + CamRealPosition, 1.0);
-    float shadow            = ShadowCalculation(FragPosLightSpace, PxlNormal, LightDir);  
-
+    vec2 uvs = gl_FragCoord.xy / ScreenInfo.xy;
+    float shadow = 1.0;
+    for (int i = 0; i < NUM_CASCADES; i++) {
+        if (-PxlViewPos.z <= -CascadeEndClipSpace[i]) {
+            vec4 FragPosLightSpace = LightMatrix[i] * vec4(PxlWorldPos + CamRealPosition, 1.0);
+            shadow = ShadowCalculation(i, FragPosLightSpace, PxlNormal, LightDir);
+			//float fade = clamp((1.0 - PxlViewPos.z / CascadeEndClipSpace[i]) / 0.05, 0.0, 1.0);
+			//if (fade < 1.0) {
+            //  vec4 NextFragPosLightSpace = LightMatrix[i + 1] * vec4(PxlWorldPos + CamRealPosition, 1.0);
+			//	float nextShadow = ShadowCalculation(i + 1, NextFragPosLightSpace, PxlNormal, LightDir);
+			//	shadow = mix(nextShadow, shadow, fade);
+			//}
+            break;
+        }
+    }
     float ao                = AO * SSAO;
     float metalness         = MetalSmooth.x;
     float smoothness        = MetalSmooth.y;
@@ -380,7 +393,7 @@ float CalculateAttenuation(in Light currentLight, float Dist, float radius){ //g
 #pragma region Projection Light Basic
     if (ShaderHelper::lacksDefinition(code, "CalcProjectionLightBasic(", "vec3 CalcProjectionLightBasic(")) {
         ShaderHelper::insertStringRightBeforeLineContent(code,
-"vec3 CalcProjectionLightBasic(in Light inLight, vec3 A, vec3 B, vec3 PxlWorldPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, float MatAlpha, float AO){\n"
+"vec3 CalcProjectionLightBasic(in Light inLight, vec3 A, vec3 B, vec3 PxlWorldPos, vec3 PxlViewPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, float MatAlpha, float AO){\n"
 /*
 //TODO: implement
 "    vec3 BMinusA = B - A;\n"
@@ -389,7 +402,7 @@ float CalculateAttenuation(in Light currentLight, float Dist, float radius){ //g
 "    vec3 _Normal = BMinusA / Dist;\n"
 "    float t = clamp(dot(CMinusA, _Normal / Dist), 0.0, 1.0);\n"
 "    vec3 LightPos = A + t * BMinusA;\n"
-"    vec3 c = CalcPointLightBasic(inLight, LightPos, PxlWorldPos, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);\n"
+"    vec3 c = CalcPointLightBasic(inLight, LightPos, PxlWorldPos, PxlViewPos, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);\n"
 "    return c;\n"
 */
 "    return vec3(0.0, 1.0, 0.0);\n"
@@ -401,14 +414,14 @@ float CalculateAttenuation(in Light currentLight, float Dist, float radius){ //g
 #pragma region Rod Light Basic
     if (ShaderHelper::lacksDefinition(code, "CalcRodLightBasic(", "vec3 CalcRodLightBasic(")) {
         ShaderHelper::insertStringRightBeforeLineContent(code, R"(
-vec3 CalcRodLightBasic(in Light inLight, vec3 A, vec3 B, vec3 PxlWorldPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, float MatAlpha, float AO){
+vec3 CalcRodLightBasic(in Light inLight, vec3 A, vec3 B, vec3 PxlWorldPos, vec3 PxlViewPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, float MatAlpha, float AO){
     vec3 BMinusA = B - A;
     vec3 CMinusA = PxlWorldPos - A;
     float Dist = length(BMinusA);
     vec3 _Normal = BMinusA / Dist;
     float t = clamp(dot(CMinusA, _Normal / Dist), 0.0, 1.0);
     vec3 LightPos = A + t * BMinusA;
-    vec3 c = CalcPointLightBasic(inLight, LightPos, PxlWorldPos, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
+    vec3 c = CalcPointLightBasic(inLight, LightPos, PxlWorldPos, PxlViewPos, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
     return c;
 }
 )", "void main(");
@@ -418,9 +431,9 @@ vec3 CalcRodLightBasic(in Light inLight, vec3 A, vec3 B, vec3 PxlWorldPos, vec3 
 #pragma region Spot Light Basic
     if (ShaderHelper::lacksDefinition(code, "CalcSpotLightBasic(", "vec3 CalcSpotLightBasic(")) {
         ShaderHelper::insertStringRightBeforeLineContent(code, R"(
-vec3 CalcSpotLightBasic(in Light inLight, vec3 SpotLightDir, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, float MatAlpha, float AO){
+vec3 CalcSpotLightBasic(in Light inLight, vec3 SpotLightDir, vec3 LightPos, vec3 PxlWorldPos, vec3 PxlViewPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, float MatAlpha, float AO){
     vec3 LightDir = normalize(LightPos - PxlWorldPos);
-    vec3 c = CalcPointLightBasic(inLight, LightPos, PxlWorldPos, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
+    vec3 c = CalcPointLightBasic(inLight, LightPos, PxlWorldPos, PxlViewPos, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
     float cosAngle = dot(LightDir, -SpotLightDir);
     float spotEffect = smoothstep(inLight.DataE.y, inLight.DataE.x, cosAngle);
     return c * spotEffect;
@@ -432,11 +445,11 @@ vec3 CalcSpotLightBasic(in Light inLight, vec3 SpotLightDir, vec3 LightPos,vec3 
 #pragma region Point Light Basic
     if (ShaderHelper::lacksDefinition(code, "CalcPointLightBasic(", "vec3 CalcPointLightBasic(")) {
         ShaderHelper::insertStringRightBeforeLineContent(code, R"(
-vec3 CalcPointLightBasic(in Light inLight, vec3 LightPos, vec3 PxlWorldPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, float MatAlpha, float AO){
+vec3 CalcPointLightBasic(in Light inLight, vec3 LightPos, vec3 PxlWorldPos, vec3 PxlViewPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, float MatAlpha, float AO){
     vec3 RawDirection = LightPos - PxlWorldPos;
     float Dist = length(RawDirection);
     vec3 LightDir = RawDirection / Dist;
-    return CalcLightInternalBasic(inLight, LightDir, PxlWorldPos, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO) * CalculateAttenuationBasic(inLight, Dist, 1.0);
+    return CalcLightInternalBasic(inLight, LightDir, PxlWorldPos, PxlViewPos, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO) * CalculateAttenuationBasic(inLight, Dist, 1.0);
 }
 )", "vec3 CalcSpotLightBasic(");
     }
@@ -446,12 +459,19 @@ vec3 CalcPointLightBasic(in Light inLight, vec3 LightPos, vec3 PxlWorldPos, vec3
     //TODO: modify the 64 constant to use either metalness or roughness (or both?). the higher this constant, the smaller the brightness spot is. roughness would probably be best then
     if (ShaderHelper::lacksDefinition(code, "CalcLightInternalBasic(", "vec3 CalcLightInternalBasic(")) {
         ShaderHelper::insertStringRightBeforeLineContent(code, R"(
-vec3 CalcLightInternalBasic(in Light currentLight, vec3 LightDir, vec3 PxlWorldPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, float MatAlpha, float AO){
+vec3 CalcLightInternalBasic(in Light currentLight, vec3 LightDir, vec3 PxlWorldPos, vec3 PxlViewPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, float MatAlpha, float AO){
     vec3 LightDiffuseColor  = currentLight.DataD.xyz;
     vec3 LightSpecularColor = currentLight.DataD.xyz * Specular;
 
-    vec4 FragPosLightSpace  = LightMatrix * vec4(PxlWorldPos + CamRealPosition, 1.0);
-    float shadow            = ShadowCalculation(FragPosLightSpace, PxlNormal, LightDir); 
+    vec2 uvs = gl_FragCoord.xy / ScreenInfo.xy;
+    float shadow = 1.0;
+    for (int i = 0; i < NUM_CASCADES; i++) {
+        if (-PxlViewPos.z <= -CascadeEndClipSpace[i]) {
+            vec4 FragPosLightSpace  = LightMatrix[i] * vec4(PxlWorldPos + CamRealPosition, 1.0);
+            shadow = ShadowCalculation(i, FragPosLightSpace, PxlNormal, LightDir);
+            break;
+        }
+    }
     vec3 ShadowColor        = max(vec3(shadow), RendererInfo2.rgb); 
 
     vec3 ViewDir            = normalize(CameraPosition - PxlWorldPos);
@@ -504,11 +524,13 @@ float CalculateAttenuationBasic(in Light currentLight, float Dist, float radius)
 if(projCoords.z > 1.0){  // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
 */
     if (ShaderHelper::lacksDefinition(code, "ShadowCalculation(", "float ShadowCalculation(")) {
-        ShaderHelper::insertStringAtLine(code, R"(
-uniform sampler2D ShadowTexture;
+        std::string shadowCode = "const int NUM_CASCADES = " + std::to_string(static_cast<int>(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS)) +";\n";
+        shadowCode += R"(
+uniform sampler2D ShadowTexture[NUM_CASCADES];
+uniform float CascadeEndClipSpace[NUM_CASCADES];
 uniform int ShadowEnabled;
 uniform vec2 ShadowTexelSize;
-float ShadowCalculation(vec4 inFragPosLightSpace, vec3 inNormal, vec3 inLightDir){
+float ShadowCalculation(int inCascadeIndex, vec4 inFragPosLightSpace, vec3 inNormal, vec3 inLightDir){
     if (ShadowEnabled == 0) {
         return 1.0;
     }
@@ -517,16 +539,14 @@ float ShadowCalculation(vec4 inFragPosLightSpace, vec3 inNormal, vec3 inLightDir
     if(projCoords.z > 1.0) {
         return 1.0;
     }
-    float bias = max(0.0002 * (1.0 - dot(inNormal, inLightDir)), 0.00002);
-    float shadow = SampleShadowLinearPCF(USE_SAMPLER_2D(ShadowTexture), projCoords.xy, projCoords.z - bias, ShadowTexelSize);
+    float bias = max((0.002 + (inCascadeIndex * 0.001515)) * (1.0 - dot(inNormal, inLightDir)), 0.0002);
+    float shadow = SampleShadowLinearPCF(USE_SAMPLER_2D(ShadowTexture[inCascadeIndex]), projCoords.xy, projCoords.z - bias, ShadowTexelSize);
     return shadow;
 }
-)", 1);
+)";
+        ShaderHelper::insertStringAtLine(code, std::move(shadowCode), 1);
     }
-
-    /*
-    * DO NOT make these constants uniforms, that will force dynamic branching and kill performance
-    */
+    // DO NOT make these constants uniforms, that will force dynamic branching on these loops and kill performance
     if (ShaderHelper::lacksDefinition(code, "SampleShadowLinearPCF(", "float SampleShadowLinearPCF(")) {
         ShaderHelper::insertStringAtLine(code, R"(
 float SampleShadowLinearPCF(sampler2D shadowMap, vec2 uvs, float compare, vec2 texelSize){

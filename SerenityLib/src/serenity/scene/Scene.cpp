@@ -148,6 +148,68 @@ void Engine::priv::PublicScene::RenderDecals(RenderModule& renderer, Scene& scen
 void Engine::priv::PublicScene::RenderParticles(RenderModule& renderer, Scene& scene, Viewport& viewport, Camera& camera, Handle program) {
     scene.m_ParticleSystem.render(viewport, camera, program, renderer);
 }
+
+
+void Engine::priv::PublicScene::RenderGeometryOpaqueShadowMap(RenderModule& renderer, Scene& scene, Viewport* viewport, Camera* camera) {
+    for (size_t i = (size_t)RenderStage::GeometryOpaque; i < (size_t)RenderStage::GeometryOpaque_4; ++i) {
+        for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
+            render_graph_ptr.validate_model_instances_for_rendering(camera, viewport);
+            render_graph_ptr.render_shadow_map(renderer, camera);
+        }
+    }
+}
+void Engine::priv::PublicScene::RenderGeometryTransparentShadowMap(RenderModule& renderer, Scene& scene, Viewport* viewport, Camera* camera) {
+    for (size_t i = (size_t)RenderStage::GeometryTransparent; i < (size_t)RenderStage::GeometryTransparent_4; ++i) {
+        for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
+            render_graph_ptr.sort(camera, SortingMode::BackToFront);
+            render_graph_ptr.validate_model_instances_for_rendering(camera, viewport);
+            render_graph_ptr.render_shadow_map(renderer, camera);
+        }
+    }
+}
+void Engine::priv::PublicScene::RenderGeometryTransparentTrianglesSortedShadowMap(RenderModule& renderer, Scene& scene, Viewport* viewport, Camera* camera) {
+    for (size_t i = (size_t)RenderStage::GeometryTransparentTrianglesSorted; i < (size_t)RenderStage::GeometryTransparentTrianglesSorted_4; ++i) {
+        for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
+            render_graph_ptr.sort(camera, SortingMode::FrontToBack);
+            render_graph_ptr.validate_model_instances_for_rendering(camera, viewport);
+            render_graph_ptr.render_shadow_map(renderer, camera);
+        }
+    }
+}
+void Engine::priv::PublicScene::RenderForwardOpaqueShadowMap(RenderModule& renderer, Scene& scene, Viewport* viewport, Camera* camera) {
+    for (size_t i = (size_t)RenderStage::ForwardOpaque; i < (size_t)RenderStage::ForwardOpaque_4; ++i) {
+        for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
+            render_graph_ptr.validate_model_instances_for_rendering(camera, viewport);
+            render_graph_ptr.render_shadow_map(renderer, camera);
+        }
+    }
+}
+void Engine::priv::PublicScene::RenderForwardTransparentShadowMap(RenderModule& renderer, Scene& scene, Viewport* viewport, Camera* camera) {
+    for (size_t i = (size_t)RenderStage::ForwardTransparent; i < (size_t)RenderStage::ForwardTransparent_4; ++i) {
+        for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
+            render_graph_ptr.sort_bruteforce(camera, SortingMode::BackToFront);
+            render_graph_ptr.validate_model_instances_for_rendering(camera, viewport);
+            render_graph_ptr.render_bruteforce_shadow_map(renderer, camera);
+        }
+    }
+}
+void Engine::priv::PublicScene::RenderForwardTransparentTrianglesSortedShadowMap(RenderModule& renderer, Scene& scene, Viewport* viewport, Camera* camera) {
+    for (size_t i = (size_t)RenderStage::ForwardTransparentTrianglesSorted; i < (size_t)RenderStage::ForwardTransparentTrianglesSorted_4; ++i) {
+        for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
+            //TODO: sort_bruteforce and render_bruteforce doesn't work here... probably has to do with custom binds and unbinds and custom shader(s)
+            render_graph_ptr.sort(camera, SortingMode::FrontToBack);
+            render_graph_ptr.validate_model_instances_for_rendering(camera, viewport);
+            render_graph_ptr.render_shadow_map(renderer, camera);
+        }
+    }
+}
+
+
+
+
+
+
+
 void Engine::priv::PublicScene::AddModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage stage) {
     auto& renderGraphs = scene.m_RenderGraphs[(uint32_t)stage];
     Engine::priv::RenderGraph* renderGraph = nullptr;

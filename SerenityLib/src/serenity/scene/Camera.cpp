@@ -83,7 +83,7 @@ Camera::Camera(Scene* scene, float left, float right, float bottom, float top, f
     auto logic      = getComponent<CameraLogicComponent>();
     auto transform  = getComponent<ComponentTransform>();
 
-    camera->lookAt(glm::vec3{ 0.0f }, glm::vec3{ 0.0f } + camera->getForward(), camera->getUp());
+    camera->lookAt(glm::vec3{ 0.0f }, glm::vec3{ 0.0f } + glm::vec3(0.0f, 0.0f, -1.0f), camera->getUp());
     logic->setUserPointer(this);
 }
 Camera::~Camera() { 
@@ -106,7 +106,7 @@ glm::quat Camera::getRotation() const noexcept {
 float Camera::getAngle() const noexcept {
     return getComponent<ComponentCamera>()->m_Angle; 
 }
-float Camera::getAspect() const noexcept {
+float Camera::getAspectRatio() const noexcept {
     return getComponent<ComponentCamera>()->m_AspectRatio; 
 }
 float Camera::getNear() const noexcept {
@@ -118,8 +118,8 @@ float Camera::getFar() const noexcept {
 void Camera::setAngle(float Angle) noexcept {
     getComponent<ComponentCamera>()->setAngle(Angle); 
 }
-void Camera::setAspect(float Aspect) noexcept {
-    getComponent<ComponentCamera>()->setAspect(Aspect); 
+void Camera::setAspectRatio(float Aspect) noexcept {
+    getComponent<ComponentCamera>()->setAspectRatio(Aspect); 
 }
 void Camera::setNear(float inNear) noexcept {
     getComponent<ComponentCamera>()->setNear(inNear);
@@ -147,9 +147,6 @@ glm::mat4 Camera::getViewProjection() const noexcept {
 }
 glm::vec3 Camera::getViewVector() const noexcept {
     return getComponent<ComponentCamera>()->getViewVector(); 
-}
-glm::vec3 Camera::getForward() const noexcept {
-    return getComponent<ComponentCamera>()->getForward(); 
 }
 glm::vec3 Camera::getRight() const noexcept {
     return getComponent<ComponentCamera>()->getRight(); 

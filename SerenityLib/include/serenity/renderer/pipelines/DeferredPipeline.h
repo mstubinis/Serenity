@@ -76,7 +76,7 @@ namespace Engine::priv {
 
 
             void internal_render_per_frame_preparation(Viewport&, Camera&);
-            void internal_pass_shadows_depth(Viewport&, Scene&);
+            void internal_pass_shadows_depth(Viewport&, Scene&, Camera&);
             void internal_init_frame_gbuffer(Viewport&, Camera&);
             void internal_pass_geometry(Viewport&, Camera&);
             void internal_pass_ssao(Viewport&, Camera&);
@@ -165,6 +165,13 @@ namespace Engine::priv {
             void sendTextureSafe(const char* location, Texture&, int unit) override;
             void sendTextureSafe(const char* location, TextureCubemap&, int unit) override;
             void sendTextureSafe(const char* location, uint32_t textureObject, int unit, uint32_t textureTarget) override;
+
+            void sendTextures(const char* location, const Texture**, int slot, const int arrSize) override;
+            void sendTextures(const char* location, const TextureCubemap**, int slot, const int arrSize) override;
+            void sendTextures(const char* location, const GLuint*, int slot, GLuint glTextureType, const int arrSize) override;
+            void sendTexturesSafe(const char* location, const Texture**, int slot, const int arrSize) override;
+            void sendTexturesSafe(const char* location, const TextureCubemap**, int slot, const int arrSize) override;
+            void sendTexturesSafe(const char* location, const GLuint*, int slot, GLuint glTextureType, const int arrSize) override;
 
             bool bindReadFBO(uint32_t fbo) override;
             bool bindDrawFBO(uint32_t fbo) override;

@@ -334,8 +334,9 @@ void RenderGraph::render_bruteforce(Engine::priv::RenderModule& renderer, Camera
         auto renderingMatrix = transform->getWorldMatrixRendering();
         if (modelInstance->hasPassedRenderCheck()) {
             if (sortingMode != SortingMode::None) {
-                if(camera)
+                if (camera) {
                     mesh->sortTriangles(*camera, *modelInstance, renderingMatrix, sortingMode);
+                }
             }
             renderer.bind(material);
             renderer.bind(mesh);
@@ -354,5 +355,49 @@ void RenderGraph::render_bruteforce(Engine::priv::RenderModule& renderer, Camera
                 renderer.bind(material);
             }
         }
+    }
+}
+void RenderGraph::render_shadow_map(Engine::priv::RenderModule& renderer, Camera* camera) {
+    //auto shaderProgram = m_ShaderProgram.get<ShaderProgram>();
+    for (auto& materialNode : m_MaterialNodes) {
+        if (materialNode.meshNodes.size() > 0) {
+            //auto material = materialNode.material.get<Material>();
+            //renderer.bind(material);
+            for (auto& meshNode : materialNode.meshNodes) {
+                if (meshNode.instanceNodes.size() > 0) {
+                    auto mesh = meshNode.mesh.get<Mesh>();
+                    renderer.bind(mesh);
+                    for (auto& modelInstance : meshNode.instanceNodes) {
+                        if (modelInstance->hasPassedRenderCheck()) {
+                            renderer.bind(modelInstance);
+                            renderer.m_Pipeline->renderMesh(*mesh, (uint32_t)modelInstance->getDrawingMode());
+                            renderer.unbind(modelInstance);
+                        }
+                    }
+                    renderer.unbind(mesh);
+                }
+            }
+            //renderer.unbind(material);
+        }
+    }
+}
+void RenderGraph::render_bruteforce_shadow_map(Engine::priv::RenderModule& renderer, Camera* camera) {
+    for (auto& modelInstance : m_InstancesTotal) {
+        auto mesh = modelInstance->getMesh().get<Mesh>();
+        //auto material = modelInstance->getMaterial().get<Material>();
+        //auto transform = modelInstance->getParent().getComponent<ComponentTransform>();
+        //auto renderingMatrix = transform->getWorldMatrixRendering();
+        if (modelInstance->hasPassedRenderCheck()) {
+            //renderer.bind(material);
+            renderer.bind(mesh);
+            renderer.bind(modelInstance);
+
+            renderer.m_Pipeline->renderMesh(*mesh, (uint32_t)modelInstance->getDrawingMode());
+
+            renderer.unbind(modelInstance);
+            renderer.unbind(mesh);
+            //renderer.unbind(material);
+        }
+        // protect against any custom changes by restoring to the regular shader and material
     }
 }

@@ -356,6 +356,25 @@ void Engine::Renderer::sendTextureSafe(const char* location, TextureCubemap& cub
 void Engine::Renderer::sendTextureSafe(const char* location, GLuint textureObject, int unit, GLuint textureTarget){
     Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->sendTextureSafe(location, textureObject, unit, textureTarget);
 }
+void Engine::Renderer::sendTextures(const char* location, const Texture** data, int slot, const int arrSize) {
+    Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->sendTextures(location, data, slot, arrSize);
+}
+void Engine::Renderer::sendTextures(const char* location, const TextureCubemap** data, int slot, const int arrSize) {
+    Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->sendTextures(location, data, slot, arrSize);
+}
+void Engine::Renderer::sendTextures(const char* location, const GLuint* data, int slot, GLuint glTextureType, const int arrSize) {
+    Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->sendTextures(location, data, slot, glTextureType, arrSize);
+}
+void Engine::Renderer::sendTexturesSafe(const char* location, const Texture** data, int slot, const int arrSize) {
+    Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->sendTexturesSafe(location, data, slot, arrSize);
+}
+void Engine::Renderer::sendTexturesSafe(const char* location, const TextureCubemap** data, int slot, const int arrSize) {
+    Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->sendTexturesSafe(location, data, slot, arrSize);
+}
+void Engine::Renderer::sendTexturesSafe(const char* location, const GLuint* data, int slot, GLuint glTextureType, const int arrSize) {
+    Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->sendTexturesSafe(location, data, slot, glTextureType, arrSize);
+}
+
 bool Engine::Renderer::bindReadFBO(const GLuint fbo){
     return Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->bindReadFBO(fbo);
 }

@@ -101,6 +101,14 @@ namespace Engine::priv {
             virtual void sendTextureSafe(const char* location, TextureCubemap&, int unit) = 0;
             virtual void sendTextureSafe(const char* location, uint32_t textureObject, int unit, uint32_t textureTarget) = 0;
 
+            virtual void sendTextures(const char* location, const Texture**, int slot, const int arrSize) = 0;
+            virtual void sendTextures(const char* location, const TextureCubemap**, int slot, const int arrSize) = 0;
+            virtual void sendTextures(const char* location, const GLuint*, int slot, GLuint glTextureType, const int arrSize) = 0;
+            virtual void sendTexturesSafe(const char* location, const Texture**, int slot, const int arrSize) = 0;
+            virtual void sendTexturesSafe(const char* location, const TextureCubemap**, int slot, const int arrSize) = 0;
+            virtual void sendTexturesSafe(const char* location, const GLuint*, int slot, GLuint glTextureType, const int arrSize) = 0;
+
+
             virtual bool bindReadFBO(uint32_t fbo) = 0;
             virtual bool bindDrawFBO(uint32_t fbo) = 0;
             virtual bool bindRBO(uint32_t rbo) = 0;
