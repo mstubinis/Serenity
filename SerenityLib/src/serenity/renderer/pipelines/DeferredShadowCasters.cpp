@@ -1,6 +1,8 @@
 #include <serenity/renderer/pipelines/DeferredShadowCasters.h>
 #include <serenity/renderer/Renderer.h>
 
+#pragma region Directional Light
+
 Engine::priv::GLDeferredDirectionalLightShadowInfo::GLDeferredDirectionalLightShadowInfo(Camera& camera, DirectionalLight& directionalLight, uint32_t shadowMapWidth, uint32_t shadowMapHeight, float orthographicRadius, float orthoNear, float orthoFar)
     : m_TexelSize{ glm::vec2{1.0f / static_cast<float>(shadowMapWidth), 1.0f / static_cast<float>(shadowMapHeight)} }
 {
@@ -30,7 +32,7 @@ Engine::priv::GLDeferredDirectionalLightShadowInfo::~GLDeferredDirectionalLightS
     glDeleteFramebuffers(1, &m_FBO);
     glDeleteTextures((GLsizei)DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS, m_DepthTexture.data());
 }
-void Engine::priv::GLDeferredDirectionalLightShadowInfo::initGL() {
+bool Engine::priv::GLDeferredDirectionalLightShadowInfo::initGL() {
     glGenTextures(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS, m_DepthTexture.data());
     for (uint32_t i = 0; i < (uint32_t)DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS; ++i) {
         glBindTexture(GL_TEXTURE_2D, m_DepthTexture[i]);
@@ -51,9 +53,11 @@ void Engine::priv::GLDeferredDirectionalLightShadowInfo::initGL() {
     glReadBuffer(GL_NONE);
     GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): FBO Error is: " << framebufferStatus)
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): FBO Error is: " << framebufferStatus);
+        return false;
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    return true;
 }
 void Engine::priv::GLDeferredDirectionalLightShadowInfo::bindUniformsReading(int textureStartSlot, Camera& camera) const noexcept {
     std::vector<glm::mat4> lightMatrices(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS);
@@ -120,3 +124,5 @@ void Engine::priv::GLDeferredDirectionalLightShadowInfo::calculateOrthographicPr
         m_LightOrthoProjection[i] = glm::ortho(minX, maxX, minY, maxY, m_CascadeDistances[0], m_CascadeDistances[m_CascadeDistances.size() - 1]);
     }
 }
+
+#pragma endregion

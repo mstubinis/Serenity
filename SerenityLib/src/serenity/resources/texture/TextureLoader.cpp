@@ -21,13 +21,9 @@ using namespace Engine::priv::textures;
 void TextureLoader::ImportIntoOpengl(Texture& texture, const Engine::priv::ImageMipmap& mipmap, TextureType textureType) {
     auto& imageData = texture.m_CPUData.m_ImagesDatas[0];
     if (imageData.m_InternalFormat.isCompressedType() && mipmap.compressedSize != 0) {
-        GLCall(glCompressedTexImage2D(textureType.toGLType(), mipmap.level, (GLenum)imageData.m_InternalFormat, mipmap.width, mipmap.height, 0, mipmap.compressedSize,
-            &mipmap.pixels[0]
-        ));
+        glCompressedTexImage2D(textureType.toGLType(), mipmap.level, (GLenum)imageData.m_InternalFormat, mipmap.width, mipmap.height, 0, mipmap.compressedSize, &mipmap.pixels[0]);
     }else{
-        GLCall(glTexImage2D(textureType.toGLType(), mipmap.level, (GLint)imageData.m_InternalFormat, mipmap.width, mipmap.height, 0,
-            (GLenum)imageData.m_PixelFormat, (GLenum)imageData.m_PixelType, &mipmap.pixels[0]
-        ));
+        glTexImage2D(textureType.toGLType(), mipmap.level, (GLint)imageData.m_InternalFormat, mipmap.width, mipmap.height, 0, (GLenum)imageData.m_PixelFormat, (GLenum)imageData.m_PixelType, &mipmap.pixels[0]);
     }
 }
 bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded_struct) {
@@ -220,17 +216,7 @@ void TextureLoader::LoadTexture2DIntoOpenGL(Texture& texture) {
 void TextureLoader::LoadTextureFramebufferIntoOpenGL(Texture& texture) {
     Engine::Renderer::bindTextureForModification(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
     const auto& image = texture.m_CPUData.m_ImagesDatas[0];
-    GLCall(glTexImage2D(
-        texture.m_CPUData.m_TextureType.toGLType(),
-        0, 
-        (GLint)image.m_InternalFormat, 
-        image.m_Mipmaps[0].width, 
-        image.m_Mipmaps[0].height, 
-        0, 
-        (GLenum)image.m_PixelFormat, 
-        (GLenum)image.m_PixelType, 
-        NULL)
-    );
+    glTexImage2D(texture.m_CPUData.m_TextureType.toGLType(), 0, (GLint)image.m_InternalFormat, image.m_Mipmaps[0].width, image.m_Mipmaps[0].height, 0, (GLenum)image.m_PixelFormat, (GLenum)image.m_PixelType, nullptr);
     texture.setFilter(TextureFilter::Linear);
     texture.setWrapping(TextureWrap::ClampToEdge);
 }
@@ -252,21 +238,21 @@ void TextureLoader::WithdrawPixelsFromOpenGLMemory(Texture& texture, uint32_t im
     pxls.clear();
     pxls.resize(image.m_Mipmaps[mipmapLevel].width * image.m_Mipmaps[mipmapLevel].height * 4);
     Engine::Renderer::bindTextureForModification(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
-    GLCall(glGetTexImage(texture.m_CPUData.m_TextureType.toGLType(), 0, (GLenum)image.m_PixelFormat, (GLenum)image.m_PixelType, &pxls[0]));
+    glGetTexImage(texture.m_CPUData.m_TextureType.toGLType(), 0, (GLenum)image.m_PixelFormat, (GLenum)image.m_PixelType, &pxls[0]);
 }
 bool TextureLoader::GenerateMipmapsOpenGL(Texture& texture) {
     if (texture.m_CPUData.m_Mipmapped || texture.m_TextureAddress == 0) {
         return false;
     }
     Engine::Renderer::bindTextureForModification(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
-    GLCall(glTexParameteri(texture.m_CPUData.m_TextureType.toGLType(), GL_TEXTURE_BASE_LEVEL, 0));
+    glTexParameteri(texture.m_CPUData.m_TextureType.toGLType(), GL_TEXTURE_BASE_LEVEL, 0);
     if (texture.m_CPUData.m_MinFilter == GL_LINEAR) {
         texture.m_CPUData.m_MinFilter = GL_LINEAR_MIPMAP_LINEAR;
     }else if (texture.m_CPUData.m_MinFilter == GL_NEAREST) {
         texture.m_CPUData.m_MinFilter = GL_NEAREST_MIPMAP_NEAREST;
     }
-    GLCall(glTexParameteri(texture.m_CPUData.m_TextureType.toGLType(), GL_TEXTURE_MIN_FILTER, texture.m_CPUData.m_MinFilter));
-    GLCall(glGenerateMipmap(texture.m_CPUData.m_TextureType.toGLType()));
+    glTexParameteri(texture.m_CPUData.m_TextureType.toGLType(), GL_TEXTURE_MIN_FILTER, texture.m_CPUData.m_MinFilter);
+    glGenerateMipmap(texture.m_CPUData.m_TextureType.toGLType());
     texture.m_CPUData.m_Mipmapped = true;
     return true;
 }
@@ -345,7 +331,7 @@ void TextureLoader::Unload(Texture& texture) {
 
 void TextureLoader::Resize(Texture& texture, Engine::priv::FramebufferObject& fbo, int width, int height) {
     if (texture.m_CPUData.m_TextureType != TextureType::RenderTarget) {
-        ENGINE_PRODUCTION_LOG("Error: Non-framebuffer texture cannot be resized. Returning...")
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "() error: Non-framebuffer texture cannot be resized. Returning...")
         return;
     }
     const float divisor           = fbo.divisor();

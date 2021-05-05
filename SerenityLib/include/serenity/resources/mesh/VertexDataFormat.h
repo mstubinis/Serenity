@@ -11,16 +11,16 @@ enum class VertexAttributeLayout : unsigned int {
 
 //information about individual attributes (example: position, uv, normals, etc)
 struct VertexAttributeInfo final {
-    size_t   typeSize   = 0;
-    size_t   offset     = 0;
-    int      size       = 0;
-    int      type       = 0;
-    int      stride     = 0;
-    bool     normalized = false;
+    size_t   typeSize      = 0; //not used for Interleaved layout
+    size_t   offset        = 0;
+    int      numComponents = 0;
+    int      type          = 0;
+    int      stride        = 0;
+    bool     normalized    = false;
 
     VertexAttributeInfo() = default;
-    VertexAttributeInfo(int size_, int type_, bool normalized_, int stride_, size_t offset_, size_t typeSize_)
-        : size{ size_ }
+    VertexAttributeInfo(int numComponents_, int type_, bool normalized_, int stride_, size_t offset_, size_t typeSize_)
+        : numComponents{ numComponents_ }
         , type{ type_ }
         , typeSize{ typeSize_ }
         , offset{ offset_ }
@@ -38,15 +38,11 @@ struct VertexDataFormat {
     std::vector<VertexAttributeInfo>  m_Attributes;
     VertexAttributeLayout             m_InterleavingType = VertexAttributeLayout::Interleaved;
 
-    inline void add(int size, int type, bool normalized, int stride, size_t offset, size_t typeSize) {
-        m_Attributes.emplace_back(size, type, normalized, stride, offset, typeSize);
+    inline void add(int numComponents, int type, bool normalized, int stride, size_t offset, size_t typeSize) {
+        m_Attributes.emplace_back(numComponents, type, normalized, stride, offset, typeSize);
     }
     void bind(const VertexData& vertData) const noexcept;
-    void unbind() const noexcept {
-        for (size_t i = 0; i < m_Attributes.size(); ++i) {
-            glDisableVertexAttribArray((GLuint)i);
-        }
-    }
+    void unbind() const noexcept;
 
     static VertexDataFormat   VertexDataPositionsOnly, 
                               VertexDataNoLighting, 

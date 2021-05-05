@@ -5,9 +5,9 @@ sf::Packet& operator <<(sf::Packet& packet, Entity entity) noexcept {
     return packet << entity.id() << entity.versionID() << entity.sceneID();
 }
 sf::Packet& operator >>(sf::Packet& packet, Entity entity) noexcept {
-    auto id = entity.id();
+    auto id      = entity.id();
     auto version = entity.versionID();
-    auto scene = entity.sceneID();
+    auto scene   = entity.sceneID();
     return packet >> id >> version >> scene;
 }
 

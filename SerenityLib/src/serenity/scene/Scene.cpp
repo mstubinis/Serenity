@@ -290,7 +290,7 @@ Scene::Scene(uint32_t id, std::string_view name, const SceneOptions& options)
     m_ECS.registerSystemOrdered<SystemComponentModel, ComponentModel>(11000);
 
     m_ECS.registerSystemOrdered<SystemBodyParentChild, ComponentTransform>(12000);
-    m_ECS.registerSystemOrdered<SystemCompoundChildTransforms, ComponentTransform, ComponentCollisionShape>(13000);
+    m_ECS.registerSystemOrdered<SystemCompoundChildTransforms, ComponentCollisionShape>(13000);
 
     m_ECS.registerSystemOrdered<SystemComponentLogic2, ComponentLogic2>(14000);
     m_ECS.registerSystemOrdered<SystemComponentCamera, ComponentCamera>(15000);

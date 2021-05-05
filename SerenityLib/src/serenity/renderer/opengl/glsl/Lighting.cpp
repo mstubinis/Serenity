@@ -93,17 +93,20 @@ vec3 CalcLightInternal(in Light currentLight, vec3 LightDir, vec3 PxlWorldPos, v
     vec3 SpecularFactor     = ConstantZeroVec3;
 
     vec2 uvs = gl_FragCoord.xy / ScreenInfo.xy;
+    vec4 ShadowPxlWorldPos = vec4(PxlWorldPos + CamRealPosition, 1.0);
     float shadow = 1.0;
     for (int i = 0; i < NUM_CASCADES; i++) {
         if (-PxlViewPos.z <= -CascadeEndClipSpace[i]) {
-            vec4 FragPosLightSpace = LightMatrix[i] * vec4(PxlWorldPos + CamRealPosition, 1.0);
+            vec4 FragPosLightSpace = LightMatrix[i] * ShadowPxlWorldPos;
             shadow = ShadowCalculation(i, FragPosLightSpace, PxlNormal, LightDir);
-			//float fade = clamp((1.0 - PxlViewPos.z / CascadeEndClipSpace[i]) / 0.05, 0.0, 1.0);
-			//if (fade < 1.0) {
-            //  vec4 NextFragPosLightSpace = LightMatrix[i + 1] * vec4(PxlWorldPos + CamRealPosition, 1.0);
-			//	float nextShadow = ShadowCalculation(i + 1, NextFragPosLightSpace, PxlNormal, LightDir);
-			//	shadow = mix(nextShadow, shadow, fade);
-			//}
+            if (i < NUM_CASCADES - 1) {
+			    float fade = clamp((1.0 - PxlViewPos.z / CascadeEndClipSpace[i]) / 0.05, 0.0, 1.0);
+			    if (fade < 1.0) {
+                    vec4 NextFragPosLightSpace = LightMatrix[i + 1] * ShadowPxlWorldPos;
+				    float nextShadow = ShadowCalculation(i + 1, NextFragPosLightSpace, PxlNormal, LightDir);
+				    shadow = mix(nextShadow, shadow, fade);
+			    }
+            }
             break;
         }
     }
@@ -153,7 +156,7 @@ vec3 CalcLightInternal(in Light currentLight, vec3 LightDir, vec3 PxlWorldPos, v
 
     vec3 TotalLight        = (componentDiffuse * min(ao, shadow)) * Albedo;
     TotalLight            /= KPI;
-    TotalLight            += LightSpecularColor;
+    TotalLight            += LightSpecularColor * shadow;
     TotalLight            *= (LightDiffuseColor * NdotL);
     TotalLight            *= MatAlpha;
     return TotalLight;
@@ -464,11 +467,20 @@ vec3 CalcLightInternalBasic(in Light currentLight, vec3 LightDir, vec3 PxlWorldP
     vec3 LightSpecularColor = currentLight.DataD.xyz * Specular;
 
     vec2 uvs = gl_FragCoord.xy / ScreenInfo.xy;
+    vec4 ShadowPxlWorldPos = vec4(PxlWorldPos + CamRealPosition, 1.0);
     float shadow = 1.0;
     for (int i = 0; i < NUM_CASCADES; i++) {
         if (-PxlViewPos.z <= -CascadeEndClipSpace[i]) {
-            vec4 FragPosLightSpace  = LightMatrix[i] * vec4(PxlWorldPos + CamRealPosition, 1.0);
+            vec4 FragPosLightSpace  = LightMatrix[i] * ShadowPxlWorldPos;
             shadow = ShadowCalculation(i, FragPosLightSpace, PxlNormal, LightDir);
+            if (i < NUM_CASCADES - 1) {
+			    float fade = clamp((1.0 - PxlViewPos.z / CascadeEndClipSpace[i]) / 0.05, 0.0, 1.0);
+			    if (fade < 1.0) {
+                    vec4 NextFragPosLightSpace = LightMatrix[i + 1] * ShadowPxlWorldPos;
+				    float nextShadow = ShadowCalculation(i + 1, NextFragPosLightSpace, PxlNormal, LightDir);
+				    shadow = mix(nextShadow, shadow, fade);
+			    }
+            }
             break;
         }
     }
@@ -486,7 +498,7 @@ vec3 CalcLightInternalBasic(in Light currentLight, vec3 LightDir, vec3 PxlWorldP
     
     vec3 ao                 = min(vec3(AO * SSAO), ShadowColor);
     vec3 TotalLight         = Albedo;
-    TotalLight             += LightSpecularColor * min(ao, ShadowColor);
+    TotalLight             += LightSpecularColor * ShadowColor;
     TotalLight             *= LightDiffuseColor;
     TotalLight             /= KPI;
     TotalLight             *= MatAlpha;

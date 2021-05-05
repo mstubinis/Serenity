@@ -3,15 +3,19 @@
 #define ENGINE_NETWORKING_SOCKET_MANAGER_H
 
 namespace Engine::Networking {
-    class SocketTCP;
-    class SocketUDP;
-    class ListenerTCP;
+    class  SocketTCP;
+    class  SocketUDP;
+    class  ListenerTCP;
+}
+namespace Engine::priv {
+    class  EditorWindowScene;
 }
 
 #include <vector>
 
 namespace Engine::priv {
     class SocketManager final {
+        friend class Engine::priv::EditorWindowScene;
         private:
             std::vector<Engine::Networking::SocketTCP*>    m_TCPSockets;
             std::vector<Engine::Networking::SocketUDP*>    m_UDPSockets;

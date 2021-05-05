@@ -4,15 +4,33 @@
 
 class  Shader;
 class  ShaderProgram;
+class  UniformBufferObjectMapper;
+class  UniformBufferObject;
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <serenity/events/Observer.h>
 #include <serenity/resources/Resource.h>
 
-//Core since version 3.1 (GLSL 140)
+//RAII wrapper for mapping uniform buffer block data
+class UniformBufferObjectMapper final {
+    private:
+        void* m_Ptr = nullptr;
+    public:
+        UniformBufferObjectMapper() = delete;
+        UniformBufferObjectMapper(UniformBufferObject&);
+        UniformBufferObjectMapper(const UniformBufferObjectMapper&)                = delete;
+        UniformBufferObjectMapper& operator=(const UniformBufferObjectMapper&)     = delete;
+        UniformBufferObjectMapper(UniformBufferObjectMapper&&) noexcept            = delete;
+        UniformBufferObjectMapper& operator=(UniformBufferObjectMapper&&) noexcept = delete;
+        ~UniformBufferObjectMapper();
+
+        inline void* getPtr() noexcept { return m_Ptr; }
+};
+
 class UniformBufferObject final : public Observer, public Resource<UniformBufferObject> {
-    friend class Shader;
+    friend class  Shader;
+    friend class  UniformBufferObjectMapper;
     public:
         static GLint     MAX_UBO_BINDINGS;
         static uint32_t  CUSTOM_UBO_AUTOMATIC_COUNT;
@@ -33,6 +51,7 @@ class UniformBufferObject final : public Observer, public Resource<UniformBuffer
         inline GLuint address() const noexcept { return m_UBOObject; }
 
         bool attachToShaderProgram(ShaderProgram&);
+
         void updateData(void* data);
 };
 #endif

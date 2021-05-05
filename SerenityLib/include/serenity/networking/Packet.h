@@ -51,14 +51,14 @@ sf::Packet& operator >>(sf::Packet&, glm::dvec2&) noexcept;
 sf::Packet& operator >>(sf::Packet&, glm::dvec3&) noexcept;
 sf::Packet& operator >>(sf::Packet&, glm::dvec4&) noexcept;
 
-template<typename T, size_t size>
+template<class T, size_t size>
 inline sf::Packet& operator <<(sf::Packet& packet, const std::array<T, size>& data) noexcept {
     for (size_t i = 0; i < size - 1; ++i) {
         packet << data[i];
     }
     return packet << data[size - 1];
 }
-template<typename T, size_t size>
+template<class T, size_t size>
 inline sf::Packet& operator >>(sf::Packet& packet, std::array<T, size>& data) noexcept {
     for (size_t i = 0; i < size - 1; ++i) {
         packet >> data[i];
@@ -70,17 +70,17 @@ namespace Engine::Networking {
     class Packet : public sf::Packet {
         using SendFP = std::function<void(Engine::Networking::Packet* packet)>;
         public:
-            template<typename T> static inline constexpr bool sequence_greater_than(T s1, T s2) noexcept {
+            template<class T> static inline constexpr bool sequence_greater_than(T s1, T s2) noexcept {
                 return ((s1 > s2) && (s1 - s2 <= std::numeric_limits<T>().max())) || ((s1 < s2) && (s2 - s1 > std::numeric_limits<T>().max()));
             }
         private:
             SendFP m_OnSendFunction = [](Engine::Networking::Packet* packet) {};
         public:
-            uint32_t           m_PacketType     = 0U;
-            PacketTimestamp    m_Timestamp      = 0U;
-            PacketBitfield     m_AckBitfield    = 0U;
-            PacketSequence     m_SequenceNumber = 0U;
-            PacketSequence     m_Ack            = 0U;
+            uint32_t           m_PacketType     = 0;
+            PacketTimestamp    m_Timestamp      = 0;
+            PacketBitfield     m_AckBitfield    = 0;
+            PacketSequence     m_SequenceNumber = 0;
+            PacketSequence     m_Ack            = 0;
             bool               m_Valid          = false;
         public:
             Packet() = default;
@@ -111,8 +111,9 @@ namespace Engine::Networking {
                 }
             }
 
-            inline void setOnSendFunction(SendFP&& function) noexcept {
-                m_OnSendFunction = std::move(function);
+            template<class FUNCTION>
+            inline void setOnSendFunction(FUNCTION&& function) noexcept {
+                m_OnSendFunction = std::forward<FUNCTION>(function);
             }
 
             virtual Engine::Networking::Packet* clone() {

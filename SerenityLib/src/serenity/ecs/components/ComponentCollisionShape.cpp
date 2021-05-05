@@ -125,6 +125,17 @@ bool ComponentCollisionShape::addChildShape(ComponentCollisionShape& other) {
     other.internal_update_ptrs();
     return true;
 }
+bool ComponentCollisionShape::updateChildShapeTransform(const glm_mat4& transformMatrix) {
+    auto parentShape = getParentCompoundShape();
+    if (!parentShape) {
+        return false;
+    }
+    btTransform tr;
+    tr.setFromOpenGLMatrix(glm::value_ptr(transformMatrix));
+    parentShape->updateChildTransform(getChildShapeIndex(), tr, true);
+    return true;
+}
+
 void ComponentCollisionShape::setCollision(btCollisionShape* shape) {
     internal_free_memory();
     m_CollisionShape.reset(shape);

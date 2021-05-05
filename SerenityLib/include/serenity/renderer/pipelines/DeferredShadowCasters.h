@@ -11,7 +11,7 @@ class  DirectionalLight;
 namespace Engine::priv {
     class GLDeferredDirectionalLightShadowInfo final : public DirectionalLightShadowData {
         private:
-            void initGL();
+            bool initGL();
             void calculateSplits(Camera&);
         public:
             glm::vec2  m_TexelSize      = glm::vec2{ 1.0f / DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE, 1.0f / DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE };

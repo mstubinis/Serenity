@@ -22,13 +22,13 @@ class Shader final : public Resource<Shader> {
     private:
         std::string  m_FileName;
         std::string  m_Code;
-        ShaderType   m_ShaderType = ShaderType::Unknown;
+        ShaderType   m_ShaderType = ShaderType::Vertex;
         bool         m_FromFile   = false;
     public:
         Shader() = default;
-        Shader(std::string_view shaderFileOrData, ShaderType shaderType, bool fromFile = true);
+        Shader(std::string_view shaderFileOrData, ShaderType, bool fromFile = true);
 
-        Shader(const Shader&)                  = default; //TODO: delete here?
+        Shader(const Shader&)                  = delete;
         Shader& operator=(const Shader&)       = delete;
         Shader(Shader&&) noexcept;
         Shader& operator=(Shader&&) noexcept;

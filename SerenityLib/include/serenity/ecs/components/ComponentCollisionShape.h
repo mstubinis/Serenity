@@ -83,6 +83,7 @@ class ComponentCollisionShape : public ComponentBaseClass<ComponentCollisionShap
         bool promoteToCompoundShape(CollisionType, const std::vector<Entity>&);
 
         bool addChildShape(ComponentCollisionShape& other);
+        bool updateChildShapeTransform(const glm_mat4& transformMatrix);
 
         [[nodiscard]] inline const btVector3& getInertia() const noexcept { return m_BtInertia; }
         [[nodiscard]] inline CollisionType getType() const noexcept { return static_cast<CollisionType>(m_CollisionShape->getShapeType()); }

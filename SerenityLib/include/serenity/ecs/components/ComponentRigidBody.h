@@ -97,9 +97,15 @@ class ComponentRigidBody : public ComponentBaseClass<ComponentRigidBody> {
         btVector3 internal_activate_and_get_vector(decimal x, decimal y, decimal z, bool local) noexcept;
         void internal_update_misc() noexcept;
 
+        void internal_set_matrix(glm_mat4);
         void internal_setPosition(decimal x, decimal y, decimal z);
         void internal_setRotation(float x, float y, float z, float w);
         void internal_setScale(float x, float y, float z);
+
+        inline void internal_setPosition(const glm_vec3& position) noexcept { internal_setPosition(position.x, position.y, position.z); }
+        inline void internal_setRotation(const glm::quat& rotation) noexcept { internal_setRotation(rotation.x, rotation.y, rotation.z, rotation.w); }
+        inline void internal_setScale(const glm::vec3& scale) noexcept { internal_setScale(scale.x, scale.y, scale.z); }
+
         void internal_calculate_mass();
 
         glm_vec3 internal_getPosition();

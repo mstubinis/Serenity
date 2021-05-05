@@ -11,16 +11,12 @@ namespace Engine::priv {
         private:
             int  m_Tab          = 0;
 
-            int  m_HDRAlgorithm;
-
-
             void internal_render_entities(Scene& currentScene);
             void internal_render_profiler();
             void internal_render_renderer();
+            void internal_render_network();
         public:
-            EditorWindowScene();
-
-            ~EditorWindowScene();
+            EditorWindowScene() = default;
 
             void update();
     };

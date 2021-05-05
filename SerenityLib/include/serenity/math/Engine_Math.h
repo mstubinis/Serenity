@@ -80,6 +80,14 @@ namespace Engine::Math {
         matrix[3][1] = 0.0f;
         matrix[3][2] = 0.0f;
     }
+    //removes the scaling portion of the input matrix, and returns what the scaling was before the operation
+    template<class MATRIX, class VECTOR3> VECTOR3 removeMatrixScale(MATRIX& matrix) noexcept {
+        auto scaleX = glm::length(VECTOR3(matrix[0][0], matrix[0][1], matrix[0][2]));
+        auto scaleY = glm::length(VECTOR3(matrix[1][0], matrix[1][1], matrix[1][2]));
+        auto scaleZ = glm::length(VECTOR3(matrix[2][0], matrix[2][1], matrix[2][2]));
+        matrix = glm::scale(matrix, VECTOR3(1.0f / scaleX, 1.0f / scaleY, 1.0f / scaleZ));
+        return VECTOR3(scaleX, scaleY, scaleZ);
+    }
 
     template<class QUAT> [[nodiscard]] inline glm::vec3 getForward(const QUAT& q) noexcept { return glm::normalize(q * glm::vec3{ 0.0f, 0.0f, -1.0f }); }
     template<class QUAT> [[nodiscard]] inline glm::vec3 getRight(const QUAT& q) noexcept { return glm::normalize(q * glm::vec3{ 1.0f, 0.0f, 0.0f }); }

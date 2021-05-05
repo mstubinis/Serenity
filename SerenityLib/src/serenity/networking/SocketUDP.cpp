@@ -21,8 +21,11 @@ Networking::SocketUDP::~SocketUDP() {
 }
 void Networking::SocketUDP::clearPartialPackets() {
     while (!m_PartialPackets.empty()) {
-        m_PartialPackets.pop();
+        m_PartialPackets.pop_front();
     }
+}
+uint32_t Networking::SocketUDP::getNumPartialPackets() const noexcept {
+    return m_PartialPackets.size();
 }
 SocketStatus::Status Networking::SocketUDP::internal_send_packet(UDPPacketInfo& PacketInfoStruct) {
     auto status = m_SocketUDP.send(*PacketInfoStruct.sfmlPacket, PacketInfoStruct.ip, PacketInfoStruct.port);
@@ -53,13 +56,13 @@ SocketStatus::Status Networking::SocketUDP::internal_send_partial_packets_loop()
         status = internal_send_packet(front);
         switch (status) {
             case SocketStatus::Done: {
-                m_PartialPackets.pop();
+                m_PartialPackets.pop_front();
                 break;
             }case SocketStatus::Disconnected: {
-                m_PartialPackets.pop();
+                m_PartialPackets.pop_front();
                 break;
             }case SocketStatus::Error: {
-                m_PartialPackets.pop();
+                m_PartialPackets.pop_front();
                 break;
             }case SocketStatus::NotReady: {
                 break;
@@ -144,12 +147,12 @@ SocketStatus::Status Networking::SocketUDP::send(const void* data, size_t size, 
     return SocketStatus::map_status(m_SocketUDP.send(data, size, ip, m_Port));
 }
 SocketStatus::Status Networking::SocketUDP::send(uint16_t port, Engine::Networking::Packet& packet, sf::IpAddress ip) {
-    m_PartialPackets.emplace(port, std::move(ip), packet.clone());
+    m_PartialPackets.emplace_back(port, std::move(ip), packet.clone());
     auto status = internal_send_partial_packets_loop();
     return status;
 }
 SocketStatus::Status Networking::SocketUDP::send(uint16_t port, sf::Packet& sfpacket, sf::IpAddress ip) {
-    m_PartialPackets.emplace(port, std::move(ip), NEW sf::Packet(sfpacket));
+    m_PartialPackets.emplace_back(port, std::move(ip), NEW sf::Packet(sfpacket));
     auto status = internal_send_partial_packets_loop();
     return status;
 }

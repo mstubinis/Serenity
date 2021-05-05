@@ -41,6 +41,73 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace Engine::Renderer;
 
+#ifndef ENGINE_PRODUCTION
+constexpr const char* getDebugMsgSourceStr(GLenum src) {
+    switch (src) {
+        case GL_DEBUG_SOURCE_API: {
+            return "API";
+        } case GL_DEBUG_SOURCE_WINDOW_SYSTEM: {
+            return "WINDOW_SYSTEM";
+        } case GL_DEBUG_SOURCE_SHADER_COMPILER: {
+            return "SHADER_COMPILER";
+        } case GL_DEBUG_SOURCE_THIRD_PARTY: {
+            return "THIRD_PARTY";
+        } case GL_DEBUG_SOURCE_APPLICATION: {
+            return "APPLICATION";
+        } case GL_DEBUG_SOURCE_OTHER: {
+            return "OTHER";
+        }
+    }
+    return "";
+}
+constexpr const char* getDebugMsgTypeStr(GLenum type) {
+    switch (type) {
+        case GL_DEBUG_TYPE_ERROR: {
+            return "ERROR";
+        } case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: {
+            return "DEPRECATED_BEHAVIOR";
+        } case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: {
+            return "UNDEFINED_BEHAVIOR";
+        } case GL_DEBUG_TYPE_PORTABILITY: {
+            return "PORTABILITY";
+        } case GL_DEBUG_TYPE_PERFORMANCE: {
+            return "PERFORMANCE";
+        } case GL_DEBUG_TYPE_MARKER: {
+            return "MARKER";
+        } case GL_DEBUG_TYPE_PUSH_GROUP: {
+            return "PUSH_GROUP";
+        } case GL_DEBUG_TYPE_POP_GROUP: {
+            return "POP_GROUP";
+        } case GL_DEBUG_TYPE_OTHER: {
+            return "OTHER";
+        }
+    }
+    return "";
+}
+constexpr const char* getDebugMsgSeverityStr(GLenum sev) {
+    switch (sev) {
+        case GL_DEBUG_SEVERITY_HIGH: {
+            return "HIGH";
+        } case GL_DEBUG_SEVERITY_MEDIUM: {
+            return "MED";
+        } case GL_DEBUG_SEVERITY_LOW: {
+            return "LOW";
+        } case GL_DEBUG_SEVERITY_NOTIFICATION: {
+            return "NOTIFICATION";
+        }
+    }
+    return "";
+}
+void opengl_debug(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+    #ifdef _DEBUG
+    if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) {
+        return;
+    }
+    #endif
+    std::cout << "opengl error - source: " << getDebugMsgSourceStr(source) << ", type: " << getDebugMsgTypeStr(type) << ", id: " << id << ", severity: " << getDebugMsgSeverityStr(severity) << ", message: " << message << '\n';
+}
+#endif 
+
 constexpr std::array<glm::mat4, 6> CAPTURE_VIEWS = {
     glm::mat4{ 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f },
     glm::mat4{ 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f },
@@ -156,7 +223,6 @@ void DeferredPipeline::init() {
 
     Handle uboCameraHandle = Engine::Resources::addResource<UniformBufferObject>("Camera", static_cast<uint32_t>(sizeof(UBOCameraDataStruct)));
     m_UBOCamera = uboCameraHandle.get<UniformBufferObject>();
-    m_UBOCamera->updateData(&m_UBOCameraDataStruct);
 
     priv::EShaders::init();
 
@@ -356,6 +422,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(Handle covoludeSha
             glm::mat4 vp = captureProjection * CAPTURE_VIEWS[i];
             Engine::Renderer::sendUniformMatrix4("VP", vp);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, preEnvTexture.address(), m);
+            fbo.checkStatus();
             Engine::Renderer::Settings::clear(true, true, false);
             Skybox::bindMesh();
         }
@@ -373,6 +440,7 @@ void DeferredPipeline::internal_generate_brdf_lut(Handle program, uint32_t brdfS
     Texture::setFilter(textureType, TextureFilter::Linear);
     TextureBaseClass::setWrapping(textureType, TextureWrap::ClampToEdge);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureType.toGLType(), brdfTexture->address(), 0);
+    fbo.checkStatus();
 
     m_Renderer.bind(program.get<ShaderProgram>());
 
@@ -666,6 +734,14 @@ void DeferredPipeline::onResize(uint32_t newWidth, uint32_t newHeight) {
 void DeferredPipeline::onOpenGLContextCreation(uint32_t windowWidth, uint32_t windowHeight) {
     //TODO: move to a more generic area
     m_OpenGLStateMachine.GL_INIT_DEFAULT_STATE_MACHINE(windowWidth, windowHeight);
+
+    if (m_OpenGLStateMachine.constants.MAJOR_VERSION >= 4 && m_OpenGLStateMachine.constants.MINOR_VERSION >= 3) {
+        #ifndef ENGINE_PRODUCTION
+        //debug logging
+        glDebugMessageCallback(opengl_debug, nullptr);
+        #endif
+    }
+
     Engine::Renderer::GLEnable(GL_CULL_FACE);
     m_GBuffer.init(windowWidth, windowHeight);
 }
@@ -715,7 +791,7 @@ bool DeferredPipeline::buildShadowCaster(DirectionalLight& directionalLight) {
     if (!m_ShadowCasters.m_ShadowCastersDirectionalHashed.contains(&directionalLight)) {
         auto& data = m_ShadowCasters.m_ShadowCastersDirectional.emplace_back(
             &directionalLight, 
-            NEW GLDeferredDirectionalLightShadowInfo(*Engine::Resources::getCurrentScene()->getActiveCamera(), directionalLight, 2048, 2048, 80.0f, 0.1f, 2000.0f)
+            NEW GLDeferredDirectionalLightShadowInfo(*Engine::Resources::getCurrentScene()->getActiveCamera(), directionalLight, 2048, 2048, 80.0f, 0.1f, 99999999999.0f)
         );
         m_ShadowCasters.m_ShadowCastersDirectionalHashed.emplace(&directionalLight, std::get<1>(data));
         return true;
@@ -904,7 +980,7 @@ void DeferredPipeline::renderPointLight(Camera& camera, PointLight& pointLight) 
     auto transform       = pointLight.getComponent<ComponentTransform>();
     auto renderingMatrix = transform->getWorldMatrixRendering();
     sendUniformMatrix4("Model", renderingMatrix);
-    sendUniformMatrix4("VP", m_UBOCameraDataStruct.CameraViewProj);
+    sendUniformMatrix4("VP", m_CameraUBODataPtr->CameraViewProj);
 
     if(result == 1){
         cullFace(GL_FRONT);
@@ -931,7 +1007,7 @@ void DeferredPipeline::renderSpotLight(Camera& camera, SpotLight& spotLight) {
     auto transform       = spotLight.getComponent<ComponentTransform>();
     auto renderingMatrix = transform->getWorldMatrixRendering();
     sendUniformMatrix4("Model", renderingMatrix);
-    sendUniformMatrix4("VP", m_UBOCameraDataStruct.CameraViewProj);
+    sendUniformMatrix4("VP", m_CameraUBODataPtr->CameraViewProj);
 
     if (result == 1) {
         cullFace(GL_FRONT);
@@ -959,7 +1035,7 @@ void DeferredPipeline::renderRodLight(Camera& camera, RodLight& rodLight) {
     auto transform       = rodLight.getComponent<ComponentTransform>();
     auto renderingMatrix = transform->getWorldMatrixRendering();
     sendUniformMatrix4("Model", renderingMatrix);
-    sendUniformMatrix4("VP", m_UBOCameraDataStruct.CameraViewProj);
+    sendUniformMatrix4("VP", m_CameraUBODataPtr->CameraViewProj);
 
     if (result == 1) {
         cullFace(GL_FRONT);
@@ -1854,23 +1930,26 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
         if (mainRenderFunction) {
 #pragma region Camera UBO
             if (m_UBOCamera && Engine::priv::OpenGLState::constants.supportsUBO()) {
+                UniformBufferObjectMapper mapper{ *m_UBOCamera };
+                m_CameraUBODataPtr = static_cast<UBOCameraDataStruct*>(mapper.getPtr());
+
                 float logDepthBufferFCoeff = (2.0f / glm::log2(camera.getFar() + 1.0f)) * 0.5f;
                 //TODO: change the manual camera uniform sending (for when glsl version < 140) to give a choice between the two render spaces
 
                 //same simulation and render space
                 /*
-                m_UBOCameraDataStruct.CameraView        = camera.getView();
-                m_UBOCameraDataStruct.CameraProj        = camera.getProjection();
-                m_UBOCameraDataStruct.CameraViewProj    = camera.getViewProjection();
-                m_UBOCameraDataStruct.CameraInvProj     = camera.getProjectionInverse();
-                m_UBOCameraDataStruct.CameraInvView     = camera.getViewInverse();
-                m_UBOCameraDataStruct.CameraInvViewProj = camera.getViewProjectionInverse();
-                m_UBOCameraDataStruct.CameraInfo1       = glm::vec4{ camera.getPosition(), camera.getNear() };
-                m_UBOCameraDataStruct.CameraInfo2       = glm::vec4{ camera.getViewVector(), camera.getFar() };
-                m_UBOCameraDataStruct.CameraInfo3       = glm::vec4{ 0.0f, 0.0f, 0.0f, logDepthBufferFCoeff };
-                m_UBOCameraDataStruct.ScreenInfo        = glm::vec4{ winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w };
-                m_UBOCameraDataStruct.RendererInfo1     = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
-                m_UBOCameraDataStruct.RendererInfo2     = glm::vec4{ sceneAmbient.r, sceneAmbient.g, sceneAmbient.b, 0.0f };
+                m_CameraUBODataPtr->CameraView        = camera.getView();
+                m_CameraUBODataPtr->CameraProj        = camera.getProjection();
+                m_CameraUBODataPtr->CameraViewProj    = camera.getViewProjection();
+                m_CameraUBODataPtr->CameraInvProj     = camera.getProjectionInverse();
+                m_CameraUBODataPtr->CameraInvView     = camera.getViewInverse();
+                m_CameraUBODataPtr->CameraInvViewProj = camera.getViewProjectionInverse();
+                m_CameraUBODataPtr->CameraInfo1       = glm::vec4{ camera.getPosition(), camera.getNear() };
+                m_CameraUBODataPtr->CameraInfo2       = glm::vec4{ camera.getViewVector(), camera.getFar() };
+                m_CameraUBODataPtr->CameraInfo3       = glm::vec4{ 0.0f, 0.0f, 0.0f, logDepthBufferFCoeff };
+                m_CameraUBODataPtr->ScreenInfo        = glm::vec4{ winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w };
+                m_CameraUBODataPtr->RendererInfo1     = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
+                m_CameraUBODataPtr->RendererInfo2     = glm::vec4{ sceneAmbient.r, sceneAmbient.g, sceneAmbient.b, 0.0f };
                 */
 
                 //this render space places the camera at the origin and offsets submitted model matrices to the vertex shaders by the camera's real simulation position
@@ -1880,20 +1959,18 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
                 viewNoTranslation[3][0]     = 0.001f;
                 viewNoTranslation[3][1]     = 0.001f;
                 viewNoTranslation[3][2]     = 0.001f;
-                m_UBOCameraDataStruct.CameraView        = viewNoTranslation;
-                m_UBOCameraDataStruct.CameraProj        = camera.getProjection();
-                m_UBOCameraDataStruct.CameraViewProj    = m_UBOCameraDataStruct.CameraProj * viewNoTranslation;
-                m_UBOCameraDataStruct.CameraInvProj     = camera.getProjectionInverse();
-                m_UBOCameraDataStruct.CameraInvView     = glm::inverse(m_UBOCameraDataStruct.CameraView);
-                m_UBOCameraDataStruct.CameraInvViewProj = glm::inverse(m_UBOCameraDataStruct.CameraViewProj);
-                m_UBOCameraDataStruct.CameraInfo1       = glm::vec4{ 0.001f, 0.001f, 0.001f, camera.getNear() };
-                m_UBOCameraDataStruct.CameraInfo2       = glm::vec4{ glm::vec3{viewNoTranslation[0][2], viewNoTranslation[1][2], viewNoTranslation[2][2]}, camera.getFar() };
-                m_UBOCameraDataStruct.CameraInfo3       = glm::vec4{ camera.getPosition(), logDepthBufferFCoeff };
-                m_UBOCameraDataStruct.ScreenInfo        = glm::vec4{ winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w };
-                m_UBOCameraDataStruct.RendererInfo1     = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
-                m_UBOCameraDataStruct.RendererInfo2     = glm::vec4{ sceneAmbient.r, sceneAmbient.g, sceneAmbient.b, 0.0f };
-                
-                m_UBOCamera->updateData(&m_UBOCameraDataStruct);
+                m_CameraUBODataPtr->CameraView        = viewNoTranslation;
+                m_CameraUBODataPtr->CameraProj        = camera.getProjection();
+                m_CameraUBODataPtr->CameraViewProj    = m_CameraUBODataPtr->CameraProj * viewNoTranslation;
+                m_CameraUBODataPtr->CameraInvProj     = camera.getProjectionInverse();
+                m_CameraUBODataPtr->CameraInvView     = glm::inverse(m_CameraUBODataPtr->CameraView);
+                m_CameraUBODataPtr->CameraInvViewProj = glm::inverse(m_CameraUBODataPtr->CameraViewProj);
+                m_CameraUBODataPtr->CameraInfo1       = glm::vec4{ 0.001f, 0.001f, 0.001f, camera.getNear() };
+                m_CameraUBODataPtr->CameraInfo2       = glm::vec4{ glm::vec3{viewNoTranslation[0][2], viewNoTranslation[1][2], viewNoTranslation[2][2]}, camera.getFar() };
+                m_CameraUBODataPtr->CameraInfo3       = glm::vec4{ camera.getPosition(), logDepthBufferFCoeff };
+                m_CameraUBODataPtr->ScreenInfo        = glm::vec4{ winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w };
+                m_CameraUBODataPtr->RendererInfo1     = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
+                m_CameraUBODataPtr->RendererInfo2     = glm::vec4{ sceneAmbient.r, sceneAmbient.g, sceneAmbient.b, 0.0f };
             }
 #pragma endregion
         }

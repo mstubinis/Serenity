@@ -6,6 +6,12 @@
 SystemRigidTransformSync::SystemRigidTransformSync(Engine::priv::ECS& ecs)
     : SystemCRTP{ ecs }
 {
+
+    /*
+    * if this is a root transform, set this transform to use the bullet physics rigid body's coordinate system
+    * this system happens AFTER SystemResolveTransformDirty
+    */
+
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
         auto& system = (SystemRigidTransformSync&)inSystem;
         system.forEach([](Entity entity, ComponentTransform* transform, ComponentRigidBody* rigidBody) {

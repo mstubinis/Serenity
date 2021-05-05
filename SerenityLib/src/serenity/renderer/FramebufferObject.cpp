@@ -46,16 +46,16 @@ GLuint FramebufferTexture::address() const {
 RenderbufferObject::RenderbufferObject(FramebufferObject& f, FramebufferAttatchment a, ImageInternalFormat i) 
     : FramebufferObjectAttatchment{ f, a, i }
 {
-    GLCall(glGenRenderbuffers(1, &m_RBO));
+    glGenRenderbuffers(1, &m_RBO);
 }
 RenderbufferObject::~RenderbufferObject(){ 
-    GLCall(glDeleteRenderbuffers(1, &m_RBO));
+    glDeleteRenderbuffers(1, &m_RBO);
 }
 void RenderbufferObject::resize(FramebufferObject& fbo, uint32_t width, uint32_t height){
     Engine::Renderer::bindRBO(m_RBO);
     m_Width  = width; 
     m_Height = height;
-    GLCall(glRenderbufferStorage(GL_RENDERBUFFER, attatchment(), m_Width, m_Height));
+    glRenderbufferStorage(GL_RENDERBUFFER, attatchment(), m_Width, m_Height);
     Engine::Renderer::unbindRBO();
 }
 
@@ -107,7 +107,7 @@ void FramebufferObject::init(uint32_t width, uint32_t height, float divisor, uin
     m_FramebufferHeight = (uint32_t)((float)height * m_Divisor);
     m_FBOs.resize(swapBufferCount, GLuint(0));
     for (auto& fbo : m_FBOs) {
-        GLCall(glGenFramebuffers(1, &fbo));
+        glGenFramebuffers(1, &fbo);
     }
     setCustomBindFunctor(FramebufferObjectDefaultBindFunctor());
     setCustomUnbindFunctor(FramebufferObjectDefaultUnbindFunctor());
@@ -123,7 +123,7 @@ void FramebufferObject::init(uint32_t width, uint32_t height, ImageInternalForma
 }
 void FramebufferObject::cleanup() {
     for (size_t i = 0; i < m_FBOs.size(); ++i) {
-        GLCall(glDeleteFramebuffers(1, &m_FBOs[i]));
+        glDeleteFramebuffers(1, &m_FBOs[i]);
     }
 }
 void FramebufferObject::resize(uint32_t w, uint32_t h){
@@ -137,13 +137,37 @@ void FramebufferObject::resize(uint32_t w, uint32_t h){
         }
     }
 }
+
+
+constexpr const char* debugFramebufferStatusAsStr(GLenum fbStatus) {
+    switch (fbStatus) {
+        case GL_FRAMEBUFFER_UNDEFINED: {
+            return "UNDEFINED";
+        } case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: {
+            return "INCOMPLETE_ATTACHMENT";
+        } case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: {
+            return "INCOMPLETE_MISSING_ATTACHMENT";
+        } case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER: {
+            return "INCOMPLETE_DRAW_BUFFER";
+        } case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER: {
+            return "INCOMPLETE_READ_BUFFER";
+        } case GL_FRAMEBUFFER_UNSUPPORTED: {
+            return "UNSUPPORTED";
+        } case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: {
+            return "INCOMPLETE_MULTISAMPLE";
+        } case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS: {
+            return "INCOMPLETE_LAYER_TARGETS";
+        }
+    }
+    return "";
+}
+
 bool FramebufferObject::checkStatus() {
     for (const auto fbo : m_FBOs) {
         Engine::Renderer::bindFBO(fbo);
         GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
-            ENGINE_PRODUCTION_LOG("Framebuffer completeness in FramebufferObject::impl _check() (index " + std::to_string(fbo) + ") is incomplete!")
-            ENGINE_PRODUCTION_LOG("Error is: " << framebufferStatus)
+            ENGINE_PRODUCTION_LOG(__FUNCTION__ << "() error - fbo: " << fbo << ": " << debugFramebufferStatusAsStr(framebufferStatus))
             return false;
         }
     }

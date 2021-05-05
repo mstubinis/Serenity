@@ -19,14 +19,9 @@ using namespace Engine::priv::textures;
 void TextureLoaderCubemap::ImportIntoOpengl(TextureCubemap& texture, const Engine::priv::ImageMipmap& mipmap, TextureType textureType) {
     auto& imageData = texture.m_CPUData.m_ImagesDatas[0];
     if (imageData.m_InternalFormat.isCompressedType() && mipmap.compressedSize != 0) {
-        GLCall(glCompressedTexImage2D(textureType.toGLType(), mipmap.level, (GLenum)imageData.m_InternalFormat, mipmap.width, mipmap.height, 0, mipmap.compressedSize,
-            &mipmap.pixels[0]
-        ));
-    }
-    else {
-        GLCall(glTexImage2D(textureType.toGLType(), mipmap.level, (GLint)imageData.m_InternalFormat, mipmap.width, mipmap.height, 0,
-            (GLenum)imageData.m_PixelFormat, (GLenum)imageData.m_PixelType, &mipmap.pixels[0]
-        ));
+        glCompressedTexImage2D(textureType.toGLType(), mipmap.level, (GLenum)imageData.m_InternalFormat, mipmap.width, mipmap.height, 0, mipmap.compressedSize, &mipmap.pixels[0]);
+    } else {
+        glTexImage2D(textureType.toGLType(), mipmap.level, (GLint)imageData.m_InternalFormat, mipmap.width, mipmap.height, 0, (GLenum)imageData.m_PixelFormat, (GLenum)imageData.m_PixelType, &mipmap.pixels[0]);
     }
 }
 bool TextureLoaderCubemap::LoadDDSFile(TextureCubemapCPUData& cpuData, ImageData& image_loaded_struct) {
@@ -224,17 +219,7 @@ void TextureLoaderCubemap::LoadTexture2DIntoOpenGL(TextureCubemap& texture) {
 void TextureLoaderCubemap::LoadTextureFramebufferIntoOpenGL(TextureCubemap& texture) {
     Engine::Renderer::bindTextureForModification(TextureType::CubeMap, texture.m_TextureAddress);
     const auto& image = texture.m_CPUData.m_ImagesDatas[0];
-    GLCall(glTexImage2D(
-        GL_TEXTURE_CUBE_MAP,
-        0,
-        (GLint)image.m_InternalFormat,
-        image.m_Mipmaps[0].width,
-        image.m_Mipmaps[0].height,
-        0,
-        (GLenum)image.m_PixelFormat,
-        (GLenum)image.m_PixelType,
-        NULL)
-    );
+    glTexImage2D(GL_TEXTURE_CUBE_MAP, 0, (GLint)image.m_InternalFormat, image.m_Mipmaps[0].width, image.m_Mipmaps[0].height, 0, (GLenum)image.m_PixelFormat, (GLenum)image.m_PixelType, nullptr);
     texture.setFilter(TextureFilter::Linear);
     texture.setWrapping(TextureWrap::ClampToEdge);
 }
@@ -256,22 +241,21 @@ void TextureLoaderCubemap::WithdrawPixelsFromOpenGLMemory(TextureCubemap& textur
     pxls.clear();
     pxls.resize(image.m_Mipmaps[mipmapLevel].width * image.m_Mipmaps[mipmapLevel].height * 4);
     Engine::Renderer::bindTextureForModification(TextureType::CubeMap, texture.m_TextureAddress);
-    GLCall(glGetTexImage(GL_TEXTURE_CUBE_MAP, 0, (GLenum)image.m_PixelFormat, (GLenum)image.m_PixelType, &pxls[0]));
+    glGetTexImage(GL_TEXTURE_CUBE_MAP, 0, (GLenum)image.m_PixelFormat, (GLenum)image.m_PixelType, &pxls[0]);
 }
 bool TextureLoaderCubemap::GenerateMipmapsOpenGL(TextureCubemap& texture) {
     if (texture.m_CPUData.m_Mipmapped || texture.m_TextureAddress == 0) {
         return false;
     }
     Engine::Renderer::bindTextureForModification(TextureType::CubeMap, texture.m_TextureAddress);
-    GLCall(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0));
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
     if (texture.m_CPUData.m_MinFilter == GL_LINEAR) {
         texture.m_CPUData.m_MinFilter = GL_LINEAR_MIPMAP_LINEAR;
-    }
-    else if (texture.m_CPUData.m_MinFilter == GL_NEAREST) {
+    } else if (texture.m_CPUData.m_MinFilter == GL_NEAREST) {
         texture.m_CPUData.m_MinFilter = GL_NEAREST_MIPMAP_NEAREST;
     }
-    GLCall(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, texture.m_CPUData.m_MinFilter));
-    GLCall(glGenerateMipmap(GL_TEXTURE_CUBE_MAP));
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, texture.m_CPUData.m_MinFilter);
+    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
     texture.m_CPUData.m_Mipmapped = true;
     return true;
 }
@@ -285,21 +269,22 @@ void TextureLoaderCubemap::GeneratePBRData(TextureCubemap& cubemap, int convolud
         cubemapConvolution.m_Resource      = cubemap.m_ConvolutionTextureHandle.get<TextureCubemap>();
         Engine::Renderer::genAndBindTexture(TextureType::CubeMap, cubemapConvolution.m_Resource->internal_get_address_for_generation());
         for (uint32_t i = 0; i < 6; ++i) {
-            GLCall(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, convoludeTextureSize, convoludeTextureSize, 0, GL_RGB, GL_FLOAT, NULL));
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, convoludeTextureSize, convoludeTextureSize, 0, GL_RGB, GL_FLOAT, nullptr);
         }
         cubemapConvolution.m_Resource->setWrapping(TextureWrap::ClampToEdge);
         cubemapConvolution.m_Resource->setFilter(TextureFilter::Linear);
     }
     if (!cubemapPreEnvFilter.m_Resource) {
-        cubemap.m_PreEnvTextureHandle  = Engine::Resources::addResource<TextureCubemap>(cubemap.name() + "PreEnvFilter", true);
+        cubemap.m_PreEnvTextureHandle  = Engine::Resources::addResource<TextureCubemap>(cubemap.name() + "PreEnvFilter", false);
         cubemapPreEnvFilter.m_Resource = cubemap.m_PreEnvTextureHandle.get<TextureCubemap>();
         Engine::Renderer::genAndBindTexture(TextureType::CubeMap, cubemapPreEnvFilter.m_Resource->internal_get_address_for_generation());
         for (uint32_t i = 0; i < 6; ++i) {
-            GLCall(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, preEnvFilterSize, preEnvFilterSize, 0, GL_RGB, GL_FLOAT, NULL));
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, preEnvFilterSize, preEnvFilterSize, 0, GL_RGB, GL_FLOAT, nullptr);
         }
         cubemapPreEnvFilter.m_Resource->setWrapping(TextureWrap::ClampToEdge);
         cubemapPreEnvFilter.m_Resource->setMinFilter(TextureFilter::Linear_Mipmap_Linear);
         cubemapPreEnvFilter.m_Resource->setMaxFilter(TextureFilter::Linear);
+        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
     }
     Core::m_Engine->m_RenderModule._genPBREnvMapData(cubemap, cubemap.m_ConvolutionTextureHandle, cubemap.m_PreEnvTextureHandle, convoludeTextureSize, preEnvFilterSize);
 }

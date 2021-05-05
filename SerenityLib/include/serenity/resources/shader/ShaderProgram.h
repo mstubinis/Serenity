@@ -16,7 +16,7 @@ namespace Engine::priv {
     class PublicShaderProgram final {
         private:
             static uint32_t CompileShader(Shader&, const char* sourceCode, uint32_t GLShaderType);
-            static bool     LinkShadersToProgram(ShaderProgram&, std::vector<uint32_t>&& shaderIDs, std::vector<char>& errors, const char* fragmentSourceCode = "");
+            static bool     LinkShadersToProgram(ShaderProgram&, const std::vector<uint32_t>& shaderIDs, std::vector<char>& errors, const char* fragmentSourceCode = "");
             static void     PopulateUniformTable(ShaderProgram&);
         public:
             static void LoadCPU(ShaderProgram&);
@@ -35,6 +35,15 @@ namespace Engine::priv {
 #include <serenity/resources/shader/ShaderIncludes.h>
 #include <functional>
 
+struct ShaderProgramParameters final {
+    Handle vertexShaderHandle;
+    Handle fragmentShaderHandle;
+    Handle geometryShaderHandle;
+    Handle computeShaderHandle;
+    Handle tesselationControlShaderHandle;
+    Handle tesselationEvaluationShaderHandle;
+};
+
 class ShaderProgram final : public Resource<ShaderProgram> {
     friend class  UniformBufferObject;
     friend class  Shader;
@@ -44,21 +53,23 @@ class ShaderProgram final : public Resource<ShaderProgram> {
     public:
         using UniformsContainer = Engine::unordered_string_map<std::string, GLint>;
         using BindFunc = void(*)(ShaderProgram*);
-
     public:
         static Handle Deferred, Forward, Decal; //loaded in renderer
     private:
-        BindFunc                     m_CustomBindFunctor  = [](ShaderProgram*) {};
-        UniformsContainer            m_UniformLocations;
-        std::unordered_set<GLuint>   m_AttachedUBOs;
-        Handle                       m_VertexShader;
-        Handle                       m_FragmentShader;
-        GLuint                       m_ShaderProgram      = 0;
-		bool                         m_LoadedCPU          = false;
-		bool                         m_LoadedGPU          = false;
+        BindFunc                                   m_CustomBindFunctor  = [](ShaderProgram*) {};
+        UniformsContainer                          m_UniformLocations;
+        std::unordered_set<GLuint>                 m_AttachedUBOs;
+        std::vector<std::pair<Handle, ShaderType>> m_Shaders; //0 = vertex, 1 = fragment, 2 = geometry
+        GLuint                                     m_ShaderProgram      = 0;
+		bool                                       m_LoadedCPU          = false;
+		bool                                       m_LoadedGPU          = false;
+
+        void internal_init(std::string_view inName, const ShaderProgramParameters&);
     public:
         ShaderProgram() = default;
         ShaderProgram(std::string_view name, Handle vertexShader, Handle fragmentShader);
+        ShaderProgram(std::string_view name, Handle vertexShader, Handle fragmentShader, Handle geometryShader);
+        ShaderProgram(std::string_view name, const ShaderProgramParameters&);
         ShaderProgram(const ShaderProgram&)            = delete;
         ShaderProgram& operator=(const ShaderProgram&) = delete;
         ShaderProgram(ShaderProgram&&) noexcept;

@@ -177,6 +177,19 @@ void ComponentRigidBody::setGravity(decimal x, decimal y, decimal z) {
     m_BulletRigidBody->setGravity(btVector3{ (btScalar)x, (btScalar)y, (btScalar)z });
 }
 
+void ComponentRigidBody::internal_set_matrix(glm_mat4 matrix) {
+    ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
+    auto localScale = Engine::Math::removeMatrixScale<glm_mat4, glm_vec3>(matrix);
+    btTransform tr;
+    tr.setFromOpenGLMatrix(glm::value_ptr(matrix));
+    m_BulletRigidBody->setWorldTransform(tr);
+    m_BulletRigidBody->setCenterOfMassTransform(tr);
+    m_BulletMotionState.setWorldTransform(tr);
+    auto collisionShape = m_Owner.getComponent<ComponentCollisionShape>();
+    if (collisionShape) {
+        collisionShape->internal_setScale(localScale.x, localScale.y, localScale.z);
+    }
+}
 void ComponentRigidBody::internal_setRotation(float x, float y, float z, float w) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     btQuaternion quat{ (btScalar)x, (btScalar)y, (btScalar)z, (btScalar)w };

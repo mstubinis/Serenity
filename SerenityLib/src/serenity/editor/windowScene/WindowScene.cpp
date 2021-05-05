@@ -12,6 +12,9 @@
 #include <serenity/renderer/postprocess/SMAA.h>
 #include <serenity/renderer/postprocess/FXAA.h>
 #include <serenity/renderer/postprocess/Bloom.h>
+
+#include <serenity/networking/Networking.h>
+
 #include <iomanip>
 
 #ifdef _WIN32
@@ -20,11 +23,75 @@
 #include <Psapi.h>
 #endif
 
-Engine::priv::EditorWindowScene::EditorWindowScene() {
+void Engine::priv::EditorWindowScene::internal_render_network() {
+    const ImVec4 yellow      = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+    const auto& tcpSockets   = Engine::priv::Core::m_Engine->m_NetworkingModule.m_SocketManager.m_TCPSockets;
+    const auto& tcpListeners = Engine::priv::Core::m_Engine->m_NetworkingModule.m_SocketManager.m_TCPListeners;
+    const auto& udpSockets   = Engine::priv::Core::m_Engine->m_NetworkingModule.m_SocketManager.m_UDPSockets;
+    ImGui::TextColored(yellow, ("Number of TCP sockets:   " + std::to_string(tcpSockets.size())).c_str());
+    ImGui::TextColored(yellow, ("Number of TCP listeners: " + std::to_string(tcpListeners.size())).c_str());
+    ImGui::TextColored(yellow, ("Number of UDP sockets:   " + std::to_string(udpSockets.size())).c_str());
 
-}
+    ImGui::BeginChild("NetworkSockets");
+    if (tcpSockets.size() > 0) {
+        if (ImGui::TreeNode("TCP Sockets")) {
+            for (const auto& tcpSocket : tcpSockets) {
+                ImGui::Text(("Ip:          " + tcpSocket->ip().toString()).c_str());
+                ImGui::Text(("Connected:   " + std::string(tcpSocket->isConnected() ? "true" : "false")).c_str());
+                ImGui::Text(("Blocking:    " + std::string(tcpSocket->isBlocking() ? "true" : "false")).c_str());
+                ImGui::Text(("Local Port:  " + std::to_string(tcpSocket->localPort())).c_str());
+                ImGui::Text(("Remote Port: " + std::to_string(tcpSocket->remotePort())).c_str());
 
-Engine::priv::EditorWindowScene::~EditorWindowScene() {
+                ImGui::Separator();
+            }
+            ImGui::TreePop();
+            ImGui::Separator();
+        }
+    }
+    if (tcpListeners.size() > 0) {
+        if (ImGui::TreeNode("TCP Listeners")) {
+            for (const auto& tcpListener : tcpListeners) {
+                ImGui::Text(("Listening:  " + std::string(tcpListener->isListening() ? "true" : "false")).c_str());
+                ImGui::Text(("Blocking:   " + std::string(tcpListener->isBlocking() ? "true" : "false")).c_str());
+                ImGui::Text(("Local Port: " + std::to_string(tcpListener->localPort())).c_str());
+
+                ImGui::Separator();
+            }
+            ImGui::TreePop();
+            ImGui::Separator();
+        }
+    }
+    if (udpSockets.size() > 0) {
+        if (ImGui::TreeNode("UDP Sockets")) {
+            for (const auto& udpSocket : udpSockets) {
+                ImGui::Text(("Ip:                  " + udpSocket->m_IP.toString()).c_str());
+                ImGui::Text(("Bound:               " + std::string(udpSocket->isBound() ? "true" : "false")).c_str());
+                ImGui::Text(("Blocking:            " + std::string(udpSocket->isBlocking() ? "true" : "false")).c_str());
+                ImGui::Text(("Local Port:          " + std::to_string(udpSocket->localPort())).c_str());
+                ImGui::Text(("Num Partial Packets: " + std::to_string(udpSocket->getNumPartialPackets())).c_str());
+                if (udpSocket->getNumPartialPackets() > 0) {
+                    if (ImGui::TreeNode("Partial Packets")) {
+                        for (const auto& packetInfo : udpSocket->m_PartialPackets) {
+                            auto& Packet = *static_cast<Engine::Networking::Packet*>(packetInfo.sfmlPacket.get());
+                            ImGui::Text(("Valid:           " + std::string(Packet.m_Valid ? "true" : "false")).c_str());
+                            ImGui::Text(("Timestamp:       " + std::to_string(Packet.m_Timestamp)).c_str());
+                            ImGui::Text(("Type:            " + std::to_string(Packet.m_PacketType)).c_str());
+                            ImGui::Text(("Ack:             " + std::to_string(Packet.m_Ack)).c_str());
+                            ImGui::Text(("Ack Bitfield:    " + std::to_string(Packet.m_AckBitfield)).c_str());
+                            ImGui::Text(("Sequence Number: " + std::to_string(Packet.m_SequenceNumber)).c_str());
+                            ImGui::Text(("Data Size Bytes: " + std::to_string(Packet.getDataSize())).c_str());
+                        }
+                        ImGui::TreePop();
+                        ImGui::Separator();
+                    }
+                }
+                ImGui::Separator();
+            }
+            ImGui::TreePop();
+            ImGui::Separator();
+        }
+    }
+    ImGui::EndChild();
 }
 void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentScene) {
     ImGui::BeginChild("SceneEntities");
@@ -35,10 +102,10 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
             if (ImGui::TreeNode(("Entity " + std::to_string(e.id()) + (name ? (" - " + name->name()) : "")).c_str())) {
                 //for each component...
                 auto transform = e.getComponent<ComponentTransform>();
-                auto rigid = e.getComponent<ComponentRigidBody>();
-                auto shape = e.getComponent<ComponentCollisionShape>();
-                auto model = e.getComponent<ComponentModel>();
-                auto cam = e.getComponent<ComponentCamera>();
+                auto rigid     = e.getComponent<ComponentRigidBody>();
+                auto shape     = e.getComponent<ComponentCollisionShape>();
+                auto model     = e.getComponent<ComponentModel>();
+                auto cam       = e.getComponent<ComponentCamera>();
                 if (name && ImGui::TreeNode("ComponentName")) {
                     ImGui::TreePop();
                 }
@@ -126,7 +193,7 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
 }
 void Engine::priv::EditorWindowScene::internal_render_profiler() {
     const auto& debugging = Engine::priv::Core::m_Engine->m_DebugManager;
-    const ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+    const ImVec4 yellow   = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
     ImGui::TextColored(yellow, ("Update Time:  " + debugging.updateTimeInMs() + " ms").c_str());
     ImGui::TextColored(yellow, ("Physics Time: " + debugging.physicsTimeInMs() + " ms").c_str());
     ImGui::TextColored(yellow, ("Sounds Time:  " + debugging.soundsTimeInMs() + " ms").c_str());
@@ -157,9 +224,9 @@ void Engine::priv::EditorWindowScene::internal_render_profiler() {
     memInfo.dwLength = sizeof(MEMORYSTATUSEX);
     GlobalMemoryStatusEx(&memInfo);
     DWORDLONG totalVirtualMem = memInfo.ullTotalPageFile; //Total Virtual Memory
-    DWORDLONG virtualMemUsed = memInfo.ullTotalPageFile - memInfo.ullAvailPageFile; //Virtual Memory currently used
-    DWORDLONG totalPhysMem = memInfo.ullTotalPhys; //Total Physical Memory (RAM)
-    DWORDLONG physMemUsed = memInfo.ullTotalPhys - memInfo.ullAvailPhys; //Physical Memory currently used
+    DWORDLONG virtualMemUsed  = memInfo.ullTotalPageFile - memInfo.ullAvailPageFile; //Virtual Memory currently used
+    DWORDLONG totalPhysMem    = memInfo.ullTotalPhys; //Total Physical Memory (RAM)
+    DWORDLONG physMemUsed     = memInfo.ullTotalPhys - memInfo.ullAvailPhys; //Physical Memory currently used
 
     ImGui::TextColored(yellow, ("Total Virtual Memory: " + byte_format(totalVirtualMem)).c_str());
     ImGui::TextColored(yellow, ("Virtual Memory Used: " + byte_format(virtualMemUsed)).c_str());
@@ -170,7 +237,7 @@ void Engine::priv::EditorWindowScene::internal_render_profiler() {
     GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
 
     SIZE_T virtualMemUsedByMe = pmc.PrivateUsage; //Virtual Memory currently used by current process
-    SIZE_T physMemUsedByMe = pmc.WorkingSetSize; //Physical Memory currently used by current process
+    SIZE_T physMemUsedByMe    = pmc.WorkingSetSize; //Physical Memory currently used by current process
     ImGui::TextColored(yellow, ("Virtual Memory used by current process: " + byte_format(virtualMemUsedByMe)).c_str());
     ImGui::TextColored(yellow, ("Physical Memory used by current process: " + byte_format(physMemUsedByMe)).c_str());
 #endif
@@ -262,6 +329,10 @@ void Engine::priv::EditorWindowScene::update() {
             m_Tab = 2;
             ImGui::EndTabItem();
         }
+        if (ImGui::BeginTabItem("Network")) {
+            m_Tab = 3;
+            ImGui::EndTabItem();
+        }
         ImGui::EndTabBar();
     }
     ImGui::PopStyleColor();
@@ -276,6 +347,10 @@ void Engine::priv::EditorWindowScene::update() {
         }
         case 2: { //Profiler
             internal_render_profiler();
+            break;
+        }
+        case 3: { //Network
+            internal_render_network();
             break;
         }
     }

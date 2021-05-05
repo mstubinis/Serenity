@@ -2,17 +2,20 @@
 #ifndef ENGINE_NETWORKING_SOCKET_UDP_H
 #define ENGINE_NETWORKING_SOCKET_UDP_H
 
+namespace Engine::priv {
+    class  SocketManager;
+    class  EditorWindowScene;
+};
+
 #include <serenity/networking/ISocket.h>
 #include <serenity/networking/Packet.h>
 #include <serenity/system/TypeDefs.h>
 #include <queue>
-namespace Engine::priv {
-    class SocketManager;
-};
 
 namespace Engine::Networking {
     class SocketUDP : public ISocket {
         friend class Engine::priv::SocketManager;
+        friend class Engine::priv::EditorWindowScene;
         public:
             struct UDPPacketInfo final {
                 std::unique_ptr<sf::Packet> sfmlPacket;
@@ -29,7 +32,7 @@ namespace Engine::Networking {
             };
         private:
             sf::UdpSocket               m_SocketUDP;
-            std::queue<UDPPacketInfo>   m_PartialPackets;
+            std::deque<UDPPacketInfo>   m_PartialPackets;
             sf::IpAddress               m_IP                = sf::IpAddress::LocalHost;
             uint16_t                    m_Port              = 0;
 
@@ -47,6 +50,7 @@ namespace Engine::Networking {
             ~SocketUDP();
 
             void clearPartialPackets();
+            [[nodiscard]] uint32_t getNumPartialPackets() const noexcept;
 
             void                   setBlocking(bool blocking) override;
             [[nodiscard]] bool                   isBlocking() const override;

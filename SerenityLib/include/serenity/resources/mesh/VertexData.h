@@ -71,17 +71,13 @@ struct VertexData final {
         std::copy(raw_src_data_uchar, raw_src_data_uchar + totalSize, std::back_inserter(destination_data));
         m_Data[attributeIndex].m_Size = bufferCount;
         if (flags & MeshModifyFlags::UploadToGPU) {
-            if (m_Format.m_InterleavingType == VertexAttributeLayout::Interleaved) {
-                sendDataToGPU(flags & MeshModifyFlags::Orphan, -1);
-            }else{
-                sendDataToGPU(flags & MeshModifyFlags::Orphan, (int)attributeIndex);
-            }
+            sendDataToGPU(flags & MeshModifyFlags::Orphan, m_Format.m_InterleavingType == VertexAttributeLayout::Interleaved ? -1 : (int)attributeIndex);
         }
     }
 
     std::vector<glm::vec3> getPositions() const;
 
-    void setData(size_t attributeIndex, uint8_t* buffer, size_t source_new_data_amount, size_t vertexCount, MeshModifyFlags::Flag flags = (MeshModifyFlags::Flag)MESH_DEFAULT_MODIFICATION_FLAGS) noexcept {
+    void setData(size_t attributeIndex, uint8_t* buffer, size_t bufferSizeInBytes, size_t vertexCount, MeshModifyFlags::Flag flags = (MeshModifyFlags::Flag)MESH_DEFAULT_MODIFICATION_FLAGS) noexcept {
         if (m_Buffers.size() == 0) {
             m_Buffers.emplace_back(BufferDataType::VertexArray);
         }
@@ -90,15 +86,11 @@ struct VertexData final {
         }
         auto& destination_data = m_Data[attributeIndex].m_Buffer;
         destination_data.clear();
-        destination_data.reserve(source_new_data_amount);
-        std::copy(buffer, buffer + source_new_data_amount, std::back_inserter(destination_data));
+        destination_data.reserve(bufferSizeInBytes);
+        std::copy(buffer, buffer + bufferSizeInBytes, std::back_inserter(destination_data));
         m_Data[attributeIndex].m_Size = vertexCount;
         if (flags & MeshModifyFlags::UploadToGPU) {
-            if (m_Format.m_InterleavingType == VertexAttributeLayout::Interleaved) {
-                sendDataToGPU(flags & MeshModifyFlags::Orphan, -1);
-            }else{
-                sendDataToGPU(flags & MeshModifyFlags::Orphan, (int)attributeIndex);
-            }
+            sendDataToGPU(flags & MeshModifyFlags::Orphan, m_Format.m_InterleavingType == VertexAttributeLayout::Interleaved ? -1 : (int)attributeIndex);
         }
     }
 

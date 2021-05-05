@@ -59,7 +59,7 @@ namespace Engine::priv {
             Engine::partial_array<uint32_t,  Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 6>    m_Text_Indices; // 6 ind per char
 
             UniformBufferObject*                               m_UBOCamera = nullptr;
-            UBOCameraDataStruct                                m_UBOCameraDataStruct;
+            UBOCameraDataStruct*                               m_CameraUBODataPtr = nullptr;
             glm::mat4                                          m_2DProjectionMatrix;
             GBuffer                                            m_GBuffer;
 

@@ -57,6 +57,7 @@ class SystemBaseClass {
         void onSceneEntered(Scene& scene) noexcept;
         void onSceneLeft(Scene& scene) noexcept;
 
+        [[nodiscard]] inline Engine::priv::ECS& getECS() noexcept { return m_ECS; }
         [[nodiscard]] Entity getEntity(uint32_t entityID) const noexcept;
 
         void addEntity(Entity entity) noexcept;
