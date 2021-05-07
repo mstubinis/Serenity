@@ -17,12 +17,11 @@ Server::Server(ServerType type, bool multithreaded)
 Server::~Server() {
     shutdown();
 }
-ServerClient* Server::getClientFromUDPData(std::string_view ip, uint16_t port, sf::Packet& sf_packet) const {
-    auto hash = m_Client_Hash_Function(std::string{ ip }, port, sf_packet);
-    return m_Clients.getClient(hash);
+ServerClient* Server::getServerClientFromUDPData(std::string_view clientIP, uint16_t clientPort) const {
+    return m_Clients.getClient( m_CustomClientHashFunction(std::string{ clientIP }, clientPort) );
 }
 bool Server::startup(uint16_t port, std::string ip_restriction) {
-    if (m_Active.load(std::memory_order_relaxed) == true) {
+    if (isActive()) {
         return false;
     }
     switch (m_ServerType) {
@@ -42,32 +41,29 @@ bool Server::startup(uint16_t port, std::string ip_restriction) {
         m_TCPListener->setBlocking(false);
         auto status  = m_TCPListener->listen();
         if (status != SocketStatus::Done) {
-            ENGINE_PRODUCTION_LOG("Server::startup() : could not start up TCP Listener")
+            ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): could not start up TCP Listener")
         }
     }
     if (m_UdpSocket) {
         m_UdpSocket->setBlocking(false);
         auto status  = m_UdpSocket->bind();
         if (status != SocketStatus::Done) {
-            ENGINE_PRODUCTION_LOG("Server::startup() : could not start up UDP Socket")
+            ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): could not start up UDP Socket")
         }
     }
-
     m_Port           = port;
     m_IP_Restriction = ip_restriction;
     m_Active.store(true, std::memory_order_relaxed);
-
     registerEvent(EventType::ClientConnected);
     registerEvent(EventType::ClientDisconnected);
     registerEvent(EventType::ServerStarted);
     registerEvent(EventType::ServerShutdowned);
     registerEvent(EventType::PacketSent);
     registerEvent(EventType::PacketReceived);
-
     return true;
 }
 bool Server::shutdown() {
-    if (m_Active.load(std::memory_order_relaxed) == false) {
+    if (!isActive()) {
         return false;
     }
     unregisterEventImmediate(EventType::ClientConnected);
@@ -76,7 +72,6 @@ bool Server::shutdown() {
     unregisterEventImmediate(EventType::ServerShutdowned);
     unregisterEventImmediate(EventType::PacketSent);
     unregisterEventImmediate(EventType::PacketReceived);
-
     if (m_UdpSocket) {
         m_UdpSocket->unbind();
     }
@@ -96,7 +91,6 @@ void Server::internal_send_to_all_tcp(const ServerClient* exclusion, sf::Packet&
         }
     }
 }
-
 void Server::internal_send_to_all_udp(const ServerClient* exclusion, sf::Packet& sf_packet) {
     for (auto& itr : m_Clients) {
         if (itr.second != exclusion) {
@@ -104,7 +98,6 @@ void Server::internal_send_to_all_udp(const ServerClient* exclusion, sf::Packet&
         }
     }
 }
-
 SocketStatus::Status Server::send_tcp_to_client(ServerClient* client, sf::Packet& sf_packet) {
     return client->send_tcp(sf_packet);
 }
@@ -114,7 +107,6 @@ void Server::send_tcp_to_all_but_client(const ServerClient* exclusion, sf::Packe
 void Server::send_tcp_to_all(sf::Packet& packet) {
     internal_send_to_all_tcp(nullptr, packet);
 }
-
 SocketStatus::Status Server::send_udp_to_client(ServerClient* client, sf::Packet& sf_packet) {
     return m_UdpSocket->send(client->port(), sf_packet, client->ip().toString());
 }
@@ -124,7 +116,6 @@ void Server::send_udp_to_all_but_client(const ServerClient* exclusion, sf::Packe
 void Server::send_udp_to_all(sf::Packet& sf_packet) {
     internal_send_to_all_udp(nullptr, sf_packet);
 }
-
 SocketStatus::Status Server::send_udp_to_client_important(ServerClient* client, Engine::Networking::Packet& packet) {
     return Server::send_udp_to_client(client, packet);
 }
@@ -134,24 +125,19 @@ void Server::send_udp_to_all_but_client_important(const ServerClient* exclusion,
 void Server::send_udp_to_all_important(Engine::Networking::Packet& packet) {
     Server::send_udp_to_all(packet);
 }
-
-SocketStatus::Status Server::receive_udp(sf::Packet& sf_packet, sf::IpAddress& sender, uint16_t& port) {
-    return m_UdpSocket->receive(sf_packet, sender, port);
-}
 bool Server::internal_add_client(const std::string& hash, ServerClient* client) {
     if (m_Clients.contains(hash)) {
         SAFE_DELETE(client);
         return false;
     }
     if (!client) {
-        ENGINE_PRODUCTION_LOG("Server::internal_add_client() called with a nullptr client")
         return false;
     }
     bool result = m_Clients.addClient(hash, client);
     if(result){
-        ENGINE_PRODUCTION_LOG("Server::internal_add_client() accepted new client: " << client->ip() << " on port: " << client->port())
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): accepted new client: " << client->ip() << " on port: " << client->port())
     }else{
-        ENGINE_PRODUCTION_LOG("Server::internal_add_client() REJECTED new client: " << client->ip() << " on port: " << client->port() << " due to not finding a next_thread")
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): REJECTED new client: " << client->ip() << " on port: " << client->port() << " due to not finding a next_thread")
         SAFE_DELETE(client);
     }
     return result;
@@ -162,77 +148,56 @@ void Server::remove_client_immediately(ServerClient& inClient) {
 void Server::remove_client(ServerClient& inClient) {
     m_Clients.removeClient(inClient, m_Mutex);
 }
-ServerClient* Server::add_new_client(std::string& hash, sf::IpAddress clientIP, uint16_t clientPort, SocketTCP* tcp) {
-    ServerClient* client = NEW ServerClient(hash, *this, tcp, clientIP, clientPort);
-    return client;
+ServerClient* Server::add_new_client(const std::string& hash, sf::IpAddress clientIP, uint16_t clientPort, SocketTCP* tcp) {
+    return NEW ServerClient{ hash, *this, tcp, std::move(clientIP), clientPort };
 }
-
-void Server::internal_update_tcp_listener_loop(bool serverActive) {
-    if (!serverActive) {
-        return;
-    }
-    if (m_TCPListener) {
-        auto* new_tcp_socket = NEW SocketTCP();
-        auto status          = m_TCPListener->accept(*new_tcp_socket);
-        if (status == sf::Socket::Status::Done) {
-            sf::Packet dummy;
-            auto client_ip   = new_tcp_socket->ip();
-            auto client_port = new_tcp_socket->remotePort();
-            auto client_hash = m_Client_Hash_Function(client_ip, client_port, dummy);
-            if (!m_Clients.contains(client_hash)) {
-                auto newClient = add_new_client(client_hash, client_ip, client_port, new_tcp_socket);
-                internal_add_client(client_hash, newClient);
-            }
-        }else{
-            SAFE_DELETE(new_tcp_socket);
-        }
-    }
-}
-
-void Server::onReceiveUDP(Engine::Networking::Packet& packet, sf::IpAddress ip, uint16_t port, const float dt) {
+void Server::internal_on_receive_udp_packet(Engine::Networking::Packet& packet, sf::IpAddress ip, uint16_t port) {
     std::string ipAsString  = ip.toString();
-    std::string client_hash = m_Client_Hash_Function(ipAsString, port, packet);
+    std::string client_hash = m_CustomClientHashFunction(ipAsString, port);
     if (m_ServerType == ServerType::UDP) {
-        if (!m_Clients.contains(client_hash)) {
-            auto newClient = add_new_client(client_hash, ipAsString, port, nullptr);
-            internal_add_client(client_hash, newClient);
-        }
+        internal_add_client( client_hash, add_new_client(client_hash, ipAsString, port, nullptr) );
     }
-    m_Clients.getClient(client_hash)->internal_on_receive_udp(packet, dt);
-    Server::m_On_Receive_UDP_Function(packet, ipAsString, port, dt);
+    m_Clients.getClient(client_hash)->internal_on_receive_udp(packet);
+    Server::m_CustomOnReceiveUDPFunction(packet, ipAsString, port);
 }
-void Server::internal_update_udp_loop(const float dt, bool serverActive) {
-    if (!serverActive) {
-        return;
-    }
+void Server::update(const float dt) {
+    auto serverActive = isActive();
+    m_CustomUpdateFunction(dt, serverActive);
+    m_Clients.internal_update_remove_clients();
+}
+std::pair<Engine::Networking::Packet, SocketStatus::Status> Server::onUpdateReceiveUDPPackets() {
+    const auto serverActive = isActive();
     Engine::Networking::Packet packet;
-    sf::IpAddress              ip;
-    uint16_t                   port;
-
-    auto status = receive_udp(packet, ip, port);
-
+    if (!serverActive) {
+        return { packet, SocketStatus::Error };
+    }
+    sf::IpAddress   ipSender;
+    uint16_t        portSender;
+    auto status = m_UdpSocket->receive(packet, ipSender, portSender);
     switch (status) {
-        case sf::Socket::Status::Done: {
-            onReceiveUDP(packet, ip, port, dt);
+        case SocketStatus::Done: {
+            internal_on_receive_udp_packet(packet, ipSender, portSender);
             break;
-        }case sf::Socket::Status::NotReady: {
+        } case SocketStatus::NotReady: {
             break;
-        }case sf::Socket::Status::Partial: {
+        } case SocketStatus::Partial: {
             break;
-        }case sf::Socket::Status::Disconnected: {
+        } case SocketStatus::Disconnected: {
             break;
-        }case sf::Socket::Status::Error: {
+        } case SocketStatus::Error: {
             break;
         }
     }
+    return {packet, status};
 }
-void Server::internal_update_client_threads(const float dt, bool serverActive) {
+void Server::onUpdateReceiveTCPPackets(const float dt) {
+    const auto serverActive = isActive();
     if (!serverActive) {
         return;
     }
-    auto lambda_update_client_thread = [this , serverActive](ServerThread& thread, const float dt) {
+    auto lambda_update_client_thread = [this, serverActive](ServerThread& thread, const float dt) {
         for (auto& [hash, client] : thread.clients()) {
-            if (serverActive == false ||  thread.num_clients() == 0) { //can be inactive if no clients are using the thread
+            if (serverActive == false || thread.num_clients() == 0) { //can be inactive if no clients are using the thread
                 return true;
             }
             if (client) {
@@ -249,20 +214,27 @@ void Server::internal_update_client_threads(const float dt, bool serverActive) {
             };
             Engine::priv::threading::addJob(std::move(lambda_update_client_thread_driver));
         }
-    }else{
+    } else {
         for (auto& clientThread : m_Clients.getThreads()) {
             lambda_update_client_thread(clientThread, dt);
         }
     }
 }
-void Server::update(const float dt) {
-    auto serverActive = m_Active.load(std::memory_order_relaxed);
-
-    internal_update_tcp_listener_loop(serverActive);
-    internal_update_udp_loop(dt, serverActive);
-    internal_update_client_threads(dt, serverActive);
-
-    m_Update_Function(dt, serverActive);
-
-    m_Clients.internal_update_remove_clients();
+void Server::onUpdateProcessTCPListeners() {
+    const auto serverActive = isActive();
+    if (!serverActive) {
+        return;
+    }
+    if (m_TCPListener) {
+        SocketTCP* tcpSocket = NEW SocketTCP();
+        auto status = m_TCPListener->accept(*tcpSocket);
+        if (status == sf::Socket::Status::Done) {
+            auto client_ip   = tcpSocket->ip();
+            auto client_port = tcpSocket->remotePort();
+            auto client_hash = m_CustomClientHashFunction(client_ip, client_port);
+            internal_add_client( client_hash, add_new_client(client_hash, client_ip, client_port, tcpSocket) );
+        } else {
+            SAFE_DELETE(tcpSocket);
+        }
+    }
 }

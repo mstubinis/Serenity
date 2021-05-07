@@ -40,10 +40,7 @@ namespace Engine::priv {
 
             [[nodiscard]] inline std::jthread* operator[](std::thread::id threadID) noexcept { return m_WorkerThreadsHashed.at(threadID); }
 
-            inline ThreadVector::iterator begin() { return m_WorkerThreads.begin(); }
-            inline ThreadVector::iterator end() { return m_WorkerThreads.end(); }
-            inline ThreadVector::const_iterator begin() const { return m_WorkerThreads.begin(); }
-            inline ThreadVector::const_iterator end() const { return m_WorkerThreads.end(); }
+            BUILD_BEGIN_END_ITR_CLASS_MEMBERS(ThreadVector, m_WorkerThreads)
     };
 };
 

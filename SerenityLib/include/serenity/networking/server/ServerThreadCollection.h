@@ -9,6 +9,7 @@ namespace Engine::Networking {
 };
 
 #include <serenity/networking/server/ServerThread.h>
+#include <serenity/system/Macros.h>
 
 namespace Engine::Networking {
     class ServerThreadCollection {
@@ -36,17 +37,14 @@ namespace Engine::Networking {
                 return false;
             }
 
-            bool addClient(std::string_view hash, ServerClient* client);
+            bool addClient(std::string_view hash, ServerClient*);
             bool removeClient(std::string_view hash);
             inline void clear() { m_ServerClientThreads.clear(); }
 
             [[nodiscard]] inline size_t getNumClients() const noexcept { return m_NumClients; }
             [[nodiscard]] ServerThread* getNextAvailableClientThread();
 
-            inline std::vector<ServerThread>::iterator begin() noexcept { return m_ServerClientThreads.begin(); }
-            inline std::vector<ServerThread>::iterator end() noexcept { return m_ServerClientThreads.end(); }
-            inline std::vector<ServerThread>::const_iterator begin() const noexcept { return m_ServerClientThreads.begin(); }
-            inline std::vector<ServerThread>::const_iterator end() const noexcept { return m_ServerClientThreads.end(); }
+            BUILD_BEGIN_END_ITR_CLASS_MEMBERS(std::vector<ServerThread>, m_ServerClientThreads)
         };
 };
 

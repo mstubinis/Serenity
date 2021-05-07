@@ -3,6 +3,7 @@
 #define ENGINE_CONTAINERS_PARTIAL_VECTOR_POD_H
 
 #include <vector>
+#include <serenity/system/Macros.h>
 
 namespace Engine {
     template<typename T, typename ALLOCATOR = std::allocator<T>>
@@ -59,10 +60,7 @@ namespace Engine {
 
             inline void pop() noexcept { m_Items[m_Count - 1U] = T(); --m_Count; }
 
-            typename inline std::vector<T>::iterator begin() { return m_Items.begin(); }
-            typename inline std::vector<T>::iterator end() { return m_Items.begin() + m_Count; }
-            typename inline std::vector<T>::const_iterator begin() const { return m_Items.begin(); }
-            typename inline std::vector<T>::const_iterator end() const { return m_Items.begin() + m_Count; }
+            BUILD_TEMPLATE_BEGIN_END_ITR_CLASS_MEMBERS(std::vector<T>, m_Items)
     };
 };
 

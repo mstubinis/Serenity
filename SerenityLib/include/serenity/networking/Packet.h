@@ -95,6 +95,8 @@ namespace Engine::Networking {
             Packet& operator=(Packet&& other) noexcept = default;
             virtual ~Packet() {}
 
+            inline constexpr bool isNull() const noexcept { return m_Timestamp == 0 || m_PacketType == 0 || m_Valid == false; }
+
             void initialize(Engine::Networking::Packet& inPacket) noexcept {        
                 m_PacketType     = inPacket.m_PacketType;
                 m_Timestamp      = inPacket.m_Timestamp;

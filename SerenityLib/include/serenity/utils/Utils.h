@@ -74,6 +74,14 @@ namespace Engine {
     template<class DERIVED, class BASE> inline bool type_compare(BASE* inPtr) noexcept {
         return inPtr && typeid(DERIVED) == typeid(*inPtr);
     }
+
+    template<class CONTAINER, class ITERATOR> bool erase(CONTAINER& container, const ITERATOR& itr) {
+        if (itr != container.end()) {
+            container.erase(itr);
+            return true;
+        }
+        return false;
+    }
 }
 
 template <class OutType, class Data> void readBigEndian(OutType& out, const Data& dataBuffer, const uint32_t inBufferSizeInBytes, uint32_t& offset) noexcept {

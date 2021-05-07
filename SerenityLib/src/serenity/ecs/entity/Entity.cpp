@@ -46,7 +46,7 @@ std::vector<Entity> Entity::getChildren() const noexcept {
     if (body) {
         auto& ecs = *Engine::priv::PublicEntity::GetECS(*this);
         auto& pcs = ecs.getSystem<SystemBodyParentChild>();
-        for (size_t i = 0; i < pcs.m_Parents.size(); ++i) {
+        for (uint32_t i = 0; i < (uint32_t)pcs.m_Parents.size(); ++i) {
             const auto parentID = pcs.m_Parents[i];
             if (parentID == m_ID) {
                 output.push_back(ecs.getEntityPool().getEntityFromID(i + 1));

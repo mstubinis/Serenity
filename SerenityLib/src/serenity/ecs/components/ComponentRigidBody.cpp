@@ -187,7 +187,7 @@ void ComponentRigidBody::internal_set_matrix(glm_mat4 matrix) {
     m_BulletMotionState.setWorldTransform(tr);
     auto collisionShape = m_Owner.getComponent<ComponentCollisionShape>();
     if (collisionShape) {
-        collisionShape->internal_setScale(localScale.x, localScale.y, localScale.z);
+        collisionShape->internal_setScale((float)localScale.x, (float)localScale.y, (float)localScale.z);
     }
 }
 void ComponentRigidBody::internal_setRotation(float x, float y, float z, float w) {

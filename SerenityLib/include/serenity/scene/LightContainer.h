@@ -2,6 +2,8 @@
 #ifndef ENGINE_SCENE_LIGHT_CONTAINER_H
 #define ENGINE_SCENE_LIGHT_CONTAINER_H
 
+#include <serenity/system/Macros.h>
+
 namespace Engine::priv {
     class ILightContainer {
         public:
@@ -70,10 +72,7 @@ namespace Engine::priv {
 
             [[nodiscard]] inline const ContainerType& getShadowCasters() const noexcept { return m_LightsShadows; }
 
-            inline typename ContainerType::iterator begin() noexcept { return m_Lights.begin(); }
-            inline typename ContainerType::const_iterator begin() const noexcept { return m_Lights.begin(); }
-            inline typename ContainerType::iterator end() noexcept { return m_Lights.end(); }
-            inline typename ContainerType::const_iterator end() const noexcept { return m_Lights.end(); }
+            BUILD_TEMPLATE_BEGIN_END_ITR_CLASS_MEMBERS(ContainerType, m_Lights)
     };
 }
 

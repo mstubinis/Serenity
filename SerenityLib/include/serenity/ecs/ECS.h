@@ -77,6 +77,17 @@ namespace Engine::priv {
                 m_ComponentPools[COMPONENT::TYPE_ID - 1].reset(NEW ECSComponentPool<COMPONENT>{m_SceneOptions});
                 return COMPONENT::TYPE_ID - 1;
             }
+
+            template<class SYSTEM, class ARGS_TUPLE, class ... COMPONENTS>
+            inline SYSTEM* registerSystem(ARGS_TUPLE&& argsTuple = ARGS_TUPLE{}) {
+                return m_SystemPool.registerSystem<SYSTEM, ARGS_TUPLE, COMPONENTS...>(*this, std::forward<ARGS_TUPLE>(argsTuple));
+            }
+            template<class SYSTEM, class ARGS_TUPLE, class ... COMPONENTS>
+            inline SYSTEM* registerSystemOrdered(uint32_t order, ARGS_TUPLE&& argsTuple = ARGS_TUPLE{}) {
+                return m_SystemPool.registerSystemOrdered<SYSTEM, ARGS_TUPLE, COMPONENTS...>(order, *this, std::forward<ARGS_TUPLE>(argsTuple));
+            }
+
+
             template<class COMPONENT>
             void onResize(uint32_t width, uint32_t height) noexcept {
                 auto& componentPool = getComponentPool<COMPONENT>();
@@ -103,11 +114,6 @@ namespace Engine::priv {
 
             template<class SYSTEM> [[nodiscard]] inline const SYSTEM& getSystem() const noexcept { return static_cast<const SYSTEM&>(m_SystemPool[SYSTEM::TYPE_ID - 1]); }
             template<class SYSTEM> [[nodiscard]] inline SYSTEM& getSystem() noexcept { return static_cast<SYSTEM&>(m_SystemPool[SYSTEM::TYPE_ID - 1]); }
-
-            template<class SYSTEM, class ... COMPONENTS, class ... ARGS>
-            inline SYSTEM* registerSystem(ARGS&&... args) { return m_SystemPool.registerSystem<SYSTEM, COMPONENTS..., ARGS...>(*this, std::forward<ARGS>(args)...); }
-            template<class SYSTEM, class ... COMPONENTS, class ... ARGS>
-            inline SYSTEM* registerSystemOrdered(uint32_t order, ARGS&&... args) { return m_SystemPool.registerSystemOrdered<SYSTEM, COMPONENTS..., ARGS...>(order, *this, std::forward<ARGS>(args)...); }
 
             template<class COMPONENT, class ... ARGS> bool addComponent(Entity entity, ARGS&&... args) noexcept {
                 COMPONENT* addedComponent = nullptr;

@@ -216,7 +216,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;BT_DEBUG_MEMORY_ALLOCATIONS;_CRTDBG_MAP_ALLOC;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -1009,6 +1009,7 @@
     <ClInclude Include="include\serenity\utils\Utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
     <None Include="include\serenity\ecs\entity\Entity.inl" />
     <None Include="include\serenity\ecs\systems\SystemBaseClass.inl" />
   </ItemGroup>

@@ -25,7 +25,7 @@ void Networking::SocketUDP::clearPartialPackets() {
     }
 }
 uint32_t Networking::SocketUDP::getNumPartialPackets() const noexcept {
-    return m_PartialPackets.size();
+    return (uint32_t)m_PartialPackets.size();
 }
 SocketStatus::Status Networking::SocketUDP::internal_send_packet(UDPPacketInfo& PacketInfoStruct) {
     auto status = m_SocketUDP.send(*PacketInfoStruct.sfmlPacket, PacketInfoStruct.ip, PacketInfoStruct.port);

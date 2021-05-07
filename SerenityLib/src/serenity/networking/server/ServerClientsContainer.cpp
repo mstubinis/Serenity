@@ -9,22 +9,16 @@ Engine::Networking::ServerClientsContainer::ServerClientsContainer(size_t numThr
 bool Engine::Networking::ServerClientsContainer::addClient(std::string_view hash, ServerClient* serverClient) {
     bool result = m_ThreadContainer.addClient(hash, serverClient);
     if (result) {
-        m_HashedClients.emplace(
-            std::piecewise_construct,
-            std::forward_as_tuple(hash),
-            std::forward_as_tuple(serverClient)
-        );
+        m_HashedClients.emplace(std::piecewise_construct, std::forward_as_tuple(hash), std::forward_as_tuple(serverClient));
         return result;
     }
-    ENGINE_PRODUCTION_LOG(__FUNCTION__ << "() failed to add client!") 
+    ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): failed to add client!") 
     return false;
 }
-
 bool Engine::Networking::ServerClientsContainer::removeClientImmediately(ServerClient& inClient, std::mutex& inMutex) {
     std::string foundHash;
     bool removed = false;
-
-    for (auto& [name, client] : m_HashedClients) {
+    for (const auto& [name, client] : m_HashedClients) {
         if (client == &inClient) {
             inClient.disconnect();
             foundHash = name;
@@ -34,29 +28,24 @@ bool Engine::Networking::ServerClientsContainer::removeClientImmediately(ServerC
     if (!foundHash.empty()) {
         {
             std::lock_guard lock{ inMutex };
-            m_HashedClients.erase(m_HashedClients.find(foundHash));
-            removed = m_ThreadContainer.removeClient(foundHash);
-            
+            Engine::erase(m_HashedClients, m_HashedClients.find(foundHash));
+            removed = m_ThreadContainer.removeClient(foundHash);    
         }
     }
     if (!removed) {
-        ENGINE_PRODUCTION_LOG("(Server::remove_client_immediately) error: could not remove client hash: " << foundHash)
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): could not remove client hash: " << foundHash)
     }
     return removed;
 }
 bool Engine::Networking::ServerClientsContainer::removeClient(ServerClient& inClient, std::mutex& inMutex) {
-    for (auto& [name, client] : m_HashedClients) {
+    for (const auto& [name, client] : m_HashedClients) {
         if (client == &inClient) {
             inClient.disconnect();
             {
-                std::lock_guard lock(inMutex);
-                m_RemovedClients.emplace_back(
-                    std::piecewise_construct,
-                    std::forward_as_tuple(name),
-                    std::forward_as_tuple(client)
-                );
+                std::lock_guard lock{ inMutex };
+                m_RemovedClients.emplace_back(std::piecewise_construct, std::forward_as_tuple(name), std::forward_as_tuple(client));
             }
-            ENGINE_PRODUCTION_LOG("ServerClientsContainer::remove_client_delayed - ip: " << client->ip() << ", port: " << client->port() << " - has been completely removed from the server")
+            ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): ip: " << client->ip() << ", port: " << client->port() << " - has been completely removed from the server")
             return true;
         }
     }
@@ -71,7 +60,7 @@ void Engine::Networking::ServerClientsContainer::internal_update_remove_clients(
     if (m_RemovedClients.size() > 0) {
         Engine::priv::threading::waitForAll();
         for (const auto& [hash, client] : m_RemovedClients) {
-            m_HashedClients.erase(m_HashedClients.find(hash));
+            Engine::erase(m_HashedClients, m_HashedClients.find(hash));
             bool result = m_ThreadContainer.removeClient(hash);
         }
         m_RemovedClients.clear();

@@ -20,8 +20,8 @@ namespace Engine::Networking {
         using update_func                = std::function<void(const float dt)>;
         using on_timed_out_func          = std::function<void()>;
         using on_recovery_timed_out_func = std::function<void()>;
-        using on_received_tcp_func       = std::function<void(sf::Packet& sfPacket, const float dt)>;
-        using on_received_udp_func       = std::function<void(sf::Packet& sfPacket, const float dt)>;
+        using on_received_tcp_func       = std::function<void(sf::Packet& sfPacket)>;
+        using on_received_udp_func       = std::function<void(sf::Packet& sfPacket)>;
 
         public:
             enum class ConnectionState : uint8_t {
@@ -31,28 +31,28 @@ namespace Engine::Networking {
                 Disconnected,
             };
         private:
-            void internal_update_receive_tcp_packet(const float dt) noexcept;
+            void internal_update_receive_tcp_packet() noexcept;
             void internal_update_connection_state(const float dt) noexcept;
             void internal_on_received_data() noexcept;
-            void internal_on_receive_udp(sf::Packet& packet, const float dt) noexcept;
+            void internal_on_receive_udp(sf::Packet& packet) noexcept;
 
             on_timed_out_func          m_On_Timed_Out_Function          = []() {};
             on_recovery_timed_out_func m_On_Recovery_Timed_Out_Function = []() {};
             update_func                m_Update_Function                = [](const float dt) {};
-            on_received_tcp_func       m_On_Received_TCP_Function       = [](sf::Packet& sfPacket, const float dt) {};
-            on_received_udp_func       m_On_Received_UDP_Function       = [](sf::Packet& sfPacket, const float dt) {};
+            on_received_tcp_func       m_On_Received_TCP_Function       = [](sf::Packet& sfPacket) {};
+            on_received_udp_func       m_On_Received_UDP_Function       = [](sf::Packet& sfPacket) {};
         protected:
             mutable std::unique_ptr<Engine::Networking::SocketTCP>  m_TcpSocket;
             Engine::Networking::Server&                             m_Server;
             sf::IpAddress                                           m_IP                           = sf::IpAddress::LocalHost;
             std::string                                             m_Hash;
-            uint32_t                                                m_ID                           = 0U;
+            uint32_t                                                m_ID                           = 0;
             ConnectionState                                         m_ConnectionState              = ConnectionState::Unknown;
             float                                                   m_Timeout_Timer                = 0.0f;
             float                                                   m_Timeout_Timer_Limit          = 30.0f;
             float                                                   m_Recovery_Timeout_Timer       = 0.0f;
             float                                                   m_Recovery_Timeout_Timer_Limit = 60.0f;
-            uint16_t                                                m_Port                         = 0U;
+            uint16_t                                                m_Port                         = 0;
         public:
             ServerClient(const std::string& hash, Engine::Networking::Server& server, Engine::Networking::SocketTCP* tcp, sf::IpAddress clientIP, uint16_t clientPort);
             virtual ~ServerClient();

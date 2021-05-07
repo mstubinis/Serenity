@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <serenity/system/TypeDefs.h>
+#include <serenity/system/Macros.h>
 
 namespace Engine {
     template<typename T, typename ALLOCATOR = std::allocator<T>> class freelist {
@@ -161,10 +162,7 @@ namespace Engine {
             inline std::vector<T>& data() noexcept { return m_Items; }
             inline const std::vector<T>& data() const noexcept { return m_Items; }
 
-            typename inline std::vector<T>::iterator begin() { return m_Items.begin(); }
-            typename inline std::vector<T>::iterator end() { return m_Items.end(); }
-            typename inline std::vector<T>::const_iterator begin() const { return m_Items.begin(); }
-            typename inline std::vector<T>::const_iterator end() const { return m_Items.end(); }
+            BUILD_TEMPLATE_BEGIN_END_ITR_CLASS_MEMBERS(std::vector<T>, m_Items)
     };
 };
 #endif

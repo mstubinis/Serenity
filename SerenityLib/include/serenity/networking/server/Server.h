@@ -23,23 +23,21 @@ namespace Engine::Networking {
     class Server : public Observer {
         friend class Engine::Networking::ServerThread;
 
-        using hash_func    = std::function<std::string(sf::IpAddress ip, uint16_t port, sf::Packet packet)>;
+        using hash_func    = std::function<std::string(sf::IpAddress ip, uint16_t port)>;
         using update_func  = std::function<void(const float dt, bool serverActive)>;
-        using on_udp_func  = std::function<void(sf::Packet& sf_packet, std::string& ip, uint16_t port, const float dt)>;
+        using on_udp_func  = std::function<void(sf::Packet&, std::string& ip, uint16_t port)>;
 
         private:
-            hash_func      m_Client_Hash_Function     = [](sf::IpAddress ip, uint16_t port, sf::Packet packet) { return (ip.toString() + "|" + std::to_string(port)); };
-            update_func    m_Update_Function          = [](const float dt, bool serverActive) {};
-            on_udp_func    m_On_Receive_UDP_Function  = [](sf::Packet& sf_packet, std::string& ip, uint16_t port, const float dt) {};
+            hash_func      m_CustomClientHashFunction    = [](sf::IpAddress ip, uint16_t port) { return (ip.toString() + "|" + std::to_string(port)); };
+            update_func    m_CustomUpdateFunction        = [](const float dt, bool serverActive) {};
+            on_udp_func    m_CustomOnReceiveUDPFunction  = [](sf::Packet& sf_packet, std::string& ip, uint16_t port) {};
 
             void internal_send_to_all_tcp(const ServerClient* exclusion, sf::Packet& packet);
             void internal_send_to_all_udp(const ServerClient* exclusion, sf::Packet& packet);
 
-            void internal_update_tcp_listener_loop(bool serverActive);
-            void internal_update_udp_loop(const float dt, bool serverActive);
-            void internal_update_client_threads(const float dt, bool serverActive);
-
             bool internal_add_client(const std::string& hash, ServerClient* client);
+
+            void internal_on_receive_udp_packet(Engine::Networking::Packet&, sf::IpAddress, uint16_t port);
 
             Server() = delete;
         protected:
@@ -60,47 +58,44 @@ namespace Engine::Networking {
             inline explicit operator bool() const noexcept { return isActive(); }
 
             //override this function with your own custom client class that inherits from Engine::Networking::ServerClient
-            virtual ServerClient* add_new_client(std::string& hash, sf::IpAddress clientIP, uint16_t clientPort, SocketTCP* tcp);
+            virtual ServerClient* add_new_client(const std::string& hash, sf::IpAddress clientIP, uint16_t clientPort, SocketTCP*);
             virtual void onEvent(const Event& e) override {}
             virtual bool startup(uint16_t port, std::string ip_restriction = "");
             virtual bool shutdown();
-
             virtual void clearAllClients();
 
-            [[nodiscard]] ServerClient* getClientFromUDPData(std::string_view ip, uint16_t port, sf::Packet& sf_packet) const;
-
+            [[nodiscard]] ServerClient* getServerClientFromUDPData(std::string_view clientIP, uint16_t clientPort) const;
             [[nodiscard]] inline constexpr uint16_t getPort() const noexcept { return m_Port; }
             [[nodiscard]] inline SocketUDP& getUDPSocket() const noexcept { return *m_UdpSocket.get(); }
             [[nodiscard]] inline constexpr ServerType getType() const noexcept { return m_ServerType; }
-
             [[nodiscard]] inline size_t num_clients() const noexcept { return m_Clients.size(); }
 
-            inline void setClientHashFunction(hash_func function) { m_Client_Hash_Function = function; }
-            inline void setServerUpdateFunction(update_func function) { m_Update_Function = function; }
-            inline void setOnReceiveUDPFunction(on_udp_func function) { m_On_Receive_UDP_Function = function; }
-            void onReceiveUDP(Engine::Networking::Packet& packet, sf::IpAddress ip, uint16_t port, const float dt);
+            template<class FUNC> inline void setCustomClientHashFunction(FUNC&& func) noexcept { m_CustomClientHashFunction = std::forward<FUNC>(func); }
+            template<class FUNC> inline void setCustomServerUpdateFunction(FUNC&& func) noexcept { m_CustomUpdateFunction = std::forward<FUNC>(func); }
+            template<class FUNC> inline void setCustomOnReceiveUDPFunction(FUNC&& func) noexcept { m_CustomOnReceiveUDPFunction = std::forward<FUNC>(func); }
 
             void update(const float dt);
 
-            void remove_client(ServerClient& client);
-            void remove_client_immediately(ServerClient& client);
+            void remove_client(ServerClient&);
+            void remove_client_immediately(ServerClient&);
 
             //tcp
-            virtual SocketStatus::Status send_tcp_to_client(ServerClient* client, sf::Packet& packet);
-            virtual void send_tcp_to_all_but_client(const ServerClient* exclusion, sf::Packet& packet);
-            virtual void send_tcp_to_all(sf::Packet& packet);
+            virtual SocketStatus::Status send_tcp_to_client(ServerClient*, sf::Packet&);
+            virtual void send_tcp_to_all_but_client(const ServerClient* exclusion, sf::Packet&);
+            virtual void send_tcp_to_all(sf::Packet&);
 
             //udp
-            
-            virtual SocketStatus::Status send_udp_to_client(ServerClient* client, sf::Packet& packet);
+            virtual SocketStatus::Status send_udp_to_client(ServerClient*, sf::Packet&);
             virtual void send_udp_to_all_but_client(const ServerClient* exclusion, sf::Packet& packet);
-            virtual void send_udp_to_all(sf::Packet& packet);
-            
-            virtual SocketStatus::Status send_udp_to_client_important(ServerClient* client, Engine::Networking::Packet& packet);
-            virtual void send_udp_to_all_but_client_important(const ServerClient* exclusion, Engine::Networking::Packet& packet);
-            virtual void send_udp_to_all_important(Engine::Networking::Packet& packet);
+            virtual void send_udp_to_all(sf::Packet&);
+            virtual SocketStatus::Status send_udp_to_client_important(ServerClient*, Engine::Networking::Packet&);
+            virtual void send_udp_to_all_but_client_important(const ServerClient* exclusion, Engine::Networking::Packet&);
+            virtual void send_udp_to_all_important(Engine::Networking::Packet&);
 
-            virtual SocketStatus::Status receive_udp(sf::Packet& packet, sf::IpAddress& sender, uint16_t& port);
+            //per frame update methods
+            std::pair<Engine::Networking::Packet, SocketStatus::Status> onUpdateReceiveUDPPackets();
+            void onUpdateReceiveTCPPackets(const float dt);
+            void onUpdateProcessTCPListeners();
     };
 };
 #endif

@@ -50,7 +50,7 @@ uint64_t ComponentTransform::getDistanceLL(Entity other) const {
     return static_cast<uint64_t>(getDistance(other));
 }
 void ComponentTransform::alignTo(decimal dirX, decimal dirY, decimal dirZ) {
-    m_Rotation = Engine::Math::alignTo(dirX, dirY, dirZ);
+    m_Rotation = Engine::Math::alignTo((float)dirX, (float)dirY, (float)dirZ);
     Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
 }
 void ComponentTransform::alignTo(const glm_vec3& direction) {

@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <vector>
+#include <serenity/system/Macros.h>
 
 namespace Engine {
     template<typename T, typename ALLOCATOR = std::allocator<T>>
@@ -130,11 +131,7 @@ namespace Engine {
                 extract();
             }
 
-            typename std::vector<T>::iterator begin() { return m_Items.begin(); }
-            typename std::vector<T>::iterator end() { return m_Items.end(); }
-            typename std::vector<T>::const_iterator begin() const { return m_Items.begin(); }
-            typename std::vector<T>::const_iterator end() const { return m_Items.end(); }
-
+            BUILD_TEMPLATE_BEGIN_END_ITR_CLASS_MEMBERS(std::vector<T>, m_Items)
     };
 };
 

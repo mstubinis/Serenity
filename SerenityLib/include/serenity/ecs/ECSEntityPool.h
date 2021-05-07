@@ -9,6 +9,7 @@ namespace Engine::priv {
 };
 
 #include <serenity/ecs/entity/Entity.h>
+#include <serenity/system/Macros.h>
 
 namespace Engine::priv {
     class ECSEntityPool final{
@@ -38,10 +39,7 @@ namespace Engine::priv {
                 m_Pool.clear(); m_Freelist.clear();
             }
 
-            inline std::vector<Entity>::iterator begin() noexcept { return m_Pool.begin(); }
-            inline std::vector<Entity>::const_iterator begin() const noexcept { return m_Pool.begin(); }
-            inline std::vector<Entity>::iterator end() noexcept { return m_Pool.end(); }
-            inline std::vector<Entity>::const_iterator end() const noexcept { return m_Pool.end(); }
+            BUILD_BEGIN_END_ITR_CLASS_MEMBERS(std::vector<Entity>, m_Pool)
         };
 };
 

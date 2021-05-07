@@ -146,7 +146,7 @@ bool PublicShaderProgram::LinkShadersToProgram(ShaderProgram& shaderProgram, con
     }
     GLint MAX_DRAW_BUFFERS;
     glGetIntegerv(GL_MAX_DRAW_BUFFERS, &MAX_DRAW_BUFFERS);
-    for (uint32_t i = 0; i < MAX_DRAW_BUFFERS; ++i) {
+    for (uint32_t i = 0; i < (uint32_t)MAX_DRAW_BUFFERS; ++i) {
         std::string outFragCol = "out vec4 FRAG_COL_" + std::to_string(i) + ";";
         if (ShaderHelper::sfind(fragmentSourceCode, outFragCol)) {
             glBindFragDataLocation(shaderProgram.m_ShaderProgram, i, std::string{ "FRAG_COL_" + std::to_string(i) }.c_str());

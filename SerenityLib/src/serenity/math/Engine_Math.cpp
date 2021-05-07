@@ -179,7 +179,7 @@ void Math::extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProject
     //https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
 }
 glm::quat Math::toGLM(const btQuaternion& BTquat){
-    return glm::quat(BTquat.getW(), BTquat.getX(), BTquat.getY(), BTquat.getZ() );
+    return glm::quat((float)BTquat.getW(), (float)BTquat.getX(), (float)BTquat.getY(), (float)BTquat.getZ() );
 }
 btQuaternion Math::toBT(const glm::quat& quat){
     return btQuaternion{ quat.x, quat.y, quat.z, quat.w };

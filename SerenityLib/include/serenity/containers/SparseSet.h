@@ -3,6 +3,7 @@
 #define ENGINE_CONTAINERS_SPARSE_SET_H
 
 #include <vector>
+#include <serenity/system/Macros.h>
 
 namespace Engine {
     namespace priv {
@@ -133,12 +134,7 @@ namespace Engine {
             inline constexpr size_t size() const noexcept { return m_Dense.size(); }
             inline constexpr container& data() noexcept { return m_Dense; }
 
-            typename inline container::iterator begin() { return m_Dense.begin(); }
-            typename inline container::iterator end() { return m_Dense.end(); }
-            typename inline container::const_iterator begin() const { return m_Dense.begin(); }
-            typename inline container::const_iterator end() const { return m_Dense.end(); }
-            typename inline container::const_iterator cbegin() const { return m_Dense.cbegin(); }
-            typename inline container::const_iterator cend() const { return m_Dense.cend(); }
+            BUILD_TEMPLATE_BEGIN_END_ITR_CLASS_MEMBERS(container, m_Dense)
     };
 };
 

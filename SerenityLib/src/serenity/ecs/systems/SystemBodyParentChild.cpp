@@ -43,7 +43,7 @@ SystemBodyParentChild::SystemBodyParentChild(Engine::priv::ECS& ecs)
 #else
                     auto worldRotation = glm::quat_cast(system->m_WorldTransforms[parentID - 1] * glm::mat4_cast(transform->m_Rotation));
 #endif
-                    rigidBody->internal_setRotation(worldRotation.x, worldRotation.y, worldRotation.z, worldRotation.w);
+                    rigidBody->internal_setRotation((float)worldRotation.x, (float)worldRotation.y, (float)worldRotation.z, (float)worldRotation.w);
                 }
             }
         }, &system, SystemExecutionPolicy::ParallelWait);
@@ -189,7 +189,7 @@ std::pair<uint32_t, uint32_t> SystemBodyParentChild::getBlockIndices(uint32_t ID
         }
     }
     //find second index
-    ret.second = m_Order.size() - 1;
+    ret.second = static_cast<uint32_t>(m_Order.size() - 1);
     if (m_Order.size() > 0) {
         for (uint32_t i = ret.first; i < m_Order.size() - 1; ++i) {
             const auto nextID     = m_Order[i + 1];

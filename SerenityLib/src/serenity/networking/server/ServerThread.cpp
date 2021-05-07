@@ -7,9 +7,9 @@ using namespace Engine;
 using namespace Engine::Networking;
 
 bool ServerThread::remove_client(std::string_view hash) {
-    bool has_client_hash        = m_HashedServerClients.contains(hash);
+    bool has_client_hash = m_HashedServerClients.contains(hash);
     if (has_client_hash) {
-        m_HashedServerClients.erase(m_HashedServerClients.find(hash));
+        Engine::erase(m_HashedServerClients, m_HashedServerClients.find(hash));
         return true;
     }
     if (!has_client_hash) {

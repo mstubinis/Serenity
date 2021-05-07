@@ -9,10 +9,16 @@ class  SystemBaseClass;
 #include <memory>
 #include <cstdint>
 #include <serenity/ecs/systems/SystemBaseClass.h>
+#include <serenity/ecs/components/ComponentBaseClass.h>
 #include <serenity/system/Macros.h>
 #include <serenity/utils/Utils.h>
 
 #include <iostream>
+
+class ComponentNullType final : public ComponentBaseClass<ComponentNullType>{
+public:
+    static inline volatile int X = 0;
+};
 
 namespace Engine::priv {
     class ECSSystemPool final {
@@ -42,6 +48,9 @@ namespace Engine::priv {
 
             template<class SYSTEM, class COMPONENT>
             void hashSystemImpl(SYSTEM* inSystem) {
+                if (std::is_same<COMPONENT, ComponentNullType>::value) {
+                    return;
+                }
                 ASSERT(COMPONENT::TYPE_ID != 0, __FUNCTION__ << "(): COMPONENT::TYPE_ID was 0, please register this component type! (component class: " << typeid(COMPONENT).name());
                 if (m_ComponentIDToSystems.size() < COMPONENT::TYPE_ID) {
                     m_ComponentIDToSystems.resize(COMPONENT::TYPE_ID);
@@ -53,7 +62,7 @@ namespace Engine::priv {
 
             template<class SYSTEM, class ... COMPONENTS>
             inline void hashSystem(SYSTEM* inSystem) {
-                (hashSystemImpl<SYSTEM, COMPONENTS>(inSystem) , ...);
+                (hashSystemImpl<SYSTEM, COMPONENTS>(inSystem), ...);
             }
         public:
             ECSSystemPool() = default;
@@ -62,8 +71,8 @@ namespace Engine::priv {
             ECSSystemPool(ECSSystemPool&&) noexcept            = delete;
             ECSSystemPool& operator=(ECSSystemPool&&) noexcept = delete;
 
-            template<class SYSTEM, class ... COMPONENTS, class ... ARGS>
-            SYSTEM* registerSystem(ARGS&&... args) {
+            template<class SYSTEM, class ARG_TUPLE, class ... COMPONENTS>
+            SYSTEM* registerSystem(Engine::priv::ECS& ecs, ARG_TUPLE&& argTuple) {
                 SYSTEM* createdSystem = nullptr;
                 if (SYSTEM::TYPE_ID == 0) {
                     SYSTEM::TYPE_ID = ++m_RegisteredSystems;
@@ -71,17 +80,18 @@ namespace Engine::priv {
                 auto threshold = std::max(SYSTEM::TYPE_ID, m_RegisteredSystems);
                 if (m_Systems.size() < threshold) {
                     m_Systems.resize(threshold);
-                    m_Order.resize(threshold, OrderEntry{ std::numeric_limits<uint32_t>().max(), std::numeric_limits<uint32_t>().max() });
                 }
-                m_Systems[SYSTEM::TYPE_ID - 1].reset( NEW SYSTEM(std::forward<ARGS>(args)...) );
-                m_Order[SYSTEM::TYPE_ID - 1] = OrderEntry{ ((SYSTEM::TYPE_ID - 1) * 1000) + 1000, SYSTEM::TYPE_ID };
+                auto tupleCat = std::tuple_cat(std::tie(ecs), std::forward<ARG_TUPLE>(argTuple));
+                auto sys = std::make_from_tuple<SYSTEM>(tupleCat);
+                m_Systems[SYSTEM::TYPE_ID - 1].reset(NEW SYSTEM(sys));
+                m_Order.emplace_back(((SYSTEM::TYPE_ID - 1) * 1000) + 1000, SYSTEM::TYPE_ID);
 
                 createdSystem = static_cast<SYSTEM*>(m_Systems[SYSTEM::TYPE_ID - 1].get());
                 hashSystem<SYSTEM, COMPONENTS...>(createdSystem);
                 return createdSystem;
             }
-            template<class SYSTEM, class ... COMPONENTS, class ... ARGS>
-            SYSTEM* registerSystemOrdered(uint32_t order, ARGS&&... args) {
+            template<class SYSTEM, class ARG_TUPLE, class ... COMPONENTS>
+            SYSTEM* registerSystemOrdered(uint32_t order, Engine::priv::ECS& ecs, ARG_TUPLE&& argTuple) {
                 SYSTEM* createdSystem = nullptr;
                 if (SYSTEM::TYPE_ID == 0) {
                     SYSTEM::TYPE_ID = ++m_RegisteredSystems;
@@ -89,10 +99,11 @@ namespace Engine::priv {
                 auto threshold = std::max(SYSTEM::TYPE_ID, m_RegisteredSystems);
                 if (m_Systems.size() < threshold) {
                     m_Systems.resize(threshold);
-                    m_Order.resize(threshold, OrderEntry{ std::numeric_limits<uint32_t>().max(), std::numeric_limits<uint32_t>().max() });
                 }
-                m_Systems[SYSTEM::TYPE_ID - 1].reset(NEW SYSTEM(std::forward<ARGS>(args)...));
-                m_Order[SYSTEM::TYPE_ID - 1] = OrderEntry{ order, SYSTEM::TYPE_ID };
+                auto tupleCat = std::tuple_cat(std::tie(ecs), std::forward<ARG_TUPLE>(argTuple));
+                auto sys = std::make_from_tuple<SYSTEM>(tupleCat);
+                m_Systems[SYSTEM::TYPE_ID - 1].reset(NEW SYSTEM(sys));
+                m_Order.emplace_back(order, SYSTEM::TYPE_ID );
 
                 //auto comp = [](const auto& lhs, const auto& rhs) { return lhs.first < rhs.first; };
                 //std::sort(std::begin(m_Order), std::end(m_Order), comp);
@@ -154,10 +165,7 @@ namespace Engine::priv {
             inline SystemBaseClass& operator[](const uint32_t idx) noexcept { return *m_Systems[idx].get(); }
             inline const SystemBaseClass& operator[](const uint32_t idx) const noexcept { return *m_Systems[idx].get(); }
 
-            inline SystemMainContainer::iterator begin() noexcept { return m_Systems.begin(); }
-            inline SystemMainContainer::iterator end() noexcept { return m_Systems.end(); }
-            inline const SystemMainContainer::const_iterator cbegin() const noexcept { return m_Systems.cbegin(); }
-            inline const SystemMainContainer::const_iterator cend() const noexcept { return m_Systems.cend(); }
+            BUILD_BEGIN_END_ITR_CLASS_MEMBERS(SystemMainContainer, m_Systems)
     };
 }
 

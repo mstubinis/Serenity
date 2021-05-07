@@ -83,12 +83,17 @@ class Scene: public Observer {
         virtual ~Scene();
 
 
-        template<class COMPONENT>
-        inline void registerComponent() { m_ECS.registerComponent<COMPONENT>(); }
-        template<class SYSTEM, class ... COMPONENTS>
-        inline void registerSystem() { m_ECS.registerSystem<SYSTEM, COMPONENTS...>(); }
-        template<class SYSTEM, class ... COMPONENTS>
-        inline void registerSystemOrdered(uint32_t order) { m_ECS.registerSystemOrdered<SYSTEM, COMPONENTS...>(order); }
+        template<class COMPONENT> inline void registerComponent() { m_ECS.registerComponent<COMPONENT>(); }
+        
+
+        template<class SYSTEM, class ARG_TUPLE, class ... COMPONENTS>
+        inline void registerSystem(ARG_TUPLE&& argTuple = ARG_TUPLE{}) {
+            m_ECS.registerSystem<SYSTEM, ARG_TUPLE, COMPONENTS...>(std::forward<ARG_TUPLE>(argTuple));
+        }
+        template<class SYSTEM, class ARG_TUPLE, class ... COMPONENTS>
+        inline void registerSystemOrdered(uint32_t order, ARG_TUPLE&& argTuple = ARG_TUPLE{}) {
+            m_ECS.registerSystemOrdered<SYSTEM, ARG_TUPLE, COMPONENTS...>(order, std::forward<ARG_TUPLE>(argTuple));
+        }
 
         inline void setName(std::string_view name) noexcept { m_Name = name; }
         [[nodiscard]] inline constexpr const std::string& name() const noexcept { return m_Name; }

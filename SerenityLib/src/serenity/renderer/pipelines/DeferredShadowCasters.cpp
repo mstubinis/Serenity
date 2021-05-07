@@ -68,8 +68,8 @@ void Engine::priv::GLDeferredDirectionalLightShadowInfo::bindUniformsReading(int
         lightMatrices[i] = m_LightOrthoProjection[i] * m_LightViewMatrix;
         vClips[i] = vClip.z;
     }
-    Engine::Renderer::sendUniformMatrix4vSafe("LightMatrix[0]", lightMatrices, lightMatrices.size());
-    Engine::Renderer::sendUniform1vSafe("CascadeEndClipSpace[0]", vClips, vClips.size());
+    Engine::Renderer::sendUniformMatrix4vSafe("LightMatrix[0]", lightMatrices, (uint32_t)lightMatrices.size());
+    Engine::Renderer::sendUniform1vSafe("CascadeEndClipSpace[0]", vClips, (uint32_t)vClips.size());
     Engine::Renderer::sendTexturesSafe("ShadowTexture[0]", m_DepthTexture.data(), textureStartSlot, GL_TEXTURE_2D, (int)m_DepthTexture.size());
 
     Engine::Renderer::sendUniform1Safe("ShadowEnabled", 1);

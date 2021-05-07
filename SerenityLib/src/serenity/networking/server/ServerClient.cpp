@@ -70,11 +70,11 @@ SocketStatus::Status ServerClient::send_udp(sf::Packet& sfPacket) noexcept {
     return m_Server.send_udp_to_client(this, sfPacket);
 }
 
-void ServerClient::internal_on_receive_udp(sf::Packet& packet, const float dt) noexcept {
+void ServerClient::internal_on_receive_udp(sf::Packet& packet) noexcept {
     internal_on_received_data();
-    ServerClient::m_On_Received_UDP_Function(packet, dt);
+    ServerClient::m_On_Received_UDP_Function(packet);
 }
-void ServerClient::internal_update_receive_tcp_packet(const float dt) noexcept {
+void ServerClient::internal_update_receive_tcp_packet() noexcept {
     if (!m_TcpSocket) {
         return;
     }
@@ -83,7 +83,7 @@ void ServerClient::internal_update_receive_tcp_packet(const float dt) noexcept {
     switch (status) {
         case SocketStatus::Done: {
             internal_on_received_data();
-            m_On_Received_TCP_Function(packet, dt);
+            m_On_Received_TCP_Function(packet);
             break;
         }case SocketStatus::NotReady: {
             break;
@@ -124,6 +124,6 @@ void ServerClient::internal_on_received_data() noexcept {
 }
 void ServerClient::update(const float dt) noexcept {
     internal_update_connection_state(dt);
-    internal_update_receive_tcp_packet(dt);
+    internal_update_receive_tcp_packet();
     m_Update_Function(dt);
 }

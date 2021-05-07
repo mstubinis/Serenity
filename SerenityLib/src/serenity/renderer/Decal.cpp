@@ -34,17 +34,16 @@ Decal::Decal(Handle materialHandle, const glm_vec3& localPosition, const glm::ve
     auto& transform  = *getComponent<ComponentTransform>();
     auto& model      = *getComponent<ComponentModel>();
 
-    const decimal factor = static_cast<decimal>(0.2f * size);
+    const auto factor = (0.2f * size);
 
     //transform.setScale(factor, factor, (decimal)0.04);
-    model.getModel(0).setScale(factor, factor, (decimal)0.04);
+    model.getModel(0).setScale(factor, factor, 0.04f);
 
     transform.setPosition(localPosition);
     auto q = Math::alignTo(hitNormal);
     m_InitialRotation = q;
     transform.setRotation(q);
-    
-    
+      
     model.setCustomBindFunctor(Engine::priv::DefaultDecalBindFunctor);
     model.setCustomUnbindFunctor(Engine::priv::DefaultDecalUnbindFunctor);
 }

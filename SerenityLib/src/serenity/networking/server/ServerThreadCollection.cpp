@@ -14,7 +14,7 @@ void Engine::Networking::ServerThreadCollection::setBlocking(bool blocking) {
 }
 void Engine::Networking::ServerThreadCollection::setBlocking(std::string_view hash, bool blocking) {
     for (auto& thread : m_ServerClientThreads) {
-        if (thread.m_HashedServerClients.count(hash)) {
+        if (thread.m_HashedServerClients.contains(hash)) {
             thread.m_HashedServerClients.find(hash)->second->socket()->setBlocking(blocking);
             return;
         }

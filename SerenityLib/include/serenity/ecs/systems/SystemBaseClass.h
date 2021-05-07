@@ -65,22 +65,11 @@ class SystemBaseClass {
         void eraseEntity(std::vector<Entity>& vec, Entity entity);
 
         template<class FUNC> void setUpdateFunction(FUNC&& func) noexcept;
-        template<class FUNC> void setUpdateFunction(const FUNC& func) noexcept;
-
         template<class FUNC> void setComponentAddedToEntityFunction(FUNC&& func) noexcept;
-        template<class FUNC> void setComponentAddedToEntityFunction(const FUNC& func) noexcept;
-
         template<class FUNC> void setComponentRemovedFromEntityFunction(FUNC&& func) noexcept;
-        template<class FUNC> void setComponentRemovedFromEntityFunction(const FUNC& func) noexcept;
-
         template<class FUNC> void setEntityAddedToSceneFunction(FUNC&& func) noexcept;
-        template<class FUNC> void setEntityAddedToSceneFunction(const FUNC& func) noexcept;
-
         template<class FUNC> void setSceneEnteredFunction(FUNC&& func) noexcept;
-        template<class FUNC> void setSceneEnteredFunction(const FUNC& func) noexcept;
-
         template<class FUNC> void setSceneLeftFunction(FUNC&& func) noexcept;
-        template<class FUNC> void setSceneLeftFunction(const FUNC& func) noexcept;
 
         template<class COMPONENT> void associateComponent();
         template<class COMPONENT> [[nodiscard]] bool hasAssociatedComponent() noexcept;

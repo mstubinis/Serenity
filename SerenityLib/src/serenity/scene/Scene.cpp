@@ -274,32 +274,32 @@ Scene::Scene(uint32_t id, std::string_view name, const SceneOptions& options)
 
     Engine::priv::ComponentCollisionShapeDeferredLoading::get().registerEvent(EventType::ResourceLoaded);
     //register systems
-    m_ECS.registerSystemOrdered<SystemAddRigidBodies>(1000);
+    m_ECS.registerSystemOrdered<SystemAddRigidBodies, std::tuple<>>(10'000);
 
-    m_ECS.registerSystemOrdered<SystemResolveTransformDirty, ComponentTransform, ComponentRigidBody>(2000);
-    m_ECS.registerSystemOrdered<SystemStepPhysics, ComponentRigidBody>(3000);
-    m_ECS.registerSystemOrdered<SystemRigidTransformSync, ComponentTransform, ComponentRigidBody>(4000);
+    m_ECS.registerSystemOrdered<SystemResolveTransformDirty, std::tuple<>, ComponentTransform, ComponentRigidBody>(20'000);
+    m_ECS.registerSystemOrdered<SystemStepPhysics, std::tuple<>, ComponentRigidBody>(30'000);
+    m_ECS.registerSystemOrdered<SystemRigidTransformSync, std::tuple<>, ComponentTransform, ComponentRigidBody>(40'000);
 
-    m_ECS.registerSystemOrdered<SystemGameUpdate>(5000);
-    m_ECS.registerSystemOrdered<SystemSceneUpdate>(6000);
+    m_ECS.registerSystemOrdered<SystemGameUpdate, std::tuple<>>(50'000);
+    m_ECS.registerSystemOrdered<SystemSceneUpdate, std::tuple<>>(60'000);
 
-    m_ECS.registerSystemOrdered<SystemComponentLogic, ComponentLogic>(7000);
-    m_ECS.registerSystemOrdered<SystemComponentTransform, ComponentTransform>(8000);
-    m_ECS.registerSystemOrdered<SystemComponentRigidBody, ComponentRigidBody>(9000);
-    m_ECS.registerSystemOrdered<SystemComponentLogic1, ComponentLogic1>(10000);
-    m_ECS.registerSystemOrdered<SystemComponentModel, ComponentModel>(11000);
+    m_ECS.registerSystemOrdered<SystemComponentLogic, std::tuple<>, ComponentLogic>(70'000);
+    m_ECS.registerSystemOrdered<SystemComponentTransform, std::tuple<>, ComponentTransform>(80'000);
+    m_ECS.registerSystemOrdered<SystemComponentRigidBody, std::tuple<>, ComponentRigidBody>(90'000);
+    m_ECS.registerSystemOrdered<SystemComponentLogic1, std::tuple<>, ComponentLogic1>(100'000);
+    m_ECS.registerSystemOrdered<SystemComponentModel, std::tuple<>, ComponentModel>(110'000);
 
-    m_ECS.registerSystemOrdered<SystemBodyParentChild, ComponentTransform>(12000);
-    m_ECS.registerSystemOrdered<SystemCompoundChildTransforms, ComponentCollisionShape>(13000);
+    m_ECS.registerSystemOrdered<SystemBodyParentChild, std::tuple<>, ComponentTransform>(120'000);
+    m_ECS.registerSystemOrdered<SystemCompoundChildTransforms, std::tuple<>, ComponentCollisionShape>(130'000);
 
-    m_ECS.registerSystemOrdered<SystemComponentLogic2, ComponentLogic2>(14000);
-    m_ECS.registerSystemOrdered<SystemComponentCamera, ComponentCamera>(15000);
-    m_ECS.registerSystemOrdered<SystemComponentLogic3, ComponentLogic3>(16000);
+    m_ECS.registerSystemOrdered<SystemComponentLogic2, std::tuple<>, ComponentLogic2>(140'000);
+    m_ECS.registerSystemOrdered<SystemComponentCamera, std::tuple<>, ComponentCamera>(150'000);
+    m_ECS.registerSystemOrdered<SystemComponentLogic3, std::tuple<>, ComponentLogic3>(160'000);
 
-    m_ECS.registerSystemOrdered<SystemSceneChanging>(17000);
-    m_ECS.registerSystemOrdered<SystemRemoveRigidBodies>(18000);
+    m_ECS.registerSystemOrdered<SystemSceneChanging, std::tuple<>>(170'000);
+    m_ECS.registerSystemOrdered<SystemRemoveRigidBodies, std::tuple<>>(180'000);
 
-    m_ECS.registerSystemOrdered<SystemComponentTransformDebugDraw, ComponentTransform, ComponentModel>(19000);
+    m_ECS.registerSystemOrdered<SystemComponentTransformDebugDraw, std::tuple<>, ComponentTransform, ComponentModel>(190'000);
     //
     m_ID = id;
     setName(name);

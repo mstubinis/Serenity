@@ -222,4 +222,20 @@
     x.clear(); \
 }
 
+#define BUILD_BEGIN_END_ITR_CLASS_MEMBERS(TYPE, VAR) \
+    inline TYPE::iterator begin() noexcept { return VAR.begin(); } \
+    inline TYPE::const_iterator begin() const noexcept { return VAR.begin(); } \
+    inline TYPE::iterator end() noexcept { return VAR.end(); } \
+    inline TYPE::const_iterator end() const noexcept { return VAR.end(); } \
+    inline const TYPE::const_iterator cbegin() const noexcept { return VAR.cbegin(); } \
+    inline const TYPE::const_iterator cend() const noexcept { return VAR.cend(); }
+
+#define BUILD_TEMPLATE_BEGIN_END_ITR_CLASS_MEMBERS(TYPE, VAR) \
+    inline typename TYPE::iterator begin() noexcept { return VAR.begin(); } \
+    inline typename TYPE::const_iterator begin() const noexcept { return VAR.begin(); } \
+    inline typename TYPE::iterator end() noexcept { return VAR.end(); } \
+    inline typename TYPE::const_iterator end() const noexcept { return VAR.end(); } \
+    inline typename const TYPE::const_iterator cbegin() const noexcept { return VAR.cbegin(); } \
+    inline typename const TYPE::const_iterator cend() const noexcept { return VAR.cend(); }
+
 #pragma endregion
